@@ -1,0 +1,30 @@
+{
+  "Profile": "strategy-wave-30",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-5506",
+      "Name": "Nakanu Technique",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After engaging, choose your performing unbowed opposed Personality at the current battlefield: Create two 1F Shadowlands • Undead Followers and attach them to him. Lose 1 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-5506.jpg",
+      "Keywords": [],
+      "Focus": 3,
+      "Abilities": [
+        "nakanu-technique-create"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

@@ -2163,6 +2163,76 @@ public static class PublishedContent
         return snapshot;
     }
 
+    /// <summary>holding-wave-3 (issue #402).</summary>
+    public static PublishedSnapshot HoldingWave3 { get; } = LoadHoldingWave3();
+
+    private static PublishedSnapshot LoadHoldingWave3()
+    {
+        var snapshot = Load("L5R.Published.HoldingWave3.json", "holding-wave-3", requireDecks: false);
+        if(snapshot.Cards.Length != 1)
+            throw new InvalidOperationException("Unexpected holding-wave-3 card count.");
+        foreach(var card in snapshot.Cards)
+            if(card.Type != CardType.Holding)
+                throw new InvalidOperationException($"holding-wave-3 card is not a Holding: {card.Id}");
+        return snapshot;
+    }
+
+    /// <summary>personality-wave-40 (issue #402).</summary>
+    public static PublishedSnapshot PersonalityWave40 { get; } = LoadPersonalityWave40();
+
+    private static PublishedSnapshot LoadPersonalityWave40()
+    {
+        var snapshot = Load("L5R.Published.PersonalityWave40.json", "personality-wave-40", requireDecks: false);
+        if(snapshot.Cards.Length != 2)
+            throw new InvalidOperationException("Unexpected personality-wave-40 card count.");
+        foreach(var card in snapshot.Cards)
+            if(card.Type != CardType.Personality)
+                throw new InvalidOperationException($"personality-wave-40 card is not a Personality: {card.Id}");
+        return snapshot;
+    }
+
+    /// <summary>celestial-wave-2 (issue #402).</summary>
+    public static PublishedSnapshot CelestialWave2 { get; } = LoadCelestialWave2();
+
+    private static PublishedSnapshot LoadCelestialWave2()
+    {
+        var snapshot = Load("L5R.Published.CelestialWave2.json", "celestial-wave-2", requireDecks: false);
+        if(snapshot.Cards.Length != 1)
+            throw new InvalidOperationException("Unexpected celestial-wave-2 card count.");
+        foreach(var card in snapshot.Cards)
+            if(card.Type != CardType.Celestial)
+                throw new InvalidOperationException($"celestial-wave-2 card is not a Celestial: {card.Id}");
+        return snapshot;
+    }
+
+    /// <summary>strategy-wave-30 (issue #402).</summary>
+    public static PublishedSnapshot StrategyWave30 { get; } = LoadStrategyWave30();
+
+    private static PublishedSnapshot LoadStrategyWave30()
+    {
+        var snapshot = Load("L5R.Published.StrategyWave30.json", "strategy-wave-30", requireDecks: false);
+        if(snapshot.Cards.Length != 1)
+            throw new InvalidOperationException("Unexpected strategy-wave-30 card count.");
+        foreach(var card in snapshot.Cards)
+            if(card.Type != CardType.Strategy)
+                throw new InvalidOperationException($"strategy-wave-30 card is not a Strategy: {card.Id}");
+        return snapshot;
+    }
+
+    /// <summary>follower-wave-19 (issue #402).</summary>
+    public static PublishedSnapshot FollowerWave19 { get; } = LoadFollowerWave19();
+
+    private static PublishedSnapshot LoadFollowerWave19()
+    {
+        var snapshot = Load("L5R.Published.FollowerWave19.json", "follower-wave-19", requireDecks: false);
+        if(snapshot.Cards.Length != 1)
+            throw new InvalidOperationException("Unexpected follower-wave-19 card count.");
+        foreach(var card in snapshot.Cards)
+            if(card.Type != CardType.Follower)
+                throw new InvalidOperationException($"follower-wave-19 card is not a Follower: {card.Id}");
+        return snapshot;
+    }
+
     private static PublishedSnapshot Load(string resourceName, string profile, bool requireDecks)
     {
         using var stream = typeof(PublishedContent).Assembly.GetManifestResourceStream(resourceName)

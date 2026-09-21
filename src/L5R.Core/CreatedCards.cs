@@ -8,10 +8,19 @@ namespace L5R.Core;
 /// Count is how many cards the ability creates; an attachment goes to a chosen host (the command's CardIds, or its TargetId): with PerHost, Count of them to EACH chosen host
 /// ("one to each of one to three Personalities"), otherwise Count in all, dealt to the chosen hosts in turn ("two Followers, attached to one or two Personalities").
 /// AtBattlefield creates a Personality at the current battlefield instead of at home. UntilBattleEnds removes the created cards from the game when the battle ends.
-/// Or lists the other cards the player may choose instead ("an Armor or Weapon Item"): each is a spec of its own, and the command names the scan chosen (GameCommand.CreatedCard).</summary>
+/// Or lists the other cards the player may choose instead ("an Armor or Weapon Item"): each is a spec of its own, and the command names the scan chosen (GameCommand.CreatedCard).
+/// Count applies to a Personality too: that many are created together. HostIsPerformer attaches a created attachment to the action's performer ("attach them to him").
+/// ControllerClan gives the created Personality its creator's Stronghold Clan and Clan keyword, fixed when it is created ("with your Clan alignment"). Values set printed values of
+/// the one created card from another card ("the performer's title and base Gold Cost", "Force equal to the target's Personal Honor"); the scan is still what the card is.</summary>
 public sealed record CreatedCardSpec(CardType Type, int? Force = null, int? Chi = null, int? PersonalHonor = null, string[]? Keywords = null,
     string? AbilityText = null, string? ProxyId = null, int Count = 1, bool PerHost = false, bool AtBattlefield = false, bool UntilBattleEnds = false, CreatedCardSpec[]? Or = null)
 {
+    public bool HostIsPerformer { get; init; }
+    public bool ControllerClan { get; init; }
+    public CreatedValue[]? Values { get; init; }
+
+    public bool HasInstanceValues => ControllerClan || Values is { Length: > 0 };
+
     public IEnumerable<CreatedCardSpec> Alternatives => Or is { Length: > 0 } others ? others.Prepend(this with { Or = null }) : [this];
 
     public string Describe()
@@ -25,9 +34,25 @@ public sealed record CreatedCardSpec(CardType Type, int? Force = null, int? Chi 
         if (Count != 1) text.Append(PerHost ? $" x{Count} per host" : $" x{Count}");
         if (AtBattlefield) text.Append(" at the battlefield");
         if (UntilBattleEnds) text.Append(" until the battle ends");
+        if (HostIsPerformer) text.Append(" attached to the performer");
+        if (ControllerClan) text.Append(" with the controller's Clan");
+        if (Values is { Length: > 0 } values) text.Append(" with ").Append(string.Join(", ", values.Select(v => v.Describe())));
         if (Or is { Length: > 0 } others) text.Append(" or ").Append(string.Join(" or ", others.Select(o => o.Describe())));
         return text.ToString();
     }
+}
+
+public enum CreatedStat { Name, GoldCost, Force, Chi, PersonalHonor }
+
+/// <summary>The card a created card's value is read from: the action's performer, its source card, the Personality its source is attached to, or its target.</summary>
+public enum CreatedSubject { Performer, Source, Wielder, Target }
+
+/// <summary>One printed value of a created card, taken from another card's printed value: Stat is set from Read of From (the same stat when Read is omitted) plus Plus, and plus
+/// PlusWithKeyword more when the subject has Keyword. Name is copied as it is; the numbers are printed values, never the current ones.</summary>
+public sealed record CreatedValue(CreatedStat Stat, CreatedSubject From, CreatedStat? Read = null, int Plus = 0, string? Keyword = null, int PlusWithKeyword = 0)
+{
+    public string Describe() => $"{Stat} from the {From.ToString().ToLowerInvariant()}" + (Read is { } read && read != Stat ? $"'s {read}" : "") + (Plus != 0 ? $" {Plus:+#;-#}" : "")
+        + (Keyword is null ? "" : $" and {PlusWithKeyword:+#;-#} with {Keyword}");
 }
 
 /// <summary>A spec that no scan, or more than one scan, fits. Candidates are the scans that matched or, when none did, the scans of the same type.</summary>
@@ -80,6 +105,14 @@ public static class CreatedCards
         return string.Join(' ', words.ToString().Split(' ', StringSplitOptions.RemoveEmptyEntries));
     }
 
+    private static bool CanHave(CardType type, CreatedStat stat) => stat switch
+    {
+        CreatedStat.Name or CreatedStat.GoldCost => true,
+        CreatedStat.Force => type is CardType.Personality or CardType.Follower or CardType.Item,
+        CreatedStat.Chi => type is CardType.Personality or CardType.Item,
+        _ => type == CardType.Personality
+    };
+
     // A Personality carries one Armor and one Weapon (two with Kensai): several created at once could not all attach, and are not built.
     private static bool IsSingleOfKind(CardDefinition scan) => scan.Type == CardType.Item && (scan.Keywords ?? []).Any(k => k is "Armor" or "Weapon");
 
@@ -110,6 +143,14 @@ public static class CreatedCards
                 if (!Creatable(scan.Type)) problems.Add($"{abilityId}: {scan.Name} ({scan.Id}) is a {scan.Type}, which the engine cannot create yet");
                 if (alternative.Count < 1 || alternative.AtBattlefield && scan.Type != CardType.Personality) problems.Add($"{abilityId}: {alternative.Describe()} names a count or a place that {scan.Name} cannot have");
                 if (alternative.Count > 1 && IsSingleOfKind(scan)) problems.Add($"{abilityId}: {alternative.Describe()} creates several {scan.Name}, a card a Personality carries only one of");
+                if (alternative.Count > 1 && scan.Type == CardType.Personality && (scan.Keywords ?? []).Contains("Unique")) problems.Add($"{abilityId}: {alternative.Describe()} creates several {scan.Name}, a Unique card");
+                if (alternative.HostIsPerformer && !IsAttachment(scan.Type)) problems.Add($"{abilityId}: {alternative.Describe()} attaches {scan.Name}, which is not an attachment");
+                var namesPerformer = alternative.HostIsPerformer || (alternative.Values ?? []).Any(v => v.From == CreatedSubject.Performer);
+                if (namesPerformer && AbilityCatalog.All.TryGetValue(abilityId, out var creator) && creator.Performer is null) problems.Add($"{abilityId}: {alternative.Describe()} names the performer, and the ability has none");
+                if (alternative.ControllerClan && scan.Type != CardType.Personality) problems.Add($"{abilityId}: {alternative.Describe()} gives {scan.Name} a Clan, which only a Personality has");
+                foreach (var value in alternative.Values ?? [])
+                    if (!CanHave(scan.Type, value.Stat) || value.Stat == CreatedStat.Name && (value.Read is not null || value.Plus != 0 || value.Keyword is not null) || value.PlusWithKeyword != 0 != (value.Keyword is not null))
+                        problems.Add($"{abilityId}: {alternative.Describe()} sets {value.Stat} of {scan.Name} in a way it cannot be set");
             }
             catch (CreatedCardResolutionException e) { problems.Add($"{abilityId}: {e.Message}"); }
         }

@@ -38,6 +38,10 @@ public static class CostVerbs
     /// <summary>The acting player loses ActionCost.Amount Honor ("Lose 2 Honor:"). Paid like any cost, so a negation of the action's effects does
     /// not stop it.</summary>
     public const string LoseHonor = "lose-honor";
+    /// <summary>Discard the subject from play into its owner's discard pile ("discard this card:" on a Celestial): a Dynasty card to the Dynasty discard pile, a Fate card to the Fate one.</summary>
+    public const string DiscardFromPlay = "discard-from-play";
+    /// <summary>The acting player's leftmost province that has not been destroyed is destroyed ("destroy your leftmost province:"). It names no card.</summary>
+    public const string DestroyLeftmostProvince = "destroy-leftmost-province";
 }
 
 /// <summary>One cost: <paramref name="Verb"/> (CostVerb.Bow or CostVerbs.*) applied to <paramref name="Subject"/> (CostSubject.*: the ability's
@@ -103,6 +107,13 @@ public sealed partial class MatchEngine
         _ => null
     };
 
+    // The cards the action bows or destroys as a cost besides its Gold: none of them can also be bowed to produce that Gold (Venerable Master's "Bow and destroy this card, and pay 2 Gold").
+    private IReadOnlySet<string>? CostPaidCards(GameCommand command)
+    {
+        var ids = PlannedCostsOf(command).Where(c => c.Cost.Verb is CostVerb.Bow or CostVerbs.Sacrifice && c.Subject is not null).Select(c => c.Subject!.Id).ToHashSet(StringComparer.Ordinal);
+        return ids.Count == 0 ? null : ids;
+    }
+
     // Every cost the action would pay (see PlannedCosts), listed safely: empty for a command that names no valid ability or option.
     private List<(ActionCost Cost, CardInstance? Subject)> PlannedCostsOf(GameCommand command)
     {
@@ -129,7 +140,7 @@ public sealed partial class MatchEngine
         foreach (var cost in ability.Costs ?? [])
         {
             if (cost.UnlessInHand && source is { Zone: Zone.Hand }) continue;
-            yield return (cost, cost.Verb == CostVerbs.LoseHonor ? null : CostSubjectCard(new CostOption(cost.Verb, cost.Verb, cost.Verb, cost.Subject), ability, command, source));
+            yield return (cost, cost.Verb is CostVerbs.LoseHonor or CostVerbs.DestroyLeftmostProvince ? null : CostSubjectCard(new CostOption(cost.Verb, cost.Verb, cost.Verb, cost.Subject), ability, command, source));
         }
     }
 
@@ -142,6 +153,11 @@ public sealed partial class MatchEngine
         {
             if (cost.UnlessInHand && source is { Zone: Zone.Hand }) continue;
             if (cost.Verb == CostVerbs.LoseHonor) { GainHonor(player.Id, -cost.Amount, source is null ? "an action" : Definition(source).Name, source); continue; }
+            if (cost.Verb == CostVerbs.DestroyLeftmostProvince)
+            {
+                if (player.Provinces.Where(p => !p.Destroyed).OrderBy(p => p.Index).FirstOrDefault() is { } leftmost) DestroyProvince(player.Id, leftmost);
+                continue;
+            }
             var subject = CostSubjectCard(new CostOption(cost.Verb, cost.Verb, cost.Verb, cost.Subject), ability, command, source);
             if (subject is null) continue;
             switch (cost.Verb)
@@ -150,6 +166,11 @@ public sealed partial class MatchEngine
                 case CostVerbs.Discard: DiscardFate(player, subject); break;
                 case CostVerbs.Remove: RemoveFromGame(subject); break;
                 case CostVerbs.Sacrifice: DestroyUnits([subject], false, player.Id); break;
+                case CostVerbs.DiscardFromPlay:
+                    subject.Zone = IsDynastyCardType(Definition(subject).Type) ? Zone.DynastyDiscard : Zone.FateDiscard;
+                    subject.ProvinceIndex = null; subject.FaceUp = true;
+                    Emit("discardedFromPlay", $"{Definition(subject).Name} was discarded.", subject.OwnerId, subject.Id);
+                    break;
                 case CostVerbs.DestroyToken: DestroyToken(subject, subject.Tokens.First(t => t.Type == cost.Token)); break;
                 case CostVerbs.ToDeck: ToOwnerDeck(subject, command.DeckPosition!); break;
                 default: throw new InvalidOperationException($"Unknown cost verb '{cost.Verb}'.");
