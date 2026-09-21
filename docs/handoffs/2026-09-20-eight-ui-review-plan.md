@@ -9,7 +9,7 @@ Alfredo approved these concept combinations. Implementation completion means a t
 | 1 | #339 | A sidebar + B clearer source preview; reusable choice and alternative-cost flow | Ready for individual review; [PR #392](https://github.com/alfredoh7/l5r-emperor/pull/392), native Mac checks and dedicated launcher; no merge |
 | 2 | #315 | B shown-card history sidebar | Ready for individual review; [PR #393](https://github.com/alfredoh7/l5r-emperor/pull/393), native Mac and live reconnect checks, dedicated launcher; no merge |
 | 3 | #347 | A restriction seal | Ready for individual review; [PR #395](https://github.com/alfredoh7/l5r-emperor/pull/395), native Mac checks and dedicated launcher; no merge |
-| 4 | #314 | B full-card gallery inside A search panel | Pending |
+| 4 | #314 | B full-card gallery inside A search panel | Ready for individual review; [PR #396](https://github.com/alfredoh7/l5r-emperor/pull/396), native Mac checks and dedicated launcher; no merge |
 | 5 | #343 | A sidebar + B explicit consequences | Pending |
 | 6 | #342 | B copy tray + A compact result summary | Pending |
 | 7 | #346 | A; reuse current battle assignment arrows and province placement | Pending |

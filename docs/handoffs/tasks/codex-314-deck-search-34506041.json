@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Claim #314 approved deck-search preview; B gallery inside A panel; no merge authorized.",
-  "validation": "Read current engine SearchView/actions and latest main/open PRs; implementation not yet started.",
-  "remaining": "Implement and test private search viewer, all follow-ups, prepared Mac launcher and native evidence.",
+  "summary": "Implement #314 approved private search gallery and prepared Mac review; no merge authorized.",
+  "validation": "Client build zero warnings/errors; native Mac 1920x1080 normal and 1280x800 reduced pass: deck/entry confirmation, grouping, hover/focus, native typing and scrolling, private seat reset, busy reset, Region/Terrain follow-ups, no-match/empty/optional Pass, Imperial Gift and Gold payment. Core deck-search 23/23 and client transport 9/9 pass. Actual app launcher and desktop filter/seat switches verified; source/native comparison inspected.",
+  "remaining": "Alfredo UI acceptance, Mendon review and pushed-revision CI; no merge authorized. Native Windows/external multiplayer untested. Remaining batch tasks #343, #342, #346, #355.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/314",
   "branch": "codex/314-deck-search",
-  "updated": "2026-09-20T23:43:59.098892+00:00"
+  "updated": "2026-09-21T00:08:49.876234+00:00"
 }

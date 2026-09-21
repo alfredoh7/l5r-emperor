@@ -21,6 +21,7 @@ public partial class Main
         (_captureMode.StartsWith("published-stabilization", StringComparison.Ordinal) ||
          _captureMode.StartsWith("published-shown", StringComparison.Ordinal) && !_captureMode.Contains("review",StringComparison.Ordinal) ||
          _captureMode.StartsWith("published-action-lock", StringComparison.Ordinal) && !_captureMode.Contains("review",StringComparison.Ordinal) ||
+         _captureMode.StartsWith("published-search", StringComparison.Ordinal) && !_captureMode.Contains("review",StringComparison.Ordinal) ||
          _captureMode.StartsWith("published-supports", StringComparison.Ordinal) && !_captureMode.Contains("review", StringComparison.Ordinal) ||
          _captureMode.StartsWith("published-board", StringComparison.Ordinal) &&
          (_captureMode.Contains("camera", StringComparison.Ordinal) || _captureMode.Contains("deselect", StringComparison.Ordinal)));
