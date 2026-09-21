@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Implement explicit Attack choices with full target faces, engine-offered No target/province/card selection, separate confirmation and prepared individual launcher; deliver the eight-task review index. No merge authorized.",
-  "validation": "Client build zero warnings/errors; Godot import; Attack native 1920x1080 normal, 1280x800 reduced and reduced-review-check passed; actual Mac app click-through and source/native comparison inspected; Core targeted reactions 30/30; transport 11/11; Movement native regression passed. All eight generated app routes checked. Final CI pending on push.",
-  "remaining": "Alfredo individual UI acceptance; Mendon rules/shared-contract review; final CI; native Windows graphical play and external multiplayer acceptance. No merge authorized. See eight-task review index for inherited dependencies.",
+  "summary": "Complete explicit Attack targets and all eight individual review launchers; include Tensin fixed-cost/performer regression and clean performer labels. No merge authorized.",
+  "validation": "Client build zero warnings/errors; final Attack normal and reduced-review native checks passed including Tensin; earlier reduced case passed; actual Mac app and Tensin click-through verified; Core targeted reactions 30/30; transport 11/11; Movement regression passed; source/native captures inspected; all eight app routes verified. CI tracked on final pushed revision.",
+  "remaining": "Alfredo individual UI acceptance, Mendon rules/shared-contract review, final CI, native Windows graphical play and external multiplayer. No merge authorized; inherited dependencies documented in eight-task review index.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/355",
   "branch": "codex/355-attack-targets",
-  "updated": "2026-09-21T02:19:34.567870+00:00"
+  "updated": "2026-09-21T02:34:19.848926+00:00"
 }

@@ -48,7 +48,8 @@ public partial class Main
         var action=_chosen!;var command=action.Command!;_guide.Visible=false;
         var heading=Palette.Text("CHOOSE AN ATTACK TARGET",19,title:true);
         heading.AutowrapMode=TextServer.AutowrapMode.WordSmart;heading.SizeFlagsHorizontal=Control.SizeFlags.ExpandFill;_sidebarHeader.AddChild(heading);
-        _inspector.AddChild(Palette.Wrapped(action.Label,18,Palette.Gold));
+        var actionLabel=command.PerformerId is {} performerId?action.Label.Replace($" ({performerId})","",StringComparison.Ordinal):action.Label;
+        _inspector.AddChild(Palette.Wrapped(actionLabel,18,Palette.Gold));
         if(FindCard(action.CardId??command.CardId??"") is {Definition:not null} source)
         {
             var sourceButton=SidebarSkin.Button("From: "+source.Definition.Name+" · inspect",()=>InspectAttackCard(source));

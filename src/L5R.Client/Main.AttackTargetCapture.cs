@@ -18,9 +18,11 @@ public partial class Main
         state.Phase=Phase.Battle;state.ActivePlayerId=state.PriorityPlayerId=0;state.PendingChoice=null;
         state.CurrentBattleProvince=0;state.UnresolvedBattlefields=[0];
         var own=SupportFixtureCard(state,3636,0,Zone.Battlefield,0);
-        var source=mode=="province"?SupportFixtureCard(state,"training-province-attacker",0,Zone.Battlefield,0):
+        var source=mode=="tensin"?SupportFixtureCard(state,3332,0,Zone.Battlefield,0):mode=="province"?SupportFixtureCard(state,"training-province-attacker",0,Zone.Battlefield,0):
             mode=="cost"?state.Cards[state.Players[0].StrongholdId]:SupportFixtureCard(state,mode=="melee"?7450:3456,0,Zone.Attached,0);
         if(source.Zone==Zone.Attached)source.AttachedTo=own.Id;
+        if(mode=="tensin")
+            foreach(var definition in new[]{3456,7450})SupportFixtureCard(state,definition,0,Zone.Attached,0).AttachedTo=source.Id;
         if(mode=="cost")source.DefinitionId="oracle-l5r-1218";
         _attackSource=source.Id;_attackCard=_attackReactiveCard=_attackFollower=_attackFollowedHost="";
         if(mode!="empty")
@@ -45,7 +47,7 @@ public partial class Main
         if(_root.GetNodeOrNull<Control>("AttackReviewControls") is {} old){_root.RemoveChild(old);old.QueueFree();}
         var row=new HBoxContainer{Name="AttackReviewControls",ZIndex=91};row.AddThemeConstantOverride("separation",5);
         var buttons=new List<Button>();
-        foreach(var (label,mode) in new[]{("Ranged","ranged"),("Melee","melee"),("Follower","follower"),("No cards","empty"),("Province demo","province"),("Cost","cost")})
+        foreach(var (label,mode) in new[]{("Ranged","ranged"),("Melee","melee"),("Follower","follower"),("No cards","empty"),("Province demo","province"),("Cost","cost"),("Tensin","tensin")})
             buttons.Add(SidebarSkin.Button(label,()=>_=RunAttackReview(()=>PrepareAttackReview(mode))));
         buttons.Add(SidebarSkin.Button("Other seat",()=>_session.SwitchPracticeSeat()));_attackReviewButtons=buttons.ToArray();
         foreach(var button in buttons){button.CustomMinimumSize=new(0,44);button.AddThemeFontSizeOverride("font_size",14);button.SizeFlagsHorizontal=Control.SizeFlags.ExpandFill;row.AddChild(button);}
@@ -123,8 +125,23 @@ public partial class Main
             await PrepareAttackReview("cost");var performer=_chosen!.Command!.PerformerId!;var honor=Self.Honor;
             await SupportClick(AttackNoTargetButton());await SupportCapture("-cost");await ConfirmAttackTarget();
             SupportRequire(_attackFixture.State.Cards[performer].Bowed&&Self.Honor==honor&&_attackFixture.State.PendingAttack is null,"No target skipped its bow cost or awarded card-target Honor");
+            foreach(var targetCard in new[]{false,true})
+            {
+                await PrepareAttackReview("tensin");
+                var offered=Actions.Where(a=>a.Enabled&&a.CardId==_attackSource&&a.Command?.AbilityId=="tensin-follower-attack").ToArray();
+                SupportRequire(offered.Length==2&&offered.All(a=>a.NoTarget&&a.AlternativeCost is null),"Tensin fixture must expose both performing Followers with a fixed bow cost");
+                var firstPerformer=offered[0].Command!.PerformerId;Choose(offered[1]);await EventFrames(12);
+                performer=_chosen!.Command!.PerformerId!;
+                SupportRequire(performer!=firstPerformer&&_attackChoice==AttackChoice.Unselected&&_paymentConfirm!.Disabled,"Changing the performing Follower retained a target draft");
+                if(targetCard)await SupportClick(AttackCardFace(_attackCard));else await SupportClick(AttackNoTargetButton());
+                CheckAttackConfirmation();
+                SupportRequire(View.Version==0&&!_attackFixture.State.Cards[performer].Bowed&&_chosen!.Command!.TargetId==(targetCard?_attackCard:null),"Selecting Tensin's target paid the cost early or lost the target");
+                await SupportCapture(targetCard?"-tensin-card":"-tensin-no-target");await ConfirmAttackTarget();
+                SupportRequire(View.Version==1&&_attackFixture.State.Cards[performer].Bowed&&!_attackFixture.State.Cards[firstPerformer!].Bowed&&_attackFixture.State.PendingAttack is null,"Tensin bowed the wrong Follower or opened an unexpected reaction");
+                SupportRequire(_attackFixture.State.Cards[_attackCard].Zone==(targetCard?Zone.Dead:Zone.Battlefield),"Tensin's explicit target was not respected");
+            }
             GD.Print(renderOnly?"ATTACK_TARGET_RENDER_PASS: rendering, sidebar controls and real-engine outcomes checked; native table focus/input and desktop launcher acceptance remain pending.":
-                "ATTACK_TARGET_PASS: native no-target/card/province choices, full faces, table and keyboard input, explicit confirm, cancel/seat reset, Follower legality, empty/Melee, real costs and correct reaction behavior.");GetTree().Quit();
+                "ATTACK_TARGET_PASS: native no-target/card/province choices, full faces, table and keyboard input, explicit confirm, cancel/seat reset, Follower legality, empty/Melee, real costs, Tensin fixed-cost/performer regression and correct reaction behavior.");GetTree().Quit();
         }
         catch(Exception e){await SupportCapture("-failure");GD.PushError(e.ToString());GetTree().Quit(1);}
     }

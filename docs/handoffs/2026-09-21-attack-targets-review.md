@@ -6,7 +6,7 @@ Eighth approved UI preview: A’s explicit choices plus B’s full-card previews
 
 On Alfredo’s Mac: [L5R Attack Targets — Review.app](../../artifacts/L5R%20Attack%20Targets%20-%20Review.app). Portable entry: `Review Attack Targets.command`.
 
-The app builds this checkout and opens Horse Archers’ real Ranged Attack without a preselected target. Above-table controls prepare **Ranged**, **Melee**, **Follower**, **No cards**, **Province demo**, **Cost**, and **Other seat**. They are review-only shortcuts to real engine decisions, not new gameplay actions. The province case explicitly uses the existing training definition; it is not added to playable decks. The other cases use published cards placed in the required zones. No fetch, branch change or merge occurs.
+The app builds this checkout and opens Horse Archers’ real Ranged Attack without a preselected target. Above-table controls prepare **Ranged**, **Melee**, **Follower**, **No cards**, **Province demo**, **Cost**, **Tensin**, and **Other seat**. They are review-only shortcuts to real engine decisions, not new gameplay actions. The province case explicitly uses the existing training definition; it is not added to playable decks. The other cases use published cards placed in the required zones. No fetch, branch change or merge occurs.
 
 Recreate the local bundle with:
 
@@ -22,7 +22,8 @@ python3 tools/create-review-launcher.py 'Review Attack Targets.command' 'L5R Att
 4. **Follower** offers the legal Follower rather than its protected host. **No cards** still permits No target. **Melee** uses the same explicit flow.
 5. **Province demo** additionally offers **This battlefield’s province**. Select it in the sidebar or by clicking the current defending province on the table. The command names the province, not its Dynasty card. Switching back to a card clears the province choice. Confirming the province reduces its strength through the training ability.
 6. **Cost** prepares Carpenter Castle’s Attack. Confirming No target still pays the real bow cost; it does not earn the card-target Honor benefit. Costs remain authoritative in the engine.
-7. **Other seat** removes the unfinished choice. Returning requires a new explicit selection. Check keyboard selection, the smaller window and reduced motion; confirmation stays visible while the option list scrolls.
+7. **Tensin** prepares the Attack performed by a Follower in his unit. Choose No target or a card, then confirm. The performing Follower bows only when the Attack is submitted. To review the other Follower, cancel, select Tensin and choose the action naming that Follower. This is a fixed bow cost; there is no alternative-cost step.
+8. **Other seat** removes the unfinished choice. Returning requires a new explicit selection. Check keyboard selection, the smaller window and reduced motion; confirmation stays visible while the option list scrolls.
 
 ## Approved design and authority
 
@@ -32,7 +33,7 @@ The existing lacquer atlas, full period scans and Caudex/WeatheredQuill implemen
 
 `NoTarget`, `TargetIds` and `Provinces` alone supply choices. All currently legal Attack abilities expose `NoTarget`; movement retains its separate `Movement` flow and is never classified from `Provinces` alone. Choosing an option sets mutually exclusive TargetId/Province fields, refreshes the engine’s quoted payment suggestions, and remains local until confirmation. Ordinary actions retain their existing target flow. No Core, server, printing or wire-format behavior is changed here.
 
-The existing version/disconnection guards discard stale drafts; a seat change also removes this task’s selection. Full faces and inspection use public CardView data. Province arrows point at the battlefield’s province; no-target choices draw no arrow. Alternative-cost and Gold handling use the existing shared panels.
+The existing version/disconnection guards discard stale drafts; a seat change also removes this task’s selection. Full faces and inspection use public CardView data. Province arrows point at the battlefield’s province; no-target choices draw no arrow. Gold handling uses the existing shared panel; fixed non-Gold costs remain part of the engine action.
 
 ## Verified evidence
 
@@ -41,6 +42,7 @@ The existing version/disconnection guards discard stale drafts; a seat change al
 - The first locked-desktop run failed the real focus guard, which was preserved. A separate renderer/controller path reports `ATTACK_TARGET_RENDER_PASS` only and does not count as native table-input acceptance. Full native runs subsequently passed after desktop access returned.
 - Initial visual inspection found that the heading and full-card minimum widths pushed the sidebar past the window. Wrapped heading text and fitted card widths corrected it; both final sizes and review navigation were visually inspected.
 - Existing Core targeted-action/reaction suite: **30/30 passed**. Client/transport suite: **11/11 passed**, including the new server-envelope/client projection and strict outgoing-command cases for No target, card and province. This is serialization/contract evidence, not an external multiplayer playtest.
+- Final normal and reduced-review checks also passed Tensin’s fixed-cost Attack through either performing Follower, preserving No target/card choice and bowing only the selected performer on submission. The test selects the second engine offer through the controller, then exercises native target/confirmation input. The actual Mac launcher was reopened and Tensin’s review button, No target and confirmed bow cost were checked through desktop clicks. Internal performer IDs are omitted from the player-facing Attack label.
 - Movement’s existing `1280x800 reduced-review-check` passed again on this combined implementation, covering the shared table/target routing, attachments, Hawado cost distinction and partial negation.
 - The actual Mac `.app` launched directly to the prepared choice. Desktop clicks verified unconfirmed full-card selection, full-size inspection and return, No target clearing the card arrow, review navigation and actual table province selection. The game was then closed cleanly.
 - All eight prepared Mac bundles were generated in this combined checkout and checked to point at their matching command here. The earlier seven actual launcher checks remain recorded in their task handoffs; Copy’s final desktop check was completed with Movement. The generic Latest launcher was refreshed.
