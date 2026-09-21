@@ -172,7 +172,7 @@ internal static class CopyKataTargetingTests
         var s = Table(Phase.Action, 0); s.PriorityPlayerId = 0; s.Players[0].TurnsTaken = 3; s.Players[1].TurnsTaken = 3;
         var old = Add(s, Puddle, 0, Zone.Home); var other = Add(s, "training-focus-strategy", 0, Zone.Hand); var enemyKata = Add(s, Puddle, 1, Zone.Home);
         var kata = Add(s, Puddle, 0, Zone.Hand);
-        var ring = Add(s, "training-ring-of-air", 0, Zone.Home);
+        var ring = Add(s, "training-ring-of-air", 0, Zone.Home); var notKata = Add(s, "training-focus-strategy", 0, Zone.Home);
         var e = MatchEngine.FromTestState(s);
         Check(!Options(e, 0, "skipping-the-puddle-enter", old.Id).Any(o => o.Enabled), "a Kata already in play is not put into play again");
         Accept(e, Enabled(e, 0, "skipping-the-puddle-enter", kata.Id).Command!);
@@ -181,7 +181,8 @@ internal static class CopyKataTargetingTests
         Eq(e.State.Cards[old.Id].Zone, Zone.FateDiscard, "his other Kata was discarded");
         Eq(e.State.Cards[enemyKata.Id].Zone, Zone.Home, "the other player's Kata stays");
         Eq(e.State.Cards[other.Id].Zone, Zone.Hand, "a card that is not a Kata stays");
-        Eq(e.State.Cards[ring.Id].Zone, Zone.Home, "and so does a Ring (or any card at home that is not a Kata)");
+        Eq(e.State.Cards[ring.Id].Zone, Zone.Home, "and so does a Ring");
+        Eq(e.State.Cards[notKata.Id].Zone, Zone.Home, "and a Strategy at home that is not a Kata");
         Check(k.Zone == Zone.Home && CardCatalog.Get(kata.DefinitionId).Type == CardType.Strategy, "it stays in play as a Strategy: not discarded after resolving");
     }
 
