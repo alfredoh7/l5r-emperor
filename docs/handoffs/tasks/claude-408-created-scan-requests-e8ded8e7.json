@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Documentation only: asks Mendon and Alfredo for the created-card scans that do not exist (9 near misses with thumbnails, 17 missing, one ruling question), and closes the 14 created-card questions in the decision doc with Mendon's answers, the answer to the stat-override question, and what is wired versus waiting.",
+  "validation": "bash tools/check.sh --skip-client passed on this branch; documentation only, no code or game data changed; thumbnails reduced from the local scan cache, nothing downloaded",
+  "remaining": "Mendon and Alfredo tick the checklist rows as scans are made; each ticked row opens a packaging task.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/408",
+  "branch": "claude/408-created-scan-requests",
+  "updated": "2026-09-21T01:46:26.020403+00:00"
+}
