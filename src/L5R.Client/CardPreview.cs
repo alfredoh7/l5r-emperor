@@ -17,7 +17,7 @@ public static class CardPreview
         face.Resized += () => { face.FaceHeight = Math.Min(height, face.Size.X * 1.4f); face.QueueRedraw(); };
         return face;
     }
-    public static Control Create(CardView card, string context, int? gold, float scale = 1, Func<string,string?>? sourceName = null)
+    public static Control Create(CardView card, string context, int? gold, float scale = 1, Func<string,string?>? sourceName = null, string? interactionHint = null)
     {
         // Fix the popup's measure independently of wrapped text. Godot measures a tooltip
         // before its first layout; a container alone can otherwise grow to thousands of pixels.
@@ -63,7 +63,7 @@ public static class CardPreview
         if(CardChanges.Entries(card).Length>0) details.AddChild(CardChangePanel.Create(card,sourceName,compact:true));
         details.AddChild(Palette.Wrapped(string.IsNullOrWhiteSpace(def.Text) ? "No activated ability is printed on this card. Its statistics and traits can still be used by the game and other card effects." : def.Text, 16, Palette.PaperDim));
         details.AddChild(Palette.Wrapped(context, 15, Palette.Crane)); body.AddChild(rules);
-        body.AddChild(Palette.Wrapped("Click to select. Read longer rules in the inspector.\n? Rules explains the table and turn sequence.", 12, Palette.Muted));
+        body.AddChild(Palette.Wrapped(interactionHint??"Click to select. Read longer rules in the inspector.\n? Rules explains the table and turn sequence.", 12, Palette.Muted));
         return shell;
     }
 }

@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Start Either/Or UI review candidate #343 on isolated stacked branch; no merge authorized.",
-  "validation": "Read live issue, engine contract and accepted rules decisions; implementation checks pending.",
-  "remaining": "Implement and validate sidebar, source inspection, payment, waiting view, auto-resolution feedback, and prepared launcher.",
+  "summary": "Implement approved Either/Or sidebar with explicit consequences, quoted payment, read-only waiting seat and automatic-result feedback; prepared Mac review; no merge authorized.",
+  "validation": "Client build/import passed; native Mac normal 1920x1080 and reduced 1280x800 passed; reduced review navigation check passed; existing Either/Or engine 17/17 and transport 9/9 passed; native screenshots and desktop launcher inspected.",
+  "remaining": "Alfredo UI acceptance, Mendon presentation review and final-revision CI pending; native Windows/external multiplayer untested. Next: #342 Copy, #346 Movement, #355 Attack targets. No merge authorized.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/343",
   "branch": "codex/343-either-or",
-  "updated": "2026-09-21T00:21:13.697200+00:00"
+  "updated": "2026-09-21T00:38:46.697314+00:00"
 }

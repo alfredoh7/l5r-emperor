@@ -121,6 +121,7 @@ public partial class Main : Node
         if (_capturePath is not null && _captureMode.StartsWith("published-shown",StringComparison.Ordinal)) { ProcessShownCapture(delta); return; }
         if (_capturePath is not null && _captureMode.StartsWith("published-action-lock",StringComparison.Ordinal)) { ProcessActionLockCapture(delta); return; }
         if (_capturePath is not null && _captureMode.StartsWith("published-search",StringComparison.Ordinal)) { ProcessSearchCapture(delta); return; }
+        if (_capturePath is not null && _captureMode.StartsWith("published-either-or",StringComparison.Ordinal)) { ProcessEitherCapture(delta); return; }
         if (_capturePath is not null && _captureMode.StartsWith("published-supports",StringComparison.Ordinal)) { ProcessSupportCapture(delta); return; }
         if (_capturePath is not null && _captureMode == "published-ink-film") { ProcessInkFilm(); return; }
         if (_capturePath is not null && _captureMode.StartsWith("published-stabilization",StringComparison.Ordinal)) { ProcessStabilizationCapture(delta); return; }
@@ -309,6 +310,7 @@ public partial class Main : Node
         _inspectorPanel.Size = new Vector2(SidebarWidth, 960);
         FitShownCards();
         FitSearchPanel();
+        FitEitherReviewControls();
         FitEventDecisions();
         _status.Visible = false;
         _timeline.Position = new Vector2(344, 12); _timeline.Size = new Vector2(_layoutWidth - SidebarWidth - 404, 100);
@@ -411,6 +413,8 @@ public partial class Main : Node
         if (MenuVisible || PracticeVisible) return;
         if (_session.Snapshot is null)
         {
+            _eitherOrKey=null;_eitherNoticeMatch=null;_eitherNotice=null;
+            if(_chosen?.Type=="chooseEitherOr"){_chosen=null;_sources.Clear();}
             ClearSearchPanel();
             ObserveShownCards();
             _eventSidebar.Visible=false;_eventHandBar.Visible=false;_eventDiscardId=null;
