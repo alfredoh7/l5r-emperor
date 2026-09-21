@@ -778,6 +778,8 @@ public sealed class MatchState
     // Spirit of the Berserker (Second City): "Delay his destruction from the action's effects until before this turn ends" -- the Personalities whose destruction a
     // reaction has put off, destroyed for real at the top of EndTurn if they are still in play (DelayedDestruction.cs).
     public List<string> PendingDelayedDestructions { get; set; } = [];
+    // Keywords and Clan alignments taken off cards until an action or the turn ends (Red Crane Dojo, TemporaryRemovals.cs).
+    public List<TemporaryRemoval> TemporaryRemovals { get; set; } = [];
     // Kyuden Kitsune: the battles ("turn:province") whose one negated movement has been used.
     public List<string> KitsuneNegatedBattles { get; set; } = [];
     // Legion of the Bat (issue #279): "after the resolution of an action that moved a target enemy

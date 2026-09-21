@@ -60,3 +60,38 @@ Strength of the Tsunami's "If he moved, negate his (future) movement" and A Quie
 ## Verification (stage 1)
 
 Suite `straighten-holds` (9 tests): the published shapes; Hibernation's timeline; who may perform it and the shield's cases; Bamboo Harvesters from the start of the game and later; a hold's refusal of effects and the view; the five points and Owner/Skip; Visitation's flow and Honor half; Strength of the Tsunami; movement lock kinds.
+
+## Stage 2 (#416): a Gold cost from a printed number; conditional Holding production
+
+Wired: **A Quiet Transaction** (strategy-wave-37), **Red Crane Dojo** and, as the second user of the same primitive, **Bushi Dojo** (holding-wave-5). Bushi Dojo is not a Second City card; it is the example Mendon named for the primitive, and wiring it exercises the shape with no printed production.
+
+### The Gold cost from a stat (`GoldCostRule.StatValue`, GoldQuotes.cs)
+
+"Pay Gold equal to [base | current] [stat] of [target | performer | source] plus or minus [z]." The rule names the card whose number is read (`CostStatSubject`: Target, Performer, Source), the stat (`CostStat`: Force, Chi, GoldCost, PersonalHonor, Focus, ProvinceStrength), whether the printed (base) or the current value is read, a modifier (added or subtracted; omitted = 0) and, as every Gold rule has, a floor and the never-below-zero clamp. The number is converted into Gold and enters the ordinary Gold pathway: it is quoted (derived, per target), validated, paid from the chosen sources and shown in the payment panel with its basis ("Kyuden's ... base Personal Honor 3 + 1"). Anything a card prints as a number can now be the price of an action; A Quiet Transaction is the first user.
+
+- **Current** is the value with every modifier and token: current Force is `PersonalityForce`/`FollowerForce`, current Chi `PersonalityChi`, current Gold Cost `CardGoldCost`, current Personal Honor `CardPersonalHonor` (0 while dishonorable), Focus Value the printed value plus modifiers. **Base** is the printed value.
+- **"Strength"** (Mendon's list): read as Force for a unit and Province Strength for a Stronghold, which are the two printed "strength" numbers. A Stronghold's current Province Strength is its printed one plus modifiers; the province's own tracked strength arrives with stage 4.
+
+### Conditional production (ConditionalProduction.cs)
+
+Every Gold payment is for one thing: a Personality or Holding recruited, an Item or Follower equipped, a card played from a hand, or an action of a card in play. A payment now carries that (`PaymentSubject`: the card, the kind, the ability), and a Holding whose Effect names a `ConditionalProduction` produces that amount when the payment meets its condition and its printed production otherwise. The subject is passed through the quote, the validation and the payment, so the three cannot disagree.
+
+- Red Crane Dojo: 4 instead of 3 when paying for a card with the keyword Ninja (recruited, equipped or played; never for an action of a Ninja card already in play, which is not "paying for a card").
+- Bushi Dojo: 6 when paying for a Follower equipped or for an action that creates a Follower; nothing otherwise.
+- "Which may only pay for that card / for one action": no rule of its own is needed. Gold does not carry over from one payment to the next, so a source's whole production always pays for the single card or action it was chosen for and any excess is lost, exactly as before.
+
+### Temporary removal (TemporaryRemovals.cs)
+
+Red Crane Dojo's Reaction removes Ninja and Shadowlands "until the action ends". Mendon's ruling: applied after targeting, so an effect conditional on the target being Ninja or Shadowlands ("if the target is Shadowlands, destroy it") finds he is not; given back once the action has resolved; if it never resolves, given back at the end of the turn. Implemented as a record of exactly what was taken (`MatchState.TemporaryRemovals`), given back when the deferred action or Attack resolves, and swept at the end of the turn. Shadowlands is a Clan alignment, so it goes the way Discovering a Conspiracy's permanent removal does (the alignment and its "Shadowlands Clan" keyword), but temporarily. An action paused for a choice or a duel has not ended, so nothing is given back until it does.
+
+### Readings for Mendon (continued)
+
+8. **"Strength" in the cost list** is Force (units) and Province Strength (Strongholds). Say if it means something else.
+9. **A Quiet Transaction's lock** covers assignment to a battlefield and any effect that moves him to one, for the rest of the turn; not movement home (Strength of the Tsunami's lock covers both). The lock is made when the action resolves, so an assignment already made this turn stands.
+10. **Red Crane Dojo's Reaction follows the Oracle text**: "Ninja Tireless Reaction, bow this card". The scan prints only "Even if this card is bowed"; both agree it may be taken while bowed, and the wired one bows the Holding if it is not already. It is offered whenever an action (either player's) targets the controller's Personality who is Ninja or Shadowlands, and never for another player's Personality.
+11. **Bushi Dojo's Oracle text** ("an action that Equips or creates a Follower ... which may only pay for one action") differs from the scan ("a Follower or an action that creates a Follower"). One condition serves both: a Follower being equipped, or an ability that creates a Follower.
+12. **"Paying for a Ninja card"** includes recruiting, equipping and playing the card; it does not include the actions of a Ninja card already in play.
+
+## Verification (stage 2)
+
+Suite `gold-stat-cost` (8 tests): the published shapes; every stat, base and current, modifier and floor; quotes per target and performer and their payment; A Quiet Transaction's cost, lock and tokens; conditional production by payment kind; a Ninja recruit and a Follower equip paid by their Holding alone (and a non-Ninja / an Item not); Red Crane Dojo's Reaction while bowed and its removal and return; the end-of-turn fallback.

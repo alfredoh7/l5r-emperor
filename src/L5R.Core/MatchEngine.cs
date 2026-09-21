@@ -553,7 +553,7 @@ public sealed partial class MatchEngine
         var card=Card(command.CardId);
         var quote=QuotePurchase(command.PlayerId,card.Id,command.ClanDiscount,command.ClanAllegiance);
         Require(quote.Error is null,quote.Error??"");
-        Pay(command.PlayerId,card,quote.Cost,command.SourceIds);
+        Pay(command.PlayerId,card,quote.Cost,command.SourceIds,paying:new PaymentSubject(card,PaymentKind.Recruit));
         var province=Player(command.PlayerId).Provinces.Single(p=>p.CardId==card.Id);
         province.CardId=null;
         card.Zone=Zone.Home; card.ProvinceIndex=null; card.FaceUp=true;
@@ -817,7 +817,7 @@ public sealed partial class MatchEngine
         Require(Army(1-command.PlayerId,provinceIndex).Any(),"The enemy must have presence at this battlefield.");
         var quote=QuotePurchase(command.PlayerId,card.Id,command.ClanDiscount,command.ClanAllegiance,viaReserve:true);
         Require(quote.Error is null,quote.Error??"");
-        Pay(command.PlayerId,card,quote.Cost,command.SourceIds);
+        Pay(command.PlayerId,card,quote.Cost,command.SourceIds,paying:new PaymentSubject(card,PaymentKind.Recruit));
         var province=Player(command.PlayerId).Provinces.Single(p=>p.CardId==card.Id);
         province.CardId=null;
         card.Zone=Zone.Battlefield; card.FaceUp=true;
@@ -919,7 +919,7 @@ public sealed partial class MatchEngine
             +(clanAllegiance?" + 2 (Clan allegiance)":"")+(clanDiscount?" − 2 (Clan discount)":"")+(rawCost<0?" (min 0)":"");
         if ((Keyword(card,"Unique") || Keyword(card,"Singular")) && ControlsCopyOf(playerId,def.Name)) error=$"You already control this {(Keyword(card,"Unique") ? "Unique" : "Singular")} card.";
         var eligible=error is null && inClan && !clanDiscount && !fromDeadPile && playerId==_state.ActivePlayerId && player.ProclaimUsedTurn!=_state.TurnNumber;
-        return new(cardId,cost,clanDiscount,clanAllegiance,eligible,error,error is null ? PaymentOptions(playerId,cost) : [],basis);
+        return new(cardId,cost,clanDiscount,clanAllegiance,eligible,error,error is null ? PaymentOptions(playerId,cost,new PaymentSubject(card,PaymentKind.Recruit)) : [],basis);
     }
 
     // True when the card's own printed waiver names the recruiting player's own Clan (see
@@ -927,26 +927,28 @@ public sealed partial class MatchEngine
     private static bool HonorRequirementWaived(CardDefinition def,PlayerState player) =>
         def.HonorRequirementWaiverClan is string clan && string.Equals(clan,player.Clan,StringComparison.Ordinal);
 
-    public int GoldProduced(string cardId,int playerId)
+    // paying: what the payment is for (ConditionalProduction.cs) -- a Holding that produces more for a kind of card or action says so only when it is asked for that one.
+    public int GoldProduced(string cardId,int playerId,PaymentSubject? paying=null)
     {
         var card=Card(cardId); var def=Definition(card);
+        if(ConditionalProductionOf(card) is { } conditional && ProductionConditionMet(conditional,paying)) return conditional.Amount;
         // A card with no printed production that can bow to produce Gold for a payment (Yoritomo Sakuma, issue #338) produces that much.
         if(def.GoldProduction==0 && AlternateGoldSource(card) is { } alternate) return alternate.Amount;
         return def.GoldProduction+(def.Effect=="crane-gold" && Player(playerId).Clan=="Crane" || def.Effect=="dragon-gold" && Player(playerId).Clan=="Dragon"?1:0);
     }
 
-    public PaymentOption[] PaymentOptions(int playerId,int cost)=>PaymentOptionsExcluding(playerId,cost,null);
+    public PaymentOption[] PaymentOptions(int playerId,int cost,PaymentSubject? paying=null)=>PaymentOptionsExcluding(playerId,cost,null,paying);
     // The same suggestion search over the producers NOT in `exclude` -- the second half of a two-part payment (a Discipline play from a
     // discard pile pays the Discipline cost first, then the action's own cost from other sources; see SplitPaymentOptions).
-    private PaymentOption[] PaymentOptionsExcluding(int playerId,int cost,IReadOnlySet<string>? exclude)
+    private PaymentOption[] PaymentOptionsExcluding(int playerId,int cost,IReadOnlySet<string>? exclude,PaymentSubject? paying=null)
     {
-        var sources=Producers(playerId).Where(c=>exclude is null || !exclude.Contains(c.Id)).OrderBy(c=>c.Id,StringComparer.Ordinal).ToArray();
+        var sources=Producers(playerId,paying).Where(c=>exclude is null || !exclude.Contains(c.Id)).OrderBy(c=>c.Id,StringComparer.Ordinal).ToArray();
         if(cost==0) return [new([],0,0,0)];
         // Dynamic programming keeps useful alternatives without exponential work for large economies.
         var byTotal=new Dictionary<int,List<string[]>> { [0]=[[]] };
         foreach(var source in sources)
         {
-            var production=GoldProduced(source.Id,playerId);
+            var production=GoldProduced(source.Id,playerId,paying);
             foreach(var pair in byTotal.OrderByDescending(p=>p.Key).ToArray())
             {
                 if(pair.Key>=cost) continue;
@@ -962,24 +964,25 @@ public sealed partial class MatchEngine
             .OrderBy(p=>p.SourceIds.Count(id=>Definition(Card(id)).GoldProduction==0)).ThenBy(p=>p.Excess).ThenBy(p=>p.SourceIds.Length).ThenBy(p=>string.Join(",",p.SourceIds),StringComparer.Ordinal).Take(24).ToArray();
     }
 
-    private IEnumerable<CardInstance> Producers(int playerId) => _state.Cards.Values.Where(c=>c.OwnerId==playerId && !c.Bowed && c.Zone is Zone.Home or Zone.Stronghold or Zone.Battlefield && (Definition(c).GoldProduction>0 || AlternateGoldSource(c) is not null));
+    private IEnumerable<CardInstance> Producers(int playerId,PaymentSubject? paying=null) => _state.Cards.Values.Where(c=>c.OwnerId==playerId && !c.Bowed && c.Zone is Zone.Home or Zone.Stronghold or Zone.Battlefield
+        && (Definition(c).GoldProduction>0 || AlternateGoldSource(c) is not null || ConditionalProductionOf(c) is { } conditional && ProductionConditionMet(conditional,paying)));
     // exclude: cards the paying action bows or destroys as another of its costs (AbilityCosts.CostPaidCards) -- a card cannot be bowed twice, so it produces no Gold for the same action.
-    private void ValidatePayment(int playerId,int cost,string[]? sourceIds,IReadOnlySet<string>? exclude=null)
+    private void ValidatePayment(int playerId,int cost,string[]? sourceIds,IReadOnlySet<string>? exclude=null,PaymentSubject? paying=null)
     {
         var ids=sourceIds??[];
         Require(exclude is null || !ids.Any(exclude.Contains),"A card bowed or destroyed as part of the action's cost cannot also be bowed for its Gold.");
         Require(ids.Distinct(StringComparer.Ordinal).Count()==ids.Length,"A Gold source cannot be used twice in one payment.");
         Require(cost>0 || ids.Length==0,"No Gold sources are needed for this free action.");
-        var producers=Producers(playerId).Select(c=>c.Id).ToHashSet(StringComparer.Ordinal);
+        var producers=Producers(playerId,paying).Select(c=>c.Id).ToHashSet(StringComparer.Ordinal);
         Require(ids.All(producers.Contains),"Every Gold source must be yours, in play, unbowed and able to produce Gold.");
-        var produced=ids.Sum(id=>GoldProduced(id,playerId));
+        var produced=ids.Sum(id=>GoldProduced(id,playerId,paying));
         Require(produced>=cost,$"This payment needs {cost} Gold; selected sources produce {produced}.");
     }
-    private void Pay(int playerId,CardInstance target,int cost,string[]? sourceIds,string? part=null,IReadOnlySet<string>? exclude=null)
+    private void Pay(int playerId,CardInstance target,int cost,string[]? sourceIds,string? part=null,IReadOnlySet<string>? exclude=null,PaymentSubject? paying=null)
     {
-        ValidatePayment(playerId,cost,sourceIds,exclude);
+        ValidatePayment(playerId,cost,sourceIds,exclude,paying);
         var ids=sourceIds??[];
-        var produced=ids.Sum(id=>GoldProduced(id,playerId));
+        var produced=ids.Sum(id=>GoldProduced(id,playerId,paying));
         // A card bowed for Gold through its own ability (Yoritomo Sakuma, issue #338) has used that Reaction: spent for the turn, and named
         // in the log so the opponent sees why it bowed.
         foreach(var id in ids)
@@ -1043,6 +1046,7 @@ public sealed partial class MatchEngine
         var negated=_state.DeferredActionNegated; _state.DeferredActionNegated=false;
         if(negated) ResolveNegatedAction(pending); else ExecuteAbilityEffects(pending);
         _state.NegatedEffects.Clear();
+        RestoreTemporaryRemovals(TemporaryRemovals.Action);
     }
 
     private void Pass()
@@ -1696,7 +1700,7 @@ public sealed partial class MatchEngine
         // The cost (Katagi's, Satoshi's Dual Warfans', Legion of the Bat's and Champion of Thunder's
         // discounts included) is EquipGoldCost in GoldQuotes.cs -- the same function that prices this
         // equip for QueryActions' quote, so the quote and the charge cannot drift (issue #303).
-        Pay(command.PlayerId,card,EquipGoldCost(command.PlayerId,card,target).Cost,command.SourceIds);
+        Pay(command.PlayerId,card,EquipGoldCost(command.PlayerId,card,target).Cost,command.SourceIds,paying:new PaymentSubject(card,PaymentKind.Equip));
         Player(command.PlayerId).Hand.Remove(card.Id);
         card.Zone=Zone.Attached; card.AttachedTo=target.Id; card.FaceUp=true;
         if(inBattle) card.ProvinceIndex=target.ProvinceIndex; // the Weapon stands where its wielder does, so it is at the battlefield with him
@@ -1723,7 +1727,7 @@ public sealed partial class MatchEngine
         // A Strategy pays its own printed Gold cost (issue #303: the same QuoteStrategyGold that
         // QueryActions ships to the client; free ones -- every training fixture -- charge nothing and,
         // as before, accept no sources).
-        if(def.GoldCost>0) Pay(command.PlayerId,card,def.GoldCost,command.SourceIds);
+        if(def.GoldCost>0) Pay(command.PlayerId,card,def.GoldCost,command.SourceIds,paying:new PaymentSubject(card,PaymentKind.Play));
         // Terrain (core rules Glossary): the printed effects only apply at the battlefield where it was
         // played -- itself just stays there as a card, not a target for a Personality-shaped effect --
         // and the default limit is at most one Terrain per battlefield until the old one is destroyed.
@@ -2364,6 +2368,7 @@ public sealed partial class MatchEngine
     {
         // A Ring's recruit grant made for a battle that was never fought (issue #379) does not carry into another turn; no other grant outlives its battle.
         _state.AdditionalActions.Clear();
+        RestoreTemporaryRemovals(TemporaryRemovals.Turn);
         AdvanceStraightenHolds(StraightenPoint.TurnEnds);
         foreach(var card in _state.Cards.Values) { card.Modifiers.RemoveAll(m=>!m.Permanent); card.GrantedKeywords.RemoveAll(g=>g.Duration=="Turn"); card.GrantedAbilities.RemoveAll(g=>g.Duration is GrantDuration.Turn or GrantDuration.Battle); card.Protections.RemoveAll(p=>p.Duration=="Turn"); card.ActionLocks.RemoveAll(l=>l.Duration==ActionLockUntilTurnEnd); }
         // Ohsuki's Sparrow (issue #299): "since your last turn ended" -- the turn that is ending right

@@ -174,7 +174,7 @@ public sealed partial class MatchEngine
     private bool TargetedActionReactionAvailable(CardInstance card, string abilityId, ReactionSubject subject)
     {
         var ability = AbilityCatalog.All[abilityId];
-        return !card.Bowed && !ActionLocked(card) && !AbilityUseSpent(card.AbilityUses, ability, ability.UsageKey ?? abilityId)
+        return (!card.Bowed || abilityId == "red-crane-dojo-ninja") && !ActionLocked(card) && !AbilityUseSpent(card.AbilityUses, ability, ability.UsageKey ?? abilityId)
             && TargetedActionReactionApplies(card, abilityId, subject) && CanPayReaction(card, abilityId);
     }
 
@@ -229,6 +229,9 @@ public sealed partial class MatchEngine
             case "to-first-blood-negate":
                 return command.PlayerId != card.OwnerId && affected.OwnerId == card.OwnerId && Definition(affected).Type == CardType.Personality
                     && ActionCarriesKeyword(acting, command.CardId is not null && _state.Cards.TryGetValue(command.CardId, out var iaijutsuSource) ? iaijutsuSource : null, "Iaijutsu");
+            // Red Crane Dojo: any action targets one of its controller's Personalities -- offered when he has Ninja or Shadowlands standing to lose.
+            case "red-crane-dojo-ninja":
+                return affected.OwnerId == card.OwnerId && Definition(affected).Type == CardType.Personality && (Keyword(affected, "Ninja") || HasClanAffiliation(affected, "Shadowlands"));
             case "yurishi-disappear":
                 return command.PlayerId != card.OwnerId && affected.Id == card.Id && IsBattleAction(command) && card.Zone == Zone.Battlefield;
             case "jinn-kuen-negate":
