@@ -47,9 +47,14 @@ public static class CostVerbs
 /// <summary>One cost: <paramref name="Verb"/> (CostVerb.Bow or CostVerbs.*) applied to <paramref name="Subject"/> (CostSubject.*: the ability's
 /// source, its chosen performer, or its chosen target). <paramref name="UnlessInHand"/>: the Ring's "bow this card OR discard it from your hand" --
 /// nothing is paid when the source is played from the hand (the hand play is spent as any hand-played card is). <paramref name="Amount"/> is the
-/// Honor of LoseHonor.</summary>
-public sealed record ActionCost(string Verb, string Subject = CostSubject.Source, bool UnlessInHand = false, string? Token = null, int Amount = 0)
+/// Honor of LoseHonor. <paramref name="UnlessKeyword"/>: "...unless he is Void" -- the cost is not paid when this Personality (the source, or the Personality an attached source
+/// is attached to) has that keyword.</summary>
+public sealed record ActionCost(string Verb, string Subject = CostSubject.Source, bool UnlessInHand = false, string? Token = null, int Amount = 0, string? UnlessKeyword = null)
 {
+    /// <summary>"Bow this Shugenja" (the wielder of the Spell the ability is on).</summary>
+    public static ActionCost[] BowWielder { get; } = [new(CostVerb.Bow, CostSubject.Wielder)];
+    /// <summary>"Bow this Shugenja unless he is [keyword]": nothing is paid, and nothing need be unbowed, when the wielder has the keyword (Control Your Destiny).</summary>
+    public static ActionCost[] BowWielderUnless(string keyword) => [new(CostVerb.Bow, CostSubject.Wielder, UnlessKeyword: keyword)];
     /// <summary>"Bow this card" / "Bow Sakuma".</summary>
     public static ActionCost[] BowSource { get; } = [new(CostVerb.Bow)];
     /// <summary>"Bow your performing X".</summary>
@@ -99,6 +104,28 @@ public sealed partial class MatchEngine
         return PlannedCostsOf(command).Any(c => CostBlockHook?.Invoke(c.Cost, c.Subject) == true || Negated(c));
     }
 
+    // "...unless this Personality is [keyword]": "this Personality" is the source itself, or the Personality an attached source (a Spell, an Item) is attached to.
+    private bool CostExempt(ActionCost cost, CardInstance? source)
+    {
+        if (cost.UnlessKeyword is not { } keyword || source is null) return false;
+        var holder = source is { Zone: Zone.Attached, AttachedTo: { } hostId } && _state.Cards.TryGetValue(hostId, out var host) ? host : source;
+        return Keyword(holder, keyword);
+    }
+
+    // A declared cost whose subject is the wielder ("Bow this Shugenja") needs one: the source is attached, and the wielder is unbowed unless he is exempt ("...unless he is Void").
+    // The other subjects are already judged where they are chosen (the Performer category, the Target category, the bowed-source rule).
+    private void ValidateWielderCosts(AbilityDefinition ability, GameCommand command, CardInstance? source)
+    {
+        foreach (var cost in ability.Costs ?? [])
+        {
+            if (cost.Subject != CostSubject.Wielder) continue;
+            var wielder = CostSubjectCard(new CostOption(cost.Verb, cost.Verb, cost.Verb, cost.Subject), ability, command, source);
+            Require(wielder is not null && InPlay(wielder), "This card must be attached to a Personality.");
+            if (cost.Verb == CostVerb.Bow && !CostExempt(cost, source))
+                Require(!wielder!.Bowed, $"{Definition(wielder).Name} is already bowed, so he cannot be bowed to pay this cost.");
+        }
+    }
+
     // The kind of negation ("bow" / "destroy", MatchState.NegatedEffects) that stops a cost verb; null for a verb no negation of an effect stops.
     private static string? NegatableKind(string verb) => verb switch
     {
@@ -140,7 +167,9 @@ public sealed partial class MatchEngine
         foreach (var cost in ability.Costs ?? [])
         {
             if (cost.UnlessInHand && source is { Zone: Zone.Hand }) continue;
-            yield return (cost, cost.Verb is CostVerbs.LoseHonor or CostVerbs.DestroyLeftmostProvince ? null : CostSubjectCard(new CostOption(cost.Verb, cost.Verb, cost.Verb, cost.Subject), ability, command, source));
+            var subject = cost.Verb is CostVerbs.LoseHonor or CostVerbs.DestroyLeftmostProvince ? null : CostSubjectCard(new CostOption(cost.Verb, cost.Verb, cost.Verb, cost.Subject), ability, command, source);
+            if (CostExempt(cost, source)) continue;
+            yield return (cost, subject);
         }
     }
 
@@ -160,12 +189,15 @@ public sealed partial class MatchEngine
             }
             var subject = CostSubjectCard(new CostOption(cost.Verb, cost.Verb, cost.Verb, cost.Subject), ability, command, source);
             if (subject is null) continue;
+            if (CostExempt(cost, source)) continue;
             switch (cost.Verb)
             {
                 case CostVerb.Bow: subject.Bowed = true; break;
                 case CostVerbs.Discard: DiscardFate(player, subject); break;
                 case CostVerbs.Remove: RemoveFromGame(subject); break;
-                case CostVerbs.Sacrifice: DestroyUnits([subject], false, player.Id); break;
+                case CostVerbs.Sacrifice:
+                    if (subject.Zone == Zone.Attached) DestroyAttachment(subject); else DestroyUnits([subject], false, player.Id);
+                    break;
                 case CostVerbs.DiscardFromPlay:
                     subject.Zone = IsDynastyCardType(Definition(subject).Type) ? Zone.DynastyDiscard : Zone.FateDiscard;
                     subject.ProvinceIndex = null; subject.FaceUp = true;

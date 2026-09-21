@@ -1,0 +1,63 @@
+{
+  "Profile": "personality-wave-42",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-9544",
+      "Name": "Yoritomo Emoto",
+      "Type": "Personality",
+      "Clan": "Mantis",
+      "GoldCost": 10,
+      "GoldProduction": 0,
+      "Force": 6,
+      "Chi": 3,
+      "PersonalHonor": 1,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Bow your performing Follower and target an enemy card without attachments: Destroy it.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9544.jpg",
+      "Keywords": [
+        "Naval",
+        "Captain of the Third Kama",
+        "Commander",
+        "Mantis Clan",
+        "Samurai"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "emoto-follower-destroy"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-2070",
+      "Name": "Doji Dainagon",
+      "Type": "Personality",
+      "Clan": "Crane",
+      "GoldCost": 5,
+      "GoldProduction": 0,
+      "Force": 1,
+      "Chi": 3,
+      "PersonalHonor": 3,
+      "HonorRequirement": 6,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Dainagon may Lobby as an Open action.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-2070.jpg",
+      "Keywords": [
+        "Courtier",
+        "Crane Clan",
+        "Imperial"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "dainagon-lobby"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

@@ -641,10 +641,12 @@ public sealed partial class MatchEngine
 
     // At Any Cost (issue #373): a dead Personality is recruited as a fresh card, into play at the battlefield the action was played at (Mendon), through the same
     // entry sequence as a province recruit. It may not be proclaimed, so its quote is never Proclaim-eligible. Returns true exactly when a window was opened.
-    private bool BringDeadPersonalityIntoPlay(PlayerState player,CardInstance card,string via,int battlefield)
+    // battlefield null: he enters at home. onEntry runs once he is in play, before any entry window opens (Essence of Undeath's permanent keywords and Honor loss).
+    private bool BringDeadPersonalityIntoPlay(PlayerState player,CardInstance card,string via,int? battlefield,Action<CardInstance>? onEntry=null)
     {
         ResetCardState(card);
         EnterPlayFromRecruit(player,card,battlefield,via);
+        onEntry?.Invoke(card);
         return OpenRecruitEntryWindows(player,card,false,null);
     }
 
@@ -782,6 +784,7 @@ public sealed partial class MatchEngine
         card.Bowed = false;
         card.Dishonorable = false;
         card.StraightenBlockedTurn = -1;
+        card.ForcePenaltiesNegatedTurn = -1;
         card.AssignedToAttackTurn = -1;
     }
 
@@ -880,7 +883,8 @@ public sealed partial class MatchEngine
     {
         if (playerId is <0 or >1 || !_state.Cards.TryGetValue(cardId,out var card)) return new(cardId,0,clanDiscount,clanAllegiance,false,"Unknown card or player.",[]);
         var def=Definition(card); var player=Player(playerId);
-        if(fromDeadPile ? card.OwnerId!=playerId || card.Zone!=Zone.Dead : card.OwnerId!=playerId || card.Zone!=Zone.Province || !card.FaceUp)
+        // The dead pile is the Personality's discard pile: Zone.Dead once he died, Zone.DynastyDiscard when he was merely discarded from a province (Goju Plot: "in your discard pile").
+        if(fromDeadPile ? card.OwnerId!=playerId || card.Zone is not (Zone.Dead or Zone.DynastyDiscard) : card.OwnerId!=playerId || card.Zone!=Zone.Province || !card.FaceUp)
             return new(cardId,0,clanDiscount,clanAllegiance,false,fromDeadPile?"Choose one of your own dead Personalities.":"Choose your face-up province card.",[]);
         string? error=null;
         var inClan=def.Type==CardType.Personality && ClanAlignments(card).Contains(player.Clan);
@@ -1564,7 +1568,7 @@ public sealed partial class MatchEngine
             // no meaning once this card is sitting face-up in a province again, ready to be purchased.
             card.Modifiers.Clear(); card.ActionLocks.Clear(); card.GrantedKeywords.Clear(); card.GrantedAbilities.Clear(); card.RemovedKeywords.Clear(); card.RemovedClanAffiliations.Clear();
             card.AbilityUses.Clear(); card.Tokens.Clear(); card.Bowed=false; card.Dishonorable=false;
-            card.StraightenBlockedTurn=-1; card.StraightenLockedTurn=-1; card.AssignedToAttackTurn=-1;
+            card.StraightenBlockedTurn=-1; card.StraightenLockedTurn=-1; card.ForcePenaltiesNegatedTurn=-1; card.AssignedToAttackTurn=-1;
             var owner=Player(card.OwnerId);
             if(!owner.Provinces.Any(p=>!p.Destroyed)) continue; // no province left to place him in -- an extremely rare edge case; he simply stays home
             _state.PendingChoice=new("yourClanNeedsYouProvince",card.OwnerId,id,$"{Definition(card).Name}: choose a province to place him into, face-up (discarding any card already there).");
@@ -2193,6 +2197,7 @@ public sealed partial class MatchEngine
                 Emit("destructionNegated",$"{Definition(card).Name}'s destruction was negated before it resolved.",card.OwnerId,card.Id);
                 continue;
             }
+            if(DestructionDelayed(card)) continue;
             foreach(var attachment in Attachments(card.Id).ToArray())
             {
                 RemoveAttachmentGrants(card, attachment.Id);
@@ -2322,6 +2327,10 @@ public sealed partial class MatchEngine
         foreach(var check in _state.PendingTamokoHonorChecks)
             if(Card(check.TargetId).AssignedToAttackTurn != _state.TurnNumber) GainHonor(check.BeneficiaryPlayerId,1,"Tamori Tamoko",Card(check.TargetId));
         _state.PendingTamokoHonorChecks.Clear();
+        // Spirit of the Berserker: a destruction put off "until before this turn ends" happens now.
+        ResolveDelayedDestructions();
+        // A window a delayed destruction opened (Overconfident's draw) is answered first; the turn then ends when the player ends the phase again.
+        if(_state.WinnerId is not null || OpenOverconfidentDrawWindow(_state.ActivePlayerId)) return;
         // Lady Matsu's Rage: "this turn" (its own printed parenthetical) -- any watch that never fired
         // (the target never straightened) simply expires here, with no further consequence.
         _state.PendingLadyMatsusRageWatches.Clear();
@@ -2344,7 +2353,7 @@ public sealed partial class MatchEngine
     {
         // A Ring's recruit grant made for a battle that was never fought (issue #379) does not carry into another turn; no other grant outlives its battle.
         _state.AdditionalActions.Clear();
-        foreach(var card in _state.Cards.Values) { card.Modifiers.Clear(); card.GrantedKeywords.RemoveAll(g=>g.Duration=="Turn"); card.GrantedAbilities.RemoveAll(g=>g.Duration is GrantDuration.Turn or GrantDuration.Battle); card.Protections.RemoveAll(p=>p.Duration=="Turn"); card.ActionLocks.RemoveAll(l=>l.Duration==ActionLockUntilTurnEnd); }
+        foreach(var card in _state.Cards.Values) { card.Modifiers.RemoveAll(m=>!m.Permanent); card.GrantedKeywords.RemoveAll(g=>g.Duration=="Turn"); card.GrantedAbilities.RemoveAll(g=>g.Duration is GrantDuration.Turn or GrantDuration.Battle); card.Protections.RemoveAll(p=>p.Duration=="Turn"); card.ActionLocks.RemoveAll(l=>l.Duration==ActionLockUntilTurnEnd); }
         // Ohsuki's Sparrow (issue #299): "since your last turn ended" -- the turn that is ending right
         // now is the ACTIVE player's own, so it restarts that one player's window; the other player's
         // flag (which may already be set by destruction during this very turn) is left untouched until

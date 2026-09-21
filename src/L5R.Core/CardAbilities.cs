@@ -122,7 +122,10 @@ public sealed record AbilityDefinition(string Timing, string Label, string Targe
     // Once per game, per source card (Border Keep's refresh, Bo of Water).
     bool OncePerGame = false,
     // "[Card]'s printed ability will not be copied" (Matsu Nimuro): no copy effect (CardCopy.cs) may take this ability.
-    bool NotCopyable = false);
+    bool NotCopyable = false,
+    // "Even if this unit is not at the current battlefield" (Taming the Beast, Rage of the Spirits): the source's own unit need not be at the battle, though the acting player
+    // must still have a unit there and the ability's target and performer keep their own location rules. Waives only the two source-at-the-battlefield checks.
+    bool SourceUnitMayBeAway = false);
 
 public static class AbilityCatalog
 {
@@ -149,6 +152,18 @@ public static class AbilityCatalog
         // Spirit of the Monk: the Strategy grants this predefined ability to its performer permanently.
         ["spirit-of-the-monk"] = new("Limited", "If the performer is a Monk, permanently give him a Battle ability to bow an enemy Personality without Armor; otherwise, permanently give him Monk", "none", Performer: "own-unbowed-personality"),
         ["spirit-monk-bow"] = new("Battle", "Target an enemy Personality without Armor: Bow him.", "enemy-personality-without-armor"),
+        // The other Spirit Strategies (Second City, Focus 4, one shape: "If he is a [keyword], permanently give him [ability]; otherwise, permanently give him [keyword]"),
+        // each with the predefined ability it grants (AbilityGrants.cs, GrantSpirit). Berserker's also gives him +2F permanently.
+        ["spirit-of-the-yojimbo"] = new("Limited", "If the performer is a Yojimbo, permanently give him a Reaction to take the action that targets one of your Personalities at his location; otherwise, permanently give him Yojimbo", "none", Performer: "own-unbowed-personality"),
+        ["spirit-yojimbo-redirect"] = new("Reaction", "After another player's action targets one of your Personalities at this Personality's location: The action targets this Personality instead, if legal.", "none", Trigger: ReactionTriggers.TargetedByAction),
+        ["spirit-of-the-scout"] = new("Limited", "If the performer is a Scout, permanently give him a Battle Ranged 4 Attack (bow him unless you have Reconnaissance); otherwise, permanently give him Scout", "none", Performer: "own-unbowed-personality"),
+        ["spirit-scout-attack"] = new("Battle", "Bow this Personality unless you have Reconnaissance: Ranged 4 Attack.", "attack"),
+        ["spirit-of-the-paragon"] = new("Limited", "If the performer is a Paragon, permanently give him a Battle ability to bow an enemy Personality with equal or lower Force or Personal Honor; otherwise, permanently give him Paragon", "none", Performer: "own-unbowed-personality"),
+        ["spirit-paragon-bow"] = new("Battle", "Target an enemy Personality with either equal or lower Force, or equal or lower Personal Honor: Bow him.", "enemy-personality-force-or-honor-lte-self"),
+        ["spirit-of-the-duelist"] = new("Limited", "If the performer is a Duelist, permanently give him an Iaijutsu Battle duel that moves the loser home; otherwise, permanently give him Duelist", "none", Performer: "own-unbowed-personality"),
+        ["spirit-duelist-duel"] = new("Battle", "Iaijutsu: Target an enemy Personality: This Personality duels him. Move the duel's loser home.", "enemy-personality", IssuesDuel: true, ActionKeywords: ["Iaijutsu"]),
+        ["spirit-of-the-berserker"] = new("Limited", "If the performer is a Berserker, permanently give him +2F and a Reaction to delay his destruction; otherwise, permanently give him Berserker", "none", Performer: "own-unbowed-personality"),
+        ["spirit-berserker-delay"] = new("Reaction", "After another player's action targets this Personality: Delay his destruction from the action's effects until before this turn ends.", "none", Trigger: ReactionTriggers.TargetedByAction),
         ["kouki-force"] = new("Battle", "Bow Kouki · enemy −3 Force", "enemy-personality", Costs: ActionCost.BowSource),
         ["prepared-death"] = new("Limited", "Perform · +2 Force", "own-personality"),
         ["paid-bow"] = new("Open", "Pay 4 Gold · bow a Personality", "personality"),
@@ -533,6 +548,10 @@ public static class AbilityCatalog
         // Hiruma Sniper's hiruma-sniper-attack and is that ability; the second bows a Follower in his unit, which then performs the Attack.
         ["tensin-follower-attack"] = new("Battle", "Bow your performing Follower in Tensin's unit: Ranged 4 Attack", "attack",
             Performer: "own-unbowed-follower-in-source-unit", CostOptions: [CostOption.Bow]),
+        // Yoritomo Emoto (oracle-l5r-9544, Second City): "Bow your performing Follower and target an enemy card without attachments: Destroy it." The performer is ANY unbowed Follower of
+        // his controller's at the current battlefield -- not one in Emoto's own unit (Tensin's category above) -- and bowing it is the cost.
+        ["emoto-follower-destroy"] = new("Battle", "Bow your performing Follower and target an enemy card without attachments: Destroy it.", "enemy-card",
+            Performer: "own-unbowed-follower-at-battle", RequireNoAttachments: true, CostOptions: [CostOption.Bow]),
         // Training fixtures for the three cost modes and the performer wielder (never on a published card): a discount ("paying 1 less Gold", floor 0), free
         // ("ignoring costs") and the Foothills Keep shape.
         ["training-attach-weapon-discount"] = new("Limited", "Training: target a non-Unique Weapon in your discard pile: attach it to this Personality, paying 1 less Gold", "attachment-in-discard",
@@ -1611,6 +1630,68 @@ public static class AbilityCatalog
         ["bo-of-water-create"] = new("Limited", "Once per game: Create a +2F/+0C Water · Weapon Item with the ability \"Battle: Target an enemy card without attachments: Bow it\" and attach it to one of your Personalities", "own-personality", OncePerGame: true,
             Creates: new(CardType.Item, Force: 2, Chi: 0, Keywords: ["Water", "Weapon"], AbilityText: "Battle: Target an enemy card without attachments: Bow it")),
         ["water-bo-bow"] = new("Battle", "Target an enemy card without attachments: Bow it", "enemy-card", RequireNoAttachments: true),
+        // Katana of Fire (oracle-l5r-4291, Second City): the same shape as Bo of Water -- once per game it creates the Flame Katana scan (oracle-l5r-10022) attached to one of your Personalities.
+        // The Item's own action bows the Katana unless its wielder is Fire (a cost paid up front, so it is declared), then destroys an enemy card without attachments.
+        ["katana-of-fire-create"] = new("Limited", "Once per game: Create a +3F/+1C Fire · Weapon Item with the ability \"Battle: Bow this card unless this Personality is Fire, and target an enemy card without attachments: Destroy it\" and attach it to one of your Personalities", "own-personality", OncePerGame: true,
+            Creates: new(CardType.Item, Force: 3, Chi: 1, Keywords: ["Fire", "Weapon"], AbilityText: "Battle: Bow this card unless this Personality is Fire, and target an enemy card without attachments: Destroy it")),
+        // Control Your Destiny (oracle-l5r-1489): a Spell whose Limited action bows its Shugenja unless he is Void and looks at the top three cards of the Fate OR the Dynasty deck (DeckLook.cs).
+        ["control-your-destiny-look"] = new("Limited", "Bow this Shugenja unless he is Void: Look at the top three cards of your Fate or Dynasty deck. You may put one or two of these cards on the bottom of your deck. Put the remaining cards on the top of your deck in any order", "none",
+            Look: LookCatalog.ControlYourDestiny, Costs: ActionCost.BowWielderUnless("Void")),
+        // Jurojin's Blessing (oracle-l5r-4070, a Celestial): a look at the top Fate card, and a discard-this-card recursion of a non-Unique Strategy.
+        ["jurojin-look"] = new("Limited", "Look at the top card of your Fate deck. You may discard it", "none", Look: LookCatalog.JurojinsBlessing),
+        ["jurojin-return"] = new("Open", "Discard this card and target a non-Unique Strategy in your Fate discard pile: Put the Strategy into your hand", "own-nonunique-strategy-in-discard", Costs: [new(CostVerbs.DiscardFromPlay)]),
+        // Interference (oracle-l5r-3785): "Political Open: A target Stronghold's abilities may not be used. If it is your turn, bow it." The lock is the action lock (ActionLock.cs), for the turn.
+        ["interference-lock"] = new("Open", "Political Open: A target Stronghold's abilities may not be used. If it is your turn, bow it", "stronghold", ActionKeywords: ["Political"]),
+        // Taming the Beast (oracle-l5r-7767), a Spell: an in-play Reaction to an action that targets your defending Personality (it destroys itself to negate his destruction, if its Shugenja is Earth)
+        // and an action that straightens one of your Nonhumans even if its unit is not at the battle.
+        ["taming-beast-negate"] = new("Reaction", "After another player's action targets your defending Personality, if this Shugenja is Earth, destroy this card: Negate the Personality's destruction from the action's effects", "none",
+            Trigger: ReactionTriggers.TargetedByAction, Costs: [new(CostVerbs.Sacrifice)]),
+        ["taming-beast-straighten"] = new("BattleOrOpen", "Even if this unit is not at the current battlefield, bow this Shugenja and target your Nonhuman: Straighten it", "own-unit-card-with-keyword", RequiredKeywords: ["Nonhuman"],
+            Costs: ActionCost.BowWielder, SourceUnitMayBeAway: true),
+        ["flame-katana-destroy"] = new("Battle", "Bow this card unless this Personality is Fire, and target an enemy card without attachments: Destroy it", "enemy-card", RequireNoAttachments: true,
+            Costs: [new(CostVerb.Bow, CostSubject.Source, UnlessKeyword: "Fire")]),
+        // Discovering a Conspiracy (oracle-l5r-2011): a Focus Effect (a duel win pays 2 Honor) and a Political Battle/Open action of a Magistrate -- the target loses his Clan alignment for good and is
+        // dishonored; if he stands at a battlefield he is bowed too, and a chosen player gains or loses 1 Honor (asked only then, as Yoshitada's is).
+        ["discovering-conspiracy-focus"] = new("FocusEffect", "As a Focus Effect: After this duel ends, if your Personality won it, gain 2 Honor.", "none"),
+        ["discovering-conspiracy-expose"] = new("BattleOrOpen", "Political Battle/Open: Target your performing unbowed Magistrate to target a Personality. Permanently remove his Clan Alignment keywords. Dishonor him. If he is at a battlefield, bow him and choose a player, who gains or loses 1 Honor", "personality",
+            Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeywords: ["Magistrate"], ActionKeywords: ["Political"],
+            Branch: new(BranchCondition.TargetAtBattlefield, HonorChoice.Options(1), HonorChoice.None)),
+        // Insulting Gesture (oracle-l5r-3779): a Political Open action of a Courtier takes the Imperial Favor; a Favor Political Battle action discards it to shame an enemy Personality.
+        ["insulting-gesture-take"] = new("Open", "Political Open: Choose your performing unbowed Courtier. Take the Imperial Favor", "none",
+            Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeywords: ["Courtier"], ActionKeywords: ["Political"]),
+        ["insulting-gesture-shame"] = new("Battle", "Favor Political Battle: Discard the Imperial Favor to target an enemy Personality. Dishonor him. Bow him. Move him home. His controller loses 2 Honor", "enemy-personality", ActionKeywords: ["Favor", "Political"]),
+        // Doji Dainagon (oracle-l5r-2070): "Dainagon may Lobby as an Open action" -- the Lobby action (bow a Personality of at least 1 Personal Honor, if your Family Honor is the higher, to take the Imperial Favor), with
+        // Dainagon as the Personality who bows, taken as an Open action (the Lobby every player has is Limited).
+        ["dainagon-lobby"] = new("Open", "Lobby: bow Dainagon to take the Imperial Favor", "none", Costs: ActionCost.BowSource),
+        // Barred Passage (oracle-l5r-708): a Hero alone in his army bows an enemy Personality's unit.
+        ["barred-passage-bow"] = new("Battle", "Heroic Battle: Target your performing unbowed Hero, who must be the only Personality in his army, to target an enemy Personality and bow his unit", "enemy-personality",
+            Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeywords: ["Hero"]),
+        // Great Sacrifice (oracle-l5r-2900): destroy your performing Personality (the cost) to destroy an enemy unit whose total Force does not exceed the performer's Force plus Personal Honor (plus one if he is defending).
+        ["great-sacrifice-destroy"] = new("Battle", "Destroy your performing unbowed Personality and target an enemy unit with total Force equal to or lower than your performer's Force, plus Personal Honor, plus one if he is defending: Destroy the enemy unit", "enemy-unit-within-performer-sacrifice",
+            Performer: "own-unbowed-personality-at-battle", Costs: [new(CostVerbs.Sacrifice, CostSubject.Performer)]),
+        // Rage of the Spirits (oracle-l5r-6141), a Spell: both its Shugenja and the performing Spirit bow (the wielder is a cost subject, so there is no second performer to choose).
+        ["rage-of-the-spirits-destroy"] = new("Battle", "Even if this unit is not at the current battlefield, bow this Shugenja and your performing Spirit, and target an enemy card without attachments and with Force lower than or equal to your Spirit's: Destroy the enemy card. If this Shugenja is Earth, gain 1 Honor", "enemy-force-lte-performer",
+            Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeywords: ["Spirit"], RequireNoAttachments: true, Costs: [new(CostVerb.Bow, CostSubject.Wielder), new(CostVerb.Bow, CostSubject.Performer)], SourceUnitMayBeAway: true),
+        // On the Hunt (oracle-l5r-5704): Low Market's attach-from-hand, as a Battle action for a Samurai at 4 less Gold; and an Open straighten of a Samurai's unit.
+        ["on-the-hunt-equip"] = new("Battle", "Choose your performing Samurai: Attach an attachment in your hand to him, paying all costs but paying 4 less Gold", "attachment-in-hand",
+            Performer: "own-personality-with-keyword-at-battle", RequiredKeywords: ["Samurai"], Cost: GoldCostRule.TargetPrinted(-4, floor: 0)),
+        ["on-the-hunt-straighten"] = new("Open", "Choose your performing Samurai with an attachment: Straighten his unit", "none", Performer: "own-samurai-with-attachment"),
+        // Tireless Efforts (oracle-l5r-8496): a straighten, and the negation of Force penalties (ForcePenalties.cs).
+        ["tireless-efforts-straighten"] = new("Battle", "Choose your performing Personality: Straighten him", "none", Performer: "own-personality-at-battle"),
+        ["tireless-efforts-negate"] = new("BattleOrOpen", "Choose your performing Personality: Negate all current and new Force penalties on him", "none", Performer: "own-personality-at-battle"),
+        // Costly Opportunity (oracle-l5r-1522): destroy your performing Samurai (the cost); the other cards in the target's unit may not use their abilities; the target is destroyed.
+        ["costly-opportunity-destroy"] = new("Battle", "Destroy your target performing unbowed Samurai to target an enemy card without attachments: Abilities on other cards now in its unit may not be used. Destroy the targeted card", "enemy-card",
+            Performer: "own-unbowed-samurai-at-battle", RequireNoAttachments: true, Costs: [new(CostVerbs.Sacrifice, CostSubject.Performer)]),
+        // Silent Terror (oracle-l5r-7261): a bow, then "you may discard a card in the current battlefield's province" -- asked only when a card is there (EffectChoice.cs).
+        ["silent-terror-bow"] = new("Battle", "Choose your performing unbowed Ninja Personality and target an enemy card: Bow it. You may discard a card in the current battlefield's province", "enemy-card",
+            Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeywords: ["Ninja"],
+            Branch: new(BranchCondition.ProvinceHoldsCard, [new("discard", "Discard the card in the province", [BranchEffect.DiscardProvinceCard]), new("keep", "Discard nothing", [])], new("none", "Nothing to discard", []))),
+        // Essence of Undeath (oracle-l5r-2380), a Spell: the At Any Cost recruit (a dead Personality paid for in full) at its Shugenja's location, with Shadowlands and Undead given permanently.
+        ["essence-of-undeath-recruit"] = new("BattleOrOpen", "Destroy this card and target your dead Personality: Bring him into play at this Shugenja's location, paying all costs. Permanently give him Shadowlands and Undead. Lose 2 Honor", "own-dead-personality",
+            Performer: "own-wielder", Cost: GoldCostRule.TargetRecruit(), Costs: [new(CostVerbs.Sacrifice)]),
+        // Goju Plot (oracle-l5r-2856): the same, from a discard pile, at the current battlefield, for the recruit cost less the performer's Gold Cost.
+        ["goju-plot-recruit"] = new("Battle", "Destroy your performing Shadowlands Ninja Personality and target a Ninja Personality in your discard pile: Bring him into play at the current battlefield, paying all costs but reducing his Gold cost to enter play by the performer's Gold Cost. Lose 2 Honor. You may take an additional Battle action", "own-ninja-personality-in-discard",
+            Performer: "own-shadowlands-ninja-at-battle", Cost: GoldCostRule.TargetRecruit(minusPerformerCost: true), Costs: [new(CostVerbs.Sacrifice, CostSubject.Performer)]),
         // Synthetic fixtures for the count/deal rules of a created attachment (issue #394): three Scouts dealt among the chosen Personalities, and two to EACH chosen one.
         ["training-create-scouts"] = new("Battle", "Training: create three 0F Scout Followers, dealt among the chosen Personalities of your army", "own-army-personalities",
             Creates: new(CardType.Follower, Force: 0, Keywords: ["Scout"], ProxyId: "oracle-l5r-9714", Count: 3)),
@@ -1967,6 +2048,16 @@ public sealed partial class MatchEngine
             .Where(clan => clan != "Unaligned" && !card.RemovedClanAffiliations.Contains(clan, StringComparer.Ordinal))
             .Distinct(StringComparer.Ordinal).ToArray();
     private bool HasClanAffiliation(CardInstance card, string clan) => ClanAlignments(card).Contains(clan, StringComparer.Ordinal);
+    // "Permanently remove his Clan Alignment keywords" (Discovering a Conspiracy): every alignment he has -- and its printed keyword ("Crane Clan") -- is gone for good, which makes him Unaligned.
+    private void RemoveClanAlignments(CardInstance card)
+    {
+        foreach (var clan in ClanAlignments(card))
+        {
+            card.RemovedClanAffiliations.Add(clan);
+            if (!card.RemovedKeywords.Contains($"{clan} Clan", StringComparer.Ordinal)) card.RemovedKeywords.Add($"{clan} Clan");
+        }
+        Emit("clanAlignmentRemoved", $"{Definition(card).Name} permanently loses his Clan Alignment keywords.", card.OwnerId, card.Id);
+    }
     private bool LoyaltyAllowsControl(CardInstance card, string clan) =>
         !Keyword(card, "Loyal") || ClanAlignments(card).Length == 0 || HasClanAffiliation(card, clan);
     // "Attachment": lasts while the granting attachment stays attached (cleared in DestroyAttachment).
@@ -2013,7 +2104,8 @@ public sealed partial class MatchEngine
         // Hida Mimori / Isawa Mitsuko (issue #301): Mimori destroys her target outright (a Personality
         // target reaches Rokai; an attachment target never does -- see BeforeActionReactionApplies's
         // Personality-only gate); Mitsuko conditionally destroys hers after bowing it.
-        or "mimori-destroy" or "mitsuko-bow-destroy"
+        or "mimori-destroy" or "mitsuko-bow-destroy" or "emoto-follower-destroy" or "flame-katana-destroy" or "great-sacrifice-destroy"
+        or "rage-of-the-spirits-destroy" or "costly-opportunity-destroy"
         // Kuni Shinoda - exp (personality-wave-24): bows, then destroys a Shadowlands target.
         or "shinoda-exp-bow-destroy"
         or "a-stain-cleansed-destroy";
@@ -2025,7 +2117,7 @@ public sealed partial class MatchEngine
     private static string? MoveOrStraightenKind(string abilityId) => abilityId switch
     {
         "incapacitated" or "favor-battle" or "journeys-end-move" or "shamate-move" or "effortless-counterattack-move"
-            or "ring-of-water-move-home" or "mihato-move" or "block-supply"
+            or "ring-of-water-move-home" or "mihato-move" or "block-supply" or "insulting-gesture-shame"
             // Shinjo Kinto (issue #299): negatable like any other move-home ability -- except when its
             // own acting player has Reconnaissance (MovementCannotBeNegated), checked per command.
             or "kinto-move"
@@ -2061,7 +2153,8 @@ public sealed partial class MatchEngine
     // rules violation (Brothers' own negation, if used, still only ever removes a bow that would
     // otherwise have applied, via the NegatesEffect check StalwartNegatesBow now performs first).
     private static bool BowsTarget(string abilityId) => abilityId is "paid-bow" or "unorthodox-attack" or "chokehold" or "immovable-object-bow"
-        or "naga-remnants-bow" or "costly-feud" or "block-supply" or "bow-before-my-will" or "surety-of-purpose" or "unexpected-support"
+        or "naga-remnants-bow" or "costly-feud" or "block-supply" or "bow-before-my-will" or "surety-of-purpose" or "unexpected-support" or "spirit-monk-bow" or "spirit-paragon-bow"
+        or "discovering-conspiracy-expose" or "insulting-gesture-shame" or "barred-passage-bow" or "silent-terror-bow"
         or "strategic-sacrifice-toggle" or "weakness-of-man-toggle" or "shosuro-ritoru-bow" or "nightingale-blade-bow" or "law-of-darkness-weaken"
         or "training-bow-enemy" or "training-bow-at-battle" or "training-bow-enemy-card-at-battle" or "training-bow-enemy-card-open" or "training-bow-any" or "horibe-bow" or "dairuko-exp-bow" or "furu-bow"
         or "tsudoken-exp-bow" or "masumi-bow" or "tsukasa-bow" or "atsumichi-bow" or "bounty-hunter-bow" or "brothers-great-lake-bow"
@@ -2362,7 +2455,7 @@ public sealed partial class MatchEngine
         // OR the printed keyword (TargetStatus.IsShadowlands), read off the ability's own IfTarget.
         "hiruma-nitani-attack" => 4 + (EffectConditionMet(abilityId, target) ? 2 : 0),
         "bayushi-kahoku-attack" => 3 + (EffectConditionMet(abilityId, target) ? 2 : 0),
-        "asako-ume-attack" => 4,
+        "asako-ume-attack" or "spirit-scout-attack" => 4,
         "training-honor-cost-attack" => 3,
         "training-weapon-attack" => 2,
         "cavalry-flankers-attack" => 2,
@@ -2452,7 +2545,7 @@ public sealed partial class MatchEngine
         "legulus-legion-attack" or "village-raiders-attack" or "chiyo-attack" or "dairuko-melee" => "Melee",
         "strength-of-the-divine-force" or "strength-of-the-divine-honor" => "Melee",
         "ebizo-attack" or "training-recon-attack" => "Ranged",
-        "kahoku-exp-attack" or "tsuruchi-kosoko-exp-attack" or "hiruma-nitani-attack" or "training-followed-recon-attack" => "Ranged",
+        "kahoku-exp-attack" or "tsuruchi-kosoko-exp-attack" or "hiruma-nitani-attack" or "training-followed-recon-attack" or "spirit-scout-attack" => "Ranged",
         "training-followed-dishonorable-melee-attack" => "Melee",
         _ => ""
     };
@@ -2725,6 +2818,10 @@ public sealed partial class MatchEngine
     private static int StatModifier(CardInstance card, string stat) => card.Modifiers.Where(m => m.Stat == stat).Sum(m => m.Amount) + card.Tokens.Where(t => t.Stat == stat).Sum(t => t.Amount);
     // A Personality reduced to 0 Chi is destroyed immediately, by any means — centralized here so
     // every current and future Chi-reducing effect enforces it without needing its own check.
+    // "Permanently give him +2F" (Spirit of the Berserker): a stat change no turn end removes (AppliedModifier.Permanent).
+    private void AddPermanentModifier(CardInstance card, string source, string effect, string stat, int amount) =>
+        card.Modifiers.Add(new(source, effect, stat, amount, Permanent: true));
+
     private void ApplyModifier(CardInstance card, string source, string effect, string stat, int amount)
     {
         // Champion of Thunder's own "all" (issue #278): negates every effect an action applies to the
@@ -2734,6 +2831,12 @@ public sealed partial class MatchEngine
         if (NegatesEffect(card, "all"))
         {
             Emit("modifierNegated", $"{Definition(card).Name}'s {stat} modifier was negated before it resolved.", card.OwnerId, card.Id);
+            return;
+        }
+        // Tireless Efforts: while it lasts no Force penalty is applied to the card at all (nor any penalty-watching card told of one).
+        if (stat == "Force" && amount < 0 && card.ForcePenaltiesNegatedTurn == _state.TurnNumber)
+        {
+            Emit("modifierNegated", $"{Definition(card).Name}'s Force penalty was negated (Tireless Efforts).", card.OwnerId, card.Id);
             return;
         }
         card.Modifiers.Add(new(source, effect, stat, amount));
@@ -2978,14 +3081,14 @@ public sealed partial class MatchEngine
             // no-presence clause as an explicit Absent.
             var reinforcesFromElsewhere = ability.Absent || ability.MovesToBattle;
             if (!reinforcesFromElsewhere) Require(Army(player.Id, _state.CurrentBattleProvince!.Value).Any(), "You need a unit at the current battlefield.");
-            if (!reinforcesFromElsewhere && source is not null && Definition(source).Type == CardType.Personality)
+            if (!reinforcesFromElsewhere && !ability.SourceUnitMayBeAway && source is not null && Definition(source).Type == CardType.Personality)
                 Require(AtBattle(source) || HasHalls(player.Id) && Keyword(source, "Shugenja"), "The performing card must be at this battlefield.");
             // The check above only ever applies to a Personality-type source -- a Spell/Item's own
             // Battle ability needs its own equivalent: AtBattle(source) already resolves an ATTACHED
             // card's own parent correctly (same helper Khol Regulars' own Reaction uses), so this is
             // exactly "the attachment's own wielder is at this battlefield."
             // An action on an attachment is performed by its wielder (core rules), so any attached card's Battle ability needs him at the battle.
-            if (!reinforcesFromElsewhere && source is { Zone: Zone.Attached }
+            if (!reinforcesFromElsewhere && !ability.SourceUnitMayBeAway && source is { Zone: Zone.Attached }
                 || id is "scouring-flood-move-home" or "earths-hunger-destroy" or "nightingale-blade-bow" or "fubatsu-plate-straighten" or "fubatsu-plate-move")
                 Require(AtBattle(source!), "This attachment's own wielder must be at the current battlefield.");
             if (id == "earth-flows-move") Require(player.Id != _state.ActivePlayerId, "Only the Defender may use The Earth Flows.");
@@ -3031,13 +3134,16 @@ public sealed partial class MatchEngine
             Require(_state.CurrentBattleProvince is not null, "There is no current battlefield to move him to.");
             Require(player.Id != _state.ActivePlayerId, "Only the Defender may use Return to Action.");
         }
-        if (id is "shunya-honor" or "favor-cycle" or "favor-battle" or "jakuei-bow-favor" or "bonds-of-coin-draw")
+        if (id is "shunya-honor" or "favor-cycle" or "favor-battle" or "jakuei-bow-favor" or "bonds-of-coin-draw" or "insulting-gesture-shame")
             Require(_state.FavorPlayerId == player.Id, "You must control the Imperial Favor to discard it.");
         // Bonds of Coin (issue #336): "Bow your Stronghold" is a cost of the action, so a bowed Stronghold cannot pay it.
         if (id == "bonds-of-coin-draw") Require(!Card(player.StrongholdId).Bowed, "Your Stronghold is already bowed.");
         if (id == "overgrown-grove-move") Require(player.FateDeck.Count >= 3,"Discarding three Fate cards is a required cost.");
         if (id == "improved-defenses-strength") Require(player.FateDeck.Count >= 1,"Discarding a Fate card is a required cost.");
-        if (id == "lobby") Require(player.Honor > Player(1-player.Id).Honor, "Lobby requires strictly higher Family Honor than your opponent.");
+        if (id is "lobby" or "dainagon-lobby") Require(player.Honor > Player(1-player.Id).Honor, "Lobby requires strictly higher Family Honor than your opponent.");
+        if (id == "dainagon-lobby") Require(CardPersonalHonor(source!) >= 1, "Lobby needs a Personality with at least 1 Personal Honor.");
+        // Barred Passage: "the only Personality in his army" -- none of the acting player's other Personalities stands at this battlefield.
+        if (id == "barred-passage-bow") Require(Army(player.Id, _state.CurrentBattleProvince!.Value).Count(c => Definition(c).Type == CardType.Personality) == 1, "The performing Hero must be the only Personality in his army.");
         if (id is "tamoko-open" or "virtuous-charity-open") Require(_state.ActivePlayerId != player.Id, "Only usable when it is not your own turn.");
         // Ohsuki's Sparrow (oracle-l5r-10023, issue #299): "If none of your provinces were destroyed
         // since your last turn ended" -- a printed condition on USING the action, checked here rather
@@ -3214,6 +3320,15 @@ public sealed partial class MatchEngine
                 // actingAsBattle; an Open-timed use has no presence requirement at all regardless.
                 "own-unbowed-personality-with-keyword-at-any-location" => Definition(performer).Type == CardType.Personality && !performer.Bowed &&
                     HasKeywords(performer, ability.RequiredKeywords) && (!actingAsBattle || AtAnyLocation(performer)),
+                // On the Hunt: "your performing Samurai with an attachment" (any bow state, at any location: the action is an Open one).
+                "own-samurai-with-attachment" => Definition(performer).Type == CardType.Personality && Keyword(performer, "Samurai") && HasAttachments(performer),
+                // Essence of Undeath: the Personality the Spell is attached to ("this Shugenja"), who performs its action.
+                "own-wielder" => source is { Zone: Zone.Attached } && performer.Id == source.AttachedTo,
+                // Goju Plot: "your performing Shadowlands Ninja Personality" (a Clan check, like own-shadowlands-personality-at-battle) -- no "unbowed" printed.
+                "own-shadowlands-ninja-at-battle" => Definition(performer).Type == CardType.Personality && HasClanAffiliation(performer, "Shadowlands") && Keyword(performer, "Ninja") && (!actingAsBattle || AtBattle(performer)),
+                // Yoritomo Emoto: "your performing Follower" -- any unbowed Follower of the acting player's in play whose unit is at the current battlefield (a Follower is at the
+                // battlefield when its host is; only meaningful while acting as a Battle action).
+                "own-unbowed-follower-at-battle" => Definition(performer).Type == CardType.Follower && !performer.Bowed && performer.Zone == Zone.Attached && (!actingAsBattle || AtBattle(performer)),
                 // No "unbowed" qualifier printed -- Monastery of New Thought's performer may be bowed.
                 "own-personality-with-fire-token-at-battle" => Definition(performer).Type == CardType.Personality && AtBattle(performer) && HasToken(performer, "Fire"),
                 // Again!'s shape: also no "unbowed" qualifier -- the whole point is straightening an
@@ -3337,6 +3452,7 @@ public sealed partial class MatchEngine
         RequireCanPerform(command, ability, source);
         // Alternative cost (issue #337): the way the acting player pays the non-Gold cost is part of the command, and payable.
         ValidateCostOption(ability, command, source);
+        ValidateWielderCosts(ability, command, source);
         Require(command.Choice is null, "Choices are resolved by a separate decision command.");
         // Goju House Guard (issue #192): the only current DeckPosition consumer, so this stays a
         // per-id check rather than a generic AbilityDefinition flag until a second card needs it.
@@ -3573,6 +3689,16 @@ public sealed partial class MatchEngine
                 // Hunter of Harmony's own ability (issue #190): a Kiho Strategy card sitting in the
                 // player's own Fate discard pile -- not in play, so this needs its own branch just like
                 // "own-kharmic-card" above.
+                // Essence of Undeath: "your dead Personality".
+                else if (ability.Target == "own-dead-personality")
+                    Require(target.OwnerId == player.Id && type == CardType.Personality && target.Zone == Zone.Dead, "Choose one of your own dead Personalities.");
+                // Goju Plot: "a Ninja Personality in your discard pile" -- dead, or merely discarded from a province (the two zones of one physical pile).
+                else if (ability.Target == "own-ninja-personality-in-discard")
+                    Require(target.OwnerId == player.Id && type == CardType.Personality && Keyword(target, "Ninja") && target.Zone is Zone.Dead or Zone.DynastyDiscard, "Choose a Ninja Personality in your discard pile.");
+                // Jurojin's Blessing: "a non-Unique Strategy in your Fate discard pile".
+                else if (ability.Target == "own-nonunique-strategy-in-discard")
+                    Require(target.OwnerId == player.Id && type == CardType.Strategy && !Keyword(target, "Unique") && target.Zone == Zone.FateDiscard,
+                        "Choose a non-Unique Strategy card from your Fate discard pile.");
                 else if (ability.Target == "own-kiho-strategy-in-discard")
                     Require(target.OwnerId == player.Id && type == CardType.Strategy && Keyword(target, "Kiho") && target.Zone == Zone.FateDiscard,
                         "Choose a Kiho Strategy card from your Fate discard pile.");
@@ -3693,6 +3819,14 @@ public sealed partial class MatchEngine
                         // dishonorable-personality below, either side.
                         "honorable-personality" => MatchesTargetStatus(target, TargetStatus.IsHonorable),
                         "own-personality" => personality && own,
+                        // Great Sacrifice: "an enemy unit with total Force equal to or lower than your performer's Force, plus Personal Honor, plus one if he is defending".
+                        "enemy-unit-within-performer-sacrifice" => personality && !own && BattleForce(target) <= SacrificeReach(Card(command.PerformerId!)),
+                        // Rage of the Spirits: an enemy Personality or Follower with Force lower than or equal to the performing Spirit's.
+                        "enemy-force-lte-performer" => !own && type is CardType.Personality or CardType.Follower && CardForce(target) <= CardForce(Card(command.PerformerId!)),
+                        // Interference: "a target Stronghold" -- either player's.
+                        "stronghold" => type == CardType.Stronghold,
+                        // Taming the Beast: "your Nonhuman" -- a Personality or a Follower of the acting player's carrying the required keywords (any bow state: straightening it is the point).
+                        "own-unit-card-with-keyword" => own && (personality || type == CardType.Follower) && HasKeywords(target, ability.RequiredKeywords),
                         // Gates of Chikushudo (issue #398): "your created Spirit Personality" -- a created card (a CreatedOnly scan or a created copy) in play, with the required keywords.
                         "own-created-personality" => personality && own && IsCreatedCard(target) && (ability.RequiredKeywords is null || HasKeywords(target, ability.RequiredKeywords)),
                         // The Tale of the Disgraced (issue #369): "your target unbowed Personality".
@@ -3789,6 +3923,9 @@ public sealed partial class MatchEngine
                         // Akodo Dairuko (issue #198): the same shape as -than-self above, restricted
                         // to an enemy.
                         "enemy-personality-lower-honor-than-self" => personality && !own && CardPersonalHonor(target) < CardPersonalHonor(source!),
+                        // Spirit of the Paragon's granted action: "an enemy Personality with either equal or lower Force, or equal or lower Personal Honor" than the Personality
+                        // holding it -- either comparison is enough, each read live.
+                        "enemy-personality-force-or-honor-lte-self" => personality && !own && (CardForce(target) <= CardForce(source!) || CardPersonalHonor(target) <= CardPersonalHonor(source!)),
                         // Akodo Furu (issue #198): a bare Chi comparison against the source itself
                         // (not a separately-chosen Performer, unlike enemy-personality-chi-lte-performer),
                         // and not restricted to an enemy.
@@ -4163,7 +4300,7 @@ public sealed partial class MatchEngine
         PayForAbility(command, player);
         // The non-Gold cost the acting player chose (issue #337): bow or destroy the performer, paid right beside the Gold.
         PayCostOption(ability, command, player, source);
-        if (id is "shunya-honor" or "favor-cycle" or "favor-battle" or "jakuei-bow-favor" or "bonds-of-coin-draw")
+        if (id is "shunya-honor" or "favor-cycle" or "favor-battle" or "jakuei-bow-favor" or "bonds-of-coin-draw" or "insulting-gesture-shame")
         {
             _state.FavorPlayerId = null;
             Emit("favorDiscarded", $"{player.Name} discarded the Imperial Favor.", player.Id);
@@ -4728,16 +4865,25 @@ public sealed partial class MatchEngine
             case "training-grant-bow": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; GrantAdditionalAction(player.Id, null); break;
             case "training-bow-at-battle": case "training-bow-enemy-card-at-battle": case "training-bow-enemy-card-open": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;
             case "training-straighten-at-battle": Straighten(target!); break;
-            case "spirit-of-the-monk":
-                var monk = Card(command.PerformerId!);
-                if (Keyword(monk, "Monk"))
-                {
-                    GrantAbility(monk, "spirit-monk-bow", source!.Id, GrantDuration.Permanent);
-                    Emit("abilityGranted", $"{Definition(monk).Name} permanently gains Battle: {AbilityCatalog.All["spirit-monk-bow"].Label}", player.Id, monk.Id);
-                }
-                else GrantKeyword(monk, "Monk", source!.Id, GrantDuration.Permanent);
+            case "spirit-of-the-monk": GrantSpirit(Card(command.PerformerId!), "Monk", "spirit-monk-bow", source!.Id, player.Id); break;
+            case "spirit-of-the-yojimbo": GrantSpirit(Card(command.PerformerId!), "Yojimbo", "spirit-yojimbo-redirect", source!.Id, player.Id); break;
+            case "spirit-of-the-scout": GrantSpirit(Card(command.PerformerId!), "Scout", "spirit-scout-attack", source!.Id, player.Id); break;
+            case "spirit-of-the-paragon": GrantSpirit(Card(command.PerformerId!), "Paragon", "spirit-paragon-bow", source!.Id, player.Id); break;
+            case "spirit-of-the-duelist": GrantSpirit(Card(command.PerformerId!), "Duelist", "spirit-duelist-duel", source!.Id, player.Id); break;
+            case "spirit-of-the-berserker":
+            {
+                // "permanently give him +2F" only when he already is a Berserker -- the same branch that gives the ability.
+                var berserker = Card(command.PerformerId!);
+                if (GrantSpirit(berserker, "Berserker", "spirit-berserker-delay", source!.Id, player.Id)) AddPermanentModifier(berserker, source!.Id, id, "Force", 2);
                 break;
-            case "spirit-monk-bow":
+            }
+            case "spirit-scout-attack":
+                if (!HasReconnaissanceAtCurrentBattlefield(player.Id)) source!.Bowed = true;
+                if (ResolveOrDeferAttack(id, player, target?.Id, ActionPerformer(ability, command, source).Id, consumedGrant)) return;
+                break;
+            case "spirit-yojimbo-redirect": RedirectAction(HeldAction(), source!.Id, source); break;
+            case "spirit-berserker-delay": DelayDestructionFromAction(source!); break;
+            case "spirit-monk-bow": case "spirit-paragon-bow":
             case "training-bow-any": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;
             case "effortless-counterattack-move": MoveHome(target!, false); break;
             case "training-honor-strike": GainHonor(target!.OwnerId, -2, "Training strike", source); break;
@@ -4877,7 +5023,7 @@ public sealed partial class MatchEngine
             // Attack-strength-reducing Reaction now checks (see the Require block above); cleared by
             // ResolveAttackNow once the specific Ranged Attack this action produces actually resolves.
             case "tsuruchi-yakusho-immunity": _state.RangedAttackStrengthReductionImmune = true; break;
-            case "low-market-equip":
+            case "low-market-equip": case "on-the-hunt-equip":
             {
                 
                 var performer = Card(command.PerformerId!);
@@ -4885,7 +5031,7 @@ public sealed partial class MatchEngine
                 player.Hand.Remove(attachment.Id);
                 attachment.Zone = Zone.Attached; attachment.AttachedTo = performer.Id; attachment.FaceUp = true; attachment.ProvinceIndex = performer.ProvinceIndex;
                 if (Definition(attachment).AttachGrantsKeyword is string granted) GrantKeyword(performer, granted, attachment.Id, "Attachment");
-                Emit("equipped", $"{Definition(attachment).Name} attached to {Definition(performer).Name} via Low Market.", player.Id, attachment.Id);
+                Emit("equipped", $"{Definition(attachment).Name} attached to {Definition(performer).Name} via {(id == "low-market-equip" ? "Low Market" : "On the Hunt")}.", player.Id, attachment.Id);
                 if (OpenEntryReactionWindow(player.Id, attachment, 1 - player.Id)) return;
                 break;
             }
@@ -5049,6 +5195,8 @@ public sealed partial class MatchEngine
                 DestroyUnits([target!], actingPlayerId: player.Id);
                 GainHonor(player.Id, 1, "Kitsu Akai", source);
                 break;
+            // Yoritomo Emoto: the performing Follower's bow was paid as its cost option; the target, a lone Follower included, is destroyed.
+            case "emoto-follower-destroy": DestroyTargetCard(target!, player.Id); break;
             case "cavalry-flankers-attack": case "murderous-thieves-attack":
                 
                 if (ResolveOrDeferAttack(id, player, target?.Id, ActionPerformer(ability, command, source).Id, consumedGrant)) return;
@@ -5209,6 +5357,88 @@ public sealed partial class MatchEngine
                 
                 ReturnToHand(target!);
                 break;
+            // Jurojin's Blessing: the Celestial's own discard was its cost (Costs); the Strategy goes to its owner's hand.
+            case "jurojin-return": ReturnToHand(target!); break;
+            case "interference-lock":
+                LockActions(target!, source!.Id);
+                if (player.Id == _state.ActivePlayerId && !StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
+                break;
+            // Taming the Beast: the Spell's own destruction was its cost; the held action's destruction of the Personality it targeted is negated.
+            case "taming-beast-negate": NegateEffects(Card(HeldAction().TargetId!), "destroy"); break;
+            case "taming-beast-straighten": Straighten(target!); break;
+            case "flame-katana-destroy":
+                DestroyTargetCard(target!, player.Id);
+                break;
+            // Discovering a Conspiracy: the Clan alignment is removed for good, he is dishonored, and -- if he stands at a battlefield -- bowed, then the honor choice is asked.
+            case "discovering-conspiracy-expose":
+                RemoveClanAlignments(target!);
+                Dishonor(target!);
+                if (target!.Zone == Zone.Battlefield && !StalwartNegatesBow(target, player.Id)) target.Bowed = true;
+                if (BeginConditionalChoice(command, ability, consumedGrant, playedFromDiscard, opponentHonorBeforeBattleAction, bowedBeforeAction, preExistingGrants)) return;
+                break;
+            case "insulting-gesture-take":
+                _state.FavorPlayerId = player.Id; Emit("favorTaken", $"{player.Name} took the Imperial Favor.", player.Id);
+                break;
+            // Insulting Gesture's second action: the Favor was discarded as its cost above. Dishonored, bowed (a bow stays through the move), sent home; his controller loses 2 Honor.
+            case "insulting-gesture-shame":
+                Dishonor(target!);
+                if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
+                MoveHome(target!, false);
+                GainHonor(target!.OwnerId, -2, "Insulting Gesture", source);
+                break;
+            case "dainagon-lobby": _state.FavorPlayerId = player.Id; Emit("favorTaken", $"{player.Name} took the Imperial Favor.", player.Id); break;
+            // Barred Passage: the Personality and every card attached to him bow.
+            case "barred-passage-bow":
+                if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
+                foreach (var attached in Attachments(target!.Id)) attached.Bowed = true;
+                break;
+            // Great Sacrifice: the performer's destruction was its cost; the enemy unit is destroyed.
+            case "great-sacrifice-destroy": DestroyUnits([target!], false, player.Id); break;
+            // Rage of the Spirits: both bows were paid as costs (the Shugenja's and the Spirit's); the enemy card is destroyed, and Earth pays a bonus.
+            case "rage-of-the-spirits-destroy":
+                DestroyTargetCard(target!, player.Id);
+                if (source is { Zone: Zone.Attached, AttachedTo: { } rageHost } && Keyword(Card(rageHost), "Earth")) GainHonor(player.Id, 1, "Rage of the Spirits", source);
+                break;
+            case "on-the-hunt-straighten": StraightenUnit(Card(command.PerformerId!)); break;
+            case "tireless-efforts-straighten": Straighten(Card(command.PerformerId!)); break;
+            case "tireless-efforts-negate": NegateForcePenalties(Card(command.PerformerId!)); break;
+            // Costly Opportunity: the Samurai's destruction was the cost. Every other card of the target's unit loses the use of its abilities, then the target is destroyed.
+            case "costly-opportunity-destroy":
+            {
+                var unitHost = Card(UnitHostId(target!));
+                foreach (var other in new[] { unitHost }.Concat(Attachments(unitHost.Id)).Where(c => c.Id != target!.Id && InPlay(c)).ToArray()) LockActions(other, source!.Id);
+                DestroyTargetCard(target!, player.Id);
+                break;
+            }
+            // Silent Terror: the bow, then the optional discard from the province (asked only when there is a card there).
+            case "silent-terror-bow":
+                if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
+                if (BeginConditionalChoice(command, ability, consumedGrant, playedFromDiscard, opponentHonorBeforeBattleAction, bowedBeforeAction, preExistingGrants)) return;
+                break;
+            // Essence of Undeath: the Spell's destruction was the cost and the Gold was paid; he enters at his Shugenja's location (home, or the battlefield he stands at).
+            case "essence-of-undeath-recruit":
+            {
+                var quote = QuotePurchase(player.Id, target!.Id, fromDeadPile: true);
+                Require(quote.Error is null, quote.Error ?? "");
+                var shugenja = Card(command.PerformerId!);
+                if (BringDeadPersonalityIntoPlay(player, target, "Essence of Undeath", shugenja.Zone == Zone.Battlefield ? shugenja.ProvinceIndex : null, entered =>
+                {
+                    GrantKeyword(entered, "Shadowlands", source!.Id, GrantDuration.Permanent);
+                    GrantKeyword(entered, "Undead", source.Id, GrantDuration.Permanent);
+                    GainHonor(player.Id, -2, "Essence of Undeath", source);
+                })) return;
+                break;
+            }
+            // Goju Plot: the performer's destruction was the cost and the reduced recruit cost was paid; he enters at the current battlefield, and another Battle action may follow.
+            case "goju-plot-recruit":
+            {
+                var quote = QuotePurchase(player.Id, target!.Id, fromDeadPile: true);
+                Require(quote.Error is null, quote.Error ?? "");
+                var entryWindow = BringDeadPersonalityIntoPlay(player, target, "Goju Plot", _state.CurrentBattleProvince!.Value, _ => GainHonor(player.Id, -2, "Goju Plot", source));
+                GrantAdditionalAction(player.Id, null);
+                if (entryWindow) return;
+                break;
+            }
             case "volcano-tattoo-destroy":
             {
                 var performer = Card(command.PerformerId!);
@@ -5622,6 +5852,8 @@ public sealed partial class MatchEngine
             // action does not finish here -- FinishLook hands priority on once the arrangement is submitted. A Strategy played from
             // the hand is spent as it is played (the tail that would discard it is skipped by the deferral).
             case "public-records-look":  BeginLook(ability.Look!, source!, player.Id, "ability", bowedBeforeAction); return;
+            case "control-your-destiny-look": case "jurojin-look":
+                BeginLook(ability.Look!, source!, player.Id, "ability", bowedBeforeAction); return;
             case "isawa-tamaki-look": case "kahoku-exp2-look": case "training-look-dynasty": case "training-look-any": case "training-look-take-item": case "training-look-fixed":
                 BeginLook(ability.Look!, source!, player.Id, "ability", bowedBeforeAction); return;
             case "training-look-show": BeginLook(ability.Look!, source!, player.Id, "ability", bowedBeforeAction, count: 2); return;
@@ -6290,6 +6522,7 @@ public sealed partial class MatchEngine
             Emit("destructionNegated", $"{Definition(card).Name}'s destruction was negated before it resolved.", card.OwnerId, card.Id);
             return;
         }
+        if (DestructionDelayed(card)) return;
         var parent = Card(card.AttachedTo);
         card.Zone = Zone.FateDiscard; card.AttachedTo = null; card.ProvinceIndex = null; card.FaceUp = true;
         RemoveAttachmentGrants(parent, card.Id);
@@ -6307,6 +6540,11 @@ public sealed partial class MatchEngine
         if (NegatesEffect(card, "all"))
         {
             Emit("tokenNegated", $"A {type} token on {Definition(card).Name} was negated before it resolved.", card.OwnerId, card.Id);
+            return null;
+        }
+        if (stat == "Force" && amount < 0 && card.ForcePenaltiesNegatedTurn == _state.TurnNumber)
+        {
+            Emit("tokenNegated", $"A {type} token's Force penalty on {Definition(card).Name} was negated (Tireless Efforts).", card.OwnerId, card.Id);
             return null;
         }
         var token = new CardToken($"token-{++_state.TokenSequence:D4}", type, source, stat, amount);
@@ -6410,6 +6648,10 @@ public sealed partial class MatchEngine
                     _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && !c.Bowed && (!actingAsBattle || AtBattle(c)) && HasKeywords(c, ability.RequiredKeywords)).Select(c => (string?)c.Id).ToArray(),
                 "own-unbowed-personality-with-keyword-at-any-location" =>
                     _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && !c.Bowed && (!actingAsBattle || AtAnyLocation(c)) && HasKeywords(c, ability.RequiredKeywords)).Select(c => (string?)c.Id).ToArray(),
+                "own-samurai-with-attachment" => _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && Definition(c).Type == CardType.Personality && Keyword(c, "Samurai") && HasAttachments(c)).Select(c => (string?)c.Id).ToArray(),
+                "own-wielder" => source is { Zone: Zone.Attached, AttachedTo: { } wielderId } ? [wielderId] : [],
+                "own-shadowlands-ninja-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && HasClanAffiliation(c, "Shadowlands") && Keyword(c, "Ninja") && (!actingAsBattle || AtBattle(c))).Select(c => (string?)c.Id).ToArray(),
+                "own-unbowed-follower-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Follower && !c.Bowed && c.Zone == Zone.Attached && (!actingAsBattle || AtBattle(c))).Select(c => (string?)c.Id).ToArray(),
                 "own-castle-or-siege" => _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && !c.Bowed && (Keyword(c, "Castle") || Keyword(c, "Siege"))).Select(c => (string?)c.Id).ToArray(),
                 "own-source-or-unbowed-holding-with-keyword" => new[] { source?.Id }.Concat(_state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Holding && !c.Bowed && HasKeywords(c, ability.RequiredKeywords)).Select(c => (string?)c.Id)).ToArray(),
                 // Sutigu (issue #301): the source itself, or any of its own unbowed keyworded attachments.
@@ -6484,6 +6726,9 @@ public sealed partial class MatchEngine
                     // Hunter of Harmony / Scholarly Hermit / Tranquil Garden (issue #317): the same gap
                     // Kharmic had -- validated, but a target in a discard pile is never in the in-play
                     // default, so the ability was never offered. Each mirrors its own Require above.
+                    "own-dead-personality" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && c.Zone == Zone.Dead).Select(c => (string?)c.Id).ToArray(),
+                    "own-ninja-personality-in-discard" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && Keyword(c, "Ninja") && c.Zone is Zone.Dead or Zone.DynastyDiscard).Select(c => (string?)c.Id).ToArray(),
+                    "own-nonunique-strategy-in-discard" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Strategy && !Keyword(c, "Unique") && c.Zone == Zone.FateDiscard).Select(c => (string?)c.Id).ToArray(),
                     "own-kiho-strategy-in-discard" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Strategy && Keyword(c, "Kiho") && c.Zone == Zone.FateDiscard).Select(c => (string?)c.Id).ToArray(),
                     "own-dark-virtue-in-discard" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Strategy && Keyword(c, "Dark Virtue") && c.Zone == Zone.FateDiscard && HasUnspentBattleAction(c)).Select(c => (string?)c.Id).ToArray(),
                     "own-ring-in-discard" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Ring && c.Zone == Zone.FateDiscard).Select(c => (string?)c.Id).ToArray(),

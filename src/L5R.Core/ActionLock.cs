@@ -31,6 +31,10 @@ public sealed partial class MatchEngine
         var named = ability.Performer is not null && command.PerformerId is not null && _state.Cards.TryGetValue(command.PerformerId, out var chosen) ? chosen : null;
         var actor = named is not null && Definition(named).Type is CardType.Personality or CardType.Follower ? named : source;
         if (actor is not null) Require(!ActionLocked(actor), $"{Definition(actor).Name} may not perform actions this turn.");
+        // "A Stronghold's abilities may not be used" (Interference): a card that is not a unit -- a Stronghold, Holding, Region or Celestial -- performs nothing itself, so the lock on IT bars
+        // every ability printed on it, whoever the ability names as its performer (Shinden Asahina's is performed by a Shugenja).
+        if (source is { ActionLocks.Count: > 0 } && Definition(source).Type is CardType.Stronghold or CardType.Holding or CardType.Region or CardType.Celestial)
+            Require(false, $"{Definition(source).Name}'s abilities may not be used this turn.");
     }
 
     // The reason the lock alone would refuse this command, or null. A Reaction listed inside a reaction window is offered before ValidateAbility ever
