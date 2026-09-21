@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "QueryActions now offers the 'choose a player' entering-play Reactions (Kitsuki Horume gain and lose, Bayushi Mugoshi, the Training fixtures) once per legal player, each carrying the TargetPlayerId the command needs; the entry-reaction window lists every own-enters-play reaction a card prints (Horume's lose was never listed)",
+  "validation": "bash tools/check.sh --skip-client passed; new player-targets suite 7/7; 7 mutations of the change all killed; client renders the generic option list unchanged",
+  "remaining": "None; ready for review. Noticed: unimpeachable-name-reaction's optional target has no candidate arm either (not a player target).",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/389",
+  "branch": "claude/389-player-target-enumeration",
+  "updated": "2026-09-20T21:24:32.804445+00:00"
+}

@@ -23,6 +23,26 @@ public sealed partial class MatchEngine
     public static MatchEngine CreateStarterMatch(ulong seed = 20260906) => Create(seed, "starter");
     public static MatchEngine CreateEconomyScenario(ulong seed = 20260906) => Create(seed, "economy");
     public static MatchEngine CreatePublishedMatch(ulong seed = 20260906) => Create(seed, PublishedContent.Scenario);
+    /// <summary>Fixture match for the deck search primitive (issue #312): both players have Ikoma Shizuka and the
+    /// training search source unbowed at home, decks that hold Regions and Terrains, and the Action Phase open for
+    /// player 0. An ordinary, replayable engine state (its own scenario name, so ExportReplay/Replay and the server's
+    /// journal recovery cover it) built for tests and for the UI issues' scripted capture -- no menu or room reaches it.</summary>
+    public static MatchEngine CreateDeckSearchShowcase(ulong seed = 20260906) => Create(seed, DeckSearchScenario);
+    public const string DeckSearchScenario = "deck-search";
+    /// <summary>Fixture matches for the copy wizard and the Either/Or wizard (issue #338): ordinary, replayable engine states (each its own scenario name,
+    /// so ExportReplay/Replay and the server's journal recovery cover them) built for tests and for the UI issues' scripted captures -- no menu or room
+    /// reaches them. In the copy showcase player 0 controls Fukuzo, a Training skin receiver and a Training skin donor at home, and player 1's discard
+    /// pile holds real Personalities to copy from; in the Either/Or showcase player 0 holds Unfortunate Hesitation, Yoritomo Sakuma and Shosuro Rin
+    /// and player 1 Yogo Adi and a Training Either/Or source. Both open in player 0's Action Phase.</summary>
+    public static MatchEngine CreateCopyShowcase(ulong seed = 20260906) => Create(seed, CopyShowcaseScenario);
+    public static MatchEngine CreateEitherOrShowcase(ulong seed = 20260906) => Create(seed, EitherOrShowcaseScenario);
+    public const string CopyShowcaseScenario = "copy-showcase";
+    public const string EitherOrShowcaseScenario = "either-or-showcase";
+    /// <summary>Fixture match for the opposing player's variable payment (issue #373): player 1 (the Lion) holds Virtuous Charity and both players have several
+    /// Gold sources at home; player 0 (the Crane) has the Action Phase. Player 0 passes, player 1 plays Virtuous Charity (it is not their turn) and chooses an
+    /// amount, and player 0 then decides how much to pay.</summary>
+    public static MatchEngine CreateOpponentPaymentShowcase(ulong seed = 20260906) => Create(seed, OpponentPaymentShowcaseScenario);
+    public const string OpponentPaymentShowcaseScenario = "opponent-payment-showcase";
     // Frozen deck lists (PublishedContent.TestSnapshot) for the C# test suite only -- never used by the
     // client or RoomManager. Editing the live deck (CreatePublishedMatch) for manual playtesting must
     // never silently change what this exercises.
@@ -46,7 +66,7 @@ public sealed partial class MatchEngine
     {
         if (scenario == PublishedContent.Scenario) return CreatePublished(seed, PublishedContent.Scenario, PublishedContent.Snapshot);
         if (scenario == PublishedContent.TestScenario) return CreatePublished(seed, PublishedContent.TestScenario, PublishedContent.TestSnapshot);
-        if (scenario is not ("starter" or "economy")) throw new ArgumentException("Unknown scenario.");
+        if (scenario is not ("starter" or "economy" or DeckSearchScenario or CopyShowcaseScenario or EitherOrShowcaseScenario or OpponentPaymentShowcaseScenario)) throw new ArgumentException("Unknown scenario.");
         var state = new MatchState { Players = [new() { Id=0, Name="Crane", Clan="Crane", Honor=8 }, new() { Id=1, Name="Lion", Clan="Lion", Honor=6 }] };
         var random = new StableRandom(seed);
         var nextId = 0;
@@ -74,6 +94,7 @@ public sealed partial class MatchEngine
             random.Shuffle(player.FateDeck);
             player.Provinces = Enumerable.Range(0,4).Select(i => new ProvinceState { Index=i,Strength=6,PrintedStrength=6 }).ToList();
         }
+        state.RngState=random.State; // Deck search (issue #312): later shuffles continue this exact sequence.
         var engine = new MatchEngine(state,seed,scenario);
         foreach (var player in state.Players)
         {
@@ -91,6 +112,45 @@ public sealed partial class MatchEngine
             }
             Add(0,"training-marketplace",Zone.Home,true);
         }
+        if (scenario == DeckSearchScenario)
+        {
+            // Deck search fixture (issue #312), see CreateDeckSearchShowcase: both players get Ikoma Shizuka and the
+            // training search source in their home, and a few deck positions are rewritten to Regions (Fallow Lands
+            // x2, another published Region, a costed training Region) and Terrains -- explicit fixture edits of an
+            // otherwise ordinary shuffled deck, so the state stays reproducible from the seed and replayable.
+            foreach (var player in state.Players)
+            {
+                Add(player.Id,"oracle-l5r-10292",Zone.Home,true);
+                Add(player.Id,"training-search-source",Zone.Home,true);
+                Add(player.Id,"training-look-source",Zone.Home,true);
+                string[] dynasty=["oracle-l5r-9865","oracle-l5r-9865","oracle-l5r-4777","training-costed-region"];
+                string[] fate=["training-terrain","training-terrain"];
+                for(var i=0;i<dynasty.Length;i++) state.Cards[player.DynastyDeck[i]].DefinitionId=dynasty[i];
+                for(var i=0;i<fate.Length;i++) state.Cards[player.FateDeck[i]].DefinitionId=fate[i];
+            }
+        }
+        if (scenario == CopyShowcaseScenario)
+        {
+            // Copy showcase (issue #338): Fukuzo and the two training fixtures at player 0's home; Tamori Tamoko (two abilities), Bayushi Kahoku
+            // - exp2 and Ikoma Shizuka (dead or discarded, a Limited action each) and a training donor in player 1's Dynasty discard pile.
+            Add(0,"oracle-l5r-2728",Zone.Home,true);
+            Add(0,"training-skin-receiver",Zone.Home,true);
+            foreach (var definition in new[] { "oracle-l5r-10056", "oracle-l5r-10479", "oracle-l5r-10292", "training-skin-donor" }) Add(1,definition,Zone.DynastyDiscard,true);
+            Add(1,"oracle-l5r-10056",Zone.Dead,true);
+        }
+        if (scenario == EitherOrShowcaseScenario)
+        {
+            // Either/Or showcase (issue #338): Sakuma and Rin at player 0's home with Unfortunate Hesitation in hand; Yogo Adi (a Political action that
+            // targets player 0's Personalities, so Sakuma may react) and the three-option fixture at player 1's home.
+            Add(0,"oracle-l5r-9624",Zone.Home,true); Add(0,"oracle-l5r-7151",Zone.Home,true);
+            var hesitation = Add(0,"oracle-l5r-9941",Zone.Hand,true); state.Players[0].Hand.Add(hesitation.Id);
+            Add(1,"oracle-l5r-9485",Zone.Home,true); Add(1,"training-either-or-source",Zone.Home,true);
+        }
+        if (scenario == OpponentPaymentShowcaseScenario)
+        {
+            var charity = Add(1,"oracle-l5r-10181",Zone.Hand,true); state.Players[1].Hand.Add(charity.Id);
+            foreach (var player in state.Players) for (var n = 0; n < 3; n++) Add(player.Id,"training-marketplace",Zone.Home,true);
+        }
         engine.StartTurn();
         if(scenario=="economy") { state.Phase=Phase.Dynasty; engine.Emit("scenario","Economy exercise: choose one payment at a time; Gold never carries over."); }
         return engine;
@@ -107,6 +167,8 @@ public sealed partial class MatchEngine
         try
         {
             Apply(command);
+            ReturnCardsOutOfPlayToTheirOwners();
+            RemoveCreatedCardsLeftInPiles();
             _state.Version++;
             _commands.Add(Copy(command));
             return new(true,null,_state.Version,_state.Events.Skip(firstEvent).ToArray());
@@ -124,17 +186,39 @@ public sealed partial class MatchEngine
     }
 
     private CommandResult Reject(string error) => new(false,error,_state.Version,[]);
+    // A window a Reaction set aside (ReactionsAreActions.cs) is reopened the moment nothing that Reaction started is still waiting.
     private void Apply(GameCommand command)
     {
+        ApplyCore(command);
+        ResumeIdleSuspendedWindow();
+        FinishSpentBeforeBattleItem();
+    }
+    private void ApplyCore(GameCommand command)
+    {
         if (command.Type=="concede") { Win(1-command.PlayerId,"Concession"); return; }
-        // Open action: cuts through the normal priority gate and any pending choice, same as concede.
+        // Order Seppuku (issue #368): an action at the player's own turn to act, with nothing pending. Dispatched ahead of the pending-choice
+        // handlers only so that its ONE timing predicate (SeppukuTimingReason) gives the reason, whatever is open.
         if (command.Type=="orderSeppuku") { OrderSeppuku(command); return; }
         Require(command.PlayerId==_state.PriorityPlayerId,"Wait for your action opportunity.");
         if (_state.PendingChoice is not null)
         {
+            // Deck search (issue #312): deck choice, candidate selection/pass, a Region's province, the discard
+            // after a Terrain. Every command a search accepts is validated in ResolveSearchCommand.
+            if (IsSearchChoice(_state.PendingChoice.Type)) { ResolveSearchCommand(command); return; }
+            // Look at the top N cards (issue #322): the deck choice and the one arrangement command.
+            if (IsLookChoice(_state.PendingChoice.Type)) { ResolveLookCommand(command); return; }
+            // Copying keywords and abilities (issue #338): the two independent copy decisions (CardCopy.cs).
+            if (IsCopyChoice(_state.PendingChoice.Type)) { ResolveCopyCommand(command); return; }
+            // The opposing player's Either/Or choice (issue #338): answered by the deciding player, who holds priority (EitherOr.cs).
+            if (_state.PendingChoice.Type=="eitherOr") { ResolveEitherOrCommand(command); return; }
+            // The opposing player's variable payment (issue #373, Virtuous Charity): answered by the paying player, who holds priority (OpponentPayment.cs).
+            if (_state.PendingChoice.Type=="opponentPayment") { ResolveOpponentPaymentCommand(command); return; }
             if (_state.PendingChoice.Type=="shinden") { ResolveShinden(command); return; }
             // Preserving Honor (issue #295): the target's own controller chooses bow-or-move.
             if (_state.PendingChoice.Type=="preservingHonor") { ResolvePreservingHonor(command); return; }
+            // Asako Rikate / Shosuro Rin (issue #301): the targeted Personality's own controller answers.
+            if (_state.PendingChoice.Type=="rikateDetach") { ResolveRikateDetach(command); return; }
+            if (_state.PendingChoice.Type=="rinShame") { ResolveRinShame(command); return; }
             // Your Clan Needs You! (issue #295): the recruiting player chooses which province to place
             // the recruited Personality back into, once this battle ends.
             if (_state.PendingChoice.Type=="yourClanNeedsYouProvince") { ResolveYourClanNeedsYouProvince(command); return; }
@@ -143,12 +227,25 @@ public sealed partial class MatchEngine
             // Before This Battle Resolves (issue #272): three tightly-scoped, mandatory choices, no
             // "useAbility"/pass alternative -- see PendingBeforeBattleResolve's own doc comment.
             if (_state.PendingChoice.Type=="beforeBattleOrder") { ResolveBeforeBattleOrder(command); return; }
+            if (_state.PendingChoice.Type=="beforeBattleOptional") { ResolveBeforeBattleOptional(command); return; }
+            if (_state.PendingChoice.Type=="beforeBattleReaction") { ResolveBeforeBattleReaction(command); return; }
+            // Battle Phase timing (issue #310, spec 4.2): "Engage:" actions and "After engaging" Reactions, open to
+            // either side; the top-level priority check above already enforces whose opportunity it is, and two
+            // passes in succession close the window (PassReaction -> CloseEngageWindow decides who acts first).
+            if (_state.PendingChoice.Type=="engageReaction")
+            {
+                Require(command.Type is "useAbility" or "declineReaction" or "pass","Resolve the Engage window first: play an Engage action or Reaction, or pass.");
+                if (command.Type=="useAbility") UseAbility(command); else PassReaction();
+                return;
+            }
             if (_state.PendingChoice.Type=="encircledOrder") { ResolveEncircledOrder(command); return; }
             if (_state.PendingChoice.Type=="encircledSelect") { ResolveEncircledSelect(command); return; }
             if (_state.PendingChoice.Type=="brashDraw") { ResolveBrashDraw(command); return; }
             if (_state.PendingChoice.Type=="overconfidentDraw") { ResolveOverconfidentDraw(command); return; }
             if (_state.PendingChoice.Type=="harshChoices") { ResolveHarshChoices(command); return; }
-            if (_state.PendingChoice.Type=="timesOfStrifeDiscard") { ResolveTimesOfStrifeDiscard(command); return; }
+            if (_state.PendingChoice.Type=="forcedDiscard") { ResolveForcedDiscard(command); return; }
+            // A conditional effect choice (issue #337, Mirumoto Yumaru): the acting player picks one of the options the engine listed.
+            if (_state.PendingChoice.Type=="effectChoice") { ResolveEffectChoice(command); return; }
             if (_state.PendingChoice.Type=="proclaim")
             {
                 // "useAbility" here resolves the entering card's own entering-play Reaction (if it
@@ -157,7 +254,7 @@ public sealed partial class MatchEngine
                 // clearing PendingChoice), so Proclaim can still follow, in either order, until passed.
                 Require(command.Type is "proclaim" or "useAbility" or "declineReaction" or "pass","Resolve the Proclaim reaction window first.");
                 if (command.Type=="proclaim") Proclaim(command);
-                else if (command.Type=="useAbility") UseAbility(command);
+                else if (command.Type=="useAbility") { ApplyPendingEntryEffects(); UseAbility(command); }
                 else PassReaction();
                 return;
             }
@@ -200,7 +297,11 @@ public sealed partial class MatchEngine
                 // priority check already enforces whose turn it is to act or pass.
                 Require(command.Type is "useAbility" or "declineReaction" or "pass","Resolve the pending attack first.");
                 if (command.Type=="useAbility") UseAbility(command); else PassReaction();
-                if (_state.PendingChoice is null && _state.PendingAttack is not null) ResolveAttack();
+                if (_state.PendingChoice is null && _state.PendingAttack is { } closing)
+                {
+                    if (closing.Command is not null && OpenForcedDiscardForTargetedTrait(closing.Command, "attack")) return;
+                    ResolveAttack();
+                }
                 return;
             }
             if (_state.PendingChoice.Type=="additionalActionReaction")
@@ -215,26 +316,34 @@ public sealed partial class MatchEngine
                 if (_state.PendingChoice is null && _state.PendingAdditionalAction is not null)
                 {
                     var pending=_state.PendingAdditionalAction; _state.PendingAdditionalAction=null;
-                    ExecuteAbilityEffects(pending,consumedGrant:true);
+                    // Negated (Effortless Counterattack): it is taken and pays its costs, only its effects are lost, and the burst it was part of goes on --
+                    // the next additional action is the holder's to take (ResolveNegatedAction, consumedGrant).
+                    var negated=_state.DeferredActionNegated; _state.DeferredActionNegated=false;
+                    if(negated) ResolveNegatedAction(pending,consumedGrant:true); else ExecuteAbilityEffects(pending,consumedGrant:true);
                 }
                 return;
             }
             if (_state.PendingChoice.Type=="beforeActionReaction")
             {
-                // Mirumoto Rokai / Tamori Tamoko (issue #207 follow-up): scoped to the one specific
-                // watching card by id, same shape as bowReaction/duelWonReaction above -- only that
-                // card's own controller may use it, or either side may pass to close the window.
+                // Rokai / Tamoko / Champion of Thunder / Brothers of Goemon / Akodo Kakihara (issues #207,
+                // #278, #305, #318): an alternating window open to EITHER player -- the active player has the
+                // first opportunity when they hold a reaction, then the other player, alternating (a reaction
+                // played resets the pass count and flips priority, exactly like attackReaction above; a pass
+                // flips it too) until both pass consecutively. Any number of applicable reactions may be
+                // played, each re-checked live by ValidateAbility (BeforeActionReactionApplies) and limited
+                // by its own once-per-turn UsageKey. Only when the window closes does the deferred command
+                // actually resolve.
                 Require(command.Type is "useAbility" or "declineReaction" or "pass","Resolve the pending reaction first.");
                 if (command.Type=="useAbility") UseAbility(command); else PassReaction();
                 if (_state.PendingChoice is null && _state.PendingNegatableAbility is not null)
                 {
+                    // A multi-target action's next target with a possible reactor gets its own window (TargetWindows.cs); a negated action needs no more.
+                    if (!_state.DeferredActionNegated && OpenNextRemainingTargetWindow()) return;
+                    _state.ReactionWindowTargetId=null; _state.ReactionWindowRemaining=[];
                     var pending=_state.PendingNegatableAbility; _state.PendingNegatableAbility=null;
-                    ExecuteAbilityEffects(pending);
-                    // Defensive: a negation signal must never survive past the one re-invocation it
-                    // was set for -- if the re-invoked ability did not actually reach a matching
-                    // MoveHome/Straighten/DestroyUnits call (a classification mismatch), clear it here
-                    // rather than risk it leaking into a later, unrelated one.
-                    _state.NegatedEffectKind=null; _state.NegatedEffectCardId=null;
+                    // A redirect may have made a Bofana the target of an action his trait was not yet judged for (issue #335).
+                    if(OpenForcedDiscardForTargetedTrait(pending,"action")) return;
+                    ResolveDeferredActionInItsWindow(pending);
                 }
                 return;
             }
@@ -249,8 +358,12 @@ public sealed partial class MatchEngine
                 if (_state.PendingChoice is null && _state.PendingOutOfPlayActionReaction is not null)
                 {
                     var pending=_state.PendingOutOfPlayActionReaction; _state.PendingOutOfPlayActionReaction=null;
+                    var reduction=_state.HonorLossReductionPlayerId;
+                    var outer=ContinueSuspendedReaction(pending);
+                    _state.HonorLossReductionPlayerId=reduction; var suspended=_state.SuspendedWindows.Count;
                     ExecuteAbilityEffects(pending);
-                    _state.HonorLossReductionPlayerId=null;
+                    if(_state.SuspendedWindows.Count>suspended) _state.SuspendedWindows[^1].HonorLossReductionPlayerId=outer?.HonorLossReductionPlayerId;
+                    else _state.HonorLossReductionPlayerId=outer?.HonorLossReductionPlayerId;
                 }
                 return;
             }
@@ -262,6 +375,14 @@ public sealed partial class MatchEngine
                 Require(command.Type is "useAbility" or "declineReaction" or "pass","Resolve the duel reaction window first.");
                 if (command.Type=="useAbility") UseAbility(command); else PassReaction();
                 if (_state.PendingChoice is null && _state.PendingDuel is { Stage:"Reaction" }) BeginFocusing();
+                return;
+            }
+            if (_state.PendingChoice.Type=="battleRecruit")
+            {
+                // After a battle resolved (issue #379): the players holding a Ring's recruit grant of this battle may put it into play (a
+                // Battle-timed useAbility, spending the grant) or pass; two consecutive passes close the window (PassReaction).
+                Require(command.Type is "useAbility" or "declineReaction" or "pass","Put a Ring into play or pass.");
+                if (command.Type=="useAbility") UseAbility(command); else PassReaction();
                 return;
             }
             if (_state.PendingChoice.Type=="duelWonReaction")
@@ -301,6 +422,20 @@ public sealed partial class MatchEngine
             return;
         }
         if (_state.PendingDuel is not null) { ResolveDuelCommand(command); return; }
+        // Unfortunate Hesitation (issue #338): a player who owes a pass at an ordinary Action/Battle opportunity may only pass.
+        EnforceForcedPass(command);
+        // Battle Phase timing (issue #310): a limit on the first-action holder's FIRST Battle action (Naval
+        // Invasion's "which he must perform"; Rebuilding Kyuden Hida's "may not announce a Battle action before the
+        // Defender's first normal opportunity"). Consumed by the holder's next accepted command; a useAbility's
+        // own check lives in ValidateAbility (so QueryActions already withholds what would be rejected), the two
+        // performer-less Battle actions are barred here. A rejected command reverts this clearing with everything else.
+        // A Battle-phase equip (a granted timing, TimingGrants.cs) is a Battle action too, barred like the performer-less ones.
+        if (_state.FirstActionRestriction is { } firstActionLimit && command.PlayerId==firstActionLimit.PlayerId && (command.Type is "pass" or "useAbility" or "playStrategy" or "recruitReserve" || command.Type=="equip" && _state.Phase==Phase.Battle))
+        {
+            if (command.Type is "playStrategy" or "recruitReserve" or "equip") throw new RuleViolation(FirstActionLimitMessage(firstActionLimit));
+            if (command.Type=="useAbility") CheckFirstActionRestriction(command);
+            _state.FirstActionRestriction=null;
+        }
         switch(command.Type)
         {
             case "pass": Pass(); break;
@@ -308,7 +443,8 @@ public sealed partial class MatchEngine
             case "overlay": Overlay(command); break;
             case "discardProvince": DiscardProvince(command); break;
             case "endDynasty": Require(_state.Phase is Phase.Dynasty or Phase.DynastyDiscard,"Not in the Dynasty Phase."); EndTurn(); break;
-            case "attack": DeclareAttack(command); break;
+            case "declareAttack": DeclareAttackPhase(command); break;
+            case "attack": AssignAttackers(command); break;
             case "assignDefense": AssignDefense(command); break;
             case "selectBattle": SelectBattle(command); break;
             case "equip": Equip(command); break;
@@ -332,20 +468,7 @@ public sealed partial class MatchEngine
     // priority once the window fully closes (both sides passed) -- see PassReaction.
     private bool OpenEntryReactionWindow(int playerId, CardInstance card, int? closesTo = null)
     {
-        // Destined keyword (core rules): a mandatory Fate-deck draw every time a card carrying it
-        // enters play -- unconditional, not an opt-in Reaction, so it fires here unconditionally
-        // rather than through the Reaction window below. Every entry point (Purchase, Equip, a played
-        // Terrain, equip-battle's Spell attach) already funnels through this one shared function.
-        if(Keyword(card,"Destined")) Draw(Player(playerId));
-        // "After this card enters play, lose X Honor" with no printed "Reaction:" prefix (issue
-        // #210) -- mandatory, same convention as Destined's own draw above, never an optional choice.
-        if(Definition(card).EntryHonorLoss is int loss) GainHonor(playerId,-loss,$"{Definition(card).Name} entering play",card);
-        // Sensei keyword (Mirumoto Hikaro / Mirumoto Yozo, Experienced 2): "After [this card] enters
-        // play: Discard all your other Sensei Personalities" -- a trait (no Action:/Reaction: label),
-        // so mandatory and unconditional, same convention as the two lines above; fires from any
-        // entry path (Purchase, Equip, RecruitReserve, an Experienced overlay were one to exist), not
-        // just Purchase.
-        if(Definition(card).Effect=="discard-other-sensei") DiscardOtherSensei(playerId,card);
+        ApplyMandatoryEntryEffects(playerId, card);
         var reactionId = EntryReactionAbility(card);
         // Singh Remnants' shape: a DIFFERENT card (in hand or a discard pile) watching for this entry,
         // not the entering card's own reaction -- only relevant when a Personality is what entered.
@@ -361,6 +484,33 @@ public sealed partial class MatchEngine
         _state.ConsecutivePasses = 0;
         Emit("reactionWindow", "Entry reaction window opened.", playerId, card.Id);
         return true;
+    }
+    // The mandatory, unconditional half of "a card enters play" (never an opt-in Reaction): Destined's
+    // draw, an EntryHonorLoss, Sensei's discard. Split out of OpenEntryReactionWindow (issue #299) so a
+    // card created from INSIDE another card's own already-open entry Reaction window (Kitsune Ohsuki's/
+    // Tokoru's created token -- CreatePersonality's duringEntryReaction) still gets these without
+    // opening a second window on top of, and thereby clobbering, the first.
+    private void ApplyMandatoryEntryEffects(int playerId, CardInstance card)
+    {
+        // Destined keyword (core rules): a mandatory Fate-deck draw every time a card carrying it
+        // enters play -- unconditional, not an opt-in Reaction, so it fires here unconditionally
+        // rather than through any Reaction window. Every entry point (Purchase, Equip, a played
+        // Terrain, equip-battle's Spell attach) already funnels through OpenEntryReactionWindow, which
+        // calls this first; CreatePersonality's nested mode calls it directly.
+        if(Keyword(card,"Destined")) Draw(Player(playerId));
+        // "After this card enters play, lose X Honor" with no printed "Reaction:" prefix (issue
+        // #210) -- mandatory, same convention as Destined's own draw above, never an optional choice.
+        if(Definition(card).EntryHonorLoss is int loss) GainHonor(playerId,-loss,$"{Definition(card).Name} entering play",card);
+        // Sensei keyword (Mirumoto Hikaro / Mirumoto Yozo, Experienced 2): "After [this card] enters
+        // play: Discard all your other Sensei Personalities" -- a trait (no Action:/Reaction: label),
+        // so mandatory and unconditional, same convention as the two lines above; fires from any
+        // entry path (Purchase, Equip, RecruitReserve, an Experienced overlay were one to exist), not
+        // just Purchase.
+        if(Definition(card).Effect=="discard-other-sensei") DiscardOtherSensei(playerId,card);
+        // Daigotsu Bofana - exp (issue #333): "...all other players must discard a card, or two cards if they are Crab Clan" -- the
+        // Honor loss is his EntryHonorLoss above; each other player then owes their discards (queued, so a Proclaim or entry window
+        // already open is never overwritten -- see OpenOverconfidentDrawWindow).
+        if(Definition(card).Effect==BofanaEntryDiscardEffect) QueueOtherPlayersEntryDiscards(playerId);
     }
     // Sensei (Mirumoto Hikaro / Mirumoto Yozo, Experienced 2): "your OTHER Sensei Personalities" --
     // every OTHER Sensei-keyword Personality this same controller has, either unbowed-or-bowed in
@@ -409,6 +559,7 @@ public sealed partial class MatchEngine
         var reactionId=EntryReactionAbility(card);
         if (quote.ProclaimEligible)
         {
+            _state.PendingEntryEffectsCardId=card.Id;
             if(reactionId is not null) card.AbilityUses.Remove(reactionId);
             _state.PendingChoice=new("proclaim",command.PlayerId,card.Id,"After entry: Proclaim for Honor"+(reactionId is not null?", use this card's own reaction,":"")+" or pass. Each may be used once.");
             _state.ConsecutivePasses=0;
@@ -431,14 +582,79 @@ public sealed partial class MatchEngine
     // same shape low-market-equip/equip-battle already use. Only a Personality is implemented; a
     // created Holding/Region/Attachment is recorded as accepted future scope, not built until a
     // real card needs it (see docs/decisions).
-    private bool CreatePersonality(int ownerId, string definitionId)
+    // duringEntryReaction (issue #299, Kitsune Ohsuki/Tokoru): the created card is being made by a
+    // Reaction used INSIDE another card's own already-open "entryReaction"/"proclaim" window (the
+    // creator's own "After X enters play: Create ..."). Opening a second window here would overwrite
+    // that one's PendingChoice (silently dropping, e.g., the creator's own still-unused Proclaim), and
+    // PendingChoice has no stack -- so only the mandatory half of entering play (Destined/EntryHonorLoss/
+    // Sensei) is applied, Overconfident is still queued (the outer window's own eventual close drains
+    // it, PassReaction), and this returns false so the calling Reaction falls through to its ordinary
+    // "priority flips, window stays open" tail. The one thing not offered is a reaction TO the created
+    // card's own entry (Singh Remnants-style watchers) -- a documented limit, since neither published
+    // token has an entering-play Reaction of its own and no watcher is known to matter here.
+    private bool CreatePersonality(int ownerId, CardDefinition definition, bool duringEntryReaction = false)
     {
-        var definition=CardCatalog.Get(definitionId);
-        var card=new CardInstance{Id=$"created-{++_state.CreatedCardSequence:D4}",DefinitionId=definitionId,OwnerId=ownerId,Zone=Zone.Home,FaceUp=true};
+        var card=new CardInstance{Id=$"created-{++_state.CreatedCardSequence:D4}",DefinitionId=definition.Id,OwnerId=ownerId,Zone=Zone.Home,FaceUp=true};
         _state.Cards.Add(card.Id,card);
         Emit("cardCreated",$"{Player(ownerId).Name} created {definition.Name}.",ownerId,card.Id);
         QueueOverconfidentDraw(card);
+        if(duringEntryReaction) { ApplyMandatoryEntryEffects(ownerId,card); return false; }
         return OpenEntryReactionWindow(ownerId,card) || OpenOverconfidentDrawWindow(ownerId);
+    }
+
+    // The shared "bring a face-up province Personality into play, paying all costs" entry sequence
+    // (issue #301): Purchase and RecruitReserve above each inline their own copy (they are commands with
+    // their own priority rules); Your Clan Needs You! (issue #295, into the CURRENT BATTLEFIELD) and
+    // Shinden Shorai (issue #301, into HOME) are the two ABILITY callers and share this one body --
+    // leave the province (the recruit's cost was already charged by ExecuteAbilityEffects' single
+    // PayForAbility, issue #303, from the ability's GoldCostRule), enter play (bowed/dishonored only if the card's own Effect says so),
+    // queue Overconfident, refill the province, then open Proclaim / the entering card's own Reaction /
+    // the Overconfident draw. battlefield names the province index to enter at (null: Home, Purchase's
+    // own destination). Returns true exactly when a window was opened, so the calling execution case
+    // knows to `return` (leaving the action pending) rather than fall through to its own tail.
+    // proclaimResumesTo: who regains priority once an opened Proclaim window fully closes (null: the
+    // active player, Purchase's own convention; Shinden Shorai, a Limited ACTION, cedes to the opponent
+    // like every other Action-phase action).
+    private bool BringProvincePersonalityIntoPlay(PlayerState player,CardInstance card,PurchaseQuote quote,int? battlefield,string via,int? proclaimResumesTo=null)
+    {
+        var province=player.Provinces.Single(p=>p.CardId==card.Id);
+        province.CardId=null;
+        EnterPlayFromRecruit(player,card,battlefield,via);
+        Refill(player,province);
+        return OpenRecruitEntryWindows(player,card,quote.ProclaimEligible,proclaimResumesTo);
+    }
+
+    // At Any Cost (issue #373): a dead Personality is recruited as a fresh card, into play at the battlefield the action was played at (Mendon), through the same
+    // entry sequence as a province recruit. It may not be proclaimed, so its quote is never Proclaim-eligible. Returns true exactly when a window was opened.
+    private bool BringDeadPersonalityIntoPlay(PlayerState player,CardInstance card,string via,int battlefield)
+    {
+        ResetCardState(card);
+        EnterPlayFromRecruit(player,card,battlefield,via);
+        return OpenRecruitEntryWindows(player,card,false,null);
+    }
+
+    private void EnterPlayFromRecruit(PlayerState player,CardInstance card,int? battlefield,string via)
+    {
+        card.Zone=battlefield is null?Zone.Home:Zone.Battlefield; card.ProvinceIndex=battlefield; card.FaceUp=true;
+        card.Bowed=Definition(card).Effect=="enters-bowed";
+        if(Definition(card).Effect=="enters-dishonored") Dishonor(card);
+        Emit("cardEnteredPlay",$"{player.Name} brought {Definition(card).Name} into play via {via}{(card.Bowed?" bowed":"")}.",player.Id,card.Id);
+        QueueOverconfidentDraw(card);
+    }
+
+    private bool OpenRecruitEntryWindows(PlayerState player,CardInstance card,bool proclaimEligible,int? proclaimResumesTo)
+    {
+        var reactionId=EntryReactionAbility(card);
+        if(proclaimEligible)
+        {
+            _state.PendingEntryEffectsCardId=card.Id;
+            if(reactionId is not null) card.AbilityUses.Remove(reactionId);
+            _state.PendingChoice=new("proclaim",player.Id,card.Id,"After entry: Proclaim for Honor"+(reactionId is not null?", use this card's own reaction,":"")+" or pass. Each may be used once.",proclaimResumesTo);
+            _state.ConsecutivePasses=0;
+            Emit("reactionWindow","Proclaim reaction window opened.",player.Id,card.Id);
+            return true;
+        }
+        return OpenEntryReactionWindow(player.Id,card,1-player.Id) || OpenOverconfidentDrawWindow(1-player.Id);
     }
 
     /// <summary>Checks the special free recruitment of a higher-Experienced Personality over a
@@ -504,9 +720,11 @@ public sealed partial class MatchEngine
 
         higher.Modifiers.AddRange(lower.Modifiers);
         higher.GrantedKeywords.AddRange(lower.GrantedKeywords);
+        higher.GrantedAbilities.AddRange(lower.GrantedAbilities);
         higher.RemovedKeywords.AddRange(lower.RemovedKeywords.Where(k => !higher.RemovedKeywords.Contains(k, StringComparer.Ordinal)));
         higher.RemovedClanAffiliations.AddRange(lower.RemovedClanAffiliations.Where(c => !higher.RemovedClanAffiliations.Contains(c, StringComparer.Ordinal)));
         higher.Protections.AddRange(lower.Protections);
+        higher.ActionLocks.AddRange(lower.ActionLocks);
         higher.Tokens.AddRange(lower.Tokens);
         foreach (var use in lower.AbilityUses)
             if (!higher.AbilityUses.TryGetValue(use.Key, out var current) || use.Value > current) higher.AbilityUses[use.Key] = use.Value;
@@ -530,17 +748,25 @@ public sealed partial class MatchEngine
 
         // The transferred state belongs only to the replacement. Clearing the terminal card avoids
         // retaining a second, stale copy in Removed from Game.
-        lower.Modifiers.Clear();
-        lower.GrantedKeywords.Clear();
-        lower.RemovedKeywords.Clear();
-        lower.RemovedClanAffiliations.Clear();
-        lower.Protections.Clear();
-        lower.Tokens.Clear();
-        lower.AbilityUses.Clear();
-        lower.Bowed = false;
-        lower.Dishonorable = false;
-        lower.StraightenBlockedTurn = -1;
-        lower.AssignedToAttackTurn = -1;
+        ResetCardState(lower);
+    }
+
+    // A card that will enter play again (a dead Personality recruited, issue #373) is a new object: nothing of its earlier life follows it.
+    private static void ResetCardState(CardInstance card)
+    {
+        card.Modifiers.Clear();
+        card.GrantedKeywords.Clear();
+        card.GrantedAbilities.Clear();
+        card.RemovedKeywords.Clear();
+        card.RemovedClanAffiliations.Clear();
+        card.Protections.Clear();
+        card.ActionLocks.Clear();
+        card.Tokens.Clear();
+        card.AbilityUses.Clear();
+        card.Bowed = false;
+        card.Dishonorable = false;
+        card.StraightenBlockedTurn = -1;
+        card.AssignedToAttackTurn = -1;
     }
 
     // Reserve (core rules, issue #184): a Dynasty Personality with this keyword may be recruited as an
@@ -578,6 +804,7 @@ public sealed partial class MatchEngine
         var reactionId=EntryReactionAbility(card);
         if (quote.ProclaimEligible)
         {
+            _state.PendingEntryEffectsCardId=card.Id;
             if(reactionId is not null) card.AbilityUses.Remove(reactionId);
             _state.PendingChoice=new("proclaim",command.PlayerId,card.Id,"After entry: Proclaim for Honor"+(reactionId is not null?", use this card's own reaction,":"")+" or pass. Each may be used once.");
             _state.ConsecutivePasses=0;
@@ -587,29 +814,37 @@ public sealed partial class MatchEngine
         else if(OpenOverconfidentDrawWindow(1-command.PlayerId)) return;
         // An ordinary action (never itself an Additional Action) forfeits any of this player's own
         // still-unused grants, same rule as ExecuteAbilityEffects' own tail and MatchEngine.Pass.
-        _state.AdditionalActions.RemoveAll(g=>g.PlayerId==command.PlayerId);
+        _state.AdditionalActions.RemoveAll(g=>g.PlayerId==command.PlayerId && Forfeitable(g));
         NextAction(command.PlayerId);
     }
 
     private void OrderSeppuku(GameCommand command)
     {
-        Require(_state.Phase==Phase.Action,"Order Seppuku is only available during the Action Phase.");
+        // Issue #368 (Mendon): Order Seppuku is an Open action taken as an action at the player's own turn to act in the Action Phase, with
+        // nothing pending -- it never interrupts another player's action, the current action, a reaction window or any pending decision.
+        // ONE predicate decides that moment for the command, the offered actions and the AI (SeppukuTiming.cs).
+        var timing=SeppukuTimingReason(command.PlayerId);
+        Require(timing is null,timing ?? "");
+        // Unfortunate Hesitation (issue #351, Mendon): Order Seppuku is an Open action, so a player who owes a pass may not take it either.
+        Require(!OwesForcedPass(command.PlayerId),ForcedPassReason);
         var card=Card(command.CardId);
         Require(card.OwnerId==command.PlayerId,"You may only order Seppuku for your own Personality.");
         Require(InPlay(card) && Definition(card).Type==CardType.Personality,"Choose your Personality in play.");
         Require(card.Dishonorable,"Only a Dishonorable Personality may perform Seppuku.");
+        // "May not perform actions" (issue #336, Mendon: even innate actions): Order Seppuku is the one action a Personality has of its own.
+        Require(!ActionLocked(card),$"{Definition(card).Name} may not perform actions this turn.");
         Require(Keyword(card,"Samurai") || Keyword(card,"Courtier") || Keyword(card,"Shugenja"),"Only a Samurai, Courtier, or Shugenja may perform Seppuku.");
         // Honorable before destruction: this is what spares the controller the dishonorable-death
         // Honor penalty applied generally in MarkDead.
         Rehonor(card);
-        // Seppuku is an Open action, cutting through the normal priority gate (see Apply()) -- it
-        // never touches priority on its own, so an Overconfident window it triggers (issue #223,
-        // MarkDead already queued it inside DestroyUnits below) must resume back to whoever already
-        // held it, not to either specific player.
-        var resumeTo=_state.PriorityPlayerId;
+        // Seppuku is an action like any other (issue #368): once it has resolved, the opportunity passes to the other player. An
+        // Overconfident window it triggers (issue #223, MarkDead already queued it inside DestroyUnits below) closes to that player.
         DestroyUnits([card],actingPlayerId:command.PlayerId);
         Emit("seppuku",$"{Definition(card).Name} performed Seppuku, dying honorably.",command.PlayerId,card.Id);
-        OpenOverconfidentDrawWindow(resumeTo);
+        if(OpenOverconfidentDrawWindow(1-command.PlayerId)) return;
+        // An ordinary action forfeits the player's own still-unused Additional Action grants, same as every other action's tail.
+        _state.AdditionalActions.RemoveAll(g=>g.PlayerId==command.PlayerId && Forfeitable(g));
+        NextAction(command.PlayerId);
     }
 
     // viaReserve (issue #216, Tamori Shinji): true only for a Reserve recruit made as an absent
@@ -618,38 +853,68 @@ public sealed partial class MatchEngine
     // OWN province's card, and doing so requires the enemy already has presence there, i.e. they are
     // attacking YOUR province), so no separate "are you the Defender" check is needed. An ordinary
     // Dynasty-phase Purchase of the same card never qualifies.
-    public PurchaseQuote QuotePurchase(int playerId,string cardId,bool clanDiscount=false,bool clanAllegiance=false,bool viaReserve=false)
+    // ignoreHonorRequirementIfPersonalityClan (issue #301, Shinden Shorai): "You may ignore the
+    // Personality's Honor Requirement if he is Lion Clan" -- a waiver supplied by the RECRUITING ACTION
+    // and keyed on the RECRUITED Personality's own Clan alignment, the opposite axis from
+    // CardDefinition.HonorRequirementWaiverClan (a waiver printed on the Personality itself and keyed on
+    // the recruiting PLAYER's Clan). Never set by an ordinary Purchase/Reserve recruit.
+    // fromDeadPile (issue #373, At Any Cost): recruiting one of the player's own dead Personalities. Only where the card is differs: every restriction below,
+    // the price with all its discounts, and Unique/Singular apply as for a province card -- except that such a Personality may not be proclaimed.
+    public PurchaseQuote QuotePurchase(int playerId,string cardId,bool clanDiscount=false,bool clanAllegiance=false,bool viaReserve=false,string? ignoreHonorRequirementIfPersonalityClan=null,bool fromDeadPile=false)
     {
         if (playerId is <0 or >1 || !_state.Cards.TryGetValue(cardId,out var card)) return new(cardId,0,clanDiscount,clanAllegiance,false,"Unknown card or player.",[]);
         var def=Definition(card); var player=Player(playerId);
-        if(card.OwnerId!=playerId || card.Zone!=Zone.Province || !card.FaceUp)
-            return new(cardId,0,clanDiscount,clanAllegiance,false,"Choose your face-up province card.",[]);
+        if(fromDeadPile ? card.OwnerId!=playerId || card.Zone!=Zone.Dead : card.OwnerId!=playerId || card.Zone!=Zone.Province || !card.FaceUp)
+            return new(cardId,0,clanDiscount,clanAllegiance,false,fromDeadPile?"Choose one of your own dead Personalities.":"Choose your face-up province card.",[]);
         string? error=null;
         var inClan=def.Type==CardType.Personality && ClanAlignments(card).Contains(player.Clan);
-        if(card.OwnerId!=playerId || card.Zone!=Zone.Province || !card.FaceUp) error="Choose your face-up province card.";
-        else if(def.Type is not (CardType.Personality or CardType.Holding)) error="This card cannot be purchased.";
+        if(fromDeadPile ? def.Type!=CardType.Personality : def.Type is not (CardType.Personality or CardType.Holding)) error=fromDeadPile?"Only a Personality can be recruited from the dead pile.":"This card cannot be purchased.";
         // Loyal (core rules Glossary): a Personality with one or more Clan affiliations may only be
         // controlled by a matching Clan. With none remaining it is Unaligned, so Loyal imposes no
         // Clan restriction, including for a player whose Stronghold represents no Clan.
         else if(def.Type==CardType.Personality && !LoyaltyAllowsControl(card,player.Clan)) error="Loyal Personalities can only be recruited by a Clan they are aligned with.";
         else if((clanDiscount||clanAllegiance)&&!inClan) error="Clan discount and allegiance require your Clan's Personality.";
-        else if(def.Type==CardType.Personality && def.HonorRequirement is int requirement && player.Honor<requirement && !clanAllegiance) error="Family Honor is below the Honor Requirement; Clan allegiance may allow purchase.";
-        var cost=Math.Max(0,def.GoldCost-(def.Effect=="prosperous-discount"?_state.Cards.Values.Count(c=>c.OwnerId==playerId && InPlay(c) && Definition(c).Type==CardType.Personality):0)
-            -(viaReserve && def.Effect=="reserve-defender-discount"?4:0)+(clanAllegiance?2:0)-(clanDiscount?2:0));
+        // Akodo Chiyo / Kitsu Ririko (issue #299): a Personality's own printed "Clan X players may ignore
+        // / it enters play ignoring Honor Requirement" waiver (CardDefinition.HonorRequirementWaiverClan),
+        // keyed on the RECRUITING player's own Clan -- this is the single check every entry path that
+        // spends a recruit quote (Purchase, RecruitReserve, Your Clan Needs You!) already funnels through.
+        else if(def.Type==CardType.Personality && def.HonorRequirement is int requirement && player.Honor<requirement && !clanAllegiance && !HonorRequirementWaived(def,player)
+            && !(ignoreHonorRequirementIfPersonalityClan is string waivedClan && HasClanAffiliation(card,waivedClan))) error="Family Honor is below the Honor Requirement; Clan allegiance may allow purchase.";
+        var prosperous=def.Effect=="prosperous-discount"?_state.Cards.Values.Count(c=>c.OwnerId==playerId && InPlay(c) && Definition(c).Type==CardType.Personality):0;
+        var reserveDiscount=viaReserve && def.Effect=="reserve-defender-discount"?4:0;
+        // "Enters play paying N less Gold if you are a <Clan> Clan player" (issue #336, Daigotsu Hotako exp3): a printed term of the card that
+        // stacks with the two Clan choices above; the same one ClanEntryDiscount gives Equip.
+        var entryDiscount=ClanEntryDiscount(def,player);
+        var rawCost=def.GoldCost-prosperous-reserveDiscount-(entryDiscount?.Amount??0)+(clanAllegiance?2:0)-(clanDiscount?2:0);
+        var cost=Math.Max(0,rawCost);
+        // The human-readable derivation the payment panel shows (issue #303), term by term.
+        var basis=$"{def.Name} cost {def.GoldCost}"+(prosperous>0?$" − {prosperous} (controlled Personalities)":"")+(reserveDiscount>0?$" − {reserveDiscount} (Reserve while defending)":"")
+            +(entryDiscount is {} entry?$" − {entry.Amount} ({entry.Clan} Clan)":"")
+            +(clanAllegiance?" + 2 (Clan allegiance)":"")+(clanDiscount?" − 2 (Clan discount)":"")+(rawCost<0?" (min 0)":"");
         if ((Keyword(card,"Unique") || Keyword(card,"Singular")) && ControlsCopyOf(playerId,def.Name)) error=$"You already control this {(Keyword(card,"Unique") ? "Unique" : "Singular")} card.";
-        var eligible=error is null && inClan && !clanDiscount && playerId==_state.ActivePlayerId && player.ProclaimUsedTurn!=_state.TurnNumber;
-        return new(cardId,cost,clanDiscount,clanAllegiance,eligible,error,error is null ? PaymentOptions(playerId,cost) : []);
+        var eligible=error is null && inClan && !clanDiscount && !fromDeadPile && playerId==_state.ActivePlayerId && player.ProclaimUsedTurn!=_state.TurnNumber;
+        return new(cardId,cost,clanDiscount,clanAllegiance,eligible,error,error is null ? PaymentOptions(playerId,cost) : [],basis);
     }
+
+    // True when the card's own printed waiver names the recruiting player's own Clan (see
+    // CardDefinition.HonorRequirementWaiverClan). An empty/unset field never waives anything.
+    private static bool HonorRequirementWaived(CardDefinition def,PlayerState player) =>
+        def.HonorRequirementWaiverClan is string clan && string.Equals(clan,player.Clan,StringComparison.Ordinal);
 
     public int GoldProduced(string cardId,int playerId)
     {
         var card=Card(cardId); var def=Definition(card);
+        // A card with no printed production that can bow to produce Gold for a payment (Yoritomo Sakuma, issue #338) produces that much.
+        if(def.GoldProduction==0 && AlternateGoldSource(card) is { } alternate) return alternate.Amount;
         return def.GoldProduction+(def.Effect=="crane-gold" && Player(playerId).Clan=="Crane" || def.Effect=="dragon-gold" && Player(playerId).Clan=="Dragon"?1:0);
     }
 
-    public PaymentOption[] PaymentOptions(int playerId,int cost)
+    public PaymentOption[] PaymentOptions(int playerId,int cost)=>PaymentOptionsExcluding(playerId,cost,null);
+    // The same suggestion search over the producers NOT in `exclude` -- the second half of a two-part payment (a Discipline play from a
+    // discard pile pays the Discipline cost first, then the action's own cost from other sources; see SplitPaymentOptions).
+    private PaymentOption[] PaymentOptionsExcluding(int playerId,int cost,IReadOnlySet<string>? exclude)
     {
-        var sources=Producers(playerId).OrderBy(c=>c.Id,StringComparer.Ordinal).ToArray();
+        var sources=Producers(playerId).Where(c=>exclude is null || !exclude.Contains(c.Id)).OrderBy(c=>c.Id,StringComparer.Ordinal).ToArray();
         if(cost==0) return [new([],0,0,0)];
         // Dynamic programming keeps useful alternatives without exponential work for large economies.
         var byTotal=new Dictionary<int,List<string[]>> { [0]=[[]] };
@@ -666,10 +931,12 @@ public sealed partial class MatchEngine
             }
         }
         return byTotal.Where(p=>p.Key>=cost).SelectMany(p=>p.Value.Select(ids=>new PaymentOption(ids,p.Key,cost,p.Key-cost)))
-            .OrderBy(p=>p.Excess).ThenBy(p=>p.SourceIds.Length).ThenBy(p=>string.Join(",",p.SourceIds),StringComparer.Ordinal).Take(24).ToArray();
+            // A payment that bows no alternate source (a Personality that can bow for Gold, issue #338) is always preferred to one that does:
+            // the engine never suggests bowing Sakuma when printed producers cover the cost. With no such card in play every count is 0.
+            .OrderBy(p=>p.SourceIds.Count(id=>Definition(Card(id)).GoldProduction==0)).ThenBy(p=>p.Excess).ThenBy(p=>p.SourceIds.Length).ThenBy(p=>string.Join(",",p.SourceIds),StringComparer.Ordinal).Take(24).ToArray();
     }
 
-    private IEnumerable<CardInstance> Producers(int playerId) => _state.Cards.Values.Where(c=>c.OwnerId==playerId && !c.Bowed && c.Zone is Zone.Home or Zone.Stronghold or Zone.Battlefield && Definition(c).GoldProduction>0);
+    private IEnumerable<CardInstance> Producers(int playerId) => _state.Cards.Values.Where(c=>c.OwnerId==playerId && !c.Bowed && c.Zone is Zone.Home or Zone.Stronghold or Zone.Battlefield && (Definition(c).GoldProduction>0 || AlternateGoldSource(c) is not null));
     private void ValidatePayment(int playerId,int cost,string[]? sourceIds)
     {
         var ids=sourceIds??[];
@@ -680,13 +947,21 @@ public sealed partial class MatchEngine
         var produced=ids.Sum(id=>GoldProduced(id,playerId));
         Require(produced>=cost,$"This payment needs {cost} Gold; selected sources produce {produced}.");
     }
-    private void Pay(int playerId,CardInstance target,int cost,string[]? sourceIds)
+    private void Pay(int playerId,CardInstance target,int cost,string[]? sourceIds,string? part=null)
     {
         ValidatePayment(playerId,cost,sourceIds);
         var ids=sourceIds??[];
         var produced=ids.Sum(id=>GoldProduced(id,playerId));
+        // A card bowed for Gold through its own ability (Yoritomo Sakuma, issue #338) has used that Reaction: spent for the turn, and named
+        // in the log so the opponent sees why it bowed.
+        foreach(var id in ids)
+            if(Definition(_state.Cards[id]).GoldProduction==0 && AlternateGoldSource(_state.Cards[id]) is { } alternate)
+            {
+                _state.Cards[id].AbilityUses[AbilityCatalog.All[alternate.AbilityId].UsageKey ?? alternate.AbilityId]=_state.TurnNumber;
+                Emit("goldSourceUsed",$"{Definition(_state.Cards[id]).Name} bowed to produce {alternate.Amount} Gold.",playerId,id);
+            }
         foreach(var id in ids) _state.Cards[id].Bowed=true;
-        Emit("payment",$"{Player(playerId).Name} paid {cost} Gold for {Definition(target).Name}, producing {produced}; {produced-cost} excess was lost.",playerId,target.Id,produced-cost);
+        Emit("payment",$"{Player(playerId).Name} paid {cost} Gold for {Definition(target).Name}{(part is null?"":$" ({part})")}, producing {produced}; {produced-cost} excess was lost.",playerId,target.Id,produced-cost);
     }
 
     private void Proclaim(GameCommand command)
@@ -698,6 +973,7 @@ public sealed partial class MatchEngine
         var card=Card(pending.CardId);
         player.ProclaimUsedTurn=_state.TurnNumber;
         GainHonor(player.Id,Definition(card).PersonalHonor,"Proclaim");
+        ApplyPendingEntryEffects();
         _state.ConsecutivePasses=0;
         _state.PriorityPlayerId=1-command.PlayerId;
     }
@@ -710,12 +986,17 @@ public sealed partial class MatchEngine
         {
             _state.PendingChoice=null;
             _state.ConsecutivePasses=0;
+            if(pending.Type=="proclaim") ApplyPendingEntryEffects();
             Emit("reactionClosed","Both players passed; the reaction window closed.");
+            // The after-battle recruit window (issue #379): whatever was not used lapses with the battle, which then finishes.
+            if(pending.Type=="battleRecruit") { ExpireBattleRecruitGrants(); CompleteBattleTransition(pending.ActingPlayerId!.Value); return; }
             // Defaults to ActivePlayerId (Dynasty-phase purchasing and mid-Battle attacks never cede
             // priority away from the active player on their own); an entry-reaction window opened by
             // an Action-phase card (Equip, a played Terrain) instead sets ActingPlayerId to the
             // opponent, so the normal "any action cedes priority" rule still holds once it closes.
-            var resumeTo=pending.ActingPlayerId ?? _state.ActivePlayerId;
+            // The Engage window (issue #310) is the one window that decides WHO resumes: whoever holds the
+            // first opportunity once its claims resolve (the Defender by default).
+            var resumeTo=pending.Type=="engageReaction" ? CloseEngageWindow() : pending.ActingPlayerId ?? _state.ActivePlayerId;
             // Overconfident (issue #223): a chance to react to anything THIS window's own resolution
             // caused to enter or leave play (Bayushi Mugoshi entering during a Proclaim/entryReaction
             // window and being slandered elsewhere, a Reaction that destroyed something, etc.) before
@@ -724,6 +1005,16 @@ public sealed partial class MatchEngine
             _state.PriorityPlayerId=resumeTo;
         }
         else _state.PriorityPlayerId=1-_state.PriorityPlayerId;
+    }
+
+    // The deferred action, once its window has closed: negated as a whole (a reaction negated it: Yoritomo Sakuma, issue #338; Jinn-Kuen, issue #335) it is taken and
+    // its costs paid but its effects are not applied (ActionNegation.cs), otherwise it resolves. A negation signal must never survive the one re-invocation it was set
+    // for, so the per-card ones are cleared here.
+    private void ResolveDeferredAction(GameCommand pending)
+    {
+        var negated=_state.DeferredActionNegated; _state.DeferredActionNegated=false;
+        if(negated) ResolveNegatedAction(pending); else ExecuteAbilityEffects(pending);
+        _state.NegatedEffects.Clear();
     }
 
     private void Pass()
@@ -735,21 +1026,23 @@ public sealed partial class MatchEngine
                 if(++_state.ConsecutivePasses==2) SetPhase(Phase.AttackDeclaration,_state.ActivePlayerId);
                 else _state.PriorityPlayerId=1-_state.PriorityPlayerId;
                 break;
-            // Declining to assign any Infantry is not a decision to skip the whole Attack Phase --
-            // Cavalry Maneuvers is a separate step that must still get its own opportunity, exactly
-            // as an empty Cavalry declaration below only declines further Cavalry, not the Battle
-            // Phase that follows it.
-            case Phase.AttackDeclaration: DeclareAttack(new("attack",_state.PriorityPlayerId,_state.Version,Assignments:[])); break;
+            // The Declaration Segment: passing IS declining to attack, and a declined attack ends the Attack Phase
+            // right here -- no battlefield exists, so there are no Maneuvers segments and no defender prompts.
+            case Phase.AttackDeclaration: DeclineAttackPhase(); break;
+            // Assigning no Infantry is not declining the attack: it was already declared, so Cavalry Maneuvers
+            // still gets its own opportunity and every battlefield is still fought (an attacker is "not
+            // compelled to assign any units").
+            case Phase.InfantryDeclaration:
+            case Phase.CavalryDeclaration: AssignAttackers(new("attack",_state.PriorityPlayerId,_state.Version,Assignments:[])); break;
             case Phase.DefenseAssignment:
             case Phase.CavalryDefense:
                 AssignDefense(new("assignDefense",_state.PriorityPlayerId,_state.Version,Assignments:[]));
                 break;
-            case Phase.CavalryDeclaration: DeclareAttack(new("attack",_state.PriorityPlayerId,_state.Version,Assignments:[])); break;
             case Phase.Battle:
                 // Additional Action (issue #181): passing forfeits any of this player's own still-
                 // unused grants rather than letting them linger for a future, ordinary turn -- the
                 // whole point of an Additional Action is that it resolves immediately, in a burst.
-                _state.AdditionalActions.RemoveAll(g=>g.PlayerId==_state.PriorityPlayerId);
+                _state.AdditionalActions.RemoveAll(g=>g.PlayerId==_state.PriorityPlayerId && Forfeitable(g));
                 if(++_state.ConsecutivePasses==2) ResolveBattle(); else _state.PriorityPlayerId=1-_state.PriorityPlayerId;
                 break;
             case Phase.Dynasty:
@@ -771,14 +1064,30 @@ public sealed partial class MatchEngine
         SetPhase(Phase.DynastyDiscard,command.PlayerId);
     }
 
-    // Infantry Maneuvers (AttackDeclaration/DefenseAssignment) always runs first; Cavalry Maneuvers
-    // (CavalryDeclaration/CavalryDefense) follows, adding to the same battlefields Infantry
-    // Maneuvers already opened -- only provinces where the attacker actually placed a unit,
-    // recomputed after each of the two attacker steps so a Cavalry-only or Infantry-only
-    // declaration is just as capable of putting a province up for battle as a mixed one.
-    private void DeclareAttack(GameCommand command)
+    // The Declaration Segment (rules lead: "an attack is either declared or not"): one explicit decision by the
+    // Attacker. Declaring creates a battlefield at EVERY one of the Defender's provinces, whether or not anyone is
+    // ever assigned to it (core rules: even a battlefield with no units on either side has its one battle);
+    // declining ends the Attack Phase at once (DeclineAttackPhase).
+    private void DeclareAttackPhase(GameCommand command)
     {
-        Require(_state.Phase is Phase.AttackDeclaration or Phase.CavalryDeclaration,"Declare an attack after the Action Phase.");
+        Require(_state.Phase==Phase.AttackDeclaration,"Declare an attack after the Action Phase.");
+        Require(!Player(command.PlayerId).MayNotAttackThisTurn,"You may not declare an attack this turn.");
+        _state.UnresolvedBattlefields=Player(1-command.PlayerId).Provinces.Where(p=>!p.Destroyed).Select(p=>p.Index).Order().ToList();
+        Emit("attackDeclared",$"{Player(command.PlayerId).Name} declared an attack: a battlefield exists at each of {Player(1-command.PlayerId).Name}'s provinces.",command.PlayerId);
+        SetPhase(Phase.InfantryDeclaration,command.PlayerId);
+    }
+    private void DeclineAttackPhase()
+    {
+        Emit("attackDeclined",$"{Player(_state.PriorityPlayerId).Name} declined to attack; the Attack Phase ends.",_state.PriorityPlayerId);
+        _state.UnresolvedBattlefields=[];
+        SetPhase(Phase.Dynasty,_state.ActivePlayerId);
+    }
+    // Infantry Maneuvers (InfantryDeclaration/DefenseAssignment) runs first, then Cavalry Maneuvers
+    // (CavalryDeclaration/CavalryDefense), both on the battlefields the declaration already created: assigning
+    // places units at them but never decides whether a battlefield exists.
+    private void AssignAttackers(GameCommand command)
+    {
+        Require(_state.Phase is Phase.InfantryDeclaration or Phase.CavalryDeclaration,"Assign attackers after declaring an attack.");
         // Utaku Chikako's own restriction (issue #186): a broad "may not declare an attack this turn"
         // -- blocks any non-empty attacker assignment outright, Infantry or Cavalry alike, regardless
         // of what would otherwise grant the assignment opportunity (a future "Ambush"-style card
@@ -788,9 +1097,7 @@ public sealed partial class MatchEngine
         var cavalry=_state.Phase==Phase.CavalryDeclaration;
         var targets=Player(1-command.PlayerId).Provinces.Where(p=>!p.Destroyed).Select(p=>p.Index).ToHashSet();
         Assign(command,targets,cavalry,false);
-        _state.UnresolvedBattlefields=_state.Cards.Values.Where(c=>c.OwnerId==command.PlayerId && c.Zone==Zone.Battlefield && c.ProvinceIndex is int)
-            .Select(c=>c.ProvinceIndex!.Value).Distinct().Order().ToList();
-        Emit("attackDeclared",$"{Player(command.PlayerId).Name} declared {(cavalry?"a Cavalry":"an Infantry")} attack.",command.PlayerId);
+        Emit("attackersAssigned",$"{Player(command.PlayerId).Name} assigned {(command.Assignments?.Count??0)} {(cavalry?"Cavalry":"Infantry")} attacker(s).",command.PlayerId);
         // Brash (core rules keyword, issue #216): the Defender may draw a card, independently, once
         // per Brash card just assigned to attack -- deferred here, before the usual phase transition,
         // so the Defender resolves every offer first; FinishBrashDraws makes that same transition
@@ -821,8 +1128,6 @@ public sealed partial class MatchEngine
         Require(_state.Phase is Phase.DefenseAssignment or Phase.CavalryDefense,"Defenders assign after the attacking army.");
         var cavalry=_state.Phase==Phase.CavalryDefense;
         Assign(command,_state.UnresolvedBattlefields.ToHashSet(),cavalry,true);
-        // Nothing to fight this turn (no Infantry or Cavalry ever attacked anywhere): skip the
-        // battlefield-selection/resolution phases outright rather than stall with zero choices.
         SetPhase(cavalry?(_state.UnresolvedBattlefields.Count>0?Phase.BattleSelection:Phase.Dynasty):Phase.CavalryDeclaration,_state.ActivePlayerId);
     }
     private void Assign(GameCommand command,HashSet<int> provinces,bool cavalry,bool isDefender)
@@ -858,8 +1163,15 @@ public sealed partial class MatchEngine
     {
         Require(_state.Phase==Phase.BattleSelection,"Battle order may be chosen between battles.");
         Require(command.Province is int && _state.UnresolvedBattlefields.Contains(command.Province.Value),"Choose an unresolved battlefield.");
-        _state.CurrentBattleProvince=command.Province;
+        _state.CurrentBattleProvince=command.Province; _state.BattleNumber++;
         SetPhase(Phase.Battle,1-_state.ActivePlayerId);
+        // Battle Phase timing (issue #310): the Defender holds the first opportunity by default (spec 4.4).
+        // "Engaging" is exactly this moment -- the Attacker has just selected the battle (spec 4.1) -- so the
+        // Engage window (spec 4.2) opens here, before any Battle action, whenever something could be played in
+        // it; its claims can flip the first opportunity (CloseEngageWindow). Nothing playable: exactly the
+        // pre-#310 flow, event stream included.
+        _state.FirstActionPlayerId=1-_state.ActivePlayerId; _state.FirstActionReason=BattleSteps.ReasonDefault; _state.FirstActionRestriction=null;
+        if(OpenEngageWindow(command.Province!.Value)) { Emit("battleStarted",$"Battle at province {command.Province+1}: engaged."); return; }
         Emit("battleStarted",$"Battle at province {command.Province+1}: defender acts first.");
     }
     private void ResolveBattle()
@@ -870,7 +1182,7 @@ public sealed partial class MatchEngine
         // resolution is determined" -- deliberately checked BEFORE Army() is ever read below, since
         // Encircled Terrain's own effect (sending every other Personality home) changes who actually
         // fights. See PendingBeforeBattleResolve's own doc comment for the full sequencing.
-        var sources=BeforeBattleResolveSourceIds(provinceIndex);
+        var sources=BeforeResolutionItemIds(provinceIndex);
         if(sources.Length>0)
         {
             _state.PendingBeforeBattleResolve=new PendingBeforeBattleResolve{ProvinceIndex=provinceIndex,Attacker=attacker,Defender=defender,RemainingSourceIds=sources.ToList()};
@@ -879,13 +1191,20 @@ public sealed partial class MatchEngine
         }
         ContinueResolveBattle(provinceIndex,attacker,defender);
     }
-    // Every in-play Terrain at this battlefield carrying a "before this battle resolves" effect --
-    // currently just Encircled Terrain, but a list (not a single nullable id) since the core rule
-    // itself is written for the general "multiple such effects" case (ordered by the active player;
-    // see AdvanceBeforeBattleResolve).
+    // Every in-play card at this battlefield carrying a "before this battle resolves / before this battle's
+    // resolution" trait (issue #310, generalizing issue #272's Encircled-Terrain-only list): a card in play
+    // on the battlefield itself (a Terrain, a Personality) or attached to a unit there, whose Abilities name an
+    // ability of Timing "BeforeResolution" -- or whose Effect names one, which is how Encircled Terrain (Effect
+    // "encircled-before-battle") is registered without touching its published data. A list, not a single id,
+    // since the rule is written for several simultaneous effects (ordered by the active player; see
+    // AdvanceBeforeBattleResolve). Ordinal-sorted so the offered order is deterministic.
     private string[] BeforeBattleResolveSourceIds(int provinceIndex) =>
-        _state.Cards.Values.Where(c=>c.Zone==Zone.Battlefield && c.ProvinceIndex==provinceIndex && Definition(c).Effect=="encircled-before-battle")
+        _state.Cards.Values.Where(c=>(c.Zone==Zone.Battlefield && c.ProvinceIndex==provinceIndex || c.Zone==Zone.Attached && c.ProvinceIndex==provinceIndex && Card(c.AttachedTo).Zone==Zone.Battlefield)
+                && BeforeResolutionAbilityId(c) is not null)
             .Select(c=>c.Id).Order(StringComparer.Ordinal).ToArray();
+    private static string? BeforeResolutionAbilityId(CardInstance card) =>
+        (Definition(card).Abilities??[]).FirstOrDefault(a=>AbilityCatalog.All.TryGetValue(a,out var d) && d.Timing=="BeforeResolution")
+        ?? (AbilityCatalog.All.TryGetValue(Definition(card).Effect,out var effectAbility) && effectAbility.Timing=="BeforeResolution" ? Definition(card).Effect : null);
     // Drains PendingBeforeBattleResolve.RemainingSourceIds one at a time: zero left resumes ordinary
     // resolution; exactly one left resolves it directly (no real choice to offer); two or more open
     // "beforeBattleOrder" for the ACTIVE player (the core rule's own "whose turn it is") to pick which
@@ -922,8 +1241,17 @@ public sealed partial class MatchEngine
     }
     private void StartBeforeBattleEffect(PendingBeforeBattleResolve pending)
     {
-        var source=Card(pending.ActiveSourceId!);
-        switch(Definition(source).Effect)
+        var itemId=pending.ActiveSourceId!;
+        if(itemId.StartsWith(DelayedItemPrefix,StringComparison.Ordinal)) { StartDelayedItem(pending,itemId); return; }
+        if(itemId.StartsWith(ReactionItemPrefix,StringComparison.Ordinal)) { StartReactionItem(pending,itemId); return; }
+        var source=Card(itemId);
+        var traitId=BeforeResolutionAbilityId(source)!;
+        var province=pending.ProvinceIndex;
+        // Each source reads the battlefield live, one at a time, so an earlier source's effect (a Personality sent
+        // home, bowed or boosted) is already reflected when the next one applies -- which is why the order the
+        // active player chooses (AdvanceBeforeBattleResolve) can change who fights.
+        Emit("beforeBattleEffect",$"Before this battle resolves: {Definition(source).Name}.",source.OwnerId,source.Id);
+        switch(traitId)
         {
             // Encircled Terrain (issue #272): "the Attacker and Defender, in the order of your
             // choice" -- "your" is THIS card's own controller, who picks whether the Attacker or the
@@ -932,11 +1260,38 @@ public sealed partial class MatchEngine
                 pending.EncircledStage="ChooseOrder";
                 _state.PendingChoice=new("encircledOrder",source.OwnerId,source.Id,"Choose whether the Attacker or the Defender selects a Personality first.");
                 _state.PriorityPlayerId=source.OwnerId;
+                return;
+            // Training fixtures (issue #310) proving the general path: a mandatory effect, a mandatory effect that
+            // changes who fights, and an optional ("you may") one that waits for its controller's answer.
+            case "training-before-resolution-boost":
+                foreach(var own in Army(source.OwnerId,province).ToArray()) ApplyModifier(own,source.Id,traitId,"Force",2);
                 break;
-            default:
-                FinishBeforeBattleEffect(pending);
+            case "training-before-resolution-send-home":
+                foreach(var weak in _state.Cards.Values.Where(c=>c.Zone==Zone.Battlefield && c.ProvinceIndex==province && Definition(c).Type==CardType.Personality && PersonalityForce(c)<=3).ToArray())
+                    ReturnHome(weak,false);
                 break;
+            case "training-before-resolution-may-bow":
+                _state.PendingChoice=new("beforeBattleOptional",source.OwnerId,source.Id,$"Before this battle resolves: you may bow one enemy Personality at this battlefield ({Definition(source).Name}).");
+                _state.PriorityPlayerId=source.OwnerId;
+                return;
         }
+        FinishBeforeBattleEffect(pending);
+    }
+    // The "you may" half of an optional before-resolution effect: its own controller either declines or names the one
+    // target it applies to. Answered with command type "beforeBattleOptional" and Choice "use" (plus TargetId) or "decline".
+    private void ResolveBeforeBattleOptional(GameCommand command)
+    {
+        var pending=_state.PendingBeforeBattleResolve!;
+        var choice=_state.PendingChoice!;
+        Require(command.Type=="beforeBattleOptional" && command.PlayerId==choice.PlayerId && command.Choice is "use" or "decline","Use the effect or decline it.");
+        if(command.Choice=="use")
+        {
+            var target=Card(command.TargetId);
+            Require(target.OwnerId!=choice.PlayerId && target.Zone==Zone.Battlefield && target.ProvinceIndex==pending.ProvinceIndex && Definition(target).Type==CardType.Personality,"Choose an enemy Personality at this battlefield.");
+            if(!StalwartNegatesBow(target,choice.PlayerId)) target.Bowed=true;
+        }
+        _state.PendingChoice=null;
+        FinishBeforeBattleEffect(pending);
     }
     private void FinishBeforeBattleEffect(PendingBeforeBattleResolve pending)
     {
@@ -1071,9 +1426,10 @@ public sealed partial class MatchEngine
     // reach the same completion as the immediate (0 or 1 candidate) path.
     private void FinishBattleResolution(int attacker,int provinceIndex,CardInstance[] a,string? conquerorUnbowedId)
     {
+        var willNotBow=_state.ResolutionWillNotBowPlayerIds.ToArray();
         foreach(var card in a.Where(c=>c.Zone==Zone.Battlefield))
         {
-            ReturnHome(card,card.Id!=conquerorUnbowedId);
+            ReturnHome(card,card.Id!=conquerorUnbowedId && !willNotBow.Contains(card.OwnerId));
             if(card.Id==conquerorUnbowedId) Emit("conquerorStraightened",$"{Definition(card).Name} returned home unbowed (Conqueror).",card.OwnerId,card.Id);
         }
         // Terrain leaves the battlefield here, after its printed effects (already applied earlier in
@@ -1095,6 +1451,14 @@ public sealed partial class MatchEngine
         // Ashigaru Elite's boost is "for the remainder of the battle," not the turn -- a turn can
         // contain more than one battle (Infantry/Cavalry Maneuvers), so it must not carry into the next.
         _state.AshigaruBoost=new int[2];
+        // First-opportunity state (issue #310) is battle-scoped too: a later battle starts from the default again.
+        _state.PendingEngage=null; _state.FirstActionPlayerId=null; _state.FirstActionReason=null; _state.FirstActionRestriction=null;
+        // A delayed effect and a "will not bow" promise belong to their battle: both lapse with it, applied or not.
+        _state.DelayedBattleEffects.Clear(); _state.ResolutionWillNotBowPlayerIds.Clear();
+        // "Remove those Followers from the game after the battle ends" (Kyuden Hida - exp): wherever they stand now (attached, or discarded with a destroyed host).
+        foreach(var createdId in _state.CreatedUntilBattleEndsIds.ToArray())
+            if(_state.Cards.TryGetValue(createdId,out var created) && created.Zone!=Zone.RemovedFromGame) RemoveFromGame(created);
+        _state.CreatedUntilBattleEndsIds.Clear();
         // Additional Action grants/restrictions (issue #181) are battle-scoped too -- Two Hands'
         // "ceases during battle resolution" is explicit, and an unused Again!/Equip(Battle) grant
         // makes no sense carried into a battle it was never meant for.
@@ -1102,8 +1466,12 @@ public sealed partial class MatchEngine
         // BEFORE this same call) must survive this Clear() -- it represents a right earned as of THIS
         // battle's own conclusion, to be used in a later window, unlike an ordinary Additional Action
         // grant (which genuinely is scoped to just this battle).
-        _state.AdditionalActions.RemoveAll(g => !(g.ScopeCardIds is { Length: 1 } ids && Definition(Card(ids[0])).Type == CardType.Ring));
+        // (Issue #379: only a recruit grant -- the one kind that carries a battle -- survives: this battle's is kept for the aftermath window that
+        // follows (OpenBattleRecruitWindow), where it is the last chance to use it, and lapses there.)
+        _state.AdditionalActions.RemoveAll(Forfeitable);
         _state.PendingAdditionalAction=null; _state.NoNewAdditionalActionsThisBattle=false;
+        // An unused Attack-target grant ("your next Ranged Attack action this battle") ends with the battle.
+        _state.AttackTargetGrants.Clear();
         // Force redirection (issue #216) is "for the duration of the battle," same reasoning.
         _state.ForceRedirects.Clear();
         // Ring of Water's own recruitment condition (issue #194) is battle-scoped, same reasoning.
@@ -1133,6 +1501,15 @@ public sealed partial class MatchEngine
         // return-to-hand always happens before the UnresolvedBattlefields.Count==0 branch below ends
         // the Battle phase, exactly the order Looting the Ruins' own printed text requires.
         ResolveAfterBattleResolveEffects();
+        // "After the resolution of a battle...: you may put this Ring into play" (issue #379): the recruit grants this battle produced get their
+        // window here, still inside the battle, and lapse with it.
+        if(OpenBattleRecruitWindow(attacker)) return;
+        CompleteBattleTransition(attacker);
+    }
+    // The last step of a battle: the next battlefield is chosen, or the Battle phase ends. Split from FinishBattleReturnHomeAndTransition so the
+    // recruit window's close (PassReaction) can continue exactly here.
+    private void CompleteBattleTransition(int attacker)
+    {
         if(_state.UnresolvedBattlefields.Count==0)
         {
             foreach(var card in _state.Cards.Values.Where(c=>c.Zone==Zone.Battlefield).ToArray()) ReturnHome(card,card.OwnerId==attacker);
@@ -1166,7 +1543,7 @@ public sealed partial class MatchEngine
             // Returning to a province is a fresh start, the same reset ToDeck() already applies to a
             // card headed back into a deck -- stale Modifiers/GrantedKeywords/Tokens/AbilityUses have
             // no meaning once this card is sitting face-up in a province again, ready to be purchased.
-            card.Modifiers.Clear(); card.GrantedKeywords.Clear(); card.RemovedKeywords.Clear(); card.RemovedClanAffiliations.Clear();
+            card.Modifiers.Clear(); card.ActionLocks.Clear(); card.GrantedKeywords.Clear(); card.GrantedAbilities.Clear(); card.RemovedKeywords.Clear(); card.RemovedClanAffiliations.Clear();
             card.AbilityUses.Clear(); card.Tokens.Clear(); card.Bowed=false; card.Dishonorable=false;
             card.StraightenBlockedTurn=-1; card.AssignedToAttackTurn=-1;
             var owner=Player(card.OwnerId);
@@ -1259,9 +1636,13 @@ public sealed partial class MatchEngine
 
     private void Equip(GameCommand command)
     {
-        Require(_state.Phase==Phase.Action && command.PlayerId==_state.ActivePlayerId,"Equip is a Limited action on your turn.");
         var card=Card(command.CardId); var target=Card(command.TargetId); var def=Definition(card);
         Require(card.OwnerId==command.PlayerId && card.Zone==Zone.Hand && def.Type is CardType.Item or CardType.Follower,"Choose a supported attachment from your hand.");
+        // Equip (Limited) -- or, with a player-level timing grant (Foothills Keep: "Equipping Weapons is a Battle/Open action for you", TimingGrants.cs), an
+        // Open equip in any player's action segment or a Battle equip: then the wielder must be a Personality at the current battlefield, not at Home.
+        var equipTimingError=EquipTimingError(command.PlayerId,card);
+        Require(equipTimingError is null,equipTimingError ?? "");
+        var inBattle=_state.Phase==Phase.Battle;
         // Cultist Infiltrator (oracle-l5r-1595): "You may attach this card to a Personality you do
         // not control" -- the one printed exception to Equip's own ordinary "your Personality"
         // restriction, an Effect-keyed override rather than a new command/ability (its own OwnerId
@@ -1270,8 +1651,8 @@ public sealed partial class MatchEngine
         // original owner's discard pile" when it and/or its host is later destroyed is already
         // correct by construction; DestroyUnits' own attachment loop below already keys off the
         // attachment's own unchanged OwnerId, never its host's).
-        Require((target.OwnerId==command.PlayerId || def.Effect=="cultist-infiltrator") && target.Zone==Zone.Home && Definition(target).Type==CardType.Personality,
-            def.Effect=="cultist-infiltrator" ? "Choose a Personality at home." : "Choose your Personality at home.");
+        Require((target.OwnerId==command.PlayerId || def.Effect=="cultist-infiltrator") && (inBattle ? AtBattle(target) : target.Zone==Zone.Home) && Definition(target).Type==CardType.Personality,
+            inBattle ? "Choose your Personality at the current battlefield." : def.Effect=="cultist-infiltrator" ? "Choose a Personality at home." : "Choose your Personality at home.");
         Require(def.AttachRequiresKeyword is null || KeywordOrHuman(target,def.AttachRequiresKeyword),$"Will only attach to a {def.AttachRequiresKeyword} Personality.");
         Require(def.AttachExcludesKeyword is null || !KeywordOrHuman(target,def.AttachExcludesKeyword),$"Will not attach to a {def.AttachExcludesKeyword} Personality.");
         Require(def.AttachRequiresName is null || Definition(target).Name==def.AttachRequiresName,$"Only attaches to {def.AttachRequiresName}.");
@@ -1282,30 +1663,24 @@ public sealed partial class MatchEngine
         // Spell entry too, for both keywords.
         Require(!(Keyword(card,"Unique") || Keyword(card,"Singular")) || !ControlsCopyOf(command.PlayerId,def.Name),
             $"You already control this {(Keyword(card,"Unique") ? "Unique" : "Singular")} card.");
-        // Mirumoto Katagi (issue #216): "Non-Unique Weapons attaching to Katagi from your hand enter
-        // play paying 4 less Gold" -- a narrow, single-card discount (unlike Clan Discount/Allegiance,
-        // which are printed-choice flags on every purchase), so it belongs on Equip's own cost
-        // formula directly rather than as a new command flag.
-        // Satoshi's Dual Warfans (issue #264): "Enters play paying 1 less Gold if you are a Lion
-        // Clan player" -- the EQUIPPING PLAYER's own Clan, not the wielder's own trait (a different
-        // axis from Katagi's own weapon-discount-non-unique above, so a separate term rather than
-        // folded into that one).
-        // Legion of the Bat (issue #279): "Enters play paying 1 less Gold if you are a Crane Clan
-        // player" -- the exact same shape as Satoshi's Dual Warfans' own lion-clan-discount above,
-        // just a different Clan/term.
-        // Champion of Thunder (the general in-play unit-targeting Reaction primitive's own proof
-        // case): "Enters play paying 1 less Gold if you are a Mantis Clan player" -- the same shape,
-        // keyed off a different Clan.
-        var cost=Math.Max(0,def.GoldCost-(Definition(target).Effect=="weapon-discount-non-unique" && Keyword(card,"Weapon") && !Keyword(card,"Unique")?4:0)
-            -(def.Effect=="lion-clan-discount" && Player(command.PlayerId).Clan=="Lion"?1:0)
-            -(def.Effect=="crane-clan-discount" && Player(command.PlayerId).Clan=="Crane"?1:0)
-            -(def.Effect=="mantis-clan-discount" && Player(command.PlayerId).Clan=="Mantis"?1:0));
-        Pay(command.PlayerId,card,cost,command.SourceIds);
+        // The cost (Katagi's, Satoshi's Dual Warfans', Legion of the Bat's and Champion of Thunder's
+        // discounts included) is EquipGoldCost in GoldQuotes.cs -- the same function that prices this
+        // equip for QueryActions' quote, so the quote and the charge cannot drift (issue #303).
+        Pay(command.PlayerId,card,EquipGoldCost(command.PlayerId,card,target).Cost,command.SourceIds);
         Player(command.PlayerId).Hand.Remove(card.Id);
         card.Zone=Zone.Attached; card.AttachedTo=target.Id; card.FaceUp=true;
+        if(inBattle) card.ProvinceIndex=target.ProvinceIndex; // the Weapon stands where its wielder does, so it is at the battlefield with him
         if(def.AttachGrantsKeyword is string granted) GrantKeyword(target,granted,card.Id,"Attachment");
         Emit("equipped",$"{def.Name} attached to {Definition(target).Name}.",command.PlayerId,card.Id);
         if(OpenEntryReactionWindow(command.PlayerId,card,1-command.PlayerId)) return;
+        if(inBattle)
+        {
+            // A Battle action like any other: it uses an Additional Action grant of this player's when one is unscoped, and otherwise forfeits them.
+            var usedGrant=ConsumeAdditionalActionGrant(command.PlayerId,null);
+            if(!usedGrant) _state.AdditionalActions.RemoveAll(g=>g.PlayerId==command.PlayerId && Forfeitable(g));
+            NextAction(command.PlayerId,usedGrant && _state.AdditionalActions.Any(g=>g.PlayerId==command.PlayerId && Forfeitable(g)));
+            return;
+        }
         NextAction(command.PlayerId);
     }
     private void PlayStrategy(GameCommand command)
@@ -1315,6 +1690,10 @@ public sealed partial class MatchEngine
         Require(card.OwnerId==command.PlayerId && card.Zone==Zone.Hand && def.Type==CardType.Strategy,"Choose a supported Strategy from your hand.");
         var province=_state.CurrentBattleProvince!.Value;
         Require(Army(command.PlayerId,province).Any(),"You need a unit at the current battlefield to take a Battle action.");
+        // A Strategy pays its own printed Gold cost (issue #303: the same QuoteStrategyGold that
+        // QueryActions ships to the client; free ones -- every training fixture -- charge nothing and,
+        // as before, accept no sources).
+        if(def.GoldCost>0) Pay(command.PlayerId,card,def.GoldCost,command.SourceIds);
         // Terrain (core rules Glossary): the printed effects only apply at the battlefield where it was
         // played -- itself just stays there as a card, not a target for a Personality-shaped effect --
         // and the default limit is at most one Terrain per battlefield until the old one is destroyed.
@@ -1433,6 +1812,10 @@ public sealed partial class MatchEngine
     // "force-max-dead-pile" (Moto Shunsuke) are always-on passive bonuses, unlike the attacking-only
     // attacking-two/attacking-four Effects above.
     private int PersonalityForce(CardInstance card) => Math.Max(0,Definition(card).Force+StatModifier(card,"Force")+(IsAttacking(card)?(Definition(card).Effect=="attacking-two"?2:Definition(card).Effect=="attacking-four"?4:
+        // Matsu Kaido (oracle-l5r-4934, issue #299): "Kaido has +1F while attacking" -- the plain +1
+        // counterpart to attacking-two/attacking-four (Matsu Yoshito's own conditional variant below
+        // starts from the same +1 base).
+        Definition(card).Effect=="attacking-one"?1:
         // Matsu Yoshito (issue #198): "+1F while attacking, or +2F if the Defender is Dragon Clan" --
         // the Defender is always the other player while this card is attacking.
         Definition(card).Effect=="attacking-vs-dragon-bonus"?(Player(1-card.OwnerId).Clan=="Dragon"?2:1):0)-(HasHalls(card.OwnerId)&&Keyword(card,"Ancestor")?1:0):0)
@@ -1450,7 +1833,7 @@ public sealed partial class MatchEngine
         // effect, so it is Effect-keyed on the ATTACHED SPELL itself (the same shape
         // ItemForceToWielder already uses for an Item's own conditional bonus), always applying --
         // bowed or not, every phase -- since no published Spell needs a conditional version yet.
-        +Attachments(card.Id).Where(c=>Definition(c).Type==CardType.Spell).Sum(c=>Definition(c).Effect=="scouring-flood-force"?2:0)
+        +Attachments(card.Id).Where(c=>Definition(c).Type==CardType.Spell).Sum(c=>Definition(c).Effect=="scouring-flood-force"||Definition(c).Effect=="wave-persists-force"&&Keyword(card,"Water")?2:0)
         +(Definition(card).Effect=="force-with-spell"&&Attachments(card.Id).Any(c=>Definition(c).Type==CardType.Spell)?1:0)
         +(Definition(card).Effect=="force-if-enemy-dishonorable"&&_state.Cards.Values.Any(c=>c.OwnerId!=card.OwnerId&&Definition(c).Type==CardType.Personality&&InPlay(c)&&c.Dishonorable)?2:0)
         // "The highest number of dead Personalities in any one discard pile" -- the greatest per-player
@@ -1473,7 +1856,20 @@ public sealed partial class MatchEngine
         // ArmyBattleMaidenBoost's own established shape, plus a defending condition on the RECEIVING
         // card rather than the granter.
         +(IsDefendingUnit(card)&&Keyword(card,"Earth")?_state.Cards.Values.Count(c=>c.Id!=card.Id&&c.OwnerId==card.OwnerId&&c.Zone==Zone.Battlefield&&c.ProvinceIndex==card.ProvinceIndex&&Definition(c).Effect=="boost-earth-personalities-while-defending"&&Keyword(c,"Earth")):0)
+        // Yoritomo Minori (oracle-l5r-9605, issue #301): "+1F for each other Magistrate in her army" --
+        // a self-received, count-based bonus (unlike ArmyBattleMaidenBoost below, which a Battle
+        // Maiden receives FROM other cards' own Effect), so it is Effect-keyed on the receiving card
+        // itself, with no attacking/defending gate at all.
+        +(Definition(card).Effect=="force-per-other-magistrate-in-army"?OtherMagistratesInArmy(card):0)
         +AshigaruBattleBoost(card)+ArmyBattleMaidenBoost(card));
+    // "Her army" (Yoritomo Minori): every Personality the same owner has at the same battlefield --
+    // Army(), the engine's own definition -- so a card not at a battlefield has no army and no bonus.
+    // "Magistrate" is a Keyword() check (printed or granted -- Justice of the Crane grants it), and the
+    // card itself is excluded ("other"). Bowed ones still count: no "unbowed" is printed.
+    private int OtherMagistratesInArmy(CardInstance card) =>
+        card.Zone==Zone.Battlefield && card.ProvinceIndex is int province
+            ? Army(card.OwnerId,province).Count(c=>c.Id!=card.Id && Keyword(c,"Magistrate"))
+            : 0;
     // "Dead" (core rules Glossary): a status a card carries once it enters Zone.Dead, distinct from
     // merely being discarded (Zone.DynastyDiscard/FateDiscard) -- both live in the same client-facing
     // PlayerView.Discard array (see GetView), told apart there by each CardView's own Zone. This is
@@ -1581,7 +1977,8 @@ public sealed partial class MatchEngine
     // EliteEffect: true for a card with the actual printed/granted Elite keyword, but also for a
     // wielder carrying an attachment that grants only Elite's effect without the keyword itself
     // (Seppun Heavy Elite's shape -- see AttachGrantsEliteEffect).
-    private bool EliteEffect(CardInstance card) => Keyword(card,"Elite") || Attachments(card.Id).Any(a=>Definition(a).AttachGrantsEliteEffect);
+    private bool EliteEffect(CardInstance card) => Keyword(card,"Elite") || Attachments(card.Id).Any(a=>Definition(a).AttachGrantsEliteEffect
+        || Definition(a).AttachGrantsEliteEffectWhileWielderHas is string wielderKeyword && Keyword(card,wielderKeyword));
     private int PersonalityBattleContribution(CardInstance card) => card.Bowed && !EliteEffect(card) ? 0 : PersonalityForce(card);
     private int FollowerBattleContribution(CardInstance card) => Attachments(card.Id)
         .Where(c=>(!c.Bowed || EliteEffect(c)) && Definition(c).Type==CardType.Follower)
@@ -1649,21 +2046,22 @@ public sealed partial class MatchEngine
     // back normally, whether because no other reaction window ever opened here, or because one that
     // did just closed (see PassReaction). closesTo is where control resumes once the WHOLE queue (not
     // just this one offer) is empty.
-    // Times of Strife (issue #259): drains PendingTimesOfStrifeDiscards FIRST, before the
-    // Overconfident queue below -- both are simple "queue of player ids owed a deferred window"
+    // Times of Strife (issue #259): drains PendingForcedDiscards FIRST, before the
+    // Overconfident queue below -- both are simple "queue of players owed a deferred window"
     // drains sharing this one function rather than needing their own copy of every call site (there
-    // are around a dozen), so a Times of Strife discard composes for free with every existing point
-    // that already calls this to hand priority back normally.
+    // are around a dozen), so a forced discard (Times of Strife, Daigotsu Bofana - exp's entry) composes for
+    // free with every existing point that already calls this to hand priority back normally. A player with
+    // an empty hand owes nothing.
     private bool OpenOverconfidentDrawWindow(int closesTo)
     {
-        if(_state.PendingTimesOfStrifeDiscards.Count>0)
+        if(_state.PendingForcedDiscards.Count>0)
         {
-            var discardPlayerId=_state.PendingTimesOfStrifeDiscards[0];
-            _state.PendingTimesOfStrifeDiscards.RemoveAt(0);
-            if(Player(discardPlayerId).Hand.Count==0) return OpenOverconfidentDrawWindow(closesTo);
-            _state.PendingChoice=new("timesOfStrifeDiscard",discardPlayerId,null,"Times of Strife: discard a card.",closesTo);
-            _state.PriorityPlayerId=discardPlayerId;
-            Emit("timesOfStrifeDiscardOffered",$"{Player(discardPlayerId).Name} must discard a card (Times of Strife).",discardPlayerId);
+            var owed=_state.PendingForcedDiscards[0];
+            _state.PendingForcedDiscards.RemoveAt(0);
+            if(Player(owed.PlayerId).Hand.Count==0) return OpenOverconfidentDrawWindow(closesTo);
+            _state.PendingChoice=new("forcedDiscard",owed.PlayerId,null,$"{owed.Reason}: discard a card.",closesTo);
+            _state.PriorityPlayerId=owed.PlayerId;
+            Emit("forcedDiscardOffered",$"{Player(owed.PlayerId).Name} must discard a card ({owed.Reason}).",owed.PlayerId);
             return true;
         }
         if(_state.PendingOverconfidentDraws.Count==0) return false;
@@ -1682,16 +2080,32 @@ public sealed partial class MatchEngine
         _state.PendingChoice=null;
         ResumeAfterDeferredWindow(pending.ActingPlayerId!.Value);
     }
-    private void ResolveTimesOfStrifeDiscard(GameCommand command)
+    // The one answer to a forced discard: the discarding player names a card of their own hand (private to them; the
+    // discard pile is public). A discard opened when an action was announced (Daigotsu Bofana) then lets that action
+    // carry on exactly where it stopped; a queued one hands priority back like the other deferred windows.
+    private void ResolveForcedDiscard(GameCommand command)
     {
         var pending=_state.PendingChoice!;
-        Require(command.Type=="timesOfStrifeDiscard" && command.PlayerId==pending.PlayerId && command.TargetId is not null && Player(command.PlayerId).Hand.Contains(command.TargetId),"Choose a card from your hand to discard.");
+        Require(command.Type=="forcedDiscard" && command.PlayerId==pending.PlayerId && command.TargetId is not null && Player(command.PlayerId).Hand.Contains(command.TargetId)
+            && !(_state.ForcedDiscardContinuation is { } held && CommandNamesCard(held,command.TargetId)),"Choose a card from your hand to discard.");
         var player=Player(command.PlayerId);
         player.Hand.Remove(command.TargetId!); var card=Card(command.TargetId); card.Zone=Zone.FateDiscard; card.FaceUp=true;
-        Emit("handDiscard",$"{player.Name} discarded {Definition(card).Name} (Times of Strife).",player.Id,card.Id);
+        Emit("handDiscard",$"{player.Name} discarded {Definition(card).Name} ({pending.Prompt.Replace(": discard a card.","")}).",player.Id,card.Id);
         _state.PendingChoice=null;
+        if(_state.ForcedDiscardContinuation is { } announced)
+        {
+            var resume=_state.ForcedDiscardResume; _state.ForcedDiscardContinuation=null; _state.ForcedDiscardResume=null;
+            if(resume=="action") ResolveDeferredActionInItsWindow(announced);
+            else if(resume=="attack") ResolveAttack();
+            else { ContinueSuspendedReaction(announced); AnnounceAbility(announced); }
+            return;
+        }
         ResumeAfterDeferredWindow(pending.ActingPlayerId!.Value);
     }
+    // A card the announced command itself uses (its source, target, performer or chosen cards): never one of the hand
+    // cards an announced action could be made to discard out from under itself.
+    private static bool CommandNamesCard(GameCommand command,string cardId) =>
+        command.CardId==cardId || command.TargetId==cardId || command.PerformerId==cardId || command.CardIds?.Contains(cardId)==true;
     // Shared tail for both deferred-window resolvers above: try the next queued window, then the
     // FinishBattleResolution special case, then hand priority back normally. Factored out once a
     // second resolver (ResolveTimesOfStrifeDiscard) needed the identical sequence ResolveOverconfidentDraw
@@ -1717,7 +2131,15 @@ public sealed partial class MatchEngine
     // treated as Personal Honor 0 (see CardPersonalHonor) until Rehonor restores them. The 180-degree
     // rotation the rules describe is purely visual, driven client-side off this same flag; no engine
     // state beyond it.
-    private void Dishonor(CardInstance card) => card.Dishonorable=true;
+    private void Dishonor(CardInstance card)
+    {
+        if(NegatesEffect(card,"all"))
+        {
+            Emit("dishonorNegated",$"{Definition(card).Name}'s dishonoring was negated before it resolved.",card.OwnerId,card.Id);
+            return;
+        }
+        card.Dishonorable=true;
+    }
     // A card already sitting in a discard pile (Zone.DynastyDiscard/FateDiscard) -- never destroyed
     // via DestroyUnits, so it carries no attachments/tokens to cascade -- becomes dead. "Honorably
     // dead" (Glossary) means dead and honorable; honorable:false leaves its current status as-is.
@@ -1822,6 +2244,9 @@ public sealed partial class MatchEngine
         // Village Guardian (oracle-l5r-9162, issue #285): the single choke point for "a province
         // destroyed this game" -- set once, never cleared, read by village-guardian-draw's own count.
         _state.ProvinceEverDestroyed[owner]=true;
+        // Ohsuki's Sparrow (oracle-l5r-10023, issue #299): the windowed twin of the flag above, cleared
+        // at the end of the OWNER's own next turn (FinishTurn) -- see MatchState's own doc comment.
+        _state.ProvinceDestroyedSinceTurnEnd[owner]=true;
         if(province.CardId is string id) { var card=Card(id); card.Zone=Zone.DynastyDiscard; card.FaceUp=true; card.ProvinceIndex=null; }
         province.CardId=null;
         // A Region attaches to the province itself -- it cannot outlive the province it is attached to.
@@ -1896,7 +2321,14 @@ public sealed partial class MatchEngine
     }
     private void FinishTurn()
     {
-        foreach(var card in _state.Cards.Values) { card.Modifiers.Clear(); card.GrantedKeywords.RemoveAll(g=>g.Duration=="Turn"); card.Protections.RemoveAll(p=>p.Duration=="Turn"); }
+        // A Ring's recruit grant made for a battle that was never fought (issue #379) does not carry into another turn; no other grant outlives its battle.
+        _state.AdditionalActions.Clear();
+        foreach(var card in _state.Cards.Values) { card.Modifiers.Clear(); card.GrantedKeywords.RemoveAll(g=>g.Duration=="Turn"); card.GrantedAbilities.RemoveAll(g=>g.Duration=="Turn"); card.Protections.RemoveAll(p=>p.Duration=="Turn"); card.ActionLocks.RemoveAll(l=>l.Duration==ActionLockUntilTurnEnd); }
+        // Ohsuki's Sparrow (issue #299): "since your last turn ended" -- the turn that is ending right
+        // now is the ACTIVE player's own, so it restarts that one player's window; the other player's
+        // flag (which may already be set by destruction during this very turn) is left untouched until
+        // THEIR turn ends.
+        _state.ProvinceDestroyedSinceTurnEnd[_state.ActivePlayerId]=false;
         _state.TurnNumber++; _state.ActivePlayerId=1-_state.ActivePlayerId;
         StartTurn();
     }
@@ -1976,6 +2408,7 @@ public sealed partial class MatchEngine
     private void EventsPhase(PlayerState player)
     {
         SetPhase(Phase.Events,player.Id);
+        _state.EventsRevealNext=0;
         ContinueEventsReveal(player);
     }
     // Split from EventsPhase (issue #259, Harsh Choices) so a reveal that needs a genuine player
@@ -1985,8 +2418,12 @@ public sealed partial class MatchEngine
     // once its own choice resolves.
     private void ContinueEventsReveal(PlayerState player)
     {
-        foreach(var province in player.Provinces.Where(p=>!p.Destroyed && p.CardId is not null))
+        // Deck search (issue #312): a reveal that deferred to a player decision (Harsh Choices, Imperial Gift's
+        // search) resumes from the next province, never from the start -- restarting at province 0 would reveal, in
+        // this same phase, the face-down card the deferred Event's own province had just been refilled with.
+        foreach(var province in player.Provinces.Where(p=>p.Index>=_state.EventsRevealNext && !p.Destroyed && p.CardId is not null))
         {
+            _state.EventsRevealNext=province.Index+1;
             var card=Card(province.CardId);
             if(!card.FaceUp)
             {
@@ -2017,6 +2454,25 @@ public sealed partial class MatchEngine
         if(Definition(card).Effect=="harsh-choices")
         {
             _state.PendingChoice=new("harshChoices",player.Id,card.Id,"Harsh Choices: you may destroy this province to draw 3 cards.");
+            return true;
+        }
+        // Imperial Gift (issue #312): "Gain 2 Honor and search your Fate deck for an Item, show it, and put it into
+        // your hand." The Honor first, then the search (deck search primitive, DeckSearch.cs) -- which defers through
+        // its own PendingChoice like Harsh Choices above; ResumeEventAfterSearch discards the Event, refills the
+        // province and resumes the reveal loop once the search has shuffled and finished. The Event stays in its
+        // province, face up, until then.
+        // Signs and Portents (issue #322): "Look at the top four cards of any Fate deck. You may discard one of them. Put the rest
+        // back in any order." -- the look primitive (DeckLook.cs), deferred through its own PendingChoice exactly like Imperial
+        // Gift's search; the Event is discarded and the reveal resumes once the arrangement is submitted.
+        if(LookCatalog.ForEventEffect(Definition(card).Effect) is { } eventLook)
+        {
+            BeginLook(eventLook,card,player.Id,"event");
+            return true;
+        }
+        if(Definition(card).Effect=="imperial-gift")
+        {
+            GainHonor(player.Id,2,"Imperial Gift",card);
+            BeginSearch(SearchCatalog.ImperialGift,card,player.Id,"event");
             return true;
         }
         province.CardId=null; card.ProvinceIndex=null;
@@ -2089,12 +2545,15 @@ public sealed partial class MatchEngine
             card.Zone=Zone.DynastyDiscard;
             Emit("regionDiscarded",$"{Definition(card).Name} was discarded: {player.Name}'s province {province.Index+1} already has a Region attached.",player.Id,card.Id);
         }
-        else
-        {
-            card.Zone=Zone.Region; card.ProvinceIndex=province.Index; province.RegionId=card.Id;
-            Emit("regionAttached",$"{Definition(card).Name} attached to {player.Name}'s province {province.Index+1}.",player.Id,card.Id);
-        }
+        else AttachRegionToProvince(player,province,card);
         Refill(player,province);
+    }
+    // The one place a Region enters play attached to a province: the Events Phase reveal above, and a Region found
+    // by a deck search that the searcher attaches to a province of their own choice (issue #312, Ikoma Shizuka).
+    private void AttachRegionToProvince(PlayerState player,ProvinceState province,CardInstance card)
+    {
+        card.Zone=Zone.Region; card.ProvinceIndex=province.Index; card.FaceUp=true; province.RegionId=card.Id;
+        Emit("regionAttached",$"{Definition(card).Name} attached to {player.Name}'s province {province.Index+1}.",player.Id,card.Id);
     }
     // A Celestial (core rules Glossary): unlike Event/Region, it enters play the instant it is
     // revealed regardless of WHICH phase that reveal happens in -- today the Events Phase reveal loop
@@ -2220,6 +2679,11 @@ public sealed partial class MatchEngine
         // (minimum 0)" -- active only while resolving the one specific command this player's own
         // just-played Reaction targeted (see ResolveOrDeferUnimpeachableName), so every negative
         // Honor change of theirs during that single resolution is reduced, not just the first.
+        if(amount<0 && HonorLossNegatedWithEffects(playerId))
+        {
+            Emit("honorLossNegated",$"{Player(playerId).Name}'s Honor loss from {reason} was negated with the action's effects.",playerId,source?.Id);
+            return;
+        }
         if(amount<0 && playerId==_state.HonorLossReductionPlayerId)
         {
             var reduced=Math.Min(0,amount+3);
@@ -2286,10 +2750,11 @@ public sealed partial class MatchEngine
         // AttackDeclaration's own once-per-turn entry (Pass, Phase.Action case) is the correct reset
         // point for it, not Phase.Battle itself.
         if(phase is Phase.Action or Phase.AttackDeclaration or Phase.Dynasty) _state.WarWearinessBowedThisPhase=false;
+        PruneForcedPasses(phase);
         // Wave Man (issue #279): "After an Attack Phase ends: Straighten this unit" -- a trait (no
         // Action:/Reaction: prefix), so mandatory and automatic, never an optional choice, same
         // convention as EntryHonorLoss/Destined above. The Attack Phase ends in exactly two places --
-        // AssignDefense (a player declined to attack outright: no battlefield was ever created) and
+        // DeclineAttackPhase (a player declined to attack outright: no battlefield was ever created) and
         // FinishBattleReturnHomeAndTransition (the last battlefield resolved) -- and BOTH, and only
         // those, ever call SetPhase(Phase.Dynasty, ...) (grep confirms it; CreateEconomyScenario's own
         // direct `state.Phase=Phase.Dynasty` field assignment bypasses SetPhase entirely, so it never
@@ -2310,6 +2775,9 @@ public sealed partial class MatchEngine
     private sealed class StableRandom(ulong seed)
     {
         private ulong _value=seed;
+        // The generator's whole state is this one value (deck search, issue #312): persisted in
+        // MatchState.RngState so a mid-game shuffle continues the exact sequence the setup shuffles started.
+        public ulong State => _value;
         private ulong Next()
         {
             // SplitMix64; owned algorithm makes shuffles stable across .NET versions.

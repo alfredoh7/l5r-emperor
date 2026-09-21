@@ -32,7 +32,7 @@ public static class TrainingOpponent
             command=action.Type switch
             {
                 "attack" or "assignDefense" => new(action.Type,self.Id,view.Version,Assignments:[]),
-                "pass" or "declineReaction" or "proclaim" or "endDynasty" => new(action.Type,self.Id,view.Version),
+                "pass" or "declineReaction" or "proclaim" or "endDynasty" or "declareAttack" => new(action.Type,self.Id,view.Version),
                 "discardProvince" when action.CardId is not null => new(action.Type,self.Id,view.Version,CardId:action.CardId),
                 "discardHand" => new(action.Type,self.Id,view.Version),
                 "purchase" when action.Quote is { Error:null,Payments.Length:>0 } q => new(action.Type,self.Id,view.Version,q.CardId,q.Payments[0].SourceIds,ClanDiscount:q.ClanDiscount,ClanAllegiance:q.ClanAllegiance),
@@ -76,7 +76,7 @@ public static class TrainingOpponent
                 var target=self.Home.Concat(self.Army).Concat(self.Hand).Concat(opponent.Home).Concat(opponent.Army)
                     .Where(c=>legal.Contains(c.Id)).OrderByDescending(c=>AbilityValue(command.AbilityId,c,self,opponent,view))
                     .ThenBy(c=>c.Id,StringComparer.Ordinal).FirstOrDefault();
-                if(target is not null) return command with { TargetId=target.Id };
+                if(target is not null) return WithTarget(command,action,target.Id);
             }
         }
         if(action.Type is "equip" or "playStrategy" && action.TargetIds is {Length:>0} targets)
@@ -84,8 +84,19 @@ public static class TrainingOpponent
             var targetCards=self.Home.Concat(self.Army).Concat(opponent.Army).Where(c=>targets.Contains(c.Id)).ToArray();
             if(targetCards.Length==0) return command;
             var ordered=targetCards.OrderBy(c=>c.Bowed).ThenByDescending(c=>c.Force);
-            return command with { TargetId=ordered.ThenBy(c=>c.Id,StringComparer.Ordinal).First().Id };
+            return WithTarget(command,action,ordered.ThenBy(c=>c.Id,StringComparer.Ordinal).First().Id);
         }
+        return command;
+    }
+
+    /// <summary>Retargets an offered command. When the cost depends on the target (issue #303), the engine's
+    /// own quote for that target supplies the payment, so the bot never submits sources priced for a
+    /// different target; a target it cannot pay for is not a candidate.</summary>
+    private static GameCommand? WithTarget(GameCommand command,ActionOption action,string targetId)
+    {
+        command=command with { TargetId=targetId };
+        if(action.TargetGold is not null && action.TargetGold.TryGetValue(targetId,out var quote))
+            return quote.Payments.Length==0 ? null : command with { SourceIds=quote.Payments[0].SourceIds };
         return command;
     }
 
@@ -100,6 +111,9 @@ public static class TrainingOpponent
             case "useAbility":
                 if(command.AbilityId is "border-first" or "border-game") return command.AbilityId=="border-first"?140:35;
                 if(command.AbilityId=="shunya-honor") return 100;
+                // Deck search (issue #312): a modest bot uses Ikoma Shizuka's search when nothing more useful is on offer
+                // (just above passing), which is what lets a whole AI-vs-AI match exercise the full search flow.
+                if(command.AbilityId=="shizuka-search") return 12;
                 var abilityTarget=self.Home.Concat(self.Army).Concat(self.Hand).Concat(opponent.Home).Concat(opponent.Army).FirstOrDefault(c=>c.Id==command.TargetId);
                 return abilityTarget is null ? -20 : AbilityValue(command.AbilityId,abilityTarget,self,opponent,view);
             case "proclaim": return 1000;
@@ -130,6 +144,15 @@ public static class TrainingOpponent
                 if(card?.Definition?.Effect=="bow-small") return target is {Bowed:false}?90+target.Force:0;
                 if(target?.Bowed==true) return 0;
                 return 70;
+            // The Declaration Segment: declare when the whole unbowed home army would threaten the weakest province, as the old
+            // per-maneuver attack score did, otherwise decline (pass scores 10).
+            case "declareAttack":
+                var readyUnits=self.Home.Where(c=>c.Definition?.Type==CardType.Personality && !c.Bowed).Select(c=>c.Id).ToHashSet(StringComparer.Ordinal);
+                var declaredForce=ArmyForce(self.Home.Where(c=>readyUnits.Contains(c.Id) || c.AttachedTo is not null && readyUnits.Contains(c.AttachedTo)));
+                var weakest=opponent.Provinces.Where(p=>!p.Destroyed).OrderBy(p=>p.Strength).ThenBy(p=>p.Index).FirstOrDefault();
+                if(weakest is null || declaredForce==0) return -100;
+                var homeDefense=ArmyForce(opponent.Home);
+                return declaredForce>homeDefense+weakest.Strength?90+declaredForce-homeDefense:declaredForce>weakest.Strength && homeDefense==0?80:0;
             case "attack":
                 if(command.Assignments is not {Count:>0}) return -100;
                 var attacking=self.Home.Where(c=>command.Assignments.ContainsKey(c.Id) || c.AttachedTo is not null && command.Assignments.ContainsKey(c.AttachedTo));
@@ -143,6 +166,42 @@ public static class TrainingOpponent
                 if(enemyForce==0) return 0;
                 return ownForce>=enemyForce?95:ownForce+StrongestThreatProvinceStrength(self,opponent)>=enemyForce?60:self.Provinces.Count(p=>!p.Destroyed)==1?50:0;
             case "pass": return 10;
+            // Deck search (issue #312): a modest bot never stalls in a search. It takes the first eligible card the engine
+            // lists (the list is already sorted by type then name, and holds only eligible entries), passes when the
+            // engine offers Pass (which it does only when nothing qualifies), attaches a found Region to the first
+            // offered province, and discards its least useful hand card after a Terrain. Ties keep the engine's order.
+            case "chooseSearchDeck": case "selectSearchCard": case "passSearch": case "chooseSearchProvince": return 100;
+            // Look at the top N cards (issue #322): a modest bot answers a look with the first arrangement the engine offers -- the
+            // simplest legal one (keep everything in order when that is legal, otherwise take the top card that may be taken) -- and
+            // picks the first offered deck.
+            case "chooseLookDeck": case "arrangeTopCards": return 100;
+            case "chooseSearchDiscard":
+                var discard=self.Hand.FirstOrDefault(c=>c.Id==command.TargetId);
+                return discard is null?0:100-HandValue(discard);
+            // The opposing player's Either/Or choice (issue #338): pay when the engine offers a payable Gold option (a modest bot keeps its action), then bow the
+            // threatened Personality, then lose Honor, and only then take the consequence. Copying a keyword or ability
+            // (Fukuzo): the first candidate the engine lists.
+            case "chooseEitherOr": return command.Choice switch { "pay" => 110, "bow" => 90, "honor" => 70, _ => 60 };
+            case "chooseCopyKeyword": case "chooseCopyAbility": return 100;
+            // The opposing player's variable payment (issue #373, Virtuous Charity): a modest bot answers with the engine's default, paying nothing.
+            case "chooseOpponentPayment": return 100;
+            // A forced discard (Times of Strife, Daigotsu Bofana; issue #333): the same modest rule as the discard after a Terrain -- give up
+            // the least useful card in hand.
+            case "forcedDiscard":
+                var forced=self.Hand.FirstOrDefault(c=>c.Id==command.TargetId);
+                return forced is null?0:100-HandValue(forced);
+            // Battle Phase timing (issue #310): the before-this-battle-resolves choices. Any legal answer is acceptable to a
+            // modest practice opponent: keep its strongest Personality, bow the strongest enemy one, and take effects in offered order.
+            case "encircledSelect":
+                var kept=self.Army.FirstOrDefault(c=>c.Id==command.TargetId);
+                return 100+(kept?.Force??0);
+            case "encircledOrder": case "beforeBattleOrder": return 50;
+            // A conditional effect choice (issue #337, Mirumoto Yumaru): a modest bot never stalls on it; every offered option is legal, so it
+            // takes the first one the engine lists (ties keep the engine's order).
+            case "chooseEffect": return 100;
+            case "beforeBattleOptional":
+                var optionalTarget=opponent.Army.FirstOrDefault(c=>c.Id==command.TargetId);
+                return command.Choice=="use" ? 60+(optionalTarget?.Force??0) : 20;
             default: return -100;
         }
     }
@@ -180,6 +239,7 @@ public static class TrainingOpponent
         "purchase"=>"Develop Gold production early, then recruit Personalities and preserve a useful Proclaim opportunity.",
         "overlay"=>"Recruit the higher-Experience Personality for free while preserving the existing unit.",
         "proclaim"=>"Take the available once-per-turn Honor gain after the Personality enters play.",
+        "declareAttack"=>"Declare an attack when visible Force can threaten a province.",
         "attack"=>"Commit the offered unbowed army when visible Force can threaten a province.",
         "assignDefense"=>"Defend the battlefield with the largest visible attacking army.",
         "playStrategy"=>"Use a legal Battle action to improve the visible Force comparison.",

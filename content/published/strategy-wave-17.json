@@ -1,0 +1,32 @@
+{
+  "Profile": "strategy-wave-17",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-690",
+      "Name": "Banish All Doubt",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Choose your performing unbowed Tactician: Look at the top four cards of your Fate deck. Put one of them in your hand and put the other three on the bottom of your deck in any order.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-690.jpg",
+      "Keywords": [
+        "Tactical"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "banish-all-doubt-look"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

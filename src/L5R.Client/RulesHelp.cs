@@ -9,7 +9,7 @@ public static class RulesHelp
     public static readonly (string Key, string Title, string Body)[] Topics =
     [
         ("bow", "Bowed / unbowed", "A sideways card is bowed: it has been used. Upright cards are unbowed. Cards normally straighten at the start of their controller's turn; some effects prevent this. Each attachment keeps its own bowed state."),
-        ("gold", "Gold & payment", "Ready Gold is potential production, not a stored balance. Choose unbowed Holdings or your Stronghold to pay a cost. Those sources bow when you confirm. Excess production is lost after that payment."),
+        ("gold", "Gold & payment", "Ready Gold is potential production, not a stored balance. Any action with a Gold cost shows its price and how it was worked out: fixed on the card or ability, worked out from the target you choose, or an amount you choose. Choose unbowed Holdings or your Stronghold to pay it. Those sources bow when you confirm. Excess production is lost after that payment."),
         ("province", "Provinces & home", "Each province holds a Dynasty card until it enters play. Recruited Personalities and Holdings live at home; they do not belong to their original province. During an attack, each unit is assigned to a defending province's battlefield."),
         ("unit", "Personalities & attachments", "A unit is a Personality and its attached cards. Items and Followers belong to that Personality, not a province. They move together. Use the + number beneath a unit to spread its attachments and inspect each card."),
         ("force", "Force, Chi & Personal Honor", "Force (F) determines army strength in battle. A bowed ordinary Personality prevents its entire unit from contributing at resolution. Reducing an unbowed Personality to 0 Force does not remove its Followers’ contribution. Chi (C) and Personal Honor are separate statistics used by card effects. Current values in the card’s corner panels include active modifiers; the spear standard shows the unit’s battle contribution."),
@@ -26,7 +26,8 @@ public static class RulesHelp
         Phase.Straighten => "Resolve straightening of eligible cards. Effects may prevent a card from straightening or offer a choice to leave it bowed; follow any required choice shown by the game.",
         Phase.Events => "Resolve Events-phase effects and any required choices. When none require a decision, the game continues automatically.",
         Phase.Action => "Use a Limited or Open action, or attach a card from your hand. Select a card to see its legal actions. Pass when you are ready to move on.",
-        Phase.AttackDeclaration => "Choose a highlighted Personality, then an opposing province. Repeat for each attacker and confirm. Leave units at home to keep them out of this attack.",
+        Phase.AttackDeclaration => "Declare an attack, or decline to end the Attack Phase. Declaring creates a battlefield at each of your opponent's provinces, whether or not anyone is assigned to it.",
+        Phase.InfantryDeclaration => "Choose a highlighted Personality, then an opposing province. Repeat for each attacker and confirm. Leave units at home to keep them out of this attack.",
         Phase.DefenseAssignment => "Choose your defenders and the provinces they will protect. A Personality and its attachments move together when you confirm.",
         Phase.BattleSelection => "Choose a contested province to resolve next. Each battlefield resolves separately; its units are shown in the same lane.",
         Phase.Battle => "Select a card to use a Battle action, or pass. Two consecutive passes resolve this battle. Check both armies' Force and the province strength first.",
@@ -48,9 +49,10 @@ public static class RulesHelp
 
     public static string ActionGuide(string type) => type switch
     {
-        "purchase" => Topic("gold"),
+        "purchase" or "recruitReserve" => Topic("gold"),
         "equip" => "Attach this card to a legal Personality. Choose the recipient and any Gold sources, then confirm. " + Topic("unit"),
         "attack" or "assignDefense" => Topic("targets"),
+        "declareAttack" => PhaseGuide(Phase.AttackDeclaration),
         "pass" => "Give the other player an opportunity to act. Two consecutive passes usually advance the current action window; in battle they resolve combat.",
         "endDynasty" => "End your Dynasty Phase and turn. Discard unwanted province cards before ending if you wish; starting to discard prevents further recruiting.",
         "proclaim" => Topic("honor"),

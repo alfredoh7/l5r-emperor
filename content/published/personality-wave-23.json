@@ -1,0 +1,35 @@
+{
+  "Profile": "personality-wave-23",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-223",
+      "Name": "Akodo Kakihara",
+      "Type": "Personality",
+      "Clan": "Lion",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 4,
+      "HonorRequirement": 7,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After another player's action targets Kakihara: Give him a Force bonus equal to his Personal Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-223.jpg",
+      "Keywords": [
+        "Lion Clan",
+        "Paragon",
+        "Samurai"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "kakihara-force-bonus",
+        "kakihara-attack-force-bonus"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

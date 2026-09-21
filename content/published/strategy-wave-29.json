@@ -1,0 +1,106 @@
+{
+  "Profile": "strategy-wave-29",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10181",
+      "Name": "Virtuous Charity",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: If it is not your turn, choose another player: You come across some starving peasants in need. You, then the player, each pay zero or more Gold. Whoever paid more Gold gains Honor equal to the difference between the two amounts paid, or 4, whichever is less.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10181.jpg",
+      "Keywords": [
+        "Bushido Virtue",
+        "Compassion"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "virtuous-charity-open"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-639",
+      "Name": "At Any Cost",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Dark Virtue Battle, :gstar:: Recruit your target performing dead Samurai.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-639.jpg",
+      "Keywords": [
+        "Dark Virtue",
+        "Will"
+      ],
+      "Focus": 1,
+      "Abilities": [
+        "at-any-cost-recruit"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-2020",
+      "Name": "Disgraceful Conduct",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Even if you control no units at the current battlefield, pay Gold equal to a target Personality or unit's total Gold cost minus 4: Bow it.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-2020.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "disgraceful-conduct-bow",
+        "disgraceful-conduct-bow-unit"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-82",
+      "Name": "A Stain Cleansed",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle, :gstar:: Target your performing unbowed Magistrate to target an enemy card without attachments with Gold Cost equal to what you paid minus 2 or an enemy Personality whose unit's total Gold Cost is equal what you paid minus 2. Destroy the card or unit.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-82.jpg",
+      "Keywords": [],
+      "Focus": 1,
+      "Abilities": [
+        "a-stain-cleansed-destroy"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}
