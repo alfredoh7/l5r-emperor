@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Published the first portable Windows Regions/Celestials review and posted the authorized Mendon notification on PR292 (comment 5732927474). Added reusable exact-source packaging, isolated prepared launchers, feedback links, private-release verification, Claude instructions and notification gating. No game code or main merge.",
-  "validation": "Tooling commit 5989a73 passed Mac/Windows foundation CI, Context/handoff, routing and Windows review package CI. Eight local/Windows regression groups passed. Windows run 35367454230 downloaded the actual ZIP, verified SHA-256 465cdf25d4105d2876c0b1c79a2fc540b9e0f487de35ea81ca3b0feccfe72272 and 1300434321 bytes, started the bundled game runtime headlessly, verified isolated user data, and executed all five launchers including paths with spaces/ampersands/exclamations. Strict export and GitHub-upload digest passed. Final follow-up only records delivery URLs/evidence. Native Windows graphical/rules acceptance and email receipt are not claimed.",
-  "remaining": "Implementation and notification complete. PR298 shared tooling review from Mendon; PR292 gameplay review and its three automated findings remain open. Neither PR is merged. Published package: https://github.com/alfredoh7/l5r-emperor/releases/tag/preview-pr292-7360ff1c17-r1-windows . Notification: https://github.com/alfredoh7/l5r-emperor/pull/292#issuecomment-5732927474 .",
+  "summary": "Deliver Alfredo-approved UI demos 1-4 as an isolated Windows package with named prepared launchers and explicit Mendon approval/feedback instructions; 5-8 excluded and unapproved.",
+  "validation": "8/8 packaging/publication Python tests passed. Exact source db649158 exported with complete Windows runtime/artwork and no development source files. Actual ZIP launchers, source pin and approval/feedback wording inspected. Source native Mac 1920x1080 and 1280x800 deck checks and full non-client suite passed; 10/10 transport. Uploaded asset validation/Windows CI and targeted notification follow using pinned receipt.",
+  "remaining": "Windows review package job must pass on exact receipt commit before publish.py deliver notifies Mendon. No main merge: Mendon approval and dependency review required; 5-8 await Alfredo. Windows graphical and external multiplayer acceptance pending.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/297",
   "branch": "codex/297-windows-review",
-  "updated": "2026-09-18T16:24:49.129874+00:00"
+  "updated": "2026-09-21T07:15:05.368214+00:00"
 }
