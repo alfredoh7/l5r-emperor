@@ -151,7 +151,7 @@ public partial class Main
         ApplyTableCamera();
     }
 
-    private bool CameraBlocked => SearchPanelOpen || CopyPanelOpen || PracticeVisible || MenuVisible || !GetWindow().HasFocus() || (_fullscreenGate?.Visible ?? false)
+    private bool CameraBlocked => LookPanelOpen || SearchPanelOpen || CopyPanelOpen || PracticeVisible || MenuVisible || !GetWindow().HasFocus() || (_fullscreenGate?.Visible ?? false)
         || GetChildren().OfType<Window>().Any(w => w.Visible)
         || _expandedUnits.Count > 0;
 
@@ -164,6 +164,7 @@ public partial class Main
             attackReview.IsVisibleInTree() && attackReview.GetGlobalRect().HasPoint(viewportPoint)) return false;
         if (_root.GetNodeOrNull<Control>("OpponentPaymentReviewControls") is { } paymentReview &&
             paymentReview.IsVisibleInTree() && paymentReview.GetGlobalRect().HasPoint(viewportPoint)) return false;
+        if (_root.GetNodeOrNull<Control>("LookReviewControls") is { } lookReview && lookReview.IsVisibleInTree() && lookReview.GetGlobalRect().HasPoint(viewportPoint)) return false;
         if(_eventHandBar is {Visible:true} && _eventHandBar.GetGlobalRect().HasPoint(viewportPoint))return false;
         if(_shownPreview is { } preview && IsInstanceValid(preview) && preview.GetGlobalRect().HasPoint(viewportPoint))return false;
         // The Fallen strips can overlap the projection. Check only the visible

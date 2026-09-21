@@ -56,7 +56,7 @@ public partial class Main
     private void ObserveShownCards()
     {
         if(_session.Snapshot is null){_shownPanel.Hide();_shownToggle.Hide();HideShownPreview();return;}
-        _shownToggle.Visible=!SearchPanelOpen;
+        _shownToggle.Visible=!LookPanelOpen&&!SearchPanelOpen;
         var live=_session.Snapshot.View;
         if(_shownMatchKey!=_session.MatchKey)
         {
@@ -78,8 +78,8 @@ public partial class Main
         }
         _shownObservedVersion=live.Version;
         if(_shownOpen)MarkShownRead();
-        _shownPanel.Visible=_shownOpen&&!SearchPanelOpen;
-        _inspectorPanel.Visible=!SearchPanelOpen&&!_shownOpen&&(!EventDecisionActive||PresentationBusy);
+        _shownPanel.Visible=_shownOpen&&!LookPanelOpen&&!SearchPanelOpen;
+        _inspectorPanel.Visible=!LookPanelOpen&&!SearchPanelOpen&&!_shownOpen&&(!EventDecisionActive||PresentationBusy);
         _eventSidebar.Visible=!_shownOpen&&EventDecisionActive&&!PresentationBusy;
         _shownToggle.Text=$"Shown cards · {records.Length}"+(ShownUnread>0?$" · {ShownUnread} new":"")+(_shownOpen?"  ▾":"  ▴");
         _shownToggle.AddThemeStyleboxOverride("normal",SidebarSkin.Surface(true,tint:ShownUnread>0?new Color(1.35f,1.25f,.9f):Colors.White));

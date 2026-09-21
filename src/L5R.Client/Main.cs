@@ -121,6 +121,7 @@ public partial class Main : Node
         if (_capturePath is not null && _captureMode.StartsWith("published-shown",StringComparison.Ordinal)) { ProcessShownCapture(delta); return; }
         if (_capturePath is not null && _captureMode.StartsWith("published-action-lock",StringComparison.Ordinal)) { ProcessActionLockCapture(delta); return; }
         if (_capturePath is not null && _captureMode.StartsWith("published-search",StringComparison.Ordinal)) { ProcessSearchCapture(delta); return; }
+        if (_capturePath is not null && _captureMode.StartsWith("published-top-cards", StringComparison.Ordinal)) { ProcessLookCapture(delta); return; }
         if (_capturePath is not null && _captureMode.StartsWith("published-opponent-payment",StringComparison.Ordinal)) { ProcessOpponentPaymentCapture(delta); return; }
         if (_capturePath is not null && _captureMode.StartsWith("published-either-or",StringComparison.Ordinal)) { ProcessEitherCapture(delta); return; }
         if (_capturePath is not null && _captureMode.StartsWith("published-copy",StringComparison.Ordinal)) { ProcessCopyCapture(delta); return; }
@@ -314,6 +315,8 @@ public partial class Main : Node
         _inspectorPanel.Size = new Vector2(SidebarWidth, 960);
         FitShownCards();
         FitSearchPanel();
+        FitLookPanel();
+        FitLookReviewControls();
         FitEitherReviewControls();
         FitOpponentPaymentReviewControls();
         FitCopyPanel();
@@ -427,6 +430,7 @@ public partial class Main : Node
             _opponentPaymentKey=null;_eitherOrKey=null;_eitherNoticeMatch=null;_eitherNotice=null;
             if(_chosen?.Type is "chooseEitherOr" or "chooseOpponentPayment"){_chosen=null;_sources.Clear();}
             ClearSearchPanel();
+            ClearLookPanel();
             ClearCopyPanel(true);_copyNoticeMatch=null;_copyNotice=null;
             ObserveShownCards();
             _eventSidebar.Visible=false;_eventHandBar.Visible=false;_eventDiscardId=null;
