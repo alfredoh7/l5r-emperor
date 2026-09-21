@@ -24,6 +24,7 @@ internal static class CreatedValuesTests
             ("Nakanu Technique: after engaging, your performing unbowed opposed Personality at the battlefield gets two Nakanu's Creations Followers and you lose 1 Honor; the Followers are his, join his unit and are removed from the game if he dies", NakanuTechniqueEngage),
             ("Nakanu Technique's performer must be unbowed, at the battlefield and opposed, the Reaction is spent once, and it is offered to the Defender too", NakanuTechniqueRules),
             ("Values are printed values read from other cards: a Force from the target's Personal Honor (plus a bonus with a keyword), a Chi and Personal Honor taken and reduced, floored at 0; the current values and the modifiers on the subject are not read", ComputedValues),
+            ("A created copy of a card that has per-instance printed values (Your Name is Mine with the performer's title and Gold Cost) is the same card: it keeps them, and is marked a copy", ACopyKeepsThePrintedValues),
             ("Values from the performer, the source and the wielder, and a Personality count: Count Personalities are created together, each with its own id, and one entry window opens", ValueSubjectsAndCounts),
         ];
         runner.Run("created-values", tests);
@@ -406,6 +407,25 @@ internal static class CreatedValuesTests
         var h = Engine(zero);
         Accept(h, h.QueryActions(0).First(a => a.Enabled && a.Command?.AbilityId == "training-create-computed" && a.TargetIds!.Contains(low.Id)).Command! with { TargetId = low.Id });
         Check(Created(h, LionAncestor).Printed is { Force: 0, Chi: 5, PersonalHonor: 0 }, $"a Personal Honor of 0 gives Force 0, and 0 - 1 is floored at 0: {Created(h, LionAncestor).Printed?.Force}/{Created(h, LionAncestor).Printed?.PersonalHonor}");
+    }
+
+    private static void ACopyKeepsThePrintedValues()
+    {
+        var s = Table(Phase.Action);
+        var copyist = Put(s, "training-copyist", 0, Zone.Home);
+        var oni = Put(s, YourNameIsMine, 0, Zone.Home);
+        oni.Printed = CardCatalog.Get(YourNameIsMine) with { Name = "Borrowed Name", GoldCost = 6 };
+        var plain = Put(s, YourNameIsMine, 0, Zone.Home);
+        var e = Engine(s);
+        Accept(e, Offer(e, 0, "training-copy-personality", copyist.Id, oni.Id));
+        var copy = e.State.Cards.Values.Single(c => c.CreatedCopy);
+        Check(copy.Printed is { Name: "Borrowed Name", GoldCost: 6, Force: 9 } && copy.DefinitionId == YourNameIsMine, "the copy is the target as it is printed");
+        Check(e.State.Events.Any(x => x.Type == "cardCreated" && x.Message == "Crane created a copy of Borrowed Name." && x.CardId == copy.Id), "the log names the title");
+        foreach (var viewer in new[] { 0, 1 })
+            Check(e.GetView(viewer).Players[0].Home.Single(c => c.Id == copy.Id) is { CreatedCopy: true, Definition: { Name: "Borrowed Name", GoldCost: 6 } }, $"viewer {viewer} sees the copy with the title and cost");
+        var f = Engine(s);
+        Accept(f, Offer(f, 0, "training-copy-personality", copyist.Id, plain.Id));
+        Check(f.State.Cards.Values.Single(c => c.CreatedCopy).Printed is null, "a card with no per-instance values is copied with none");
     }
 
     private static void ValueSubjectsAndCounts()

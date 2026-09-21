@@ -2233,6 +2233,20 @@ public static class PublishedContent
         return snapshot;
     }
 
+    /// <summary>spell-wave-11 (issue #398).</summary>
+    public static PublishedSnapshot SpellWave11 { get; } = LoadSpellWave11();
+
+    private static PublishedSnapshot LoadSpellWave11()
+    {
+        var snapshot = Load("L5R.Published.SpellWave11.json", "spell-wave-11", requireDecks: false);
+        if(snapshot.Cards.Length != 1)
+            throw new InvalidOperationException("Unexpected spell-wave-11 card count.");
+        foreach(var card in snapshot.Cards)
+            if(card.Type != CardType.Spell)
+                throw new InvalidOperationException($"spell-wave-11 card is not a Spell: {card.Id}");
+        return snapshot;
+    }
+
     /// <summary>holding-wave-4 (issue #406).</summary>
     public static PublishedSnapshot HoldingWave4 { get; } = LoadHoldingWave4();
 

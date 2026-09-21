@@ -602,11 +602,13 @@ public sealed partial class MatchEngine
     // token has an entering-play Reaction of its own and no watcher is known to matter here.
     // battlefield (issue #394, "at this battlefield"): the province whose battle the card is created at, on its controller's side; null is home.
     // printed (issue #402): the card's own printed values when they are not the scan's; beforeWindow: the rest of the creating action, run before any entry window opens.
-    private bool CreatePersonality(int ownerId, CardDefinition definition, bool duringEntryReaction, int? battlefield, out CardInstance card, CardDefinition? printed = null, Action? beforeWindow = null)
+    // createdCopy (issue #398): the card is a created copy of another card, marked per instance (CardInstance.CreatedCopy); a copy of a card with printed values keeps them.
+    private bool CreatePersonality(int ownerId, CardDefinition definition, bool duringEntryReaction, int? battlefield, out CardInstance card, CardDefinition? printed = null, Action? beforeWindow = null, bool createdCopy = false)
     {
-        card=new CardInstance{Id=$"created-{++_state.CreatedCardSequence:D4}",DefinitionId=definition.Id,Printed=printed,OwnerId=ownerId,Zone=battlefield is null?Zone.Home:Zone.Battlefield,ProvinceIndex=battlefield,FaceUp=true};
+        card=new CardInstance{Id=$"created-{++_state.CreatedCardSequence:D4}",DefinitionId=definition.Id,Printed=printed,OwnerId=ownerId,Zone=battlefield is null?Zone.Home:Zone.Battlefield,ProvinceIndex=battlefield,FaceUp=true,CreatedCopy=createdCopy};
         _state.Cards.Add(card.Id,card);
-        Emit("cardCreated",$"{Player(ownerId).Name} created {(printed??definition).Name}{(battlefield is null?"":" at the battlefield")}.",ownerId,card.Id);
+        var title=(printed??definition).Name; var where=battlefield is null?"":" at the battlefield";
+        Emit("cardCreated",createdCopy?$"{Player(ownerId).Name} created a copy of {title}{where}.":$"{Player(ownerId).Name} created {title}{where}.",ownerId,card.Id);
         QueueOverconfidentDraw(card);
         beforeWindow?.Invoke();
         if(duringEntryReaction) { ApplyMandatoryEntryEffects(ownerId,card); return false; }
@@ -2219,7 +2221,7 @@ public sealed partial class MatchEngine
             // actingPlayerId like Lady Matsu's Rage below), since battle resolution's own casualty
             // sweep -- the most common way one actually dies -- calls this with no actingPlayerId at
             // all.
-            if(Definition(card).CreatedOnly)
+            if(IsCreatedCard(card))
             {
                 card.Zone=Zone.RemovedFromGame;
                 Emit("removedFromGame",$"{Definition(card).Name} was destroyed and removed from the game.",card.OwnerId,card.Id);
