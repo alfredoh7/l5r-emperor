@@ -1,0 +1,20 @@
+[
+  {
+    "card_id": "oracle-l5r-6219",
+    "printing_set": [
+      "Second City"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=6219",
+    "image_path": "assets/reference/oracle/second-city/webp/oracle-l5r-6219-printing-1-image-1.webp",
+    "image_sha256": "a28133d44bac87f41e47293e6313c2540048b7656b42d8a5b1f832d53db09073"
+  },
+  {
+    "card_id": "oracle-l5r-1190",
+    "printing_set": [
+      "Honor and Treachery"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=1190",
+    "image_path": "assets/reference/oracle/honor-and-treachery/webp/oracle-l5r-1190-printing-6-image-1.webp",
+    "image_sha256": "7b652d01d317f4ba37251cce8fd1926ef8edc318d5d14c771b47ec3ba2e366ca"
+  }
+]

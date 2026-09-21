@@ -2335,4 +2335,8 @@ public static class PublishedContent
     public static PublishedSnapshot StrategyWave36 { get; } = Load("L5R.Published.StrategyWave36.json", "strategy-wave-36", requireDecks: false);
     /// <summary>Spell wave 14 (issue #415): Strength of the Tsunami.</summary>
     public static PublishedSnapshot SpellWave14 { get; } = Load("L5R.Published.SpellWave14.json", "spell-wave-14", requireDecks: false);
+    /// <summary>Strategy wave 37 (issue #416): A Quiet Transaction.</summary>
+    public static PublishedSnapshot StrategyWave37 { get; } = Load("L5R.Published.StrategyWave37.json", "strategy-wave-37", requireDecks: false);
+    /// <summary>Holding wave 5 (issue #416): Red Crane Dojo and Bushi Dojo.</summary>
+    public static PublishedSnapshot HoldingWave5 { get; } = Load("L5R.Published.HoldingWave5.json", "holding-wave-5", requireDecks: false);
 }

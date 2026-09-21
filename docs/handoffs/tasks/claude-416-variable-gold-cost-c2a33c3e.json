@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Second City primitives 2/6 (#416): a Gold cost read from a printed number of a card (base or current Force, Chi, Gold Cost, Personal Honor, Focus, Province Strength, of target, performer or source, plus or minus a modifier), conditional Holding production by what is being paid for, and temporary removal of keywords and Clan alignments until an action ends; wires A Quiet Transaction, Red Crane Dojo and (as the second user of the production primitive) Bushi Dojo. Rules lane; the client-lane files are only the three shipped art scans and their .import files. Stacked on #415 (PR 421).",
+  "validation": "Local: every test suite passes (Core 968 lines incl. gold-stat-cost 8, AI 28, server 8, transport 7; client builds); the local Godot import step exits 1 with the two known f.is_null errors on unrelated existing assets, CI is authoritative. 35 mutation checks (stat rule, per-payment subject through quote, validation and payment, conditional conditions, temporary removal and restore, Red Crane's Reaction, A Quiet Transaction): two survived the first tests, the tests were strengthened, and every one now fails a named test.",
+  "remaining": "Readings 8-12 for Mendon in docs/decisions/2026-09-21-second-city-primitives.md (Strength = Force / Province Strength; A Quiet Transaction's lock kinds; Red Crane's Reaction follows the Oracle text; Bushi Dojo's condition; what counts as paying for a Ninja card). The temporary removal is not given back while an action is paused for an effect choice or a duel, only when it ends. Stages 3-6 (#417-#420) follow.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/416",
+  "branch": "claude/416-variable-gold-cost",
+  "updated": "2026-09-21T14:37:24.701972+00:00"
+}

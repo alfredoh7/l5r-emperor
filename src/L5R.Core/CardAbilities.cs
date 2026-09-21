@@ -1698,6 +1698,19 @@ public static class AbilityCatalog
                  new("straighten-move", "Straighten him and move him home", [BranchEffect.StraightenWielder, BranchEffect.MoveWielderHome])],
                 new("none", "Nothing happens", []))),
         ["tsunami-move-home"] = new("Battle", "Bow this card and target an enemy Personality: Move him home. If he moved, negate his (future) movement", "enemy-personality", Costs: ActionCost.BowSource),
+        // Training fixtures for the Gold-cost-from-a-stat rule (issue #416): the performer's CURRENT Chi plus 2; the source's own printed Focus Value minus 1, at least 1.
+        ["training-stat-cost-performer"] = new("Open", "Training: pay Gold equal to your performing Personality's current Chi plus 2", "none", Performer: "own-personality",
+            Cost: GoldCostRule.StatValue(CostStatSubject.Performer, CostStat.Chi, basePrinted: false, modifier: 2)),
+        ["training-stat-cost-source"] = new("Open", "Training: pay Gold equal to this card's Focus Value minus 1, at least 1", "none",
+            Cost: GoldCostRule.StatValue(CostStatSubject.Source, CostStat.Focus, basePrinted: true, modifier: -1, floor: 1)),
+        // A Quiet Transaction (oracle-l5r-70): the first Open action costs Gold equal to the target's BASE Personal Honor plus one (GoldCostRule.StatValue, issue #416) and locks his assignment and
+        // movement to battlefields for the turn (MovementLocks.cs); the second gives him two -2 Gold Cost tokens.
+        ["quiet-transaction-lock"] = new("Open", "Target a dishonorable Personality and pay Gold equal to his base Personal Honor plus one: He may not be assigned, and will not move, to battlefields this turn", "personality",
+            TargetMustBe: TargetStatus.IsDishonorable, Cost: GoldCostRule.StatValue(CostStatSubject.Target, CostStat.PersonalHonor, basePrinted: true, modifier: 1)),
+        ["quiet-transaction-tokens"] = new("Open", "Target a dishonorable Personality: Give him two -2 Gold Cost tokens", "personality", TargetMustBe: TargetStatus.IsDishonorable),
+        // Red Crane Dojo (oracle-l5r-6219): the conditional production is its Effect (ConditionalProduction.cs); this is its Ninja Tireless Reaction, taken even while the Holding is bowed.
+        ["red-crane-dojo-ninja"] = new("Reaction", "Ninja Tireless Reaction, bow this card: After an action targets your Personality, remove Ninja and Shadowlands from him until the action ends", "none",
+            Trigger: ReactionTriggers.TargetedByAction, ActionKeywords: ["Ninja"]),
         // Great Sacrifice (oracle-l5r-2900): destroy your performing Personality (the cost) to destroy an enemy unit whose total Force does not exceed the performer's Force plus Personal Honor (plus one if he is defending).
         ["great-sacrifice-destroy"] = new("Battle", "Destroy your performing unbowed Personality and target an enemy unit with total Force equal to or lower than your performer's Force, plus Personal Honor, plus one if he is defending: Destroy the enemy unit", "enemy-unit-within-performer-sacrifice",
             Performer: "own-unbowed-personality-at-battle", Costs: [new(CostVerbs.Sacrifice, CostSubject.Performer)]),
@@ -2825,6 +2838,7 @@ public sealed partial class MatchEngine
         if (!attack.Negated) ResolveAttackNow(attack.AbilityId, attack.PlayerId, attack.TargetId, attack.Strength, attack.SourceId);
         else { AttackTargetedACard(attack.AbilityId, attack.PlayerId, attack.TargetId); _state.RangedAttackStrengthReductionImmune = false; }
         _state.NegatedEffects.Clear();
+        RestoreTemporaryRemovals(TemporaryRemovals.Action);
         // The deferred Attack is the action's resolution: "after the resolution of your [keyword] action" traits
         // fire now, not when it was announced (ExecuteAbilityEffects returned before its own funnel). The inherited
         // keywords are the ability's source card's (Command.CardId), not the performer's (SourceId).
@@ -3080,7 +3094,9 @@ public sealed partial class MatchEngine
                 // Akodo Dairuko (oracle-l5r-200): "Tireless Reaction" -- the action may be taken even while the card is bowed.
                 or "dairuko-rally"
                 // Strength of the Tsunami: "Battle: Even if this card is bowed, if this Shugenja is Water: Straighten him."
-                or "tsunami-straighten", "Abilities on bowed cards cannot be used.");
+                or "tsunami-straighten"
+                // Red Crane Dojo: "Ninja Tireless Reaction".
+                or "red-crane-dojo-ninja", "Abilities on bowed cards cannot be used.");
             uses = source.AbilityUses;
         }
         // The per-turn limit is AbilityDefinition.UsesPerTurn (AbilityLimits.cs). A once-per-GAME ability (AbilityDefinition.OncePerGame: Border Keep's refresh, Bo of Water) never resets: any stamp spends it.
@@ -5488,6 +5504,18 @@ public sealed partial class MatchEngine
                 if (zoneBefore == Zone.Battlefield && target.Zone == Zone.Home) LockMovement(target, Definition(source!).Name, MovementKinds.Home | MovementKinds.ToBattlefield);
                 break;
             }
+            case "training-stat-cost-performer": case "training-stat-cost-source": break;
+            // A Quiet Transaction: the Gold was the cost; the target may not be assigned or move to a battlefield this turn. The second half puts two -2 Gold Cost tokens on him.
+            case "quiet-transaction-lock": LockMovement(target!, Definition(source!).Name, MovementKinds.ToBattlefield | MovementKinds.Assign); break;
+            case "quiet-transaction-tokens":
+                CreateToken(target!, "Gold Cost", source!.Id, "GoldCost", -2);
+                CreateToken(target!, "Gold Cost", source.Id, "GoldCost", -2);
+                break;
+            // Red Crane Dojo: bowed as its cost (a Tireless Reaction may also be taken while it is bowed already); the targeted Personality is Ninja- and Shadowlands-less until the action ends.
+            case "red-crane-dojo-ninja":
+                source!.Bowed = true;
+                RemoveKeywordsAndClans(Card(HeldAction().TargetId!), TemporaryRemovals.Action, ["Ninja"], ["Shadowlands"]);
+                break;
             // Great Sacrifice: the performer's destruction was its cost; the enemy unit is destroyed.
             case "great-sacrifice-destroy": DestroyUnits([target!], false, player.Id); break;
             // Rage of the Spirits: both bows were paid as costs (the Shugenja's and the Spirit's); the enemy card is destroyed, and Earth pays a bonus.
