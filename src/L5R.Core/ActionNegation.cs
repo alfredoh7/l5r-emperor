@@ -60,8 +60,8 @@ public sealed partial class MatchEngine
         SpendAbilityUse(source?.AbilityUses ?? player.AbilityUses, ability, ability.UsageKey ?? command.AbilityId!);
         SpendHandPlayedCard(player, source);
         if (playedFromDiscard) RemoveFromGame(source!);
-        if (!consumedGrant && ForfeitsAdditionalActions(ability)) _state.AdditionalActions.RemoveAll(g => g.PlayerId == player.Id);
+        if (!consumedGrant && ForfeitsAdditionalActions(ability)) _state.AdditionalActions.RemoveAll(g => g.PlayerId == player.Id && Forfeitable(g));
         if (OpenOverconfidentDrawWindow(1 - player.Id)) return;
-        NextAction(player.Id, ForfeitsAdditionalActions(ability) && _state.AdditionalActions.Any(g => g.PlayerId == player.Id));
+        NextAction(player.Id, ForfeitsAdditionalActions(ability) && _state.AdditionalActions.Any(g => g.PlayerId == player.Id && Forfeitable(g)));
     }
 }

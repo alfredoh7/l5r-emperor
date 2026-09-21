@@ -101,7 +101,7 @@ public sealed partial class MatchEngine
 
     // "An ability that does not itself copy abilities" -- and one that triggers on its own card ENTERING play is not offered either:
     // that moment has already happened for the receiver, so the copy could never do anything.
-    private static bool CopyableAbility(AbilityDefinition ability) => !ability.CopiesAbilities && ability.Trigger != "own-enters-play";
+    private static bool CopyableAbility(AbilityDefinition ability) => !ability.CopiesAbilities && !ability.NotCopyable && ability.Trigger != "own-enters-play";
 
     private string[] CopyableKeywords(CardInstance source, CardInstance receiver) =>
         CurrentKeywordList(source).Where(keyword => !Keyword(receiver, keyword)).ToArray();

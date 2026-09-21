@@ -118,7 +118,9 @@ public sealed record CardDefinition(string Id, string Name, CardType Type, strin
     // "You may include up to N copies of this card in your deck" (Fading Shadows 10; issue #337): the deck-construction copy
     // limit this card prints in place of the usual 3 (1 for a Unique card). Read only by DeckWorkshop's soft legality note;
     // null is every card without such a line. It is a per-card limit, so it never changes what any other card is held to.
-    int? DeckCopyLimit = null);
+    int? DeckCopyLimit = null,
+    // Bo of Water: the Elite effect (never the Elite keyword) goes to the wielder only while he has this keyword ("While this Shugenja is Water, he contributes Force even if bowed").
+    string? AttachGrantsEliteEffectWhileWielderHas = null);
 
 /// <summary>One applied Force/Chi change, in application order, so a future card can negate a
 /// specific prior effect instead of only ever resetting a flat running total.</summary>
@@ -416,7 +418,10 @@ public sealed record FirstActionRestriction(int PlayerId, string? PerformerId, b
 /// single scoped card FROM A DISCARD PILE (Daigotsu Bofana - exp: "take an additional action to play it ... After it
 /// resolves, remove the card from the game"); it makes that card's Battle actions available, and consumed, like any
 /// grant.</summary>
-public sealed record AdditionalActionGrant(int PlayerId, string[]? ScopeCardIds, bool FromDiscard = false);
+///  <param name="Battle">The battle the grant belongs to (MatchState.BattleNumber), or null for one that needs no battle. A Ring's recruit grant
+/// (Mendon's ruling, issue #379: "A recruit grant at one battle is limited to that battle") is usable only at its own battle and lapses when that
+/// battle is over: made during a battle it belongs to that battle, made between battles (the Action phase) it belongs to the NEXT one.</param>
+public sealed record AdditionalActionGrant(int PlayerId, string[]? ScopeCardIds, bool FromDiscard = false, int? Battle = null);
 
 /// <summary>A discard a player owes: they choose the card from their hand (Times of Strife, Daigotsu Bofana - exp's entry).
 /// Reason names the card or rule in the prompt and the event.</summary>
@@ -612,6 +617,9 @@ public sealed class MatchState
     // it does not touch grants already sitting in AdditionalActions. All battle-scoped: cleared at
     // FinishBattleResolution, never carried into a later battle or turn.
     public List<AdditionalActionGrant> AdditionalActions { get; set; } = [];
+    // Which battle of the game is being fought (issue #379): incremented when a battle is selected, so it names the battle in progress from its Engage
+    // window through its aftermath, and stays that battle's number until the next one is selected. What a battle-scoped grant is compared against.
+    public int BattleNumber { get; set; }
     public GameCommand? PendingAdditionalAction { get; set; }
     public bool NoNewAdditionalActionsThisBattle { get; set; }
     // Attack-vs-Followers exceptions granted by another card (AttackFollowerException shape (e), Yoritomo
@@ -816,7 +824,10 @@ public sealed record GameCommand(string Type, int PlayerId, long ExpectedVersion
     string? CostOption = null,
     // Multi-target actions (issue #336): one entry per target slot of an ability that declares AbilityDefinition.Slots --
     // the cards (or the player) chosen for that slot. Null for every ability with a single Target.
-    SlotSelection[]? Selections = null);
+    SlotSelection[]? Selections = null,
+    // "Create a card" with a choice of cards (issue #394, "an Armor or Weapon Item"): the id of the scan the acting player chose among the ability's
+    // CreatedCardSpec.Or alternatives; null for an ability that creates a single card.
+    string? CreatedCard = null);
 public sealed record CommandResult(bool Accepted, string? Error, long Version, GameEvent[] Events);
 public sealed record PaymentOption(string[] SourceIds, int Produced, int Cost, int Excess);
 // Basis (issue #303): the human-readable derivation of Cost, e.g. "Training samurai cost 5 - 2 (Clan

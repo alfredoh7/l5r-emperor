@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Mendon's answers on #373 applied (follow-up to merged #378): A Stain Cleansed flipped to the scan reading (current total minus 2), At Any Cost enters at the current battlefield, Disgraceful Conduct player-chosen Personality or unit mode (unit bows every card), Virtuous Charity payments moved to resolution (negated action pays nothing, negated Honor gain leaves both payments).",
+  "validation": "bash tools/check.sh --skip-client all suites pass (24 gold-rulings tests); 18 mutation checks each killed by a named test; client project unchanged.",
+  "remaining": "None; ready for review. At Any Cost keeps the Battle presence requirement (not Absent): Mendon's example 'a battle with no units of the player' cannot arise; one flag if it should be Absent.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/373",
+  "branch": "claude/373-gold-rulings-answers",
+  "updated": "2026-09-20T20:17:37.996560+00:00"
+}

@@ -116,14 +116,20 @@ public sealed record AbilityDefinition(string Timing, string Label, string Targe
     // which is then "slots". Every slot has its own category and count; the command carries one SlotSelection per slot.
     TargetSlot[]? Slots = null,
     // A move to a destination the ability's own rule defines, of its source, its target or both together (see MoveDestinations.cs).
-    MoveSpec? Move = null);
+    MoveSpec? Move = null,
+    // "Create a [card]" (issue #387): the card the printed text says this action creates, as data; the engine instantiates the Proxy scan that fits (CreatedCards.cs).
+    CreatedCardSpec? Creates = null,
+    // Once per game, per source card (Border Keep's refresh, Bo of Water).
+    bool OncePerGame = false,
+    // "[Card]'s printed ability will not be copied" (Matsu Nimuro): no copy effect (CardCopy.cs) may take this ability.
+    bool NotCopyable = false);
 
 public static class AbilityCatalog
 {
     public static IReadOnlyDictionary<string, AbilityDefinition> All { get; } = new ReadOnlyDictionary<string, AbilityDefinition>(new Dictionary<string, AbilityDefinition>
     {
         ["border-first"] = new("Limited", "First-turn province refresh", "provinces"),
-        ["border-game"] = new("Limited", "Once-per-game province refresh", "provinces"),
+        ["border-game"] = new("Limited", "Once-per-game province refresh", "provinces", OncePerGame: true),
         ["shinden-choice"] = new("Open", "Offer bowing or 1 Honor", "shinden", Performer: "shugenja", Costs: ActionCost.BowPerformer),
         ["air-straighten"] = new("Open", "Straighten an Air Personality", "air"),
         // Training fixture for the generic keyword-satisfaction primitive (Immovable Object: "Battle/
@@ -227,6 +233,9 @@ public static class AbilityCatalog
         ["training-bow-guard"] = new("Reaction", "Training: before an action resolves, negate the bowing of your Personality it targets", "none", Trigger: "before-action-resolves"),
         ["training-negate-mover"] = new("Reaction", "Training: before an action resolves, target a Personality it would move: negate his movement from the action's effects", "deferred-action-mover", Trigger: "before-action-resolves"),
         ["training-negate-action"] = new("Reaction", "Training: after another player's action targets a card of yours: negate the action's effects", "none", Trigger: "before-action-resolves"),
+        // Issue #373 fixtures: reactions to an action that names no card (Virtuous Charity). No printed card negates either yet.
+        ["training-negate-untargeted-action"] = new("Reaction", "Training: before another player's action resolves: negate the action's effects", "none", Trigger: "before-action-resolves"),
+        ["training-negate-honor-gain"] = new("Reaction", "Training: before another player's opponent-payment action resolves: negate its Honor gain (the payments are still made)", "none", Trigger: "before-action-resolves"),
         ["training-slots-discard"] = new("Open", "Training: discard a target card from your hand", "slots", Slots: [new("card", "hand", "A card from your hand")]),
         ["training-move-current"] = new("Battle", "Training: move a target Personality of yours at home to the current battlefield", "own-personality-at-home", Move: new(MoveSpec.Target, MoveSpec.CurrentBattlefield), MovesToBattle: true),
         ["training-move-anywhere"] = new("Battle", "Training: move a target enemy Personality to another unresolved battlefield", "enemy-personality", Move: new(MoveSpec.Target, MoveSpec.AnyUnresolved)),
@@ -433,7 +442,9 @@ public static class AbilityCatalog
         // of one to three of your Personalities in your current army. Remove those Followers from the game after the battle ends." The chosen Personalities travel on
         // CardIds (one to three, all in the acting player's army), like the province choice of Border Keep.
         ["kyuden-hida-exp-scouts"] = new("Reaction", "Recon Reaction: after engaging: you have Reconnaissance at the current battlefield. Create and attach a 0F Scout Follower to each of one to three of your Personalities in your current army; remove those Followers from the game after the battle ends",
-            "own-army-personalities", Trigger: "after-engaging", ActionKeywords: ["Recon"]),
+            "own-army-personalities", Trigger: "after-engaging", ActionKeywords: ["Recon"],
+            // Two scans are 0F Scout Followers (Kyuden Hida Scout, Kyuden Hida Survivor); Mendon's ruling (issue #394): his is the Survivor.
+            Creates: new(CardType.Follower, Force: 0, Keywords: ["Scout"], ProxyId: "oracle-l5r-9714", PerHost: true, UntilBattleEnds: true)),
         // The delayed effects (issue #364): each registers a member of the one before-resolution set (BeforeResolution.cs). Holding Cells (oracle-l5r-10733,
         // "Kolat Battle, 4 Gold: Target a Personality. Before this battle resolves, bow him. Lose 1 Honor."): the 4 Gold is the ability's own cost and "Kolat" its
         // action keyword (the card itself has no keywords); the Honor loss is the action's own, at once.
@@ -629,9 +640,9 @@ public static class AbilityCatalog
         // discard this Ring from your hand to use its ability without cost"). Recruitment for the
         // four Reaction-shaped Rings below is granted as an Additional Battle Action (GrantRingRecruit)
         // rather than a forced mid-resolution interrupt -- the user's own simplification.
-        ["ring-of-air-recruit"] = new("Battle", "Play after you resolve two or more Favor actions in one turn", "none"),
+        ["ring-of-air-recruit"] = new("Battle", "Play after you resolve two or more Favor actions in one turn", "none", Absent: true),
         ["ring-of-air-straighten"] = new("BattleOrOpen", "Air Repeatable Battle/Open, bow: Straighten your target Personality or attachment", "personality-or-attachment", UsesPerTurn: AbilityUseLimit.Unlimited, Costs: ActionCost.BowSourceUnlessInHand),
-        ["ring-of-water-recruit"] = new("Battle", "Play after a battle resolves in which you played a Terrain, destroyed a Terrain, and destroyed any cards or provinces during resolution", "none"),
+        ["ring-of-water-recruit"] = new("Battle", "Play after a battle resolves in which you played a Terrain, destroyed a Terrain, and destroyed any cards or provinces during resolution", "none", Absent: true),
         // Simplified from the printed "Absent Repeatable Battle" (issue #194): only the "move home" half
         // of the dual move effect is wired -- the "or move him to the current battlefield if he would be
         // opposed" half is deferred. See docs/ROADMAP.md. Its "Absent" (no-presence-required) half was
@@ -644,7 +655,7 @@ public static class AbilityCatalog
         // entire hand (except the Void ring itself).
         ["ring-of-void-recruit"] = new("Limited", "Play if you have two or fewer Rings in play. Discard your hand", "none"),
         ["ring-of-void-draw"] = new("Limited", "Void Limited, bow: Draw a card. If you now have more cards in your hand than any other player, discard a card", "none", Costs: ActionCost.BowSourceUnlessInHand),
-        ["false-ring-of-air-recruit"] = new("Battle", "After you win a battle in which there was ever a unit on the opposing side, you may put this Ring into play and lose 2 Honor", "none"),
+        ["false-ring-of-air-recruit"] = new("Battle", "After you win a battle in which there was ever a unit on the opposing side, you may put this Ring into play and lose 2 Honor", "none", Absent: true),
         // False Ring of Earth (oracle-l5r-10532, issue #295): Dueling (issue #204) and the own-won-duel
         // Reaction trigger (issue #209) cover "after a duel resolves" generally, but this Ring's own
         // condition is a per-PLAYER reaction to any duel their side wins (not a reaction carried by the
@@ -652,7 +663,7 @@ public static class AbilityCatalog
         // Action scoped to this Ring in hand" shape (GrantRingRecruit) instead, called from ResolveDuel
         // once a winner is known (see Dueling.cs), the same simplification every other Ring recruit
         // condition already uses in place of a forced mid-resolution interrupt.
-        ["false-ring-of-earth-recruit"] = new("Battle", "After you win a duel against a Personality who shared no keywords with your Personality in the duel, you may put this Ring into play and lose 2 Honor", "none"),
+        ["false-ring-of-earth-recruit"] = new("Battle", "After you win a duel against a Personality who shared no keywords with your Personality in the duel, you may put this Ring into play and lose 2 Honor", "none", Absent: true),
         // "Absent Battle" (issue #331: the Absent flag replaces the earlier simplification to plain Battle).
         // Bowing the Ring is a COST of the action (Mendon's ruling, issue #353): it must be in play and unbowed (the shared "abilities on bowed cards
         // cannot be used" Require), and it is a DECLARED cost (Costs: ActionCost.BowSource, AbilityCosts.cs), so a negated action still pays it and a
@@ -679,7 +690,7 @@ public static class AbilityCatalog
         // branch -- "none of your Personalities were destroyed" holds by construction on the winning
         // side of an outright win (only DestroyUnits(the LOSING army) runs in those two branches; a
         // tie is the only resolution that ever destroys the winning side's own units too).
-        ["ring-of-earth-recruit"] = new("Battle", "After the resolution of a battle you won, if there were ever any enemy units at that battlefield and none of your Personalities were destroyed during the battle, you may put this Ring into play from your hand", "none"),
+        ["ring-of-earth-recruit"] = new("Battle", "After the resolution of a battle you won, if there were ever any enemy units at that battlefield and none of your Personalities were destroyed during the battle, you may put this Ring into play from your hand", "none", Absent: true),
         // "Even if you control no units at the current battlefield" waives the ordinary Battle-timing
         // presence check -- exactly rule 9's own gloss of Absent ("the action may be taken even without
         // controlling any unit at the current battlefield"), so it carries the Absent flag (issue #331; it
@@ -697,7 +708,7 @@ public static class AbilityCatalog
         // provinces or enemy cards in this resolution" fact Ring of Water's own CheckRingOfWaterRecruit
         // already computes at each ResolveBattle call site -- no "win" requirement, same as Ring of
         // Water, unlike Ring of Earth/False Ring of Air above.
-        ["ring-of-fire-recruit"] = new("Battle", "After the resolution of a battle in which you destroyed one or more provinces or enemy cards, you may put this Ring into play from your hand", "none"),
+        ["ring-of-fire-recruit"] = new("Battle", "After the resolution of a battle in which you destroyed one or more provinces or enemy cards, you may put this Ring into play from your hand", "none", Absent: true),
         // "Destroy your performing Personality" needs no new Performer category -- "own-personality"
         // (no AtBattle/unbowed qualifier, same reasoning as Steel on Steel's own performer) already
         // matches the printed text exactly. "enemy-personality-chi-lte-performer" (Chokehold's own
@@ -832,13 +843,16 @@ public static class AbilityCatalog
         ["clay-kshatriya-invest"] = new("Reaction", "Invest 5 Gold: give this Follower two +1F tokens", "none", Trigger: "own-enters-play", Cost: GoldCostRule.Fixed(5)),
         ["training-invest"] = new("Reaction", "Training: Invest 3 Gold: give this Follower a +1F token", "none", Trigger: "own-enters-play", Cost: GoldCostRule.Fixed(3)),
         // Strategy wave 29 (issue #373, docs/decisions/2026-09-20-gold-payment-rulings.md). "Another player" is the one opponent, so no choice is asked.
-        ["virtuous-charity-open"] = new("Open", "Open: If it is not your turn, choose another player: you, then the player, each pay zero or more Gold; whoever paid more Gold gains Honor equal to the difference between the two amounts, or 4, whichever is less", "none", Cost: GoldCostRule.Variable()),
-        ["at-any-cost-recruit"] = new("Battle", "Dark Virtue Battle: recruit your target performing dead Samurai, paying all costs (he may not be proclaimed)", "own-dead-samurai", Cost: GoldCostRule.TargetRecruit()),
-        ["disgraceful-conduct-bow"] = new("Battle", "Even if you control no units at the current battlefield, pay Gold equal to a target Personality or unit's total Gold cost minus 4: bow it", "personality",
-            Cost: GoldCostRule.TargetUnitTotal(-4, floor: 0), Absent: true),
-        // Oracle: cost = paid - 2, so the price is cost + 2 (Mendon); the period scan reads price = cost - 2. The sign below is the one thing to flip.
-        ["a-stain-cleansed-destroy"] = new("Battle", "Choose your performing unbowed Magistrate and target an enemy card without attachments or an enemy Personality: pay Gold equal to its (unit's) current total Gold cost plus 2: destroy the card or unit",
-            "enemy-personality-or-attachment", Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeywords: ["Magistrate"], Cost: GoldCostRule.TargetUnitTotal(2)),
+        ["virtuous-charity-open"] = new("Open", "Open: If it is not your turn, choose another player: you, then the player, each pay zero or more Gold; whoever paid more Gold gains Honor equal to the difference between the two amounts, or 4, whichever is less", "none", Cost: GoldCostRule.Variable(atResolution: true)),
+        ["at-any-cost-recruit"] = new("Battle", "Dark Virtue Battle: recruit your target performing dead Samurai into play at this battlefield, paying all costs (he may not be proclaimed)", "own-dead-samurai", Cost: GoldCostRule.TargetRecruit()),
+        // The player chooses the Personality or the unit (Mendon): two abilities, the second offered only for a Personality that has attachments (for a bare one the modes are the same).
+        ["disgraceful-conduct-bow"] = new("Battle", "Even if you control no units at the current battlefield, pay Gold equal to a target Personality's Gold cost minus 4: bow him", "personality",
+            Cost: GoldCostRule.TargetCurrent(-4, floor: 0), Absent: true, UsageKey: "disgraceful-conduct"),
+        ["disgraceful-conduct-bow-unit"] = new("Battle", "Even if you control no units at the current battlefield, pay Gold equal to a target unit's total Gold cost minus 4: bow the Personality and every card attached to him", "personality-with-attachment",
+            Cost: GoldCostRule.TargetUnitTotal(-4, floor: 0), Absent: true, UsageKey: "disgraceful-conduct"),
+        // The scan governs (Mendon): pay the card or unit's current total Gold cost minus 2. The sign below is the one number.
+        ["a-stain-cleansed-destroy"] = new("Battle", "Choose your performing unbowed Magistrate and target an enemy card without attachments or an enemy Personality: pay Gold equal to its (unit's) current total Gold cost minus 2: destroy the card or unit",
+            "enemy-personality-or-attachment", Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeywords: ["Magistrate"], Cost: GoldCostRule.TargetUnitTotal(-2, floor: 0)),
         // Generalized Gold payment (issue #303): synthetic fixtures, one per cost shape, standing in for the real cards (Exchange of Letters and
         // Urgency are still unwired; the other four are wired above -- see docs/decisions/2026-09-18-generalized-gold-payment.md). Each proves that
         // the shape prices, validates, quotes and pays through the ONE GoldCostRule path.
@@ -1062,7 +1076,8 @@ public static class AbilityCatalog
         // MatchEngine.CreatePersonality, no target of its own (the created card is not chosen, only
         // named by the effect itself, the same "none" shape kano-token already uses for a no-target
         // Limited action).
-        ["kitsu-akai-create"] = new("Limited", "Create a 2F/2C/3PH Lion Clan · Samurai · Ancestor · Spirit Personality", "none"),
+        ["kitsu-akai-create"] = new("Limited", "Create a 2F/2C/3PH Lion Clan · Samurai · Ancestor · Spirit Personality", "none",
+            Creates: new(CardType.Personality, Force: 2, Chi: 2, PersonalHonor: 3, Keywords: ["Lion Clan", "Samurai", "Ancestor", "Spirit"])),
         // "Bow your performing Ancestor Personality" -- own-unbowed-personality-at-battle-with-keyword
         // already covers exactly this shape (Volcano Tattoo's own generic Performer category), just
         // with a single RequiredKeywords entry instead of two. The created Lion Ancestor is the usual
@@ -1577,8 +1592,10 @@ public static class AbilityCatalog
         // Create a ... Personality" -- Kitsu Akai's own kitsu-akai-create (MatchEngine.CreatePersonality,
         // issue #257) as an entering-play Reaction instead of a Limited action, so it is created from
         // inside its creator's own already-open entry window (CreatePersonality's duringEntryReaction).
-        ["ohsuki-create"] = new("Reaction", "After Ohsuki enters play: Create a 0F/2C/3PH Mantis Clan · Nonhuman · Sparrow · Cavalry · Spirit Personality", "none", Trigger: "own-enters-play"),
-        ["tokoru-create"] = new("Reaction", "After Tokoru enters play: Create a 4F/2C/3PH Mantis Clan · Nonhuman · Bear · Spirit Personality", "none", Trigger: "own-enters-play"),
+        ["ohsuki-create"] = new("Reaction", "After Ohsuki enters play: Create a 0F/2C/3PH Mantis Clan · Nonhuman · Sparrow · Cavalry · Spirit Personality", "none", Trigger: "own-enters-play",
+            Creates: new(CardType.Personality, Force: 0, Chi: 2, PersonalHonor: 3, Keywords: ["Mantis Clan", "Nonhuman", "Sparrow", "Cavalry", "Spirit"])),
+        ["tokoru-create"] = new("Reaction", "After Tokoru enters play: Create a 4F/2C/3PH Mantis Clan · Nonhuman · Bear · Spirit Personality", "none", Trigger: "own-enters-play",
+            Creates: new(CardType.Personality, Force: 4, Chi: 2, PersonalHonor: 3, Keywords: ["Mantis Clan", "Nonhuman", "Bear", "Spirit"])),
         // Ohsuki's Sparrow (oracle-l5r-10023): "Limited: If none of your provinces were destroyed since
         // your last turn ended: Gain 3 Honor." The condition precedes the colon, so it gates USING the
         // action at all (a per-id Require in ValidateAbility, the way horibe-bow's own "If opposed"
@@ -1590,6 +1607,28 @@ public static class AbilityCatalog
         // "attacking" category is Personality-only; this one also reaches an attacking unit's own
         // Followers/Items/Spells).
         ["tokoru-bear-bow"] = new("Battle", "Target an attacking enemy card: Bow it. Destroy it if it is an attachment", "enemy-attacking-card"),
+        // Bo of Water (oracle-l5r-1084, issue #387): creates Water Bo (oracle-l5r-10026, found by its Creates spec) attached to one of your Personalities.
+        ["bo-of-water-create"] = new("Limited", "Once per game: Create a +2F/+0C Water · Weapon Item with the ability \"Battle: Target an enemy card without attachments: Bow it\" and attach it to one of your Personalities", "own-personality", OncePerGame: true,
+            Creates: new(CardType.Item, Force: 2, Chi: 0, Keywords: ["Water", "Weapon"], AbilityText: "Battle: Target an enemy card without attachments: Bow it")),
+        ["water-bo-bow"] = new("Battle", "Target an enemy card without attachments: Bow it", "enemy-card", RequireNoAttachments: true),
+        // Synthetic fixtures for the count/deal rules of a created attachment (issue #394): three Scouts dealt among the chosen Personalities, and two to EACH chosen one.
+        ["training-create-scouts"] = new("Battle", "Training: create three 0F Scout Followers, dealt among the chosen Personalities of your army", "own-army-personalities",
+            Creates: new(CardType.Follower, Force: 0, Keywords: ["Scout"], ProxyId: "oracle-l5r-9714", Count: 3)),
+        ["training-create-scouts-each"] = new("Battle", "Training: create two 0F Scout Followers for each chosen Personality of your army", "own-army-personalities",
+            Creates: new(CardType.Follower, Force: 0, Keywords: ["Scout"], ProxyId: "oracle-l5r-9714", Count: 2, PerHost: true, UntilBattleEnds: true)),
+        // Created-card follow-up (issue #394, Mendon's answers). Shinjo Dak-ho (oracle-l5r-6867): "Battle: Create a 2F/2C/2PH Unicorn Clan * Samurai * Cavalry * Scout
+        // Personality at this battlefield. Remove him from the game after this battle ends." Two scans print that card (Dak-ho's Men, Unicorn Scout); his is Dak-ho's Men.
+        ["dak-ho-create"] = new("Battle", "Create a 2F/2C/2PH Unicorn Clan · Samurai · Cavalry · Scout Personality at this battlefield; remove him from the game after this battle ends", "none",
+            Creates: new(CardType.Personality, Force: 2, Chi: 2, PersonalHonor: 2, Keywords: ["Unicorn Clan", "Samurai", "Cavalry", "Scout"], ProxyId: "oracle-l5r-10001", AtBattlefield: true, UntilBattleEnds: true)),
+        // Hida Fubatsu (oracle-l5r-3091): "Limited: Target your Personality: Create a +1F Armor or Weapon Item and attach it to him." The player chooses the Item: Kaiu Armor or
+        // Yasunori's Gift (+1F/+0C; the Chi is not printed, so it is +0). "Battle: Target an enemy card without attachments: Bow it. If it is an attachment, remove it from the game."
+        ["fubatsu-create"] = new("Limited", "Target your Personality: Create a +1F Armor or Weapon Item and attach it to him", "own-personality",
+            Creates: new(CardType.Item, Force: 1, Chi: 0, Keywords: ["Armor"], Or: [new(CardType.Item, Force: 1, Chi: 0, Keywords: ["Weapon"])])),
+        ["fubatsu-bow"] = new("Battle", "Target an enemy card without attachments: Bow it. If it is an attachment, remove it from the game", "enemy-card", RequireNoAttachments: true),
+        // Matsu Nimuro (oracle-l5r-10463): "Nimuro's printed ability will not be copied. Limited: Once per game, create a Personality titled The False Nimuro with Nimuro's printed
+        // Force, Chi, Personal Honor, and keywords." The False Nimuro (oracle-l5r-10807) prints exactly Nimuro's stats and keywords and no text.
+        ["nimuro-create"] = new("Limited", "Once per game: create a Personality titled The False Nimuro with Nimuro's printed Force, Chi, Personal Honor and keywords", "none", OncePerGame: true, NotCopyable: true,
+            Creates: new(CardType.Personality, Force: 5, Chi: 5, PersonalHonor: 4, Keywords: ["Lion Clan", "Clan Champion", "Samurai", "Duelist", "Experienced 2", "Loyal", "Tactician", "Unique"])),
 
         // Personality wave 22 / region-wave-3 (issue #301, Batch F of the "Not blocked; deferred for
         // scope" BLOCKERS audit -- the final batch).
@@ -1718,7 +1757,7 @@ public static class AbilityCatalog
         ["training-copy-ability-turn"] = new("Open", "Training: remove a target Personality in any discard pile from the game: copy one ability that does not itself copy abilities from it (this turn)", "personality-in-any-discard", CopiesAbilities: true, Costs: ActionCost.RemoveTarget),
         // Training fixture (issue #338): opens the three-option Either/Or for the opposing player.
         ["training-either-or-three"] = new("Open", "Training: your opponent chooses to pay 2 Gold, lose 2 Honor, or let you gain 2 Honor", "none"),
-        ["training-opponent-payment"] = new("Open", "Training: pay zero or more Gold; your opponent then pays zero or more Gold; each of you gains Honor equal to what the other paid", "none", Cost: GoldCostRule.Variable()),
+        ["training-opponent-payment"] = new("Open", "Training: pay zero or more Gold; your opponent then pays zero or more Gold; each of you gains Honor equal to what the other paid", "none", Cost: GoldCostRule.Variable(atResolution: true)),
         // Fukuzo (oracle-l5r-2728, issue #338): "Open: Remove a target Personality in any player's discard pile from the game: Fukuzo wears
         // his skin. Until the next time this game this ability is used, Fukuzo copies one keyword, and one ability that does not itself
         // copy abilities, from the Personality." The removal is the cost (paid first); the two copies are the two independent copy
@@ -1975,7 +2014,7 @@ public sealed partial class MatchEngine
         or "training-bow-enemy" or "training-bow-at-battle" or "training-bow-enemy-card-at-battle" or "training-bow-enemy-card-open" or "training-bow-any" or "horibe-bow" or "dairuko-exp-bow" or "furu-bow"
         or "tsudoken-exp-bow" or "masumi-bow" or "tsukasa-bow" or "atsumichi-bow" or "bounty-hunter-bow" or "brothers-great-lake-bow"
         or "soshi-conditional-bow" or "kinaro-exp-bow" or "nubane-bow" or "xijkt-bow" or "kouzei-bow" or "mitoshi-bow" or "jinai-bow"
-        or "muzu-bow" or "hiroto-bow" or "noboru-shattered-star-weaken" or "korimi-exp-bow" or "jakuei-bow" or "jakuei-bow-favor" or "ruya-bow"
+        or "muzu-bow" or "hiroto-bow" or "water-bo-bow" or "fubatsu-bow" or "noboru-shattered-star-weaken" or "korimi-exp-bow" or "jakuei-bow" or "jakuei-bow-favor" or "ruya-bow"
         // Strategy wave 13 (issue #287): Strength of the Bear and Unexpected both bow their own
         // target unconditionally; The Strength of the Spider bows its target conditionally (only
         // when not already destroyed by its own alternate branch) -- still counts as "bows the
@@ -2002,7 +2041,7 @@ public sealed partial class MatchEngine
         or "fukui-bow"
         // Issue #336: Doji Yoshitada, Gold and Steel's two bows and (its bow half) their target.
         or "yoshitada-bow" or "gold-and-steel-bow" or "gold-and-steel-bow-move"
-        or "disgraceful-conduct-bow";
+        or "disgraceful-conduct-bow" or "disgraceful-conduct-bow-unit";
     // Whether the command's TargetId is an Attack's OWN target, which reacts through the separate attackReaction
     // window instead of this one: an Attack-classified ability whose Target category is "attack". Bayushi Kahoku
     // - exp (issue #313) is Attack-classified too, but its TargetId is the separate "-4F" target (an ordinary
@@ -2040,6 +2079,10 @@ public sealed partial class MatchEngine
     private bool BeforeActionReactionApplies(CardInstance card, string abilityId, GameCommand command, string? affectedId = null)
     {
         affectedId ??= ReactionAffectedId(command);
+        // Issue #373 fixtures: they react to another player's action whatever it targets, an action that names no card included.
+        if (abilityId is "training-negate-untargeted-action" or "training-negate-honor-gain")
+            return command.AbilityId is not null && AbilityCatalog.All.TryGetValue(command.AbilityId, out var anyAction) && IsAction(anyAction) && InPlay(card) && command.PlayerId != card.OwnerId
+                && (abilityId != "training-negate-honor-gain" || command.AbilityId is "virtuous-charity-open" or "training-opponent-payment");
         if (command.AbilityId is null || affectedId is null || !_state.Cards.TryGetValue(affectedId, out var affected)) return false;
         if (!InPlay(card) || !AbilityCatalog.All.TryGetValue(command.AbilityId, out var acting) || !IsAction(acting)) return false;
         var negatable = !MovementCannotBeNegated(command);
@@ -2444,10 +2487,10 @@ public sealed partial class MatchEngine
     // ceding priority to their opponent first -- Again!'s shape (ScopeCardIds null: any of the
     // player's own cards) or Two Hands' shape (a specific set: "from cards in his unit"). Two Hands'
     // own restriction blocks future GRANTS, not the use of ones already sitting here.
-    private void GrantAdditionalAction(int playerId, string[]? scopeCardIds, bool fromDiscard = false)
+    private void GrantAdditionalAction(int playerId, string[]? scopeCardIds, bool fromDiscard = false, int? battle = null)
     {
         if (_state.NoNewAdditionalActionsThisBattle) return;
-        _state.AdditionalActions.Add(new(playerId, scopeCardIds, fromDiscard));
+        _state.AdditionalActions.Add(new(playerId, scopeCardIds, fromDiscard, battle));
         Emit("additionalActionGranted", $"{Player(playerId).Name} may take an additional Battle action.", playerId);
     }
     // Ring recruitment (issue #194): rather than a forced mid-resolution interrupt, a satisfied
@@ -2460,9 +2503,37 @@ public sealed partial class MatchEngine
         if (!condition) return;
         var ring = player.Hand.Select(Card).FirstOrDefault(c => (Definition(c).Abilities ?? []).Contains(recruitAbilityId));
         if (ring is null) return;
-        if (!_state.AdditionalActions.Any(g => g.PlayerId == player.Id && g.ScopeCardIds is { } ids && ids.Contains(ring.Id)))
-            GrantAdditionalAction(player.Id, [ring.Id]);
+        var battle = RecruitGrantBattle();
+        if (!_state.AdditionalActions.Any(g => g.PlayerId == player.Id && g.Battle == battle && g.ScopeCardIds is { } ids && ids.Contains(ring.Id)))
+            GrantAdditionalAction(player.Id, [ring.Id], battle: battle);
     }
+    // The abilities that put a Ring into play on a GRANT ("After ...: you may put this Ring into play", issue #194): their Rings' recruit rights. (False Ring of
+    // Water's and Ring of the Void's recruits are standing checks with no grant.)
+    private static readonly HashSet<string> RingRecruitGrantIds = new(StringComparer.Ordinal)
+    {
+        "ring-of-air-recruit", "ring-of-water-recruit", "ring-of-earth-recruit", "ring-of-fire-recruit", "false-ring-of-air-recruit", "false-ring-of-earth-recruit"
+    };
+    // The battle a recruit grant made NOW belongs to (Mendon's ruling, issue #379: "A recruit grant at one battle is limited to that battle"): the battle in
+    // progress -- its Battle phase, through its resolution and aftermath -- or, made anywhere else (the Action phase's Favor actions), the next battle to be fought.
+    private int RecruitGrantBattle() => _state.Phase == Phase.Battle ? _state.BattleNumber : _state.BattleNumber + 1;
+    // A recruit grant (the only grants that carry a battle) is a standing permission for its battle, not a burst: another action, or a pass, by its holder does not
+    // forfeit it, and holding one does not keep the holder's priority (issue #379: it stays available across the actions of its own battle, and lapses with the battle).
+    private static bool Forfeitable(AdditionalActionGrant g) => g.Battle is null;
+    private bool GrantUsableNow(AdditionalActionGrant g) => g.Battle is null || g.Battle == _state.BattleNumber;
+    // A player still holding a recruit grant of the battle just resolved, for a Ring that is still in their hand.
+    private bool HoldsBattleRecruit(int playerId) => _state.AdditionalActions.Any(g => g.PlayerId == playerId && g.Battle == _state.BattleNumber
+        && g.ScopeCardIds is { Length: 1 } ids && Card(ids[0]).Zone == Zone.Hand);
+    // The window after a battle resolved, in which its recruit grants may be used before they lapse with it. Opens only when someone holds one.
+    private bool OpenBattleRecruitWindow(int attacker)
+    {
+        if (_state.WinnerId is not null) return false;
+        if (!HoldsBattleRecruit(0) && !HoldsBattleRecruit(1)) { ExpireBattleRecruitGrants(); return false; }
+        var first = FirstReactionOpportunity(HoldsBattleRecruit);
+        OpenAlternatingReactionWindow(new("battleRecruit", first, null, "After this battle resolved: you may put a Ring into play, or pass.", attacker), first, "After-battle recruit window opened.");
+        return true;
+    }
+    // A recruit grant is over when its battle is: this battle's and any older one's go; a grant for the NEXT battle (made between battles) waits.
+    private void ExpireBattleRecruitGrants() => _state.AdditionalActions.RemoveAll(g => g.Battle is int b && b <= _state.BattleNumber);
     // Ring of Water's own recruitment condition (issue #194): "played a Terrain, destroyed a
     // Terrain, and destroyed any cards or provinces during resolution" -- the first two are this
     // player's own battle-scoped flags; `destroyedSomething` is this specific resolution's own fact,
@@ -2476,8 +2547,8 @@ public sealed partial class MatchEngine
     {
         // A grant for playing this very card from a discard pile (Daigotsu Bofana - exp) goes first: it is the permission the play
         // was validated against, and an unscoped grant must not be spent in its place.
-        var grant = _state.AdditionalActions.Where(g => g.PlayerId == playerId && (g.ScopeCardIds is null || cardId is not null && g.ScopeCardIds.Contains(cardId)))
-            .OrderByDescending(g => g.FromDiscard).FirstOrDefault();
+        var grant = _state.AdditionalActions.Where(g => g.PlayerId == playerId && GrantUsableNow(g) && (g.ScopeCardIds is null || cardId is not null && g.ScopeCardIds.Contains(cardId)))
+            .OrderByDescending(g => g.FromDiscard).ThenByDescending(g => g.ScopeCardIds is not null).FirstOrDefault();
         if (grant is null) return false;
         _state.AdditionalActions.Remove(grant);
         return true;
@@ -2582,8 +2653,8 @@ public sealed partial class MatchEngine
         // keywords are the ability's source card's (Command.CardId), not the performer's (SourceId).
         FireAfterOwnActionTraits(AbilityCatalog.All[attack.AbilityId], attack.PlayerId, attack.Command?.CardId is { } sourceCardId ? Card(sourceCardId) : null);
         // Same "an unrelated action forfeits dangling grants" rule as ExecuteAbilityEffects' own tail.
-        if (!attack.Additional) _state.AdditionalActions.RemoveAll(g => g.PlayerId == attack.PlayerId);
-        NextAction(attack.PlayerId, attack.Additional && _state.AdditionalActions.Any(g => g.PlayerId == attack.PlayerId));
+        if (!attack.Additional) _state.AdditionalActions.RemoveAll(g => g.PlayerId == attack.PlayerId && Forfeitable(g));
+        NextAction(attack.PlayerId, attack.Additional && _state.AdditionalActions.Any(g => g.PlayerId == attack.PlayerId && Forfeitable(g)));
     }
     private bool IsAttacking(CardInstance card) => card.Zone == Zone.Battlefield && card.OwnerId == _state.ActivePlayerId;
     // "Defending": at the current battlefield and owned by the non-active player -- unlike IsAttacking
@@ -2823,9 +2894,9 @@ public sealed partial class MatchEngine
                 or "dairuko-rally", "Abilities on bowed cards cannot be used.");
             uses = source.AbilityUses;
         }
-        // The per-turn limit is AbilityDefinition.UsesPerTurn (AbilityLimits.cs). Border Keep's once-per-GAME refresh never resets: any stamp spends it.
+        // The per-turn limit is AbilityDefinition.UsesPerTurn (AbilityLimits.cs). A once-per-GAME ability (AbilityDefinition.OncePerGame: Border Keep's refresh, Bo of Water) never resets: any stamp spends it.
         var usageKey = ability.UsageKey ?? id;
-        Require(id == "border-game" ? !uses.ContainsKey(usageKey) : !AbilityUseSpent(uses, ability, usageKey), "This ability has already been used within its limit.");
+        Require(ability.OncePerGame ? !uses.ContainsKey(usageKey) : !AbilityUseSpent(uses, ability, usageKey), "This ability has already been used within its limit.");
         if (id == "border-first") Require(player.TurnsTaken == 1, "This Border Keep ability is only available on your first turn.");
         // Battle/Open presence primitive (issue #267): a printed "Battle/Open" ability carries no
         // battlefield-presence requirement at all when used as its OPEN half (performed from Home,
@@ -2861,7 +2932,9 @@ public sealed partial class MatchEngine
             // Battle ability needs its own equivalent: AtBattle(source) already resolves an ATTACHED
             // card's own parent correctly (same helper Khol Regulars' own Reaction uses), so this is
             // exactly "the attachment's own wielder is at this battlefield."
-            if (id is "scouring-flood-move-home" or "earths-hunger-destroy" or "nightingale-blade-bow" or "fubatsu-plate-straighten" or "fubatsu-plate-move")
+            // An action on an attachment is performed by its wielder (core rules), so any attached card's Battle ability needs him at the battle.
+            if (!reinforcesFromElsewhere && source is { Zone: Zone.Attached }
+                || id is "scouring-flood-move-home" or "earths-hunger-destroy" or "nightingale-blade-bow" or "fubatsu-plate-straighten" or "fubatsu-plate-move")
                 Require(AtBattle(source!), "This attachment's own wielder must be at the current battlefield.");
             if (id == "earth-flows-move") Require(player.Id != _state.ActivePlayerId, "Only the Defender may use The Earth Flows.");
             // Overgrown Grove (issue #264): a Region sits in Zone.Region, never AtBattle-eligible at
@@ -2925,8 +2998,8 @@ public sealed partial class MatchEngine
         // re-checked here. This also naturally makes the grant, not a separate flag, the single
         // source of truth for "was this satisfied."
         if (id is "ring-of-air-recruit" or "ring-of-water-recruit" or "false-ring-of-air-recruit" or "ring-of-earth-recruit" or "ring-of-fire-recruit" or "false-ring-of-earth-recruit")
-            Require(_state.AdditionalActions.Any(g => g.PlayerId == player.Id && g.ScopeCardIds is { Length: 1 } grantIds && grantIds[0] == source!.Id),
-                "This Ring's recruitment condition has not been granted yet.");
+            Require(_state.AdditionalActions.Any(g => g.PlayerId == player.Id && GrantUsableNow(g) && g.ScopeCardIds is { Length: 1 } grantIds && grantIds[0] == source!.Id),
+                "This Ring's recruitment condition has not been granted at this battle.");
         // Ring of the Void's own entry condition (issue #194): a Limited ability (not a granted
         // Additional Action), gated only by how many Rings this player already controls.
         if (id == "ring-of-void-recruit")
@@ -3783,6 +3856,9 @@ public sealed partial class MatchEngine
         if (slotAbility is not null) return;
         // Attach (issue #337): the wielder and the Equip legality of the attachment (see AttachAction.cs).
         if (ability.Attach is { } attachSpec) ValidateAttach(command, attachSpec, player, source);
+        // A created attachment must be one the chosen Personality could be equipped with.
+        if (ability.Creates is { } createdSpec) ValidateCreate(command, createdSpec, player);
+        else Require(command.CreatedCard is null, "This action creates no card.");
         // Shinden Shorai (oracle-l5r-6857, issue #301): "If it is not your first or second turn" -- the
         // player's OWN turn count (PlayerState.TurnsTaken counts only that player's turns, the same
         // counter border-first's own "your first turn" reads; the global MatchState.TurnNumber advances
@@ -4045,7 +4121,7 @@ public sealed partial class MatchEngine
         // Snapshotted by reference (not just a count): a switch case that itself grants fresh actions
         // (Again!/Two Hands/equip-battle) must never accidentally spare an unrelated PRE-EXISTING
         // grant from forfeiture below just because the total count happens to end up higher.
-        var preExistingGrants = _state.AdditionalActions.Where(g => g.PlayerId == player.Id).ToList();
+        var preExistingGrants = _state.AdditionalActions.Where(g => g.PlayerId == player.Id && Forfeitable(g)).ToList();
         // Dueling (issue #204): a challenge-issuing ability resolves generically, not through the
         // per-id switch below -- "playing" the card (paying its cost, discarding a hand-played
         // Strategy immediately) is the only part that happens right away; the printed EFFECT (the
@@ -4076,7 +4152,10 @@ public sealed partial class MatchEngine
                 _state.PriorityPlayerId = target.OwnerId; _state.ConsecutivePasses = 0;
                 return; // The action does not finish until the opponent answers.
             case "air-straighten": case "paid-straighten": case "training-keyword-conditional-straighten": case "immovable-object-straighten": case "training-stain-straighten": Straighten(target!); break;
-            case "paid-bow": case "unorthodox-attack": case "chokehold": case "immovable-object-bow": case "naga-remnants-bow": case "training-disgrace-bow": case "disgraceful-conduct-bow": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;
+            case "paid-bow": case "unorthodox-attack": case "chokehold": case "immovable-object-bow": case "naga-remnants-bow": case "training-disgrace-bow": case "disgraceful-conduct-bow": case "water-bo-bow": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;
+            case "disgraceful-conduct-bow-unit":
+                foreach (var member in Attachments(target!.Id).Prepend(target)) if (!StalwartNegatesBow(member, player.Id)) member.Bowed = true;
+                break;
             // Generalized Gold payment fixtures (issue #303): the Gold itself was already charged by
             // PayForAbility above; a variable-cost effect reads the amount the player actually chose.
             case "training-urgency-draw": Draw(player); break;
@@ -4090,7 +4169,7 @@ public sealed partial class MatchEngine
                 var quote = QuotePurchase(player.Id, target!.Id, fromDeadPile: true);
                 Require(quote.Error is null, quote.Error ?? "");
                 SpendHandPlayedCard(player, source);
-                if (BringDeadPersonalityIntoPlay(player, target, "At Any Cost")) return;
+                if (BringDeadPersonalityIntoPlay(player, target, "At Any Cost", _state.CurrentBattleProvince!.Value)) return;
                 break;
             }
             case "virtuous-charity-open":
@@ -4170,6 +4249,8 @@ public sealed partial class MatchEngine
             case "training-bow-guard": NegateEffects(Card(ReactionAffectedId(_state.PendingNegatableAbility!)!), "bow"); break;
             case "training-negate-mover": _state.NegatedEffects.Add(new("move", target!.Id)); break;
             case "training-negate-action": NegateDeferredAction(source!); break;
+            case "training-negate-untargeted-action": NegateDeferredAction(source!); break;
+            case "training-negate-honor-gain": _state.NegatedEffects.Add(new("honor-gain", _state.PendingNegatableAbility!.CardId!)); break;
             case "training-slots-discard": foreach (var discarded in SlotCards(command, "card").ToArray()) DiscardFate(player, discarded); break;
             case "training-move-current": case "training-move-anywhere": case "training-move-source-adjacent": case "training-move-both-home": case "training-move-performer-and-target":
                 ExecuteMove(command, ability, source, target); break;
@@ -4785,13 +4866,9 @@ public sealed partial class MatchEngine
                 }
                 break;
             }
-            case "kitsu-akai-create": if (CreatePersonality(player.Id, "oracle-l5r-9785")) return; break;
             // Personality wave 21 (issue #299, Batch E). Akodo Chiyo's "chiyo-attack" shares the
             // attack-execution case below.
-            // Kitsune Ohsuki / Kitsune Tokoru: created from INSIDE this Personality's own already-open
-            // entry window (duringEntryReaction), so CreatePersonality never returns true here.
-            case "ohsuki-create": CreatePersonality(player.Id, "oracle-l5r-10023", duringEntryReaction: true); break;
-            case "tokoru-create": CreatePersonality(player.Id, "oracle-l5r-10025", duringEntryReaction: true); break;
+            // Kitsu Akai / Ohsuki / Tokoru create through their Creates spec (default branch below).
             // Daigotsu Bofana - exp: the additional action to play the chosen Dark Virtue from the discard pile.
             case "bofana-exp-dark-virtue": GrantAdditionalAction(player.Id, [target!.Id], fromDiscard: true); break;
             case "ohsuki-sparrow-honor": GainHonor(player.Id, 3, "Ohsuki's Sparrow", source); break;
@@ -5343,6 +5420,19 @@ public sealed partial class MatchEngine
                 if (target!.Zone == Zone.Attached) DestroyAttachment(target);
                 else if (!StalwartNegatesBow(target, player.Id)) target.Bowed = true;
                 break;
+            // "Bow it. If it is an attachment, remove it from the game": the removal is a separate clause, so a Stalwart attachment whose bow was negated is still removed.
+            // A removed Item may take Chi with it; a Personality left with none is destroyed, as when an attachment is destroyed (DestroyAttachment).
+            case "fubatsu-bow":
+            {
+                if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
+                if (target!.Zone == Zone.Attached)
+                {
+                    var wielder = Card(target.AttachedTo!);
+                    RemoveFromGame(target);
+                    if (Definition(wielder).Type == CardType.Personality && PersonalityChi(wielder) <= 0) DestroyUnits([wielder], true);
+                }
+                break;
+            }
             case "kasuru-draw":
                 
                 if (IsAttacking(source!)) Draw(player);
@@ -5444,7 +5534,7 @@ public sealed partial class MatchEngine
                 SpendHandPlayedCard(player, source);
                 if (!consumedGrant) _state.AdditionalActions.RemoveAll(preExistingGrants.Contains);
                 if (OpenEitherOr(EitherOrSpecs.UnfortunateHesitation, source!, player.Id, target!.OwnerId, target, "action", bowedBeforeAction,
-                        stayWithActor: _state.AdditionalActions.Any(g => g.PlayerId == player.Id))) return;
+                        stayWithActor: _state.AdditionalActions.Any(g => g.PlayerId == player.Id && Forfeitable(g)))) return;
                 break;
             }
             // Training fixture for the Either/Or primitive's three-option shape.
@@ -5528,7 +5618,7 @@ public sealed partial class MatchEngine
             case "kyuden-hida-exp-scouts":
             {
                 GrantReconnaissanceAtCurrentBattlefield(player.Id);
-                foreach (var hostId in ArmyPersonalityChoice(command)) CreateAttachedFollower(Card(hostId), "created-scout-follower");
+                if (ExecuteCreate(ability, ability.Creates!, command, player)) return;
                 break;
             }
             case "wave-persists-move":
@@ -5574,6 +5664,12 @@ public sealed partial class MatchEngine
                 if (ability.Branch is not null)
                 {
                     if (BeginConditionalChoice(command, ability, consumedGrant, playedFromDiscard, opponentHonorBeforeBattleAction, bowedBeforeAction, preExistingGrants)) return;
+                    break;
+                }
+                // Any ability with a Creates spec (Kitsu Akai, Kitsune Ohsuki/Tokoru, Bo of Water) creates the scan that fits it (CreatedCardEntry.cs).
+                if (ability.Creates is { } createdSpec)
+                {
+                    if (ExecuteCreate(ability, createdSpec, command, player)) return;
                     break;
                 }
                 throw new RuleViolation("Ability effect is not implemented.");
@@ -5647,7 +5743,7 @@ public sealed partial class MatchEngine
         if (!consumedGrant && ForfeitsAdditionalActions(ability)) _state.AdditionalActions.RemoveAll(preExistingGrants.Contains);
         // A burst the acting player still holds keeps its priority through every window this action opens (a Reaction, being played inside a window
         // that alternates on its own, never does: the window's own alternation goes on, and the burst waits behind it).
-        var burstContinues = ForfeitsAdditionalActions(ability) && _state.AdditionalActions.Any(g => g.PlayerId == player.Id);
+        var burstContinues = ForfeitsAdditionalActions(ability) && _state.AdditionalActions.Any(g => g.PlayerId == player.Id && Forfeitable(g));
         var closesTo = burstContinues ? player.Id : 1 - player.Id;
         // Togashi Hizumi / Tamori Ruya (issue #216): a chance to react to this action having just bowed a
         // Personality, before handing priority back the ordinary way. A Reaction is an action too, so its own
@@ -5960,16 +6056,6 @@ public sealed partial class MatchEngine
     }
     // The Personalities an own-army-personalities action names: several on CardIds, or the one a plain click named as TargetId.
     private static string[] ArmyPersonalityChoice(GameCommand command) => command.CardIds is { Length: > 0 } ids ? ids : command.TargetId is null ? [] : [command.TargetId];
-    // A Follower an action creates and attaches to a Personality in play, removed from the game when the battle ends (Kyuden Hida - exp). It is a new card, owned by the
-    // Personality's controller; nothing entered play from a zone, so there is no entry window to open (the created Scout has no "after entering play" text).
-    private CardInstance CreateAttachedFollower(CardInstance host, string definitionId)
-    {
-        var card = new CardInstance { Id = $"created-{++_state.CreatedCardSequence:D4}", DefinitionId = definitionId, OwnerId = host.OwnerId, Zone = Zone.Attached, AttachedTo = host.Id, ProvinceIndex = host.ProvinceIndex, FaceUp = true };
-        _state.Cards.Add(card.Id, card);
-        _state.CreatedUntilBattleEndsIds.Add(card.Id);
-        Emit("cardCreated", $"{Player(host.OwnerId).Name} created {Definition(card).Name} and attached it to {Definition(host).Name}.", host.OwnerId, card.Id);
-        return card;
-    }
     private void MoveHome(CardInstance card, bool bow)
     {
         // Tamori Tamoko (issue #207 follow-up): "before an action resolves, negate ... his movement
@@ -6211,8 +6297,11 @@ public sealed partial class MatchEngine
         var inEngageWindow = _state.PendingChoice?.Type == "engageReaction" && _state.PendingEngage is not null;
         // Likewise for the before-resolution set's Reaction window: only the one card it is asking about, only its "Before a battle resolves" Reactions.
         var beforeResolutionCard = _state.PendingChoice is { Type: "beforeBattleReaction" } beforeResolution ? beforeResolution.CardId : null;
+        // After a battle resolved (issue #379): only the recruits of this battle's grants are on offer.
+        var inRecruitWindow = _state.PendingChoice?.Type == "battleRecruit";
         foreach (var (source, id) in sources)
         {
+            if (inRecruitWindow && !RingRecruitGrantIds.Contains(id)) continue;
             var ability = AbilityCatalog.All[id];
             var isEngageReaction = ability.Timing == "Reaction" && ability.Trigger is "after-engaging" or "after-engaging-at-own-battlefield";
             if (inEngageWindow != isEngageReaction) continue;
@@ -6275,21 +6364,24 @@ public sealed partial class MatchEngine
             // its own validation, so an option that cannot be paid is listed disabled with the reason); an ability with a single way, or none,
             // is listed exactly as before with the choice left off the command.
             CostOption?[] costOptions = ability.CostOptions is { Length: > 1 } manyOptions ? manyOptions.Select(o => (CostOption?)o).ToArray() : [null];
+            // A created card the player chooses (issue #394, "an Armor or Weapon Item"): one offered action per card, each carrying its scan's id.
+            CardDefinition?[] createChoices = ability.Creates is { Or.Length: > 0 } multiple ? multiple.Alternatives.Select(a => (CardDefinition?)CreatedCards.Resolve(a)).ToArray() : [null];
             foreach (var performer in performers)
             foreach (var costOption in costOptions)
+            foreach (var createChoice in createChoices)
             {
                 var provinces = player.Provinces.Where(p => !p.Destroyed && p.CardId is not null).Select(p => p.CardId!).ToArray();
                 var armyIds = _state.CurrentBattleProvince is int currentProvince ? Army(playerId, currentProvince).Select(a => a.Id).OrderBy(x => x, StringComparer.Ordinal).ToArray() : [];
                 var prototype = new GameCommand("useAbility", playerId, _state.Version, source?.Id, null,
-                    CardIds: ability.Target == "provinces" ? provinces : null, AbilityId: id, PerformerId: performer, CostOption: costOption?.Id);
+                    CardIds: ability.Target == "provinces" ? provinces : null, AbilityId: id, PerformerId: performer, CostOption: costOption?.Id, CreatedCard: createChoice?.Id);
                 // Multi-target actions (issue #336): one option carrying every slot's legal candidates, and the default selection as its command.
                 if (ability.Slots is not null)
                 {
-                    yield return SlotAbilityOption(prototype, ability, AbilityOptionLabel(id, ability, performer, source, costOption), source?.Id);
+                    yield return SlotAbilityOption(prototype, ability, AbilityOptionLabel(id, ability, performer, source, costOption) + (createChoice is null ? "" : $" · {createChoice.Name}"), source?.Id);
                     continue;
                 }
                 // Kyuden Hida - exp: each Personality of the army is a candidate on its own (a click names one); several are named together on CardIds.
-                string?[] candidates = ability.Target switch { "none" or "provinces" => new string?[] {null}, "own-army-personalities" => armyIds.Cast<string?>().ToArray(), "hand" => player.Hand.ToArray(),
+                string?[] candidates = ability.Target switch { "none" or "provinces" or "any-province" or "enemy-province" => new string?[] {null}, "own-army-personalities" => armyIds.Cast<string?>().ToArray(), "hand" => player.Hand.ToArray(),
                     "spell-or-reserve-in-hand" => player.Hand.Where(h => Definition(Card(h)).Type == CardType.Spell || Keyword(Card(h), "Reserve")).Cast<string?>().ToArray(),
                     // Low Market: broader than Equip (Battle)'s own hand filter (any Item/Follower/
                     // Spell, matching the ordinary Equip() command's own type filter).
@@ -6323,9 +6415,14 @@ public sealed partial class MatchEngine
                 // keeps only the ones with enemy units. Every other ability has exactly one (null).
                 // A move whose destination is a rule of the ability that the player chooses between (issue #336) offers one candidate
                 // per battlefield the rule lists; a move with nothing to choose (and no legal battlefield) offers the single null one.
-                int?[] destinations = id == "hawado-move-battlefield" ? _state.UnresolvedBattlefields.Select(p => (int?)p).ToArray()
+                // A province target (Ring of Earth's "a province", a Reconnaissance grant's "an enemy province", issue #379) is a command parameter, not a card: one
+                // candidate per province, and for "any province" one option per owner (whose province) -- the choices QueryActions could not enumerate before.
+                int?[] destinations = ability.Target is "any-province" or "enemy-province" ? Enumerable.Range(0, Player(playerId).Provinces.Count).Select(i => (int?)i).ToArray()
+                    : id == "hawado-move-battlefield" ? _state.UnresolvedBattlefields.Select(p => (int?)p).ToArray()
                     : ability.Move is { ChoosesBattlefield: true } chosenMove && MoveDestinations(chosenMove) is { Length: > 0 } listed ? listed.Select(p => (int?)p).ToArray()
                     : ability.Target == "attack" && ability.AttackTargetsProvince && _state.CurrentBattleProvince is int battleProvince ? [null, battleProvince] : [null];
+                foreach (var provinceOwner in ability.Target == "any-province" ? new int?[] { 0, 1 } : new int?[] { null })
+                {
                 var legal = new List<GameCommand>(); string? error = null;
                 var quotes = new List<(GameCommand Command, GoldQuote? Quote)>();
                 foreach (var (target, destination) in candidates.SelectMany(t => destinations.Select(d => (t, d))))
@@ -6336,7 +6433,7 @@ public sealed partial class MatchEngine
                     // a parallel per-ability chain. A free ability gets the empty source list, and a cost the
                     // player cannot pay gets none, so ValidateAbility below reports the shortfall exactly as
                     // it always has.
-                    var command = prototype with { TargetId = target, Province = destination };
+                    var command = prototype with { TargetId = target, Province = destination, TargetPlayerId = provinceOwner };
                     var quote = QuoteAbilityGold(command);
                     command = command with { SourceIds = quote is null ? [] : quote.Payments.FirstOrDefault()?.SourceIds };
                     try { ValidateAbility(command); legal.Add(command); quotes.Add((command, quote)); }
@@ -6347,17 +6444,20 @@ public sealed partial class MatchEngine
                 // the client swaps between them without a round trip.
                 var targetQuotes = firstQuote?.Kind == GoldCostKind.Derived
                     ? quotes.Where(q => q.Command.TargetId is not null && q.Quote is not null).GroupBy(q => q.Command.TargetId!).ToDictionary(g => g.Key, g => g.First().Quote!) : null;
-                var label = AbilityOptionLabel(id, ability, performer, source, costOption);
+                var label = AbilityOptionLabel(id, ability, performer, source, costOption) + (createChoice is null ? "" : $" · {createChoice.Name}")
+                    + (provinceOwner is int owner ? (owner == playerId ? " · your Province" : " · an enemy Province") : "");
                 yield return new("useAbility", label, legal.Count > 0, legal.Count > 0 ? null : error ?? "No legal target or performer.",
                     legal.FirstOrDefault(), source?.Id, ability.Target == "provinces" ? provinces : legal.Where(c => c.TargetId is not null).Select(c => c.TargetId!).Distinct().ToArray(),
                     // The battlefields a move's destination rule lists (issue #336) or, for an Attack, the province it may name instead of a card (issue #335): the
                     // province indices the assignment flow already draws. An ability has one shape or the other (a Move ability is never an Attack), so the
                     // same field never means both; ActionOption.Type/Slots/NoTarget say which.
-                    Provinces: ability.Move is { ChoosesBattlefield: true } ? legal.Where(c => c.Province is not null).Select(c => c.Province!.Value).Distinct().ToArray()
+                    Provinces: ability.Target is "any-province" or "enemy-province" ? legal.Where(c => c.Province is not null).Select(c => c.Province!.Value).Distinct().ToArray()
+                        : ability.Move is { ChoosesBattlefield: true } ? legal.Where(c => c.Province is not null).Select(c => c.Province!.Value).Distinct().ToArray()
                         : ability.Target == "attack" && legal.Any(c => c.Province is not null) ? legal.Where(c => c.Province is not null).Select(c => c.Province!.Value).Distinct().ToArray() : null,
                     Gold: firstQuote, TargetGold: targetQuotes,
                     // An Attack may always be taken with no target (or on the province where the ability allows it): the client must be able to say so.
                     NoTarget: ability.Target == "attack" && legal.Any(c => c.TargetId is null && c.Province is null));
+                }
             }
         }
     }
