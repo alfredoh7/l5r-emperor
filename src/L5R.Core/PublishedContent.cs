@@ -2329,4 +2329,6 @@ public static class PublishedContent
     public static PublishedSnapshot StrategyWave35 { get; } = Load("L5R.Published.StrategyWave35.json", "strategy-wave-35", requireDecks: false);
     /// <summary>Second City pass (#264): Rage of the Spirits and Essence of Undeath.</summary>
     public static PublishedSnapshot SpellWave13 { get; } = Load("L5R.Published.SpellWave13.json", "spell-wave-13", requireDecks: false);
+    /// <summary>Second City pass (#264): Kyuden Kitsune.</summary>
+    public static PublishedSnapshot StrongholdWave10 { get; } = Load("L5R.Published.StrongholdWave10.json", "stronghold-wave-10", requireDecks: false);
 }

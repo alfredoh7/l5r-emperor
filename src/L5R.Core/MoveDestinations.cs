@@ -10,6 +10,8 @@ namespace L5R.Core;
 public sealed record MoveSpec(string Movers, string Destination)
 {
     public const string Target = "target", Source = "source", SourceAndTarget = "source-and-target", Performer = "performer", PerformerAndTarget = "performer-and-target";
+    /// <summary>Every card of the ability's performing slot moves ("Move the targets to the current battlefield", Dislodge the Foe).</summary>
+    public const string PerformingSlot = "performing-slot";
     public const string Home = "home", CurrentBattlefield = "current-battlefield", AdjacentUnresolved = "adjacent-unresolved-battlefield", AnyUnresolved = "unresolved-battlefield";
     public bool ChoosesBattlefield => Destination is AdjacentUnresolved or AnyUnresolved;
 }
@@ -65,6 +67,7 @@ public sealed partial class MatchEngine
         var battlefield = move.Destination == MoveSpec.CurrentBattlefield ? _state.CurrentBattleProvince : command.Province;
         if (move.Movers is MoveSpec.Source or MoveSpec.SourceAndTarget) MoveByRule(source!, move, battlefield);
         if (move.Movers is MoveSpec.Performer or MoveSpec.PerformerAndTarget) MoveByRule(Card(command.PerformerId), move, battlefield);
+        if (move.Movers == MoveSpec.PerformingSlot) foreach (var mover in PerformingSlotCards(command, ability).ToArray()) MoveByRule(mover, move, battlefield);
         return move.Movers is MoveSpec.Target or MoveSpec.SourceAndTarget or MoveSpec.PerformerAndTarget && MoveByRule(target!, move, battlefield);
     }
 

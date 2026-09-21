@@ -73,7 +73,7 @@ internal static partial class SecondCityBattleTests
         }
         Check(CardCatalog.Get(SilentTerror).Keywords!.Contains("Ninja") && CardCatalog.Get(GojuPlot).Keywords!.Contains("Ninja"), "Silent Terror and Goju Plot are Ninja");
         Check(CardCatalog.Get(Rage).Keywords!.Contains("Earth") && CardCatalog.Get(Essence).Keywords!.Contains("Maho"), "Rage is Earth, Essence is Maho");
-        Eq(PublishedContent.StrategyWave35.Cards.Length, 9); Eq(PublishedContent.SpellWave13.Cards.Length, 2);
+        Eq(PublishedContent.StrategyWave35.Cards.Length, 13); Eq(PublishedContent.SpellWave13.Cards.Length, 2);
         var dainagon = CardCatalog.Get(Dainagon);
         Check(dainagon.Name == "Doji Dainagon" && dainagon.Type == CardType.Personality && dainagon.GoldCost == 5 && dainagon.Force == 1 && dainagon.Chi == 3 && dainagon.PersonalHonor == 3 && dainagon.HonorRequirement == 6, "Doji Dainagon");
         Check(dainagon.Keywords!.Contains("Courtier") && dainagon.Keywords.Contains("Crane Clan") && dainagon.Keywords.Contains("Imperial") && dainagon.Text == "Dainagon may Lobby as an Open action." && dainagon.Abilities!.SequenceEqual(new[] { "dainagon-lobby" }), "his keywords and text");

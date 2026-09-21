@@ -52,7 +52,8 @@ public sealed partial class MatchEngine
         if (command.TargetId is not null) yield return command.TargetId;
         if (command.AbilityId == "kahoku-exp-attack" && command.CardIds is { Length: 1 } attackTarget) yield return attackTarget[0];
         // A multi-target action (issue #336) targets every card of every card slot; the first is TargetId, yielded above.
-        foreach (var id in (command.Selections ?? []).SelectMany(s => s.CardIds ?? []))
+        var slots = command.AbilityId is not null && AbilityCatalog.All.TryGetValue(command.AbilityId, out var slotted) ? slotted.Slots : null;
+        foreach (var id in (command.Selections ?? []).Where(s => slots?.FirstOrDefault(x => x.Id == s.Slot)?.Performing != true).SelectMany(s => s.CardIds ?? []))
             if (id != command.TargetId) yield return id;
     }
 

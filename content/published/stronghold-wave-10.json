@@ -1,0 +1,33 @@
+{
+  "Profile": "stronghold-wave-10",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-4642",
+      "Name": "Kyuden Kitsune",
+      "Type": "Stronghold",
+      "Clan": "Mantis",
+      "GoldCost": 0,
+      "GoldProduction": 4,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 7,
+      "StartingHonor": 4,
+      "Text": "Your forests are maddening. Negate the first movement each battle into attacking armies at your provinces' battlefields from other players' actions.\nLimited: Bow your target Forest to gain 1 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-4642.jpg",
+      "Keywords": [
+        "Experienced",
+        "Forest"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "kitsune-forest-honor"
+      ],
+      "Effect": "negate-first-movement-into-attacking-armies"
+    }
+  ],
+  "Decks": []
+}
