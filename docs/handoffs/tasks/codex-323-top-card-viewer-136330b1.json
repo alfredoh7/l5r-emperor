@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Implement approved private top-card tray with one full-card row, per-card destinations and keyboard-accessible return order (#323)",
-  "validation": "Final client build zero warnings/errors; Godot import and artwork coverage passed. Native 1920x1080 review-normal and 1280x800 reduced passed: hover/inspection, keyboard/menu/reorder input, engine deck order, min/max and illegal reasons, top/bottom, take/discard/show, opponent ownership/privacy, seat/busy reset, fixed/short/empty/no-eligible and prepared navigation. Actual app launcher and native manual reorder/opponent-deck navigation verified. Screenshots in docs/screenshots/top-cards.",
+  "summary": "Implement approved private top-card tray with one full-card row, engine destinations and keyboard-accessible return order (#323); integrate current main 9876402c",
+  "validation": "Client build zero warnings/errors, import/art coverage passed. Native 1920x1080 review-normal and 1280x800 reduced passed; actual app launch/manual reorder and opponent-deck navigation passed. After conflict-free main 9876402c merge, all tools/check.sh --skip-client checks and full 1280x800 integrated-reduced native exercise passed again. Updated 2959-image art pack is private and GitHub size/SHA-256 match the receipt. See handoff for exact scenarios and screenshots.",
   "remaining": "Exact implementation-head CI after push; Alfredo hands-on review, Mendon review and Windows graphical playtest pending. No merge authorized. Active goal still requires #345, #311 and #400 plus combined delivery.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/323",
   "branch": "codex/323-top-card-viewer",
-  "updated": "2026-09-21T21:22:15.783283+00:00"
+  "updated": "2026-09-21T21:28:13.933249+00:00"
 }

@@ -1,6 +1,6 @@
 # Top-card viewer review — #323
 
-PR: https://github.com/alfredoh7/l5r-emperor/pull/428. Branch `codex/323-top-card-viewer`, stacked on opponent-payment preview #427 (`09774bbd`). Main through `99875bc5` is integrated in the preview base. Nothing is merged into main. #427 has passing exact-head collaboration, Mac and Windows checks and awaits human review.
+PR: https://github.com/alfredoh7/l5r-emperor/pull/428. Branch `codex/323-top-card-viewer`, stacked on opponent-payment preview #427 (`09774bbd`). Main through `9876402c` is integrated, including Mendon’s newly merged province-strength/Terrain update #424. That merge was conflict-free; its rules changes are inherited from main. Nothing is merged into main. #427 has passing exact-head collaboration, Mac and Windows checks and awaits human review.
 
 ## Approved design and behavior
 
@@ -32,6 +32,8 @@ The review navigation only exists in this prepared demo. It constructs initial t
 - Client compilation passed with zero warnings/errors; Godot import and local artwork coverage verification passed.
 - `bash tools/check-top-cards-ui.sh '1920x1080 review-normal' '1280x800 reduced'` passed on the final implementation. The earlier standard 1920×1080 run also passed before the last label/layout polish.
 - Native checks exercise mouse and keyboard reordering/menus, full-face hover/inspection, required/min/max and forbidden choices/reasons, exact engine return order at top and bottom, take/discard/show outcomes, either deck owner, waiting privacy, inspection cleanup, seat/draft reset, fixed/short/empty/no-eligible cases, busy pause/resume and prepared navigation. The harness compares the resulting real engine deck order with the displayed arrangement.
+- After integrating main `9876402c`, `bash tools/check.sh --skip-client` passed all requested deterministic suites and `bash tools/check-top-cards-ui.sh '1280x800 integrated-reduced'` passed the complete native viewer exercise again. The prepared app launcher was reopened against the integrated build.
+- The complete 2,959-image artwork dependency is published privately as `catalogue-art-pr428-20260921-r1`. GitHub confirms 403,226,088 bytes and SHA-256 `262fc197eda909f48409552d48c37e675a9e923526ea06de41088f76d6e1ab01`, matching the installed/committed receipt. This includes all three new main printings; prior previews’ packages are preserved.
 - Final native logs have `TOP_CARDS_PASS` and no resource-leak warnings. A first layout probe caught footer wrapping expanding the tray; explicit button widths and compact labels fixed it. An unparented optional header container was also removed before the final runs.
 - Actual `.app` launch passed. Manual native clicks reordered cards and navigated through Signs and Portents into the opponent’s deck, with ownership visible and a separate arrangement confirmation.
 - Screenshots in `docs/screenshots/top-cards/` show normal and reduced native output. These are not Windows graphical evidence or human rules acceptance. CI is checked against the published implementation head.
