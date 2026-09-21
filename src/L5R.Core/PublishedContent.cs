@@ -2371,4 +2371,6 @@ public static class PublishedContent
     public static PublishedSnapshot CelestialWave4 { get; } = Load("L5R.Published.CelestialWave4.json", "celestial-wave-4", requireDecks: false);
     /// <summary>Region wave 5 (issue #431): Stone-Hewed Shrine.</summary>
     public static PublishedSnapshot RegionWave5 { get; } = Load("L5R.Published.RegionWave5.json", "region-wave-5", requireDecks: false);
+    /// <summary>Personality wave 44 (issue #431): The Red Hunger.</summary>
+    public static PublishedSnapshot PersonalityWave44 { get; } = Load("L5R.Published.PersonalityWave44.json", "personality-wave-44", requireDecks: false);
 }

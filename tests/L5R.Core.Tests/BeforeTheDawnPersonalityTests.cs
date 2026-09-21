@@ -21,6 +21,7 @@ internal static class BeforeTheDawnPersonalityTests
         ("Reactions to a targeting action: Kota negates the movement, Taishuu negates a Political action", TargetedReactions),
         ("Attaching: Ebara (a Weapon from the hand, draws) and Hailung (a Follower from the hand, discount while defending or Crab)", AttachActions),
         ("Izuna (dishonor and a permanent keyword), Yupadi (Naval; bow her or a Spell), Iemasa's Limited", EntryAndGrants),
+        ("The Red Hunger: destroys one or two attachments with a total Force lower than his, or a Personality without attachments with lower Force", RedHunger),
         ("Tarao: the chosen player bows a card of his or discards one from his hand; Kiuchi: equalizes two Forces; Shigeyuki: a refusable Personal Honor duel", DecidersAndDuels),
     ]);
 
@@ -157,14 +158,14 @@ internal static class BeforeTheDawnPersonalityTests
         Accept(me2, Offer(me2, 0, "masafuni-move", masafuni2.Id, foe2.Id));
         Check(me2.State.Cards[foe2.Id].Zone == Zone.Home && !me2.State.Cards[masafuni2.Id].Bowed, "with Reconnaissance he does not bow");
         // Nijugun: bows a performing Follower, moves an enemy home; with Reconnaissance or as a Unicorn player negates his further movement.
-        foreach (var (recon, expectLock) in new[] { (false, false), (true, true) })
+        foreach (var (recon, unicorn, expectLock) in new[] { (false, false, false), (true, false, true), (false, true, true) })
         {
             var n = Battle(); var nijugun = Bf(n, Nijugun, 0); var follower = Add(n, "training-follower", 0, Zone.Attached, province: 0, parent: nijugun.Id); var enemy2 = Bf(n, "training-lion-samurai", 1);
-            n.Players[1].Provinces[0].Reconnaissance[0] = recon;
+            n.Players[1].Provinces[0].Reconnaissance[0] = recon; n.Players[0].Clan = unicorn ? "Unicorn" : "Crane";
             var ne = MatchEngine.FromTestState(n);
             Accept(ne, Offer(ne, 0, "nijugun-move", nijugun.Id, enemy2.Id, follower.Id));
             Check(ne.State.Cards[follower.Id].Bowed && ne.State.Cards[enemy2.Id].Zone == Zone.Home, "the Follower bowed and the enemy went home");
-            Eq(ne.State.Cards[enemy2.Id].MovementLocks.Count > 0, expectLock, $"Reconnaissance {recon}: his further movement is negated");
+            Eq(ne.State.Cards[enemy2.Id].MovementLocks.Count > 0, expectLock, $"Reconnaissance {recon}, Unicorn {unicorn}: his further movement is negated");
         }
         // Omigawa: lower Force or no Weapon; bow him if he moved and she has a Weapon.
         foreach (var armed in new[] { false, true })
@@ -199,6 +200,36 @@ internal static class BeforeTheDawnPersonalityTests
         Check(e.State.Cards[weak.Id].Zone is Zone.Dead or Zone.DynastyDiscard, "Ranged 1 destroyed a Force-1 Personality");
         e = Edit(e, st => st.PriorityPlayerId = 0);
         Check(CanUse(e, 0, "kaname-ranged-attack", kaname.Id), "and it may be used again this turn");
+        // The +2 Reaction (Kaname's own) raises the pending Attack's strength from 1 to 3.
+        foreach (var react in new[] { false, true })
+        {
+            var k = Battle(); var kaname2 = Bf(k, Kaname, 0); var target1 = Bf(k, "training-lion-samurai", 1); Force(target1, -CardCatalog.Get("training-lion-samurai").Force + 1);
+            var ke = MatchEngine.FromTestState(k);
+            Accept(ke, Offer(ke, 0, "kaname-ranged-attack", kaname2.Id, target1.Id));
+            Eq(ke.State.PendingChoice?.Type, "attackReaction", "the Ranged Attack opens its window");
+            Eq(ke.State.PendingAttack!.Strength, 1, "Ranged 1");
+            if (react) { Accept(ke, ke.QueryActions(ke.State.PriorityPlayerId).First(x => x.Enabled && x.Command?.AbilityId == "kaname-attack-boost").Command!); Eq(ke.State.PendingAttack!.Strength, 3, "+2 strength"); }
+            PassAttackWindow(ke);
+        }
+        // Umiko: +2 or -2, once: an enemy Ranged 4 Attack is turned to 2, or to 6.
+        foreach (var (ability, expected) in new[] { ("umiko-attack-reduce", 2), ("umiko-attack-boost", 6) })
+        {
+            var u = Battle(); u.ActivePlayerId = 1; u.PriorityPlayerId = 1;
+            var shooter = Bf(u, Yashiro, 1); var umiko = Bf(u, Umiko, 0); var victim = Bf(u, "training-crane-samurai", 0); Force(victim, -CardCatalog.Get("training-crane-samurai").Force + 4);
+            u.Players[0].Provinces[0].Reconnaissance[1] = true;
+            var ue = MatchEngine.FromTestState(u);
+            Accept(ue, Offer(ue, 1, "yashiro-attack", shooter.Id, victim.Id));
+            var seen = -1;
+            for (var guard = 0; guard < 6 && ue.State.PendingChoice is { Type: "attackReaction" }; guard++)
+            {
+                var who = ue.State.PriorityPlayerId;
+                var use = ue.QueryActions(who).FirstOrDefault(x => x.Enabled && x.Command?.AbilityId == ability);
+                if (use is not null) { Accept(ue, use.Command!); seen = ue.State.PendingAttack!.Strength; Check(!ue.QueryActions(0).Any(x => x.Enabled && x.Command?.AbilityId is "umiko-attack-boost" or "umiko-attack-reduce"), "one use covers both"); }
+                Accept(ue, ue.QueryActions(ue.State.PriorityPlayerId).First(x => x.Type == "declineReaction").Command!);
+            }
+            Eq(seen, expected, $"{ability}: the Attack's strength");
+            Check(umiko.Id.Length > 0);
+        }
         // Yashiro: bow unless Reconnaissance; Ranged 4.
         var y = Battle(); var yashiro = Bf(y, Yashiro, 0); var t = Bf(y, "training-lion-samurai", 1);
         var ye = MatchEngine.FromTestState(y);
@@ -339,22 +370,27 @@ internal static class BeforeTheDawnPersonalityTests
 
     private static void EntryAndGrants()
     {
-        // Izuna: after she enters play, dishonor an enemy Personality with Personal Honor at most her Chi and permanently give him Ninja.
-        var s = MatchEngine.CreateEconomyScenario().State;
-        for (var i = 0; i < 5; i++) Add(s, "training-marketplace", 0, Zone.Home);
-        s.Players[0].Honor = 20;
-        var cardId = s.Players[0].Provinces[0].CardId!; s.Cards[cardId].DefinitionId = Izuna; s.Cards[cardId].FaceUp = true;
-        var victim = Add(s, "training-lion-samurai", 1, Zone.Home); victim.Modifiers.Add(new("test-source", "test", "PersonalHonor", -CardCatalog.Get("training-lion-samurai").PersonalHonor));
-        var proud = Add(s, "training-lion-veteran", 1, Zone.Home); proud.Modifiers.Add(new("test-source", "test", "PersonalHonor", 10));
-        var e = MatchEngine.FromTestState(s);
-        Accept(e, new GameCommand("purchase", 0, e.Version, CardId: cardId, SourceIds: e.PaymentOptions(0, CardCatalog.Get(Izuna).GoldCost).First().SourceIds));
-        Eq(e.State.PendingChoice?.Type, "entryReaction", "her entry window is open");
-        var offered = e.QueryActions(0).Where(x => x.Type == "useAbility" && x.Command?.AbilityId is "izuna-kolat" or "izuna-ninja" or "izuna-shadowlands").ToArray();
-        Eq(offered.Length, 3, "one option per keyword she may give");
-        Check(offered.All(o => o.Enabled && o.TargetIds!.Contains(victim.Id) && !o.TargetIds.Contains(proud.Id)), "another player's Personality with Personal Honor at most her Chi");
-        Accept(e, Offer(e, 0, "izuna-ninja", cardId, victim.Id));
-        Check(e.State.Cards[victim.Id].Dishonorable && e.HasKeyword(victim.Id, "Ninja"), "dishonored and permanently a Ninja");
-        Check(!e.QueryActions(0).Any(x => x.Enabled && x.Command?.AbilityId is "izuna-kolat" or "izuna-shadowlands"), "the three share one use");
+        // Izuna: after she enters play, dishonor an enemy Personality with Personal Honor at most her Chi and permanently give him Kolat, Ninja or Shadowlands.
+        foreach (var (ability, keyword) in new[] { ("izuna-kolat", "Kolat"), ("izuna-ninja", "Ninja"), ("izuna-shadowlands", "Shadowlands") })
+        {
+            var s = MatchEngine.CreateEconomyScenario().State;
+            for (var i = 0; i < 5; i++) Add(s, "training-marketplace", 0, Zone.Home);
+            s.Players[0].Honor = 20;
+            var cardId = s.Players[0].Provinces[0].CardId!; s.Cards[cardId].DefinitionId = Izuna; s.Cards[cardId].FaceUp = true;
+            var victim = Add(s, "training-lion-samurai", 1, Zone.Home); victim.Modifiers.Add(new("test-source", "test", "PersonalHonor", -CardCatalog.Get("training-lion-samurai").PersonalHonor));
+            var proud = Add(s, "training-lion-veteran", 1, Zone.Home); proud.Modifiers.Add(new("test-source", "test", "PersonalHonor", 10));
+            var own = Add(s, "training-crane-samurai", 0, Zone.Home);
+            var e = MatchEngine.FromTestState(s);
+            Accept(e, new GameCommand("purchase", 0, e.Version, CardId: cardId, SourceIds: e.PaymentOptions(0, CardCatalog.Get(Izuna).GoldCost).First().SourceIds));
+            Eq(e.State.PendingChoice?.Type, "entryReaction", "her entry window is open");
+            var offered = e.QueryActions(0).Where(x => x.Type == "useAbility" && x.Command?.AbilityId is "izuna-kolat" or "izuna-ninja" or "izuna-shadowlands").ToArray();
+            Eq(offered.Length, 3, "one option per keyword she may give");
+            Check(offered.All(o => o.Enabled && o.TargetIds!.Contains(victim.Id) && !o.TargetIds.Contains(proud.Id) && !o.TargetIds.Contains(own.Id)), "another player's Personality with Personal Honor at most her Chi");
+            Accept(e, Offer(e, 0, ability, cardId, victim.Id));
+            Check(e.State.Cards[victim.Id].Dishonorable && e.HasKeyword(victim.Id, keyword), $"dishonored and permanently {keyword}");
+            Check(e.State.Cards[victim.Id].GrantedKeywords.Any(g => g.Keyword == keyword && g.Duration == GrantDuration.Permanent), "permanently");
+            Check(!e.QueryActions(0).Any(x => x.Enabled && x.Command?.AbilityId is "izuna-kolat" or "izuna-ninja" or "izuna-shadowlands"), "the three share one use");
+        }
         // Yupadi: bow Yupadi or one of her Spells, and give a Personality Naval (this turn).
         var y = Table(Phase.Action, 0); y.PriorityPlayerId = 0; y.Players[0].TurnsTaken = 3; y.Players[1].TurnsTaken = 3;
         var yupadi = Add(y, Yupadi, 0, Zone.Home); var spell = Add(y, "training-spell", 0, Zone.Attached, parent: yupadi.Id); var ally = Add(y, "training-crane-samurai", 0, Zone.Home);
@@ -370,6 +406,31 @@ internal static class BeforeTheDawnPersonalityTests
         var ie = MatchEngine.FromTestState(lim); var honor = Honor(ie, 0);
         Accept(ie, Enabled(ie, 0, "iemasa-rebuild", iemasa.Id).Command!);
         Check(Honor(ie, 0) >= honor + 3 && ie.State.Players[0].MayNotAttackThisTurn, "3 Honor; no attack this turn");
+    }
+
+    private static void RedHunger()
+    {
+        var hunger = CardCatalog.Get("oracle-l5r-8283");
+        Check(hunger.Name == "The Red Hunger" && hunger.Abilities!.SequenceEqual(new[] { "red-hunger-attachments", "red-hunger-personality" }), "the printed card");
+        var s = Battle(); var rh = Bf(s, "oracle-l5r-8283", 0); var host = Bf(s, "training-lion-samurai", 1); var weapon = Add(s, "training-weapon", 1, Zone.Attached, province: 0, parent: host.Id);
+        var follower = Add(s, "training-follower", 1, Zone.Attached, province: 0, parent: host.Id); var bare = Bf(s, "training-crane-samurai", 1); var strong = Bf(s, "training-lion-veteran", 1); Force(strong, 50);
+        var e = MatchEngine.FromTestState(s); var force = e.CardForceForTest(rh.Id);
+        var personalityTargets = Options(e, 0, "red-hunger-personality", rh.Id).First(o => o.Enabled).TargetIds!;
+        Check(personalityTargets.Contains(bare.Id) && !personalityTargets.Contains(host.Id) && !personalityTargets.Contains(strong.Id), "a Personality without attachments and with lower Force: " + string.Join(",", personalityTargets));
+        Accept(e, Offer(e, 0, "red-hunger-personality", rh.Id, bare.Id));
+        Check(e.State.Cards[bare.Id].Zone is Zone.Dead or Zone.DynastyDiscard, "he swallows him whole");
+        Check(!CanUse(e, 0, "red-hunger-attachments", rh.Id), "the two shapes share one use");
+        var f = MatchEngine.FromTestState(s);
+        var slot = Enabled(f, 0, "red-hunger-attachments", rh.Id);
+        Check(slot.Slots!.Single().CardIds.Contains(weapon.Id) && slot.Slots!.Single().CardIds.Contains(follower.Id), "attachments of either side");
+        Accept(f, slot.Command! with { Selections = [Pick("attachments", weapon.Id, follower.Id)] });
+        Check(f.State.Cards[weapon.Id].Zone != Zone.Attached && f.State.Cards[follower.Id].Zone != Zone.Attached, "both are destroyed");
+        // A total Force that is not lower than his own is refused.
+        var t = Battle(); var rh2 = Bf(t, "oracle-l5r-8283", 0); var host2 = Bf(t, "training-lion-samurai", 1); var big = Add(t, "training-follower", 1, Zone.Attached, province: 0, parent: host2.Id); big.Modifiers.Add(new("test-source", "test", "Force", 50));
+        var te = MatchEngine.FromTestState(t);
+        Check(!CanUse(te, 0, "red-hunger-attachments", rh2.Id), "not offered when the only attachments outweigh him");
+        Reject(te, new GameCommand("useAbility", 0, te.Version, CardId: rh2.Id, AbilityId: "red-hunger-attachments", Selections: [Pick("attachments", big.Id)]));
+        Check(force > 0);
     }
 
     private static void DecidersAndDuels()

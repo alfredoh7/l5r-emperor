@@ -1779,7 +1779,7 @@ public static class AbilityCatalog
         ["anger-management-destroy"] = new("Battle", "Heroic Battle: Target your performing unbowed Hero to target an enemy card. If it has no attachments, and is bowed or Nonhuman, destroy it. Bow it", "enemy-card",
             Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeywords: ["Hero"], ActionKeywords: ["Heroic"]),
         ["control-the-board-terrain"] = new("Battle", "Destroy a target Terrain", "terrain-at-battle"),
-        ["control-the-board-weaken"] = new("Battle", "Tactical Battle: Target your performing unbowed Tactician to give a target Follower or Personality -6F and bow it", "any-unit",
+        ["control-the-board-weaken"] = new("Battle", "Tactical Battle: Choose your performing unbowed Tactician and target an enemy Personality or Follower: Give it -6F. Bow it", "enemy-force",
             Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeywords: ["Tactician"], ActionKeywords: ["Tactical"]),
         ["defending-their-home-force"] = new("Battle", "Heroic Battle: Give your target performing unbowed Hero +2F for each Personality you control not at the current battlefield", "none",
             Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeywords: ["Hero"], ActionKeywords: ["Heroic"]),
@@ -1841,6 +1841,11 @@ public static class AbilityCatalog
             Slots: [new("targets", "personality", "One or two Personalities controlled by the same player", 1, 2)], Costs: [new(CostVerbs.DiscardFromPlay)]),
         ["stone-hewed-shrine-strength"] = new("Battle", "Even if you control no units at the current battlefield, bow your performing Earth Personality at any location: Give the current battlefield's province +3 strength", "none", Absent: true,
             Performer: "own-unbowed-personality-with-keyword-at-any-location", RequiredKeywords: ["Earth"], Costs: ActionCost.BowPerformer),
+        // The Red Hunger: "Target one or two attachments, or a Personality without attachments, with a total Force lower than The Red Hunger's Force: He swallows them whole. Destroy the targeted cards." The two
+        // shapes of target are two abilities that share a use.
+        ["red-hunger-attachments"] = new("Battle", "Target one or two attachments with a total Force lower than The Red Hunger's Force: He swallows them whole. Destroy the targeted cards", "slots",
+            Slots: [new("attachments", "any-attachment", "One or two attachments", 1, 2)], UsageKey: "red-hunger"),
+        ["red-hunger-personality"] = new("Battle", "Target a Personality without attachments with Force lower than The Red Hunger's Force: He swallows him whole. Destroy the targeted card", "personality-lower-force-than-source", RequireNoAttachments: true, UsageKey: "red-hunger"),
         ["ebara-equip"] = new("BattleOrOpen", "Target a Weapon in your hand: Attach it to Ebara, paying all costs. Draw a card", "attachment-in-discard",
             Cost: GoldCostRule.AttachCost(), Attach: new(AttachSource.Target, AttachPile.OwnHand, AttachWielder.Source, [CardType.Item], ["Weapon"])),
         // Quagmire (oracle-l5r-6123), a Region: Togashi Hizumi's reaction for a battlefield at its own province or an adjacent one -- bow the Region to negate the bowed Personality's next straightening this turn.
@@ -2331,7 +2336,7 @@ public sealed partial class MatchEngine
         or "shinoda-exp-bow-destroy"
         or "a-stain-cleansed-destroy"
         // Before the Dawn (issue #431): Wrathful Dead, and the actions that destroy their target.
-        or "wrathful-dead-destroy" or "anger-management-destroy" or "dismissing-the-cur-move" or "spirit-kensai-destroy" or "spirit-commander-destroy" or "embers-final-fire-destroy";
+        or "wrathful-dead-destroy" or "anger-management-destroy" or "dismissing-the-cur-move" or "spirit-kensai-destroy" or "spirit-commander-destroy" or "embers-final-fire-destroy" or "red-hunger-personality";
     // The actions whose ONLY effect is to straighten their target: against a card that may not be straightened this turn (Basic Lesson) they are refused outright, where an action that
     // also does something else (Defensive Stance's +3F) still resolves and only its straightening is skipped (Straighten refuses it).
     private static bool StraightensOnly(string abilityId) => abilityId is "jinn-kuen-straighten" or "kodo-straighten" or "munefusa-straighten" or "mitsuko-straighten" or "ritual-preparation-straighten"
@@ -4352,7 +4357,7 @@ public sealed partial class MatchEngine
                         "enemy-personality-honor-lte-source-chi" => personality && !own && CardPersonalHonor(target) <= PersonalityChi(source!),
                         "enemy-force-lte-province-strength" => type is CardType.Personality or CardType.Follower && !own
                             && CardForce(target) <= EffectiveProvinceStrength(Player(1 - _state.ActivePlayerId).Provinces.Single(p => p.Index == _state.CurrentBattleProvince!.Value)),
-                        "any-unit" => type is CardType.Personality or CardType.Follower,
+                        "personality-lower-force-than-source" => personality && CardForce(target) < CardForce(source!),
                         "non-unique-personality" => personality && !Keyword(target, "Unique"),
                         "enemy-personality-honor-lte-performer" => personality && !own && CardPersonalHonor(target) <= CardPersonalHonor(Card(command.PerformerId!)),
                         "own-nonhuman-or-undead-personality" => personality && own && (Keyword(target, "Nonhuman") || Keyword(target, "Undead")),
@@ -4375,6 +4380,8 @@ public sealed partial class MatchEngine
             Require(command.Province is int ownProvince && player.Provinces.Any(p => p.Index == ownProvince && !p.Destroyed && p.CardId is not null), "Choose one of your provinces that holds a card.");
         // One slot candidate has now been judged; everything below is about the whole action (its own checks and its price).
         if (slotAbility is not null) return;
+        if (id == "red-hunger-attachments")
+            Require(SlotCards(command, "attachments").Sum(a => Definition(a).Type == CardType.Follower ? CardForce(a) : Definition(a).Force + StatModifier(a, "Force")) < CardForce(source!), "Their total Force must be lower than The Red Hunger's Force.");
         // Attach (issue #337): the wielder and the Equip legality of the attachment (see AttachAction.cs).
         if (ability.Attach is { } attachSpec) ValidateAttach(command, attachSpec, player, source);
         // A created attachment must be one the chosen Personality could be equipped with.
@@ -5839,6 +5846,8 @@ public sealed partial class MatchEngine
             case "wrathful-dead-destroy":
                 if (target!.Zone == Zone.Attached) DestroyAttachment(target); else DestroyUnits([target], false, player.Id);
                 break;
+            case "red-hunger-attachments": foreach (var swallowed in SlotCards(command, "attachments").ToArray()) DestroyAttachment(swallowed); break;
+            case "red-hunger-personality": DestroyUnits([target!], false, player.Id); break;
             case "gentle-word-rehonor": Rehonor(target!); GainHonor(player.Id, 2, Definition(source!).Name, source); break;
             case "anger-management-destroy":
             {
