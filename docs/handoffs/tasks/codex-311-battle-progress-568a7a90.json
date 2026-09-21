@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Begin approved battle progress strip and expandable sequence (#311), client presentation only on inherited shared preview stack.",
+  "validation": "Fresh main c8e13901 and published BattleStep contract read; no new implementation checks yet.",
+  "remaining": "Implementation, native checks, prepared launcher and review. No main merge authorized.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/311",
+  "branch": "codex/311-battle-progress",
+  "updated": "2026-09-21T22:04:41.102269+00:00"
+}
