@@ -29,6 +29,7 @@ internal static class MoveDestinationTests
             ("The option's Provinces (the destinations to draw) and its command's Province (the choice) survive JSON, and every offered destination validates and resolves on a fresh engine", OfferedDestinationsValidate),
         ];
         runner.Run("move-destination", tests);
+        runner.Run("move-destination-preview", [("Hawado exposes all destinations and only herself as mover; province Attacks are distinct", HawadoPreview)]);
     }
 
     private static void Check(bool ok, string message = "Assertion failed") => Batch336Support.Check(ok, message);
@@ -74,6 +75,7 @@ internal static class MoveDestinationTests
             var elsewhere = Add(r.S, "training-battle-bower", 0, Zone.Battlefield, province: destination);
             var e = MatchEngine.FromTestState(r.S);
             var option = Enabled(e, 1, Move, r.Predator.Id);
+        Check(option.Movement is {DefenderId:0,TargetMoves:true} && option.Movement.FixedMoverIds.SequenceEqual([r.Predator.Id]),"Predator previews his own movement plus the selected target");
             Check(option.Provinces!.ToHashSet().SetEquals([0, 2]), "both adjacent unresolved battlefields are offered: " + string.Join(",", option.Provinces!));
             Check(option.TargetIds!.ToHashSet().SetEquals([r.Target.Id, bystanderAtCurrent.Id]), "the Personalities opposing him at the current battlefield");
             var bowedBefore = e.State.Cards[r.Predator.Id].Bowed;
@@ -379,6 +381,7 @@ internal static class MoveDestinationTests
         var src2 = Add(s2, "training-move-source", 1, Zone.Battlefield, province: 1); var tgt2 = Add(s2, "training-battle-bower", 0, Zone.Battlefield, province: 1);
         var e2 = MatchEngine.FromTestState(s2);
         var any = Enabled(e2, 1, "training-move-anywhere", src2.Id);
+        Check(any.Movement is {TargetMoves:true,FixedMoverIds.Length:0},"A target-only move does not preview the source moving");
         Check(any.Provinces!.ToHashSet().SetEquals([0, 3]), "every OTHER unresolved battlefield, adjacent or not: " + string.Join(",", any.Provinces!));
         Reject(e2, any.Command! with { TargetId = tgt2.Id, Province = 1 });
         Accept(e2, any.Command! with { TargetId = tgt2.Id, Province = 3 });
@@ -388,6 +391,7 @@ internal static class MoveDestinationTests
         var src3 = Add(s3, "training-move-source", 1, Zone.Battlefield, province: 1); var stay = Add(s3, "training-battle-bower", 0, Zone.Battlefield, province: 1);
         var e3 = MatchEngine.FromTestState(s3);
         var self = Enabled(e3, 1, "training-move-source-adjacent", src3.Id);
+        Check(self.Movement is {TargetMoves:false}&&self.Movement.FixedMoverIds.SequenceEqual([src3.Id]),"Source-only preview");
         Check(self.Provinces!.ToHashSet().SetEquals([0, 2]) && self.Command!.TargetId is null, "the source's own move needs no target");
         Accept(e3, self.Command! with { Province = 2 });
         Check(e3.State.Cards[src3.Id].ProvinceIndex == 2 && e3.State.Cards[stay.Id].ProvinceIndex == 1, "only Predator-shaped source moved");
@@ -406,9 +410,30 @@ internal static class MoveDestinationTests
         var tgt5 = Add(s5, "training-battle-bower", 0, Zone.Battlefield, province: 1);
         var e5 = MatchEngine.FromTestState(s5);
         var pair = Enabled(e5, 1, "training-move-performer-and-target", src5.Id, perf5.Id);
+        Check(pair.Movement is {TargetMoves:true}&&pair.Movement.FixedMoverIds.SequenceEqual([perf5.Id]),"Performer moves, not the source of the ability");
         Check(pair.Provinces!.ToHashSet().SetEquals([0, 2]), "adjacent unresolved again");
         Accept(e5, pair.Command! with { TargetId = tgt5.Id, Province = 0 });
         Check(e5.State.Cards[perf5.Id].ProvinceIndex == 0 && e5.State.Cards[tgt5.Id].ProvinceIndex == 0 && e5.State.Cards[src5.Id].ProvinceIndex == 1, "the performer and the target moved, the source stayed");
+    }
+
+    private static void HawadoPreview()
+    {
+        var s=Table();s.CurrentBattleProvince=1;s.UnresolvedBattlefields=[0,1,2];
+        var hawado=Add(s,"oracle-l5r-7103",1,Zone.Home,bowed:true);
+        var cost=Add(s,"training-lion-samurai",0,Zone.DynastyDiscard);
+        Add(s,"training-battle-bower",0,Zone.Battlefield,province:0);
+        Add(s,"training-battle-bower",0,Zone.Battlefield,province:2);
+        var e=MatchEngine.FromTestState(s);var option=Enabled(e,1,"hawado-move-battlefield",hawado.Id);
+        Check(option.Provinces!.ToHashSet().SetEquals([0,2]),"Hawado exposes every validated destination");
+        Check(option.Movement is {DefenderId:0,TargetMoves:false}&&option.Movement.FixedMoverIds.SequenceEqual([hawado.Id]),"The removed Dynasty target is not a moving unit");
+        Accept(e,option.Command! with {TargetId=cost.Id,Province=2});
+        Check(e.State.Cards[hawado.Id].ProvinceIndex==2&&!e.State.Cards[hawado.Id].Bowed&&e.State.Cards[cost.Id].Zone==Zone.RemovedFromGame,"Existing movement, straightening and cost remain unchanged");
+        foreach(var enemy in s.Cards.Values.Where(c=>c.OwnerId==0&&c.Zone==Zone.Battlefield)){enemy.Zone=Zone.Home;enemy.ProvinceIndex=null;}
+        var blocked=Options(MatchEngine.FromTestState(s),1,"hawado-move-battlefield",hawado.Id).Single();
+        Check(!blocked.Enabled&&blocked.Provinces is {Length:0}&&blocked.Reason is not null,"No legal destination remains an explained disabled action");
+        var attackState=Table();var attacker=Add(attackState,"training-province-attacker",1,Zone.Battlefield,province:0);
+        var attack=Enabled(MatchEngine.FromTestState(attackState),1,"training-province-attack",attacker.Id);
+        Check(attack.Provinces is {Length:>0}&&attack.Movement is null,"A province-targeting Attack is not a movement");
     }
 
     private static void OfferedDestinationsValidate()
@@ -417,6 +442,7 @@ internal static class MoveDestinationTests
         var e = MatchEngine.FromTestState(r.S);
         var option = Enabled(e, 1, Move, r.Predator.Id);
         var back = JsonSerializer.Deserialize<ActionOption>(JsonSerializer.Serialize(option))!;
+        Check(JsonSerializer.Serialize(back.Movement)==JsonSerializer.Serialize(option.Movement),"Mover metadata survives JSON");
         Check(back.Provinces!.SequenceEqual(option.Provinces!) && back.Command!.Province == option.Command!.Province, "the destinations and the default choice survive JSON");
         Check(option.Command!.Province is int first && option.Provinces!.Contains(first), "the default command already names one of the listed battlefields");
         foreach (var province in option.Provinces!)

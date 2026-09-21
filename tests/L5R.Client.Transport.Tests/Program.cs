@@ -21,6 +21,7 @@ try
         ("shown-card history arrives on both seats and survives live reconnect without exposing other deck cards", ShownHistoryReconnect),
         ("client rejects insecure remote URLs and invalid room reservations", () => InvalidConnections(url)),
         ("client command payload carries every GameCommand field the server accepts (issue #303)", () => { OutgoingPayload(); return Task.CompletedTask; }),
+        ("movement destinations/movers and alternative costs survive the server envelope", () => { MovementActionProjection(); return Task.CompletedTask; }),
         ("deck search: the searcher's deck viewer, the public shown-cards record and every search action survive the server envelope and the client's deserialization (issue #312)", () => { SearchViewsCrossTheWire(); return Task.CompletedTask; }),
         ("look at the top cards: the viewer's ordered cards, the deck choice over any of four decks (the opponent's included) and every look action survive the server envelope and the client's deserialization (issue #322)", () => { LookViewsCrossTheWire(); return Task.CompletedTask; })
     };
@@ -40,6 +41,26 @@ finally
     if (Directory.Exists(storage)) Directory.Delete(storage, recursive: true);
 }
 return failures == 0 ? 0 : 1;
+
+static void MovementActionProjection()
+{
+    var engine=MatchEngine.CreateEconomyScenario();var view=engine.GetView(0);
+    var option=new ActionOption("useAbility","Movement preview",true,null,
+        new GameCommand("useAbility",0,view.Version,"source",TargetId:"target",Province:2,AbilityId:"move",CostOption:"bow"),
+        "source",["target"],[0,2],AlternativeCost:new("move","performer","bow","Bow performer","Movement preview"),
+        Movement:new(1,["performer"],true));
+    var message=new StateMessage("state","ABCDEFGH",0,view.Version,view,[AvailableAction.FromCore(option)],[true,true]);
+    using var json=JsonDocument.Parse(JsonSerializer.Serialize(message,Protocol.Json));
+    var web=new JsonSerializerOptions(JsonSerializerDefaults.Web);
+    var received=json.RootElement.GetProperty("actions").Deserialize<ActionOption[]>(web)!.Single();
+    received=received with {Command=received.Command! with {PlayerId=0,ExpectedVersion=view.Version}};
+    Check(JsonSerializer.Serialize(received,web)==JsonSerializer.Serialize(option,web),"The server projection dropped or altered action metadata");
+    var command=received.Command! with {Province=0};
+    var wire=JsonSerializer.Serialize(MatchSession.ToWire(command),web);
+    var bound=JsonSerializer.Deserialize<WireGameCommand>(wire,Protocol.Json)!.BindToSeat(0,view.Version);
+    Check(JsonSerializer.Serialize(bound)==JsonSerializer.Serialize(command),"The selected province/target did not survive the submitted command");
+    Check(bound.Assignments is null,"A movement must not submit attack assignments");
+}
 
 static async Task LivePlay(string url)
 {

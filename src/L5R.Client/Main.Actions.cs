@@ -18,6 +18,7 @@ public partial class Main
         if (RenderEitherOr()) return;
         if (RenderCopyTray()) return;
         if (RenderDecisionChooser()) { AddDecisionReviewNavigation(); return; }
+        if (RenderMovement()) return;
         if (RenderBattleFlow()) { AddDecisionReviewNavigation(); return; }
         if (PresentationBusy)
         {
@@ -184,7 +185,9 @@ public partial class Main
         var priced = _chosen.TargetGold?.ContainsKey(id) == true;
         _chosen = _chosen with { Command = command with { TargetId = id } };
         if (priced) ResuggestSources();
+        if(MovementActive)RenderBoard();
         RenderInspector(); Highlight();
+        if(MovementActive)FocusMovement();
     }
 
     private void ChooseAmount(int amount)

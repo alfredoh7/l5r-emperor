@@ -11,8 +11,8 @@ Alfredo approved these concept combinations. Implementation completion means a t
 | 3 | #347 | A restriction seal | Ready for individual review; [PR #395](https://github.com/alfredoh7/l5r-emperor/pull/395), native Mac checks and dedicated launcher; no merge |
 | 4 | #314 | B full-card gallery inside A search panel | Ready for individual review; [PR #396](https://github.com/alfredoh7/l5r-emperor/pull/396), native Mac checks and dedicated launcher; no merge |
 | 5 | #343 | A sidebar + B explicit consequences | Ready for individual review; [PR #401](https://github.com/alfredoh7/l5r-emperor/pull/401), native Mac cases and dedicated launcher; no merge |
-| 6 | #342 | B copy tray + A compact result summary | Implemented; [PR #403](https://github.com/alfredoh7/l5r-emperor/pull/403), native Mac checks passed and launcher prepared; final desktop launcher click-through awaits unlocked Mac; no merge |
-| 7 | #346 | A; reuse current battle assignment arrows and province placement | Pending |
+| 6 | #342 | B copy tray + A compact result summary | Ready for individual review; [PR #403](https://github.com/alfredoh7/l5r-emperor/pull/403), native Mac checks and actual prepared-app click-through passed; no merge |
+| 7 | #346 | A; reuse current battle assignment arrows and province placement | Ready for individual review; [PR #404](https://github.com/alfredoh7/l5r-emperor/pull/404), native Mac cases and actual prepared-app click-through passed; no merge |
 | 8 | #355 | A explicit target choices + B full-card previews | Pending |
 
 Approved concepts and prompts are in the local `artifacts/ui-eight-design-review-2026-09-20` gallery in the parent checkout. No new concept approval is required for these combinations. Preserve full card scans, lacquer/Caudex/WeatheredQuill presentation, reduced motion, and sparse table labels. Do not use Impeccable.

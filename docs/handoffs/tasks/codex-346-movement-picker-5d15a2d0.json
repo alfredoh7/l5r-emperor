@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Start approved Movement destination preview #346 with assignment arrows; include missing engine destination/mover projection.",
-  "validation": "Read issue, accepted movement rules and current engine/client implementation. No implementation checks yet.",
-  "remaining": "Implementation, regression/native validation, prepared launcher and review. No merge authorized.",
+  "summary": "Movement destination review with engine-owned mover metadata, existing battle arrows and prepared launcher; Copy desktop launcher also verified. No merge authorized.",
+  "validation": "Client build/import passed; movement native normal/reduced/review controls passed; attack and defense court regressions passed after correcting an inherited Cavalry-reminder assertion; Core 12+1 and transport 10 passed; full check --skip-client passed; actual Movement and Copy apps opened and interacted with through Computer Use.",
+  "remaining": "Alfredo UI acceptance, Mendon shared-contract review and final CI; native Windows/external multiplayer not claimed. Attack targets #355 remains in batch. No merge authorized.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/346",
   "branch": "codex/346-movement-picker",
-  "updated": "2026-09-21T01:13:40.870280+00:00"
+  "updated": "2026-09-21T01:50:13.882446+00:00"
 }

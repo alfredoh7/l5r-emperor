@@ -859,7 +859,11 @@ public sealed record ActionOption(string Type, string Label, bool Enabled, strin
     // Multi-target actions (issue #336): the slots of a Slots ability with the legal candidates of each, so a viewer can
     // collect the whole selection. Null for every ability with a single Target.
     TargetSlotOption[]? Slots = null,
-    bool NoTarget = false, AlternativeCostView? AlternativeCost = null);
+    bool NoTarget = false, AlternativeCostView? AlternativeCost = null,
+    MoveDestinationView? Movement = null);
+/// <summary>Proposed movement only: reactions may prevent each arrival independently. FixedMoverIds names the source/performer units;
+/// TargetMoves adds the command's selected target. Destinations remain in ActionOption.Provinces. No card-rule inference belongs in the UI.</summary>
+public sealed record MoveDestinationView(int DefenderId, string[] FixedMoverIds, bool TargetMoves);
 /// <param name="UnitForce">Authoritative effective unit contribution, including qualifying Followers.
 /// Null for hidden/non-unit/out-of-play cards and older payloads; never substitute a client calculation.</param>
 public sealed record CardView(string Id, CardDefinition? Definition, int OwnerId, Zone Zone, bool FaceUp,

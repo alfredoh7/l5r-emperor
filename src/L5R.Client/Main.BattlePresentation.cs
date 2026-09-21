@@ -92,11 +92,9 @@ public partial class Main
             BattleInkArt.Neck(canvas, edge, above, new Color(1,1,1,reveal));
 
         }
-        foreach (var (id, province) in _assignments)
+        foreach (var (unit,owner,origin) in ProposedUnitPlacements())
         {
-            var unit = Self.Home.FirstOrDefault(c => c.Id == id);
-            if (unit is null || !_battlePlacements.TryGetValue(id, out var origin)) continue;
-            var cards = Self.Home.Where(c => c.AttachedTo == id).Append(unit).ToArray();
+            var cards = owner.Home.Concat(owner.Army).Where(c => c.AttachedTo == unit.Id).Append(unit).ToArray();
             for (var i = 0; i < cards.Length; i++)
             {
                 var card = cards[i];
@@ -113,7 +111,7 @@ public partial class Main
                 }
                 else canvas.DrawTextureRect(tex, new Rect2(position, face), false, new Color(.78f, .87f, .88f, .24f));
             }
-            var footprint = new Rect2(origin, new Vector2(UnitWidth(unit, Self), StackHeight(unit, Self)));
+            var footprint = new Rect2(origin, new Vector2(UnitWidth(unit, owner), StackHeight(unit, owner)));
             var corners = new[] { footprint.Position, new Vector2(footprint.End.X, footprint.Position.Y), footprint.End, new Vector2(footprint.Position.X, footprint.End.Y), footprint.Position };
             for (var i = 0; i < 4; i++) canvas.DrawDashedLine(corners[i], corners[i + 1], new Color(.57f, .85f, .90f, .65f), 1.5f, 8, true);
         }

@@ -270,6 +270,7 @@ public partial class Main
     private void SelectProvince(int owner, int province)
     {
         if (PresentationBusy) return;
+        if(MovementActive){ChooseMovementProvince(owner,province);return;}
         if (_chosen is { Type: "attack" or "assignDefense" } action)
         {
             if (owner != 1 - View.ActivePlayerId || action.Provinces?.Contains(province) != true || _assignmentUnit is null) return;
@@ -307,7 +308,10 @@ public partial class Main
                     yield return new(ScreenCenter(tile), ScreenCenter(target), Palette.Crane, true, clip);
             }
         }
-        if (_chosen is { Type: "equip" or "useAbility" or "playStrategy", Command: { TargetId: string targetId } command })
+        foreach(var (id,origin) in MovementActive?_movementPlacements:[])
+            if(_tiles.FirstOrDefault(t=>t.Card.Id==id) is {} mover&&TileVisible(mover))
+                yield return new(ScreenCenter(mover),WorldToScreen(origin+new Vector2(70,100)),Palette.Gold,true,clip);
+        if (!MovementActive&&_chosen is { Type: "equip" or "useAbility" or "playStrategy", Command: { TargetId: string targetId } command })
         {
             var from = _tiles.FirstOrDefault(t => t.Card.Id == (command.PerformerId ?? command.CardId));
             var to = _tiles.FirstOrDefault(t => t.Card.Id == targetId);

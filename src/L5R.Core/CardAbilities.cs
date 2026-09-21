@@ -6405,12 +6405,13 @@ public sealed partial class MatchEngine
                     // province indices the assignment flow already draws. An ability has one shape or the other (a Move ability is never an Attack), so the
                     // same field never means both; ActionOption.Type/Slots/NoTarget say which.
                     Provinces: ability.Target is "any-province" or "enemy-province" ? legal.Where(c => c.Province is not null).Select(c => c.Province!.Value).Distinct().ToArray()
-                        : ability.Move is { ChoosesBattlefield: true } ? legal.Where(c => c.Province is not null).Select(c => c.Province!.Value).Distinct().ToArray()
+                        : ability.Move is { ChoosesBattlefield: true } || id == "hawado-move-battlefield" ? legal.Where(c => c.Province is not null).Select(c => c.Province!.Value).Distinct().ToArray()
                         : ability.Target == "attack" && legal.Any(c => c.Province is not null) ? legal.Where(c => c.Province is not null).Select(c => c.Province!.Value).Distinct().ToArray() : null,
                     Gold: firstQuote, TargetGold: targetQuotes,
                     // An Attack may always be taken with no target (or on the province where the ability allows it): the client must be able to say so.
                     NoTarget: ability.Target == "attack" && legal.Any(c => c.TargetId is null && c.Province is null),
-                    AlternativeCost: costOption is null ? null : new(id,performer,costOption.Id,costOption.Label,ability.Label));
+                    AlternativeCost: costOption is null ? null : new(id,performer,costOption.Id,costOption.Label,ability.Label),
+                    Movement: MovementPreview(id,ability,source,performer));
                 }
             }
         }

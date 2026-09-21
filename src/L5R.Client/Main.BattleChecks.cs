@@ -73,7 +73,11 @@ public partial class Main
                 GD.Print($"BLOOD_MOVIE_START: frame {Engine.GetProcessFrames()}.");
                 _decisionActions.GetChildren().OfType<Button>().Single(b => b.Text == "Confirm assignments").EmitSignal(Button.SignalName.Pressed);
                 _uiQueue.Clear(); Render();
-                InkRequire(View.Version == version + 1 && _assignments.Count == 0 && !IntentArrows().Any(a => a.Assignment), "Confirmation failed to replace previews.");
+                // Defense can advance to Cavalry Maneuvers, which deliberately retains blue arrows
+                // for committed Infantry. Only the gold local drafts/ghost stacks must disappear.
+                var committedReminders = View.Phase is Phase.CavalryDeclaration or Phase.CavalryDefense;
+                InkRequire(View.Version == version + 1 && _assignments.Count == 0 && !ProposedUnitPlacements().Any()
+                    && IntentArrows().All(a => committedReminders && a.Assignment && a.Color == Palette.Crane), "Confirmation failed to replace previews.");
                 foreach (var (id, province) in plans)
                 {
                     var root = FindCard(id)!;

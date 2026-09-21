@@ -16,7 +16,8 @@ public partial class Main
     private readonly Dictionary<string, Vector2> _battlePlacements = [];
     private IEnumerable<CardView> CourtUnits(PlayerView player, int province) => player.Army
         .Where(c => c.AttachedTo is null && c.ProvinceIndex == province)
-        .Concat(player.Home.Where(c => c.AttachedTo is null && _assignments.GetValueOrDefault(c.Id, -1) == province));
+        .Concat(player.Home.Where(c => c.AttachedTo is null && _assignments.GetValueOrDefault(c.Id, -1) == province))
+        .Concat(MovementCourtUnits(player,province));
     private readonly Dictionary<int, CardView[][]> _holdingRows = [];
     private readonly Dictionary<int, Rect2> _holdingBounds = [], _homeBounds = [];
     private readonly List<InkMatSection> _matTargets = [];
@@ -55,7 +56,7 @@ public partial class Main
         // permanently inflate the next Action/Dynasty board.
         if (!BattleActive && !PresentationBusy)
         { _reservedBattleHeight = 0; _reservedHoldingWidth = 0; _reservedHomeBands.Clear(); Array.Clear(_reservedLaneWidths); }
-        _matTargets.Clear(); _battleCourts.Clear(); _battlePlacements.Clear();
+        _matTargets.Clear(); _battleCourts.Clear(); _battlePlacements.Clear();_movementPlacements.Clear();
         MeasurePersistentHome();
         for (var i = 0; i < 4; i++)
         {
@@ -146,7 +147,7 @@ public partial class Main
                         ProvinceRowY(player) - MatHeader, bayWidth, provinceHeight),
                     ProvinceNumber: province.Index + 1, RegionPair: province.Region is not null, ConnectionAbove: player.Id == Self.Id,
                     Connected: BattleActive && player.Id != View.ActivePlayerId &&
-                        (View.CurrentBattleProvince == province.Index || View.Players.Any(p => CourtUnits(p, province.Index).Any()))));
+                        (View.CurrentBattleProvince == province.Index || View.Players.Any(p => CourtUnits(p, province.Index).Any())||MovementDestination(player.Id,province.Index))));
             }
         }
         if (BattleActive)
@@ -155,7 +156,7 @@ public partial class Main
             foreach (var province in defender.Provinces.Where(p => !p.Destroyed))
             {
                 var index = province.Index;
-                if (!View.Players.Any(p => CourtUnits(p, index).Any()) && View.CurrentBattleProvince != index) continue;
+                if (!View.Players.Any(p => CourtUnits(p, index).Any()) && View.CurrentBattleProvince != index&&!MovementDestination(defender.Id,index)) continue;
                 var widest = View.Players.SelectMany(p => CourtUnits(p, index).Select(c => UnitWidth(c, p))).DefaultIfEmpty(154).Max();
                 var width = Math.Max(210, ArmyColumns(index) * (widest + CardGap) + MatPadding * 2 + 10) - 16;
                 var occupiedHeight = View.Players.Sum(p => CourtUnits(p, index).Chunk(ArmyColumns(index))
@@ -164,7 +165,7 @@ public partial class Main
                 var yCourt = defender.Id == Self.Id ? _battleY + _battleHeight - courtHeight : _battleY;
                 var bounds = new Rect2(SlotX(defender, 2 + index) + CardHeight / 2 - width / 2, yCourt, width, courtHeight);
                 _battleCourts[index] = bounds;
-                _matTargets.Add(new($"battle:{defender.Id}:{index}", $"Province {index + 1}", bounds, View.CurrentBattleProvince == index, ConnectionAbove: defender.Id != Self.Id));
+                _matTargets.Add(new($"battle:{defender.Id}:{index}", $"Province {index + 1}", bounds, View.CurrentBattleProvince == index||MovementDestination(defender.Id,index), ConnectionAbove: defender.Id != Self.Id));
                 // Top army belongs to the top seat, so the defending seat is
                 // always closest to its own province, from either player's view.
                 foreach (var player in new[] { enemy, Self })
@@ -176,7 +177,12 @@ public partial class Main
                     {
                         var rowWidth = row.Sum(c => UnitWidth(c, player)) + (row.Length - 1) * CardGap;
                         var cx = bounds.GetCenter().X - rowWidth / 2;
-                        foreach (var card in row) { _battlePlacements[card.Id] = new Vector2(cx, y); cx += UnitWidth(card, player) + CardGap; }
+                        foreach (var card in row)
+                        {
+                            if(MovementGhost(card,index))_movementPlacements[card.Id]=new Vector2(cx,y);
+                            else _battlePlacements[card.Id]=new Vector2(cx,y);
+                            cx += UnitWidth(card, player) + CardGap;
+                        }
                         y += row.Max(c => StackHeight(c, player)) + RowGap;
                     }
                 }
