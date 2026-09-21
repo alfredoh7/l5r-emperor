@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Stage next five approved UI designs as a private Windows review with seven launchers; earlier releases remain immutable.",
-  "validation": "Packaging regressions 9/9 PASS; delivery checkout full non-client checks PASS including 7/7 transport; Windows export and actual ZIP launchers verified; uploaded asset byte size/SHA-256 verified; collaboration audit shared with no errors. Game source CI/native evidence remain separately recorded.",
-  "remaining": "Windows checks on exact receipt, then gated Mendon notification. Human hands-on/rules acceptance pending. No main merge authorized.",
+  "summary": "Deliver five approved design previews to Mendon as a verified private Windows bundle; seven launchers, review checklist and Claude prompt published. Main remains unmerged.",
+  "validation": "Exact Windows package run 35666577555 PASS at c659ed2a; uploaded and downloaded checksum/runtime/isolated data/all seven launchers verified. Packaging regressions 9/9 and local full non-client checks PASS. Final game-source 0aa6992d Mac/Windows/collaboration CI all PASS; native five-demo checks recorded in source handoffs. Notification comment 5768849177 read back and verified.",
+  "remaining": "Alfredo hands-on acceptance, Mendon rules/UI review, native Windows graphical play and external multiplayer acceptance. No main merge authorized. This final record changes documentation only; validated spec/receipt/archive unchanged.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/297",
   "branch": "codex/297-windows-review",
-  "updated": "2026-09-21T23:13:37.558155+00:00"
+  "updated": "2026-09-21T23:23:40.759393+00:00"
 }
