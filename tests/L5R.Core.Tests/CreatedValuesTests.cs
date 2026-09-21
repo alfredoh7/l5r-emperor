@@ -53,7 +53,7 @@ internal static class CreatedValuesTests
     {
         var root = RepoRoot();
         (string Id, string Wave, bool CreatedOnly, CardType Type)[] cards = [
-            (VenerableMaster, "holding-wave-3", false, CardType.Holding), (AkumasPower, "celestial-wave-2", false, CardType.Celestial), (NakanuTechnique, "strategy-wave-30", false, CardType.Strategy),
+            (VenerableMaster, "holding-wave-3", false, CardType.Holding), (AkumasPower, "celestial-wave-2", false, CardType.Celestial), (NakanuTechnique, "strategy-wave-31", false, CardType.Strategy),
             (Sensei, "personality-wave-40", true, CardType.Personality), (YourNameIsMine, "personality-wave-40", true, CardType.Personality), (NakanusCreations, "follower-wave-19", true, CardType.Follower)];
         foreach (var (id, wave, createdOnly, type) in cards)
         {
@@ -67,7 +67,7 @@ internal static class CreatedValuesTests
             Eq(source.GetProperty("source_url").GetString(), $"https://oracleofthevoid.com/#cardid={id.Replace("oracle-l5r-", "")}");
             Check(File.ReadAllLines(Path.Combine(root, "tests/L5R.Core.Tests/PublishedWaves", wave + ".txt")).Contains(id), id + " is in the wave manifest");
         }
-        Eq(PublishedContent.HoldingWave3.Cards.Length, 1); Eq(PublishedContent.CelestialWave2.Cards.Length, 1); Eq(PublishedContent.StrategyWave30.Cards.Length, 1);
+        Eq(PublishedContent.HoldingWave3.Cards.Length, 1); Eq(PublishedContent.CelestialWave2.Cards.Length, 1); Eq(PublishedContent.StrategyWave31.Cards.Length, 1);
         Eq(PublishedContent.PersonalityWave40.Cards.Length, 2); Eq(PublishedContent.FollowerWave19.Cards.Length, 1);
         var master = CardCatalog.Get(VenerableMaster);
         Eq(master.GoldCost, 2); Eq(master.GoldProduction, 2); Eq(string.Join(",", master.Keywords!), "Retainer"); Eq(string.Join(",", master.Abilities!), "venerable-master-create");

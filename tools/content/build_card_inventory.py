@@ -346,12 +346,11 @@ BLOCKERS: dict[str, str] = {
     # cards the triage had left uncertain, and found one Region the triage flagged BUILDABLE* to
     # actually be blocked -- see docs/decisions/ for the full audit.
     "oracle-l5r-6123": "OpenBowReactionWindow (the shared bowed-personality-at-own-battlefield Reaction watcher Hizumi/Ruya both already use) hardcodes AtBattle(c) for the watching card and same-province-only matching for its own trigger condition -- both structurally exclude a Region source (never AtBattle-eligible) and its own \"at this province or an adjacent province\" text. Reusable only by loosening that SHARED function (adding an AdjacentProvinces branch and waiving its own AtBattle check), which is genuine shared-infrastructure surgery, not a routine per-card wiring addition, and risks regressing Hizumi/Ruya's own already-published behavior.",
-    "oracle-l5r-7420": "Needs a genuinely new primitive: granting a brand-new, ad-hoc, printed-on-this-card ability (with its own Target/Timing) to an arbitrary target CardInstance at runtime, permanently. GrantedKeywords already covers granting a KEYWORD this way; nothing grants a whole new ABILITY id this way -- CardDefinition.Abilities is fixed per definition, never per-instance.",
-    "oracle-l5r-7423": "Same gap as oracle-l5r-7420 (Spirit of the Berserker): needs a runtime per-instance ability grant, not just a keyword grant.",
-    "oracle-l5r-7424": "Same gap as oracle-l5r-7420 (Spirit of the Berserker): needs a runtime per-instance ability grant, not just a keyword grant.",
-    "oracle-l5r-7425": "Same gap as oracle-l5r-7420 (Spirit of the Berserker): needs a runtime per-instance ability grant, not just a keyword grant.",
-    "oracle-l5r-7426": "Same gap as oracle-l5r-7420 (Spirit of the Berserker): needs a runtime per-instance ability grant, not just a keyword grant.",
-    "oracle-l5r-7430": "Same gap as oracle-l5r-7420 (Spirit of the Berserker): needs a runtime per-instance ability grant, not just a keyword grant.",
+    "oracle-l5r-7420": "Permanent per-card ability grants exist (#338/#386). Not yet wired: still needs the granted Reaction that delays destruction from the targeting action until before turn end, plus permanent +2F.",
+    "oracle-l5r-7423": "Permanent per-card ability grants exist (#386). Not yet wired: define its Iaijutsu Battle duel with move-home stakes and the Duelist keyword alternative; the grant mechanism is no longer a blocker.",
+    "oracle-l5r-7425": "Permanent per-card ability grants exist (#386). Not yet wired: define its enemy Force-or-Personal-Honor comparison bow action and Paragon keyword alternative; the grant mechanism is no longer a blocker.",
+    "oracle-l5r-7426": "Permanent per-card ability grants exist (#386). Not yet wired: define the granted Ranged 4 Attack with its conditional bow cost unless Reconnaissance, and the Scout keyword alternative.",
+    "oracle-l5r-7430": "Permanent per-card ability grants exist (#386). Not yet wired: define the granted same-location target-redirection Reaction, reusing TargetedActionReactions where applicable, and the Yojimbo keyword alternative.",
 
     # Second City unwired-card audit, non-Personality rest batch (follow-up to issue #264): the 39
     # remaining unwired Strategy/Item/Celestial/Spell/Holding/Region cards, triaged against every

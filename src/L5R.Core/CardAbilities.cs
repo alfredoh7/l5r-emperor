@@ -146,6 +146,9 @@ public static class AbilityCatalog
         // "if used when it is not their turn" clause -- honor gain unaffected either way -- describes
         // a case this engine's Limited timing already makes structurally unreachable.
         ["utaku-chikako-decline"] = new("Limited", "Gain 2 Honor. You may not declare an attack this turn.", "none"),
+        // Spirit of the Monk: the Strategy grants this predefined ability to its performer permanently.
+        ["spirit-of-the-monk"] = new("Limited", "If the performer is a Monk, permanently give him a Battle ability to bow an enemy Personality without Armor; otherwise, permanently give him Monk", "none", Performer: "own-unbowed-personality"),
+        ["spirit-monk-bow"] = new("Battle", "Target an enemy Personality without Armor: Bow him.", "enemy-personality-without-armor"),
         ["kouki-force"] = new("Battle", "Bow Kouki · enemy −3 Force", "enemy-personality", Costs: ActionCost.BowSource),
         ["prepared-death"] = new("Limited", "Perform · +2 Force", "own-personality"),
         ["paid-bow"] = new("Open", "Pay 4 Gold · bow a Personality", "personality"),
@@ -3706,6 +3709,7 @@ public sealed partial class MatchEngine
                         "own-wielder-or-personality-with-wielder-keyword" => own && personality &&
                             (target.Id == Card(source!.AttachedTo!).Id || HasKeywords(Card(source.AttachedTo!), ability.RequiredKeywords)),
                         "enemy-personality" => personality && !own,
+                        "enemy-personality-without-armor" => personality && !own && !Attachments(target.Id).Any(a => Keyword(a, "Armor")),
                         "own-bowed" => personality && own && target.Bowed,
                         "own-opposed" => personality && own && Army(1-player.Id, _state.CurrentBattleProvince!.Value).Any(),
                         "enemy-force" => !own && type is CardType.Personality or CardType.Follower,
@@ -4668,7 +4672,7 @@ public sealed partial class MatchEngine
                 foreach (var weapon in Attachments(kensai.Id).Where(a => Keyword(a, "Weapon")))
                 {
                     Straighten(weapon);
-                    foreach (var weaponAbilityId in Definition(weapon).Abilities ?? [])
+                    foreach (var weaponAbilityId in AbilityIdsOf(weapon))
                         if (AbilityCatalog.All.TryGetValue(weaponAbilityId, out var weaponAbility) && weaponAbility.Timing == "Battle")
                             weapon.AbilityUses.Remove(weaponAbility.UsageKey ?? weaponAbilityId);
                 }
@@ -4704,6 +4708,16 @@ public sealed partial class MatchEngine
             case "training-grant-bow": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; GrantAdditionalAction(player.Id, null); break;
             case "training-bow-at-battle": case "training-bow-enemy-card-at-battle": case "training-bow-enemy-card-open": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;
             case "training-straighten-at-battle": Straighten(target!); break;
+            case "spirit-of-the-monk":
+                var monk = Card(command.PerformerId!);
+                if (Keyword(monk, "Monk"))
+                {
+                    GrantAbility(monk, "spirit-monk-bow", source!.Id, GrantDuration.Permanent);
+                    Emit("abilityGranted", $"{Definition(monk).Name} permanently gains Battle: {AbilityCatalog.All["spirit-monk-bow"].Label}", player.Id, monk.Id);
+                }
+                else GrantKeyword(monk, "Monk", source!.Id, GrantDuration.Permanent);
+                break;
+            case "spirit-monk-bow":
             case "training-bow-any": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;
             case "effortless-counterattack-move": MoveHome(target!, false); break;
             case "training-honor-strike": GainHonor(target!.OwnerId, -2, "Training strike", source); break;
@@ -6111,7 +6125,7 @@ public sealed partial class MatchEngine
     // only the actual removal, run once the ability it triggered has fully resolved.
     private void RemoveFromGame(CardInstance card)
     {
-        if (card.AttachedTo is string parentId) Card(parentId).GrantedKeywords.RemoveAll(g => g.Source == card.Id && g.Duration == "Attachment");
+        if (card.AttachedTo is string parentId) RemoveAttachmentGrants(Card(parentId), card.Id);
         card.Zone = Zone.RemovedFromGame; card.AttachedTo = null; card.ProvinceIndex = null; card.FaceUp = true; card.Tokens.Clear();
         // Fukuzo's copies (issue #338, Mendon): they end only when he is reshuffled into the Dynasty deck (ToOwnerDeck) or removed from the game (here).
         // Copy-duration grants only: a permanent change of a removed card is still what a later copy from it reads (Fukuzo's own cost removes the donor
@@ -6137,7 +6151,7 @@ public sealed partial class MatchEngine
         var wasAttachedTo = card.Zone == Zone.Attached && card.AttachedTo is string hostId ? Card(hostId) : null;
         if (wasAttachedTo is not null)
         {
-            wasAttachedTo.GrantedKeywords.RemoveAll(g => g.Source == card.Id && g.Duration == "Attachment");
+            RemoveAttachmentGrants(wasAttachedTo, card.Id);
             card.AttachedTo = null; card.Bowed = false;
             card.Tokens.Clear(); card.Modifiers.Clear(); card.ActionLocks.Clear(); card.GrantedKeywords.Clear(); card.GrantedAbilities.Clear(); card.RemovedKeywords.Clear();
         }
@@ -6156,7 +6170,7 @@ public sealed partial class MatchEngine
     private void ToOwnerDeck(CardInstance card, string position)
     {
         RestoreOwner(card); // ...and to its OWNER's deck (issue #352)
-        if (card.AttachedTo is string parentId) Card(parentId).GrantedKeywords.RemoveAll(g => g.Source == card.Id && g.Duration == "Attachment");
+        if (card.AttachedTo is string parentId) RemoveAttachmentGrants(Card(parentId), card.Id);
         var owner = Player(card.OwnerId);
         var dynasty = Definition(card).Type == CardType.Personality;
         card.AttachedTo = null; card.ProvinceIndex = null; card.FaceUp = false; card.Bowed = false;
@@ -6238,7 +6252,7 @@ public sealed partial class MatchEngine
         }
         var parent = Card(card.AttachedTo);
         card.Zone = Zone.FateDiscard; card.AttachedTo = null; card.ProvinceIndex = null; card.FaceUp = true;
-        parent.GrantedKeywords.RemoveAll(g => g.Source == card.Id && g.Duration == "Attachment");
+        RemoveAttachmentGrants(parent, card.Id);
         card.Tokens.Clear();
         DestroyedDuringBattleBonus(card);
         ExpendableDraw(card);
@@ -6372,6 +6386,7 @@ public sealed partial class MatchEngine
                 "own-naval-personality-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && AtBattle(c) && Keyword(c, "Naval")).Select(c => (string?)c.Id).ToArray(),
                 "own-personality-with-keyword-opposed-at-battle" => _state.CurrentBattleProvince is not int opposedProvince || !Army(1 - playerId, opposedProvince).Any() ? []
                     : _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && AtBattle(c) && HasKeywords(c, ability.RequiredKeywords)).Select(c => (string?)c.Id).ToArray(),
+                "own-unbowed-personality" => _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && Definition(c).Type == CardType.Personality && !c.Bowed).Select(c => (string?)c.Id).ToArray(),
                 "own-tactician-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && AtBattle(c) && Keyword(c, "Tactician")).Select(c => (string?)c.Id).ToArray(),
                 // Kitsu Fukui / Fading Shadows (issue #337): the generic "performing [Keyword] Personality", bowed or not. It was missing from
                 // this listing, so an ability that used it (Again!'s shape) could only be played by a hand-built command.
@@ -6497,5 +6512,6 @@ public sealed partial class MatchEngine
         // play of one granted by Daigotsu Bofana - exp (issue #333).
         + (PlayedFromDiscard(ability, source) ? (ability.Discipline ? " · Discipline (removed from the game)" : " · from your discard pile (removed from the game)") : "")
         // A copied ability says whose it was (issue #338), so the player can tell it from the card's own printed ones.
-        + (source is not null && !(Definition(source).Abilities ?? []).Contains(id) && source.GrantedAbilities.FirstOrDefault(g => g.AbilityId == id) is { CopiedFromName: { } copiedFrom } ? $" · copied from {copiedFrom}" : "");
+        + (source is not null && !(Definition(source).Abilities ?? []).Contains(id) && source.GrantedAbilities.FirstOrDefault(g => g.AbilityId == id && GrantHolds(g.Duration, source)) is { } grant
+            ? $" · {(grant.CopiedFrom is null ? "granted" : "copied")} from {GrantSourceName(grant)}" : "");
 }
