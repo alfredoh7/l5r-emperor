@@ -1,0 +1,31 @@
+{
+  "Profile": "strategy-wave-32",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-713",
+      "Name": "Basic Lesson",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 4,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Create a (bowed) Holding with the trait \"Bow this card: Produce 3 Gold.\" Negate your Stronghold's straightening (this turn).\nOpen: Destroy your target Holding: Create a Samurai Personality with 3C/2PH and Force equal to the Holding's base Gold Cost.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-713.jpg",
+      "Keywords": [],
+      "Focus": 4,
+      "Abilities": [
+        "basic-lesson-holding",
+        "basic-lesson-samurai"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}
