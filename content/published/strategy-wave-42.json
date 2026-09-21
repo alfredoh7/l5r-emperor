@@ -1,0 +1,82 @@
+{
+  "Profile": "strategy-wave-42",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-7285",
+      "Name": "Skipping the Puddle",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "You have the ability, \"Water Battle: If any enemy units are at the current battlefield, choose your performing Water Shugenja: Move him there. You may take an additional Battle action which he must perform.\"\nLimited: Put this card into play. Discard all your other Kata.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7285.jpg",
+      "Keywords": [
+        "Kata",
+        "Water"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "skipping-the-puddle-enter",
+        "skipping-the-puddle-move"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-7656",
+      "Name": "Superior Reach",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing unbowed Kensai and target an enemy Personality without Weapons: Reduce his Force to 0. While your Kensai has a Weapon, actions the Personality performs may not target your performer.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7656.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "superior-reach-zero"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-6491",
+      "Name": "Scavenging Party",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "As a Focus Effect: After this duel ends, give its winner -3F.\nLimited: Target your discarded Personality: Discard a card from one of your provinces and refill it face-up with the Personality.\nOpen: Give each of your provinces +2 strength.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6491.jpg",
+      "Keywords": [],
+      "Focus": 1,
+      "Abilities": [
+        "scavenging-party-focus",
+        "scavenging-party-provinces",
+        "scavenging-party-refill"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}
