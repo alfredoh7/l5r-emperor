@@ -414,6 +414,10 @@ public sealed partial class MatchEngine
             case "courtesy-of-the-crane-focus":
                 if (ownerId == winnerPlayerId) foreach (var province in Player(ownerId).Provinces) province.Strength += 2;
                 break;
+            // Discovering a Conspiracy: "if your Personality won it, gain 2 Honor".
+            case "discovering-conspiracy-focus":
+                if (ownerId == winnerPlayerId) GainHonor(ownerId, 2, "Discovering a Conspiracy");
+                break;
         }
     }
 }

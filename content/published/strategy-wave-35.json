@@ -145,6 +145,84 @@
         "goju-plot-recruit"
       ],
       "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-2011",
+      "Name": "Discovering a Conspiracy",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "As a Focus Effect, after this duel ends, if your Personality won it, gain 2 Honor.\nPolitical Battle/Open: Target your performing unbowed Magistrate to target a Personality. His lord casts him out for treachery. Permanently remove his Clan Alignment keywords. Dishonor him. If he is at a battlefield, bow him and choose a player, who gains or loses 1 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-2011.jpg",
+      "Keywords": [
+        "Political"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "discovering-conspiracy-focus",
+        "discovering-conspiracy-expose"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-3779",
+      "Name": "Insulting Gesture",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Political Open: Choose your performing unbowed Courtier. Take the Imperial Favor.\nFavor Political Battle: Discard the Imperial Favor to target an enemy Personality. Dishonor him. Bow him. Move him home. His controller loses 2 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-3779.jpg",
+      "Keywords": [
+        "Favor",
+        "Political"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "insulting-gesture-take",
+        "insulting-gesture-shame"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-708",
+      "Name": "Barred Passage",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Heroic Battle: Target your performing unbowed Hero, who must be the only Personality in his army, to target an enemy Personality and bow his unit.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-708.jpg",
+      "Keywords": [
+        "Heroic"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "barred-passage-bow"
+      ],
+      "Effect": "none"
     }
   ],
   "Decks": []

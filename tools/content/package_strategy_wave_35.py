@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build Strategy wave 35 (issue #264, Second City pass): Great Sacrifice (2900), On the Hunt (5704), Tireless Efforts (8496), Costly Opportunity (1522), Silent Terror (7261) and Goju Plot (2856).
+"""Build Strategy wave 35 (issue #264, Second City pass): Great Sacrifice (2900), On the Hunt (5704), Tireless Efforts (8496), Costly Opportunity (1522), Silent Terror (7261), Goju Plot (2856), Discovering a Conspiracy (2011), Insulting Gesture (3779) and Barred Passage (708).
 
 Every scan was read by eye and its source receipt (with the working copy's sha256) is recorded next to the wave.
 """
@@ -21,6 +21,9 @@ ABILITIES: dict[int, list[str]] = {
     1522: ["costly-opportunity-destroy"],
     7261: ["silent-terror-bow"],
     2856: ["goju-plot-recruit"],
+    2011: ["discovering-conspiracy-focus", "discovering-conspiracy-expose"],
+    3779: ["insulting-gesture-take", "insulting-gesture-shame"],
+    708: ["barred-passage-bow"],
 }
 OVERRIDE: dict[int, dict] = {
 }

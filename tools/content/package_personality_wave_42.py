@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build Personality wave 42 (issue #264, Second City pass): Yoritomo Emoto (oracle-l5r-9544; Cost 10, 6F/3C/1PH). His Battle action bows any of his controller's unbowed Followers at the battlefield to destroy an enemy card without attachments.
+"""Build Personality wave 42 (issue #264, Second City pass): Yoritomo Emoto (oracle-l5r-9544) and Doji Dainagon (oracle-l5r-2070).
 
 Every scan was read by eye and its source receipt (with the working copy's sha256) is recorded next to the wave.
 """
@@ -12,9 +12,11 @@ from package_vanilla_wave import build_definition_fields
 
 ROOT = Path(__file__).resolve().parents[2]
 PROFILE = "personality-wave-42"
+NL = chr(10)
 
 ABILITIES: dict[int, list[str]] = {
     9544: ["emoto-follower-destroy"],
+    2070: ["dainagon-lobby"],
 }
 OVERRIDE: dict[int, dict] = {
 }
@@ -37,8 +39,8 @@ def package(card_ids: list[str], root: Path = ROOT) -> dict:
                   Cards=definitions, Decks=[])
     published_dir = root / "content/published"
     published_dir.mkdir(parents=True, exist_ok=True)
-    (published_dir / f"{PROFILE}.json").write_text(json.dumps(output, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    (published_dir / f"{PROFILE}-sources.json").write_text(json.dumps(sources, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    (published_dir / f"{PROFILE}.json").write_text(json.dumps(output, ensure_ascii=False, indent=2) + NL, encoding="utf-8")
+    (published_dir / f"{PROFILE}-sources.json").write_text(json.dumps(sources, ensure_ascii=False, indent=2) + NL, encoding="utf-8")
     return dict(cards=len(definitions))
 
 

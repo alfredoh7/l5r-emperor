@@ -1650,6 +1650,22 @@ public static class AbilityCatalog
             Costs: ActionCost.BowWielder, SourceUnitMayBeAway: true),
         ["flame-katana-destroy"] = new("Battle", "Bow this card unless this Personality is Fire, and target an enemy card without attachments: Destroy it", "enemy-card", RequireNoAttachments: true,
             Costs: [new(CostVerb.Bow, CostSubject.Source, UnlessKeyword: "Fire")]),
+        // Discovering a Conspiracy (oracle-l5r-2011): a Focus Effect (a duel win pays 2 Honor) and a Political Battle/Open action of a Magistrate -- the target loses his Clan alignment for good and is
+        // dishonored; if he stands at a battlefield he is bowed too, and a chosen player gains or loses 1 Honor (asked only then, as Yoshitada's is).
+        ["discovering-conspiracy-focus"] = new("FocusEffect", "As a Focus Effect: After this duel ends, if your Personality won it, gain 2 Honor.", "none"),
+        ["discovering-conspiracy-expose"] = new("BattleOrOpen", "Political Battle/Open: Target your performing unbowed Magistrate to target a Personality. Permanently remove his Clan Alignment keywords. Dishonor him. If he is at a battlefield, bow him and choose a player, who gains or loses 1 Honor", "personality",
+            Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeywords: ["Magistrate"], ActionKeywords: ["Political"],
+            Branch: new(BranchCondition.TargetAtBattlefield, HonorChoice.Options(1), HonorChoice.None)),
+        // Insulting Gesture (oracle-l5r-3779): a Political Open action of a Courtier takes the Imperial Favor; a Favor Political Battle action discards it to shame an enemy Personality.
+        ["insulting-gesture-take"] = new("Open", "Political Open: Choose your performing unbowed Courtier. Take the Imperial Favor", "none",
+            Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeywords: ["Courtier"], ActionKeywords: ["Political"]),
+        ["insulting-gesture-shame"] = new("Battle", "Favor Political Battle: Discard the Imperial Favor to target an enemy Personality. Dishonor him. Bow him. Move him home. His controller loses 2 Honor", "enemy-personality", ActionKeywords: ["Favor", "Political"]),
+        // Doji Dainagon (oracle-l5r-2070): "Dainagon may Lobby as an Open action" -- the Lobby action (bow a Personality of at least 1 Personal Honor, if your Family Honor is the higher, to take the Imperial Favor), with
+        // Dainagon as the Personality who bows, taken as an Open action (the Lobby every player has is Limited).
+        ["dainagon-lobby"] = new("Open", "Lobby: bow Dainagon to take the Imperial Favor", "none", Costs: ActionCost.BowSource),
+        // Barred Passage (oracle-l5r-708): a Hero alone in his army bows an enemy Personality's unit.
+        ["barred-passage-bow"] = new("Battle", "Heroic Battle: Target your performing unbowed Hero, who must be the only Personality in his army, to target an enemy Personality and bow his unit", "enemy-personality",
+            Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeywords: ["Hero"]),
         // Great Sacrifice (oracle-l5r-2900): destroy your performing Personality (the cost) to destroy an enemy unit whose total Force does not exceed the performer's Force plus Personal Honor (plus one if he is defending).
         ["great-sacrifice-destroy"] = new("Battle", "Destroy your performing unbowed Personality and target an enemy unit with total Force equal to or lower than your performer's Force, plus Personal Honor, plus one if he is defending: Destroy the enemy unit", "enemy-unit-within-performer-sacrifice",
             Performer: "own-unbowed-personality-at-battle", Costs: [new(CostVerbs.Sacrifice, CostSubject.Performer)]),
@@ -2025,6 +2041,16 @@ public sealed partial class MatchEngine
             .Where(clan => clan != "Unaligned" && !card.RemovedClanAffiliations.Contains(clan, StringComparer.Ordinal))
             .Distinct(StringComparer.Ordinal).ToArray();
     private bool HasClanAffiliation(CardInstance card, string clan) => ClanAlignments(card).Contains(clan, StringComparer.Ordinal);
+    // "Permanently remove his Clan Alignment keywords" (Discovering a Conspiracy): every alignment he has -- and its printed keyword ("Crane Clan") -- is gone for good, which makes him Unaligned.
+    private void RemoveClanAlignments(CardInstance card)
+    {
+        foreach (var clan in ClanAlignments(card))
+        {
+            card.RemovedClanAffiliations.Add(clan);
+            if (!card.RemovedKeywords.Contains($"{clan} Clan", StringComparer.Ordinal)) card.RemovedKeywords.Add($"{clan} Clan");
+        }
+        Emit("clanAlignmentRemoved", $"{Definition(card).Name} permanently loses his Clan Alignment keywords.", card.OwnerId, card.Id);
+    }
     private bool LoyaltyAllowsControl(CardInstance card, string clan) =>
         !Keyword(card, "Loyal") || ClanAlignments(card).Length == 0 || HasClanAffiliation(card, clan);
     // "Attachment": lasts while the granting attachment stays attached (cleared in DestroyAttachment).
@@ -2079,7 +2105,7 @@ public sealed partial class MatchEngine
     private static string? MoveOrStraightenKind(string abilityId) => abilityId switch
     {
         "incapacitated" or "favor-battle" or "journeys-end-move" or "shamate-move" or "effortless-counterattack-move"
-            or "ring-of-water-move-home" or "mihato-move" or "block-supply"
+            or "ring-of-water-move-home" or "mihato-move" or "block-supply" or "insulting-gesture-shame"
             // Shinjo Kinto (issue #299): negatable like any other move-home ability -- except when its
             // own acting player has Reconnaissance (MovementCannotBeNegated), checked per command.
             or "kinto-move"
@@ -2116,6 +2142,7 @@ public sealed partial class MatchEngine
     // otherwise have applied, via the NegatesEffect check StalwartNegatesBow now performs first).
     private static bool BowsTarget(string abilityId) => abilityId is "paid-bow" or "unorthodox-attack" or "chokehold" or "immovable-object-bow"
         or "naga-remnants-bow" or "costly-feud" or "block-supply" or "bow-before-my-will" or "surety-of-purpose" or "unexpected-support" or "spirit-monk-bow" or "spirit-paragon-bow"
+        or "discovering-conspiracy-expose" or "insulting-gesture-shame" or "barred-passage-bow" or "silent-terror-bow"
         or "strategic-sacrifice-toggle" or "weakness-of-man-toggle" or "shosuro-ritoru-bow" or "nightingale-blade-bow" or "law-of-darkness-weaken"
         or "training-bow-enemy" or "training-bow-at-battle" or "training-bow-enemy-card-at-battle" or "training-bow-enemy-card-open" or "training-bow-any" or "horibe-bow" or "dairuko-exp-bow" or "furu-bow"
         or "tsudoken-exp-bow" or "masumi-bow" or "tsukasa-bow" or "atsumichi-bow" or "bounty-hunter-bow" or "brothers-great-lake-bow"
@@ -3095,11 +3122,14 @@ public sealed partial class MatchEngine
             Require(_state.CurrentBattleProvince is not null, "There is no current battlefield to move him to.");
             Require(player.Id != _state.ActivePlayerId, "Only the Defender may use Return to Action.");
         }
-        if (id is "shunya-honor" or "favor-cycle" or "favor-battle" or "jakuei-bow-favor" or "bonds-of-coin-draw")
+        if (id is "shunya-honor" or "favor-cycle" or "favor-battle" or "jakuei-bow-favor" or "bonds-of-coin-draw" or "insulting-gesture-shame")
             Require(_state.FavorPlayerId == player.Id, "You must control the Imperial Favor to discard it.");
         // Bonds of Coin (issue #336): "Bow your Stronghold" is a cost of the action, so a bowed Stronghold cannot pay it.
         if (id == "bonds-of-coin-draw") Require(!Card(player.StrongholdId).Bowed, "Your Stronghold is already bowed.");
-        if (id == "lobby") Require(player.Honor > Player(1-player.Id).Honor, "Lobby requires strictly higher Family Honor than your opponent.");
+        if (id is "lobby" or "dainagon-lobby") Require(player.Honor > Player(1-player.Id).Honor, "Lobby requires strictly higher Family Honor than your opponent.");
+        if (id == "dainagon-lobby") Require(CardPersonalHonor(source!) >= 1, "Lobby needs a Personality with at least 1 Personal Honor.");
+        // Barred Passage: "the only Personality in his army" -- none of the acting player's other Personalities stands at this battlefield.
+        if (id == "barred-passage-bow") Require(Army(player.Id, _state.CurrentBattleProvince!.Value).Count(c => Definition(c).Type == CardType.Personality) == 1, "The performing Hero must be the only Personality in his army.");
         if (id is "tamoko-open" or "virtuous-charity-open") Require(_state.ActivePlayerId != player.Id, "Only usable when it is not your own turn.");
         // Ohsuki's Sparrow (oracle-l5r-10023, issue #299): "If none of your provinces were destroyed
         // since your last turn ended" -- a printed condition on USING the action, checked here rather
@@ -4258,7 +4288,7 @@ public sealed partial class MatchEngine
         PayForAbility(command, player);
         // The non-Gold cost the acting player chose (issue #337): bow or destroy the performer, paid right beside the Gold.
         PayCostOption(ability, command, player, source);
-        if (id is "shunya-honor" or "favor-cycle" or "favor-battle" or "jakuei-bow-favor" or "bonds-of-coin-draw")
+        if (id is "shunya-honor" or "favor-cycle" or "favor-battle" or "jakuei-bow-favor" or "bonds-of-coin-draw" or "insulting-gesture-shame")
         {
             _state.FavorPlayerId = null;
             Emit("favorDiscarded", $"{player.Name} discarded the Imperial Favor.", player.Id);
@@ -5326,6 +5356,29 @@ public sealed partial class MatchEngine
             case "taming-beast-straighten": Straighten(target!); break;
             case "flame-katana-destroy":
                 DestroyTargetCard(target!, player.Id);
+                break;
+            // Discovering a Conspiracy: the Clan alignment is removed for good, he is dishonored, and -- if he stands at a battlefield -- bowed, then the honor choice is asked.
+            case "discovering-conspiracy-expose":
+                RemoveClanAlignments(target!);
+                Dishonor(target!);
+                if (target!.Zone == Zone.Battlefield && !StalwartNegatesBow(target, player.Id)) target.Bowed = true;
+                if (BeginConditionalChoice(command, ability, consumedGrant, playedFromDiscard, opponentHonorBeforeBattleAction, bowedBeforeAction, preExistingGrants)) return;
+                break;
+            case "insulting-gesture-take":
+                _state.FavorPlayerId = player.Id; Emit("favorTaken", $"{player.Name} took the Imperial Favor.", player.Id);
+                break;
+            // Insulting Gesture's second action: the Favor was discarded as its cost above. Dishonored, bowed (a bow stays through the move), sent home; his controller loses 2 Honor.
+            case "insulting-gesture-shame":
+                Dishonor(target!);
+                if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
+                MoveHome(target!, false);
+                GainHonor(target!.OwnerId, -2, "Insulting Gesture", source);
+                break;
+            case "dainagon-lobby": _state.FavorPlayerId = player.Id; Emit("favorTaken", $"{player.Name} took the Imperial Favor.", player.Id); break;
+            // Barred Passage: the Personality and every card attached to him bow.
+            case "barred-passage-bow":
+                if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
+                foreach (var attached in Attachments(target!.Id)) attached.Bowed = true;
                 break;
             // Great Sacrifice: the performer's destruction was its cost; the enemy unit is destroyed.
             case "great-sacrifice-destroy": DestroyUnits([target!], false, player.Id); break;

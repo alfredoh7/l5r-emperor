@@ -4,10 +4,11 @@ using static Batch336Support;
 
 // The Second City unwired-card pass (issue #264), part three: Great Sacrifice, Rage of the Spirits, On the Hunt, Tireless Efforts, Costly Opportunity, Silent Terror, Essence of Undeath
 // and Goju Plot. Every position is built explicitly and played through QueryActions and the commands it offers. Readings and assumptions: docs/decisions/2026-09-21-second-city-pass.md.
-internal static class SecondCityBattleTests
+internal static partial class SecondCityBattleTests
 {
     private const string GreatSacrifice = "oracle-l5r-2900", Rage = "oracle-l5r-6141", OnTheHunt = "oracle-l5r-5704", Tireless = "oracle-l5r-8496", Costly = "oracle-l5r-1522",
-        SilentTerror = "oracle-l5r-7261", Essence = "oracle-l5r-2380", GojuPlot = "oracle-l5r-2856";
+        SilentTerror = "oracle-l5r-7261", Essence = "oracle-l5r-2380", GojuPlot = "oracle-l5r-2856", Conspiracy = "oracle-l5r-2011", InsultingGesture = "oracle-l5r-3779",
+        BarredPassage = "oracle-l5r-708", Dainagon = "oracle-l5r-2070";
 
     public static void Run(TestRunner runner) => runner.Run("second-city-battle", [
         ("Published shape: the eight cards are the printed ones with the abilities named for them, ship their art, and their waves pin exactly them", PublishedShapes),
@@ -23,6 +24,11 @@ internal static class SecondCityBattleTests
         ("Silent Terror bows the target and, only when a card sits in the current battlefield's province, offers the choice to discard it (the province refills); when none does nothing is asked", SilentTerror_),
         ("Essence of Undeath: the Spell is destroyed as the cost, the dead Personality is paid for in full and enters at its Shugenja's location -- home or the battlefield -- permanently Shadowlands and Undead, and its controller loses 2 Honor", EssenceOfUndeath),
         ("Goju Plot: the performing Shadowlands Ninja is destroyed as the cost, a Ninja Personality of his controller's discard pile (dead or merely discarded) enters at the current battlefield for its recruit cost less the performer's Gold Cost, 2 Honor is lost and another Battle action may follow", GojuPlotRecruits),
+        ("Discovering a Conspiracy: a Magistrate removes a Personality's Clan alignment for good and dishonors him; at a battlefield he is also bowed and a chosen player gains or loses 1 Honor -- asked only there", DiscoveringAConspiracy),
+        ("Discovering a Conspiracy's Focus Effect: after the duel, its controller gains 2 Honor if his Personality won it -- and none if he lost", ConspiracyFocusEffect),
+        ("Insulting Gesture: a Courtier's Political Open action takes the Imperial Favor; its Favor Political Battle action discards the Favor to dishonor, bow and send home an enemy Personality, whose controller loses 2 Honor -- and only a holder of the Favor may use it", InsultingGesture_),
+        ("Doji Dainagon's Lobby is an Open action: he bows to take the Imperial Favor, while his controller's Family Honor is the higher and he has 1 Personal Honor, and it does not use up the Limited Lobby", DainagonLobbies),
+        ("Barred Passage: a Hero who is the only Personality in his army bows an enemy Personality's whole unit; another Personality beside him, or a performer who is not a Hero, refuses it", BarredPassage_),
         ("Every enabled command offered for the cards of this pass validates and is accepted on a fresh engine", OfferedCommandsValidateFresh),
     ]);
 
@@ -67,7 +73,18 @@ internal static class SecondCityBattleTests
         }
         Check(CardCatalog.Get(SilentTerror).Keywords!.Contains("Ninja") && CardCatalog.Get(GojuPlot).Keywords!.Contains("Ninja"), "Silent Terror and Goju Plot are Ninja");
         Check(CardCatalog.Get(Rage).Keywords!.Contains("Earth") && CardCatalog.Get(Essence).Keywords!.Contains("Maho"), "Rage is Earth, Essence is Maho");
-        Eq(PublishedContent.StrategyWave35.Cards.Length, 6); Eq(PublishedContent.SpellWave13.Cards.Length, 2);
+        Eq(PublishedContent.StrategyWave35.Cards.Length, 9); Eq(PublishedContent.SpellWave13.Cards.Length, 2);
+        var dainagon = CardCatalog.Get(Dainagon);
+        Check(dainagon.Name == "Doji Dainagon" && dainagon.Type == CardType.Personality && dainagon.GoldCost == 5 && dainagon.Force == 1 && dainagon.Chi == 3 && dainagon.PersonalHonor == 3 && dainagon.HonorRequirement == 6, "Doji Dainagon");
+        Check(dainagon.Keywords!.Contains("Courtier") && dainagon.Keywords.Contains("Crane Clan") && dainagon.Keywords.Contains("Imperial") && dainagon.Text == "Dainagon may Lobby as an Open action." && dainagon.Abilities!.SequenceEqual(new[] { "dainagon-lobby" }), "his keywords and text");
+        Shipped(Dainagon);
+        var conspiracy = CardCatalog.Get(Conspiracy);
+        Check(conspiracy.Focus == 4 && conspiracy.Abilities!.SequenceEqual(new[] { "discovering-conspiracy-focus", "discovering-conspiracy-expose" }) && conspiracy.Keywords!.Contains("Political"), "Discovering a Conspiracy: a Focus Effect and its action");
+        Eq(AbilityCatalog.All["discovering-conspiracy-focus"].Timing, "FocusEffect");
+        var gesture = CardCatalog.Get(InsultingGesture);
+        Check(gesture.Focus == 3 && gesture.Keywords!.Contains("Favor") && gesture.Keywords.Contains("Political") && gesture.Abilities!.SequenceEqual(new[] { "insulting-gesture-take", "insulting-gesture-shame" }), "Insulting Gesture");
+        Check(CardCatalog.Get(BarredPassage).Focus == 2 && CardCatalog.Get(BarredPassage).Keywords!.Contains("Heroic"), "Barred Passage");
+        Shipped(Conspiracy); Shipped(InsultingGesture); Shipped(BarredPassage);
         Check(AbilityCatalog.All["rage-of-the-spirits-destroy"].Costs!.Select(c => (c.Verb, c.Subject)).SequenceEqual(new[] { (CostVerb.Bow, CostSubject.Wielder), (CostVerb.Bow, CostSubject.Performer) }), "both bows are declared costs");
         Check(AbilityCatalog.All["goju-plot-recruit"].Cost!.MinusPerformerCost && AbilityCatalog.All["essence-of-undeath-recruit"].Cost!.Basis == GoldCostBasis.TargetRecruit, "the recruit prices");
         Check(File.ReadAllText(Path.Combine(root, "content/published/strategy-wave-35-sources.json")).Contains("image_sha256"), "receipts are recorded");

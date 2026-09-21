@@ -84,7 +84,7 @@ internal static class SecondCityPassTests
         Check(jurojin.Type == CardType.Celestial && jurojin.Name == "Jurojin's Blessing" && jurojin.Keywords!.Contains("Unique") && jurojin.Keywords.Contains("Fortune"), "Jurojin's Blessing");
         Check(jurojin.Abilities!.SequenceEqual(new[] { "jurojin-look", "jurojin-return" }), "both of its abilities");
         foreach (var id in new[] { Emoto, Interference, ControlYourDestiny, KatanaOfFire, TamingTheBeast, FlameKatana, Jurojin }) { Shipped(id); Check(!CardCatalog.Get(id).ScenarioOnly, id); }
-        Eq(PublishedContent.PersonalityWave42.Cards.Length, 1); Eq(PublishedContent.StrategyWave34.Cards.Length, 1); Eq(PublishedContent.SpellWave12.Cards.Length, 3);
+        Eq(PublishedContent.PersonalityWave42.Cards.Length, 2); Eq(PublishedContent.StrategyWave34.Cards.Length, 1); Eq(PublishedContent.SpellWave12.Cards.Length, 3);
         Eq(PublishedContent.ItemWave7.Cards.Length, 1); Eq(PublishedContent.CelestialWave3.Cards.Length, 1);
         // The declared data: costs are declared, so a negated action still pays them.
         Check(AbilityCatalog.All["control-your-destiny-look"].Costs!.Single() is { Verb: CostVerb.Bow, Subject: CostSubject.Wielder, UnlessKeyword: "Void" }, "bow the wielder unless Void");

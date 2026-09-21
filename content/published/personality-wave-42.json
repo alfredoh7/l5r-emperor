@@ -30,6 +30,33 @@
         "emoto-follower-destroy"
       ],
       "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-2070",
+      "Name": "Doji Dainagon",
+      "Type": "Personality",
+      "Clan": "Crane",
+      "GoldCost": 5,
+      "GoldProduction": 0,
+      "Force": 1,
+      "Chi": 3,
+      "PersonalHonor": 3,
+      "HonorRequirement": 6,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Dainagon may Lobby as an Open action.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-2070.jpg",
+      "Keywords": [
+        "Courtier",
+        "Crane Clan",
+        "Imperial"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "dainagon-lobby"
+      ],
+      "Effect": "none"
     }
   ],
   "Decks": []

@@ -39,6 +39,8 @@ public static class BranchCondition
     public const string TargetDishonorable = "target-dishonorable";
     /// <summary>The target actually moved (issue #336: Fear Me!'s "If he moved"); the ability's own effect says whether it did.</summary>
     public const string TargetMoved = "target-moved";
+    /// <summary>The target stands at a battlefield (Discovering a Conspiracy: "If he is at a battlefield").</summary>
+    public const string TargetAtBattlefield = "target-at-battlefield";
     /// <summary>A card sits in the current battlefield's province (Silent Terror: "you may discard a card in the current battlefield's province").</summary>
     public const string ProvinceHoldsCard = "province-holds-card";
 }
@@ -99,6 +101,7 @@ public sealed partial class MatchEngine
         BranchCondition.SourceHasWeapon => Attachments(source.Id).Any(a => Keyword(a, "Weapon")),
         BranchCondition.TargetDishonorable => target is not null && MatchesTargetStatus(target, TargetStatus.IsDishonorable),
         BranchCondition.TargetMoved => targetMoved,
+        BranchCondition.TargetAtBattlefield => target is not null && target.Zone == Zone.Battlefield,
         BranchCondition.ProvinceHoldsCard => CurrentBattlefieldProvince() is { CardId: not null },
         _ => throw new InvalidOperationException($"Unknown branch condition '{condition}'.")
     };
