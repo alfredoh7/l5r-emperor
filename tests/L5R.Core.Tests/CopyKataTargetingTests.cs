@@ -123,6 +123,24 @@ internal static class CopyKataTargetingTests
         Eq(m.Printed.Effect, "tsunami-force", "a card has one trait slot: the later Spell's trait replaces the earlier one");
         Eq(back.CardForceForTest(host.Id), Def(host).Force + 6, "+6F now, not +2F");
         Check(second.Id == flood.Id);
+        // Copying the same Spell again adds nothing twice; its trait, being a later one, is the one the card has.
+        MatchEngine Recycle(MatchEngine en, Action<MatchState>? more = null)
+        {
+            var again = Edit(en, st => { var c = st.Cards[mastering.Id]; c.Zone = Zone.Hand; c.AttachedTo = null; c.Bowed = false; c.AbilityUses.Clear(); c.FaceUp = false; st.Players[0].Hand.Add(c.Id); st.PendingChoice = null; st.PriorityPlayerId = 0; more?.Invoke(st); });
+            Accept(again, Equip(again, mastering, host));
+            return again;
+        }
+        var third = Recycle(back);
+        Accept(third, Copy(third, mastering, third.State.Cards[flood.Id], 2));
+        var abilities = third.State.Cards[mastering.Id].Printed!.Abilities!;
+        Eq(abilities.Count(x => x == "scouring-flood-move-home"), 1, "a copied ability is not added a second time");
+        Eq(abilities.Length, 3, "and nothing else changed");
+        Eq(third.State.Cards[mastering.Id].Printed!.Effect, "scouring-flood-force", "the latest Spell's trait");
+        // A Spell with no trait leaves the card's trait as it is.
+        var plainId = "";
+        var fourth = Recycle(third, st => plainId = Add(st, "training-spell", 0, Zone.Attached, province: 0, parent: st.Cards[wielder.Id].Id).Id);
+        Accept(fourth, Copy(fourth, mastering, fourth.State.Cards[plainId], 1));
+        Eq(fourth.State.Cards[mastering.Id].Printed!.Effect, "scouring-flood-force", "a Spell without a trait does not take the card's trait away");
     }
 
     private static void MasteringTargetsAndCost()
