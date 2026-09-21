@@ -134,3 +134,36 @@ A Region's version of Togashi Hizumi's reaction ("after the resolution of an act
 ## Verification (stage 3)
 
 Suite `after-resolution` (8 tests): the published shapes; no window without a Reaction; Redoubled Attack (each copy, one or two Personalities, no bow on return, the third refused, none for a player holding none); Tales of Dishonor (loser, tie, nothing destroyed, the defender who destroyed nothing); its Battle action; Never Safe (-4F, the return, one battle only, one player only, playable again); the trigger's exclusivity; Quagmire (own and adjacent province, not farther, not bowed, not the Attacker's).
+
+## Stage 4 (#418): province strength maximum; Terrain statics
+
+Wired: **Ancient Feud**, **Hasty Fortifications**, **Shiotome Plains** (strategy-wave-39).
+
+### Current strength and a maximum (TerrainStatics.cs, `EffectiveProvinceStrength`)
+
+A province has a CURRENT strength: its printed strength as raised and lowered by everything that has acted on it (Ring of Earth, a duel win, an Attack, Improved Defenses, a Region, a Terrain's bonus). Mendon's ruling: a maximum does not stop a raise, it is enforced on what is READ. Raises are added to the current strength and the maximum is applied after, so
+
+- while the current strength is above the maximum every reader (the battle's resolution, the Attack rules, the client) sees the maximum;
+- below it, every reader sees the current strength;
+- when the limit ends (its Terrain leaves play, its Event ends) the province is back at its current strength, raises included.
+
+`EffectiveProvinceStrength` is that read: current strength (raw strength, Region bonus, bonuses of cards still in play), then `ProvinceStrengthMax`, the lowest limit in force. Times of Strife ("all Provinces have a maximum strength equal to their base strength") was already a ceiling in that function and is now one source among the limits; Ancient Feud is the second, for the province at its battlefield while the Terrain is in play there, which is until the battle is resolved (a Terrain is discarded as the battle closes). The province view carries the limit (`ProvinceView.MaxStrength`) beside the strength that is read, so a client can show both. A minimum would be the mirror image in the same function; no card needs one, so none is built.
+
+### Terrains (TerrainStatics.cs)
+
+A Terrain is an ordinary card in play at a battlefield with a passive, non-optional trait; it is read live from where it stands, so nothing has to be undone when it leaves.
+
+- **Ancient Feud**: the limit above. Playing it destroys the Terrain already at the battlefield ("all other Terrains", a battlefield holding one unless a card says otherwise), like Encircled Terrain and Looting the Ruins.
+- **Hasty Fortifications**: each of its controller's Battle actions gives the battlefield's province +1 strength, and so does putting it into play ("including this card's"). The bonuses belong to the Terrain (`ProvinceState.SourceBonuses`) and are counted only while it is in play: destroyed, or discarded with the battle, they are gone.
+- **Shiotome Plains**: at its battlefield every Cavalry Personality and Follower has +1F and every other one -1F, computed at the card level (`TerrainForceAdjustment`) and lost the moment the Terrain leaves play. Force is never below 0.
+
+### Readings for Mendon (continued)
+
+19. **A lowering acts on the current strength.** An Attack that reduces a capped province lowers the current strength (9 to 6), and what is read stays at the maximum (5) until the current strength falls below it. Say if a reduction should instead apply to the strength as read.
+20. **"Your Battle actions" (Hasty Fortifications)** are the abilities with Battle timing (and a Battle/Open ability used in a battle) and the playing of the Terrain itself; an Equip taken as a Battle action and a recruit by a grant are not counted.
+21. **"Infantry cards" (Shiotome Plains)** are the Personalities and Followers at the battlefield without the Cavalry keyword, each by its own keywords (a Follower is not judged by its host's unit). Items and other cards are not affected.
+22. **A Terrain's effect cannot be negated yet.** Mendon's note that a negated Terrain's limit lapses is honoured for the Terrain leaving play; no card negates a Terrain's trait, so there is nothing to build for it.
+
+## Verification (stage 4)
+
+Suite `terrain-statics` (6 tests): the published shapes; the maximum (raised, below, other provinces, the Attacker's own province, the Terrain leaving, a farther battlefield); the battle's resolution reading the maximum; playing the Terrains (Ancient Feud replaces, the others do not); Hasty Fortifications (played, after each Battle action, stacking, the other player's action, gone with the Terrain and with the battle); Shiotome Plains (Personalities and Followers, Cavalry and not, elsewhere and at home, the floor of 0).

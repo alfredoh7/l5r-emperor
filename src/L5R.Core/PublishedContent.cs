@@ -2343,4 +2343,6 @@ public static class PublishedContent
     public static PublishedSnapshot StrategyWave38 { get; } = Load("L5R.Published.StrategyWave38.json", "strategy-wave-38", requireDecks: false);
     /// <summary>Region wave 4 (issue #417): Quagmire.</summary>
     public static PublishedSnapshot RegionWave4 { get; } = Load("L5R.Published.RegionWave4.json", "region-wave-4", requireDecks: false);
+    /// <summary>Strategy wave 39 (issue #418): Ancient Feud, Hasty Fortifications, Shiotome Plains.</summary>
+    public static PublishedSnapshot StrategyWave39 { get; } = Load("L5R.Published.StrategyWave39.json", "strategy-wave-39", requireDecks: false);
 }
