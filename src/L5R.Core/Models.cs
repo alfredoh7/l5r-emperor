@@ -876,7 +876,10 @@ public sealed record ActionOption(string Type, string Label, bool Enabled, strin
     // collect the whole selection. Null for every ability with a single Target.
     TargetSlotOption[]? Slots = null,
     bool NoTarget = false, AlternativeCostView? AlternativeCost = null,
-    MoveDestinationView? Movement = null);
+    MoveDestinationView? Movement = null, AttackCueView? Attack = null);
+/// <summary>Read-only attack presentation. SourceId is the explicitly selected performer or the ability source;
+/// it identifies the card to mark, not a new legality or damage calculation.</summary>
+public sealed record AttackCueView(string Kind, string SourceId);
 /// <summary>Proposed movement only: reactions may prevent each arrival independently. FixedMoverIds names the source/performer units;
 /// TargetMoves adds the command's selected target. Destinations remain in ActionOption.Provinces. No card-rule inference belongs in the UI.</summary>
 public sealed record MoveDestinationView(int DefenderId, string[] FixedMoverIds, bool TargetMoves);
@@ -985,5 +988,5 @@ public sealed record MatchView(string ContentVersion, string Scenario, long Vers
     EitherOrView? PendingEitherOr = null,
     // The opposing player's variable payment (issue #373, see OpponentPayment.cs): PUBLIC -- both players see the first player's amount, the card and the
     // Honor at stake; only the paying player's view carries the payment quote and what each amount would do.
-    OpponentPaymentView? PendingOpponentPayment = null);
+    OpponentPaymentView? PendingOpponentPayment = null, AttackCueView? PendingAttack = null);
 public sealed record ReplayRecord(string ContentVersion, string Scenario, ulong Seed, GameCommand[] Commands, Deck[]? CustomDecks = null);

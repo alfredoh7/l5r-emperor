@@ -1,4 +1,6 @@
-# Attack target choices (#355) — ready for individual review
+# Attack target choices (#355) — Alfredo approved; Mendon review pending
+
+**Current status:** Alfredo approved demos 5–8 and F’s temporary sliding source tab. See the [superseding attack-tab review](2026-09-21-attack-tabs-review.md) and [approval decision](../decisions/2026-09-21-approved-ui-5-8.md). The earlier evidence below describes prior revisions.
 
 Eighth individual UI preview: A’s explicit choices plus B’s full-card previews. [Draft PR #410](https://github.com/alfredoh7/l5r-emperor/pull/410) is stacked on #404. **No merge is authorized.** Completion delivers a review candidate, not human acceptance or merge permission.
 
@@ -77,4 +79,4 @@ The branch inherits the unmerged review stack through #404 and separately unappr
 
 `collab.py context` refreshed refs but could not complete live GitHub context; direct Git/GitHub CLI reads supplied the open-task and PR facts. The project-board token is unavailable. PR #404’s final context, Mac and Windows CI passed on `7e7d6999`; this PR’s checks must be read on its own final revision.
 
-Alfredo’s UI acceptance, Mendon’s rules-presentation review, native Windows graphical play and external multiplayer acceptance remain open. Final-revision CI is tracked on PR #410. Root checkout and main are unchanged. **Do not merge without Alfredo’s explicit go-ahead.**
+Alfredo’s UI acceptance, Mendon’s rules-presentation review, native Windows graphical play and external multiplayer acceptance remain open. Final-revision CI is tracked on PR #410. Root checkout and main are unchanged. **Merge remains contingent on Mendon’s approval and required checks.**

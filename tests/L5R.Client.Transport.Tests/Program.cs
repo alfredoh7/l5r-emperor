@@ -49,11 +49,19 @@ static void AttackTargetProjection()
     var engine=MatchEngine.CreateEconomyScenario();var view=engine.GetView(0);
     var offered=new ActionOption("useAbility","Attack",true,null,
         new GameCommand("useAbility",0,view.Version,"source",TargetId:"card",AbilityId:"attack"),
-        "source",["card"],[2],NoTarget:true);
+        "source",["card"],[2],NoTarget:true,Attack:new("Ranged","source"));
+    view = view with { PendingAttack = new("Melee","performer") };
     var message=new StateMessage("state","ABCDEFGH",0,view.Version,view,[AvailableAction.FromCore(offered)],[true,true]);
     using var document=JsonDocument.Parse(JsonSerializer.Serialize(message,Protocol.Json));
     var web=new JsonSerializerOptions(JsonSerializerDefaults.Web);
     var received=document.RootElement.GetProperty("actions").Deserialize<ActionOption[]>(web)!.Single();
+    Check(received.Attack == offered.Attack, "The server dropped the attack type/source");
+    var receivedView=document.RootElement.GetProperty("view").Deserialize<MatchView>(web)!;
+    Check(receivedView.PendingAttack == view.PendingAttack, "A pending reaction lost its attack cue");
+    var olderAction=JsonSerializer.SerializeToNode(offered,web)!;olderAction.AsObject().Remove("attack");
+    Check(olderAction.Deserialize<ActionOption>(web)!.Attack is null,"Older servers must not imply an attack type");
+    var olderView=JsonSerializer.SerializeToNode(view,web)!;olderView.AsObject().Remove("pendingAttack");
+    Check(olderView.Deserialize<MatchView>(web)!.PendingAttack is null,"Older views must omit the pending cue safely");
     Check(received.NoTarget&&received.TargetIds!.SequenceEqual(["card"])&&received.Provinces!.SequenceEqual([2])&&received.Movement is null,
         "The Attack's three choices were lost or confused with a movement");
     foreach(var command in new[]{

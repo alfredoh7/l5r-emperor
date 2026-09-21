@@ -15,6 +15,7 @@ internal static class TargetedActionReactionTests
     public static void Run(TestRunner runner)
     {
         (string Name, Action Test)[] tests = [
+            ("Attack presentation uses engine kinds and explicit performers, survives reaction windows for both viewers, clears after resolution, and never exposes hidden sources", AttackPresentation),
             ("Published shape: the five cards are the printed ones (Ezuno F4 C3 Cost 7 Honor Req 3; Yurishi F4 C3 Cost 7 no Honor Req, Spider Clan, loses 3 Honor on entry; Jinn-Kuen F2 C4 Cost 7; Mochitoko F6 C3 Cost 9; Blade +3F +1C Cost 5 Focus 3 Unique Weapon), each whole and with its scan shipped, on ONE shared Reaction trigger", PublishedShape),
             ("The per-turn use limit: every ability keeps the default of once per turn, the ten former id-list exemptions are now Unlimited on their own definitions, and Mochitoko's is twice -- pinned against the old list", UseLimitParity),
             ("Ezuno redirects a non-Attack action (issue #335): another player's Battle action targeting his Shugenja at his location opens the before-action window for his controller, nothing has happened yet, the reaction makes the action target Ezuno, the acting player may still answer, and the action then resolves on Ezuno; the Shugenja is untouched and hidden information stays hidden", EzunoRedirectsAnAction),
@@ -50,6 +51,51 @@ internal static class TargetedActionReactionTests
     }
 
     // ---- helpers ----------------------------------------------------------------------------------------------
+    private static void AttackPresentation()
+    {
+        var (s, sh) = ReactiveDefence(); var (castle, stronghold) = Siege(s);
+        var e = MatchEngine.FromTestState(s);
+        var option = e.QueryActions(1).Single(a => a.Enabled && a.Command?.AbilityId == "carpenter-castle-siege" && a.Command.PerformerId == castle.Id);
+        Eq(option.Attack, new AttackCueView("Ranged", castle.Id));
+        var version = e.Version;
+        foreach (var player in new[] { 0, 1 }) Eq(e.GetView(player).PendingAttack, null);
+        Eq(e.Version, version, "presentation queries mutated the match");
+        Accept(e, SiegeAt(e, castle, stronghold, sh.Id));
+        foreach (var player in new[] { 0, 1 }) Eq(e.GetView(player).PendingAttack, option.Attack);
+        ClosePassing(e);
+        foreach (var player in new[] { 0, 1 }) Eq(e.GetView(player).PendingAttack, null, "resolved Attack retained a cue");
+
+        var r = MochitokoTable();
+        var wielder = Add(r.S, "training-lion-samurai", 1, Zone.Battlefield, province: 0);
+        var weapon = Add(r.S, "training-weapon-with-attack", 1, Zone.Attached, province: 0, parent: wielder.Id);
+        e = MatchEngine.FromTestState(r.S);
+        option = e.QueryActions(1).Single(a => a.Enabled && a.CardId == weapon.Id && a.Command?.AbilityId == "training-weapon-attack");
+        Eq(option.Attack, new AttackCueView("Melee", weapon.Id), "attachment source changed to its host");
+        Accept(e, Offer(e, 1, "training-weapon-attack", weapon.Id, r.Follower.Id));
+        Eq(e.GetView(0).PendingAttack, option.Attack);
+        ClosePassing(e); Eq(e.GetView(1).PendingAttack, null);
+
+        s = Table(actor: 0); Add(s, Mochitoko, 0, Zone.Battlefield, province: 0);
+        var tensin = Add(s, "oracle-l5r-3332", 0, Zone.Battlefield, province: 0);
+        var follower = Add(s, "training-follower", 0, Zone.Attached, province: 0, parent: tensin.Id);
+        var enemy = Add(s, "training-shugenja", 1, Zone.Battlefield, province: 0);
+        e = MatchEngine.FromTestState(s);
+        option = e.QueryActions(0).Single(a => a.Enabled && a.Command?.AbilityId == "tensin-follower-attack" && a.Command.PerformerId == follower.Id);
+        Eq(option.Attack, new AttackCueView("Ranged", follower.Id));
+        Accept(e, Offer(e, 0, "tensin-follower-attack", tensin.Id, enemy.Id, follower.Id));
+        Eq(Window(e), "beforeActionReaction");
+        foreach (var player in new[] { 0, 1 }) Eq(e.GetView(player).PendingAttack, option.Attack);
+        ClosePassing(e); Eq(e.GetView(0).PendingAttack, null);
+
+        // Defensive projection: a queued command is not itself permission to expose its
+        // card ID. A Strategy still in a private hand must not become a public mount.
+        s = Table(); var hidden = Add(s, "training-honor-cost-strategy", 1, Zone.Hand);
+        s.PendingAnnouncedAction = new("useAbility",1,s.Version,hidden.Id,AbilityId:"training-honor-cost-attack");
+        e = MatchEngine.FromTestState(s); Eq(e.GetView(0).PendingAttack, null);
+        s.PendingAnnouncedAction = new("useAbility",1,s.Version,castle.Id,AbilityId:Bow);
+        e = MatchEngine.FromTestState(s); Eq(e.GetView(0).PendingAttack, null);
+    }
+
     private static void Check(bool ok, string message = "Assertion failed") { if (!ok) throw new Exception(message); }
     private static void Eq<T>(T actual, T expected, string message = "Values differ") => Check(EqualityComparer<T>.Default.Equals(actual, expected), $"{message}: expected {expected}; got {actual}");
 

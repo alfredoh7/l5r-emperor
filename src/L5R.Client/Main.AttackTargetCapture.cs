@@ -65,6 +65,14 @@ public partial class Main
     private AttackTargetFace AttackCardFace(string id)=>StabilizationButtons(_inspector).OfType<AttackTargetFace>().Single(b=>b.Card.Id==id);
     private async Task ConfirmAttackTarget()
     {await SupportClick(_paymentConfirm!);await WaitDecisionPresentation();await EventFrames(45);}
+    private void CheckAttackTab(string kind, string source)
+    {
+        SupportRequire(_attackTab.Visible && _attackTab.Current == new AttackCueView(kind,source) && _attackTab.Progress == 1,
+            $"Missing settled {kind} source tab for {source}: {_attackTab.Current}, {_attackTab.Progress}");
+        var body=_attackTab.GetGlobalRect();
+        SupportRequire(_tableViewport.GetGlobalRect().Encloses(body),"Attack tab is outside the table");
+        SupportRequire(!UnitBadges.OfType<UnitStandard>().Where(b=>b.IsVisibleInTree()).Any(b=>b.BodyRectOnViewport().Intersects(body)),"Attack tab covers a Force ribbon");
+    }
     private void CheckAttackConfirmation()
     {
         SupportRequire(_paymentConfirm is {Disabled:false}&&GetViewport().GetVisibleRect().Encloses(_paymentConfirm.GetGlobalRect()),"Attack confirmation is disabled or offscreen");
@@ -79,6 +87,19 @@ public partial class Main
             var renderOnly=_captureMode.Contains("render");
             _preferences.ReducedMotion=_captureMode.Contains("reduced");ApplyPreferences(false);await PrepareAttackReview();
             if(_captureMode.EndsWith("-review",StringComparison.Ordinal)){GD.Print("ATTACK_TARGET_REVIEW_READY: real Ranged/Melee choices and prepared province/cost examples.");return;}
+            CheckAttackTab("Ranged",_attackSource);
+            // Drive the native control's timeline deterministically as well as the live
+            // captures: reduced motion jumps; normal mode visibly slides both ways.
+            _attackTab.SetProcess(false);_attackTab.Observe=null;_attackTab.Cancel();_attackTab.Desired=_chosen!.Attack;
+            _attackTab._Process(.09);
+            SupportRequire(_reducedMotion?_attackTab.Progress==1:_attackTab.Progress is >0 and <1,"Attack tab did not honor motion preference");
+            await SupportCapture("-tab-entering");
+            _attackTab._Process(.18);CheckAttackTab("Ranged",_attackSource);
+            _attackTab.Desired=null;_attackTab._Process(.09);
+            SupportRequire(_reducedMotion?!_attackTab.Visible:_attackTab.Progress is >0 and <1,"Attack tab did not retract");
+            await SupportCapture("-tab-retracting");
+            _attackTab._Process(.18);SupportRequire(!_attackTab.Visible,"Retracted tab remains visible");
+            _attackTab.Observe=ObserveAttackTab;_attackTab.SetProcess(true);await EventFrames(20);CheckAttackTab("Ranged",_attackSource);
             SupportRequire(AttackTargetActive&&_attackChoice==AttackChoice.Unselected&&_paymentConfirm!.Disabled&&_chosen!.Command is {TargetId:null,Province:null},"Attack silently selected a card or No target");
             SupportRequire(!StabilizationButtons(_inspector).Any(b=>b.Name.ToString().StartsWith("AttackProvince")),"Ordinary Attack offered a province");
             if(_captureMode.Contains("review"))SupportRequire(!_root.GetNode<Control>("AttackReviewControls").GetGlobalRect().Intersects(_inspectorPanel.GetGlobalRect()),"Attack review controls overlap the sidebar");
@@ -88,28 +109,40 @@ public partial class Main
             CheckAttackConfirmation();SupportRequire(_attackChoice==AttackChoice.NoTarget&&View.Version==0&&!IntentArrows().Any(),"Keyboard No target changed authority or left an arrow");await SupportCapture("-no-target");
             await SupportClick(AttackCardFace(_attackCard));CheckAttackConfirmation();
             SupportRequire(_chosen!.Command!.TargetId==_attackCard&&_chosen.Command.Province is null&&IntentArrows().Count()==1&&View.Version==0,"Card face did not produce a local card-target draft");await SupportCapture("-card");
+            var savedZoom=_cameraZoom;var savedCenter=_cameraCenter;
+            ZoomTable(1.7f,_tableViewport.GetGlobalTransform().AffineInverse()*ScreenCenter(_tiles.Single(t=>t.Card.Id==_attackSource)));
+            await EventFrames(20);CheckAttackTab("Ranged",_attackSource);await SupportCapture("-tab-close");
+            _cameraZoom=savedZoom;_cameraCenter=savedCenter;ApplyTableCamera();await EventFrames(12);
             if(renderOnly){ChooseAttackTarget(AttackChoice.Card,_attackReactiveCard);await EventFrames(12);}
             else await SupportClick(_tiles.Single(t=>t.Card.Id==_attackReactiveCard));
             SupportRequire(_chosen.Command.TargetId==_attackReactiveCard,"Table retargeting did not follow the clicked legal card");
+            CheckAttackTab("Ranged",_attackSource);
             await SupportClick(AttackNoTargetButton());SupportRequire(_chosen.Command.TargetId is null&&_chosen.Command.Province is null&&!IntentArrows().Any(),"No target retained the previous target/arrow");
             await SupportClick(StabilizationButtons(_decisionActions).Single(b=>b.Text=="Cancel attack"));
             SupportRequire(_chosen is null&&View.Version==0&&!IntentArrows().Any(),"Cancel executed the Attack or kept an arrow");
+            await EventFrames(20);SupportRequire(!_attackTab.Visible,"Cancel left the attack tab");
             await PrepareAttackReview();await SupportClick(AttackNoTargetButton());_session.SwitchPracticeSeat();await EventFrames(15);
             SupportRequire(_chosen is null&&!AttackTargetActive,"A changed seat retained the attack draft");await SupportCapture("-waiting");
+            SupportRequire(!_attackTab.Visible,"A changed seat retained the private attack tab");
             _session.SwitchPracticeSeat();await EventFrames(15);Choose(Actions.First(a=>a.CardId==_attackSource&&a.Enabled&&a.NoTarget));await EventFrames(12);
             SupportRequire(_attackChoice==AttackChoice.Unselected&&_paymentConfirm!.Disabled,"Seat return silently reused the choice");
             await SupportClick(AttackNoTargetButton());await ConfirmAttackTarget();
             SupportRequire(View.Version==1&&_attackFixture.State.PendingChoice is null&&_attackFixture.State.PendingAttack is null&&_attackFixture.State.Cards[_attackCard].Zone==Zone.Battlefield,"No-target Attack failed or triggered a card reaction/hit");
+            SupportRequire(!_attackTab.Visible,"Resolved No target retained a tab");
             await PrepareAttackReview();await SupportClick(AttackCardFace(_attackCard));await ConfirmAttackTarget();
             SupportRequire(View.Events.Any(e=>e.Type=="unitDestroyed"&&e.CardId==_attackCard),"Confirmed card attack did not hit its chosen card");await SupportCapture("-hit");
             await PrepareAttackReview();await SupportClick(AttackCardFace(_attackReactiveCard));await ConfirmAttackTarget();
             SupportRequire(_attackFixture.State.PendingAttack is not null&&_attackFixture.State.PendingChoice?.Type=="attackReaction","Card-targeted reaction was bypassed");await SupportCapture("-reaction");
+            CheckAttackTab("Ranged",_attackSource);
+            _session.SwitchPracticeSeat();await EventFrames(20);ResetTableCamera();await EventFrames(30);
+            CheckAttackTab("Ranged",_attackSource);await SupportCapture("-reaction-other-seat");
             await PrepareAttackReview("follower");SupportRequire(_chosen!.TargetIds!.Contains(_attackFollower)&&!_chosen.TargetIds.Contains(_attackFollowedHost),"Gallery overrode the engine's Follower target restriction");
             await SupportClick(AttackCardFace(_attackFollower));await SupportCapture("-follower");await ConfirmAttackTarget();
             SupportRequire(_attackFixture.State.Cards[_attackFollower].Zone==Zone.FateDiscard&&_attackFixture.State.Cards[_attackFollowedHost].Zone==Zone.Battlefield,"Follower attack destroyed the wrong card");
             foreach(var mode in new[]{"melee","empty"})
             {
                 await PrepareAttackReview(mode);if(mode=="empty")SupportRequire(_chosen!.TargetIds is {Length:0},"Empty fixture retained a legal card");
+                await EventFrames(20);CheckAttackTab(mode=="melee"?"Melee":"Ranged",_attackSource);
                 await SupportClick(AttackNoTargetButton());CheckAttackConfirmation();await SupportCapture("-"+mode);await ConfirmAttackTarget();
                 SupportRequire(View.Version==1&&_attackFixture.State.PendingAttack is null,"No-target "+mode+" could not resolve");
             }
@@ -132,6 +165,8 @@ public partial class Main
                 SupportRequire(offered.Length==2&&offered.All(a=>a.NoTarget&&a.AlternativeCost is null),"Tensin fixture must expose both performing Followers with a fixed bow cost");
                 var firstPerformer=offered[0].Command!.PerformerId;Choose(offered[1]);await EventFrames(12);
                 performer=_chosen!.Command!.PerformerId!;
+                await ToSignal(GetTree().CreateTimer(.42),SceneTreeTimer.SignalName.Timeout);
+                CheckAttackTab("Ranged",performer);
                 SupportRequire(performer!=firstPerformer&&_attackChoice==AttackChoice.Unselected&&_paymentConfirm!.Disabled,"Changing the performing Follower retained a target draft");
                 if(targetCard)await SupportClick(AttackCardFace(_attackCard));else await SupportClick(AttackNoTargetButton());
                 CheckAttackConfirmation();

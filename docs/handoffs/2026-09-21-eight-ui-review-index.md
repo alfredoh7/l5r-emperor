@@ -1,5 +1,7 @@
 # Eight UI previews — individual review links
 
+**2026-09-21 approval update:** Alfredo has approved the UI of all eight demos, including F’s temporary sliding bow/katana tab for #8. Mendon review and required checks remain the merge gates. The second Windows batch (5–8) is tracked on PR #410 / delivery PR #298. [Decision and scope](../decisions/2026-09-21-approved-ui-5-8.md).
+
 All eight designs are implemented in the isolated review stack. **Alfredo approved previews 1–4 on 2026-09-21; their merge is contingent on Mendon approving and required checks passing. Previews 5–8 still await Alfredo's review.** See the [current acceptance decision](../decisions/2026-09-21-first-four-ui-review-approval.md). Nothing has been merged by this delivery. Each launcher opens a prepared example without playing a whole match.
 
 The links below open locally generated Mac apps in this checkout. Open one at a time and quit the game before opening another. Each app builds this checkout and opens its named scenario; it does not fetch, change branches or merge. The eight `.command` files are the portable source entry points.
