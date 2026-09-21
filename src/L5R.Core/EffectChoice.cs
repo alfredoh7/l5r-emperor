@@ -39,6 +39,8 @@ public static class BranchCondition
     public const string TargetDishonorable = "target-dishonorable";
     /// <summary>The target actually moved (issue #336: Fear Me!'s "If he moved"); the ability's own effect says whether it did.</summary>
     public const string TargetMoved = "target-moved";
+    /// <summary>A card sits in the current battlefield's province (Silent Terror: "you may discard a card in the current battlefield's province").</summary>
+    public const string ProvinceHoldsCard = "province-holds-card";
 }
 
 /// <summary>Effects an option may apply. Each goes through the same helper an ordinary effect would, so a negation a reaction set
@@ -53,6 +55,8 @@ public static class BranchEffect
     /// is relative to the player who took the action ("self" is him, "opponent" the other player), so the option's label reads the same for both seats.
     /// Applied by ApplyPlayerHonorChoice, so a gain for a dishonorable performer's own controller rehonors him instead.</summary>
     public static string Honor(bool self, int amount) => $"honor:{(self ? "self" : "opponent")}:{amount}";
+    /// <summary>The card in the current battlefield's province is discarded (and the province refilled), whoever's it is (Silent Terror).</summary>
+    public const string DiscardProvinceCard = "discard-province-card";
 }
 
 /// <summary>The four answers to "choose a player who gains or loses N Honor" (issue #336): each player, each direction. Shared by every card that prints it.</summary>
@@ -95,6 +99,7 @@ public sealed partial class MatchEngine
         BranchCondition.SourceHasWeapon => Attachments(source.Id).Any(a => Keyword(a, "Weapon")),
         BranchCondition.TargetDishonorable => target is not null && MatchesTargetStatus(target, TargetStatus.IsDishonorable),
         BranchCondition.TargetMoved => targetMoved,
+        BranchCondition.ProvinceHoldsCard => CurrentBattlefieldProvince() is { CardId: not null },
         _ => throw new InvalidOperationException($"Unknown branch condition '{condition}'.")
     };
 
@@ -113,8 +118,25 @@ public sealed partial class MatchEngine
         {
             case BranchEffect.MoveSourceHome: MoveHome(source, false); break;
             case BranchEffect.MoveTargetHome: MoveHome(target!, false); break;
+            case BranchEffect.DiscardProvinceCard: DiscardCurrentProvinceCard(); break;
             default: throw new InvalidOperationException($"Unknown branch effect '{effect}'.");
         }
+    }
+
+    // The current battlefield's province is the Defender's province at that index (a battlefield is where the Defender's province is).
+    private ProvinceState? CurrentBattlefieldProvince() =>
+        _state.CurrentBattleProvince is int index ? Player(1 - _state.ActivePlayerId).Provinces.FirstOrDefault(p => p.Index == index && !p.Destroyed) : null;
+
+    // "Discard a card in the current battlefield's province": the Dynasty card sitting there, face up or face down (a discard pile is public, so it is shown), and the
+    // province is refilled as after any discard from it.
+    private void DiscardCurrentProvinceCard()
+    {
+        if (CurrentBattlefieldProvince() is not { CardId: { } cardId } province) return;
+        var card = Card(cardId); var owner = Player(card.OwnerId);
+        card.Zone = Zone.DynastyDiscard; card.ProvinceIndex = null; card.FaceUp = true;
+        province.CardId = null;
+        Emit("provinceDiscard", $"{Definition(card).Name} was discarded from {owner.Name}'s province.", owner.Id, card.Id);
+        Refill(owner, province);
     }
 
     // Called from the ability's execution case. True when the action paused for a decision (the caller returns without finishing);

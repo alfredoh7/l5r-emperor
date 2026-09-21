@@ -1650,6 +1650,32 @@ public static class AbilityCatalog
             Costs: ActionCost.BowWielder, SourceUnitMayBeAway: true),
         ["flame-katana-destroy"] = new("Battle", "Bow this card unless this Personality is Fire, and target an enemy card without attachments: Destroy it", "enemy-card", RequireNoAttachments: true,
             Costs: [new(CostVerb.Bow, CostSubject.Source, UnlessKeyword: "Fire")]),
+        // Great Sacrifice (oracle-l5r-2900): destroy your performing Personality (the cost) to destroy an enemy unit whose total Force does not exceed the performer's Force plus Personal Honor (plus one if he is defending).
+        ["great-sacrifice-destroy"] = new("Battle", "Destroy your performing unbowed Personality and target an enemy unit with total Force equal to or lower than your performer's Force, plus Personal Honor, plus one if he is defending: Destroy the enemy unit", "enemy-unit-within-performer-sacrifice",
+            Performer: "own-unbowed-personality-at-battle", Costs: [new(CostVerbs.Sacrifice, CostSubject.Performer)]),
+        // Rage of the Spirits (oracle-l5r-6141), a Spell: both its Shugenja and the performing Spirit bow (the wielder is a cost subject, so there is no second performer to choose).
+        ["rage-of-the-spirits-destroy"] = new("Battle", "Even if this unit is not at the current battlefield, bow this Shugenja and your performing Spirit, and target an enemy card without attachments and with Force lower than or equal to your Spirit's: Destroy the enemy card. If this Shugenja is Earth, gain 1 Honor", "enemy-force-lte-performer",
+            Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeywords: ["Spirit"], RequireNoAttachments: true, Costs: [new(CostVerb.Bow, CostSubject.Wielder), new(CostVerb.Bow, CostSubject.Performer)], SourceUnitMayBeAway: true),
+        // On the Hunt (oracle-l5r-5704): Low Market's attach-from-hand, as a Battle action for a Samurai at 4 less Gold; and an Open straighten of a Samurai's unit.
+        ["on-the-hunt-equip"] = new("Battle", "Choose your performing Samurai: Attach an attachment in your hand to him, paying all costs but paying 4 less Gold", "attachment-in-hand",
+            Performer: "own-personality-with-keyword-at-battle", RequiredKeywords: ["Samurai"], Cost: GoldCostRule.TargetPrinted(-4, floor: 0)),
+        ["on-the-hunt-straighten"] = new("Open", "Choose your performing Samurai with an attachment: Straighten his unit", "none", Performer: "own-samurai-with-attachment"),
+        // Tireless Efforts (oracle-l5r-8496): a straighten, and the negation of Force penalties (ForcePenalties.cs).
+        ["tireless-efforts-straighten"] = new("Battle", "Choose your performing Personality: Straighten him", "none", Performer: "own-personality-at-battle"),
+        ["tireless-efforts-negate"] = new("BattleOrOpen", "Choose your performing Personality: Negate all current and new Force penalties on him", "none", Performer: "own-personality-at-battle"),
+        // Costly Opportunity (oracle-l5r-1522): destroy your performing Samurai (the cost); the other cards in the target's unit may not use their abilities; the target is destroyed.
+        ["costly-opportunity-destroy"] = new("Battle", "Destroy your target performing unbowed Samurai to target an enemy card without attachments: Abilities on other cards now in its unit may not be used. Destroy the targeted card", "enemy-card",
+            Performer: "own-unbowed-samurai-at-battle", RequireNoAttachments: true, Costs: [new(CostVerbs.Sacrifice, CostSubject.Performer)]),
+        // Silent Terror (oracle-l5r-7261): a bow, then "you may discard a card in the current battlefield's province" -- asked only when a card is there (EffectChoice.cs).
+        ["silent-terror-bow"] = new("Battle", "Choose your performing unbowed Ninja Personality and target an enemy card: Bow it. You may discard a card in the current battlefield's province", "enemy-card",
+            Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeywords: ["Ninja"],
+            Branch: new(BranchCondition.ProvinceHoldsCard, [new("discard", "Discard the card in the province", [BranchEffect.DiscardProvinceCard]), new("keep", "Discard nothing", [])], new("none", "Nothing to discard", []))),
+        // Essence of Undeath (oracle-l5r-2380), a Spell: the At Any Cost recruit (a dead Personality paid for in full) at its Shugenja's location, with Shadowlands and Undead given permanently.
+        ["essence-of-undeath-recruit"] = new("BattleOrOpen", "Destroy this card and target your dead Personality: Bring him into play at this Shugenja's location, paying all costs. Permanently give him Shadowlands and Undead. Lose 2 Honor", "own-dead-personality",
+            Performer: "own-wielder", Cost: GoldCostRule.TargetRecruit(), Costs: [new(CostVerbs.Sacrifice)]),
+        // Goju Plot (oracle-l5r-2856): the same, from a discard pile, at the current battlefield, for the recruit cost less the performer's Gold Cost.
+        ["goju-plot-recruit"] = new("Battle", "Destroy your performing Shadowlands Ninja Personality and target a Ninja Personality in your discard pile: Bring him into play at the current battlefield, paying all costs but reducing his Gold cost to enter play by the performer's Gold Cost. Lose 2 Honor. You may take an additional Battle action", "own-ninja-personality-in-discard",
+            Performer: "own-shadowlands-ninja-at-battle", Cost: GoldCostRule.TargetRecruit(minusPerformerCost: true), Costs: [new(CostVerbs.Sacrifice, CostSubject.Performer)]),
         // Synthetic fixtures for the count/deal rules of a created attachment (issue #394): three Scouts dealt among the chosen Personalities, and two to EACH chosen one.
         ["training-create-scouts"] = new("Battle", "Training: create three 0F Scout Followers, dealt among the chosen Personalities of your army", "own-army-personalities",
             Creates: new(CardType.Follower, Force: 0, Keywords: ["Scout"], ProxyId: "oracle-l5r-9714", Count: 3)),
@@ -2045,7 +2071,8 @@ public sealed partial class MatchEngine
         // Hida Mimori / Isawa Mitsuko (issue #301): Mimori destroys her target outright (a Personality
         // target reaches Rokai; an attachment target never does -- see BeforeActionReactionApplies's
         // Personality-only gate); Mitsuko conditionally destroys hers after bowing it.
-        or "mimori-destroy" or "mitsuko-bow-destroy" or "emoto-follower-destroy"
+        or "mimori-destroy" or "mitsuko-bow-destroy" or "emoto-follower-destroy" or "flame-katana-destroy" or "great-sacrifice-destroy"
+        or "rage-of-the-spirits-destroy" or "costly-opportunity-destroy"
         // Kuni Shinoda - exp (personality-wave-24): bows, then destroys a Shadowlands target.
         or "shinoda-exp-bow-destroy"
         or "a-stain-cleansed-destroy";
@@ -2767,6 +2794,12 @@ public sealed partial class MatchEngine
             Emit("modifierNegated", $"{Definition(card).Name}'s {stat} modifier was negated before it resolved.", card.OwnerId, card.Id);
             return;
         }
+        // Tireless Efforts: while it lasts no Force penalty is applied to the card at all (nor any penalty-watching card told of one).
+        if (stat == "Force" && amount < 0 && card.ForcePenaltiesNegatedTurn == _state.TurnNumber)
+        {
+            Emit("modifierNegated", $"{Definition(card).Name}'s Force penalty was negated (Tireless Efforts).", card.OwnerId, card.Id);
+            return;
+        }
         card.Modifiers.Add(new(source, effect, stat, amount));
         if (stat == "Chi" && Definition(card).Type == CardType.Personality && InPlay(card) && PersonalityChi(card) <= 0) DestroyUnits([card], true);
         // A negative modifier on Force, Chi, Gold cost or Personal Honor is a stat penalty (issue #336); the cards that watch for one are told here.
@@ -3243,6 +3276,12 @@ public sealed partial class MatchEngine
                 // actingAsBattle; an Open-timed use has no presence requirement at all regardless.
                 "own-unbowed-personality-with-keyword-at-any-location" => Definition(performer).Type == CardType.Personality && !performer.Bowed &&
                     HasKeywords(performer, ability.RequiredKeywords) && (!actingAsBattle || AtAnyLocation(performer)),
+                // On the Hunt: "your performing Samurai with an attachment" (any bow state, at any location: the action is an Open one).
+                "own-samurai-with-attachment" => Definition(performer).Type == CardType.Personality && Keyword(performer, "Samurai") && HasAttachments(performer),
+                // Essence of Undeath: the Personality the Spell is attached to ("this Shugenja"), who performs its action.
+                "own-wielder" => source is { Zone: Zone.Attached } && performer.Id == source.AttachedTo,
+                // Goju Plot: "your performing Shadowlands Ninja Personality" (a Clan check, like own-shadowlands-personality-at-battle) -- no "unbowed" printed.
+                "own-shadowlands-ninja-at-battle" => Definition(performer).Type == CardType.Personality && HasClanAffiliation(performer, "Shadowlands") && Keyword(performer, "Ninja") && (!actingAsBattle || AtBattle(performer)),
                 // Yoritomo Emoto: "your performing Follower" -- any unbowed Follower of the acting player's in play whose unit is at the current battlefield (a Follower is at the
                 // battlefield when its host is; only meaningful while acting as a Battle action).
                 "own-unbowed-follower-at-battle" => Definition(performer).Type == CardType.Follower && !performer.Bowed && performer.Zone == Zone.Attached && (!actingAsBattle || AtBattle(performer)),
@@ -3606,6 +3645,12 @@ public sealed partial class MatchEngine
                 // Hunter of Harmony's own ability (issue #190): a Kiho Strategy card sitting in the
                 // player's own Fate discard pile -- not in play, so this needs its own branch just like
                 // "own-kharmic-card" above.
+                // Essence of Undeath: "your dead Personality".
+                else if (ability.Target == "own-dead-personality")
+                    Require(target.OwnerId == player.Id && type == CardType.Personality && target.Zone == Zone.Dead, "Choose one of your own dead Personalities.");
+                // Goju Plot: "a Ninja Personality in your discard pile" -- dead, or merely discarded from a province (the two zones of one physical pile).
+                else if (ability.Target == "own-ninja-personality-in-discard")
+                    Require(target.OwnerId == player.Id && type == CardType.Personality && Keyword(target, "Ninja") && target.Zone is Zone.Dead or Zone.DynastyDiscard, "Choose a Ninja Personality in your discard pile.");
                 // Jurojin's Blessing: "a non-Unique Strategy in your Fate discard pile".
                 else if (ability.Target == "own-nonunique-strategy-in-discard")
                     Require(target.OwnerId == player.Id && type == CardType.Strategy && !Keyword(target, "Unique") && target.Zone == Zone.FateDiscard,
@@ -3728,6 +3773,10 @@ public sealed partial class MatchEngine
                         // dishonorable-personality below, either side.
                         "honorable-personality" => MatchesTargetStatus(target, TargetStatus.IsHonorable),
                         "own-personality" => personality && own,
+                        // Great Sacrifice: "an enemy unit with total Force equal to or lower than your performer's Force, plus Personal Honor, plus one if he is defending".
+                        "enemy-unit-within-performer-sacrifice" => personality && !own && BattleForce(target) <= SacrificeReach(Card(command.PerformerId!)),
+                        // Rage of the Spirits: an enemy Personality or Follower with Force lower than or equal to the performing Spirit's.
+                        "enemy-force-lte-performer" => !own && type is CardType.Personality or CardType.Follower && CardForce(target) <= CardForce(Card(command.PerformerId!)),
                         // Interference: "a target Stronghold" -- either player's.
                         "stronghold" => type == CardType.Stronghold,
                         // Taming the Beast: "your Nonhuman" -- a Personality or a Follower of the acting player's carrying the required keywords (any bow state: straightening it is the point).
@@ -4932,7 +4981,7 @@ public sealed partial class MatchEngine
             // Attack-strength-reducing Reaction now checks (see the Require block above); cleared by
             // ResolveAttackNow once the specific Ranged Attack this action produces actually resolves.
             case "tsuruchi-yakusho-immunity": _state.RangedAttackStrengthReductionImmune = true; break;
-            case "low-market-equip":
+            case "low-market-equip": case "on-the-hunt-equip":
             {
                 
                 var performer = Card(command.PerformerId!);
@@ -4940,7 +4989,7 @@ public sealed partial class MatchEngine
                 player.Hand.Remove(attachment.Id);
                 attachment.Zone = Zone.Attached; attachment.AttachedTo = performer.Id; attachment.FaceUp = true; attachment.ProvinceIndex = performer.ProvinceIndex;
                 if (Definition(attachment).AttachGrantsKeyword is string granted) GrantKeyword(performer, granted, attachment.Id, "Attachment");
-                Emit("equipped", $"{Definition(attachment).Name} attached to {Definition(performer).Name} via Low Market.", player.Id, attachment.Id);
+                Emit("equipped", $"{Definition(attachment).Name} attached to {Definition(performer).Name} via {(id == "low-market-equip" ? "Low Market" : "On the Hunt")}.", player.Id, attachment.Id);
                 if (OpenEntryReactionWindow(player.Id, attachment, 1 - player.Id)) return;
                 break;
             }
@@ -5105,9 +5154,7 @@ public sealed partial class MatchEngine
                 GainHonor(player.Id, 1, "Kitsu Akai", source);
                 break;
             // Yoritomo Emoto: the performing Follower's bow was paid as its cost option; the target, a lone Follower included, is destroyed.
-            case "emoto-follower-destroy":
-                if (Definition(target!).Type == CardType.Follower) DestroyAttachment(target!); else DestroyUnits([target!], false, player.Id);
-                break;
+            case "emoto-follower-destroy": DestroyTargetCard(target!, player.Id); break;
             case "cavalry-flankers-attack": case "murderous-thieves-attack":
                 
                 if (ResolveOrDeferAttack(id, player, target?.Id, ActionPerformer(ability, command, source).Id, consumedGrant)) return;
@@ -5278,8 +5325,55 @@ public sealed partial class MatchEngine
             case "taming-beast-negate": NegateEffects(Card(HeldAction().TargetId!), "destroy"); break;
             case "taming-beast-straighten": Straighten(target!); break;
             case "flame-katana-destroy":
-                if (Definition(target!).Type == CardType.Follower) DestroyAttachment(target!); else DestroyUnits([target!], false, player.Id);
+                DestroyTargetCard(target!, player.Id);
                 break;
+            // Great Sacrifice: the performer's destruction was its cost; the enemy unit is destroyed.
+            case "great-sacrifice-destroy": DestroyUnits([target!], false, player.Id); break;
+            // Rage of the Spirits: both bows were paid as costs (the Shugenja's and the Spirit's); the enemy card is destroyed, and Earth pays a bonus.
+            case "rage-of-the-spirits-destroy":
+                DestroyTargetCard(target!, player.Id);
+                if (source is { Zone: Zone.Attached, AttachedTo: { } rageHost } && Keyword(Card(rageHost), "Earth")) GainHonor(player.Id, 1, "Rage of the Spirits", source);
+                break;
+            case "on-the-hunt-straighten": StraightenUnit(Card(command.PerformerId!)); break;
+            case "tireless-efforts-straighten": Straighten(Card(command.PerformerId!)); break;
+            case "tireless-efforts-negate": NegateForcePenalties(Card(command.PerformerId!)); break;
+            // Costly Opportunity: the Samurai's destruction was the cost. Every other card of the target's unit loses the use of its abilities, then the target is destroyed.
+            case "costly-opportunity-destroy":
+            {
+                var unitHost = Card(UnitHostId(target!));
+                foreach (var other in new[] { unitHost }.Concat(Attachments(unitHost.Id)).Where(c => c.Id != target!.Id && InPlay(c)).ToArray()) LockActions(other, source!.Id);
+                DestroyTargetCard(target!, player.Id);
+                break;
+            }
+            // Silent Terror: the bow, then the optional discard from the province (asked only when there is a card there).
+            case "silent-terror-bow":
+                if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
+                if (BeginConditionalChoice(command, ability, consumedGrant, playedFromDiscard, opponentHonorBeforeBattleAction, bowedBeforeAction, preExistingGrants)) return;
+                break;
+            // Essence of Undeath: the Spell's destruction was the cost and the Gold was paid; he enters at his Shugenja's location (home, or the battlefield he stands at).
+            case "essence-of-undeath-recruit":
+            {
+                var quote = QuotePurchase(player.Id, target!.Id, fromDeadPile: true);
+                Require(quote.Error is null, quote.Error ?? "");
+                var shugenja = Card(command.PerformerId!);
+                if (BringDeadPersonalityIntoPlay(player, target, "Essence of Undeath", shugenja.Zone == Zone.Battlefield ? shugenja.ProvinceIndex : null, entered =>
+                {
+                    GrantKeyword(entered, "Shadowlands", source!.Id, GrantDuration.Permanent);
+                    GrantKeyword(entered, "Undead", source.Id, GrantDuration.Permanent);
+                    GainHonor(player.Id, -2, "Essence of Undeath", source);
+                })) return;
+                break;
+            }
+            // Goju Plot: the performer's destruction was the cost and the reduced recruit cost was paid; he enters at the current battlefield, and another Battle action may follow.
+            case "goju-plot-recruit":
+            {
+                var quote = QuotePurchase(player.Id, target!.Id, fromDeadPile: true);
+                Require(quote.Error is null, quote.Error ?? "");
+                var entryWindow = BringDeadPersonalityIntoPlay(player, target, "Goju Plot", _state.CurrentBattleProvince!.Value, _ => GainHonor(player.Id, -2, "Goju Plot", source));
+                GrantAdditionalAction(player.Id, null);
+                if (entryWindow) return;
+                break;
+            }
             case "volcano-tattoo-destroy":
             {
                 var performer = Card(command.PerformerId!);
@@ -6371,6 +6465,11 @@ public sealed partial class MatchEngine
             Emit("tokenNegated", $"A {type} token on {Definition(card).Name} was negated before it resolved.", card.OwnerId, card.Id);
             return null;
         }
+        if (stat == "Force" && amount < 0 && card.ForcePenaltiesNegatedTurn == _state.TurnNumber)
+        {
+            Emit("tokenNegated", $"A {type} token's Force penalty on {Definition(card).Name} was negated (Tireless Efforts).", card.OwnerId, card.Id);
+            return null;
+        }
         var token = new CardToken($"token-{++_state.TokenSequence:D4}", type, source, stat, amount);
         card.Tokens.Add(token);
         if (stat == "Chi" && Definition(card).Type == CardType.Personality && InPlay(card) && PersonalityChi(card) <= 0) DestroyUnits([card], true);
@@ -6471,6 +6570,9 @@ public sealed partial class MatchEngine
                     _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && !c.Bowed && (!actingAsBattle || AtBattle(c)) && HasKeywords(c, ability.RequiredKeywords)).Select(c => (string?)c.Id).ToArray(),
                 "own-unbowed-personality-with-keyword-at-any-location" =>
                     _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && !c.Bowed && (!actingAsBattle || AtAnyLocation(c)) && HasKeywords(c, ability.RequiredKeywords)).Select(c => (string?)c.Id).ToArray(),
+                "own-samurai-with-attachment" => _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && Definition(c).Type == CardType.Personality && Keyword(c, "Samurai") && HasAttachments(c)).Select(c => (string?)c.Id).ToArray(),
+                "own-wielder" => source is { Zone: Zone.Attached, AttachedTo: { } wielderId } ? [wielderId] : [],
+                "own-shadowlands-ninja-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && HasClanAffiliation(c, "Shadowlands") && Keyword(c, "Ninja") && (!actingAsBattle || AtBattle(c))).Select(c => (string?)c.Id).ToArray(),
                 "own-unbowed-follower-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Follower && !c.Bowed && c.Zone == Zone.Attached && (!actingAsBattle || AtBattle(c))).Select(c => (string?)c.Id).ToArray(),
                 "own-castle-or-siege" => _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && !c.Bowed && (Keyword(c, "Castle") || Keyword(c, "Siege"))).Select(c => (string?)c.Id).ToArray(),
                 "own-source-or-unbowed-holding-with-keyword" => new[] { source?.Id }.Concat(_state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Holding && !c.Bowed && HasKeywords(c, ability.RequiredKeywords)).Select(c => (string?)c.Id)).ToArray(),
@@ -6546,6 +6648,8 @@ public sealed partial class MatchEngine
                     // Hunter of Harmony / Scholarly Hermit / Tranquil Garden (issue #317): the same gap
                     // Kharmic had -- validated, but a target in a discard pile is never in the in-play
                     // default, so the ability was never offered. Each mirrors its own Require above.
+                    "own-dead-personality" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && c.Zone == Zone.Dead).Select(c => (string?)c.Id).ToArray(),
+                    "own-ninja-personality-in-discard" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && Keyword(c, "Ninja") && c.Zone is Zone.Dead or Zone.DynastyDiscard).Select(c => (string?)c.Id).ToArray(),
                     "own-nonunique-strategy-in-discard" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Strategy && !Keyword(c, "Unique") && c.Zone == Zone.FateDiscard).Select(c => (string?)c.Id).ToArray(),
                     "own-kiho-strategy-in-discard" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Strategy && Keyword(c, "Kiho") && c.Zone == Zone.FateDiscard).Select(c => (string?)c.Id).ToArray(),
                     "own-dark-virtue-in-discard" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Strategy && Keyword(c, "Dark Virtue") && c.Zone == Zone.FateDiscard && HasUnspentBattleAction(c)).Select(c => (string?)c.Id).ToArray(),

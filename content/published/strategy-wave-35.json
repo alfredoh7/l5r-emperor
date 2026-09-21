@@ -1,0 +1,151 @@
+{
+  "Profile": "strategy-wave-35",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-2900",
+      "Name": "Great Sacrifice",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Destroy your performing unbowed Personality and target an enemy unit with total Force equal to or lower than your performer's Force, plus Personal Honor, plus one if he is defending: Destroy the enemy unit.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-2900.jpg",
+      "Keywords": [],
+      "Focus": 1,
+      "Abilities": [
+        "great-sacrifice-destroy"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-5704",
+      "Name": "On the Hunt",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing Samurai: Attach an attachment in your hand to him, paying all costs but paying 4 less Gold.\nOpen: Choose your performing Samurai with an attachment: Straighten his unit.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-5704.jpg",
+      "Keywords": [],
+      "Focus": 1,
+      "Abilities": [
+        "on-the-hunt-equip",
+        "on-the-hunt-straighten"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-8496",
+      "Name": "Tireless Efforts",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing Personality: Straighten him.\nBattle/Open: Choose your performing Personality: Negate all current and new Force penalties on him.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8496.jpg",
+      "Keywords": [],
+      "Focus": 1,
+      "Abilities": [
+        "tireless-efforts-straighten",
+        "tireless-efforts-negate"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-1522",
+      "Name": "Costly Opportunity",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Destroy your target performing unbowed Samurai to target an enemy card without attachments. Abilities on other cards now in its unit may not be used. Destroy the targeted card.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1522.jpg",
+      "Keywords": [],
+      "Focus": 1,
+      "Abilities": [
+        "costly-opportunity-destroy"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-7261",
+      "Name": "Silent Terror",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing unbowed Ninja Personality and target an enemy card: Bow it. You may discard a card in the current battlefield's province.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7261.jpg",
+      "Keywords": [
+        "Ninja"
+      ],
+      "Focus": 1,
+      "Abilities": [
+        "silent-terror-bow"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-2856",
+      "Name": "Goju Plot",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Destroy your performing Shadowlands Ninja Personality and target a Ninja Personality in your discard pile: Bring him into play at the current battlefield, paying all costs but reducing his Gold cost to enter play by the performer's Gold Cost. Lose 2 Honor. You may take an additional Battle action.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-2856.jpg",
+      "Keywords": [
+        "Ninja"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "goju-plot-recruit"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

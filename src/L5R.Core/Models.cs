@@ -226,6 +226,9 @@ public sealed class CardInstance
     public List<CardToken> Tokens { get; set; } = [];
     public bool Dishonorable { get; set; }
     public int StraightenBlockedTurn { get; set; } = -1;
+    // Tireless Efforts (Second City): "Negate all current and new Force penalties on him" -- the turn it was played; while TurnNumber equals it, a Force penalty
+    // (a negative Force modifier or token) is not applied to this card. Reset with the card like the other per-turn flags.
+    public int ForcePenaltiesNegatedTurn { get; set; } = -1;
     // Tamori Tamoko's own Open action (issue #207 follow-up): "assigned to attack ... this turn" --
     // set once, in Assign(), the turn this card is assigned during Infantry/Cavalry Maneuvers.
     public int AssignedToAttackTurn { get; set; } = -1;

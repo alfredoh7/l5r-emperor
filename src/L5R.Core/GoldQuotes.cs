@@ -61,14 +61,15 @@ public static class GoldCostBasis
 /// (a Strategy source paying its own printed cost): those charge nothing, and emit no payment event, when
 /// that cost is 0.</param>
 public sealed record GoldCostRule(string Basis, int Amount = 0, int Modifier = 0, int? Floor = null,
-    int? MaxAmount = null, string? HonorWaiverClan = null, bool Explicit = true, bool AtResolution = false)
+    int? MaxAmount = null, string? HonorWaiverClan = null, bool Explicit = true, bool AtResolution = false, bool MinusPerformerCost = false)
 {
     public static GoldCostRule Fixed(int amount) => new(GoldCostBasis.Fixed, amount);
     public static GoldCostRule SourcePrinted() => new(GoldCostBasis.SourcePrinted);
     public static GoldCostRule TargetPrinted(int modifier = 0, int? floor = null) => new(GoldCostBasis.TargetPrinted, Modifier: modifier, Floor: floor);
     public static GoldCostRule TargetUnitTotal(int modifier = 0, int? floor = null) => new(GoldCostBasis.TargetUnitTotal, Modifier: modifier, Floor: floor);
-    public static GoldCostRule TargetRecruit(int modifier = 0, int? floor = null, string? honorWaiverClan = null) =>
-        new(GoldCostBasis.TargetRecruit, Modifier: modifier, Floor: floor, HonorWaiverClan: honorWaiverClan);
+    /// <summary>minusPerformerCost: "reducing his Gold cost to enter play by the performer's Gold Cost" (Goju Plot) -- the performer's current Gold Cost comes off the recruit cost, to no less than 0.</summary>
+    public static GoldCostRule TargetRecruit(int modifier = 0, int? floor = null, string? honorWaiverClan = null, bool minusPerformerCost = false) =>
+        new(GoldCostBasis.TargetRecruit, Modifier: modifier, Floor: floor, HonorWaiverClan: honorWaiverClan, MinusPerformerCost: minusPerformerCost);
     public static GoldCostRule TargetCurrent(int modifier = 0, int? floor = null) => new(GoldCostBasis.TargetCurrent, Modifier: modifier, Floor: floor);
     public static GoldCostRule Variable(int min = 0, int? max = null, bool atResolution = false) => new(GoldCostBasis.Variable, Amount: min, MaxAmount: max, AtResolution: atResolution);
     public static GoldCostRule AttachCost(int modifier = 0, int? floor = null) => new(GoldCostBasis.AttachCost, Modifier: modifier, Floor: floor);
@@ -234,9 +235,15 @@ public sealed partial class MatchEngine
             }
             case GoldCostBasis.TargetRecruit:
             {
-                var recruit = QuotePurchase(command.PlayerId, target.Id, ignoreHonorRequirementIfPersonalityClan: rule.HonorWaiverClan, fromDeadPile: target.Zone == Zone.Dead);
+                var recruit = QuotePurchase(command.PlayerId, target.Id, ignoreHonorRequirementIfPersonalityClan: rule.HonorWaiverClan, fromDeadPile: target.Zone is Zone.Dead or Zone.DynastyDiscard);
                 var derivation = recruit.Error is null && recruit.Cost != Definition(target).GoldCost && recruit.Basis is { } terms ? $" ({terms})" : "";
-                return new(rule, Clamp(recruit.Cost + rule.Modifier, rule.Floor), $"{name} recruit cost {recruit.Cost}{derivation}{Modified(rule.Modifier, rule.Floor)}", recruit.Error, false, target);
+                var performerCost = 0; var performerNote = "";
+                if (rule.MinusPerformerCost)
+                {
+                    if (command.PerformerId is null || !_state.Cards.TryGetValue(command.PerformerId, out var performing)) return new(rule, 0, "Choose a performing card to see this cost.", null, true, null);
+                    performerCost = CardGoldCost(performing); performerNote = $" less {Definition(performing).Name}'s Gold Cost {performerCost}";
+                }
+                return new(rule, Clamp(recruit.Cost + rule.Modifier - performerCost, rule.Floor), $"{name} recruit cost {recruit.Cost}{derivation}{performerNote}{Modified(rule.Modifier, rule.Floor)}", recruit.Error, false, target);
             }
         }
         return new(rule, 0, "Unsupported Gold cost rule.", "Unsupported Gold cost rule.", false, null);

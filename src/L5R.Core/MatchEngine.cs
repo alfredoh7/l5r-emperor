@@ -639,10 +639,12 @@ public sealed partial class MatchEngine
 
     // At Any Cost (issue #373): a dead Personality is recruited as a fresh card, into play at the battlefield the action was played at (Mendon), through the same
     // entry sequence as a province recruit. It may not be proclaimed, so its quote is never Proclaim-eligible. Returns true exactly when a window was opened.
-    private bool BringDeadPersonalityIntoPlay(PlayerState player,CardInstance card,string via,int battlefield)
+    // battlefield null: he enters at home. onEntry runs once he is in play, before any entry window opens (Essence of Undeath's permanent keywords and Honor loss).
+    private bool BringDeadPersonalityIntoPlay(PlayerState player,CardInstance card,string via,int? battlefield,Action<CardInstance>? onEntry=null)
     {
         ResetCardState(card);
         EnterPlayFromRecruit(player,card,battlefield,via);
+        onEntry?.Invoke(card);
         return OpenRecruitEntryWindows(player,card,false,null);
     }
 
@@ -779,6 +781,7 @@ public sealed partial class MatchEngine
         card.Bowed = false;
         card.Dishonorable = false;
         card.StraightenBlockedTurn = -1;
+        card.ForcePenaltiesNegatedTurn = -1;
         card.AssignedToAttackTurn = -1;
     }
 
@@ -877,7 +880,8 @@ public sealed partial class MatchEngine
     {
         if (playerId is <0 or >1 || !_state.Cards.TryGetValue(cardId,out var card)) return new(cardId,0,clanDiscount,clanAllegiance,false,"Unknown card or player.",[]);
         var def=Definition(card); var player=Player(playerId);
-        if(fromDeadPile ? card.OwnerId!=playerId || card.Zone!=Zone.Dead : card.OwnerId!=playerId || card.Zone!=Zone.Province || !card.FaceUp)
+        // The dead pile is the Personality's discard pile: Zone.Dead once he died, Zone.DynastyDiscard when he was merely discarded from a province (Goju Plot: "in your discard pile").
+        if(fromDeadPile ? card.OwnerId!=playerId || card.Zone is not (Zone.Dead or Zone.DynastyDiscard) : card.OwnerId!=playerId || card.Zone!=Zone.Province || !card.FaceUp)
             return new(cardId,0,clanDiscount,clanAllegiance,false,fromDeadPile?"Choose one of your own dead Personalities.":"Choose your face-up province card.",[]);
         string? error=null;
         var inClan=def.Type==CardType.Personality && ClanAlignments(card).Contains(player.Clan);
@@ -1561,7 +1565,7 @@ public sealed partial class MatchEngine
             // no meaning once this card is sitting face-up in a province again, ready to be purchased.
             card.Modifiers.Clear(); card.ActionLocks.Clear(); card.GrantedKeywords.Clear(); card.GrantedAbilities.Clear(); card.RemovedKeywords.Clear(); card.RemovedClanAffiliations.Clear();
             card.AbilityUses.Clear(); card.Tokens.Clear(); card.Bowed=false; card.Dishonorable=false;
-            card.StraightenBlockedTurn=-1; card.AssignedToAttackTurn=-1;
+            card.StraightenBlockedTurn=-1; card.ForcePenaltiesNegatedTurn=-1; card.AssignedToAttackTurn=-1;
             var owner=Player(card.OwnerId);
             if(!owner.Provinces.Any(p=>!p.Destroyed)) continue; // no province left to place him in -- an extremely rare edge case; he simply stays home
             _state.PendingChoice=new("yourClanNeedsYouProvince",card.OwnerId,id,$"{Definition(card).Name}: choose a province to place him into, face-up (discarding any card already there).");

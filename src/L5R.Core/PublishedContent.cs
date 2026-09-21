@@ -2297,4 +2297,8 @@ public static class PublishedContent
     public static PublishedSnapshot ItemWave7 { get; } = Load("L5R.Published.ItemWave7.json", "item-wave-7", requireDecks: false);
     /// <summary>Second City pass (#264): Jurojin's Blessing.</summary>
     public static PublishedSnapshot CelestialWave3 { get; } = Load("L5R.Published.CelestialWave3.json", "celestial-wave-3", requireDecks: false);
+    /// <summary>Second City pass (#264): Great Sacrifice, On the Hunt, Tireless Efforts, Costly Opportunity, Silent Terror and Goju Plot.</summary>
+    public static PublishedSnapshot StrategyWave35 { get; } = Load("L5R.Published.StrategyWave35.json", "strategy-wave-35", requireDecks: false);
+    /// <summary>Second City pass (#264): Rage of the Spirits and Essence of Undeath.</summary>
+    public static PublishedSnapshot SpellWave13 { get; } = Load("L5R.Published.SpellWave13.json", "spell-wave-13", requireDecks: false);
 }
