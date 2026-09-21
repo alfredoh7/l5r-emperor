@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Delivered Alfredo-approved UI demos5-8 with the final sequenced spear/attack-tab refinement. Four named Windows demo launchers share a self-contained, isolated package; Mendon received the validated refreshed download and feedback/merge instructions.",
-  "validation": "Source6b6908d7 Mac/Windows CI35598262930 passes after a bootstrap-timeout retry; all four native demo suites and actual Mac launchers verified. Packaging tests9/9 pass. Actual uploaded ZIP cb878ec60d227126bab09e9f6876f804dc8f6a92196e349ad9d74f0c101479c0 passed Windows runtime and all six launchers in run35599418450 at receipt commit9244505b. Release digest/size and notification5760497921 verified. Final documentation update leaves the validated spec/receipt/package unchanged.",
-  "remaining": "None for requested packaging/notification. Mendon review and later merge checks remain human gates; no main merge. Windows graphical play and external multiplayer are not claimed. Inherited rules candidates retain separate acceptance.",
+  "summary": "Stage next five approved UI designs as a private Windows review with seven launchers; earlier releases remain immutable.",
+  "validation": "Packaging regressions 9/9 PASS; delivery checkout full non-client checks PASS including 7/7 transport; Windows export and actual ZIP launchers verified; uploaded asset byte size/SHA-256 verified; collaboration audit shared with no errors. Game source CI/native evidence remain separately recorded.",
+  "remaining": "Windows checks on exact receipt, then gated Mendon notification. Human hands-on/rules acceptance pending. No main merge authorized.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/297",
   "branch": "codex/297-windows-review",
-  "updated": "2026-09-21T12:33:58.457970+00:00"
+  "updated": "2026-09-21T23:13:37.558155+00:00"
 }

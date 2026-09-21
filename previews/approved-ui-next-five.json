@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "slug": "approved-ui-next-five",
+  "title": "Next five UI previews (designs approved; playtest pending)",
+  "source_pr": 432,
+  "source_commit": "0aa6992d19115153f02455391875b94b6aa25d72",
+  "revision": 1,
+  "reviewer": "mdornbrook",
+  "summary": "Alfredo approved the five ImageGen design directions and requested the established isolated native-preview workflow. Please review gameplay, rules presentation and UI/QoL before integration. Design approval is not hands-on acceptance; nothing is merged into main.",
+  "review_steps": [
+    "Alfredo approved these design directions; hands-on preview acceptance remains pending. Merging requires Mendon review and required checks. No main merge is authorized by delivery.",
+    "Extract the whole ZIP. Start Review.cmd opens Opponent Payment immediately. Quit between demos, then double-click another numbered launcher. No source checkout, SDK or Godot editor is needed. Each opens its prepared review scenario, with a menu or controls for related cases.",
+    "Demo 1 \u2014 Opponent Payment (#377 / PR #427): choose zero or a legal Gold amount, inspect plain coin symbols, select payment sources, and inspect the immediate outcome. Check the decision owner, Gold restrictions and other-seat presentation. https://github.com/alfredoh7/l5r-emperor/pull/427",
+    "Demo 2 \u2014 Top Cards (#323 / PR #428): inspect the single row of full card scans, choose their destinations/order, and confirm. No duplicate thumbnail strip or redundant bottom caption. Check private visibility and the published preview cases. https://github.com/alfredoh7/l5r-emperor/pull/428",
+    "Demo 3 \u2014 Multiple Targets (#345 / PR #429): select on the board or expand independent target groups; check ordered targets, optional zero, attachment selection, alternate costs and reaction cases. https://github.com/alfredoh7/l5r-emperor/pull/429",
+    "Demo 4 \u2014 Battle Progress (#311 / PR #430): click the five-symbol edge strip to expand the sequence, then return to the current decision. Try declaration/maneuvers, Naval, defender override, forced pass, before-resolution decisions, Encircled Terrain and empty battle. Check decision owners/reasons/pass counts; the strip never submits an action. Infantry uses a distinct helmet. https://github.com/alfredoh7/l5r-emperor/pull/430",
+    "Demo 5 \u2014 Created Copies (#400 / PR #432): compare the real Gates-created Lion Ancestor with its original. Try battle, bowed stack, an ordinary Personality copy and destruction/removal. The twin-card seal stays outside the full face and existing token rail. Check hover, inspector and public Removed gallery. https://github.com/alfredoh7/l5r-emperor/pull/432",
+    "Asterisks in review menus identify synthetic training cases. Record approval or requested changes on the relevant feature PR. Please note UI/QoL feedback for Alfredo with the demo, steps and expected result. Send Feedback.url opens the batch/source PR #432."
+  ],
+  "known_limitations": [
+    "Prepared local engine positions are for focused review. They are not full human match acceptance or external multiplayer validation.",
+    "This stacked preview includes the previous isolated UI lineage and separately unapproved inherited stabilization/rules/interface candidates. Approving a design does not approve those rules changes; resolve the dependencies with Mendon before integration.",
+    "Source includes main through 97d8e407. The public engine contract remains authoritative for choices, ownership, legal targets, Gold, timing and CreatedCopy. The latest five UI tasks do not change authoritative rules; inherited shared changes remain visible in the stack.",
+    "Actual Mac native review and automated Windows runtime/launcher validation are separate evidence. Native Windows graphical play and Mendon expert rules acceptance remain pending."
+  ],
+  "scenarios": [
+    {
+      "name": "Start Review",
+      "mode": "published-opponent-payment-review"
+    },
+    {
+      "name": "Demo 1 - Opponent Payment",
+      "mode": "published-opponent-payment-review"
+    },
+    {
+      "name": "Demo 2 - Top Cards",
+      "mode": "published-top-cards-review"
+    },
+    {
+      "name": "Demo 3 - Multiple Targets",
+      "mode": "published-multi-targets-review"
+    },
+    {
+      "name": "Demo 4 - Battle Progress",
+      "mode": "published-battle-sequence-review"
+    },
+    {
+      "name": "Demo 5 - Created Copies",
+      "mode": "published-created-copy-review"
+    },
+    {
+      "name": "Open Full Game",
+      "mode": null
+    }
+  ]
+}
