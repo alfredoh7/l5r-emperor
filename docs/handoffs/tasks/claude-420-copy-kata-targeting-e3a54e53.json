@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Second City primitives 6/6: permanent copying of a Spell's rules (Mastering the Elements), the Kata keyword (Skipping the Puddle), may-not-be-targeted with a Weapon-attached condition (Superior Reach), dead Personalities as discarded (Scavenging Party); four cards wired; entry Reactions can now target a card in play; readings 29-36 for Mendon in docs/decisions/2026-09-21-second-city-primitives.md",
+  "validation": "bash tools/check.sh: exit 0, 1008 tests pass incl. new copy-kata-targeting (9); 42 mutations of the new code run, all killed after strengthening tests except one equivalent (an InPlay guard on a bar of a card that cannot be targeted out of play); art scans viewed against the cards",
+  "remaining": "Blessings of the Shi-Tien Yen-Wang (1040) stays unwired (dead-to-deck move and a shield of unstated duration); readings 1-36 await Mendon's confirmation; the client shows a Kata at home like any card at home, no UI work done",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/420",
+  "branch": "claude/420-copy-kata-targeting",
+  "updated": "2026-09-21T17:14:37.174543+00:00"
+}

@@ -1,0 +1,32 @@
+{
+  "Profile": "spell-wave-15",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-4874",
+      "Name": "Mastering the Elements",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: Once per game, after this card enters play, target your Spell and pay Gold equal to its base Gold Cost: This card permanently copies the Spell's keywords, traits, and its base abilities that do not themselves copy abilities.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-4874.jpg",
+      "Keywords": [
+        "Unique"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "mastering-the-elements-copy"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

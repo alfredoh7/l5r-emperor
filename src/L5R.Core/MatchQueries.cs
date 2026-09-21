@@ -96,6 +96,27 @@ public sealed partial class MatchEngine
                 Add("useAbility",text,command,why,card.Id,gold:gold);
             }
         }
+        // An entering-play Reaction that targets a card in play (Mastering the Elements, issue #420: "target your Spell"): one option carrying every legal target, each with its own Gold quote when the
+        // cost comes from the target, the way an ordinary ability is listed; disabled, with the first reason, when no target is legal.
+        void AddTargetedEntryReaction(CardInstance card,string abilityId,string? reason)
+        {
+            var ability=AbilityCatalog.All[abilityId];
+            var legal=new List<(GameCommand Command,GoldQuote? Gold)>(); string? firstError=null;
+            foreach(var candidate in _state.Cards.Values.Where(InPlay).Select(c=>c.Id).OrderBy(x=>x,StringComparer.Ordinal))
+            {
+                var command=new GameCommand("useAbility",playerId,_state.Version,CardId:card.Id,TargetId:candidate,AbilityId:abilityId);
+                var gold=QuoteAbilityGold(command);
+                if(gold is not null) command=command with {SourceIds=gold.Payments.FirstOrDefault()?.SourceIds};
+                var why=gold is null ? null : gold.Error ?? (gold.Payments.Length==0 ? "Insufficient unbowed Gold production." : null);
+                why??=AbilityRejection(command);
+                why??=ActionLockRejection(command);
+                if(why is null) legal.Add((command,gold)); else firstError??=why;
+            }
+            var first=legal.FirstOrDefault();
+            var targetGold=first.Gold?.Kind==GoldCostKind.Derived ? legal.Where(l=>l.Gold is not null).ToDictionary(l=>l.Command.TargetId!,l=>l.Gold!) : null;
+            Add("useAbility",AbilityOptionLabel(abilityId,ability,null,card),legal.Count>0 ? first.Command : null,reason??(legal.Count>0 ? null : firstError??"No legal target."),card.Id,
+                legal.Select(l=>l.Command.TargetId!).ToArray(),gold:first.Gold,targetGold:targetGold);
+        }
         // Targeted-by-action reactions (issue #335): one option per legal new target for Blade of Champions, else one; unusable ones are listed disabled.
         void AddTargetedActionReactions()
         {
@@ -134,7 +155,8 @@ public sealed partial class MatchEngine
                 foreach(var reactionId in (Definition(enteringCard).Abilities??[]).Where(a=>AbilityCatalog.All.TryGetValue(a,out var def) && def.Timing=="Reaction" && def.Trigger=="own-enters-play"))
                 {
                     var used=enteringCard.AbilityUses.ContainsKey(AbilityCatalog.All[reactionId].UsageKey??reactionId);
-                    AddReaction(enteringCard,reactionId,used?"This reaction has already been used.":null);
+                    if(AbilityCatalog.All[reactionId].Target is "none" or "player") AddReaction(enteringCard,reactionId,used?"This reaction has already been used.":null);
+                    else AddTargetedEntryReaction(enteringCard,reactionId,used?"This reaction has already been used.":null);
                 }
                 // Singh Remnants' shape: a DIFFERENT card (hand or discard pile) watching this entry,
                 // only relevant once a Personality is what entered.

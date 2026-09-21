@@ -749,6 +749,8 @@ public sealed partial class MatchEngine
         higher.PrintedHoldsSeeded = lower.PrintedHoldsSeeded;
         higher.MovementLocks.AddRange(lower.MovementLocks);
         higher.TargetShield = lower.TargetShield;
+        higher.TargetBars.AddRange(lower.TargetBars);
+        foreach (var other in _state.Cards.Values) for (var i = 0; i < other.TargetBars.Count; i++) if (other.TargetBars[i].ActorCardId == lower.Id) other.TargetBars[i] = other.TargetBars[i] with { ActorCardId = higher.Id };
         higher.AssignedToAttackTurn = Math.Max(higher.AssignedToAttackTurn, lower.AssignedToAttackTurn);
 
         higher.Modifiers.AddRange(lower.Modifiers);
@@ -803,6 +805,7 @@ public sealed partial class MatchEngine
         card.PrintedHoldsSeeded = false;
         card.MovementLocks.Clear();
         card.TargetShield = false;
+        card.TargetBars.Clear();
         card.ForcePenaltiesNegatedTurn = -1;
         card.AssignedToAttackTurn = -1;
     }
