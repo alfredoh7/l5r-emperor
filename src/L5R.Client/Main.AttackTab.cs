@@ -8,6 +8,8 @@ public partial class Main
     private AttackSourceTab _attackTab = null!;
     private (string Room, int Viewer)? _attackTabContext;
     private long _attackTabVersion;
+    private (string Source, string Unit)? _attackTabUnit;
+    private bool _attackStandardsReserved;
 
     private void ObserveAttackTab()
     {
@@ -36,16 +38,28 @@ public partial class Main
         var height = width*396/562;
         var mount = ends[0].Lerp(ends[1],.07f);
         var body = new Rect2(mount,new Vector2(width,height));
-        // A live Force ribbon may belong to the host rather than this attachment.
-        // Leave all live numerals visible, including on bowed/overlapping stacks.
-        foreach (var badge in UnitBadges.OfType<UnitStandard>().Where(b => b.IsVisibleInTree()))
-        {
-            var r = badge.BodyRectOnViewport();
-            var local = new Rect2(inverse*r.Position,r.Size/_root.Scale);
-            if (body.Grow(2).Intersects(local)) body.Position = new Vector2(body.Position.X,local.End.Y+3);
-        }
         var clip = _tableViewport.GetGlobalRect();
         var globalBody = new Rect2(_root.GetGlobalTransform()*body.Position,body.Size*_root.Scale);
         return clip.Encloses(globalBody) ? body : null;
+    }
+
+    private void ArrangeAttackTab(AttackCueView? cue, Rect2 body, float clearance)
+    {
+        if (cue is null && !_attackStandardsReserved) return;
+        var source = cue is null ? null : _tiles.FirstOrDefault(t => t.Card.Id == cue.SourceId && TileVisible(t));
+        var standards = Standards(_root).ToArray();
+        if (cue is null || _attackTabUnit?.Source != cue.SourceId) _attackTabUnit = null;
+        if (source is not null && standards.FirstOrDefault(b => b.CardAnchor == source || b.Companions.Contains(source)) is { } host)
+            _attackTabUnit = (cue!.SourceId, host.Card.Id);
+        var slot = new Rect2(_root.GetGlobalTransform() * body.Position,
+            (body.Size + new Vector2(0, 5)) * _root.Scale);
+        // Standards live inside each projected card stack, not in the screen-space
+        // Force/Chi token layer. Keep the host's whole ribbon clear for attachments too.
+        foreach (var standard in standards)
+        {
+            var sameUnit = _attackTabUnit?.Unit == standard.Card.Id;
+            standard.ReserveAttackSpace(sameUnit ? slot : null, sameUnit ? clearance : 0);
+        }
+        _attackStandardsReserved = cue is not null;
     }
 }

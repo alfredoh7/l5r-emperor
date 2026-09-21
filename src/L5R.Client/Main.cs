@@ -374,7 +374,7 @@ public partial class Main : Node
         _notice.TextOverrunBehavior = TextServer.OverrunBehavior.TrimEllipsis; _notice.MouseFilter = Control.MouseFilterEnum.Stop;
         _intentOverlay = new BoardIntentOverlay { MouseFilter = Control.MouseFilterEnum.Ignore, Arrows = IntentArrows };
         _root.AddChild(_intentOverlay); _intentOverlay.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.FullRect);
-        _attackTab = new AttackSourceTab { Observe = ObserveAttackTab, Placement = AttackTabPlacement };
+        _attackTab = new AttackSourceTab { Observe = ObserveAttackTab, Placement = AttackTabPlacement, Arrange = ArrangeAttackTab };
         _root.AddChild(_attackTab);
         // Fixed placards overlap the projected table and the hand. Keep both drawing
         // and native GUI picking above those cards, but below expanded/modal views.

@@ -158,6 +158,10 @@ public partial class Main
     private bool PointerOnTable(Vector2 viewportPoint)
     {
         if (CameraBlocked || !_tableViewport.GetGlobalRect().HasPoint(viewportPoint)) return false;
+        // Prepared attack-review navigation sits over the table. Let native GUI
+        // picking receive its clicks instead of forwarding them into the mat.
+        if (_root.GetNodeOrNull<Control>("AttackReviewControls") is { } attackReview &&
+            attackReview.IsVisibleInTree() && attackReview.GetGlobalRect().HasPoint(viewportPoint)) return false;
         if(_eventHandBar is {Visible:true} && _eventHandBar.GetGlobalRect().HasPoint(viewportPoint))return false;
         if(_shownPreview is { } preview && IsInstanceValid(preview) && preview.GetGlobalRect().HasPoint(viewportPoint))return false;
         // The Fallen strips can overlap the projection. Check only the visible

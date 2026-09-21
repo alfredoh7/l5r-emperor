@@ -40,7 +40,7 @@ public partial class Main
         var action=Actions.First(a=>a.CardId==source.Id&&a.Enabled&&a.NoTarget);
         Choose(action);
         if(_captureMode.Contains("review"))BuildAttackReviewControls();
-        await EventFrames(20);
+        await ToSignal(GetTree().CreateTimer(.75),SceneTreeTimer.SignalName.Timeout);
     }
     private void BuildAttackReviewControls()
     {
@@ -71,7 +71,22 @@ public partial class Main
             $"Missing settled {kind} source tab for {source}: {_attackTab.Current}, {_attackTab.Progress}");
         var body=_attackTab.GetGlobalRect();
         SupportRequire(_tableViewport.GetGlobalRect().Encloses(body),"Attack tab is outside the table");
-        SupportRequire(!UnitBadges.OfType<UnitStandard>().Where(b=>b.IsVisibleInTree()).Any(b=>b.BodyRectOnViewport().Intersects(body)),"Attack tab covers a Force ribbon");
+        CheckAttackRibbonClearance();
+    }
+    private UnitStandard AttackSourceStandard() => Standards(_root).Single(b =>
+        b.CardAnchor.Card.Id == _attackTab.Current!.SourceId || b.Companions.Any(c => c.Card.Id == _attackTab.Current!.SourceId));
+    private void CheckAttackRibbonClearance()
+    {
+        if (!_attackTab.Visible) return;
+        var standards = Standards(_root).Where(b => b.IsVisibleInTree()).ToArray();
+        SupportRequire(standards.Length > 0, "Ribbon clearance check found no actual mounted standards");
+        SupportRequire(!standards.Any(b => b.BodyRectOnViewport().Intersects(_attackTab.GetGlobalRect())),
+            "Attack tab covers the spears or Unit Force ribbon");
+    }
+    private void AdvanceAttackTab(float seconds)
+    {
+        for (var elapsed = 0f; elapsed < seconds; elapsed += .01f)
+        { _attackTab._Process(Math.Min(.01f, seconds-elapsed)); CheckAttackRibbonClearance(); }
     }
     private void CheckAttackConfirmation()
     {
@@ -87,18 +102,44 @@ public partial class Main
             var renderOnly=_captureMode.Contains("render");
             _preferences.ReducedMotion=_captureMode.Contains("reduced");ApplyPreferences(false);await PrepareAttackReview();
             if(_captureMode.EndsWith("-review",StringComparison.Ordinal)){GD.Print("ATTACK_TARGET_REVIEW_READY: real Ranged/Melee choices and prepared province/cost examples.");return;}
+            if (_captureMode.Contains("review"))
+            {
+                foreach (var kind in new[] { "Melee", "Ranged" })
+                {
+                    await SupportClick(_attackReviewButtons.Single(b=>b.Text==kind));
+                    for (var frames=0; frames<240 && _attackReviewBusy; frames++) await EventFrames(1);
+                    SupportRequire(!_attackReviewBusy && _chosen?.Attack?.Kind==kind,"Review navigation click did not select "+kind);
+                    CheckAttackTab(kind,_attackSource);
+                }
+            }
             CheckAttackTab("Ranged",_attackSource);
             // Drive the native control's timeline deterministically as well as the live
             // captures: reduced motion jumps; normal mode visibly slides both ways.
             _attackTab.SetProcess(false);_attackTab.Observe=null;_attackTab.Cancel();_attackTab.Desired=_chosen!.Attack;
-            _attackTab._Process(.09);
+            AdvanceAttackTab(.08f);
+            SupportRequire(_reducedMotion ? _attackTab.Progress==1 : !_attackTab.Visible && _attackTab.ClearanceProgress is >0 and <1,
+                "Spears must move down before the attack tab appears");
+            SupportRequire(AttackSourceStandard().AttackSlidePixels > 0,"Mounted spear ribbon did not make room");
+            await SupportCapture("-spears-lowering");
+            AdvanceAttackTab(.17f);
             SupportRequire(_reducedMotion?_attackTab.Progress==1:_attackTab.Progress is >0 and <1,"Attack tab did not honor motion preference");
             await SupportCapture("-tab-entering");
-            _attackTab._Process(.18);CheckAttackTab("Ranged",_attackSource);
-            _attackTab.Desired=null;_attackTab._Process(.09);
-            SupportRequire(_reducedMotion?!_attackTab.Visible:_attackTab.Progress is >0 and <1,"Attack tab did not retract");
+            AdvanceAttackTab(.10f);CheckAttackTab("Ranged",_attackSource);
+            _attackTab.Desired=null;AdvanceAttackTab(.09f);
+            SupportRequire(_reducedMotion?!_attackTab.Visible:_attackTab.Progress is >0 and <1 && _attackTab.ClearanceProgress==1,"Spears returned before the attack tab retracted");
             await SupportCapture("-tab-retracting");
-            _attackTab._Process(.18);SupportRequire(!_attackTab.Visible,"Retracted tab remains visible");
+            AdvanceAttackTab(.18f);
+            SupportRequire(!_attackTab.Visible && (_reducedMotion || _attackTab.ClearanceProgress is >0 and <1),"Spears did not slide back after the tab retracted");
+            await SupportCapture("-spears-returning");
+            AdvanceAttackTab(.10f);
+            SupportRequire(!_attackTab.Visible && Standards(_root).All(b=>b.AttackSlidePixels==0),"Dismissal left a displaced ribbon");
+            // Reverse mid-entry and mid-exit without a jump or a frame of overlap.
+            _attackTab.Desired=_chosen!.Attack;AdvanceAttackTab(.24f);
+            _attackTab.Desired=null;AdvanceAttackTab(.04f);
+            _attackTab.Desired=_chosen.Attack;AdvanceAttackTab(.35f);
+            CheckAttackTab("Ranged",_attackSource);
+            // A board rebuild must preserve the current reserved space for new controls.
+            RenderBoard();AdvanceAttackTab(.01f);CheckAttackTab("Ranged",_attackSource);
             _attackTab.Observe=ObserveAttackTab;_attackTab.SetProcess(true);await EventFrames(20);CheckAttackTab("Ranged",_attackSource);
             SupportRequire(AttackTargetActive&&_attackChoice==AttackChoice.Unselected&&_paymentConfirm!.Disabled&&_chosen!.Command is {TargetId:null,Province:null},"Attack silently selected a card or No target");
             SupportRequire(!StabilizationButtons(_inspector).Any(b=>b.Name.ToString().StartsWith("AttackProvince")),"Ordinary Attack offered a province");
@@ -165,7 +206,7 @@ public partial class Main
                 SupportRequire(offered.Length==2&&offered.All(a=>a.NoTarget&&a.AlternativeCost is null),"Tensin fixture must expose both performing Followers with a fixed bow cost");
                 var firstPerformer=offered[0].Command!.PerformerId;Choose(offered[1]);await EventFrames(12);
                 performer=_chosen!.Command!.PerformerId!;
-                await ToSignal(GetTree().CreateTimer(.42),SceneTreeTimer.SignalName.Timeout);
+                await ToSignal(GetTree().CreateTimer(.75),SceneTreeTimer.SignalName.Timeout);
                 CheckAttackTab("Ranged",performer);
                 SupportRequire(performer!=firstPerformer&&_attackChoice==AttackChoice.Unselected&&_paymentConfirm!.Disabled,"Changing the performing Follower retained a target draft");
                 if(targetCard)await SupportClick(AttackCardFace(_attackCard));else await SupportClick(AttackNoTargetButton());

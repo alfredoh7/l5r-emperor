@@ -187,6 +187,7 @@ public partial class Main
                 CardAnchor = front, Card = personality,
                 Companions = detail ? [] : stack.GetChildren().OfType<CardTile>().Where(t => t != front).ToArray(),
                 Projection = detail ? null : _tableSurface.ProjectCanvas,
+                Unprojection = detail ? null : _tableSurface.ScreenToCanvas,
                 Inline = detail, Explanation = UnitStandard.ExplainUnit(personality),
                 Allowed = () => detail || (_expandedUnits.Count == 0 && _tableViewport.GetGlobalRect().HasPoint(ScreenCenter(front)))
             };

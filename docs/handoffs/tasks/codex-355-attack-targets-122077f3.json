@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Implement Alfredo-approved F temporary sliding Ranged/Melee source tabs; record UI approval of demos 5-8 and prepare their Windows delivery. Preserve main 828f1bb7 and refresh complete 2917-image dependency.",
-  "validation": "Full check.sh --skip-client passes: targeted reactions 31/31, AI 34/34, server 8/8, transport 12/12. Client build/import pass zero warnings/errors. Native Attack normal/reduced/review-controls passes with lifecycle, both seats, counters, zoom and performing-Follower coverage. Native demos 5-7 reduced-review-check pass. All four actual Mac apps opened prepared scenarios; Attack Melee click verified. Source/native art inspected side by side; exact F, production imagegen atlas and prompt retained.",
-  "remaining": "Mendon shared/rules review, final CI and validated Windows package notification are pending; delivery PR298 tracks packaging. Native Windows graphical and external multiplayer acceptance remain human gates. UI approval excludes inherited stabilization rules candidates. No main merge.",
+  "summary": "Refine F attack tabs so the complete spear/Unit Force ribbon slides down before the tab enters and returns after retraction; correct actual mounted-ribbon coverage and prepared-demo mouse routing. Integrate main 485320af and refresh the complete 2946-image art dependency.",
+  "validation": "Client build/import passes, zero warnings/errors. Final full check.sh --skip-client passes including targeted reactions31/31, AI34/34, server8/8, transport12/12. Native 1920x1080 normal and 1280x800 normal/reduced review passes: sequenced clearance, every sampled intermediate/reversal frame, board rebuild, zoom, both seats, pending reactions, Melee, follower changes, costs, native table and prepared-navigation clicks. Actual native launcher opens prepared table; comparison updated with real renderer captures. Art archive installed and remote digest verified.",
+  "remaining": "Mendon review and final CI remain; no main merge. Earlier Windows release 552b54a4 does not contain this later refinement: a new Windows package and exact-package validation are needed before claiming updated Windows delivery. Inherited rules candidates retain separate acceptance.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/355",
   "branch": "codex/355-attack-targets",
-  "updated": "2026-09-21T11:24:38.573387+00:00"
+  "updated": "2026-09-21T12:12:01.534381+00:00"
 }
