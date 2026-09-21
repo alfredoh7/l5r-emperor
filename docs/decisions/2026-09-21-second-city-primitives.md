@@ -95,3 +95,42 @@ Red Crane Dojo's Reaction removes Ninja and Shadowlands "until the action ends".
 ## Verification (stage 2)
 
 Suite `gold-stat-cost` (8 tests): the published shapes; every stat, base and current, modifier and floor; quotes per target and performer and their payment; A Quiet Transaction's cost, lock and tokens; conditional production by payment kind; a Ninja recruit and a Follower equip paid by their Holding alone (and a non-Ninja / an Item not); Red Crane Dojo's Reaction while bowed and its removal and return; the end-of-turn fallback.
+
+## Stage 3 (#417): the after-resolution window
+
+Wired: **Never Safe**, **Redoubled Attack**, **Tales of Dishonor** (strategy-wave-38) and **Quagmire** (region-wave-4).
+
+### The window (AfterResolution.cs)
+
+"After a battle's resolution ends": once the losing units are destroyed, the province is destroyed and Honor is gained or lost, and while the winners are still at the battlefield, either player may play the Reactions that name that moment, alternating (the active player first when both can), until both pass. It comes before the Conqueror's choice and the winners' return home (which is why Redoubled Attack can stop them bowing) and before the Rings' recruit window that follows a battle. It opens only when someone holds a Reaction that could be played now; with none the battle resolves exactly as before.
+
+- A Reaction names the moment with the trigger `after-battle-resolution` (`ReactionTriggers.AfterBattleResolution`). It may be taken by a card in a hand (Redoubled Attack, Tales of Dishonor), in a discard pile (`AbilityDefinition.FromDiscard`: Never Safe) or in play (none is wired yet; the shape is the same). The window's facts are recorded when the resolution ends (`PendingAfterResolution`): who destroyed how many enemy units, whether the province was destroyed and by whom, and the battle's loser or losers; each Reaction reads them for its own condition.
+- Redoubled Attack: "as many Redoubled Attacks as they have in their hand": each copy is its own play (its own performing Personalities, its own use), and a player who holds none is not offered one. Its performers are chosen, not targeted (the performing-slot primitive of #414), so they open no reaction windows.
+- Never Safe: the card remembers the battle it was played in; the window offers its return from the discard pile to its player for that battle only. A card that is no longer in the discard pile, or was played in an earlier battle, is not offered.
+- Tales of Dishonor: Mendon's ruling that a tie makes both players the battle's loser is built into the facts (`Losers`), so a tied battle costs both players 4 Honor when it is played, its own player included.
+
+### Which cards need this check
+
+Mendon asked which other cards return themselves to a hand after a battle. The catalogue holds one: **Never Safe**. The two nearest are Embracing Virtue ("Before an End Phase begins, if this card is in your discard pile: you may put it in your hand") and Move the Troops ("Open, 2 Gold: if this Strategy is in your discard pile, put it into your hand before this phase ends"): the same `FromDiscard` Reaction on another trigger, not on this window. Forty-two cards name a battle's end or resolution; what each needs of the window:
+
+- **Already handled elsewhere:** Looting the Ruins and Vital Pathways (the province's destruction), the Ring recruits (the window after this one), and the "remove after the battle ends" cards (No Way Out, Deadly Orders, Death, Defeated, the created Personalities and Followers), which are delayed removals at the battle's close.
+- **Now expressible in this window:** Redoubled Attack, Tales of Dishonor and Never Safe (wired); Spoils of Exploration and Shiba's Guidance - exp (draw after a resolution in which a province or army was destroyed), Shosuro Ryoken, Utaku Suying, Bandit Gang (a payment decision after the resolution), Treasure Hunter and Returning Home (create a Holding after a province is destroyed), Words Have Strength and Shosuro Rokuta (a loss of Courtiers or the Rokuta himself), Halls of the Forgotten (delay until the battle ends), False Ring of the Void.
+
+Those are not wired here (they are not Second City cards and several need a decision the window does not yet ask for); each would be an ability with the trigger and a condition in `AfterResolutionApplies`.
+
+### Quagmire
+
+A Region's version of Togashi Hizumi's reaction ("after the resolution of an action that bowed a Personality at a battlefield at this province or an adjacent province, target him and bow this card: negate his next straightening this turn"). `OpenBowReactionWindow` now also looks for a Region: the Defender's, unbowed, whose province is the battlefield's or next to it (provinces are numbered in a row). The window's options were not listed by `QueryActions` for the bow-reaction window at all (Hizumi's reaction was only usable by a hand-built command); it now lists the watching card's reactions, one per Personality it may target, and the pass.
+
+### Readings for Mendon (continued)
+
+13. **The window is after destruction, the province and Honor, and before the winners go home.** "After a battle's resolution ends" for Redoubled Attack needs the winners still at the battlefield to straighten and to keep from bowing, so the window is not after the battle's close; the Rings' recruit window (a battle's aftermath) still follows it.
+14. **Redoubled Attack's performers** are one or two of the player's own Personalities at the battlefield (any bow state), whoever won; "their units" is each with everything attached. Playing two copies on the same Personality is allowed.
+15. **"They will not bow from the battle's resolution"** is a promise about the winners' return home, kept for the named Personalities and lapsing with the battle. A player-wide version (Akodo Dairuko) still works beside it.
+16. **Tales of Dishonor's "you destroyed"** is the acting player's army destroying at least one enemy unit, or the Attacker destroying the province, in this resolution. In a tie both players are the loser, so the Tales' own player loses 4 as well.
+17. **Never Safe's return** is offered to the player who played it, in the window after the battle it was played in, and to no one else.
+18. **Quagmire's "this province or an adjacent province"** is the Region's province index and the two next to it; the battlefield must be at the Region's controller's province, so it is the Defender's Region that answers.
+
+## Verification (stage 3)
+
+Suite `after-resolution` (8 tests): the published shapes; no window without a Reaction; Redoubled Attack (each copy, one or two Personalities, no bow on return, the third refused, none for a player holding none); Tales of Dishonor (loser, tie, nothing destroyed, the defender who destroyed nothing); its Battle action; Never Safe (-4F, the return, one battle only, one player only, playable again); the trigger's exclusivity; Quagmire (own and adjacent province, not farther, not bowed, not the Attacker's).

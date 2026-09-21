@@ -227,6 +227,30 @@ public sealed partial class MatchEngine
             result.AddRange(AbilityActions(playerId));
             Add("declineReaction","Pass reaction",Command("declineReaction"));
         }
+        else if(_state.PendingChoice is { Type:"bowReaction" } bowPending)
+        {
+            // After an action bowed a Personality (issue #216 Hizumi and Ruya, issue #417 Quagmire): the one watching card's own Reaction, one option per Personality it may target
+            // when its target is one of those the action bowed, else the plain option; then the pass.
+            if(bowPending.PlayerId==playerId && bowPending.CardId is not null)
+            {
+                var watcher=Card(bowPending.CardId);
+                foreach(var reactionId in AbilityIdsOf(watcher).Where(a=>AbilityCatalog.All.TryGetValue(a,out var def) && def.Timing=="Reaction" && def.Trigger is "bowed-personality-at-own-battlefield" or "bowed-personality-near-region" or "own-action-bowed-personality"))
+                {
+                    var used=AbilityUseSpent(watcher.AbilityUses,AbilityCatalog.All[reactionId],AbilityCatalog.All[reactionId].UsageKey??reactionId);
+                    if(AbilityCatalog.All[reactionId].Target=="bow-reaction-candidate")
+                        foreach(var candidateId in _state.BowReactionCandidateIds)
+                            AddReaction(watcher,reactionId,used?"This reaction has already been used.":null,targetId:candidateId,label:$"{AbilityCatalog.All[reactionId].Label} · {Definition(Card(candidateId)).Name} ({candidateId})",validate:true);
+                    else AddReaction(watcher,reactionId,used?"This reaction has already been used.":null);
+                }
+            }
+            Add("declineReaction","Pass reaction",Command("declineReaction"));
+        }
+        else if(_state.PendingChoice is { Type:"afterResolutionReaction" })
+        {
+            // After a battle's resolution (issue #417): this player's Reactions that name it, from a hand, a discard pile or play, then the pass.
+            result.AddRange(AbilityActions(playerId));
+            Add("declineReaction","Pass reaction",Command("declineReaction"));
+        }
         else if(_state.PendingChoice is { Type:"battleRecruit" })
         {
             // After a battle resolved (issue #379): the recruit grants of this battle this player still holds, then the pass.

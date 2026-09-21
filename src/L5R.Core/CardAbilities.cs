@@ -125,7 +125,9 @@ public sealed record AbilityDefinition(string Timing, string Label, string Targe
     bool NotCopyable = false,
     // "Even if this unit is not at the current battlefield" (Taming the Beast, Rage of the Spirits): the source's own unit need not be at the battle, though the acting player
     // must still have a unit there and the ability's target and performer keep their own location rules. Waives only the two source-at-the-battlefield checks.
-    bool SourceUnitMayBeAway = false);
+    bool SourceUnitMayBeAway = false,
+    // The ability is taken by its own card from a DISCARD PILE (issue #417, Never Safe: "After this battle ends, if this card is in your discard pile, you may put it into your hand").
+    bool FromDiscard = false);
 
 public static class AbilityCatalog
 {
@@ -1683,6 +1685,22 @@ public static class AbilityCatalog
         ["know-no-fear-negate-fear"] = new("Reaction", "After a Fear action targets your performing Samurai: Negate its effects", "none", Trigger: ReactionTriggers.TargetedByAction),
         ["to-first-blood-focus"] = new("FocusEffect", "As a Focus Effect: Negate any destruction for losing this duel. After this duel ends, its winner's controller gains 2 Honor.", "none"),
         ["to-first-blood-negate"] = new("Reaction", "After another player's Iaijutsu action targets your Personality: Negate his destruction from the action's effects", "none", Trigger: ReactionTriggers.TargetedByAction),
+        // Quagmire (oracle-l5r-6123), a Region: Togashi Hizumi's reaction for a battlefield at its own province or an adjacent one -- bow the Region to negate the bowed Personality's next straightening this turn.
+        ["quagmire-negate-straighten"] = new("Reaction", "After the resolution of an action that bowed a Personality at a battlefield at this province or an adjacent province, target him and bow this card: Negate his next straightening (this turn)", "bow-reaction-candidate",
+            Trigger: "bowed-personality-near-region", Costs: ActionCost.BowSource),
+        // The after-resolution window (issue #417, AfterResolution.cs). Never Safe (oracle-l5r-5535): the Battle action gives -4F; its second sentence is a Reaction the card takes from
+        // a discard pile in the window after the battle it was played in.
+        ["never-safe-penalty"] = new("Battle", "Choose your performing Ninja and target an enemy Personality or Follower: Give it -4F", "enemy-personality-or-follower",
+            Performer: "own-personality-with-keyword-at-battle", RequiredKeywords: ["Ninja"]),
+        ["never-safe-return"] = new("Reaction", "After this battle ends, if this card is in your discard pile, you may put it into your hand", "none",
+            Trigger: ReactionTriggers.AfterBattleResolution, FromDiscard: true, Cost: GoldCostRule.Fixed(0)),
+        // Redoubled Attack (oracle-l5r-6222): as many copies as a player holds, each its own play; the units straighten and will not bow as the winners return home.
+        ["redoubled-attack-straighten"] = new("Reaction", "After a battle's resolution ends, choose one or two performing Personalities at the current battlefield: Straighten their units. They will not bow from the battle's resolution", "slots",
+            Trigger: ReactionTriggers.AfterBattleResolution, Slots: [new("units", "own-personality-at-battle", "Your performing Personalities (one or two) at the battlefield", 1, 2, Performing: true)]),
+        // Tales of Dishonor (oracle-l5r-7753): a Political Reaction -- the battle's loser (both players, in a tie) loses 4 Honor -- and a Battle action that straightens a Magistrate.
+        ["tales-of-dishonor-lose-honor"] = new("Reaction", "Political Reaction: After the resolution of a battle at a province, if you destroyed any enemy units or a province in that resolution: The battle's loser loses 4 Honor", "none",
+            Trigger: ReactionTriggers.AfterBattleResolution, ActionKeywords: ["Political"]),
+        ["tales-of-dishonor-straighten"] = new("Battle", "Choose your performing Magistrate: Straighten him", "none", Performer: "own-personality-with-keyword-at-battle", RequiredKeywords: ["Magistrate"]),
         // Timed straighten holds and movement locks (issue #415, StraightenHolds.cs, MovementLocks.cs). Hibernation (oracle-l5r-3065): the performer bows and hibernates -- its straightening is negated
         // until its controller's next turn begins, and the next Battle action of another player that targets it is negated whole (once, this game).
         ["hibernation-hibernate"] = new("Open", "Bow your performing Nonhuman: It hibernates. Negate its straightening until your next turn begins. After the next time this game another player's Battle action targets it, negate the action's effects", "none",
@@ -2957,6 +2975,9 @@ public sealed partial class MatchEngine
         : ability.Attach?.Card == AttachSource.Self ? source.Zone == Zone.Hand && player.Hand.Contains(source.Id)
             : ability.Trigger is "any-personality-enters-play" or "before-any-action-resolves" ? source.Zone is Zone.Hand or Zone.FateDiscard
             : ability.Trigger == "after-battle-action-resolves" ? source.Zone is Zone.Hand or Zone.FateDiscard || InPlay(source)
+            // A Reaction that returns its own card from a discard pile (Never Safe) is taken from there; any other after-resolution Reaction from a hand or from play.
+            : ability.FromDiscard ? source.Zone is Zone.FateDiscard or Zone.DynastyDiscard
+            : ability.Trigger == AfterResolutionTrigger ? source.Zone == Zone.Hand && player.Hand.Contains(source.Id) || InPlay(source)
             // A Ring (issue #194) may use its printed action from hand too -- "you may discard
             // this Ring from your hand to use its ability without cost" -- in addition to the
             // ordinary in-play case once recruited (ExecuteAbilityEffects' own tail discards it
@@ -3018,7 +3039,7 @@ public sealed partial class MatchEngine
                 // Togashi Hizumi / Tamori Ruya (issue #216): both scoped to the one specific watching
                 // card by id, the same shape own-won-duel already uses -- see OpenBowReactionWindow
                 // for how each is actually distinguished when opening the window.
-                "bowed-personality-at-own-battlefield" or "own-action-bowed-personality" => _state.PendingChoice.Type == "bowReaction"
+                "bowed-personality-at-own-battlefield" or "own-action-bowed-personality" or "bowed-personality-near-region" => _state.PendingChoice.Type == "bowReaction"
                     && _state.PendingChoice.CardId == command.CardId && command.PlayerId == _state.PendingChoice.PlayerId,
                 // Mirumoto Rokai / Tamori Tamoko (issue #207 follow-up): both scoped to the one
                 // specific watching card by id, the same shape own-won-duel/bowed-personality-at-
@@ -3058,6 +3079,9 @@ public sealed partial class MatchEngine
                 "after-engaging" or "after-engaging-at-own-battlefield" => _state.PendingChoice.Type == "engageReaction" && _state.PendingEngage is not null,
                 // "Before a battle resolves" (Steady Resolve, Akodo Dairuko): the one Reaction the before-resolution set is currently asking its owner about.
                 "before-battle-resolves" => _state.PendingChoice.Type == "beforeBattleReaction" && _state.PendingChoice.CardId == command.CardId && command.PlayerId == _state.PendingChoice.PlayerId,
+                // After a battle's resolution (issue #417): open to either player while the window is; each Reaction judges its own condition.
+                AfterResolutionTrigger => _state.PendingChoice.Type == "afterResolutionReaction" && command.CardId is not null && _state.Cards.TryGetValue(command.CardId, out var afterSource)
+                    && AfterResolutionApplies(afterSource, id, command.PlayerId),
                 _ => false
             },
             _ => false
@@ -3935,6 +3959,8 @@ public sealed partial class MatchEngine
                         "own-opposed" => personality && own && Army(1-player.Id, _state.CurrentBattleProvince!.Value).Any(),
                         "enemy-force" => !own && type is CardType.Personality or CardType.Follower,
                         "enemy-follower" => !own && type == CardType.Follower,
+                        // Never Safe: "an enemy Personality or Follower".
+                        "enemy-personality-or-follower" => !own && type is CardType.Personality or CardType.Follower,
                         "any-card" => true,
                         "attacking" => personality && target.OwnerId == _state.ActivePlayerId,
                         "defending" => personality && target.OwnerId != _state.ActivePlayerId,
@@ -5471,6 +5497,25 @@ public sealed partial class MatchEngine
             case "know-no-fear-negate-move": NegateEffects(Card(HeldAction().TargetId!), "bow", "move"); break;
             case "know-no-fear-negate-fear": NegateHeldAction(source!); break;
             case "to-first-blood-negate": NegateEffects(Card(HeldAction().TargetId!), "destroy"); break;
+            // Never Safe: -4F for the turn; the card remembers the battle it was played in, for its return from the discard pile after that battle.
+            case "never-safe-penalty":
+                ApplyModifier(target!, source!.Id, id, "Force", -4);
+                source.ReturnAfterBattle = _state.BattleNumber;
+                break;
+            case "never-safe-return": ReturnToHand(source!); source!.ReturnAfterBattle = -1; break;
+            // Redoubled Attack: the chosen Personalities' units straighten, and their battle's resolution will not bow them.
+            case "redoubled-attack-straighten":
+                foreach (var chosen in PerformingSlotCards(command, ability).ToArray())
+                {
+                    StraightenUnit(chosen);
+                    if (!_state.ResolutionWillNotBowCardIds.Contains(chosen.Id)) _state.ResolutionWillNotBowCardIds.Add(chosen.Id);
+                }
+                break;
+            // Tales of Dishonor: the battle's loser loses 4 Honor -- both players when the battle was tied.
+            case "tales-of-dishonor-lose-honor":
+                foreach (var loser in _state.PendingAfterResolution!.Losers.ToArray()) GainHonor(loser, -4, "Tales of Dishonor", source);
+                break;
+            case "tales-of-dishonor-straighten": Straighten(Card(command.PerformerId!)); break;
             // Hibernation: the performer (bowed as the cost) is held bowed until its controller's next turn begins, and the next Battle action another player aims at it is negated.
             case "hibernation-hibernate":
             {
@@ -5903,7 +5948,7 @@ public sealed partial class MatchEngine
             // Straighten() itself clears the block the moment it actually negates one, so the target
             // may still be straightened additional times afterward if something else straightens it
             // again later the same turn.
-            case "hizumi-negate-straighten": target!.StraightenBlockedTurn = _state.TurnNumber; break;
+            case "hizumi-negate-straighten": case "quagmire-negate-straighten": target!.StraightenBlockedTurn = _state.TurnNumber; break;
             case "ruya-bow": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;
             // Legion of the Bat / Nikutai (issue #279): both Target "none" -- the affected card is
             // read from the state field OpenMoveReactionWindow/OpenNikutaiReactionWindow stashed when
@@ -6157,7 +6202,8 @@ public sealed partial class MatchEngine
         // A Ring's own recruit ability already moves it out of Zone.Hand within its own execution
         // case above, so it never falls into this branch -- only "discard from hand to use the
         // printed action without cost" (issue #194) does.
-        SpendHandPlayedCard(player, source);
+        // (A Strategy that returned ITSELF to a hand from a discard pile in this very action -- Never Safe -- was not played from that hand.)
+        if (!ability.FromDiscard) SpendHandPlayedCard(player, source);
         // Discipline (core rules, issue #184; a flag since #331): "played and resolved and then removed from the
         // game" -- always, whether or not its own effect above did anything else with the card. Only the DISCARD-
         // PILE mode: a hand-played Discipline Strategy was just discarded by SpendHandPlayedCard above like any
@@ -6211,6 +6257,11 @@ public sealed partial class MatchEngine
     // other and no real scenario needs both simultaneously.
     private static string? BowedAtBattlefieldReactionAbility(CardInstance card) =>
         AbilityIdsOf(card).FirstOrDefault(a => AbilityCatalog.All.TryGetValue(a, out var def) && def.Timing == "Reaction" && def.Trigger == "bowed-personality-at-own-battlefield");
+    // Quagmire (issue #417): the Region's own province and the ones next to it (provinces are numbered in a row); a battlefield is at a province of its Defender.
+    private static string? BowedNearRegionReactionAbility(CardInstance card) =>
+        AbilityIdsOf(card).FirstOrDefault(a => AbilityCatalog.All.TryGetValue(a, out var def) && def.Timing == "Reaction" && def.Trigger == "bowed-personality-near-region");
+    private bool RegionIsNear(CardInstance region, CardInstance personality) =>
+        region.ProvinceIndex is int regionProvince && personality.ProvinceIndex is int battlefield && Math.Abs(regionProvince - battlefield) <= 1 && region.OwnerId != _state.ActivePlayerId;
     private static string? OwnActionBowedPersonalityReactionAbility(CardInstance card) =>
         AbilityIdsOf(card).FirstOrDefault(a => AbilityCatalog.All.TryGetValue(a, out var def) && def.Timing == "Reaction" && def.Trigger == "own-action-bowed-personality");
     private bool OpenBowReactionWindow(int actingPlayerId, HashSet<string> bowedBeforeAction, int closesTo)
@@ -6226,6 +6277,17 @@ public sealed partial class MatchEngine
             _state.PendingChoice = new("bowReaction", hizumi.OwnerId, hizumi.Id, "After the bow resolved: you may use this card's own reaction, or pass.", closesTo);
             _state.ConsecutivePasses = 0; _state.PriorityPlayerId = hizumi.OwnerId;
             Emit("reactionWindow", "Bow-reaction window opened.", hizumi.OwnerId, hizumi.Id);
+            return true;
+        }
+        var quagmire = atABattlefield.Length > 0 ? _state.Cards.Values.FirstOrDefault(c => c.Zone == Zone.Region && !c.Bowed && BowedNearRegionReactionAbility(c) is { } quagmireAbility && Unspent(c, quagmireAbility)
+            && atABattlefield.Any(nb => RegionIsNear(c, nb))) : null;
+        if (quagmire is not null)
+        {
+            SuspendOpenWindow();
+            _state.BowReactionCandidateIds = atABattlefield.Where(nb => RegionIsNear(quagmire, nb)).Select(c => c.Id).ToList();
+            _state.PendingChoice = new("bowReaction", quagmire.OwnerId, quagmire.Id, "After the bow resolved: you may use this card's own reaction, or pass.", closesTo);
+            _state.ConsecutivePasses = 0; _state.PriorityPlayerId = quagmire.OwnerId;
+            Emit("reactionWindow", "Bow-reaction window opened.", quagmire.OwnerId, quagmire.Id);
             return true;
         }
         var ruya = _state.Cards.Values.FirstOrDefault(c => c.OwnerId == actingPlayerId && InPlay(c) && OwnActionBowedPersonalityReactionAbility(c) is { } ruyaAbility && Unspent(c, ruyaAbility));
@@ -6734,7 +6796,7 @@ public sealed partial class MatchEngine
         // offered, priced and removed from the game as the Discipline play -- never both at once, since a card is
         // in one zone at a time.
         var sources = _state.Cards.Values.Where(c => c.OwnerId == playerId && (InPlay(c) || c.Zone == Zone.Hand ||
-                c.Zone is Zone.FateDiscard or Zone.DynastyDiscard && ((Definition(c).Abilities ?? []).Any(a => AbilityCatalog.All.TryGetValue(a, out var def) && def.Discipline) || DiscardPlayGrant(playerId, c) is not null)))
+                c.Zone is Zone.FateDiscard or Zone.DynastyDiscard && ((Definition(c).Abilities ?? []).Any(a => AbilityCatalog.All.TryGetValue(a, out var def) && (def.Discipline || def.FromDiscard)) || DiscardPlayGrant(playerId, c) is not null)))
             .SelectMany(c => AbilityIdsOf(c).Select(id => (Card: (CardInstance?)c, Id: id))).ToList();
         if (!Definition(Card(player.StrongholdId)).ScenarioOnly)
             sources.AddRange(AbilityCatalog.All.Where(p => p.Value.PlayerAbility).Select(p => (Card: (CardInstance?)null, Id: p.Key)));
@@ -6747,16 +6809,19 @@ public sealed partial class MatchEngine
         var beforeResolutionCard = _state.PendingChoice is { Type: "beforeBattleReaction" } beforeResolution ? beforeResolution.CardId : null;
         // After a battle resolved (issue #379): only the recruits of this battle's grants are on offer.
         var inRecruitWindow = _state.PendingChoice?.Type == "battleRecruit";
+        // After a battle's resolution (issue #417): only the Reactions that name it are on offer, and they are on offer nowhere else.
+        var inAfterResolutionWindow = _state.PendingChoice?.Type == "afterResolutionReaction";
         foreach (var (source, id) in sources)
         {
             if (inRecruitWindow && !RingRecruitGrantIds.Contains(id)) continue;
             var ability = AbilityCatalog.All[id];
+            if (inAfterResolutionWindow != IsAfterResolutionReaction(ability)) continue;
             var isEngageReaction = ability.Timing == "Reaction" && ability.Trigger is "after-engaging" or "after-engaging-at-own-battlefield";
             if (inEngageWindow != isEngageReaction) continue;
             // "Bow this card:" with no hand alternative is offered only from play (issue #370): from a hand or a discard pile it is not even listed.
             if (source is not null && RequiresSourceInPlay(ability) && !InPlay(source)) continue;
             if ((beforeResolutionCard is not null) != IsBeforeResolutionReaction(ability) || beforeResolutionCard is not null && source?.Id != beforeResolutionCard) continue;
-            var phaseOk = inEngageWindow || beforeResolutionCard is not null ? true : ability.Timing switch { "Battle" => _state.Phase == Phase.Battle, "BattleOrOpen" => _state.Phase is Phase.Action or Phase.Battle, "BeforeResolution" => false, _ => _state.Phase == Phase.Action };
+            var phaseOk = inEngageWindow || inAfterResolutionWindow || beforeResolutionCard is not null ? true : ability.Timing switch { "Battle" => _state.Phase == Phase.Battle, "BattleOrOpen" => _state.Phase is Phase.Action or Phase.Battle, "BeforeResolution" => false, _ => _state.Phase == Phase.Action };
             if (!phaseOk) continue;
             if (ability.Timing == "Limited" && playerId != _state.ActivePlayerId) continue;
             // Battle/Open presence primitive (issue #267): the same actingAsBattle generalization

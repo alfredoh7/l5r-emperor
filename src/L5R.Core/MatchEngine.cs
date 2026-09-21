@@ -385,6 +385,13 @@ public sealed partial class MatchEngine
                 if (_state.PendingChoice is null && _state.PendingDuel is { Stage:"Reaction" }) BeginFocusing();
                 return;
             }
+            if (_state.PendingChoice.Type=="afterResolutionReaction")
+            {
+                // After a battle's resolution (issue #417): either player may play a Reaction that names it, or pass; two consecutive passes close the window (PassReaction).
+                Require(command.Type is "useAbility" or "declineReaction" or "pass","Play a Reaction to the battle's resolution or pass.");
+                if (command.Type=="useAbility") UseAbility(command); else PassReaction();
+                return;
+            }
             if (_state.PendingChoice.Type=="battleRecruit")
             {
                 // After a battle resolved (issue #379): the players holding a Ring's recruit grant of this battle may put it into play (a
@@ -1021,6 +1028,8 @@ public sealed partial class MatchEngine
             Emit("reactionClosed","Both players passed; the reaction window closed.");
             // The after-battle recruit window (issue #379): whatever was not used lapses with the battle, which then finishes.
             if(pending.Type=="battleRecruit") { ExpireBattleRecruitGrants(); CompleteBattleTransition(pending.ActingPlayerId!.Value); return; }
+            // The after-resolution window (issue #417, AfterResolution.cs): the resolution goes on with the winners' return home.
+            if(pending.Type=="afterResolutionReaction") { FinishAfterResolutionWindow(); return; }
             // Defaults to ActivePlayerId (Dynasty-phase purchasing and mid-Battle attacks never cede
             // priority away from the active player on their own); an entry-reaction window opened by
             // an Action-phase card (Equip, a played Terrain) instead sets ActingPlayerId to the
@@ -1377,13 +1386,17 @@ public sealed partial class MatchEngine
         // regardless of the outcome -- the only trigger that clears it.
         Player(defender).Provinces.Single(p=>p.Index==provinceIndex).Reconnaissance=new bool[2];
         var attackerWon=af>df;
+        // What the resolution did, for the Reactions that name it (AfterResolution.cs).
+        var destroyedByPlayer=new int[2]; var provinceDestroyedNow=false; var losers=new List<int>();
         if(attackerWon)
         {
             var destroyedDefenders=DestroyUnits(d);
+            destroyedByPlayer[attacker]=destroyedDefenders; losers.Add(defender);
             if(!RehonorWinners(a)) { GainHonor(attacker,destroyedDefenders*2,"Battle victory"); CheckEarthFlowsBonus(attacker,a); }
             var province=Player(defender).Provinces.Single(p=>p.Index==provinceIndex);
             var destroyedProvince=af>df+EffectiveProvinceStrength(province);
             if(destroyedProvince) DestroyProvince(defender,province);
+            provinceDestroyedNow=destroyedProvince;
             // Vital Pathways (issue #272): "After this battlefield's province is destroyed, if you
             // are the Attacker" -- checked here, at the actual moment of destruction, since
             // DestroyProvince only ever runs in this same attacker-won branch and a later hook would
@@ -1404,6 +1417,7 @@ public sealed partial class MatchEngine
         else if(df>af)
         {
             var destroyedAttackers=DestroyUnits(a);
+            destroyedByPlayer[defender]=destroyedAttackers; losers.Add(attacker);
             if(!RehonorWinners(d)) { GainHonor(defender,destroyedAttackers*2,"Battle victory"); CheckEarthFlowsBonus(defender,d); }
             GrantRingRecruit(Player(defender),a.Length>0,"false-ring-of-air-recruit");
             GrantRingRecruit(Player(defender),a.Length>0,"ring-of-earth-recruit");
@@ -1418,6 +1432,8 @@ public sealed partial class MatchEngine
             var attackerHadDishonorable=RehonorWinners(a);
             var defenderHadDishonorable=RehonorWinners(d);
             var destroyedA=DestroyUnits(a); var destroyedD=DestroyUnits(d);
+            // A tie: both players are the battle's loser (Mendon, issue #417: Tales of Dishonor).
+            destroyedByPlayer[attacker]=destroyedD; destroyedByPlayer[defender]=destroyedA; losers.Add(attacker); losers.Add(defender);
             // The Earth Flows (issue #264) is deliberately NOT checked here: its own text requires
             // being "in the WINNING army," which a tie -- by definition -- never has.
             if(!attackerHadDishonorable) GainHonor(attacker,destroyedD,"Tied battle");
@@ -1430,6 +1446,13 @@ public sealed partial class MatchEngine
             GrantRingRecruit(Player(attacker),destroyedD>0,"ring-of-fire-recruit");
             GrantRingRecruit(Player(defender),destroyedA>0,"ring-of-fire-recruit");
         }
+        // After the losing units are destroyed, the province is destroyed and Honor is settled: the Reactions that name this moment (AfterResolution.cs), before the winners go home.
+        if(OpenAfterResolutionWindow(NewAfterResolutionFacts(provinceIndex,attacker,attackerWon,a,destroyedByPlayer,provinceDestroyedNow,losers))) return;
+        ContinueAfterResolution(provinceIndex,attacker,attackerWon,a);
+    }
+    // The rest of the resolution once its after-resolution Reactions are done: the Conqueror's choice, the return home, the close of the battlefield.
+    private void ContinueAfterResolution(int provinceIndex,int attacker,bool attackerWon,CardInstance[] a)
+    {
         // Conqueror (core rules Glossary): only relevant when the attacker won -- the attacking army
         // (a) is untouched in that branch (only defenders are destroyed), so candidates read off it
         // here are still accurate even if the choice must be deferred to the attacker.
@@ -1462,7 +1485,7 @@ public sealed partial class MatchEngine
         var willNotBow=_state.ResolutionWillNotBowPlayerIds.ToArray();
         foreach(var card in a.Where(c=>c.Zone==Zone.Battlefield))
         {
-            ReturnHome(card,card.Id!=conquerorUnbowedId && !willNotBow.Contains(card.OwnerId));
+            ReturnHome(card,card.Id!=conquerorUnbowedId && !willNotBow.Contains(card.OwnerId) && !ResolutionWillNotBow(card));
             if(card.Id==conquerorUnbowedId) Emit("conquerorStraightened",$"{Definition(card).Name} returned home unbowed (Conqueror).",card.OwnerId,card.Id);
         }
         // Terrain leaves the battlefield here, after its printed effects (already applied earlier in
@@ -1487,7 +1510,7 @@ public sealed partial class MatchEngine
         // First-opportunity state (issue #310) is battle-scoped too: a later battle starts from the default again.
         _state.PendingEngage=null; _state.FirstActionPlayerId=null; _state.FirstActionReason=null; _state.FirstActionRestriction=null;
         // A delayed effect and a "will not bow" promise belong to their battle: both lapse with it, applied or not.
-        _state.DelayedBattleEffects.Clear(); _state.ResolutionWillNotBowPlayerIds.Clear();
+        _state.DelayedBattleEffects.Clear(); _state.ResolutionWillNotBowPlayerIds.Clear(); _state.ResolutionWillNotBowCardIds.Clear();
         // "Remove those Followers from the game after the battle ends" (Kyuden Hida - exp): wherever they stand now (attached, or discarded with a destroyed host).
         foreach(var createdId in _state.CreatedUntilBattleEndsIds.ToArray())
             if(_state.Cards.TryGetValue(createdId,out var created) && created.Zone!=Zone.RemovedFromGame) RemoveFromGame(created);

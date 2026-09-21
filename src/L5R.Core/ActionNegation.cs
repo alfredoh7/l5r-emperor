@@ -58,7 +58,7 @@ public sealed partial class MatchEngine
     private void CompleteNegatedAction(GameCommand command, AbilityDefinition ability, PlayerState player, CardInstance? source, bool playedFromDiscard, bool consumedGrant)
     {
         SpendAbilityUse(source?.AbilityUses ?? player.AbilityUses, ability, ability.UsageKey ?? command.AbilityId!);
-        SpendHandPlayedCard(player, source);
+        if (!ability.FromDiscard) SpendHandPlayedCard(player, source);
         if (playedFromDiscard) RemoveFromGame(source!);
         if (!consumedGrant && ForfeitsAdditionalActions(ability)) _state.AdditionalActions.RemoveAll(g => g.PlayerId == player.Id && Forfeitable(g));
         if (OpenOverconfidentDrawWindow(1 - player.Id)) return;
