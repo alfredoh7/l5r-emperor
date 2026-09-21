@@ -546,6 +546,9 @@ public sealed class PendingDuel
     // Timing=="FocusEffect" ability, set once (by ResolveDuelFocusEffectsInOrder) just before
     // ResolveDuel actually applies them.
     public List<string> OrderedFocusEffects { get; set; } = [];
+    // The duel's result, kept while its Focus Effects resolve one by one (a Focus Effect may pause for a decision, FocusEffectChoice.cs).
+    public string? WinnerId { get; set; }
+    public List<string> LoserIds { get; set; } = [];
     // Mirumoto Hikaro's own second trait: "once per duel, you may focus from your discard pile
     // instead" -- per player (either side could independently control their own Hikaro), and which
     // already-focused card ids came from a discard pile this way (ResolveDuel removes those from
@@ -849,6 +852,12 @@ public sealed class MatchState
     public PendingEitherOr? PendingEitherOr { get; set; }
     // The opposing player's variable payment (issue #373, Virtuous Charity): non-null exactly while an "opponentPayment" PendingChoice is open. See OpponentPayment.cs.
     public PendingOpponentPayment? PendingOpponentPayment { get; set; }
+    // The decision another player makes inside an action (issue #419, DeciderChoice.cs): non-null exactly while a "deciderChoice" PendingChoice is open.
+    public PendingDeciderChoice? PendingDeciderChoice { get; set; }
+    // A Focus Effect paused for a decision (issue #419, FocusEffectChoice.cs): non-null exactly while a "focusEffectChoice" PendingChoice is open.
+    public PendingFocusChoice? PendingFocusChoice { get; set; }
+    // The second target of a sequenced action (issue #419, SequencedTarget.cs): non-null exactly while a "sequencedTarget" PendingChoice is open.
+    public PendingSequencedTarget? PendingSequencedTarget { get; set; }
     // Whole-action negation (issue #338, Yoritomo Sakuma): set on the deferred command's window while a reaction has negated the
     // action's effects; the window's close then resolves it with everything but its costs skipped (ActionNegation.cs).
     public bool DeferredActionNegated { get; set; }

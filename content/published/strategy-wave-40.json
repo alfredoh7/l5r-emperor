@@ -1,0 +1,58 @@
+{
+  "Profile": "strategy-wave-40",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-4487",
+      "Name": "Know Their Minds",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: Bow your performing Samurai: Choose a player. He chooses a face-up Personality in one of his provinces. Turn the Personality face-down.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-4487.jpg",
+      "Keywords": [
+        "Dark Virtue",
+        "Insight"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "know-their-minds-choose"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-6488",
+      "Name": "Scandalous Rumors",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Bow your performing Courtier at any location: The Attacker may target any of his Personalities at the current battlefield and move them home. He loses 1 Honor for each of his Personalities there that this did not move, then dishonors them.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6488.jpg",
+      "Keywords": [
+        "Political"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "scandalous-rumors-move"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

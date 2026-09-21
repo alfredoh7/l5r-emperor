@@ -167,3 +167,41 @@ A Terrain is an ordinary card in play at a battlefield with a passive, non-optio
 ## Verification (stage 4)
 
 Suite `terrain-statics` (6 tests): the published shapes; the maximum (raised, below, other provinces, the Attacker's own province, the Terrain leaving, a farther battlefield); the battle's resolution reading the maximum; playing the Terrains (Ancient Feud replaces, the others do not); Hasty Fortifications (played, after each Battle action, stacking, the other player's action, gone with the Terrain and with the battle); Shiotome Plains (Personalities and Followers, Cavalry and not, elsewhere and at home, the floor of 0).
+
+## Stage 5 (#419): the other player decides; a Focus Effect that pauses; sequenced targets
+
+Wired: **Know Their Minds**, **Scandalous Rumors** (strategy-wave-40), **Dragon's Breath Castle** (stronghold-wave-11), **Disreputable Deal**, **Engulfing Flames** (strategy-wave-41).
+
+### "Choose a player who chooses" (DeciderChoice.cs)
+
+An action whose effect is a decision another player makes stops when it comes to that choice and hands it over: the engine offers the deciding player exactly the legal picks (`chooseDecider`: a card to add, or "done"), and when the choice is made the action carries on and finishes as any action does (the same pause-and-resume the Virtuous Charity payment uses, `PendingEffectChoice`). Mendon's ruling asked for the opposing player either to react to negate the action or to choose: the chance to react is the before-action window every action already has, which comes before the effect resolves, so by the time the choice is asked the action stands; a whole-action negation never reaches the choice, and a negation of a card's movement or dishonoring still applies to the effect that follows.
+
+- **Know Their Minds**: the acting player chooses a player (an option per player, "you" and "your opponent"; the first Open action that chooses a player, so the pinned inventory of player-target abilities was updated); that player chooses one of his face-up Personalities in his provinces, which is turned face-down. It is revealed again by his next Events phase exactly as a card that was never revealed (the reveal loop reveals every face-down province card), with its reveal event.
+- **Scandalous Rumors**: the Attacker decides, whichever player took the action. He may choose any number of his Personalities at the battlefield to move home (one pick at a time and "done"; none is a legal answer); each Personality still there afterwards costs him 1 Honor and is dishonored. A Personality whose movement failed (a negation, a movement lock) "was not moved" and counts.
+- **Dragon's Breath Castle**: its Reaction ("Even if this card is bowed, after engaging at a battlefield at one of your provinces") makes the Attacker choose one of his unbowed Personalities there, which is bowed; it is played inside the Engage window, which is set aside and given back afterwards. Its trait gives its controller 2 Honor after another player's Dynasty Phase begins if that player controls any Personalities and assigned none of them to an attack this turn.
+- With nothing to choose, or the one card a mandatory choice needs, nobody is asked: the log says so and the effect applies.
+
+### A Focus Effect that needs a decision (FocusEffectChoice.cs)
+
+A duel's Focus Effects resolve one after another in the order the active player chose; one with a real choice now stops the run at its place, its player answers (`chooseFocusEffect`), and the run goes on from the next Focus Effect and then finishes the duel exactly as before (the spending of the focused cards and everything after). `ResolveDuel` was split at that point; the duel's result is kept on `PendingDuel` while it waits. **Disreputable Deal**: a card, non-Unique, that is a Strategy in the player's Fate discard pile and has a Political ability (an ability printed with the Political action keyword, or on a card with the keyword: an ability inherits its card's keywords), goes to his hand; "may": any one or none. Mendon named the Fate deck as the place searched; the card's text says the discard pile, which is what is built (`FocusChoiceZone` is the one constant). Its Political Open action bows a performing Courtier, gives a target Personality -3F, and makes a dishonorable one's controller lose Honor equal to his printed Personal Honor.
+
+### Sequenced targets and effects (SequencedTarget.cs)
+
+One action, two effects, the second target chosen after the first effect has resolved: Engulfing Flames destroys an optional enemy attachment (an ordinary optional slot, named as the action is announced), and then, if its Monk has any Fire tokens, makes a Ranged 4 Attack whose target is chosen only now, because destroying the Follower that shielded a Personality from a Ranged Attack makes him a target. The Attack is an Attack in every respect (`engulfing-flames-attack`: strength, kind, target rules, reaction window), never offered as an action of its own. The acting player chooses among the cards that are legal targets now, or no target. It is one action: the costs are paid once, a whole-action negation negates both parts (neither happens), and a negation of the destruction leaves the Attack to happen (it does not depend on the destruction).
+
+### Cards not built here and why
+
+Dragon's Breath Castle's trait and Reaction are built; nothing else in the blocker families "the other player decides inside your action" remains.
+
+### Readings for Mendon (continued)
+
+23. **Know Their Minds' "choose a player"** may name either player, the acting player included; the chosen player's own face-up Personalities are the candidates.
+24. **The opposing player's chance to negate** is the existing before-action window (before the effect resolves), not a second window inside the decision.
+25. **Scandalous Rumors**: "the Attacker may target any of his Personalities at the current battlefield" is a choice of any number of them, chosen one at a time; a Personality that stays for any reason counts and is dishonored. Only Personalities are choices (not Followers).
+26. **Dragon's Breath Castle's Reaction** needs a battle at a province of the Castle's controller (the Defender's); it is offered to him in the Engage window while the Castle is bowed. Its trait counts Personalities in play (home or at a battlefield) and reads "assigned to an attack" as the Personality having been assigned this turn.
+27. **Disreputable Deal's search zone** is the discard pile (the card's text), not the Fate deck (Mendon's note).
+28. **Engulfing Flames**: the second target may be none (an Attack may always be taken with no target); the card does not name the province, so unlike the training Attack it may not target one. It is judged after the destruction. "If your Monk has any Fire tokens" is judged when the first effect is done.
+
+## Verification (stage 5)
+
+Suites `decider-choice` (6), `focus-effect-choice` (6) and `sequenced-target` (5); the pinned player-target inventory was updated for Know Their Minds.

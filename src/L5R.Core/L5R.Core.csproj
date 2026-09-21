@@ -144,5 +144,8 @@
     <EmbeddedResource Include="../../content/published/strategy-wave-38.json" LogicalName="L5R.Published.StrategyWave38.json" />
     <EmbeddedResource Include="../../content/published/region-wave-4.json" LogicalName="L5R.Published.RegionWave4.json" />
     <EmbeddedResource Include="../../content/published/strategy-wave-39.json" LogicalName="L5R.Published.StrategyWave39.json" />
+    <EmbeddedResource Include="../../content/published/strategy-wave-40.json" LogicalName="L5R.Published.StrategyWave40.json" />
+    <EmbeddedResource Include="../../content/published/stronghold-wave-11.json" LogicalName="L5R.Published.StrongholdWave11.json" />
+    <EmbeddedResource Include="../../content/published/strategy-wave-41.json" LogicalName="L5R.Published.StrategyWave41.json" />
   </ItemGroup>
 </Project>

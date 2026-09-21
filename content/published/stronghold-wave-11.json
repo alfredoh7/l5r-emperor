@@ -1,0 +1,30 @@
+{
+  "Profile": "stronghold-wave-11",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-2219",
+      "Name": "Dragon's Breath Castle",
+      "Type": "Stronghold",
+      "Clan": "Dragon",
+      "GoldCost": 0,
+      "GoldProduction": 4,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 7,
+      "StartingHonor": 5,
+      "Text": "After another player's Dynasty Phase begins, if he controls any Personalities and he assigned none of them to an attacking army this turn: Gain 2 Honor.\nReaction: Even if this card is bowed, after engaging at a battlefield at one of your provinces: The Attacker targets and bows one of his Personalities there.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-2219.jpg",
+      "Keywords": [],
+      "Focus": 0,
+      "Abilities": [
+        "dbc-attacker-bow"
+      ],
+      "Effect": "dbc-honor"
+    }
+  ],
+  "Decks": []
+}

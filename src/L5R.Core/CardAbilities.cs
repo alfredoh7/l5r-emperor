@@ -1685,6 +1685,24 @@ public static class AbilityCatalog
         ["know-no-fear-negate-fear"] = new("Reaction", "After a Fear action targets your performing Samurai: Negate its effects", "none", Trigger: ReactionTriggers.TargetedByAction),
         ["to-first-blood-focus"] = new("FocusEffect", "As a Focus Effect: Negate any destruction for losing this duel. After this duel ends, its winner's controller gains 2 Honor.", "none"),
         ["to-first-blood-negate"] = new("Reaction", "After another player's Iaijutsu action targets your Personality: Negate his destruction from the action's effects", "none", Trigger: ReactionTriggers.TargetedByAction),
+        // "Choose a player who chooses" (issue #419, DeciderChoice.cs). Know Their Minds (oracle-l5r-4487): a player of the acting player's choosing turns one of his face-up province Personalities face-down.
+        ["know-their-minds-choose"] = new("Open", "Bow your performing Samurai: Choose a player. He chooses a face-up Personality in one of his provinces. Turn the Personality face-down", "player",
+            Performer: "own-unbowed-personality-with-keyword-at-any-location", RequiredKeywords: ["Samurai"], Costs: ActionCost.BowPerformer),
+        // Scandalous Rumors (oracle-l5r-6488): the Attacker moves any of his Personalities at the battlefield home; each that stays costs him 1 Honor and is dishonored.
+        ["scandalous-rumors-move"] = new("Battle", "Bow your performing Courtier at any location: The Attacker may target any of his Personalities at the current battlefield and move them home. He loses 1 Honor for each of his Personalities there that this did not move, then dishonors them", "none",
+            Performer: "own-unbowed-personality-with-keyword-at-any-location", RequiredKeywords: ["Courtier"], ActionKeywords: ["Political"], Costs: ActionCost.BowPerformer),
+        // Dragon's Breath Castle (oracle-l5r-2219), a Stronghold: after engaging at one of its controller's provinces, the Attacker bows one of his Personalities there. Its trait (Effect dbc-honor) is in SetPhase.
+        ["dbc-attacker-bow"] = new("Reaction", "Even if this card is bowed, after engaging at a battlefield at one of your provinces: The Attacker targets and bows one of his Personalities there", "none", Trigger: "after-engaging"),
+        // Disreputable Deal (oracle-l5r-2031): its Focus Effect is a decision that pauses the duel's resolution (FocusEffectChoice.cs); its Political Open action is -3F and a loss of Honor.
+        ["disreputable-deal-focus"] = new("FocusEffect", "As a Focus Effect, you may put a non-Unique Strategy with a Political ability in your discard pile into your hand", "none"),
+        ["disreputable-deal-penalty"] = new("Open", "Bow your target performing Courtier to give a target Personality -3F. If he is dishonorable, his controller loses Honor equal to his printed Personal Honor", "personality",
+            Performer: "own-unbowed-personality-with-keyword-at-any-location", RequiredKeywords: ["Courtier"], ActionKeywords: ["Political"], Costs: ActionCost.BowPerformer),
+        // Engulfing Flames (oracle-l5r-2342): sequenced targets (SequencedTarget.cs). The first is named up front (an optional enemy attachment to destroy); the Ranged 4 Attack that follows, if the
+        // Monk has any Fire tokens, is aimed only after the destruction has resolved. "engulfing-flames-attack" is that Attack's own ability id and is not on the card.
+        ["engulfing-flames-destroy"] = new("Battle", "Choose your performing unbowed Monk: You may target and destroy an enemy attachment. If your Monk has any Fire tokens, Ranged 4 Attack", "slots",
+            Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeywords: ["Monk"],
+            Slots: [new("attachment", "enemy-attachment", "An enemy attachment to destroy (optional)", 0, 1)]),
+        ["engulfing-flames-attack"] = new("Battle", "Ranged 4 Attack (the second half of Engulfing Flames)", "attack"),
         // Quagmire (oracle-l5r-6123), a Region: Togashi Hizumi's reaction for a battlefield at its own province or an adjacent one -- bow the Region to negate the bowed Personality's next straightening this turn.
         ["quagmire-negate-straighten"] = new("Reaction", "After the resolution of an action that bowed a Personality at a battlefield at this province or an adjacent province, target him and bow this card: Negate his next straightening (this turn)", "bow-reaction-candidate",
             Trigger: "bowed-personality-near-region", Costs: ActionCost.BowSource),
@@ -2518,7 +2536,7 @@ public sealed partial class MatchEngine
         // OR the printed keyword (TargetStatus.IsShadowlands), read off the ability's own IfTarget.
         "hiruma-nitani-attack" => 4 + (EffectConditionMet(abilityId, target) ? 2 : 0),
         "bayushi-kahoku-attack" => 3 + (EffectConditionMet(abilityId, target) ? 2 : 0),
-        "asako-ume-attack" or "spirit-scout-attack" => 4,
+        "asako-ume-attack" or "spirit-scout-attack" or "engulfing-flames-attack" => 4,
         "training-honor-cost-attack" => 3,
         "training-weapon-attack" => 2,
         "cavalry-flankers-attack" => 2,
@@ -2608,7 +2626,7 @@ public sealed partial class MatchEngine
         "legulus-legion-attack" or "village-raiders-attack" or "chiyo-attack" or "dairuko-melee" => "Melee",
         "strength-of-the-divine-force" or "strength-of-the-divine-honor" => "Melee",
         "ebizo-attack" or "training-recon-attack" => "Ranged",
-        "kahoku-exp-attack" or "tsuruchi-kosoko-exp-attack" or "hiruma-nitani-attack" or "training-followed-recon-attack" or "spirit-scout-attack" => "Ranged",
+        "kahoku-exp-attack" or "tsuruchi-kosoko-exp-attack" or "hiruma-nitani-attack" or "training-followed-recon-attack" or "spirit-scout-attack" or "engulfing-flames-attack" => "Ranged",
         "training-followed-dishonorable-melee-attack" => "Melee",
         _ => ""
     };
@@ -3121,7 +3139,9 @@ public sealed partial class MatchEngine
                 // Strength of the Tsunami: "Battle: Even if this card is bowed, if this Shugenja is Water: Straighten him."
                 or "tsunami-straighten"
                 // Red Crane Dojo: "Ninja Tireless Reaction".
-                or "red-crane-dojo-ninja", "Abilities on bowed cards cannot be used.");
+                or "red-crane-dojo-ninja"
+                // Dragon's Breath Castle: "Reaction: Even if this card is bowed, ...".
+                or "dbc-attacker-bow", "Abilities on bowed cards cannot be used.");
             uses = source.AbilityUses;
         }
         // The per-turn limit is AbilityDefinition.UsesPerTurn (AbilityLimits.cs). A once-per-GAME ability (AbilityDefinition.OncePerGame: Border Keep's refresh, Bo of Water) never resets: any stamp spends it.
@@ -3334,6 +3354,8 @@ public sealed partial class MatchEngine
         if (id == "tsuruchi-yakusho-immunity") Require(AtBattle(source!), "Tsuruchi Yakusho must be at the current battlefield.");
         // Battle Phase timing (issue #310): the Engage window's own per-trigger and per-card conditions.
         // "After engaging at X's battlefield": X's own battlefield is the one it is assigned to.
+        // Dragon's Breath Castle: "after engaging at a battlefield at one of your provinces" -- the battlefield is at the Defender's province, so its controller is the Defender.
+        if (id == "dbc-attacker-bow") Require(command.PlayerId == 1 - _state.ActivePlayerId, "Dragon's Breath Castle reacts to a battle at one of its controller's provinces.");
         if (ability.Trigger == "after-engaging-at-own-battlefield")
             Require(AtBattle(source!), "This card must be assigned to the battlefield being engaged.");
         // Daidoji Yuki: "if all your Personalities there are Scouts" sits BEFORE the effects colon, so it is a
@@ -5549,6 +5571,27 @@ public sealed partial class MatchEngine
                 break;
             }
             case "training-stat-cost-performer": case "training-stat-cost-source": break;
+            // "Choose a player who chooses": the effect is a decision another player makes (DeciderChoice.cs), and the action finishes when it is made.
+            case "know-their-minds-choose": case "scandalous-rumors-move": case "dbc-attacker-bow":
+            {
+                var spec = id switch { "know-their-minds-choose" => DeciderSpecs.KnowTheirMinds, "scandalous-rumors-move" => DeciderSpecs.ScandalousRumors, _ => DeciderSpecs.DragonsBreath };
+                if (BeginDeciderChoice(spec, command, consumedGrant, playedFromDiscard, opponentHonorBeforeBattleAction, bowedBeforeAction, preExistingGrants)) return;
+                break;
+            }
+            // Disreputable Deal: -3F, and if he is dishonorable his controller loses Honor equal to his printed Personal Honor.
+            case "disreputable-deal-penalty":
+                ApplyModifier(target!, source!.Id, id, "Force", -3);
+                if (MatchesTargetStatus(target!, TargetStatus.IsDishonorable)) GainHonor(target!.OwnerId, -Definition(target).PersonalHonor, Definition(source).Name, source);
+                break;
+            // Engulfing Flames: the first effect destroys the chosen attachment (its own negation leaves the second alone); the second, only if the Monk has Fire tokens, is a Ranged 4 Attack whose
+            // target is chosen now that the first has resolved.
+            case "engulfing-flames-destroy":
+            {
+                foreach (var attachment in SlotCards(command, "attachment").ToArray()) DestroyAttachment(attachment);
+                var monk = Card(command.PerformerId!);
+                if (HasToken(monk, "Fire") && BeginSequencedAttackTarget("engulfing-flames-attack", command, monk, consumedGrant, playedFromDiscard, opponentHonorBeforeBattleAction, bowedBeforeAction, preExistingGrants)) return;
+                break;
+            }
             // A Quiet Transaction: the Gold was the cost; the target may not be assigned or move to a battlefield this turn. The second half puts two -2 Gold Cost tokens on him.
             case "quiet-transaction-lock": LockMovement(target!, Definition(source!).Name, MovementKinds.ToBattlefield | MovementKinds.Assign); break;
             case "quiet-transaction-tokens":
@@ -6902,7 +6945,7 @@ public sealed partial class MatchEngine
                     continue;
                 }
                 // Kyuden Hida - exp: each Personality of the army is a candidate on its own (a click names one); several are named together on CardIds.
-                string?[] candidates = ability.Target switch { "none" or "provinces" or "any-province" or "enemy-province" => new string?[] {null}, "own-army-personalities" => armyIds.Cast<string?>().ToArray(), "hand" => player.Hand.ToArray(),
+                string?[] candidates = ability.Target switch { "none" or "provinces" or "any-province" or "enemy-province" or "player" => new string?[] {null}, "own-army-personalities" => armyIds.Cast<string?>().ToArray(), "hand" => player.Hand.ToArray(),
                     "spell-or-reserve-in-hand" => player.Hand.Where(h => Definition(Card(h)).Type == CardType.Spell || Keyword(Card(h), "Reserve")).Cast<string?>().ToArray(),
                     // Low Market: broader than Equip (Battle)'s own hand filter (any Item/Follower/
                     // Spell, matching the ordinary Equip() command's own type filter).
@@ -6945,7 +6988,7 @@ public sealed partial class MatchEngine
                     : id == "hawado-move-battlefield" ? _state.UnresolvedBattlefields.Select(p => (int?)p).ToArray()
                     : ability.Move is { ChoosesBattlefield: true } chosenMove && MoveDestinations(chosenMove) is { Length: > 0 } listed ? listed.Select(p => (int?)p).ToArray()
                     : ability.Target == "attack" && ability.AttackTargetsProvince && _state.CurrentBattleProvince is int battleProvince ? [null, battleProvince] : [null];
-                foreach (var provinceOwner in ability.Target == "any-province" ? new int?[] { 0, 1 } : new int?[] { null })
+                foreach (var provinceOwner in ability.Target is "any-province" or "player" ? new int?[] { 0, 1 } : new int?[] { null })
                 {
                 var legal = new List<GameCommand>(); string? error = null;
                 var quotes = new List<(GameCommand Command, GoldQuote? Quote)>();
@@ -6969,7 +7012,7 @@ public sealed partial class MatchEngine
                 var targetQuotes = firstQuote?.Kind == GoldCostKind.Derived
                     ? quotes.Where(q => q.Command.TargetId is not null && q.Quote is not null).GroupBy(q => q.Command.TargetId!).ToDictionary(g => g.Key, g => g.First().Quote!) : null;
                 var label = AbilityOptionLabel(id, ability, performer, source, costOption) + (createChoice is null ? "" : $" · {createChoice.Name}")
-                    + (provinceOwner is int owner ? (owner == playerId ? " · your Province" : " · an enemy Province") : "");
+                    + (provinceOwner is int owner ? ability.Target == "player" ? (owner == playerId ? " · you" : " · your opponent") : (owner == playerId ? " · your Province" : " · an enemy Province") : "");
                 yield return new("useAbility", label, legal.Count > 0, legal.Count > 0 ? null : error ?? "No legal target or performer.",
                     legal.FirstOrDefault(), source?.Id, ability.Target == "provinces" ? provinces : legal.Where(c => c.TargetId is not null).Select(c => c.TargetId!).Distinct().ToArray(),
                     // The battlefields a move's destination rule lists (issue #336) or, for an Attack, the province it may name instead of a card (issue #335): the

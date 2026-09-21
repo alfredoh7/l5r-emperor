@@ -223,6 +223,12 @@ public sealed partial class MatchEngine
             if (_state.PendingChoice.Type=="eitherOr") { ResolveEitherOrCommand(command); return; }
             // The opposing player's variable payment (issue #373, Virtuous Charity): answered by the paying player, who holds priority (OpponentPayment.cs).
             if (_state.PendingChoice.Type=="opponentPayment") { ResolveOpponentPaymentCommand(command); return; }
+            // Another player's choice inside an action (issue #419, DeciderChoice.cs): answered by the deciding player, who holds priority.
+            if (_state.PendingChoice.Type=="deciderChoice") { ResolveDeciderChoiceCommand(command); return; }
+            // A Focus Effect paused for its player's decision (issue #419, FocusEffectChoice.cs).
+            if (_state.PendingChoice.Type=="focusEffectChoice") { ResolveFocusEffectChoiceCommand(command); return; }
+            // The second target of a sequenced action (issue #419, SequencedTarget.cs).
+            if (_state.PendingChoice.Type=="sequencedTarget") { ResolveSequencedTargetCommand(command); return; }
             if (_state.PendingChoice.Type=="shinden") { ResolveShinden(command); return; }
             // Preserving Honor (issue #295): the target's own controller chooses bow-or-move.
             if (_state.PendingChoice.Type=="preservingHonor") { ResolvePreservingHonor(command); return; }
@@ -2838,6 +2844,7 @@ public sealed partial class MatchEngine
         // direct `state.Phase=Phase.Dynasty` field assignment bypasses SetPhase entirely, so it never
         // reaches here). One check here therefore covers both paths without needing two separate hooks.
         if(_state.Phase==Phase.Action && phase!=Phase.Action) AdvanceStraightenHolds(StraightenPoint.ActionPhaseEnds);
+        if(phase==Phase.Dynasty) DragonsBreathHonor();
         if(phase==Phase.Dynasty)
             foreach(var waveMan in _state.Cards.Values.Where(c=>InPlay(c) && Definition(c).Effect=="wave-man-attack-phase-straighten"))
                 StraightenBowedUnit(waveMan);

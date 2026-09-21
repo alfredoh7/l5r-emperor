@@ -1,0 +1,59 @@
+{
+  "Profile": "strategy-wave-41",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-2031",
+      "Name": "Disreputable Deal",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "As a Focus Effect, you may put a non-Unique Strategy with a Political ability in your discard pile into your hand.\nPolitical Open: Bow your target performing Courtier to give a target Personality -3F. If he is dishonorable, his controller loses Honor equal to his printed Personal Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-2031.jpg",
+      "Keywords": [
+        "Political"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "disreputable-deal-focus",
+        "disreputable-deal-penalty"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-2342",
+      "Name": "Engulfing Flames",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing unbowed Monk: You may target and destroy an enemy attachment. If your Monk has any Fire tokens, Ranged 4 Attack.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-2342.jpg",
+      "Keywords": [
+        "Fire",
+        "Kiho"
+      ],
+      "Focus": 1,
+      "Abilities": [
+        "engulfing-flames-destroy"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

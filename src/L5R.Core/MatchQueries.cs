@@ -362,6 +362,18 @@ public sealed partial class MatchEngine
             // listed disabled with the reason.
             result.AddRange(EitherOrActions(playerId));
         }
+        else if(_state.PendingChoice is { Type:"deciderChoice" })
+        {
+            result.AddRange(DeciderChoiceActions(playerId));
+        }
+        else if(_state.PendingChoice is { Type:"focusEffectChoice" })
+        {
+            result.AddRange(FocusChoiceActions(playerId));
+        }
+        else if(_state.PendingChoice is { Type:"sequencedTarget" })
+        {
+            result.AddRange(SequencedTargetActions(playerId));
+        }
         else if(_state.PendingChoice is { Type:"opponentPayment" })
         {
             // The opposing player's variable payment (issue #373): one action carrying the variable quote; the paying player always has the legal answer of paying nothing.
