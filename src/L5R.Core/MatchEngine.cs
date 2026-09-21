@@ -592,11 +592,11 @@ public sealed partial class MatchEngine
     // "priority flips, window stays open" tail. The one thing not offered is a reaction TO the created
     // card's own entry (Singh Remnants-style watchers) -- a documented limit, since neither published
     // token has an entering-play Reaction of its own and no watcher is known to matter here.
-    private bool CreatePersonality(int ownerId, CardDefinition definition, bool duringEntryReaction = false)
+    private bool CreatePersonality(int ownerId, CardDefinition definition, bool duringEntryReaction = false, bool createdCopy = false)
     {
-        var card=new CardInstance{Id=$"created-{++_state.CreatedCardSequence:D4}",DefinitionId=definition.Id,OwnerId=ownerId,Zone=Zone.Home,FaceUp=true};
+        var card=new CardInstance{Id=$"created-{++_state.CreatedCardSequence:D4}",DefinitionId=definition.Id,OwnerId=ownerId,Zone=Zone.Home,FaceUp=true,CreatedCopy=createdCopy};
         _state.Cards.Add(card.Id,card);
-        Emit("cardCreated",$"{Player(ownerId).Name} created {definition.Name}.",ownerId,card.Id);
+        Emit("cardCreated",createdCopy?$"{Player(ownerId).Name} created a copy of {definition.Name}.":$"{Player(ownerId).Name} created {definition.Name}.",ownerId,card.Id);
         QueueOverconfidentDraw(card);
         if(duringEntryReaction) { ApplyMandatoryEntryEffects(ownerId,card); return false; }
         return OpenEntryReactionWindow(ownerId,card) || OpenOverconfidentDrawWindow(ownerId);
@@ -2204,7 +2204,7 @@ public sealed partial class MatchEngine
             // actingPlayerId like Lady Matsu's Rage below), since battle resolution's own casualty
             // sweep -- the most common way one actually dies -- calls this with no actingPlayerId at
             // all.
-            if(Definition(card).CreatedOnly)
+            if(IsCreatedCard(card))
             {
                 card.Zone=Zone.RemovedFromGame;
                 Emit("removedFromGame",$"{Definition(card).Name} was destroyed and removed from the game.",card.OwnerId,card.Id);

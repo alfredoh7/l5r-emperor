@@ -93,9 +93,9 @@ internal static class CreatedCardTests
     private static void EveryCreatorHasItsScan()
     {
         Eq(string.Join("; ", CreatedCards.Verify()), "", "every ability that creates a card has exactly one scan that fits");
-        var pairs = CreatedCards.Creators.ToDictionary(c => c.AbilityId, c => CreatedCards.Resolve(c.Spec).Id);
+        var pairs = CreatedCards.Creators.Where(c => !c.Spec.CopyOfTarget).ToDictionary(c => c.AbilityId, c => CreatedCards.Resolve(c.Spec).Id);
         Eq(pairs["kitsu-akai-create"], LionAncestor); Eq(pairs["ohsuki-create"], Sparrow); Eq(pairs["tokoru-create"], Bear); Eq(pairs[Create], WaterBo);
-        foreach (var (id, spec) in CreatedCards.Creators)
+        foreach (var (id, spec) in CreatedCards.Creators.Where(c => !c.Spec.CopyOfTarget))
         {
             var scan = CreatedCards.Resolve(spec);
             Check(scan.CreatedOnly && !scan.ScenarioOnly && CreatedCards.Creatable(scan.Type), $"{id}: the scan is a published created-only card of a creatable type");

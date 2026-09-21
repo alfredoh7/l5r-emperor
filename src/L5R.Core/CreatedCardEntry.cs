@@ -5,8 +5,9 @@ public sealed partial class MatchEngine
     // Returns true when an entering-play window opened (the caller returns). A Reaction printed "After X enters play" creates inside the window it was played in.
     private bool ExecuteCreate(AbilityDefinition ability, CreatedCardSpec spec, PlayerState player, CardInstance? target)
     {
-        var scan = CreatedCards.Resolve(spec);
         var insideEntryWindow = ability.Timing == "Reaction" && ability.Trigger == "own-enters-play";
+        if (spec.CopyOfTarget) return CreatePersonality(player.Id, Definition(target ?? throw new RuleViolation("Choose the card to copy.")), insideEntryWindow, createdCopy: true);
+        var scan = CreatedCards.Resolve(spec);
         if (scan.Type == CardType.Personality) return CreatePersonality(player.Id, scan, insideEntryWindow);
         if (!CreatedCards.IsAttachment(scan.Type)) throw new InvalidOperationException($"{scan.Name} ({scan.Id}) is a {scan.Type}: creating one is not built.");
         return CreateAttachment(player.Id, scan, target ?? throw new RuleViolation("Choose a Personality to attach it to."), insideEntryWindow);
@@ -15,6 +16,11 @@ public sealed partial class MatchEngine
     // The created attachment must be one the chosen Personality could be equipped with; the card does not exist yet, so a stand-in with its definition is judged.
     private void ValidateCreate(GameCommand command, CreatedCardSpec spec, PlayerState player)
     {
+        if (spec.CopyOfTarget)
+        {
+            Require(command.TargetId is not null && Definition(Card(command.TargetId)).Type == spec.Type && InPlay(Card(command.TargetId)), $"Choose a {spec.Type} in play to copy.");
+            return;
+        }
         var scan = CreatedCards.Resolve(spec);
         if (!CreatedCards.IsAttachment(scan.Type)) return;
         var host = command.TargetId is null ? throw new RuleViolation("Choose a Personality to attach it to.") : Card(command.TargetId);
@@ -37,10 +43,13 @@ public sealed partial class MatchEngine
         return OpenEntryReactionWindow(ownerId, card, 1 - ownerId);
     }
 
+    // A created card: a CreatedOnly scan, or a created copy of another card (CardInstance.CreatedCopy). It has no physical card, so it is removed from the game rather than discarded.
+    private static bool IsCreatedCard(CardInstance card) => card.CreatedCopy || Definition(card).CreatedOnly;
+
     // A created card has no pile to return to: whatever way it leaves play (a destroyed host, a return to hand, a shuffle), it is removed from the game by the end of the command.
     private void RemoveCreatedCardsLeftInPiles()
     {
-        foreach (var card in _state.Cards.Values.Where(c => Definition(c).CreatedOnly && c.Zone is Zone.FateDiscard or Zone.DynastyDiscard or Zone.Dead or Zone.Hand or Zone.FateDeck or Zone.DynastyDeck).ToArray())
+        foreach (var card in _state.Cards.Values.Where(c => IsCreatedCard(c) && c.Zone is Zone.FateDiscard or Zone.DynastyDiscard or Zone.Dead or Zone.Hand or Zone.FateDeck or Zone.DynastyDeck).ToArray())
         {
             foreach (var player in _state.Players) { player.Hand.Remove(card.Id); player.FateDeck.Remove(card.Id); player.DynastyDeck.Remove(card.Id); }
             RemoveFromGame(card);

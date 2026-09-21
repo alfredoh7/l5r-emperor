@@ -234,6 +234,10 @@ public sealed class CardInstance
     // StartTurn discards the card once the owner's own TurnsTaken reaches it. Null for an Event with
     // no bounded duration (Suspicions, Formal Apology) or any non-Event card.
     public int? ExpiresAtTurnsTaken { get; set; }
+    // A created COPY of another card (issue #398, Mendon): this instance's DefinitionId is the copied card's own, so it behaves exactly as that card, and this flag is the only thing
+    // that says it is a created card: it has no physical card to return to (it is removed from the game when it leaves play) and the client marks it so. Every other created card is a
+    // CardDefinition.CreatedOnly scan and needs no marker.
+    public bool CreatedCopy { get; set; }
 }
 
 public sealed class ProvinceState
@@ -866,7 +870,9 @@ public sealed record CardView(string Id, CardDefinition? Definition, int OwnerId
     // while a cost is being paid: Yoritomo Sakuma); null when it cannot. The client shows this and never derives it.
     int? GoldProduced = null,
     // "May not perform actions" (issue #336): true while the card, or the Personality it is attached to, is action-locked.
-    bool ActionLocked = false);
+    bool ActionLocked = false,
+    // A created copy of another card (issue #398): its Definition is the copied card's own; this says it is a created card, for the client's marker.
+    bool CreatedCopy = false);
 /// <summary>One granted ability as the client shows it: the id, the engine's label for it, and where it came from.</summary>
 public sealed record GrantedAbilityView(string AbilityId, string Label, string Timing, string Source, string Duration, string? CopiedFrom, string? CopiedFromName);
 // Strength is the EFFECTIVE strength (printed + any attached Region's static bonus, e.g. Fallow
