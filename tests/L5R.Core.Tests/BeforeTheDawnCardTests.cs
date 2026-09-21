@@ -99,10 +99,10 @@ internal static class BeforeTheDawnCardTests
         var ccard = Add(c, ControlTheBoard, 0, Zone.Hand); var ce = MatchEngine.FromTestState(c);
         Accept(ce, Offer(ce, 0, "control-the-board-terrain", ccard.Id, terrain.Id));
         Check(ce.State.Cards[terrain.Id].Zone != Zone.Battlefield, "the Terrain is destroyed");
-        var c2 = Battle(); var tactician2 = Kw(Bf(c2, "training-crane-samurai", 0), "Tactician"); var target2 = Bf(c2, "training-lion-samurai", 1); var ccard2 = Add(c2, ControlTheBoard, 0, Zone.Hand);
+        var c2 = Battle(); var tactician2 = Kw(Bf(c2, "training-crane-samurai", 0), "Tactician"); var target2 = Bf(c2, "training-lion-samurai", 1); Force(target2, 20); var ccard2 = Add(c2, ControlTheBoard, 0, Zone.Hand);
         var ce2 = MatchEngine.FromTestState(c2); var targetForce = ce2.CardForceForTest(target2.Id);
         Accept(ce2, Offer(ce2, 0, "control-the-board-weaken", ccard2.Id, target2.Id, tactician2.Id));
-        Check(ce2.State.Cards[target2.Id].Bowed && ce2.CardForceForTest(target2.Id) == Math.Max(0, targetForce - 6), "-6F and bowed");
+        Check(ce2.State.Cards[target2.Id].Bowed && ce2.CardForceForTest(target2.Id) == targetForce - 6, "-6F and bowed");
         Check(tactician.Id != target.Id);
     }
 
@@ -169,6 +169,10 @@ internal static class BeforeTheDawnCardTests
             Check(!we.State.Cards[actor.Id].Dishonorable && !we.State.Cards[actor.Id].Bowed, "rehonored and, being opposed, straightened");
             Eq(we.State.Cards[actor.Id].Zone == Zone.Home, home, home ? "and moved home" : "and staying");
         }
+        var lone = Battle(); var loneActor = Bf(lone, "training-crane-samurai", 0, bowed: true); loneActor.Dishonorable = true; var lcard = Add(lone, ShadowTactics, 0, Zone.Hand);
+        var loneE = MatchEngine.FromTestState(lone);
+        Accept(loneE, Enabled(loneE, 0, "shadow-tactics-stay", lcard.Id, loneActor.Id).Command!);
+        Check(!loneE.State.Cards[loneActor.Id].Dishonorable && loneE.State.Cards[loneActor.Id].Bowed, "rehonored, but with no enemy opposing him he stays bowed");
         // Strength of the Mountain: an unbowed Monk, or an Earth Monk even if bowed, bows an enemy Personality or Follower.
         foreach (var (bowed, earth, allowed) in new[] { (false, false, true), (true, true, true), (true, false, false) })
         {
@@ -205,8 +209,9 @@ internal static class BeforeTheDawnCardTests
         var t = ActionPhase(); var bowedMonk = Kw(Add(t, "training-crane-samurai", 0, Zone.Home, bowed: true), "Monk"); Kw(Add(t, "training-focus-strategy", 0, Zone.FateDiscard), "Kiho"); var tcard = Add(t, WorldDisappears, 0, Zone.Hand);
         Check(!Options(MatchEngine.FromTestState(t), 0, "world-disappears-bow", tcard.Id, bowedMonk.Id).Any(o => o.Enabled), "a bowed Monk who is not Void cannot bow himself");
         // Of One Instant: a Duelist gets a Force bonus equal to his base Chi.
-        var u = Battle(); var duelist = Kw(Bf(u, "training-crane-samurai", 0), "Duelist"); var ucard = Add(u, OfOneInstant, 0, Zone.Hand); var ue = MatchEngine.FromTestState(u); var uf = ue.CardForceForTest(duelist.Id);
+        var u = Battle(); var duelist = Kw(Bf(u, "training-crane-veteran", 0), "Duelist"); var ucard = Add(u, OfOneInstant, 0, Zone.Hand); var ue = MatchEngine.FromTestState(u); var uf = ue.CardForceForTest(duelist.Id);
         Accept(ue, Enabled(ue, 0, "of-one-instant-boost", ucard.Id, duelist.Id).Command!);
+        Check(Def(duelist).Chi != Def(duelist).Force, "the fixture's Chi and Force differ");
         Eq(ue.CardForceForTest(duelist.Id), uf + Def(duelist).Chi, "his own base Chi");
     }
 
@@ -266,7 +271,7 @@ internal static class BeforeTheDawnCardTests
             var e2 = MatchEngine.FromTestState(s2); var chiBefore = e2.State.Cards[has.Id].Modifiers.Count;
             Accept(e2, Enabled(e2, 0, spiritAbility, card2.Id, has.Id).Command!);
             Check(e2.State.Cards[has.Id].GrantedAbilities.Any(g => g.AbilityId == ability && g.Duration == GrantDuration.Permanent), $"{keyword}: he already had it, so he permanently has the ability");
-            if (spirit == SpiritTruth) Eq(e2.State.Cards[has.Id].Modifiers.Count, chiBefore + 1, "and +1C, permanently");
+            if (spirit == SpiritTruth) { Eq(e2.State.Cards[has.Id].Modifiers.Count, chiBefore + 1, "and +1C, permanently"); Eq(e2.PersonalityChiForTest(has.Id), Def(has).Chi + 1, "exactly +1"); }
             Check(chi >= 0);
         }
         // The granted actions.
@@ -298,9 +303,14 @@ internal static class BeforeTheDawnCardTests
         var s = ActionPhase(); var ninja = Kw(Add(s, "training-crane-samurai", 0, Zone.Home), "Ninja"); var target = Add(s, "oracle-l5r-4604", 1, Zone.Home); var unique = Add(s, "training-lion-veteran", 1, Zone.Home); GiveKeyword(unique, "Unique");
         var notNinja = Add(s, "training-crane-veteran", 0, Zone.Home); var card = Add(s, SlyDeceiver, 0, Zone.Hand);
         unique.Printed = Def(unique) with { Keywords = ["Unique"] };
+        var copying = Add(s, "training-lion-veteran", 1, Zone.Home); copying.Printed = Def(copying) with { Abilities = ["kunji-boost", "fukuzo-wear-skin"] };
         var e = MatchEngine.FromTestState(s);
         var options = Options(e, 0, "sly-deceiver-copy", card.Id, ninja.Id).First(o => o.Enabled);
         Check(options.TargetIds!.Contains(target.Id) && !options.TargetIds.Contains(unique.Id), "any non-Unique Personality: " + string.Join(",", options.TargetIds ?? []));
+        var e0 = MatchEngine.FromTestState(s);
+        Accept(e0, Offer(e0, 0, "sly-deceiver-copy", card.Id, copying.Id, ninja.Id));
+        var copied = e0.State.Cards[ninja.Id].Printed!.Abilities ?? [];
+        Check(copied.Contains("kunji-boost") && !copied.Contains("fukuzo-wear-skin"), "an ability that itself copies abilities is not copied: " + string.Join(",", copied));
         Check(!Options(e, 0, "sly-deceiver-copy", card.Id, notNinja.Id).Any(o => o.Enabled), "only a Ninja performs it");
         var before = e.HasKeyword(ninja.Id, "Cavalry");
         Accept(e, Offer(e, 0, "sly-deceiver-copy", card.Id, target.Id, ninja.Id));
@@ -380,7 +390,7 @@ internal static class BeforeTheDawnCardTests
         var attach = ye.QueryActions(0).FirstOrDefault(x => x.Enabled && x.Command?.AbilityId == "simple-yari-attach");
         Check(attach is not null, "the Yari's Reaction is offered in his entry window: " + string.Join(";", ye.QueryActions(0).Select(x => x.Label)));
         Accept(ye, attach!.Command!);
-        Check(ye.State.Cards[yari.Id].Zone == Zone.Attached && ye.State.Cards[yari.Id].AttachedTo == cardId, "the Yari is attached to him");
+        Check(ye.State.Cards[yari.Id].Zone == Zone.Attached && ye.State.Cards[yari.Id].AttachedTo == cardId && !ye.State.Players[0].Hand.Contains(yari.Id), "the Yari is attached to him and has left the hand");
     }
 
     private static void FollowersAndHolding()
@@ -425,10 +435,10 @@ internal static class BeforeTheDawnCardTests
         var e = MatchEngine.FromTestState(s); var plain = MatchEngine.FromTestState(ActionPhase());
         Eq(e.GetView(0).Players[0].Provinces[0].Strength, plain.GetView(0).Players[0].Provinces[0].Strength + 2, "+2 strength");
         Eq(e.GetView(0).Players[1].Provinces[0].Strength, plain.GetView(0).Players[1].Provinces[0].Strength, "yours only");
-        var honor = Honor(e, 0); var count = e.State.Players[0].Provinces.Count(p => !p.Destroyed);
+        var honor = Honor(e, 0); var count = e.State.Players[0].Provinces.Count(p => !p.Destroyed); var rightmostIndex = e.State.Players[0].Provinces.Where(p => !p.Destroyed).Max(p => p.Index);
         Accept(e, Enabled(e, 0, "ebisu-destroy-province", ebisu.Id).Command!);
         Eq(e.State.Players[0].Provinces.Count(p => !p.Destroyed), count - 1, "a province was destroyed");
-        Check(e.State.Players[0].Provinces.Last().Destroyed || e.State.Players[0].Provinces.Where(p => p.Destroyed).All(p => p.Index == e.State.Players[0].Provinces.Where(q => q.Destroyed).Max(q => q.Index)), "the rightmost one");
+        Check(e.State.Players[0].Provinces.Where(p => p.Destroyed).Select(p => p.Index).SequenceEqual(new[] { rightmostIndex }) && rightmostIndex > 0, "the rightmost one");
         Check(Honor(e, 0) >= honor + 4 && e.State.Cards[ebisu.Id].Zone != Zone.Celestial, "4 Honor, and the Celestial is discarded");
         // Saibankan's Justice: other players may not lobby; Open: dishonor one or two Personalities controlled by the same player, discarding it.
         var t = ActionPhase(); var sai = Add(t, Saibankan, 0, Zone.Celestial); var one = Add(t, "training-lion-samurai", 1, Zone.Home); var two = Add(t, "training-lion-veteran", 1, Zone.Home); var mine = Add(t, "training-crane-samurai", 0, Zone.Home);
@@ -444,11 +454,12 @@ internal static class BeforeTheDawnCardTests
         Check(!Options(withSai, 1, "lobby").Any(o => o.Enabled) && lobbyist.Id.Length > 0, "with it he may not");
         // Stone-Hewed Shrine: defending Earth Personalities have +1F at this province's battlefield; bow an Earth Personality at any location: +3 strength, even with no unit there.
         var r = Table(Phase.Battle, 1); r.PriorityPlayerId = 0;
-        var defenderEarth = Kw(Add(r, "training-crane-samurai", 0, Zone.Battlefield, province: 0), "Earth"); var defenderFire = Add(r, "training-crane-veteran", 0, Zone.Battlefield, province: 0); Add(r, "training-lion-samurai", 1, Zone.Battlefield, province: 0);
+        var defenderEarth = Kw(Add(r, "training-crane-samurai", 0, Zone.Battlefield, province: 0), "Earth"); var defenderFire = Add(r, "training-crane-veteran", 0, Zone.Battlefield, province: 0); var attackerEarth = Kw(Add(r, "training-lion-samurai", 1, Zone.Battlefield, province: 0), "Earth");
         var noShrine = MatchEngine.FromTestState(r); var earthBase = noShrine.CardForceForTest(defenderEarth.Id);
         var shrine = Add(r, Shrine, 0, Zone.Region, province: 0); var homeEarth = Kw(Add(r, "training-lion-samurai", 0, Zone.Home), "Earth");
         var re = MatchEngine.FromTestState(r);
         Eq(re.CardForceForTest(defenderEarth.Id), earthBase + 1, "a defending Earth Personality has +1F"); Eq(re.CardForceForTest(defenderFire.Id), noShrine.CardForceForTest(defenderFire.Id), "a non-Earth one does not");
+        Eq(re.CardForceForTest(attackerEarth.Id), noShrine.CardForceForTest(attackerEarth.Id), "an attacking Earth Personality does not");
         var strength = re.State.Players[0].Provinces[0].Strength;
         Accept(re, Enabled(re, 0, "stone-hewed-shrine-strength", shrine.Id, homeEarth.Id).Command!);
         Check(re.State.Cards[homeEarth.Id].Bowed && re.State.Players[0].Provinces[0].Strength == strength + 3, "+3 strength; the Earth Personality at home bowed");
