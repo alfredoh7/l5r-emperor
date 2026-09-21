@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Refresh all approved demo 5-8 Windows launchers to PR410 source 6b6908d7, including sequenced spear clearance and working attack-review buttons; preserve prior immutable release and main 485320af.",
-  "validation": "Packaging/publication regressions9/9 pass. All four native demo suites passed on the pinned source; Mac launcher targets verified. Windows export validates bundled runtime/resources and source omission. Actual new ZIP SHA/size, six launcher modes/profiles, isolated override and approval/merge/feedback instructions verified. Upload and exact Windows package gate must finish before notification.",
-  "remaining": "Finish candidate staging, pass the exact Windows review package check and source bootstrap retry, then notify Mendon. Human review/Windows graphical play remain separate; nothing merges into main.",
+  "summary": "Delivered Alfredo-approved UI demos5-8 with the final sequenced spear/attack-tab refinement. Four named Windows demo launchers share a self-contained, isolated package; Mendon received the validated refreshed download and feedback/merge instructions.",
+  "validation": "Source6b6908d7 Mac/Windows CI35598262930 passes after a bootstrap-timeout retry; all four native demo suites and actual Mac launchers verified. Packaging tests9/9 pass. Actual uploaded ZIP cb878ec60d227126bab09e9f6876f804dc8f6a92196e349ad9d74f0c101479c0 passed Windows runtime and all six launchers in run35599418450 at receipt commit9244505b. Release digest/size and notification5760497921 verified. Final documentation update leaves the validated spec/receipt/package unchanged.",
+  "remaining": "None for requested packaging/notification. Mendon review and later merge checks remain human gates; no main merge. Windows graphical play and external multiplayer are not claimed. Inherited rules candidates retain separate acceptance.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/297",
   "branch": "codex/297-windows-review",
-  "updated": "2026-09-21T12:22:58.832614+00:00"
+  "updated": "2026-09-21T12:33:58.457970+00:00"
 }
