@@ -35,6 +35,8 @@ public sealed partial class MatchEngine
     /// pile holds real Personalities to copy from; in the Either/Or showcase player 0 holds Unfortunate Hesitation, Yoritomo Sakuma and Shosuro Rin
     /// and player 1 Yogo Adi and a Training Either/Or source. Both open in player 0's Action Phase.</summary>
     public static MatchEngine CreateCopyShowcase(ulong seed = 20260906) => Create(seed, CopyShowcaseScenario);
+    public static MatchEngine CreateAbilityGrantShowcase(ulong seed = 20260906) => Create(seed, AbilityGrantShowcaseScenario);
+    public const string AbilityGrantShowcaseScenario = "ability-grant-showcase";
     public static MatchEngine CreateEitherOrShowcase(ulong seed = 20260906) => Create(seed, EitherOrShowcaseScenario);
     public const string CopyShowcaseScenario = "copy-showcase";
     public const string EitherOrShowcaseScenario = "either-or-showcase";
@@ -66,7 +68,7 @@ public sealed partial class MatchEngine
     {
         if (scenario == PublishedContent.Scenario) return CreatePublished(seed, PublishedContent.Scenario, PublishedContent.Snapshot);
         if (scenario == PublishedContent.TestScenario) return CreatePublished(seed, PublishedContent.TestScenario, PublishedContent.TestSnapshot);
-        if (scenario is not ("starter" or "economy" or DeckSearchScenario or CopyShowcaseScenario or EitherOrShowcaseScenario or OpponentPaymentShowcaseScenario)) throw new ArgumentException("Unknown scenario.");
+        if (scenario is not ("starter" or "economy" or DeckSearchScenario or CopyShowcaseScenario or AbilityGrantShowcaseScenario or EitherOrShowcaseScenario or OpponentPaymentShowcaseScenario)) throw new ArgumentException("Unknown scenario.");
         var state = new MatchState { Players = [new() { Id=0, Name="Crane", Clan="Crane", Honor=8 }, new() { Id=1, Name="Lion", Clan="Lion", Honor=6 }] };
         var random = new StableRandom(seed);
         var nextId = 0;
@@ -128,6 +130,12 @@ public sealed partial class MatchEngine
                 for(var i=0;i<dynasty.Length;i++) state.Cards[player.DynastyDeck[i]].DefinitionId=dynasty[i];
                 for(var i=0;i<fate.Length;i++) state.Cards[player.FateDeck[i]].DefinitionId=fate[i];
             }
+        }
+        if (scenario == AbilityGrantShowcaseScenario)
+        {
+            // Two copies demonstrate that only the chosen Personality receives the permanent grant.
+            Add(0,"oracle-l5r-8550",Zone.Home,true); Add(0,"oracle-l5r-8550",Zone.Home,true);
+            var spirit = Add(0,"oracle-l5r-7424",Zone.Hand,true); state.Players[0].Hand.Add(spirit.Id);
         }
         if (scenario == CopyShowcaseScenario)
         {
@@ -592,12 +600,17 @@ public sealed partial class MatchEngine
     // "priority flips, window stays open" tail. The one thing not offered is a reaction TO the created
     // card's own entry (Singh Remnants-style watchers) -- a documented limit, since neither published
     // token has an entering-play Reaction of its own and no watcher is known to matter here.
-    private bool CreatePersonality(int ownerId, CardDefinition definition, bool duringEntryReaction = false)
+    // battlefield (issue #394, "at this battlefield"): the province whose battle the card is created at, on its controller's side; null is home.
+    // printed (issue #402): the card's own printed values when they are not the scan's; beforeWindow: the rest of the creating action, run before any entry window opens.
+    // createdCopy (issue #398): the card is a created copy of another card, marked per instance (CardInstance.CreatedCopy); a copy of a card with printed values keeps them.
+    private bool CreatePersonality(int ownerId, CardDefinition definition, bool duringEntryReaction, int? battlefield, out CardInstance card, CardDefinition? printed = null, Action? beforeWindow = null, bool createdCopy = false)
     {
-        var card=new CardInstance{Id=$"created-{++_state.CreatedCardSequence:D4}",DefinitionId=definition.Id,OwnerId=ownerId,Zone=Zone.Home,FaceUp=true};
+        card=new CardInstance{Id=$"created-{++_state.CreatedCardSequence:D4}",DefinitionId=definition.Id,Printed=printed,OwnerId=ownerId,Zone=battlefield is null?Zone.Home:Zone.Battlefield,ProvinceIndex=battlefield,FaceUp=true,CreatedCopy=createdCopy};
         _state.Cards.Add(card.Id,card);
-        Emit("cardCreated",$"{Player(ownerId).Name} created {definition.Name}.",ownerId,card.Id);
+        var title=(printed??definition).Name; var where=battlefield is null?"":" at the battlefield";
+        Emit("cardCreated",createdCopy?$"{Player(ownerId).Name} created a copy of {title}{where}.":$"{Player(ownerId).Name} created {title}{where}.",ownerId,card.Id);
         QueueOverconfidentDraw(card);
+        beforeWindow?.Invoke();
         if(duringEntryReaction) { ApplyMandatoryEntryEffects(ownerId,card); return false; }
         return OpenEntryReactionWindow(ownerId,card) || OpenOverconfidentDrawWindow(ownerId);
     }
@@ -716,6 +729,7 @@ public sealed partial class MatchEngine
         higher.Bowed = lower.Bowed || Definition(higher).Effect == "enters-bowed";
         higher.Dishonorable = lower.Dishonorable || Definition(higher).Effect == "enters-dishonored";
         higher.StraightenBlockedTurn = Math.Max(higher.StraightenBlockedTurn, lower.StraightenBlockedTurn);
+        higher.StraightenLockedTurn = Math.Max(higher.StraightenLockedTurn, lower.StraightenLockedTurn);
         higher.AssignedToAttackTurn = Math.Max(higher.AssignedToAttackTurn, lower.AssignedToAttackTurn);
 
         higher.Modifiers.AddRange(lower.Modifiers);
@@ -937,9 +951,11 @@ public sealed partial class MatchEngine
     }
 
     private IEnumerable<CardInstance> Producers(int playerId) => _state.Cards.Values.Where(c=>c.OwnerId==playerId && !c.Bowed && c.Zone is Zone.Home or Zone.Stronghold or Zone.Battlefield && (Definition(c).GoldProduction>0 || AlternateGoldSource(c) is not null));
-    private void ValidatePayment(int playerId,int cost,string[]? sourceIds)
+    // exclude: cards the paying action bows or destroys as another of its costs (AbilityCosts.CostPaidCards) -- a card cannot be bowed twice, so it produces no Gold for the same action.
+    private void ValidatePayment(int playerId,int cost,string[]? sourceIds,IReadOnlySet<string>? exclude=null)
     {
         var ids=sourceIds??[];
+        Require(exclude is null || !ids.Any(exclude.Contains),"A card bowed or destroyed as part of the action's cost cannot also be bowed for its Gold.");
         Require(ids.Distinct(StringComparer.Ordinal).Count()==ids.Length,"A Gold source cannot be used twice in one payment.");
         Require(cost>0 || ids.Length==0,"No Gold sources are needed for this free action.");
         var producers=Producers(playerId).Select(c=>c.Id).ToHashSet(StringComparer.Ordinal);
@@ -947,9 +963,9 @@ public sealed partial class MatchEngine
         var produced=ids.Sum(id=>GoldProduced(id,playerId));
         Require(produced>=cost,$"This payment needs {cost} Gold; selected sources produce {produced}.");
     }
-    private void Pay(int playerId,CardInstance target,int cost,string[]? sourceIds,string? part=null)
+    private void Pay(int playerId,CardInstance target,int cost,string[]? sourceIds,string? part=null,IReadOnlySet<string>? exclude=null)
     {
-        ValidatePayment(playerId,cost,sourceIds);
+        ValidatePayment(playerId,cost,sourceIds,exclude);
         var ids=sourceIds??[];
         var produced=ids.Sum(id=>GoldProduced(id,playerId));
         // A card bowed for Gold through its own ability (Yoritomo Sakuma, issue #338) has used that Reaction: spent for the turn, and named
@@ -1510,6 +1526,7 @@ public sealed partial class MatchEngine
     // recruit window's close (PassReaction) can continue exactly here.
     private void CompleteBattleTransition(int attacker)
     {
+        foreach (var card in _state.Cards.Values) card.GrantedAbilities.RemoveAll(g => g.Duration == GrantDuration.Battle);
         if(_state.UnresolvedBattlefields.Count==0)
         {
             foreach(var card in _state.Cards.Values.Where(c=>c.Zone==Zone.Battlefield).ToArray()) ReturnHome(card,card.OwnerId==attacker);
@@ -1536,7 +1553,7 @@ public sealed partial class MatchEngine
             foreach(var attachment in Attachments(card.Id).ToArray())
             {
                 attachment.Zone=Zone.FateDiscard; attachment.AttachedTo=null; attachment.ProvinceIndex=null; attachment.FaceUp=true; attachment.Tokens.Clear();
-                card.GrantedKeywords.RemoveAll(g=>g.Source==attachment.Id && g.Duration=="Attachment");
+                RemoveAttachmentGrants(card, attachment.Id);
                 Emit("attachmentDiscarded",$"{Definition(attachment).Name} was discarded.",attachment.OwnerId,attachment.Id);
             }
             if(card.Zone==Zone.Battlefield) ReturnHome(card,false);
@@ -1545,7 +1562,7 @@ public sealed partial class MatchEngine
             // no meaning once this card is sitting face-up in a province again, ready to be purchased.
             card.Modifiers.Clear(); card.ActionLocks.Clear(); card.GrantedKeywords.Clear(); card.GrantedAbilities.Clear(); card.RemovedKeywords.Clear(); card.RemovedClanAffiliations.Clear();
             card.AbilityUses.Clear(); card.Tokens.Clear(); card.Bowed=false; card.Dishonorable=false;
-            card.StraightenBlockedTurn=-1; card.AssignedToAttackTurn=-1;
+            card.StraightenBlockedTurn=-1; card.StraightenLockedTurn=-1; card.AssignedToAttackTurn=-1;
             var owner=Player(card.OwnerId);
             if(!owner.Provinces.Any(p=>!p.Destroyed)) continue; // no province left to place him in -- an extremely rare edge case; he simply stays home
             _state.PendingChoice=new("yourClanNeedsYouProvince",card.OwnerId,id,$"{Definition(card).Name}: choose a province to place him into, face-up (discarding any card already there).");
@@ -2176,6 +2193,7 @@ public sealed partial class MatchEngine
             }
             foreach(var attachment in Attachments(card.Id).ToArray())
             {
+                RemoveAttachmentGrants(card, attachment.Id);
                 attachment.Zone=Zone.FateDiscard; attachment.AttachedTo=null; attachment.ProvinceIndex=null; attachment.Tokens.Clear(); count++;
                 DestroyedDuringBattleBonus(attachment);
                 ExpendableDraw(attachment);
@@ -2204,7 +2222,7 @@ public sealed partial class MatchEngine
             // actingPlayerId like Lady Matsu's Rage below), since battle resolution's own casualty
             // sweep -- the most common way one actually dies -- calls this with no actingPlayerId at
             // all.
-            if(Definition(card).CreatedOnly)
+            if(IsCreatedCard(card))
             {
                 card.Zone=Zone.RemovedFromGame;
                 Emit("removedFromGame",$"{Definition(card).Name} was destroyed and removed from the game.",card.OwnerId,card.Id);
@@ -2323,7 +2341,7 @@ public sealed partial class MatchEngine
     {
         // A Ring's recruit grant made for a battle that was never fought (issue #379) does not carry into another turn; no other grant outlives its battle.
         _state.AdditionalActions.Clear();
-        foreach(var card in _state.Cards.Values) { card.Modifiers.Clear(); card.GrantedKeywords.RemoveAll(g=>g.Duration=="Turn"); card.GrantedAbilities.RemoveAll(g=>g.Duration=="Turn"); card.Protections.RemoveAll(p=>p.Duration=="Turn"); card.ActionLocks.RemoveAll(l=>l.Duration==ActionLockUntilTurnEnd); }
+        foreach(var card in _state.Cards.Values) { card.Modifiers.Clear(); card.GrantedKeywords.RemoveAll(g=>g.Duration=="Turn"); card.GrantedAbilities.RemoveAll(g=>g.Duration is GrantDuration.Turn or GrantDuration.Battle); card.Protections.RemoveAll(p=>p.Duration=="Turn"); card.ActionLocks.RemoveAll(l=>l.Duration==ActionLockUntilTurnEnd); }
         // Ohsuki's Sparrow (issue #299): "since your last turn ended" -- the turn that is ending right
         // now is the ACTIVE player's own, so it restarts that one player's window; the other player's
         // flag (which may already be set by destruction during this very turn) is left untouched until
@@ -2767,7 +2785,7 @@ public sealed partial class MatchEngine
     private void Emit(string type,string message,int? playerId=null,string? cardId=null,int? Amount=null) => _state.Events.Add(new(_state.Events.Count+1,type,message,playerId,cardId,Amount));
     private PlayerState Player(int id) => _state.Players[id];
     private CardInstance Card(string? id) { Require(id is not null && _state.Cards.ContainsKey(id),"Unknown card."); return _state.Cards[id!]; }
-    private static CardDefinition Definition(CardInstance card) => CardCatalog.Get(card.DefinitionId);
+    private static CardDefinition Definition(CardInstance card) => card.Printed ?? CardCatalog.Get(card.DefinitionId);
     private static void Require(bool condition,string message) { if(!condition) throw new RuleViolation(message); }
     private sealed class RuleViolation(string message):Exception(message);
     private static T Copy<T>(T value) => JsonSerializer.Deserialize<T>(JsonSerializer.Serialize(value))!;

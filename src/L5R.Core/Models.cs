@@ -163,7 +163,9 @@ public sealed record GrantedKeyword(string Keyword, string Source, string Durati
 /// <summary>An ability a card has because another card's effect gave it (as opposed to one printed on it), the ability twin of
 /// GrantedKeyword. Duration is "Permanent" (only when the granting text says so; it survives the card dying and returning),
 /// "Turn" (cleared at turn end) or "Copy" (a copied ability, kept until the copying ability is used again -- Source is that
-/// copying ability's id; CopiedFrom/CopiedFromName say which card it was copied from). See CardCopy.cs.</summary>
+/// copying ability's id; CopiedFrom/CopiedFromName say which card it was copied from). "Battle" ends with the battle;
+/// "Attachment" ends when the granting attachment leaves its host. Source is the granting card instance, or the copying
+/// ability id for a copy. See AbilityGrants.cs and CardCopy.cs.</summary>
 public sealed record GrantedAbility(string AbilityId, string Source, string Duration, string? CopiedFrom = null, string? CopiedFromName = null);
 
 /// <summary>"Protection" (issue #212: Tamori Takeshi's "Effects of actions the target performs
@@ -193,6 +195,9 @@ public sealed class CardInstance
 {
     public string Id { get; set; } = "";
     public string DefinitionId { get; set; } = "";
+    // A created card whose printed values belong to this one instance (Venerated Sensei's Clan, Your Name is Mine's title and Gold Cost): the definition every rule reads
+    // through MatchEngine.Definition, instead of the catalogue's. Null for every card whose printed values are the catalogue's, which is nearly all of them.
+    public CardDefinition? Printed { get; set; }
     public int OwnerId { get; set; }
     // Control follows the Personality (issue #352): a card attached to a Personality is controlled by that Personality's controller, and a card
     // brought into play from an ENEMY discard or dead pile is controlled by the player who brought it. While such a card is in play OwnerId is
@@ -220,6 +225,10 @@ public sealed class CardInstance
     public List<CardToken> Tokens { get; set; } = [];
     public bool Dishonorable { get; set; }
     public int StraightenBlockedTurn { get; set; } = -1;
+    // "May not be straightened this turn" (issue #411, Basic Lesson's Stronghold): every effect that would straighten this card is refused for the whole of the turn with this number,
+    // unlike the one-shot StraightenBlockedTurn above, which negates the next attempt only. Not swept: it simply stops holding when the turn number moves on, which is after the
+    // End phase, so the next Straighten phase (which is not an effect) is untouched.
+    public int StraightenLockedTurn { get; set; } = -1;
     // Tamori Tamoko's own Open action (issue #207 follow-up): "assigned to attack ... this turn" --
     // set once, in Assign(), the turn this card is assigned during Infantry/Cavalry Maneuvers.
     public int AssignedToAttackTurn { get; set; } = -1;
@@ -234,6 +243,10 @@ public sealed class CardInstance
     // StartTurn discards the card once the owner's own TurnsTaken reaches it. Null for an Event with
     // no bounded duration (Suspicions, Formal Apology) or any non-Event card.
     public int? ExpiresAtTurnsTaken { get; set; }
+    // A created COPY of another card (issue #398, Mendon): this instance's DefinitionId is the copied card's own, so it behaves exactly as that card, and this flag is the only thing
+    // that says it is a created card: it has no physical card to return to (it is removed from the game when it leaves play) and the client marks it so. Every other created card is a
+    // CardDefinition.CreatedOnly scan and needs no marker.
+    public bool CreatedCopy { get; set; }
 }
 
 public sealed class ProvinceState
@@ -822,7 +835,10 @@ public sealed record GameCommand(string Type, int PlayerId, long ExpectedVersion
     string? CostOption = null,
     // Multi-target actions (issue #336): one entry per target slot of an ability that declares AbilityDefinition.Slots --
     // the cards (or the player) chosen for that slot. Null for every ability with a single Target.
-    SlotSelection[]? Selections = null);
+    SlotSelection[]? Selections = null,
+    // "Create a card" with a choice of cards (issue #394, "an Armor or Weapon Item"): the id of the scan the acting player chose among the ability's
+    // CreatedCardSpec.Or alternatives; null for an ability that creates a single card.
+    string? CreatedCard = null);
 public sealed record CommandResult(bool Accepted, string? Error, long Version, GameEvent[] Events);
 public sealed record PaymentOption(string[] SourceIds, int Produced, int Cost, int Excess);
 // Basis (issue #303): the human-readable derivation of Cost, e.g. "Training samurai cost 5 - 2 (Clan
@@ -866,9 +882,12 @@ public sealed record CardView(string Id, CardDefinition? Definition, int OwnerId
     // while a cost is being paid: Yoritomo Sakuma); null when it cannot. The client shows this and never derives it.
     int? GoldProduced = null,
     // "May not perform actions" (issue #336): true while the card, or the Personality it is attached to, is action-locked.
-    bool ActionLocked = false);
+    bool ActionLocked = false,
+    // A created copy of another card (issue #398): its Definition is the copied card's own; this says it is a created card, for the client's marker.
+    bool CreatedCopy = false);
 /// <summary>One granted ability as the client shows it: the id, the engine's label for it, and where it came from.</summary>
-public sealed record GrantedAbilityView(string AbilityId, string Label, string Timing, string Source, string Duration, string? CopiedFrom, string? CopiedFromName);
+public sealed record GrantedAbilityView(string AbilityId, string Label, string Timing, string Source, string Duration, string? CopiedFrom, string? CopiedFromName,
+    string? SourceName = null, int? UsesPerTurn = null, int? UsesRemaining = null);
 // Strength is the EFFECTIVE strength (printed + any attached Region's static bonus, e.g. Fallow
 // Lands) -- what a player actually needs to beat to destroy the province, not the raw mutable field.
 public sealed record ProvinceView(int Index, int Strength, bool Destroyed, CardView? Card, CardView? Region);
