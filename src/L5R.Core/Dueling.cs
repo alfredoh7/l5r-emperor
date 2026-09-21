@@ -72,6 +72,8 @@ public sealed partial class MatchEngine
     {
         var duel = _state.PendingDuel!;
         Emit("duelRefused", $"{Definition(Card(duel.ChallengedId)).Name} refuses the duel.", duel.ChallengedPlayerId, duel.ChallengedId);
+        // Doji Shigeyuki: "He may refuse; if he does, move him home."
+        if (duel.AbilityId == "shigeyuki-duel") MoveHome(Card(duel.ChallengedId), false);
         var challengerPlayerId = duel.ChallengerPlayerId;
         _state.PendingDuel = null;
         NextAction(challengerPlayerId);
@@ -425,6 +427,11 @@ public sealed partial class MatchEngine
             // Second City unwired-card audit (issue #264): "she won" is exactly "the challenger's own
             // side won" in a self-performer 1v1 duel -- there is no ally on that side to conflate her
             // with, so checking the winner's OWNER matches the printed text precisely.
+            // Doji Shigeyuki: "Bow the duel's loser's unit."
+            case "shigeyuki-duel":
+                foreach (var loserId in loserIds)
+                    foreach (var member in Attachments(loserId).Prepend(Card(loserId))) if (!StalwartNegatesBow(member, challengerPlayerId)) member.Bowed = true;
+                break;
             case "shiba-kudome-duel":
                 foreach (var id in loserIds) if (!StalwartNegatesBow(Card(id), challengerPlayerId)) Card(id).Bowed = true;
                 if (winnerId is not null && Card(winnerId).OwnerId == challengerPlayerId && ControlsKeyword(challengerPlayerId, "Shugenja"))
@@ -445,6 +452,14 @@ public sealed partial class MatchEngine
             // To First Blood: "its winner's controller gains 2 Honor" (the destruction it negates was applied before the Focus Effects, in ResolveDuel).
             case "to-first-blood-focus":
                 if (winnerPlayerId is int firstBloodWinner) GainHonor(firstBloodWinner, 2, "To First Blood");
+                break;
+            // Of One Instant: "Give your Personality in this duel Tactician." Shadow Tactics: "After this duel ends, the loser's controller draws a card." A Simple Yari: "After this duel ends, bow its winner."
+            case "of-one-instant-focus":
+                if (_state.PendingDuel is { } instantDuel) GrantKeyword(Card(instantDuel.ChallengerPlayerId == ownerId ? instantDuel.ChallengerId : instantDuel.ChallengedId), "Tactician", abilityId, "Turn");
+                break;
+            case "shadow-tactics-focus": foreach (var loserPlayer in loserPlayerIds.Distinct().ToArray()) Draw(Player(loserPlayer)); break;
+            case "simple-yari-focus":
+                if (_state.PendingDuel?.WinnerId is string yariWinnerId && InPlay(Card(yariWinnerId)) && !StalwartNegatesBow(Card(yariWinnerId), ownerId)) Card(yariWinnerId).Bowed = true;
                 break;
             // Scavenging Party: "After this duel ends, give its winner -3F" (a tie has no winner).
             case "scavenging-party-focus":

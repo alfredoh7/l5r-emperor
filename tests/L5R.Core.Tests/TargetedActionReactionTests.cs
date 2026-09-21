@@ -177,7 +177,7 @@ internal static class TargetedActionReactionTests
         var formerlyExempt = new[] { "tactical-advantage", "equip-battle", "training-ashigaru-boost", "ashigaru-elite-boost", "elite-sentry-straighten", "kharmic-discard",
             "neiru-equip", "naval-invasion", "ring-of-air-straighten", "ring-of-water-move-home" };
         foreach (var (id, ability) in AbilityCatalog.All)
-            Eq(ability.UsesPerTurn, formerlyExempt.Contains(id) ? AbilityUseLimit.Unlimited : id == "mochitoko-negate" ? 2 : 1, $"the limit of {id}");
+            Eq(ability.UsesPerTurn, formerlyExempt.Contains(id) || id == "kaname-ranged-attack" ? AbilityUseLimit.Unlimited : id == "mochitoko-negate" ? 2 : 1, $"the limit of {id}");
         Eq(AbilityUseLimit.Unlimited, 0);
     }
 

@@ -2355,4 +2355,20 @@ public static class PublishedContent
     public static PublishedSnapshot SpellWave15 { get; } = Load("L5R.Published.SpellWave15.json", "spell-wave-15", requireDecks: false);
     /// <summary>Strategy wave 42 (issue #420): Skipping the Puddle (a Kata), Superior Reach and Scavenging Party.</summary>
     public static PublishedSnapshot StrategyWave42 { get; } = Load("L5R.Published.StrategyWave42.json", "strategy-wave-42", requireDecks: false);
+    /// <summary>Personality wave 43 (issue #431): Before the Dawn Personalities built on existing primitives.</summary>
+    public static PublishedSnapshot PersonalityWave43 { get; } = Load("L5R.Published.PersonalityWave43.json", "personality-wave-43", requireDecks: false);
+    /// <summary>Strategy wave 43 (issue #431): Before the Dawn Strategies built from existing primitives.</summary>
+    public static PublishedSnapshot StrategyWave43 { get; } = Load("L5R.Published.StrategyWave43.json", "strategy-wave-43", requireDecks: false);
+    /// <summary>Item wave 8 (issue #431): A Simple Yari and Crimson Shadow Armor.</summary>
+    public static PublishedSnapshot ItemWave8 { get; } = Load("L5R.Published.ItemWave8.json", "item-wave-8", requireDecks: false);
+    /// <summary>Spell wave 16 (issue #431): A Dragon's Favor and Ember's Final Fire.</summary>
+    public static PublishedSnapshot SpellWave16 { get; } = Load("L5R.Published.SpellWave16.json", "spell-wave-16", requireDecks: false);
+    /// <summary>Follower wave 20 (issue #431): Ashigaru Recruits and Genji's Students.</summary>
+    public static PublishedSnapshot FollowerWave20 { get; } = Load("L5R.Published.FollowerWave20.json", "follower-wave-20", requireDecks: false);
+    /// <summary>Holding wave 6 (issue #431): Indomitable Home.</summary>
+    public static PublishedSnapshot HoldingWave6 { get; } = Load("L5R.Published.HoldingWave6.json", "holding-wave-6", requireDecks: false);
+    /// <summary>Celestial wave 4 (issue #431): Ebisu's Honesty and Saibankan's Justice.</summary>
+    public static PublishedSnapshot CelestialWave4 { get; } = Load("L5R.Published.CelestialWave4.json", "celestial-wave-4", requireDecks: false);
+    /// <summary>Region wave 5 (issue #431): Stone-Hewed Shrine.</summary>
+    public static PublishedSnapshot RegionWave5 { get; } = Load("L5R.Published.RegionWave5.json", "region-wave-5", requireDecks: false);
 }

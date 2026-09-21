@@ -1,0 +1,59 @@
+{
+  "Profile": "celestial-wave-4",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-2276",
+      "Name": "Ebisu's Honesty",
+      "Type": "Celestial",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Your provinces have +2 strength.\nLimited: Destroy your rightmost province and discard this card: Gain 4 Honor; this gain will not be negated.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-2276.jpg",
+      "Keywords": [
+        "Unique",
+        "Fortune"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "ebisu-destroy-province"
+      ],
+      "Effect": "ebisu-provinces"
+    },
+    {
+      "Id": "oracle-l5r-6446",
+      "Name": "Saibankan's Justice",
+      "Type": "Celestial",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Other players may not lobby.\nOpen: Target one or two Personalities controlled by the same player and discard this card: Dishonor them.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6446.jpg",
+      "Keywords": [
+        "Unique",
+        "Fortune"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "saibankan-dishonor"
+      ],
+      "Effect": "saibankan-no-lobby"
+    }
+  ],
+  "Decks": []
+}
