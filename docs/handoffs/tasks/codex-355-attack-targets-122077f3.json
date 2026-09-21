@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Start approved explicit Attack target choices with full-card previews (#355).",
+  "validation": "Read live issue, accepted rules note, engine contract and approved A/B concepts.",
+  "remaining": "Implementation, native and transport verification, prepared launcher and human review. No merge authorized.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/355",
+  "branch": "codex/355-attack-targets",
+  "updated": "2026-09-21T01:55:05.104453+00:00"
+}
