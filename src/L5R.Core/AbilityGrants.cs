@@ -15,6 +15,20 @@ public sealed partial class MatchEngine
         if (!receiver.GrantedAbilities.Contains(grant)) receiver.GrantedAbilities.Add(grant);
     }
 
+    // The Spirit Strategies (Second City): "Choose your performing unbowed Personality: If he is a [keyword], permanently give him [the ability]; otherwise, permanently
+    // give him [keyword]." Returns whether he already had the keyword, i.e. whether the ability was the branch taken.
+    private bool GrantSpirit(CardInstance performer, string keyword, string abilityId, string sourceId, int playerId)
+    {
+        if (!Keyword(performer, keyword))
+        {
+            GrantKeyword(performer, keyword, sourceId, GrantDuration.Permanent);
+            return false;
+        }
+        GrantAbility(performer, abilityId, sourceId, GrantDuration.Permanent);
+        Emit("abilityGranted", $"{Definition(performer).Name} permanently gains {AbilityCatalog.All[abilityId].Timing}: {AbilityCatalog.All[abilityId].Label}", playerId, performer.Id);
+        return true;
+    }
+
     private void RemoveAttachmentGrants(CardInstance receiver, string source)
     {
         receiver.GrantedKeywords.RemoveAll(g => g.Source == source && g.Duration == GrantDuration.Attachment);

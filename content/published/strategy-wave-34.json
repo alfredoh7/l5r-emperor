@@ -1,0 +1,30 @@
+{
+  "Profile": "strategy-wave-34",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-3785",
+      "Name": "Interference",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Political Open: A target Stronghold's abilities may not be used. If it is your turn, bow it.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-3785.jpg",
+      "Keywords": [],
+      "Focus": 4,
+      "Abilities": [
+        "interference-lock"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}
