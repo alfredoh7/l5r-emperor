@@ -18,6 +18,7 @@ public partial class Main
         _guide.TooltipText = RulesHelp.Tooltip(RulesHelp.PhaseGuide(View.Phase) + "\n\n" + RulesHelp.Topic("targets"));
         if (RenderSearchDecision()) return;
         if (RenderEventDecision()) return;
+        if (RenderOpponentPayment()) return;
         if (RenderEitherOr()) return;
         if (RenderCopyTray()) return;
         if (RenderDecisionChooser()) { AddDecisionReviewNavigation(); return; }
@@ -211,13 +212,18 @@ public partial class Main
     {
         if (QuoteFor(action) is not { } quote) return (0, true);
         var required = AmountFor(action, quote);
-        _inspector.AddChild(Palette.Text("PAYMENT · " + KindLabel(quote.Kind), 11, Palette.Gold));
-        _inspector.AddChild(Palette.Wrapped($"{required} Gold", 24, Palette.Gold));
-        if (!string.IsNullOrWhiteSpace(quote.Basis)) _inspector.AddChild(Palette.Wrapped(quote.Basis, 13, Palette.PaperDim));
+        var opponent = action.Type == "chooseOpponentPayment";
+        if (opponent) RenderOpponentAmount(required, quote);
+        else
+        {
+            _inspector.AddChild(Palette.Text("PAYMENT · " + KindLabel(quote.Kind), 11, Palette.Gold));
+            _inspector.AddChild(Palette.Wrapped($"{required} Gold", 24, Palette.Gold));
+            if (!string.IsNullOrWhiteSpace(quote.Basis)) _inspector.AddChild(Palette.Wrapped(quote.Basis, 13, Palette.PaperDim));
+            if (quote.Kind == GoldCostKind.Variable) RenderAmountControl(required, quote.MinAmount ?? 0, quote.MaxAmount ?? quote.MinAmount ?? 0);
+        }
         if (quote.Error is { } error) _inspector.AddChild(Palette.Wrapped(error, 14, Palette.Error));
-        if (quote.Kind == GoldCostKind.Variable) RenderAmountControl(required, quote.MinAmount ?? 0, quote.MaxAmount ?? quote.MinAmount ?? 0);
         var payments = PaymentsFor(quote, required);
-        if (payments.Length > 1)
+        if (payments.Length > 1 && !opponent)
         {
             var suggestions = new OptionButton { CustomMinimumSize = new Vector2(0, 36), FitToLongestItem = false, ClipText = true };
             for (var i = 0; i < payments.Length; i++)
@@ -229,7 +235,8 @@ public partial class Main
             suggestions.Selected = Array.FindIndex(payments, p => p.SourceIds.ToHashSet().SetEquals(_sources));
             _inspector.AddChild(suggestions);
         }
-        if (required > 0) RenderSources(required);
+        if (required > 0 && opponent) RenderOpponentSources(required);
+        else if (required > 0) RenderSources(required);
         else _inspector.AddChild(Palette.Wrapped("No Gold sources are needed.", 15, Palette.Crane));
         return (required, quote.Error is null && SelectedProduction() >= required);
     }
@@ -395,7 +402,7 @@ public partial class Main
         var button = SidebarSkin.Button(label, () =>
         {
             if (option.Type=="useAbility" && View.PendingChoice?.Type is "bowReaction" or "beforeActionReaction" && option.TargetIds is {Length:0} && option.Command is { } reaction && QuoteFor(option) is null) Submit(reaction);
-            else if (option.Type is "purchase" or "recruitReserve" or "equip" or "playStrategy" or "attack" or "assignDefense" or "discardHand" or "useAbility") Choose(option);
+            else if (option.Type is "purchase" or "recruitReserve" or "equip" or "playStrategy" or "attack" or "assignDefense" or "discardHand" or "useAbility" or "chooseOpponentPayment") Choose(option);
             else if (option.Type == "discardProvince") Confirm("Discard this province card?", "Discarding starts the Dynasty discard step. You cannot recruit more cards this phase.", () => Submit(option.Command!));
             else if (option.Command is { } command) Submit(command);
         }, option.Type is "pass" or "endDynasty" or "declineReaction");
@@ -413,7 +420,7 @@ public partial class Main
         Palette.Clear(_phaseActions);
         if (_session.Snapshot is null) return;
         if (View.WinnerId is not null) return;
-        if (_chosen is not null || EventDecisionActive || GenericDecisionActive || EitherOrActive || CopyDecisionActive) return;
+        if (_chosen is not null || EventDecisionActive || GenericDecisionActive || EitherOrActive || OpponentPaymentActive || CopyDecisionActive) return;
         _phaseActions.AddChild(new HSeparator());
         if (_session.Online && !_session.Connected)
         {

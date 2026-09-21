@@ -121,6 +121,7 @@ public partial class Main : Node
         if (_capturePath is not null && _captureMode.StartsWith("published-shown",StringComparison.Ordinal)) { ProcessShownCapture(delta); return; }
         if (_capturePath is not null && _captureMode.StartsWith("published-action-lock",StringComparison.Ordinal)) { ProcessActionLockCapture(delta); return; }
         if (_capturePath is not null && _captureMode.StartsWith("published-search",StringComparison.Ordinal)) { ProcessSearchCapture(delta); return; }
+        if (_capturePath is not null && _captureMode.StartsWith("published-opponent-payment",StringComparison.Ordinal)) { ProcessOpponentPaymentCapture(delta); return; }
         if (_capturePath is not null && _captureMode.StartsWith("published-either-or",StringComparison.Ordinal)) { ProcessEitherCapture(delta); return; }
         if (_capturePath is not null && _captureMode.StartsWith("published-copy",StringComparison.Ordinal)) { ProcessCopyCapture(delta); return; }
         if (_capturePath is not null && _captureMode.StartsWith("published-movement",StringComparison.Ordinal)) { ProcessMovementCapture(delta); return; }
@@ -314,6 +315,7 @@ public partial class Main : Node
         FitShownCards();
         FitSearchPanel();
         FitEitherReviewControls();
+        FitOpponentPaymentReviewControls();
         FitCopyPanel();
         FitCopyReviewControls();
         FitMovementReviewControls();
@@ -422,8 +424,8 @@ public partial class Main : Node
         if (MenuVisible || PracticeVisible) return;
         if (_session.Snapshot is null)
         {
-            _eitherOrKey=null;_eitherNoticeMatch=null;_eitherNotice=null;
-            if(_chosen?.Type=="chooseEitherOr"){_chosen=null;_sources.Clear();}
+            _opponentPaymentKey=null;_eitherOrKey=null;_eitherNoticeMatch=null;_eitherNotice=null;
+            if(_chosen?.Type is "chooseEitherOr" or "chooseOpponentPayment"){_chosen=null;_sources.Clear();}
             ClearSearchPanel();
             ClearCopyPanel(true);_copyNoticeMatch=null;_copyNotice=null;
             ObserveShownCards();
@@ -512,8 +514,10 @@ public partial class Main : Node
         {
             ChooseTarget(card.Id); return;
         }
-        if (_chosen is { Type: "purchase" or "recruitReserve" or "equip" or "useAbility" or "playStrategy" } && card.OwnerId == View.ViewerId && Production(card, Self) > 0 && !card.Bowed && card.Zone is Zone.Home or Zone.Stronghold or Zone.Battlefield)
+        if (_chosen is { Type: "purchase" or "recruitReserve" or "equip" or "useAbility" or "playStrategy" or "chooseOpponentPayment" } && card.OwnerId == View.ViewerId && Production(card, Self) > 0 && !card.Bowed && card.Zone is Zone.Home or Zone.Stronghold or Zone.Battlefield)
         {
+            if (_chosen.Type == "chooseOpponentPayment" && QuoteFor(_chosen) is { } paymentQuote && AmountFor(_chosen, paymentQuote) == 0)
+            { SetNotice("Choose how much Gold to pay before selecting sources."); return; }
             if (!_sources.Add(card.Id)) _sources.Remove(card.Id);
             RenderInspector(); Highlight(); return;
         }

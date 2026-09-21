@@ -15,7 +15,7 @@ public partial class Main
         if(_eitherNoticeMatch!=_session.MatchKey)
         {_eitherNoticeMatch=_session.MatchKey;_eitherNoticeSequence=sequence;_eitherNotice=null;}
         if(_eitherNoticeVersion!=View.Version)_eitherNotice=null;
-        var automatic=View.Events.LastOrDefault(e=>e.Sequence>_eitherNoticeSequence&&e.Type=="eitherOrAutoResolved");
+        var automatic=View.Events.LastOrDefault(e=>e.Sequence>_eitherNoticeSequence&&e.Type is "eitherOrAutoResolved" or "opponentPaymentAutoResolved");
         if(automatic is not null)_eitherNotice=automatic.Message;
         _eitherNoticeSequence=sequence;_eitherNoticeVersion=View.Version;
         if(_eitherNotice is null)return;

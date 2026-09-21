@@ -162,6 +162,8 @@ public partial class Main
         // picking receive its clicks instead of forwarding them into the mat.
         if (_root.GetNodeOrNull<Control>("AttackReviewControls") is { } attackReview &&
             attackReview.IsVisibleInTree() && attackReview.GetGlobalRect().HasPoint(viewportPoint)) return false;
+        if (_root.GetNodeOrNull<Control>("OpponentPaymentReviewControls") is { } paymentReview &&
+            paymentReview.IsVisibleInTree() && paymentReview.GetGlobalRect().HasPoint(viewportPoint)) return false;
         if(_eventHandBar is {Visible:true} && _eventHandBar.GetGlobalRect().HasPoint(viewportPoint))return false;
         if(_shownPreview is { } preview && IsInstanceValid(preview) && preview.GetGlobalRect().HasPoint(viewportPoint))return false;
         // The Fallen strips can overlap the projection. Check only the visible

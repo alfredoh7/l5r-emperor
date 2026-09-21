@@ -1,0 +1,8 @@
+{
+  "tool": "built-in image_gen",
+  "source": "/Users/alfredo/.codex/generated_images/01a0b019-027d-7ee0-84a4-44aac565a142/exec-8d5b9d0e-0435-42db-b6f2-19b8a0c3e48e.png",
+  "sha256": "8ca994a6c279301db16836b73ab3980949d0759c00cc7ad07b8376ebc425a20b",
+  "reference": "artifacts/ui-next-design-review-2026-09-21/images/01-payment-a.png",
+  "prompt": "Use case: stylized-concept. Production 2D game UI asset: one simple warm gold coin, front-on circular disc, blank face with only a gently raised plain circular rim. Subtle worn brass/gold metal texture, softly beveled edge, warm highlights at upper left, dark lower rim. Match the antique gold ornamental accents of the supplied game UI reference, but the coin MUST HAVE A COMPLETELY BLANK FACE: no numerals, no digits, no 6, no letters, no emblem, no symbol, no hole. One coin only, centered and filling 84% of a square image, genuine transparent background with clean alpha. No text or surrounding UI. Must remain legible as a plain coin at 24px. Input image is a STYLE reference only; do not reproduce its numeral-bearing coin.",
+  "approval": "Alfredo requested plain coins for #377; production asset derived from the approved concept."
+}
