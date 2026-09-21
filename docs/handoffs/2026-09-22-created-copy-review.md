@@ -18,4 +18,6 @@ The actual ImageGen production sprite derived from approved A is under `Art/Crea
 - Art coverage verified offline using the inherited 2,968-image PR430 receipt/archive. No new catalogue scans or art package needed.
 - No authored Core/server/rules changes in this task. The inherited stack’s full deterministic baseline passed for #430 at `66a80e1f`; final PR432 CI runs separately. Cumulative collaboration lane remains shared because of inherited unmerged rules/interface work.
 
+A final source/native comparison enlarged the reading-view seal to preserve the approved proportions; both normal/reduced native checks passed again. Concurrent desktop activity exposed a focus change between probe steps; probe clicks now wait for stable real OS focus. No product focus guard is bypassed.
+
 Mendon rules review, Alfredo hands-on acceptance, native Windows graphical play and external multiplayer acceptance remain pending. Source CI and Windows export/runtime validation do not constitute human acceptance. A combined five-demo Windows delivery follows this source publication.

@@ -97,8 +97,24 @@ public partial class Main
         catch (Exception e) { SetNotice("Choose a scenario to restart the prepared demo."); GD.PushWarning(e.ToString()); }
         finally { _createdReviewBusy = false; }
     }
+    private async Task WaitCreatedFocus()
+    {
+        var announced=false;
+        for(var i=0;i<18000;i++)
+        {
+            if(GetWindow().HasFocus())
+            {
+                await ToSignal(GetTree().CreateTimer(.4),SceneTreeTimer.SignalName.Timeout);
+                if(GetWindow().HasFocus())return;
+            }
+            if(!announced){GD.Print("CREATED_COPY_FOCUS_REQUIRED: activate the game window.");announced=true;}
+            await EventFrames(1);
+        }
+        throw new Exception("Native window requires OS focus");
+    }
     private async Task ClickCreatedSeal()
     {
+        await WaitCreatedFocus();
         var seal = _tiles.Single(t => t.Card.Id == _createdId).CopySeal!;
         var point = seal.CenterOnViewport();
         PushCaptureMouse(new InputEventMouseMotion { Position = point, GlobalPosition = point }); await EventFrames(8);
@@ -122,9 +138,7 @@ public partial class Main
             _preferences.ReducedMotion = _captureMode.Contains("reduced"); ApplyPreferences(false);
             await PrepareCreatedReview();
             if (_captureMode.EndsWith("-review")) { GD.Print("CREATED_COPY_REVIEW_READY: Gates created Lion Ancestor; scenario picker includes clearly marked synthetic cases."); return; }
-            if (!GetWindow().HasFocus()) GD.Print("CREATED_COPY_FOCUS_REQUIRED: activate the game window.");
-            for (var i = 0; i < 18000 && !GetWindow().HasFocus(); i++) await EventFrames(1);
-            SupportRequire(GetWindow().HasFocus(), "Native window requires focus"); await EventFrames(40);
+            await WaitCreatedFocus(); await EventFrames(40);
             CheckCreatedMarkers(); var version = View.Version; DeselectCard(); await ClickCreatedSeal();
             SupportRequire(_selected?.Id == _createdId && View.Version == version && StabilizationText(_inspector).Contains("Created copy"), "Seal did not inspect without changing state");
             await SupportCapture("-home");

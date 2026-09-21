@@ -41,7 +41,7 @@ public partial class CreatedCopySeal : Button
     {
         var inverse = CardAnchor.GetGlobalTransform().AffineInverse();
         var corners = CardAnchor.FaceCornersInCanvas().Select(p => inverse * p).ToArray();
-        var diameter = CardAnchor.ProjectToScreen is null ? Math.Clamp(CardAnchor.FaceHeight * .15f, 22, 34) : Math.Max(24, CardAnchor.FaceHeight * .20f);
+        var diameter = CardAnchor.ProjectToScreen is null ? Math.Clamp(CardAnchor.FaceHeight * .17f, 22, 48) : Math.Max(24, CardAnchor.FaceHeight * .20f);
         var extent = Vector2.One * diameter;
         if (CardAnchor.ProjectToScreen is {} project)
         {
