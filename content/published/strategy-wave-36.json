@@ -1,0 +1,54 @@
+{
+  "Profile": "strategy-wave-36",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-3065",
+      "Name": "Hibernation",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: Bow your performing Nonhuman: It hibernates. Negate its straightening until your next turn begins. After the next time this game another player's Battle action targets it, negate the action's effects.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-3065.jpg",
+      "Keywords": [],
+      "Focus": 1,
+      "Abilities": [
+        "hibernation-hibernate"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9172",
+      "Name": "Visitation",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: Destroy your performing Ancestor Personality to bow a target Personality. Negate his straightening until after you reveal cards in your Provinces at the start of your next turn.\nLimited: If you control an Ancestor Personality, gain 2 Honor. Each player who does not control an Ancestor Personality loses 2 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9172.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "visitation-bow",
+        "visitation-honor"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

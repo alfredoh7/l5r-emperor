@@ -185,6 +185,21 @@ public sealed record Protection(string Source, string Duration);
 /// the GrantedKeyword/Protection convention: "Turn" (the default -- until the end of the turn) is swept by FinishTurn.</summary>
 public sealed record ActionLock(string Source, string Duration);
 
+/// <summary>The moments of a turn a straighten hold can wait for. Each happens during the active player's turn; a hold names whose turn counts.</summary>
+public enum StraightenPoint { TurnBegins, StraightenPhaseEnds, EventsRevealEnds, ActionPhaseEnds, TurnEnds }
+
+/// <summary>"May not straighten until X" (issue #415). <see cref="Owner"/> is the player whose turn counts (null: whoever's turn it is when the point comes, "this turn" and "the
+/// next Straighten Phase"); <see cref="Until"/> is the point; <see cref="Skip"/> is how many of those points must pass with the hold still standing before it is released (0: the
+/// next one releases it). <see cref="WhileInPlay"/> ties the hold to a card ("while this card remains in play"): it ends when that card leaves play.</summary>
+public sealed class StraightenHold
+{
+    public string Source { get; set; } = "";
+    public int? Owner { get; set; }
+    public StraightenPoint Until { get; set; }
+    public int Skip { get; set; }
+    public string? WhileInPlay { get; set; }
+}
+
 /// <summary>A physical marker on a card, not a card itself (core rules Glossary — Token). Type
 /// identifies the kind of token (e.g. "Fire", "Madness") for other effects to count/reference; it
 /// does not grant its host a keyword. Stat/Amount, when set, is a persistent bonus/penalty carried
@@ -233,6 +248,15 @@ public sealed class CardInstance
     // unlike the one-shot StraightenBlockedTurn above, which negates the next attempt only. Not swept: it simply stops holding when the turn number moves on, which is after the
     // End phase, so the next Straighten phase (which is not an effect) is untouched.
     public int StraightenLockedTurn { get; set; } = -1;
+    // Timed straighten holds (issue #415, StraightenHolds.cs): "negate its straightening until [a point in a player's turn]" -- Hibernation, Visitation, Bamboo Harvesters' "will not
+    // straighten before your second turn". While any hold stands the card is not straightened by the Straighten phase or by any effect; PrintedHoldsSeeded records that the holds a
+    // printed trait implies were created for this stay in play.
+    public List<StraightenHold> StraightenHolds { get; set; } = [];
+    public bool PrintedHoldsSeeded { get; set; }
+    // Movement locks (issue #415, MovementLocks.cs): kinds of movement refused until the end of a given turn.
+    public List<MovementLock> MovementLocks { get; set; } = [];
+    // Hibernation: "after the next time this game another player's Battle action targets it, negate the action's effects" -- set when it hibernates, spent by that action.
+    public bool TargetShield { get; set; }
     // Tamori Tamoko's own Open action (issue #207 follow-up): "assigned to attack ... this turn" --
     // set once, in Assign(), the turn this card is assigned during Infantry/Cavalry Maneuvers.
     public int AssignedToAttackTurn { get; set; } = -1;

@@ -732,6 +732,10 @@ public sealed partial class MatchEngine
         higher.Dishonorable = lower.Dishonorable || Definition(higher).Effect == "enters-dishonored";
         higher.StraightenBlockedTurn = Math.Max(higher.StraightenBlockedTurn, lower.StraightenBlockedTurn);
         higher.StraightenLockedTurn = Math.Max(higher.StraightenLockedTurn, lower.StraightenLockedTurn);
+        higher.StraightenHolds.AddRange(lower.StraightenHolds);
+        higher.PrintedHoldsSeeded = lower.PrintedHoldsSeeded;
+        higher.MovementLocks.AddRange(lower.MovementLocks);
+        higher.TargetShield = lower.TargetShield;
         higher.AssignedToAttackTurn = Math.Max(higher.AssignedToAttackTurn, lower.AssignedToAttackTurn);
 
         higher.Modifiers.AddRange(lower.Modifiers);
@@ -782,6 +786,10 @@ public sealed partial class MatchEngine
         card.Bowed = false;
         card.Dishonorable = false;
         card.StraightenBlockedTurn = -1;
+        card.StraightenHolds.Clear();
+        card.PrintedHoldsSeeded = false;
+        card.MovementLocks.Clear();
+        card.TargetShield = false;
         card.ForcePenaltiesNegatedTurn = -1;
         card.AssignedToAttackTurn = -1;
     }
@@ -1163,6 +1171,7 @@ public sealed partial class MatchEngine
             var cavalryEligible=IsCavalryUnit(card) || isDefender && Definition(card).Effect=="cavalry-if-defender";
             Require(cavalry?cavalryEligible:!IsCavalryUnit(card),cavalry?"Only a Cavalry unit may assign during Cavalry Maneuvers.":"An Infantry unit must assign during Infantry Maneuvers.");
             Require(provinces.Contains(assignment.Value),"Choose an existing enemy province battlefield.");
+            Require(!MovementLocked(card,MovementKinds.Assign),$"{Definition(card).Name} may not be assigned to a battlefield this turn.");
             card.Zone=Zone.Battlefield; card.ProvinceIndex=assignment.Value;
             foreach(var attached in Attachments(card.Id)) attached.ProvinceIndex=assignment.Value;
             // Tamori Tamoko's own Open action (issue #207 follow-up): "gain 1 Honor if he was NOT
@@ -1566,7 +1575,7 @@ public sealed partial class MatchEngine
             // no meaning once this card is sitting face-up in a province again, ready to be purchased.
             card.Modifiers.Clear(); card.ActionLocks.Clear(); card.GrantedKeywords.Clear(); card.GrantedAbilities.Clear(); card.RemovedKeywords.Clear(); card.RemovedClanAffiliations.Clear();
             card.AbilityUses.Clear(); card.Tokens.Clear(); card.Bowed=false; card.Dishonorable=false;
-            card.StraightenBlockedTurn=-1; card.StraightenLockedTurn=-1; card.ForcePenaltiesNegatedTurn=-1; card.AssignedToAttackTurn=-1;
+            card.StraightenBlockedTurn=-1; card.StraightenLockedTurn=-1; card.StraightenHolds.Clear(); card.PrintedHoldsSeeded=false; card.ForcePenaltiesNegatedTurn=-1; card.AssignedToAttackTurn=-1;
             var owner=Player(card.OwnerId);
             if(!owner.Provinces.Any(p=>!p.Destroyed)) continue; // no province left to place him in -- an extremely rare edge case; he simply stays home
             _state.PendingChoice=new("yourClanNeedsYouProvince",card.OwnerId,id,$"{Definition(card).Name}: choose a province to place him into, face-up (discarding any card already there).");
@@ -1855,6 +1864,8 @@ public sealed partial class MatchEngine
         // ItemForceToWielder already uses for an Item's own conditional bonus), always applying --
         // bowed or not, every phase -- since no published Spell needs a conditional version yet.
         +Attachments(card.Id).Where(c=>Definition(c).Type==CardType.Spell).Sum(c=>Definition(c).Effect=="scouring-flood-force"||Definition(c).Effect=="wave-persists-force"&&Keyword(card,"Water")?2:0)
+        // Strength of the Tsunami: "This Shugenja has +6F" -- only the Shugenja it is attached to gets it.
+        +Attachments(card.Id).Where(c=>Definition(c).Type==CardType.Spell && Definition(c).Effect=="tsunami-force" && Keyword(card,"Shugenja")).Sum(_=>6)
         +(Definition(card).Effect=="force-with-spell"&&Attachments(card.Id).Any(c=>Definition(c).Type==CardType.Spell)?1:0)
         +(Definition(card).Effect=="force-if-enemy-dishonorable"&&_state.Cards.Values.Any(c=>c.OwnerId!=card.OwnerId&&Definition(c).Type==CardType.Personality&&InPlay(c)&&c.Dishonorable)?2:0)
         // "The highest number of dead Personalities in any one discard pile" -- the greatest per-player
@@ -2291,7 +2302,7 @@ public sealed partial class MatchEngine
     // Returns whether the card moved: false only when Kyuden Kitsune negated the movement (the card stays where it was; callers ignore the result unless it matters).
     private bool MoveToBattlefield(CardInstance card,int province)
     {
-        if((card.Zone!=Zone.Battlefield || card.ProvinceIndex!=province) && KitsuneNegatesMovement(card,province)) return false;
+        if((card.Zone!=Zone.Battlefield || card.ProvinceIndex!=province) && (MovementLockNegates(card,MovementKinds.ToBattlefield) || KitsuneNegatesMovement(card,province))) return false;
         // Legion of the Bat (issue #279): "after the resolution of an action that moved a target
         // enemy Infantry Personality to this card's battlefield" -- every printed "move to the
         // current battlefield" ability (Mirumoto Michi/Togashi Rikyou/Intervening Spirit/Takasho/
@@ -2353,6 +2364,7 @@ public sealed partial class MatchEngine
     {
         // A Ring's recruit grant made for a battle that was never fought (issue #379) does not carry into another turn; no other grant outlives its battle.
         _state.AdditionalActions.Clear();
+        AdvanceStraightenHolds(StraightenPoint.TurnEnds);
         foreach(var card in _state.Cards.Values) { card.Modifiers.RemoveAll(m=>!m.Permanent); card.GrantedKeywords.RemoveAll(g=>g.Duration=="Turn"); card.GrantedAbilities.RemoveAll(g=>g.Duration is GrantDuration.Turn or GrantDuration.Battle); card.Protections.RemoveAll(p=>p.Duration=="Turn"); card.ActionLocks.RemoveAll(l=>l.Duration==ActionLockUntilTurnEnd); }
         // Ohsuki's Sparrow (issue #299): "since your last turn ended" -- the turn that is ending right
         // now is the ACTIVE player's own, so it restarts that one player's window; the other player's
@@ -2390,6 +2402,7 @@ public sealed partial class MatchEngine
             expired.Zone=Zone.DynastyDiscard;
             Emit("eventExpired",$"{Definition(expired).Name}'s effect ended.",expired.OwnerId,expired.Id);
         }
+        AdvanceStraightenHolds(StraightenPoint.TurnBegins);
         StraightenPhase(player);
     }
     private static readonly string[] RingElements=["Fire","Water","Air","Earth","Void"];
@@ -2425,6 +2438,7 @@ public sealed partial class MatchEngine
             else Straighten(card);
         }
         Emit("straightened",$"{player.Name}'s turn: eligible cards straightened.",player.Id);
+        AdvanceStraightenHolds(StraightenPoint.StraightenPhaseEnds);
         // Cultist Infiltrator (oracle-l5r-1595): "After each Straighten Phase: Give this Personality
         // a -1C token" -- fires once per turn's single Straighten Phase, for every Cultist
         // Infiltrator in play regardless of whose turn it is (no "your own turn" qualifier printed)
@@ -2464,6 +2478,7 @@ public sealed partial class MatchEngine
                 else if(Definition(card).Type==CardType.Celestial) ResolveCelestial(player,province,card);
             }
         }
+        AdvanceStraightenHolds(StraightenPoint.EventsRevealEnds);
         // Suspicions-shaped ongoing Event effects: re-checked every Events Phase (see ResolveOngoingEvents),
         // not just the phase that reveals them, so a card already sitting in Zone.EventInPlay from a
         // previous turn triggers here too.
@@ -2789,6 +2804,7 @@ public sealed partial class MatchEngine
         // those, ever call SetPhase(Phase.Dynasty, ...) (grep confirms it; CreateEconomyScenario's own
         // direct `state.Phase=Phase.Dynasty` field assignment bypasses SetPhase entirely, so it never
         // reaches here). One check here therefore covers both paths without needing two separate hooks.
+        if(_state.Phase==Phase.Action && phase!=Phase.Action) AdvanceStraightenHolds(StraightenPoint.ActionPhaseEnds);
         if(phase==Phase.Dynasty)
             foreach(var waveMan in _state.Cards.Values.Where(c=>InPlay(c) && Definition(c).Effect=="wave-man-attack-phase-straighten"))
                 StraightenBowedUnit(waveMan);

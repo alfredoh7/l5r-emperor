@@ -43,6 +43,8 @@ public static class BranchCondition
     public const string TargetAtBattlefield = "target-at-battlefield";
     /// <summary>A card sits in the current battlefield's province (Silent Terror: "you may discard a card in the current battlefield's province").</summary>
     public const string ProvinceHoldsCard = "province-holds-card";
+    /// <summary>The Personality the source is attached to has a keyword (Strength of the Tsunami: "if this Shugenja is Water").</summary>
+    public static string WielderHas(string keyword) => $"wielder-has:{keyword}";
 }
 
 /// <summary>Effects an option may apply. Each goes through the same helper an ordinary effect would, so a negation a reaction set
@@ -59,6 +61,10 @@ public static class BranchEffect
     public static string Honor(bool self, int amount) => $"honor:{(self ? "self" : "opponent")}:{amount}";
     /// <summary>The card in the current battlefield's province is discarded (and the province refilled), whoever's it is (Silent Terror).</summary>
     public const string DiscardProvinceCard = "discard-province-card";
+    /// <summary>The Personality the source is attached to is straightened (and only he: "Straighten him").</summary>
+    public const string StraightenWielder = "straighten-wielder";
+    /// <summary>The Personality the source is attached to moves home.</summary>
+    public const string MoveWielderHome = "move-wielder-home";
 }
 
 /// <summary>The four answers to "choose a player who gains or loses N Honor" (issue #336): each player, each direction. Shared by every card that prints it.</summary>
@@ -103,6 +109,7 @@ public sealed partial class MatchEngine
         BranchCondition.TargetMoved => targetMoved,
         BranchCondition.TargetAtBattlefield => target is not null && target.Zone == Zone.Battlefield,
         BranchCondition.ProvinceHoldsCard => CurrentBattlefieldProvince() is { CardId: not null },
+        _ when condition.StartsWith("wielder-has:", StringComparison.Ordinal) => source.AttachedTo is { } wielderId && Keyword(Card(wielderId), condition["wielder-has:".Length..]),
         _ => throw new InvalidOperationException($"Unknown branch condition '{condition}'.")
     };
 
@@ -122,6 +129,8 @@ public sealed partial class MatchEngine
             case BranchEffect.MoveSourceHome: MoveHome(source, false); break;
             case BranchEffect.MoveTargetHome: MoveHome(target!, false); break;
             case BranchEffect.DiscardProvinceCard: DiscardCurrentProvinceCard(); break;
+            case BranchEffect.StraightenWielder: Straighten(Card(source.AttachedTo)); break;
+            case BranchEffect.MoveWielderHome: MoveHome(Card(source.AttachedTo), false); break;
             default: throw new InvalidOperationException($"Unknown branch effect '{effect}'.");
         }
     }

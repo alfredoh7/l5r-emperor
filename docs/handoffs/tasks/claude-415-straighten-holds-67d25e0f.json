@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Second City primitives 1/6 (#415): a universal timed straighten hold (designated player, turn point, count of points; Bamboo Harvesters re-applied), per-card movement locks, and Hibernation's target shield; wires Hibernation, Visitation and Strength of the Tsunami. Rules lane; the client-lane files are only the three shipped art scans and their generated .import files. Decision doc: docs/decisions/2026-09-21-second-city-primitives.md (survey of the 33 cards whose text stops a straightening).",
+  "validation": "bash tools/check.sh exits 0 (Python suites, Core suites incl. straighten-holds 9, AI 28, server 8, transport 7; client builds; Godot import passes). 26 mutation checks of the new logic (turn-flow hooks, seeding, release count, owner match, shield, movement locks, Tsunami Force and lock, Visitation cost and honor, validation, view): five survived the first tests, the tests were strengthened, and every one now fails a named test.",
+  "remaining": "Readings 1-7 for Mendon in the decision doc (Hibernation lifts as the next turn begins; the shield negates the whole action at announcement; Visitation's destruction is a cost and its hold belongs to Visitation's controller; Tsunami's move-home choice and lock kinds). The two older per-turn fields (StraightenLockedTurn, StraightenBlockedTurn) were not folded into the hold. Stages 2-6 (#416-#420) follow.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/415",
+  "branch": "claude/415-straighten-holds",
+  "updated": "2026-09-21T14:05:51.103391+00:00"
+}

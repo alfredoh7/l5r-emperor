@@ -1683,6 +1683,21 @@ public static class AbilityCatalog
         ["know-no-fear-negate-fear"] = new("Reaction", "After a Fear action targets your performing Samurai: Negate its effects", "none", Trigger: ReactionTriggers.TargetedByAction),
         ["to-first-blood-focus"] = new("FocusEffect", "As a Focus Effect: Negate any destruction for losing this duel. After this duel ends, its winner's controller gains 2 Honor.", "none"),
         ["to-first-blood-negate"] = new("Reaction", "After another player's Iaijutsu action targets your Personality: Negate his destruction from the action's effects", "none", Trigger: ReactionTriggers.TargetedByAction),
+        // Timed straighten holds and movement locks (issue #415, StraightenHolds.cs, MovementLocks.cs). Hibernation (oracle-l5r-3065): the performer bows and hibernates -- its straightening is negated
+        // until its controller's next turn begins, and the next Battle action of another player that targets it is negated whole (once, this game).
+        ["hibernation-hibernate"] = new("Open", "Bow your performing Nonhuman: It hibernates. Negate its straightening until your next turn begins. After the next time this game another player's Battle action targets it, negate the action's effects", "none",
+            Performer: "own-unbowed-unit-with-keyword", RequiredKeywords: ["Nonhuman"], Costs: ActionCost.BowPerformer),
+        // Visitation (oracle-l5r-9172): the performing Ancestor is destroyed as the cost; the target bows and does not straighten until after its controller's next reveal of provinces.
+        ["visitation-bow"] = new("Open", "Destroy your performing Ancestor Personality to bow a target Personality. Negate his straightening until after you reveal cards in your Provinces at the start of your next turn", "personality",
+            Performer: "own-personality-with-keyword-at-battle", RequiredKeywords: ["Ancestor"], Costs: [new(CostVerbs.Sacrifice, CostSubject.Performer)]),
+        ["visitation-honor"] = new("Limited", "If you control an Ancestor Personality, gain 2 Honor. Each player who does not control an Ancestor Personality loses 2 Honor", "none"),
+        // Strength of the Tsunami (oracle-l5r-7562), a Spell: "This Shugenja has +6F" is the Effect. The first action works even while the Spell is bowed (it has no bow cost).
+        ["tsunami-straighten"] = new("Battle", "Even if this card is bowed, if this Shugenja is Water: Straighten him. You may move him home", "none",
+            Branch: new(BranchCondition.WielderHas("Water"),
+                [new("straighten", "Straighten him", [BranchEffect.StraightenWielder]),
+                 new("straighten-move", "Straighten him and move him home", [BranchEffect.StraightenWielder, BranchEffect.MoveWielderHome])],
+                new("none", "Nothing happens", []))),
+        ["tsunami-move-home"] = new("Battle", "Bow this card and target an enemy Personality: Move him home. If he moved, negate his (future) movement", "enemy-personality", Costs: ActionCost.BowSource),
         // Great Sacrifice (oracle-l5r-2900): destroy your performing Personality (the cost) to destroy an enemy unit whose total Force does not exceed the performer's Force plus Personal Honor (plus one if he is defending).
         ["great-sacrifice-destroy"] = new("Battle", "Destroy your performing unbowed Personality and target an enemy unit with total Force equal to or lower than your performer's Force, plus Personal Honor, plus one if he is defending: Destroy the enemy unit", "enemy-unit-within-performer-sacrifice",
             Performer: "own-unbowed-personality-at-battle", Costs: [new(CostVerbs.Sacrifice, CostSubject.Performer)]),
@@ -2148,7 +2163,7 @@ public sealed partial class MatchEngine
             or "yumaru-move-home"
             // Issue #336: Sea Troll Predator moves its target (and itself, each movement negatable on its own), Fear Me!, Liu-Xeung and Gold and Steel's second
             // ability send their target home.
-            or "predator-move" or "fear-me-move" or "liuxeung-move-home" or "gold-and-steel-bow-move" => "move",
+            or "predator-move" or "fear-me-move" or "liuxeung-move-home" or "gold-and-steel-bow-move" or "tsunami-move-home" => "move",
         "air-straighten" or "paid-straighten" or "training-keyword-conditional-straighten" or "immovable-object-straighten"
             or "defensive-stance" or "ritual-preparation-straighten" or "training-straighten-at-battle" or "horibe-straighten"
             or "furu-straighten" or "tsudoken-exp2-straighten" or "tsukasa-straighten" or "atsumichi-straighten"
@@ -2171,7 +2186,7 @@ public sealed partial class MatchEngine
     // otherwise have applied, via the NegatesEffect check StalwartNegatesBow now performs first).
     private static bool BowsTarget(string abilityId) => abilityId is "paid-bow" or "unorthodox-attack" or "chokehold" or "immovable-object-bow"
         or "naga-remnants-bow" or "costly-feud" or "block-supply" or "bow-before-my-will" or "surety-of-purpose" or "unexpected-support" or "spirit-monk-bow" or "spirit-paragon-bow"
-        or "discovering-conspiracy-expose" or "insulting-gesture-shame" or "barred-passage-bow" or "silent-terror-bow" or "fugitive-apprehended"
+        or "discovering-conspiracy-expose" or "insulting-gesture-shame" or "barred-passage-bow" or "silent-terror-bow" or "fugitive-apprehended" or "visitation-bow"
         or "strategic-sacrifice-toggle" or "weakness-of-man-toggle" or "shosuro-ritoru-bow" or "nightingale-blade-bow" or "law-of-darkness-weaken"
         or "training-bow-enemy" or "training-bow-at-battle" or "training-bow-enemy-card-at-battle" or "training-bow-enemy-card-open" or "training-bow-any" or "horibe-bow" or "dairuko-exp-bow" or "furu-bow"
         or "tsudoken-exp-bow" or "masumi-bow" or "tsukasa-bow" or "atsumichi-bow" or "bounty-hunter-bow" or "brothers-great-lake-bow"
@@ -3063,7 +3078,9 @@ public sealed partial class MatchEngine
                 // Shosuro Hawado (issue #301): "Battle: Even if Hawado is bowed, ..." -- both destination halves.
                 or "hawado-move-home" or "hawado-move-battlefield"
                 // Akodo Dairuko (oracle-l5r-200): "Tireless Reaction" -- the action may be taken even while the card is bowed.
-                or "dairuko-rally", "Abilities on bowed cards cannot be used.");
+                or "dairuko-rally"
+                // Strength of the Tsunami: "Battle: Even if this card is bowed, if this Shugenja is Water: Straighten him."
+                or "tsunami-straighten", "Abilities on bowed cards cannot be used.");
             uses = source.AbilityUses;
         }
         // The per-turn limit is AbilityDefinition.UsesPerTurn (AbilityLimits.cs). A once-per-GAME ability (AbilityDefinition.OncePerGame: Border Keep's refresh, Bo of Water) never resets: any stamp spends it.
@@ -3335,6 +3352,8 @@ public sealed partial class MatchEngine
                 // actingAsBattle; an Open-timed use has no presence requirement at all regardless.
                 "own-unbowed-personality-with-keyword-at-any-location" => Definition(performer).Type == CardType.Personality && !performer.Bowed &&
                     HasKeywords(performer, ability.RequiredKeywords) && (!actingAsBattle || AtAnyLocation(performer)),
+                // Hibernation: "your performing Nonhuman" -- an unbowed Personality or Follower in play with the keyword, wherever it is.
+                "own-unbowed-unit-with-keyword" => Definition(performer).Type is CardType.Personality or CardType.Follower && InPlay(performer) && !performer.Bowed && HasKeywords(performer, ability.RequiredKeywords),
                 // On the Hunt: "your performing Samurai with an attachment" (any bow state, at any location: the action is an Open one).
                 "own-samurai-with-attachment" => Definition(performer).Type == CardType.Personality && Keyword(performer, "Samurai") && HasAttachments(performer),
                 // Essence of Undeath: the Personality the Spell is attached to ("this Shugenja"), who performs its action.
@@ -3803,7 +3822,7 @@ public sealed partial class MatchEngine
                     // follows, exactly like RequireNoAttachments -- "target an enemy dishonorable Personality".
                     Require(ability.TargetMustBe is null || MatchesTargetStatus(target, ability.TargetMustBe),
                         $"The target must be {ability.TargetMustBe?.Describe()}.");
-                    Require(!StraightensOnly(id) || target.StraightenLockedTurn != _state.TurnNumber, $"{Definition(target).Name} cannot be straightened this turn.");
+                    Require(!StraightensOnly(id) || !StraightenRefused(target), $"{Definition(target).Name} cannot be straightened {(target.StraightenLockedTurn == _state.TurnNumber ? "this turn" : "until its hold is released")}.");
                     Require((!ability.RequireNoAttachments || !HasAttachments(target)) && ability.Target switch {
                         "shinden" => personality && !own && !target.Bowed,
                         "air" => personality && Keyword(target, "Air"),
@@ -4149,6 +4168,7 @@ public sealed partial class MatchEngine
         // selected, costs are paid, targets are selected, and effects applied."
         // A Reaction is an action, so these windows apply to it wherever it is played -- including the Engage window: the window it
         // was played in is suspended behind them and reopened afterwards (ReactionsAreActions.cs).
+        if (TargetShieldNegates(command)) return;
         if (ResolveOrDeferAnnounceReaction(command)) return;
         if (ResolveOrDeferBeforeActionReaction(command)) return;
         // Unimpeachable Name (oracle-l5r-8989): checked after Rokai/Tamoko above, same shape as the
@@ -5435,6 +5455,39 @@ public sealed partial class MatchEngine
             case "know-no-fear-negate-move": NegateEffects(Card(HeldAction().TargetId!), "bow", "move"); break;
             case "know-no-fear-negate-fear": NegateHeldAction(source!); break;
             case "to-first-blood-negate": NegateEffects(Card(HeldAction().TargetId!), "destroy"); break;
+            // Hibernation: the performer (bowed as the cost) is held bowed until its controller's next turn begins, and the next Battle action another player aims at it is negated.
+            case "hibernation-hibernate":
+            {
+                var sleeper = Card(command.PerformerId!);
+                AddStraightenHold(sleeper, Definition(source!).Name, player.Id, StraightenPoint.TurnBegins);
+                sleeper.TargetShield = true;
+                Emit("hibernates", $"{Definition(sleeper).Name} hibernates.", sleeper.OwnerId, sleeper.Id);
+                break;
+            }
+            // Visitation: the Ancestor's destruction was the cost; the target bows and does not straighten until its controller's next reveal of provinces is over. The Limited half
+            // pays the players who control (or lack) an Ancestor Personality.
+            case "visitation-bow":
+                if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
+                AddStraightenHold(target!, Definition(source!).Name, player.Id, StraightenPoint.EventsRevealEnds);
+                break;
+            case "visitation-honor":
+                foreach (var each in _state.Players)
+                {
+                    if (ControlsKeyword(each.Id, "Ancestor")) { if (each.Id == player.Id) GainHonor(each.Id, 2, "Visitation", source); }
+                    else GainHonor(each.Id, -2, "Visitation", source);
+                }
+                break;
+            // Strength of the Tsunami: the first half is the branch (Water host: straighten him, and maybe move him home); the second moves an enemy home and, if he moved, locks his movement.
+            case "tsunami-straighten":
+                if (BeginConditionalChoice(command, ability, consumedGrant, playedFromDiscard, opponentHonorBeforeBattleAction, bowedBeforeAction, preExistingGrants)) return;
+                break;
+            case "tsunami-move-home":
+            {
+                var zoneBefore = target!.Zone;
+                MoveHome(target, false);
+                if (zoneBefore == Zone.Battlefield && target.Zone == Zone.Home) LockMovement(target, Definition(source!).Name, MovementKinds.Home | MovementKinds.ToBattlefield);
+                break;
+            }
             // Great Sacrifice: the performer's destruction was its cost; the enemy unit is destroyed.
             case "great-sacrifice-destroy": DestroyUnits([target!], false, player.Id); break;
             // Rage of the Spirits: both bows were paid as costs (the Shugenja's and the Spirit's); the enemy card is destroyed, and Earth pays a bonus.
@@ -5805,6 +5858,7 @@ public sealed partial class MatchEngine
             case "jakuei-bow": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;
             case "jakuei-bow-favor":
                 if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
+                if (MovementLockNegates(target!, MovementKinds.Home)) break;
                 ReturnHome(target!, false); // bow above is preserved -- ReturnHome(bow:false) never straightens
                 Emit("unitMovedHome", $"{Definition(target!).Name}'s unit moved home bowed.", target!.OwnerId, target.Id);
                 break;
@@ -6355,7 +6409,8 @@ public sealed partial class MatchEngine
             card.StraightenBlockedTurn = -1;
             Emit("straightenNegated", $"{Definition(card).Name} could not straighten.", card.OwnerId, card.Id);
         }
-        else if (Definition(card).Effect == "skip-first-straighten" && Player(card.OwnerId).TurnsTaken < 2)
+        // A timed hold (StraightenHolds.cs: Hibernation, Visitation, Bamboo Harvesters' "will not straighten before your second turn") refuses every attempt until it is released.
+        else if (StraightenHeld(card))
             Emit("straightenNegated", $"{Definition(card).Name} could not straighten.", card.OwnerId, card.Id);
         else
         {
@@ -6425,6 +6480,7 @@ public sealed partial class MatchEngine
             Emit("moveNegated", $"{Definition(card).Name}'s movement was negated before it resolved.", card.OwnerId, card.Id);
             return;
         }
+        if (MovementLockNegates(card, MovementKinds.Home)) return;
         ReturnHome(card, bow);
         Emit("unitMovedHome", $"{Definition(card).Name}'s unit moved home{(bow ? " bowed" : "")}.", card.OwnerId, card.Id);
     }
@@ -6690,6 +6746,7 @@ public sealed partial class MatchEngine
                     _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && !c.Bowed && (!actingAsBattle || AtBattle(c)) && HasKeywords(c, ability.RequiredKeywords)).Select(c => (string?)c.Id).ToArray(),
                 "own-unbowed-personality-with-keyword-at-any-location" =>
                     _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && !c.Bowed && (!actingAsBattle || AtAnyLocation(c)) && HasKeywords(c, ability.RequiredKeywords)).Select(c => (string?)c.Id).ToArray(),
+                "own-unbowed-unit-with-keyword" => _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && Definition(c).Type is CardType.Personality or CardType.Follower && !c.Bowed && HasKeywords(c, ability.RequiredKeywords)).Select(c => (string?)c.Id).ToArray(),
                 "own-samurai-with-attachment" => _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && Definition(c).Type == CardType.Personality && Keyword(c, "Samurai") && HasAttachments(c)).Select(c => (string?)c.Id).ToArray(),
                 "own-wielder" => source is { Zone: Zone.Attached, AttachedTo: { } wielderId } ? [wielderId] : [],
                 "own-shadowlands-ninja-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && HasClanAffiliation(c, "Shadowlands") && Keyword(c, "Ninja") && (!actingAsBattle || AtBattle(c))).Select(c => (string?)c.Id).ToArray(),

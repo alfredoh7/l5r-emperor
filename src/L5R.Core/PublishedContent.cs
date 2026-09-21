@@ -2331,4 +2331,8 @@ public static class PublishedContent
     public static PublishedSnapshot SpellWave13 { get; } = Load("L5R.Published.SpellWave13.json", "spell-wave-13", requireDecks: false);
     /// <summary>Second City pass (#264): Kyuden Kitsune.</summary>
     public static PublishedSnapshot StrongholdWave10 { get; } = Load("L5R.Published.StrongholdWave10.json", "stronghold-wave-10", requireDecks: false);
+    /// <summary>Strategy wave 36 (issue #415): Hibernation and Visitation.</summary>
+    public static PublishedSnapshot StrategyWave36 { get; } = Load("L5R.Published.StrategyWave36.json", "strategy-wave-36", requireDecks: false);
+    /// <summary>Spell wave 14 (issue #415): Strength of the Tsunami.</summary>
+    public static PublishedSnapshot SpellWave14 { get; } = Load("L5R.Published.SpellWave14.json", "spell-wave-14", requireDecks: false);
 }
