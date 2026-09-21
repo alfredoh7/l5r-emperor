@@ -165,8 +165,9 @@ public sealed partial class MatchEngine
         CompleteNegatedAction(command, ability, player, source, playedFromDiscard, consumedGrant);
     }
 
+    // In play, or in a hand: Know No Fear and To First Blood are Strategies played from a hand as a Reaction (Mendon: the window opens for a reactor holding a matching card).
     private IEnumerable<(CardInstance Card, string AbilityId)> TargetedActionReactionCandidates() =>
-        _state.Cards.Values.Where(InPlay).SelectMany(c => AbilityIdsOf(c)
+        _state.Cards.Values.Where(c => InPlay(c) || c.Zone == Zone.Hand).SelectMany(c => AbilityIdsOf(c)
             .Where(id => AbilityCatalog.All.TryGetValue(id, out var a) && a.Timing == "Reaction" && a.Trigger == TargetedByAction)
             .Select(id => (Card: c, AbilityId: id)));
 
@@ -195,7 +196,7 @@ public sealed partial class MatchEngine
     {
         var command = subject.Command;
         if (command.AbilityId is null || !AbilityCatalog.All.TryGetValue(command.AbilityId, out var acting) || !IsAction(acting)) return false;
-        if (!InPlay(card) || HeldActionNegated(subject)) return false;
+        if (!(InPlay(card) || card.Zone == Zone.Hand) || HeldActionNegated(subject)) return false;
         if (abilityId == "mochitoko-negate") return MochitokoFollowers(card, subject).Any();
         if (subject.TargetId is null || !_state.Cards.TryGetValue(subject.TargetId, out var affected) || !InPlay(affected)) return false;
         switch (abilityId)
@@ -216,6 +217,18 @@ public sealed partial class MatchEngine
                     && AtBattle(affected) && affected.OwnerId != _state.ActivePlayerId
                     && card is { Zone: Zone.Attached, AttachedTo: { } tamedHostId } && Keyword(Card(tamedHostId), "Earth")
                     && (subject.IsAttack || DestroysTarget(command.AbilityId));
+            // Know No Fear (a Strategy played from a hand): another player's action targets one of its controller's Samurai -- the "performing Samurai" is that targeted one. The first
+            // half answers an action that would bow or move him; the second, any Fear action.
+            case "know-no-fear-negate-move":
+                return command.PlayerId != card.OwnerId && affected.OwnerId == card.OwnerId && Definition(affected).Type == CardType.Personality && Keyword(affected, "Samurai")
+                    && (BowsTarget(command.AbilityId) || MoveOrStraightenKind(command.AbilityId) == "move");
+            case "know-no-fear-negate-fear":
+                return command.PlayerId != card.OwnerId && affected.OwnerId == card.OwnerId && Definition(affected).Type == CardType.Personality && Keyword(affected, "Samurai")
+                    && ActionCarriesKeyword(acting, command.CardId is not null && _state.Cards.TryGetValue(command.CardId, out var fearSource) ? fearSource : null, "Fear");
+            // To First Blood: another player's Iaijutsu action targets one of its controller's Personalities.
+            case "to-first-blood-negate":
+                return command.PlayerId != card.OwnerId && affected.OwnerId == card.OwnerId && Definition(affected).Type == CardType.Personality
+                    && ActionCarriesKeyword(acting, command.CardId is not null && _state.Cards.TryGetValue(command.CardId, out var iaijutsuSource) ? iaijutsuSource : null, "Iaijutsu");
             case "yurishi-disappear":
                 return command.PlayerId != card.OwnerId && affected.Id == card.Id && IsBattleAction(command) && card.Zone == Zone.Battlefield;
             case "jinn-kuen-negate":

@@ -31,6 +31,8 @@ public sealed partial class MatchEngine
         var named = ability.Performer is not null && command.PerformerId is not null && _state.Cards.TryGetValue(command.PerformerId, out var chosen) ? chosen : null;
         var actor = named is not null && Definition(named).Type is CardType.Personality or CardType.Follower ? named : source;
         if (actor is not null) Require(!ActionLocked(actor), $"{Definition(actor).Name} may not perform actions this turn.");
+        if (ability.Slots is not null)
+            foreach (var performing in PerformingSlotCards(command, ability)) Require(!ActionLocked(performing), $"{Definition(performing).Name} may not perform actions this turn.");
         // "A Stronghold's abilities may not be used" (Interference): a card that is not a unit -- a Stronghold, Holding, Region or Celestial -- performs nothing itself, so the lock on IT bars
         // every ability printed on it, whoever the ability names as its performer (Shinden Asahina's is performed by a Shugenja).
         if (source is { ActionLocks.Count: > 0 } && Definition(source).Type is CardType.Stronghold or CardType.Holding or CardType.Region or CardType.Celestial)
