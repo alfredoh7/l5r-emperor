@@ -2261,6 +2261,34 @@ public static class PublishedContent
         return snapshot;
     }
 
+    /// <summary>strategy-wave-32 (issue #411).</summary>
+    public static PublishedSnapshot StrategyWave32 { get; } = LoadStrategyWave32();
+
+    private static PublishedSnapshot LoadStrategyWave32()
+    {
+        var snapshot = Load("L5R.Published.StrategyWave32.json", "strategy-wave-32", requireDecks: false);
+        if(snapshot.Cards.Length != 1)
+            throw new InvalidOperationException("Unexpected strategy-wave-32 card count.");
+        foreach(var card in snapshot.Cards)
+            if(card.Type != CardType.Strategy)
+                throw new InvalidOperationException($"strategy-wave-32 card is not a Strategy: {card.Id}");
+        return snapshot;
+    }
+
+    /// <summary>personality-wave-41 (issue #411).</summary>
+    public static PublishedSnapshot PersonalityWave41 { get; } = LoadPersonalityWave41();
+
+    private static PublishedSnapshot LoadPersonalityWave41()
+    {
+        var snapshot = Load("L5R.Published.PersonalityWave41.json", "personality-wave-41", requireDecks: false);
+        if(snapshot.Cards.Length != 1)
+            throw new InvalidOperationException("Unexpected personality-wave-41 card count.");
+        foreach(var card in snapshot.Cards)
+            if(card.Type != CardType.Personality)
+                throw new InvalidOperationException($"personality-wave-41 card is not a Personality: {card.Id}");
+        return snapshot;
+    }
+
     private static PublishedSnapshot Load(string resourceName, string profile, bool requireDecks)
     {
         using var stream = typeof(PublishedContent).Assembly.GetManifestResourceStream(resourceName)

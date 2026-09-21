@@ -1739,6 +1739,13 @@ public static class AbilityCatalog
         ["training-create-bowed-holding"] = new("Open", "Training: create a bowed Questionable Resources Holding", "none", Creates: new(CardType.Holding, ProxyId: "oracle-l5r-10024") { EntersBowed = true }),
         ["training-create-terrain"] = new("Battle", "Training: create a Terrain at the current battlefield", "none", Creates: new(CardType.Strategy, ProxyId: "training-created-terrain")),
         ["training-create-terrain-open"] = new("Open", "Training: create a Terrain at the current battlefield (an Open action, which may be taken with none)", "none", Creates: new(CardType.Strategy, ProxyId: "training-created-terrain")),
+        // Basic Lesson (oracle-l5r-713, issue #411): "Limited: Create a (bowed) Holding with the trait "Bow this card: Produce 3 Gold." Negate your Stronghold's straightening (this turn)." The Holding
+        // is Questionable Resources. Mendon's ruling: your Stronghold may not be straightened by any effect or ability for the rest of the turn it is played (the Straighten phase is not an effect).
+        ["basic-lesson-holding"] = new("Limited", "Create a (bowed) Holding with the trait \"Bow this card: Produce 3 Gold.\" Negate your Stronghold's straightening (this turn)", "none",
+            Creates: new(CardType.Holding, ProxyId: "oracle-l5r-10024") { EntersBowed = true }),
+        // "Open: Destroy your target Holding: Create a Samurai Personality with 3C/2PH and Force equal to the Holding's base Gold Cost." Hired Samurai, with its Force set from the destroyed Holding.
+        ["basic-lesson-samurai"] = new("Open", "Destroy your target Holding: create a Samurai Personality with 3C/2PH and Force equal to the Holding's base Gold Cost", "own-holding", Costs: [new(CostVerbs.Sacrifice, CostSubject.Target)],
+            Creates: new(CardType.Personality, Chi: 3, PersonalHonor: 2, Keywords: ["Samurai"]) { Values = [new(CreatedStat.Force, CreatedSubject.Target, CreatedStat.GoldCost)] }),
         ["training-create-pair"] = new("Open", "Training: create two Personalities at home", "none", Creates: new(CardType.Personality, ProxyId: "oracle-l5r-9785", Count: 2)),
         ["training-create-titled"] = new("Open", "Training: choose your performing Personality: create a Personality with his title and one more than this card's Gold Cost", "none", Performer: "own-personality",
             Creates: new(CardType.Personality, ProxyId: "oracle-l5r-10202") { Values = [new(CreatedStat.Name, CreatedSubject.Performer), new(CreatedStat.GoldCost, CreatedSubject.Source, Plus: 1)] }),
@@ -2102,6 +2109,11 @@ public sealed partial class MatchEngine
         // Kuni Shinoda - exp (personality-wave-24): bows, then destroys a Shadowlands target.
         or "shinoda-exp-bow-destroy"
         or "a-stain-cleansed-destroy";
+    // The actions whose ONLY effect is to straighten their target: against a card that may not be straightened this turn (Basic Lesson) they are refused outright, where an action that
+    // also does something else (Defensive Stance's +3F) still resolves and only its straightening is skipped (Straighten refuses it).
+    private static bool StraightensOnly(string abilityId) => abilityId is "jinn-kuen-straighten" or "kodo-straighten" or "munefusa-straighten" or "mitsuko-straighten" or "ritual-preparation-straighten"
+        or "training-straighten-at-battle" or "horibe-straighten" or "furu-straighten" or "tsudoken-exp2-straighten" or "tsukasa-straighten" or "atsumichi-straighten" or "ring-of-air-straighten"
+        or "mitoshi-straighten";
     private static string? MoveOrStraightenKind(string abilityId) => abilityId switch
     {
         "incapacitated" or "favor-battle" or "journeys-end-move" or "shamate-move" or "effortless-counterattack-move"
@@ -3774,6 +3786,7 @@ public sealed partial class MatchEngine
                     // follows, exactly like RequireNoAttachments -- "target an enemy dishonorable Personality".
                     Require(ability.TargetMustBe is null || MatchesTargetStatus(target, ability.TargetMustBe),
                         $"The target must be {ability.TargetMustBe?.Describe()}.");
+                    Require(!StraightensOnly(id) || target.StraightenLockedTurn != _state.TurnNumber, $"{Definition(target).Name} cannot be straightened this turn.");
                     Require((!ability.RequireNoAttachments || !HasAttachments(target)) && ability.Target switch {
                         "shinden" => personality && !own && !target.Bowed,
                         "air" => personality && Keyword(target, "Air"),
@@ -3785,6 +3798,7 @@ public sealed partial class MatchEngine
                         // Yasuki Tsujiken (oracle-l5r-9469): "target a Holding" -- no ownership or
                         // bowed-state restriction on either of his own two abilities.
                         "any-holding" => type == CardType.Holding,
+                        "own-holding" => type == CardType.Holding && own,
                         "holding-or-stronghold" => type is CardType.Holding or CardType.Stronghold,
                         // Blade of Champions: one of the reactor's own cards (the Blade included, judged bowed) that the held action accepts.
                         "redirect-target-own-card" => own && OpenReactionSubject() is { } redirectedAction
@@ -5900,6 +5914,9 @@ public sealed partial class MatchEngine
                 SpendHandPlayedCard(player, source);
                 if (ExecuteAttach(command, ability.Attach!, player, source, target)) return;
                 break;
+            case "basic-lesson-holding":
+                if (ExecuteCreate(ability, ability.Creates!, command, player, () => LockStraightening(Card(player.StrongholdId)))) return;
+                break;
             case "nakanu-technique-create": case "akumas-power-create": case "training-create-charter-tax":
             {
                 var honorLost = id switch { "akumas-power-create" => 3, "training-create-charter-tax" => 2, _ => 1 };
@@ -6266,6 +6283,12 @@ public sealed partial class MatchEngine
         }
     }
 
+    private void LockStraightening(CardInstance card)
+    {
+        card.StraightenLockedTurn = _state.TurnNumber;
+        Emit("straightenLocked", $"{Definition(card).Name} cannot be straightened this turn.", card.OwnerId, card.Id);
+    }
+
     private void Straighten(CardInstance card)
     {
         // Tamori Tamoko (issue #207 follow-up): "before an action resolves, negate ... his
@@ -6283,7 +6306,10 @@ public sealed partial class MatchEngine
         // negates an actual attempt, so a LATER straighten attempt the same turn (an ability that
         // straightens more than once) succeeds normally. skip-first-straighten is a distinct,
         // ongoing condition (a whole turn's worth of Novice restriction), never consumed this way.
-        if (card.StraightenBlockedTurn == _state.TurnNumber)
+        // Basic Lesson (issue #411): a card that may not be straightened this turn refuses every attempt, and keeps refusing until the turn is over.
+        if (card.StraightenLockedTurn == _state.TurnNumber)
+            Emit("straightenNegated", $"{Definition(card).Name} cannot be straightened this turn.", card.OwnerId, card.Id);
+        else if (card.StraightenBlockedTurn == _state.TurnNumber)
         {
             card.StraightenBlockedTurn = -1;
             Emit("straightenNegated", $"{Definition(card).Name} could not straighten.", card.OwnerId, card.Id);

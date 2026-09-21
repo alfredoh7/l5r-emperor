@@ -229,6 +229,10 @@ public sealed class CardInstance
     // Tireless Efforts (Second City): "Negate all current and new Force penalties on him" -- the turn it was played; while TurnNumber equals it, a Force penalty
     // (a negative Force modifier or token) is not applied to this card. Reset with the card like the other per-turn flags.
     public int ForcePenaltiesNegatedTurn { get; set; } = -1;
+    // "May not be straightened this turn" (issue #411, Basic Lesson's Stronghold): every effect that would straighten this card is refused for the whole of the turn with this number,
+    // unlike the one-shot StraightenBlockedTurn above, which negates the next attempt only. Not swept: it simply stops holding when the turn number moves on, which is after the
+    // End phase, so the next Straighten phase (which is not an effect) is untouched.
+    public int StraightenLockedTurn { get; set; } = -1;
     // Tamori Tamoko's own Open action (issue #207 follow-up): "assigned to attack ... this turn" --
     // set once, in Assign(), the turn this card is assigned during Infantry/Cavalry Maneuvers.
     public int AssignedToAttackTurn { get; set; } = -1;
