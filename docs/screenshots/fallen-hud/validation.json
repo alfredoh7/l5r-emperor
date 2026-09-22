@@ -1,0 +1,58 @@
+{
+  "date": "2026-09-17",
+  "platform": "native macOS / Godot 4.7.2 .NET",
+  "build": "0 warnings, 0 errors",
+  "import": "passed",
+  "pre_fix": "Reproduced projected card covering counter and wheel reaching table",
+  "cases": [
+    {
+      "case": "opponent",
+      "passed": true,
+      "signals": [
+        "FALLEN_OVERLAP_PASS: covered-card hover/wheel blocked; counter opens correct owner; uncovered table zoom and drag release work.",
+        "FALLEN_TABLE_PASS: native counter click, correct owner, modal table blocking, isolated public piles, unchanged session, full-table orientations.",
+        "CAPTURE_RESULT: Ok /Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/fallen-hud-fix/docs/screenshots/fallen-hud/opponent.png",
+        "WAR_ROOM_PROJECTION_PASS: 279 visible samples, max 0,000180 px; 46 offscreen/behind-eye samples excluded."
+      ]
+    },
+    {
+      "case": "opponent-small",
+      "passed": true,
+      "signals": [
+        "FALLEN_OVERLAP_PASS: covered-card hover/wheel blocked; counter opens correct owner; uncovered table zoom and drag release work.",
+        "FALLEN_TABLE_PASS: native counter click, correct owner, modal table blocking, isolated public piles, unchanged session, full-table orientations.",
+        "CAPTURE_RESULT: Ok /Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/fallen-hud-fix/docs/screenshots/fallen-hud/opponent-small.png",
+        "WAR_ROOM_PROJECTION_PASS: 279 visible samples, max 0,000160 px; 46 offscreen/behind-eye samples excluded."
+      ]
+    },
+    {
+      "case": "opposite-seat",
+      "passed": true,
+      "signals": [
+        "FALLEN_OVERLAP_PASS: covered-card hover/wheel blocked; counter opens correct owner; uncovered table zoom and drag release work.",
+        "FALLEN_TABLE_PASS: native counter click, correct owner, modal table blocking, isolated public piles, unchanged session, full-table orientations.",
+        "CAPTURE_RESULT: Ok /Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/fallen-hud-fix/docs/screenshots/fallen-hud/opposite-seat.png",
+        "WAR_ROOM_PROJECTION_PASS: 279 visible samples, max 0,000180 px; 46 offscreen/behind-eye samples excluded."
+      ]
+    },
+    {
+      "case": "own-counter",
+      "passed": true,
+      "signals": [
+        "FALLEN_TABLE_PASS: native counter click, correct owner, modal table blocking, isolated public piles, unchanged session, full-table orientations.",
+        "CAPTURE_RESULT: Ok /Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/fallen-hud-fix/docs/screenshots/fallen-hud/own-counter.png",
+        "WAR_ROOM_PROJECTION_PASS: 225 visible samples, max 0,000173 px; 0 offscreen/behind-eye samples excluded."
+      ]
+    },
+    {
+      "case": "launcher",
+      "passed": true,
+      "signals": [
+        "FALLEN_TABLE_PASS: native counter click, correct owner, modal table blocking, isolated public piles, unchanged session, full-table orientations.",
+        "CAPTURE_RESULT: Ok /Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/fallen-hud-fix/docs/screenshots/fallen-hud/launcher.png",
+        "WAR_ROOM_PROJECTION_PASS: 225 visible samples, max 0,000179 px; 0 offscreen/behind-eye samples excluded."
+      ]
+    }
+  ],
+  "scope": "Client presentation and input only. Native Windows graphical checks not performed."
+}

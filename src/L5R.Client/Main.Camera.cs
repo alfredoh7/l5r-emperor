@@ -158,10 +158,10 @@ public partial class Main
     private bool PointerOnTable(Vector2 viewportPoint)
     {
         if (CameraBlocked || !_tableViewport.GetGlobalRect().HasPoint(viewportPoint)) return false;
-        // Fixed HUD lives outside this rectangle; modal/expanded views are
-        // blocked above. Root hover state intentionally does not govern the
-        // isolated viewport, whose mouse events are forwarded before root GUI.
-        return true;
+        // The Fallen strips can overlap the projection. Check only the visible
+        // placards, not their full-screen parent, before forwarding root input.
+        return !_clanHud.GetChildren().OfType<Control>().Any(c =>
+            c.IsVisibleInTree() && c.GetGlobalRect().HasPoint(viewportPoint));
     }
 
     public override void _Input(InputEvent @event)
@@ -187,7 +187,7 @@ public partial class Main
             }
             if (!PointerOnTable(mouse.Position))
             {
-                if (!mouse.Pressed) _tableSurface.ForwardMouse(mouse);
+                if (!mouse.Pressed) _tableSurface.ReleaseMouseOutside(mouse);
                 return;
             }
             if (!mouse.Pressed) { _tableSurface.ForwardMouse(mouse); GetViewport().SetInputAsHandled(); return; }
