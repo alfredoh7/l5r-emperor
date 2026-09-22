@@ -15,7 +15,9 @@ public partial class TableSurface : TextureRect
     private bool _mouseInside;
     public override void _Ready()
     {
-        MouseFilter = MouseFilterEnum.Stop;
+        // Main routes table input through the inverse projection. The display
+        // texture must not swallow fixed HUD controls earlier in the scene tree.
+        MouseFilter = MouseFilterEnum.Ignore;
         TextureFilter = TextureFilterEnum.Linear;
         ExpandMode = ExpandModeEnum.IgnoreSize;
         Canvas = new SubViewport { TransparentBg = true, Disable3D = true,

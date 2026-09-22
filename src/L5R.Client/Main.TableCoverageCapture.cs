@@ -28,7 +28,7 @@ public partial class Main
             if (_captureMode.EndsWith("-review", StringComparison.Ordinal))
             {
                 _cameraFitted = false; _cameraZoom = FitZoom * 1.4f; ApplyTableCamera();
-                _capturePath = null; _cameraProbeDone = true;
+                _autoOpponent = false; _capturePath = null; _cameraProbeDone = true;
                 GD.Print("TABLE_VISIBILITY_REVIEW_READY: prepared zoom; wheel or drag to inspect the edges, Home to fit the table.");
                 return;
             }
@@ -38,7 +38,7 @@ public partial class Main
             var version = View.Version;
             var fitted = _tableViewport.GetGlobalRect();
             var tile = _tiles.Where(t => _board.IsAncestorOf(t) && !t.Card.Bowed && t.Card.Definition is not null && t.Card.AttachedTo is null)
-                .OrderBy(t => Math.Abs(ScreenToWorld(ScreenCenter(t)).Y - _worldHeight * .4f)).First();
+                .OrderBy(t => ScreenToWorld(ScreenCenter(t)).DistanceTo(new Vector2(WorldWidth / 2, _worldHeight / 2))).First();
             var anchor = ScreenToWorld(ScreenCenter(tile));
             var density = _root.Scale.X;
             var points = new (string Edge, Vector2 Point)[]
@@ -54,7 +54,7 @@ public partial class Main
                 var local = _tableViewport.GetGlobalTransform().AffineInverse() * point;
                 _cameraCenter = anchor - TableSurface.UnprojectOffset(local - _tableViewport.Size / 2) / _cameraZoom;
                 ApplyTableCamera();
-                RequireCamera(ScreenCenter(tile).DistanceTo(point) < 1, $"{edge}: fixture could not reach boundary");
+                RequireCamera(ScreenCenter(tile).DistanceTo(point) < 1, $"{edge}: fixture could not reach boundary (anchor={anchor}, center={_cameraCenter}, dimensions={WorldWidth}x{_worldHeight})");
                 RequireCamera(!fitted.HasPoint(point), $"{edge}: regression sample is inside old crop");
                 MoveProbeMouse(_menu.GetGlobalRect().GetCenter());
                 await CoverageFrames();
@@ -94,10 +94,10 @@ public partial class Main
             foreach (var button in HudDescendants(_clanHud).OfType<BaseButton>().Append(_fitTableButton))
             {
                 await CoverageFocus();
-                MoveProbeMouse(button.GetGlobalRect().GetCenter()); await CoverageFrames();
+                MoveProbeMouse(button.GetGlobalRect().GetCenter());
                 var hovered = GetViewport().GuiGetHoveredControl();
                 RequireCamera(hovered == button || hovered is not null && button.IsAncestorOf(hovered),
-                    $"table surface intercepts fixed HUD control {button.Name} (hovered={hovered?.Name})");
+                    $"table surface intercepts fixed HUD control {button.Name} (hovered={hovered?.Name}, focus={GetWindow().HasFocus()}, point={button.GetGlobalRect().GetCenter()})");
             }
             RequireCamera(View.Version == version, "coverage inspection changed match state");
             DeselectCard(); ReleaseTableFocus(); ResetTableCamera(); await CoverageFrames();
