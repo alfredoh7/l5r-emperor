@@ -8528,6 +8528,9 @@ static void BrashForceRedirectAndBowReactions()
         s.Players[0].Honor=5; // meets the printed Honor Requirement outright
         Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0);
         var e=MatchEngine.FromTestState(s);
+        // Issue #443: the offered recruitReserve option itself must show the discounted price too,
+        // not just what RecruitReserve actually charges below.
+        Check(e.QueryActions(0).Any(a=>a.Type=="recruitReserve" && a.CardId==shinjiId && a.Gold?.Cost==4),"Offered recruitReserve quote reflects the Reserve-while-Defender discount (4, not 8)");
         var payment=e.PaymentOptions(0,4).First();
         Accept(e,new GameCommand("recruitReserve",0,e.Version,CardId:shinjiId,SourceIds:payment.SourceIds));
         Equal(e.State.Cards[shinjiId].Zone,Zone.Battlefield);
@@ -8541,6 +8544,7 @@ static void BrashForceRedirectAndBowReactions()
         s.Players[0].Honor=4;
         Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0);
         var e=MatchEngine.FromTestState(s);
+        Check(e.QueryActions(0).Any(a=>a.Type=="recruitReserve" && a.CardId==shinjiId && a.Command?.ClanAllegiance==true && a.Command?.ClanDiscount!=true && a.Gold?.Cost==6),"Offered recruitReserve quote (Allegiance mode) reflects the Reserve discount stacked with Allegiance (6, not 8)");
         Reject(e,new GameCommand("recruitReserve",0,e.Version,CardId:shinjiId,SourceIds:e.PaymentOptions(0,4).First().SourceIds,ClanAllegiance:false));
         Accept(e,new GameCommand("recruitReserve",0,e.Version,CardId:shinjiId,SourceIds:e.PaymentOptions(0,6).First().SourceIds,ClanAllegiance:true));
         Equal(e.State.Cards[shinjiId].Zone,Zone.Battlefield);

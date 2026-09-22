@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Fixed the recruitReserve offer-quote gap flagged during #440: MatchQueries.cs's QueryActions listing now quotes with viaReserve:true, so the displayed price/basis for a viaReserve-conditional discount (Tamori Shinji's Reserve-while-Defender, Akodo Ashiko's outnumbered discount) matches what RecruitReserve actually charges. Added offered-quote assertions (reading the ActionOption's own Gold.Cost, not just QuotePurchase) for both cards. Lane is shared only because docs/handoffs/tasks/ falls outside the rules/ui path patterns; every code change is rules-lane.",
+  "validation": "Full L5R.Core.Tests suite green (1017/1017). bash tools/check.sh --skip-client exits 0 (Core, AI, Server, Client.Transport test projects plus collaboration/content Python unit tests).",
+  "remaining": "None; ready for review.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/443",
+  "branch": "claude/443-recruit-reserve-quote-viareserve",
+  "updated": "2026-09-22T14:00:56.095761+00:00"
+}

@@ -26,15 +26,18 @@ internal static class AkodoAshikoTests
     private static void Check(bool ok, string message = "Assertion failed") => Batch336Support.Check(ok, message);
     private static CardInstance Add(MatchState s, string def, int owner, Zone zone, bool bowed = false, int? province = null, string? parent = null) => Batch336Support.Add(s, def, owner, zone, bowed, province, parent);
 
-    // recruitReserve is a raw command type, not an AbilityCatalog id, so Batch336Support.Options/Enabled (keyed on AbilityCatalog.All[ability].Label) cannot find it;
-    // QueryActions' own "recruitReserve" listing also quotes without viaReserve (MatchQueries.cs), the same pre-existing display gap
-    // GoldParityTests.Reserve()/Program.cs's own Tamori Shinji cases already route around by asking QuotePurchase(viaReserve:true) directly
-    // and paying that amount, rather than reading the offered ActionOption's own Gold.Cost -- not something this pass changes or needs to.
+    // recruitReserve is a raw command type, not an AbilityCatalog id, so Batch336Support.Options/Enabled (keyed on AbilityCatalog.All[ability].Label) cannot find it.
     private static void AcceptReserve(MatchEngine e, string cardId, int cost)
     {
         var payment = e.PaymentOptions(0, cost).First();
         Accept(e, new GameCommand("recruitReserve", 0, e.Version, CardId: cardId, SourceIds: payment.SourceIds));
     }
+
+    // Issue #443: QueryActions' own "recruitReserve" listing now quotes with viaReserve:true (MatchQueries.cs), so the offered
+    // option's own Gold.Cost must match what RecruitReserve actually charges, not just the full printed cost.
+    private static void CheckOfferedCost(MatchEngine e, string cardId, int expectedCost) =>
+        Check(e.QueryActions(0).Any(a => a.Type == "recruitReserve" && a.CardId == cardId && a.Command?.ClanDiscount != true && a.Command?.ClanAllegiance != true && a.Gold?.Cost == expectedCost),
+            $"Offered recruitReserve quote (full-cost mode) shows {expectedCost}");
 
     // A battle at province 0 (player 0 defending), with Ashiko face-up in player 0's own province 0 slot -- the same shape GoldParityTests.Reserve() uses.
     private static MatchState AshikoTable()
@@ -67,6 +70,7 @@ internal static class AkodoAshikoTests
         var quote = e.QuotePurchase(0, ashikoId, viaReserve: true);
         Eq(quote.Cost, 8, "no discount when not outnumbered");
         Check(!(quote.Basis ?? "").Contains("outnumbered"), quote.Basis ?? "");
+        CheckOfferedCost(e, ashikoId, 8);
         AcceptReserve(e, ashikoId, 8);
         Eq(e.State.Cards[ashikoId].Zone, Zone.Battlefield, "recruited to the battlefield");
     }
@@ -82,6 +86,7 @@ internal static class AkodoAshikoTests
         var quote = e.QuotePurchase(0, ashikoId, viaReserve: true);
         Eq(quote.Cost, 6, "8 − 2 (outnumbered)");
         Check((quote.Basis ?? "").Contains("− 2 (outnumbered)"), quote.Basis ?? "");
+        CheckOfferedCost(e, ashikoId, 6);
         AcceptReserve(e, ashikoId, 6);
         Eq(e.State.Cards[ashikoId].Zone, Zone.Battlefield, "recruited to the battlefield");
     }
@@ -101,6 +106,7 @@ internal static class AkodoAshikoTests
         Eq(reinforced.QuotePurchase(0, ashikoId, viaReserve: true).Cost, 8, "tied is not \"more\"");
         var outnumbered = Edit(reinforced, st => Add(st, "training-crane-samurai", 1, Zone.Battlefield, province: 0)); // player 1 now has 3 against player 0's 2
         Eq(outnumbered.QuotePurchase(0, ashikoId, viaReserve: true).Cost, 6, "now outnumbered: the discount reflects the CURRENT count, not the one when the battle began");
+        CheckOfferedCost(outnumbered, ashikoId, 6);
         AcceptReserve(outnumbered, ashikoId, 6);
         Eq(outnumbered.State.Cards[ashikoId].Zone, Zone.Battlefield, "recruited at the discounted cost the live count now supports");
     }
