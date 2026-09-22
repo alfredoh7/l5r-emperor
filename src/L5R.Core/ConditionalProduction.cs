@@ -22,7 +22,9 @@ public enum ProductionCondition
     /// <summary>Paying for a card that has a keyword ("when paying for a Ninja card"): a card bought, equipped or played, never an action of a card in play.</summary>
     PayingForKeyword,
     /// <summary>Paying for an action that equips a Follower or creates one (Bushi Dojo).</summary>
-    EquipsOrCreatesFollower
+    EquipsOrCreatesFollower,
+    /// <summary>Paying to recruit a Holding (Yasuki Dokansuto: "When paying for a Holding, produce 2 Gold which may only pay for that card").</summary>
+    PayingForHolding
 }
 
 /// <summary>A Holding's production that depends on what it is paying for (issue #416): while a payment meets <paramref name="When"/> the Holding produces
@@ -32,11 +34,13 @@ public sealed record ConditionalProduction(int Amount, ProductionCondition When,
 public static class ConditionalProductionCatalog
 {
     /// <summary>Red Crane Dojo: "Produce 3 Gold, or 4 Gold when paying for a Ninja card which may only pay for that card." Bushi Dojo: "When paying for an action that Equips or creates a
-    /// Follower, produce 6 Gold which may only pay for one action."</summary>
+    /// Follower, produce 6 Gold which may only pay for one action." Yasuki Dokansuto, a Personality that bows for it: "Kolat Reaction, bow: When paying for a Holding, produce 2 Gold which may
+    /// only pay for that card."</summary>
     public static ConditionalProduction? For(string effect) => effect switch
     {
         "red-crane-dojo-gold" => new(4, ProductionCondition.PayingForKeyword, "Ninja"),
         "bushi-dojo-gold" => new(6, ProductionCondition.EquipsOrCreatesFollower),
+        "dokansuto-gold" => new(2, ProductionCondition.PayingForHolding),
         _ => null
     };
 }
@@ -55,6 +59,7 @@ public sealed partial class MatchEngine
         return production.When switch
         {
             ProductionCondition.PayingForKeyword => paying.Kind != PaymentKind.Action && production.Keyword is not null && Keyword(paying.Card, production.Keyword),
+            ProductionCondition.PayingForHolding => paying.Kind == PaymentKind.Recruit && Definition(paying.Card).Type == CardType.Holding,
             ProductionCondition.EquipsOrCreatesFollower =>
                 paying.Kind == PaymentKind.Equip && Definition(paying.Card).Type == CardType.Follower
                 || paying.Ability?.Creates is { Type: CardType.Follower },

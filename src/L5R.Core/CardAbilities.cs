@@ -1834,6 +1834,10 @@ public static class AbilityCatalog
         ["crimson-shadow-bow"] = new("Battle", "Fear Battle: Target an enemy Follower: Bow it", "enemy-follower", ActionKeywords: ["Fear"]),
         ["dragons-favor-attack"] = new("Battle", "Thunder Battle, bow this card: Ranged Attack with strength equal to this Shugenja's Chi", "attack", ActionKeywords: ["Thunder"], Costs: ActionCost.BowSource),
         ["embers-final-fire-destroy"] = new("Battle", "Bow this card and target an enemy attachment: Destroy it", "enemy-attachment", Costs: ActionCost.BowSource),
+        // Necessary Evil (oracle-l5r-5524): "Open: If you control a Personality, target a Personality and pay Gold equal to the number of Personalities you control, or 4, whichever is higher: The targeted
+        // Personality may not assign to battlefields." The movement lock (MovementLocks.cs) for the turn, of assignment alone.
+        ["necessary-evil-lock"] = new("Open", "If you control a Personality, target a Personality and pay Gold equal to the number of Personalities you control, or 4, whichever is higher: The targeted Personality may not assign to battlefields",
+            "personality", Cost: GoldCostRule.OwnPersonalityCount(floor: 4)),
         // Kakita Munemori - exp (oracle-l5r-4203): "Political Open: Target a Personality: He may not perform actions until the current phase ends." The action lock (ActionLock.cs), for the phase.
         ["munemori-lock"] = new("Open", "Political Open: Target a Personality: He may not perform actions until the current phase ends", "personality", ActionKeywords: ["Political"]),
         // Daigotsu Bukaro (oracle-l5r-1707): "Limited: Pay 2 Gold and target a Personality: Create a 1F Follower and attach it to the Personality." The Follower is Farmlands Conscripts (oracle-l5r-10004).
@@ -3467,6 +3471,7 @@ public sealed partial class MatchEngine
         // check above already requires the source itself (a Personality) to be at this battlefield.
         if (id == "torazu-fire-attack") Require(HasToken(source!, "Fire"), "Torazu needs a Fire token of his own to attack.");
         if (id == "moto-ming-gwok-attack") Require(DeadCount(0) > 0 || DeadCount(1) > 0, "Moto Ming-Gwok needs a dead Personality in some player's discard pile to attack.");
+        if (id == "necessary-evil-lock") Require(_state.Cards.Values.Any(c => c.OwnerId == player.Id && InPlay(c) && Definition(c).Type == CardType.Personality), "You must control a Personality.");
         if (id == "archery-range-reaction") Require(_state.PendingAttack!.Kind == "Ranged", "Archery Range only boosts a Ranged Attack.");
         if (id == "saibankan-dishonor" && command.Selections is { } saibankanSelections)
             Require(saibankanSelections.SelectMany(x => x.CardIds ?? []).Select(x => Card(x).OwnerId).Distinct().Count() <= 1, "The Personalities must be controlled by the same player.");
@@ -5980,6 +5985,7 @@ public sealed partial class MatchEngine
             case "ashigaru-recruits-create":
                 if (ExecuteCreate(ability, ability.Creates!, command, player)) return;
                 break;
+            case "necessary-evil-lock": LockMovement(target!, Definition(source!).Name, MovementKinds.Assign); break;
             case "munemori-lock": LockActions(target!, source!.Id, CurrentPhaseLock()); break;
             case "bukaro-create":
                 if (ExecuteCreate(ability, ability.Creates!, command, player)) return;

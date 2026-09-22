@@ -2383,4 +2383,8 @@ public static class PublishedContent
     public static PublishedSnapshot PersonalityWave46 { get; } = Load("L5R.Published.PersonalityWave46.json", "personality-wave-46", requireDecks: false);
     /// <summary>Follower wave 22 (issue #431): the Farmlands Conscripts and the Birds of Prey.</summary>
     public static PublishedSnapshot FollowerWave22 { get; } = Load("L5R.Published.FollowerWave22.json", "follower-wave-22", requireDecks: false);
+    /// <summary>Personality wave 47 (issue #431): Yasuki Dokansuto.</summary>
+    public static PublishedSnapshot PersonalityWave47 { get; } = Load("L5R.Published.PersonalityWave47.json", "personality-wave-47", requireDecks: false);
+    /// <summary>Strategy wave 44 (issue #431): Necessary Evil.</summary>
+    public static PublishedSnapshot StrategyWave44 { get; } = Load("L5R.Published.StrategyWave44.json", "strategy-wave-44", requireDecks: false);
 }

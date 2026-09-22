@@ -20,7 +20,7 @@ public sealed partial class MatchEngine
     }
 
     private static string DescribeKinds(MovementKinds kinds) =>
-        kinds.HasFlag(MovementKinds.Assign) ? "assignment and movement to battlefields" : kinds.HasFlag(MovementKinds.Home) ? "movement" : "movement to battlefields";
+        kinds == MovementKinds.Assign ? "assignment to battlefields" : kinds.HasFlag(MovementKinds.Assign) ? "assignment and movement to battlefields" : kinds.HasFlag(MovementKinds.Home) ? "movement" : "movement to battlefields";
 
     private bool MovementLocked(CardInstance card, MovementKinds kind) =>
         card.MovementLocks.Any(l => l.Turn == _state.TurnNumber && (l.Kinds & kind) != 0);

@@ -49,7 +49,7 @@ public static class AttachPile
     public const string Any = "any-discard";
     /// <summary>Your own hand or your own discard pile (Harsh Taskmaster: "a Follower in your hand or discard pile").</summary>
     public const string OwnHandOrDiscard = "own-hand-or-discard";
-    /// <summary>Your own hand only (Asako Ebara, Moto Hailung, Ikoma Shinohara: "a Weapon/Follower in your hand").</summary>
+    /// <summary>Your own hand only (Asako Ebara, Moto Hailung: "a Weapon/Follower in your hand").</summary>
     public const string OwnHand = "own-hand";
 }
 
