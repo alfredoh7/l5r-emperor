@@ -1,0 +1,62 @@
+{
+  "Profile": "personality-wave-17",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-4371",
+      "Name": "Kitsu Akai",
+      "Type": "Personality",
+      "Clan": "Lion",
+      "GoldCost": 10,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 4,
+      "PersonalHonor": 4,
+      "HonorRequirement": 7,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Create a 2F/2C/3PH Lion Clan • Samurai • Ancestor • Spirit Personality.\nBattle: Bow your performing Ancestor Personality and target an enemy card without attachments: Destroy it. Gain 1 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-4371.jpg",
+      "Keywords": [
+        "Lion Clan",
+        "Shugenja",
+        "Water"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "kitsu-akai-create",
+        "kitsu-akai-battle"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9785",
+      "Name": "Lion Ancestor",
+      "Type": "Personality",
+      "Clan": "Lion",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 2,
+      "PersonalHonor": 3,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "May not be included in decks.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9785.jpg",
+      "Keywords": [
+        "Ancestor",
+        "Lion Clan",
+        "Samurai",
+        "Spirit"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "none",
+      "CreatedOnly": true
+    }
+  ],
+  "Decks": []
+}

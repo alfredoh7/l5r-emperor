@@ -634,6 +634,18 @@ public static class AbilityCatalog
         // this card if he is Earth" -- see own-wielder-or-source-with-wielder-keyword's own doc
         // comment for the cost-choice shape (Xijkt's own, mirrored the other way round).
         ["earths-hunger-destroy"] = new("Battle", "Bow this Shugenja, or bow this card if he is Earth, and target an enemy card without attachments: Destroy it", "enemy-card", Performer: "own-wielder-or-source-with-wielder-keyword", RequiredKeywords: ["Earth"], RequireNoAttachments: true),
+        // Kitsu Akai (Second City, issue #257): the engine's first "create a card" effect --
+        // MatchEngine.CreatePersonality, no target of its own (the created card is not chosen, only
+        // named by the effect itself, the same "none" shape kano-token already uses for a no-target
+        // Limited action).
+        ["kitsu-akai-create"] = new("Limited", "Create a 2F/2C/3PH Lion Clan · Samurai · Ancestor · Spirit Personality", "none"),
+        // "Bow your performing Ancestor Personality" -- own-unbowed-personality-at-battle-with-keyword
+        // already covers exactly this shape (Volcano Tattoo's own generic Performer category), just
+        // with a single RequiredKeywords entry instead of two. The created Lion Ancestor is the usual
+        // cost-payer, but any other own Ancestor-keyword Personality at the battle qualifies too --
+        // Ancestor carries no mechanical rule of its own beyond this kind of qualification check
+        // (issue #257's own user spec).
+        ["kitsu-akai-battle"] = new("Battle", "Bow your performing Ancestor Personality and target an enemy card without attachments: Destroy it. Gain 1 Honor", "enemy-card", Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeywords: ["Ancestor"], RequireNoAttachments: true),
     });
 }
 
@@ -1681,6 +1693,39 @@ public sealed partial class MatchEngine
         var target = command.TargetId is null ? null : Card(command.TargetId);
         var uses = source?.AbilityUses ?? player.AbilityUses;
         uses[ability.UsageKey ?? id] = _state.TurnNumber;
+        // Times of Strife (issue #259): "after each time another player who controls no units at the
+        // current battlefield announces a Battle action, he discards a card" -- checked here,
+        // "announcing" the action, before its own effects below apply (matching the card's own
+        // "after ... announces," not "after ... resolves"). Queued (PendingTimesOfStrifeDiscards),
+        // drained by OpenOverconfidentDrawWindow, rather than opened as a PendingChoice directly here,
+        // since this function has no safe place to defer BEFORE its own switch runs without also
+        // rewriting every case's own early-return shape.
+        if (ability.Timing == "Battle" && _state.CurrentBattleProvince is int cbp && !Army(player.Id, cbp).Any() && ControlsEventEffect(1 - player.Id, "times-of-strife"))
+            _state.PendingTimesOfStrifeDiscards.Add(player.Id);
+        // War Weariness (issue #259): "after the resolution of the first action each phase that one
+        // or more Personalities performed, bow them." Approximated as "announced" (checked here,
+        // before the switch below, alongside Times of Strife's own identical announce-timed check
+        // above) rather than strictly after every possible deferred-window resolution -- every
+        // currently published ability either bows its own performer as part of its own cost already
+        // (harmless/idempotent alongside this) or never reads its own performer's Bowed status mid-
+        // resolution, so bowing here instead of strictly after is not observably different today.
+        // Scoped to ExecuteAbilityEffects-dispatched abilities only (Battle/Limited/Open/etc. via
+        // useAbility) -- playStrategy/equip/recruitReserve are the CONTROLLER acting generically, not
+        // "a Personality performed" in the printed rules' own technical sense, so they are correctly
+        // out of scope, not merely unhandled.
+        if (!_state.WarWearinessBowedThisPhase && _state.Phase is Phase.Action or Phase.Battle or Phase.Dynasty
+            && (ControlsEventEffect(0, "war-weariness") || ControlsEventEffect(1, "war-weariness")))
+        {
+            var warWearinessPerformer = ability.Performer is not null
+                ? (command.PerformerId is not null ? ActingPersonality(Card(command.PerformerId)) : null)
+                : (command.CardId is not null ? ActingPersonality(Card(command.CardId)) : null);
+            if (warWearinessPerformer is not null && Definition(warWearinessPerformer).Type == CardType.Personality)
+            {
+                warWearinessPerformer.Bowed = true;
+                _state.WarWearinessBowedThisPhase = true;
+                Emit("warWearinessBow", $"{Definition(warWearinessPerformer).Name} bows (War Weariness).", warWearinessPerformer.OwnerId, warWearinessPerformer.Id);
+            }
+        }
         if (source is not null && Definition(source).Type == CardType.Strategy && Definition(source).GoldCost > 0)
             Pay(player.Id, source, Definition(source).GoldCost, command.SourceIds);
         if (id is "shunya-honor" or "favor-cycle" or "favor-battle" or "jakuei-bow-favor")
@@ -1903,6 +1948,16 @@ public sealed partial class MatchEngine
             case "earths-hunger-destroy":
                 Card(command.PerformerId!).Bowed = true;
                 DestroyUnits([target!], actingPlayerId: player.Id);
+                break;
+            case "kitsu-akai-create": if (CreatePersonality(player.Id, "oracle-l5r-9785")) return; break;
+            case "kitsu-akai-battle":
+                // No StalwartNegatesBow check -- unlike lady-matsus-rage-bow-destroy's own bow
+                // (inflicted on an enemy target), this bow is the performer's own chosen cost
+                // payment, the same distinction earths-hunger-destroy's own cost-bow above already
+                // draws.
+                Card(command.PerformerId!).Bowed = true;
+                DestroyUnits([target!], actingPlayerId: player.Id);
+                GainHonor(player.Id, 1, "Kitsu Akai", source);
                 break;
             case "cavalry-flankers-attack": case "murderous-thieves-attack":
                 source!.Bowed = true;

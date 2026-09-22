@@ -50,5 +50,7 @@
     <EmbeddedResource Include="../../content/published/region-wave-1.json" LogicalName="L5R.Published.RegionWave1.json" />
     <EmbeddedResource Include="../../content/published/celestial-wave-1.json" LogicalName="L5R.Published.CelestialWave1.json" />
     <EmbeddedResource Include="../../content/published/spell-wave-1.json" LogicalName="L5R.Published.SpellWave1.json" />
+    <EmbeddedResource Include="../../content/published/personality-wave-17.json" LogicalName="L5R.Published.PersonalityWave17.json" />
+    <EmbeddedResource Include="../../content/published/event-wave-2.json" LogicalName="L5R.Published.EventWave2.json" />
   </ItemGroup>
 </Project>

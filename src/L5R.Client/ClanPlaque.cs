@@ -73,7 +73,7 @@ public partial class ClanPlaque : Control
         AddStatRegion(new Rect2(175, 66, 38, 31), "Available Gold", $"{gold} available Gold production\nProduced when paying, not a saved balance.");
         HandRegion = AddStatRegion(new Rect2(222, 66, 82, 31), "Hand limit", HandHelp);
         var hit = new TooltipButton { Flat = true, Text = "", Position = new Vector2(9, 10), Size = new Vector2(86, 87),
-            TooltipText = clan + " · inspect dead cards and lost provinces", MouseDefaultCursorShape = CursorShape.PointingHand };
+            TooltipText = clan + " · inspect Fallen cards", MouseDefaultCursorShape = CursorShape.PointingHand };
         foreach (var state in new[] { "normal", "pressed", "hover", "focus" })
             hit.AddThemeStyleboxOverride(state, Palette.Box(Colors.Transparent, state is "hover" or "focus" ? Palette.Gold : null, 0, 40));
         hit.Pressed += inspect; _design.AddChild(hit);

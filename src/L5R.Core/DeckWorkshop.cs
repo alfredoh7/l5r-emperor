@@ -1,7 +1,11 @@
 namespace L5R.Core;
 
-/// <summary>Catalogue facts supplied by the content adapter. No card effects are created here.</summary>
-public sealed record DeckCardInfo(string Id, string Name, string[] Types, string[] Families, string[] Keywords, bool Implemented)
+/// <summary>Catalogue facts supplied by the content adapter. No card effects are created here.
+/// CreatedOnly (issue #257) defaults false so existing callers built before it existed keep
+/// compiling unchanged; a caller that never threads CardDefinition.CreatedOnly through just never
+/// surfaces the Review() warning below, the same soft-check discipline every other deck-legality
+/// rule in this file already accepts.</summary>
+public sealed record DeckCardInfo(string Id, string Name, string[] Types, string[] Families, string[] Keywords, bool Implemented, bool CreatedOnly = false)
 {
     public int ExperienceLevel => Experienced.Level(Keywords);
     public string DeckName => Experienced.DeckName(Name, Keywords);
@@ -93,6 +97,11 @@ public sealed class DeckWorkshop
         foreach (var v in limits.Violations) warnings.Add($"{v.CardName}: {v.Count} exceeds the usual {v.Limit} limit. Card-specific exceptions require review.");
         var unsupported = Cards.Count(c => !c.Implemented);
         if (unsupported > 0) warnings.Add($"{unsupported} selected card types are not yet implemented; this draft cannot be treated as playable.");
+        // Kitsu Akai's own Lion Ancestor (issue #257): a created-only card ("May not be included in
+        // decks.", its own printed text) that a pool built before CreatedOnly existed can still let
+        // through -- soft check only, same as every other rule here, never a hard block on
+        // Adjust/Load.
+        foreach (var c in Cards.Where(c => c.CreatedOnly)) warnings.Add($"{c.Name} cannot be included in decks (it is created, not recruited).");
         return new(dynasty, fate, warnings.ToArray(), limits.Violations.Select(v => v.CardName).ToArray(), unsupported);
     }
 }

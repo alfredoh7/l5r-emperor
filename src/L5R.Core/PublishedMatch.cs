@@ -25,7 +25,7 @@ public sealed partial class MatchEngine
             foreach (var id in deck.Dynasty) player.DynastyDeck.Add(Add(player.Id, id, Zone.DynastyDeck).Id);
             foreach (var id in deck.Fate) player.FateDeck.Add(Add(player.Id, id, Zone.FateDeck).Id);
             random.Shuffle(player.DynastyDeck); random.Shuffle(player.FateDeck);
-            player.Provinces = Enumerable.Range(0, 4).Select(i => new ProvinceState { Index = i, Strength = stronghold.ProvinceStrength }).ToList();
+            player.Provinces = Enumerable.Range(0, 4).Select(i => new ProvinceState { Index = i, Strength = stronghold.ProvinceStrength, PrintedStrength = stronghold.ProvinceStrength }).ToList();
         }
         state.ActivePlayerId = state.Players.OrderByDescending(p => p.Honor).First().Id;
         Add(1-state.ActivePlayerId, "oracle-l5r-679", Zone.Home, true, true);
