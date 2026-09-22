@@ -35,24 +35,7 @@ public partial class Main
         dialog.CloseRequested += dialog.QueueFree; PresentDialog(dialog, 540, 170);
     }
 
-    private void ShowPractice()
-    {
-        var (dialog, body) = Dialog("Practice table", 610, 640);
-        body.AddChild(Palette.Text("Choose your match", 29, title: true));
-        body.AddChild(Palette.Wrapped("Play the published 40/40 Lion and Crane decks with every card ability automated, or use the training scenarios to learn the flow.", 16, Palette.PaperDim));
-        void Start(bool economy, bool published = false, int seat = 0)
-        {
-            void Begin() { _turnBloomGate.Reset(); _turnBloom.Cancel(); ResetStatHistory(); _tableLayoutSeen = false; _cameraFitted = true; _selected = null; _chosen = null; _session.StartPractice(economy, published, seat); EnterTable(); dialog.QueueFree(); SetNotice(published ? "Lion vs Crane · published Emperor playtest started." : economy ? "Choose a province card to review its payment." : "Crane vs Lion · training match started."); }
-            if (_session.Online || _session.Snapshot?.View.Version > 0) Confirm("Start a new practice?", "This leaves the current table. Export a practice replay first if you want to keep it.", Begin);
-            else Begin();
-        }
-        body.AddChild(SidebarSkin.Button("Play Crane · Shinden Asahina", () => Start(false, true, 0), true));
-        body.AddChild(SidebarSkin.Button("Play Lion · Halls of Memory", () => Start(false, true, 1)));
-        body.AddChild(SidebarSkin.Button("Economy lab · Gold, Clan options & Proclaim", () => Start(true), true));
-        body.AddChild(SidebarSkin.Button("Full training match · Crane vs Lion", () => Start(false)));
-        var ai = new CheckBox { Text = "Practice opponent", ButtonPressed = _autoOpponent }; ai.Toggled += enabled => { _autoOpponent = enabled; RenderPhaseActions(); }; body.AddChild(ai);
-        body.AddChild(Palette.Wrapped("The practice opponent uses the published abilities and sees only its own permitted information. Lion starts; Crane receives Bamboo Harvesters.", 13, Palette.Muted));
-    }
+    private void ShowPractice() => ShowPracticeSetup();
 
     private void ShowSettings() => ShowFrontendOptions();
 

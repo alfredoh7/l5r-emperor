@@ -29,11 +29,13 @@ public sealed partial class MatchEngine
     public static MatchEngine CreatePublishedTestMatch(ulong seed = 20260906) => Create(seed, PublishedContent.TestScenario);
     internal static MatchEngine FromTestState(MatchState state) => new(Copy(state), 1, "test-only");
 
-    public ReplayRecord ExportReplay() => new(ContentVersion, _scenario, _seed, _commands.Select(Copy).ToArray());
+    public ReplayRecord ExportReplay() => new(ContentVersion, _scenario, _seed, _commands.Select(Copy).ToArray(), _customDecks?.Select(CustomPractice.CopyDeck).ToArray());
     public static MatchEngine Replay(ReplayRecord replay)
     {
         if (replay.ContentVersion != ContentVersion) throw new ArgumentException("Replay content version is not supported.");
-        var engine = Create(replay.Seed, replay.Scenario);
+        var engine = replay.Scenario == CustomPractice.Scenario
+            ? replay.CustomDecks is { Length: 2 } decks ? CreateCustomMatch(replay.Seed, decks[0], decks[1]) : throw new ArgumentException("Custom replay is missing its two deck snapshots.")
+            : Create(replay.Seed, replay.Scenario);
         foreach (var command in replay.Commands)
         {
             var result = engine.Execute(command);

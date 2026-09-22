@@ -51,6 +51,14 @@ public sealed class MatchSession : IDisposable
         RefreshLocal();
     }
 
+    public void StartCustomPractice(Deck yourDeck, Deck opponentDeck)
+    {
+        // Construct and validate before disconnecting/replacing a running session.
+        var seed = BitConverter.ToUInt64(RandomNumberGenerator.GetBytes(sizeof(ulong)));
+        var engine = MatchEngine.CreateCustomMatch(seed, yourDeck, opponentDeck);
+        Disconnect(); _engine = engine; _localSeat = 0; _practiceNameSeat = 0; RefreshLocal();
+    }
+
     public void FollowPracticePriority()
     {
         if (_engine is null || Online) return;

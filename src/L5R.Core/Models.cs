@@ -507,4 +507,4 @@ public sealed record MatchView(string ContentVersion, string Scenario, long Vers
     int? CurrentBattleProvince, int[] UnresolvedBattlefields, int? WinnerId, string? VictoryReason,
     PlayerView[] Players, GameEvent[] Events, string[] Limitations, int? FavorPlayerId = null,
     DuelView? PendingDuel = null);
-public sealed record ReplayRecord(string ContentVersion, string Scenario, ulong Seed, GameCommand[] Commands);
+public sealed record ReplayRecord(string ContentVersion, string Scenario, ulong Seed, GameCommand[] Commands, Deck[]? CustomDecks = null);

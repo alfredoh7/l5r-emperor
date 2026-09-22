@@ -78,14 +78,12 @@ public partial class Main
         {
             if (_menuProbeStep == 1)
             {
-                Click(menu.Entries.GetChild<Button>(0)); MenuAssert(menu.Page == "play", "Play opens clan selection");
-                Click(menu.Entries.GetChild<Button>(1)); MenuAssert(menu.Page == "name" && _session.Snapshot is null, "deck selection opens name entry before creating a match");
-                var field = menu.Entries.GetChildren().OfType<LineEdit>().Single();
-                var begin = menu.Entries.GetChildren().OfType<Button>().First();
-                field.Text = "   "; MenuAssert(begin.Disabled, "blank name cannot start match");
-                field.Text = " Alfredo "; Click(begin);
-                MenuAssert(!MenuVisible && Self.Clan == "Lion" && Self.Name == "Alfredo", "name entry starts the selected published deck with trimmed local name");
-                var reloaded = new MenuPreferences(_preferencesProfile); reloaded.Load(); MenuAssert(reloaded.DisplayName == "Alfredo", "local name is remembered by a fresh preferences instance");
+                Click(menu.Entries.GetChild<Button>(0)); MenuAssert(menu.Page == "play", "Play opens match choices");
+                Click(menu.Entries.GetChild<Button>(0)); MenuAssert(PracticeVisible && _session.Snapshot is null, "Practice setup opens before creating a match");
+                var setup=_practiceLayer!.GetChildren().OfType<PracticeSetupScreen>().Single();
+                setup.Browse(0);setup.Select(PracticeSetupScreen.Preset("Lion"));setup.Browse(1);setup.Select(PracticeSetupScreen.Preset("Crane"));setup.ShowSetup();
+                _preferences.DisplayName="Alfredo";_preferences.Save();ApplyPreferences(false);Click(setup.StartButton);
+                MenuAssert(!MenuVisible && !PracticeVisible && Self.Clan=="Lion" && Self.Name=="Alfredo", "chosen decks and saved display name start custom Practice");
                 _session.SwitchPracticeSeat(); MenuAssert(View.Players.Single(p=>p.Clan=="Lion").Name=="Alfredo" && Self.Name!="Alfredo", "passing device does not move name to opponent"); _session.SwitchPracticeSeat();
                 _menuProbeVersion = View.Version; ShowMainMenu(); _captureClock = 0; _menuProbeStep++; return;
             }
@@ -93,8 +91,11 @@ public partial class Main
             {
                 MenuAssert(View.Version == _menuProbeVersion, "practice stays paused behind main menu");
                 menu.ShowPlay(); Click(menu.Entries.GetChild<Button>(0)); MenuAssert(!MenuVisible && View.Version == _menuProbeVersion, "return resumes unchanged practice");
-                ShowMainMenu(); menu.ShowPlay(); Click(menu.Entries.GetChild<Button>(1)); MenuAssert(menu.Page == "replace", "replacing an existing match requires confirmation");
-                Click(menu.Entries.GetChildren().OfType<Button>().Last()); MenuAssert(menu.Page == "play", "cancel replacement keeps current match");
+                ShowMainMenu();menu.ShowPlay();Click(menu.Entries.GetChild<Button>(1));MenuAssert(PracticeVisible,"new Practice opens selection without replacing active match");
+                var setup=_practiceLayer!.GetChildren().OfType<PracticeSetupScreen>().Single();
+                var expected=View.Version;Click(setup.StartButton);var confirm=GetChildren().OfType<ConfirmationDialog>().Single(d=>d.Visible);
+                MenuAssert(confirm.Visible&&View.Version==expected,"replacing an existing match requires confirmation");
+                confirm.EmitSignal(ConfirmationDialog.SignalName.Canceled);ClosePracticeSetup();MenuAssert(View.Version==expected,"cancel replacement keeps current match");
                 menu.ShowOptions();
                 var motion = menu.Entries.GetChildren().OfType<CheckBox>().Last(); motion.ButtonPressed = true;
                 MenuAssert(_reducedMotion && _preferences.ReducedMotion, "reduced motion applies to game and menu");

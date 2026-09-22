@@ -92,7 +92,7 @@ public partial class Main : Node
     {
         while (_uiQueue.TryDequeue(out var update)) update();
         if (_captureMode.StartsWith("menu", StringComparison.Ordinal) && _capturePath is not null) { try { ProcessMenuCapture(delta); } catch (Exception e) { GD.PushError(e.ToString()); GetTree().Quit(1); } return; }
-        if (MenuVisible) return;
+        if (MenuVisible || PracticeVisible && _capturePath is null) return;
         ProcessBattlePresentation(delta);
         if (_session.Snapshot is not null) SyncBloodCourts();
         ProcessTableCamera(delta);
@@ -371,7 +371,7 @@ public partial class Main : Node
             if (MenuVisible && _titleMenu!.Page == "options") _titleMenu.ShowOptions();
             GetViewport().SetInputAsHandled();
         }
-        else if (MenuVisible) return;
+        else if (MenuVisible || PracticeVisible) return;
         else if (key.Keycode == Key.Escape && _expandedUnits.Count > 0)
         {
             _expandedUnits.Clear(); RenderBoard(); GetViewport().SetInputAsHandled();
@@ -383,7 +383,7 @@ public partial class Main : Node
     {
         Interlocked.Exchange(ref _renderQueued, 0);
         if (MenuVisible && _enteringPrivate && _session.Online && _session.Connected && _session.Snapshot is not null) { EnterTable(); return; }
-        if (MenuVisible) return;
+        if (MenuVisible || PracticeVisible) return;
         if (_session.Snapshot is null)
         {
             _status.Text = _session.Busy ? "Connecting to your private match…" : "Disconnected · use Private match to reconnect";
@@ -406,7 +406,7 @@ public partial class Main : Node
         if (_selected is not null) _selected = FindCard(_selected.Id);
         _seatLabel.Text = _session.Online ? $"ROOM {_session.Snapshot.RoomCode} · {Self.Clan}" : $"PRACTICE · {Self.Clan}";
         _status.Text = View.WinnerId is { } winner ? $"{View.Players[winner].Clan} wins · {View.VictoryReason}" : $"Turn {View.TurnNumber}  ·  {View.Players[View.ActivePlayerId].Clan}  ·  {(View.PriorityPlayerId == View.ViewerId ? "Your opportunity" : View.Players[View.PriorityPlayerId].Clan + " is deciding")}";
-        if (View.Scenario == PublishedContent.Scenario) _status.Text += $"  ·  Favor: {(View.FavorPlayerId is int favor ? View.Players[favor].Clan : "unclaimed")}";
+        if (View.Scenario is PublishedContent.Scenario or CustomPractice.Scenario) _status.Text += $"  ·  Favor: {(View.FavorPlayerId is int favor ? View.Players[favor].Clan : "unclaimed")}";
         if (_session.Online && _session.Snapshot.PlayersConnected is { } connected && connected.Any(p => !p)) _status.Text = $"Room {_session.Snapshot.RoomCode} · waiting for both players to connect";
         RenderTimeline(); RenderBoard(); RenderInspector(); RenderPhaseActions(); Highlight(); FrameNewBattle();
         RenderBattleFeedback();
