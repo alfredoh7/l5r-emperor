@@ -40,7 +40,9 @@ public partial class Main
 
     private void BuildTableViewport()
     {
-        _tableViewport = Place(_root, new Control { ClipContents = true, MouseFilter = Control.MouseFilterEnum.Ignore }, 24, 148, 1500, 702);
+        // This rectangle frames the overview. Drawing continues beneath the fixed
+        // HUD to the window edges, rather than stopping at an invisible inner box.
+        _tableViewport = Place(_root, new Control { ClipContents = false, ZIndex = -1, MouseFilter = Control.MouseFilterEnum.Ignore }, 24, 148, 1500, 702);
         _tableSurface = Place(_tableViewport, new TableSurface(), 0, 0, 1500, 702);
         _tableSurface.ResizePlane(_tableViewport.Size, 1);
         _world = Place(_tableSurface.Canvas, new Control { Theme = Palette.MakeTheme(), MouseFilter = Control.MouseFilterEnum.Ignore }, 0, 0, WorldWidth, 1100);
@@ -63,7 +65,8 @@ public partial class Main
         // upward reach of its fan. Hover can still deliberately lift a hand card.
         _tableViewport.Size = new Vector2(_layoutWidth - SidebarWidth - left - 44,
             Math.Min(666, 1060 - HandCardSide - _tableViewport.Position.Y - 30));
-        _tableSurface.ResizePlane(_tableViewport.Size, _root.Scale.X);
+        _tableSurface.ResizePlane(_tableViewport.Size, _root.Scale.X,
+            new Rect2(-_tableViewport.Position, GetViewport().GetVisibleRect().Size / _root.Scale.X));
         ApplyTableCamera();
     }
 
@@ -157,15 +160,26 @@ public partial class Main
 
     private bool PointerOnTable(Vector2 viewportPoint)
     {
-        if (CameraBlocked || !_tableViewport.GetGlobalRect().HasPoint(viewportPoint)) return false;
-        // Fixed HUD lives outside this rectangle; modal/expanded views are
-        // blocked above. Root hover state intentionally does not govern the
-        // isolated viewport, whose mouse events are forwarded before root GUI.
+        if (CameraBlocked || !_tableSurface.GetGlobalRect().HasPoint(viewportPoint) || FixedHudCovers(viewportPoint)) return false;
         return true;
+    }
+
+    private bool FixedHudCovers(Vector2 point)
+    {
+        static bool Covers(Control? control, Vector2 p) => control is not null &&
+            control.IsVisibleInTree() && control.GetGlobalRect().HasPoint(p);
+        return Covers(_inspectorPanel, point) || Covers(_hand, point) || Covers(_timeline, point) || Covers(_menu, point)
+            || _clanHud.GetChildren().OfType<Control>().Any(c => Covers(c, point))
+            // A hovered hand face can rise above the hand container.
+            || _hand.GetChildren().OfType<CardTile>().Any(c => Covers(c, point));
     }
 
     public override void _Input(InputEvent @event)
     {
+        // Native camera probes share a desktop with the reviewer. Only their
+        // tagged pointer events belong to the scripted acceptance sequence.
+        if (IsMouseInputCapture && @event is InputEventMouse && !@event.HasMeta(CaptureMouseTag))
+        { GetViewport().SetInputAsHandled(); return; }
         // A recorded demonstration consumes live input so a wheel/key/click
         // cannot alter the evidence mid-take. Normal play and input probes do not.
         if (_capturePath is not null && _captureMode == "published-ink-film")

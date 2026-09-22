@@ -50,7 +50,7 @@ public partial class InkMatSections : Control
     /// <summary>
     /// Input-transparent hit regions for the emblems painted on the mat. Project receives unprojected
     /// world points and returns viewport-global points; the returned input-transparent
-    /// control should be parented inside the clipped table viewport.
+    /// control should be parented with the table layer, below the fixed HUD.
     /// </summary>
     public Control CreateIconOverlay(Func<Vector2, Vector2> projectToGlobal)
     {

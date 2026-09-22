@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Separate camera fitting from full-window table rendering to remove invisible interior clipping. Input projection and fixed-HUD protection remain aligned; no engine changes.",
+  "validation": "Client builds and eight native camera cases passed. Native edge coverage reproduced baseline clipping; final coverage and fortress preview checks are in progress.",
+  "remaining": "Complete focus-resilient coverage verification, current-fortress preview, and final handoff. Do not merge before human review.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/446",
+  "branch": "codex/446-table-clipping",
+  "updated": "2026-09-22T15:04:49.586517+00:00"
+}
