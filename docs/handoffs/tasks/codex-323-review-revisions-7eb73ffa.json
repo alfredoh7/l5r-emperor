@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Implement staged Top Cards, remove target chevrons, align phase frame; payment approved and B+A ghost marker selected.",
-  "validation": "UI build, native top/target/battle checks at both sizes, full baseline on main 062e5718, artwork release and three prepared app launchers verified.",
-  "remaining": "Implement and natively verify approved B+A ethereal copy marker. Alfredo reviews revised demos; Mendon rules approval still required; no main merge.",
-  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/323",
+  "summary": "Simplify Top Cards into choose/return steps, remove multi-target chevrons, align the phase bar to the narrow battle strip, and implement Alfredo-approved ghost-copy outlines with compact wisps. Opponent Payment acceptance recorded separately; no main merge authorized.",
+  "validation": "Client build 0 warnings/errors. Native top-card, multi-target, battle-sequence and created-copy checks passed at 1920x1080 normal and 1280x800 reduced motion. Full check.sh --skip-client passed after origin/main 062e5718. Prepared Mac launchers and source/native gallery verified; screenshots committed. Private catalogue artwork r2 verified.",
+  "remaining": "Alfredo hands-on review of revised demos; Mendon rules acceptance; final CI. Earlier Windows package is unchanged and excludes these revisions. No main merge authorized.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/400",
   "branch": "codex/323-review-revisions",
-  "updated": "2026-09-22T11:24:11.579721+00:00"
+  "updated": "2026-09-22T11:38:10.001938+00:00"
 }
