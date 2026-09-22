@@ -1,0 +1,113 @@
+{
+  "Profile": "personality-wave-45",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-2858",
+      "Name": "Goju Sawaki",
+      "Type": "Personality",
+      "Clan": "Ninja",
+      "GoldCost": 5,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 2,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After Sawaki enters play: Lose 2 Honor.\nReaction: After another player's Battle action targets Sawaki, destroy him: Create two 1F/1C/0PH Spider Clan • Shadowlands • Ninja Personalities at the current battlefield.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-2858.jpg",
+      "Keywords": [
+        "Immortal",
+        "Ninja",
+        "Shadowlands",
+        "Spider Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "sawaki-spawn"
+      ],
+      "Effect": "none",
+      "EntryHonorLoss": 2
+    },
+    {
+      "Id": "oracle-l5r-4240",
+      "Name": "Kakita Yasunori",
+      "Type": "Personality",
+      "Clan": "Crane",
+      "GoldCost": 5,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 3,
+      "PersonalHonor": 3,
+      "HonorRequirement": 6,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Remove a card in your Fate discard pile from the game and target your Personality: Create a +1F/+0C Weapon Item and attach it to him.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-4240.jpg",
+      "Keywords": [
+        "Artisan",
+        "Crane Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "yasunori-create"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9711",
+      "Name": "Goju Genin",
+      "Type": "Personality",
+      "Clan": "Ninja",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 1,
+      "Chi": 1,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "May not be included in decks.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9711.jpg",
+      "Keywords": [
+        "Ninja",
+        "Shadowlands",
+        "Spider Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "none",
+      "CreatedOnly": true
+    },
+    {
+      "Id": "oracle-l5r-9741",
+      "Name": "The Walking Dead",
+      "Type": "Personality",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 2,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "May not be included in decks.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9741.jpg",
+      "Keywords": [
+        "Shadowlands",
+        "Undead"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "none",
+      "CreatedOnly": true
+    }
+  ],
+  "Decks": []
+}

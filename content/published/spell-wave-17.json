@@ -1,0 +1,33 @@
+{
+  "Profile": "spell-wave-17",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-1898",
+      "Name": "Death, Defeated",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "This Shugenja has +2F and Shadowlands.\nBattle: Remove a target dead Personality in any player's discard pile from the game: Create a 2F/2C/0PH Shadowlands • Undead Personality at the current battlefield. Remove him from the game after this battle's resolution. Lose 2 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1898.jpg",
+      "Keywords": [
+        "Maho"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "death-defeated-create"
+      ],
+      "Effect": "death-defeated-force",
+      "AttachGrantsKeyword": "Shadowlands"
+    }
+  ],
+  "Decks": []
+}

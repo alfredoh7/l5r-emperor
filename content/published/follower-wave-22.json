@@ -1,0 +1,57 @@
+{
+  "Profile": "follower-wave-22",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10004",
+      "Name": "Farmlands Conscripts",
+      "Type": "Follower",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 1,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "May not be included in decks.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10004.jpg",
+      "Keywords": [],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "none",
+      "CreatedOnly": true
+    },
+    {
+      "Id": "oracle-l5r-9712",
+      "Name": "Bird of Prey",
+      "Type": "Follower",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 1,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "May not be included in decks.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9712.jpg",
+      "Keywords": [
+        "Cavalry",
+        "Nonhuman",
+        "Raptor",
+        "Shadowlands",
+        "Undead"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "none",
+      "CreatedOnly": true
+    }
+  ],
+  "Decks": []
+}

@@ -1,0 +1,38 @@
+[
+  {
+    "card_id": "oracle-l5r-2858",
+    "printing_set": [
+      "Before the Dawn"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=2858",
+    "image_path": "assets/reference/oracle/before-the-dawn/webp/oracle-l5r-2858-printing-1-image-1.webp",
+    "image_sha256": "a8853b216754aeed43ec565adfc606ff2a1b3866310f2523880fa6da19e954b3"
+  },
+  {
+    "card_id": "oracle-l5r-4240",
+    "printing_set": [
+      "Before the Dawn"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=4240",
+    "image_path": "assets/reference/oracle/before-the-dawn/webp/oracle-l5r-4240-printing-1-image-1.webp",
+    "image_sha256": "03d8deae8250d7a9828dd25debd84b0d6660eede722c55e2bb0a19be35c73252"
+  },
+  {
+    "card_id": "oracle-l5r-9711",
+    "printing_set": [
+      "Before the Dawn"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=9711",
+    "image_path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-9711-printing-1-image-1.jpg",
+    "image_sha256": "d5f4dbf8995ad252eddb70f15a92027649c387a65e14a03a4fc5205cf7337a3a"
+  },
+  {
+    "card_id": "oracle-l5r-9741",
+    "printing_set": [
+      "Emperor Edition"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=9741",
+    "image_path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-9741-printing-4-image-1.jpg",
+    "image_sha256": "2456442310a545d64dcd9b94a5770b51e167ddffeae5f14bd8597240ce295709"
+  }
+]

@@ -1,0 +1,795 @@
+{
+  "Profile": "personality-wave-43",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-537",
+      "Name": "Asako Heiwa",
+      "Type": "Personality",
+      "Clan": "Phoenix",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": 6,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle/Open: Target another Personality or a Follower: Give it a Force bonus or penalty equal to Heiwa's Chi.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-537.jpg",
+      "Keywords": [
+        "Earth",
+        "Henshin",
+        "Monk",
+        "Phoenix Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "heiwa-bonus",
+        "heiwa-penalty"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-546",
+      "Name": "Asako Izuna",
+      "Type": "Personality",
+      "Clan": "Phoenix",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 4,
+      "PersonalHonor": 3,
+      "HonorRequirement": 6,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After Izuna enters play, target another player's Personality with Personal Honor lower than or equal to Izuna's Chi: She coerces testimony of a family's secret. Dishonor the targeted Personality and permanently give him Kolat, Ninja, or Shadowlands.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-546.jpg",
+      "Keywords": [
+        "Air",
+        "Inquisitor",
+        "Magistrate",
+        "Phoenix Clan",
+        "Shugenja",
+        "Villain"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "izuna-kolat",
+        "izuna-ninja",
+        "izuna-shadowlands"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-763",
+      "Name": "Bayushi Ebara",
+      "Type": "Personality",
+      "Clan": "Scorpion",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 4,
+      "PersonalHonor": 1,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle/Open: Target a Weapon in your hand: Attach it to Ebara, paying all costs. Draw a card.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-763.jpg",
+      "Keywords": [
+        "Kensai",
+        "Bitter Lies",
+        "Samurai",
+        "Scorpion Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "ebara-equip"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-879",
+      "Name": "Bayushi Shibata",
+      "Type": "Personality",
+      "Clan": "Scorpion",
+      "GoldCost": 4,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 3,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Your provinces have +1 strength while another player controls a dishonorable Personality.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-879.jpg",
+      "Keywords": [
+        "Courtier",
+        "Resourceful",
+        "Scorpion Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "shibata-provinces"
+    },
+    {
+      "Id": "oracle-l5r-901",
+      "Name": "Bayushi Suwabe",
+      "Type": "Personality",
+      "Clan": "Scorpion",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 1,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle/Open: Target your performing Courtier at any location to give Suwabe a Force bonus equal to the Courtier's Chi.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-901.jpg",
+      "Keywords": [
+        "Loyal",
+        "Paragon",
+        "Samurai",
+        "Scorpion Clan",
+        "Yojimbo"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "suwabe-force"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-1356",
+      "Name": "Chuda Kiuchi",
+      "Type": "Personality",
+      "Clan": "Spider",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 4,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After Kiuchi enters play, lose 1 Honor.\nOpen: Target your performing Personality and your performing Nonhuman or Undead Personality to set each Personality's Force equal to the higher printed Force of the two.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1356.jpg",
+      "Keywords": [
+        "Artisan",
+        "Shadowlands",
+        "Shugenja",
+        "Spider Clan",
+        "Vicious",
+        "Worker of Flesh"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "kiuchi-equalize"
+      ],
+      "Effect": "none",
+      "EntryHonorLoss": 1
+    },
+    {
+      "Id": "oracle-l5r-1653",
+      "Name": "Daidoji Masafuni",
+      "Type": "Personality",
+      "Clan": "Crane",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": 4,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Bow Masafuni unless you have Reconnaissance, and target a Personality: Move him home.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1653.jpg",
+      "Keywords": [
+        "Crane Clan",
+        "Iron Crane",
+        "Samurai",
+        "Scout"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "masafuni-move"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-2152",
+      "Name": "Doji Shigeyuki",
+      "Type": "Personality",
+      "Clan": "Crane",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 4,
+      "PersonalHonor": 3,
+      "HonorRequirement": 5,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Target a Personality with lower Personal Honor than Shigeyuki's Chi: Shigeyuki challenges him. He may refuse; if he does, move him home. Both Personalities use their Personal Honor as their duel stat. Bow the duel's loser's unit.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-2152.jpg",
+      "Keywords": [
+        "Duelist",
+        "Crane Clan",
+        "Magistrate",
+        "Samurai"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "shigeyuki-duel"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-3287",
+      "Name": "Hiruma Akio",
+      "Type": "Personality",
+      "Clan": "Crab",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 3,
+      "HonorRequirement": 4,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Your Followers at Akio's location have +1F while you have Reconnaissance.\nBattle: Bow your performing Personality or Follower: Ranged 5 Attack.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-3287.jpg",
+      "Keywords": [
+        "Unique",
+        "Chui",
+        "Commander",
+        "Crab Clan",
+        "Experienced",
+        "Samurai",
+        "Scout"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "akio-attack"
+      ],
+      "Effect": "akio-follower-force"
+    },
+    {
+      "Id": "oracle-l5r-3844",
+      "Name": "Isawa Kaname",
+      "Type": "Personality",
+      "Clan": "Phoenix",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 4,
+      "PersonalHonor": 2,
+      "HonorRequirement": 5,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After a Ranged Attack is targeted: Give the Ranged Attack +2 strength.\nBattle: Any number of times per turn: Ranged 1 Attack.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-3844.jpg",
+      "Keywords": [
+        "Fire",
+        "Phoenix Clan",
+        "Shugenja",
+        "Yojimbo"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "kaname-attack-boost",
+        "kaname-ranged-attack"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-3994",
+      "Name": "Iuchi Kota",
+      "Type": "Personality",
+      "Clan": "Unicorn",
+      "GoldCost": 9,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 4,
+      "PersonalHonor": 3,
+      "HonorRequirement": 3,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Kota has +2F while he has a Spell.\nReaction: After an action targets one of your Personalities at Kota's battlefield: Negate the Personality's movement from the action's effects.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-3994.jpg",
+      "Keywords": [
+        "Cavalry",
+        "Unique",
+        "Experienced",
+        "Shugenja",
+        "Unicorn Clan",
+        "Water"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "kota-negate-move"
+      ],
+      "Effect": "force-with-spell-2"
+    },
+    {
+      "Id": "oracle-l5r-4010",
+      "Name": "Iuchi Yupadi",
+      "Type": "Personality",
+      "Clan": "Unicorn",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Bow Yupadi or one of her Spells, and target a Personality: Give him Naval.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-4010.jpg",
+      "Keywords": [
+        "Cavalry",
+        "Ghost Guard",
+        "Shugenja",
+        "Unicorn Clan",
+        "Water"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "yupadi-naval"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-4119",
+      "Name": "Kaiu Iemasa",
+      "Type": "Personality",
+      "Clan": "Crab",
+      "GoldCost": 9,
+      "GoldProduction": 0,
+      "Force": 6,
+      "Chi": 4,
+      "PersonalHonor": 3,
+      "HonorRequirement": 3,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: You help rebuild another clan's defenses. Gain 3 Honor. You may not declare an attack.\nBattle: Target an enemy card with Force lower than or equal to this battlefield's province's strength: Bow it.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-4119.jpg",
+      "Keywords": [
+        "Loyal",
+        "Tactician",
+        "Unique",
+        "Crab Clan",
+        "Daimyo",
+        "Jade Hand",
+        "Samurai",
+        "Siege"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "iemasa-rebuild",
+        "iemasa-bow"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-4604",
+      "Name": "Kunji",
+      "Type": "Personality",
+      "Clan": "Phoenix",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 4,
+      "PersonalHonor": 1,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle/Open: Target a Personality: Give him +2F.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-4604.jpg",
+      "Keywords": [
+        "Cavalry",
+        "Fenghuang",
+        "Nonhuman",
+        "Phoenix Clan",
+        "Shugenja"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "kunji-boost"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-5287",
+      "Name": "Moshi Umiko",
+      "Type": "Personality",
+      "Clan": "Mantis",
+      "GoldCost": 9,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 4,
+      "PersonalHonor": 1,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Umiko has +2F while she has a Spell.\nReaction: After a Ranged Attack is targeted: Give the Ranged Attack +2 or -2 strength.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-5287.jpg",
+      "Keywords": [
+        "Naval",
+        "Mantis Clan",
+        "Shugenja",
+        "Storm Rider",
+        "Thunder"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "umiko-attack-boost",
+        "umiko-attack-reduce"
+      ],
+      "Effect": "force-with-spell-2"
+    },
+    {
+      "Id": "oracle-l5r-5322",
+      "Name": "Moto Hailung",
+      "Type": "Personality",
+      "Clan": "Unicorn",
+      "GoldCost": 9,
+      "GoldProduction": 0,
+      "Force": 5,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Target a Follower in your hand: Attach it to Hailung, paying all costs, and paying 4 less Gold if he is defending or if you are a Crab Clan player.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-5322.jpg",
+      "Keywords": [
+        "Cavalry",
+        "Commander",
+        "Samurai",
+        "Unicorn Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "hailung-attach",
+        "hailung-attach-discount"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-5560",
+      "Name": "Nijugun",
+      "Type": "Personality",
+      "Clan": "Crab",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Bow your performing Follower to move home a target enemy Personality. After this moves him, and you have Reconnaissance or you are a Unicorn Clan player, negate his (further) movement.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-5560.jpg",
+      "Keywords": [
+        "Cavalry",
+        "Crab Clan",
+        "Enigma",
+        "Mujina",
+        "Nonhuman",
+        "Scout"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "nijugun-move"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-5695",
+      "Name": "Omigawa",
+      "Type": "Personality",
+      "Clan": "Spider",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 5,
+      "Chi": 2,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Target an enemy Personality with lower Force or without attached Weapons: Omigawa knocks him aside. Move the targeted card home. Bow him if he moved and Omigawa has a Weapon.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-5695.jpg",
+      "Keywords": [
+        "Kensai",
+        "Face of Ghosts",
+        "Master Sensei",
+        "Monk",
+        "Spider Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "omigawa-move"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-6799",
+      "Name": "Shiba Ryuba",
+      "Type": "Personality",
+      "Clan": "Phoenix",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 3,
+      "HonorRequirement": 5,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Target your Personality: Move him home. If he moved, straighten him.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6799.jpg",
+      "Keywords": [
+        "Duelist",
+        "Phoenix Clan",
+        "Samurai",
+        "Yojimbo"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "ryuba-move"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-7179",
+      "Name": "Shosuro Tsuji",
+      "Type": "Personality",
+      "Clan": "Ninja",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 5,
+      "Chi": 3,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Target an enemy card: Bow it.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7179.jpg",
+      "Keywords": [
+        "Assassin",
+        "Ninja",
+        "Scorpion Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "tsuji-bow"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-7355",
+      "Name": "Soshi Komiko",
+      "Type": "Personality",
+      "Clan": "Scorpion",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 3,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Political Battle: Target a Personality with Personal Honor lower than or equal to Komiko's Chi: Bow the Personality. If he is dishonorable, his controller loses 2 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7355.jpg",
+      "Keywords": [
+        "Courtier",
+        "Iron Flower",
+        "Junshin",
+        "Magistrate",
+        "Scorpion Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "komiko-bow"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-7733",
+      "Name": "Taishuu",
+      "Type": "Personality",
+      "Clan": "Spider",
+      "GoldCost": 9,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 4,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Other players' maximum hand sizes are reduced by 1.\nReaction: After another player's Political action targets one of your Personalities: Negate its effects.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7733.jpg",
+      "Keywords": [
+        "Experienced Mirumoto Taishuu",
+        "Loyal",
+        "Unique",
+        "Ambassador to the Empire",
+        "Courtier",
+        "Paragon",
+        "Samurai",
+        "Shadowlands",
+        "Spider Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "taishuu-political-negate"
+      ],
+      "Effect": "decrease-other-hand-size"
+    },
+    {
+      "Id": "oracle-l5r-8896",
+      "Name": "Tsuruchi Yashiro",
+      "Type": "Personality",
+      "Clan": "Mantis",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Enters play paying 2 less Gold if you are a Lion Clan or Scorpion Clan player.\nBattle: Bow Yashiro unless you have Reconnaissance: Ranged 4 Attack.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8896.jpg",
+      "Keywords": [
+        "Mantis Clan",
+        "Samurai",
+        "Scout"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "yashiro-attack"
+      ],
+      "Effect": "lion-or-scorpion-clan-discount-2"
+    },
+    {
+      "Id": "oracle-l5r-9061",
+      "Name": "Utaku Eun-ju",
+      "Type": "Personality",
+      "Clan": "Unicorn",
+      "GoldCost": 10,
+      "GoldProduction": 0,
+      "Force": 5,
+      "Chi": 3,
+      "PersonalHonor": 4,
+      "HonorRequirement": 6,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Target an enemy Personality with lower Personal Honor: Bow him. Gain 2 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9061.jpg",
+      "Keywords": [
+        "Cavalry",
+        "Battle Maiden",
+        "Paragon",
+        "Samurai",
+        "Unicorn Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "eun-ju-bow"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9391",
+      "Name": "Wrathful Dead",
+      "Type": "Personality",
+      "Clan": "Scorpion",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 3,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Target a card without attachments in a unit led by a dishonorable Personality: Destroy the targeted card.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9391.jpg",
+      "Keywords": [
+        "Cavalry",
+        "Goryo",
+        "Nonhuman",
+        "Scorpion Clan",
+        "Spirit"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "wrathful-dead-destroy"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9642",
+      "Name": "Yoritomo Tarao",
+      "Type": "Personality",
+      "Clan": "Mantis",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 1,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: Pay 2 Gold: Choose a player. He targets one of his unbowed Personalities or Holdings or a card in his hand. If the targeted card is in his hand, discard it. Otherwise, bow it.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9642.jpg",
+      "Keywords": [
+        "Naval",
+        "Extortionist",
+        "Magistrate",
+        "Mantis Clan",
+        "Samurai"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "tarao-sacrifice"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9659",
+      "Name": "Yoritomo Zinan",
+      "Type": "Personality",
+      "Clan": "Mantis",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 5,
+      "Chi": 3,
+      "PersonalHonor": 1,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Target an attachment: Put it in its owner's hand.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9659.jpg",
+      "Keywords": [
+        "Naval",
+        "Commander",
+        "Mantis Clan",
+        "Samurai"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "zinan-return"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

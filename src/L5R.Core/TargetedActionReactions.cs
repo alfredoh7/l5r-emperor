@@ -234,6 +234,17 @@ public sealed partial class MatchEngine
             // Red Crane Dojo: any action targets one of its controller's Personalities -- offered when he has Ninja or Shadowlands standing to lose.
             case "red-crane-dojo-ninja":
                 return affected.OwnerId == card.OwnerId && Definition(affected).Type == CardType.Personality && (Keyword(affected, "Ninja") || HasClanAffiliation(affected, "Shadowlands"));
+            // Iuchi Kota - exp: an action targets one of the reactor's own Personalities at Kota's battlefield and would move him.
+            case "kota-negate-move":
+                return affected.OwnerId == card.OwnerId && Definition(affected).Type == CardType.Personality && card.Zone == Zone.Battlefield && affected.Zone == Zone.Battlefield
+                    && affected.ProvinceIndex == card.ProvinceIndex && MoveOrStraightenKind(command.AbilityId) == "move";
+            // Taishuu: another player's Political action targets one of the reactor's own Personalities.
+            case "taishuu-political-negate":
+                return command.PlayerId != card.OwnerId && affected.OwnerId == card.OwnerId && Definition(affected).Type == CardType.Personality
+                    && ActionCarriesKeyword(acting, command.CardId is not null && _state.Cards.TryGetValue(command.CardId, out var politicalSource) ? politicalSource : null, "Political");
+            // Goju Sawaki: another player's Battle action targets him where he stands.
+            case "sawaki-spawn":
+                return command.PlayerId != card.OwnerId && affected.Id == card.Id && IsBattleAction(command);
             case "yurishi-disappear":
                 return command.PlayerId != card.OwnerId && affected.Id == card.Id && IsBattleAction(command) && card.Zone == Zone.Battlefield;
             case "jinn-kuen-negate":

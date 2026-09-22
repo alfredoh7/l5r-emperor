@@ -81,16 +81,17 @@ internal static class PlayerTargetTests
     private static void Inventory()
     {
         var singles = AbilityCatalog.All.Where(p => p.Value.Target == "player").OrderBy(p => p.Key, StringComparer.Ordinal).ToArray();
-        Eq(string.Join(",", singles.Select(p => p.Key)), "horume-gain,horume-lose,know-their-minds-choose,mugoshi-slander,training-choose-player-gain,training-choose-player-lose");
-        // Every one is an entering-play Reaction (listed by the entry-reaction window) except Know Their Minds (issue #419), the one Open action that chooses a player: AbilityActions lists it once per player.
-        Check(singles.Where(p => p.Key != "know-their-minds-choose").All(p => p.Value.Timing == "Reaction" && p.Value.Trigger == "own-enters-play") && singles.Single(p => p.Key == "know-their-minds-choose").Value.Timing == "Open", "the entering-play Reactions, and Know Their Minds' Open action");
+        Eq(string.Join(",", singles.Select(p => p.Key)), "horume-gain,horume-lose,know-their-minds-choose,mugoshi-slander,tarao-sacrifice,training-choose-player-gain,training-choose-player-lose");
+        // Every one is an entering-play Reaction (listed by the entry-reaction window) except the two Open actions that choose a player (Know Their Minds, issue #419; Tarao, issue #431): AbilityActions lists them once per player.
+        var openChoosers = new[] { "know-their-minds-choose", "tarao-sacrifice" };
+        Check(singles.Where(p => !openChoosers.Contains(p.Key)).All(p => p.Value.Timing == "Reaction" && p.Value.Trigger == "own-enters-play") && singles.Where(p => openChoosers.Contains(p.Key)).All(p => p.Value.Timing == "Open"), "the entering-play Reactions, and the two Open actions that choose a player");
         var slotted = AbilityCatalog.All.Where(p => p.Value.Slots?.Any(s => s.IsPlayer) == true).Select(p => p.Key).OrderBy(k => k, StringComparer.Ordinal).ToArray();
         Eq(string.Join(",", slotted), "fear-me-move,training-slots-mixed,yoshitada-bow");
         // No card prints two player-target reactions of different kinds: Horume and the fixture print exactly a gain and a lose.
         // The entry-reaction window lists every own-enters-play reaction a card prints; only these cards print more than one, so no other card's listing changes.
         var several = CardCatalog.Cards.Values.Where(c => (c.Abilities ?? []).Count(a => AbilityCatalog.All.TryGetValue(a, out var d) && d.Timing == "Reaction" && d.Trigger == "own-enters-play") > 1)
             .Select(c => c.Name).OrderBy(n => n, StringComparer.Ordinal).ToArray();
-        Eq(string.Join(",", several), "Kitsuki Horume,Training choose-a-player personality");
+        Eq(string.Join(",", several), "Asako Izuna,Kitsuki Horume,Training choose-a-player personality"); // Izuna (issue #431) prints three, one per keyword she may give: they share one use
     }
 
     private static void HorumeOptions()
