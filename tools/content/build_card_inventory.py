@@ -397,7 +397,6 @@ BLOCKERS: dict[str, str] = {
     # spell-wave-16/17, follower-wave-20/21/22, holding-wave-6, celestial-wave-4, region-wave-5) and these 55 are not, for the gap each names. Where a note says a half is buildable,
     # the card stays unwired because the other half is not: a card is never wired with a printed ability missing.
     "oracle-l5r-6": "Needs a Focus Effect that substitutes one of your Yojimbo Personalities for your Personality in the duel (the duel's participants are fixed when it is issued), and Revenge tokens (+1F tokens of a named kind, three at once) given after another player's action destroys one of your Courtiers or Shugenja.",
-    "oracle-l5r-193": "Needs a Battle-timed Recruit of the card itself from a Province. Recruit is a Dynasty-phase purchase (QuotePurchase); the only Battle-timed ways into play bring a dead Personality (At Any Cost, Goju Plot) or a Ring (Ring of Fire) into play, and nothing lets a face-up Province card act as a Battle action. The discount also reads a comparison of the unit counts on the two sides of the current battle.",
     # Action-effect tracking (issue #437): MatchState.LastResolvedAction (ActionEffectTracking.cs) now records which cards an action destroyed
     # or moved (not a bow: no single choke point narrates every one the way DestroyUnits/MoveHome already do), read by a new "after an action
     # resolved" Reaction window. Measure of Devotion and Revenge, both blocked on exactly this, are now wired; Hida Defenders and Akodo Kobi's

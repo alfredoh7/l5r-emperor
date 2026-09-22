@@ -2397,4 +2397,6 @@ public static class PublishedContent
     public static PublishedSnapshot PersonalityWave48 { get; } = Load("L5R.Published.PersonalityWave48.json", "personality-wave-48", requireDecks: false);
     /// <summary>Strategy wave 46 (issue #437): Measure of Devotion.</summary>
     public static PublishedSnapshot StrategyWave46 { get; } = Load("L5R.Published.StrategyWave46.json", "strategy-wave-46", requireDecks: false);
+    /// <summary>Personality wave 49 (issue #440): Akodo Ashiko.</summary>
+    public static PublishedSnapshot PersonalityWave49 { get; } = Load("L5R.Published.PersonalityWave49.json", "personality-wave-49", requireDecks: false);
 }

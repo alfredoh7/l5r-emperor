@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Review routing accepts the complete paginated PR file listing when GitHub reports changed_files=0 for very large PRs (e.g. #268); still refuses to route when the listing hits GitHub's 3000-file cap or disagrees with a non-zero changed_files.",
+  "validation": "python -m unittest discover -s tools/collaboration: 45 tests pass, including new zero-metadata and at-cap regressions.",
+  "remaining": "None; ready for review. Takes effect for PRs after merge because the route job runs main's collab.py.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/pull/268",
+  "branch": "claude/268-route-large-pr-files",
+  "updated": "2026-09-22T13:33:35.541061+00:00"
+}

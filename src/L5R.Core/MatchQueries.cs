@@ -480,7 +480,7 @@ public sealed partial class MatchEngine
                 // player's own required, only a battlefield at the card's own province with enemy
                 // presence there. Offered across every one of the player's own provinces, not just the
                 // currently-resolving battlefield.
-                foreach(var card in player.Provinces.Where(p=>p.CardId is not null).Select(p=>Card(p.CardId)).Where(c=>c.FaceUp && Definition(c).Type==CardType.Personality && Keyword(c,"Reserve")))
+                foreach(var card in player.Provinces.Where(p=>p.CardId is not null).Select(p=>Card(p.CardId)).Where(c=>c.FaceUp && Definition(c).Type==CardType.Personality && IsReserveRecruitable(c)))
                 {
                     var def=Definition(card);
                     var provinceIndex=card.ProvinceIndex!.Value;
