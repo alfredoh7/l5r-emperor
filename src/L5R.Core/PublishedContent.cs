@@ -2399,4 +2399,6 @@ public static class PublishedContent
     public static PublishedSnapshot StrategyWave46 { get; } = Load("L5R.Published.StrategyWave46.json", "strategy-wave-46", requireDecks: false);
     /// <summary>Personality wave 49 (issue #440): Akodo Ashiko.</summary>
     public static PublishedSnapshot PersonalityWave49 { get; } = Load("L5R.Published.PersonalityWave49.json", "personality-wave-49", requireDecks: false);
+    /// <summary>Personality wave 50 (issue #440 follow-up): Akodo Kobi - exp.</summary>
+    public static PublishedSnapshot PersonalityWave50 { get; } = Load("L5R.Published.PersonalityWave50.json", "personality-wave-50", requireDecks: false);
 }
