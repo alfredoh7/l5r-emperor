@@ -1,9 +1,9 @@
 {
-  "lane": "rules",
-  "summary": "Before the Dawn audit: triaged all 123 unwired cards; wired 68 on existing primitives with small generalizations (personality-wave-43/45/46/47, strategy-wave-43/44, item-wave-8, spell-wave-16/17, follower-wave-20/21/22, holding-wave-6, celestial-wave-4, region-wave-5); documented specific blockers for the remaining 55 in build_card_inventory.py's BLOCKERS dict. See docs/decisions/2026-09-22-before-the-dawn.md for the readings and cross-cutting gaps.",
+  "lane": "shared",
+  "summary": "Before the Dawn audit: triaged all 123 unwired cards; wired 68 on existing primitives with small generalizations (personality-wave-43/45/46/47, strategy-wave-43/44, item-wave-8, spell-wave-16/17, follower-wave-20/21/22, holding-wave-6, celestial-wave-4, region-wave-5); documented specific blockers for the remaining 55 in build_card_inventory.py's BLOCKERS dict. Lane is shared only because docs/CARD_INVENTORY.xlsx and docs/decisions/2026-09-22-before-the-dawn.md fall outside the rules/ui path patterns (collab.py's unknown-file fallback); every actual code change is rules-lane (src/L5R.Core, tests/L5R.Core.Tests, content/, tools/content). See docs/decisions/2026-09-22-before-the-dawn.md for the readings and cross-cutting gaps.",
   "validation": "39 new tests (btd-personalities, btd-cards, btd-creation, btd-gold-and-lock), all passing; full core suite green (no regressions); every mutant of the new code was killed by a strengthened test (mutation-tested in several passes); bash tools/check.sh exits 0.",
   "remaining": "None for this task; a future primitive pass (action-affected-cards tracking, an any-Personality move/assign trigger, an action-announced reaction window, classification/performer-scoped Additional Actions, an EnteredPlayTurn field, and a persists-until-consumed one-shot) would unblock a meaningful share of the 55 documented blockers, as noted in the decision doc.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/431",
   "branch": "claude/before-the-dawn-audit",
-  "updated": "2026-09-22T07:05:16.409543+00:00"
+  "updated": "2026-09-22T07:25:26.113779+00:00"
 }
