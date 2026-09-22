@@ -7,7 +7,8 @@ using static Batch336Support;
 internal static class BeforeTheDawnCreationTests
 {
     private const string DeathDefeated = "oracle-l5r-1898", Sawaki = "oracle-l5r-2858", Yasunori = "oracle-l5r-4240", CrimsonMark = "oracle-l5r-8002", Genin = "oracle-l5r-9711",
-        WalkingDead = "oracle-l5r-9741", YasunorisGift = "oracle-l5r-10019", Bukaro = "oracle-l5r-1707", GreatDeath = "oracle-l5r-8110", Munemori = "oracle-l5r-4203", Conscripts = "oracle-l5r-10004", BirdOfPrey = "oracle-l5r-9712";
+        WalkingDead = "oracle-l5r-9741", YasunorisGift = "oracle-l5r-10019", Bukaro = "oracle-l5r-1707", GreatDeath = "oracle-l5r-8110", Munemori = "oracle-l5r-4203", Conscripts = "oracle-l5r-10004", BirdOfPrey = "oracle-l5r-9712",
+        ShindenAsahina = "oracle-l5r-6855";
 
     public static void Run(TestRunner runner) => runner.Run("btd-creation", [
         ("Published shapes: the five cards and the two created Personalities are the printed cards with their abilities, traits and art", PublishedShapes),
@@ -197,9 +198,11 @@ internal static class BeforeTheDawnCreationTests
 
     private static void MunemoriLocks()
     {
-        // Player 0's Munemori locks player 1's own Munemori (a Personality with an Open action to try) in the Action Phase.
+        // Player 0's Munemori locks player 1's own Munemori (a Personality with an Open action to try) in the Action Phase. Foe also carries Tsuji's Battle ability, to probe
+        // whether the lock (placed during the Action Phase) still holds once the phase becomes Battle later the same turn.
         var s = Table(Phase.Action, 0); s.PriorityPlayerId = 0; s.Players[0].TurnsTaken = 3; s.Players[1].TurnsTaken = 3;
         var munemori = Add(s, Munemori, 0, Zone.Home); var foe = Add(s, Munemori, 1, Zone.Home);
+        foe.Printed = CardCatalog.Get(Munemori) with { Abilities = ["munemori-lock", "tsuji-bow"] };
         var e = MatchEngine.FromTestState(s);
         Check(Enabled(e, 0, "munemori-lock", munemori.Id).TargetIds!.Contains(foe.Id), "any Personality");
         Check(AbilityCatalog.All["munemori-lock"].ActionKeywords!.Contains("Political"), "a Political action");
@@ -210,10 +213,20 @@ internal static class BeforeTheDawnCreationTests
         Check(!CanUse(locked, 1, "munemori-lock", foe.Id), "locked, he may not perform actions");
         Check(Options(locked, 1, "munemori-lock", foe.Id).Any(o => o.Reason is not null && o.Reason.Contains("may not perform actions")), "and the reason says so: " + string.Join(";", Options(locked, 1, "munemori-lock", foe.Id).Select(o => o.Reason)));
         // The lock belongs to the Action Phase it was placed in: it ends with the phase, not with the turn.
-        var nextPhase = Edit(e, st => { st.Phase = Phase.AttackDeclaration; st.PriorityPlayerId = 1; });
+        var nextPhase = Edit(e, st => { st.Phase = Phase.Battle; st.PriorityPlayerId = 1; st.CurrentBattleProvince = 0; st.UnresolvedBattlefields = [0]; st.Cards[foe.Id].Zone = Zone.Battlefield; st.Cards[foe.Id].ProvinceIndex = 0; st.Cards[munemori.Id].Zone = Zone.Battlefield; st.Cards[munemori.Id].ProvinceIndex = 0; });
         Check(nextPhase.State.Cards[foe.Id].ActionLocks.Count == 1 && nextPhase.State.Cards[foe.Id].ActionLocks[0].Duration.StartsWith("Phase:"), "it is a phase lock, not a turn lock");
+        // A different phase group the SAME turn is a different phase instance too: the lock does not carry over.
+        Check(CanUse(nextPhase, 1, "tsuji-bow", foe.Id), "the Battle Phase, later the same turn, is a different phase: the lock has already ended");
         var nextTurn = Edit(e, st => { st.TurnNumber += 1; st.PriorityPlayerId = 1; });
         Check(CanUse(nextTurn, 1, "munemori-lock", foe.Id), "the next turn's Action Phase is a new phase: the lock has ended");
+        // A phase lock that is not for the CURRENT phase instance does not block a Stronghold's own abilities either (RequireCanPerform's Stronghold branch).
+        var sh = Table(Phase.Action, 1); sh.PriorityPlayerId = 1;
+        sh.Cards[sh.Players[1].StrongholdId].DefinitionId = ShindenAsahina;
+        Add(sh, "training-shugenja", 1, Zone.Home); Add(sh, "training-crane-samurai", 0, Zone.Home);
+        var she = MatchEngine.FromTestState(sh);
+        Check(CanUse(she, 1, "shinden-choice"), "unlocked, the Stronghold's Open action is offered");
+        var stale = Edit(she, st => st.Cards[st.Players[1].StrongholdId].ActionLocks.Add(new("test", "Phase:0")));
+        Check(CanUse(stale, 1, "shinden-choice"), "a stale phase lock (for a phase instance that has already passed) does not block the Stronghold's own abilities");
     }
 
     private static void CrimsonMark_()
