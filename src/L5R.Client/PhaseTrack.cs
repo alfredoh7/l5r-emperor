@@ -57,11 +57,15 @@ public partial class PhaseTrack : Control
         Resized += FitArtwork;
         FitArtwork();
     }
+    // The approved raster has an outer mounting tab; align the lacquer frame itself.
+    private const float FrameRight = 1748f / 1774f;
+    public static float WidthForFrame(float width) => width / FrameRight + 34;
+    public Rect2 PlateBounds { get { var bounds = _plate.GetGlobalRect(); return new(bounds.Position, new(bounds.Size.X * FrameRight, bounds.Size.Y)); } }
     private void FitArtwork()
     {
-        var width = Math.Min(Math.Max(0,Size.X-34), 1260);
+        var width = Math.Max(0, Size.X - 34);
         _plate.Position = new Vector2((Size.X-width-34)/2,0);
-        _plate.Size = new Vector2(width, width * 154/1774);
+        _plate.Size = new Vector2(width, Math.Min(82, width * 154 / 1774));
         _art.SetShaderParameter("plate_size", _plate.Size);
         for (var i=0;i<_areas.Count;i++)
         {

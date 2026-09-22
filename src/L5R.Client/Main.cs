@@ -330,7 +330,7 @@ public partial class Main : Node
         FitAttackReviewControls();
         FitEventDecisions();
         _status.Visible = false;
-        _timeline.Position = new Vector2(344, 12); _timeline.Size = new Vector2(_layoutWidth - SidebarWidth - 404, 100);
+        _timeline.Position = new Vector2(344, 12); _timeline.Size = new Vector2(PhaseTrack.WidthForFrame(_layoutWidth - SidebarWidth - 30 - 344), 100);
         _menu.Position = new Vector2(_layoutWidth - 300, 28); _menu.Size = new Vector2(275, 40);
         _notice.Position = new Vector2(_layoutWidth - SidebarWidth - 22, 1060); _notice.Size = new Vector2(SidebarWidth, 19);
         _unitDetail.Size = DesignSize;

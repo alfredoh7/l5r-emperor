@@ -45,8 +45,8 @@ public partial class Main
             SupportFixtureCard(state, tactician.Id, 0, Zone.Home); ability = "banish-all-doubt-look";
         }
         else if (mode == "show") { SupportFixtureCard(state, 10479, 0, Zone.Home); ability = "kahoku-exp2-look"; }
-        else if (mode is "take" or "none" or "fixed")
-        { SupportFixtureCard(state, "training-look-source", 0, Zone.Home); ability = mode == "fixed" ? "training-look-fixed" : "training-look-take-item"; }
+        else if (mode is "take" or "none" or "fixed" or "mixed")
+        { SupportFixtureCard(state, "training-look-source", 0, Zone.Home); ability = mode == "fixed" ? "training-look-fixed" : mode == "mixed" ? "training-look-any" : "training-look-take-item"; }
         else { SupportFixtureCard(state, 6095, 0, Zone.Home); ability = "public-records-look"; }
         _lookFixture = (MatchEngine)typeof(MatchEngine).GetMethod("FromTestState", BindingFlags.NonPublic | BindingFlags.Static)!.Invoke(null, [state])!;
         await LoadSupportFixture(_lookFixture, mode == "any" ? 1 : 0);
@@ -59,7 +59,7 @@ public partial class Main
         if (_root.GetNodeOrNull<Control>("LookReviewControls") is {} old) { _root.RemoveChild(old); old.QueueFree(); }
         var row = new HBoxContainer { Name = "LookReviewControls", ZIndex = 91 }; row.AddThemeConstantOverride("separation", 6);
         var buttons = new List<Button>();
-        foreach (var (label, mode) in new[] { ("Reorder", "reorder"), ("Take + top", "take"), ("Take + bottom", "bottom"), ("Any Fate deck", "any"), ("Show + take", "show"), ("Fixed order", "fixed") })
+        foreach (var (label, mode) in new[] { ("Reorder", "reorder"), ("Take + top", "take"), ("Take + bottom", "bottom"), ("Any Fate deck", "any"), ("Show + take", "show"), ("Fixed order", "fixed"), ("Mixed choices*", "mixed") })
             buttons.Add(SidebarSkin.Button(label, () => _ = RunLookReview(() => PrepareLookReview(mode))));
         buttons.Add(SidebarSkin.Button("Other seat", () => _session.SwitchPracticeSeat()));
         _lookReviewButtons = buttons.ToArray();
@@ -84,14 +84,21 @@ public partial class Main
     }
     private async Task SetLookDestination(int position, string destination)
     {
-        var choice = _lookPanel!.Choice(position);
+        var panel = _lookPanel!;
+        SupportRequire(!panel.ReturnStep, "Destination requested on return screen");
         var card = View.PendingLook!.Cards!.Single(c => c.Position == position);
-        var index = Array.FindIndex(card.Dispositions, d => d.Disposition == destination);
-        SupportRequire(index >= 0 && card.Dispositions[index].Legal, "Harness requested a forbidden destination");
-        await SupportClick(choice); await LookKey(Key.Home);
-        for (var i = 0; i < card.Dispositions.Length + 1 && choice.GetPopup().GetFocusedItem() != index; i++) await LookKey(Key.Down);
-        SupportRequire(choice.GetPopup().GetFocusedItem() == index, "Native destination menu did not focus the requested option");
-        await LookKey(Key.Enter); SupportRequire(_lookPanel.Destinations[position] == destination, "Native destination selection failed");
+        if (destination == View.PendingLook.Remainder)
+        {
+            var selected = panel.Destinations[position];
+            if (selected == destination) return;
+            await SupportClick(panel.Choice(position, selected));
+        }
+        else
+        {
+            SupportRequire(card.Dispositions.Any(d => d.Disposition == destination && d.Legal), "Harness requested a forbidden destination");
+            panel.Choice(position, destination).GrabFocus(); await LookKey(Key.Enter);
+        }
+        SupportRequire(panel.Destinations[position] == destination, "Visible choice button did not select the requested destination");
     }
     private void LookFits()
     {
@@ -100,11 +107,18 @@ public partial class Main
         if (View.PendingLook?.Stage == "Arrange")
         {
             SupportRequire(panel.GetGlobalRect().Encloses(panel.ConfirmButton.GetGlobalRect()), "Confirmation is outside viewer");
-            foreach (var position in panel.Order) SupportRequire(panel.GetGlobalRect().Encloses(panel.Face(position).GetGlobalRect()), "Full card leaves viewer");
+            foreach (var position in panel.Order.Where(p => !panel.ReturnStep || panel.Destinations[p] is "top" or "bottom")) SupportRequire(panel.GetGlobalRect().Encloses(panel.Face(position).GetGlobalRect()), "Full card leaves viewer");
         }
     }
     private async Task ConfirmLook()
     {
+        if (!_lookPanel!.ReturnStep)
+        {
+            var versionBeforeNext = View.Version;
+            await SupportClick(_lookPanel.ContinueButton); await EventFrames(6); LookFits();
+            SupportRequire(_lookPanel.ReturnStep && View.Version == versionBeforeNext, "Next resolved the effect instead of opening return review");
+            await SupportCapture("-return");
+        }
         var view = View.PendingLook!; var owner = view.DeckOwnerId!.Value; var deck = _lookFixture.State.Players[owner].FateDeck.ToArray();
         var count = view.Cards!.Length; var order = _lookPanel!.Order.ToArray(); var destinations = new Dictionary<int, string>(_lookPanel.Destinations);
         var expected = order.Where(p => destinations[p] == "top").Select(p => deck[p]).Concat(deck.Skip(count))
@@ -122,7 +136,7 @@ public partial class Main
         try
         {
             _preferences.ReducedMotion = _captureMode.Contains("reduced"); ApplyPreferences(false);
-            await PrepareLookReview();
+            await PrepareLookReview(_captureMode.EndsWith("review", StringComparison.Ordinal) ? "bottom" : "reorder");
             if (_captureMode.EndsWith("review", StringComparison.Ordinal)) { GD.Print("TOP_CARDS_REVIEW_READY: real engine choices; prepared scenarios above the tray."); return; }
             LookFits(); SupportRequire(_lookPanel!.Order.Count == 3 && !_lookPanel.ConfirmButton.Disabled, "Reorder case missing");
             var version = View.Version;
@@ -141,13 +155,20 @@ public partial class Main
             await SupportClick(_lookPanel.MoveButton(0, true)); await ConfirmLook();
             await PrepareLookReview("take"); LookFits(); SupportRequire(_lookPanel!.ConfirmButton.Disabled, "Required choice defaulted");
             var illegal = View.PendingLook!.Cards!.First(c => c.Dispositions.Any(d => d.Disposition == "hand" && !d.Legal));
-            var optionIndex = Array.FindIndex(illegal.Dispositions, d => d.Disposition == "hand");
-            SupportRequire(_lookPanel.Choice(illegal.Position).IsItemDisabled(optionIndex) && !string.IsNullOrWhiteSpace(_lookPanel.Choice(illegal.Position).GetItemTooltip(optionIndex)), "Engine ineligible reason missing");
+            SupportRequire(_lookPanel.Choice(illegal.Position, "hand").Disabled && !string.IsNullOrWhiteSpace(_lookPanel.Choice(illegal.Position, "hand").TooltipText), "Engine ineligible reason missing");
+            SupportRequire(!_lookPanel.ReturnStep && !_lookPanel.ConfirmButton.IsVisibleInTree(), "Selection screen shows final confirmation");
+            await SupportCapture("-choose");
             await SetLookDestination(0, "hand"); SupportRequire(!_lookPanel.ConfirmButton.Disabled, "Required count never satisfied");
             await SetLookDestination(2, "hand"); SupportRequire(_lookPanel.ConfirmButton.Disabled, "Excess count can submit");
-            await SetLookDestination(2, "top"); await SupportCapture("-take"); await ConfirmLook();
+            await SetLookDestination(2, "top"); await SupportCapture("-take");
+            await SupportClick(_lookPanel.ContinueButton); await EventFrames(6);
+            SupportRequire(_lookPanel.ReturnStep && _lookPanel.Destinations[0] == "hand", "Next lost chosen card");
+            await SupportClick(_lookPanel.BackButton); await EventFrames(6);
+            SupportRequire(!_lookPanel.ReturnStep && _lookPanel.Destinations[0] == "hand", "Back lost the draft");
+            await SupportClick(_lookPanel.Face(0)); SupportRequire(_lookPanel.Destinations[0] == "top", "Click selected card did not undo");
+            await SupportClick(_lookPanel.Face(0)); await ConfirmLook();
             await PrepareLookReview("bottom"); LookFits(); SupportRequire(View.PendingLook!.Remainder == "bottom" && _lookPanel!.Order.Count == 4, "Banish case missing");
-            await SetLookDestination(0, "hand"); await SupportClick(_lookPanel!.MoveButton(3, false)); await SupportCapture("-bottom"); await ConfirmLook();
+            await SetLookDestination(0, "hand"); await SupportClick(_lookPanel!.ContinueButton); await EventFrames(6); await SupportClick(_lookPanel.MoveButton(3, false)); await SupportCapture("-bottom"); await ConfirmLook();
             await PrepareLookReview("any"); LookFits(); await SupportCapture("-decks");
             var opponent = View.PendingLook!.DeckChoices!.Single(d => !d.OwnDeck);
             var deckButton = StabilizationButtons(_lookPanel!).Single(b => b.HasMeta("owner") && b.GetMeta("owner").AsInt32() == opponent.OwnerId);
@@ -158,6 +179,17 @@ public partial class Main
             await PrepareLookReview("show"); var shown = View.PendingLook!.Cards!.First(c => c.Dispositions.Any(d => d.Disposition == "show" && d.Legal));
             await SetLookDestination(shown.Position, "show"); SupportRequire(StabilizationText(_lookPanel!).Contains("Will be shown"), "Public reveal warning missing");
             await SupportCapture("-show"); await ConfirmLook(); SupportRequire(View.ShownCards!.Any(c => c.Definition.Id == shown.DefinitionId), "Shown card did not enter public history");
+            await PrepareLookReview("mixed");
+            var ownFate = StabilizationButtons(_lookPanel!).Single(b => b.HasMeta("owner") && b.GetMeta("owner").AsInt32() == 0 && b.GetMeta("deck").AsString() == "Fate");
+            await SupportClick(ownFate); await WaitDecisionPresentation(); await EventFrames(15); LookFits();
+            await SetLookDestination(0, "bottom"); await SetLookDestination(1, "hand"); await SupportCapture("-mixed-choices");
+            await SupportClick(_lookPanel!.ContinueButton); await EventFrames(6); LookFits();
+            SupportRequire(_lookPanel.Face(2).GetGlobalRect().Position.X < _lookPanel.Face(0).GetGlobalRect().Position.X, "Top and bottom return groups are interleaved");
+            await SupportCapture("-mixed-return"); await ConfirmLook();
+            await PrepareLookReview("mixed");
+            ownFate = StabilizationButtons(_lookPanel!).Single(b => b.HasMeta("owner") && b.GetMeta("owner").AsInt32() == 0 && b.GetMeta("deck").AsString() == "Fate");
+            await SupportClick(ownFate); await WaitDecisionPresentation(); await EventFrames(15);
+            await SetLookDestination(0, "hand"); await SetLookDestination(1, "discard"); await SetLookDestination(2, "bottom"); await ConfirmLook();
             await PrepareLookReview("fixed"); SupportRequire(!_lookPanel!.MoveButton(0, true).IsVisibleInTree(), "Fixed order has reorder controls");
             await SetLookDestination(1, "discard"); await SupportCapture("-fixed"); await ConfirmLook();
             await PrepareLookReview("none"); SupportRequire(View.PendingLook!.Rules!.Single().Max == 0 && !_lookPanel!.ConfirmButton.Disabled, "No-eligible case ignored capped engine bounds"); await ConfirmLook();
@@ -169,7 +201,7 @@ public partial class Main
             SupportRequire(!_lookPanel!.ConfirmButton.Disabled, "Session did not resume");
             if (_captureMode.Contains("review"))
             { await SupportClick(_lookReviewButtons.Single(b => b.Text == "Take + bottom")); await EventFrames(90); SupportRequire(View.PendingLook?.Remainder == "bottom", "Prepared navigation failed"); }
-            GD.Print("TOP_CARDS_PASS: private native hover/inspection, keyboard reorder/menu, exact counts, engine return order, top/bottom, opponent deck, show, fixed/short/empty, seat and busy resets"); GetTree().Quit();
+            GD.Print("TOP_CARDS_PASS: private native hover/inspection, keyboard reorder/choice buttons and staged Back/Next, exact counts, engine return order, top/bottom, opponent deck, show, fixed/short/empty, seat and busy resets"); GetTree().Quit();
         }
         catch (Exception e) { await SupportCapture("-failure"); GD.PushError(e.ToString()); GetTree().Quit(1); }
     }

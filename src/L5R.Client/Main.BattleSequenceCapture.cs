@@ -110,6 +110,8 @@ public partial class Main
         SupportRequire(_battleProgressStrip?.Visible == true && _battleProgressStrip.ActiveSegment == ProgressSegment, "Wrong active battle segment");
         var strip = _battleProgressStrip!.GetGlobalRect();
         SupportRequire(GetViewport().GetVisibleRect().Encloses(strip), "Strip clipped");
+        SupportRequire(Math.Abs(_timeline.PlateBounds.End.X - strip.End.X) < 1, "Phase plate is not flush with the narrow battle strip");
+        SupportRequire(_timeline.PlateBounds.End.Y <= strip.Position.Y + 1, "Phase plate overlaps battle strip");
         SupportRequire(!_tableViewport.GetGlobalRect().Intersects(strip) && !_hand.GetGlobalRect().Intersects(strip), "Strip overlaps table or hand");
         SupportRequire(!RulesHelp.PhaseGuide(View.Phase).Contains("match has ended"), "Active battle described as ended");
         if (View.CurrentBattleProvince is {} province)

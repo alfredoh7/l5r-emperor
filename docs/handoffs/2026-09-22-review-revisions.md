@@ -1,7 +1,42 @@
 # Next-five review revisions — 22 September 2026
 
-Alfredo approved Opponent Payment (#377) hands-on. Main merge is still contingent on Mendon review.
+PR: https://github.com/alfredoh7/l5r-emperor/pull/434
+Branch: `codex/323-review-revisions`, isolated follow-up to PR #432. Current main `062e5718` integrated. No main merge authorized.
 
-This isolated follow-up to PR #432 addresses Alfredo’s feedback on #323 (simpler staged top-card choices), #345 (remove target reorder arrows while retaining click order), and #311 (align phase bar with the narrow battle strip). #400 gets ethereal copy-marker concepts only; no new marker appearance is approved yet.
+## Acceptance and changes
 
-Implementation and native validation are in progress. Original five-preview Windows release is unchanged. No main merge is authorized.
+- **#377 Opponent Payment:** Alfredo says “good to go.” Hands-on UI acceptance recorded on PR #427: https://github.com/alfredoh7/l5r-emperor/pull/427#issuecomment-5774661062. Mendon review still required before merge.
+- **#323 Top Cards:** separate choice and return-order steps. Visible per-card action buttons replace dropdowns; a card with one action can be clicked to select/undo. Required counts and engine eligibility reasons stay visible. Next is local only. Return review shows outgoing-card names and the full faces of returning cards, with explicit top/bottom positions and text move controls. Back retains the draft; only final confirmation submits. Mixed destinations group top and bottom returns separately. The launcher now opens Banish All Doubt; training scenarios are marked with an asterisk.
+- **#345 Multiple Targets:** removed earlier/later chevrons and the redundant remove row from every up-front group. Clicking a selected card deselects it; reselection appends it to the chosen order. Numbered targets, command order and ordered reaction windows remain. No slot timing or rules changed.
+- **#311 Battle Progress:** phase plate widened so its visible gold frame meets the right edge of the narrow flag/helmet/horse strip. The artwork’s mounting-tab inset is accounted for. Height is bounded above the strip; labels gain room; Rules help remains accessible.
+- **#400 Created Copies:** three new ImageGen concepts in `docs/designs/2026-09-22-copy-marker/`. Recommend B’s ghost outlines with A’s compact wisps. Alfredo selected B’s overlapping ghost outlines with A’s shorter, quieter wisps during this task; faithful production asset and native checks are now in progress.
+
+## Launchers
+
+All paths below are under this checkout’s `artifacts/` directory:
+
+- `L5R Top Cards - Revised Review.app` → `Review Top Cards.command`
+- `L5R Multiple Targets - Revised Review.app` → `Review Multiple Targets.command`
+- `L5R Battle Progress - Revised Review.app` → `Review Battle Progress.command`
+- `L5R Emperor - Latest.app` → `Play Latest.command`
+
+Local gallery: http://127.0.0.1:8799/revisions-2026-09-22/
+Copy concepts: http://127.0.0.1:8799/copy-ethereal/
+
+## Validation
+
+- Client compilation: 0 errors / 0 warnings.
+- `tools/check-top-cards-ui.sh`: 1920×1080 normal and 1280×800 reduced passed. Native card/button selection, hover, inspection, keyboard reorder, Back/Next draft retention, count bounds, exact engine outcomes, mixed return groups, opponent privacy, show/history, fixed/short/empty decks, seat and busy reset exercised.
+- `tools/check-multi-targets-ui.sh`: both sizes passed; no chevrons, keyboard deselect/reselect order, exact engine effects, independent groups, counts, optional zero, private hand, conditional follow-ups and ordered target reactions.
+- `tools/check-battle-sequence-ui.sh`: both sizes passed; visible-frame alignment and non-overlap asserted along with formal battle flow, native input and reduced motion.
+- Final `bash tools/check.sh --skip-client`: all requested checks passed after main `062e5718`; includes 8/8 server and 12/12 client transport checks.
+- Native screenshots inspected and saved in `docs/screenshots/review-revisions/`. Local browser gallery rendered and concept links verified. Existing browser preferences preserved.
+- Prepared Top Cards app opened and the choice → return flow exercised. Multiple Targets app opened Bonds of Coin; Battle Progress app opened the prepared Engage scenario through Finder. Desktop automation’s short-lived app selector timed out although those wrappers successfully launched; the native windows were verified separately.
+
+## Artwork dependency
+
+Current main adds printings beyond the previous package. Published private prerelease `catalogue-art-pr434-20260922-r2`, 3044 verified WebP85 images, 414328092 bytes, SHA-256 `2fa09124ccd0fa0e944b82d72e36e293bbed84bb6e7a95e8d970f93c56f75889`. Uploaded release digest/size match; offline installation verification passes. Archive stays out of Git. No printing provenance changed by this task.
+
+## Remaining
+
+Alfredo reviews revised #323/#345/#311; implement and check the now-approved #400 combination; Mendon validates rules interpretation before any main merge. PR remains a draft for this review. The earlier Windows review package is unchanged and does not contain these revisions. Native Mac validation is not Windows graphical playtesting. CI status is tracked on PR #434.
