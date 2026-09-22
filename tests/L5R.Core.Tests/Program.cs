@@ -13,6 +13,7 @@ var tests = new (string Name, Action Run)[]
     ("Own focused cards are inspectable from every source without opponent disclosure", DuelDemoChecks.OwnFocusViews),
     ("Duel Demo scenarios and legal decisions", DuelDemoChecks.Decisions),
     ("Duel stakes and source-linked public consequences", DuelDemoChecks.Story),
+    ("Either player may concede while a duel is pending", DuelDemoChecks.ConcedeDuringDuel),
     ("Duel results record effective province strength (Times of Strife's ceiling), matching GetView", DuelDemoChecks.EffectiveProvinceStrength),
     ("Battle journal groups public effects and actual destinations without duplicating snapshots", BattleJournalProjection),
     ("Accepted battle and reaction passes publish their actor; rejected passes remain atomic", PublicPassEvents),

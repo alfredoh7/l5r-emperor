@@ -107,12 +107,14 @@ public sealed partial class MatchEngine
 
     private ActionOption[] QueryDuelActions(int playerId)
     {
-        if (playerId != _state.PriorityPlayerId)
-            return [new("wait", $"Waiting for {Player(_state.PriorityPlayerId).Name}", false, "The other player has priority.")];
         var actions = new List<ActionOption>();
         void Add(GameCommand c, string label, string[]? targets = null) => actions.Add(new(c.Type, label, true, null, c, c.CardId, targets));
         GameCommand Command(string type, string? card = null, string? target = null, string? choice = null) =>
             new(type, playerId, _state.Version, CardId: card, TargetId: target, Choice: choice);
+        // Conceding is always available, mid-duel included, exactly as QueryActions offers it elsewhere.
+        if (playerId != _state.PriorityPlayerId)
+            return [new("wait", $"Waiting for {Player(_state.PriorityPlayerId).Name}", false, "The other player has priority."),
+                new("concede", "Concede", true, null, Command("concede"))];
         if (_state.PendingChoice is { Type: "overconfidentDraw" })
         {
             Add(Command("overconfidentDraw", choice: "draw"), "Draw a card");
@@ -168,6 +170,7 @@ public sealed partial class MatchEngine
                     break;
             }
         }
+        Add(Command("concede"), "Concede");
         return actions.ToArray();
     }
 }

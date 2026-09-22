@@ -98,6 +98,16 @@ static class DuelDemoChecks
         }
         Check(!record.Beats!.Any(b=>b.Lines.Any(l=>l.Contains("strength"))),"No strength change reported while the ceiling hides it");
     }
+    public static void ConcedeDuringDuel()
+    {
+        var e=MatchEngine.CreateDuelDemo();Begin(e);
+        Check(e.State.PendingDuel is not null,"a duel is pending");
+        foreach(var player in new[]{0,1})
+            Check(e.QueryActions(player).Any(a=>a.Type=="concede"&&a.Enabled),$"player {player} may concede mid-duel");
+        var waiting=1-e.State.PriorityPlayerId;
+        Send(e,e.QueryActions(waiting).Single(a=>a.Type=="concede").Command!);
+        Equal(e.State.WinnerId,1-waiting);Equal(e.State.VictoryReason,"Concession");
+    }
     public static void Story()
     {
         var e=MatchEngine.CreateDuelDemo();Begin(e);
@@ -177,9 +187,9 @@ static class DuelDemoChecks
             Equal(result.ResolutionReason,scenario=="duelist"?"Duelist breaks the tie":"Equal totals · both lose");
             Equal(JsonSerializer.Deserialize<DuelResult>(JsonSerializer.Serialize(result))!.ResolutionReason,result.ResolutionReason);
         }
-        var empty=MatchEngine.CreateDuelDemo("empty");Begin(empty,"empty");Equal(empty.QueryActions(1).Length,1);Send(empty,Action(empty,"strike"));
+        var empty=MatchEngine.CreateDuelDemo("empty");Begin(empty,"empty");Equal(empty.QueryActions(1).Count(a=>a.Type!="concede"),1);Send(empty,Action(empty,"strike"));
         var cap=MatchEngine.CreateDuelDemo("four");Begin(cap,"four");for(var i=0;i<8;i++)Send(cap,Action(cap,"focus",c=>c.Choice=="deck"));
-        Equal(cap.QueryActions(1).Single().Type,"strike");Check(!cap.Execute(new("focus",1,cap.Version,Choice:"deck")).Accepted,"fifth rejected");
+        Equal(cap.QueryActions(1).Single(a=>a.Type!="concede").Type,"strike");Check(!cap.Execute(new("focus",1,cap.Version,Choice:"deck")).Accepted,"fifth rejected");
         var reaction=MatchEngine.CreateDuelDemo("reaction");Begin(reaction,"reaction");Send(reaction,Action(reaction,"useAbility"));
         for(var i=0;i<2;i++)Send(reaction,Action(reaction,"declineReaction"));Equal(reaction.State.PendingDuel!.Stage,"Focusing");
         var order=MatchEngine.CreateDuelDemo("effects");Begin(order,"effects");
