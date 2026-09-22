@@ -470,7 +470,11 @@ public sealed record FirstActionRestriction(int PlayerId, string? PerformerId, b
 ///  <param name="Battle">The battle the grant belongs to (MatchState.BattleNumber), or null for one that needs no battle. A Ring's recruit grant
 /// (Mendon's ruling, issue #379: "A recruit grant at one battle is limited to that battle") is usable only at its own battle and lapses when that
 /// battle is over: made during a battle it belongs to that battle, made between battles (the Action phase) it belongs to the NEXT one.</param>
-public sealed record AdditionalActionGrant(int PlayerId, string[]? ScopeCardIds, bool FromDiscard = false, int? Battle = null);
+///  <param name="AnyDiscardTiming">FromDiscard only. False (Daigotsu Bofana - exp) makes only the scoped card's Battle-timed abilities playable, the
+/// default and only shape until issue #449. True (Akodo Tezuka: "play it for one of its Battle, Limited, or Open actions, as appropriate to the
+/// current phase") also admits Limited and Open -- each still gated by its own ordinary phase/active-player legality, so "as appropriate to the
+/// current phase" needs no extra check of its own.</param>
+public sealed record AdditionalActionGrant(int PlayerId, string[]? ScopeCardIds, bool FromDiscard = false, int? Battle = null, bool AnyDiscardTiming = false);
 
 /// <summary>A discard a player owes: they choose the card from their hand (Times of Strife, Daigotsu Bofana - exp's entry).
 /// Reason names the card or rule in the prompt and the event.</summary>

@@ -1,0 +1,34 @@
+{
+  "Profile": "personality-wave-52",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-298",
+      "Name": "Akodo Tezuka",
+      "Type": "Personality",
+      "Clan": "Lion",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 2,
+      "PersonalHonor": 4,
+      "HonorRequirement": 7,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle/Open: Discard a card and target a Bushido Virtue in your discard pile: Take an additional action to play it for one of its Battle, Limited, or Open actions, as appropriate to the current phase. Remove it from the game after its action ends.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-298.jpg",
+      "Keywords": [
+        "Lion Clan",
+        "Paragon",
+        "Samurai"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "tezuka-grant"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}
