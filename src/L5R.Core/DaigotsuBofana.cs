@@ -95,13 +95,18 @@ public sealed partial class MatchEngine
     // FromDiscard). That grant makes exactly that card's Battle-timed abilities usable from the discard pile -- the player picks which
     // one, each validated like any action -- and taking the action consumes it. The grant is spent or forfeited like every other
     // (a normal action or a pass ends the burst), and the card, a Strategy that sat in a discard pile, is removed from the game once
-    // the action has resolved. Limited to a Battle-timed ability: a Battle/Open ability's Open half is not "one of its Battle actions".
+    // the action has resolved. Limited to a Battle-timed ability by default: a Battle/Open ability's Open half is not "one of its
+    // Battle actions". Akodo Tezuka (issue #449) grants "one of its Battle, Limited, or Open actions" instead --
+    // AdditionalActionGrant.AnyDiscardTiming -- so the same grant also admits those, each still gated by the ordinary Timing-vs-phase
+    // legality (Limited: the active player only; Open/Battle: their own phase) every other use of that ability already goes through, which
+    // is exactly what "as appropriate to the current phase" describes: no separate check of its own.
     private AdditionalActionGrant? DiscardPlayGrant(int playerId, CardInstance card) =>
         card.Zone is Zone.FateDiscard or Zone.DynastyDiscard
             ? _state.AdditionalActions.FirstOrDefault(g => g.FromDiscard && g.PlayerId == playerId && g.ScopeCardIds?.Contains(card.Id) == true)
             : null;
     private bool PlayableFromDiscard(AbilityDefinition ability, CardInstance source, int playerId) =>
-        DisciplineFromDiscard(ability, source) || ability.Timing == "Battle" && DiscardPlayGrant(playerId, source) is not null;
+        DisciplineFromDiscard(ability, source) || DiscardPlayGrant(playerId, source) is { } grant
+            && (ability.Timing == "Battle" || grant.AnyDiscardTiming && ability.Timing is "Limited" or "Open" or "BattleOrOpen");
     // A card played as an action from a discard pile leaves the game afterward: the Discipline play and the granted play are the
     // only two ways to use a non-Reaction ability from a discard pile (ValidateAbility's zone check).
     private static bool PlayedFromDiscard(AbilityDefinition ability, CardInstance? source) =>
@@ -109,7 +114,9 @@ public sealed partial class MatchEngine
     // Same-turn replay is refused PER ACTION (Mendon's ruling): the once-per-turn stamp lives under each ability's own UsageKey on the card
     // and survives the move to the discard pile, so an action performed this turn (from hand, in play, or earlier from the pile) cannot be
     // performed again, while another action of the same card can. The Discipline play uses the very same stamp, so both rules are one mechanism.
-    private bool HasUnspentBattleAction(CardInstance card) => (Definition(card).Abilities ?? []).Any(a => AbilityCatalog.All.TryGetValue(a, out var def) && def.Timing == "Battle"
+    // Generalized (issue #449) from a Battle-only check to any of the caller's own named Timings, so Akodo Tezuka's own target legality --
+    // "choose a Bushido Virtue with a Battle, Limited or Open action still unspent" -- can ask the same question Bofana's Battle-only case does.
+    private bool HasUnspentAction(CardInstance card, params string[] timings) => (Definition(card).Abilities ?? []).Any(a => AbilityCatalog.All.TryGetValue(a, out var def) && timings.Contains(def.Timing)
         && (!card.AbilityUses.TryGetValue(def.UsageKey ?? a, out var used) || used != _state.TurnNumber));
 
     // Proclaim first, then the entering effects (Mendon's ruling): a Proclaim-eligible entry opens the Proclaim window, and its mandatory "after

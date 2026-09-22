@@ -854,6 +854,9 @@ public static class AbilityCatalog
         // Training-only: exercises Stalwart's "never the card's own controller" exclusion -- "personality"
         // allows either side, unlike training-bow-enemy above.
         ["training-bow-any"] = new("Open", "Training: bow a target Personality, own or enemy", "personality"),
+        // Akodo Tezuka fixture (issue #449): a Limited action with no cost or target, to prove a FromDiscard grant
+        // with AnyDiscardTiming admits Limited too, not just Battle/Open.
+        ["training-limited-draw"] = new("Limited", "Training: draw a card", "none"),
         // Singh Remnants' own Reaction: unlike "own-enters-play" (the entering card's own ability),
         // this fires when a DIFFERENT card the player controls (a Personality) enters play, letting
         // Singh Remnants -- sitting in hand or a discard pile -- attach itself. Target "none": the
@@ -2183,6 +2186,14 @@ public static class AbilityCatalog
         // His other printed ability, "After Bofana enters play: Lose 2 Honor and all other players must discard a card...", is his
         // Effect (bofana-entry-discard) plus EntryHonorLoss -- a mandatory entry effect, not an ability here.
         ["bofana-exp-dark-virtue"] = new("Battle", "Target a Dark Virtue in your discard pile: Take an additional action to play it for one of its Battle actions. After it resolves, remove the card from the game", "own-dark-virtue-in-discard"),
+        // Akodo Tezuka (oracle-l5r-298, issue #449): "Battle/Open: Discard a card and target a Bushido Virtue in your discard pile: Take an
+        // additional action to play it for one of its Battle, Limited, or Open actions, as appropriate to the current phase. Remove it from
+        // the game after its action ends." Bofana's own shape above, generalized on two fronts: the "discard a card" cost is a separate slot
+        // from the real target (Kakita Yasunori's own two-slot "remove a card ... and target ..." precedent), and the grant itself admits
+        // Limited/Open too (AdditionalActionGrant.AnyDiscardTiming) -- "as appropriate to the current phase" needs no check of its own, since
+        // each Timing is still gated by its own ordinary phase/active-player legality once the grant makes the card playable at all.
+        ["tezuka-grant"] = new("BattleOrOpen", "Discard a card and target a Bushido Virtue in your discard pile: Take an additional action to play it for one of its Battle, Limited, or Open actions, as appropriate to the current phase. Remove it from the game after its action ends",
+            "slots", Slots: [new("target", "own-bushido-virtue-in-discard", "A Bushido Virtue in your Fate discard pile"), new("discard", "hand", "A card in your hand")]),
 
         // Training fixtures (issue #338): each copy step on its own, showing the two primitives compose independently of Fukuzo -- keyword only,
         // ability only, and an ability copied for the turn (a Duration other than "Copy" is never replaced by a later use).
@@ -2953,11 +2964,11 @@ public sealed partial class MatchEngine
     // ceding priority to their opponent first -- Again!'s shape (ScopeCardIds null: any of the
     // player's own cards) or Two Hands' shape (a specific set: "from cards in his unit"). Two Hands'
     // own restriction blocks future GRANTS, not the use of ones already sitting here.
-    private void GrantAdditionalAction(int playerId, string[]? scopeCardIds, bool fromDiscard = false, int? battle = null)
+    private void GrantAdditionalAction(int playerId, string[]? scopeCardIds, bool fromDiscard = false, int? battle = null, bool anyDiscardTiming = false)
     {
         if (_state.NoNewAdditionalActionsThisBattle) return;
-        _state.AdditionalActions.Add(new(playerId, scopeCardIds, fromDiscard, battle));
-        Emit("additionalActionGranted", $"{Player(playerId).Name} may take an additional Battle action.", playerId);
+        _state.AdditionalActions.Add(new(playerId, scopeCardIds, fromDiscard, battle, anyDiscardTiming));
+        Emit("additionalActionGranted", $"{Player(playerId).Name} may take an additional {(anyDiscardTiming ? "" : "Battle ")}action.", playerId);
     }
     // Ring recruitment (issue #194): rather than a forced mid-resolution interrupt, a satisfied
     // condition grants an Additional Battle Action scoped to that specific Ring card in hand (the
@@ -4085,8 +4096,14 @@ public sealed partial class MatchEngine
                 // keyword, in the player's own Fate discard pile, that has a Battle action still playable this turn (a card with
                 // none would only waste the grant).
                 else if (ability.Target == "own-dark-virtue-in-discard")
-                    Require(target.OwnerId == player.Id && type == CardType.Strategy && Keyword(target, "Dark Virtue") && target.Zone == Zone.FateDiscard && HasUnspentBattleAction(target),
+                    Require(target.OwnerId == player.Id && type == CardType.Strategy && Keyword(target, "Dark Virtue") && target.Zone == Zone.FateDiscard && HasUnspentAction(target, "Battle"),
                         "Choose a Dark Virtue with a Battle action from your Fate discard pile.");
+                // Akodo Tezuka (oracle-l5r-298, issue #449): "a Bushido Virtue in your discard pile" -- the same shape as Bofana's own Dark Virtue
+                // above, generalized to admit any of the card's Battle, Limited or Open actions (not Battle only), matching what her own grant
+                // (AdditionalActionGrant.AnyDiscardTiming) then makes playable.
+                else if (ability.Target == "own-bushido-virtue-in-discard")
+                    Require(target.OwnerId == player.Id && type == CardType.Strategy && Keyword(target, "Bushido Virtue") && target.Zone == Zone.FateDiscard && HasUnspentAction(target, "Battle", "Limited", "Open", "BattleOrOpen"),
+                        "Choose a Bushido Virtue with a Battle, Limited or Open action from your Fate discard pile.");
                 // Scholarly Hermit's own ability (issue #194): a Ring in the player's own Fate
                 // discard pile -- not in play, so this needs its own branch too.
                 else if (ability.Target == "own-ring-in-discard")
@@ -5503,6 +5520,13 @@ public sealed partial class MatchEngine
             // Kitsu Akai / Ohsuki / Tokoru create through their Creates spec (default branch below).
             // Daigotsu Bofana - exp: the additional action to play the chosen Dark Virtue from the discard pile.
             case "bofana-exp-dark-virtue": GrantAdditionalAction(player.Id, [target!.Id], fromDiscard: true); break;
+            case "tezuka-grant":
+            {
+                DiscardFate(player, SlotCards(command, "discard").Single());
+                var granted = SlotCards(command, "target").Single();
+                GrantAdditionalAction(player.Id, [granted.Id], fromDiscard: true, anyDiscardTiming: true);
+                break;
+            }
             case "ohsuki-sparrow-honor": GainHonor(player.Id, 3, "Ohsuki's Sparrow", source); break;
             // "Destroy it if it is an attachment" is a separate clause from "Bow it" -- a Stalwart
             // attachment whose bow was negated is still destroyed.
@@ -6470,7 +6494,7 @@ public sealed partial class MatchEngine
                 break;
             case "mitoshi-bow": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;
             case "mitoshi-straighten": Straighten(target!); break;
-            case "shikei-draw": Draw(player); break;
+            case "shikei-draw": case "training-limited-draw": Draw(player); break;
             case "yozo-exp-destroy":
                 if (HasClanAffiliation(target!, "Lion")) RemoveFromGame(target!); else DestroyUnits([target!], actingPlayerId: player.Id);
                 break;
@@ -7553,7 +7577,7 @@ public sealed partial class MatchEngine
                     "own-ninja-personality-in-discard" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && Keyword(c, "Ninja") && c.Zone is Zone.Dead or Zone.DynastyDiscard).Select(c => (string?)c.Id).ToArray(),
                     "own-nonunique-strategy-in-discard" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Strategy && !Keyword(c, "Unique") && c.Zone == Zone.FateDiscard).Select(c => (string?)c.Id).ToArray(),
                     "own-kiho-strategy-in-discard" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Strategy && Keyword(c, "Kiho") && c.Zone == Zone.FateDiscard).Select(c => (string?)c.Id).ToArray(),
-                    "own-dark-virtue-in-discard" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Strategy && Keyword(c, "Dark Virtue") && c.Zone == Zone.FateDiscard && HasUnspentBattleAction(c)).Select(c => (string?)c.Id).ToArray(),
+                    "own-dark-virtue-in-discard" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Strategy && Keyword(c, "Dark Virtue") && c.Zone == Zone.FateDiscard && HasUnspentAction(c, "Battle")).Select(c => (string?)c.Id).ToArray(),
                     "own-ring-in-discard" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Ring && c.Zone == Zone.FateDiscard).Select(c => (string?)c.Id).ToArray(),
                     "ring-in-play-or-own-discard" => _state.Cards.Values.Where(c => Definition(c).Type == CardType.Ring && (InPlay(c) || c.OwnerId == playerId && c.Zone == Zone.FateDiscard)).Select(c => (string?)c.Id).ToArray(),
                     // Shosuro Hawado / Soshi Neiru (issue #301): a Dynasty card in either player's
