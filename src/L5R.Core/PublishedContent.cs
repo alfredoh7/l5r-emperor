@@ -2391,4 +2391,10 @@ public static class PublishedContent
     public static PublishedSnapshot FollowerWave23 { get; } = Load("L5R.Published.FollowerWave23.json", "follower-wave-23", requireDecks: false);
     /// <summary>Item wave 9 (issue #435): Shamsir.</summary>
     public static PublishedSnapshot ItemWave9 { get; } = Load("L5R.Published.ItemWave9.json", "item-wave-9", requireDecks: false);
+    /// <summary>Strategy wave 45 (issue #437): Revenge.</summary>
+    public static PublishedSnapshot StrategyWave45 { get; } = Load("L5R.Published.StrategyWave45.json", "strategy-wave-45", requireDecks: false);
+    /// <summary>Personality wave 48 (issue #437): the Oathsworn Deathseeker Measure of Devotion creates.</summary>
+    public static PublishedSnapshot PersonalityWave48 { get; } = Load("L5R.Published.PersonalityWave48.json", "personality-wave-48", requireDecks: false);
+    /// <summary>Strategy wave 46 (issue #437): Measure of Devotion.</summary>
+    public static PublishedSnapshot StrategyWave46 { get; } = Load("L5R.Published.StrategyWave46.json", "strategy-wave-46", requireDecks: false);
 }

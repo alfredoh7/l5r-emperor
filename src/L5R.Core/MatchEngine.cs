@@ -398,6 +398,15 @@ public sealed partial class MatchEngine
                 if (command.Type=="useAbility") UseAbility(command); else PassReaction();
                 return;
             }
+            if (_state.PendingChoice.Type=="afterActionResolvedReaction")
+            {
+                // After an action's resolution (issue #437): either player may play a Reaction that names it, or pass; two consecutive passes close the window (PassReaction),
+                // the same shape as afterResolutionReaction above -- there is nothing special to do when it closes (no special-cased branch in PassReaction), priority just
+                // returns to whoever this window's own ActingPlayerId (FinishActionEffectTracking's own closesTo) named.
+                Require(command.Type is "useAbility" or "declineReaction" or "pass","Play a Reaction to the action's resolution or pass.");
+                if (command.Type=="useAbility") UseAbility(command); else PassReaction();
+                return;
+            }
             if (_state.PendingChoice.Type=="battleRecruit")
             {
                 // After a battle resolved (issue #379): the players holding a Ring's recruit grant of this battle may put it into play (a
@@ -1218,6 +1227,7 @@ public sealed partial class MatchEngine
         Require(_state.Phase==Phase.BattleSelection,"Battle order may be chosen between battles.");
         Require(command.Province is int && _state.UnresolvedBattlefields.Contains(command.Province.Value),"Choose an unresolved battlefield.");
         _state.CurrentBattleProvince=command.Province; _state.BattleNumber++;
+        _state.EnemyDestroyedOwnPersonalitySinceLastBattleAction=new bool[2]; // Revenge (issue #437): "this battle" bounds the window.
         SetPhase(Phase.Battle,1-_state.ActivePlayerId);
         // Battle Phase timing (issue #310): the Defender holds the first opportunity by default (spec 4.4).
         // "Engaging" is exactly this moment -- the Attacker has just selected the battle (spec 4.1) -- so the
@@ -2277,6 +2287,9 @@ public sealed partial class MatchEngine
             card.ProvinceIndex=null;
             MarkDead(card);
             count++;
+            // Action-effect tracking (issue #437): only ever recorded when this destruction came from a specific action (actingPlayerId is set) --
+            // never for the mass casualty sweep a battle's own resolution performs directly (see the comment above on IsCreatedCard's own check).
+            if(actingPlayerId is not null) RecordActionEffect(card.Id,DestroyedKind);
             // The destruction itself, and everything it normally triggers (the Dishonorable-death
             // penalty MarkDead already applied above, ExpendableDraw, DestroyedDuringBattleBonus,
             // Overconfident), still fully happens -- Lady Matsu's Rage only overrides where the
