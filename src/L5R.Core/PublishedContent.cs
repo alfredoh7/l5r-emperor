@@ -2373,4 +2373,10 @@ public static class PublishedContent
     public static PublishedSnapshot RegionWave5 { get; } = Load("L5R.Published.RegionWave5.json", "region-wave-5", requireDecks: false);
     /// <summary>Personality wave 44 (issue #431): The Red Hunger.</summary>
     public static PublishedSnapshot PersonalityWave44 { get; } = Load("L5R.Published.PersonalityWave44.json", "personality-wave-44", requireDecks: false);
+    /// <summary>Personality wave 45 (issue #431): Goju Sawaki, Kakita Yasunori and the Personalities and Weapon they create.</summary>
+    public static PublishedSnapshot PersonalityWave45 { get; } = Load("L5R.Published.PersonalityWave45.json", "personality-wave-45", requireDecks: false);
+    /// <summary>Spell wave 17 (issue #431): Death, Defeated.</summary>
+    public static PublishedSnapshot SpellWave17 { get; } = Load("L5R.Published.SpellWave17.json", "spell-wave-17", requireDecks: false);
+    /// <summary>Follower wave 21 (issue #431): The Crimson Mark.</summary>
+    public static PublishedSnapshot FollowerWave21 { get; } = Load("L5R.Published.FollowerWave21.json", "follower-wave-21", requireDecks: false);
 }

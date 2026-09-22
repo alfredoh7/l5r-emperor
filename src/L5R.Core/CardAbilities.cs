@@ -1696,6 +1696,10 @@ public static class AbilityCatalog
         // Dragon's Breath Castle (oracle-l5r-2219), a Stronghold: after engaging at one of its controller's provinces, the Attacker bows one of his Personalities there. Its trait (Effect dbc-honor) is in SetPhase.
         ["dbc-attacker-bow"] = new("Reaction", "Even if this card is bowed, after engaging at a battlefield at one of your provinces: The Attacker targets and bows one of his Personalities there", "none", Trigger: "after-engaging"),
         // Disreputable Deal (oracle-l5r-2031): its Focus Effect is a decision that pauses the duel's resolution (FocusEffectChoice.cs); its Political Open action is -3F and a loss of Honor.
+        // The Crimson Mark (oracle-l5r-8002): "As a Focus Effect: You may destroy an attachment on a Personality involved in this duel." and "Battle: Destroy this card and target an enemy card without
+        // attachments: Destroy it."
+        ["crimson-mark-focus"] = new("FocusEffect", "As a Focus Effect, you may destroy an attachment on a Personality involved in this duel", "none"),
+        ["crimson-mark-destroy"] = new("Battle", "Destroy this card and target an enemy card without attachments: Destroy it", "enemy-card", RequireNoAttachments: true, Costs: [new(CostVerbs.Sacrifice)]),
         ["disreputable-deal-focus"] = new("FocusEffect", "As a Focus Effect, you may put a non-Unique Strategy with a Political ability in your discard pile into your hand", "none"),
         ["disreputable-deal-penalty"] = new("Open", "Bow your target performing Courtier to give a target Personality -3F. If he is dishonorable, his controller loses Honor equal to his printed Personal Honor", "personality",
             Performer: "own-unbowed-personality-with-keyword-at-any-location", RequiredKeywords: ["Courtier"], ActionKeywords: ["Political"], Costs: ActionCost.BowPerformer),
@@ -1830,6 +1834,21 @@ public static class AbilityCatalog
         ["crimson-shadow-bow"] = new("Battle", "Fear Battle: Target an enemy Follower: Bow it", "enemy-follower", ActionKeywords: ["Fear"]),
         ["dragons-favor-attack"] = new("Battle", "Thunder Battle, bow this card: Ranged Attack with strength equal to this Shugenja's Chi", "attack", ActionKeywords: ["Thunder"], Costs: ActionCost.BowSource),
         ["embers-final-fire-destroy"] = new("Battle", "Bow this card and target an enemy attachment: Destroy it", "enemy-attachment", Costs: ActionCost.BowSource),
+        // Death, Defeated (oracle-l5r-1898): "Battle: Remove a target dead Personality in any player's discard pile from the game: Create a 2F/2C/0PH Shadowlands * Undead Personality at the current
+        // battlefield. Remove him from the game after this battle's resolution. Lose 2 Honor." The created Personality is The Walking Dead (oracle-l5r-9741).
+        ["death-defeated-create"] = new("Battle", "Remove a target dead Personality in any player's discard pile from the game: Create a 2F/2C/0PH Shadowlands · Undead Personality at the current battlefield, to be removed from the game after this battle. Lose 2 Honor",
+            "dead-personality-any-discard", Costs: ActionCost.RemoveTarget,
+            Creates: new(CardType.Personality, Force: 2, Chi: 2, PersonalHonor: 0, Keywords: ["Shadowlands", "Undead"], ProxyId: "oracle-l5r-9741", AtBattlefield: true, UntilBattleEnds: true)),
+        // Goju Sawaki (oracle-l5r-2858): "Reaction: After another player's Battle action targets Sawaki, destroy him: Create two 1F/1C/0PH Spider Clan * Shadowlands * Ninja Personalities at the current
+        // battlefield." The created Personalities are Goju Genin (oracle-l5r-9711). The action he was targeted by goes on without him (his destruction is its own cost).
+        ["sawaki-spawn"] = new("Reaction", "After another player's Battle action targets Sawaki, destroy him: Create two 1F/1C/0PH Spider Clan · Shadowlands · Ninja Personalities at the current battlefield", "none",
+            Trigger: ReactionTriggers.TargetedByAction, Costs: [new(CostVerbs.Sacrifice)],
+            Creates: new(CardType.Personality, Force: 1, Chi: 1, PersonalHonor: 0, Keywords: ["Spider Clan", "Shadowlands", "Ninja"], ProxyId: "oracle-l5r-9711", Count: 2, AtBattlefield: true)),
+        // Kakita Yasunori (oracle-l5r-4240): "Limited: Remove a card in your Fate discard pile from the game and target your Personality: Create a +1F/+0C Weapon Item and attach it to him." The Item is
+        // Yasunori's Gift (oracle-l5r-10019). The removed card is a second target (a slot), the Personality the first: he is the primary target the created Item is attached to.
+        ["yasunori-create"] = new("Limited", "Remove a card in your Fate discard pile from the game and target your Personality: Create a +1F/+0C Weapon Item and attach it to him", "slots",
+            Slots: [new("host", "own-personality", "Your Personality"), new("removed", "own-fate-discard-card", "A card in your Fate discard pile")],
+            Creates: new(CardType.Item, Force: 1, Chi: 0, Keywords: ["Weapon"], ProxyId: "oracle-l5r-10019")),
         ["genji-province-raise"] = new("BattleOrOpen", "Bow this card: Give a target Province +3 strength", "any-province", Costs: ActionCost.BowSource, UsageKey: "genji-province"),
         ["genji-province-lower"] = new("BattleOrOpen", "Bow this card: Give a target Province -3 strength", "any-province", Costs: ActionCost.BowSource, UsageKey: "genji-province"),
         ["genji-attack"] = new("Battle", "Bow this card: Ranged 3 Attack with +1 strength for each other Follower in this unit", "attack", Costs: ActionCost.BowSource),
@@ -2336,7 +2355,7 @@ public sealed partial class MatchEngine
         or "shinoda-exp-bow-destroy"
         or "a-stain-cleansed-destroy"
         // Before the Dawn (issue #431): Wrathful Dead, and the actions that destroy their target.
-        or "wrathful-dead-destroy" or "anger-management-destroy" or "dismissing-the-cur-move" or "spirit-kensai-destroy" or "spirit-commander-destroy" or "embers-final-fire-destroy" or "red-hunger-personality";
+        or "wrathful-dead-destroy" or "anger-management-destroy" or "dismissing-the-cur-move" or "spirit-kensai-destroy" or "spirit-commander-destroy" or "embers-final-fire-destroy" or "red-hunger-personality" or "crimson-mark-destroy";
     // The actions whose ONLY effect is to straighten their target: against a card that may not be straightened this turn (Basic Lesson) they are refused outright, where an action that
     // also does something else (Defensive Stance's +3F) still resolves and only its straightening is skipped (Straighten refuses it).
     private static bool StraightensOnly(string abilityId) => abilityId is "jinn-kuen-straighten" or "kodo-straighten" or "munefusa-straighten" or "mitsuko-straighten" or "ritual-preparation-straighten"
@@ -4016,6 +4035,9 @@ public sealed partial class MatchEngine
                 // Scavenging Party (issue #420): "your discarded Personality" -- a dead Personality is a discarded one too (Mendon).
                 else if (ability.Target == "own-discarded-personality")
                     Require(type == CardType.Personality && target.OwnerId == player.Id && IsDiscardedPersonality(target), "Choose one of your own discarded Personalities.");
+                // Kakita Yasunori (issue #431): "a card in your Fate discard pile".
+                else if (ability.Target == "own-fate-discard-card")
+                    Require(target.OwnerId == player.Id && target.Zone == Zone.FateDiscard, "Choose a card in your own Fate discard pile.");
                 else if (ability.Target == "own-dead-samurai")
                     Require(type == CardType.Personality && target.OwnerId == player.Id && target.Zone == Zone.Dead && Keyword(target, "Samurai"), "Choose one of your own dead Samurai.");
                 // Your Clan Needs You! (issue #295): "your performing Personality in one of your
@@ -5895,7 +5917,7 @@ public sealed partial class MatchEngine
             }
             case "spirit-of-the-warrior": GrantSpirit(Card(command.PerformerId!), "Commander", "spirit-commander-destroy", source!.Id, player.Id); break;
             case "spirit-of-knowledge": GrantSpirit(Card(command.PerformerId!), "Tactician", "spirit-tactician-draw", source!.Id, player.Id); break;
-            case "spirit-kensai-destroy": case "spirit-commander-destroy":
+            case "spirit-kensai-destroy": case "spirit-commander-destroy": case "crimson-mark-destroy":
                 if (target!.Zone == Zone.Attached) DestroyAttachment(target); else DestroyUnits([target], false, player.Id);
                 break;
             case "spirit-magistrate-bow": case "strength-of-the-mountain-bow": case "strength-of-the-mountain-earth": case "crimson-shadow-bow":
@@ -5950,6 +5972,14 @@ public sealed partial class MatchEngine
                 if (ResolveOrDeferAttack(id, player, target?.Id, ActionPerformer(ability, command, source).Id, consumedGrant)) return;
                 break;
             case "ashigaru-recruits-create":
+                if (ExecuteCreate(ability, ability.Creates!, command, player)) return;
+                break;
+            case "sawaki-spawn":
+                RecheckTarget(HeldAction(), source!);
+                if (ExecuteCreate(ability, ability.Creates!, command, player)) return;
+                break;
+            case "yasunori-create":
+                foreach (var removed in SlotCards(command, "removed").ToArray()) RemoveFromGame(removed);
                 if (ExecuteCreate(ability, ability.Creates!, command, player)) return;
                 break;
             case "indomitable-home-strength": Player(1 - _state.ActivePlayerId).Provinces.Single(p => p.Index == _state.CurrentBattleProvince!.Value).Strength += 2; break;
@@ -6564,9 +6594,9 @@ public sealed partial class MatchEngine
             case "basic-lesson-holding":
                 if (ExecuteCreate(ability, ability.Creates!, command, player, () => LockStraightening(Card(player.StrongholdId)))) return;
                 break;
-            case "nakanu-technique-create": case "akumas-power-create": case "training-create-charter-tax":
+            case "nakanu-technique-create": case "akumas-power-create": case "training-create-charter-tax": case "death-defeated-create":
             {
-                var honorLost = id switch { "akumas-power-create" => 3, "training-create-charter-tax" => 2, _ => 1 };
+                var honorLost = id switch { "akumas-power-create" => 3, "training-create-charter-tax" or "death-defeated-create" => 2, _ => 1 };
                 if (ExecuteCreate(ability, ability.Creates!, command, player, () => GainHonor(player.Id, -honorLost, Definition(source!).Name, source))) return;
                 break;
             }

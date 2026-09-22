@@ -1908,6 +1908,7 @@ public sealed partial class MatchEngine
         +(Definition(card).Effect=="force-with-spell-2"&&Attachments(card.Id).Any(c=>Definition(c).Type==CardType.Spell)?2:0)
         // Ember's Final Fire: "While this Shugenja is Fire, he has +1F". Stone-Hewed Shrine: "Defending Earth Personalities have +1F while at this province's battlefield."
         +Attachments(card.Id).Count(c=>Definition(c).Type==CardType.Spell && Definition(c).Effect=="embers-final-fire-force" && Keyword(card,"Fire"))
+        +2*Attachments(card.Id).Count(c=>Definition(c).Effect=="death-defeated-force")
         +(card.Zone==Zone.Battlefield && Keyword(card,"Earth") && IsDefendingUnit(card) && _state.Cards.Values.Any(r=>r.Zone==Zone.Region && r.ProvinceIndex==card.ProvinceIndex && Definition(r).Effect=="stone-hewed-shrine-force")?1:0)
         +(Definition(card).Effect=="force-if-enemy-dishonorable"&&_state.Cards.Values.Any(c=>c.OwnerId!=card.OwnerId&&Definition(c).Type==CardType.Personality&&InPlay(c)&&c.Dishonorable)?2:0)
         // "The highest number of dead Personalities in any one discard pile" -- the greatest per-player

@@ -242,6 +242,9 @@ public sealed partial class MatchEngine
             case "taishuu-political-negate":
                 return command.PlayerId != card.OwnerId && affected.OwnerId == card.OwnerId && Definition(affected).Type == CardType.Personality
                     && ActionCarriesKeyword(acting, command.CardId is not null && _state.Cards.TryGetValue(command.CardId, out var politicalSource) ? politicalSource : null, "Political");
+            // Goju Sawaki: another player's Battle action targets him where he stands.
+            case "sawaki-spawn":
+                return command.PlayerId != card.OwnerId && affected.Id == card.Id && IsBattleAction(command) && card.Zone == Zone.Battlefield;
             case "yurishi-disappear":
                 return command.PlayerId != card.OwnerId && affected.Id == card.Id && IsBattleAction(command) && card.Zone == Zone.Battlefield;
             case "jinn-kuen-negate":
