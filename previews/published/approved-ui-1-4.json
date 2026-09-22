@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "repository": "alfredoh7/l5r-emperor",
+  "source_pr": 396,
+  "source_commit": "db649158edd527b72714fab053d7f190af425e09",
+  "title": "UI demos 1-4 (approved by Alfredo)",
+  "slug": "approved-ui-1-4",
+  "tag": "preview-pr396-db649158ed-r1-windows",
+  "asset": "L5R-Review-pr396-db649158ed-r1-Windows.zip",
+  "bytes": 1381236787,
+  "sha256": "9bb494f26ad83cb17d8e68209251a17317ddd6a31122ffb316b66e9b1964a206",
+  "folder": "L5R-Review-pr396-db649158ed-r1",
+  "launcher": "Start Review.cmd",
+  "reviewer": "mdornbrook"
+}

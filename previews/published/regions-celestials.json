@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "repository": "alfredoh7/l5r-emperor",
+  "source_pr": 292,
+  "source_commit": "7360ff1c17f9b9fd08d956a8952cb10929293cdd",
+  "title": "Regions and Celestials",
+  "slug": "regions-celestials",
+  "tag": "preview-pr292-7360ff1c17-r1-windows",
+  "asset": "L5R-Review-pr292-7360ff1c17-r1-Windows.zip",
+  "bytes": 1300434321,
+  "sha256": "465cdf25d4105d2876c0b1c79a2fc540b9e0f487de35ea81ca3b0feccfe72272",
+  "folder": "L5R-Review-pr292-7360ff1c17-r1",
+  "launcher": "Start Review.cmd",
+  "reviewer": "mdornbrook"
+}

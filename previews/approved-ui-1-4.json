@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "slug": "approved-ui-1-4",
+  "title": "UI demos 1-4 (approved by Alfredo)",
+  "source_pr": 396,
+  "source_commit": "db649158edd527b72714fab053d7f190af425e09",
+  "revision": 1,
+  "reviewer": "mdornbrook",
+  "summary": "Alfredo approved the UI of demos 1-4, including immediate deck-button navigation in #4. He requests Mendon review before merging and written UI/QoL feedback for Alfredo to address.",
+  "review_steps": [
+    "Alfredo has approved the UI of demos 1-4. Merging these four into the main game is contingent on Mendon approving and the required checks passing. No merge has been performed. Demos 5-8 still await Alfredo and are not included in this package.",
+    "Start Review.cmd opens demo 1 immediately. Quit the game between demos, then double-click Demo 1 - Decision Chooser.cmd, Demo 2 - Shown Cards.cmd, Demo 3 - Action Restriction.cmd or Demo 4 - Deck Search.cmd. Each prepares its own scenario without playing a whole match.",
+    "Demo 1 / issue #339 / PR #392: try Yumaru choices and source inspection, then Next demo for Fukui bow versus destroy costs, including an unavailable bow option. Confirmations should clearly explain the engine choices. https://github.com/alfredoh7/l5r-emperor/pull/392",
+    "Demo 2 / issue #315 / PR #393: inspect a shown card, minimize, reveal another and reopen the public history. Check full-card inspection and who can see each reveal. https://github.com/alfredoh7/l5r-emperor/pull/393",
+    "Demo 3 / issue #347 / PR #395: inspect the action-restriction seal and unavailable actions, then advance to check the restriction expires. https://github.com/alfredoh7/l5r-emperor/pull/395",
+    "Demo 4 / issue #314 / PR #396: click Dynasty or Fate once to open its private list immediately. There is no deck confirmation button. Filter and inspect cards; card selection still requires Confirm selection. Try the other seat, Imperial Gift, no eligible cards and the Region/Terrain follow-ups. https://github.com/alfredoh7/l5r-emperor/pull/396",
+    "Please record your approval or requested changes for each demo on its PR. If you have UI or QoL feedback, please write it down with the demo number and what should change; Alfredo will make the necessary changes. Send Feedback.url opens the batch discussion on PR #396."
+  ],
+  "known_limitations": [
+    "Prepared local engine fixtures are included to reach each decision quickly. They do not constitute full human matches, expert rules acceptance or external multiplayer testing.",
+    "The isolated preview includes the preceding UI lineage and separately unapproved stabilization rules candidates from the preview base (see PR #275 and docs/handoffs/2026-09-20-eight-ui-review-plan.md). Alfredo approval of demos 1-4 does not approve those inherited rules changes; dependencies must be resolved with Mendon before integration.",
+    "PR #396 includes forwarding of existing AlternativeCost metadata so demo 1 can receive its authoritative cost choices online without importing demo 7. Core still decides legality and payments. This small shared change needs Mendon review alongside PR #392.",
+    "Automated Windows package startup and launcher checks are distinct from a native Windows graphical playtest. Mendon graphical/rules review is pending."
+  ],
+  "scenarios": [
+    {
+      "name": "Start Review",
+      "mode": "published-decisions-review"
+    },
+    {
+      "name": "Demo 1 - Decision Chooser",
+      "mode": "published-decisions-review"
+    },
+    {
+      "name": "Demo 2 - Shown Cards",
+      "mode": "published-shown-review"
+    },
+    {
+      "name": "Demo 3 - Action Restriction",
+      "mode": "published-action-lock-review"
+    },
+    {
+      "name": "Demo 4 - Deck Search",
+      "mode": "published-search-review"
+    },
+    {
+      "name": "Open Full Game",
+      "mode": null
+    }
+  ]
+}
