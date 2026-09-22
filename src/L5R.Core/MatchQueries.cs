@@ -59,8 +59,8 @@ public sealed partial class MatchEngine
         GameCommand Command(string type,string? id=null,string[]? sources=null,int? province=null,bool discount=false,bool allegiance=false,
             Dictionary<string,int>? assignments=null,string[]? cardIds=null,string? target=null)
             =>new(type,playerId,_state.Version,id,sources,province,discount,allegiance,assignments,cardIds,target);
-        void Add(string type,string label,GameCommand? command=null,string? reason=null,string? cardId=null,string[]? targets=null,int[]? provinces=null,PurchaseQuote? quote=null)
-            =>result.Add(new(type,label,reason is null,reason,command,cardId,targets,provinces,quote));
+        void Add(string type,string label,GameCommand? command=null,string? reason=null,string? cardId=null,string[]? targets=null,int[]? provinces=null,PurchaseQuote? quote=null,int? goldCost=null)
+            =>result.Add(new(type,label,reason is null,reason,command,cardId,targets,provinces,quote,goldCost));
         // Order Seppuku is an Open action: available to any Dishonorable Samurai/Courtier/Shugenja
         // the querying player controls during the Action Phase, independent of who holds priority.
         if(_state.Phase==Phase.Action && _state.PendingChoice is null)
@@ -87,10 +87,16 @@ public sealed partial class MatchEngine
             foreach(var id in player.Hand)
                 Add("timesOfStrifeDiscard",$"Discard {Definition(Card(id)).Name}",Command("timesOfStrifeDiscard",target:id),cardId:id);
         }
-        else if(_state.PendingChoice is { Type:"overconfidentDraw" })
+        else if(_state.PendingChoice is { Type:"overconfidentDraw" or "brashDraw" } draw)
         {
-            Add("overconfidentDraw","Draw 1 card",Command("overconfidentDraw") with {Choice="draw"});
-            Add("overconfidentDraw","Decline draw",Command("overconfidentDraw") with {Choice="decline"});
+            Add(draw.Type,"Draw 1 card",Command(draw.Type) with {Choice="draw"});
+            Add(draw.Type,"Decline draw",Command(draw.Type) with {Choice="decline"});
+        }
+        else if(_state.PendingChoice is { Type:"bowReaction" or "beforeActionReaction" })
+        {
+            // Use the execution validator for the exact watcher, targets, costs and usage limits.
+            result.AddRange(AbilityActions(playerId,reactionsOnly:true).Where(a=>a.Enabled));
+            Add("declineReaction","Pass reaction",Command("declineReaction"));
         }
         else if(_state.PendingChoice is { Type:"proclaim" or "entryReaction" } pending)
         {
@@ -149,6 +155,33 @@ public sealed partial class MatchEngine
                     cardId:card.Id);
             Add("declineReaction","Pass reaction",Command("declineReaction"));
         }
+        else if(_state.PendingChoice is { Type:"battleActionReaction" } battleActionPending)
+        {
+            // Stormless Fury (issue #276 follow-up): scoped to the one specific offered card by id,
+            // same single-watcher shape as entryReaction/bowReaction above.
+            if(battleActionPending.PlayerId==playerId)
+            {
+                var card=Card(battleActionPending.CardId!);
+                foreach(var reactionId in (Definition(card).Abilities??[]).Where(a=>AbilityCatalog.All.TryGetValue(a,out var def) && def.Timing=="Reaction" && def.Trigger=="after-battle-action-resolves"))
+                    Add("useAbility",AbilityCatalog.All[reactionId].Label,
+                        new("useAbility",playerId,_state.Version,CardId:card.Id,AbilityId:reactionId),
+                        cardId:card.Id);
+            }
+            Add("declineReaction","Pass reaction",Command("declineReaction"));
+        }
+        else if(_state.PendingChoice is { Type:"announceReaction" } announcePending)
+        {
+            // Tsuruchi Yakusho (issue #276 follow-up): scoped to the one specific offered card by id.
+            if(announcePending.PlayerId==playerId)
+            {
+                var card=Card(announcePending.CardId!);
+                foreach(var reactionId in (Definition(card).Abilities??[]).Where(a=>AbilityCatalog.All.TryGetValue(a,out var def) && def.Timing=="Reaction" && def.Trigger=="own-ranged-action-announced"))
+                    Add("useAbility",AbilityCatalog.All[reactionId].Label,
+                        new("useAbility",playerId,_state.Version,CardId:card.Id,AbilityId:reactionId),
+                        cardId:card.Id);
+            }
+            Add("declineReaction","Pass reaction",Command("declineReaction"));
+        }
         else if(_state.PendingChoice is { Type:"shinden" })
         {
             Add("chooseShinden","Bow and prevent straightening this turn",Command("chooseShinden") with {Choice="bow"});
@@ -180,11 +213,20 @@ public sealed partial class MatchEngine
                     foreach(var card in player.Hand.Select(Card).Where(c=>Definition(c).Type is CardType.Item or CardType.Follower))
                     {
                         var def=Definition(card);
-                        var legalTargets=targets.Where(t=>AttachmentAllowed(card,t) && AttachmentLegalTarget(def,t)).Select(t=>t.Id).ToArray();
-                        var payment=PaymentOptions(playerId,def.GoldCost).FirstOrDefault();
-                        var reason=legalTargets.Length==0?"No Personality meets the attachment requirements.":payment is null?"Insufficient unbowed Gold production.":null;
-                        Add("equip",$"Equip {def.Name} · {def.GoldCost} Gold",reason is null?Command("equip",card.Id,payment!.SourceIds,target:legalTargets[0]):null,
-                            reason,card.Id,legalTargets);
+                        var legalTargets=targets.Where(t=>AttachmentAllowed(card,t) && AttachmentLegalTarget(def,t)).ToArray();
+                        if(legalTargets.Length==0)
+                            Add("equip",$"Equip {def.Name}",reason:"No Personality meets the attachment requirements.",cardId:card.Id);
+                        // Only combine targets that have the same authoritative price. Changing a
+                        // target in the client must not carry a cheaper payment onto another target.
+                        foreach(var group in legalTargets.GroupBy(t=>EquipCost(playerId,card,t)))
+                        {
+                            var cost=group.Key;var targetIds=group.Select(t=>t.Id).ToArray();
+                            var payment=PaymentOptions(playerId,cost).FirstOrDefault();
+                            var duplicate=(Keyword(card,"Unique") || Keyword(card,"Singular")) && ControlsCopyOf(playerId,def.Name);
+                            var reason=duplicate?"You already control this Unique or Singular card.":payment is null?"Insufficient unbowed Gold production.":null;
+                            Add("equip",$"Equip {def.Name} · {cost} Gold",reason is null?Command("equip",card.Id,payment!.SourceIds,target:targetIds[0]):null,
+                                reason,card.Id,targetIds,goldCost:cost);
+                        }
                     }
                 }
                 Add("pass","Pass action",Command("pass"));

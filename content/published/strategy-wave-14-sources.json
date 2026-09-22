@@ -1,0 +1,65 @@
+[
+  {
+    "card_id": "oracle-l5r-10929",
+    "printing_set": [
+      "Aftermath"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10929",
+    "image_path": "assets/reference/oracle/aftermath/webp/oracle-l5r-10929-printing-1-image-1.webp",
+    "image_sha256": "38553d1b9b68dde58031033ee686800701143e2783e7a79db7e5bcf70433881d"
+  },
+  {
+    "card_id": "oracle-l5r-9922",
+    "printing_set": [
+      "The Shadow's Embrace"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=9922",
+    "image_path": "assets/reference/oracle/the-shadow-s-embrace/webp/oracle-l5r-9922-printing-1-image-1.webp",
+    "image_sha256": "f4c8d154c8d8c35f64918863900bbf64d9d011e110c2abfba7918dac08b94773"
+  },
+  {
+    "card_id": "oracle-l5r-10946",
+    "printing_set": [
+      "Aftermath"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10946",
+    "image_path": "assets/reference/oracle/aftermath/webp/oracle-l5r-10946-printing-1-image-1.webp",
+    "image_sha256": "f87d9c00967c86ccdad1c5ce51c944529012da6a6585382ce51a5c8dbc2cef96"
+  },
+  {
+    "card_id": "oracle-l5r-10945",
+    "printing_set": [
+      "Aftermath"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10945",
+    "image_path": "assets/reference/oracle/aftermath/webp/oracle-l5r-10945-printing-1-image-1.webp",
+    "image_sha256": "d4f3d56489eddcd45d64c471d9b7fb5273e50f46961004854c647025b8c68f1f"
+  },
+  {
+    "card_id": "oracle-l5r-9931",
+    "printing_set": [
+      "The Shadow's Embrace"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=9931",
+    "image_path": "assets/reference/oracle/the-shadow-s-embrace/webp/oracle-l5r-9931-printing-1-image-1.webp",
+    "image_sha256": "cda5ac584b018e520419584369071b7b306448a5f04de77f08c04df5296e59ce"
+  },
+  {
+    "card_id": "oracle-l5r-10402",
+    "printing_set": [
+      "Torn Asunder"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10402",
+    "image_path": "assets/reference/oracle/torn-asunder/webp/oracle-l5r-10402-printing-1-image-1.webp",
+    "image_sha256": "6902eb9b9bfaf0c09569ddfe50ca102f3367055ee0e4c50e8c0943fec63052a8"
+  },
+  {
+    "card_id": "oracle-l5r-9168",
+    "printing_set": [
+      "Before the Dawn"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=9168",
+    "image_path": "assets/reference/oracle/before-the-dawn/webp/oracle-l5r-9168-printing-1-image-1.webp",
+    "image_sha256": "3698155109251f1e5802db4b73e3ba1a6cdf7b620d0cc3d078cfcd285d4d27d2"
+  }
+]

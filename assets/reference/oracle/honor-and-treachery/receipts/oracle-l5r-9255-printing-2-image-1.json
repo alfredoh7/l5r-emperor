@@ -29,9 +29,7 @@
     "path": "assets/reference/oracle/honor-and-treachery/webp/oracle-l5r-9255-printing-2-image-1.webp",
     "sha256": "c2e895a77fda96d9b8f751c97f6e175c9df694ba9e9fac58bf0e53d206a4bfd3",
     "source": {
-      "asset": "L5R-Catalogue-WebP85.zip",
-      "matched_by": "original_sha256",
-      "release": "catalogue-art-webp-v1"
+      "note": "Re-derived locally from the verified Oracle-of-the-Void master (top-level path/sha256, untouched) via PIL WebP85 -- the catalogue-art-webp Release attachments available this session did not include this card."
     },
     "width": 750
   }

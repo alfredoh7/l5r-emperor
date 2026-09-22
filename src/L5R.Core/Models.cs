@@ -272,6 +272,32 @@ public sealed class PendingConqueror
     public string[] CandidateIds { get; set; } = [];
 }
 
+/// <summary>Before This Battle Resolves (issue #272, Encircled Terrain's own printed timing): "occur
+/// after all players have passed but before resolution is determined... If there are multiple
+/// 'before this battle resolves' effects in play at a battlefield, the player whose turn it is
+/// chooses the order." Opened by ResolveBattle itself, before Army()/ArmyForces are ever computed --
+/// deliberately BEFORE the battle's own participants are read, since Encircled Terrain's own effect
+/// (sending every other Personality home) changes who actually fights. RemainingSourceIds holds every
+/// not-yet-resolved source's own card id, still to be ordered by the active player (via the
+/// "beforeBattleOrder" PendingChoice) whenever more than one remains; ActiveSourceId is whichever one
+/// is currently resolving. The Encircled* fields are that one source's own sub-stage -- a future
+/// second "before this battle resolves" card with a different shape gets its own such fields, never
+/// reusing these by coincidence of type.</summary>
+public sealed class PendingBeforeBattleResolve
+{
+    public int ProvinceIndex { get; set; }
+    public int Attacker { get; set; }
+    public int Defender { get; set; }
+    public List<string> RemainingSourceIds { get; set; } = [];
+    public string? ActiveSourceId { get; set; }
+    // Encircled Terrain's own sub-stage while ActiveSourceId is its id: "ChooseOrder" (its own
+    // controller picks who selects first) -> "FirstSelect" -> "SecondSelect" (each side chooses one
+    // Personality of their own at this battlefield to keep) -> resolved (every other Personality here
+    // sent home).
+    public string? EncircledStage { get; set; }
+    public string? EncircledFirstSelectedId { get; set; }
+}
+
 /// <summary>An Additional Action grant (core rules Glossary; issue #181): one Battle action the
 /// named player may take out of the normal back-and-forth alternation, without ceding priority to
 /// their opponent in between. ScopeCardIds null means any of the player's own cards (Again!'s
@@ -299,6 +325,18 @@ public sealed record TamokoHonorCheck(string TargetId, int BeneficiaryPlayerId);
 /// delayed destroy so her own destroy-redirect trait still attributes correctly even though she has
 /// already been discarded as this ability's own cost by the time it fires.</summary>
 public sealed record LadyMatsusRageWatch(string TargetId, int ActingPlayerId);
+
+/// <summary>Yasuki Tsujiken (oracle-l5r-9469): one mark placed by his own "After Tsujiken enters
+/// play, target a Holding" Reaction. See MatchState.TsujikenWatches for the full shape/lifecycle.</summary>
+public sealed record TsujikenWatch(string TsujikenId, string HoldingId);
+
+/// <summary>Fields of Mercy (oracle-l5r-2530): the per-player destroyed-Personality counter for one
+/// specific in-play copy of the card. See MatchState.FieldsOfMercyWatches for the full lifecycle.</summary>
+public sealed class FieldsOfMercyWatch
+{
+    public string CardId { get; set; } = "";
+    public int[] DestroyedCount { get; set; } = new int[2];
+}
 
 /// <summary>Dueling (core rules; issue #204): a mini-game that pauses whatever the outer game was
 /// doing (a duel-issuing ability's own execution sets this up and returns without ceding priority,
@@ -365,11 +403,33 @@ public sealed class MatchState
     public PendingDuel? PendingDuel { get; set; }
     public int? CurrentBattleProvince { get; set; }
     public List<int> UnresolvedBattlefields { get; set; } = [];
+    // Before This Battle Resolves (issue #272): see PendingBeforeBattleResolve's own doc comment.
+    // Non-null only while ResolveBattle's own before-resolution sequence is still being sorted out
+    // (ordering choices, Encircled Terrain's own selection sub-stages); cleared before the battle's
+    // actual winner/casualties are ever computed.
+    public PendingBeforeBattleResolve? PendingBeforeBattleResolve { get; set; }
+    // After This Battle Resolves (issue #272, Looting the Ruins' own printed timing): "after the
+    // resolution of the current battle but before the next battlefield is chosen." FinishBattleResolution
+    // sets this to the province that just resolved (its own provinceIndex parameter, otherwise lost --
+    // CurrentBattleProvince is already cleared by the time this hook fires, and the Overconfident
+    // draw window may defer the whole tail across a command boundary first, same reasoning
+    // PendingConqueror.ProvinceIndex already documents). FinishBattleReturnHomeAndTransition reads and
+    // clears it once its own after-resolve effects have run.
+    public int? ResolvedBattleProvinceIndex { get; set; }
     // Ashigaru Elite's shape: a per-player counter of the current battle's Force boost to each of the
     // performer's own Ashigaru-keyword Personalities/Followers at this battlefield, incremented once
     // per use (stacks, tireless). Reset to zero whenever a battle resolves (FinishBattleResolution) --
     // "for the remainder of the battle," not the turn -- since a turn can contain more than one battle.
     public int[] AshigaruBoost { get; set; } = new int[2];
+    // Village Guardian (oracle-l5r-9162, issue #285): "Draw one card for each player who has had a
+    // province destroyed this game" -- a game-wide, per-player, match-lifetime flag, set once and
+    // never cleared (unlike AshigaruBoost above, which resets every battle). Indexed by player id,
+    // the same shape as AshigaruBoost/DestroyedCount, set at DestroyProvince's own single choke
+    // point. Deliberately NOT FieldsOfMercyWatches' shape (a List of per-Terrain-instance, per-player
+    // Personality-destruction counters) -- this is a plain per-player boolean, scoped to the whole
+    // match rather than any one card instance, and to Province destruction rather than Personality
+    // destruction.
+    public bool[] ProvinceEverDestroyed { get; set; } = new bool[2];
     // Additional Action (issue #181): every currently-available grant across both players, and a
     // command snapshot awaiting the "additionalActionReaction" window (Effortless Counterattack's
     // shape) before it actually resolves. Two Hands' own restriction ("other actions will not give
@@ -433,6 +493,30 @@ public sealed class MatchState
     // clarification is that the whole Attack-Declaration-through-battle-resolution sequence counts as
     // one "battle phase" for this purpose, not each battlefield separately.
     public bool WarWearinessBowedThisPhase { get; set; }
+    // Stormless Fury (issue #276 follow-up): the general "after a Battle action resolves" primitive.
+    // The just-resolved Battle action's own performer, valid only while a "battleActionReaction"
+    // window is open -- stormless-fury-bow's own implicit Target (no separate selection needed, since
+    // there is only ever one performer to name).
+    public string? BattleActionReactionPerformerId { get; set; }
+    // Which Stormless-Fury-shaped card ids already used their own out-of-play "attach as Reaction"
+    // half (stormless-fury-attach) against the CURRENTLY open battleActionReaction window's own
+    // action -- the same card's own in-play "bow" half (stormless-fury-bow) may not also fire against
+    // that same action (the card owner's own errata ruling). Overwritten (cleared) every time a fresh
+    // battleActionReaction window opens for a new action, so it never leaks into a later, unrelated
+    // one -- the small transient piece of state the primitive needs, nothing more.
+    public List<string> BattleActionReaction1UsedCardIds { get; set; } = [];
+    // Tsuruchi Yakusho (issue #276 follow-up): the general "after you announce an action" primitive.
+    // The whole triggering command, stashed here (never partially applied) while an "announceReaction"
+    // window offers the one eligible watching card's own controller a chance to react before
+    // ExecuteAbilityEffects actually runs -- the same defer-then-reexecute shape PendingNegatableAbility
+    // already uses for beforeActionReaction.
+    public GameCommand? PendingAnnouncedAction { get; set; }
+    // True for the remainder of the currently-resolving Ranged Attack's own resolution once Tsuruchi
+    // Yakusho's Reaction fires -- checked by every existing Attack-strength-reducing Reaction (Fallow
+    // Lands, Training's own negate) before it applies, and cleared unconditionally once that specific
+    // Attack actually resolves (ResolveAttackNow). A single flag, not a per-attack set, is correct and
+    // sufficient here: only one PendingAttack is ever open at a time in this engine.
+    public bool RangedAttackStrengthReductionImmune { get; set; }
     // Tamori Tamoko's own Open action (issue #207 follow-up): "target an unbowed Personality
     // controlled by the active player: before the turn ends, gain 1 Honor if he was not assigned to
     // attack your provinces this turn" -- a delayed, mandatory (no further choice) check, queued
@@ -444,6 +528,52 @@ public sealed class MatchState
     // LadyMatsusRageWatch's own doc comment. Cleared unconditionally in EndTurn (same call site as
     // PendingTamokoHonorChecks above) for whichever entries never fired this turn.
     public List<LadyMatsusRageWatch> PendingLadyMatsusRageWatches { get; set; } = [];
+    // Legion of the Bat (issue #279): "after the resolution of an action that moved a target enemy
+    // Infantry Personality to this card's battlefield" -- MoveToBattlefield itself (the sole "an
+    // action moved a card to a battlefield" primitive; ordinary Attack/Defense assignment goes
+    // through Assign() instead, and RecruitReserve is explicitly excluded per the card's own rule)
+    // queues the card that just arrived here; OpenMoveReactionWindow (the same "after this action"
+    // timing OpenBowReactionWindow already uses) drains it once the whole ability finishes
+    // resolving. MoveReactionTargetId is then the one card actually offered by the open window,
+    // read by legion-of-bat-bow's own execution (Target "none": the affected card is auto-
+    // determined, not separately chosen, the same shape PendingNegatableAbility's own resolution
+    // already uses).
+    public string? PendingMoveReactionCardId { get; set; }
+    public string? MoveReactionTargetId { get; set; }
+    // Nikutai (issue #279): "Even if this card is bowed, after a Follower in this unit bows:
+    // Straighten it" -- the one sibling Follower actually offered by an open "nikutaiReaction"
+    // window, read by nikutai-straighten's own execution (Target "none", same auto-determined shape
+    // as MoveReactionTargetId above).
+    public string? NikutaiReactionTargetId { get; set; }
+    // Unimpeachable Name (oracle-l5r-8989): an out-of-play (hand/discard) Reaction offered before
+    // ANY action resolves -- broader than PendingNegatableAbility above (which only ever watches a
+    // curated destroy/move/straighten Target on an IN-PLAY card). The whole triggering command is
+    // stashed here, same defer-then-execute shape, while a "unimpeachableNameReaction" window offers
+    // the opponent a chance to play it (or pass) before the command actually resolves. See
+    // CardAbilities.ResolveOrDeferUnimpeachableName / AbilityMayCauseHonorLoss.
+    public GameCommand? PendingOutOfPlayActionReaction { get; set; }
+    // Set to the reacting player's own id for the duration of resolving PendingOutOfPlayActionReaction
+    // only when Unimpeachable Name was actually played (not merely offered) -- consumed (amount
+    // floored toward 0, never past it) by every negative GainHonor call for that same player while
+    // active, satisfying "reduce EACH Honor loss from its effects by 3" for a command that causes more
+    // than one. Cleared unconditionally once that one command finishes resolving.
+    public int? HonorLossReductionPlayerId { get; set; }
+    // Yasuki Tsujiken (oracle-l5r-9469): each entry is one "mark" placed by his own entering-play
+    // Reaction on a specific Holding -- a list, not a dictionary, since the SAME Holding may be marked
+    // more than once (by separate copies of Tsujiken; nothing printed forbids it), and each mark is
+    // independently worth 1 Honor lost per future bow. A mark stays here even after its own Tsujiken
+    // leaves play (removed instead at that point -- see MatchEngine's own destroy/discard paths) rather
+    // than being filtered live by InPlay(), so a client can enumerate exactly which stacked marks are
+    // still active without re-deriving it. TsujikenId names the specific CardInstance that placed the
+    // mark (Alfredo's own future signifier can key its rendering off this -- see the decision doc).
+    public List<TsujikenWatch> TsujikenWatches { get; set; } = [];
+    // Fields of Mercy (oracle-l5r-2530): one entry per currently-in-play copy, created when it enters
+    // play (never earlier -- "the count of destroyed personalities does not start until Fields of
+    // Mercy are played") and removed when it leaves (DiscardTerrain), so a later copy entering play
+    // always starts its own count fresh. DestroyedCount is indexed by player id: how many of that
+    // player's own Personalities have already been fully destroyed while this specific copy has been
+    // in play. See CardAbilities.FieldsOfMercyNegatesPersonalityDestruction.
+    public List<FieldsOfMercyWatch> FieldsOfMercyWatches { get; set; } = [];
     public int? WinnerId { get; set; }
     public string? VictoryReason { get; set; }
     public PlayerState[] Players { get; set; } = [];
@@ -467,9 +597,11 @@ public sealed record PaymentOption(string[] SourceIds, int Produced, int Cost, i
 public sealed record PurchaseQuote(string CardId, int Cost, bool ClanDiscount, bool ClanAllegiance,
     bool ProclaimEligible, string? Error, PaymentOption[] Payments);
 public sealed record OverlayQuote(string CardId, string TargetId, int HigherLevel, int LowerLevel, string? Error);
+/// <param name="GoldCost">Authoritative cost for this action's offered targets. Null in older
+/// snapshots or for actions without a quoted Gold cost; clients must not infer card discounts.</param>
 public sealed record ActionOption(string Type, string Label, bool Enabled, string? Reason,
     GameCommand? Command = null, string? CardId = null, string[]? TargetIds = null,
-    int[]? Provinces = null, PurchaseQuote? Quote = null);
+    int[]? Provinces = null, PurchaseQuote? Quote = null, int? GoldCost = null);
 /// <param name="UnitForce">Authoritative effective unit contribution, including qualifying Followers.
 /// Null for hidden/non-unit/out-of-play cards and older payloads; never substitute a client calculation.</param>
 public sealed record CardView(string Id, CardDefinition? Definition, int OwnerId, Zone Zone, bool FaceUp,

@@ -99,6 +99,7 @@ public static class TrainingOpponent
             case "timesOfStrifeDiscard":
                 var discard=self.Hand.FirstOrDefault(c=>c.Id==command.TargetId);
                 return discard is null?-1000:150-HandValue(discard);
+            case "brashDraw":
             case "overconfidentDraw": return command.Choice=="draw"?150:100;
             case "chooseShinden":
                 var threatened=self.Home.Concat(self.Army).FirstOrDefault(c=>c.Id==view.PendingChoice?.CardId);

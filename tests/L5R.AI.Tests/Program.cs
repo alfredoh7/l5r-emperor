@@ -54,6 +54,7 @@ Run("pending Event choices use only offered commands and preserve provinces",()=
     var draws=new ActionOption[]{new("overconfidentDraw","Draw",true,null,new("overconfidentDraw",0,version,Choice:"draw")),new("overconfidentDraw","Decline",true,null,new("overconfidentDraw",0,version,Choice:"decline"))};
     Check(TrainingOpponent.Choose(v,draws).Command?.Choice=="draw","Optional draw stalled");
 });
+Run("Brash and scoped reactions finish through detached legal commands",DecisionContinuationTests.Run);
 foreach(var seed in new ulong[]{1,42,831,20260906,99999})
     Run($"seed {seed}: legal complete training match, bounded decisions and deterministic replay",()=>Play(seed));
 foreach(var seed in new ulong[]{1,42,831,20260906,99999})

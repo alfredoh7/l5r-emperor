@@ -1,0 +1,106 @@
+{
+  "Profile": "follower-wave-12",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-419",
+      "Name": "Apprentice Shinobi",
+      "Type": "Follower",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 0,
+      "Force": 1,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After the resolution of a Ninja action: Give this card +1F.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-419.jpg",
+      "Keywords": [
+        "Ninja"
+      ],
+      "Focus": 2,
+      "Abilities": [],
+      "Effect": "apprentice-shinobi-ninja-bonus"
+    },
+    {
+      "Id": "oracle-l5r-4700",
+      "Name": "Legion of the Bat",
+      "Type": "Follower",
+      "Clan": "Unaligned",
+      "GoldCost": 5,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Enters play paying 1 less Gold if you are a Crane Clan player.\nReaction: After the resolution of an action that moved a target enemy Infantry Personality to this card's battlefield: Bow the Personality.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-4700.jpg",
+      "Keywords": [
+        "Cavalry",
+        "Bat Clan"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "legion-of-bat-bow"
+      ],
+      "Effect": "crane-clan-discount"
+    },
+    {
+      "Id": "oracle-l5r-9872",
+      "Name": "Nikutai",
+      "Type": "Follower",
+      "Clan": "Unaligned",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 5,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": 2,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: Even if this card is bowed, after a Follower in this unit bows: Straighten it.\nBattle: Melee 5 Attack.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9872.jpg",
+      "Keywords": [
+        "Nikutai"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "nikutai-straighten",
+        "nikutai-attack"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9255",
+      "Name": "Wave Man",
+      "Type": "Follower",
+      "Clan": "Unaligned",
+      "GoldCost": 4,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Will only attach to a Samurai.\nAfter an Attack Phase ends: Straighten this unit.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9255.jpg",
+      "Keywords": [
+        "Ronin"
+      ],
+      "Focus": 1,
+      "Abilities": [],
+      "Effect": "wave-man-attack-phase-straighten",
+      "AttachRequiresKeyword": "Samurai"
+    }
+  ],
+  "Decks": []
+}

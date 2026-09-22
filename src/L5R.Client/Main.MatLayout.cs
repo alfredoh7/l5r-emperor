@@ -9,7 +9,7 @@ public partial class Main
     private InkMatSections _matSections = null!;
     private float _playLeft, _playWidth;
     private int _matMatchEpoch;
-    private float _enemyProvinceY, _reservedBattleHeight, _reservedHoldingWidth;
+    private float _enemyProvinceY, _reservedBattleHeight, _reservedHoldingWidth, _regionLayoutExtent;
     private readonly Dictionary<int, float> _reservedHomeBands = [];
     private readonly float[] _reservedLaneWidths = new float[4];
     private readonly Dictionary<int, Rect2> _battleCourts = [];
@@ -43,6 +43,8 @@ public partial class Main
     private void MeasureTableLayout()
     {
         var oldSize = new Vector2(WorldWidth, _worldHeight);
+        var oldRegionExtent = _regionLayoutExtent;
+        _regionLayoutExtent = View.Players.SelectMany(p => p.Provinces).Sum(ProvinceCardWidth);
         var oldPersistentExtent = new Vector3(_persistentWidth, _persistentHeights.GetValueOrDefault(0), _persistentHeights.GetValueOrDefault(1));
         if (!_tableLayoutSeen)
         {
@@ -60,7 +62,8 @@ public partial class Main
             var unitWidth = View.Players.SelectMany(p => CourtUnits(p, i)
                 .Select(c => UnitWidth(c, p))).DefaultIfEmpty(154).Max();
             _laneWidths[i] = _reservedLaneWidths[i] = Math.Max(_reservedLaneWidths[i],
-                Math.Max(210, ArmyColumns(i) * (unitWidth + CardGap) + MatPadding * 2 + 10));
+                Math.Max(View.Players.Max(p => ProvinceCardWidth(p.Provinces.Single(v => v.Index == i))) + 24,
+                    ArmyColumns(i) * (unitWidth + CardGap) + MatPadding * 2 + 10));
         }
         // This inner play area mirrors by seat. Holdings deliberately remain on
         // screen-left for both owners and never enter this mirrored slot system.
@@ -137,11 +140,11 @@ public partial class Main
             // Destroying one never shifts or renumbers its surviving neighbours.
             foreach (var province in player.Provinces.Where(p => !p.Destroyed))
             {
-                var bayWidth = Math.Min(CardHeight + 8, _laneWidths[province.Index] - 12);
+                var bayWidth = Math.Min(ProvinceCardWidth(province) + 8, _laneWidths[province.Index] - 12);
                 _matTargets.Add(new($"province:{player.Id}:{province.Index}", $"Province {province.Index + 1}",
                     new Rect2(SlotX(player, province.Index + 2) + (CardHeight - bayWidth) / 2,
                         ProvinceRowY(player) - MatHeader, bayWidth, provinceHeight),
-                    ProvinceNumber: province.Index + 1, ConnectionAbove: player.Id == Self.Id,
+                    ProvinceNumber: province.Index + 1, RegionPair: province.Region is not null, ConnectionAbove: player.Id == Self.Id,
                     Connected: BattleActive && player.Id != View.ActivePlayerId &&
                         (View.CurrentBattleProvince == province.Index || View.Players.Any(p => CourtUnits(p, province.Index).Any()))));
             }
@@ -187,7 +190,7 @@ public partial class Main
         // so a newly gained Favor cannot appear behind the sidebar. A manually
         // positioned camera remains under player control.
         var persistentChanged = oldPersistentExtent.DistanceTo(new Vector3(_persistentWidth, _persistentHeights.GetValueOrDefault(0), _persistentHeights.GetValueOrDefault(1))) > 1;
-        if (_tableLayoutSeen && _cameraFitted && !persistentChanged && oldSize.DistanceTo(new Vector2(WorldWidth, _worldHeight)) > 1) _cameraFitted = false;
+        if (_tableLayoutSeen && _cameraFitted && !persistentChanged && Math.Abs(oldRegionExtent - _regionLayoutExtent) < 1 && oldSize.DistanceTo(new Vector2(WorldWidth, _worldHeight)) > 1) _cameraFitted = false;
         _tableLayoutSeen = true;
         _board.Size = new Vector2(WorldWidth, _worldHeight); _world.Size = _board.Size; _pileHud.Size = _board.Size; _battleDecor.Size = _board.Size;
     }

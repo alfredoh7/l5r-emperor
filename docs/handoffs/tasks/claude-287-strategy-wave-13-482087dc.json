@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Wire 7 of 8 deferred-scope Strategies (strategy-wave-13, issue #287, Batch B): Scorn the Weak, Strength in Terror, Strength of Purity, Strength of the Bear, Strength of the Divine, The Strength of the Spider (Battle half only; Focus Effect duel-delay clause deferred), and Unexpected. Surety of Purpose (oracle-l5r-7664) was found already published in strategy-wave-6 (issue #264) -- its stale BLOCKERS entry was removed but the card was not re-wired. Shared/cross-lane touch: src/L5R.Client/Content/Published/*.jpg for the 7 new cards -- this is the standard, routine content-wave artifact every prior wave's own package_*.py script writes (e.g. follower-wave-14/PR #286 did the same for its own 6 cards), not a UI/rules conflict; no other L5R.Client file changed.",
+  "validation": "dotnet run --project tests/L5R.Core.Tests: 187/187 core + 57/57 published + 9/9 deck-format + 10/10 deck-workshop. python3 -m unittest discover tools/collaboration (43) and tools/content (130): all pass. L5R.AI.Tests 14/14, L5R.Server.Tests 5/5, L5R.Client.Transport.Tests 4/4. New StrategyWave13Primitives regression test exercises all 7 new ability ids with real assertions (both branches of each conditional).",
+  "remaining": "None; ready for review. The Strength of the Spider's Focus Effect duel-delay clause ('delay the effects of losing this duel') is deliberately out of scope -- genuinely novel duel-timing plumbing, no existing card does this yet.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/287",
+  "branch": "claude/287-strategy-wave-13",
+  "updated": "2026-09-18T12:52:20.801470+00:00"
+}

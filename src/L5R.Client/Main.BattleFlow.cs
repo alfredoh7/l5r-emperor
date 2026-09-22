@@ -20,7 +20,7 @@ public partial class Main
         {
             FlowText(pending.Prompt,22,Palette.Paper);
             if(View.PriorityPlayerId==View.ViewerId)
-                foreach(var option in Actions.Where(a=>a.Enabled && a.Command is not null && a.Type is not ("pass" or "declineReaction" or "proclaim" or "chooseShinden"))) AddAction(_inspector,option);
+                foreach(var option in Actions.Where(a=>a.Enabled && a.Command is not null && a.Type is not ("pass" or "declineReaction" or "proclaim" or "chooseShinden" or "concede"))) AddAction(_inspector,option);
             return true;
         }
         if (PresentationBusy || _resolutionMessage is not null)

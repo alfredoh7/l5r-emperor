@@ -1,0 +1,171 @@
+{
+  "Profile": "strategy-wave-13",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-9925",
+      "Name": "Scorn the Weak",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Target an enemy Personality: Give him -5F. If his Force is now 0, his controller loses 1 Honor and you may target and dishonor a Personality.\nBattle: Target an enemy Personality: Give him -5F. If his Force is now 0, his controller loses 1 Honor and you may target and dishonor a Personality.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9925.jpg",
+      "Keywords": [],
+      "Focus": 1,
+      "Abilities": [
+        "scorn-the-weak"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-7538",
+      "Name": "Strength in Terror",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing Paragon and target an enemy Personality: Reduce his Force by an amount equal to your Paragon's Force. You may target and destroy one of the Personality's attachments. Lose 3 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7538.jpg",
+      "Keywords": [
+        "Fear"
+      ],
+      "Focus": 1,
+      "Abilities": [
+        "strength-in-terror"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-7546",
+      "Name": "Strength of Purity",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing Personality with 3 or higher Personal Honor: Give him +3F.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7546.jpg",
+      "Keywords": [],
+      "Focus": 1,
+      "Abilities": [
+        "strength-of-purity"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10748",
+      "Name": "Strength of the Bear",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Bow your target unbowed Personality. Bow a target enemy card with lower Force than his. If your Personality has 5 or more printed Force, straighten him.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10748.jpg",
+      "Keywords": [],
+      "Focus": 1,
+      "Abilities": [
+        "strength-of-the-bear"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10555",
+      "Name": "Strength of the Divine",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Target your opposed unbowed Paragon. Give him +2F or +2PH. Melee Attack with strength equal to his Force or Personal Honor.\n.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10555.jpg",
+      "Keywords": [],
+      "Focus": 1,
+      "Abilities": [
+        "strength-of-the-divine-force",
+        "strength-of-the-divine-honor"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-8362",
+      "Name": "The Strength of the Spider",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "As a Focus Effect: You may choose (now) to delay the effects of losing this duel until after the next Dynasty Phase begins.\nBattle: Choose your performing unbowed Spider Clan Personality and target an enemy Personality or Follower: Destroy it if it is bowed. Reduce its Force by an amount equal to your Personality's Force. Bow it if its Force is now 0.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8362.jpg",
+      "Keywords": [],
+      "Focus": 1,
+      "Abilities": [
+        "strength-of-the-spider"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9940",
+      "Name": "Unexpected",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing unbowed Personality and target an enemy card without attachments: Bow it. You may bow your Personality; if you did, draw a card.\nBattle: Choose your performing unbowed Personality and target an enemy card without attachments: Bow it. You may bow your Personality; if you did, draw a card.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9940.jpg",
+      "Keywords": [],
+      "Focus": 1,
+      "Abilities": [
+        "unexpected"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}
