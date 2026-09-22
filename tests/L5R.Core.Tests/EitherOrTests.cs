@@ -160,7 +160,7 @@ internal static class EitherOrTests
             Eq(CardCatalog.Get(id).ArtworkKey, $"res://Content/Published/{id}.jpg");
         }
         // Every wired Political action carries the tag (a published text that prints "Political <Timing>" and is wired), so Sakuma sees them all.
-        foreach (var card in CardCatalog.Cards.Values.Where(c => !c.ScenarioOnly && System.Text.RegularExpressions.Regex.IsMatch(c.Text, @"\bPolitical (Open|Limited|Battle|Reaction)")))
+        foreach (var card in CardCatalog.Cards.Values.Where(c => !c.ScenarioOnly && c.Id != "oracle-l5r-7428" /* Spirit of the Truth: the Political action is the one it grants */ && System.Text.RegularExpressions.Regex.IsMatch(c.Text, @"\bPolitical (Open|Limited|Battle|Reaction)")))
             foreach (var id in card.Abilities!)
                 if (AbilityCatalog.All[id].Timing != "Reaction" || card.Id == Sakuma)
                     Check(AbilityCatalog.All[id].ActionKeywords?.Contains("Political") == true || card.Text.Split('\n').Where(l => !System.Text.RegularExpressions.Regex.IsMatch(l, @"\bPolitical (Open|Limited|Battle|Reaction)")).Any(),

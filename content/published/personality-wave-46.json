@@ -1,0 +1,95 @@
+{
+  "Profile": "personality-wave-46",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-1707",
+      "Name": "Daigotsu Bukaro",
+      "Type": "Personality",
+      "Clan": "Spider",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After Bukaro enters play: Lose 1 Honor.\nLimited: Pay 2 Gold and target a Personality: Create a 1F Follower and attach it to the Personality.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1707.jpg",
+      "Keywords": [
+        "Conqueror",
+        "Commander",
+        "Samurai",
+        "Shadowlands",
+        "Spider Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "bukaro-create"
+      ],
+      "Effect": "none",
+      "EntryHonorLoss": 1
+    },
+    {
+      "Id": "oracle-l5r-4203",
+      "Name": "Kakita Munemori",
+      "Type": "Personality",
+      "Clan": "Crane",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 4,
+      "PersonalHonor": 3,
+      "HonorRequirement": 5,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Political Open: Target a Personality: He may not perform actions until the current phase ends.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-4203.jpg",
+      "Keywords": [
+        "Unique",
+        "Courtier",
+        "Crane Clan",
+        "Experienced",
+        "Samurai"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "munemori-lock"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-8110",
+      "Name": "The Great Death",
+      "Type": "Personality",
+      "Clan": "Unaligned",
+      "GoldCost": 9,
+      "GoldProduction": 0,
+      "Force": 6,
+      "Chi": 4,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After The Great Death enters play: Create three 1F Shadowlands • Nonhuman • Raptor • Cavalry • Undead Followers, attach them to it, and lose 6 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8110.jpg",
+      "Keywords": [
+        "Naval",
+        "Bake-kujira",
+        "Nonhuman",
+        "Shadowlands",
+        "Undead",
+        "Water"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "great-death-entry",
+      "EntryHonorLoss": 6
+    }
+  ],
+  "Decks": []
+}

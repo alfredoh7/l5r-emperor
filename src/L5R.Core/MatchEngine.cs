@@ -532,6 +532,9 @@ public sealed partial class MatchEngine
         // Honor loss is his EntryHonorLoss above; each other player then owes their discards (queued, so a Proclaim or entry window
         // already open is never overwritten -- see OpenOverconfidentDrawWindow).
         if(Definition(card).Effect==BofanaEntryDiscardEffect) QueueOtherPlayersEntryDiscards(playerId);
+        // The Great Death (issue #431): "After The Great Death enters play: Create three 1F Shadowlands * Nonhuman * Raptor * Cavalry * Undead Followers, attach them to it, and lose 6 Honor." A trait, so
+        // mandatory like the lines above (the Honor loss is its EntryHonorLoss).
+        if(Definition(card).Effect==GreatDeathEntryEffect) CreateGreatDeathFollowers(playerId,card);
     }
     // Sensei (Mirumoto Hikaro / Mirumoto Yozo, Experienced 2): "your OTHER Sensei Personalities" --
     // every OTHER Sensei-keyword Personality this same controller has, either unbowed-or-bowed in
@@ -1905,6 +1908,11 @@ public sealed partial class MatchEngine
         // Strength of the Tsunami: "This Shugenja has +6F" -- only the Shugenja it is attached to gets it.
         +Attachments(card.Id).Where(c=>Definition(c).Type==CardType.Spell && Definition(c).Effect=="tsunami-force" && Keyword(card,"Shugenja")).Sum(_=>6)
         +(Definition(card).Effect=="force-with-spell"&&Attachments(card.Id).Any(c=>Definition(c).Type==CardType.Spell)?1:0)
+        +(Definition(card).Effect=="force-with-spell-2"&&Attachments(card.Id).Any(c=>Definition(c).Type==CardType.Spell)?2:0)
+        // Ember's Final Fire: "While this Shugenja is Fire, he has +1F". Stone-Hewed Shrine: "Defending Earth Personalities have +1F while at this province's battlefield."
+        +Attachments(card.Id).Count(c=>Definition(c).Type==CardType.Spell && Definition(c).Effect=="embers-final-fire-force" && Keyword(card,"Fire"))
+        +2*Attachments(card.Id).Count(c=>Definition(c).Effect=="death-defeated-force")
+        +(card.Zone==Zone.Battlefield && Keyword(card,"Earth") && IsDefendingUnit(card) && _state.Cards.Values.Any(r=>r.Zone==Zone.Region && r.ProvinceIndex==card.ProvinceIndex && Definition(r).Effect=="stone-hewed-shrine-force")?1:0)
         +(Definition(card).Effect=="force-if-enemy-dishonorable"&&_state.Cards.Values.Any(c=>c.OwnerId!=card.OwnerId&&Definition(c).Type==CardType.Personality&&InPlay(c)&&c.Dishonorable)?2:0)
         // "The highest number of dead Personalities in any one discard pile" -- the greatest per-player
         // count of Zone.Dead Personalities, i.e. the largest single pile, not the combined total.
@@ -1988,7 +1996,7 @@ public sealed partial class MatchEngine
         // Item's bonus TO the wielder); here the Follower's own Force is keyed off the wielder instead.
         "force-equals-wielder-printed-force" => card.AttachedTo is null ? 0 : Definition(Card(card.AttachedTo)).Force,
         _ => 0
-    })+UnitFollowerBoost(card)+AshigaruBattleBoost(card)+ArmyBattleMaidenBoost(card));
+    })+UnitFollowerBoost(card)+AkioFollowerBoost(card)+AshigaruBattleBoost(card)+ArmyBattleMaidenBoost(card));
     // "Boost other cards in the unit" primitive (Senior Infantry Legion's shape): distinct from the
     // self-referential conditional bonuses above, this is a card that grants a static Force bonus to
     // every OTHER Follower attached to the same Personality (a unit is a Personality and all of its
@@ -2689,7 +2697,7 @@ public sealed partial class MatchEngine
     private int EffectiveProvinceStrength(ProvinceState province)
     {
         // The CURRENT strength: raised and lowered by everything that has acted on the province, and by the Region and the Terrain bonuses still in play.
-        var strength=province.Strength + (province.RegionId is string id && RegionStrengthBonus.TryGetValue(Definition(Card(id)).Effect,out var bonus) ? bonus : 0) + ProvinceSourceBonuses(province);
+        var strength=province.Strength + (province.RegionId is string id && RegionStrengthBonus.TryGetValue(Definition(Card(id)).Effect,out var bonus) ? bonus : 0) + ProvinceSourceBonuses(province) + StaticProvinceBonus(province);
         // A limit (TerrainStatics.cs: Times of Strife, issue #259; Ancient Feud, issue #418) is a CEILING on what is read, never a lowering of the current strength: a province already at or
         // below it is untouched, and one above it reads as the maximum until the limit ends.
         return ProvinceStrengthMax(province) is int max ? Math.Min(strength,max) : strength;

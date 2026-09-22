@@ -52,6 +52,8 @@ public static class GoldCostBasis
     /// <summary>"Pay Gold equal to [base | current] [stat] of [target | performer | source] +/- [z]" (issue #416): any printed number of a card, converted into Gold and paid through the
     /// ordinary Gold pathway. Which card, which stat and whether the printed (base) or the current value is read are on the rule (GoldCostRule.StatOf, Stat, StatBase).</summary>
     public const string Stat = "stat";
+    /// <summary>"Pay Gold equal to the number of Personalities you control" (Necessary Evil), plus Modifier and raised to Floor ("or 4, whichever is higher").</summary>
+    public const string OwnPersonalities = "own-personalities";
 }
 
 /// <summary>Whose stat a <see cref="GoldCostBasis.Stat"/> rule reads.</summary>
@@ -98,6 +100,7 @@ public sealed record GoldCostRule(string Basis, int Amount = 0, int Modifier = 0
     public static GoldCostRule AttachCost(int modifier = 0, int? floor = null) => new(GoldCostBasis.AttachCost, Modifier: modifier, Floor: floor);
     /// <summary>Gold equal to a printed number of a card, plus or minus a modifier (A Quiet Transaction: the target's BASE Personal Honor plus one). <paramref name="of"/> is a
     /// CostStatSubject, <paramref name="stat"/> a CostStat; <paramref name="basePrinted"/> reads the printed value, otherwise the current one (every modifier and token).</summary>
+    public static GoldCostRule OwnPersonalityCount(int modifier = 0, int? floor = null) => new(GoldCostBasis.OwnPersonalities, Modifier: modifier, Floor: floor);
     public static GoldCostRule StatValue(string of, string stat, bool basePrinted, int modifier = 0, int? floor = null) =>
         new(GoldCostBasis.Stat, Modifier: modifier, Floor: floor, StatOf: of, Stat: stat, StatBase: basePrinted);
 
@@ -261,6 +264,11 @@ public sealed partial class MatchEngine
                 var value = CostStatValue(statCard, rule.Stat!, rule.StatBase);
                 return new(rule, Clamp(value + rule.Modifier, rule.Floor),
                     $"{Definition(statCard).Name} {(rule.StatBase ? "base" : "current")} {StatLabel(rule.Stat!)} {value}{Modified(rule.Modifier, rule.Floor)}", null, false, statCard);
+            }
+            case GoldCostBasis.OwnPersonalities:
+            {
+                var controlled = _state.Cards.Values.Count(c => c.OwnerId == command.PlayerId && InPlay(c) && Definition(c).Type == CardType.Personality);
+                return new(rule, Clamp(controlled + rule.Modifier, rule.Floor), $"the {controlled} Personalit{(controlled == 1 ? "y" : "ies")} you control{Modified(rule.Modifier, rule.Floor)}", null, false, source);
             }
             case GoldCostBasis.AttachCost:
             {

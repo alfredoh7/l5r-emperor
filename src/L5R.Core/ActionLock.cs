@@ -5,19 +5,26 @@ namespace L5R.Core;
 public sealed partial class MatchEngine
 {
     private const string ActionLockUntilTurnEnd = "Turn";
+    private const string ActionLockPhasePrefix = "Phase:";
+
+    // "Until the current phase ends" (Kakita Munemori - exp, issue #431): the lock names the phase INSTANCE it belongs to (PrintedPhases.Instance: this turn's Action Phase, this turn's Attack Phase)
+    // and counts only while that instance is the current one, so it lapses by itself when the phase ends, with nothing to clear.
+    private string CurrentPhaseLock() => ActionLockPhasePrefix + PrintedPhases.Instance(_state.TurnNumber, _state.Phase);
+    private bool LockInForce(ActionLock actionLock) => !actionLock.Duration.StartsWith(ActionLockPhasePrefix, StringComparison.Ordinal) || actionLock.Duration == CurrentPhaseLock();
+    private bool HasActionLock(CardInstance card) => card.ActionLocks.Any(LockInForce);
 
     // Places the lock. A locked card can still be targeted, moved, bowed and so on; it only stops being able to perform. A card that
     // is locked twice is locked once as far as the rules go (the second entry just lasts as long as the first).
     private void LockActions(CardInstance card, string sourceId, string duration = ActionLockUntilTurnEnd)
     {
         card.ActionLocks.Add(new(sourceId, duration));
-        Emit("actionsLocked", $"{Definition(card).Name} may not perform actions this turn.", card.OwnerId, card.Id);
+        Emit("actionsLocked", $"{Definition(card).Name} may not perform actions {(duration == ActionLockUntilTurnEnd ? "this turn" : "until the phase ends")}.", card.OwnerId, card.Id);
     }
 
     // The card is locked, or it is an attachment (Item, Spell, Follower) of a locked Personality: an action printed on it is
     // performed by, or through, that Personality.
     private bool ActionLocked(CardInstance card) =>
-        card.ActionLocks.Count > 0 || card.Zone == Zone.Attached && card.AttachedTo is string hostId && _state.Cards.TryGetValue(hostId, out var host) && host.ActionLocks.Count > 0;
+        HasActionLock(card) || card.Zone == Zone.Attached && card.AttachedTo is string hostId && _state.Cards.TryGetValue(hostId, out var host) && HasActionLock(host);
 
     // ValidateAbility's check, for every action there is -- an ability on a card, a Reaction (a Reaction IS an action: IsAction, ReactionsAreActions.cs, the one
     // classification), a Strategy naming its performer -- because they all reach the engine as an ability command. A trait or a mandatory effect is not an
@@ -35,7 +42,7 @@ public sealed partial class MatchEngine
             foreach (var performing in PerformingSlotCards(command, ability)) Require(!ActionLocked(performing), $"{Definition(performing).Name} may not perform actions this turn.");
         // "A Stronghold's abilities may not be used" (Interference): a card that is not a unit -- a Stronghold, Holding, Region or Celestial -- performs nothing itself, so the lock on IT bars
         // every ability printed on it, whoever the ability names as its performer (Shinden Asahina's is performed by a Shugenja).
-        if (source is { ActionLocks.Count: > 0 } && Definition(source).Type is CardType.Stronghold or CardType.Holding or CardType.Region or CardType.Celestial)
+        if (source is not null && HasActionLock(source) && Definition(source).Type is CardType.Stronghold or CardType.Holding or CardType.Region or CardType.Celestial)
             Require(false, $"{Definition(source).Name}'s abilities may not be used this turn.");
     }
 

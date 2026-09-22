@@ -93,7 +93,7 @@ internal static class BattleAbsentMovesTests
     private static void MarkedInventoryPinned()
     {
         var marked = string.Join(",", AbilityCatalog.All.Where(p => p.Value.MovesToBattle).Select(p => p.Key).OrderBy(k => k, StringComparer.Ordinal));
-        Eq(marked, "charge-into-danger-move,dislodge-the-foe,earth-flows-move,hawado-move-battlefield,houken-exp-straighten,intervening-spirit-move,mai-move-force-penalty,michi-move,return-to-action-move,rikyou-move,sanctuary-of-the-waves-move,skipping-the-puddle-move,takasho-move,training-move-current,training-move-to-battle,trusting-instinct-move,your-clan-needs-you");
+        Eq(marked, "charge-into-danger-move,dislodge-the-foe,earth-flows-move,hawado-move-battlefield,houken-exp-straighten,intervening-spirit-move,mai-move-force-penalty,michi-move,return-to-action-move,rikyou-move,sanctuary-of-the-waves-move,skipping-the-puddle-move,sound-of-thunder-move,takasho-move,training-move-current,training-move-to-battle,trusting-instinct-move,your-clan-needs-you");
         foreach (var (id, ability) in AbilityCatalog.All.Where(p => p.Value.MovesToBattle))
             Check(ability.Timing is "Battle" or "BattleOrOpen", $"{id}: a move to the battle is a Battle action");
     }
@@ -167,7 +167,7 @@ internal static class BattleAbsentMovesTests
         Add(s, "training-lion-veteran", 1 - actor, Zone.Battlefield, province: 0);
         var water = CardCatalog.Cards.Values.First(c => c.Type == CardType.Personality && !c.ScenarioOnly && c.Keywords?.Contains("Water") == true && c.Keywords.Contains("Shugenja"));
         var host = Add(s, water.Id, actor, Zone.Home);
-        Add(s, "training-crane-veteran", actor, Zone.Home);
+        var maiden = Add(s, "training-crane-veteran", actor, Zone.Home); if (ability == "sound-of-thunder-move") maiden.GrantedKeywords.Add(new("Battle Maiden", "test-fixture", GrantDuration.Permanent));
         CardInstance card;
         if (definition.Type == CardType.Personality) card = Add(s, definition.Id, actor, Zone.Home, bowed: ability is "hawado-move-battlefield" or "houken-exp-straighten");
         else if (definition.Type == CardType.Spell) card = Add(s, definition.Id, actor, Zone.Attached, parent: host.Id);

@@ -29,4 +29,22 @@ public sealed partial class MatchEngine
         Emit("spellCopied", $"{Definition(copier).Name} permanently copies {Definition(spell).Name}: {(newKeywords.Length == 0 ? "no new keywords" : string.Join(", ", newKeywords))}"
             + $"{(spellTrait != "none" ? ", its trait" : "")}{(copiedAbilities.Count == 0 ? "" : $", and {copiedAbilities.Count} abilit{(copiedAbilities.Count == 1 ? "y" : "ies")}")}.", copier.OwnerId, copier.Id);
     }
+
+    // Sly Deceiver (Before the Dawn, issue #431): "Your Ninja permanently copies the Personality's base keywords, except Clan Champion, Daimyo, or Shugenja, and permanently copies his base abilities
+    // which do not themselves copy abilities." The same permanent copy as Mastering the Elements' (its Spell's keywords, trait and abilities), read from a Personality's printed values.
+    private void PermanentlyCopyPersonality(CardInstance copier, CardInstance from)
+    {
+        var printed = Definition(copier);
+        string[] excluded = ["Clan Champion", "Daimyo", "Shugenja"];
+        var keywords = (printed.Keywords ?? []).ToList();
+        var newKeywords = new List<string>();
+        foreach (var keyword in Definition(from).Keywords ?? [])
+            if (!excluded.Contains(keyword, StringComparer.Ordinal) && !keywords.Contains(keyword, StringComparer.Ordinal)) { keywords.Add(keyword); newKeywords.Add(keyword); }
+        var abilities = (printed.Abilities ?? []).ToList();
+        var copied = 0;
+        foreach (var id in Definition(from).Abilities ?? [])
+            if (AbilityCatalog.All.TryGetValue(id, out var ability) && CopyableAbility(ability) && !abilities.Contains(id, StringComparer.Ordinal)) { abilities.Add(id); copied++; }
+        copier.Printed = printed with { Keywords = keywords.ToArray(), Abilities = abilities.ToArray() };
+        Emit("personalityCopied", $"{Definition(copier).Name} permanently copies {Definition(from).Name}: {(newKeywords.Count == 0 ? "no new keywords" : string.Join(", ", newKeywords))}, and {copied} abilit{(copied == 1 ? "y" : "ies")}.", copier.OwnerId, copier.Id);
+    }
 }
