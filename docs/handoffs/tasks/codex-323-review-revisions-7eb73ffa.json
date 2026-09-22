@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Simplify Top Cards into choose/return steps, remove multi-target chevrons, align the phase bar to the narrow battle strip, and implement Alfredo-approved ghost-copy outlines with compact wisps. Opponent Payment acceptance recorded separately; no main merge authorized.",
-  "validation": "Client build 0 warnings/errors. Native top-card, multi-target, battle-sequence and created-copy checks passed at 1920x1080 normal and 1280x800 reduced motion. Full check.sh --skip-client passed after origin/main 062e5718. Prepared Mac launchers and source/native gallery verified; screenshots committed. Private catalogue artwork r2 verified.",
-  "remaining": "Alfredo hands-on review of revised demos; Mendon rules acceptance; final CI. Earlier Windows package is unchanged and excludes these revisions. No main merge authorized.",
-  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/400",
+  "summary": "Implement Alfredo-approved A destination trays and B deck-order labels for draggable Top Cards; record Alfredo approval of revised Multiple Targets and Battle Progress and notify Mendon. Preserve current fortress/table-visibility integration; no main merge.",
+  "validation": "Client build 0 warnings/errors. Native Top Cards acceptance passed at 1920x1080 normal and 1280x800 reduced, covering drag/slot previews, click/keyboard, undo/cancel, exact engine order, eligibility/counts, fixed/short/empty, privacy and seat/busy resets. Native 1920x1080 camera input and full-window coverage regressions passed. Source/native captures and gallery inspected. Latest launcher regenerated. Finder launched the prepared app; its exact profile process and TOP_CARDS_REVIEW_READY log verified. Native visuals verified in automated renderer captures; CUA app selection resolves another Godot instance.",
+  "remaining": "Alfredo hands-on review of new Top Cards implementation; Mendon review; CI. Windows package unchanged and native Windows not claimed. No main merge authorized.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/323",
   "branch": "codex/323-review-revisions",
-  "updated": "2026-09-22T11:38:10.001938+00:00"
+  "updated": "2026-09-22T17:10:47.204336+00:00"
 }

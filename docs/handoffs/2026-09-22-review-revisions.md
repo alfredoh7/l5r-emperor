@@ -3,7 +3,13 @@
 PR: https://github.com/alfredoh7/l5r-emperor/pull/434
 Branch: `codex/323-review-revisions`, isolated follow-up to PR #432. Current main `062e5718` integrated. No main merge authorized.
 
-## Acceptance and changes
+## Latest follow-up
+
+Alfredo approved revised Multiple Targets and Battle Progress and selected **A’s draggable Top Cards layout with B’s deck-order labels**. The two-step Top Cards interface described below is superseded by [the draggable implementation handoff](2026-09-22-top-cards-drag.md). Review acceptance and Mendon notifications are recorded in [the decision](../decisions/2026-09-22-top-cards-drag-review.md). No main merge is authorized. The implementation branch now includes current main `aa27db4c` and the table-visibility fix from #447.
+
+## Earlier revision record (superseded for Top Cards)
+
+### Acceptance and changes
 
 - **#377 Opponent Payment:** Alfredo says “good to go.” Hands-on UI acceptance recorded on PR #427: https://github.com/alfredoh7/l5r-emperor/pull/427#issuecomment-5774661062. Mendon review still required before merge.
 - **#323 Top Cards:** separate choice and return-order steps. Visible per-card action buttons replace dropdowns; a card with one action can be clicked to select/undo. Required counts and engine eligibility reasons stay visible. Next is local only. Return review shows outgoing-card names and the full faces of returning cards, with explicit top/bottom positions and text move controls. Back retains the draft; only final confirmation submits. Mixed destinations group top and bottom returns separately. The launcher now opens Banish All Doubt; training scenarios are marked with an asterisk.
@@ -42,4 +48,4 @@ Current main adds printings beyond the previous package. Published private prere
 
 ## Remaining
 
-Alfredo reviews revised #323/#345/#311 and the native result of the approved #400 combination; Mendon validates rules interpretation before any main merge. PR remains a draft for this review. The earlier Windows review package is unchanged and does not contain these revisions. Native Mac validation is not Windows graphical playtesting. CI status is tracked on PR #434.
+At this earlier checkpoint Alfredo had not reviewed the revised demos. His subsequent #345/#311 approvals and #323 redesign are recorded above; Mendon validates rules interpretation before any main merge. PR remains a draft for this review. The earlier Windows review package is unchanged and does not contain these revisions. Native Mac validation is not Windows graphical playtesting. CI status is tracked on PR #434.

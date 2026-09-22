@@ -216,7 +216,9 @@ public partial class Main
             }
             if (!PointerOnTable(mouse.Position))
             {
-                if (!mouse.Pressed) _tableSurface.ReleaseMouseOutside(mouse);
+                // A root-UI drag owns its release. Forwarding it into the table's
+                // SubViewport can end the shared Godot drag before the tray receives it.
+                if (!mouse.Pressed && !GetViewport().GuiIsDragging()) _tableSurface.ReleaseMouseOutside(mouse);
                 return;
             }
             if (!mouse.Pressed) { _tableSurface.ForwardMouse(mouse); GetViewport().SetInputAsHandled(); return; }

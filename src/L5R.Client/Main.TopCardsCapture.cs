@@ -44,6 +44,7 @@ public partial class Main
             var tactician = CardCatalog.Cards.Values.First(d => !d.ScenarioOnly && d.Type == CardType.Personality && (d.Keywords ?? []).Contains("Tactician"));
             SupportFixtureCard(state, tactician.Id, 0, Zone.Home); ability = "banish-all-doubt-look";
         }
+        else if (mode == "top-bottom") { SupportFixtureCard(state, 3918, 0, Zone.Home); ability = "isawa-tamaki-look"; }
         else if (mode == "show") { SupportFixtureCard(state, 10479, 0, Zone.Home); ability = "kahoku-exp2-look"; }
         else if (mode is "take" or "none" or "fixed" or "mixed")
         { SupportFixtureCard(state, "training-look-source", 0, Zone.Home); ability = mode == "fixed" ? "training-look-fixed" : mode == "mixed" ? "training-look-any" : "training-look-take-item"; }
@@ -59,7 +60,7 @@ public partial class Main
         if (_root.GetNodeOrNull<Control>("LookReviewControls") is {} old) { _root.RemoveChild(old); old.QueueFree(); }
         var row = new HBoxContainer { Name = "LookReviewControls", ZIndex = 91 }; row.AddThemeConstantOverride("separation", 6);
         var buttons = new List<Button>();
-        foreach (var (label, mode) in new[] { ("Reorder", "reorder"), ("Take + top", "take"), ("Take + bottom", "bottom"), ("Any Fate deck", "any"), ("Show + take", "show"), ("Fixed order", "fixed"), ("Mixed choices*", "mixed") })
+        foreach (var (label, mode) in new[] { ("Reorder", "reorder"), ("Take + top", "take"), ("Take + bottom", "bottom"), ("Top or bottom", "top-bottom"), ("Any Fate deck", "any"), ("Show + take", "show"), ("Fixed order", "fixed"), ("Mixed choices*", "mixed") })
             buttons.Add(SidebarSkin.Button(label, () => _ = RunLookReview(() => PrepareLookReview(mode))));
         buttons.Add(SidebarSkin.Button("Other seat", () => _session.SwitchPracticeSeat()));
         _lookReviewButtons = buttons.ToArray();
@@ -84,41 +85,64 @@ public partial class Main
     }
     private async Task SetLookDestination(int position, string destination)
     {
-        var panel = _lookPanel!;
-        SupportRequire(!panel.ReturnStep, "Destination requested on return screen");
-        var card = View.PendingLook!.Cards!.Single(c => c.Position == position);
-        if (destination == View.PendingLook.Remainder)
+        var panel = _lookPanel!; var version = View.Version;
+        panel.Face(position).GrabFocus(); await LookKey(Key.Enter);
+        panel.Tray(destination).GrabFocus(); await LookKey(Key.Enter); await EventFrames(15);
+        SupportRequire(panel.Destinations[position] == destination && panel.Picked is null && View.Version == version,
+            "Keyboard placement failed or submitted the draft");
+    }
+    private void LookMouse(InputEventMouse mouse)
+    {
+        GetWindow().GrabFocus(); GetViewport().WarpMouse(mouse.Position);
+        PushCaptureMouse(mouse, buffered: true); Input.FlushBufferedEvents();
+    }
+    private async Task BeginLookDrag(int position)
+    {
+        var point = _lookPanel!.Face(position).GetGlobalRect().GetCenter();
+        LookMouse(new InputEventMouseMotion { Position = point, GlobalPosition = point }); await EventFrames(2);
+        LookMouse(new InputEventMouseButton { Position = point, GlobalPosition = point, ButtonIndex = MouseButton.Left, ButtonMask = MouseButtonMask.Left, Pressed = true });
+        await EventFrames(2);
+        var moved = point + new Vector2(26, 12);
+        LookMouse(new InputEventMouseMotion { Position = moved, GlobalPosition = moved, Relative = moved - point, ButtonMask = MouseButtonMask.Left });
+        await EventFrames(4);
+        SupportRequire(GetViewport().GuiIsDragging(), "Native mouse gesture did not start card drag");
+    }
+    private async Task DragLook(int position, string destination, int index = 0, bool legal = true, string? capture = null, bool cancelOutside = false)
+    {
+        var panel = _lookPanel!; var order = panel.Order.ToArray(); var before = new Dictionary<int, string>(panel.Destinations); var version = View.Version;
+        await BeginLookDrag(position);
+        var point = cancelOutside ? panel.GetGlobalRect().Position + new Vector2(-12, 20) : panel.DropPoint(destination, index, position);
+        LookMouse(new InputEventMouseMotion { Position = point, GlobalPosition = point, ButtonMask = MouseButtonMask.Left }); await EventFrames(16);
+        SupportRequire(panel.ConfirmButton.Disabled, "Can confirm while holding a card");
+        if (legal && !cancelOutside) SupportRequire(panel.LandingRect is not null, "Legal destination has no insertion preview");
+        if (capture is not null)
         {
-            var selected = panel.Destinations[position];
-            if (selected == destination) return;
-            await SupportClick(panel.Choice(position, selected));
+            var path = Path.ChangeExtension(_capturePath, null) + capture + ".png";
+            SupportRequire(GetViewport().GetTexture().GetImage().SavePng(path) == Error.Ok, "Drag capture failed");
         }
-        else
-        {
-            SupportRequire(card.Dispositions.Any(d => d.Disposition == destination && d.Legal), "Harness requested a forbidden destination");
-            panel.Choice(position, destination).GrabFocus(); await LookKey(Key.Enter);
-        }
-        SupportRequire(panel.Destinations[position] == destination, "Visible choice button did not select the requested destination");
+        LookMouse(new InputEventMouseButton { Position = point, GlobalPosition = point, ButtonIndex = MouseButton.Left, Pressed = false }); await EventFrames(20);
+        SupportRequire(!GetViewport().GuiIsDragging() && View.Version == version && panel.Picked is null, "Drop submitted or left a held card");
+        if (legal && !cancelOutside) SupportRequire(panel.Destinations[position] == destination, "Native drop did not move the card");
+        else SupportRequire(panel.Order.SequenceEqual(order) && before.All(pair => panel.Destinations[pair.Key] == pair.Value), "Rejected or outside drop altered draft");
+        LookFits();
     }
     private void LookFits()
     {
         var panel = _lookPanel!;
         SupportRequire(GetViewport().GetVisibleRect().Encloses(panel.GetGlobalRect()), $"Viewer leaves the window: {panel.GetGlobalRect()}, min {panel.GetCombinedMinimumSize()}");
-        if (View.PendingLook?.Stage == "Arrange")
-        {
-            SupportRequire(panel.GetGlobalRect().Encloses(panel.ConfirmButton.GetGlobalRect()), "Confirmation is outside viewer");
-            foreach (var position in panel.Order.Where(p => !panel.ReturnStep || panel.Destinations[p] is "top" or "bottom")) SupportRequire(panel.GetGlobalRect().Encloses(panel.Face(position).GetGlobalRect()), "Full card leaves viewer");
-        }
+        if (View.PendingLook?.Stage != "Arrange") return;
+        SupportRequire(panel.GetGlobalRect().Encloses(panel.ConfirmButton.GetGlobalRect()), "Confirmation is outside viewer");
+        var trays = panel.TrayDestinations.Select(d => panel.Tray(d).GetGlobalRect()).ToArray();
+        foreach (var caption in panel.Face(panel.Order[0]).GetParent().GetChildren().OfType<Label>())
+            SupportRequire(trays.Any(t => t.Encloses(caption.GetGlobalRect())), "Deck-order caption leaves its destination tray");
+        var faces = panel.Order.Select(p => panel.Face(p).GetGlobalRect()).ToArray();
+        foreach (var rect in faces) SupportRequire(panel.GetGlobalRect().Encloses(rect), "Full card leaves viewer");
+        for (var i = 0; i < faces.Length; i++) for (var j = i + 1; j < faces.Length; j++)
+            SupportRequire(!faces[i].Intersects(faces[j]), "Card faces overlap after arrangement");
     }
     private async Task ConfirmLook()
     {
-        if (!_lookPanel!.ReturnStep)
-        {
-            var versionBeforeNext = View.Version;
-            await SupportClick(_lookPanel.ContinueButton); await EventFrames(6); LookFits();
-            SupportRequire(_lookPanel.ReturnStep && View.Version == versionBeforeNext, "Next resolved the effect instead of opening return review");
-            await SupportCapture("-return");
-        }
+        LookFits();
         var view = View.PendingLook!; var owner = view.DeckOwnerId!.Value; var deck = _lookFixture.State.Players[owner].FateDeck.ToArray();
         var count = view.Cards!.Length; var order = _lookPanel!.Order.ToArray(); var destinations = new Dictionary<int, string>(_lookPanel.Destinations);
         var expected = order.Where(p => destinations[p] == "top").Select(p => deck[p]).Concat(deck.Skip(count))
@@ -137,71 +161,69 @@ public partial class Main
         {
             _preferences.ReducedMotion = _captureMode.Contains("reduced"); ApplyPreferences(false);
             await PrepareLookReview(_captureMode.EndsWith("review", StringComparison.Ordinal) ? "bottom" : "reorder");
-            if (_captureMode.EndsWith("review", StringComparison.Ordinal)) { GD.Print("TOP_CARDS_REVIEW_READY: real engine choices; prepared scenarios above the tray."); return; }
+            if (_captureMode.EndsWith("review", StringComparison.Ordinal)) { GD.Print("TOP_CARDS_REVIEW_READY: draggable destinations and explicit deck order; real engine choices."); return; }
+            GetWindow().GrabFocus(); await EventFrames(20);
             LookFits(); SupportRequire(_lookPanel!.Order.Count == 3 && !_lookPanel.ConfirmButton.Disabled, "Reorder case missing");
             var version = View.Version;
-            _lookPanel.MoveButton(0, true).GrabFocus(); await LookKey(Key.Enter);
-            SupportRequire(_lookPanel.Order.SequenceEqual(new[] { 1, 0, 2 }) && View.Version == version, "Keyboard move submitted or failed to reorder");
+            _lookPanel.Face(0).GrabFocus(); await LookKey(Key.Enter); await LookKey(Key.Right); await LookKey(Key.Enter); await EventFrames(15);
+            SupportRequire(_lookPanel.Order.SequenceEqual(new[] { 1, 0, 2 }) && View.Version == version, "Keyboard insertion failed or submitted");
+            await SupportClick(_lookPanel.UndoButton);
+            await DragLook(2, "top", capture: "-drag-reorder");
+            SupportRequire(_lookPanel.Order.SequenceEqual(new[] { 2, 0, 1 }) && _lookPanel.PositionLabel(2).Contains("Drawn first"), $"Drag reorder or first-drawn label is wrong: {string.Join(",",_lookPanel.Order)}; label={_lookPanel.PositionLabel(2)}; drop={GetViewport().GuiIsDragSuccessful()}");
             await SupportCapture("-reorder");
-            var face = _lookPanel.Face(1); var point = face.GetGlobalRect().GetCenter();
-            PushCaptureMouse(new InputEventMouseMotion { Position = point, GlobalPosition = point });
-            for (var i = 0; i < 240 && !ContainsEitherPreview(GetTree().Root); i++) await EventFrames(1);
-            SupportRequire(ContainsEitherPreview(GetTree().Root), "Full-card hover missing"); await SupportCapture("-hover");
-            await SupportClick(face); SupportRequire(_lookInspection?.Visible == true && View.Version == version, "Inspection submitted a command or did not open");
+            _lookPanel.Face(1).GrabFocus(); await LookKey(Key.I);
+            SupportRequire(_lookInspection?.Visible == true && View.Version == version, "Full inspection failed or submitted");
             _session.SwitchPracticeSeat(); await EventFrames(15);
-            SupportRequire(_lookPanel is null && _lookInspection is null && View.PendingLook is null, "Private view or inspection survived a seat change"); await SupportCapture("-waiting");
-            _session.SwitchPracticeSeat(); await EventFrames(15);
+            SupportRequire(_lookPanel is null && _lookInspection is null && View.PendingLook is null, "Private view survived seat change");
+            await SupportCapture("-waiting"); _session.SwitchPracticeSeat(); await EventFrames(15);
             SupportRequire(_lookPanel!.Order.SequenceEqual(new[] { 0, 1, 2 }), "Seat change retained private draft");
-            await SupportClick(_lookPanel.MoveButton(0, true)); await ConfirmLook();
+            await BeginLookDrag(0); await LookKey(Key.Escape);
+            SupportRequire(!GetViewport().GuiIsDragging() && _lookPanel.Order.SequenceEqual(new[] { 0, 1, 2 }), "Escape did not cancel drag");
+            await BeginLookDrag(0); _session.SwitchPracticeSeat(); await EventFrames(15);
+            SupportRequire(!GetViewport().GuiIsDragging() && _lookPanel is null, "Private drag preview survived seat change");
+            _session.SwitchPracticeSeat(); await EventFrames(15); await ConfirmLook();
             await PrepareLookReview("take"); LookFits(); SupportRequire(_lookPanel!.ConfirmButton.Disabled, "Required choice defaulted");
             var illegal = View.PendingLook!.Cards!.First(c => c.Dispositions.Any(d => d.Disposition == "hand" && !d.Legal));
-            SupportRequire(_lookPanel.Choice(illegal.Position, "hand").Disabled && !string.IsNullOrWhiteSpace(_lookPanel.Choice(illegal.Position, "hand").TooltipText), "Engine ineligible reason missing");
-            SupportRequire(!_lookPanel.ReturnStep && !_lookPanel.ConfirmButton.IsVisibleInTree(), "Selection screen shows final confirmation");
-            await SupportCapture("-choose");
-            await SetLookDestination(0, "hand"); SupportRequire(!_lookPanel.ConfirmButton.Disabled, "Required count never satisfied");
-            await SetLookDestination(2, "hand"); SupportRequire(_lookPanel.ConfirmButton.Disabled, "Excess count can submit");
-            await SetLookDestination(2, "top"); await SupportCapture("-take");
-            await SupportClick(_lookPanel.ContinueButton); await EventFrames(6);
-            SupportRequire(_lookPanel.ReturnStep && _lookPanel.Destinations[0] == "hand", "Next lost chosen card");
-            await SupportClick(_lookPanel.BackButton); await EventFrames(6);
-            SupportRequire(!_lookPanel.ReturnStep && _lookPanel.Destinations[0] == "hand", "Back lost the draft");
-            await SupportClick(_lookPanel.Face(0)); SupportRequire(_lookPanel.Destinations[0] == "top", "Click selected card did not undo");
-            await SupportClick(_lookPanel.Face(0)); await ConfirmLook();
-            await PrepareLookReview("bottom"); LookFits(); SupportRequire(View.PendingLook!.Remainder == "bottom" && _lookPanel!.Order.Count == 4, "Banish case missing");
-            await SetLookDestination(0, "hand"); await SupportClick(_lookPanel!.ContinueButton); await EventFrames(6); await SupportClick(_lookPanel.MoveButton(3, false)); await SupportCapture("-bottom"); await ConfirmLook();
+            SupportRequire(!string.IsNullOrWhiteSpace(_lookPanel.DropReason(illegal.Position, "hand")), "Ineligible engine reason missing");
+            await DragLook(illegal.Position, "hand", legal: false);
+            await DragLook(0, "hand", capture: "-drag-hand"); SupportRequire(!_lookPanel.ConfirmButton.Disabled, "Required count never satisfied");
+            await DragLook(2, "hand", legal: false); await SupportCapture("-take");
+            await SupportClick(_lookPanel.UndoButton); SupportRequire(_lookPanel.ConfirmButton.Disabled && _lookPanel.Destinations[0] == "top", "Undo did not restore required choice");
+            await SupportClick(_lookPanel.Face(0)); await SupportClick(_lookPanel.Tray("hand")); await EventFrames(15);
+            SupportRequire(_lookPanel.Destinations[0] == "hand", "Click-to-place alternative failed"); await ConfirmLook();
+            await PrepareLookReview("bottom"); LookFits();
+            await DragLook(0, "hand"); await DragLook(3, "bottom", 0, capture: "-drag-bottom");
+            SupportRequire(_lookPanel!.PositionLabel(3).Contains("Immediately") && _lookPanel.PositionLabel(2).Contains("Very bottom"), "Bottom order labels reversed");
+            await DragLook(1, "hand", cancelOutside: true); await SupportCapture("-bottom"); await ConfirmLook();
+            await PrepareLookReview("top-bottom"); LookFits();
+            await DragLook(0, "bottom"); await SupportCapture("-top-bottom"); await ConfirmLook();
             await PrepareLookReview("any"); LookFits(); await SupportCapture("-decks");
             var opponent = View.PendingLook!.DeckChoices!.Single(d => !d.OwnDeck);
             var deckButton = StabilizationButtons(_lookPanel!).Single(b => b.HasMeta("owner") && b.GetMeta("owner").AsInt32() == opponent.OwnerId);
             await SupportClick(deckButton); await WaitDecisionPresentation(); await EventFrames(15); LookFits();
             SupportRequire(View.PendingLook is { OwnDeck: false } && StabilizationText(_lookPanel!).Contains("your opponent’s"), "Opponent deck is ambiguous");
-            SupportRequire(_lookFixture.GetView(opponent.OwnerId).PendingLook is null, "Deck owner can see private look");
-            await SetLookDestination(0, "discard"); await SupportCapture("-opponent-deck"); await ConfirmLook();
+            SupportRequire(_lookFixture.GetView(opponent.OwnerId).PendingLook is null && !_lookPanel!.TrayDestinations.Any(d => d is "hand" or "show"), "Opponent privacy or destinations incorrect");
+            await DragLook(0, "discard"); await SupportCapture("-opponent-deck"); await ConfirmLook();
             await PrepareLookReview("show"); var shown = View.PendingLook!.Cards!.First(c => c.Dispositions.Any(d => d.Disposition == "show" && d.Legal));
             await SetLookDestination(shown.Position, "show"); SupportRequire(StabilizationText(_lookPanel!).Contains("Will be shown"), "Public reveal warning missing");
             await SupportCapture("-show"); await ConfirmLook(); SupportRequire(View.ShownCards!.Any(c => c.Definition.Id == shown.DefinitionId), "Shown card did not enter public history");
             await PrepareLookReview("mixed");
             var ownFate = StabilizationButtons(_lookPanel!).Single(b => b.HasMeta("owner") && b.GetMeta("owner").AsInt32() == 0 && b.GetMeta("deck").AsString() == "Fate");
-            await SupportClick(ownFate); await WaitDecisionPresentation(); await EventFrames(15); LookFits();
-            await SetLookDestination(0, "bottom"); await SetLookDestination(1, "hand"); await SupportCapture("-mixed-choices");
-            await SupportClick(_lookPanel!.ContinueButton); await EventFrames(6); LookFits();
-            SupportRequire(_lookPanel.Face(2).GetGlobalRect().Position.X < _lookPanel.Face(0).GetGlobalRect().Position.X, "Top and bottom return groups are interleaved");
-            await SupportCapture("-mixed-return"); await ConfirmLook();
-            await PrepareLookReview("mixed");
-            ownFate = StabilizationButtons(_lookPanel!).Single(b => b.HasMeta("owner") && b.GetMeta("owner").AsInt32() == 0 && b.GetMeta("deck").AsString() == "Fate");
             await SupportClick(ownFate); await WaitDecisionPresentation(); await EventFrames(15);
-            await SetLookDestination(0, "hand"); await SetLookDestination(1, "discard"); await SetLookDestination(2, "bottom"); await ConfirmLook();
-            await PrepareLookReview("fixed"); SupportRequire(!_lookPanel!.MoveButton(0, true).IsVisibleInTree(), "Fixed order has reorder controls");
+            await SetLookDestination(0, "hand"); await SetLookDestination(1, "discard"); await SetLookDestination(2, "bottom"); LookFits();
+            await SupportCapture("-mixed"); await ConfirmLook();
+            await PrepareLookReview("fixed"); var initialOrder = _lookPanel!.Order.ToArray();
+            await DragLook(0, "top", 2); SupportRequire(_lookPanel.Order.SequenceEqual(initialOrder), "Fixed-order drag reordered cards");
             await SetLookDestination(1, "discard"); await SupportCapture("-fixed"); await ConfirmLook();
-            await PrepareLookReview("none"); SupportRequire(View.PendingLook!.Rules!.Single().Max == 0 && !_lookPanel!.ConfirmButton.Disabled, "No-eligible case ignored capped engine bounds"); await ConfirmLook();
+            await PrepareLookReview("none"); SupportRequire(View.PendingLook!.Rules!.Single().Max == 0 && !_lookPanel!.ConfirmButton.Disabled && !_lookPanel.TrayDestinations.Contains("hand"), "Capped zero destination offered"); await ConfirmLook();
             await PrepareLookReview("short"); SupportRequire(_lookPanel!.Order.Count == 2, "Short deck invented cards"); await ConfirmLook();
             await PrepareLookReview("empty"); SupportRequire(View.PendingLook is null && _lookPanel is null, "Empty deck trapped player");
-            await PrepareLookReview(); typeof(MatchSession).GetProperty(nameof(MatchSession.Busy))!.SetValue(_session, true); Render(); await EventFrames(8);
-            SupportRequire(_lookPanel!.ConfirmButton.Disabled, "Busy session can submit"); await SupportCapture("-paused");
+            await PrepareLookReview(); await BeginLookDrag(0);
+            typeof(MatchSession).GetProperty(nameof(MatchSession.Busy))!.SetValue(_session, true); Render(); await EventFrames(8);
+            SupportRequire(!GetViewport().GuiIsDragging() && _lookPanel!.ConfirmButton.Disabled, "Busy state retained drag or submission"); await SupportCapture("-paused");
             typeof(MatchSession).GetProperty(nameof(MatchSession.Busy))!.SetValue(_session, false); Render(); await EventFrames(8);
             SupportRequire(!_lookPanel!.ConfirmButton.Disabled, "Session did not resume");
-            if (_captureMode.Contains("review"))
-            { await SupportClick(_lookReviewButtons.Single(b => b.Text == "Take + bottom")); await EventFrames(90); SupportRequire(View.PendingLook?.Remainder == "bottom", "Prepared navigation failed"); }
-            GD.Print("TOP_CARDS_PASS: private native hover/inspection, keyboard reorder/choice buttons and staged Back/Next, exact counts, engine return order, top/bottom, opponent deck, show, fixed/short/empty, seat and busy resets"); GetTree().Quit();
+            GD.Print("TOP_CARDS_PASS: native drag and insertion previews; keyboard equivalent; rejected/full/outside drops; undo; exact confirmed engine order; top/bottom/hand/show/discard; fixed/short/empty; privacy, Escape, seat and busy drag cancellation"); GetTree().Quit();
         }
         catch (Exception e) { await SupportCapture("-failure"); GD.PushError(e.ToString()); GetTree().Quit(1); }
     }
