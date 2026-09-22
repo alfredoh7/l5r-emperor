@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Wired Akodo Ashiko (oracle-l5r-193): her text is exactly the Reserve keyword's own shape on a card without the printed keyword. MatchEngine.IsReserveRecruitable admits her by her own Effect string; her unit-count discount reuses Army(playerId, province), the engine's existing live unit-count primitive -- no new primitive needed, confirmed by DiscountIsDynamic (tests/L5R.Core.Tests/AkodoAshikoTests.cs), which recruits her at the discounted price after board changes mid-battle. Flagged (spawn_task, not fixed here) a pre-existing gap: MatchQueries.cs's recruitReserve offer listing quotes without viaReserve, understating any viaReserve-conditional discount's displayed price (affects Tamori Shinji too). Lane is shared only because docs/CARD_INVENTORY.xlsx and docs/decisions/2026-09-22-akodo-ashiko-reserve.md fall outside the rules/ui path patterns; every code change is rules-lane.",
+  "validation": "5 new tests (akodo-ashiko), full core test suite green, bash tools/check.sh --skip-client exits 0.",
+  "remaining": "None for this task. The recruitReserve offer-quote display gap is tracked as its own follow-up.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/440",
+  "branch": "claude/440-akodo-ashiko-reserve",
+  "updated": "2026-09-22T13:34:51.003110+00:00"
+}
