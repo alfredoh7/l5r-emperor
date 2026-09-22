@@ -68,6 +68,7 @@ public sealed partial class MatchEngine
 
     private static MatchEngine Create(ulong seed, string scenario)
     {
+        if (scenario.StartsWith("duel-demo/", StringComparison.Ordinal)) return CreateDuelDemoState(seed, scenario[10..]);
         if (scenario == PublishedContent.Scenario) return CreatePublished(seed, PublishedContent.Scenario, PublishedContent.Snapshot);
         if (scenario == PublishedContent.TestScenario) return CreatePublished(seed, PublishedContent.TestScenario, PublishedContent.TestSnapshot);
         if (scenario is not ("starter" or "economy" or DeckSearchScenario or CopyShowcaseScenario or AbilityGrantShowcaseScenario or EitherOrShowcaseScenario or OpponentPaymentShowcaseScenario)) throw new ArgumentException("Unknown scenario.");
@@ -176,10 +177,17 @@ public sealed partial class MatchEngine
         var firstEvent = _state.Events.Count;
         try
         {
+            var aftermath = _state.LastDuel is { Complete:false, Result:not null } ? CaptureDuelEvidence() : null;
+            var reactionSource = command.CardId ?? _state.PendingChoice?.CardId;
+            var reactionCard = aftermath is not null && reactionSource is not null && _state.Cards.TryGetValue(reactionSource, out var rc)
+                && rc.FaceUp && rc.Zone is not (Zone.Hand or Zone.FateDeck or Zone.DynastyDeck) ? ViewCard(rc) : null;
+            var reactionLabel = _state.PendingChoice?.Type=="overconfidentDraw" ? "Overconfident" : null;
             Apply(command);
             ReturnCardsOutOfPlayToTheirOwners();
             RemoveCreatedCardsLeftInPiles();
+            if (aftermath is not null) RecordDuelChanges(aftermath, "Aftermath", reactionCard, sourceLabel: reactionLabel);
             _state.Version++;
+            RefreshDuelRecord();
             _commands.Add(Copy(command));
             return new(true,null,_state.Version,_state.Events.Skip(firstEvent).ToArray());
         }
@@ -2419,6 +2427,9 @@ public sealed partial class MatchEngine
     // Asahina Tsugio / Asako Kijo (issue #223): "other players' maximum hand sizes are increased by
     // 1" -- the printed 8 becomes a per-player computed value, raised by 1 for every in-play card an
     // OPPONENT controls carrying this Effect (either of them, on either side, could stack).
+    // False Ring of Earth (oracle-l5r-10532, issue #295): "Other players have -1 maximum hand size" --
+    // a separate Effect from increase-other-hand-size, so an increaser and a decreaser net out.
+    // HandLimitFor also names each contributing card for the public hand-limit placard.
     private HandLimitView HandLimitFor(int playerId)
     {
         var modifiers = _state.Cards.Values
@@ -2581,6 +2592,10 @@ public sealed partial class MatchEngine
                 else if(Definition(card).Type==CardType.Region) ResolveRegion(player,province,card);
                 else if(Definition(card).Type==CardType.Celestial) ResolveCelestial(player,province,card);
             }
+            // An Event already face up (refilled face up by Border Keep's cycle or the Kharmic replacement) was never
+            // revealed here, but Events resolve only in the Events Phase: it resolves now instead of staying stuck
+            // (rules lead ruling, docs/decisions/2026-09-22-suspicions-owner-events-phase.md).
+            else if(Definition(card).Type==CardType.Event && ResolveEvent(player,province,card)) return;
         }
         AdvanceStraightenHolds(StraightenPoint.EventsRevealEnds);
         // Suspicions-shaped ongoing Event effects: re-checked every Events Phase (see ResolveOngoingEvents),
@@ -2765,10 +2780,9 @@ public sealed partial class MatchEngine
     // game"): re-checked every Events Phase rather than snapshotted once, the same living-state
     // approach GrantedKeyword.Duration "Permanent" uses for a keyword grant -- a card sitting in
     // Zone.EventInPlay IS the "effect still active" flag, so nothing else needs to remember it
-    // separately, and nothing needs to clear it (Suspicions' own effect never ends). "The player's
-    // Events Phase" (singular, Suspicions' own printed wording) is whichever player's turn this is --
-    // only the active player has an Events Phase at all (turn-based, core rules turn order), and its
-    // trigger affects BOTH players' Honor once per such phase, including the very turn Suspicions
+    // separately, and nothing needs to clear it (Suspicions' own effect never ends). It triggers
+    // "before each of your Action Phases" -- only on its owner's own turns -- and each trigger
+    // affects BOTH players' Honor once, including the very turn Suspicions
     // itself is revealed (ResolveEvent above already moved it into Zone.EventInPlay earlier in this
     // same EventsPhase call).
     private void ResolveOngoingEvents(PlayerState activePlayer)
@@ -2776,8 +2790,9 @@ public sealed partial class MatchEngine
         foreach(var card in _state.Cards.Values.Where(c=>c.Zone==Zone.EventInPlay).ToArray())
         {
             // Suspicions' own printed order: "each player in turn order starting with you" -- the
-            // revealing/active player's own loss resolves first, then the other player's.
-            if(Definition(card).Effect=="suspicions")
+            // revealing/active player's own loss resolves first, then the other player's. It fires
+            // only "before each of YOUR Action Phases": on its owner's turns, never the opponent's.
+            if(Definition(card).Effect=="suspicions" && card.OwnerId==activePlayer.Id)
                 foreach(var playerId in new[] { activePlayer.Id, 1-activePlayer.Id })
                     GainHonor(playerId,-1,$"Suspicions (end of {activePlayer.Name}'s Events Phase)",card);
         }

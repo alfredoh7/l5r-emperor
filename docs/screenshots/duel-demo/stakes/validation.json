@@ -1,0 +1,95 @@
+{
+  "date": "2026-09-16",
+  "branch": "codex/205-duel-arena",
+  "base": "28654c5",
+  "scope": "Challenge stakes and ordered source-linked consequences; existing mechanical execution preserved.",
+  "checks": {
+    "command": "L5R_PYTHON=/opt/homebrew/bin/python3 bash tools/check.sh --skip-client",
+    "passed": true,
+    "total": 491,
+    "collaboration": 43,
+    "content": 132,
+    "meshy_tools": 6,
+    "core": 172,
+    "published": 52,
+    "deck_format": 9,
+    "deck_workshop": 10,
+    "ai": 56,
+    "server": 5,
+    "transport": 6,
+    "client_build": "0 warnings, 0 errors"
+  },
+  "native": {
+    "canonical_full_motion": {
+      "Passed": true,
+      "Steps": 20,
+      "ReducedMotion": false,
+      "Resolution": "(1672, 942)",
+      "FrameCount": 1281,
+      "P50Ms": 9.051,
+      "P95Ms": 14.062,
+      "P99Ms": 633.301
+    },
+    "special_stages_full_motion": {
+      "passed": true,
+      "scenarios": 13
+    },
+    "canonical_compact_reduced_via_launcher": {
+      "Passed": true,
+      "Steps": 20,
+      "ReducedMotion": true,
+      "Resolution": "(1120, 700)",
+      "FrameCount": 861,
+      "P50Ms": 7.311,
+      "P95Ms": 14.166,
+      "P99Ms": 279.565
+    },
+    "guidance_and_source_inspection_compact": {
+      "Passed": true,
+      "Steps": 43,
+      "ReducedMotion": true,
+      "Resolution": "(1120, 700)",
+      "ProfileIsolated": true
+    }
+  },
+  "native_notes": [
+    "Full-motion canonical capture preceded final story-lifecycle, cardDrawn and ordering-grid refinements. Final 13-scenario full-motion and compact canonical/guidance captures use the final build.",
+    "Native captures use fixed 30 simulation FPS; frame samples are not a production performance benchmark.",
+    "Verified canonical 8\u20137, actual destruction, Courtesy province delta, restored priority, Continue, preserved practice, private inspection, source inspection without commands, and later reaction stories once."
+  ],
+  "findings": [
+    "Retained records lacked the challenge card identity; optional public Challenge now preserves it.",
+    "Courtesy changes province strength without a legacy event; public before/after records capture the actual change.",
+    "Aftermath consequences arrive later; append-only beats avoid replaying the verdict.",
+    "Overconfident queues the beneficiary but not the triggering card ID; display the actual keyword without inventing card provenance.",
+    "Engine currently executes the built-in challenge outcome before ordered Focus Effects; preserved for Mendon review, not certified by this UI pass."
+  ],
+  "fixed_during_validation": [
+    "Passive story was parented to the rebuilt HUD and became disposed during transitions; story now has a stable parent and guarded cleanup.",
+    "Expanded full-motion probe hit its old global step limit; timeout is now per scenario.",
+    "Draw-count regression caught the incorrect event name; count actual cardDrawn events without their card IDs.",
+    "Replaced oversized ordering-row buttons with full card faces and compact move controls."
+  ],
+  "artwork": {
+    "release": "https://github.com/alfredoh7/l5r-emperor/releases/tag/catalogue-art-webp-v4-20260916",
+    "images": 2749,
+    "bytes": 375462528,
+    "sha256": "a1ecf9de0845f7619c6c6a69ba96943eb61952eac3046b36e4059dbab35d9e20",
+    "verified": "private release asset digest matches receipt; launcher offline preflight passes"
+  },
+  "screenshots": {
+    "challenge.png": "stakes-stages-complete-reaction-story-0.png",
+    "courtesy.png": "stakes-stages-complete-effects-story-3.png",
+    "effect-order.png": "stakes-stages-complete-effects-order.png",
+    "movement.png": "stakes-stages-complete-duelist-story-1.png",
+    "aftermath.png": "stakes-stages-complete-aftermath-story-3.png",
+    "source-inspection-compact.png": "stakes-guidance-complete-challenge-source.png"
+  },
+  "remaining": [
+    "Alfredo visual acceptance",
+    "Mendon shared-interface and mechanical review",
+    "Native Windows playtesting",
+    "Normal-match activation after demo acceptance",
+    "Separate AAA grass/cloud track"
+  ]
+}

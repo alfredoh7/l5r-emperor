@@ -7,6 +7,11 @@ namespace L5R.Client;
 public partial class TableSurface : TextureRect
 {
     public const float Pitch = .64f, Depth = .00065f;
+    // Optional presentation camera. The normal game table keeps its original defaults.
+    public float PlanePitch { get; set; } = Pitch;
+    public float PlaneDepth { get; set; } = Depth;
+    // Fixed presentation scenes may bound their content more tightly than the pannable board.
+    public Vector2 CanvasExtent { get; set; } = new(1.7f, 2.7f);
     public SubViewport Canvas { get; private set; } = null!;
     public Vector2 CanvasSize { get; private set; }
     public float RenderScale { get; private set; } = 1;
@@ -47,18 +52,20 @@ public partial class TableSurface : TextureRect
         _projection.SetShaderParameter("display_size", Size);
         _projection.SetShaderParameter("projection_center", _projectionCenter);
         _projection.SetShaderParameter("canvas_size", CanvasSize);
-        _projection.SetShaderParameter("pitch", Pitch);
-        _projection.SetShaderParameter("depth", Depth);
+        _projection.SetShaderParameter("pitch", PlanePitch);
+        _projection.SetShaderParameter("depth", PlaneDepth);
     }
-    public static Vector2 ProjectOffset(Vector2 plane)
+    public static Vector2 ProjectOffset(Vector2 plane) => ProjectOffset(plane, Pitch, Depth);
+    public static Vector2 ProjectOffset(Vector2 plane, float pitch, float depth)
     {
-        var divisor = 1 - plane.Y * Depth;
-        return new Vector2(plane.X, plane.Y * Pitch) / divisor;
+        var divisor = 1 - plane.Y * depth;
+        return new Vector2(plane.X, plane.Y * pitch) / divisor;
     }
-    public static Vector2 UnprojectOffset(Vector2 screen)
+    public static Vector2 UnprojectOffset(Vector2 screen) => UnprojectOffset(screen, Pitch, Depth);
+    public static Vector2 UnprojectOffset(Vector2 screen, float pitch, float depth)
     {
-        var y = screen.Y / (Pitch + Depth * screen.Y);
-        return new Vector2(screen.X * (1 - Depth * y), y);
+        var y = screen.Y / (pitch + depth * screen.Y);
+        return new Vector2(screen.X * (1 - depth * y), y);
     }
     public Vector2 ProjectCanvas(Vector2 plane) => GetGlobalTransform() * (_projectionCenter + ProjectOffset(plane - CanvasSize / 2));
     public Vector2 ScreenToCanvas(Vector2 screen) => CanvasSize / 2 + UnprojectOffset(GetGlobalTransform().AffineInverse() * screen - _projectionCenter);

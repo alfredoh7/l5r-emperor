@@ -1,0 +1,16 @@
+{
+  "v4_embedded_texture_sha256": {
+    "approved-duel-mat": "6dd3fe31b810a37927e341360fed7bd91698d785e838f816d2a74944e1e4a649",
+    "meshy-pine-original-map-2": "f168f7424cd16d5e7ddeea5f7e720efdd1cd9487cc1cd82d2d7bea837938223e",
+    "meshy-pine-original-map-0": "a764cfed67607631b53069cb338ab207ba9ca3aa99d0afa533c040109afb54e5",
+    "meshy-pine-original-map-1": "a1ac08ff17650b064f845d00eeacb50139b0a61bc0879aba91208bd6fb32ad84",
+    "meshy-lantern-normal": "4155074afdcbccde700da027b3407932a2be23060b4d78da6966e2683504cf74",
+    "meshy-lantern-basecolor": "815b9b17318e3e08b3132c757f14527ada7271113e43d409f1ce27408187075c",
+    "meshy-lantern-metallic-roughness": "c2a49db0dcd30dbdb27f8858fd536a5049240de0c844163d21df6c6caa6a66f3"
+  },
+  "all_seven_original_textures_preserved": true,
+  "mat_lantern_geometry_uvs_and_transforms_preserved": true,
+  "texture_imports_lossless_mipmapped": true,
+  "scene_triangles": 451176,
+  "source_and_cleanup_hashes_verified": true
+}

@@ -1,0 +1,34 @@
+{
+  "asset": "Duel garden boulder v1",
+  "authorization": "Alfredo requested proceeding with garden rocks, architecture and atmosphere from approved generation 3 on 2026-09-15",
+  "route": "Meshy text-to-3D geometry then PBR refinement; no new imagegen request",
+  "prompt_file": "assets/ui/duel-arena/garden-rock-prompts.json",
+  "cli_version": "@meshy-ai/cli@0.3.0",
+  "tasks": [
+    {
+      "task_id": "01a0a4f3-1a39-753d-afbd-37b3c414646e",
+      "type": "text-to-3d-preview",
+      "status": "SUCCEEDED",
+      "created_at": 1789473793240,
+      "finished_at": 1789473864319,
+      "consumed_credits": 20
+    },
+    {
+      "task_id": "01a0a4f7-90f0-75d3-be0c-a3dc059c0dbe",
+      "type": "text-to-3d-refine",
+      "status": "SUCCEEDED",
+      "created_at": 1789474086305,
+      "finished_at": 1789474176041,
+      "consumed_credits": 10
+    }
+  ],
+  "total_reported_credits": 30,
+  "source": {
+    "file": "assets/table/duel-arena/meshy/rock-v1/rock-source.glb",
+    "sha256": "bb9f3d467638694f3694aa2c6bd5ba8ceb7bc7ce102d51ed186b3cf4ae27c346",
+    "bytes": 33241896,
+    "triangles": 20633
+  },
+  "cleanup": "Normalize ground pivot and a 2.8-unit footprint in Blender; original source geometry/UVs preserved; runtime maps resized to 2048 square from the original high maps, stored in the combined environment export; no paid remesh or enhancement; eight placements use different exposed faces and proportions. Small scatter stones are separately authored.",
+  "builder": "tools/blender/build_duel_arena_v6.py"
+}

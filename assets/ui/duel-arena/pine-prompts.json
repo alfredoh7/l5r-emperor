@@ -1,0 +1,25 @@
+{
+  "asset": "Japanese garden pine",
+  "image_generation": "External ChatGPT; model described by user as image 2.5, not independently verified",
+  "primary": {
+    "file": "approved-pine-primary.png",
+    "sha256": "742bb311b95f83b87175c08e567bb057fe53b345c63278446e7ddeed31d3aa2f"
+  },
+  "reverse": {
+    "file": "approved-pine-reverse.png",
+    "sha256": "a2d39365864907e39eef9871b447f86bf86f8db7ae81e968532c65c7b5ad9e96"
+  },
+  "approval_context": "User requested proceeding with the pine, generated these references from the supplied prompts, and returned both images for the approved Meshy/Blender/Godot workflow. Final 3D result remains for visual review.",
+  "prompts": [
+    {
+      "view": "primary",
+      "reference": "approved-generation-3.png",
+      "prompt": "Create one mature Japanese black pine as an individual 3D game-asset reference, matching the restrained Japanese garden aesthetic of the attached duel arena.\n\nGive it a sturdy, gently twisting trunk with deeply textured charcoal-brown bark, substantial exposed branches, and a broad asymmetric canopy that leans slightly to the right. Arrange the muted deep-green needles into loosely layered, naturally irregular masses, with clear gaps that reveal the branch structure. The silhouette should feel aged, carefully tended and believable at full garden scale. Keep the lower trunk relatively open so the tree can frame a game board without forming a solid wall of foliage.\n\nShow the complete tree in one clear three-quarter view, including its crown, outermost branches and compact root flare. Use minimal perspective distortion and generous space around every edge. Present it against a uniform light-gray background under soft, neutral studio lighting. Keep the bark and foliage richly detailed, with readable shadow detail and natural material colors.\n\nThis image will guide 3D reconstruction. Make the branching coherent, the foliage dimensional and the connections between trunk and canopy understandable. Produce one tree in one image, at the highest available quality.\n\nNo pot, pedestal, terrain patch, rocks, buildings, lanterns, fallen leaves, text or collage. No moonlight, fog, glow, dramatic rim lighting or baked cinematic color grading."
+    },
+    {
+      "view": "reverse",
+      "reference": "approved-pine-primary.png",
+      "prompt": "Use the attached approved pine image as the exact identity reference. Show this same tree from the rear three-quarter angle, moving the camera approximately 180 degrees around its vertical axis.\n\nPreserve its trunk proportions and bend, major branch connections, canopy volumes, needle color, bark texture and root flare. Infer the previously hidden surfaces consistently with the visible structure. Changes in the outline should follow naturally from the new viewpoint.\n\nMatch the original image’s camera elevation, subject size, neutral studio illumination and uniform light-gray background. Show the complete tree with clear margins around the crown, branches and base. Keep all materials unlit by any environmental effects.\n\nProduce one clean image of this additional view, with no labels, inset views, scenery or added objects."
+    }
+  ]
+}

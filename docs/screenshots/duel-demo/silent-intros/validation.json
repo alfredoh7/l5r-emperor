@@ -1,0 +1,54 @@
+{
+  "Date": "2026-09-17",
+  "Scope": "Remove duel sounds and introduction-only 3D grass; preserve gameplay vegetation and mechanics.",
+  "Baseline": "0b4efd1cd06b88f39825aa9844db6ac0e9365ee0",
+  "ClientBuild": {
+    "Passed": true,
+    "Warnings": 0,
+    "Errors": 0
+  },
+  "NativeMovie": {
+    "Passed": true,
+    "Resolution": "1920x1080",
+    "FrameRate": 30,
+    "Frames": 1113,
+    "Seconds": 37.1,
+    "Commands": 4,
+    "Result": "8\u20137",
+    "OpeningRuns": 1,
+    "EndingRuns": 1,
+    "VisuallyInspected": [
+      "Champion introduction without isolated 3D strands"
+    ],
+    "AudioPeakDb": "-inf",
+    "AudioRmsDb": "-inf",
+    "AudioSamplesPerChannel": 1780800,
+    "AudioEvidence": "ffmpeg astats of raw Godot AVI before removing the silent audio track from MP4",
+    "LocalMovie": "artifacts/duel-atmosphere/silent-intros.mp4",
+    "PerformanceClaim": false
+  },
+  "ReducedMotion": {
+    "Passed": true,
+    "Resolution": "1120x700",
+    "Steps": 20,
+    "Coverage": "Native Play menu, real challenge/focus/Strike, main-game hover and pinned inspection, manual seat privacy, duplicate input, source-linked consequences, Continue and preserved practice session.",
+    "Attempts": "Initial run failed the upright-hover assertion; unchanged rerun passed all 20 steps. No production inspection change made."
+  },
+  "SourceChecks": {
+    "DuelAudioHelperRemoved": true,
+    "DuelAudioPlayersAndControlsRemoved": true,
+    "IntroWindFieldRemoved": true,
+    "PlayableGrassInstances": 188,
+    "ProjectSettingsPreserved": true
+  },
+  "Limits": [
+    "No Core, AI or transport changes; prior mechanical suite evidence is unchanged.",
+    "No native Windows graphical testing or final AAA atmosphere acceptance.",
+    "No new performance benchmark; offline capture timing is not performance evidence."
+  ],
+  "Launcher": {
+    "Refreshed": true,
+    "ArtworkPreflight": "ready offline",
+    "HeadlessStartup": "passed"
+  }
+}

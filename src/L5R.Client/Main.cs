@@ -10,7 +10,6 @@ public partial class Main : Node
 {
     private readonly MatchSession _session = new();
     private readonly ConcurrentQueue<Action> _uiQueue = new();
-    private int _renderQueued;
     private Control _root = null!;
     private Control _board = null!, _hand = null!, _unitDetail = null!;
     private VBoxContainer _inspector = null!, _phaseActions = null!, _decisionActions = null!;
@@ -60,7 +59,17 @@ public partial class Main : Node
     public override void _Ready()
     {
         GetWindow().MinSize = new Vector2I(1120, 700);
-        _session.Changed += () => { if (Interlocked.Exchange(ref _renderQueued, 1) == 0) _uiQueue.Enqueue(() => { Interlocked.Exchange(ref _renderQueued, 0); Render(); }); };
+        _session.Changed += () =>
+        {
+            // Capture every permitted snapshot, even when several packets arrive within one rendered frame.
+            var snapshot=_session.Snapshot;var generation=_session.Generation;
+            _uiQueue.Enqueue(() =>
+            {
+                if(generation!=_session.Generation)return;
+                if(_matchDuelGeneration!=generation){_matchDuelFlow.Reset();_matchDuelGeneration=generation;}
+                _matchDuelFlow.Observe(snapshot);Render();
+            });
+        };
         _session.Notice += message => _uiQueue.Enqueue(() => SetNotice(message));
         _session.SeatCreated += (seat, server) => _uiQueue.Enqueue(() => SaveSeat(seat, server));
         foreach (var arg in OS.GetCmdlineUserArgs())
@@ -83,6 +92,8 @@ public partial class Main : Node
         _table = new TableArtStage { ReviewMode = false }; AddChild(_table);
         BuildShell();
         InitializeFrontend();
+        if(OS.GetCmdlineUserArgs().Contains("--duel-match-review")){StartMatchDuelCapture();return;}
+        if(OS.GetCmdlineUserArgs().Contains("--duel-transition-review")){StartTransitionReview();return;}
         if (_capturePath is null || _captureMode.StartsWith("menu", StringComparison.Ordinal)) return;
         var published = _capturePath is null || _captureMode.StartsWith("published", StringComparison.Ordinal);
         if (_captureMode.StartsWith("gold-", StringComparison.Ordinal)) _session.StartShowcase(_captureMode.Split('-')[1]);
@@ -94,8 +105,11 @@ public partial class Main : Node
     public override void _Process(double delta)
     {
         while (_uiQueue.TryDequeue(out var update)) update();
+        if(_transitionReview){try{ProcessTransitionReview(delta);}catch(Exception e){GD.PushError(e.ToString());GetTree().Quit(1);}return;}
         if (_captureMode.StartsWith("menu", StringComparison.Ordinal) && _capturePath is not null) { try { ProcessMenuCapture(delta); } catch (Exception e) { GD.PushError(e.ToString()); GetTree().Quit(1); } return; }
-        if (MenuVisible || PracticeVisible && _capturePath is null) return;
+        if(MatchDuelOpen){ProcessMatchDuel(delta);ProcessMatchDuelCapture(delta);return;}
+        if(ProcessMatchDuelCapture(delta))return;
+        if (MenuVisible || DuelDemoOpen || PracticeVisible && _capturePath is null) return;
         ProcessBattlePresentation(delta);
         if (_session.Snapshot is not null) SyncBloodCourts();
         ProcessTableCamera(delta);
@@ -111,7 +125,7 @@ public partial class Main : Node
             if (_opponentClock > (_reducedMotion ? .12 : .7))
             {
                 _opponentClock = 0;
-                _session.StepPracticeOpponent((view, actions) => TrainingOpponent.Choose(view, actions).Command);
+                _session.StepPracticeOpponent((view, actions) => view.PendingDuel is not null ? DuelOpponent.Choose(view,actions) : TrainingOpponent.Choose(view, actions).Command);
             }
             // No delay: this only fires when declining is the player's sole legal option, so there is
             // nothing for them to weigh — unlike the opponent's move above, it needs no "thinking" pause.
@@ -301,6 +315,7 @@ public partial class Main : Node
 
     private void FitPresentation()
     {
+        if(_transitionReview && _transitionRoom is not null)return;
         var available = GetViewport().GetVisibleRect().Size;
         var scale = available.Y / 1080f;
         // Root controls use an explicit scale, so rasterize system fonts at the
@@ -416,7 +431,7 @@ public partial class Main : Node
             if (MenuVisible && _titleMenu!.Page == "options") _titleMenu.ShowOptions();
             GetViewport().SetInputAsHandled();
         }
-        else if (MenuVisible || PracticeVisible) return;
+        else if (MenuVisible || DuelDemoOpen || PracticeVisible || _transitionReview || MatchDuelOpen) return;
         else if (key.Keycode == Key.Escape && _shownPreview is not null) { HideShownPreview(); GetViewport().SetInputAsHandled(); }
         else if (key.Keycode == Key.Escape && _shownOpen) { ToggleShownCards(false); GetViewport().SetInputAsHandled(); }
         else if (key.Keycode == Key.Escape && _battleSequenceOpen)
@@ -430,9 +445,9 @@ public partial class Main : Node
 
     private void Render()
     {
-        Interlocked.Exchange(ref _renderQueued, 0);
+        if(_transitionReview && _transitionRoom is not null)return;
         if (MenuVisible && _enteringPrivate && _session.Online && _session.Connected && _session.Snapshot is not null) { EnterTable(); return; }
-        if (MenuVisible || PracticeVisible) return;
+        if (MenuVisible || DuelDemoOpen || PracticeVisible) return;
         if (_session.Snapshot is null)
         {
             _opponentPaymentKey=null;_eitherOrKey=null;_eitherNoticeMatch=null;_eitherNotice=null;
@@ -449,6 +464,7 @@ public partial class Main : Node
             Palette.Clear(_board); Palette.Clear(_hand); Palette.Clear(_inspector); Palette.Clear(_phaseActions); Palette.Clear(_decisionActions);
             return;
         }
+        if(RouteMatchDuel())return;
         ObserveBattleJournal();
         PrepareBattlePresentation();
         RenderBattleFeedback();
@@ -631,6 +647,6 @@ public partial class Main : Node
     private static int UnitForce(CardView unit, PlayerView owner) => (unit.Bowed ? 0 : unit.Force) + owner.Home.Concat(owner.Army).Where(c => c.AttachedTo == unit.Id && c.Definition?.Type == CardType.Follower && !c.Bowed).Sum(c => c.Force);
     private CardView? FindCard(string id) => View.Players.SelectMany(p => p.Home.Concat(p.Army).Concat(p.Hand).Concat(p.Discard).Concat(p.RemovedFromGame).Concat(p.EventsInPlay??[]).Concat(p.Celestials??[]).Concat(p.Provinces.Where(p => p.Card is not null).Select(p => p.Card!)).Concat(p.Provinces.Where(p=>p.Region is not null).Select(p=>p.Region!)).Append(p.Stronghold)).FirstOrDefault(c => c.Id == id);
     private static string HumanPhase(Phase phase) => phase switch { Phase.AttackDeclaration => "Declare an attack", Phase.InfantryDeclaration => "Assign attackers", Phase.DefenseAssignment => "Assign defenders", Phase.BattleSelection => "Choose a battlefield", Phase.DynastyDiscard => "Dynasty · discard", _ => phase.ToString() };
-    private void SetNotice(string message) { _notice.Text = message; _notice.TooltipText = message; if (MenuVisible) _titleMenu!.Notify(message); }
+    private void SetNotice(string message) { _matchDuel?.Notify(message); _notice.Text = message; _notice.TooltipText = message; if (MenuVisible) _titleMenu!.Notify(message); }
     public override void _ExitTree() => _session.Dispose();
 }

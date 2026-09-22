@@ -1,0 +1,23 @@
+{
+  "clouds": {
+    "changed_pixel_fraction": 0.5788532874576635,
+    "mean_absolute_max_channel_difference": 7.413700876296973,
+    "max": 157
+  },
+  "sun": {
+    "changed_pixel_fraction": 0.0,
+    "mean_absolute_max_channel_difference": 0.0,
+    "max": 0
+  },
+  "mat_and_cards": {
+    "changed_pixel_fraction": 0.0,
+    "mean_absolute_max_channel_difference": 0.0,
+    "max": 0
+  },
+  "grass_band": {
+    "changed_pixel_fraction": 0.2875465178096757,
+    "mean_absolute_max_channel_difference": 5.056469298245614,
+    "max": 137
+  },
+  "reduced_motion_byte_identical": true
+}
