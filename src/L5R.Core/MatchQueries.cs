@@ -273,6 +273,12 @@ public sealed partial class MatchEngine
             result.AddRange(AbilityActions(playerId));
             Add("declineReaction","Pass reaction",Command("declineReaction"));
         }
+        else if(_state.PendingChoice is { Type:"afterActionResolvedReaction" })
+        {
+            // After an action's resolution (issue #437): this player's Reactions that name it, then the pass -- same shape as afterResolutionReaction above.
+            result.AddRange(AbilityActions(playerId));
+            Add("declineReaction","Pass reaction",Command("declineReaction"));
+        }
         else if(_state.PendingChoice is { Type:"battleRecruit" })
         {
             // After a battle resolved (issue #379): the recruit grants of this battle this player still holds, then the pass.

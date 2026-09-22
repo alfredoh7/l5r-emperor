@@ -1,0 +1,33 @@
+{
+  "Profile": "strategy-wave-45",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-6302",
+      "Name": "Revenge",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing unbowed Samurai and target an enemy card without attachments: Bow it. Destroy it if another player's action has destroyed one of your Personalities since the end of your last Battle action this battle.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6302.jpg",
+      "Keywords": [
+        "Dark Virtue",
+        "Determination"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "revenge-bow"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

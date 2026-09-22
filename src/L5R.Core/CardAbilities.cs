@@ -904,6 +904,9 @@ public static class AbilityCatalog
         // ApplyDuelOutcome's own generic -1F case, used only so a test can observe the loser(s)
         // without needing a real card's own outcome.
         ["training-duel-challenge"] = new("Battle", "Training: choose your performing unbowed Personality and target an enemy Personality: duel (refusable)", "enemy-personality", Performer: "own-unbowed-personality", IssuesDuel: true, DuelRefusable: true),
+        // Training-only: exercises the after-action-resolved Reaction window (ActionEffectTracking.cs, issue #437) directly, without a real
+        // card's own extra Timing/keyword narrowing (see Measure of Devotion/Revenge for real consumers of the same underlying primitive).
+        ["training-after-action-resolved-gain"] = new("Reaction", "Training: after the resolution of an action that destroyed one of your Personalities, gain 3 Honor", "none", Trigger: AfterActionReactionTriggers.AfterActionResolved),
         // Dragon Clan review (issue #207): every real Dragon Clan Personality wired this pass, using
         // only already-existing primitives plus the small additions documented alongside them (the
         // self-performer duel extension, StraightenUnit, MoveToBattlefield, and a handful of new
@@ -1854,6 +1857,15 @@ public static class AbilityCatalog
         // shape, at 3 instead of 2.
         ["home-guard-focus"] = new("FocusEffect", "As a Focus Effect: After this duel ends, give your Personality in it +3F", "none"),
         ["home-guard-bow"] = new("Battle", "Target an enemy card without attachments: Bow it. Gain 2 Honor", "enemy-card-without-attachments"),
+        // Revenge (oracle-l5r-6302, issue #437): "Destroy it if another player's action has destroyed one of your Personalities since the end of
+        // your last Battle action this battle" -- MatchState.EnemyDestroyedOwnPersonalitySinceLastBattleAction (ActionEffectTracking.cs).
+        ["revenge-bow"] = new("Battle", "Choose your performing unbowed Samurai and target an enemy card without attachments: Bow it. Destroy it if another player's action has destroyed one of your Personalities since the end of your last Battle action this battle",
+            "enemy-card-without-attachments", Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeywords: ["Samurai"]),
+        // Measure of Devotion (oracle-l5r-5013, issue #437): "After the resolution of a Battle action that destroyed one of your Deathseekers" --
+        // the after-action-resolved Reaction window (ActionEffectTracking.cs). The created Personality is Oathsworn Deathseeker (oracle-l5r-9710).
+        ["measure-of-devotion-create"] = new("Reaction", "After the resolution of a Battle action that destroyed one of your Deathseekers: Create a 2F/2C/0PH Lion Clan · Samurai · Deathseeker Personality at the current battlefield. Gain 1 Honor",
+            "none", Trigger: AfterActionReactionTriggers.AfterActionResolved,
+            Creates: new(CardType.Personality, Force: 2, Chi: 2, PersonalHonor: 0, Keywords: ["Lion Clan", "Samurai", "Deathseeker"], ProxyId: "oracle-l5r-9710", AtBattlefield: true)),
         // Necessary Evil (oracle-l5r-5524): "Open: If you control a Personality, target a Personality and pay Gold equal to the number of Personalities you control, or 4, whichever is higher: The targeted
         // Personality may not assign to battlefields." The movement lock (MovementLocks.cs) for the turn, of assignment alone.
         ["necessary-evil-lock"] = new("Open", "If you control a Personality, target a Personality and pay Gold equal to the number of Personalities you control, or 4, whichever is higher: The targeted Personality may not assign to battlefields",
@@ -3090,7 +3102,10 @@ public sealed partial class MatchEngine
         FireAfterOwnActionTraits(AbilityCatalog.All[attack.AbilityId], attack.PlayerId, attack.Command?.CardId is { } sourceCardId ? Card(sourceCardId) : null);
         // Same "an unrelated action forfeits dangling grants" rule as ExecuteAbilityEffects' own tail.
         if (!attack.Additional) _state.AdditionalActions.RemoveAll(g => g.PlayerId == attack.PlayerId && Forfeitable(g));
-        NextAction(attack.PlayerId, attack.Additional && _state.AdditionalActions.Any(g => g.PlayerId == attack.PlayerId && Forfeitable(g)));
+        var attackBurstContinues = attack.Additional && _state.AdditionalActions.Any(g => g.PlayerId == attack.PlayerId && Forfeitable(g));
+        // Action-effect tracking (issue #437): the deferred Attack is the action's resolution, the same reasoning FireAfterOwnActionTraits above already follows.
+        if (FinishActionEffectTracking(attack.AbilityId, attack.PlayerId, attack.SourceId, attackBurstContinues ? attack.PlayerId : 1 - attack.PlayerId)) return;
+        NextAction(attack.PlayerId, attackBurstContinues);
     }
     private bool IsAttacking(CardInstance card) => card.Zone == Zone.Battlefield && card.OwnerId == _state.ActivePlayerId;
     // "Defending": at the current battlefield and owned by the non-active player -- unlike IsAttacking
@@ -3313,6 +3328,9 @@ public sealed partial class MatchEngine
                 // After a battle's resolution (issue #417): open to either player while the window is; each Reaction judges its own condition.
                 AfterResolutionTrigger => _state.PendingChoice.Type == "afterResolutionReaction" && command.CardId is not null && _state.Cards.TryGetValue(command.CardId, out var afterSource)
                     && AfterResolutionApplies(afterSource, id, command.PlayerId),
+                // After an action resolves (issue #437, ActionEffectTracking.cs): open to either player while the window is; each Reaction reads MatchState.LastResolvedAction for its own condition.
+                AfterActionReactionTriggers.AfterActionResolved => _state.PendingChoice.Type == "afterActionResolvedReaction" && command.CardId is not null && _state.Cards.TryGetValue(command.CardId, out var afterActionSource)
+                    && AfterActionResolvedApplies(afterActionSource, id, command.PlayerId),
                 _ => false
             },
             _ => false
@@ -6342,6 +6360,14 @@ public sealed partial class MatchEngine
             case "hiromis-vassals-attack":
                 if (ResolveOrDeferAttack(id, player, target?.Id, ActionPerformer(ability, command, source).Id, consumedGrant)) return;
                 break;
+            case "revenge-bow":
+                if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
+                if (_state.EnemyDestroyedOwnPersonalitySinceLastBattleAction[player.Id]) DestroyTargetCard(target!, player.Id);
+                break;
+            case "training-after-action-resolved-gain": GainHonor(player.Id, 3, "Training After-Action Watcher"); break;
+            case "measure-of-devotion-create":
+                if (ExecuteCreate(ability, ability.Creates!, command, player, () => GainHonor(player.Id, 1, "Measure of Devotion", source))) return;
+                break;
             case "singh-remnants-attach": case "training-personality-entry-watch":
             {
                 var enteredPersonality = Card(_state.PendingChoice!.CardId!);
@@ -6800,6 +6826,9 @@ public sealed partial class MatchEngine
         // every one of those windows' own eventual close funnels through PassReaction's own hook
         // instead, not this one.
         if (_state.PendingChoice is null && OpenOverconfidentDrawWindow(closesTo)) return;
+        // Action-effect tracking (issue #437): this action's own resolution is now truly done -- snapshot what it affected and offer the
+        // Reaction that names it, same placement in the chain as the "after this action" windows above.
+        if (FinishActionEffectTracking(id, player.Id, source?.Id, closesTo)) return;
         NextAction(player.Id, burstContinues);
     }
     // Togashi Hizumi: "after the resolution of an action that bowed a Personality AT HIZUMI'S
@@ -7111,6 +7140,7 @@ public sealed partial class MatchEngine
         }
         if (!MoveToBattlefield(card, province)) return false;
         Emit("unitMovedToBattlefield", $"{Definition(card).Name}'s unit moved to the battlefield at province {province + 1}.", card.OwnerId, card.Id);
+        RecordActionEffect(card.Id, MovedKind); // Action-effect tracking (issue #437)
         return true;
     }
     // The Personalities an own-army-personalities action names: several on CardIds, or the one a plain click named as TargetId.
@@ -7129,6 +7159,7 @@ public sealed partial class MatchEngine
         if (MovementLockNegates(card, MovementKinds.Home)) return;
         ReturnHome(card, bow);
         Emit("unitMovedHome", $"{Definition(card).Name}'s unit moved home{(bow ? " bowed" : "")}.", card.OwnerId, card.Id);
+        RecordActionEffect(card.Id, MovedKind); // Action-effect tracking (issue #437)
     }
     private void DiscardFate(PlayerState player, CardInstance card)
     {
@@ -7276,6 +7307,9 @@ public sealed partial class MatchEngine
         DestroyedDuringBattleBonus(card);
         ExpendableDraw(card);
         Emit("attachmentDestroyed", $"{Definition(card).Name} was destroyed.", card.OwnerId, card.Id);
+        // Action-effect tracking (issue #437): unlike DestroyUnits, DestroyAttachment is only ever reached from within a specific action's own
+        // effects (an attachment is never swept away in bulk the way a battle's own resolution destroys units), so this is recorded unconditionally.
+        RecordActionEffect(card.Id, DestroyedKind);
         if (PersonalityChi(parent) <= 0) DestroyUnits([parent], true);
     }
 
@@ -7368,17 +7402,20 @@ public sealed partial class MatchEngine
         var inRecruitWindow = _state.PendingChoice?.Type == "battleRecruit";
         // After a battle's resolution (issue #417): only the Reactions that name it are on offer, and they are on offer nowhere else.
         var inAfterResolutionWindow = _state.PendingChoice?.Type == "afterResolutionReaction";
+        // After an action's resolution (issue #437): only the Reactions that name it are on offer, and they are on offer nowhere else -- same shape as inAfterResolutionWindow above.
+        var inAfterActionResolvedWindow = _state.PendingChoice?.Type == "afterActionResolvedReaction";
         foreach (var (source, id) in sources)
         {
             if (inRecruitWindow && !RingRecruitGrantIds.Contains(id)) continue;
             var ability = AbilityCatalog.All[id];
             if (inAfterResolutionWindow != IsAfterResolutionReaction(ability)) continue;
+            if (inAfterActionResolvedWindow != IsAfterActionResolvedReaction(ability)) continue;
             var isEngageReaction = ability.Timing == "Reaction" && ability.Trigger is "after-engaging" or "after-engaging-at-own-battlefield";
             if (inEngageWindow != isEngageReaction) continue;
             // "Bow this card:" with no hand alternative is offered only from play (issue #370): from a hand or a discard pile it is not even listed.
             if (source is not null && RequiresSourceInPlay(ability) && !InPlay(source)) continue;
             if ((beforeResolutionCard is not null) != IsBeforeResolutionReaction(ability) || beforeResolutionCard is not null && source?.Id != beforeResolutionCard) continue;
-            var phaseOk = inEngageWindow || inAfterResolutionWindow || beforeResolutionCard is not null ? true : ability.Timing switch { "Battle" => _state.Phase == Phase.Battle, "BattleOrOpen" => _state.Phase is Phase.Action or Phase.Battle, "BeforeResolution" => false, _ => _state.Phase == Phase.Action };
+            var phaseOk = inEngageWindow || inAfterResolutionWindow || inAfterActionResolvedWindow || beforeResolutionCard is not null ? true : ability.Timing switch { "Battle" => _state.Phase == Phase.Battle, "BattleOrOpen" => _state.Phase is Phase.Action or Phase.Battle, "BeforeResolution" => false, _ => _state.Phase == Phase.Action };
             if (!phaseOk) continue;
             if (ability.Timing == "Limited" && playerId != _state.ActivePlayerId) continue;
             // Battle/Open presence primitive (issue #267): the same actingAsBattle generalization
