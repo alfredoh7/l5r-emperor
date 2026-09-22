@@ -2736,10 +2736,9 @@ public sealed partial class MatchEngine
     // game"): re-checked every Events Phase rather than snapshotted once, the same living-state
     // approach GrantedKeyword.Duration "Permanent" uses for a keyword grant -- a card sitting in
     // Zone.EventInPlay IS the "effect still active" flag, so nothing else needs to remember it
-    // separately, and nothing needs to clear it (Suspicions' own effect never ends). "The player's
-    // Events Phase" (singular, Suspicions' own printed wording) is whichever player's turn this is --
-    // only the active player has an Events Phase at all (turn-based, core rules turn order), and its
-    // trigger affects BOTH players' Honor once per such phase, including the very turn Suspicions
+    // separately, and nothing needs to clear it (Suspicions' own effect never ends). It triggers
+    // "before each of your Action Phases" -- only on its owner's own turns -- and each trigger
+    // affects BOTH players' Honor once, including the very turn Suspicions
     // itself is revealed (ResolveEvent above already moved it into Zone.EventInPlay earlier in this
     // same EventsPhase call).
     private void ResolveOngoingEvents(PlayerState activePlayer)
@@ -2747,8 +2746,9 @@ public sealed partial class MatchEngine
         foreach(var card in _state.Cards.Values.Where(c=>c.Zone==Zone.EventInPlay).ToArray())
         {
             // Suspicions' own printed order: "each player in turn order starting with you" -- the
-            // revealing/active player's own loss resolves first, then the other player's.
-            if(Definition(card).Effect=="suspicions")
+            // revealing/active player's own loss resolves first, then the other player's. It fires
+            // only "before each of YOUR Action Phases": on its owner's turns, never the opponent's.
+            if(Definition(card).Effect=="suspicions" && card.OwnerId==activePlayer.Id)
                 foreach(var playerId in new[] { activePlayer.Id, 1-activePlayer.Id })
                     GainHonor(playerId,-1,$"Suspicions (end of {activePlayer.Name}'s Events Phase)",card);
         }
