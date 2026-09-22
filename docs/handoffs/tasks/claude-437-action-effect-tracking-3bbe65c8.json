@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Extended the existing GameEvent/command-journal machinery (MatchState.LastResolvedAction, ActionEffectTracking.cs) rather than building a new logging subsystem, per Mendon's request following the grouped-blocker review. Records which cards a resolved action destroyed or moved (not bowed -- no single choke point narrates every bow site the way DestroyUnits/MoveHome do), read by a new after-action-resolved Reaction window (mirrors AfterResolution.cs's shape). Wired Measure of Devotion (creates the Oathsworn Deathseeker, personality-wave-48/strategy-wave-46) and Revenge (a derived per-player flag, strategy-wave-45) -- both previously blocked on exactly this gap. Refreshed Hida Defenders' and Akodo Kobi's BLOCKERS notes to their real narrower remaining gap. Lane is shared only because docs/CARD_INVENTORY.xlsx and docs/decisions/2026-09-22-action-effect-tracking.md fall outside the rules/ui path patterns; every code change is rules-lane (src/L5R.Core, tests/L5R.Core.Tests, content/published, tools/content). This branch stacks on the still-open #436 (claude/435-dueling-focus-reevaluation); its diff will shrink to just this issue's changes once #436 merges. See docs/decisions/2026-09-22-action-effect-tracking.md.",
+  "validation": "7 new tests (action-effect-tracking), full core test suite green, bash tools/check.sh --skip-client exits 0.",
+  "remaining": "None for this task. Bow-tracking (needed for Hida Defenders) and Kobi's turn-boundary window/Recruit-ignoring-costs effect are each a future task of their own.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/437",
+  "branch": "claude/437-action-effect-tracking",
+  "updated": "2026-09-22T12:05:02.172927+00:00"
+}
