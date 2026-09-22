@@ -2379,4 +2379,8 @@ public static class PublishedContent
     public static PublishedSnapshot SpellWave17 { get; } = Load("L5R.Published.SpellWave17.json", "spell-wave-17", requireDecks: false);
     /// <summary>Follower wave 21 (issue #431): The Crimson Mark.</summary>
     public static PublishedSnapshot FollowerWave21 { get; } = Load("L5R.Published.FollowerWave21.json", "follower-wave-21", requireDecks: false);
+    /// <summary>Personality wave 46 (issue #431): Daigotsu Bukaro, The Great Death and Kakita Munemori - exp.</summary>
+    public static PublishedSnapshot PersonalityWave46 { get; } = Load("L5R.Published.PersonalityWave46.json", "personality-wave-46", requireDecks: false);
+    /// <summary>Follower wave 22 (issue #431): the Farmlands Conscripts and the Birds of Prey.</summary>
+    public static PublishedSnapshot FollowerWave22 { get; } = Load("L5R.Published.FollowerWave22.json", "follower-wave-22", requireDecks: false);
 }

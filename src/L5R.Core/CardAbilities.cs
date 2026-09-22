@@ -1834,6 +1834,12 @@ public static class AbilityCatalog
         ["crimson-shadow-bow"] = new("Battle", "Fear Battle: Target an enemy Follower: Bow it", "enemy-follower", ActionKeywords: ["Fear"]),
         ["dragons-favor-attack"] = new("Battle", "Thunder Battle, bow this card: Ranged Attack with strength equal to this Shugenja's Chi", "attack", ActionKeywords: ["Thunder"], Costs: ActionCost.BowSource),
         ["embers-final-fire-destroy"] = new("Battle", "Bow this card and target an enemy attachment: Destroy it", "enemy-attachment", Costs: ActionCost.BowSource),
+        // Kakita Munemori - exp (oracle-l5r-4203): "Political Open: Target a Personality: He may not perform actions until the current phase ends." The action lock (ActionLock.cs), for the phase.
+        ["munemori-lock"] = new("Open", "Political Open: Target a Personality: He may not perform actions until the current phase ends", "personality", ActionKeywords: ["Political"]),
+        // Daigotsu Bukaro (oracle-l5r-1707): "Limited: Pay 2 Gold and target a Personality: Create a 1F Follower and attach it to the Personality." The Follower is Farmlands Conscripts (oracle-l5r-10004).
+        // Like every attachment it is controlled by the Personality's controller (ExecuteAttach's rule), so one attached to another player's Personality is theirs.
+        ["bukaro-create"] = new("Limited", "Pay 2 Gold and target a Personality: Create a 1F Follower and attach it to the Personality", "personality", Cost: GoldCostRule.Fixed(2),
+            Creates: new(CardType.Follower, Force: 1, ProxyId: "oracle-l5r-10004")),
         // Death, Defeated (oracle-l5r-1898): "Battle: Remove a target dead Personality in any player's discard pile from the game: Create a 2F/2C/0PH Shadowlands * Undead Personality at the current
         // battlefield. Remove him from the game after this battle's resolution. Lose 2 Honor." The created Personality is The Walking Dead (oracle-l5r-9741).
         ["death-defeated-create"] = new("Battle", "Remove a target dead Personality in any player's discard pile from the game: Create a 2F/2C/0PH Shadowlands · Undead Personality at the current battlefield, to be removed from the game after this battle. Lose 2 Honor",
@@ -5972,6 +5978,10 @@ public sealed partial class MatchEngine
                 if (ResolveOrDeferAttack(id, player, target?.Id, ActionPerformer(ability, command, source).Id, consumedGrant)) return;
                 break;
             case "ashigaru-recruits-create":
+                if (ExecuteCreate(ability, ability.Creates!, command, player)) return;
+                break;
+            case "munemori-lock": LockActions(target!, source!.Id, CurrentPhaseLock()); break;
+            case "bukaro-create":
                 if (ExecuteCreate(ability, ability.Creates!, command, player)) return;
                 break;
             case "sawaki-spawn":

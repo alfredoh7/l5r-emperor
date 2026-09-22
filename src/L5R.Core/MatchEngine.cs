@@ -532,6 +532,9 @@ public sealed partial class MatchEngine
         // Honor loss is his EntryHonorLoss above; each other player then owes their discards (queued, so a Proclaim or entry window
         // already open is never overwritten -- see OpenOverconfidentDrawWindow).
         if(Definition(card).Effect==BofanaEntryDiscardEffect) QueueOtherPlayersEntryDiscards(playerId);
+        // The Great Death (issue #431): "After The Great Death enters play: Create three 1F Shadowlands * Nonhuman * Raptor * Cavalry * Undead Followers, attach them to it, and lose 6 Honor." A trait, so
+        // mandatory like the lines above (the Honor loss is its EntryHonorLoss).
+        if(Definition(card).Effect==GreatDeathEntryEffect) CreateGreatDeathFollowers(playerId,card);
     }
     // Sensei (Mirumoto Hikaro / Mirumoto Yozo, Experienced 2): "your OTHER Sensei Personalities" --
     // every OTHER Sensei-keyword Personality this same controller has, either unbowed-or-bowed in

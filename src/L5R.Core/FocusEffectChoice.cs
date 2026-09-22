@@ -37,7 +37,7 @@ public sealed partial class MatchEngine
     // The attachments on the Personalities involved in the duel: the challenger and the challenged.
     private List<string> DuelAttachmentCandidates() =>
         _state.PendingDuel is { } duel
-            ? new[] { duel.ChallengerId, duel.ChallengedId }.Where(id => _state.Cards.ContainsKey(id) && InPlay(Card(id))).SelectMany(id => Attachments(id)).Select(c => c.Id).Order(StringComparer.Ordinal).ToList()
+            ? new[] { duel.ChallengerId, duel.ChallengedId }.SelectMany(id => Attachments(id)).Select(c => c.Id).Order(StringComparer.Ordinal).ToList()
             : [];
 
     private List<string> DiscardStrategyCandidates(int playerId) =>

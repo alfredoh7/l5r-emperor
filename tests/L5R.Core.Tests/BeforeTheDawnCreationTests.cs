@@ -7,13 +7,15 @@ using static Batch336Support;
 internal static class BeforeTheDawnCreationTests
 {
     private const string DeathDefeated = "oracle-l5r-1898", Sawaki = "oracle-l5r-2858", Yasunori = "oracle-l5r-4240", CrimsonMark = "oracle-l5r-8002", Genin = "oracle-l5r-9711",
-        WalkingDead = "oracle-l5r-9741", YasunorisGift = "oracle-l5r-10019";
+        WalkingDead = "oracle-l5r-9741", YasunorisGift = "oracle-l5r-10019", Bukaro = "oracle-l5r-1707", GreatDeath = "oracle-l5r-8110", Munemori = "oracle-l5r-4203", Conscripts = "oracle-l5r-10004", BirdOfPrey = "oracle-l5r-9712";
 
     public static void Run(TestRunner runner) => runner.Run("btd-creation", [
         ("Published shapes: the five cards and the two created Personalities are the printed cards with their abilities, traits and art", PublishedShapes),
         ("Death, Defeated: +2F and Shadowlands for its Shugenja; removes a dead Personality to create The Walking Dead at the battlefield for the battle, and loses 2 Honor", DeathDefeatedCreates),
         ("Goju Sawaki: destroyed as the cost when a Battle action targets him, he creates two Goju Genin at the battlefield and the action goes on without him", SawakiSpawns),
         ("Kakita Yasunori: removes a card of your Fate discard pile from the game and creates Yasunori's Gift on your Personality", YasunoriCreates),
+        ("Daigotsu Bukaro: pays 2 Gold to create Farmlands Conscripts on a Personality; The Great Death creates three Birds of Prey on itself as it enters play and its controller loses 6 Honor", BukaroAndGreatDeath),
+        ("Kakita Munemori - exp: a Political Open that bars a Personality from performing actions until the current phase ends", MunemoriLocks),
         ("The Crimson Mark: a Focus Effect that may destroy an attachment on a Personality in the duel; a Battle action that destroys it and an enemy card without attachments", CrimsonMark_),
     ]);
 
@@ -31,6 +33,8 @@ internal static class BeforeTheDawnCreationTests
             (DeathDefeated, "Death, Defeated", CardType.Spell, ["death-defeated-create"], "death-defeated-force"), (Sawaki, "Goju Sawaki", CardType.Personality, ["sawaki-spawn"], "none"),
             (Yasunori, "Kakita Yasunori", CardType.Personality, ["yasunori-create"], "none"), (CrimsonMark, "The Crimson Mark", CardType.Follower, ["crimson-mark-focus", "crimson-mark-destroy"], "none"),
             (Genin, "Goju Genin", CardType.Personality, [], "none"), (WalkingDead, "The Walking Dead", CardType.Personality, [], "none"),
+            (Bukaro, "Daigotsu Bukaro", CardType.Personality, ["bukaro-create"], "none"), (GreatDeath, "The Great Death", CardType.Personality, [], "great-death-entry"),
+            (Munemori, "Kakita Munemori", CardType.Personality, ["munemori-lock"], "none"), (Conscripts, "Farmlands Conscripts", CardType.Follower, [], "none"), (BirdOfPrey, "Bird of Prey", CardType.Follower, [], "none"),
         };
         var root = RepoRoot();
         foreach (var (id, name, type, abilities, effect) in expected)
@@ -42,11 +46,14 @@ internal static class BeforeTheDawnCreationTests
         }
         Eq(CardCatalog.Get(DeathDefeated).AttachGrantsKeyword, "Shadowlands", "the Spell gives its Shugenja Shadowlands");
         Eq(CardCatalog.Get(Sawaki).EntryHonorLoss, 2, "Sawaki loses 2 Honor entering play");
+        Eq(CardCatalog.Get(Bukaro).EntryHonorLoss, 1, "Bukaro loses 1 Honor entering play"); Eq(CardCatalog.Get(GreatDeath).EntryHonorLoss, 6, "The Great Death costs its controller 6 Honor entering play");
+        Check(CardCatalog.Get(Conscripts).CreatedOnly && CardCatalog.Get(BirdOfPrey).CreatedOnly, "the two created Followers are created-only scans");
+        Eq(CreatedCards.Resolve(AbilityCatalog.All["bukaro-create"].Creates!).Id, Conscripts, "Bukaro creates Farmlands Conscripts");
         Check(CardCatalog.Get(Genin).CreatedOnly && CardCatalog.Get(WalkingDead).CreatedOnly, "the two created Personalities are created-only scans");
         Eq(CreatedCards.Resolve(AbilityCatalog.All["death-defeated-create"].Creates!).Id, WalkingDead, "Death, Defeated creates The Walking Dead");
         Eq(CreatedCards.Resolve(AbilityCatalog.All["sawaki-spawn"].Creates!).Id, Genin, "Sawaki creates Goju Genin");
         Eq(CreatedCards.Resolve(AbilityCatalog.All["yasunori-create"].Creates!).Id, YasunorisGift, "Yasunori creates Yasunori's Gift");
-        Check(CardCatalog.PlayableFromDecks.All(c => c.Id is not (Genin or WalkingDead)), "neither created Personality is playable from a deck");
+        Check(CardCatalog.PlayableFromDecks.All(c => c.Id is not (Genin or WalkingDead or Conscripts or BirdOfPrey)), "no created card is playable from a deck");
     }
 
     private static void DeathDefeatedCreates()
@@ -98,6 +105,7 @@ internal static class BeforeTheDawnCreationTests
             for (var guard = 0; guard < 6 && e.State.PendingChoice is { Type: "beforeActionReaction" }; guard++)
                 Accept(e, e.QueryActions(e.State.PriorityPlayerId).First(x => x.Type == "declineReaction").Command!);
             Check(e.State.Cards[sawaki.Id].Zone is Zone.Dead or Zone.DynastyDiscard, "Sawaki is destroyed as the cost");
+            Check(!e.State.Cards[sawaki.Id].Bowed, "the action goes on without him: nothing is left to bow");
             var genin = Created(e, Genin);
             Eq(genin.Length, 2, "two Goju Genin");
             Check(genin.All(g => g.OwnerId == 0 && g.Zone == Zone.Battlefield && g.ProvinceIndex == 0 && e.CardForceForTest(g.Id) == 1 && e.HasKeyword(g.Id, "Ninja") && e.HasKeyword(g.Id, "Shadowlands") && e.HasKeyword(g.Id, "Spider Clan")), "1F Spider Clan, Shadowlands, Ninja Personalities at the battlefield");
@@ -113,7 +121,15 @@ internal static class BeforeTheDawnCreationTests
         var u = Table(Phase.Battle, 1); u.PriorityPlayerId = 1; var s3 = Bf(u, Sawaki, 0); var other = Bf(u, "training-crane-samurai", 0); var tsuji3 = Bf(u, "oracle-l5r-7179", 1);
         var ue = MatchEngine.FromTestState(u);
         Accept(ue, Offer(ue, 1, "tsuji-bow", tsuji3.Id, other.Id));
-        Check(!ue.QueryActions(0).Any(x => x.Enabled && x.Command?.AbilityId == "sawaki-spawn") && s3.Id.Length > 0, "an action targeting another Personality is not answered");
+        Check(!ue.QueryActions(0).Any(x => x.Enabled && x.Command?.AbilityId == "sawaki-spawn") && s3.Id.Length > 0 && ue.State.PendingChoice?.Type != "beforeActionReaction", "an action targeting another Personality is not answered");
+        // He need not be at the battlefield: a Battle action may target him at home.
+        var h = Table(Phase.Battle, 1); h.PriorityPlayerId = 1; var home = Add(h, Sawaki, 0, Zone.Home); var tsujiH = Bf(h, "oracle-l5r-7179", 1); Bf(h, "training-crane-samurai", 0);
+        var he = MatchEngine.FromTestState(h);
+        if ((Options(he, 1, "tsuji-bow", tsujiH.Id).FirstOrDefault(o => o.Enabled)?.TargetIds ?? []).Contains(home.Id))
+        {
+            Accept(he, Offer(he, 1, "tsuji-bow", tsujiH.Id, home.Id));
+            Check(he.QueryActions(0).Any(x => x.Enabled && x.Command?.AbilityId == "sawaki-spawn"), "at home too");
+        }
     }
 
     private static void YasunoriCreates()
@@ -137,6 +153,67 @@ internal static class BeforeTheDawnCreationTests
         Eq(e.CardForceForTest(host.Id), Def(host).Force + 1, "+1F");
         Check(e.HasKeyword(gift.Id, "Weapon"), "a Weapon");
         Check(!CanUse(e, 0, "yasunori-create", yasunori.Id), "Limited: once a turn");
+    }
+
+    private static MatchEngine EconomyAction(Action<MatchState> arrange)
+    {
+        var s = Table(Phase.Action, 0); s.PriorityPlayerId = 0; s.Players[0].TurnsTaken = 3; s.Players[1].TurnsTaken = 3;
+        s.Cards[s.Players[0].StrongholdId].DefinitionId = "oracle-l5r-1218";
+        for (var i = 0; i < 8; i++) Add(s, "training-marketplace", 0, Zone.Home);
+        arrange(s);
+        return MatchEngine.FromTestState(s);
+    }
+
+    private static void BukaroAndGreatDeath()
+    {
+        // Bukaro: 2 Gold and a target Personality; the created Follower is attached to him. It is controlled, like any attachment, by the Personality's controller.
+        CardInstance bukaro = null!, mine = null!, theirs = null!;
+        var e = EconomyAction(s => { bukaro = Add(s, Bukaro, 0, Zone.Home); mine = Add(s, "training-crane-samurai", 0, Zone.Home); theirs = Add(s, "training-lion-samurai", 1, Zone.Home); });
+        var option = Options(e, 0, "bukaro-create", bukaro.Id).First(o => o.Enabled);
+        Check(option.TargetIds!.Contains(mine.Id) && option.TargetIds.Contains(theirs.Id), "any Personality");
+        Eq(option.Gold!.Cost, 2, "2 Gold");
+        var force = e.CardForceForTest(mine.Id);
+        Accept(e, Offer(e, 0, "bukaro-create", bukaro.Id, mine.Id));
+        var follower = Created(e, Conscripts).Single();
+        Check(follower.Zone == Zone.Attached && follower.AttachedTo == mine.Id && follower.OwnerId == 0, "a Farmlands Conscripts is attached to the Personality");
+        Eq(e.CardForceForTest(follower.Id), 1, "a 1F Follower"); Check(force > 0);
+        Check(!CanUse(e, 0, "bukaro-create", bukaro.Id), "Limited: once a turn");
+        CardInstance bukaro2 = null!, foe = null!;
+        var e2 = EconomyAction(s => { bukaro2 = Add(s, Bukaro, 0, Zone.Home); foe = Add(s, "training-lion-samurai", 1, Zone.Home); });
+        Accept(e2, Offer(e2, 0, "bukaro-create", bukaro2.Id, foe.Id));
+        Check(Created(e2, Conscripts).Single() is { AttachedTo: { } host, OwnerId: 1 } && host == foe.Id, "attached to another player's Personality, it is that player's, as every attachment is");
+        // The Great Death: three Birds of Prey come with it, and it costs 6 Honor.
+        var g = MatchEngine.CreateEconomyScenario().State;
+        for (var i = 0; i < 10; i++) Add(g, "training-marketplace", 0, Zone.Home);
+        g.Players[0].Honor = 20;
+        var cardId = g.Players[0].Provinces[0].CardId!; g.Cards[cardId].DefinitionId = GreatDeath; g.Cards[cardId].FaceUp = true;
+        var ge = MatchEngine.FromTestState(g); var honor = Honor(ge, 0);
+        Accept(ge, new GameCommand("purchase", 0, ge.Version, CardId: cardId, SourceIds: ge.PaymentOptions(0, CardCatalog.Get(GreatDeath).GoldCost).First().SourceIds));
+        var birds = Created(ge, BirdOfPrey);
+        Eq(birds.Length, 3, "three Birds of Prey");
+        Check(birds.All(b => b.Zone == Zone.Attached && b.AttachedTo == cardId && b.OwnerId == 0 && ge.CardForceForTest(b.Id) == 1 && ge.HasKeyword(b.Id, "Raptor") && ge.HasKeyword(b.Id, "Cavalry") && ge.HasKeyword(b.Id, "Undead") && ge.HasKeyword(b.Id, "Nonhuman") && ge.HasKeyword(b.Id, "Shadowlands")), "1F Shadowlands Nonhuman Raptor Cavalry Undead Followers attached to it");
+        Eq(Honor(ge, 0), honor - 6, "6 Honor lost");
+    }
+
+    private static void MunemoriLocks()
+    {
+        // Player 0's Munemori locks player 1's own Munemori (a Personality with an Open action to try) in the Action Phase.
+        var s = Table(Phase.Action, 0); s.PriorityPlayerId = 0; s.Players[0].TurnsTaken = 3; s.Players[1].TurnsTaken = 3;
+        var munemori = Add(s, Munemori, 0, Zone.Home); var foe = Add(s, Munemori, 1, Zone.Home);
+        var e = MatchEngine.FromTestState(s);
+        Check(Enabled(e, 0, "munemori-lock", munemori.Id).TargetIds!.Contains(foe.Id), "any Personality");
+        Check(AbilityCatalog.All["munemori-lock"].ActionKeywords!.Contains("Political"), "a Political action");
+        Check(CanUse(Edit(e, st => st.PriorityPlayerId = 1), 1, "munemori-lock", foe.Id), "unlocked, he can act");
+        Accept(e, Offer(e, 0, "munemori-lock", munemori.Id, foe.Id));
+        Eq(e.State.Cards[foe.Id].ActionLocks.Count, 1, "one lock");
+        var locked = Edit(e, st => st.PriorityPlayerId = 1);
+        Check(!CanUse(locked, 1, "munemori-lock", foe.Id), "locked, he may not perform actions");
+        Check(Options(locked, 1, "munemori-lock", foe.Id).Any(o => o.Reason is not null && o.Reason.Contains("may not perform actions")), "and the reason says so: " + string.Join(";", Options(locked, 1, "munemori-lock", foe.Id).Select(o => o.Reason)));
+        // The lock belongs to the Action Phase it was placed in: it ends with the phase, not with the turn.
+        var nextPhase = Edit(e, st => { st.Phase = Phase.AttackDeclaration; st.PriorityPlayerId = 1; });
+        Check(nextPhase.State.Cards[foe.Id].ActionLocks.Count == 1 && nextPhase.State.Cards[foe.Id].ActionLocks[0].Duration.StartsWith("Phase:"), "it is a phase lock, not a turn lock");
+        var nextTurn = Edit(e, st => { st.TurnNumber += 1; st.PriorityPlayerId = 1; });
+        Check(CanUse(nextTurn, 1, "munemori-lock", foe.Id), "the next turn's Action Phase is a new phase: the lock has ended");
     }
 
     private static void CrimsonMark_()

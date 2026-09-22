@@ -32,6 +32,13 @@ public sealed partial class MatchEngine
         return CreateAttachments(player.Id, scan, printed, spec, CreateHosts(command, spec), insideEntryWindow, beforeWindow);
     }
 
+    private const string GreatDeathEntryEffect = "great-death-entry";
+    private static readonly CreatedCardSpec BirdsOfPrey = new(CardType.Follower, Force: 1, Keywords: ["Shadowlands", "Nonhuman", "Raptor", "Cavalry", "Undead"], ProxyId: "oracle-l5r-9712", Count: 3);
+
+    // Three Birds of Prey, each attached to the Personality that entered play. Made inside the entry, so none opens an entry window of its own (CreateAttachments' duringEntryReaction).
+    private void CreateGreatDeathFollowers(int playerId, CardInstance personality) =>
+        CreateAttachments(playerId, CreatedCards.Resolve(BirdsOfPrey), null, BirdsOfPrey, [personality], true, null);
+
     // The Personalities a created attachment goes to: the performer ("attach them to him"), the ones the command names (CardIds), or its single target.
     private CardInstance[] CreateHosts(GameCommand command, CreatedCardSpec spec) =>
         spec.HostIsPerformer ? (command.PerformerId is not null && _state.Cards.TryGetValue(command.PerformerId, out var performer) ? [performer] : []) : ArmyPersonalityChoice(command).Select(Card).ToArray();
