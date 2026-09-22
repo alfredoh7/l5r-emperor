@@ -480,7 +480,7 @@ public sealed partial class MatchEngine
                     var modes=HasClanAffiliation(card,player.Clan) ? new[] {(true,false),(false,false),(true,true),(false,true)} : [(false,false)];
                     foreach(var (discount,allegiance) in modes)
                     {
-                        var quote=QuotePurchase(playerId,card.Id,discount,allegiance);
+                        var quote=QuotePurchase(playerId,card.Id,discount,allegiance,viaReserve:true);
                         var payment=quote.Payments.FirstOrDefault();
                         var reason=!eligible?"There is no battlefield here with enemy presence.":quote.Error??(payment is null?"Insufficient unbowed Gold production.":null);
                         var mode=discount?allegiance?"discount + allegiance":"Clan discount":allegiance?"Clan allegiance":"full cost";
