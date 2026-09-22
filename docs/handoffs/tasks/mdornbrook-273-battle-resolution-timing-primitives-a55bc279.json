@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Build three battle-resolution timing primitives (Before This Battle Resolves, After This Battle Resolves, province-destroyed-during-resolution) in MatchEngine.cs, and wire the first three real cards to use them: Encircled Terrain, Looting the Ruins, Vital Pathways (Strategy wave 10, 320 wired). Crosses into src/L5R.Client/Content/Published/ only to add the three new cards' own scanned art (oracle-l5r-2332.jpg, oracle-l5r-10742.jpg, oracle-l5r-10403.jpg), the same routine art-only cross every prior wave's handoff already makes -- no client code or UI behavior touched. Also fixes a real, unrelated pre-existing bug in tools/env.sh (an unguarded Godot-discovery glob silently exited tools/check.sh with zero output on any machine with no Godot editor installed, including a plain --skip-client run).",
+  "validation": "dotnet run --project tests/L5R.Core.Tests (230/230: 173 core + 57 published, including 4 new regression tests for the three primitives) and bash tools/check.sh --skip-client (all four .NET test projects plus both Python unittest suites) both green. docs/CARD_INVENTORY.xlsx regenerated (320 wired, 3 stale BLOCKERS entries removed).",
+  "remaining": "None; ready for review.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/273",
+  "branch": "mdornbrook/273-battle-resolution-timing-primitives",
+  "updated": "2026-09-17T21:16:32.977722+00:00"
+}

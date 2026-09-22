@@ -1,0 +1,30 @@
+{
+  "Profile": "strategy-wave-28",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10553",
+      "Name": "The Tale of the Disgraced",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Bow your target unbowed Personality. Bow a target enemy card. If your Personality is Fallen or a Magistrate, straighten him before this battle resolves.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10553.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "tale-of-the-disgraced"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

@@ -1,0 +1,70 @@
+{
+  "Profile": "personality-wave-33",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-2728",
+      "Name": "Fukuzo",
+      "Type": "Personality",
+      "Clan": "Spider",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 5,
+      "Chi": 2,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: Remove a target Personality in any player's discard pile from the game: Fukuzo wears his skin. Until the next time this game this ability is used, Fukuzo copies one keyword, and one ability that does not itself copy abilities, from the Personality.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-2728.jpg",
+      "Keywords": [
+        "Experienced Chuda Fukuzo",
+        "Unique",
+        "Advisor to the Emerald Champion",
+        "Bog Hag",
+        "Infiltrator",
+        "Magistrate",
+        "Nonhuman",
+        "Samurai",
+        "Shadowlands",
+        "Spider Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "fukuzo-wear-skin"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9624",
+      "Name": "Yoritomo Sakuma",
+      "Type": "Personality",
+      "Clan": "Mantis",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 1,
+      "Chi": 3,
+      "PersonalHonor": 1,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: When paying a Gold Cost, bow Sakuma: Produce 2 Gold.\nPolitical Reaction: After another player's Political action targets one of your Personalities, bow Sakuma: The player may pay 2 Gold. If he did not, negate the action's (remaining) effects.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9624.jpg",
+      "Keywords": [
+        "Bully",
+        "Courtier",
+        "Mantis Clan",
+        "Merchant"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "sakuma-produce-gold",
+        "sakuma-political-negate"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

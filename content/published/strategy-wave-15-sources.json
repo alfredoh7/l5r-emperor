@@ -1,0 +1,65 @@
+[
+  {
+    "card_id": "oracle-l5r-10366",
+    "printing_set": [
+      "Torn Asunder"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10366",
+    "image_path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10366-printing-1-image-1.jpg",
+    "image_sha256": "fbd44c574d6cf5ae13fdc03cfa577102aa0b2c8fe5e2d366af6ffa0c448409e3"
+  },
+  {
+    "card_id": "oracle-l5r-1467",
+    "printing_set": [
+      "Before the Dawn"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=1467",
+    "image_path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-1467-printing-1-image-1.jpg",
+    "image_sha256": "49eb9b8c8bb71410253eb15334f1cd6633e5f9a5a0e31208ce661cb5acfba37b"
+  },
+  {
+    "card_id": "oracle-l5r-10552",
+    "printing_set": [
+      "Coils of Madness"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10552",
+    "image_path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10552-printing-1-image-1.jpg",
+    "image_sha256": "16ae47826202e103725ce3b5a9bce3ed11a61070788b85355f23e2c6431a228c"
+  },
+  {
+    "card_id": "oracle-l5r-2908",
+    "printing_set": [
+      "Forgotten Legacy"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=2908",
+    "image_path": "assets/reference/oracle/forgotten-legacy/images/oracle-l5r-2908-printing-1-image-1.jpg",
+    "image_sha256": "11a201fef690ba3b5b54a44a5d3f1ac3959be04d9de33dc83097f7f4a6d5b680"
+  },
+  {
+    "card_id": "oracle-l5r-10746",
+    "printing_set": [
+      "Gates of Chaos"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10746",
+    "image_path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10746-printing-1-image-1.jpg",
+    "image_sha256": "95f0e48ef96fde3b36b642bb4f27d7f459e1aaf2aca75b86ea98682c0d49b0dc"
+  },
+  {
+    "card_id": "oracle-l5r-6060",
+    "printing_set": [
+      "Emperor Edition"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=6060",
+    "image_path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-6060-printing-1-image-1.jpg",
+    "image_sha256": "5c31855ffa93f657d90bc1026def8f9b8f97c204db7fd53294e7a5c5c942fd71"
+  },
+  {
+    "card_id": "oracle-l5r-9687",
+    "printing_set": [
+      "Second City"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=9687",
+    "image_path": "assets/reference/oracle/second-city/images/oracle-l5r-9687-printing-1-image-1.jpg",
+    "image_sha256": "e77a4720ea4d97fcead241bca873cf29ceae291698a71e54e4a0bccdadc1a943"
+  }
+]

@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "False Rings (Mendon's ruling after #358): the second ability of a False Ring requires the Ring in play and bowed as a declared cost -- a derived rule (a bow-this-card cost with no hand alternative), so it is never listed from a hand or discard pile; False Ring of Water's attack no longer has the true Rings' hand alternative; every Ring put-into-play requires the hand (a Water Ring in play could re-recruit for 2 Honor each time); Earth's static pinned to in-play; Fire and Void are not wired. True Rings unchanged.",
+  "validation": "bash tools/check.sh --skip-client: python unit tests, core 216, new false-rings 8 (through QueryActions) and every other suite green, AI 27; 9 mutations each killed by a named test. One existing test adapted: HandPlayedAttackSpentWhenWindowOpens (#320) used False Ring of Water as a hand-played Attack card. No client change; no Godot run.",
+  "remaining": "None; ready for review. Noted, not changed: Ring of Earth's province target is not enumerated by QueryActions; Ring recruit grants survive to a later battle of the turn (#194 simplification). Fire and Void need wiring with the same shape.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/370",
+  "branch": "claude/370-false-rings",
+  "updated": "2026-09-20T18:36:01.328520+00:00"
+}

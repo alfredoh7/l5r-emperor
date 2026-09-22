@@ -1,0 +1,33 @@
+{
+  "Profile": "region-wave-5",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-7502",
+      "Name": "Stone-Hewed Shrine",
+      "Type": "Region",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Defending Earth Personalities have +1F while at this province's battlefield. \nBattle: Even if you control no units at the current battlefield, bow your performing Earth Personality at any location: Give the current battlefield's province +3 strength.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7502.jpg",
+      "Keywords": [
+        "Mountain",
+        "Temple"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "stone-hewed-shrine-strength"
+      ],
+      "Effect": "stone-hewed-shrine-force"
+    }
+  ],
+  "Decks": []
+}

@@ -1,0 +1,83 @@
+{
+  "Profile": "follower-wave-20",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-618",
+      "Name": "Ashigaru Recruits",
+      "Type": "Follower",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After this Follower enters play from your hand, create a 0F Ashigaru  Follower and attach it to your target Personality.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-618.jpg",
+      "Keywords": [
+        "Ashigaru"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "ashigaru-recruits-create"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-2792",
+      "Name": "Genji's Students",
+      "Type": "Follower",
+      "Clan": "Unaligned",
+      "GoldCost": 4,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": 1,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle/Open, Bow this card: Give a target Province +3 or -3 strength.\nBattle, Bow this card: Ranged 3 Attack with +1 strength for each other Follower in this unit.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-2792.jpg",
+      "Keywords": [
+        "Siege"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "genji-province-raise",
+        "genji-province-lower",
+        "genji-attack"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9713",
+      "Name": "Fledgling Ashigaru",
+      "Type": "Follower",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "May not be included in decks.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9713.jpg",
+      "Keywords": [
+        "Ashigaru"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "none",
+      "CreatedOnly": true
+    }
+  ],
+  "Decks": []
+}

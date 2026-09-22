@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Pin Kahoku Exp's confirmed reading (follow-up to #316): his own Force is not modified by his action; assertion added to BayushiKahokuExpTrait and the ruling recorded in the decision note. Test and documentation only; shared lane because the decision note lives under docs/decisions.",
+  "validation": "Core 209/209, published 57/57 on current main. Mutation-checked earlier on the PR branch: applying the -4F to Kahoku instead of the target fails the new assertion.",
+  "remaining": "None; ready for review.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/313",
+  "branch": "claude/313-kahoku-force-pin",
+  "updated": "2026-09-19T08:48:31.403376+00:00"
+}

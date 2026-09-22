@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Second City pass (#264): 24 more Second City cards wired in eight waves (rules lane: engine primitives, tests, blocker notes, decision doc). The client-lane files are only the shipped card art (24 scans and their generated .import files, each read by eye against its receipt) -- no UI code or scene changes. BLOCKERS rewritten for the 27 cards still unwired.",
+  "validation": "Local: python tools/collab audit; bash tools/check.sh -- Python suites, Core suites (216 core tests, 59 published tests and every named suite, including second-city-spirits 10, second-city-pass 12, second-city-battle 19), AI 28, server 8, transport 7 all pass; client builds. Godot headless import logged two get_multiple_md5 f.is_null errors on unrelated existing assets (war-journal, navy-mat), so the local Godot step exited 1; CI is the authority. 20 mutation checks: every one fails a named test.",
+  "remaining": "Readings and four rulings for Mendon are in docs/decisions/2026-09-21-second-city-pass.md (hand-played targeted-by-action Reactions and hidden information; A Fugitive Apprehended; Dislodge the Foe; Kyuden Kitsune). 27 Second City cards remain unwired with specific blockers.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/264",
+  "branch": "claude/264-second-city-wiring",
+  "updated": "2026-09-21T11:10:20.209211+00:00"
+}

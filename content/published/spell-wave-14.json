@@ -1,0 +1,33 @@
+{
+  "Profile": "spell-wave-14",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-7562",
+      "Name": "Strength of the Tsunami",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "This Shugenja has +6F.\nBattle: Even if this card is bowed, if this Shugenja is Water: Straighten him. You may move him home.\nBattle: Bow this card and target an enemy Personality: Move him home. If he moved, negate his (future) movement.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7562.jpg",
+      "Keywords": [
+        "Water"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "tsunami-straighten",
+        "tsunami-move-home"
+      ],
+      "Effect": "tsunami-force"
+    }
+  ],
+  "Decks": []
+}

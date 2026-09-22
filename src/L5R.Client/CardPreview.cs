@@ -55,6 +55,8 @@ public static class CardPreview
             details.AddChild(Palette.Wrapped($"{token.Type} ×{token.Instances.Length}" + (CardTokenRail.Delta(token.Stat,token.Amount) is { Length: > 0 } delta ? $" · {delta} each" : ""),16,Palette.Gold));
         if (card.Dishonorable) details.AddChild(Palette.Wrapped("Dishonorable", 20, new Color("efaa9a")));
         if(CardChanges.Entries(card).Length>0) details.AddChild(CardChangePanel.Create(card,sourceName,compact:true));
+        foreach (var grant in card.GrantedAbilities ?? [])
+            details.AddChild(Palette.Wrapped(GrantedAbilityText.Describe(grant), 16, Palette.Gold));
         details.AddChild(Palette.Wrapped(string.IsNullOrWhiteSpace(def.Text) ? "No activated ability is printed on this card. Its statistics and traits can still be used by the game and other card effects." : def.Text, 16, Palette.PaperDim));
         details.AddChild(Palette.Wrapped(context, 15, Palette.Crane)); body.AddChild(rules);
         body.AddChild(Palette.Wrapped("Click to select. Read longer rules in the inspector.\n? Rules explains the table and turn sequence.", 12, Palette.Muted));

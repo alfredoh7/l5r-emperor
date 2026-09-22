@@ -8,7 +8,7 @@ public partial class Main
     private void RenderInspector()
     {
         Palette.Clear(_sidebarHeader); Palette.Clear(_inspector); Palette.Clear(_decisionActions); _paymentConfirm = null;
-        _guide.Text = View.PendingChoice?.Prompt ?? (_chosen is { Type: "attack" or "assignDefense" } ? "Select a unit, then its destination province. Review the arrows and confirm assignments." : _chosen is { Type: "purchase" } ? "Choose ready Gold sources. Confirm pays the cost and brings the card into play." : _chosen is not null ? "Review the highlighted target and any payment. Confirm to resolve, or cancel to change your plan." : View.PriorityPlayerId != View.ViewerId ? "Your opponent is deciding. You can hover over visible cards to read them while you wait." : RulesHelp.PhaseGuide(View.Phase));
+        _guide.Text = View.PendingChoice?.Prompt ?? (_chosen is { Type: "attack" or "assignDefense" } ? "Select a unit, then its destination province. Review the arrows and confirm assignments." : _chosen is { Type: "purchase" or "recruitReserve" } ? "Choose ready Gold sources. Confirm pays the cost and brings the card into play." : _chosen is not null && QuoteFor(_chosen) is not null ? "Review the cost and its basis, then choose ready Gold sources. Confirm pays and resolves; cancel changes your plan." : _chosen is not null ? "Review the highlighted target. Confirm to resolve, or cancel to change your plan." : View.PriorityPlayerId != View.ViewerId ? "Your opponent is deciding. You can hover over visible cards to read them while you wait." : RulesHelp.PhaseGuide(View.Phase));
         _guide.Visible = View.PendingChoice is not null || _chosen is not null;
         _guide.TooltipText = RulesHelp.Tooltip(RulesHelp.PhaseGuide(View.Phase) + "\n\n" + RulesHelp.Topic("targets"));
         if(View.WinnerId is null && View.PendingDuel?.Stage is ("AwaitingAccept" or "Reaction") && View.LastDuel is {} duel)
@@ -68,6 +68,8 @@ public partial class Main
                 details.AddChild(preview);
             }
             if (_selected.Dishonorable) details.AddChild(Palette.Wrapped("Dishonorable", 21, new Color("efaa9a")));
+            foreach (var grant in _selected.GrantedAbilities ?? [])
+                details.AddChild(Palette.Wrapped(GrantedAbilityText.Describe(grant), 16, Palette.Gold));
             if (_selected.StraightenBlocked) details.AddChild(Palette.Wrapped("Straightening is prevented for this turn.", 13, Palette.Gold));
             if (!string.IsNullOrWhiteSpace(def.Text)) details.AddChild(Palette.Wrapped(def.Text, 16, Palette.PaperDim));
             if (def.Type == CardType.Personality && (_selected.Force != def.Force || _selected.Chi != def.Chi)) details.AddChild(Palette.Wrapped($"Current: {_selected.Force} Force · {_selected.Chi} Chi", 16, Palette.Gold));
@@ -85,7 +87,7 @@ public partial class Main
             help.MouseFilter = Control.MouseFilterEnum.Stop; help.TooltipText = RulesHelp.PhaseGuide(View.Phase);
             _inspector.AddChild(help);
         }
-        if (_chosen is { Type: "purchase" }) { RenderPurchase(); return; }
+        if (_chosen is { Type: "purchase" or "recruitReserve", Quote: not null }) { RenderPurchase(); return; }
         if (_chosen is { Type: "attack" or "assignDefense" }) { RenderAssignments(); return; }
         if (_chosen is { Type: "useAbility", Command.CardIds: not null }) { RenderProvinceRefresh(); return; }
         if (_chosen is { Type: "equip" or "playStrategy" or "useAbility" }) { RenderTargeted(); return; }
@@ -93,7 +95,7 @@ public partial class Main
         // An inspected reminder must never hide a new engine decision (e.g. hand limit).
         if (_selectedHomeReminder is not null && View.PendingChoice is null) { AddHomeReminderActions(); return; }
         foreach (var action in Actions.Where(a => a.CardId == _selected?.Id && a.CardId is not null && a.Type is not "proclaim")) AddAction(_inspector, action);
-        if (View.Phase is Phase.AttackDeclaration or Phase.DefenseAssignment or Phase.CavalryDeclaration or Phase.CavalryDefense)
+        if (View.Phase is Phase.InfantryDeclaration or Phase.DefenseAssignment or Phase.CavalryDeclaration or Phase.CavalryDefense)
         {
             var action = Actions.FirstOrDefault(a => a.Type is "attack" or "assignDefense" && a.Enabled);
             if (action is not null) _inspector.AddChild(SidebarSkin.Button("Assign units…", () => Choose(action), true));
@@ -101,13 +103,15 @@ public partial class Main
         foreach (var action in Actions.Where(a => a.Type is "selectBattle" or "discardHand" || a.Type == "useAbility" && a.CardId is null)) AddAction(_inspector, action);
     }
 
+    // The recruit review for purchase and recruitReserve: their own mode picker and Proclaim notes (from the
+    // engine's PurchaseQuote), then the ONE payment panel every costed action shares.
     private void RenderPurchase()
     {
         var choice = _chosen!;
         var reviewedVersion = choice.Command?.ExpectedVersion ?? View.Version;
         var quote = choice.Quote!;
-        var variants = Actions.Where(a => a.Type == "purchase" && a.CardId == choice.CardId).ToArray();
-        _inspector.AddChild(Palette.Text("PURCHASE OPTIONS", 11, Palette.Gold));
+        var variants = Actions.Where(a => a.Type == choice.Type && a.CardId == choice.CardId && a.Quote is not null).ToArray();
+        _inspector.AddChild(Palette.Text(choice.Type == "recruitReserve" ? "RESERVE RECRUIT OPTIONS" : "PURCHASE OPTIONS", 11, Palette.Gold));
         if (variants.Length > 1)
         {
             var modes = new OptionButton { CustomMinimumSize = new Vector2(0, 38), FitToLongestItem = false, ClipText = true };
@@ -123,29 +127,107 @@ public partial class Main
         }
         _inspector.AddChild(Palette.Wrapped(quote.ClanDiscount ? "Clan discount reduces the Gold cost by 2. This purchase cannot trigger Proclaim." : quote.ProclaimEligible ? "Paying without the Clan discount leaves Proclaim available after entry." : "This card is not eligible for Proclaim.", 13, Palette.PaperDim));
         if (quote.ClanAllegiance) _inspector.AddChild(Palette.Wrapped("Clan allegiance adds 2 Gold and ignores the Honor requirement.", 13, Palette.Crane));
+        var (required, ready) = RenderGoldPanel(choice);
+        AddConfirm(choice.Type == "recruitReserve" ? "Confirm recruit" : "Confirm purchase", required, ready,
+            () => new GameCommand(choice.Type, View.ViewerId, reviewedVersion, choice.CardId, required > 0 ? _sources.ToArray() : [], ClanDiscount: quote.ClanDiscount, ClanAllegiance: quote.ClanAllegiance),
+            "Cancel payment");
+    }
+
+    // The quote the panel shows for the chosen action, straight from the engine: the chosen target's own quote
+    // when the cost depends on the target, otherwise the option's single quote. The client never derives a cost.
+    private static GoldQuote? QuoteFor(ActionOption action) =>
+        action.Command?.TargetId is string target && action.TargetGold is { } byTarget && byTarget.TryGetValue(target, out var targeted) ? targeted : action.Gold;
+
+    // The amount this action pays now: the chosen one for a variable cost (default: the quote's minimum),
+    // otherwise the quote's own Cost.
+    private static int AmountFor(ActionOption action, GoldQuote quote) =>
+        quote.Kind == GoldCostKind.Variable ? Math.Clamp(action.Command?.GoldAmount ?? quote.MinAmount ?? 0, quote.MinAmount ?? 0, quote.MaxAmount ?? quote.MinAmount ?? 0) : quote.Cost;
+
+    // The engine's suggested and alternative payments for the amount being paid (per-amount for a variable cost).
+    private static PaymentOption[] PaymentsFor(GoldQuote quote, int amount) =>
+        quote.PaymentsByAmount is { } byAmount && byAmount.TryGetValue(amount, out var options) ? options : quote.Payments;
+
+    private static string KindLabel(string kind) => kind switch { GoldCostKind.Variable => "YOU CHOOSE THE AMOUNT", GoldCostKind.Derived => "COST FROM YOUR TARGET", _ => "FIXED COST" };
+
+    // Re-suggest sources from the engine's first payment for the quote now in force (called when the target or
+    // the chosen amount changes; the player's own selection is only ever replaced by such a deliberate change).
+    private void ResuggestSources()
+    {
+        _sources.Clear();
+        if (_chosen is null || QuoteFor(_chosen) is not { } quote) return;
+        foreach (var id in PaymentsFor(quote, AmountFor(_chosen, quote)).FirstOrDefault()?.SourceIds ?? []) _sources.Add(id);
+    }
+
+    // Retarget the reviewed action: its command, the quote it is priced by and (when that quote is target-specific)
+    // the suggested sources all follow, instantly and without a round trip.
+    private void ChooseTarget(string id)
+    {
+        if (_chosen?.Command is not { } command) return;
+        var priced = _chosen.TargetGold?.ContainsKey(id) == true;
+        _chosen = _chosen with { Command = command with { TargetId = id } };
+        if (priced) ResuggestSources();
+        RenderInspector(); Highlight();
+    }
+
+    private void ChooseAmount(int amount)
+    {
+        if (_chosen?.Command is not { } command || QuoteFor(_chosen) is not { Kind: GoldCostKind.Variable } quote) return;
+        _chosen = _chosen with { Command = command with { GoldAmount = Math.Clamp(amount, quote.MinAmount ?? 0, quote.MaxAmount ?? quote.MinAmount ?? 0) } };
+        ResuggestSources();
+        RenderInspector(); Highlight();
+    }
+
+    // THE payment panel: what the action costs and why, the amount control for a player-chosen cost, the engine's
+    // suggested and alternative payments, the sources to bow and the produced/required line. Every Gold action
+    // (recruit, reserve recruit, equip, Strategy, any costed ability) draws it from its GoldQuote and nothing else.
+    // Returns the amount to be paid and whether the chosen sources already cover it.
+    private (int Required, bool Ready) RenderGoldPanel(ActionOption action)
+    {
+        if (QuoteFor(action) is not { } quote) return (0, true);
+        var required = AmountFor(action, quote);
+        _inspector.AddChild(Palette.Text("PAYMENT · " + KindLabel(quote.Kind), 11, Palette.Gold));
+        _inspector.AddChild(Palette.Wrapped($"{required} Gold", 24, Palette.Gold));
+        if (!string.IsNullOrWhiteSpace(quote.Basis)) _inspector.AddChild(Palette.Wrapped(quote.Basis, 13, Palette.PaperDim));
         if (quote.Error is { } error) _inspector.AddChild(Palette.Wrapped(error, 14, Palette.Error));
-        if (quote.Payments.Length > 1)
+        if (quote.Kind == GoldCostKind.Variable) RenderAmountControl(required, quote.MinAmount ?? 0, quote.MaxAmount ?? quote.MinAmount ?? 0);
+        var payments = PaymentsFor(quote, required);
+        if (payments.Length > 1)
         {
             var suggestions = new OptionButton { CustomMinimumSize = new Vector2(0, 36), FitToLongestItem = false, ClipText = true };
-            for (var i = 0; i < quote.Payments.Length; i++)
+            for (var i = 0; i < payments.Length; i++)
             {
-                var p = quote.Payments[i];
+                var p = payments[i];
                 suggestions.AddItem($"{(i == 0 ? "Suggested" : "Alternative " + i)} · {p.SourceIds.Length} sources · {p.Excess} excess");
             }
-            suggestions.ItemSelected += i => { _sources.Clear(); foreach (var id in quote.Payments[(int)i].SourceIds) _sources.Add(id); RenderInspector(); Highlight(); };
-            var selected = Array.FindIndex(quote.Payments, p => p.SourceIds.ToHashSet().SetEquals(_sources));
-            suggestions.Selected = selected;
+            suggestions.ItemSelected += i => { _sources.Clear(); foreach (var id in payments[(int)i].SourceIds) _sources.Add(id); RenderInspector(); Highlight(); };
+            suggestions.Selected = Array.FindIndex(payments, p => p.SourceIds.ToHashSet().SetEquals(_sources));
             _inspector.AddChild(suggestions);
         }
-        RenderSources(quote.Cost);
-        _paymentConfirm = SidebarSkin.Button($"Confirm purchase · {quote.Cost} Gold", () =>
-        {
-            var command = new GameCommand("purchase", View.ViewerId, reviewedVersion, choice.CardId, _sources.ToArray(), ClanDiscount: quote.ClanDiscount, ClanAllegiance: quote.ClanAllegiance);
-            Submit(command);
-        }, true);
-        _paymentConfirm.Disabled = quote.Error is not null || SelectedProduction() < quote.Cost || _session.Busy;
+        if (required > 0) RenderSources(required);
+        else _inspector.AddChild(Palette.Wrapped("No Gold sources are needed.", 15, Palette.Crane));
+        return (required, quote.Error is null && SelectedProduction() >= required);
+    }
+
+    private void RenderAmountControl(int amount, int min, int max)
+    {
+        _inspector.AddChild(Palette.Text("HOW MUCH GOLD", 11, Palette.Gold));
+        var row = new HBoxContainer(); row.AddThemeConstantOverride("separation", 8);
+        var less = Palette.Button("−", () => ChooseAmount(amount - 1)); less.Disabled = amount <= min; less.CustomMinimumSize = new Vector2(48, 38);
+        var value = Palette.Text($"{amount} Gold  ({min}–{max})", 17); value.HorizontalAlignment = HorizontalAlignment.Center; value.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill;
+        var more = Palette.Button("+", () => ChooseAmount(amount + 1)); more.Disabled = amount >= max; more.CustomMinimumSize = new Vector2(48, 38);
+        var most = Palette.Button("Max", () => ChooseAmount(max)); most.Disabled = amount >= max; most.CustomMinimumSize = new Vector2(60, 38);
+        row.AddChild(less); row.AddChild(value); row.AddChild(more); row.AddChild(most);
+        _inspector.AddChild(row);
+    }
+
+    // The confirm/cancel pair every reviewed action ends with. A free action confirms in one click with no
+    // sources; a costed one names its cost and waits until the chosen sources cover it.
+    private void AddConfirm(string verb, int required, bool ready, Func<GameCommand> build, string cancel, bool enabled = true)
+    {
+        _paymentConfirm = SidebarSkin.Button(required > 0 ? $"{verb} · {required} Gold" : verb, () => Submit(build()), true);
+        _paymentConfirm.Disabled = !enabled || !ready || _session.Busy;
         _decisionActions.AddChild(_paymentConfirm);
-        _decisionActions.AddChild(SidebarSkin.Button("Cancel payment", CancelChoice));
+        _decisionActions.AddChild(SidebarSkin.Button(cancel, CancelChoice));
     }
 
     private int SelectedProduction() => Self.Home.Concat(Self.Army).Append(Self.Stronghold).Where(c => _sources.Contains(c.Id) && !c.Bowed).Sum(c => Production(c, Self));
@@ -204,24 +286,16 @@ public partial class Main
             foreach (var id in targets)
             {
                 var card = FindCard(id)!;
-                picker.AddItem($"{(card.Definition?.Type == CardType.Personality ? CardTile.UnitLabel(card) + " · " : "")}{View.Players[card.OwnerId].Clan} · {ShortName(card)} · {card.Force} F{(card.Bowed ? " · bowed" : "")}");
+                // A target-derived cost is part of the choice: each target's own engine quote leads the label.
+                var price = action.TargetGold?.TryGetValue(id, out var priced) == true ? $" · {priced.Cost} Gold" : "";
+                picker.AddItem($"{(card.Definition?.Type == CardType.Personality ? CardTile.UnitLabel(card) + " · " : "")}{View.Players[card.OwnerId].Clan} · {ShortName(card)}{price} · {card.Force} F{(card.Bowed ? " · bowed" : "")}");
             }
             picker.Selected = Math.Max(0, Array.IndexOf(targets, target));
-            picker.ItemSelected += i =>
-            {
-                target = targets[(int)i];
-                if (_chosen?.Command is { } chosen) _chosen = _chosen with { Command = chosen with { TargetId = target } };
-                Highlight();
-            };
+            picker.ItemSelected += i => ChooseTarget(targets[(int)i]);
             _inspector.AddChild(picker);
         }
-        var definition = action.CardId is null ? null : FindCard(action.CardId)?.Definition;
-        var cost = action.Type == "equip" || definition?.Type == CardType.Strategy ? definition?.GoldCost ?? 0 : 0;
-        if (cost > 0) RenderSources(cost);
-        var confirm = SidebarSkin.Button(cost > 0 ? $"Confirm action · {cost} Gold" : "Confirm action", () => Submit(command with { SourceIds = _sources.ToArray(), TargetId = target }), true);
-        confirm.Disabled = !action.Enabled || _session.Busy || cost > 0 && SelectedProduction() < cost;
-        _decisionActions.AddChild(confirm);
-        _decisionActions.AddChild(SidebarSkin.Button("Cancel action", CancelChoice));
+        var (required, ready) = RenderGoldPanel(action);
+        AddConfirm("Confirm action", required, ready, () => command with { SourceIds = required > 0 ? _sources.ToArray() : [], TargetId = target }, "Cancel action", action.Enabled);
     }
 
     private void RenderProvinceRefresh()
@@ -271,10 +345,10 @@ public partial class Main
 
     private void AddAction(VBoxContainer container, ActionOption option)
     {
-        var label = option.Type == "discardProvince" ? "Discard from province…" : option.Type == "purchase" ? "Review payment…" : option.Label;
+        var label = option.Type == "discardProvince" ? "Discard from province…" : option.Type is "purchase" or "recruitReserve" ? "Review payment…" : option.Label;
         var button = SidebarSkin.Button(label, () =>
         {
-            if (option.Type is "purchase" or "equip" or "playStrategy" or "attack" or "assignDefense" or "discardHand" or "useAbility") Choose(option);
+            if (option.Type is "purchase" or "recruitReserve" or "equip" or "playStrategy" or "attack" or "assignDefense" or "discardHand" or "useAbility") Choose(option);
             else if (option.Type == "discardProvince") Confirm("Discard this province card?", "Discarding starts the Dynasty discard step. You cannot recruit more cards this phase.", () => Submit(option.Command!));
             else if (option.Command is { } command) Submit(command);
         }, option.Type is "pass" or "endDynasty" or "declineReaction");
@@ -303,7 +377,7 @@ public partial class Main
         }
         if (View.Phase==Phase.Battle && View.PendingChoice is null && View.PriorityPlayerId==View.ViewerId && View.Events.LastOrDefault()?.Type=="passed")
             _phaseActions.AddChild(Palette.Wrapped("Passing now ends Battle actions.",16,Palette.PaperDim));
-        foreach (var a in Actions.Where(a => a.Type is "pass" or "endDynasty" or "proclaim" or "declineReaction" or "chooseShinden")) AddAction(_phaseActions, a);
+        foreach (var a in Actions.Where(a => a.Type is "pass" or "endDynasty" or "proclaim" or "declineReaction" or "chooseShinden" or "declareAttack")) AddAction(_phaseActions, a);
         if (View.PriorityPlayerId != View.ViewerId) _phaseActions.AddChild(Palette.Wrapped($"Waiting for {View.Players[View.PriorityPlayerId].Clan}…", 15, Palette.Crane));
         if (!_session.Online && !_autoOpponent) _phaseActions.AddChild(SidebarSkin.Button("Pass device to other player", SwitchSeat));
     }

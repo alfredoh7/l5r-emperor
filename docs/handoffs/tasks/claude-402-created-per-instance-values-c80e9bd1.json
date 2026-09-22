@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Per-instance printed values for created cards (CardInstance.Printed read through Definition), Personality counts, HostIsPerformer, controller Clan and values read from the performer/source/wielder/target; wires Venerable Master (Venerated Sensei), Akuma's Power (Your Name is Mine) and Nakanu Technique (Nakanu's Creations); Gold sources exclude cards an action bows or destroys as costs. Answers Mendon's question 12: no per-card override existed (additive modifiers/tokens only; the UI projection is read-only). Shared change: rules engine and published card data; the client is untouched (CardView already carries Definition).",
+  "validation": "bash tools/check.sh --skip-client passed (Python 132+43, Core all pass with new suite created-values 11/11, AI 28, Server, client transport 7/7); 40 named mutation checks each fail a test, one listing-only mutation is equivalent; nothing downloaded",
+  "remaining": "None for this topic; stacked on #397 (merge it first). Holdings/Terrain creation, scan requests and the decision-doc update are separate PRs.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/402",
+  "branch": "claude/402-created-per-instance-values",
+  "updated": "2026-09-21T01:18:53.280116+00:00"
+}

@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Mendon's rulings on the Discipline/Absent PR: a Discipline play from a discard pile pays the Discipline cost first then the action's own cost as ONE combined GoldQuote (two payments, Gold does not carry over, offered only when both parts are payable), from hand only the action's own cost; wires Expensive Achievement, Knowledge and Power and Two Steady Breaths (strategy-wave-23; Mercantile Conflict stays blocked on an Honor-loss-increase primitive); pins Lost in Transit's two modes (no presence as an Open action, presence only as a Battle action; no behavior change needed); False Ring of Air's bow is a cost and it loses its free hand play. Shipped card art added under src/L5R.Client (three scans), no client code.",
+  "validation": "bash tools/check.sh --skip-client: python unit tests, core 216, published 57 (pinned count 420 = origin/main 05cc2493's 417 recounted from content/published + 3), gold-parity 18, gold-quote 20, discipline-absent 15, discipline-rulings 10 (new), AI 25 and every other suite green; 15 mutations each killed by a named test; the Godot client C# compiled (the Godot editor import/smoke steps were not run: they segfaulted in this environment on the previous PR). Scans sha256-verified against the receipts. No native client check.",
+  "remaining": "None for the engine; ready for review. Client follow-up: no token picker for Knowledge and Power (the engine accepts any one or two tokens on CardIds, the UI gets the default of one). False Ring of Water's attack has the same free-from-hand shape (noted, not changed).",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/353",
+  "branch": "claude/353-discipline-rulings",
+  "updated": "2026-09-19T20:15:01.014032+00:00"
+}

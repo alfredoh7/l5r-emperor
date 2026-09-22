@@ -119,3 +119,7 @@ legality or silently replace canonical artwork.
 An image's folder label does not establish its edition legality. Oracle's
 current text can include later wording; `printings[].text_override` and original
 period sources must be reviewed before implementing a historical ability.
+
+## Publishing a card wave
+
+A wave adds its `content/published/<wave>.json`, an `EmbeddedResource` in `src/L5R.Core/L5R.Core.csproj`, a loader in `PublishedContent.cs` and a link in the `CardCatalog.cs` chain. Then run `python3 tools/content/pin_wave_ids.py` and commit the new `tests/L5R.Core.Tests/PublishedWaves/<wave>.txt`, the wave's own card-id manifest. There is no card total to update: `PublishedTests` derives the expected catalogue from `content/published/*.json` and compares each wave with its manifest (see `docs/decisions/2026-09-19-published-count-guard.md`). Change an existing wave's cards deliberately with `pin_wave_ids.py --update`.

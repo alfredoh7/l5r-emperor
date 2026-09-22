@@ -1,0 +1,328 @@
+{
+  "Profile": "strategy-wave-35",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-2900",
+      "Name": "Great Sacrifice",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Destroy your performing unbowed Personality and target an enemy unit with total Force equal to or lower than your performer's Force, plus Personal Honor, plus one if he is defending: Destroy the enemy unit.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-2900.jpg",
+      "Keywords": [],
+      "Focus": 1,
+      "Abilities": [
+        "great-sacrifice-destroy"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-5704",
+      "Name": "On the Hunt",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing Samurai: Attach an attachment in your hand to him, paying all costs but paying 4 less Gold.\nOpen: Choose your performing Samurai with an attachment: Straighten his unit.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-5704.jpg",
+      "Keywords": [],
+      "Focus": 1,
+      "Abilities": [
+        "on-the-hunt-equip",
+        "on-the-hunt-straighten"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-8496",
+      "Name": "Tireless Efforts",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing Personality: Straighten him.\nBattle/Open: Choose your performing Personality: Negate all current and new Force penalties on him.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8496.jpg",
+      "Keywords": [],
+      "Focus": 1,
+      "Abilities": [
+        "tireless-efforts-straighten",
+        "tireless-efforts-negate"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-1522",
+      "Name": "Costly Opportunity",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Destroy your target performing unbowed Samurai to target an enemy card without attachments. Abilities on other cards now in its unit may not be used. Destroy the targeted card.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1522.jpg",
+      "Keywords": [],
+      "Focus": 1,
+      "Abilities": [
+        "costly-opportunity-destroy"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-7261",
+      "Name": "Silent Terror",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing unbowed Ninja Personality and target an enemy card: Bow it. You may discard a card in the current battlefield's province.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7261.jpg",
+      "Keywords": [
+        "Ninja"
+      ],
+      "Focus": 1,
+      "Abilities": [
+        "silent-terror-bow"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-2856",
+      "Name": "Goju Plot",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Destroy your performing Shadowlands Ninja Personality and target a Ninja Personality in your discard pile: Bring him into play at the current battlefield, paying all costs but reducing his Gold cost to enter play by the performer's Gold Cost. Lose 2 Honor. You may take an additional Battle action.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-2856.jpg",
+      "Keywords": [
+        "Ninja"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "goju-plot-recruit"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-2011",
+      "Name": "Discovering a Conspiracy",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "As a Focus Effect, after this duel ends, if your Personality won it, gain 2 Honor.\nPolitical Battle/Open: Target your performing unbowed Magistrate to target a Personality. His lord casts him out for treachery. Permanently remove his Clan Alignment keywords. Dishonor him. If he is at a battlefield, bow him and choose a player, who gains or loses 1 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-2011.jpg",
+      "Keywords": [
+        "Political"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "discovering-conspiracy-focus",
+        "discovering-conspiracy-expose"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-3779",
+      "Name": "Insulting Gesture",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Political Open: Choose your performing unbowed Courtier. Take the Imperial Favor.\nFavor Political Battle: Discard the Imperial Favor to target an enemy Personality. Dishonor him. Bow him. Move him home. His controller loses 2 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-3779.jpg",
+      "Keywords": [
+        "Favor",
+        "Political"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "insulting-gesture-take",
+        "insulting-gesture-shame"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-708",
+      "Name": "Barred Passage",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Heroic Battle: Target your performing unbowed Hero, who must be the only Personality in his army, to target an enemy Personality and bow his unit.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-708.jpg",
+      "Keywords": [
+        "Heroic"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "barred-passage-bow"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-24",
+      "Name": "A Fugitive Apprehended",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Target your performing unbowed Personality. Bow a target enemy card without attachments and with lower Gold Cost. If your Personality is a Magistrate, you may target an enemy card and reduce its Gold Cost to 0.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-24.jpg",
+      "Keywords": [],
+      "Focus": 1,
+      "Abilities": [
+        "fugitive-apprehended"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-2024",
+      "Name": "Dislodge the Foe",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Target one or more of your performing Tacticians at the same, non-current battlefield to target a Personality opposing them. He is lured into a trap. Move the targets to the current battlefield.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-2024.jpg",
+      "Keywords": [],
+      "Focus": 3,
+      "Abilities": [
+        "dislodge-the-foe"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-4481",
+      "Name": "Know No Fear",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After another player's action targets your performing Samurai: Negate his bowing and movement from the action's effects.\nReaction: After a Fear action targets your performing Samurai: Negate its effects.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-4481.jpg",
+      "Keywords": [
+        "Courage",
+        "Bushido Virtue"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "know-no-fear-negate-move",
+        "know-no-fear-negate-fear"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-8500",
+      "Name": "To First Blood",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "As a Focus Effect: Negate any destruction for losing this duel. After this duel ends, its winner's controller gains 2 Honor.\nReaction: After another player's Iaijutsu action targets your Personality: Negate his destruction from the action's effects.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8500.jpg",
+      "Keywords": [
+        "Iaijutsu"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "to-first-blood-focus",
+        "to-first-blood-negate"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

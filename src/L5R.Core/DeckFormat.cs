@@ -60,7 +60,9 @@ public static class DeckFormat
     /// (some Strongholds and cards are meant to break them; some players build illegal decks for
     /// fun). Stronghold/Bamboo Harvesters/Border Keep entries are ordinarily a single copy each,
     /// so they never trip a limit here even though this check has no way to exempt them by name.</summary>
-    public static DeckLegality CheckLegality(Deck deck, Func<string, IReadOnlyList<string>> keywordsFor)
+    /// <param name="copyLimitFor">A per-card copy limit printed on the card ("You may include up to 10 copies of this card in your deck",
+    /// Fading Shadows; issue #337), by deck name; null (or a null answer) is the usual limit. It replaces the usual limit for that card only.</param>
+    public static DeckLegality CheckLegality(Deck deck, Func<string, IReadOnlyList<string>> keywordsFor, Func<string, int?>? copyLimitFor = null)
     {
         var violations = new List<DeckLegalityViolation>();
         // A title plus its Experience Level is the construction identity. DeckWorkshop emits that
@@ -68,7 +70,7 @@ public static class DeckFormat
         foreach (var entry in deck.Entries.GroupBy(e => e.Name, StringComparer.OrdinalIgnoreCase)
             .Select(g => new DeckEntry(g.First().Name, g.Sum(e => e.Count))))
         {
-            var limit = keywordsFor(entry.Name).Contains("Unique", StringComparer.Ordinal) ? 1 : 3;
+            var limit = copyLimitFor?.Invoke(entry.Name) ?? (keywordsFor(entry.Name).Contains("Unique", StringComparer.Ordinal) ? 1 : 3);
             if (entry.Count > limit) violations.Add(new(entry.Name, entry.Count, limit));
         }
         return new(violations.Count == 0, violations.ToArray());

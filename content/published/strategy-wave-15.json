@@ -1,0 +1,172 @@
+{
+  "Profile": "strategy-wave-15",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10366",
+      "Name": "Charge Into Danger",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing Personality: If he assigned to, or would be opposed at, the current battlefield, move him there. If his base Force is 7 or higher, straighten him.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10366.jpg",
+      "Keywords": [],
+      "Focus": 1,
+      "Abilities": [
+        "charge-into-danger-move"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-1467",
+      "Name": "Consuming Weakness",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Fear Battle: Target your performing Shadowlands Personality and remove a target dead Personality in any discard pile from the game to give your Personality +3F, or +4F if he is Undead.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1467.jpg",
+      "Keywords": [
+        "Fear"
+      ],
+      "Focus": 1,
+      "Abilities": [
+        "consuming-weakness"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10552",
+      "Name": "Fires of Turmoil",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Discard the top card of a Fate deck. Target a card without attachments. If the discarded card's Focus Value is odd, bow the target (0 is even). Otherwise, straighten it. Move its unit home if the target has a Madness token.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10552.jpg",
+      "Keywords": [],
+      "Focus": 1,
+      "Abilities": [
+        "fires-of-turmoil"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-2908",
+      "Name": "Gripped by Terror",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing Personality and target an enemy Personality or Follower: Give it -4F. If your Personality is Nonhuman, give each of your Personalities at the current battlefield +1F.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-2908.jpg",
+      "Keywords": [
+        "Fear"
+      ],
+      "Focus": 1,
+      "Abilities": [
+        "gripped-by-terror"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10746",
+      "Name": "Outnumbered",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Give all your opposed Personalities with Followers at the current battlefield +1F. Give all enemy Personalities there without Followers -1F.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10746.jpg",
+      "Keywords": [],
+      "Focus": 1,
+      "Abilities": [
+        "outnumbered"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-6060",
+      "Name": "Preserving Honor",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Target an enemy Personality at the current battlefield: His controller chooses either to bow him, or to choose another location and move him there. If the bowing or movement is negated, remove the Personality from the game.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6060.jpg",
+      "Keywords": [],
+      "Focus": 1,
+      "Abilities": [
+        "preserving-honor"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9687",
+      "Name": "Your Clan Needs You!",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: If any enemy units are at the current battlefield, choose your performing Personality in one of your provinces: Bring him into play at the current battlefield, paying all costs but paying 6 less Gold. After the battle ends, if he is in play, discard all his attachments and put him into one of your provinces, face-up, discarding any card there.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9687.jpg",
+      "Keywords": [],
+      "Focus": 3,
+      "Abilities": [
+        "your-clan-needs-you"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

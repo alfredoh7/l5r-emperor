@@ -1,0 +1,76 @@
+{
+  "Profile": "strategy-wave-10",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-2332",
+      "Name": "Encircled Terrain",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Before this battle resolves, the Attacker and Defender, in the order of your choice, each choose one of their own Personalities at its battlefield. Move all other Personalities there home. \nBattle: Destroy a Terrain (if able). Put this Terrain into play.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-2332.jpg",
+      "Keywords": [
+        "Terrain"
+      ],
+      "Focus": 1,
+      "Abilities": [],
+      "Effect": "encircled-before-battle"
+    },
+    {
+      "Id": "oracle-l5r-10742",
+      "Name": "Looting the Ruins",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After this battle resolves, if this Terrain is in play, put it into your hand.\nBattle: Destroy a Terrain (if able). Put this Terrain into play.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10742.jpg",
+      "Keywords": [
+        "Terrain"
+      ],
+      "Focus": 1,
+      "Abilities": [],
+      "Effect": "looting-return-to-hand"
+    },
+    {
+      "Id": "oracle-l5r-10403",
+      "Name": "Vital Pathways",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After this battlefield's province is destroyed, if you are the Attacker: Draw a card, or two cards if your current army was ever opposed during this battle.\nBattle: If there is no Terrain in play at the current battlefield: Put this card into play there.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10403.jpg",
+      "Keywords": [
+        "Terrain"
+      ],
+      "Focus": 1,
+      "Abilities": [],
+      "Effect": "vital-pathways-draw"
+    }
+  ],
+  "Decks": []
+}

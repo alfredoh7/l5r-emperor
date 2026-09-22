@@ -1,0 +1,77 @@
+{
+  "Profile": "strategy-wave-23",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10938",
+      "Name": "Expensive Achievement",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Discipline :g2: (You may pay 2 Gold to play this Discipline from your discard pile, then remove it from the game after its action resolves.)\nBattle: Give this Province +2 or -2 Strength.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10938.jpg",
+      "Keywords": [],
+      "Focus": 3,
+      "Abilities": [
+        "expensive-achievement-raise",
+        "expensive-achievement-lower"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10942",
+      "Name": "Knowledge and Power",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 1,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Discipline :g1: (You may pay 1 Gold to play this Discipline from your discard pile, then remove it from the game after its action resolves.)\nLimited, :g1:: Destroy one or two of a target Personality's tokens. Give him as many +1F tokens as the number of tokens this destroyed.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10942.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "knowledge-and-power"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10961",
+      "Name": "Two Steady Breaths",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Discipline :g2: (You may pay the Discipline cost to play this card from the discard pile. Remove it from the game after the action resolves.)\nLimited, :g1:: Give your target face-up Personality out of play Destined. (Draw a card after your Destined card enters play.)",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10961.jpg",
+      "Keywords": [],
+      "Focus": 4,
+      "Abilities": [
+        "two-steady-breaths-destined"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

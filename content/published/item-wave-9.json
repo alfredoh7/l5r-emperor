@@ -1,0 +1,33 @@
+{
+  "Profile": "item-wave-9",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-6702",
+      "Name": "Shamsir",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 4,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 1,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "As a Focus Effect: After this duel ends, you may attach this card to one of your Personalities, ignoring Gold cost.\nBattle: Target an enemy Personality or Follower: Give it -5F.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6702.jpg",
+      "Keywords": [
+        "Weapon"
+      ],
+      "Focus": 1,
+      "Abilities": [
+        "shamsir-focus",
+        "shamsir-attack"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

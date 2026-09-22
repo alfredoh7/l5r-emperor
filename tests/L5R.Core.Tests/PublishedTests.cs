@@ -8,6 +8,8 @@ internal static class PublishedTests
     {
         (string Name, Action Test)[] tests = [
             ("Published pool pins card definitions and the ability-free vanilla wave", Catalogue),
+            ("Published catalogue is exactly content/published/*.json: nothing missing, extra, duplicated or unembedded", CatalogueMatchesDisk),
+            ("Published wave files match their PublishedWaves manifests: no wave dropped, shrunk or added unpinned", WaveManifests),
             ("CatalogueDecks/live: Lion and Crane retain 40/40 decks", () => CatalogueDecks(PublishedContent.Snapshot)),
             ("CatalogueDecks/frozen: Lion and Crane test fixture retains 40/40 decks", () => CatalogueDecks(PublishedContent.TestSnapshot)),
             ("Published setup pins Lion first turn, Honor, province strengths and Crane Bamboo", Setup),
@@ -50,6 +52,10 @@ internal static class PublishedTests
             ("OfferedActions/battle/player-0: live-deck commands and alternate targets validate", () => OfferedActions(true,0)),
             ("OfferedActions/battle/player-1: live-deck commands and alternate targets validate", () => OfferedActions(true,1)),
             ("Published full-game transcript replays deterministically", Replay),
+            ("Encircled Terrain: controller-chosen order, both sides keep one Personality, all others sent home unbowed", EncircledTerrainSelection),
+            ("Before This Battle Resolves: two simultaneous sources are ordered by the active player, one at a time", BeforeBattleResolveMultiSourceOrdering),
+            ("Looting the Ruins: unconditional return-to-hand, mid-Battle-phase and as the last battlefield ending the phase", LootingTheRuinsReturnToHand),
+            ("Vital Pathways: Attacker draws two if opposed, one if not, none unless the province was actually destroyed", VitalPathwaysDraw),
         ];
         runner.Run("published",tests.Concat(CatalogueWaves()));
     }
@@ -81,13 +87,63 @@ internal static class PublishedTests
     private static CardView ViewCard(MatchEngine e,string id)=>e.GetView(0).Players.SelectMany(p=>p.Home.Concat(p.Army)).Single(c=>c.Id==id);
     private static void Catalogue()
     {
-        var published=CardCatalog.Cards.Values.Where(c=>!c.ScenarioOnly).ToArray();Eq(published.Length,317);
+        var published=CardCatalog.Cards.Values.Where(c=>!c.ScenarioOnly).ToArray();
         foreach(var c in published){Check(c.ArtworkKey?.EndsWith(c.Id+".jpg")==true);Check(c.Abilities is not null);Check(c.Keywords is not null);Check(c.Abilities!.All(AbilityCatalog.All.ContainsKey));}
         Eq(CardCatalog.Get(Id(3636)).GoldCost,4);Eq(CardCatalog.Get(Id(521)).GoldCost,4);Eq(CardCatalog.Get(Id(9879)).Chi,1);
         Check(CardCatalog.Get(Id(10368)).Text.Contains("performing bowed"));Check(!CardCatalog.Get(Id(2158)).Text.StartsWith("Favor"));
         var vanilla=PublishedContent.VanillaWave1.Cards;Eq(vanilla.Length,63);
         foreach(var c in vanilla){Eq(c.Effect,"none");Eq(c.Text,"");Eq(c.Abilities!.Length,0);Check(CardCatalog.Get(c.Id).Id==c.Id);}
         Check(!vanilla.Select(c=>c.Id).Intersect(PublishedContent.Snapshot.Cards.Select(c=>c.Id)).Any());
+    }
+    private const string FrozenTestSnapshot="lion-crane-test-v1";
+    private static Dictionary<string,PublishedSnapshot> DiskWaves()
+    {
+        var files=Directory.GetFiles(Path.Combine(Support337.RepoRoot(),"content","published"),"*.json").Where(f=>!f.EndsWith("-sources.json",StringComparison.Ordinal));
+        return files.OrderBy(f=>f,StringComparer.Ordinal).ToDictionary(f=>Path.GetFileNameWithoutExtension(f),f=>JsonSerializer.Deserialize<PublishedSnapshot>(File.ReadAllBytes(f))!,StringComparer.Ordinal);
+    }
+    private static void NoProblems(List<string> problems,string what)=>Check(problems.Count==0,$"{what}: {problems.Count} problem(s)\n  "+string.Join("\n  ",problems.Take(25))+(problems.Count>25?$"\n  ... and {problems.Count-25} more":""));
+    private static void CatalogueMatchesDisk()
+    {
+        var disk=DiskWaves();var problems=new List<string>();
+        Check(disk.Count>0,"content/published holds no wave files");
+        foreach(var (stem,snapshot) in disk)
+        {
+            if(snapshot.Profile!=stem)problems.Add($"{stem}.json has profile '{snapshot.Profile}'; a wave's profile must equal its file name");
+            foreach(var twice in snapshot.Cards.GroupBy(c=>c.Id).Where(g=>g.Count()>1))problems.Add($"{twice.Key} is listed {twice.Count()} times in {stem}.json");
+            foreach(var card in snapshot.Cards.Where(c=>c.ScenarioOnly))problems.Add($"{card.Id} in {stem}.json is ScenarioOnly; a published file may hold only published cards");
+        }
+        var owners=disk.Where(d=>d.Key!=FrozenTestSnapshot).SelectMany(d=>d.Value.Cards.Where(c=>!c.ScenarioOnly).Select(c=>(c.Id,c.Name,File:d.Key))).GroupBy(x=>x.Id).ToDictionary(g=>g.Key,g=>g.ToArray());
+        foreach(var (id,files) in owners.Where(o=>o.Value.Length>1))problems.Add($"{id} is published by more than one file: {string.Join(", ",files.Select(f=>f.File))}");
+        var embedded=typeof(PublishedContent).Assembly.GetManifestResourceNames().Where(n=>n.StartsWith("L5R.Published.",StringComparison.Ordinal)).Select(n=>
+        {
+            using var stream=typeof(PublishedContent).Assembly.GetManifestResourceStream(n)!;
+            return JsonSerializer.Deserialize<PublishedSnapshot>(stream)!.Profile;
+        }).ToHashSet(StringComparer.Ordinal);
+        foreach(var stem in disk.Keys.Where(k=>!embedded.Contains(k)))problems.Add($"content/published/{stem}.json is not embedded in L5R.Core; add its EmbeddedResource to src/L5R.Core/L5R.Core.csproj and load it in PublishedContent.cs and CardCatalog.cs");
+        foreach(var profile in embedded.Where(p=>!disk.ContainsKey(p)))problems.Add($"L5R.Core embeds profile '{profile}' but content/published/{profile}.json does not exist");
+        NoProblems(problems,"content/published files are inconsistent or not embedded in L5R.Core");
+        var loaded=CardCatalog.Cards.Values.Where(c=>!c.ScenarioOnly).Select(c=>c.Id).ToHashSet(StringComparer.Ordinal);
+        foreach(var (id,files) in owners.Where(o=>!loaded.Contains(o.Key)).OrderBy(o=>o.Key,StringComparer.Ordinal))problems.Add($"{id} ({files[0].Name}) is in content/published/{files[0].File}.json but not loaded into CardCatalog");
+        foreach(var id in loaded.Where(id=>!owners.ContainsKey(id)).Order(StringComparer.Ordinal))problems.Add($"{id} is in CardCatalog (not ScenarioOnly) but in no content/published file");
+        if(disk.TryGetValue(FrozenTestSnapshot,out var frozen))
+            foreach(var card in frozen.Cards.Where(c=>!owners.ContainsKey(c.Id)))problems.Add($"{card.Id} is in {FrozenTestSnapshot}.json but published by no other file");
+        NoProblems(problems,"Published catalogue differs from content/published/*.json");
+    }
+    private static void WaveManifests()
+    {
+        var disk=DiskWaves();var problems=new List<string>();
+        var dir=Path.Combine(Support337.RepoRoot(),"tests","L5R.Core.Tests","PublishedWaves");
+        Check(Directory.Exists(dir),"tests/L5R.Core.Tests/PublishedWaves is missing; it holds one manifest per wave file");
+        var pinned=Directory.GetFiles(dir,"*.txt").ToDictionary(f=>Path.GetFileNameWithoutExtension(f),f=>File.ReadAllLines(f).Where(l=>l.Length>0).ToArray(),StringComparer.Ordinal);
+        foreach(var stem in disk.Keys.Where(k=>!pinned.ContainsKey(k)).Order(StringComparer.Ordinal))problems.Add($"content/published/{stem}.json has no manifest; run python3 tools/content/pin_wave_ids.py and commit tests/L5R.Core.Tests/PublishedWaves/{stem}.txt");
+        foreach(var stem in pinned.Keys.Where(k=>!disk.ContainsKey(k)).Order(StringComparer.Ordinal))problems.Add($"PublishedWaves/{stem}.txt pins a wave whose content/published/{stem}.json is gone; restore the wave file with its loader, CardCatalog chain and csproj entry, or delete the manifest only if the wave was removed on purpose");
+        foreach(var (stem,ids) in pinned.Where(p=>disk.ContainsKey(p.Key)).OrderBy(p=>p.Key,StringComparer.Ordinal))
+        {
+            var actual=disk[stem].Cards.Select(c=>c.Id).ToHashSet(StringComparer.Ordinal);
+            var missing=ids.Where(id=>!actual.Contains(id)).ToArray();var added=actual.Where(id=>!ids.Contains(id)).Order(StringComparer.Ordinal).ToArray();
+            if(missing.Length>0||added.Length>0)problems.Add($"{stem}.json no longer matches PublishedWaves/{stem}.txt: missing [{string.Join(", ",missing)}], not pinned [{string.Join(", ",added)}]; a card removed on purpose or added to an existing wave needs python3 tools/content/pin_wave_ids.py --update");
+        }
+        NoProblems(problems,"Published wave files differ from their manifests");
     }
     private static void CatalogueDecks(PublishedSnapshot snapshot)
     {
@@ -110,6 +166,7 @@ internal static class PublishedTests
             ("FollowerWave1",()=>PublishedContent.FollowerWave1,1,CardType.Follower,null),
             ("PersonalityWave4",()=>PublishedContent.PersonalityWave4,2,CardType.Personality,()=>PublishedContent.PersonalityWave3),
             ("PersonalityWave5",()=>PublishedContent.PersonalityWave5,5,CardType.Personality,()=>PublishedContent.PersonalityWave4),
+            ("StrategyWave10",()=>PublishedContent.StrategyWave10,3,CardType.Strategy,()=>PublishedContent.StrategyWave9),
         ];
         foreach(var wave in waves)
             yield return ($"CatalogueWaves/{wave.Name}: count, type, text and catalogue wiring",()=>
@@ -287,10 +344,12 @@ internal static class PublishedTests
     private static void CavalryAfterEmptyInfantry()
     {
         // A pass with no Infantry to assign only declines Infantry Maneuvers -- it must not skip
-        // the whole Attack Phase, or a deck with only Cavalry-keyword units could never attack.
+        // the whole Attack Phase, or a deck with only Cavalry-keyword units could never attack. (Declining
+        // the ATTACK is the Declaration Segment's own pass, a step earlier.)
         var s=State();s.Phase=Phase.AttackDeclaration;s.PriorityPlayerId=0;
         var cavalry=Add(s,3623,0,Zone.Home); // Ikoma Natsu: printed Cavalry keyword.
         var e=MatchEngine.FromTestState(s);
+        Accept(e,new("declareAttack",0,e.Version));Eq(e.State.Phase,Phase.InfantryDeclaration);
         Pass(e);Eq(e.State.Phase,Phase.DefenseAssignment);
         Pass(e);Eq(e.State.Phase,Phase.CavalryDeclaration);Eq(e.State.PriorityPlayerId,0);
         Accept(e,new("attack",0,e.Version,Assignments:new(){[cavalry.Id]=0}));
@@ -363,9 +422,151 @@ internal static class PublishedTests
             var chosen=options.FirstOrDefault(a=>a.Type=="proclaim")??options.FirstOrDefault(a=>a.Type=="declineReaction")??options.FirstOrDefault(a=>a.Type=="chooseShinden")??options.FirstOrDefault(a=>a.Type=="discardHand")
                 ??options.FirstOrDefault(a=>a.Type=="purchase"&&!a.Command!.ClanDiscount)??options.FirstOrDefault(a=>a.Type=="purchase")??options.FirstOrDefault(a=>a.Type=="discardProvince")
                 ??options.FirstOrDefault(a=>a.Type=="useAbility"&&a.Command!.AbilityId=="border-first")
-                ??options.FirstOrDefault(a=>a.Type=="selectBattle")??options.FirstOrDefault(a=>a.Type=="endDynasty")??options.FirstOrDefault(a=>a.Type=="attack")??options.First(a=>a.Type=="pass");
+                ??options.FirstOrDefault(a=>a.Type=="selectBattle")??options.FirstOrDefault(a=>a.Type=="endDynasty")??options.FirstOrDefault(a=>a.Type=="declareAttack")??options.FirstOrDefault(a=>a.Type=="attack")??options.First(a=>a.Type=="pass");
             Accept(e,chosen.Command!);
         }
         Check(e.State.WinnerId is not null,"Published scripted match did not finish.");Eq(Json(MatchEngine.Replay(e.ExportReplay()).State),Json(e.State));
+    }
+    // Strategy wave 10 (issue #272): the three new battle-resolution-timing primitives -- see
+    // MatchEngine.cs' own BeforeBattleResolve/AfterBattleResolve doc comments and
+    // docs/decisions/2026-09-17-battle-resolution-timing-primitives.md.
+    private static void EncircledTerrainSelection()
+    {
+        var s=State(battle:true);
+        foreach(var c in s.Cards.Values.Where(c=>c.Zone==Zone.Battlefield).ToArray()) s.Cards.Remove(c.Id);
+        var terrain=Add(s,"oracle-l5r-2332",0,Zone.Battlefield,province:0); // controller: the Attacker (player 0)
+        var a1=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0); // Force 3, sent home
+        var a2=Add(s,"training-crane-veteran",0,Zone.Battlefield,province:0); // Force 5, kept -- decides the battle
+        var d1=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0); // Force 3, sent home
+        var d2=Add(s,"training-bow-enemy-source",1,Zone.Battlefield,province:0); // Force 1, kept -- decides the battle
+        var e=MatchEngine.FromTestState(s);
+        Pass(e);Pass(e);
+        // Both players passed: Before This Battle Resolves opens before Army()/winner are ever
+        // computed. The TERRAIN's OWN controller (the Attacker here) chooses who selects first.
+        Eq(e.State.PendingChoice!.Type,"encircledOrder");Eq(e.State.PendingChoice!.PlayerId,0);
+        Reject(e,new("encircledOrder",1,e.Version,Choice:"attacker")); // only the terrain's controller may choose
+        Accept(e,new("encircledOrder",0,e.Version,Choice:"defender"));
+        Eq(e.State.PendingChoice!.Type,"encircledSelect");Eq(e.State.PendingChoice!.PlayerId,1);
+        Reject(e,new("encircledSelect",1,e.Version,TargetId:a2.Id)); // must choose your OWN Personality
+        Accept(e,new("encircledSelect",1,e.Version,TargetId:d2.Id));
+        Eq(e.State.PendingChoice!.Type,"encircledSelect");Eq(e.State.PendingChoice!.PlayerId,0);
+        Accept(e,new("encircledSelect",0,e.Version,TargetId:a2.Id));
+        // Every OTHER Personality at this battlefield was sent home unbowed BEFORE the battle's own
+        // Army() was ever read -- a1/d1 never fought at all, distinguished from a2/d2 (Force 5 vs.
+        // Force 1), the only two units that actually decided this battle: the Attacker wins outright,
+        // so a2 (Attacker) returns home bowed through the ordinary post-resolution sweep, and d2
+        // (Defender, the losing army) is actually destroyed -- proving d2, not d1, was the one still
+        // in the fight.
+        Check(Card(e,a1.Id).Zone==Zone.Home && !Card(e,a1.Id).Bowed,"a1 should be sent home unbowed by Encircled Terrain");
+        Check(Card(e,d1.Id).Zone==Zone.Home && !Card(e,d1.Id).Bowed,"d1 should be sent home unbowed by Encircled Terrain");
+        Check(Card(e,a2.Id).Zone==Zone.Home && Card(e,a2.Id).Bowed,"a2 fought, won, and returns home bowed (Attacker)");
+        Check(Card(e,d2.Id).Zone==Zone.Dead,"d2 fought and lost -- proof it (not d1) was the unit still in the battle");
+        Check(e.State.PendingBeforeBattleResolve is null);
+    }
+    private static void BeforeBattleResolveMultiSourceOrdering()
+    {
+        var s=State(battle:true);
+        foreach(var c in s.Cards.Values.Where(c=>c.Zone==Zone.Battlefield).ToArray()) s.Cards.Remove(c.Id);
+        // Two Encircled Terrains at the same battlefield can never happen through ordinary play (at
+        // most one Terrain per battlefield), but the core rule's own "if there are multiple... the
+        // player whose turn it is chooses the order" is written generally -- this proves the engine's
+        // own ordering primitive directly against two simultaneous sources.
+        var terrainA=Add(s,"oracle-l5r-2332",0,Zone.Battlefield,province:0);
+        var terrainB=Add(s,"oracle-l5r-2332",1,Zone.Battlefield,province:0);
+        var a1=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0);
+        var d1=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0);
+        var e=MatchEngine.FromTestState(s);
+        Pass(e);Pass(e);
+        Eq(e.State.PendingChoice!.Type,"beforeBattleOrder");
+        Eq(e.State.PendingChoice!.PlayerId,0); // the ACTIVE player's own choice, regardless of either terrain's controller
+        Reject(e,new("beforeBattleOrder",0,e.Version,TargetId:"not-a-real-id"));
+        Reject(e,new("beforeBattleOrder",1,e.Version,TargetId:terrainA.Id)); // only the active player orders
+        Accept(e,new("beforeBattleOrder",0,e.Version,TargetId:terrainB.Id));
+        // terrainB (owned by the Defender) resolves first: ITS OWN controller picks the select order.
+        Eq(e.State.PendingChoice!.Type,"encircledOrder");Eq(e.State.PendingChoice!.PlayerId,1);
+        Accept(e,new("encircledOrder",1,e.Version,Choice:"attacker"));
+        Accept(e,new("encircledSelect",0,e.Version,TargetId:a1.Id));
+        Accept(e,new("encircledSelect",1,e.Version,TargetId:d1.Id));
+        // Exactly one source (terrainA) remains: resolves directly, no second ordering choice offered.
+        Eq(e.State.PendingChoice!.Type,"encircledOrder");Eq(e.State.PendingChoice!.PlayerId,0);
+        Accept(e,new("encircledOrder",0,e.Version,Choice:"defender"));
+        Accept(e,new("encircledSelect",1,e.Version,TargetId:d1.Id));
+        Accept(e,new("encircledSelect",0,e.Version,TargetId:a1.Id));
+        Check(e.State.PendingBeforeBattleResolve is null);
+        Check(e.State.PendingChoice is null,"Both before-this-battle-resolves sources resolved; ordinary resolution should have completed.");
+    }
+    private static void LootingTheRuinsReturnToHand()
+    {
+        // Mid-Battle-phase case: a second unresolved battlefield remains after this one.
+        {
+            var s=State(battle:true);
+            foreach(var c in s.Cards.Values.Where(c=>c.Zone==Zone.Battlefield).ToArray()) s.Cards.Remove(c.Id);
+            s.UnresolvedBattlefields=[0,1];
+            var looting=Add(s,"oracle-l5r-10742",0,Zone.Battlefield,province:0);
+            Add(s,"training-crane-veteran",0,Zone.Battlefield,province:0);
+            Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0);
+            var e=MatchEngine.FromTestState(s);
+            Pass(e);Pass(e);
+            Check(Card(e,looting.Id).Zone==Zone.Hand,"Looting the Ruins must return to hand, unconditionally, once in play when its battle resolves");
+            Check(e.State.Players[0].Hand.Contains(looting.Id));
+            Eq(e.State.Phase,Phase.BattleSelection); // another battlefield remains; the phase does not end
+        }
+        // Last-battlefield case: returns to hand THEN ends the Battle phase (order matters -- issue #272).
+        {
+            var s=State(battle:true);
+            foreach(var c in s.Cards.Values.Where(c=>c.Zone==Zone.Battlefield).ToArray()) s.Cards.Remove(c.Id);
+            s.UnresolvedBattlefields=[0];
+            var looting=Add(s,"oracle-l5r-10742",1,Zone.Battlefield,province:0); // Defender-owned this time: unconditional either side
+            Add(s,"training-crane-veteran",0,Zone.Battlefield,province:0);
+            Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0);
+            var e=MatchEngine.FromTestState(s);
+            Pass(e);Pass(e);
+            Check(Card(e,looting.Id).Zone==Zone.Hand);
+            Check(e.State.Players[1].Hand.Contains(looting.Id));
+            Eq(e.State.Phase,Phase.Dynasty); // last battlefield: the return happens, then the Battle phase ends
+        }
+    }
+    private static void VitalPathwaysDraw()
+    {
+        // Case 1: the province is destroyed and the Defender had presence -- draw two.
+        {
+            var s=State(battle:true);
+            foreach(var c in s.Cards.Values.Where(c=>c.Zone==Zone.Battlefield).ToArray()) s.Cards.Remove(c.Id);
+            s.Players[1].Provinces[0].Strength=1;s.Players[1].Provinces[0].PrintedStrength=1;
+            Add(s,"oracle-l5r-10403",0,Zone.Battlefield,province:0); // Attacker-owned
+            Add(s,"training-crane-veteran",0,Zone.Battlefield,province:0); // Force 5
+            Add(s,"training-bow-enemy-source",1,Zone.Battlefield,province:0); // Force 1: opposed
+            for(var i=0;i<3;i++) Add(s,"training-crane-samurai",0,Zone.FateDeck);
+            var e=MatchEngine.FromTestState(s);
+            Pass(e);Pass(e);
+            Check(e.State.Players[1].Provinces[0].Destroyed);
+            Eq(e.State.Players[0].Hand.Count,2);
+        }
+        // Case 2: the province is destroyed but the Defender had no presence -- draw one.
+        {
+            var s=State(battle:true);
+            foreach(var c in s.Cards.Values.Where(c=>c.Zone==Zone.Battlefield).ToArray()) s.Cards.Remove(c.Id);
+            s.Players[1].Provinces[0].Strength=1;s.Players[1].Provinces[0].PrintedStrength=1;
+            Add(s,"oracle-l5r-10403",0,Zone.Battlefield,province:0);
+            Add(s,"training-crane-veteran",0,Zone.Battlefield,province:0); // Force 5, unopposed
+            for(var i=0;i<3;i++) Add(s,"training-crane-samurai",0,Zone.FateDeck);
+            var e=MatchEngine.FromTestState(s);
+            Pass(e);Pass(e);
+            Check(e.State.Players[1].Provinces[0].Destroyed);
+            Eq(e.State.Players[0].Hand.Count,1);
+        }
+        // Case 3: the province is NOT destroyed -- no draw at all, even with Vital Pathways in play.
+        {
+            var s=State(battle:true);
+            foreach(var c in s.Cards.Values.Where(c=>c.Zone==Zone.Battlefield).ToArray()) s.Cards.Remove(c.Id);
+            s.Players[1].Provinces[0].Strength=20;s.Players[1].Provinces[0].PrintedStrength=20;
+            Add(s,"oracle-l5r-10403",0,Zone.Battlefield,province:0);
+            Add(s,"training-crane-veteran",0,Zone.Battlefield,province:0); // Force 5: nowhere near enough
+            for(var i=0;i<3;i++) Add(s,"training-crane-samurai",0,Zone.FateDeck);
+            var e=MatchEngine.FromTestState(s);
+            Pass(e);Pass(e);
+            Check(!e.State.Players[1].Provinces[0].Destroyed);
+            Eq(e.State.Players[0].Hand.Count,0);
+        }
     }
 }

@@ -1,0 +1,29 @@
+[
+  {
+    "card_id": "oracle-l5r-10938",
+    "printing_set": [
+      "Aftermath"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10938",
+    "image_path": "assets/reference/oracle/aftermath/webp/oracle-l5r-10938-printing-1-image-1.webp",
+    "image_sha256": "29e3ea71e90eb839e8967909ade16e38bf73a8082aeb333684b17e51b04bbbcc"
+  },
+  {
+    "card_id": "oracle-l5r-10942",
+    "printing_set": [
+      "Aftermath"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10942",
+    "image_path": "assets/reference/oracle/aftermath/webp/oracle-l5r-10942-printing-1-image-1.webp",
+    "image_sha256": "ae788c88425bf5b65a47bcdd01073f3f14a14a1cd7cc7ef324b4134ef13fb0dd"
+  },
+  {
+    "card_id": "oracle-l5r-10961",
+    "printing_set": [
+      "Aftermath"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10961",
+    "image_path": "assets/reference/oracle/aftermath/webp/oracle-l5r-10961-printing-1-image-1.webp",
+    "image_sha256": "8fbc05ca4025b038e0e32fc20e87e8e7092c9d78e8d3ae269fa7509d39be6428"
+  }
+]

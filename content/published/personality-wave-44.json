@@ -1,0 +1,34 @@
+{
+  "Profile": "personality-wave-44",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-8283",
+      "Name": "The Red Hunger",
+      "Type": "Personality",
+      "Clan": "Unaligned",
+      "GoldCost": 9,
+      "GoldProduction": 0,
+      "Force": 7,
+      "Chi": 1,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Target one or two attachments, or a Personality without attachments, with a total Force lower than The Red Hunger's Force: He swallows them whole. Destroy the targeted cards.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8283.jpg",
+      "Keywords": [
+        "Bashe",
+        "Nonhuman"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "red-hunger-attachments",
+        "red-hunger-personality"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

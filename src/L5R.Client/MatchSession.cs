@@ -72,6 +72,16 @@ public sealed class MatchSession : IDisposable
         Generation++;Disconnect(); Seat = null; Snapshot = null; _engine = null; Changed?.Invoke();
     }
 
+    /// <summary>Scripted UI verification only (issue #303): a real engine state built to put one kind of Gold cost
+    /// on screen. Reached only through the --capture-mode=gold-* harness, never from a menu or a room.</summary>
+    public void StartShowcase(string kind)
+    {
+        Disconnect();
+        _engine = MatchEngine.CreateGoldPaymentShowcase(kind);
+        _localSeat = 0; _practiceNameSeat = 0;
+        RefreshLocal();
+    }
+
     public void SwitchPracticeSeat()
     {
         if (_engine is null || Online) return;
@@ -130,6 +140,22 @@ public sealed class MatchSession : IDisposable
         return result.Accepted;
     }
 
+    /// <summary>The outgoing command payload: every GameCommand field except the acting seat and the expected
+    /// version (the server binds both from the authenticated connection). A field missing here is silently
+    /// dropped online, so the transport tests compare this against GameCommand by reflection (issue #303). Deck search
+    /// (issue #312) adds no field: its commands ride Choice (a deck or a card definition id), Province, SourceIds and
+    /// TargetId. The search's view fields (MatchView.PendingSearch, MatchView.ShownCards) travel inside MatchView itself,
+    /// which this session deserializes as the core record, so they need no mapping here; the transport test
+    /// SearchViewsCrossTheWire fails if a MatchView property is ever missing from the wire.</summary>
+    public static object ToWire(GameCommand command) => new
+    {
+        type = command.Type, cardId = command.CardId, sourceIds = command.SourceIds,
+        province = command.Province, clanDiscount = command.ClanDiscount, clanAllegiance = command.ClanAllegiance,
+        assignments = command.Assignments, cardIds = command.CardIds, targetId = command.TargetId,
+        abilityId = command.AbilityId, performerId = command.PerformerId, choice = command.Choice,
+        deckPosition = command.DeckPosition, targetPlayerId = command.TargetPlayerId, goldAmount = command.GoldAmount, costOption = command.CostOption, selections = command.Selections, createdCard = command.CreatedCard
+    };
+
     public async Task Submit(GameCommand command)
     {
         if (Busy) return;
@@ -150,14 +176,7 @@ public sealed class MatchSession : IDisposable
         var commandSocket = _socket;
         try
         {
-            var wire = new
-            {
-                type = command.Type, cardId = command.CardId, sourceIds = command.SourceIds,
-                province = command.Province, clanDiscount = command.ClanDiscount, clanAllegiance = command.ClanAllegiance,
-                assignments = command.Assignments, cardIds = command.CardIds, targetId = command.TargetId,
-                abilityId = command.AbilityId, performerId = command.PerformerId, choice = command.Choice
-            };
-            await Send(new { type = "command", commandId = Guid.NewGuid().ToString(), expectedVersion = command.ExpectedVersion, command = wire });
+            await Send(new { type = "command", commandId = Guid.NewGuid().ToString(), expectedVersion = command.ExpectedVersion, command = ToWire(command) });
         }
         catch (Exception e) when (e is WebSocketException or OperationCanceledException or InvalidOperationException)
         {

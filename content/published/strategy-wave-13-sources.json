@@ -1,0 +1,65 @@
+[
+  {
+    "card_id": "oracle-l5r-9925",
+    "printing_set": [
+      "The Shadow's Embrace"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=9925",
+    "image_path": "assets/reference/oracle/the-shadow-s-embrace/webp/oracle-l5r-9925-printing-1-image-1.webp",
+    "image_sha256": "26170c4783c142923795287fd119e363fc7944fcaa2fe1768d75519c17479d7d"
+  },
+  {
+    "card_id": "oracle-l5r-7538",
+    "printing_set": [
+      "Emperor Edition"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=7538",
+    "image_path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-7538-printing-1-image-1.webp",
+    "image_sha256": "12e1f5283f40c06c31f83817d1c264e7a1ee2825bcab8604f070fa1d4c6cfbd4"
+  },
+  {
+    "card_id": "oracle-l5r-7546",
+    "printing_set": [
+      "Emperor Edition"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=7546",
+    "image_path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-7546-printing-1-image-1.webp",
+    "image_sha256": "18b48a9e51c364982a0e26afe6604bed422baa592279daef5331dee950ac5b17"
+  },
+  {
+    "card_id": "oracle-l5r-10748",
+    "printing_set": [
+      "Gates of Chaos"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10748",
+    "image_path": "assets/reference/oracle/gates-of-chaos/webp/oracle-l5r-10748-printing-1-image-1.webp",
+    "image_sha256": "4f93b43bedd5d31b48d04c062e3243d0e33313277a55871ef423b6ff2c156947"
+  },
+  {
+    "card_id": "oracle-l5r-10555",
+    "printing_set": [
+      "Coils of Madness"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10555",
+    "image_path": "assets/reference/oracle/coils-of-madness/webp/oracle-l5r-10555-printing-1-image-1.webp",
+    "image_sha256": "98e522a8ced8cb06c2ad74faff3a24c2845176d84f1bfcb8fc373549621062be"
+  },
+  {
+    "card_id": "oracle-l5r-8362",
+    "printing_set": [
+      "Emperor Edition"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=8362",
+    "image_path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-8362-printing-1-image-1.webp",
+    "image_sha256": "1eb1d0890df302965d3f70efd3279bf6fe68cd1a5058f2fb3e752529d4d0e06b"
+  },
+  {
+    "card_id": "oracle-l5r-9940",
+    "printing_set": [
+      "The Shadow's Embrace"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=9940",
+    "image_path": "assets/reference/oracle/the-shadow-s-embrace/webp/oracle-l5r-9940-printing-1-image-1.webp",
+    "image_sha256": "132c01bf713d6d7e217966f3d9eeb3a32f5fd44f5295bbee197f6e4b522f797e"
+  }
+]

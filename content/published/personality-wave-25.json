@@ -1,0 +1,37 @@
+{
+  "Profile": "personality-wave-25",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-1696",
+      "Name": "Daidoji Yuki",
+      "Type": "Personality",
+      "Clan": "Crane",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Recon Reaction: After engaging at Yuki's battlefield, if all your Personalities there are Scouts: You have Reconnaissance there. You have the first opportunity in this battle to take a Battle action or pass.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1696.jpg",
+      "Keywords": [
+        "Unique",
+        "Crane Clan",
+        "Experienced",
+        "Iron Crane",
+        "Samurai",
+        "Scout"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "yuki-engage-recon"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

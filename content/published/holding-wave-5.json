@@ -1,0 +1,56 @@
+{
+  "Profile": "holding-wave-5",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-6219",
+      "Name": "Red Crane Dojo",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 4,
+      "GoldProduction": 3,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Bow this card: Produce 3 Gold, or 4 Gold when paying for a Ninja card which may only pay for that card.\nNinja Tireless Reaction, Bow this card: After an action targets your Personality, remove Ninja and Shadowlands from him until the action ends.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6219.jpg",
+      "Keywords": [
+        "Dojo",
+        "Ninja"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "red-crane-dojo-ninja"
+      ],
+      "Effect": "red-crane-dojo-gold"
+    },
+    {
+      "Id": "oracle-l5r-1190",
+      "Name": "Bushi Dojo",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 3,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Bow this card: When paying for an action that Equips or creates a Follower, produce 6 Gold which may only pay for one action.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1190.jpg",
+      "Keywords": [
+        "Dojo"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "bushi-dojo-gold"
+    }
+  ],
+  "Decks": []
+}

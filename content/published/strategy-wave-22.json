@@ -1,0 +1,30 @@
+{
+  "Profile": "strategy-wave-22",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-9941",
+      "Name": "Unfortunate Hesitation",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle/Open: Target a Personality: His controller may choose to bow him. If he did not choose this, he must pass at his next opportunity this phase to take a Battle, Limited, or Open action.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9941.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "unfortunate-hesitation"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

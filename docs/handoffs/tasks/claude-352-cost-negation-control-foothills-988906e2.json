@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Mendon's rulings on the #340 open questions: a destruction paid as a cost can be negated and then negates the whole action (seam CostPaymentBlockedByNegation, built on main's ActionNegation); control follows the Personality for cards taken from an enemy pile (OriginalOwnerId, returned to the owner on any exit); Foothills Keep wired (stronghold-wave-5) on a new player-level timing grant (TimingGrants.cs) that adds Battle/Open equips of Weapons without replacing Equip (Limited). Decision doc records all six rulings.",
+  "validation": "bash tools/check.sh --skip-client passes (published count 418 recounted from ids); 17 named mutations each fail named tests; Godot client compiles (dotnet build), headless import/smoke not run locally, CI runs it.",
+  "remaining": "None; ready for review. Open: Weapon-token reading for Yumaru, 'paying all costs' discounts, the Keep-unbowed reading for the timing grant, Rikate to the owner's hand, Cultist Infiltrator's control (decision doc Open questions 5, 6, 9, 10, 11).",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/352",
+  "branch": "claude/352-cost-negation-control-foothills",
+  "updated": "2026-09-19T20:06:05.451984+00:00"
+}

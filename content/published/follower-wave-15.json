@@ -1,0 +1,32 @@
+{
+  "Profile": "follower-wave-15",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-4867",
+      "Name": "Master Scouts",
+      "Type": "Follower",
+      "Clan": "Unaligned",
+      "GoldCost": 3,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": 1,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After the resolution of a Recon action you took: Give this card +1F.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-4867.jpg",
+      "Keywords": [
+        "Elite",
+        "Gaijin",
+        "Scout"
+      ],
+      "Focus": 3,
+      "Abilities": [],
+      "Effect": "force-after-own-recon-action"
+    }
+  ],
+  "Decks": []
+}

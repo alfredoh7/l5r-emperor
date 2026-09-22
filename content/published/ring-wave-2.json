@@ -1,0 +1,34 @@
+{
+  "Profile": "ring-wave-2",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10532",
+      "Name": "False Ring of Earth",
+      "Type": "Ring",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Does not count towards an Enlightenment Victory.\nAfter you win a duel against a Personality who shared no keywords with your Personality in the duel, you may put this Ring into play and lose 2 Honor.\nOther players have -1 maximum hand size.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10532.jpg",
+      "Keywords": [
+        "Unique",
+        "Earth",
+        "Fudo"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "false-ring-of-earth-recruit"
+      ],
+      "Effect": "decrease-other-hand-size"
+    }
+  ],
+  "Decks": []
+}

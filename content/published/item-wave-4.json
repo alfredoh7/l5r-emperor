@@ -1,0 +1,33 @@
+{
+  "Profile": "item-wave-4",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-1004",
+      "Name": "Blade of Champions",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 5,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 1,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: When a Battle action would target a card in this unit, bow this card: The action targets another of your cards instead, if legal.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1004.jpg",
+      "Keywords": [
+        "Unique",
+        "Weapon"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "blade-of-champions-redirect"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

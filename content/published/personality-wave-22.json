@@ -1,0 +1,345 @@
+{
+  "Profile": "personality-wave-22",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-142",
+      "Name": "Agasha Kodo",
+      "Type": "Personality",
+      "Clan": "Phoenix",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 4,
+      "PersonalHonor": 4,
+      "HonorRequirement": 6,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Political Open: Target a Holding: Straighten it.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-142.jpg",
+      "Keywords": [
+        "Courtier",
+        "Phoenix Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "kodo-straighten"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-505",
+      "Name": "Asahina Munefusa",
+      "Type": "Personality",
+      "Clan": "Crane",
+      "GoldCost": 10,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 5,
+      "PersonalHonor": 4,
+      "HonorRequirement": 6,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: Target your Temple Holding: Straighten it.\nBattle: Even if Munefusa is not at the current battlefield, target an attacking Personality: Move him home. If he moved, gain 1 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-505.jpg",
+      "Keywords": [
+        "Air",
+        "Crane Clan",
+        "Shugenja"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "munefusa-straighten",
+        "munefusa-move"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-576",
+      "Name": "Asako Rikate",
+      "Type": "Personality",
+      "Clan": "Phoenix",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 2,
+      "PersonalHonor": 2,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Maho Battle: Target an enemy Personality: His controller may put any attachments in that unit into his hand. Give the Personality -2C.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-576.jpg",
+      "Keywords": [
+        "Blood of Kinuye",
+        "Earth",
+        "Golden Arm",
+        "Henshin",
+        "Monk",
+        "Phoenix Clan",
+        "Shadowlands"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "rikate-detach-chi"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-857",
+      "Name": "Bayushi Nori",
+      "Type": "Personality",
+      "Clan": "Scorpion",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": 1,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Target an enemy Personality: Bow the Personality or all of his attachments. If he is dishonorable, his controller loses 2 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-857.jpg",
+      "Keywords": [
+        "Magistrate",
+        "Samurai",
+        "Scorpion Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "nori-bow-personality",
+        "nori-bow-attachments"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-3150",
+      "Name": "Hida Mimori",
+      "Type": "Personality",
+      "Clan": "Crab",
+      "GoldCost": 10,
+      "GoldProduction": 0,
+      "Force": 8,
+      "Chi": 2,
+      "PersonalHonor": 1,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Target a bowed enemy card: Destroy it.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-3150.jpg",
+      "Keywords": [
+        "Berserker",
+        "Crab Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "mimori-destroy"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-3850",
+      "Name": "Isawa Kojiro",
+      "Type": "Personality",
+      "Clan": "Phoenix",
+      "GoldCost": 10,
+      "GoldProduction": 0,
+      "Force": 5,
+      "Chi": 5,
+      "PersonalHonor": 2,
+      "HonorRequirement": 6,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Kojiro has Naval while he has a Spell.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-3850.jpg",
+      "Keywords": [
+        "Cavalry",
+        "Phoenix Clan",
+        "Shugenja",
+        "Water"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "naval-while-has-spell"
+    },
+    {
+      "Id": "oracle-l5r-3866",
+      "Name": "Isawa Mitsuko",
+      "Type": "Personality",
+      "Clan": "Phoenix",
+      "GoldCost": 9,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 5,
+      "PersonalHonor": 3,
+      "HonorRequirement": 6,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: Target an Air Shugenja or a Holding: Straighten it.\nBattle: Target an enemy Personality: Bow him. Destroy him if he is Kolat, Ninja, or Shadowlands.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-3866.jpg",
+      "Keywords": [
+        "Unique",
+        "Air",
+        "Elemental Master",
+        "Experienced",
+        "Inquisitor",
+        "Magistrate",
+        "Phoenix Clan",
+        "Shugenja"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "mitsuko-straighten",
+        "mitsuko-bow-destroy"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-7103",
+      "Name": "Shosuro Hawado",
+      "Type": "Personality",
+      "Clan": "Scorpion",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 2,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Even if Hawado is bowed, remove a Dynasty card in any discard pile from the game: Move Hawado home or to a battlefield with one or more enemy units. If she moved, straighten her.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7103.jpg",
+      "Keywords": [
+        "Ninja",
+        "Scorpion Clan",
+        "Shadowspawn"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "hawado-move-home",
+        "hawado-move-battlefield"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-7151",
+      "Name": "Shosuro Rin",
+      "Type": "Personality",
+      "Clan": "Scorpion",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Political Open: Bow Rin and target an honorable Personality: Rin shames him in a performance. The Personality's controller may dishonor him. If he did not choose this, bow him and negate his straightening (this turn).",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7151.jpg",
+      "Keywords": [
+        "Actor",
+        "Artisan",
+        "Courtier",
+        "Eye of Shadow",
+        "Scorpion Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "rin-shame"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-7360",
+      "Name": "Soshi Neiru",
+      "Type": "Personality",
+      "Clan": "Scorpion",
+      "GoldCost": 4,
+      "GoldProduction": 0,
+      "Force": 1,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": 1,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "You may equip Air Spells to Neiru as an Open action.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7360.jpg",
+      "Keywords": [
+        "Air",
+        "Prodigy",
+        "Scorpion Clan",
+        "Shugenja"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "neiru-equip"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-7676",
+      "Name": "Sutigu",
+      "Type": "Personality",
+      "Clan": "Spider",
+      "GoldCost": 6,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 3,
+      "PersonalHonor": 1,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Bow Sutigu or one of his Weapons, and target an enemy card: Negate its straightening (until the turn ends) if it is an attachment. Bow it.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7676.jpg",
+      "Keywords": [
+        "Kensai",
+        "Monk",
+        "Spider Clan",
+        "Tiger's Claw"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "sutigu-bow"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9605",
+      "Name": "Yoritomo Minori",
+      "Type": "Personality",
+      "Clan": "Mantis",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 1,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Minori has +1F for each other Magistrate in her army.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9605.jpg",
+      "Keywords": [
+        "Naval",
+        "Half-Naga",
+        "Magistrate",
+        "Mantis Clan",
+        "Samurai"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "force-per-other-magistrate-in-army"
+    }
+  ],
+  "Decks": []
+}

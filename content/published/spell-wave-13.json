@@ -1,0 +1,57 @@
+{
+  "Profile": "spell-wave-13",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-6141",
+      "Name": "Rage of the Spirits",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Even if this unit is not at the current battlefield, bow this Shugenja and your performing Spirit, and target an enemy card without attachments and with Force lower than or equal to your Spirit's: Destroy the enemy card. If this Shugenja is Earth, gain 1 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6141.jpg",
+      "Keywords": [
+        "Earth"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "rage-of-the-spirits-destroy"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-2380",
+      "Name": "Essence of Undeath",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle/Open: Destroy this card and target your dead Personality: Bring him into play at this Shugenja's location, paying all costs. Permanently give him Shadowlands and Undead. Lose 2 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-2380.jpg",
+      "Keywords": [
+        "Maho"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "essence-of-undeath-recruit"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}
