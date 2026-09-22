@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Revise next-five demos from Alfredo hands-on feedback; payment accepted, copy marker concepts pending.",
+  "validation": "Planning record only; native checks pending.",
+  "remaining": "Implement and validate top-card, target and phase-bar revisions; present ethereal marker options. No merge authorized.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/323",
+  "branch": "codex/323-review-revisions",
+  "updated": "2026-09-22T09:52:42.177810+00:00"
+}
