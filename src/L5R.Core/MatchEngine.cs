@@ -2554,6 +2554,9 @@ public sealed partial class MatchEngine
                 else if(Definition(card).Type==CardType.Region) ResolveRegion(player,province,card);
                 else if(Definition(card).Type==CardType.Celestial) ResolveCelestial(player,province,card);
             }
+            // An Event already face up (refilled face up by Border Keep's cycle or the Kharmic replacement) was never
+            // revealed here, but Events resolve only in the Events Phase: it resolves now instead of staying stuck.
+            else if(Definition(card).Type==CardType.Event && ResolveEvent(player,province,card)) return;
         }
         AdvanceStraightenHolds(StraightenPoint.EventsRevealEnds);
         // Suspicions-shaped ongoing Event effects: re-checked every Events Phase (see ResolveOngoingEvents),

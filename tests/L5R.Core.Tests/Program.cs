@@ -174,6 +174,7 @@ var tests = new (string Name, Action Run)[]
     ("Issue #216: Brash (the Defender may draw a card, once per Brash card assigned to attack); Force redirection (Togashi Noboru -- a targeted enemy Personality's own Force, never its Followers', counts toward Noboru's controller's army instead, live-rechecked at resolution against 'while you have at least one unit in your current army'); the new 'after a bow resolves' Reaction trigger family (Togashi Hizumi -- location-scoped on the trigger, negating that same Personality's own next straightening, which Straighten() now correctly clears once consumed rather than blocking every attempt the rest of the turn; Tamori Ruya -- actor-scoped on the trigger instead, bowing an unrelated Personality at her own location, Home or a battlefield); Tamori Yayu (a bow-or-destroy dual-cost Ranged Attack restricted to his own attached Spells); Mirumoto Katagi and Tamori Shinji (single-card Gold discounts -- a Non-Unique Weapon attaching to Katagi, and Shinji's own Reserve-while-Defender recruit)", BrashForceRedirectAndBowReactions),
     ("Overconfident (issue #223): each other player may optionally draw a card after an Overconfident card enters OR leaves play -- a queue (PendingOverconfidentDraws) populated from the single MarkDead choke point (leaving play; 'leaves' means dying while actually InPlay, excluding both a province/deck discard via DestroyProvince and MakeDead applied to a card already sitting in a discard pile) and from Purchase/RecruitReserve (entering play), drained at every point the engine would otherwise hand back priority (PassReaction's own window-close, Purchase, RecruitReserve, ExecuteAbilityEffects, FinishBattleResolution via the new FinishBattleReturnHomeAndTransition split, ResolveDuel, OrderSeppuku), including a tie battle queuing separate sequential offers for both sides. Kitsuki Minori's live Keyword() suppression (no Overconfident at all, in or out of play, while the other player is Lion Clan); Asahina Tsugio/Asako Kijo's MaxHandSize (raises only an opponent's own hand-size threshold, never the controller's own); Bayushi Mugoshi's own entering-play Reaction chaining into the Overconfident offer once its own window closes", OverconfidentPrimitive),
     ("Event wave 1: Suspicions, the first Event resolved through the Events-Phase dispatch (ResolveEvent) -- revealed, removed from its province and refilled immediately, both players lose 1 Honor (revealing player first) the same turn it is revealed; the ongoing effect fires before each of its owner's later Action Phases (never on the opponent's turn), with the card never leaving the new public Zone.EventInPlay/PlayerView.EventsInPlay for the discard pile", SuspicionsEventInPlay),
+    ("An Event already face up in a province (refilled face up) resolves at its owner's next Events Phase instead of staying stuck", FaceUpEventResolvesInEventsPhase),
     ("Region primitive: a Region attaches to a PROVINCE (the new Zone.Region/ProvinceState.RegionId), not to a card; a second Region revealed at an already-regioned province is discarded instead of replacing the first; destroying a province discards whichever Region was attached to it and clears the pointer", RegionAttachmentPrimitive),
     ("Region wave 1: Fallow Lands -- a static province-strength bonus live-recomputed from the attached Region (EffectiveProvinceStrength), applied immediately without respect to presence; reveal/attach/refill mechanics; its Reaction weakens a Melee/Ranged Attack by 2, usable the same turn it enters play, gated on the Attack actually being at Fallow Lands' own province with its controller's own presence there (a Region never satisfies presence itself)", FallowLandsRegion),
     ("Region wave 1: Low Market -- an Open ability (not the ordinary Limited-only Equip() command, not a PlayerAbility like Equip (Battle)) that bows itself as its entire cost/limiter, Equips a targeted Item/Follower/Spell from hand to a chosen Personality at a genuine 2-Gold discount floored at a minimum of 1", LowMarketEquip),
@@ -495,6 +496,23 @@ static void SuspicionsEventInPlay()
     Equal(e.State.Players[0].Honor,honor0-2);
     Equal(e.State.Players[1].Honor,honor1-2);
     Equal(e.State.Cards[card.Id].Zone,Zone.EventInPlay);
+}
+static void FaceUpEventResolvesInEventsPhase()
+{
+    // Refilled face up outside the Events Phase (Border Keep, the Kharmic replacement): never revealed,
+    // but still resolved at its owner's next Events Phase rather than left sitting in the province.
+    var s=MatchEngine.CreateEconomyScenario().State;
+    var card=Add(s,"oracle-l5r-7675",1,Zone.Province,province:0);
+    card.FaceUp=true;
+    s.Players[1].Provinces[0].CardId=card.Id;
+    var honor0=s.Players[0].Honor; var honor1=s.Players[1].Honor;
+    var e=MatchEngine.FromTestState(s);
+    SkipToDynasty(e); Accept(e,Cmd(e,"endDynasty"));
+    Equal(e.State.Phase,Phase.Action); Equal(e.State.ActivePlayerId,1);
+    Equal(e.State.Cards[card.Id].Zone,Zone.EventInPlay);
+    Check(e.State.Players[1].Provinces[0].CardId!=card.Id,"Removed from its province and refilled");
+    Equal(e.State.Players[0].Honor,honor0-1);
+    Equal(e.State.Players[1].Honor,honor1-1);
 }
 static void RegionAttachmentPrimitive()
 {
