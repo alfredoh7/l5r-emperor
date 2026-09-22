@@ -16,13 +16,22 @@ public partial class Main
     private CardTile? _probeTile;
     private double _nextCameraProbe = .25;
 
+    private const string CaptureMouseTag = "native_acceptance_mouse";
+    private bool IsMouseInputCapture => _capturePath is not null &&
+        _captureMode.StartsWith("published-board", StringComparison.Ordinal) &&
+        (_captureMode.Contains("camera", StringComparison.Ordinal) || _captureMode.Contains("deselect", StringComparison.Ordinal));
+    private void PushCaptureMouse(InputEventMouse mouse)
+    {
+        mouse.SetMeta(CaptureMouseTag, true);
+        GetViewport().PushInput(mouse, true);
+    }
     private void MoveProbeMouse(Vector2 point, Vector2 relative = default)
     {
         GetViewport().WarpMouse(point);
-        GetViewport().PushInput(new InputEventMouseMotion { Position = point, GlobalPosition = point, Relative = relative }, true);
+        PushCaptureMouse(new InputEventMouseMotion { Position = point, GlobalPosition = point, Relative = relative });
     }
-    private void CameraMouse(MouseButton button, bool pressed, Vector2 point) => GetViewport().PushInput(
-        new InputEventMouseButton { ButtonIndex = button, Pressed = pressed, Position = point, GlobalPosition = point, Factor = 1 }, true);
+    private void CameraMouse(MouseButton button, bool pressed, Vector2 point) => PushCaptureMouse(
+        new InputEventMouseButton { ButtonIndex = button, Pressed = pressed, Position = point, GlobalPosition = point, Factor = 1 });
     private void CameraKey(Key key, bool pressed) => Input.ParseInputEvent(new InputEventKey { Keycode = key, PhysicalKeycode = key, Pressed = pressed });
     private void RequireCamera(bool value, string message) { if (!value) throw new InvalidOperationException("Camera acceptance: " + message); }
 
@@ -37,6 +46,11 @@ public partial class Main
             return;
         }
         _nextCameraProbe = _captureClock + .12;
+        if (_captureMode.Contains("coverage", StringComparison.Ordinal))
+        {
+            if (_cameraProbeStep++ == 0) _ = CaptureTableCoverage();
+            return;
+        }
         try
         {
             switch (_cameraProbeStep++)
@@ -88,7 +102,7 @@ public partial class Main
                     RequireCamera(_cameraCenter.X > _probeCenter.X, "arrow-key pan failed");
                     CameraKey(Key.Home, true); CameraKey(Key.Home, false); break;
                 case 9:
-                    RequireCamera(_cameraFitted && Mathf.IsEqualApprox(_cameraZoom, FitZoom), "Home did not restore overview");
+                    RequireCamera(_cameraFitted && Mathf.IsEqualApprox(_cameraZoom, FitZoom), $"Home did not restore overview (fitted={_cameraFitted}, zoom={_cameraZoom}, fit={FitZoom}, focus={GetWindow().HasFocus()}, blocked={CameraBlocked}, right={Input.IsPhysicalKeyPressed(Key.Right)}, gui={GetViewport().GuiGetFocusOwner()?.Name}, table={TableFocus?.Name})");
                     _probeZoom = _cameraZoom;
                     _probePoint = _inspectorPanel.GetGlobalRect().GetCenter(); MoveProbeMouse(_probePoint); break;
                 case 10:
