@@ -70,6 +70,8 @@ public sealed partial class MatchEngine
         {
             // Measure of Devotion (oracle-l5r-5013): "After the resolution of a Battle action that destroyed one of your Deathseekers."
             "measure-of-devotion-create" => AbilityCatalog.All[facts.AbilityId].Timing == "Battle" && LastActionDestroyedOwnKeyword(playerId, "Deathseeker"),
+            // Akodo Kobi - exp (oracle-l5r-232): "After another player's Battle action resolves which destroyed one of your Lion Clan Personalities."
+            "kobi-recruit" => facts.PlayerId != playerId && AbilityCatalog.All[facts.AbilityId].Timing == "Battle" && LastActionDestroyedOwnKeyword(playerId, "Lion Clan"),
             // Synthetic fixture (issue #437): "after the resolution of an action that destroyed one of your Personalities, gain 3 Honor" -- no
             // Timing/keyword narrowing, exercising AfterActionResolvedApplies/the window itself directly rather than through a real card's own
             // extra conditions.

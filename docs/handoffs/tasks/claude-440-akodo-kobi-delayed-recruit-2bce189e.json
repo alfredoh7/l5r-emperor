@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Follow-up to Akodo Ashiko (#440): wired Akodo Kobi - exp (oracle-l5r-232). Her Tactical +1F trait is one more AfterOwnActionTraits entry. Her Reaction's own trigger needed nothing further -- issue #437's after-action-resolved window already covers 'after another player's Battle action destroyed one of your Lion Clan Personalities' ('at the current battlefield' holds by construction). Its effect is delayed ('before the current turn ends', mandatory once triggered), which needed one new small primitive after surveying the engine's other delayed-effect mechanisms (DelayedDestruction, BeforeResolution's DelayedBattleEffect, StraightenHolds, PendingTamokoHonorChecks) and finding none fit: MatchState.PendingEndPhaseRecruits, drained by EndTurn at the same point PendingTamokoHonorChecks/ResolveDelayedDestructions already run, so it naturally fires at 'the next End Phase, any player's' with no extra scheduling logic. BringDeadPersonalityIntoPlay already ignores costs/Honor Requirements by construction, reused as-is. Deliberately does not open an entering-play Reaction window (would interrupt EndTurn's own transition with no resume path); documented as a known, narrow gap for a future card that needs one. Lane is shared only because docs/CARD_INVENTORY.xlsx and the decision doc fall outside rules/ui path patterns; every code change is rules-lane. See docs/decisions/2026-09-22-akodo-kobi-delayed-recruit.md.",
+  "validation": "5 new tests (akodo-kobi), full core test suite green, bash tools/check.sh --skip-client exits 0.",
+  "remaining": "None for this task. The skipped entering-play-Reaction path for a queued recruit is a documented, narrow follow-up if a future Lion Clan Personality needs it.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/440",
+  "branch": "claude/440-akodo-kobi-delayed-recruit",
+  "updated": "2026-09-22T13:59:26.098872+00:00"
+}

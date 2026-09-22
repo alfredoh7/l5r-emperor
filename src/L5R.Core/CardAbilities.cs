@@ -1870,6 +1870,14 @@ public static class AbilityCatalog
         ["measure-of-devotion-create"] = new("Reaction", "After the resolution of a Battle action that destroyed one of your Deathseekers: Create a 2F/2C/0PH Lion Clan · Samurai · Deathseeker Personality at the current battlefield. Gain 1 Honor",
             "none", Trigger: AfterActionReactionTriggers.AfterActionResolved,
             Creates: new(CardType.Personality, Force: 2, Chi: 2, PersonalHonor: 0, Keywords: ["Lion Clan", "Samurai", "Deathseeker"], ProxyId: "oracle-l5r-9710", AtBattlefield: true)),
+        // Akodo Kobi - exp (oracle-l5r-232, issue #440 follow-up): "Reaction: After another player's Battle action resolves which destroyed one of your Lion Clan
+        // Personalities at the current battlefield, before the current turn ends, if the destroyed Personality is dead, Recruit him, ignoring costs and Honor
+        // Requirements." "At the current battlefield" is true by construction: a Battle action's own destruction always lands on a card that was there (the same
+        // reasoning Tamori Shinji's own Reserve-while-Defender note already uses for its own "are you the Defender" clause). The Reaction itself fires once,
+        // immediately (the after-action-resolved window, same as Measure of Devotion); its own effect is queuing the delayed recruit, not recruiting outright --
+        // see MatchState.PendingEndPhaseRecruits and MatchEngine.ResolvePendingEndPhaseRecruits.
+        ["kobi-recruit"] = new("Reaction", "After another player's Battle action resolves which destroyed one of your Lion Clan Personalities at the current battlefield: before the current turn ends, if the destroyed Personality is dead, Recruit him, ignoring costs and Honor Requirements",
+            "none", Trigger: AfterActionReactionTriggers.AfterActionResolved),
         // Necessary Evil (oracle-l5r-5524): "Open: If you control a Personality, target a Personality and pay Gold equal to the number of Personalities you control, or 4, whichever is higher: The targeted
         // Personality may not assign to battlefields." The movement lock (MovementLocks.cs) for the turn, of assignment alone.
         ["necessary-evil-lock"] = new("Open", "If you control a Personality, target a Personality and pay Gold equal to the number of Personalities you control, or 4, whichever is higher: The targeted Personality may not assign to battlefields",
@@ -3175,6 +3183,8 @@ public sealed partial class MatchEngine
     {
         // Daidoji Ebizo (oracle-l5r-1629): "After the resolution of your Recon action: Give Ebizo +1F."
         ["force-after-own-recon-action"] = ("Recon", "Force", 1),
+        // Akodo Kobi - exp (oracle-l5r-232, issue #440 follow-up): "After the resolution of your Tactical action, give Kobi +1F."
+        ["kobi-tactical-bonus"] = ("Tactical", "Force", 1),
     };
     private void FireAfterOwnActionTraits(AbilityDefinition ability, int actingPlayerId, CardInstance? source)
     {
@@ -6372,6 +6382,13 @@ public sealed partial class MatchEngine
             case "measure-of-devotion-create":
                 if (ExecuteCreate(ability, ability.Creates!, command, player, () => GainHonor(player.Id, 1, "Measure of Devotion", source))) return;
                 break;
+            case "kobi-recruit":
+            {
+                var kobiDestroyed = _state.LastResolvedAction!.Affected.First(a => a.Kind == DestroyedKind && Card(a.CardId).OwnerId == player.Id && Keyword(Card(a.CardId), "Lion Clan"));
+                _state.PendingEndPhaseRecruits.Add(new(player.Id, kobiDestroyed.CardId, Definition(source!).Name));
+                Emit("kobiRecruitQueued", $"{Definition(source!).Name}: {Definition(Card(kobiDestroyed.CardId)).Name} will be recruited before the turn ends, if he is still dead.", player.Id, source!.Id);
+                break;
+            }
             case "singh-remnants-attach": case "training-personality-entry-watch":
             {
                 var enteredPersonality = Card(_state.PendingChoice!.CardId!);
