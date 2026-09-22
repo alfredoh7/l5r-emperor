@@ -10,6 +10,7 @@ public partial class Main
     private static void Click(Button button) => button.EmitSignal(BaseButton.SignalName.Pressed);
     private void ProcessMenuCapture(double delta)
     {
+        if (_captureMode.StartsWith("menu-duel", StringComparison.Ordinal)) { ProcessDuelDemoCapture(delta); return; }
         _captureClock += delta;
         if (_captureClock < .7) return;
         var menu = _titleMenu!;
@@ -48,7 +49,7 @@ public partial class Main
             void MouseClick(Control control) { var point=control.GetGlobalRect().GetCenter(); Input.ParseInputEvent(new InputEventMouseMotion { Position=point, GlobalPosition=point }); Input.ParseInputEvent(new InputEventMouseButton { Position=point, GlobalPosition=point, ButtonIndex=MouseButton.Left, Pressed=true }); Input.ParseInputEvent(new InputEventMouseButton { Position=point, GlobalPosition=point, ButtonIndex=MouseButton.Left, Pressed=false }); }
             if (_menuProbeStep == 1) { KeyEvent(Key.Enter); _menuProbeStep++; _captureClock=0; return; }
             if (_menuProbeStep == 2) { MenuAssert(menu.Page == "play", "native Enter activates focused Play"); KeyEvent(Key.Escape); _menuProbeStep++; _captureClock=0; return; }
-            if (_menuProbeStep == 3) { MenuAssert(menu.Page == "main", "native Escape returns from clan selection"); MouseClick(menu.Entries.GetChild<Control>(3)); _menuProbeStep++; _captureClock=0; return; }
+            if (_menuProbeStep == 3) { MenuAssert(menu.Page == "main", $"native Escape returns from clan selection (page={menu.Page}, focus={GetViewport().GuiGetFocusOwner()?.GetPath()})"); MouseClick(menu.Entries.GetChildren().OfType<Button>().Single(b=>b.Text=="OPTIONS")); _menuProbeStep++; _captureClock=0; return; }
             if (_menuProbeStep == 4) { MenuAssert(menu.Page == "options", "native mouse hits Options at rendered coordinates"); MouseClick(menu.Entries.GetChildren().OfType<CheckBox>().Last()); _menuProbeStep++; _captureClock=0; return; }
             if (_menuProbeStep == 5) { MenuAssert(_reducedMotion, "native mouse toggles reduced motion"); DirAccess.RemoveAbsolute(ProjectSettings.GlobalizePath(_preferences.Path)); KeyEvent(Key.F11); _menuProbeStep++; _captureClock=0; return; }
             if (_menuProbeStep == 6) { MenuAssert(IsFullscreen, "native F11 enters fullscreen"); KeyEvent(Key.F11); _menuProbeStep++; _captureClock=0; return; }
@@ -78,14 +79,12 @@ public partial class Main
         {
             if (_menuProbeStep == 1)
             {
-                Click(menu.Entries.GetChild<Button>(0)); MenuAssert(menu.Page == "play", "Play opens clan selection");
-                Click(menu.Entries.GetChild<Button>(1)); MenuAssert(menu.Page == "name" && _session.Snapshot is null, "deck selection opens name entry before creating a match");
-                var field = menu.Entries.GetChildren().OfType<LineEdit>().Single();
-                var begin = menu.Entries.GetChildren().OfType<Button>().First();
-                field.Text = "   "; MenuAssert(begin.Disabled, "blank name cannot start match");
-                field.Text = " Alfredo "; Click(begin);
-                MenuAssert(!MenuVisible && Self.Clan == "Lion" && Self.Name == "Alfredo", "name entry starts the selected published deck with trimmed local name");
-                var reloaded = new MenuPreferences(_preferencesProfile); reloaded.Load(); MenuAssert(reloaded.DisplayName == "Alfredo", "local name is remembered by a fresh preferences instance");
+                Click(menu.Entries.GetChild<Button>(0)); MenuAssert(menu.Page == "play", "Play opens match choices");
+                Click(menu.Entries.GetChild<Button>(0)); MenuAssert(PracticeVisible && _session.Snapshot is null, "Practice setup opens before creating a match");
+                var setup=_practiceLayer!.GetChildren().OfType<PracticeSetupScreen>().Single();
+                setup.Browse(0);setup.Select(PracticeSetupScreen.Preset("Lion"));setup.Browse(1);setup.Select(PracticeSetupScreen.Preset("Crane"));setup.ShowSetup();
+                _preferences.DisplayName="Alfredo";_preferences.Save();ApplyPreferences(false);Click(setup.StartButton);
+                MenuAssert(!MenuVisible && !PracticeVisible && Self.Clan=="Lion" && Self.Name=="Alfredo", "chosen decks and saved display name start custom Practice");
                 _session.SwitchPracticeSeat(); MenuAssert(View.Players.Single(p=>p.Clan=="Lion").Name=="Alfredo" && Self.Name!="Alfredo", "passing device does not move name to opponent"); _session.SwitchPracticeSeat();
                 _menuProbeVersion = View.Version; ShowMainMenu(); _captureClock = 0; _menuProbeStep++; return;
             }
@@ -93,8 +92,11 @@ public partial class Main
             {
                 MenuAssert(View.Version == _menuProbeVersion, "practice stays paused behind main menu");
                 menu.ShowPlay(); Click(menu.Entries.GetChild<Button>(0)); MenuAssert(!MenuVisible && View.Version == _menuProbeVersion, "return resumes unchanged practice");
-                ShowMainMenu(); menu.ShowPlay(); Click(menu.Entries.GetChild<Button>(1)); MenuAssert(menu.Page == "replace", "replacing an existing match requires confirmation");
-                Click(menu.Entries.GetChildren().OfType<Button>().Last()); MenuAssert(menu.Page == "play", "cancel replacement keeps current match");
+                ShowMainMenu();menu.ShowPlay();Click(menu.Entries.GetChild<Button>(1));MenuAssert(PracticeVisible,"new Practice opens selection without replacing active match");
+                var setup=_practiceLayer!.GetChildren().OfType<PracticeSetupScreen>().Single();
+                var expected=View.Version;Click(setup.StartButton);var confirm=GetChildren().OfType<ConfirmationDialog>().Single(d=>d.Visible);
+                MenuAssert(confirm.Visible&&View.Version==expected,"replacing an existing match requires confirmation");
+                confirm.EmitSignal(ConfirmationDialog.SignalName.Canceled);ClosePracticeSetup();MenuAssert(View.Version==expected,"cancel replacement keeps current match");
                 menu.ShowOptions();
                 var motion = menu.Entries.GetChildren().OfType<CheckBox>().Last(); motion.ButtonPressed = true;
                 MenuAssert(_reducedMotion && _preferences.ReducedMotion, "reduced motion applies to game and menu");

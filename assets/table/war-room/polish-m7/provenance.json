@@ -1,0 +1,76 @@
+{
+  "date": "2026-09-16",
+  "generator": "Built-in imagegen: four dedicated references derived from approved B3; direct Meshy CLI for requested object/material variants.",
+  "reference": "assets/table/war-room/approved-fortress-hall-b3.png",
+  "reference_sha256": "a12b4e6350268639f5670bc45b923a7c2b1bac14572adf283afab1c247c46059",
+  "requested_changes": [
+    "Varied worn polished floor boards",
+    "Varied matte stone column feet",
+    "Remove tabletop lamps and their lighting pools",
+    "Remove side spear racks",
+    "Retexture both perimeter chests",
+    "Detailed fitted dais and steps",
+    "Close side walls with shoji; retain rear views"
+  ],
+  "source_images": {
+    "assets/table/war-room/polish-m7/floor-reference.png": "4bba2158ccb151522316d828c787ab03b55533ecac3f1a0f8ca41dfb719b6e5f",
+    "assets/table/war-room/polish-m7/stone-reference.png": "ae30775d4d88a6d2a96c2e67b7fe349f0d32f1135a2e26cb4386bd8d19488fdd",
+    "assets/table/war-room/polish-m7/dais-reference.png": "df7103c90b58e1c0ec76834cafe578588cfd1a924aa5874d30d61764af006b24",
+    "assets/table/war-room/polish-m7/chest-reference.png": "7cb5134072357544a3afc7bf37bb624c8588385f92a50965b17e5b18c9cf6255"
+  },
+  "jobs": [
+    {
+      "asset": "stone-a-m7",
+      "task_id": "01a0a78c-df9e-7735-9288-01d8b575ebaf",
+      "credits": 35,
+      "status": "Inspected original, then prepared in Blender for native review."
+    },
+    {
+      "asset": "floor-a-m7",
+      "task_id": "01a0a78f-f6fa-775c-88ac-039c2e449a84",
+      "credits": 10,
+      "status": "Inspected original, then prepared in Blender for native review."
+    },
+    {
+      "asset": "chest-m7",
+      "task_id": "01a0a78f-ff07-7255-b527-4b43b5825111",
+      "credits": 10,
+      "status": "Inspected original, then prepared in Blender for native review."
+    },
+    {
+      "asset": "dais-m7",
+      "task_id": "01a0a790-1181-74b2-a21b-1bdb46371520",
+      "credits": 35,
+      "status": "Rejected: Meshy flattened the steps into a single slab. Retained in ignored artifacts; replaced by fitted Blender geometry plus Meshy retexture."
+    },
+    {
+      "asset": "floor-b-m7",
+      "task_id": "01a0a794-a86b-714d-8951-20b1c30ddfb5",
+      "credits": 10,
+      "status": "Inspected original, then prepared in Blender for native review."
+    },
+    {
+      "asset": "floor-c-m7",
+      "task_id": "01a0a794-b02d-725b-bb18-88c9718d41b6",
+      "credits": 10,
+      "status": "Inspected original, then prepared in Blender for native review."
+    },
+    {
+      "asset": "stone-b-m7",
+      "task_id": "01a0a794-b7bd-76b9-994f-e1f1e57e5b79",
+      "credits": 35,
+      "status": "Inspected original, then prepared in Blender for native review."
+    },
+    {
+      "asset": "dais-fit-m7",
+      "task_id": "01a0a796-9822-7331-afcd-9b1d5d40b042",
+      "credits": 10,
+      "status": "Inspected original, then prepared in Blender for native review."
+    }
+  ],
+  "credits_this_pass": 155,
+  "balance_before": 1620,
+  "balance_after": 1465,
+  "approval": "Implementation authorized by latest user request. Final native visual acceptance remains for review.",
+  "cleanup": "Original 4K Meshy results preserved under ignored artifacts/meshy; prepared source and runtime use 2K maps. Existing timber separated from old combined stone foot; no extra Meshy job for timber. Fitted boards and dais geometry created in Blender, Meshy supplies PBR textures. Shoji geometry is direct Blender carpentry."
+}

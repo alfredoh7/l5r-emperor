@@ -199,6 +199,24 @@ foreach(var seed in new ulong[]{1,42,831,20260906,99999})
     Run($"seed {seed}: legal complete training match, bounded decisions and deterministic replay",()=>Play(seed));
 foreach(var seed in new ulong[]{1,42,831,20260906,99999})
     Run($"seed {seed}: published abilities, complete match and replay",()=>Play(seed,true));
+foreach(var pair in new[]{("Crane","Lion"),("Lion","Crane"),("Crane","Crane"),("Lion","Lion")})
+    Run($"custom Practice {pair.Item1}/{pair.Item2}: complete match and replay",()=>Play(42,custom:pair));
+foreach(var scenario in DuelDemoScenarios.All)
+foreach(var seed in new ulong[]{1,205,9876})
+    Run($"Duel {scenario.Id}, seed {seed}: permitted views, completion and replay",()=> {
+        var e=MatchEngine.CreateDuelDemo(scenario.Id,seed);
+        var start=e.QueryActions(0).First(a=>a.Enabled&&a.Command?.AbilityId==scenario.ChallengeAbility).Command!;
+        Check(e.Execute(start).Accepted,"Challenge failed");
+        for(var n=0;n<40&&!e.GetView(0).LastDuel!.Complete;n++) {
+            var seat=e.GetView(0).PriorityPlayerId;
+            var view=JsonSerializer.Deserialize<MatchView>(JsonSerializer.Serialize(e.GetView(seat)))!;
+            var action=DuelOpponent.Choose(view,e.QueryActions(seat));
+            Check(action is not null,$"No decision in {view.PendingDuel?.Stage}/{view.PendingChoice?.Type}");
+            Check(e.Execute(action!).Accepted,"Illegal bot command");
+        }
+        Check(e.GetView(0).LastDuel!.Complete,"Bot stalled");
+        Check(JsonSerializer.Serialize(e.State)==JsonSerializer.Serialize(MatchEngine.Replay(e.ExportReplay()).State),"Replay mismatch");
+    });
 runner.Run("ai",tests);
 return runner.Finish();
 
@@ -255,9 +273,9 @@ static void PlaySearchMatch(ulong seed)
     Check(JsonSerializer.Serialize(replay.GetView(0))==JsonSerializer.Serialize(game.GetView(0)) && JsonSerializer.Serialize(replay.State)==JsonSerializer.Serialize(game.State),"Replay differs (shuffles included)");
     Console.WriteLine($"  {commands} decisions; {view.ShownCards.Length} cards shown; {view.Events.Count(e=>e.Type=="deckShuffled")} shuffles; {view.VictoryReason}; turn {view.TurnNumber}");
 }
-static void Play(ulong seed,bool published=false)
+static void Play(ulong seed,bool published=false,(string Your,string Opponent)? custom=null)
 {
-    var game=published?MatchEngine.CreatePublishedMatch(seed):MatchEngine.CreateStarterMatch(seed); var commands=0;
+    var game=custom is {} pair?MatchEngine.CreateCustomMatch(seed,CustomPractice.Preset(pair.Your),CustomPractice.Preset(pair.Opponent)):published?MatchEngine.CreatePublishedMatch(seed):MatchEngine.CreateStarterMatch(seed); var commands=0;
     while(game.GetView(0).WinnerId is null && commands<1600)
     {
         var player=game.GetView(0).PriorityPlayerId; CheckSeppukuTiming(game,player); CheckSeppukuTiming(game,1-player);

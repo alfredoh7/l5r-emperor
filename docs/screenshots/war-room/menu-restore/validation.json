@@ -1,0 +1,153 @@
+{
+  "date": "2026-09-16",
+  "source_branch": "origin/codex/168-lacquer-menus",
+  "source_commit": "5f438d427467d7e2f0e87c6c789b3c00377eecca",
+  "room_before_restore": "66854b5f43bf3f4822fbe7ccccdb971fbcef92f4",
+  "build": "0 warnings; 0 errors",
+  "import": "pass",
+  "native_cases": [
+    {
+      "name": "menu",
+      "result": "pass",
+      "log_sha256": "e6a1628910e891884535fdca0c390e687ce028ec36d5e3a86ff953f38f0883d3",
+      "capture_sha256": "63f7bb35fbd987cffb6305d52f3f1738332453e59bf8aea6e3500d1cbbf023ba"
+    },
+    {
+      "name": "guide",
+      "result": "pass",
+      "log_sha256": "d3c27059e25d974a0b633023c371ef47590368a286fe98335b052b6f437c1b99",
+      "capture_sha256": "2770817e255f91ac75321611f22d98e2729ac949659d4c032f3588d80493ab55"
+    },
+    {
+      "name": "card-hover",
+      "result": "pass",
+      "log_sha256": "24cb50c0af21a2f7c4a1e923f6297de1286f97e6c00f3a4967417703107f2983",
+      "capture_sha256": "b385974ae30109698ae88ebb0eb6bec47d1531bc30a2e90db61067ae3c06823e"
+    },
+    {
+      "name": "tooltip",
+      "result": "pass",
+      "log_sha256": "330b7aea7f81c255c15f96998bda2884eba717a2db6c439ce952d6875059c9c4",
+      "capture_sha256": "d5d331fd2a9d524715db525acd2b5765155b6ba4bc417790aff46af92d9819b8"
+    },
+    {
+      "name": "history",
+      "result": "pass",
+      "log_sha256": "972d785c55c6ef938c0ac0e0a975760232b20a0a262cf9b00a4c1140300fba43",
+      "capture_sha256": "01edf2b0b772c946fb9a14c2056a6185b5c36914a914d3f75a25986661f438d8"
+    },
+    {
+      "name": "coverage",
+      "result": "pass",
+      "log_sha256": "46e99acce38a71930381279f27bf3177cff2894d0c41214089a484c70886816f",
+      "capture_sha256": "d44fe3f975071b3697c6a23a5c5e5e1fc282cd0dfc72b22b5ad18e12673343a4"
+    },
+    {
+      "name": "pile",
+      "result": "pass",
+      "log_sha256": "33e1ea48c094fdaf378cfc009becc5bd9523590c41a104b56a8e637d246428a1",
+      "capture_sha256": "664f50a25e825d4cc723f30006925cecb50fc6bbb8ab89a1dd7c48d5f278dfcb"
+    },
+    {
+      "name": "menu-compact",
+      "result": "pass",
+      "log_sha256": "b46d01eca43290c34af7b57761e315794313f8aba00f913d18e679464ba53e02",
+      "capture_sha256": "b3ea030d6298b2c5eba778851bddeb3734aa470add8125fcc73bf954e27b93c8"
+    },
+    {
+      "name": "guide-compact",
+      "result": "pass",
+      "log_sha256": "7905ac7d8ed9aef6be3f503d963b190870c4ba9bd0b97afd48e85c83de673c0d",
+      "capture_sha256": "c3fb558709c681ee59fe6bb00e3591679c31a3f6a54d9700ab854013b2067e6d"
+    },
+    {
+      "name": "practice-compact",
+      "result": "pass",
+      "log_sha256": "50b5e7329e4a8c872d3c603c70cacec8e03bcaa00088dcfb18803d2fb858428c",
+      "capture_sha256": "4a482c4a80a44b2370af98aa82ec8827cf9f3558e847a2b4f2f4dcff0c744309"
+    },
+    {
+      "name": "private-compact",
+      "result": "pass",
+      "log_sha256": "eb3bb320cb0372a897f74d864c0890f67e886437e8e00386d1a9f1c51bf2476e",
+      "capture_sha256": "9b248ef4ba8fa495fa4e4635f3caedc7ab46d35d82003b6a4bb8d2bee50f3a18"
+    },
+    {
+      "name": "confirm-compact",
+      "result": "pass",
+      "log_sha256": "6ff180d63481e8d62229609eccff5f40fbea69bf7278dc24ba431beb86306bfc",
+      "capture_sha256": "46b2d1fcc5fa5e53abd142ae0598edcb9d3fdccfcdd4582ab9bdaf97b81fc52a"
+    },
+    {
+      "name": "toolbar",
+      "result": "pass",
+      "log_sha256": "4971005526d7003248663cbcdf7221253c580b4d430ab56ecfdf3bc05b2e2f45",
+      "capture_sha256": "461418272476423bcd83b23558a584ed96bdab30b89a30f80cf9115224f6957c"
+    },
+    {
+      "name": "sidebar-battle",
+      "result": "pass",
+      "log_sha256": "8bcf7e4b63667188e6b34b9ba8495cc4f5f9fa0d58943bda1b72d4b192445708",
+      "capture_sha256": "385ab36f181dc7b6aaf9372a852592af635bb3ebe85fbf37319166e19847468a"
+    },
+    {
+      "name": "sidebar-assignment",
+      "result": "pass",
+      "log_sha256": "bd94c88aa95226f0ffd23868ad635f77e68c75a3e1e503add9e56355bcde454e",
+      "capture_sha256": "044ed63ebfd8727ae932c6a736791c1e755acdb47af6694a6df82fac0660e926"
+    },
+    {
+      "name": "sidebar-defense",
+      "result": "pass",
+      "log_sha256": "60fd03e02fd8b17028dceceef9aa53ebb6234cc5bf8da593aca4833231fd349d",
+      "capture_sha256": "a38e25a5644387319431fc82eab39232d374e1a3926921ea0c1db730b54299f4"
+    },
+    {
+      "name": "sidebar-target",
+      "result": "pass",
+      "log_sha256": "b5a4402ab6e9182f160bf1dd1df24fb918e5b4ed61f421115b2b13acc6fd9239",
+      "capture_sha256": "8647250f888577fc5e9f07cb976b5da42c4115ef4011c3151f904e9a18c85eab"
+    },
+    {
+      "name": "launcher-menu",
+      "result": "pass",
+      "log_sha256": "dd0bd0dbcd07c67c1524b6640bdc3fb581caebc52a850b769e628d7e690dfd76",
+      "capture_sha256": "15c2f802979e7d4707a0573ef5f4b1b83354cb3ef537cfdd5cf112cd474ac762"
+    }
+  ],
+  "source_assets": [
+    {
+      "path": "src/L5R.Client/Art/Sidebar/lacquer-atlas.png",
+      "sha256": "dee7b3ccd7135bc73510d4548d5fbdffdf485bd567adbd62f99f80ddb103b4a4",
+      "unchanged_from_approved_menu_branch": true
+    },
+    {
+      "path": "src/L5R.Client/Art/Fonts/Caudex-Regular.ttf",
+      "sha256": "aff046a4a3bded9339fa7a571a5b5dff4f513ff0efdc87f02fa9acf6382dc101",
+      "unchanged_from_approved_menu_branch": true
+    },
+    {
+      "path": "src/L5R.Client/Art/Fonts/Caudex-Bold.ttf",
+      "sha256": "aaa237528e7c15ab633269d698896a4f27cac5d96932b0192b027aa89cae06d5",
+      "unchanged_from_approved_menu_branch": true
+    },
+    {
+      "path": "src/L5R.Client/Art/Fonts/Caudex-Italic.ttf",
+      "sha256": "f6dbed79b234a47637ff551bc205a468c645d075b06b050b5b24d34076aad781",
+      "unchanged_from_approved_menu_branch": true
+    },
+    {
+      "path": "src/L5R.Client/Art/Fonts/Caudex-BoldItalic.ttf",
+      "sha256": "93d5773af76dc8306c70d9fd22c501b85c75d3adfcc3b897b01d81cbba3ad18e",
+      "unchanged_from_approved_menu_branch": true
+    }
+  ],
+  "notes": [
+    "Source PR165 and PR169 are integrated into the room preview, not merged into main.",
+    "Current catalogue retained; legacy browser menu patch applied to renamed LegacyLibraryDialog.",
+    "WeatheredQuill headings preserved; no newly authored rules or room lighting changes.",
+    "Settled guide/card-hover/tooltip and exact-launcher captures wait for the turn bloom to clear.",
+    "Earlier compact capture surfaces are valid but include the initial turn bloom in the background.",
+    "No native Windows graphical playtest or expert rules acceptance claimed."
+  ]
+}

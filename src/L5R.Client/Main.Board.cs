@@ -9,7 +9,7 @@ public partial class Main
     private IEnumerable<StatTokens> UnitBadges => _statTokenLayer?.GetChildren().OfType<StatTokens>() ?? [];
     private IEnumerable<StatTokens> TokenPairs => UnitBadges.Where(t => t is not UnitStandard);
     private bool OverStatToken(Vector2 point) => _tableViewport.GetGlobalRect().HasPoint(point) && UnitBadges.Any(t => t.Visible && t._HasPoint(t.GetGlobalTransform().AffineInverse() * point));
-    private bool BattleActive => View.Phase is Phase.AttackDeclaration or Phase.InfantryDeclaration or Phase.DefenseAssignment or Phase.BattleSelection or Phase.Battle;
+    private bool BattleActive => View.Phase is Phase.AttackDeclaration or Phase.InfantryDeclaration or Phase.DefenseAssignment or Phase.CavalryDeclaration or Phase.CavalryDefense or Phase.BattleSelection or Phase.Battle;
 
     private void RenderBoard()
     {
@@ -22,7 +22,7 @@ public partial class Main
             _previousBows.Clear(); foreach (var pair in _currentBows) _previousBows[pair.Key] = pair.Value;
             _bowVersion = View.Version; _bowChangedAt = Time.GetTicksMsec();
         }
-        Palette.Clear(_board); Palette.Clear(_hand); Palette.Clear(_unitDetail); _tiles.Clear(); _provinceButtons.Clear(); _laneSummaries.Clear();
+        Palette.Clear(_board); Palette.Clear(_hand); Palette.Clear(_unitDetail); _tiles.Clear(); _provinceButtons.Clear(); _laneSummaries.Clear(); _homeReminders.Clear();
         // A removed unit must not leave its inspection tray holding camera input.
         _expandedUnits.RemoveWhere(id => !View.Players.SelectMany(p => p.Home.Concat(p.Army)).Any(c => c.Id == id && c.AttachedTo is null));
         _matSections.Emphasize(null, hover:true);
@@ -30,6 +30,7 @@ public partial class Main
         SyncMatSections();
         var enemy = View.Players.Single(p => p.Id != View.ViewerId);
         AddHoldings(enemy); AddHome(enemy); AddProvinces(enemy); AddBattlefields(); AddProvinces(Self); AddHome(Self); AddHoldings(Self);
+        AddPersistentHome(enemy); AddPersistentHome(Self); HighlightHomeReminders();
         // A shallow physical fan, with complete scans and space for a modest hover lift.
         var step = Math.Min(204, Math.Max(22, (_hand.Size.X - HandCardSide - 84) / Math.Max(1, Self.Hand.Length - 1)));
         var start = (_hand.Size.X - (Math.Max(0, Self.Hand.Length - 1) * step + HandCardSide)) / 2;
@@ -76,27 +77,27 @@ public partial class Main
     private float SlotX(PlayerView player, int slot) =>
         _playLeft + (player.Id == View.ViewerId ? _slotCenters[slot] : _playWidth - _slotCenters[slot]) - CardHeight / 2;
     private CardView[] HomeCards(PlayerView player) => player.Home
-        .Where(c => c.AttachedTo is null && c.Definition?.Type != CardType.Holding).ToArray();
+        .Where(c => c.AttachedTo is null && c.Definition?.Type != CardType.Holding && !IsPersistentHomeCard(c)).ToArray();
     private CardView[] HoldingCards(PlayerView player) => new[] { player.Stronghold }
         .Concat(player.Home.Where(c => c.AttachedTo is null && c.Definition?.Type == CardType.Holding)).ToArray();
     private static int AttachmentCount(CardView card, PlayerView owner) => owner.Home.Concat(owner.Army).Count(c => c.AttachedTo == card.Id);
-    private static int TokenAttachmentCount(CardView card, PlayerView owner) => owner.Home.Concat(owner.Army).Count(c => c.AttachedTo == card.Id && CardTokenRail.HasTokens(c));
+    private static int TokenAttachmentCount(CardView card, PlayerView owner) => owner.Home.Concat(owner.Army).Count(c => c.AttachedTo == card.Id && CardTokenRail.HasRail(c));
     private float UnitWidth(CardView card, PlayerView owner) => Math.Max(CardFootprint(card, CardHeight), owner.Home.Concat(owner.Army)
         .Where(c => c.AttachedTo == card.Id).Select(c => CardFootprint(c, CardHeight)).DefaultIfEmpty(0).Max()) + (card.UnitForce.HasValue ? UnitStandard.ReservedWidth : 0) + TokenAttachmentCount(card, owner) * CardTokenRail.Width;
     private float TokenBottomPadding(CardView card, PlayerView owner)
     {
         var attachments=owner.Home.Concat(owner.Army).Where(c=>c.AttachedTo==card.Id).ToArray();
-        var padding=card.Bowed&&CardTokenRail.HasTokens(card)?CardTokenRail.Width:0f;
+        var padding=card.Bowed&&CardTokenRail.HasRail(card)?CardTokenRail.Width:0f;
         for(var i=0;i<attachments.Length;i++)
-            if(attachments[i].Bowed&&CardTokenRail.HasTokens(attachments[i]))
-                padding=Math.Max(padding,(2+attachments.Take(i).Count(CardTokenRail.HasTokens))*CardTokenRail.Width*1.02f);
+            if(attachments[i].Bowed&&CardTokenRail.HasRail(attachments[i]))
+                padding=Math.Max(padding,(2+attachments.Take(i).Count(CardTokenRail.HasRail))*CardTokenRail.Width*1.02f);
         return padding;
     }
     private float StackHeight(CardView card, PlayerView owner) => PlaneHeight(CardHeight) + AttachmentCount(card, owner) * 24 + (AttachmentCount(card, owner) > 0 ? 24 : 0) + TokenBottomPadding(card,owner);
     private int ArmyColumns(int province) => Math.Clamp((int)Math.Ceiling(Math.Sqrt(View.Players.Max(p => CourtUnits(p, province).Count()))), 1, 4);
     private static float CardFootprint(CardView card, float height)
     {
-        var rail = CardTokenRail.HasTokens(card) ? CardTokenRail.Width * height / CardHeight : 0;
+        var rail = CardTokenRail.HasRail(card) ? CardTokenRail.Width * height / CardHeight : 0;
         if (card.Bowed) return height + rail;
         var art = card.Definition is { ScenarioOnly: false } definition ? CardTile.Artwork(definition) : null;
         var ratio = art is null ? .7142857f : art.GetWidth() / (float)art.GetHeight();
@@ -136,8 +137,8 @@ public partial class Main
         {
             // Inspect the whole unit at useful size, instead of forcing six cards into
             // one narrow battlefield. These are the actual live tiles, not extra copies.
-            var panel = Place(_unitDetail, new LacquerPanel(), 238, 342, BoardWidth, 320);
-            panel.AddThemeStyleboxOverride("panel", Palette.Box(new Color(.04f, .037f, .025f, .98f), Palette.Gold, 16, 3));
+            var panel = Place(_unitDetail, new PanelContainer { Theme = SidebarSkin.Theme() }, 238, 342, BoardWidth, 320);
+            panel.AddThemeStyleboxOverride("panel", SidebarSkin.Inset());
             panel.SetMeta("battle_province", personality.ProvinceIndex ?? -1);
             panel.SetMeta("home_owner", personality.OwnerId);
             var content = new VBoxContainer(); content.AddThemeConstantOverride("separation", 6); panel.AddChild(content);
@@ -169,7 +170,7 @@ public partial class Main
         for (var i = attachments.Length - 1; i >= 0; i--)
         {
             var child = Tile(attachments[i], true, faceWidth, side);
-            child.TokenRailOffset = expanded ? 0 : (1 + attachments.Take(i).Count(CardTokenRail.HasTokens)) * CardTokenRail.Width * (side-12)/198f;
+            child.TokenRailOffset = expanded ? 0 : (1 + attachments.Take(i).Count(CardTokenRail.HasRail)) * CardTokenRail.Width * (side-12)/198f;
             if (detail) { child.ProjectToScreen = null; child.CustomMinimumSize = new Vector2(faceWidth, side); }
             Place(stack, child, expanded ? faceWidth + bannerWidth + i * step : 0, expanded ? 4 : (attachments.Length - 1 - i) * step, faceWidth, tileHeight);
         }

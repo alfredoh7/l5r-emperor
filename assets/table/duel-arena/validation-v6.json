@@ -1,0 +1,302 @@
+{
+  "iteration": 6,
+  "tools": {
+    "blender": "5.2.1 LTS",
+    "godot": "4.7.2 .NET / macOS Compatibility",
+    "sdk": "10.0.400"
+  },
+  "client_build": "PASS: 0 warnings / 0 errors",
+  "native_import": "PASS",
+  "main_headless_smoke": "PASS; not gameplay acceptance",
+  "blender_preservation": {
+    "matches_v5": true,
+    "meshes": {
+      "Thin silk backing": "890dacc9d4d9cacc8c43a3bb8655b93e545d6faff4651618190bba2ba8842209",
+      "ApprovedDuelMat": "6fd4dc77a00f0d5f153dc9c36156e0f20fc6565a7fa9288624dadf36f328136b",
+      "StoneLanternRight": "4ba48be0fa688afa9cfe670fd53adf1fc144ab275e26d91828207402c0bead84",
+      "StoneLanternLeft": "c4c4a2c029d841cfd16afc6b5912dee59cfe3173bc33b7c03fa80892ff7bb306",
+      "PineHero": "10b37daad47ca38722ce4f9dcaf5c72b3c6ac353add1ff5c55e545d52fe4d8ec"
+    },
+    "anchors": {
+      "DuelLeft": [
+        -3.6500000953674316,
+        1.8000000715255737,
+        0.0
+      ],
+      "DuelRight": [
+        3.6500000953674316,
+        1.8000000715255737,
+        0.0
+      ],
+      "FocusLeft": [
+        -3.6500000953674316,
+        -1.0499999523162842,
+        0.0
+      ],
+      "FocusRight": [
+        3.6500000953674316,
+        -1.0499999523162842,
+        0.0
+      ],
+      "Center": [
+        0.0,
+        1.2000000476837158,
+        0.0
+      ],
+      "StoneLanternLeftGlow": [
+        0.0,
+        0.0,
+        1.4105520248413086
+      ],
+      "StoneLanternRightGlow": [
+        0.0,
+        0.0,
+        1.4105520248413086
+      ]
+    }
+  },
+  "unchanged_tracked_original_and_v5_runtime_files": 21,
+  "mesh_source_and_nine_CC0_surface_hashes": "PASS against provenance",
+  "approved_background_hash_matches_original": true,
+  "source_blend_bytes": 94205563,
+  "environment_glb_bytes": 45282368,
+  "new_environment_mesh_instances": 83,
+  "new_environment_triangles": 279894,
+  "new_environment_embedded_images": 15,
+  "runtime_textures": "lossless with mipmaps; no duplicate extracted files",
+  "reduced_motion": {
+    "byte_identical_at_1_5_and_4_seconds": true,
+    "static_sha256": "6502e053af164a707f256f3a3930c2a8c4939010081805fecf17d2072c570aeb",
+    "animated_capture_differs": true,
+    "animated_seconds": 4.0054502
+  },
+  "preexisting_project_godot_preserved": true,
+  "meshy_credits": 30,
+  "captures": [
+    {
+      "path": "docs/screenshots/duel-arena/v6/clear-1600.png",
+      "sha256": "6502e053af164a707f256f3a3930c2a8c4939010081805fecf17d2072c570aeb",
+      "result": {
+        "Stage": "iteration 6",
+        "Viewport": "(1600, 900)",
+        "GardenPhase": 3,
+        "ReducedMotion": true,
+        "AtmosphereTime": 0,
+        "Zoom": 1,
+        "MatDetail": false,
+        "LanternDetail": false,
+        "ClearView": true,
+        "PineDetail": false,
+        "PineReverse": false,
+        "PineBefore": false,
+        "CameraChecked": true,
+        "PineScreenBounds": "(674.8761, 27.568745), (252.38751, 342.16138)",
+        "MaxCameraErrorPixels": 0.00012207031,
+        "NativeCardClicks": 0,
+        "Crowded": false,
+        "Bowed": false,
+        "Revealed": false,
+        "Sidebar": false,
+        "ObservedFramesPerSecond": 26,
+        "RenderedPrimitives": 2168796,
+        "CardFaces": 14,
+        "GameplayTested": false,
+        "FinalArt": false
+      }
+    },
+    {
+      "path": "docs/screenshots/duel-arena/v6/clear.png",
+      "sha256": "d5f35fb60ed42f4da2ad98f9ddd2f3b46742a78eb4d4e81aa919a74c159a8104",
+      "result": {
+        "Stage": "iteration 6",
+        "Viewport": "(1920, 1080)",
+        "GardenPhase": 3,
+        "ReducedMotion": true,
+        "AtmosphereTime": 0,
+        "Zoom": 1,
+        "MatDetail": false,
+        "LanternDetail": false,
+        "ClearView": true,
+        "PineDetail": false,
+        "PineReverse": false,
+        "PineBefore": false,
+        "CameraChecked": true,
+        "PineScreenBounds": "(809.8513, 33.082497), (302.865, 410.5937)",
+        "MaxCameraErrorPixels": 0.00012207031,
+        "NativeCardClicks": 0,
+        "Crowded": false,
+        "Bowed": false,
+        "Revealed": false,
+        "Sidebar": false,
+        "ObservedFramesPerSecond": 86,
+        "RenderedPrimitives": 2246132,
+        "CardFaces": 14,
+        "GameplayTested": false,
+        "FinalArt": false
+      }
+    },
+    {
+      "path": "docs/screenshots/duel-arena/v6/crowded.png",
+      "sha256": "609e3070826b2b2b1c5eab80689b2c6fcad8916877b9d5ab822b931be5f841ed",
+      "result": {
+        "Stage": "iteration 6",
+        "Viewport": "(1280, 800)",
+        "GardenPhase": 3,
+        "ReducedMotion": true,
+        "AtmosphereTime": 0,
+        "Zoom": 1,
+        "MatDetail": false,
+        "LanternDetail": false,
+        "ClearView": false,
+        "PineDetail": false,
+        "PineReverse": false,
+        "PineBefore": false,
+        "CameraChecked": true,
+        "PineScreenBounds": "(431.92072, 153.64397), (161.52802, 218.98332)",
+        "MaxCameraErrorPixels": 6.1035156e-05,
+        "NativeCardClicks": 1,
+        "Crowded": true,
+        "Bowed": true,
+        "Revealed": true,
+        "Sidebar": true,
+        "ObservedFramesPerSecond": 120,
+        "RenderedPrimitives": 2121198,
+        "CardFaces": 22,
+        "GameplayTested": false,
+        "FinalArt": false
+      }
+    },
+    {
+      "path": "docs/screenshots/duel-arena/v6/motion.png",
+      "sha256": "4200aa2803a7bd3cb6bb7d8086c8dedac05c5e6d02fb186dd28a5be125333b2c",
+      "result": {
+        "Stage": "iteration 6",
+        "Viewport": "(1600, 900)",
+        "GardenPhase": 3,
+        "ReducedMotion": false,
+        "AtmosphereTime": 4.0054502,
+        "Zoom": 1,
+        "MatDetail": false,
+        "LanternDetail": false,
+        "ClearView": true,
+        "PineDetail": false,
+        "PineReverse": false,
+        "PineBefore": false,
+        "CameraChecked": true,
+        "PineScreenBounds": "(674.8761, 27.568745), (252.38751, 342.16138)",
+        "MaxCameraErrorPixels": 0.00012207031,
+        "NativeCardClicks": 0,
+        "Crowded": false,
+        "Bowed": false,
+        "Revealed": false,
+        "Sidebar": false,
+        "ObservedFramesPerSecond": 103,
+        "RenderedPrimitives": 2168796,
+        "CardFaces": 14,
+        "GameplayTested": false,
+        "FinalArt": false
+      }
+    },
+    {
+      "path": "docs/screenshots/duel-arena/v6/normal.png",
+      "sha256": "7af13012b0f7558ec794fde2df0c0cb9beef5933ba2b97515c4639afb2d551a5",
+      "result": {
+        "Stage": "iteration 6",
+        "Viewport": "(1600, 900)",
+        "GardenPhase": 3,
+        "ReducedMotion": true,
+        "AtmosphereTime": 0,
+        "Zoom": 1,
+        "MatDetail": false,
+        "LanternDetail": false,
+        "ClearView": false,
+        "PineDetail": false,
+        "PineReverse": false,
+        "PineBefore": false,
+        "CameraChecked": true,
+        "PineScreenBounds": "(674.8761, 27.568745), (252.38751, 342.16138)",
+        "MaxCameraErrorPixels": 0.00012207031,
+        "NativeCardClicks": 1,
+        "Crowded": false,
+        "Bowed": false,
+        "Revealed": false,
+        "Sidebar": false,
+        "ObservedFramesPerSecond": 108,
+        "RenderedPrimitives": 2170402,
+        "CardFaces": 14,
+        "GameplayTested": false,
+        "FinalArt": false
+      }
+    },
+    {
+      "path": "docs/screenshots/duel-arena/v6/pine-front.png",
+      "sha256": "77baea129f5fd35ca7e6ea91e1e0a8f88fde4048113af86267a0966ba12275f1",
+      "result": {
+        "Stage": "iteration 6",
+        "Viewport": "(1600, 900)",
+        "GardenPhase": 3,
+        "ReducedMotion": true,
+        "AtmosphereTime": 0,
+        "Zoom": 1,
+        "MatDetail": false,
+        "LanternDetail": false,
+        "ClearView": false,
+        "PineDetail": true,
+        "PineReverse": false,
+        "PineBefore": false,
+        "CameraChecked": false,
+        "PineScreenBounds": null,
+        "MaxCameraErrorPixels": 0,
+        "NativeCardClicks": 0,
+        "Crowded": false,
+        "Bowed": false,
+        "Revealed": false,
+        "Sidebar": false,
+        "ObservedFramesPerSecond": 137,
+        "RenderedPrimitives": 1059875,
+        "CardFaces": 0,
+        "GameplayTested": false,
+        "FinalArt": false
+      }
+    },
+    {
+      "path": "docs/screenshots/duel-arena/v6/zoom.png",
+      "sha256": "84d9e96f02f0e5887f063b0acc67002d4e33f5175cf4284c3238ee1ad134fcbb",
+      "result": {
+        "Stage": "iteration 6",
+        "Viewport": "(1600, 900)",
+        "GardenPhase": 3,
+        "ReducedMotion": true,
+        "AtmosphereTime": 0,
+        "Zoom": 1.1,
+        "MatDetail": false,
+        "LanternDetail": false,
+        "ClearView": false,
+        "PineDetail": false,
+        "PineReverse": false,
+        "PineBefore": false,
+        "CameraChecked": true,
+        "PineScreenBounds": "(662.3637, -29.674458), (277.62622, 376.3776)",
+        "MaxCameraErrorPixels": 6.823938e-05,
+        "NativeCardClicks": 1,
+        "Crowded": false,
+        "Bowed": false,
+        "Revealed": false,
+        "Sidebar": false,
+        "ObservedFramesPerSecond": 144,
+        "RenderedPrimitives": 2192434,
+        "CardFaces": 14,
+        "GameplayTested": false,
+        "FinalArt": false
+      }
+    }
+  ],
+  "limits": [
+    "Isolated native presentation scene with public fixture cards; no live duel integration",
+    "Final human art acceptance remains open",
+    "The distant scene is a 2D approved image layer",
+    "Full pine fit is checked at default zoom; deliberate zoom can crop it",
+    "FPS observations are not a controlled performance benchmark",
+    "Native Windows graphical acceptance and complete matches are not performed"
+  ]
+}

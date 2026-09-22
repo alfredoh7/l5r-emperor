@@ -1,0 +1,126 @@
+{
+  "Date": "2026-09-17",
+  "Baseline": "a069e4b786ad7ed0e74ab2103338a36ea40e5304",
+  "Scope": "Five sequential UI-only passes: physical cards/piles, focus movement, shared inspector placement, coherent grass/clouds, measured frame pacing. Silence and grass-free introductions preserved.",
+  "Build": {
+    "Passed": true,
+    "Warnings": 0,
+    "Errors": 0
+  },
+  "NativeSuite": {
+    "native": {
+      "Passed": true,
+      "Steps": 20,
+      "ReducedMotion": false,
+      "Resolution": "(1920, 1080)"
+    },
+    "small-reduced": {
+      "Passed": true,
+      "Steps": 20,
+      "ReducedMotion": true,
+      "Resolution": "(1120, 700)"
+    },
+    "stages": {
+      "passed": true,
+      "scenarios": 13
+    },
+    "guidance": {
+      "Passed": true,
+      "Steps": 43,
+      "ReducedMotion": false,
+      "Resolution": "(1920, 1872)",
+      "ProfileIsolated": true
+    },
+    "guidance-reduced": {
+      "Passed": true,
+      "Steps": 43,
+      "ReducedMotion": true,
+      "Resolution": "(1120, 700)",
+      "ProfileIsolated": true
+    }
+  },
+  "InputTimingNote": "Fixed 30fps and screenshot capture; these input probes are not performance measurements. Final suite passed once after phase-specific fixes. Earlier development probes exposed a seat-handoff stall and one missed selection; corrected before the final suite.",
+  "Movie": {
+    "Passed": true,
+    "Seconds": 38.633333,
+    "Frames": 1159,
+    "Resolution": "1920x1080",
+    "Commands": 4,
+    "Result": "8\u20137",
+    "OpeningRuns": 1,
+    "EndingRuns": 1,
+    "LocalFile": "artifacts/duel-polish/final.mp4",
+    "PerformanceClaim": false,
+    "VisualInspection": [
+      "intro names/vignette with no extra 3D grass",
+      "permitted hand face turns into one back; no duplicate destination",
+      "deck and contact shadows",
+      "shared inspector preserves source click and turn prompt",
+      "dense field remains beyond mat edge",
+      "held winner and fallen card"
+    ],
+    "Audio": "Raw AVI peak/RMS -inf; MP4 has video only."
+  },
+  "Atmosphere": {
+    "mat": {
+      "changed_pixels": 0,
+      "box": [
+        0,
+        470,
+        1920,
+        1080
+      ]
+    },
+    "sun_center": {
+      "changed_pixels": 0,
+      "box": [
+        1110,
+        54,
+        1190,
+        108
+      ]
+    },
+    "mountain": {
+      "changed_pixels": 0,
+      "box": [
+        460,
+        166,
+        640,
+        214
+      ]
+    },
+    "upper_sky": {
+      "changed_pixels": 65847,
+      "box": [
+        10,
+        0,
+        1000,
+        80
+      ]
+    },
+    "grass": {
+      "changed_pixels": 33956,
+      "box": [
+        20,
+        300,
+        420,
+        390
+      ]
+    },
+    "ReducedMotionExactMatch": true
+  },
+  "Performance": "See performance-before.json and performance-final.json; native M1 Max completed frames, first 3s excluded, no screenshot/encoding during benchmark. Final P99 13.774 ms; max 28.964 ms; no frames above 33.34 ms.",
+  "SharedTable": "Default canvas extent unchanged; native published-board-battle-camera 1920x1080 inspected without clipping.",
+  "RuntimeLogs": "No ERROR, SCRIPT ERROR or WARNING in final five native probes, scenery comparisons, movie or default-board capture.",
+  "Launcher": {
+    "Refreshed": true,
+    "OfflineArtworkPreflight": "passed",
+    "HeadlessStartup": "passed"
+  },
+  "Preserved": "Unrelated project.godot and catalogue import files excluded. No Core/AI/transport changes in this increment.",
+  "Remaining": [
+    "Alfredo moving-image visual acceptance; automated checks do not certify AAA quality.",
+    "Native Windows graphical acceptance.",
+    "Mendon mechanical/shared-interface review, effective province-strength finding, normal-match activation."
+  ]
+}

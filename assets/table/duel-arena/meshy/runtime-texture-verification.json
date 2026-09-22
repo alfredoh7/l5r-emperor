@@ -1,0 +1,26 @@
+[
+  {
+    "image": "approved-duel-mat",
+    "original_bytes_preserved": true,
+    "sha256": "6dd3fe31b810a37927e341360fed7bd91698d785e838f816d2a74944e1e4a649",
+    "bytes": 3184333
+  },
+  {
+    "image": "meshy-lantern-normal",
+    "original_bytes_preserved": true,
+    "sha256": "4155074afdcbccde700da027b3407932a2be23060b4d78da6966e2683504cf74",
+    "bytes": 2424053
+  },
+  {
+    "image": "meshy-lantern-basecolor",
+    "original_bytes_preserved": true,
+    "sha256": "815b9b17318e3e08b3132c757f14527ada7271113e43d409f1ce27408187075c",
+    "bytes": 2982630
+  },
+  {
+    "image": "meshy-lantern-metallic-roughness",
+    "original_bytes_preserved": true,
+    "sha256": "c2a49db0dcd30dbdb27f8858fd536a5049240de0c844163d21df6c6caa6a66f3",
+    "bytes": 1454859
+  }
+]

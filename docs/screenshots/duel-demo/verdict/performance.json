@@ -1,0 +1,188 @@
+{
+  "Passed": true,
+  "ActualSessionCommands": 4,
+  "CanonicalResult": "8\u20137",
+  "OpeningRuns": 1,
+  "EndingRuns": 1,
+  "TransitionPauseChecks": 0,
+  "EndingSkipped": false,
+  "ResultMirrored": false,
+  "ReducedMotion": false,
+  "DetailedGrass": true,
+  "GrassInstances": 960,
+  "Resolution": "(1920, 1080)",
+  "DurationSeconds": 40.65158466666641,
+  "Mode": "real-time native benchmark; completed rendered frames; monotonic wall clock",
+  "Frames": {
+    "Samples": 4487,
+    "P50Ms": 8.39,
+    "P95Ms": 13.815,
+    "P99Ms": 14.431,
+    "MaxMs": 37.358,
+    "Over33Ms": 1
+  },
+  "ByPhase": {
+    "idle": {
+      "Samples": 360,
+      "P50Ms": 8.356,
+      "P95Ms": 13.599,
+      "P99Ms": 14.802,
+      "MaxMs": 15.79,
+      "Over33Ms": 0
+    },
+    "opening-stakes": {
+      "Samples": 405,
+      "P50Ms": 8.537,
+      "P95Ms": 13.602,
+      "P99Ms": 15.818,
+      "MaxMs": 19.704,
+      "Over33Ms": 0
+    },
+    "opening-hush": {
+      "Samples": 84,
+      "P50Ms": 9.411,
+      "P95Ms": 14.223,
+      "P99Ms": 16.964,
+      "MaxMs": 16.964,
+      "Over33Ms": 0
+    },
+    "opening-challenger": {
+      "Samples": 108,
+      "P50Ms": 7.891,
+      "P95Ms": 14.15,
+      "P99Ms": 15.79,
+      "MaxMs": 16.735,
+      "Over33Ms": 0
+    },
+    "opening-answer": {
+      "Samples": 110,
+      "P50Ms": 8.821,
+      "P95Ms": 13.995,
+      "P99Ms": 14.299,
+      "MaxMs": 14.872,
+      "Over33Ms": 0
+    },
+    "opening-standoff": {
+      "Samples": 106,
+      "P50Ms": 10.749,
+      "P95Ms": 13.929,
+      "P99Ms": 15.354,
+      "MaxMs": 18.173,
+      "Over33Ms": 0
+    },
+    "focusing": {
+      "Samples": 1225,
+      "P50Ms": 8.579,
+      "P95Ms": 13.941,
+      "P99Ms": 14.24,
+      "MaxMs": 37.358,
+      "Over33Ms": 1
+    },
+    "verdict": {
+      "Samples": 849,
+      "P50Ms": 8.529,
+      "P95Ms": 13.663,
+      "P99Ms": 14.048,
+      "MaxMs": 28.191,
+      "Over33Ms": 0
+    },
+    "ending-totals": {
+      "Samples": 267,
+      "P50Ms": 7.657,
+      "P95Ms": 13.767,
+      "P99Ms": 14.026,
+      "MaxMs": 30.771,
+      "Over33Ms": 0
+    },
+    "ending-verdict": {
+      "Samples": 132,
+      "P50Ms": 9.768,
+      "P95Ms": 11.99,
+      "P99Ms": 12.199,
+      "MaxMs": 12.808,
+      "Over33Ms": 0
+    },
+    "ending-consequence": {
+      "Samples": 841,
+      "P50Ms": 8.066,
+      "P95Ms": 11.725,
+      "P99Ms": 12.443,
+      "MaxMs": 18.499,
+      "Over33Ms": 0
+    }
+  },
+  "SlowFrames": [
+    {
+      "Time": 17.83057566666649,
+      "Phase": "focusing",
+      "Milliseconds": 37.358,
+      "Step": 2
+    }
+  ],
+  "Timeline": [
+    {
+      "Time": 0.133,
+      "Phase": "idle",
+      "Version": 1
+    },
+    {
+      "Time": 6.008,
+      "Phase": "opening-stakes",
+      "Version": 1
+    },
+    {
+      "Time": 9.409,
+      "Phase": "opening-hush",
+      "Version": 1
+    },
+    {
+      "Time": 10.108,
+      "Phase": "opening-challenger",
+      "Version": 1
+    },
+    {
+      "Time": 11.008,
+      "Phase": "opening-answer",
+      "Version": 1
+    },
+    {
+      "Time": 11.914,
+      "Phase": "opening-standoff",
+      "Version": 1
+    },
+    {
+      "Time": 12.814,
+      "Phase": "focusing",
+      "Version": 1
+    },
+    {
+      "Time": 23.111,
+      "Phase": "verdict",
+      "Version": 4
+    },
+    {
+      "Time": 24.258,
+      "Phase": "ending-totals",
+      "Version": 4
+    },
+    {
+      "Time": 26.507,
+      "Phase": "ending-verdict",
+      "Version": 4
+    },
+    {
+      "Time": 27.607,
+      "Phase": "ending-consequence",
+      "Version": 4
+    },
+    {
+      "Time": 34.657,
+      "Phase": "verdict",
+      "Version": 4
+    }
+  ],
+  "TableRasterSize": "(2534, 1976)",
+  "DrawCalls": 240,
+  "Gpu": "Apple M1 Max",
+  "Notes": "Uses the production screen and MatchSession, a blind legal opponent focus, native local selection/placement, and authoritative resolution. Duels are silent; 3D grass is confined to the playable camera. Native Windows/AAA human acceptance not implied."
+}

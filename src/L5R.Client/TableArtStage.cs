@@ -2,15 +2,16 @@ using Godot;
 
 namespace L5R.Client;
 
-/// <summary>Isolated 2.5D environment review. The plate includes scenery only, never game state.
-/// Blender owns the projection mesh and placement anchors. Gameplay adds a localized
-/// animated candle treatment; the isolated review retains the original painted light.</summary>
+/// <summary>Presentation-only table environment. Gameplay uses the physical war
+/// room with the established card projection; isolated and legacy art reviews
+/// remain available. No scene object owns match state.</summary>
 public partial class TableArtStage : Node3D
 {
     public bool ReviewMode { get; set; } = true;
     private const float PlateWidth = 1586f / 992f * 10f;
     private const float PlateHeight = 10;
     private Camera3D _camera = null!;
+    private WarRoomStage? _warRoom;
     private string? _capture;
     private double _elapsed;
     private float _lightTime;
@@ -21,6 +22,12 @@ public partial class TableArtStage : Node3D
 
     public override void _Ready()
     {
+        if (!ReviewMode && !OS.GetCmdlineUserArgs().Contains("--without-war-room"))
+        {
+            _warRoom = new WarRoomStage();
+            AddChild(_warRoom);
+            return;
+        }
         foreach (var arg in ReviewMode ? OS.GetCmdlineUserArgs() : [])
             if (arg.StartsWith("--capture=")) _capture = arg[10..];
         var packed = GD.Load<PackedScene>(ReviewMode ? "res://Art/table-art-stage.glb" : "res://Art/navy-table-v4.glb");
@@ -171,7 +178,7 @@ public partial class TableArtStage : Node3D
         return new Rect2(boardSize / 2 - extent / 2 + extent * FabricInset, extent * (1 - 2 * FabricInset));
     }
 
-    public void SetPlaneCamera(Vector2 screenCenter, float density, Vector2 center, float zoom, Vector2 boardSize, float fitZoom)
+    public void SetPlaneCamera(Vector2 screenCenter, float density, Vector2 center, float zoom, Vector2 boardSize, float fitZoom, float pitch=TableSurface.Pitch, float depth=TableSurface.Depth)
     {
         // Expand the environment around the playable area, keeping its native
         // aspect instead of stretching edge pixels into an infinite surface.
@@ -196,13 +203,14 @@ public partial class TableArtStage : Node3D
             material.SetShaderParameter("display_density", density);
             material.SetShaderParameter("camera_center", center);
             material.SetShaderParameter("camera_zoom", zoom);
-            material.SetShaderParameter("plane_pitch", TableSurface.Pitch);
-            material.SetShaderParameter("plane_depth", TableSurface.Depth);
+            material.SetShaderParameter("plane_pitch", pitch);
+            material.SetShaderParameter("plane_depth", depth);
             material.SetShaderParameter("environment_origin", origin);
             material.SetShaderParameter("environment_size", extent);
             material.SetShaderParameter("left_lamp", leftLamp);
             material.SetShaderParameter("right_lamp", RightLamp);
         }
+        _warRoom?.SetTableCamera(screenCenter, density, center, zoom, boardSize, extent, leftLamp, RightLamp, pitch, depth);
         CardPaper.Table.SetShaderParameter("light_radius", extent * new Vector2(.24f, .31f));
         CardPaper.Table.SetShaderParameter("light_origin", leftWorld);
         CardPaper.Table.SetShaderParameter("light_origin_right", origin + extent * RightLamp);
@@ -229,7 +237,8 @@ public partial class TableArtStage : Node3D
             material.SetShaderParameter("candle_phase", time);
             material.SetShaderParameter("candle_motion", animate ? 1 : 0);
         }
-        CardPaper.SetLight(time, animate);
+        _warRoom?.PresentLight(time, animate);
+        CardPaper.SetLight(time, animate, tableLamps: _warRoom is null);
     }
 
     public override void _UnhandledKeyInput(InputEvent @event)

@@ -1,0 +1,79 @@
+{
+  "asset": "dais-m7",
+  "task_id": "01a0a790-1181-74b2-a21b-1bdb46371520",
+  "resource": "image-to-3d",
+  "request": {
+    "resource": "image-to-3d",
+    "arguments": [
+      "image-to-3d",
+      "create",
+      "--image-url",
+      "assets/table/war-room/polish-m7/dais-reference.png",
+      "--model-type",
+      "standard",
+      "--ultra-mode",
+      "true",
+      "--should-texture",
+      "true",
+      "--image-enhancement",
+      "false",
+      "--texture-prompt",
+      "An empty low wide wooden Japanese dais with two shallow front levels. Beautiful aged dark cedar, fine deep brown grain, burnished tread edges, delicate frame-panel risers, subtle peg joinery and restrained old satin lacquer. Exactly the isolated low architecture in the reference. No objects, no room, no ornaments. Relightable PBR, not orange or plastic.",
+      "--enable-pbr",
+      "true",
+      "--texture-resolution",
+      "4k",
+      "--remove-lighting",
+      "true",
+      "--target-formats",
+      "glb",
+      "--operation-id",
+      "l5r-dais-m7",
+      "--async",
+      "--save-json",
+      "artifacts/meshy/dais-m7/submission.json"
+    ]
+  },
+  "texture_prompt_returned": "An empty low wide wooden Japanese dais with two shallow front levels. Beautiful aged dark cedar, fine deep brown grain, burnished tread edges, delicate frame-panel risers, subtle peg joinery and restrained old satin lacquer. Exactly the isolated low architecture in the reference. No objects, no room, no ornaments. Relightable PBR, not orange or plastic.",
+  "source_reference": "assets/table/war-room/polish-m7/dais-reference.png",
+  "status": "SUCCEEDED",
+  "consumed_credits": 35,
+  "timestamps": {
+    "created_at": 1789517636090,
+    "started_at": 1789517636092,
+    "finished_at": 1789517784850
+  },
+  "raw_downloads": [
+    {
+      "file": "model.glb",
+      "bytes": 25936904,
+      "sha256": "0fb69740588472afab7f85dd70e60018c833c6db2d4a13f1eed22c461c34f7b9"
+    },
+    {
+      "file": "texture_0_base_color.png",
+      "bytes": 19602064,
+      "sha256": "31360fe89513dfcfbf5db9d0300dbc84cf7cc0c3686442f4c3110dd6af99e565"
+    },
+    {
+      "file": "texture_0_metallic.png",
+      "bytes": 19034,
+      "sha256": "64e9bedc8b567dba68202481c3ddd7eb9fcbcd3860be895fb6d814829f616a9a"
+    },
+    {
+      "file": "texture_0_normal.png",
+      "bytes": 17258307,
+      "sha256": "f0fdde0cf52721c19eb13818409cc513e9541b63f3d666be5f18279809933f96"
+    },
+    {
+      "file": "texture_0_roughness.png",
+      "bytes": 1280777,
+      "sha256": "7dbf777654949899ed8f6fdd6a085f759caeef6b2e775dc892eea4d5d15b2863"
+    },
+    {
+      "file": "thumbnail.png",
+      "bytes": 70719,
+      "sha256": "3f029bd2af188d5990b7183fe2c08b0d743dfd3050e76ca40a7208b464deaec0"
+    }
+  ],
+  "disposition": "Rejected: Meshy flattened the steps into a single slab. Retained in ignored artifacts; replaced by fitted Blender geometry plus Meshy retexture."
+}

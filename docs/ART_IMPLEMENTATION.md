@@ -12,3 +12,11 @@ Standing user direction, accepted 2026-09-09. Applies to Codex, Claude Code and 
 This workflow does not authorize changing rules or replacing the approved game layout to make artwork easier to fit. User-requested changes take precedence. Shared state presentation still follows the repository's review policy.
 
 Current example: `assets/ui/battle-presentation/pass-1-battlefields.png`, variant B. The court corners, neck and sword medallion are sampled from that source; the live province frame retains approved C art. See PR #76 / issue #75.
+
+## 3D production requirement — 2026-09-16
+
+Alfredo explicitly requires Meshy during initial production of **every new 3D asset**, including ornamental UI frames. Do not ship a manual approximation and defer Meshy until after feedback. Existing approved assets are preserved unless their replacement is requested.
+
+Approved reference → optional measured Blender blockout and early Godot camera/clearance check → **Meshy geometry/material production** → Blender inspection, cleanup and measured fitting → Godot presentation → source/native comparison and iteration. Blender remains the assembly, cleanup and optimization tool; blockouts are not finished assets. Flat card scans, text, mat artwork and 2D interface elements retain their own approved raster/native workflows.
+
+See [MESHY_WORKFLOW.md](MESHY_WORKFLOW.md) for credential-safe submissions, cost/provenance records and download handling. Current task #245 applies this requirement to F's ivory Noble Crest frame. No extra art approval is needed for a faithful production pass on the already approved design; expose material mismatches honestly in native review.

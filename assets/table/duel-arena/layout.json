@@ -1,0 +1,76 @@
+{
+  "stage": "composition blockout",
+  "reference": "assets/ui/duel-arena/approved-generation-3.png",
+  "units_to_card_plane": 100,
+  "playing_surface": [
+    14.8,
+    6.85
+  ],
+  "anchors": {
+    "DuelLeft": {
+      "blender": [
+        -3.65,
+        1.7999999999999998,
+        0
+      ],
+      "card_plane": [
+        -365.0,
+        -179.99999999999997
+      ]
+    },
+    "DuelRight": {
+      "blender": [
+        3.65,
+        1.7999999999999998,
+        0
+      ],
+      "card_plane": [
+        365.0,
+        -179.99999999999997
+      ]
+    },
+    "FocusLeft": {
+      "blender": [
+        -3.65,
+        -1.05,
+        0
+      ],
+      "card_plane": [
+        -365.0,
+        105.0
+      ]
+    },
+    "FocusRight": {
+      "blender": [
+        3.65,
+        -1.05,
+        0
+      ],
+      "card_plane": [
+        365.0,
+        105.0
+      ]
+    },
+    "Center": {
+      "blender": [
+        0,
+        1.2,
+        0
+      ],
+      "card_plane": [
+        0,
+        -120.0
+      ]
+    }
+  },
+  "pitch": 0.64,
+  "depth": 0.00065,
+  "camera_distance": 11.821152438337567,
+  "meshes": 37,
+  "triangles": 3372,
+  "limitations": [
+    "Temporary flat materials",
+    "No Meshy assets",
+    "No live match integration"
+  ]
+}

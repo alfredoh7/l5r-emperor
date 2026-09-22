@@ -1,0 +1,209 @@
+{
+  "date": "2026-09-16",
+  "command": "bash tools/check-duel-demo.sh",
+  "platform": "macOS Apple M1 Max, Godot 4.7.2 .NET, native graphical OpenGL compatibility",
+  "client_build": "passed, zero warnings/errors",
+  "import": "passed",
+  "checks": {
+    "native": {
+      "Passed": true,
+      "Steps": 20,
+      "ReducedMotion": false,
+      "Resolution": "(1920, 1080)",
+      "FrameCount": 2260,
+      "P50Ms": 8.979,
+      "P95Ms": 13.655,
+      "P99Ms": 16.3
+    },
+    "small-reduced": {
+      "Passed": true,
+      "Steps": 20,
+      "ReducedMotion": true,
+      "Resolution": "(1120, 700)",
+      "FrameCount": 2089,
+      "P50Ms": 8.304,
+      "P95Ms": 13.706,
+      "P99Ms": 15.685
+    },
+    "stages": {
+      "passed": true,
+      "scenarios": 13
+    },
+    "guidance": {
+      "Passed": true,
+      "Steps": 39,
+      "ReducedMotion": false,
+      "Resolution": "(1920, 1080)",
+      "ProfileIsolated": true
+    },
+    "guidance-reduced": {
+      "Passed": true,
+      "Steps": 39,
+      "ReducedMotion": true,
+      "Resolution": "(1120, 700)",
+      "ProfileIsolated": true
+    }
+  },
+  "assertions": {
+    "native": [
+      "DUEL_DEMO_CHECK: Play menu opens in-app demo",
+      "DUEL_DEMO_CHECK: Begin Duel submits the real challenge",
+      "DUEL_DEMO_CHECK: private handoff hides the complete table",
+      "DUEL_DEMO_CHECK: rapid duplicate focus advances once",
+      "DUEL_DEMO_CHECK: rapid duplicate focus advances once",
+      "DUEL_DEMO_CHECK: rapid duplicate focus advances once",
+      "DUEL_DEMO_CHECK: blind focus is privately inspectable after commitment",
+      "DUEL_DEMO_CHECK: rapid duplicate focus advances once",
+      "DUEL_DEMO_CHECK: projected card input selects a legal hand card",
+      "DUEL_DEMO_CHECK: direct drag/keyboard placement submits before duplicate click",
+      "DUEL_DEMO_CHECK: drag/keyboard focus and duplicate click advance once",
+      "DUEL_DEMO_CHECK: drag/keyboard focus and duplicate click advance once",
+      "DUEL_DEMO_CHECK: opponent focused backs expose no inspection",
+      "DUEL_DEMO_CHECK: resolved commitments leave the focus rows",
+      "DUEL_DEMO_CHECK: resolved commitments leave the focus rows",
+      "DUEL_DEMO_CHECK: Fate discard opens an inspectable public spread",
+      "DUEL_DEMO_CHECK: resolved commitments leave the focus rows",
+      "DUEL_DEMO_CHECK: resolved commitments leave the focus rows",
+      "DUEL_DEMO_CHECK: dead personalities remain separate from Fate discards",
+      "DUEL_DEMO_CHECK: resolved commitments leave the focus rows",
+      "DUEL_DEMO_CHECK: native UI reproduces canonical 8\u20137",
+      "DUEL_DEMO_CHECK: repeated snapshots do not replay the reveal",
+      "DUEL_DEMO_CHECK: result held for Continue",
+      "DUEL_DEMO_CHECK: Continue returns to prepared setup",
+      "DUEL_DEMO_CHECK: demo exits to normal L5R menu",
+      "DUEL_DEMO_CHECK: existing offline practice is preserved unchanged"
+    ],
+    "small-reduced": [
+      "DUEL_DEMO_CHECK: Play menu opens in-app demo",
+      "DUEL_DEMO_CHECK: Begin Duel submits the real challenge",
+      "DUEL_DEMO_CHECK: private handoff hides the complete table",
+      "DUEL_DEMO_CHECK: rapid duplicate focus advances once",
+      "DUEL_DEMO_CHECK: rapid duplicate focus advances once",
+      "DUEL_DEMO_CHECK: rapid duplicate focus advances once",
+      "DUEL_DEMO_CHECK: blind focus is privately inspectable after commitment",
+      "DUEL_DEMO_CHECK: rapid duplicate focus advances once",
+      "DUEL_DEMO_CHECK: projected card input selects a legal hand card",
+      "DUEL_DEMO_CHECK: direct drag/keyboard placement submits before duplicate click",
+      "DUEL_DEMO_CHECK: drag/keyboard focus and duplicate click advance once",
+      "DUEL_DEMO_CHECK: drag/keyboard focus and duplicate click advance once",
+      "DUEL_DEMO_CHECK: opponent focused backs expose no inspection",
+      "DUEL_DEMO_CHECK: resolved commitments leave the focus rows",
+      "DUEL_DEMO_CHECK: resolved commitments leave the focus rows",
+      "DUEL_DEMO_CHECK: Fate discard opens an inspectable public spread",
+      "DUEL_DEMO_CHECK: resolved commitments leave the focus rows",
+      "DUEL_DEMO_CHECK: resolved commitments leave the focus rows",
+      "DUEL_DEMO_CHECK: dead personalities remain separate from Fate discards",
+      "DUEL_DEMO_CHECK: resolved commitments leave the focus rows",
+      "DUEL_DEMO_CHECK: native UI reproduces canonical 8\u20137",
+      "DUEL_DEMO_CHECK: repeated snapshots do not replay the reveal",
+      "DUEL_DEMO_CHECK: result held for Continue",
+      "DUEL_DEMO_CHECK: Continue returns to prepared setup",
+      "DUEL_DEMO_CHECK: demo exits to normal L5R menu",
+      "DUEL_DEMO_CHECK: existing offline practice is preserved unchanged"
+    ],
+    "stages": [
+      "DUEL_STAGE_CHECK: refusal complete through native controls, 2 commands",
+      "DUEL_STAGE_CHECK: reaction complete through native controls, 10 commands",
+      "DUEL_STAGE_CHECK: duelist complete through native controls, 7 commands",
+      "DUEL_STAGE_CHECK: effects complete through native controls, 7 commands",
+      "DUEL_STAGE_CHECK: discard complete through native controls, 7 commands",
+      "DUEL_STAGE_CHECK: aftermath complete through native controls, 11 commands",
+      "DUEL_STAGE_CHECK: force complete through native controls, 6 commands",
+      "DUEL_STAGE_CHECK: honor complete through native controls, 6 commands",
+      "DUEL_STAGE_CHECK: open complete through native controls, 6 commands",
+      "DUEL_STAGE_CHECK: duelist-tie complete through native controls, 8 commands",
+      "DUEL_STAGE_CHECK: four complete through native controls, 10 commands",
+      "DUEL_STAGE_CHECK: empty complete through native controls, 2 commands",
+      "DUEL_STAGE_CHECK: tie complete through native controls, 6 commands"
+    ],
+    "guidance": [
+      "DUEL_GUIDANCE_CHECK: help is available while waiting without a false focus choice",
+      "DUEL_GUIDANCE_CHECK: help follows the viewer\u2019s legal options",
+      "DUEL_GUIDANCE_CHECK: seat handoff hides cards and guidance",
+      "DUEL_GUIDANCE_CHECK: quiet coaching appears for the active seat",
+      "GUIDANCE_RECT: (608.79913, 748.3103), (702.4018, 139.77258)",
+      "DUEL_GUIDANCE_CHECK: quiet coaching stays compact above the hand",
+      "DUEL_GUIDANCE_CHECK: do not show again starts unchecked",
+      "DUEL_GUIDANCE_CHECK: checking alone does not persist suppression",
+      "DUEL_GUIDANCE_CHECK: checkbox input does not click through to gameplay",
+      "DUEL_GUIDANCE_CHECK: explicit dismissal persists in the existing profile",
+      "DUEL_GUIDANCE_CHECK: opt-out hides coaching and retains essential turn status",
+      "DUEL_GUIDANCE_CHECK: manual help remains available after opt-out",
+      "DUEL_GUIDANCE_CHECK: first help anchors to a legal hand card",
+      "DUEL_GUIDANCE_CHECK: deck help explains blind commitment",
+      "DUEL_GUIDANCE_CHECK: reading a guide does not submit a command",
+      "DUEL_GUIDANCE_CHECK: Strike help matches the legal action",
+      "DUEL_GUIDANCE_CHECK: keyboard help dismissal does not Strike",
+      "DUEL_GUIDANCE_CHECK: finishing optional help keeps opt-out",
+      "DUEL_GUIDANCE_CHECK: Menu restores and persists quiet coaching",
+      "DUEL_GUIDANCE_CHECK: restored coaching is immediately available",
+      "DUEL_GUIDANCE_CHECK: unchecked Got it dismisses only this encounter",
+      "DUEL_GUIDANCE_CHECK: restart restores optional coaching for a new encounter",
+      "DUEL_GUIDANCE_CHECK: suppression survives a profile reload",
+      "DUEL_GUIDANCE_CHECK: reopened demo uses the persisted setting",
+      "DUEL_GUIDANCE_CHECK: manual help works again after reopening the demo",
+      "DUEL_GUIDANCE_CHECK: help, settings and restart perform no extra game commands"
+    ],
+    "guidance-reduced": [
+      "DUEL_GUIDANCE_CHECK: help is available while waiting without a false focus choice",
+      "DUEL_GUIDANCE_CHECK: help follows the viewer\u2019s legal options",
+      "DUEL_GUIDANCE_CHECK: seat handoff hides cards and guidance",
+      "DUEL_GUIDANCE_CHECK: quiet coaching appears for the active seat",
+      "GUIDANCE_RECT: (355.02393, 462.20096), (409.95215, 94.03828)",
+      "DUEL_GUIDANCE_CHECK: quiet coaching stays compact above the hand",
+      "DUEL_GUIDANCE_CHECK: do not show again starts unchecked",
+      "DUEL_GUIDANCE_CHECK: checking alone does not persist suppression",
+      "DUEL_GUIDANCE_CHECK: checkbox input does not click through to gameplay",
+      "DUEL_GUIDANCE_CHECK: explicit dismissal persists in the existing profile",
+      "DUEL_GUIDANCE_CHECK: opt-out hides coaching and retains essential turn status",
+      "DUEL_GUIDANCE_CHECK: manual help remains available after opt-out",
+      "DUEL_GUIDANCE_CHECK: first help anchors to a legal hand card",
+      "DUEL_GUIDANCE_CHECK: deck help explains blind commitment",
+      "DUEL_GUIDANCE_CHECK: reading a guide does not submit a command",
+      "DUEL_GUIDANCE_CHECK: Strike help matches the legal action",
+      "DUEL_GUIDANCE_CHECK: keyboard help dismissal does not Strike",
+      "DUEL_GUIDANCE_CHECK: finishing optional help keeps opt-out",
+      "DUEL_GUIDANCE_CHECK: Menu restores and persists quiet coaching",
+      "DUEL_GUIDANCE_CHECK: restored coaching is immediately available",
+      "DUEL_GUIDANCE_CHECK: unchecked Got it dismisses only this encounter",
+      "DUEL_GUIDANCE_CHECK: restart restores optional coaching for a new encounter",
+      "DUEL_GUIDANCE_CHECK: suppression survives a profile reload",
+      "DUEL_GUIDANCE_CHECK: reopened demo uses the persisted setting",
+      "DUEL_GUIDANCE_CHECK: manual help works again after reopening the demo",
+      "DUEL_GUIDANCE_CHECK: help, settings and restart perform no extra game commands"
+    ]
+  },
+  "artifacts": [
+    {
+      "path": "anchored.png",
+      "sha256": "da8dccc17c83a59ce9936eab213d098d3e3ddc7bcd00ee47882ac4e3aed4e143"
+    },
+    {
+      "path": "compact-help.png",
+      "sha256": "dc676cdf081d4b76d4e4dec37317a7b8c588390d4d569eefad16ff20502a3c4a"
+    },
+    {
+      "path": "compact-quiet.png",
+      "sha256": "a83a7771a54600983971caf8760a2d7101239fe0d5121c63865cd83fd6831ab1"
+    },
+    {
+      "path": "four-focus.png",
+      "sha256": "f44fc4e20c4582e04d91c05baa868c4c3dbe845206688c0c261b1f69daeb2a9b"
+    },
+    {
+      "path": "hidden.png",
+      "sha256": "7d1a1e866b78b70e4d2ea7f400842d86e2e4552fff25628ad421a292243f1d39"
+    },
+    {
+      "path": "quiet-crane.png",
+      "sha256": "b7dff6dcf727532356f330f6a9233b8f5e6c33925a0c66159f45fe01b911fa00"
+    }
+  ],
+  "limits": [
+    "UI-only follow-up: Core/AI/transport files unchanged and their earlier full regression baseline was not repeated in this turn.",
+    "Human rules acceptance remains requested from mdornbrook.",
+    "Native Windows graphical play is not claimed.",
+    "Sky/grass quality and normal-match activation remain separate acceptance tracks."
+  ],
+  "visual_review": "Exact approved sources and native captures compared at equal width. Original card scans preserved; quieter ink/brush styling replaces bolted plaques. Compact coaching clears the hand; optional help remains in the sky area. No claim of pixel equivalence."
+}

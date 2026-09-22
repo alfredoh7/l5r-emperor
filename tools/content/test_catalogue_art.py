@@ -49,3 +49,19 @@ class CatalogueArtInstallTests(unittest.TestCase):
         p=self.destination.parent/'catalogue-printings.json';p.write_text(json.dumps(dict(cards={'card':[{'sha256':'a'*64}]})))
         with self.assertRaisesRegex(RuntimeError,'publisher update'):art.install(self.root,self.archive)
         self.assertFalse(self.destination.exists())
+
+    def test_new_bundled_card_cannot_silently_ship_without_optimized_art(self):
+        published=self.destination.parent/'Published';published.mkdir()
+        (published/'new-card.jpg').write_bytes(b'new published source scan')
+        with self.assertRaisesRegex(RuntimeError,'publisher update'):art.install(self.root,self.archive)
+        self.assertFalse(self.destination.exists())
+
+
+class CataloguePublisherReceiptTests(unittest.TestCase):
+    def test_checked_in_release_covers_current_catalogue_and_bundled_cards(self):
+        # Catch a content merge with a stale artwork release before the next player launch.
+        # Receipts/source hashes suffice here; CI need not download the private bulk archive.
+        art.validate_coverage(art.ROOT)
+        receipt=json.loads((art.ROOT/'content/catalogue-art-pack.json').read_text())
+        manifest=json.loads((art.ROOT/'src/L5R.Client/Content/catalogue-art.json').read_text())
+        self.assertEqual(receipt['images'],len(manifest['scans']))

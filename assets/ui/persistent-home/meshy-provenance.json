@@ -1,0 +1,13 @@
+{
+  "asset": "Imperial Favor \u2014 F Noble Crest",
+  "task_id": "01a0a9c2-41f4-7550-9e70-148283aea94e",
+  "status": "SUCCEEDED",
+  "consumed_credits": 35,
+  "source": "src/L5R.Client/Art/PersistentHome/noble-crest.png",
+  "pipeline": "Approved F > imagegen isolated frame > Meshy image-to-3D Meshy7 Ultra textured4k > Blender Cycles orthographic RGBA > Godot projected table",
+  "model_sha256": "4252ecad77168e9aba292796c6f58e4f012b2c5e79b4118d5b8fa781c8cbff6b",
+  "render_sha256": "638d39a5c12db371b7138d44c6f2cde689c8f1214d7650e7bd3997e35695944b",
+  "geometry": "423936 triangles; source mesh unchanged; smoothed normals, neutral ivory studio lighting; actual 3D relief rendered, no source-image projection",
+  "runtime": "1536x2150 RGBA bake; original full Favor card face remains live and separate",
+  "source_archive": "https://github.com/alfredoh7/l5r-emperor/releases/tag/art-source-noble-crest-20260916"
+}

@@ -1,0 +1,15 @@
+{
+  "date": "2026-09-15",
+  "accepted_milestone": 4,
+  "accepted_commit": "512755f6702c711b2df7bc6f402403f7321af86c",
+  "user_request": "looks good, please continue",
+  "context": "The preceding delivery paused at static-lighting milestone 4 and identified animation as the next pass.",
+  "scope": [
+    "Use the established presentation clock for room flames, halation, window emission and native practical lights.",
+    "Give each fixture a restrained independent rhythm; match tabletop phases to existing cloth/frame/cards.",
+    "Add only localized warm-floor modulation above the accepted static bake; retain cool fill/contact occlusion.",
+    "Move the existing brazier fire; retain approved inventory and Meshy geometry.",
+    "Respect live reduced motion; pause after native motion review."
+  ],
+  "new_meshy_jobs": 0
+}

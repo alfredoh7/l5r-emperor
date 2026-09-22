@@ -7,6 +7,14 @@ using L5R.Client;
 
 var tests = new (string Name, Action Run)[]
 {
+    ("Granted-effect view is public, detached, duration-accurate and absent from hidden cards/older payloads", GrantedEffectPresentationView),
+    ("Public hand limit matches End Phase enforcement, follows visible modifiers and preserves hand privacy", PublicHandLimitView),
+    ("Duel Demo canonical commands, privacy and retained result", DuelDemoChecks.Canonical),
+    ("Own focused cards are inspectable from every source without opponent disclosure", DuelDemoChecks.OwnFocusViews),
+    ("Duel Demo scenarios and legal decisions", DuelDemoChecks.Decisions),
+    ("Duel stakes and source-linked public consequences", DuelDemoChecks.Story),
+    ("Either player may concede while a duel is pending", DuelDemoChecks.ConcedeDuringDuel),
+    ("Duel results record effective province strength (Times of Strife's ceiling), matching GetView", DuelDemoChecks.EffectiveProvinceStrength),
     ("Battle journal groups public effects and actual destinations without duplicating snapshots", BattleJournalProjection),
     ("Accepted battle and reaction passes publish their actor; rejected passes remain atomic", PublicPassEvents),
     ("BowedPersonalityResolution/attacker: two Native Guides win and destroy the province", () => BowedPersonalityResolution(0,true,10,1)),
@@ -103,6 +111,7 @@ var tests = new (string Name, Action Run)[]
     ("Conqueror straightens the sole eligible attacker automatically; with two eligible, the attacker must choose", ConquerorStraightensAfterVictory),
     ("Kensai raises the Weapon cap to two; Kama independently raises it to two but does not stack with Kensai", KensaiAndKamaWeaponCap),
     ("Cavalry Maneuvers follows Infantry Maneuvers; a unit is Cavalry only if the Personality and every attached Follower carry the keyword", CavalryManeuversSegment),
+    ("Infantry and Cavalry defender queries only offer existing battlefields, and every offered assignment executes", DefenderAssignmentQueries),
     ("A Two-Handed Weapon overrides Kensai and Kama entirely: at most one Weapon whenever one is involved, either way round", TwoHandedWeaponOverridesKensaiAndKama),
     ("Daigotsu Kendo's Conqueror keeps him unbowed after a win; Ikoma Natsu's Cavalry assigns during Cavalry Maneuvers", DaigotsuKendoConquerorAndIkomaNatsuCavalry),
     ("Mirumoto Reiyu gives an enemy Force/Follower a Force penalty equal to her own current Force", MirumotoReiyuForcePenalty),
@@ -166,7 +175,8 @@ var tests = new (string Name, Action Run)[]
     ("Protection (issue #212): a general action-effect negation-immunity status (Tamori Takeshi's 'effects of actions the target performs will not be negated'), checked at the point a negation would otherwise apply -- the same 'still legal to play, its own effect just becomes a no-op' shape StalwartNegatesBow already uses -- against both existing negation points in the engine (Effortless Counterattack's Additional-Action negation; the Attack-strength-negation Reaction), generalizing PendingAttack's own performer-tracking (an attached Weapon resolves to its wielder) along the way so every Attack, not just the two cards that needed it before, records who actually performed it. Cleared at FinishTurn, the same as a Turn-duration GrantedKeyword, and Tamori Takeshi's own real Open ability grants it", ProtectionPrimitive),
     ("Issue #216: Brash (the Defender may draw a card, once per Brash card assigned to attack); Force redirection (Togashi Noboru -- a targeted enemy Personality's own Force, never its Followers', counts toward Noboru's controller's army instead, live-rechecked at resolution against 'while you have at least one unit in your current army'); the new 'after a bow resolves' Reaction trigger family (Togashi Hizumi -- location-scoped on the trigger, negating that same Personality's own next straightening, which Straighten() now correctly clears once consumed rather than blocking every attempt the rest of the turn; Tamori Ruya -- actor-scoped on the trigger instead, bowing an unrelated Personality at her own location, Home or a battlefield); Tamori Yayu (a bow-or-destroy dual-cost Ranged Attack restricted to his own attached Spells); Mirumoto Katagi and Tamori Shinji (single-card Gold discounts -- a Non-Unique Weapon attaching to Katagi, and Shinji's own Reserve-while-Defender recruit)", BrashForceRedirectAndBowReactions),
     ("Overconfident (issue #223): each other player may optionally draw a card after an Overconfident card enters OR leaves play -- a queue (PendingOverconfidentDraws) populated from the single MarkDead choke point (leaving play; 'leaves' means dying while actually InPlay, excluding both a province/deck discard via DestroyProvince and MakeDead applied to a card already sitting in a discard pile) and from Purchase/RecruitReserve (entering play), drained at every point the engine would otherwise hand back priority (PassReaction's own window-close, Purchase, RecruitReserve, ExecuteAbilityEffects, FinishBattleResolution via the new FinishBattleReturnHomeAndTransition split, ResolveDuel, OrderSeppuku), including a tie battle queuing separate sequential offers for both sides. Kitsuki Minori's live Keyword() suppression (no Overconfident at all, in or out of play, while the other player is Lion Clan); Asahina Tsugio/Asako Kijo's MaxHandSize (raises only an opponent's own hand-size threshold, never the controller's own); Bayushi Mugoshi's own entering-play Reaction chaining into the Overconfident offer once its own window closes", OverconfidentPrimitive),
-    ("Event wave 1: Suspicions, the first Event resolved through the Events-Phase dispatch (ResolveEvent) -- revealed, removed from its province and refilled immediately, both players lose 1 Honor (revealing player first) the same turn it is revealed; the ongoing effect keeps firing every subsequent Events Phase, on either player's turn, with the card never leaving the new public Zone.EventInPlay/PlayerView.EventsInPlay for the discard pile", SuspicionsEventInPlay),
+    ("Event wave 1: Suspicions, the first Event resolved through the Events-Phase dispatch (ResolveEvent) -- revealed, removed from its province and refilled immediately, both players lose 1 Honor (revealing player first) the same turn it is revealed; the ongoing effect fires before each of its owner's later Action Phases (never on the opponent's turn), with the card never leaving the new public Zone.EventInPlay/PlayerView.EventsInPlay for the discard pile", SuspicionsEventInPlay),
+    ("An Event already face up in a province (refilled face up) resolves at its owner's next Events Phase instead of staying stuck", FaceUpEventResolvesInEventsPhase),
     ("Region primitive: a Region attaches to a PROVINCE (the new Zone.Region/ProvinceState.RegionId), not to a card; a second Region revealed at an already-regioned province is discarded instead of replacing the first; destroying a province discards whichever Region was attached to it and clears the pointer", RegionAttachmentPrimitive),
     ("Region wave 1: Fallow Lands -- a static province-strength bonus live-recomputed from the attached Region (EffectiveProvinceStrength), applied immediately without respect to presence; reveal/attach/refill mechanics; its Reaction weakens a Melee/Ranged Attack by 2, usable the same turn it enters play, gated on the Attack actually being at Fallow Lands' own province with its controller's own presence there (a Region never satisfies presence itself)", FallowLandsRegion),
     ("Region wave 1: Low Market -- an Open ability (not the ordinary Limited-only Equip() command, not a PlayerAbility like Equip (Battle)) that bows itself as its entire cost/limiter, Equips a targeted Item/Follower/Spell from hand to a chosen Personality at a genuine 2-Gold discount floored at a minimum of 1", LowMarketEquip),
@@ -476,13 +486,35 @@ static void SuspicionsEventInPlay()
     Check(e.GetView(0).Players[1].EventsInPlay?.Any(c=>c.Id==card.Id)??false,"Public zone: visible to the opponent");
     Check(e.GetView(1).Players[1].EventsInPlay?.Any(c=>c.Id==card.Id)??false,"Public zone: visible to its own controller");
     Check(!e.GetView(0).Players[1].Discard.Any(c=>c.Id==card.Id),"Never discarded -- the effect is still active");
-    // The ongoing effect keeps firing on a later, unrelated player's Events Phase too -- it is not a
-    // one-turn effect, and the card never leaves Zone.EventInPlay for the discard pile on its own.
+    // "Before each of YOUR Action Phases": the opponent's turn triggers nothing...
     SkipToDynasty(e); Accept(e,Cmd(e,"endDynasty"));
-    Equal(e.State.Phase,Phase.Action);
+    Equal(e.State.Phase,Phase.Action); Equal(e.State.ActivePlayerId,0);
+    Equal(e.State.Players[0].Honor,honor0-1);
+    Equal(e.State.Players[1].Honor,honor1-1);
+    // ...and its owner's next turn triggers it again -- it is not a one-turn effect, and the card
+    // never leaves Zone.EventInPlay for the discard pile on its own.
+    SkipToDynasty(e); Accept(e,Cmd(e,"endDynasty"));
+    Equal(e.State.Phase,Phase.Action); Equal(e.State.ActivePlayerId,1);
     Equal(e.State.Players[0].Honor,honor0-2);
     Equal(e.State.Players[1].Honor,honor1-2);
     Equal(e.State.Cards[card.Id].Zone,Zone.EventInPlay);
+}
+static void FaceUpEventResolvesInEventsPhase()
+{
+    // Refilled face up outside the Events Phase (Border Keep, the Kharmic replacement): never revealed,
+    // but still resolved at its owner's next Events Phase rather than left sitting in the province.
+    var s=MatchEngine.CreateEconomyScenario().State;
+    var card=Add(s,"oracle-l5r-7675",1,Zone.Province,province:0);
+    card.FaceUp=true;
+    s.Players[1].Provinces[0].CardId=card.Id;
+    var honor0=s.Players[0].Honor; var honor1=s.Players[1].Honor;
+    var e=MatchEngine.FromTestState(s);
+    SkipToDynasty(e); Accept(e,Cmd(e,"endDynasty"));
+    Equal(e.State.Phase,Phase.Action); Equal(e.State.ActivePlayerId,1);
+    Equal(e.State.Cards[card.Id].Zone,Zone.EventInPlay);
+    Check(e.State.Players[1].Provinces[0].CardId!=card.Id,"Removed from its province and refilled");
+    Equal(e.State.Players[0].Honor,honor0-1);
+    Equal(e.State.Players[1].Honor,honor1-1);
 }
 static void RegionAttachmentPrimitive()
 {
@@ -3478,6 +3510,40 @@ static void CavalryManeuversSegment()
     Accept(e,Cmd(e,"assignDefense",player:1,assignments:[]));
     Equal(e.State.Phase,Phase.BattleSelection,"Both Maneuvers segments complete before Battle Selection");
 }
+static void DefenderAssignmentQueries()
+{
+    foreach(var cavalry in new[]{false,true})
+    {
+        var s=MatchEngine.CreateStarterMatch().State;
+        // After the Declaration Segment (#359) a battlefield exists at each declared province; a subset
+        // here proves the defender is offered exactly the battlefields AssignDefense accepts.
+        s.Phase=cavalry?Phase.CavalryDeclaration:Phase.InfantryDeclaration;
+        s.ActivePlayerId=0; s.PriorityPlayerId=0; s.UnresolvedBattlefields=[2];
+        var attacker=Add(s,cavalry?"training-cavalry":"training-crane-samurai",0,Zone.Home);
+        var defender=Add(s,cavalry?"training-cavalry":"training-lion-veteran",1,Zone.Home);
+        var e=MatchEngine.FromTestState(s);
+        Check(e.QueryActions(0).Where(a=>a.Type=="attack" && a.Enabled)
+            .SelectMany(a=>a.Provinces!).Distinct().Order().SequenceEqual(new[]{0,1,2,3}),"An attacker may create a battlefield at any surviving province");
+        Accept(e,Cmd(e,"attack",assignments:new(){[attacker.Id]=2}));
+        Equal(e.State.Phase,cavalry?Phase.CavalryDefense:Phase.DefenseAssignment);
+        var options=e.QueryActions(1).Where(a=>a.Type=="assignDefense" && a.Enabled).ToArray();
+        Check(options.Length>0,"The available defender must be offered an assignment");
+        foreach(var option in options)
+        {
+            Check(option.Provinces!.SequenceEqual(new[]{2}),"Defenders cannot be offered an unattacked province");
+            var replay=MatchEngine.FromTestState(e.State);
+            Accept(replay,option.Command!);
+            Equal(replay.State.Cards[defender.Id].Zone,Zone.Battlefield);
+            Equal(replay.State.Cards[defender.Id].ProvinceIndex,2);
+        }
+        var empty=s;
+        empty.Phase=cavalry?Phase.CavalryDefense:Phase.DefenseAssignment; empty.PriorityPlayerId=1;
+        empty.UnresolvedBattlefields=[];
+        var noBattle=MatchEngine.FromTestState(empty);
+        Check(!noBattle.QueryActions(1).Any(a=>a.Type=="assignDefense"),"No battlefield means no destination to defend");
+        Accept(noBattle,noBattle.QueryActions(1).Single(a=>a.Type=="pass" && a.Enabled).Command!);
+    }
+}
 static void TwoHandedWeaponOverridesKensaiAndKama()
 {
     // A Kensai may attach a Two-Handed Weapon as their only Weapon...
@@ -3776,6 +3842,43 @@ static void OverconfidentPrimitive()
         Equal(e.State.Players[0].Hand.Count,9);
     }
 }
+static void PublicHandLimitView()
+{
+    var state = MatchEngine.CreateEconomyScenario().State;
+    var tsugio = PublishedContent.PersonalityWave13.Cards.Single(c => c.Name == "Asahina Tsugio").Id;
+    var baseline = MatchEngine.FromTestState(state).GetView(0);
+    Check(baseline.Players.All(p => p.HandLimit is { Base: 8, Maximum: 8, Modifiers.Length: 0 }));
+    var first = Add(state, tsugio, 1, Zone.Home);
+    var second = Add(state, tsugio, 1, Zone.Battlefield, province: 0);
+    Add(state, tsugio, 1, Zone.Hand); // Concealed copies neither modify the limit nor leak into sources.
+    var engine = MatchEngine.FromTestState(state);
+    foreach (var viewer in new[] { 0, 1 })
+    {
+        var view = engine.GetView(viewer);
+        Equal(view.Players[0].HandLimit!.Maximum, 10);
+        Equal(view.Players[1].HandLimit!.Maximum, 8, "The controller does not gain their own modifier");
+        Equal(view.Players[0].HandLimit!.Modifiers.Length, 2);
+        Check(view.Players[0].HandLimit!.Modifiers.All(m => m.CardId == first.Id || m.CardId == second.Id));
+        Equal(view.Players[1-viewer].Hand.Length, 0, "Public counts must not reveal concealed cards");
+        var roundTrip = JsonSerializer.Deserialize<MatchView>(JsonSerializer.Serialize(view))!;
+        Equal(roundTrip.Players[0].HandLimit!.Maximum, 10);
+        Equal(roundTrip.Players[0].HandLimit!.Modifiers[0].CardName, "Asahina Tsugio");
+    }
+    // Leaving play updates both public presentation and the very same End Phase threshold.
+    state.Cards[first.Id].Zone = Zone.Dead;
+    state.Cards[second.Id].Zone = Zone.DynastyDiscard;
+    engine = MatchEngine.FromTestState(state);
+    Equal(engine.GetView(0).Players[0].HandLimit!.Maximum, 8);
+    while (state.Players[0].Hand.Count < 9) Add(state, "training-rally", 0, Zone.Hand);
+    engine = MatchEngine.FromTestState(state);
+    Accept(engine, Cmd(engine, "endDynasty"));
+    var maximum = engine.GetView(0).Players[0].HandLimit!.Maximum;
+    Equal(engine.State.PendingChoice!.Prompt, $"Discard {engine.State.Players[0].Hand.Count-maximum} card(s) to return to {maximum}.");
+    var legacy = System.Text.Json.Nodes.JsonNode.Parse(JsonSerializer.Serialize(baseline.Players[0]))!.AsObject();
+    legacy.Remove("HandLimit");
+    Check(JsonSerializer.Deserialize<PlayerView>(legacy.ToJsonString())!.HandLimit is null, "Old snapshots report an unknown limit");
+}
+
 static void CarpenterCastleAttack()
 {
     {
@@ -11437,4 +11540,36 @@ static MatchState NeiruOfferTable()
     Add(s,"oracle-l5r-6502",0,Zone.Hand);
     Add(s,"training-marketplace",0,Zone.Home); Add(s,"training-marketplace",0,Zone.Home);
     return s;
+}
+
+static void GrantedEffectPresentationView()
+{
+    var state=MatchEngine.CreateEconomyScenario().State;
+    var card=Add(state,"training-crane-samurai",0,Zone.Home);
+    card.GrantedKeywords=[new("Berserker","source","Permanent")];
+    card.Protections=[new("source","Permanent"),new("temporary-source","Turn")];
+    var hidden=state.Cards.Values.First(c=>c.Zone==Zone.Province&&!c.FaceUp);
+    hidden.Protections=[new("hidden-source","Permanent")];
+    var engine=MatchEngine.FromTestState(state);
+    foreach(var viewer in new[]{0,1})
+    {
+        var view=engine.GetView(viewer);
+        var visible=view.Players[0].Home.Single(c=>c.Id==card.Id);
+        Equal(visible.GrantedEffects!.Length,2);
+        Check(visible.GrantedEffects.Any(e=>e.Duration=="Permanent"&&e.Source=="source"));
+        Check(visible.GrantedEffects.All(e=>e.Text.Contains("will not be negated")));
+        Check(view.Players.SelectMany(p=>p.Provinces).Where(p=>p.Card?.Definition is null).All(p=>p.Card?.GrantedEffects is null),"Hidden provinces never carry metadata");
+        visible.GrantedEffects[0]=new("Changed","Not engine text","x","Turn");
+        Check(engine.GetView(viewer).Players[0].Home.Single(c=>c.Id==card.Id).GrantedEffects![0].Name=="Action protection","Detached view does not mutate the engine");
+    }
+    var snapshot=engine.GetView(0).Players[0].Home.Single(c=>c.Id==card.Id);
+    var encoded=JsonSerializer.Serialize(snapshot);
+    var decoded=JsonSerializer.Deserialize<CardView>(encoded)!;
+    Equal(decoded.GrantedEffects!.Length,2);
+    var old=System.Text.Json.Nodes.JsonNode.Parse(encoded)!.AsObject();old.Remove("GrantedEffects");
+    Check(JsonSerializer.Deserialize<CardView>(old.ToJsonString())!.GrantedEffects is null,"Older snapshots remain readable");
+    SkipToDynasty(engine);Accept(engine,Cmd(engine,"endDynasty"));
+    var after=engine.GetView(0).Players[0].Home.Single(c=>c.Id==card.Id);
+    Equal(after.GrantedEffects!.Length,1);Equal(after.GrantedEffects[0].Duration,"Permanent");
+    Equal(after.GrantedKeywords!.Single().Duration,"Permanent");
 }

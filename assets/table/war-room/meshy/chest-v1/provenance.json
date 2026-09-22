@@ -1,0 +1,63 @@
+{
+  "task_id": "01a0a63f-d533-7054-8565-e6f7812882d8",
+  "source_sha256": "9fd2f928883d699922f7c1e1d1d4f1f50e59543723c8a36916889ac5cf6ac8a2",
+  "source_region_px": [
+    1485,
+    303,
+    128,
+    54
+  ],
+  "approval": "chest cropped from approved B3; replaces the same existing furnishing, no inventory added.",
+  "cli": "@meshy-ai/cli 0.3.0",
+  "settings": {
+    "model_type": "standard",
+    "should_texture": true,
+    "enable_pbr": true,
+    "texture_resolution": "4k",
+    "remove_lighting": true,
+    "target_formats": "glb",
+    "ultra_mode": false,
+    "image_enhancement": true
+  },
+  "texture_prompt": "One small closed Japanese fortress storage chest. Aged black-brown lacquered wood, delicate rubbed antique brass corner guards, hand-forged iron straps, ornate small brass clasp, scuffed edges and deep grain. Exactly the sparse antique chest in the reference. Grounded complete box with lid shut. No surrounding floor, spears, other furniture, room, light or background. Relightable PBR surface, restrained worn gold accents.",
+  "estimated_credits": 30,
+  "consumed_credits_reported_by_task": 30,
+  "timestamps_ms": {
+    "created_at": 1789495606795,
+    "started_at": 1789495606802,
+    "finished_at": 1789495720188
+  },
+  "downloads": [
+    {
+      "file": "model.glb",
+      "sha256": "e8bb331aa9b739f765518b6aff49d5af6e9b154ce912cb906811b52cb79bcd7d",
+      "bytes": 29318320
+    },
+    {
+      "file": "texture_0_base_color.png",
+      "sha256": "7769e472416dc0f02f3c322bce7961e75da52124e03fb48e7403a4e7f485899e",
+      "bytes": 16337844
+    },
+    {
+      "file": "texture_0_metallic.png",
+      "sha256": "a9b0e8e97219e1f16ba0011be791281f52f48b33e97fe9574996a6a87da646fe",
+      "bytes": 309430
+    },
+    {
+      "file": "texture_0_normal.png",
+      "sha256": "10120478f7464d39837b1abb7dfe16e2cc37b7cf74698d0a58343d5c165e93a2",
+      "bytes": 11438263
+    },
+    {
+      "file": "texture_0_roughness.png",
+      "sha256": "6ed9351ee6faa702d47cec9dcb5373b63fa1fbabc4aa134bb805cc336d278beb",
+      "bytes": 1450452
+    },
+    {
+      "file": "thumbnail.png",
+      "sha256": "1418d72c741e495a1202cbcc67a228343438601c0d149c620db6a8337c84baba",
+      "bytes": 110124
+    }
+  ],
+  "returned_model_version": "Not supplied in task response; standard CLI route requests Meshy-7."
+}

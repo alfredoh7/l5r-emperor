@@ -1,0 +1,844 @@
+{
+  "Date": "2026-09-16",
+  "Scope": "Latest increment is client atmosphere and native capture tooling only; no Core/AI/transport changes.",
+  "ClientBuild": {
+    "Passed": true,
+    "Warnings": 0,
+    "Errors": 0
+  },
+  "GodotImport": "Passed; no shader/script errors in final native runs",
+  "NativeMenuAndInput": {
+    "native": {
+      "Passed": true,
+      "Steps": 20,
+      "ReducedMotion": false,
+      "Resolution": "(1920, 1080)",
+      "FrameCount": 1281,
+      "P50Ms": 8.929,
+      "P95Ms": 13.878,
+      "P99Ms": 847.878
+    },
+    "small-reduced": {
+      "Passed": true,
+      "Steps": 20,
+      "ReducedMotion": true,
+      "Resolution": "(1120, 700)",
+      "FrameCount": 861,
+      "P50Ms": 9.266,
+      "P95Ms": 14.033,
+      "P99Ms": 280.515
+    },
+    "stages": {
+      "passed": true,
+      "scenarios": 13
+    },
+    "guidance": {
+      "Passed": true,
+      "Steps": 43,
+      "ReducedMotion": false,
+      "Resolution": "(1920, 1080)",
+      "ProfileIsolated": true
+    },
+    "guidance-reduced": {
+      "Passed": true,
+      "Steps": 43,
+      "ReducedMotion": true,
+      "Resolution": "(1120, 700)",
+      "ProfileIsolated": true
+    }
+  },
+  "NativeAtmosphere": {
+    "crimson-atmosphere": {
+      "Passed": true,
+      "ActualSessionCommands": 4,
+      "CanonicalResult": "8\u20137",
+      "OpeningRuns": 1,
+      "EndingRuns": 1,
+      "ReducedMotion": false,
+      "DetailedGrass": true,
+      "GrassInstances": 188,
+      "Resolution": "(1920, 1080)",
+      "DurationSeconds": 37.09166666666713,
+      "Mode": "offline movie; not a performance benchmark",
+      "Frames": {
+        "Samples": 2044,
+        "P50Ms": 19.155,
+        "P95Ms": 21.774,
+        "P99Ms": 24.897,
+        "MaxMs": 891.303,
+        "Over33Ms": 9
+      },
+      "ByPhase": {
+        "idle": {
+          "Samples": 182,
+          "P50Ms": 20.226,
+          "P95Ms": 22.093,
+          "P99Ms": 26.747,
+          "MaxMs": 891.303,
+          "Over33Ms": 1
+        },
+        "opening-stakes": {
+          "Samples": 204,
+          "P50Ms": 19.804,
+          "P95Ms": 21.774,
+          "P99Ms": 22.121,
+          "MaxMs": 23.339,
+          "Over33Ms": 0
+        },
+        "opening-hush": {
+          "Samples": 42,
+          "P50Ms": 20.453,
+          "P95Ms": 21.961,
+          "P99Ms": 25.635,
+          "MaxMs": 25.635,
+          "Over33Ms": 0
+        },
+        "opening-challenger": {
+          "Samples": 54,
+          "P50Ms": 19.837,
+          "P95Ms": 23.473,
+          "P99Ms": 782.543,
+          "MaxMs": 782.543,
+          "Over33Ms": 1
+        },
+        "opening-answer": {
+          "Samples": 54,
+          "P50Ms": 19.325,
+          "P95Ms": 23.011,
+          "P99Ms": 26.108,
+          "MaxMs": 26.108,
+          "Over33Ms": 0
+        },
+        "opening-standoff": {
+          "Samples": 54,
+          "P50Ms": 20.183,
+          "P95Ms": 22.336,
+          "P99Ms": 56.808,
+          "MaxMs": 56.808,
+          "Over33Ms": 1
+        },
+        "focusing": {
+          "Samples": 532,
+          "P50Ms": 19.68,
+          "P95Ms": 21.933,
+          "P99Ms": 26.985,
+          "MaxMs": 880.146,
+          "Over33Ms": 4
+        },
+        "verdict": {
+          "Samples": 428,
+          "P50Ms": 18.804,
+          "P95Ms": 21.106,
+          "P99Ms": 23.214,
+          "MaxMs": 55.518,
+          "Over33Ms": 1
+        },
+        "ending-reveal": {
+          "Samples": 42,
+          "P50Ms": 19.218,
+          "P95Ms": 21.164,
+          "P99Ms": 24.251,
+          "MaxMs": 24.251,
+          "Over33Ms": 0
+        },
+        "ending-cut": {
+          "Samples": 14,
+          "P50Ms": 19.593,
+          "P95Ms": 21.052,
+          "P99Ms": 21.052,
+          "MaxMs": 21.052,
+          "Over33Ms": 0
+        },
+        "ending-consequence": {
+          "Samples": 438,
+          "P50Ms": 19.073,
+          "P95Ms": 21.05,
+          "P99Ms": 23.777,
+          "MaxMs": 876.577,
+          "Over33Ms": 1
+        }
+      },
+      "SlowFrames": [
+        {
+          "Time": 4.024999999999996,
+          "Phase": "idle",
+          "Milliseconds": 891.303,
+          "Step": 0
+        },
+        {
+          "Time": 10.658333333333307,
+          "Phase": "opening-challenger",
+          "Milliseconds": 782.543,
+          "Step": 0
+        },
+        {
+          "Time": 12.824999999999966,
+          "Phase": "opening-standoff",
+          "Milliseconds": 56.808,
+          "Step": 0
+        },
+        {
+          "Time": 14.62499999999996,
+          "Phase": "focusing",
+          "Milliseconds": 880.146,
+          "Step": 1
+        },
+        {
+          "Time": 16.624999999999986,
+          "Phase": "focusing",
+          "Milliseconds": 78.396,
+          "Step": 2
+        },
+        {
+          "Time": 17.65833333333337,
+          "Phase": "focusing",
+          "Milliseconds": 826.95,
+          "Step": 3
+        },
+        {
+          "Time": 21.691666666666904,
+          "Phase": "focusing",
+          "Milliseconds": 873.784,
+          "Step": 4
+        },
+        {
+          "Time": 27.091666666667173,
+          "Phase": "ending-consequence",
+          "Milliseconds": 876.577,
+          "Step": 4
+        },
+        {
+          "Time": 36.491666666667165,
+          "Phase": "verdict",
+          "Milliseconds": 55.518,
+          "Step": 4
+        }
+      ],
+      "Timeline": [
+        {
+          "Time": 0.025,
+          "Phase": "idle",
+          "Version": 1
+        },
+        {
+          "Time": 6.058,
+          "Phase": "opening-stakes",
+          "Version": 1
+        },
+        {
+          "Time": 9.458,
+          "Phase": "opening-hush",
+          "Version": 1
+        },
+        {
+          "Time": 10.158,
+          "Phase": "opening-challenger",
+          "Version": 1
+        },
+        {
+          "Time": 11.058,
+          "Phase": "opening-answer",
+          "Version": 1
+        },
+        {
+          "Time": 11.958,
+          "Phase": "opening-standoff",
+          "Version": 1
+        },
+        {
+          "Time": 12.858,
+          "Phase": "focusing",
+          "Version": 1
+        },
+        {
+          "Time": 21.725,
+          "Phase": "verdict",
+          "Version": 4
+        },
+        {
+          "Time": 22.858,
+          "Phase": "ending-reveal",
+          "Version": 4
+        },
+        {
+          "Time": 23.558,
+          "Phase": "ending-cut",
+          "Version": 4
+        },
+        {
+          "Time": 23.792,
+          "Phase": "ending-consequence",
+          "Version": 4
+        },
+        {
+          "Time": 31.092,
+          "Phase": "verdict",
+          "Version": 4
+        }
+      ],
+      "DrawCalls": 80,
+      "Gpu": "Apple M1 Max",
+      "Notes": "Uses the production screen and MatchSession, a blind legal opponent focus, native local selection/placement, and authoritative resolution. Procedural prototype sound; native Windows/AAA human acceptance not implied."
+    },
+    "reduced": {
+      "Passed": true,
+      "ActualSessionCommands": 4,
+      "CanonicalResult": "8\u20137",
+      "OpeningRuns": 1,
+      "EndingRuns": 1,
+      "ReducedMotion": true,
+      "DetailedGrass": true,
+      "GrassInstances": 188,
+      "Resolution": "(1120, 700)",
+      "DurationSeconds": 20.22692766666624,
+      "Mode": "native review",
+      "Frames": {
+        "Samples": 1999,
+        "P50Ms": 9.386,
+        "P95Ms": 13.298,
+        "P99Ms": 13.907,
+        "MaxMs": 327.665,
+        "Over33Ms": 5
+      },
+      "ByPhase": {
+        "opening-stakes": {
+          "Samples": 288,
+          "P50Ms": 9.386,
+          "P95Ms": 13.381,
+          "P99Ms": 13.495,
+          "MaxMs": 54.073,
+          "Over33Ms": 1
+        },
+        "focusing": {
+          "Samples": 1008,
+          "P50Ms": 9.669,
+          "P95Ms": 13.357,
+          "P99Ms": 13.975,
+          "MaxMs": 327.665,
+          "Over33Ms": 4
+        },
+        "verdict": {
+          "Samples": 703,
+          "P50Ms": 6.722,
+          "P95Ms": 12.809,
+          "P99Ms": 13.052,
+          "MaxMs": 15.703,
+          "Over33Ms": 0
+        }
+      },
+      "SlowFrames": [
+        {
+          "Time": 5.400241000000057,
+          "Phase": "opening-stakes",
+          "Milliseconds": 54.073,
+          "Step": 0
+        },
+        {
+          "Time": 7.208545333333449,
+          "Phase": "focusing",
+          "Milliseconds": 290.353,
+          "Step": 1
+        },
+        {
+          "Time": 9.24178600000005,
+          "Phase": "focusing",
+          "Milliseconds": 49.325,
+          "Step": 2
+        },
+        {
+          "Time": 10.216852666666709,
+          "Phase": "focusing",
+          "Milliseconds": 277.774,
+          "Step": 3
+        },
+        {
+          "Time": 14.218764999999868,
+          "Phase": "focusing",
+          "Milliseconds": 327.665,
+          "Step": 4
+        }
+      ],
+      "Timeline": [
+        {
+          "Time": 0.149,
+          "Phase": "idle",
+          "Version": 1
+        },
+        {
+          "Time": 2.017,
+          "Phase": "opening-stakes",
+          "Version": 1
+        },
+        {
+          "Time": 5.434,
+          "Phase": "focusing",
+          "Version": 1
+        },
+        {
+          "Time": 14.365,
+          "Phase": "verdict",
+          "Version": 4
+        }
+      ],
+      "DrawCalls": 80,
+      "Gpu": "Apple M1 Max",
+      "Notes": "Uses the production screen and MatchSession, a blind legal opponent focus, native local selection/placement, and authoritative resolution. Procedural prototype sound; native Windows/AAA human acceptance not implied."
+    }
+  },
+  "Pixels": {
+    "mat": {
+      "MeanChannelDifference": 0.0,
+      "Changed": false
+    },
+    "sun": {
+      "MeanChannelDifference": 0.0,
+      "Changed": false
+    },
+    "sky": {
+      "MeanChannelDifference": 2.8378593904909692,
+      "Changed": true
+    },
+    "grass": {
+      "MeanChannelDifference": 7.3041897506925215,
+      "Changed": true
+    },
+    "mountains": {
+      "MeanChannelDifference": 0.0,
+      "Changed": false
+    },
+    "ReducedMotionIdentical": true
+  },
+  "Performance": {
+    "Detailed": {
+      "Passed": true,
+      "ActualSessionCommands": 4,
+      "CanonicalResult": "8\u20137",
+      "OpeningRuns": 1,
+      "EndingRuns": 1,
+      "ReducedMotion": false,
+      "DetailedGrass": true,
+      "GrassInstances": 188,
+      "Resolution": "(1920, 1080)",
+      "DurationSeconds": 36.945520999999125,
+      "Mode": "real-time native benchmark; completed rendered frames; monotonic wall clock",
+      "Frames": {
+        "Samples": 4052,
+        "P50Ms": 8.067,
+        "P95Ms": 13.847,
+        "P99Ms": 13.991,
+        "MaxMs": 56.193,
+        "Over33Ms": 3
+      },
+      "ByPhase": {
+        "idle": {
+          "Samples": 360,
+          "P50Ms": 8.904,
+          "P95Ms": 13.765,
+          "P99Ms": 13.956,
+          "MaxMs": 25.248,
+          "Over33Ms": 0
+        },
+        "opening-stakes": {
+          "Samples": 408,
+          "P50Ms": 10.073,
+          "P95Ms": 13.809,
+          "P99Ms": 13.903,
+          "MaxMs": 15.124,
+          "Over33Ms": 0
+        },
+        "opening-hush": {
+          "Samples": 84,
+          "P50Ms": 10.926,
+          "P95Ms": 13.746,
+          "P99Ms": 13.77,
+          "MaxMs": 13.77,
+          "Over33Ms": 0
+        },
+        "opening-challenger": {
+          "Samples": 108,
+          "P50Ms": 7.52,
+          "P95Ms": 13.664,
+          "P99Ms": 13.908,
+          "MaxMs": 14.41,
+          "Over33Ms": 0
+        },
+        "opening-answer": {
+          "Samples": 108,
+          "P50Ms": 7.984,
+          "P95Ms": 13.668,
+          "P99Ms": 13.75,
+          "MaxMs": 14.583,
+          "Over33Ms": 0
+        },
+        "opening-standoff": {
+          "Samples": 108,
+          "P50Ms": 10.225,
+          "P95Ms": 13.852,
+          "P99Ms": 13.963,
+          "MaxMs": 56.193,
+          "Over33Ms": 1
+        },
+        "focusing": {
+          "Samples": 1043,
+          "P50Ms": 9.588,
+          "P95Ms": 13.871,
+          "P99Ms": 14.019,
+          "MaxMs": 54.298,
+          "Over33Ms": 2
+        },
+        "verdict": {
+          "Samples": 848,
+          "P50Ms": 8.59,
+          "P95Ms": 13.876,
+          "P99Ms": 13.992,
+          "MaxMs": 14.479,
+          "Over33Ms": 0
+        },
+        "ending-reveal": {
+          "Samples": 85,
+          "P50Ms": 8.064,
+          "P95Ms": 13.656,
+          "P99Ms": 13.954,
+          "MaxMs": 13.954,
+          "Over33Ms": 0
+        },
+        "ending-cut": {
+          "Samples": 24,
+          "P50Ms": 12.121,
+          "P95Ms": 13.68,
+          "P99Ms": 13.854,
+          "MaxMs": 13.854,
+          "Over33Ms": 0
+        },
+        "ending-consequence": {
+          "Samples": 876,
+          "P50Ms": 7.092,
+          "P95Ms": 13.859,
+          "P99Ms": 14.022,
+          "MaxMs": 18.84,
+          "Over33Ms": 0
+        }
+      },
+      "SlowFrames": [
+        {
+          "Time": 12.80796933333324,
+          "Phase": "opening-standoff",
+          "Milliseconds": 56.193,
+          "Step": 0
+        },
+        {
+          "Time": 16.659629666666394,
+          "Phase": "focusing",
+          "Milliseconds": 54.298,
+          "Step": 2
+        },
+        {
+          "Time": 21.62921999999947,
+          "Phase": "focusing",
+          "Milliseconds": 42.073,
+          "Step": 4
+        }
+      ],
+      "Timeline": [
+        {
+          "Time": 0.133,
+          "Phase": "idle",
+          "Version": 1
+        },
+        {
+          "Time": 6.009,
+          "Phase": "opening-stakes",
+          "Version": 1
+        },
+        {
+          "Time": 9.416,
+          "Phase": "opening-hush",
+          "Version": 1
+        },
+        {
+          "Time": 10.116,
+          "Phase": "opening-challenger",
+          "Version": 1
+        },
+        {
+          "Time": 11.016,
+          "Phase": "opening-answer",
+          "Version": 1
+        },
+        {
+          "Time": 11.916,
+          "Phase": "opening-standoff",
+          "Version": 1
+        },
+        {
+          "Time": 12.849,
+          "Phase": "focusing",
+          "Version": 1
+        },
+        {
+          "Time": 21.662,
+          "Phase": "verdict",
+          "Version": 4
+        },
+        {
+          "Time": 22.746,
+          "Phase": "ending-reveal",
+          "Version": 4
+        },
+        {
+          "Time": 23.454,
+          "Phase": "ending-cut",
+          "Version": 4
+        },
+        {
+          "Time": 23.654,
+          "Phase": "ending-consequence",
+          "Version": 4
+        },
+        {
+          "Time": 30.954,
+          "Phase": "verdict",
+          "Version": 4
+        }
+      ],
+      "DrawCalls": 101,
+      "Gpu": "Apple M1 Max",
+      "Notes": "Uses the production screen and MatchSession, a blind legal opponent focus, native local selection/placement, and authoritative resolution. Procedural prototype sound; native Windows/AAA human acceptance not implied."
+    },
+    "Light": {
+      "Passed": true,
+      "ActualSessionCommands": 4,
+      "CanonicalResult": "8\u20137",
+      "OpeningRuns": 1,
+      "EndingRuns": 1,
+      "ReducedMotion": false,
+      "DetailedGrass": false,
+      "GrassInstances": 0,
+      "Resolution": "(1920, 1080)",
+      "DurationSeconds": 36.93396299999866,
+      "Mode": "real-time native benchmark; completed rendered frames; monotonic wall clock",
+      "Frames": {
+        "Samples": 4051,
+        "P50Ms": 8.67,
+        "P95Ms": 13.883,
+        "P99Ms": 14.037,
+        "MaxMs": 56.356,
+        "Over33Ms": 3
+      },
+      "ByPhase": {
+        "idle": {
+          "Samples": 360,
+          "P50Ms": 9.568,
+          "P95Ms": 13.761,
+          "P99Ms": 13.89,
+          "MaxMs": 25.195,
+          "Over33Ms": 0
+        },
+        "opening-stakes": {
+          "Samples": 406,
+          "P50Ms": 8.839,
+          "P95Ms": 13.763,
+          "P99Ms": 13.911,
+          "MaxMs": 15.024,
+          "Over33Ms": 0
+        },
+        "opening-hush": {
+          "Samples": 84,
+          "P50Ms": 11.442,
+          "P95Ms": 12.612,
+          "P99Ms": 13.436,
+          "MaxMs": 13.436,
+          "Over33Ms": 0
+        },
+        "opening-challenger": {
+          "Samples": 108,
+          "P50Ms": 7.295,
+          "P95Ms": 13.753,
+          "P99Ms": 13.902,
+          "MaxMs": 13.915,
+          "Over33Ms": 0
+        },
+        "opening-answer": {
+          "Samples": 108,
+          "P50Ms": 9.346,
+          "P95Ms": 13.81,
+          "P99Ms": 13.879,
+          "MaxMs": 14.45,
+          "Over33Ms": 0
+        },
+        "opening-standoff": {
+          "Samples": 108,
+          "P50Ms": 11.225,
+          "P95Ms": 13.854,
+          "P99Ms": 14.018,
+          "MaxMs": 56.356,
+          "Over33Ms": 1
+        },
+        "focusing": {
+          "Samples": 1045,
+          "P50Ms": 9.365,
+          "P95Ms": 13.879,
+          "P99Ms": 14.074,
+          "MaxMs": 54.567,
+          "Over33Ms": 2
+        },
+        "verdict": {
+          "Samples": 848,
+          "P50Ms": 7.473,
+          "P95Ms": 13.926,
+          "P99Ms": 14.102,
+          "MaxMs": 15.833,
+          "Over33Ms": 0
+        },
+        "ending-reveal": {
+          "Samples": 84,
+          "P50Ms": 8.67,
+          "P95Ms": 13.657,
+          "P99Ms": 13.898,
+          "MaxMs": 13.898,
+          "Over33Ms": 0
+        },
+        "ending-cut": {
+          "Samples": 25,
+          "P50Ms": 11.387,
+          "P95Ms": 13.376,
+          "P99Ms": 13.741,
+          "MaxMs": 13.741,
+          "Over33Ms": 0
+        },
+        "ending-consequence": {
+          "Samples": 875,
+          "P50Ms": 6.715,
+          "P95Ms": 13.939,
+          "P99Ms": 14.06,
+          "MaxMs": 14.458,
+          "Over33Ms": 0
+        }
+      },
+      "SlowFrames": [
+        {
+          "Time": 12.803082333333242,
+          "Phase": "opening-standoff",
+          "Milliseconds": 56.356,
+          "Step": 0
+        },
+        {
+          "Time": 16.666666666666433,
+          "Phase": "focusing",
+          "Milliseconds": 54.567,
+          "Step": 2
+        },
+        {
+          "Time": 21.62744499999952,
+          "Phase": "focusing",
+          "Milliseconds": 41.605,
+          "Step": 4
+        }
+      ],
+      "Timeline": [
+        {
+          "Time": 0.133,
+          "Phase": "idle",
+          "Version": 1
+        },
+        {
+          "Time": 6.02,
+          "Phase": "opening-stakes",
+          "Version": 1
+        },
+        {
+          "Time": 9.411,
+          "Phase": "opening-hush",
+          "Version": 1
+        },
+        {
+          "Time": 10.111,
+          "Phase": "opening-challenger",
+          "Version": 1
+        },
+        {
+          "Time": 11.011,
+          "Phase": "opening-answer",
+          "Version": 1
+        },
+        {
+          "Time": 11.911,
+          "Phase": "opening-standoff",
+          "Version": 1
+        },
+        {
+          "Time": 12.844,
+          "Phase": "focusing",
+          "Version": 1
+        },
+        {
+          "Time": 21.661,
+          "Phase": "verdict",
+          "Version": 4
+        },
+        {
+          "Time": 22.742,
+          "Phase": "ending-reveal",
+          "Version": 4
+        },
+        {
+          "Time": 23.442,
+          "Phase": "ending-cut",
+          "Version": 4
+        },
+        {
+          "Time": 23.651,
+          "Phase": "ending-consequence",
+          "Version": 4
+        },
+        {
+          "Time": 30.942,
+          "Phase": "verdict",
+          "Version": 4
+        }
+      ],
+      "DrawCalls": 98,
+      "Gpu": "Apple M1 Max",
+      "Notes": "Uses the production screen and MatchSession, a blind legal opponent focus, native local selection/placement, and authoritative resolution. Procedural prototype sound; native Windows/AAA human acceptance not implied."
+    }
+  },
+  "Movie": {
+    "programs": [],
+    "stream_groups": [],
+    "streams": [
+      {
+        "codec_name": "h264",
+        "width": 1920,
+        "height": 1080,
+        "r_frame_rate": "30/1",
+        "nb_frames": "1113"
+      },
+      {
+        "codec_name": "aac",
+        "r_frame_rate": "0/0",
+        "nb_frames": "1741"
+      }
+    ],
+    "format": {
+      "duration": "37.100000"
+    }
+  },
+  "Sound": {
+    "Stereo": true,
+    "PeakDb": -27.5,
+    "MeanDb": -45.3,
+    "ClippingDetected": false,
+    "HumanListeningAcceptance": false
+  },
+  "Launcher": "Play Latest.command --headless --quit-after 2 passed; catalogue ready offline; normal app menu exercised by native probes.",
+  "Harness": "Fixed 30 fps and always-on-top stabilize native input probes; separate real-time FramePostDraw samples exclude startup/capture and are not fixed-FPS. Movie-only forced drawing avoids macOS occlusion. Movie checked as 1113 frames / 37.1 seconds at 1920x1080, and native introduction/consequence/verdict frames inspected.",
+  "PriorChecks": "491 automated checks and prior Mac/Windows CI are recorded for 73dfe34 in the stakes evidence. Core was not modified or rerun for this atmosphere-only increment.",
+  "Limits": [
+    "Prototype visual/audio acceptance remains open; flow-mapped sky is not volumetric.",
+    "Three completed-frame spikes over 33 ms; maximum 56.193 ms on M1 Max; startup excluded.",
+    "Native Windows graphical acceptance not performed.",
+    "Godot reports two ObjectDB instances at some scene exits, also observed in existing menu probe; no script/shader errors.",
+    "Mendon mechanical review and effective province-strength reporting finding remain open.",
+    "Normal-match activation is still deferred."
+  ]
+}

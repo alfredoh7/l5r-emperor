@@ -1,0 +1,1 @@
+Satoshi Bold, unmodified official OTF from Fontshare, downloaded 2026-09-16. Source: https://api.fontshare.com/v2/fonts/download/satoshi . Typeface: https://www.fontshare.com/fonts/satoshi . Embedded in this game under ITF Free Font License 2.0; see Satoshi-FFL.txt. Not a standalone font distribution. SHA256: 50e4f9b7c1864c50761d729d6001bfac708c80457fa6fc41559a8ab1bd2573ff

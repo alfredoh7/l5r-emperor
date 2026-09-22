@@ -169,6 +169,10 @@ public sealed record GrantedKeyword(string Keyword, string Source, string Durati
 /// ability id for a copy. See AbilityGrants.cs and CardCopy.cs.</summary>
 public sealed record GrantedAbility(string AbilityId, string Source, string Duration, string? CopiedFrom = null, string? CopiedFromName = null);
 
+/// <summary>Read-only explanation of an already enforced granted effect. This is not an
+/// executable ability definition. Older snapshots may omit it; the client must not invent one.</summary>
+public sealed record GrantedEffectView(string Name, string Text, string Source, string Duration, string Kind = "Ability");
+
 /// <summary>"Protection" (issue #212: Tamori Takeshi's "Effects of actions the target performs
 /// will not be negated") -- while any Protection sits in a card's own list, no card of the
 /// opposing kind (Effortless Counterattack's own Additional-Action negation, Attack-strength
@@ -519,8 +523,12 @@ public sealed class PendingDuel
     // Negations a Reaction set on the issuing action (To First Blood's "negate his destruction from the action's effects"): the duel's own outcome is one of that action's effects.
     public List<NegatedEffect> NegatedEffects { get; set; } = [];
     public string AbilityId { get; set; } = "";
+    public string DuelId { get; set; } = "";
     // The card the challenge-issuing ability is printed on (an Attack keeps it in PendingAttack.Command.CardId); null for a player ability.
     public string? SourceCardId { get; set; }
+    // Duel presentation: the retained result assembled by ResolveDuel and completed by FinishDuelResolution.
+    public DuelResult? ResultDraft { get; set; }
+    public int ResultEventStart { get; set; }
     // The player who issued the challenge -- NextAction is called with this once the duel fully
     // resolves, so priority returns exactly where it would have without the interjecting duel.
     public int ChallengerPlayerId { get; set; }
@@ -574,6 +582,7 @@ public sealed class MatchState
     public PendingAttack? PendingAttack { get; set; }
     public PendingConqueror? PendingConqueror { get; set; }
     public PendingDuel? PendingDuel { get; set; }
+    public DuelRecord? LastDuel { get; set; }
     // Deck search (issue #312): see DeckSearch.cs. Non-null exactly while one of the "search*" PendingChoice
     // types is open; it holds the engine-private context (which deck, which card was picked) that the
     // player's own MatchView.PendingSearch is derived from, and is never sent as-is to anyone.
@@ -972,7 +981,9 @@ public sealed record CardView(string Id, CardDefinition? Definition, int OwnerId
     // "May not perform actions" (issue #336): true while the card, or the Personality it is attached to, is action-locked.
     bool ActionLocked = false,
     // A created copy of another card (issue #398): its Definition is the copied card's own; this says it is a created card, for the client's marker.
-    bool CreatedCopy = false);
+    bool CreatedCopy = false,
+    // Read-only explanations of already enforced granted effects (duel presentation); null when none.
+    GrantedEffectView[]? GrantedEffects = null);
 /// <summary>One granted ability as the client shows it: the id, the engine's label for it, and where it came from.</summary>
 public sealed record GrantedAbilityView(string AbilityId, string Label, string Timing, string Source, string Duration, string? CopiedFrom, string? CopiedFromName,
     string? SourceName = null, int? UsesPerTurn = null, int? UsesRemaining = null);
@@ -993,12 +1004,17 @@ public sealed record PlayerView(int Id, string Name, string Clan, int Honor, int
     // Zone.EventInPlay (Suspicions): public, like RemovedFromGame -- no visibility gate needed.
     CardView[]? EventsInPlay = null,
     // Zone.Celestial (Lady Matsu's Rage): also public -- no visibility gate needed.
-    CardView[]? Celestials = null);
+    CardView[]? Celestials = null, int FocusCount = 0)
+{
+    public HandLimitView? HandLimit { get; init; }
+}
+public sealed record HandLimitModifier(string CardId, string CardName, int Amount);
+public sealed record HandLimitView(int Base, int Maximum, HandLimitModifier[] Modifiers);
 /// <summary>Nothing here is hidden information -- both players already know who challenged whom, on
 /// what stat, and whose turn it is; a focused card's own identity is still gated the normal way,
 /// through PlayerView.Focused's own per-viewer visibility.</summary>
 public sealed record DuelView(int ChallengerPlayerId, int ChallengedPlayerId, string ChallengerId,
-    string ChallengedId, string Stat, string Stage, int TurnPlayerId, bool Struck);
+    string ChallengedId, string Stat, string Stage, int TurnPlayerId, bool Struck, string DuelId = "");
 /// <summary>The names <see cref="BattleStepView"/> speaks in, one per step of the rules lead's formal Battle
 /// Phase (issue #310). A client keys its sidebar off these constants and never infers timing itself.</summary>
 public static class BattleSteps
@@ -1060,5 +1076,5 @@ public sealed record MatchView(string ContentVersion, string Scenario, long Vers
     EitherOrView? PendingEitherOr = null,
     // The opposing player's variable payment (issue #373, see OpponentPayment.cs): PUBLIC -- both players see the first player's amount, the card and the
     // Honor at stake; only the paying player's view carries the payment quote and what each amount would do.
-    OpponentPaymentView? PendingOpponentPayment = null);
-public sealed record ReplayRecord(string ContentVersion, string Scenario, ulong Seed, GameCommand[] Commands);
+    OpponentPaymentView? PendingOpponentPayment = null, DuelRecord? LastDuel = null);
+public sealed record ReplayRecord(string ContentVersion, string Scenario, ulong Seed, GameCommand[] Commands, Deck[]? CustomDecks = null);
