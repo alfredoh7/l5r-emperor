@@ -6,6 +6,11 @@ namespace L5R.Core;
 public sealed partial class MatchEngine
 {
     public const string ContentVersion = "emperor-lion-crane-0.2.0";
+    /// <summary>The wire protocol both the server and the client advertise in the handshake. One constant, so a client
+    /// can never claim a protocol whose command/state members the peer would reject (UnmappedMemberHandling.Disallow).
+    /// 2: commands carry createdCard, and the state message carries the attack cue and per-action attack/movement/
+    /// alternative-cost metadata.</summary>
+    public const int ProtocolVersion = 2;
     private MatchState _state;
     private readonly ulong _seed;
     private readonly string _scenario;

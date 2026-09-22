@@ -6,7 +6,10 @@ namespace L5R.Server;
 
 public static class Protocol
 {
-    public const int Version = 1;
+    // The one constant both ends advertise (MatchEngine.ProtocolVersion): a peer that does not know the
+    // current command/state members rejects them (UnmappedMemberHandling.Disallow), so a schema change is a
+    // new protocol and the handshake refuses the older one rather than failing every command.
+    public const int Version = MatchEngine.ProtocolVersion;
     public const string ContentVersion = MatchEngine.ContentVersion;
     public const int MaximumMessageBytes = 32 * 1024;
 

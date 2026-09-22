@@ -14,6 +14,7 @@ internal static class SequencedTargetTests
         ("Without Fire tokens only the first effect happens and nobody is asked; the first target is optional, and the second may be nothing", Variations),
         ("One action, two effects: a whole-action negation negates both, and a negated destruction still leaves the Attack to happen", NegationSemantics),
         ("Who may perform it and what may be targeted: an unbowed Monk of the player's, an enemy attachment only, and only the acting player answers the second choice", Legality),
+        ("A target bar (issue #420) reaches the second target too: a card the performer may not target is not offered and is refused if named", BarredSecondTarget),
     ]);
 
     private static void Check(bool ok, string message = "Assertion failed") => Batch336Support.Check(ok, message);
@@ -53,6 +54,22 @@ internal static class SequencedTargetTests
     {
         var option = Enabled(e, 0, "engulfing-flames-destroy", card.Id, monk.Id);
         return option.Command! with { Selections = [Pick("attachment", attachments)] };
+    }
+
+    // Superior Reach's bar names the card whose actions may not target the protected one. The second target of a
+    // sequenced Attack is chosen after the action was announced, so the bar has to be applied there as well.
+    private static void BarredSecondTarget()
+    {
+        var (e, card, monk, followed, follower, bystander) = Setup();
+        e = Edit(e, st => st.Cards[bystander.Id].TargetBars.Add(new TargetBar(monk.Id, st.TurnNumber)));
+        Accept(e, Play(e, card, monk, follower.Id));
+        Eq(e.State.PendingChoice?.Type, "sequencedTarget", "the second target is asked");
+        var picks = e.QueryActions(0).Where(x => x.Type == "chooseSequencedTarget").ToArray();
+        Check(!picks.Any(x => x.CardId == bystander.Id), "the barred card is not offered as the second target");
+        Check(picks.Any(x => x.CardId == followed.Id), "an unbarred card still is: " + string.Join(",", picks.Select(x => x.Label)));
+        var refused = Rejection(e, new GameCommand("chooseSequencedTarget", 0, e.Version, TargetId: bystander.Id));
+        Check(refused.Length > 0, "naming the barred card is refused: " + refused);
+        Check(e.State.Cards[bystander.Id].Zone == Zone.Battlefield && !e.State.Cards[bystander.Id].Bowed, "and nothing happened to it");
     }
 
     private static void SecondTargetAfterFirstEffect()

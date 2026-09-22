@@ -359,6 +359,8 @@ static void OutgoingPayload()
     Check(sent.SetEquals(expected), $"The client wire payload and GameCommand disagree: missing [{string.Join(",", expected.Except(sent))}] extra [{string.Join(",", sent.Except(expected))}]");
     var wire = System.Text.Json.JsonSerializer.Deserialize<WireGameCommand>(json, Protocol.Json)!;
     Check(System.Text.Json.JsonSerializer.Serialize(wire.BindToSeat(1, 9)) == System.Text.Json.JsonSerializer.Serialize(command), "The server binds exactly the command the client meant, GoldAmount included.");
+    // One advertised protocol for both ends: the client's hello may never claim a version whose members the server rejects.
+    Check(MatchEngine.ProtocolVersion == Protocol.Version, $"The client advertises protocol {MatchEngine.ProtocolVersion} while the server speaks {Protocol.Version}");
 }
 
 // Issue #312: MatchView crosses the wire as the core record itself (the server serializes StateMessage.View, the client

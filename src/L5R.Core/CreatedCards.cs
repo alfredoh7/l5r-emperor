@@ -122,12 +122,14 @@ public static class CreatedCards
     // A Personality carries one Armor and one Weapon (two with Kensai): several created at once could not all attach, and are not built.
     private static bool IsSingleOfKind(CardDefinition scan) => scan.Type == CardType.Item && (scan.Keywords ?? []).Any(k => k is "Armor" or "Weapon");
 
-    /// <summary>The alternative the command chose: the only one when there is only one, else the one whose scan id the command names (null when it names none of them).</summary>
+    /// <summary>The alternative the command chose: the only one when there is only one, else the one whose scan id the command names (null when it names none of them).
+    /// A copy-of-target alternative has no scan to name, so a command that names one chooses none of them -- validation then rejects it as an illegal action
+    /// (Resolve would throw InvalidOperationException, which is not a RuleViolation and would end the session instead).</summary>
     public static CreatedCardSpec? Chosen(CreatedCardSpec spec, string? chosenScanId)
     {
         var options = spec.Alternatives.ToArray();
-        if (options.Length == 1) return chosenScanId is null || Resolve(options[0]).Id == chosenScanId ? options[0] : null;
-        return chosenScanId is null ? null : options.FirstOrDefault(o => Resolve(o).Id == chosenScanId);
+        if (chosenScanId is null) return options.Length == 1 ? options[0] : null;
+        return options.FirstOrDefault(o => !o.CopyOfTarget && Resolve(o).Id == chosenScanId);
     }
 
     public static IEnumerable<(string AbilityId, CreatedCardSpec Spec)> Creators =>

@@ -9593,6 +9593,13 @@ static void StrategyWave14Primitives()
         var performer=Add(s,"training-thunder-shugenja",0,Zone.Battlefield,province:0); // Force 2, raised to 6
         var weak=Add(s,"training-lion-courtier",1,Zone.Battlefield,province:0); // Force 2, no attachments
         var e=MatchEngine.FromTestState(s);
+        // A target bar (issue #420) covers this channel too: the bowed card is named on CardIds, not TargetId.
+        var barredState=e.State;
+        barredState.Cards[weak.Id].TargetBars.Add(new TargetBar(performer.Id,barredState.TurnNumber));
+        var barred=MatchEngine.FromTestState(barredState);
+        var barRefusal=barred.Execute(new GameCommand("useAbility",0,barred.Version,CardId:strat.Id,AbilityId:"visage-of-the-orochi",PerformerId:performer.Id,CardIds:[weak.Id]));
+        Check(!barRefusal.Accepted && (barRefusal.Error??"").Contains("may not be targeted"),"A barred card named on CardIds is refused: "+barRefusal.Error);
+        Check(!barred.State.Cards[weak.Id].Bowed,"and it was not bowed");
         Accept(e,new GameCommand("useAbility",0,e.Version,CardId:strat.Id,AbilityId:"visage-of-the-orochi",PerformerId:performer.Id,CardIds:[weak.Id]));
         Equal(e.GetView(0).Players[0].Army.Single(c=>c.Id==performer.Id).Force,6,"Raised to 6");
         Check(e.State.Cards[weak.Id].Bowed,"Optional bow target bowed");

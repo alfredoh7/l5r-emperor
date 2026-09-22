@@ -240,7 +240,7 @@ public sealed partial class MatchSession : IDisposable
             timeout.CancelAfter(TimeSpan.FromSeconds(12));
             await socket.ConnectAsync(builder.Uri, timeout.Token);
             token.ThrowIfCancellationRequested();
-            await Send(new { type = "hello", protocolVersion = 1, contentVersion = MatchEngine.ContentVersion }, socket, token);
+            await Send(new { type = "hello", protocolVersion = MatchEngine.ProtocolVersion, contentVersion = MatchEngine.ContentVersion }, socket, token);
             _ = Receive(socket, token);
         }
         catch
