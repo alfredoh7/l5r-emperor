@@ -13,7 +13,9 @@ public sealed partial class MatchEngine
             var def=Definition(card);
             var force=def.Type switch { CardType.Personality=>PersonalityForce(card), CardType.Follower=>FollowerForce(card), _=>Math.Max(0,def.Force+StatModifier(card,"Force")) };
             return new(card.Id,Copy(def),card.OwnerId,card.Zone,card.FaceUp,card.Bowed,card.ProvinceIndex,card.AttachedTo,force,def.Type==CardType.Personality?PersonalityChi(card):def.Chi,card.StraightenBlockedTurn==_state.TurnNumber,card.Modifiers.ToArray(),card.GrantedKeywords.ToArray(),card.Dishonorable,
-                def.Type==CardType.Personality && card.Zone is Zone.Home or Zone.Battlefield ? BattleForce(card) : null,card.Tokens.ToArray());
+                def.Type==CardType.Personality && card.Zone is Zone.Home or Zone.Battlefield ? BattleForce(card) : null,card.Tokens.ToArray(),
+                card.Protections.Select(p=>new GrantedEffectView("Action protection",
+                    "Effects of actions this card performs will not be negated.",p.Source,p.Duration)).ToArray());
         }
         var players=_state.Players.Select(player=>
         {
@@ -22,7 +24,9 @@ public sealed partial class MatchEngine
                 ViewCard(Card(player.StrongholdId)),
                 owned.Where(c=>c.Zone==Zone.Home || c.Zone==Zone.Attached && Card(c.AttachedTo).Zone==Zone.Home).Select(c=>ViewCard(c)).ToArray(),
                 owned.Where(c=>c.Zone==Zone.Battlefield || c.Zone==Zone.Attached && Card(c.AttachedTo).Zone==Zone.Battlefield).Select(c=>ViewCard(c)).ToArray(),
-                player.Provinces.Select(p=>new ProvinceView(p.Index,p.Strength,p.Destroyed,p.CardId is null?null:ViewCard(Card(p.CardId),Card(p.CardId).FaceUp))).ToArray(),
+                player.Provinces.Select(p=>new ProvinceView(p.Index,EffectiveProvinceStrength(p),p.Destroyed,
+                    p.CardId is null?null:ViewCard(Card(p.CardId),Card(p.CardId).FaceUp),
+                    p.RegionId is null?null:ViewCard(Card(p.RegionId)))).ToArray(),
                 player.Id==playerId?player.Hand.Select(id=>ViewCard(Card(id))).ToArray():[],player.Hand.Count,
                 player.DynastyDeck.Count,player.FateDeck.Count,
                 owned.Where(c=>c.Zone is Zone.DynastyDiscard or Zone.FateDiscard or Zone.Dead).Select(c=>ViewCard(c)).ToArray(),
@@ -35,7 +39,8 @@ public sealed partial class MatchEngine
                 // unlike a face-down province card's ProvinceIndex-keyed one, since a duel's own
                 // focused-card list has no comparable positional slot).
                 owned.Where(c=>c.Zone==Zone.Focused && (player.Id==playerId || (_state.PendingDuel?.Struck ?? false))).Select(c=>ViewCard(c)).ToArray(),
-                owned.Where(c=>c.Zone==Zone.EventInPlay).Select(c=>ViewCard(c)).ToArray())
+                owned.Where(c=>c.Zone==Zone.EventInPlay).Select(c=>ViewCard(c)).ToArray(),
+                owned.Where(c=>c.Zone==Zone.Celestial).Select(c=>ViewCard(c)).ToArray())
                 { HandLimit = HandLimitFor(player.Id) };
         }).ToArray();
         var duel=_state.PendingDuel;

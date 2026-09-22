@@ -1,0 +1,29 @@
+[
+  {
+    "card_id": "oracle-l5r-10133",
+    "printing_set": [
+      "Seeds of Decay"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10133",
+    "image_path": "assets/reference/oracle/seeds-of-decay/webp/oracle-l5r-10133-printing-1-image-1.webp",
+    "image_sha256": "8498867af24e5ca828638388f2a25dab33ba37d4d21c51b789e34c3a9298837f"
+  },
+  {
+    "card_id": "oracle-l5r-6502",
+    "printing_set": [
+      "Emperor Edition"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=6502",
+    "image_path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-6502-printing-1-image-1.webp",
+    "image_sha256": "117c0810180df7b44b6fdccbf08e566db18c13ae1ebfb94e58089b4f9ccfca1e"
+  },
+  {
+    "card_id": "oracle-l5r-9889",
+    "printing_set": [
+      "The Shadow's Embrace"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=9889",
+    "image_path": "assets/reference/oracle/the-shadow-s-embrace/webp/oracle-l5r-9889-printing-1-image-1.webp",
+    "image_sha256": "aaad4480b6d524d1befd24d6708a55cdd9f62a5fa84bb66aa347320e5fadea46"
+  }
+]

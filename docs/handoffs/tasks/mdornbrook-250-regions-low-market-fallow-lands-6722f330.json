@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Wire the first two Region cards: Low Market and Fallow Lands. New Region attachment primitive (Zone.Region attaches to a PROVINCE, not a card -- ProvinceState.RegionId, EffectiveProvinceStrength live-recomputed for a static strength bonus, DestroyProvince cleanup, at-most-one-Region-per-province discard rule), a new attachment-in-hand Target category, Low Market's Open-timed discounted Equip (low-market-equip), and Fallow Lands' static +2 strength plus a Reaction that weakens an Attack at its own province (fallow-lands-reaction), usable the turn it enters play. Registered via the standard content-wave pipeline (RegionWave1). Marked shared only because the packaging script copies scans into src/L5R.Client/Content/Published/ (the same data-asset path every other wave already writes to) and ProvinceView/PlayerView gained new fields the client will eventually read -- no actual client/UI code changed; rendering the new zone is explicitly deferred to Alfredo (see the decision doc).",
+  "validation": "bash tools/check.sh --skip-client: 155/155 core (4 new regression tests: RegionAttachmentPrimitive, FallowLandsRegion, LowMarketEquip, plus the existing suite), 52/52 published (bumped the pinned catalog-size assertion 274->276), 9/9 deck-format, 10/10 deck-workshop, 14/14 AI, 5/5 server, 4/4 client-transport, plus both Python content/collaboration unittest suites -- all green. dotnet build of src/L5R.Client/L5R.Client.csproj also succeeds.",
+  "remaining": "None for the two cards themselves. UI rendering of a Region as a province-attached visual is explicitly deferred to Alfredo (UI lane) per the decision doc.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/250",
+  "branch": "mdornbrook/250-regions-low-market-fallow-lands",
+  "updated": "2026-09-16T13:20:35.211566+00:00"
+}
