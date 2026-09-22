@@ -243,6 +243,7 @@ internal static class BeforeTheDawnCardTests
         var e3 = EconomyBattle(s => { k3 = Kw(Bf(s, "training-crane-samurai", 0), "Kensai"); c3 = Add(s, ReadiedSteel, 0, Zone.Hand); reactive = Kw(Add(s, "training-item-entry-reaction", 0, Zone.FateDiscard), "Weapon"); Bf(s, "training-lion-samurai", 1); });
         Accept(e3, Offer(e3, 0, "readied-steel-attach", c3.Id, reactive.Id, k3.Id));
         Eq(e3.State.PendingChoice?.Type, "entryReaction", "the attached Weapon's entering-play window is open");
+        Eq(e3.State.Cards[c3.Id].Zone, Zone.FateDiscard, "the Strategy is spent even though the attachment's entering-play window is open");
         // Stockpiled Resources: after engaging, attach an attachment from your hand to your performing Personality, 4 less if he is a Commander.
         foreach (var commander in new[] { false, true })
         {
@@ -259,6 +260,17 @@ internal static class BeforeTheDawnCardTests
             Accept(te, offers[0].Command! with { TargetId = item.Id, PerformerId = actor.Id });
             Check(te.State.Cards[item.Id].AttachedTo == actor.Id, "attached to the performing Personality");
         }
+        // An attachment with an entering-play Reaction opens its window; the Strategy is spent all the same.
+        var r = Table(Phase.BattleSelection, 0); r.PriorityPlayerId = 0; r.CurrentBattleProvince = null; r.UnresolvedBattlefields = [0];
+        r.Cards[r.Players[0].StrongholdId].DefinitionId = "oracle-l5r-1218"; for (var i = 0; i < 4; i++) Add(r, "training-marketplace", 0, Zone.Home);
+        var performer = Add(r, "training-crane-samurai", 0, Zone.Battlefield, province: 0); Add(r, "training-lion-samurai", 1, Zone.Battlefield, province: 0);
+        var reactiveItem = Add(r, "training-item-entry-reaction", 0, Zone.Hand); var rcard = Add(r, Stockpiled, 0, Zone.Hand);
+        var re = MatchEngine.FromTestState(r);
+        Accept(re, new GameCommand("selectBattle", 0, re.Version, Province: 0));
+        var roffer = re.QueryActions(re.State.PriorityPlayerId).First(x => x.Enabled && x.Command?.AbilityId == "stockpiled-attach" && x.CardId == rcard.Id);
+        Accept(re, roffer.Command! with { TargetId = reactiveItem.Id, PerformerId = performer.Id });
+        Eq(re.State.PendingChoice?.Type, "entryReaction", "the attachment's entering-play window is open");
+        Eq(re.State.Cards[rcard.Id].Zone, Zone.FateDiscard, "and the Strategy is spent");
     }
 
     private static void Spirits()

@@ -5830,9 +5830,8 @@ public sealed partial class MatchEngine
                 break;
             case "nijugun-move":
             {
-                var nijugunBefore = target!.Zone;
-                MoveHome(target, false);
-                if (nijugunBefore == Zone.Battlefield && target.Zone == Zone.Home && (HasReconnaissanceAtCurrentBattlefield(player.Id) || player.Clan == "Unicorn"))
+                MoveHome(target!, false);
+                if (target!.Zone == Zone.Home && (HasReconnaissanceAtCurrentBattlefield(player.Id) || player.Clan == "Unicorn"))
                     LockMovement(target, Definition(source!).Name, MovementKinds.Home | MovementKinds.ToBattlefield);
                 break;
             }
@@ -5875,7 +5874,7 @@ public sealed partial class MatchEngine
             {
                 var kensai = Card(command.PerformerId!);
                 if (Attachments(kensai.Id).Any(a => Keyword(a, "Weapon"))) StraightenUnit(kensai);
-                if (id == "readied-steel-attach" && ExecuteAttach(command, ability.Attach!, player, source, target)) return;
+                if (id == "readied-steel-attach" && ExecuteAttach(command, ability.Attach!, player, source, target)) { SpendHandPlayedCard(player, source); return; }
                 break;
             }
             case "shadow-tactics-stay": case "shadow-tactics-home":
@@ -5964,7 +5963,7 @@ public sealed partial class MatchEngine
             }
             case "saibankan-dishonor": foreach (var dishonored in SlotCards(command, "targets").ToArray()) Dishonor(dishonored); break;
             case "stockpiled-attach": case "stockpiled-attach-commander":
-                if (ExecuteAttach(command, ability.Attach!, player, source, target)) return;
+                if (ExecuteAttach(command, ability.Attach!, player, source, target)) { SpendHandPlayedCard(player, source); return; }
                 break;
             case "kota-negate-move": NegateEffects(Card(HeldAction().TargetId!), "move"); break;
             case "taishuu-political-negate": NegateHeldAction(source!); break;
