@@ -79,6 +79,25 @@ static class DuelDemoChecks
         record.Reveals[0].Cards[0]=record.Challenger;
         Check(e.GetView(0).LastDuel!.Reveals[0].Cards.All(c=>c.Zone==Zone.Focused),"record detached");
     }
+    public static void EffectiveProvinceStrength()
+    {
+        // Times of Strife caps every province at its maximum: Courtesy's raw +2 is invisible in GetView, so the
+        // retained result and its beat must not report an increase either.
+        var s=MatchEngine.CreateDuelDemo().State;
+        s.Cards.Add("strife",new CardInstance{Id="strife",DefinitionId="oracle-l5r-8494",OwnerId=1,Zone=Zone.EventInPlay,FaceUp=true});
+        var e=MatchEngine.FromTestState(s);Begin(e);
+        Send(e,Action(e,"focus",c=>c.Choice=="deck"));
+        Send(e,Action(e,"focus",c=>c.CardId is {} id&&e.State.Cards[id].DefinitionId=="oracle-l5r-7996"));
+        Send(e,Action(e,"strike"));
+        var view=e.GetView(0);var record=view.LastDuel!;
+        Check(e.State.Players[0].Provinces.All(p=>p.Strength>p.PrintedStrength),"Courtesy's raw raise still applies underneath");
+        foreach(var p in record.Result!.Provinces.Where(p=>p.PlayerId==0))
+        {
+            Equal(p.After,p.Before);
+            Equal(p.After,view.Players[0].Provinces[p.Index].Strength);
+        }
+        Check(!record.Beats!.Any(b=>b.Lines.Any(l=>l.Contains("strength"))),"No strength change reported while the ceiling hides it");
+    }
     public static void Story()
     {
         var e=MatchEngine.CreateDuelDemo();Begin(e);

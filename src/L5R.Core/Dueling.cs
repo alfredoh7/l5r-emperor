@@ -294,7 +294,7 @@ public sealed partial class MatchEngine
             else { winnerId = null; loserIds = [duel.ChallengerId, duel.ChallengedId]; resolutionReason = "Equal totals · both lose"; }
         }
         var resultStart = _state.Events.Count;
-        var strengthsBefore = _state.Players.SelectMany(p => p.Provinces.Select(v => new DuelProvince(p.Id, v.Index, v.Strength, v.Strength))).ToArray();
+        var strengthsBefore = _state.Players.SelectMany(p => p.Provinces.Select(v => new DuelProvince(p.Id, v.Index, EffectiveProvinceStrength(v), EffectiveProvinceStrength(v)))).ToArray();
         var challengerStat = DuelStatValue(challenger, duel.Stat);
         var challengedStat = DuelStatValue(challenged, duel.Stat);
         var winnerPlayerId = winnerId is null ? (int?)null : Card(winnerId).OwnerId;
@@ -378,7 +378,7 @@ public sealed partial class MatchEngine
         var draft = duel.ResultDraft!;
         _state.LastDuel = _state.LastDuel! with { Result = draft with {
             Consequences = _state.Events.Skip(duel.ResultEventStart).ToArray(),
-            Provinces = draft.Provinces.Select(p => p with { After = Player(p.PlayerId).Provinces[p.Index].Strength }).ToArray(),
+            Provinces = draft.Provinces.Select(p => p with { After = EffectiveProvinceStrength(Player(p.PlayerId).Provinces[p.Index]) }).ToArray(),
             ResolutionVersion = _state.Version + 1, ReturnPhase = _state.Phase, ReturnPriority = _state.PriorityPlayerId } };
         _state.PendingDuel = null;
         // The duel itself is a single, complete action from challenge to consequences (issue #209):

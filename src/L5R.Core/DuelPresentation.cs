@@ -33,7 +33,8 @@ public sealed partial class MatchEngine
     private DuelEvidence CaptureDuelEvidence() => new(
         _state.Cards.Values.Where(c => c.Zone is not (Zone.Hand or Zone.FateDeck or Zone.DynastyDeck) && c.FaceUp)
             .ToDictionary(c => c.Id, c => ViewCard(c)),
-        _state.Players.Select(p => p.Provinces.Select(v => v.Strength).ToArray()).ToArray(),
+        // Effective strength (Regions, Terrains, Times of Strife's ceiling): what GetView shows, never the raw field.
+        _state.Players.Select(p => p.Provinces.Select(EffectiveProvinceStrength).ToArray()).ToArray(),
         _state.Players.Select(p => p.Honor).ToArray(), _state.Events.Count, _state.FavorPlayerId);
 
     private void ExplainDuelEffect(string kind, CardView? source, Action apply)
@@ -58,7 +59,7 @@ public sealed partial class MatchEngine
         }
         foreach (var player in _state.Players)
         {
-            var changes = player.Provinces.Select((p,i) => p.Strength-before.Provinces[player.Id][i]).ToArray();
+            var changes = player.Provinces.Select((p,i) => EffectiveProvinceStrength(p)-before.Provinces[player.Id][i]).ToArray();
             if (changes.Length>0 && changes.All(d => d==changes[0]) && changes[0]!=0)
                 lines.Add($"{player.Name}: all provinces {changes[0]:+0;−0} strength.");
             else for (var i=0;i<changes.Length;i++) if (changes[i]!=0)

@@ -13,6 +13,7 @@ var tests = new (string Name, Action Run)[]
     ("Own focused cards are inspectable from every source without opponent disclosure", DuelDemoChecks.OwnFocusViews),
     ("Duel Demo scenarios and legal decisions", DuelDemoChecks.Decisions),
     ("Duel stakes and source-linked public consequences", DuelDemoChecks.Story),
+    ("Duel results record effective province strength (Times of Strife's ceiling), matching GetView", DuelDemoChecks.EffectiveProvinceStrength),
     ("Battle journal groups public effects and actual destinations without duplicating snapshots", BattleJournalProjection),
     ("Accepted battle and reaction passes publish their actor; rejected passes remain atomic", PublicPassEvents),
     ("BowedPersonalityResolution/attacker: two Native Guides win and destroy the province", () => BowedPersonalityResolution(0,true,10,1)),
