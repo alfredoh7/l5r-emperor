@@ -2570,7 +2570,8 @@ public sealed partial class MatchEngine
                 else if(Definition(card).Type==CardType.Celestial) ResolveCelestial(player,province,card);
             }
             // An Event already face up (refilled face up by Border Keep's cycle or the Kharmic replacement) was never
-            // revealed here, but Events resolve only in the Events Phase: it resolves now instead of staying stuck.
+            // revealed here, but Events resolve only in the Events Phase: it resolves now instead of staying stuck
+            // (rules lead ruling, docs/decisions/2026-09-22-suspicions-owner-events-phase.md).
             else if(Definition(card).Type==CardType.Event && ResolveEvent(player,province,card)) return;
         }
         AdvanceStraightenHolds(StraightenPoint.EventsRevealEnds);

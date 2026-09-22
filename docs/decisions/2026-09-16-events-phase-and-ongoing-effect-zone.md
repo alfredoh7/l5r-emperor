@@ -11,7 +11,7 @@ same way `Zone.RemovedFromGame` already is, with no visibility gate.
 Dispatch is Effect-keyed, the same convention every other one-off card behavior in `MatchEngine.cs`
 already uses: `MatchEngine.ResolveEvent` runs once per revealed Event, `MatchEngine.ResolveOngoingEvents`
 re-checks every card currently sitting in `Zone.EventInPlay` at the end of every Events Phase (whoever's
-turn it is). The card's own zone membership *is* the "effect still active" flag — no separate per-player
+turn it is). *(Superseded for Suspicions by [2026-09-22-suspicions-owner-events-phase.md](2026-09-22-suspicions-owner-events-phase.md): it fires only on its owner's turns.)* The card's own zone membership *is* the "effect still active" flag — no separate per-player
 or per-match state tracks it, the same living-state approach `GrantedKeyword.Duration == "Permanent"`
 already uses for a keyword grant. Nothing yet moves a card *out* of `Zone.EventInPlay` (no published
 Event's effect ends), but the intended shape when one does is: move it to `Zone.DynastyDiscard`, same
