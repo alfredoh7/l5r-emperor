@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Wire Akodo Tezuka (oracle-l5r-298): generalizes Daigotsu Bofana - exp's Battle-only FromDiscard Additional Action grant with AdditionalActionGrant.AnyDiscardTiming so it also admits Limited/Open, each still gated by its own ordinary phase legality ('as appropriate to the current phase' needs no check of its own). Bushido Virtue reuses the same filterable-keyword shape Dark Virtue already had. Two-slot cost/target shape reuses Kakita Yasunori's own precedent.",
+  "validation": "dotnet build (core + tests) clean; full test suite against the new origin/main (post PR #268 merge) 0 FAIL (akodo-tezuka 4/4 new, Bofana's own daigotsu-bofana suite unaffected); docs/CARD_INVENTORY.xlsx regenerated (2165 rows, 603 wired).",
+  "remaining": "None; ready for review.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/451",
+  "branch": "claude/449-akodo-tezuka-discard-grant",
+  "updated": "2026-09-22T19:24:04.207638+00:00"
+}
