@@ -876,7 +876,15 @@ public sealed class MatchState
     // action this battle" -- per player, set true whenever another player's action destroys one of theirs (FinishActionEffectTracking), cleared
     // when their own Battle action finishes resolving (the same point) and when a new battle begins (SelectBattle).
     public bool[] EnemyDestroyedOwnPersonalitySinceLastBattleAction { get; set; } = new bool[2];
+    // Akodo Kobi (oracle-l5r-232, issue #440 follow-up): "Recruit him... before the current turn ends" -- queued when her Reaction triggers, resolved the next time
+    // ANY player's turn ends (MatchEngine.cs's ResolvePendingEndPhaseRecruits, called from EndTurn -- exactly "the next End Phase," whichever player's it is). Via
+    // names the source for the entry log, the same role DestroyUnits'/BringDeadPersonalityIntoPlay's own "via" string already plays elsewhere.
+    public List<PendingEndPhaseRecruit> PendingEndPhaseRecruits { get; set; } = [];
 }
+
+/// <summary>A dead Personality to recruit automatically -- ignoring costs and Honor Requirements -- the next time any player's turn ends, if he is still dead then
+/// (issue #440 follow-up). See MatchState.PendingEndPhaseRecruits.</summary>
+public sealed record PendingEndPhaseRecruit(int PlayerId, string CardId, string Via);
 
 /// <summary>One card the currently-resolving action affected, and how (issue #437: ActionEffectTracking.cs). Kind is "destroyed" or "moved" today;
 /// a bow is not tracked here yet (no single choke point narrates every one the way DestroyUnits/MoveHome already do -- see the file comment).</summary>

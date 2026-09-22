@@ -673,6 +673,25 @@ public sealed partial class MatchEngine
         return OpenRecruitEntryWindows(player,card,false,null);
     }
 
+    // Akodo Kobi (issue #440 follow-up): each queued recruit -- checked, at the moment it actually resolves, for whether the card is STILL dead (a later
+    // effect could already have brought him back another way) -- enters at home the same way BringDeadPersonalityIntoPlay does, ignoring costs and Honor
+    // Requirements by construction (no QuotePurchase call at all, the same reason that primitive already ignores them for At Any Cost/Goju Plot). Unlike
+    // BringDeadPersonalityIntoPlay, this deliberately does NOT open an entering-play Reaction window: doing so mid-EndTurn would interrupt the turn's own
+    // transition to Phase.End with nothing recorded to resume it correctly (ResumeAfterDeferredWindow has no case for "we were mid-EndTurn"), and no Lion
+    // Clan Personality this pass concerns carries one -- a future card that does would need that resumption built first. The Overconfident draw entering
+    // play still queues (EnterPlayFromRecruit's own QueueOverconfidentDraw) is picked up by EndTurn's very next check, same as any other entry there.
+    private void ResolvePendingEndPhaseRecruits()
+    {
+        var due=_state.PendingEndPhaseRecruits.ToArray();
+        _state.PendingEndPhaseRecruits.Clear();
+        foreach(var pending in due)
+        {
+            if(!_state.Cards.TryGetValue(pending.CardId,out var card) || card.Zone!=Zone.Dead) continue;
+            ResetCardState(card);
+            EnterPlayFromRecruit(Player(pending.PlayerId),card,null,pending.Via);
+        }
+    }
+
     private void EnterPlayFromRecruit(PlayerState player,CardInstance card,int? battlefield,string via)
     {
         card.Zone=battlefield is null?Zone.Home:Zone.Battlefield; card.ProvinceIndex=battlefield; card.FaceUp=true;
@@ -2422,6 +2441,10 @@ public sealed partial class MatchEngine
         // Lady Matsu's Rage: "this turn" (its own printed parenthetical) -- any watch that never fired
         // (the target never straightened) simply expires here, with no further consequence.
         _state.PendingLadyMatsusRageWatches.Clear();
+        // Akodo Kobi (issue #440 follow-up): "before the current turn ends" -- exactly here, the next End Phase reached by ANY player (this function runs
+        // for every player's own turn ending, not just one). A second Overconfident check catches anything a freshly-entered Personality just queued.
+        ResolvePendingEndPhaseRecruits();
+        if(_state.WinnerId is not null || OpenOverconfidentDrawWindow(_state.ActivePlayerId)) return;
         var player=Player(_state.ActivePlayerId);
         SetPhase(Phase.End,player.Id);
         if(player.DishonorLossPending) { Win(1-player.Id,"Dishonor defeat at the beginning of the End Phase"); return; }
