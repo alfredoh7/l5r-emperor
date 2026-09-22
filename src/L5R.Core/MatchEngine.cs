@@ -400,6 +400,15 @@ public sealed partial class MatchEngine
                 if (command.Type=="useAbility") UseAbility(command); else PassReaction();
                 return;
             }
+            if (_state.PendingChoice.Type=="afterActionResolvedReaction")
+            {
+                // After an action's resolution (issue #437): either player may play a Reaction that names it, or pass; two consecutive passes close the window (PassReaction),
+                // the same shape as afterResolutionReaction above -- there is nothing special to do when it closes (no special-cased branch in PassReaction), priority just
+                // returns to whoever this window's own ActingPlayerId (FinishActionEffectTracking's own closesTo) named.
+                Require(command.Type is "useAbility" or "declineReaction" or "pass","Play a Reaction to the action's resolution or pass.");
+                if (command.Type=="useAbility") UseAbility(command); else PassReaction();
+                return;
+            }
             if (_state.PendingChoice.Type=="battleRecruit")
             {
                 // After a battle resolved (issue #379): the players holding a Ring's recruit grant of this battle may put it into play (a
@@ -666,6 +675,25 @@ public sealed partial class MatchEngine
         return OpenRecruitEntryWindows(player,card,false,null);
     }
 
+    // Akodo Kobi (issue #440 follow-up): each queued recruit -- checked, at the moment it actually resolves, for whether the card is STILL dead (a later
+    // effect could already have brought him back another way) -- enters at home the same way BringDeadPersonalityIntoPlay does, ignoring costs and Honor
+    // Requirements by construction (no QuotePurchase call at all, the same reason that primitive already ignores them for At Any Cost/Goju Plot). Unlike
+    // BringDeadPersonalityIntoPlay, this deliberately does NOT open an entering-play Reaction window: doing so mid-EndTurn would interrupt the turn's own
+    // transition to Phase.End with nothing recorded to resume it correctly (ResumeAfterDeferredWindow has no case for "we were mid-EndTurn"), and no Lion
+    // Clan Personality this pass concerns carries one -- a future card that does would need that resumption built first. The Overconfident draw entering
+    // play still queues (EnterPlayFromRecruit's own QueueOverconfidentDraw) is picked up by EndTurn's very next check, same as any other entry there.
+    private void ResolvePendingEndPhaseRecruits()
+    {
+        var due=_state.PendingEndPhaseRecruits.ToArray();
+        _state.PendingEndPhaseRecruits.Clear();
+        foreach(var pending in due)
+        {
+            if(!_state.Cards.TryGetValue(pending.CardId,out var card) || card.Zone!=Zone.Dead) continue;
+            ResetCardState(card);
+            EnterPlayFromRecruit(Player(pending.PlayerId),card,null,pending.Via);
+        }
+    }
+
     private void EnterPlayFromRecruit(PlayerState player,CardInstance card,int? battlefield,string via)
     {
         card.Zone=battlefield is null?Zone.Home:Zone.Battlefield; card.ProvinceIndex=battlefield; card.FaceUp=true;
@@ -827,11 +855,17 @@ public sealed partial class MatchEngine
     // possible by a defender's battlefield-creation ability at the attacker's own province -- that
     // mechanic does not exist yet, so QuotePurchase's own ProclaimEligible (which already requires
     // playerId==ActivePlayerId) is reused as-is and simply never overridden for this narrow case.
+    // Akodo Ashiko (oracle-l5r-193, issue #440): "If Ashiko is face-up in one of your Provinces, Recruit her..." is the Reserve keyword's own
+    // shape (an absent battle action, only her own card, no separate granting card needed -- see the Reserve keyword's reminder text on Tamori
+    // Shinji and its own kind), just printed on a card that carries no other Reserve-keyword capability, so IsReserveRecruitable substitutes her
+    // own Effect string for the keyword check rather than adding "Reserve" to her printed Keywords (which she does not carry).
+    private bool IsReserveRecruitable(CardInstance card) => Keyword(card,"Reserve") || Definition(card).Effect=="ashiko-outnumbered-reserve";
+
     private void RecruitReserve(GameCommand command)
     {
         Require(_state.Phase==Phase.Battle,"Reserve recruitment is an absent battle action, only available during the Battle Phase.");
         var card=Card(command.CardId);
-        Require(card.OwnerId==command.PlayerId && card.Zone==Zone.Province && card.FaceUp && Definition(card).Type==CardType.Personality && Keyword(card,"Reserve"),
+        Require(card.OwnerId==command.PlayerId && card.Zone==Zone.Province && card.FaceUp && Definition(card).Type==CardType.Personality && IsReserveRecruitable(card),
             "Choose your own face-up Reserve Personality in a province.");
         var provinceIndex=card.ProvinceIndex!.Value;
         Require(_state.UnresolvedBattlefields.Contains(provinceIndex),"There is no battlefield at this province.");
@@ -929,13 +963,22 @@ public sealed partial class MatchEngine
             && !(ignoreHonorRequirementIfPersonalityClan is string waivedClan && HasClanAffiliation(card,waivedClan))) error="Family Honor is below the Honor Requirement; Clan allegiance may allow purchase.";
         var prosperous=def.Effect=="prosperous-discount"?_state.Cards.Values.Count(c=>c.OwnerId==playerId && InPlay(c) && Definition(c).Type==CardType.Personality):0;
         var reserveDiscount=viaReserve && def.Effect=="reserve-defender-discount"?4:0;
+        // Akodo Ashiko (oracle-l5r-193, issue #440): "reducing her Gold Cost by 2 if there are more units on the enemy side of the current battle
+        // than on your side" -- true by construction only on a Reserve recruit (viaReserve), where card.ProvinceIndex is already the battlefield
+        // (the same one RecruitReserve's own Require checked has enemy presence). Army(...).Count() is the live, always-current unit count at a
+        // battlefield -- already the established primitive for exactly this comparison (e.g. barred-passage-bow's own army-size check), not
+        // something that needs tracking or updating separately: it is read fresh every time a quote is asked for, including after intervening
+        // Battle actions have changed either side's presence.
+        var ashikoDiscount=viaReserve && def.Effect=="ashiko-outnumbered-reserve" && card.ProvinceIndex is int ashikoProvince
+            && Army(1-playerId,ashikoProvince).Count() > Army(playerId,ashikoProvince).Count() ? 2 : 0;
         // "Enters play paying N less Gold if you are a <Clan> Clan player" (issue #336, Daigotsu Hotako exp3): a printed term of the card that
         // stacks with the two Clan choices above; the same one ClanEntryDiscount gives Equip.
         var entryDiscount=ClanEntryDiscount(def,player);
-        var rawCost=def.GoldCost-prosperous-reserveDiscount-(entryDiscount?.Amount??0)+(clanAllegiance?2:0)-(clanDiscount?2:0);
+        var rawCost=def.GoldCost-prosperous-reserveDiscount-ashikoDiscount-(entryDiscount?.Amount??0)+(clanAllegiance?2:0)-(clanDiscount?2:0);
         var cost=Math.Max(0,rawCost);
         // The human-readable derivation the payment panel shows (issue #303), term by term.
         var basis=$"{def.Name} cost {def.GoldCost}"+(prosperous>0?$" − {prosperous} (controlled Personalities)":"")+(reserveDiscount>0?$" − {reserveDiscount} (Reserve while defending)":"")
+            +(ashikoDiscount>0?$" − {ashikoDiscount} (outnumbered)":"")
             +(entryDiscount is {} entry?$" − {entry.Amount} ({entry.Clan} Clan)":"")
             +(clanAllegiance?" + 2 (Clan allegiance)":"")+(clanDiscount?" − 2 (Clan discount)":"")+(rawCost<0?" (min 0)":"");
         if ((Keyword(card,"Unique") || Keyword(card,"Singular")) && ControlsCopyOf(playerId,def.Name)) error=$"You already control this {(Keyword(card,"Unique") ? "Unique" : "Singular")} card.";
@@ -1220,6 +1263,7 @@ public sealed partial class MatchEngine
         Require(_state.Phase==Phase.BattleSelection,"Battle order may be chosen between battles.");
         Require(command.Province is int && _state.UnresolvedBattlefields.Contains(command.Province.Value),"Choose an unresolved battlefield.");
         _state.CurrentBattleProvince=command.Province; _state.BattleNumber++;
+        _state.EnemyDestroyedOwnPersonalitySinceLastBattleAction=new bool[2]; // Revenge (issue #437): "this battle" bounds the window.
         SetPhase(Phase.Battle,1-_state.ActivePlayerId);
         // Battle Phase timing (issue #310): the Defender holds the first opportunity by default (spec 4.4).
         // "Engaging" is exactly this moment -- the Attacker has just selected the battle (spec 4.1) -- so the
@@ -2279,6 +2323,9 @@ public sealed partial class MatchEngine
             card.ProvinceIndex=null;
             MarkDead(card);
             count++;
+            // Action-effect tracking (issue #437): only ever recorded when this destruction came from a specific action (actingPlayerId is set) --
+            // never for the mass casualty sweep a battle's own resolution performs directly (see the comment above on IsCreatedCard's own check).
+            if(actingPlayerId is not null) RecordActionEffect(card.Id,DestroyedKind);
             // The destruction itself, and everything it normally triggers (the Dishonorable-death
             // penalty MarkDead already applied above, ExpendableDraw, DestroyedDuringBattleBonus,
             // Overconfident), still fully happens -- Lady Matsu's Rage only overrides where the
@@ -2397,6 +2444,10 @@ public sealed partial class MatchEngine
         // Lady Matsu's Rage: "this turn" (its own printed parenthetical) -- any watch that never fired
         // (the target never straightened) simply expires here, with no further consequence.
         _state.PendingLadyMatsusRageWatches.Clear();
+        // Akodo Kobi (issue #440 follow-up): "before the current turn ends" -- exactly here, the next End Phase reached by ANY player (this function runs
+        // for every player's own turn ending, not just one). A second Overconfident check catches anything a freshly-entered Personality just queued.
+        ResolvePendingEndPhaseRecruits();
+        if(_state.WinnerId is not null || OpenOverconfidentDrawWindow(_state.ActivePlayerId)) return;
         var player=Player(_state.ActivePlayerId);
         SetPhase(Phase.End,player.Id);
         if(player.DishonorLossPending) { Win(1-player.Id,"Dishonor defeat at the beginning of the End Phase"); return; }

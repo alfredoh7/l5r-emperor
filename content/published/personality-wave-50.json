@@ -1,0 +1,37 @@
+{
+  "Profile": "personality-wave-50",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-232",
+      "Name": "Akodo Kobi",
+      "Type": "Personality",
+      "Clan": "Lion",
+      "GoldCost": 9,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 5,
+      "PersonalHonor": 3,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After the resolution of your Tactical action, give Kobi +1F.\nReaction: After another player's Battle action resolves which destroyed one of your Lion Clan Personalities at the current battlefield, before the current turn ends, if the destroyed Personality is dead, Recruit him, ignoring costs and Honor Requirements.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-232.jpg",
+      "Keywords": [
+        "Tactician",
+        "Unique",
+        "Experienced",
+        "Lion Clan",
+        "Paragon",
+        "Samurai"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "kobi-recruit"
+      ],
+      "Effect": "kobi-tactical-bonus"
+    }
+  ],
+  "Decks": []
+}

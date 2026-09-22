@@ -296,6 +296,12 @@ public sealed partial class MatchEngine
             result.AddRange(AbilityActions(playerId));
             Add("declineReaction","Pass reaction",Command("declineReaction"));
         }
+        else if(_state.PendingChoice is { Type:"afterActionResolvedReaction" })
+        {
+            // After an action's resolution (issue #437): this player's Reactions that name it, then the pass -- same shape as afterResolutionReaction above.
+            result.AddRange(AbilityActions(playerId));
+            Add("declineReaction","Pass reaction",Command("declineReaction"));
+        }
         else if(_state.PendingChoice is { Type:"battleRecruit" })
         {
             // After a battle resolved (issue #379): the recruit grants of this battle this player still holds, then the pass.
@@ -490,7 +496,7 @@ public sealed partial class MatchEngine
                 // player's own required, only a battlefield at the card's own province with enemy
                 // presence there. Offered across every one of the player's own provinces, not just the
                 // currently-resolving battlefield.
-                foreach(var card in player.Provinces.Where(p=>p.CardId is not null).Select(p=>Card(p.CardId)).Where(c=>c.FaceUp && Definition(c).Type==CardType.Personality && Keyword(c,"Reserve")))
+                foreach(var card in player.Provinces.Where(p=>p.CardId is not null).Select(p=>Card(p.CardId)).Where(c=>c.FaceUp && Definition(c).Type==CardType.Personality && IsReserveRecruitable(c)))
                 {
                     var def=Definition(card);
                     var provinceIndex=card.ProvinceIndex!.Value;
@@ -498,7 +504,7 @@ public sealed partial class MatchEngine
                     var modes=HasClanAffiliation(card,player.Clan) ? new[] {(true,false),(false,false),(true,true),(false,true)} : [(false,false)];
                     foreach(var (discount,allegiance) in modes)
                     {
-                        var quote=QuotePurchase(playerId,card.Id,discount,allegiance);
+                        var quote=QuotePurchase(playerId,card.Id,discount,allegiance,viaReserve:true);
                         var payment=quote.Payments.FirstOrDefault();
                         var reason=!eligible?"There is no battlefield here with enemy presence.":quote.Error??(payment is null?"Insufficient unbowed Gold production.":null);
                         var mode=discount?allegiance?"discount + allegiance":"Clan discount":allegiance?"Clan allegiance":"full cost";

@@ -357,5 +357,16 @@ class RouterTests(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             self.exercise([{'filename':'src/L5R.Client/CardTile.cs'}],changed=2)
 
+    def test_zero_changed_files_metadata_uses_complete_paginated_listing(self):
+        result,calls=self.exercise([{'filename':'src/L5R.Client/Main.cs'},{'filename':'src/L5R.Core/Models.cs'}],changed=0)
+        self.assertEqual(result['lane'],'shared')
+        self.assertTrue(any('labels[]=lane:shared' in x for x in calls))
+
+    def test_listing_at_github_cap_stops_before_writes(self):
+        files=[{'filename':f'docs/f{i}.md'} for i in range(c.FILE_LISTING_LIMIT)]
+        for changed in (0,c.FILE_LISTING_LIMIT):
+            with self.subTest(changed=changed), self.assertRaises(RuntimeError):
+                self.exercise(files,changed=changed)
+
 
 if __name__=='__main__':unittest.main()

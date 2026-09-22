@@ -1,0 +1,33 @@
+{
+  "Profile": "personality-wave-49",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-193",
+      "Name": "Akodo Ashiko",
+      "Type": "Personality",
+      "Clan": "Lion",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 5,
+      "Chi": 4,
+      "PersonalHonor": 0,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle, :gstar:: If Ashiko is face-up in one of your Provinces, Recruit her reducing her Gold Cost by 2 if there are more units on the enemy side of the current battle than on your side.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-193.jpg",
+      "Keywords": [
+        "Deathseeker",
+        "Hero",
+        "Lion Clan",
+        "Samurai"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "ashiko-outnumbered-reserve"
+    }
+  ],
+  "Decks": []
+}
