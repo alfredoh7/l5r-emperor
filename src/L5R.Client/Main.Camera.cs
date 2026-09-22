@@ -40,7 +40,8 @@ public partial class Main
 
     private void BuildTableViewport()
     {
-        _tableViewport = Place(_root, new Control { ClipContents = true, MouseFilter = Control.MouseFilterEnum.Ignore }, 24, 148, 1500, 702);
+        // Keep overview fitting separate from full-window table drawing.
+        _tableViewport = Place(_root, new Control { ClipContents = false, ZIndex = -1, MouseFilter = Control.MouseFilterEnum.Ignore }, 24, 148, 1500, 702);
         _tableSurface = Place(_tableViewport, new TableSurface(), 0, 0, 1500, 702);
         _tableSurface.ResizePlane(_tableViewport.Size, 1);
         _world = Place(_tableSurface.Canvas, new Control { Theme = Palette.MakeTheme(), MouseFilter = Control.MouseFilterEnum.Ignore }, 0, 0, WorldWidth, 1100);
@@ -63,7 +64,8 @@ public partial class Main
         // upward reach of its fan. Hover can still deliberately lift a hand card.
         _tableViewport.Size = new Vector2(_layoutWidth - SidebarWidth - BattleStripReserve - left - 44,
             Math.Min(666, 1060 - HandCardSide - _tableViewport.Position.Y - 30));
-        _tableSurface.ResizePlane(_tableViewport.Size, _root.Scale.X);
+        _tableSurface.ResizePlane(_tableViewport.Size, _root.Scale.X,
+            new Rect2(-_tableViewport.Position, GetViewport().GetVisibleRect().Size / _root.Scale.X));
         ApplyTableCamera();
     }
 
@@ -157,7 +159,7 @@ public partial class Main
 
     private bool PointerOnTable(Vector2 viewportPoint)
     {
-        if (CameraBlocked || !_tableViewport.GetGlobalRect().HasPoint(viewportPoint)) return false;
+        if (CameraBlocked || !_tableSurface.GetGlobalRect().HasPoint(viewportPoint) || FixedHudCovers(viewportPoint)) return false;
         // Prepared attack-review navigation sits over the table. Let native GUI
         // picking receive its clicks instead of forwarding them into the mat.
         if (_root.GetNodeOrNull<Control>("AttackReviewControls") is { } attackReview &&
@@ -174,6 +176,16 @@ public partial class Main
         // placards, not their full-screen parent, before forwarding root input.
         return !_clanHud.GetChildren().OfType<Control>().Any(c =>
             c.IsVisibleInTree() && c.GetGlobalRect().HasPoint(viewportPoint));
+    }
+
+    private bool FixedHudCovers(Vector2 point)
+    {
+        static bool Covers(Control? control, Vector2 p) => control is not null &&
+            control.IsVisibleInTree() && control.GetGlobalRect().HasPoint(p);
+        return Covers(_inspectorPanel, point) || Covers(_hand, point) || Covers(_timeline, point) || Covers(_menu, point) || Covers(_battleProgressStrip, point)
+            || _clanHud.GetChildren().OfType<Control>().Any(c => Covers(c, point))
+            // A hovered hand face can rise above the hand container.
+            || _hand.GetChildren().OfType<CardTile>().Any(c => Covers(c, point));
     }
 
     public override void _Input(InputEvent @event)

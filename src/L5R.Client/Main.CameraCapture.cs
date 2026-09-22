@@ -76,6 +76,11 @@ public partial class Main
             return;
         }
         _nextCameraProbe = _captureClock + .12;
+        if (_captureMode.Contains("coverage", StringComparison.Ordinal))
+        {
+            if (_cameraProbeStep++ == 0) _ = CaptureTableCoverage();
+            return;
+        }
         try
         {
             switch (_cameraProbeStep++)
@@ -125,7 +130,7 @@ public partial class Main
                     RequireCamera(_cameraCenter.X > _probeCenter.X, "arrow-key pan failed");
                     CameraKey(Key.Home, true); CameraKey(Key.Home, false); break;
                 case 9:
-                    RequireCamera(_cameraFitted && Mathf.IsEqualApprox(_cameraZoom, FitZoom), "Home did not restore overview");
+                    RequireCamera(_cameraFitted && Mathf.IsEqualApprox(_cameraZoom, FitZoom), $"Home did not restore overview (fitted={_cameraFitted}, zoom={_cameraZoom}, fit={FitZoom}, focus={GetWindow().HasFocus()}, blocked={CameraBlocked}, right={Input.IsPhysicalKeyPressed(Key.Right)})");
                     _probeZoom = _cameraZoom;
                     _probePoint = _inspectorPanel.GetGlobalRect().GetCenter(); MoveProbeMouse(_probePoint); break;
                 case 10:

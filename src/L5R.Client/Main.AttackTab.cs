@@ -38,7 +38,7 @@ public partial class Main
         var height = width*396/562;
         var mount = ends[0].Lerp(ends[1],.07f);
         var body = new Rect2(mount,new Vector2(width,height));
-        var clip = _tableViewport.GetGlobalRect();
+        var clip = _tableSurface.GetGlobalRect();
         var globalBody = new Rect2(_root.GetGlobalTransform()*body.Position,body.Size*_root.Scale);
         return clip.Encloses(globalBody) ? body : null;
     }
