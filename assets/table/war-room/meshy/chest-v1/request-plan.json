@@ -1,0 +1,12 @@
+{
+  "asset": "chest",
+  "region_px": [
+    1485,
+    303,
+    128,
+    54
+  ],
+  "texture_prompt": "One small closed Japanese fortress storage chest. Aged black-brown lacquered wood, delicate rubbed antique brass corner guards, hand-forged iron straps, ornate small brass clasp, scuffed edges and deep grain. Exactly the sparse antique chest in the reference. Grounded complete box with lid shut. No surrounding floor, spears, other furniture, room, light or background. Relightable PBR surface, restrained worn gold accents.",
+  "estimated_credits": 30,
+  "source_sha256": "9fd2f928883d699922f7c1e1d1d4f1f50e59543723c8a36916889ac5cf6ac8a2"
+}

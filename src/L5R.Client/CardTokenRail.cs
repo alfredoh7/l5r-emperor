@@ -11,6 +11,8 @@ public partial class CardTokenRail : Button
     public float Offset { get; set; }
     public CardTile[] Companions { get; set; } = [];
     public Rect2 Body { get; private set; }
+    public PermanentGrantSeal? GrantSeal { get; private set; }
+    public static bool HasRail(CardView card) => HasTokens(card) || CardChanges.HasSeal(card);
     public float ContentScale { get; private set; } = 1;
     public record Group(string Type, string? Stat, int Amount, CardToken[] Instances);
     public static bool HasTokens(CardView card) => card.FaceUp && card.Definition is not null && card.Zone is Zone.Home or Zone.Battlefield or Zone.Attached && card.Tokens is { Length: > 0 };
@@ -32,6 +34,10 @@ public partial class CardTokenRail : Button
     public override void _Ready()
     {
         _groups = Groups(CardAnchor.Card);
+        if(CardChanges.HasSeal(CardAnchor.Card))
+        {
+            GrantSeal=new PermanentGrantSeal { CardAnchor=CardAnchor };AddChild(GrantSeal);
+        }
         Pressed += () => CardAnchor.EmitSignal(BaseButton.SignalName.Pressed);
         var lines = new List<string>{CardAnchor.Card.Definition?.Name ?? "Card", "Tokens", ""};
         foreach(var group in _groups)
@@ -44,12 +50,15 @@ public partial class CardTokenRail : Button
         TooltipText = string.Join("\n",lines); SetMeta("flat_tooltip",TooltipText);
         PositionAtCard();
     }
-    public override Control _MakeCustomTooltip(string text) => ReadingTooltip.Create(this,TooltipText.Length>0?TooltipText:GetMeta("flat_tooltip").AsString());
+    public override Control _MakeCustomTooltip(string text) => CardAnchor.ProjectToScreen is not null?null!:CreateReadingPreview();
+    public Control CreateReadingPreview() => _groups.Length==0&&GrantSeal is not null
+        ?CardChangePanel.Tooltip(CardAnchor.Card,CardAnchor.TokenSourceName,GetTree().Root.GetVisibleRect().Size)
+        :ReadingTooltip.Create(this,TooltipText.Length>0?TooltipText:GetMeta("flat_tooltip").AsString());
     public override void _Process(double delta) => PositionAtCard();
     public void PositionAtCard()
     {
         if(!IsInstanceValid(CardAnchor)) return;
-        Visible = HasTokens(CardAnchor.Card);
+        Visible = HasRail(CardAnchor.Card);
         if(!Visible) return;
         var inverse = CardAnchor.GetGlobalTransform().AffineInverse();
         var corners = CardAnchor.FaceCornersInCanvas().Select(p=>inverse*p).ToArray();
@@ -69,11 +78,17 @@ public partial class CardTokenRail : Button
         if (_horizontal && Offset > 0 && Companions.Length > 0)
         {
             var bottom=Companions.Where(IsInstanceValid).SelectMany(c=>c.FaceCornersInCanvas()).Select(p=>inverse*p).Max(p=>p.Y);
-            var rootRail=Companions.Any(c=>c.Card.AttachedTo is null&&c.Card.Bowed&&HasTokens(c.Card))?width:0;
+            var rootRail=Companions.Any(c=>c.Card.AttachedTo is null&&c.Card.Bowed&&HasRail(c.Card))?width:0;
             Position=new Vector2(Position.X,bottom+width*.5f+Math.Max(0,Offset-width)*1.01f+rootRail+.06f);
         }
         Body=_horizontal?new Rect2(0,-width*.5f,edge[0].DistanceTo(edge[1]),width):new Rect2(-width*.5f,0,width,edge[0].DistanceTo(edge[1]));
         Size = Body.Size;
+        if(GrantSeal is not null)
+        {
+            var thickness=_horizontal?Body.Size.Y:Body.Size.X;
+            GrantSeal.Position=Body.Position;
+            GrantSeal.Size=new Vector2(thickness,thickness*.97f);
+        }
         QueueRedraw();
     }
     public Vector2[] CornersOnViewport() => new[]{Body.Position,new Vector2(Body.End.X,Body.Position.Y),Body.End,new Vector2(Body.Position.X,Body.End.Y)}
@@ -81,7 +96,7 @@ public partial class CardTokenRail : Button
     public override bool _HasPoint(Vector2 p) => Body.Grow(2).HasPoint(p);
     public override void _Draw()
     {
-        if(_groups.Length==0)return;
+        if(!HasRail(CardAnchor.Card))return;
         _hardware??=GD.Load<Texture2D>("res://Art/card-token-hardware.png");
         _icons??=GD.Load<Texture2D>("res://Art/card-token-source.png");
         // Sample only the opaque rail; the generator's checkerboard never enters the mesh.
@@ -95,13 +110,15 @@ public partial class CardTokenRail : Button
         else DrawTextureRectRegion(_hardware,Body,rail);
         var length=_horizontal?Body.Size.X:Body.Size.Y;
         var thickness=_horizontal?Body.Size.Y:Body.Size.X;
-        var available=length-thickness*.45f;
-        var normalCell=thickness*1.18f;
+        var reserved=GrantSeal is null?0:thickness*1.02f;
+        var available=length-thickness*.45f-reserved;
+        var normalCell=thickness*(GrantSeal is null?1.18f:1f);
+        if(_groups.Length==0)return;
         // One through four groups preserve the default design; five/six compress smoothly.
         var cell=Math.Min(normalCell,available/_groups.Length);
         ContentScale=Math.Min(1,cell/normalCell);
-        var diameter=thickness*(_horizontal?.54f:.76f)*ContentScale;
-        var start=(_groups.Length<=4?Math.Min(thickness*.75f,Math.Max(thickness*.2f,length-cell*_groups.Length-thickness*.2f)):thickness*.22f);
+        var diameter=thickness*(_horizontal?.54f:GrantSeal is null?.76f:.68f)*ContentScale;
+        var start=reserved+(_groups.Length<=4?Math.Min(GrantSeal is null?thickness*.75f:0,Math.Max(thickness*.2f,length-cell*_groups.Length-thickness*.2f)):thickness*.22f);
         for(var i=0;i<_groups.Length;i++)
         {
             var group=_groups[i];
@@ -109,7 +126,7 @@ public partial class CardTokenRail : Button
                 :new Vector2(Body.GetCenter().X,Body.Position.Y+start+cell*i+diameter*.5f);
             DrawIcon(this,_icons,group.Type,center,diameter);
             var count=$"×{group.Instances.Length}";
-            var size=Math.Max(4,(int)(thickness*(_horizontal?.34f:.44f)*ContentScale));
+            var size=Math.Max(4,(int)(thickness*(_horizontal?.34f:GrantSeal is null?.44f:.32f)*ContentScale));
             while(size>3&&Palette.Body.GetStringSize(count,fontSize:size).X>thickness*.92f)size--;
             var countWidth=_horizontal?cell-diameter:thickness*.96f;
             while(size>3&&Palette.Body.GetStringSize(count,fontSize:size).X>countWidth)size--;

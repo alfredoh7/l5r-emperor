@@ -6,88 +6,52 @@ namespace L5R.Client;
 /// <summary>Presentation of existing public phases, not an additional rules state machine.</summary>
 public partial class BattleTracker : Control
 {
+    private static Texture2D? _flowArt;
     public MatchView Snapshot { get; set; } = null!;
     public bool Compact { get; set; }
     public bool ReducedMotion { get; set; }
     public bool PresentationInProgress { get; set; }
     public bool ActionOutcome { get; set; }
     public string? ResolutionMessage { get; set; }
-    private static Texture2D? _plate;
-    private double _clock;
     public int Stage => ActionOutcome ? 1 : ResolutionMessage is not null ? 2 : Snapshot.Phase == Phase.Battle ? 1 : 0;
-    public static bool InBattle(Phase phase) => phase is Phase.AttackDeclaration or Phase.InfantryDeclaration or Phase.DefenseAssignment or Phase.BattleSelection or Phase.Battle;
+    public static bool InBattle(Phase phase) => phase is Phase.AttackDeclaration or Phase.InfantryDeclaration or Phase.DefenseAssignment or Phase.CavalryDeclaration or Phase.CavalryDefense or Phase.BattleSelection or Phase.Battle;
     public override void _Ready()
     {
         MouseFilter = MouseFilterEnum.Stop;
         TextureFilter = TextureFilterEnum.LinearWithMipmaps;
-        CustomMinimumSize = new Vector2(0, (Compact ? 100 : 490) + 44);
+        CustomMinimumSize = new Vector2(0, 188);
         TooltipText = ResolutionMessage ?? (Snapshot.Phase == Phase.BattleSelection
             ? "The attacker chooses the next battlefield."
             : Snapshot.Phase == Phase.Battle ? "Battle actions alternate. Resolution follows two consecutive passes."
             : "Assign units to provinces. The highlighted player has the next decision.");
     }
     public override Control _MakeCustomTooltip(string text) => ReadingTooltip.Create(this, text);
-    public override void _Process(double delta) { if (!ReducedMotion) { _clock += delta; QueueRedraw(); } }
     public string Status => PresentationInProgress ? (ActionOutcome ? "Applying battle action" : "Resolving battle") : ResolutionMessage is not null ? "Resolved" : Snapshot.PriorityPlayerId == Snapshot.ViewerId ? (Snapshot.PendingChoice is null && Snapshot.Phase == Phase.Battle ? "You may act or pass" : "Your decision") : "Opponent may act";
-    private Color Highlight => ResolutionMessage is not null ? Palette.Gold : Snapshot.PriorityPlayerId == Snapshot.ViewerId ? new Color("8bc9ee") : new Color("efb967");
     public override void _Draw()
     {
-        _plate ??= GD.Load<Texture2D>("res://Art/battle-tracker.png");
-        // Atlas excludes generated outer backdrop; all visible surface is original lacquer art.
-        var source = new Rect2(63, 29, 763, 1714);
-        var w = Math.Min(Size.X, Compact ? Size.X : 225);
-        var h = Compact ? 100 : 490;
-        var x = (Size.X - w) / 2;
-        var rect = new Rect2(x, 0, w, h);
-        if (Compact)
-        {
-            DrawTextureRectRegion(_plate, rect, new Rect2(63, 29, 763, 270));
-            // Same real medallions in a compact row while the card inspector is open.
-            float[] sourceY = [457, 883, 1312];
-            for (var i = 0; i < 3; i++)
-            {
-                var c = new Vector2(x + w * (.22f + i * .28f), 28);
-                var vertices = new Vector2[80]; var uv = new Vector2[80];
-                for (var j = 0; j < 80; j++)
-                {
-                    var dir = Vector2.FromAngle(j * Mathf.Tau / 80);
-                    vertices[j] = c + dir * 19;
-                    uv[j] = (new Vector2(443, sourceY[i]) + dir * 146) / _plate.GetSize();
-                }
-                DrawColoredPolygon(vertices, Colors.White, uv, _plate);
-                if (i == Stage)
-                    for (var r = 7; r >= 0; r--) DrawArc(c, 19 + r * .7f, 0, Mathf.Tau, 64, Highlight with { A = .20f * (1 - r / 8f) }, 2, true);
-            }
-            var label = Stage == 2 ? "Resolution" : Stage == 1 ? "Battle actions" : "Assignment";
-            TextAt(label, new Rect2(x + 8, 52, w - 16, 22), 20, Highlight, true);
-            TextAt(Status, new Rect2(x + 8, h + 8, w - 16, 28), 17, Highlight, false);
-            return;
+        var title = Stage == 2 ? "BATTLE OUTCOME" : Snapshot.PendingChoice is not null ? "YOUR CHOICE" : Snapshot.Phase switch {
+            Phase.Battle => "BATTLE ACTIONS", Phase.BattleSelection => "CHOOSE THE BATTLE",
+            Phase.CavalryDeclaration or Phase.CavalryDefense => "CAVALRY MANEUVERS", _ => "INFANTRY MANEUVERS" };
+        TextAt(title, new Rect2(0, 0, Size.X-30, 38), 25, Palette.Paper, true);
+        DrawTextureRectRegion(_flowArt ??= GD.Load<Texture2D>("res://Art/battle-flow-reference.png"), new Rect2(Size.X-33,2,32,36),new Rect2(320,121,47,53));
+        var progress = Stage == 2 ? 3 : Snapshot.Phase == Phase.Battle ? 2 : Snapshot.Phase == Phase.BattleSelection ? 1 : 0;
+        string[] steps = ["Maneuvers", "Engage", "Actions", "Outcome"];
+        var stepWidth = Size.X/4;
+        for(var i=0;i<4;i++) {
+            var center = new Vector2(stepWidth*(i+.5f),58);
+            if(i<3) DrawLine(center,center+new Vector2(stepWidth,0),new Color("5e5648"),1,true);
+            DrawCircle(center,5,new Color("24221d"));
+            DrawArc(center,5,0,Mathf.Tau,24,i==progress?Palette.Gold:new Color("736955"),1,true);
+            if(i==progress) { DrawCircle(center,3,Palette.Paper); DrawArc(center,8,0,Mathf.Tau,32,Palette.Gold with {A=.28f},3,true); }
+            TextAt(steps[i],new Rect2(i*stepWidth,70,stepWidth,20),13,i==progress?Palette.Paper:Palette.PaperDim,false);
         }
-        DrawTextureRectRegion(_plate, rect, source);
-        TextAt(ProvinceTitle, new Rect2(x + 12, h * .05f, w - 24, 28), 20, Palette.Gold, true);
-        float[] centers = [.249f, .497f, .750f];
-        float[] labels = [.337f, .585f, .845f];
-        string[] names = ["Assignment", "Battle actions", "Resolution"];
-        for (var i = 0; i < 3; i++)
-        {
-            var c = new Vector2(x + w * .5f, h * centers[i]);
-            var radius = w * .19f;
-            if (i == Stage)
-            {
-                var pulse = ReducedMotion ? 1 : .90f + .10f * (float)Math.Sin(_clock * 1.4);
-                // Soft layered halo surrounds the real textured medallion; no flat replacement disc.
-                for (var ring = 17; ring >= 0; ring--)
-                    DrawArc(c, radius + ring * .65f, 0, Mathf.Tau, 96, Highlight with { A = (.012f + .10f * (1 - ring / 18f) * (1 - ring / 18f)) * pulse }, 2, true);
-                DrawCircle(c, radius * .94f, Highlight with { A = .13f });
-                DrawArc(c, radius * .99f, 0, Mathf.Tau, 96, Highlight with { A = .75f }, 1.2f, true);
-            }
-            TextAt(names[i], new Rect2(x + 8, h * labels[i], w - 16, 25), 20, i == Stage ? Highlight : Palette.PaperDim, true);
-
-        }
-        // A dedicated footer below the plate keeps priority text clear of
-        // medallions, stage headings and the next inspector control.
-        TextAt(Status, new Rect2(x + 8, h + 8, w - 16, 28), 17, Highlight, false);
+        TextAt(ProvinceTitle,new Rect2(0,104,Size.X,25),20,Palette.Paper,false);
+        var role = Snapshot.Players.Single(p=>p.Id==Snapshot.ActivePlayerId).Clan+" turn · "+
+            (PresentationInProgress?Status:Stage==2?"Result recorded":Snapshot.PriorityPlayerId==Snapshot.ViewerId?"You may act":"Opponent may act");
+        TextAt(role,new Rect2(0,139,Size.X,24),16,Palette.PaperDim,false);
+        DrawLine(new Vector2(0,178),new Vector2(Size.X,178),Palette.Gold with { A=.55f },1,true);
     }
+
     private string ProvinceTitle => Snapshot.CurrentBattleProvince is int p ? $"Province {p + 1}" : ResolutionMessage is not null ? "Battle resolved" : "Battle";
     private void TextAt(string text, Rect2 box, int size, Color color, bool heading)
     {

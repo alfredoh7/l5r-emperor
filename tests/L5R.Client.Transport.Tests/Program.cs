@@ -5,6 +5,10 @@ using L5R.Core;
 using L5R.Server;
 
 var storage = Path.Combine(Path.GetTempPath(), "l5r-client-transport-" + Guid.NewGuid().ToString("N"));
+const string duelRoom="DUEL2345";
+var duelTokens=Enumerable.Range(0,2).Select(_=>Convert.ToHexString(System.Security.Cryptography.RandomNumberGenerator.GetBytes(32))).ToArray();
+await new RoomStore(storage).SaveAsync(new PersistedRoom(1,duelRoom,DateTimeOffset.UtcNow,
+        duelTokens.Select((token,i)=>new SeatCredential(i,Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(token))))).ToArray(),MatchEngine.CreateDuelDemo().ExportReplay(),[]));
 var app = await ServerApplication.BuildAsync(["--urls", "http://127.0.0.1:0", "--L5R:StoragePath", storage,
     "--Logging:LogLevel:Default", "Critical"]);
 var failures = 0;
@@ -14,6 +18,11 @@ try
     var url = app.Urls.Single();
     var cases = new (string Name, Func<Task> Test)[]
     {
+        ("private duel round trip retains own focus, result and priority through reconnect", () => PrivateDuel(url,duelRoom,duelTokens)),
+        ("live duel queue preserves immediate results, reconnects and back-to-back presentations", DuelQueue),
+        ("custom Practice keeps selected seat, rejects invalid replacement and exports replay", CustomPlay),
+        ("Duel Demo isolates practice, serializes results and rejects stale commands", DemoSession),
+        ("Leaving a private table for Duel Demo disconnects without conceding", () => LeaveForDemo(url)),
         ("client create/join, typed actions, commands and authenticated actor", () => LivePlay(url)),
         ("published match transmits Border Keep ability and restores it on reconnect", () => PublishedPlay(url)),
         ("client disconnect/resume and overlapping reconnects", () => Reconnect(url)),
@@ -38,6 +47,105 @@ finally
     if (Directory.Exists(storage)) Directory.Delete(storage, recursive: true);
 }
 return failures == 0 ? 0 : 1;
+
+static async Task PrivateDuel(string url,string room,string[] tokens)
+{
+    using var crane=new MatchSession();using var lion=new MatchSession();
+    var seats=tokens.Select((t,i)=>new RoomSeat(room,i,t,Protocol.Version,MatchEngine.ContentVersion)).ToArray();
+    await crane.Resume(url,seats[0]);await lion.Resume(url,seats[1]);
+    await WaitFor(()=>crane.Snapshot?.PlayersConnected?.All(c=>c)==true&&lion.Snapshot?.PlayersConnected?.All(c=>c)==true);
+    var flows=new[]{new MatchDuelFlow(),new MatchDuelFlow()};flows[0].Observe(crane.Snapshot);flows[1].Observe(lion.Snapshot);
+    await crane.Submit(crane.Snapshot!.Actions.First(a=>a.Command?.AbilityId=="steel-on-steel-duel").Command!);
+    await Both(1);flows[0].Observe(crane.Snapshot);flows[1].Observe(lion.Snapshot);
+    Check(flows.All(f=>f.Current?.View.PendingDuel?.Stage=="Focusing"),"Both real clients route accepted challenge");
+    await lion.Submit(lion.Snapshot!.Actions.Single(a=>a.Command?.Choice=="deck").Command!);await Both(2);
+    Check(lion.Snapshot!.View.Players[1].Focused!.Single().Definition is not null&&crane.Snapshot!.View.Players[1].Focused!.Length==0,"Blind deck focus is inspectable only by its owner");
+    var identity=lion.Generation;
+    lion.Disconnect();await WaitFor(()=>crane.Snapshot?.PlayersConnected?[1]==false);
+    await lion.Resume(url,seats[1]);await WaitFor(()=>lion.Connected&&!lion.Busy&&lion.Snapshot?.View.Version==2&&crane.Snapshot?.PlayersConnected?.All(c=>c)==true);
+    Check(lion.Generation==identity,"Reconnect retains this match presentation identity");
+    Check(lion.Snapshot!.View.Players[1].Focused!.Single().Definition is not null,"Reconnect restores private focus without a new commitment");
+    var courtesy=crane.Snapshot!.View.Players[0].Hand.Single(c=>c.Definition!.Id=="oracle-l5r-7996");
+    await crane.Submit(crane.Snapshot.Actions.Single(a=>a.Type=="focus"&&a.Command!.CardId==courtesy.Id).Command!);await Both(3);
+    await lion.Submit(lion.Snapshot.Actions.Single(a=>a.Type=="strike").Command!);await Both(4);
+    foreach(var (session,index) in new[]{(crane,0),(lion,1)})
+    {
+        var snapshot=session.Snapshot!;flows[index].Observe(snapshot);
+        Check(flows[index].Current!.View.LastDuel is {Complete:true,Result.ChallengerTotal:8,Result.ChallengedTotal:7},"Each client retains the identical complete result");
+        flows[index].Complete(snapshot.View.LastDuel!.Id);flows[index].Observe(snapshot);
+        Check(flows[index].Current is null&&session.Snapshot!.View.Version==4,"Continue is presentation-only, and a duplicate snapshot cannot reopen it");
+        Check(snapshot.View.PendingDuel is null&&snapshot.View.PriorityPlayerId==1&&snapshot.View.Phase==Phase.Battle,"Battle and priority belong to the engine after the return");
+    }
+    await lion.Submit(lion.Snapshot.Actions.First(a=>a.Type=="pass"&&a.Enabled).Command!);await Both(5);
+    Check(crane.Snapshot!.View.Version==5,"The original private match continues after the duel");
+    async Task Both(long version)=>await WaitFor(()=>crane.Snapshot?.View.Version==version&&lion.Snapshot?.View.Version==version&&!crane.Busy&&!lion.Busy);
+}
+
+static async Task DuelQueue()
+{
+    using var session=new MatchSession();session.StartDuelDemo("steel",205,1);
+    var flow=new MatchDuelFlow();flow.Observe(session.Snapshot);await session.BeginDuelDemo();flow.Observe(session.Snapshot);
+    var generation=session.Generation;
+    var id=flow.Current!.View.LastDuel!.Id;var initial=session.Snapshot!;
+    Check(flow.Current.View.PendingDuel?.Stage=="Focusing","Routes the real pending duel");
+    await session.Submit(session.Snapshot!.Actions.Single(a=>a.Type=="strike").Command!);
+    var result=session.Snapshot!;flow.Observe(result);flow.Observe(result);
+    Check(flow.Current!.View.LastDuel is {Complete:true,Result:not null},"Immediate strike retains complete result through repeated snapshots");
+    var resumed=new MatchDuelFlow();resumed.Observe(initial);
+    Check(resumed.Current is not null,"Reconnect resumes an unfinished duel");
+    var historic=new MatchDuelFlow();historic.Observe(result);Check(historic.Current is null,"Initial connection never replays an old completed duel");
+    // Simulate subsequent permitted packets arriving while the first verdict is still being read.
+    var next=initial with {View=initial.View with {Version=result.View.Version+1,LastDuel=initial.View.LastDuel! with {Id="second-duel"}}};
+    flow.Observe(next);Check(flow.Current!.View.LastDuel!.Id==id,"New duel cannot overwrite a held verdict");
+    flow.Complete(id);Check(flow.Current!.View.LastDuel!.Id=="second-duel","Next duel follows Continue");
+    flow.Observe(next);flow.Complete("second-duel");flow.Observe(next);Check(flow.Current is null,"Completed presentation does not restart on duplicate snapshot");
+    flow.Observe(initial with {RoomCode="NEWROOM"});Check(flow.Current is not null,"Different match resets presentation history");
+    flow.Reset();Check(flow.Current is null,"Seat handoff clears retained private snapshots");
+    session.StartDuelDemo("steel",205,1);Check(session.Generation!=generation,"A replacement practice can discard queued snapshots from the old match, even with the same seed and scenario");
+}
+
+static async Task DemoSession()
+{
+    using var practice=new MatchSession();practice.StartPractice(false,true);
+    var saved=practice.ExportPracticeReplay();
+    using var demo=new MatchSession();demo.StartDuelDemo("steel",205,1);
+    Check(demo.Snapshot!.Mode=="Duel Demo"&&demo.Snapshot.View.ViewerId==1,"Correct isolated demo seat");
+    await demo.BeginDuelDemo();await demo.BeginDuelDemo();
+    Check(demo.Snapshot!.View.Version==1,"Begin is idempotent");
+    var command=demo.Snapshot.Actions.Single(a=>a.Command?.Choice=="deck").Command!;
+    await Task.WhenAll(demo.Submit(command),demo.Submit(command));
+    Check(demo.Snapshot!.View.Version==2,"Rapid stale command is rejected");
+    var privateCopy=System.Text.Json.JsonSerializer.Deserialize<SessionSnapshot>(System.Text.Json.JsonSerializer.Serialize(demo.Snapshot))!;
+    var ownFocus=privateCopy.View.Players[1].Focused!.Single();
+    Check(ownFocus.Definition is not null&&!ownFocus.FaceUp,"Serialized owner session exposes committed blind focus while it stays face down");
+    demo.SwitchPracticeSeat();
+    Check(demo.Snapshot!.View.Players[1].Focused!.Length==0&&demo.Snapshot.View.Players[1].FocusCount==1,"Counts cross session without hidden identities");
+    var card=demo.Snapshot.View.Players[0].Hand.Single(c=>c.Definition!.Id=="oracle-l5r-7996");
+    await demo.Submit(demo.Snapshot.Actions.First(a=>a.Command?.Type=="focus"&&a.Command.CardId==card.Id).Command!);
+    Check(demo.Snapshot!.View.Players[0].Focused!.Single().Definition!.Id==card.Definition!.Id,"Hand focus remains privately readable off-turn");
+    demo.SwitchPracticeSeat();
+    Check(demo.Snapshot!.View.Players[1].Focused!.Single().Definition!.Id==ownFocus.Definition!.Id&&demo.Snapshot.View.Players[0].Focused!.Length==0,"Returning to the owner restores its focus without the other seat identity");
+    await demo.Submit(demo.Snapshot.Actions.Single(a=>a.Type=="strike").Command!);
+    var json=System.Text.Json.JsonSerializer.Serialize(demo.Snapshot);
+    var copy=System.Text.Json.JsonSerializer.Deserialize<SessionSnapshot>(json)!;
+    Check(copy.View.LastDuel is {Complete:true,Result.ChallengerTotal:8,Result.ChallengedTotal:7},"Retained result survives typed transport envelope");
+    Check(copy.View.LastDuel!.Reveals[0].Cards.Length==2,"Reveal survives immediate resolution");
+    var replay=System.Text.Json.JsonSerializer.Deserialize<ReplayRecord>(demo.ExportPracticeReplay()!,new System.Text.Json.JsonSerializerOptions(System.Text.Json.JsonSerializerDefaults.Web))!;
+    Check(MatchEngine.Replay(replay).GetView(0).LastDuel!.Result!.ChallengerTotal==8,"Export replays");
+    demo.StartDuelDemo("steel",205,0);Check(demo.Snapshot!.View.Version==0,"Restart returns prepared position");
+    Check(practice.ExportPracticeReplay()==saved,"Separate practice never advances or resets");
+}
+
+static async Task LeaveForDemo(string url)
+{
+    using var online=new MatchSession();await online.CreateOrJoin(url,null,true);
+    await WaitFor(()=>online.Snapshot is not null&&!online.Busy);
+    var seat=online.Seat!;var version=online.Snapshot!.View.Version;
+    online.LeavePrivateTable();Check(!online.Online&&online.Snapshot is null,"Private seat cleared");
+    using var demo=new MatchSession();demo.StartDuelDemo("steel",205);await demo.BeginDuelDemo();
+    await online.Resume(url,seat);await WaitFor(()=>online.Connected&&online.Snapshot is not null&&!online.Busy);
+    Check(online.Snapshot!.View.WinnerId is null&&online.Snapshot.View.Version==version,"Leaving did not concede or advance room");
+}
 
 static async Task LivePlay(string url)
 {
@@ -347,4 +455,16 @@ static async Task PublishedPlay(string url)
     var wire = WireGameCommand.FromCore(new GameCommand("useAbility",1,1,"source",TargetId:"target",AbilityId:"shinden-choice",PerformerId:"performer",Choice:"honor"));
     var bound = wire.BindToSeat(0,7);
     Check(bound.AbilityId=="shinden-choice" && bound.PerformerId=="performer" && bound.Choice=="honor" && bound.PlayerId==0 && bound.ExpectedVersion==7,"New fields survive wire conversion while actor/version remain authenticated.");
+}
+
+static async Task CustomPlay()
+{
+    using var session=new MatchSession{LocalDisplayName="Custom player"};
+    session.StartCustomPractice(CustomPractice.Preset("Lion"),CustomPractice.Preset("Crane"));
+    var initial=session.Snapshot!;
+    Check(initial.View.ViewerId==0&&initial.View.Players[0].Clan=="Lion"&&initial.View.Players[0].Name=="Custom player","Chosen deck belongs to local seat zero.");
+    try{session.StartCustomPractice(new Deck("Emperor",[]),CustomPractice.Preset("Crane"));throw new Exception("Invalid deck accepted");}catch(ArgumentException){}
+    Check(ReferenceEquals(session.Snapshot,initial),"Invalid selection must not discard a running Practice.");
+    await session.Submit(new GameCommand("concede",0,initial.View.Version));
+    Check(session.Snapshot!.View.WinnerId==1,"Custom commands execute in the authoritative local engine.");
 }

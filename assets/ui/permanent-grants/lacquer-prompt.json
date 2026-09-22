@@ -1,0 +1,8 @@
+{
+  "date": "2026-09-16",
+  "mode": "built-in image_gen",
+  "purpose": "Faithful blank lacquer material derived from approved B; original frame and medallions are sampled separately.",
+  "reference": "src/L5R.Client/Art/PermanentGrants/approved-B.png",
+  "output": "src/L5R.Client/Art/PermanentGrants/lacquer-v1.png",
+  "prompt": "Use case: precise-object-edit. Asset type: clean background material for the approved L5R Emperor UI. Input image is the approved concept B. Extract only the BLACK LACQUER MATERIAL inside the PERMANENT CHANGES panel on the upper right. Produce one square 1024x1024 flat front-facing seamless material swatch that reproduces that same near-black worn lacquer, fine restrained diagonal grain, hairline scratches and sparse tiny warm antique-gold wear flecks. Preserve the source's exact sober black (not blue, green, gray or brown), low contrast and fine texture scale. No frame, no panel edge, no text, no letters, no icons, no dividers, no medallions, no glow, no spots, no gradients, no lighting vignette, no forms. Uniform textured material across the entire image, suitable for native live text on top. This is texture extraction for implementation, not a new concept."
+}

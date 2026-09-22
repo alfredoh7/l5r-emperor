@@ -1,0 +1,7 @@
+{
+  "tool": "image_gen.imagegen",
+  "reference": "src/L5R.Client/Art/Practice/approved-A.png",
+  "output": "src/L5R.Client/Art/Practice/backdrop.png",
+  "purpose": "Clean approved navy background without baked UI or text",
+  "prompt": "Edit this approved Practice setup screenshot into a production background plate. Remove ALL text, ALL buttons, BOTH large central deck panels including their black interiors, every medallion, both Stronghold landscape images, all numeric/stat/status elements, the Back button and the Start Practice button. Reveal a continuous deep navy cloth background where the removed UI was. Preserve exactly the outermost thin ornate gold perimeter border and its corner filigree, the navy cloth texture, subtle golden mountain outline at right, gold cloud flourishes at left, and all peripheral decorative artwork. Do not create any new objects, panels, lines or glyphs. Keep exact landscape composition and 1672x941 aspect ratio. Result must be a clean text-free UI backdrop matching this source. No logo or text anywhere."
+}

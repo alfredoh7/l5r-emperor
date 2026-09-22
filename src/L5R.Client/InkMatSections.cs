@@ -266,6 +266,7 @@ public partial class InkMatSections : Control
                 {
                     "Holdings" => "Holdings · Stronghold and in-play Holdings",
                     "Home" => "Home · Cards at home and their attachments",
+                    "Removed" => "Removed from the Game · Both players may inspect. Cannot be targeted or returned.",
                     "Provinces" => "Provinces · The seals below the cards identify each province",
                     _ => target.Label + " battlefield"
                 });

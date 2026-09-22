@@ -1,0 +1,67 @@
+{
+  "change": "Use original Musashi Brush heading for YOUR MOVE / OPPONENT’S MOVE and PLACE FOCUS / RELEASE TO FOCUS; compensate font metrics. Other accepted layout remains unchanged.",
+  "native_command": "bash \"Play Latest.command\" --fixed-fps 30 --resolution 1672x941 --position 10,50 -- --capture=\"$PWD/artifacts/duel-demo/brush-prompts-verified\" --capture-mode=menu-duel",
+  "native_result": {
+    "Passed": true,
+    "Steps": 20,
+    "ReducedMotion": false,
+    "Resolution": "(1672, 942)",
+    "FrameCount": 987,
+    "P50Ms": 8.735,
+    "P95Ms": 14.63,
+    "P99Ms": 628.573
+  },
+  "build": "0 warnings, 0 errors; normal launcher offline artwork preflight passed",
+  "assertions": [
+    "Play menu opens in-app demo",
+    "Begin Duel submits the real challenge",
+    "opening plays once and submits no extra command",
+    "DUEL title is gone when the introduction finishes",
+    "turn prompt uses the original Musashi Brush heading",
+    "upright champions with no decorative corner discard piles",
+    "upright champion hover reuses main-game card inspection",
+    "upright champion click opens full inspection",
+    "second champion click dismisses inspection without a command",
+    "private handoff hides the table and hover preview",
+    "rapid duplicate focus advances once",
+    "duplicate placement does not select the newly committed card",
+    "hover restores the main-game preview for own committed focus",
+    "hover preview stays within the viewport",
+    "blind focus is privately inspectable after commitment",
+    "second hand click deselects and removes placement without a command",
+    "projected card input selects a legal hand card",
+    "drag outside target does not arm or submit focus",
+    "legal drag target clearly signals release to focus",
+    "focus target uses the original Musashi Brush heading",
+    "direct drag/keyboard placement submits before duplicate click",
+    "drag/keyboard focus and duplicate click advance once",
+    "hover never inspects an anonymous opponent focus",
+    "opponent focused backs expose no inspection",
+    "resolved commitments leave the focus rows",
+    "Fate discard opens an inspectable public spread",
+    "dead personalities remain separate from Fate discards",
+    "native UI reproduces canonical 8–7",
+    "repeated snapshots do not replay the reveal",
+    "victory sequence plays once and holds the authoritative result",
+    "destroyed participant settles out of the upright champion position",
+    "result held for Continue",
+    "Duel details retain authoritative final totals without extra mat numerals",
+    "Continue returns to prepared setup",
+    "demo exits to normal L5R menu",
+    "existing offline practice is preserved unchanged"
+  ],
+  "visual_review": [
+    "Final 1672x942 placement prompt",
+    "Final 1120x700 placement and release states"
+  ],
+  "earlier_attempts": [
+    "First normal-speed run stopped at existing own-focus hover assertion.",
+    "A compact fixed-FPS run passed all 20 steps before the final font-size adjustment.",
+    "After size adjustment, compact run stopped when the public-pile menu button was unavailable. Final full-size run passed all 20 steps with no code change. These intermittent automation failures were not diagnosed as font defects."
+  ],
+  "limits": [
+    "Fixed-FPS capture metrics are not performance benchmarks.",
+    "No new Core regression or Windows native testing claimed for this font-only change.",
+    "Existing mechanics review and full-game activation remain pending."
+  ]
+}

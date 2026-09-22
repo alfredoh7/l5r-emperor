@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Implement approved A permanent-grant seal and B icon-led lacquer details using original artwork; preserve token rails, full card faces, source inspection and duration distinctions. Add a read-only protection view and update to the existing verified v3 WebP pack so the launcher includes newer main printings.",
+  "validation": "431 deterministic checks pass on final files; client build zero warnings/errors; Godot import; five isolated native cases, three full-game cases and three existing token-rail regressions pass. Native source comparison, small windows, long text, bowed attachment ownership, hover/focus, single projected popup and command-free owner/source inspection checked. Play Latest launcher preflight, build and native capture pass; gallery at docs/screenshots/permanent-grants/index.html. Perspective review labels were moved away from card faces and that native capture passed again.",
+  "remaining": "PR 256 is stacked on approved UI consolidation PR 248; current-head CI and Mendon shared review required before merge. Spirit of the Berserker permanent stat/Reaction examples remain staged views, not newly executable mechanics. Native Windows, expert rules and two-machine acceptance were not performed. Separate Duel Demo 220 excluded. Board token unavailable; GitHub ownership recorded.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/213",
+  "branch": "codex/213-permanent-grants",
+  "updated": "2026-09-16T16:40:14.228299+00:00"
+}

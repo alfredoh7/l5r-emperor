@@ -4,6 +4,7 @@ Start here when continuing this repository with Codex, Claude Code, or another c
 
 ## Current checkpoint
 
+- Approved UI consolidation: [PR #248](https://github.com/alfredoh7/l5r-emperor/pull/248) is the current combined review build. Read [UI_CONSOLIDATION.md](docs/UI_CONSOLIDATION.md) for source branches, integration fixes and validation. Preserve black lacquer/Caudex menus, uppercase WeatheredQuill headings, the fortress hall, placards and Home/Favor. Alfredo subsequently requested normal-match integration: PR #268 combines the latest duel #220 with transition #266 and preserves Play → Duel Demo as the shared sandbox. Read docs/DUEL_MATCH_INTEGRATION.md for the current combined candidate and remaining review gates.
 - Desktop presentation: **0.3.10**.
 - Playable content: **`lion-crane-v1`**, content version **`emperor-lion-crane-0.2.0`**.
 - Each Clan has 40 Dynasty and 40 Fate cards. The pool contains 40 distinct published definitions, including pregames, with implementations and original period scans.
@@ -18,7 +19,7 @@ This is a new standalone **Emperor Edition** game, not Imperial Edition and not 
 
 The engine enforces rules and bookkeeping. Gold is produced for a particular payment, with excess discarded; it is not an automatically accumulating wallet. Preserve optional choices such as payment sources, Clan purchase choices, Proclaim, targets and assignments.
 
-The current UI is a 2.5D table with a shared perspective projection, full uncropped card scans, sideways bowing, attachment stacks, physical draw/discard piles, pan/zoom, fixed hand/HUD, Musashi Brush headings, and upright lantern sprites with shader lighting. The phase bar is bitmap lacquer/brass art with live labels and a subdued glow. Windowed play is allowed; F11 toggles fullscreen. Reduced motion freezes ambient animation and makes transfers immediate.
+The UI uses a shared perspective projection, full uncropped card scans, sideways bowing, attachment stacks, physical draw/discard piles, pan/zoom and a fixed hand/HUD. The approved integration replaces the earlier Musashi headings with uppercase WeatheredQuill and uses Caudex for body text. The phase bar is bitmap lacquer/brass art with live labels and a subdued glow. The fortress hall supplies the surrounding room and lighting. Windowed play is allowed; F11 toggles fullscreen. Reduced motion freezes ambient animation and makes transfers immediate.
 
 The user explicitly rejected website/dashboard styling and the Impeccable UI skill for this game. Preserve the navy mat's padding, complete artwork, clear stacks and sparse board labels. Do not restore persistent Force totals, card IDs, attacker/defender summaries or destroyed-province placeholders as unsolicited UI help. The tutorial may explain rules without exposing private cards or prescribing optimal competitive decisions.
 
@@ -53,6 +54,8 @@ bash tools/run.sh
 On Windows use `python` instead of `python3` if needed. The bootstrap installs the pinned SDK/editor into ignored `.tools/`; it does not change system PATH. For manual SDK/editor commands, run `source tools/env.sh` inside Bash. The project is not a website; do not introduce a web stack.
 
 Normal client builds use the committed runtime art and do not require Blender, image generation, the original Sun and Moon installation, or the optional bulk research scans. Existing Blender authoring scripts include historical machine-local paths; inspect their `ROOT`/MCP setup before an art rebuild on another machine. The runtime GLBs and source `.blend` files are committed.
+
+For detailed 3D props, follow [MESHY_WORKFLOW.md](docs/MESHY_WORKFLOW.md): external ChatGPT references and Alfredo's approval, Blender layout and early Godot camera check, Meshy generation, then Blender cleanup and native Godot review. Direct Meshy API access is configured on Alfredo's Mac through `python3 tools/meshy.py`; credentials stay in Keychain. The agent submits/retrieves approved assets without manual export transfers. Flat approved artwork and straight architecture remain direct Blender work.
 
 Private local server:
 

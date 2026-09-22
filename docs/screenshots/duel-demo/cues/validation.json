@@ -1,0 +1,50 @@
+{
+  "date": "2026-09-16",
+  "base": "286984e",
+  "native_checks": {
+    "cues-final": {
+      "Passed": true,
+      "Steps": 20,
+      "ReducedMotion": false,
+      "Resolution": "(1672, 942)",
+      "FrameCount": 3591,
+      "P50Ms": 8.942,
+      "P95Ms": 13.563,
+      "P99Ms": 16.163
+    },
+    "cues-reduced": {
+      "Passed": true,
+      "Steps": 20,
+      "ReducedMotion": true,
+      "Resolution": "(1120, 700)",
+      "FrameCount": 2888,
+      "P50Ms": 8.658,
+      "P95Ms": 13.638,
+      "P99Ms": 13.912
+    },
+    "cues-help": {
+      "Passed": true,
+      "Steps": 39,
+      "ReducedMotion": false,
+      "Resolution": "(1672, 942)",
+      "ProfileIsolated": true
+    }
+  },
+  "images_sha256": {
+    "challenger.png": "babb704a5b58f3e1600a33244fb67dfa5e34dc95a3e3105f047f7136f6a758bd",
+    "answer.png": "b5168bd46ac292a1fcd000d54ce30ae9b77abba279713066792a4aeadc905f5f",
+    "drag-focus.png": "cd12a3bb9bbc7a65bcb9897e99deb27062e62a48de01d7fb87fe93fd2f370909",
+    "compact.png": "2dd67ea1e71e5e8f2a973e190ef31f45b717231edd0d92424722b8f97e2d118d"
+  },
+  "client_build": "0 warnings, 0 errors",
+  "notes": [
+    "Normal-speed native captures; screenshots inspected at full and compact size",
+    "Turn/drop fonts checked against actual Satoshi font family",
+    "Legal drag target arms and changes copy; outside target sends no command",
+    "Title dismissed after introduction, reduced motion and Skip/restart",
+    "Actual launcher preflight and full canonical 8\u20137 run passed",
+    "Reduced-motion run precedes final drag-only font padding adjustment; final full-motion run covers that adjustment",
+    "No engine changes; existing mechanical regression evidence retained separately",
+    "Native Windows graphical and human visual acceptance remain open"
+  ]
+}

@@ -13,6 +13,8 @@ public partial class CardTile : Button
     private float _bowAngle;
     private float _bowDestination;
     public float VisualBowAngle => _bowAngle;
+    public bool UprightPreview { get; set; }
+    public float VisualFaceAngle => _bowAngle + RestAngle + (!UprightPreview && FallenArt.TurnsOnTable(Card) ? Mathf.Pi : 0);
     public bool SelectedSource { get; set; }
     public bool Compact { get; set; }
     public float FaceHeight { get; set; }
@@ -60,7 +62,7 @@ public partial class CardTile : Button
 
     public override void _Ready()
     {
-        if (ShowTokenRail && CardTokenRail.HasTokens(Card))
+        if (ShowTokenRail && CardTokenRail.HasRail(Card))
         {
             AlignUnitRightEdge = true;
             TokenRail = new CardTokenRail { CardAnchor = this, Offset = TokenRailOffset, Companions = TokenRailCompanions };
@@ -74,7 +76,9 @@ public partial class CardTile : Button
     public override void _Process(double delta)
     {
         AdvanceStatFeedback(delta);
-        var inspecting = IsInspectionHover;
+        // The rail cap must stay under the pointer. Enlarging its parent moves this
+        // small target into/out of the card face and repeatedly restarts the tooltip.
+        var inspecting = IsInspectionHover && TokenRail?.GrantSeal?.IsHovered()!=true;
         var targetLift = inspecting ? Card.Zone == Zone.Hand ? 40f : ProjectToScreen is null ? 4f : 0f : 0f;
         var targetScale = inspecting ? Card.Zone == Zone.Hand ? 1.22f : 1.06f : 1f;
         ZIndex = _hover ? 30 : HasFocus() ? 20 : IsSelected ? 10 : 0;
@@ -104,11 +108,11 @@ public partial class CardTile : Button
 
     private Vector2 ProjectFacePoint(Vector2 point, Vector2 face)
     {
-        var p = ((point - face / 2) * _hoverScale).Rotated(_bowAngle + RestAngle);
+        var p = ((point - face / 2) * _hoverScale).Rotated(VisualFaceAngle);
         var center = Size / 2;
         if (AlignUnitRightEdge)
         {
-            var angle = _bowAngle + RestAngle;
+            var angle = VisualFaceAngle;
             var extent = (Math.Abs(Mathf.Cos(angle)) * face.X + Math.Abs(Mathf.Sin(angle)) * face.Y) * _hoverScale / 2;
             center.X = Size.X - 6 - extent;
         }
@@ -133,7 +137,7 @@ public partial class CardTile : Button
 
     internal bool ContainsRestingFace(Vector2 point)
     {
-        var resting = (point - Size / 2).Rotated(-_bowAngle - RestAngle) + FaceSize() / 2;
+        var resting = (point - Size / 2).Rotated(-VisualFaceAngle) + FaceSize() / 2;
         return new Rect2(Vector2.Zero, FaceSize()).Grow(2).HasPoint(resting);
     }
 
@@ -173,11 +177,20 @@ public partial class CardTile : Button
         DrawInteractionEdge();
         DrawStatInlays();
         DrawPublicStatus();
+        DrawDishonorMarker();
     }
 
     public string[] PublicStatusLabels => Card.Definition is null || Card.Zone is not (Zone.Home or Zone.Battlefield or Zone.Attached) ? [] :
-        (Card.Dishonorable ? new[]{ "Dishonorable" } : Array.Empty<string>())
-        .Concat((Card.GrantedKeywords ?? []).Select(k => "+ " + k.Keyword).Distinct()).ToArray();
+        (Card.GrantedKeywords ?? []).Where(k => !CardChanges.IsPermanent(k.Duration)).Select(k => "+ " + k.Keyword).Distinct().ToArray();
+    private void DrawDishonorMarker()
+    {
+        if(UprightPreview||!FallenArt.TurnsOnTable(Card))return;
+        var corners=LocalFaceCorners();
+        var width=Math.Max(10,FaceSize().Y*.10f);
+        // Lower right stays clear of the left/near token rail and upper-right Force tab.
+        // The marker remains readable while the physical printed face turns.
+        FallenArt.Medallion(this,new Vector2(corners.Max(p=>p.X)+3+width/2,corners.Max(p=>p.Y)-width/2),width,true);
+    }
     private void DrawPublicStatus()
     {
         var labels = PublicStatusLabels;
@@ -228,7 +241,7 @@ public partial class CardTile : Button
     public Control CreateReadingPreview()
     {
         LastPreviewCardId = Card.Id;
-        return LastPreviewControl = CardPreview.Create(Card, ContextHelp, ContextualGoldProduction, GetTree().Root.GetVisibleRect().Size.Y / 1080f);
+        return LastPreviewControl = CardPreview.Create(Card, ContextHelp, ContextualGoldProduction, GetTree().Root.GetVisibleRect().Size.Y / 1080f, TokenSourceName);
     }
 
     public override void _Draw()
@@ -247,7 +260,7 @@ public partial class CardTile : Button
         var faceSize = new Vector2(height * ratio, height);
         DrawInteractionHalo();
         DrawInteractionEdge();
-        DrawSetTransformMatrix(new Transform2D(Vector2.Right, Vector2.Down, Size / 2 + new Vector2(0, -_lift)) * Transform2D.Identity.Rotated(_bowAngle + RestAngle).ScaledLocal(Vector2.One * _hoverScale).TranslatedLocal(-faceSize / 2));
+        DrawSetTransformMatrix(new Transform2D(Vector2.Right, Vector2.Down, Size / 2 + new Vector2(0, -_lift)) * Transform2D.Identity.Rotated(VisualFaceAngle).ScaledLocal(Vector2.One * _hoverScale).TranslatedLocal(-faceSize / 2));
         var r = new Rect2(Vector2.Zero, faceSize);
         var border = SelectedSource || ChosenTarget ? Palette.Crane : Highlighted || LegalTarget || _hover || HasFocus() ? Palette.Gold : new Color("8e866b");
         // Broad penumbra, close contact shadow, and a thin paper edge. The original

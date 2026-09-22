@@ -1,0 +1,63 @@
+{
+  "task_id": "01a0a620-9da4-76cb-a182-ab16290debd4",
+  "source_sha256": "96e6d6243aa3dde7ad9eaaab9e20e860d5d479a43dff9def7a7f595ee9f4fd12",
+  "source_region_px": [
+    184,
+    0,
+    119,
+    400
+  ],
+  "approval": "Aged structural column cropped from approved B3. Replaces the same existing room columns; no furnishing added.",
+  "cli": "@meshy-ai/cli 0.3.0",
+  "settings": {
+    "model_type": "standard",
+    "should_texture": true,
+    "enable_pbr": true,
+    "texture_resolution": "4k",
+    "remove_lighting": true,
+    "target_formats": "glb",
+    "ultra_mode": false,
+    "image_enhancement": true
+  },
+  "texture_prompt": "One massive square Japanese fortress timber column exactly like the reference, aged dark scorched cedar, deep irregular wood splits, organic wear, black iron band with round hammered rivets, chipped dark stone base. Warm brown and charcoal patina. Straight upright structural post, square section and flat cut top. No floor, walls, lanterns, background or scenery. Relightable material with intact subtle weathering.",
+  "estimated_credits": 30,
+  "consumed_credits_reported_by_task": 30,
+  "timestamps_ms": {
+    "created_at": 1789493558732,
+    "started_at": 1789493558740,
+    "finished_at": 1789493667272
+  },
+  "downloads": [
+    {
+      "file": "model.glb",
+      "sha256": "eb119c5f6e50acdcc3ae78e64563ed5eb865520ca4b01b1fd51d264bce3150ea",
+      "bytes": 34329892
+    },
+    {
+      "file": "texture_0_base_color.png",
+      "sha256": "c805736ed7d5129c7d49372106aac5e5bb0716362110e530ffbd31383c7d3d7f",
+      "bytes": 23010840
+    },
+    {
+      "file": "texture_0_metallic.png",
+      "sha256": "cd849a88c72509c29ad75f33a45dd18657869bce3131cb3469cbf713fe353baa",
+      "bytes": 30404
+    },
+    {
+      "file": "texture_0_normal.png",
+      "sha256": "fe0ef16399970cd4be11a602057bdb170351f9b11bb251efb5c359c2ce14c089",
+      "bytes": 16659643
+    },
+    {
+      "file": "texture_0_roughness.png",
+      "sha256": "ddbcc962f84de4884bc69ea52be8f79d56c0c734f81b11c7bdd0d397815b6b3a",
+      "bytes": 1398990
+    },
+    {
+      "file": "thumbnail.png",
+      "sha256": "55ddb9c2a9b021ab94af2e78d97ed2e6ab9337d6db06da7834fe2aa325c1b6de",
+      "bytes": 112980
+    }
+  ],
+  "returned_model_version": "Not supplied in task response; standard CLI route requests Meshy-7."
+}

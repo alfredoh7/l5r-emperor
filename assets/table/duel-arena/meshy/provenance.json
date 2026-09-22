@@ -1,0 +1,39 @@
+{
+  "supplied_by": "Alfredo in the task conversation, 2026-09-14",
+  "generator": "Meshy, as identified by the user",
+  "service_job_run_by_codex": false,
+  "selected": "lantern-textured.blend",
+  "source_mesh": {
+    "vertices": 2126,
+    "triangles": 4051,
+    "height": 1.0
+  },
+  "packed_maps": {
+    "basecolor": [
+      2048,
+      2048
+    ],
+    "metallic_roughness": [
+      2048,
+      2048
+    ],
+    "normal": [
+      2048,
+      2048
+    ]
+  },
+  "files": [
+    {
+      "file": "lantern-geometry.blend",
+      "original_filename": "Meshy_AI_Mosslit_Stone_Lantern_0914201150_generate.blend",
+      "sha256": "ca9b67f704753fe68369a502689e336d0e94b9759eeb4948ef210c54aa9c7c63",
+      "bytes": 582176
+    },
+    {
+      "file": "lantern-textured.blend",
+      "original_filename": "Meshy_AI__0914201140_texture.blend",
+      "sha256": "edf417c64fb12d0398a7f732716d5a0fab4ea5d184f2c6d7b3b19f4cf2579c9c",
+      "bytes": 7633069
+    }
+  ]
+}

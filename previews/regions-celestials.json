@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "slug": "regions-celestials",
+  "title": "Regions and Celestials",
+  "source_pr": 292,
+  "source_commit": "7360ff1c17f9b9fd08d956a8952cb10929293cdd",
+  "revision": 1,
+  "reviewer": "mdornbrook",
+  "summary": "Alfredo has built the Regions and Celestials preview and would like Mendon to review its rules, available actions and player usability.",
+  "review_steps": [
+    "Open Start Review.cmd. The game opens directly to a prepared practice table, with no deck setup needed.",
+    "Inspect each player's Regions beside their provinces and Celestials beside Imperial Favor. Check that ownership and card relationships are clear.",
+    "Click Low Market and Lady Matsu's Rage. Inspect the full card, offered targets and costs, then try the available actions.",
+    "Use the Other previews folder for the opposite seat, a crowded table and normal animation. Each launch starts a fresh fixture.",
+    "Use Open Full Game.cmd to inspect the preceding non-duel UI changes and normal Practice. Use Send Feedback.url to record findings on the PR."
+  ],
+  "known_limitations": [
+    "Review candidate, not merged or rules-certified. Three automated review findings on PR #292 still need investigation.",
+    "This prepared fixture uses real engine actions, manual seats and no automated opponent. It is separate from the pinned Lion/Crane decks.",
+    "Includes the preceding non-duel UI stack. The separate Duel Demo is excluded.",
+    "Windows graphical play and Mendon's human review remain unverified until he tests this package."
+  ],
+  "scenarios": [
+    {"name": "Start Review", "mode": "published-supports-review"},
+    {"name": "Other previews/Opposite Seat", "mode": "published-supports-review-opponent"},
+    {"name": "Other previews/Crowded Table", "mode": "published-supports-review-crowded"},
+    {"name": "Other previews/Normal Animation", "mode": "published-supports-review-motion"},
+    {"name": "Open Full Game", "mode": null}
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "source": "fortress-hall-b3.blend",
+  "source_sha256": "6d4fe7f16a34e2adc3e7efcc79f55ff978cf3267621a7351e67e696d9a125d48",
+  "engine": "Blender Cycles Metal",
+  "samples": 128,
+  "size": [
+    1536,
+    1167
+  ],
+  "world_bounds_xy": [
+    -2.5,
+    -1.55,
+    2.5,
+    2.25
+  ],
+  "floor_z": -0.169,
+  "passes": [
+    "diffuse direct",
+    "diffuse indirect"
+  ],
+  "practical_watt_multiplier": 3.2,
+  "practical_colour_linear": [
+    1.0,
+    0.47,
+    0.19
+  ],
+  "practical_radius_m": {
+    "brazier": 0.045,
+    "lantern": 0.027
+  },
+  "dusk_area_watts": 3.0,
+  "world_strength": 0.055,
+  "color_baked": false,
+  "alpha": "Short-range ambient occlusion at 0.13 m, 16 AO rays; denoised",
+  "denoiser": "Blender compositor OpenImageDenoise",
+  "geometry": "Existing approved room, Meshy assets and table provide occlusion; floor texture remains separate.",
+  "animation": "Static bounce/contact baseline; native synchronized firelight modulation is applied separately at runtime.",
+  "output_sha256": "b13e5a9d604f1781571266dae58ab1f57aac68350bafc28084c69c1d60bb63a5"
+}

@@ -1,0 +1,41 @@
+{
+  "approved": "approved-crimson-standoff.png",
+  "mode": "built-in imagegen",
+  "files": [
+    {
+      "path": "assets/ui/duel-arena/crimson/campaign-mat-albedo.png",
+      "sha256": "fb56aae880a33e28f0fe3ce8bb34ce1257aaf9043ba5f832f2fba4ce5c882675",
+      "dimensions": [
+        1774,
+        887
+      ]
+    },
+    {
+      "path": "assets/ui/duel-arena/crimson/landscape-clean-plate.png",
+      "sha256": "cc97ebb89a09b34dfca4977ee380e66c80760803056be216be52c916d50b62de",
+      "dimensions": [
+        1672,
+        941
+      ]
+    },
+    {
+      "path": "assets/ui/duel-arena/crimson/golden-grass-tuft.png",
+      "sha256": "140af50ac8fd0d677f40450f3c6e07c1764f779ed84f7613cb0bc731ab541363",
+      "dimensions": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "path": "assets/ui/duel-arena/crimson/approved-crimson-standoff.png",
+      "sha256": "c817e8b6174585dd3e41cfce469fdd6c0f06237e489e9157fa025f600a76a4b8",
+      "dimensions": [
+        1672,
+        941
+      ]
+    }
+  ],
+  "original_outputs_preserved": true,
+  "card_scans": "Existing original scan resources; generated mockup cards are never used as live card art.",
+  "sources": "Prompt files stored alongside. Images are derived from the approved target; no pixel-equivalence claim."
+}

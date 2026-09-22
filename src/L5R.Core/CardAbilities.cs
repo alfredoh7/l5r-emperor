@@ -903,6 +903,10 @@ public static class AbilityCatalog
         // Training-only: a refusable challenge with no printed win/loss text of its own -- see
         // ApplyDuelOutcome's own generic -1F case, used only so a test can observe the loser(s)
         // without needing a real card's own outcome.
+        ["training-duel-force"] = new("Battle", "Training Force duel", "enemy-personality", Performer: "own-unbowed-personality", IssuesDuel: true, DuelStat: "Force"),
+        ["training-duel-honor"] = new("Battle", "Training Personal Honor duel", "enemy-personality", Performer: "own-unbowed-personality", IssuesDuel: true, DuelStat: "PersonalHonor"),
+        ["training-duel-open"] = new("Open", "Training Open duel", "enemy-personality", Performer: "own-unbowed-personality", IssuesDuel: true),
+        ["training-duel-reaction"] = new("Reaction", "Training: gain 1 Honor before the duel", "none", Trigger: "before-duel-begins"),
         ["training-duel-challenge"] = new("Battle", "Training: choose your performing unbowed Personality and target an enemy Personality: duel (refusable)", "enemy-personality", Performer: "own-unbowed-personality", IssuesDuel: true, DuelRefusable: true),
         // Training-only: exercises the after-action-resolved Reaction window (ActionEffectTracking.cs, issue #437) directly, without a real
         // card's own extra Timing/keyword narrowing (see Measure of Devotion/Revenge for real consumers of the same underlying primitive).
@@ -1874,6 +1878,13 @@ public static class AbilityCatalog
         // see MatchState.PendingEndPhaseRecruits and MatchEngine.ResolvePendingEndPhaseRecruits.
         ["kobi-recruit"] = new("Reaction", "After another player's Battle action resolves which destroyed one of your Lion Clan Personalities at the current battlefield: before the current turn ends, if the destroyed Personality is dead, Recruit him, ignoring costs and Honor Requirements",
             "none", Trigger: AfterActionReactionTriggers.AfterActionResolved),
+        // Matsu Rika (oracle-l5r-9827, issue #449): "After your Bushido Virtue action resolves, three times per turn: Give Rika +1F." Bushido Virtue is
+        // a plain card keyword (e.g. My Enemy's Mercy's own keywords include it), not a printed action-type prefix like Tactical/Political, so whether
+        // an action carries it is read through ActionCarriesKeyword's own source-card-keyword fallback (issue #321) -- the same question Ebizo/Kobi's
+        // Recon/Tactical Traits already ask, here through the after-action-resolved Reaction window instead since the cap ("three times per turn") needs
+        // AbilityDefinition.UsesPerTurn, which only a Reaction consults; Mochitoko's Sentries is the same "N times per turn, mandatory-worded" shape.
+        ["rika-bushido-virtue-bonus"] = new("Reaction", "Three times per turn, after your Bushido Virtue action resolves: Give this card +1F.",
+            "none", Trigger: AfterActionReactionTriggers.AfterActionResolved, UsesPerTurn: 3),
         // Necessary Evil (oracle-l5r-5524): "Open: If you control a Personality, target a Personality and pay Gold equal to the number of Personalities you control, or 4, whichever is higher: The targeted
         // Personality may not assign to battlefields." The movement lock (MovementLocks.cs) for the turn, of assignment alone.
         ["necessary-evil-lock"] = new("Open", "If you control a Personality, target a Personality and pay Gold equal to the number of Personalities you control, or 4, whichever is higher: The targeted Personality may not assign to battlefields",
@@ -4749,7 +4760,7 @@ public sealed partial class MatchEngine
             // him") -- no separate Performer selection at all, unlike Steel on Steel's own chosen
             // performer. ability.Performer null means exactly this: the source card is the challenger.
             var challengerId = ability.Performer is not null ? command.PerformerId! : source!.Id;
-            IssueChallenge(id, player.Id, challengerId, target!.Id, ability.DuelStat, ability.DuelRefusable);
+            IssueChallenge(id, player.Id, challengerId, target!.Id, ability.DuelStat, ability.DuelRefusable, source);
             return;
         }
         // The declared non-Gold costs (issue #351, AbilityCosts.cs), paid together and just before the effects: the same list a negated action pays.
@@ -6385,6 +6396,9 @@ public sealed partial class MatchEngine
                 Emit("kobiRecruitQueued", $"{Definition(source!).Name}: {Definition(Card(kobiDestroyed.CardId)).Name} will be recruited before the turn ends, if he is still dead.", player.Id, source!.Id);
                 break;
             }
+            case "rika-bushido-virtue-bonus":
+                ApplyModifier(source!, source!.Id, id, "Force", 1);
+                break;
             case "singh-remnants-attach": case "training-personality-entry-watch":
             {
                 var enteredPersonality = Card(_state.PendingChoice!.CardId!);
@@ -6525,6 +6539,7 @@ public sealed partial class MatchEngine
             case "daisuke-exp-draw": Draw(player); break;
             case "horume-gain": case "training-choose-player-gain": ApplyPlayerHonorChoice(source!, command.TargetPlayerId!.Value, 1); break;
             case "horume-lose": case "training-choose-player-lose": ApplyPlayerHonorChoice(source!, command.TargetPlayerId!.Value, -1); break;
+            case "training-duel-reaction": GainHonor(player.Id, 1, "Training duel reaction", source); break;
             case "horume-honor": GainHonor(player.Id, 1, "Kitsuki Horume", source); break;
             case "jakuei-favor": _state.FavorPlayerId = player.Id; break;
             case "jakuei-bow": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;

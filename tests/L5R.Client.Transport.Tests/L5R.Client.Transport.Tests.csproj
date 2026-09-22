@@ -8,6 +8,7 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="../../src/L5R.Server/L5R.Server.csproj" />
+    <Compile Include="../../src/L5R.Client/MatchDuelFlow.cs" Link="MatchDuelFlow.cs" />
     <Compile Include="../../src/L5R.Client/MatchSession.cs" Link="MatchSession.cs" />
   </ItemGroup>
 </Project>

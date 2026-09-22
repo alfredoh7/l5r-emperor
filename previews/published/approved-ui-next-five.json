@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "repository": "alfredoh7/l5r-emperor",
+  "source_pr": 432,
+  "source_commit": "0aa6992d19115153f02455391875b94b6aa25d72",
+  "title": "Next five UI previews (designs approved; playtest pending)",
+  "slug": "approved-ui-next-five",
+  "tag": "preview-pr432-0aa6992d19-r1-windows",
+  "asset": "L5R-Review-pr432-0aa6992d19-r1-Windows.zip",
+  "bytes": 1450407450,
+  "sha256": "dd155ea5a95f8919ddb28b210e3d456213c9ee301a3b6422f53adbb07211d04d",
+  "folder": "L5R-Review-pr432-0aa6992d19-r1",
+  "launcher": "Start Review.cmd",
+  "reviewer": "mdornbrook"
+}

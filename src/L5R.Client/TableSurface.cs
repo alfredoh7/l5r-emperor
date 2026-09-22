@@ -7,6 +7,11 @@ namespace L5R.Client;
 public partial class TableSurface : TextureRect
 {
     public const float Pitch = .64f, Depth = .00065f;
+    // Optional presentation camera. The normal game table keeps its original defaults.
+    public float PlanePitch { get; set; } = Pitch;
+    public float PlaneDepth { get; set; } = Depth;
+    // Fixed presentation scenes may bound their content more tightly than the pannable board.
+    public Vector2 CanvasExtent { get; set; } = new(1.7f, 2.7f);
     public SubViewport Canvas { get; private set; } = null!;
     public Vector2 CanvasSize { get; private set; }
     public float RenderScale { get; private set; } = 1;
@@ -36,10 +41,11 @@ public partial class TableSurface : TextureRect
         _projectionCenter = fitSize / 2 - Position;
         var extent = Vector2.Zero;
         foreach (var corner in new[] { Vector2.Zero, new Vector2(Size.X, 0), Size, new Vector2(0, Size.Y) })
-            extent = extent.Max(UnprojectOffset(corner - _projectionCenter).Abs());
+            extent = extent.Max(UnprojectOffset(corner - _projectionCenter, PlanePitch, PlaneDepth).Abs());
         // Include filtering guard pixels; a fixed overscan multiplier can still
-        // lose the far corners after widening the display or changing its anchor.
-        CanvasSize = extent * 2 + Vector2.One * 16;
+        // lose the far corners after widening the display or changing its anchor. Never
+        // shrink below CanvasExtent's own tuned minimum for a fixed presentation scene.
+        CanvasSize = (extent * 2 + Vector2.One * 16).Max(Size * CanvasExtent);
         RenderScale = Math.Min(density, 8192 / Math.Max(CanvasSize.X, CanvasSize.Y));
         Canvas.Size = (Vector2I)(CanvasSize * RenderScale).Ceil();
         CanvasSize = (Vector2)Canvas.Size / RenderScale;
@@ -47,21 +53,23 @@ public partial class TableSurface : TextureRect
         _projection.SetShaderParameter("display_size", Size);
         _projection.SetShaderParameter("projection_center", _projectionCenter);
         _projection.SetShaderParameter("canvas_size", CanvasSize);
-        _projection.SetShaderParameter("pitch", Pitch);
-        _projection.SetShaderParameter("depth", Depth);
+        _projection.SetShaderParameter("pitch", PlanePitch);
+        _projection.SetShaderParameter("depth", PlaneDepth);
     }
-    public static Vector2 ProjectOffset(Vector2 plane)
+    public static Vector2 ProjectOffset(Vector2 plane) => ProjectOffset(plane, Pitch, Depth);
+    public static Vector2 ProjectOffset(Vector2 plane, float pitch, float depth)
     {
-        var divisor = 1 - plane.Y * Depth;
-        return new Vector2(plane.X, plane.Y * Pitch) / divisor;
+        var divisor = 1 - plane.Y * depth;
+        return new Vector2(plane.X, plane.Y * pitch) / divisor;
     }
-    public static Vector2 UnprojectOffset(Vector2 screen)
+    public static Vector2 UnprojectOffset(Vector2 screen) => UnprojectOffset(screen, Pitch, Depth);
+    public static Vector2 UnprojectOffset(Vector2 screen, float pitch, float depth)
     {
-        var y = screen.Y / (Pitch + Depth * screen.Y);
-        return new Vector2(screen.X * (1 - Depth * y), y);
+        var y = screen.Y / (pitch + depth * screen.Y);
+        return new Vector2(screen.X * (1 - depth * y), y);
     }
-    public Vector2 ProjectCanvas(Vector2 plane) => GetGlobalTransform() * (_projectionCenter + ProjectOffset(plane - CanvasSize / 2));
-    public Vector2 ScreenToCanvas(Vector2 screen) => CanvasSize / 2 + UnprojectOffset(GetGlobalTransform().AffineInverse() * screen - _projectionCenter);
+    public Vector2 ProjectCanvas(Vector2 plane) => GetGlobalTransform() * (_projectionCenter + ProjectOffset(plane - CanvasSize / 2, PlanePitch, PlaneDepth));
+    public Vector2 ScreenToCanvas(Vector2 screen) => CanvasSize / 2 + UnprojectOffset(GetGlobalTransform().AffineInverse() * screen - _projectionCenter, PlanePitch, PlaneDepth);
     public void ForwardMouse(InputEventMouse mouse)
     {
         var forwarded = (InputEventMouse)mouse.Duplicate();
@@ -76,6 +84,16 @@ public partial class TableSurface : TextureRect
     {
         if (!_mouseInside) return;
         Canvas.NotifyMouseExited(); _mouseInside = false;
+    }
+
+    public void ReleaseMouseOutside(InputEventMouseButton mouse)
+    {
+        // Finish a table press released over fixed HUD/outside the table without
+        // re-entering the projection and activating a covered card or button.
+        ExitMouse();
+        var released = (InputEventMouseButton)mouse.Duplicate();
+        released.Position = released.GlobalPosition = new Vector2(-1, -1);
+        Canvas.PushInput(released, true);
     }
 
 }

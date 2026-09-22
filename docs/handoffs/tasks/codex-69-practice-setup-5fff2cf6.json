@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Implement approved A/B/C custom Practice setup with saved-deck browser, builder return, Core validation/construction and detached replay snapshots; preserve consolidated UI through #261.",
+  "validation": "457 deterministic checks passed; client build zero warnings/errors; Godot import and native Practice probe passed with visual iteration at 1672x941/1280x720; native menu flow/input/play passed; pinned WebP pack verified offline; clickable launcher created and launched successfully.",
+  "remaining": "Alfredo visual review and Mendon shared mechanics review; CI pending publication; native Windows play not performed. Stacked on #261, private custom rooms #70 and Duel Demo #220 excluded.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/69",
+  "branch": "codex/69-practice-setup",
+  "updated": "2026-09-16T21:19:59.864957+00:00"
+}

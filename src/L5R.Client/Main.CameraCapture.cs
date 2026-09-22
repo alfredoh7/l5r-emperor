@@ -82,7 +82,10 @@ public partial class Main
                     RequireCamera(_selected?.Id == _probeSelection && View.Version == _probeVersion, "drag activated a card");
                     RequireCamera(_inspectorPanel.GetGlobalRect().Position == _probeHud, "HUD moved with the table");
                     ResetTableCamera();
-                    _probePoint = _tableViewport.GetGlobalRect().Position + new Vector2(5, 5);
+                    // The approved Fallen placard covers the old top-left probe position.
+                    // Exercise empty cloth while respecting the HUD's intentional input exclusion.
+                    var tableRect = _tableViewport.GetGlobalRect();
+                    _probePoint = tableRect.Position + new Vector2(tableRect.Size.X / 2, 5);
                     MoveProbeMouse(_probePoint); break;
                 case 5:
                     _probeCenter = _cameraCenter;

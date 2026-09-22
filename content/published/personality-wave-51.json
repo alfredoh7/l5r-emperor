@@ -1,0 +1,35 @@
+{
+  "Profile": "personality-wave-51",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-9827",
+      "Name": "Matsu Rika",
+      "Type": "Personality",
+      "Clan": "Lion",
+      "GoldCost": 5,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 3,
+      "PersonalHonor": 3,
+      "HonorRequirement": 7,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After your Bushido Virtue action resolves, three times per turn: Give Rika +1F.\nAfter your Bushido Virtue action resolves, three times per turn: Give Rika +1F.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9827.jpg",
+      "Keywords": [
+        "Lion Clan",
+        "Lion's Pride",
+        "Paragon",
+        "Samurai"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "rika-bushido-virtue-bonus"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

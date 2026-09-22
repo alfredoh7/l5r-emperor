@@ -48,7 +48,9 @@ public partial class PhaseTrackProbe : Control
             {
                 if(!_track.HelpText.Contains("Events-phase"))throw new Exception("Events hover help missing: "+_track.HelpText+" hovered="+GetViewport().GuiGetHoveredControl()?.GetPath()+" area="+_track.HelpRegions[1].GetGlobalRect());
                 _track.HelpRegions[1].GrabFocus();Save("hover-events");
-                Input.ParseInputEvent(new InputEventMouseMotion{Position=Vector2.One*5});_track.HelpRegions[0].GrabFocus();KeyEvent(Key.Right);_stage++;return;
+                // Keep the native cursor and injected motion aligned; otherwise a
+                // later OS motion can re-enter Events and reopen the hover help.
+                Input.WarpMouse(Vector2.One*5);Input.ParseInputEvent(new InputEventMouseMotion{Position=Vector2.One*5});_track.HelpRegions[0].GrabFocus();KeyEvent(Key.Right);_stage++;return;
             }
             if(_stage==2)
             {
