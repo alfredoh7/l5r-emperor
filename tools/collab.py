@@ -236,6 +236,9 @@ def context(root, offline=False):
     return result
 
 
+FILE_LISTING_LIMIT = 3000  # GitHub's maximum for GET /pulls/{number}/files
+
+
 def route_pr(root, number):
     """Runs only from trusted base code in the metadata-only GitHub Action."""
     cfg = config(root)
@@ -245,7 +248,9 @@ def route_pr(root, number):
         return {'skipped': 'PR is closed; no labels or review requests changed.'}
     pages = json.loads(gh(['api', '--paginate', '--slurp', f'repos/{repo}/pulls/{number}/files?per_page=100'], root))
     files = [p for page in pages for p in page]
-    if len(files) != pr['changed_files']:
+    # GitHub reports changed_files as 0 on very large PRs even though the paginated
+    # listing is complete; the listing itself is capped at FILE_LISTING_LIMIT entries.
+    if len(files) >= FILE_LISTING_LIMIT or (pr['changed_files'] and len(files) != pr['changed_files']):
         raise RuntimeError('Incomplete PR file listing; inspect scope before routing.')
     paths = [f['filename'] for f in files] + [f['previous_filename'] for f in files if 'previous_filename' in f]
     lane = classify(paths, cfg)
