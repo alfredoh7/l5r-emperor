@@ -493,6 +493,16 @@ In the coming Ivory Edition, every card with a Gold Cost will enter play via an 
 **Notes on specific cards:**
 - **Ningen's "Treatise on the Nezumi"**: introduces the "multiplayer" keyword as a reminder that the ability is primarily useful in games with more than two players. The keyword itself has no rules effect.
 
+### The Shadow's Embrace Supplement
+
+**Notes on specific cards:**
+- **Matsu Rika**: "After your Bushido Virtue action resolves, three times per turn: Give Rika +1F." **Bushido Virtue** is a plain printed keyword some Strategy cards carry (e.g. My Enemy's Mercy, alongside Compassion) — it is not a Designator-style action-type prefix like Political/Tactical. Whether an action "is a Bushido Virtue action" follows the same rule already stated for Political/Tactical/Recon/etc. (see Open Items, below, and Reading the Cards — Abilities, above): either the acting ability itself is expressly printed with that keyword before its designator, or the performing card carries the keyword itself, since an ability inherits all the keywords of the card it's on. Her bonus is capped at three times per turn — a per-turn cap on an otherwise mandatory-worded trigger, the same shape as Hida Mochitoko's own "twice per turn, after an action targets your Follower..." trait (Second City).
+
+### Before the Dawn Supplement
+
+**Notes on specific cards:**
+- **Akodo Tezuka**: "Battle/Open: Discard a card and target a Bushido Virtue in your discard pile: Take an additional action to play it for one of its Battle, Limited, or Open actions, as appropriate to the current phase. Remove it from the game after its action ends." Unlike a narrower "take an additional action to play it for one of its Battle actions" grant (contrast Daigotsu Bofana - exp, Torn Asunder), this one admits any of the target card's actions, not Battle only. "As appropriate to the current phase" is not a special exception — each granted action still needs its own ordinary timing to be legal when actually taken: a Limited action only during the Action Phase as the active player, an Open action only during the Action Phase, a Battle action only during a battle's Combat Segment (see The Turn Sequence, above). So in practice, only the target's Battle action (if any) is ever usable while a battle is underway, and only its Limited/Open actions (if any) are usable outside one — the phase itself does the filtering, with nothing extra to track.
+
 ---
 
 ## Open items for future supplements
@@ -501,5 +511,5 @@ Noted while compiling this document, for whoever adds the next supplement:
 
 - This rulebook's own **Contents** page (p. 4–5) lists further Online Rules sub-sections beyond p. 131 (multiplayer "Ally," draft/sealed variants) that live past this document's page-131 cutoff and were not compiled here.
 - The rulebook frequently cross-references errata/FAQ content hosted at `rules.l5r.com`, which is not included in this compilation and would need its own source.
-- Several mechanics described here by name only (Terrain, Reconnaissance, Political/Tactical/Recon/Ninja/Iaijutsu/Kiho/Thunder/Dark Virtue action-type keywords, Clan Alignment as "Imperial," Madness tokens, Henshin) are defined at the *keyword* level in this rulebook but get their full behavioral texture from the specific cards that use them — a useful next supplement would be a per-mechanic deep-dive sourced from representative card text, similar to how `docs/rules/LION_CRANE_COVERAGE.md` already documents specific implemented cards.
-- The **Rules Supplements** section above (Torn Asunder, Coils of Madness, Gates of Chaos, Aftermath) was supplied directly by the rules-lane owner rather than sourced from this compilation's own rulebook PDF; later supplements (e.g. Ivory Edition itself, once the "coming edition" changes previewed above take final effect) are expected to land the same way.
+- Several mechanics described here by name only (Terrain, Reconnaissance, Political/Tactical/Recon/Ninja/Iaijutsu/Kiho/Thunder/Dark Virtue/Bushido Virtue action-type keywords, Clan Alignment as "Imperial," Madness tokens, Henshin) are defined at the *keyword* level in this rulebook but get their full behavioral texture from the specific cards that use them — a useful next supplement would be a per-mechanic deep-dive sourced from representative card text, similar to how `docs/rules/LION_CRANE_COVERAGE.md` already documents specific implemented cards.
+- The **Rules Supplements** section above (Torn Asunder, Coils of Madness, Gates of Chaos, Aftermath, The Shadow's Embrace, Before the Dawn) was supplied directly by the rules-lane owner rather than sourced from this compilation's own rulebook PDF; later supplements (e.g. Ivory Edition itself, once the "coming edition" changes previewed above take final effect) are expected to land the same way.
