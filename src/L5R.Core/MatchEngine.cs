@@ -834,11 +834,17 @@ public sealed partial class MatchEngine
     // possible by a defender's battlefield-creation ability at the attacker's own province -- that
     // mechanic does not exist yet, so QuotePurchase's own ProclaimEligible (which already requires
     // playerId==ActivePlayerId) is reused as-is and simply never overridden for this narrow case.
+    // Akodo Ashiko (oracle-l5r-193, issue #440): "If Ashiko is face-up in one of your Provinces, Recruit her..." is the Reserve keyword's own
+    // shape (an absent battle action, only her own card, no separate granting card needed -- see the Reserve keyword's reminder text on Tamori
+    // Shinji and its own kind), just printed on a card that carries no other Reserve-keyword capability, so IsReserveRecruitable substitutes her
+    // own Effect string for the keyword check rather than adding "Reserve" to her printed Keywords (which she does not carry).
+    private bool IsReserveRecruitable(CardInstance card) => Keyword(card,"Reserve") || Definition(card).Effect=="ashiko-outnumbered-reserve";
+
     private void RecruitReserve(GameCommand command)
     {
         Require(_state.Phase==Phase.Battle,"Reserve recruitment is an absent battle action, only available during the Battle Phase.");
         var card=Card(command.CardId);
-        Require(card.OwnerId==command.PlayerId && card.Zone==Zone.Province && card.FaceUp && Definition(card).Type==CardType.Personality && Keyword(card,"Reserve"),
+        Require(card.OwnerId==command.PlayerId && card.Zone==Zone.Province && card.FaceUp && Definition(card).Type==CardType.Personality && IsReserveRecruitable(card),
             "Choose your own face-up Reserve Personality in a province.");
         var provinceIndex=card.ProvinceIndex!.Value;
         Require(_state.UnresolvedBattlefields.Contains(provinceIndex),"There is no battlefield at this province.");
@@ -936,13 +942,22 @@ public sealed partial class MatchEngine
             && !(ignoreHonorRequirementIfPersonalityClan is string waivedClan && HasClanAffiliation(card,waivedClan))) error="Family Honor is below the Honor Requirement; Clan allegiance may allow purchase.";
         var prosperous=def.Effect=="prosperous-discount"?_state.Cards.Values.Count(c=>c.OwnerId==playerId && InPlay(c) && Definition(c).Type==CardType.Personality):0;
         var reserveDiscount=viaReserve && def.Effect=="reserve-defender-discount"?4:0;
+        // Akodo Ashiko (oracle-l5r-193, issue #440): "reducing her Gold Cost by 2 if there are more units on the enemy side of the current battle
+        // than on your side" -- true by construction only on a Reserve recruit (viaReserve), where card.ProvinceIndex is already the battlefield
+        // (the same one RecruitReserve's own Require checked has enemy presence). Army(...).Count() is the live, always-current unit count at a
+        // battlefield -- already the established primitive for exactly this comparison (e.g. barred-passage-bow's own army-size check), not
+        // something that needs tracking or updating separately: it is read fresh every time a quote is asked for, including after intervening
+        // Battle actions have changed either side's presence.
+        var ashikoDiscount=viaReserve && def.Effect=="ashiko-outnumbered-reserve" && card.ProvinceIndex is int ashikoProvince
+            && Army(1-playerId,ashikoProvince).Count() > Army(playerId,ashikoProvince).Count() ? 2 : 0;
         // "Enters play paying N less Gold if you are a <Clan> Clan player" (issue #336, Daigotsu Hotako exp3): a printed term of the card that
         // stacks with the two Clan choices above; the same one ClanEntryDiscount gives Equip.
         var entryDiscount=ClanEntryDiscount(def,player);
-        var rawCost=def.GoldCost-prosperous-reserveDiscount-(entryDiscount?.Amount??0)+(clanAllegiance?2:0)-(clanDiscount?2:0);
+        var rawCost=def.GoldCost-prosperous-reserveDiscount-ashikoDiscount-(entryDiscount?.Amount??0)+(clanAllegiance?2:0)-(clanDiscount?2:0);
         var cost=Math.Max(0,rawCost);
         // The human-readable derivation the payment panel shows (issue #303), term by term.
         var basis=$"{def.Name} cost {def.GoldCost}"+(prosperous>0?$" − {prosperous} (controlled Personalities)":"")+(reserveDiscount>0?$" − {reserveDiscount} (Reserve while defending)":"")
+            +(ashikoDiscount>0?$" − {ashikoDiscount} (outnumbered)":"")
             +(entryDiscount is {} entry?$" − {entry.Amount} ({entry.Clan} Clan)":"")
             +(clanAllegiance?" + 2 (Clan allegiance)":"")+(clanDiscount?" − 2 (Clan discount)":"")+(rawCost<0?" (min 0)":"");
         if ((Keyword(card,"Unique") || Keyword(card,"Singular")) && ControlsCopyOf(playerId,def.Name)) error=$"You already control this {(Keyword(card,"Unique") ? "Unique" : "Singular")} card.";
