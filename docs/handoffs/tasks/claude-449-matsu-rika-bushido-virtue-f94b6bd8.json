@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Wire Matsu Rika (oracle-l5r-9827): Bushido Virtue is a plain card keyword (confirmed against My Enemy's Mercy's own keywords), read through ActionCarriesKeyword's existing source-card-keyword fallback (issue #321), so her after-your-Bushido-Virtue-action +1F Reaction (3x/turn, AbilityDefinition.UsesPerTurn, the same shape Mochitoko's own twice-per-turn Reaction uses) is directly wirable on the existing after-action-resolved Reaction window (issue #437), with no new engine mechanics.",
+  "validation": "dotnet build (core + tests) clean; full test suite 0 FAIL (matsu-rika 3/3 new, targeted-action-reactions 30/30 incl. the updated UseLimitParity pin, seppuku-timing, published, all others green); docs/CARD_INVENTORY.xlsx regenerated (2165 rows, 602 wired).",
+  "remaining": "Akodo Tamisu (oracle-l5r-294) shares the same three-way classification but still needs a target-choice Reaction shape and her separate 'discard all your other Sensei Personalities' entry effect; blocker note narrowed, not wired here.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/449",
+  "branch": "claude/449-matsu-rika-bushido-virtue",
+  "updated": "2026-09-22T17:11:35.602491+00:00"
+}

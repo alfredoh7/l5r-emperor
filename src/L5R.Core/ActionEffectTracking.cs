@@ -72,6 +72,11 @@ public sealed partial class MatchEngine
             "measure-of-devotion-create" => AbilityCatalog.All[facts.AbilityId].Timing == "Battle" && LastActionDestroyedOwnKeyword(playerId, "Deathseeker"),
             // Akodo Kobi - exp (oracle-l5r-232): "After another player's Battle action resolves which destroyed one of your Lion Clan Personalities."
             "kobi-recruit" => facts.PlayerId != playerId && AbilityCatalog.All[facts.AbilityId].Timing == "Battle" && LastActionDestroyedOwnKeyword(playerId, "Lion Clan"),
+            // Matsu Rika (oracle-l5r-9827): "After your Bushido Virtue action resolves" -- her own action (facts.PlayerId == playerId, already implied by
+            // source.OwnerId == playerId above only gating who HOLDS the Reaction, not whose action it was), classified through ActionCarriesKeyword the
+            // same way Ebizo/Kobi's Recon/Tactical Traits already read a card's own keyword when the acting ability prints no explicit designator.
+            "rika-bushido-virtue-bonus" => facts.PlayerId == playerId
+                && ActionCarriesKeyword(AbilityCatalog.All[facts.AbilityId], facts.SourceId is null ? null : Card(facts.SourceId), "Bushido Virtue"),
             // Synthetic fixture (issue #437): "after the resolution of an action that destroyed one of your Personalities, gain 3 Honor" -- no
             // Timing/keyword narrowing, exercising AfterActionResolvedApplies/the window itself directly rather than through a real card's own
             // extra conditions.
