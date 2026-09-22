@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Reevaluated the 8 Before the Dawn cards blocked on the stale 'Dueling/Focus Effects (not started at all)' note (Dueling #204 and Focus Effects #419 now exist). Wired Hiromi's Vassals, Home Guard and Shamsir (follower-wave-23, item-wave-9): the first two share a new FocusEffectChoice.cs choice kind (attach the focused card itself, ignoring Gold cost), Home Guard reuses an existing mandatory-Focus-Effect and while-defending shape. Refreshed the BLOCKERS note on the other 5 (Flanking Unit, Broken Cipher, Paralyzing Touch, Splintered Weapon, The Courage of the Mantis) with their real remaining gap. Lane is shared only because docs/CARD_INVENTORY.xlsx and docs/decisions/2026-09-22-dueling-focus-effect-reevaluation.md fall outside the rules/ui path patterns (collab.py's unknown-file fallback); every actual code change is rules-lane (src/L5R.Core, tests/L5R.Core.Tests, content/published, tools/content). See docs/decisions/2026-09-22-dueling-focus-effect-reevaluation.md for the readings.",
+  "validation": "6 new tests (dueling-focus-effect-reevaluation), full core test suite green, bash tools/check.sh --skip-client exits 0.",
+  "remaining": "None for this task. Five cards remain blocked on genuinely unbuilt primitives (attachment Transfer, delayed negation of a future action, delayed duel-loss-consequence mechanism) -- each documented as its own future task.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/435",
+  "branch": "claude/435-dueling-focus-reevaluation",
+  "updated": "2026-09-22T10:35:27.006181+00:00"
+}

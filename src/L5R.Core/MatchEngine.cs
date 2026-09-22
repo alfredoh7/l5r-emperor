@@ -1973,6 +1973,9 @@ public sealed partial class MatchEngine
     private int FollowerForce(CardInstance card) => Math.Max(0,Definition(card).Force+StatModifier(card,"Force")+TerrainForceAdjustment(card)+(Definition(card).Effect switch
     {
         "force-while-defending" => IsDefendingUnit(card) ? 2 : 0,
+        // Home Guard (oracle-l5r-3413, issue #435): "This card has +3F while defending" -- the same
+        // shape as force-while-defending above, at 3 instead of 2.
+        "force-while-defending-3" => IsDefendingUnit(card) ? 3 : 0,
         // Disciples of Ganesh: "+2F while defending" -- shares FollowerForce's existing case, plus a
         // separate destruction-triggered Honor gain (see DestroyedDuringBattleBonus, keyed by the same
         // Effect string) -- one card, two engine hooks, since Effect is a single field per card.

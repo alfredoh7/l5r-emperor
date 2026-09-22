@@ -59,12 +59,14 @@ BLOCKERS: dict[str, str] = {
     "oracle-l5r-10679": "Needs \"grant keyword to whole unit\" (the passive Attack-strength defense half is now built -- Destrier/Singh Remnants -- and directly reusable here).",
     "oracle-l5r-10680": "The deck search primitive now exists (issue #312: a searched deck, criteria, show, effect, shuffle), but this card searches the discard pile FIRST and then the deck (\"search your discard pile, then deck, for another Enslaved Djinn\") -- a multi-source search, and a discard-pile candidate list, are not built.",
     "oracle-l5r-2520": "Needs an attachment Transfer mechanic.",
-    "oracle-l5r-2598": "Needs Dueling/Focus Effects (not started at all).",
+    # Dueling/Focus Effect reevaluation (issue #435): Dueling (#204) and Focus Effects (issue #419's FocusEffectChoice.cs) now exist, so the eight Before the Dawn cards once
+    # blocked on "Dueling/Focus Effects (not started at all)" were re-read against the engine as it now stands. Three were fully wirable: Hiromi's Vassals and Shamsir share a
+    # "you may attach this card to one of your Personalities, ignoring Gold cost" Focus Effect, generalized as FocusEffectChoice.cs's third choice kind; Home Guard's mandatory
+    # +3F Focus Effect, +3F-while-defending static and Battle bow-and-Honor-gain each reuse an existing shape outright. No remaining blocker note for any of the three.
+    "oracle-l5r-2598": "Needs an attachment Transfer mechanic (same gap as oracle-l5r-2520/10900): its Focus Effect is \"you may transfer a Follower from your Personality in this duel to another of your Personalities.\" The Battle half (move a target Personality at the current battlefield home or to an adjacent battlefield) is separately wirable.",
     "oracle-l5r-10681": "Its ordinary Equip is allowed from YOUR discard pile (\"You may Equip this Follower from your discard pile\"). The attach-from-a-discard-pile primitive exists (AttachAction.cs, issue #337) for an ability that TARGETS a card in a pile, but here the SOURCE card in the pile is the attachment (AttachSource.Self is hand-only) and the action is the ordinary Limited Equip command, not an ability -- not built.",
     "oracle-l5r-2722": "Needs a compound multi-keyword attach restriction (AttachRequiresKeyword only holds one today).",
     "oracle-l5r-10336": "Needs card creation (its army-scoped keyword-boost half is otherwise wirable).",
-    "oracle-l5r-3280": "Needs Dueling/Focus Effects (not started at all).",
-    "oracle-l5r-3413": "Needs Dueling/Focus Effects (not started at all).",
     "oracle-l5r-10588": "Needs cost-ignoring Equip tied to a named restriction (explicitly deferred since #156).",
     "oracle-l5r-3589": "The Attack-vs-attachments override now exists (AttackFollowerException, personality-wave-24: an unconditional printed exception is one FollowerException: new(\"Ranged\")). Still needs \"last attached to\" tracking after detachment (the strength is that Personality's Chi, and the Honor loss and dishonor act on him).",
     "oracle-l5r-3611": "Needs a performer/wielder-keyed Attack-strength axis (already a known gap elsewhere).",
@@ -138,7 +140,7 @@ BLOCKERS: dict[str, str] = {
     # (noted "Not blocked; deferred for scope") but were left for a future pass to keep this wave's
     # own scope bounded.
     "oracle-l5r-634": "Needs a Retainer mechanic, movement to any location (not just home), and a province-card discard (three separate gaps).",
-    "oracle-l5r-1151": "Needs Dueling/Focus Effects (not started at all).",
+    "oracle-l5r-1151": "Needs an attachment Transfer mechanic (issue #435 reevaluation; same gap as oracle-l5r-2520/10900/2598): its Focus Effect is \"you may transfer a Spell from your Personality in this duel to another of your Shugenja at the same location.\" Its Battle half also needs two live-tracked conditions not built anywhere else: \"you have not put cards into your hand this phase\" and \"you have attached a Spell this turn.\"",
     "oracle-l5r-9900": "Needs a new Reaction trigger: \"after an action resolves that a Personality performed\" (the Terrain-play and additional-Battle-action halves are separately wirable).",
     "oracle-l5r-1607": "Needs Chi as a repeatable payable cost resource (distinct from a Force/Stat modifier), interacting correctly with the existing Chi<=0 death rule.",
     "oracle-l5r-10126": "Rings themselves are now built (issue #194); that alone does not unblock this card. Its own scan (\"Extend the Soul's Boundaries\") shows: enters play paying 1 less Gold per Ring controlled (a new variable, count-scaled discount -- every existing discount is either clan-alignment-based or a fixed printed amount, never scaled by a live count); Battle: destroy this card, bow the performing Shugenja, destroy him unless he is Void, target an enemy Personality whose controller may shuffle him and his attachments back into their owners' decks (needs a shuffle-into-deck primitive, not built); if he did not choose this, the acting player takes two additional Battle actions (a grant conditioned on the TARGET's own opponent choice, a novel shape). Three separate unbuilt pieces, not one.",
@@ -158,17 +160,16 @@ BLOCKERS: dict[str, str] = {
     "oracle-l5r-5444": "Needs a \"count this card's own keywords, excluding a named pattern\" mechanism (novel).",
     "oracle-l5r-5533": "Needs an exemption from the generic Battle-timing army-presence requirement (the adjacent-battlefield Performer shape itself, Moto Gunso's own, already exists).",
     "oracle-l5r-10386": "Needs a dual-target selection with a relational constraint (\"not sharing a Clan alignment\"). The multi-target shape (issue #336) makes the two targets independent slots, each judged on its own; a constraint BETWEEN the two chosen targets is still not expressible.",
-    "oracle-l5r-9919": "Needs Dueling/Focus Effects (not started at all).",
+    "oracle-l5r-9919": "Needs a delayed negation of a FUTURE action (issue #435 reevaluation; same gap as oracle-l5r-2580): its Focus Effect is \"after this duel ends, negate the effects of the next action performed by its winner\" -- every negation the engine has applies to an action already being held in a reaction window, none waits on a card until it next acts. The Battle half (a Monk performer, move an enemy Personality to a different battlefield, conditional bow) is separately wirable.",
     "oracle-l5r-5928": "Its Reaction (\"after another player's action targets your Personality: Discard him\") is now expressible through the targeted-by-action trigger (issue #335, played from hand: see the decision note's Known limits); the Battle half needs card creation (a temporary token Personality) -- a known gap.",
     "oracle-l5r-5941": "Needs a non-AtBattle-gated compound Performer category for BattleOrOpen abilities (every existing keyword-Performer category requires the current battlefield).",
     "oracle-l5r-10388": "Needs a \"count copies of this same card played this battle\" mechanism (novel; the additional-Battle-action half is separately wirable).",
     "oracle-l5r-6034": "Needs a Gold-Cost comparison Target category (same gap as oracle-l5r-24).",
     "oracle-l5r-10164": "Needs an \"actions must target this card if legal\" forced-redirection rule (same gap as oracle-l5r-10300): a standing effect that rewrites every other player's Battle action for the rest of the battle. The legality half now exists (ActionAcceptsTarget, issue #335 -- \"if legal\" is that check); the standing hook that applies it to every action is the gap.",
-    "oracle-l5r-6702": "Needs Dueling/Focus Effects (the Battle half, a plain Force debuff, is separately wirable).",
     "oracle-l5r-6727": "Needs a non-AtBattle-gated Performer category (\"at any location\", same gap as oracle-l5r-5941).",
-    "oracle-l5r-7435": "Needs Dueling/Focus Effects (the Battle half is separately wirable).",
+    "oracle-l5r-7435": "Needs an attachment Transfer mechanic (issue #435 reevaluation; same gap as oracle-l5r-2520/10900/2598/1151): its Focus Effect is \"you may transfer an attachment from your Personality in this duel to another of your Personalities.\" The Battle half (an enemy card without attachments, bow it, destroy it if this Personality is a Berserker) is separately wirable.",
     "oracle-l5r-10132": "Needs a delayed, multi-step revival mechanic (\"before this turn ends, put a removed unit into play ignoring costs\") -- not built.",
-    "oracle-l5r-7995": "Needs Dueling/Focus Effects (the Battle half is separately wirable).",
+    "oracle-l5r-7995": "Needs a delayed duel-loss-consequence mechanism (issue #435 reevaluation): its Focus Effect is \"you may choose (now) to delay the effects of losing this duel until after the next Dynasty Phase begins\" -- genuinely novel duel-resolution-timing plumbing (Strength of the Spider, oracle-l5r-8362, is blocked on the identical clause and deliberately deferred rather than invented for one card; see CardAbilities.cs). The Battle half (a Mantis Clan performer, move to the current battlefield, an additional Battle action) is separately wirable.",
     "oracle-l5r-10718": "Needs a self-replacing Terrain variant plus a delayed post-destruction straighten (two gaps, same self-replace gap as oracle-l5r-10941).",
     "oracle-l5r-8188": "Needs a new trigger keyed to passing instead of a Battle action (novel; the Terrain-play half is separately wirable).",
     "oracle-l5r-10958": "Needs a \"Political\" Reaction timing (not built; the plain Ranged 1 Attack half is separately wirable).",
