@@ -27,3 +27,5 @@ Screenshots in `docs/screenshots/table-visibility/` demonstrate drawing beyond t
 - Current fortress preview source is kept on `codex/446-table-visibility-review`. It includes the previously unmerged UI stack and must not be treated as approval to merge that stack.
 - Local fast launcher: `artifacts/table-clipping-review/artifacts/L5R Table Visibility - Review.app` relative to Alfredo's workspace. It uses the built preview directly. Other existing review apps are unchanged.
 - Human appearance acceptance and native Windows graphical validation remain open. Do not merge main without approval.
+
+Current-fortress integration completed: all three coverage sizes, native created-copy/attack-target/camera probes and full `check.sh --skip-client` passed. The Finder-launched fast app reached `TABLE_VISIBILITY_REVIEW_READY`. See `codex/446-table-visibility-review` and its dated handoff for that separate stack's evidence and main-integration details.

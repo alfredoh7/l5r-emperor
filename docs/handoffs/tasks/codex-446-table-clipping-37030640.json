@@ -1,9 +1,9 @@
 {
   "lane": "shared",
   "summary": "Fix issue 446 by separating camera fitting from full-window rendering. Use matching inverse input, corner-derived canvas coverage and fixed-HUD layering/picking. Rules unchanged; no merge authorized.",
-  "validation": "Updated main aa27db4c. Client build 0 warnings/errors. Baseline raster regression failed as expected; final native four-edge pixels/click/zoom and fixed-HUD picking PASS at 1920x1080, 1440x900, 2560x1080. All 8 check-table-camera.sh cases PASS after final input correction. Screenshots in docs/screenshots/table-visibility. Current-fortress integration validation is recorded separately.",
-  "remaining": "Alfredo appearance review and Mendon PR review; native Windows graphical test not performed. Separate fortress preview is finishing checks. No main merge authorized.",
+  "validation": "Main aa27db4c integrated. Client build 0 warnings/errors. Baseline raster regression failed as expected; final native four-edge pixels/click/zoom and fixed-HUD picking PASS at 1920x1080, 1440x900, 2560x1080. All 8 check-table-camera.sh cases PASS. Separate current-fortress preview also passes coverage, copy/attack/camera probes and full check.sh --skip-client; Finder launcher reached review-ready. See dated handoffs/screenshots.",
+  "remaining": "Alfredo appearance review and Mendon PR review. CI remains a merge gate; native Windows graphical playtest not performed. No main merge authorized.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/446",
   "branch": "codex/446-table-clipping",
-  "updated": "2026-09-22T15:12:40.375190+00:00"
+  "updated": "2026-09-22T15:21:59.465195+00:00"
 }
