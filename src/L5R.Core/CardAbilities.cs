@@ -1874,6 +1874,13 @@ public static class AbilityCatalog
         // see MatchState.PendingEndPhaseRecruits and MatchEngine.ResolvePendingEndPhaseRecruits.
         ["kobi-recruit"] = new("Reaction", "After another player's Battle action resolves which destroyed one of your Lion Clan Personalities at the current battlefield: before the current turn ends, if the destroyed Personality is dead, Recruit him, ignoring costs and Honor Requirements",
             "none", Trigger: AfterActionReactionTriggers.AfterActionResolved),
+        // Matsu Rika (oracle-l5r-9827, issue #449): "After your Bushido Virtue action resolves, three times per turn: Give Rika +1F." Bushido Virtue is
+        // a plain card keyword (e.g. My Enemy's Mercy's own keywords include it), not a printed action-type prefix like Tactical/Political, so whether
+        // an action carries it is read through ActionCarriesKeyword's own source-card-keyword fallback (issue #321) -- the same question Ebizo/Kobi's
+        // Recon/Tactical Traits already ask, here through the after-action-resolved Reaction window instead since the cap ("three times per turn") needs
+        // AbilityDefinition.UsesPerTurn, which only a Reaction consults; Mochitoko's Sentries is the same "N times per turn, mandatory-worded" shape.
+        ["rika-bushido-virtue-bonus"] = new("Reaction", "Three times per turn, after your Bushido Virtue action resolves: Give this card +1F.",
+            "none", Trigger: AfterActionReactionTriggers.AfterActionResolved, UsesPerTurn: 3),
         // Necessary Evil (oracle-l5r-5524): "Open: If you control a Personality, target a Personality and pay Gold equal to the number of Personalities you control, or 4, whichever is higher: The targeted
         // Personality may not assign to battlefields." The movement lock (MovementLocks.cs) for the turn, of assignment alone.
         ["necessary-evil-lock"] = new("Open", "If you control a Personality, target a Personality and pay Gold equal to the number of Personalities you control, or 4, whichever is higher: The targeted Personality may not assign to battlefields",
@@ -6385,6 +6392,9 @@ public sealed partial class MatchEngine
                 Emit("kobiRecruitQueued", $"{Definition(source!).Name}: {Definition(Card(kobiDestroyed.CardId)).Name} will be recruited before the turn ends, if he is still dead.", player.Id, source!.Id);
                 break;
             }
+            case "rika-bushido-virtue-bonus":
+                ApplyModifier(source!, source!.Id, id, "Force", 1);
+                break;
             case "singh-remnants-attach": case "training-personality-entry-watch":
             {
                 var enteredPersonality = Card(_state.PendingChoice!.CardId!);
