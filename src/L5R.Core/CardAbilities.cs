@@ -1834,6 +1834,26 @@ public static class AbilityCatalog
         ["crimson-shadow-bow"] = new("Battle", "Fear Battle: Target an enemy Follower: Bow it", "enemy-follower", ActionKeywords: ["Fear"]),
         ["dragons-favor-attack"] = new("Battle", "Thunder Battle, bow this card: Ranged Attack with strength equal to this Shugenja's Chi", "attack", ActionKeywords: ["Thunder"], Costs: ActionCost.BowSource),
         ["embers-final-fire-destroy"] = new("Battle", "Bow this card and target an enemy attachment: Destroy it", "enemy-attachment", Costs: ActionCost.BowSource),
+        // Before the Dawn Dueling/Focus Effect reevaluation (issue #435): these three cards' old
+        // "Dueling/Focus Effects (not started at all)" notes predate Dueling (#204) and Focus Effects
+        // (issue #419's FocusEffectChoice.cs) -- both now exist, and their own printed Focus Effects
+        // are directly expressible on top of them.
+        // Hiromi's Vassals (oracle-l5r-3280) and Shamsir (oracle-l5r-6702): "As a Focus Effect: After
+        // this duel ends, you may attach this card to one of your Personalities, ignoring Gold cost."
+        // A choice among candidates that stops the duel's resolution to ask (FocusEffectChoice.cs,
+        // issue #419's Disreputable Deal/Crimson Mark primitive), generalized with a third choice kind
+        // (attach the focus card itself) alongside destroy-an-attachment and take-a-Strategy.
+        ["hiromis-vassals-focus"] = new("FocusEffect", "As a Focus Effect: After this duel ends, you may attach this card to one of your Personalities, ignoring Gold cost", "none"),
+        ["hiromis-vassals-attack"] = new("Battle", "Bow this card: Ranged 6 Attack", "attack", Costs: ActionCost.BowSource),
+        ["shamsir-focus"] = new("FocusEffect", "As a Focus Effect: After this duel ends, you may attach this card to one of your Personalities, ignoring Gold cost", "none"),
+        ["shamsir-attack"] = new("Battle", "Target an enemy Personality or Follower: Give it -5F", "enemy-force"),
+        // Home Guard (oracle-l5r-3413): "As a Focus Effect: After this duel ends, give your Personality
+        // in it +3F." Mandatory (no "may"), read off the duel the same way of-one-instant-focus already
+        // reads "your Personality in this duel" -- the challenger or challenged card owned by this
+        // focus card's own owner. "+3F while defending" is FollowerForce's own force-while-defending
+        // shape, at 3 instead of 2.
+        ["home-guard-focus"] = new("FocusEffect", "As a Focus Effect: After this duel ends, give your Personality in it +3F", "none"),
+        ["home-guard-bow"] = new("Battle", "Target an enemy card without attachments: Bow it. Gain 2 Honor", "enemy-card-without-attachments"),
         // Necessary Evil (oracle-l5r-5524): "Open: If you control a Personality, target a Personality and pay Gold equal to the number of Personalities you control, or 4, whichever is higher: The targeted
         // Personality may not assign to battlefields." The movement lock (MovementLocks.cs) for the turn, of assignment alone.
         ["necessary-evil-lock"] = new("Open", "If you control a Personality, target a Personality and pay Gold equal to the number of Personalities you control, or 4, whichever is higher: The targeted Personality may not assign to battlefields",
@@ -2767,6 +2787,7 @@ public sealed partial class MatchEngine
         "training-recon-attack" => 2,
         "training-province-attack" => 3,
         "strength-of-the-divine-honor" => sourceId is not null ? CardPersonalHonor(Card(sourceId)) : 0,
+        "hiromis-vassals-attack" => 6,
         _ => 0
     };
     // AttackStrength plus every passive defense modifier applying to this specific target (Destrier/
@@ -2815,6 +2836,7 @@ public sealed partial class MatchEngine
         "ebizo-attack" or "training-recon-attack" => "Ranged",
         "kahoku-exp-attack" or "tsuruchi-kosoko-exp-attack" or "hiruma-nitani-attack" or "training-followed-recon-attack" or "spirit-scout-attack" or "engulfing-flames-attack" => "Ranged",
         "training-followed-dishonorable-melee-attack" => "Melee",
+        "hiromis-vassals-attack" => "Ranged",
         _ => ""
     };
     // General "in play" Reaction primitive: a printed Reaction whose card must actually be in play
@@ -6310,6 +6332,15 @@ public sealed partial class MatchEngine
                 if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
                 GainHonor(player.Id, 2, "Unimpeachable Name", source);
                 CheckTsujikenWatch(target!);
+                break;
+            case "home-guard-bow":
+                if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
+                GainHonor(player.Id, 2, "Home Guard", source);
+                CheckTsujikenWatch(target!);
+                break;
+            case "shamsir-attack": ApplyModifier(target!, source!.Id, id, "Force", -5); break;
+            case "hiromis-vassals-attack":
+                if (ResolveOrDeferAttack(id, player, target?.Id, ActionPerformer(ability, command, source).Id, consumedGrant)) return;
                 break;
             case "singh-remnants-attach": case "training-personality-entry-watch":
             {

@@ -469,6 +469,12 @@ public sealed partial class MatchEngine
             case "discovering-conspiracy-focus":
                 if (ownerId == winnerPlayerId) GainHonor(ownerId, 2, "Discovering a Conspiracy");
                 break;
+            // Home Guard (issue #435): "give your Personality in it +3F" -- mandatory (no "may"), the
+            // same "your Personality in this duel" read of-one-instant-focus already established.
+            case "home-guard-focus":
+                if (_state.PendingDuel is { } homeGuardDuel)
+                    ApplyModifier(Card(homeGuardDuel.ChallengerPlayerId == ownerId ? homeGuardDuel.ChallengerId : homeGuardDuel.ChallengedId), abilityId, abilityId, "Force", 3);
+                break;
         }
     }
 }

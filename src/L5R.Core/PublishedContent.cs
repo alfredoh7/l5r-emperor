@@ -2387,4 +2387,8 @@ public static class PublishedContent
     public static PublishedSnapshot PersonalityWave47 { get; } = Load("L5R.Published.PersonalityWave47.json", "personality-wave-47", requireDecks: false);
     /// <summary>Strategy wave 44 (issue #431): Necessary Evil.</summary>
     public static PublishedSnapshot StrategyWave44 { get; } = Load("L5R.Published.StrategyWave44.json", "strategy-wave-44", requireDecks: false);
+    /// <summary>Follower wave 23 (issue #435): Hiromi's Vassals and Home Guard.</summary>
+    public static PublishedSnapshot FollowerWave23 { get; } = Load("L5R.Published.FollowerWave23.json", "follower-wave-23", requireDecks: false);
+    /// <summary>Item wave 9 (issue #435): Shamsir.</summary>
+    public static PublishedSnapshot ItemWave9 { get; } = Load("L5R.Published.ItemWave9.json", "item-wave-9", requireDecks: false);
 }
