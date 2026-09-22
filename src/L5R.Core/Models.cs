@@ -867,6 +867,30 @@ public sealed class MatchState
     public PlayerState[] Players { get; set; } = [];
     public Dictionary<string, CardInstance> Cards { get; set; } = [];
     public List<GameEvent> Events { get; set; } = [];
+    // Action-effect tracking (issue #437, ActionEffectTracking.cs): what the currently-resolving action has affected so far -- appended to by
+    // DestroyUnits/DestroyAttachment/MoveHome/MoveByRule as they run, snapshotted into LastResolvedAction and cleared once the action (and any
+    // reaction windows of its own) finishes resolving. Never populated by a mass sweep outside a single action (battle resolution's own casualties).
+    public List<AffectedCard> CurrentActionAffected { get; set; } = [];
+    public ResolvedActionFacts? LastResolvedAction { get; set; }
+    // Revenge (oracle-l5r-6302, issue #437): "another player's action has destroyed one of your Personalities since the end of your last Battle
+    // action this battle" -- per player, set true whenever another player's action destroys one of theirs (FinishActionEffectTracking), cleared
+    // when their own Battle action finishes resolving (the same point) and when a new battle begins (SelectBattle).
+    public bool[] EnemyDestroyedOwnPersonalitySinceLastBattleAction { get; set; } = new bool[2];
+}
+
+/// <summary>One card the currently-resolving action affected, and how (issue #437: ActionEffectTracking.cs). Kind is "destroyed" or "moved" today;
+/// a bow is not tracked here yet (no single choke point narrates every one the way DestroyUnits/MoveHome already do -- see the file comment).</summary>
+public sealed record AffectedCard(string CardId, string Kind);
+
+/// <summary>What the LAST fully-resolved action did (issue #437): who performed it, which ability, and which cards it affected. Replaced, not
+/// merged, each time a new top-level action -- an ability's own synchronous resolution, a deferred Attack, or a duel -- finishes, including its
+/// own reaction windows. A Reaction whose trigger names "after an action ... " reads this instead of re-deriving it from the raw event log.</summary>
+public sealed class ResolvedActionFacts
+{
+    public string AbilityId { get; set; } = "";
+    public int PlayerId { get; set; }
+    public string? SourceId { get; set; }
+    public List<AffectedCard> Affected { get; set; } = [];
 }
 
 // DeckPosition ("Top"/"Bottom") is the acting player's own upfront choice of where a card goes in
