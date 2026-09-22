@@ -170,5 +170,6 @@
     <EmbeddedResource Include="../../content/published/personality-wave-48.json" LogicalName="L5R.Published.PersonalityWave48.json" />
     <EmbeddedResource Include="../../content/published/strategy-wave-46.json" LogicalName="L5R.Published.StrategyWave46.json" />
     <EmbeddedResource Include="../../content/published/personality-wave-49.json" LogicalName="L5R.Published.PersonalityWave49.json" />
+    <EmbeddedResource Include="../../content/published/personality-wave-50.json" LogicalName="L5R.Published.PersonalityWave50.json" />
   </ItemGroup>
 </Project>
