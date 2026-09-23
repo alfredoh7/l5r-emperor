@@ -20,7 +20,7 @@ public partial class Main
     private void FitLookPanel()
     {
         if (_lookPanel is null) return;
-        var width = Math.Min(1700, _layoutWidth - 64);
+        var width = Math.Min(1800, _layoutWidth - 64);
         _lookPanel.Position = new((_layoutWidth - width) / 2, 168); _lookPanel.Size = new(width, 884);
     }
     private bool RenderLookDecision()

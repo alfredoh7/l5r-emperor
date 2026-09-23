@@ -21,3 +21,7 @@ Alfredo explicitly says Multiple Targets (#345) and Battle Progress (#311) are g
 - [Battle Progress](https://github.com/alfredoh7/l5r-emperor/pull/430#issuecomment-5780064575)
 
 These are Alfredo’s approvals, not Mendon’s acceptance or authorization to merge main. Previous Opponent Payment acceptance and the selected ghost-copy design remain recorded in their existing decisions/handoffs.
+
+## 23 September correction
+
+Alfredo rejected the earlier native appearance as not matching the selected concept. The earlier reuse-only interpretation was insufficient: restore A’s brush title, larger full faces and physical deck anchor, a visible Hand slot, and the landing highlight treatment. Keep B’s explicit positional labels. His screenshot displays B; an optional layout clarification was requested, with the earlier explicit A+B selection retained in the absence of a changed direction. This is not renewed approval of the native implementation. The correction uses a derived raster atlas with provenance in `assets/ui/top-cards/provenance.json`. The Windows package pinned at 9f8ef9f5 does not contain it.
