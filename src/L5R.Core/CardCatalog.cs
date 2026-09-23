@@ -587,6 +587,10 @@ public static class CardCatalog
             .Concat(PublishedContent.StrategyWave51.Cards)
             .Concat(PublishedContent.StrongholdWave13.Cards)
             .Concat(PublishedContent.FollowerWave27.Cards)
+            .Concat(PublishedContent.ItemWave12.Cards)
+            .Concat(PublishedContent.HoldingWave9.Cards)
+            .Concat(PublishedContent.FollowerWave28.Cards)
+            .Concat(PublishedContent.PersonalityWave64.Cards)
             .ToDictionary(c => c.Id, StringComparer.Ordinal);
     }
 }

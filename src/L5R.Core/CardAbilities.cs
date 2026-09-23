@@ -2584,6 +2584,63 @@ public static class AbilityCatalog
         // primitive (AttachAction.cs) with a fixed 2-Gold discount, attaching to the source itself.
         ["haruto-attach"] = new("Battle", "Target a Follower in your discard pile: Attach it to Haruto, paying 2 less Gold", "attachment-in-discard",
             Cost: GoldCostRule.AttachCost(-2, 0), Attach: new(AttachSource.Target, AttachPile.Own, AttachWielder.Source, [CardType.Follower])),
+
+        // Embers of War pass, batch 6 (issue #460): every entry below is documented at its own use in EmbersOfWarBatch6.cs; this file holds only the declarative data.
+        // Celestial Sword of the Lion - exp (oracle-l5r-1268): "Will only attach to a Lion Clan Personality" (AttachRequiresKeyword, package script). "+1F for each Lion
+        // Clan Personality you control" reuses ItemForceToWielder's celestial-sword-force-mantis/scorpion shape (celestial-sword-force-lion, MatchEngine.cs).
+        ["celestial-sword-lion-honor"] = new("Reaction", "After this card enters play: Gain 2 Honor", "none", Trigger: "own-enters-play"),
+        ["celestial-sword-lion-create"] = new("Battle", "Create a 2F/2C/3PH Lion Clan · Samurai · Ancestor · Spirit Personality at the current battlefield", "none",
+            Creates: new(CardType.Personality, Force: 2, Chi: 2, PersonalHonor: 3, Keywords: ["Lion Clan", "Samurai", "Ancestor", "Spirit"]) { AtBattlefield = true }),
+        // Celestial Sword of the Unicorn - exp (oracle-l5r-1273): entry Honor gain and Force-per-Unicorn-Personality share the Lion sword's shape
+        // (celestial-sword-force-unicorn). The Battle bow-then-conditional-destroy is a plain IfTarget-free inline check (not-Cavalry and no attachments), since
+        // TargetStatus has no Cavalry/attachment terms -- see the execution case.
+        ["celestial-sword-unicorn-honor"] = new("Reaction", "After this card enters play: Gain 2 Honor", "none", Trigger: "own-enters-play"),
+        ["celestial-sword-unicorn-bow"] = new("Battle", "Target an enemy card: Bow it. Destroy it if it is not Cavalry and has no attachments", "enemy-card"),
+        // The Ancestral Sword of Hantei - exp (oracle-l5r-7958): printed "Will only attach to a Spider Clan Personality" despite its Hantei title (trust the scan/oracle
+        // data over the flavor of the name); entry Honor and Force-per-Spider-Personality share the family shape (celestial-sword-force-spider). "You may destroy it if
+        // it is bowed or an attachment" is evaluated on the target's state BEFORE this same action's own "Bow it" effect applies (ordered effect resolution).
+        ["ancestral-sword-hantei-honor"] = new("Reaction", "After this card enters play: Gain 2 Honor", "none", Trigger: "own-enters-play"),
+        ["ancestral-sword-hantei-bow"] = new("Battle", "Target a card in a unit: You may destroy it if it is bowed or an attachment. Bow it. Straighten this Personality", "any-unit-card"),
+        // Dazzling Attire (oracle-l5r-1875): "Political Open, bow: Take the Imperial Favor" -- the universal Lobby ability's own effect (favorTaken), without Lobby's
+        // Family-Honor/Personal-Honor requirements, as an Item action instead of a player ability.
+        ["dazzling-attire-favor"] = new("Open", "Bow this card: Take the Imperial Favor", "none", ActionKeywords: ["Political"], Costs: ActionCost.BowSource),
+        // Splintered Weapon (oracle-l5r-7435): the Focus Effect transfer reuses AttachmentTransfers.cs (TransferAttachment), the same primitive Communion with Earth's
+        // Battle-timed transfer already uses (Honor and Treachery pass, issue #458) -- own-personality-other-than-wielder is the FocusEffect-timed sibling of
+        // own-earth-shugenja-other-than-wielder. The Battle half destroys its bowed target only if the wielding Personality is a Berserker.
+        ["splintered-weapon-focus"] = new("FocusEffect", "As a Focus Effect: You may transfer an attachment from your Personality in this duel to another of your Personalities", "own-personality-other-than-wielder"),
+        ["splintered-weapon-bow"] = new("Battle", "Target an enemy card without attachments: Bow it. Destroy it if this Personality is a Berserker", "enemy-card", RequireNoAttachments: true),
+
+        // Staging Grounds (oracle-l5r-7444): ":bow:: Produce 3 Gold, or 4 Gold if paying for a card with a printed Gold Cost of 9 or more which may only pay for that
+        // card" -- data-only (ConditionalProduction.cs, ProductionCondition.PayingForExpensiveCard), no ability of its own.
+        // Surveillance Outpost (oracle-l5r-7671): "Limited: If you have fewer Provinces than each other player, or exactly one Province, give your performing Siege
+        // Personality Conqueror." own-personality-with-keyword is the existing Limited-timed (no battlefield restriction), RequiredKeywords-gated Performer category;
+        // the province-count condition is a per-id Require, the same shape "lobby"'s own Family-Honor condition already uses (around ValidateAbility's id-keyed block).
+        ["surveillance-outpost-conqueror"] = new("Limited", "If you have fewer Provinces than each other player, or exactly one Province, give your performing Siege Personality Conqueror", "none",
+            Performer: "own-personality-with-keyword", RequiredKeywords: ["Siege"]),
+        // Temple to the Elements (oracle-l5r-7897): "Open: Give your target Monk or Shugenja Air, Earth, Fire, or Water" -- a player's choice among four otherwise
+        // identical actions sharing one UsageKey (Shosuro Chikata's bow/straighten toggle's shape, Honor and Treachery pass).
+        ["temple-elements-air"] = new("Open", "Give your target Monk or Shugenja Air", "own-monk-or-shugenja", UsageKey: "temple-elements-give"),
+        ["temple-elements-earth"] = new("Open", "Give your target Monk or Shugenja Earth", "own-monk-or-shugenja", UsageKey: "temple-elements-give"),
+        ["temple-elements-fire"] = new("Open", "Give your target Monk or Shugenja Fire", "own-monk-or-shugenja", UsageKey: "temple-elements-give"),
+        ["temple-elements-water"] = new("Open", "Give your target Monk or Shugenja Water", "own-monk-or-shugenja", UsageKey: "temple-elements-give"),
+        // Terraced Farm (oracle-l5r-7915): "Battle, bow: Give each of your Ashigaru cards at the current battlefield +1F" -- a mass Force boost over the acting
+        // player's army plus each army member's Ashigaru Followers, Moto Gunso's own "each of your other Followers ..." loop shape (see the execution case).
+        ["terraced-farm-boost"] = new("Battle", "Bow this card: Give each of your Ashigaru cards at the current battlefield +1F", "none", Costs: ActionCost.BowSource),
+
+        // Field Messenger (oracle-l5r-2520): "Battle/Open: Transfer this Follower to your target Personality" -- AttachmentTransfers.cs's TransferAttachment,
+        // directly reusing own-personality for "your target Personality." Re-evaluated for the Embers of War pass (issue #460): the attachment Transfer mechanic this
+        // card's earlier blocker note asked for now exists (Honor and Treachery pass, issue #458, Communion with Earth) and wires this card unchanged.
+        ["field-messenger-transfer"] = new("BattleOrOpen", "Transfer this Follower to your target Personality", "own-personality"),
+        // Flanking Unit (oracle-l5r-2598): the Focus Effect transfer shares Splintered Weapon's own-personality-other-than-wielder shape (a Follower, not an
+        // arbitrary attachment, but TransferAttachment itself does not distinguish attachment kinds). The Battle move is a player's choice between two destinations
+        // sharing one UsageKey (Temple to the Elements' shape above), since MoveSpec's Destination is singular per ability.
+        ["flanking-unit-focus"] = new("FocusEffect", "As a Focus Effect, you may transfer a Follower from your Personality in this duel to another of your Personalities", "own-personality-other-than-wielder"),
+        ["flanking-unit-move-home"] = new("Battle", "Move a target Personality at the current battlefield home", "personality-at-current-battlefield", UsageKey: "flanking-unit-move", Move: new(MoveSpec.Target, MoveSpec.Home)),
+        ["flanking-unit-move-adjacent"] = new("Battle", "Move a target Personality at the current battlefield to an adjacent battlefield", "personality-at-current-battlefield", UsageKey: "flanking-unit-move", Move: new(MoveSpec.Target, MoveSpec.AdjacentUnresolved)),
+
+        // Haruki's Deer (oracle-l5r-9999, a Proxy created by Kitsune Haruki, oracle-l5r-4462): "Limited: If another player has higher Family Honor than you: Gain 2
+        // Honor" -- the condition is a per-id Require, the same shape "lobby"'s own Family-Honor condition uses.
+        ["haruki-deer-honor"] = new("Limited", "If another player has higher Family Honor than you: Gain 2 Honor", "none"),
     });
 }
 
@@ -3965,6 +4022,12 @@ public sealed partial class MatchEngine
         // Barred Passage: "the only Personality in his army" -- none of the acting player's other Personalities stands at this battlefield.
         if (id == "barred-passage-bow") Require(Army(player.Id, _state.CurrentBattleProvince!.Value).Count(c => Definition(c).Type == CardType.Personality) == 1, "The performing Hero must be the only Personality in his army.");
         if (id is "tamoko-open" or "virtuous-charity-open") Require(_state.ActivePlayerId != player.Id, "Only usable when it is not your own turn.");
+        // Embers of War batch 6 (issue #460): Surveillance Outpost -- "If you have fewer Provinces than each other player, or exactly one Province" (a 2-player
+        // engine, so "each other player" is the one opponent; live province count, per Player.Provinces, excludes destroyed provinces).
+        if (id == "surveillance-outpost-conqueror") Require(player.Provinces.Count(p => !p.Destroyed) is var mine && (mine < Player(1 - player.Id).Provinces.Count(p => !p.Destroyed) || mine == 1),
+            "You must have fewer Provinces than your opponent, or exactly one Province.");
+        // Haruki's Deer (oracle-l5r-9999): "If another player has higher Family Honor than you."
+        if (id == "haruki-deer-honor") Require(Player(1 - player.Id).Honor > player.Honor, "Another player must have higher Family Honor than you.");
         // Ohsuki's Sparrow (oracle-l5r-10023, issue #299): "If none of your provinces were destroyed
         // since your last turn ended" -- a printed condition on USING the action, checked here rather
         // than only when it resolves (MatchState.ProvinceDestroyedSinceTurnEnd).
@@ -4722,6 +4785,15 @@ public sealed partial class MatchEngine
                         // dishonorable-personality below, either side.
                         "honorable-personality" => MatchesTargetStatus(target, TargetStatus.IsHonorable),
                         "own-personality" => personality && own,
+                        // Embers of War batch 6 (issue #460): Splintered Weapon's and Flanking Unit's Focus Effect transfer ("another of your Personalities") --
+                        // own-earth-shugenja-other-than-wielder's shape (Communion with Earth) without the Shugenja/Earth restriction.
+                        "own-personality-other-than-wielder" => personality && own && target.Id != source!.AttachedTo,
+                        // Embers of War batch 6: Temple to the Elements ("your target Monk or Shugenja").
+                        "own-monk-or-shugenja" => personality && own && (Keyword(target, "Monk") || Keyword(target, "Shugenja")),
+                        // Embers of War batch 6: The Ancestral Sword of Hantei - exp ("target a card in a unit") reuses the existing any-unit-card category (Shiba
+                        // Tsukimi, Honor and Treachery pass) unchanged -- see its own case below.
+                        // Embers of War batch 6: Flanking Unit ("a target Personality at the current battlefield") -- either side's.
+                        "personality-at-current-battlefield" => personality && AtBattle(target),
                         // A Fugitive Apprehended: an enemy card with no attachments whose Gold Cost is lower than the performing Personality's.
                         "enemy-bare-card-lower-gold-than-performer" => !own && (personality || target.Zone == Zone.Attached && type is CardType.Follower or CardType.Item or CardType.Spell)
                             && !HasAttachments(target) && CardGoldCost(target) < CardGoldCost(Card(command.PerformerId!)),
@@ -7473,6 +7545,58 @@ public sealed partial class MatchEngine
                 if (ResolveOrDeferAttack(id, player, target?.Id, ActionPerformer(ability, command, source).Id, consumedGrant, strengthOverride: EffectiveAttackStrength(id, player, target, ActionPerformer(ability, command, source).Id) + 2 * PaidGoldAmount(command))) return;
                 break;
             case "celestial-sword-scorpion-lose": ApplyPlayerHonorChoice(source!, command.TargetPlayerId!.Value, -2); break;
+            // Embers of War pass, batch 6 (issue #460): the three sister Celestial Swords (Lion, Unicorn, the Spider-Clan-restricted "Ancestral Sword of Hantei"),
+            // each sharing the Mantis/Scorpion swords' entry-Honor and Force-per-Clan-Personality shape (ItemForceToWielder, MatchEngine.cs).
+            case "celestial-sword-lion-honor": case "celestial-sword-unicorn-honor": case "ancestral-sword-hantei-honor":
+                GainHonor(player.Id, 2, Definition(source!).Name, source); break;
+            case "celestial-sword-lion-create":
+                if (ExecuteCreate(ability, ability.Creates!, command, player)) return;
+                break;
+            // "Target an enemy card: Bow it. Destroy it if it is not Cavalry and has no attachments." -- Cavalry/attachment state has no TargetStatus term, so the
+            // conditional destroy is a plain inline check on the already-bowed target, evaluated after the bow (order matches the printed text).
+            case "celestial-sword-unicorn-bow":
+                if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
+                if (!Keyword(target!, "Cavalry") && !HasAttachments(target!)) DestroyUnits([target!], false, player.Id);
+                break;
+            // "Target a card in a unit: You may destroy it if it is bowed or an attachment. Bow it. Straighten this Personality." -- the optional destroy reads the
+            // target's state BEFORE this action's own Bow effect (ordered resolution, matching the printed text's own order); "this Personality" is the wielder.
+            case "ancestral-sword-hantei-bow":
+                if (target!.Bowed || Definition(target).Type is CardType.Item or CardType.Follower or CardType.Spell) DestroyUnits([target], false, player.Id);
+                if (InPlay(target) && !StalwartNegatesBow(target, player.Id)) target.Bowed = true;
+                Straighten(Card(source!.AttachedTo!));
+                break;
+            // Dazzling Attire (oracle-l5r-1875): the universal Lobby ability's own effect, without its Honor requirements.
+            case "dazzling-attire-favor": _state.FavorPlayerId = player.Id; Emit("favorTaken", $"{player.Name} took the Imperial Favor.", player.Id); break;
+            // Splintered Weapon (oracle-l5r-7435) and Flanking Unit (oracle-l5r-2598): the same AttachmentTransfers.cs primitive Communion with Earth's Battle-timed
+            // transfer already uses (Honor and Treachery pass, issue #458), here as a Focus Effect transfer.
+            case "splintered-weapon-focus": case "flanking-unit-focus": TransferAttachment(source!, target!, Definition(source!).Name); break;
+            case "splintered-weapon-bow":
+                if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
+                if (Keyword(Card(source!.AttachedTo!), "Berserker")) DestroyUnits([target!], false, player.Id);
+                break;
+            // Field Messenger (oracle-l5r-2520): re-evaluated for the Embers of War pass (issue #460) now that AttachmentTransfers.cs exists.
+            case "field-messenger-transfer": TransferAttachment(source!, target!, Definition(source!).Name); break;
+            case "flanking-unit-move-home": case "flanking-unit-move-adjacent":
+                ExecuteMove(command, ability, source, target); break;
+            // Surveillance Outpost (oracle-l5r-7671): the performer is the chosen Siege Personality (ActionPerformer), not the Holding itself.
+            case "surveillance-outpost-conqueror": GrantKeyword(ActionPerformer(ability, command, source!), "Conqueror", source!.Id, GrantDuration.Turn); break;
+            // Temple to the Elements (oracle-l5r-7897): one of four otherwise identical Element grants sharing one UsageKey.
+            case "temple-elements-air": GrantKeyword(target!, "Air", source!.Id, GrantDuration.Turn); break;
+            case "temple-elements-earth": GrantKeyword(target!, "Earth", source!.Id, GrantDuration.Turn); break;
+            case "temple-elements-fire": GrantKeyword(target!, "Fire", source!.Id, GrantDuration.Turn); break;
+            case "temple-elements-water": GrantKeyword(target!, "Water", source!.Id, GrantDuration.Turn); break;
+            // Terraced Farm (oracle-l5r-7915): every Ashigaru card (Personality or attached Follower) in the performer's own army at the current battlefield --
+            // Moto Gunso's own "each of your other Followers ..." loop shape (moto-gunso-boost above), widened to include the Personalities themselves.
+            case "terraced-farm-boost":
+                foreach (var personality in Army(player.Id, _state.CurrentBattleProvince!.Value))
+                {
+                    if (Keyword(personality, "Ashigaru")) ApplyModifier(personality, source!.Id, id, "Force", 1);
+                    foreach (var follower in Attachments(personality.Id).Where(c => Definition(c).Type == CardType.Follower && Keyword(c, "Ashigaru")))
+                        ApplyModifier(follower, source!.Id, id, "Force", 1);
+                }
+                break;
+            // Haruki's Deer (oracle-l5r-9999): the condition is checked in ValidateAbility's per-id Require block above.
+            case "haruki-deer-honor": GainHonor(player.Id, 2, "Haruki's Deer", source); break;
             // The bow, then the optional province discard (asked only when a card is there); the conditional destroy is applied by the chosen branch (ScorpionSwordResolve).
             case "celestial-sword-scorpion-bow":
                 if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;

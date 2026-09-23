@@ -1,0 +1,60 @@
+{
+  "Profile": "personality-wave-64",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-9998",
+      "Name": "Guest",
+      "Type": "Personality",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 1,
+      "Chi": 1,
+      "PersonalHonor": 1,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "May not be included in decks.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9998.jpg",
+      "Keywords": [
+        "Monk"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "none",
+      "CreatedOnly": true
+    },
+    {
+      "Id": "oracle-l5r-9999",
+      "Name": "Haruki's Deer",
+      "Type": "Personality",
+      "Clan": "Mantis",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 2,
+      "PersonalHonor": 3,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "May not be included in decks.\nLimited: If another player has higher Family Honor than you: Gain 2 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9999.jpg",
+      "Keywords": [
+        "Mantis Clan",
+        "Nonhuman",
+        "Deer",
+        "Spirit"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "haruki-deer-honor"
+      ],
+      "Effect": "none",
+      "CreatedOnly": true
+    }
+  ],
+  "Decks": []
+}
