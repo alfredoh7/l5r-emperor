@@ -2405,4 +2405,16 @@ public static class PublishedContent
     public static PublishedSnapshot PersonalityWave51 { get; } = Load("L5R.Published.PersonalityWave51.json", "personality-wave-51", requireDecks: false);
     /// <summary>Personality wave 52 (issue #449 follow-up): Akodo Tezuka.</summary>
     public static PublishedSnapshot PersonalityWave52 { get; } = Load("L5R.Published.PersonalityWave52.json", "personality-wave-52", requireDecks: false);
+    /// <summary>Seeds of Decay pass (issue #453), batch 4: the Sensei, Naka Mahatsu - exp, Daigotsu Yamato, Hiruma Sawai, Shinjo Katsuo.</summary>
+    public static PublishedSnapshot PersonalityWave58 { get; } = Load("L5R.Published.PersonalityWave58.json", "personality-wave-58", requireDecks: false);
+    /// <summary>Seeds of Decay pass (issue #453), batch 4: the created-only Detached Personality and Ninja Proxy scans.</summary>
+    public static PublishedSnapshot PersonalityWave60 { get; } = Load("L5R.Published.PersonalityWave60.json", "personality-wave-60", requireDecks: false);
+    /// <summary>Seeds of Decay pass (issue #453), batch 4: Temple to Fudo, Hachi's Revenge, Incense Mill, Overlooked Palace, Second City Port.</summary>
+    public static PublishedSnapshot HoldingWave7 { get; } = Load("L5R.Published.HoldingWave7.json", "holding-wave-7", requireDecks: false);
+    /// <summary>Seeds of Decay pass (issue #453), batch 4: Tested Land.</summary>
+    public static PublishedSnapshot RegionWave6 { get; } = Load("L5R.Published.RegionWave6.json", "region-wave-6", requireDecks: false);
+    /// <summary>Seeds of Decay pass (issue #453), batch 4: Offering Reverence.</summary>
+    public static PublishedSnapshot EventWave5 { get; } = Load("L5R.Published.EventWave5.json", "event-wave-5", requireDecks: false);
+    /// <summary>Seeds of Decay pass (issue #453), batch 4: Cavalry Detachment.</summary>
+    public static PublishedSnapshot FollowerWave26 { get; } = Load("L5R.Published.FollowerWave26.json", "follower-wave-26", requireDecks: false);
 }

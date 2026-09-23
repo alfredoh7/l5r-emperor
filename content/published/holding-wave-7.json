@@ -1,0 +1,131 @@
+{
+  "Profile": "holding-wave-7",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10039",
+      "Name": "Temple to Fudo",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 2,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After this Holding enters play, lose 3 Honor.\nThis Holding will not straighten before your third turn. \nBow this card: Produce 2 Gold and lose 1 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10039.jpg",
+      "Keywords": [
+        "Fudo",
+        "Temple"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "temple-to-fudo",
+      "EntryHonorLoss": 3
+    },
+    {
+      "Id": "oracle-l5r-10034",
+      "Name": "Hachi's Revenge",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 4,
+      "GoldProduction": 2,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Bow this card: Produce 2 Gold, or 3 Gold if you are a Crane Clan player.\nOpen: Target a non-Unique Holding. You blockade it. Bow it.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10034.jpg",
+      "Keywords": [
+        "Unique",
+        "Ship"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "hachis-revenge-bow"
+      ],
+      "Effect": "crane-gold"
+    },
+    {
+      "Id": "oracle-l5r-10035",
+      "Name": "Incense Mill",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 2,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Bow this card: Produce 2 Gold.\nBattle/Open: Target a Personality. Negate all current Force penalties on him. Negate any cards' effects that say he may not perform actions (this turn).",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10035.jpg",
+      "Keywords": [],
+      "Focus": 0,
+      "Abilities": [
+        "incense-mill-cleanse"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10036",
+      "Name": "Overlooked Palace",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 2,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Bow this card: Produce 2 Gold.\nNinja Limited: Destroy this card to create a 0F/2C/0PH Ninja Personality with your Clan Alignment.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10036.jpg",
+      "Keywords": [
+        "Ninja"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "overlooked-palace-create"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10037",
+      "Name": "Second City Port",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 2,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Bow this card: Produce 2 Gold.\nOpen, Bow this card: Straighten a target Market or Port.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10037.jpg",
+      "Keywords": [
+        "Port"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "second-city-port-straighten"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

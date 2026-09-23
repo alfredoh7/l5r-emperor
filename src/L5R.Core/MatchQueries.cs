@@ -422,6 +422,21 @@ public sealed partial class MatchEngine
             var count=player.Hand.Count-8;
             Add("discardHand",$"Discard {count} card(s)",Command("discardHand",cardIds:player.Hand.Take(count).ToArray()),targets:player.Hand.ToArray());
         }
+        // Seeds of Decay pass (issue #453), batch 4: the two Events Phase decisions (SeedsOfDecayBatch4.cs), for the revealing player only.
+        else if(_state.PendingChoice is { Type:"offeringReverence" } reverence)
+        {
+            if(playerId==reverence.PlayerId)
+            {
+                Add("offeringReverence","Offering Reverence: shuffle it into your Dynasty deck",new GameCommand("offeringReverence",playerId,_state.Version,Choice:"shuffle"),cardId:reverence.CardId);
+                Add("offeringReverence","Offering Reverence: discard it",new GameCommand("offeringReverence",playerId,_state.Version,Choice:"discard"),cardId:reverence.CardId);
+            }
+        }
+        else if(_state.PendingChoice is { Type:"testedLandProvince" } testedLand)
+        {
+            if(playerId==testedLand.PlayerId)
+                foreach(var province in TestedLandCandidates(playerId))
+                    Add("testedLandProvince",$"Tested Land: attach it to the enemy province {province.Index+1}",new GameCommand("testedLandProvince",playerId,_state.Version,Province:province.Index),cardId:testedLand.CardId,provinces:[province.Index]);
+        }
         else switch(_state.Phase)
         {
             case Phase.Action:

@@ -267,6 +267,9 @@ public sealed partial class MatchEngine
             if (_state.PendingChoice.Type=="brashDraw") { ResolveBrashDraw(command); return; }
             if (_state.PendingChoice.Type=="overconfidentDraw") { ResolveOverconfidentDraw(command); return; }
             if (_state.PendingChoice.Type=="harshChoices") { ResolveHarshChoices(command); return; }
+            // Seeds of Decay pass (issue #453), batch 4: two decisions inside the Events Phase reveal (SeedsOfDecayBatch4.cs).
+            if (_state.PendingChoice.Type=="offeringReverence") { ResolveOfferingReverenceChoice(command); return; }
+            if (_state.PendingChoice.Type=="testedLandProvince") { ResolveTestedLandProvince(command); return; }
             if (_state.PendingChoice.Type=="forcedDiscard") { ResolveForcedDiscard(command); return; }
             // A conditional effect choice (issue #337, Mirumoto Yumaru): the acting player picks one of the options the engine listed.
             if (_state.PendingChoice.Type=="effectChoice") { ResolveEffectChoice(command); return; }
@@ -554,6 +557,10 @@ public sealed partial class MatchEngine
         // The Great Death (issue #431): "After The Great Death enters play: Create three 1F Shadowlands * Nonhuman * Raptor * Cavalry * Undead Followers, attach them to it, and lose 6 Honor." A trait, so
         // mandatory like the lines above (the Honor loss is its EntryHonorLoss).
         if(Definition(card).Effect==GreatDeathEntryEffect) CreateGreatDeathFollowers(playerId,card);
+        // Seeds of Decay pass (issue #453), batch 4: the Sensei whose Effect field carries their other static trait (StaticKeywordRules.cs) discard the other Sensei too;
+        // Daigotsu Yamato loses Brash for good if another player is Scorpion Clan (SeedsOfDecayBatch4.cs).
+        if(HasSenseiEntryEffect(Definition(card).Effect)) DiscardOtherSensei(playerId,card);
+        if(Definition(card).Effect==YamatoEntryEffect) RemoveBrashIfOpponentIsScorpion(card);
     }
     // Sensei (Mirumoto Hikaro / Mirumoto Yozo, Experienced 2): "your OTHER Sensei Personalities" --
     // every OTHER Sensei-keyword Personality this same controller has, either unbowed-or-bowed in
@@ -982,12 +989,15 @@ public sealed partial class MatchEngine
         // "Enters play paying N less Gold if you are a <Clan> Clan player" (issue #336, Daigotsu Hotako exp3): a printed term of the card that
         // stacks with the two Clan choices above; the same one ClanEntryDiscount gives Equip.
         var entryDiscount=ClanEntryDiscount(def,player);
-        var rawCost=def.GoldCost-prosperous-reserveDiscount-ashikoDiscount-(entryDiscount?.Amount??0)+(clanAllegiance?2:0)-(clanDiscount?2:0);
+        // Mukudori (Seeds of Decay, issue #453): "Your other Fudo cards enter play for 1 less Gold" -- a term of the price of every entry, like ClanEntryDiscount (StaticKeywordRules.cs).
+        var keywordDiscount=KeywordEntryDiscount(card,playerId);
+        var rawCost=def.GoldCost-prosperous-reserveDiscount-ashikoDiscount-(entryDiscount?.Amount??0)-keywordDiscount+(clanAllegiance?2:0)-(clanDiscount?2:0);
         var cost=Math.Max(0,rawCost);
         // The human-readable derivation the payment panel shows (issue #303), term by term.
         var basis=$"{def.Name} cost {def.GoldCost}"+(prosperous>0?$" − {prosperous} (controlled Personalities)":"")+(reserveDiscount>0?$" − {reserveDiscount} (Reserve while defending)":"")
             +(ashikoDiscount>0?$" − {ashikoDiscount} (outnumbered)":"")
             +(entryDiscount is {} entry?$" − {entry.Amount} ({entry.Clan} Clan)":"")
+            +(keywordDiscount>0?$" − {keywordDiscount} (Fudo, Mukudori)":"")
             +(clanAllegiance?" + 2 (Clan allegiance)":"")+(clanDiscount?" − 2 (Clan discount)":"")+(rawCost<0?" (min 0)":"");
         if ((Keyword(card,"Unique") || Keyword(card,"Singular")) && ControlsCopyOf(playerId,def.Name)) error=$"You already control this {(Keyword(card,"Unique") ? "Unique" : "Singular")} card.";
         var eligible=error is null && inClan && !clanDiscount && !fromDeadPile && playerId==_state.ActivePlayerId && player.ProclaimUsedTurn!=_state.TurnNumber;
@@ -1065,6 +1075,8 @@ public sealed partial class MatchEngine
             }
         foreach(var id in ids) _state.Cards[id].Bowed=true;
         Emit("payment",$"{Player(playerId).Name} paid {cost} Gold for {Definition(target).Name}{(part is null?"":$" ({part})")}, producing {produced}; {produced-cost} excess was lost.",playerId,target.Id,produced-cost);
+        // Temple to Fudo (Seeds of Decay, issue #453): ":bow:: Produce 2 Gold and lose 1 Honor" -- the loss is part of producing (SeedsOfDecayBatch4.cs).
+        LoseHonorForProducers(playerId,ids);
     }
 
     private void Proclaim(GameCommand command)
@@ -2053,7 +2065,7 @@ public sealed partial class MatchEngine
         // Item's bonus TO the wielder); here the Follower's own Force is keyed off the wielder instead.
         "force-equals-wielder-printed-force" => card.AttachedTo is null ? 0 : Definition(Card(card.AttachedTo)).Force,
         _ => 0
-    })+UnitFollowerBoost(card)+AkioFollowerBoost(card)+AshigaruBattleBoost(card)+ArmyBattleMaidenBoost(card));
+    })+UnitFollowerBoost(card)+AkioFollowerBoost(card)+AshigaruBattleBoost(card)+ArmyBattleMaidenBoost(card)+ZanshoFollowerBoost(card));
     // "Boost other cards in the unit" primitive (Senior Infantry Legion's shape): distinct from the
     // self-referential conditional bonuses above, this is a card that grants a static Force bonus to
     // every OTHER Follower attached to the same Personality (a unit is a Personality and all of its
@@ -2589,8 +2601,10 @@ public sealed partial class MatchEngine
                 card.FaceUp=true;
                 Emit("provinceRevealed",$"{player.Name} revealed {Definition(card).Name} in province {province.Index+1}.",player.Id,card.Id);
                 if(Definition(card).Type==CardType.Event) { if(ResolveEvent(player,province,card)) return; }
-                else if(Definition(card).Type==CardType.Region) ResolveRegion(player,province,card);
+                else if(Definition(card).Type==CardType.Region) { if(ResolveRegion(player,province,card)) return; }
                 else if(Definition(card).Type==CardType.Celestial) ResolveCelestial(player,province,card);
+                // Tested Land (Seeds of Decay, issue #453): "After a Holding is revealed in this Province, discard it and this Region." (SeedsOfDecayBatch4.cs)
+                else if(Definition(card).Type==CardType.Holding) DiscardRevealedHoldingOnTestedLand(player,province,card);
             }
             // An Event already face up (refilled face up by Border Keep's cycle or the Kharmic replacement) was never
             // revealed here, but Events resolve only in the Events Phase: it resolves now instead of staying stuck
@@ -2639,6 +2653,8 @@ public sealed partial class MatchEngine
             BeginSearch(SearchCatalog.ImperialGift,card,player.Id,"event");
             return true;
         }
+        // Offering Reverence (Seeds of Decay, issue #453): creates an Ancestor per dead Personality, or asks whether to shuffle itself into the deck (SeedsOfDecayBatch4.cs).
+        if(Definition(card).Effect==OfferingReverenceEffect) return ResolveOfferingReverence(player,province,card);
         province.CardId=null; card.ProvinceIndex=null;
         switch(Definition(card).Effect)
         {
@@ -2701,8 +2717,10 @@ public sealed partial class MatchEngine
     // Unlike Event, a Region that DOES attach never moves on from Zone.Region on its own; there is no
     // "resolve once, then discard" step, since its whole printed effect (a standing trait, a Reaction,
     // or both) lives for as long as it stays attached.
-    private void ResolveRegion(PlayerState player,ProvinceState province,CardInstance card)
+    // Returns true when the reveal paused for a decision (Tested Land's choice of enemy province, Seeds of Decay, issue #453 -- SeedsOfDecayBatch4.cs).
+    private bool ResolveRegion(PlayerState player,ProvinceState province,CardInstance card)
     {
+        if(Definition(card).Effect==TestedLandEffect) return ResolveTestedLand(player,province,card);
         province.CardId=null; card.ProvinceIndex=null;
         if(province.RegionId is not null)
         {
@@ -2711,6 +2729,7 @@ public sealed partial class MatchEngine
         }
         else AttachRegionToProvince(player,province,card);
         Refill(player,province);
+        return false;
     }
     // The one place a Region enters play attached to a province: the Events Phase reveal above, and a Region found
     // by a deck search that the searcher attaches to a province of their own choice (issue #312, Ikoma Shizuka).

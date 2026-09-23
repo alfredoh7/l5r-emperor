@@ -1,0 +1,268 @@
+{
+  "Profile": "personality-wave-58",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10061",
+      "Name": "Ikoma Aimi",
+      "Type": "Personality",
+      "Clan": "Lion",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 4,
+      "PersonalHonor": 2,
+      "HonorRequirement": 5,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After Aimi enters play: Discard all your other Sensei Personalities.\nYour Lion Clan Personalities (in play) have Courtier but do not have Cavalry, Commander, Deathseeker, Paragon, Scout, or Tactician.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10061.jpg",
+      "Keywords": [
+        "Loyal",
+        "Courtier",
+        "Lion Clan",
+        "Samurai",
+        "Sensei"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "aimi-lion-courtier"
+    },
+    {
+      "Id": "oracle-l5r-10092",
+      "Name": "Mukudori",
+      "Type": "Personality",
+      "Clan": "Unaligned",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 5,
+      "PersonalHonor": 2,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After Mukudori enters play, discard all your other Sensei Personalities.\nYour other Fudo cards enter play for 1 less Gold.\nLimited: Bow three of your Fudo cards to draw a card.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10092.jpg",
+      "Keywords": [
+        "Unique",
+        "Fudo",
+        "Sensei"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "mukudori-bow-fudo-draw"
+      ],
+      "Effect": "mukudori-fudo-discount"
+    },
+    {
+      "Id": "oracle-l5r-10095",
+      "Name": "Seppun Nagi",
+      "Type": "Personality",
+      "Clan": "Unaligned",
+      "GoldCost": 5,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 4,
+      "PersonalHonor": 2,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After Nagi enters play: Discard all your other Sensei Personalities.\nYour other non-Loyal Magistrate Personalities in and out of play have your Clan alignment.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10095.jpg",
+      "Keywords": [
+        "Emerald Magistrate",
+        "Imperial",
+        "Magistrate",
+        "Sensei"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "nagi-magistrate-clan"
+    },
+    {
+      "Id": "oracle-l5r-10097",
+      "Name": "Zansho",
+      "Type": "Personality",
+      "Clan": "Unaligned",
+      "GoldCost": 3,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 3,
+      "PersonalHonor": 3,
+      "HonorRequirement": 3,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After Zansho enters play: Discard all your other Sensei Personalities.\nYour Followers have +1F or a Force bonus equal to their Honor Requirement, whichever is greater.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10097.jpg",
+      "Keywords": [
+        "Samurai",
+        "Sensei"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "zansho-follower-force"
+    },
+    {
+      "Id": "oracle-l5r-10069",
+      "Name": "Tsuruchi Nobukatsu",
+      "Type": "Personality",
+      "Clan": "Mantis",
+      "GoldCost": 9,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 4,
+      "PersonalHonor": 2,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After Nobukatsu enters play or overlays: Discard all your other Sensei Personalities.\nYour Mantis Clan Samurai in and out of play have Magistrate.\nBattle: Target a Personality at any location: Bow him.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10069.jpg",
+      "Keywords": [
+        "Naval",
+        "Unique",
+        "Experienced",
+        "Magistrate",
+        "Mantis Clan",
+        "Ruby Champion",
+        "Samurai",
+        "Sensei"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "nobukatsu-bow"
+      ],
+      "Effect": "nobukatsu-mantis-magistrate"
+    },
+    {
+      "Id": "oracle-l5r-10093",
+      "Name": "Naka Mahatsu",
+      "Type": "Personality",
+      "Clan": "Unaligned",
+      "GoldCost": 12,
+      "GoldProduction": 0,
+      "Force": 5,
+      "Chi": 6,
+      "PersonalHonor": 2,
+      "HonorRequirement": 4,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: If it is the Action Phase or Mahatsu is at the current battlefield, before an action with Thunder or an element keyword resolve, negate its effects.\nLimited: Search your Fate deck for a card with Thunder or an element keyword. Show it. Put it in your hand.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10093.jpg",
+      "Keywords": [
+        "Experienced Mahatsu",
+        "Unique",
+        "Air",
+        "Alchemist",
+        "Earth",
+        "Fire",
+        "Grand Master of the Elements",
+        "Ronin",
+        "Shugenja",
+        "Thunder",
+        "Void",
+        "Water"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "mahatsu-negate",
+        "mahatsu-search"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10085",
+      "Name": "Daigotsu Yamato",
+      "Type": "Personality",
+      "Clan": "Spider",
+      "GoldCost": 6,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 2,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After Yamato enters play: Lose 1 Honor and if any other player is Scorpion Clan, permanently remove Brash from Yamato. (The Defender may draw a card after a Brash card is assigned to attack.)\nBattle/Open: Target your Follower at any location: Transfer it to Yamato. You may take an additional action.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10085.jpg",
+      "Keywords": [
+        "Brash",
+        "Conqueror",
+        "Commander",
+        "Samurai",
+        "Shadowlands",
+        "Spider Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "yamato-transfer"
+      ],
+      "Effect": "yamato-entry-lose-brash-vs-scorpion",
+      "EntryHonorLoss": 1
+    },
+    {
+      "Id": "oracle-l5r-10042",
+      "Name": "Hiruma Sawai",
+      "Type": "Personality",
+      "Clan": "Crab",
+      "GoldCost": 6,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 2,
+      "PersonalHonor": 1,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Target two Personalities controlled by the same player: Transfer a Follower from one to the other. If you have Reconnaissance, you may take an additional action.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10042.jpg",
+      "Keywords": [
+        "Crab Clan",
+        "Fudo",
+        "Samurai",
+        "Scout"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "sawai-transfer"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10101",
+      "Name": "Shinjo Katsuo",
+      "Type": "Personality",
+      "Clan": "Unicorn",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 2,
+      "PersonalHonor": 2,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Katsuo does not have Brash if any other player is Lion Clan. (The Defender may draw a card after a Brash card is assigned to attack.)\nBattle/Open: Target your Follower: Straighten it. You may take an additional action.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10101.jpg",
+      "Keywords": [
+        "Brash",
+        "Cavalry",
+        "Commander",
+        "Samurai",
+        "Unicorn Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "katsuo-straighten"
+      ],
+      "Effect": "loses-brash-vs-lion"
+    }
+  ],
+  "Decks": []
+}

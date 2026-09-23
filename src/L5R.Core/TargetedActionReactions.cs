@@ -250,6 +250,9 @@ public sealed partial class MatchEngine
             case "jinn-kuen-negate":
             case "training-negate-merchant-free":
                 return affected.OwnerId == card.OwnerId && Keyword(affected, "Merchant");
+            // Cavalry Detachment (Seeds of Decay, issue #453): another player's action targets the Personality this Follower is attached to.
+            case "cavalry-detachment-spawn":
+                return command.PlayerId != card.OwnerId && card.Zone == Zone.Attached && affected.Id == card.AttachedTo && Definition(affected).Type == CardType.Personality;
             default:
                 return false;
         }
