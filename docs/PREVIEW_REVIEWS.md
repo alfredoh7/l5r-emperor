@@ -6,12 +6,13 @@ do not ask either person to operate branches or build tools merely to playtest.
 Alfredo delegates human preview/playability review to Mendon. This does not imply
 Mendon's acceptance or replace the existing checks/review requirements for merging.
 
-Current delivery: [Updated UI review for Windows](https://github.com/alfredoh7/l5r-emperor/releases/tag/preview-pr434-9f8ef9f5a5-r1-windows)
-— [Mendon's review notification](https://github.com/alfredoh7/l5r-emperor/pull/434#issuecomment-5790404279).
-This pins combined PR #434 at `9f8ef9f5`: draggable Top Cards, ghost-copy markers,
-revised Multiple Targets/Battle Progress, and Table Visibility, with Opponent Payment
-also available. [Delivery evidence and acceptance limits](handoffs/2026-09-23-refreshed-windows-review.md).
-Earlier Windows packages remain immutable; publication does not merge the candidate.
+Current delivery candidate: [Approved Top Cards and updated UI review for Windows](https://github.com/alfredoh7/l5r-emperor/releases/tag/preview-pr434-659e015f0e-r2-windows).
+This pins combined PR #434 at `659e015f`, including Alfredo's approved Top Cards
+correction (`58456f72`), ghost-copy markers, revised Multiple Targets/Battle Progress,
+Table Visibility and Opponent Payment. [Current delivery evidence](handoffs/2026-09-23-approved-ui-windows-review.md).
+The older [9f8ef9f5 package](https://github.com/alfredoh7/l5r-emperor/releases/tag/preview-pr434-9f8ef9f5a5-r1-windows)
+predates the final Top Cards correction; retain it only as historical evidence.
+Packages remain immutable; publication does not merge the candidate.
 
 ## Mendon's path
 

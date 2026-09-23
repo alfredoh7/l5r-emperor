@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Delivered the refreshed Windows review bundle from PR 434 at 9f8ef9f5: Top Cards, ghost copies, Multiple Targets, Battle Progress and Table Visibility, with eight direct launchers. Mendon notified and publication verified; no merge.",
-  "validation": "9/9 packaging/publication regressions pass. Exact 1787505284-byte ZIP upload/download SHA-256 matches. Windows package run 35826153462 at 8208d97f passes actual runtime, isolated data and all eight launcher routes; Mac/Windows foundation and collaboration/routing CI pass. Fresh native Top Cards/Ghost Copies normal+reduced and table coverage at three resolutions pass; captures inspected. Multiple Targets native rerun failed its window-focus guard; Battle Progress rerun not executed after that stop. Notification 5790404279 read back and verified.",
-  "remaining": "Delivery complete. Mendon graphical/rules review and any requested changes, pending Alfredo hands-on acceptances, and fresh Multiple Targets/Battle Progress native reruns remain separate. Desktop focus automation timed out; no native pass claimed for those two. No merge authorized.",
+  "summary": "Prepared revision 2 Windows preview from PR 434 at 659e015f with Alfredos approved Top Cards correction; retains eight direct review launchers and resolves both pending native reruns. Delivery checkpoint and final status are linked from PR 454.",
+  "validation": "9/9 packaging regressions pass. Exact-source Mac Multiple Targets and Battle Progress native suites each pass 1920x1080 normal and 1280x800 reduced; captures inspected and logs committed. Windows export resource/runtime/source checks pass; archive spec, approval wording, eight launcher routes and approved Top Cards atlas verified. Source CI green at 659e015f. Exact uploaded Windows package validation and final notification are recorded on PR 454 after this preparation checkpoint.",
+  "remaining": "Publish only after exact uploaded Windows package CI passes, then notify Mendon once; final delivery evidence on PR 454. Mendon native Windows graphical/rules acceptance and later feedback remain separate. No main merge or outdated-task cleanup in this task.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/297",
   "branch": "codex/297-windows-refresh",
-  "updated": "2026-09-23T06:55:22.855877+00:00"
+  "updated": "2026-09-23T21:55:03.597182+00:00"
 }
