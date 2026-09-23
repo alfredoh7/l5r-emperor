@@ -2417,4 +2417,16 @@ public static class PublishedContent
     public static PublishedSnapshot PersonalityWave53 { get; } = Load("L5R.Published.PersonalityWave53.json", "personality-wave-53", requireDecks: false);
     /// <summary>Follower wave 24 (Seeds of Decay pass, issue #453, batch 2): the created-only Ronin Follower Dubious Resources creates.</summary>
     public static PublishedSnapshot FollowerWave24 { get; } = Load("L5R.Published.FollowerWave24.json", "follower-wave-24", requireDecks: false);
+    /// <summary>Seeds of Decay pass (issue #453), batch 4: the Sensei, Naka Mahatsu - exp, Daigotsu Yamato, Hiruma Sawai, Shinjo Katsuo.</summary>
+    public static PublishedSnapshot PersonalityWave58 { get; } = Load("L5R.Published.PersonalityWave58.json", "personality-wave-58", requireDecks: false);
+    /// <summary>Seeds of Decay pass (issue #453), batch 4: the created-only Detached Personality and Ninja Proxy scans.</summary>
+    public static PublishedSnapshot PersonalityWave60 { get; } = Load("L5R.Published.PersonalityWave60.json", "personality-wave-60", requireDecks: false);
+    /// <summary>Seeds of Decay pass (issue #453), batch 4: Temple to Fudo, Hachi's Revenge, Incense Mill, Overlooked Palace, Second City Port.</summary>
+    public static PublishedSnapshot HoldingWave7 { get; } = Load("L5R.Published.HoldingWave7.json", "holding-wave-7", requireDecks: false);
+    /// <summary>Seeds of Decay pass (issue #453), batch 4: Tested Land.</summary>
+    public static PublishedSnapshot RegionWave6 { get; } = Load("L5R.Published.RegionWave6.json", "region-wave-6", requireDecks: false);
+    /// <summary>Seeds of Decay pass (issue #453), batch 4: Offering Reverence.</summary>
+    public static PublishedSnapshot EventWave5 { get; } = Load("L5R.Published.EventWave5.json", "event-wave-5", requireDecks: false);
+    /// <summary>Seeds of Decay pass (issue #453), batch 4: Cavalry Detachment.</summary>
+    public static PublishedSnapshot FollowerWave26 { get; } = Load("L5R.Published.FollowerWave26.json", "follower-wave-26", requireDecks: false);
 }

@@ -17,7 +17,13 @@ namespace L5R.Core;
 public sealed partial class MatchEngine
 {
     // "This card will not straighten before your Nth turn": the number of its controller's turn from which it may straighten.
-    private static int PrintedStraightenTurn(CardDefinition definition) => definition.Effect == "skip-first-straighten" ? 2 : 0;
+    private static int PrintedStraightenTurn(CardDefinition definition) => definition.Effect switch
+    {
+        "skip-first-straighten" => 2,
+        // Temple to Fudo (Seeds of Decay, issue #453): "This Holding will not straighten before your third turn."
+        TempleToFudoEffect => 3,
+        _ => 0
+    };
 
     private void AddStraightenHold(CardInstance card, string source, int? owner, StraightenPoint until, int skip = 0, string? whileInPlay = null)
     {

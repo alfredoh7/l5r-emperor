@@ -59,7 +59,9 @@ public sealed record SearchComparison(string Stat, string Op, int Value);
 /// <summary>Who may be selected. Every condition that is set must hold (Keywords is "all of"). Noun is the short
 /// display name of what is being searched for ("Region", "Terrain", "Item") used in prompts and reasons.</summary>
 public sealed record SearchCriteria(string Noun, CardType[]? Types = null, string[]? Keywords = null,
-    string[]? ExcludedKeywords = null, bool NonUnique = false, string[]? Titles = null, SearchComparison[]? Comparisons = null);
+    string[]? ExcludedKeywords = null, bool NonUnique = false, string[]? Titles = null, SearchComparison[]? Comparisons = null,
+    // "A card with Thunder or an element keyword" (Naka Mahatsu - exp, Seeds of Decay, issue #453): at least one of these keywords ("any of"), where Keywords is "all of".
+    string[]? AnyKeywords = null);
 
 /// <summary>One searchable deck, the criteria that deck's candidates must meet, and what happens to the chosen
 /// card. A card that lets the player pick the deck (Ikoma Shizuka) lists two, each with its own criteria.</summary>
@@ -98,7 +100,11 @@ public static class SearchCatalog
     public static SearchSpec TrainingOptional { get; } = new("training-optional", "You may search your Fate deck for a Weapon",
         [new(SearchDeck.Fate, new("Weapon", [CardType.Item], ["Weapon"]), SearchEffect.ToHand)], Optional: true);
 
-    public static IReadOnlyDictionary<string, SearchSpec> All { get; } = new[] { IkomaShizuka, ImperialGift, TrainingCheap, TrainingFocus, TrainingOptional }
+    /// <summary>Naka Mahatsu - exp (oracle-l5r-10093, Seeds of Decay, issue #453): "Search your Fate deck for a card with Thunder or an element keyword. Show it. Put it in your hand."</summary>
+    public static SearchSpec NakaMahatsu { get; } = new("naka-mahatsu", "Search your Fate deck for a card with Thunder or an element keyword",
+        [new(SearchDeck.Fate, new("card with Thunder or an element keyword", AnyKeywords: ["Thunder", "Air", "Earth", "Fire", "Water", "Void"]), SearchEffect.ToHand)]);
+
+    public static IReadOnlyDictionary<string, SearchSpec> All { get; } = new[] { IkomaShizuka, ImperialGift, TrainingCheap, TrainingFocus, TrainingOptional, NakaMahatsu }
         .ToDictionary(s => s.Id, StringComparer.Ordinal);
 
     /// <summary>The search an Event carries in its Effect (an Event has no abilities of its own to hang a spec on).</summary>
@@ -431,6 +437,7 @@ public sealed partial class MatchEngine
         var notA = $"Not {Article(criteria.Noun)}";
         if (criteria.Types is { Length: > 0 } && !criteria.Types.Contains(def.Type)) return (false, notA);
         if (criteria.Keywords is { Length: > 0 } && !criteria.Keywords.All(k => Keyword(card, k))) return (false, notA);
+        if (criteria.AnyKeywords is { Length: > 0 } && !criteria.AnyKeywords.Any(k => Keyword(card, k))) return (false, notA);
         if (criteria.NonUnique && Keyword(card, "Unique")) return (false, "Unique cards cannot be chosen");
         if (criteria.ExcludedKeywords is { Length: > 0 } && criteria.ExcludedKeywords.FirstOrDefault(k => Keyword(card, k)) is string excluded)
             return (false, $"{excluded} cards cannot be chosen");

@@ -1,0 +1,31 @@
+{
+  "Profile": "event-wave-5",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10031",
+      "Name": "Offering Reverence",
+      "Type": "Event",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After you reveal cards in your Provinces at the start of your turn, if this Event is face-up in one of them, for each dead Personality in your discard pile, create a 2F/2C/3PH Samurai • Ancestor • Spirit Personality with your Clan Alignment. If this created no Personalities, you may shuffle this Event into your deck instead of discarding it normally.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10031.jpg",
+      "Keywords": [
+        "Unique",
+        "Festival"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "offering-reverence"
+    }
+  ],
+  "Decks": []
+}
