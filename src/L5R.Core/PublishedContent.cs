@@ -2405,4 +2405,10 @@ public static class PublishedContent
     public static PublishedSnapshot PersonalityWave51 { get; } = Load("L5R.Published.PersonalityWave51.json", "personality-wave-51", requireDecks: false);
     /// <summary>Personality wave 52 (issue #449 follow-up): Akodo Tezuka.</summary>
     public static PublishedSnapshot PersonalityWave52 { get; } = Load("L5R.Published.PersonalityWave52.json", "personality-wave-52", requireDecks: false);
+    /// <summary>Strategy wave 47 (Seeds of Decay pass, issue #453, batch 1): twenty Seeds of Decay Strategies.</summary>
+    public static PublishedSnapshot StrategyWave47 { get; } = Load("L5R.Published.StrategyWave47.json", "strategy-wave-47", requireDecks: false);
+    /// <summary>Stronghold wave 12 (Seeds of Decay pass, issue #453, batch 1): The Castle of Order.</summary>
+    public static PublishedSnapshot StrongholdWave12 { get; } = Load("L5R.Published.StrongholdWave12.json", "stronghold-wave-12", requireDecks: false);
+    /// <summary>Celestial wave 5 (Seeds of Decay pass, issue #453, batch 1): Megumi's Guidance.</summary>
+    public static PublishedSnapshot CelestialWave5 { get; } = Load("L5R.Published.CelestialWave5.json", "celestial-wave-5", requireDecks: false);
 }

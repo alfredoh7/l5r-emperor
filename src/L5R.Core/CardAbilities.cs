@@ -2220,6 +2220,56 @@ public static class AbilityCatalog
         // did not choose this, he must pass at his next opportunity this phase to take a Battle, Limited, or Open action." The controller's
         // Either/Or (bow him, or take the forced pass -- ForcedPass.cs).
         ["unfortunate-hesitation"] = new("BattleOrOpen", "Target a Personality: his controller may choose to bow him. If he did not choose this, he must pass at his next opportunity this phase to take a Battle, Limited, or Open action", "personality"),
+        // Seeds of Decay pass (issue #453), batch 1. Standing redirects (StandingRedirects.cs): Ceaseless Vigil (oracle-l5r-10139), Ruthless Onslaught (10164), Metsubushi (10158).
+        ["ceaseless-vigil-focus"] = new("FocusEffect", "As a Focus Effect: After this duel ends, straighten a Personality", "none"),
+        // The scan prints "Choose your performing Yojimbo" (the catalogue "Target your performing Yojimbo"): a performer, so no reaction window opens for him.
+        ["ceaseless-vigil-watch"] = new("BattleOrOpen", "Choose your performing Yojimbo: The next time (this turn) another player's action would target one of your Personalities, it targets the Yojimbo instead, if legal. You may take an additional action", "none",
+            Performer: "own-personality-with-keyword-at-battle", RequiredKeywords: ["Yojimbo"]),
+        ["ruthless-onslaught-watch"] = new("Battle", "Choose your performing Personality: The next time this battle another player's Battle action would target one of your cards, it targets your performer, if legal. If he has 7 or more base Force, you may take an additional Battle action", "none",
+            Performer: "own-personality-at-battle"),
+        ["metsubushi-attack"] = new("Battle", "Choose your performing unbowed Ninja: Ranged 4 Attack. The next time this battle the enemy leader takes a Battle action, if it can legally target the Ninja, it must target him", "attack",
+            Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeywords: ["Ninja"]),
+        // Shifting Terrain (10168): the Terrain is put into play with the playStrategy command (the Terrain rule); in play, its Reaction is a targeted-by-action redirect with a chosen performer
+        // (the "performing" Personality is the card the action targets instead, chosen inside the window as Blade of Champions' new target is).
+        ["shifting-terrain-redirect"] = new("Reaction", "If this card is in play, when another player's action would target one of your Personalities, choose your performing Personality: The action targets him instead, if legal", "redirect-target-own-personality-at-source-battlefield",
+            Trigger: ReactionTriggers.TargetedByAction),
+        // The Castle of Order (10185): once per battle (its own stamp on the Stronghold, CastleOfOrderUsedThisBattle), so the per-turn limit is lifted.
+        ["castle-of-order-redirect"] = new("Reaction", "When another player's Battle action would target your Ninja: once per battle, you may choose your Ninja at the same location. The action targets it instead, if legal", "redirect-target-own-ninja-at-affected-location",
+            Trigger: ReactionTriggers.TargetedByAction, UsesPerTurn: AbilityUseLimit.Unlimited),
+        // Exchange of Letters (10147): the phase-scoped action lock (ActionLock.cs) on both. Martial Manipulation (10157): the assignment lock (MovementLocks.cs) on both.
+        ["exchange-of-letters-lock"] = new("Open", "Choose your performing unbowed Personality and target another player's unbowed Personality: Neither may perform actions this phase", "enemy-unbowed-personality", Performer: "own-unbowed-personality"),
+        ["martial-manipulation-lock"] = new("Limited", "Choose your performing Samurai and target another player's Personality: Neither Personality may be assigned to battlefields", "enemy-personality",
+            Performer: "own-personality-with-keyword", RequiredKeywords: ["Samurai"]),
+        // Defensive Blockade (10142): the card's ForceContributionNegatedBattle stamp, read by the battle contribution helpers. Shield Formation (10167), Unexpected Obstacle (10177): Force modifiers.
+        ["defensive-blockade-negate"] = new("Battle", "Target an attacking Follower or Personality without attachments: It does not contribute Force to its army's total Force this battle", "attacking-follower-or-personality", RequireNoAttachments: true),
+        ["shield-formation-boost"] = new("Battle", "Target your defending Personality: Give him and each of his Followers +3F", "own-defending-personality"),
+        ["unexpected-obstacle-penalty"] = new("Battle", "Target an enemy Personality or Follower: Give it -4F", "enemy-personality-or-follower"),
+        // Embracing Battle (10146) / Military Promotion (10159): the Focus Effect is A Simple Yari's; "may assign even if bowed" is the card's AssignBowedTurn stamp (read by Assign); Elite is a granted keyword.
+        ["embracing-battle-focus"] = new("FocusEffect", "As a Focus Effect: After this duel ends, bow the winner", "none"),
+        ["embracing-battle-elite"] = new("Limited", "Target your performing Paragon: He may assign even if bowed. Give him Elite", "own-personality-with-keyword", RequiredKeywords: ["Paragon"]),
+        ["military-promotion-elite"] = new("Open", "Choose your performing Tactician and target your Personality: He may assign even if bowed. Give him Elite", "own-personality",
+            Performer: "own-personality-with-keyword", RequiredKeywords: ["Tactician"]),
+        // The Arrow's Eye (10172), Sticks and Stones (10170), Two Stings (10176; its second action is the card's own, played from the discard pile and removed from the game afterward), Vengeful Dismissal (10180).
+        ["arrows-eye-attack"] = new("Battle", "Ranged 3 Attack with +1 strength for each Follower in the target's unit", "attack"),
+        ["sticks-and-stones-attack"] = new("Battle", "Ranged 1 Attack. If the Ranged Attack destroyed a card, draw a card; if it destroyed a Follower, you may take an additional Battle action", "attack"),
+        ["two-stings-attack"] = new("Battle", "Bow your performing Personality or Follower: Ranged 4 Attack", "attack", Performer: "own-unbowed-unit-at-battle", Costs: ActionCost.BowPerformer),
+        ["two-stings-attack-from-discard"] = new("Battle", "If this card is in your discard pile, bow your performing Personality or Follower: Ranged 4 Attack. Remove this card from the game", "attack",
+            Performer: "own-unbowed-unit-at-battle", Costs: ActionCost.BowPerformer, FromDiscard: true, Cost: GoldCostRule.Fixed(0)),
+        ["vengeful-dismissal-move"] = new("Battle", "Choose your performing unbowed Personality and target an enemy Personality with lower Chi: Move him home", "enemy-personality-chi-lt-performer", Performer: "own-unbowed-personality-at-battle"),
+        // Sound the Retreat (10169), a Kata (KataCards.cs, Skipping the Puddle's shape). Requesting Reinforcements (10163): Your Clan Needs You!'s entry sequence, at the full recruit price.
+        ["sound-the-retreat-enter"] = new("Limited", "Put this card into play. Discard all your other Kata", "none"),
+        ["sound-the-retreat-move"] = new("Battle", "If this card is in play, choose your performing Personality: Move him home. If he moved, straighten his unit", "none", Performer: "own-personality-at-battle"),
+        ["requesting-reinforcements-recruit"] = new("Battle", "Bow your performing Scout and target a face-up Scout Personality in your province: Bring the target into play at the current battlefield, paying all costs. If you have Reconnaissance, you may take an additional Battle action",
+            "own-personality-in-province-with-keyword", Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeywords: ["Scout"], Cost: GoldCostRule.TargetRecruit(), Costs: ActionCost.BowPerformer, MovesToBattle: true),
+        // Grappling the Snake (10150): the Battle action grants the Monk, for the turn, two Reactions sharing one use -- the choice its text offers when the next action targets him (SeedsOfDecayBatch1.cs).
+        ["grappling-the-snake-watch"] = new("Battle", "Choose your performing unbowed Monk: After the next time (this turn) an action targets him, you may choose either to negate its effects on your Monk, or to bow the unit of one Personality that performed it after the action resolves. You may take an additional Battle action", "none",
+            Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeywords: ["Monk"]),
+        ["grappling-snake-negate"] = new("Reaction", "Grappling the Snake: negate the action's effects on this Monk", "none", Trigger: ReactionTriggers.TargetedByAction, UsageKey: "grappling-snake-response"),
+        ["grappling-snake-bow"] = new("Reaction", "Grappling the Snake: after the action resolves, bow the unit of a Personality that performed it", "none", Trigger: ReactionTriggers.TargetedByAction, UsageKey: "grappling-snake-response"),
+        // Advanced Intelligence (10135): a Reaction played from the hand in the after-action-resolved window (ActionEffectTracking.cs), drawing for the Recon Strategy actions its player took this battle.
+        ["advanced-intelligence-draw"] = new("Reaction", "After a Recon Strategy's action resolves: Draw one card for each action from a Recon Strategy you have taken this battle", "none", Trigger: AfterActionReactionTriggers.AfterActionResolved),
+        // Megumi's Guidance (10028), a Celestial: the discard is its cost; the shield is the Personality's DestructionShieldTurn stamp (read by DestroyUnits).
+        ["megumis-guidance-shield"] = new("BattleOrOpen", "Discard this card and choose your performing Personality: Negate his destruction from other players' cards' effects (until the turn ends)", "none", Performer: "own-personality-at-battle"),
     });
 }
 
@@ -2452,6 +2502,8 @@ public sealed partial class MatchEngine
             // ability send their target home.
             or "predator-move" or "fear-me-move" or "liuxeung-move-home" or "gold-and-steel-bow-move" or "tsunami-move-home"
             // Before the Dawn (issue #431): the move-home actions.
+            // Seeds of Decay pass (issue #453), batch 1: Vengeful Dismissal moves its target home.
+            or "vengeful-dismissal-move"
             or "ryuba-move" or "masafuni-move" or "nijugun-move" or "omigawa-move" or "dismissing-the-cur-move" or "second-feint-bow" or "tsunami-tattoo-move" or "detained-move" or "shadow-tactics-home" => "move",
         "air-straighten" or "paid-straighten" or "training-keyword-conditional-straighten" or "immovable-object-straighten"
             or "defensive-stance" or "ritual-preparation-straighten" or "training-straighten-at-battle" or "horibe-straighten"
@@ -2830,6 +2882,10 @@ public sealed partial class MatchEngine
         "training-province-attack" => 3,
         "strength-of-the-divine-honor" => sourceId is not null ? CardPersonalHonor(Card(sourceId)) : 0,
         "hiromis-vassals-attack" => 6,
+        // Seeds of Decay pass (issue #453), batch 1. The Arrow's Eye: +1 for each Follower in the target's unit (the Followers attached to the target's host Personality).
+        "arrows-eye-attack" => 3 + (target is null ? 0 : Attachments(UnitHostId(target)).Count(a => Definition(a).Type == CardType.Follower)),
+        "sticks-and-stones-attack" => 1,
+        "two-stings-attack" or "two-stings-attack-from-discard" or "metsubushi-attack" => 4,
         _ => 0
     };
     // AttackStrength plus every passive defense modifier applying to this specific target (Destrier/
@@ -2879,6 +2935,8 @@ public sealed partial class MatchEngine
         "kahoku-exp-attack" or "tsuruchi-kosoko-exp-attack" or "hiruma-nitani-attack" or "training-followed-recon-attack" or "spirit-scout-attack" or "engulfing-flames-attack" => "Ranged",
         "training-followed-dishonorable-melee-attack" => "Melee",
         "hiromis-vassals-attack" => "Ranged",
+        // Seeds of Decay pass (issue #453), batch 1.
+        "arrows-eye-attack" or "sticks-and-stones-attack" or "two-stings-attack" or "two-stings-attack-from-discard" or "metsubushi-attack" => "Ranged",
         _ => ""
     };
     // General "in play" Reaction primitive: a printed Reaction whose card must actually be in play
@@ -3054,6 +3112,7 @@ public sealed partial class MatchEngine
     // and destroy on a hit. A strength of 0 or less, or no target ever chosen, has no effect.
     private void ResolveAttackNow(string abilityId, int playerId, string? targetId, int strength, string? sourceId = null, int? province = null)
     {
+        var targetInPlayBefore = targetId is not null && InPlay(Card(targetId)); // Seeds of Decay pass (issue #453), batch 1: Sticks and Stones asks whether THIS Attack destroyed its target.
         // An Attack that targets a province targets no card (Mendon, issue #335): its effect is the ability's own.
         if (targetId is null && province is int provinceIndex) ResolveProvinceAttack(abilityId, provinceIndex, strength);
         if (strength > 0 && targetId is not null)
@@ -3071,6 +3130,7 @@ public sealed partial class MatchEngine
         // Tsuruchi Isas: "Move Isas home" is a second, unconditional effect of the same ability --
         // it happens whether or not the Attack actually hit, so it lives outside the hit branch above.
         if (abilityId == "tsuruchi-isas-attack" && sourceId is not null) MoveHome(Card(sourceId), false);
+        AfterSticksAndStonesAttack(abilityId, playerId, targetId, targetInPlayBefore); // Seeds of Decay pass (issue #453), batch 1.
         // Tsuruchi Yakusho (issue #276 follow-up): this specific Attack's own resolution has now fully
         // completed -- the single funnel every Attack resolves through, deferred or not -- so any
         // immunity granted for it is cleared here, never carried into a later, unrelated Attack.
@@ -3122,6 +3182,8 @@ public sealed partial class MatchEngine
     {
         var attack = _state.PendingAttack!;
         _state.PendingAttack = null;
+        // Seeds of Decay pass (issue #453), batch 1: a grant the Attack's own resolution makes (Sticks and Stones) is not one of the dangling grants forfeited below.
+        var grantsBeforeAttack = _state.AdditionalActions.Where(g => g.PlayerId == attack.PlayerId && Forfeitable(g)).ToList();
         if (!attack.Negated) ResolveAttackNow(attack.AbilityId, attack.PlayerId, attack.TargetId, attack.Strength, attack.SourceId);
         else { AttackTargetedACard(attack.AbilityId, attack.PlayerId, attack.TargetId); _state.RangedAttackStrengthReductionImmune = false; }
         _state.NegatedEffects.Clear();
@@ -3131,8 +3193,9 @@ public sealed partial class MatchEngine
         // keywords are the ability's source card's (Command.CardId), not the performer's (SourceId).
         FireAfterOwnActionTraits(AbilityCatalog.All[attack.AbilityId], attack.PlayerId, attack.Command?.CardId is { } sourceCardId ? Card(sourceCardId) : null);
         // Same "an unrelated action forfeits dangling grants" rule as ExecuteAbilityEffects' own tail.
-        if (!attack.Additional) _state.AdditionalActions.RemoveAll(g => g.PlayerId == attack.PlayerId && Forfeitable(g));
-        var attackBurstContinues = attack.Additional && _state.AdditionalActions.Any(g => g.PlayerId == attack.PlayerId && Forfeitable(g));
+        if (!attack.Additional) _state.AdditionalActions.RemoveAll(grantsBeforeAttack.Contains);
+        var attackBurstContinues = _state.AdditionalActions.Any(g => g.PlayerId == attack.PlayerId && Forfeitable(g));
+        FinishGrapplingWatches(attack.Command); // Seeds of Decay pass (issue #453), batch 1: the deferred Attack is the action's resolution.
         // Action-effect tracking (issue #437): the deferred Attack is the action's resolution, the same reasoning FireAfterOwnActionTraits above already follows.
         if (FinishActionEffectTracking(attack.AbilityId, attack.PlayerId, attack.SourceId, attackBurstContinues ? attack.PlayerId : 1 - attack.PlayerId)) return;
         NextAction(attack.PlayerId, attackBurstContinues);
@@ -3638,6 +3701,12 @@ public sealed partial class MatchEngine
         // "After engaging at X's battlefield": X's own battlefield is the one it is assigned to.
         // Dragon's Breath Castle: "after engaging at a battlefield at one of your provinces" -- the battlefield is at the Defender's province, so its controller is the Defender.
         if (id == "dbc-attacker-bow") Require(command.PlayerId == 1 - _state.ActivePlayerId, "Dragon's Breath Castle reacts to a battle at one of its controller's provinces.");
+        // Seeds of Decay pass (issue #453), batch 1 (SeedsOfDecayBatch1.cs).
+        if (id == "castle-of-order-redirect") Require(!CastleOfOrderUsedThisBattle(source!), "The Castle of Order's redirect may be used once per battle.");
+        if (id == "sound-the-retreat-enter") Require(source!.Zone == Zone.Hand && player.Hand.Contains(source.Id), "A Kata is put into play from your hand.");
+        if (id == "sound-the-retreat-move") Require(source!.Zone == Zone.Home, "This Kata must be in play.");
+        if (id == "advanced-intelligence-draw") Require(!AdvancedIntelligencePlayedThisBattle(player), "You may only play one copy of Advanced Intelligence per battle.");
+        if (id is "grappling-snake-negate" or "grappling-snake-bow") Require(source!.GrantedAbilities.Any(g => g.AbilityId == id && GrantHolds(g.Duration, source)), "Grappling the Snake's choice is no longer open.");
         if (ability.Trigger == "after-engaging-at-own-battlefield")
             Require(AtBattle(source!), "This card must be assigned to the battlefield being engaged.");
         // Daidoji Yuki: "if all your Personalities there are Scouts" sits BEFORE the effects colon, so it is a
@@ -4162,6 +4231,11 @@ public sealed partial class MatchEngine
                     Require(!(Keyword(target, "Unique") || Keyword(target, "Singular")) || !ControlsCopyOf(player.Id, Definition(target).Name),
                         $"You already control this {(Keyword(target, "Unique") ? "Unique" : "Singular")} card.");
                 }
+                // Seeds of Decay pass (issue #453), batch 1. Requesting Reinforcements: "a face-up Scout Personality in your province" -- Your Clan Needs You!'s own
+                // province-card shape, narrowed by RequiredKeywords.
+                else if (ability.Target == "own-personality-in-province-with-keyword")
+                    Require(target.OwnerId == player.Id && type == CardType.Personality && target.Zone == Zone.Province && target.FaceUp && HasKeywords(target, ability.RequiredKeywords),
+                        "Choose your own face-up Personality with the required keyword in a province.");
                 else
                 {
                     Require(InPlay(target), "Target a card in play.");
@@ -4480,6 +4554,21 @@ public sealed partial class MatchEngine
                         "card-in-dishonorable-unit" => (personality || target.Zone == Zone.Attached && type is CardType.Follower or CardType.Item or CardType.Spell) && Card(UnitHostId(target)) is { } leader
                             && Definition(leader).Type == CardType.Personality && MatchesTargetStatus(leader, TargetStatus.IsDishonorable),
                         "enemy-personality-gold-cost-lte-performer" => personality && !own && CardGoldCost(target) <= CardGoldCost(Card(command.PerformerId!)),
+                        // Seeds of Decay pass (issue #453), batch 1.
+                        // Shifting Terrain: one of the reactor's own Personalities at the Terrain's battlefield, other than the held action's target, that the action accepts.
+                        "redirect-target-own-personality-at-source-battlefield" => own && personality && OpenReactionSubject() is { } terrainAction && target.Id != terrainAction.TargetId
+                            && source!.Zone == Zone.Battlefield && target.Zone == Zone.Battlefield && target.ProvinceIndex == source.ProvinceIndex && ActionAcceptsTarget(terrainAction, target.Id),
+                        // The Castle of Order: one of the reactor's own Ninja cards at the targeted Ninja's location, other than it, that the action accepts.
+                        "redirect-target-own-ninja-at-affected-location" => own && Keyword(target, "Ninja") && OpenReactionSubject() is { TargetId: { } affectedNinjaId } ninjaAction && target.Id != affectedNinjaId
+                            && SameLocation(target, Card(affectedNinjaId)) && ActionAcceptsTarget(ninjaAction, target.Id),
+                        // Exchange of Letters: "another player's unbowed Personality".
+                        "enemy-unbowed-personality" => personality && !own && !target.Bowed,
+                        // Defensive Blockade: "an attacking Follower or Personality" -- a card of the Attacker's army at the battlefield (a Follower is attacking when its host is).
+                        "attacking-follower-or-personality" => (personality || type == CardType.Follower) && Card(UnitHostId(target)).OwnerId == _state.ActivePlayerId,
+                        // Shield Formation: "your defending Personality".
+                        "own-defending-personality" => personality && own && IsDefendingUnit(target),
+                        // Vengeful Dismissal: an enemy Personality with strictly lower current Chi than the chosen performer's.
+                        "enemy-personality-chi-lt-performer" => personality && !own && PersonalityChi(target) < PersonalityChi(Card(command.PerformerId!)),
                         _ => false
                     }, "That card does not meet this ability's target or performer requirements.");
                 }
@@ -4540,6 +4629,8 @@ public sealed partial class MatchEngine
     }
     private void ContinueUseAbility(GameCommand command)
     {
+        // Seeds of Decay pass (issue #453), batch 1: a standing redirect of another player's rewrites this action's target as it is announced (StandingRedirects.cs).
+        command = ApplyStandingRedirects(command);
         var ability = AbilityCatalog.All[command.AbilityId!];
         // Additional Action (issue #181): a Battle-timed use that matches one of this player's
         // currently available grants is taken "out of order" -- deferred through the same
@@ -6765,6 +6856,81 @@ public sealed partial class MatchEngine
                 if (ResolveOrDeferAttack(id, player, target?.Id, command.PerformerId!, consumedGrant)) return;
                 break;
             case "training-follower-honor-draw": GainHonor(player.Id, -2, "Training Honor cost"); Draw(player); break;
+            // Seeds of Decay pass (issue #453), batch 1 (helpers in SeedsOfDecayBatch1.cs, the standing redirects in StandingRedirects.cs).
+            case "ceaseless-vigil-watch":
+                AddStandingRedirect(StandingRedirectKinds.OwnPersonalities, player.Id, Card(command.PerformerId!), thisBattle: false, Definition(source!).Name);
+                GrantAdditionalAction(player.Id, null, anyDiscardTiming: _state.Phase != Phase.Battle);
+                break;
+            case "ruthless-onslaught-watch":
+            {
+                var onslaughtPerformer = Card(command.PerformerId!);
+                AddStandingRedirect(StandingRedirectKinds.OwnCardsBattleAction, player.Id, onslaughtPerformer, thisBattle: true, Definition(source!).Name);
+                if (Definition(onslaughtPerformer).Force >= 7) GrantAdditionalAction(player.Id, null);
+                break;
+            }
+            case "metsubushi-attack":
+                AddStandingRedirect(StandingRedirectKinds.MustTarget, player.Id, Card(command.PerformerId!), thisBattle: true, Definition(source!).Name);
+                if (ResolveOrDeferAttack(id, player, target?.Id, command.PerformerId!, consumedGrant)) return;
+                break;
+            case "shifting-terrain-redirect": RedirectAction(HeldAction(), target!.Id, source!); break;
+            case "castle-of-order-redirect": MarkCastleOfOrderUsed(source!); RedirectAction(HeldAction(), target!.Id, source!); break;
+            case "exchange-of-letters-lock":
+                LockActions(target!, source!.Id, CurrentPhaseLock());
+                LockActions(Card(command.PerformerId!), source.Id, CurrentPhaseLock());
+                break;
+            case "martial-manipulation-lock":
+                LockMovement(target!, Definition(source!).Name, MovementKinds.Assign);
+                LockMovement(Card(command.PerformerId!), Definition(source!).Name, MovementKinds.Assign);
+                break;
+            case "defensive-blockade-negate": NegateForceContribution(target!, Definition(source!).Name); break;
+            case "shield-formation-boost":
+                ApplyModifier(target!, source!.Id, id, "Force", 3);
+                foreach (var follower in Attachments(target!.Id).Where(a => Definition(a).Type == CardType.Follower).ToArray()) ApplyModifier(follower, source.Id, id, "Force", 3);
+                break;
+            case "unexpected-obstacle-penalty": ApplyModifier(target!, source!.Id, id, "Force", -4); break;
+            case "embracing-battle-elite": GrantAssignWhileBowedAndElite(target!, source!); break;
+            case "military-promotion-elite": GrantAssignWhileBowedAndElite(target!, source!); break;
+            case "arrows-eye-attack": case "sticks-and-stones-attack":
+                if (ResolveOrDeferAttack(id, player, target?.Id, additional: consumedGrant)) return;
+                break;
+            case "two-stings-attack": case "two-stings-attack-from-discard":
+                if (ResolveOrDeferAttack(id, player, target?.Id, command.PerformerId!, consumedGrant)) return;
+                break;
+            case "vengeful-dismissal-move": MoveHome(target!, false); break;
+            case "sound-the-retreat-enter": EnterPlayAsKata(player, source!); break;
+            case "sound-the-retreat-move":
+            {
+                var retreating = Card(command.PerformerId!);
+                var retreatZoneBefore = retreating.Zone;
+                MoveHome(retreating, false);
+                if (retreating.Zone != retreatZoneBefore) StraightenUnit(retreating);
+                break;
+            }
+            case "requesting-reinforcements-recruit":
+            {
+                var reinforcement = target!;
+                var reinforcementQuote = QuotePurchase(player.Id, reinforcement.Id);
+                Require(reinforcementQuote.Error is null && Definition(reinforcement).Type == CardType.Personality, reinforcementQuote.Error ?? "");
+                if (HasReconnaissanceAtCurrentBattlefield(player.Id)) GrantAdditionalAction(player.Id, null);
+                SpendHandPlayedCard(player, source);
+                if (BringProvincePersonalityIntoPlay(player, reinforcement, reinforcementQuote, _state.CurrentBattleProvince!.Value, "Requesting Reinforcements")) return;
+                break;
+            }
+            case "grappling-the-snake-watch":
+                GrantGrapplingWatch(Card(command.PerformerId!), source!);
+                GrantAdditionalAction(player.Id, null);
+                break;
+            case "grappling-snake-negate": UseGrapplingWatch(source!, negate: true); break;
+            case "grappling-snake-bow": UseGrapplingWatch(source!, negate: false); break;
+            case "advanced-intelligence-draw":
+                MarkAdvancedIntelligencePlayed(player);
+                for (var drawn = 0; drawn < _state.ReconStrategyActionsThisBattle[player.Id]; drawn++) Draw(player);
+                break;
+            case "megumis-guidance-shield":
+                source!.Zone = Zone.DynastyDiscard;
+                Emit("celestialDiscarded", $"{Definition(source).Name} was discarded to use its action.", player.Id, source.Id);
+                ShieldFromDestruction(Card(command.PerformerId!), Definition(source).Name);
+                break;
             default:
                 // Any ability with an AttachSpec (Moto Jun-Ni, Fading Shadows, Foothills Keep and the training shapes) needs no case of its own: the Gold was
                 // paid by PayForAbility, so the card now leaves its place and enters play attached. An entering-play window ends the action here.
@@ -6842,6 +7008,7 @@ public sealed partial class MatchEngine
         // printed action without cost" (issue #194) does.
         // (A Strategy that returned ITSELF to a hand from a discard pile in this very action -- Never Safe -- was not played from that hand.)
         if (!ability.FromDiscard) SpendHandPlayedCard(player, source);
+        FinishGrapplingWatches(command); // Seeds of Decay pass (issue #453), batch 1: after the action that targeted the Monk resolves (SeedsOfDecayBatch1.cs).
         // Discipline (core rules, issue #184; a flag since #331): "played and resolved and then removed from the
         // game" -- always, whether or not its own effect above did anything else with the card. Only the DISCARD-
         // PILE mode: a hand-played Discipline Strategy was just discarded by SpendHandPlayedCard above like any
@@ -7345,6 +7512,7 @@ public sealed partial class MatchEngine
     // discarded to the Fate discard pile as a destroyed card (DestroyUnits), Expendable draws included.
     private void DestroyAttackTarget(CardInstance target, int playerId)
     {
+        if (DestructionShielded(target, playerId)) return; // Seeds of Decay pass (issue #453), batch 1: Megumi's Guidance (a Follower target goes through DestroyAttachment, which has no acting player).
         if (Definition(target).Type == CardType.Follower) DestroyAttachment(target);
         else DestroyUnits([target], true, playerId);
     }
@@ -7356,6 +7524,7 @@ public sealed partial class MatchEngine
             return;
         }
         if (DestructionDelayed(card)) return;
+        if (WideValleyNegatesDestruction(card)) return; // Seeds of Decay pass (issue #453), batch 1: an attachment's destruction is always an action's effect (see RecordActionEffect below).
         var parent = Card(card.AttachedTo);
         card.Zone = Zone.FateDiscard; card.AttachedTo = null; card.ProvinceIndex = null; card.FaceUp = true;
         RemoveAttachmentGrants(parent, card.Id);
@@ -7587,6 +7756,8 @@ public sealed partial class MatchEngine
                     "spell-in-hand-with-keyword" => player.Hand.Where(h => Definition(Card(h)).Type == CardType.Spell && HasKeywords(Card(h), ability.RequiredKeywords)).Cast<string?>().ToArray(),
                     // Moto Jun-Ni / Foothills Keep (issue #337): every card in a discard pile the ability's AttachSpec accepts.
                     "attachment-in-discard" => AttachCandidatesInDiscard(ability.Attach!, playerId).Select(c => (string?)c.Id).ToArray(),
+                    // Seeds of Decay pass (issue #453), batch 1: Requesting Reinforcements' face-up province Personality with the required keyword.
+                    "own-personality-in-province-with-keyword" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && c.Zone == Zone.Province && c.FaceUp && HasKeywords(c, ability.RequiredKeywords)).Select(c => (string?)c.Id).ToArray(),
                     _ => inPlay };
                 // Shosuro Hawado's battlefield half also needs its destination (command.Province): one
                 // candidate per battlefield not yet resolved this Battle phase -- ValidateAbility below

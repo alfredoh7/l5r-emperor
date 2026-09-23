@@ -48,6 +48,7 @@ public sealed partial class MatchEngine
         }
         // Revenge: the window resets once the acting player's OWN Battle action finishes resolving.
         if (AbilityCatalog.All[abilityId].Timing == "Battle") _state.EnemyDestroyedOwnPersonalitySinceLastBattleAction[playerId] = false;
+        CountReconStrategyAction(abilityId, playerId, sourceId); // Advanced Intelligence (Seeds of Decay pass, issue #453, batch 1).
         return OpenAfterActionResolvedWindow(closesTo);
     }
 
@@ -81,6 +82,9 @@ public sealed partial class MatchEngine
             // Timing/keyword narrowing, exercising AfterActionResolvedApplies/the window itself directly rather than through a real card's own
             // extra conditions.
             "training-after-action-resolved-gain" => LastActionDestroyedOwnPersonality(playerId),
+            // Advanced Intelligence (Seeds of Decay pass, issue #453, batch 1): "After a Recon Strategy's action resolves" -- either player's, classified through ActionCarriesKeyword.
+            "advanced-intelligence-draw" => facts.SourceId is { } reconSourceId && _state.Cards.TryGetValue(reconSourceId, out var reconSource) && Definition(reconSource).Type == CardType.Strategy
+                && ActionCarriesKeyword(AbilityCatalog.All[facts.AbilityId], reconSource, "Recon"),
             _ => false
         };
     }

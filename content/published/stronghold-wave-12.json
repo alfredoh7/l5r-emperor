@@ -1,0 +1,30 @@
+{
+  "Profile": "stronghold-wave-12",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10185",
+      "Name": "The Castle of Order",
+      "Type": "Stronghold",
+      "Clan": "Scorpion",
+      "GoldCost": 0,
+      "GoldProduction": 4,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 7,
+      "StartingHonor": 0,
+      "Text": "You do not lose Honor from Ninja cards you own.\nWhen another player's Battle action would target your Ninja: He is a master of the art of Ninjutsu. Once per battle, you may choose your Ninja at the same location. If you did, the action targets it instead, if legal.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10185.jpg",
+      "Keywords": [],
+      "Focus": 0,
+      "Abilities": [
+        "castle-of-order-redirect"
+      ],
+      "Effect": "castle-of-order"
+    }
+  ],
+  "Decks": []
+}

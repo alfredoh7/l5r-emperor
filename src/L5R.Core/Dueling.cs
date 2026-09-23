@@ -509,6 +509,10 @@ public sealed partial class MatchEngine
                 if (_state.PendingDuel is { } homeGuardDuel)
                     ApplyModifier(Card(homeGuardDuel.ChallengerPlayerId == ownerId ? homeGuardDuel.ChallengerId : homeGuardDuel.ChallengedId), abilityId, abilityId, "Force", 3);
                 break;
+            // Seeds of Decay pass (issue #453), batch 1. Embracing Battle: "bow the winner" (A Simple Yari's). Ceaseless Vigil's "straighten a Personality" is a choice (FocusEffectChoice.cs).
+            case "embracing-battle-focus":
+                if (_state.PendingDuel?.WinnerId is string embracingWinnerId && InPlay(Card(embracingWinnerId)) && !StalwartNegatesBow(Card(embracingWinnerId), ownerId)) Card(embracingWinnerId).Bowed = true;
+                break;
         }
     }
 }

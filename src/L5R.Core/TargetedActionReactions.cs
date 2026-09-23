@@ -250,6 +250,20 @@ public sealed partial class MatchEngine
             case "jinn-kuen-negate":
             case "training-negate-merchant-free":
                 return affected.OwnerId == card.OwnerId && Keyword(affected, "Merchant");
+            // Seeds of Decay pass (issue #453), batch 1. Shifting Terrain (in play at a battlefield): another player's action targets one of its controller's Personalities, and a
+            // Personality of the controller's at the Terrain's battlefield could be the target instead.
+            case "shifting-terrain-redirect":
+                return card.Zone == Zone.Battlefield && command.PlayerId != card.OwnerId && affected.OwnerId == card.OwnerId && Definition(affected).Type == CardType.Personality
+                    && ShiftingTerrainCandidates(card, subject).Any();
+            // The Castle of Order: another player's Battle action targets one of its controller's Ninja cards, once per battle, with another Ninja of his at the same location the action accepts.
+            case "castle-of-order-redirect":
+                return IsBattleAction(command) && command.PlayerId != card.OwnerId && affected.OwnerId == card.OwnerId && Keyword(affected, "Ninja")
+                    && !CastleOfOrderUsedThisBattle(card) && CastleOfOrderCandidates(card, subject, affected).Any();
+            // Grappling the Snake's granted choice: any action targets the Monk himself; the bow option only when a Personality performed the action.
+            case "grappling-snake-negate":
+                return affected.Id == card.Id;
+            case "grappling-snake-bow":
+                return affected.Id == card.Id && ActionPerformingPersonality(command) is not null;
             default:
                 return false;
         }
@@ -294,6 +308,9 @@ public sealed partial class MatchEngine
         {
             "blade-of-champions-redirect" => RedirectCandidates(card, subject).Select(c => ((string?)c.Id, (string?)$"{AbilityCatalog.All[abilityId].Label} · {Definition(c).Name} ({c.Id})")),
             "mochitoko-negate" => MochitokoFollowers(card, subject).Select(c => ((string?)c.Id, (string?)$"{AbilityCatalog.All[abilityId].Label} · {Definition(c).Name} ({c.Id})")),
+            // Seeds of Decay pass (issue #453), batch 1: one option per Personality/Ninja the action may be redirected to.
+            "shifting-terrain-redirect" => ShiftingTerrainCandidates(card, subject).Select(c => ((string?)c.Id, (string?)$"{AbilityCatalog.All[abilityId].Label} · {Definition(c).Name} ({c.Id})")),
+            "castle-of-order-redirect" => CastleOfOrderCandidates(card, subject, Card(subject.TargetId!)).Select(c => ((string?)c.Id, (string?)$"{AbilityCatalog.All[abilityId].Label} · {Definition(c).Name} ({c.Id})")),
             _ => [(null, null)]
         };
 }

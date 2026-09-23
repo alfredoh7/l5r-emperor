@@ -1241,7 +1241,7 @@ public sealed partial class MatchEngine
         foreach(var assignment in command.Assignments??[])
         {
             var card=Card(assignment.Key);
-            Require(card.OwnerId==command.PlayerId && card.Zone==Zone.Home && !card.Bowed && Definition(card).Type==CardType.Personality,"Assign only your unbowed Personalities at home.");
+            Require(card.OwnerId==command.PlayerId && card.Zone==Zone.Home && (!card.Bowed || MayAssignBowed(card)) && Definition(card).Type==CardType.Personality,"Assign only your unbowed Personalities at home.");
             // Xijkt (issue #207 follow-up): "may assign during Cavalry Maneuvers if you are the
             // Defender" -- a narrow, card-specific Cavalry-eligibility override (checked here rather
             // than broadening IsCavalryUnit's own shared logic for one card), additive only: it never
@@ -1272,6 +1272,7 @@ public sealed partial class MatchEngine
         Require(command.Province is int && _state.UnresolvedBattlefields.Contains(command.Province.Value),"Choose an unresolved battlefield.");
         _state.CurrentBattleProvince=command.Province; _state.BattleNumber++;
         _state.EnemyDestroyedOwnPersonalitySinceLastBattleAction=new bool[2]; // Revenge (issue #437): "this battle" bounds the window.
+        _state.ReconStrategyActionsThisBattle=new int[2]; // Advanced Intelligence (Seeds of Decay pass, issue #453, batch 1): "this battle" too.
         SetPhase(Phase.Battle,1-_state.ActivePlayerId);
         // Battle Phase timing (issue #310): the Defender holds the first opportunity by default (spec 4.4).
         // "Engaging" is exactly this moment -- the Attacker has just selected the battle (spec 4.1) -- so the
@@ -2114,9 +2115,9 @@ public sealed partial class MatchEngine
     // (Seppun Heavy Elite's shape -- see AttachGrantsEliteEffect).
     private bool EliteEffect(CardInstance card) => Keyword(card,"Elite") || Attachments(card.Id).Any(a=>Definition(a).AttachGrantsEliteEffect
         || Definition(a).AttachGrantsEliteEffectWhileWielderHas is string wielderKeyword && Keyword(card,wielderKeyword));
-    private int PersonalityBattleContribution(CardInstance card) => card.Bowed && !EliteEffect(card) ? 0 : PersonalityForce(card);
+    private int PersonalityBattleContribution(CardInstance card) => card.Bowed && !EliteEffect(card) || ForceContributionNegated(card) ? 0 : PersonalityForce(card);
     private int FollowerBattleContribution(CardInstance card) => Attachments(card.Id)
-        .Where(c=>(!c.Bowed || EliteEffect(c)) && Definition(c).Type==CardType.Follower)
+        .Where(c=>(!c.Bowed || EliteEffect(c)) && !ForceContributionNegated(c) && Definition(c).Type==CardType.Follower)
         .Sum(FollowerForce);
     private int BattleForce(CardInstance card) => PersonalityBattleContribution(card)+FollowerBattleContribution(card);
     // Force redirection (issue #216, Togashi Noboru): each army's own total, honoring any active
@@ -2129,6 +2130,8 @@ public sealed partial class MatchEngine
         int af=0,df=0;
         foreach(var c in a) { if(RedirectsTo(c,attacker,defender,a,d)==defender) df+=PersonalityBattleContribution(c); else af+=PersonalityBattleContribution(c); af+=FollowerBattleContribution(c); }
         foreach(var c in d) { if(RedirectsTo(c,attacker,defender,a,d)==attacker) af+=PersonalityBattleContribution(c); else df+=PersonalityBattleContribution(c); df+=FollowerBattleContribution(c); }
+        // Seeds of Decay pass (issue #453), batch 1: Megumi's Guidance's "+2 total Force, or +3 if you are the Defender, while your army is opposed" (SeedsOfDecayBatch1.cs).
+        af+=CelestialArmyBonus(attacker,a,d,defending:false); df+=CelestialArmyBonus(defender,d,a,defending:true);
         return (af,df);
     }
     private int? RedirectsTo(CardInstance card,int attacker,int defender,CardInstance[] a,CardInstance[] d)
@@ -2310,6 +2313,9 @@ public sealed partial class MatchEngine
                 continue;
             }
             if(DestructionDelayed(card)) continue;
+            // Seeds of Decay pass (issue #453), batch 1: an action's effect (actingPlayerId is set exactly then) is negated by Wide Valley at its battlefield and by Megumi's Guidance's shield.
+            if(actingPlayerId is not null && WideValleyNegatesDestruction(card)) continue;
+            if(actingPlayerId is int shieldActor && DestructionShielded(card,shieldActor)) continue;
             foreach(var attachment in Attachments(card.Id).ToArray())
             {
                 RemoveAttachmentGrants(card, attachment.Id);
@@ -2825,6 +2831,7 @@ public sealed partial class MatchEngine
     {
         if(source is null || source.OwnerId != playerId) return false;
         var stronghold = Definition(Card(Player(playerId).StrongholdId)).Effect;
+        if(HonorLossNegatedByKeyword(stronghold,source)) return true; // Seeds of Decay pass (issue #453), batch 1: The Castle of Order's "Ninja cards you own".
         if(!HonorLossImmunity.TryGetValue(stronghold, out var rule)) return false;
         var def = Definition(source);
         return (rule.Clan is not null && HasClanAffiliation(source,rule.Clan)) || (rule.Fate && IsFateCardType(def.Type));

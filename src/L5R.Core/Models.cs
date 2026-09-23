@@ -283,6 +283,12 @@ public sealed class CardInstance
     // that says it is a created card: it has no physical card to return to (it is removed from the game when it leaves play) and the client marks it so. Every other created card is a
     // CardDefinition.CreatedOnly scan and needs no marker.
     public bool CreatedCopy { get; set; }
+    // Seeds of Decay pass (issue #453), batch 1. Defensive Blockade: the battle (MatchState.BattleNumber) in which this card contributes no Force to its army's total.
+    public int ForceContributionNegatedBattle { get; set; } = -1;
+    // Embracing Battle / Military Promotion: the turn in which this Personality may be assigned to a battlefield even if bowed.
+    public int AssignBowedTurn { get; set; } = -1;
+    // Megumi's Guidance: the turn through which this Personality's destruction from other players' cards' effects is negated (SeedsOfDecayBatch1.cs).
+    public int DestructionShieldTurn { get; set; } = -1;
 }
 
 public sealed class ProvinceState
@@ -893,7 +899,22 @@ public sealed class MatchState
     // ANY player's turn ends (MatchEngine.cs's ResolvePendingEndPhaseRecruits, called from EndTurn -- exactly "the next End Phase," whichever player's it is). Via
     // names the source for the entry log, the same role DestroyUnits'/BringDeadPersonalityIntoPlay's own "via" string already plays elsewhere.
     public List<PendingEndPhaseRecruit> PendingEndPhaseRecruits { get; set; } = [];
+    // Seeds of Decay pass (issue #453), batch 1. Standing redirects (StandingRedirects.cs): "the next time (this turn / this battle) another player's action would
+    // target one of your Personalities/cards, it targets X instead, if legal" (Ceaseless Vigil, Ruthless Onslaught) and Metsubushi's "must target him"; each is spent
+    // by the next action that matches it, when that action is announced.
+    public List<StandingRedirect> StandingRedirects { get; set; } = [];
+    // Grappling the Snake: the units to bow once the action the Monk's Reaction answered has resolved (SeedsOfDecayBatch1.cs).
+    public List<PendingGrapplingBow> PendingGrapplingBows { get; set; } = [];
+    // Advanced Intelligence: per player, how many actions from a Recon Strategy that player has taken in the current battle (reset when a battle is selected).
+    public int[] ReconStrategyActionsThisBattle { get; set; } = new int[2];
 }
+
+/// <summary>A standing redirect (Seeds of Decay, issue #453): Kind is a StandingRedirectKinds value, OwnerId the player whose cards it protects, ToCardId the card the action
+/// targets instead, Turn the turn it lasts (Battle: the battle it lasts, or null for the whole turn), SourceName the card that set it up.</summary>
+public sealed record StandingRedirect(string Kind, int OwnerId, string ToCardId, int Turn, int? Battle, string SourceName);
+
+/// <summary>Grappling the Snake: after the action that targeted MonkId resolves, bow the unit of PerformerId (a Personality that performed it).</summary>
+public sealed record PendingGrapplingBow(string MonkId, string PerformerId, string SourceName);
 
 /// <summary>A dead Personality to recruit automatically -- ignoring costs and Honor Requirements -- the next time any player's turn ends, if he is still dead then
 /// (issue #440 follow-up). See MatchState.PendingEndPhaseRecruits.</summary>

@@ -93,7 +93,7 @@ internal static class BattleAbsentMovesTests
     private static void MarkedInventoryPinned()
     {
         var marked = string.Join(",", AbilityCatalog.All.Where(p => p.Value.MovesToBattle).Select(p => p.Key).OrderBy(k => k, StringComparer.Ordinal));
-        Eq(marked, "charge-into-danger-move,dislodge-the-foe,earth-flows-move,hawado-move-battlefield,houken-exp-straighten,intervening-spirit-move,mai-move-force-penalty,michi-move,return-to-action-move,rikyou-move,sanctuary-of-the-waves-move,skipping-the-puddle-move,sound-of-thunder-move,takasho-move,training-move-current,training-move-to-battle,trusting-instinct-move,your-clan-needs-you");
+        Eq(marked, "charge-into-danger-move,dislodge-the-foe,earth-flows-move,hawado-move-battlefield,houken-exp-straighten,intervening-spirit-move,mai-move-force-penalty,michi-move,requesting-reinforcements-recruit,return-to-action-move,rikyou-move,sanctuary-of-the-waves-move,skipping-the-puddle-move,sound-of-thunder-move,takasho-move,training-move-current,training-move-to-battle,trusting-instinct-move,your-clan-needs-you");
         foreach (var (id, ability) in AbilityCatalog.All.Where(p => p.Value.MovesToBattle))
             Check(ability.Timing is "Battle" or "BattleOrOpen", $"{id}: a move to the battle is a Battle action");
     }
@@ -183,7 +183,9 @@ internal static class BattleAbsentMovesTests
     private static void RealCardsOfferedWithoutPresence()
     {
         var failures = new List<string>();
-        foreach (var ability in AbilityCatalog.All.Where(p => p.Value.MovesToBattle && !p.Key.StartsWith("training-")).Select(p => p.Key).OrderBy(k => k, StringComparer.Ordinal))
+        // Requesting Reinforcements (Seeds of Decay pass, issue #453) is performed by "your performing Scout" AT the battlefield (bowed as its cost), so its acting player always
+        // has a unit there: the no-presence position this test rigs cannot arise for it. It is still marked (its effect brings a Personality to the battle).
+        foreach (var ability in AbilityCatalog.All.Where(p => p.Value.MovesToBattle && !p.Key.StartsWith("training-") && p.Key != "requesting-reinforcements-recruit").Select(p => p.Key).OrderBy(k => k, StringComparer.Ordinal))
         {
             var offeredTo = new List<int>();
             var reasons = new List<string>();
