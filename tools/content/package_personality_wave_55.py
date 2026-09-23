@@ -47,9 +47,10 @@ ABILITIES: dict[int, list[str]] = {
 OVERRIDE: dict[int, dict] = {
     10091: {"EntryHonorLoss": 3},  # Chuda Seki: "After Seki enters play: Lose 3 Honor."
     10040: {"Effect": "negate-first-enemy-move-each-turn"},  # Hida Kaiji's trait
-    10090: {"EntryHonorLoss": 2},  # Ninube Hajime: "After Hajime enters play: Lose 2 Honor."
+    10090: {"EntryHonorLoss": 2, "Clan": "Spider"},  # Ninube Hajime: "After Hajime enters play: Lose 2 Honor."; the catalogue lists Ninja first, his Clan alignment is Spider
+    10081: {"Clan": "Scorpion"},  # Shosuro Hawado - exp: the catalogue lists Ninja first, his Clan alignment is Scorpion
     10096: {"Effect": "tanemono-no-phoenix-control"},  # Tanemono: "will not be controlled by a Phoenix Clan player"
-    10088: {"Effect": "target-of-last-resort", "EntryHonorLoss": 3},  # Goju Yurishi - exp: both traits
+    10088: {"Effect": "target-of-last-resort", "EntryHonorLoss": 3, "Clan": "Spider"},  # Goju Yurishi - exp: both traits; Loyal, so his Clan alignment must be his printed Spider Clan (the catalogue lists Ninja first)
 }
 
 

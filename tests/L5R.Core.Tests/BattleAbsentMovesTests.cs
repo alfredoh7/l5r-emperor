@@ -168,6 +168,8 @@ internal static class BattleAbsentMovesTests
         var water = CardCatalog.Cards.Values.First(c => c.Type == CardType.Personality && !c.ScenarioOnly && c.Keywords?.Contains("Water") == true && c.Keywords.Contains("Shugenja"));
         var host = Add(s, water.Id, actor, Zone.Home);
         var maiden = Add(s, "training-crane-veteran", actor, Zone.Home); if (ability == "sound-of-thunder-move") maiden.GrantedKeywords.Add(new("Battle Maiden", "test-fixture", GrantDuration.Permanent));
+        // Yogo Heijin (issue #453, batch 3): his own second slot needs a Courtier -- the same Personality already sitting at home for every other rig.
+        if (ability == "heijin-move") maiden.GrantedKeywords.Add(new("Courtier", "test-fixture", GrantDuration.Permanent));
         CardInstance card;
         if (definition.Type == CardType.Personality) card = Add(s, definition.Id, actor, Zone.Home, bowed: ability is "hawado-move-battlefield" or "houken-exp-straighten");
         else if (definition.Type == CardType.Spell) card = Add(s, definition.Id, actor, Zone.Attached, parent: host.Id);
