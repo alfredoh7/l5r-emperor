@@ -39,6 +39,7 @@ public sealed partial class MatchEngine
         if (move.Movers is MoveSpec.Source or MoveSpec.SourceAndTarget && command.CardId is not null) yield return command.CardId;
         if (move.Movers is MoveSpec.Performer or MoveSpec.PerformerAndTarget && command.PerformerId is not null) yield return command.PerformerId;
         if (move.Movers == MoveSpec.PerformingSlot) foreach (var mover in PerformingSlotCards(command, ability)) yield return mover.Id;
+        if (move.Movers == MoveSpec.BattleActionPerformer && _state.BattleActionReactionPerformerId is { } reactedPerformerId) yield return reactedPerformerId;
         if (move.Movers is MoveSpec.Target or MoveSpec.SourceAndTarget or MoveSpec.PerformerAndTarget)
             foreach (var id in ReactionWindowTargets(command).OfType<string>()) yield return id;
     }

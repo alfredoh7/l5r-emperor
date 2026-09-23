@@ -91,6 +91,10 @@ public sealed partial class MatchEngine
             foreach(var chosenPlayer in chosenPlayers)
             {
                 var command=new GameCommand("useAbility",playerId,_state.Version,CardId:card.Id,TargetId:targetId,TargetPlayerId:chosenPlayer,AbilityId:abilityId);
+                // A Reaction whose move names a battlefield the player chooses (Shosuro Hawado - exp, issue #453): the command carries the first listed destination
+                // and the option lists them all (ActionOption.Provinces), as an ordinary move ability's offer does.
+                var destinations=AbilityCatalog.All[abilityId].Move is { ChoosesBattlefield:true } reactionMove ? MoveDestinations(reactionMove) : null;
+                if(destinations is { Length:>0 }) command=command with {Province=destinations[0]};
                 var gold=QuoteAbilityGold(command);
                 if(gold is not null) command=command with {SourceIds=gold.Payments.FirstOrDefault()?.SourceIds};
                 var why=reason ?? (gold is null ? null : gold.Error ?? (gold.Payments.Length==0 ? "Insufficient unbowed Gold production." : null));
@@ -99,7 +103,7 @@ public sealed partial class MatchEngine
                 why??=ActionLockRejection(command);
                 var text=label??AbilityOptionLabel(abilityId,AbilityCatalog.All[abilityId],null,card);
                 if(chosenPlayer is int who) text+=who==playerId ? " · you" : " · your opponent";
-                Add("useAbility",text,command,why,card.Id,gold:gold);
+                Add("useAbility",text,command,why,card.Id,provinces:destinations,gold:gold);
             }
         }
         // An entering-play Reaction that targets a card in play (Mastering the Elements, issue #420: "target your Spell"): one option carrying every legal target, each with its own Gold quote when the
@@ -153,7 +157,8 @@ public sealed partial class MatchEngine
                 if(pending.Type=="proclaim")
                 {
                     var honor=Definition(Card(pending.CardId)).PersonalHonor;
-                    Add("proclaim",$"Proclaim · gain {honor} Honor",Command("proclaim"),player.ProclaimUsedTurn==_state.TurnNumber?"Already used Proclaim this turn.":null,pending.CardId);
+                    // Kakita Yusugi / Yogo Ugimori (issue #453, batch 2): the limit he ignores, and the lock (ProclaimRejection).
+                    Add("proclaim",$"Proclaim · gain {honor} Honor",Command("proclaim"),ProclaimRejection(player,Definition(Card(pending.CardId))),pending.CardId);
                 }
                 var enteringCard=Card(pending.CardId);
                 // Every "own enters play" Reaction the card prints (issue #389: Horume's gain AND lose; before, only the first was listed). One that shares a
@@ -161,6 +166,14 @@ public sealed partial class MatchEngine
                 foreach(var reactionId in (Definition(enteringCard).Abilities??[]).Where(a=>AbilityCatalog.All.TryGetValue(a,out var def) && def.Timing=="Reaction" && def.Trigger=="own-enters-play"))
                 {
                     var used=enteringCard.AbilityUses.ContainsKey(AbilityCatalog.All[reactionId].UsageKey??reactionId);
+                    // A multi-target entering-play Reaction (Bayushi Makubesu, issue #453: "one or two of your Personalities"): the slot offer an ordinary ability gets.
+                    if(AbilityCatalog.All[reactionId].Slots is not null)
+                    {
+                        var slotReaction=AbilityCatalog.All[reactionId];
+                        var slotOption=SlotAbilityOption(new GameCommand("useAbility",playerId,_state.Version,CardId:enteringCard.Id,AbilityId:reactionId),slotReaction,AbilityOptionLabel(reactionId,slotReaction,null,enteringCard),enteringCard.Id);
+                        result.Add(used ? slotOption with {Enabled=false,Reason="This reaction has already been used."} : slotOption);
+                        continue;
+                    }
                     if(AbilityCatalog.All[reactionId].Target is "none" or "player") AddReaction(enteringCard,reactionId,used?"This reaction has already been used.":null);
                     else AddTargetedEntryReaction(enteringCard,reactionId,used?"This reaction has already been used.":null);
                 }
@@ -208,7 +221,9 @@ public sealed partial class MatchEngine
                     var reaction=AbilityCatalog.All[reactionId];
                     string?[] candidates=reaction.Target=="own-unit-member"?UnitMembers(card).Select(c=>(string?)c.Id).ToArray()
                         // Issue #336 fixture: one option per Personality the deferred action would move.
-                        :reaction.Target=="deferred-action-mover"?ActionMovers(deferredAction).Select(c=>(string?)c).ToArray():[null];
+                        :reaction.Target=="deferred-action-mover"?ActionMovers(deferredAction).Select(c=>(string?)c).ToArray()
+                        // The Earth's Strength (issue #453 batch 5): one option per defending Personality the deferred action would move.
+                        :reaction.Target=="deferred-action-defending-mover"?DeferredActionDefendingMovers(deferredAction).Select(c=>(string?)c).ToArray():[null];
                     foreach(var candidate in candidates)
                         AddReaction(card,reactionId,targetId:candidate,label:candidate is null?null:$"{reaction.Label} · {Definition(Card(candidate)).Name} ({candidate})",validate:true);
                 }
@@ -283,6 +298,12 @@ public sealed partial class MatchEngine
         {
             // After an action's resolution (issue #437): this player's Reactions that name it, then the pass -- same shape as afterResolutionReaction above.
             result.AddRange(AbilityActions(playerId));
+            Add("declineReaction","Pass reaction",Command("declineReaction"));
+        }
+        else if(_state.PendingChoice is { Type:"proclaimNegateReaction" })
+        {
+            // Turning the Story (issue #453, batch 2): the one reacting player's "before a Proclaim resolves" Reactions from hand, then the pass.
+            result.AddRange(BeforeProclaimReactionOptions(playerId));
             Add("declineReaction","Pass reaction",Command("declineReaction"));
         }
         else if(_state.PendingChoice is { Type:"battleRecruit" })
@@ -422,6 +443,21 @@ public sealed partial class MatchEngine
             var count=player.Hand.Count-8;
             Add("discardHand",$"Discard {count} card(s)",Command("discardHand",cardIds:player.Hand.Take(count).ToArray()),targets:player.Hand.ToArray());
         }
+        // Seeds of Decay pass (issue #453), batch 4: the two Events Phase decisions (SeedsOfDecayBatch4.cs), for the revealing player only.
+        else if(_state.PendingChoice is { Type:"offeringReverence" } reverence)
+        {
+            if(playerId==reverence.PlayerId)
+            {
+                Add("offeringReverence","Offering Reverence: shuffle it into your Dynasty deck",new GameCommand("offeringReverence",playerId,_state.Version,Choice:"shuffle"),cardId:reverence.CardId);
+                Add("offeringReverence","Offering Reverence: discard it",new GameCommand("offeringReverence",playerId,_state.Version,Choice:"discard"),cardId:reverence.CardId);
+            }
+        }
+        else if(_state.PendingChoice is { Type:"testedLandProvince" } testedLand)
+        {
+            if(playerId==testedLand.PlayerId)
+                foreach(var province in TestedLandCandidates(playerId))
+                    Add("testedLandProvince",$"Tested Land: attach it to the enemy province {province.Index+1}",new GameCommand("testedLandProvince",playerId,_state.Version,Province:province.Index),cardId:testedLand.CardId,provinces:[province.Index]);
+        }
         else switch(_state.Phase)
         {
             case Phase.Action:
@@ -439,7 +475,7 @@ public sealed partial class MatchEngine
             case Phase.CavalryDeclaration:
             case Phase.CavalryDefense:
                 var cavalrySegment=_state.Phase is Phase.CavalryDeclaration or Phase.CavalryDefense;
-                var units=_state.Cards.Values.Where(c=>c.OwnerId==playerId && c.Zone==Zone.Home && !c.Bowed && Definition(c).Type==CardType.Personality && IsCavalryUnit(c)==cavalrySegment).Select(c=>c.Id).ToArray();
+                var units=_state.Cards.Values.Where(c=>c.OwnerId==playerId && c.Zone==Zone.Home && (!c.Bowed || MayAssignBowed(c)) && Definition(c).Type==CardType.Personality && IsCavalryUnit(c)==cavalrySegment).Select(c=>c.Id).ToArray();
                 var attack=_state.Phase is Phase.InfantryDeclaration or Phase.CavalryDeclaration;
                 // Defenders are offered only the battlefields AssignDefense accepts.
                 var provinces=Player(1-_state.ActivePlayerId).Provinces
@@ -536,6 +572,7 @@ public sealed partial class MatchEngine
         if(_state.PendingChoice is null && _state.Phase is Phase.Action or Phase.Battle) result.AddRange(AbilityActions(playerId));
         Add("concede","Concede",Command("concede"));
         // Unfortunate Hesitation (issue #338): what a player who owes a pass cannot do at this opportunity is listed disabled.
-        return ApplyForcedPassToOptions(playerId,result);
+        // Urgency (issue #453, batch 2): past the allowance, every non-Reaction action is listed disabled too.
+        return ApplyActionAllowanceToOptions(playerId,ApplyForcedPassToOptions(playerId,result));
     }
 }

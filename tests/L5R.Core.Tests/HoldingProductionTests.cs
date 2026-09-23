@@ -1,0 +1,57 @@
+using System.Text.RegularExpressions;
+using L5R.Core;
+
+// Issue #455: a published card whose printed text says "Bow this card: Produce N Gold" must carry that N as its
+// GoldProduction, or produce it through an ability. holding-wave-1's four Holdings carried 0 and no ability, so
+// Producers() skipped them and they could never be bowed for Gold at all.
+internal static class HoldingProductionTests
+{
+    // The cards that produce Gold through an ability instead of the printed field: a conditional production
+    // (ConditionalProductionCatalog), a Reaction that produces while a cost is paid (Yoritomo Sakuma), or a
+    // created Holding's own trait (Basic Lesson). Each is covered by its own suite. The Sacred Temple of the
+    // Phoenix - inexperienced (issue #458): GoldProduction is its own printed BASE (3, the catalogue's own
+    // "production" field); the printed text's "produce 5 Gold" is its conditional bonus (sacred-temple-phoenix-gold).
+    private static readonly string[] ProduceThroughAnAbility =
+        ["oracle-l5r-1190", "oracle-l5r-9624", "oracle-l5r-9437", "oracle-l5r-713", "oracle-l5r-10256"];
+
+    public static void Run(TestRunner runner) => runner.Run("holding-production", [
+        ("The four holding-wave-1 Holdings produce the Gold they print: the field carries it and each one alone funds a payment of that size", PrintedProductionIsUsable),
+        ("Every published card printing \"Produce N Gold\" carries N, unless it produces through an ability", NoPublishedCardSilentlyProducesNothing),
+    ]);
+
+    private static void Check(bool ok, string message = "Assertion failed") => Batch336Support.Check(ok, message);
+    private static void Eq<T>(T actual, T expected, string message = "Values differ") => Batch336Support.Eq(actual, expected, message);
+    private static CardInstance Add(MatchState s, string def, int owner, Zone zone) => Batch336Support.Add(s, def, owner, zone);
+
+    private static int PrintedProduction(CardDefinition card) =>
+        Regex.Match(card.Text ?? "", @"[Pp]roduce (\d+) Gold") is { Success: true } m ? int.Parse(m.Groups[1].Value) : 0;
+
+    private static void PrintedProductionIsUsable()
+    {
+        foreach (var id in new[] { "oracle-l5r-430", "oracle-l5r-7291", "oracle-l5r-7875", "oracle-l5r-8721" })
+        {
+            var definition = CardCatalog.Get(id);
+            var printed = PrintedProduction(definition);
+            Check(printed > 0, $"{definition.Name} prints a Gold production");
+            Eq(definition.GoldProduction, printed, $"{definition.Name} carries its printed production");
+            var state = MatchEngine.CreateEconomyScenario().State;
+            state.Phase = Phase.Action; state.ActivePlayerId = 0; state.PriorityPlayerId = 0;
+            var holding = Add(state, id, 0, Zone.Home);
+            var engine = MatchEngine.FromTestState(state);
+            Eq(engine.GoldProduced(holding.Id, 0), printed, $"{definition.Name} produces its printed Gold");
+            Check(engine.PaymentOptions(0, printed).Any(o => o.SourceIds.SequenceEqual(new[] { holding.Id }) && o.Produced == printed),
+                $"{definition.Name} is offered as the source that funds a {printed} Gold payment");
+        }
+    }
+
+    private static void NoPublishedCardSilentlyProducesNothing()
+    {
+        var wrong = CardCatalog.PlayableFromDecks
+            .Where(c => !ProduceThroughAnAbility.Contains(c.Id, StringComparer.Ordinal))
+            .Select(c => (Card: c, Printed: PrintedProduction(c)))
+            .Where(x => x.Printed > 0 && x.Card.GoldProduction != x.Printed)
+            .Select(x => $"{x.Card.Name} ({x.Card.Id}) prints {x.Printed} and carries {x.Card.GoldProduction}")
+            .ToArray();
+        Check(wrong.Length == 0, "Published cards whose printed Gold production is not wired: " + string.Join("; ", wrong));
+    }
+}

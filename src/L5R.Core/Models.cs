@@ -190,7 +190,10 @@ public sealed record Protection(string Source, string Duration);
 public sealed record ActionLock(string Source, string Duration);
 
 /// <summary>The moments of a turn a straighten hold can wait for. Each happens during the active player's turn; a hold names whose turn counts.</summary>
-public enum StraightenPoint { TurnBegins, StraightenPhaseEnds, EventsRevealEnds, ActionPhaseEnds, TurnEnds }
+public enum StraightenPoint { TurnBegins, StraightenPhaseEnds, EventsRevealEnds, ActionPhaseEnds, TurnEnds,
+    // "until the phase ends" (Ronin Ambushers, issue #453 batch 5): released when the phase in progress gives way to a different one (the whole
+    // Attack-declaration-through-battle-resolution stretch counts as one phase, the War Weariness convention). Owner is always null.
+    PhaseEnds }
 
 /// <summary>"May not straighten until X" (issue #415). <see cref="Owner"/> is the player whose turn counts (null: whoever's turn it is when the point comes, "this turn" and "the
 /// next Straighten Phase"); <see cref="Until"/> is the point; <see cref="Skip"/> is how many of those points must pass with the hold still standing before it is released (0: the
@@ -283,6 +286,17 @@ public sealed class CardInstance
     // that says it is a created card: it has no physical card to return to (it is removed from the game when it leaves play) and the client marks it so. Every other created card is a
     // CardDefinition.CreatedOnly scan and needs no marker.
     public bool CreatedCopy { get; set; }
+    // Seeds of Decay pass (issue #453), batch 1. Defensive Blockade: the battle (MatchState.BattleNumber) in which this card contributes no Force to its army's total.
+    public int ForceContributionNegatedBattle { get; set; } = -1;
+    // Embracing Battle / Military Promotion: the turn in which this Personality may be assigned to a battlefield even if bowed.
+    public int AssignBowedTurn { get; set; } = -1;
+    // Megumi's Guidance: the turn through which this Personality's destruction from other players' cards' effects is negated (SeedsOfDecayBatch1.cs).
+    public int DestructionShieldTurn { get; set; } = -1;
+    // Seeds of Decay pass (issue #453), batch 2. Sentinel Spirit ("if it was opposed this turn"): the last turn this card stood in a battle whose two armies opposed each other
+    // (MarkOpposed, at the battle's resolution); the AssignedToAttackTurn convention. Dragon Tattoo - exp ("who has not performed an action from a Dragon Tattoo this game"):
+    // the titles of the cards whose actions this Personality performed, kept for the game (never reset with the card: it is the same card).
+    public int OpposedTurn { get; set; } = -1;
+    public List<string> PerformedActionFromTitles { get; set; } = [];
 }
 
 public sealed class ProvinceState
@@ -344,6 +358,8 @@ public sealed class PlayerState
     public List<string> FateDeck { get; set; } = [];
     public List<string> Hand { get; set; } = [];
     public List<ProvinceState> Provinces { get; set; } = [];
+    // Brotherhood Schism (issue #453, batch 2): the last turn this player put a Ring into play (its own recruit action), the AssignedToAttackTurn convention.
+    public int RingPutIntoPlayTurn { get; set; } = -1;
 }
 
 public sealed record PendingChoice(string Type, int PlayerId, string? CardId, string Prompt, int? ActingPlayerId = null);
@@ -893,7 +909,46 @@ public sealed class MatchState
     // ANY player's turn ends (MatchEngine.cs's ResolvePendingEndPhaseRecruits, called from EndTurn -- exactly "the next End Phase," whichever player's it is). Via
     // names the source for the entry log, the same role DestroyUnits'/BringDeadPersonalityIntoPlay's own "via" string already plays elsewhere.
     public List<PendingEndPhaseRecruit> PendingEndPhaseRecruits { get; set; } = [];
+    // Seeds of Decay pass (issue #453), batch 1. Standing redirects (StandingRedirects.cs): "the next time (this turn / this battle) another player's action would
+    // target one of your Personalities/cards, it targets X instead, if legal" (Ceaseless Vigil, Ruthless Onslaught) and Metsubushi's "must target him"; each is spent
+    // by the next action that matches it, when that action is announced.
+    public List<StandingRedirect> StandingRedirects { get; set; } = [];
+    // Grappling the Snake: the units to bow once the action the Monk's Reaction answered has resolved (SeedsOfDecayBatch1.cs).
+    public List<PendingGrapplingBow> PendingGrapplingBows { get; set; } = [];
+    // Advanced Intelligence: per player, how many actions from a Recon Strategy that player has taken in the current battle (reset when a battle is selected).
+    public int[] ReconStrategyActionsThisBattle { get; set; } = new int[2];
+    // Seeds of Decay pass (issue #453), batch 2 (SeedsOfDecayBatch2.cs). Each record expires by comparison (a turn number, a phase instance, a player's turn count), never by a sweep.
+    // Province strength for the turn (Incriminating Testimony, Bayushi Shibata - exp, Imperial Protection's standing rule) -- read by EffectiveProvinceStrength beside the permanent Strength.
+    public List<ProvinceStrengthEffect> ProvinceStrengthEffects { get; set; } = [];
+    // "After the next time this turn he is assigned to attack [or is destroyed]" (Imperial Protection, Fair Warning): fired from Assign() and MarkDead.
+    public List<AssignmentWatch> AssignmentWatches { get; set; } = [];
+    // Sentinel Spirit: judged when the next Dynasty Phase begins (SetPhase).
+    public List<SentinelWatch> SentinelWatches { get; set; } = [];
+    // Urgency: "each player may only take two more non-Reaction actions this phase" -- ForcedPass's own shape, counted down by Apply().
+    public List<ActionAllowance> ActionAllowances { get; set; } = [];
+    // Yogo Ugimori: "he may not take the Proclaim Reaction until your next turn begins".
+    public List<ProclaimLock> ProclaimLocks { get; set; } = [];
+    // Turning the Story: non-null exactly while a "proclaimNegateReaction" PendingChoice is open (the Proclaim it holds resolves when the window closes).
+    public HeldProclaim? HeldProclaim { get; set; }
+    // Ingenuity: "draw an additional card during your next End Phase", per player, drawn and reset by EndTurn.
+    public int[] ExtraEndPhaseDraws { get; set; } = new int[2];
+    // Yogo Ugimori ("after Ugimori enters play from a province"): the card a province recruit (Purchase, RecruitReserve) last brought into play.
+    public string? LastProvinceEntryCardId { get; set; }
+    // An Insult Answered ("an action ... which caused you an Honor loss"): the players the currently-resolving action cost Honor, snapshotted into LastResolvedAction.HonorLosers.
+    public List<int> CurrentActionHonorLosers { get; set; } = [];
+    // Brotherhood Schism: the turn in which "Rings will not enter play if their owner has already put a Ring into play this turn" stands.
+    public int RingSchismTurn { get; set; } = -1;
+    // Moksha Patam (oracle-l5r-10121, issue #453 batch 5): "After an action resolves, if a player gained Honor from its effects" -- set by GainHonor on any
+    // gain, reset when an action begins (RunAbilityEffects) and read once when it is truly done (FinishActionEffectTracking, ApplyMokshaPatamTokens).
+    public bool CurrentActionHonorGained { get; set; }
 }
+
+/// <summary>A standing redirect (Seeds of Decay, issue #453): Kind is a StandingRedirectKinds value, OwnerId the player whose cards it protects, ToCardId the card the action
+/// targets instead, Turn the turn it lasts (Battle: the battle it lasts, or null for the whole turn), SourceName the card that set it up.</summary>
+public sealed record StandingRedirect(string Kind, int OwnerId, string ToCardId, int Turn, int? Battle, string SourceName);
+
+/// <summary>Grappling the Snake: after the action that targeted MonkId resolves, bow the unit of PerformerId (a Personality that performed it).</summary>
+public sealed record PendingGrapplingBow(string MonkId, string PerformerId, string SourceName);
 
 /// <summary>A dead Personality to recruit automatically -- ignoring costs and Honor Requirements -- the next time any player's turn ends, if he is still dead then
 /// (issue #440 follow-up). See MatchState.PendingEndPhaseRecruits.</summary>
@@ -912,6 +967,9 @@ public sealed class ResolvedActionFacts
     public int PlayerId { get; set; }
     public string? SourceId { get; set; }
     public List<AffectedCard> Affected { get; set; } = [];
+    // Seeds of Decay pass (issue #453), batch 2: the Personality who performed the action (the named performer, or the source resolved to its wielder), and the players it cost Honor.
+    public string? PerformerId { get; set; }
+    public List<int> HonorLosers { get; set; } = [];
 }
 
 // DeckPosition ("Top"/"Bottom") is the acting player's own upfront choice of where a card goes in

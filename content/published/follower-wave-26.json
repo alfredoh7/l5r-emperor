@@ -1,0 +1,32 @@
+{
+  "Profile": "follower-wave-26",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10105",
+      "Name": "Cavalry Detachment",
+      "Type": "Follower",
+      "Clan": "Unaligned",
+      "GoldCost": 4,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After another player's action targets this Personality, remove this card from the game to create a 3F/1C/2PH Samurai • Cavalry Personality with your Clan Alignment at the target's location. Transfer the target's attachments to the created Personality.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10105.jpg",
+      "Keywords": [
+        "Cavalry"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "cavalry-detachment-spawn"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

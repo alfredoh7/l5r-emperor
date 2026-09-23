@@ -1,0 +1,34 @@
+{
+  "Profile": "holding-wave-8",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10240",
+      "Name": "Border Keep",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 2,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Bow this card: Produce 2 Gold. \nLimited: If it is your first turn, put one or more cards in your Provinces at the bottom of your deck, refilling the Provinces face-up.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10240.jpg",
+      "Keywords": [
+        "Unique",
+        "Inexperienced",
+        "Winter"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "border-first"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

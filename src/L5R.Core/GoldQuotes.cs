@@ -291,6 +291,10 @@ public sealed partial class MatchEngine
             case GoldCostBasis.TargetPrinted:
             {
                 var printed = Definition(target).GoldCost;
+                // Extend the Soul's Boundaries (issue #453 batch 5): "This card enters play paying 1 less Gold for each Ring you control" -- a Spell enters play through Equip (Battle)'s
+                // target-printed price, so the count-scaled discount is read here (never below zero).
+                var ringDiscount = RingEntryDiscount(Definition(target), command.PlayerId);
+                if (ringDiscount > 0) return new(rule, Clamp(Math.Max(0, printed - ringDiscount) + rule.Modifier, rule.Floor), $"{name} cost {printed} − {ringDiscount} (Rings you control){Modified(rule.Modifier, rule.Floor)}", null, false, target);
                 return new(rule, Clamp(printed + rule.Modifier, rule.Floor), $"{name} cost {printed}{Modified(rule.Modifier, rule.Floor)}", null, false, target);
             }
             case GoldCostBasis.TargetCurrent:
@@ -480,6 +484,8 @@ public sealed partial class MatchEngine
         // Daigotsu Hotako exp3 (issue #336): the same term for a Personality, and for any N ("<clan>-clan-discount-N"): ClanEntryDiscount
         // reads all of them, here and in QuotePurchase, so an entry discount by Clan has one definition.
         if (ClanEntryDiscount(def, player) is { } clanEntry) { raw -= clanEntry.Amount; basis += $" − {clanEntry.Amount} ({clanEntry.Clan} Clan)"; }
+        // Mukudori (Seeds of Decay, issue #453): "Your other Fudo cards enter play for 1 less Gold" -- the same term QuotePurchase applies (StaticKeywordRules.cs).
+        if (KeywordEntryDiscount(card, playerId) is > 0 and var fudoDiscount) { raw -= fudoDiscount; basis += $" − {fudoDiscount} (Fudo, Mukudori)"; }
         if (raw < 0) basis += " (min 0)";
         return (Math.Max(0, raw), basis, kind);
     }

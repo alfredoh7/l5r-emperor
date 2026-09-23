@@ -1,0 +1,20 @@
+[
+  {
+    "card_id": "oracle-l5r-10201",
+    "printing_set": [
+      "Seeds of Decay"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10201",
+    "image_path": "assets/reference/oracle/seeds-of-decay/webp/oracle-l5r-10201-printing-1-image-1.webp",
+    "image_sha256": "df512ac4ceebcfe21729ef47bffe7b9079e0fe0c5b7db1efd5b18a12c97be106"
+  },
+  {
+    "card_id": "oracle-l5r-10200",
+    "printing_set": [
+      "Seeds of Decay"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10200",
+    "image_path": "assets/reference/oracle/seeds-of-decay/webp/oracle-l5r-10200-printing-1-image-1.webp",
+    "image_sha256": "4a514bf0f4b6832215ed46f28b646402dad4d9c070809cc29c6532d52c89b36b"
+  }
+]

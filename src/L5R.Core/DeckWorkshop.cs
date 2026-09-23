@@ -5,7 +5,9 @@ namespace L5R.Core;
 /// compiling unchanged. A created-only card ("May not be included in decks.") never enters a DeckWorkshop's pool.</summary>
 // CopyLimit (issue #337): the copy limit the card itself prints ("You may include up to 10 copies of this card in your deck" -- Fading
 // Shadows), read from CardDefinition.DeckCopyLimit; null, like CreatedOnly, for a caller or a card that has none, which keeps the usual 3 (1 if Unique).
-public sealed record DeckCardInfo(string Id, string Name, string[] Types, string[] Families, string[] Keywords, bool Implemented, bool CreatedOnly = false, int? CopyLimit = null)
+// FateMinimumReduction (issue #453 batch 5, Hato-gurama: "Your minimum Fate deck size is decreased by one"): how much each copy of the card in the deck lowers the 40-card Fate minimum,
+// read from CardDefinition.Effect == "hato-gurama" (the card's one Effect id also carries its hand-discard restriction, CardAbilities.cs); 0 for every other card.
+public sealed record DeckCardInfo(string Id, string Name, string[] Types, string[] Families, string[] Keywords, bool Implemented, bool CreatedOnly = false, int? CopyLimit = null, int FateMinimumReduction = 0)
 {
     public int ExperienceLevel => Experienced.Level(Keywords);
     public string DeckName => Experienced.DeckName(Name, Keywords);
@@ -24,6 +26,8 @@ public sealed record DeckReview(int Dynasty, int Fate, string[] Warnings, string
 public sealed class DeckWorkshop
 {
     public static readonly string[] SetupSlots = ["Stronghold", "Border Keep", "Bamboo Harvesters"];
+    /// <summary>Hato-gurama (issue #453 batch 5): the Fate-minimum reduction a card's printed trait gives, for a DeckCardInfo built from its definition.</summary>
+    public static int FateMinimumReductionOf(CardDefinition definition) => definition.Effect == "hato-gurama" ? 1 : 0;
     private readonly Dictionary<string, DeckCardInfo> _pool;
     private readonly Dictionary<string, DeckCardInfo> _poolById;
     private readonly Dictionary<string, int> _counts = new(StringComparer.OrdinalIgnoreCase);
@@ -94,7 +98,9 @@ public sealed class DeckWorkshop
         int Total(string family) => Cards.Where(c => c.SetupSlot.Length == 0 && c.Families.Contains(family)).Sum(c => Count(c.Id));
         var dynasty = Total("Dynasty"); var fate = Total("Fate");
         if (dynasty < 40) warnings.Add($"Dynasty needs {40 - dynasty} more cards (40 minimum).");
-        if (fate < 40) warnings.Add($"Fate needs {40 - fate} more cards (40 minimum).");
+        // Hato-gurama (issue #453 batch 5): each copy in the deck lowers the Fate minimum by one.
+        var fateMinimum = 40 - Cards.Where(c => c.FateMinimumReduction > 0).Sum(c => Count(c.Id) * c.FateMinimumReduction);
+        if (fate < fateMinimum) warnings.Add($"Fate needs {fateMinimum - fate} more cards ({fateMinimum} minimum).");
         var limits = DeckFormat.CheckLegality(ToDeck(), name => _pool[name].Keywords, name => _pool[name].CopyLimit);
         foreach (var v in limits.Violations) warnings.Add(_pool[v.CardName].CopyLimit is not null
             ? $"{v.CardName}: {v.Count} exceeds the card's own limit of {v.Limit} copies."

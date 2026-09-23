@@ -120,7 +120,7 @@ public sealed partial class MatchEngine
     {
         if (_state.PendingChoice?.Type == "attackReaction" && _state.PendingAttack is { } attack)
         {
-            if (attack.SourceId is not null && Protected(ActingPersonality(Card(attack.SourceId))))
+            if (attack.SourceId is not null && (Protected(ActingPersonality(Card(attack.SourceId))) || ActionProtected(attack.Command))) // Ki-Uso too (issue #453 batch 5)
             {
                 Emit("actionProtected", "Protection negates the negation -- this action cannot be negated.", negator.OwnerId, negator.Id);
                 return;
@@ -205,6 +205,11 @@ public sealed partial class MatchEngine
         {
             case "ezuno-redirect":
                 return YojimboRedirectApplies(card, subject, affected, "Shugenja");
+            // Bayushi Irezu (issue #458): "Before your Scorpion Clan Personality enters a duel, Irezu enters the duel instead" -- Ezuno's own shape, a Scorpion Clan
+            // restriction in place of his Shugenja one, narrowed to an action that actually issues a duel (a Battle action of another player's naming a Scorpion
+            // Clan Personality of Irezu's controller's as its target -- the challenged party).
+            case "irezu-duel-enter":
+                return acting.IssuesDuel && YojimboRedirectApplies(card, subject, affected, "Scorpion Clan");
             case "blade-of-champions-redirect":
                 return IsBattleAction(command) && UnitHostId(affected) == UnitHostId(card) && RedirectCandidates(card, subject).Any();
             // Spirit of the Yojimbo's granted Reaction: Ezuno's shape without his Shugenja restriction -- any of the reactor's own Personalities at his location.
@@ -250,6 +255,23 @@ public sealed partial class MatchEngine
             case "jinn-kuen-negate":
             case "training-negate-merchant-free":
                 return affected.OwnerId == card.OwnerId && Keyword(affected, "Merchant");
+            // Seeds of Decay pass (issue #453), batch 1. Shifting Terrain (in play at a battlefield): another player's action targets one of its controller's Personalities, and a
+            // Personality of the controller's at the Terrain's battlefield could be the target instead.
+            case "shifting-terrain-redirect":
+                return card.Zone == Zone.Battlefield && command.PlayerId != card.OwnerId && affected.OwnerId == card.OwnerId && Definition(affected).Type == CardType.Personality
+                    && ShiftingTerrainCandidates(card, subject).Any();
+            // The Castle of Order: another player's Battle action targets one of its controller's Ninja cards, once per battle, with another Ninja of his at the same location the action accepts.
+            case "castle-of-order-redirect":
+                return IsBattleAction(command) && command.PlayerId != card.OwnerId && affected.OwnerId == card.OwnerId && Keyword(affected, "Ninja")
+                    && !CastleOfOrderUsedThisBattle(card) && CastleOfOrderCandidates(card, subject, affected).Any();
+            // Grappling the Snake's granted choice: any action targets the Monk himself; the bow option only when a Personality performed the action.
+            case "grappling-snake-negate":
+                return affected.Id == card.Id;
+            case "grappling-snake-bow":
+                return affected.Id == card.Id && ActionPerformingPersonality(command) is not null;
+            // Cavalry Detachment (Seeds of Decay, issue #453): another player's action targets the Personality this Follower is attached to.
+            case "cavalry-detachment-spawn":
+                return command.PlayerId != card.OwnerId && card.Zone == Zone.Attached && affected.Id == card.AttachedTo && Definition(affected).Type == CardType.Personality;
             default:
                 return false;
         }
@@ -294,6 +316,9 @@ public sealed partial class MatchEngine
         {
             "blade-of-champions-redirect" => RedirectCandidates(card, subject).Select(c => ((string?)c.Id, (string?)$"{AbilityCatalog.All[abilityId].Label} · {Definition(c).Name} ({c.Id})")),
             "mochitoko-negate" => MochitokoFollowers(card, subject).Select(c => ((string?)c.Id, (string?)$"{AbilityCatalog.All[abilityId].Label} · {Definition(c).Name} ({c.Id})")),
+            // Seeds of Decay pass (issue #453), batch 1: one option per Personality/Ninja the action may be redirected to.
+            "shifting-terrain-redirect" => ShiftingTerrainCandidates(card, subject).Select(c => ((string?)c.Id, (string?)$"{AbilityCatalog.All[abilityId].Label} · {Definition(c).Name} ({c.Id})")),
+            "castle-of-order-redirect" => CastleOfOrderCandidates(card, subject, Card(subject.TargetId!)).Select(c => ((string?)c.Id, (string?)$"{AbilityCatalog.All[abilityId].Label} · {Definition(c).Name} ({c.Id})")),
             _ => [(null, null)]
         };
 }

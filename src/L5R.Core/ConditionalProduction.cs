@@ -24,7 +24,10 @@ public enum ProductionCondition
     /// <summary>Paying for an action that equips a Follower or creates one (Bushi Dojo).</summary>
     EquipsOrCreatesFollower,
     /// <summary>Paying to recruit a Holding (Yasuki Dokansuto: "When paying for a Holding, produce 2 Gold which may only pay for that card").</summary>
-    PayingForHolding
+    PayingForHolding,
+    /// <summary>The Sacred Temple of the Phoenix - inexperienced (issue #458, Honor and Treachery): "When paying for a Spell or Shugenja, produce 5 Gold which may only pay for
+    /// that card" -- a Spell equipped (PaymentKind.Equip), or a Shugenja Personality recruited (PaymentKind.Recruit, the printed Shugenja keyword), never an action.</summary>
+    PayingForSpellOrShugenja
 }
 
 /// <summary>A Holding's production that depends on what it is paying for (issue #416): while a payment meets <paramref name="When"/> the Holding produces
@@ -41,6 +44,7 @@ public static class ConditionalProductionCatalog
         "red-crane-dojo-gold" => new(4, ProductionCondition.PayingForKeyword, "Ninja"),
         "bushi-dojo-gold" => new(6, ProductionCondition.EquipsOrCreatesFollower),
         "dokansuto-gold" => new(2, ProductionCondition.PayingForHolding),
+        "sacred-temple-phoenix-gold" => new(5, ProductionCondition.PayingForSpellOrShugenja),
         _ => null
     };
 }
@@ -60,6 +64,8 @@ public sealed partial class MatchEngine
         {
             ProductionCondition.PayingForKeyword => paying.Kind != PaymentKind.Action && production.Keyword is not null && Keyword(paying.Card, production.Keyword),
             ProductionCondition.PayingForHolding => paying.Kind == PaymentKind.Recruit && Definition(paying.Card).Type == CardType.Holding,
+            ProductionCondition.PayingForSpellOrShugenja => paying.Kind is PaymentKind.Equip or PaymentKind.Recruit
+                && (Definition(paying.Card).Type == CardType.Spell || Definition(paying.Card).Type == CardType.Personality && Keyword(paying.Card, "Shugenja")),
             ProductionCondition.EquipsOrCreatesFollower =>
                 paying.Kind == PaymentKind.Equip && Definition(paying.Card).Type == CardType.Follower
                 || paying.Ability?.Creates is { Type: CardType.Follower },

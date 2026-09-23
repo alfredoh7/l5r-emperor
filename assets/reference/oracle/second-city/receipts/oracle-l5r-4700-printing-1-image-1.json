@@ -31,7 +31,9 @@
     "path": "assets/reference/oracle/second-city/webp/oracle-l5r-4700-printing-1-image-1.webp",
     "sha256": "dd36b79b0200fa54a64663517bfde57a0101cdd43a597a548e3401462412fc40",
     "source": {
-      "note": "Re-derived locally from the verified Oracle-of-the-Void master (top-level path/sha256, untouched) via PIL WebP85 -- the catalogue-art-webp Release attachments available this session did not include this card."
+      "asset": "L5R-Catalogue-WebP85.zip",
+      "matched_by": "original_sha256",
+      "release": "catalogue-art-webp-v1"
     },
     "width": 750
   }

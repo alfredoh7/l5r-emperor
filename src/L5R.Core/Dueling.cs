@@ -389,14 +389,14 @@ public sealed partial class MatchEngine
         // destroyed (ApplyDuelOutcome/ApplyDuelFocusEffect, both above, already queued it via MarkDead).
         if (OpenOverconfidentDrawWindow(1 - challengerPlayerId)) return;
         // Action-effect tracking (issue #437): the duel is the action's resolution, the same reasoning FireAfterOwnActionTraits above already follows.
-        if (FinishActionEffectTracking(duel.AbilityId, challengerPlayerId, duel.SourceCardId, challengerPlayerId)) return;
+        if (FinishActionEffectTracking(duel.AbilityId, challengerPlayerId, duel.SourceCardId, challengerPlayerId, duel.ChallengerId)) return;
         NextAction(challengerPlayerId);
     }
 
     // "After a duel resolves during which [this card] won" (issue #209): scoped to the one specific
     // card that won, the same shape own-enters-play already uses for entering-play Reactions (see
     // OpenEntryReactionWindow) -- a tie has no single winner, so there is nothing to react with here.
-    private static string? DuelWonReactionAbility(CardInstance card) =>
+    private string? DuelWonReactionAbility(CardInstance card) =>
         AbilityIdsOf(card).FirstOrDefault(a => AbilityCatalog.All.TryGetValue(a, out var def) && def.Timing == "Reaction" && def.Trigger == "own-won-duel");
 
     // Kakita Maratai (issue #299): "After a duel ends that your Personality won" -- the same window,
@@ -409,7 +409,7 @@ public sealed partial class MatchEngine
     // watchers ever match ValidateAbility's own trigger check. The "duelWonReaction" PendingChoice
     // itself is untouched (CardId is still the winning card), so every consumer of the existing own-won-
     // duel window -- Apply()'s pass/close handling included -- needs no change.
-    private static string? DuelWonBroadcastReactionAbility(CardInstance card) =>
+    private string? DuelWonBroadcastReactionAbility(CardInstance card) =>
         AbilityIdsOf(card).FirstOrDefault(a => AbilityCatalog.All.TryGetValue(a, out var def) && def.Timing == "Reaction" && def.Trigger == "own-personality-won-duel");
 
     private bool OpenDuelWonReactionWindow(string winnerId, int winnerPlayerId, int closesTo)
@@ -471,6 +471,15 @@ public sealed partial class MatchEngine
                 if (winnerId is not null && Card(winnerId).OwnerId == challengerPlayerId && ControlsKeyword(challengerPlayerId, "Shugenja"))
                     CreateToken(Card(winnerId), "Fire", abilityId, "Force", 1);
                 break;
+            // An Insult Answered (issue #453, batch 2): "Destroy the duel's loser. Give the duel's winner two +1F Revenge tokens."
+            case "insult-answered-duel":
+                DestroyUnits(loserIds.Select(Card).ToArray(), actingPlayerId: challengerPlayerId);
+                if (winnerId is not null && InPlay(Card(winnerId))) { CreateToken(Card(winnerId), "Revenge", abilityId, "Force", 1); CreateToken(Card(winnerId), "Revenge", abilityId, "Force", 1); }
+                break;
+            // Doji Mitsuru (issue #453, batch 3): "Bow the duel's loser."
+            case "mitsuru-duel":
+                foreach (var id in loserIds) if (!StalwartNegatesBow(Card(id), challengerPlayerId)) Card(id).Bowed = true;
+                break;
         }
     }
 
@@ -508,6 +517,10 @@ public sealed partial class MatchEngine
             case "home-guard-focus":
                 if (_state.PendingDuel is { } homeGuardDuel)
                     ApplyModifier(Card(homeGuardDuel.ChallengerPlayerId == ownerId ? homeGuardDuel.ChallengerId : homeGuardDuel.ChallengedId), abilityId, abilityId, "Force", 3);
+                break;
+            // Seeds of Decay pass (issue #453), batch 1. Embracing Battle: "bow the winner" (A Simple Yari's). Ceaseless Vigil's "straighten a Personality" is a choice (FocusEffectChoice.cs).
+            case "embracing-battle-focus":
+                if (_state.PendingDuel?.WinnerId is string embracingWinnerId && InPlay(Card(embracingWinnerId)) && !StalwartNegatesBow(Card(embracingWinnerId), ownerId)) Card(embracingWinnerId).Bowed = true;
                 break;
         }
     }

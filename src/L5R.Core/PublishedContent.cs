@@ -2405,4 +2405,55 @@ public static class PublishedContent
     public static PublishedSnapshot PersonalityWave51 { get; } = Load("L5R.Published.PersonalityWave51.json", "personality-wave-51", requireDecks: false);
     /// <summary>Personality wave 52 (issue #449 follow-up): Akodo Tezuka.</summary>
     public static PublishedSnapshot PersonalityWave52 { get; } = Load("L5R.Published.PersonalityWave52.json", "personality-wave-52", requireDecks: false);
+    /// <summary>Strategy wave 47 (Seeds of Decay pass, issue #453, batch 1): twenty Seeds of Decay Strategies.</summary>
+    public static PublishedSnapshot StrategyWave47 { get; } = Load("L5R.Published.StrategyWave47.json", "strategy-wave-47", requireDecks: false);
+    /// <summary>Stronghold wave 12 (Seeds of Decay pass, issue #453, batch 1): The Castle of Order.</summary>
+    public static PublishedSnapshot StrongholdWave12 { get; } = Load("L5R.Published.StrongholdWave12.json", "stronghold-wave-12", requireDecks: false);
+    /// <summary>Celestial wave 5 (Seeds of Decay pass, issue #453, batch 1): Megumi's Guidance.</summary>
+    public static PublishedSnapshot CelestialWave5 { get; } = Load("L5R.Published.CelestialWave5.json", "celestial-wave-5", requireDecks: false);
+    /// <summary>Strategy wave 50 (Seeds of Decay pass, issue #453, batch 2): seventeen Strategies.</summary>
+    public static PublishedSnapshot StrategyWave50 { get; } = Load("L5R.Published.StrategyWave50.json", "strategy-wave-50", requireDecks: false);
+    /// <summary>Personality wave 53 (Seeds of Decay pass, issue #453, batch 2): Yasuki Baiko, Yasuki Tsujiken - exp, Doji Yuka, Kakita Yusugi, Yogo Ugimori, Akodo Hotaka, Bayushi Shibata - exp.</summary>
+    public static PublishedSnapshot PersonalityWave53 { get; } = Load("L5R.Published.PersonalityWave53.json", "personality-wave-53", requireDecks: false);
+    /// <summary>Follower wave 24 (Seeds of Decay pass, issue #453, batch 2): the created-only Ronin Follower Dubious Resources creates.</summary>
+    public static PublishedSnapshot FollowerWave24 { get; } = Load("L5R.Published.FollowerWave24.json", "follower-wave-24", requireDecks: false);
+    /// <summary>Seeds of Decay pass (issue #453), batch 4: the Sensei, Naka Mahatsu - exp, Daigotsu Yamato, Hiruma Sawai, Shinjo Katsuo.</summary>
+    public static PublishedSnapshot PersonalityWave58 { get; } = Load("L5R.Published.PersonalityWave58.json", "personality-wave-58", requireDecks: false);
+    /// <summary>Seeds of Decay pass (issue #453), batch 4: the created-only Detached Personality and Ninja Proxy scans.</summary>
+    public static PublishedSnapshot PersonalityWave60 { get; } = Load("L5R.Published.PersonalityWave60.json", "personality-wave-60", requireDecks: false);
+    /// <summary>Seeds of Decay pass (issue #453), batch 4: Temple to Fudo, Hachi's Revenge, Incense Mill, Overlooked Palace, Second City Port.</summary>
+    public static PublishedSnapshot HoldingWave7 { get; } = Load("L5R.Published.HoldingWave7.json", "holding-wave-7", requireDecks: false);
+    /// <summary>Seeds of Decay pass (issue #453), batch 4: Tested Land.</summary>
+    public static PublishedSnapshot RegionWave6 { get; } = Load("L5R.Published.RegionWave6.json", "region-wave-6", requireDecks: false);
+    /// <summary>Seeds of Decay pass (issue #453), batch 4: Offering Reverence.</summary>
+    public static PublishedSnapshot EventWave5 { get; } = Load("L5R.Published.EventWave5.json", "event-wave-5", requireDecks: false);
+    /// <summary>Seeds of Decay pass (issue #453), batch 4: Cavalry Detachment.</summary>
+    public static PublishedSnapshot FollowerWave26 { get; } = Load("L5R.Published.FollowerWave26.json", "follower-wave-26", requireDecks: false);
+    /// <summary>Item wave 11 (Seeds of Decay pass, issue #453, batch 5): Aka-beko, Blades of the Black Dragon, Celestial Sword of the Mantis - exp, Celestial Sword of the
+    /// Scorpion - exp, Hato-gurama, Kama, Ki-Uso, Moksha Patam, Okesa-goma, Sandalwood Incense.</summary>
+    public static PublishedSnapshot ItemWave11 { get; } = Load("L5R.Published.ItemWave11.json", "item-wave-11", requireDecks: false);
+    /// <summary>Spell wave 18 (Seeds of Decay pass, issue #453, batch 5): Extend the Soul's Boundaries, Immolation, Master of Beasts, Nature's Wrath, Peace of the Kami,
+    /// Scent of Dishonor, The Earth's Strength.</summary>
+    public static PublishedSnapshot SpellWave18 { get; } = Load("L5R.Published.SpellWave18.json", "spell-wave-18", requireDecks: false);
+    /// <summary>Follower wave 25 (Seeds of Decay pass, issue #453, batch 5): O-Yoroi Troops, Ronin Ambushers.</summary>
+    public static PublishedSnapshot FollowerWave25 { get; } = Load("L5R.Published.FollowerWave25.json", "follower-wave-25", requireDecks: false);
+    /// <summary>Personality wave 55 (Seeds of Decay pass, issue #453, batch 3): the batch's 26 wired Personalities.</summary>
+    public static PublishedSnapshot PersonalityWave55 { get; } = Load("L5R.Published.PersonalityWave55.json", "personality-wave-55", requireDecks: false);
+    /// <summary>Personality wave 57 (issue #453, batch 3): Merihiko's Swarm, the created-only Personality Kitsune Merihiko creates.</summary>
+    public static PublishedSnapshot PersonalityWave57 { get; } = Load("L5R.Published.PersonalityWave57.json", "personality-wave-57", requireDecks: false);
+    /// <summary>Item wave 10 (issue #453, batch 3): Masayoshi's Blade, the created-only Weapon Masayoshi creates.</summary>
+    public static PublishedSnapshot ItemWave10 { get; } = Load("L5R.Published.ItemWave10.json", "item-wave-10", requireDecks: false);
+    /// <summary>Personality wave 61 (Honor and Treachery pass, issue #458): Akodo Shihiro, Bayushi Irezu, Bayushi Kasumi, Bayushi Utoro, Isawa Taiken, Shiba Mitsushen,
+    /// Shiba Tsukimi, Shosuro Chikata, Tsubo, Yogo Haruto.</summary>
+    public static PublishedSnapshot PersonalityWave61 { get; } = Load("L5R.Published.PersonalityWave61.json", "personality-wave-61", requireDecks: false);
+    /// <summary>Holding wave 8 (issue #458): Border Keep - inexperienced.</summary>
+    public static PublishedSnapshot HoldingWave8 { get; } = Load("L5R.Published.HoldingWave8.json", "holding-wave-8", requireDecks: false);
+    /// <summary>Spell wave 19 (issue #458): Communion with Earth.</summary>
+    public static PublishedSnapshot SpellWave19 { get; } = Load("L5R.Published.SpellWave19.json", "spell-wave-19", requireDecks: false);
+    /// <summary>Strategy wave 51 (issue #458): Elite Training.</summary>
+    public static PublishedSnapshot StrategyWave51 { get; } = Load("L5R.Published.StrategyWave51.json", "strategy-wave-51", requireDecks: false);
+    /// <summary>Stronghold wave 13 (issue #458): The Sacred Temple of the Phoenix - inexperienced, The Towers of the Yogo.</summary>
+    public static PublishedSnapshot StrongholdWave13 { get; } = Load("L5R.Published.StrongholdWave13.json", "stronghold-wave-13", requireDecks: false);
+    /// <summary>Follower wave 27 (issue #458): Devoted Yojimbo.</summary>
+    public static PublishedSnapshot FollowerWave27 { get; } = Load("L5R.Published.FollowerWave27.json", "follower-wave-27", requireDecks: false);
 }

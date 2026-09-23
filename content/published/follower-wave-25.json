@@ -1,0 +1,54 @@
+{
+  "Profile": "follower-wave-25",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10107",
+      "Name": "O-Yoroi Troops",
+      "Type": "Follower",
+      "Clan": "Unaligned",
+      "GoldCost": 9,
+      "GoldProduction": 0,
+      "Force": 7,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": 2,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After another player's action targets a card in this unit: Negate the action's effects on this card.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10107.jpg",
+      "Keywords": [],
+      "Focus": 4,
+      "Abilities": [
+        "champion-of-thunder-negate"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10108",
+      "Name": "Ronin Ambushers",
+      "Type": "Follower",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After this card bows: Straighten it and, if you do not control a Terrain, negate its (future) straightening until the phase ends.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10108.jpg",
+      "Keywords": [
+        "Ronin",
+        "Scout"
+      ],
+      "Focus": 3,
+      "Abilities": [],
+      "Effect": "ronin-ambushers-rebound"
+    }
+  ],
+  "Decks": []
+}
