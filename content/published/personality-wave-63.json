@@ -3,84 +3,6 @@
   "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
   "Cards": [
     {
-      "Id": "oracle-l5r-4167",
-      "Name": "Kakita Gonji",
-      "Type": "Personality",
-      "Clan": "Crane",
-      "GoldCost": 7,
-      "GoldProduction": 0,
-      "Force": 2,
-      "Chi": 5,
-      "PersonalHonor": 3,
-      "HonorRequirement": 5,
-      "ProvinceStrength": 0,
-      "StartingHonor": 0,
-      "Text": "After Gonji enters play: Discard all your other Sensei Personalities.\nBefore you focus: Once per duel, instead of focusing that time, you may give your Crane Clan Personality in the duel +4 to his duel stat until the duel ends.",
-      "ScenarioOnly": false,
-      "ArtworkKey": "res://Content/Published/oracle-l5r-4167.jpg",
-      "Keywords": [
-        "Duelist",
-        "Loyal",
-        "Crane Clan",
-        "Samurai",
-        "Sensei"
-      ],
-      "Focus": 0,
-      "Abilities": [],
-      "Effect": "none"
-    },
-    {
-      "Id": "oracle-l5r-4179",
-      "Name": "Kakita Kae",
-      "Type": "Personality",
-      "Clan": "Crane",
-      "GoldCost": 7,
-      "GoldProduction": 0,
-      "Force": 2,
-      "Chi": 4,
-      "PersonalHonor": 3,
-      "HonorRequirement": 6,
-      "ProvinceStrength": 0,
-      "StartingHonor": 0,
-      "Text": "After a Battle action targets Kae, you may discard the Imperial Favor to negate Kae's destruction, bowing, and movement from the action's effects.\nBattle: Move Kae home.",
-      "ScenarioOnly": false,
-      "ArtworkKey": "res://Content/Published/oracle-l5r-4179.jpg",
-      "Keywords": [
-        "Courtier",
-        "Crane Clan",
-        "Storyteller"
-      ],
-      "Focus": 0,
-      "Abilities": [],
-      "Effect": "none"
-    },
-    {
-      "Id": "oracle-l5r-4189",
-      "Name": "Kakita Kenta",
-      "Type": "Personality",
-      "Clan": "Crane",
-      "GoldCost": 6,
-      "GoldProduction": 0,
-      "Force": 2,
-      "Chi": 3,
-      "PersonalHonor": 3,
-      "HonorRequirement": 3,
-      "ProvinceStrength": 0,
-      "StartingHonor": 0,
-      "Text": "Iaijutsu Reaction: After an action resolves during which Kenta won a duel, target a dishonorable enemy Personality at the current battlefield: Move him home.",
-      "ScenarioOnly": false,
-      "ArtworkKey": "res://Content/Published/oracle-l5r-4189.jpg",
-      "Keywords": [
-        "Duelist",
-        "Crane Clan",
-        "Magistrate",
-        "Samurai"
-      ],
-      "Focus": 0,
-      "Abilities": [],
-      "Effect": "none"
-    },
-    {
       "Id": "oracle-l5r-4386",
       "Name": "Kitsu Miro",
       "Type": "Personality",
@@ -106,60 +28,6 @@
       "Abilities": [
         "miro-create"
       ],
-      "Effect": "none"
-    },
-    {
-      "Id": "oracle-l5r-4462",
-      "Name": "Kitsune Haruki",
-      "Type": "Personality",
-      "Clan": "Mantis",
-      "GoldCost": 6,
-      "GoldProduction": 0,
-      "Force": 0,
-      "Chi": 2,
-      "PersonalHonor": 3,
-      "HonorRequirement": 4,
-      "ProvinceStrength": 0,
-      "StartingHonor": 0,
-      "Text": "Reaction: After Haruki enters play: Create a 2F/2C/3PH Mantis Clan • Nonhuman • Deer • Spirit Personality with the ability, \"Limited: If another player has higher Family Honor than you: Gain 2 Honor.\"",
-      "ScenarioOnly": false,
-      "ArtworkKey": "res://Content/Published/oracle-l5r-4462.jpg",
-      "Keywords": [
-        "Earth",
-        "Mantis Clan",
-        "Shugenja"
-      ],
-      "Focus": 0,
-      "Abilities": [],
-      "Effect": "none"
-    },
-    {
-      "Id": "oracle-l5r-4806",
-      "Name": "Makito",
-      "Type": "Personality",
-      "Clan": "Unaligned",
-      "GoldCost": 7,
-      "GoldProduction": 0,
-      "Force": 4,
-      "Chi": 4,
-      "PersonalHonor": 0,
-      "HonorRequirement": null,
-      "ProvinceStrength": 0,
-      "StartingHonor": 0,
-      "Text": "Makito has +1F while a Phoenix Clan player controls him.\nAfter a card is destroyed: Give Makito +1F.\nMaho Battle: Target an enemy Personality with equal or lower Chi: Destroy a card without attachments in his unit; this destruction will not be negated or delayed.",
-      "ScenarioOnly": false,
-      "ArtworkKey": "res://Content/Published/oracle-l5r-4806.jpg",
-      "Keywords": [
-        "Experienced Asako Makito",
-        "Unique",
-        "Bloodspeaker",
-        "Monk",
-        "Order of Death",
-        "Shadowlands",
-        "Student of Kinuye"
-      ],
-      "Focus": 0,
-      "Abilities": [],
       "Effect": "none"
     },
     {
@@ -216,35 +84,6 @@
         "isul-bow",
         "isul-straighten"
       ],
-      "Effect": "none"
-    },
-    {
-      "Id": "oracle-l5r-5361",
-      "Name": "Moto Rani",
-      "Type": "Personality",
-      "Clan": "Unicorn",
-      "GoldCost": 8,
-      "GoldProduction": 0,
-      "Force": 4,
-      "Chi": 4,
-      "PersonalHonor": 1,
-      "HonorRequirement": null,
-      "ProvinceStrength": 0,
-      "StartingHonor": 0,
-      "Text": "Water Reaction: When paying for a Spell Equipping to Rani, remove a dead Personality in your discard pile from the game to reduce the Spell's Gold Cost by the Personality's Chi.\nWater Tireless Battle: Straighten Rani. You may move her home.",
-      "ScenarioOnly": false,
-      "ArtworkKey": "res://Content/Published/oracle-l5r-5361.jpg",
-      "Keywords": [
-        "Cavalry",
-        "Unique",
-        "Death Priest",
-        "Experienced",
-        "Shugenja",
-        "Unicorn Clan",
-        "Water"
-      ],
-      "Focus": 0,
-      "Abilities": [],
       "Effect": "none"
     },
     {
@@ -330,65 +169,6 @@
       "Effect": "none"
     },
     {
-      "Id": "oracle-l5r-6653",
-      "Name": "Shadow Dragon",
-      "Type": "Personality",
-      "Clan": "Ninja",
-      "GoldCost": 20,
-      "GoldProduction": 0,
-      "Force": 10,
-      "Chi": 5,
-      "PersonalHonor": 0,
-      "HonorRequirement": null,
-      "ProvinceStrength": 0,
-      "StartingHonor": 0,
-      "Text": "After Shadow Dragon enters play: Lose 5 Honor.\nShadow Dragon's abilities will not be copied.\nBattle: Target an enemy Personality: Permanently give him Ninja and Shadowlands. Take control of him. Return control of him to his owner after the next time this game this ability is announced.\nOpen: If Shadow Dragon is dead: Bring it into play, paying all costs.",
-      "ScenarioOnly": false,
-      "ArtworkKey": "res://Content/Published/oracle-l5r-6653.jpg",
-      "Keywords": [
-        "Cavalry",
-        "Conqueror",
-        "Experienced 2",
-        "Unique",
-        "Dragon",
-        "Ninja",
-        "Nonhuman",
-        "Shadowlands",
-        "Shugenja",
-        "Spider Clan"
-      ],
-      "Focus": 0,
-      "Abilities": [],
-      "Effect": "none"
-    },
-    {
-      "Id": "oracle-l5r-6883",
-      "Name": "Shinjo Hayan",
-      "Type": "Personality",
-      "Clan": "Unicorn",
-      "GoldCost": 8,
-      "GoldProduction": 0,
-      "Force": 4,
-      "Chi": 3,
-      "PersonalHonor": 2,
-      "HonorRequirement": 4,
-      "ProvinceStrength": 0,
-      "StartingHonor": 0,
-      "Text": "After Hayan enters play: Discard all your other Sensei Personalities.\nAfter engaging: Once per turn, you may assign your (unbowed) Unicorn Clan Personality in your home to the current battlefield.",
-      "ScenarioOnly": false,
-      "ArtworkKey": "res://Content/Published/oracle-l5r-6883.jpg",
-      "Keywords": [
-        "Cavalry",
-        "Loyal",
-        "Samurai",
-        "Sensei",
-        "Unicorn Clan"
-      ],
-      "Focus": 0,
-      "Abilities": [],
-      "Effect": "none"
-    },
-    {
       "Id": "oracle-l5r-6901",
       "Name": "Shinjo Junpei",
       "Type": "Personality",
@@ -415,57 +195,6 @@
       "Abilities": [
         "junpei-attack"
       ],
-      "Effect": "none"
-    },
-    {
-      "Id": "oracle-l5r-6934",
-      "Name": "Shinjo Sarang",
-      "Type": "Personality",
-      "Clan": "Unicorn",
-      "GoldCost": 7,
-      "GoldProduction": 0,
-      "Force": 3,
-      "Chi": 3,
-      "PersonalHonor": 2,
-      "HonorRequirement": 0,
-      "ProvinceStrength": 0,
-      "StartingHonor": 0,
-      "Text": "Battle: Choose your performing Personality, and target your Follower at any location: Transfer it to the Personality. Straighten the Follower if the Personality is opposed or Spider Clan.",
-      "ScenarioOnly": false,
-      "ArtworkKey": "res://Content/Published/oracle-l5r-6934.jpg",
-      "Keywords": [
-        "Cavalry",
-        "Commander",
-        "Samurai",
-        "Unicorn Clan"
-      ],
-      "Focus": 0,
-      "Abilities": [],
-      "Effect": "none"
-    },
-    {
-      "Id": "oracle-l5r-7110",
-      "Name": "Shosuro Ietsuno",
-      "Type": "Personality",
-      "Clan": "Ninja",
-      "GoldCost": 7,
-      "GoldProduction": 0,
-      "Force": 4,
-      "Chi": 3,
-      "PersonalHonor": 0,
-      "HonorRequirement": null,
-      "ProvinceStrength": 0,
-      "StartingHonor": 0,
-      "Text": "After a card from a deck refills Ietsuno's battlefield's province: Look at it. You may switch it with a card owned by the same player in another province.\nBattle: Target an enemy card without attachments: Bow it.",
-      "ScenarioOnly": false,
-      "ArtworkKey": "res://Content/Published/oracle-l5r-7110.jpg",
-      "Keywords": [
-        "Assassin",
-        "Ninja",
-        "Scorpion Clan"
-      ],
-      "Focus": 0,
-      "Abilities": [],
       "Effect": "none"
     },
     {
@@ -530,61 +259,6 @@
       "Effect": "none"
     },
     {
-      "Id": "oracle-l5r-8613",
-      "Name": "Tokiko",
-      "Type": "Personality",
-      "Clan": "Unaligned",
-      "GoldCost": 7,
-      "GoldProduction": 0,
-      "Force": 2,
-      "Chi": 5,
-      "PersonalHonor": 3,
-      "HonorRequirement": 0,
-      "ProvinceStrength": 0,
-      "StartingHonor": 0,
-      "Text": "Tokiko has +1F while a Phoenix Clan player controls her.\nBattle/Open: Destroy Tokiko and target your dead Personality: Bring him into play in your home or at the current battlefield, paying all costs but paying 7 less Gold.",
-      "ScenarioOnly": false,
-      "ArtworkKey": "res://Content/Published/oracle-l5r-8613.jpg",
-      "Keywords": [
-        "Experienced Isawa Tokiko",
-        "Unique",
-        "Brothers of Rebirth",
-        "Monk",
-        "Shugenja",
-        "Void"
-      ],
-      "Focus": 0,
-      "Abilities": [],
-      "Effect": "none"
-    },
-    {
-      "Id": "oracle-l5r-8878",
-      "Name": "Tsuruchi Shichiro",
-      "Type": "Personality",
-      "Clan": "Mantis",
-      "GoldCost": 7,
-      "GoldProduction": 0,
-      "Force": 4,
-      "Chi": 3,
-      "PersonalHonor": 1,
-      "HonorRequirement": null,
-      "ProvinceStrength": 0,
-      "StartingHonor": 0,
-      "Text": "After Shichiro enters play: Discard all your other Sensei Personalities.\nAfter a Ranged Attack action resolves that your Mantis Clan Personality performed: Once per battle, you may move him home.",
-      "ScenarioOnly": false,
-      "ArtworkKey": "res://Content/Published/oracle-l5r-8878.jpg",
-      "Keywords": [
-        "Loyal",
-        "Naval",
-        "Mantis Clan",
-        "Samurai",
-        "Sensei"
-      ],
-      "Focus": 0,
-      "Abilities": [],
-      "Effect": "none"
-    },
-    {
       "Id": "oracle-l5r-8894",
       "Name": "Tsuruchi Tomaru",
       "Type": "Personality",
@@ -612,33 +286,6 @@
       "Abilities": [
         "tomaru-attack"
       ],
-      "Effect": "none"
-    },
-    {
-      "Id": "oracle-l5r-9083",
-      "Name": "Utaku Lishan",
-      "Type": "Personality",
-      "Clan": "Unicorn",
-      "GoldCost": 9,
-      "GoldProduction": 0,
-      "Force": 4,
-      "Chi": 3,
-      "PersonalHonor": 3,
-      "HonorRequirement": 5,
-      "ProvinceStrength": 0,
-      "StartingHonor": 0,
-      "Text": "While Lishan is attacking, she has +1F and +1PH.\nReaction: After you announce a Battle action, if Lishan is at the current battlefield, target a Personality or Follower opposing her: Give it a Force penalty equal to Lishan's Personal Honor.",
-      "ScenarioOnly": false,
-      "ArtworkKey": "res://Content/Published/oracle-l5r-9083.jpg",
-      "Keywords": [
-        "Cavalry",
-        "Battle Maiden",
-        "Paragon",
-        "Samurai",
-        "Unicorn Clan"
-      ],
-      "Focus": 0,
-      "Abilities": [],
       "Effect": "none"
     },
     {

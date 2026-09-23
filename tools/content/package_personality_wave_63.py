@@ -1,13 +1,11 @@
 #!/usr/bin/env python3
-"""Build Personality wave 63 (Embers of War pass, issue #460, batch 2): Kakita Gonji, Kakita Kae, Kakita Kenta,
-Kitsu Miro, Kitsune Haruki, Makito - experienced, Moshi Tomiko, Moto Isul, Moto Rani - experienced, Rata,
-Rokku - experienced, Sakti, Shadow Dragon - experienced 2, Shinjo Hayan, Shinjo Junpei - experienced, Shinjo Sarang,
-Shosuro Ietsuno, Soshi Yoshihara - experienced, Sugihara, Tokiko - experienced, Tsuruchi Shichiro,
-Tsuruchi Tomaru - experienced, Utaku Lishan, Yasuki Makoto, Yoritomo Kanaye.
-
-Several of these carry no curated Ability id (see tools/content/build_card_inventory.py's BLOCKERS dict for the
-specific reason each is not wired) -- they still ship their verified stats/keywords/scan like every other card in
-the reference catalogue; being published is not the same as being playable.
+"""Build Personality wave 63 (Embers of War pass, issue #460, batch 2): the 12 of the batch's 25 candidate
+Personalities directly wirable off existing/small-generalized primitives -- Kitsu Miro, Moshi Tomiko, Moto Isul,
+Rata, Rokku - experienced, Sakti, Shinjo Junpei - experienced, Soshi Yoshihara - experienced, Sugihara,
+Tsuruchi Tomaru - experienced, Yasuki Makoto, Yoritomo Kanaye. The other 13 stay unwired -- see
+tools/content/build_card_inventory.py's BLOCKERS dict for the specific reason each is not wired; per this
+project's established convention (every other wave of this pass), an unwired card is never published at all,
+so it cannot silently become a blank playable card.
 
 Every scan was read by eye and its source receipt (with the working copy's sha256) is recorded next to the wave.
 """
@@ -23,29 +21,16 @@ PROFILE = "personality-wave-63"
 NL = chr(10)
 
 ABILITIES: dict[int, list[str]] = {
-    4167: [],  # Kakita Gonji -- see BLOCKERS
-    4179: [],  # Kakita Kae -- see BLOCKERS
-    4189: [],  # Kakita Kenta -- see BLOCKERS
     4386: ["miro-create"],
-    4462: [],  # Kitsune Haruki -- see BLOCKERS
-    4806: [],  # Makito - experienced -- see BLOCKERS
     5286: ["tomiko-attack"],
     5332: ["isul-bow", "isul-straighten"],
-    5361: [],  # Moto Rani - experienced -- see BLOCKERS
     6165: ["rata-draw"],
     6376: ["rokku-move"],
     6454: ["sakti-bow"],
-    6653: [],  # Shadow Dragon - experienced 2 -- see BLOCKERS
-    6883: [],  # Shinjo Hayan -- see BLOCKERS
     6901: ["junpei-attack"],
-    6934: [],  # Shinjo Sarang -- see BLOCKERS
-    7110: [],  # Shosuro Ietsuno -- see BLOCKERS
     7373: ["yoshihara-lock", "yoshihara-dishonor"],
     7615: ["sugihara-penalty"],
-    8613: [],  # Tokiko - experienced -- see BLOCKERS
-    8878: [],  # Tsuruchi Shichiro -- see BLOCKERS
     8894: ["tomaru-attack"],
-    9083: [],  # Utaku Lishan -- see BLOCKERS
     9449: ["makoto-lock"],
     9579: ["kanaye-bow"],
 }

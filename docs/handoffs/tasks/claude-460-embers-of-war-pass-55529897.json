@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Embers of War pass (#460): 54 of 141 unwired cards wired across six parallel batches (personality-wave-62/63/64, strategy-wave-52/53, spell-wave-20, stronghold-wave-14, region-wave-7, item-wave-12, holding-wave-9, follower-wave-28), union-merged onto claude/460-embers-of-war-pass. 87 stay blocked with specific notes. New primitives: two more controller-wide static ability grants (Kitsu Miro's created token, The Ki-Rin's Path), own-personality-in-ninja-unit and enemy-personality-at-any-location Target categories, a loss-triggered Focus Effect choice, a live conditional Elite-effect extension, own-source-or-unbowed-attached-spell and own-personality-other-than-wielder Performer categories, ConditionalProduction.PayingForExpensiveCard, and three new ItemForceToWielder cases. Found and fixed a real bug during the merge: batch 2 had published all 25 of its candidate cards (including its 13 unwired ones) into personality-wave-63, leaving blank playable cards with no rules text -- corrected to publish only the 12 actually wired, with the test file, a pinned Naval-carrier scan and the inventory count all fixed to match. Shared scope: touches the content packaging pipeline and inventory builder alongside rules-lane engine changes.",
+  "validation": "Full L5R.Core.Tests suite: zero failures, including six new embers-of-war-batch-N suites (60 scenarios). L5R.AI.Tests, L5R.Server.Tests, L5R.Client.Transport.Tests: all pass. Content suite: 134/134 after the catalogue art pack was republished. docs/CARD_INVENTORY.xlsx regenerated: 2172 cards, 786 wired (+54). Catalogue art pack pinned to catalogue-art-pr460-20260923-r1 (3233 scans).",
+  "remaining": "None; ready for review.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/460",
+  "branch": "claude/460-embers-of-war-pass",
+  "updated": "2026-09-23T22:50:24.701889+00:00"
+}

@@ -1,32 +1,5 @@
 [
   {
-    "card_id": "oracle-l5r-4167",
-    "printing_set": [
-      "Embers of War"
-    ],
-    "source_url": "https://oracleofthevoid.com/#cardid=4167",
-    "image_path": "assets/reference/oracle/embers-of-war/webp/oracle-l5r-4167-printing-1-image-1.webp",
-    "image_sha256": "61f3c55b8087347179c964ccfeb0050996a26798258af65510f81638994a3e81"
-  },
-  {
-    "card_id": "oracle-l5r-4179",
-    "printing_set": [
-      "Embers of War"
-    ],
-    "source_url": "https://oracleofthevoid.com/#cardid=4179",
-    "image_path": "assets/reference/oracle/embers-of-war/webp/oracle-l5r-4179-printing-1-image-1.webp",
-    "image_sha256": "87e12980c70567da21e151f3b5ebdabb545b0dfc6a745b35e29c6313ffe9040b"
-  },
-  {
-    "card_id": "oracle-l5r-4189",
-    "printing_set": [
-      "Embers of War"
-    ],
-    "source_url": "https://oracleofthevoid.com/#cardid=4189",
-    "image_path": "assets/reference/oracle/embers-of-war/webp/oracle-l5r-4189-printing-1-image-1.webp",
-    "image_sha256": "51f0854a1e78c2794607fbaa14714aee39701e6a3128ce73c8351c5f0bb0ce78"
-  },
-  {
     "card_id": "oracle-l5r-4386",
     "printing_set": [
       "Embers of War"
@@ -34,24 +7,6 @@
     "source_url": "https://oracleofthevoid.com/#cardid=4386",
     "image_path": "assets/reference/oracle/embers-of-war/webp/oracle-l5r-4386-printing-1-image-1.webp",
     "image_sha256": "6738a53f2c6a9043f6b7e96352ae13af3bb002a0d55c9a97d5e514455e07f031"
-  },
-  {
-    "card_id": "oracle-l5r-4462",
-    "printing_set": [
-      "Embers of War"
-    ],
-    "source_url": "https://oracleofthevoid.com/#cardid=4462",
-    "image_path": "assets/reference/oracle/embers-of-war/webp/oracle-l5r-4462-printing-1-image-1.webp",
-    "image_sha256": "817c3d7c6737988487b1d79cea44d62f37f51cdbc837bfdebd42f74337312e0d"
-  },
-  {
-    "card_id": "oracle-l5r-4806",
-    "printing_set": [
-      "Embers of War"
-    ],
-    "source_url": "https://oracleofthevoid.com/#cardid=4806",
-    "image_path": "assets/reference/oracle/embers-of-war/webp/oracle-l5r-4806-printing-1-image-1.webp",
-    "image_sha256": "ce68f660d4c175bb4cdcb26bc5485b9de71797c50eaa756d4286685c64c2d66a"
   },
   {
     "card_id": "oracle-l5r-5286",
@@ -70,15 +25,6 @@
     "source_url": "https://oracleofthevoid.com/#cardid=5332",
     "image_path": "assets/reference/oracle/embers-of-war/webp/oracle-l5r-5332-printing-1-image-1.webp",
     "image_sha256": "64158a3a8a39180a81949a983eb74f1804000366ed07bc5ca23448f02f83feb4"
-  },
-  {
-    "card_id": "oracle-l5r-5361",
-    "printing_set": [
-      "Embers of War"
-    ],
-    "source_url": "https://oracleofthevoid.com/#cardid=5361",
-    "image_path": "assets/reference/oracle/embers-of-war/webp/oracle-l5r-5361-printing-1-image-1.webp",
-    "image_sha256": "c3ef1dfbf315668b8a23912275513faab925f51fb82eca029d0b174f5a89ef13"
   },
   {
     "card_id": "oracle-l5r-6165",
@@ -108,24 +54,6 @@
     "image_sha256": "182b995fedd3d2817353b70a66de4a644107382a2e7ff30dedda4409c0b9b2ee"
   },
   {
-    "card_id": "oracle-l5r-6653",
-    "printing_set": [
-      "Embers of War"
-    ],
-    "source_url": "https://oracleofthevoid.com/#cardid=6653",
-    "image_path": "assets/reference/oracle/embers-of-war/webp/oracle-l5r-6653-printing-1-image-1.webp",
-    "image_sha256": "2212aedb331d95d9c18a21c6f0499b13e1b7546f5b0bc2e3b59827d817584a9a"
-  },
-  {
-    "card_id": "oracle-l5r-6883",
-    "printing_set": [
-      "Embers of War"
-    ],
-    "source_url": "https://oracleofthevoid.com/#cardid=6883",
-    "image_path": "assets/reference/oracle/embers-of-war/webp/oracle-l5r-6883-printing-1-image-1.webp",
-    "image_sha256": "e9169a7fe0223129976c30df2f243491d677dfd6d23165fa2d8a2964df5bd28f"
-  },
-  {
     "card_id": "oracle-l5r-6901",
     "printing_set": [
       "Embers of War"
@@ -133,24 +61,6 @@
     "source_url": "https://oracleofthevoid.com/#cardid=6901",
     "image_path": "assets/reference/oracle/embers-of-war/webp/oracle-l5r-6901-printing-1-image-1.webp",
     "image_sha256": "a055872dd2bd0adef8d944244f1f4a5452b0dccb3d2b16218127813a2cd05110"
-  },
-  {
-    "card_id": "oracle-l5r-6934",
-    "printing_set": [
-      "Embers of War"
-    ],
-    "source_url": "https://oracleofthevoid.com/#cardid=6934",
-    "image_path": "assets/reference/oracle/embers-of-war/webp/oracle-l5r-6934-printing-1-image-1.webp",
-    "image_sha256": "243a2db533eb43d937cb2a2e3e0e05fb578f8cb877e483eb3af8f85815057e6c"
-  },
-  {
-    "card_id": "oracle-l5r-7110",
-    "printing_set": [
-      "Embers of War"
-    ],
-    "source_url": "https://oracleofthevoid.com/#cardid=7110",
-    "image_path": "assets/reference/oracle/embers-of-war/webp/oracle-l5r-7110-printing-1-image-1.webp",
-    "image_sha256": "cba7f06853cb84e6c9e049446f678490658311d2a9cb3b085e6382b7c856f51b"
   },
   {
     "card_id": "oracle-l5r-7373",
@@ -171,24 +81,6 @@
     "image_sha256": "3fa82d139df2dbeb097b83cb23517bb77f5085586a2556228ea19a0b6870a25c"
   },
   {
-    "card_id": "oracle-l5r-8613",
-    "printing_set": [
-      "Embers of War"
-    ],
-    "source_url": "https://oracleofthevoid.com/#cardid=8613",
-    "image_path": "assets/reference/oracle/embers-of-war/webp/oracle-l5r-8613-printing-1-image-1.webp",
-    "image_sha256": "aee1884ee25420313c69c3a520830c255d282e29dd679b9ee2a1a47a24068cb9"
-  },
-  {
-    "card_id": "oracle-l5r-8878",
-    "printing_set": [
-      "Embers of War"
-    ],
-    "source_url": "https://oracleofthevoid.com/#cardid=8878",
-    "image_path": "assets/reference/oracle/embers-of-war/webp/oracle-l5r-8878-printing-1-image-1.webp",
-    "image_sha256": "9d76c7bfea3d94a058c33cb1bcf9780019fd3c46258d6b84163655bac289608e"
-  },
-  {
     "card_id": "oracle-l5r-8894",
     "printing_set": [
       "Embers of War"
@@ -196,15 +88,6 @@
     "source_url": "https://oracleofthevoid.com/#cardid=8894",
     "image_path": "assets/reference/oracle/embers-of-war/webp/oracle-l5r-8894-printing-1-image-1.webp",
     "image_sha256": "064b84dd46ca1d23e0e9b06f4bec30b7a0a62a569df8919e700598f5ae046f0a"
-  },
-  {
-    "card_id": "oracle-l5r-9083",
-    "printing_set": [
-      "Embers of War"
-    ],
-    "source_url": "https://oracleofthevoid.com/#cardid=9083",
-    "image_path": "assets/reference/oracle/embers-of-war/webp/oracle-l5r-9083-printing-1-image-1.webp",
-    "image_sha256": "417e45f6ca271daf243733c918ad3227b89646c8b78bc69bab356267bda5897c"
   },
   {
     "card_id": "oracle-l5r-9449",

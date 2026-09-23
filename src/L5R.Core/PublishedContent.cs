@@ -2477,4 +2477,6 @@ public static class PublishedContent
     /// <summary>Personality wave 64 (Embers of War pass, issue #460, batch 6): Guest and Haruki's Deer, two CreatedOnly Proxy tokens (their creators, Perplexing
     /// Guests and Kitsune Haruki, are not themselves wired this pass).</summary>
     public static PublishedSnapshot PersonalityWave64 { get; } = Load("L5R.Published.PersonalityWave64.json", "personality-wave-64", requireDecks: false);
+    /// <summary>Personality wave 62 (Embers of War pass, issue #460, batch 1): Akodo Uehara, Daigotsu Takayasu - exp, Goju Gochiso, Kaiu Onizuka, Kaiu Tojikana.</summary>
+    public static PublishedSnapshot PersonalityWave62 { get; } = Load("L5R.Published.PersonalityWave62.json", "personality-wave-62", requireDecks: false);
 }

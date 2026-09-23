@@ -8043,8 +8043,6 @@ public sealed partial class MatchEngine
             case "devoted-yojimbo-straighten": Straighten(target!); break;
             case "elite-training-grant": GrantKeyword(Card(command.PerformerId!), "Elite", source!.Id, GrantDuration.Permanent); break;
             case "taiken-attack": if (ResolveOrDeferAttack(id, player, target?.Id, additional: consumedGrant)) return; break;
-            // Embers of War pass, batch 1 (issue #460): plain fixed/computed-strength Attacks, no target of their own (AttackTargetsProvince not needed --
-            // neither prints "or its province").
             case "takayasu-attack": case "onizuka-attack": if (ResolveOrDeferAttack(id, player, target?.Id, source!.Id, consumedGrant)) return; break;
             case "mitsushen-move":
             {

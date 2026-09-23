@@ -2,17 +2,15 @@ using L5R.Core;
 using static RegressionAssertions;
 using static Batch336Support;
 
-// Embers of War pass (issue #460), batch 2: the 25 cards of personality-wave-63, driven through QueryActions and the commands it offers.
-// Every scenario is an explicit position on the economy table (player 0 the Crane, player 1 the Lion), a Scorpion/Crab/Lion fixture
-// Personality or Player.Clan override substituted in as each card needs. 16 of the 25 are wired; 9 stay blocked (see BLOCKERS in
-// tools/content/build_card_inventory.py) and are still checked for their stats/keywords/scan in PublishedShape.
+// Embers of War pass (issue #460), batch 2: the 12 of the batch's 25 candidate Personalities wired in personality-wave-63, driven through
+// QueryActions and the commands it offers. Every scenario is an explicit position on the economy table (player 0 the Crane, player 1 the
+// Lion), a Scorpion/Crab/Lion fixture Personality or Player.Clan override substituted in as each card needs. The other 13 stay unwired and,
+// per this pass's established convention, are never published at all (see BLOCKERS in tools/content/build_card_inventory.py).
 internal static class EmbersOfWarBatch2Tests
 {
-    private const string Gonji = "oracle-l5r-4167", Kae = "oracle-l5r-4179", Kenta = "oracle-l5r-4189", Miro = "oracle-l5r-4386", Haruki = "oracle-l5r-4462",
-        Makito = "oracle-l5r-4806", Tomiko = "oracle-l5r-5286", Isul = "oracle-l5r-5332", MotoRani = "oracle-l5r-5361", Rata = "oracle-l5r-6165",
-        Rokku = "oracle-l5r-6376", Sakti = "oracle-l5r-6454", ShadowDragon = "oracle-l5r-6653", Hayan = "oracle-l5r-6883", Junpei = "oracle-l5r-6901",
-        Sarang = "oracle-l5r-6934", Ietsuno = "oracle-l5r-7110", Yoshihara = "oracle-l5r-7373", Sugihara = "oracle-l5r-7615", Tokiko = "oracle-l5r-8613",
-        Shichiro = "oracle-l5r-8878", Tomaru = "oracle-l5r-8894", Lishan = "oracle-l5r-9083", Makoto = "oracle-l5r-9449", Kanaye = "oracle-l5r-9579";
+    private const string Miro = "oracle-l5r-4386", Tomiko = "oracle-l5r-5286", Isul = "oracle-l5r-5332", Rata = "oracle-l5r-6165",
+        Rokku = "oracle-l5r-6376", Sakti = "oracle-l5r-6454", Junpei = "oracle-l5r-6901", Yoshihara = "oracle-l5r-7373", Sugihara = "oracle-l5r-7615",
+        Tomaru = "oracle-l5r-8894", Makoto = "oracle-l5r-9449", Kanaye = "oracle-l5r-9579";
 
     private static void Check(bool ok, string message = "Assertion failed") => Batch336Support.Check(ok, message);
     private static void Eq<T>(T actual, T expected, string message = "Values differ") => Batch336Support.Eq(actual, expected, message);
@@ -30,7 +28,7 @@ internal static class EmbersOfWarBatch2Tests
     private static ActionOption[] Options(MatchEngine e, int player, string ability, string? cardId = null, string? performerId = null) => Batch336Support.Options(e, player, ability, cardId, performerId);
 
     public static void Run(TestRunner runner) => runner.Run("embers-of-war-batch-2", [
-        ("Published shape: all 25 cards of personality-wave-63 print their catalogue stats, keywords and Effect/ability ids, ship their art and are listed in the wave manifest -- 16 wired, 9 still blocked", PublishedShape),
+        ("Published shape: the 12 wired cards of personality-wave-63 print their catalogue stats, keywords and Effect/ability ids, ship their art and are listed in the wave manifest", PublishedShape),
         ("Kitsu Miro: Home Battle (Absent), bow, creates the 2F/2C/3PH Lion Ancestor token at the current battlefield, removed after the battle ends", MiroCreate),
         ("Moshi Tomiko: Ranged 6 Attack paid by bowing Tomiko herself or one of her attached Spells", TomikoAttack),
         ("Moto Isul: even at home (Absent), bows or straightens a target Personality (either side) -- one shared use", IsulToggle),
@@ -82,23 +80,7 @@ internal static class EmbersOfWarBatch2Tests
         Stats(Makoto, "Crab", 2, 3, 7, "Courtier,Crab Clan,Kolat,Merchant", ["makoto-lock"], "makoto-holding-discount");
         Stats(Kanaye, "Mantis", 4, 3, 7, "Brute,Extortionist,Magistrate,Mantis Clan,Naval,Samurai", ["kanaye-bow"]);
 
-        // Blocked (see BLOCKERS): shipped stats/keywords/scan only, no Abilities.
-        Stats(Kenta, "Crane", 2, 3, 6, "Crane Clan,Duelist,Magistrate,Samurai", []);
-        Stats(Gonji, "Crane", 2, 5, 7, "Crane Clan,Duelist,Loyal,Samurai,Sensei", []);
-        Stats(Kae, "Crane", 2, 4, 7, "Courtier,Crane Clan,Storyteller", []);
-        Stats(Haruki, "Mantis", 0, 2, 6, "Earth,Mantis Clan,Shugenja", []);
-        Stats(Makito, "Unaligned", 4, 4, 7, "Bloodspeaker,Experienced Asako Makito,Monk,Order of Death,Shadowlands,Student of Kinuye,Unique", []);
-        Stats(MotoRani, "Unicorn", 4, 4, 8, "Cavalry,Death Priest,Experienced,Shugenja,Unicorn Clan,Unique,Water", []);
-        Stats(ShadowDragon, "Ninja", 10, 5, 20, "Cavalry,Conqueror,Dragon,Experienced 2,Ninja,Nonhuman,Shadowlands,Shugenja,Spider Clan,Unique", []);
-        Stats(Hayan, "Unicorn", 4, 3, 8, "Cavalry,Loyal,Samurai,Sensei,Unicorn Clan", []);
-        Stats(Sarang, "Unicorn", 3, 3, 7, "Cavalry,Commander,Samurai,Unicorn Clan", []);
-        Stats(Ietsuno, "Ninja", 4, 3, 7, "Assassin,Ninja,Scorpion Clan", []);
-        Stats(Tokiko, "Unaligned", 2, 5, 7, "Brothers of Rebirth,Experienced Isawa Tokiko,Monk,Shugenja,Unique,Void", []);
-        Stats(Shichiro, "Mantis", 4, 3, 7, "Loyal,Mantis Clan,Naval,Samurai,Sensei", []);
-        Stats(Lishan, "Unicorn", 4, 3, 9, "Battle Maiden,Cavalry,Paragon,Samurai,Unicorn Clan", []);
-
-        Manifest(root, "personality-wave-63", Gonji, Kae, Kenta, Miro, Haruki, Makito, Tomiko, Isul, MotoRani, Rata, Rokku, Sakti, ShadowDragon, Hayan,
-            Junpei, Sarang, Ietsuno, Yoshihara, Sugihara, Tokiko, Shichiro, Tomaru, Lishan, Makoto, Kanaye);
+        Manifest(root, "personality-wave-63", Miro, Tomiko, Isul, Rata, Rokku, Sakti, Junpei, Yoshihara, Sugihara, Tomaru, Makoto, Kanaye);
     }
 
 
