@@ -208,7 +208,9 @@ public sealed partial class MatchEngine
                     var reaction=AbilityCatalog.All[reactionId];
                     string?[] candidates=reaction.Target=="own-unit-member"?UnitMembers(card).Select(c=>(string?)c.Id).ToArray()
                         // Issue #336 fixture: one option per Personality the deferred action would move.
-                        :reaction.Target=="deferred-action-mover"?ActionMovers(deferredAction).Select(c=>(string?)c).ToArray():[null];
+                        :reaction.Target=="deferred-action-mover"?ActionMovers(deferredAction).Select(c=>(string?)c).ToArray()
+                        // The Earth's Strength (issue #453 batch 5): one option per defending Personality the deferred action would move.
+                        :reaction.Target=="deferred-action-defending-mover"?DeferredActionDefendingMovers(deferredAction).Select(c=>(string?)c).ToArray():[null];
                     foreach(var candidate in candidates)
                         AddReaction(card,reactionId,targetId:candidate,label:candidate is null?null:$"{reaction.Label} · {Definition(Card(candidate)).Name} ({candidate})",validate:true);
                 }

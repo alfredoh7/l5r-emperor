@@ -120,7 +120,7 @@ public sealed partial class MatchEngine
     {
         if (_state.PendingChoice?.Type == "attackReaction" && _state.PendingAttack is { } attack)
         {
-            if (attack.SourceId is not null && Protected(ActingPersonality(Card(attack.SourceId))))
+            if (attack.SourceId is not null && (Protected(ActingPersonality(Card(attack.SourceId))) || ActionProtected(attack.Command))) // Ki-Uso too (issue #453 batch 5)
             {
                 Emit("actionProtected", "Protection negates the negation -- this action cannot be negated.", negator.OwnerId, negator.Id);
                 return;

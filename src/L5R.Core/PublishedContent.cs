@@ -2405,4 +2405,12 @@ public static class PublishedContent
     public static PublishedSnapshot PersonalityWave51 { get; } = Load("L5R.Published.PersonalityWave51.json", "personality-wave-51", requireDecks: false);
     /// <summary>Personality wave 52 (issue #449 follow-up): Akodo Tezuka.</summary>
     public static PublishedSnapshot PersonalityWave52 { get; } = Load("L5R.Published.PersonalityWave52.json", "personality-wave-52", requireDecks: false);
+    /// <summary>Item wave 11 (Seeds of Decay pass, issue #453, batch 5): Aka-beko, Blades of the Black Dragon, Celestial Sword of the Mantis - exp, Celestial Sword of the
+    /// Scorpion - exp, Hato-gurama, Kama, Ki-Uso, Moksha Patam, Okesa-goma, Sandalwood Incense.</summary>
+    public static PublishedSnapshot ItemWave11 { get; } = Load("L5R.Published.ItemWave11.json", "item-wave-11", requireDecks: false);
+    /// <summary>Spell wave 18 (Seeds of Decay pass, issue #453, batch 5): Extend the Soul's Boundaries, Immolation, Master of Beasts, Nature's Wrath, Peace of the Kami,
+    /// Scent of Dishonor, The Earth's Strength.</summary>
+    public static PublishedSnapshot SpellWave18 { get; } = Load("L5R.Published.SpellWave18.json", "spell-wave-18", requireDecks: false);
+    /// <summary>Follower wave 25 (Seeds of Decay pass, issue #453, batch 5): O-Yoroi Troops, Ronin Ambushers.</summary>
+    public static PublishedSnapshot FollowerWave25 { get; } = Load("L5R.Published.FollowerWave25.json", "follower-wave-25", requireDecks: false);
 }

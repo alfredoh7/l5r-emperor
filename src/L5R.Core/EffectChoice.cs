@@ -65,6 +65,10 @@ public static class BranchEffect
     public const string StraightenWielder = "straighten-wielder";
     /// <summary>The Personality the source is attached to moves home.</summary>
     public const string MoveWielderHome = "move-wielder-home";
+    /// <summary>Celestial Sword of the Scorpion - exp (issue #453 batch 5): the card in the current battlefield's province is discarded, then the target is destroyed if that card was a
+    /// Personality or the acting player controls a Courtier; and the same conditional destroy with nothing discarded (MatchEngine.ScorpionSwordResolve).</summary>
+    public const string ScorpionSwordDiscard = "scorpion-sword-discard";
+    public const string ScorpionSwordKeep = "scorpion-sword-keep";
 }
 
 /// <summary>The four answers to "choose a player who gains or loses N Honor" (issue #336): each player, each direction. Shared by every card that prints it.</summary>
@@ -131,6 +135,8 @@ public sealed partial class MatchEngine
             case BranchEffect.DiscardProvinceCard: DiscardCurrentProvinceCard(); break;
             case BranchEffect.StraightenWielder: Straighten(Card(source.AttachedTo)); break;
             case BranchEffect.MoveWielderHome: MoveHome(Card(source.AttachedTo), false); break;
+            case BranchEffect.ScorpionSwordDiscard: ScorpionSwordResolve(command, target!, discardFirst: true); break;
+            case BranchEffect.ScorpionSwordKeep: ScorpionSwordResolve(command, target!, discardFirst: false); break;
             default: throw new InvalidOperationException($"Unknown branch effect '{effect}'.");
         }
     }

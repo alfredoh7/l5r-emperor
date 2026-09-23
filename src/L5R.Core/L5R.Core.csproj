@@ -174,5 +174,8 @@
     <EmbeddedResource Include="../../content/published/personality-wave-50.json" LogicalName="L5R.Published.PersonalityWave50.json" />
     <EmbeddedResource Include="../../content/published/personality-wave-51.json" LogicalName="L5R.Published.PersonalityWave51.json" />
     <EmbeddedResource Include="../../content/published/personality-wave-52.json" LogicalName="L5R.Published.PersonalityWave52.json" />
+    <EmbeddedResource Include="../../content/published/item-wave-11.json" LogicalName="L5R.Published.ItemWave11.json" />
+    <EmbeddedResource Include="../../content/published/spell-wave-18.json" LogicalName="L5R.Published.SpellWave18.json" />
+    <EmbeddedResource Include="../../content/published/follower-wave-25.json" LogicalName="L5R.Published.FollowerWave25.json" />
   </ItemGroup>
 </Project>

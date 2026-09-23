@@ -30,13 +30,21 @@ public sealed partial class MatchEngine
 {
     private const Zone FocusChoiceZone = Zone.FateDiscard;
 
-    private static bool FocusEffectNeedsChoice(string abilityId) => abilityId is "disreputable-deal-focus" or "crimson-mark-focus" or "hiromis-vassals-focus" or "shamsir-focus";
+    private static bool FocusEffectNeedsChoice(string abilityId) => abilityId is "disreputable-deal-focus" or "crimson-mark-focus" or "hiromis-vassals-focus" or "shamsir-focus" or "sandalwood-incense-focus";
     private static bool IsAttachSelfFocusEffect(string abilityId) => abilityId is "hiromis-vassals-focus" or "shamsir-focus";
+    // Sandalwood Incense (oracle-l5r-10123, issue #453 batch 5): "After this duel ends, if your Personality won it, gain 2 Honor or draw a card" -- a choice between two EFFECTS, not
+    // cards: the candidates are the two effect keys below, offered only when the focusing player's Personality won (a tie or a loss asks nothing).
+    private const string SandalwoodGainHonor = "gain-honor";
+    private const string SandalwoodDrawCard = "draw-card";
+    private static bool IsEffectKeyFocusEffect(string abilityId) => abilityId is "sandalwood-incense-focus";
+    private List<string> SandalwoodCandidates(int playerId) =>
+        _state.PendingDuel is { WinnerId: { } winnerId } && Card(winnerId).OwnerId == playerId ? [SandalwoodGainHonor, SandalwoodDrawCard] : [];
 
     private bool HasPoliticalAbility(CardInstance card) =>
         AbilityIdsOf(card).Any(id => AbilityCatalog.All.TryGetValue(id, out var ability) && IsAction(ability) && ActionCarriesKeyword(ability, card, "Political"));
 
     private List<string> FocusChoiceCandidates(int playerId, string abilityId, string focusCardId) => abilityId == "crimson-mark-focus" ? DuelAttachmentCandidates()
+        : IsEffectKeyFocusEffect(abilityId) ? SandalwoodCandidates(playerId)
         : IsAttachSelfFocusEffect(abilityId) ? AttachWielderCandidates(playerId, focusCardId) : DiscardStrategyCandidates(playerId);
 
     // The attachments on the Personalities involved in the duel: the challenger and the challenged.
@@ -67,6 +75,19 @@ public sealed partial class MatchEngine
         var candidates = FocusChoiceCandidates(owner, abilityId, focusCardId);
         var attachments = abilityId == "crimson-mark-focus";
         var attachSelf = IsAttachSelfFocusEffect(abilityId);
+        if (candidates.Count == 0 && IsEffectKeyFocusEffect(abilityId))
+        {
+            Emit("focusEffectNothing", $"{Definition(focus).Name}: {Player(owner).Name}'s Personality did not win the duel, so nothing is gained.", owner, focusCardId);
+            return false;
+        }
+        if (IsEffectKeyFocusEffect(abilityId))
+        {
+            _state.PendingFocusChoice = new PendingFocusChoice { Index = index, FocusCardId = focusCardId, PlayerId = owner, Candidates = candidates, AbilityId = abilityId };
+            _state.PendingChoice = new("focusEffectChoice", owner, focusCardId, $"{Definition(focus).Name} (Focus Effect): {Player(owner).Name}, gain 2 Honor or draw a card.");
+            _state.PriorityPlayerId = owner; _state.ConsecutivePasses = 0;
+            Emit("focusEffectChoiceOffered", $"{Player(owner).Name} may gain 2 Honor or draw a card ({Definition(focus).Name}).", owner, focusCardId);
+            return true;
+        }
         if (candidates.Count == 0)
         {
             Emit("focusEffectNothing", attachments ? $"{Definition(focus).Name}: no Personality involved in the duel has an attachment."
@@ -95,6 +116,14 @@ public sealed partial class MatchEngine
         var destroys = pending.AbilityId == "crimson-mark-focus";
         var attachSelf = IsAttachSelfFocusEffect(pending.AbilityId);
         if (command.Choice == "decline") Emit("focusEffectDeclined", $"{Player(pending.PlayerId).Name} took nothing ({Definition(focus).Name}).", pending.PlayerId, pending.FocusCardId);
+        // Sandalwood Incense (issue #453 batch 5): the chosen effect key, not a card.
+        else if (IsEffectKeyFocusEffect(pending.AbilityId))
+        {
+            Require(command.TargetId is not null && pending.Candidates.Contains(command.TargetId), "Choose to gain 2 Honor or to draw a card, or decline.");
+            if (command.TargetId == SandalwoodGainHonor) GainHonor(pending.PlayerId, 2, Definition(focus).Name, focus);
+            else Draw(Player(pending.PlayerId));
+            Emit("focusEffectChosen", $"{Player(pending.PlayerId).Name} chose to {(command.TargetId == SandalwoodGainHonor ? "gain 2 Honor" : "draw a card")} ({Definition(focus).Name}).", pending.PlayerId, pending.FocusCardId);
+        }
         else
         {
             Require(command.TargetId is not null && pending.Candidates.Contains(command.TargetId),
@@ -132,7 +161,8 @@ public sealed partial class MatchEngine
     {
         if (_state.PendingFocusChoice is not { } p || p.PlayerId != playerId) yield break;
         foreach (var id in p.Candidates)
-            yield return new("chooseFocusEffect", p.AbilityId == "crimson-mark-focus" ? $"Destroy {Definition(Card(id)).Name}"
+            yield return new("chooseFocusEffect", IsEffectKeyFocusEffect(p.AbilityId) ? (id == SandalwoodGainHonor ? "Gain 2 Honor" : "Draw a card")
+                : p.AbilityId == "crimson-mark-focus" ? $"Destroy {Definition(Card(id)).Name}"
                 : IsAttachSelfFocusEffect(p.AbilityId) ? $"Attach to {Definition(Card(id)).Name}" : $"Put {Definition(Card(id)).Name} into your hand", true, null,
                 new GameCommand("chooseFocusEffect", playerId, _state.Version, CardId: p.FocusCardId, TargetId: id), id);
         yield return new("chooseFocusEffect", "Take nothing", true, null, new GameCommand("chooseFocusEffect", playerId, _state.Version, CardId: p.FocusCardId, Choice: "decline"), p.FocusCardId);
