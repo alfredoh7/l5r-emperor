@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Stage the refreshed Windows UI review package from PR 434 at 9f8ef9f5 with eight direct launchers and accurate approval notes.",
-  "validation": "Packaging/publication regressions 9/9 pass. Clean source and all archive scenarios verified. Windows export validates bundled managed libraries/runtime, art and source omission; upload size/SHA-256 match. Native Top Cards and Ghost Copies pass normal/reduced; other native suites in progress.",
-  "remaining": "Exact downloaded Windows package CI; remaining native integrated-source checks; publish ready instructions and notify Mendon once. No merge authorized.",
+  "summary": "Delivered the refreshed Windows review bundle from PR 434 at 9f8ef9f5: Top Cards, ghost copies, Multiple Targets, Battle Progress and Table Visibility, with eight direct launchers. Mendon notified and publication verified; no merge.",
+  "validation": "9/9 packaging/publication regressions pass. Exact 1787505284-byte ZIP upload/download SHA-256 matches. Windows package run 35826153462 at 8208d97f passes actual runtime, isolated data and all eight launcher routes; Mac/Windows foundation and collaboration/routing CI pass. Fresh native Top Cards/Ghost Copies normal+reduced and table coverage at three resolutions pass; captures inspected. Multiple Targets native rerun failed its window-focus guard; Battle Progress rerun not executed after that stop. Notification 5790404279 read back and verified.",
+  "remaining": "Delivery complete. Mendon graphical/rules review and any requested changes, pending Alfredo hands-on acceptances, and fresh Multiple Targets/Battle Progress native reruns remain separate. Desktop focus automation timed out; no native pass claimed for those two. No merge authorized.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/297",
   "branch": "codex/297-windows-refresh",
-  "updated": "2026-09-23T06:17:14.929090+00:00"
+  "updated": "2026-09-23T06:55:22.855877+00:00"
 }

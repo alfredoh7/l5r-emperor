@@ -6,9 +6,12 @@ do not ask either person to operate branches or build tools merely to playtest.
 Alfredo delegates human preview/playability review to Mendon. This does not imply
 Mendon's acceptance or replace the existing checks/review requirements for merging.
 
-Current delivery: [Regions and Celestials for Windows](https://github.com/alfredoh7/l5r-emperor/releases/tag/preview-pr292-7360ff1c17-r1-windows)
-— [Mendon's review notification](https://github.com/alfredoh7/l5r-emperor/pull/292#issuecomment-5732927474).
-This version is the combined non-duel UI preview at `7360ff1`, not a merged release.
+Current delivery: [Updated UI review for Windows](https://github.com/alfredoh7/l5r-emperor/releases/tag/preview-pr434-9f8ef9f5a5-r1-windows)
+— [Mendon's review notification](https://github.com/alfredoh7/l5r-emperor/pull/434#issuecomment-5790404279).
+This pins combined PR #434 at `9f8ef9f5`: draggable Top Cards, ghost-copy markers,
+revised Multiple Targets/Battle Progress, and Table Visibility, with Opponent Payment
+also available. [Delivery evidence and acceptance limits](handoffs/2026-09-23-refreshed-windows-review.md).
+Earlier Windows packages remain immutable; publication does not merge the candidate.
 
 ## Mendon's path
 
