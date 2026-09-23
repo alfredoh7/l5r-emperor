@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Taking issue463: reproduce and fix cancelled local seat handoff and dynamic hand-limit discard query/selector on current main. This draft records ownership before implementation; no finished fix is claimed.",
-  "validation": "Read current main and PR434 source; confirmed hardcoded eight in query and selector and unconditional switch in dialog teardown. Implementation regressions and native tests have not yet run.",
-  "remaining": "Implement and verify both fixes, check combined-preview compatibility, publish prepared Mac and validated Windows scenarios, request Mendon shared review. No merge authorized.",
+  "summary": "Fix the offered hand-discard count and selector to use the authoritative modified limit and offered command. Add regressions for limits 7/8/10, both seats, invalid selections, stale versions and privacy. Seat-handoff privacy fix and prepared reviews are also implemented locally and undergoing final validation.",
+  "validation": "Core regression reproduced two failures before query fix and passes 4/4 after. Native selector regression reproduced one-card acceptance for a two-card requirement before UI fix. Full tools/check.sh --skip-client passed. Client compilation 0 warnings/errors. Native 1920x1080 privacy and exact-discard checks passed; smaller-window and delivery validation ongoing.",
+  "remaining": "Complete final native evidence, review launchers, compatibility check and Windows delivery. Mendon review required; no merge authorized.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/463",
   "branch": "codex/463-interaction-fixes",
-  "updated": "2026-09-23T22:47:41.023156+00:00"
+  "updated": "2026-09-23T23:19:05.284141+00:00"
 }

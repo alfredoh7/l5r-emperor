@@ -325,11 +325,22 @@ public partial class Main
 
     private void RenderHandDiscard()
     {
-        var count = Self.HandCount - 8;
-        var reviewedVersion = _chosen?.Command?.ExpectedVersion ?? View.Version;
+        // The offered command already contains the engine's required number of cards.
+        // Keep its seat/version and replace only the player's explicit selection.
+        var offered = _chosen?.Command;
+        if (offered is not { Type: "discardHand", CardIds.Length: > 0 }
+            || offered.PlayerId != View.ViewerId || offered.ExpectedVersion != View.Version)
+        {
+            _inspector.AddChild(Palette.Wrapped("Waiting for the current discard choice…", 17));
+            return;
+        }
+        var count = offered.CardIds.Length;
         var selected = new HashSet<string>();
-        _inspector.AddChild(Palette.Wrapped($"Choose {count} card(s) to discard.", 17));
-        var confirm = SidebarSkin.Button("Confirm discard", () => Submit(new GameCommand("discardHand", View.ViewerId, reviewedVersion, CardIds: selected.ToArray())), true);
+        var instruction = Self.HandLimit is { } limit
+            ? $"Choose {count} card(s) to discard. Hand limit: {limit.Maximum}."
+            : $"Choose {count} card(s) to discard.";
+        _inspector.AddChild(Palette.Wrapped(instruction, 17));
+        var confirm = SidebarSkin.Button("Confirm discard", () => Submit(offered with { CardIds = selected.ToArray() }), true);
         confirm.Disabled = true;
         foreach (var c in Self.Hand)
         {
