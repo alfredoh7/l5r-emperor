@@ -389,7 +389,7 @@ public sealed partial class MatchEngine
         // destroyed (ApplyDuelOutcome/ApplyDuelFocusEffect, both above, already queued it via MarkDead).
         if (OpenOverconfidentDrawWindow(1 - challengerPlayerId)) return;
         // Action-effect tracking (issue #437): the duel is the action's resolution, the same reasoning FireAfterOwnActionTraits above already follows.
-        if (FinishActionEffectTracking(duel.AbilityId, challengerPlayerId, duel.SourceCardId, challengerPlayerId)) return;
+        if (FinishActionEffectTracking(duel.AbilityId, challengerPlayerId, duel.SourceCardId, challengerPlayerId, duel.ChallengerId)) return;
         NextAction(challengerPlayerId);
     }
 
@@ -470,6 +470,11 @@ public sealed partial class MatchEngine
                 foreach (var id in loserIds) if (!StalwartNegatesBow(Card(id), challengerPlayerId)) Card(id).Bowed = true;
                 if (winnerId is not null && Card(winnerId).OwnerId == challengerPlayerId && ControlsKeyword(challengerPlayerId, "Shugenja"))
                     CreateToken(Card(winnerId), "Fire", abilityId, "Force", 1);
+                break;
+            // An Insult Answered (issue #453, batch 2): "Destroy the duel's loser. Give the duel's winner two +1F Revenge tokens."
+            case "insult-answered-duel":
+                DestroyUnits(loserIds.Select(Card).ToArray(), actingPlayerId: challengerPlayerId);
+                if (winnerId is not null && InPlay(Card(winnerId))) { CreateToken(Card(winnerId), "Revenge", abilityId, "Force", 1); CreateToken(Card(winnerId), "Revenge", abilityId, "Force", 1); }
                 break;
         }
     }
