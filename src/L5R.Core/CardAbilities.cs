@@ -2547,6 +2547,46 @@ public static class AbilityCatalog
         // (a "hand" cost slot beside the real target), since the discarded card and the straightened target are independent choices.
         ["utoro-straighten"] = new("Battle", "Even if Utoro is bowed, discard a card and target a Personality: Straighten him", "slots",
             Slots: [new("target", "personality", "A Personality"), new("discard", "hand", "A card in your hand")]),
+        // Embers of War pass (issue #460, batch 4). Primitives and readings are in EmbersOfWarBatch4.cs and the pass's own decision doc.
+        // Sheathing the Sword (oracle-l5r-6727): "Battle: Choose your performing unbowed Courtier at any location and target an enemy Personality: Move him
+        // home. Gain 1 Honor." -- resolves the cross-batch blocker (oracle-l5r-5941/6727) now that enemy-personality-at-any-location exists: the Performer
+        // side ("...at any location") was already own-unbowed-personality-with-keyword-at-any-location (Scandalous Rumors); only the TARGET side was missing.
+        ["sheathing-sword-move"] = new("Battle", "Choose your performing unbowed Courtier at any location and target an enemy Personality: Move him home. Gain 1 Honor",
+            "enemy-personality-at-any-location", Performer: "own-unbowed-personality-with-keyword-at-any-location", RequiredKeywords: ["Courtier"], ActionKeywords: ["Political"]),
+        // Tactical Trap (oracle-l5r-7717): "Battle: Choose your performing unbowed Tactician at any location and target an enemy Personality: Move him home.
+        // Bow him if he moved." -- the same new Target category, a Tactician performer, and Mitsushen's own "did it actually move" post-check (a target
+        // already at home does not get bowed for free).
+        ["tactical-trap-move"] = new("Battle", "Choose your performing unbowed Tactician at any location and target an enemy Personality: Move him home. Bow him if he moved",
+            "enemy-personality-at-any-location", Performer: "own-unbowed-personality-with-keyword-at-any-location", RequiredKeywords: ["Tactician"], ActionKeywords: ["Tactical"]),
+        // Unstoppable Strike (oracle-l5r-9020): "Battle: Choose your performing Personality: Give him the ability, 'Battle: Target an enemy Personality:
+        // Destroy him.'" -- a bare GrantAbility (AbilityGrants.cs) of a one-off granted ability, Turn duration (the default; the card prints no "permanently").
+        ["unstoppable-strike-grant"] = new("Battle", "Choose your performing Personality: Give him the ability, \"Battle: Target an enemy Personality: Destroy him.\"",
+            "none", Performer: "own-personality-at-battle"),
+        ["unstoppable-strike-destroy"] = new("Battle", "Target an enemy Personality: Destroy him (granted by Unstoppable Strike)", "enemy-personality"),
+        // You Are Unworthy (oracle-l5r-9683): "Open: Choose your performing unbowed Paragon and target an attachment with Force equal to or lower than your
+        // Paragon's Personal Honor: Destroy it." -- the existing "attachment" Target category narrowed by a new Force-vs-performer's-PersonalHonor
+        // comparison (surety-of-purpose's own performer-stat-vs-target-stat shape, read the other way around and against an attachment instead of a
+        // Personality).
+        ["unworthy-destroy"] = new("Open", "Choose your performing unbowed Paragon and target an attachment with Force equal to or lower than your Paragon's Personal Honor: Destroy it",
+            "attachment-force-lte-performer-honor", Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeywords: ["Paragon"]),
+        // The Cycle of Vengeance (oracle-l5r-8004): "As a Focus Effect: After this duel ends, if your Personality lost it, give one of your Personalities two
+        // +1F Revenge tokens." (candidates/resolution in FocusEffectChoice.cs, Fair Warning's own shape read on a LOSS instead of a win, giving Revenge
+        // tokens -- An Insult Answered's own token shape -- instead of -4F). "Battle/Open: Choose your performing Personality: Straighten his unit."
+        ["cycle-of-vengeance-focus"] = new("FocusEffect", "As a Focus Effect: After this duel ends, if your Personality lost it, you may give one of your Personalities two +1F Revenge tokens", "none"),
+        ["cycle-of-vengeance-straighten"] = new("BattleOrOpen", "Choose your performing Personality: Straighten his unit", "none", Performer: "own-personality-at-battle"),
+        // Stuck in Rokugan (oracle-l5r-7593): "Open: Target a Holding: Straighten it." and "Limited: Target a Celestial: Discard it." -- two independent,
+        // plain targeted effects; a Celestial in play sits in Zone.Celestial (ResolveCelestial's own self-replacement discards the same way).
+        ["stuck-in-rokugan-straighten"] = new("Open", "Target a Holding: Straighten it", "any-holding"),
+        ["stuck-in-rokugan-discard"] = new("Limited", "Target a Celestial: Discard it", "in-play-celestial"),
+        // Thick Marsh (oracle-l5r-8445): a Terrain (Keyword "Terrain" is the whole "if no Terrain in play... put this into play there" rule --
+        // MatchEngine's own generic Terrain-play default, already proven by the training-terrain fixtures); "After this card enters play: Choose and bow
+        // an enemy card at the current battlefield" is an ordinary own-enters-play entry Reaction (Izuna's own shape) targeting any enemy card, not only
+        // a Personality.
+        ["thick-marsh-entry"] = new("Reaction", "After this card enters play: Choose and bow an enemy card at the current battlefield", "enemy-card-explicitly-at-battle", Trigger: "own-enters-play"),
+        // Stand as the Mountain (oracle-l5r-7459): "Battle: Choose one or two of your performing Personalities with 7 or higher base Force: Straighten
+        // them" -- Redoubled Attack's own Slots shape (issue #336), narrowed by the new Force floor.
+        ["mountain-straighten"] = new("Battle", "Choose one or two of your performing Personalities with 7 or higher base Force: Straighten them", "slots",
+            Slots: [new("targets", "own-personality-at-battle-force-7-plus", "One or two of your performing Personalities with 7+ base Force", 1, 2, Performing: true)]),
         // Border Keep - inexperienced (oracle-l5r-10240): the printed first-turn province refresh is the existing border-first ability, unchanged; its base Gold
         // Production (2) is the card's own printed stat.
         // Communion with Earth (oracle-l5r-10254): "This Shugenja has Stalwart" is AttachGrantsKeyword (Unparalleled Sword's own shape); "Battle: Target another of your
@@ -4861,7 +4901,7 @@ public sealed partial class MatchEngine
                     // (it is discarded when its battle resolves), so exempting the whole category is exact.
                     // Return to Action (issue #331): "your Personality at HOME" is by definition not at the battlefield
                     // -- own-personality-at-home is exempt for the same reason.
-                    if (actingAsBattle && ability.Target is not ("personality-at-adjacent-battlefield" or "own-unbowed-farm" or "region-or-terrain" or "own-personality-at-home" or "personality-at-any-location" or "own-follower-at-any-location")
+                    if (actingAsBattle && ability.Target is not ("personality-at-adjacent-battlefield" or "own-unbowed-farm" or "region-or-terrain" or "own-personality-at-home" or "personality-at-any-location" or "own-follower-at-any-location" or "enemy-personality-at-any-location")
                         && id is not ("intervening-spirit-move" or "earth-flows-move" or "sanctuary-of-the-waves-move" or "dislodge-the-foe" or "heijin-move"
                             or "natures-wrath-move" or "irezu-move" or "mitsushen-move" or "pronouncement-guilt-move")) Require(AtBattle(target), "Target or performer must be at the current battlefield."); // Nature's Wrath (issue #453 batch 5): its target is brought TO the battlefield; Irezu (issue #458) moves the target HOME from wherever he stands; Mitsushen (issue #458) brings his target TO his own battlefield from wherever it stands; Pronouncement of Guilt (issue #460) brings its enemy target TO the battlefield the same way
                     var personality = type == CardType.Personality;
@@ -4928,6 +4968,10 @@ public sealed partial class MatchEngine
                         "own-unbowed-personality" => personality && own && !target.Bowed,
                         // The Wave Persists (issue #364): "target your Personality there" -- a Reaction has no Battle-timing location Require of its own.
                         "own-personality-at-battle" => personality && own && AtBattle(target),
+                        // Stand as the Mountain (oracle-l5r-7459, issue #460 batch 4): "one or two of your performing Personalities with 7 or
+                        // higher base Force" -- own-personality-at-battle narrowed by a printed-Force floor (the same "Force >= N" comparison
+                        // Charge into Danger's own Slots-free bonus already reads, Definition(performer).Force >= 7).
+                        "own-personality-at-battle-force-7-plus" => personality && own && AtBattle(target) && Definition(target).Force >= 7,
                         // Quick Recovery (issue #364): "a bowed card in his unit (which may be him)" -- the chosen performer or one of his attachments.
                         "bowed-card-in-performer-unit" => target.Bowed && UnitHostId(target) == command.PerformerId,
                         // Return to Action (issue #331): "target your Personality at home" -- own, in Zone.Home (a
@@ -4962,6 +5006,20 @@ public sealed partial class MatchEngine
                         "own-wielder-or-personality-with-wielder-keyword" => own && personality &&
                             (target.Id == Card(source!.AttachedTo!).Id || HasKeywords(Card(source.AttachedTo!), ability.RequiredKeywords)),
                         "enemy-personality" => personality && !own,
+                        // Embers of War pass (issue #460, batch 4): an enemy-only sibling of personality-at-any-location (Tsuruchi Nobukatsu, issue #453 batch 4) -- the
+                        // Target-side half of the AtAnyLocation gap oracle-l5r-5941/6727 were blocked on: every existing keyword-Performer "at any location" category
+                        // (own-unbowed-personality-with-keyword-at-any-location) already exists, but no TARGET category let the chosen enemy Personality itself stand
+                        // anywhere but the current battlefield while acting as Battle. Sheathing the Sword (oracle-l5r-6727) and Tactical Trap (oracle-l5r-7717) are its
+                        // first two consumers.
+                        "enemy-personality-at-any-location" => personality && !own && (!actingAsBattle || AtAnyLocation(target)),
+                        // Thick Marsh (oracle-l5r-8445, issue #460 batch 4): its "bow an enemy card at the current battlefield" is a Reaction (Trigger
+                        // own-enters-play), not a Battle-timed ability, so the generic actingAsBattle AtBattle enforcement below never applies to it --
+                        // an explicit AtBattle check is required here instead (distinct from the plain "enemy-card" category, which several Battle-timed
+                        // abilities rely on that generic enforcement for).
+                        "enemy-card-explicitly-at-battle" => !own && AtBattle(target),
+                        // Stuck in Rokugan (oracle-l5r-7593, issue #460 batch 4): "a Celestial" (either player's) currently in play -- Zone.Celestial,
+                        // the same zone ResolveCelestial's own self-replacement discards from.
+                        "in-play-celestial" => type == CardType.Celestial && target.Zone == Zone.Celestial,
                         "enemy-personality-without-armor" => personality && !own && !Attachments(target.Id).Any(a => Keyword(a, "Armor")),
                         "own-bowed" => personality && own && target.Bowed,
                         "own-opposed" => personality && own && Army(1-player.Id, _state.CurrentBattleProvince!.Value).Any(),
@@ -4994,6 +5052,11 @@ public sealed partial class MatchEngine
                         // own) below.
                         "enemy-bowed-card" => !own && target.Bowed && (personality || target.Zone == Zone.Attached && type is CardType.Follower or CardType.Item or CardType.Spell),
                         "attachment" => target.Zone == Zone.Attached && type is CardType.Follower or CardType.Item or CardType.Spell,
+                        // You Are Unworthy (oracle-l5r-9683, issue #460 batch 4): "an attachment with Force equal to or lower than your Paragon's Personal
+                        // Honor" -- the plain "attachment" category above, narrowed by a numeric compare against the chosen PERFORMER's own printed
+                        // PersonalHonor (Surety of Purpose's own performer-stat-vs-target-stat shape, read against an attachment's Force instead).
+                        "attachment-force-lte-performer-honor" => target.Zone == Zone.Attached && type is CardType.Follower or CardType.Item or CardType.Spell
+                            && Definition(target).Force <= Definition(Card(command.PerformerId!)).PersonalHonor,
                         // Champion of Thunder: "any card in this unit" -- the reacting card's own
                         // unit (source is Champion itself here), always in play by construction
                         // (every member of a unit is either the host Personality or one of its own
@@ -7864,6 +7927,17 @@ public sealed partial class MatchEngine
                 if (guiltMoved && !MatchesTargetStatus(target!, TargetStatus.DishonorableKolatNinjaOrShadowlands)) StraightenUnit(target!);
                 break;
             }
+            // Embers of War pass (issue #460, batch 4; helpers in EmbersOfWarBatch4.cs).
+            case "sheathing-sword-move": MoveHome(target!, false); GainHonorFromPerformer(Card(command.PerformerId!), 1, "Sheathing the Sword"); break;
+            case "tactical-trap-move": TacticalTrapMove(target!, player.Id); break;
+            case "unstoppable-strike-grant": GrantAbility(Card(command.PerformerId!), "unstoppable-strike-destroy", source!.Id, GrantDuration.Turn); break;
+            case "unstoppable-strike-destroy": DestroyUnits([target!], false, player.Id); break;
+            case "unworthy-destroy": DestroyAttachment(target!); break;
+            case "cycle-of-vengeance-straighten": StraightenUnit(Card(command.PerformerId!)); break;
+            case "stuck-in-rokugan-straighten": Straighten(target!); break;
+            case "stuck-in-rokugan-discard": target!.Zone = Zone.DynastyDiscard; target!.FaceUp = true; Emit("celestialDiscarded", $"{Definition(target!).Name} was discarded.", target!.OwnerId, target!.Id); break;
+            case "thick-marsh-entry": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;
+            case "mountain-straighten": foreach (var chosen in PerformingSlotCards(command, ability).ToArray()) StraightenUnit(chosen); break;
             default:
                 // Any ability with an AttachSpec (Moto Jun-Ni, Fading Shadows, Foothills Keep and the training shapes) needs no case of its own: the Gold was
                 // paid by PayForAbility, so the card now leaves its place and enters play attached. An entering-play window ends the action here.

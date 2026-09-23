@@ -2459,4 +2459,6 @@ public static class PublishedContent
     public static PublishedSnapshot StrongholdWave13 { get; } = Load("L5R.Published.StrongholdWave13.json", "stronghold-wave-13", requireDecks: false);
     /// <summary>Follower wave 27 (issue #458): Devoted Yojimbo.</summary>
     public static PublishedSnapshot FollowerWave27 { get; } = Load("L5R.Published.FollowerWave27.json", "follower-wave-27", requireDecks: false);
+    /// <summary>Strategy wave 53 (Embers of War pass, issue #460, batch 4): Sheathing the Sword, Tactical Trap, Unstoppable Strike, You Are Unworthy, The Cycle of Vengeance.</summary>
+    public static PublishedSnapshot StrategyWave53 { get; } = Load("L5R.Published.StrategyWave53.json", "strategy-wave-53", requireDecks: false);
 }
