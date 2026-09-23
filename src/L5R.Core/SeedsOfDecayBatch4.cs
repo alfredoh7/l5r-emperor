@@ -34,9 +34,10 @@ public sealed partial class MatchEngine
     // "Reaction: If it is the Action Phase or Mahatsu is at the current battlefield, before an action with Thunder or an element keyword resolve, negate its effects." The
     // action is any player's (the text names no player), carrying Thunder or an element keyword on the ability itself or on the card it is printed on (ActionCarriesKeyword),
     // whatever it targets -- an action that names no card included, like the untargeted-action fixture of issue #373.
+    // His own Reaction is itself an action carrying his element keywords: it is never its own trigger (a window for it would only ever negate itself).
     private bool MahatsuNegateApplies(CardInstance mahatsu, GameCommand command)
     {
-        if (command.AbilityId is null || !AbilityCatalog.All.TryGetValue(command.AbilityId, out var acting) || !IsAction(acting) || !InPlay(mahatsu)) return false;
+        if (command.AbilityId is null or "mahatsu-negate" || !AbilityCatalog.All.TryGetValue(command.AbilityId, out var acting) || !IsAction(acting) || !InPlay(mahatsu)) return false;
         if (!(_state.Phase == Phase.Action || AtBattle(mahatsu))) return false;
         var actingSource = command.CardId is not null && _state.Cards.TryGetValue(command.CardId, out var s) ? s : null;
         return ThunderOrElementKeywords.Any(k => ActionCarriesKeyword(acting, actingSource, k));

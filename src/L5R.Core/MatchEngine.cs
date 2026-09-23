@@ -1141,6 +1141,8 @@ public sealed partial class MatchEngine
         switch(_state.Phase)
         {
             case Phase.Action:
+                // An additional action in the Action phase (Seeds of Decay, issue #453: Daigotsu Yamato, Shinjo Katsuo) is forfeited by a pass, as in a battle below.
+                _state.AdditionalActions.RemoveAll(g=>g.PlayerId==_state.PriorityPlayerId && Forfeitable(g));
                 if(++_state.ConsecutivePasses==2) SetPhase(Phase.AttackDeclaration,_state.ActivePlayerId);
                 else _state.PriorityPlayerId=1-_state.PriorityPlayerId;
                 break;
