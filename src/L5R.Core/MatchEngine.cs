@@ -182,7 +182,9 @@ public sealed partial class MatchEngine
             var reactionCard = aftermath is not null && reactionSource is not null && _state.Cards.TryGetValue(reactionSource, out var rc)
                 && rc.FaceUp && rc.Zone is not (Zone.Hand or Zone.FateDeck or Zone.DynastyDeck) ? ViewCard(rc) : null;
             var reactionLabel = _state.PendingChoice?.Type=="overconfidentDraw" ? "Overconfident" : null;
+            var traitSnapshot = AfterCommandTraitSnapshot(); // "After this card bows/attaches" traits (issue #453 batch 5, SeedsOfDecayBatch5.cs)
             Apply(command);
+            ApplyAfterCommandTraits(traitSnapshot);
             ReturnCardsOutOfPlayToTheirOwners();
             RemoveCreatedCardsLeftInPiles();
             if (aftermath is not null) RecordDuelChanges(aftermath, "Aftermath", reactionCard, sourceLabel: reactionLabel);
@@ -267,9 +269,23 @@ public sealed partial class MatchEngine
             if (_state.PendingChoice.Type=="brashDraw") { ResolveBrashDraw(command); return; }
             if (_state.PendingChoice.Type=="overconfidentDraw") { ResolveOverconfidentDraw(command); return; }
             if (_state.PendingChoice.Type=="harshChoices") { ResolveHarshChoices(command); return; }
+            // Seeds of Decay pass (issue #453), batch 4: two decisions inside the Events Phase reveal (SeedsOfDecayBatch4.cs).
+            if (_state.PendingChoice.Type=="offeringReverence") { ResolveOfferingReverenceChoice(command); return; }
+            if (_state.PendingChoice.Type=="testedLandProvince") { ResolveTestedLandProvince(command); return; }
             if (_state.PendingChoice.Type=="forcedDiscard") { ResolveForcedDiscard(command); return; }
             // A conditional effect choice (issue #337, Mirumoto Yumaru): the acting player picks one of the options the engine listed.
             if (_state.PendingChoice.Type=="effectChoice") { ResolveEffectChoice(command); return; }
+            if (_state.PendingChoice.Type=="proclaimNegateReaction")
+            {
+                // Turning the Story (issue #453, batch 2): the one reacting player answers -- the Reaction (negating the held Proclaim) or a pass -- and the
+                // Proclaim then resolves, negated or not, back inside the Proclaim window it interrupted (SeedsOfDecayBatch2.cs).
+                Require(command.Type is "useAbility" or "declineReaction" or "pass","Resolve the before-Proclaim reaction window first.");
+                if (command.Type=="useAbility") UseAbility(command);
+                else Emit("reactionPassed",$"{Player(command.PlayerId).Name} passed the reaction opportunity.",command.PlayerId);
+                // The window closes the instant the one reacting player has answered: a pass, or the Reaction that negated the Proclaim.
+                if (_state.HeldProclaim is { } held && (command.Type!="useAbility" || held.Negated)) { _state.PendingChoice=null; _state.ConsecutivePasses=0; ResolveHeldProclaim(); }
+                return;
+            }
             if (_state.PendingChoice.Type=="proclaim")
             {
                 // "useAbility" here resolves the entering card's own entering-play Reaction (if it
@@ -464,6 +480,8 @@ public sealed partial class MatchEngine
         if (_state.PendingDuel is not null) { ResolveDuelCommand(command); return; }
         // Unfortunate Hesitation (issue #338): a player who owes a pass at an ordinary Action/Battle opportunity may only pass.
         EnforceForcedPass(command);
+        // Urgency (issue #453, batch 2): a player past his allowance of non-Reaction actions this phase may take none.
+        EnforceActionAllowance(command);
         // Battle Phase timing (issue #310): a limit on the first-action holder's FIRST Battle action (Naval
         // Invasion's "which he must perform"; Rebuilding Kyuden Hida's "may not announce a Battle action before the
         // Defender's first normal opportunity"). Consumed by the holder's next accepted command; a useAbility's
@@ -554,6 +572,10 @@ public sealed partial class MatchEngine
         // The Great Death (issue #431): "After The Great Death enters play: Create three 1F Shadowlands * Nonhuman * Raptor * Cavalry * Undead Followers, attach them to it, and lose 6 Honor." A trait, so
         // mandatory like the lines above (the Honor loss is its EntryHonorLoss).
         if(Definition(card).Effect==GreatDeathEntryEffect) CreateGreatDeathFollowers(playerId,card);
+        // Seeds of Decay pass (issue #453), batch 4: the Sensei whose Effect field carries their other static trait (StaticKeywordRules.cs) discard the other Sensei too;
+        // Daigotsu Yamato loses Brash for good if another player is Scorpion Clan (SeedsOfDecayBatch4.cs).
+        if(HasSenseiEntryEffect(Definition(card).Effect)) DiscardOtherSensei(playerId,card);
+        if(Definition(card).Effect==YamatoEntryEffect) RemoveBrashIfOpponentIsScorpion(card);
     }
     // Sensei (Mirumoto Hikaro / Mirumoto Yozo, Experienced 2): "your OTHER Sensei Personalities" --
     // every OTHER Sensei-keyword Personality this same controller has, either unbowed-or-bowed in
@@ -591,6 +613,7 @@ public sealed partial class MatchEngine
         Pay(command.PlayerId,card,quote.Cost,command.SourceIds,paying:new PaymentSubject(card,PaymentKind.Recruit));
         var province=Player(command.PlayerId).Provinces.Single(p=>p.CardId==card.Id);
         province.CardId=null;
+        _state.LastProvinceEntryCardId=card.Id; // "enters play from a province" (Yogo Ugimori; issue #453, batch 2)
         card.Zone=Zone.Home; card.ProvinceIndex=null; card.FaceUp=true;
         // A Personality is straightened by default; entering bowed is only ever a direct
         // consequence of a printed effect, never a separate straighten-then-bow step.
@@ -883,6 +906,7 @@ public sealed partial class MatchEngine
         Pay(command.PlayerId,card,quote.Cost,command.SourceIds,paying:new PaymentSubject(card,PaymentKind.Recruit));
         var province=Player(command.PlayerId).Provinces.Single(p=>p.CardId==card.Id);
         province.CardId=null;
+        _state.LastProvinceEntryCardId=card.Id; // "enters play from a province" (Yogo Ugimori; issue #453, batch 2)
         card.Zone=Zone.Battlefield; card.FaceUp=true;
         card.Bowed=Definition(card).Effect=="enters-bowed";
         if(Definition(card).Effect=="enters-dishonored") Dishonor(card);
@@ -982,15 +1006,19 @@ public sealed partial class MatchEngine
         // "Enters play paying N less Gold if you are a <Clan> Clan player" (issue #336, Daigotsu Hotako exp3): a printed term of the card that
         // stacks with the two Clan choices above; the same one ClanEntryDiscount gives Equip.
         var entryDiscount=ClanEntryDiscount(def,player);
-        var rawCost=def.GoldCost-prosperous-reserveDiscount-ashikoDiscount-(entryDiscount?.Amount??0)+(clanAllegiance?2:0)-(clanDiscount?2:0);
+        // Mukudori (Seeds of Decay, issue #453): "Your other Fudo cards enter play for 1 less Gold" -- a term of the price of every entry, like ClanEntryDiscount (StaticKeywordRules.cs).
+        var keywordDiscount=KeywordEntryDiscount(card,playerId);
+        var rawCost=def.GoldCost-prosperous-reserveDiscount-ashikoDiscount-(entryDiscount?.Amount??0)-keywordDiscount+(clanAllegiance?2:0)-(clanDiscount?2:0);
         var cost=Math.Max(0,rawCost);
         // The human-readable derivation the payment panel shows (issue #303), term by term.
         var basis=$"{def.Name} cost {def.GoldCost}"+(prosperous>0?$" − {prosperous} (controlled Personalities)":"")+(reserveDiscount>0?$" − {reserveDiscount} (Reserve while defending)":"")
             +(ashikoDiscount>0?$" − {ashikoDiscount} (outnumbered)":"")
             +(entryDiscount is {} entry?$" − {entry.Amount} ({entry.Clan} Clan)":"")
+            +(keywordDiscount>0?$" − {keywordDiscount} (Fudo, Mukudori)":"")
             +(clanAllegiance?" + 2 (Clan allegiance)":"")+(clanDiscount?" − 2 (Clan discount)":"")+(rawCost<0?" (min 0)":"");
         if ((Keyword(card,"Unique") || Keyword(card,"Singular")) && ControlsCopyOf(playerId,def.Name)) error=$"You already control this {(Keyword(card,"Unique") ? "Unique" : "Singular")} card.";
-        var eligible=error is null && inClan && !clanDiscount && !fromDeadPile && playerId==_state.ActivePlayerId && player.ProclaimUsedTurn!=_state.TurnNumber;
+        // Kakita Yusugi and Yogo Ugimori (issue #453, batch 2): the once-per-turn limit he ignores, and a lock on the player (ProclaimAllowed).
+        var eligible=error is null && inClan && !clanDiscount && !fromDeadPile && playerId==_state.ActivePlayerId && ProclaimAllowed(player,def);
         return new(cardId,cost,clanDiscount,clanAllegiance,eligible,error,error is null ? PaymentOptions(playerId,cost,new PaymentSubject(card,PaymentKind.Recruit)) : [],basis);
     }
 
@@ -1065,6 +1093,8 @@ public sealed partial class MatchEngine
             }
         foreach(var id in ids) _state.Cards[id].Bowed=true;
         Emit("payment",$"{Player(playerId).Name} paid {cost} Gold for {Definition(target).Name}{(part is null?"":$" ({part})")}, producing {produced}; {produced-cost} excess was lost.",playerId,target.Id,produced-cost);
+        // Temple to Fudo (Seeds of Decay, issue #453): ":bow:: Produce 2 Gold and lose 1 Honor" -- the loss is part of producing (SeedsOfDecayBatch4.cs).
+        LoseHonorForProducers(playerId,ids);
     }
 
     private void Proclaim(GameCommand command)
@@ -1072,13 +1102,10 @@ public sealed partial class MatchEngine
         var pending=_state.PendingChoice!;
         var player=Player(command.PlayerId);
         Require(pending.PlayerId==command.PlayerId && command.PlayerId==_state.ActivePlayerId,"Only the entering Personality's controller may Proclaim during their turn.");
-        Require(player.ProclaimUsedTurn!=_state.TurnNumber,"Proclaim has already been used this turn.");
-        var card=Card(pending.CardId);
-        player.ProclaimUsedTurn=_state.TurnNumber;
-        GainHonor(player.Id,Definition(card).PersonalHonor,"Proclaim");
-        ApplyPendingEntryEffects();
-        _state.ConsecutivePasses=0;
-        _state.PriorityPlayerId=1-command.PlayerId;
+        Require(ProclaimRejection(player,Definition(Card(pending.CardId))) is null,ProclaimRejection(player,Definition(Card(pending.CardId)))??"Proclaim has already been used this turn.");
+        // Turning the Story (issue #453, batch 2): "Before a Proclaim action resolves" -- the Proclaim waits for the opponent's Reaction when they hold one (SeedsOfDecayBatch2.cs).
+        if(DeferProclaimForNegation(command)) return;
+        FinishProclaim(command,negated:false);
     }
     private void PassReaction()
     {
@@ -1129,6 +1156,8 @@ public sealed partial class MatchEngine
         switch(_state.Phase)
         {
             case Phase.Action:
+                // An additional action in the Action phase (Seeds of Decay, issue #453: Daigotsu Yamato, Shinjo Katsuo) is forfeited by a pass, as in a battle below.
+                _state.AdditionalActions.RemoveAll(g=>g.PlayerId==_state.PriorityPlayerId && Forfeitable(g));
                 if(++_state.ConsecutivePasses==2) SetPhase(Phase.AttackDeclaration,_state.ActivePlayerId);
                 else _state.PriorityPlayerId=1-_state.PriorityPlayerId;
                 break;
@@ -1241,7 +1270,7 @@ public sealed partial class MatchEngine
         foreach(var assignment in command.Assignments??[])
         {
             var card=Card(assignment.Key);
-            Require(card.OwnerId==command.PlayerId && card.Zone==Zone.Home && !card.Bowed && Definition(card).Type==CardType.Personality,"Assign only your unbowed Personalities at home.");
+            Require(card.OwnerId==command.PlayerId && card.Zone==Zone.Home && (!card.Bowed || MayAssignBowed(card)) && Definition(card).Type==CardType.Personality,"Assign only your unbowed Personalities at home.");
             // Xijkt (issue #207 follow-up): "may assign during Cavalry Maneuvers if you are the
             // Defender" -- a narrow, card-specific Cavalry-eligibility override (checked here rather
             // than broadening IsCavalryUnit's own shared logic for one card), additive only: it never
@@ -1258,6 +1287,8 @@ public sealed partial class MatchEngine
             // battle may have already resolved and returned this card home, losing a live Zone check.
             card.AssignedToAttackTurn=_state.TurnNumber;
             Emit("unitAssigned",$"{Definition(card).Name} assigned to province {assignment.Value+1}.",command.PlayerId,card.Id);
+            // "After the next time this turn he is assigned to attack" (Imperial Protection, Fair Warning; issue #453, batch 2): an attacker's assignment only.
+            if(!isDefender) FireAssignedToAttackWatches(card);
         }
     }
     // Cavalry (core rules Attack Phase): a unit is Cavalry only if the Personality AND every attached
@@ -1272,6 +1303,7 @@ public sealed partial class MatchEngine
         Require(command.Province is int && _state.UnresolvedBattlefields.Contains(command.Province.Value),"Choose an unresolved battlefield.");
         _state.CurrentBattleProvince=command.Province; _state.BattleNumber++;
         _state.EnemyDestroyedOwnPersonalitySinceLastBattleAction=new bool[2]; // Revenge (issue #437): "this battle" bounds the window.
+        _state.ReconStrategyActionsThisBattle=new int[2]; // Advanced Intelligence (Seeds of Decay pass, issue #453, batch 1): "this battle" too.
         SetPhase(Phase.Battle,1-_state.ActivePlayerId);
         // Battle Phase timing (issue #310): the Defender holds the first opportunity by default (spec 4.4).
         // "Engaging" is exactly this moment -- the Attacker has just selected the battle (spec 4.1) -- so the
@@ -1446,6 +1478,7 @@ public sealed partial class MatchEngine
     private void ContinueResolveBattle(int provinceIndex,int attacker,int defender)
     {
         var a=Army(attacker,provinceIndex).ToArray(); var d=Army(defender,provinceIndex).ToArray();
+        MarkOpposed(a,d); // Sentinel Spirit (issue #453, batch 2): "if it was opposed this turn".
         var (af,df)=ArmyForces(a,d,attacker,defender);
         Emit("battleResolved",$"Province {provinceIndex+1}: attacking Force {af}, defending Force {df}.");
         // Reconnaissance resets to No for both players at this battlefield once its battle resolves,
@@ -1456,6 +1489,8 @@ public sealed partial class MatchEngine
         var destroyedByPlayer=new int[2]; var provinceDestroyedNow=false; var losers=new List<int>();
         if(attackerWon)
         {
+            // Yoritomo Iwashi (issue #453, batch 3): every Personality of the winning attacking army remembers this victory (SeedsOfDecayBatch3.cs).
+            MarkAttackVictory(a);
             var destroyedDefenders=DestroyUnits(d);
             destroyedByPlayer[attacker]=destroyedDefenders; losers.Add(defender);
             if(!RehonorWinners(a)) { GainHonor(attacker,destroyedDefenders*2,"Battle victory"); CheckEarthFlowsBonus(attacker,a); }
@@ -1896,7 +1931,7 @@ public sealed partial class MatchEngine
             // Two-Handed overrides Kensai and Kama entirely: whenever a Two-Handed Weapon is involved
             // (already attached, or the one being attached), at most one Weapon total is ever allowed.
             if(Keyword(attachment,"Two-Handed") || existingWeapons.Any(c=>Keyword(c,"Two-Handed"))) return existingWeapons.Length==0;
-            var weaponCap=Keyword(target,"Kensai") || Keyword(attachment,"Kama") || existingWeapons.Any(c=>Keyword(c,"Kama")) ? 2 : 1;
+            var weaponCap=Keyword(target,"Kensai") || IsKama(attachment) || existingWeapons.Any(IsKama) ? 2 : 1; // IsKama: the keyword, or the printed Kama's own Effect (issue #453 batch 5)
             return existingWeapons.Length<weaponCap;
         }
         return true;
@@ -1926,7 +1961,8 @@ public sealed partial class MatchEngine
     // is not removed by this and resumes applying once honorable again. The handful of rules that
     // deliberately key off the *printed* value regardless of current status (Dishonorable death's
     // Honor penalty, Proclaim's grant) intentionally do not use this helper.
-    private int CardPersonalHonor(CardInstance card) => card.Dishonorable && !DishonorablePersonalHonorOverridden(card) ? 0 : Definition(card).PersonalHonor+StatModifier(card,"PersonalHonor");
+    private int CardPersonalHonor(CardInstance card) => card.Dishonorable && !DishonorablePersonalHonorOverridden(card) ? 0 : Definition(card).PersonalHonor+StatModifier(card,"PersonalHonor")
+        +StaticPersonalHonorBonus(card); // Akodo Hotaka (issue #453, batch 2): "+1PH if any other player is Dragon Clan".
     // Utaku Chikako's own passive (issue #186): "Your dishonorable Battle Maidens do not have a
     // maximum Personal Honor of 0" -- a Personality's own passive (not a Stronghold's), so checked
     // generically against any in-play Personality the SAME owner controls carrying this Effect,
@@ -1993,6 +2029,8 @@ public sealed partial class MatchEngine
         // Maiden receives FROM other cards' own Effect), so it is Effect-keyed on the receiving card
         // itself, with no attacking/defending gate at all.
         +(Definition(card).Effect=="force-per-other-magistrate-in-army"?OtherMagistratesInArmy(card):0)
+        // Immolation (oracle-l5r-10127, issue #453 batch 5): "This Shugenja has +3F, or +4F while he is Fire" -- Effect-keyed on the attached Spell, like tsunami-force above.
+        +Attachments(card.Id).Where(c=>Definition(c).Type==CardType.Spell && Definition(c).Effect=="immolation-force" && Keyword(card,"Shugenja")).Sum(_=>Keyword(card,"Fire")?4:3)
         +AshigaruBattleBoost(card)+ArmyBattleMaidenBoost(card));
     // "Her army" (Yoritomo Minori): every Personality the same owner has at the same battlefield --
     // Army(), the engine's own definition -- so a card not at a battlefield has no army and no bonus.
@@ -2016,6 +2054,9 @@ public sealed partial class MatchEngine
     private int ItemForceToWielder(CardInstance item,CardInstance wielder) => Definition(item).Effect switch
     {
         "force-to-kensai-wielder" => Keyword(wielder,"Kensai") ? 1 : 0,
+        // Celestial Sword of the Mantis / of the Scorpion - exp (issue #453 batch 5): "This card has +1F for each <Clan> Personality you control" -- the wielder's controller's, the wielder himself included.
+        "celestial-sword-force-mantis" => ControlledClanPersonalities(wielder.OwnerId,"Mantis"),
+        "celestial-sword-force-scorpion" => ControlledClanPersonalities(wielder.OwnerId,"Scorpion"),
         _ => 0
     };
     // A Follower's own standalone Force, including any static conditional bonus it grants itself
@@ -2053,7 +2094,7 @@ public sealed partial class MatchEngine
         // Item's bonus TO the wielder); here the Follower's own Force is keyed off the wielder instead.
         "force-equals-wielder-printed-force" => card.AttachedTo is null ? 0 : Definition(Card(card.AttachedTo)).Force,
         _ => 0
-    })+UnitFollowerBoost(card)+AkioFollowerBoost(card)+AshigaruBattleBoost(card)+ArmyBattleMaidenBoost(card));
+    })+UnitFollowerBoost(card)+AkioFollowerBoost(card)+AshigaruBattleBoost(card)+ArmyBattleMaidenBoost(card)+ZanshoFollowerBoost(card));
     // "Boost other cards in the unit" primitive (Senior Infantry Legion's shape): distinct from the
     // self-referential conditional bonuses above, this is a card that grants a static Force bonus to
     // every OTHER Follower attached to the same Personality (a unit is a Personality and all of its
@@ -2114,9 +2155,9 @@ public sealed partial class MatchEngine
     // (Seppun Heavy Elite's shape -- see AttachGrantsEliteEffect).
     private bool EliteEffect(CardInstance card) => Keyword(card,"Elite") || Attachments(card.Id).Any(a=>Definition(a).AttachGrantsEliteEffect
         || Definition(a).AttachGrantsEliteEffectWhileWielderHas is string wielderKeyword && Keyword(card,wielderKeyword));
-    private int PersonalityBattleContribution(CardInstance card) => card.Bowed && !EliteEffect(card) ? 0 : PersonalityForce(card);
+    private int PersonalityBattleContribution(CardInstance card) => card.Bowed && !EliteEffect(card) || ForceContributionNegated(card) ? 0 : PersonalityForce(card);
     private int FollowerBattleContribution(CardInstance card) => Attachments(card.Id)
-        .Where(c=>(!c.Bowed || EliteEffect(c)) && Definition(c).Type==CardType.Follower)
+        .Where(c=>(!c.Bowed || EliteEffect(c)) && !ForceContributionNegated(c) && Definition(c).Type==CardType.Follower)
         .Sum(FollowerForce);
     private int BattleForce(CardInstance card) => PersonalityBattleContribution(card)+FollowerBattleContribution(card);
     // Force redirection (issue #216, Togashi Noboru): each army's own total, honoring any active
@@ -2129,6 +2170,8 @@ public sealed partial class MatchEngine
         int af=0,df=0;
         foreach(var c in a) { if(RedirectsTo(c,attacker,defender,a,d)==defender) df+=PersonalityBattleContribution(c); else af+=PersonalityBattleContribution(c); af+=FollowerBattleContribution(c); }
         foreach(var c in d) { if(RedirectsTo(c,attacker,defender,a,d)==attacker) af+=PersonalityBattleContribution(c); else df+=PersonalityBattleContribution(c); df+=FollowerBattleContribution(c); }
+        // Seeds of Decay pass (issue #453), batch 1: Megumi's Guidance's "+2 total Force, or +3 if you are the Defender, while your army is opposed" (SeedsOfDecayBatch1.cs).
+        af+=CelestialArmyBonus(attacker,a,d,defending:false); df+=CelestialArmyBonus(defender,d,a,defending:true);
         return (af,df);
     }
     private int? RedirectsTo(CardInstance card,int attacker,int defender,CardInstance[] a,CardInstance[] d)
@@ -2159,6 +2202,8 @@ public sealed partial class MatchEngine
         // not trigger this" carve-out. Checked before the Zone changes, using the card's own status
         // right up to the moment it actually died.
         if(InPlay(card)) QueueOverconfidentDraw(card);
+        // Fair Warning (issue #453, batch 2): "after the next time this turn he ... is destroyed" -- a destruction while in play.
+        if(InPlay(card)) FireDestroyedWatches(card);
         card.Zone = Definition(card).Type==CardType.Personality ? Zone.Dead
             : Definition(card).Type is CardType.Follower or CardType.Item or CardType.Spell or CardType.Strategy or CardType.Ring ? Zone.FateDiscard
             : Zone.DynastyDiscard;
@@ -2310,6 +2355,9 @@ public sealed partial class MatchEngine
                 continue;
             }
             if(DestructionDelayed(card)) continue;
+            // Seeds of Decay pass (issue #453), batch 1: an action's effect (actingPlayerId is set exactly then) is negated by Wide Valley at its battlefield and by Megumi's Guidance's shield.
+            if(actingPlayerId is not null && WideValleyNegatesDestruction(card)) continue;
+            if(actingPlayerId is int shieldActor && DestructionShielded(card,shieldActor)) continue;
             foreach(var attachment in Attachments(card.Id).ToArray())
             {
                 RemoveAttachmentGrants(card, attachment.Id);
@@ -2463,6 +2511,8 @@ public sealed partial class MatchEngine
         SetPhase(Phase.End,player.Id);
         if(player.DishonorLossPending) { Win(1-player.Id,"Dishonor defeat at the beginning of the End Phase"); return; }
         Draw(player);
+        // Ingenuity (issue #453, batch 2): "draw an additional card during your next End Phase".
+        DrawExtraEndPhaseCards(player);
         var maxHand=MaxHandSize(player.Id);
         if(player.Hand.Count>maxHand) _state.PendingChoice=new("discardHand",player.Id,null,$"Discard {player.Hand.Count-maxHand} card(s) to return to {maxHand}.");
         else FinishTurn();
@@ -2493,7 +2543,8 @@ public sealed partial class MatchEngine
     {
         var player=Player(_state.ActivePlayerId);
         _state.PriorityPlayerId=player.Id;
-        if(player.Honor>=40) { Win(player.Id,"Honor victory at the start of the turn"); return; }
+        // Akodo Hotaka (issue #453, batch 2) lowers the 40 his controller needs (HonorVictoryThreshold).
+        if(player.Honor>=HonorVictoryThreshold(player.Id)) { Win(player.Id,"Honor victory at the start of the turn"); return; }
         // Enlightenment victory (issue #194): begins their turn with all five REAL elemental Rings
         // (Fire/Water/Air/Earth/Void) in play -- checked by Keyword, not a fixed card id, since more
         // than one printing of a given Ring exists. Every False Ring carries its own matching
@@ -2589,8 +2640,10 @@ public sealed partial class MatchEngine
                 card.FaceUp=true;
                 Emit("provinceRevealed",$"{player.Name} revealed {Definition(card).Name} in province {province.Index+1}.",player.Id,card.Id);
                 if(Definition(card).Type==CardType.Event) { if(ResolveEvent(player,province,card)) return; }
-                else if(Definition(card).Type==CardType.Region) ResolveRegion(player,province,card);
+                else if(Definition(card).Type==CardType.Region) { if(ResolveRegion(player,province,card)) return; }
                 else if(Definition(card).Type==CardType.Celestial) ResolveCelestial(player,province,card);
+                // Tested Land (Seeds of Decay, issue #453): "After a Holding is revealed in this Province, discard it and this Region." (SeedsOfDecayBatch4.cs)
+                else if(Definition(card).Type==CardType.Holding) DiscardRevealedHoldingOnTestedLand(player,province,card);
             }
             // An Event already face up (refilled face up by Border Keep's cycle or the Kharmic replacement) was never
             // revealed here, but Events resolve only in the Events Phase: it resolves now instead of staying stuck
@@ -2639,6 +2692,8 @@ public sealed partial class MatchEngine
             BeginSearch(SearchCatalog.ImperialGift,card,player.Id,"event");
             return true;
         }
+        // Offering Reverence (Seeds of Decay, issue #453): creates an Ancestor per dead Personality, or asks whether to shuffle itself into the deck (SeedsOfDecayBatch4.cs).
+        if(Definition(card).Effect==OfferingReverenceEffect) return ResolveOfferingReverence(player,province,card);
         province.CardId=null; card.ProvinceIndex=null;
         switch(Definition(card).Effect)
         {
@@ -2701,8 +2756,10 @@ public sealed partial class MatchEngine
     // Unlike Event, a Region that DOES attach never moves on from Zone.Region on its own; there is no
     // "resolve once, then discard" step, since its whole printed effect (a standing trait, a Reaction,
     // or both) lives for as long as it stays attached.
-    private void ResolveRegion(PlayerState player,ProvinceState province,CardInstance card)
+    // Returns true when the reveal paused for a decision (Tested Land's choice of enemy province, Seeds of Decay, issue #453 -- SeedsOfDecayBatch4.cs).
+    private bool ResolveRegion(PlayerState player,ProvinceState province,CardInstance card)
     {
+        if(Definition(card).Effect==TestedLandEffect) return ResolveTestedLand(player,province,card);
         province.CardId=null; card.ProvinceIndex=null;
         if(province.RegionId is not null)
         {
@@ -2711,6 +2768,7 @@ public sealed partial class MatchEngine
         }
         else AttachRegionToProvince(player,province,card);
         Refill(player,province);
+        return false;
     }
     // The one place a Region enters play attached to a province: the Events Phase reveal above, and a Region found
     // by a deck search that the searcher attaches to a province of their own choice (issue #312, Ikoma Shizuka).
@@ -2769,7 +2827,8 @@ public sealed partial class MatchEngine
     private int EffectiveProvinceStrength(ProvinceState province)
     {
         // The CURRENT strength: raised and lowered by everything that has acted on the province, and by the Region and the Terrain bonuses still in play.
-        var strength=province.Strength + (province.RegionId is string id && RegionStrengthBonus.TryGetValue(Definition(Card(id)).Effect,out var bonus) ? bonus : 0) + ProvinceSourceBonuses(province) + StaticProvinceBonus(province);
+        var strength=province.Strength + (province.RegionId is string id && RegionStrengthBonus.TryGetValue(Definition(Card(id)).Effect,out var bonus) ? bonus : 0) + ProvinceSourceBonuses(province) + StaticProvinceBonus(province)
+            + TimedProvinceStrength(province); // Seeds of Decay (issue #453), batch 2: strength given for the turn (SeedsOfDecayBatch2.cs).
         // A limit (TerrainStatics.cs: Times of Strife, issue #259; Ancient Feud, issue #418) is a CEILING on what is read, never a lowering of the current strength: a province already at or
         // below it is untouched, and one above it reads as the maximum until the limit ends.
         return ProvinceStrengthMax(province) is int max ? Math.Min(strength,max) : strength;
@@ -2825,6 +2884,7 @@ public sealed partial class MatchEngine
     {
         if(source is null || source.OwnerId != playerId) return false;
         var stronghold = Definition(Card(Player(playerId).StrongholdId)).Effect;
+        if(HonorLossNegatedByKeyword(stronghold,source)) return true; // Seeds of Decay pass (issue #453), batch 1: The Castle of Order's "Ninja cards you own".
         if(!HonorLossImmunity.TryGetValue(stronghold, out var rule)) return false;
         var def = Definition(source);
         return (rule.Clan is not null && HasClanAffiliation(source,rule.Clan)) || (rule.Fate && IsFateCardType(def.Type));
@@ -2854,6 +2914,8 @@ public sealed partial class MatchEngine
             amount=reduced;
         }
         var player=Player(playerId); player.Honor+=amount;
+        if(amount<0) RecordHonorLoss(playerId); // An Insult Answered (issue #453, batch 2): the action that cost this player Honor.
+        if(amount>0) _state.CurrentActionHonorGained=true; // Moksha Patam (issue #453 batch 5): read when the action in progress is done.
         if(player.Honor<=-20) player.DishonorLossPending=true;
         Emit("honorChanged",$"{player.Name}: {amount:+#;-#;0} Honor ({reason}).",playerId,Amount:amount);
         // Formal Apology (issue #259): checked after EVERY Honor change, gain or loss alike, since the
@@ -2922,7 +2984,11 @@ public sealed partial class MatchEngine
         // direct `state.Phase=Phase.Dynasty` field assignment bypasses SetPhase entirely, so it never
         // reaches here). One check here therefore covers both paths without needing two separate hooks.
         if(_state.Phase==Phase.Action && phase!=Phase.Action) AdvanceStraightenHolds(StraightenPoint.ActionPhaseEnds);
+        // "until the phase ends" holds (issue #453 batch 5, Ronin Ambushers): the whole Attack-declaration-through-battle stretch is one phase (the War Weariness convention above).
+        if(PhaseFamily(phase)!=PhaseFamily(_state.Phase)) AdvanceStraightenHolds(StraightenPoint.PhaseEnds);
         if(phase==Phase.Dynasty) DragonsBreathHonor();
+        // Sentinel Spirit (issue #453, batch 2): "after the next Dynasty Phase begins".
+        if(phase==Phase.Dynasty) ResolveSentinelWatches();
         if(phase==Phase.Dynasty)
             foreach(var waveMan in _state.Cards.Values.Where(c=>InPlay(c) && Definition(c).Effect=="wave-man-attack-phase-straighten"))
                 StraightenBowedUnit(waveMan);

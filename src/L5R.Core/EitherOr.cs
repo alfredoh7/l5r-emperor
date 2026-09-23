@@ -27,6 +27,11 @@ public static class EitherOrSpecs
     public const string UnfortunateHesitation = "unfortunate-hesitation";
     /// <summary>A three-option fixture (never in a playable deck): pay 2 Gold, lose 2 Honor, or let the acting player gain 2 Honor.</summary>
     public const string TrainingThreeWay = "training-three-way";
+    /// <summary>Extend the Soul's Boundaries (issue #453 batch 5): "His controller may shuffle him and his attachments back into their owners' decks. If he did not choose
+    /// this, take two additional Battle actions."</summary>
+    public const string ExtendSoulShuffle = "extend-soul-shuffle";
+    /// <summary>Moshi Ino's storm (issue #453, batch 3): the player who took the action chooses to discard a card or bow its performer (MoshiInoStorm.cs).</summary>
+    public const string InoStorm = "ino-storm";
 }
 
 /// <summary>What choosing an option amounts to, for a client to word and style it: "avoid" (accept a cost or a lesser loss so the
@@ -86,6 +91,8 @@ public sealed partial class MatchEngine
             EitherOrSpecs.SakumaPayOrNegate => $"{source}: pay 2 Gold, or your action's remaining effects are negated.",
             EitherOrSpecs.UnfortunateHesitation => $"{source}: bow {affected}, or you must pass at your next opportunity this phase to take a Battle, Limited, or Open action.",
             EitherOrSpecs.TrainingThreeWay => $"{source}: pay 2 Gold, lose 2 Honor, or let your opponent gain 2 Honor.",
+            EitherOrSpecs.ExtendSoulShuffle => $"{source}: shuffle {affected} and his attachments into their owners' decks, or your opponent takes two additional Battle actions.",
+            EitherOrSpecs.InoStorm => $"{source}'s storm: discard a card, or bow {(affected == "" ? "the performer" : affected)}.",
             _ => throw new RuleViolation("Unknown choice.")
         };
     }
@@ -101,7 +108,7 @@ public sealed partial class MatchEngine
             case EitherOrSpecs.SakumaPayOrNegate:
                 // An action performed by a Protected card cannot be negated (issue #212), so there is nothing to pay to avoid: that leaves one
                 // option, and the choice resolves by itself.
-                var cannotBeNegated = _state.PendingNegatableAbility is { } deferred && Protected(ActionPerformer(deferred));
+                var cannotBeNegated = _state.PendingNegatableAbility is { } deferred && ActionProtected(deferred); // Ki-Uso too (issue #453 batch 5)
                 return [
                     new("pay", "Pay 2 Gold", "Your action goes ahead: it is not negated.", EitherOrKind.Avoid, 2, payable(2) && !cannotBeNegated,
                         cannotBeNegated ? "This action cannot be negated." : "You cannot produce 2 Gold."),
@@ -122,6 +129,17 @@ public sealed partial class MatchEngine
                     new("honor", "Lose 2 Honor", "You lose 2 Honor.", EitherOrKind.Avoid, 0, Player(p.DeciderPlayerId).Honor > 0, "You have no Honor to lose."),
                     new("accept", "Let your opponent gain 2 Honor", "Your opponent gains 2 Honor.", EitherOrKind.Accept, 0, true, null)
                 ];
+            // Extend the Soul's Boundaries (issue #453 batch 5): the shuffle is a choice only while the Personality is still in play.
+            case EitherOrSpecs.ExtendSoulShuffle:
+            {
+                var name = Definition(affected!).Name;
+                return [
+                    new("shuffle", $"Shuffle {name} into the decks", $"{name} and his attachments are shuffled into their owners' decks.", EitherOrKind.Avoid, 0, InPlay(affected!), $"{name} is no longer in play."),
+                    new("refuse", "Do not shuffle him", "Your opponent takes two additional Battle actions.", EitherOrKind.Accept, 0, true, null)
+                ];
+            }
+            case EitherOrSpecs.InoStorm:
+                return InoStormOptions(p, affected);
             default: throw new RuleViolation("Unknown choice.");
         }
     }
@@ -208,6 +226,21 @@ public sealed partial class MatchEngine
             case (EitherOrSpecs.TrainingThreeWay, "accept"):
                 Emit("eitherOrChosen", $"{decider.Name} let {Player(1 - decider.Id).Name} gain 2 Honor ({Definition(source).Name}).", decider.Id, source.Id);
                 GainHonor(1 - decider.Id, 2, Definition(source).Name);
+                break;
+            // Extend the Soul's Boundaries (issue #453 batch 5).
+            case (EitherOrSpecs.ExtendSoulShuffle, "shuffle"):
+                Emit("eitherOrChosen", $"{decider.Name} chose to shuffle {Definition(affected!).Name} and his attachments into their owners' decks ({Definition(source).Name}).", decider.Id, affected!.Id);
+                ShuffleUnitIntoOwnersDecks(affected!);
+                break;
+            case (EitherOrSpecs.ExtendSoulShuffle, "refuse"):
+                Emit("eitherOrChosen", $"{decider.Name} did not shuffle {Definition(affected!).Name} ({Definition(source).Name}): {Player(p.ActingPlayerId).Name} takes two additional Battle actions.", decider.Id, source.Id);
+                GrantAdditionalAction(p.ActingPlayerId, null);
+                GrantAdditionalAction(p.ActingPlayerId, null);
+                p.StayWithActor = _state.AdditionalActions.Any(g => g.PlayerId == p.ActingPlayerId && Forfeitable(g));
+                break;
+            case (EitherOrSpecs.InoStorm, "discard"):
+            case (EitherOrSpecs.InoStorm, "bow"):
+                ApplyInoStorm(p, option, decider, affected);
                 break;
             default: throw new RuleViolation("Unknown choice.");
         }

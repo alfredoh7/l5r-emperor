@@ -1,0 +1,65 @@
+[
+  {
+    "card_id": "oracle-l5r-10044",
+    "printing_set": [
+      "Seeds of Decay"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10044",
+    "image_path": "assets/reference/oracle/seeds-of-decay/webp/oracle-l5r-10044-printing-1-image-1.webp",
+    "image_sha256": "ce2778fd976e107b5dadeb0a06f624e050f096f8d7960128eea8bd81b9dd14fa"
+  },
+  {
+    "card_id": "oracle-l5r-10045",
+    "printing_set": [
+      "Seeds of Decay"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10045",
+    "image_path": "assets/reference/oracle/seeds-of-decay/webp/oracle-l5r-10045-printing-1-image-1.webp",
+    "image_sha256": "feae366a8ae3684061a077c804a4f979ab67bb131cdbd6f10a2343dba3d53b5b"
+  },
+  {
+    "card_id": "oracle-l5r-10050",
+    "printing_set": [
+      "Seeds of Decay"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10050",
+    "image_path": "assets/reference/oracle/seeds-of-decay/webp/oracle-l5r-10050-printing-1-image-1.webp",
+    "image_sha256": "5d2a5c31824c953ca637466b967d9fb00de60939ecf59d0120e4af351bf3049b"
+  },
+  {
+    "card_id": "oracle-l5r-10051",
+    "printing_set": [
+      "Seeds of Decay"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10051",
+    "image_path": "assets/reference/oracle/seeds-of-decay/webp/oracle-l5r-10051-printing-1-image-1.webp",
+    "image_sha256": "98c4329186262f3f06a91a9bfb886c93b5344e7c512c1c32e5f69a8c80fb365f"
+  },
+  {
+    "card_id": "oracle-l5r-10084",
+    "printing_set": [
+      "Seeds of Decay"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10084",
+    "image_path": "assets/reference/oracle/seeds-of-decay/webp/oracle-l5r-10084-printing-1-image-1.webp",
+    "image_sha256": "c8737ea7ce2ad1be71f74065fc4d1eeff36aa1cddb3af9684f60737aeb2300aa"
+  },
+  {
+    "card_id": "oracle-l5r-10059",
+    "printing_set": [
+      "Seeds of Decay"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10059",
+    "image_path": "assets/reference/oracle/seeds-of-decay/webp/oracle-l5r-10059-printing-1-image-1.webp",
+    "image_sha256": "2ca7ef5a63f2f4aba56e3cffa222e1dcbc4a007c1e374f1be6d7e464e2d2ce50"
+  },
+  {
+    "card_id": "oracle-l5r-10080",
+    "printing_set": [
+      "Seeds of Decay"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10080",
+    "image_path": "assets/reference/oracle/seeds-of-decay/webp/oracle-l5r-10080-printing-1-image-1.webp",
+    "image_sha256": "3ed5dcf53674a9415e7ffceb2e1e6f74c9f95cd6d059bc64816f052b4359e3eb"
+  }
+]

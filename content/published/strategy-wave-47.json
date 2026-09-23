@@ -1,0 +1,482 @@
+{
+  "Profile": "strategy-wave-47",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10139",
+      "Name": "Ceaseless Vigil",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "As a Focus Effect, after this duel ends, straighten a Personality.\nBattle/Open: Target your performing Yojimbo. The next time (this turn) another player's action would target one of your Personalities, it targets the Yojimbo instead, if legal. You may take an additional action.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10139.jpg",
+      "Keywords": [],
+      "Focus": 4,
+      "Abilities": [
+        "ceaseless-vigil-focus",
+        "ceaseless-vigil-watch"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10164",
+      "Name": "Ruthless Onslaught",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing Personality: The next time this battle another player's Battle action would target one of your cards, it targets your performer, if legal. If he has 7 or more base Force, you may take an additional Battle action (after this action ends).",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10164.jpg",
+      "Keywords": [],
+      "Focus": 1,
+      "Abilities": [
+        "ruthless-onslaught-watch"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10158",
+      "Name": "Metsubushi",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing unbowed Ninja: Ranged 4 Attack. The next time this battle the enemy leader takes a Battle action, if it can legally target the Ninja, it must target him.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10158.jpg",
+      "Keywords": [
+        "Ninja"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "metsubushi-attack"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10168",
+      "Name": "Shifting Terrain",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: If there is no Terrain in play at the current battlefield: Put this card into play there.\nReaction: If this card is in play, when another player's action would target one of your Personalities, choose your performing Personality: The action targets him instead, if legal.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10168.jpg",
+      "Keywords": [
+        "Terrain"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "shifting-terrain-redirect"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10147",
+      "Name": "Exchange of Letters",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 1,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: Choose your performing unbowed Personality and target another player's unbowed Personality: Neither may perform actions this phase.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10147.jpg",
+      "Keywords": [],
+      "Focus": 4,
+      "Abilities": [
+        "exchange-of-letters-lock"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10157",
+      "Name": "Martial Manipulation",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Choose your performing Samurai and target another player's Personality: Neither Personality may be assigned to battlefields.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10157.jpg",
+      "Keywords": [
+        "Control",
+        "Dark Virtue"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "martial-manipulation-lock"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10142",
+      "Name": "Defensive Blockade",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Target an attacking Follower or Personality without attachments: It does not contribute Force to its army's total Force this battle.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10142.jpg",
+      "Keywords": [],
+      "Focus": 3,
+      "Abilities": [
+        "defensive-blockade-negate"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10167",
+      "Name": "Shield Formation",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Target your defending Personality: Give him and each of his Followers +3F.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10167.jpg",
+      "Keywords": [],
+      "Focus": 3,
+      "Abilities": [
+        "shield-formation-boost"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10146",
+      "Name": "Embracing Battle",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "As a Focus Effect, after this duel ends, bow the winner.\nLimited: Target your performing Paragon. He may assign even if bowed. Give him Elite (Elite cards contribute Force even if bowed).",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10146.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "embracing-battle-focus",
+        "embracing-battle-elite"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10159",
+      "Name": "Military Promotion",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: Choose your performing Tactician and target your Personality: He may assign even if bowed. Give him Elite (Elite cards contribute Force even if bowed).",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10159.jpg",
+      "Keywords": [],
+      "Focus": 3,
+      "Abilities": [
+        "military-promotion-elite"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10177",
+      "Name": "Unexpected Obstacle",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Target an enemy Personality or Follower: Give it -4F.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10177.jpg",
+      "Keywords": [],
+      "Focus": 4,
+      "Abilities": [
+        "unexpected-obstacle-penalty"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10172",
+      "Name": "The Arrow's Eye",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Ranged 3 Attack with +1 strength for each Follower in the target's unit.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10172.jpg",
+      "Keywords": [],
+      "Focus": 3,
+      "Abilities": [
+        "arrows-eye-attack"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10180",
+      "Name": "Vengeful Dismissal",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing unbowed Personality and target an enemy Personality with lower Chi: Move him home.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10180.jpg",
+      "Keywords": [],
+      "Focus": 3,
+      "Abilities": [
+        "vengeful-dismissal-move"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10170",
+      "Name": "Sticks and Stones",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Ranged 1 Attack. If the Ranged Attack destroyed a card, draw a card; if it destroyed a Follower, you may take an additional Battle action.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10170.jpg",
+      "Keywords": [],
+      "Focus": 0,
+      "Abilities": [
+        "sticks-and-stones-attack"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10176",
+      "Name": "Two Stings",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Bow your performing Personality or Follower: Ranged 4 Attack.\nBattle: If this card is in your discard pile, bow your performing Personality or Follower: Ranged 4 Attack. Remove this card from the game.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10176.jpg",
+      "Keywords": [],
+      "Focus": 1,
+      "Abilities": [
+        "two-stings-attack",
+        "two-stings-attack-from-discard"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10182",
+      "Name": "Wide Valley",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Before an action's effect destroys a card in a unit: Negate the destruction.\nBattle: If there is no Terrain in play at the current battlefield: Put this card into play there.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10182.jpg",
+      "Keywords": [
+        "Terrain"
+      ],
+      "Focus": 1,
+      "Abilities": [],
+      "Effect": "wide-valley"
+    },
+    {
+      "Id": "oracle-l5r-10150",
+      "Name": "Grappling the Snake",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing unbowed Monk: After the next time (this turn) an action targets him, you may choose either to negate its effects on your Monk, or to bow the unit of one Personality that performed it after the action resolves. You may take an additional Battle action.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10150.jpg",
+      "Keywords": [
+        "Kiho"
+      ],
+      "Focus": 1,
+      "Abilities": [
+        "grappling-the-snake-watch"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10169",
+      "Name": "Sound the Retreat",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Put this card into play. Discard all your other Kata in play.\nBattle: If this card is in play, choose your performing Personality: Move him home. If he moved, straighten his unit.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10169.jpg",
+      "Keywords": [
+        "Kata"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "sound-the-retreat-enter",
+        "sound-the-retreat-move"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10163",
+      "Name": "Requesting Reinforcements",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Bow your performing Scout and target a face-up Scout Personality in your province: Bring the target into play at the current battlefield, paying all costs. If you have Reconnaissance, you may take an additional Battle action.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10163.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "requesting-reinforcements-recruit"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10135",
+      "Name": "Advanced Intelligence",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "You may only play one copy of Advanced Intelligence per battle.\nReaction: After a Recon Strategy's action resolves: Draw one card for each action from a Recon Strategy you have taken this battle.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10135.jpg",
+      "Keywords": [],
+      "Focus": 1,
+      "Abilities": [
+        "advanced-intelligence-draw"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

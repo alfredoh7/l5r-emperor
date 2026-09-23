@@ -38,6 +38,8 @@ public sealed record TargetStatus(bool Honorable = false, bool Dishonorable = fa
     public static readonly TargetStatus DishonorableKolatNinjaOrShadowlands = new(Dishonorable: true, Keywords: ["Kolat", "Ninja"], ClanOrKeyword: ["Shadowlands"]);
     /// <summary>"Shadowlands" alone (Clan alignment or keyword).</summary>
     public static readonly TargetStatus IsShadowlands = new(ClanOrKeyword: ["Shadowlands"]);
+    /// <summary>"Nonhuman or Shadowlands" (Okesa-goma, issue #453 batch 5): the Nonhuman keyword, or Shadowlands as Clan alignment or keyword.</summary>
+    public static readonly TargetStatus NonhumanOrShadowlands = new(Keywords: ["Nonhuman"], ClanOrKeyword: ["Shadowlands"]);
 
     /// <summary>Human-readable form for rejection messages, e.g. "dishonorable, Kolat, Ninja, or Shadowlands".</summary>
     public string Describe()

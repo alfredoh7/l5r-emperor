@@ -34,11 +34,13 @@ public sealed partial class MatchEngine
     // applies, and clears the accumulator either way. Called from the three points an action (its own reaction windows included) is truly done,
     // in the same chain as CompleteAbilityResolution's own OpenBowReactionWindow/OpenMoveReactionWindow/OpenOverconfidentDrawWindow (closesTo is
     // the same "who priority returns to once every window this action opens has closed" every one of those already threads through).
-    private bool FinishActionEffectTracking(string abilityId, int playerId, string? sourceId, int closesTo)
+    // performerId (issue #453, batch 2): the Personality who performed the action, for a Reaction that targets "the action's performer" (An Insult Answered); the Honor
+    // the action cost (RecordHonorLoss, from GainHonor) rides along the same way.
+    private bool FinishActionEffectTracking(string abilityId, int playerId, string? sourceId, int closesTo, string? performerId = null)
     {
         var affected = _state.CurrentActionAffected;
-        _state.LastResolvedAction = new ResolvedActionFacts { AbilityId = abilityId, PlayerId = playerId, SourceId = sourceId, Affected = affected };
-        _state.CurrentActionAffected = [];
+        _state.LastResolvedAction = new ResolvedActionFacts { AbilityId = abilityId, PlayerId = playerId, SourceId = sourceId, Affected = affected, PerformerId = performerId, HonorLosers = _state.CurrentActionHonorLosers };
+        _state.CurrentActionAffected = []; _state.CurrentActionHonorLosers = [];
         // Revenge (issue #437): this action destroyed a Personality of some OTHER player's -- set that owner's flag.
         foreach (var a in affected)
         {
@@ -48,7 +50,19 @@ public sealed partial class MatchEngine
         }
         // Revenge: the window resets once the acting player's OWN Battle action finishes resolving.
         if (AbilityCatalog.All[abilityId].Timing == "Battle") _state.EnemyDestroyedOwnPersonalitySinceLastBattleAction[playerId] = false;
-        return OpenAfterActionResolvedWindow(closesTo);
+        CountReconStrategyAction(abilityId, playerId, sourceId); // Advanced Intelligence (Seeds of Decay pass, issue #453, batch 1).
+        // Moksha Patam (issue #453 batch 5): "After an action resolves, if a player gained Honor from its effects" -- a trait, so applied here before any Reaction to the same point.
+        ApplyMokshaPatamTokens();
+        if (OpenAfterActionResolvedWindow(closesTo)) return true;
+        // Moshi Ino's storm (issue #453, batch 3; MoshiInoStorm.cs): the same "this action is truly done" moment, asked once no Reaction window opened over it.
+        return OpenInoStorm(closesTo);
+    }
+
+    // The Personality who performs an ability: the named performer, else the source resolved to its wielder; null for a player ability or a non-Personality source.
+    private string? ActionPerformerIdOrNull(AbilityDefinition ability, GameCommand command, CardInstance? source)
+    {
+        var performer = ability.Performer is not null ? (command.PerformerId is null ? null : ActingPersonality(Card(command.PerformerId))) : source is null ? null : ActingPersonality(source);
+        return performer is not null && Definition(performer).Type == CardType.Personality ? performer.Id : null;
     }
 
     private static bool IsAfterActionResolvedReaction(AbilityDefinition ability) => ability.Timing == "Reaction" && ability.Trigger == AfterActionReactionTriggers.AfterActionResolved;
@@ -81,6 +95,17 @@ public sealed partial class MatchEngine
             // Timing/keyword narrowing, exercising AfterActionResolvedApplies/the window itself directly rather than through a real card's own
             // extra conditions.
             "training-after-action-resolved-gain" => LastActionDestroyedOwnPersonality(playerId),
+            // Advanced Intelligence (Seeds of Decay pass, issue #453, batch 1): "After a Recon Strategy's action resolves" -- either player's, classified through ActionCarriesKeyword.
+            "advanced-intelligence-draw" => facts.SourceId is { } reconSourceId && _state.Cards.TryGetValue(reconSourceId, out var reconSource) && Definition(reconSource).Type == CardType.Strategy
+                && ActionCarriesKeyword(AbilityCatalog.All[facts.AbilityId], reconSource, "Recon"),
+            // An Insult Answered (oracle-l5r-10136, issue #453 batch 2): "After another player's performed Limited or Open action resolves which caused you an Honor loss" -- a
+            // Limited or Open ability (its Open half when Battle/Open was taken in the Action Phase) with a Personality performer still in play, that cost this player Honor.
+            "insult-answered-duel" => facts.PlayerId != playerId && AbilityCatalog.All[facts.AbilityId].Timing is "Limited" or "Open" or "BattleOrOpen" && _state.Phase == Phase.Action
+                && LastActionCostHonor(playerId) && LastActionPerformer() is not null,
+            // Asahina Akikusa (oracle-l5r-10046, issue #453 batch 3): "After an action on your Air Spell resolves" -- the resolved action's source card is a Spell with the
+            // Air keyword attached to a Personality her controller controls (the Spell's action is her controller's own, so facts.PlayerId matches too).
+            "akikusa-honor" => facts.SourceId is not null && _state.Cards.TryGetValue(facts.SourceId, out var akikusaSpell) && Definition(akikusaSpell).Type == CardType.Spell
+                && Keyword(akikusaSpell, "Air") && akikusaSpell.OwnerId == playerId && facts.PlayerId == playerId,
             _ => false
         };
     }

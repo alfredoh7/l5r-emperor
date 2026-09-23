@@ -1,0 +1,431 @@
+{
+  "Profile": "strategy-wave-50",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10140",
+      "Name": "Courting Trouble",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: Target another player's face-up Personality in or out of play: Permanently give him Overconfident (each other player may draw a card after an Overconfident card enters or leaves play).",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10140.jpg",
+      "Keywords": [],
+      "Focus": 4,
+      "Abilities": [
+        "courting-trouble-overconfident"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10162",
+      "Name": "Out of My Sight!",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: Target another player's Personality: Permanently give him Brash (the Defender may draw a card after a Brash card is assigned to attack).",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10162.jpg",
+      "Keywords": [],
+      "Focus": 4,
+      "Abilities": [
+        "out-of-my-sight-brash"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10141",
+      "Name": "Debt to the Kaiu",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Permanently give each of your provinces +1 strength.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10141.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "debt-to-the-kaiu-strength"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10152",
+      "Name": "Imperial Protection",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: Target a Personality: After the next time this turn he is assigned to attack, dishonor him and his controller loses Honor equal to his base Personal Honor.\nOpen: Each of your provinces has +2 strength for each dishonorable Personality attacking it.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10152.jpg",
+      "Keywords": [
+        "Political"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "imperial-protection-watch",
+        "imperial-protection-provinces"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10153",
+      "Name": "Incriminating Testimony",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Bow your performing Courtier at any location and target an enemy Personality: Bow him. Give this battlefield's province a strength bonus equal to your Courtier's Chi.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10153.jpg",
+      "Keywords": [
+        "Political"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "incriminating-testimony-bow"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10154",
+      "Name": "Ingenuity",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Choose your performing unbowed Magistrate and target one or two Personalities: Dishonor them. Draw an additional card during your next End Phase.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10154.jpg",
+      "Keywords": [
+        "Political"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "ingenuity-dishonor"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10171",
+      "Name": "Testimony",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Choose your performing unbowed honorable Personality and target a Personality with lower base Personal Honor: Dishonor or rehonor the target.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10171.jpg",
+      "Keywords": [
+        "Political"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "testimony-dishonor",
+        "testimony-rehonor"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10166",
+      "Name": "Sharing Gossip",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Choose your performing unbowed Courtier: After this action ends (and this card is in your discard pile), gain 1 Honor for each card titled Sharing Gossip in all players' discard piles.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10166.jpg",
+      "Keywords": [
+        "Political"
+      ],
+      "Focus": 1,
+      "Abilities": [
+        "sharing-gossip-honor"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10179",
+      "Name": "Urgency",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: Each player may only take two more non-Reaction actions this phase.\nLimited: Pay 2 Gold: Draw a card.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10179.jpg",
+      "Keywords": [
+        "Political"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "urgency-limit",
+        "urgency-draw"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10174",
+      "Name": "Turning the Story",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: Before a Proclaim action resolves: Negate its effects.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10174.jpg",
+      "Keywords": [
+        "Political"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "turning-the-story-negate"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10149",
+      "Name": "Fair Warning",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "As a Focus Effect: After this duel ends, if your Personality won it, you may give a Personality -4F.\nOpen: Target another player's Personality: After the next time this turn he is assigned to attack or is destroyed, gain 2 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10149.jpg",
+      "Keywords": [],
+      "Focus": 3,
+      "Abilities": [
+        "fair-warning-focus",
+        "fair-warning-watch"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10165",
+      "Name": "Sentinel Spirit",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: If it is not your turn and the active player controls any Personalities, choose your performing unbowed Spirit: After the next Dynasty Phase begins, if it was opposed this turn, gain 2 Honor, and if no units were assigned to attack this turn, gain 3 Honor if your Honor is lower than each other player's.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10165.jpg",
+      "Keywords": [],
+      "Focus": 3,
+      "Abilities": [
+        "sentinel-spirit-watch"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10136",
+      "Name": "An Insult Answered",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Iaijutsu Revenge Reaction: After another player's performed Limited or Open action resolves which caused you an Honor loss, target your performing unbowed Duelist to target and have him challenge the action's performer. Destroy the loser. Give the winner two +1F Revenge tokens.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10136.jpg",
+      "Keywords": [
+        "Iaijutsu",
+        "Revenge"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "insult-answered-duel"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10156",
+      "Name": "Manipulate Energies",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: Choose your performing unbowed Henshin and target a Personality: Permanently give him, or remove from him, Cavalry, Naval, or Tactician.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10156.jpg",
+      "Keywords": [
+        "Kiho"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "manipulate-energies-give-cavalry",
+        "manipulate-energies-give-naval",
+        "manipulate-energies-give-tactician",
+        "manipulate-energies-remove-cavalry",
+        "manipulate-energies-remove-naval",
+        "manipulate-energies-remove-tactician"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10144",
+      "Name": "Dragon Tattoo",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Fire Limited: Target your performing unbowed Tattooed Personality who has not performed an action from a Dragon Tattoo this game. He is imbued with the mystical power of the Dragon. Permanently give him the ability, \"Fire Limited: Give this Personality a +1F Fire token.\"",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10144.jpg",
+      "Keywords": [
+        "Experienced",
+        "Fire",
+        "Tattoo"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "dragon-tattoo-exp-imbue"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10145",
+      "Name": "Dubious Resources",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle, :g2:: Target your performing Personality. Create a 2F Ronin Follower and attach it to him.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10145.jpg",
+      "Keywords": [],
+      "Focus": 1,
+      "Abilities": [
+        "dubious-resources-create"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10138",
+      "Name": "Brotherhood Schism",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: Until the turn ends, Rings will not enter play if their owner has already put a Ring into play this turn.\nLimited: Target an Event in another player's discard pile. End all of its ongoing effects. Shuffle it into its owner's deck.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10138.jpg",
+      "Keywords": [],
+      "Focus": 3,
+      "Abilities": [
+        "brotherhood-schism-rings",
+        "brotherhood-schism-shuffle"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

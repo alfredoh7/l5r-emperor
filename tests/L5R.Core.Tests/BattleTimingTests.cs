@@ -103,7 +103,9 @@ internal static class BattleTimingTests
             .Select(c=>c.Id).OrderBy(x=>x,StringComparer.Ordinal).ToArray();
         // + oracle-l5r-1726 (issue #336: Daigotsu Hotako, Experienced 3, printed Naval).
         // + oracle-l5r-9544 (issue #264 Second City pass: Yoritomo Emoto, printed Naval).
-        string[] expected=["oracle-l5r-10133","oracle-l5r-10299","oracle-l5r-10853","oracle-l5r-10857","oracle-l5r-1726","oracle-l5r-3850","oracle-l5r-5285","oracle-l5r-5287","oracle-l5r-6501","oracle-l5r-8110","oracle-l5r-8840","oracle-l5r-8879","oracle-l5r-8895","oracle-l5r-9539","oracle-l5r-9544","oracle-l5r-9605","oracle-l5r-9610","oracle-l5r-9642","oracle-l5r-9659","oracle-l5r-9832","oracle-l5r-9834"];
+        // + oracle-l5r-10049, -10066, -10068, -10070, -10071 (issue #453 Seeds of Decay batch 3: Doji Mitsuru, Moshi Ino, Tsuruchi Kohrogi, Yoritomo Akukiho, Yoritomo Iwashi, each printed Naval).
+        // + oracle-l5r-10069 (issue #453 Seeds of Decay pass, batch 4: Tsuruchi Nobukatsu - exp, printed Naval).
+        string[] expected=["oracle-l5r-10049","oracle-l5r-10066","oracle-l5r-10068","oracle-l5r-10069","oracle-l5r-10070","oracle-l5r-10071","oracle-l5r-10133","oracle-l5r-10299","oracle-l5r-10853","oracle-l5r-10857","oracle-l5r-1726","oracle-l5r-3850","oracle-l5r-5285","oracle-l5r-5287","oracle-l5r-6501","oracle-l5r-8110","oracle-l5r-8840","oracle-l5r-8879","oracle-l5r-8895","oracle-l5r-9539","oracle-l5r-9544","oracle-l5r-9605","oracle-l5r-9610","oracle-l5r-9642","oracle-l5r-9659","oracle-l5r-9832","oracle-l5r-9834"];
         Eq(string.Join(",",navalCarriers),string.Join(",",expected.OrderBy(x=>x,StringComparer.Ordinal)),"Every wired Naval carrier");
         var pinned=PublishedContent.Snapshot.Cards.Concat(PublishedContent.TestSnapshot.Cards).Select(c=>c.Id).ToHashSet();
         Check(!navalCarriers.Any(pinned.Contains),"No Naval card is in the pinned Lion/Crane decks");

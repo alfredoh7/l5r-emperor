@@ -20,7 +20,7 @@ public sealed partial class MatchEngine
     private void NegateDeferredAction(CardInstance negatingCard)
     {
         if (_state.PendingNegatableAbility is not { } deferred) return;
-        if (Protected(ActionPerformer(deferred)))
+        if (ActionProtected(deferred)) // Takeshi's Protection, or Ki-Uso's for a Political action (issue #453 batch 5)
         {
             Emit("actionProtected", "Protection negates the negation -- this action cannot be negated.", negatingCard.OwnerId, negatingCard.Id);
             return;
@@ -42,7 +42,7 @@ public sealed partial class MatchEngine
         var playedFromDiscard = PlayedFromDiscard(ability, source);
         PayForAbility(command, player);
         PayCostOption(ability, command, player, source);
-        if (id is "shunya-honor" or "favor-cycle" or "favor-battle" or "jakuei-bow-favor" or "bonds-of-coin-draw")
+        if (id is "shunya-honor" or "favor-cycle" or "favor-battle" or "jakuei-bow-favor" or "bonds-of-coin-draw" or "baiko-shame")
         {
             _state.FavorPlayerId = null;
             Emit("favorDiscarded", $"{player.Name} discarded the Imperial Favor.", player.Id);

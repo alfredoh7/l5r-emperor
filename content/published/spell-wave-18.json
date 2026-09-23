@@ -1,0 +1,183 @@
+{
+  "Profile": "spell-wave-18",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10126",
+      "Name": "Extend the Soul's Boundaries",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "This card enters play paying 1 less Gold for each Ring you control.\nBattle: Destroy this card, bow this Shugenja, destroy him unless he is Void, and target an enemy Personality: His controller may shuffle him and his attachments back into their owners' decks. If he did not choose this, take two additional Battle actions.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10126.jpg",
+      "Keywords": [
+        "Void"
+      ],
+      "Focus": 1,
+      "Abilities": [
+        "extend-soul-shuffle"
+      ],
+      "Effect": "discount-per-ring"
+    },
+    {
+      "Id": "oracle-l5r-10127",
+      "Name": "Immolation",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 4,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "This Shugenja has +3F, or +4F while he is Fire.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10127.jpg",
+      "Keywords": [
+        "Fire"
+      ],
+      "Focus": 2,
+      "Abilities": [],
+      "Effect": "immolation-force"
+    },
+    {
+      "Id": "oracle-l5r-10128",
+      "Name": "Master of Beasts",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle/Open: Even if this card is not at the current battlefield, bow this Shugenja and target one or two Shadowlands Nonhumans: Straighten them.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10128.jpg",
+      "Keywords": [
+        "Maho"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "master-of-beasts-straighten"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10129",
+      "Name": "Nature's Wrath",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "If this Shugenja is Earth, he may perform this card's Battle action even if it is in your home.\nBattle: Bow this card and target your Nonhuman Personality: If he would be opposed, move him to the current battlefield. Straighten him if he moved.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10129.jpg",
+      "Keywords": [
+        "Earth"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "natures-wrath-move"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10130",
+      "Name": "Peace of the Kami",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "If this Shugenja is Water, he may perform this card's Battle action even if it is in your home.\nBattle: Bow this card and target your Personality or Follower: Negate all current effects on it from other players' cards. Negate its (current and new) Force penalties from actions. If it is a Spirit, straighten it.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10130.jpg",
+      "Keywords": [
+        "Kami",
+        "Water"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "peace-of-the-kami-negate"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10131",
+      "Name": "Scent of Dishonor",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: Bow this Shugenja unless he is Air, destroy this card, and target a Kolat, Ninja, Shadowlands, or dishonorable Personality: Bow him.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10131.jpg",
+      "Keywords": [
+        "Air"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "scent-of-dishonor-bow"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10134",
+      "Name": "The Earth's Strength",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Bow this card and target your Earth or Water Shugenja: Straighten him. Gain 1 Honor if he is an Alchemist and opposed.\nReaction: Before an action resolves, bow this card and target a defending Personality: Negate his movement from the action's effects.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10134.jpg",
+      "Keywords": [
+        "Earth",
+        "Water"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "earths-strength-straighten",
+        "earths-strength-negate-move"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

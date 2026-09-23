@@ -275,6 +275,8 @@ internal static class ActionLockTests
         "beforeBattleOptional", "beforeBattleOrder", "chooseConqueror", "choosePreservingHonor", "chooseRikateDetach", "chooseRinShame", "chooseShinden",
         "chooseYourClanNeedsYouProvince", "concede", "declareAttack", "declineReaction", "declineStraighten", "discardHand", "discardProvince", "encircledOrder", "encircledSelect",
         "endDynasty", "equip", "forcedDiscard", "overlay", "pass", "playStrategy", "proclaim", "purchase", "recruitReserve", "selectBattle", "wait",
+        // Seeds of Decay pass (issue #453), batch 4: two Events Phase decisions of the revealing player's (Offering Reverence's shuffle-or-discard, Tested Land's enemy province).
+        "offeringReverence", "testedLandProvince",
     ];
 
     private static void InnateActionInventory()
