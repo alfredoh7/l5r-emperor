@@ -2866,6 +2866,29 @@ public static class AbilityCatalog
         // Haruki's Deer (oracle-l5r-9999, a Proxy created by Kitsune Haruki, oracle-l5r-4462): "Limited: If another player has higher Family Honor than you: Gain 2
         // Honor" -- the condition is a per-id Require, the same shape "lobby"'s own Family-Honor condition uses.
         ["haruki-deer-honor"] = new("Limited", "If another player has higher Family Honor than you: Gain 2 Honor", "none"),
+        // Embers of War pass, batch 1 (issue #460): Goju Gochiso (oracle-l5r-2849) carries only "After Gochiso enters play: Lose 2 Honor" -- EntryHonorLoss,
+        // no ability id at all (the same convention every other bare-entry-loss Personality already uses).
+        // Daigotsu Takayasu - Experienced (oracle-l5r-1777): "After Takayasu enters play: Lose 1 Honor" is EntryHonorLoss; "Maho Battle: Melee 6 Attack" is a
+        // plain fixed-strength Melee Attack (Akodo Chiyo's own "chiyo-attack" shape). "Maho" is not among Takayasu's own printed keywords, so -- per the Seeds
+        // of Decay pass's own reading of a flavor prefix with no printed mechanical verb of its own -- it is read as a descriptive label only, not a
+        // RequiredKeywords gate (which would make the ability illegal for a card that never carries the keyword it would require of itself).
+        ["takayasu-attack"] = new("Battle", "Maho Battle: Melee 6 Attack", "attack"),
+        // Kaiu Onizuka (oracle-l5r-4131): "Battle: Ranged Attack with strength equal to the current battlefield's province's strength." -- EffectiveProvinceStrength
+        // read against the defender's own province at the current battlefield, the same read QuotePurchase's own province-strength Requires already use.
+        ["onizuka-attack"] = new("Battle", "Ranged Attack with strength equal to the current battlefield's province's strength", "attack"),
+        // Kaiu Tojikana (oracle-l5r-4145): "Limited: If none of your provinces have been destroyed since your last turn began, or you are a Scorpion Clan player:
+        // Gain 2 Honor" reads against MatchState.ProvinceDestroyedSinceTurnEnd (Ohsuki's Sparrow's own "since your last turn ended" precedent -- the printed
+        // "since your last turn began" is the same turn-boundary flag under the established house reading) OR'd with the player's own Clan, gated the same way
+        // Ohsuki's Sparrow's own conditional Honor gain is (a Require, not a conditional inside the effect -- an unmet "If ..." is not offered at all).
+        // "Battle: Target an enemy card without attachments: Bow it" reuses enemy-card-without-attachments verbatim (Masumi's own shape).
+        ["tojikana-honor"] = new("Limited", "If none of your provinces have been destroyed since your last turn began, or you are a Scorpion Clan player: Gain 2 Honor", "none"),
+        ["tojikana-bow"] = new("Battle", "Target an enemy card without attachments: Bow it", "enemy-card-without-attachments"),
+        // Akodo Uehara (oracle-l5r-305, re-verified against the Honor and Treachery pass's own note): "Uehara has +1F while he opposes a Phoenix Clan
+        // Personality" is a live CardForce conditional (Kitsuki Miroken's own "+2F while opposing a dishonorable or Gaijin card" shape, just a Clan check in
+        // place of the dishonorable/Gaijin one). "Limited: Look at the top card of your Fate deck. You may leave it there, discard it, or put it at the bottom
+        // of the deck" is the top-1 LookSpec (Isawa Tamaki's own shape) with both a Discard and a Bottom rule instead of Bottom alone.
+        ["uehara-look"] = new("Limited", "Look at the top card of your Fate deck. You may leave it there, discard it, or put it at the bottom of the deck", "none",
+            Look: LookCatalog.UeharaLook),
     });
 }
 
@@ -3545,6 +3568,11 @@ public sealed partial class MatchEngine
         "kitahime-attack" or "merihikos-swarm-attack" => 4,
         "nitani-exp-attack" => 6,
         "kohrogi-attack" => 2,
+        // Embers of War pass, batch 1 (issue #460). Daigotsu Takayasu - exp: "Maho Battle: Melee 6 Attack."
+        "takayasu-attack" => 6,
+        // Kaiu Onizuka: "Ranged Attack with strength equal to the current battlefield's province's strength" -- the defender's own province at the current
+        // battlefield, read the exact way the Requires at line ~3992/4916/4971 already do (EffectiveProvinceStrength off the defender's Provinces list).
+        "onizuka-attack" => EffectiveProvinceStrength(Player(1 - _state.ActivePlayerId).Provinces.Single(p => p.Index == _state.CurrentBattleProvince!.Value)),
         _ => 0
     };
     // AttackStrength plus every passive defense modifier applying to this specific target (Destrier/
@@ -3604,6 +3632,9 @@ public sealed partial class MatchEngine
         "blades-of-black-dragon-attack" or "celestial-sword-mantis-attack" => "Melee",
         // Seeds of Decay (issue #453, batch 3).
         "kitahime-attack" or "nitani-exp-attack" or "kohrogi-attack" or "merihikos-swarm-attack" => "Ranged",
+        // Embers of War pass, batch 1 (issue #460).
+        "takayasu-attack" => "Melee",
+        "onizuka-attack" => "Ranged",
         _ => ""
     };
     // General "in play" Reaction primitive: a printed Reaction whose card must actually be in play
@@ -4278,6 +4309,11 @@ public sealed partial class MatchEngine
         // than only when it resolves (MatchState.ProvinceDestroyedSinceTurnEnd).
         if (id == "ohsuki-sparrow-honor")
             Require(!_state.ProvinceDestroyedSinceTurnEnd[player.Id], "One of your provinces was destroyed since your last turn ended.");
+        // Kaiu Tojikana (oracle-l5r-4145, Embers of War pass, issue #460): "If none of your provinces have been destroyed since your last turn began, or you are
+        // a Scorpion Clan player" -- Ohsuki's Sparrow's own conditional-Honor-gain shape (a Require, not a branch inside the effect), OR'd with the player's Clan.
+        if (id == "tojikana-honor")
+            Require(!_state.ProvinceDestroyedSinceTurnEnd[player.Id] || Player(player.Id).Clan == "Scorpion",
+                "One of your provinces was destroyed since your last turn began, and you are not a Scorpion Clan player.");
         if (id == "shosei-honor") Require(_state.Cards.Values.Any(c => c.OwnerId == player.Id && InPlay(c) && Keyword(c, "Temple")), "You must control a Temple.");
         // Ring recruitment (issue #194): each of these three is only ever playable as the specific
         // Additional Battle Action already granted for it (GrantRingRecruit) -- never as an ordinary
@@ -6476,6 +6512,7 @@ public sealed partial class MatchEngine
                 break;
             }
             case "ohsuki-sparrow-honor": GainHonor(player.Id, 3, "Ohsuki's Sparrow", source); break;
+            case "tojikana-honor": GainHonor(player.Id, 2, "Kaiu Tojikana", source); break;
             // "Destroy it if it is an attachment" is a separate clause from "Bow it" -- a Stalwart
             // attachment whose bow was negated is still destroyed.
             case "tokoru-bear-bow":
@@ -6684,6 +6721,8 @@ public sealed partial class MatchEngine
             }
             case "ayumi-entry": GainHonor(player.Id, -2, "Ikoma Ayumi", source); break;
             case "masumi-bow": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;
+            // Kaiu Tojikana (oracle-l5r-4145, Embers of War pass, issue #460): "Target an enemy card without attachments: Bow it" -- Masumi's own shape verbatim.
+            case "tojikana-bow": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;
             case "brawl-bow": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;
             case "brawl-destroy":
                 // A Terrain shares training-destroy-terrain's removal and Ring of Water's own
@@ -7613,7 +7652,7 @@ public sealed partial class MatchEngine
             case "public-records-look":  BeginLook(ability.Look!, source!, player.Id, "ability", bowedBeforeAction); return;
             case "control-your-destiny-look": case "jurojin-look":
                 BeginLook(ability.Look!, source!, player.Id, "ability", bowedBeforeAction); return;
-            case "isawa-tamaki-look": case "kahoku-exp2-look": case "training-look-dynasty": case "training-look-any": case "training-look-take-item": case "training-look-fixed":
+            case "isawa-tamaki-look": case "kahoku-exp2-look": case "uehara-look": case "training-look-dynasty": case "training-look-any": case "training-look-take-item": case "training-look-fixed":
                 BeginLook(ability.Look!, source!, player.Id, "ability", bowedBeforeAction); return;
             case "training-look-show": BeginLook(ability.Look!, source!, player.Id, "ability", bowedBeforeAction, count: 2); return;
             case "banish-all-doubt-look":
@@ -8004,6 +8043,9 @@ public sealed partial class MatchEngine
             case "devoted-yojimbo-straighten": Straighten(target!); break;
             case "elite-training-grant": GrantKeyword(Card(command.PerformerId!), "Elite", source!.Id, GrantDuration.Permanent); break;
             case "taiken-attack": if (ResolveOrDeferAttack(id, player, target?.Id, additional: consumedGrant)) return; break;
+            // Embers of War pass, batch 1 (issue #460): plain fixed/computed-strength Attacks, no target of their own (AttackTargetsProvince not needed --
+            // neither prints "or its province").
+            case "takayasu-attack": case "onizuka-attack": if (ResolveOrDeferAttack(id, player, target?.Id, source!.Id, consumedGrant)) return; break;
             case "mitsushen-move":
             {
                 var mitsushenBattle = _state.CurrentBattleProvince!.Value;

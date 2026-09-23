@@ -2028,6 +2028,9 @@ public sealed partial class MatchEngine
         // Kitsuki Miroken: "+2F while opposing a dishonorable or Gaijin card" -- checked against the
         // whole opposing army at the current battlefield, not a specific targeted card.
         +(Definition(card).Effect=="force-vs-dishonorable-or-gaijin-opposed"&&AtBattle(card)&&Army(1-card.OwnerId,card.ProvinceIndex??-1).Any(c=>c.Dishonorable||Keyword(c,"Gaijin"))?2:0)
+        // Akodo Uehara (oracle-l5r-305, Embers of War pass, issue #460): "Uehara has +1F while he opposes a Phoenix Clan Personality" -- Kitsuki Miroken's own
+        // opposing-army shape, just a Clan check (HasClanAffiliation) in place of dishonorable/Gaijin.
+        +(Definition(card).Effect=="uehara-force-vs-phoenix"&&AtBattle(card)&&Army(1-card.OwnerId,card.ProvinceIndex??-1).Any(c=>Definition(c).Type==CardType.Personality&&HasClanAffiliation(c,"Phoenix"))?1:0)
         // Tamori Muzu: "Your other Earth Personalities have +1F while defending" -- army-scoped (not
         // unit-scoped, since Muzu's own bonus reaches every OTHER Earth-keyword card he controls at
         // the same battlefield, not just his own unit) and keyword-based, following
