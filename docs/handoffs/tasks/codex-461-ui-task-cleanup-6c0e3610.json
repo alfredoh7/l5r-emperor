@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Reconcile stale UI status summaries and all 38 open Alfredo UI issues. Close only superseded PR266, preserving its branch. Record completed Windows delivery without claiming graphical/rules acceptance. Shared classification is documentation-only; no rules, client behavior, ownership policy or workflow change.",
+  "validation": "Live GitHub merge/source evidence checked; exact 38-issue inventory and 15 local Markdown links pass. All 24 open Mendon-assigned issue snapshots unchanged; original Alfredo issue bodies/titles remain intact and open. PR434/454 heads, bases, draft flags and review requests unchanged. PR266 closed without merge or branch deletion. git diff --check passes. No game tests rerun for docs-only work.",
+  "remaining": "Ready for documentation review in a separate draft PR; no merge authorized. Existing UI review, expert/Windows/full-match acceptance, duel448 and rules-reference58 remain in their original tasks. Board token unavailable; no board mutation or human acceptance claim.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/461",
+  "branch": "codex/461-ui-task-cleanup",
+  "updated": "2026-09-23T22:36:29.333416+00:00"
+}
