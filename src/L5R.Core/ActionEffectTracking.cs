@@ -53,7 +53,9 @@ public sealed partial class MatchEngine
         CountReconStrategyAction(abilityId, playerId, sourceId); // Advanced Intelligence (Seeds of Decay pass, issue #453, batch 1).
         // Moksha Patam (issue #453 batch 5): "After an action resolves, if a player gained Honor from its effects" -- a trait, so applied here before any Reaction to the same point.
         ApplyMokshaPatamTokens();
-        return OpenAfterActionResolvedWindow(closesTo);
+        if (OpenAfterActionResolvedWindow(closesTo)) return true;
+        // Moshi Ino's storm (issue #453, batch 3; MoshiInoStorm.cs): the same "this action is truly done" moment, asked once no Reaction window opened over it.
+        return OpenInoStorm(closesTo);
     }
 
     // The Personality who performs an ability: the named performer, else the source resolved to its wielder; null for a player ability or a non-Personality source.
@@ -100,6 +102,10 @@ public sealed partial class MatchEngine
             // Limited or Open ability (its Open half when Battle/Open was taken in the Action Phase) with a Personality performer still in play, that cost this player Honor.
             "insult-answered-duel" => facts.PlayerId != playerId && AbilityCatalog.All[facts.AbilityId].Timing is "Limited" or "Open" or "BattleOrOpen" && _state.Phase == Phase.Action
                 && LastActionCostHonor(playerId) && LastActionPerformer() is not null,
+            // Asahina Akikusa (oracle-l5r-10046, issue #453 batch 3): "After an action on your Air Spell resolves" -- the resolved action's source card is a Spell with the
+            // Air keyword attached to a Personality her controller controls (the Spell's action is her controller's own, so facts.PlayerId matches too).
+            "akikusa-honor" => facts.SourceId is not null && _state.Cards.TryGetValue(facts.SourceId, out var akikusaSpell) && Definition(akikusaSpell).Type == CardType.Spell
+                && Keyword(akikusaSpell, "Air") && akikusaSpell.OwnerId == playerId && facts.PlayerId == playerId,
             _ => false
         };
     }

@@ -476,6 +476,10 @@ public sealed partial class MatchEngine
                 DestroyUnits(loserIds.Select(Card).ToArray(), actingPlayerId: challengerPlayerId);
                 if (winnerId is not null && InPlay(Card(winnerId))) { CreateToken(Card(winnerId), "Revenge", abilityId, "Force", 1); CreateToken(Card(winnerId), "Revenge", abilityId, "Force", 1); }
                 break;
+            // Doji Mitsuru (issue #453, batch 3): "Bow the duel's loser."
+            case "mitsuru-duel":
+                foreach (var id in loserIds) if (!StalwartNegatesBow(Card(id), challengerPlayerId)) Card(id).Bowed = true;
+                break;
         }
     }
 

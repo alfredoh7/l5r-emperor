@@ -1,0 +1,38 @@
+{
+  "Profile": "personality-wave-57",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10199",
+      "Name": "Merihiko's Swarm",
+      "Type": "Personality",
+      "Clan": "Mantis",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 2,
+      "PersonalHonor": 3,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "May not be included in decks.\nBattle: Bow this card: Ranged 4 Attack.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10199.jpg",
+      "Keywords": [
+        "Cavalry",
+        "Bee",
+        "Mantis Clan",
+        "Nonhuman",
+        "Spirit",
+        "Swarm"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "merihikos-swarm-attack"
+      ],
+      "Effect": "none",
+      "CreatedOnly": true
+    }
+  ],
+  "Decks": []
+}

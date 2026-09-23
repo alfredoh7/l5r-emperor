@@ -2437,4 +2437,10 @@ public static class PublishedContent
     public static PublishedSnapshot SpellWave18 { get; } = Load("L5R.Published.SpellWave18.json", "spell-wave-18", requireDecks: false);
     /// <summary>Follower wave 25 (Seeds of Decay pass, issue #453, batch 5): O-Yoroi Troops, Ronin Ambushers.</summary>
     public static PublishedSnapshot FollowerWave25 { get; } = Load("L5R.Published.FollowerWave25.json", "follower-wave-25", requireDecks: false);
+    /// <summary>Personality wave 55 (Seeds of Decay pass, issue #453, batch 3): the batch's 26 wired Personalities.</summary>
+    public static PublishedSnapshot PersonalityWave55 { get; } = Load("L5R.Published.PersonalityWave55.json", "personality-wave-55", requireDecks: false);
+    /// <summary>Personality wave 57 (issue #453, batch 3): Merihiko's Swarm, the created-only Personality Kitsune Merihiko creates.</summary>
+    public static PublishedSnapshot PersonalityWave57 { get; } = Load("L5R.Published.PersonalityWave57.json", "personality-wave-57", requireDecks: false);
+    /// <summary>Item wave 10 (issue #453, batch 3): Masayoshi's Blade, the created-only Weapon Masayoshi creates.</summary>
+    public static PublishedSnapshot ItemWave10 { get; } = Load("L5R.Published.ItemWave10.json", "item-wave-10", requireDecks: false);
 }

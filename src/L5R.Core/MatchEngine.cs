@@ -1489,6 +1489,8 @@ public sealed partial class MatchEngine
         var destroyedByPlayer=new int[2]; var provinceDestroyedNow=false; var losers=new List<int>();
         if(attackerWon)
         {
+            // Yoritomo Iwashi (issue #453, batch 3): every Personality of the winning attacking army remembers this victory (SeedsOfDecayBatch3.cs).
+            MarkAttackVictory(a);
             var destroyedDefenders=DestroyUnits(d);
             destroyedByPlayer[attacker]=destroyedDefenders; losers.Add(defender);
             if(!RehonorWinners(a)) { GainHonor(attacker,destroyedDefenders*2,"Battle victory"); CheckEarthFlowsBonus(attacker,a); }

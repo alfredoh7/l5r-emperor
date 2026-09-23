@@ -17,6 +17,8 @@ public sealed record CreatedCardSpec(CardType Type, int? Force = null, int? Chi 
     string? AbilityText = null, string? ProxyId = null, int Count = 1, bool PerHost = false, bool AtBattlefield = false, bool UntilBattleEnds = false, CreatedCardSpec[]? Or = null, bool CopyOfTarget = false)
 {
     public bool HostIsPerformer { get; init; }
+    /// <summary>Attaches a created attachment to the creating card itself ("attach it to him" on an entering-play Reaction of the Personality: Masayoshi, issue #453).</summary>
+    public bool HostIsSource { get; init; }
     public bool ControllerClan { get; init; }
     public bool EntersBowed { get; init; }
     public CreatedValue[]? Values { get; init; }
@@ -39,6 +41,7 @@ public sealed record CreatedCardSpec(CardType Type, int? Force = null, int? Chi 
         if (UntilBattleEnds) text.Append(" until the battle ends");
         if (EntersBowed) text.Append(" bowed");
         if (HostIsPerformer) text.Append(" attached to the performer");
+        if (HostIsSource) text.Append(" attached to the source");
         if (ControllerClan) text.Append(" with the controller's Clan");
         if (Values is { Length: > 0 } values) text.Append(" with ").Append(string.Join(", ", values.Select(v => v.Describe())));
         if (Or is { Length: > 0 } others) text.Append(" or ").Append(string.Join(" or ", others.Select(o => o.Describe())));
@@ -161,6 +164,7 @@ public static class CreatedCards
                 if (alternative.Count > 1 && IsSingleOfKind(scan)) problems.Add($"{abilityId}: {alternative.Describe()} creates several {scan.Name}, a card a Personality carries only one of");
                 if (alternative.Count > 1 && scan.Type == CardType.Personality && (scan.Keywords ?? []).Contains("Unique")) problems.Add($"{abilityId}: {alternative.Describe()} creates several {scan.Name}, a Unique card");
                 if (alternative.HostIsPerformer && !IsAttachment(scan.Type)) problems.Add($"{abilityId}: {alternative.Describe()} attaches {scan.Name}, which is not an attachment");
+                if (alternative.HostIsSource && (!IsAttachment(scan.Type) || alternative.HostIsPerformer)) problems.Add($"{abilityId}: {alternative.Describe()} attaches {scan.Name} to its source, which needs an attachment and no performer host");
                 var namesPerformer = alternative.HostIsPerformer || (alternative.Values ?? []).Any(v => v.From == CreatedSubject.Performer);
                 if (namesPerformer && AbilityCatalog.All.TryGetValue(abilityId, out var creator) && creator.Performer is null) problems.Add($"{abilityId}: {alternative.Describe()} names the performer, and the ability has none");
                 if (alternative.ControllerClan && scan.Type != CardType.Personality) problems.Add($"{abilityId}: {alternative.Describe()} gives {scan.Name} a Clan, which only a Personality has");

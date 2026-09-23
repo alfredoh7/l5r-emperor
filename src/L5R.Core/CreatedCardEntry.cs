@@ -40,8 +40,14 @@ public sealed partial class MatchEngine
         CreateAttachments(playerId, CreatedCards.Resolve(BirdsOfPrey), null, BirdsOfPrey, [personality], true, null);
 
     // The Personalities a created attachment goes to: the performer ("attach them to him"), the ones the command names (CardIds), or its single target.
+    // The source itself ("attach it to him" on the creator's own entering-play Reaction: Masayoshi, issue #453), or -- for a multi-target creator -- every card of its FIRST
+    // card slot ("one or two of your Personalities": Bayushi Makubesu; Kakita Yasunori's host slot is his first too), so a later slot (Yasunori's removed card) is never a host.
     private CardInstance[] CreateHosts(GameCommand command, CreatedCardSpec spec) =>
-        spec.HostIsPerformer ? (command.PerformerId is not null && _state.Cards.TryGetValue(command.PerformerId, out var performer) ? [performer] : []) : ArmyPersonalityChoice(command).Select(Card).ToArray();
+        spec.HostIsSource ? (command.CardId is not null && _state.Cards.TryGetValue(command.CardId, out var creator) ? [creator] : [])
+        : spec.HostIsPerformer ? (command.PerformerId is not null && _state.Cards.TryGetValue(command.PerformerId, out var performer) ? [performer] : [])
+        : command.AbilityId is not null && AbilityCatalog.All.TryGetValue(command.AbilityId, out var creatorAbility) && creatorAbility.Slots?.FirstOrDefault(s => !s.IsPlayer && !s.Performing && !s.AtResolution) is { } hostSlot
+            ? SlotCards(command, hostSlot.Id).ToArray()
+        : ArmyPersonalityChoice(command).Select(Card).ToArray();
 
     // The created attachment must be one the chosen Personality could be equipped with; the card does not exist yet, so a stand-in with its definition is judged.
     private void ValidateCreate(GameCommand command, CreatedCardSpec creates, PlayerState player)

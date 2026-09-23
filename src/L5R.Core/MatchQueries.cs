@@ -91,6 +91,10 @@ public sealed partial class MatchEngine
             foreach(var chosenPlayer in chosenPlayers)
             {
                 var command=new GameCommand("useAbility",playerId,_state.Version,CardId:card.Id,TargetId:targetId,TargetPlayerId:chosenPlayer,AbilityId:abilityId);
+                // A Reaction whose move names a battlefield the player chooses (Shosuro Hawado - exp, issue #453): the command carries the first listed destination
+                // and the option lists them all (ActionOption.Provinces), as an ordinary move ability's offer does.
+                var destinations=AbilityCatalog.All[abilityId].Move is { ChoosesBattlefield:true } reactionMove ? MoveDestinations(reactionMove) : null;
+                if(destinations is { Length:>0 }) command=command with {Province=destinations[0]};
                 var gold=QuoteAbilityGold(command);
                 if(gold is not null) command=command with {SourceIds=gold.Payments.FirstOrDefault()?.SourceIds};
                 var why=reason ?? (gold is null ? null : gold.Error ?? (gold.Payments.Length==0 ? "Insufficient unbowed Gold production." : null));
@@ -99,7 +103,7 @@ public sealed partial class MatchEngine
                 why??=ActionLockRejection(command);
                 var text=label??AbilityOptionLabel(abilityId,AbilityCatalog.All[abilityId],null,card);
                 if(chosenPlayer is int who) text+=who==playerId ? " · you" : " · your opponent";
-                Add("useAbility",text,command,why,card.Id,gold:gold);
+                Add("useAbility",text,command,why,card.Id,provinces:destinations,gold:gold);
             }
         }
         // An entering-play Reaction that targets a card in play (Mastering the Elements, issue #420: "target your Spell"): one option carrying every legal target, each with its own Gold quote when the
@@ -162,6 +166,14 @@ public sealed partial class MatchEngine
                 foreach(var reactionId in (Definition(enteringCard).Abilities??[]).Where(a=>AbilityCatalog.All.TryGetValue(a,out var def) && def.Timing=="Reaction" && def.Trigger=="own-enters-play"))
                 {
                     var used=enteringCard.AbilityUses.ContainsKey(AbilityCatalog.All[reactionId].UsageKey??reactionId);
+                    // A multi-target entering-play Reaction (Bayushi Makubesu, issue #453: "one or two of your Personalities"): the slot offer an ordinary ability gets.
+                    if(AbilityCatalog.All[reactionId].Slots is not null)
+                    {
+                        var slotReaction=AbilityCatalog.All[reactionId];
+                        var slotOption=SlotAbilityOption(new GameCommand("useAbility",playerId,_state.Version,CardId:enteringCard.Id,AbilityId:reactionId),slotReaction,AbilityOptionLabel(reactionId,slotReaction,null,enteringCard),enteringCard.Id);
+                        result.Add(used ? slotOption with {Enabled=false,Reason="This reaction has already been used."} : slotOption);
+                        continue;
+                    }
                     if(AbilityCatalog.All[reactionId].Target is "none" or "player") AddReaction(enteringCard,reactionId,used?"This reaction has already been used.":null);
                     else AddTargetedEntryReaction(enteringCard,reactionId,used?"This reaction has already been used.":null);
                 }

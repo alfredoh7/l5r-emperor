@@ -30,6 +30,8 @@ public static class EitherOrSpecs
     /// <summary>Extend the Soul's Boundaries (issue #453 batch 5): "His controller may shuffle him and his attachments back into their owners' decks. If he did not choose
     /// this, take two additional Battle actions."</summary>
     public const string ExtendSoulShuffle = "extend-soul-shuffle";
+    /// <summary>Moshi Ino's storm (issue #453, batch 3): the player who took the action chooses to discard a card or bow its performer (MoshiInoStorm.cs).</summary>
+    public const string InoStorm = "ino-storm";
 }
 
 /// <summary>What choosing an option amounts to, for a client to word and style it: "avoid" (accept a cost or a lesser loss so the
@@ -90,6 +92,7 @@ public sealed partial class MatchEngine
             EitherOrSpecs.UnfortunateHesitation => $"{source}: bow {affected}, or you must pass at your next opportunity this phase to take a Battle, Limited, or Open action.",
             EitherOrSpecs.TrainingThreeWay => $"{source}: pay 2 Gold, lose 2 Honor, or let your opponent gain 2 Honor.",
             EitherOrSpecs.ExtendSoulShuffle => $"{source}: shuffle {affected} and his attachments into their owners' decks, or your opponent takes two additional Battle actions.",
+            EitherOrSpecs.InoStorm => $"{source}'s storm: discard a card, or bow {(affected == "" ? "the performer" : affected)}.",
             _ => throw new RuleViolation("Unknown choice.")
         };
     }
@@ -135,6 +138,8 @@ public sealed partial class MatchEngine
                     new("refuse", "Do not shuffle him", "Your opponent takes two additional Battle actions.", EitherOrKind.Accept, 0, true, null)
                 ];
             }
+            case EitherOrSpecs.InoStorm:
+                return InoStormOptions(p, affected);
             default: throw new RuleViolation("Unknown choice.");
         }
     }
@@ -232,6 +237,10 @@ public sealed partial class MatchEngine
                 GrantAdditionalAction(p.ActingPlayerId, null);
                 GrantAdditionalAction(p.ActingPlayerId, null);
                 p.StayWithActor = _state.AdditionalActions.Any(g => g.PlayerId == p.ActingPlayerId && Forfeitable(g));
+                break;
+            case (EitherOrSpecs.InoStorm, "discard"):
+            case (EitherOrSpecs.InoStorm, "bow"):
+                ApplyInoStorm(p, option, decider, affected);
                 break;
             default: throw new RuleViolation("Unknown choice.");
         }
