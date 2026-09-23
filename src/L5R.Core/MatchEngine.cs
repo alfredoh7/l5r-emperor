@@ -270,6 +270,17 @@ public sealed partial class MatchEngine
             if (_state.PendingChoice.Type=="forcedDiscard") { ResolveForcedDiscard(command); return; }
             // A conditional effect choice (issue #337, Mirumoto Yumaru): the acting player picks one of the options the engine listed.
             if (_state.PendingChoice.Type=="effectChoice") { ResolveEffectChoice(command); return; }
+            if (_state.PendingChoice.Type=="proclaimNegateReaction")
+            {
+                // Turning the Story (issue #453, batch 2): the one reacting player answers -- the Reaction (negating the held Proclaim) or a pass -- and the
+                // Proclaim then resolves, negated or not, back inside the Proclaim window it interrupted (SeedsOfDecayBatch2.cs).
+                Require(command.Type is "useAbility" or "declineReaction" or "pass","Resolve the before-Proclaim reaction window first.");
+                if (command.Type=="useAbility") UseAbility(command);
+                else Emit("reactionPassed",$"{Player(command.PlayerId).Name} passed the reaction opportunity.",command.PlayerId);
+                // The window closes the instant the one reacting player has answered: a pass, or the Reaction that negated the Proclaim.
+                if (_state.HeldProclaim is { } held && (command.Type!="useAbility" || held.Negated)) { _state.PendingChoice=null; _state.ConsecutivePasses=0; ResolveHeldProclaim(); }
+                return;
+            }
             if (_state.PendingChoice.Type=="proclaim")
             {
                 // "useAbility" here resolves the entering card's own entering-play Reaction (if it
@@ -464,6 +475,8 @@ public sealed partial class MatchEngine
         if (_state.PendingDuel is not null) { ResolveDuelCommand(command); return; }
         // Unfortunate Hesitation (issue #338): a player who owes a pass at an ordinary Action/Battle opportunity may only pass.
         EnforceForcedPass(command);
+        // Urgency (issue #453, batch 2): a player past his allowance of non-Reaction actions this phase may take none.
+        EnforceActionAllowance(command);
         // Battle Phase timing (issue #310): a limit on the first-action holder's FIRST Battle action (Naval
         // Invasion's "which he must perform"; Rebuilding Kyuden Hida's "may not announce a Battle action before the
         // Defender's first normal opportunity"). Consumed by the holder's next accepted command; a useAbility's
@@ -591,6 +604,7 @@ public sealed partial class MatchEngine
         Pay(command.PlayerId,card,quote.Cost,command.SourceIds,paying:new PaymentSubject(card,PaymentKind.Recruit));
         var province=Player(command.PlayerId).Provinces.Single(p=>p.CardId==card.Id);
         province.CardId=null;
+        _state.LastProvinceEntryCardId=card.Id; // "enters play from a province" (Yogo Ugimori; issue #453, batch 2)
         card.Zone=Zone.Home; card.ProvinceIndex=null; card.FaceUp=true;
         // A Personality is straightened by default; entering bowed is only ever a direct
         // consequence of a printed effect, never a separate straighten-then-bow step.
@@ -883,6 +897,7 @@ public sealed partial class MatchEngine
         Pay(command.PlayerId,card,quote.Cost,command.SourceIds,paying:new PaymentSubject(card,PaymentKind.Recruit));
         var province=Player(command.PlayerId).Provinces.Single(p=>p.CardId==card.Id);
         province.CardId=null;
+        _state.LastProvinceEntryCardId=card.Id; // "enters play from a province" (Yogo Ugimori; issue #453, batch 2)
         card.Zone=Zone.Battlefield; card.FaceUp=true;
         card.Bowed=Definition(card).Effect=="enters-bowed";
         if(Definition(card).Effect=="enters-dishonored") Dishonor(card);
@@ -990,7 +1005,8 @@ public sealed partial class MatchEngine
             +(entryDiscount is {} entry?$" − {entry.Amount} ({entry.Clan} Clan)":"")
             +(clanAllegiance?" + 2 (Clan allegiance)":"")+(clanDiscount?" − 2 (Clan discount)":"")+(rawCost<0?" (min 0)":"");
         if ((Keyword(card,"Unique") || Keyword(card,"Singular")) && ControlsCopyOf(playerId,def.Name)) error=$"You already control this {(Keyword(card,"Unique") ? "Unique" : "Singular")} card.";
-        var eligible=error is null && inClan && !clanDiscount && !fromDeadPile && playerId==_state.ActivePlayerId && player.ProclaimUsedTurn!=_state.TurnNumber;
+        // Kakita Yusugi and Yogo Ugimori (issue #453, batch 2): the once-per-turn limit he ignores, and a lock on the player (ProclaimAllowed).
+        var eligible=error is null && inClan && !clanDiscount && !fromDeadPile && playerId==_state.ActivePlayerId && ProclaimAllowed(player,def);
         return new(cardId,cost,clanDiscount,clanAllegiance,eligible,error,error is null ? PaymentOptions(playerId,cost,new PaymentSubject(card,PaymentKind.Recruit)) : [],basis);
     }
 
@@ -1072,13 +1088,10 @@ public sealed partial class MatchEngine
         var pending=_state.PendingChoice!;
         var player=Player(command.PlayerId);
         Require(pending.PlayerId==command.PlayerId && command.PlayerId==_state.ActivePlayerId,"Only the entering Personality's controller may Proclaim during their turn.");
-        Require(player.ProclaimUsedTurn!=_state.TurnNumber,"Proclaim has already been used this turn.");
-        var card=Card(pending.CardId);
-        player.ProclaimUsedTurn=_state.TurnNumber;
-        GainHonor(player.Id,Definition(card).PersonalHonor,"Proclaim");
-        ApplyPendingEntryEffects();
-        _state.ConsecutivePasses=0;
-        _state.PriorityPlayerId=1-command.PlayerId;
+        Require(ProclaimRejection(player,Definition(Card(pending.CardId))) is null,ProclaimRejection(player,Definition(Card(pending.CardId)))??"Proclaim has already been used this turn.");
+        // Turning the Story (issue #453, batch 2): "Before a Proclaim action resolves" -- the Proclaim waits for the opponent's Reaction when they hold one (SeedsOfDecayBatch2.cs).
+        if(DeferProclaimForNegation(command)) return;
+        FinishProclaim(command,negated:false);
     }
     private void PassReaction()
     {
@@ -1258,6 +1271,8 @@ public sealed partial class MatchEngine
             // battle may have already resolved and returned this card home, losing a live Zone check.
             card.AssignedToAttackTurn=_state.TurnNumber;
             Emit("unitAssigned",$"{Definition(card).Name} assigned to province {assignment.Value+1}.",command.PlayerId,card.Id);
+            // "After the next time this turn he is assigned to attack" (Imperial Protection, Fair Warning; issue #453, batch 2): an attacker's assignment only.
+            if(!isDefender) FireAssignedToAttackWatches(card);
         }
     }
     // Cavalry (core rules Attack Phase): a unit is Cavalry only if the Personality AND every attached
@@ -1447,6 +1462,7 @@ public sealed partial class MatchEngine
     private void ContinueResolveBattle(int provinceIndex,int attacker,int defender)
     {
         var a=Army(attacker,provinceIndex).ToArray(); var d=Army(defender,provinceIndex).ToArray();
+        MarkOpposed(a,d); // Sentinel Spirit (issue #453, batch 2): "if it was opposed this turn".
         var (af,df)=ArmyForces(a,d,attacker,defender);
         Emit("battleResolved",$"Province {provinceIndex+1}: attacking Force {af}, defending Force {df}.");
         // Reconnaissance resets to No for both players at this battlefield once its battle resolves,
@@ -1927,7 +1943,8 @@ public sealed partial class MatchEngine
     // is not removed by this and resumes applying once honorable again. The handful of rules that
     // deliberately key off the *printed* value regardless of current status (Dishonorable death's
     // Honor penalty, Proclaim's grant) intentionally do not use this helper.
-    private int CardPersonalHonor(CardInstance card) => card.Dishonorable && !DishonorablePersonalHonorOverridden(card) ? 0 : Definition(card).PersonalHonor+StatModifier(card,"PersonalHonor");
+    private int CardPersonalHonor(CardInstance card) => card.Dishonorable && !DishonorablePersonalHonorOverridden(card) ? 0 : Definition(card).PersonalHonor+StatModifier(card,"PersonalHonor")
+        +StaticPersonalHonorBonus(card); // Akodo Hotaka (issue #453, batch 2): "+1PH if any other player is Dragon Clan".
     // Utaku Chikako's own passive (issue #186): "Your dishonorable Battle Maidens do not have a
     // maximum Personal Honor of 0" -- a Personality's own passive (not a Stronghold's), so checked
     // generically against any in-play Personality the SAME owner controls carrying this Effect,
@@ -2162,6 +2179,8 @@ public sealed partial class MatchEngine
         // not trigger this" carve-out. Checked before the Zone changes, using the card's own status
         // right up to the moment it actually died.
         if(InPlay(card)) QueueOverconfidentDraw(card);
+        // Fair Warning (issue #453, batch 2): "after the next time this turn he ... is destroyed" -- a destruction while in play.
+        if(InPlay(card)) FireDestroyedWatches(card);
         card.Zone = Definition(card).Type==CardType.Personality ? Zone.Dead
             : Definition(card).Type is CardType.Follower or CardType.Item or CardType.Spell or CardType.Strategy or CardType.Ring ? Zone.FateDiscard
             : Zone.DynastyDiscard;
@@ -2469,6 +2488,8 @@ public sealed partial class MatchEngine
         SetPhase(Phase.End,player.Id);
         if(player.DishonorLossPending) { Win(1-player.Id,"Dishonor defeat at the beginning of the End Phase"); return; }
         Draw(player);
+        // Ingenuity (issue #453, batch 2): "draw an additional card during your next End Phase".
+        DrawExtraEndPhaseCards(player);
         var maxHand=MaxHandSize(player.Id);
         if(player.Hand.Count>maxHand) _state.PendingChoice=new("discardHand",player.Id,null,$"Discard {player.Hand.Count-maxHand} card(s) to return to {maxHand}.");
         else FinishTurn();
@@ -2499,7 +2520,8 @@ public sealed partial class MatchEngine
     {
         var player=Player(_state.ActivePlayerId);
         _state.PriorityPlayerId=player.Id;
-        if(player.Honor>=40) { Win(player.Id,"Honor victory at the start of the turn"); return; }
+        // Akodo Hotaka (issue #453, batch 2) lowers the 40 his controller needs (HonorVictoryThreshold).
+        if(player.Honor>=HonorVictoryThreshold(player.Id)) { Win(player.Id,"Honor victory at the start of the turn"); return; }
         // Enlightenment victory (issue #194): begins their turn with all five REAL elemental Rings
         // (Fire/Water/Air/Earth/Void) in play -- checked by Keyword, not a fixed card id, since more
         // than one printing of a given Ring exists. Every False Ring carries its own matching
@@ -2775,7 +2797,8 @@ public sealed partial class MatchEngine
     private int EffectiveProvinceStrength(ProvinceState province)
     {
         // The CURRENT strength: raised and lowered by everything that has acted on the province, and by the Region and the Terrain bonuses still in play.
-        var strength=province.Strength + (province.RegionId is string id && RegionStrengthBonus.TryGetValue(Definition(Card(id)).Effect,out var bonus) ? bonus : 0) + ProvinceSourceBonuses(province) + StaticProvinceBonus(province);
+        var strength=province.Strength + (province.RegionId is string id && RegionStrengthBonus.TryGetValue(Definition(Card(id)).Effect,out var bonus) ? bonus : 0) + ProvinceSourceBonuses(province) + StaticProvinceBonus(province)
+            + TimedProvinceStrength(province); // Seeds of Decay (issue #453), batch 2: strength given for the turn (SeedsOfDecayBatch2.cs).
         // A limit (TerrainStatics.cs: Times of Strife, issue #259; Ancient Feud, issue #418) is a CEILING on what is read, never a lowering of the current strength: a province already at or
         // below it is untouched, and one above it reads as the maximum until the limit ends.
         return ProvinceStrengthMax(province) is int max ? Math.Min(strength,max) : strength;
@@ -2861,6 +2884,7 @@ public sealed partial class MatchEngine
             amount=reduced;
         }
         var player=Player(playerId); player.Honor+=amount;
+        if(amount<0) RecordHonorLoss(playerId); // An Insult Answered (issue #453, batch 2): the action that cost this player Honor.
         if(player.Honor<=-20) player.DishonorLossPending=true;
         Emit("honorChanged",$"{player.Name}: {amount:+#;-#;0} Honor ({reason}).",playerId,Amount:amount);
         // Formal Apology (issue #259): checked after EVERY Honor change, gain or loss alike, since the
@@ -2930,6 +2954,8 @@ public sealed partial class MatchEngine
         // reaches here). One check here therefore covers both paths without needing two separate hooks.
         if(_state.Phase==Phase.Action && phase!=Phase.Action) AdvanceStraightenHolds(StraightenPoint.ActionPhaseEnds);
         if(phase==Phase.Dynasty) DragonsBreathHonor();
+        // Sentinel Spirit (issue #453, batch 2): "after the next Dynasty Phase begins".
+        if(phase==Phase.Dynasty) ResolveSentinelWatches();
         if(phase==Phase.Dynasty)
             foreach(var waveMan in _state.Cards.Values.Where(c=>InPlay(c) && Definition(c).Effect=="wave-man-attack-phase-straighten"))
                 StraightenBowedUnit(waveMan);

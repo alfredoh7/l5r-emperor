@@ -2411,4 +2411,10 @@ public static class PublishedContent
     public static PublishedSnapshot StrongholdWave12 { get; } = Load("L5R.Published.StrongholdWave12.json", "stronghold-wave-12", requireDecks: false);
     /// <summary>Celestial wave 5 (Seeds of Decay pass, issue #453, batch 1): Megumi's Guidance.</summary>
     public static PublishedSnapshot CelestialWave5 { get; } = Load("L5R.Published.CelestialWave5.json", "celestial-wave-5", requireDecks: false);
+    /// <summary>Strategy wave 50 (Seeds of Decay pass, issue #453, batch 2): seventeen Strategies.</summary>
+    public static PublishedSnapshot StrategyWave50 { get; } = Load("L5R.Published.StrategyWave50.json", "strategy-wave-50", requireDecks: false);
+    /// <summary>Personality wave 53 (Seeds of Decay pass, issue #453, batch 2): Yasuki Baiko, Yasuki Tsujiken - exp, Doji Yuka, Kakita Yusugi, Yogo Ugimori, Akodo Hotaka, Bayushi Shibata - exp.</summary>
+    public static PublishedSnapshot PersonalityWave53 { get; } = Load("L5R.Published.PersonalityWave53.json", "personality-wave-53", requireDecks: false);
+    /// <summary>Follower wave 24 (Seeds of Decay pass, issue #453, batch 2): the created-only Ronin Follower Dubious Resources creates.</summary>
+    public static PublishedSnapshot FollowerWave24 { get; } = Load("L5R.Published.FollowerWave24.json", "follower-wave-24", requireDecks: false);
 }

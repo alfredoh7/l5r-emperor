@@ -2270,6 +2270,76 @@ public static class AbilityCatalog
         ["advanced-intelligence-draw"] = new("Reaction", "After a Recon Strategy's action resolves: Draw one card for each action from a Recon Strategy you have taken this battle", "none", Trigger: AfterActionReactionTriggers.AfterActionResolved),
         // Megumi's Guidance (10028), a Celestial: the discard is its cost; the shield is the Personality's DestructionShieldTurn stamp (read by DestroyUnits).
         ["megumis-guidance-shield"] = new("BattleOrOpen", "Discard this card and choose your performing Personality: Negate his destruction from other players' cards' effects (until the turn ends)", "none", Performer: "own-personality-at-battle"),
+        // Seeds of Decay pass (issue #453), batch 2 (SeedsOfDecayBatch2.cs holds the execution and the primitives).
+        // Courting Trouble (oracle-l5r-10140): "in or out of play" -- a face-up Personality anywhere a card is face up (in play, face up in a province, in a discard pile).
+        ["courting-trouble-overconfident"] = new("Open", "Target another player's face-up Personality in or out of play: Permanently give him Overconfident", "enemy-face-up-personality-anywhere"),
+        // Out of My Sight! (oracle-l5r-10162).
+        ["out-of-my-sight-brash"] = new("Open", "Target another player's Personality: Permanently give him Brash", "enemy-personality"),
+        // Debt to the Kaiu (oracle-l5r-10141): the permanent path (ProvinceState.Strength), as Ring of Earth's.
+        ["debt-to-the-kaiu-strength"] = new("Limited", "Permanently give each of your provinces +1 strength", "none"),
+        // Imperial Protection (oracle-l5r-10152): a standing watch on the target (AssignmentWatch), and a province rule for the turn (ProvinceStrengthEffect).
+        ["imperial-protection-watch"] = new("Open", "Political Open: Target a Personality: After the next time this turn he is assigned to attack, dishonor him and his controller loses Honor equal to his base Personal Honor", "personality", ActionKeywords: ["Political"]),
+        ["imperial-protection-provinces"] = new("Open", "Political Open: Each of your provinces has +2 strength for each dishonorable Personality attacking it", "none", ActionKeywords: ["Political"]),
+        // Incriminating Testimony (oracle-l5r-10153): the Courtier's bow is the cost; the bonus is read from his Chi as the action resolves and lasts the turn.
+        ["incriminating-testimony-bow"] = new("Battle", "Political Battle: Bow your performing Courtier at any location and target an enemy Personality: Bow him. Give this battlefield's province a strength bonus equal to your Courtier's Chi", "enemy-personality",
+            Performer: "own-unbowed-personality-with-keyword-at-any-location", RequiredKeywords: ["Courtier"], ActionKeywords: ["Political"], Costs: ActionCost.BowPerformer),
+        // Ingenuity (oracle-l5r-10154): one or two Personalities (a slot), and an extra End Phase draw.
+        ["ingenuity-dishonor"] = new("Limited", "Political Limited: Choose your performing unbowed Magistrate and target one or two Personalities: Dishonor them. Draw an additional card during your next End Phase", "slots",
+            Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeywords: ["Magistrate"], ActionKeywords: ["Political"], Slots: [new("targets", "personality", "One or two Personalities", 1, 2)]),
+        // Testimony (oracle-l5r-10171): "dishonor or rehonor" is one printed ability with two effects (one use, the UsageKey).
+        ["testimony-dishonor"] = new("Limited", "Political Limited: Choose your performing unbowed honorable Personality and target a Personality with lower base Personal Honor: Dishonor the target", "personality-lower-base-honor-than-performer",
+            Performer: "own-unbowed-honorable-personality", ActionKeywords: ["Political"], UsageKey: "testimony"),
+        ["testimony-rehonor"] = new("Limited", "Political Limited: Choose your performing unbowed honorable Personality and target a Personality with lower base Personal Honor: Rehonor the target", "personality-lower-base-honor-than-performer",
+            Performer: "own-unbowed-honorable-personality", ActionKeywords: ["Political"], UsageKey: "testimony"),
+        // Sharing Gossip (oracle-l5r-10166): the copies in every Fate discard pile, this card counted once it is there (it is discarded when the action ends).
+        ["sharing-gossip-honor"] = new("Limited", "Political Limited: Choose your performing unbowed Courtier: After this action ends, gain 1 Honor for each card titled Sharing Gossip in all players' discard piles", "none",
+            Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeywords: ["Courtier"], ActionKeywords: ["Political"]),
+        // Urgency (oracle-l5r-10179): an allowance per player for the phase (ActionAllowance), and a paid draw.
+        ["urgency-limit"] = new("Open", "Political Open: Each player may only take two more non-Reaction actions this phase", "none", ActionKeywords: ["Political"]),
+        ["urgency-draw"] = new("Limited", "Political Limited: Pay 2 Gold: Draw a card", "none", ActionKeywords: ["Political"], Cost: GoldCostRule.Fixed(2)),
+        // Turning the Story (oracle-l5r-10174): played from hand in the before-Proclaim window Proclaim itself opens (DeferProclaimForNegation).
+        ["turning-the-story-negate"] = new("Reaction", "Political Reaction: Before a Proclaim action resolves: Negate its effects", "none", Trigger: "before-proclaim-resolves", ActionKeywords: ["Political"]),
+        // Fair Warning (oracle-l5r-10149): a Focus Effect with a choice (FocusEffectChoice.cs), and a watch that also fires on destruction.
+        ["fair-warning-focus"] = new("FocusEffect", "As a Focus Effect: After this duel ends, if your Personality won it, you may give a Personality -4F", "none"),
+        ["fair-warning-watch"] = new("Open", "Target another player's Personality: After the next time this turn he is assigned to attack or is destroyed, gain 2 Honor", "enemy-personality"),
+        // Sentinel Spirit (oracle-l5r-10165): usable only on another player's turn while the active player controls a Personality (a per-id Require); judged when the next Dynasty Phase begins.
+        ["sentinel-spirit-watch"] = new("Open", "If it is not your turn and the active player controls any Personalities, choose your performing unbowed Spirit: After the next Dynasty Phase begins, if it was opposed this turn, gain 2 Honor, and if no units were assigned to attack this turn, gain 3 Honor if your Honor is lower than each other player's", "none",
+            Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeywords: ["Spirit"]),
+        // An Insult Answered (oracle-l5r-10136): the after-action-resolved window, reading the Honor the action cost (LastResolvedAction.HonorLosers) and its performer; an Iaijutsu duel.
+        ["insult-answered-duel"] = new("Reaction", "Iaijutsu Revenge Reaction: After another player's performed Limited or Open action resolves which caused you an Honor loss, choose your performing unbowed Duelist and target the action's performer: Your Duelist duels the target. Destroy the duel's loser. Give the duel's winner two +1F Revenge tokens", "last-action-performer",
+            Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeywords: ["Duelist"], Trigger: AfterActionReactionTriggers.AfterActionResolved, IssuesDuel: true, ActionKeywords: ["Iaijutsu", "Revenge"]),
+        // Manipulate Energies (oracle-l5r-10156): one printed ability, six effects sharing one use; give what he lacks, remove what he has (per-id Requires).
+        ["manipulate-energies-give-cavalry"] = new("Open", "Kiho Open: Choose your performing unbowed Henshin and target a Personality: Permanently give him Cavalry", "personality", Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeywords: ["Henshin"], ActionKeywords: ["Kiho"], UsageKey: "manipulate-energies"),
+        ["manipulate-energies-give-naval"] = new("Open", "Kiho Open: Choose your performing unbowed Henshin and target a Personality: Permanently give him Naval", "personality", Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeywords: ["Henshin"], ActionKeywords: ["Kiho"], UsageKey: "manipulate-energies"),
+        ["manipulate-energies-give-tactician"] = new("Open", "Kiho Open: Choose your performing unbowed Henshin and target a Personality: Permanently give him Tactician", "personality", Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeywords: ["Henshin"], ActionKeywords: ["Kiho"], UsageKey: "manipulate-energies"),
+        ["manipulate-energies-remove-cavalry"] = new("Open", "Kiho Open: Choose your performing unbowed Henshin and target a Personality: Permanently remove Cavalry from him", "personality", Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeywords: ["Henshin"], ActionKeywords: ["Kiho"], UsageKey: "manipulate-energies"),
+        ["manipulate-energies-remove-naval"] = new("Open", "Kiho Open: Choose your performing unbowed Henshin and target a Personality: Permanently remove Naval from him", "personality", Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeywords: ["Henshin"], ActionKeywords: ["Kiho"], UsageKey: "manipulate-energies"),
+        ["manipulate-energies-remove-tactician"] = new("Open", "Kiho Open: Choose your performing unbowed Henshin and target a Personality: Permanently remove Tactician from him", "personality", Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeywords: ["Henshin"], ActionKeywords: ["Kiho"], UsageKey: "manipulate-energies"),
+        // Dragon Tattoo - exp (oracle-l5r-10144): the granted ability is the second entry, permanent on the Tattooed Personality (AbilityGrants.cs).
+        ["dragon-tattoo-exp-imbue"] = new("Limited", "Fire Limited: Target your performing unbowed Tattooed Personality who has not performed an action from a Dragon Tattoo this game: Permanently give him the ability \"Fire Limited: Give this Personality a +1F Fire token\"", "none",
+            Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeywords: ["Tattooed"], ActionKeywords: ["Fire"]),
+        ["dragon-tattoo-fire-token"] = new("Limited", "Fire Limited: Give this Personality a +1F Fire token", "none", ActionKeywords: ["Fire"]),
+        // Dubious Resources (oracle-l5r-10145): the card's own printed cost is the 2 Gold; the created Ronin Follower is its own Proxy scan (follower-wave-24).
+        ["dubious-resources-create"] = new("Battle", "Choose your performing Personality: Create a 2F Ronin Follower and attach it to him", "none", Performer: "own-personality-at-battle",
+            Creates: new(CardType.Follower, Force: 2, Keywords: ["Ronin"], ProxyId: "oracle-l5r-10203") { HostIsPerformer = true }),
+        // Brotherhood Schism (oracle-l5r-10138): a bar for the turn on a second Ring of one owner's (RequireRingMayEnterPlay), and an Event shuffled back into its owner's deck.
+        ["brotherhood-schism-rings"] = new("Open", "Until the turn ends, Rings will not enter play if their owner has already put a Ring into play this turn", "none"),
+        ["brotherhood-schism-shuffle"] = new("Limited", "Target an Event in another player's discard pile: End all of its ongoing effects. Shuffle it into its owner's deck", "event-in-enemy-discard"),
+        // Yasuki Baiko (oracle-l5r-10044): the Favor is required and discarded (the Favor id lists), the target dishonorable.
+        ["baiko-shame"] = new("Limited", "Favor Political Limited: Discard the Imperial Favor and target a dishonorable Personality: His controller loses 1 Honor", "dishonorable-personality", ActionKeywords: ["Favor", "Political"]),
+        ["baiko-favor"] = new("Open", "Political Open: Pay 2 Gold: Take the Imperial Favor", "none", ActionKeywords: ["Political"], Cost: GoldCostRule.Fixed(2)),
+        // Yasuki Tsujiken - exp (oracle-l5r-10045): "bow or straighten" shares one use; "your Stronghold" is the acting player's own.
+        ["tsujiken-exp-bow"] = new("Open", "Target a Holding or your Stronghold: Bow it", "holding-or-own-stronghold", UsageKey: "tsujiken-exp-toggle"),
+        ["tsujiken-exp-straighten"] = new("Open", "Target a Holding or your Stronghold: Straighten it", "holding-or-own-stronghold", UsageKey: "tsujiken-exp-toggle"),
+        ["tsujiken-exp-draw"] = new("Limited", "Pay 5 Gold: Draw a card", "none", Cost: GoldCostRule.Fixed(5)),
+        ["tsujiken-exp-dishonor"] = new("Limited", "Bow Tsujiken and target a Personality: Dishonor him. His controller loses 1 Honor", "personality", Costs: ActionCost.BowSource),
+        // Yogo Ugimori (oracle-l5r-10084): "from a province" (LastProvinceEntryCardId, a per-id Require); the chosen player is locked until Ugimori's controller's next turn begins.
+        ["ugimori-proclaim-lock"] = new("Reaction", "After Ugimori enters play from a province, choose a player: He may not take the Proclaim Reaction until your next turn begins", "player", Trigger: "own-enters-play"),
+        // Bayushi Shibata - exp (oracle-l5r-10080): the +3 lasts the turn (ProvinceStrengthEffect), the target-status half through IfTarget.
+        ["shibata-exp-bow"] = new("Battle", "Even if Shibata is not at the current battlefield, target an attacking Personality: Bow the target. Give the current battlefield's province +3 strength if the target is dishonorable", "attacking-personality",
+            SourceUnitMayBeAway: true, IfTarget: TargetStatus.IsDishonorable),
+        // Training fixture (issue #453, batch 2): a Dark Virtue Strategy whose Open action a chosen Personality performs (Akodo Hotaka's ban).
+        ["training-performed-bow"] = new("Open", "Training: choose your performing unbowed Personality and target a Personality: bow him", "personality", Performer: "own-unbowed-personality"),
     });
 }
 
@@ -2482,7 +2552,8 @@ public sealed partial class MatchEngine
     // also does something else (Defensive Stance's +3F) still resolves and only its straightening is skipped (Straighten refuses it).
     private static bool StraightensOnly(string abilityId) => abilityId is "jinn-kuen-straighten" or "kodo-straighten" or "munefusa-straighten" or "mitsuko-straighten" or "ritual-preparation-straighten"
         or "training-straighten-at-battle" or "horibe-straighten" or "furu-straighten" or "tsudoken-exp2-straighten" or "tsukasa-straighten" or "atsumichi-straighten" or "ring-of-air-straighten"
-        or "mitoshi-straighten";
+        or "mitoshi-straighten"
+        or "tsujiken-exp-straighten"; // Seeds of Decay pass (issue #453), batch 2
     private static string? MoveOrStraightenKind(string abilityId) => abilityId switch
     {
         "incapacitated" or "favor-battle" or "journeys-end-move" or "shamate-move" or "effortless-counterattack-move"
@@ -2562,7 +2633,9 @@ public sealed partial class MatchEngine
         or "disgraceful-conduct-bow" or "disgraceful-conduct-bow-unit"
         // Before the Dawn (issue #431): the plain bows.
         or "tsuji-bow" or "komiko-bow" or "eun-ju-bow" or "iemasa-bow" or "omigawa-move"
-        or "anger-management-destroy" or "control-the-board-weaken" or "spirit-magistrate-bow" or "strength-of-the-mountain-bow" or "strength-of-the-mountain-earth" or "second-feint-bow" or "crimson-shadow-bow" or "tsunami-tattoo-move" or "detained-move";
+        or "anger-management-destroy" or "control-the-board-weaken" or "spirit-magistrate-bow" or "strength-of-the-mountain-bow" or "strength-of-the-mountain-earth" or "second-feint-bow" or "crimson-shadow-bow" or "tsunami-tattoo-move" or "detained-move"
+        // Seeds of Decay pass (issue #453), batch 2.
+        or "incriminating-testimony-bow" or "shibata-exp-bow" or "tsujiken-exp-bow" or "training-performed-bow";
     // Whether the command's TargetId is an Attack's OWN target, which reacts through the separate attackReaction
     // window instead of this one: an Attack-classified ability whose Target category is "attack". Bayushi Kahoku
     // - exp (issue #313) is Attack-classified too, but its TargetId is the separate "-4F" target (an ordinary
@@ -2726,7 +2799,9 @@ public sealed partial class MatchEngine
         or "training-honor-strike" or "training-honor-loss-entry" or "training-honor-cost-attack" or "training-reconnaissance-strike"
         or "tsudoken-exp2-entry" or "nojima-entry" or "ayumi-entry" or "soshi-conditional-bow" or "unseen-assassin-strike" or "fujimura-expose"
         // Bayushi Nori (issue #301): "If he is dishonorable, his controller loses 2 Honor" -- both halves.
-        or "nori-bow-personality" or "nori-bow-attachments";
+        or "nori-bow-personality" or "nori-bow-attachments"
+        // Seeds of Decay pass (issue #453), batch 2.
+        or "baiko-shame" or "tsujiken-exp-dishonor";
     private bool ControlsDishonorablePersonality(int playerId) => _state.Cards.Values.Any(c => c.OwnerId == playerId && InPlay(c) && Definition(c).Type == CardType.Personality && c.Dishonorable);
     // Gate for whether the window is even worth opening -- "if [neither a Dishonorable Personality
     // nor an Honor loss] occurs, do not trigger the reaction interrupt" (the user's own ruling).
@@ -3314,6 +3389,7 @@ public sealed partial class MatchEngine
         RequiresSourceInPlay(ability) ? InPlay(source)
         : ability.Attach?.Card == AttachSource.Self ? source.Zone == Zone.Hand && player.Hand.Contains(source.Id)
             : ability.Trigger is "any-personality-enters-play" or "before-any-action-resolves" ? source.Zone is Zone.Hand or Zone.FateDiscard
+            : ability.Trigger == "before-proclaim-resolves" ? source.Zone == Zone.Hand && player.Hand.Contains(source.Id) // Turning the Story (issue #453, batch 2)
             : ability.Trigger == "after-battle-action-resolves" ? source.Zone is Zone.Hand or Zone.FateDiscard || InPlay(source)
             // A Reaction that returns its own card from a discard pile (Never Safe) is taken from there; any other after-resolution Reaction from a hand or from play.
             : ability.FromDiscard ? source.Zone is Zone.FateDiscard or Zone.DynastyDiscard
@@ -3426,6 +3502,8 @@ public sealed partial class MatchEngine
                 // After an action resolves (issue #437, ActionEffectTracking.cs): open to either player while the window is; each Reaction reads MatchState.LastResolvedAction for its own condition.
                 AfterActionReactionTriggers.AfterActionResolved => _state.PendingChoice.Type == "afterActionResolvedReaction" && command.CardId is not null && _state.Cards.TryGetValue(command.CardId, out var afterActionSource)
                     && AfterActionResolvedApplies(afterActionSource, id, command.PlayerId),
+                // Turning the Story (issue #453, batch 2): the one reacting player, in the window Proclaim itself opened (SeedsOfDecayBatch2.cs).
+                "before-proclaim-resolves" => _state.PendingChoice.Type == "proclaimNegateReaction" && command.PlayerId == _state.PendingChoice.PlayerId && _state.HeldProclaim is not null,
                 _ => false
             },
             _ => false
@@ -3561,7 +3639,7 @@ public sealed partial class MatchEngine
             Require(_state.CurrentBattleProvince is not null, "There is no current battlefield to move him to.");
             Require(player.Id != _state.ActivePlayerId, "Only the Defender may use Return to Action.");
         }
-        if (id is "shunya-honor" or "favor-cycle" or "favor-battle" or "jakuei-bow-favor" or "bonds-of-coin-draw" or "insulting-gesture-shame")
+        if (id is "shunya-honor" or "favor-cycle" or "favor-battle" or "jakuei-bow-favor" or "bonds-of-coin-draw" or "insulting-gesture-shame" or "baiko-shame")
             Require(_state.FavorPlayerId == player.Id, "You must control the Imperial Favor to discard it.");
         // Bonds of Coin (issue #336): "Bow your Stronghold" is a cost of the action, so a bowed Stronghold cannot pay it.
         if (id == "bonds-of-coin-draw") Require(!Card(player.StrongholdId).Bowed, "Your Stronghold is already bowed.");
@@ -3736,6 +3814,22 @@ public sealed partial class MatchEngine
             // Gold cost (attachDef.GoldCost) is validated once, generically, in the shared cost
             // computation below -- not duplicated here.
         }
+        // Seeds of Decay pass (issue #453), batch 2.
+        RequireRingMayEnterPlay(id, player); // Brotherhood Schism
+        if (id == "sentinel-spirit-watch")
+        {
+            Require(_state.ActivePlayerId != player.Id, "Sentinel Spirit is only usable when it is not your turn.");
+            Require(_state.Cards.Values.Any(c => c.OwnerId == _state.ActivePlayerId && InPlay(c) && Definition(c).Type == CardType.Personality), "The active player controls no Personality.");
+        }
+        if (id == "ugimori-proclaim-lock") Require(_state.LastProvinceEntryCardId == source!.Id, "Ugimori did not enter play from a province.");
+        if (id == "dragon-tattoo-exp-imbue" && command.PerformerId is not null)
+            Require(!Card(command.PerformerId).PerformedActionFromTitles.Contains("Dragon Tattoo"), "He has already performed an action from a Dragon Tattoo this game.");
+        if (id.StartsWith("manipulate-energies-", StringComparison.Ordinal) && command.TargetId is not null)
+        {
+            var energiesKeyword = id.EndsWith("-cavalry", StringComparison.Ordinal) ? "Cavalry" : id.EndsWith("-naval", StringComparison.Ordinal) ? "Naval" : "Tactician";
+            var energiesGives = id.Contains("-give-", StringComparison.Ordinal);
+            Require(Keyword(Card(command.TargetId), energiesKeyword) != energiesGives, energiesGives ? $"He already has {energiesKeyword}." : $"He does not have {energiesKeyword}.");
+        }
         if (ability.Performer is not null)
         {
             var performer = command.PerformerId is null ? throw new RuleViolation("Choose a performing card.") : Card(command.PerformerId);
@@ -3903,12 +3997,16 @@ public sealed partial class MatchEngine
                 // "unbowed" printed here -- "Straighten him before this battle resolves" is the whole
                 // point, so the performer may already be bowed).
                 "own-defending-personality-at-battle" => Definition(performer).Type == CardType.Personality && IsDefendingUnit(performer),
+                // Testimony (issue #453, batch 2): "your performing unbowed honorable Personality".
+                "own-unbowed-honorable-personality" => Definition(performer).Type == CardType.Personality && !performer.Bowed && MatchesTargetStatus(performer, TargetStatus.IsHonorable),
                 _ => false
             }, "That card does not meet this ability's performer requirement.");
         }
         else Require(command.PerformerId is null || command.PerformerId == command.TargetId && id is "prepared-death" or "defensive-stance" or "lobby", "Unexpected performing card.");
         // "May not perform actions" (issue #336): the performer of this action -- whoever it is -- must be free to act.
         RequireCanPerform(command, ability, source);
+        // "Hotaka may not perform Dark Virtue actions" (issue #453, batch 2): a performer-side ban on an action keyword.
+        RequirePerformerActionKeywordAllowed(command, ability, source);
         // Alternative cost (issue #337): the way the acting player pays the non-Gold cost is part of the command, and payable.
         ValidateCostOption(ability, command, source);
         ValidateWielderCosts(ability, command, source);
@@ -4236,6 +4334,13 @@ public sealed partial class MatchEngine
                 else if (ability.Target == "own-personality-in-province-with-keyword")
                     Require(target.OwnerId == player.Id && type == CardType.Personality && target.Zone == Zone.Province && target.FaceUp && HasKeywords(target, ability.RequiredKeywords),
                         "Choose your own face-up Personality with the required keyword in a province.");
+                // Courting Trouble (issue #453, batch 2): "another player's face-up Personality in or out of play" -- in play, face up in a province, or in a discard pile (face up by nature).
+                else if (ability.Target == "enemy-face-up-personality-anywhere")
+                    Require(target.OwnerId != player.Id && type == CardType.Personality && (InPlay(target) || target.Zone == Zone.Province && target.FaceUp || target.Zone is Zone.Dead or Zone.DynastyDiscard),
+                        "Choose another player's face-up Personality.");
+                // Brotherhood Schism (issue #453, batch 2): "an Event in another player's discard pile".
+                else if (ability.Target == "event-in-enemy-discard")
+                    Require(target.OwnerId != player.Id && type == CardType.Event && target.Zone == Zone.DynastyDiscard, "Choose an Event in another player's discard pile.");
                 else
                 {
                     Require(InPlay(target), "Target a card in play.");
@@ -4569,6 +4674,11 @@ public sealed partial class MatchEngine
                         "own-defending-personality" => personality && own && IsDefendingUnit(target),
                         // Vengeful Dismissal: an enemy Personality with strictly lower current Chi than the chosen performer's.
                         "enemy-personality-chi-lt-performer" => personality && !own && PersonalityChi(target) < PersonalityChi(Card(command.PerformerId!)),
+                        // Seeds of Decay pass (issue #453), batch 2.
+                        "attacking-personality" => personality && IsAttacking(target) && AtBattle(target),
+                        "holding-or-own-stronghold" => type == CardType.Holding || type == CardType.Stronghold && own,
+                        "personality-lower-base-honor-than-performer" => personality && Definition(target).PersonalHonor < Definition(Card(command.PerformerId!)).PersonalHonor,
+                        "last-action-performer" => personality && LastActionPerformer()?.Id == target.Id,
                         _ => false
                     }, "That card does not meet this ability's target or performer requirements.");
                 }
@@ -4837,7 +4947,7 @@ public sealed partial class MatchEngine
         PayForAbility(command, player);
         // The non-Gold cost the acting player chose (issue #337): bow or destroy the performer, paid right beside the Gold.
         PayCostOption(ability, command, player, source);
-        if (id is "shunya-honor" or "favor-cycle" or "favor-battle" or "jakuei-bow-favor" or "bonds-of-coin-draw" or "insulting-gesture-shame")
+        if (id is "shunya-honor" or "favor-cycle" or "favor-battle" or "jakuei-bow-favor" or "bonds-of-coin-draw" or "insulting-gesture-shame" or "baiko-shame")
         {
             _state.FavorPlayerId = null;
             Emit("favorDiscarded", $"{player.Name} discarded the Imperial Favor.", player.Id);
@@ -4858,9 +4968,13 @@ public sealed partial class MatchEngine
         // Strategy immediately) is the only part that happens right away; the printed EFFECT (the
         // duel itself) is deferred to IssueChallenge, which pauses here without ceding priority the
         // same way ResolveOrDeferAttack does, until the whole duel resolves.
+        // Doji Yuka (issue #453, batch 2): "After Yuka performs a Political action: Give her +3C until it ends" -- applied as her action begins to resolve, removed when it completes.
+        BeginPerformerActionTraits(ability, command, source);
         if (ability.IssuesDuel)
         {
             if (source is not null && Definition(source).Type == CardType.Strategy && source.Zone == Zone.Hand) DiscardFate(player, source);
+            // A duel issued by a Reaction (An Insult Answered; issue #453, batch 2) sets the window it was played in aside, as any window a Reaction opens does (ReactionsAreActions.cs).
+            if (ability.Timing == "Reaction") SuspendOpenWindow();
             // A Discipline card played from a discard pile is spent the same way: out of the pile the moment it is
             // played (the duel resolves later, and the engine has no "being resolved" zone).
             if (playedFromDiscard) RemoveFromGame(source!);
@@ -6324,14 +6438,17 @@ public sealed partial class MatchEngine
             // real Rings do not.
             case "ring-of-air-recruit": case "ring-of-water-recruit": case "ring-of-earth-recruit": case "ring-of-fire-recruit":
                 player.Hand.Remove(source!.Id); source.Zone = Zone.Home; source.FaceUp = true;
+                player.RingPutIntoPlayTurn = _state.TurnNumber; // Brotherhood Schism (issue #453, batch 2)
                 break;
             case "false-ring-of-air-recruit": case "false-ring-of-water-recruit": case "false-ring-of-earth-recruit":
                 player.Hand.Remove(source!.Id); source.Zone = Zone.Home; source.FaceUp = true;
+                player.RingPutIntoPlayTurn = _state.TurnNumber; // Brotherhood Schism (issue #453, batch 2)
                 GainHonor(player.Id, -2, Definition(source).Name);
                 break;
             case "ring-of-void-recruit":
                 foreach (var handId in player.Hand.Where(h => h != source!.Id).ToArray()) DiscardFate(player, Card(handId));
                 player.Hand.Remove(source!.Id); source.Zone = Zone.Home; source.FaceUp = true;
+                player.RingPutIntoPlayTurn = _state.TurnNumber; // Brotherhood Schism (issue #453, batch 2)
                 break;
             case "ring-of-air-straighten": Straighten(target!);  break;
             case "ring-of-water-move-home": MoveHome(target!, false);  break;
@@ -6931,6 +7048,16 @@ public sealed partial class MatchEngine
                 Emit("celestialDiscarded", $"{Definition(source).Name} was discarded to use its action.", player.Id, source.Id);
                 ShieldFromDestruction(Card(command.PerformerId!), Definition(source).Name);
                 break;
+            // Seeds of Decay pass (issue #453), batch 2: every case is in SeedsOfDecayBatch2.cs.
+            case "courting-trouble-overconfident": case "out-of-my-sight-brash": case "debt-to-the-kaiu-strength": case "imperial-protection-watch": case "imperial-protection-provinces":
+            case "incriminating-testimony-bow": case "ingenuity-dishonor": case "testimony-dishonor": case "testimony-rehonor": case "sharing-gossip-honor": case "urgency-limit": case "urgency-draw":
+            case "turning-the-story-negate": case "fair-warning-watch": case "sentinel-spirit-watch": case "manipulate-energies-give-cavalry": case "manipulate-energies-give-naval":
+            case "manipulate-energies-give-tactician": case "manipulate-energies-remove-cavalry": case "manipulate-energies-remove-naval": case "manipulate-energies-remove-tactician":
+            case "dragon-tattoo-exp-imbue": case "dragon-tattoo-fire-token": case "brotherhood-schism-rings": case "brotherhood-schism-shuffle": case "baiko-shame": case "baiko-favor":
+            case "tsujiken-exp-bow": case "tsujiken-exp-straighten": case "tsujiken-exp-draw": case "tsujiken-exp-dishonor": case "ugimori-proclaim-lock": case "shibata-exp-bow":
+                RunSeedsBatch2Effect(id, command, player, source, target);
+                break;
+            case "training-performed-bow": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;
             default:
                 // Any ability with an AttachSpec (Moto Jun-Ni, Fading Shadows, Foothills Keep and the training shapes) needs no case of its own: the Gold was
                 // paid by PayForAbility, so the card now leaves its place and enters play attached. An entering-play window ends the action here.
@@ -6968,6 +7095,7 @@ public sealed partial class MatchEngine
         var player = Player(command.PlayerId);
         var source = command.CardId is null ? null : Card(command.CardId);
         var target = command.TargetId is null ? null : Card(command.TargetId);
+        EndPerformerActionTraits(); // Doji Yuka (issue #453, batch 2): "until it ends".
         // "After the resolution of your [keyword] action" traits (Daidoji Ebizo, issue #321): every in-play card of
         // the acting player whose Effect registers one (AfterOwnActionTraits) reacts here, the single funnel every
         // synchronously resolving ability passes through -- a deferred Attack and a duel reach the same helper from
@@ -6992,7 +7120,7 @@ public sealed partial class MatchEngine
         // actions in one turn" -- every Favor-consuming ability shares this one shared Require
         // (see above), so the counter and the grant-check are shared here too, rather than
         // duplicated across each of the three execution cases.
-        if (id is "shunya-honor" or "favor-cycle" or "favor-battle" or "jakuei-bow-favor" or "bonds-of-coin-draw")
+        if (id is "shunya-honor" or "favor-cycle" or "favor-battle" or "jakuei-bow-favor" or "bonds-of-coin-draw" or "baiko-shame")
         {
             player.FavorActionsThisTurn++;
             GrantRingRecruit(player, player.FavorActionsThisTurn >= 2, "ring-of-air-recruit");
@@ -7051,7 +7179,7 @@ public sealed partial class MatchEngine
         if (_state.PendingChoice is null && OpenOverconfidentDrawWindow(closesTo)) return;
         // Action-effect tracking (issue #437): this action's own resolution is now truly done -- snapshot what it affected and offer the
         // Reaction that names it, same placement in the chain as the "after this action" windows above.
-        if (FinishActionEffectTracking(id, player.Id, source?.Id, closesTo)) return;
+        if (FinishActionEffectTracking(id, player.Id, source?.Id, closesTo, ActionPerformerIdOrNull(ability, command, source))) return;
         NextAction(player.Id, burstContinues);
     }
     // Togashi Hizumi: "after the resolution of an action that bowed a Personality AT HIZUMI'S
@@ -7695,6 +7823,8 @@ public sealed partial class MatchEngine
                     _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && !c.Bowed && AtBattle(c) && Keyword(c, "Shugenja")).Select(c => (string?)c.Id).ToArray(),
                 "own-unbowed-personality-opposed-at-battle" => !Army(1 - playerId, _state.CurrentBattleProvince ?? -1).Any() ? [] :
                     _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && !c.Bowed && AtBattle(c)).Select(c => (string?)c.Id).ToArray(),
+                // Testimony (issue #453, batch 2).
+                "own-unbowed-honorable-personality" => _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && Definition(c).Type == CardType.Personality && !c.Bowed && MatchesTargetStatus(c, TargetStatus.IsHonorable)).Select(c => (string?)c.Id).ToArray(),
                 _ => [null]
             };
             // Unlike every other Performer-based ability (still offered, disabled, with no eligible
@@ -7758,6 +7888,9 @@ public sealed partial class MatchEngine
                     "attachment-in-discard" => AttachCandidatesInDiscard(ability.Attach!, playerId).Select(c => (string?)c.Id).ToArray(),
                     // Seeds of Decay pass (issue #453), batch 1: Requesting Reinforcements' face-up province Personality with the required keyword.
                     "own-personality-in-province-with-keyword" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && c.Zone == Zone.Province && c.FaceUp && HasKeywords(c, ability.RequiredKeywords)).Select(c => (string?)c.Id).ToArray(),
+                    // Seeds of Decay pass (issue #453), batch 2: the two out-of-play categories.
+                    "enemy-face-up-personality-anywhere" => _state.Cards.Values.Where(c => c.OwnerId != playerId && Definition(c).Type == CardType.Personality && (InPlay(c) || c.Zone == Zone.Province && c.FaceUp || c.Zone is Zone.Dead or Zone.DynastyDiscard)).Select(c => (string?)c.Id).ToArray(),
+                    "event-in-enemy-discard" => _state.Cards.Values.Where(c => c.OwnerId != playerId && Definition(c).Type == CardType.Event && c.Zone == Zone.DynastyDiscard).Select(c => (string?)c.Id).ToArray(),
                     _ => inPlay };
                 // Shosuro Hawado's battlefield half also needs its destination (command.Province): one
                 // candidate per battlefield not yet resolved this Battle phase -- ValidateAbility below

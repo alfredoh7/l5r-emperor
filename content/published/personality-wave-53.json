@@ -1,0 +1,204 @@
+{
+  "Profile": "personality-wave-53",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10044",
+      "Name": "Yasuki Baiko",
+      "Type": "Personality",
+      "Clan": "Crab",
+      "GoldCost": 6,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 3,
+      "PersonalHonor": 1,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Favor Political Limited: Discard the Imperial Favor to target a dishonorable Personality. His controller loses 1 Honor.\nPolitical Open, :g2:: Take the Imperial Favor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10044.jpg",
+      "Keywords": [
+        "Courtier",
+        "Crab Clan",
+        "Merchant"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "baiko-shame",
+        "baiko-favor"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10045",
+      "Name": "Yasuki Tsujiken",
+      "Type": "Personality",
+      "Clan": "Crab",
+      "GoldCost": 11,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 5,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: Target a Holding or your Stronghold: Bow or straighten it.\nLimited: Pay 5 Gold: Draw a card.\nLimited: Bow Tsujiken and target a Personality: Dishonor him. His controller loses 1 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10045.jpg",
+      "Keywords": [
+        "Unique",
+        "Courtier",
+        "Crab Clan",
+        "Experienced",
+        "Favored of the Void Dragon",
+        "Merchant",
+        "Oyabun"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "tsujiken-exp-bow",
+        "tsujiken-exp-straighten",
+        "tsujiken-exp-draw",
+        "tsujiken-exp-dishonor"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10050",
+      "Name": "Doji Yuka",
+      "Type": "Personality",
+      "Clan": "Crane",
+      "GoldCost": 5,
+      "GoldProduction": 0,
+      "Force": 1,
+      "Chi": 3,
+      "PersonalHonor": 4,
+      "HonorRequirement": 10,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After Yuka performs a Political action: Give her +3C until it ends.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10050.jpg",
+      "Keywords": [
+        "Courtier",
+        "Crane Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "yuka-political-chi"
+    },
+    {
+      "Id": "oracle-l5r-10051",
+      "Name": "Kakita Yusugi",
+      "Type": "Personality",
+      "Clan": "Crane",
+      "GoldCost": 4,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": 6,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "You may take the Proclaim Reaction to Yusugi entering play even if you have already used the Proclaim ability once this turn.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10051.jpg",
+      "Keywords": [
+        "Duelist",
+        "Crane Clan",
+        "Samurai",
+        "Yojimbo"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "proclaim-ignores-turn-limit"
+    },
+    {
+      "Id": "oracle-l5r-10084",
+      "Name": "Yogo Ugimori",
+      "Type": "Personality",
+      "Clan": "Scorpion",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 4,
+      "PersonalHonor": 2,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After Ugimori enters play from a province, choose a player: He may not take the Proclaim action until your next turn begins.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10084.jpg",
+      "Keywords": [
+        "Air",
+        "Kuroiban",
+        "Scorpion Clan",
+        "Shugenja"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "ugimori-proclaim-lock"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10059",
+      "Name": "Akodo Hotaka",
+      "Type": "Personality",
+      "Clan": "Lion",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 3,
+      "PersonalHonor": 3,
+      "HonorRequirement": 7,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Hotaka has +1PH if any other player is Dragon Clan.\nHotaka may not perform Dark Virtue actions.\nThe amount of Honor you need in order to win an Honor Victory is reduced by Hotaka's Personal Honor minus one.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10059.jpg",
+      "Keywords": [
+        "Lion Clan",
+        "Paragon",
+        "Samurai"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "hotaka-paragon"
+    },
+    {
+      "Id": "oracle-l5r-10080",
+      "Name": "Bayushi Shibata",
+      "Type": "Personality",
+      "Clan": "Scorpion",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 1,
+      "Chi": 4,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Even if Shibata is not at the current battlefield, target an attacking Personality: Shibata draws on his knowledge of the land. Bow the target. Give the current battlefield's province +3 strength if the target is dishonorable.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10080.jpg",
+      "Keywords": [
+        "Unique",
+        "Courtier",
+        "Experienced",
+        "Imperial",
+        "Imperial Explorer",
+        "Resourceful",
+        "Scorpion Clan",
+        "Scout"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "shibata-exp-bow"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

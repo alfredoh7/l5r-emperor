@@ -32,13 +32,20 @@ public sealed partial class MatchEngine
 
     private static bool FocusEffectNeedsChoice(string abilityId) => abilityId is "disreputable-deal-focus" or "crimson-mark-focus" or "hiromis-vassals-focus" or "shamsir-focus"
         // Ceaseless Vigil (Seeds of Decay pass, issue #453, batch 1): "straighten a Personality" -- a mandatory choice among the bowed Personalities in play (SeedsOfDecayBatch1.cs).
-        or "ceaseless-vigil-focus";
+        or "ceaseless-vigil-focus"
+        || abilityId == "fair-warning-focus"; // issue #453, batch 2
+    // Fair Warning (issue #453, batch 2): "if your Personality won it, you may give a Personality -4F" -- any Personality in play, only when the focus card's player's side won.
+    private static bool IsFairWarningFocus(string abilityId) => abilityId == "fair-warning-focus";
+    private List<string> FairWarningCandidates(int playerId) =>
+        _state.PendingDuel?.WinnerId is string winnerId && Card(winnerId).OwnerId == playerId
+            ? _state.Cards.Values.Where(c => InPlay(c) && Definition(c).Type == CardType.Personality).Select(c => c.Id).Order(StringComparer.Ordinal).ToList() : [];
     private static bool IsAttachSelfFocusEffect(string abilityId) => abilityId is "hiromis-vassals-focus" or "shamsir-focus";
 
     private bool HasPoliticalAbility(CardInstance card) =>
         AbilityIdsOf(card).Any(id => AbilityCatalog.All.TryGetValue(id, out var ability) && IsAction(ability) && ActionCarriesKeyword(ability, card, "Political"));
 
     private List<string> FocusChoiceCandidates(int playerId, string abilityId, string focusCardId) => abilityId == "crimson-mark-focus" ? DuelAttachmentCandidates()
+        : IsFairWarningFocus(abilityId) ? FairWarningCandidates(playerId)
         : IsAttachSelfFocusEffect(abilityId) ? AttachWielderCandidates(playerId, focusCardId)
         : IsStraightenFocusEffect(abilityId) ? StraightenFocusCandidates() : DiscardStrategyCandidates(playerId);
 
@@ -72,14 +79,17 @@ public sealed partial class MatchEngine
         var attachSelf = IsAttachSelfFocusEffect(abilityId);
         if (candidates.Count == 0)
         {
-            Emit("focusEffectNothing", attachments ? $"{Definition(focus).Name}: no Personality involved in the duel has an attachment."
+            Emit("focusEffectNothing", IsFairWarningFocus(abilityId) ? $"{Definition(focus).Name}: {Player(owner).Name}'s Personality did not win the duel."
+                : attachments ? $"{Definition(focus).Name}: no Personality involved in the duel has an attachment."
                 : IsStraightenFocusEffect(abilityId) ? $"{Definition(focus).Name}: no Personality in play is bowed."
                 : attachSelf ? $"{Definition(focus).Name}: {Player(owner).Name} controls no Personality it may attach to."
                 : $"{Definition(focus).Name}: {Player(owner).Name} has no non-Unique Strategy with a Political ability in the discard pile.", owner, focusCardId);
             return false;
         }
         _state.PendingFocusChoice = new PendingFocusChoice { Index = index, FocusCardId = focusCardId, PlayerId = owner, Candidates = candidates, AbilityId = abilityId };
-        _state.PendingChoice = new("focusEffectChoice", owner, focusCardId, attachments
+        _state.PendingChoice = new("focusEffectChoice", owner, focusCardId, IsFairWarningFocus(abilityId)
+            ? $"{Definition(focus).Name} (Focus Effect): {Player(owner).Name}, you may give a Personality -4F."
+            : attachments
             ? $"{Definition(focus).Name} (Focus Effect): {Player(owner).Name}, you may destroy an attachment on a Personality involved in this duel."
             : IsStraightenFocusEffect(abilityId) ? $"{Definition(focus).Name} (Focus Effect): {Player(owner).Name}, straighten a Personality."
             : attachSelf ? $"{Definition(focus).Name} (Focus Effect): {Player(owner).Name}, you may attach this card to one of your Personalities, ignoring Gold cost."
@@ -106,7 +116,8 @@ public sealed partial class MatchEngine
             Require(command.TargetId is not null && pending.Candidates.Contains(command.TargetId),
                 destroys ? "Choose one of the offered attachments, or decline." : attachSelf ? "Choose one of the offered Personalities, or decline." : "Choose one of the offered Strategies, or decline.");
             var taken = Card(command.TargetId);
-            if (destroys) { DestroyAttachment(taken); Emit("focusEffectDestroyed", $"{Player(pending.PlayerId).Name} destroyed {Definition(taken).Name} ({Definition(focus).Name}).", pending.PlayerId, taken.Id); }
+            if (IsFairWarningFocus(pending.AbilityId)) { ApplyModifier(taken, focus.Id, pending.AbilityId, "Force", -4); Emit("focusEffectPenalty", $"{Player(pending.PlayerId).Name} gave {Definition(taken).Name} -4F ({Definition(focus).Name}).", pending.PlayerId, taken.Id); }
+            else if (destroys) { DestroyAttachment(taken); Emit("focusEffectDestroyed", $"{Player(pending.PlayerId).Name} destroyed {Definition(taken).Name} ({Definition(focus).Name}).", pending.PlayerId, taken.Id); }
             else if (IsStraightenFocusEffect(pending.AbilityId)) { Straighten(taken); Emit("focusEffectStraightened", $"{Player(pending.PlayerId).Name} straightened {Definition(taken).Name} ({Definition(focus).Name}).", pending.PlayerId, taken.Id); }
             else if (attachSelf)
             {
@@ -139,7 +150,7 @@ public sealed partial class MatchEngine
     {
         if (_state.PendingFocusChoice is not { } p || p.PlayerId != playerId) yield break;
         foreach (var id in p.Candidates)
-            yield return new("chooseFocusEffect", p.AbilityId == "crimson-mark-focus" ? $"Destroy {Definition(Card(id)).Name}"
+            yield return new("chooseFocusEffect", IsFairWarningFocus(p.AbilityId) ? $"Give {Definition(Card(id)).Name} -4F" : p.AbilityId == "crimson-mark-focus" ? $"Destroy {Definition(Card(id)).Name}"
                 : IsAttachSelfFocusEffect(p.AbilityId) ? $"Attach to {Definition(Card(id)).Name}"
                 : IsStraightenFocusEffect(p.AbilityId) ? $"Straighten {Definition(Card(id)).Name}" : $"Put {Definition(Card(id)).Name} into your hand", true, null,
                 new GameCommand("chooseFocusEffect", playerId, _state.Version, CardId: p.FocusCardId, TargetId: id), id);

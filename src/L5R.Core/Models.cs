@@ -289,6 +289,11 @@ public sealed class CardInstance
     public int AssignBowedTurn { get; set; } = -1;
     // Megumi's Guidance: the turn through which this Personality's destruction from other players' cards' effects is negated (SeedsOfDecayBatch1.cs).
     public int DestructionShieldTurn { get; set; } = -1;
+    // Seeds of Decay pass (issue #453), batch 2. Sentinel Spirit ("if it was opposed this turn"): the last turn this card stood in a battle whose two armies opposed each other
+    // (MarkOpposed, at the battle's resolution); the AssignedToAttackTurn convention. Dragon Tattoo - exp ("who has not performed an action from a Dragon Tattoo this game"):
+    // the titles of the cards whose actions this Personality performed, kept for the game (never reset with the card: it is the same card).
+    public int OpposedTurn { get; set; } = -1;
+    public List<string> PerformedActionFromTitles { get; set; } = [];
 }
 
 public sealed class ProvinceState
@@ -350,6 +355,8 @@ public sealed class PlayerState
     public List<string> FateDeck { get; set; } = [];
     public List<string> Hand { get; set; } = [];
     public List<ProvinceState> Provinces { get; set; } = [];
+    // Brotherhood Schism (issue #453, batch 2): the last turn this player put a Ring into play (its own recruit action), the AssignedToAttackTurn convention.
+    public int RingPutIntoPlayTurn { get; set; } = -1;
 }
 
 public sealed record PendingChoice(string Type, int PlayerId, string? CardId, string Prompt, int? ActingPlayerId = null);
@@ -907,6 +914,27 @@ public sealed class MatchState
     public List<PendingGrapplingBow> PendingGrapplingBows { get; set; } = [];
     // Advanced Intelligence: per player, how many actions from a Recon Strategy that player has taken in the current battle (reset when a battle is selected).
     public int[] ReconStrategyActionsThisBattle { get; set; } = new int[2];
+    // Seeds of Decay pass (issue #453), batch 2 (SeedsOfDecayBatch2.cs). Each record expires by comparison (a turn number, a phase instance, a player's turn count), never by a sweep.
+    // Province strength for the turn (Incriminating Testimony, Bayushi Shibata - exp, Imperial Protection's standing rule) -- read by EffectiveProvinceStrength beside the permanent Strength.
+    public List<ProvinceStrengthEffect> ProvinceStrengthEffects { get; set; } = [];
+    // "After the next time this turn he is assigned to attack [or is destroyed]" (Imperial Protection, Fair Warning): fired from Assign() and MarkDead.
+    public List<AssignmentWatch> AssignmentWatches { get; set; } = [];
+    // Sentinel Spirit: judged when the next Dynasty Phase begins (SetPhase).
+    public List<SentinelWatch> SentinelWatches { get; set; } = [];
+    // Urgency: "each player may only take two more non-Reaction actions this phase" -- ForcedPass's own shape, counted down by Apply().
+    public List<ActionAllowance> ActionAllowances { get; set; } = [];
+    // Yogo Ugimori: "he may not take the Proclaim Reaction until your next turn begins".
+    public List<ProclaimLock> ProclaimLocks { get; set; } = [];
+    // Turning the Story: non-null exactly while a "proclaimNegateReaction" PendingChoice is open (the Proclaim it holds resolves when the window closes).
+    public HeldProclaim? HeldProclaim { get; set; }
+    // Ingenuity: "draw an additional card during your next End Phase", per player, drawn and reset by EndTurn.
+    public int[] ExtraEndPhaseDraws { get; set; } = new int[2];
+    // Yogo Ugimori ("after Ugimori enters play from a province"): the card a province recruit (Purchase, RecruitReserve) last brought into play.
+    public string? LastProvinceEntryCardId { get; set; }
+    // An Insult Answered ("an action ... which caused you an Honor loss"): the players the currently-resolving action cost Honor, snapshotted into LastResolvedAction.HonorLosers.
+    public List<int> CurrentActionHonorLosers { get; set; } = [];
+    // Brotherhood Schism: the turn in which "Rings will not enter play if their owner has already put a Ring into play this turn" stands.
+    public int RingSchismTurn { get; set; } = -1;
 }
 
 /// <summary>A standing redirect (Seeds of Decay, issue #453): Kind is a StandingRedirectKinds value, OwnerId the player whose cards it protects, ToCardId the card the action
@@ -933,6 +961,9 @@ public sealed class ResolvedActionFacts
     public int PlayerId { get; set; }
     public string? SourceId { get; set; }
     public List<AffectedCard> Affected { get; set; } = [];
+    // Seeds of Decay pass (issue #453), batch 2: the Personality who performed the action (the named performer, or the source resolved to its wielder), and the players it cost Honor.
+    public string? PerformerId { get; set; }
+    public List<int> HonorLosers { get; set; } = [];
 }
 
 // DeckPosition ("Top"/"Bottom") is the acting player's own upfront choice of where a card goes in

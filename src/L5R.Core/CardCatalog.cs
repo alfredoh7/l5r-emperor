@@ -375,7 +375,12 @@ public static class CardCatalog
             new("training-honor-gain-negator", "Training Honor-gain negator", CardType.Personality, "Unaligned", GoldCost:3, Force:2, Chi:2, PersonalHonor:1, Abilities:["training-negate-honor-gain"], Text:"Synthetic reaction fixture: before another player's opponent-payment action resolves, negate its Honor gain only. Never included in a playable deck."),
             new("training-opponent-payment-source", "Training opponent payment source", CardType.Personality, "Unaligned", GoldCost:3, Force:2, Chi:2, PersonalHonor:1, Abilities:["training-opponent-payment"], Text:"Synthetic opponent-payment fixture: an Open action that costs zero or more Gold, after which the opposing player pays zero or more Gold and each player gains Honor equal to what the other paid. Never included in a playable deck."),
             // Action-effect tracking (issue #437): a Reaction on the after-action-resolved window (ActionEffectTracking.cs).
-            new("training-after-action-watcher", "Training after-action watcher", CardType.Strategy, GoldCost:0, Abilities:["training-after-action-resolved-gain"], Text:"Synthetic action-effect-tracking fixture: after the resolution of an action that destroyed one of your Personalities, gain 3 Honor. Never included in a playable deck.")
+            new("training-after-action-watcher", "Training after-action watcher", CardType.Strategy, GoldCost:0, Abilities:["training-after-action-resolved-gain"], Text:"Synthetic action-effect-tracking fixture: after the resolution of an action that destroyed one of your Personalities, gain 3 Honor. Never included in a playable deck."),
+            // Seeds of Decay pass (issue #453), batch 2: keyword performers the batch's Strategies name, and a Dark Virtue action a Personality performs (Akodo Hotaka's ban).
+            new("training-courtier-personality", "Training courtier", CardType.Personality, "Unaligned", GoldCost:3, Force:2, Chi:2, PersonalHonor:1, Keywords:["Courtier"], Text:"Synthetic keyword fixture: a Courtier. Never included in a playable deck."),
+            new("training-spirit-personality", "Training spirit", CardType.Personality, "Unaligned", GoldCost:3, Force:2, Chi:2, PersonalHonor:1, Keywords:["Spirit"], Text:"Synthetic keyword fixture: a Spirit. Never included in a playable deck."),
+            new("training-henshin-personality", "Training henshin", CardType.Personality, "Unaligned", GoldCost:3, Force:2, Chi:2, PersonalHonor:1, Keywords:["Henshin","Monk"], Text:"Synthetic keyword fixture: a Henshin. Never included in a playable deck."),
+            new("training-dark-virtue-performed", "Training performed Dark Virtue", CardType.Strategy, GoldCost:0, Keywords:["Dark Virtue"], Abilities:["training-performed-bow"], Text:"Synthetic Hotaka fixture: a Dark Virtue Strategy whose Open action a chosen unbowed Personality performs (bow a target Personality). Never included in a playable deck.")
         ];
         // Deliberately does NOT concat PublishedContent.TestSnapshot.Cards: that frozen scenario only
         // pins which ids make up the test suite's Lion/Crane decks, not a second copy of their
@@ -550,6 +555,9 @@ public static class CardCatalog
             .Concat(PublishedContent.StrategyWave47.Cards)
             .Concat(PublishedContent.StrongholdWave12.Cards)
             .Concat(PublishedContent.CelestialWave5.Cards)
+            .Concat(PublishedContent.StrategyWave50.Cards)
+            .Concat(PublishedContent.PersonalityWave53.Cards)
+            .Concat(PublishedContent.FollowerWave24.Cards)
             .ToDictionary(c => c.Id, StringComparer.Ordinal);
     }
 }

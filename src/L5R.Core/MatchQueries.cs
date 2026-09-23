@@ -153,7 +153,8 @@ public sealed partial class MatchEngine
                 if(pending.Type=="proclaim")
                 {
                     var honor=Definition(Card(pending.CardId)).PersonalHonor;
-                    Add("proclaim",$"Proclaim · gain {honor} Honor",Command("proclaim"),player.ProclaimUsedTurn==_state.TurnNumber?"Already used Proclaim this turn.":null,pending.CardId);
+                    // Kakita Yusugi / Yogo Ugimori (issue #453, batch 2): the limit he ignores, and the lock (ProclaimRejection).
+                    Add("proclaim",$"Proclaim · gain {honor} Honor",Command("proclaim"),ProclaimRejection(player,Definition(Card(pending.CardId))),pending.CardId);
                 }
                 var enteringCard=Card(pending.CardId);
                 // Every "own enters play" Reaction the card prints (issue #389: Horume's gain AND lose; before, only the first was listed). One that shares a
@@ -283,6 +284,12 @@ public sealed partial class MatchEngine
         {
             // After an action's resolution (issue #437): this player's Reactions that name it, then the pass -- same shape as afterResolutionReaction above.
             result.AddRange(AbilityActions(playerId));
+            Add("declineReaction","Pass reaction",Command("declineReaction"));
+        }
+        else if(_state.PendingChoice is { Type:"proclaimNegateReaction" })
+        {
+            // Turning the Story (issue #453, batch 2): the one reacting player's "before a Proclaim resolves" Reactions from hand, then the pass.
+            result.AddRange(BeforeProclaimReactionOptions(playerId));
             Add("declineReaction","Pass reaction",Command("declineReaction"));
         }
         else if(_state.PendingChoice is { Type:"battleRecruit" })
@@ -536,6 +543,7 @@ public sealed partial class MatchEngine
         if(_state.PendingChoice is null && _state.Phase is Phase.Action or Phase.Battle) result.AddRange(AbilityActions(playerId));
         Add("concede","Concede",Command("concede"));
         // Unfortunate Hesitation (issue #338): what a player who owes a pass cannot do at this opportunity is listed disabled.
-        return ApplyForcedPassToOptions(playerId,result);
+        // Urgency (issue #453, batch 2): past the allowance, every non-Reaction action is listed disabled too.
+        return ApplyActionAllowanceToOptions(playerId,ApplyForcedPassToOptions(playerId,result));
     }
 }
