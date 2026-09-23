@@ -1,0 +1,28 @@
+{
+  "Profile": "stronghold-wave-14",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-8187",
+      "Name": "The Ki-Rin's Path",
+      "Type": "Stronghold",
+      "Clan": "Unicorn",
+      "GoldCost": 0,
+      "GoldProduction": 5,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 7,
+      "StartingHonor": 4,
+      "Text": "Your Tacticians have the ability, \"Tactical Open: Give this Personality +1F and Cavalry.\"",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8187.jpg",
+      "Keywords": [],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "ki-rins-path-grant"
+    }
+  ],
+  "Decks": []
+}

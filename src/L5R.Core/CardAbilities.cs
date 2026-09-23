@@ -2776,6 +2776,40 @@ public static class AbilityCatalog
         // outcome, combined (ApplyDuelOutcome, Dueling.cs).
         ["reckless-duel"] = new("Battle", "Choose your performing unbowed Personality and target an enemy Personality: Your Personality duels the target. Bow the duel's loser. Move him home",
             "enemy-personality", Performer: "own-unbowed-personality", IssuesDuel: true),
+        // Embers of War pass (issue #460, batch 5). Inescapable Snare (oracle-l5r-3738): "Battle: Bow this card and target an enemy card: Bow
+        // it. If this Shugenja is Earth, gain 2 Honor." A bare bow-of-source-and-target, plus Rage of the Spirits' own wielder-keyword Honor
+        // gain shape (the "if this Shugenja is X, gain N Honor" clause read off source.AttachedTo).
+        ["snare-bow"] = new("Battle", "Bow this card and target an enemy card: Bow it. If this Shugenja is Earth, gain 2 Honor", "enemy-card", Costs: ActionCost.BowSource),
+        // Incite the Phantoms (oracle-l5r-3732): "While this Shugenja is Earth, your Spirits contribute Force to their army even while bowed" is
+        // an EliteEffect-shape live conditional (EmbersOfWarBatch5.cs, InciteThePhantomsActive), scoped to every Spirit the controller owns, not
+        // just the wielder -- broader than Bo of Water's own single-card AttachGrantsEliteEffectWhileWielderHas, so it is its own check rather than
+        // reusing that field. "Battle: Even if this unit is not at the current battlefield, bow your performing Spirit and target an enemy card:
+        // Bow it" is Stone-Hewed Shrine's own Absent/at-any-location performer shape (CardAbilities.cs, "stone-hewed-shrine-strength").
+        ["incite-phantoms-bow"] = new("Battle", "Even if this unit is not at the current battlefield, bow your performing Spirit and target an enemy card: Bow it", "enemy-card",
+            Performer: "own-unbowed-personality-with-keyword-at-any-location", RequiredKeywords: ["Spirit"], Costs: ActionCost.BowPerformer, Absent: true),
+        // Sudden Guardian (oracle-l5r-7612): "Battle: Even if this unit is not at the current battlefield, bow this Shugenja, choose your
+        // performing Spirit, and target an enemy Personality: Move him home. If this Shugenja is Water, gain 1 Honor." The cost bows the WIELDER
+        // (ActionCost.BowWielder), distinct from the chosen Spirit performer; the move is the generic MoveSpec (Target, Home) primitive
+        // (MoveDestinations.cs); the Honor gain reuses Rage of the Spirits' own wielder-keyword shape.
+        ["sudden-guardian-move"] = new("Battle", "Even if this unit is not at the current battlefield, bow this Shugenja, choose your performing Spirit, and target an enemy Personality: Move him home. If this Shugenja is Water, gain 1 Honor", "enemy-personality",
+            Performer: "own-unbowed-personality-with-keyword-at-any-location", RequiredKeywords: ["Spirit"], Costs: ActionCost.BowWielder, Absent: true, Move: new(MoveSpec.Target, MoveSpec.Home), MovesToBattle: false),
+        // The Swell of Strength (oracle-l5r-8366): "As a Focus Effect: After this duel ends, you may attach this card to one of your Water
+        // Shugenja, ignoring Gold cost" is Hiromi's Vassals/Shamsir's own attach-self Focus Effect shape (FocusEffectChoice.cs), narrowed to
+        // Water wielders via the plain AttachRequiresKeyword field (no new candidate filter needed -- AttachWielderCandidates already calls
+        // AttachmentLegalTarget, which already reads it). "This Shugenja has +2F" is Scouring Flood's own Spell-Effect-keyed static Force bonus
+        // shape (MatchEngine.PersonalityForce). "Battle: Bow this card and target an enemy Personality or Follower: Reduce its Force to 0" is
+        // Kaido's own delta-to-value Force override ("kaido-force-zero").
+        ["swell-of-strength-focus"] = new("FocusEffect", "As a Focus Effect: After this duel ends, you may attach this card to one of your Water Shugenja, ignoring Gold cost", "none"),
+        ["swell-of-strength-attack"] = new("Battle", "Bow this card and target an enemy Personality or Follower: Reduce its Force to 0", "enemy-force", Costs: ActionCost.BowSource),
+        // The Distant Reaches (oracle-l5r-8030, a Region): "Open, bow: Bow one or two target attachments." The Red Hunger's own "one or two
+        // attachments" Slots shape (TargetSlots.cs), bowing instead of destroying the chosen slot cards.
+        ["distant-reaches-bow"] = new("Open", "Bow this card: Bow one or two target attachments", "slots",
+            Slots: [new("target", "any-attachment", "One or two attachments", 1, 2)], Costs: ActionCost.BowSource),
+        // The Ki-Rin's Path (oracle-l5r-8187, a Stronghold): "Your Tacticians have the ability, 'Tactical Open: Give this Personality +1F and
+        // Cavalry.'" The Towers of the Yogo's own controller-wide static ability grant shape (HonorAndTreacheryPass.cs/EmbersOfWarBatch5.cs),
+        // scoped to the Tactician keyword instead of a Clan; the granted ability itself is a bare self-boost, the same shape "spirit-of-the-
+        // berserker"'s own permanent +2F grant is.
+        ["ki-rins-path-boost"] = new("Open", "Tactical Open: Give this Personality +1F and Cavalry", "none", ActionKeywords: ["Tactical"]),
     });
 }
 
@@ -7938,6 +7972,20 @@ public sealed partial class MatchEngine
             case "stuck-in-rokugan-discard": target!.Zone = Zone.DynastyDiscard; target!.FaceUp = true; Emit("celestialDiscarded", $"{Definition(target!).Name} was discarded.", target!.OwnerId, target!.Id); break;
             case "thick-marsh-entry": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;
             case "mountain-straighten": foreach (var chosen in PerformingSlotCards(command, ability).ToArray()) StraightenUnit(chosen); break;
+            // Embers of War pass (issue #460, batch 5).
+            case "snare-bow":
+                if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
+                // Rage of the Spirits' own wielder-keyword Honor gain shape ("if this Shugenja is Earth, gain N Honor"), read off source.AttachedTo.
+                if (source is { Zone: Zone.Attached, AttachedTo: { } snareHost } && Keyword(Card(snareHost), "Earth")) GainHonor(player.Id, 2, "Inescapable Snare", source);
+                break;
+            case "incite-phantoms-bow": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;
+            case "sudden-guardian-move":
+                ExecuteMove(command, ability, source, target);
+                if (source is { Zone: Zone.Attached, AttachedTo: { } guardianHost } && Keyword(Card(guardianHost), "Water")) GainHonor(player.Id, 1, "Sudden Guardian", source);
+                break;
+            case "swell-of-strength-attack": ApplyModifier(target!, source!.Id, id, "Force", -CardForce(target!)); break;
+            case "distant-reaches-bow": foreach (var slotAttachment in SlotCards(command, "target").ToArray()) slotAttachment.Bowed = true; break;
+            case "ki-rins-path-boost": AddPermanentModifier(source!, source!.Id, id, "Force", 1); GrantKeyword(source!, "Cavalry", id, GrantDuration.Permanent); break;
             default:
                 // Any ability with an AttachSpec (Moto Jun-Ni, Fading Shadows, Foothills Keep and the training shapes) needs no case of its own: the Gold was
                 // paid by PayForAbility, so the card now leaves its place and enters play attached. An entering-play window ends the action here.

@@ -35,13 +35,14 @@ public sealed partial class MatchEngine
         or "ceaseless-vigil-focus"
         or "sandalwood-incense-focus" // issue #453, batch 5
         or "cycle-of-vengeance-focus" // issue #460, batch 4
+        or "swell-of-strength-focus" // issue #460, batch 5: Hiromi's Vassals/Shamsir's own attach-self shape, narrowed to Water Shugenja by AttachRequiresKeyword.
         || abilityId == "fair-warning-focus"; // issue #453, batch 2
     // Fair Warning (issue #453, batch 2): "if your Personality won it, you may give a Personality -4F" -- any Personality in play, only when the focus card's player's side won.
     private static bool IsFairWarningFocus(string abilityId) => abilityId == "fair-warning-focus";
     private List<string> FairWarningCandidates(int playerId) =>
         _state.PendingDuel?.WinnerId is string winnerId && Card(winnerId).OwnerId == playerId
             ? _state.Cards.Values.Where(c => InPlay(c) && Definition(c).Type == CardType.Personality).Select(c => c.Id).Order(StringComparer.Ordinal).ToList() : [];
-    private static bool IsAttachSelfFocusEffect(string abilityId) => abilityId is "hiromis-vassals-focus" or "shamsir-focus";
+    private static bool IsAttachSelfFocusEffect(string abilityId) => abilityId is "hiromis-vassals-focus" or "shamsir-focus" or "swell-of-strength-focus";
     // The Cycle of Vengeance (oracle-l5r-8004, issue #460 batch 4): "After this duel ends, if your Personality lost it, you may give one of your
     // Personalities two +1F Revenge tokens" -- Fair Warning's own shape (candidates = own Personalities in play), asked on a LOSS instead of a win: the
     // focus player's Personality is one of the duel's LoserIds, not its WinnerId.

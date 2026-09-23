@@ -2461,4 +2461,10 @@ public static class PublishedContent
     public static PublishedSnapshot FollowerWave27 { get; } = Load("L5R.Published.FollowerWave27.json", "follower-wave-27", requireDecks: false);
     /// <summary>Strategy wave 53 (Embers of War pass, issue #460, batch 4): Sheathing the Sword, Tactical Trap, Unstoppable Strike, You Are Unworthy, The Cycle of Vengeance.</summary>
     public static PublishedSnapshot StrategyWave53 { get; } = Load("L5R.Published.StrategyWave53.json", "strategy-wave-53", requireDecks: false);
+    /// <summary>Spell wave 20 (Embers of War pass, issue #460, batch 5): Inescapable Snare, Incite the Phantoms, Sudden Guardian, The Swell of Strength.</summary>
+    public static PublishedSnapshot SpellWave20 { get; } = Load("L5R.Published.SpellWave20.json", "spell-wave-20", requireDecks: false);
+    /// <summary>Stronghold wave 14 (issue #460, batch 5): The Ki-Rin's Path.</summary>
+    public static PublishedSnapshot StrongholdWave14 { get; } = Load("L5R.Published.StrongholdWave14.json", "stronghold-wave-14", requireDecks: false);
+    /// <summary>Region wave 7 (issue #460, batch 5): The Distant Reaches.</summary>
+    public static PublishedSnapshot RegionWave7 { get; } = Load("L5R.Published.RegionWave7.json", "region-wave-7", requireDecks: false);
 }
