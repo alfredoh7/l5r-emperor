@@ -1,0 +1,9 @@
+{
+  "lane": "rules",
+  "summary": "holding-wave-1's four Holdings (Archery Range, Slanderer, Temple of Hotei, Tranquil Garden) print 'Bow this card: Produce N Gold' but carried GoldProduction 0 and wire production no other way, so Producers() skipped them and they could never be bowed for Gold. The four printed values are restored. Interim fix straight to main: #434 carries the same correction, but main is wrong until that lands.",
+  "validation": "Windows local: Core 1054 (including the new holding-production suite), AI 74, server 8, transport 12, collaboration 45, content 134, Meshy 6 pass; zero build warnings. Both new checks fail on the unfixed data (expected 2, got 0) and pass with it.",
+  "remaining": "None; ready for review. The same data fix and a sibling regression also ride on #434.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/455",
+  "branch": "claude/455-holdings-gold-production",
+  "updated": "2026-09-23T13:37:21.487074+00:00"
+}
