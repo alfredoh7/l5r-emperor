@@ -90,6 +90,11 @@ public partial class Main : Node
         _table = new TableArtStage { ReviewMode = false }; AddChild(_table);
         BuildShell();
         InitializeFrontend();
+        if (_capturePath is not null && _captureMode.StartsWith("published-interactions-", StringComparison.Ordinal))
+        {
+            var review = new InteractionReview(this, _captureMode, _capturePath);
+            _capturePath = null; AddChild(review); return;
+        }
         if(OS.GetCmdlineUserArgs().Contains("--duel-match-review")){StartMatchDuelCapture();return;}
         if(OS.GetCmdlineUserArgs().Contains("--duel-transition-review")){StartTransitionReview();return;}
         if (_capturePath is null || _captureMode.StartsWith("menu", StringComparison.Ordinal)) return;
@@ -392,6 +397,12 @@ public partial class Main : Node
             _preferences.Fullscreen = IsFullscreen;
             if (_capturePath is null) _preferences.Save();
             if (MenuVisible && _titleMenu!.Page == "options") _titleMenu.ShowOptions();
+            GetViewport().SetInputAsHandled();
+        }
+        else if (_seatHandoff is not null && IsInstanceValid(_seatHandoff))
+        {
+            // A modal cancellation must not also open the background menu.
+            if (key.Keycode == Key.Escape) _seatHandoff.QueueFree();
             GetViewport().SetInputAsHandled();
         }
         else if (MenuVisible || DuelDemoOpen || PracticeVisible || _transitionReview || MatchDuelOpen) return;

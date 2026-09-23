@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Fix the offered hand-discard count and selector to use the authoritative modified limit and offered command. Add regressions for limits 7/8/10, both seats, invalid selections, stale versions and privacy. Seat-handoff privacy fix and prepared reviews are also implemented locally and undergoing final validation.",
-  "validation": "Core regression reproduced two failures before query fix and passes 4/4 after. Native selector regression reproduced one-card acceptance for a two-card requirement before UI fix. Full tools/check.sh --skip-client passed. Client compilation 0 warnings/errors. Native 1920x1080 privacy and exact-discard checks passed; smaller-window and delivery validation ongoing.",
-  "remaining": "Complete final native evidence, review launchers, compatibility check and Windows delivery. Mendon review required; no merge authorized.",
+  "summary": "Fix modified hand-limit discard offers/selection and cancelled local handoff privacy. Include prepared hand-limit/privacy launchers plus reproducible core/native regressions. Existing combined preview and Mendon branches are unchanged.",
+  "validation": "Full tools/check.sh --skip-client passed; focused core suite 4/4. Native checks passed at 1920x1080 normal and 1280x800 reduced motion, both seats, close/Escape/Cancel/cleanup, duplicate readiness, replacement session, exact discard results. Mac manual 1440x900 launcher, discard 11 to 10, Escape and window-close verified. Client build 0 warnings/errors. Three-way application to isolated #434 source 659e015f and client build passed (one pre-existing BattleTracker unused-field warning). Packaging tests 9/9.",
+  "remaining": "Publish/validate Windows review archive and notify Mendon. Human UI/rules acceptance and native Windows graphical playtest remain open. No merge authorized.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/463",
   "branch": "codex/463-interaction-fixes",
-  "updated": "2026-09-23T23:19:05.284141+00:00"
+  "updated": "2026-09-23T23:24:01.881119+00:00"
 }
