@@ -93,7 +93,7 @@ internal static class BattleAbsentMovesTests
     private static void MarkedInventoryPinned()
     {
         var marked = string.Join(",", AbilityCatalog.All.Where(p => p.Value.MovesToBattle).Select(p => p.Key).OrderBy(k => k, StringComparer.Ordinal));
-        Eq(marked, "charge-into-danger-move,chukage-move,dislodge-the-foe,earth-flows-move,hawado-move-battlefield,heijin-move,houken-exp-straighten,intervening-spirit-move,irezu-move,mai-move-force-penalty,michi-move,natures-wrath-move,requesting-reinforcements-recruit,return-to-action-move,rikyou-move,sanctuary-of-the-waves-move,skipping-the-puddle-move,sound-of-thunder-move,takasho-move,training-move-current,training-move-to-battle,trusting-instinct-move,your-clan-needs-you");
+        Eq(marked, "charge-into-danger-move,chukage-move,dislodge-the-foe,earth-flows-move,hawado-move-battlefield,heijin-move,help-shadows-move,houken-exp-straighten,intervening-spirit-move,irezu-move,mai-move-force-penalty,michi-move,moving-unmoving-approach,natures-wrath-move,pronouncement-guilt-move,requesting-reinforcements-recruit,return-to-action-move,rikyou-move,sanctuary-of-the-waves-move,skipping-the-puddle-move,sound-of-thunder-move,takasho-move,training-move-current,training-move-to-battle,trusting-instinct-move,your-clan-needs-you");
         foreach (var (id, ability) in AbilityCatalog.All.Where(p => p.Value.MovesToBattle))
             Check(ability.Timing is "Battle" or "BattleOrOpen", $"{id}: a move to the battle is a Battle action");
     }
@@ -173,6 +173,11 @@ internal static class BattleAbsentMovesTests
         if (ability == "heijin-move") maiden.GrantedKeywords.Add(new("Courtier", "test-fixture", GrantDuration.Permanent));
         // Bayushi Irezu (issue #458): his own target is "another target Scorpion Clan Personality you control" -- neither fixture already at home carries the keyword.
         if (ability == "irezu-move") Add(s, "training-scorpion-veteran", actor, Zone.Home);
+        // Embers of War pass, batch 3 (issue #460): these three move-to-battle abilities each name a keyword-gated Performer (Ninja/Kensai/Magistrate) --
+        // neither fixture already at home carries it, so the "maiden" fixture is granted whichever one the ability needs.
+        if (ability == "help-shadows-move") maiden.GrantedKeywords.Add(new("Ninja", "test-fixture", GrantDuration.Permanent));
+        if (ability == "moving-unmoving-approach") maiden.GrantedKeywords.Add(new("Kensai", "test-fixture", GrantDuration.Permanent));
+        if (ability == "pronouncement-guilt-move") maiden.GrantedKeywords.Add(new("Magistrate", "test-fixture", GrantDuration.Permanent));
         CardInstance card;
         if (definition.Type == CardType.Personality) card = Add(s, definition.Id, actor, Zone.Home, bowed: ability is "hawado-move-battlefield" or "houken-exp-straighten");
         else if (definition.Type == CardType.Spell) card = Add(s, definition.Id, actor, Zone.Attached, parent: host.Id);

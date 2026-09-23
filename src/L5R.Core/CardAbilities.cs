@@ -2584,6 +2584,79 @@ public static class AbilityCatalog
         // primitive (AttachAction.cs) with a fixed 2-Gold discount, attaching to the source itself.
         ["haruto-attach"] = new("Battle", "Target a Follower in your discard pile: Attach it to Haruto, paying 2 less Gold", "attachment-in-discard",
             Cost: GoldCostRule.AttachCost(-2, 0), Attach: new(AttachSource.Target, AttachPile.Own, AttachWielder.Source, [CardType.Follower])),
+
+        // Embers of War pass, batch 3 (issue #460; helpers in EmbersOfWarBatch3.cs).
+        // A Weak Poison (oracle-l5r-99): "Open: Target a Personality: Reduce his Force to 0. Lose 2 Honor." -- Matsu Kaido's own delta-to-zero shape
+        // (kaido-force-zero), any Personality rather than enemy-only, and an unconditional flat Honor cost (ActionCost.LoseHonor).
+        ["weak-poison-force-zero"] = new("Open", "Target a Personality: Reduce his Force to 0. Lose 2 Honor", "personality", Costs: ActionCost.LoseHonor(2)),
+        // Astonishing Accusation (oracle-l5r-637): "Political Reaction: After another player's Political action targets your Personality, negate its
+        // effects." -- Yoritomo Sakuma's own printed shape (sakuma-political-negate/taishuu-political-negate), reused verbatim.
+        // "Political Limited: Target a Kolat, Ninja, Shadowlands, or dishonorable Personality. His controller loses Honor equal to his printed Personal
+        // Honor." -- the target is restricted outright (TargetMustBe), so the Honor loss (Winds of Dismissal's own shape) always applies once a legal
+        // target is chosen, unconditionally, rather than being read back through EffectConditionMet/IfTarget.
+        ["accusation-negate"] = new("Reaction", "Political Reaction: After another player's Political action targets your Personality, negate its effects",
+            "none", Trigger: ReactionTriggers.TargetedByAction, ActionKeywords: ["Political"]),
+        ["accusation-honor-loss"] = new("Limited", "Political Limited: Target a Kolat, Ninja, Shadowlands, or dishonorable Personality: His controller loses Honor equal to his printed Personal Honor",
+            "personality", TargetMustBe: TargetStatus.DishonorableKolatNinjaOrShadowlands, ActionKeywords: ["Political"]),
+        // Deadly Discipline (oracle-l5r-1880): "Fire Kiho Limited: Target your performing unbowed Monk to give him two +1F Fire tokens." -- the
+        // performer-is-the-target shape (Suwabe's own "own-personality-with-keyword" Performer, Target "none"), unbowed and at any location since
+        // Limited timing has no battlefield presence rule of its own.
+        ["deadly-discipline-tokens"] = new("Limited", "Fire Kiho Limited: Target your performing unbowed Monk: Give him two +1F Fire tokens", "none",
+            Performer: "own-unbowed-personality-with-keyword-at-any-location", RequiredKeywords: ["Monk"], ActionKeywords: ["Fire", "Kiho"]),
+        // "Fire Kiho Battle: Target your performing unbowed Monk to bow a target enemy card without attachments. Destroy it if your Monk has any Fire
+        // tokens." -- an ordinary Battle-timed unbowed Monk performer (Volcano Tattoo's own shape) plus masumi-bow's own "enemy card without
+        // attachments" Target category; the Fire-token-conditional destroy is read in its own execution case (HasToken, the same helper Monastery of
+        // New Thought's own Fire-attack performer category already reads).
+        ["deadly-discipline-bow"] = new("Battle", "Fire Kiho Battle: Target your performing unbowed Monk: Bow a target enemy card without attachments. Destroy it if your Monk has any Fire tokens",
+            "enemy-card-without-attachments", Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeywords: ["Monk"], ActionKeywords: ["Fire", "Kiho"]),
+        // Exploited Advantage (oracle-l5r-2413): "Battle: Choose your performing unbowed Paragon and target an enemy Personality: Move him home. If he
+        // moved, bow him and negate his (future) movement. Lose 2 Honor." -- Strength of the Tsunami's own movement-negation primitive
+        // (MovementLocks.cs), applied only when the move actually happened (the same "If he moved" gate Mitsushen/The Earth Flows already read off
+        // ExecuteMove's own return value).
+        ["exploited-advantage-move"] = new("Battle", "Choose your performing unbowed Paragon and target an enemy Personality: Move him home. If he moved, bow him and negate his movement. Lose 2 Honor",
+            "enemy-personality", Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeywords: ["Paragon"], Move: new(MoveSpec.Target, MoveSpec.Home), Costs: ActionCost.LoseHonor(2)),
+        // Help from the Shadows (oracle-l5r-3055): "Battle: Choose your performing Personality in a Ninja unit: Move him to the current battlefield.
+        // Straighten his unit if he moved." -- a new Performer category, own-personality-in-ninja-unit (the Personality himself or one of his attached
+        // Followers carries Ninja -- "a Ninja unit" is a property of the unit, not only its own Personality), mirroring Skipping the Puddle's own
+        // performer-is-the-mover shape (Target "none", MoveSpec.Performer).
+        ["help-shadows-move"] = new("Battle", "Choose your performing Personality in a Ninja unit: Move him to the current battlefield. Straighten his unit if he moved",
+            "none", Performer: "own-personality-in-ninja-unit", Move: new(MoveSpec.Performer, MoveSpec.CurrentBattlefield), MovesToBattle: true),
+        // Moving and Unmoving (oracle-l5r-5423): "Battle: If any enemy units are at the current battlefield, choose your performing Kensai: Move him
+        // there. Straighten his unit if he moved." -- Skipping the Puddle's own shape (own-personality-with-keyword Performer, no AtBattle of its own
+        // since he is moving TO the battle), the "opposed" entry condition checked by ability id (skipping-the-puddle-move's own precedent).
+        ["moving-unmoving-approach"] = new("Battle", "If any enemy units are at the current battlefield, choose your performing Kensai: Move him there. Straighten his unit if he moved",
+            "none", Performer: "own-personality-with-keyword", RequiredKeywords: ["Kensai"], Move: new(MoveSpec.Performer, MoveSpec.CurrentBattlefield), MovesToBattle: true),
+        // "Battle: Choose your performing unbowed Kensai and target an enemy Personality with lower Force: Move him home." -- a new Force comparison
+        // Target category against the PERFORMER (lower-or-equal-honor-than-performer's own shape, off CardForce instead of CardPersonalHonor).
+        ["moving-unmoving-retreat"] = new("Battle", "Choose your performing unbowed Kensai and target an enemy Personality with lower Force: Move him home",
+            "enemy-personality-force-lt-performer", Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeywords: ["Kensai"], Move: new(MoveSpec.Target, MoveSpec.Home)),
+        // Phantom Visage (oracle-l5r-5941, re-evaluated per issue #460: the old blocker note's "non-AtBattle-gated compound Performer category" is
+        // exactly own-unbowed-personality-with-keyword-at-any-location, built for Fading Shadows/World Disappears since issue #337 -- stale, not still
+        // true): "Battle/Open: Bow your performing Ninja Personality and target a Personality: Bow him."
+        ["phantom-visage-bow"] = new("BattleOrOpen", "Bow your performing Ninja Personality and target a Personality: Bow him", "personality",
+            Performer: "own-unbowed-personality-with-keyword-at-any-location", RequiredKeywords: ["Ninja"], Costs: ActionCost.BowPerformer),
+        // Precision (oracle-l5r-6047): "Reaction: After a Melee or Ranged Attack is targeted: Give it +2 or -2 strength." -- Umiko's own toggle shape
+        // (kaname/umiko-attack-boost/-reduce), minus the Ranged-only Require those carry (this card's own text names either kind, Strong
+        // Defenses/Trusting Instinct's own unrestricted-kind shape).
+        ["precision-boost"] = new("Reaction", "After a Melee or Ranged Attack is targeted: Give it +2 strength", "none", Trigger: "before-attack-resolves", UsageKey: "precision-strength"),
+        ["precision-reduce"] = new("Reaction", "After a Melee or Ranged Attack is targeted: Give it -2 strength", "none", Trigger: "before-attack-resolves", UsageKey: "precision-strength"),
+        ["precision-attack"] = new("Battle", "Ranged 3 Attack", "attack"),
+        // Pronouncement of Guilt (oracle-l5r-6077, re-evaluated per its own stale blocker note: the move-to-the-current-battlefield primitive and the
+        // Magistrate performer both now exist): "Battle: Choose your performing unbowed Magistrate and target an enemy Personality: Move him to the
+        // current battlefield. Straighten his unit unless he is dishonorable, Kolat, Ninja, or Shadowlands." -- dispensing-justice-destroy's own
+        // Magistrate performer and TargetStatus.DishonorableKolatNinjaOrShadowlands, the straighten itself conditioned in its own execution case.
+        // The Absent/move-to-battle ruling ("actions that move Personalities to a battle may be played as Absent Battle actions by either player,"
+        // docs/decisions/2026-09-19-battle-rulings-round-2.md) exempts the acting player's own presence too, so the Magistrate performer uses the
+        // no-AtBattle-of-its-own category (own-unbowed-personality-with-keyword-at-any-location) instead of dispensing-justice-destroy's own
+        // at-battle one -- that card does not move anyone, so its own performer keeps the ordinary presence rule.
+        ["pronouncement-guilt-move"] = new("Battle", "Choose your performing unbowed Magistrate and target an enemy Personality: Move him to the current battlefield. Straighten his unit unless he is dishonorable, Kolat, Ninja, or Shadowlands",
+            "enemy-personality", Performer: "own-unbowed-personality-with-keyword-at-any-location", RequiredKeywords: ["Magistrate"], Move: new(MoveSpec.Target, MoveSpec.CurrentBattlefield), MovesToBattle: true),
+        // Reckless Duel (oracle-l5r-6209): "Battle: Choose your performing unbowed Personality and target an enemy Personality: Your Personality duels
+        // the target. Bow the duel's loser. Move him home." -- Steel on Steel's own self-performer duel shape (Performer: own-unbowed-personality, no
+        // AtBattle of its own -- Dueling's own Timing already gates the source), Doji Mitsuru's own "bow the loser" plus Daisuke's own "move him home"
+        // outcome, combined (ApplyDuelOutcome, Dueling.cs).
+        ["reckless-duel"] = new("Battle", "Choose your performing unbowed Personality and target an enemy Personality: Your Personality duels the target. Bow the duel's loser. Move him home",
+            "enemy-personality", Performer: "own-unbowed-personality", IssuesDuel: true),
     });
 }
 
@@ -3189,6 +3262,7 @@ public sealed partial class MatchEngine
         "stalking-tiger-attack" => 6,
         "tsuruchi-isas-attack" => 3,
         "taiken-attack" => 4, // Isawa Taiken (issue #458): "Bow Taiken: Ranged 4 Attack."
+        "precision-attack" => 3, // Precision (oracle-l5r-6047, issue #460): "Battle: Ranged 3 Attack."
         // Tsuruchi Kosoko - exp: "Ranged 6 Attack". Bayushi Kahoku - exp: "Ranged 3 Attack" (after the -4F).
         "tsuruchi-kosoko-exp-attack" => 6,
         "training-followed-recon-attack" or "training-followed-dishonorable-melee-attack" => 3,
@@ -3291,6 +3365,7 @@ public sealed partial class MatchEngine
         "shiro-shiba-melee" or "stalking-tiger-attack" or "unparalleled-sword-attack" or "training-weapon-attack" => "Melee",
         "shinjo-eun-sahng-attack" or "shosuro-konishi-attack" or "tsuruchi-kosoko-attack" or "tsuruchi-isas-attack" or "bayushi-kahoku-attack" or "asako-ume-attack" or "training-honor-cost-attack" => "Ranged",
         "taiken-attack" => "Ranged", // Isawa Taiken (issue #458)
+        "precision-attack" => "Ranged", // Precision (issue #460)
         "cavalry-flankers-attack" or "murderous-thieves-attack" => "Melee",
         "dark-naga-scouts-attack" or "horse-archers-attack" or "hiruma-sniper-attack" or "tensin-follower-attack" => "Ranged",
         "moshi-ikako-attack" or "training-province-attack" or "kaname-ranged-attack" or "yashiro-attack" or "akio-attack" or "genji-attack" or "dragons-favor-attack" => "Ranged",
@@ -3920,6 +3995,10 @@ public sealed partial class MatchEngine
             if (id == "your-clan-needs-you")
                 Require(Army(1 - player.Id, _state.CurrentBattleProvince!.Value).Any(),
                     "Your Clan Needs You! requires enemy units at the current battlefield.");
+            // Moving and Unmoving (oracle-l5r-5423, issue #460): "If any enemy units are at the current battlefield" -- its own printed entry condition.
+            if (id == "moving-unmoving-approach")
+                Require(Army(1 - player.Id, _state.CurrentBattleProvince!.Value).Any(),
+                    "Moving and Unmoving requires enemy units at the current battlefield.");
             // Shosuro Hawado (issue #301): "Move Hawado ... to a battlefield with one or more enemy
             // units" -- the destination is a per-command choice (command.Province, the same field
             // enemy-province/any-province targets already use): any battlefield not yet resolved this
@@ -4256,6 +4335,9 @@ public sealed partial class MatchEngine
                 "own-personality" => Definition(performer).Type == CardType.Personality,
                 // Skipping the Puddle (issue #420): "choose your performing Water Shugenja" -- wherever he is (he is moving to the battle), bowed or not.
                 "own-personality-with-keyword" => Definition(performer).Type == CardType.Personality && HasKeywords(performer, ability.RequiredKeywords),
+                // Help from the Shadows (oracle-l5r-3055, issue #460): "your performing Personality in a Ninja unit" -- a UNIT-membership keyword check
+                // (the Personality himself, or any of his attached Followers, carries Ninja), not a keyword on the Personality alone.
+                "own-personality-in-ninja-unit" => Definition(performer).Type == CardType.Personality && (Keyword(performer, "Ninja") || Attachments(UnitHostId(performer)).Any(a => Keyword(a, "Ninja"))),
                 // Hiruma Akio - exp: "Bow your performing Personality or Follower" -- an unbowed unit card of the player's at the current battlefield.
                 "own-unbowed-unit-at-battle" => Definition(performer).Type is CardType.Personality or CardType.Follower && !performer.Bowed && AtBattle(performer),
                 // Spirit of the Blade's granted action: "Bow one of this Personality's Weapons" -- an unbowed Weapon attached to the source.
@@ -4684,7 +4766,7 @@ public sealed partial class MatchEngine
                     // -- own-personality-at-home is exempt for the same reason.
                     if (actingAsBattle && ability.Target is not ("personality-at-adjacent-battlefield" or "own-unbowed-farm" or "region-or-terrain" or "own-personality-at-home" or "personality-at-any-location" or "own-follower-at-any-location")
                         && id is not ("intervening-spirit-move" or "earth-flows-move" or "sanctuary-of-the-waves-move" or "dislodge-the-foe" or "heijin-move"
-                            or "natures-wrath-move" or "irezu-move" or "mitsushen-move")) Require(AtBattle(target), "Target or performer must be at the current battlefield."); // Nature's Wrath (issue #453 batch 5): its target is brought TO the battlefield; Irezu (issue #458) moves the target HOME from wherever he stands; Mitsushen (issue #458) brings his target TO his own battlefield from wherever it stands
+                            or "natures-wrath-move" or "irezu-move" or "mitsushen-move" or "pronouncement-guilt-move")) Require(AtBattle(target), "Target or performer must be at the current battlefield."); // Nature's Wrath (issue #453 batch 5): its target is brought TO the battlefield; Irezu (issue #458) moves the target HOME from wherever he stands; Mitsushen (issue #458) brings his target TO his own battlefield from wherever it stands; Pronouncement of Guilt (issue #460) brings its enemy target TO the battlefield the same way
                     var personality = type == CardType.Personality;
                     var own = target.OwnerId == player.Id;
                     // TargetMustBe (P2): a target-status legality condition layered onto whichever category
@@ -4835,6 +4917,9 @@ public sealed partial class MatchEngine
                         "enemy-fewer-or-equal-followers-than-performer" => personality && !own &&
                             Attachments(target.Id).Count(a => Definition(a).Type == CardType.Follower) <= Attachments(command.PerformerId!).Count(a => Definition(a).Type == CardType.Follower),
                         "lower-or-equal-honor-than-performer" => personality && CardPersonalHonor(target) <= CardPersonalHonor(Card(command.PerformerId!)),
+                        // Moving and Unmoving (oracle-l5r-5423, issue #460): "an enemy Personality with lower Force" -- lower-or-equal-honor-than-
+                        // performer's own shape, off CardForce against the performer instead of CardPersonalHonor against the source.
+                        "enemy-personality-force-lt-performer" => personality && !own && CardForce(target) < CardForce(Card(command.PerformerId!)),
                         "own-personality-with-token" => personality && own && target.Tokens.Count > 0,
                         "own-tattooed-personality" => personality && own && Keyword(target, "Tattooed"),
                         "personality-lower-honor-than-self" => personality && CardPersonalHonor(target) < CardPersonalHonor(source!),
@@ -5971,7 +6056,7 @@ public sealed partial class MatchEngine
             case "sakata-attack":
                 if (ResolveOrDeferAttack(id, player, target?.Id, ActionPerformer(ability, command, source).Id, consumedGrant)) return;
                 break;
-            case "shinjo-eun-sahng-attack": case "shosuro-konishi-attack": case "tsuruchi-kosoko-attack": case "stalking-tiger-attack":
+            case "shinjo-eun-sahng-attack": case "shosuro-konishi-attack": case "tsuruchi-kosoko-attack": case "stalking-tiger-attack": case "precision-attack":
                 if (ResolveOrDeferAttack(id, player, target?.Id, ActionPerformer(ability, command, source).Id, consumedGrant)) return;
                 break;
             // Tsuruchi Kosoko - exp (oracle-l5r-9831): a plain Ranged 6 Attack whose printed Follower
@@ -7610,6 +7695,60 @@ public sealed partial class MatchEngine
             case "chikata-straighten": Straighten(target!); break;
             case "towers-of-yogo-bow": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;
             case "tsubo-straighten": Straighten(target!); break;
+            // Embers of War pass, batch 3 (issue #460; helpers in EmbersOfWarBatch3.cs).
+            case "weak-poison-force-zero": ApplyModifier(target!, source!.Id, id, "Force", -CardForce(target!)); break;
+            case "accusation-negate": NegateHeldAction(source!); break;
+            case "accusation-honor-loss": GainHonor(target!.OwnerId, -Definition(target).PersonalHonor, "Astonishing Accusation", source); break;
+            case "deadly-discipline-tokens":
+            {
+                var deadlyMonk = Card(command.PerformerId!);
+                CreateToken(deadlyMonk, "Fire", id, "Force", 1);
+                CreateToken(deadlyMonk, "Fire", id, "Force", 1);
+                break;
+            }
+            case "deadly-discipline-bow":
+            {
+                var deadlyMonk = Card(command.PerformerId!);
+                if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
+                if (HasToken(deadlyMonk, "Fire")) DestroyUnits([target!], false, player.Id);
+                break;
+            }
+            case "exploited-advantage-move":
+            {
+                var exploitedMoved = ExecuteMove(command, ability, source, target);
+                if (exploitedMoved)
+                {
+                    if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
+                    LockMovement(target!, id, MovementKinds.Home | MovementKinds.ToBattlefield);
+                }
+                break;
+            }
+            case "help-shadows-move":
+            {
+                var shadowsPerformer = Card(command.PerformerId!);
+                var wasAtBattle = AtBattle(shadowsPerformer);
+                ExecuteMove(command, ability, source, target);
+                if (!wasAtBattle && AtBattle(shadowsPerformer)) StraightenUnit(shadowsPerformer);
+                break;
+            }
+            case "moving-unmoving-approach":
+            {
+                var kensai = Card(command.PerformerId!);
+                var wasAtBattle = AtBattle(kensai);
+                ExecuteMove(command, ability, source, target);
+                if (!wasAtBattle && AtBattle(kensai)) StraightenUnit(kensai);
+                break;
+            }
+            case "moving-unmoving-retreat": ExecuteMove(command, ability, source, target); break;
+            case "phantom-visage-bow": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;
+            case "precision-boost": _state.PendingAttack!.Strength += 2; break;
+            case "precision-reduce": _state.PendingAttack!.Strength -= 2; break;
+            case "pronouncement-guilt-move":
+            {
+                var guiltMoved = ExecuteMove(command, ability, source, target);
+                if (guiltMoved && !MatchesTargetStatus(target!, TargetStatus.DishonorableKolatNinjaOrShadowlands)) StraightenUnit(target!);
+                break;
+            }
             default:
                 // Any ability with an AttachSpec (Moto Jun-Ni, Fading Shadows, Foothills Keep and the training shapes) needs no case of its own: the Gold was
                 // paid by PayForAbility, so the card now leaves its place and enters play attached. An entering-play window ends the action here.
@@ -8366,6 +8505,8 @@ public sealed partial class MatchEngine
                     ? new[] { Card(source.AttachedTo).Id, source.Id } : new[] { Card(source.AttachedTo).Id },
                 "own-personality" => _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && Definition(c).Type == CardType.Personality).Select(c => (string?)c.Id).ToArray(),
                 "own-personality-with-keyword" => _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && Definition(c).Type == CardType.Personality && HasKeywords(c, ability.RequiredKeywords)).Select(c => (string?)c.Id).ToArray(),
+                // Help from the Shadows (issue #460): mirrors the Performer validation switch's own own-personality-in-ninja-unit above.
+                "own-personality-in-ninja-unit" => _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && Definition(c).Type == CardType.Personality && (Keyword(c, "Ninja") || Attachments(UnitHostId(c)).Any(a => Keyword(a, "Ninja")))).Select(c => (string?)c.Id).ToArray(),
                 "own-unbowed-weapon-of-source" => _state.Cards.Values.Where(c => c.OwnerId == playerId && c.Zone == Zone.Attached && c.AttachedTo == source?.Id && !c.Bowed && Definition(c).Type == CardType.Item && Keyword(c, "Weapon")).Select(c => (string?)c.Id).ToArray(),
                 "own-unbowed-unit-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && Definition(c).Type is CardType.Personality or CardType.Follower && !c.Bowed && AtBattle(c)).Select(c => (string?)c.Id).ToArray(),
                 "own-personality-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && (!actingAsBattle || AtBattle(c))).Select(c => (string?)c.Id).ToArray(),
