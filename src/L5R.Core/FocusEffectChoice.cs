@@ -34,13 +34,14 @@ public sealed partial class MatchEngine
         // Ceaseless Vigil (Seeds of Decay pass, issue #453, batch 1): "straighten a Personality" -- a mandatory choice among the bowed Personalities in play (SeedsOfDecayBatch1.cs).
         or "ceaseless-vigil-focus"
         or "sandalwood-incense-focus" // issue #453, batch 5
+        or "swell-of-strength-focus" // issue #460, batch 5: Hiromi's Vassals/Shamsir's own attach-self shape, narrowed to Water Shugenja by AttachRequiresKeyword.
         || abilityId == "fair-warning-focus"; // issue #453, batch 2
     // Fair Warning (issue #453, batch 2): "if your Personality won it, you may give a Personality -4F" -- any Personality in play, only when the focus card's player's side won.
     private static bool IsFairWarningFocus(string abilityId) => abilityId == "fair-warning-focus";
     private List<string> FairWarningCandidates(int playerId) =>
         _state.PendingDuel?.WinnerId is string winnerId && Card(winnerId).OwnerId == playerId
             ? _state.Cards.Values.Where(c => InPlay(c) && Definition(c).Type == CardType.Personality).Select(c => c.Id).Order(StringComparer.Ordinal).ToList() : [];
-    private static bool IsAttachSelfFocusEffect(string abilityId) => abilityId is "hiromis-vassals-focus" or "shamsir-focus";
+    private static bool IsAttachSelfFocusEffect(string abilityId) => abilityId is "hiromis-vassals-focus" or "shamsir-focus" or "swell-of-strength-focus";
     // Sandalwood Incense (oracle-l5r-10123, issue #453 batch 5): "After this duel ends, if your Personality won it, gain 2 Honor or draw a card" -- a choice between two EFFECTS, not
     // cards: the candidates are the two effect keys below, offered only when the focusing player's Personality won (a tie or a loss asks nothing).
     private const string SandalwoodGainHonor = "gain-honor";
