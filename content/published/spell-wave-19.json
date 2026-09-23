@@ -1,0 +1,33 @@
+{
+  "Profile": "spell-wave-19",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10254",
+      "Name": "Communion with Earth",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "This Shugenja has Stalwart. (Stalwart cards negate their first bowing each turn by other players' cards.)\nBattle: Target another of your Shugenja, who must be Earth: Transfer this card to him.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10254.jpg",
+      "Keywords": [
+        "Earth"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "communion-transfer"
+      ],
+      "Effect": "none",
+      "AttachGrantsKeyword": "Stalwart"
+    }
+  ],
+  "Decks": []
+}

@@ -8,9 +8,11 @@ internal static class HoldingProductionTests
 {
     // The cards that produce Gold through an ability instead of the printed field: a conditional production
     // (ConditionalProductionCatalog), a Reaction that produces while a cost is paid (Yoritomo Sakuma), or a
-    // created Holding's own trait (Basic Lesson). Each is covered by its own suite.
+    // created Holding's own trait (Basic Lesson). Each is covered by its own suite. The Sacred Temple of the
+    // Phoenix - inexperienced (issue #458): GoldProduction is its own printed BASE (3, the catalogue's own
+    // "production" field); the printed text's "produce 5 Gold" is its conditional bonus (sacred-temple-phoenix-gold).
     private static readonly string[] ProduceThroughAnAbility =
-        ["oracle-l5r-1190", "oracle-l5r-9624", "oracle-l5r-9437", "oracle-l5r-713"];
+        ["oracle-l5r-1190", "oracle-l5r-9624", "oracle-l5r-9437", "oracle-l5r-713", "oracle-l5r-10256"];
 
     public static void Run(TestRunner runner) => runner.Run("holding-production", [
         ("The four holding-wave-1 Holdings produce the Gold they print: the field carries it and each one alone funds a payment of that size", PrintedProductionIsUsable),

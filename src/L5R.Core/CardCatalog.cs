@@ -72,6 +72,8 @@ public static class CardCatalog
             new("training-crane-samurai", "Crane training samurai", CardType.Personality, "Crane", GoldCost:5, Force:3, Chi:3, PersonalHonor:2, HonorRequirement:4, Text:"Training fixture. No card abilities."),
             new("training-crane-courtier", "Crane training courtier", CardType.Personality, "Crane", GoldCost:6, Force:2, Chi:3, PersonalHonor:3, HonorRequirement:6, Text:"Training fixture. No card abilities."),
             new("training-crane-veteran", "Crane training veteran", CardType.Personality, "Crane", GoldCost:8, Force:5, Chi:4, PersonalHonor:3, HonorRequirement:6, Text:"Training fixture. No card abilities."),
+            // Honor and Treachery pass (issue #458): a plain Scorpion Clan Personality fixture (Bayushi Irezu's own target category, own-scorpion-personality-other-than-source).
+            new("training-scorpion-veteran", "Scorpion training veteran", CardType.Personality, "Scorpion", GoldCost:8, Force:5, Chi:4, PersonalHonor:3, HonorRequirement:6, Text:"Training fixture. No card abilities."),
             new("training-crane-dignitary", "Crane training dignitary", CardType.Personality, "Crane", GoldCost:6, Force:3, Chi:4, PersonalHonor:4, HonorRequirement:12, Text:"Training fixture. High Honor Requirement demonstrates Clan allegiance."),
             new("training-lion-samurai", "Lion training samurai", CardType.Personality, "Lion", GoldCost:5, Force:4, Chi:3, PersonalHonor:2, HonorRequirement:4, Text:"Training fixture. No card abilities."),
             new("training-lion-courtier", "Lion training courtier", CardType.Personality, "Lion", GoldCost:6, Force:2, Chi:3, PersonalHonor:3, HonorRequirement:6, Text:"Training fixture. No card abilities."),
@@ -579,6 +581,12 @@ public static class CardCatalog
             .Concat(PublishedContent.PersonalityWave55.Cards)
             .Concat(PublishedContent.PersonalityWave57.Cards)
             .Concat(PublishedContent.ItemWave10.Cards)
+            .Concat(PublishedContent.PersonalityWave61.Cards)
+            .Concat(PublishedContent.HoldingWave8.Cards)
+            .Concat(PublishedContent.SpellWave19.Cards)
+            .Concat(PublishedContent.StrategyWave51.Cards)
+            .Concat(PublishedContent.StrongholdWave13.Cards)
+            .Concat(PublishedContent.FollowerWave27.Cards)
             .ToDictionary(c => c.Id, StringComparer.Ordinal);
     }
 }

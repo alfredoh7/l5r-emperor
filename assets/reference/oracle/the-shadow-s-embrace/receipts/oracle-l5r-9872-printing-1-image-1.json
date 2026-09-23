@@ -31,7 +31,9 @@
     "path": "assets/reference/oracle/the-shadow-s-embrace/webp/oracle-l5r-9872-printing-1-image-1.webp",
     "sha256": "b3b0b3f13bac1dc4a3872ee2b0eca23f82a21434b2b7cf0b002ae0a7f3daf124",
     "source": {
-      "note": "Re-derived locally from the verified Oracle-of-the-Void master (top-level path/sha256, untouched) via PIL WebP85 -- the catalogue-art-webp Release attachments available this session did not include this card."
+      "asset": "L5R-Catalogue-WebP85.zip",
+      "matched_by": "original_sha256",
+      "release": "catalogue-art-webp-v1"
     },
     "width": 750
   }
