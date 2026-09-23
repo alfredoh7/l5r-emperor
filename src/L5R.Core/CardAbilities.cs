@@ -2584,6 +2584,86 @@ public static class AbilityCatalog
         // primitive (AttachAction.cs) with a fixed 2-Gold discount, attaching to the source itself.
         ["haruto-attach"] = new("Battle", "Target a Follower in your discard pile: Attach it to Haruto, paying 2 less Gold", "attachment-in-discard",
             Cost: GoldCostRule.AttachCost(-2, 0), Attach: new(AttachSource.Target, AttachPile.Own, AttachWielder.Source, [CardType.Follower])),
+
+        // Embers of War pass, batch 2 (issue #460): logic in EmbersOfWarBatch2.cs holds only the execution/validation helpers this batch
+        // needs of its own; every ability here is documented at its own use, same shape as the Honor and Treachery pass.
+        // Kitsu Miro (oracle-l5r-4386): "Home Battle, bow: Create a 2F/2C/3PH Lion Clan · Ancestor · Samurai · Spirit Personality at the
+        // current battlefield. Remove him from the game after the battle ends." Previously blocked on two primitives that have both grown
+        // since: Absent (Coils of Madness, issue #337 follow-up) already lets a Battle-timing source act without controlling a unit at the
+        // current battlefield -- exactly "Home actions can be taken from home" -- and CreatedCardSpec.AtBattlefield/UntilBattleEnds (issue
+        // #394) already exist (Kitsu Akai's own identical stat-line token, oracle-l5r-1116, creates the same token at home with neither
+        // flag set). No new "Home Battle" Timing was ever needed: it is Timing "Battle" with Absent true, same as the False Ring of Air's
+        // own "Absent Battle, bow" shape.
+        ["miro-create"] = new("Battle", "Home Battle, bow: Create a 2F/2C/3PH Lion Clan · Ancestor · Samurai · Spirit Personality at the current battlefield. Remove him from the game after the battle ends",
+            "none", Absent: true, Costs: ActionCost.BowSource,
+            Creates: new(CardType.Personality, Force: 2, Chi: 2, PersonalHonor: 3, Keywords: ["Lion Clan", "Ancestor", "Samurai", "Spirit"], AtBattlefield: true, UntilBattleEnds: true)),
+        // Moshi Tomiko (oracle-l5r-5286): "Battle: Bow Tomiko or one of her Spells: Ranged 6 Attack." Xijkt's own "Bow Xijkt or one of your
+        // Mines" shape: the CHOICE of what to bow lives in the Performer category (own-source-or-unbowed-attached-spell, a new small sibling
+        // of the existing own-source-or-unbowed-attached-with-keyword -- Spell is a CardType, not a keyword, so it is its own category rather
+        // than a RequiredKeywords narrowing), with CostOption.Bow bowing whichever was chosen.
+        ["tomiko-attack"] = new("Battle", "Bow Tomiko or one of her Spells: Ranged 6 Attack", "attack",
+            Performer: "own-source-or-unbowed-attached-spell", CostOptions: [CostOption.Bow]),
+        // Moto Isul (oracle-l5r-5332): "Battle: Even if Isul is at home, target a Personality: Bow or straighten him." Absent (he need not be
+        // at the battlefield himself), a plain "any Personality" target, and the same bow-or-straighten toggle shape Shosuro Chikata's own
+        // pair uses (UsageKey shared so choosing one spends both).
+        ["isul-bow"] = new("Battle", "Even if Isul is at home, target a Personality: Bow him", "personality", Absent: true, UsageKey: "isul-toggle"),
+        ["isul-straighten"] = new("Battle", "Even if Isul is at home, target a Personality: Straighten him", "personality", Absent: true, UsageKey: "isul-toggle"),
+        // Rata (oracle-l5r-6165): "Reaction: After an action resolves that Rata performed and that destroyed a Personality: Rata sacrifices
+        // his victim's corpse. Draw a card." AfterActionReactionTriggers.AfterActionResolved is the shared "after an action's resolution,
+        // scoped to what it did" window (training-after-action-resolved-gain's own precedent); RataDestroyedPersonality (EmbersOfWarBatch2.cs)
+        // narrows it to an action Rata himself performed that destroyed a Personality.
+        ["rata-draw"] = new("Reaction", "After an action resolves that Rata performed and that destroyed a Personality: Draw a card", "none", Trigger: AfterActionReactionTriggers.AfterActionResolved),
+        // Rokku - experienced (oracle-l5r-6376): "Rokku has +1F while a Lion Clan player controls him" is the "rokku-lion-force-bonus" Effect
+        // (a new term in PersonalityForce, the same Effect-keyed shape Matsu Kaido's plain "+1F while attacking" already uses, but always on
+        // rather than attacking-only, gated only by the controller's own Stronghold Clan) -- carried on his CardDefinition.Effect, not an
+        // AbilityCatalog entry (a card's base stats/traits, unlike its actions, are never one). "Reaction: Even if Rokku is bowed, after
+        // engaging, if any enemy units are at the current battlefield: Move Rokku there. Straighten his unit if he moved." -- no MovesToBattle
+        // (that flag waives the actingAsBattle presence Require a Battle-TIMING action alone is subject to; a Reaction is never gated by it
+        // in the first place, so nothing needs waiving -- BattleAbsentMovesTests.MarkedInventoryPinned enforces every MovesToBattle-flagged
+        // ability being Battle/BattleOrOpen timed), just a plain TryMoveToBattlefield in the execution case. The enemy-presence condition and
+        // "straighten his unit if he moved" read live off _state.PendingEngage (RokkuEnemyPresentAtEngagedBattlefield, EmbersOfWarBatch2.cs).
+        // His own id joins the hardcoded bowed-source exemption list (dbc-attacker-bow's own precedent) since he reacts "even if bowed".
+        ["rokku-move"] = new("Reaction", "Even if Rokku is bowed, after engaging, if any enemy units are at the current battlefield: Move Rokku there. Straighten his unit if he moved",
+            "none", Trigger: "after-engaging"),
+        // Sakti (oracle-l5r-6454): "Battle: Target an enemy card with lower Force: Bow it. If it is a Personality, you may move it home." The
+        // same enemy-force-lt-self category Kaiji's own "Target an enemy card with lower Force: Bow it" already uses; the optional move-home
+        // is conditioned on the target's own type in the execution case (SaktiBow, EmbersOfWarBatch2.cs).
+        ["sakti-bow"] = new("Battle", "Target an enemy card with lower Force: Bow it. If it is a Personality, you may move it home", "enemy-force-lt-self"),
+        // Shinjo Junpei - experienced (oracle-l5r-6901): "Tactical Battle: Even if Junpei is at home, choose your performing unbowed
+        // Personality: Melee 4 Attack." Absent (he need not be at the battlefield to open the action) with an ordinary unbowed-Personality
+        // Performer choosing who actually swings; ActionKeywords: ["Tactical"] tags the printed word.
+        ["junpei-attack"] = new("Battle", "Tactical: Even if Junpei is at home, choose your performing unbowed Personality: Melee 4 Attack", "attack",
+            Performer: "own-unbowed-personality", Absent: true, ActionKeywords: ["Tactical"]),
+        // Soshi Yoshihara - experienced (oracle-l5r-7373): two independent Political Open abilities. "Target a Holding or Personality: Its
+        // base abilities may not be used" reuses ActionLock (RequireCanPerform already bars ANY card's actions once locked, Personality or
+        // Holding alike -- Interference's own "abilities may not be used" precedent was written for a Stronghold specifically, but the lock
+        // itself was never type-restricted). "Bow Yoshihara and target a Personality: Dishonor him. If you are a Scorpion Clan or Crab Clan
+        // player, his controller loses 1 Honor" reads the acting player's own Stronghold Clan (YoshiharaHonorPenalty, EmbersOfWarBatch2.cs).
+        ["yoshihara-lock"] = new("Open", "Political Open: Target a Holding or Personality: Its base abilities may not be used", "personality-or-holding", ActionKeywords: ["Political"]),
+        ["yoshihara-dishonor"] = new("Open", "Political Open: Bow Yoshihara and target a Personality: Dishonor him. If you are a Scorpion Clan or Crab Clan player, his controller loses 1 Honor",
+            "personality", ActionKeywords: ["Political"], Costs: ActionCost.BowSource),
+        // Sugihara (oracle-l5r-7615): "Battle: Target an enemy Personality: Give him -4F. If his Force is now 0, you may take an additional
+        // Battle action which Sugihara must perform." The Force penalty is a plain ApplyModifier(-4) like every other fixed Force penalty;
+        // the conditional additional action, restricted to Sugihara himself as its performer, is GrantAdditionalAction scoped by CardIds
+        // (SugiharaPenalty, EmbersOfWarBatch2.cs) -- the same scopeCardIds parameter GrantAdditionalAction already exposes.
+        ["sugihara-penalty"] = new("Battle", "Target an enemy Personality: Give him -4F. If his Force is now 0, you may take an additional Battle action which Sugihara must perform", "enemy-personality"),
+        // Tsuruchi Tomaru - experienced (oracle-l5r-8894): "Battle: Twice per turn: Ranged 4 Attack." The same UsesPerTurn: 2 Shiba Tsukimi's
+        // own "Twice per turn" already uses, on a bare Ranged Attack (Asako Ume's own precedent).
+        ["tomaru-attack"] = new("Battle", "Twice per turn: Ranged 4 Attack", "attack", UsesPerTurn: 2),
+        // Yasuki Makoto (oracle-l5r-9449): "Your Holdings enter play for 1 less Gold" -- the makoto-holding-discount Effect (a discount read
+        // where Holding entry cost is quoted, StaticKeywordRules.cs's own "your controller's clan-conditional discount" precedent). "Economic
+        // Home Battle, bow: Target an enemy Personality. His controller may pay 4 Gold. If he does, he loses 1 Honor. If he does not,
+        // dishonor the target and move him home" -- Absent (Home Battle) plus a new EitherOrSpecs.MakotoPayOrDishonor, the same "the
+        // AFFECTED card's controller decides" shape Extend the Soul's Boundaries already established (EitherOr.cs).
+        ["makoto-lock"] = new("Battle", "Economic Home Battle, bow: Target an enemy Personality. His controller may pay 4 Gold. If he does, he loses 1 Honor. If he does not, dishonor the target and move him home",
+            "enemy-personality", Absent: true, ActionKeywords: ["Economic"], Costs: ActionCost.BowSource),
+        // Yoritomo Kanaye (oracle-l5r-9579): "Battle: Target an enemy card without attachments, and you may pay Gold equal to its Gold Cost:
+        // Bow it. If you paid the Gold, destroy it." An optional Gold payment made by the ACTING player for a bonus effect, the same "pay
+        // zero or more Gold" shape Celestial Sword's own Mantis half already uses (GoldCostRule.Variable, PaidGoldAmount read back in
+        // execution) -- narrowed here to exactly zero or the target's own Gold Cost by a per-id Require in ValidateAbility (KanayeBow reads
+        // it in EmbersOfWarBatch2.cs), since the printed text is a binary choice, not an open range.
+        ["kanaye-bow"] = new("Battle", "Target an enemy card without attachments, and you may pay Gold equal to its Gold Cost: Bow it. If you paid the Gold, destroy it",
+            "enemy-card", RequireNoAttachments: true, Cost: GoldCostRule.Variable(atResolution: true)),
     });
 }
 
@@ -3198,6 +3278,10 @@ public sealed partial class MatchEngine
         "hiruma-nitani-attack" => 4 + (EffectConditionMet(abilityId, target) ? 2 : 0),
         "bayushi-kahoku-attack" => 3 + (EffectConditionMet(abilityId, target) ? 2 : 0),
         "asako-ume-attack" or "spirit-scout-attack" or "engulfing-flames-attack" => 4,
+        // Embers of War pass (issue #460, batch 2).
+        "tomiko-attack" => 6, // Moshi Tomiko (oracle-l5r-5286): "Ranged 6 Attack".
+        "junpei-attack" => 4, // Shinjo Junpei - experienced (oracle-l5r-6901): "Melee 4 Attack".
+        "tomaru-attack" => 4, // Tsuruchi Tomaru - experienced (oracle-l5r-8894): "Ranged 4 Attack".
         "training-honor-cost-attack" => 3,
         "training-weapon-attack" => 2,
         "cavalry-flankers-attack" => 2,
@@ -3291,6 +3375,8 @@ public sealed partial class MatchEngine
         "shiro-shiba-melee" or "stalking-tiger-attack" or "unparalleled-sword-attack" or "training-weapon-attack" => "Melee",
         "shinjo-eun-sahng-attack" or "shosuro-konishi-attack" or "tsuruchi-kosoko-attack" or "tsuruchi-isas-attack" or "bayushi-kahoku-attack" or "asako-ume-attack" or "training-honor-cost-attack" => "Ranged",
         "taiken-attack" => "Ranged", // Isawa Taiken (issue #458)
+        "tomiko-attack" or "tomaru-attack" => "Ranged", // Embers of War pass (issue #460 batch 2).
+        "junpei-attack" => "Melee",
         "cavalry-flankers-attack" or "murderous-thieves-attack" => "Melee",
         "dark-naga-scouts-attack" or "horse-archers-attack" or "hiruma-sniper-attack" or "tensin-follower-attack" => "Ranged",
         "moshi-ikako-attack" or "training-province-attack" or "kaname-ranged-attack" or "yashiro-attack" or "akio-attack" or "genji-attack" or "dragons-favor-attack" => "Ranged",
@@ -3857,7 +3943,9 @@ public sealed partial class MatchEngine
                 or "chukage-move"
                 or "dbc-attacker-bow"
                 // Honor and Treachery pass (issue #458): Bayushi Utoro, Shosuro Chikata and Tsubo each print "Even if [he] is bowed".
-                or "utoro-straighten" or "chikata-bow" or "chikata-straighten" or "tsubo-straighten", "Abilities on bowed cards cannot be used.");
+                or "utoro-straighten" or "chikata-bow" or "chikata-straighten" or "tsubo-straighten"
+                // Rokku - experienced (oracle-l5r-6376, Embers of War pass, issue #460 batch 2): "Even if Rokku is bowed, after engaging...".
+                or "rokku-move", "Abilities on bowed cards cannot be used.");
             uses = source.AbilityUses;
         }
         // The per-turn limit is AbilityDefinition.UsesPerTurn (AbilityLimits.cs). A once-per-GAME ability (AbilityDefinition.OncePerGame: Border Keep's refresh, Bo of Water) never resets: any stamp spends it.
@@ -3932,6 +4020,12 @@ public sealed partial class MatchEngine
                 Require(command.Province is null, "Moving home names no battlefield.");
             // Bayushi Irezu (issue #458): "Home Battle: If Irezu is at home..." -- his own printed condition on taking the action at all.
             if (id == "irezu-move") Require(source!.Zone == Zone.Home, "Irezu must be at home.");
+            // Yoritomo Kanaye (oracle-l5r-9579, Embers of War pass, issue #460 batch 2): "you may pay Gold equal to its Gold Cost" -- a
+            // binary choice (zero, or exactly the target's own Gold Cost), narrower than Variable's own open range.
+            if (id == "kanaye-bow")
+                Require(PaidGoldAmount(command) is var kanayePaid && (kanayePaid == 0
+                        || command.TargetId is not null && _state.Cards.TryGetValue(command.TargetId, out var kanayeTarget) && kanayePaid == CardGoldCost(kanayeTarget)),
+                    "Pay either nothing, or exactly the target's Gold Cost.");
         }
         // Return to Action (oracle-l5r-10953, issue #331): "If you are the Defender" is a condition on taking the
         // action at all (it sits before the effects colon), so it is checked here where every offer and every
@@ -4238,6 +4332,10 @@ public sealed partial class MatchEngine
                 // Require already rejects the whole action if he is bowed).
                 "own-source-or-unbowed-attached-with-keyword" => performer.Id == source!.Id
                     || performer.Zone == Zone.Attached && performer.AttachedTo == source.Id && !performer.Bowed && HasKeywords(performer, ability.RequiredKeywords),
+                // Moshi Tomiko (oracle-l5r-5286, Embers of War pass, issue #460 batch 2): "Bow Tomiko or one of her Spells" -- the same
+                // source-or-attachment choice as own-source-or-unbowed-attached-with-keyword, but by CardType (Spell) rather than a keyword.
+                "own-source-or-unbowed-attached-spell" => performer.Id == source!.Id
+                    || performer.Zone == Zone.Attached && performer.AttachedTo == source.Id && !performer.Bowed && Definition(performer).Type == CardType.Spell,
                 // The Earth's Hunger: "Bow this Shugenja, or bow this card if he is Earth" -- a cost
                 // choice too, but shaped the other way round from Xijkt's own: the CONDITION is
                 // checked against the WIELDER (the card this Spell is attached to), not against the
@@ -4999,6 +5097,9 @@ public sealed partial class MatchEngine
                         // Seeds of Decay pass (issue #453), batch 2.
                         "attacking-personality" => personality && IsAttacking(target) && AtBattle(target),
                         "holding-or-own-stronghold" => type == CardType.Holding || type == CardType.Stronghold && own,
+                        // Soshi Yoshihara - experienced (oracle-l5r-7373, Embers of War pass, issue #460 batch 2): "Target a Holding or
+                        // Personality" -- either side's, for the ActionLock ("its base abilities may not be used").
+                        "personality-or-holding" => personality || type == CardType.Holding,
                         "personality-lower-base-honor-than-performer" => personality && Definition(target).PersonalHonor < Definition(Card(command.PerformerId!)).PersonalHonor,
                         "last-action-performer" => personality && LastActionPerformer()?.Id == target.Id,
                         // Seeds of Decay pass (issue #453), batch 4.
@@ -7610,6 +7711,21 @@ public sealed partial class MatchEngine
             case "chikata-straighten": Straighten(target!); break;
             case "towers-of-yogo-bow": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;
             case "tsubo-straighten": Straighten(target!); break;
+            // Embers of War pass (issue #460, batch 2; helpers in EmbersOfWarBatch2.cs).
+            case "kenta-move-dishonorable": MoveHome(target!, false); break;
+            case "tomiko-attack": if (ResolveOrDeferAttack(id, player, target?.Id, ActionPerformer(ability, command, source).Id, consumedGrant)) return; break;
+            case "isul-bow": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;
+            case "isul-straighten": Straighten(target!); break;
+            case "rata-draw": Draw(player); break;
+            case "rokku-move": RokkuMove(source!); break;
+            case "sakti-bow": SaktiBow(target!, player.Id); break;
+            case "junpei-attack": if (ResolveOrDeferAttack(id, player, target?.Id, ActionPerformer(ability, command, source).Id, consumedGrant)) return; break;
+            case "yoshihara-lock": LockActions(target!, source!.Id); break;
+            case "yoshihara-dishonor": YoshiharaDishonor(target!, player.Id); break;
+            case "sugihara-penalty": SugiharaPenalty(target!, source!, player.Id); break;
+            case "tomaru-attack": if (ResolveOrDeferAttack(id, player, target?.Id, additional: consumedGrant)) return; break;
+            case "makoto-lock": if (OpenEitherOr(EitherOrSpecs.MakotoPayOrDishonor, source!, player.Id, target!.OwnerId, target, "action")) return; break;
+            case "kanaye-bow": KanayeBow(target!, command, player.Id); break;
             default:
                 // Any ability with an AttachSpec (Moto Jun-Ni, Fading Shadows, Foothills Keep and the training shapes) needs no case of its own: the Gold was
                 // paid by PayForAbility, so the card now leaves its place and enters play attached. An entering-play window ends the action here.
@@ -8358,6 +8474,9 @@ public sealed partial class MatchEngine
                 // Sutigu (issue #301): the source itself, or any of its own unbowed keyworded attachments.
                 "own-source-or-unbowed-spell-attached" => new[] { source?.Id }.Concat(_state.Cards.Values.Where(c => c.OwnerId == playerId && c.Zone == Zone.Attached && c.AttachedTo == source?.Id && !c.Bowed && Definition(c).Type == CardType.Spell).Select(c => (string?)c.Id)).ToArray(),
                 "own-source-or-unbowed-attached-with-keyword" => new[] { source?.Id }.Concat(_state.Cards.Values.Where(c => c.OwnerId == playerId && c.Zone == Zone.Attached && c.AttachedTo == source?.Id && !c.Bowed && HasKeywords(c, ability.RequiredKeywords)).Select(c => (string?)c.Id)).ToArray(),
+                // Moshi Tomiko (issue #460 batch 2): the listing-switch twin of own-source-or-unbowed-attached-spell above -- an ability whose
+                // Performer category exists only in the validation switch is offered to nobody (QueryActions falls back to a null performer).
+                "own-source-or-unbowed-attached-spell" => new[] { source?.Id }.Concat(_state.Cards.Values.Where(c => c.OwnerId == playerId && c.Zone == Zone.Attached && c.AttachedTo == source?.Id && !c.Bowed && Definition(c).Type == CardType.Spell).Select(c => (string?)c.Id)).ToArray(),
                 // A wielder-relative ability on a Spell still in hand (The Earth's Hunger while unattached) has no
                 // wielder yet: no performer, so it is offered disabled instead of Card(null) throwing out of
                 // QueryActions for the whole player (found while building the Equip (Battle) payment fixture, issue #303).
