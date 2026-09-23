@@ -8,7 +8,7 @@ public partial class Main
     private Control? _statTokenLayer;
     private IEnumerable<StatTokens> UnitBadges => _statTokenLayer?.GetChildren().OfType<StatTokens>() ?? [];
     private IEnumerable<StatTokens> TokenPairs => UnitBadges.Where(t => t is not UnitStandard);
-    private bool OverStatToken(Vector2 point) => _tableViewport.GetGlobalRect().HasPoint(point) && UnitBadges.Any(t => t.Visible && t._HasPoint(t.GetGlobalTransform().AffineInverse() * point));
+    private bool OverStatToken(Vector2 point) => PointerOnTable(point) && UnitBadges.Any(t => t.Visible && t._HasPoint(t.GetGlobalTransform().AffineInverse() * point));
     private bool BattleActive => View.Phase is Phase.AttackDeclaration or Phase.InfantryDeclaration or Phase.DefenseAssignment or Phase.CavalryDeclaration or Phase.CavalryDefense or Phase.BattleSelection or Phase.Battle;
 
     private void RenderBoard()
@@ -188,7 +188,7 @@ public partial class Main
                 Companions = detail ? [] : stack.GetChildren().OfType<CardTile>().Where(t => t != front).ToArray(),
                 Projection = detail ? null : _tableSurface.ProjectCanvas,
                 Inline = detail, Explanation = UnitStandard.ExplainUnit(personality),
-                Allowed = () => detail || (_expandedUnits.Count == 0 && _tableViewport.GetGlobalRect().HasPoint(ScreenCenter(front)))
+                Allowed = () => detail || (_expandedUnits.Count == 0 && _tableSurface.GetGlobalRect().HasPoint(ScreenCenter(front)))
             };
             if (!detail) foreach (var tile in stack.GetChildren().OfType<CardTile>()) tile.AlignUnitRightEdge = true;
             standard.Pressed += () => SelectCard(personality);
@@ -273,7 +273,7 @@ public partial class Main
     private IEnumerable<IntentArrow> IntentArrows()
     {
         if (_session.Snapshot is null || !IsInstanceValid(_board)) yield break;
-        var clip = _tableViewport.GetGlobalRect();
+        var clip = _tableSurface.GetGlobalRect();
         foreach (var (id, province) in _assignments)
         {
             var tile = _tiles.FirstOrDefault(t => t.Card.Id == id);
