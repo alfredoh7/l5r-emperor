@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Fix modified hand-limit discard offers/selection and cancelled local handoff privacy. Include prepared hand-limit/privacy launchers plus reproducible core/native regressions. Existing combined preview and Mendon branches are unchanged.",
-  "validation": "Full tools/check.sh --skip-client passed; focused core suite 4/4. Native checks passed at 1920x1080 normal and 1280x800 reduced motion, both seats, close/Escape/Cancel/cleanup, duplicate readiness, replacement session, exact discard results. Mac manual 1440x900 launcher, discard 11 to 10, Escape and window-close verified. Client build 0 warnings/errors. Three-way application to isolated #434 source 659e015f and client build passed (one pre-existing BattleTracker unused-field warning). Packaging tests 9/9.",
-  "remaining": "Publish/validate Windows review archive and notify Mendon. Human UI/rules acceptance and native Windows graphical playtest remain open. No merge authorized.",
+  "summary": "Implemented modified hand-limit discard offers/selector and explicit-only local seat handoff. Prepared and manually launched both Mac review apps. Built/uploaded immutable Windows candidate preview-pr464-2f3a9bbc55-r1-windows from 2f3a9bbc55; receipt/spec and regression evidence included. No merge; #434 and Mendon work remain unchanged.",
+  "validation": "Full skip-client suite passed. Focused core 4/4; native 1920x1080 normal + 1280x800 reduced both-seat privacy/exact-discard checks passed; manual Mac 1440x900 app launch/select/confirm/Escape/close/readiness passed. Client 0 warnings/errors. #434 patch application and compilation passed with one pre-existing unused-field warning. Packaging regressions 9/9. Windows export resources/runtime/source omission validated; GitHub archive size/SHA256 verified (1883880983 bytes, 7246fb50d0541970c7256701113b03269402067dcabd6ac32572cacc401d22a1). Source Mac CI passed; final delivery CI pending.",
+  "remaining": "Windows package and final delivery CI must pass before publisher sends one targeted Mendon notification. Follow live PR464/release for that gate. Human interaction/rules review and native Windows graphical playtesting remain open; no merge authorized.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/463",
   "branch": "codex/463-interaction-fixes",
-  "updated": "2026-09-23T23:24:01.881119+00:00"
+  "updated": "2026-09-23T23:31:53.847863+00:00"
 }

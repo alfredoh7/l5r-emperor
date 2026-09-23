@@ -68,3 +68,14 @@ motion. These inject events through Godot's input system; they do not claim Wind
 OS-level mouse/keyboard or graphical playtesting. Native Mac manual visual/input
 review and source compatibility are recorded in the handoff. Windows CI validates
 packaged runtime/launcher behavior; Mendon's graphical and rules review remains open.
+
+## Windows review candidate
+
+Game source: `2f3a9bbc55cc8b7d1342acd26ade66c4d263cd49`. Package revision 1 is
+tracked by `previews/interaction-fixes.json` and its published receipt. The private
+[versioned release](https://github.com/alfredoh7/l5r-emperor/releases/tag/preview-pr464-2f3a9bbc55-r1-windows)
+is marked Validation pending until the Windows package job passes. The publisher
+then marks it ready and posts the review request on PR #464. Follow the live
+release/PR for delivery status; this source document does not imply acceptance.
+
+[Exact before/after regression outcomes](screenshots/interaction-fixes/regression-outcomes.md).
