@@ -205,6 +205,11 @@ public sealed partial class MatchEngine
         {
             case "ezuno-redirect":
                 return YojimboRedirectApplies(card, subject, affected, "Shugenja");
+            // Bayushi Irezu (issue #458): "Before your Scorpion Clan Personality enters a duel, Irezu enters the duel instead" -- Ezuno's own shape, a Scorpion Clan
+            // restriction in place of his Shugenja one, narrowed to an action that actually issues a duel (a Battle action of another player's naming a Scorpion
+            // Clan Personality of Irezu's controller's as its target -- the challenged party).
+            case "irezu-duel-enter":
+                return acting.IssuesDuel && YojimboRedirectApplies(card, subject, affected, "Scorpion Clan");
             case "blade-of-champions-redirect":
                 return IsBattleAction(command) && UnitHostId(affected) == UnitHostId(card) && RedirectCandidates(card, subject).Any();
             // Spirit of the Yojimbo's granted Reaction: Ezuno's shape without his Shugenja restriction -- any of the reactor's own Personalities at his location.

@@ -48,8 +48,14 @@ BLOCKERS: dict[str, str] = {
     "oracle-l5r-10682": "Needs Home-timing generalization plus hypothetical-opposition movement.",
     "oracle-l5r-9867": "Needs a delayed/scheduled effect across turn boundaries.",
     "oracle-l5r-10894": "Needs a \"modify the next Honor change\" pending-state mechanism.",
-    "oracle-l5r-1992": "The Follower Performer category now exists (own-unbowed-follower-in-source-unit, issue #337: Hiruma Tensin), but this card's performer is \"one of your Followers or Personalities in this army\" (any unit card of either type, bowed as the cost) and its target is \"a Follower or Personality in this army\": neither category is built.",
     "oracle-l5r-10335": "Needs a new tracked EnteredPlayTurn field on CardInstance.",
+    # Honor and Treachery pass (issue #458): Bayushi Nitoshi - inexperienced (10248). "Battle/Limited: Look at the top card of your Fate deck. If it is
+    # an attachment, you may attach it to one of your Personalities at Nitoshi's location, paying all costs. If it is a Strategy, you may take an
+    # additional action to play it (if legal)." LookSpec (issue #whichever built the peek primitive) only supports the "look, then optionally discard/
+    # keep/reorder" shapes; this needs a genuinely new "peek the top card, branch on its own type, and either attach it in place (paying its costs) or
+    # grant an additional action to play it, leaving it on top if declined" primitive -- none of the three outcomes (conditional attach-in-place from a
+    # peeked deck position, conditional additional-action grant keyed on the peeked card's type, "stays on top until then") exists today.
+    "oracle-l5r-10248": "Needs a \"peek the top card of a deck, branch on its type, and either attach it in place (paying costs) or grant an additional action to play it, else leave it on top\" primitive -- LookSpec only covers look-then-discard/keep/reorder shapes, not a type-conditional attach-or-grant off a peeked (not drawn) card.",
     # Elephant Caravan (9868): the old note claimed a printed Attack-vs-attachments override (deferred in #158), but the card prints
     # no Attack at all ("Fear Battle: Target an enemy card with equal or lower Force. If it is bowed or an attachment, destroy it.
     # Bow it."). The real Follower-exception family (Kahoku - exp, Kosoko - exp, Ebumi, Strategic Strike, Toritaka Chokichi,

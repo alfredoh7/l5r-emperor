@@ -2528,6 +2528,62 @@ public static class AbilityCatalog
         // Asahina Akikusa (oracle-l5r-10046): "Reaction: After an action on your Air Spell resolves: Gain 1 Honor." -- the after-action-resolved window (ActionEffectTracking.cs),
         // her own condition being that the resolved action's source is an Air Spell her controller controls.
         ["akikusa-honor"] = new("Reaction", "After an action on your Air Spell resolves: Gain 1 Honor", "none", Trigger: AfterActionReactionTriggers.AfterActionResolved),
+        // Honor and Treachery pass (issue #458). Readings and the primitives are in HonorAndTreacheryPass.cs and the pass's own decision doc.
+        // Akodo Shihiro (oracle-l5r-10241): "Before (each time) another player's action resolves during a battle at Shihiro's battlefield: Give Shihiro +1F (until the turn
+        // ends)." -- the existing before-action-resolves Reaction window, unlimited uses per turn (Ring of Void's own "Any number of times" shape), no target: it fires on
+        // every qualifying action, not one the target of which is Shihiro or his controller's.
+        ["shihiro-boost"] = new("Reaction", "Before (each time) another player's action resolves during a battle at Shihiro's battlefield: Give Shihiro +1F (until the turn ends)", "none",
+            Trigger: "before-action-resolves", UsesPerTurn: AbilityUseLimit.Unlimited),
+        // Bayushi Irezu (oracle-l5r-793): "Home Battle: If Irezu is at home, move home another target Scorpion Clan Personality you control. Move Irezu to the current
+        // battlefield." -- MovesToBattle exempts Irezu's own AtBattle/presence checks (Return to Action's own "at home" shape); the printed condition ("if Irezu is at
+        // home") is a per-id Require. "Reaction, bow: Before your Scorpion Clan Personality enters a duel, Irezu enters the duel instead." -- Ezuno's own redirect shape
+        // (YojimboRedirectApplies), narrowed to Scorpion Clan and to an IssuesDuel action (TargetedActionReactions.cs).
+        ["irezu-move"] = new("Battle", "Home Battle: If Irezu is at home, move home another target Scorpion Clan Personality you control. Move Irezu to the current battlefield",
+            "own-scorpion-personality-other-than-source", MovesToBattle: true),
+        ["irezu-duel-enter"] = new("Reaction", "Reaction, bow: Before your Scorpion Clan Personality enters a duel, Irezu enters the duel instead", "none",
+            Trigger: ReactionTriggers.TargetedByAction, Costs: ActionCost.BowSource),
+        // Bayushi Kasumi (oracle-l5r-10247): printed Elite only, no ability.
+        // Bayushi Utoro (oracle-l5r-10249): "Battle: Even if Utoro is bowed, discard a card and target a Personality: Straighten him." -- Akodo Tezuka's own two-slot shape
+        // (a "hand" cost slot beside the real target), since the discarded card and the straightened target are independent choices.
+        ["utoro-straighten"] = new("Battle", "Even if Utoro is bowed, discard a card and target a Personality: Straighten him", "slots",
+            Slots: [new("target", "personality", "A Personality"), new("discard", "hand", "A card in your hand")]),
+        // Border Keep - inexperienced (oracle-l5r-10240): the printed first-turn province refresh is the existing border-first ability, unchanged; its base Gold
+        // Production (2) is the card's own printed stat.
+        // Communion with Earth (oracle-l5r-10254): "This Shugenja has Stalwart" is AttachGrantsKeyword (Unparalleled Sword's own shape); "Battle: Target another of your
+        // Shugenja, who must be Earth: Transfer this card to him" is the general attachment transfer (AttachmentTransfers.cs, issue #453).
+        ["communion-transfer"] = new("Battle", "Target another of your Shugenja, who must be Earth: Transfer this card to him", "own-earth-shugenja-other-than-wielder"),
+        // Devoted Yojimbo (oracle-l5r-1992): "Battle: Bow one of your Followers or Personalities in this army to straighten a target Follower or Personality in this army."
+        // Performer and Target are independently chosen, each any card (Personality, or an attached Follower) of the controller's own army at the current battlefield.
+        ["devoted-yojimbo-straighten"] = new("Battle", "Bow one of your Followers or Personalities in this army to straighten a target Follower or Personality in this army",
+            "own-follower-or-personality-in-army", Performer: "own-follower-or-personality-in-army", Costs: ActionCost.BowPerformer),
+        // Elite Training (oracle-l5r-10255): "Limited: Target your performing Personality. He undergoes vigorous training. Permanently give him Elite." -- Embracing
+        // Battle's own shape (Seeds of Decay), a bare permanent keyword grant.
+        ["elite-training-grant"] = new("Limited", "Target your performing Personality: Permanently give him Elite", "none", Performer: "own-unbowed-personality"),
+        // Isawa Taiken (oracle-l5r-10243): "Battle: Bow Taiken: Ranged 4 Attack." -- Tsuruchi Isas' own plain bow-and-attack shape.
+        ["taiken-attack"] = new("Battle", "Bow Taiken: Ranged 4 Attack", "attack", Costs: ActionCost.BowSource),
+        // Shiba Mitsushen (oracle-l5r-10245): "Battle: Target your Personality: Move him to Mitsushen's battlefield. If he moved, straighten his unit." -- the
+        // move-to-the-current-battlefield-if-not-there-already shape (Nature's Wrath, Seeds of Decay), read against Mitsushen's own battlefield rather than any enemy unit.
+        ["mitsushen-move"] = new("Battle", "Target your Personality: Move him to Mitsushen's battlefield. If he moved, straighten his unit", "own-personality"),
+        // Shiba Tsukimi (oracle-l5r-10246): "Battle: Twice per turn, target a card in a unit: Straighten it. It may use its abilities a second time this turn." --
+        // Straighten plus Again!'s own "may be used again this turn" (HonorAndTreacheryPass.cs), generalized past a Kensai's own Weapons to any card in any unit.
+        ["tsukimi-refresh"] = new("Battle", "Twice per turn, target a card in a unit: Straighten it. It may use its abilities a second time this turn", "any-unit-card", UsesPerTurn: 2),
+        // Shosuro Chikata (oracle-l5r-10250): "Battle: Even if Chikata is bowed, target a Scorpion Clan or Dragon Clan Personality: Bow or straighten him." -- the
+        // any-of-keyword category (Utaku Hirononri's shape, Seeds of Decay) and the ordinary bow/straighten UsageKey toggle.
+        ["chikata-bow"] = new("Battle", "Even if Chikata is bowed, target a Scorpion Clan or Dragon Clan Personality: Bow him", "card-with-any-required-keyword",
+            RequiredKeywords: ["Scorpion Clan", "Dragon Clan"], UsageKey: "chikata-toggle"),
+        ["chikata-straighten"] = new("Battle", "Even if Chikata is bowed, target a Scorpion Clan or Dragon Clan Personality: Straighten him", "card-with-any-required-keyword",
+            RequiredKeywords: ["Scorpion Clan", "Dragon Clan"], UsageKey: "chikata-toggle"),
+        // The Sacred Temple of the Phoenix - inexperienced (oracle-l5r-10256): ":bow:: When paying for a Spell or Shugenja, produce 5 Gold which may only pay for that
+        // card" -- data-only (ConditionalProduction.cs), no ability of its own.
+        // The Towers of the Yogo (oracle-l5r-8392): "Each of your Scorpion Clan Personalities has the ability, 'Battle, bow: Bow a target enemy Follower or Personality
+        // without Followers.'" -- a controller-wide static ability grant (HonorAndTreacheryPass.cs); the granted ability itself.
+        ["towers-of-yogo-bow"] = new("Battle", "Bow this card: Bow a target enemy Follower or Personality without Followers", "enemy-card-without-followers", Costs: ActionCost.BowSource),
+        // Tsubo (oracle-l5r-10252): "Battle: Even if Tsubo is bowed, target a Personality: Straighten him." -- a bare straighten, either side's Personality.
+        ["tsubo-straighten"] = new("Battle", "Even if Tsubo is bowed, target a Personality: Straighten him", "personality"),
+        // Yogo Haruto (oracle-l5r-10251): "Battle: Target a Follower in your discard pile: Attach it to Haruto, paying 2 less Gold." -- the attach-from-discard-pile
+        // primitive (AttachAction.cs) with a fixed 2-Gold discount, attaching to the source itself.
+        ["haruto-attach"] = new("Battle", "Target a Follower in your discard pile: Attach it to Haruto, paying 2 less Gold", "attachment-in-discard",
+            Cost: GoldCostRule.AttachCost(-2, 0), Attach: new(AttachSource.Target, AttachPile.Own, AttachWielder.Source, [CardType.Follower])),
     });
 }
 
@@ -2898,6 +2954,11 @@ public sealed partial class MatchEngine
                 && (abilityId != "training-negate-honor-gain" || command.AbilityId is "virtuous-charity-open" or "training-opponent-payment");
         // Naka Mahatsu - exp (Seeds of Decay, issue #453): any player's action with Thunder or an element keyword, whatever it targets (SeedsOfDecayBatch4.cs).
         if (abilityId == "mahatsu-negate") return MahatsuNegateApplies(card, command);
+        // Akodo Shihiro (issue #458): "Before (each time) another player's action resolves during a battle at Shihiro's battlefield" -- whatever the action targets, so
+        // long as it is a genuine action (IsAction), taken by another player, while a battle is under way at Shihiro's own battlefield.
+        if (abilityId == "shihiro-boost")
+            return command.AbilityId is not null && AbilityCatalog.All.TryGetValue(command.AbilityId, out var shihiroAction) && IsAction(shihiroAction) && InPlay(card)
+                && command.PlayerId != card.OwnerId && card.Zone == Zone.Battlefield && _state.CurrentBattleProvince == card.ProvinceIndex;
         if (command.AbilityId is null || affectedId is null || !_state.Cards.TryGetValue(affectedId, out var affected)) return false;
         if (!InPlay(card) || !AbilityCatalog.All.TryGetValue(command.AbilityId, out var acting) || !IsAction(acting)) return false;
         var negatable = !MovementCannotBeNegated(command);
@@ -3127,6 +3188,7 @@ public sealed partial class MatchEngine
         "yayu-bow-attack" or "yayu-destroy-attack" => 5,
         "stalking-tiger-attack" => 6,
         "tsuruchi-isas-attack" => 3,
+        "taiken-attack" => 4, // Isawa Taiken (issue #458): "Bow Taiken: Ranged 4 Attack."
         // Tsuruchi Kosoko - exp: "Ranged 6 Attack". Bayushi Kahoku - exp: "Ranged 3 Attack" (after the -4F).
         "tsuruchi-kosoko-exp-attack" => 6,
         "training-followed-recon-attack" or "training-followed-dishonorable-melee-attack" => 3,
@@ -3228,6 +3290,7 @@ public sealed partial class MatchEngine
         "carpenter-castle-siege" or "monastery-fire-attack" or "torazu-fire-attack" => "Ranged",
         "shiro-shiba-melee" or "stalking-tiger-attack" or "unparalleled-sword-attack" or "training-weapon-attack" => "Melee",
         "shinjo-eun-sahng-attack" or "shosuro-konishi-attack" or "tsuruchi-kosoko-attack" or "tsuruchi-isas-attack" or "bayushi-kahoku-attack" or "asako-ume-attack" or "training-honor-cost-attack" => "Ranged",
+        "taiken-attack" => "Ranged", // Isawa Taiken (issue #458)
         "cavalry-flankers-attack" or "murderous-thieves-attack" => "Melee",
         "dark-naga-scouts-attack" or "horse-archers-attack" or "hiruma-sniper-attack" or "tensin-follower-attack" => "Ranged",
         "moshi-ikako-attack" or "training-province-attack" or "kaname-ranged-attack" or "yashiro-attack" or "akio-attack" or "genji-attack" or "dragons-favor-attack" => "Ranged",
@@ -3792,7 +3855,9 @@ public sealed partial class MatchEngine
                 // Dragon's Breath Castle: "Reaction: Even if this card is bowed, ...".
                 // Asako Chukage - exp (issue #453, batch 3): "Battle: Even if Chukage is bowed: ..." -- Michi's own tireless reinforce.
                 or "chukage-move"
-                or "dbc-attacker-bow", "Abilities on bowed cards cannot be used.");
+                or "dbc-attacker-bow"
+                // Honor and Treachery pass (issue #458): Bayushi Utoro, Shosuro Chikata and Tsubo each print "Even if [he] is bowed".
+                or "utoro-straighten" or "chikata-bow" or "chikata-straighten" or "tsubo-straighten", "Abilities on bowed cards cannot be used.");
             uses = source.AbilityUses;
         }
         // The per-turn limit is AbilityDefinition.UsesPerTurn (AbilityLimits.cs). A once-per-GAME ability (AbilityDefinition.OncePerGame: Border Keep's refresh, Bo of Water) never resets: any stamp spends it.
@@ -3865,6 +3930,8 @@ public sealed partial class MatchEngine
                     "Choose a battlefield with one or more enemy units.");
             else if (id == "hawado-move-home")
                 Require(command.Province is null, "Moving home names no battlefield.");
+            // Bayushi Irezu (issue #458): "Home Battle: If Irezu is at home..." -- his own printed condition on taking the action at all.
+            if (id == "irezu-move") Require(source!.Zone == Zone.Home, "Irezu must be at home.");
         }
         // Return to Action (oracle-l5r-10953, issue #331): "If you are the Defender" is a condition on taking the
         // action at all (it sits before the effects colon), so it is checked here where every offer and every
@@ -4247,6 +4314,10 @@ public sealed partial class MatchEngine
                 "own-defending-personality-at-battle" => Definition(performer).Type == CardType.Personality && IsDefendingUnit(performer),
                 // Testimony (issue #453, batch 2): "your performing unbowed honorable Personality".
                 "own-unbowed-honorable-personality" => Definition(performer).Type == CardType.Personality && !performer.Bowed && MatchesTargetStatus(performer, TargetStatus.IsHonorable),
+                // Devoted Yojimbo (issue #458): "one of your Followers or Personalities in this army" -- unbowed, since the ability's own cost bows him
+                // (a Performer category's own job to enforce: ValidateWielderCosts only judges CostSubject.Wielder, not Performer).
+                "own-follower-or-personality-in-army" => (Definition(performer).Type == CardType.Personality || Definition(performer).Type == CardType.Follower && performer.Zone == Zone.Attached)
+                    && !performer.Bowed && AtBattle(Card(UnitHostId(performer))),
                 _ => false
             }, "That card does not meet this ability's performer requirement.");
         }
@@ -4613,7 +4684,7 @@ public sealed partial class MatchEngine
                     // -- own-personality-at-home is exempt for the same reason.
                     if (actingAsBattle && ability.Target is not ("personality-at-adjacent-battlefield" or "own-unbowed-farm" or "region-or-terrain" or "own-personality-at-home" or "personality-at-any-location" or "own-follower-at-any-location")
                         && id is not ("intervening-spirit-move" or "earth-flows-move" or "sanctuary-of-the-waves-move" or "dislodge-the-foe" or "heijin-move"
-                            or "natures-wrath-move")) Require(AtBattle(target), "Target or performer must be at the current battlefield."); // Nature's Wrath (issue #453 batch 5): its target is brought TO the battlefield
+                            or "natures-wrath-move" or "irezu-move" or "mitsushen-move")) Require(AtBattle(target), "Target or performer must be at the current battlefield."); // Nature's Wrath (issue #453 batch 5): its target is brought TO the battlefield; Irezu (issue #458) moves the target HOME from wherever he stands; Mitsushen (issue #458) brings his target TO his own battlefield from wherever it stands
                     var personality = type == CardType.Personality;
                     var own = target.OwnerId == player.Id;
                     // TargetMustBe (P2): a target-status legality condition layered onto whichever category
@@ -4975,6 +5046,20 @@ public sealed partial class MatchEngine
                         // hold once the -4F applies (that target's Force is at most 4, so "now 0", and the acting player controls a Shugenja).
                         "iaimiko-collateral" => (type == CardType.Follower || personality && !HasAttachments(target)) && SlotCards(command, "target").FirstOrDefault() is { } iaimikoPrimary
                             && UnitHostId(target) == UnitHostId(iaimikoPrimary) && CardForce(iaimikoPrimary) <= 4 && ControlsKeyword(player.Id, "Shugenja"),
+                        // Honor and Treachery pass (issue #458).
+                        // Bayushi Irezu: "another target Scorpion Clan Personality you control" -- wherever he stands, other than Irezu himself.
+                        "own-scorpion-personality-other-than-source" => personality && own && target.Id != source!.Id && HasClanAffiliation(target, "Scorpion"),
+                        // Communion with Earth: "another of your Shugenja, who must be Earth" -- excludes the Spell's own current wielder.
+                        "own-earth-shugenja-other-than-wielder" => personality && own && Keyword(target, "Shugenja") && Keyword(target, "Earth") && target.Id != source!.AttachedTo,
+                        // Devoted Yojimbo: "a Follower or Personality in this army" -- either side of the controller's own army at the current battlefield
+                        // (a Follower's own "unit" is its host's; a Personality is its own unit).
+                        "own-follower-or-personality-in-army" => own && (personality || type == CardType.Follower && target.Zone == Zone.Attached)
+                            && AtBattle(Card(UnitHostId(target))),
+                        // Shiba Tsukimi: "a card in a unit" -- any side's Personality, or an attached Follower/Item/Spell.
+                        "any-unit-card" => personality || target.Zone == Zone.Attached && type is CardType.Follower or CardType.Item or CardType.Spell,
+                        // The Towers of the Yogo's granted ability: "an enemy Follower or Personality without Followers" -- a Personality with no attached Follower,
+                        // or any enemy Follower (a Follower cannot itself carry a Follower).
+                        "enemy-card-without-followers" => !own && (type == CardType.Follower || personality && !Attachments(target.Id).Any(a => Definition(a).Type == CardType.Follower)),
                         _ => false
                     }, "That card does not meet this ability's target or performer requirements.");
                 }
@@ -7505,6 +7590,26 @@ public sealed partial class MatchEngine
             case "iwashi-bow": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;
             case "ino-storm": ArmInoStorm(source!); GrantAdditionalAction(player.Id, null); break;
             case "akikusa-honor": GainHonor(player.Id, 1, "Asahina Akikusa", source); break;
+            // Honor and Treachery pass (issue #458; helpers in HonorAndTreacheryPass.cs).
+            case "shihiro-boost": ApplyModifier(source!, source!.Id, id, "Force", 1); break;
+            case "irezu-move": IrezuMove(command, source!, target!, _state.CurrentBattleProvince!.Value); break;
+            case "irezu-duel-enter": RedirectAction(HeldAction(), source!.Id, source); break;
+            case "utoro-straighten": DiscardFate(player, SlotCards(command, "discard").Single()); Straighten(SlotCards(command, "target").Single()); break;
+            case "communion-transfer": TransferAttachment(source!, target!, Definition(source!).Name); break;
+            case "devoted-yojimbo-straighten": Straighten(target!); break;
+            case "elite-training-grant": GrantKeyword(Card(command.PerformerId!), "Elite", source!.Id, GrantDuration.Permanent); break;
+            case "taiken-attack": if (ResolveOrDeferAttack(id, player, target?.Id, additional: consumedGrant)) return; break;
+            case "mitsushen-move":
+            {
+                var mitsushenBattle = _state.CurrentBattleProvince!.Value;
+                if (!AtBattle(target!) && TryMoveToBattlefield(target!, mitsushenBattle)) StraightenUnit(target!);
+                break;
+            }
+            case "tsukimi-refresh": Straighten(target!); RefreshBattleAbilities(target!); break;
+            case "chikata-bow": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;
+            case "chikata-straighten": Straighten(target!); break;
+            case "towers-of-yogo-bow": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;
+            case "tsubo-straighten": Straighten(target!); break;
             default:
                 // Any ability with an AttachSpec (Moto Jun-Ni, Fading Shadows, Foothills Keep and the training shapes) needs no case of its own: the Gold was
                 // paid by PayForAbility, so the card now leaves its place and enters play attached. An entering-play window ends the action here.
@@ -7638,14 +7743,14 @@ public sealed partial class MatchEngine
     // personality was actually bowed. Hizumi checked first if somehow both are eligible at once --
     // an arbitrary but deterministic tie-break, since nothing printed orders them relative to each
     // other and no real scenario needs both simultaneously.
-    private static string? BowedAtBattlefieldReactionAbility(CardInstance card) =>
+    private string? BowedAtBattlefieldReactionAbility(CardInstance card) =>
         AbilityIdsOf(card).FirstOrDefault(a => AbilityCatalog.All.TryGetValue(a, out var def) && def.Timing == "Reaction" && def.Trigger == "bowed-personality-at-own-battlefield");
     // Quagmire (issue #417): the Region's own province and the ones next to it (provinces are numbered in a row); a battlefield is at a province of its Defender.
-    private static string? BowedNearRegionReactionAbility(CardInstance card) =>
+    private string? BowedNearRegionReactionAbility(CardInstance card) =>
         AbilityIdsOf(card).FirstOrDefault(a => AbilityCatalog.All.TryGetValue(a, out var def) && def.Timing == "Reaction" && def.Trigger == "bowed-personality-near-region");
     private bool RegionIsNear(CardInstance region, CardInstance personality) =>
         region.ProvinceIndex is int regionProvince && personality.ProvinceIndex is int battlefield && Math.Abs(regionProvince - battlefield) <= 1 && region.OwnerId != _state.ActivePlayerId;
-    private static string? OwnActionBowedPersonalityReactionAbility(CardInstance card) =>
+    private string? OwnActionBowedPersonalityReactionAbility(CardInstance card) =>
         AbilityIdsOf(card).FirstOrDefault(a => AbilityCatalog.All.TryGetValue(a, out var def) && def.Timing == "Reaction" && def.Trigger == "own-action-bowed-personality");
     private bool OpenBowReactionWindow(int actingPlayerId, HashSet<string> bowedBeforeAction, int closesTo)
     {
@@ -7684,7 +7789,7 @@ public sealed partial class MatchEngine
         }
         return false;
     }
-    private static string? MovedEnemyInfantryReactionAbility(CardInstance card) =>
+    private string? MovedEnemyInfantryReactionAbility(CardInstance card) =>
         AbilityIdsOf(card).FirstOrDefault(a => AbilityCatalog.All.TryGetValue(a, out var def) && def.Timing == "Reaction" && def.Trigger == "moved-enemy-infantry-to-own-battlefield");
     // Legion of the Bat (issue #279): unlike OpenBowReactionWindow above (a battlefield-wide search
     // across every candidate reacting card), the reacting card here is uniquely determined by
@@ -7710,7 +7815,7 @@ public sealed partial class MatchEngine
         Emit("reactionWindow", "Move-reaction window opened.", legion.OwnerId, legion.Id);
         return true;
     }
-    private static string? SiblingFollowerBowedReactionAbility(CardInstance card) =>
+    private string? SiblingFollowerBowedReactionAbility(CardInstance card) =>
         AbilityIdsOf(card).FirstOrDefault(a => AbilityCatalog.All.TryGetValue(a, out var def) && def.Timing == "Reaction" && def.Trigger == "sibling-follower-bowed");
     // Nikutai (issue #279): a narrow in-play Reaction scoped to Nikutai's own host unit rather than a
     // battlefield (OpenBowReactionWindow's own scope) or the acting player (Ruya's shape) -- kept as
@@ -8282,6 +8387,11 @@ public sealed partial class MatchEngine
                     _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && !c.Bowed && AtBattle(c)).Select(c => (string?)c.Id).ToArray(),
                 // Testimony (issue #453, batch 2).
                 "own-unbowed-honorable-personality" => _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && Definition(c).Type == CardType.Personality && !c.Bowed && MatchesTargetStatus(c, TargetStatus.IsHonorable)).Select(c => (string?)c.Id).ToArray(),
+                // Devoted Yojimbo (issue #458): "bow one of your Followers or Personalities in this army" -- the same army-membership shape as its own
+                // Performer validation switch above, mirrored here so a legal performer is actually offered rather than falling to the null-performer default.
+                "own-follower-or-personality-in-army" => _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && !c.Bowed
+                    && (Definition(c).Type == CardType.Personality || Definition(c).Type == CardType.Follower && c.Zone == Zone.Attached)
+                    && AtBattle(Card(UnitHostId(c)))).Select(c => (string?)c.Id).ToArray(),
                 _ => [null]
             };
             // Unlike every other Performer-based ability (still offered, disabled, with no eligible

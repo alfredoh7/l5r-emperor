@@ -1,0 +1,30 @@
+{
+  "Profile": "strategy-wave-51",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10255",
+      "Name": "Elite Training",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Target your performing Personality. He undergoes vigorous training. Permanently give him Elite. (Elite cards contribute Force even if bowed.)",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10255.jpg",
+      "Keywords": [],
+      "Focus": 3,
+      "Abilities": [
+        "elite-training-grant"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

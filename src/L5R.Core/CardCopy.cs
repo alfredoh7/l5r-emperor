@@ -79,10 +79,11 @@ public sealed partial class MatchEngine
 {
     private static bool IsCopyChoice(string type) => type is "copyKeyword" or "copyAbility";
 
-    // The ability ids a card has now: printed, plus granted (a permanent grant, a copy). The ONE place a granted ability is joined
+    // The ability ids a card has now: printed, plus granted (a permanent grant, a copy), plus a controller-wide STATIC grant (issue #458, The Towers of
+    // the Yogo: "Each of your Scorpion Clan Personalities has the ability ..." -- StaticAbilityGrants.cs). The ONE place a granted ability is joined
     // to the printed ones; every scan of "the abilities this card has" goes through it.
-    private static IEnumerable<string> AbilityIdsOf(CardInstance card) =>
-        (Definition(card).Abilities ?? []).Concat(card.GrantedAbilities.Where(g => GrantHolds(g.Duration, card)).Select(g => g.AbilityId)).Distinct(StringComparer.Ordinal);
+    private IEnumerable<string> AbilityIdsOf(CardInstance card) =>
+        (Definition(card).Abilities ?? []).Concat(card.GrantedAbilities.Where(g => GrantHolds(g.Duration, card)).Select(g => g.AbilityId)).Concat(StaticGrantedAbilityIds(card)).Distinct(StringComparer.Ordinal);
 
     // A grant that is still "on" a card that is not in play: a permanent one, or a copy (which lasts until the copying ability is
     // used again, wherever the receiver is). A turn or attachment grant belongs to a card in play -- it does not follow a Personality

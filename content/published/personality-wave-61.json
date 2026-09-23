@@ -1,0 +1,294 @@
+{
+  "Profile": "personality-wave-61",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10241",
+      "Name": "Akodo Shihiro",
+      "Type": "Personality",
+      "Clan": "Lion",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 4,
+      "PersonalHonor": 2,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Before (each time) another player's action resolves during a battle at Shihiro's battlefield: Give Shihiro +1F (until the turn ends).",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10241.jpg",
+      "Keywords": [
+        "Lion Clan",
+        "Samurai",
+        "Soul of Akodo Ieshige"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "shihiro-boost"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-793",
+      "Name": "Bayushi Irezu",
+      "Type": "Personality",
+      "Clan": "Scorpion",
+      "GoldCost": 2,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 1,
+      "PersonalHonor": 1,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Home Battle: If Irezu is at home, move home another target Scorpion Clan Personality you control. Move Irezu to the current battlefield.\nReaction, Bow this card: Before your Scorpion Clan Personality enters a duel, Irezu enters the duel instead.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-793.jpg",
+      "Keywords": [
+        "Bitter Lies",
+        "Martyr",
+        "Scorpion Clan",
+        "Soul of Bayushi Kwanchai"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "irezu-move",
+        "irezu-duel-enter"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10247",
+      "Name": "Bayushi Kasumi",
+      "Type": "Personality",
+      "Clan": "Scorpion",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 1,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "(Elite cards contribute Force even if bowed.)",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10247.jpg",
+      "Keywords": [
+        "Elite",
+        "Samurai",
+        "Scorpion Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10249",
+      "Name": "Bayushi Utoro",
+      "Type": "Personality",
+      "Clan": "Scorpion",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 4,
+      "PersonalHonor": 1,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Even if Utoro is bowed, discard a card and target a Personality: Straighten him.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10249.jpg",
+      "Keywords": [
+        "Samurai",
+        "Scorpion Clan",
+        "Soul of Bayushi Motomu"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "utoro-straighten"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10243",
+      "Name": "Isawa Taiken",
+      "Type": "Personality",
+      "Clan": "Phoenix",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 3,
+      "PersonalHonor": 3,
+      "HonorRequirement": 4,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Bow Taiken: Ranged 4 Attack.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10243.jpg",
+      "Keywords": [
+        "Duelist",
+        "Fire",
+        "Firestorm Legion",
+        "Phoenix Clan",
+        "Shugenja",
+        "Soul of Isawa Kokuten"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "taiken-attack"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10245",
+      "Name": "Shiba Mitsushen",
+      "Type": "Personality",
+      "Clan": "Phoenix",
+      "GoldCost": 9,
+      "GoldProduction": 0,
+      "Force": 5,
+      "Chi": 4,
+      "PersonalHonor": 3,
+      "HonorRequirement": 4,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Target your Personality: Move him to Mitsushen's battlefield. If he moved, straighten his unit.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10245.jpg",
+      "Keywords": [
+        "Unique",
+        "Commander",
+        "Phoenix Clan",
+        "Samurai"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "mitsushen-move"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10246",
+      "Name": "Shiba Tsukimi",
+      "Type": "Personality",
+      "Clan": "Phoenix",
+      "GoldCost": 10,
+      "GoldProduction": 0,
+      "Force": 6,
+      "Chi": 5,
+      "PersonalHonor": 4,
+      "HonorRequirement": 6,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Twice per turn, target a card in a unit: Straighten it. It may use its abilities a second time this turn.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10246.jpg",
+      "Keywords": [
+        "Duelist",
+        "Experienced 3.5",
+        "Loyal",
+        "Unique",
+        "Clan Champion",
+        "Daimyo",
+        "Phoenix Clan",
+        "Samurai",
+        "Shiba's Soul"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "tsukimi-refresh"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10250",
+      "Name": "Shosuro Chikata",
+      "Type": "Personality",
+      "Clan": "Ninja",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 3,
+      "PersonalHonor": 1,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Even if Chikata is bowed, target a Scorpion Clan or Dragon Clan Personality: Bow or straighten him.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10250.jpg",
+      "Keywords": [
+        "Ninja",
+        "Scorpion Clan",
+        "Soul of Bayushi Kasata"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "chikata-bow",
+        "chikata-straighten"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10252",
+      "Name": "Tsubo",
+      "Type": "Personality",
+      "Clan": "Unaligned",
+      "GoldCost": 6,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 4,
+      "PersonalHonor": 2,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Even if Tsubo is bowed, target a Personality: Straighten him.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10252.jpg",
+      "Keywords": [
+        "Experienced Tsubo the Drunk",
+        "Unique",
+        "Ronin",
+        "Samurai",
+        "Sober"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "tsubo-straighten"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10251",
+      "Name": "Yogo Haruto",
+      "Type": "Personality",
+      "Clan": "Scorpion",
+      "GoldCost": 9,
+      "GoldProduction": 0,
+      "Force": 5,
+      "Chi": 4,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Target a Follower in your discard pile: Attach it to Haruto, paying 2 less Gold.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10251.jpg",
+      "Keywords": [
+        "Loyal",
+        "Unique",
+        "Air",
+        "Commander",
+        "Scorpion Clan",
+        "Shugenja",
+        "Villain"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "haruto-attach"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

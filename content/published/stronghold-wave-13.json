@@ -1,0 +1,52 @@
+{
+  "Profile": "stronghold-wave-13",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10256",
+      "Name": "The Sacred Temple of the Phoenix",
+      "Type": "Stronghold",
+      "Clan": "Phoenix",
+      "GoldCost": 0,
+      "GoldProduction": 3,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 5,
+      "StartingHonor": 6,
+      "Text": "Bow this card: When paying for a Spell or Shugenja, produce 5 Gold which may only pay for that card.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10256.jpg",
+      "Keywords": [
+        "Inexperienced",
+        "Temple"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "sacred-temple-phoenix-gold"
+    },
+    {
+      "Id": "oracle-l5r-8392",
+      "Name": "The Towers of the Yogo",
+      "Type": "Stronghold",
+      "Clan": "Scorpion",
+      "GoldCost": 0,
+      "GoldProduction": 4,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 7,
+      "StartingHonor": 1,
+      "Text": "Each of your Scorpion Clan Personalities has the ability, \"Battle, Bow this card: Bow a target enemy Follower or Personality without Followers.\"\nEach of your Scorpion Clan Personalities has the ability, \"Battle: Bow this card and target an enemy Follower or Personality without Followers: Bow it.\"",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8392.jpg",
+      "Keywords": [],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "towers-of-yogo-grant"
+    }
+  ],
+  "Decks": []
+}

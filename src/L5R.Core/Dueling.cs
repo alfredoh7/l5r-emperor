@@ -396,7 +396,7 @@ public sealed partial class MatchEngine
     // "After a duel resolves during which [this card] won" (issue #209): scoped to the one specific
     // card that won, the same shape own-enters-play already uses for entering-play Reactions (see
     // OpenEntryReactionWindow) -- a tie has no single winner, so there is nothing to react with here.
-    private static string? DuelWonReactionAbility(CardInstance card) =>
+    private string? DuelWonReactionAbility(CardInstance card) =>
         AbilityIdsOf(card).FirstOrDefault(a => AbilityCatalog.All.TryGetValue(a, out var def) && def.Timing == "Reaction" && def.Trigger == "own-won-duel");
 
     // Kakita Maratai (issue #299): "After a duel ends that your Personality won" -- the same window,
@@ -409,7 +409,7 @@ public sealed partial class MatchEngine
     // watchers ever match ValidateAbility's own trigger check. The "duelWonReaction" PendingChoice
     // itself is untouched (CardId is still the winning card), so every consumer of the existing own-won-
     // duel window -- Apply()'s pass/close handling included -- needs no change.
-    private static string? DuelWonBroadcastReactionAbility(CardInstance card) =>
+    private string? DuelWonBroadcastReactionAbility(CardInstance card) =>
         AbilityIdsOf(card).FirstOrDefault(a => AbilityCatalog.All.TryGetValue(a, out var def) && def.Timing == "Reaction" && def.Trigger == "own-personality-won-duel");
 
     private bool OpenDuelWonReactionWindow(string winnerId, int winnerPlayerId, int closesTo)
