@@ -190,7 +190,10 @@ public sealed record Protection(string Source, string Duration);
 public sealed record ActionLock(string Source, string Duration);
 
 /// <summary>The moments of a turn a straighten hold can wait for. Each happens during the active player's turn; a hold names whose turn counts.</summary>
-public enum StraightenPoint { TurnBegins, StraightenPhaseEnds, EventsRevealEnds, ActionPhaseEnds, TurnEnds }
+public enum StraightenPoint { TurnBegins, StraightenPhaseEnds, EventsRevealEnds, ActionPhaseEnds, TurnEnds,
+    // "until the phase ends" (Ronin Ambushers, issue #453 batch 5): released when the phase in progress gives way to a different one (the whole
+    // Attack-declaration-through-battle-resolution stretch counts as one phase, the War Weariness convention). Owner is always null.
+    PhaseEnds }
 
 /// <summary>"May not straighten until X" (issue #415). <see cref="Owner"/> is the player whose turn counts (null: whoever's turn it is when the point comes, "this turn" and "the
 /// next Straighten Phase"); <see cref="Until"/> is the point; <see cref="Skip"/> is how many of those points must pass with the hold still standing before it is released (0: the
@@ -935,6 +938,9 @@ public sealed class MatchState
     public List<int> CurrentActionHonorLosers { get; set; } = [];
     // Brotherhood Schism: the turn in which "Rings will not enter play if their owner has already put a Ring into play this turn" stands.
     public int RingSchismTurn { get; set; } = -1;
+    // Moksha Patam (oracle-l5r-10121, issue #453 batch 5): "After an action resolves, if a player gained Honor from its effects" -- set by GainHonor on any
+    // gain, reset when an action begins (RunAbilityEffects) and read once when it is truly done (FinishActionEffectTracking, ApplyMokshaPatamTokens).
+    public bool CurrentActionHonorGained { get; set; }
 }
 
 /// <summary>A standing redirect (Seeds of Decay, issue #453): Kind is a StandingRedirectKinds value, OwnerId the player whose cards it protects, ToCardId the card the action

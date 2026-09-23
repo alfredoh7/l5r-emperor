@@ -40,6 +40,7 @@ public sealed partial class MatchEngine
             StraightenPoint.StraightenPhaseEnds => $"{who}next Straighten Phase ends",
             StraightenPoint.EventsRevealEnds => $"{who}cards are revealed at the start of the next turn",
             StraightenPoint.ActionPhaseEnds => $"{who}next Action Phase ends",
+            StraightenPoint.PhaseEnds => "this phase ends",
             _ => "this turn ends"
         };
     }

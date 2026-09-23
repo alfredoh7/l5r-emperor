@@ -380,7 +380,16 @@ public static class CardCatalog
             new("training-courtier-personality", "Training courtier", CardType.Personality, "Unaligned", GoldCost:3, Force:2, Chi:2, PersonalHonor:1, Keywords:["Courtier"], Text:"Synthetic keyword fixture: a Courtier. Never included in a playable deck."),
             new("training-spirit-personality", "Training spirit", CardType.Personality, "Unaligned", GoldCost:3, Force:2, Chi:2, PersonalHonor:1, Keywords:["Spirit"], Text:"Synthetic keyword fixture: a Spirit. Never included in a playable deck."),
             new("training-henshin-personality", "Training henshin", CardType.Personality, "Unaligned", GoldCost:3, Force:2, Chi:2, PersonalHonor:1, Keywords:["Henshin","Monk"], Text:"Synthetic keyword fixture: a Henshin. Never included in a playable deck."),
-            new("training-dark-virtue-performed", "Training performed Dark Virtue", CardType.Strategy, GoldCost:0, Keywords:["Dark Virtue"], Abilities:["training-performed-bow"], Text:"Synthetic Hotaka fixture: a Dark Virtue Strategy whose Open action a chosen unbowed Personality performs (bow a target Personality). Never included in a playable deck.")
+            new("training-dark-virtue-performed", "Training performed Dark Virtue", CardType.Strategy, GoldCost:0, Keywords:["Dark Virtue"], Abilities:["training-performed-bow"], Text:"Synthetic Hotaka fixture: a Dark Virtue Strategy whose Open action a chosen unbowed Personality performs (bow a target Personality). Never included in a playable deck."),
+            // Seeds of Decay pass (issue #453), batch 5: keyworded Personalities the batch's scenarios need (never included in a playable deck).
+            new("training-seeds5-earth-alchemist", "Training Earth Alchemist Shugenja", CardType.Personality, "Unaligned", GoldCost:3, Force:2, Chi:3, PersonalHonor:1, Keywords:["Earth","Shugenja","Alchemist"], Text:"Synthetic batch-5 fixture: an Earth Alchemist Shugenja (Nature's Wrath, The Earth's Strength). Never included in a playable deck."),
+            new("training-seeds5-void-shugenja", "Training Void Shugenja", CardType.Personality, "Unaligned", GoldCost:3, Force:2, Chi:3, PersonalHonor:1, Keywords:["Void","Shugenja"], Text:"Synthetic batch-5 fixture: a Void Shugenja (Extend the Soul's Boundaries). Never included in a playable deck."),
+            new("training-seeds5-fire-shugenja", "Training Fire Shugenja", CardType.Personality, "Unaligned", GoldCost:3, Force:2, Chi:3, PersonalHonor:1, Keywords:["Fire","Shugenja"], Text:"Synthetic batch-5 fixture: a Fire Shugenja (Immolation). Never included in a playable deck."),
+            new("training-seeds5-air-shugenja", "Training Air Shugenja", CardType.Personality, "Unaligned", GoldCost:3, Force:2, Chi:3, PersonalHonor:1, Keywords:["Air","Shugenja"], Text:"Synthetic batch-5 fixture: an Air Shugenja (Scent of Dishonor). Never included in a playable deck."),
+            new("training-seeds5-shadowlands-oni", "Training Shadowlands Oni", CardType.Personality, "Shadowlands", GoldCost:4, Force:3, Chi:2, PersonalHonor:0, Keywords:["Nonhuman","Oni"], Text:"Synthetic batch-5 fixture: a Shadowlands Nonhuman Personality (Master of Beasts, Okesa-goma). Never included in a playable deck."),
+            new("training-seeds5-spirit", "Training Spirit", CardType.Personality, "Unaligned", GoldCost:3, Force:2, Chi:2, PersonalHonor:1, Keywords:["Spirit"], Text:"Synthetic batch-5 fixture: a Spirit Personality (Peace of the Kami). Never included in a playable deck."),
+            new("training-seeds5-mantis-samurai", "Training Mantis samurai", CardType.Personality, "Mantis", GoldCost:3, Force:2, Chi:2, PersonalHonor:2, Keywords:["Mantis Clan","Samurai"], Text:"Synthetic batch-5 fixture: a Mantis Clan Personality (Kama, Celestial Sword of the Mantis). Never included in a playable deck."),
+            new("training-seeds5-political-courtier", "Training Political Courtier", CardType.Personality, "Unaligned", GoldCost:3, Force:1, Chi:2, PersonalHonor:2, Keywords:["Courtier","Political"], Abilities:["training-bow-any"], Text:"Synthetic batch-5 fixture: a Courtier whose Open action is Political (the keyword is inherited by its abilities) -- Ki-Uso, Celestial Sword of the Scorpion. Never included in a playable deck."),
         ];
         // Deliberately does NOT concat PublishedContent.TestSnapshot.Cards: that frozen scenario only
         // pins which ids make up the test suite's Lion/Crane decks, not a second copy of their
@@ -564,6 +573,9 @@ public static class CardCatalog
             .Concat(PublishedContent.RegionWave6.Cards)
             .Concat(PublishedContent.EventWave5.Cards)
             .Concat(PublishedContent.FollowerWave26.Cards)
+            .Concat(PublishedContent.ItemWave11.Cards)
+            .Concat(PublishedContent.SpellWave18.Cards)
+            .Concat(PublishedContent.FollowerWave25.Cards)
             .ToDictionary(c => c.Id, StringComparer.Ordinal);
     }
 }

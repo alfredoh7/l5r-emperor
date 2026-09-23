@@ -51,6 +51,8 @@ public sealed partial class MatchEngine
         // Revenge: the window resets once the acting player's OWN Battle action finishes resolving.
         if (AbilityCatalog.All[abilityId].Timing == "Battle") _state.EnemyDestroyedOwnPersonalitySinceLastBattleAction[playerId] = false;
         CountReconStrategyAction(abilityId, playerId, sourceId); // Advanced Intelligence (Seeds of Decay pass, issue #453, batch 1).
+        // Moksha Patam (issue #453 batch 5): "After an action resolves, if a player gained Honor from its effects" -- a trait, so applied here before any Reaction to the same point.
+        ApplyMokshaPatamTokens();
         return OpenAfterActionResolvedWindow(closesTo);
     }
 

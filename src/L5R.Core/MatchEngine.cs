@@ -182,7 +182,9 @@ public sealed partial class MatchEngine
             var reactionCard = aftermath is not null && reactionSource is not null && _state.Cards.TryGetValue(reactionSource, out var rc)
                 && rc.FaceUp && rc.Zone is not (Zone.Hand or Zone.FateDeck or Zone.DynastyDeck) ? ViewCard(rc) : null;
             var reactionLabel = _state.PendingChoice?.Type=="overconfidentDraw" ? "Overconfident" : null;
+            var traitSnapshot = AfterCommandTraitSnapshot(); // "After this card bows/attaches" traits (issue #453 batch 5, SeedsOfDecayBatch5.cs)
             Apply(command);
+            ApplyAfterCommandTraits(traitSnapshot);
             ReturnCardsOutOfPlayToTheirOwners();
             RemoveCreatedCardsLeftInPiles();
             if (aftermath is not null) RecordDuelChanges(aftermath, "Aftermath", reactionCard, sourceLabel: reactionLabel);
@@ -1927,7 +1929,7 @@ public sealed partial class MatchEngine
             // Two-Handed overrides Kensai and Kama entirely: whenever a Two-Handed Weapon is involved
             // (already attached, or the one being attached), at most one Weapon total is ever allowed.
             if(Keyword(attachment,"Two-Handed") || existingWeapons.Any(c=>Keyword(c,"Two-Handed"))) return existingWeapons.Length==0;
-            var weaponCap=Keyword(target,"Kensai") || Keyword(attachment,"Kama") || existingWeapons.Any(c=>Keyword(c,"Kama")) ? 2 : 1;
+            var weaponCap=Keyword(target,"Kensai") || IsKama(attachment) || existingWeapons.Any(IsKama) ? 2 : 1; // IsKama: the keyword, or the printed Kama's own Effect (issue #453 batch 5)
             return existingWeapons.Length<weaponCap;
         }
         return true;
@@ -2025,6 +2027,8 @@ public sealed partial class MatchEngine
         // Maiden receives FROM other cards' own Effect), so it is Effect-keyed on the receiving card
         // itself, with no attacking/defending gate at all.
         +(Definition(card).Effect=="force-per-other-magistrate-in-army"?OtherMagistratesInArmy(card):0)
+        // Immolation (oracle-l5r-10127, issue #453 batch 5): "This Shugenja has +3F, or +4F while he is Fire" -- Effect-keyed on the attached Spell, like tsunami-force above.
+        +Attachments(card.Id).Where(c=>Definition(c).Type==CardType.Spell && Definition(c).Effect=="immolation-force" && Keyword(card,"Shugenja")).Sum(_=>Keyword(card,"Fire")?4:3)
         +AshigaruBattleBoost(card)+ArmyBattleMaidenBoost(card));
     // "Her army" (Yoritomo Minori): every Personality the same owner has at the same battlefield --
     // Army(), the engine's own definition -- so a card not at a battlefield has no army and no bonus.
@@ -2048,6 +2052,9 @@ public sealed partial class MatchEngine
     private int ItemForceToWielder(CardInstance item,CardInstance wielder) => Definition(item).Effect switch
     {
         "force-to-kensai-wielder" => Keyword(wielder,"Kensai") ? 1 : 0,
+        // Celestial Sword of the Mantis / of the Scorpion - exp (issue #453 batch 5): "This card has +1F for each <Clan> Personality you control" -- the wielder's controller's, the wielder himself included.
+        "celestial-sword-force-mantis" => ControlledClanPersonalities(wielder.OwnerId,"Mantis"),
+        "celestial-sword-force-scorpion" => ControlledClanPersonalities(wielder.OwnerId,"Scorpion"),
         _ => 0
     };
     // A Follower's own standalone Force, including any static conditional bonus it grants itself
@@ -2906,6 +2913,7 @@ public sealed partial class MatchEngine
         }
         var player=Player(playerId); player.Honor+=amount;
         if(amount<0) RecordHonorLoss(playerId); // An Insult Answered (issue #453, batch 2): the action that cost this player Honor.
+        if(amount>0) _state.CurrentActionHonorGained=true; // Moksha Patam (issue #453 batch 5): read when the action in progress is done.
         if(player.Honor<=-20) player.DishonorLossPending=true;
         Emit("honorChanged",$"{player.Name}: {amount:+#;-#;0} Honor ({reason}).",playerId,Amount:amount);
         // Formal Apology (issue #259): checked after EVERY Honor change, gain or loss alike, since the
@@ -2974,6 +2982,8 @@ public sealed partial class MatchEngine
         // direct `state.Phase=Phase.Dynasty` field assignment bypasses SetPhase entirely, so it never
         // reaches here). One check here therefore covers both paths without needing two separate hooks.
         if(_state.Phase==Phase.Action && phase!=Phase.Action) AdvanceStraightenHolds(StraightenPoint.ActionPhaseEnds);
+        // "until the phase ends" holds (issue #453 batch 5, Ronin Ambushers): the whole Attack-declaration-through-battle stretch is one phase (the War Weariness convention above).
+        if(PhaseFamily(phase)!=PhaseFamily(_state.Phase)) AdvanceStraightenHolds(StraightenPoint.PhaseEnds);
         if(phase==Phase.Dynasty) DragonsBreathHonor();
         // Sentinel Spirit (issue #453, batch 2): "after the next Dynasty Phase begins".
         if(phase==Phase.Dynasty) ResolveSentinelWatches();

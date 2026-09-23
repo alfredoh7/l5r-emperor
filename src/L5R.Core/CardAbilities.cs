@@ -129,7 +129,11 @@ public sealed record AbilityDefinition(string Timing, string Label, string Targe
     // The ability is taken by its own card from a DISCARD PILE (issue #417, Never Safe: "After this battle ends, if this card is in your discard pile, you may put it into your hand").
     bool FromDiscard = false,
     // The action names one of the acting player's own provinces (command.Province) that holds a card (issue #420, Scavenging Party: "Discard a card from one of your provinces and refill it face-up").
-    bool ChoosesOwnProvince = false);
+    bool ChoosesOwnProvince = false,
+    // "If this Shugenja is <keyword>, he may perform this card's Battle action even if it is in your home" (Seeds of Decay, issue #453 batch 5: Nature's Wrath -- Earth, Peace of
+    // the Kami -- Water): SourceUnitMayBeAway, granted only while the Personality the source is attached to has the keyword (MatchEngine.SourceMayBeAway). The acting
+    // player still needs a unit at the battlefield, and the target keeps its own location rule.
+    string? SourceUnitMayBeAwayIfWielder = null);
 
 public static class AbilityCatalog
 {
@@ -2383,6 +2387,53 @@ public static class AbilityCatalog
             Costs: [new(CostVerbs.Sacrifice)], Creates: new(CardType.Personality, Force: 0, Chi: 2, PersonalHonor: 0, Keywords: ["Ninja"], ProxyId: "oracle-l5r-10200") { ControllerClan = true }),
         // Second City Port (oracle-l5r-10037): "Open, :bow:: Straighten a target Market or Port." Any player's Holding with either keyword.
         ["second-city-port-straighten"] = new("Open", "Bow this card: Straighten a target Market or Port", "market-or-port-holding", Costs: ActionCost.BowSource),
+        // Seeds of Decay pass (issue #453), batch 5
+        // O-Yoroi Troops (oracle-l5r-10107) reuses champion-of-thunder-negate as written (its Target and trigger are unit-relative, not card-specific).
+        // Ronin Ambushers (oracle-l5r-10108), Aka-beko (10110), Hato-gurama (10115), Kama (10116), Ki-Uso (10117) and Immolation (10127) are traits (Effect ids), not abilities.
+        // Blades of the Black Dragon (oracle-l5r-10111): "Battle: Bow this Personality unless he is Nonhuman: Melee Attack with strength equal to his Force" -- the
+        // wielder's live Force, legulus-legion-attack's self-referential shape, with Control Your Destiny's keyword-exempt wielder bow.
+        ["blades-of-black-dragon-attack"] = new("Battle", "Bow this Personality unless he is Nonhuman: Melee Attack with strength equal to his Force", "attack", Costs: ActionCost.BowWielderUnless("Nonhuman")),
+        // Celestial Sword of the Mantis - exp (oracle-l5r-10113): the entry Honor gain is an entering-play Reaction (training-item-entry-reaction's shape); the Battle action is
+        // one printed ability with a choice of effects, so its two halves share one use (UsageKey), each paying "zero or more Gold" (training-charity-honor's Variable rule).
+        ["celestial-sword-mantis-honor"] = new("Reaction", "After this card enters play: Gain 2 Honor", "none", Trigger: "own-enters-play"),
+        ["celestial-sword-mantis-force"] = new("Battle", "Pay zero or more Gold: Give this Personality a Force bonus equal to the amount paid plus two", "none", Cost: GoldCostRule.Variable(), UsageKey: "celestial-sword-mantis-battle"),
+        ["celestial-sword-mantis-attack"] = new("Battle", "Pay zero or more Gold: Melee Attack with strength equal to twice the amount paid", "attack", Cost: GoldCostRule.Variable(), UsageKey: "celestial-sword-mantis-battle"),
+        // Celestial Sword of the Scorpion - exp (oracle-l5r-10114): the entry loss is horume-lose's "choose a player" entering-play Reaction; the Battle action is Silent Terror's
+        // bow-then-optional-province-discard, whose branches then apply the conditional destroy ("if you discarded a Personality or you control a Courtier").
+        ["celestial-sword-scorpion-lose"] = new("Reaction", "After this card enters play: Choose a player. He loses 2 Honor", "player", Trigger: "own-enters-play"),
+        ["celestial-sword-scorpion-bow"] = new("Battle", "Target an enemy card without attachments: Bow it. You may discard a card in the current battlefield's province. If you discarded a Personality or you control a Courtier, destroy the target", "enemy-card",
+            RequireNoAttachments: true, Branch: new(BranchCondition.ProvinceHoldsCard,
+                [new("discard", "Discard the card in the province", [BranchEffect.ScorpionSwordDiscard]), new("keep", "Discard nothing", [BranchEffect.ScorpionSwordKeep])],
+                new("none", "Nothing to discard", [BranchEffect.ScorpionSwordKeep]))),
+        // Moksha Patam (oracle-l5r-10121): the move home, a conditional movement lock (MovementLock.WhileCardAtBattlefield) and the Honor loss; its token trait is its Effect.
+        ["moksha-patam-move"] = new("Battle", "Target a Personality: Move him home. While this card is at the current battlefield, negate his movement to it. Lose 1 Honor", "personality"),
+        // Okesa-goma (oracle-l5r-10122): "Bow this card and target a Nonhuman or Shadowlands Personality: Move him home."
+        ["okesa-goma-move"] = new("Battle", "Bow this card and target a Nonhuman or Shadowlands Personality: Move him home", "personality", TargetMustBe: TargetStatus.NonhumanOrShadowlands, Costs: ActionCost.BowSource),
+        // Sandalwood Incense (oracle-l5r-10123): a Focus Effect with a two-way choice (FocusEffectChoice.cs), and an Open action whose cost (this card to the top of its owner's
+        // Fate deck) is paid in its case so the wielder it straightens is read first; the card is attached when used, so "last attached" is its wielder.
+        ["sandalwood-incense-focus"] = new("FocusEffect", "As a Focus Effect: After this duel ends, if your Personality won it, gain 2 Honor or draw a card", "none"),
+        ["sandalwood-incense-straighten"] = new("Open", "Put this card on top of your Fate deck: Straighten the Personality to whom this card was last attached", "none"),
+        // Master of Beasts (oracle-l5r-10128): "Even if this card is not at the current battlefield" (SourceUnitMayBeAway), a one-or-two-target slot of Shadowlands Nonhumans.
+        ["master-of-beasts-straighten"] = new("BattleOrOpen", "Even if this card is not at the current battlefield, bow this Shugenja and target one or two Shadowlands Nonhumans: Straighten them", "slots",
+            Costs: ActionCost.BowWielder, SourceUnitMayBeAway: true, Slots: [new("targets", "shadowlands-nonhuman", "One or two Shadowlands Nonhumans", 1, 2)]),
+        // Nature's Wrath (oracle-l5r-10129): a move to the current battlefield (an Absent Battle action for either player by the rules lead's ruling -- MovesToBattle -- so the
+        // printed Earth exemption, recorded all the same, never restricts it), "if he would be opposed", straightening him if he moved.
+        ["natures-wrath-move"] = new("Battle", "Bow this card and target your Nonhuman Personality: If he would be opposed, move him to the current battlefield. Straighten him if he moved", "own-personality",
+            TargetMustBe: new(Keywords: ["Nonhuman"]), Costs: ActionCost.BowSource, MovesToBattle: true, SourceUnitMayBeAwayIfWielder: "Earth"),
+        // Peace of the Kami (oracle-l5r-10130): performable from home while the Shugenja is Water; the purge of other players' effects, Tireless Efforts' Force-penalty negation, a Spirit straighten.
+        ["peace-of-the-kami-negate"] = new("Battle", "Bow this card and target your Personality or Follower: Negate all current effects on it from other players' cards. Negate its (current and new) Force penalties from actions. If it is a Spirit, straighten it", "own-personality-or-follower",
+            Costs: ActionCost.BowSource, SourceUnitMayBeAwayIfWielder: "Water"),
+        // Scent of Dishonor (oracle-l5r-10131): Winds of Dismissal's predicate as a target-legality condition, the wielder bow exempt for Air, the Spell destroyed as a cost.
+        ["scent-of-dishonor-bow"] = new("Open", "Bow this Shugenja unless he is Air, destroy this card, and target a Kolat, Ninja, Shadowlands, or dishonorable Personality: Bow him", "personality",
+            TargetMustBe: TargetStatus.DishonorableKolatNinjaOrShadowlands, Costs: [new(CostVerb.Bow, CostSubject.Wielder, UnlessKeyword: "Air"), new(CostVerbs.Sacrifice)]),
+        // Extend the Soul's Boundaries (oracle-l5r-10126): the wielder (Performer "own-wielder") is bowed and the Spell destroyed as declared costs; "destroy him unless he is Void" is
+        // paid in the case (a cost conditional on the wielder's keyword, read after the Spell has left him -- so not declarable, the AbilityCosts.cs convention); the target's
+        // controller then decides (EitherOr.cs: shuffle him and his attachments into their owners' decks, or let the acting player take two additional Battle actions).
+        ["extend-soul-shuffle"] = new("Battle", "Destroy this card, bow this Shugenja, destroy him unless he is Void, and target an enemy Personality: His controller may shuffle him and his attachments back into their owners' decks. If he did not choose this, take two additional Battle actions", "enemy-personality",
+            Performer: "own-wielder", Costs: [new(CostVerb.Bow, CostSubject.Wielder), new(CostVerbs.Sacrifice)]),
+        // The Earth's Strength (oracle-l5r-10134): the straighten with its Alchemist-and-opposed Honor, and a training-negate-mover-shaped Reaction restricted to a defending Personality.
+        ["earths-strength-straighten"] = new("Battle", "Bow this card and target your Earth or Water Shugenja: Straighten him. Gain 1 Honor if he is an Alchemist and opposed", "own-earth-or-water-shugenja", Costs: ActionCost.BowSource),
+        ["earths-strength-negate-move"] = new("Reaction", "Before an action resolves, bow this card and target a defending Personality: Negate his movement from the action's effects", "deferred-action-defending-mover", Trigger: "before-action-resolves", Costs: ActionCost.BowSource),
     });
 }
 
@@ -2592,6 +2643,8 @@ public sealed partial class MatchEngine
         // target reaches Rokai; an attachment target never does -- see BeforeActionReactionApplies's
         // Personality-only gate); Mitsuko conditionally destroys hers after bowing it.
         or "mimori-destroy" or "mitsuko-bow-destroy" or "emoto-follower-destroy" or "flame-katana-destroy" or "great-sacrifice-destroy"
+        // Celestial Sword of the Scorpion - exp (issue #453 batch 5): conditionally destroys its bowed target.
+        or "celestial-sword-scorpion-bow"
         or "rage-of-the-spirits-destroy" or "costly-opportunity-destroy"
         // Kuni Shinoda - exp (personality-wave-24): bows, then destroys a Shadowlands target.
         or "shinoda-exp-bow-destroy"
@@ -2637,6 +2690,10 @@ public sealed partial class MatchEngine
             or "mitsuko-straighten"
             // Seeds of Decay pass (issue #453), batch 4: Shinjo Katsuo straightens a Follower, Second City Port a Holding.
             or "katsuo-straighten" or "second-city-port-straighten" => "straighten",
+        // Seeds of Decay pass (issue #453), batch 5: Moksha Patam and Okesa-goma move their target home, Nature's Wrath moves it to the battlefield;
+        // Master of Beasts, Peace of the Kami (if a Spirit) and The Earth's Strength straighten theirs.
+        "moksha-patam-move" or "okesa-goma-move" or "natures-wrath-move" => "move",
+        "master-of-beasts-straighten" or "peace-of-the-kami-negate" or "earths-strength-straighten" => "straighten",
         _ => null
     };
     // Champion of Thunder / Brothers of Goemon's own narrower half (Brothers only ever negates a
@@ -2691,7 +2748,9 @@ public sealed partial class MatchEngine
         // Seeds of Decay pass (issue #453), batch 2.
         or "incriminating-testimony-bow" or "shibata-exp-bow" or "tsujiken-exp-bow" or "training-performed-bow"
         // Seeds of Decay pass (issue #453), batch 4.
-        or "nobukatsu-bow" or "hachis-revenge-bow";
+        or "nobukatsu-bow" or "hachis-revenge-bow"
+        // Seeds of Decay pass (issue #453), batch 5.
+        or "celestial-sword-scorpion-bow" or "scent-of-dishonor-bow";
     // Whether the command's TargetId is an Attack's OWN target, which reacts through the separate attackReaction
     // window instead of this one: an Attack-classified ability whose Target category is "attack". Bayushi Kahoku
     // - exp (issue #313) is Attack-classified too, but its TargetId is the separate "-4F" target (an ordinary
@@ -2778,6 +2837,10 @@ public sealed partial class MatchEngine
             // Training fixture (issue #337): another player's action whose source carries a Weapon -- see its execution case.
             case "training-break-weapon":
                 return command.PlayerId != card.OwnerId && command.CardId is not null && Attachments(command.CardId).Any(w => Keyword(w, "Weapon"));
+            // The Earth's Strength (oracle-l5r-10134, issue #453 batch 5): "Before an action resolves, bow this card and target a defending Personality: Negate his
+            // movement from the action's effects" -- any player's action that would move a defending Personality (DeferredActionDefendingMovers), negatable like Tamoko's.
+            case "earths-strength-negate-move":
+                return negatable && DeferredActionDefendingMovers(command).Any();
             default:
                 return false;
         }
@@ -2859,7 +2922,9 @@ public sealed partial class MatchEngine
         // Bayushi Nori (issue #301): "If he is dishonorable, his controller loses 2 Honor" -- both halves.
         or "nori-bow-personality" or "nori-bow-attachments"
         // Seeds of Decay pass (issue #453), batch 2.
-        or "baiko-shame" or "tsujiken-exp-dishonor";
+        or "baiko-shame" or "tsujiken-exp-dishonor"
+        // Seeds of Decay pass (issue #453), batch 5: Moksha Patam's "Lose 1 Honor", Celestial Sword of the Scorpion's entry "choose a player. He loses 2 Honor".
+        or "moksha-patam-move" or "celestial-sword-scorpion-lose";
     private bool ControlsDishonorablePersonality(int playerId) => _state.Cards.Values.Any(c => c.OwnerId == playerId && InPlay(c) && Definition(c).Type == CardType.Personality && c.Dishonorable);
     // Gate for whether the window is even worth opening -- "if [neither a Dishonorable Personality
     // nor an Honor loss] occurs, do not trigger the reaction interrupt" (the user's own ruling).
@@ -3019,6 +3084,10 @@ public sealed partial class MatchEngine
         "arrows-eye-attack" => 3 + (target is null ? 0 : Attachments(UnitHostId(target)).Count(a => Definition(a).Type == CardType.Follower)),
         "sticks-and-stones-attack" => 1,
         "two-stings-attack" or "two-stings-attack-from-discard" or "metsubushi-attack" => 4,
+        // Seeds of Decay pass (issue #453), batch 5: Blades of the Black Dragon reads its wielder's live Force (sourceId is the performing wielder, ebizo-attack's shape);
+        // Celestial Sword of the Mantis's attack half is priced at resolution from the Gold paid (strengthOverride in its case), so it has no strength of its own here.
+        "blades-of-black-dragon-attack" => sourceId is not null ? CardForce(ActingPersonality(Card(sourceId))) : 0,
+        "celestial-sword-mantis-attack" => 0,
         _ => 0
     };
     // AttackStrength plus every passive defense modifier applying to this specific target (Destrier/
@@ -3070,6 +3139,8 @@ public sealed partial class MatchEngine
         "hiromis-vassals-attack" => "Ranged",
         // Seeds of Decay pass (issue #453), batch 1.
         "arrows-eye-attack" or "sticks-and-stones-attack" or "two-stings-attack" or "two-stings-attack-from-discard" or "metsubushi-attack" => "Ranged",
+        // Seeds of Decay pass (issue #453), batch 5.
+        "blades-of-black-dragon-attack" or "celestial-sword-mantis-attack" => "Melee",
         _ => ""
     };
     // General "in play" Reaction primitive: a printed Reaction whose card must actually be in play
@@ -3372,6 +3443,12 @@ public sealed partial class MatchEngine
             Emit("modifierNegated", $"{Definition(card).Name}'s Force penalty was negated (Tireless Efforts).", card.OwnerId, card.Id);
             return;
         }
+        // Aka-beko (issue #453 batch 5): a Force or Chi penalty from another player's action is never applied to its wielder.
+        if (AkaBekoNegates(card, stat, amount, source))
+        {
+            Emit("modifierNegated", $"{Definition(card).Name}'s {stat} penalty was negated (Aka-beko).", card.OwnerId, card.Id);
+            return;
+        }
         card.Modifiers.Add(new(source, effect, stat, amount));
         if (stat == "Chi" && Definition(card).Type == CardType.Personality && InPlay(card) && PersonalityChi(card) <= 0) DestroyUnits([card], true);
         // A negative modifier on Force, Chi, Gold cost or Personal Honor is a stat penalty (issue #336); the cards that watch for one are told here.
@@ -3638,14 +3715,14 @@ public sealed partial class MatchEngine
             // no-presence clause as an explicit Absent.
             var reinforcesFromElsewhere = ability.Absent || ability.MovesToBattle;
             if (!reinforcesFromElsewhere) Require(Army(player.Id, _state.CurrentBattleProvince!.Value).Any(), "You need a unit at the current battlefield.");
-            if (!reinforcesFromElsewhere && !ability.SourceUnitMayBeAway && source is not null && Definition(source).Type == CardType.Personality)
+            if (!reinforcesFromElsewhere && !SourceMayBeAway(ability, source) && source is not null && Definition(source).Type == CardType.Personality)
                 Require(AtBattle(source) || HasHalls(player.Id) && Keyword(source, "Shugenja"), "The performing card must be at this battlefield.");
             // The check above only ever applies to a Personality-type source -- a Spell/Item's own
             // Battle ability needs its own equivalent: AtBattle(source) already resolves an ATTACHED
             // card's own parent correctly (same helper Khol Regulars' own Reaction uses), so this is
             // exactly "the attachment's own wielder is at this battlefield."
             // An action on an attachment is performed by its wielder (core rules), so any attached card's Battle ability needs him at the battle.
-            if (!reinforcesFromElsewhere && !ability.SourceUnitMayBeAway && source is { Zone: Zone.Attached }
+            if (!reinforcesFromElsewhere && !SourceMayBeAway(ability, source) && source is { Zone: Zone.Attached }
                 || id is "scouring-flood-move-home" or "earths-hunger-destroy" or "nightingale-blade-bow" or "fubatsu-plate-straighten" or "fubatsu-plate-move")
                 Require(AtBattle(source!), "This attachment's own wielder must be at the current battlefield.");
             if (id == "earth-flows-move") Require(player.Id != _state.ActivePlayerId, "Only the Defender may use The Earth Flows.");
@@ -4262,6 +4339,8 @@ public sealed partial class MatchEngine
             {
                 var target = Card(command.TargetId); var type = Definition(target).Type;
                 if (ability.Target == "hand") Require(target.OwnerId == player.Id && target.Zone == Zone.Hand && player.Hand.Contains(target.Id), "Discard a card from your hand.");
+                // Hato-gurama (oracle-l5r-10115, issue #453 batch 5): "You may not choose this card to be discarded as a cost or effect of your actions if you have other cards in your hand."
+                if (ability.Target == "hand") Require(Definition(target).Effect != "hato-gurama" || player.Hand.Count == 1, "Hato-gurama may not be chosen to be discarded while you have other cards in your hand.");
                 else if (ability.Target == "spell-or-reserve-in-hand")
                 {
                     Require(target.OwnerId == player.Id && target.Zone == Zone.Hand && (type == CardType.Spell || Keyword(target, "Reserve")), "Choose a Spell, or a Reserve Fate card, from your hand.");
@@ -4421,7 +4500,8 @@ public sealed partial class MatchEngine
                     // Return to Action (issue #331): "your Personality at HOME" is by definition not at the battlefield
                     // -- own-personality-at-home is exempt for the same reason.
                     if (actingAsBattle && ability.Target is not ("personality-at-adjacent-battlefield" or "own-unbowed-farm" or "region-or-terrain" or "own-personality-at-home" or "personality-at-any-location" or "own-follower-at-any-location")
-                        && id is not ("intervening-spirit-move" or "earth-flows-move" or "sanctuary-of-the-waves-move" or "dislodge-the-foe")) Require(AtBattle(target), "Target or performer must be at the current battlefield.");
+                        && id is not ("intervening-spirit-move" or "earth-flows-move" or "sanctuary-of-the-waves-move" or "dislodge-the-foe"
+                            or "natures-wrath-move")) Require(AtBattle(target), "Target or performer must be at the current battlefield."); // Nature's Wrath (issue #453 batch 5): its target is brought TO the battlefield
                     var personality = type == CardType.Personality;
                     var own = target.OwnerId == player.Id;
                     // TargetMustBe (P2): a target-status legality condition layered onto whichever category
@@ -4755,6 +4835,15 @@ public sealed partial class MatchEngine
                         "non-unique-holding" => type == CardType.Holding && !Keyword(target, "Unique"),
                         // Second City Port: "a target Market or Port" (either player's Holding with either keyword).
                         "market-or-port-holding" => type == CardType.Holding && (Keyword(target, "Market") || Keyword(target, "Port")),
+                        // Seeds of Decay pass (issue #453), batch 5
+                        // Master of Beasts: "Shadowlands Nonhumans" -- a Nonhuman Personality or attached Follower that is Shadowlands (Clan alignment or keyword).
+                        "shadowlands-nonhuman" => (personality || type == CardType.Follower && target.Zone == Zone.Attached) && Keyword(target, "Nonhuman") && MatchesTargetStatus(target, TargetStatus.IsShadowlands),
+                        // Peace of the Kami: "your Personality or Follower".
+                        "own-personality-or-follower" => own && (personality || type == CardType.Follower && target.Zone == Zone.Attached),
+                        // The Earth's Strength: "your Earth or Water Shugenja".
+                        "own-earth-or-water-shugenja" => own && personality && Keyword(target, "Shugenja") && (Keyword(target, "Earth") || Keyword(target, "Water")),
+                        // The Earth's Strength's Reaction: a defending Personality the deferred action would move (DeferredActionDefendingMovers).
+                        "deferred-action-defending-mover" => personality && _state.PendingNegatableAbility is { } defenderMoverAction && DeferredActionDefendingMovers(defenderMoverAction).Contains(target.Id, StringComparer.Ordinal),
                         _ => false
                     }, "That card does not meet this ability's target or performer requirements.");
                 }
@@ -5032,6 +5121,7 @@ public sealed partial class MatchEngine
             Emit("favorDiscarded", $"{player.Name} discarded the Imperial Favor.", player.Id);
         }
         Emit("abilityUsed", $"{player.Name}: {(source is null ? "Imperial Favor" : Definition(source).Name)} — {ability.Label}.", player.Id, source?.Id);
+        _state.CurrentActionHonorGained = false; // Moksha Patam (issue #453 batch 5): only Honor gained from here on is "from its effects".
         // Snapshot before the effect resolves so any Battle-action Honor loss it inflicts on an
         // opponent can be detected generically afterward (Law of Darkness Dojo's passive).
         var opponentHonorBeforeBattleAction = ability.Timing == "Battle" && target is not null && target.OwnerId != player.Id ? Player(target.OwnerId).Honor : (int?)null;
@@ -5580,7 +5670,7 @@ public sealed partial class MatchEngine
                 // same "still legal to play, its own effect just does nothing" shape StalwartNegatesBow
                 // already uses -- PendingAdditionalAction is left set, so it resolves normally once
                 // this reaction window closes (see the "additionalActionReaction" branch in Apply()).
-                if (!Protected(ActionPerformer(_state.PendingAdditionalAction!)))
+                if (!ActionProtected(_state.PendingAdditionalAction!)) // Ki-Uso (issue #453 batch 5): a Political action may also be protected by the performer's Item
                 {
                     // Negated: the additional action is still taken and pays its costs, and only its effects are skipped (Mendon, issue #351); the burst goes on
                     // (the close of the window, in Apply, resolves it as a negated action).
@@ -6043,14 +6133,14 @@ public sealed partial class MatchEngine
             case "training-attack-negate":
                 // Protection (issue #212): same no-op-against-a-protected-performer shape as
                 // effortless-counterattack-negate above.
-                if (!Protected(Card(_state.PendingAttack!.SourceId!))) _state.PendingAttack!.Strength = 0;
+                if (!Protected(Card(_state.PendingAttack!.SourceId!)) && !ActionProtected(_state.PendingAttack!.Command)) _state.PendingAttack!.Strength = 0; // Ki-Uso (issue #453 batch 5)
                 else Emit("actionProtected", "Protection negates the negation -- this action cannot be negated.", player.Id, source?.Id);
                 break;
             case "a-close-call-negate":
                 // Same shape as training-attack-negate above -- "negate its effects" is the whole
                 // Attack, achieved by zeroing the strength ResolveAttackNow later reads (a hit needs
                 // strength > 0), still respecting Protection.
-                if (!Protected(Card(_state.PendingAttack!.SourceId!))) _state.PendingAttack!.Strength = 0;
+                if (!Protected(Card(_state.PendingAttack!.SourceId!)) && !ActionProtected(_state.PendingAttack!.Command)) _state.PendingAttack!.Strength = 0; // Ki-Uso (issue #453 batch 5)
                 else Emit("actionProtected", "Protection negates the negation -- this action cannot be negated.", player.Id, source?.Id);
                 break;
             case "a-close-call-boost": ApplyModifier(target!, source!.Id, id, "Force", 2); break;
@@ -7152,6 +7242,67 @@ public sealed partial class MatchEngine
             case "hachis-revenge-bow": target!.Bowed = true; break;
             case "incense-mill-cleanse": CleanseForcePenaltiesAndLocks(target!); break;
             case "second-city-port-straighten": Straighten(target!); break;
+            // Seeds of Decay pass (issue #453), batch 5
+            case "blades-of-black-dragon-attack":
+                if (ResolveOrDeferAttack(id, player, target?.Id, ActionPerformer(ability, command, source).Id, consumedGrant)) return;
+                break;
+            case "celestial-sword-mantis-honor": GainHonor(player.Id, 2, "Celestial Sword of the Mantis", source); break;
+            case "celestial-sword-mantis-force": ApplyModifier(Card(source!.AttachedTo!), source.Id, id, "Force", PaidGoldAmount(command) + 2); break;
+            case "celestial-sword-mantis-attack":
+                if (ResolveOrDeferAttack(id, player, target?.Id, ActionPerformer(ability, command, source).Id, consumedGrant, strengthOverride: EffectiveAttackStrength(id, player, target, ActionPerformer(ability, command, source).Id) + 2 * PaidGoldAmount(command))) return;
+                break;
+            case "celestial-sword-scorpion-lose": ApplyPlayerHonorChoice(source!, command.TargetPlayerId!.Value, -2); break;
+            // The bow, then the optional province discard (asked only when a card is there); the conditional destroy is applied by the chosen branch (ScorpionSwordResolve).
+            case "celestial-sword-scorpion-bow":
+                if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
+                if (BeginConditionalChoice(command, ability, consumedGrant, playedFromDiscard, opponentHonorBeforeBattleAction, bowedBeforeAction, preExistingGrants)) return;
+                break;
+            case "moksha-patam-move":
+            {
+                MoveHome(target!, false);
+                if (_state.CurrentBattleProvince is int battlefield)
+                {
+                    target!.MovementLocks.Add(new MovementLock(source!.Id, _state.TurnNumber, MovementKinds.ToBattlefield, WhileCardAtBattlefield: source.Id, Battlefield: battlefield));
+                    Emit("movementLocked", $"{Definition(target).Name}'s movement to this battlefield is negated while {Definition(source).Name} is there.", target.OwnerId, target.Id);
+                }
+                GainHonor(player.Id, -1, "Moksha Patam", source);
+                break;
+            }
+            case "okesa-goma-move": MoveHome(target!, false); break;
+            case "sandalwood-incense-straighten":
+            {
+                var lastWielder = Card(source!.AttachedTo!);
+                ToOwnerDeck(source, "Top");
+                Straighten(lastWielder);
+                break;
+            }
+            case "master-of-beasts-straighten":
+                foreach (var beast in SlotCards(command, "targets").ToArray()) Straighten(beast);
+                break;
+            case "natures-wrath-move":
+                if (Army(1 - player.Id, _state.CurrentBattleProvince!.Value).Any() && !AtBattle(target!) && TryMoveToBattlefield(target!, _state.CurrentBattleProvince.Value)) Straighten(target!);
+                break;
+            case "peace-of-the-kami-negate":
+                NegateOtherPlayersEffects(target!);
+                NegateForcePenalties(target!);
+                if (Keyword(target!, "Spirit")) Straighten(target!);
+                break;
+            case "scent-of-dishonor-bow": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;
+            case "extend-soul-shuffle":
+            {
+                // "destroy him unless he is Void": the wielder's own keyword, read now that the Spell (destroyed as a declared cost) no longer counts among his attachments.
+                var shugenja = Card(command.PerformerId!);
+                if (!Keyword(shugenja, "Void")) DestroyUnits([shugenja], false, player.Id);
+                if (!consumedGrant) _state.AdditionalActions.RemoveAll(preExistingGrants.Contains);
+                if (OpenEitherOr(EitherOrSpecs.ExtendSoulShuffle, source!, player.Id, target!.OwnerId, target, "action", bowedBeforeAction,
+                        stayWithActor: _state.AdditionalActions.Any(g => g.PlayerId == player.Id && Forfeitable(g)))) return;
+                break;
+            }
+            case "earths-strength-straighten":
+                Straighten(target!);
+                if (Keyword(target!, "Alchemist") && AtBattle(target!) && Army(1 - target!.OwnerId, target.ProvinceIndex ?? -1).Any()) GainHonor(player.Id, 1, "The Earth's Strength", source);
+                break;
+            case "earths-strength-negate-move": _state.NegatedEffects.Add(new("move", target!.Id)); break;
             default:
                 // Any ability with an AttachSpec (Moto Jun-Ni, Fading Shadows, Foothills Keep and the training shapes) needs no case of its own: the Gold was
                 // paid by PayForAbility, so the card now leaves its place and enters play attached. An entering-play window ends the action here.
@@ -7772,6 +7923,12 @@ public sealed partial class MatchEngine
         if (stat == "Force" && amount < 0 && card.ForcePenaltiesNegatedTurn == _state.TurnNumber)
         {
             Emit("tokenNegated", $"A {type} token's Force penalty on {Definition(card).Name} was negated (Tireless Efforts).", card.OwnerId, card.Id);
+            return null;
+        }
+        // Aka-beko (issue #453 batch 5): the same for a token carrying a Force or Chi penalty from another player's action.
+        if (stat is not null && AkaBekoNegates(card, stat, amount, source))
+        {
+            Emit("tokenNegated", $"A {type} token's {stat} penalty on {Definition(card).Name} was negated (Aka-beko).", card.OwnerId, card.Id);
             return null;
         }
         var token = new CardToken($"token-{++_state.TokenSequence:D4}", type, source, stat, amount);

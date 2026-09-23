@@ -20,7 +20,7 @@ public sealed partial class MatchEngine
     private void NegateDeferredAction(CardInstance negatingCard)
     {
         if (_state.PendingNegatableAbility is not { } deferred) return;
-        if (Protected(ActionPerformer(deferred)))
+        if (ActionProtected(deferred)) // Takeshi's Protection, or Ki-Uso's for a Political action (issue #453 batch 5)
         {
             Emit("actionProtected", "Protection negates the negation -- this action cannot be negated.", negatingCard.OwnerId, negatingCard.Id);
             return;

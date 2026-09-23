@@ -81,7 +81,7 @@ internal static class PlayerTargetTests
     private static void Inventory()
     {
         var singles = AbilityCatalog.All.Where(p => p.Value.Target == "player").OrderBy(p => p.Key, StringComparer.Ordinal).ToArray();
-        Eq(string.Join(",", singles.Select(p => p.Key)), "horume-gain,horume-lose,know-their-minds-choose,mugoshi-slander,tarao-sacrifice,training-choose-player-gain,training-choose-player-lose,ugimori-proclaim-lock");
+        Eq(string.Join(",", singles.Select(p => p.Key)), "celestial-sword-scorpion-lose,horume-gain,horume-lose,know-their-minds-choose,mugoshi-slander,tarao-sacrifice,training-choose-player-gain,training-choose-player-lose,ugimori-proclaim-lock"); // celestial-sword-scorpion-lose: Seeds of Decay batch 5 (issue #453), an entering-play Reaction like Horume's
         // Every one is an entering-play Reaction (listed by the entry-reaction window) except the two Open actions that choose a player (Know Their Minds, issue #419; Tarao, issue #431): AbilityActions lists them once per player.
         var openChoosers = new[] { "know-their-minds-choose", "tarao-sacrifice" };
         Check(singles.Where(p => !openChoosers.Contains(p.Key)).All(p => p.Value.Timing == "Reaction" && p.Value.Trigger == "own-enters-play") && singles.Where(p => openChoosers.Contains(p.Key)).All(p => p.Value.Timing == "Open"), "the entering-play Reactions, and the two Open actions that choose a player");
