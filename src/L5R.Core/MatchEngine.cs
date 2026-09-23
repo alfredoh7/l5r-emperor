@@ -2067,6 +2067,11 @@ public sealed partial class MatchEngine
         // Celestial Sword of the Mantis / of the Scorpion - exp (issue #453 batch 5): "This card has +1F for each <Clan> Personality you control" -- the wielder's controller's, the wielder himself included.
         "celestial-sword-force-mantis" => ControlledClanPersonalities(wielder.OwnerId,"Mantis"),
         "celestial-sword-force-scorpion" => ControlledClanPersonalities(wielder.OwnerId,"Scorpion"),
+        // Embers of War pass, batch 6 (issue #460): the Lion, Unicorn and (Spider-Clan) Ancestral Sword of Hantei siblings share the same "+1F for
+        // each <Clan> Personality you control" shape as the Mantis/Scorpion swords above.
+        "celestial-sword-force-lion" => ControlledClanPersonalities(wielder.OwnerId,"Lion"),
+        "celestial-sword-force-unicorn" => ControlledClanPersonalities(wielder.OwnerId,"Unicorn"),
+        "celestial-sword-force-spider" => ControlledClanPersonalities(wielder.OwnerId,"Spider"),
         _ => 0
     };
     // A Follower's own standalone Force, including any static conditional bonus it grants itself

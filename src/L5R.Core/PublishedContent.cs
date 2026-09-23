@@ -2467,4 +2467,14 @@ public static class PublishedContent
     public static PublishedSnapshot StrongholdWave14 { get; } = Load("L5R.Published.StrongholdWave14.json", "stronghold-wave-14", requireDecks: false);
     /// <summary>Region wave 7 (issue #460, batch 5): The Distant Reaches.</summary>
     public static PublishedSnapshot RegionWave7 { get; } = Load("L5R.Published.RegionWave7.json", "region-wave-7", requireDecks: false);
+    /// <summary>Item wave 12 (Embers of War pass, issue #460, batch 6): Celestial Sword of the Lion - exp, Celestial Sword of the Unicorn - exp, Dazzling Attire,
+    /// Splintered Weapon, The Ancestral Sword of Hantei - exp.</summary>
+    public static PublishedSnapshot ItemWave12 { get; } = Load("L5R.Published.ItemWave12.json", "item-wave-12", requireDecks: false);
+    /// <summary>Holding wave 9 (Embers of War pass, issue #460, batch 6): Staging Grounds, Surveillance Outpost, Temple to the Elements, Terraced Farm.</summary>
+    public static PublishedSnapshot HoldingWave9 { get; } = Load("L5R.Published.HoldingWave9.json", "holding-wave-9", requireDecks: false);
+    /// <summary>Follower wave 28 (Embers of War pass, issue #460, batch 6): Field Messenger, Flanking Unit.</summary>
+    public static PublishedSnapshot FollowerWave28 { get; } = Load("L5R.Published.FollowerWave28.json", "follower-wave-28", requireDecks: false);
+    /// <summary>Personality wave 64 (Embers of War pass, issue #460, batch 6): Guest and Haruki's Deer, two CreatedOnly Proxy tokens (their creators, Perplexing
+    /// Guests and Kitsune Haruki, are not themselves wired this pass).</summary>
+    public static PublishedSnapshot PersonalityWave64 { get; } = Load("L5R.Published.PersonalityWave64.json", "personality-wave-64", requireDecks: false);
 }

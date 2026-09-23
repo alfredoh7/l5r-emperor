@@ -27,12 +27,16 @@ public enum ProductionCondition
     PayingForHolding,
     /// <summary>The Sacred Temple of the Phoenix - inexperienced (issue #458, Honor and Treachery): "When paying for a Spell or Shugenja, produce 5 Gold which may only pay for
     /// that card" -- a Spell equipped (PaymentKind.Equip), or a Shugenja Personality recruited (PaymentKind.Recruit, the printed Shugenja keyword), never an action.</summary>
-    PayingForSpellOrShugenja
+    PayingForSpellOrShugenja,
+    /// <summary>Staging Grounds (issue #460, Embers of War pass): "Produce 3 Gold, or 4 Gold if paying for a card with a printed Gold Cost of 9 or more which may
+    /// only pay for that card." A card bought, equipped or played (never an action), by its own PRINTED Gold Cost (CardDefinition.GoldCost, not any live-modified
+    /// price) -- Threshold names the minimum.</summary>
+    PayingForExpensiveCard
 }
 
 /// <summary>A Holding's production that depends on what it is paying for (issue #416): while a payment meets <paramref name="When"/> the Holding produces
 /// <paramref name="Amount"/> instead of its printed production. Data on the card's Effect, so a printed Holding of this kind needs no code of its own.</summary>
-public sealed record ConditionalProduction(int Amount, ProductionCondition When, string? Keyword = null);
+public sealed record ConditionalProduction(int Amount, ProductionCondition When, string? Keyword = null, int? Threshold = null);
 
 public static class ConditionalProductionCatalog
 {
@@ -45,6 +49,7 @@ public static class ConditionalProductionCatalog
         "bushi-dojo-gold" => new(6, ProductionCondition.EquipsOrCreatesFollower),
         "dokansuto-gold" => new(2, ProductionCondition.PayingForHolding),
         "sacred-temple-phoenix-gold" => new(5, ProductionCondition.PayingForSpellOrShugenja),
+        "staging-grounds-gold" => new(4, ProductionCondition.PayingForExpensiveCard, Threshold: 9),
         _ => null
     };
 }
@@ -69,6 +74,9 @@ public sealed partial class MatchEngine
             ProductionCondition.EquipsOrCreatesFollower =>
                 paying.Kind == PaymentKind.Equip && Definition(paying.Card).Type == CardType.Follower
                 || paying.Ability?.Creates is { Type: CardType.Follower },
+            // Staging Grounds: the card's own PRINTED Gold Cost (never a live-modified price), bought, equipped or played -- never an action.
+            ProductionCondition.PayingForExpensiveCard =>
+                paying.Kind != PaymentKind.Action && production.Threshold is int threshold && Definition(paying.Card).GoldCost >= threshold,
             _ => false
         };
     }
