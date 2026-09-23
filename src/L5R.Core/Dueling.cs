@@ -471,6 +471,10 @@ public sealed partial class MatchEngine
                 if (winnerId is not null && Card(winnerId).OwnerId == challengerPlayerId && ControlsKeyword(challengerPlayerId, "Shugenja"))
                     CreateToken(Card(winnerId), "Fire", abilityId, "Force", 1);
                 break;
+            // Doji Mitsuru (issue #453, batch 3): "Bow the duel's loser."
+            case "mitsuru-duel":
+                foreach (var id in loserIds) if (!StalwartNegatesBow(Card(id), challengerPlayerId)) Card(id).Bowed = true;
+                break;
         }
     }
 

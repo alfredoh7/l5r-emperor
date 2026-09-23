@@ -48,7 +48,9 @@ public sealed partial class MatchEngine
         }
         // Revenge: the window resets once the acting player's OWN Battle action finishes resolving.
         if (AbilityCatalog.All[abilityId].Timing == "Battle") _state.EnemyDestroyedOwnPersonalitySinceLastBattleAction[playerId] = false;
-        return OpenAfterActionResolvedWindow(closesTo);
+        if (OpenAfterActionResolvedWindow(closesTo)) return true;
+        // Moshi Ino's storm (issue #453, batch 3; MoshiInoStorm.cs): the same "this action is truly done" moment, asked once no Reaction window opened over it.
+        return OpenInoStorm(closesTo);
     }
 
     private static bool IsAfterActionResolvedReaction(AbilityDefinition ability) => ability.Timing == "Reaction" && ability.Trigger == AfterActionReactionTriggers.AfterActionResolved;
@@ -81,6 +83,10 @@ public sealed partial class MatchEngine
             // Timing/keyword narrowing, exercising AfterActionResolvedApplies/the window itself directly rather than through a real card's own
             // extra conditions.
             "training-after-action-resolved-gain" => LastActionDestroyedOwnPersonality(playerId),
+            // Asahina Akikusa (oracle-l5r-10046, issue #453 batch 3): "After an action on your Air Spell resolves" -- the resolved action's source card is a Spell with the
+            // Air keyword attached to a Personality her controller controls (the Spell's action is her controller's own, so facts.PlayerId matches too).
+            "akikusa-honor" => facts.SourceId is not null && _state.Cards.TryGetValue(facts.SourceId, out var akikusaSpell) && Definition(akikusaSpell).Type == CardType.Spell
+                && Keyword(akikusaSpell, "Air") && akikusaSpell.OwnerId == playerId && facts.PlayerId == playerId,
             _ => false
         };
     }

@@ -12,6 +12,9 @@ public sealed record MoveSpec(string Movers, string Destination)
     public const string Target = "target", Source = "source", SourceAndTarget = "source-and-target", Performer = "performer", PerformerAndTarget = "performer-and-target";
     /// <summary>Every card of the ability's performing slot moves ("Move the targets to the current battlefield", Dislodge the Foe).</summary>
     public const string PerformingSlot = "performing-slot";
+    /// <summary>The Personality that performed the Battle action an "after a Battle action resolves" Reaction reacts to (MatchState.BattleActionReactionPerformerId): Shosuro
+    /// Hawado - exp's "target a Personality that performed it: Move him from his current location to another" (issue #453).</summary>
+    public const string BattleActionPerformer = "battle-action-performer";
     public const string Home = "home", CurrentBattlefield = "current-battlefield", AdjacentUnresolved = "adjacent-unresolved-battlefield", AnyUnresolved = "unresolved-battlefield";
     public bool ChoosesBattlefield => Destination is AdjacentUnresolved or AnyUnresolved;
 }
@@ -57,6 +60,8 @@ public sealed partial class MatchEngine
         if (move.Movers is MoveSpec.Source or MoveSpec.SourceAndTarget) MoveByRule(source!, move, battlefield);
         if (move.Movers is MoveSpec.Performer or MoveSpec.PerformerAndTarget) MoveByRule(Card(command.PerformerId), move, battlefield);
         if (move.Movers == MoveSpec.PerformingSlot) foreach (var mover in PerformingSlotCards(command, ability).ToArray()) MoveByRule(mover, move, battlefield);
+        if (move.Movers == MoveSpec.BattleActionPerformer && _state.BattleActionReactionPerformerId is { } reactedPerformerId && _state.Cards.TryGetValue(reactedPerformerId, out var reactedPerformer) && InPlay(reactedPerformer))
+            MoveByRule(reactedPerformer, move, battlefield);
         return move.Movers is MoveSpec.Target or MoveSpec.SourceAndTarget or MoveSpec.PerformerAndTarget && MoveByRule(target!, move, battlefield);
     }
 

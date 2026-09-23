@@ -1,0 +1,767 @@
+{
+  "Profile": "personality-wave-55",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10072",
+      "Name": "Asako Chukage",
+      "Type": "Personality",
+      "Clan": "Phoenix",
+      "GoldCost": 12,
+      "GoldProduction": 0,
+      "Force": 6,
+      "Chi": 5,
+      "PersonalHonor": 3,
+      "HonorRequirement": 6,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Bow your target Ring: Draw a card.\nBattle: Even if Chukage is bowed: If he would be opposed, move him to the current battlefield. If he moved, straighten his unit. If there are now more units there on the enemy side than on yours, you may target an enemy unit and move it home.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10072.jpg",
+      "Keywords": [
+        "Cavalry",
+        "Loyal",
+        "Unique",
+        "Elemental Master",
+        "Experienced",
+        "Henshin",
+        "Monk",
+        "Phoenix Clan",
+        "Shugenja",
+        "Water"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "chukage-draw",
+        "chukage-move"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10073",
+      "Name": "Asako Jukko",
+      "Type": "Personality",
+      "Clan": "Phoenix",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 5,
+      "PersonalHonor": 2,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle/Open: Target a Personality with 1 Force or greater: Switch his Force and Chi. You may switch Jukko's Force and Chi.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10073.jpg",
+      "Keywords": [
+        "Henshin",
+        "Monk",
+        "Phoenix Clan",
+        "Void"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "jukko-switch"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10075",
+      "Name": "Asako Rikate",
+      "Type": "Personality",
+      "Clan": "Phoenix",
+      "GoldCost": 9,
+      "GoldProduction": 0,
+      "Force": 5,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Target an enemy Personality: Reduce his Force to 0. Give him -2C.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10075.jpg",
+      "Keywords": [
+        "Unique",
+        "Blood of Kinuye",
+        "Earth",
+        "Experienced",
+        "Favored of the Earth Dragon",
+        "Golden Arm",
+        "Henshin",
+        "Monk",
+        "Phoenix Clan",
+        "Shadowlands"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "rikate-exp-weaken"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10078",
+      "Name": "Bayushi Makubesu",
+      "Type": "Personality",
+      "Clan": "Scorpion",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After Makubesu enters play: Create two 1F Followers and attach them to one or two of your Personalities.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10078.jpg",
+      "Keywords": [
+        "Bitter Lies",
+        "Courtier",
+        "Imperial",
+        "Magistrate",
+        "Samurai",
+        "Scorpion Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "makubesu-create"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10091",
+      "Name": "Chuda Seki",
+      "Type": "Personality",
+      "Clan": "Unaligned",
+      "GoldCost": 3,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 3,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After Seki enters play: Lose 3 Honor.\nReaction: After Seki enters play, target a Personality: Give him a -1C Plague token.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10091.jpg",
+      "Keywords": [
+        "Plague",
+        "Shadowlands",
+        "Shugenja"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "seki-plague"
+      ],
+      "Effect": "none",
+      "EntryHonorLoss": 3
+    },
+    {
+      "Id": "oracle-l5r-10048",
+      "Name": "Daidoji Kitahime",
+      "Type": "Personality",
+      "Clan": "Crane",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 4,
+      "PersonalHonor": 3,
+      "HonorRequirement": 5,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Bow Kitahime unless you have Reconnaissance: Ranged 4 Attack.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10048.jpg",
+      "Keywords": [
+        "Cavalry",
+        "Crane Clan",
+        "Iron Crane",
+        "Samurai",
+        "Scout"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "kitahime-attack"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10049",
+      "Name": "Doji Mitsuru",
+      "Type": "Personality",
+      "Clan": "Crane",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 4,
+      "PersonalHonor": 3,
+      "HonorRequirement": 2,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Target an enemy Personality: Mitsuru duels him. Bow the duel's loser.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10049.jpg",
+      "Keywords": [
+        "Duelist",
+        "Naval",
+        "Crane Clan",
+        "Magistrate",
+        "Samurai"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "mitsuru-duel"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10040",
+      "Name": "Hida Kaiji",
+      "Type": "Personality",
+      "Clan": "Crab",
+      "GoldCost": 12,
+      "GoldProduction": 0,
+      "Force": 9,
+      "Chi": 2,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Before the first time each turn another player's action moves Kaiji: Negate his movement from that action.\nBattle: Target an enemy card with lower Force: Bow it. Destroy it if it has no attachments.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10040.jpg",
+      "Keywords": [
+        "Berserker",
+        "Crab Clan",
+        "Mutant",
+        "Nonhuman"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "kaiji-bow"
+      ],
+      "Effect": "negate-first-enemy-move-each-turn"
+    },
+    {
+      "Id": "oracle-l5r-10041",
+      "Name": "Hiruma Nitani",
+      "Type": "Personality",
+      "Clan": "Crab",
+      "GoldCost": 9,
+      "GoldProduction": 0,
+      "Force": 5,
+      "Chi": 3,
+      "PersonalHonor": 3,
+      "HonorRequirement": 3,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Ranged 6 Attack.\nBattle: Target an enemy card with the base Shadowlands keyword: Destroy it.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10041.jpg",
+      "Keywords": [
+        "Unique",
+        "Crab Clan",
+        "Experienced",
+        "Jade Hand",
+        "Samurai",
+        "Scout"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "nitani-exp-attack",
+        "nitani-exp-destroy"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10043",
+      "Name": "Kaiu Okaru",
+      "Type": "Personality",
+      "Clan": "Crab",
+      "GoldCost": 6,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "(The Defender may draw a card after a Brash card is assigned to attack.)\nBattle: Target an enemy Personality or Follower: Give it -3F. You may take an additional Battle action.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10043.jpg",
+      "Keywords": [
+        "Brash",
+        "Tactician",
+        "Crab Clan",
+        "Samurai",
+        "Siege"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "okaru-weaken"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10065",
+      "Name": "Kitsune Merihiko",
+      "Type": "Personality",
+      "Clan": "Mantis",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 4,
+      "PersonalHonor": 3,
+      "HonorRequirement": 3,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After Merihiko enters play: Create a 0F/2C/3PH Mantis Clan • Nonhuman • Bee • Cavalry • Spirit • Swarm Personality with the ability, \"Battle: Bow this card: Ranged 4 Attack.\"",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10065.jpg",
+      "Keywords": [
+        "Earth",
+        "Mantis Clan",
+        "Shugenja"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "merihiko-create"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10089",
+      "Name": "Masayoshi",
+      "Type": "Personality",
+      "Clan": "Spider",
+      "GoldCost": 10,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After Masayoshi enters play: Create a +4F/+1C Weapon Item and attach it to him.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10089.jpg",
+      "Keywords": [
+        "Kensai",
+        "Monk",
+        "Order of the Spider",
+        "Spider Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "masayoshi-create"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10064",
+      "Name": "Matsu Koyama",
+      "Type": "Personality",
+      "Clan": "Lion",
+      "GoldCost": 9,
+      "GoldProduction": 0,
+      "Force": 5,
+      "Chi": 4,
+      "PersonalHonor": 4,
+      "HonorRequirement": 10,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Give each other Lion Clan Personality in your army a Force bonus equal to his own Personal Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10064.jpg",
+      "Keywords": [
+        "Unique",
+        "Experienced",
+        "Imperial",
+        "Lion Clan",
+        "Paragon",
+        "Samurai",
+        "Yojimbo"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "koyama-exp-boost"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10098",
+      "Name": "Moto Aoi",
+      "Type": "Personality",
+      "Clan": "Unicorn",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": 4,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle/Open: Even if Aoi is at home, bow him and target a Personality: Give him +4F.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10098.jpg",
+      "Keywords": [
+        "Tactician",
+        "Samurai",
+        "Unicorn Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "aoi-boost"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10090",
+      "Name": "Ninube Hajime",
+      "Type": "Personality",
+      "Clan": "Ninja",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 4,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After Hajime enters play, lose 2 Honor.\nNinja Battle: Target an enemy Personality at the current battlefield. Hajime turns his mind to rice pudding and he wanders off. Move him to a different location.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10090.jpg",
+      "Keywords": [
+        "Ninja",
+        "Shadowlands",
+        "Shugenja",
+        "Spider Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "hajime-move-home",
+        "hajime-move-battlefield"
+      ],
+      "Effect": "none",
+      "EntryHonorLoss": 2
+    },
+    {
+      "Id": "oracle-l5r-10077",
+      "Name": "Shiba Iaimiko",
+      "Type": "Personality",
+      "Clan": "Phoenix",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 4,
+      "PersonalHonor": 2,
+      "HonorRequirement": 4,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Target an enemy Personality or Follower: Give it -4F. If its Force is now 0 and you control a Shugenja, you may target and destroy a card without attachments in the target's unit.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10077.jpg",
+      "Keywords": [
+        "Duelist",
+        "Phoenix Clan",
+        "Samurai",
+        "Yojimbo"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "iaimiko-weaken"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10081",
+      "Name": "Shosuro Hawado",
+      "Type": "Personality",
+      "Clan": "Ninja",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After a Battle action resolves, if Hawado is at the current battlefield, target a Personality that performed it: Move him from his current location to another.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10081.jpg",
+      "Keywords": [
+        "Unique",
+        "Experienced",
+        "Ninja",
+        "Scorpion Clan",
+        "Shadowspawn"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "hawado-exp-move-home",
+        "hawado-exp-move-battlefield"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10096",
+      "Name": "Tanemono",
+      "Type": "Personality",
+      "Clan": "Unaligned",
+      "GoldCost": 6,
+      "GoldProduction": 0,
+      "Force": 1,
+      "Chi": 6,
+      "PersonalHonor": 1,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Tanemono will not be controlled by a Phoenix Clan player.\nBattle/Open: Switch Tanemono's Force and Chi.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10096.jpg",
+      "Keywords": [
+        "Ishiken",
+        "Ronin",
+        "Shugenja",
+        "Void"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "tanemono-switch"
+      ],
+      "Effect": "tanemono-no-phoenix-control"
+    },
+    {
+      "Id": "oracle-l5r-10068",
+      "Name": "Tsuruchi Kohrogi",
+      "Type": "Personality",
+      "Clan": "Mantis",
+      "GoldCost": 6,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "(The Defender may draw a card after a Brash card is assigned to attack.)\nBattle: Ranged 2 Attack.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10068.jpg",
+      "Keywords": [
+        "Brash",
+        "Naval",
+        "Mantis Clan",
+        "Samurai",
+        "Scout"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "kohrogi-attack"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10103",
+      "Name": "Utaku Hirononri",
+      "Type": "Personality",
+      "Clan": "Unicorn",
+      "GoldCost": 3,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 1,
+      "PersonalHonor": 1,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: Bow Hirononri and target a Stables or Cavalry card: Straighten it.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10103.jpg",
+      "Keywords": [
+        "Stable Master",
+        "Unicorn Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "hirononri-straighten"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10083",
+      "Name": "Yogo Heijin",
+      "Type": "Personality",
+      "Clan": "Scorpion",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 2,
+      "PersonalHonor": 1,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Target your Courtier and an enemy Personality: Move them to the current battlefield. Straighten the enemy Personality's unit.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10083.jpg",
+      "Keywords": [
+        "Loyal",
+        "Cursed",
+        "Paragon",
+        "Samurai",
+        "Scorpion Clan",
+        "Yojimbo"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "heijin-move"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10070",
+      "Name": "Yoritomo Akukiho",
+      "Type": "Personality",
+      "Clan": "Mantis",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 4,
+      "PersonalHonor": 1,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Target a Weapon in your hand: Attach it to Akukiho, paying all costs. You may take an additional Battle action.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10070.jpg",
+      "Keywords": [
+        "Kensai",
+        "Naval",
+        "Mantis Clan",
+        "Mercenary",
+        "Samurai"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "akukiho-attach"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10071",
+      "Name": "Yoritomo Iwashi",
+      "Type": "Personality",
+      "Clan": "Mantis",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 1,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: If Iwashi has been in an attacking army when it won a battle since your last turn began, target a Personality: Bow him.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10071.jpg",
+      "Keywords": [
+        "Naval",
+        "Magistrate",
+        "Mantis Clan",
+        "Samurai"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "iwashi-bow"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10088",
+      "Name": "Goju Yurishi",
+      "Type": "Personality",
+      "Clan": "Ninja",
+      "GoldCost": 9,
+      "GoldProduction": 0,
+      "Force": 5,
+      "Chi": 3,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After Yurishi enters play: Lose 3 Honor.\nOther players may not target Yurishi with actions if any other legal targets are available.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10088.jpg",
+      "Keywords": [
+        "Loyal",
+        "Unique",
+        "Dragon Child",
+        "Experienced",
+        "Ninja",
+        "Shadowlands",
+        "Spider Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "target-of-last-resort",
+      "EntryHonorLoss": 3
+    },
+    {
+      "Id": "oracle-l5r-10066",
+      "Name": "Moshi Ino",
+      "Type": "Personality",
+      "Clan": "Mantis",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Ino summons a storm. After the next action not performed by a Thunder Personality resolves this battle, the player who took it chooses to discard a card or bow the performer. You may take an additional Battle action.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10066.jpg",
+      "Keywords": [
+        "Naval",
+        "Mantis Clan",
+        "Shugenja",
+        "Thunder"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "ino-storm"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10046",
+      "Name": "Asahina Akikusa",
+      "Type": "Personality",
+      "Clan": "Crane",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 4,
+      "PersonalHonor": 4,
+      "HonorRequirement": 6,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After an action on your Air Spell resolves: Gain 1 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10046.jpg",
+      "Keywords": [
+        "Loyal",
+        "Unique",
+        "Air",
+        "Crane Clan",
+        "Daimyo",
+        "Shugenja"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "akikusa-honor"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

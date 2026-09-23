@@ -2220,6 +2220,100 @@ public static class AbilityCatalog
         // did not choose this, he must pass at his next opportunity this phase to take a Battle, Limited, or Open action." The controller's
         // Either/Or (bow him, or take the forced pass -- ForcedPass.cs).
         ["unfortunate-hesitation"] = new("BattleOrOpen", "Target a Personality: his controller may choose to bow him. If he did not choose this, he must pass at his next opportunity this phase to take a Battle, Limited, or Open action", "personality"),
+        // Seeds of Decay pass (issue #453), batch 3. Readings and the primitives are in SeedsOfDecayBatch3.cs and the batch report.
+        // Asako Chukage - exp (oracle-l5r-10072): "Limited: Bow your target Ring: Draw a card." -- the Ring is the cost (ActionCost.BowTarget), so it must be one of the
+        // player's own unbowed Rings in play (own-unbowed-ring). "Battle: Even if Chukage is bowed: If he would be opposed, move him to the current battlefield. If he
+        // moved, straighten his unit. If there are now more units there on the enemy side than on yours, you may target an enemy unit and move it home." -- Michi's
+        // own tireless reinforce (bowed-exemption list, MovesToBattle) plus an optional enemy Personality slot, legal only when the unit count after his move holds.
+        ["chukage-draw"] = new("Limited", "Bow your target Ring: Draw a card", "own-unbowed-ring", Costs: ActionCost.BowTarget),
+        ["chukage-move"] = new("Battle", "Even if bowed: if he would be opposed, move Chukage to the current battlefield and straighten his unit. If there are now more enemy units there than yours, you may target an enemy unit and move it home", "slots",
+            Slots: [new("enemy", "enemy-personality", "An enemy unit to move home, if the enemy then has more units there than you", 0, 1)], MovesToBattle: true),
+        // Asako Jukko (oracle-l5r-10073): "Battle/Open: Target a Personality with 1 Force or greater: Switch his Force and Chi. You may switch Jukko's Force and Chi." -- an
+        // Exchange (core rules Glossary: note both current values, then set each to the other's), applied as two modifiers; the optional second switch is a slot that may
+        // name only Jukko himself.
+        ["jukko-switch"] = new("BattleOrOpen", "Target a Personality with 1 Force or greater: Switch his Force and Chi. You may switch Jukko's Force and Chi", "slots",
+            Slots: [new("target", "personality-force-gte-one", "A Personality with 1 Force or greater"), new("self", "source-itself", "Jukko himself, to switch his own Force and Chi too", 0, 1)]),
+        // Asako Rikate - exp (oracle-l5r-10075): "Battle: Target an enemy Personality: Reduce his Force to 0. Give him -2C." -- Kaido's Set-Force-to-0 delta and a Chi penalty
+        // (a Personality whose Chi reaches 0 is destroyed, as ApplyModifier already does).
+        ["rikate-exp-weaken"] = new("Battle", "Target an enemy Personality: Reduce his Force to 0. Give him -2C", "enemy-personality"),
+        // Bayushi Makubesu (oracle-l5r-10078): "After Makubesu enters play: Create two 1F Followers and attach them to one or two of your Personalities." -- printed without
+        // "Reaction:", but it needs a choice of hosts, so it is offered in his own entry window (reading 4 in the batch report). The Followers are Farmlands Conscripts
+        // (oracle-l5r-10004, Bukaro's), dealt in turn to the one or two chosen Personalities (CreatedCardSpec.Count without PerHost).
+        ["makubesu-create"] = new("Reaction", "After Makubesu enters play: Create two 1F Followers and attach them to one or two of your Personalities", "slots", Trigger: "own-enters-play",
+            Slots: [new("hosts", "own-personality", "One or two of your Personalities", 1, 2)],
+            Creates: new(CardType.Follower, Force: 1, ProxyId: "oracle-l5r-10004", Count: 2)),
+        // Chuda Seki (oracle-l5r-10091): "After Seki enters play: Lose 3 Honor." is his EntryHonorLoss. "Reaction: After Seki enters play, target a Personality: Give him a
+        // -1C Plague token." -- a Chi-penalty token (Cultist Infiltrator's shape), either side's Personality.
+        ["seki-plague"] = new("Reaction", "After Seki enters play, target a Personality: Give him a -1C Plague token", "personality", Trigger: "own-enters-play"),
+        // Daidoji Kitahime (oracle-l5r-10048): "Battle: Bow Kitahime unless you have Reconnaissance: Ranged 4 Attack." -- Tsuruchi Yashiro's own shape.
+        ["kitahime-attack"] = new("Battle", "Bow Kitahime unless you have Reconnaissance: Ranged 4 Attack", "attack"),
+        // Doji Mitsuru (oracle-l5r-10049): "Battle: Target an enemy Personality: Mitsuru duels him. Bow the duel's loser." -- Shiba Kudome's duel without her token.
+        ["mitsuru-duel"] = new("Battle", "Target an enemy Personality: Mitsuru duels him. Bow the duel's loser", "enemy-personality", IssuesDuel: true),
+        // Hida Kaiji (oracle-l5r-10040): "Before the first time each turn another player's action moves Kaiji: Negate his movement from that action." is his Effect
+        // (negate-first-enemy-move-each-turn, read where a movement is applied). "Battle: Target an enemy card with lower Force: Bow it. Destroy it if it has no
+        // attachments." -- an enemy Personality or Follower with Force strictly below his (enemy-force-lt-self).
+        ["kaiji-bow"] = new("Battle", "Target an enemy card with lower Force: Bow it. Destroy it if it has no attachments", "enemy-force-lt-self"),
+        // Hiruma Nitani - exp (oracle-l5r-10041): "Battle: Ranged 6 Attack." "Battle: Target an enemy card with the base Shadowlands keyword: Destroy it." -- "base" is the
+        // PRINTED keyword (PrintedKeyword), not a granted one nor a Shadowlands Clan alignment: enemy-card-with-printed-keyword.
+        ["nitani-exp-attack"] = new("Battle", "Ranged 6 Attack", "attack"),
+        ["nitani-exp-destroy"] = new("Battle", "Target an enemy card with the base Shadowlands keyword: Destroy it", "enemy-card-with-printed-keyword", RequiredKeywords: ["Shadowlands"]),
+        // Kaiu Okaru (oracle-l5r-10043): "Battle: Target an enemy Personality or Follower: Give it -3F. You may take an additional Battle action." Brash is the keyword's own rule.
+        ["okaru-weaken"] = new("Battle", "Target an enemy Personality or Follower: Give it -3F. You may take an additional Battle action", "enemy-force"),
+        // Kitsune Merihiko (oracle-l5r-10065): "Reaction: After Merihiko enters play: Create a 0F/2C/3PH Mantis Clan * Nonhuman * Bee * Cavalry * Spirit * Swarm Personality
+        // with the ability, 'Battle: Bow this card: Ranged 4 Attack.'" -- Merihiko's Swarm (oracle-l5r-10199, personality-wave-57), Ohsuki's own entry-create shape.
+        ["merihiko-create"] = new("Reaction", "After Merihiko enters play: Create a 0F/2C/3PH Mantis Clan · Nonhuman · Bee · Cavalry · Spirit · Swarm Personality with \"Battle: Bow this card: Ranged 4 Attack\"", "none", Trigger: "own-enters-play",
+            Creates: new(CardType.Personality, Force: 0, Chi: 2, PersonalHonor: 3, Keywords: ["Mantis Clan", "Nonhuman", "Bee", "Cavalry", "Spirit", "Swarm"], AbilityText: "Battle: Bow this card: Ranged 4 Attack")),
+        ["merihikos-swarm-attack"] = new("Battle", "Bow this card: Ranged 4 Attack", "attack", Costs: ActionCost.BowSource),
+        // Masayoshi (oracle-l5r-10089): "Reaction: After Masayoshi enters play: Create a +4F/+1C Weapon Item and attach it to him." -- Masayoshi's Blade (oracle-l5r-10204,
+        // item-wave-10), attached to the creating card itself (CreatedCardSpec.HostIsSource, the Reaction's own source; a Kensai carries two Weapons).
+        ["masayoshi-create"] = new("Reaction", "After Masayoshi enters play: Create a +4F/+1C Weapon Item and attach it to him", "none", Trigger: "own-enters-play",
+            Creates: new(CardType.Item, Force: 4, Chi: 1, Keywords: ["Weapon"], ProxyId: "oracle-l5r-10204") { HostIsSource = true }),
+        // Matsu Koyama - exp (oracle-l5r-10064): "Battle: Give each other Lion Clan Personality in your army a Force bonus equal to his own Personal Honor." -- a per-card
+        // amount (each Personality's OWN current Personal Honor), so a loop over the army rather than the flat army boost.
+        ["koyama-exp-boost"] = new("Battle", "Give each other Lion Clan Personality in your army a Force bonus equal to his own Personal Honor", "none"),
+        // Moto Aoi (oracle-l5r-10098): "Battle/Open: Even if Aoi is at home, bow him and target a Personality: Give him +4F." -- Kamina's bow-for-+4F as Battle/Open;
+        // "even if Aoi is at home" waives only his own presence at the battlefield (SourceUnitMayBeAway), the acting player still needs a unit there in the Battle phase.
+        ["aoi-boost"] = new("BattleOrOpen", "Even if Aoi is at home, bow him and target a Personality: Give him +4F", "personality", Costs: ActionCost.BowSource, SourceUnitMayBeAway: true),
+        // Ninube Hajime (oracle-l5r-10090): "After Hajime enters play: Lose 2 Honor." is his EntryHonorLoss. "Ninja Battle: Target an enemy Personality at the current
+        // battlefield: Move him to a different location." -- a different location is home or another unresolved battlefield: two moves sharing one use.
+        ["hajime-move-home"] = new("Battle", "Ninja Battle: Target an enemy Personality at the current battlefield: Move him home", "enemy-personality", ActionKeywords: ["Ninja"], UsageKey: "hajime-move", Move: new(MoveSpec.Target, MoveSpec.Home)),
+        ["hajime-move-battlefield"] = new("Battle", "Ninja Battle: Target an enemy Personality at the current battlefield: Move him to another unresolved battlefield", "enemy-personality", ActionKeywords: ["Ninja"], UsageKey: "hajime-move", Move: new(MoveSpec.Target, MoveSpec.AnyUnresolved)),
+        // Shiba Iaimiko (oracle-l5r-10077): "Battle: Target an enemy Personality or Follower: Give it -4F. If its Force is now 0 and you control a Shugenja, you may target
+        // and destroy a card without attachments in the target's unit." -- Scorn the Weak's shape as two slots: the optional second target is listed only while the
+        // condition can hold (the target's Force is at most 4 and a Shugenja is controlled).
+        ["iaimiko-weaken"] = new("Battle", "Target an enemy Personality or Follower: Give it -4F. If its Force is now 0 and you control a Shugenja, you may target and destroy a card without attachments in the target's unit", "slots",
+            Slots: [new("target", "enemy-force", "An enemy Personality or Follower"), new("destroy", "iaimiko-collateral", "A card without attachments in the target's unit, to destroy if its Force is now 0 and you control a Shugenja", 0, 1)]),
+        // Shosuro Hawado - exp (oracle-l5r-10081): "Reaction: After a Battle action resolves, if Hawado is at the current battlefield, target a Personality that performed it:
+        // Move him from his current location to another." -- Stormless Fury's own after-Battle-action window; the performer (MoveSpec.BattleActionPerformer) goes home or to
+        // another unresolved battlefield, two Reactions sharing one use.
+        ["hawado-exp-move-home"] = new("Reaction", "After a Battle action resolves, if Hawado is at the current battlefield, target a Personality that performed it: Move him home", "none", Trigger: "after-battle-action-resolves", UsageKey: "hawado-exp-move", Move: new(MoveSpec.BattleActionPerformer, MoveSpec.Home)),
+        ["hawado-exp-move-battlefield"] = new("Reaction", "After a Battle action resolves, if Hawado is at the current battlefield, target a Personality that performed it: Move him to another unresolved battlefield", "none", Trigger: "after-battle-action-resolves", UsageKey: "hawado-exp-move", Move: new(MoveSpec.BattleActionPerformer, MoveSpec.AnyUnresolved)),
+        // Tanemono (oracle-l5r-10096): "Tanemono will not be controlled by a Phoenix Clan player." is his Effect (tanemono-no-phoenix-control, read with Loyal's own control
+        // check). "Battle/Open: Switch Tanemono's Force and Chi." -- Jukko's Exchange on himself.
+        ["tanemono-switch"] = new("BattleOrOpen", "Switch Tanemono's Force and Chi", "none"),
+        // Tsuruchi Kohrogi (oracle-l5r-10068): "Battle: Ranged 2 Attack."
+        ["kohrogi-attack"] = new("Battle", "Ranged 2 Attack", "attack"),
+        // Utaku Hirononri (oracle-l5r-10103): "Open: Bow Hirononri and target a Stables or Cavalry card: Straighten it." -- any card in play carrying either keyword
+        // (card-with-any-required-keyword: ANY of RequiredKeywords, unlike the all-of categories).
+        ["hirononri-straighten"] = new("Open", "Bow Hirononri and target a Stables or Cavalry card: Straighten it", "card-with-any-required-keyword", RequiredKeywords: ["Stables", "Cavalry"], Costs: ActionCost.BowSource),
+        // Yogo Heijin (oracle-l5r-10083): "Battle: Target your Courtier and an enemy Personality: Move them to the current battlefield. Straighten the enemy Personality's
+        // unit." -- two slots, either anywhere in play (the point is bringing them in: exempt from the at-the-battlefield target rule, MovesToBattle).
+        ["heijin-move"] = new("Battle", "Target your Courtier and an enemy Personality: Move them to the current battlefield. Straighten the enemy Personality's unit", "slots",
+            Slots: [new("courtier", "own-personality-with-keyword", "Your Courtier"), new("enemy", "enemy-personality", "An enemy Personality")], RequiredKeywords: ["Courtier"], MovesToBattle: true),
+        // Yoritomo Akukiho (oracle-l5r-10070): "Battle: Target a Weapon in your hand: Attach it to Akukiho, paying all costs. You may take an additional Battle action." --
+        // Moto Hailung's attach-from-hand shape (AttachSpec, priced by GoldCostRule.AttachCost) plus the grant.
+        ["akukiho-attach"] = new("Battle", "Target a Weapon in your hand: Attach it to Akukiho, paying all costs. You may take an additional Battle action", "attachment-in-discard",
+            Cost: GoldCostRule.AttachCost(), Attach: new(AttachSource.Target, AttachPile.OwnHand, AttachWielder.Source, [CardType.Item], ["Weapon"])),
+        // Yoritomo Iwashi (oracle-l5r-10071): "Limited: If Iwashi has been in an attacking army when it won a battle since your last turn began, target a Personality: Bow
+        // him." -- the condition precedes the colon, so it gates the action (a per-id Require reading the victory stamp MarkAttackVictory leaves on him).
+        ["iwashi-bow"] = new("Limited", "If Iwashi has been in an attacking army when it won a battle since your last turn began, target a Personality: Bow him", "personality"),
+        // Moshi Ino (oracle-l5r-10066): "Battle: Ino summons a storm. After the next action not performed by a Thunder Personality resolves this battle, the player who
+        // took it chooses to discard a card or bow the performer. You may take an additional Battle action." -- a standing watch on her (MoshiInoStorm.cs) answered by the
+        // Either/Or of the player who took the action.
+        ["ino-storm"] = new("Battle", "Ino summons a storm: after the next action not performed by a Thunder Personality resolves this battle, the player who took it chooses to discard a card or bow the performer. You may take an additional Battle action", "none"),
+        // Asahina Akikusa (oracle-l5r-10046): "Reaction: After an action on your Air Spell resolves: Gain 1 Honor." -- the after-action-resolved window (ActionEffectTracking.cs),
+        // her own condition being that the resolved action's source is an Air Spell her controller controls.
+        ["akikusa-honor"] = new("Reaction", "After an action on your Air Spell resolves: Gain 1 Honor", "none", Trigger: AfterActionReactionTriggers.AfterActionResolved),
     });
 }
 
@@ -2376,7 +2470,7 @@ public sealed partial class MatchEngine
         Emit("clanAlignmentRemoved", $"{Definition(card).Name} permanently loses his Clan Alignment keywords.", card.OwnerId, card.Id);
     }
     private bool LoyaltyAllowsControl(CardInstance card, string clan) =>
-        !Keyword(card, "Loyal") || ClanAlignments(card).Length == 0 || HasClanAffiliation(card, clan);
+        (!Keyword(card, "Loyal") || ClanAlignments(card).Length == 0 || HasClanAffiliation(card, clan)) && !ControlRefusedByClan(card, clan);
     // "Attachment": lasts while the granting attachment stays attached (cleared in DestroyAttachment).
     // "Turn": cleared at FinishTurn, the default for a keyword granted by an action's effect.
     // "Permanent": only when the granting card's text says so; never auto-cleared.
@@ -2426,13 +2520,17 @@ public sealed partial class MatchEngine
         // Kuni Shinoda - exp (personality-wave-24): bows, then destroys a Shadowlands target.
         or "shinoda-exp-bow-destroy"
         or "a-stain-cleansed-destroy"
+        // Seeds of Decay (issue #453, batch 3): Hiruma Nitani - exp destroys his target outright; Hida Kaiji destroys his when it has no attachments.
+        or "nitani-exp-destroy" or "kaiji-bow"
         // Before the Dawn (issue #431): Wrathful Dead, and the actions that destroy their target.
         or "wrathful-dead-destroy" or "anger-management-destroy" or "dismissing-the-cur-move" or "spirit-kensai-destroy" or "spirit-commander-destroy" or "embers-final-fire-destroy" or "red-hunger-personality" or "crimson-mark-destroy";
     // The actions whose ONLY effect is to straighten their target: against a card that may not be straightened this turn (Basic Lesson) they are refused outright, where an action that
     // also does something else (Defensive Stance's +3F) still resolves and only its straightening is skipped (Straighten refuses it).
     private static bool StraightensOnly(string abilityId) => abilityId is "jinn-kuen-straighten" or "kodo-straighten" or "munefusa-straighten" or "mitsuko-straighten" or "ritual-preparation-straighten"
         or "training-straighten-at-battle" or "horibe-straighten" or "furu-straighten" or "tsudoken-exp2-straighten" or "tsukasa-straighten" or "atsumichi-straighten" or "ring-of-air-straighten"
-        or "mitoshi-straighten";
+        or "mitoshi-straighten"
+        // Seeds of Decay (issue #453, batch 3): Utaku Hirononri only straightens his target.
+        or "hirononri-straighten";
     private static string? MoveOrStraightenKind(string abilityId) => abilityId switch
     {
         "incapacitated" or "favor-battle" or "journeys-end-move" or "shamate-move" or "effortless-counterattack-move"
@@ -2451,12 +2549,16 @@ public sealed partial class MatchEngine
             // Issue #336: Sea Troll Predator moves its target (and itself, each movement negatable on its own), Fear Me!, Liu-Xeung and Gold and Steel's second
             // ability send their target home.
             or "predator-move" or "fear-me-move" or "liuxeung-move-home" or "gold-and-steel-bow-move" or "tsunami-move-home"
+            // Seeds of Decay (issue #453, batch 3): Ninube Hajime's two destinations and Chukage's optional enemy move home are moves of their target.
+            or "hajime-move-home" or "hajime-move-battlefield" or "chukage-move"
             // Before the Dawn (issue #431): the move-home actions.
             or "ryuba-move" or "masafuni-move" or "nijugun-move" or "omigawa-move" or "dismissing-the-cur-move" or "second-feint-bow" or "tsunami-tattoo-move" or "detained-move" or "shadow-tactics-home" => "move",
         "air-straighten" or "paid-straighten" or "training-keyword-conditional-straighten" or "immovable-object-straighten"
             or "defensive-stance" or "ritual-preparation-straighten" or "training-straighten-at-battle" or "horibe-straighten"
             or "furu-straighten" or "tsudoken-exp2-straighten" or "tsukasa-straighten" or "atsumichi-straighten"
             or "ring-of-air-straighten" or "mitoshi-straighten"
+            // Seeds of Decay (issue #453, batch 3): Utaku Hirononri straightens a Stables or Cavalry card.
+            or "hirononri-straighten"
             // Isawa Mitsuko (issue #301): straightens an Air Shugenja (a Personality, so negatable) or a
             // Holding (never reaches Tamoko -- BeforeActionReactionApplies's kind check is Personality-only).
             or "mitsuko-straighten" => "straighten",
@@ -2510,6 +2612,8 @@ public sealed partial class MatchEngine
         or "disgraceful-conduct-bow" or "disgraceful-conduct-bow-unit"
         // Before the Dawn (issue #431): the plain bows.
         or "tsuji-bow" or "komiko-bow" or "eun-ju-bow" or "iemasa-bow" or "omigawa-move"
+        // Seeds of Decay (issue #453, batch 3): Hida Kaiji, Yoritomo Iwashi and Doji Mitsuru's duel bow their target.
+        or "kaiji-bow" or "iwashi-bow" or "mitsuru-duel"
         or "anger-management-destroy" or "control-the-board-weaken" or "spirit-magistrate-bow" or "strength-of-the-mountain-bow" or "strength-of-the-mountain-earth" or "second-feint-bow" or "crimson-shadow-bow" or "tsunami-tattoo-move" or "detained-move";
     // Whether the command's TargetId is an Attack's OWN target, which reacts through the separate attackReaction
     // window instead of this one: an Attack-classified ability whose Target category is "attack". Bayushi Kahoku
@@ -2830,6 +2934,10 @@ public sealed partial class MatchEngine
         "training-province-attack" => 3,
         "strength-of-the-divine-honor" => sourceId is not null ? CardPersonalHonor(Card(sourceId)) : 0,
         "hiromis-vassals-attack" => 6,
+        // Seeds of Decay (issue #453, batch 3): Daidoji Kitahime "Ranged 4", Hiruma Nitani - exp "Ranged 6", Tsuruchi Kohrogi "Ranged 2", Merihiko's Swarm "Ranged 4".
+        "kitahime-attack" or "merihikos-swarm-attack" => 4,
+        "nitani-exp-attack" => 6,
+        "kohrogi-attack" => 2,
         _ => 0
     };
     // AttackStrength plus every passive defense modifier applying to this specific target (Destrier/
@@ -2879,6 +2987,8 @@ public sealed partial class MatchEngine
         "kahoku-exp-attack" or "tsuruchi-kosoko-exp-attack" or "hiruma-nitani-attack" or "training-followed-recon-attack" or "spirit-scout-attack" or "engulfing-flames-attack" => "Ranged",
         "training-followed-dishonorable-melee-attack" => "Melee",
         "hiromis-vassals-attack" => "Ranged",
+        // Seeds of Decay (issue #453, batch 3).
+        "kitahime-attack" or "nitani-exp-attack" or "kohrogi-attack" or "merihikos-swarm-attack" => "Ranged",
         _ => ""
     };
     // General "in play" Reaction primitive: a printed Reaction whose card must actually be in play
@@ -3403,6 +3513,8 @@ public sealed partial class MatchEngine
                 // Red Crane Dojo: "Ninja Tireless Reaction".
                 or "red-crane-dojo-ninja"
                 // Dragon's Breath Castle: "Reaction: Even if this card is bowed, ...".
+                // Asako Chukage - exp (issue #453, batch 3): "Battle: Even if Chukage is bowed: ..." -- Michi's own tireless reinforce.
+                or "chukage-move"
                 or "dbc-attacker-bow", "Abilities on bowed cards cannot be used.");
             uses = source.AbilityUses;
         }
@@ -4183,7 +4295,7 @@ public sealed partial class MatchEngine
                     // Return to Action (issue #331): "your Personality at HOME" is by definition not at the battlefield
                     // -- own-personality-at-home is exempt for the same reason.
                     if (actingAsBattle && ability.Target is not ("personality-at-adjacent-battlefield" or "own-unbowed-farm" or "region-or-terrain" or "own-personality-at-home")
-                        && id is not ("intervening-spirit-move" or "earth-flows-move" or "sanctuary-of-the-waves-move" or "dislodge-the-foe")) Require(AtBattle(target), "Target or performer must be at the current battlefield.");
+                        && id is not ("intervening-spirit-move" or "earth-flows-move" or "sanctuary-of-the-waves-move" or "dislodge-the-foe" or "heijin-move")) Require(AtBattle(target), "Target or performer must be at the current battlefield.");
                     var personality = type == CardType.Personality;
                     var own = target.OwnerId == player.Id;
                     // TargetMustBe (P2): a target-status legality condition layered onto whichever category
@@ -4480,6 +4592,25 @@ public sealed partial class MatchEngine
                         "card-in-dishonorable-unit" => (personality || target.Zone == Zone.Attached && type is CardType.Follower or CardType.Item or CardType.Spell) && Card(UnitHostId(target)) is { } leader
                             && Definition(leader).Type == CardType.Personality && MatchesTargetStatus(leader, TargetStatus.IsDishonorable),
                         "enemy-personality-gold-cost-lte-performer" => personality && !own && CardGoldCost(target) <= CardGoldCost(Card(command.PerformerId!)),
+                        // Seeds of Decay pass (issue #453), batch 3.
+                        // Asako Chukage - exp: "Bow your target Ring" -- one of the acting player's own unbowed Rings in play (a Ring sits in Zone.Home once put into play).
+                        "own-unbowed-ring" => type == CardType.Ring && own && !target.Bowed,
+                        // Hida Kaiji: "an enemy card with lower Force" -- an enemy Personality or Follower (the cards in a unit with a Force of their own) strictly below his.
+                        "enemy-force-lt-self" => !own && type is CardType.Personality or CardType.Follower && CardForce(target) < CardForce(source!),
+                        // Hiruma Nitani - exp: "an enemy card with the base Shadowlands keyword" -- any enemy card in a unit whose PRINTED keywords include every RequiredKeywords entry
+                        // (a granted keyword or a Shadowlands Clan alignment is not the base keyword).
+                        "enemy-card-with-printed-keyword" => !own && (personality || target.Zone == Zone.Attached && type is CardType.Follower or CardType.Item or CardType.Spell)
+                            && (ability.RequiredKeywords ?? []).All(k => PrintedKeyword(target, k)),
+                        // Utaku Hirononri: "a Stables or Cavalry card" -- any card in play carrying ANY of the RequiredKeywords (either side's), unlike the all-of categories.
+                        "card-with-any-required-keyword" => (ability.RequiredKeywords ?? []).Any(k => Keyword(target, k)),
+                        // Asako Jukko: "a Personality with 1 Force or greater".
+                        "personality-force-gte-one" => personality && CardForce(target) >= 1,
+                        // Asako Jukko's optional second switch: only the source card itself.
+                        "source-itself" => source is not null && target.Id == source.Id,
+                        // Shiba Iaimiko's optional second target: a card without attachments in the first slot's target's unit -- listed only while the printed condition can
+                        // hold once the -4F applies (that target's Force is at most 4, so "now 0", and the acting player controls a Shugenja).
+                        "iaimiko-collateral" => (type == CardType.Follower || personality && !HasAttachments(target)) && SlotCards(command, "target").FirstOrDefault() is { } iaimikoPrimary
+                            && UnitHostId(target) == UnitHostId(iaimikoPrimary) && CardForce(iaimikoPrimary) <= 4 && ControlsKeyword(player.Id, "Shugenja"),
                         _ => false
                     }, "That card does not meet this ability's target or performer requirements.");
                 }
@@ -4489,6 +4620,9 @@ public sealed partial class MatchEngine
         ValidateMove(command, ability);
         if (ability.ChoosesOwnProvince)
             Require(command.Province is int ownProvince && player.Provinces.Any(p => p.Index == ownProvince && !p.Destroyed && p.CardId is not null), "Choose one of your provinces that holds a card.");
+        // Goju Yurishi - exp (issue #453, batch 3; TargetOfLastResort.cs): a card another player may only target when no other legal target exists -- judged for a
+        // single target and for each slot candidate alike, before the slot probe returns.
+        RequireNotTargetOfLastResort(command, ability, slotAbility);
         // One slot candidate has now been judged; everything below is about the whole action (its own checks and its price).
         if (slotAbility is not null) return;
         if (id == "red-hunger-attachments")
@@ -4515,6 +4649,8 @@ public sealed partial class MatchEngine
             var recruitQuote = QuotePurchase(player.Id, recruit.Id, ignoreHonorRequirementIfPersonalityClan: "Lion");
             Require(recruitQuote.Error is null, recruitQuote.Error ?? "");
         }
+        // Seeds of Decay pass (issue #453), batch 3: the per-id conditions of this batch's cards (SeedsOfDecayBatch3.cs).
+        ValidateSeedsOfDecayBatch3(id, command, ability, player, source);
         // The Gold cost (issue #303): every ability's price -- Equip (Battle)/Soshi Neiru's Spell cost, Low
         // Market's "2 less, to a minimum of 1", Your Clan Needs You!'s recruit cost minus 6, Shinden
         // Shorai's "all costs", Singh Remnants' own cost, a Strategy/Discipline's printed cost, Kharmic's
@@ -6765,6 +6901,72 @@ public sealed partial class MatchEngine
                 if (ResolveOrDeferAttack(id, player, target?.Id, command.PerformerId!, consumedGrant)) return;
                 break;
             case "training-follower-honor-draw": GainHonor(player.Id, -2, "Training Honor cost"); Draw(player); break;
+            // Seeds of Decay pass (issue #453), batch 3 (SeedsOfDecayBatch3.cs holds the helpers).
+            case "chukage-draw": Draw(player); break;
+            case "chukage-move":
+            {
+                // "If he would be opposed, move him to the current battlefield. If he moved, straighten his unit." (Michi's shape), then the optional enemy move home,
+                // re-judged now that he has moved: "If there are now more units there on the enemy side than on yours".
+                var chukageBattle = _state.CurrentBattleProvince!.Value;
+                var chukageWasThere = source!.Zone == Zone.Battlefield && source.ProvinceIndex == chukageBattle;
+                if (Army(1 - player.Id, chukageBattle).Any() && !chukageWasThere && MoveToBattlefield(source, chukageBattle)) StraightenUnit(source);
+                if (SlotCards(command, "enemy").FirstOrDefault() is { } chukageEnemy && Army(1 - player.Id, chukageBattle).Count() > Army(player.Id, chukageBattle).Count()) MoveHome(chukageEnemy, false);
+                break;
+            }
+            case "jukko-switch":
+                SwitchForceAndChi(SlotCards(command, "target").Single(), source!, id);
+                if (SlotCards(command, "self").Any()) SwitchForceAndChi(source!, source!, id);
+                break;
+            case "tanemono-switch": SwitchForceAndChi(source!, source!, id); break;
+            case "rikate-exp-weaken":
+                ApplyModifier(target!, source!.Id, id, "Force", -CardForce(target!));
+                ApplyModifier(target!, source!.Id, id, "Chi", -2);
+                break;
+            case "seki-plague": CreateToken(target!, "Plague", id, "Chi", -1); break;
+            case "kitahime-attack":
+                if (!HasReconnaissanceAtCurrentBattlefield(player.Id)) source!.Bowed = true;
+                if (ResolveOrDeferAttack(id, player, target?.Id, ActionPerformer(ability, command, source).Id, consumedGrant)) return;
+                break;
+            case "nitani-exp-attack": case "kohrogi-attack": case "merihikos-swarm-attack":
+                if (ResolveOrDeferAttack(id, player, target?.Id, ActionPerformer(ability, command, source).Id, consumedGrant)) return;
+                break;
+            case "nitani-exp-destroy": DestroyUnitCard(target!, player.Id); break;
+            case "kaiji-bow":
+                if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
+                if (!HasAttachments(target!)) DestroyUnitCard(target!, player.Id);
+                break;
+            case "okaru-weaken": ApplyModifier(target!, source!.Id, id, "Force", -3); GrantAdditionalAction(player.Id, null); break;
+            case "koyama-exp-boost": KoyamaBoost(source!, player.Id); break;
+            case "aoi-boost": ApplyModifier(target!, source!.Id, id, "Force", 4); break;
+            case "hajime-move-home": case "hajime-move-battlefield": case "hawado-exp-move-home": case "hawado-exp-move-battlefield":
+                ExecuteMove(command, ability, source, target); break;
+            case "iaimiko-weaken":
+            {
+                var iaimikoTarget = SlotCards(command, "target").Single();
+                ApplyModifier(iaimikoTarget, source!.Id, id, "Force", -4);
+                if (CardForce(iaimikoTarget) == 0 && ControlsKeyword(player.Id, "Shugenja") && SlotCards(command, "destroy").FirstOrDefault() is { } collateral) DestroyUnitCard(collateral, player.Id);
+                break;
+            }
+            case "hirononri-straighten": Straighten(target!); break;
+            case "heijin-move":
+            {
+                var heijinBattle = _state.CurrentBattleProvince!.Value;
+                var heijinEnemy = SlotCards(command, "enemy").Single();
+                TryMoveToBattlefield(SlotCards(command, "courtier").Single(), heijinBattle);
+                TryMoveToBattlefield(heijinEnemy, heijinBattle);
+                StraightenUnit(heijinEnemy);
+                break;
+            }
+            case "akukiho-attach":
+            {
+                var akukihoWindow = ExecuteAttach(command, ability.Attach!, player, source, target);
+                GrantAdditionalAction(player.Id, null);
+                if (akukihoWindow) return;
+                break;
+            }
+            case "iwashi-bow": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;
+            case "ino-storm": ArmInoStorm(source!); GrantAdditionalAction(player.Id, null); break;
+            case "akikusa-honor": GainHonor(player.Id, 1, "Asahina Akikusa", source); break;
             default:
                 // Any ability with an AttachSpec (Moto Jun-Ni, Fading Shadows, Foothills Keep and the training shapes) needs no case of its own: the Gold was
                 // paid by PayForAbility, so the card now leaves its place and enters play attached. An entering-play window ends the action here.
@@ -7189,6 +7391,8 @@ public sealed partial class MatchEngine
     // no negation window ever names, so plain MoveToBattlefield has no such check.
     private bool TryMoveToBattlefield(CardInstance card, int province)
     {
+        // Hida Kaiji (issue #453, batch 3): see MoveHome.
+        if (EnemyActionMovementAutoNegated(card)) return false;
         if (NegatesEffect(card, "move"))
         {
             Emit("moveNegated", $"{Definition(card).Name}'s movement was negated before it resolved.", card.OwnerId, card.Id);
@@ -7203,6 +7407,8 @@ public sealed partial class MatchEngine
     private static string[] ArmyPersonalityChoice(GameCommand command) => command.CardIds is { Length: > 0 } ids ? ids : command.TargetId is null ? [] : [command.TargetId];
     private void MoveHome(CardInstance card, bool bow)
     {
+        // Hida Kaiji (issue #453, batch 3): the first time each turn another player's action would move him, the movement is negated by his own trait.
+        if (EnemyActionMovementAutoNegated(card)) return;
         // Tamori Tamoko (issue #207 follow-up): "before an action resolves, negate ... his movement
         // from the action's effects" -- consumed here, not inside ReturnHome, so the end-of-battle
         // bulk return-home sweep (FinishBattleReturnHomeAndTransition) is never negatable this way --

@@ -93,7 +93,7 @@ internal static class BattleAbsentMovesTests
     private static void MarkedInventoryPinned()
     {
         var marked = string.Join(",", AbilityCatalog.All.Where(p => p.Value.MovesToBattle).Select(p => p.Key).OrderBy(k => k, StringComparer.Ordinal));
-        Eq(marked, "charge-into-danger-move,dislodge-the-foe,earth-flows-move,hawado-move-battlefield,houken-exp-straighten,intervening-spirit-move,mai-move-force-penalty,michi-move,return-to-action-move,rikyou-move,sanctuary-of-the-waves-move,skipping-the-puddle-move,sound-of-thunder-move,takasho-move,training-move-current,training-move-to-battle,trusting-instinct-move,your-clan-needs-you");
+        Eq(marked, "charge-into-danger-move,chukage-move,dislodge-the-foe,earth-flows-move,hawado-move-battlefield,heijin-move,houken-exp-straighten,intervening-spirit-move,mai-move-force-penalty,michi-move,return-to-action-move,rikyou-move,sanctuary-of-the-waves-move,skipping-the-puddle-move,sound-of-thunder-move,takasho-move,training-move-current,training-move-to-battle,trusting-instinct-move,your-clan-needs-you");
         foreach (var (id, ability) in AbilityCatalog.All.Where(p => p.Value.MovesToBattle))
             Check(ability.Timing is "Battle" or "BattleOrOpen", $"{id}: a move to the battle is a Battle action");
     }

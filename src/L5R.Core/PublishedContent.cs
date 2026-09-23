@@ -2405,4 +2405,10 @@ public static class PublishedContent
     public static PublishedSnapshot PersonalityWave51 { get; } = Load("L5R.Published.PersonalityWave51.json", "personality-wave-51", requireDecks: false);
     /// <summary>Personality wave 52 (issue #449 follow-up): Akodo Tezuka.</summary>
     public static PublishedSnapshot PersonalityWave52 { get; } = Load("L5R.Published.PersonalityWave52.json", "personality-wave-52", requireDecks: false);
+    /// <summary>Personality wave 55 (Seeds of Decay pass, issue #453, batch 3): the batch's 26 wired Personalities.</summary>
+    public static PublishedSnapshot PersonalityWave55 { get; } = Load("L5R.Published.PersonalityWave55.json", "personality-wave-55", requireDecks: false);
+    /// <summary>Personality wave 57 (issue #453, batch 3): Merihiko's Swarm, the created-only Personality Kitsune Merihiko creates.</summary>
+    public static PublishedSnapshot PersonalityWave57 { get; } = Load("L5R.Published.PersonalityWave57.json", "personality-wave-57", requireDecks: false);
+    /// <summary>Item wave 10 (issue #453, batch 3): Masayoshi's Blade, the created-only Weapon Masayoshi creates.</summary>
+    public static PublishedSnapshot ItemWave10 { get; } = Load("L5R.Published.ItemWave10.json", "item-wave-10", requireDecks: false);
 }

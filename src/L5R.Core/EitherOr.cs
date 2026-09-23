@@ -27,6 +27,8 @@ public static class EitherOrSpecs
     public const string UnfortunateHesitation = "unfortunate-hesitation";
     /// <summary>A three-option fixture (never in a playable deck): pay 2 Gold, lose 2 Honor, or let the acting player gain 2 Honor.</summary>
     public const string TrainingThreeWay = "training-three-way";
+    /// <summary>Moshi Ino's storm (issue #453, batch 3): the player who took the action chooses to discard a card or bow its performer (MoshiInoStorm.cs).</summary>
+    public const string InoStorm = "ino-storm";
 }
 
 /// <summary>What choosing an option amounts to, for a client to word and style it: "avoid" (accept a cost or a lesser loss so the
@@ -86,6 +88,7 @@ public sealed partial class MatchEngine
             EitherOrSpecs.SakumaPayOrNegate => $"{source}: pay 2 Gold, or your action's remaining effects are negated.",
             EitherOrSpecs.UnfortunateHesitation => $"{source}: bow {affected}, or you must pass at your next opportunity this phase to take a Battle, Limited, or Open action.",
             EitherOrSpecs.TrainingThreeWay => $"{source}: pay 2 Gold, lose 2 Honor, or let your opponent gain 2 Honor.",
+            EitherOrSpecs.InoStorm => $"{source}'s storm: discard a card, or bow {(affected == "" ? "the performer" : affected)}.",
             _ => throw new RuleViolation("Unknown choice.")
         };
     }
@@ -122,6 +125,8 @@ public sealed partial class MatchEngine
                     new("honor", "Lose 2 Honor", "You lose 2 Honor.", EitherOrKind.Avoid, 0, Player(p.DeciderPlayerId).Honor > 0, "You have no Honor to lose."),
                     new("accept", "Let your opponent gain 2 Honor", "Your opponent gains 2 Honor.", EitherOrKind.Accept, 0, true, null)
                 ];
+            case EitherOrSpecs.InoStorm:
+                return InoStormOptions(p, affected);
             default: throw new RuleViolation("Unknown choice.");
         }
     }
@@ -208,6 +213,10 @@ public sealed partial class MatchEngine
             case (EitherOrSpecs.TrainingThreeWay, "accept"):
                 Emit("eitherOrChosen", $"{decider.Name} let {Player(1 - decider.Id).Name} gain 2 Honor ({Definition(source).Name}).", decider.Id, source.Id);
                 GainHonor(1 - decider.Id, 2, Definition(source).Name);
+                break;
+            case (EitherOrSpecs.InoStorm, "discard"):
+            case (EitherOrSpecs.InoStorm, "bow"):
+                ApplyInoStorm(p, option, decider, affected);
                 break;
             default: throw new RuleViolation("Unknown choice.");
         }
