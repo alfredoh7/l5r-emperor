@@ -197,6 +197,7 @@
     <EmbeddedResource Include="../../content/published/holding-wave-8.json" LogicalName="L5R.Published.HoldingWave8.json" />
     <EmbeddedResource Include="../../content/published/spell-wave-19.json" LogicalName="L5R.Published.SpellWave19.json" />
     <EmbeddedResource Include="../../content/published/strategy-wave-51.json" LogicalName="L5R.Published.StrategyWave51.json" />
+    <EmbeddedResource Include="../../content/published/strategy-wave-52.json" LogicalName="L5R.Published.StrategyWave52.json" />
     <EmbeddedResource Include="../../content/published/stronghold-wave-13.json" LogicalName="L5R.Published.StrongholdWave13.json" />
     <EmbeddedResource Include="../../content/published/follower-wave-27.json" LogicalName="L5R.Published.FollowerWave27.json" />
   </ItemGroup>
