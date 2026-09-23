@@ -41,10 +41,11 @@ public partial class TableSurface : TextureRect
         _projectionCenter = fitSize / 2 - Position;
         var extent = Vector2.Zero;
         foreach (var corner in new[] { Vector2.Zero, new Vector2(Size.X, 0), Size, new Vector2(0, Size.Y) })
-            extent = extent.Max(UnprojectOffset(corner - _projectionCenter).Abs());
+            extent = extent.Max(UnprojectOffset(corner - _projectionCenter, PlanePitch, PlaneDepth).Abs());
         // Include filtering guard pixels; a fixed overscan multiplier can still
-        // lose the far corners after widening the display or changing its anchor.
-        CanvasSize = extent * 2 + Vector2.One * 16;
+        // lose the far corners after widening the display or changing its anchor. Never
+        // shrink below CanvasExtent's own tuned minimum for a fixed presentation scene.
+        CanvasSize = (extent * 2 + Vector2.One * 16).Max(Size * CanvasExtent);
         RenderScale = Math.Min(density, 8192 / Math.Max(CanvasSize.X, CanvasSize.Y));
         Canvas.Size = (Vector2I)(CanvasSize * RenderScale).Ceil();
         CanvasSize = (Vector2)Canvas.Size / RenderScale;
@@ -67,8 +68,8 @@ public partial class TableSurface : TextureRect
         var y = screen.Y / (pitch + depth * screen.Y);
         return new Vector2(screen.X * (1 - depth * y), y);
     }
-    public Vector2 ProjectCanvas(Vector2 plane) => GetGlobalTransform() * (_projectionCenter + ProjectOffset(plane - CanvasSize / 2));
-    public Vector2 ScreenToCanvas(Vector2 screen) => CanvasSize / 2 + UnprojectOffset(GetGlobalTransform().AffineInverse() * screen - _projectionCenter);
+    public Vector2 ProjectCanvas(Vector2 plane) => GetGlobalTransform() * (_projectionCenter + ProjectOffset(plane - CanvasSize / 2, PlanePitch, PlaneDepth));
+    public Vector2 ScreenToCanvas(Vector2 screen) => CanvasSize / 2 + UnprojectOffset(GetGlobalTransform().AffineInverse() * screen - _projectionCenter, PlanePitch, PlaneDepth);
     public void ForwardMouse(InputEventMouse mouse)
     {
         var forwarded = (InputEventMouse)mouse.Duplicate();

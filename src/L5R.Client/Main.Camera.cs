@@ -190,6 +190,10 @@ public partial class Main
 
     public override void _Input(InputEvent @event)
     {
+        // Native camera probes share a desktop with the reviewer. Only their
+        // tagged pointer events belong to the scripted acceptance sequence.
+        if (IsMouseInputCapture && @event is InputEventMouse && !@event.HasMeta(CaptureMouseTag))
+        { GetViewport().SetInputAsHandled(); return; }
         // A recorded demonstration consumes live input so a wheel/key/click
         // cannot alter the evidence mid-take. Normal play and input probes do not.
         if (_capturePath is not null && _captureMode == "published-ink-film")
