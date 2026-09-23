@@ -95,6 +95,10 @@ public sealed partial class MatchEngine
             // Timing/keyword narrowing, exercising AfterActionResolvedApplies/the window itself directly rather than through a real card's own
             // extra conditions.
             "training-after-action-resolved-gain" => LastActionDestroyedOwnPersonality(playerId),
+            // Rata (oracle-l5r-6165, Embers of War pass, issue #460 batch 2): "After an action resolves that Rata
+            // performed and that destroyed a Personality" -- scoped to Rata himself as the action's own performer
+            // (facts.PerformerId), not merely his controller's action, and to either player's destroyed Personality.
+            "rata-draw" => RataDestroyedAPersonality(source),
             // Advanced Intelligence (Seeds of Decay pass, issue #453, batch 1): "After a Recon Strategy's action resolves" -- either player's, classified through ActionCarriesKeyword.
             "advanced-intelligence-draw" => facts.SourceId is { } reconSourceId && _state.Cards.TryGetValue(reconSourceId, out var reconSource) && Definition(reconSource).Type == CardType.Strategy
                 && ActionCarriesKeyword(AbilityCatalog.All[facts.AbilityId], reconSource, "Recon"),

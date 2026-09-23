@@ -1008,13 +1008,17 @@ public sealed partial class MatchEngine
         var entryDiscount=ClanEntryDiscount(def,player);
         // Mukudori (Seeds of Decay, issue #453): "Your other Fudo cards enter play for 1 less Gold" -- a term of the price of every entry, like ClanEntryDiscount (StaticKeywordRules.cs).
         var keywordDiscount=KeywordEntryDiscount(card,playerId);
-        var rawCost=def.GoldCost-prosperous-reserveDiscount-ashikoDiscount-(entryDiscount?.Amount??0)-keywordDiscount+(clanAllegiance?2:0)-(clanDiscount?2:0);
+        // Yasuki Makoto (oracle-l5r-9449, Embers of War pass, issue #460 batch 2): "Your Holdings enter play for 1 less Gold" -- the same
+        // per-source-in-play term shape as Mukudori's own keywordDiscount above, narrowed to CardType.Holding rather than a keyword.
+        var holdingDiscount=HoldingEntryDiscount(card,playerId);
+        var rawCost=def.GoldCost-prosperous-reserveDiscount-ashikoDiscount-(entryDiscount?.Amount??0)-keywordDiscount-holdingDiscount+(clanAllegiance?2:0)-(clanDiscount?2:0);
         var cost=Math.Max(0,rawCost);
         // The human-readable derivation the payment panel shows (issue #303), term by term.
         var basis=$"{def.Name} cost {def.GoldCost}"+(prosperous>0?$" − {prosperous} (controlled Personalities)":"")+(reserveDiscount>0?$" − {reserveDiscount} (Reserve while defending)":"")
             +(ashikoDiscount>0?$" − {ashikoDiscount} (outnumbered)":"")
             +(entryDiscount is {} entry?$" − {entry.Amount} ({entry.Clan} Clan)":"")
             +(keywordDiscount>0?$" − {keywordDiscount} (Fudo, Mukudori)":"")
+            +(holdingDiscount>0?$" − {holdingDiscount} (Yasuki Makoto)":"")
             +(clanAllegiance?" + 2 (Clan allegiance)":"")+(clanDiscount?" − 2 (Clan discount)":"")+(rawCost<0?" (min 0)":"");
         if ((Keyword(card,"Unique") || Keyword(card,"Singular")) && ControlsCopyOf(playerId,def.Name)) error=$"You already control this {(Keyword(card,"Unique") ? "Unique" : "Singular")} card.";
         // Kakita Yusugi and Yogo Ugimori (issue #453, batch 2): the once-per-turn limit he ignores, and a lock on the player (ProclaimAllowed).
@@ -1984,6 +1988,9 @@ public sealed partial class MatchEngine
         // unlike the attacking-only cases above, this applies whenever the card is at a battlefield
         // (attacking or defending) that also has one of its own controller's Terrains in play.
         +(Definition(card).Effect=="force-with-own-terrain-at-battlefield"&&AtBattle(card)&&_state.Cards.Values.Any(c=>c.OwnerId==card.OwnerId&&c.Zone==Zone.Battlefield&&c.ProvinceIndex==card.ProvinceIndex&&Keyword(c,"Terrain"))?1:0)
+        // Rokku - experienced (oracle-l5r-6376, Embers of War pass, issue #460 batch 2): "Rokku has +1F while a Lion Clan player controls
+        // him" -- unconditional on attacking or location, gated only by his own controller's Stronghold Clan (RokkuClanForceBonus).
+        +RokkuClanForceBonus(card)
         // An Item's printed "+F" box (and any conditional bonus it grants the wielder, e.g. Kensai's
         // Blade's "+1F to a Personality with Kensai") always conveys to the wielder, whether the Item
         // is bowed or not -- unlike a Follower's own Force, which stays with the Follower itself (see

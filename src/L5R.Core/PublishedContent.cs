@@ -2446,6 +2446,7 @@ public static class PublishedContent
     /// <summary>Personality wave 61 (Honor and Treachery pass, issue #458): Akodo Shihiro, Bayushi Irezu, Bayushi Kasumi, Bayushi Utoro, Isawa Taiken, Shiba Mitsushen,
     /// Shiba Tsukimi, Shosuro Chikata, Tsubo, Yogo Haruto.</summary>
     public static PublishedSnapshot PersonalityWave61 { get; } = Load("L5R.Published.PersonalityWave61.json", "personality-wave-61", requireDecks: false);
+    public static PublishedSnapshot PersonalityWave63 { get; } = Load("L5R.Published.PersonalityWave63.json", "personality-wave-63", requireDecks: false);
     /// <summary>Holding wave 8 (issue #458): Border Keep - inexperienced.</summary>
     public static PublishedSnapshot HoldingWave8 { get; } = Load("L5R.Published.HoldingWave8.json", "holding-wave-8", requireDecks: false);
     /// <summary>Spell wave 19 (issue #458): Communion with Earth.</summary>

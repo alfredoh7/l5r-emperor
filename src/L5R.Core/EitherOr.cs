@@ -32,6 +32,9 @@ public static class EitherOrSpecs
     public const string ExtendSoulShuffle = "extend-soul-shuffle";
     /// <summary>Moshi Ino's storm (issue #453, batch 3): the player who took the action chooses to discard a card or bow its performer (MoshiInoStorm.cs).</summary>
     public const string InoStorm = "ino-storm";
+    /// <summary>Yasuki Makoto (issue #460, batch 2): "His controller may pay 4 Gold. If he does, he loses 1 Honor. If he does not, dishonor the
+    /// target and move him home." -- the same "the AFFECTED card's controller decides" shape Extend the Soul's Boundaries already established.</summary>
+    public const string MakotoPayOrDishonor = "makoto-pay-or-dishonor";
 }
 
 /// <summary>What choosing an option amounts to, for a client to word and style it: "avoid" (accept a cost or a lesser loss so the
@@ -93,6 +96,7 @@ public sealed partial class MatchEngine
             EitherOrSpecs.TrainingThreeWay => $"{source}: pay 2 Gold, lose 2 Honor, or let your opponent gain 2 Honor.",
             EitherOrSpecs.ExtendSoulShuffle => $"{source}: shuffle {affected} and his attachments into their owners' decks, or your opponent takes two additional Battle actions.",
             EitherOrSpecs.InoStorm => $"{source}'s storm: discard a card, or bow {(affected == "" ? "the performer" : affected)}.",
+            EitherOrSpecs.MakotoPayOrDishonor => $"{source}: pay 4 Gold and lose 1 Honor, or {affected} is dishonored and moved home.",
             _ => throw new RuleViolation("Unknown choice.")
         };
     }
@@ -140,6 +144,16 @@ public sealed partial class MatchEngine
             }
             case EitherOrSpecs.InoStorm:
                 return InoStormOptions(p, affected);
+            // Yasuki Makoto (issue #460 batch 2): the decider is the TARGET's controller (p.DeciderPlayerId, set to target.OwnerId when the
+            // action opens this decision), not the acting player -- paying avoids both the Honor loss and the dishonor/move-home.
+            case EitherOrSpecs.MakotoPayOrDishonor:
+            {
+                var name = Definition(affected!).Name;
+                return [
+                    new("pay", "Pay 4 Gold", "You lose 1 Honor.", EitherOrKind.Avoid, 4, payable(4), "You cannot produce 4 Gold."),
+                    new("refuse", "Do not pay", $"{name} is dishonored and moved home.", EitherOrKind.Accept, 0, true, null)
+                ];
+            }
             default: throw new RuleViolation("Unknown choice.");
         }
     }
@@ -241,6 +255,17 @@ public sealed partial class MatchEngine
             case (EitherOrSpecs.InoStorm, "discard"):
             case (EitherOrSpecs.InoStorm, "bow"):
                 ApplyInoStorm(p, option, decider, affected);
+                break;
+            // Yasuki Makoto (issue #460 batch 2).
+            case (EitherOrSpecs.MakotoPayOrDishonor, "pay"):
+                Pay(decider.Id, source, option.GoldCost, sourceIds);
+                GainHonor(decider.Id, -1, Definition(source).Name);
+                Emit("eitherOrChosen", $"{decider.Name} paid 4 Gold and lost 1 Honor ({Definition(source).Name}).", decider.Id, source.Id);
+                break;
+            case (EitherOrSpecs.MakotoPayOrDishonor, "refuse"):
+                Emit("eitherOrChosen", $"{decider.Name} did not pay ({Definition(source).Name}): {Definition(affected!).Name} is dishonored and moved home.", decider.Id, affected!.Id);
+                Dishonor(affected!);
+                MoveHome(affected!, false);
                 break;
             default: throw new RuleViolation("Unknown choice.");
         }
