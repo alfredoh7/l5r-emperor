@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Refresh Mendon Windows review delivery from combined PR 434 at 9f8ef9f5 with eight direct launchers.",
+  "validation": "Packaging/publication regressions 9/9 pass; exact clean source and all prepared mode mappings verified; source CI green. Export is in progress.",
+  "remaining": "Complete export, native checks on the updated source, private upload, exact Windows package CI, and verified Mendon notification. No merge authorized.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/297",
+  "branch": "codex/297-windows-refresh",
+  "updated": "2026-09-23T06:02:39.189795+00:00"
+}
