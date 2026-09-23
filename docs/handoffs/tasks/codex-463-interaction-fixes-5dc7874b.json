@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Taking issue463: reproduce and fix cancelled local seat handoff and dynamic hand-limit discard query/selector on current main. This draft records ownership before implementation; no finished fix is claimed.",
+  "validation": "Read current main and PR434 source; confirmed hardcoded eight in query and selector and unconditional switch in dialog teardown. Implementation regressions and native tests have not yet run.",
+  "remaining": "Implement and verify both fixes, check combined-preview compatibility, publish prepared Mac and validated Windows scenarios, request Mendon shared review. No merge authorized.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/463",
+  "branch": "codex/463-interaction-fixes",
+  "updated": "2026-09-23T22:47:41.023156+00:00"
+}
