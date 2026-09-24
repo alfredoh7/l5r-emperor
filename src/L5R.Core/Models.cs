@@ -346,6 +346,8 @@ public sealed class PlayerState
     // actions in one turn." Incremented at each Favor-consuming ability's own execution case
     // (shunya-honor, favor-cycle, favor-battle); reset every StartTurn.
     public int FavorActionsThisTurn { get; set; }
+    // Moshi Madoka - exp (Gempukku pass, issue #461): "If you have attached a card from your hand this turn" -- set wherever a card leaves the hand to become an attachment, reset every StartTurn.
+    public bool AttachedFromHandThisTurn { get; set; }
     // Ring of Fire's own recruitment condition (issue #194, the "Ring of Flame" printing): "after you
     // resolve your second or later action in one turn which destroyed a Personality you did not
     // control." Incremented once per qualifying ResolveBattle destruction (a simplification: only
@@ -472,13 +474,17 @@ public sealed class PendingEngage
     public List<FirstOpportunityClaim> Claims { get; set; } = [];
     public bool NavalInvasionUsed { get; set; }
     public string? NavalPerformerId { get; set; }
+    // Jade's Roar - exp (Gempukku pass, issue #461): "You have the first opportunity to take a Battle action in this battle, which must be a Terrain action." The keyword the
+    // claimant's first action must carry, and who claimed it (the restriction applies only if that player actually ends up holding the first opportunity).
+    public string? FirstActionKeyword { get; set; }
+    public int? FirstActionKeywordPlayerId { get; set; }
 }
 
 /// <summary>A limit on the FIRST Battle action a player takes in a battle, set when the Engage window closes
 /// and consumed by that player's next accepted command: Naval Invasion's "which he must perform"
 /// (PerformerId), or Rebuilding Kyuden Hida's "the Attacker may not announce a Battle action before the
 /// Defender's first normal opportunity to act or pass" (MustPass).</summary>
-public sealed record FirstActionRestriction(int PlayerId, string? PerformerId, bool MustPass);
+public sealed record FirstActionRestriction(int PlayerId, string? PerformerId, bool MustPass, string? ActionKeyword = null);
 
 /// <summary>An Additional Action grant (core rules Glossary; issue #181): one Battle action the
 /// named player may take out of the normal back-and-forth alternation, without ceding priority to
@@ -1115,7 +1121,7 @@ public static class BattleSteps
     // FirstActionReason values.
     public const string ReasonDefault = "Default", ReasonNaval = "Naval", ReasonEngageGrant = "EngageGrant", ReasonDefenderOverride = "DefenderOverride";
     // FirstActionLimit values.
-    public const string LimitMustPass = "MustPass", LimitPerformerOnly = "PerformerOnly";
+    public const string LimitMustPass = "MustPass", LimitPerformerOnly = "PerformerOnly", LimitActionKeyword = "ActionKeyword";
     // BeforeResolutionEffectView.Kind: the three kinds of item in the one ordered set of before-resolution effects.
     public const string EffectTrait = "Trait", EffectDelayed = "Delayed", EffectReaction = "Reaction";
 }

@@ -133,7 +133,11 @@ public sealed record AbilityDefinition(string Timing, string Label, string Targe
     // "If this Shugenja is <keyword>, he may perform this card's Battle action even if it is in your home" (Seeds of Decay, issue #453 batch 5: Nature's Wrath -- Earth, Peace of
     // the Kami -- Water): SourceUnitMayBeAway, granted only while the Personality the source is attached to has the keyword (MatchEngine.SourceMayBeAway). The acting
     // player still needs a unit at the battlefield, and the target keeps its own location rule.
-    string? SourceUnitMayBeAwayIfWielder = null);
+    string? SourceUnitMayBeAwayIfWielder = null,
+    // Gempukku pass (issue #461): the ability is taken by its own card from the DEAD pile (Kunji - exp's "If Kunji is honorably dead", Hida Yamadera - exp's Reaction after he is destroyed);
+    // RequiresHonorable narrows it to a card that is not Dishonorable.
+    bool FromDead = false,
+    bool RequiresHonorable = false);
 
 public static class AbilityCatalog
 {
@@ -3195,6 +3199,44 @@ public static class AbilityCatalog
         // non-Stronghold cards at the same location. The action targets it instead, if legal." The Castle of Order's redirect shape, paid by discarding the Celestial.
         ["ryoshun-redirect"] = new("Reaction", "When another player's action would target one of your cards, discard this card: Choose another of your non-Stronghold cards at the same location. The action targets it instead, if legal",
             "redirect-target-own-non-stronghold-at-affected-location", Trigger: ReactionTriggers.TargetedByAction, Costs: [new(CostVerbs.DiscardFromPlay)]),
+        // Emperor Edition Gempukku pass (issue #461). The nine Market Holdings (Buried Treasures, Purveyor of Questionable Goods, Tattoos & Trinkets, The Daidoji Marketplace, The Ide
+        // Caravan, The Merchant's District, The Mystical Merchant, The Quartermaster's Depot, The Yasuki Peddler): ":bow:: Produce 2 Gold" is the printed GoldProduction; "Limited, :bow::
+        // If you have four or fewer cards in your hand and you are a [Clan] Clan player, draw a card" is one Limited ability per Clan (a per-id Require reads the acting player's own
+        // Stronghold Clan and hand size, the same shape Kaiu Tojikana's own Clan condition uses -- an unmet "If ..." before the effects is a condition on taking the action, not offered at all).
+        ["market-draw-mantis"] = new("Limited", "Bow this card: If you have four or fewer cards in your hand and you are a Mantis Clan player, draw a card", "none", Costs: ActionCost.BowSource),
+        ["market-draw-spider"] = new("Limited", "Bow this card: If you have four or fewer cards in your hand and you are a Spider Clan player, draw a card", "none", Costs: ActionCost.BowSource),
+        ["market-draw-dragon"] = new("Limited", "Bow this card: If you have four or fewer cards in your hand and you are a Dragon Clan player, draw a card", "none", Costs: ActionCost.BowSource),
+        ["market-draw-crane"] = new("Limited", "Bow this card: If you have four or fewer cards in your hand and you are a Crane Clan player, draw a card", "none", Costs: ActionCost.BowSource),
+        ["market-draw-unicorn"] = new("Limited", "Bow this card: If you have four or fewer cards in your hand and you are a Unicorn Clan player, draw a card", "none", Costs: ActionCost.BowSource),
+        ["market-draw-scorpion"] = new("Limited", "Bow this card: If you have four or fewer cards in your hand and you are a Scorpion Clan player, draw a card", "none", Costs: ActionCost.BowSource),
+        ["market-draw-phoenix"] = new("Limited", "Bow this card: If you have four or fewer cards in your hand and you are a Phoenix Clan player, draw a card", "none", Costs: ActionCost.BowSource),
+        ["market-draw-lion"] = new("Limited", "Bow this card: If you have four or fewer cards in your hand and you are a Lion Clan player, draw a card", "none", Costs: ActionCost.BowSource),
+        ["market-draw-crab"] = new("Limited", "Bow this card: If you have four or fewer cards in your hand and you are a Crab Clan player, draw a card", "none", Costs: ActionCost.BowSource),
+        // Doji Dainagon - exp (oracle-l5r-10221): "Political Open: Take the Imperial Favor." -- Dazzling Attire's own bare Favor take, without Lobby's Honor comparison (the printing says only
+        // "Take the Imperial Favor", unlike his base printing's named Lobby).
+        ["dainagon-exp-favor"] = new("Open", "Political Open: Take the Imperial Favor", "none", ActionKeywords: ["Political"]),
+        // Shinjo Byung - exp (oracle-l5r-10228): "Reaction: After a Tactical Battle action resolves that Byung performed: Take an additional Battle action." Rata's own performer-scoped
+        // after-action-resolved shape, narrowed to a Tactical Battle action, granting the ordinary additional action (Sugihara's/Goju Plot's own GrantAdditionalAction).
+        ["byung-additional-action"] = new("Reaction", "After a Tactical Battle action resolves that Byung performed: Take an additional Battle action", "none", Trigger: AfterActionReactionTriggers.AfterActionResolved),
+        // Jade's Roar - exp (oracle-l5r-10223): "Recon Reaction: After engaging at Jade's Roar's battlefield: You have Reconnaissance there. You have the first opportunity to take a Battle
+        // action in this battle, which must be a Terrain action." Daidoji Yuki's own engage-recon shape (an Engage first-opportunity claim), with the claim carrying a keyword the
+        // claimant's first action must carry (PendingEngage.FirstActionKeyword -> FirstActionRestriction.ActionKeyword).
+        ["jades-roar-recon"] = new("Reaction", "Recon Reaction: After engaging at Jade's Roar's battlefield: You have Reconnaissance there. You have the first opportunity to take a Battle action in this battle, which must be a Terrain action", "none",
+            Trigger: "after-engaging-at-own-battlefield", ActionKeywords: ["Recon"]),
+        // Moshi Madoka - exp (oracle-l5r-10224): "Limited: If you have attached a card from your hand this turn, bow Madoka: Draw a card." PlayerState.AttachedFromHandThisTurn, set at every
+        // hand-to-attachment site (Equip, an attach-from-hand ability, an entry-Reaction attach, an out-of-play Reaction attach).
+        ["madoka-draw"] = new("Limited", "If you have attached a card from your hand this turn, bow Madoka: Draw a card", "none", Costs: ActionCost.BowSource),
+        // Kunji - exp (oracle-l5r-10225): "Open: If Kunji is honorably dead: Bring it into play, ignoring costs if you are a Phoenix Clan player." An ability taken by its own card from the
+        // dead pile (FromDead + RequiresHonorable), in two halves sharing one shape: a Phoenix Clan player brings him into play free, anyone else pays his ordinary recruit price.
+        ["kunji-exp-return-free"] = new("Open", "If Kunji is honorably dead and you are a Phoenix Clan player: Bring him into play, ignoring costs", "source-if-dead", FromDead: true, RequiresHonorable: true),
+        ["kunji-exp-return-paid"] = new("Open", "If Kunji is honorably dead: Bring him into play, paying all costs", "source-if-dead", FromDead: true, RequiresHonorable: true, Cost: GoldCostRule.TargetRecruit()),
+        // Shosuro Hawado - exp 2 (oracle-l5r-10226): "Limited: Target a card in a province: Discard it. Refill the province face-up." Either player's province card, face-down included (the
+        // target is chosen by its province, nothing about a hidden card is disclosed until it is discarded); the refill is Scavenging Party's face-up province placement, from the top of the
+        // province owner's Dynasty deck.
+        ["hawado-exp2-discard"] = new("Limited", "Target a card in a province: Discard it. Refill the province face-up", "card-in-province"),
+        // Hida Yamadera - exp (oracle-l5r-10220): "Reaction: After another player's Battle action resolves, if its effects destroyed Yamadera: Melee 8 Attack." A Reaction taken by its own
+        // card from the dead pile (FromDead), read off the last resolved action's own destroyed list.
+        ["yamadera-attack"] = new("Reaction", "After another player's Battle action resolves, if its effects destroyed Yamadera: Melee 8 Attack", "attack", Trigger: AfterActionReactionTriggers.AfterActionResolved, FromDead: true),
     });
 }
 
@@ -3888,6 +3930,7 @@ public sealed partial class MatchEngine
         "kohrogi-attack" => 2,
         // Embers of War pass, batch 1 (issue #460). Daigotsu Takayasu - exp: "Maho Battle: Melee 6 Attack."
         "takayasu-attack" => 6,
+        "yamadera-attack" => 8,
         // Kaiu Onizuka: "Ranged Attack with strength equal to the current battlefield's province's strength" -- the defender's own province at the current
         // battlefield, read the exact way the Requires at line ~3992/4916/4971 already do (EffectiveProvinceStrength off the defender's Provinces list).
         "onizuka-attack" => EffectiveProvinceStrength(Player(1 - _state.ActivePlayerId).Provinces.Single(p => p.Index == _state.CurrentBattleProvince!.Value)),
@@ -3965,7 +4008,7 @@ public sealed partial class MatchEngine
         // Seeds of Decay (issue #453, batch 3).
         "kitahime-attack" or "nitani-exp-attack" or "kohrogi-attack" or "merihikos-swarm-attack" => "Ranged",
         // Embers of War pass, batch 1 (issue #460).
-        "takayasu-attack" => "Melee",
+        "takayasu-attack" or "yamadera-attack" => "Melee",
         "onizuka-attack" => "Ranged",
         // Forgotten Legacy pass (issue #467), batch 2.
         "vengeful-attack" or "chokichi-attack" or "haruhiko-attack" => "Ranged",
@@ -4363,7 +4406,8 @@ public sealed partial class MatchEngine
         ability.Costs?.Any(c => c.Verb == CostVerb.Bow && c.Subject == CostSubject.Source && !c.UnlessInHand) == true;
 
     private bool AbilitySourceZoneAllows(AbilityDefinition ability, CardInstance source, PlayerState player) =>
-        RequiresSourceInPlay(ability) ? InPlay(source)
+        ability.FromDead ? source.Zone == Zone.Dead && source.OwnerId == player.Id && (!ability.RequiresHonorable || !source.Dishonorable)
+        : RequiresSourceInPlay(ability) ? InPlay(source)
         : ability.Attach?.Card == AttachSource.Self ? source.Zone == Zone.Hand && player.Hand.Contains(source.Id)
             : ability.Trigger is "any-personality-enters-play" or "before-any-action-resolves" ? source.Zone is Zone.Hand or Zone.FateDiscard
             : ability.Trigger == "before-proclaim-resolves" ? source.Zone == Zone.Hand && player.Hand.Contains(source.Id) // Turning the Story (issue #453, batch 2)
@@ -4677,6 +4721,16 @@ public sealed partial class MatchEngine
         if (id == "tojikana-honor")
             Require(!_state.ProvinceDestroyedSinceTurnEnd[player.Id] || Player(player.Id).Clan == "Scorpion",
                 "One of your provinces was destroyed since your last turn began, and you are not a Scorpion Clan player.");
+        // Gempukku pass (issue #461): the Market Holdings' Clan-and-hand-size condition, Madoka's attached-from-hand condition and Kunji's Clan split.
+        if (id.StartsWith("market-draw-", StringComparison.Ordinal))
+        {
+            var marketClan = char.ToUpperInvariant(id["market-draw-".Length]) + id["market-draw-".Length..][1..];
+            Require(player.Hand.Count <= 4, "You must have four or fewer cards in your hand.");
+            Require(string.Equals(player.Clan, marketClan, StringComparison.Ordinal), $"You must be a {marketClan} Clan player.");
+        }
+        if (id == "madoka-draw") Require(player.AttachedFromHandThisTurn, "You have not attached a card from your hand this turn.");
+        if (id == "kunji-exp-return-free") Require(player.Clan == "Phoenix", "Only a Phoenix Clan player brings Kunji into play ignoring costs.");
+        if (id == "kunji-exp-return-paid") Require(player.Clan != "Phoenix", "A Phoenix Clan player brings Kunji into play ignoring costs instead.");
         if (id == "shosei-honor") Require(_state.Cards.Values.Any(c => c.OwnerId == player.Id && InPlay(c) && Keyword(c, "Temple")), "You must control a Temple.");
         // Ring recruitment (issue #194): each of these three is only ever playable as the specific
         // Additional Battle Action already granted for it (GrantRingRecruit) -- never as an ordinary
@@ -5288,6 +5342,12 @@ public sealed partial class MatchEngine
                 // Hunter of Harmony's own ability (issue #190): a Kiho Strategy card sitting in the
                 // player's own Fate discard pile -- not in play, so this needs its own branch just like
                 // "own-kharmic-card" above.
+                // Kunji - exp (Gempukku pass, issue #461): the source card itself, in the dead pile.
+                else if (ability.Target == "source-if-dead")
+                    Require(source is not null && target.Id == source.Id && target.Zone == Zone.Dead, "Kunji must be in your dead pile.");
+                // Shosuro Hawado - exp 2: "a card in a province" -- either player's, face-down or face-up.
+                else if (ability.Target == "card-in-province")
+                    Require(target.Zone == Zone.Province, "Choose a card in a province.");
                 // Essence of Undeath: "your dead Personality".
                 else if (ability.Target == "own-dead-personality")
                     Require(target.OwnerId == player.Id && type == CardType.Personality && target.Zone == Zone.Dead, "Choose one of your own dead Personalities.");
@@ -6032,7 +6092,7 @@ public sealed partial class MatchEngine
     // entering-play moment inviting a THIRD nested reaction.
     private void AttachAsOutOfPlayReaction(CardInstance card, CardInstance target, int ownerId)
     {
-        Player(ownerId).Hand.Remove(card.Id);
+        Player(ownerId).Hand.Remove(card.Id); Player(ownerId).AttachedFromHandThisTurn = true;
         // Equip (Battle)'s own convention: an attachment's ProvinceIndex must be copied from its
         // wielder for AtBattle() to ever recognize it (unlike ordinary Equip(), whose target is
         // always at Zone.Home -- ProvinceIndex null either way -- this attach can land on a
@@ -6877,7 +6937,7 @@ public sealed partial class MatchEngine
                 
                 var performer = Card(command.PerformerId!);
                 var attachment = target!;
-                player.Hand.Remove(attachment.Id);
+                player.Hand.Remove(attachment.Id); player.AttachedFromHandThisTurn = true;
                 attachment.Zone = Zone.Attached; attachment.AttachedTo = performer.Id; attachment.FaceUp = true; attachment.ProvinceIndex = performer.ProvinceIndex;
                 if (Definition(attachment).AttachGrantsKeyword is string granted) GrantKeyword(performer, granted, attachment.Id, "Attachment");
                 Emit("equipped", $"{Definition(attachment).Name} attached to {Definition(performer).Name} via {(id == "low-market-equip" ? "Low Market" : "On the Hunt")}.", player.Id, attachment.Id);
@@ -7027,7 +7087,7 @@ public sealed partial class MatchEngine
             case "neiru-equip":
             {
                 var spell = target!;
-                player.Hand.Remove(spell.Id);
+                player.Hand.Remove(spell.Id); player.AttachedFromHandThisTurn = true;
                 spell.Zone = Zone.Attached; spell.AttachedTo = source!.Id; spell.FaceUp = true; spell.ProvinceIndex = source.ProvinceIndex;
                 if (Definition(spell).AttachGrantsKeyword is string neiruGranted) GrantKeyword(source, neiruGranted, spell.Id, "Attachment");
                 Emit("equipped", $"{Definition(spell).Name} attached to {Definition(source).Name}.", player.Id, spell.Id);
@@ -7079,7 +7139,7 @@ public sealed partial class MatchEngine
             {
                 var performer = Card(command.PerformerId!);
                 var attachment = target!;
-                player.Hand.Remove(attachment.Id);
+                player.Hand.Remove(attachment.Id); player.AttachedFromHandThisTurn = true;
                 attachment.Zone = Zone.Attached; attachment.AttachedTo = performer.Id; attachment.FaceUp = true; attachment.ProvinceIndex = performer.ProvinceIndex;
                 // Reserve (issue #184): a non-Spell attachment can carry AttachGrantsKeyword too (a
                 // Spell never has, so this was never needed before) -- same as the ordinary Equip().
@@ -7461,7 +7521,7 @@ public sealed partial class MatchEngine
             case "simple-yari-attach":
             {
                 var yariHost = Card(_state.PendingChoice!.CardId!);
-                if (source!.Zone == Zone.Hand) player.Hand.Remove(source.Id);
+                if (source!.Zone == Zone.Hand) { player.Hand.Remove(source.Id); player.AttachedFromHandThisTurn = true; }
                 source.Zone = Zone.Attached; source.AttachedTo = yariHost.Id; source.FaceUp = true;
                 if (Definition(source).AttachGrantsKeyword is string yariGranted) GrantKeyword(yariHost, yariGranted, source.Id, "Attachment");
                 Emit("equipped", $"{Definition(source).Name} attached to {Definition(yariHost).Name}.", player.Id, source.Id);
@@ -7836,7 +7896,7 @@ public sealed partial class MatchEngine
             {
                 var enteredPersonality = Card(_state.PendingChoice!.CardId!);
                 var attachDef = Definition(source!);
-                if (source!.Zone == Zone.Hand) player.Hand.Remove(source.Id);
+                if (source!.Zone == Zone.Hand) { player.Hand.Remove(source.Id); player.AttachedFromHandThisTurn = true; }
                 source.Zone = Zone.Attached; source.AttachedTo = enteredPersonality.Id; source.FaceUp = true;
                 if (attachDef.AttachGrantsKeyword is string granted) GrantKeyword(enteredPersonality, granted, source.Id, "Attachment");
                 GainHonor(player.Id, 1, attachDef.Name, source);
@@ -8336,6 +8396,22 @@ public sealed partial class MatchEngine
                 break;
             // Haruki's Deer (oracle-l5r-9999): the condition is checked in ValidateAbility's per-id Require block above.
             case "haruki-deer-honor": GainHonor(player.Id, 2, "Haruki's Deer", source); break;
+            // Emperor Edition Gempukku pass (issue #461); helpers in GempukkuPass.cs.
+            case "dainagon-exp-favor": _state.FavorPlayerId = player.Id; Emit("favorTaken", $"{player.Name} took the Imperial Favor.", player.Id); break;
+            case "byung-additional-action": GrantAdditionalAction(player.Id, null); break;
+            case "jades-roar-recon": JadesRoarRecon(player.Id, source!); break;
+            case "madoka-draw": case "market-draw-mantis": case "market-draw-spider": case "market-draw-dragon": case "market-draw-crane": case "market-draw-unicorn":
+            case "market-draw-scorpion": case "market-draw-phoenix": case "market-draw-lion": case "market-draw-crab": Draw(player); break;
+            case "kunji-exp-return-free": if (BringDeadPersonalityIntoPlay(player, source!, "Kunji", null)) return; break;
+            case "kunji-exp-return-paid":
+            {
+                var kunjiQuote = QuotePurchase(player.Id, source!.Id, fromDeadPile: true);
+                Require(kunjiQuote.Error is null, kunjiQuote.Error ?? "");
+                if (BringDeadPersonalityIntoPlay(player, source, "Kunji", null)) return;
+                break;
+            }
+            case "hawado-exp2-discard": DiscardProvinceCardAndRefillFaceUp(target!, source!); break;
+            case "yamadera-attack": if (ResolveOrDeferAttack(id, player, target?.Id, source!.Id, consumedGrant)) return; break;
             // The bow, then the optional province discard (asked only when a card is there); the conditional destroy is applied by the chosen branch (ScorpionSwordResolve).
             case "celestial-sword-scorpion-bow":
                 if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
@@ -9346,6 +9422,7 @@ public sealed partial class MatchEngine
         // offered, priced and removed from the game as the Discipline play -- never both at once, since a card is
         // in one zone at a time.
         var sources = _state.Cards.Values.Where(c => c.OwnerId == playerId && (InPlay(c) || c.Zone == Zone.Hand ||
+                c.Zone == Zone.Dead && (Definition(c).Abilities ?? []).Any(a => AbilityCatalog.All.TryGetValue(a, out var deadDef) && deadDef.FromDead) ||
                 c.Zone is Zone.FateDiscard or Zone.DynastyDiscard && ((Definition(c).Abilities ?? []).Any(a => AbilityCatalog.All.TryGetValue(a, out var def) && (def.Discipline || def.FromDiscard)) || DiscardPlayGrant(playerId, c) is not null)))
             .SelectMany(c => AbilityIdsOf(c).Select(id => (Card: (CardInstance?)c, Id: id))).ToList();
         if (!Definition(Card(player.StrongholdId)).ScenarioOnly)
@@ -9496,6 +9573,8 @@ public sealed partial class MatchEngine
                     // Kharmic had -- validated, but a target in a discard pile is never in the in-play
                     // default, so the ability was never offered. Each mirrors its own Require above.
                     "own-dead-personality" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && c.Zone == Zone.Dead).Select(c => (string?)c.Id).ToArray(),
+                    "source-if-dead" => source is { Zone: Zone.Dead } ? [source.Id] : [],
+                    "card-in-province" => _state.Cards.Values.Where(c => c.Zone == Zone.Province).Select(c => (string?)c.Id).ToArray(),
                     "own-ninja-personality-in-discard" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && Keyword(c, "Ninja") && c.Zone is Zone.Dead or Zone.DynastyDiscard).Select(c => (string?)c.Id).ToArray(),
                     "own-nonunique-strategy-in-discard" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Strategy && !Keyword(c, "Unique") && c.Zone == Zone.FateDiscard).Select(c => (string?)c.Id).ToArray(),
                     "own-kiho-strategy-in-discard" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Strategy && Keyword(c, "Kiho") && c.Zone == Zone.FateDiscard).Select(c => (string?)c.Id).ToArray(),

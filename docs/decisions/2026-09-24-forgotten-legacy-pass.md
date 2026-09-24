@@ -2,7 +2,7 @@
 
 Requested by Mendon: repeat the Seeds of Decay (#453), Honor and Treachery (#458) and Embers of War (#460) passes against the Forgotten Legacy reference set. Each unwired card was evaluated against `docs/rules/EMPEROR_EDITION_CORE_RULES.md` and the current engine. Everything that fits within existing primitives, or small new ones that do not conflict with the core rules, was wired. Each remaining card has a specific blocker note. Lane: rules. Issue: [#467](https://github.com/alfredoh7/l5r-emperor/issues/467). PR: [#469](https://github.com/alfredoh7/l5r-emperor/pull/469).
 
-The set has 91 reference cards. 10 were already wired as reprints. Of the 81 unwired cards, **64 are now wired** and **17 stay unwired**. Each of the 17 has a blocker note in `tools/content/build_card_inventory.py` (`BLOCKERS`), which feeds `docs/CARD_INVENTORY.xlsx`. The inventory now reads 2172 cards, 850 wired (786 before this pass).
+The set has 91 reference cards. 10 were already wired as reprints. Of the 81 unwired cards, **64 are now wired** and **17 stay unwired**. Each of the 17 has a blocker note in `tools/content/build_card_inventory.py` (`BLOCKERS`), which feeds `docs/CARD_INVENTORY.xlsx`. The inventory now reads 2172 cards, 867 wired after merging main's Gempukku pass (#468, +17); this pass adds 64.
 
 ## Method
 
@@ -119,7 +119,7 @@ Each batch's report recorded its rulings; the ones that matter most:
 
 ## Verification
 
-- Full core suite (`L5R.Core.Tests`): **1290 PASS, 0 FAIL**. That is the 1220 baseline plus 70 new scenarios across `forgotten-legacy-batch-1` to `-5`. It was re-run after every batch merge and after the Terrain fix.
+- Full core suite (`L5R.Core.Tests`): **1290 PASS, 0 FAIL** on the pass alone, **1300/1300** after merging main (Gempukku pass #468). That is the 1220 baseline plus 70 new scenarios across `forgotten-legacy-batch-1` to `-5`. It was re-run after every batch merge and after the Terrain fix.
 - `L5R.AI.Tests` 74/74, `L5R.Server.Tests` 8/8, `L5R.Client.Transport.Tests` 12/12.
 - Collaboration tests 45/45. Content suite 134/134 once the new art pack was pinned (see below).
 - **Environment limits:**
@@ -130,6 +130,11 @@ Each batch's report recorded its rulings; the ones that matter most:
 
 ## Catalogue art pack
 
-The 64 newly bundled scans are covered by a new catalogue art release, `catalogue-art-pr469-20260924-r1`: 3297 scans, incremental over `catalogue-art-pr460-20260923-r1`, sha256 `b0661dd45a5124a470564f863a81d8ec374f08653322c3cbc21b8076a8f09965`. This cloud session could not create GitHub releases, and the full 448 MB zip was too large to hand over. So it sent an 8.5 MB kit instead: the 64 new WebP-85 scans, the manifest and an assemble script.
+The 64 newly bundled scans need a new catalogue art release. This cloud session is not permitted to create GitHub releases, and the full pack (about 450 MB) is too large to hand over. So it sends a small kit instead: the 64 new WebP-85 scans, the manifest and `assemble.py`. The kit rebuilds the exact zip from the previous release. `assemble.py` pins each entry's `create_system` header byte to 3, because Python writes 0 on Windows and a Windows rebuild would otherwise differ in bytes from identical scans. Mendon uploads the rebuilt zip as the release.
 
-Mendon rebuilt the zip from the pr460 release with that kit and uploaded it himself. GitHub's asset digest matches the sha256 above. The assemble script pins each zip entry's `create_system` header byte to 3. Python writes 0 on Windows, so without the pin a Windows rebuild produced different bytes from the identical scans. `content/catalogue-art-pack.json` and `src/L5R.Client/Content/catalogue-art.json` now pin the new release.
+- `catalogue-art-pr469-20260924-r1` (3297 scans, over pr460) was published first. It became stale when main merged the Gempukku pass (#468) with its own pack, `catalogue-art-pr461-20260924-r1` (3250 scans).
+- `catalogue-art-pr469-20260924-r2` covers both passes: 3314 scans, incremental over pr461, sha256 `a368e4f72c2f2bed0542461ea67492bafb99f812a93395cf6bec622f6c470c26`. The content suite passes 134/134 against its manifest. `content/catalogue-art-pack.json` and `src/L5R.Client/Content/catalogue-art.json` are pinned to it once the release exists.
+
+## Merge notes
+
+Main's Gempukku pass (#468) had already used `personality-wave-65` and `holding-wave-10`, so this pass's waves were renumbered to `personality-wave-67` and `holding-wave-11` before merging. Every other conflict was additive.

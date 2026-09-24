@@ -492,7 +492,9 @@ public sealed partial class MatchEngine
         // A Battle-phase equip (a granted timing, TimingGrants.cs) is a Battle action too, barred like the performer-less ones.
         if (_state.FirstActionRestriction is { } firstActionLimit && command.PlayerId==firstActionLimit.PlayerId && (command.Type is "pass" or "useAbility" or "playStrategy" or "recruitReserve" || command.Type=="equip" && _state.Phase==Phase.Battle))
         {
-            if (command.Type is "playStrategy" or "recruitReserve" or "equip") throw new RuleViolation(FirstActionLimitMessage(firstActionLimit));
+            // Jade's Roar - exp (Gempukku pass, issue #461): a Terrain is played by playStrategy, so a keyword-limited first action lets a card carrying that keyword through.
+            var keywordCardPlayed = firstActionLimit.ActionKeyword is { } limitKeyword && command.Type=="playStrategy" && command.CardId is not null && _state.Cards.TryGetValue(command.CardId,out var limitCard) && Keyword(limitCard,limitKeyword);
+            if (command.Type is "playStrategy" or "recruitReserve" or "equip" && !keywordCardPlayed) throw new RuleViolation(FirstActionLimitMessage(firstActionLimit));
             if (command.Type=="useAbility") CheckFirstActionRestriction(command);
             _state.FirstActionRestriction=null;
         }
@@ -1850,7 +1852,7 @@ public sealed partial class MatchEngine
         // discounts included) is EquipGoldCost in GoldQuotes.cs -- the same function that prices this
         // equip for QueryActions' quote, so the quote and the charge cannot drift (issue #303).
         Pay(command.PlayerId,card,EquipGoldCost(command.PlayerId,card,target).Cost,command.SourceIds,paying:new PaymentSubject(card,PaymentKind.Equip));
-        Player(command.PlayerId).Hand.Remove(card.Id);
+        Player(command.PlayerId).Hand.Remove(card.Id); Player(command.PlayerId).AttachedFromHandThisTurn=true;
         card.Zone=Zone.Attached; card.AttachedTo=target.Id; card.FaceUp=true;
         if(inBattle) card.ProvinceIndex=target.ProvinceIndex; // the Weapon stands where its wielder does, so it is at the battlefield with him
         if(def.AttachGrantsKeyword is string granted) GrantKeyword(target,granted,card.Id,"Attachment");
@@ -2405,6 +2407,7 @@ public sealed partial class MatchEngine
             // Seeds of Decay pass (issue #453), batch 1: an action's effect (actingPlayerId is set exactly then) is negated by Wide Valley at its battlefield and by Megumi's Guidance's shield.
             if(actingPlayerId is not null && WideValleyNegatesDestruction(card)) continue;
             if(actingPlayerId is int shieldActor && DestructionShielded(card,shieldActor)) continue;
+            if(actingPlayerId is not null && NegishiNegatesDestruction(card)) continue;
             foreach(var attachment in Attachments(card.Id).ToArray())
             {
                 RemoveAttachmentGrants(card, attachment.Id);
@@ -2604,6 +2607,7 @@ public sealed partial class MatchEngine
         player.TurnsTaken++;
         player.MayNotAttackThisTurn=false;
         player.FavorActionsThisTurn=0;
+        player.AttachedFromHandThisTurn=false;
         player.DestroyedEnemyPersonalityActionsThisTurn=0;
         // "Until your second turn from now begins" (issue #259): the one place a turn begins for
         // THIS specific player, so the one place their own bounded-duration ongoing Event's own

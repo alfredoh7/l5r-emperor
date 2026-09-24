@@ -173,6 +173,7 @@ public sealed partial class MatchEngine
         var wielder = WielderOfAttach(spec, command, source)!;
         var def = Definition(attachment);
         var fromDiscard = attachment.Zone == Zone.FateDiscard;
+        if (!fromDiscard && attachment.Zone == Zone.Hand) Player(attachment.OwnerId).AttachedFromHandThisTurn = true;
         Player(attachment.OwnerId).Hand.Remove(attachment.Id);
         if (fromDiscard)
         {

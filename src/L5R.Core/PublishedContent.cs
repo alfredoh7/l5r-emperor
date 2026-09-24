@@ -2507,4 +2507,8 @@ public static class PublishedContent
     public static PublishedSnapshot CelestialWave6 { get; } = Load("L5R.Published.CelestialWave6.json", "celestial-wave-6", requireDecks: false);
     /// <summary>Region wave 8 (issue #467, batch 5): The Second City.</summary>
     public static PublishedSnapshot RegionWave8 { get; } = Load("L5R.Published.RegionWave8.json", "region-wave-8", requireDecks: false);
+    /// <summary>Personality wave 65 (Emperor Edition Gempukku pass, issue #461): the eight Experienced Personalities of the set.</summary>
+    public static PublishedSnapshot PersonalityWave65 { get; } = Load("L5R.Published.PersonalityWave65.json", "personality-wave-65", requireDecks: false);
+    /// <summary>Holding wave 10 (Emperor Edition Gempukku pass, issue #461): the nine Market Holdings.</summary>
+    public static PublishedSnapshot HoldingWave10 { get; } = Load("L5R.Published.HoldingWave10.json", "holding-wave-10", requireDecks: false);
 }
