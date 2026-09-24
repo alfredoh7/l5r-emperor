@@ -2489,4 +2489,7 @@ public static class PublishedContent
     public static PublishedSnapshot FollowerWave29 { get; } = Load("L5R.Published.FollowerWave29.json", "follower-wave-29", requireDecks: false);
     /// <summary>Stronghold wave 15 (Forgotten Legacy pass, issue #467, batch 2): The Forgotten Temple.</summary>
     public static PublishedSnapshot StrongholdWave15 { get; } = Load("L5R.Published.StrongholdWave15.json", "stronghold-wave-15", requireDecks: false);
+    /// <summary>Personality wave 65 (Forgotten Legacy pass, issue #467, batch 1): Asahina Shigemitsu, Asako Kaitoko, Bayushi Higaonna, Bayushi Toshimo, Daidoji
+    /// Takichi, Daigotsu Gyoken, Daigotsu Murota, Doji Hakuseki, Doji Rengetsu, Hiruma Nikaru, Iuchi Abodan, Kitsu Kagako.</summary>
+    public static PublishedSnapshot PersonalityWave65 { get; } = Load("L5R.Published.PersonalityWave65.json", "personality-wave-65", requireDecks: false);
 }

@@ -60,11 +60,15 @@ public static class AttachWielder
     public const string Source = "source";
     /// <summary>The performer the acting player chose (AbilityDefinition.Performer names which Personalities are eligible).</summary>
     public const string Performer = "performer";
+    /// <summary>The Personality chosen for the ability's "personality" target slot (Forgotten Legacy pass, issue #467, batch 1: Daigotsu Gyoken's "Target your Personality
+    /// and a non-Unique attachment in any player's discard pile: Attach it to the Personality") -- a TARGET, not a performer, so the source still performs.</summary>
+    public const string PersonalitySlot = "personality-slot";
 }
 
-/// <summary>An "attach a card" effect. See the file comment; Types is required for a Target attach (the kinds of card the ability names).</summary>
+/// <summary>An "attach a card" effect. See the file comment; Types is required for a Target attach (the kinds of card the ability names).
+/// IgnoreHonorRequirement: "ignoring Honor Requirements" (Daigotsu Gyoken) -- a Follower's Honor Requirement is not checked against the wielder.</summary>
 public sealed record AttachSpec(string Card = AttachSource.Target, string Pile = AttachPile.Any, string Wielder = AttachWielder.Source,
-    CardType[]? Types = null, string[]? Keywords = null, string[]? ExcludedKeywords = null);
+    CardType[]? Types = null, string[]? Keywords = null, string[]? ExcludedKeywords = null, bool IgnoreHonorRequirement = false);
 
 public sealed partial class MatchEngine
 {
@@ -98,16 +102,18 @@ public sealed partial class MatchEngine
     private CardInstance? WielderOfAttach(AttachSpec spec, GameCommand command, CardInstance? source) =>
         spec.Wielder == AttachWielder.Performer
             ? (command.PerformerId is not null && _state.Cards.TryGetValue(command.PerformerId, out var performer) ? performer : null)
-            : source;
+            : spec.Wielder == AttachWielder.PersonalitySlot
+                ? (command.Selections?.FirstOrDefault(s => s.Slot == "personality")?.CardIds is [var slotId, ..] && _state.Cards.TryGetValue(slotId, out var targeted) ? targeted : null)
+                : source;
 
     // What Equip enforces on ANY attach, in one place (the Equip command, Equip (Battle), Low Market and Singh Remnants each still carry their
     // own copy of these four Requires; this is the one a new attach path calls instead of writing a fifth).
-    private void RequireAttachable(CardInstance attachment, CardInstance wielder, int playerId)
+    private void RequireAttachable(CardInstance attachment, CardInstance wielder, int playerId, bool ignoreHonorRequirement = false)
     {
         var def = Definition(attachment);
         var wielderName = Definition(wielder).Name;
         Require(InPlay(wielder) && Definition(wielder).Type == CardType.Personality, $"{wielderName} is not a Personality in play.");
-        Require(AttachmentLegalTarget(def, wielder), $"{def.Name} will not attach to {wielderName}.");
+        Require(AttachmentLegalTarget(ignoreHonorRequirement ? def with { HonorRequirement = null } : def, wielder), $"{def.Name} will not attach to {wielderName}.");
         Require(AttachmentAllowed(attachment, wielder), "A Personality may attach only one Armor and, without Kensai or a Kama, only one Weapon.");
         Require(!(Keyword(attachment, "Unique") || Keyword(attachment, "Singular")) || !ControlsCopyOf(playerId, def.Name),
             $"You already control this {(Keyword(attachment, "Unique") ? "Unique" : "Singular")} card.");
@@ -131,7 +137,7 @@ public sealed partial class MatchEngine
             Require(error is null, error ?? "");
         }
         var wielder = WielderOfAttach(spec, command, source) ?? throw new RuleViolation("Choose a Personality to attach it to.");
-        RequireAttachable(attachment, wielder, player.Id);
+        RequireAttachable(attachment, wielder, player.Id, spec.IgnoreHonorRequirement);
     }
 
     // Control (issue #352): `controllerId` now controls `card`. The real owner is remembered the first time a card changes hands and restored when it

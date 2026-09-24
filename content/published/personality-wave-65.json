@@ -1,0 +1,356 @@
+{
+  "Profile": "personality-wave-65",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-515",
+      "Name": "Asahina Shigemitsu",
+      "Type": "Personality",
+      "Clan": "Crane",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 4,
+      "PersonalHonor": 3,
+      "HonorRequirement": 6,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: Bow Shigemitsu or one of his Spells: Give each of your provinces +1 strength. If it is not your turn, before it ends, if none of your provinces were destroyed this turn, gain 1 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-515.jpg",
+      "Keywords": [
+        "Air",
+        "Crane Clan",
+        "Shugenja"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "shigemitsu-provinces"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-549",
+      "Name": "Asako Kaitoko",
+      "Type": "Personality",
+      "Clan": "Phoenix",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 4,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Target an enemy Personality: Reduce his Force to 0. Destroy a card without attachments in his unit if he is Kolat, Ninja, or Shadowlands.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-549.jpg",
+      "Keywords": [
+        "Inquisitor",
+        "Magistrate",
+        "Phoenix Clan",
+        "Shugenja",
+        "Void"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "kaitoko-weaken"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-775",
+      "Name": "Bayushi Higaonna",
+      "Type": "Personality",
+      "Clan": "Scorpion",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 5,
+      "Chi": 3,
+      "PersonalHonor": 1,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Ranged 4 Attack. If the Ranged Attack destroyed a card, its owner loses 1 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-775.jpg",
+      "Keywords": [
+        "Magistrate",
+        "Samurai",
+        "Scorpion Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "higaonna-attack"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-916",
+      "Name": "Bayushi Toshimo",
+      "Type": "Personality",
+      "Clan": "Scorpion",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 1,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "(Kensai may attach two Weapons, as long as neither is Two-Handed.) \nBattle: Bow a target enemy card without attachments. If Toshimo has a Weapon or you control a Courtier, the card cannot straighten.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-916.jpg",
+      "Keywords": [
+        "Kensai",
+        "Loyal",
+        "Bitter Lies",
+        "Paragon",
+        "Samurai",
+        "Scorpion Clan",
+        "Yojimbo"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "toshimo-bow"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-1679",
+      "Name": "Daidoji Takichi",
+      "Type": "Personality",
+      "Clan": "Crane",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 3,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Target a Personality opposing Takichi at the current battlefield: Move the Personality and Takichi to the same adjacent unresolved battlefield.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1679.jpg",
+      "Keywords": [
+        "Crane Clan",
+        "Iron Crane",
+        "Samurai",
+        "Scout"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "takichi-move"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-1719",
+      "Name": "Daigotsu Gyoken",
+      "Type": "Personality",
+      "Clan": "Spider",
+      "GoldCost": 10,
+      "GoldProduction": 0,
+      "Force": 7,
+      "Chi": 3,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After Gyoken enters play: Lose 2 Honor.\nBattle/Open: Target your Personality and a non-Unique attachment in any player's discard pile: Attach it to the Personality, paying all costs and ignoring Honor Requirements. You may take an additional action appropriate to this phase.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1719.jpg",
+      "Keywords": [
+        "Conqueror",
+        "Experienced 2",
+        "Unique",
+        "Commander",
+        "Dark Death",
+        "Paragon",
+        "Samurai",
+        "Shadowlands",
+        "Spider Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "gyoken-attach"
+      ],
+      "Effect": "none",
+      "EntryHonorLoss": 2
+    },
+    {
+      "Id": "oracle-l5r-1750",
+      "Name": "Daigotsu Murota",
+      "Type": "Personality",
+      "Clan": "Spider",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After Murota enters play: Lose 2 Honor.\nBattle: Target an enemy card, which must have no attachments unless Murota has performed a Dark Virtue action this turn: Bow it.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1750.jpg",
+      "Keywords": [
+        "Conqueror",
+        "Dark Stalker",
+        "Paragon",
+        "Samurai",
+        "Shadowlands",
+        "Spider Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "murota-bow"
+      ],
+      "Effect": "none",
+      "EntryHonorLoss": 2
+    },
+    {
+      "Id": "oracle-l5r-2082",
+      "Name": "Doji Hakuseki",
+      "Type": "Personality",
+      "Clan": "Crane",
+      "GoldCost": 10,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 5,
+      "PersonalHonor": 4,
+      "HonorRequirement": 6,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: Target a Personality: Choose one of his abilities; it may not be used.\nBattle: Target an enemy Personality: Hakuseki issues him an unrefusable challenge. The controller of the duel's winner gains 2 Honor. Bow the duel's loser, and destroy him if he is dishonorable.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-2082.jpg",
+      "Keywords": [
+        "Duelist",
+        "Experienced 2",
+        "Loyal",
+        "Unique",
+        "Crane Clan",
+        "First Magistrate",
+        "Magistrate",
+        "Samurai"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "hakuseki-disable",
+        "hakuseki-duel"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-2142",
+      "Name": "Doji Rengetsu",
+      "Type": "Personality",
+      "Clan": "Crane",
+      "GoldCost": 6,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 4,
+      "PersonalHonor": 4,
+      "HonorRequirement": 6,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Favor Political Open: Discard the Imperial Favor to target a Personality or Holding. Choose one of its abilities; it may not be used.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-2142.jpg",
+      "Keywords": [
+        "Artisan",
+        "Courtier",
+        "Crane Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "rengetsu-disable"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-3310",
+      "Name": "Hiruma Nikaru",
+      "Type": "Personality",
+      "Clan": "Crab",
+      "GoldCost": 9,
+      "GoldProduction": 0,
+      "Force": 7,
+      "Chi": 2,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Target an enemy Personality: Bow him. He may not perform actions.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-3310.jpg",
+      "Keywords": [
+        "Berserker",
+        "Crab Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "nikaru-bow-lock"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-3974",
+      "Name": "Iuchi Abodan",
+      "Type": "Personality",
+      "Clan": "Unicorn",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 1,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose a Personality in a discard pile, remove him from the game, and target an enemy Personality: Move him home. Bow him if the Personality you chose was dead.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-3974.jpg",
+      "Keywords": [
+        "Cavalry",
+        "Death Priest",
+        "Shugenja",
+        "Unicorn Clan",
+        "Water"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "abodan-move"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-4382",
+      "Name": "Kitsu Kagako",
+      "Type": "Personality",
+      "Clan": "Lion",
+      "GoldCost": 6,
+      "GoldProduction": 0,
+      "Force": 1,
+      "Chi": 4,
+      "PersonalHonor": 3,
+      "HonorRequirement": 4,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After Kagako enters play: She summons an ancestor. Create a 2F/2C/3PH Lion Clan • Samurai • Ancestor • Spirit Personality. Gain 1 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-4382.jpg",
+      "Keywords": [
+        "Lion Clan",
+        "Shugenja",
+        "Water"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "kagako-create"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

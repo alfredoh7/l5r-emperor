@@ -105,6 +105,9 @@ public sealed class PendingEffectChoice
     public int? OpponentHonorBefore { get; set; }
     public List<string> BowedBefore { get; set; } = [];
     public List<AdditionalActionGrant> PreExistingGrants { get; set; } = [];
+    /// <summary>Options the engine listed for THIS resolution, when they depend on the game (Forgotten Legacy pass, issue #467, batch 1: "choose one of his
+    /// abilities", "destroy a card without attachments in his unit"); null for a branch whose options are the ability's own fixed data.</summary>
+    public List<EffectOption>? Options { get; set; }
 }
 
 public sealed partial class MatchEngine
@@ -135,6 +138,7 @@ public sealed partial class MatchEngine
             ApplyPlayerHonorChoice(performer, affected, int.Parse(parts[2]));
             return;
         }
+        if (ApplyForgottenLegacyBatch1BranchEffect(effect, command)) return;
         switch (effect)
         {
             case BranchEffect.MoveSourceHome: MoveHome(source, false); break;
@@ -197,7 +201,7 @@ public sealed partial class MatchEngine
         var pending = _state.PendingEffectChoice ?? throw new RuleViolation("No effect choice is open.");
         Require(command.Type == "chooseEffect" && command.PlayerId == pending.PlayerId, "Choose one of the offered effects.");
         var ability = AbilityCatalog.All[pending.Command.AbilityId!];
-        var option = FollowUpOf(ability)!.Options.FirstOrDefault(o => o.Id == command.Choice);
+        var option = (pending.Options?.ToArray() ?? FollowUpOf(ability)!.Options).FirstOrDefault(o => o.Id == command.Choice);
         Require(option is not null, "Choose one of the offered effects.");
         var source = Card(pending.Command.CardId);
         var target = pending.Command.TargetId is null ? null : Card(pending.Command.TargetId);
@@ -215,7 +219,7 @@ public sealed partial class MatchEngine
     {
         if (_state.PendingEffectChoice is not { } pending || pending.PlayerId != playerId) yield break;
         var ability = AbilityCatalog.All[pending.Command.AbilityId!];
-        foreach (var option in FollowUpOf(ability)!.Options)
+        foreach (var option in pending.Options?.ToArray() ?? FollowUpOf(ability)!.Options)
             yield return new("chooseEffect", option.Label, true, null, new GameCommand("chooseEffect", playerId, _state.Version, Choice: option.Id), pending.Command.CardId);
     }
 }

@@ -47,6 +47,9 @@ public sealed partial class MatchEngine
             _state.FavorPlayerId = null;
             Emit("favorDiscarded", $"{player.Name} discarded the Imperial Favor.", player.Id);
         }
+        DiscardFavorForBatch1(id, player); // Forgotten Legacy pass (issue #467), batch 1: Doji Rengetsu's Favor discard is a cost.
+        // A negated action was still performed (Forgotten Legacy pass, issue #467, batch 1: Daigotsu Murota's Dark Virtue record).
+        RecordPerformedKeywordActions(ability, command, source);
         PayAbilityCosts(ability, command, player, source);
         Emit("abilityUsed", $"{player.Name}: {(source is null ? "Imperial Favor" : Definition(source).Name)} — {ability.Label} (negated).", player.Id, source?.Id);
         CompleteNegatedAction(command, ability, player, source, playedFromDiscard, consumedGrant);
