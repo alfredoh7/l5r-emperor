@@ -1,0 +1,20 @@
+[
+  {
+    "card_id": "oracle-l5r-993",
+    "printing_set": [
+      "Forgotten Legacy"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=993",
+    "image_path": "assets/reference/oracle/forgotten-legacy/webp/oracle-l5r-993-printing-1-image-1.webp",
+    "image_sha256": "a79f73ff4d21e526d2d2cc573565454d296b4a5db542d442c5a29c21461adfa8"
+  },
+  {
+    "card_id": "oracle-l5r-1607",
+    "printing_set": [
+      "Forgotten Legacy"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=1607",
+    "image_path": "assets/reference/oracle/forgotten-legacy/webp/oracle-l5r-1607-printing-1-image-1.webp",
+    "image_sha256": "3e1944c97f3b17c0a03f209e7c20bdc71bcfb40b4ed975ec38adc617531e5282"
+  }
+]

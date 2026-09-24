@@ -258,7 +258,7 @@ public sealed partial class MatchEngine
             if(announcePending.PlayerId==playerId)
             {
                 var card=Card(announcePending.CardId!);
-                foreach(var reactionId in AbilityIdsOf(card).Where(a=>AbilityCatalog.All.TryGetValue(a,out var def) && def.Timing=="Reaction" && def.Trigger=="own-ranged-action-announced"))
+                foreach(var reactionId in AbilityIdsOf(card).Where(a=>AbilityCatalog.All.TryGetValue(a,out var def) && def.Timing=="Reaction" && def.Trigger is "own-ranged-action-announced" or EntrenchedTrigger))
                     AddReaction(card,reactionId);
             }
             Add("declineReaction","Pass reaction",Command("declineReaction"));
@@ -311,6 +311,11 @@ public sealed partial class MatchEngine
             // After a battle resolved (issue #379): the recruit grants of this battle this player still holds, then the pass.
             result.AddRange(AbilityActions(playerId));
             Add("declineReaction","Pass reaction",Command("declineReaction"));
+        }
+        else if(_state.PendingChoice is { Type:"beforeBattleOptional" } heartPending && _state.PendingBeforeBattleResolve is { } heartResolve && IsHeartOfDarknessChoice(heartResolve))
+        {
+            // Heart of Darkness (Forgotten Legacy pass, issue #467 batch 4): bow no card, one card, or two cards (ForgottenLegacyBatch4.cs).
+            foreach(var option in HeartOfDarknessOptions(playerId,heartPending.CardId)) result.Add(option);
         }
         else if(_state.PendingChoice is { Type:"beforeBattleOptional" } optionalPending)
         {
@@ -491,7 +496,9 @@ public sealed partial class MatchEngine
                 foreach(var province in _state.UnresolvedBattlefields) Add("selectBattle",$"Fight at province {province+1}",Command("selectBattle",province:province));
                 break;
             case Phase.Battle:
-                foreach(var card in player.Hand.Select(Card).Where(c=>Definition(c).Type==CardType.Strategy && Definition(c).ScenarioOnly))
+                // A published Terrain is played through this same command (the generic Terrain rule -- it prints no Battle ability of its own), so it is listed
+                // here too; before issue #467 only scenario Strategies were, and every published Terrain was playable by command but never offered.
+                foreach(var card in player.Hand.Select(Card).Where(c=>Definition(c).Type==CardType.Strategy && (Definition(c).ScenarioOnly || Keyword(c,"Terrain"))))
                 {
                     var def=Definition(card);
                     // A Strategy played with playStrategy pays its printed cost (issue #303): one quote, with

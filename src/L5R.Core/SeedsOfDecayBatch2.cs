@@ -107,7 +107,7 @@ public sealed partial class MatchEngine
             // Imperial Protection: "dishonor him and his controller loses Honor equal to his base Personal Honor".
             case WatchImperialProtection:
                 Emit("watchFired", $"{watch.Source}: {Definition(card).Name} {what}.", watch.BeneficiaryPlayerId, card.Id);
-                Dishonor(card);
+                Dishonor(card, watch.BeneficiaryPlayerId);
                 GainHonor(card.OwnerId, -Definition(card).PersonalHonor, watch.Source);
                 break;
             // Fair Warning: "gain 2 Honor".

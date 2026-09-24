@@ -65,6 +65,7 @@ public sealed partial class MatchEngine
         var (holder, reason) = ResolveFirstOpportunity(engage);
         _state.FirstActionPlayerId = holder; _state.FirstActionReason = reason;
         _state.FirstActionRestriction = null;
+        _state.AttackerLeadBattle = holder == engage.Attacker ? _state.BattleNumber : -1; // Entrenched Position (Forgotten Legacy pass, issue #467 batch 3)
         Emit("firstOpportunity", $"{Player(holder).Name} has the first opportunity to take a Battle action or pass ({reason}).", holder);
         if (holder == engage.Attacker)
         {

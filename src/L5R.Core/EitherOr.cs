@@ -35,6 +35,9 @@ public static class EitherOrSpecs
     /// <summary>Yasuki Makoto (issue #460, batch 2): "His controller may pay 4 Gold. If he does, he loses 1 Honor. If he does not, dishonor the
     /// target and move him home." -- the same "the AFFECTED card's controller decides" shape Extend the Soul's Boundaries already established.</summary>
     public const string MakotoPayOrDishonor = "makoto-pay-or-dishonor";
+    /// <summary>Yasuki Daiki (Forgotten Legacy pass, issue #467 batch 2): "His controller chooses to either pay 4 Gold, lose 2 Honor, or do neither. If he did not pay 4 Gold
+    /// or lose 2 Honor, the Personality may not be assigned, and will not move, into attacking armies." -- Makoto's "the affected card's controller decides", three ways.</summary>
+    public const string DaikiPayLoseOrLock = "daiki-pay-lose-or-lock";
 }
 
 /// <summary>What choosing an option amounts to, for a client to word and style it: "avoid" (accept a cost or a lesser loss so the
@@ -97,6 +100,7 @@ public sealed partial class MatchEngine
             EitherOrSpecs.ExtendSoulShuffle => $"{source}: shuffle {affected} and his attachments into their owners' decks, or your opponent takes two additional Battle actions.",
             EitherOrSpecs.InoStorm => $"{source}'s storm: discard a card, or bow {(affected == "" ? "the performer" : affected)}.",
             EitherOrSpecs.MakotoPayOrDishonor => $"{source}: pay 4 Gold and lose 1 Honor, or {affected} is dishonored and moved home.",
+            EitherOrSpecs.DaikiPayLoseOrLock => $"{source}: pay 4 Gold, lose 2 Honor, or neither -- then {affected} may not be assigned, and will not move, into attacking armies this turn.",
             _ => throw new RuleViolation("Unknown choice.")
         };
     }
@@ -152,6 +156,16 @@ public sealed partial class MatchEngine
                 return [
                     new("pay", "Pay 4 Gold", "You lose 1 Honor.", EitherOrKind.Avoid, 4, payable(4), "You cannot produce 4 Gold."),
                     new("refuse", "Do not pay", $"{name} is dishonored and moved home.", EitherOrKind.Accept, 0, true, null)
+                ];
+            }
+            // Yasuki Daiki (issue #467 batch 2): the decider is the target's controller. Losing Honor is always possible (Family Honor may go negative).
+            case EitherOrSpecs.DaikiPayLoseOrLock:
+            {
+                var name = Definition(affected!).Name;
+                return [
+                    new("pay", "Pay 4 Gold", "Nothing further happens.", EitherOrKind.Avoid, 4, payable(4), "You cannot produce 4 Gold."),
+                    new("honor", "Lose 2 Honor", "Nothing further happens.", EitherOrKind.Avoid, 0, true, null),
+                    new("neither", "Do neither", $"{name} may not be assigned, and will not move, into attacking armies this turn.", EitherOrKind.Accept, 0, true, null)
                 ];
             }
             default: throw new RuleViolation("Unknown choice.");
@@ -264,8 +278,21 @@ public sealed partial class MatchEngine
                 break;
             case (EitherOrSpecs.MakotoPayOrDishonor, "refuse"):
                 Emit("eitherOrChosen", $"{decider.Name} did not pay ({Definition(source).Name}): {Definition(affected!).Name} is dishonored and moved home.", decider.Id, affected!.Id);
-                Dishonor(affected!);
+                Dishonor(affected!, p.ActingPlayerId);
                 MoveHome(affected!, false);
+                break;
+            // Yasuki Daiki (issue #467 batch 2; ForgottenLegacyBatch2.cs).
+            case (EitherOrSpecs.DaikiPayLoseOrLock, "pay"):
+                Pay(decider.Id, source, option.GoldCost, sourceIds);
+                Emit("eitherOrChosen", $"{decider.Name} paid 4 Gold ({Definition(source).Name}).", decider.Id, source.Id);
+                break;
+            case (EitherOrSpecs.DaikiPayLoseOrLock, "honor"):
+                Emit("eitherOrChosen", $"{decider.Name} chose to lose 2 Honor ({Definition(source).Name}).", decider.Id, source.Id);
+                GainHonor(decider.Id, -2, Definition(source).Name, source);
+                break;
+            case (EitherOrSpecs.DaikiPayLoseOrLock, "neither"):
+                Emit("eitherOrChosen", $"{decider.Name} did neither ({Definition(source).Name}).", decider.Id, affected!.Id);
+                DaikiLock(affected!, source);
                 break;
             default: throw new RuleViolation("Unknown choice.");
         }

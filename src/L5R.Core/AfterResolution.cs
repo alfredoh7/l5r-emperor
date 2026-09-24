@@ -70,6 +70,8 @@ public sealed partial class MatchEngine
             // Redoubled Attack needs a Personality of the player's still at the battlefield: its performing slot has no candidate otherwise, so it is not playable.
             // Tales of Dishonor: "if you destroyed any enemy units or a province in that resolution" and somebody lost.
             "tales-of-dishonor-lose-honor" => ResolutionDestroyedForPlayer(playerId) && facts.Losers.Count > 0,
+            // Returning Home (Forgotten Legacy pass, issue #467 batch 4): "a battle ... in which you destroyed a province as the Attacker".
+            "returning-home-create" => facts.ProvinceDestroyedBy == playerId && facts.Attacker == playerId,
             _ => true
         };
     }
@@ -83,5 +85,6 @@ public sealed partial class MatchEngine
     }
 
     // Redoubled Attack: "They will not bow from the battle's resolution" -- named cards, as opposed to a player's whole army (Akodo Dairuko).
-    private bool ResolutionWillNotBow(CardInstance card) => _state.ResolutionWillNotBowCardIds.Contains(card.Id);
+    private bool ResolutionWillNotBow(CardInstance card) => _state.ResolutionWillNotBowCardIds.Contains(card.Id)
+        || SasakoUnitWillNotBow(card); // Moshi Sasako (Forgotten Legacy pass, issue #467 batch 2): "Battle resolution does not bow cards in this unit."
 }

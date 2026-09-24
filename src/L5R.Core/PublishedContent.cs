@@ -2455,12 +2455,18 @@ public static class PublishedContent
     public static PublishedSnapshot StrategyWave51 { get; } = Load("L5R.Published.StrategyWave51.json", "strategy-wave-51", requireDecks: false);
     // Embers of War pass, batch 3 (issue #460).
     public static PublishedSnapshot StrategyWave52 { get; } = Load("L5R.Published.StrategyWave52.json", "strategy-wave-52", requireDecks: false);
+    /// <summary>Strategy wave 54 (Forgotten Legacy pass, batch 3, issue #467): A Game of Dice, A Yojimbo's Duty, Accidental Confession, Broken Alliance, Cast Aside the Weak,
+    /// Consideration, Creating Order, Duel of Haiku, Entrenched Position, Feint &amp; Strike.</summary>
+    public static PublishedSnapshot StrategyWave54 { get; } = Load("L5R.Published.StrategyWave54.json", "strategy-wave-54", requireDecks: false);
     /// <summary>Stronghold wave 13 (issue #458): The Sacred Temple of the Phoenix - inexperienced, The Towers of the Yogo.</summary>
     public static PublishedSnapshot StrongholdWave13 { get; } = Load("L5R.Published.StrongholdWave13.json", "stronghold-wave-13", requireDecks: false);
     /// <summary>Follower wave 27 (issue #458): Devoted Yojimbo.</summary>
     public static PublishedSnapshot FollowerWave27 { get; } = Load("L5R.Published.FollowerWave27.json", "follower-wave-27", requireDecks: false);
     /// <summary>Strategy wave 53 (Embers of War pass, issue #460, batch 4): Sheathing the Sword, Tactical Trap, Unstoppable Strike, You Are Unworthy, The Cycle of Vengeance.</summary>
     public static PublishedSnapshot StrategyWave53 { get; } = Load("L5R.Published.StrategyWave53.json", "strategy-wave-53", requireDecks: false);
+    /// <summary>Strategy wave 55 (Forgotten Legacy pass, issue #467, batch 4): Heart of Darkness, Intimidation, Never Beyond My Reach, Pearls &amp; Spirits, Returning Home,
+    /// Rise of the Dark Naga, Seeking the Truth, Siege Volley, Steadfast Defense, Sundering Strike.</summary>
+    public static PublishedSnapshot StrategyWave55 { get; } = Load("L5R.Published.StrategyWave55.json", "strategy-wave-55", requireDecks: false);
     /// <summary>Spell wave 20 (Embers of War pass, issue #460, batch 5): Inescapable Snare, Incite the Phantoms, Sudden Guardian, The Swell of Strength.</summary>
     public static PublishedSnapshot SpellWave20 { get; } = Load("L5R.Published.SpellWave20.json", "spell-wave-20", requireDecks: false);
     /// <summary>Stronghold wave 14 (issue #460, batch 5): The Ki-Rin's Path.</summary>
@@ -2479,6 +2485,28 @@ public static class PublishedContent
     public static PublishedSnapshot PersonalityWave64 { get; } = Load("L5R.Published.PersonalityWave64.json", "personality-wave-64", requireDecks: false);
     /// <summary>Personality wave 62 (Embers of War pass, issue #460, batch 1): Akodo Uehara, Daigotsu Takayasu - exp, Goju Gochiso, Kaiu Onizuka, Kaiu Tojikana.</summary>
     public static PublishedSnapshot PersonalityWave62 { get; } = Load("L5R.Published.PersonalityWave62.json", "personality-wave-62", requireDecks: false);
+    /// <summary>Personality wave 66 (Forgotten Legacy pass, issue #467, batch 2): Matsu Koyama, Moshi Sasako, Moto Xiao, Ninube Shiho, Shiba Sawaken, Shinjo Junpei,
+    /// Shosuro Makiko, The Shakash, The Sleepless One, Togashi Osawa, Toritaka Chokichi, Utaku Ji-Yun, Yamazaki, Yasuki Daiki, Yoritomo Haruhiko.</summary>
+    public static PublishedSnapshot PersonalityWave66 { get; } = Load("L5R.Published.PersonalityWave66.json", "personality-wave-66", requireDecks: false);
+    /// <summary>Follower wave 29 (Forgotten Legacy pass, issue #467, batch 2): The Vengeful.</summary>
+    public static PublishedSnapshot FollowerWave29 { get; } = Load("L5R.Published.FollowerWave29.json", "follower-wave-29", requireDecks: false);
+    /// <summary>Stronghold wave 15 (Forgotten Legacy pass, issue #467, batch 2): The Forgotten Temple.</summary>
+    public static PublishedSnapshot StrongholdWave15 { get; } = Load("L5R.Published.StrongholdWave15.json", "stronghold-wave-15", requireDecks: false);
+    /// <summary>Personality wave 67 (Forgotten Legacy pass, issue #467, batch 1): Asahina Shigemitsu, Asako Kaitoko, Bayushi Higaonna, Bayushi Toshimo, Daidoji
+    /// Takichi, Daigotsu Gyoken, Daigotsu Murota, Doji Hakuseki, Doji Rengetsu, Hiruma Nikaru, Iuchi Abodan, Kitsu Kagako.</summary>
+    public static PublishedSnapshot PersonalityWave67 { get; } = Load("L5R.Published.PersonalityWave67.json", "personality-wave-67", requireDecks: false);
+    /// <summary>Spell wave 21 (Forgotten Legacy pass, issue #467, batch 5): Pearl of Rage, The Mountain's Power, Wind of the Moon, Thunder's Wrath.</summary>
+    public static PublishedSnapshot SpellWave21 { get; } = Load("L5R.Published.SpellWave21.json", "spell-wave-21", requireDecks: false);
+    /// <summary>Holding wave 11 (issue #467, batch 5): Ageless Shrine, Bamboo Harvesters - experienced, Border Keep - experienced, Colonial Harbor.</summary>
+    public static PublishedSnapshot HoldingWave11 { get; } = Load("L5R.Published.HoldingWave11.json", "holding-wave-11", requireDecks: false);
+    /// <summary>Item wave 13 (issue #467, batch 5): Black Pearl, Cursed Relic.</summary>
+    public static PublishedSnapshot ItemWave13 { get; } = Load("L5R.Published.ItemWave13.json", "item-wave-13", requireDecks: false);
+    /// <summary>Event wave 6 (issue #467, batch 5): Assault in the Jungle, Burning Dreams, Willing Spirits.</summary>
+    public static PublishedSnapshot EventWave6 { get; } = Load("L5R.Published.EventWave6.json", "event-wave-6", requireDecks: false);
+    /// <summary>Celestial wave 6 (issue #467, batch 5): Ryoshun's Guidance.</summary>
+    public static PublishedSnapshot CelestialWave6 { get; } = Load("L5R.Published.CelestialWave6.json", "celestial-wave-6", requireDecks: false);
+    /// <summary>Region wave 8 (issue #467, batch 5): The Second City.</summary>
+    public static PublishedSnapshot RegionWave8 { get; } = Load("L5R.Published.RegionWave8.json", "region-wave-8", requireDecks: false);
     /// <summary>Personality wave 65 (Emperor Edition Gempukku pass, issue #461): the eight Experienced Personalities of the set.</summary>
     public static PublishedSnapshot PersonalityWave65 { get; } = Load("L5R.Published.PersonalityWave65.json", "personality-wave-65", requireDecks: false);
     /// <summary>Holding wave 10 (Emperor Edition Gempukku pass, issue #461): the nine Market Holdings.</summary>

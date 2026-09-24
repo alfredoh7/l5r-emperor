@@ -42,11 +42,15 @@ public sealed partial class MatchEngine
         var playedFromDiscard = PlayedFromDiscard(ability, source);
         PayForAbility(command, player);
         PayCostOption(ability, command, player, source);
-        if (id is "shunya-honor" or "favor-cycle" or "favor-battle" or "jakuei-bow-favor" or "bonds-of-coin-draw" or "baiko-shame")
+        // The same list RunAbilityEffects discards the Favor for (Insulting Gesture's own discard was missing here: a negated one kept the Favor).
+        if (DiscardsImperialFavorAsCost(id))
         {
             _state.FavorPlayerId = null;
             Emit("favorDiscarded", $"{player.Name} discarded the Imperial Favor.", player.Id);
         }
+        DiscardFavorForBatch1(id, player); // Forgotten Legacy pass (issue #467), batch 1: Doji Rengetsu's Favor discard is a cost.
+        // A negated action was still performed (Forgotten Legacy pass, issue #467, batch 1: Daigotsu Murota's Dark Virtue record).
+        RecordPerformedKeywordActions(ability, command, source);
         PayAbilityCosts(ability, command, player, source);
         Emit("abilityUsed", $"{player.Name}: {(source is null ? "Imperial Favor" : Definition(source).Name)} — {ability.Label} (negated).", player.Id, source?.Id);
         CompleteNegatedAction(command, ability, player, source, playedFromDiscard, consumedGrant);

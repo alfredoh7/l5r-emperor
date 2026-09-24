@@ -416,7 +416,7 @@ public sealed partial class MatchEngine
     {
         var card = Card(winnerId);
         var reactionId = DuelWonReactionAbility(card);
-        var broadcastWatchers = _state.Cards.Values.Where(c => c.OwnerId == winnerPlayerId && InPlay(c) && !c.Bowed && DuelWonBroadcastReactionAbility(c) is not null).ToArray();
+        var broadcastWatchers = _state.Cards.Values.Where(c => c.OwnerId == winnerPlayerId && InPlay(c) && !BowedBarsAbilities(c) && DuelWonBroadcastReactionAbility(c) is not null).ToArray();
         if (reactionId is null && broadcastWatchers.Length == 0) return false;
         // A fresh window per duel: clear any earlier use so the same card may react again to a later duel.
         if (reactionId is not null) card.AbilityUses.Remove(reactionId);
@@ -481,11 +481,23 @@ public sealed partial class MatchEngine
                 foreach (var id in loserIds) if (!StalwartNegatesBow(Card(id), challengerPlayerId)) Card(id).Bowed = true;
                 break;
             // Reckless Duel (oracle-l5r-6209, issue #460): "Bow the duel's loser. Move him home." -- Doji Mitsuru's own bow plus Daisuke's own move-home, combined.
+            // Doji Hakuseki (Forgotten Legacy pass, issue #467, batch 1; ForgottenLegacyBatch1.cs).
+            case "hakuseki-duel": HakusekiDuelOutcome(winnerId, loserIds, challengerPlayerId); break;
             case "reckless-duel":
                 foreach (var id in loserIds)
                 {
                     if (!StalwartNegatesBow(Card(id), challengerPlayerId)) Card(id).Bowed = true;
                     MoveHome(Card(id), false);
+                }
+                break;
+            // Duel of Haiku (oracle-l5r-2245, Forgotten Legacy pass issue #467 batch 3): "The winner gains 1 Honor. Bow and dishonor the loser." -- the winning
+            // Personality's controller gains the Honor (a tie has no winner); every loser is bowed and dishonored.
+            case "duel-of-haiku":
+                if (winnerId is not null) GainHonor(Card(winnerId).OwnerId, 1, "Duel of Haiku");
+                foreach (var id in loserIds)
+                {
+                    if (!StalwartNegatesBow(Card(id), challengerPlayerId)) Card(id).Bowed = true;
+                    Dishonor(Card(id));
                 }
                 break;
         }
@@ -529,6 +541,11 @@ public sealed partial class MatchEngine
             // Seeds of Decay pass (issue #453), batch 1. Embracing Battle: "bow the winner" (A Simple Yari's). Ceaseless Vigil's "straighten a Personality" is a choice (FocusEffectChoice.cs).
             case "embracing-battle-focus":
                 if (_state.PendingDuel?.WinnerId is string embracingWinnerId && InPlay(Card(embracingWinnerId)) && !StalwartNegatesBow(Card(embracingWinnerId), ownerId)) Card(embracingWinnerId).Bowed = true;
+                break;
+            // Feint & Strike (oracle-l5r-2506, Forgotten Legacy pass issue #467 batch 3): "After this duel's resolution, its winner's controller discards a card" -- queued
+            // like Times of Strife's own forced discard and answered as the duel hands play back (FinishDuelResolution's OpenOverconfidentDrawWindow). A tie has no winner.
+            case "feint-strike-focus":
+                if (winnerPlayerId is int feintWinner) _state.PendingForcedDiscards.Add(new(feintWinner, "Feint & Strike"));
                 break;
         }
     }

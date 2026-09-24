@@ -469,7 +469,9 @@ public sealed partial class MatchEngine
                 if (_state.PendingChoice is null && _state.PendingAnnouncedAction is not null)
                 {
                     var pending=_state.PendingAnnouncedAction; _state.PendingAnnouncedAction=null;
-                    ExecuteAbilityEffects(pending);
+                    // Entrenched Position (Forgotten Legacy pass, issue #467 batch 3): a Reaction in this window negated the announced action.
+                    if(_state.AnnouncedActionNegated) { _state.AnnouncedActionNegated=false; ResolveNegatedAction(pending); }
+                    else ExecuteAbilityEffects(pending);
                 }
                 return;
             }
@@ -815,6 +817,7 @@ public sealed partial class MatchEngine
         higher.PrintedHoldsSeeded = lower.PrintedHoldsSeeded;
         higher.MovementLocks.AddRange(lower.MovementLocks);
         higher.TargetShield = lower.TargetShield;
+        higher.TargetShieldTurn = lower.TargetShieldTurn; higher.ForceModifiersNegatedTurn = lower.ForceModifiersNegatedTurn; // Forgotten Legacy pass, batch 3 (issue #467)
         higher.TargetBars.AddRange(lower.TargetBars);
         foreach (var other in _state.Cards.Values) for (var i = 0; i < other.TargetBars.Count; i++) if (other.TargetBars[i].ActorCardId == lower.Id) other.TargetBars[i] = other.TargetBars[i] with { ActorCardId = higher.Id };
         higher.AssignedToAttackTurn = Math.Max(higher.AssignedToAttackTurn, lower.AssignedToAttackTurn);
@@ -873,6 +876,7 @@ public sealed partial class MatchEngine
         card.TargetShield = false;
         card.TargetBars.Clear();
         card.ForcePenaltiesNegatedTurn = -1;
+        card.ForceModifiersNegatedTurn = -1; card.TargetShieldTurn = -1; // Forgotten Legacy pass, batch 3 (issue #467)
         card.AssignedToAttackTurn = -1;
     }
 
@@ -974,12 +978,13 @@ public sealed partial class MatchEngine
     // the recruiting PLAYER's Clan). Never set by an ordinary Purchase/Reserve recruit.
     // fromDeadPile (issue #373, At Any Cost): recruiting one of the player's own dead Personalities. Only where the card is differs: every restriction below,
     // the price with all its discounts, and Unique/Singular apply as for a province card -- except that such a Personality may not be proclaimed.
-    public PurchaseQuote QuotePurchase(int playerId,string cardId,bool clanDiscount=false,bool clanAllegiance=false,bool viaReserve=false,string? ignoreHonorRequirementIfPersonalityClan=null,bool fromDeadPile=false)
+    public PurchaseQuote QuotePurchase(int playerId,string cardId,bool clanDiscount=false,bool clanAllegiance=false,bool viaReserve=false,string? ignoreHonorRequirementIfPersonalityClan=null,bool fromDeadPile=false,bool anyOwnerPile=false)
     {
         if (playerId is <0 or >1 || !_state.Cards.TryGetValue(cardId,out var card)) return new(cardId,0,clanDiscount,clanAllegiance,false,"Unknown card or player.",[]);
         var def=Definition(card); var player=Player(playerId);
         // The dead pile is the Personality's discard pile: Zone.Dead once he died, Zone.DynastyDiscard when he was merely discarded from a province (Goju Plot: "in your discard pile").
-        if(fromDeadPile ? card.OwnerId!=playerId || card.Zone is not (Zone.Dead or Zone.DynastyDiscard) : card.OwnerId!=playerId || card.Zone!=Zone.Province || !card.FaceUp)
+        // Black Pearl (Forgotten Legacy pass, issue #467): anyOwnerPile -- "a Personality in any player's discard pile", brought into play under the payer's control (TakeControl).
+        if(fromDeadPile ? card.OwnerId!=playerId && !anyOwnerPile || card.Zone is not (Zone.Dead or Zone.DynastyDiscard) : card.OwnerId!=playerId || card.Zone!=Zone.Province || !card.FaceUp)
             return new(cardId,0,clanDiscount,clanAllegiance,false,fromDeadPile?"Choose one of your own dead Personalities.":"Choose your face-up province card.",[]);
         string? error=null;
         var inClan=def.Type==CardType.Personality && ClanAlignments(card).Contains(player.Clan);
@@ -1013,14 +1018,20 @@ public sealed partial class MatchEngine
         // Yasuki Makoto (oracle-l5r-9449, Embers of War pass, issue #460 batch 2): "Your Holdings enter play for 1 less Gold" -- the same
         // per-source-in-play term shape as Mukudori's own keywordDiscount above, narrowed to CardType.Holding rather than a keyword.
         var holdingDiscount=HoldingEntryDiscount(card,playerId);
-        var rawCost=def.GoldCost-prosperous-reserveDiscount-ashikoDiscount-(entryDiscount?.Amount??0)-keywordDiscount-holdingDiscount+(clanAllegiance?2:0)-(clanDiscount?2:0);
+        // The Shakash / The Sleepless One (Forgotten Legacy pass, issue #467 batch 2): "Enters play paying 1 less Gold [for each Nonhuman you control, up to 3]" -- the card's own printed term.
+        var (nagaDiscount,nagaTerm)=ForgottenLegacyEntryDiscount(card,playerId);
+        // A Gold Cost modifier on the card itself (Wind of the Moon's "+1 Gold Cost" on a face-up Personality out of play, Forgotten Legacy pass issue #467) is part of
+        // the price: CardGoldCost is the printed cost plus every GoldCost modifier (none survives a card's return to a province or a recruit from a dead pile).
+        var goldCost=CardGoldCost(card);
+        var rawCost=goldCost-prosperous-reserveDiscount-ashikoDiscount-(entryDiscount?.Amount??0)-keywordDiscount-holdingDiscount-nagaDiscount+(clanAllegiance?2:0)-(clanDiscount?2:0);
         var cost=Math.Max(0,rawCost);
         // The human-readable derivation the payment panel shows (issue #303), term by term.
-        var basis=$"{def.Name} cost {def.GoldCost}"+(prosperous>0?$" − {prosperous} (controlled Personalities)":"")+(reserveDiscount>0?$" − {reserveDiscount} (Reserve while defending)":"")
+        var basis=$"{def.Name} cost {goldCost}"+(prosperous>0?$" − {prosperous} (controlled Personalities)":"")+(reserveDiscount>0?$" − {reserveDiscount} (Reserve while defending)":"")
             +(ashikoDiscount>0?$" − {ashikoDiscount} (outnumbered)":"")
             +(entryDiscount is {} entry?$" − {entry.Amount} ({entry.Clan} Clan)":"")
             +(keywordDiscount>0?$" − {keywordDiscount} (Fudo, Mukudori)":"")
             +(holdingDiscount>0?$" − {holdingDiscount} (Yasuki Makoto)":"")
+            +(nagaDiscount>0?$" − {nagaDiscount} ({nagaTerm})":"")
             +(clanAllegiance?" + 2 (Clan allegiance)":"")+(clanDiscount?" − 2 (Clan discount)":"")+(rawCost<0?" (min 0)":"");
         if ((Keyword(card,"Unique") || Keyword(card,"Singular")) && ControlsCopyOf(playerId,def.Name)) error=$"You already control this {(Keyword(card,"Unique") ? "Unique" : "Singular")} card.";
         // Kakita Yusugi and Yogo Ugimori (issue #453, batch 2): the once-per-turn limit he ignores, and a lock on the player (ProclaimAllowed).
@@ -1184,6 +1195,7 @@ public sealed partial class MatchEngine
                 // unused grants rather than letting them linger for a future, ordinary turn -- the
                 // whole point of an Additional Action is that it resolves immediately, in a burst.
                 _state.AdditionalActions.RemoveAll(g=>g.PlayerId==_state.PriorityPlayerId && Forfeitable(g));
+                EndAttackerLeadIfCeded(_state.PriorityPlayerId,false); // Entrenched Position (Forgotten Legacy pass, issue #467 batch 3)
                 if(++_state.ConsecutivePasses==2) ResolveBattle(); else _state.PriorityPlayerId=1-_state.PriorityPlayerId;
                 break;
             case Phase.Dynasty:
@@ -1420,6 +1432,11 @@ public sealed partial class MatchEngine
                 _state.PendingChoice=new("beforeBattleOptional",source.OwnerId,source.Id,$"Before this battle resolves: you may bow one enemy Personality at this battlefield ({Definition(source).Name}).");
                 _state.PriorityPlayerId=source.OwnerId;
                 return;
+            // Heart of Darkness (Forgotten Legacy pass, issue #467 batch 4): the same optional choice, naming zero to two cards (ForgottenLegacyBatch4.cs).
+            case "heart-of-darkness-bow":
+                _state.PendingChoice=new("beforeBattleOptional",source.OwnerId,source.Id,$"Before this battle resolves: choose and bow zero to two cards at this battlefield with 4 or greater Force ({Definition(source).Name}).");
+                _state.PriorityPlayerId=source.OwnerId;
+                return;
         }
         FinishBeforeBattleEffect(pending);
     }
@@ -1430,7 +1447,8 @@ public sealed partial class MatchEngine
         var pending=_state.PendingBeforeBattleResolve!;
         var choice=_state.PendingChoice!;
         Require(command.Type=="beforeBattleOptional" && command.PlayerId==choice.PlayerId && command.Choice is "use" or "decline","Use the effect or decline it.");
-        if(command.Choice=="use")
+        if(IsHeartOfDarknessChoice(pending)) ResolveHeartOfDarkness(command,pending,choice.PlayerId);
+        else if(command.Choice=="use")
         {
             var target=Card(command.TargetId);
             Require(target.OwnerId!=choice.PlayerId && target.Zone==Zone.Battlefield && target.ProvinceIndex==pending.ProvinceIndex && Definition(target).Type==CardType.Personality,"Choose an enemy Personality at this battlefield.");
@@ -1554,6 +1572,7 @@ public sealed partial class MatchEngine
             GrantRingRecruit(Player(defender),destroyedA>0,"ring-of-fire-recruit");
         }
         // After the losing units are destroyed, the province is destroyed and Honor is settled: the Reactions that name this moment (AfterResolution.cs), before the winners go home.
+        MarkSeekingTheTruthResolution(destroyedByPlayer,provinceDestroyedNow?attacker:null); // Forgotten Legacy pass (issue #467 batch 4).
         if(OpenAfterResolutionWindow(NewAfterResolutionFacts(provinceIndex,attacker,attackerWon,a,destroyedByPlayer,provinceDestroyedNow,losers))) return;
         ContinueAfterResolution(provinceIndex,attacker,attackerWon,a);
     }
@@ -1658,6 +1677,8 @@ public sealed partial class MatchEngine
         // play now sits. Deferring here (a province choice) re-enters this same function from scratch
         // once answered, so nothing below runs twice.
         if (CheckYourClanNeedsYouReturn()) return;
+        // Seeking the Truth (Forgotten Legacy pass, issue #467 batch 4): "After this battle ends, if you did not destroy the battlefield's province or an army, discard a card at random."
+        ResolveSeekingTheTruthWatches();
         // After This Battle Resolves (issue #272): "after the resolution of the current battle but
         // before the next battlefield is chosen. If it is the last battlefield to resolve, then
         // return the card to the player's hand and then end the battle phase" -- run first, so the
@@ -1906,7 +1927,7 @@ public sealed partial class MatchEngine
     // the player still has an unused grant afterward. An ordinary action never sets this, even if
     // unrelated grants happen to be sitting unused for this player -- only the specific action that
     // touched them may skip ceding priority.
-    private void NextAction(int playerId,bool stayWithPlayer=false) { _state.ConsecutivePasses=0; _state.PriorityPlayerId=stayWithPlayer?playerId:1-playerId; }
+    private void NextAction(int playerId,bool stayWithPlayer=false) { _state.ConsecutivePasses=0; _state.PriorityPlayerId=stayWithPlayer?playerId:1-playerId; EndAttackerLeadIfCeded(playerId,stayWithPlayer); }
     private IEnumerable<CardInstance> Army(int playerId,int province) => _state.Cards.Values.Where(c=>c.OwnerId==playerId && c.Zone==Zone.Battlefield && c.ProvinceIndex==province && Definition(c).Type==CardType.Personality);
     // Province adjacency (core rules): a player's provinces sit in a line, 1-2-3-4. A destroyed
     // province is skipped entirely -- its former neighbors become directly adjacent to each other,
@@ -1978,7 +1999,7 @@ public sealed partial class MatchEngine
     // "force-with-spell" (Asako Ume), "force-if-enemy-dishonorable" (Bayushi Kahoku) and
     // "force-max-dead-pile" (Moto Shunsuke) are always-on passive bonuses, unlike the attacking-only
     // attacking-two/attacking-four Effects above.
-    private int PersonalityForce(CardInstance card) => Math.Max(0,Definition(card).Force+StatModifier(card,"Force")+TerrainForceAdjustment(card)+(IsAttacking(card)?(Definition(card).Effect=="attacking-two"?2:Definition(card).Effect=="attacking-four"?4:
+    private int PersonalityForce(CardInstance card) => Math.Max(0,Definition(card).Force+StatModifier(card,"Force")+TerrainForceAdjustment(card)+ForgottenLegacyBatch5Force(card)+(IsAttacking(card)?(Definition(card).Effect=="attacking-two"?2:Definition(card).Effect=="attacking-four"?4:
         // Matsu Kaido (oracle-l5r-4934, issue #299): "Kaido has +1F while attacking" -- the plain +1
         // counterpart to attacking-two/attacking-four (Matsu Yoshito's own conditional variant below
         // starts from the same +1 base).
@@ -2083,7 +2104,7 @@ public sealed partial class MatchEngine
     // (e.g. "+2F while defending") -- distinct from an Item's, which always conveys to the wielder
     // instead (see PersonalityForce/ItemForceToWielder). Feeds both CardForce (targeting, always
     // visible regardless of bow state) and BattleForce (unit total, gated on unbowed-or-Elite).
-    private int FollowerForce(CardInstance card) => Math.Max(0,Definition(card).Force+StatModifier(card,"Force")+TerrainForceAdjustment(card)+(Definition(card).Effect switch
+    private int FollowerForce(CardInstance card) => Math.Max(0,Definition(card).Force+StatModifier(card,"Force")+TerrainForceAdjustment(card)+ForgottenLegacyBatch5Force(card)+(Definition(card).Effect switch
     {
         "force-while-defending" => IsDefendingUnit(card) ? 2 : 0,
         // Home Guard (oracle-l5r-3413, issue #435): "This card has +3F while defending" -- the same
@@ -2114,7 +2135,8 @@ public sealed partial class MatchEngine
         // Item's bonus TO the wielder); here the Follower's own Force is keyed off the wielder instead.
         "force-equals-wielder-printed-force" => card.AttachedTo is null ? 0 : Definition(Card(card.AttachedTo)).Force,
         _ => 0
-    })+UnitFollowerBoost(card)+AkioFollowerBoost(card)+AshigaruBattleBoost(card)+ArmyBattleMaidenBoost(card)+ZanshoFollowerBoost(card));
+    })+UnitFollowerBoost(card)+AkioFollowerBoost(card)+AshigaruBattleBoost(card)+ArmyBattleMaidenBoost(card)+ZanshoFollowerBoost(card)
+        +XiaoFollowerBoost(card)); // Moto Xiao (Forgotten Legacy pass, issue #467 batch 2): "Followers in Xiao's army have +1F."
     // "Boost other cards in the unit" primitive (Senior Infantry Legion's shape): distinct from the
     // self-referential conditional bonuses above, this is a card that grants a static Force bonus to
     // every OTHER Follower attached to the same Personality (a unit is a Personality and all of its
@@ -2335,13 +2357,16 @@ public sealed partial class MatchEngine
     // treated as Personal Honor 0 (see CardPersonalHonor) until Rehonor restores them. The 180-degree
     // rotation the rules describe is purely visual, driven client-side off this same flag; no engine
     // state beyond it.
-    private void Dishonor(CardInstance card)
+    // byPlayerId: the player whose card's effect dishonors him, when the caller knows it better than the action being resolved (an Either/Or or a
+    // decider's choice answers a separate command); null reads it off the running action (Utaku Ji-Yun, Forgotten Legacy pass issue #467 batch 2).
+    private void Dishonor(CardInstance card,int? byPlayerId=null)
     {
         if(NegatesEffect(card,"all"))
         {
             Emit("dishonorNegated",$"{Definition(card).Name}'s dishonoring was negated before it resolved.",card.OwnerId,card.Id);
             return;
         }
+        if(JiYunNegatesDishonor(card,byPlayerId)) return;
         card.Dishonorable=true;
     }
     // A card already sitting in a discard pile (Zone.DynastyDiscard/FateDiscard) -- never destroyed
@@ -2521,6 +2546,7 @@ public sealed partial class MatchEngine
         foreach(var check in _state.PendingTamokoHonorChecks)
             if(Card(check.TargetId).AssignedToAttackTurn != _state.TurnNumber) GainHonor(check.BeneficiaryPlayerId,1,"Tamori Tamoko",Card(check.TargetId));
         _state.PendingTamokoHonorChecks.Clear();
+        ResolveProvincesHeldHonorChecks(); // Forgotten Legacy pass (issue #467), batch 1: Asahina Shigemitsu's "before it ends" Honor.
         // Spirit of the Berserker: a destruction put off "until before this turn ends" happens now.
         ResolveDelayedDestructions();
         // A window a delayed destruction opened (Overconfident's draw) is answered first; the turn then ends when the player ends the phase again.
@@ -2591,6 +2617,7 @@ public sealed partial class MatchEngine
         // just advanced, so only their own cards' expiry could possibly be reached right now.
         foreach(var expired in _state.Cards.Values.Where(c=>c.OwnerId==player.Id && c.Zone==Zone.EventInPlay && c.ExpiresAtTurnsTaken==player.TurnsTaken).ToArray())
         {
+            OnForgottenLegacyBatch5EventExpired(expired); // Willing Spirits' delayed effect (issue #467).
             expired.Zone=Zone.DynastyDiscard;
             Emit("eventExpired",$"{Definition(expired).Name}'s effect ended.",expired.OwnerId,expired.Id);
         }
@@ -2629,6 +2656,7 @@ public sealed partial class MatchEngine
             if(declinedIds.Contains(card.Id)) Emit("straightenDeclined",$"{Definition(card).Name} was left bowed by choice.",card.OwnerId,card.Id);
             else Straighten(card);
         }
+        StraightenWindOfTheMoonShugenja(player); // Wind of the Moon (issue #467): "he straightens during each player's Straighten Phase".
         Emit("straightened",$"{player.Name}'s turn: eligible cards straightened.",player.Id);
         AdvanceStraightenHolds(StraightenPoint.StraightenPhaseEnds);
         // Cultist Infiltrator (oracle-l5r-1595): "After each Straighten Phase: Give this Personality
@@ -2740,6 +2768,10 @@ public sealed partial class MatchEngine
                 card.ExpiresAtTurnsTaken=player.TurnsTaken+2;
                 Emit("eventEnteredPlay",$"{Definition(card).Name} stays in play until {player.Name}'s second turn from now begins.",player.Id,card.Id);
                 break;
+            // Forgotten Legacy pass (issue #467), batch 5: Assault in the Jungle, Burning Dreams, Willing Spirits (ForgottenLegacyBatch5.cs).
+            case AssaultInTheJungleEffect or BurningDreamsEffect or WillingSpiritsEffect:
+                ResolveForgottenLegacyBatch5Event(player,card);
+                break;
             default:
                 card.Zone=Zone.DynastyDiscard;
                 Emit("eventResolved",$"{Definition(card).Name} resolved and was discarded.",player.Id,card.Id);
@@ -2817,6 +2849,7 @@ public sealed partial class MatchEngine
     private void ResolveCelestial(PlayerState player,ProvinceState province,CardInstance card)
     {
         province.CardId=null; card.ProvinceIndex=null;
+        var hadRyoshun=ControlsCelestialEffect(player.Id,RyoshunsGuidanceEffect); // Ryoshun's Guidance (issue #467): its +1C leaves with it.
         foreach(var other in _state.Cards.Values.Where(c=>c.OwnerId==player.Id && c.Zone==Zone.Celestial).ToArray())
         {
             other.Zone=Zone.DynastyDiscard;
@@ -2824,6 +2857,7 @@ public sealed partial class MatchEngine
         }
         card.Zone=Zone.Celestial;
         Emit("celestialEnteredPlay",$"{Definition(card).Name} entered play.",player.Id,card.Id);
+        if(hadRyoshun && Definition(card).Effect!=RyoshunsGuidanceEffect) CheckChiAfterRyoshunLeaves(player.Id);
         Refill(player,province);
     }
     // Lady Matsu's Rage's own destroy-redirect trait is Effect-keyed the same way RegionStrengthBonus
@@ -2917,6 +2951,9 @@ public sealed partial class MatchEngine
     }
     private void GainHonor(int playerId,int amount,string reason,CardInstance? source=null)
     {
+        if(amount==0) return;
+        // The Forgotten Temple (Forgotten Legacy pass, issue #467 batch 2): no gain at all, no loss from the player's own cards, and every other loss reduced to 1.
+        amount=ForgottenTempleHonorChange(playerId,amount,reason,source);
         if(amount==0) return;
         if(amount<0 && HonorLossNegated(playerId,source))
         {

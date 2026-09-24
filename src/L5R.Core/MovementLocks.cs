@@ -9,7 +9,10 @@ public enum MovementKinds { None = 0, Home = 1, ToBattlefield = 2, Assign = 4 }
 public sealed record MovementLock(string Source, int Turn, MovementKinds Kinds,
     // Moksha Patam (issue #453 batch 5): "While this card is at the current battlefield, negate his movement to it" -- the lock holds only while the card
     // WhileCardAtBattlefield stands at the battlefield Battlefield, which must also be the current one (MatchEngine.MovementLockHolds). Null: unconditional.
-    string? WhileCardAtBattlefield = null, int? Battlefield = null);
+    string? WhileCardAtBattlefield = null, int? Battlefield = null,
+    // Shinjo Junpei (Forgotten Legacy pass, issue #467 batch 2): "negate his NEXT movement" -- a one-shot lock, spent the first time it negates a movement
+    // (MovementLockNegates), and otherwise lapsing at the end of the turn like every other lock.
+    bool NextOnly = false);
 
 // Movement locks (issue #415, Mendon's ruling on Strength of the Tsunami: "negate his (future) movement" means the movement AFTER the one the card caused, until the end of the
 // turn). Every movement an effect makes goes through MoveHome or MoveToBattlefield, and the assignment of an army through Assign; each asks here first. A battle ending sends its
@@ -33,6 +36,8 @@ public sealed partial class MatchEngine
     {
         if (!MovementLocked(card, kind)) return false;
         Emit("moveNegated", $"{Definition(card).Name}'s movement was negated: it may not move this turn.", card.OwnerId, card.Id);
+        // A "next movement" lock is spent by the movement it just negated (Shinjo Junpei); a turn-long lock negating the same movement is not.
+        card.MovementLocks.RemoveAll(l => l.NextOnly && l.Turn == _state.TurnNumber && (l.Kinds & kind) != 0 && MovementLockHolds(l));
         return true;
     }
 }

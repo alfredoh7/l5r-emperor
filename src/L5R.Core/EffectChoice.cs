@@ -45,6 +45,9 @@ public static class BranchCondition
     public const string ProvinceHoldsCard = "province-holds-card";
     /// <summary>The Personality the source is attached to has a keyword (Strength of the Tsunami: "if this Shugenja is Water").</summary>
     public static string WielderHas(string keyword) => $"wielder-has:{keyword}";
+    /// <summary>The action's optional target was chosen (Forgotten Legacy pass, issue #467, batch 4 -- Steadfast Defense: "you may target a Personality or Follower and bow or
+    /// straighten it" asks bow-or-straighten only when a target was named).</summary>
+    public const string TargetChosen = "target-chosen";
 }
 
 /// <summary>Effects an option may apply. Each goes through the same helper an ordinary effect would, so a negation a reaction set
@@ -69,6 +72,9 @@ public static class BranchEffect
     /// Personality or the acting player controls a Courtier; and the same conditional destroy with nothing discarded (MatchEngine.ScorpionSwordResolve).</summary>
     public const string ScorpionSwordDiscard = "scorpion-sword-discard";
     public const string ScorpionSwordKeep = "scorpion-sword-keep";
+    /// <summary>The target is bowed / straightened (Steadfast Defense, issue #467 batch 4).</summary>
+    public const string BowTarget = "bow-target";
+    public const string StraightenTarget = "straighten-target";
 }
 
 /// <summary>The four answers to "choose a player who gains or loses N Honor" (issue #336): each player, each direction. Shared by every card that prints it.</summary>
@@ -99,6 +105,9 @@ public sealed class PendingEffectChoice
     public int? OpponentHonorBefore { get; set; }
     public List<string> BowedBefore { get; set; } = [];
     public List<AdditionalActionGrant> PreExistingGrants { get; set; } = [];
+    /// <summary>Options the engine listed for THIS resolution, when they depend on the game (Forgotten Legacy pass, issue #467, batch 1: "choose one of his
+    /// abilities", "destroy a card without attachments in his unit"); null for a branch whose options are the ability's own fixed data.</summary>
+    public List<EffectOption>? Options { get; set; }
 }
 
 public sealed partial class MatchEngine
@@ -113,6 +122,7 @@ public sealed partial class MatchEngine
         BranchCondition.TargetMoved => targetMoved,
         BranchCondition.TargetAtBattlefield => target is not null && target.Zone == Zone.Battlefield,
         BranchCondition.ProvinceHoldsCard => CurrentBattlefieldProvince() is { CardId: not null },
+        BranchCondition.TargetChosen => target is not null,
         _ when condition.StartsWith("wielder-has:", StringComparison.Ordinal) => source.AttachedTo is { } wielderId && Keyword(Card(wielderId), condition["wielder-has:".Length..]),
         _ => throw new InvalidOperationException($"Unknown branch condition '{condition}'.")
     };
@@ -128,6 +138,7 @@ public sealed partial class MatchEngine
             ApplyPlayerHonorChoice(performer, affected, int.Parse(parts[2]));
             return;
         }
+        if (ApplyForgottenLegacyBatch1BranchEffect(effect, command)) return;
         switch (effect)
         {
             case BranchEffect.MoveSourceHome: MoveHome(source, false); break;
@@ -137,6 +148,8 @@ public sealed partial class MatchEngine
             case BranchEffect.MoveWielderHome: MoveHome(Card(source.AttachedTo), false); break;
             case BranchEffect.ScorpionSwordDiscard: ScorpionSwordResolve(command, target!, discardFirst: true); break;
             case BranchEffect.ScorpionSwordKeep: ScorpionSwordResolve(command, target!, discardFirst: false); break;
+            case BranchEffect.BowTarget: if (InPlay(target!) && !StalwartNegatesBow(target!, command.PlayerId)) target!.Bowed = true; break;
+            case BranchEffect.StraightenTarget: if (InPlay(target!)) Straighten(target!); break;
             default: throw new InvalidOperationException($"Unknown branch effect '{effect}'.");
         }
     }
@@ -188,7 +201,7 @@ public sealed partial class MatchEngine
         var pending = _state.PendingEffectChoice ?? throw new RuleViolation("No effect choice is open.");
         Require(command.Type == "chooseEffect" && command.PlayerId == pending.PlayerId, "Choose one of the offered effects.");
         var ability = AbilityCatalog.All[pending.Command.AbilityId!];
-        var option = FollowUpOf(ability)!.Options.FirstOrDefault(o => o.Id == command.Choice);
+        var option = (pending.Options?.ToArray() ?? FollowUpOf(ability)!.Options).FirstOrDefault(o => o.Id == command.Choice);
         Require(option is not null, "Choose one of the offered effects.");
         var source = Card(pending.Command.CardId);
         var target = pending.Command.TargetId is null ? null : Card(pending.Command.TargetId);
@@ -206,7 +219,7 @@ public sealed partial class MatchEngine
     {
         if (_state.PendingEffectChoice is not { } pending || pending.PlayerId != playerId) yield break;
         var ability = AbilityCatalog.All[pending.Command.AbilityId!];
-        foreach (var option in FollowUpOf(ability)!.Options)
+        foreach (var option in pending.Options?.ToArray() ?? FollowUpOf(ability)!.Options)
             yield return new("chooseEffect", option.Label, true, null, new GameCommand("chooseEffect", playerId, _state.Version, Choice: option.Id), pending.Command.CardId);
     }
 }

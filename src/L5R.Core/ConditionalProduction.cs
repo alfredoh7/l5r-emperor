@@ -50,6 +50,8 @@ public static class ConditionalProductionCatalog
         "dokansuto-gold" => new(2, ProductionCondition.PayingForHolding),
         "sacred-temple-phoenix-gold" => new(5, ProductionCondition.PayingForSpellOrShugenja),
         "staging-grounds-gold" => new(4, ProductionCondition.PayingForExpensiveCard, Threshold: 9),
+        // Ageless Shrine (Forgotten Legacy pass, issue #467): "Produce 2 Gold, or 3 Gold when paying for a Nonhuman."
+        "ageless-shrine-gold" => new(3, ProductionCondition.PayingForKeyword, "Nonhuman"),
         _ => null
     };
 }
