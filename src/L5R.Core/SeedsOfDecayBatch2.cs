@@ -19,7 +19,7 @@ namespace L5R.Core;
 
 /// <summary>A province strength effect for one turn. Kind "flat": Amount on the province at (PlayerId, ProvinceIndex). Kind "per-dishonorable-attacker":
 /// Amount for each dishonorable enemy Personality attacking each of PlayerId's provinces (Imperial Protection).</summary>
-public sealed record ProvinceStrengthEffect(int PlayerId, int? ProvinceIndex, string Kind, int Amount, int Turn, string Source);
+public sealed record ProvinceStrengthEffect(int PlayerId, int? ProvinceIndex, string Kind, int Amount, int Turn, string Source, int? UntilBattle = null);
 
 /// <summary>"After the next time this turn he is assigned to attack [or is destroyed]": Kind names the card's own consequence (SeedsOfDecayBatch2.cs).</summary>
 public sealed record AssignmentWatch(string CardId, string Kind, int BeneficiaryPlayerId, int Turn, string Source);
@@ -70,7 +70,8 @@ public sealed partial class MatchEngine
     {
         var ownerId = _state.Players.First(p => p.Provinces.Contains(province)).Id;
         var total = 0;
-        foreach (var effect in _state.ProvinceStrengthEffects.Where(e => e.Turn == _state.TurnNumber && e.PlayerId == ownerId))
+        // UntilBattle (Kaiu Hideaki, Emperor Edition Personality pass, issue #477 batch 2): a strength that lasts only until that battle's resolution begins (ExpireUntilResolutionProvinceStrength).
+        foreach (var effect in _state.ProvinceStrengthEffects.Where(e => e.Turn == _state.TurnNumber && e.PlayerId == ownerId && (e.UntilBattle is null || e.UntilBattle == _state.BattleNumber)))
         {
             if (effect.Kind == ProvinceEffectFlat) { if (effect.ProvinceIndex == province.Index) total += effect.Amount; }
             else if (effect.Kind == ProvinceEffectPerDishonorableAttacker)

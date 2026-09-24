@@ -176,12 +176,14 @@ public sealed partial class MatchEngine
         // ability's own AttackKind (already tracked per ability id). Effect, not Keywords -- this is a
         // synthetic marker for the card's own unique text, not a printed keyword other cards could reference.
         Require(AttackKind(id) != "Melee" || Definition(target).Effect != "melee-attack-immune", "Melee Attacks may not target this card.");
+        // Matsu Yuuto (Emperor Edition Personality pass, issue #477 batch 2): "Ranged Attacks may not target cards in this unit."
+        Require(AttackKind(id) != "Ranged" || !UnitImmuneToRangedAttacks(target), "Ranged Attacks may not target cards in this unit.");
         // Strength of the Divine (issue #287): the first "attack" Target ability with its own separate
         // Performer -- sourceId here must be the chosen Performer (the card whose live Force/Personal
         // Honor the strength formula reads), not the ability's own source card, the same distinction
         // ExecuteAbilityEffects' own case already draws for it. Every existing "attack" ability without a
         // Performer of its own falls back to the source card.
-        var strength = id == "mitsu-fire-attack" ? (command.CardIds ?? []).Length : EffectiveAttackStrength(id, player, target, command.PerformerId ?? source?.Id)
+        var strength = id == "mitsu-fire-attack" ? (command.CardIds ?? []).Length + ShishidoRangedBonus(id, command.PerformerId ?? source?.Id) : EffectiveAttackStrength(id, player, target, command.PerformerId ?? source?.Id)
             // Celestial Sword of the Mantis - exp (issue #453 batch 5): "strength equal to twice the amount paid" -- the Gold the command chooses, read here as at resolution.
             + (id == "celestial-sword-mantis-attack" ? 2 * (command.GoldAmount ?? 0) : 0);
         var compared = AttackComparedForce(target);

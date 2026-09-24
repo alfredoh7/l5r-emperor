@@ -80,6 +80,10 @@ public sealed partial class MatchEngine
     private bool AfterActionResolvedApplies(CardInstance source, string abilityId, int playerId)
     {
         if (_state.LastResolvedAction is not { } facts || source.OwnerId != playerId) return false;
+        // Hida Takeuchi (Emperor Edition Personality pass, issue #477 batch 2): "After the resolution of an action that attached a Follower from your hand to Takeuchi" -- any action,
+        // Equip (a universal player action with no catalog entry) included, so it is read before the per-ability-id switch that indexes the catalog by the action's id.
+        if (abilityId == "takeuchi-draw") return ActionAttachedFollowerFromHandTo(source, playerId);
+        if (!AbilityCatalog.All.ContainsKey(facts.AbilityId)) return false; // Equip's facts name no catalogued ability: only the Reaction above reads them.
         return abilityId switch
         {
             // Measure of Devotion (oracle-l5r-5013): "After the resolution of a Battle action that destroyed one of your Deathseekers."

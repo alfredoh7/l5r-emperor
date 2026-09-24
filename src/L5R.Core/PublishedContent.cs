@@ -2495,6 +2495,9 @@ public static class PublishedContent
     /// <summary>Personality wave 67 (Forgotten Legacy pass, issue #467, batch 1): Asahina Shigemitsu, Asako Kaitoko, Bayushi Higaonna, Bayushi Toshimo, Daidoji
     /// Takichi, Daigotsu Gyoken, Daigotsu Murota, Doji Hakuseki, Doji Rengetsu, Hiruma Nikaru, Iuchi Abodan, Kitsu Kagako.</summary>
     public static PublishedSnapshot PersonalityWave67 { get; } = Load("L5R.Published.PersonalityWave67.json", "personality-wave-67", requireDecks: false);
+    /// <summary>Personality wave 69 (Emperor Edition Personality pass, issue #477, batch 2): Hida Horu, Hida Kisada (Emperor), Hida Komatsu, Hida Takeuchi, Hida Watari, Kaiu Esumi,
+    /// Kaiu Hideaki, Kuni Shinoda, Toritaka Shishido, Ikoma Shinju, Matsu Hana, Matsu Yuuto.</summary>
+    public static PublishedSnapshot PersonalityWave69 { get; } = Load("L5R.Published.PersonalityWave69.json", "personality-wave-69", requireDecks: false);
     /// <summary>Spell wave 21 (Forgotten Legacy pass, issue #467, batch 5): Pearl of Rage, The Mountain's Power, Wind of the Moon, Thunder's Wrath.</summary>
     public static PublishedSnapshot SpellWave21 { get; } = Load("L5R.Published.SpellWave21.json", "spell-wave-21", requireDecks: false);
     /// <summary>Holding wave 11 (issue #467, batch 5): Ageless Shrine, Bamboo Harvesters - experienced, Border Keep - experienced, Colonial Harbor.</summary>

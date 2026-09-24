@@ -10,8 +10,10 @@ internal static class AttackPerformerAuditTests
     // Attack abilities that carry an explicit Performer, each reviewed against the printed text. The last five do NOT print a named performer: the Performer field there only picks a card
     // to bow (Yayu/Tomiko: one of the source's own Spells, so the acting Personality is still the source) or a target (Strength of the Divine's Paragon, a Strategy); Carpenter Castle's
     // bowed Castle/Siege card is not its performer (ActionPerformer returns the Stronghold).
-    private static readonly string[] NamedPerformer = ["akio-attack", "junpei-attack", "metsubushi-attack", "monastery-fire-attack", "shiro-shiba-melee", "tensin-follower-attack", "two-stings-attack", "two-stings-attack-from-discard"];
-    private static readonly string[] NotANamedPerformer = ["carpenter-castle-siege", "strength-of-the-divine-force", "strength-of-the-divine-honor", "tomiko-attack", "yayu-bow-attack", "yayu-destroy-attack"];
+    // Issue #477: the Forgotten Legacy pass's Attacks (merged after this audit) were reviewed the same way. Named ("your performing ..."): Chokichi's Follower, Never Beyond My Reach's Kensai and
+    // Pearls & Spirits' three Shugenja halves. Not named: Thunder's Wrath's own-wielder Performer only picks the Spell's Shugenja (its action is a Spell's, performed by its wielder anyway).
+    private static readonly string[] NamedPerformer = ["akio-attack", "chokichi-attack", "junpei-attack", "metsubushi-attack", "monastery-fire-attack", "never-beyond-reach-attack", "pearls-spirits-chi-attack", "pearls-spirits-force-attack", "pearls-spirits-sacrifice-attack", "shiro-shiba-melee", "tensin-follower-attack", "two-stings-attack", "two-stings-attack-from-discard"];
+    private static readonly string[] NotANamedPerformer = ["carpenter-castle-siege", "strength-of-the-divine-force", "strength-of-the-divine-honor", "thunders-wrath-attack", "tomiko-attack", "yayu-bow-attack", "yayu-destroy-attack"];
 
     public static void Run(TestRunner runner) => runner.Run("attack-performer-audit", [
         ("Every Melee/Ranged Attack ability with an explicit Performer is one reviewed against its printed text", ExplicitPerformersAreReviewed),
