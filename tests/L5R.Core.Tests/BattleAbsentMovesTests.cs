@@ -92,8 +92,10 @@ internal static class BattleAbsentMovesTests
 
     private static void MarkedInventoryPinned()
     {
+        // + shinoda-move (Emperor Edition Personality pass, issue #477 batch 2: Kuni Shinoda moves himself and an optional Crab Clan Personality to the current battlefield).
         var marked = string.Join(",", AbilityCatalog.All.Where(p => p.Value.MovesToBattle).Select(p => p.Key).OrderBy(k => k, StringComparer.Ordinal));
-        Eq(marked, "broken-alliance-move,charge-into-danger-move,chukage-move,dislodge-the-foe,earth-flows-move,hawado-move-battlefield,heijin-move,help-shadows-move,houken-exp-straighten,intervening-spirit-move,intimidation-move,irezu-move,lesson-of-earth-move,mai-move-force-penalty,michi-move,moving-unmoving-approach,natsumi-move,natures-wrath-move,pronouncement-guilt-move,requesting-reinforcements-recruit,return-to-action-move,rikyou-move,sanctuary-of-the-waves-move,skipping-the-puddle-move,sound-of-thunder-move,sudden-movement-switch,takasho-move,training-move-current,training-move-to-battle,trusting-instinct-move,your-clan-needs-you");
+        // Issue #477 (Emperor Edition Personality pass, batch 3): tetsuo-move-attack -- Moto Tetsuo moves himself to the current battlefield.
+        Eq(marked, "broken-alliance-move,charge-into-danger-move,chukage-move,dislodge-the-foe,earth-flows-move,hawado-move-battlefield,heijin-move,help-shadows-move,houken-exp-straighten,intervening-spirit-move,intimidation-move,irezu-move,lesson-of-earth-move,mai-move-force-penalty,michi-move,moving-unmoving-approach,natsumi-move,natures-wrath-move,pronouncement-guilt-move,requesting-reinforcements-recruit,return-to-action-move,rikyou-move,sanctuary-of-the-waves-move,shinoda-move,skipping-the-puddle-move,sound-of-thunder-move,sudden-movement-switch,takasho-move,tetsuo-move-attack,training-move-current,training-move-to-battle,trusting-instinct-move,your-clan-needs-you");
         foreach (var (id, ability) in AbilityCatalog.All.Where(p => p.Value.MovesToBattle))
             Check(ability.Timing is "Battle" or "BattleOrOpen", $"{id}: a move to the battle is a Battle action");
     }
@@ -191,6 +193,9 @@ internal static class BattleAbsentMovesTests
         else if (ability == "skipping-the-puddle-move") card = Add(s, definition.Id, actor, Zone.Home);
         else card = Add(s, definition.Id, actor, Zone.Hand);
         Add(s, "training-lion-samurai", actor, Zone.DynastyDiscard);
+        // Kuni Shinoda (Emperor Edition Personality pass, issue #477 batch 2): "If any enemy units are at the current battlefield and Shinoda is at another battlefield" -- he stands at
+        // battlefield 1 (the actor still has no unit at the current one) and an enemy unit stands at the current one.
+        if (ability == "shinoda-move") { s.UnresolvedBattlefields = [0, 1]; card.Zone = Zone.Battlefield; card.ProvinceIndex = 1; Add(s, "training-lion-samurai", 1 - actor, Zone.Battlefield, province: 0); }
         // Dislodge the Foe (issue #264): the performing Tacticians stand at ANOTHER battlefield, with the Personality who opposes them there.
         if (ability == "dislodge-the-foe") { s.UnresolvedBattlefields = [0, 1]; Add(s, "training-tactician", actor, Zone.Battlefield, province: 1); Add(s, "training-lion-samurai", 1 - actor, Zone.Battlefield, province: 1); }
         return (s, card);
@@ -201,7 +206,9 @@ internal static class BattleAbsentMovesTests
         var failures = new List<string>();
         // Requesting Reinforcements (Seeds of Decay pass, issue #453) is performed by "your performing Scout" AT the battlefield (bowed as its cost), so its acting player always
         // has a unit there: the no-presence position this test rigs cannot arise for it. It is still marked (its effect brings a Personality to the battle).
-        foreach (var ability in AbilityCatalog.All.Where(p => p.Value.MovesToBattle && !p.Key.StartsWith("training-") && p.Key != "requesting-reinforcements-recruit").Select(p => p.Key).OrderBy(k => k, StringComparer.Ordinal))
+        // Moto Tetsuo (issue #477, Emperor Edition Personality pass, batch 3) prints "If you control any Cavalry units at the current battlefield:" before its colon, so its acting player always
+        // has a unit there (a Cavalry one): the no-presence position this test rigs cannot arise for it. It is still marked (its effect moves Tetsuo, who is at home, to the battle).
+        foreach (var ability in AbilityCatalog.All.Where(p => p.Value.MovesToBattle && !p.Key.StartsWith("training-") && p.Key != "requesting-reinforcements-recruit" && p.Key != "tetsuo-move-attack").Select(p => p.Key).OrderBy(k => k, StringComparer.Ordinal))
         {
             var offeredTo = new List<int>();
             var reasons = new List<string>();

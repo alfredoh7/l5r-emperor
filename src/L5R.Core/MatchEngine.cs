@@ -183,7 +183,9 @@ public sealed partial class MatchEngine
                 && rc.FaceUp && rc.Zone is not (Zone.Hand or Zone.FateDeck or Zone.DynastyDeck) ? ViewCard(rc) : null;
             var reactionLabel = _state.PendingChoice?.Type=="overconfidentDraw" ? "Overconfident" : null;
             var traitSnapshot = AfterCommandTraitSnapshot(); // "After this card bows/attaches" traits (issue #453 batch 5, SeedsOfDecayBatch5.cs)
+            UsePaymentDiscards(command); // Asahina Keigo (issue #477): the hand cards named for Gold sources that discard one.
             Apply(command);
+            _paymentDiscards=[];
             ApplyAfterCommandTraits(traitSnapshot);
             ReturnCardsOutOfPlayToTheirOwners();
             RemoveCreatedCardsLeftInPiles();
@@ -195,12 +197,12 @@ public sealed partial class MatchEngine
         }
         catch (RuleViolation error)
         {
-            _state=original;
+            _state=original; _paymentDiscards=[];
             return Reject(error.Message);
         }
         catch
         {
-            _state=original;
+            _state=original; _paymentDiscards=[];
             throw;
         }
     }
@@ -249,6 +251,7 @@ public sealed partial class MatchEngine
             // the recruited Personality back into, once this battle ends.
             if (_state.PendingChoice.Type=="yourClanNeedsYouProvince") { ResolveYourClanNeedsYouProvince(command); return; }
             if (_state.PendingChoice.Type=="declineStraighten") { ResolveDeclineStraighten(command); return; }
+            if (_state.PendingChoice.Type=="rentatsuLoss") { ResolveRentatsuLoss(command); return; } // Bayushi Rentatsu (issue #477, batch 4).
             if (_state.PendingChoice.Type=="conqueror") { ResolveConqueror(command); return; }
             // Before This Battle Resolves (issue #272): three tightly-scoped, mandatory choices, no
             // "useAbility"/pass alternative -- see PendingBeforeBattleResolve's own doc comment.
@@ -330,6 +333,7 @@ public sealed partial class MatchEngine
                 // Reaction and was not itself Proclaim-eligible (e.g. bought with Clan Discount).
                 Require(command.Type is "useAbility" or "declineReaction" or "pass","Resolve the entry reaction window first.");
                 if (command.Type=="useAbility") UseAbility(command); else PassReaction();
+                FinishPendingAttachTracking(); // Hida Takeuchi (issue #477 batch 2): the Equip whose attached Follower opened this window is now finished.
                 return;
             }
             if (_state.PendingChoice.Type=="attackReaction")
@@ -621,7 +625,7 @@ public sealed partial class MatchEngine
         Pay(command.PlayerId,card,quote.Cost,command.SourceIds,paying:new PaymentSubject(card,PaymentKind.Recruit));
         var province=Player(command.PlayerId).Provinces.Single(p=>p.CardId==card.Id);
         province.CardId=null;
-        _state.LastProvinceEntryCardId=card.Id; // "enters play from a province" (Yogo Ugimori; issue #453, batch 2)
+        _state.LastProvinceEntryCardId=card.Id; _state.LastProvinceEntryProvinceIndex=province.Index; // "enters play from a province" (Yogo Ugimori; issue #453, batch 2; Agasha Ryo, issue #477)
         card.Zone=Zone.Home; card.ProvinceIndex=null; card.FaceUp=true;
         // A Personality is straightened by default; entering bowed is only ever a direct
         // consequence of a printed effect, never a separate straighten-then-bow step.
@@ -872,6 +876,7 @@ public sealed partial class MatchEngine
         card.ActionLocks.Clear();
         card.Tokens.Clear();
         card.AbilityUses.Clear();
+        card.RentatsuHeld = false; card.BarrierTurn = -1; // Emperor Edition Personality pass (issue #477), batch 4.
         card.Bowed = false;
         card.Dishonorable = false;
         card.StraightenBlockedTurn = -1;
@@ -918,7 +923,7 @@ public sealed partial class MatchEngine
         Pay(command.PlayerId,card,quote.Cost,command.SourceIds,paying:new PaymentSubject(card,PaymentKind.Recruit));
         var province=Player(command.PlayerId).Provinces.Single(p=>p.CardId==card.Id);
         province.CardId=null;
-        _state.LastProvinceEntryCardId=card.Id; // "enters play from a province" (Yogo Ugimori; issue #453, batch 2)
+        _state.LastProvinceEntryCardId=card.Id; _state.LastProvinceEntryProvinceIndex=province.Index; // "enters play from a province" (Yogo Ugimori; issue #453, batch 2; Agasha Ryo, issue #477)
         card.Zone=Zone.Battlefield; card.FaceUp=true;
         card.Bowed=Definition(card).Effect=="enters-bowed";
         if(Definition(card).Effect=="enters-dishonored") Dishonor(card);
@@ -1058,7 +1063,7 @@ public sealed partial class MatchEngine
         var adjustment=def.Type==CardType.Holding ? ShadowsEmbraceBatch6Production(card,playerId) : 0;
         if(ConditionalProductionOf(card) is { } conditional && ProductionConditionMet(conditional,paying)) return Math.Max(0,conditional.Amount+adjustment);
         // A card with no printed production that can bow to produce Gold for a payment (Yoritomo Sakuma, issue #338) produces that much.
-        if(def.GoldProduction==0 && AlternateGoldSource(card) is { } alternate) return alternate.Amount;
+        if(def.GoldProduction==0 && AlternateGoldSource(card,paying) is { } alternate) return alternate.Amount;
         return Math.Max(0,def.GoldProduction+adjustment+(def.Effect=="crane-gold" && Player(playerId).Clan=="Crane" || def.Effect=="dragon-gold" && Player(playerId).Clan=="Dragon"?1:0));
     }
 
@@ -1067,7 +1072,8 @@ public sealed partial class MatchEngine
     // discard pile pays the Discipline cost first, then the action's own cost from other sources; see SplitPaymentOptions).
     private PaymentOption[] PaymentOptionsExcluding(int playerId,int cost,IReadOnlySet<string>? exclude,PaymentSubject? paying=null)
     {
-        var sources=Producers(playerId,paying).Where(c=>exclude is null || !exclude.Contains(c.Id)).OrderBy(c=>c.Id,StringComparer.Ordinal).ToArray();
+        // A source whose amount is the payer's own choice (Asahina Keigo, issue #477) is never suggested.
+        var sources=Producers(playerId,paying).Where(c=>(exclude is null || !exclude.Contains(c.Id)) && !IsVariableGoldSource(c)).OrderBy(c=>c.Id,StringComparer.Ordinal).ToArray();
         if(cost==0) return [new([],0,0,0)];
         // Dynamic programming keeps useful alternatives without exponential work for large economies.
         var byTotal=new Dictionary<int,List<string[]>> { [0]=[[]] };
@@ -1090,7 +1096,7 @@ public sealed partial class MatchEngine
     }
 
     private IEnumerable<CardInstance> Producers(int playerId,PaymentSubject? paying=null) => _state.Cards.Values.Where(c=>c.OwnerId==playerId && !c.Bowed && c.Zone is Zone.Home or Zone.Stronghold or Zone.Battlefield
-        && (Definition(c).GoldProduction>0 || AlternateGoldSource(c) is not null || ConditionalProductionOf(c) is { } conditional && ProductionConditionMet(conditional,paying)));
+        && (Definition(c).GoldProduction>0 || AlternateGoldSource(c,paying) is not null || ConditionalProductionOf(c) is { } conditional && ProductionConditionMet(conditional,paying)));
     // exclude: cards the paying action bows or destroys as another of its costs (AbilityCosts.CostPaidCards) -- a card cannot be bowed twice, so it produces no Gold for the same action.
     private void ValidatePayment(int playerId,int cost,string[]? sourceIds,IReadOnlySet<string>? exclude=null,PaymentSubject? paying=null)
     {
@@ -1100,6 +1106,7 @@ public sealed partial class MatchEngine
         Require(cost>0 || ids.Length==0,"No Gold sources are needed for this free action.");
         var producers=Producers(playerId,paying).Select(c=>c.Id).ToHashSet(StringComparer.Ordinal);
         Require(ids.All(producers.Contains),"Every Gold source must be yours, in play, unbowed and able to produce Gold.");
+        RequirePaymentDiscards(playerId,ids,paying); // Asahina Keigo (issue #477): the card each such source discards is named.
         var produced=ids.Sum(id=>GoldProduced(id,playerId,paying));
         Require(produced>=cost,$"This payment needs {cost} Gold; selected sources produce {produced}.");
     }
@@ -1110,13 +1117,17 @@ public sealed partial class MatchEngine
         var produced=ids.Sum(id=>GoldProduced(id,playerId,paying));
         // A card bowed for Gold through its own ability (Yoritomo Sakuma, issue #338) has used that Reaction: spent for the turn, and named
         // in the log so the opponent sees why it bowed.
+        var staysStraight=new HashSet<string>(StringComparer.Ordinal); // Emperor Edition pass (issue #477), batch 6: Yasuki Tanimura produces without bowing.
         foreach(var id in ids)
-            if(Definition(_state.Cards[id]).GoldProduction==0 && AlternateGoldSource(_state.Cards[id]) is { } alternate)
+            if(Definition(_state.Cards[id]).GoldProduction==0 && AlternateGoldSource(_state.Cards[id],paying) is { } alternate)
             {
                 _state.Cards[id].AbilityUses[AbilityCatalog.All[alternate.AbilityId].UsageKey ?? alternate.AbilityId]=_state.TurnNumber;
-                Emit("goldSourceUsed",$"{Definition(_state.Cards[id]).Name} bowed to produce {alternate.Amount} Gold.",playerId,id);
+                var bows=AbilityCatalog.All[alternate.AbilityId].PaymentBows;
+                if(!bows) staysStraight.Add(id);
+                Emit("goldSourceUsed",$"{Definition(_state.Cards[id]).Name} {(bows?"bowed to produce":"produced")} {alternate.Amount} Gold.",playerId,id);
+                if(AbilityCatalog.All[alternate.AbilityId].PaymentDiscardsFocus) DiscardForVariableGoldSource(_state.Cards[id],playerId);
             }
-        foreach(var id in ids) _state.Cards[id].Bowed=true;
+        foreach(var id in ids) if(!staysStraight.Contains(id)) _state.Cards[id].Bowed=true;
         Emit("payment",$"{Player(playerId).Name} paid {cost} Gold for {Definition(target).Name}{(part is null?"":$" ({part})")}, producing {produced}; {produced-cost} excess was lost.",playerId,target.Id,produced-cost);
         // Temple to Fudo (Seeds of Decay, issue #453): ":bow:: Produce 2 Gold and lose 1 Honor" -- the loss is part of producing (SeedsOfDecayBatch4.cs).
         LoseHonorForProducers(playerId,ids);
@@ -1351,6 +1362,7 @@ public sealed partial class MatchEngine
     {
         var provinceIndex=_state.CurrentBattleProvince!.Value;
         var attacker=_state.ActivePlayerId; var defender=1-attacker;
+        ExpireUntilResolutionProvinceStrength(); // Kaiu Hideaki (issue #477 batch 2): "until the battle's resolution begins".
         // Before This Battle Resolves (issue #272): "occur after all players have passed but before
         // resolution is determined" -- deliberately checked BEFORE Army() is ever read below, since
         // Encircled Terrain's own effect (sending every other Personality home) changes who actually
@@ -1676,6 +1688,7 @@ public sealed partial class MatchEngine
         _state.PendingAdditionalAction=null; _state.NoNewAdditionalActionsThisBattle=false;
         // An unused Attack-target grant ("your next Ranged Attack action this battle") ends with the battle.
         _state.AttackTargetGrants.Clear();
+        _state.BattleAbilityLocks.Clear(); // Yoritomo Naoto (Emperor Edition Personality pass, issue #477): "until this battle ends".
         // Force redirection (issue #216) is "for the duration of the battle," same reasoning.
         _state.ForceRedirects.Clear();
         // Ring of Water's own recruitment condition (issue #194) is battle-scoped, same reasoning.
@@ -1874,7 +1887,9 @@ public sealed partial class MatchEngine
         // discounts included) is EquipGoldCost in GoldQuotes.cs -- the same function that prices this
         // equip for QueryActions' quote, so the quote and the charge cannot drift (issue #303).
         Pay(command.PlayerId,card,EquipGoldCost(command.PlayerId,card,target).Cost,command.SourceIds,paying:new PaymentSubject(card,PaymentKind.Equip));
+        _state.CurrentActionAffected=[]; // Emperor Edition Personality pass (issue #477 batch 2): what Equip records (NoteAttachedFollowerFromHand) is this action's alone.
         Player(command.PlayerId).Hand.Remove(card.Id); Player(command.PlayerId).AttachedFromHandThisTurn=true;
+        NoteAttachedFollowerFromHand(card,target);
         card.Zone=Zone.Attached; card.AttachedTo=target.Id; card.FaceUp=true;
         if(inBattle) card.ProvinceIndex=target.ProvinceIndex; // the Weapon stands where its wielder does, so it is at the battlefield with him
         if(def.AttachGrantsKeyword is string granted) GrantKeyword(target,granted,card.Id,"Attachment");
@@ -1885,9 +1900,12 @@ public sealed partial class MatchEngine
             // A Battle action like any other: it uses an Additional Action grant of this player's when one is unscoped, and otherwise forfeits them.
             var usedGrant=ConsumeAdditionalActionGrant(command.PlayerId,null);
             if(!usedGrant) _state.AdditionalActions.RemoveAll(g=>g.PlayerId==command.PlayerId && Forfeitable(g));
-            NextAction(command.PlayerId,usedGrant && _state.AdditionalActions.Any(g=>g.PlayerId==command.PlayerId && Forfeitable(g)));
+            var stays=usedGrant && _state.AdditionalActions.Any(g=>g.PlayerId==command.PlayerId && Forfeitable(g));
+            if(FinishEquipTracking(command.PlayerId,stays ? command.PlayerId : 1-command.PlayerId)) return; // Hida Takeuchi (issue #477 batch 2).
+            NextAction(command.PlayerId,stays);
             return;
         }
+        if(FinishEquipTracking(command.PlayerId,1-command.PlayerId)) return; // Hida Takeuchi (issue #477 batch 2).
         NextAction(command.PlayerId);
     }
     private void PlayStrategy(GameCommand command)
@@ -2031,7 +2049,7 @@ public sealed partial class MatchEngine
     // "force-with-spell" (Asako Ume), "force-if-enemy-dishonorable" (Bayushi Kahoku) and
     // "force-max-dead-pile" (Moto Shunsuke) are always-on passive bonuses, unlike the attacking-only
     // attacking-two/attacking-four Effects above.
-    private int PersonalityForce(CardInstance card) => Math.Max(0,Definition(card).Force+StatModifier(card,"Force")+TerrainForceAdjustment(card)+ForgottenLegacyBatch5Force(card)+ShadowsEmbraceBatch5Force(card)+ShadowsEmbraceBatch2Force(card)+ShadowsEmbraceBatch1Force(card)+(IsAttacking(card)?(Definition(card).Effect=="attacking-two"?2:Definition(card).Effect=="attacking-four"?4:
+    private int PersonalityForce(CardInstance card) => Math.Max(0,Definition(card).Force+StatModifier(card,"Force")+TerrainForceAdjustment(card)+ForgottenLegacyBatch5Force(card)+EmperorBatch5Force(card)+EmperorPersonalityBatch3Force(card)+ShadowsEmbraceBatch5Force(card)+ShadowsEmbraceBatch2Force(card)+ShadowsEmbraceBatch1Force(card)+(IsAttacking(card)?(Definition(card).Effect=="attacking-two"?2:Definition(card).Effect=="attacking-four"?4:
         // Matsu Kaido (oracle-l5r-4934, issue #299): "Kaido has +1F while attacking" -- the plain +1
         // counterpart to attacking-two/attacking-four (Matsu Yoshito's own conditional variant below
         // starts from the same +1 base).
@@ -2251,10 +2269,14 @@ public sealed partial class MatchEngine
     private (int Attacker,int Defender) ArmyForces(CardInstance[] a,CardInstance[] d,int attacker,int defender)
     {
         int af=0,df=0;
-        foreach(var c in a) { if(RedirectsTo(c,attacker,defender,a,d)==defender) df+=PersonalityBattleContribution(c); else af+=PersonalityBattleContribution(c); af+=FollowerBattleContribution(c); }
-        foreach(var c in d) { if(RedirectsTo(c,attacker,defender,a,d)==attacker) af+=PersonalityBattleContribution(c); else df+=PersonalityBattleContribution(c); df+=FollowerBattleContribution(c); }
+        // Hida Horu (Emperor Edition Personality pass, issue #477 batch 2): he contributes no Force while his army has two or more units (his Followers still do).
+        int Contribution(CardInstance c,CardInstance[] army) => HoruContributesNothing(c,army) ? 0 : PersonalityBattleContribution(c);
+        foreach(var c in a) { if(RedirectsTo(c,attacker,defender,a,d)==defender) df+=Contribution(c,a); else af+=Contribution(c,a); af+=FollowerBattleContribution(c); }
+        foreach(var c in d) { if(RedirectsTo(c,attacker,defender,a,d)==attacker) af+=Contribution(c,d); else df+=Contribution(c,d); df+=FollowerBattleContribution(c); }
         // Seeds of Decay pass (issue #453), batch 1: Megumi's Guidance's "+2 total Force, or +3 if you are the Defender, while your army is opposed" (SeedsOfDecayBatch1.cs).
         af+=CelestialArmyBonus(attacker,a,d,defending:false); df+=CelestialArmyBonus(defender,d,a,defending:true);
+        // Emperor Edition Personality pass (issue #477), batch 5: Isawa Norimichi's "+5 total Force while there are any units in your army".
+        af+=ArmyForceBonusFor(attacker,a); df+=ArmyForceBonusFor(defender,d);
         return (af,df);
     }
     private int? RedirectsTo(CardInstance card,int attacker,int defender,CardInstance[] a,CardInstance[] d)
@@ -2459,7 +2481,7 @@ public sealed partial class MatchEngine
             // Expendable/Halls-of-Memory/Lady-Matsu's-Rage consequences) is skipped -- her attachments
             // were already destroyed unconditionally above, matching "an effect that destroys an
             // entire unit would destroy all cards attached to the personality but not the personality."
-            if(Definition(card).Type==CardType.Personality && FieldsOfMercyNegatesPersonalityDestruction(card))
+            if(Definition(card).Type==CardType.Personality && FieldsOfMercyNegatesPersonalityDestruction(card) && !HiromiUnnegatable())
             {
                 Emit("destructionNegated",$"{Definition(card).Name}'s destruction was negated by Fields of Mercy (attachments were still destroyed).",card.OwnerId,card.Id);
                 continue;
@@ -2544,7 +2566,7 @@ public sealed partial class MatchEngine
     // Returns whether the card moved: false only when Kyuden Kitsune negated the movement (the card stays where it was; callers ignore the result unless it matters).
     private bool MoveToBattlefield(CardInstance card,int province)
     {
-        if((card.Zone!=Zone.Battlefield || card.ProvinceIndex!=province) && (MovementLockNegates(card,MovementKinds.ToBattlefield) || KitsuneNegatesMovement(card,province))) return false;
+        if((card.Zone!=Zone.Battlefield || card.ProvinceIndex!=province) && (MovementLockNegates(card,MovementKinds.ToBattlefield) || KitsuneNegatesMovement(card,province) || UguluNegatesMovement(card,province))) return false;
         // The Shadow's Embrace pass (issue #476), batch 6: Shieldman "will not move into an attacking army"; Star-Crossed Lovers "will not move to each other's battlefields".
         if((card.Zone!=Zone.Battlefield || card.ProvinceIndex!=province) && (ShieldmanNegatesMove(card) || StarCrossedNegatesMove(card,province))) return false;
         // Legion of the Bat (issue #279): "after the resolution of an action that moved a target
@@ -2559,6 +2581,9 @@ public sealed partial class MatchEngine
         card.Zone=Zone.Battlefield; card.ProvinceIndex=province;
         foreach(var attachment in Attachments(card.Id)) attachment.ProvinceIndex=province;
         if(arrivedFromElsewhere) _state.PendingMoveReactionCardId=card.Id;
+        // Bayushi Mitsuo (Emperor Edition Personality pass, issue #477, batch 4): "a Battle action that moved Mitsuo" -- every move an action makes is on the action's record, including the
+        // unit that moves itself (its own source or performer), which TryMoveToBattlefield's target moves are not the only ones.
+        if(arrivedFromElsewhere && _runningCommand is not null) RecordActionEffect(card.Id,MovedKind);
         return true;
     }
 
@@ -2654,6 +2679,7 @@ public sealed partial class MatchEngine
         player.MayNotAttackThisTurn=false;
         player.FavorActionsThisTurn=0;
         player.AttachedFromHandThisTurn=false;
+        _state.HonorLostToOtherActionSinceTurnBegan[player.Id]=false; // Kitsu Tamasine (issue #477, batch 5): "since your last turn began".
         player.DestroyedEnemyPersonalityActionsThisTurn=0;
         // "Until your second turn from now begins" (issue #259): the one place a turn begins for
         // THIS specific player, so the one place their own bounded-duration ongoing Event's own
@@ -2675,6 +2701,12 @@ public sealed partial class MatchEngine
     private void StraightenPhase(PlayerState player)
     {
         SetPhase(Phase.Straighten,player.Id);
+        // Bayushi Rentatsu (Emperor Edition Personality pass, issue #477, batch 4): "after each of your turns begins, choose a player; he loses 2 Honor" while he remains bowed (EmperorPersonalityBatch4.cs).
+        if(BeginRentatsuLoss(player)) return;
+        ContinueStraightenPhase(player);
+    }
+    private void ContinueStraightenPhase(PlayerState player)
+    {
         // A card with the choose-straighten effect lets its controller decide, per turn, whether to
         // straighten it instead of that being automatic or a fixed forced-skip condition.
         if(EligibleForOptionalStraighten(player.Id).Length>0)
@@ -2684,8 +2716,8 @@ public sealed partial class MatchEngine
         }
         FinishStraightening(player,[]);
     }
-    private string[] EligibleForOptionalStraighten(int playerId)=>_state.Cards.Values.Where(c=>c.OwnerId==playerId && c.Bowed && c.Zone is Zone.Home or Zone.Stronghold or Zone.Attached
-        && Definition(c).Effect=="choose-straighten" && c.StraightenBlockedTurn!=_state.TurnNumber).Select(c=>c.Id).ToArray();
+    private string[] EligibleForOptionalStraighten(int playerId)=>_state.Cards.Values.Where(c=>c.OwnerId==playerId && (c.Bowed && c.Zone is Zone.Home or Zone.Stronghold or Zone.Attached
+        && Definition(c).Effect=="choose-straighten" && c.StraightenBlockedTurn!=_state.TurnNumber || RentatsuMayStayBowed(c))).Select(c=>c.Id).ToArray();
     private void ResolveDeclineStraighten(GameCommand command)
     {
         var pending=_state.PendingChoice!;
@@ -2704,6 +2736,7 @@ public sealed partial class MatchEngine
             else Straighten(card);
         }
         StraightenWindOfTheMoonShugenja(player); // Wind of the Moon (issue #467): "he straightens during each player's Straighten Phase".
+        StraightenNaleeshUnits(player); // Moto Naleesh (issue #477): "Naleesh's unit straightens during each player's Straighten Phase".
         Emit("straightened",$"{player.Name}'s turn: eligible cards straightened.",player.Id);
         AdvanceStraightenHolds(StraightenPoint.StraightenPhaseEnds);
         // Cultist Infiltrator (oracle-l5r-1595): "After each Straighten Phase: Give this Personality
@@ -2949,6 +2982,7 @@ public sealed partial class MatchEngine
         // The CURRENT strength: raised and lowered by everything that has acted on the province, and by the Region and the Terrain bonuses still in play.
         var strength=province.Strength + (province.RegionId is string id && RegionStrengthBonus.TryGetValue(Definition(Card(id)).Effect,out var bonus) ? bonus : 0) + ProvinceSourceBonuses(province) + StaticProvinceBonus(province)
             + TimedProvinceStrength(province); // Seeds of Decay (issue #453), batch 2: strength given for the turn (SeedsOfDecayBatch2.cs).
+        strength=Math.Max(0,strength); // Core rules, Stats: most stats floor at zero (Kaiu Esumi's -2, issue #477 batch 2, is the first penalty that could take a province below it).
         // A limit (TerrainStatics.cs: Times of Strife, issue #259; Ancient Feud, issue #418) is a CEILING on what is read, never a lowering of the current strength: a province already at or
         // below it is untouched, and one above it reads as the maximum until the limit ends.
         return ProvinceStrengthMax(province) is int max ? Math.Min(strength,max) : strength;
@@ -2979,6 +3013,7 @@ public sealed partial class MatchEngine
         if(player.FateDeck.Count==0) { Emit("deckEmpty",$"{player.Name}'s Fate deck is empty; no card drawn.",player.Id); return; }
         var id=player.FateDeck[0]; player.FateDeck.RemoveAt(0); player.Hand.Add(id);
         Card(id).Zone=Zone.Hand;
+        NoteCardIntoHand(player.Id); // Isawa Kimi - exp 2 (issue #477, batch 5): "an action that put any cards into another player's hand".
         Emit("cardDrawn",$"{player.Name} drew a Fate card.",player.Id); // Deliberately excludes hidden identity.
     }
     private void Refill(PlayerState player,ProvinceState province)

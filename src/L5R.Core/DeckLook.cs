@@ -293,10 +293,10 @@ public sealed partial class MatchEngine
                 case LookDisposition.Top: top.Add(card.Id); break;
                 case LookDisposition.Bottom: bottom.Add(card.Id); break;
                 case LookDisposition.Hand:
-                    card.Zone = Zone.Hand; viewer.Hand.Add(card.Id); hand++; break;
+                    card.Zone = Zone.Hand; viewer.Hand.Add(card.Id); NoteCardIntoHand(viewer.Id); hand++; break;
                 case LookDisposition.Show:
                     RecordShown(viewer.Id, card, source, look.Deck!, "look");
-                    card.Zone = Zone.Hand; viewer.Hand.Add(card.Id); shown++; break;
+                    card.Zone = Zone.Hand; viewer.Hand.Add(card.Id); NoteCardIntoHand(viewer.Id); shown++; break;
                 case LookDisposition.Discard:
                     card.Zone = look.Deck == SearchDeck.Dynasty ? Zone.DynastyDiscard : Zone.FateDiscard; card.FaceUp = true; discarded++;
                     // A discard is public (a discard pile is a public zone): the event names the card and carries its id.

@@ -2501,6 +2501,18 @@ public static class PublishedContent
     /// <summary>Personality wave 67 (Forgotten Legacy pass, issue #467, batch 1): Asahina Shigemitsu, Asako Kaitoko, Bayushi Higaonna, Bayushi Toshimo, Daidoji
     /// Takichi, Daigotsu Gyoken, Daigotsu Murota, Doji Hakuseki, Doji Rengetsu, Hiruma Nikaru, Iuchi Abodan, Kitsu Kagako.</summary>
     public static PublishedSnapshot PersonalityWave67 { get; } = Load("L5R.Published.PersonalityWave67.json", "personality-wave-67", requireDecks: false);
+    /// <summary>Personality wave 69 (Emperor Edition Personality pass, issue #477, batch 2): Hida Horu, Hida Kisada (Emperor), Hida Komatsu, Hida Takeuchi, Hida Watari, Kaiu Esumi,
+    /// Kaiu Hideaki, Kuni Shinoda, Toritaka Shishido, Ikoma Shinju, Matsu Hana, Matsu Yuuto.</summary>
+    public static PublishedSnapshot PersonalityWave69 { get; } = Load("L5R.Published.PersonalityWave69.json", "personality-wave-69", requireDecks: false);
+    /// <summary>Personality wave 70 (Emperor Edition Personality pass, issue #477, batch 3): Moto Naleesh, Moto Shigeru, Moto Tetsuo, Shinjo Itao, Utaku Ryoko, Iuchi Shunshi,
+    /// Tsuruchi Samuru, Tsuruchi Tomaru, Unmei, Yoritomo Hama, Yoritomo Hiromi, Yoritomo Naoto.</summary>
+    public static PublishedSnapshot PersonalityWave70 { get; } = Load("L5R.Published.PersonalityWave70.json", "personality-wave-70", requireDecks: false);
+    /// <summary>Personality wave 72 (Emperor Edition Personality pass, issue #477, batch 5): Agasha Ryo, Asako Nobunori, Asako Tsunefusa, Asako Yorisada, Isawa Kimi - exp 2, Isawa Norimichi,
+    /// Shiba Kataken, Shiba Sansesuke, Shiba Tsukimi - exp 4, Kitsu Tamasine, Tamori Kusugi.</summary>
+    public static PublishedSnapshot PersonalityWave72 { get; } = Load("L5R.Published.PersonalityWave72.json", "personality-wave-72", requireDecks: false);
+    /// <summary>Personality wave 73 (Emperor Edition Personality pass, issue #477, batch 6): Kitsuki Yataku, Nishimura, Genmyo, Qalyar, Seppun Washi, Yasuki Jekku, Yasuki Tanimura, Yung,
+    /// Daigotsu Ishibashi, Daigotsu Kanpeki - exp.</summary>
+    public static PublishedSnapshot PersonalityWave73 { get; } = Load("L5R.Published.PersonalityWave73.json", "personality-wave-73", requireDecks: false);
     /// <summary>Spell wave 21 (Forgotten Legacy pass, issue #467, batch 5): Pearl of Rage, The Mountain's Power, Wind of the Moon, Thunder's Wrath.</summary>
     public static PublishedSnapshot SpellWave21 { get; } = Load("L5R.Published.SpellWave21.json", "spell-wave-21", requireDecks: false);
     /// <summary>Holding wave 11 (issue #467, batch 5): Ageless Shrine, Bamboo Harvesters - experienced, Border Keep - experienced, Colonial Harbor.</summary>
@@ -2539,4 +2551,9 @@ public static class PublishedContent
     /// Bayushi Tarou, Bayushi Waru, Chiisai, Chuda Hitaka, Daidoji Sosuke, Daigotsu Arakan, Daigotsu Rafu, Goju Bunoro, Hida Bakari, Hiruma Hikazu, Hiruma Nikaru
     /// (Shadow's Embrace printing), Iuchi Haruma, Kaiu Fumiko, Kakita Ichigiku, Kakita Tadanobu, Kazehime.</summary>
     public static PublishedSnapshot PersonalityWave74 { get; } = Load("L5R.Published.PersonalityWave74.json", "personality-wave-74", requireDecks: false);
+    /// <summary>Personality wave 68 (Emperor Edition Personality pass, issue #477, batch 1): Chuda Niiro, Daigotsu Aya, Daigotsu Gyoken, Daigotsu Matsuda, Daigotsu Negishi, Daigotsu Misaki, Ekichu no Oni,
+    /// Goju Oyoto, Ninube Onchi, Nosloc no Oni, Ugulu no Oni.</summary>
+    public static PublishedSnapshot PersonalityWave68 { get; } = Load("L5R.Published.PersonalityWave68.json", "personality-wave-68", requireDecks: false);
+    /// <summary>Personality wave 71 (Emperor Edition Personality pass, issue #477, batch 4): fifteen Crane, Scorpion and Ninja Personalities wired whole.</summary>
+    public static PublishedSnapshot PersonalityWave71 { get; } = Load("L5R.Published.PersonalityWave71.json", "personality-wave-71", requireDecks: false);
 }

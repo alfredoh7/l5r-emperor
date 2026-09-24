@@ -31,6 +31,8 @@ public sealed partial class MatchEngine
     private void IssueChallenge(string abilityId, int challengerPlayerId, string challengerId, string challengedId, string stat, bool refusable, CardInstance? source = null)
     {
         var challenger = Card(challengerId); var challenged = Card(challengedId);
+        // Kitsuki Yataku (issue #477 batch 6): "The Samurai's controller may not choose to refuse any challenge created by the action."
+        if (refusable && !ChallengeMayBeRefused(challengedId)) { refusable = false; Emit("refusalForbidden", $"{Definition(challenged).Name} may not refuse this challenge.", challenged.OwnerId, challengedId); }
         _state.PendingDuel = new PendingDuel
         {
             AbilityId = abilityId, ChallengerPlayerId = challengerPlayerId, ChallengedPlayerId = challenged.OwnerId,
@@ -466,7 +468,7 @@ public sealed partial class MatchEngine
             case "training-duel-challenge": foreach (var id in loserIds) ApplyModifier(Card(id), id, abilityId, "Force", -1); break;
             // Dragon Clan review (issue #207): three real self-performer Iaijutsu duels.
             case "daisuke-duel": case "spirit-duelist-duel": foreach (var id in loserIds) MoveHome(Card(id), false); break;
-            case "ichizo-exp-duel": case "shikei-duel": DestroyUnits(loserIds.Select(Card).ToArray(), actingPlayerId: challengerPlayerId); break;
+            case "ichizo-exp-duel": case "shikei-duel": case "makoto-duel": DestroyUnits(loserIds.Select(Card).ToArray(), actingPlayerId: challengerPlayerId); break;
             // Second City unwired-card audit (issue #264): "she won" is exactly "the challenger's own
             // side won" in a self-performer 1v1 duel -- there is no ally on that side to conflate her
             // with, so checking the winner's OWNER matches the printed text precisely.

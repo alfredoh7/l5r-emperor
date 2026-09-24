@@ -62,7 +62,8 @@ public sealed partial class MatchEngine
         if (move.Movers == MoveSpec.PerformingSlot) foreach (var mover in PerformingSlotCards(command, ability).ToArray()) MoveByRule(mover, move, battlefield);
         if (move.Movers == MoveSpec.BattleActionPerformer && _state.BattleActionReactionPerformerId is { } reactedPerformerId && _state.Cards.TryGetValue(reactedPerformerId, out var reactedPerformer) && InPlay(reactedPerformer))
             MoveByRule(reactedPerformer, move, battlefield);
-        return move.Movers is MoveSpec.Target or MoveSpec.SourceAndTarget or MoveSpec.PerformerAndTarget && MoveByRule(target!, move, battlefield);
+        // An optional target (Kuni Shinoda's "the target, if any") leaves only the source to move.
+        return move.Movers is MoveSpec.Target or MoveSpec.SourceAndTarget or MoveSpec.PerformerAndTarget && target is not null && MoveByRule(target, move, battlefield);
     }
 
     private bool MoveByRule(CardInstance card, MoveSpec move, int? battlefield)

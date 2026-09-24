@@ -129,7 +129,7 @@ public sealed partial class MatchEngine
     /// so it may already have left the game as the action's cost. Returns true when a decision was opened (the action does not finish
     /// until it is answered: FinishCopy resumes it); false when nothing needed deciding, and the caller finishes the action itself.</summary>
     private bool BeginCopy(CardInstance receiver, CardInstance source, string copierAbilityId, string[] steps, int playerId, string origin,
-        IEnumerable<string>? bowedBefore = null, string duration = GrantDuration.Copy)
+        IEnumerable<string>? bowedBefore = null, string duration = GrantDuration.Copy, string? abilityActionKeyword = null)
     {
         var copy = new PendingCopy
         {
@@ -140,7 +140,12 @@ public sealed partial class MatchEngine
         // copy provided is not "already had" and may be chosen again.
         if (duration == GrantDuration.Copy) foreach (var step in steps) EndPreviousCopies(receiver, copierAbilityId, step);
         if (steps.Contains(CopyStep.Keyword)) copy.KeywordChoices = CopyableKeywords(source, receiver).ToList();
-        if (steps.Contains(CopyStep.Ability)) copy.AbilityChoices = CopyableAbilityIds(source, receiver).ToList();
+        if (steps.Contains(CopyStep.Ability))
+        {
+            copy.AbilityChoices = CopyableAbilityIds(source, receiver).ToList();
+            // Asahina Kitiaru (Emperor Edition Personality pass, issue #477): "one of his Political abilities" -- only abilities carrying the action keyword are offered.
+            if (abilityActionKeyword is not null) copy.AbilityChoices = copy.AbilityChoices.Where(id => AbilityCatalog.All[id].ActionKeywords?.Contains(abilityActionKeyword, StringComparer.Ordinal) == true || Keyword(source, abilityActionKeyword)).ToList();
+        }
         Emit("copyBegun", $"{Definition(receiver).Name} copies from {copy.SourceName}.", playerId, receiver.Id);
         return AdvanceCopy(copy);
     }

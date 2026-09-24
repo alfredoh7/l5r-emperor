@@ -18,6 +18,7 @@ public sealed partial class MatchEngine
     // Called where a destruction is about to happen (DestroyUnits, DestroyAttachment): true when it is put off instead.
     private bool DestructionDelayed(CardInstance card)
     {
+        if (HiromiUnnegatable()) return false; // Yoritomo Hiromi (issue #477): the destruction from her Battle actions will not be delayed.
         var entry = _state.NegatedEffects.FirstOrDefault(n => n.CardId == card.Id && n.Kind == DelayDestroyKind);
         if (entry is null) return false;
         _state.NegatedEffects.Remove(entry);

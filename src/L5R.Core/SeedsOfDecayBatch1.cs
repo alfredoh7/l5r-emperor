@@ -30,6 +30,8 @@ public sealed partial class MatchEngine
     // Read where an action's effect destroys a card (DestroyUnits with an acting player; DestroyAttackTarget): another player's effect only. A battle's own resolution is not a card's effect.
     private bool DestructionShielded(CardInstance card, int actingPlayerId)
     {
+        if (HiromiUnnegatable()) return false; // Yoritomo Hiromi (issue #477): the destruction from her Battle actions will not be negated.
+        if (MichiruBarrierNegates(card, actingPlayerId)) return true; // Asahina Michiru (Emperor Edition Personality pass, issue #477, batch 4).
         if (MountainsPowerNegates(card, actingPlayerId)) return true; // The Mountain's Power (Forgotten Legacy pass, issue #467).
         if (TwinForksNegates(card, actingPlayerId, "destruction")) return true; // Twin Forks City (The Shadow's Embrace pass, issue #476 batch 6).
         if (card.DestructionShieldTurn != _state.TurnNumber || actingPlayerId == card.OwnerId) return false;
@@ -45,6 +47,7 @@ public sealed partial class MatchEngine
     // action's effect (an acting player is set exactly then); an attachment's destruction is always an action's effect (ActionEffectTracking.cs), so DestroyAttachment asks unconditionally.
     private bool WideValleyNegatesDestruction(CardInstance card)
     {
+        if (HiromiUnnegatable()) return false; // Yoritomo Hiromi (issue #477).
         if (Definition(card).Type is not (CardType.Personality or CardType.Follower)) return false;
         var host = Card(UnitHostId(card));
         if (host.Zone != Zone.Battlefield || host.ProvinceIndex is not int battlefield || !TerrainsAtBattlefield(battlefield).Any(t => Definition(t).Effect == "wide-valley")) return false;

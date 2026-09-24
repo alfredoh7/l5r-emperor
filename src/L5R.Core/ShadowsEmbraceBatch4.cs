@@ -46,7 +46,6 @@ public sealed partial class MatchEngine
     /// <summary>Social Grace: "After each time he is assigned to attack this turn, gain 2 Honor" -- an assignment watch that stays for the turn.</summary>
     public const string WatchSocialGrace = "social-grace";
     /// <summary>A DisabledAbility usage key that locks every ability of its card (Watchers in the Dark).</summary>
-    internal const string AllAbilitiesUsageKey = "*all*";
 
     // ---- validation (ValidateAbility, after the per-id Requires; also run for each candidate of a slot, with ability.Slots null) ----
 

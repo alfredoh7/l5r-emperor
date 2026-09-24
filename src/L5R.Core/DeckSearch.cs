@@ -128,7 +128,11 @@ public static class SearchCatalog
         [new(SearchDeck.Dynasty, new("non-Unique Farm Holding with another title", [CardType.Holding], ["Farm"], NonUnique: true, ExcludedTitles: ["Versatile Farm"]),
             SearchEffect.RecruitUnbowed)], RecruitDiscount: 2);
 
-    public static IReadOnlyDictionary<string, SearchSpec> All { get; } = new[] { IkomaShizuka, ImperialGift, TrainingCheap, TrainingFocus, TrainingOptional, NakaMahatsu,
+    /// <summary>Yung (oracle-l5r-9697, Emperor Edition Personality pass, issue #477 batch 6): "Search your Fate deck for a Ring, show it, and put it in your hand."</summary>
+    public static SearchSpec YungRing { get; } = new("yung-ring", "Search your Fate deck for a Ring",
+        [new(SearchDeck.Fate, new("Ring", [CardType.Ring]), SearchEffect.ToHand)]);
+
+    public static IReadOnlyDictionary<string, SearchSpec> All { get; } = new[] { IkomaShizuka, ImperialGift, TrainingCheap, TrainingFocus, TrainingOptional, NakaMahatsu, YungRing,
             DiscoveringTheTemple, VersatileFarm }
         .ToDictionary(s => s.Id, StringComparer.Ordinal);
 
@@ -339,7 +343,7 @@ public sealed partial class MatchEngine
     {
         var player = Player(search.PlayerId);
         SearchDeckList(player, search.Deck!).Remove(card.Id);
-        card.Zone = Zone.Hand; player.Hand.Add(card.Id);
+        card.Zone = Zone.Hand; player.Hand.Add(card.Id); NoteCardIntoHand(player.Id); // Isawa Kimi - exp 2 (issue #477, batch 5)
         Emit("searchToHand", $"{player.Name} put {Definition(card).Name} into their hand.", player.Id);
     }
 

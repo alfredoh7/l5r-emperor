@@ -52,6 +52,8 @@ public static class BranchCondition
     public const string TargetDishonorableKolatNinjaOrShadowlands = "target-dishonorable-kolat-ninja-or-shadowlands";
     /// <summary>No condition: the choice is always asked (The Shadow's Embrace pass, issue #476, batch 4 -- Running Battle's "You may move your Scout home").</summary>
     public const string Always = "always";
+    /// <summary>The target is Kolat, Ninja, or Shadowlands (Emperor Edition Personality pass, issue #477 -- Asako Tsunefusa's second sentence).</summary>
+    public const string TargetKolatNinjaOrShadowlands = "target-kolat-ninja-or-shadowlands";
 }
 
 /// <summary>Effects an option may apply. Each goes through the same helper an ordinary effect would, so a negation a reaction set
@@ -131,6 +133,7 @@ public sealed partial class MatchEngine
         BranchCondition.TargetChosen => target is not null,
         BranchCondition.TargetDishonorableKolatNinjaOrShadowlands => target is not null && MatchesTargetStatus(target, TargetStatus.DishonorableKolatNinjaOrShadowlands),
         BranchCondition.Always => true,
+        BranchCondition.TargetKolatNinjaOrShadowlands => target is not null && MatchesTargetStatus(target, TargetStatus.KolatNinjaOrShadowlands),
         _ when condition.StartsWith("wielder-has:", StringComparison.Ordinal) => source.AttachedTo is { } wielderId && Keyword(Card(wielderId), condition["wielder-has:".Length..]),
         _ => throw new InvalidOperationException($"Unknown branch condition '{condition}'.")
     };
@@ -150,6 +153,7 @@ public sealed partial class MatchEngine
         if (ApplyShadowsEmbraceBatch1BranchEffect(effect, command)) return; // The Shadow's Embrace pass (issue #476), batch 1.
         if (ApplyShadowsEmbraceBatch3BranchEffect(effect, command)) return; // The Shadow's Embrace pass (issue #476), batch 3
         if (ApplyShadowsEmbraceBatch4BranchEffect(effect, command)) return; // The Shadow's Embrace pass (issue #476), batch 4: The Game Has Changed's steps.
+        if (ApplyEmperorBatch4BranchEffect(effect, command)) return; // Emperor Edition Personality pass (issue #477), batch 4.
         switch (effect)
         {
             case BranchEffect.MoveSourceHome: MoveHome(source, false); break;

@@ -240,7 +240,9 @@ internal static class SeppukuTimingTests
         // Tripwire, not a rule: today no wired card mentions seppuku at all, so none can grant the action in another phase. The moment one is wired
         // (An Empire of Madness, Dying Remonstration, Kitsuki Judgment, Yogo Katsuta ... mention it), read its text: a card that lets a Personality
         // commit Order Seppuku outside the Action phase belongs in SeppukuTimingReason next to the phase test, with its own test here.
-        var mentioning = CardCatalog.Cards.Values.Where(c => !c.ScenarioOnly && c.Text.Contains("seppuku", StringComparison.OrdinalIgnoreCase)).Select(c => c.Id).ToArray();
+        // Moto Shigeru (oracle-l5r-5370, issue #477 Emperor Edition Personality pass, batch 3) is the one wired mention so far, read for a phase allowance: "If her Personal Honor is now 0, she
+        // commits seppuku" is an EFFECT of her own Reaction (rehonor her, destroy her), not an Order Seppuku action or a timing for it, so it grants nothing in another phase.
+        var mentioning = CardCatalog.Cards.Values.Where(c => !c.ScenarioOnly && c.Text.Contains("seppuku", StringComparison.OrdinalIgnoreCase) && c.Id != "oracle-l5r-5370").Select(c => c.Id).ToArray();
         Check(mentioning.Length == 0, "Published cards now mention seppuku -- check each for a phase allowance for Order Seppuku (SeppukuTiming.cs): " + string.Join(", ", mentioning));
     }
 }

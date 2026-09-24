@@ -130,7 +130,7 @@ public sealed partial class MatchEngine
             if (cost.Subject != CostSubject.Wielder) continue;
             var wielder = CostSubjectCard(new CostOption(cost.Verb, cost.Verb, cost.Verb, cost.Subject), ability, command, source);
             Require(wielder is not null && InPlay(wielder), "This card must be attached to a Personality.");
-            if (cost.Verb == CostVerb.Bow && !CostExempt(cost, source))
+            if (cost.Verb == CostVerb.Bow && !CostExempt(cost, source) && !YorimiWaivesBow(ability, cost, source, wielder))
                 Require(!wielder!.Bowed, $"{Definition(wielder).Name} is already bowed, so he cannot be bowed to pay this cost.");
             // Cursed Relic (issue #467): a Chi penalty is paid in full or not at all.
             if (cost.Verb == CostVerbs.ChiPenalty)
@@ -180,7 +180,7 @@ public sealed partial class MatchEngine
         {
             if (cost.UnlessInHand && source is { Zone: Zone.Hand }) continue;
             var subject = cost.Verb is CostVerbs.LoseHonor or CostVerbs.DestroyLeftmostProvince ? null : CostSubjectCard(new CostOption(cost.Verb, cost.Verb, cost.Verb, cost.Subject), ability, command, source);
-            if (CostExempt(cost, source, subject)) continue;
+            if (CostExempt(cost, source, subject) || YorimiWaivesBow(ability, cost, source, subject)) continue; // Soshi Yorimi (issue #477, batch 4): ignored, so not planned.
             yield return (cost, subject);
         }
     }
@@ -202,6 +202,7 @@ public sealed partial class MatchEngine
             var subject = CostSubjectCard(new CostOption(cost.Verb, cost.Verb, cost.Verb, cost.Subject), ability, command, source);
             if (subject is null) continue;
             if (CostExempt(cost, source, subject)) continue;
+            if (YorimiWaivesBow(ability, cost, source, subject)) { SpendYorimiWaiver(subject, source is null ? "an action" : Definition(source).Name); continue; }
             switch (cost.Verb)
             {
                 case CostVerb.Bow: subject.Bowed = true; break;

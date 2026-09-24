@@ -282,6 +282,10 @@ public sealed partial class MatchEngine
                 return command.PlayerId != card.OwnerId && card.Zone == Zone.Attached && affected.Id == card.AttachedTo && Definition(affected).Type == CardType.Personality;
             // Ryoshun's Guidance (Forgotten Legacy pass, issue #467): another player's action targets one of its controller's cards, and another of his non-Stronghold cards
             // at the same location could be the target instead.
+            // Hida Kisada (Emperor Edition Personality pass, issue #477 batch 2): another player's Battle action targets Kisada himself, and another Personality of his controller's at his
+            // location could be the target instead.
+            case "kisada-redirect":
+                return IsBattleAction(command) && command.PlayerId != card.OwnerId && affected.Id == card.Id && KisadaRedirectCandidates(card, subject).Any();
             case "ryoshun-redirect":
                 return command.PlayerId != card.OwnerId && card.Zone == Zone.Celestial && affected.OwnerId == card.OwnerId && RyoshunRedirectCandidates(card, subject, affected).Any();
             // Ward of Air (The Shadow's Embrace pass, issue #476 batch 5): Taming the Beast's shape -- another player's Battle action targets its Shugenja (or, if he is Air, any
@@ -291,6 +295,19 @@ public sealed partial class MatchEngine
             // Social Grace (The Shadow's Embrace pass, issue #476, batch 4): another player's action targets one of its player's Courtiers and would dishonor him.
             case "social-grace-negate":
                 return SocialGraceApplies(card, subject, affected);
+            // Moto Shigeru (Emperor Edition Personality pass, issue #477, batch 3): a Limited action -- anyone's -- targets one of her controller's Personalities.
+            case "shigeru-negate":
+                return acting.Timing == "Limited" && affected.OwnerId == card.OwnerId && Definition(affected).Type == CardType.Personality;
+            // Emperor Edition Personality pass (issue #477), batch 5 (EmperorPersonalityBatch5.cs). Shiba Sansesuke: an action (any player's) would target one of the reactor's own Shugenja at his
+            // location and is legal against him once he is bowed (the cost). Isawa Norimichi: another player's action targets his controller's Earth Shugenja at his location and could destroy him.
+            case "sansesuke-redirect":
+                return SansesukeRedirectApplies(card, subject, affected);
+            case "norimichi-negate":
+                return command.PlayerId != card.OwnerId && affected.OwnerId == card.OwnerId && Definition(affected).Type == CardType.Personality && Keyword(affected, "Shugenja") && Keyword(affected, "Earth")
+                    && SameLocation(card, affected) && (subject.IsAttack || DestroysTarget(command.AbilityId));
+            // Yasuki Tanimura (Emperor Edition Personality pass, issue #477 batch 6): another player's Battle action targets him.
+            case "tanimura-political-pay":
+                return TanimuraApplies(card, subject, affected);
             default:
                 return false;
         }
@@ -328,7 +345,7 @@ public sealed partial class MatchEngine
         isAttack || BowsTarget(abilityId) || DestroysTarget(abilityId) || DestroysAttachmentTarget(abilityId);
 
     private static bool DestroysAttachmentTarget(string abilityId) => abilityId is "crushing-destroy" or "never-afraid" or "keppo-destroy" or "michitsu-destroy"
-        or "tetsuo-destroy-attachment" or "tokoru-bear-bow" or "hiroto-bow";
+        or "tetsuo-destroy-attachment" or "tokoru-bear-bow" or "hiroto-bow" or "komatsu-destroy-attachment";
 
     private IEnumerable<(string? TargetId, string? Label)> TargetedReactionChoices(CardInstance card, string abilityId, ReactionSubject subject) =>
         abilityId switch
@@ -339,6 +356,7 @@ public sealed partial class MatchEngine
             "shifting-terrain-redirect" => ShiftingTerrainCandidates(card, subject).Select(c => ((string?)c.Id, (string?)$"{AbilityCatalog.All[abilityId].Label} · {Definition(c).Name} ({c.Id})")),
             "castle-of-order-redirect" => CastleOfOrderCandidates(card, subject, Card(subject.TargetId!)).Select(c => ((string?)c.Id, (string?)$"{AbilityCatalog.All[abilityId].Label} · {Definition(c).Name} ({c.Id})")),
             // Forgotten Legacy pass (issue #467), batch 5: Ryoshun's Guidance, one option per card the action may be redirected to.
+            "kisada-redirect" => KisadaRedirectCandidates(card, subject).Select(c => ((string?)c.Id, (string?)$"{AbilityCatalog.All[abilityId].Label} · {Definition(c).Name} ({c.Id})")),
             "ryoshun-redirect" => RyoshunRedirectCandidates(card, subject, Card(subject.TargetId!)).Select(c => ((string?)c.Id, (string?)$"{AbilityCatalog.All[abilityId].Label} · {Definition(c).Name} ({c.Id})")),
             _ => [(null, null)]
         };

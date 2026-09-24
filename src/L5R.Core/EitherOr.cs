@@ -51,6 +51,11 @@ public static class EitherOrSpecs
     public const string ForgeYourSoulAttach = "forge-your-soul-attach";
     public const string ForgeYourSoulShuffle = "forge-your-soul-shuffle";
     public const string ForgeYourSoulShuffleNoWeapon = "forge-your-soul-shuffle-no-weapon";
+    /// <summary>Kakita Genshi (Emperor Edition Personality pass, issue #477 batch 4): "His controller may dishonor him. If he did not choose to dishonor him, gain 1 Honor and choose one of the
+    /// Personality's abilities; it may not be used until your next turn begins." -- the affected card's controller decides (Yasuki Makoto's shape); a refusal chains into the acting player's choice.</summary>
+    public const string GenshiShame = "genshi-shame";
+    /// <summary>Yasuki Tanimura (Emperor Edition Personality pass, issue #477 batch 6): "The player may pay 4 Gold. If he does not pay the Gold, he loses 3 Honor." -- the decider is the ACTING player.</summary>
+    public const string TanimuraPayOrLose = "tanimura-pay-or-lose";
 }
 
 /// <summary>What choosing an option amounts to, for a client to word and style it: "avoid" (accept a cost or a lesser loss so the
@@ -84,6 +89,14 @@ public sealed class PendingEitherOr
     public List<string>? BowedBefore { get; set; }
     /// <summary>The card that performed the action, when an option reads it (Kitsuki Methods: "gain 2 Honor" is its performer's; The Shadow's Embrace pass, issue #476 batch 3).</summary>
     public string? PerformerId { get; set; }
+    // Kakita Genshi (issue #477 batch 4): the whole action, so the tail every action ends with runs once the choice (and the one it chains into) is made; ChainAbilityLock is set by the
+    // refusal, which owes the acting player a choice of one of the affected Personality's abilities to lock.
+    public GameCommand? Command { get; set; }
+    public bool ConsumedGrant { get; set; }
+    public bool PlayedFromDiscard { get; set; }
+    public int? OpponentHonorBefore { get; set; }
+    public List<AdditionalActionGrant> PreExistingGrants { get; set; } = [];
+    public bool ChainAbilityLock { get; set; }
 }
 
 /// <summary>One thing the deciding player may choose. Detail says in plain words what it does; Gold is the payment quote for an option
@@ -118,6 +131,8 @@ public sealed partial class MatchEngine
             EitherOrSpecs.DaikiPayLoseOrLock => $"{source}: pay 4 Gold, lose 2 Honor, or neither -- then {affected} may not be assigned, and will not move, into attacking armies this turn.",
             EitherOrSpecs.KitsukiMethodsDiscard or EitherOrSpecs.KitsukiMethodsReward or EitherOrSpecs.CrowdedStreetsMoveHome
                 or EitherOrSpecs.ForgeYourSoulAttach or EitherOrSpecs.ForgeYourSoulShuffle or EitherOrSpecs.ForgeYourSoulShuffleNoWeapon => ShadowsEmbraceEitherOrPrompt(p, source, affected),
+            EitherOrSpecs.GenshiShame => $"{source}: dishonor {affected}, or {Player(p.ActingPlayerId).Name} gains 1 Honor and locks one of his abilities until their next turn begins.",
+            EitherOrSpecs.TanimuraPayOrLose => $"{source}: pay 4 Gold, or lose 3 Honor.",
             _ => throw new RuleViolation("Unknown choice.")
         };
     }
@@ -188,6 +203,21 @@ public sealed partial class MatchEngine
             case EitherOrSpecs.KitsukiMethodsDiscard: case EitherOrSpecs.KitsukiMethodsReward: case EitherOrSpecs.CrowdedStreetsMoveHome:
             case EitherOrSpecs.ForgeYourSoulAttach: case EitherOrSpecs.ForgeYourSoulShuffle: case EitherOrSpecs.ForgeYourSoulShuffleNoWeapon:
                 return ShadowsEmbraceEitherOrOptions(p, affected);
+            // Kakita Genshi (issue #477 batch 4): the decider is the target's controller. Dishonoring is a choice only while the Personality is still in play.
+            case EitherOrSpecs.GenshiShame:
+            {
+                var name = Definition(affected!).Name;
+                return [
+                    new("dishonor", $"Dishonor {name}", $"{name} is dishonored. Nothing further happens.", EitherOrKind.Avoid, 0, InPlay(affected!), $"{name} is no longer in play."),
+                    new("refuse", "Do not dishonor him", $"{Player(p.ActingPlayerId).Name} gains 1 Honor and chooses one of {name}'s abilities, which may not be used until their next turn begins.", EitherOrKind.Accept, 0, true, null)
+                ];
+            }
+            // Yasuki Tanimura (issue #477 batch 6): the decider is the player whose Battle action targeted him. Losing Honor is always possible (Family Honor may go negative).
+            case EitherOrSpecs.TanimuraPayOrLose:
+                return [
+                    new("pay", "Pay 4 Gold", "Nothing further happens.", EitherOrKind.Avoid, 4, payable(4), "You cannot produce 4 Gold."),
+                    new("lose", "Do not pay", "You lose 3 Honor.", EitherOrKind.Accept, 0, true, null)
+                ];
             default: throw new RuleViolation("Unknown choice.");
         }
     }
@@ -320,6 +350,25 @@ public sealed partial class MatchEngine
             case (EitherOrSpecs.ForgeYourSoulAttach, _): case (EitherOrSpecs.ForgeYourSoulShuffle, _): case (EitherOrSpecs.ForgeYourSoulShuffleNoWeapon, _):
                 ApplyShadowsEmbraceEitherOr(p, option, decider, affected, sourceIds);
                 break;
+            // Kakita Genshi (issue #477 batch 4; EmperorPersonalityBatch4.cs).
+            case (EitherOrSpecs.GenshiShame, "dishonor"):
+                Emit("eitherOrChosen", $"{decider.Name} chose to dishonor {Definition(affected!).Name} ({Definition(source).Name}).", decider.Id, affected!.Id);
+                Dishonor(affected!, p.ActingPlayerId);
+                break;
+            case (EitherOrSpecs.GenshiShame, "refuse"):
+                Emit("eitherOrChosen", $"{decider.Name} did not dishonor {Definition(affected!).Name} ({Definition(source).Name}): {Player(p.ActingPlayerId).Name} gains 1 Honor.", decider.Id, source.Id);
+                GainHonorFromPerformer(source, 1, Definition(source).Name);
+                p.ChainAbilityLock = true;
+                break;
+            // Yasuki Tanimura (issue #477 batch 6).
+            case (EitherOrSpecs.TanimuraPayOrLose, "pay"):
+                Pay(decider.Id, source, option.GoldCost, sourceIds);
+                Emit("eitherOrChosen", $"{decider.Name} paid 4 Gold ({Definition(source).Name}).", decider.Id, source.Id);
+                break;
+            case (EitherOrSpecs.TanimuraPayOrLose, "lose"):
+                Emit("eitherOrChosen", $"{decider.Name} did not pay ({Definition(source).Name}): {decider.Name} loses 3 Honor.", decider.Id, source.Id);
+                GainHonor(decider.Id, -3, Definition(source).Name, source);
+                break;
             default: throw new RuleViolation("Unknown choice.");
         }
     }
@@ -331,6 +380,7 @@ public sealed partial class MatchEngine
         // The Shadow's Embrace pass (issue #476), batch 3 (ShadowsEmbraceBatch3.cs): Crowded Streets' trait decision carries on with the resolved action's own tail; Forge Your
         // Soul's last decision draws and opens the attached Weapon's entering-play window first.
         if (FinishShadowsEmbraceEitherOr(p)) return;
+        if (p.SpecId == EitherOrSpecs.GenshiShame && p.Origin == "action") { FinishGenshi(p); return; } // Kakita Genshi (issue #477 batch 4): the whole Iaijutsu action finishes together.
         if (p.Origin == "window")
         {
             // A Reaction was played inside a reaction window: the window stays open and priority flips, exactly as when any Reaction

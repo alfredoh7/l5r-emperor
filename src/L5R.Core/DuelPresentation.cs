@@ -20,7 +20,7 @@ public sealed partial class MatchEngine
     private DuelChallenge DescribeChallenge(string abilityId, CardInstance? source, bool refusable)
     {
         var loss = abilityId switch {
-            "steel-on-steel-duel" or "ichizo-exp-duel" or "shikei-duel" => "Defeat: the losing unit is destroyed.",
+            "steel-on-steel-duel" or "ichizo-exp-duel" or "shikei-duel" or "makoto-duel" => "Defeat: the losing unit is destroyed.",
             "daisuke-duel" => "Defeat: the losing unit moves home.",
             "training-duel-force" or "training-duel-honor" or "training-duel-open" or "training-duel-challenge" => "Defeat: the losing Personality gets −1 Force this turn.",
             _ => "The challenge card defines the consequences."

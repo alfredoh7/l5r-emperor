@@ -39,8 +39,10 @@ public sealed partial class MatchEngine
     private bool FinishActionEffectTracking(string abilityId, int playerId, string? sourceId, int closesTo, string? performerId = null)
     {
         var affected = _state.CurrentActionAffected;
-        _state.LastResolvedAction = new ResolvedActionFacts { AbilityId = abilityId, PlayerId = playerId, SourceId = sourceId, Affected = affected, PerformerId = performerId, HonorLosers = _state.CurrentActionHonorLosers };
-        _state.CurrentActionAffected = []; _state.CurrentActionHonorLosers = [];
+        _state.LastResolvedAction = new ResolvedActionFacts { AbilityId = abilityId, PlayerId = playerId, SourceId = sourceId, Affected = affected, PerformerId = performerId, HonorLosers = _state.CurrentActionHonorLosers,
+            HandRecipients = _state.CurrentActionHandRecipients };
+        NoteHonorLostToOtherAction(playerId, _state.CurrentActionHonorLosers); // Kitsu Tamasine (issue #477, batch 5)
+        _state.CurrentActionAffected = []; _state.CurrentActionHonorLosers = []; _state.CurrentActionHandRecipients = [];
         // Revenge (issue #437): this action destroyed a Personality of some OTHER player's -- set that owner's flag.
         foreach (var a in affected)
         {
@@ -67,6 +69,9 @@ public sealed partial class MatchEngine
         return performer is not null && Definition(performer).Type == CardType.Personality ? performer.Id : null;
     }
 
+    // A Battle action: a Battle-timed ability, or a Battle/Open one resolved in a Combat Segment.
+    private bool IsBattleAction(string abilityId) => AbilityCatalog.All.TryGetValue(abilityId, out var ability) && (ability.Timing == "Battle" || ability.Timing == "BattleOrOpen" && _state.Phase == Phase.Battle);
+
     private static bool IsAfterActionResolvedReaction(AbilityDefinition ability) => ability.Timing == "Reaction" && ability.Trigger == AfterActionReactionTriggers.AfterActionResolved;
 
     // Whether the last resolved action's own effects destroyed a Personality of `playerId`'s.
@@ -82,6 +87,10 @@ public sealed partial class MatchEngine
     private bool AfterActionResolvedApplies(CardInstance source, string abilityId, int playerId)
     {
         if (_state.LastResolvedAction is not { } facts || source.OwnerId != playerId) return false;
+        // Hida Takeuchi (Emperor Edition Personality pass, issue #477 batch 2): "After the resolution of an action that attached a Follower from your hand to Takeuchi" -- any action,
+        // Equip (a universal player action with no catalog entry) included, so it is read before the per-ability-id switch that indexes the catalog by the action's id.
+        if (abilityId == "takeuchi-draw") return ActionAttachedFollowerFromHandTo(source, playerId);
+        if (!AbilityCatalog.All.ContainsKey(facts.AbilityId)) return false; // Equip's facts name no catalogued ability: only the Reaction above reads them.
         return abilityId switch
         {
             // Measure of Devotion (oracle-l5r-5013): "After the resolution of a Battle action that destroyed one of your Deathseekers."
@@ -108,6 +117,9 @@ public sealed partial class MatchEngine
                 && ActionCarriesKeyword(AbilityCatalog.All[facts.AbilityId], facts.SourceId is null ? null : Card(facts.SourceId), "Tactical"),
             "byung-additional-action" => facts.PerformerId == source.Id && facts.PlayerId == playerId && AbilityCatalog.All[facts.AbilityId].Timing == "Battle"
                 && ActionCarriesKeyword(AbilityCatalog.All[facts.AbilityId], facts.SourceId is null ? null : Card(facts.SourceId), "Tactical"),
+            // Bayushi Mitsuo (Emperor Edition Personality pass, issue #477, batch 4): "After the resolution of a Battle action that moved Mitsuo" -- either player's Battle action (a
+            // Battle/Open one taken in a Combat Segment is a Battle action), his own move on the action's record.
+            "mitsuo-additional-action" => IsBattleAction(facts.AbilityId) && facts.Affected.Any(a => a.Kind == MovedKind && a.CardId == source.Id),
             // Hida Yamadera - exp: "After another player's Battle action resolves, if its effects destroyed Yamadera."
             "yamadera-attack" => facts.PlayerId != playerId && AbilityCatalog.All[facts.AbilityId].Timing == "Battle" && facts.Affected.Any(a => a.Kind == DestroyedKind && a.CardId == source.Id),
             // Advanced Intelligence (Seeds of Decay pass, issue #453, batch 1): "After a Recon Strategy's action resolves" -- either player's, classified through ActionCarriesKeyword.
@@ -128,6 +140,12 @@ public sealed partial class MatchEngine
             "grief-dishonor" => facts.Affected.Any(a => a.Kind == DestroyedKind && Definition(Card(a.CardId)).Type == CardType.Personality),
             "cast-two-shadows-move" => facts.Affected.Any(a => a.Kind == MovedKind && a.FromBattlefield is not null && Card(a.CardId) is { Zone: Zone.Home } moved
                 && moved.OwnerId == playerId && Definition(moved).Type == CardType.Personality && InNinjaUnit(moved)),
+            // Emperor Edition Personality pass (issue #477), batch 5 (EmperorPersonalityBatch5.cs): Isawa Kimi - exp 2 and Shiba Tsukimi - exp 4.
+            "kimi-exp2-discard" or "tsukimi-home" or "tsukimi-battlefield" => EmperorBatch5AfterActionApplies(source, abilityId, playerId, facts),
+            // Emperor Edition Personality pass (issue #477), batch 6 (EmperorPersonalityBatch6.cs). Yung: "After one of your Rings enters play". Daigotsu Kanpeki - exp: "After the resolution of a Battle
+            // action from a Strategy, if Kanpeki performed it".
+            "yung-search-ring" => YungRingEnteredPlay(facts, playerId),
+            "kanpeki-additional-action" => KanpekiPerformedStrategyBattleAction(source, facts, playerId),
             _ => false
         };
     }

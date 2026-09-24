@@ -301,6 +301,11 @@ public sealed class CardInstance
     public int AssignBowedTurn { get; set; } = -1;
     // Megumi's Guidance: the turn through which this Personality's destruction from other players' cards' effects is negated (SeedsOfDecayBatch1.cs).
     public int DestructionShieldTurn { get; set; } = -1;
+    // Emperor Edition Personality pass (issue #477), batch 4. Asahina Michiru's barrier of air: the turn through which the NEXT destruction of this Personality by another player's action is
+    // negated and moves him home instead (spent by that destruction). Bayushi Rentatsu: true while the Limited action's "while Rentatsu remains bowed" effect stands
+    // (EmperorPersonalityBatch4.cs; ends when he straightens or leaves play).
+    public int BarrierTurn { get; set; } = -1;
+    public bool RentatsuHeld { get; set; }
     // Seeds of Decay pass (issue #453), batch 2. Sentinel Spirit ("if it was opposed this turn"): the last turn this card stood in a battle whose two armies opposed each other
     // (MarkOpposed, at the battle's resolution); the AssignedToAttackTurn convention. Dragon Tattoo - exp ("who has not performed an action from a Dragon Tattoo this game"):
     // the titles of the cards whose actions this Personality performed, kept for the game (never reset with the card: it is the same card).
@@ -958,6 +963,8 @@ public sealed class MatchState
     // Forgotten Legacy pass (issue #467), batch 1 (ForgottenLegacyBatch1.cs); each record expires by comparison with the turn number.
     // "Choose one of his abilities; it may not be used" (Doji Hakuseki, Doji Rengetsu): one printed ability (by usage key) of one card, locked for the turn.
     public List<DisabledAbility> DisabledAbilities { get; set; } = [];
+    // "Until this battle ends, abilities on cards now in that unit may not be used" (Yoritomo Naoto, Emperor Edition Personality pass, issue #477): cleared when the battle ends.
+    public List<BattleAbilityLock> BattleAbilityLocks { get; set; } = [];
     // "If it is not your turn, before it ends, if none of your provinces were destroyed this turn, gain 1 Honor" (Asahina Shigemitsu): drained in EndTurn.
     public List<ProvincesHeldHonorCheck> ProvincesHeldHonorChecks { get; set; } = [];
     // "Unless Murota has performed a Dark Virtue action this turn": the action keywords each Personality has performed an action with, per turn.
@@ -1001,7 +1008,19 @@ public sealed class MatchState
     public List<BattleTargetShield> BattleTargetShields { get; set; } = [];
     // Agasha Kurou: "Remove it from the game before the turn ends" -- the Spells he attached, drained in EndTurn.
     public List<TurnEndRemoval> TurnEndRemovals { get; set; } = [];
+    // Emperor Edition Personality pass (issue #477), batch 5 (EmperorPersonalityBatch5.cs).
+    // Asako Ryo ("refill it face-up"): the province index LastProvinceEntryCardId last left (set beside it).
+    public int? LastProvinceEntryProvinceIndex { get; set; }
+    // Isawa Norimichi ("your army has +5 total Force" until the battle ends): read by ArmyForces, expiring by comparison with BattleNumber.
+    public List<ArmyForceBonus> ArmyForceBonuses { get; set; } = [];
+    // Kitsu Tamasine ("if you have lost Honor from another player's action during an Action Phase since your last turn began"): per player, set as such an action resolves, cleared as that player's turn begins.
+    public bool[] HonorLostToOtherActionSinceTurnBegan { get; set; } = new bool[2];
+    // Isawa Kimi - exp 2 ("an action that put any cards into another player's hand"): the players whose hand the currently-resolving action put a card into, snapshotted into LastResolvedAction.HandRecipients.
+    public List<int> CurrentActionHandRecipients { get; set; } = [];
 }
+
+/// <summary>Isawa Norimichi: PlayerId's army has +Amount total Force in the battle numbered Battle (while it has any units).</summary>
+public sealed record ArmyForceBonus(int PlayerId, int Amount, int Battle);
 
 /// <summary>A standing redirect (Seeds of Decay, issue #453): Kind is a StandingRedirectKinds value, OwnerId the player whose cards it protects, ToCardId the card the action
 /// targets instead, Turn the turn it lasts (Battle: the battle it lasts, or null for the whole turn), SourceName the card that set it up.</summary>
@@ -1033,6 +1052,8 @@ public sealed class ResolvedActionFacts
     // Seeds of Decay pass (issue #453), batch 2: the Personality who performed the action (the named performer, or the source resolved to its wielder), and the players it cost Honor.
     public string? PerformerId { get; set; }
     public List<int> HonorLosers { get; set; } = [];
+    // Emperor Edition Personality pass (issue #477), batch 5: the players whose hand the action put a card into (Isawa Kimi - exp 2).
+    public List<int> HandRecipients { get; set; } = [];
 }
 
 // DeckPosition ("Top"/"Bottom") is the acting player's own upfront choice of where a card goes in
@@ -1060,7 +1081,10 @@ public sealed record GameCommand(string Type, int PlayerId, long ExpectedVersion
     SlotSelection[]? Selections = null,
     // "Create a card" with a choice of cards (issue #394, "an Armor or Weapon Item"): the id of the scan the acting player chose among the ability's
     // CreatedCardSpec.Or alternatives; null for an ability that creates a single card.
-    string? CreatedCard = null);
+    string? CreatedCard = null,
+    // Emperor Edition Personality pass (issue #477), batch 4 (Asahina Keigo): for each Gold source that produces "Gold equal to the Focus Value of a card discarded", the id of the
+    // hand card the payer discards for it (source id -> hand card id). Null for every other payment.
+    Dictionary<string, string>? PaymentDiscards = null);
 public sealed record CommandResult(bool Accepted, string? Error, long Version, GameEvent[] Events);
 public sealed record PaymentOption(string[] SourceIds, int Produced, int Cost, int Excess);
 // Basis (issue #303): the human-readable derivation of Cost, e.g. "Training samurai cost 5 - 2 (Clan
