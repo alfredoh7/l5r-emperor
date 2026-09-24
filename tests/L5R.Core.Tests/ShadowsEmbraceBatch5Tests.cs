@@ -38,7 +38,7 @@ internal static class ShadowsEmbraceBatch5Tests
         ("Celestial Sword of the Crab: attaches only to a Crab Clan Personality, gains 2 Honor as it enters play, +1F per Crab Clan Personality, and straightens its whole unit even while bowed", CrabSwordEquipAndStraighten),
         ("Celestial Sword of the Crane: its Political Open gives -4F, and discarding the Imperial Favor (optional, one shared use) also gains 1 Honor", CraneSwordFavor),
         ("Celestial Sword of the Phoenix: brings an honorably dead Phoenix Clan Personality into play at its location free, and removes him from the game before the turn ends", PhoenixSwordReturn),
-        ("The String of the Colonies and Vanquisher's Armor: a bow for a Ranged 5 Attack, which cannot reach a Personality whose Armor gives Attacks targeting him -5 strength", StringAndArmor),
+        ("The String of the Colonies and Vanquisher's Armor: a bow for a Ranged 5 Attack, which fails to destroy a Personality whose Armor gives Attacks targeting him -5 strength (he is still a legal target; the cost is paid)", StringAndArmor),
         ("The Victor: equipped, its Personality has Conqueror (and +4F)", VictorGrantsConqueror),
         ("Blood of the Preserver: each player chooses up to two Personalities at the battle; their units leave the game with their cards and tokens and return home after the next turn begins with three +1F Blood tokens", BloodOfThePreserverRemovesAndReturns),
         ("Beseech Sakkaku: bowing its Shugenja gains 1 Honor, or -- destroyed, if he is Earth -- Honor equal to the Spirit's Personal Honor", BeseechSakkakuHonor),

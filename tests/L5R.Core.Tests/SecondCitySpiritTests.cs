@@ -21,7 +21,7 @@ internal static class SecondCitySpiritTests
         ("Keyword first, ability second: a performer without the keyword permanently gains it (and no ability); the next Spirit gives the ability to the same performer alone, each Strategy is spent, a bowed performer is refused", KeywordThenAbility),
         ("Spirit of the Berserker's +2F is permanent and only on the ability branch: it is not given with the keyword, and it outlives the turn", BerserkerForce),
         ("Spirit of the Yojimbo's granted Reaction redirects an action that targets another of his controller's Personalities at his location -- not one at another location, not at himself, not his controller's own action", YojimboRedirects),
-        ("Spirit of the Scout's granted Ranged 4 Attack bows its holder unless his controller has Reconnaissance, and hits a Force-4 target but not a Force-5 one", ScoutAttack),
+        ("Spirit of the Scout's granted Ranged 4 Attack bows its holder unless his controller has Reconnaissance, destroys a Force-4 target, and a Force-5 target is a legal target that survives (core rules: Force above the strength does not make a target illegal)", ScoutAttack),
         ("Spirit of the Scout: the Personality holding the granted ability is the Attack's performer", ScoutPerformer),
         ("Spirit of the Paragon's granted action bows an enemy Personality with equal or lower Force OR equal or lower Personal Honor, and no other", ParagonBow),
         ("Spirit of the Duelist's granted Iaijutsu action duels an enemy Personality and moves the loser home; it counts as an Iaijutsu action", DuelistDuel),
