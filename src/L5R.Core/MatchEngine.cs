@@ -2506,7 +2506,7 @@ public sealed partial class MatchEngine
     // Returns whether the card moved: false only when Kyuden Kitsune negated the movement (the card stays where it was; callers ignore the result unless it matters).
     private bool MoveToBattlefield(CardInstance card,int province)
     {
-        if((card.Zone!=Zone.Battlefield || card.ProvinceIndex!=province) && (MovementLockNegates(card,MovementKinds.ToBattlefield) || KitsuneNegatesMovement(card,province))) return false;
+        if((card.Zone!=Zone.Battlefield || card.ProvinceIndex!=province) && (MovementLockNegates(card,MovementKinds.ToBattlefield) || KitsuneNegatesMovement(card,province) || UguluNegatesMovement(card,province))) return false;
         // Legion of the Bat (issue #279): "after the resolution of an action that moved a target
         // enemy Infantry Personality to this card's battlefield" -- every printed "move to the
         // current battlefield" ability (Mirumoto Michi/Togashi Rikyou/Intervening Spirit/Takasho/

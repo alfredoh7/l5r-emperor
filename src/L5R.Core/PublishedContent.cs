@@ -2511,4 +2511,7 @@ public static class PublishedContent
     public static PublishedSnapshot PersonalityWave65 { get; } = Load("L5R.Published.PersonalityWave65.json", "personality-wave-65", requireDecks: false);
     /// <summary>Holding wave 10 (Emperor Edition Gempukku pass, issue #461): the nine Market Holdings.</summary>
     public static PublishedSnapshot HoldingWave10 { get; } = Load("L5R.Published.HoldingWave10.json", "holding-wave-10", requireDecks: false);
+    /// <summary>Personality wave 68 (Emperor Edition Personality pass, issue #477, batch 1): Chuda Niiro, Daigotsu Aya, Daigotsu Gyoken, Daigotsu Matsuda, Daigotsu Negishi, Daigotsu Misaki, Ekichu no Oni,
+    /// Goju Oyoto, Ninube Onchi, Nosloc no Oni, Ugulu no Oni.</summary>
+    public static PublishedSnapshot PersonalityWave68 { get; } = Load("L5R.Published.PersonalityWave68.json", "personality-wave-68", requireDecks: false);
 }

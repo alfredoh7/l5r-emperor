@@ -499,6 +499,8 @@ public sealed partial class MatchEngine
         if (ClanEntryDiscount(def, player) is { } clanEntry) { raw -= clanEntry.Amount; basis += $" − {clanEntry.Amount} ({clanEntry.Clan} Clan)"; }
         // Mukudori (Seeds of Decay, issue #453): "Your other Fudo cards enter play for 1 less Gold" -- the same term QuotePurchase applies (StaticKeywordRules.cs).
         if (KeywordEntryDiscount(card, playerId) is > 0 and var fudoDiscount) { raw -= fudoDiscount; basis += $" − {fudoDiscount} (Fudo, Mukudori)"; }
+        // Daigotsu Misaki (Emperor Edition Personality pass, issue #477): "Followers attaching to Misaki enter play paying 2 less Gold" -- any attach, from a hand or a discard pile.
+        if (FollowerAttachDiscount(card, target) is > 0 and var misakiDiscount) { raw -= misakiDiscount; kind = GoldCostKind.Derived; basis += $" − {misakiDiscount} ({Definition(target).Name})"; }
         if (raw < 0) basis += " (min 0)";
         return (Math.Max(0, raw), basis, kind);
     }

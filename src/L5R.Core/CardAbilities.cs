@@ -3237,6 +3237,24 @@ public static class AbilityCatalog
         // Hida Yamadera - exp (oracle-l5r-10220): "Reaction: After another player's Battle action resolves, if its effects destroyed Yamadera: Melee 8 Attack." A Reaction taken by its own
         // card from the dead pile (FromDead), read off the last resolved action's own destroyed list.
         ["yamadera-attack"] = new("Reaction", "After another player's Battle action resolves, if its effects destroyed Yamadera: Melee 8 Attack", "attack", Trigger: AfterActionReactionTriggers.AfterActionResolved, FromDead: true),
+        // Emperor Edition Personality pass (issue #477), batch 1 (helpers in EmperorPersonalityBatch1.cs). Chuda Niiro, Daigotsu Gyoken (1720), Daigotsu Matsuda, Goju Oyoto and Nosloc no Oni carry only
+        // "After [X] enters play: Lose N Honor" -- EntryHonorLoss, no ability id. Ekichu no Oni's three Battle actions are the published Shosuro Tsuji's "Target an enemy card: Bow it" (tsuji-bow),
+        // Kuronada's "Target an enemy card without attachments: Destroy it" (kuronada-destroy) and Togashi Mihato's "Target an enemy Personality: Move him home" (mihato-move), each its own action.
+        // Daigotsu Aya: "After Aya enters play: Lose 2 Honor and you may put a Dark Virtue from your discard pile into your hand" -- the loss is her EntryHonorLoss, the optional retrieval an entering-play
+        // window offering any Dark Virtue in the controller's Fate discard pile (or a pass); "Open: Give Aya Cavalry, Duelist, or Tactician" is one action with a choice of keyword (a shared UsageKey).
+        ["aya-entry-dark-virtue"] = new("Reaction", "After Aya enters play: You may put a Dark Virtue from your discard pile into your hand", "own-dark-virtue-card-in-discard", Trigger: "own-enters-play"),
+        ["aya-cavalry"] = new("Open", "Give Aya Cavalry", "none", UsageKey: "aya-keyword"),
+        ["aya-duelist"] = new("Open", "Give Aya Duelist", "none", UsageKey: "aya-keyword"),
+        ["aya-tactician"] = new("Open", "Give Aya Tactician", "none", UsageKey: "aya-keyword"),
+        // Daigotsu Negishi (oracle-l5r-1751): "Battle/Open: Target your Personality: Straighten him."
+        ["negishi-straighten"] = new("BattleOrOpen", "Target your Personality: Straighten him", "own-personality"),
+        // Daigotsu Misaki: "Battle: Bow Misaki's performing Follower: Melee Attack with strength equal to the Follower's Force." Hiruma Tensin's shape (a Follower in the source's unit performs and is bowed as the
+        // cost), the strength read live off the performing Follower. "Followers attaching to Misaki enter play paying 2 less Gold" is her Effect (GoldQuotes.EquipGoldCost).
+        ["misaki-follower-attack"] = new("Battle", "Bow Misaki's performing Follower: Melee Attack with strength equal to the Follower's Force", "attack",
+            Performer: "own-unbowed-follower-in-source-unit", CostOptions: [CostOption.Bow]),
+        // Ninube Onchi: "Ninja Open: Remove a target Personality's abilities (until the turn ends)." -- "abilities" are a card's actions (core rules, Abilities: "a block of text describing an action a player can take", as
+        // distinct from Traits); every action printed on or granted to the Personality may not be used until the turn ends (the single-ability lock, MatchState.DisabledAbilities, for all of them).
+        ["onchi-remove-abilities"] = new("Open", "Ninja Open: Remove a target Personality's abilities (until the turn ends)", "personality", ActionKeywords: ["Ninja"]),
     });
 }
 
@@ -3464,7 +3482,7 @@ public sealed partial class MatchEngine
     // also does something else (Defensive Stance's +3F) still resolves and only its straightening is skipped (Straighten refuses it).
     private static bool StraightensOnly(string abilityId) => abilityId is "jinn-kuen-straighten" or "kodo-straighten" or "munefusa-straighten" or "mitsuko-straighten" or "ritual-preparation-straighten"
         or "training-straighten-at-battle" or "horibe-straighten" or "furu-straighten" or "tsudoken-exp2-straighten" or "tsukasa-straighten" or "atsumichi-straighten" or "ring-of-air-straighten"
-        or "mitoshi-straighten"
+        or "mitoshi-straighten" or "negishi-straighten" // Emperor Edition Personality pass (issue #477), batch 1
         or "tsujiken-exp-straighten" // Seeds of Decay pass (issue #453), batch 2
         // Seeds of Decay pass (issue #453), batch 4: Second City Port (a Holding); Katsuo's also grants an additional action, so it is not "only" a straighten.
         or "second-city-port-straighten"
@@ -3497,7 +3515,7 @@ public sealed partial class MatchEngine
         "air-straighten" or "paid-straighten" or "training-keyword-conditional-straighten" or "immovable-object-straighten"
             or "defensive-stance" or "ritual-preparation-straighten" or "training-straighten-at-battle" or "horibe-straighten"
             or "furu-straighten" or "tsudoken-exp2-straighten" or "tsukasa-straighten" or "atsumichi-straighten"
-            or "ring-of-air-straighten" or "mitoshi-straighten"
+            or "ring-of-air-straighten" or "mitoshi-straighten" or "negishi-straighten"
             // Seeds of Decay (issue #453, batch 3): Utaku Hirononri straightens a Stables or Cavalry card.
             or "hirononri-straighten"
             // Isawa Mitsuko (issue #301): straightens an Air Shugenja (a Personality, so negatable) or a
@@ -3837,7 +3855,7 @@ public sealed partial class MatchEngine
     // null); a target-dependent conditional simply falls back to its unconditional value then.
     // sourceId (issue #207 follow-up, Togashi Sakata): the performing card itself, needed to read a
     // live token count off it -- optional, since most Attacks here need no such thing.
-    private int AttackStrength(string abilityId, PlayerState player, CardInstance? target = null, string? sourceId = null) => ForgottenLegacyBatch5AttackStrength(abilityId, sourceId, target) ?? abilityId switch
+    private int AttackStrength(string abilityId, PlayerState player, CardInstance? target = null, string? sourceId = null) => ForgottenLegacyBatch5AttackStrength(abilityId, sourceId, target) ?? EmperorPersonalityBatch1AttackStrength(abilityId, sourceId) ?? abilityId switch
     {
         "carpenter-castle-siege" => 5,
         // Togashi Sakata: "Ranged 4 Attack, with +1 strength for each Sake token on Sakata" -- only
@@ -3983,6 +4001,7 @@ public sealed partial class MatchEngine
         "shinjo-eun-sahng-attack" or "shosuro-konishi-attack" or "tsuruchi-kosoko-attack" or "tsuruchi-isas-attack" or "bayushi-kahoku-attack" or "asako-ume-attack" or "training-honor-cost-attack" => "Ranged",
         "taiken-attack" => "Ranged", // Isawa Taiken (issue #458)
         "tomiko-attack" or "tomaru-attack" => "Ranged", // Embers of War pass (issue #460 batch 2).
+        "misaki-follower-attack" => "Melee", // Emperor Edition Personality pass (issue #477), batch 1.
         "higaonna-attack" => "Ranged", // Forgotten Legacy pass (issue #467 batch 1).
         "junpei-attack" => "Melee",
         "precision-attack" => "Ranged", // Precision (issue #460)
@@ -5348,6 +5367,9 @@ public sealed partial class MatchEngine
                 // Kunji - exp (Gempukku pass, issue #461): the source card itself, in the dead pile.
                 else if (ability.Target == "source-if-dead")
                     Require(source is not null && target.Id == source.Id && target.Zone == Zone.Dead, "Kunji must be in your dead pile.");
+                // Daigotsu Aya (Emperor Edition Personality pass, issue #477): "a Dark Virtue from your discard pile" -- any Dark Virtue Strategy in the player's own Fate discard pile.
+                else if (ability.Target == "own-dark-virtue-card-in-discard")
+                    Require(target.OwnerId == player.Id && type == CardType.Strategy && Keyword(target, "Dark Virtue") && target.Zone == Zone.FateDiscard, "Choose a Dark Virtue from your Fate discard pile.");
                 // Shosuro Hawado - exp 2: "a card in a province" -- either player's, face-down or face-up.
                 else if (ability.Target == "card-in-province")
                     Require(target.Zone == Zone.Province, "Choose a card in a province.");
@@ -8568,6 +8590,10 @@ public sealed partial class MatchEngine
             case "tomaru-attack": if (ResolveOrDeferAttack(id, player, target?.Id, additional: consumedGrant)) return; break;
             case "makoto-lock": if (OpenEitherOr(EitherOrSpecs.MakotoPayOrDishonor, source!, player.Id, target!.OwnerId, target, "action")) return; break;
             case "kanaye-bow": KanayeBow(target!, command, player.Id); break;
+            // Emperor Edition Personality pass (issue #477), batch 1: every case is in EmperorPersonalityBatch1.cs (true: the action is paused -- an Attack's reaction window).
+            case "aya-entry-dark-virtue": case "aya-cavalry": case "aya-duelist": case "aya-tactician": case "negishi-straighten": case "misaki-follower-attack": case "onchi-remove-abilities":
+                if (RunEmperorPersonalityBatch1Effect(id, command, player, source, target, consumedGrant)) return;
+                break;
             // Forgotten Legacy pass (issue #467), batch 2: every case is in ForgottenLegacyBatch2.cs (true: the action is paused -- an Attack's reaction window, an Either/Or).
             case "vengeful-attack": case "vengeful-straighten": case "koyama-weaken": case "xiao-destroy": case "shiho-return": case "sawaken-weaken": case "junpei-base-bow":
             case "makiko-favor": case "shakash-bow": case "shakash-move-home": case "sleepless-boost": case "osawa-bow": case "osawa-straighten": case "chokichi-attack":
@@ -9578,6 +9604,7 @@ public sealed partial class MatchEngine
                     "own-dead-personality" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && c.Zone == Zone.Dead).Select(c => (string?)c.Id).ToArray(),
                     "source-if-dead" => source is { Zone: Zone.Dead } ? [source.Id] : [],
                     "card-in-province" => _state.Cards.Values.Where(c => c.Zone == Zone.Province).Select(c => (string?)c.Id).ToArray(),
+                    "own-dark-virtue-card-in-discard" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Strategy && Keyword(c, "Dark Virtue") && c.Zone == Zone.FateDiscard).Select(c => (string?)c.Id).ToArray(),
                     "own-ninja-personality-in-discard" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && Keyword(c, "Ninja") && c.Zone is Zone.Dead or Zone.DynastyDiscard).Select(c => (string?)c.Id).ToArray(),
                     "own-nonunique-strategy-in-discard" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Strategy && !Keyword(c, "Unique") && c.Zone == Zone.FateDiscard).Select(c => (string?)c.Id).ToArray(),
                     "own-kiho-strategy-in-discard" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Strategy && Keyword(c, "Kiho") && c.Zone == Zone.FateDiscard).Select(c => (string?)c.Id).ToArray(),
