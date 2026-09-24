@@ -164,7 +164,10 @@ internal static class EmperorStrongholdBatch3Tests
         Check(CanUse(e, 0, "otoro-attack", sh.Id, ninja.Id), "an unbowed Ninja performs it");
         Check(!CanUse(e, 0, "otoro-attack", sh.Id, bowedNinja.Id) && !CanUse(e, 0, "otoro-attack", sh.Id, samurai.Id), "neither a bowed Ninja nor a Personality that is not a Ninja");
         var targets = Options(e, 0, "otoro-attack", sh.Id, ninja.Id).Where(o => o.Enabled).SelectMany(o => o.TargetIds ?? []).ToArray();
-        Check(targets.Contains(weak.Id) && !targets.Contains(strong.Id), "Ranged 4 may target the 4F enemy but not the 5F one (an Attack must be able to destroy its target)");
+        Check(targets.Contains(weak.Id) && targets.Contains(strong.Id), "Ranged 4 may target the 4F enemy and the 5F one (core rules, issue #488: Force above the strength is still a legal target)");
+        var e2 = MatchEngine.FromTestState(Setup(out var sh2, out var ninja2, out _, out _, out _, out var strong2));
+        Accept(e2, Offer(e2, 0, "otoro-attack", sh2.Id, strong2.Id, ninja2.Id));
+        Eq(e2.State.Cards[strong2.Id].Zone, Zone.Battlefield, "Ranged 4 fails to destroy the 5F enemy, who survives");
         // Ranged 4: a 4F Personality is destroyed, and the Ninja stays at the battlefield.
         Accept(e, Offer(e, 0, "otoro-attack", sh.Id, weak.Id, ninja.Id));
         Eq(e.State.Cards[weak.Id].Zone, Zone.Dead, "Ranged 4 destroys a card with Force 4");
