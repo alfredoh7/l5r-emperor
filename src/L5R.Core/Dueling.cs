@@ -511,6 +511,8 @@ public sealed partial class MatchEngine
             case "first-blood-duel-battle": case "first-blood-duel-limited":
                 foreach (var id in loserIds) if (InPlay(Card(id)) && !StalwartNegatesBow(Card(id), challengerPlayerId)) Card(id).Bowed = true;
                 break;
+            // The Aerie (Emperor Edition Stronghold pass, issue #486 batch 2): Duel of Haiku's outcome.
+            case "aerie-duel": AerieDuelOutcome(winnerId, loserIds, challengerPlayerId); break;
             case "duel-of-haiku":
                 if (winnerId is not null) GainHonor(Card(winnerId).OwnerId, 1, "Duel of Haiku");
                 foreach (var id in loserIds)

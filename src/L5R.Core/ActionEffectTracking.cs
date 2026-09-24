@@ -146,6 +146,8 @@ public sealed partial class MatchEngine
             // action from a Strategy, if Kanpeki performed it".
             "yung-search-ring" => YungRingEnteredPlay(facts, playerId),
             "kanpeki-additional-action" => KanpekiPerformedStrategyBattleAction(source, facts, playerId),
+            // Pillars of Virtue (Emperor Edition Stronghold pass, issue #486 batch 2): "After the resolution of a Kiho Battle action you took."
+            "pillars-virtue-additional-action" => PillarsKihoBattleActionTaken(facts, playerId),
             _ => false
         };
     }

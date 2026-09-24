@@ -629,6 +629,7 @@ public static class CardCatalog
             .Concat(PublishedContent.PersonalityWave74.Cards)
             .Concat(PublishedContent.PersonalityWave68.Cards)
             .Concat(PublishedContent.PersonalityWave71.Cards)
+            .Concat(PublishedContent.StrongholdWave18.Cards) // Emperor Edition Stronghold pass (issue #486), batch 2
             .ToDictionary(c => c.Id, StringComparer.Ordinal);
     }
 }

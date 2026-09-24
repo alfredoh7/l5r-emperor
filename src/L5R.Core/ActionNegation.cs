@@ -52,6 +52,7 @@ public sealed partial class MatchEngine
         DiscardFavorForBatch4(id, player); // Emperor Edition Personality pass (issue #477), batch 4: Kakita Tadanobu's Favor discard is a cost.
         // A negated action was still performed (Forgotten Legacy pass, issue #467, batch 1: Daigotsu Murota's Dark Virtue record).
         RecordPerformedKeywordActions(ability, command, source);
+        NoteSteelSoulNegated(ability, command.PlayerId, source); // Steel Soul Dojo (Emperor Edition Stronghold pass, issue #486 batch 2): a negated Dark Virtue action was still the first of its phase.
         PayAbilityCosts(ability, command, player, source);
         Emit("abilityUsed", $"{player.Name}: {(source is null ? "Imperial Favor" : Definition(source).Name)} — {ability.Label} (negated).", player.Id, source?.Id);
         CompleteNegatedAction(command, ability, player, source, playedFromDiscard, consumedGrant);

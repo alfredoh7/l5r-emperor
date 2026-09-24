@@ -832,6 +832,10 @@ public sealed class MatchState
     // Entrenched Position (Forgotten Legacy pass, issue #467 batch 3): set by its Reaction inside an "announceReaction" window; the announced action then resolves negated
     // (ResolveNegatedAction: taken, its costs paid, no effects) when the window closes. Cleared as it is read.
     public bool AnnouncedActionNegated { get; set; }
+    // Emperor Edition Stronghold pass (issue #486), batch 2: the action (a "player|ability|card" key, EmperorStrongholdBatch2.ActionKey) whose effects will not be negated or delayed
+    // (Suitengu's Torch), and the action whose Honor gain and loss is reduced by 2 (Shiro Chugo). Each is read while that action resolves and replaced by the next action announced.
+    public string? UnnegatableActionKey { get; set; }
+    public string? HonorReducedActionKey { get; set; }
     // Entrenched Position: the battle (BattleNumber) in which the Attacker holds the first opportunity to act and the Defender has not yet had his first normal
     // opportunity to act or pass -- set when the Engage window closes with the Attacker holding it, cleared the moment the Attacker cedes priority (NextAction, Pass).
     public int AttackerLeadBattle { get; set; } = -1;
