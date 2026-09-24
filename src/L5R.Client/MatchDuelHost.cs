@@ -85,7 +85,7 @@ public partial class MatchDuelHost : Control
             handoff.AddChild(DuelUi.Wrapped("Private cards are hidden. Pass the device before revealing the other seat.",21));
             handoff.AddChild(DuelUi.Button("Reveal this seat",()=>{_handoff=false;Screen.Show();BuildOverlay();},true));
         }
-        else if(_menuOpen)
+        else if(_menuOpen&&!_confirmConcede)
         {
             var veil=new ColorRect{Color=new Color(0,0,0,.55f),Size=size};_overlay.AddChild(veil);
             var box=DuelUi.Modal(veil,size,new Vector2(530,Session.Online?600:520),"Duel");
@@ -100,15 +100,17 @@ public partial class MatchDuelHost : Control
                 seat.Disabled=Screen.PresentationBusy;box.AddChild(seat);
             }
             if(Session.Online)Button("Reconnect",()=>{SetMenu(false);Reconnect?.Invoke();});
+            if(ConcedeOption is not null)Button("Concede match…",OpenConcede);
             // Leaving uses the main application's confirmation and retains its usual room flow.
             Button("Return to menu…",()=>Leave?.Invoke());
         }
+        if(_confirmConcede&&!_matchEnded)BuildConcede();
         RefreshLock();
     }
-    private void SetMenu(bool open){_menuOpen=open;Screen.ClearReading();BuildOverlay();}
+    private void SetMenu(bool open){_confirmConcede=false;_menuOpen=open;Screen.ClearReading();BuildOverlay();}
     public override void _Process(double delta)=>RefreshLock();
     public override void _UnhandledKeyInput(InputEvent e)
     {
-        if(!Covered&&!_handoff&&e is InputEventKey{Pressed:true,Echo:false,Keycode:Key.Escape}){SetMenu(!_menuOpen);GetViewport().SetInputAsHandled();}
+        if(!Covered&&!_handoff&&e is InputEventKey{Pressed:true,Echo:false,Keycode:Key.Escape}){if(_confirmConcede)CancelConcede();else SetMenu(!_menuOpen);GetViewport().SetInputAsHandled();}
     }
 }

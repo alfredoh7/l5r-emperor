@@ -60,6 +60,7 @@ public partial class DuelScreen : Control
         if(Snapshot?.View is {} previous && previous.Version==snapshot.View.Version && previous.ViewerId==snapshot.View.ViewerId && previous.Scenario==snapshot.View.Scenario)return;
         var changedSeat=Snapshot?.View.ViewerId!=snapshot.View.ViewerId;
         _previousZones=(Snapshot?.View.Players.SelectMany(p=>p.Hand.Concat(p.Focused??[]).Concat(p.Discard))??[]).ToDictionary(c=>c.Id,c=>c.Zone);
+        _focusChoiceTarget=null;
         HideCardHover();Snapshot=snapshot;_submitted=false;_selectedDeck=false;_dragCard=null;ClearReading();
         if(changedSeat){CloseGuidance();_selectedHand=null;_selectedFocus=null;_selectedInspection=null;}
         var record=snapshot.View.LastDuel;
@@ -157,6 +158,8 @@ public partial class DuelScreen : Control
         RenderTableLabels();
         _actions=new VBoxContainer{Position=_controlsRect.Position,Size=_controlsRect.Size};_actions.AddThemeConstantOverride("separation",Math.Max(2,(int)(4*_scale)));_hud.AddChild(_actions);
         if(PresentationBusy){ribbon.Visible=false;return;}
+        if(view.PendingChoice?.Type=="focusEffectChoice")
+        {ribbon.Visible=false;RenderFocusChoice();return;}
         if(view.LastDuel?.Result is {} result)
         {
             var record=view.LastDuel;
@@ -318,6 +321,7 @@ public partial class DuelScreen : Control
             if(_guidanceLayer is not null&&GetViewport().GuiGetFocusOwner() is {} focused&&_guidanceLayer.IsAncestorOf(focused))return;
             if(key.Keycode==Key.Escape && _reading is not null){ClearReading();GetViewport().SetInputAsHandled();return;}
             if(_reading is not null)return;
+            if(FocusChoicePending)return;
             if(key.Keycode is Key.Left or Key.Right && Snapshot is not null && !PresentationBusy)
             {
                 var hand=Snapshot.View.Players[Snapshot.View.ViewerId].Hand;
@@ -338,6 +342,7 @@ public partial class DuelScreen : Control
             }
             if(m is InputEventMouseButton)HideCardHover();
             if(_guidanceRect.HasPoint(m.Position)||UprightAt(m.Position) is not null){_table.ExitMouse();return;}
+            if(FocusChoicePending){_table.ExitMouse();return;}
             if(_reading is null&&HandlePlacement(m))return;
             if(_reading is null&&!_controlsRect.HasPoint(m.Position)&&m.Position.Y>_offset.Y+340*_scale)
             {

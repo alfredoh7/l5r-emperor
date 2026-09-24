@@ -90,7 +90,7 @@ public partial class Main : Node
         _table = new TableArtStage { ReviewMode = false }; AddChild(_table);
         BuildShell();
         InitializeFrontend();
-        if(OS.GetCmdlineUserArgs().Contains("--duel-match-review")){StartMatchDuelCapture();return;}
+        if(_captureMode.StartsWith("duel-followup-",StringComparison.Ordinal)||OS.GetCmdlineUserArgs().Contains("--duel-match-review")){StartMatchDuelCapture();return;}
         if(OS.GetCmdlineUserArgs().Contains("--duel-transition-review")){StartTransitionReview();return;}
         if (_capturePath is null || _captureMode.StartsWith("menu", StringComparison.Ordinal)) return;
         var published = _capturePath is null || _captureMode.StartsWith("published", StringComparison.Ordinal);

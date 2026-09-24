@@ -1,0 +1,209 @@
+{
+  "concede": {
+    "Passed": true,
+    "Scenario": "concede",
+    "ReducedMotion": false,
+    "Checks": [
+      "confirmation defaults to Keep playing",
+      "Escape cancels without a command",
+      "Keep playing preserves the duel",
+      "actual menu concedes exactly once for either seat",
+      "concession returns to the original table"
+    ]
+  },
+  "concede-lion": {
+    "Passed": true,
+    "Scenario": "concede",
+    "ReducedMotion": true,
+    "Checks": [
+      "confirmation defaults to Keep playing",
+      "Escape cancels without a command",
+      "Keep playing preserves the duel",
+      "actual menu concedes exactly once for either seat",
+      "concession returns to the original table"
+    ]
+  },
+  "discard": {
+    "Passed": true,
+    "Scenario": "choice-discard",
+    "ReducedMotion": false,
+    "Checks": [
+      "decision pauses final verdict",
+      "source opens original card inspector",
+      "decline is shown only when the engine offers it",
+      "selecting a target never submits it",
+      "choice submits exactly one engine command",
+      "choice outcome retained as a source-linked beat",
+      "complete verdict waits for Continue",
+      "recap includes the Focus Effect source",
+      "returns to the same match after the decision"
+    ]
+  },
+  "discard-reduced": {
+    "Passed": true,
+    "Scenario": "choice-discard",
+    "ReducedMotion": true,
+    "Checks": [
+      "decision pauses final verdict",
+      "source opens original card inspector",
+      "decline is shown only when the engine offers it",
+      "selecting a target never submits it",
+      "choice submits exactly one engine command",
+      "choice outcome retained as a source-linked beat",
+      "complete verdict waits for Continue",
+      "recap includes the Focus Effect source",
+      "returns to the same match after the decision"
+    ]
+  },
+  "discard-opponent": {
+    "Passed": true,
+    "Scenario": "choice-discard",
+    "ReducedMotion": true,
+    "Checks": [
+      "decision pauses final verdict",
+      "waiting seat has no choice controls",
+      "seat switch uses opaque handoff",
+      "decision pauses final verdict",
+      "source opens original card inspector",
+      "decline is shown only when the engine offers it",
+      "selecting a target never submits it",
+      "choice submits exactly one engine command",
+      "choice outcome retained as a source-linked beat",
+      "complete verdict waits for Continue",
+      "recap includes the Focus Effect source",
+      "returns to the same match after the decision"
+    ]
+  },
+  "discard-decline": {
+    "Passed": true,
+    "Scenario": "choice-discard",
+    "ReducedMotion": true,
+    "Checks": [
+      "decision pauses final verdict",
+      "source opens original card inspector",
+      "decline is shown only when the engine offers it",
+      "choice submits exactly one engine command",
+      "choice outcome retained as a source-linked beat",
+      "complete verdict waits for Continue",
+      "recap includes the Focus Effect source",
+      "returns to the same match after the decision"
+    ]
+  },
+  "attach": {
+    "Passed": true,
+    "Scenario": "choice-attach",
+    "ReducedMotion": false,
+    "Checks": [
+      "decision pauses final verdict",
+      "source opens original card inspector",
+      "decline is shown only when the engine offers it",
+      "selecting a target never submits it",
+      "choice submits exactly one engine command",
+      "choice outcome retained as a source-linked beat",
+      "complete verdict waits for Continue",
+      "recap includes the Focus Effect source",
+      "returns to the same match after the decision"
+    ]
+  },
+  "straighten": {
+    "Passed": true,
+    "Scenario": "choice-straighten",
+    "ReducedMotion": false,
+    "Checks": [
+      "decision pauses final verdict",
+      "source opens original card inspector",
+      "decline is shown only when the engine offers it",
+      "selecting a target never submits it",
+      "choice submits exactly one engine command",
+      "choice outcome retained as a source-linked beat",
+      "complete verdict waits for Continue",
+      "recap includes the Focus Effect source",
+      "returns to the same match after the decision"
+    ]
+  },
+  "destroy": {
+    "Passed": true,
+    "Scenario": "choice-destroy",
+    "ReducedMotion": false,
+    "Checks": [
+      "decision pauses final verdict",
+      "source opens original card inspector",
+      "decline is shown only when the engine offers it",
+      "selecting a target never submits it",
+      "choice submits exactly one engine command",
+      "choice outcome retained as a source-linked beat",
+      "complete verdict waits for Continue",
+      "recap includes the Focus Effect source",
+      "returns to the same match after the decision"
+    ]
+  },
+  "effect": {
+    "Passed": true,
+    "Scenario": "choice-effect",
+    "ReducedMotion": false,
+    "Checks": [
+      "decision pauses final verdict",
+      "source opens original card inspector",
+      "decline is shown only when the engine offers it",
+      "choice submits exactly one engine command",
+      "choice outcome retained as a source-linked beat",
+      "complete verdict waits for Continue",
+      "recap includes the Focus Effect source",
+      "returns to the same match after the decision"
+    ]
+  },
+  "effect-draw": {
+    "Passed": true,
+    "Scenario": "choice-effect",
+    "ReducedMotion": true,
+    "Checks": [
+      "decision pauses final verdict",
+      "source opens original card inspector",
+      "decline is shown only when the engine offers it",
+      "choice submits exactly one engine command",
+      "choice outcome retained as a source-linked beat",
+      "complete verdict waits for Continue",
+      "recap includes the Focus Effect source",
+      "returns to the same match after the decision"
+    ]
+  },
+  "multiple": {
+    "Passed": true,
+    "Scenario": "choice-multiple",
+    "ReducedMotion": false,
+    "Checks": [
+      "decision pauses final verdict",
+      "source opens original card inspector",
+      "decline is shown only when the engine offers it",
+      "selecting a target never submits it",
+      "choice submits exactly one engine command",
+      "choice outcome retained as a source-linked beat",
+      "decision pauses final verdict",
+      "source opens original card inspector",
+      "decline is shown only when the engine offers it",
+      "selecting a target never submits it",
+      "choice submits exactly one engine command",
+      "choice outcome retained as a source-linked beat",
+      "complete verdict waits for Continue",
+      "recap includes the Focus Effect source",
+      "returns to the same match after the decision"
+    ]
+  },
+  "crowded": {
+    "Passed": true,
+    "Scenario": "choice-crowded",
+    "ReducedMotion": true,
+    "Checks": [
+      "decision pauses final verdict",
+      "source opens original card inspector",
+      "decline is shown only when the engine offers it",
+      "crowded tray scrolls with native input to the last legal card",
+      "selecting a target never submits it",
+      "choice submits exactly one engine command",
+      "choice outcome retained as a source-linked beat",
+      "complete verdict waits for Continue",
+      "recap includes the Focus Effect source",
+      "returns to the same match after the decision"
+    ]
+  }
+}

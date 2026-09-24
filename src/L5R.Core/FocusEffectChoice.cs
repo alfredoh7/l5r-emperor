@@ -129,6 +129,8 @@ public sealed partial class MatchEngine
         Require(command.Type == "chooseFocusEffect", "Choose a card or decline.");
         Require(command.PlayerId == pending.PlayerId, "Only the Focus Effect's player may choose.");
         var focus = Card(pending.FocusCardId);
+        var evidenceStart = _state.Events.Count;
+        var evidenceSource = ViewCard(focus);
         var destroys = pending.AbilityId == "crimson-mark-focus";
         var attachSelf = IsAttachSelfFocusEffect(pending.AbilityId);
         Require(command.Choice != "decline" || !IsStraightenFocusEffect(pending.AbilityId), "This Focus Effect is not optional: choose a Personality to straighten.");
@@ -160,6 +162,7 @@ public sealed partial class MatchEngine
                 Emit("focusEffectTook", $"{Player(pending.PlayerId).Name} put {Definition(taken).Name} into their hand ({Definition(focus).Name}).", pending.PlayerId, taken.Id);
             }
         }
+        RecordFocusChoiceBeat(evidenceStart, evidenceSource);
         _state.PendingChoice = null; _state.PendingFocusChoice = null;
         ContinueDuelFocusEffects(pending.Index + 1);
     }

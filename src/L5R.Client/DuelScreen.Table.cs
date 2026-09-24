@@ -87,7 +87,7 @@ public partial class DuelScreen
                 AddFlat(card,_resultArranged?ResultFocusPoint(side,i,count):FocusPoint(side,i%4)+Vector2.Down*(i/4)*82,_resultArranged?(count==1?265:count==2?190:120):138);
             }
         }
-        var hand=view.LastDuel?.Result is not null?[]:view.Players[view.ViewerId].Hand;var spacing=Math.Min(180,870f/Math.Max(1,hand.Length));
+        var hand=view.LastDuel?.Result is not null||FocusChoicePending?[]:view.Players[view.ViewerId].Hand;var spacing=Math.Min(180,870f/Math.Max(1,hand.Length));
         for(var i=0;i<hand.Length;i++)AddFlat(hand[i],new Vector2(835+(i-(hand.Length-1)/2f)*spacing,778),225);
         foreach(var (id,tile) in oldTiles)if(!_tiles.TryGetValue(id,out var current)||current!=tile)tile.QueueFree();
         _focusReleasePoint=null;_animateEntry=false;RenderLanding();

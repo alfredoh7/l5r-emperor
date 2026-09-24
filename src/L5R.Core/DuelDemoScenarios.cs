@@ -21,6 +21,13 @@ public static class DuelDemoScenarios
         new("honor", "Personal Honor duel", "Synthetic challenge using authoritative Personal Honor.", "training-duel-honor", true),
         new("discard", "Focus from discard", "Daisuke with Mirumoto Hikaro: one public discard-pile focus, removed after resolution.", "daisuke-duel"),
         new("aftermath", "Aftermath reactions", "Experienced Daisuke can draw after winning; defeating Overconfident Asahina Tsugio offers another draw.", "steel-on-steel-duel"),
+        new("choice-discard", "Focus Effect · return to hand", "Disreputable Deal offers two Political Strategies from your discard pile.", "steel-on-steel-duel"),
+        new("choice-crowded", "Focus Effect · many cards", "A larger discard choice tests scrolling and complete card faces.", "steel-on-steel-duel"),
+        new("choice-attach", "Focus Effect · attach a card", "Shamsir offers legal recipients after the duel.", "steel-on-steel-duel"),
+        new("choice-straighten", "Focus Effect · required target", "Ceaseless Vigil requires a bowed Personality to straighten.", "steel-on-steel-duel"),
+        new("choice-destroy", "Focus Effect · destroy attachment", "The Crimson Mark offers a surviving attachment as an optional target.", "steel-on-steel-duel"),
+        new("choice-effect", "Focus Effect · Honor or card", "Sandalwood Incense offers two different effects after a win.", "steel-on-steel-duel"),
+        new("choice-multiple", "Focus Effect · consecutive choices", "Two Disreputable Deals pause in the selected effect order.", "steel-on-steel-duel"),
         new("open", "Return to Action phase", "Synthetic Open challenge exercises return to the outer Action phase.", "training-duel-open", true)
     });
     public static DuelDemoScenario Get(string id) => All.FirstOrDefault(s => s.Id == id) ?? throw new ArgumentException("Unknown duel demo scenario.");
@@ -86,6 +93,7 @@ public sealed partial class MatchEngine
                 for(var i=0;i<8;i++)Add(p.Id,pool[i%pool.Count],Zone.FateDeck);
             }
         }
+        if(id.StartsWith("choice-",StringComparison.Ordinal))ConfigureDuelChoiceScenario(state,id,Add);
         var engine=new MatchEngine(state,seed,"duel-demo/"+id);
         engine.Emit("scenario",$"Duel Demo: {scenario.Name}. Seed {seed}. {scenario.Description}");
         return engine;

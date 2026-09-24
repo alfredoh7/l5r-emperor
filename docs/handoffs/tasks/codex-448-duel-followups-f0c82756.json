@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Begin approved #448 duel concession and Focus Effect presentation in isolated current-main branch.",
-  "validation": "Live issue/open PR review complete; implementation and native validation pending.",
-  "remaining": "Implement controls, source-ordered choice beats, native checks, prepared Mac/Windows previews and Mendon review. No merge.",
+  "summary": "Implement approved live-duel Concede confirmation and engine-offered Focus Effect tray; retain public choice outcomes in ordered duel beats and unblock the practice opponent.",
+  "validation": "Client compiles; full check.sh --skip-client passes; 4 source/replay/privacy regressions, 95 AI checks, and 13 new native follow-up scenarios pass. Existing Mac duel suites and portable review delivery are in progress.",
+  "remaining": "Finish existing native duel suites, verify prepared Mac launchers, publish and validate Windows preview, and request Mendon review. Windows graphical play and expert rules acceptance remain open; do not merge.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/448",
   "branch": "codex/448-duel-followups",
-  "updated": "2026-09-24T01:24:55.232142+00:00"
+  "updated": "2026-09-24T01:53:12.353186+00:00"
 }

@@ -8,6 +8,8 @@ public static class DuelOpponent
     {
         var legal=actions.Where(a=>a.Enabled && a.Command is not null).ToArray();
         GameCommand? First(string type)=>legal.FirstOrDefault(a=>a.Type==type)?.Command;
+        if(view.PendingChoice?.Type=="focusEffectChoice")
+            return legal.FirstOrDefault(a=>a.Type=="chooseFocusEffect" && a.Command!.Choice=="decline")?.Command ?? First("chooseFocusEffect");
         if(view.PendingDuel is {Stage:"Focusing"})
         {
             if(view.Players[view.ViewerId].FocusCount>=2)return First("strike");

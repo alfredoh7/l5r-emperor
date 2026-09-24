@@ -22,9 +22,23 @@ public partial class Main
         _preferences.ReducedMotion=_reducedMotion=_preferences.ReducedMotion||OS.GetCmdlineUserArgs().Contains("--duel-match-reduced");
         _matchProbeScenario=OS.GetCmdlineUserArgs().FirstOrDefault(a=>a.StartsWith("--duel-match-scenario="))?[22..]??"steel";
         _matchProbeSeat=OS.GetCmdlineUserArgs().Contains("--duel-match-lion")?1:0;
+        // Portable review launchers use existing capture-mode plumbing, but stay interactive.
+        var packagedFollowup=_captureMode.StartsWith("duel-followup-",StringComparison.Ordinal);
+        if(packagedFollowup)
+        {
+            var scenario=_captureMode[14..];
+            if(scenario.EndsWith("-opponent",StringComparison.Ordinal)){_matchProbeSeat=1;scenario=scenario[..^9];}
+            if(scenario.EndsWith("-reduced",StringComparison.Ordinal)){_preferences.ReducedMotion=_reducedMotion=true;scenario=scenario[..^8];}
+            _matchProbeScenario=scenario=="concede"?"concede":"choice-"+scenario;
+            _capturePath=null;
+        }
         _table.ReducedMotion=_timeline.ReducedMotion=_reducedMotion;
         _session.StartDuelDemo(_matchProbeScenario=="concede"?"steel":_matchProbeScenario,205,_matchProbeSeat);_matchDuelFlow.Observe(_session.Snapshot);
         EnterTable();_turnBloom.Cancel();
+        if(packagedFollowup||OS.GetCmdlineUserArgs().Contains("--duel-followup-review"))
+        {
+            _autoOpponent=false;_followupPreparing=true;_ = _session.BeginDuelDemo();return;
+        }
         if(_capturePath is null)
         {
             var reviewLayer=new CanvasLayer{Layer=90};AddChild(reviewLayer);
@@ -39,6 +53,7 @@ public partial class Main
     }
     private bool RunMatchDuelCapture(double delta)
     {
+        if(ProcessDuelFollowupReview(delta))return true;
         if(!_matchReview||_capturePath is null)return false;
         _matchProbeTotal+=delta;_matchProbeClock+=delta;
         if(_matchProbeTotal>80)throw new InvalidOperationException($"Round-trip probe timed out: step {_matchProbeStep}, { _matchDuel?.Screen.CinematicPhase}");
