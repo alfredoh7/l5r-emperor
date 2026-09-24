@@ -103,6 +103,8 @@ public sealed partial class MatchEngine
     {
         if (ability.CostOptions is null)
         {
+            // Kyuden Otomo - exp (Stronghold pass, issue #486 batch 1): a Favor-discard action may discard a Favor token instead (the option is validated with the Favor cost itself).
+            if (command.CostOption == FavorTokenCostOption && command.AbilityId is { } favorId && IsFavorDiscardAbility(favorId)) return;
             Require(command.CostOption is null, "This action has no alternative cost to choose.");
             return;
         }

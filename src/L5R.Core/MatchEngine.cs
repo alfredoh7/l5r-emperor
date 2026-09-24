@@ -912,6 +912,7 @@ public sealed partial class MatchEngine
     private void RecruitReserve(GameCommand command)
     {
         Require(_state.Phase==Phase.Battle,"Reserve recruitment is an absent battle action, only available during the Battle Phase.");
+        RequireNoRestrictedBurst(command.PlayerId); // Koshin Keep (Stronghold pass, issue #486 batch 1): only the additional Ranged Attack is allowed.
         var card=Card(command.CardId);
         Require(card.OwnerId==command.PlayerId && card.Zone==Zone.Province && card.FaceUp && Definition(card).Type==CardType.Personality && IsReserveRecruitable(card),
             "Choose your own face-up Reserve Personality in a province.");
@@ -1062,6 +1063,8 @@ public sealed partial class MatchEngine
         // The Shadow's Embrace pass (issue #476), batch 6: a production modifier for the turn (The Moon's Imperative, The Sun's Aspiration) and Sheltered Port's count.
         var adjustment=def.Type==CardType.Holding ? ShadowsEmbraceBatch6Production(card,playerId) : 0;
         if(ConditionalProductionOf(card) is { } conditional && ProductionConditionMet(conditional,paying)) return Math.Max(0,conditional.Amount+adjustment);
+        // Library of Rebirth (Stronghold pass, issue #486 batch 1): a Reaction that produces Gold for a Spell in a Combat Segment, even bowed and without bowing.
+        if(ReactiveGoldSource(card,paying) is { } reactive) return Math.Max(0,reactive.Amount+adjustment);
         // A card with no printed production that can bow to produce Gold for a payment (Yoritomo Sakuma, issue #338) produces that much.
         if(def.GoldProduction==0 && AlternateGoldSource(card,paying) is { } alternate) return alternate.Amount;
         return Math.Max(0,def.GoldProduction+adjustment+(def.Effect=="crane-gold" && Player(playerId).Clan=="Crane" || def.Effect=="dragon-gold" && Player(playerId).Clan=="Dragon"?1:0));
@@ -1095,8 +1098,9 @@ public sealed partial class MatchEngine
             .OrderBy(p=>p.SourceIds.Count(id=>Definition(Card(id)).GoldProduction==0)).ThenBy(p=>p.Excess).ThenBy(p=>p.SourceIds.Length).ThenBy(p=>string.Join(",",p.SourceIds),StringComparer.Ordinal).Take(24).ToArray();
     }
 
-    private IEnumerable<CardInstance> Producers(int playerId,PaymentSubject? paying=null) => _state.Cards.Values.Where(c=>c.OwnerId==playerId && !c.Bowed && c.Zone is Zone.Home or Zone.Stronghold or Zone.Battlefield
-        && (Definition(c).GoldProduction>0 || AlternateGoldSource(c,paying) is not null || ConditionalProductionOf(c) is { } conditional && ProductionConditionMet(conditional,paying)));
+    private IEnumerable<CardInstance> Producers(int playerId,PaymentSubject? paying=null) => _state.Cards.Values.Where(c=>c.OwnerId==playerId && c.Zone is Zone.Home or Zone.Stronghold or Zone.Battlefield
+        && (!c.Bowed && (Definition(c).GoldProduction>0 || AlternateGoldSource(c,paying) is not null || ConditionalProductionOf(c) is { } conditional && ProductionConditionMet(conditional,paying))
+            || ReactiveGoldSource(c,paying) is not null)); // Library of Rebirth (issue #486): "Even if this card is bowed".
     // exclude: cards the paying action bows or destroys as another of its costs (AbilityCosts.CostPaidCards) -- a card cannot be bowed twice, so it produces no Gold for the same action.
     private void ValidatePayment(int playerId,int cost,string[]? sourceIds,IReadOnlySet<string>? exclude=null,PaymentSubject? paying=null)
     {
@@ -1119,7 +1123,8 @@ public sealed partial class MatchEngine
         // in the log so the opponent sees why it bowed.
         var staysStraight=new HashSet<string>(StringComparer.Ordinal); // Emperor Edition pass (issue #477), batch 6: Yasuki Tanimura produces without bowing.
         foreach(var id in ids)
-            if(Definition(_state.Cards[id]).GoldProduction==0 && AlternateGoldSource(_state.Cards[id],paying) is { } alternate)
+            if(UseReactiveGoldSource(_state.Cards[id],paying,playerId)) staysStraight.Add(id); // Library of Rebirth (Stronghold pass, issue #486 batch 1): produced by its Reaction, not bowed.
+            else if(Definition(_state.Cards[id]).GoldProduction==0 && AlternateGoldSource(_state.Cards[id],paying) is { } alternate)
             {
                 _state.Cards[id].AbilityUses[AbilityCatalog.All[alternate.AbilityId].UsageKey ?? alternate.AbilityId]=_state.TurnNumber;
                 var bows=AbilityCatalog.All[alternate.AbilityId].PaymentBows;
@@ -1287,6 +1292,7 @@ public sealed partial class MatchEngine
             Emit("brashDrawOffered",$"{Player(1-command.PlayerId).Name} may draw a card ({brashCount} Brash {(brashCount==1?"card":"cards")} assigned to attack).",1-command.PlayerId);
             return;
         }
+        if(_state.ExtraInfantrySegment) { AdvanceExtraInfantry(attackerStep:false); return; } // Hidden Falls Dojo (Stronghold pass, issue #486 batch 1): the additional Infantry Maneuvers Segment.
         SetPhase(cavalry?Phase.CavalryDefense:Phase.DefenseAssignment,1-command.PlayerId);
     }
     private void ResolveBrashDraw(GameCommand command)
@@ -1297,6 +1303,7 @@ public sealed partial class MatchEngine
         if(_state.PendingBrashDraws>0) return;
         _state.PendingChoice=null;
         var cavalry=_state.Phase==Phase.CavalryDeclaration;
+        if(_state.ExtraInfantrySegment) { AdvanceExtraInfantry(attackerStep:false); return; } // Hidden Falls Dojo (issue #486).
         SetPhase(cavalry?Phase.CavalryDefense:Phase.DefenseAssignment,command.PlayerId);
     }
     private void AssignDefense(GameCommand command)
@@ -1304,6 +1311,9 @@ public sealed partial class MatchEngine
         Require(_state.Phase is Phase.DefenseAssignment or Phase.CavalryDefense,"Defenders assign after the attacking army.");
         var cavalry=_state.Phase==Phase.CavalryDefense;
         Assign(command,_state.UnresolvedBattlefields.ToHashSet(),cavalry,true);
+        // Hidden Falls Dojo (Stronghold pass, issue #486 batch 1): "After each Cavalry Maneuvers Segment there is an additional Infantry Maneuvers Segment" -- and that segment ends the maneuvers.
+        if(_state.ExtraInfantrySegment) { _state.ExtraInfantrySegment=false; SetPhase(_state.UnresolvedBattlefields.Count>0?Phase.BattleSelection:Phase.Dynasty,_state.ActivePlayerId); return; }
+        if(cavalry && BeginHiddenFallsSegment()) return;
         SetPhase(cavalry?(_state.UnresolvedBattlefields.Count>0?Phase.BattleSelection:Phase.Dynasty):Phase.CavalryDeclaration,_state.ActivePlayerId);
     }
     private void Assign(GameCommand command,HashSet<int> provinces,bool cavalry,bool isDefender)
@@ -1320,6 +1330,7 @@ public sealed partial class MatchEngine
             Require(cavalry?cavalryEligible:!IsCavalryUnit(card),cavalry?"Only a Cavalry unit may assign during Cavalry Maneuvers.":"An Infantry unit must assign during Infantry Maneuvers.");
             Require(provinces.Contains(assignment.Value),"Choose an existing enemy province battlefield.");
             Require(!MovementLocked(card,MovementKinds.Assign),$"{Definition(card).Name} may not be assigned to a battlefield this turn.");
+            if(_state.ExtraInfantrySegment) RequireHiddenFallsAssignment(card,assignment.Value); // Hidden Falls Dojo (Stronghold pass, issue #486 batch 1): its Scouts, to the provinces it targeted.
             // The Shadow's Embrace pass (issue #476), batch 6: Shieldman's unit is never assigned to an attacking army; Star-Crossed Lovers never to each other's battlefields.
             RequireShieldmanMayAssign(card,isDefender);
             RequireStarCrossedMayAssign(card,assignment.Value,command.Assignments!);
@@ -1331,6 +1342,7 @@ public sealed partial class MatchEngine
             // battle may have already resolved and returned this card home, losing a live Zone check.
             card.AssignedToAttackTurn=_state.TurnNumber;
             Emit("unitAssigned",$"{Definition(card).Name} assigned to province {assignment.Value+1}.",command.PlayerId,card.Id);
+            FireMiddayShadowAssigned(card); // Midday Shadow Court (Stronghold pass, issue #486 batch 1): "After the next time this turn he is assigned" -- to either side.
             // "After the next time this turn he is assigned to attack" (Imperial Protection, Fair Warning; issue #453, batch 2): an attacker's assignment only.
             if(!isDefender) FireAssignedToAttackWatches(card);
         }
@@ -1856,6 +1868,7 @@ public sealed partial class MatchEngine
 
     private void Equip(GameCommand command)
     {
+        if(_state.Phase==Phase.Battle) RequireNoRestrictedBurst(command.PlayerId); // Koshin Keep (Stronghold pass, issue #486 batch 1).
         var card=Card(command.CardId); var target=Card(command.TargetId); var def=Definition(card);
         Require(card.OwnerId==command.PlayerId && card.Zone==Zone.Hand && def.Type is CardType.Item or CardType.Follower,"Choose a supported attachment from your hand.");
         // Equip (Limited) -- or, with a player-level timing grant (Foothills Keep: "Equipping Weapons is a Battle/Open action for you", TimingGrants.cs), an
@@ -1876,7 +1889,7 @@ public sealed partial class MatchEngine
         Require(def.AttachRequiresKeyword is null || KeywordOrHuman(target,def.AttachRequiresKeyword),$"Will only attach to a {def.AttachRequiresKeyword} Personality.");
         Require(def.AttachExcludesKeyword is null || !KeywordOrHuman(target,def.AttachExcludesKeyword),$"Will not attach to a {def.AttachExcludesKeyword} Personality.");
         Require(def.AttachRequiresName is null || Definition(target).Name==def.AttachRequiresName,$"Only attaches to {def.AttachRequiresName}.");
-        Require(def.Type!=CardType.Follower || def.HonorRequirement is null || CardPersonalHonor(target)>=def.HonorRequirement,"The Personality does not meet this Follower's Personal Honor Requirement.");
+        Require(def.Type!=CardType.Follower || def.HonorRequirement is null || IgnoresFollowerHonorRequirement(target) || CardPersonalHonor(target)>=def.HonorRequirement,"The Personality does not meet this Follower's Personal Honor Requirement.");
         Require(AttachmentAllowed(card,target),"A Personality may attach only one Armor and, without Kensai or a Kama, only one Weapon.");
         // Unique/Singular (issue #202): Equip had no in-play-duplicate check at all before this -- only
         // QuotePurchase (Personality/Holding) did. Generalizes that same check to cover Follower/Item/
@@ -1911,6 +1924,7 @@ public sealed partial class MatchEngine
     private void PlayStrategy(GameCommand command)
     {
         Require(_state.Phase==Phase.Battle,"This Strategy can only be played during a battle.");
+        RequireNoRestrictedBurst(command.PlayerId); // Koshin Keep (Stronghold pass, issue #486 batch 1).
         var card=Card(command.CardId); var def=Definition(card);
         Require(card.OwnerId==command.PlayerId && card.Zone==Zone.Hand && def.Type==CardType.Strategy,"Choose a supported Strategy from your hand.");
         var province=_state.CurrentBattleProvince!.Value;
@@ -2032,7 +2046,8 @@ public sealed partial class MatchEngine
         (attachmentDef.AttachRequiresKeyword is null || KeywordOrHuman(target,attachmentDef.AttachRequiresKeyword)) &&
         (attachmentDef.AttachExcludesKeyword is null || !KeywordOrHuman(target,attachmentDef.AttachExcludesKeyword)) &&
         (attachmentDef.AttachRequiresName is null || Definition(target).Name==attachmentDef.AttachRequiresName) &&
-        (attachmentDef.Type!=CardType.Follower || attachmentDef.HonorRequirement is null || CardPersonalHonor(target)>=attachmentDef.HonorRequirement);
+        (attachmentDef.Type!=CardType.Follower || attachmentDef.HonorRequirement is null || IgnoresFollowerHonorRequirement(target) || CardPersonalHonor(target)>=attachmentDef.HonorRequirement); // Keep of the Dead (Stronghold pass, issue #486 batch 1): "You ignore Honor Requirements on your Followers."
+
     // "Current" Personal Honor (core rules Glossary): a Dishonorable Personality's is fixed at 0 until
     // Rehonor restores them -- fixed at 0, not merely reduced, so a persistent modifier (e.g. a token)
     // is not removed by this and resumes applying once honorable again. The handful of rules that
@@ -2632,6 +2647,8 @@ public sealed partial class MatchEngine
         var player=Player(_state.ActivePlayerId);
         SetPhase(Phase.End,player.Id);
         if(player.DishonorLossPending) { Win(1-player.Id,"Dishonor defeat at the beginning of the End Phase"); return; }
+        ResolvePendingEndPhaseDraws(); // Eternal Victory Dojo (Stronghold pass, issue #486 batch 1): "Draw a card after the next End Phase begins."
+        if(_state.WinnerId is not null) return;
         Draw(player);
         // Ingenuity (issue #453, batch 2): "draw an additional card during your next End Phase".
         DrawExtraEndPhaseCards(player);
@@ -2648,6 +2665,7 @@ public sealed partial class MatchEngine
     }
     private void FinishTurn()
     {
+        ClearReconnaissanceAtTurnEnd(); // Hidden Falls Dojo (Stronghold pass, issue #486 batch 1): a battlefield exists only within its Attack Phase, and so does Reconnaissance at it.
         // A Ring's recruit grant made for a battle that was never fought (issue #379) does not carry into another turn; no other grant outlives its battle.
         _state.AdditionalActions.Clear();
         RestoreTemporaryRemovals(TemporaryRemovals.Turn);
@@ -3033,8 +3051,9 @@ public sealed partial class MatchEngine
     private static readonly Dictionary<string,(string? Clan,bool Fate)> HonorLossImmunity = new(StringComparer.Ordinal)
     {
         ["training-honor-immunity"] = ("Spider", true),
+        ["keep-of-the-dead"] = ("Spider", true), // Keep of the Dead (Stronghold pass, issue #486 batch 1): "You do not lose Honor from Spider Clan and Fate cards you own."
     };
-    private static bool IsFateCardType(CardType type) => type is CardType.Strategy or CardType.Follower or CardType.Item or CardType.Spell;
+    private static bool IsFateCardType(CardType type) => type is CardType.Strategy or CardType.Follower or CardType.Item or CardType.Spell or CardType.Ring; // core rules, Fate card types: Strategy and Ring, and the attachments
     private bool HonorLossNegated(int playerId, CardInstance? source)
     {
         if(source is null || source.OwnerId != playerId) return false;

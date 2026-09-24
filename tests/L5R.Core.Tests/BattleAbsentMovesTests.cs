@@ -95,7 +95,8 @@ internal static class BattleAbsentMovesTests
         // + shinoda-move (Emperor Edition Personality pass, issue #477 batch 2: Kuni Shinoda moves himself and an optional Crab Clan Personality to the current battlefield).
         var marked = string.Join(",", AbilityCatalog.All.Where(p => p.Value.MovesToBattle).Select(p => p.Key).OrderBy(k => k, StringComparer.Ordinal));
         // Issue #477 (Emperor Edition Personality pass, batch 3): tetsuo-move-attack -- Moto Tetsuo moves himself to the current battlefield.
-        Eq(marked, "broken-alliance-move,charge-into-danger-move,chukage-move,dislodge-the-foe,earth-flows-move,hawado-move-battlefield,heijin-move,help-shadows-move,houken-exp-straighten,intervening-spirit-move,intimidation-move,irezu-move,lesson-of-earth-move,mai-move-force-penalty,michi-move,moving-unmoving-approach,natsumi-move,natures-wrath-move,pronouncement-guilt-move,requesting-reinforcements-recruit,return-to-action-move,rikyou-move,sanctuary-of-the-waves-move,shinoda-move,skipping-the-puddle-move,sound-of-thunder-move,sudden-movement-switch,takasho-move,tetsuo-move-attack,training-move-current,training-move-to-battle,trusting-instinct-move,your-clan-needs-you");
+        // + keep-of-dead-move (Emperor Edition Stronghold pass, issue #486 batch 1: Keep of the Dead moves its performing Commander to the current battlefield).
+        Eq(marked, "broken-alliance-move,charge-into-danger-move,chukage-move,dislodge-the-foe,earth-flows-move,hawado-move-battlefield,heijin-move,help-shadows-move,houken-exp-straighten,intervening-spirit-move,intimidation-move,irezu-move,keep-of-dead-move,lesson-of-earth-move,mai-move-force-penalty,michi-move,moving-unmoving-approach,natsumi-move,natures-wrath-move,pronouncement-guilt-move,requesting-reinforcements-recruit,return-to-action-move,rikyou-move,sanctuary-of-the-waves-move,shinoda-move,skipping-the-puddle-move,sound-of-thunder-move,sudden-movement-switch,takasho-move,tetsuo-move-attack,training-move-current,training-move-to-battle,trusting-instinct-move,your-clan-needs-you");
         foreach (var (id, ability) in AbilityCatalog.All.Where(p => p.Value.MovesToBattle))
             Check(ability.Timing is "Battle" or "BattleOrOpen", $"{id}: a move to the battle is a Battle action");
     }
@@ -186,8 +187,12 @@ internal static class BattleAbsentMovesTests
         // two Personalities of one player at different locations -- the enemy's at the battlefield and another of his at home.
         if (ability == "lesson-of-earth-move") maiden.GrantedKeywords.Add(new("Monk", "test-fixture", GrantDuration.Permanent));
         if (ability == "sudden-movement-switch") Add(s, "training-lion-samurai", 1 - actor, Zone.Home);
+        // Emperor Edition Stronghold pass (issue #486, batch 1): Keep of the Dead's performing Commander (from home: an Absent move-to-battle action).
+        if (ability == "keep-of-dead-move") maiden.GrantedKeywords.Add(new("Commander", "test-fixture", GrantDuration.Permanent));
         CardInstance card;
-        if (definition.Type == CardType.Personality) card = Add(s, definition.Id, actor, Zone.Home, bowed: ability is "hawado-move-battlefield" or "houken-exp-straighten");
+        // A Stronghold is the player's own from the start of the match: the card is the actor's Stronghold, made this definition.
+        if (definition.Type == CardType.Stronghold) { card = s.Cards[s.Players[actor].StrongholdId]; card.DefinitionId = definition.Id; }
+        else if (definition.Type == CardType.Personality) card = Add(s, definition.Id, actor, Zone.Home, bowed: ability is "hawado-move-battlefield" or "houken-exp-straighten");
         else if (definition.Type == CardType.Spell) card = Add(s, definition.Id, actor, Zone.Attached, parent: host.Id);
         // A Kata's action is taken from play, where it sits at the right of home.
         else if (ability == "skipping-the-puddle-move") card = Add(s, definition.Id, actor, Zone.Home);

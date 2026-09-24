@@ -510,7 +510,9 @@ public sealed record FirstActionRestriction(int PlayerId, string? PerformerId, b
 /// default and only shape until issue #449. True (Akodo Tezuka: "play it for one of its Battle, Limited, or Open actions, as appropriate to the
 /// current phase") also admits Limited and Open -- each still gated by its own ordinary phase/active-player legality, so "as appropriate to the
 /// current phase" needs no extra check of its own.</param>
-public sealed record AdditionalActionGrant(int PlayerId, string[]? ScopeCardIds, bool FromDiscard = false, int? Battle = null, bool AnyDiscardTiming = false);
+///  <param name="RangedTargetId">Emperor Edition Stronghold pass (issue #486), batch 1 (Koshin Keep: "an additional Ranged Attack Battle action that may only target the same card"): when set, the
+/// grant is used only by a Ranged Attack that targets that card, and while the player holds it nothing else may be taken (EmperorStrongholdBatch1.cs).</param>
+public sealed record AdditionalActionGrant(int PlayerId, string[]? ScopeCardIds, bool FromDiscard = false, int? Battle = null, bool AnyDiscardTiming = false, string? RangedTargetId = null);
 
 /// <summary>A discard a player owes: they choose the card from their hand (Times of Strife, Daigotsu Bofana - exp's entry).
 /// Reason names the card or rule in the prompt and the event.</summary>
@@ -994,6 +996,13 @@ public sealed class MatchState
     public string? LastProvinceEntryCardId { get; set; }
     // An Insult Answered ("an action ... which caused you an Honor loss"): the players the currently-resolving action cost Honor, snapshotted into LastResolvedAction.HonorLosers.
     public List<int> CurrentActionHonorLosers { get; set; } = [];
+    // Emperor Edition Stronghold pass (issue #486), batch 1 (EmperorStrongholdBatch1.cs). Eternal Victory Dojo: "Draw a card after the next End Phase begins" -- one entry per draw owed, the player who
+    // draws it. Kyuden Otomo - exp: the players who took the Imperial Favor during the action now resolving (snapshotted into LastResolvedAction.FavorTakers). Hidden Falls Dojo: the provinces a
+    // player targeted this turn, and whether the additional Infantry Maneuvers Segment it grants is the segment in progress.
+    public List<int> PendingEndPhaseDraws { get; set; } = [];
+    public List<int> CurrentActionFavorTakers { get; set; } = [];
+    public List<HiddenFallsGrant> HiddenFallsGrants { get; set; } = [];
+    public bool ExtraInfantrySegment { get; set; }
     // Brotherhood Schism: the turn in which "Rings will not enter play if their owner has already put a Ring into play this turn" stands.
     public int RingSchismTurn { get; set; } = -1;
     // Moksha Patam (oracle-l5r-10121, issue #453 batch 5): "After an action resolves, if a player gained Honor from its effects" -- set by GainHonor on any
@@ -1054,6 +1063,8 @@ public sealed class ResolvedActionFacts
     public List<int> HonorLosers { get; set; } = [];
     // Emperor Edition Personality pass (issue #477), batch 5: the players whose hand the action put a card into (Isawa Kimi - exp 2).
     public List<int> HandRecipients { get; set; } = [];
+    // Emperor Edition Stronghold pass (issue #486), batch 1 (Kyuden Otomo - exp): the players who took the Imperial Favor during the action.
+    public List<int> FavorTakers { get; set; } = [];
 }
 
 // DeckPosition ("Top"/"Bottom") is the acting player's own upfront choice of where a card goes in
@@ -1084,7 +1095,10 @@ public sealed record GameCommand(string Type, int PlayerId, long ExpectedVersion
     string? CreatedCard = null,
     // Emperor Edition Personality pass (issue #477), batch 4 (Asahina Keigo): for each Gold source that produces "Gold equal to the Focus Value of a card discarded", the id of the
     // hand card the payer discards for it (source id -> hand card id). Null for every other payment.
-    Dictionary<string, string>? PaymentDiscards = null);
+    Dictionary<string, string>? PaymentDiscards = null,
+    // Emperor Edition Stronghold pass (issue #486), batch 1 (Hidden Falls Dojo: "Target one or two provinces"): the indices of the Defender's provinces the action targets; null for every other action
+    // (a single province rides in Province, as it always has).
+    int[]? Provinces = null);
 public sealed record CommandResult(bool Accepted, string? Error, long Version, GameEvent[] Events);
 public sealed record PaymentOption(string[] SourceIds, int Produced, int Cost, int Excess);
 // Basis (issue #303): the human-readable derivation of Cost, e.g. "Training samurai cost 5 - 2 (Clan

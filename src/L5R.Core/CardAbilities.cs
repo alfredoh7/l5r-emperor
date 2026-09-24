@@ -145,7 +145,11 @@ public sealed record AbilityDefinition(string Timing, string Label, string Targe
     // Gold source (PaymentProduction) that is only a source while the payment is for an ACTION (an action of a card in play, a Strategy played from a hand, or an Equip -- never a
     // recruit), and whose use does not bow its card (PaymentBows false -- its printed text has no bow cost).
     bool PaymentActionsOnly = false,
-    bool PaymentBows = true);
+    bool PaymentBows = true,
+    // Emperor Edition Stronghold pass (issue #486), batch 1 (Library of Rebirth: "Reaction: Even if this card is bowed, when paying for a Spell during the Combat Segment: Produce 4 Gold"): a reactive
+    // Gold source of a card that also has a printed production -- PaymentProduction, offered only for a payment meeting PaymentWhen (EmperorStrongholdBatch1.cs), and PaymentEvenIfBowed when the
+    // card may produce it while bowed.
+    string? PaymentWhen = null, bool PaymentEvenIfBowed = false);
 
 public static class AbilityCatalog
 {
@@ -3870,7 +3874,7 @@ public static class AbilityCatalog
         // Tamori Kusugi (oracle-l5r-7780): "Battle: Even if Kusugi is not at the current battlefield, bow him: Raise or lower the current battlefield's province's strength by 4."
         ["kusugi-raise"] = new("Battle", "Even if Kusugi is not at the current battlefield, bow him: Raise the current battlefield's province's strength by 4", "none", UsageKey: "kusugi-province", Costs: ActionCost.BowSource, SourceUnitMayBeAway: true),
         ["kusugi-lower"] = new("Battle", "Even if Kusugi is not at the current battlefield, bow him: Lower the current battlefield's province's strength by 4", "none", UsageKey: "kusugi-province", Costs: ActionCost.BowSource, SourceUnitMayBeAway: true),
-    }.AddEmperorPersonalityBatch2()); // Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs.
+    }.AddEmperorPersonalityBatch2().AddEmperorStrongholdBatch1()); // Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batch 1: EmperorStrongholdBatch1.cs.
 }
 
 public sealed partial class MatchEngine
@@ -4830,10 +4834,10 @@ public sealed partial class MatchEngine
     // ceding priority to their opponent first -- Again!'s shape (ScopeCardIds null: any of the
     // player's own cards) or Two Hands' shape (a specific set: "from cards in his unit"). Two Hands'
     // own restriction blocks future GRANTS, not the use of ones already sitting here.
-    private void GrantAdditionalAction(int playerId, string[]? scopeCardIds, bool fromDiscard = false, int? battle = null, bool anyDiscardTiming = false)
+    private void GrantAdditionalAction(int playerId, string[]? scopeCardIds, bool fromDiscard = false, int? battle = null, bool anyDiscardTiming = false, string? rangedTargetId = null)
     {
         if (_state.NoNewAdditionalActionsThisBattle) return;
-        _state.AdditionalActions.Add(new(playerId, scopeCardIds, fromDiscard, battle, anyDiscardTiming));
+        _state.AdditionalActions.Add(new(playerId, scopeCardIds, fromDiscard, battle, anyDiscardTiming, rangedTargetId));
         Emit("additionalActionGranted", $"{Player(playerId).Name} may take an additional {(anyDiscardTiming ? "" : "Battle ")}action.", playerId);
     }
     // Ring recruitment (issue #194): rather than a forced mid-resolution interrupt, a satisfied
@@ -4886,12 +4890,13 @@ public sealed partial class MatchEngine
     // Removes and returns whether an available grant matches this specific use (unscoped, or scoped
     // to include cardId) -- the single check deciding whether a Battle-timed useAbility is an
     // ordinary action or one taken "out of order" as an Additional Action (see UseAbility).
-    private bool ConsumeAdditionalActionGrant(int playerId, string? cardId)
+    private bool ConsumeAdditionalActionGrant(int playerId, string? cardId, GameCommand? command = null)
     {
         // A grant for playing this very card from a discard pile (Daigotsu Bofana - exp) goes first: it is the permission the play
         // was validated against, and an unscoped grant must not be spent in its place.
-        var grant = _state.AdditionalActions.Where(g => g.PlayerId == playerId && GrantUsableNow(g) && (g.ScopeCardIds is null || cardId is not null && g.ScopeCardIds.Contains(cardId)))
-            .OrderByDescending(g => g.FromDiscard).ThenByDescending(g => g.ScopeCardIds is not null).FirstOrDefault();
+        // Koshin Keep (Stronghold pass, issue #486 batch 1): a grant restricted to a Ranged Attack on one card is spent only by that Attack (and by nothing when no command is given).
+        var grant = _state.AdditionalActions.Where(g => g.PlayerId == playerId && GrantUsableNow(g) && (g.ScopeCardIds is null || cardId is not null && g.ScopeCardIds.Contains(cardId)) && RangedTargetGrantMatches(g, command) && (g.RangedTargetId is null || command is not null))
+            .OrderByDescending(g => g.FromDiscard).ThenByDescending(g => g.RangedTargetId is not null).ThenByDescending(g => g.ScopeCardIds is not null).FirstOrDefault();
         if (grant is null) return false;
         _state.AdditionalActions.Remove(grant);
         return true;
@@ -4943,6 +4948,7 @@ public sealed partial class MatchEngine
         AfterForgottenLegacyBatch1Attack(abilityId, targetId, targetInPlayBefore, sourceId); // Forgotten Legacy pass (issue #467), batch 1: Bayushi Higaonna.
         NoteThundersWrathAttack(abilityId, targetId, targetInPlayBefore); // Forgotten Legacy pass (issue #467), batch 5.
         AfterShadowsEmbraceBatch2Attack(abilityId, targetId, sourceId); // The Shadow's Embrace pass (issue #476), batch 2: Niiro no Oni's -5F token.
+        AfterKoshinKeepAttack(abilityId, playerId, targetId, strength, targetInPlayBefore); // Emperor Edition Stronghold pass (issue #486), batch 1: Koshin Keep's additional effects.
         // Tsuruchi Yakusho (issue #276 follow-up): this specific Attack's own resolution has now fully
         // completed -- the single funnel every Attack resolves through, deferred or not -- so any
         // immunity granted for it is cleared here, never carried into a later, unrelated Attack.
@@ -5018,6 +5024,7 @@ public sealed partial class MatchEngine
         if (!attack.Additional) _state.AdditionalActions.RemoveAll(grantsBeforeAttack.Contains);
         var attackBurstContinues = _state.AdditionalActions.Any(g => g.PlayerId == attack.PlayerId && Forfeitable(g));
         FinishGrapplingWatches(attack.Command); // Seeds of Decay pass (issue #453), batch 1: the deferred Attack is the action's resolution.
+        MiddayShadowActionEnded(attack.Command); // Emperor Edition Stronghold pass (issue #486), batch 1: Midday Shadow Court's "an action that he performed ends".
         FireCowedAndDefeatedActionWatches(attack.PlayerId, attack.Command, attack.TargetId); // The Shadow's Embrace pass (issue #476), batch 3
         // Action-effect tracking (issue #437): the deferred Attack is the action's resolution, the same reasoning FireAfterOwnActionTraits above already follows.
         if (FinishActionEffectTracking(attack.AbilityId, attack.PlayerId, attack.SourceId, attackBurstContinues ? attack.PlayerId : 1 - attack.PlayerId)) return;
@@ -5327,6 +5334,8 @@ public sealed partial class MatchEngine
                 // Emperor Edition Personality pass (issue #477), batch 5: Isawa Kimi - exp 2's Reaction ("Even if Kimi is bowed").
                 or "kimi-exp2-discard"
                 // Colonial Harbor (Forgotten Legacy pass, issue #467): "Your Stronghold's abilities have Tireless."
+                // Emperor Edition Stronghold pass (issue #486), batch 1: Midday Shadow Court's Political Open ("Even if this card is bowed") and Kyuden Otomo - exp's Favor trait.
+                || StrongholdBatch1EvenIfBowed(id)
                 || TirelessStronghold(source), "Abilities on bowed cards cannot be used.");
             uses = source.AbilityUses;
         }
@@ -5440,17 +5449,19 @@ public sealed partial class MatchEngine
             Require(_state.CurrentBattleProvince is not null, "There is no current battlefield to move him to.");
             Require(player.Id != _state.ActivePlayerId, "Only the Defender may use Return to Action.");
         }
-        if (id is "shunya-honor" or "favor-cycle" or "favor-battle" or "jakuei-bow-favor" or "bonds-of-coin-draw" or "insulting-gesture-shame" or "baiko-shame" or "accidental-confession-dishonor" or "celestial-sword-crane-favor" or "sosuke-tariffs")
-            Require(_state.FavorPlayerId == player.Id, "You must control the Imperial Favor to discard it.");
+        // Emperor Edition Stronghold pass (issue #486), batch 1: Kyuden Otomo - exp lets a Favor token be discarded instead (EmperorStrongholdBatch1.cs); every Favor-discard action shares this.
+        if (IsFavorDiscardAbility(id)) RequireFavorDiscard(command, player);
         // Bonds of Coin (issue #336): "Bow your Stronghold" is a cost of the action, so a bowed Stronghold cannot pay it.
         if (id == "bonds-of-coin-draw") Require(!Card(player.StrongholdId).Bowed, "Your Stronghold is already bowed.");
-        if (id is "lobby" or "dainagon-lobby") Require(player.Honor > Player(1-player.Id).Honor, "Lobby requires strictly higher Family Honor than your opponent.");
+        // Midday Shadow Court (Stronghold pass, issue #486 batch 1): "When a Lobby action checks Family Honor, your Honor is treated as 20 points higher."
+        if (id is "lobby" or "dainagon-lobby") Require(player.Honor + LobbyHonorBonus(player) > Player(1-player.Id).Honor, "Lobby requires strictly higher Family Honor than your opponent.");
         // Saibankan's Justice: "Other players may not lobby."
         if (id is "lobby" or "dainagon-lobby") Require(!_state.Cards.Values.Any(c => c.OwnerId != player.Id && InPlay(c) && Definition(c).Effect == "saibankan-no-lobby"), "Another player's Saibankan's Justice forbids you to lobby.");
         if (id == "dainagon-lobby") Require(CardPersonalHonor(source!) >= 1, "Lobby needs a Personality with at least 1 Personal Honor.");
         ValidateForgottenLegacyBatch5(id, ability, command, source); // Forgotten Legacy pass (issue #467), batch 5.
         ValidateShadowsEmbraceBatch5(id, command, player, source); // The Shadow's Embrace pass (issue #476), batch 5.
         ValidateShadowsEmbraceBatch6(id, command, player, source); // The Shadow's Embrace pass (issue #476), batch 6.
+        ValidateEmperorStrongholdBatch1(id, ability, command, player, source); // Emperor Edition Stronghold pass (issue #486), batch 1.
         ValidateEmperorPersonalityBatch2(id, player, source); // Emperor Edition Personality pass (issue #477), batch 2: Kuni Shinoda's conditions.
         ValidateEmperorBatch4(id, ability, command, player, source); // Emperor Edition Personality pass (issue #477), batch 4.
         // Barred Passage: "the only Personality in his army" -- none of the acting player's other Personalities stands at this battlefield.
@@ -5640,7 +5651,7 @@ public sealed partial class MatchEngine
             Require(attachDef.AttachRequiresKeyword is null || KeywordOrHuman(enteredPersonality, attachDef.AttachRequiresKeyword), $"Will only attach to a {attachDef.AttachRequiresKeyword} Personality.");
             Require(attachDef.AttachExcludesKeyword is null || !KeywordOrHuman(enteredPersonality, attachDef.AttachExcludesKeyword), $"Will not attach to a {attachDef.AttachExcludesKeyword} Personality.");
             Require(attachDef.AttachRequiresName is null || Definition(enteredPersonality).Name == attachDef.AttachRequiresName, $"Only attaches to {attachDef.AttachRequiresName}.");
-            Require(attachDef.HonorRequirement is null || CardPersonalHonor(enteredPersonality) >= attachDef.HonorRequirement, "The Personality does not meet this Follower's Personal Honor Requirement.");
+            Require(attachDef.HonorRequirement is null || IgnoresFollowerHonorRequirement(enteredPersonality) || CardPersonalHonor(enteredPersonality) >= attachDef.HonorRequirement, "The Personality does not meet this Follower's Personal Honor Requirement.");
             Require(AttachmentAllowed(source!, enteredPersonality), "A Personality may attach only one Armor and, without Kensai or a Kama, only one Weapon.");
             // Gold cost (attachDef.GoldCost) is validated once, generically, in the shared cost
             // computation below -- not duplicated here.
@@ -5854,6 +5865,8 @@ public sealed partial class MatchEngine
                 "own-defending-personality-at-battle" => Definition(performer).Type == CardType.Personality && IsDefendingUnit(performer),
                 // Testimony (issue #453, batch 2): "your performing unbowed honorable Personality".
                 "own-unbowed-honorable-personality" => Definition(performer).Type == CardType.Personality && !performer.Bowed && MatchesTargetStatus(performer, TargetStatus.IsHonorable),
+                // Kyuden Otomo - exp (Stronghold pass, issue #486 batch 1): "your performing honorable Courtier" (unbowed: bowing him is the cost), wherever he stands (an Open action).
+                "own-unbowed-honorable-personality-with-keyword" => Definition(performer).Type == CardType.Personality && !performer.Bowed && MatchesTargetStatus(performer, TargetStatus.IsHonorable) && HasKeywords(performer, ability.RequiredKeywords),
                 // Devoted Yojimbo (issue #458): "one of your Followers or Personalities in this army" -- unbowed, since the ability's own cost bows him
                 // (a Performer category's own job to enforce: ValidateWielderCosts only judges CostSubject.Wielder, not Performer).
                 "own-follower-or-personality-in-army" => (Definition(performer).Type == CardType.Personality || Definition(performer).Type == CardType.Follower && performer.Zone == Zone.Attached)
@@ -5907,6 +5920,8 @@ public sealed partial class MatchEngine
             Require(command.Province is int idx && idx is >= 0 and <= 3 && !Player(1 - player.Id).Provinces[idx].Destroyed,
                 "Choose one of the enemy's provinces.");
         }
+        // Hidden Falls Dojo (Stronghold pass, issue #486 batch 1): "Target one or two provinces" -- the Defender's, the provinces a battlefield will sit at.
+        else if (ability.Target == EmperorStrongholdBatch1Abilities.HiddenFallsTarget) ValidateHiddenFallsTargets(command);
         // Ring of Earth (issue #194): "give A province +3 or -3 strength" -- either side's own,
         // unlike enemy-province above -- so which player's province, not just which index, must be
         // named. TargetPlayerId already exists for "choose a player" (issue #210); reused here purely
@@ -6860,7 +6875,7 @@ public sealed partial class MatchEngine
         // Seeds of Decay pass (issue #453, batch 4): an additional action in the ACTION phase too (Daigotsu Yamato / Shinjo Katsuo: "Battle/Open: ... You may take an
         // additional action") -- a Limited or Open action taken while its player holds a grant is that additional action, consumed the same way. Only the Battle timing was
         // ever consumed before; nothing changes for a grant made in a battle.
-        if ((ability.Timing == "Battle" || _state.Phase == Phase.Action && ability.Timing is "Limited" or "Open" or "BattleOrOpen") && ConsumeAdditionalActionGrant(command.PlayerId, command.CardId))
+        if ((ability.Timing == "Battle" || _state.Phase == Phase.Action && ability.Timing is "Limited" or "Open" or "BattleOrOpen") && ConsumeAdditionalActionGrant(command.PlayerId, command.CardId, command))
         {
             ResolveOrDeferAdditionalAction(command);
             return;
@@ -7069,13 +7084,8 @@ public sealed partial class MatchEngine
         PayForAbility(command, player);
         // The non-Gold cost the acting player chose (issue #337): bow or destroy the performer, paid right beside the Gold.
         PayCostOption(ability, command, player, source);
-        if (id is "shunya-honor" or "favor-cycle" or "favor-battle" or "jakuei-bow-favor" or "bonds-of-coin-draw" or "insulting-gesture-shame" or "baiko-shame" or "accidental-confession-dishonor" or "celestial-sword-crane-favor" or "sosuke-tariffs")
-        {
-            _state.FavorPlayerId = null;
-            Emit("favorDiscarded", $"{player.Name} discarded the Imperial Favor.", player.Id);
-        }
-        DiscardFavorForBatch1(id, player); // Forgotten Legacy pass (issue #467), batch 1: Doji Rengetsu's Favor discard.
-        DiscardFavorForBatch4(id, player); // Emperor Edition Personality pass (issue #477), batch 4: Kakita Tadanobu's Favor discard.
+        // Every action that discards the Imperial Favor as a cost (Doji Rengetsu and Kakita Tadanobu included), or a Favor token in its place (Kyuden Otomo - exp, issue #486).
+        if (IsFavorDiscardAbility(id)) DiscardImperialFavorCost(command, player);
         Emit("abilityUsed", $"{player.Name}: {(source is null ? "Imperial Favor" : Definition(source).Name)} — {ability.Label}.", player.Id, source?.Id);
         _state.CurrentActionHonorGained = false; // Moksha Patam (issue #453 batch 5): only Honor gained from here on is "from its effects".
         // Snapshot before the effect resolves so any Battle-action Honor loss it inflicts on an
@@ -7168,7 +7178,7 @@ public sealed partial class MatchEngine
             case "crushing-destroy": case "never-afraid": DestroyAttachment(target!); break;
             case "incapacitated": case "favor-battle": MoveHome(target!, false); break;
             case "block-supply": MoveHome(target!, !StalwartNegatesBow(target!, player.Id)); break;
-            case "lobby": _state.FavorPlayerId = player.Id; Emit("favorTaken", $"{player.Name} took the Imperial Favor.", player.Id); break;
+            case "lobby": TakeImperialFavor(player.Id); Emit("favorTaken", $"{player.Name} took the Imperial Favor.", player.Id); break;
             case "favor-cycle":  Draw(player); break;
             case "journeys-end-move": MoveHome(target!, false); break;
             case "shamate-move": MoveHome(target!, false); if (target!.OwnerId != player.Id) GainHonorFromPerformer(Card(command.PerformerId!), 2, "Shamate Keep"); break;
@@ -7413,6 +7423,13 @@ public sealed partial class MatchEngine
             }
             // Batch D of the "Not blocked; deferred for scope" audit (issue #295): strategy-wave-15,
             // spell-wave-4, ring-wave-2.
+            // Keep of the Dead (Stronghold pass, issue #486 batch 1): "If any enemy units are at the current battlefield or he assigned there, move him there. Straighten his unit if he moved."
+            case "keep-of-dead-move":
+            {
+                var keepCommander = Card(command.PerformerId!);
+                if (KeepOfTheDeadMayMove(player, keepCommander) && MoveToBattlefield(keepCommander, _state.CurrentBattleProvince!.Value)) StraightenUnit(keepCommander);
+                break;
+            }
             case "charge-into-danger-move":
             {
                 var performer = Card(command.PerformerId!);
@@ -7881,7 +7898,7 @@ public sealed partial class MatchEngine
             case "maratai-statue":
                 
                 GainHonor(player.Id, 2, "Kakita Maratai", source);
-                _state.FavorPlayerId = player.Id;
+                TakeImperialFavor(player.Id);
                 Emit("favorTaken", $"{player.Name} took the Imperial Favor.", player.Id);
                 break;
             // Personality wave 22 / region-wave-3 (issue #301, Batch F).
@@ -8166,7 +8183,7 @@ public sealed partial class MatchEngine
                 if (BeginConditionalChoice(command, ability, consumedGrant, playedFromDiscard, opponentHonorBeforeBattleAction, bowedBeforeAction, preExistingGrants)) return;
                 break;
             case "insulting-gesture-take":
-                _state.FavorPlayerId = player.Id; Emit("favorTaken", $"{player.Name} took the Imperial Favor.", player.Id);
+                TakeImperialFavor(player.Id); Emit("favorTaken", $"{player.Name} took the Imperial Favor.", player.Id);
                 break;
             // Insulting Gesture's second action: the Favor was discarded as its cost above. Dishonored, bowed (a bow stays through the move), sent home; his controller loses 2 Honor.
             case "insulting-gesture-shame":
@@ -8175,7 +8192,7 @@ public sealed partial class MatchEngine
                 MoveHome(target!, false);
                 GainHonor(target!.OwnerId, -2, "Insulting Gesture", source);
                 break;
-            case "dainagon-lobby": _state.FavorPlayerId = player.Id; Emit("favorTaken", $"{player.Name} took the Imperial Favor.", player.Id); break;
+            case "dainagon-lobby": TakeImperialFavor(player.Id); Emit("favorTaken", $"{player.Name} took the Imperial Favor.", player.Id); break;
             // Barred Passage: the Personality and every card attached to him bow.
             case "barred-passage-bow":
                 if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
@@ -8878,7 +8895,7 @@ public sealed partial class MatchEngine
                 if (IsAttacking(source!)) Draw(player);
                 break;
             case "mihato-move": MoveHome(target!, false); break;
-            case "noboru-exp2-favor": _state.FavorPlayerId = player.Id; break;
+            case "noboru-exp2-favor": TakeImperialFavor(player.Id); break;
             case "noboru-shattered-star-weaken":
             {
                 var bonus = CardForce(target!);
@@ -8904,7 +8921,7 @@ public sealed partial class MatchEngine
             case "horume-lose": case "training-choose-player-lose": ApplyPlayerHonorChoice(source!, command.TargetPlayerId!.Value, -1); break;
             case "training-duel-reaction": GainHonor(player.Id, 1, "Training duel reaction", source); break;
             case "horume-honor": GainHonor(player.Id, 1, "Kitsuki Horume", source); break;
-            case "jakuei-favor": _state.FavorPlayerId = player.Id; break;
+            case "jakuei-favor": TakeImperialFavor(player.Id); break;
             case "jakuei-bow": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;
             case "jakuei-bow-favor":
                 if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
@@ -9240,7 +9257,7 @@ public sealed partial class MatchEngine
                 Straighten(Card(source!.AttachedTo!));
                 break;
             // Dazzling Attire (oracle-l5r-1875): the universal Lobby ability's own effect, without its Honor requirements.
-            case "dazzling-attire-favor": _state.FavorPlayerId = player.Id; Emit("favorTaken", $"{player.Name} took the Imperial Favor.", player.Id); break;
+            case "dazzling-attire-favor": TakeImperialFavor(player.Id); Emit("favorTaken", $"{player.Name} took the Imperial Favor.", player.Id); break;
             // Splintered Weapon (oracle-l5r-7435) and Flanking Unit (oracle-l5r-2598): the same AttachmentTransfers.cs primitive Communion with Earth's Battle-timed
             // transfer already uses (Honor and Treachery pass, issue #458), here as a Focus Effect transfer.
             case "splintered-weapon-focus": case "flanking-unit-focus": TransferAttachment(source!, target!, Definition(source!).Name); break;
@@ -9272,7 +9289,7 @@ public sealed partial class MatchEngine
             // Haruki's Deer (oracle-l5r-9999): the condition is checked in ValidateAbility's per-id Require block above.
             case "haruki-deer-honor": GainHonor(player.Id, 2, "Haruki's Deer", source); break;
             // Emperor Edition Gempukku pass (issue #461); helpers in GempukkuPass.cs.
-            case "dainagon-exp-favor": _state.FavorPlayerId = player.Id; Emit("favorTaken", $"{player.Name} took the Imperial Favor.", player.Id); break;
+            case "dainagon-exp-favor": TakeImperialFavor(player.Id); Emit("favorTaken", $"{player.Name} took the Imperial Favor.", player.Id); break;
             case "byung-additional-action": GrantAdditionalAction(player.Id, null); break;
             case "jades-roar-recon": JadesRoarRecon(player.Id, source!); break;
             case "madoka-draw": case "market-draw-mantis": case "market-draw-spider": case "market-draw-dragon": case "market-draw-crane": case "market-draw-unicorn":
@@ -9658,6 +9675,8 @@ public sealed partial class MatchEngine
                 break;
             }
             default:
+                // Emperor Edition Stronghold pass (issue #486), batch 1 (EmperorStrongholdBatch1.cs): its effects are simple, none opens a window.
+                if (RunEmperorStrongholdBatch1(id, ability, command, player, source, target) is not null) break;
                 // The Shadow's Embrace pass (issue #476), batch 6 (ShadowsEmbraceBatch6.cs): true when a window opened and the action waits.
                 if (RunShadowsEmbraceBatch6(id, ability, command, player, source, target, bowedBeforeAction) is { } shadowsEmbrace6)
                 {
@@ -9772,6 +9791,7 @@ public sealed partial class MatchEngine
         // (A Strategy that returned ITSELF to a hand from a discard pile in this very action -- Never Safe -- was not played from that hand.)
         if (!ability.FromDiscard) SpendHandPlayedCard(player, source);
         FinishGrapplingWatches(command); // Seeds of Decay pass (issue #453), batch 1: after the action that targeted the Monk resolves (SeedsOfDecayBatch1.cs).
+        MiddayShadowActionEnded(command); // Emperor Edition Stronghold pass (issue #486), batch 1: Midday Shadow Court's "an action that he performed ends".
         FireCowedAndDefeatedActionWatches(player.Id, command); // The Shadow's Embrace pass (issue #476), batch 3: Cowed and Defeated (ShadowsEmbraceBatch3.cs).
         // Discipline (core rules, issue #184; a flag since #331): "played and resolved and then removed from the
         // game" -- always, whether or not its own effect above did anything else with the card. Only the DISCARD-
@@ -10432,6 +10452,12 @@ public sealed partial class MatchEngine
             // ValidateAbility would then reject (or, symmetrically, so a legal Open-phase performer
             // is actually offered instead of silently requiring AtBattle year-round).
             var actingAsBattle = ability.Timing == "Battle" || ability.Timing == "BattleOrOpen" && _state.Phase == Phase.Battle;
+            // Hidden Falls Dojo (Stronghold pass, issue #486 batch 1): one offered action per set of one or two provinces (a province set is not a card, so it is enumerated here).
+            if (ability.Target == EmperorStrongholdBatch1Abilities.HiddenFallsTarget)
+            {
+                foreach (var option in HiddenFallsOptions(id, ability, source, playerId)) yield return option;
+                continue;
+            }
             string?[] performers = ability.Performer switch
             {
                 "shugenja" => _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && Keyword(c, "Shugenja") && !c.Bowed).Select(c => (string?)c.Id).ToArray(),
@@ -10501,6 +10527,7 @@ public sealed partial class MatchEngine
                     _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && !c.Bowed && AtBattle(c)).Select(c => (string?)c.Id).ToArray(),
                 // Testimony (issue #453, batch 2).
                 "own-unbowed-honorable-personality" => _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && Definition(c).Type == CardType.Personality && !c.Bowed && MatchesTargetStatus(c, TargetStatus.IsHonorable)).Select(c => (string?)c.Id).ToArray(),
+                "own-unbowed-honorable-personality-with-keyword" => _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && Definition(c).Type == CardType.Personality && !c.Bowed && MatchesTargetStatus(c, TargetStatus.IsHonorable) && HasKeywords(c, ability.RequiredKeywords)).Select(c => (string?)c.Id).ToArray(),
                 // Devoted Yojimbo (issue #458): "bow one of your Followers or Personalities in this army" -- the same army-membership shape as its own
                 // Performer validation switch above, mirrored here so a legal performer is actually offered rather than falling to the null-performer default.
                 "own-follower-or-personality-in-army" => _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && !c.Bowed
@@ -10524,7 +10551,9 @@ public sealed partial class MatchEngine
             // Alternative cost (issue #337): one offered action per way to pay when the ability has more than one (each with its own label and
             // its own validation, so an option that cannot be paid is listed disabled with the reason); an ability with a single way, or none,
             // is listed exactly as before with the choice left off the command.
-            CostOption?[] costOptions = ability.CostOptions is { Length: > 1 } manyOptions ? manyOptions.Select(o => (CostOption?)o).ToArray() : [null];
+            // Kyuden Otomo - exp (Stronghold pass, issue #486 batch 1): a Favor-discard action is also offered with a Favor token discarded in place of the Imperial Favor.
+            CostOption?[] costOptions = ability.CostOptions is { Length: > 1 } manyOptions ? manyOptions.Select(o => (CostOption?)o).ToArray()
+                : IsFavorDiscardAbility(id) && FavorTokenSource(playerId) is not null ? [null, FavorTokenOption] : [null];
             // A created card the player chooses (issue #394, "an Armor or Weapon Item"): one offered action per card, each carrying its scan's id.
             CardDefinition?[] createChoices = ability.Creates is { Or.Length: > 0 } multiple ? multiple.Alternatives.Select(a => (CardDefinition?)CreatedCards.Resolve(a)).ToArray() : [null];
             // Daigotsu Ishibashi (issue #477 batch 6): one offered action per Dark Virtue card that may be shown from the hand, each with its own strength (a hand with none is offered once, disabled).

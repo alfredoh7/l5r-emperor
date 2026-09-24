@@ -494,6 +494,8 @@ public sealed partial class MatchEngine
                 // Defenders are offered only the battlefields AssignDefense accepts.
                 var provinces=Player(1-_state.ActivePlayerId).Provinces
                     .Where(p=>!p.Destroyed && (attack || _state.UnresolvedBattlefields.Contains(p.Index))).Select(p=>p.Index).ToArray();
+                // Hidden Falls Dojo (Stronghold pass, issue #486 batch 1): in the additional Infantry Maneuvers Segment only the acting player's Scouts, only to the provinces he targeted.
+                if(_state.ExtraInfantrySegment) (units,provinces)=HiddenFallsAssignmentChoices(playerId,attack);
                 var actionType=attack?"attack":"assignDefense";
                 foreach(var province in provinces)
                     Add(actionType,$"{(attack?"Attack":"Defend")} province {province+1} · {units.Length} {(cavalrySegment?"Cavalry":"Infantry")} units",
