@@ -64,6 +64,10 @@ public static class LookCatalog
     public static LookSpec ControlYourDestiny { get; } = new("control-your-destiny", "Look at the top three cards of your Fate or Dynasty deck", [new("Fate"), new("Dynasty")], 3, [new(LookDisposition.Bottom, 0, 2)], Reorder: true);
     /// <summary>Jurojin's Blessing (oracle-l5r-4070, Celestial): "Look at the top card of your Fate deck. You may discard it."</summary>
     public static LookSpec JurojinsBlessing { get; } = new("jurojins-blessing", "Look at the top card of your Fate deck", [new("Fate")], 1, [new(LookDisposition.Discard, 0, 1)]);
+    /// <summary>Akodo Uehara (oracle-l5r-305, Embers of War pass, issue #460): "Look at the top card of your Fate deck. You may leave it there, discard it, or put it
+    /// at the bottom of the deck." -- Isawa Tamaki's own top-1 shape, plus a Discard rule alongside Bottom (the default Remainder, "top", already covers "leave it there").</summary>
+    public static LookSpec UeharaLook { get; } = new("uehara-look", "Look at the top card of your Fate deck", [new("Fate")], 1,
+        [new(LookDisposition.Discard, 0, 1), new(LookDisposition.Bottom, 0, 1)]);
 
     // Training fixtures (never in a playable deck): every parameter the 25 cards need, ahead of any published card needing it.
     /// <summary>Own Dynasty deck, two cards, one may go to the bottom (Asako Kikugoro's shape).</summary>
@@ -82,7 +86,7 @@ public static class LookCatalog
     public static LookSpec TrainingShowAny { get; } = new("training-look-show", "Look at the top cards of your Fate deck", [new("Fate")], 3, [new(LookDisposition.Show, 1, 1)], Reorder: true);
 
     public static IReadOnlyDictionary<string, LookSpec> All { get; } = new[] { PublicRecords, IsawaTamaki, BanishAllDoubt, BayushiKahokuExp2, SignsAndPortents, ControlYourDestiny, JurojinsBlessing,
-        TrainingDynasty, TrainingAny, TrainingTakeItem, TrainingFixedOrder, TrainingShowAny }.ToDictionary(s => s.Id, StringComparer.Ordinal);
+        UeharaLook, TrainingDynasty, TrainingAny, TrainingTakeItem, TrainingFixedOrder, TrainingShowAny }.ToDictionary(s => s.Id, StringComparer.Ordinal);
 
     /// <summary>The look an Event carries in its Effect (an Event has no abilities of its own to hang a spec on).</summary>
     public static LookSpec? ForEventEffect(string effect) => effect == "signs-and-portents" ? SignsAndPortents : null;

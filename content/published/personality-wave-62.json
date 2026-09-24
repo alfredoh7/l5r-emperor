@@ -1,0 +1,152 @@
+{
+  "Profile": "personality-wave-62",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-305",
+      "Name": "Akodo Uehara",
+      "Type": "Personality",
+      "Clan": "Lion",
+      "GoldCost": 5,
+      "GoldProduction": 0,
+      "Force": 1,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": 6,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Uehara has +1F while he opposes a Phoenix Clan Personality.\nLimited: Look at the top card of your Fate deck. You may leave it there, discard it, or put it at the bottom of the deck.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-305.jpg",
+      "Keywords": [
+        "Tactician",
+        "Lion Clan",
+        "Samurai"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "uehara-look"
+      ],
+      "Effect": "uehara-force-vs-phoenix"
+    },
+    {
+      "Id": "oracle-l5r-1777",
+      "Name": "Daigotsu Takayasu",
+      "Type": "Personality",
+      "Clan": "Spider",
+      "GoldCost": 9,
+      "GoldProduction": 0,
+      "Force": 5,
+      "Chi": 4,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After Takayasu enters play: Lose 1 Honor.\nMaho Battle: Melee 6 Attack.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1777.jpg",
+      "Keywords": [
+        "Conqueror",
+        "Unique",
+        "Commander",
+        "Experienced",
+        "Samurai",
+        "Shadowlands",
+        "Spider Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "takayasu-attack"
+      ],
+      "Effect": "none",
+      "EntryHonorLoss": 1
+    },
+    {
+      "Id": "oracle-l5r-2849",
+      "Name": "Goju Gochiso",
+      "Type": "Personality",
+      "Clan": "Ninja",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 6,
+      "Chi": 3,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After Gochiso enters play: Lose 2 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-2849.jpg",
+      "Keywords": [
+        "Ninja",
+        "Shadowlands",
+        "Shugenja",
+        "Spider Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "none",
+      "EntryHonorLoss": 2
+    },
+    {
+      "Id": "oracle-l5r-4131",
+      "Name": "Kaiu Onizuka",
+      "Type": "Personality",
+      "Clan": "Crab",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Ranged Attack with strength equal to the current battlefield's province's strength.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-4131.jpg",
+      "Keywords": [
+        "Tactician",
+        "Unique",
+        "Crab Clan",
+        "Samurai",
+        "Siege",
+        "Topaz Champion"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "onizuka-attack"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-4145",
+      "Name": "Kaiu Tojikana",
+      "Type": "Personality",
+      "Clan": "Crab",
+      "GoldCost": 9,
+      "GoldProduction": 0,
+      "Force": 5,
+      "Chi": 3,
+      "PersonalHonor": 3,
+      "HonorRequirement": 3,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: If none of your provinces have been destroyed since your last turn began, or you are a Scorpion Clan player: Gain 2 Honor.\nBattle: Target an enemy card without attachments: Bow it.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-4145.jpg",
+      "Keywords": [
+        "Tactician",
+        "Crab Clan",
+        "Samurai",
+        "Siege"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "tojikana-honor",
+        "tojikana-bow"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

@@ -1,0 +1,256 @@
+{
+  "Profile": "strategy-wave-52",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-99",
+      "Name": "A Weak Poison",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: Target a Personality: Reduce his Force to 0. Lose 2 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-99.jpg",
+      "Keywords": [
+        "Kolat"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "weak-poison-force-zero"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-637",
+      "Name": "Astonishing Accusation",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Political Reaction: After another player's Political action targets your Personality, negate its effects.\nPolitical Limited: Target a Kolat, Ninja, Shadowlands, or dishonorable Personality. His controller loses Honor equal to his printed Personal Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-637.jpg",
+      "Keywords": [
+        "Political"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "accusation-negate",
+        "accusation-honor-loss"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-1880",
+      "Name": "Deadly Discipline",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Fire Kiho Limited: Target your performing unbowed Monk to give him two +1F Fire tokens. \nFire Kiho Battle: Target your performing unbowed Monk to bow a target enemy card without attachments. Destroy it if your Monk has any Fire tokens.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1880.jpg",
+      "Keywords": [
+        "Fire",
+        "Kiho"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "deadly-discipline-tokens",
+        "deadly-discipline-bow"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-2413",
+      "Name": "Exploited Advantage",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing unbowed Paragon and target an enemy Personality: Move him home. If he moved, bow him and negate his (future) movement. Lose 2 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-2413.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "exploited-advantage-move"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-3055",
+      "Name": "Help from the Shadows",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing Personality in a Ninja unit: Move him to the current battlefield. Straighten his unit if he moved.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-3055.jpg",
+      "Keywords": [
+        "Ninja"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "help-shadows-move"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-5423",
+      "Name": "Moving and Unmoving",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: If any enemy units are at the current battlefield, choose your performing Kensai: Move him there. Straighten his unit if he moved.\nBattle: Choose your performing unbowed Kensai and target an enemy Personality with lower Force: Move him home.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-5423.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "moving-unmoving-approach",
+        "moving-unmoving-retreat"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-5941",
+      "Name": "Phantom Visage",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle/Open: Bow your performing Ninja Personality and target a Personality: Bow him.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-5941.jpg",
+      "Keywords": [
+        "Fear",
+        "Ninja"
+      ],
+      "Focus": 1,
+      "Abilities": [
+        "phantom-visage-bow"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-6047",
+      "Name": "Precision",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After a Melee or Ranged Attack is targeted: Give it +2 or -2 strength.\nBattle: Ranged 3 Attack.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6047.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "precision-boost",
+        "precision-reduce",
+        "precision-attack"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-6077",
+      "Name": "Pronouncement of Guilt",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing unbowed Magistrate and target an enemy Personality: Move him to the current battlefield. Straighten his unit unless he is dishonorable, Kolat, Ninja, or Shadowlands.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6077.jpg",
+      "Keywords": [],
+      "Focus": 3,
+      "Abilities": [
+        "pronouncement-guilt-move"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-6209",
+      "Name": "Reckless Duel",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing unbowed Personality and target an enemy Personality: Your Personality duels the target. Bow the duel's loser. Move him home.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6209.jpg",
+      "Keywords": [
+        "Iaijutsu"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "reckless-duel"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

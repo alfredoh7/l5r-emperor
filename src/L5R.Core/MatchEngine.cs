@@ -1008,13 +1008,17 @@ public sealed partial class MatchEngine
         var entryDiscount=ClanEntryDiscount(def,player);
         // Mukudori (Seeds of Decay, issue #453): "Your other Fudo cards enter play for 1 less Gold" -- a term of the price of every entry, like ClanEntryDiscount (StaticKeywordRules.cs).
         var keywordDiscount=KeywordEntryDiscount(card,playerId);
-        var rawCost=def.GoldCost-prosperous-reserveDiscount-ashikoDiscount-(entryDiscount?.Amount??0)-keywordDiscount+(clanAllegiance?2:0)-(clanDiscount?2:0);
+        // Yasuki Makoto (oracle-l5r-9449, Embers of War pass, issue #460 batch 2): "Your Holdings enter play for 1 less Gold" -- the same
+        // per-source-in-play term shape as Mukudori's own keywordDiscount above, narrowed to CardType.Holding rather than a keyword.
+        var holdingDiscount=HoldingEntryDiscount(card,playerId);
+        var rawCost=def.GoldCost-prosperous-reserveDiscount-ashikoDiscount-(entryDiscount?.Amount??0)-keywordDiscount-holdingDiscount+(clanAllegiance?2:0)-(clanDiscount?2:0);
         var cost=Math.Max(0,rawCost);
         // The human-readable derivation the payment panel shows (issue #303), term by term.
         var basis=$"{def.Name} cost {def.GoldCost}"+(prosperous>0?$" − {prosperous} (controlled Personalities)":"")+(reserveDiscount>0?$" − {reserveDiscount} (Reserve while defending)":"")
             +(ashikoDiscount>0?$" − {ashikoDiscount} (outnumbered)":"")
             +(entryDiscount is {} entry?$" − {entry.Amount} ({entry.Clan} Clan)":"")
             +(keywordDiscount>0?$" − {keywordDiscount} (Fudo, Mukudori)":"")
+            +(holdingDiscount>0?$" − {holdingDiscount} (Yasuki Makoto)":"")
             +(clanAllegiance?" + 2 (Clan allegiance)":"")+(clanDiscount?" − 2 (Clan discount)":"")+(rawCost<0?" (min 0)":"");
         if ((Keyword(card,"Unique") || Keyword(card,"Singular")) && ControlsCopyOf(playerId,def.Name)) error=$"You already control this {(Keyword(card,"Unique") ? "Unique" : "Singular")} card.";
         // Kakita Yusugi and Yogo Ugimori (issue #453, batch 2): the once-per-turn limit he ignores, and a lock on the player (ProclaimAllowed).
@@ -1984,6 +1988,9 @@ public sealed partial class MatchEngine
         // unlike the attacking-only cases above, this applies whenever the card is at a battlefield
         // (attacking or defending) that also has one of its own controller's Terrains in play.
         +(Definition(card).Effect=="force-with-own-terrain-at-battlefield"&&AtBattle(card)&&_state.Cards.Values.Any(c=>c.OwnerId==card.OwnerId&&c.Zone==Zone.Battlefield&&c.ProvinceIndex==card.ProvinceIndex&&Keyword(c,"Terrain"))?1:0)
+        // Rokku - experienced (oracle-l5r-6376, Embers of War pass, issue #460 batch 2): "Rokku has +1F while a Lion Clan player controls
+        // him" -- unconditional on attacking or location, gated only by his own controller's Stronghold Clan (RokkuClanForceBonus).
+        +RokkuClanForceBonus(card)
         // An Item's printed "+F" box (and any conditional bonus it grants the wielder, e.g. Kensai's
         // Blade's "+1F to a Personality with Kensai") always conveys to the wielder, whether the Item
         // is bowed or not -- unlike a Follower's own Force, which stays with the Follower itself (see
@@ -1995,6 +2002,9 @@ public sealed partial class MatchEngine
         // ItemForceToWielder already uses for an Item's own conditional bonus), always applying --
         // bowed or not, every phase -- since no published Spell needs a conditional version yet.
         +Attachments(card.Id).Where(c=>Definition(c).Type==CardType.Spell).Sum(c=>Definition(c).Effect=="scouring-flood-force"||Definition(c).Effect=="wave-persists-force"&&Keyword(card,"Water")?2:0)
+        // The Swell of Strength (oracle-l5r-8366, issue #460 batch 5): "This Shugenja has +2F" -- Scouring Flood's own Spell-Effect-keyed static bonus shape; always applies (the
+        // Spell only ever attaches to a Water Shugenja, via AttachRequiresKeyword, so no extra wielder-keyword check is needed here).
+        +Attachments(card.Id).Count(c=>Definition(c).Type==CardType.Spell && Definition(c).Effect=="swell-of-strength-force")*2
         // Strength of the Tsunami: "This Shugenja has +6F" -- only the Shugenja it is attached to gets it.
         +Attachments(card.Id).Where(c=>Definition(c).Type==CardType.Spell && Definition(c).Effect=="tsunami-force" && Keyword(card,"Shugenja")).Sum(_=>6)
         +(Definition(card).Effect=="force-with-spell"&&Attachments(card.Id).Any(c=>Definition(c).Type==CardType.Spell)?1:0)
@@ -2018,6 +2028,9 @@ public sealed partial class MatchEngine
         // Kitsuki Miroken: "+2F while opposing a dishonorable or Gaijin card" -- checked against the
         // whole opposing army at the current battlefield, not a specific targeted card.
         +(Definition(card).Effect=="force-vs-dishonorable-or-gaijin-opposed"&&AtBattle(card)&&Army(1-card.OwnerId,card.ProvinceIndex??-1).Any(c=>c.Dishonorable||Keyword(c,"Gaijin"))?2:0)
+        // Akodo Uehara (oracle-l5r-305, Embers of War pass, issue #460): "Uehara has +1F while he opposes a Phoenix Clan Personality" -- Kitsuki Miroken's own
+        // opposing-army shape, just a Clan check (HasClanAffiliation) in place of dishonorable/Gaijin.
+        +(Definition(card).Effect=="uehara-force-vs-phoenix"&&AtBattle(card)&&Army(1-card.OwnerId,card.ProvinceIndex??-1).Any(c=>Definition(c).Type==CardType.Personality&&HasClanAffiliation(c,"Phoenix"))?1:0)
         // Tamori Muzu: "Your other Earth Personalities have +1F while defending" -- army-scoped (not
         // unit-scoped, since Muzu's own bonus reaches every OTHER Earth-keyword card he controls at
         // the same battlefield, not just his own unit) and keyword-based, following
@@ -2057,6 +2070,11 @@ public sealed partial class MatchEngine
         // Celestial Sword of the Mantis / of the Scorpion - exp (issue #453 batch 5): "This card has +1F for each <Clan> Personality you control" -- the wielder's controller's, the wielder himself included.
         "celestial-sword-force-mantis" => ControlledClanPersonalities(wielder.OwnerId,"Mantis"),
         "celestial-sword-force-scorpion" => ControlledClanPersonalities(wielder.OwnerId,"Scorpion"),
+        // Embers of War pass, batch 6 (issue #460): the Lion, Unicorn and (Spider-Clan) Ancestral Sword of Hantei siblings share the same "+1F for
+        // each <Clan> Personality you control" shape as the Mantis/Scorpion swords above.
+        "celestial-sword-force-lion" => ControlledClanPersonalities(wielder.OwnerId,"Lion"),
+        "celestial-sword-force-unicorn" => ControlledClanPersonalities(wielder.OwnerId,"Unicorn"),
+        "celestial-sword-force-spider" => ControlledClanPersonalities(wielder.OwnerId,"Spider"),
         _ => 0
     };
     // A Follower's own standalone Force, including any static conditional bonus it grants itself
@@ -2154,7 +2172,11 @@ public sealed partial class MatchEngine
     // wielder carrying an attachment that grants only Elite's effect without the keyword itself
     // (Seppun Heavy Elite's shape -- see AttachGrantsEliteEffect).
     private bool EliteEffect(CardInstance card) => Keyword(card,"Elite") || Attachments(card.Id).Any(a=>Definition(a).AttachGrantsEliteEffect
-        || Definition(a).AttachGrantsEliteEffectWhileWielderHas is string wielderKeyword && Keyword(card,wielderKeyword));
+        || Definition(a).AttachGrantsEliteEffectWhileWielderHas is string wielderKeyword && Keyword(card,wielderKeyword))
+        // Incite the Phantoms (oracle-l5r-3732, issue #460 batch 5): "While this Shugenja is Earth, your Spirits contribute Force to their
+        // army even while bowed" -- broader than Bo of Water's own single-card AttachGrantsEliteEffectWhileWielderHas: every Spirit the
+        // controller owns, not only the Spell's own wielder (EmbersOfWarBatch5.cs, InciteThePhantomsActive).
+        || (Keyword(card,"Spirit") && InciteThePhantomsActive(card.OwnerId));
     private int PersonalityBattleContribution(CardInstance card) => card.Bowed && !EliteEffect(card) || ForceContributionNegated(card) ? 0 : PersonalityForce(card);
     private int FollowerBattleContribution(CardInstance card) => Attachments(card.Id)
         .Where(c=>(!c.Bowed || EliteEffect(c)) && !ForceContributionNegated(c) && Definition(c).Type==CardType.Follower)

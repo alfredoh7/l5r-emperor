@@ -2446,14 +2446,37 @@ public static class PublishedContent
     /// <summary>Personality wave 61 (Honor and Treachery pass, issue #458): Akodo Shihiro, Bayushi Irezu, Bayushi Kasumi, Bayushi Utoro, Isawa Taiken, Shiba Mitsushen,
     /// Shiba Tsukimi, Shosuro Chikata, Tsubo, Yogo Haruto.</summary>
     public static PublishedSnapshot PersonalityWave61 { get; } = Load("L5R.Published.PersonalityWave61.json", "personality-wave-61", requireDecks: false);
+    public static PublishedSnapshot PersonalityWave63 { get; } = Load("L5R.Published.PersonalityWave63.json", "personality-wave-63", requireDecks: false);
     /// <summary>Holding wave 8 (issue #458): Border Keep - inexperienced.</summary>
     public static PublishedSnapshot HoldingWave8 { get; } = Load("L5R.Published.HoldingWave8.json", "holding-wave-8", requireDecks: false);
     /// <summary>Spell wave 19 (issue #458): Communion with Earth.</summary>
     public static PublishedSnapshot SpellWave19 { get; } = Load("L5R.Published.SpellWave19.json", "spell-wave-19", requireDecks: false);
     /// <summary>Strategy wave 51 (issue #458): Elite Training.</summary>
     public static PublishedSnapshot StrategyWave51 { get; } = Load("L5R.Published.StrategyWave51.json", "strategy-wave-51", requireDecks: false);
+    // Embers of War pass, batch 3 (issue #460).
+    public static PublishedSnapshot StrategyWave52 { get; } = Load("L5R.Published.StrategyWave52.json", "strategy-wave-52", requireDecks: false);
     /// <summary>Stronghold wave 13 (issue #458): The Sacred Temple of the Phoenix - inexperienced, The Towers of the Yogo.</summary>
     public static PublishedSnapshot StrongholdWave13 { get; } = Load("L5R.Published.StrongholdWave13.json", "stronghold-wave-13", requireDecks: false);
     /// <summary>Follower wave 27 (issue #458): Devoted Yojimbo.</summary>
     public static PublishedSnapshot FollowerWave27 { get; } = Load("L5R.Published.FollowerWave27.json", "follower-wave-27", requireDecks: false);
+    /// <summary>Strategy wave 53 (Embers of War pass, issue #460, batch 4): Sheathing the Sword, Tactical Trap, Unstoppable Strike, You Are Unworthy, The Cycle of Vengeance.</summary>
+    public static PublishedSnapshot StrategyWave53 { get; } = Load("L5R.Published.StrategyWave53.json", "strategy-wave-53", requireDecks: false);
+    /// <summary>Spell wave 20 (Embers of War pass, issue #460, batch 5): Inescapable Snare, Incite the Phantoms, Sudden Guardian, The Swell of Strength.</summary>
+    public static PublishedSnapshot SpellWave20 { get; } = Load("L5R.Published.SpellWave20.json", "spell-wave-20", requireDecks: false);
+    /// <summary>Stronghold wave 14 (issue #460, batch 5): The Ki-Rin's Path.</summary>
+    public static PublishedSnapshot StrongholdWave14 { get; } = Load("L5R.Published.StrongholdWave14.json", "stronghold-wave-14", requireDecks: false);
+    /// <summary>Region wave 7 (issue #460, batch 5): The Distant Reaches.</summary>
+    public static PublishedSnapshot RegionWave7 { get; } = Load("L5R.Published.RegionWave7.json", "region-wave-7", requireDecks: false);
+    /// <summary>Item wave 12 (Embers of War pass, issue #460, batch 6): Celestial Sword of the Lion - exp, Celestial Sword of the Unicorn - exp, Dazzling Attire,
+    /// Splintered Weapon, The Ancestral Sword of Hantei - exp.</summary>
+    public static PublishedSnapshot ItemWave12 { get; } = Load("L5R.Published.ItemWave12.json", "item-wave-12", requireDecks: false);
+    /// <summary>Holding wave 9 (Embers of War pass, issue #460, batch 6): Staging Grounds, Surveillance Outpost, Temple to the Elements, Terraced Farm.</summary>
+    public static PublishedSnapshot HoldingWave9 { get; } = Load("L5R.Published.HoldingWave9.json", "holding-wave-9", requireDecks: false);
+    /// <summary>Follower wave 28 (Embers of War pass, issue #460, batch 6): Field Messenger, Flanking Unit.</summary>
+    public static PublishedSnapshot FollowerWave28 { get; } = Load("L5R.Published.FollowerWave28.json", "follower-wave-28", requireDecks: false);
+    /// <summary>Personality wave 64 (Embers of War pass, issue #460, batch 6): Guest and Haruki's Deer, two CreatedOnly Proxy tokens (their creators, Perplexing
+    /// Guests and Kitsune Haruki, are not themselves wired this pass).</summary>
+    public static PublishedSnapshot PersonalityWave64 { get; } = Load("L5R.Published.PersonalityWave64.json", "personality-wave-64", requireDecks: false);
+    /// <summary>Personality wave 62 (Embers of War pass, issue #460, batch 1): Akodo Uehara, Daigotsu Takayasu - exp, Goju Gochiso, Kaiu Onizuka, Kaiu Tojikana.</summary>
+    public static PublishedSnapshot PersonalityWave62 { get; } = Load("L5R.Published.PersonalityWave62.json", "personality-wave-62", requireDecks: false);
 }

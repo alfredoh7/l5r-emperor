@@ -480,6 +480,14 @@ public sealed partial class MatchEngine
             case "mitsuru-duel":
                 foreach (var id in loserIds) if (!StalwartNegatesBow(Card(id), challengerPlayerId)) Card(id).Bowed = true;
                 break;
+            // Reckless Duel (oracle-l5r-6209, issue #460): "Bow the duel's loser. Move him home." -- Doji Mitsuru's own bow plus Daisuke's own move-home, combined.
+            case "reckless-duel":
+                foreach (var id in loserIds)
+                {
+                    if (!StalwartNegatesBow(Card(id), challengerPlayerId)) Card(id).Bowed = true;
+                    MoveHome(Card(id), false);
+                }
+                break;
         }
     }
 
