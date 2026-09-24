@@ -183,6 +183,18 @@ public sealed partial class MatchEngine
     {
         switch (id)
         {
+            // The Golden Plains: Reconnaissance, then the Plain of Gold is created at the battlefield (made inside the Reaction, so no entry window opens over it).
+            case "golden-plains-recon":
+                GrantReconnaissanceAtCurrentBattlefield(player.Id);
+                if (_state.CurrentBattleProvince is int plainsProvince && !_state.Cards.Values.Any(c => c.Zone == Zone.Battlefield && c.ProvinceIndex == plainsProvince && Keyword(c, "Terrain")))
+                    CreateInPlay(player.Id, CreatedCards.Resolve(ability.Creates!), Zone.Battlefield, plainsProvince, false, " at the battlefield", true, null);
+                else Emit("createFailed", "This battlefield already has a Terrain in play: the Plain of Gold has no room.", player.Id, source?.Id);
+                return false;
+            // Plain of Gold: the Terrain is destroyed, and an additional Battle action to play the chosen Terrain from the hand is granted for that card alone.
+            case "plain-gold-play-terrain":
+                DiscardTerrain(source!);
+                GrantAdditionalAction(player.Id, [target!.Id]);
+                return false;
             // Palace of the Breaking Dawn: the chosen opposed Ronin Personality.
             case "palace-dawn-boost":
                 ApplyModifier(Card(command.PerformerId!), source!.Id, id, "Force", 2);

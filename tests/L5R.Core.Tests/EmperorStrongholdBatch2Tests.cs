@@ -7,7 +7,7 @@ using static Batch336Support;
 internal static class EmperorStrongholdBatch2Tests
 {
     private const string Palace = "oracle-l5r-5863", Pillars = "oracle-l5r-5957", Chugo = "oracle-l5r-7008", SteelSoul = "oracle-l5r-7484", Torch = "oracle-l5r-7623",
-        Temple = "oracle-l5r-7879", Aerie = "oracle-l5r-7949";
+        Temple = "oracle-l5r-7879", Aerie = "oracle-l5r-7949", GoldenPlains = "oracle-l5r-8105", PlainOfGold = "oracle-l5r-10012";
     private const string Sanzoko = "oracle-l5r-9858", Mahatsu = "oracle-l5r-10093", WaveMan = "oracle-l5r-9255", SteadfastDefense = "oracle-l5r-7477", CastAside = "oracle-l5r-1225", Rinshi = "oracle-l5r-577";
 
     private static void Check(bool ok, string message = "Assertion failed") => Batch336Support.Check(ok, message);
@@ -33,6 +33,8 @@ internal static class EmperorStrongholdBatch2Tests
         ("Suitengu's Torch: the Battle action moves an enemy Personality home, performed by an unbowed Personality", TorchMove),
         ("Suitengu's Torch: after you announce a Thunder Battle action its effects will not be negated -- not offered for a non-Thunder action, and negated without it", TorchProtect),
         ("Temple of Purity: even bowed, -4F that Tireless Efforts and a negating Reaction cannot stop; a player gains or loses 2 Honor only for Kolat/Ninja/Shadowlands with an Inquisitor on the opponent's turn", TemplePenalty),
+        ("The Golden Plains: after engaging, Reconnaissance at the battlefield and a created Plain of Gold Terrain put into play there (only Reconnaissance where a Terrain already stands)", GoldenPlainsCreates),
+        ("Plain of Gold: destroys itself and, for a Terrain in your hand, grants an additional Battle action to play it -- which spends the grant; not offered without a Terrain in hand", PlainOfGoldPlaysTerrain),
         ("The Aerie: even bowed, an unbowed Samurai duels another player's Personality; the loser is bowed and dishonored and the winner's controller gains 1 Honor", AerieDuel),
     ]);
 
@@ -87,9 +89,15 @@ internal static class EmperorStrongholdBatch2Tests
         Stats(Torch, "Suitengu's Torch", "Mantis", 4, 2, 7, "Thunder", "none", "torch-protect", "torch-move");
         Stats(Temple, "Temple of Purity", "Phoenix", 4, 6, 6, "Temple", "none", "temple-purity-weaken");
         Stats(Aerie, "The Aerie", "Crane", 4, 6, 6, "", "none", "aerie-duel");
-        Check(!CardCatalog.Cards.ContainsKey("oracle-l5r-8105"), "The Golden Plains is not published: its created Terrain Strategy has no scan");
-        Check(PublishedContent.StrongholdWave18.Cards.Select(c => c.Id).OrderBy(i => i, StringComparer.Ordinal).SequenceEqual(new[] { Palace, Pillars, Chugo, SteelSoul, Torch, Temple, Aerie }.OrderBy(i => i, StringComparer.Ordinal)), "stronghold-wave-18 is exactly the wired cards");
-        Manifest(root, "stronghold-wave-18", Palace, Pillars, Chugo, SteelSoul, Torch, Temple, Aerie);
+        Stats(GoldenPlains, "The Golden Plains", "Lion", 3, 7, 7, "", "none", "golden-plains-recon");
+        var plain = CardCatalog.Get(PlainOfGold);
+        Check(plain.Type == CardType.Strategy && plain.Name == "Plain of Gold" && plain.GoldCost == 0 && plain.CreatedOnly && (plain.Keywords ?? []).SequenceEqual(["Terrain"]) && plain.Text.StartsWith("May not be included in decks.")
+            && string.Join(",", plain.Abilities ?? []) == "plain-gold-play-terrain", "Plain of Gold: a created-only 0-cost Terrain Strategy");
+        Check(!CardCatalog.PlayableFromDecks.Any(c => c.Id == PlainOfGold), "and never playable from a deck");
+        Eq(CreatedCards.Resolve(AbilityCatalog.All["golden-plains-recon"].Creates!).Id, PlainOfGold, "The Golden Plains creates the Plain of Gold scan");
+        Check(CreatedCards.Verify().Length == 0, "every creator still has its scan: " + string.Join("; ", CreatedCards.Verify()));
+        Check(PublishedContent.StrongholdWave18.Cards.Select(c => c.Id).OrderBy(i => i, StringComparer.Ordinal).SequenceEqual(new[] { Palace, Pillars, Chugo, SteelSoul, Torch, Temple, Aerie, GoldenPlains, PlainOfGold }.OrderBy(i => i, StringComparer.Ordinal)), "stronghold-wave-18 is exactly the wired cards and the proxy");
+        Manifest(root, "stronghold-wave-18", Palace, Pillars, Chugo, SteelSoul, Torch, Temple, Aerie, GoldenPlains, PlainOfGold);
         Check(AbilityCatalog.All["chugo-honor-reduce"].ActionKeywords!.SequenceEqual(["Political"]) && AbilityCatalog.All["aerie-duel"].ActionKeywords!.SequenceEqual(["Iaijutsu"]), "printed action keywords");
     }
 
@@ -487,6 +495,77 @@ internal static class EmperorStrongholdBatch2Tests
         var own = Add(s5, "training-crane-samurai", 0, Zone.Home);
         var e5 = MatchEngine.FromTestState(s5);
         Check(!Batch336Support.Options(e5, 0, "temple-purity-weaken", StrongholdOf(s5, 0).Id).Any(a => a.Enabled && (a.Slots?.SelectMany(x => x.CardIds ?? []).Contains(own.Id) ?? false)), "my own Personality is not a target");
+    }
+
+    // ---- The Golden Plains and the Plain of Gold ---------------------------------------------------------------------------------------------------------------------------
+    private static MatchEngine Engaged(bool terrainAlready, out CardInstance plains)
+    {
+        var s = WithStronghold(MatchEngine.CreateEconomyScenario().State, 0, GoldenPlains);
+        plains = StrongholdOf(s, 0);
+        s.Phase = Phase.BattleSelection; s.ActivePlayerId = 0; s.PriorityPlayerId = 0; s.CurrentBattleProvince = null; s.UnresolvedBattlefields = [0];
+        Add(s, "training-crane-samurai", 0, Zone.Battlefield, province: 0);
+        Add(s, "training-lion-samurai", 1, Zone.Battlefield, province: 0);
+        if (terrainAlready) Add(s, "training-terrain", 1, Zone.Battlefield, province: 0);
+        var e = MatchEngine.FromTestState(s);
+        Accept(e, new GameCommand("selectBattle", 0, e.Version, Province: 0));
+        Eq(e.State.PendingChoice?.Type, "engageReaction", "the Engage window opens");
+        return e;
+    }
+
+    private static void GoldenPlainsCreates()
+    {
+        var e = Engaged(false, out var plains);
+        Accept(e, ReactionOf(e, 0, "golden-plains-recon", plains.Id));
+        while (e.State.PendingChoice?.Type == "engageReaction") Accept(e, new GameCommand("declineReaction", e.State.PriorityPlayerId, e.Version));
+        Check(e.State.Players[1].Provinces[0].Reconnaissance[0], "Reconnaissance at the battlefield");
+        var created = e.State.Cards.Values.Single(c => c.DefinitionId == PlainOfGold);
+        Check(created.Zone == Zone.Battlefield && created.ProvinceIndex == 0 && created.OwnerId == 0 && created.Id.StartsWith("created-"), "the created Plain of Gold is in play at the battlefield, its creator's");
+
+        // A bowed Stronghold cannot react.
+        var e2 = Engaged(false, out var plains2);
+        var e2b = Edit(e2, st => st.Cards[plains2.Id].Bowed = true);
+        Check(!CanUse(e2b, 0, "golden-plains-recon", plains2.Id), "a bowed Stronghold cannot react");
+
+        // A battlefield that already holds a Terrain: the Reconnaissance still happens, and nothing is created.
+        var e3 = Engaged(true, out var plains3);
+        Accept(e3, ReactionOf(e3, 0, "golden-plains-recon", plains3.Id));
+        while (e3.State.PendingChoice?.Type == "engageReaction") Accept(e3, new GameCommand("declineReaction", e3.State.PriorityPlayerId, e3.Version));
+        Check(e3.State.Players[1].Provinces[0].Reconnaissance[0], "Reconnaissance is still gained where a Terrain stands");
+        Check(e3.State.Cards.Values.All(c => c.DefinitionId != PlainOfGold), "and no Plain of Gold is created there");
+    }
+
+    private static void PlainOfGoldPlaysTerrain()
+    {
+        MatchEngine Rig(bool terrainInHand, out CardInstance plain, out CardInstance handTerrain)
+        {
+            var s = Table(Phase.Battle, 0);
+            Add(s, "training-crane-samurai", 0, Zone.Battlefield, province: 0);
+            Add(s, "training-lion-samurai", 1, Zone.Battlefield, province: 0);
+            plain = Add(s, PlainOfGold, 0, Zone.Battlefield, province: 0);
+            handTerrain = terrainInHand ? Add(s, "training-terrain", 0, Zone.Hand) : plain;
+            return MatchEngine.FromTestState(s);
+        }
+        var e = Rig(true, out var plain, out var terrain);
+        Accept(e, Offer(e, 0, "plain-gold-play-terrain", plain.Id, terrain.Id));
+        Check(e.State.Cards[plain.Id].Zone != Zone.Battlefield, "the Plain of Gold was destroyed");
+        Check(e.State.AdditionalActions.Any(g => g.PlayerId == 0 && g.ScopeCardIds?.Contains(terrain.Id) == true), "an additional Battle action was granted for that Terrain");
+        Eq(e.State.PriorityPlayerId, 0, "its player keeps the opportunity to take it");
+        Accept(e, new GameCommand("playStrategy", 0, e.Version, terrain.Id));
+        Eq(e.State.Cards[terrain.Id].Zone, Zone.Battlefield, "the Terrain was played at the battlefield");
+        Check(!e.State.AdditionalActions.Any(g => g.PlayerId == 0), "playing it spent the additional action");
+        Eq(e.State.PriorityPlayerId, 1, "and the opportunity passes on");
+
+        // No Terrain in hand: nothing to target.
+        var e2 = Rig(false, out var plain2, out _);
+        Check(!CanUse(e2, 0, "plain-gold-play-terrain", plain2.Id), "not offered without a Terrain in hand");
+        // A card that is not a Terrain is not a legal target.
+        var s3 = Table(Phase.Battle, 0);
+        Add(s3, "training-crane-samurai", 0, Zone.Battlefield, province: 0);
+        Add(s3, "training-lion-samurai", 1, Zone.Battlefield, province: 0);
+        var plain3 = Add(s3, PlainOfGold, 0, Zone.Battlefield, province: 0);
+        Add(s3, "training-follower", 0, Zone.Hand);
+        var e3 = MatchEngine.FromTestState(s3);
+        Check(!Batch336Support.Options(e3, 0, "plain-gold-play-terrain", plain3.Id).Any(a => a.Enabled), "a Follower in hand is not a Terrain");
     }
 
     // ---- The Aerie ---------------------------------------------------------------------------------------------------------------------------------------------------------

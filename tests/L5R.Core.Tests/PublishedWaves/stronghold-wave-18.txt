@@ -5,3 +5,5 @@ oracle-l5r-7484
 oracle-l5r-7623
 oracle-l5r-7879
 oracle-l5r-7949
+oracle-l5r-8105
+oracle-l5r-10012

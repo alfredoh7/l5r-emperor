@@ -3599,6 +3599,14 @@ public static class AbilityCatalog
                 new("honor", "player", "If he is Kolat, Ninja, or Shadowlands, you control an Inquisitor and it is not your turn: a player gains or loses 2 Honor", 0, 0, Resolution: new(BranchCondition.TargetKolatNinjaOrShadowlandsWithInquisitorOffTurn, HonorChoice.Options(2), HonorChoice.None))]),
         // The Aerie (oracle-l5r-7949): "Iaijutsu Battle: Even if this card is bowed, choose your performing unbowed Samurai and target another player's Personality: Your Samurai duels the Personality.
         // Bow and dishonor the duel's loser. The winner's controller gains 1 Honor." -- an unrefusable duel (Chi), outcome in Dueling.cs.
+        // The Golden Plains (oracle-l5r-8105): "Recon Reaction: After engaging: You have Reconnaissance at the current battlefield. Create a Terrain Strategy with the ability, \"Battle: If this card is in
+        // play, destroy it and target a Terrain in your hand: Take an additional Battle action to play it.\" Put it into play there." -- Daidoji Yuki's engage-recon plus a created Terrain (the Plain of Gold,
+        // oracle-l5r-10012, CreatedCardEntry.cs); a battlefield that already holds a Terrain has no room for it, so only the Reconnaissance happens then.
+        ["golden-plains-recon"] = new("Reaction", "Recon Reaction: After engaging: You have Reconnaissance at the current battlefield. Create a Terrain Strategy with the ability, \"Battle: If this card is in play, destroy it and target a Terrain in your hand: Take an additional Battle action to play it.\" Put it into play there", "none",
+            Trigger: "after-engaging", ActionKeywords: ["Recon"], Creates: new(CardType.Strategy, ProxyId: "oracle-l5r-10012")),
+        // Plain of Gold (oracle-l5r-10012, the Terrain The Golden Plains creates): "Battle: If this card is in play, destroy it and target a Terrain in your hand: Take an additional Battle action to play it." -- the
+        // Terrain is removed, then an additional Battle action is granted for that one card (a Ring's scoped grant); playing the Terrain is the ordinary Terrain play, which spends it (PlayStrategy).
+        ["plain-gold-play-terrain"] = new("Battle", "If this card is in play, destroy it and target a Terrain in your hand: Take an additional Battle action to play it", "own-terrain-in-hand"),
         ["aerie-duel"] = new("Battle", "Iaijutsu Battle: Even if this card is bowed, choose your performing unbowed Samurai and target another player's Personality: Your Samurai duels the Personality. Bow and dishonor the duel's loser. The winner's controller gains 1 Honor",
             "enemy-personality", Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeywords: ["Samurai"], IssuesDuel: true, ActionKeywords: ["Iaijutsu"]),
         // The Shadow's Embrace pass (issue #476), batch 1: personality-wave-74. The declarative data only; every execution/validation helper, trait and small primitive is in
@@ -6160,6 +6168,8 @@ public sealed partial class MatchEngine
                 else if (ability.Target == "card-in-province")
                     Require(target.Zone == Zone.Province, "Choose a card in a province.");
                 // Nishimura (Emperor Edition Personality pass, issue #477 batch 6): "a Kiho or Weapon from your hand" -- a Kiho Strategy or a Weapon Item in the acting player's own hand.
+                else if (ability.Target == "own-terrain-in-hand") // Plain of Gold (Emperor Edition Stronghold pass, issue #486 batch 2)
+                    Require(target.OwnerId == player.Id && target.Zone == Zone.Hand && player.Hand.Contains(target.Id) && type == CardType.Strategy && Keyword(target, "Terrain"), "Choose a Terrain in your hand.");
                 else if (ability.Target == "own-hand-kiho-or-weapon")
                     Require(target.OwnerId == player.Id && target.Zone == Zone.Hand && player.Hand.Contains(target.Id) && (Keyword(target, "Kiho") || Keyword(target, "Weapon")), "Choose a Kiho or a Weapon in your hand.");
                 // Essence of Undeath: "your dead Personality".
@@ -9484,7 +9494,7 @@ public sealed partial class MatchEngine
                 if (RunForgottenLegacyBatch2Effect(id, ability, command, player, source, target, consumedGrant)) return;
                 break;
             // Emperor Edition Stronghold pass (issue #486), batch 2: every case is in EmperorStrongholdBatch2.cs; true means the action paused (an Attack's reaction window, a choice).
-            case "palace-dawn-boost": case "pillars-virtue-additional-action": case "chugo-honor-reduce": case "chugo-melee": case "torch-protect": case "torch-move": case "temple-purity-weaken":
+            case "golden-plains-recon": case "plain-gold-play-terrain": case "palace-dawn-boost": case "pillars-virtue-additional-action": case "chugo-honor-reduce": case "chugo-melee": case "torch-protect": case "torch-move": case "temple-purity-weaken":
                 if (RunEmperorStrongholdBatch2Effect(id, command, ability, player, source, target, consumedGrant, playedFromDiscard, opponentHonorBeforeBattleAction, bowedBeforeAction, preExistingGrants)) return;
                 break;
             // Emperor Edition Personality pass (issue #477), batch 5: every case is in EmperorPersonalityBatch5.cs; true means the action paused (a choice, a created card's entry window).
@@ -10583,6 +10593,7 @@ public sealed partial class MatchEngine
                 }
                 // Kyuden Hida - exp: each Personality of the army is a candidate on its own (a click names one); several are named together on CardIds.
                 string?[] candidates = ability.Target switch { "none" or "provinces" or "any-province" or "enemy-province" or "player" => new string?[] {null}, "own-army-personalities" => armyIds.Cast<string?>().ToArray(), "hand" => player.Hand.ToArray(),
+                    "own-terrain-in-hand" => player.Hand.Where(h => Definition(Card(h)).Type == CardType.Strategy && Keyword(Card(h), "Terrain")).Cast<string?>().ToArray(),
                     "spell-or-reserve-in-hand" => player.Hand.Where(h => Definition(Card(h)).Type == CardType.Spell || Keyword(Card(h), "Reserve")).Cast<string?>().ToArray(),
                     // Forthrightness (The Shadow's Embrace pass, issue #476 batch 3): another Strategy in the acting player's own hand.
                     "own-other-strategy-in-hand" => player.Hand.Where(h => h != source?.Id && Definition(Card(h)).Type == CardType.Strategy).Cast<string?>().ToArray(),

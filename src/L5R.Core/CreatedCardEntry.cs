@@ -63,7 +63,8 @@ public sealed partial class MatchEngine
         if (CreatedCards.IsTerrain(scan))
         {
             Require(_state.CurrentBattleProvince is not null, NoBattlefieldForTerrain);
-            Require(!_state.Cards.Values.Any(c => c.Zone == Zone.Battlefield && c.ProvinceIndex == _state.CurrentBattleProvince && Keyword(c, "Terrain")), "This battlefield already has a Terrain in play.");
+            // The Golden Plains (issue #486): its Reaction still gives Reconnaissance where a Terrain already stands; only the creation has no room then.
+            Require(command.AbilityId == "golden-plains-recon" || !_state.Cards.Values.Any(c => c.Zone == Zone.Battlefield && c.ProvinceIndex == _state.CurrentBattleProvince && Keyword(c, "Terrain")), "This battlefield already has a Terrain in play.");
         }
         if (!CreatedCards.IsAttachment(scan.Type)) return;
         var hosts = CreateHosts(command, spec);

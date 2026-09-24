@@ -1956,8 +1956,12 @@ public sealed partial class MatchEngine
             NoteForthrightnessStrategyAction(command.PlayerId,card);
             ResolveForthrightnessWatches(command.PlayerId,card);
             var terrainGrant=CrowdedStreetsDefenderGrant(command.PlayerId,card);
-            if(OpenEntryReactionWindow(command.PlayerId,card,terrainGrant?command.PlayerId:1-command.PlayerId)) return;
-            NextAction(command.PlayerId,terrainGrant);
+            // Plain of Gold (Emperor Edition Stronghold pass, issue #486 batch 2): "Take an additional Battle action to play it" -- a grant scoped to this very card is spent by its play, and the
+            // player keeps priority only while he holds another.
+            var scopedGrantUsed=_state.AdditionalActions.Any(g=>g.PlayerId==command.PlayerId && GrantUsableNow(g) && g.ScopeCardIds is not null && g.ScopeCardIds.Contains(card.Id)) && ConsumeAdditionalActionGrant(command.PlayerId,card.Id);
+            var scopedStays=scopedGrantUsed && _state.AdditionalActions.Any(g=>g.PlayerId==command.PlayerId && Forfeitable(g));
+            if(OpenEntryReactionWindow(command.PlayerId,card,terrainGrant||scopedStays?command.PlayerId:1-command.PlayerId)) return;
+            NextAction(command.PlayerId,terrainGrant||scopedStays);
             return;
         }
         var target=Card(command.TargetId);

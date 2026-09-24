@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Build Stronghold wave 18 (Emperor Edition Stronghold pass, issue #486, batch 2): Palace of the Breaking Dawn, Pillars of Virtue, Shiro Chugo, Steel Soul Dojo, Suitengu's Torch,
-Temple of Purity and The Aerie. (The Golden Plains is not published: its created Terrain Strategy has no scan -- see tools/content/ee_sh_batch2_blockers.json.)
+Temple of Purity, The Aerie and The Golden Plains, plus the Terrain Strategy The Golden Plains creates (oracle-l5r-10012, "Plain of Gold", a created-only card: the follower-wave-24
+precedent). Its scan was supplied by Mendon on 2026-09-24, and its receipt carries an honest working_copy block (429x600 WebP q90, not resized).
 
 Only the cards this batch actually wired are published here (an unwired card is never published with a blank ability list). Every scan was read by eye; the published Text is the
 scan's own wording (the printing's text, not the catalogue's reworded Oracle text, where they differ), and each source receipt (with the working copy's sha256) is recorded next to the wave.
@@ -24,15 +25,19 @@ ABILITIES: dict[int, list[str]] = {
     7623: ["torch-protect", "torch-move"],  # Suitengu's Torch
     7879: ["temple-purity-weaken"],  # Temple of Purity
     7949: ["aerie-duel"],  # The Aerie
+    8105: ["golden-plains-recon"],  # The Golden Plains
+    10012: ["plain-gold-play-terrain"],  # Plain of Gold: the Terrain Strategy The Golden Plains creates (a created-only card, never in a deck)
 }
 OVERRIDE: dict[int, dict] = {
     5863: {"Effect": "palace-breaking-dawn"},
     7484: {"Effect": "steel-soul-dojo"},
+    10012: {"Type": "Strategy", "CreatedOnly": True},
 }
 # The scans' own wording, where the catalogue's Oracle text is reworded.
 TEXT: dict[int, str] = {
     5863: "Your Ronin cards enter play paying 1 less Gold and ignoring Honor Requirements." + NL
           + "Battle: Even if this card is bowed, choose your performing opposed Ronin Personality: Give him +2F.",
+    10012: "May not be included in decks." + NL + "Battle: If this card is in play, destroy it and target a Terrain in your hand: Take an additional Battle action to play it.",
 }
 
 
