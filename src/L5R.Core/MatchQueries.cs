@@ -258,7 +258,7 @@ public sealed partial class MatchEngine
             if(announcePending.PlayerId==playerId)
             {
                 var card=Card(announcePending.CardId!);
-                foreach(var reactionId in AbilityIdsOf(card).Where(a=>AbilityCatalog.All.TryGetValue(a,out var def) && def.Timing=="Reaction" && def.Trigger=="own-ranged-action-announced"))
+                foreach(var reactionId in AbilityIdsOf(card).Where(a=>AbilityCatalog.All.TryGetValue(a,out var def) && def.Timing=="Reaction" && def.Trigger is "own-ranged-action-announced" or EntrenchedTrigger))
                     AddReaction(card,reactionId);
             }
             Add("declineReaction","Pass reaction",Command("declineReaction"));
