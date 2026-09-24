@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Begin approved #448 duel concession and Focus Effect presentation in isolated current-main branch.",
+  "validation": "Live issue/open PR review complete; implementation and native validation pending.",
+  "remaining": "Implement controls, source-ordered choice beats, native checks, prepared Mac/Windows previews and Mendon review. No merge.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/448",
+  "branch": "codex/448-duel-followups",
+  "updated": "2026-09-24T01:24:55.232142+00:00"
+}
