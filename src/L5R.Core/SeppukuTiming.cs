@@ -64,6 +64,7 @@ public sealed partial class MatchEngine
         nameof(MatchState.PendingDelayedDestructions),     // destructions put off until the turn ends; no one is deciding anything
         nameof(MatchState.PendingEndPhaseRecruits),        // Akodo Kobi's delayed recruits, resolved at the next End Phase; no one is deciding anything
         nameof(MatchState.PendingGrapplingBows),           // Grappling the Snake's bows applied once the action resolves (Seeds of Decay, issue #453); no one is deciding anything
+        nameof(MatchState.PendingEndPhaseDraws),           // Eternal Victory Dojo's delayed draws, taken as the next End Phase begins (issue #486); no one is deciding anything
     ];
 
     /// <summary>The names the guard test compares with every <c>Pending*</c> property of <see cref="MatchState"/>.</summary>

@@ -385,6 +385,7 @@ public sealed partial class MatchEngine
         // "after the resolution of your [keyword] action" traits fire once its whole outcome has applied.
         FireAfterOwnActionTraits(AbilityCatalog.All[duel.AbilityId], challengerPlayerId, duel.SourceCardId is null ? null : Card(duel.SourceCardId));
         FireCowedAndDefeatedActionWatches(challengerPlayerId, null, duel.ChallengedId); // The Shadow's Embrace pass (issue #476), batch 3: a challenge targets the challenged Personality.
+        MiddayShadowPerformerActionEnded(performer); // Emperor Edition Stronghold pass (issue #486), batch 1: the challenger performed the duel-issuing action.
         var draft = duel.ResultDraft!;
         _state.LastDuel = _state.LastDuel! with { Result = draft with {
             Consequences = _state.Events.Skip(duel.ResultEventStart).ToArray(),

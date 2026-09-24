@@ -49,18 +49,10 @@ public sealed partial class MatchEngine
         if (id == "murota-bow" && command.TargetId is not null && _state.Cards.TryGetValue(command.TargetId, out var murotaTarget))
             Require(!HasAttachments(murotaTarget) || source is not null && PerformedKeywordActionThisTurn(source.Id, "Dark Virtue"),
                 "The target must have no attachments unless Murota has performed a Dark Virtue action this turn.");
-        // Doji Rengetsu: "Discard the Imperial Favor to target..." -- a cost, so the Favor must be his to discard.
-        if (id == "rengetsu-disable") Require(_state.FavorPlayerId == player.Id, "You must control the Imperial Favor to discard it.");
+        // Doji Rengetsu: "Discard the Imperial Favor to target..." -- a cost, so the Favor must be his to discard (ValidateAbility asks every Favor discard, EmperorStrongholdBatch1.cs).
     }
 
     // ---- costs ----
-
-    private void DiscardFavorForBatch1(string id, PlayerState player)
-    {
-        if (id != "rengetsu-disable") return;
-        _state.FavorPlayerId = null;
-        Emit("favorDiscarded", $"{player.Name} discarded the Imperial Favor.", player.Id);
-    }
 
     private void CaptureBeforeCostsForBatch1(string id, GameCommand command)
     {

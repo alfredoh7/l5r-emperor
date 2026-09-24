@@ -42,14 +42,8 @@ public sealed partial class MatchEngine
         var playedFromDiscard = PlayedFromDiscard(ability, source);
         PayForAbility(command, player);
         PayCostOption(ability, command, player, source);
-        // The same list RunAbilityEffects discards the Favor for (Insulting Gesture's own discard was missing here: a negated one kept the Favor).
-        if (DiscardsImperialFavorAsCost(id))
-        {
-            _state.FavorPlayerId = null;
-            Emit("favorDiscarded", $"{player.Name} discarded the Imperial Favor.", player.Id);
-        }
-        DiscardFavorForBatch1(id, player); // Forgotten Legacy pass (issue #467), batch 1: Doji Rengetsu's Favor discard is a cost.
-        DiscardFavorForBatch4(id, player); // Emperor Edition Personality pass (issue #477), batch 4: Kakita Tadanobu's Favor discard is a cost.
+        // The same list RunAbilityEffects discards the Favor for (Insulting Gesture's own discard was missing here: a negated one kept the Favor); a Favor token in its place (Kyuden Otomo - exp).
+        if (IsFavorDiscardAbility(id)) DiscardImperialFavorCost(command, player);
         // A negated action was still performed (Forgotten Legacy pass, issue #467, batch 1: Daigotsu Murota's Dark Virtue record).
         RecordPerformedKeywordActions(ability, command, source);
         PayAbilityCosts(ability, command, player, source);

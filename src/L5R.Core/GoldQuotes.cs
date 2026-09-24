@@ -132,7 +132,7 @@ public sealed partial class MatchEngine
     private (string AbilityId, int Amount)? AlternateGoldSource(CardInstance card, PaymentSubject? paying = null)
     {
         foreach (var id in AbilityIdsOf(card))
-            if (AbilityCatalog.All.TryGetValue(id, out var ability) && (ability.PaymentProduction is not null || ability.PaymentDiscardsFocus)
+            if (AbilityCatalog.All.TryGetValue(id, out var ability) && (ability.PaymentProduction is not null || ability.PaymentDiscardsFocus) && ability.PaymentWhen is null // a conditional reactive source is ReactiveGoldSource's (Library of Rebirth)
                 && (!ability.PaymentActionsOnly || paying is { Kind: PaymentKind.Action or PaymentKind.Play or PaymentKind.Equip }) // Yasuki Tanimura (issue #477 batch 6): "When paying for an action".
                 && !(card.AbilityUses.TryGetValue(ability.UsageKey ?? id, out var used) && used == _state.TurnNumber)
                 && !AbilityDisabled(card, id)) // Forgotten Legacy pass (issue #467), batch 1: "it may not be used"

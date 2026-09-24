@@ -61,7 +61,7 @@ public partial class DeckBuilderScreen : Control
         _canvas.AddChild(_overlay);_overlay.Visible=false;_canvas.AddChild(_hover);_hover.Visible=false;_hover.MouseFilter=MouseFilterEnum.Ignore;
         Resized+=Fit;TreeExiting+=Scans.Close;TreeExiting+=()=>GetViewport().GuiEmbedSubwindows=_previousEmbed;Fit();ShowDecks();
     }
-    private DeckWorkshop NewDraft()=>new(Data.Cards.Select(c=>new DeckCardInfo(c.Id,c.Name,c.Types,c.DeckTypes,c.Definition?.Keywords?.ToArray()??c.Keywords,c.Playable,c.Definition?.CreatedOnly??false,c.Definition?.DeckCopyLimit,c.Definition is null?0:DeckWorkshop.FateMinimumReductionOf(c.Definition))));
+    private DeckWorkshop NewDraft()=>new(Data.Cards.Select(c=>new DeckCardInfo(c.Id,c.Name,c.Types,c.DeckTypes,c.Definition?.Keywords?.ToArray()??c.Keywords,c.Playable,c.Definition?.CreatedOnly??false,c.Definition?.DeckCopyLimit,c.Definition is null?0:DeckWorkshop.FateMinimumReductionOf(c.Definition),c.Definition is not null&&DeckWorkshop.StrategyCopyRuleOf(c.Definition),c.Definition is not null&&DeckWorkshop.BattleStrategyOf(c.Definition))));
     private static void Put(Control parent,Control child,float x,float y,float w,float h)
     {parent.AddChild(child);child.Position=new Vector2(x,y);child.Size=new Vector2(w,h);}
     private static void Place(Control child,float x,float y,float w,float h){child.Position=new Vector2(x,y);child.Size=new Vector2(w,h);}
