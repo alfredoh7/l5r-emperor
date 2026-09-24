@@ -133,7 +133,7 @@ Each batch's report recorded its rulings; the ones that matter most:
 The 64 newly bundled scans need a new catalogue art release. This cloud session is not permitted to create GitHub releases, and the full pack (about 450 MB) is too large to hand over. So it sends a small kit instead: the 64 new WebP-85 scans, the manifest and `assemble.py`. The kit rebuilds the exact zip from the previous release. `assemble.py` pins each entry's `create_system` header byte to 3, because Python writes 0 on Windows and a Windows rebuild would otherwise differ in bytes from identical scans. Mendon uploads the rebuilt zip as the release.
 
 - `catalogue-art-pr469-20260924-r1` (3297 scans, over pr460) was published first. It became stale when main merged the Gempukku pass (#468) with its own pack, `catalogue-art-pr461-20260924-r1` (3250 scans).
-- `catalogue-art-pr469-20260924-r2` covers both passes: 3314 scans, incremental over pr461, sha256 `a368e4f72c2f2bed0542461ea67492bafb99f812a93395cf6bec622f6c470c26`. The content suite passes 134/134 against its manifest. `content/catalogue-art-pack.json` and `src/L5R.Client/Content/catalogue-art.json` are pinned to it once the release exists.
+- `catalogue-art-pr469-20260924-r2` covers both passes: 3314 scans, incremental over pr461, sha256 `a368e4f72c2f2bed0542461ea67492bafb99f812a93395cf6bec622f6c470c26`. The content suite passes 134/134 against its manifest. Mendon uploaded it; GitHub's asset digest matches, and `content/catalogue-art-pack.json` and `src/L5R.Client/Content/catalogue-art.json` are pinned to it.
 
 ## Merge notes
 
