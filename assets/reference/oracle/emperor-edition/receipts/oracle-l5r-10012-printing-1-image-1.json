@@ -23,5 +23,18 @@
   "source_image_hash": "26/07",
   "source_url": "https://images.oracleofthevoid.com/l5r/26/07/printing_10012_1_master.jpg",
   "url_prefix": "https://images.oracleofthevoid.com/l5r/26/07/printing_10012_1_",
-  "width": 750
+  "width": 750,
+  "working_copy": {
+    "bytes": 71802,
+    "format": "WEBP",
+    "height": 600,
+    "path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-10012-printing-1-image-1.webp",
+    "sha256": "a7afa3c5da506208c4f5593c78d7eaac78c59167afc1b166f4a2630f71c1f9dc",
+    "source": {
+      "asset": "user-supplied scan (Mendon, converted from his PNG of the card; 429x600 WebP quality 90, not resized)",
+      "matched_by": "supplied by Mendon on 2026-09-24",
+      "release": null
+    },
+    "width": 429
+  }
 }

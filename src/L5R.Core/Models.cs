@@ -510,7 +510,9 @@ public sealed record FirstActionRestriction(int PlayerId, string? PerformerId, b
 /// default and only shape until issue #449. True (Akodo Tezuka: "play it for one of its Battle, Limited, or Open actions, as appropriate to the
 /// current phase") also admits Limited and Open -- each still gated by its own ordinary phase/active-player legality, so "as appropriate to the
 /// current phase" needs no extra check of its own.</param>
-public sealed record AdditionalActionGrant(int PlayerId, string[]? ScopeCardIds, bool FromDiscard = false, int? Battle = null, bool AnyDiscardTiming = false);
+///  <param name="RangedTargetId">Emperor Edition Stronghold pass (issue #486), batch 1 (Koshin Keep: "an additional Ranged Attack Battle action that may only target the same card"): when set, the
+/// grant is used only by a Ranged Attack that targets that card, and while the player holds it nothing else may be taken (EmperorStrongholdBatch1.cs).</param>
+public sealed record AdditionalActionGrant(int PlayerId, string[]? ScopeCardIds, bool FromDiscard = false, int? Battle = null, bool AnyDiscardTiming = false, string? RangedTargetId = null);
 
 /// <summary>A discard a player owes: they choose the card from their hand (Times of Strife, Daigotsu Bofana - exp's entry).
 /// Reason names the card or rule in the prompt and the event.</summary>
@@ -832,6 +834,10 @@ public sealed class MatchState
     // Entrenched Position (Forgotten Legacy pass, issue #467 batch 3): set by its Reaction inside an "announceReaction" window; the announced action then resolves negated
     // (ResolveNegatedAction: taken, its costs paid, no effects) when the window closes. Cleared as it is read.
     public bool AnnouncedActionNegated { get; set; }
+    // Emperor Edition Stronghold pass (issue #486), batch 2: the action (a "player|ability|card" key, EmperorStrongholdBatch2.ActionKey) whose effects will not be negated or delayed
+    // (Suitengu's Torch), and the action whose Honor gain and loss is reduced by 2 (Shiro Chugo). Each is read while that action resolves and replaced by the next action announced.
+    public string? UnnegatableActionKey { get; set; }
+    public string? HonorReducedActionKey { get; set; }
     // Entrenched Position: the battle (BattleNumber) in which the Attacker holds the first opportunity to act and the Defender has not yet had his first normal
     // opportunity to act or pass -- set when the Engage window closes with the Attacker holding it, cleared the moment the Attacker cedes priority (NextAction, Pass).
     public int AttackerLeadBattle { get; set; } = -1;
@@ -940,6 +946,8 @@ public sealed class MatchState
     public int[]? PhaseStartHonor { get; set; }
     public int[] PhaseBattleHonor { get; set; } = new int[2];
     public List<string[]> StarCrossedPairs { get; set; } = [];
+    // Emperor Edition Stronghold pass (issue #486), batch 3 (The Otoro Estate: "Look at all face-down cards in one player's provinces"): what a player was shown, private to that viewer.
+    public List<ProvinceSight> ProvinceSights { get; set; } = [];
     public ResolvedActionFacts? LastResolvedAction { get; set; }
     // Revenge (oracle-l5r-6302, issue #437): "another player's action has destroyed one of your Personalities since the end of your last Battle
     // action this battle" -- per player, set true whenever another player's action destroys one of theirs (FinishActionEffectTracking), cleared
@@ -994,6 +1002,13 @@ public sealed class MatchState
     public string? LastProvinceEntryCardId { get; set; }
     // An Insult Answered ("an action ... which caused you an Honor loss"): the players the currently-resolving action cost Honor, snapshotted into LastResolvedAction.HonorLosers.
     public List<int> CurrentActionHonorLosers { get; set; } = [];
+    // Emperor Edition Stronghold pass (issue #486), batch 1 (EmperorStrongholdBatch1.cs). Eternal Victory Dojo: "Draw a card after the next End Phase begins" -- one entry per draw owed, the player who
+    // draws it. Kyuden Otomo - exp: the players who took the Imperial Favor during the action now resolving (snapshotted into LastResolvedAction.FavorTakers). Hidden Falls Dojo: the provinces a
+    // player targeted this turn, and whether the additional Infantry Maneuvers Segment it grants is the segment in progress.
+    public List<int> PendingEndPhaseDraws { get; set; } = [];
+    public List<int> CurrentActionFavorTakers { get; set; } = [];
+    public List<HiddenFallsGrant> HiddenFallsGrants { get; set; } = [];
+    public bool ExtraInfantrySegment { get; set; }
     // Brotherhood Schism: the turn in which "Rings will not enter play if their owner has already put a Ring into play this turn" stands.
     public int RingSchismTurn { get; set; } = -1;
     // Moksha Patam (oracle-l5r-10121, issue #453 batch 5): "After an action resolves, if a player gained Honor from its effects" -- set by GainHonor on any
@@ -1054,6 +1069,8 @@ public sealed class ResolvedActionFacts
     public List<int> HonorLosers { get; set; } = [];
     // Emperor Edition Personality pass (issue #477), batch 5: the players whose hand the action put a card into (Isawa Kimi - exp 2).
     public List<int> HandRecipients { get; set; } = [];
+    // Emperor Edition Stronghold pass (issue #486), batch 1 (Kyuden Otomo - exp): the players who took the Imperial Favor during the action.
+    public List<int> FavorTakers { get; set; } = [];
 }
 
 // DeckPosition ("Top"/"Bottom") is the acting player's own upfront choice of where a card goes in
@@ -1084,7 +1101,10 @@ public sealed record GameCommand(string Type, int PlayerId, long ExpectedVersion
     string? CreatedCard = null,
     // Emperor Edition Personality pass (issue #477), batch 4 (Asahina Keigo): for each Gold source that produces "Gold equal to the Focus Value of a card discarded", the id of the
     // hand card the payer discards for it (source id -> hand card id). Null for every other payment.
-    Dictionary<string, string>? PaymentDiscards = null);
+    Dictionary<string, string>? PaymentDiscards = null,
+    // Emperor Edition Stronghold pass (issue #486), batch 1 (Hidden Falls Dojo: "Target one or two provinces"): the indices of the Defender's provinces the action targets; null for every other action
+    // (a single province rides in Province, as it always has).
+    int[]? Provinces = null);
 public sealed record CommandResult(bool Accepted, string? Error, long Version, GameEvent[] Events);
 public sealed record PaymentOption(string[] SourceIds, int Produced, int Cost, int Excess);
 // Basis (issue #303): the human-readable derivation of Cost, e.g. "Training samurai cost 5 - 2 (Clan
@@ -1225,5 +1245,12 @@ public sealed record MatchView(string ContentVersion, string Scenario, long Vers
     EitherOrView? PendingEitherOr = null,
     // The opposing player's variable payment (issue #373, see OpponentPayment.cs): PUBLIC -- both players see the first player's amount, the card and the
     // Honor at stake; only the paying player's view carries the payment quote and what each amount would do.
-    OpponentPaymentView? PendingOpponentPayment = null, DuelRecord? LastDuel = null);
+    OpponentPaymentView? PendingOpponentPayment = null, DuelRecord? LastDuel = null,
+    // Emperor Edition Stronghold pass (issue #486), batch 3 (see EmperorStrongholdBatch3.cs): the face-down province cards this viewer looked at this turn -- PRIVATE to the looker, null for
+    // everyone else. Never a card id: a face-down card is named by whose province and which.
+    ProvinceSightView[]? ProvinceSights = null);
+/// <summary>Engine-private record of one face-down province card a player looked at (MatchState.ProvinceSights). Turn is the turn number it was looked at.</summary>
+public sealed record ProvinceSight(int ViewerId, int OwnerId, int Province, string CardId, string DefinitionId, int Turn);
+/// <summary>PRIVATE to the looking player: what the face-down card in a province is (its owner's province Province).</summary>
+public sealed record ProvinceSightView(int OwnerId, int Province, string DefinitionId, CardDefinition Definition);
 public sealed record ReplayRecord(string ContentVersion, string Scenario, ulong Seed, GameCommand[] Commands, Deck[]? CustomDecks = null);

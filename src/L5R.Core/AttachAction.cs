@@ -63,6 +63,9 @@ public static class AttachWielder
     /// <summary>The Personality chosen for the ability's "personality" target slot (Forgotten Legacy pass, issue #467, batch 1: Daigotsu Gyoken's "Target your Personality
     /// and a non-Unique attachment in any player's discard pile: Attach it to the Personality") -- a TARGET, not a performer, so the source still performs.</summary>
     public const string PersonalitySlot = "personality-slot";
+    /// <summary>The Personality whose entering play opened the window this Reaction is used in (Emperor Edition Stronghold pass, issue #486 batch 3, The Spider's Web: "After your
+    /// Personality enters play: ... attach a Weapon to him").</summary>
+    public const string Entered = "entered";
 }
 
 /// <summary>An "attach a card" effect. See the file comment; Types is required for a Target attach (the kinds of card the ability names).
@@ -102,6 +105,8 @@ public sealed partial class MatchEngine
     private CardInstance? WielderOfAttach(AttachSpec spec, GameCommand command, CardInstance? source) =>
         spec.Wielder == AttachWielder.Performer
             ? (command.PerformerId is not null && _state.Cards.TryGetValue(command.PerformerId, out var performer) ? performer : null)
+            : spec.Wielder == AttachWielder.Entered
+                ? (_state.PendingChoice?.CardId is { } enteredId && _state.Cards.TryGetValue(enteredId, out var entered) ? entered : null)
             : spec.Wielder == AttachWielder.PersonalitySlot
                 ? (command.Selections?.FirstOrDefault(s => s.Slot == "personality")?.CardIds is [var slotId, ..] && _state.Cards.TryGetValue(slotId, out var targeted) ? targeted : null)
                 : source;

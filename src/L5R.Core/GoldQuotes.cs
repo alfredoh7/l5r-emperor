@@ -132,7 +132,7 @@ public sealed partial class MatchEngine
     private (string AbilityId, int Amount)? AlternateGoldSource(CardInstance card, PaymentSubject? paying = null)
     {
         foreach (var id in AbilityIdsOf(card))
-            if (AbilityCatalog.All.TryGetValue(id, out var ability) && (ability.PaymentProduction is not null || ability.PaymentDiscardsFocus)
+            if (AbilityCatalog.All.TryGetValue(id, out var ability) && (ability.PaymentProduction is not null || ability.PaymentDiscardsFocus) && ability.PaymentWhen is null // a conditional reactive source is ReactiveGoldSource's (Library of Rebirth)
                 && (!ability.PaymentActionsOnly || paying is { Kind: PaymentKind.Action or PaymentKind.Play or PaymentKind.Equip }) // Yasuki Tanimura (issue #477 batch 6): "When paying for an action".
                 && !(card.AbilityUses.TryGetValue(ability.UsageKey ?? id, out var used) && used == _state.TurnNumber)
                 && !AbilityDisabled(card, id)) // Forgotten Legacy pass (issue #467), batch 1: "it may not be used"
@@ -519,6 +519,8 @@ public sealed partial class MatchEngine
         if (QuelsaAttachDiscount(card, target) is > 0 and var quelsaAttach) { raw -= quelsaAttach; kind = GoldCostKind.Derived; basis += $" − {quelsaAttach} (Quelsa)"; }
         // Whispering Archive (The Shadow's Embrace pass, issue #476 batch 6): "Your Spells enter play paying 1 less Gold."
         if (WhisperingArchiveDiscount(card, playerId) is > 0 and var archiveDiscount) { raw -= archiveDiscount; basis += $" − {archiveDiscount} (Whispering Archive)"; }
+        // Palace of the Breaking Dawn (Emperor Edition Stronghold pass, issue #486 batch 2): "Your Ronin cards enter play paying 1 less Gold."
+        if (RoninEntryDiscount(card, playerId) is > 0 and var roninDiscount) { raw -= roninDiscount; basis += $" − {roninDiscount} (Palace of the Breaking Dawn)"; }
         // Daigotsu Misaki (Emperor Edition Personality pass, issue #477): "Followers attaching to Misaki enter play paying 2 less Gold" -- any attach, from a hand or a discard pile.
         if (FollowerAttachDiscount(card, target) is > 0 and var misakiDiscount) { raw -= misakiDiscount; kind = GoldCostKind.Derived; basis += $" − {misakiDiscount} ({Definition(target).Name})"; }
         if (raw < 0) basis += " (min 0)";

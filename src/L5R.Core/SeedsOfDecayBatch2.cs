@@ -112,6 +112,12 @@ public sealed partial class MatchEngine
                 Dishonor(card, watch.BeneficiaryPlayerId);
                 GainHonor(card.OwnerId, -Definition(card).PersonalHonor, watch.Source);
                 break;
+            // Midday Shadow Court (Stronghold pass, issue #486 batch 1): "dishonor him and his controller loses 1 Honor".
+            case WatchMiddayShadow:
+                Emit("watchFired", $"{watch.Source}: {Definition(card).Name} {what}.", watch.BeneficiaryPlayerId, card.Id);
+                Dishonor(card, watch.BeneficiaryPlayerId);
+                GainHonor(card.OwnerId, -1, watch.Source);
+                break;
             // Fair Warning: "gain 2 Honor". Social Grace (The Shadow's Embrace pass, issue #476, batch 4): the same, each time.
             case WatchSocialGrace:
             case WatchFairWarning:
@@ -400,7 +406,7 @@ public sealed partial class MatchEngine
                 break;
             }
             case "baiko-shame": GainHonor(target!.OwnerId, -1, "Yasuki Baiko", source); break;
-            case "baiko-favor": _state.FavorPlayerId = player.Id; Emit("favorTaken", $"{player.Name} took the Imperial Favor (Yasuki Baiko).", player.Id, source?.Id); break;
+            case "baiko-favor": TakeImperialFavor(player.Id); Emit("favorTaken", $"{player.Name} took the Imperial Favor (Yasuki Baiko).", player.Id, source?.Id); break;
             case "tsujiken-exp-bow": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;
             case "tsujiken-exp-straighten": Straighten(target!); break;
             case "tsujiken-exp-draw": Draw(player); break;

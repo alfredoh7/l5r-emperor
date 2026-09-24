@@ -625,10 +625,13 @@ public static class CardCatalog
             .Concat(PublishedContent.FollowerWave30.Cards)
             .Concat(PublishedContent.EventWave7.Cards)
             .Concat(PublishedContent.StrongholdWave16.Cards)
+            .Concat(PublishedContent.StrongholdWave17.Cards) // Emperor Edition Stronghold pass (issue #486), batch 1
+            .Concat(PublishedContent.StrongholdWave19.Cards)
             .Concat(PublishedContent.CelestialWave7.Cards)
             .Concat(PublishedContent.PersonalityWave74.Cards)
             .Concat(PublishedContent.PersonalityWave68.Cards)
             .Concat(PublishedContent.PersonalityWave71.Cards)
+            .Concat(PublishedContent.StrongholdWave18.Cards) // Emperor Edition Stronghold pass (issue #486), batch 2
             .ToDictionary(c => c.Id, StringComparer.Ordinal);
     }
 }

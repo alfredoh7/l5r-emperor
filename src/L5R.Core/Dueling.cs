@@ -85,6 +85,8 @@ public sealed partial class MatchEngine
         if (duel.AbilityId == "shigeyuki-duel") MoveHome(Card(duel.ChallengedId), false);
         // Duel to First Blood (The Shadow's Embrace pass, issue #476 batch 3): "He may refuse; if he did, draw two cards." -- the challenger's player draws them.
         if (duel.AbilityId is "first-blood-duel-battle" or "first-blood-duel-limited") { Draw(Player(duel.ChallengerPlayerId)); Draw(Player(duel.ChallengerPlayerId)); }
+        // Watchful Eye Dojo (Emperor Edition Stronghold pass, issue #486 batch 3): "He may refuse; if he did, dishonor him and gain 1 Honor."
+        if (duel.AbilityId == "watchful-eye-duel") WatchfulEyeRefusal(duel);
         _state.LastDuel = _state.LastDuel! with { Result = new("Refused", null, [], 0, 0, 0, 0, [], _state.Events.Skip(refusalStart).ToArray(), [], _state.Version + 1, _state.Phase, _state.PriorityPlayerId, "Challenge refused") };
         var challengerPlayerId = duel.ChallengerPlayerId;
         _state.PendingDuel = null;
@@ -385,6 +387,7 @@ public sealed partial class MatchEngine
         // "after the resolution of your [keyword] action" traits fire once its whole outcome has applied.
         FireAfterOwnActionTraits(AbilityCatalog.All[duel.AbilityId], challengerPlayerId, duel.SourceCardId is null ? null : Card(duel.SourceCardId));
         FireCowedAndDefeatedActionWatches(challengerPlayerId, null, duel.ChallengedId); // The Shadow's Embrace pass (issue #476), batch 3: a challenge targets the challenged Personality.
+        MiddayShadowPerformerActionEnded(performer); // Emperor Edition Stronghold pass (issue #486), batch 1: the challenger performed the duel-issuing action.
         var draft = duel.ResultDraft!;
         _state.LastDuel = _state.LastDuel! with { Result = draft with {
             Consequences = _state.Events.Skip(duel.ResultEventStart).ToArray(),
@@ -508,9 +511,12 @@ public sealed partial class MatchEngine
             // Duel of Haiku (oracle-l5r-2245, Forgotten Legacy pass issue #467 batch 3): "The winner gains 1 Honor. Bow and dishonor the loser." -- the winning
             // Personality's controller gains the Honor (a tie has no winner); every loser is bowed and dishonored.
             // Duel to First Blood (The Shadow's Embrace pass, issue #476 batch 3): "Bow the duel's loser."
-            case "first-blood-duel-battle": case "first-blood-duel-limited":
+            // Watchful Eye Dojo (Emperor Edition Stronghold pass, issue #486 batch 3): "Bow the duel's loser."
+            case "first-blood-duel-battle": case "first-blood-duel-limited": case "watchful-eye-duel":
                 foreach (var id in loserIds) if (InPlay(Card(id)) && !StalwartNegatesBow(Card(id), challengerPlayerId)) Card(id).Bowed = true;
                 break;
+            // The Aerie (Emperor Edition Stronghold pass, issue #486 batch 2): Duel of Haiku's outcome.
+            case "aerie-duel": AerieDuelOutcome(winnerId, loserIds, challengerPlayerId); break;
             case "duel-of-haiku":
                 if (winnerId is not null) GainHonor(Card(winnerId).OwnerId, 1, "Duel of Haiku");
                 foreach (var id in loserIds)

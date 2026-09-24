@@ -1,0 +1,205 @@
+{
+  "Profile": "stronghold-wave-19",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-8182",
+      "Name": "The Khan's Estate",
+      "Type": "Stronghold",
+      "Clan": "Unicorn",
+      "GoldCost": 0,
+      "GoldProduction": 5,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 7,
+      "StartingHonor": 4,
+      "Text": "Tactical Limited: Choose your performing Tactician: He may not be assigned to attack this turn. Draw a card.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8182.jpg",
+      "Keywords": [],
+      "Focus": 0,
+      "Abilities": [
+        "khans-estate-draw"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-8246",
+      "Name": "The Otoro Estate",
+      "Type": "Stronghold",
+      "Clan": "Scorpion",
+      "GoldCost": 0,
+      "GoldProduction": 4,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 7,
+      "StartingHonor": 0,
+      "Text": "You do not lose Honor from Ninja cards you own.\nNinja Open: Look at all face-down cards in one player's provinces.\nNinja Battle: Choose your performing unbowed Ninja Personality: Ranged 4 Attack. You may move your Ninja home.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8246.jpg",
+      "Keywords": [],
+      "Focus": 0,
+      "Abilities": [
+        "otoro-look",
+        "otoro-attack",
+        "otoro-attack-move"
+      ],
+      "Effect": "otoro-estate"
+    },
+    {
+      "Id": "oracle-l5r-8316",
+      "Name": "The Shadow's Lair",
+      "Type": "Stronghold",
+      "Clan": "Spider",
+      "GoldCost": 0,
+      "GoldProduction": 4,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "You do not lose Honor from Ninja and Fate cards you own.\nNinja Battle: Once per battle, even if this card is bowed and even if you control no units at the current battlefield, target one or more unopposed units with combined total Force of 9 or lower, or one opposed unit: Move each target home; this will not be negated or delayed if you control a Ninja.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8316.jpg",
+      "Keywords": [],
+      "Focus": 0,
+      "Abilities": [
+        "shadows-lair-move"
+      ],
+      "Effect": "shadows-lair"
+    },
+    {
+      "Id": "oracle-l5r-8352",
+      "Name": "The Spider's Web",
+      "Type": "Stronghold",
+      "Clan": "Spider",
+      "GoldCost": 0,
+      "GoldProduction": 4,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 7,
+      "StartingHonor": 1,
+      "Text": "After your Personality enters play: You may attach a Weapon to him from your hand, paying all costs but, once per turn, paying 4 less Gold if he is a Kensai.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8352.jpg",
+      "Keywords": [],
+      "Focus": 0,
+      "Abilities": [
+        "spiders-web-attach",
+        "spiders-web-attach-kensai"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-8373",
+      "Name": "The Temple of Death",
+      "Type": "Stronghold",
+      "Clan": "Unicorn",
+      "GoldCost": 0,
+      "GoldProduction": 5,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 7,
+      "StartingHonor": 4,
+      "Text": "Limited: Target a discarded Personality: He becomes honorably dead.\nBattle/Open: If you own a dead Personality, choose your performing unbowed Shugenja and target a Personality: Straighten him. You may bow him if this is the Combat Segment.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8373.jpg",
+      "Keywords": [
+        "Experienced",
+        "Temple"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "temple-of-death-dead",
+        "temple-of-death-straighten",
+        "temple-of-death-straighten-bow"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9246",
+      "Name": "Watchful Eye Dojo",
+      "Type": "Stronghold",
+      "Clan": "Dragon",
+      "GoldCost": 0,
+      "GoldProduction": 4,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 7,
+      "StartingHonor": 5,
+      "Text": "Iaijutsu Open: Even if this card is bowed, choose your performing unbowed Personality and target another player's Personality: Your performer challenges the target. He may refuse; if he did, dishonor him and gain 1 Honor. Bow the duel's loser.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9246.jpg",
+      "Keywords": [
+        "Dojo"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "watchful-eye-duel"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9267",
+      "Name": "Waystation of the Path",
+      "Type": "Stronghold",
+      "Clan": "Phoenix",
+      "GoldCost": 0,
+      "GoldProduction": 4,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 6,
+      "StartingHonor": 6,
+      "Text": "Reaction: After another player's action targets your performing Henshin, target another of your Personalities. The Henshin is reborn. Transfer his attachments and tokens to the other Personality. The action's effects that would destroy your Henshin instead overlay him onto the Personality.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9267.jpg",
+      "Keywords": [
+        "Temple"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "waystation-reborn"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9459",
+      "Name": "Yasuki Palaces",
+      "Type": "Stronghold",
+      "Clan": "Crab",
+      "GoldCost": 0,
+      "GoldProduction": 5,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 7,
+      "StartingHonor": 3,
+      "Text": "This card produces 1 less Gold when paying for a Personality.\nBattle: Even if this card is bowed and even if you control no units at the current battlefield, target an attacking Personality and pay 3 Gold: Move him home. If he moved, his controller loses 1 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9459.jpg",
+      "Keywords": [
+        "Experienced"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "yasuki-palaces-move"
+      ],
+      "Effect": "yasuki-palaces-gold"
+    }
+  ],
+  "Decks": []
+}

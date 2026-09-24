@@ -39,7 +39,7 @@ public sealed partial class MatchEngine
                 }
                 return false;
             case "makiko-favor":
-                _state.FavorPlayerId = player.Id;
+                TakeImperialFavor(player.Id);
                 Emit("favorTaken", $"{player.Name} took the Imperial Favor ({Definition(source!).Name}).", player.Id, source!.Id);
                 return false;
             case "shakash-bow": case "osawa-bow":

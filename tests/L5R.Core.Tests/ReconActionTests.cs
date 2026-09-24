@@ -87,7 +87,7 @@ internal static class ReconActionTests
         foreach(var k in new[]{"Elite","Gaijin","Scout"}) Check(scouts.Keywords!.Contains(k),$"Master Scouts printed keyword {k}");
         Eq(scouts.Text,"After the resolution of a Recon action you took: Give this card +1F."); Eq(scouts.Effect,"force-after-own-recon-action"); Eq(scouts.Abilities!.Length,0);
         // The classification: exactly Yuki's real ability and the training fixtures print a Recon tag (other action keywords, Political since issue #338, are separate tags); every published Recon-prefixed text is tagged.
-        Eq(string.Join(",",AbilityCatalog.All.Where(a=>a.Value.ActionKeywords?.Contains("Recon")==true).Select(a=>a.Key).OrderBy(x=>x,StringComparer.Ordinal)),"jades-roar-recon,kyuden-hida-exp-scouts,qalyar-recon-minus,qalyar-recon-plus,training-recon-attack,training-recon-duel,training-recon-open,wasteland-scout-recon,yuki-engage-recon"); // + jades-roar-recon (issue #461); + wasteland-scout-recon (issue #476 batch 6)
+        Eq(string.Join(",",AbilityCatalog.All.Where(a=>a.Value.ActionKeywords?.Contains("Recon")==true).Select(a=>a.Key).OrderBy(x=>x,StringComparer.Ordinal)),"golden-plains-recon,hidden-falls-recon,jades-roar-recon,koshin-keep-recon,kyuden-hida-exp-scouts,qalyar-recon-minus,qalyar-recon-plus,training-recon-attack,training-recon-duel,training-recon-open,wasteland-scout-recon,yuki-engage-recon"); // + jades-roar-recon (issue #461); + wasteland-scout-recon (issue #476 batch 6); + hidden-falls-recon and koshin-keep-recon (issue #486 Stronghold pass, batch 1)
     }
 
     // ---- the trait ----------------------------------------------------------------------------------------------

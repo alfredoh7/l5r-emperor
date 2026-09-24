@@ -308,6 +308,9 @@ public sealed partial class MatchEngine
             // Yasuki Tanimura (Emperor Edition Personality pass, issue #477 batch 6): another player's Battle action targets him.
             case "tanimura-political-pay":
                 return TanimuraApplies(card, subject, affected);
+            // The Waystation of the Path (Emperor Edition Stronghold pass, issue #486 batch 3): another player's action targets the controller's Henshin.
+            case "waystation-reborn":
+                return WaystationApplies(card, subject, affected);
             default:
                 return false;
         }
@@ -356,6 +359,7 @@ public sealed partial class MatchEngine
             "shifting-terrain-redirect" => ShiftingTerrainCandidates(card, subject).Select(c => ((string?)c.Id, (string?)$"{AbilityCatalog.All[abilityId].Label} · {Definition(c).Name} ({c.Id})")),
             "castle-of-order-redirect" => CastleOfOrderCandidates(card, subject, Card(subject.TargetId!)).Select(c => ((string?)c.Id, (string?)$"{AbilityCatalog.All[abilityId].Label} · {Definition(c).Name} ({c.Id})")),
             // Forgotten Legacy pass (issue #467), batch 5: Ryoshun's Guidance, one option per card the action may be redirected to.
+            "waystation-reborn" => WaystationCandidates(card, Card(subject.TargetId!)).Select(c => ((string?)c.Id, (string?)$"{AbilityCatalog.All[abilityId].Label} · {Definition(c).Name} ({c.Id})")),
             "kisada-redirect" => KisadaRedirectCandidates(card, subject).Select(c => ((string?)c.Id, (string?)$"{AbilityCatalog.All[abilityId].Label} · {Definition(c).Name} ({c.Id})")),
             "ryoshun-redirect" => RyoshunRedirectCandidates(card, subject, Card(subject.TargetId!)).Select(c => ((string?)c.Id, (string?)$"{AbilityCatalog.All[abilityId].Label} · {Definition(c).Name} ({c.Id})")),
             _ => [(null, null)]

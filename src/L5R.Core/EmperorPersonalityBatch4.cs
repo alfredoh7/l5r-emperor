@@ -24,8 +24,7 @@ public sealed partial class MatchEngine
     {
         // Bayushi Waru: "If you control a Courtier or this is a Combat Segment" -- the Limited half is never in a Combat Segment, so it needs a Courtier of yours.
         if (id == "waru-bow-limited") Require(ControlsKeyword(player.Id, "Courtier"), "You must control a Courtier to take Waru's Limited action.");
-        // Kakita Tadanobu: "discard the Imperial Favor" is a cost, so the Favor must be his controller's to discard.
-        if (id == "tadanobu-draw") Require(_state.FavorPlayerId == player.Id, "You must control the Imperial Favor to discard it.");
+        // Kakita Tadanobu: "discard the Imperial Favor" is a cost, so the Favor must be his controller's to discard (or a Favor token, Kyuden Otomo - exp; ValidateAbility asks every Favor discard).
     }
 
     // ---- target categories (the validation switch's arms) ----
@@ -74,7 +73,7 @@ public sealed partial class MatchEngine
             case "seishi-rehonor": Rehonor(target!); return false;
             case "tadanobu-draw": Draw(player); Draw(player); return false;
             case "makoto-favor":
-                _state.FavorPlayerId = player.Id;
+                TakeImperialFavor(player.Id);
                 Emit("favorTaken", $"{player.Name} took the Imperial Favor ({Definition(source!).Name}).", player.Id, source!.Id);
                 return false;
             // Bayushi Hurunayi: Ninja is taken off him until the turn ends (an ongoing effect with no stated duration).
@@ -108,14 +107,7 @@ public sealed partial class MatchEngine
 
     // ---- Favor discard as a cost (Kakita Tadanobu) ----
 
-    private static bool Batch4DiscardsFavor(string id) => id == "tadanobu-draw";
-
-    private void DiscardFavorForBatch4(string id, PlayerState player)
-    {
-        if (!Batch4DiscardsFavor(id)) return;
-        _state.FavorPlayerId = null;
-        Emit("favorDiscarded", $"{player.Name} discarded the Imperial Favor.", player.Id);
-    }
+    // (The discard itself is every Favor-discard action's shared DiscardImperialFavorCost, EmperorStrongholdBatch1.cs.)
 
     // ---- Michiru's barrier ----
 
