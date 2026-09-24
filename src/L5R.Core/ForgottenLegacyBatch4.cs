@@ -94,7 +94,7 @@ public sealed partial class MatchEngine
         {
             if (strategy.Zone != Zone.FateDiscard) continue;
             strategy.Zone = Zone.Hand; strategy.FaceUp = true;
-            player.Hand.Add(strategy.Id);
+            player.Hand.Add(strategy.Id); NoteCardIntoHand(player.Id); // Isawa Kimi - exp 2 (issue #477, batch 5)
             Emit("cardReturnedToHand", $"{player.Name} put {Definition(strategy).Name} from the discard pile into their hand.", player.Id, strategy.Id);
         }
         _state.SeekingTheTruthWatches.Add(new() { PlayerId = player.Id, BattleNumber = _state.BattleNumber });

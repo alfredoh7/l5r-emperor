@@ -621,7 +621,7 @@ public sealed partial class MatchEngine
         Pay(command.PlayerId,card,quote.Cost,command.SourceIds,paying:new PaymentSubject(card,PaymentKind.Recruit));
         var province=Player(command.PlayerId).Provinces.Single(p=>p.CardId==card.Id);
         province.CardId=null;
-        _state.LastProvinceEntryCardId=card.Id; // "enters play from a province" (Yogo Ugimori; issue #453, batch 2)
+        _state.LastProvinceEntryCardId=card.Id; _state.LastProvinceEntryProvinceIndex=province.Index; // "enters play from a province" (Yogo Ugimori; issue #453, batch 2; Agasha Ryo, issue #477)
         card.Zone=Zone.Home; card.ProvinceIndex=null; card.FaceUp=true;
         // A Personality is straightened by default; entering bowed is only ever a direct
         // consequence of a printed effect, never a separate straighten-then-bow step.
@@ -917,7 +917,7 @@ public sealed partial class MatchEngine
         Pay(command.PlayerId,card,quote.Cost,command.SourceIds,paying:new PaymentSubject(card,PaymentKind.Recruit));
         var province=Player(command.PlayerId).Provinces.Single(p=>p.CardId==card.Id);
         province.CardId=null;
-        _state.LastProvinceEntryCardId=card.Id; // "enters play from a province" (Yogo Ugimori; issue #453, batch 2)
+        _state.LastProvinceEntryCardId=card.Id; _state.LastProvinceEntryProvinceIndex=province.Index; // "enters play from a province" (Yogo Ugimori; issue #453, batch 2; Agasha Ryo, issue #477)
         card.Zone=Zone.Battlefield; card.FaceUp=true;
         card.Bowed=Definition(card).Effect=="enters-bowed";
         if(Definition(card).Effect=="enters-dishonored") Dishonor(card);
@@ -2014,7 +2014,7 @@ public sealed partial class MatchEngine
     // "force-with-spell" (Asako Ume), "force-if-enemy-dishonorable" (Bayushi Kahoku) and
     // "force-max-dead-pile" (Moto Shunsuke) are always-on passive bonuses, unlike the attacking-only
     // attacking-two/attacking-four Effects above.
-    private int PersonalityForce(CardInstance card) => Math.Max(0,Definition(card).Force+StatModifier(card,"Force")+TerrainForceAdjustment(card)+ForgottenLegacyBatch5Force(card)+EmperorPersonalityBatch3Force(card)+(IsAttacking(card)?(Definition(card).Effect=="attacking-two"?2:Definition(card).Effect=="attacking-four"?4:
+    private int PersonalityForce(CardInstance card) => Math.Max(0,Definition(card).Force+StatModifier(card,"Force")+TerrainForceAdjustment(card)+ForgottenLegacyBatch5Force(card)+EmperorBatch5Force(card)+EmperorPersonalityBatch3Force(card)+(IsAttacking(card)?(Definition(card).Effect=="attacking-two"?2:Definition(card).Effect=="attacking-four"?4:
         // Matsu Kaido (oracle-l5r-4934, issue #299): "Kaido has +1F while attacking" -- the plain +1
         // counterpart to attacking-two/attacking-four (Matsu Yoshito's own conditional variant below
         // starts from the same +1 base).
@@ -2235,6 +2235,8 @@ public sealed partial class MatchEngine
         foreach(var c in d) { if(RedirectsTo(c,attacker,defender,a,d)==attacker) af+=Contribution(c,d); else df+=Contribution(c,d); df+=FollowerBattleContribution(c); }
         // Seeds of Decay pass (issue #453), batch 1: Megumi's Guidance's "+2 total Force, or +3 if you are the Defender, while your army is opposed" (SeedsOfDecayBatch1.cs).
         af+=CelestialArmyBonus(attacker,a,d,defending:false); df+=CelestialArmyBonus(defender,d,a,defending:true);
+        // Emperor Edition Personality pass (issue #477), batch 5: Isawa Norimichi's "+5 total Force while there are any units in your army".
+        af+=ArmyForceBonusFor(attacker,a); df+=ArmyForceBonusFor(defender,d);
         return (af,df);
     }
     private int? RedirectsTo(CardInstance card,int attacker,int defender,CardInstance[] a,CardInstance[] d)
@@ -2628,6 +2630,7 @@ public sealed partial class MatchEngine
         player.MayNotAttackThisTurn=false;
         player.FavorActionsThisTurn=0;
         player.AttachedFromHandThisTurn=false;
+        _state.HonorLostToOtherActionSinceTurnBegan[player.Id]=false; // Kitsu Tamasine (issue #477, batch 5): "since your last turn began".
         player.DestroyedEnemyPersonalityActionsThisTurn=0;
         // "Until your second turn from now begins" (issue #259): the one place a turn begins for
         // THIS specific player, so the one place their own bounded-duration ongoing Event's own
@@ -2947,6 +2950,7 @@ public sealed partial class MatchEngine
         if(player.FateDeck.Count==0) { Emit("deckEmpty",$"{player.Name}'s Fate deck is empty; no card drawn.",player.Id); return; }
         var id=player.FateDeck[0]; player.FateDeck.RemoveAt(0); player.Hand.Add(id);
         Card(id).Zone=Zone.Hand;
+        NoteCardIntoHand(player.Id); // Isawa Kimi - exp 2 (issue #477, batch 5): "an action that put any cards into another player's hand".
         Emit("cardDrawn",$"{player.Name} drew a Fate card.",player.Id); // Deliberately excludes hidden identity.
     }
     private void Refill(PlayerState player,ProvinceState province)

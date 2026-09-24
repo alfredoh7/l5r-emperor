@@ -11,6 +11,8 @@ public static class DeciderSpecs
     public const string DragonsBreath = "dragons-breath-bow";
     /// <summary>Yoritomo Tarao: "Choose a player. He targets one of his unbowed Personalities or Holdings or a card in his hand. If the targeted card is in his hand, discard it. Otherwise, bow it."</summary>
     public const string TaraoSacrifice = "tarao-sacrifice";
+    /// <summary>Isawa Kimi - exp 2 (issue #477): "That player chooses and discards a card from his hand." The decider is the other player, who was just given a card.</summary>
+    public const string KimiDiscard = "kimi-discard";
 }
 
 /// <summary>The decision another player makes inside an action (MatchState.PendingDeciderChoice). Paused is the action that opened it, kept whole so it finishes exactly as it would have.</summary>
@@ -46,6 +48,7 @@ public sealed partial class MatchEngine
         DeciderSpecs.ScandalousRumors => $"{Definition(Card(p.SourceCardId)).Name}: {Player(p.DeciderPlayerId).Name}, choose any of your Personalities at this battlefield to move home. You lose 1 Honor for each that stays, and dishonor them.",
         DeciderSpecs.DragonsBreath => $"{Definition(Card(p.SourceCardId)).Name}: {Player(p.DeciderPlayerId).Name}, choose one of your Personalities at this battlefield. It is bowed.",
         DeciderSpecs.TaraoSacrifice => $"{Definition(Card(p.SourceCardId)).Name}: {Player(p.DeciderPlayerId).Name}, choose one of your unbowed Personalities or Holdings, or a card in your hand. A card in your hand is discarded; any other is bowed.",
+        DeciderSpecs.KimiDiscard => $"{Definition(Card(p.SourceCardId)).Name}: {Player(p.DeciderPlayerId).Name}, choose a card from your hand. It is discarded.",
         _ => throw new RuleViolation("Unknown choice.")
     };
 
@@ -65,6 +68,8 @@ public sealed partial class MatchEngine
             case DeciderSpecs.TaraoSacrifice:
                 return (_state.Cards.Values.Where(c => c.OwnerId == deciderId && (InPlay(c) && !c.Bowed && Definition(c).Type is CardType.Personality or CardType.Holding || c.Zone == Zone.Hand && Player(deciderId).Hand.Contains(c.Id)))
                     .Select(c => c.Id).Order(StringComparer.Ordinal).ToList(), 1, 1);
+            case DeciderSpecs.KimiDiscard:
+                return (Player(deciderId).Hand.OrderBy(id => id, StringComparer.Ordinal).ToList(), 1, 1);
             case DeciderSpecs.DragonsBreath:
                 return (_state.CurrentBattleProvince is int battle ? Army(deciderId, battle).Where(c => Definition(c).Type == CardType.Personality && !c.Bowed).Select(c => c.Id).Order(StringComparer.Ordinal).ToList() : [], 1, 1);
             default: throw new RuleViolation("Unknown choice.");
@@ -77,7 +82,8 @@ public sealed partial class MatchEngine
         HashSet<string> bowedBefore, List<AdditionalActionGrant> preExistingGrants)
     {
         var source = Card(command.CardId);
-        var deciderId = specId is DeciderSpecs.KnowTheirMinds or DeciderSpecs.TaraoSacrifice ? command.TargetPlayerId ?? command.PlayerId : _state.ActivePlayerId;
+        var deciderId = specId is DeciderSpecs.KnowTheirMinds or DeciderSpecs.TaraoSacrifice ? command.TargetPlayerId ?? command.PlayerId
+            : specId == DeciderSpecs.KimiDiscard ? 1 - command.PlayerId : _state.ActivePlayerId;
         var (candidates, min, max) = DeciderOptions(specId, deciderId, command);
         var pending = new PendingDeciderChoice
         {
@@ -157,6 +163,9 @@ public sealed partial class MatchEngine
             case DeciderSpecs.DragonsBreath:
                 foreach (var id in p.Chosen) { var card = Card(id); if (!StalwartNegatesBow(card, p.ActingPlayerId)) card.Bowed = true; }
                 break;
+            case DeciderSpecs.KimiDiscard:
+                foreach (var id in p.Chosen) { var card = Card(id); if (card.Zone == Zone.Hand) DiscardFate(Player(card.OwnerId), card); }
+                break;
             case DeciderSpecs.TaraoSacrifice:
                 foreach (var id in p.Chosen)
                 {
@@ -184,7 +193,7 @@ public sealed partial class MatchEngine
     private IEnumerable<ActionOption> DeciderChoiceActions(int playerId)
     {
         if (_state.PendingDeciderChoice is not { } p || p.DeciderPlayerId != playerId) yield break;
-        var verb = p.SpecId switch { DeciderSpecs.ScandalousRumors => "Move home", DeciderSpecs.DragonsBreath => "Bow", DeciderSpecs.TaraoSacrifice => "Sacrifice", _ => "Turn face-down" };
+        var verb = p.SpecId switch { DeciderSpecs.ScandalousRumors => "Move home", DeciderSpecs.DragonsBreath => "Bow", DeciderSpecs.TaraoSacrifice => "Sacrifice", DeciderSpecs.KimiDiscard => "Discard", _ => "Turn face-down" };
         if (p.Chosen.Count < p.Max)
             foreach (var id in p.Candidates.Where(c => !p.Chosen.Contains(c)))
                 yield return new("chooseDecider", $"{verb} · {Definition(Card(id)).Name}", true, null,
