@@ -9176,6 +9176,8 @@ public sealed partial class MatchEngine
                 if (RunShadowsEmbraceBatch6(id, ability, command, player, source, target, bowedBeforeAction) is { } shadowsEmbrace6)
                 {
                     if (shadowsEmbrace6) return;
+                    break;
+                }
                 // The Shadow's Embrace pass (issue #476), batch 3 (ShadowsEmbraceBatch3.cs): true when a window or a choice opened and the action waits.
                 if (RunShadowsEmbraceBatch3(id, ability, command, player, source, target, consumedGrant, playedFromDiscard, opponentHonorBeforeBattleAction, bowedBeforeAction, preExistingGrants) is { } shadowsEmbrace3)
                 {
