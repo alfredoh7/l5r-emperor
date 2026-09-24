@@ -708,8 +708,30 @@ def build(root: Path = ROOT) -> dict:
         summary.append([t, wired_n, total_n, f"{wired_n/total_n:.1%}"])
     summary.append(["TOTAL", total_wired, total_all, f"{total_wired/total_all:.1%}"])
     summary[summary.max_row][0].font = Font(bold=True)
-    for col, width in zip("ABCD", (18, 10, 10, 10)):
-        summary.column_dimensions[col].width = width
+
+    # Second table: the cards that remain Unwired, broken out by Set (rows) and card Type (columns).
+    unwired: dict[str, dict[str, int]] = {}
+    for _id, _name, card_set, t, _clan, status, _blocker in rows:
+        if status == "Unwired":
+            counts = unwired.setdefault(card_set or "(no set)", {})
+            counts[t] = counts.get(t, 0) + 1
+    unwired_types = [t for t in TYPE_ORDER if any(t in c for c in unwired.values())]
+    unwired_types += sorted({t for c in unwired.values() for t in c} - set(unwired_types))
+    summary.append([])
+    summary.append(["Unwired cards by Set and Type"])
+    summary[summary.max_row][0].font = Font(bold=True, size=12)
+    summary.append(["Set", *unwired_types, "TOTAL"])
+    for cell in summary[summary.max_row]:
+        cell.font = Font(bold=True)
+    for card_set in sorted(unwired, key=lambda k: (-sum(unwired[k].values()), k)):
+        counts = unwired[card_set]
+        summary.append([card_set, *[counts.get(t, 0) or None for t in unwired_types], sum(counts.values())])
+    summary.append(["TOTAL", *[sum(c.get(t, 0) for c in unwired.values()) for t in unwired_types], sum(sum(c.values()) for c in unwired.values())])
+    for cell in summary[summary.max_row]:
+        cell.font = Font(bold=True)
+    summary.column_dimensions["A"].width = 30
+    for index in range(2, max(5, len(unwired_types) + 3)):
+        summary.column_dimensions[get_column_letter(index)].width = 13
 
     sheet = wb.create_sheet("Cards")
     header = ["Id", "Name", "Set", "Type", "Clan", "Status", "Blocker"]
