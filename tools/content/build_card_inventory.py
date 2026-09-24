@@ -598,6 +598,11 @@ BLOCKERS: dict[str, str] = {
     # Forgotten Legacy pass (issue #467), batch 5: all 15 cards wired (spell-wave-21, holding-wave-11, item-wave-13, event-wave-6, celestial-wave-6,
     # region-wave-8), so no note of this batch stands. Cursed Relic's old note (oracle-l5r-1607, "Chi as a repeatable payable cost") was removed: CostVerbs.ChiPenalty
     # (AbilityCosts.cs) now pays "give this Personality -1C" in full or not at all, and the ordinary 0-Chi rule (ApplyModifier) destroys a wielder it empties.
+    # The Shadow's Embrace pass (issue #476), batch 1: 23 Personalities (Agasha Kurou .. Kazehime), none with an earlier note. Twenty-two are wired in
+    # personality-wave-68 (ShadowsEmbraceBatch1.cs): Agasha Kurou, Asahina Keigo, Asako Hayate, Asako Jirou, Atosa, Bayushi Misaki, Bayushi Tarou, Bayushi Waru,
+    # Chiisai, Chuda Hitaka, Daidoji Sosuke, Daigotsu Arakan, Daigotsu Rafu, Goju Bunoro, Hida Bakari, Hiruma Hikazu, Hiruma Nikaru (oracle-l5r-9806), Iuchi Haruma,
+    # Kaiu Fumiko, Kakita Ichigiku, Kakita Tadanobu, Kazehime. The one below is not.
+    "oracle-l5r-9814": "Kakita Saki: SCAN UNAVAILABLE for the card she creates. \"Limited: Target your Personality: Create a +2F Armor Item with the trait, 'Melee and Ranged Attacks targeting this Personality have -3 strength' and attach it to him.\" Mechanically wirable: an AbilityDefinition.Creates spec (CardType.Item, Force 2, Chi 0, Keywords [\"Armor\"], the trait as AbilityText) attached to the targeted own Personality (the Creates/host shape of Kaiu Armor's creator), plus one static Attack-strength term keyed on the created Item's Effect (EffectiveAttackStrength: -3 against its wielder for a Melee or Ranged Attack, the Destrier/Singh Remnants defensive-strength shape). Blocked only because CreatedCards.Resolve needs a published CreatedOnly Proxy scan that fits the spec, and none exists: no Oracle record or art-pack scan is a +2F Armor with that trait (Kaiu Armor, oracle-l5r-10007, is +1F with no text). Wire it once a verified Proxy scan is available.",
 }
 
 

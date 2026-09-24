@@ -2511,4 +2511,8 @@ public static class PublishedContent
     public static PublishedSnapshot PersonalityWave65 { get; } = Load("L5R.Published.PersonalityWave65.json", "personality-wave-65", requireDecks: false);
     /// <summary>Holding wave 10 (Emperor Edition Gempukku pass, issue #461): the nine Market Holdings.</summary>
     public static PublishedSnapshot HoldingWave10 { get; } = Load("L5R.Published.HoldingWave10.json", "holding-wave-10", requireDecks: false);
+    /// <summary>Personality wave 68 (The Shadow's Embrace pass, issue #476, batch 1): Agasha Kurou, Asahina Keigo, Asako Hayate, Asako Jirou, Atosa, Bayushi Misaki,
+    /// Bayushi Tarou, Bayushi Waru, Chiisai, Chuda Hitaka, Daidoji Sosuke, Daigotsu Arakan, Daigotsu Rafu, Goju Bunoro, Hida Bakari, Hiruma Hikazu, Hiruma Nikaru
+    /// (Shadow's Embrace printing), Iuchi Haruma, Kaiu Fumiko, Kakita Ichigiku, Kakita Tadanobu, Kazehime.</summary>
+    public static PublishedSnapshot PersonalityWave68 { get; } = Load("L5R.Published.PersonalityWave68.json", "personality-wave-68", requireDecks: false);
 }

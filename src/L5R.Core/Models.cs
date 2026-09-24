@@ -552,6 +552,8 @@ public sealed class FieldsOfMercyWatch
 /// Focus-Effect-bearing focused cards) -> resolved (PendingDuel set back to null).</summary>
 public sealed class PendingDuel
 {
+    // Kakita Ichigiku (The Shadow's Embrace pass, issue #476 batch 1): he challenged a dishonorable Personality during a Combat Segment, so the loser is destroyed too.
+    public bool IchigikuDestroysLoser { get; set; }
     // Negations a Reaction set on the issuing action (To First Blood's "negate his destruction from the action's effects"): the duel's own outcome is one of that action's effects.
     public List<NegatedEffect> NegatedEffects { get; set; } = [];
     public string AbilityId { get; set; } = "";
@@ -968,6 +970,15 @@ public sealed class MatchState
     // Moksha Patam (oracle-l5r-10121, issue #453 batch 5): "After an action resolves, if a player gained Honor from its effects" -- set by GainHonor on any
     // gain, reset when an action begins (RunAbilityEffects) and read once when it is truly done (FinishActionEffectTracking, ApplyMokshaPatamTokens).
     public bool CurrentActionHonorGained { get; set; }
+    // The Shadow's Embrace pass (issue #476), batch 1 (ShadowsEmbraceBatch1.cs); each record expires by comparison with the turn (or battle) number.
+    // Bayushi Misaki: "Before this phase ends, straighten him. Before this turn ends, if the Personality was not assigned to attack this turn, dishonor him ..."
+    public List<MisakiWatch> MisakiWatches { get; set; } = [];
+    // Bayushi Waru: "negate the effects of the next action the target performs (this turn)" -- spent by that action.
+    public List<NextPerformedActionNegation> NextPerformedActionNegations { get; set; } = [];
+    // Hiruma Nikaru (Shadow's Embrace): "Negate the effects of the next Battle action this battle another player takes which targets Nikaru" -- spent by that action.
+    public List<BattleTargetShield> BattleTargetShields { get; set; } = [];
+    // Agasha Kurou: "Remove it from the game before the turn ends" -- the Spells he attached, drained in EndTurn.
+    public List<TurnEndRemoval> TurnEndRemovals { get; set; } = [];
 }
 
 /// <summary>A standing redirect (Seeds of Decay, issue #453): Kind is a StandingRedirectKinds value, OwnerId the player whose cards it protects, ToCardId the card the action

@@ -47,6 +47,7 @@ public sealed partial class MatchEngine
         if (source is not null && HasActionLock(source) && Definition(source).Type is CardType.Stronghold or CardType.Holding or CardType.Region or CardType.Celestial)
             Require(false, $"{Definition(source).Name}'s abilities may not be used this turn.");
         RequireBurningDreamsAllows(command, ability, source); // Burning Dreams (Forgotten Legacy pass, issue #467): Nonhumans may not perform Political actions.
+        RequireChiisaiAllows(command, ability, source); // Chiisai (The Shadow's Embrace pass, issue #476 batch 1): may not perform Iaijutsu or Political actions.
     }
 
     // The reason the lock alone would refuse this command, or null. A Reaction listed inside a reaction window is offered before ValidateAbility ever

@@ -94,6 +94,8 @@ public sealed partial class MatchEngine
     {
         ShakashDiscountEffect => (Math.Min(3, _state.Cards.Values.Count(c => c.Id != entering.Id && c.OwnerId == playerId && InPlay(c) && Keyword(c, "Nonhuman"))), "Nonhuman you control, up to 3"),
         SleeplessDiscountEffect => (1, Definition(entering).Name),
+        // Bayushi Tarou (The Shadow's Embrace pass, issue #476 batch 1): "Enters play paying 2 less Gold if you control a Courtier."
+        TarouCourtierDiscountEffect => (ControlsKeyword(playerId, "Courtier") ? 2 : 0, "you control a Courtier"),
         _ => (0, "")
     };
 

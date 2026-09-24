@@ -176,6 +176,8 @@ public sealed partial class MatchEngine
         // ability's own AttackKind (already tracked per ability id). Effect, not Keywords -- this is a
         // synthetic marker for the card's own unique text, not a printed keyword other cards could reference.
         Require(AttackKind(id) != "Melee" || Definition(target).Effect != "melee-attack-immune", "Melee Attacks may not target this card.");
+        // Chiisai (The Shadow's Embrace pass, issue #476 batch 1): "Melee Attacks may not target Chiisai's Followers."
+        Require(AttackKind(id) != "Melee" || !IsChiisaisFollower(target), "Melee Attacks may not target Chiisai's Followers.");
         // Strength of the Divine (issue #287): the first "attack" Target ability with its own separate
         // Performer -- sourceId here must be the chosen Performer (the card whose live Force/Personal
         // Honor the strength formula reads), not the ability's own source card, the same distinction

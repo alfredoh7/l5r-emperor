@@ -139,6 +139,7 @@ public sealed partial class MatchEngine
             return;
         }
         if (ApplyForgottenLegacyBatch1BranchEffect(effect, command)) return;
+        if (ApplyShadowsEmbraceBatch1BranchEffect(effect, command)) return; // The Shadow's Embrace pass (issue #476), batch 1.
         switch (effect)
         {
             case BranchEffect.MoveSourceHome: MoveHome(source, false); break;

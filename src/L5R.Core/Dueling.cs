@@ -38,6 +38,8 @@ public sealed partial class MatchEngine
             Stage = refusable ? "AwaitingAccept" : "Reaction",
             NegatedEffects = _state.NegatedEffects.ToList(),
         };
+        // Kakita Ichigiku (The Shadow's Embrace pass, issue #476 batch 1): a challenge he issues to a dishonorable Personality in a Combat Segment will not be refused.
+        if (IchigikuChallenge(challenger, challenged)) { _state.PendingDuel.IchigikuDestroysLoser = true; _state.PendingDuel.Refusable = false; _state.PendingDuel.Stage = "Reaction"; refusable = false; }
         Emit("duelChallenged", $"{Definition(challenger).Name} challenges {Definition(challenged).Name} to a duel.", challengerPlayerId, challengerId);
         var duelId = $"duel-{_state.Events[^1].Sequence}";
         _state.PendingDuel.DuelId = duelId;
@@ -267,7 +269,7 @@ public sealed partial class MatchEngine
     // The duel stat plus each side's own total focused Focus Value (revealed by the time this runs).
     // Any attachment modifying the stat applies as long as it is active right now -- CardForce/
     // CardPersonalHonor/PersonalityChi already read current, not printed, values.
-    private int DuelStatValue(CardInstance card, string stat) => stat switch
+    private int DuelStatValue(CardInstance card, string stat) => NikaruDuelStat(card) ?? stat switch
     {
         "Force" => CardForce(card),
         "PersonalHonor" => CardPersonalHonor(card),
@@ -312,6 +314,8 @@ public sealed partial class MatchEngine
                 foreach (var loserId in loserIds) _state.NegatedEffects.Add(new("destroy", loserId));
         ExplainDuelEffect("Outcome", _state.LastDuel!.Challenge?.Source,
             () => ApplyDuelOutcome(duel.AbilityId, winnerId, loserIds, duel.ChallengerPlayerId));
+        // Kakita Ichigiku: "destroy that duel's loser in addition to other consequences of losing."
+        if (duel.IchigikuDestroysLoser) IchigikuDestroyLosers(loserIds, duel.ChallengerPlayerId);
         _state.NegatedEffects = [];
         // False Ring of Earth (oracle-l5r-10532, issue #295): "After you win a duel against a
         // Personality who shared no keywords with your Personality in the duel" -- Ring
@@ -483,6 +487,8 @@ public sealed partial class MatchEngine
             // Reckless Duel (oracle-l5r-6209, issue #460): "Bow the duel's loser. Move him home." -- Doji Mitsuru's own bow plus Daisuke's own move-home, combined.
             // Doji Hakuseki (Forgotten Legacy pass, issue #467, batch 1; ForgottenLegacyBatch1.cs).
             case "hakuseki-duel": HakusekiDuelOutcome(winnerId, loserIds, challengerPlayerId); break;
+            // The Shadow's Embrace pass (issue #476), batch 1: Kakita Tadanobu (ShadowsEmbraceBatch1.cs).
+            case "tadanobu-duel-battle": case "tadanobu-duel-limited": TadanobuDuelOutcome(winnerId, loserIds, challengerPlayerId); break;
             case "reckless-duel":
                 foreach (var id in loserIds)
                 {
