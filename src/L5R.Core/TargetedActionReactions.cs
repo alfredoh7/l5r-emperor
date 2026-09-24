@@ -284,6 +284,9 @@ public sealed partial class MatchEngine
                 return IsBattleAction(command) && command.PlayerId != card.OwnerId && affected.Id == card.Id && KisadaRedirectCandidates(card, subject).Any();
             case "ryoshun-redirect":
                 return command.PlayerId != card.OwnerId && card.Zone == Zone.Celestial && affected.OwnerId == card.OwnerId && RyoshunRedirectCandidates(card, subject, affected).Any();
+            // Moto Shigeru (Emperor Edition Personality pass, issue #477, batch 3): a Limited action -- anyone's -- targets one of her controller's Personalities.
+            case "shigeru-negate":
+                return acting.Timing == "Limited" && affected.OwnerId == card.OwnerId && Definition(affected).Type == CardType.Personality;
             default:
                 return false;
         }

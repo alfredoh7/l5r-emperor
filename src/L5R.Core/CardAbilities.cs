@@ -3147,6 +3147,44 @@ public static class AbilityCatalog
         ["kagako-create"] = new("Reaction", "After Kagako enters play: Create a 2F/2C/3PH Lion Clan · Samurai · Ancestor · Spirit Personality. Gain 1 Honor", "none", Trigger: "own-enters-play",
             Creates: new(CardType.Personality, Force: 2, Chi: 2, PersonalHonor: 3, Keywords: ["Lion Clan", "Samurai", "Ancestor", "Spirit"])),
 
+        // Emperor Edition Personality pass (issue #477), batch 3 (personality-wave-70): every entry is documented at its own use in EmperorPersonalityBatch3.cs.
+        // Moto Naleesh (oracle-l5r-5354): "Battle: Target an enemy unit: Naleesh overruns it. Bow it. Destroy all cards in it without attachments and without Cavalry." ("Naleesh
+        // overruns it" is flavour: the rules text is the bow and the destruction.) His static straighten is the naleesh-straightens Effect.
+        ["naleesh-overrun"] = new("Battle", "Target an enemy unit: Naleesh overruns it. Bow it. Destroy all cards in it without attachments and without Cavalry", "enemy-unit"),
+        // Moto Shigeru (oracle-l5r-5370): "Reaction: After a Limited action targets your Personality, negate the action's effects. Permanently reduce Shigeru's Personal Honor by the
+        // number of other Personalities you control. If her Personal Honor is now 0, she commits seppuku." Taishuu's targeted-by-action negation, narrowed to a Limited action.
+        ["shigeru-negate"] = new("Reaction", "After a Limited action targets your Personality, negate the action's effects. Permanently reduce Shigeru's Personal Honor by the number of other Personalities you control. If her Personal Honor is now 0, she commits seppuku",
+            "none", Trigger: ReactionTriggers.TargetedByAction),
+        // Moto Tetsuo (oracle-l5r-5382): the scan prints "Battle: If you control any Cavalry units at the current battlefield: Move Tetsuo there. If he moved, Ranged 4 Attack." (the Oracle
+        // text words it "...battlefield, move Tetsuo there. After this moves him, Ranged 4 Attack"). Read as printed: the condition sits before the colon, so it gates taking the action
+        // (ValidateEmperorPersonalityBatch3). An action that moves a Personality to the battle (MovesToBattle); the Attack's target is chosen up front and is used only if he moved.
+        ["tetsuo-move-attack"] = new("Battle", "If you control any Cavalry units at the current battlefield: Move Tetsuo there. If he moved, Ranged 4 Attack", "attack", MovesToBattle: true),
+        // Shinjo Itao (oracle-l5r-6895): "Reaction: After Itao enters play, target a Follower in your hand: Attach it to Itao, paying all costs." Moto Hailung's attach from a hand.
+        ["itao-attach"] = new("Reaction", "After Itao enters play, target a Follower in your hand: Attach it to Itao, paying all costs", "attachment-in-discard", Trigger: "own-enters-play",
+            Cost: GoldCostRule.AttachCost(), Attach: new(AttachSource.Target, AttachPile.OwnHand, AttachWielder.Source, [CardType.Follower])),
+        // Utaku Ryoko (oracle-l5r-9094): "Reaction: After engaging at Ryoko's battlefield, target a Personality or Follower opposing her: Give it a Force penalty equal to Ryoko's Personal Honor."
+        ["ryoko-penalty"] = new("Reaction", "After engaging at Ryoko's battlefield, target a Personality or Follower opposing her: Give it a Force penalty equal to Ryoko's Personal Honor", "enemy-personality-or-follower",
+            Trigger: "after-engaging-at-own-battlefield"),
+        // Iuchi Shunshi (oracle-l5r-4002): "Open: Target a Personality without attachments: He may not be assigned, and will not move, to battlefields." A Quiet Transaction's lock.
+        ["shunshi-lock"] = new("Open", "Target a Personality without attachments: He may not be assigned, and will not move, to battlefields", "personality", RequireNoAttachments: true),
+        // Tsuruchi Samuru (oracle-l5r-8874): "Battle: Ranged 6 Attack that you compare against Gold Cost." The Attack's strength is compared to the target's Gold Cost, not its Force.
+        ["samuru-attack"] = new("Battle", "Ranged 6 Attack that you compare against Gold Cost", "attack"),
+        // Tsuruchi Tomaru (oracle-l5r-8893): "Battle: Twice per turn: Ranged 3 Attack." (Tomaru - experienced's own Ranged 4 is tomaru-attack.)
+        ["tomaru-attack-3"] = new("Battle", "Twice per turn: Ranged 3 Attack", "attack", UsesPerTurn: 2),
+        // Unmei (oracle-l5r-8995): "While Unmei has Samurai or Shugenja, it has +3F and 'Battle: Bow Unmei: Ranged 5 Attack.'" -- granted by the unmei-mirror Effect (StaticGrantedAbilityIds).
+        ["unmei-attack"] = new("Battle", "Bow Unmei: Ranged 5 Attack", "attack", Costs: ActionCost.BowSource),
+        // Yoritomo Hama (oracle-l5r-9552): "Battle: Target a card with lower Gold Cost in a unit: Bow or straighten the target." Isul's bow-or-straighten pair (one shared use); "lower Gold
+        // Cost" is lower than Hama's own.
+        ["hama-bow"] = new("Battle", "Target a card with lower Gold Cost in a unit: Bow the target", "any-unit-card", UsageKey: "hama-toggle"),
+        ["hama-straighten"] = new("Battle", "Target a card with lower Gold Cost in a unit: Straighten the target", "any-unit-card", UsageKey: "hama-toggle"),
+        // Yoritomo Hiromi (oracle-l5r-9558): "Battle: Target an enemy card without attachments, or an enemy unit, with a lower total Gold Cost than Hiromi's unit: Hiromi strikes with the
+        // power of Thunder. Destroy the target." Her static "Bowing, destruction, and movement from Battle actions Hiromi performs will not be negated or delayed" is the
+        // hiromi-unnegatable Effect (HiromiUnnegatable).
+        ["hiromi-thunder"] = new("Battle", "Target an enemy card without attachments, or an enemy unit, with a lower total Gold Cost than Hiromi's unit: Hiromi strikes with the power of Thunder. Destroy the target",
+            "enemy-card-or-unit-lower-than-source-unit"),
+        // Yoritomo Naoto (oracle-l5r-9611): "Battle: Target an enemy unit: Until this battle ends, abilities on cards now in that unit may not be used."
+        ["naoto-lock"] = new("Battle", "Target an enemy unit: Until this battle ends, abilities on cards now in that unit may not be used", "enemy-unit"),
+
         // Forgotten Legacy pass (issue #467), batch 5: every entry below is documented at its own use in ForgottenLegacyBatch5.cs.
         // Assault in the Jungle (oracle-l5r-628, an Event): the ability "all players have" while the Event is in effect -- a player ability, never listed while dormant.
         ["assault-jungle-destroy"] = new("Battle", "Assault in the Jungle: target your performing unbowed attacking Personality and bow all unbowed cards in his unit to destroy a target enemy card without attachments",
@@ -3305,6 +3343,7 @@ public sealed partial class MatchEngine
         // A static rule of a card in play gives the keyword to a category of its controller's cards, in or out of play (Ikoma Aimi's Courtier, Seppun Nagi's Clan
         // keyword, Tsuruchi Nobukatsu - exp's Magistrate) -- StaticKeywordRules.cs, read live like the two conditional grants around it.
         if (StaticKeywordGranted(card, keyword)) return true;
+        if (UnmeiMirrorsKeyword(card, keyword)) return true; // Unmei (Emperor Edition Personality pass, issue #477, batch 3).
         // Tamori Yayu (issue #216): "has ... Cavalry while it is not your turn" -- a live conditional
         // grant, re-evaluated every time (unlike GrantedKeyword's own durable one-time grant).
         return keyword == "Cavalry" && Definition(card).Effect == "cavalry-force-while-not-your-turn" && card.OwnerId != _state.ActivePlayerId;
@@ -3358,6 +3397,7 @@ public sealed partial class MatchEngine
     private bool NegatesEffect(CardInstance card, string kind)
     {
         if (_state.NegatedEffects.Count == 0) return false;
+        if (kind is "bow" or "destroy" or "move" && HiromiUnnegatable()) return false; // Yoritomo Hiromi (Emperor Edition Personality pass, issue #477): her Battle actions' bowing, destruction and movement.
         if (_state.NegatedEffects.Any(n => n.CardId == card.Id && n.Kind == "all")) return true;
         var match = _state.NegatedEffects.FirstOrDefault(n => n.CardId == card.Id && n.Kind == kind);
         if (match is null) return false;
@@ -3374,6 +3414,7 @@ public sealed partial class MatchEngine
     // exactly "resets at each player's end phase, regardless of whose turn it is."
     private bool StalwartNegatesBow(CardInstance card, int actingPlayerId)
     {
+        if (HiromiUnnegatable()) return false; // Yoritomo Hiromi (issue #477): the bowing from her Battle actions will not be negated.
         // Champion of Thunder / Brothers of Goemon: checked first, ahead of every reason below --
         // unlike those (all either automatic or keyed on whose card this is), this is a genuine
         // per-instance player CHOICE already made in the reaction window that just closed.
@@ -3481,7 +3522,9 @@ public sealed partial class MatchEngine
         // Forgotten Legacy pass (issue #467), batch 3: Broken Alliance destroys its target attachment; Cast Aside the Weak destroys its target when its Samurai is a Paragon.
         or "broken-alliance-destroy" or "cast-aside-bow"
         // Emperor Edition Personality pass (issue #477), batch 2: Hida Kisada and Ikoma Shinju destroy their target (Shinju's is the enemy card, its primary target).
-        or "kisada-destroy" or "shinju-destroy";
+        or "kisada-destroy" or "shinju-destroy"
+        // Emperor Edition Personality pass (issue #477), batch 3: Naleesh destroys the cards of the target unit that have no attachments and no Cavalry; Hiromi destroys her target.
+        or "naleesh-overrun" or "hiromi-thunder";
     // The actions whose ONLY effect is to straighten their target: against a card that may not be straightened this turn (Basic Lesson) they are refused outright, where an action that
     // also does something else (Defensive Stance's +3F) still resolves and only its straightening is skipped (Straighten refuses it).
     private static bool StraightensOnly(string abilityId) => abilityId is "jinn-kuen-straighten" or "kodo-straighten" or "munefusa-straighten" or "mitsuko-straighten" or "ritual-preparation-straighten"
@@ -3491,7 +3534,8 @@ public sealed partial class MatchEngine
         // Seeds of Decay pass (issue #453), batch 4: Second City Port (a Holding); Katsuo's also grants an additional action, so it is not "only" a straighten.
         or "second-city-port-straighten"
         // Seeds of Decay (issue #453, batch 3): Utaku Hirononri only straightens his target.
-        or "hirononri-straighten";
+        or "hirononri-straighten"
+        or "hama-straighten"; // Emperor Edition Personality pass (issue #477), batch 3
     private static string? MoveOrStraightenKind(string abilityId) => abilityId switch
     {
         "incapacitated" or "favor-battle" or "journeys-end-move" or "shamate-move" or "effortless-counterattack-move"
@@ -3538,6 +3582,7 @@ public sealed partial class MatchEngine
         // Forgotten Legacy pass (issue #467), batch 3: Feint & Strike moves its enemy target home; Creating Order's straighten half straightens its target's unit.
         "feint-strike-move" => "move",
         "creating-order-straighten" => "straighten",
+        "hama-straighten" => "straighten", // Emperor Edition Personality pass (issue #477), batch 3
         _ => null
     };
     // Champion of Thunder / Brothers of Goemon's own narrower half (Brothers only ever negates a
@@ -3602,7 +3647,9 @@ public sealed partial class MatchEngine
         // Forgotten Legacy pass (issue #467), batch 1: Toshimo, Murota and Nikaru bow their target; Abodan bows his (conditionally) and Hakuseki's duel its loser.
         or "toshimo-bow" or "murota-bow" or "nikaru-bow-lock" or "abodan-move" or "hakuseki-duel"
         // Emperor Edition Personality pass (issue #477), batch 2: Hida Komatsu bows his target; Matsu Hana bows her target (and its Followers).
-        or "komatsu-bow" or "hana-bow";
+        or "komatsu-bow" or "hana-bow"
+        // Emperor Edition Personality pass (issue #477), batch 3: Naleesh bows his target unit; Hama's bow.
+        or "naleesh-overrun" or "hama-bow";
     // Whether the command's TargetId is an Attack's OWN target, which reacts through the separate attackReaction
     // window instead of this one: an Attack-classified ability whose Target category is "attack". Bayushi Kahoku
     // - exp (issue #313) is Attack-classified too, but its TargetId is the separate "-4F" target (an ordinary
@@ -3727,7 +3774,7 @@ public sealed partial class MatchEngine
     // rules lead's Daidoji Yuki ruling overturned). Wrathful Ancestor was previously protected from Tamoko only by omission from
     // MoveOrStraightenKind, which left Champion of Thunder's own "all" negation able to catch it
     // anyway; routing it through this shared check closes that gap too.
-    private bool MovementCannotBeNegated(GameCommand command) => command.AbilityId switch
+    private bool MovementCannotBeNegated(GameCommand command) => HiromiPerforms(command) || command.AbilityId switch // Yoritomo Hiromi (issue #477): the movement from her Battle actions.
     {
         "wrathful-ancestor-move" => true,
         "kinto-move" => HasReconnaissanceAtCurrentBattlefield(command.PlayerId),
@@ -3894,6 +3941,8 @@ public sealed partial class MatchEngine
         "asako-ume-attack" or "spirit-scout-attack" or "engulfing-flames-attack" => 4,
         // Embers of War pass (issue #460, batch 2).
         "tomiko-attack" => 6, // Moshi Tomiko (oracle-l5r-5286): "Ranged 6 Attack".
+        // Emperor Edition Personality pass (issue #477), batch 3.
+        "samuru-attack" => 6, "tomaru-attack-3" => 3, "unmei-attack" => 5, "tetsuo-move-attack" => 4,
         "junpei-attack" => 4, // Shinjo Junpei - experienced (oracle-l5r-6901): "Melee 4 Attack".
         "tomaru-attack" => 4, // Tsuruchi Tomaru - experienced (oracle-l5r-8894): "Ranged 4 Attack".
         "higaonna-attack" => 4, // Bayushi Higaonna (oracle-l5r-775, Forgotten Legacy pass, issue #467 batch 1): "Ranged 4 Attack".
@@ -4012,6 +4061,7 @@ public sealed partial class MatchEngine
         "taiken-attack" => "Ranged", // Isawa Taiken (issue #458)
         "tomiko-attack" or "tomaru-attack" => "Ranged", // Embers of War pass (issue #460 batch 2).
         "misaki-follower-attack" => "Melee", // Emperor Edition Personality pass (issue #477), batch 1.
+        "samuru-attack" or "tomaru-attack-3" or "unmei-attack" or "tetsuo-move-attack" => "Ranged", // Emperor Edition Personality pass (issue #477), batch 3.
         "higaonna-attack" => "Ranged", // Forgotten Legacy pass (issue #467 batch 1).
         "esumi-attack-raise" or "esumi-attack-lower" => "Ranged", // Emperor Edition Personality pass (issue #477 batch 2).
         "junpei-attack" => "Melee",
@@ -4232,7 +4282,7 @@ public sealed partial class MatchEngine
             // AttackComparedForce is the one decision point for WHICH Force a Personality's Attack
             // strength is compared to (see AttackTargeting.cs) -- identical to CardForce for every target
             // that needs no Follower exception.
-            if (InPlay(target) && AtBattle(target) && AttackComparedForce(target) <= strength)
+            if (InPlay(target) && AtBattle(target) && AttackComparedValue(abilityId, target) <= strength)
             {
                 DestroyAttackTarget(target, playerId);
             }
@@ -4298,7 +4348,12 @@ public sealed partial class MatchEngine
         _state.PendingAttack = null;
         // Seeds of Decay pass (issue #453), batch 1: a grant the Attack's own resolution makes (Sticks and Stones) is not one of the dangling grants forfeited below.
         var grantsBeforeAttack = _state.AdditionalActions.Where(g => g.PlayerId == attack.PlayerId && Forfeitable(g)).ToList();
-        if (!attack.Negated) ResolveAttackNow(attack.AbilityId, attack.PlayerId, attack.TargetId, attack.Strength, attack.SourceId);
+        if (!attack.Negated)
+        {
+            _attackCommandInResolution = attack.Command; // Yoritomo Hiromi (issue #477): the deferred Attack's own destruction is from her Battle action.
+            try { ResolveAttackNow(attack.AbilityId, attack.PlayerId, attack.TargetId, attack.Strength, attack.SourceId); }
+            finally { _attackCommandInResolution = null; }
+        }
         else { AttackTargetedACard(attack.AbilityId, attack.PlayerId, attack.TargetId); _state.RangedAttackStrengthReductionImmune = false; }
         _state.NegatedEffects.Clear();
         RestoreTemporaryRemovals(TemporaryRemovals.Action);
@@ -5960,6 +6015,10 @@ public sealed partial class MatchEngine
                         // The Towers of the Yogo's granted ability: "an enemy Follower or Personality without Followers" -- a Personality with no attached Follower,
                         // or any enemy Follower (a Follower cannot itself carry a Follower).
                         "enemy-card-without-followers" => !own && (type == CardType.Follower || personality && !Attachments(target.Id).Any(a => Definition(a).Type == CardType.Follower)),
+                        // Emperor Edition Personality pass (issue #477), batch 3 (EmperorPersonalityBatch3.cs).
+                        "enemy-unit" => personality && !own,
+                        "enemy-card-or-unit-lower-than-source-unit" => !own && (personality || target.Zone == Zone.Attached && type is CardType.Follower or CardType.Item or CardType.Spell)
+                            && UnitTotalGoldCost(target, out _) < UnitTotalGoldCost(source!, out _),
                         _ => false
                     }, "That card does not meet this ability's target or performer requirements.");
                 }
@@ -6005,6 +6064,7 @@ public sealed partial class MatchEngine
         ValidateSeedsOfDecayBatch3(id, command, ability, player, source);
         // Forgotten Legacy pass (issue #467), batch 1: the per-id conditions of this batch's cards (ForgottenLegacyBatch1.cs).
         ValidateForgottenLegacyBatch1(id, command, player, source);
+        ValidateEmperorPersonalityBatch3(id, command, source); // Emperor Edition Personality pass (issue #477), batch 3.
         // The Gold cost (issue #303): every ability's price -- Equip (Battle)/Soshi Neiru's Spell cost, Low
         // Market's "2 less, to a minimum of 1", Your Clan Needs You!'s recruit cost minus 6, Shinden
         // Shorai's "all costs", Singh Remnants' own cost, a Strategy/Discipline's printed cost, Kharmic's
@@ -8630,6 +8690,20 @@ public sealed partial class MatchEngine
             case "hakuseki-disable": case "rengetsu-disable": case "nikaru-bow-lock": case "abodan-move": case "kagako-create": case "gyoken-attach":
                 if (RunForgottenLegacyBatch1Effect(id, command, ability, player, source, target, consumedGrant, playedFromDiscard, opponentHonorBeforeBattleAction, bowedBeforeAction, preExistingGrants)) return;
                 break;
+            // Emperor Edition Personality pass (issue #477), batch 3: the cases are in EmperorPersonalityBatch3.cs; true means the action paused (an Attack's reaction window, an attach's entry window).
+            case "naleesh-overrun": case "shigeru-negate": case "itao-attach": case "ryoko-penalty": case "shunshi-lock": case "samuru-attack": case "tomaru-attack-3": case "unmei-attack":
+            case "hama-bow": case "hama-straighten": case "hiromi-thunder": case "naoto-lock":
+                if (RunEmperorPersonalityBatch3Effect(id, command, ability, player, source, target, consumedGrant)) return;
+                break;
+            // Moto Tetsuo: move him to the battle, and if he moved, Ranged 4 Attack. (The move is inline so the MovesToBattle scan sees it.)
+            case "tetsuo-move-attack":
+            {
+                var tetsuoBattle = _state.CurrentBattleProvince!.Value;
+                var tetsuoWasThere = AtBattle(source!);
+                var tetsuoMoved = !tetsuoWasThere && TryMoveToBattlefield(source!, tetsuoBattle);
+                if (tetsuoMoved && ResolveOrDeferAttack(id, player, target?.Id, source!.Id, consumedGrant)) return;
+                break;
+            }
             // Embers of War pass, batch 3 (issue #460; helpers in EmbersOfWarBatch3.cs).
             case "weak-poison-force-zero": ApplyModifier(target!, source!.Id, id, "Force", -CardForce(target!)); break;
             case "accusation-negate": NegateHeldAction(source!); break;

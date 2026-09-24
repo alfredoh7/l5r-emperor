@@ -89,7 +89,8 @@ public sealed partial class MatchEngine
     private bool AbilityDisabled(CardInstance card, string abilityId)
     {
         var key = AbilityUsageKey(abilityId);
-        return _state.DisabledAbilities.Any(d => d.CardId == card.Id && (d.UsageKey == key || d.UsageKey == AllAbilitiesUsageKey) && d.Turn == _state.TurnNumber); // AllAbilitiesUsageKey: Ninube Onchi (issue #477)
+        return BattleAbilityLocked(card) // Yoritomo Naoto (issue #477): every ability of a card that was in the unit, until the battle ends.
+            || _state.DisabledAbilities.Any(d => d.CardId == card.Id && (d.UsageKey == key || d.UsageKey == AllAbilitiesUsageKey) && d.Turn == _state.TurnNumber); // AllAbilitiesUsageKey: Ninube Onchi
     }
 
     private void RequireAbilityNotDisabled(GameCommand command, CardInstance? source)
