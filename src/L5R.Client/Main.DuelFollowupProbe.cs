@@ -42,6 +42,8 @@ public partial class Main
         {
             case 0:
                 Check(view.PendingChoice?.Type=="focusEffectChoice"&&view.LastDuel?.Result is null,"decision pauses final verdict");
+                var tray=Descendants(screen!).OfType<Control>().Single(c=>c.Name=="Focus Effect choice tray");
+                Check(tray.GetChildren().OfType<Label>().All(l=>l.Position.X>=0&&l.Position.Y>=0&&l.Position.X+l.Size.X<=tray.Size.X&&l.Position.Y+l.Size.Y<=tray.Size.Y),"choice explanations stay within the tray");
                 Shot(view.ViewerId==view.PriorityPlayerId?"choice":"waiting");
                 if(view.ViewerId!=view.PriorityPlayerId)
                 {Check(!Descendants(screen!).OfType<Button>().Any(b=>b.Text is "Return to hand" or "Take no card"),"waiting seat has no choice controls");Press("Menu");_followupStep=100;return true;}

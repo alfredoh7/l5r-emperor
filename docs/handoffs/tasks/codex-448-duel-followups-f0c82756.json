@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Implement approved live-duel Concede confirmation and engine-offered Focus Effect tray; retain public choice outcomes in ordered duel beats and unblock the practice opponent.",
-  "validation": "Client compiles; full check.sh --skip-client passes; 4 source/replay/privacy regressions, 95 AI checks, and 13 new native follow-up scenarios pass. Existing Mac duel suites and portable review delivery are in progress.",
-  "remaining": "Finish existing native duel suites, verify prepared Mac launchers, publish and validate Windows preview, and request Mendon review. Windows graphical play and expert rules acceptance remain open; do not merge.",
+  "summary": "Implement approved 1A live-duel concession and 2B/2A/2C Focus Effect tray, public source-ordered outcome beats, legal-command practice opponent, and prepared review modes.",
+  "validation": "Client builds cleanly; full check.sh --skip-client passed (including 4 new evidence/replay/privacy tests, 95 AI, 8 server and 12 transport). Native: 13 follow-up scenarios, 8 final layout reruns, 14 live match, 5 sandbox/guidance and 5 transition variants pass. Legacy static-art probe fails at 0.50006104 px on both task and unchanged main; documented, not counted as passing. Source/native visual comparison reviewed.",
+  "remaining": "Complete review package delivery and launch verification; Mendon expert review and native Windows graphical play remain open. No automatic merge. Other unmerged previews remain separate.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/448",
   "branch": "codex/448-duel-followups",
-  "updated": "2026-09-24T01:53:12.353186+00:00"
+  "updated": "2026-09-24T02:14:22.478843+00:00"
 }

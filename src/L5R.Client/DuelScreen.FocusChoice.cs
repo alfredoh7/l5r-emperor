@@ -5,6 +5,7 @@ namespace L5R.Client;
 public partial class DuelScreen
 {
     private string? _focusChoiceTarget;
+    private int _focusChoiceScrollX;
     private bool FocusChoicePending=>Snapshot?.View.PendingChoice?.Type=="focusEffectChoice";
     internal string? SelectedFocusChoiceTarget=>_focusChoiceTarget;
     private IEnumerable<CardView> FocusChoiceCards()
@@ -34,8 +35,8 @@ public partial class DuelScreen
         DuelDecisionArt.Background(tray,true);
         Label Words(string text,Vector2 at,Vector2 size,int font=20,bool title=false,Color? color=null)
         {
-            var label=DuelUi.Text(text,font,color??Palette.Paper,title);label.Position=at;label.Size=size;
-            label.AutowrapMode=TextServer.AutowrapMode.WordSmart;label.MouseFilter=MouseFilterEnum.Ignore;tray.AddChild(label);return label;
+            var label=DuelUi.Text(text,font,color??Palette.Paper,title);label.AutowrapMode=TextServer.AutowrapMode.WordSmart;
+            label.Position=at;label.Size=size;label.MouseFilter=MouseFilterEnum.Ignore;tray.AddChild(label);return label;
         }
         var prompt=pending.Prompt;
         var prefix=$"{source?.Definition?.Name} (Focus Effect): {view.Players[pending.PlayerId].Name}, ";
@@ -60,6 +61,8 @@ public partial class DuelScreen
         }
         Words(cardChoices.Length>0?"ELIGIBLE CARDS":"AVAILABLE EFFECTS",new(502,27),new(600,35),22);
         var scroll=new ScrollContainer{Name="Focus choices",Position=new(493,67),Size=new(615,312),VerticalScrollMode=ScrollContainer.ScrollMode.Disabled};tray.AddChild(scroll);
+        var retainedScroll=_focusChoiceScrollX;
+        scroll.GetHScrollBar().ValueChanged+=value=>_focusChoiceScrollX=(int)value;
         var row=new HBoxContainer();row.AddThemeConstantOverride("separation",26);scroll.AddChild(row);
         // Leave room for the horizontal scrollbar when the legal set exceeds one row.
         var crowdedOffset=cardChoices.Length>2?16:0;
@@ -83,9 +86,9 @@ public partial class DuelScreen
                 var outline=new Panel{Position=new(12,1),Size=new(185-crowdedOffset*.72f,251-crowdedOffset),MouseFilter=MouseFilterEnum.Ignore};
                 outline.AddThemeStyleboxOverride("panel",Palette.Box(Colors.Transparent,Palette.Gold,2,0));column.AddChild(outline);
             }
-            var pick=DuelUi.Button(isSelected?"Selected":$"Select · {view.Players[card.OwnerId].Name}",Pick,fontSize:16);
+            var pick=FocusChoiceTextButton(isSelected?"Selected":$"Select · {view.Players[card.OwnerId].Name}",Pick,16);
             pick.Position=new(0,255-crowdedOffset);pick.Size=new(210,25);column.AddChild(pick);
-            var inspect=DuelUi.Button("Inspect",()=>Inspect(card),fontSize:15);inspect.Position=new(47,285-crowdedOffset);inspect.Size=new(116,25);
+            var inspect=FocusChoiceTextButton("Inspect",()=>Inspect(card),15);inspect.Position=new(47,285-crowdedOffset);inspect.Size=new(116,25);
             // Scroll content includes a separate inspection affordance; selecting never submits.
             column.CustomMinimumSize=new(210,308-crowdedOffset);column.AddChild(inspect);
         }
@@ -101,7 +104,7 @@ public partial class DuelScreen
         if(cardChoices.Length>0)
         {
             var confirm=DuelUi.Button(selected is null?"Select a card":returns?"Return to hand":selected.Label,()=>{if(selected?.Command is {} command)Submit(command);},fontSize:25);
-            confirm.Name="Resolve Focus choice";confirm.Position=new(rightX,239);confirm.Size=new(380,64);confirm.AutowrapMode=TextServer.AutowrapMode.WordSmart;tray.AddChild(confirm);
+            confirm.Name="Resolve Focus choice";confirm.AutowrapMode=TextServer.AutowrapMode.WordSmart;confirm.Position=new(rightX,239);confirm.Size=new(380,64);tray.AddChild(confirm);
             confirm.Disabled=selected is null||InputLocked||_submitted||_commandCooldown>0;
         }
         if(decline?.Command is {} declineCommand)
@@ -111,8 +114,17 @@ public partial class DuelScreen
             skip.Disabled=InputLocked||_submitted||_commandCooldown>0;
         }
         Words("The duel continues after your choice.",new(rightX,361),new(395,26),16,color:Palette.PaperDim);
+        scroll.SetDeferred(ScrollContainer.PropertyName.ScrollHorizontal,retainedScroll);
         // A complete engine prompt remains available without crowding the primary choice.
         tray.TooltipText=prompt;
+    }
+    private static Button FocusChoiceTextButton(string text,Action action,int fontSize)
+    {
+        var button=DuelUi.Button(text,action,fontSize:fontSize);button.CustomMinimumSize=Vector2.Zero;
+        foreach(var state in new[]{"normal","hover","pressed","disabled"})
+            button.AddThemeStyleboxOverride(state,new StyleBoxEmpty{ContentMarginTop=2,ContentMarginBottom=2,ContentMarginLeft=4,ContentMarginRight=4});
+        button.AddThemeColorOverride("font_hover_color",Palette.Gold);
+        return button;
     }
     private CardTile AddFocusChoiceFace(Control parent,CardView card,Vector2 position,float height,Action choose)
     {

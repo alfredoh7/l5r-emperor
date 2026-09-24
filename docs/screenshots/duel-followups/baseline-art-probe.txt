@@ -1,0 +1,6 @@
+Legacy static-art probe: res://CrimsonDuelReview.tscn, 1672x941, --motion --time=0 --check
+Task source and unchanged main de672f585ec405663f4d9174ac528ed992e259cf both report:
+ERROR: System.Exception: 3D/card projection mismatch: 0,50006104
+Threshold: 0.5 pixels; src/L5R.Client/CrimsonDuelReview.cs:239
+No projection/rendering files changed for this task. Later static-art variants were not run.
+Live-match 14/14, sandbox/guidance 5/5, and transition 5/5 passed independently.

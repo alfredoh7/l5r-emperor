@@ -60,7 +60,7 @@ public partial class DuelScreen : Control
         if(Snapshot?.View is {} previous && previous.Version==snapshot.View.Version && previous.ViewerId==snapshot.View.ViewerId && previous.Scenario==snapshot.View.Scenario)return;
         var changedSeat=Snapshot?.View.ViewerId!=snapshot.View.ViewerId;
         _previousZones=(Snapshot?.View.Players.SelectMany(p=>p.Hand.Concat(p.Focused??[]).Concat(p.Discard))??[]).ToDictionary(c=>c.Id,c=>c.Zone);
-        _focusChoiceTarget=null;
+        _focusChoiceTarget=null;_focusChoiceScrollX=0;
         HideCardHover();Snapshot=snapshot;_submitted=false;_selectedDeck=false;_dragCard=null;ClearReading();
         if(changedSeat){CloseGuidance();_selectedHand=null;_selectedFocus=null;_selectedInspection=null;}
         var record=snapshot.View.LastDuel;
