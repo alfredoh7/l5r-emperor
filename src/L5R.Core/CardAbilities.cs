@@ -6090,7 +6090,6 @@ public sealed partial class MatchEngine
                         "enemy-card-without-followers" => !own && (type == CardType.Follower || personality && !Attachments(target.Id).Any(a => Definition(a).Type == CardType.Follower)),
                         // Set the Fields Aflame (The Shadow's Embrace pass, issue #476 batch 5): "a Region" -- attached to any province, either player's.
                         "region" => type == CardType.Region && target.Zone == Zone.Region,
-                        _ => false
                         // The Shadow's Embrace pass (issue #476), batch 2: this batch's in-play categories (ShadowsEmbraceBatch2.cs).
                         _ => ShadowsEmbraceBatch2TargetAllows(ability.Target, command, player, source, target)
                     }, "That card does not meet this ability's target or performer requirements.");
