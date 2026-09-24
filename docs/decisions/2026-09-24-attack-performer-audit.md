@@ -16,11 +16,12 @@ All 78 Attack abilities in `AbilityCatalog` (Melee and Ranged) were checked agai
 - Tomiko and Yayu (x2): "Bow Tomiko / one of Yayu's Spells" -- the Performer field only picks the spell to bow; the acting Personality is still the source (a spell resolves to its wielder).
 - Rings (False Ring of Water) perform their own action; Strategies with no Performer (Arrow's Eye, Precision, Sticks and Stones) are allowed to have none.
 
-## For Mendon to decide
+## Mendon's rulings (2026-09-24), applied
 
-**Strength of the Divine** (a Strategy, Melee) has no named performer; the engine treats the targeted opposed Paragon as performer. If a Strategy's Melee Attack should have none either, that changes the Paragon's role. Left as is.
-
-Two Attack abilities (`engulfing-flames-attack`, `spirit-scout-attack`) have no published card yet.
+- **Strength of the Divine**: the targeted Paragon is the performer (as wired). A Strategy's Melee or Ranged Attack with no named performer or target -- The Legion's Might, for one -- simply has no performer, which is acceptable.
+- **Engulfing Flames** (Second City pack, already wired as `engulfing-flames-destroy` + the sequenced `engulfing-flames-attack`): the performing Monk is the Attack's performer. Pinned by `AttackPerformerIsTheMonk`.
+- **Spirit of the Scout** (Second City pack, already wired as a permanent grant of `spirit-scout-attack`): a granted ability counts as the holder's own, so the holding Personality is the performer. Pinned by `ScoutPerformer`.
+- The audit's earlier "no published card" note for those two ids was an artifact: they are a sequenced half and a granted ability, never listed on a card's own `Abilities`.
 
 ## Verification
 

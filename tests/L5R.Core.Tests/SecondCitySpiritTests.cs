@@ -22,6 +22,7 @@ internal static class SecondCitySpiritTests
         ("Spirit of the Berserker's +2F is permanent and only on the ability branch: it is not given with the keyword, and it outlives the turn", BerserkerForce),
         ("Spirit of the Yojimbo's granted Reaction redirects an action that targets another of his controller's Personalities at his location -- not one at another location, not at himself, not his controller's own action", YojimboRedirects),
         ("Spirit of the Scout's granted Ranged 4 Attack bows its holder unless his controller has Reconnaissance, and hits a Force-4 target but not a Force-5 one", ScoutAttack),
+        ("Spirit of the Scout: the Personality holding the granted ability is the Attack's performer", ScoutPerformer),
         ("Spirit of the Paragon's granted action bows an enemy Personality with equal or lower Force OR equal or lower Personal Honor, and no other", ParagonBow),
         ("Spirit of the Duelist's granted Iaijutsu action duels an enemy Personality and moves the loser home; it counts as an Iaijutsu action", DuelistDuel),
         ("Spirit of the Berserker's granted Reaction delays the destruction an action would inflict on him until the turn ends, and only that destruction", BerserkerDelaysDestruction),
@@ -212,6 +213,19 @@ internal static class SecondCitySpiritTests
             Eq(e.State.Cards[holder.Id].Bowed, bowed, recon ? "with Reconnaissance he is not bowed" : "without Reconnaissance he bows");
             Check(e.State.Cards[strong.Id].Zone == Zone.Battlefield, "the Force-5 Personality is untouched");
         }
+    }
+
+    // Mendon's ruling (2026-09-24): a permanent ability a Spirit grants is the holder's own, so the holder is the Attack's performer.
+    private static void ScoutPerformer()
+    {
+        var s = Table(Phase.Battle, 0); s.PriorityPlayerId = 0;
+        var holder = Add(s, "training-lion-samurai", 0, Zone.Battlefield, province: 0);
+        holder.GrantedAbilities.Add(new("spirit-scout-attack", "test-spirit", GrantDuration.Permanent));
+        var target = Add(s, "training-lion-samurai", 1, Zone.Battlefield, province: 0);
+        Add(s, "training-attack-reactor", 1, Zone.Home);
+        var e = MatchEngine.FromTestState(s);
+        Accept(e, Enabled(e, 0, "spirit-scout-attack", holder.Id).Command! with { TargetId = target.Id });
+        Eq(e.State.PendingAttack?.SourceId, holder.Id, "the Personality holding the granted ability is the performer");
     }
 
     private static void ParagonBow()
