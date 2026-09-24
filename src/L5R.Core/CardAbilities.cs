@@ -3113,7 +3113,9 @@ public sealed partial class MatchEngine
     // provides is really performed BY its wielder (AttackDefenseModifier already does the same
     // Zone.Attached-to-parent lookup inline, for a different purpose). Every other card (a
     // Personality, a Stronghold, a played-from-hand Strategy/Ring) performs its own actions directly.
-    private CardInstance ActingPersonality(CardInstance card) => card.Zone == Zone.Attached && card.AttachedTo is string parentId ? Card(parentId) : card;
+    // Core rules, Choose Performers: an action on a Personality or Follower is performed by that card itself; only an Item or Spell's action is performed by the Personality it is attached to.
+    // A Follower is attached in this engine's zones but never collapses to its host.
+    private CardInstance ActingPersonality(CardInstance card) => card.Zone == Zone.Attached && card.AttachedTo is string parentId && Definition(card).Type != CardType.Follower ? Card(parentId) : card;
     // "Location" (core rules Glossary, issue #216): there are exactly two kinds -- a battlefield
     // (associated with a province, either player's cards may share one) and Home (associated with a
     // PLAYER, not shared between the two players -- your own Home and your opponent's are different
@@ -3465,7 +3467,8 @@ public sealed partial class MatchEngine
     // (PendingAdditionalAction IS the original command, so the overload below just looks its own
     // ability up first).
     private CardInstance ActionPerformer(AbilityDefinition ability, GameCommand command, CardInstance? source) =>
-        ActingPersonality(ability.Performer is not null ? Card(command.PerformerId!) : source!);
+        // Carpenter Castle's "Bow your target Castle or Siege card" names a card to bow (its cost), not a performer: the Stronghold that prints the action performs it.
+        ActingPersonality(command.AbilityId == "carpenter-castle-siege" ? source! : ability.Performer is not null ? Card(command.PerformerId!) : source!);
     private CardInstance ActionPerformer(GameCommand command) =>
         ActionPerformer(AbilityCatalog.All[command.AbilityId!], command, command.CardId is null ? null : Card(command.CardId));
     private bool AtBattle(CardInstance card) => _state.CurrentBattleProvince is not null &&

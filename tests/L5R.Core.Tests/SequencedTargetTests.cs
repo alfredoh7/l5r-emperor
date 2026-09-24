@@ -13,6 +13,7 @@ internal static class SequencedTargetTests
         ("The second target is judged after the first effect: destroying the Follower that shielded a Personality makes him a legal Attack target, which he was not when the action was announced", SecondTargetAfterFirstEffect),
         ("Without Fire tokens only the first effect happens and nobody is asked; the first target is optional, and the second may be nothing", Variations),
         ("One action, two effects: a whole-action negation negates both, and a negated destruction still leaves the Attack to happen", NegationSemantics),
+        ("The Attack half is performed by the performing Monk, not by the Strategy", AttackPerformerIsTheMonk),
         ("Who may perform it and what may be targeted: an unbowed Monk of the player's, an enemy attachment only, and only the acting player answers the second choice", Legality),
     ]);
 
@@ -53,6 +54,17 @@ internal static class SequencedTargetTests
     {
         var option = Enabled(e, 0, "engulfing-flames-destroy", card.Id, monk.Id);
         return option.Command! with { Selections = [Pick("attachment", attachments)] };
+    }
+
+    // Mendon's ruling (2026-09-24): "The performing monk is the ranged attack performer." A reactor keeps the Attack pending so its recorded performer can be read.
+    private static void AttackPerformerIsTheMonk()
+    {
+        var (e0, card, monk, _, _, bystander) = Setup();
+        var e = Edit(e0, st => Add(st, "training-attack-reactor", 1, Zone.Home));
+        Accept(e, Play(e, card, monk));
+        var pick = e.QueryActions(0).First(x => x.Type == "chooseSequencedTarget" && x.CardId == bystander.Id);
+        Accept(e, pick.Command!);
+        Eq(e.State.PendingAttack?.SourceId, monk.Id, "the pending Attack's performer is the performing Monk");
     }
 
     private static void SecondTargetAfterFirstEffect()

@@ -8378,12 +8378,12 @@ static void ProtectionPrimitive()
         var s=StrongholdBattle("oracle-l5r-1218");
         Add(s,"training-lion-samurai",0,Zone.Battlefield,province:0);
         var castle=Add(s,"training-castle",0,Zone.Home);
-        castle.Protections=[new("test-fixture","Turn")];
+        s.Cards[s.Players[0].StrongholdId!].Protections=[new("test-fixture","Turn")]; // Carpenter Castle itself performs its action; the chosen Castle/Siege card is only bowed
         var reactor=Add(s,"training-attack-reactor",1,Zone.Home);
         var enemy=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0); // Force 3
         var e=MatchEngine.FromTestState(s);
         Accept(e,new GameCommand("useAbility",0,e.Version,CardId:s.Players[0].StrongholdId,PerformerId:castle.Id,TargetId:enemy.Id,AbilityId:"carpenter-castle-siege"));
-        Equal(e.State.PendingAttack?.SourceId,castle.Id,"PendingAttack now records the actual performer generically");
+        Equal(e.State.PendingAttack?.SourceId,s.Players[0].StrongholdId,"PendingAttack now records the actual performer generically: the Stronghold that prints Carpenter Castle's action");
         Accept(e,new GameCommand("useAbility",1,e.Version,CardId:reactor.Id,AbilityId:"training-attack-negate"));
         Equal(e.State.PendingAttack?.Strength,5,"Protection negates the negation -- strength is untouched");
         Accept(e,new GameCommand("declineReaction",0,e.Version));
