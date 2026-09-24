@@ -442,7 +442,9 @@ internal static class ForgottenLegacyBatch2Tests
         Eq(e.AttackStrengthForTest("haruhiko-attack", haruhiko.Id), 3);
         var recon = Edit(e, st => st.Players[1].Provinces[0].Reconnaissance[0] = true);
         Eq(recon.AttackStrengthForTest("haruhiko-attack", haruhiko.Id), 5, "+2 with Reconnaissance");
-        Check(!Options(e, 0, "haruhiko-attack", haruhiko.Id).Any(o => o.Enabled && (o.TargetIds ?? []).Contains(enemy.Id)), "Ranged 3 cannot take a 4F target");
+        Check(Options(e, 0, "haruhiko-attack", haruhiko.Id).Any(o => o.Enabled && (o.TargetIds ?? []).Contains(enemy.Id)), "a 4F target is still a legal target of Ranged 3");
+        Accept(e, Offer(e, 0, "haruhiko-attack", haruhiko.Id, enemy.Id));
+        Eq(e.State.Cards[enemy.Id].Zone, Zone.Battlefield, "but Ranged 3 does not destroy it");
         Accept(recon, Offer(recon, 0, "haruhiko-attack", haruhiko.Id, enemy.Id));
         Eq(recon.State.Cards[enemy.Id].Zone, Zone.Dead, "Ranged 5 does");
     }

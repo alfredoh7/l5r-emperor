@@ -19,7 +19,7 @@ internal static class EmperorPersonalityBatch1Tests
         ("Daigotsu Aya: Open gives her Cavalry, Duelist or Tactician for the turn -- one choice a turn, and it wears off", AyaKeywordChoice),
         ("Daigotsu Negishi: Battle/Open straightens a target Personality of yours (bowed or not), never an enemy one", NegishiStraighten),
         ("Daigotsu Misaki: a Follower attaching to her pays 2 less Gold (from a hand, to a minimum of 0), a Follower attaching to another Personality does not", MisakiDiscount),
-        ("Daigotsu Misaki: bows her performing Follower for a Melee Attack whose strength is that Follower's Force -- destroys a target with Force at most that, not a stronger one; a bowed Follower cannot perform", MisakiAttack),
+        ("Daigotsu Misaki: bows her performing Follower for a Melee Attack whose strength is that Follower's Force -- destroys a target with Force at most that, a stronger one is a legal target that survives; a bowed Follower cannot perform", MisakiAttack),
         ("Ekichu no Oni: three Battle actions -- bow an enemy card, destroy an enemy card without attachments, move an enemy Personality home; each with its printed target restriction", EkichuActions),
         ("Ninube Onchi: Ninja Open removes all of a target Personality's abilities until the turn ends -- his own printed actions and the next turn's are unaffected, as is Onchi", OnchiRemoval),
         ("Ugulu no Oni: negates a Human Personality's movement to Ugulu's battlefield -- not a Nonhuman's, not a movement to another battlefield, not while Ugulu is at home", UguluNegation),
@@ -234,14 +234,16 @@ internal static class EmperorPersonalityBatch1Tests
         Check(!e.State.Cards[misaki.Id].Bowed, "Misaki himself was not");
         Eq(e.State.Cards[weak.Id].Zone, Zone.Dead, "Force <= the Follower's Force: destroyed");
 
-        // A stronger target is not a legal target: the strength is the Follower's Force (2), not Misaki's (6).
+        // A stronger target is still a legal target (core rules) but survives: the strength is the Follower's Force (2), not Misaki's (6).
         var s2 = Battle();
         var misaki2 = Bf(s2, Misaki, 0);
         var follower2 = Add(s2, Squire, 0, Zone.Attached, province: 0, parent: misaki2.Id);
         var strong = Bf(s2, "training-lion-samurai", 1);   // Force 4
         var e2 = MatchEngine.FromTestState(s2);
-        Check(!(Batch336Support.Options(e2, 0, "misaki-follower-attack", misaki2.Id, follower2.Id).FirstOrDefault()?.TargetIds?.Contains(strong.Id) ?? false), "a target with more Force than the Follower is not offered");
-        Check(Rejection(e2, Use(e2, 0, "misaki-follower-attack", misaki2.Id, strong.Id, follower2.Id)).Contains("above the Attack's strength"), "and is refused if named");
+        Check(Batch336Support.Options(e2, 0, "misaki-follower-attack", misaki2.Id, follower2.Id).FirstOrDefault()?.TargetIds?.Contains(strong.Id) ?? false, "a target with more Force than the Follower is still offered");
+        Accept(e2, Offer(e2, 0, "misaki-follower-attack", misaki2.Id, strong.Id, follower2.Id));
+        Check(e2.State.Cards[follower2.Id].Bowed, "the cost is still paid");
+        Eq(e2.State.Cards[strong.Id].Zone, Zone.Battlefield, "but the Force-4 target survives the strength-2 Attack (Misaki's own Force 6 is not used)");
 
         // The strength follows the Follower's live Force.
         var s3 = Battle();
