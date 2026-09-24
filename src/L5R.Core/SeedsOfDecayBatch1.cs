@@ -113,7 +113,8 @@ public sealed partial class MatchEngine
         CardInstance? actor = ability.Performer is not null && command.PerformerId is not null && _state.Cards.TryGetValue(command.PerformerId, out var chosen) ? chosen
             : command.CardId is not null && _state.Cards.TryGetValue(command.CardId, out var source) ? source : null;
         if (actor is { Zone: Zone.Attached, AttachedTo: { } hostId }) actor = Card(hostId);
-        return actor is not null && Definition(actor).Type == CardType.Personality && InPlay(actor) ? actor : null;
+        // A printed action is performed by the card that prints it, so a dead Personality's own FromDead action (Hida Yamadera - exp's Melee 8 Attack) is performed by that Personality.
+        return actor is not null && Definition(actor).Type == CardType.Personality && (InPlay(actor) || ability.FromDead && actor.Zone == Zone.Dead) ? actor : null;
     }
     private void UseGrapplingWatch(CardInstance monk, bool negate)
     {
