@@ -211,21 +211,33 @@ internal static class ShadowsEmbraceBatch5Tests
 
     private static void StringAndArmor()
     {
-        var s = Table(Phase.Battle, 1); s.PriorityPlayerId = 1;
-        var archer = Add(s, "training-lion-samurai", 1, Zone.Battlefield, province: 0);
-        var bow = Add(s, StringOfTheColonies, 1, Zone.Attached, province: 0, parent: archer.Id);
-        var armored = Add(s, "training-crane-samurai", 0, Zone.Battlefield, province: 0);   // 3F + 5
-        Add(s, VanquishersArmor, 0, Zone.Attached, province: 0, parent: armored.Id);
-        var bare = Add(s, "training-crane-samurai", 0, Zone.Battlefield, province: 0);      // 3F
-        var strong = Add(s, "training-lion-samurai", 0, Zone.Battlefield, province: 0); Force(strong, 2); // 6F
-        var e = MatchEngine.FromTestState(s);
+        (MatchEngine E, CardInstance Bow, CardInstance Armored, CardInstance Bare, CardInstance Strong) Build()
+        {
+            var s = Table(Phase.Battle, 1); s.PriorityPlayerId = 1;
+            var archer = Add(s, "training-lion-samurai", 1, Zone.Battlefield, province: 0);
+            var bow = Add(s, StringOfTheColonies, 1, Zone.Attached, province: 0, parent: archer.Id);
+            var armored = Add(s, "training-crane-samurai", 0, Zone.Battlefield, province: 0);   // 3F + 5
+            Add(s, VanquishersArmor, 0, Zone.Attached, province: 0, parent: armored.Id);
+            var bare = Add(s, "training-crane-samurai", 0, Zone.Battlefield, province: 0);      // 3F
+            var strong = Add(s, "training-lion-samurai", 0, Zone.Battlefield, province: 0); Force(strong, 2); // 6F
+            return (MatchEngine.FromTestState(s), bow, armored, bare, strong);
+        }
+        var (e, bow, armored, bare, strong) = Build();
         Eq(e.CardForceForTest(armored.Id), 3 + 5, "the Armor's +5F");
         var option = Opt(e, 1, "string-colonies-attack");
-        Check(option.TargetIds!.Contains(bare.Id) && !option.TargetIds.Contains(strong.Id), "Ranged 5: a 3F target, not a 6F one");
-        Check(!option.TargetIds.Contains(armored.Id), "the Armor's -5 strength leaves the Attack no reach");
+        // Above the strength is still a legal target (core rule): all three are offered, but only the 3F one is destroyed.
+        Check(option.TargetIds!.Contains(bare.Id) && option.TargetIds.Contains(strong.Id) && option.TargetIds.Contains(armored.Id), "Ranged 5: every enemy Personality is a legal target");
         Accept(e, option.Command! with { TargetId = bare.Id });
         DeclineWindows(e);
         Check(e.State.Cards[bow.Id].Bowed && e.State.Cards[bare.Id].Zone != Zone.Battlefield, "bowed; the target was destroyed");
+        foreach (var pick in new[] { (Func<(MatchEngine E, CardInstance Bow, CardInstance Armored, CardInstance Bare, CardInstance Strong), CardInstance>)(b => b.Strong), b => b.Armored })
+        {
+            var b = Build();
+            Accept(b.E, Opt(b.E, 1, "string-colonies-attack").Command! with { TargetId = pick(b).Id });
+            DeclineWindows(b.E);
+            Check(b.E.State.Cards[b.Bow.Id].Bowed, "the bow is still paid");
+            Eq(b.E.State.Cards[pick(b).Id].Zone, Zone.Battlefield, "a 6F target, or the Armored one at -5 strength, survives");
+        }
     }
 
     private static void VictorGrantsConqueror()

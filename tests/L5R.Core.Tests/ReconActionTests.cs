@@ -277,9 +277,11 @@ internal static class ReconActionTests
         }
         {
             var (e,ebizo,target,_,_)=Build("training-lion-veteran"); // Force 6
-            Reject(e,Use(e,0,"ebizo-attack",ebizo.Id,target:target.Id)); // a declared target above the Attack's strength (4) is not a legal target
-            Accept(e,Use(e,0,"ebizo-attack",ebizo.Id)); // ...but the action itself needs no target up front
+            Accept(e,Use(e,0,"ebizo-attack",ebizo.Id,target:target.Id)); // a target above the Attack's strength (4) is still a legal target (core rule)
             Eq(e.State.Cards[target.Id].Zone,Zone.Battlefield,"strength 4 cannot destroy a Force-6 target");
+            var (e2,ebizo2,target2,_,_)=Build("training-lion-veteran");
+            Accept(e2,Use(e2,0,"ebizo-attack",ebizo2.Id)); // ...and the action needs no target up front
+            Eq(e2.State.Cards[target2.Id].Zone,Zone.Battlefield,"no target: nothing destroyed");
         }
         // Held open by an enemy attack reactor, the pending Attack is a Ranged one whose strength is his live Force.
         {

@@ -262,8 +262,8 @@ internal static class ShadowsEmbraceBatch2Tests
         var weak = Add(s2, Follower, 0, Zone.Attached, province: 0, parent: morio2.Id); // 2F
         var enemy2 = Add(s2, Lion, 1, Zone.Battlefield, province: 0);
         var e2 = MatchEngine.FromTestState(s2);
-        Reject(e2, Option(e2, 0, "morio-attack", c => c.PerformerId == weak.Id).Command! with { TargetId = enemy2.Id }); // this engine judges an Attack's target against its strength
-        Eq(Card(e2, enemy2).Zone, Zone.Battlefield, "Melee 2 cannot reach a 4F enemy");
+        Accept(e2, Option(e2, 0, "morio-attack", c => c.PerformerId == weak.Id).Command! with { TargetId = enemy2.Id }); // a target above the Attack's strength is still a legal target (core rule)
+        Eq(Card(e2, enemy2).Zone, Zone.Battlefield, "Melee 2 cannot destroy a 4F enemy");
     }
 
     private static void NatsumiRefusesAndReinforces()
