@@ -604,6 +604,7 @@ public static class CardCatalog
             .Concat(PublishedContent.FollowerWave29.Cards)
             .Concat(PublishedContent.StrongholdWave15.Cards)
             .Concat(PublishedContent.PersonalityWave67.Cards)
+            .Concat(PublishedContent.PersonalityWave70.Cards)
             .Concat(PublishedContent.SpellWave21.Cards)
             .Concat(PublishedContent.HoldingWave11.Cards)
             .Concat(PublishedContent.ItemWave13.Cards)

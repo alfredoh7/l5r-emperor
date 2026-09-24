@@ -112,7 +112,9 @@ public sealed partial class MatchEngine
         {
             var ability=AbilityCatalog.All[abilityId];
             var legal=new List<(GameCommand Command,GoldQuote? Gold)>(); string? firstError=null;
-            foreach(var candidate in _state.Cards.Values.Where(InPlay).Select(c=>c.Id).OrderBy(x=>x,StringComparer.Ordinal))
+            // Shinjo Itao (issue #477, batch 3): an entering-play Reaction that attaches a card from a hand or discard pile (AttachSpec) names it among its targets too.
+            var entryTargets=_state.Cards.Values.Where(InPlay).Select(c=>c.Id).Concat(ability.Attach is { } attachSpec ? AttachCandidatesInDiscard(attachSpec,playerId).Select(c=>c.Id) : []).Distinct(StringComparer.Ordinal);
+            foreach(var candidate in entryTargets.OrderBy(x=>x,StringComparer.Ordinal))
             {
                 var command=new GameCommand("useAbility",playerId,_state.Version,CardId:card.Id,TargetId:candidate,AbilityId:abilityId);
                 var gold=QuoteAbilityGold(command);

@@ -93,7 +93,8 @@ internal static class BattleAbsentMovesTests
     private static void MarkedInventoryPinned()
     {
         var marked = string.Join(",", AbilityCatalog.All.Where(p => p.Value.MovesToBattle).Select(p => p.Key).OrderBy(k => k, StringComparer.Ordinal));
-        Eq(marked, "broken-alliance-move,charge-into-danger-move,chukage-move,dislodge-the-foe,earth-flows-move,hawado-move-battlefield,heijin-move,help-shadows-move,houken-exp-straighten,intervening-spirit-move,intimidation-move,irezu-move,mai-move-force-penalty,michi-move,moving-unmoving-approach,natures-wrath-move,pronouncement-guilt-move,requesting-reinforcements-recruit,return-to-action-move,rikyou-move,sanctuary-of-the-waves-move,skipping-the-puddle-move,sound-of-thunder-move,takasho-move,training-move-current,training-move-to-battle,trusting-instinct-move,your-clan-needs-you");
+        // Issue #477 (Emperor Edition Personality pass, batch 3): tetsuo-move-attack -- Moto Tetsuo moves himself to the current battlefield.
+        Eq(marked, "broken-alliance-move,charge-into-danger-move,chukage-move,dislodge-the-foe,earth-flows-move,hawado-move-battlefield,heijin-move,help-shadows-move,houken-exp-straighten,intervening-spirit-move,intimidation-move,irezu-move,mai-move-force-penalty,michi-move,moving-unmoving-approach,natures-wrath-move,pronouncement-guilt-move,requesting-reinforcements-recruit,return-to-action-move,rikyou-move,sanctuary-of-the-waves-move,skipping-the-puddle-move,sound-of-thunder-move,takasho-move,tetsuo-move-attack,training-move-current,training-move-to-battle,trusting-instinct-move,your-clan-needs-you");
         foreach (var (id, ability) in AbilityCatalog.All.Where(p => p.Value.MovesToBattle))
             Check(ability.Timing is "Battle" or "BattleOrOpen", $"{id}: a move to the battle is a Battle action");
     }
@@ -197,7 +198,9 @@ internal static class BattleAbsentMovesTests
         var failures = new List<string>();
         // Requesting Reinforcements (Seeds of Decay pass, issue #453) is performed by "your performing Scout" AT the battlefield (bowed as its cost), so its acting player always
         // has a unit there: the no-presence position this test rigs cannot arise for it. It is still marked (its effect brings a Personality to the battle).
-        foreach (var ability in AbilityCatalog.All.Where(p => p.Value.MovesToBattle && !p.Key.StartsWith("training-") && p.Key != "requesting-reinforcements-recruit").Select(p => p.Key).OrderBy(k => k, StringComparer.Ordinal))
+        // Moto Tetsuo (issue #477, Emperor Edition Personality pass, batch 3) prints "If you control any Cavalry units at the current battlefield:" before its colon, so its acting player always
+        // has a unit there (a Cavalry one): the no-presence position this test rigs cannot arise for it. It is still marked (its effect moves Tetsuo, who is at home, to the battle).
+        foreach (var ability in AbilityCatalog.All.Where(p => p.Value.MovesToBattle && !p.Key.StartsWith("training-") && p.Key != "requesting-reinforcements-recruit" && p.Key != "tetsuo-move-attack").Select(p => p.Key).OrderBy(k => k, StringComparer.Ordinal))
         {
             var offeredTo = new List<int>();
             var reasons = new List<string>();

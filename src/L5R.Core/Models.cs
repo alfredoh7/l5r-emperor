@@ -943,6 +943,8 @@ public sealed class MatchState
     // Forgotten Legacy pass (issue #467), batch 1 (ForgottenLegacyBatch1.cs); each record expires by comparison with the turn number.
     // "Choose one of his abilities; it may not be used" (Doji Hakuseki, Doji Rengetsu): one printed ability (by usage key) of one card, locked for the turn.
     public List<DisabledAbility> DisabledAbilities { get; set; } = [];
+    // "Until this battle ends, abilities on cards now in that unit may not be used" (Yoritomo Naoto, Emperor Edition Personality pass, issue #477): cleared when the battle ends.
+    public List<BattleAbilityLock> BattleAbilityLocks { get; set; } = [];
     // "If it is not your turn, before it ends, if none of your provinces were destroyed this turn, gain 1 Honor" (Asahina Shigemitsu): drained in EndTurn.
     public List<ProvincesHeldHonorCheck> ProvincesHeldHonorChecks { get; set; } = [];
     // "Unless Murota has performed a Dark Virtue action this turn": the action keywords each Personality has performed an action with, per turn.

@@ -1654,6 +1654,7 @@ public sealed partial class MatchEngine
         _state.PendingAdditionalAction=null; _state.NoNewAdditionalActionsThisBattle=false;
         // An unused Attack-target grant ("your next Ranged Attack action this battle") ends with the battle.
         _state.AttackTargetGrants.Clear();
+        _state.BattleAbilityLocks.Clear(); // Yoritomo Naoto (Emperor Edition Personality pass, issue #477): "until this battle ends".
         // Force redirection (issue #216) is "for the duration of the battle," same reasoning.
         _state.ForceRedirects.Clear();
         // Ring of Water's own recruitment condition (issue #194) is battle-scoped, same reasoning.
@@ -1999,7 +2000,7 @@ public sealed partial class MatchEngine
     // "force-with-spell" (Asako Ume), "force-if-enemy-dishonorable" (Bayushi Kahoku) and
     // "force-max-dead-pile" (Moto Shunsuke) are always-on passive bonuses, unlike the attacking-only
     // attacking-two/attacking-four Effects above.
-    private int PersonalityForce(CardInstance card) => Math.Max(0,Definition(card).Force+StatModifier(card,"Force")+TerrainForceAdjustment(card)+ForgottenLegacyBatch5Force(card)+(IsAttacking(card)?(Definition(card).Effect=="attacking-two"?2:Definition(card).Effect=="attacking-four"?4:
+    private int PersonalityForce(CardInstance card) => Math.Max(0,Definition(card).Force+StatModifier(card,"Force")+TerrainForceAdjustment(card)+ForgottenLegacyBatch5Force(card)+EmperorPersonalityBatch3Force(card)+(IsAttacking(card)?(Definition(card).Effect=="attacking-two"?2:Definition(card).Effect=="attacking-four"?4:
         // Matsu Kaido (oracle-l5r-4934, issue #299): "Kaido has +1F while attacking" -- the plain +1
         // counterpart to attacking-two/attacking-four (Matsu Yoshito's own conditional variant below
         // starts from the same +1 base).
@@ -2421,7 +2422,7 @@ public sealed partial class MatchEngine
             // Expendable/Halls-of-Memory/Lady-Matsu's-Rage consequences) is skipped -- her attachments
             // were already destroyed unconditionally above, matching "an effect that destroys an
             // entire unit would destroy all cards attached to the personality but not the personality."
-            if(Definition(card).Type==CardType.Personality && FieldsOfMercyNegatesPersonalityDestruction(card))
+            if(Definition(card).Type==CardType.Personality && FieldsOfMercyNegatesPersonalityDestruction(card) && !HiromiUnnegatable())
             {
                 Emit("destructionNegated",$"{Definition(card).Name}'s destruction was negated by Fields of Mercy (attachments were still destroyed).",card.OwnerId,card.Id);
                 continue;
@@ -2657,6 +2658,7 @@ public sealed partial class MatchEngine
             else Straighten(card);
         }
         StraightenWindOfTheMoonShugenja(player); // Wind of the Moon (issue #467): "he straightens during each player's Straighten Phase".
+        StraightenNaleeshUnits(player); // Moto Naleesh (issue #477): "Naleesh's unit straightens during each player's Straighten Phase".
         Emit("straightened",$"{player.Name}'s turn: eligible cards straightened.",player.Id);
         AdvanceStraightenHolds(StraightenPoint.StraightenPhaseEnds);
         // Cultist Infiltrator (oracle-l5r-1595): "After each Straighten Phase: Give this Personality

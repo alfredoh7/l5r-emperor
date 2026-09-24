@@ -1,0 +1,359 @@
+{
+  "Profile": "personality-wave-70",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-5354",
+      "Name": "Moto Naleesh",
+      "Type": "Personality",
+      "Clan": "Unicorn",
+      "GoldCost": 13,
+      "GoldProduction": 0,
+      "Force": 6,
+      "Chi": 5,
+      "PersonalHonor": 4,
+      "HonorRequirement": 10,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Naleesh's unit straightens during each player's Straighten Phase.\nBattle: Target an enemy unit: Naleesh overruns it. Bow it. Destroy all cards in it without attachments and without Cavalry.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-5354.jpg",
+      "Keywords": [
+        "Cavalry",
+        "Loyal",
+        "Tactician",
+        "Unique",
+        "Clan Champion",
+        "Commander",
+        "Kami",
+        "Naga",
+        "Paragon",
+        "Samurai",
+        "Unicorn Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "naleesh-overrun"
+      ],
+      "Effect": "naleesh-straightens"
+    },
+    {
+      "Id": "oracle-l5r-5370",
+      "Name": "Moto Shigeru",
+      "Type": "Personality",
+      "Clan": "Unicorn",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Shigeru has +1F while she has an Item.\nReaction: After a Limited action targets your Personality, negate the action's effects. Permanently reduce Shigeru's Personal Honor by the number of other Personalities you control. If her Personal Honor is now 0, she commits seppuku.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-5370.jpg",
+      "Keywords": [
+        "Cavalry",
+        "Samurai",
+        "Soul of Moto Gurban",
+        "Unicorn Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "shigeru-negate"
+      ],
+      "Effect": "shigeru-item-force"
+    },
+    {
+      "Id": "oracle-l5r-5382",
+      "Name": "Moto Tetsuo",
+      "Type": "Personality",
+      "Clan": "Unicorn",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 2,
+      "PersonalHonor": 2,
+      "HonorRequirement": 2,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: If you control any Cavalry units at the current battlefield, move Tetsuo there. After this moves him, Ranged 4 Attack.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-5382.jpg",
+      "Keywords": [
+        "Samurai",
+        "Soul of Moto Shanyu",
+        "Unicorn Clan",
+        "White Guard"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "tetsuo-move-attack"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-6895",
+      "Name": "Shinjo Itao",
+      "Type": "Personality",
+      "Clan": "Unicorn",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 3,
+      "PersonalHonor": 3,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After Itao enters play, target a Follower in your hand: Attach it to Itao, paying all costs.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6895.jpg",
+      "Keywords": [
+        "Cavalry",
+        "Samurai",
+        "Soul of Shinjo Goshi",
+        "Unicorn Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "itao-attach"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9094",
+      "Name": "Utaku Ryoko",
+      "Type": "Personality",
+      "Clan": "Unicorn",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 2,
+      "PersonalHonor": 3,
+      "HonorRequirement": 4,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After engaging at Ryoko's battlefield, target a Personality or Follower opposing her: Give it a Force penalty equal to Ryoko's Personal Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9094.jpg",
+      "Keywords": [
+        "Cavalry",
+        "Battle Maiden",
+        "Paragon",
+        "Samurai",
+        "Soul of Utaku Liu-Xeung",
+        "Unicorn Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "ryoko-penalty"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-4002",
+      "Name": "Iuchi Shunshi",
+      "Type": "Personality",
+      "Clan": "Unicorn",
+      "GoldCost": 11,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 3,
+      "HonorRequirement": 3,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: Target a Personality without attachments: He may not be assigned, and will not move, to battlefields.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-4002.jpg",
+      "Keywords": [
+        "Unique",
+        "Doomseeker",
+        "Shugenja",
+        "Soul of Iuchi Karasu Experienced 2",
+        "Unicorn Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "shunshi-lock"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-8874",
+      "Name": "Tsuruchi Samuru",
+      "Type": "Personality",
+      "Clan": "Mantis",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 4,
+      "PersonalHonor": 3,
+      "HonorRequirement": 2,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Ranged 6 Attack that you compare against Gold Cost.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8874.jpg",
+      "Keywords": [
+        "Unique",
+        "Magistrate",
+        "Mantis Clan",
+        "Samurai",
+        "Soul of Tsuruchi Mochisa Experienced",
+        "Yojimbo"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "samuru-attack"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-8893",
+      "Name": "Tsuruchi Tomaru",
+      "Type": "Personality",
+      "Clan": "Mantis",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Twice per turn: Ranged 3 Attack.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8893.jpg",
+      "Keywords": [
+        "Mantis Clan",
+        "Samurai",
+        "Scout"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "tomaru-attack-3"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-8995",
+      "Name": "Unmei",
+      "Type": "Personality",
+      "Clan": "Mantis",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 3,
+      "PersonalHonor": 1,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Unmei has Earth, Thunder, Courtier, Samurai, Shugenja, Cavalry, Duelist, Magistrate, Naval, Scout, and/or Tactician while you control another Mantis Clan Personality with the same keyword.\nWhile Unmei has Samurai or Shugenja, it has +3F and \"Battle: Bow Unmei: Ranged 5 Attack.\"",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8995.jpg",
+      "Keywords": [
+        "Unique",
+        "Mantis Clan",
+        "Nonhuman",
+        "Shapeshifter",
+        "Spirit"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "unmei-mirror"
+    },
+    {
+      "Id": "oracle-l5r-9552",
+      "Name": "Yoritomo Hama",
+      "Type": "Personality",
+      "Clan": "Mantis",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 4,
+      "PersonalHonor": 2,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Target a card with lower Gold Cost in a unit: Bow or straighten the target.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9552.jpg",
+      "Keywords": [
+        "Naval",
+        "Extortionist",
+        "Magistrate",
+        "Mantis Clan",
+        "Samurai",
+        "Soul of Yoritomo Manzo"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "hama-bow",
+        "hama-straighten"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9558",
+      "Name": "Yoritomo Hiromi",
+      "Type": "Personality",
+      "Clan": "Mantis",
+      "GoldCost": 13,
+      "GoldProduction": 0,
+      "Force": 8,
+      "Chi": 5,
+      "PersonalHonor": 3,
+      "HonorRequirement": 2,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Bowing, destruction, and movement from Battle actions Hiromi performs will not be negated or delayed.\nBattle: Target an enemy card without attachments, or an enemy unit, with a lower total Gold Cost than Hiromi's unit: Hiromi strikes with the power of Thunder. Destroy the target.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9558.jpg",
+      "Keywords": [
+        "Loyal",
+        "Naval",
+        "Unique",
+        "Clan Champion",
+        "Mantis Clan",
+        "Samurai",
+        "Thunder"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "hiromi-thunder"
+      ],
+      "Effect": "hiromi-unnegatable"
+    },
+    {
+      "Id": "oracle-l5r-9611",
+      "Name": "Yoritomo Naoto",
+      "Type": "Personality",
+      "Clan": "Mantis",
+      "GoldCost": 9,
+      "GoldProduction": 0,
+      "Force": 6,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Target an enemy unit: Until this battle ends, abilities on cards now in that unit may not be used.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9611.jpg",
+      "Keywords": [
+        "Naval",
+        "Mantis Clan",
+        "Samurai",
+        "Soul of Yoritomo Isoshi"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "naoto-lock"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

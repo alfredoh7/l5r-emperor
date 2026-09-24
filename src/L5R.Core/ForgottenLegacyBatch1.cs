@@ -89,7 +89,8 @@ public sealed partial class MatchEngine
     private bool AbilityDisabled(CardInstance card, string abilityId)
     {
         var key = AbilityUsageKey(abilityId);
-        return _state.DisabledAbilities.Any(d => d.CardId == card.Id && d.UsageKey == key && d.Turn == _state.TurnNumber);
+        return BattleAbilityLocked(card) // Yoritomo Naoto (issue #477): every ability of a card that was in the unit, until the battle ends.
+            || _state.DisabledAbilities.Any(d => d.CardId == card.Id && d.UsageKey == key && d.Turn == _state.TurnNumber);
     }
 
     private void RequireAbilityNotDisabled(GameCommand command, CardInstance? source)
