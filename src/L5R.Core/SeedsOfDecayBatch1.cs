@@ -59,7 +59,7 @@ public sealed partial class MatchEngine
     // "You do not lose Honor from Ninja cards you own": the Stronghold's Effect names the keyword; HonorLossNegated (MatchEngine.cs) already limits it to the losing player's own cards.
     private static readonly Dictionary<string, string> HonorLossKeywordImmunity = new(StringComparer.Ordinal) { ["castle-of-order"] = "Ninja" };
     private bool HonorLossNegatedByKeyword(string strongholdEffect, CardInstance? source) =>
-        source is not null && HonorLossKeywordImmunity.TryGetValue(strongholdEffect, out var keyword) && Keyword(source, keyword);
+        source is not null && (HonorLossKeywordImmunity.TryGetValue(strongholdEffect, out var keyword) && Keyword(source, keyword) || StrongholdHonorImmunityBatch3(strongholdEffect, source)); // Stronghold pass (issue #486), batch 3: Otoro Estate, Shadow's Lair.
     // "Once per battle": a stamp of the battle number on the Stronghold's own uses (a card's per-turn stamps live under the ability id; this key cannot collide).
     private const string CastleOfOrderBattleKey = "castle-of-order-redirect:battle";
     private bool CastleOfOrderUsedThisBattle(CardInstance stronghold) => stronghold.AbilityUses.TryGetValue(CastleOfOrderBattleKey, out var battle) && battle == _state.BattleNumber;

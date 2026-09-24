@@ -70,6 +70,8 @@ public sealed partial class MatchEngine
     private bool HiromiPerforms(GameCommand? command)
     {
         if (command?.AbilityId is not { } id || !AbilityCatalog.All.TryGetValue(id, out var ability)) return false;
+        // The Shadow's Lair (Emperor Edition Stronghold pass, issue #486 batch 3): "this will not be negated or delayed if you control a Ninja" -- read as the same unnegatable movement.
+        if (id == "shadows-lair-move") return ControlsKeyword(command.PlayerId, "Ninja");
         if (!(ability.Timing == "Battle" || ability.Timing == "BattleOrOpen" && _state.Phase == Phase.Battle)) return false;
         return ActionPerformingPersonality(command) is { } performer && Definition(performer).Effect == HiromiUnnegatableEffect;
     }

@@ -41,7 +41,7 @@ public sealed partial class MatchEngine
             BuildBattleStepView(),
             // Deck search (issue #312): the deck viewer is private to the searcher; the shown-cards record is public.
             BuildSearchView(playerId),BuildShownCards(),BuildLookView(playerId),BuildCopyView(playerId),BuildEitherOrView(playerId),BuildOpponentPaymentView(playerId),
-            _state.LastDuel is null?null:Copy(_state.LastDuel));
+            _state.LastDuel is null?null:Copy(_state.LastDuel),BuildProvinceSights(playerId));
     }
 
     private CardView ViewCard(CardInstance card,bool visible=true)
@@ -186,6 +186,9 @@ public sealed partial class MatchEngine
                         .SelectMany(c=>(Definition(c).Abilities??[]).Select(a=>(Card:c,Id:a)))
                         .Where(x=>AbilityCatalog.All.TryGetValue(x.Id,out var def) && def.Timing=="Reaction" && def.Trigger=="any-personality-enters-play"))
                         AddReaction(card,watchId);
+                // The Spider's Web (issue #486, batch 3): the controller's own Stronghold watching the entry, one option per legal Weapon in the hand.
+                foreach(var watchId in StrongholdEntryWatchers(playerId,enteringCard))
+                    AddTargetedEntryReaction(Card(player.StrongholdId),watchId,null);
             }
             Add("declineReaction","Pass reaction",Command("declineReaction"));
         }

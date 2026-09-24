@@ -179,7 +179,7 @@ internal static class TargetedActionReactionTests
         foreach (var (id, ability) in AbilityCatalog.All)
             Eq(ability.UsesPerTurn, formerlyExempt.Contains(id) || id == "kaname-ranged-attack" || id == "castle-of-order-redirect" /* once per BATTLE, its own stamp (issue #453) */
                 || id == "shihiro-boost" /* "each time" -- issue #458 */ || id == "cursed-relic-attack" /* "Any number of times per turn" -- issue #467 batch 5 */ || id is "tsukimi-home" or "tsukimi-battlefield" /* "Twice per battle", its own stamp pair -- issue #477 batch 5 */
-                || id == "otomo-favor-token" /* Kyuden Otomo - exp's triggered trait is not limited to once per turn -- issue #486 batch 1 */ ? AbilityUseLimit.Unlimited : id == "mochitoko-negate" ? 2 : id == "rika-bushido-virtue-bonus" ? 3
+                || id == "otomo-favor-token" /* Kyuden Otomo - exp's triggered trait is not limited to once per turn -- issue #486 batch 1 */ || id is "shadows-lair-move" or "spiders-web-attach" /* batch 3: once per battle (own stamp) / a trait -- issue #486 */ ? AbilityUseLimit.Unlimited : id == "mochitoko-negate" ? 2 : id == "rika-bushido-virtue-bonus" ? 3
                 : id == "tsukimi-refresh" || id == "tomaru-attack" /* "Twice per turn" -- issue #460 batch 2 */ || id == "tomaru-attack-3" /* "Twice per turn" -- issue #477 batch 3 */
                     || id == "sleepless-boost" /* "Twice per turn" -- issue #467 batch 2 */ ? 2 : 1, $"the limit of {id}");
         Eq(AbilityUseLimit.Unlimited, 0);

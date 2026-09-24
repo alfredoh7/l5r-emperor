@@ -2547,6 +2547,9 @@ public static class PublishedContent
     public static PublishedSnapshot StrongholdWave16 { get; } = Load("L5R.Published.StrongholdWave16.json", "stronghold-wave-16", requireDecks: false);
     /// <summary>Stronghold wave 17 (Emperor Edition Stronghold pass, issue #486, batch 1): Eternal Victory Dojo, Hidden Falls Dojo, Keep of the Dead, Koshin Keep, Kyuden Otomo - exp, Library of Rebirth, Midday Shadow Court.</summary>
     public static PublishedSnapshot StrongholdWave17 { get; } = Load("L5R.Published.StrongholdWave17.json", "stronghold-wave-17", requireDecks: false);
+    /// <summary>Stronghold wave 19 (Emperor Edition Stronghold pass, issue #486, batch 3): The Khan's Estate, The Otoro Estate, The Shadow's Lair, The Spider's Web, The Temple of Death,
+    /// Watchful Eye Dojo, Yasuki Palaces.</summary>
+    public static PublishedSnapshot StrongholdWave19 { get; } = Load("L5R.Published.StrongholdWave19.json", "stronghold-wave-19", requireDecks: false);
     /// <summary>Celestial wave 7 (issue #476, batch 6): The Moon's Imperative, The Sun's Aspiration.</summary>
     public static PublishedSnapshot CelestialWave7 { get; } = Load("L5R.Published.CelestialWave7.json", "celestial-wave-7", requireDecks: false);
     /// <summary>Personality wave 74 (The Shadow's Embrace pass, issue #476, batch 1): Agasha Kurou, Asahina Keigo, Asako Hayate, Asako Jirou, Atosa, Bayushi Misaki,

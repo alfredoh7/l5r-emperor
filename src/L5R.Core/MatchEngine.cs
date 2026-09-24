@@ -539,7 +539,8 @@ public sealed partial class MatchEngine
         var reactionId = EntryReactionAbility(card);
         // Singh Remnants' shape: a DIFFERENT card (in hand or a discard pile) watching for this entry,
         // not the entering card's own reaction -- only relevant when a Personality is what entered.
-        var watchingReactionAvailable = Definition(card).Type==CardType.Personality && AnyPersonalityEntryReactionAvailable(playerId);
+        // Emperor Edition Stronghold pass (issue #486), batch 3: or the controller's own Stronghold watching the entry (The Spider's Web).
+        var watchingReactionAvailable = Definition(card).Type==CardType.Personality && (AnyPersonalityEntryReactionAvailable(playerId) || StrongholdEntryWatcherAvailable(playerId,card));
         if (reactionId is null && !watchingReactionAvailable) return false;
         // Kitsuki Horume's own "choose a player, gain or lose" (issue #210) is the first
         // entry-reaction to share a UsageKey across two catalog entries -- the actual dedupe stamp
@@ -1335,6 +1336,7 @@ public sealed partial class MatchEngine
             Require(provinces.Contains(assignment.Value),"Choose an existing enemy province battlefield.");
             Require(!MovementLocked(card,MovementKinds.Assign),$"{Definition(card).Name} may not be assigned to a battlefield this turn.");
             if(_state.ExtraInfantrySegment) RequireHiddenFallsAssignment(card,assignment.Value); // Hidden Falls Dojo (Stronghold pass, issue #486 batch 1): its Scouts, to the provinces it targeted.
+            Require(isDefender || !MovementLocked(card,MovementKinds.AssignAttack),$"{Definition(card).Name} may not be assigned to attack this turn."); // Emperor Edition Stronghold pass (issue #486), batch 3: The Khan's Estate.
             // The Shadow's Embrace pass (issue #476), batch 6: Shieldman's unit is never assigned to an attacking army; Star-Crossed Lovers never to each other's battlefields.
             RequireShieldmanMayAssign(card,isDefender);
             RequireStarCrossedMayAssign(card,assignment.Value,command.Assignments!);

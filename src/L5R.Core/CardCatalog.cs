@@ -626,6 +626,7 @@ public static class CardCatalog
             .Concat(PublishedContent.EventWave7.Cards)
             .Concat(PublishedContent.StrongholdWave16.Cards)
             .Concat(PublishedContent.StrongholdWave17.Cards) // Emperor Edition Stronghold pass (issue #486), batch 1
+            .Concat(PublishedContent.StrongholdWave19.Cards)
             .Concat(PublishedContent.CelestialWave7.Cards)
             .Concat(PublishedContent.PersonalityWave74.Cards)
             .Concat(PublishedContent.PersonalityWave68.Cards)
