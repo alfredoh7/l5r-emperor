@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Implement approved 1A live-duel concession and 2B/2A/2C Focus Effect tray, public source-ordered outcome beats, legal-command practice opponent, and prepared review modes.",
-  "validation": "Client builds cleanly; full check.sh --skip-client passed (including 4 new evidence/replay/privacy tests, 95 AI, 8 server and 12 transport). Native: 13 follow-up scenarios, 8 final layout reruns, 14 live match, 5 sandbox/guidance and 5 transition variants pass. Legacy static-art probe fails at 0.50006104 px on both task and unchanged main; documented, not counted as passing. Source/native visual comparison reviewed.",
-  "remaining": "Complete review package delivery and launch verification; Mendon expert review and native Windows graphical play remain open. No automatic merge. Other unmerged previews remain separate.",
+  "summary": "Implement approved live-duel confirmation and Focus Effect tray, ordered public choice evidence and practice support. Prepare verified one-click Mac launches and versioned portable Windows review candidate for #448.",
+  "validation": "Clean client compile; full deterministic checks passed. Native: 13 follow-up scenarios, 8 final layout reruns, 14 live match, 5 sandbox/guidance, 5 transition cases pass. Latest, Concede and Return a Card Mac apps launched and visually verified. Windows export, bundled runtime/resources, archive checksum and private uploaded asset verified for source ae214dc0. Windows delivery CI is the remaining publication gate. Legacy static-art probe reproduces the same 0.50006104 px failure on unchanged main; documented separately.",
+  "remaining": "Delivery is gated on Windows CI and the package's ready-review notification on PR #466; after that only Mendon's native Windows play, expert review and implementation approval remain. Do not merge automatically. Other unmerged previews stay separate.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/448",
   "branch": "codex/448-duel-followups",
-  "updated": "2026-09-24T02:14:22.478843+00:00"
+  "updated": "2026-09-24T02:24:13.028067+00:00"
 }

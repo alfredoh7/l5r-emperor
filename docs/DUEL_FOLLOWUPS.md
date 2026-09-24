@@ -12,7 +12,7 @@ Issue [#448](https://github.com/alfredoh7/l5r-emperor/issues/448), PR [#466](htt
 
 ## Prepared reviews
 
-On this Mac run `python3 tools/create-duel-review-launchers.py`. Apps appear in `artifacts/duel-followups/Launchers`: Return a Card, Concede, Other Seat, Crowded, Attach, Required Straighten, Destroy Attachment, Honor or Draw, Consecutive Choices, and Reduced Motion. They build/run this checkout with isolated review profiles, never fetch or switch branches. Close and relaunch to reset.
+On this Mac run `python3 tools/create-duel-review-launchers.py`. Apps appear in `artifacts/duel-followups/Launchers`: Return a Card, Concede, Other Seat, Crowded, Attach, Required Straighten, Destroy Attachment, Honor or Draw, Consecutive Choices, and Reduced Motion. They build/run this checkout with isolated review profiles, never fetch or switch branches. Close and relaunch to reset. The normal Latest app, prepared Concede app, and prepared Return a Card app were launched and visually verified on this Mac; Return a Card stops at a playable choice without automated submission.
 
 The portable Windows package is specified by `previews/duel-followups.json`. Its source commit, private release, checksum and delivery validation are recorded in `previews/published/duel-followups.json` once published. Start Review enters a prepared real decision; Other previews contains each remaining case. Full Game opens the same build's normal menus. No external runtime or source checkout is needed.
 
