@@ -139,10 +139,10 @@ Every conflict was additive except these, which were merged by hand:
 
 - `L5R.Core.Tests`: **1417/1417**, 0 FAIL. That is the 1304 baseline plus 113 new scenarios. The suite was re-run after every merge.
 - `L5R.AI.Tests` 74/74, `L5R.Server.Tests` 8/8, `L5R.Client.Transport.Tests` 12/12, collaboration tests 45/45.
-- Content suite: 133/134 until the art pack is republished (see below), then 134/134 against the new manifest.
+- Content suite: 134/134 with the new art pack pinned.
 - Built with SDK 10.0.112; the pinned 10.0.400 is unreachable from the cloud sandbox. `global.json` was overridden locally only.
 - The Godot client was not built here, and no native or visual play was done.
 
 ## Catalogue art pack
 
-The 110 newly bundled scans need a new release. Cloud sessions cannot create releases, so a kit was prepared as for #469: the 110 new WebP-85 scans, the manifest and `assemble.py`. The release is `catalogue-art-issue476-20260924-r1`: 3424 scans, incremental over `catalogue-art-pr469-20260924-r2`, sha256 `a09c56d7045e091dbbdddd2fd4086fd876743dd7fe93ee9f1bc79c09cf875b1a`. The two art-pack JSON files are pinned once the release exists.
+The 110 newly bundled scans need a new release. Cloud sessions cannot create releases, so a kit was prepared as for #469: the 110 new WebP-85 scans, the manifest and `assemble.py`. The release is `catalogue-art-issue476-20260924-r1`: 3424 scans, incremental over `catalogue-art-pr469-20260924-r2`, sha256 `a09c56d7045e091dbbdddd2fd4086fd876743dd7fe93ee9f1bc79c09cf875b1a`. Mendon uploaded it; GitHub's asset digest matches, and the two art-pack JSON files are pinned to it.
