@@ -280,6 +280,9 @@ public sealed partial class MatchEngine
             // at the same location could be the target instead.
             case "ryoshun-redirect":
                 return command.PlayerId != card.OwnerId && card.Zone == Zone.Celestial && affected.OwnerId == card.OwnerId && RyoshunRedirectCandidates(card, subject, affected).Any();
+            // Yasuki Tanimura (Emperor Edition Personality pass, issue #477 batch 6): another player's Battle action targets him.
+            case "tanimura-political-pay":
+                return TanimuraApplies(card, subject, affected);
             default:
                 return false;
         }

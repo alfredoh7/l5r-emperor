@@ -116,6 +116,10 @@ public sealed partial class MatchEngine
             // Air keyword attached to a Personality her controller controls (the Spell's action is her controller's own, so facts.PlayerId matches too).
             "akikusa-honor" => facts.SourceId is not null && _state.Cards.TryGetValue(facts.SourceId, out var akikusaSpell) && Definition(akikusaSpell).Type == CardType.Spell
                 && Keyword(akikusaSpell, "Air") && akikusaSpell.OwnerId == playerId && facts.PlayerId == playerId,
+            // Emperor Edition Personality pass (issue #477), batch 6 (EmperorPersonalityBatch6.cs). Yung: "After one of your Rings enters play". Daigotsu Kanpeki - exp: "After the resolution of a Battle
+            // action from a Strategy, if Kanpeki performed it".
+            "yung-search-ring" => YungRingEnteredPlay(facts, playerId),
+            "kanpeki-additional-action" => KanpekiPerformedStrategyBattleAction(source, facts, playerId),
             _ => false
         };
     }

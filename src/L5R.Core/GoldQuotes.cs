@@ -129,10 +129,11 @@ public sealed partial class MatchEngine
     // and unbowed and its use is unspent this turn, and choosing it as a source is what bows it and spends the use. It is a Reaction
     // ("once a turn" like every other), never an action of its own. A source that also names a target to sacrifice (Zlkyt's "destroy your
     // target Mine or Farm: Produce Gold equal to its base Gold Cost") is a further extension this does not model.
-    private (string AbilityId, int Amount)? AlternateGoldSource(CardInstance card)
+    private (string AbilityId, int Amount)? AlternateGoldSource(CardInstance card, PaymentSubject? paying = null)
     {
         foreach (var id in AbilityIdsOf(card))
             if (AbilityCatalog.All.TryGetValue(id, out var ability) && ability.PaymentProduction is int amount
+                && (!ability.PaymentActionsOnly || paying is { Kind: PaymentKind.Action or PaymentKind.Play or PaymentKind.Equip }) // Yasuki Tanimura (issue #477 batch 6): "When paying for an action".
                 && !(card.AbilityUses.TryGetValue(ability.UsageKey ?? id, out var used) && used == _state.TurnNumber)
                 && !AbilityDisabled(card, id)) // Forgotten Legacy pass (issue #467), batch 1: "it may not be used"
                 return (id, amount);

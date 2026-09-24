@@ -1050,7 +1050,7 @@ public sealed partial class MatchEngine
         var card=Card(cardId); var def=Definition(card);
         if(ConditionalProductionOf(card) is { } conditional && ProductionConditionMet(conditional,paying)) return conditional.Amount;
         // A card with no printed production that can bow to produce Gold for a payment (Yoritomo Sakuma, issue #338) produces that much.
-        if(def.GoldProduction==0 && AlternateGoldSource(card) is { } alternate) return alternate.Amount;
+        if(def.GoldProduction==0 && AlternateGoldSource(card,paying) is { } alternate) return alternate.Amount;
         return def.GoldProduction+(def.Effect=="crane-gold" && Player(playerId).Clan=="Crane" || def.Effect=="dragon-gold" && Player(playerId).Clan=="Dragon"?1:0);
     }
 
@@ -1082,7 +1082,7 @@ public sealed partial class MatchEngine
     }
 
     private IEnumerable<CardInstance> Producers(int playerId,PaymentSubject? paying=null) => _state.Cards.Values.Where(c=>c.OwnerId==playerId && !c.Bowed && c.Zone is Zone.Home or Zone.Stronghold or Zone.Battlefield
-        && (Definition(c).GoldProduction>0 || AlternateGoldSource(c) is not null || ConditionalProductionOf(c) is { } conditional && ProductionConditionMet(conditional,paying)));
+        && (Definition(c).GoldProduction>0 || AlternateGoldSource(c,paying) is not null || ConditionalProductionOf(c) is { } conditional && ProductionConditionMet(conditional,paying)));
     // exclude: cards the paying action bows or destroys as another of its costs (AbilityCosts.CostPaidCards) -- a card cannot be bowed twice, so it produces no Gold for the same action.
     private void ValidatePayment(int playerId,int cost,string[]? sourceIds,IReadOnlySet<string>? exclude=null,PaymentSubject? paying=null)
     {
@@ -1102,13 +1102,16 @@ public sealed partial class MatchEngine
         var produced=ids.Sum(id=>GoldProduced(id,playerId,paying));
         // A card bowed for Gold through its own ability (Yoritomo Sakuma, issue #338) has used that Reaction: spent for the turn, and named
         // in the log so the opponent sees why it bowed.
+        var staysStraight=new HashSet<string>(StringComparer.Ordinal); // Emperor Edition pass (issue #477), batch 6: Yasuki Tanimura produces without bowing.
         foreach(var id in ids)
-            if(Definition(_state.Cards[id]).GoldProduction==0 && AlternateGoldSource(_state.Cards[id]) is { } alternate)
+            if(Definition(_state.Cards[id]).GoldProduction==0 && AlternateGoldSource(_state.Cards[id],paying) is { } alternate)
             {
                 _state.Cards[id].AbilityUses[AbilityCatalog.All[alternate.AbilityId].UsageKey ?? alternate.AbilityId]=_state.TurnNumber;
-                Emit("goldSourceUsed",$"{Definition(_state.Cards[id]).Name} bowed to produce {alternate.Amount} Gold.",playerId,id);
+                var bows=AbilityCatalog.All[alternate.AbilityId].PaymentBows;
+                if(!bows) staysStraight.Add(id);
+                Emit("goldSourceUsed",$"{Definition(_state.Cards[id]).Name} {(bows?"bowed to produce":"produced")} {alternate.Amount} Gold.",playerId,id);
             }
-        foreach(var id in ids) _state.Cards[id].Bowed=true;
+        foreach(var id in ids) if(!staysStraight.Contains(id)) _state.Cards[id].Bowed=true;
         Emit("payment",$"{Player(playerId).Name} paid {cost} Gold for {Definition(target).Name}{(part is null?"":$" ({part})")}, producing {produced}; {produced-cost} excess was lost.",playerId,target.Id,produced-cost);
         // Temple to Fudo (Seeds of Decay, issue #453): ":bow:: Produce 2 Gold and lose 1 Honor" -- the loss is part of producing (SeedsOfDecayBatch4.cs).
         LoseHonorForProducers(playerId,ids);

@@ -38,6 +38,8 @@ public static class EitherOrSpecs
     /// <summary>Yasuki Daiki (Forgotten Legacy pass, issue #467 batch 2): "His controller chooses to either pay 4 Gold, lose 2 Honor, or do neither. If he did not pay 4 Gold
     /// or lose 2 Honor, the Personality may not be assigned, and will not move, into attacking armies." -- Makoto's "the affected card's controller decides", three ways.</summary>
     public const string DaikiPayLoseOrLock = "daiki-pay-lose-or-lock";
+    /// <summary>Yasuki Tanimura (Emperor Edition Personality pass, issue #477 batch 6): "The player may pay 4 Gold. If he does not pay the Gold, he loses 3 Honor." -- the decider is the ACTING player.</summary>
+    public const string TanimuraPayOrLose = "tanimura-pay-or-lose";
 }
 
 /// <summary>What choosing an option amounts to, for a client to word and style it: "avoid" (accept a cost or a lesser loss so the
@@ -101,6 +103,7 @@ public sealed partial class MatchEngine
             EitherOrSpecs.InoStorm => $"{source}'s storm: discard a card, or bow {(affected == "" ? "the performer" : affected)}.",
             EitherOrSpecs.MakotoPayOrDishonor => $"{source}: pay 4 Gold and lose 1 Honor, or {affected} is dishonored and moved home.",
             EitherOrSpecs.DaikiPayLoseOrLock => $"{source}: pay 4 Gold, lose 2 Honor, or neither -- then {affected} may not be assigned, and will not move, into attacking armies this turn.",
+            EitherOrSpecs.TanimuraPayOrLose => $"{source}: pay 4 Gold, or lose 3 Honor.",
             _ => throw new RuleViolation("Unknown choice.")
         };
     }
@@ -168,6 +171,12 @@ public sealed partial class MatchEngine
                     new("neither", "Do neither", $"{name} may not be assigned, and will not move, into attacking armies this turn.", EitherOrKind.Accept, 0, true, null)
                 ];
             }
+            // Yasuki Tanimura (issue #477 batch 6): the decider is the player whose Battle action targeted him. Losing Honor is always possible (Family Honor may go negative).
+            case EitherOrSpecs.TanimuraPayOrLose:
+                return [
+                    new("pay", "Pay 4 Gold", "Nothing further happens.", EitherOrKind.Avoid, 4, payable(4), "You cannot produce 4 Gold."),
+                    new("lose", "Do not pay", "You lose 3 Honor.", EitherOrKind.Accept, 0, true, null)
+                ];
             default: throw new RuleViolation("Unknown choice.");
         }
     }
@@ -293,6 +302,15 @@ public sealed partial class MatchEngine
             case (EitherOrSpecs.DaikiPayLoseOrLock, "neither"):
                 Emit("eitherOrChosen", $"{decider.Name} did neither ({Definition(source).Name}).", decider.Id, affected!.Id);
                 DaikiLock(affected!, source);
+                break;
+            // Yasuki Tanimura (issue #477 batch 6).
+            case (EitherOrSpecs.TanimuraPayOrLose, "pay"):
+                Pay(decider.Id, source, option.GoldCost, sourceIds);
+                Emit("eitherOrChosen", $"{decider.Name} paid 4 Gold ({Definition(source).Name}).", decider.Id, source.Id);
+                break;
+            case (EitherOrSpecs.TanimuraPayOrLose, "lose"):
+                Emit("eitherOrChosen", $"{decider.Name} did not pay ({Definition(source).Name}): {decider.Name} loses 3 Honor.", decider.Id, source.Id);
+                GainHonor(decider.Id, -3, Definition(source).Name, source);
                 break;
             default: throw new RuleViolation("Unknown choice.");
         }

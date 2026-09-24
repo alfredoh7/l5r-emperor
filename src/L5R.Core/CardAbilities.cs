@@ -137,7 +137,12 @@ public sealed record AbilityDefinition(string Timing, string Label, string Targe
     // Gempukku pass (issue #461): the ability is taken by its own card from the DEAD pile (Kunji - exp's "If Kunji is honorably dead", Hida Yamadera - exp's Reaction after he is destroyed);
     // RequiresHonorable narrows it to a card that is not Dishonorable.
     bool FromDead = false,
-    bool RequiresHonorable = false);
+    bool RequiresHonorable = false,
+    // Emperor Edition Personality pass (issue #477), batch 6 (Yasuki Tanimura: "Reaction: When paying for an action, produce 3 Gold which may only pay for that action"): an alternate
+    // Gold source (PaymentProduction) that is only a source while the payment is for an ACTION (an action of a card in play, a Strategy played from a hand, or an Equip -- never a
+    // recruit), and whose use does not bow its card (PaymentBows false -- its printed text has no bow cost).
+    bool PaymentActionsOnly = false,
+    bool PaymentBows = true);
 
 public static class AbilityCatalog
 {
@@ -2341,6 +2346,44 @@ public static class AbilityCatalog
         ["tsujiken-exp-straighten"] = new("Open", "Target a Holding or your Stronghold: Straighten it", "holding-or-own-stronghold", UsageKey: "tsujiken-exp-toggle"),
         ["tsujiken-exp-draw"] = new("Limited", "Pay 5 Gold: Draw a card", "none", Cost: GoldCostRule.Fixed(5)),
         ["tsujiken-exp-dishonor"] = new("Limited", "Bow Tsujiken and target a Personality: Dishonor him. His controller loses 1 Honor", "personality", Costs: ActionCost.BowSource),
+        // Emperor Edition Personality pass (issue #477), batch 6 (EmperorPersonalityBatch6.cs holds every effect and helper).
+        // Kitsuki Yataku (oracle-l5r-4446): "Political Reaction: After an action targets a target Samurai, bow Yataku: The Samurai's controller may not choose to refuse any challenge created by the action." A
+        // before-action-resolves reaction (Sakuma's window), offered only against an action that creates a refusable challenge (a challenge nobody may refuse changes nothing).
+        ["yataku-no-refuse"] = new("Reaction", "Political Reaction: After an action targets a target Samurai, bow Yataku: The Samurai's controller may not choose to refuse any challenge created by the action", "none",
+            Trigger: "before-action-resolves", ActionKeywords: ["Political"], Costs: ActionCost.BowSource),
+        // Nishimura (oracle-l5r-5595): the bow, and "You may discard a Kiho or Weapon from your hand to draw a card" as an optional up-front slot (Min 0) beside the target.
+        ["nishimura-bow"] = new("Battle", "Bow a target enemy card without attachments. You may discard a Kiho or Weapon from your hand to draw a card", "slots",
+            Slots: [new("target", "enemy-card-without-attachments", "An enemy card without attachments"), new("discard", "own-hand-kiho-or-weapon", "A Kiho or Weapon in your hand to discard (optional)", 0, 1)]),
+        // Genmyo (oracle-l5r-2793): "Open: Target your Personality: Genmyo copies one of his keywords." An ongoing effect with no printed duration lasts until the turn ends (core rules, Duration).
+        ["genmyo-copy"] = new("Open", "Target your Personality: Genmyo copies one of his keywords", "own-personality"),
+        // Qalyar (oracle-l5r-6117): "Recon Reaction: After engaging at Qalyar's battlefield: You have Reconnaissance there. Give its province +2 or -2 strength." One printed ability with a choice of two
+        // amounts is two ids sharing one use (UsageKey), the way Bayushi Nori's two bows do.
+        ["qalyar-recon-plus"] = new("Reaction", "Recon Reaction: After engaging at Qalyar's battlefield: You have Reconnaissance there. Give its province +2 strength", "none",
+            Trigger: "after-engaging-at-own-battlefield", ActionKeywords: ["Recon"], UsageKey: "qalyar-recon"),
+        ["qalyar-recon-minus"] = new("Reaction", "Recon Reaction: After engaging at Qalyar's battlefield: You have Reconnaissance there. Give its province -2 strength", "none",
+            Trigger: "after-engaging-at-own-battlefield", ActionKeywords: ["Recon"], UsageKey: "qalyar-recon"),
+        // Seppun Washi (oracle-l5r-6620): Yoritomo Sakuma's first ability verbatim (an alternate Gold source that bows its card).
+        ["washi-produce-gold"] = new("Reaction", "When paying a Gold cost, bow this card: produce 2 Gold", "none", Trigger: "paying-gold-cost", PaymentProduction: 2),
+        // Yasuki Jekku (oracle-l5r-9443): "Political Limited: Pay Gold equal to a target Personality's base Personal Honor minus 1: Dishonor him. His controller loses 1 Honor, or 2 Honor if his base Personal
+        // Honor is 3 or greater." The Gold is a derived cost (GoldCostRule.StatValue on the printed Personal Honor, never below 0).
+        ["jekku-dishonor"] = new("Limited", "Political Limited: Pay Gold equal to a target Personality's base Personal Honor minus 1: Dishonor him. His controller loses 1 Honor, or 2 Honor if his base Personal Honor is 3 or greater", "personality",
+            ActionKeywords: ["Political"], Cost: GoldCostRule.StatValue(CostStatSubject.Target, CostStat.PersonalHonor, basePrinted: true, modifier: -1, floor: 0)),
+        // Yasuki Tanimura (oracle-l5r-9464): "Reaction: When paying for an action, produce 3 Gold which may only pay for that action" (an alternate Gold source for actions only, with no bow cost), and "Political
+        // Reaction: After another player's Battle action targets Tanimura, the player may pay 4 Gold. If he does not pay the Gold, he loses 3 Honor" (a targeted-by-action reaction handing the acting player an Either/Or).
+        ["tanimura-produce-gold"] = new("Reaction", "When paying for an action, produce 3 Gold which may only pay for that action", "none", Trigger: "paying-gold-cost", PaymentProduction: 3, PaymentActionsOnly: true, PaymentBows: false),
+        ["tanimura-political-pay"] = new("Reaction", "Political Reaction: After another player's Battle action targets Tanimura, the player may pay 4 Gold. If he does not pay the Gold, he loses 3 Honor", "none",
+            Trigger: ReactionTriggers.TargetedByAction, ActionKeywords: ["Political"]),
+        // Yung (oracle-l5r-9697): "Reaction: After one of your Rings enters play, bow Yung: Search your Fate deck for a Ring, show it, and put it in your hand." A Ring enters play by its own recruit action, so this reads the
+        // action that just resolved (the after-action-resolved window, Yung's controller's Ring, put into play by it).
+        ["yung-search-ring"] = new("Reaction", "After one of your Rings enters play, bow Yung: Search your Fate deck for a Ring, show it, and put it in your hand", "none",
+            Trigger: AfterActionReactionTriggers.AfterActionResolved, Costs: ActionCost.BowSource, Search: SearchCatalog.YungRing),
+        // Daigotsu Ishibashi (oracle-l5r-1728): "Fear Battle: Show a Dark Virtue card in your hand: Ranged Attack with strength equal to the card's Focus Value plus one." The shown card rides on CardIds (Mitsu's
+        // token ids are the precedent for a per-command Attack strength); its strength is read by RequireLegalAttackTarget and the execution case alike.
+        ["ishibashi-attack"] = new("Battle", "Fear Battle: Show a Dark Virtue card in your hand: Ranged Attack with strength equal to the card's Focus Value plus one", "attack", ActionKeywords: ["Fear"]),
+        // Daigotsu Kanpeki - exp (oracle-l5r-1733): "Reaction: After the resolution of a Battle action from a Strategy, if Kanpeki performed it: Take an additional Battle action." and "Battle: Target an enemy
+        // Personality with lower Force. Kanpeki snaps him like a twig. Destroy him."
+        ["kanpeki-additional-action"] = new("Reaction", "After the resolution of a Battle action from a Strategy, if Kanpeki performed it: Take an additional Battle action", "none", Trigger: AfterActionReactionTriggers.AfterActionResolved),
+        ["kanpeki-destroy"] = new("Battle", "Target an enemy Personality with lower Force: Destroy him", "enemy-personality-force-lt-self"),
         // Yogo Ugimori (oracle-l5r-10084): "from a province" (LastProvinceEntryCardId, a per-id Require); the chosen player is locked until Ugimori's controller's next turn begins.
         ["ugimori-proclaim-lock"] = new("Reaction", "After Ugimori enters play from a province, choose a player: He may not take the Proclaim Reaction until your next turn begins", "player", Trigger: "own-enters-play"),
         // Bayushi Shibata - exp (oracle-l5r-10080): the +3 lasts the turn (ProvinceStrengthEffect), the target-status half through IfTarget.
@@ -3459,7 +3502,9 @@ public sealed partial class MatchEngine
         // Before the Dawn (issue #431): Wrathful Dead, and the actions that destroy their target.
         or "wrathful-dead-destroy" or "anger-management-destroy" or "dismissing-the-cur-move" or "spirit-kensai-destroy" or "spirit-commander-destroy" or "embers-final-fire-destroy" or "red-hunger-personality" or "crimson-mark-destroy"
         // Forgotten Legacy pass (issue #467), batch 3: Broken Alliance destroys its target attachment; Cast Aside the Weak destroys its target when its Samurai is a Paragon.
-        or "broken-alliance-destroy" or "cast-aside-bow";
+        or "broken-alliance-destroy" or "cast-aside-bow"
+        // Emperor Edition Personality pass (issue #477), batch 6: Daigotsu Kanpeki - exp destroys his target outright.
+        or "kanpeki-destroy";
     // The actions whose ONLY effect is to straighten their target: against a card that may not be straightened this turn (Basic Lesson) they are refused outright, where an action that
     // also does something else (Defensive Stance's +3F) still resolves and only its straightening is skipped (Straighten refuses it).
     private static bool StraightensOnly(string abilityId) => abilityId is "jinn-kuen-straighten" or "kodo-straighten" or "munefusa-straighten" or "mitsuko-straighten" or "ritual-preparation-straighten"
@@ -3576,7 +3621,9 @@ public sealed partial class MatchEngine
         // Seeds of Decay pass (issue #453), batch 5.
         or "celestial-sword-scorpion-bow" or "scent-of-dishonor-bow"
         // Forgotten Legacy pass (issue #467), batch 1: Toshimo, Murota and Nikaru bow their target; Abodan bows his (conditionally) and Hakuseki's duel its loser.
-        or "toshimo-bow" or "murota-bow" or "nikaru-bow-lock" or "abodan-move" or "hakuseki-duel";
+        or "toshimo-bow" or "murota-bow" or "nikaru-bow-lock" or "abodan-move" or "hakuseki-duel"
+        // Emperor Edition Personality pass (issue #477), batch 6: Nishimura bows its target.
+        or "nishimura-bow";
     // Whether the command's TargetId is an Attack's OWN target, which reacts through the separate attackReaction
     // window instead of this one: an Attack-classified ability whose Target category is "attack". Bayushi Kahoku
     // - exp (issue #313) is Attack-classified too, but its TargetId is the separate "-4F" target (an ordinary
@@ -3672,6 +3719,9 @@ public sealed partial class MatchEngine
             // movement from the action's effects" -- any player's action that would move a defending Personality (DeferredActionDefendingMovers), negatable like Tamoko's.
             case "earths-strength-negate-move":
                 return negatable && DeferredActionDefendingMovers(command).Any();
+            // Kitsuki Yataku (issue #477 batch 6): any action that targets a Samurai and would create a refusable challenge.
+            case "yataku-no-refuse":
+                return !TargetsThroughAttackPipeline(command.AbilityId) && YatakuApplies(affected, acting);
             default:
                 return false;
         }
@@ -3755,7 +3805,9 @@ public sealed partial class MatchEngine
         // Seeds of Decay pass (issue #453), batch 2.
         or "baiko-shame" or "tsujiken-exp-dishonor"
         // Seeds of Decay pass (issue #453), batch 5: Moksha Patam's "Lose 1 Honor", Celestial Sword of the Scorpion's entry "choose a player. He loses 2 Honor".
-        or "moksha-patam-move" or "celestial-sword-scorpion-lose";
+        or "moksha-patam-move" or "celestial-sword-scorpion-lose"
+        // Emperor Edition Personality pass (issue #477), batch 6: Yasuki Jekku's controller-of-the-target Honor loss.
+        or "jekku-dishonor";
     private bool ControlsDishonorablePersonality(int playerId) => _state.Cards.Values.Any(c => c.OwnerId == playerId && InPlay(c) && Definition(c).Type == CardType.Personality && c.Dishonorable);
     // Gate for whether the window is even worth opening -- "if [neither a Dishonorable Personality
     // nor an Honor loss] occurs, do not trigger the reaction interrupt" (the user's own ruling).
@@ -3984,6 +4036,7 @@ public sealed partial class MatchEngine
         "taiken-attack" => "Ranged", // Isawa Taiken (issue #458)
         "tomiko-attack" or "tomaru-attack" => "Ranged", // Embers of War pass (issue #460 batch 2).
         "higaonna-attack" => "Ranged", // Forgotten Legacy pass (issue #467 batch 1).
+        "ishibashi-attack" => "Ranged", // Emperor Edition Personality pass (issue #477 batch 6).
         "junpei-attack" => "Melee",
         "precision-attack" => "Ranged", // Precision (issue #460)
         "cursed-relic-attack" or "pearl-of-rage-attack" or "thunders-wrath-attack" or "thunders-wrath-followup-attack" => "Ranged", // Forgotten Legacy pass (issue #467), batch 5
@@ -5164,7 +5217,7 @@ public sealed partial class MatchEngine
             // player chooses to destroy right now), not a static per-ability-id/target/source formula
             // AttackStrength's own switch can express. CardIds carries the chosen token ids here
             // (tokens are not entries in _state.Cards, so this is a deliberate, narrow reuse).
-            Require(id is "mitsu-fire-attack" or "scorn-the-weak" or "strength-in-terror" or "unexpected" or "visage-of-the-orochi" or "kahoku-exp-attack" or "knowledge-and-power"
+            Require(id is "mitsu-fire-attack" or "scorn-the-weak" or "strength-in-terror" or "unexpected" or "visage-of-the-orochi" or "kahoku-exp-attack" or "knowledge-and-power" or "ishibashi-attack"
                 || command.CardIds is null || command.CardIds.Length == 0, "This action does not select multiple cards.");
             // Bayushi Kahoku - exp (oracle-l5r-807): "Target an enemy Personality: Give him -4F. Ranged 3
             // Attack." Two SEPARATE selections, the Ranged Attack's own target being the second (per the
@@ -5351,6 +5404,9 @@ public sealed partial class MatchEngine
                 // Shosuro Hawado - exp 2: "a card in a province" -- either player's, face-down or face-up.
                 else if (ability.Target == "card-in-province")
                     Require(target.Zone == Zone.Province, "Choose a card in a province.");
+                // Nishimura (Emperor Edition Personality pass, issue #477 batch 6): "a Kiho or Weapon from your hand" -- a Kiho Strategy or a Weapon Item in the acting player's own hand.
+                else if (ability.Target == "own-hand-kiho-or-weapon")
+                    Require(target.OwnerId == player.Id && target.Zone == Zone.Hand && player.Hand.Contains(target.Id) && (Keyword(target, "Kiho") || Keyword(target, "Weapon")), "Choose a Kiho or a Weapon in your hand.");
                 // Essence of Undeath: "your dead Personality".
                 else if (ability.Target == "own-dead-personality")
                     Require(target.OwnerId == player.Id && type == CardType.Personality && target.Zone == Zone.Dead, "Choose one of your own dead Personalities.");
@@ -5764,6 +5820,8 @@ public sealed partial class MatchEngine
                         // Mirumoto Mitoshi: a Personality (either side) with strictly lower Force
                         // than the source's own.
                         "personality-force-lt-self" => personality && CardForce(target) < CardForce(source!),
+                        // Daigotsu Kanpeki - exp (issue #477 batch 6): "an enemy Personality with lower Force" than his own.
+                        "enemy-personality-force-lt-self" => personality && !own && CardForce(target) < CardForce(source!),
                         // Strategic Sacrifice (issue #264): a card in a unit (either side) with Force
                         // at or below the current battlefield's own province's strength -- "the
                         // current battlefield's province" is always the Defender's own, the same
@@ -5964,6 +6022,8 @@ public sealed partial class MatchEngine
         ValidateSeedsOfDecayBatch3(id, command, ability, player, source);
         // Forgotten Legacy pass (issue #467), batch 1: the per-id conditions of this batch's cards (ForgottenLegacyBatch1.cs).
         ValidateForgottenLegacyBatch1(id, command, player, source);
+        // Emperor Edition Personality pass (issue #477), batch 6: the per-id conditions of this batch's cards (EmperorPersonalityBatch6.cs).
+        ValidateEmperorBatch6(id, command, player, source);
         // The Gold cost (issue #303): every ability's price -- Equip (Battle)/Soshi Neiru's Spell cost, Low
         // Market's "2 less, to a minimum of 1", Your Clan Needs You!'s recruit cost minus 6, Shinden
         // Shorai's "all costs", Singh Remnants' own cost, a Strategy/Discipline's printed cost, Kharmic's
@@ -8321,6 +8381,11 @@ public sealed partial class MatchEngine
             case "tsujiken-exp-bow": case "tsujiken-exp-straighten": case "tsujiken-exp-draw": case "tsujiken-exp-dishonor": case "ugimori-proclaim-lock": case "shibata-exp-bow":
                 RunSeedsBatch2Effect(id, command, player, source, target);
                 break;
+            // Emperor Edition Personality pass (issue #477), batch 6: every case is in EmperorPersonalityBatch6.cs.
+            case "yataku-no-refuse": case "nishimura-bow": case "genmyo-copy": case "qalyar-recon-plus": case "qalyar-recon-minus": case "jekku-dishonor": case "tanimura-political-pay":
+            case "yung-search-ring": case "ishibashi-attack": case "kanpeki-additional-action": case "kanpeki-destroy":
+                if (RunEmperorBatch6Effect(id, command, ability, player, source, target, consumedGrant, bowedBeforeAction)) return;
+                break;
             case "training-performed-bow": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;
             // Seeds of Decay pass (issue #453), batch 4 (helpers in SeedsOfDecayBatch4.cs).
             case "mukudori-bow-fudo-draw": BowFudoCardsAndDraw(command, player); break;
@@ -9540,14 +9605,17 @@ public sealed partial class MatchEngine
             CostOption?[] costOptions = ability.CostOptions is { Length: > 1 } manyOptions ? manyOptions.Select(o => (CostOption?)o).ToArray() : [null];
             // A created card the player chooses (issue #394, "an Armor or Weapon Item"): one offered action per card, each carrying its scan's id.
             CardDefinition?[] createChoices = ability.Creates is { Or.Length: > 0 } multiple ? multiple.Alternatives.Select(a => (CardDefinition?)CreatedCards.Resolve(a)).ToArray() : [null];
+            // Daigotsu Ishibashi (issue #477 batch 6): one offered action per Dark Virtue card that may be shown from the hand, each with its own strength (a hand with none is offered once, disabled).
+            string?[] shownChoices = id == "ishibashi-attack" ? IshibashiShowableCards(player).Cast<string?>().DefaultIfEmpty(null).ToArray() : [null];
             foreach (var performer in performers)
             foreach (var costOption in costOptions)
             foreach (var createChoice in createChoices)
+            foreach (var shownChoice in shownChoices)
             {
                 var provinces = player.Provinces.Where(p => !p.Destroyed && p.CardId is not null).Select(p => p.CardId!).ToArray();
                 var armyIds = _state.CurrentBattleProvince is int currentProvince ? Army(playerId, currentProvince).Select(a => a.Id).OrderBy(x => x, StringComparer.Ordinal).ToArray() : [];
                 var prototype = new GameCommand("useAbility", playerId, _state.Version, source?.Id, null,
-                    CardIds: ability.Target == "provinces" ? provinces : null, AbilityId: id, PerformerId: performer, CostOption: costOption?.Id, CreatedCard: createChoice?.Id);
+                    CardIds: ability.Target == "provinces" ? provinces : shownChoice is null ? null : [shownChoice], AbilityId: id, PerformerId: performer, CostOption: costOption?.Id, CreatedCard: createChoice?.Id);
                 // Multi-target actions (issue #336): one option carrying every slot's legal candidates, and the default selection as its command.
                 if (ability.Slots is not null)
                 {
@@ -9635,6 +9703,7 @@ public sealed partial class MatchEngine
                 var targetQuotes = firstQuote?.Kind == GoldCostKind.Derived
                     ? quotes.Where(q => q.Command.TargetId is not null && q.Quote is not null).GroupBy(q => q.Command.TargetId!).ToDictionary(g => g.Key, g => g.First().Quote!) : null;
                 var label = AbilityOptionLabel(id, ability, performer, source, costOption) + (createChoice is null ? "" : $" · {createChoice.Name}")
+                    + (shownChoice is null ? "" : $" · shows {Definition(Card(shownChoice)).Name} ({shownChoice})")
                     + (provinceOwner is int owner ? ability.Target == "player" ? (owner == playerId ? " · you" : " · your opponent") : (owner == playerId ? " · your Province" : " · an enemy Province") : "");
                 yield return new("useAbility", label, legal.Count > 0, legal.Count > 0 ? null : error ?? "No legal target or performer.",
                     legal.FirstOrDefault(), source?.Id, ability.Target == "provinces" ? provinces : legal.Where(c => c.TargetId is not null).Select(c => c.TargetId!).Distinct().ToArray(),

@@ -183,7 +183,9 @@ public sealed partial class MatchEngine
         // Performer of its own falls back to the source card.
         var strength = id == "mitsu-fire-attack" ? (command.CardIds ?? []).Length : EffectiveAttackStrength(id, player, target, command.PerformerId ?? source?.Id)
             // Celestial Sword of the Mantis - exp (issue #453 batch 5): "strength equal to twice the amount paid" -- the Gold the command chooses, read here as at resolution.
-            + (id == "celestial-sword-mantis-attack" ? 2 * (command.GoldAmount ?? 0) : 0);
+            + (id == "celestial-sword-mantis-attack" ? 2 * (command.GoldAmount ?? 0) : 0)
+            // Daigotsu Ishibashi (issue #477 batch 6): "strength equal to the card's Focus Value plus one" of the Dark Virtue shown from the hand.
+            + (id == "ishibashi-attack" ? IshibashiStrength(command) : 0);
         var compared = AttackComparedForce(target);
         if (forcePenaltyTargetId == target.Id) compared = Math.Max(0, compared - forcePenalty);
         Require(compared <= strength, "That card's Force is above the Attack's strength.");
