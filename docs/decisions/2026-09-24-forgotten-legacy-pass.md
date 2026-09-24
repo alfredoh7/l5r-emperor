@@ -121,17 +121,15 @@ Each batch's report recorded its rulings; the ones that matter most:
 
 - Full core suite (`L5R.Core.Tests`): **1290 PASS, 0 FAIL**. That is the 1220 baseline plus 70 new scenarios across `forgotten-legacy-batch-1` to `-5`. It was re-run after every batch merge and after the Terrain fix.
 - `L5R.AI.Tests` 74/74, `L5R.Server.Tests` 8/8, `L5R.Client.Transport.Tests` 12/12.
-- Collaboration tests 45/45. Content suite 133/134. The one error is `test_checked_in_release_covers_current_catalogue_and_bundled_cards`, because the art pack is not yet republished (see below).
+- Collaboration tests 45/45. Content suite 134/134 once the new art pack was pinned (see below).
 - **Environment limits:**
   - Built with .NET SDK 10.0.112 from Ubuntu packages. The pinned 10.0.400 installer host is blocked here, so `global.json` was overridden locally and never committed; `tools/check.sh` was not run as-is.
   - The Godot client was not built or launched.
   - No native or visual check was done.
   - The CI jobs that check the pinned SDK did not start: GitHub refused them for an account billing reason.
 
-## Remaining: catalogue art pack republish
+## Catalogue art pack
 
-64 newly bundled scans (`src/L5R.Client/Content/Published/oracle-l5r-*.jpg`) need a new catalogue art release. This session was refused permission to create GitHub releases, so `content/catalogue-art-pack.json` and `src/L5R.Client/Content/catalogue-art.json` are unchanged and still pin `catalogue-art-pr460-20260923-r1`.
+The 64 newly bundled scans are covered by a new catalogue art release, `catalogue-art-pr469-20260924-r1`: 3297 scans, incremental over `catalogue-art-pr460-20260923-r1`, sha256 `b0661dd45a5124a470564f863a81d8ec374f08653322c3cbc21b8076a8f09965`. This cloud session could not create GitHub releases, and the full 448 MB zip was too large to hand over. So it sent an 8.5 MB kit instead: the 64 new WebP-85 scans, the manifest and an assemble script.
 
-An incremental pack was assembled and verified locally: 3297 scans, all hashes matching. It could not be uploaded.
-
-On Mendon's machine, run `python tools/content/build_catalogue_art.py --cache <non-synced dir> --output <non-synced dir>/L5R-Catalogue-WebP85.zip --tag catalogue-art-pr469-<date>-r1`. Upload the zip as that release, then commit the two regenerated JSON files. The content test then passes.
+Mendon rebuilt the zip from the pr460 release with that kit and uploaded it himself. GitHub's asset digest matches the sha256 above. The assemble script pins each zip entry's `create_system` header byte to 3. Python writes 0 on Windows, so without the pin a Windows rebuild produced different bytes from the identical scans. `content/catalogue-art-pack.json` and `src/L5R.Client/Content/catalogue-art.json` now pin the new release.
