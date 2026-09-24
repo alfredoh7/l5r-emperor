@@ -1,0 +1,9 @@
+{
+  "lane": "ui",
+  "summary": "Taking #470: native B6 Lantern Study menu from approved pixels, slow 85% lighting and functional navigation.",
+  "validation": "Approval hash recorded; current origin/main and open PRs inspected; no TitleMenu overlap. Implementation and native checks pending.",
+  "remaining": "Implement, compare native output, verify input and prepare review launchers. No merge.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/470",
+  "branch": "codex/470-lantern-main-menu",
+  "updated": "2026-09-24T10:51:22.303597+00:00"
+}
