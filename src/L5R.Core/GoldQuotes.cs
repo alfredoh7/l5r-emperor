@@ -132,10 +132,11 @@ public sealed partial class MatchEngine
     private (string AbilityId, int Amount)? AlternateGoldSource(CardInstance card)
     {
         foreach (var id in AbilityIdsOf(card))
-            if (AbilityCatalog.All.TryGetValue(id, out var ability) && ability.PaymentProduction is int amount
+            if (AbilityCatalog.All.TryGetValue(id, out var ability) && (ability.PaymentProduction is not null || ability.PaymentDiscardsFocus)
                 && !(card.AbilityUses.TryGetValue(ability.UsageKey ?? id, out var used) && used == _state.TurnNumber)
                 && !AbilityDisabled(card, id)) // Forgotten Legacy pass (issue #467), batch 1: "it may not be used"
-                return (id, amount);
+                // Asahina Keigo (Emperor Edition Personality pass, issue #477): the Focus Value of the hand card named for him (0 until one is).
+                return (id, ability.PaymentDiscardsFocus ? PaymentDiscardFocus(card) : ability.PaymentProduction!.Value);
         return null;
     }
 
@@ -145,7 +146,7 @@ public sealed partial class MatchEngine
     {
         if (card.Zone is not (Zone.Home or Zone.Stronghold or Zone.Battlefield)) return null;
         if (Definition(card).GoldProduction > 0) return GoldProduced(card.Id, card.OwnerId);
-        return AlternateGoldSource(card)?.Amount;
+        return IsVariableGoldSource(card) ? null : AlternateGoldSource(card)?.Amount;
     }
 
     /// <summary>The resolved price of one ability command. Amount is what must be paid now; Subject is the
@@ -345,6 +346,7 @@ public sealed partial class MatchEngine
     /// chosen amount, then require that the offered sources actually produce it.</summary>
     private void ValidateAbilityPayment(GameCommand command, int playerId)
     {
+        UsePaymentDiscards(command);
         var cost = AbilityGoldCost(command);
         Require(command.GoldAmount is null || cost?.Rule.Basis == GoldCostBasis.Variable, "This action has no player-chosen Gold amount.");
         if (cost is not null) Require(cost.Error is null, cost.Error ?? "");
@@ -389,6 +391,7 @@ public sealed partial class MatchEngine
         Require(ids.Distinct(StringComparer.Ordinal).Count() == ids.Length, "A Gold source cannot be used twice in one payment.");
         var producers = Producers(playerId, paying).Select(c => c.Id).ToHashSet(StringComparer.Ordinal);
         Require(ids.All(producers.Contains), "Every Gold source must be yours, in play, unbowed and able to produce Gold.");
+        RequirePaymentDiscards(playerId, ids, paying);
         Require(TrySplitPayment(playerId, lead, rest, ids, out _, out var restIds, paying) && (rest > 0 || restIds.Length == 0),
             $"This play needs its Discipline cost ({lead} Gold) paid first and then {rest} Gold for the action itself, each from its own sources (Gold does not carry over); the selected sources cannot do that.");
     }
@@ -418,6 +421,7 @@ public sealed partial class MatchEngine
     /// always has, leaves no payment event.</summary>
     private void PayForAbility(GameCommand command, PlayerState player, bool atResolution = false)
     {
+        UsePaymentDiscards(command);
         if (AbilityGoldCost(command) is not { } cost || cost.Rule.AtResolution != atResolution) return;
         Require(cost.Error is null, cost.Error ?? "");
         if (!cost.Rule.Explicit && cost.Amount <= 0) return;

@@ -139,6 +139,7 @@ public sealed partial class MatchEngine
             return;
         }
         if (ApplyForgottenLegacyBatch1BranchEffect(effect, command)) return;
+        if (ApplyEmperorBatch4BranchEffect(effect, command)) return; // Emperor Edition Personality pass (issue #477), batch 4.
         switch (effect)
         {
             case BranchEffect.MoveSourceHome: MoveHome(source, false); break;

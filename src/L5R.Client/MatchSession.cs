@@ -153,7 +153,7 @@ public sealed class MatchSession : IDisposable
         province = command.Province, clanDiscount = command.ClanDiscount, clanAllegiance = command.ClanAllegiance,
         assignments = command.Assignments, cardIds = command.CardIds, targetId = command.TargetId,
         abilityId = command.AbilityId, performerId = command.PerformerId, choice = command.Choice,
-        deckPosition = command.DeckPosition, targetPlayerId = command.TargetPlayerId, goldAmount = command.GoldAmount, costOption = command.CostOption, selections = command.Selections, createdCard = command.CreatedCard
+        deckPosition = command.DeckPosition, targetPlayerId = command.TargetPlayerId, goldAmount = command.GoldAmount, costOption = command.CostOption, selections = command.Selections, createdCard = command.CreatedCard, paymentDiscards = command.PaymentDiscards
     };
 
     public async Task Submit(GameCommand command)

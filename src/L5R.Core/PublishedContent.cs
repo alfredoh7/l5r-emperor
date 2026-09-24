@@ -2520,4 +2520,6 @@ public static class PublishedContent
     /// <summary>Personality wave 68 (Emperor Edition Personality pass, issue #477, batch 1): Chuda Niiro, Daigotsu Aya, Daigotsu Gyoken, Daigotsu Matsuda, Daigotsu Negishi, Daigotsu Misaki, Ekichu no Oni,
     /// Goju Oyoto, Ninube Onchi, Nosloc no Oni, Ugulu no Oni.</summary>
     public static PublishedSnapshot PersonalityWave68 { get; } = Load("L5R.Published.PersonalityWave68.json", "personality-wave-68", requireDecks: false);
+    /// <summary>Personality wave 71 (Emperor Edition Personality pass, issue #477, batch 4): fifteen Crane, Scorpion and Ninja Personalities wired whole.</summary>
+    public static PublishedSnapshot PersonalityWave71 { get; } = Load("L5R.Published.PersonalityWave71.json", "personality-wave-71", requireDecks: false);
 }

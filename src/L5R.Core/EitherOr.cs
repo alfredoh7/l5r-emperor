@@ -38,6 +38,9 @@ public static class EitherOrSpecs
     /// <summary>Yasuki Daiki (Forgotten Legacy pass, issue #467 batch 2): "His controller chooses to either pay 4 Gold, lose 2 Honor, or do neither. If he did not pay 4 Gold
     /// or lose 2 Honor, the Personality may not be assigned, and will not move, into attacking armies." -- Makoto's "the affected card's controller decides", three ways.</summary>
     public const string DaikiPayLoseOrLock = "daiki-pay-lose-or-lock";
+    /// <summary>Kakita Genshi (Emperor Edition Personality pass, issue #477 batch 4): "His controller may dishonor him. If he did not choose to dishonor him, gain 1 Honor and choose one of the
+    /// Personality's abilities; it may not be used until your next turn begins." -- the affected card's controller decides (Yasuki Makoto's shape); a refusal chains into the acting player's choice.</summary>
+    public const string GenshiShame = "genshi-shame";
 }
 
 /// <summary>What choosing an option amounts to, for a client to word and style it: "avoid" (accept a cost or a lesser loss so the
@@ -69,6 +72,14 @@ public sealed class PendingEitherOr
     public int ResumePlayerId { get; set; }
     public bool StayWithActor { get; set; }
     public List<string>? BowedBefore { get; set; }
+    // Kakita Genshi (issue #477 batch 4): the whole action, so the tail every action ends with runs once the choice (and the one it chains into) is made; ChainAbilityLock is set by the
+    // refusal, which owes the acting player a choice of one of the affected Personality's abilities to lock.
+    public GameCommand? Command { get; set; }
+    public bool ConsumedGrant { get; set; }
+    public bool PlayedFromDiscard { get; set; }
+    public int? OpponentHonorBefore { get; set; }
+    public List<AdditionalActionGrant> PreExistingGrants { get; set; } = [];
+    public bool ChainAbilityLock { get; set; }
 }
 
 /// <summary>One thing the deciding player may choose. Detail says in plain words what it does; Gold is the payment quote for an option
@@ -101,6 +112,7 @@ public sealed partial class MatchEngine
             EitherOrSpecs.InoStorm => $"{source}'s storm: discard a card, or bow {(affected == "" ? "the performer" : affected)}.",
             EitherOrSpecs.MakotoPayOrDishonor => $"{source}: pay 4 Gold and lose 1 Honor, or {affected} is dishonored and moved home.",
             EitherOrSpecs.DaikiPayLoseOrLock => $"{source}: pay 4 Gold, lose 2 Honor, or neither -- then {affected} may not be assigned, and will not move, into attacking armies this turn.",
+            EitherOrSpecs.GenshiShame => $"{source}: dishonor {affected}, or {Player(p.ActingPlayerId).Name} gains 1 Honor and locks one of his abilities until their next turn begins.",
             _ => throw new RuleViolation("Unknown choice.")
         };
     }
@@ -166,6 +178,15 @@ public sealed partial class MatchEngine
                     new("pay", "Pay 4 Gold", "Nothing further happens.", EitherOrKind.Avoid, 4, payable(4), "You cannot produce 4 Gold."),
                     new("honor", "Lose 2 Honor", "Nothing further happens.", EitherOrKind.Avoid, 0, true, null),
                     new("neither", "Do neither", $"{name} may not be assigned, and will not move, into attacking armies this turn.", EitherOrKind.Accept, 0, true, null)
+                ];
+            }
+            // Kakita Genshi (issue #477 batch 4): the decider is the target's controller. Dishonoring is a choice only while the Personality is still in play.
+            case EitherOrSpecs.GenshiShame:
+            {
+                var name = Definition(affected!).Name;
+                return [
+                    new("dishonor", $"Dishonor {name}", $"{name} is dishonored. Nothing further happens.", EitherOrKind.Avoid, 0, InPlay(affected!), $"{name} is no longer in play."),
+                    new("refuse", "Do not dishonor him", $"{Player(p.ActingPlayerId).Name} gains 1 Honor and chooses one of {name}'s abilities, which may not be used until their next turn begins.", EitherOrKind.Accept, 0, true, null)
                 ];
             }
             default: throw new RuleViolation("Unknown choice.");
@@ -294,6 +315,16 @@ public sealed partial class MatchEngine
                 Emit("eitherOrChosen", $"{decider.Name} did neither ({Definition(source).Name}).", decider.Id, affected!.Id);
                 DaikiLock(affected!, source);
                 break;
+            // Kakita Genshi (issue #477 batch 4; EmperorPersonalityBatch4.cs).
+            case (EitherOrSpecs.GenshiShame, "dishonor"):
+                Emit("eitherOrChosen", $"{decider.Name} chose to dishonor {Definition(affected!).Name} ({Definition(source).Name}).", decider.Id, affected!.Id);
+                Dishonor(affected!, p.ActingPlayerId);
+                break;
+            case (EitherOrSpecs.GenshiShame, "refuse"):
+                Emit("eitherOrChosen", $"{decider.Name} did not dishonor {Definition(affected!).Name} ({Definition(source).Name}): {Player(p.ActingPlayerId).Name} gains 1 Honor.", decider.Id, source.Id);
+                GainHonorFromPerformer(source, 1, Definition(source).Name);
+                p.ChainAbilityLock = true;
+                break;
             default: throw new RuleViolation("Unknown choice.");
         }
     }
@@ -302,6 +333,7 @@ public sealed partial class MatchEngine
     private void FinishEitherOr(PendingEitherOr p)
     {
         _state.PendingEitherOr = null;
+        if (p.SpecId == EitherOrSpecs.GenshiShame && p.Origin == "action") { FinishGenshi(p); return; } // Kakita Genshi (issue #477 batch 4): the whole Iaijutsu action finishes together.
         if (p.Origin == "window")
         {
             // A Reaction was played inside a reaction window: the window stays open and priority flips, exactly as when any Reaction

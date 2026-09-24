@@ -30,6 +30,7 @@ public sealed partial class MatchEngine
     private bool DestructionShielded(CardInstance card, int actingPlayerId)
     {
         if (HiromiUnnegatable()) return false; // Yoritomo Hiromi (issue #477): the destruction from her Battle actions will not be negated.
+        if (MichiruBarrierNegates(card, actingPlayerId)) return true; // Asahina Michiru (Emperor Edition Personality pass, issue #477, batch 4).
         if (MountainsPowerNegates(card, actingPlayerId)) return true; // The Mountain's Power (Forgotten Legacy pass, issue #467).
         if (card.DestructionShieldTurn != _state.TurnNumber || actingPlayerId == card.OwnerId) return false;
         Emit("destructionNegated", $"{Definition(card).Name}'s destruction was negated (Megumi's Guidance).", card.OwnerId, card.Id);
