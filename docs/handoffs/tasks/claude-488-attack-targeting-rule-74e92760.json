@@ -1,9 +1,9 @@
 {
-  "lane": "rules",
-  "summary": "Attack targeting follows the core rule: a target whose Force (or compared stat) is above the Attack's strength is legal to target and simply survives; an Attack may have no target. Removes the strength check from RequireLegalAttackTarget and updates ~40 tests that pinned the old rule (plus a new regression).",
+  "lane": "shared",
+  "summary": "Attack targeting follows the core rule: a target whose Force (or compared stat) is above the Attack's strength is legal to target and simply survives; an Attack may have no target. Removes the strength check from RequireLegalAttackTarget and updates ~40 tests that pinned the old rule (plus a new regression). Shared because the change is rules code plus many test files; no UI or wire change.",
   "validation": "Core suite 0 failures (1497 pass); AI 74/74, Server 8/8, Client.Transport 12/12",
   "remaining": "None; Item/token attachments blocking Attacks left as a separate decision.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/488",
   "branch": "claude/488-attack-targeting-rule",
-  "updated": "2026-09-24T21:58:01.921674+00:00"
+  "updated": "2026-09-24T21:58:14.880236+00:00"
 }
