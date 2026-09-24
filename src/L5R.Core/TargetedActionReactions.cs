@@ -288,6 +288,9 @@ public sealed partial class MatchEngine
             // Personality its controller controls) and could destroy him.
             case "ward-of-air-negate":
                 return WardOfAirApplies(card, subject, affected);
+            // Social Grace (The Shadow's Embrace pass, issue #476, batch 4): another player's action targets one of its player's Courtiers and would dishonor him.
+            case "social-grace-negate":
+                return SocialGraceApplies(card, subject, affected);
             default:
                 return false;
         }

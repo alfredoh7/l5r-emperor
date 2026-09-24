@@ -93,7 +93,7 @@ internal static class BattleAbsentMovesTests
     private static void MarkedInventoryPinned()
     {
         var marked = string.Join(",", AbilityCatalog.All.Where(p => p.Value.MovesToBattle).Select(p => p.Key).OrderBy(k => k, StringComparer.Ordinal));
-        Eq(marked, "broken-alliance-move,charge-into-danger-move,chukage-move,dislodge-the-foe,earth-flows-move,hawado-move-battlefield,heijin-move,help-shadows-move,houken-exp-straighten,intervening-spirit-move,intimidation-move,irezu-move,mai-move-force-penalty,michi-move,moving-unmoving-approach,natsumi-move,natures-wrath-move,pronouncement-guilt-move,requesting-reinforcements-recruit,return-to-action-move,rikyou-move,sanctuary-of-the-waves-move,skipping-the-puddle-move,sound-of-thunder-move,takasho-move,training-move-current,training-move-to-battle,trusting-instinct-move,your-clan-needs-you");
+        Eq(marked, "broken-alliance-move,charge-into-danger-move,chukage-move,dislodge-the-foe,earth-flows-move,hawado-move-battlefield,heijin-move,help-shadows-move,houken-exp-straighten,intervening-spirit-move,intimidation-move,irezu-move,lesson-of-earth-move,mai-move-force-penalty,michi-move,moving-unmoving-approach,natsumi-move,natures-wrath-move,pronouncement-guilt-move,requesting-reinforcements-recruit,return-to-action-move,rikyou-move,sanctuary-of-the-waves-move,skipping-the-puddle-move,sound-of-thunder-move,sudden-movement-switch,takasho-move,training-move-current,training-move-to-battle,trusting-instinct-move,your-clan-needs-you");
         foreach (var (id, ability) in AbilityCatalog.All.Where(p => p.Value.MovesToBattle))
             Check(ability.Timing is "Battle" or "BattleOrOpen", $"{id}: a move to the battle is a Battle action");
     }
@@ -180,6 +180,10 @@ internal static class BattleAbsentMovesTests
         if (ability == "pronouncement-guilt-move") maiden.GrantedKeywords.Add(new("Magistrate", "test-fixture", GrantDuration.Permanent));
         // Forgotten Legacy pass, batch 4 (issue #467): Intimidation's Berserker performer, and its target -- another player's Personality NOT at the current battlefield.
         if (ability == "intimidation-move") { maiden.GrantedKeywords.Add(new("Berserker", "test-fixture", GrantDuration.Permanent)); Add(s, "training-lion-samurai", 1 - actor, Zone.Home); }
+        // The Shadow's Embrace pass, batch 4 (issue #476): The Lesson of Earth's Monk performer (from home: an Absent move-to-battle action), and Sudden Movement's
+        // two Personalities of one player at different locations -- the enemy's at the battlefield and another of his at home.
+        if (ability == "lesson-of-earth-move") maiden.GrantedKeywords.Add(new("Monk", "test-fixture", GrantDuration.Permanent));
+        if (ability == "sudden-movement-switch") Add(s, "training-lion-samurai", 1 - actor, Zone.Home);
         CardInstance card;
         if (definition.Type == CardType.Personality) card = Add(s, definition.Id, actor, Zone.Home, bowed: ability is "hawado-move-battlefield" or "houken-exp-straighten");
         else if (definition.Type == CardType.Spell) card = Add(s, definition.Id, actor, Zone.Attached, parent: host.Id);

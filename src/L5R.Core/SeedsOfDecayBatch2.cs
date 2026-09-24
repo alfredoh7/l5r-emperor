@@ -86,7 +86,8 @@ public sealed partial class MatchEngine
     {
         foreach (var watch in _state.AssignmentWatches.Where(w => w.CardId == card.Id && w.Turn == _state.TurnNumber).ToArray())
         {
-            _state.AssignmentWatches.Remove(watch);
+            // Social Grace (The Shadow's Embrace pass, issue #476, batch 4): "after EACH time he is assigned to attack this turn" -- it stays for the turn.
+            if (watch.Kind != WatchSocialGrace) _state.AssignmentWatches.Remove(watch);
             ResolveAssignmentWatch(watch, card, "was assigned to attack");
         }
     }
@@ -110,7 +111,8 @@ public sealed partial class MatchEngine
                 Dishonor(card, watch.BeneficiaryPlayerId);
                 GainHonor(card.OwnerId, -Definition(card).PersonalHonor, watch.Source);
                 break;
-            // Fair Warning: "gain 2 Honor".
+            // Fair Warning: "gain 2 Honor". Social Grace (The Shadow's Embrace pass, issue #476, batch 4): the same, each time.
+            case WatchSocialGrace:
             case WatchFairWarning:
                 Emit("watchFired", $"{watch.Source}: {Definition(card).Name} {what}.", watch.BeneficiaryPlayerId, card.Id);
                 GainHonor(watch.BeneficiaryPlayerId, 2, watch.Source);
