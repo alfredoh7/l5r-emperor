@@ -11,8 +11,8 @@ internal static class AttackPerformerAuditTests
     // to bow (Yayu/Tomiko: one of the source's own Spells, so the acting Personality is still the source) or a target (Strength of the Divine's Paragon, a Strategy); Carpenter Castle's
     // bowed Castle/Siege card is not its performer (ActionPerformer returns the Stronghold).
     // Forgotten Legacy pass (#467), reviewed in #476: Toritaka Chokichi ("Bow your performing Follower"), Never Beyond My Reach ("your performing unbowed Kensai") and Pearls & Spirits'
-    // three Attacks ("your performing Shugenja") each print a named performer.
-    private static readonly string[] NamedPerformer = ["akio-attack", "chokichi-attack", "junpei-attack", "metsubushi-attack", "monastery-fire-attack", "never-beyond-reach-attack",
+    // three Attacks ("your performing Shugenja") each print a named performer. The Shadow's Embrace pass (#476), batch 2: Moto Morio ("Choose your performing Follower").
+    private static readonly string[] NamedPerformer = ["akio-attack", "chokichi-attack", "junpei-attack", "metsubushi-attack", "monastery-fire-attack", "morio-attack", "never-beyond-reach-attack",
         "pearls-spirits-chi-attack", "pearls-spirits-force-attack", "pearls-spirits-sacrifice-attack", "shiro-shiba-melee", "tensin-follower-attack", "two-stings-attack", "two-stings-attack-from-discard"];
     // Thunder's Wrath (Forgotten Legacy pass, reviewed in #476): its own-wielder Performer names the Spell's wielder, the core rules' performer of a Spell's action anyway -- needed only because
     // the Spell is destroyed as the cost ("this Shugenja" is read after it has left play).

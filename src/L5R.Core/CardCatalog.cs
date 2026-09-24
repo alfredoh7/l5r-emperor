@@ -612,6 +612,7 @@ public static class CardCatalog
             .Concat(PublishedContent.RegionWave8.Cards)
             .Concat(PublishedContent.PersonalityWave65.Cards)
             .Concat(PublishedContent.HoldingWave10.Cards)
+            .Concat(PublishedContent.PersonalityWave69.Cards) // The Shadow's Embrace pass (issue #476), batch 2
             .ToDictionary(c => c.Id, StringComparer.Ordinal);
     }
 }

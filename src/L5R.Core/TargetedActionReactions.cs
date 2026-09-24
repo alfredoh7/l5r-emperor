@@ -256,6 +256,10 @@ public sealed partial class MatchEngine
                 return command.PlayerId != card.OwnerId && affected.Id == card.Id && IsBattleAction(command);
             case "yurishi-disappear":
                 return command.PlayerId != card.OwnerId && affected.Id == card.Id && IsBattleAction(command) && card.Zone == Zone.Battlefield;
+            // Yasuki Ikke (The Shadow's Embrace pass, issue #476, batch 2): "After another player's Battle action targets one of your Merchants".
+            case "ikke-negate":
+            case "ikke-honor-loss":
+                return command.PlayerId != card.OwnerId && IsBattleAction(command) && affected.OwnerId == card.OwnerId && Keyword(affected, "Merchant");
             case "jinn-kuen-negate":
             case "training-negate-merchant-free":
                 return affected.OwnerId == card.OwnerId && Keyword(affected, "Merchant");
