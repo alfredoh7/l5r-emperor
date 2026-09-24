@@ -473,7 +473,7 @@ public sealed partial class MatchEngine
                 break;
             case Phase.AttackDeclaration:
                 Add("declareAttack","Declare an attack",Command("declareAttack"),player.MayNotAttackThisTurn?"You may not declare an attack this turn.":null);
-                Add("pass","Decline to attack",Command("pass"));
+                Add("pass","Decline to attack",Command("pass"),ForcedAttackDeclineRefusal(playerId)); // Spiritual Manipulation (issue #476 batch 4): an owed attack may not be declined
                 break;
             case Phase.InfantryDeclaration:
             case Phase.DefenseAssignment:
@@ -490,7 +490,9 @@ public sealed partial class MatchEngine
                     Add(actionType,$"{(attack?"Attack":"Defend")} province {province+1} · {units.Length} {(cavalrySegment?"Cavalry":"Infantry")} units",
                         Command(actionType,assignments:units.ToDictionary(id=>id,_=>province)),units.Length==0?$"No unbowed {(cavalrySegment?"Cavalry":"Infantry")} Personalities at home.":null,
                         targets:units,provinces:provinces);
-                Add("pass",attack?(cavalrySegment?"Assign no Cavalry attackers":"Assign no Infantry attackers"):(cavalrySegment?"Assign no Cavalry defenders":"Assign no defenders"),Command("pass"));
+                // Spiritual Manipulation (issue #476 batch 4): assigning no attackers is refused while a forced target can be assigned in this segment.
+                Add("pass",attack?(cavalrySegment?"Assign no Cavalry attackers":"Assign no Infantry attackers"):(cavalrySegment?"Assign no Cavalry defenders":"Assign no defenders"),Command("pass"),
+                    attack?ForcedAssignmentRefusal(playerId,null,cavalrySegment):null);
                 break;
             case Phase.BattleSelection:
                 foreach(var province in _state.UnresolvedBattlefields) Add("selectBattle",$"Fight at province {province+1}",Command("selectBattle",province:province));
@@ -498,7 +500,8 @@ public sealed partial class MatchEngine
             case Phase.Battle:
                 // A published Terrain is played through this same command (the generic Terrain rule -- it prints no Battle ability of its own), so it is listed
                 // here too; before issue #467 only scenario Strategies were, and every published Terrain was playable by command but never offered.
-                foreach(var card in player.Hand.Select(Card).Where(c=>Definition(c).Type==CardType.Strategy && (Definition(c).ScenarioOnly || Keyword(c,"Terrain"))))
+                // A Terrain whose own Battle ability puts it into play (Unstable Ground, issue #476 batch 4) is offered through that ability instead.
+                foreach(var card in player.Hand.Select(Card).Where(c=>Definition(c).Type==CardType.Strategy && (Definition(c).ScenarioOnly || Keyword(c,"Terrain")) && !TerrainPlaysThroughOwnAbility(c)))
                 {
                     var def=Definition(card);
                     // A Strategy played with playStrategy pays its printed cost (issue #303): one quote, with

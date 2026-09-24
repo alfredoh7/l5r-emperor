@@ -524,6 +524,14 @@ public sealed partial class MatchEngine
             case "simple-yari-focus":
                 if (_state.PendingDuel?.WinnerId is string yariWinnerId && InPlay(Card(yariWinnerId)) && !StalwartNegatesBow(Card(yariWinnerId), ownerId)) Card(yariWinnerId).Bowed = true;
                 break;
+            // Paralyzing Touch (The Shadow's Embrace pass, issue #476, batch 4): "After this duel ends, negate the effects of the next action performed by its winner" (a tie has none).
+            case "paralyzing-touch-focus":
+                if (_state.PendingDuel?.WinnerId is string paralyzedWinnerId && InPlay(Card(paralyzedWinnerId))) WatchParalyzingTouch(Card(paralyzedWinnerId), "Paralyzing Touch");
+                break;
+            // Sudden Movement (The Shadow's Embrace pass, issue #476, batch 4): "After this duel ends, give its winner +3F" (a tie has no winner).
+            case "sudden-movement-focus":
+                if (_state.PendingDuel?.WinnerId is string suddenWinnerId && InPlay(Card(suddenWinnerId))) ApplyModifier(Card(suddenWinnerId), suddenWinnerId, abilityId, "Force", 3);
+                break;
             // Scavenging Party: "After this duel ends, give its winner -3F" (a tie has no winner).
             case "scavenging-party-focus":
                 if (_state.PendingDuel?.WinnerId is string scavengedWinnerId && InPlay(Card(scavengedWinnerId))) ApplyModifier(Card(scavengedWinnerId), scavengedWinnerId, abilityId, "Force", -3);

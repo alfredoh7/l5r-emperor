@@ -949,6 +949,15 @@ public sealed class MatchState
     public List<PerformedKeywordAction> PerformedKeywordActions { get; set; } = [];
     // "After the next time this turn he is assigned to attack [or is destroyed]" (Imperial Protection, Fair Warning): fired from Assign() and MarkDead.
     public List<AssignmentWatch> AssignmentWatches { get; set; } = [];
+    // The Shadow's Embrace pass (issue #476), batch 4 (ShadowsEmbraceBatch4.cs): Preserving Beauty's "before this turn ends, gain 3 Honor if that battlefield's province
+    // has not been destroyed", one record per use, drained in EndTurn.
+    public List<PreservingBeautyCheck> PreservingBeautyChecks { get; set; } = [];
+    // Paralyzing Touch's "negate the effects of the next action performed by its winner" (for the turn), spent by that action.
+    public List<ParalyzingTouchWatch> ParalyzingTouchWatches { get; set; } = [];
+    // Spiritual Manipulation's "must declare a normal attack this turn and assign the target (if legal)".
+    public List<ForcedAttack> ForcedAttacks { get; set; } = [];
+    // The Game Has Changed: the attachments its resolving action has already transferred (each at most once), cleared as the action begins.
+    public List<string> GameHasChangedTransferred { get; set; } = [];
     // Sentinel Spirit: judged when the next Dynasty Phase begins (SetPhase).
     public List<SentinelWatch> SentinelWatches { get; set; } = [];
     // Urgency: "each player may only take two more non-Reaction actions this phase" -- ForcedPass's own shape, counted down by Apply().

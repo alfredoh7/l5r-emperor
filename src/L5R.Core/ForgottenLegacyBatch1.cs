@@ -89,7 +89,8 @@ public sealed partial class MatchEngine
     private bool AbilityDisabled(CardInstance card, string abilityId)
     {
         var key = AbilityUsageKey(abilityId);
-        return _state.DisabledAbilities.Any(d => d.CardId == card.Id && d.UsageKey == key && d.Turn == _state.TurnNumber);
+        // AllAbilitiesUsageKey (The Shadow's Embrace pass, issue #476, batch 4 -- Watchers in the Dark): every ability of the card.
+        return _state.DisabledAbilities.Any(d => d.CardId == card.Id && (d.UsageKey == key || d.UsageKey == AllAbilitiesUsageKey) && d.Turn == _state.TurnNumber);
     }
 
     private void RequireAbilityNotDisabled(GameCommand command, CardInstance? source)

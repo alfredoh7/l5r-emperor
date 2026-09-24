@@ -280,6 +280,9 @@ public sealed partial class MatchEngine
             // at the same location could be the target instead.
             case "ryoshun-redirect":
                 return command.PlayerId != card.OwnerId && card.Zone == Zone.Celestial && affected.OwnerId == card.OwnerId && RyoshunRedirectCandidates(card, subject, affected).Any();
+            // Social Grace (The Shadow's Embrace pass, issue #476, batch 4): another player's action targets one of its player's Courtiers and would dishonor him.
+            case "social-grace-negate":
+                return SocialGraceApplies(card, subject, affected);
             default:
                 return false;
         }

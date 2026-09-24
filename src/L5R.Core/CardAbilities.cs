@@ -3237,6 +3237,112 @@ public static class AbilityCatalog
         // Hida Yamadera - exp (oracle-l5r-10220): "Reaction: After another player's Battle action resolves, if its effects destroyed Yamadera: Melee 8 Attack." A Reaction taken by its own
         // card from the dead pile (FromDead), read off the last resolved action's own destroyed list.
         ["yamadera-attack"] = new("Reaction", "After another player's Battle action resolves, if its effects destroyed Yamadera: Melee 8 Attack", "attack", Trigger: AfterActionReactionTriggers.AfterActionResolved, FromDead: true),
+        // The Shadow's Embrace pass (issue #476), batch 4: strategy-wave-57. The declarative data only; every execution/validation helper and the small primitives
+        // are in ShadowsEmbraceBatch4.cs, documented at their own use there.
+        // Overcome Adversity (oracle-l5r-9918): "Battle: Choose your performing unbowed Paragon and target an enemy Personality: Reduce his Force by your Paragon's
+        // Force. Draw a card. You may take an additional Battle action. Lose 5 Honor." -- Strength in Terror's own live-Force reduction; the Honor loss is an effect.
+        ["overcome-adversity"] = new("Battle", "Choose your performing unbowed Paragon and target an enemy Personality: Reduce his Force by your Paragon's Force. Draw a card. You may take an additional Battle action. Lose 5 Honor",
+            "enemy-personality", Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeywords: ["Paragon"]),
+        // Paralyzing Touch (oracle-l5r-9919, an Atemi/Kiho card; re-evaluated per its own blocker note): "As a Focus Effect: After this duel ends, negate the effects
+        // of the next action performed by its winner." -- a delayed negation (ParalyzingTouchWatches): the next action the winning Personality performs this turn (the
+        // default duration: none is printed) resolves negated, its costs paid (ResolveNegatedAction). "Battle: Choose your performing unbowed Monk and target an enemy
+        // Personality: Move him to a different battlefield. Bow him if he moved." -- MoveSpec target/another unresolved battlefield (Ninube Hajime's), the bow read
+        // off whether he moved. It takes a Personality away from the battle, so it is not a move-to-battle action (Sea Troll Predator's reading).
+        ["paralyzing-touch-focus"] = new("FocusEffect", "As a Focus Effect: After this duel ends, negate the effects of the next action performed by its winner", "none"),
+        ["paralyzing-touch-move"] = new("Battle", "Choose your performing unbowed Monk and target an enemy Personality: Move him to a different battlefield. Bow him if he moved", "enemy-personality",
+            Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeywords: ["Monk"], Move: new(MoveSpec.Target, MoveSpec.AnyUnresolved)),
+        // Preserving Beauty (oracle-l5r-9921): "Battle: If any enemy units are at the current battlefield: Before this turn ends, gain 3 Honor if that battlefield's
+        // province has not been destroyed." -- the entry condition is a Require; the gain is a delayed end-of-turn check on that one province (PreservingBeautyChecks).
+        ["preserving-beauty"] = new("Battle", "If any enemy units are at the current battlefield: Before this turn ends, gain 3 Honor if that battlefield's province has not been destroyed", "none"),
+        // Running Battle (oracle-l5r-9924): "Battle: Choose your performing Scout Personality and target an enemy Personality: Give him -4F. If you have
+        // Reconnaissance, you may target one of his attachments and put it in his owner's hand. You may move your Scout home." -- Sundering Strike's optional
+        // slot-relative attachment (legal only with Reconnaissance), and the Scout's move home a follow-up choice asked as the action resolves.
+        ["running-battle"] = new("Battle", "Choose your performing Scout Personality and target an enemy Personality: Give him -4F. If you have Reconnaissance, you may target one of his attachments and put it in his owner's hand. You may move your Scout home",
+            "slots", Performer: "own-personality-with-keyword-at-battle", RequiredKeywords: ["Scout"],
+            Slots: [new("target", "enemy-personality", "Enemy Personality to give -4F"),
+                new("attachment", "attachment-of-slot-target", "If you have Reconnaissance: one of his attachments to put in its owner's hand", 0, 1),
+                new("home", TargetSlotKinds.FollowUp, "You may move your Scout home", 0, 0, Resolution: new(BranchCondition.Always,
+                    [new("home", "Move your Scout home", [BranchEffect.MovePerformerHome]), new("stay", "Leave your Scout at the battlefield", [])], new("stay", "Leave your Scout at the battlefield", [])))]),
+        // Serenity in Air (oracle-l5r-9926), a Kata (KataCards.cs): "Limited: Put this card into play. Discard all your other Kata in play." and "Battle/Open: If this
+        // card is in play, target your Personality and, if this is the Action Phase, discard a card: Straighten him." -- the one Battle/Open action is two catalog
+        // entries sharing one use (the bow-or-straighten shape): used in a battle it is a Battle action with no discard; used in the Action Phase it is an Open
+        // action whose discard is a declared cost on a slot (Akodo Tezuka's "hand" cost slot).
+        ["serenity-air-enter"] = new("Limited", "Put this card into play. Discard all your other Kata in play", "none"),
+        ["serenity-air-straighten"] = new("Battle", "If this card is in play, target your Personality: Straighten him", "own-personality", UsageKey: "serenity-air-straighten"),
+        ["serenity-air-straighten-open"] = new("Open", "If this card is in play, target your Personality and, as this is the Action Phase, discard a card: Straighten him", "slots",
+            Slots: [new("target", "own-personality", "Your Personality to straighten"), new("discard", "hand", "A card in your hand to discard")],
+            Costs: [new(CostVerbs.Discard, CostSubject.Slot("discard"))], UsageKey: "serenity-air-straighten"),
+        // Social Grace (oracle-l5r-9928, a Political card): "Reaction: After another player's action targets your Courtier: Negate his dishonoring from the action's
+        // effects." -- a targeted-by-action Reaction offered only against an action that dishonors its target (DishonorsTarget), negating the "dishonor" kind; and
+        // "Open: Choose your performing Courtier and target another player's Personality: Give him a Force penalty equal to your Courtier's Personal Honor. After each
+        // time he is assigned to attack this turn, gain 2 Honor." -- a Force penalty read off the Courtier, and a standing assignment watch (not spent when it fires).
+        ["social-grace-negate"] = new("Reaction", "After another player's action targets your Courtier: Negate his dishonoring from the action's effects", "none", Trigger: ReactionTriggers.TargetedByAction),
+        ["social-grace-penalty"] = new("Open", "Choose your performing Courtier and target another player's Personality: Give him a Force penalty equal to your Courtier's Personal Honor. After each time he is assigned to attack this turn, gain 2 Honor",
+            "enemy-personality", Performer: "own-personality-with-keyword", RequiredKeywords: ["Courtier"]),
+        // Spiritual Manipulation (oracle-l5r-9929): "Open: Choose your performing Spirit Personality and target a Personality controlled by the active player: His
+        // controller must declare a normal attack this turn and assign the target (if legal)." -- a forced attack for the turn (MatchState.ForcedAttacks): the
+        // active player may not decline the Attack Phase, and in the Maneuvers segment the target can be assigned in he must be (ShadowsEmbraceBatch4.cs). A
+        // "may not declare an attack" (Utaku Chikako) forbids it outright and wins (core rules Glossary, May not).
+        ["spiritual-manipulation-force"] = new("Open", "Choose your performing Spirit Personality and target a Personality controlled by the active player: His controller must declare a normal attack this turn and assign the target (if legal)",
+            "personality-controlled-by-active-player", Performer: "own-personality-with-keyword", RequiredKeywords: ["Spirit"]),
+        // Subtle Games (oracle-l5r-9932, a Political card): "Limited: Bow your performing Courtier and target a Personality: Dishonor him. Draw a card."
+        ["subtle-games-dishonor"] = new("Limited", "Bow your performing Courtier and target a Personality: Dishonor him. Draw a card", "personality",
+            Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeywords: ["Courtier"], Costs: ActionCost.BowPerformer),
+        // Sudden Movement (oracle-l5r-9933): "As a Focus Effect: After this duel ends, give its winner +3F." (the scan's wording) and "Battle: Target two Personalities
+        // controlled by the same player at different locations: Switch their locations. If they moved, straighten their units." -- a switch (core rules Glossary:
+        // negating one side's movement negates the other's too, SwitchBlocked). It can move a Personality to a battle, so it is an Absent Battle action for either
+        // player (the rules lead's 2026-09-19 ruling, MovesToBattle).
+        ["sudden-movement-focus"] = new("FocusEffect", "As a Focus Effect: After this duel ends, give its winner +3F", "none"),
+        ["sudden-movement-switch"] = new("Battle", "Target two Personalities controlled by the same player at different locations: Switch their locations. If they moved, straighten their units", "slots",
+            Slots: [new("first", "personality-with-switch-partner", "A Personality"), new("second", "personality-same-controller-as-first-elsewhere", "Another Personality of the same player's, at a different location")],
+            MovesToBattle: true),
+        // Tactical Assault (oracle-l5r-9934, a Tactical card): "Battle: Choose your performing unbowed Tactician and target an enemy card without attachments: Destroy it."
+        // -- Ikoma Masumi's own enemy-card-without-attachments (a Follower, or a Personality with no attachments).
+        ["tactical-assault-destroy"] = new("Battle", "Choose your performing unbowed Tactician and target an enemy card without attachments: Destroy it", "enemy-card-without-attachments",
+            Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeywords: ["Tactician"], ActionKeywords: ["Tactical"]),
+        // The Game Has Changed (oracle-l5r-9935): "Battle/Open: Choose your performing Commander and target one to three Personalities controlled by the same player:
+        // Straighten zero or more of their attachments, then transfer zero or more attachments among any of the targets." -- the effects are choices made as the
+        // action resolves: a repeated engine-listed effect choice, first "straighten this bowed attachment" or done, then "transfer this attachment to that target"
+        // (each attachment at most once, AttachmentTransfers.cs's attaching restrictions) or done (GameHasChangedOptions).
+        ["game-has-changed"] = new("BattleOrOpen", "Choose your performing Commander and target one to three Personalities controlled by the same player: Straighten zero or more of their attachments, then transfer zero or more attachments among any of the targets",
+            "slots", Performer: "own-personality-with-keyword-at-battle", RequiredKeywords: ["Commander"],
+            Slots: [new("targets", "personality", "One to three Personalities controlled by the same player", 1, 3)]),
+        // The Lesson of Earth (oracle-l5r-9936, re-evaluated per its own blocker note): "Battle: Choose your performing unbowed Monk and target another player's
+        // Personality: Move him to the current battlefield. If your Monk is not Earth, straighten the target's unit." -- Pronouncement of Guilt's own shape: MoveSpec
+        // target/current-battlefield, an Absent move-to-battle action whose Monk may perform from any location (own-unbowed-personality-with-keyword-at-any-location),
+        // the enemy-at-any-location Target (he may be anywhere he can move from), and the Earth-conditional straighten read off the performer as it resolves.
+        ["lesson-of-earth-move"] = new("Battle", "Choose your performing unbowed Monk and target another player's Personality: Move him to the current battlefield. If your Monk is not Earth, straighten the target's unit",
+            "enemy-personality-at-any-location", Performer: "own-unbowed-personality-with-keyword-at-any-location", RequiredKeywords: ["Monk"],
+            Move: new(MoveSpec.Target, MoveSpec.CurrentBattlefield), MovesToBattle: true),
+        // Theological Indecision (oracle-l5r-9937): "Limited: Target a Celestial: Discard it." (Stuck in Rokugan's own in-play-celestial) and "Battle/Open: Target a
+        // Personality with 3 or higher Chi: Give him -2C."
+        ["theological-indecision-discard"] = new("Limited", "Target a Celestial: Discard it", "in-play-celestial"),
+        ["theological-indecision-chi"] = new("BattleOrOpen", "Target a Personality with 3 or higher Chi: Give him -2C", "personality-chi-3-plus"),
+        // Thuggish Techniques (oracle-l5r-9938): "Limited: Bow your performing Personality or Follower and target a Personality without attachments and with lower
+        // Force, or target a Follower: Bow it." -- "lower Force" than the performer's own (a Follower performer's is its own Force).
+        ["thuggish-techniques-bow"] = new("Limited", "Bow your performing Personality or Follower and target a Personality without attachments and with lower Force, or target a Follower: Bow it",
+            "bare-personality-lower-force-than-performer-or-follower", Performer: "own-unbowed-personality-or-follower", Costs: ActionCost.BowPerformer),
+        // Unstable Ground (oracle-l5r-9942), a Terrain: "Battle: If there is no Terrain in play at the current battlefield, bow your performing Scout and target an
+        // enemy card without attachments: Destroy it. Put this card into play there." -- unlike every other published Terrain, its play prints a cost and a target, so
+        // it is played through this ability and never through the generic playStrategy Terrain rule (TerrainPlaysThroughOwnAbility).
+        ["unstable-ground-destroy"] = new("Battle", "If there is no Terrain in play at the current battlefield, bow your performing Scout and target an enemy card without attachments: Destroy it. Put this card into play there",
+            "enemy-card-without-attachments", Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeywords: ["Scout"], Costs: ActionCost.BowPerformer),
+        // Void Tattoo (oracle-l5r-9943, the scan's wording): "Battle: Choose your performing unbowed Tattooed Personality, target a Tattoo Strategy in your discard
+        // pile, discard a card unless your Personality is Void, and remove this card from the game: Put the Tattoo into your hand. You may take an additional Battle
+        // action." -- two declared costs: the discard on a slot and the source's own removal. The "unless" is two catalog entries sharing one use: a performer who
+        // is not Void names the card to discard; a Void one names none.
+        ["void-tattoo-return"] = new("Battle", "Choose your performing unbowed Tattooed Personality, target a Tattoo Strategy in your discard pile, discard a card unless your Personality is Void, and remove this card from the game: Put the Tattoo into your hand. You may take an additional Battle action",
+            "slots", Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeywords: ["Tattooed"], UsageKey: "void-tattoo-return",
+            Slots: [new("target", "own-tattoo-strategy-in-discard", "A Tattoo Strategy in your discard pile"), new("discard", "hand", "A card in your hand to discard (your Personality is not Void)")],
+            Costs: [new(CostVerbs.Discard, CostSubject.Slot("discard")), new(CostVerbs.Remove)]),
+        ["void-tattoo-return-void"] = new("Battle", "Choose your performing unbowed Tattooed Void Personality, target a Tattoo Strategy in your discard pile, and remove this card from the game: Put the Tattoo into your hand. You may take an additional Battle action",
+            "own-tattoo-strategy-in-discard", Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeywords: ["Tattooed", "Void"], UsageKey: "void-tattoo-return",
+            Costs: [new(CostVerbs.Remove)]),
+        // Watchers in the Dark (oracle-l5r-9944, a Recon card): "Reaction: After engaging, choose your performing Scout at the current battlefield and target a card in a
+        // unit there: You have Reconnaissance there. Abilities on cards (now) in the target's unit may not be used." -- Seeking the Truth's Engage-window Reaction (any
+        // bow state: none is printed), and a whole-card ability lock for the turn on each card in the unit as it resolves (DisabledAbilities, AllAbilitiesUsageKey).
+        ["watchers-dark-recon"] = new("Reaction", "After engaging, choose your performing Scout at the current battlefield and target a card in a unit there: You have Reconnaissance there. Abilities on cards (now) in the target's unit may not be used",
+            "unit-card-explicitly-at-battle", Trigger: "after-engaging", Performer: "own-personality-with-keyword-explicitly-at-battle", RequiredKeywords: ["Scout"]),
     });
 }
 
@@ -3459,7 +3565,9 @@ public sealed partial class MatchEngine
         // Before the Dawn (issue #431): Wrathful Dead, and the actions that destroy their target.
         or "wrathful-dead-destroy" or "anger-management-destroy" or "dismissing-the-cur-move" or "spirit-kensai-destroy" or "spirit-commander-destroy" or "embers-final-fire-destroy" or "red-hunger-personality" or "crimson-mark-destroy"
         // Forgotten Legacy pass (issue #467), batch 3: Broken Alliance destroys its target attachment; Cast Aside the Weak destroys its target when its Samurai is a Paragon.
-        or "broken-alliance-destroy" or "cast-aside-bow";
+        or "broken-alliance-destroy" or "cast-aside-bow"
+        // The Shadow's Embrace pass (issue #476), batch 4: Tactical Assault and Unstable Ground destroy their target outright.
+        or "tactical-assault-destroy" or "unstable-ground-destroy";
     // The actions whose ONLY effect is to straighten their target: against a card that may not be straightened this turn (Basic Lesson) they are refused outright, where an action that
     // also does something else (Defensive Stance's +3F) still resolves and only its straightening is skipped (Straighten refuses it).
     private static bool StraightensOnly(string abilityId) => abilityId is "jinn-kuen-straighten" or "kodo-straighten" or "munefusa-straighten" or "mitsuko-straighten" or "ritual-preparation-straighten"
@@ -3469,7 +3577,9 @@ public sealed partial class MatchEngine
         // Seeds of Decay pass (issue #453), batch 4: Second City Port (a Holding); Katsuo's also grants an additional action, so it is not "only" a straighten.
         or "second-city-port-straighten"
         // Seeds of Decay (issue #453, batch 3): Utaku Hirononri only straightens his target.
-        or "hirononri-straighten";
+        or "hirononri-straighten"
+        // The Shadow's Embrace pass (issue #476), batch 4: Serenity in Air only straightens its target.
+        or "serenity-air-straighten" or "serenity-air-straighten-open";
     private static string? MoveOrStraightenKind(string abilityId) => abilityId switch
     {
         "incapacitated" or "favor-battle" or "journeys-end-move" or "shamate-move" or "effortless-counterattack-move"
@@ -3514,6 +3624,9 @@ public sealed partial class MatchEngine
         // Forgotten Legacy pass (issue #467), batch 3: Feint & Strike moves its enemy target home; Creating Order's straighten half straightens its target's unit.
         "feint-strike-move" => "move",
         "creating-order-straighten" => "straighten",
+        // The Shadow's Embrace pass (issue #476), batch 4: The Lesson of Earth and Paralyzing Touch move their target; Serenity in Air straightens its target.
+        "lesson-of-earth-move" or "paralyzing-touch-move" => "move",
+        "serenity-air-straighten" or "serenity-air-straighten-open" => "straighten",
         _ => null
     };
     // Champion of Thunder / Brothers of Goemon's own narrower half (Brothers only ever negates a
@@ -3576,7 +3689,9 @@ public sealed partial class MatchEngine
         // Seeds of Decay pass (issue #453), batch 5.
         or "celestial-sword-scorpion-bow" or "scent-of-dishonor-bow"
         // Forgotten Legacy pass (issue #467), batch 1: Toshimo, Murota and Nikaru bow their target; Abodan bows his (conditionally) and Hakuseki's duel its loser.
-        or "toshimo-bow" or "murota-bow" or "nikaru-bow-lock" or "abodan-move" or "hakuseki-duel";
+        or "toshimo-bow" or "murota-bow" or "nikaru-bow-lock" or "abodan-move" or "hakuseki-duel"
+        // The Shadow's Embrace pass (issue #476), batch 4: Thuggish Techniques bows its target; Paralyzing Touch bows it if it moved.
+        or "thuggish-techniques-bow" or "paralyzing-touch-move";
     // Whether the command's TargetId is an Attack's OWN target, which reacts through the separate attackReaction
     // window instead of this one: an Attack-classified ability whose Target category is "attack". Bayushi Kahoku
     // - exp (issue #313) is Attack-classified too, but its TargetId is the separate "-4F" target (an ordinary
@@ -3755,7 +3870,9 @@ public sealed partial class MatchEngine
         // Seeds of Decay pass (issue #453), batch 2.
         or "baiko-shame" or "tsujiken-exp-dishonor"
         // Seeds of Decay pass (issue #453), batch 5: Moksha Patam's "Lose 1 Honor", Celestial Sword of the Scorpion's entry "choose a player. He loses 2 Honor".
-        or "moksha-patam-move" or "celestial-sword-scorpion-lose";
+        or "moksha-patam-move" or "celestial-sword-scorpion-lose"
+        // The Shadow's Embrace pass (issue #476), batch 4: Overcome Adversity's "Lose 5 Honor".
+        or "overcome-adversity";
     private bool ControlsDishonorablePersonality(int playerId) => _state.Cards.Values.Any(c => c.OwnerId == playerId && InPlay(c) && Definition(c).Type == CardType.Personality && c.Dishonorable);
     // Gate for whether the window is even worth opening -- "if [neither a Dishonorable Personality
     // nor an Honor loss] occurs, do not trigger the reaction interrupt" (the user's own ruling).
@@ -4708,6 +4825,8 @@ public sealed partial class MatchEngine
         if (id is "tamoko-open" or "virtuous-charity-open") Require(_state.ActivePlayerId != player.Id, "Only usable when it is not your own turn.");
         // Forgotten Legacy pass (issue #467), batch 4: the per-card conditions of strategy-wave-55 (ForgottenLegacyBatch4.cs).
         ValidateForgottenLegacyBatch4(id, command, player);
+        // The Shadow's Embrace pass (issue #476), batch 4: the per-card conditions of strategy-wave-57 (ShadowsEmbraceBatch4.cs).
+        ValidateShadowsEmbraceBatch4(id, ability, command, player, source);
         // Embers of War batch 6 (issue #460): Surveillance Outpost -- "If you have fewer Provinces than each other player, or exactly one Province" (a 2-player
         // engine, so "each other player" is the one opponent; live province count, per Player.Provinces, excludes destroyed provinces).
         if (id == "surveillance-outpost-conqueror") Require(player.Provinces.Count(p => !p.Destroyed) is var mine && (mine < Player(1 - player.Id).Provinces.Count(p => !p.Destroyed) || mine == 1),
@@ -5034,6 +5153,10 @@ public sealed partial class MatchEngine
                 // (never acting as Battle, so the location is checked explicitly).
                 "own-unbowed-personality-with-keyword-at-battle-or-adjacent-with-weapon" => AtBattleOrAdjacentWithWeapon(performer, ability),
                 "own-unbowed-personality-with-keyword-explicitly-at-battle" => Definition(performer).Type == CardType.Personality && !performer.Bowed && AtBattle(performer) && HasKeywords(performer, ability.RequiredKeywords),
+                // The Shadow's Embrace pass (issue #476), batch 4. Watchers in the Dark: "your performing Scout at the current battlefield" on a Reaction, any bow state;
+                // Thuggish Techniques: "your performing Personality or Follower" (unbowed: bowing it is the cost), wherever it stands (a Limited action).
+                "own-personality-with-keyword-explicitly-at-battle" => Definition(performer).Type == CardType.Personality && AtBattle(performer) && HasKeywords(performer, ability.RequiredKeywords),
+                "own-unbowed-personality-or-follower" => (Definition(performer).Type == CardType.Personality || Definition(performer).Type == CardType.Follower && performer.Zone == Zone.Attached) && !performer.Bowed,
                 // Hiruma Akio - exp: "Bow your performing Personality or Follower" -- an unbowed unit card of the player's at the current battlefield.
                 "own-unbowed-unit-at-battle" => Definition(performer).Type is CardType.Personality or CardType.Follower && !performer.Bowed && AtBattle(performer),
                 // Spirit of the Blade's granted action: "Bow one of this Personality's Weapons" -- an unbowed Weapon attached to the source.
@@ -5365,6 +5488,10 @@ public sealed partial class MatchEngine
                 else if (ability.Target == "own-nonunique-battle-strategy-in-discard")
                     Require(target.OwnerId == player.Id && type == CardType.Strategy && !Keyword(target, "Unique") && target.Zone == Zone.FateDiscard && IsBattleStrategy(target),
                         "Choose a non-Unique Battle Strategy from your Fate discard pile.");
+                // The Shadow's Embrace pass (issue #476), batch 4 -- Void Tattoo: "a Tattoo Strategy in your discard pile".
+                else if (ability.Target == "own-tattoo-strategy-in-discard")
+                    Require(target.OwnerId == player.Id && type == CardType.Strategy && Keyword(target, "Tattoo") && target.Zone == Zone.FateDiscard,
+                        "Choose a Tattoo Strategy card from your Fate discard pile.");
                 else if (ability.Target == "own-kiho-strategy-in-discard")
                     Require(target.OwnerId == player.Id && type == CardType.Strategy && Keyword(target, "Kiho") && target.Zone == Zone.FateDiscard,
                         "Choose a Kiho Strategy card from your Fate discard pile.");
@@ -5481,7 +5608,8 @@ public sealed partial class MatchEngine
                     // (it is discarded when its battle resolves), so exempting the whole category is exact.
                     // Return to Action (issue #331): "your Personality at HOME" is by definition not at the battlefield
                     // -- own-personality-at-home is exempt for the same reason.
-                    if (actingAsBattle && ability.Target is not ("personality-at-adjacent-battlefield" or "own-unbowed-farm" or "region-or-terrain" or "own-personality-at-home" or "personality-at-any-location" or "own-follower-at-any-location" or "enemy-personality-at-any-location" or "enemy-personality-not-at-battle")
+                    if (actingAsBattle && ability.Target is not ("personality-at-adjacent-battlefield" or "own-unbowed-farm" or "region-or-terrain" or "own-personality-at-home" or "personality-at-any-location" or "own-follower-at-any-location" or "enemy-personality-at-any-location" or "enemy-personality-not-at-battle"
+                        or "personality-same-controller-as-first-elsewhere" or "personality-with-switch-partner")
                         && id is not ("intervening-spirit-move" or "earth-flows-move" or "sanctuary-of-the-waves-move" or "dislodge-the-foe" or "heijin-move"
                             or "natures-wrath-move" or "irezu-move" or "mitsushen-move" or "pronouncement-guilt-move")) Require(AtBattle(target), "Target or performer must be at the current battlefield."); // Nature's Wrath (issue #453 batch 5): its target is brought TO the battlefield; Irezu (issue #458) moves the target HOME from wherever he stands; Mitsushen (issue #458) brings his target TO his own battlefield from wherever it stands; Pronouncement of Guilt (issue #460) brings its enemy target TO the battlefield the same way
                     var personality = type == CardType.Personality;
@@ -5573,6 +5701,8 @@ public sealed partial class MatchEngine
                         // Personality controlled by the active player" -- "if it is not your turn" is
                         // checked separately below (a per-id Require, not part of this Target shape).
                         "unbowed-personality-controlled-by-active-player" => personality && !target.Bowed && target.OwnerId == _state.ActivePlayerId,
+                        // Spiritual Manipulation (The Shadow's Embrace pass, issue #476, batch 4): "a Personality controlled by the active player", any bow state.
+                        "personality-controlled-by-active-player" => personality && target.OwnerId == _state.ActivePlayerId,
                         // Ritual Preparation (issue #192): "your target card in a unit" -- either
                         // half of a unit (the Personality herself, or an attached Follower), own,
                         // in play. Items/Spells are never described as "in a unit" (core rules:
@@ -5609,6 +5739,18 @@ public sealed partial class MatchEngine
                         // Sundering Strike: "one of his attachments" -- attached to the card chosen for the ability's "target" slot (Hiruma Sawai's slot-relative shape).
                         "attachment-of-slot-target" => target.Zone == Zone.Attached && type is CardType.Follower or CardType.Item or CardType.Spell
                             && SlotCards(command, "target").FirstOrDefault() is { } attachmentHost && target.AttachedTo == attachmentHost.Id,
+                        // The Shadow's Embrace pass (issue #476), batch 4 (ShadowsEmbraceBatch4.cs). Sudden Movement: "two Personalities controlled by the same player at
+                        // different locations" -- the first has such a partner (personality-with-switch-partner); the second is the first one's partner: the same controller, at a
+                        // location of its own (both exempt from the AtBattle Require above, since the point is a Personality elsewhere).
+                        "personality-with-switch-partner" => personality && HasSwitchPartner(target),
+                        "personality-same-controller-as-first-elsewhere" => personality && SwitchPartnerAllowed(command, target),
+                        // Theological Indecision: "a Personality with 3 or higher Chi" (current Chi, the reading of every Chi-comparing category).
+                        "personality-chi-3-plus" => personality && PersonalityChi(target) >= 3,
+                        // Thuggish Techniques: "a Personality without attachments and with lower Force [than the performer], or a Follower".
+                        "bare-personality-lower-force-than-performer-or-follower" => type == CardType.Follower && target.Zone == Zone.Attached
+                            || personality && !HasAttachments(target) && command.PerformerId is not null && CardForce(target) < CardForce(Card(command.PerformerId)),
+                        // Watchers in the Dark: "a card in a unit there" on a Reaction (never acting as Battle, so the location is checked explicitly), either side's.
+                        "unit-card-explicitly-at-battle" => (personality || target.Zone == Zone.Attached && type is CardType.Follower or CardType.Item or CardType.Spell) && AtBattle(target),
                         // Thick Marsh (oracle-l5r-8445, issue #460 batch 4): its "bow an enemy card at the current battlefield" is a Reaction (Trigger
                         // own-enters-play), not a Battle-timed ability, so the generic actingAsBattle AtBattle enforcement below never applies to it --
                         // an explicit AtBattle check is required here instead (distinct from the plain "enemy-card" category, which several Battle-timed
@@ -6130,6 +6272,8 @@ public sealed partial class MatchEngine
         if (CostPaymentBlockedByNegation(command)) { AbortActionForBlockedCost(command, consumedGrant); return; }
         // Burning Dreams (Forgotten Legacy pass, issue #467): a Favor-discarding action that targets a Nonhuman Personality is taken, its costs paid, its effects negated.
         if (BurningDreamsNegates(command)) { ResolveNegatedAction(command, consumedGrant); return; }
+        // Paralyzing Touch (The Shadow's Embrace pass, issue #476, batch 4): the next action a duel's winner performs is taken, its costs paid, its effects negated.
+        if (ParalyzingTouchNegates(command)) { ResolveNegatedAction(command, consumedGrant); return; }
         var pendingDuelBefore = _state.PendingDuel;
         var runningBefore = _runningCommand;
         _runningCommand = command;
@@ -8716,7 +8860,23 @@ public sealed partial class MatchEngine
                 if (BeginConditionalChoice(command, ability, consumedGrant, playedFromDiscard, opponentHonorBeforeBattleAction, bowedBeforeAction, preExistingGrants)) return;
                 break;
             case "sundering-strike": SunderingStrike(command, target!, player.Id); break;
+            // The Shadow's Embrace pass (issue #476), batch 4 -- Sudden Movement (ShadowsEmbraceBatch4.cs): a switch, both movements or neither (SwitchBlocked asks
+            // every negation first); each unit that moved straightens.
+            case "sudden-movement-switch":
+            {
+                var switchPlan = SwitchPlan(command);
+                if (SwitchBlocked(switchPlan, Definition(source!).Name)) break;
+                foreach (var (switchMover, switchTo) in switchPlan) { if (switchTo is int switchProvince) TryMoveToBattlefield(switchMover, switchProvince); else MoveHome(switchMover, false); }
+                foreach (var (switchMover, switchTo) in switchPlan) if (InPlay(switchMover) && SwitchDestination(switchMover) == switchTo) StraightenUnit(switchMover);
+                break;
+            }
             default:
+                // The Shadow's Embrace pass (issue #476), batch 4 (ShadowsEmbraceBatch4.cs): true when a window opened and the action waits.
+                if (RunShadowsEmbraceBatch4(id, ability, command, player, source, target, consumedGrant, playedFromDiscard, opponentHonorBeforeBattleAction, bowedBeforeAction, preExistingGrants) is { } shadowsEmbrace4)
+                {
+                    if (shadowsEmbrace4) return;
+                    break;
+                }
                 // Forgotten Legacy pass (issue #467), batch 5 (ForgottenLegacyBatch5.cs): true when a window opened and the action waits.
                 if (RunForgottenLegacyBatch5(id, ability, command, player, source, target, consumedGrant, playedFromDiscard, opponentHonorBeforeBattleAction, bowedBeforeAction, preExistingGrants) is { } forgottenLegacy5)
                 {
@@ -9500,6 +9660,10 @@ public sealed partial class MatchEngine
                 // Forgotten Legacy pass (issue #467), batch 4: the listing twins of the two Performer categories above.
                 "own-unbowed-personality-with-keyword-at-battle-or-adjacent-with-weapon" => _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && AtBattleOrAdjacentWithWeapon(c, ability)).Select(c => (string?)c.Id).ToArray(),
                 "own-unbowed-personality-with-keyword-explicitly-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && !c.Bowed && AtBattle(c) && HasKeywords(c, ability.RequiredKeywords)).Select(c => (string?)c.Id).ToArray(),
+                // The Shadow's Embrace pass (issue #476), batch 4: the listing twins of its two Performer categories above.
+                "own-personality-with-keyword-explicitly-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && AtBattle(c) && HasKeywords(c, ability.RequiredKeywords)).Select(c => (string?)c.Id).ToArray(),
+                "own-unbowed-personality-or-follower" => _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && !c.Bowed
+                    && (Definition(c).Type == CardType.Personality || Definition(c).Type == CardType.Follower && c.Zone == Zone.Attached)).OrderBy(c => c.Id, StringComparer.Ordinal).Select(c => (string?)c.Id).ToArray(),
                 "own-unbowed-weapon-of-source" => _state.Cards.Values.Where(c => c.OwnerId == playerId && c.Zone == Zone.Attached && c.AttachedTo == source?.Id && !c.Bowed && Definition(c).Type == CardType.Item && Keyword(c, "Weapon")).Select(c => (string?)c.Id).ToArray(),
                 "own-unbowed-unit-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && Definition(c).Type is CardType.Personality or CardType.Follower && !c.Bowed && AtBattle(c)).Select(c => (string?)c.Id).ToArray(),
                 "own-personality-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && (!actingAsBattle || AtBattle(c))).Select(c => (string?)c.Id).ToArray(),
@@ -9581,6 +9745,8 @@ public sealed partial class MatchEngine
                     "own-ninja-personality-in-discard" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && Keyword(c, "Ninja") && c.Zone is Zone.Dead or Zone.DynastyDiscard).Select(c => (string?)c.Id).ToArray(),
                     "own-nonunique-strategy-in-discard" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Strategy && !Keyword(c, "Unique") && c.Zone == Zone.FateDiscard).Select(c => (string?)c.Id).ToArray(),
                     "own-kiho-strategy-in-discard" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Strategy && Keyword(c, "Kiho") && c.Zone == Zone.FateDiscard).Select(c => (string?)c.Id).ToArray(),
+                    // The Shadow's Embrace pass (issue #476), batch 4: Void Tattoo's discard-pile target, mirroring its Require above.
+                    "own-tattoo-strategy-in-discard" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Strategy && Keyword(c, "Tattoo") && c.Zone == Zone.FateDiscard).Select(c => (string?)c.Id).ToArray(),
                     "own-dark-virtue-in-discard" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Strategy && Keyword(c, "Dark Virtue") && c.Zone == Zone.FateDiscard && HasUnspentAction(c, "Battle")).Select(c => (string?)c.Id).ToArray(),
                     "own-ring-in-discard" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Ring && c.Zone == Zone.FateDiscard).Select(c => (string?)c.Id).ToArray(),
                     "ring-in-play-or-own-discard" => _state.Cards.Values.Where(c => Definition(c).Type == CardType.Ring && (InPlay(c) || c.OwnerId == playerId && c.Zone == Zone.FateDiscard)).Select(c => (string?)c.Id).ToArray(),

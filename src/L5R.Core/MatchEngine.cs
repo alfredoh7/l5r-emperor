@@ -1231,6 +1231,8 @@ public sealed partial class MatchEngine
     }
     private void DeclineAttackPhase()
     {
+        // Spiritual Manipulation (The Shadow's Embrace pass, issue #476, batch 4): "must declare a normal attack this turn".
+        if(ForcedAttackDeclineRefusal(_state.PriorityPlayerId) is string forcedDecline) throw new RuleViolation(forcedDecline);
         Emit("attackDeclined",$"{Player(_state.PriorityPlayerId).Name} declined to attack; the Attack Phase ends.",_state.PriorityPlayerId);
         _state.UnresolvedBattlefields=[];
         SetPhase(Phase.Dynasty,_state.ActivePlayerId);
@@ -1248,6 +1250,8 @@ public sealed partial class MatchEngine
         // assignment (declining to attack) is always still legal.
         Require(!(command.Assignments?.Count>0) || !Player(command.PlayerId).MayNotAttackThisTurn,"You may not declare an attack this turn.");
         var cavalry=_state.Phase==Phase.CavalryDeclaration;
+        // Spiritual Manipulation (The Shadow's Embrace pass, issue #476, batch 4): "and assign the target (if legal)" -- in the segment he can be assigned in.
+        if(ForcedAssignmentRefusal(command.PlayerId,command.Assignments,cavalry) is string forcedAssignment) throw new RuleViolation(forcedAssignment);
         var targets=Player(1-command.PlayerId).Provinces.Where(p=>!p.Destroyed).Select(p=>p.Index).ToHashSet();
         Assign(command,targets,cavalry,false);
         Emit("attackersAssigned",$"{Player(command.PlayerId).Name} assigned {(command.Assignments?.Count??0)} {(cavalry?"Cavalry":"Infantry")} attacker(s).",command.PlayerId);
@@ -1884,6 +1888,8 @@ public sealed partial class MatchEngine
         // and the default limit is at most one Terrain per battlefield until the old one is destroyed.
         if(Keyword(card,"Terrain"))
         {
+            // Unstable Ground (The Shadow's Embrace pass, issue #476, batch 4): a Terrain whose own Battle ability is its play (a cost and a target) is played only through that ability.
+            Require(!TerrainPlaysThroughOwnAbility(card),$"{def.Name} is played through its own Battle action.");
             Require(command.TargetId is null,"Playing a Terrain does not target another card.");
             var existingTerrain=_state.Cards.Values.FirstOrDefault(c=>c.Zone==Zone.Battlefield && c.ProvinceIndex==province && Keyword(c,"Terrain"));
             if(existingTerrain is not null)
@@ -2361,7 +2367,8 @@ public sealed partial class MatchEngine
     // decider's choice answers a separate command); null reads it off the running action (Utaku Ji-Yun, Forgotten Legacy pass issue #467 batch 2).
     private void Dishonor(CardInstance card,int? byPlayerId=null)
     {
-        if(NegatesEffect(card,"all"))
+        // "all" (Champion of Thunder) or "dishonor" (Social Grace, The Shadow's Embrace pass issue #476 batch 4): NegatesEffect reads both.
+        if(NegatesEffect(card,"dishonor"))
         {
             Emit("dishonorNegated",$"{Definition(card).Name}'s dishonoring was negated before it resolved.",card.OwnerId,card.Id);
             return;
@@ -2547,6 +2554,7 @@ public sealed partial class MatchEngine
             if(Card(check.TargetId).AssignedToAttackTurn != _state.TurnNumber) GainHonor(check.BeneficiaryPlayerId,1,"Tamori Tamoko",Card(check.TargetId));
         _state.PendingTamokoHonorChecks.Clear();
         ResolveProvincesHeldHonorChecks(); // Forgotten Legacy pass (issue #467), batch 1: Asahina Shigemitsu's "before it ends" Honor.
+        ResolvePreservingBeautyChecks(); // The Shadow's Embrace pass (issue #476), batch 4: Preserving Beauty's "before this turn ends".
         // Spirit of the Berserker: a destruction put off "until before this turn ends" happens now.
         ResolveDelayedDestructions();
         // A window a delayed destruction opened (Overconfident's draw) is answered first; the turn then ends when the player ends the phase again.
