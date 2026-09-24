@@ -30,6 +30,7 @@ public sealed partial class MatchEngine
     private bool DestructionShielded(CardInstance card, int actingPlayerId)
     {
         if (MountainsPowerNegates(card, actingPlayerId)) return true; // The Mountain's Power (Forgotten Legacy pass, issue #467).
+        if (TwinForksNegates(card, actingPlayerId, "destruction")) return true; // Twin Forks City (The Shadow's Embrace pass, issue #476 batch 6).
         if (card.DestructionShieldTurn != _state.TurnNumber || actingPlayerId == card.OwnerId) return false;
         Emit("destructionNegated", $"{Definition(card).Name}'s destruction was negated (Megumi's Guidance).", card.OwnerId, card.Id);
         return true;

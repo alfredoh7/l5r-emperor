@@ -21,6 +21,7 @@ public sealed partial class MatchEngine
 {
     private void LockMovement(CardInstance card, string source, MovementKinds kinds)
     {
+        if (WartimePreparationsNegatesAssignLock(card, source, kinds)) return; // Wartime Preparations (The Shadow's Embrace pass, issue #476 batch 6).
         card.MovementLocks.Add(new MovementLock(source, _state.TurnNumber, kinds));
         Emit("movementLocked", $"{Definition(card).Name}'s {DescribeKinds(kinds)} is negated for the rest of the turn.", card.OwnerId, card.Id);
     }

@@ -1,0 +1,51 @@
+{
+  "Profile": "stronghold-wave-16",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-9945",
+      "Name": "Bishamon's Tower",
+      "Type": "Stronghold",
+      "Clan": "Crab",
+      "GoldCost": 0,
+      "GoldProduction": 4,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 8,
+      "StartingHonor": 3,
+      "Text": "Battle: Choose your performing Berserker or unbowed Personality and target an enemy card with lower Force and no attachments: Destroy it.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9945.jpg",
+      "Keywords": [],
+      "Focus": 0,
+      "Abilities": [
+        "bishamon-tower-destroy"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9946",
+      "Name": "Twin Forks City",
+      "Type": "Stronghold",
+      "Clan": "Crane",
+      "GoldCost": 0,
+      "GoldProduction": 4,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 6,
+      "StartingHonor": 6,
+      "Text": "After an action resolves that created a duel your Personality won during a Combat Segment, once per Personality per battle: Negate his next bowing, movement, or destruction from other players' cards' effects.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9946.jpg",
+      "Keywords": [],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "twin-forks-city"
+    }
+  ],
+  "Decks": []
+}

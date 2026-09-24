@@ -28,7 +28,7 @@ public sealed partial class MatchEngine
     public const string DestroyedKind = "destroyed";
     public const string MovedKind = "moved";
 
-    private void RecordActionEffect(string cardId, string kind) => _state.CurrentActionAffected.Add(new(cardId, kind));
+    private void RecordActionEffect(string cardId, string kind, string? hostId = null) => _state.CurrentActionAffected.Add(new(cardId, kind, hostId));
 
     // Snapshots what the just-finished action affected into LastResolvedAction, opens the Reaction window naming it if anyone holds one that
     // applies, and clears the accumulator either way. Called from the three points an action (its own reaction windows included) is truly done,
@@ -117,6 +117,8 @@ public sealed partial class MatchEngine
                 && LastActionCostHonor(playerId) && LastActionPerformer() is not null,
             // Asahina Akikusa (oracle-l5r-10046, issue #453 batch 3): "After an action on your Air Spell resolves" -- the resolved action's source card is a Spell with the
             // Air keyword attached to a Personality her controller controls (the Spell's action is her controller's own, so facts.PlayerId matches too).
+            // Shieldman (The Shadow's Embrace pass, issue #476 batch 6): "After another player's action resolves which destroyed another card in this unit."
+            "shieldman-honor" => ShieldmanReactionApplies(source, playerId),
             "akikusa-honor" => facts.SourceId is not null && _state.Cards.TryGetValue(facts.SourceId, out var akikusaSpell) && Definition(akikusaSpell).Type == CardType.Spell
                 && Keyword(akikusaSpell, "Air") && akikusaSpell.OwnerId == playerId && facts.PlayerId == playerId,
             _ => false

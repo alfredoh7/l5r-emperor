@@ -271,6 +271,7 @@ public sealed partial class MatchEngine
             if (_state.PendingChoice.Type=="harshChoices") { ResolveHarshChoices(command); return; }
             // Seeds of Decay pass (issue #453), batch 4: two decisions inside the Events Phase reveal (SeedsOfDecayBatch4.cs).
             if (_state.PendingChoice.Type=="offeringReverence") { ResolveOfferingReverenceChoice(command); return; }
+            if (_state.PendingChoice.Type=="starCrossedLovers") { ResolveStarCrossedLoversChoice(command); return; } // The Shadow's Embrace pass (issue #476), batch 6.
             if (_state.PendingChoice.Type=="testedLandProvince") { ResolveTestedLandProvince(command); return; }
             if (_state.PendingChoice.Type=="forcedDiscard") { ResolveForcedDiscard(command); return; }
             // A conditional effect choice (issue #337, Mirumoto Yumaru): the acting player picks one of the options the engine listed.
@@ -581,6 +582,7 @@ public sealed partial class MatchEngine
         if(HasSenseiEntryEffect(Definition(card).Effect)) DiscardOtherSensei(playerId,card);
         if(Definition(card).Effect==YamatoEntryEffect) RemoveBrashIfOpponentIsScorpion(card);
         ApplyShadowsEmbraceBatch2EntryEffects(playerId,card); // The Shadow's Embrace pass (issue #476), batch 2: M'rika's "After M'rika enters play: Gain 2 Honor."
+        ApplyShadowsEmbraceBatch6EntryEffects(playerId,card); // Clearing Crew (The Shadow's Embrace pass, issue #476 batch 6).
     }
     // Sensei (Mirumoto Hikaro / Mirumoto Yozo, Experienced 2): "your OTHER Sensei Personalities" --
     // every OTHER Sensei-keyword Personality this same controller has, either unbowed-or-bowed in
@@ -1049,10 +1051,12 @@ public sealed partial class MatchEngine
     public int GoldProduced(string cardId,int playerId,PaymentSubject? paying=null)
     {
         var card=Card(cardId); var def=Definition(card);
-        if(ConditionalProductionOf(card) is { } conditional && ProductionConditionMet(conditional,paying)) return conditional.Amount;
+        // The Shadow's Embrace pass (issue #476), batch 6: a production modifier for the turn (The Moon's Imperative, The Sun's Aspiration) and Sheltered Port's count.
+        var adjustment=def.Type==CardType.Holding ? ShadowsEmbraceBatch6Production(card,playerId) : 0;
+        if(ConditionalProductionOf(card) is { } conditional && ProductionConditionMet(conditional,paying)) return Math.Max(0,conditional.Amount+adjustment);
         // A card with no printed production that can bow to produce Gold for a payment (Yoritomo Sakuma, issue #338) produces that much.
         if(def.GoldProduction==0 && AlternateGoldSource(card) is { } alternate) return alternate.Amount;
-        return def.GoldProduction+(def.Effect=="crane-gold" && Player(playerId).Clan=="Crane" || def.Effect=="dragon-gold" && Player(playerId).Clan=="Dragon"?1:0);
+        return Math.Max(0,def.GoldProduction+adjustment+(def.Effect=="crane-gold" && Player(playerId).Clan=="Crane" || def.Effect=="dragon-gold" && Player(playerId).Clan=="Dragon"?1:0));
     }
 
     public PaymentOption[] PaymentOptions(int playerId,int cost,PaymentSubject? paying=null)=>PaymentOptionsExcluding(playerId,cost,null,paying);
@@ -1298,6 +1302,9 @@ public sealed partial class MatchEngine
             Require(cavalry?cavalryEligible:!IsCavalryUnit(card),cavalry?"Only a Cavalry unit may assign during Cavalry Maneuvers.":"An Infantry unit must assign during Infantry Maneuvers.");
             Require(provinces.Contains(assignment.Value),"Choose an existing enemy province battlefield.");
             Require(!MovementLocked(card,MovementKinds.Assign),$"{Definition(card).Name} may not be assigned to a battlefield this turn.");
+            // The Shadow's Embrace pass (issue #476), batch 6: Shieldman's unit is never assigned to an attacking army; Star-Crossed Lovers never to each other's battlefields.
+            RequireShieldmanMayAssign(card,isDefender);
+            RequireStarCrossedMayAssign(card,assignment.Value,command.Assignments!);
             card.Zone=Zone.Battlefield; card.ProvinceIndex=assignment.Value;
             foreach(var attached in Attachments(card.Id)) attached.ProvinceIndex=assignment.Value;
             // Tamori Tamoko's own Open action (issue #207 follow-up): "gain 1 Honor if he was NOT
@@ -2513,6 +2520,8 @@ public sealed partial class MatchEngine
     private bool MoveToBattlefield(CardInstance card,int province)
     {
         if((card.Zone!=Zone.Battlefield || card.ProvinceIndex!=province) && (MovementLockNegates(card,MovementKinds.ToBattlefield) || KitsuneNegatesMovement(card,province))) return false;
+        // The Shadow's Embrace pass (issue #476), batch 6: Shieldman "will not move into an attacking army"; Star-Crossed Lovers "will not move to each other's battlefields".
+        if((card.Zone!=Zone.Battlefield || card.ProvinceIndex!=province) && (ShieldmanNegatesMove(card) || StarCrossedNegatesMove(card,province))) return false;
         // Legion of the Bat (issue #279): "after the resolution of an action that moved a target
         // enemy Infantry Personality to this card's battlefield" -- every printed "move to the
         // current battlefield" ability (Mirumoto Michi/Togashi Rikyou/Intervening Spirit/Takasho/
@@ -2756,6 +2765,10 @@ public sealed partial class MatchEngine
         }
         // Offering Reverence (Seeds of Decay, issue #453): creates an Ancestor per dead Personality, or asks whether to shuffle itself into the deck (SeedsOfDecayBatch4.cs).
         if(Definition(card).Effect==OfferingReverenceEffect) return ResolveOfferingReverence(player,province,card);
+        // The Shadow's Embrace pass (issue #476), batch 6 (ShadowsEmbraceBatch6.cs): Discovering the Temple's search defers like Imperial Gift's; Star-Crossed Lovers' choice
+        // like Offering Reverence's.
+        if(Definition(card).Effect==DiscoveringTheTempleEffect) { BeginSearch(SearchCatalog.DiscoveringTheTemple,card,player.Id,"event"); return true; }
+        if(Definition(card).Effect==StarCrossedLoversEffect) return ResolveStarCrossedLovers(player,province,card);
         province.CardId=null; card.ProvinceIndex=null;
         switch(Definition(card).Effect)
         {
@@ -2779,6 +2792,15 @@ public sealed partial class MatchEngine
             // Forgotten Legacy pass (issue #467), batch 5: Assault in the Jungle, Burning Dreams, Willing Spirits (ForgottenLegacyBatch5.cs).
             case AssaultInTheJungleEffect or BurningDreamsEffect or WillingSpiritsEffect:
                 ResolveForgottenLegacyBatch5Event(player,card);
+                break;
+            // The Shadow's Embrace pass (issue #476), batch 6: On and Wartime Preparations last until the game ends (Suspicions' shape).
+            case OnEffect:
+                card.Zone=Zone.EventInPlay;
+                Emit("eventEnteredPlay",$"{Definition(card).Name} stays in play: at the end of each phase, each player's Honor is lowered to what it was at the start of the phase plus 3 plus any Honor he gained from battle resolution.",player.Id,card.Id);
+                break;
+            case WartimePreparationsEffect:
+                card.Zone=Zone.EventInPlay;
+                Emit("eventEnteredPlay",$"{Definition(card).Name} stays in play: from each turn's second bowing (in the Action Phase) or assignment-preventing effect of another player's card on, {player.Name}'s Personalities are spared.",player.Id,card.Id);
                 break;
             default:
                 card.Zone=Zone.DynastyDiscard;
@@ -2989,6 +3011,7 @@ public sealed partial class MatchEngine
         var player=Player(playerId); player.Honor+=amount;
         if(amount<0) RecordHonorLoss(playerId); // An Insult Answered (issue #453, batch 2): the action that cost this player Honor.
         if(amount>0) _state.CurrentActionHonorGained=true; // Moksha Patam (issue #453 batch 5): read when the action in progress is done.
+        NoteBattleResolutionHonor(playerId,amount,reason); // On (The Shadow's Embrace pass, issue #476 batch 6).
         if(player.Honor<=-20) player.DishonorLossPending=true;
         Emit("honorChanged",$"{player.Name}: {amount:+#;-#;0} Honor ({reason}).",playerId,Amount:amount);
         // Formal Apology (issue #259): checked after EVERY Honor change, gain or loss alike, since the
@@ -3040,6 +3063,7 @@ public sealed partial class MatchEngine
     private void Win(int winner,string reason) { _state.WinnerId=winner; _state.VictoryReason=reason; _state.Phase=Phase.Finished; _state.PendingChoice=null; Emit("matchFinished",$"{Player(winner).Name} wins: {reason}.",winner); }
     private void SetPhase(Phase phase,int priority)
     {
+        OnPhaseBoundary(_state.Phase,phase); // On (The Shadow's Embrace pass, issue #476 batch 6): the end of one phase and the start of the next.
         // War Weariness (issue #259): reset only on the three phases that genuinely begin once per
         // turn -- NOT Phase.Battle, which this same function re-enters once per battlefield (see
         // SelectBattle); the user's own clarification is that the whole Attack-Declaration-through-

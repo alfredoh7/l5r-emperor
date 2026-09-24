@@ -2519,4 +2519,14 @@ public static class PublishedContent
     /// Natsumi, Niiro no Oni, Quelsa, Shiba Kudome (Experienced), Shiba Shirou, Shinjo Jong-Ho, Shinjo Min-Hee, Shosuro Nobu, Shosuro Ryoken, Shugorei, Yamazaki (Experienced),
     /// Yasuki Ikke, Yoritomo Kanahashi.</summary>
     public static PublishedSnapshot PersonalityWave69 { get; } = Load("L5R.Published.PersonalityWave69.json", "personality-wave-69", requireDecks: false);
+    /// <summary>Holding wave 12 (The Shadow's Embrace pass, issue #476, batch 6): Fortress of Lidless Eyes, Platinum Mine, Sheltered Port, Small-Time Bully, Versatile Farm, Whispering Archive.</summary>
+    public static PublishedSnapshot HoldingWave12 { get; } = Load("L5R.Published.HoldingWave12.json", "holding-wave-12", requireDecks: false);
+    /// <summary>Follower wave 30 (issue #476, batch 6): Clearing Crew, Elephant Caravan, Shieldman, Wasteland Scout.</summary>
+    public static PublishedSnapshot FollowerWave30 { get; } = Load("L5R.Published.FollowerWave30.json", "follower-wave-30", requireDecks: false);
+    /// <summary>Event wave 7 (issue #476, batch 6): Discovering the Temple, On, Star-Crossed Lovers, Wartime Preparations.</summary>
+    public static PublishedSnapshot EventWave7 { get; } = Load("L5R.Published.EventWave7.json", "event-wave-7", requireDecks: false);
+    /// <summary>Stronghold wave 16 (issue #476, batch 6): Bishamon's Tower, Twin Forks City.</summary>
+    public static PublishedSnapshot StrongholdWave16 { get; } = Load("L5R.Published.StrongholdWave16.json", "stronghold-wave-16", requireDecks: false);
+    /// <summary>Celestial wave 7 (issue #476, batch 6): The Moon's Imperative, The Sun's Aspiration.</summary>
+    public static PublishedSnapshot CelestialWave7 { get; } = Load("L5R.Published.CelestialWave7.json", "celestial-wave-7", requireDecks: false);
 }

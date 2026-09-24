@@ -1,0 +1,61 @@
+{
+  "Profile": "celestial-wave-7",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-9789",
+      "Name": "The Moon's Imperative",
+      "Type": "Celestial",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: Target a non-Unique Holding: It produces 1 less Gold when it bows to produce Gold.\nOpen: Remove this card from the game and target one to three face-up Personalities in provinces: Discard them, refilling the provinces face-up.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9789.jpg",
+      "Keywords": [
+        "Unique",
+        "Obsidian"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "moons-imperative-holding",
+        "moons-imperative-discard"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9790",
+      "Name": "The Sun's Aspiration",
+      "Type": "Celestial",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: Target a non-Unique Holding: It produces 1 more Gold when it bows to produce Gold.\nOpen: Remove this card from the game and target one to three cards in your discard piles: Shuffle them into their appropriate decks.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9790.jpg",
+      "Keywords": [
+        "Unique",
+        "Jade"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "suns-aspiration-holding",
+        "suns-aspiration-shuffle"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

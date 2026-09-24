@@ -31,7 +31,10 @@ public enum ProductionCondition
     /// <summary>Staging Grounds (issue #460, Embers of War pass): "Produce 3 Gold, or 4 Gold if paying for a card with a printed Gold Cost of 9 or more which may
     /// only pay for that card." A card bought, equipped or played (never an action), by its own PRINTED Gold Cost (CardDefinition.GoldCost, not any live-modified
     /// price) -- Threshold names the minimum.</summary>
-    PayingForExpensiveCard
+    PayingForExpensiveCard,
+    /// <summary>Platinum Mine (The Shadow's Embrace pass, issue #476 batch 6): "Produce 5 Gold, or 6 Gold if paying for an attachment." A Follower, Item or Spell
+    /// being attached and paid for (an Equip, or an attach from a discard pile priced as one) -- never an action, nor a card created as an attachment.</summary>
+    PayingForAttachment
 }
 
 /// <summary>A Holding's production that depends on what it is paying for (issue #416): while a payment meets <paramref name="When"/> the Holding produces
@@ -52,6 +55,8 @@ public static class ConditionalProductionCatalog
         "staging-grounds-gold" => new(4, ProductionCondition.PayingForExpensiveCard, Threshold: 9),
         // Ageless Shrine (Forgotten Legacy pass, issue #467): "Produce 2 Gold, or 3 Gold when paying for a Nonhuman."
         "ageless-shrine-gold" => new(3, ProductionCondition.PayingForKeyword, "Nonhuman"),
+        // Platinum Mine (The Shadow's Embrace pass, issue #476 batch 6).
+        "platinum-mine-gold" => new(6, ProductionCondition.PayingForAttachment),
         _ => null
     };
 }
@@ -79,6 +84,7 @@ public sealed partial class MatchEngine
             // Staging Grounds: the card's own PRINTED Gold Cost (never a live-modified price), bought, equipped or played -- never an action.
             ProductionCondition.PayingForExpensiveCard =>
                 paying.Kind != PaymentKind.Action && production.Threshold is int threshold && Definition(paying.Card).GoldCost >= threshold,
+            ProductionCondition.PayingForAttachment => paying.Kind == PaymentKind.Equip && Definition(paying.Card).Type is CardType.Follower or CardType.Item or CardType.Spell,
             _ => false
         };
     }
@@ -90,6 +96,9 @@ public sealed partial class MatchEngine
         var source = command.CardId is not null && _state.Cards.TryGetValue(command.CardId, out var s) ? s : null;
         if (ability.Cost?.Basis == GoldCostBasis.TargetRecruit && priced is not null) return new(priced, PaymentKind.Recruit, ability);
         if (ability.Cost?.Basis == GoldCostBasis.AttachCost && priced is not null) return new(priced, PaymentKind.Equip, ability);
+        // Equip (Battle) and Soshi Neiru's equip price the attachment by its printed cost: they pay for that attachment too (Platinum Mine, The Shadow's Embrace pass issue #476 batch 6).
+        if (command.AbilityId is "equip-battle" or "neiru-equip" && priced is not null && Definition(priced).Type is CardType.Follower or CardType.Item or CardType.Spell)
+            return new(priced, PaymentKind.Equip, ability);
         return source is null ? null : new(source, source.Zone == Zone.Hand ? PaymentKind.Play : PaymentKind.Action, ability);
     }
 }
