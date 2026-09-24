@@ -519,7 +519,7 @@ internal static class EmperorPersonalityBatch6Tests
             edit?.Invoke(s);
             return MatchEngine.FromTestState(s);
         }
-        // Cast Aside the Weak has Focus Value 4: strength 5. A Force 4 target (training-lion-samurai) is legal, a Force-9 one is not until stronger.
+        // Cast Aside the Weak has Focus Value 4: strength 5. A Force 4 target (training-lion-samurai) is legal and destroyed.
         var e = Setup("training-lion-samurai");
         var ishibashi = e.State.Cards.Values.Single(c => c.DefinitionId == Ishibashi);
         var foe = e.State.Cards.Values.Single(c => c.DefinitionId == "training-lion-samurai" && c.Zone == Zone.Battlefield);
@@ -530,7 +530,7 @@ internal static class EmperorPersonalityBatch6Tests
         Check(options.All(o => o.Label.Contains("shows")), "each says which card it shows");
         Check(options.Any(o => o.Enabled && o.Command!.CardIds is [var a] && a == castAside.Id), "Cast Aside the Weak (Focus 4) is offered");
         var focusOne = options.Single(o => o.Command!.CardIds is [var a] && a == atAnyCost.Id);
-        Check(focusOne.Enabled == false || !(focusOne.TargetIds ?? []).Contains(foe.Id), "At Any Cost (Focus 1, strength 2) cannot reach a Force 4 target");
+        Check(focusOne.Enabled && (focusOne.TargetIds ?? []).Contains(foe.Id), "At Any Cost (Focus 1, strength 2) cannot destroy a Force 4 target but may still target it");
         var strong = options.Single(o => o.Command!.CardIds is [var a] && a == castAside.Id);
         Check(strong.TargetIds!.Contains(foe.Id), "strength 5 reaches a Force 4 target");
         var cardsInHand = e.State.Players[0].Hand.Count;
@@ -542,12 +542,19 @@ internal static class EmperorPersonalityBatch6Tests
         Settle(e);
         Eq(e.State.Cards[foe.Id].Zone, Zone.Dead, "Force 4 against strength 5: destroyed");
 
-        // A weaker card: strength 2 (Focus 1 + 1) destroys a Force 2 target but cannot target a Force 4 one (refused).
+        // A weaker card: strength 2 (Focus 1 + 1) may target a Force 4 one (a legal target) but fails to destroy it.
         var weak = Setup("training-lion-samurai");
         var wIshibashi = weak.State.Cards.Values.Single(c => c.DefinitionId == Ishibashi);
         var wFoe = weak.State.Cards.Values.Single(c => c.DefinitionId == "training-lion-samurai" && c.Zone == Zone.Battlefield);
         var wAtAnyCost = InHand(weak, AtAnyCost);
-        Check(Rejection(weak, Use(weak, 0, "ishibashi-attack", wIshibashi.Id, wFoe.Id) with { CardIds = [wAtAnyCost.Id] }).Length > 0, "the Attack's strength is Focus plus one, so Force 4 is too strong for Focus 1");
+        var weakTry = Setup("training-lion-samurai");
+        var wtIshibashi = weakTry.State.Cards.Values.Single(c => c.DefinitionId == Ishibashi);
+        var wtFoe = weakTry.State.Cards.Values.Single(c => c.DefinitionId == "training-lion-samurai" && c.Zone == Zone.Battlefield);
+        var wtAtAnyCost = InHand(weakTry, AtAnyCost);
+        Accept(weakTry, Use(weakTry, 0, "ishibashi-attack", wtIshibashi.Id, wtFoe.Id) with { CardIds = [wtAtAnyCost.Id] });
+        Check(weakTry.State.ShownCards.Any(x => x.DefinitionId == AtAnyCost), "the Dark Virtue was shown");
+        Settle(weakTry);
+        Eq(weakTry.State.Cards[wtFoe.Id].Zone, Zone.Battlefield, "the Attack's strength is Focus plus one, so Force 4 is too strong for Focus 1: it survives");
 
         // Something that is not a Dark Virtue cannot be shown; nor can nothing.
         var wWeapon = InHand(weak, Weapon);

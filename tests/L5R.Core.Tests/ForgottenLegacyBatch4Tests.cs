@@ -210,8 +210,8 @@ internal static class ForgottenLegacyBatch4Tests
         Check(e2.State.Cards[naga.Id].Zone == Zone.Battlefield && e2.State.Cards[naga.Id].Bowed, "the Nonhuman Shugenja is bowed, not destroyed");
         Eq(e2.State.Cards[six.Id].Zone, Zone.Dead, "Force plus Chi (6) destroyed the Force 6 target");
 
-        // The second action: his Force (5) or his Chi (4). A Ranged Attack targets only a card its strength reaches (RequireLegalAttackTarget), so the Force 5 target
-        // is legal for the Force Attack and not for the Chi Attack, which reaches the Force 4 one.
+        // The second action: his Force (5) or his Chi (4). A Ranged Attack may target a card its strength does not reach (it then survives), so the Force 5 target
+        // is destroyed by the Force Attack and survives the Chi Attack, which destroys the Force 4 one.
         foreach (var (ability, defId) in new[] { ("pearls-spirits-force-attack", "training-crane-veteran"), ("pearls-spirits-chi-attack", "training-lion-samurai") })
         {
             var s3 = Table(Phase.Battle, 0);
@@ -221,7 +221,13 @@ internal static class ForgottenLegacyBatch4Tests
             var target = defId == "training-crane-veteran" ? five : Add(s3, defId, 1, Zone.Battlefield, province: 0);
             var e3 = MatchEngine.FromTestState(s3);
             if (ability == "pearls-spirits-chi-attack")
-                Check(!Batch336Support.Options(e3, 0, ability, card3.Id, veteran.Id).Any(o => o.Enabled && o.TargetIds!.Contains(five.Id)), "the Chi Attack (4) cannot target the Force 5 card");
+            {
+                Check(Batch336Support.Options(e3, 0, ability, card3.Id, veteran.Id).Any(o => o.Enabled && o.TargetIds!.Contains(five.Id)), "the Chi Attack (4) may still target the Force 5 card");
+                var e3b = MatchEngine.FromTestState(s3);
+                Accept(e3b, Offer(e3b, 0, ability, card3.Id, five.Id, veteran.Id));
+                Check(e3b.State.Cards[veteran.Id].Bowed, $"{ability}: the Shugenja bowed");
+                Eq(e3b.State.Cards[five.Id].Zone, Zone.Battlefield, "but the Chi Attack (4) fails to destroy the Force 5 card");
+            }
             Accept(e3, Offer(e3, 0, ability, card3.Id, target.Id, veteran.Id));
             Check(e3.State.Cards[veteran.Id].Bowed && e3.State.Cards[veteran.Id].Zone == Zone.Battlefield, $"{ability}: the Shugenja bowed and stayed");
             Eq(e3.State.Cards[target.Id].Zone, Zone.Dead, $"{ability}: the target its chosen stat reaches was destroyed");

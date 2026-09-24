@@ -175,11 +175,18 @@ internal static class ForgottenLegacyBatch1Tests
         var s2 = Battle(); var h2 = Bf(s2, Higaonna, 0); var tough = Bf(s2, "training-lion-veteran", 1); // Force 6
         var e2 = MatchEngine.FromTestState(s2);
         var honor2 = Honor(e2, 1);
-        Check(!Enabled(e2, 0, "higaonna-attack", h2.Id).TargetIds!.Contains(tough.Id), "Force 6 is out of a Ranged 4 Attack's reach, so it is not offered");
-        // The Attack may still be taken with no card destroyed (its targeting happens as it resolves): with no target, no Honor is lost.
-        Accept(e2, Use(e2, 0, "higaonna-attack", h2.Id));
+        Check(Enabled(e2, 0, "higaonna-attack", h2.Id).TargetIds!.Contains(tough.Id), "Force 6 is out of a Ranged 4 Attack's reach, but still a legal target");
+        // A target above the strength is taken (core rules) and simply survives: no card destroyed, so no Honor is lost.
+        Accept(e2, Offer(e2, 0, "higaonna-attack", h2.Id, tough.Id));
         Check(e2.State.Cards[tough.Id].Zone == Zone.Battlefield, "Force 6 survives Ranged 4");
         Eq(Honor(e2, 1), honor2, "no card destroyed: no Honor lost");
+        // The Attack may also be taken with no target (its targeting happens as it resolves): no Honor is lost either.
+        var s3 = Battle(); var h3 = Bf(s3, Higaonna, 0); var tough3 = Bf(s3, "training-lion-veteran", 1);
+        var e3 = MatchEngine.FromTestState(s3);
+        var honor3 = Honor(e3, 1);
+        Accept(e3, Use(e3, 0, "higaonna-attack", h3.Id));
+        Check(e3.State.Cards[tough3.Id].Zone == Zone.Battlefield, "no target: nothing destroyed");
+        Eq(Honor(e3, 1), honor3, "no card destroyed: no Honor lost");
     }
 
     private static void ToshimoBow()

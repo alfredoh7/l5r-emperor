@@ -464,7 +464,7 @@ internal static class DelayedMoveHomeWaveTests
         Eq(e2.State.PendingChoice?.Type, "beforeBattleReaction"); Eq(e2.State.PendingChoice?.CardId, dairuko.Id, "even bowed");
         Take(e2, 0, "useAbility", o => o.Command!.AbilityId == "dairuko-rally");
         Check(!e2.State.Cards[ally.Id].Bowed && e2.State.Cards[ally.Id].Zone == Zone.Home, "the resolution did not bow her army: " + e2.State.Cards[ally.Id].Zone + " " + e2.State.Cards[ally.Id].Bowed + " | " + string.Join("; ", e2.GetView(0).Events.TakeLast(6).Select(x => x.Message)));
-        // Melee 8 Attack: a Personality of Force 8 or less is destroyed (8 exactly included), one of Force 9 is out of reach; she must be unbowed and at the battlefield like any
+        // Melee 8 Attack: a Personality of Force 8 or less is destroyed (8 exactly included), one of Force 9 is still a legal target but survives; she must be unbowed and at the battlefield like any
         // Battle action.
         foreach (var (bonus, dies) in new[] { (0, true), (2, true), (3, false) })
         {
@@ -475,11 +475,11 @@ internal static class DelayedMoveHomeWaveTests
             var e3 = MatchEngine.FromTestState(s3); Pass(e3, 1);
             var offer = Offer(e3, 0, "dairuko-melee", attacker.Id);
             Check(offer is { Enabled: true }, Why(e3, 0, offer));
-            if (!dies) { Check(!offer!.TargetIds!.Contains(victim.Id), $"Force {6 + bonus} is out of reach of strength 8"); continue; }
-            Check(offer!.TargetIds!.Contains(victim.Id), $"Force {6 + bonus} is within strength 8");
+            // A target above the strength is still a legal target (core rules); the Attack just fails to destroy it.
+            Check(offer!.TargetIds!.Contains(victim.Id), $"Force {6 + bonus} is a legal target of strength 8");
             Target(e3, 0, "dairuko-melee", victim.Id, attacker.Id);
             while (e3.State.PendingChoice?.Type == "attackReaction") Decline(e3);
-            Eq(e3.State.Cards[victim.Id].Zone, Zone.Dead, $"Force {6 + bonus} against strength 8");
+            Eq(e3.State.Cards[victim.Id].Zone, dies ? Zone.Dead : Zone.Battlefield, $"Force {6 + bonus} against strength 8");
         }
         // Bowed, she cannot attack (only the Reaction is Tireless).
         var s4 = Combat(); Add(s4, Dairuko, 0, Zone.Battlefield, bowed: true, province: 0); Add(s4, "training-crane-samurai", 1, Zone.Battlefield, province: 0);

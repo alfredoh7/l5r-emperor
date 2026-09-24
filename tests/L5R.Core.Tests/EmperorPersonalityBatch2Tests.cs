@@ -159,13 +159,17 @@ internal static class EmperorPersonalityBatch2Tests
         Accept(ae, ReactionCommand(ae, 0, "kisada-redirect", aAlly.Id));
         ClosePassing(ae);
         Check(ae.State.Cards[aAlly.Id].Zone == Zone.Dead && ae.State.Cards[ak.Id].Zone == Zone.Battlefield, "the Attack hit the Personality it was redirected to");
-        // A redirect must be legal: the Attack cannot target a Personality above its strength, so a 6F ally is not offered.
+        // A target above the Attack's strength is still a legal target (core rules), so a 6F ally is offered as a redirect; the Attack then simply fails to destroy it.
         var b = Table(Phase.Battle, 1);
         var bk = Bf(b, Kisada, 0); Force(bk, -5); var strong = Bf(b, "training-lion-veteran", 0); var be0 = Bf(b, Esumi, 1);
         var be = MatchEngine.FromTestState(b);
         Accept(be, Offer(be, 1, "esumi-attack-raise", be0.Id, bk.Id));
-        Check(Window(be) is null || !Listed(be, 0, "kisada-redirect").Any(x => x.Enabled), "a target the Attack could not legally choose is not offered: " + string.Join(",", Listed(be, 0, "kisada-redirect").Select(x => x.Reason)));
-        _ = strong;
+        Eq(Window(be), "attackReaction", "the Attack window opens");
+        var strongOffers = Listed(be, 0, "kisada-redirect").Where(x => x.Enabled).Select(x => x.Command!.TargetId).ToArray();
+        Check(strongOffers.Contains(strong.Id), "a target above the Attack's strength is still a legal redirect: " + string.Join(",", Listed(be, 0, "kisada-redirect").Select(x => x.Reason)));
+        Accept(be, ReactionCommand(be, 0, "kisada-redirect", strong.Id));
+        ClosePassing(be);
+        Check(be.State.Cards[strong.Id].Zone == Zone.Battlefield && be.State.Cards[bk.Id].Zone == Zone.Battlefield, "the redirected Attack fails to destroy the 6F Personality, and Kisada is not hit either");
     }
 
     private static void KisadaDestroy()
@@ -381,21 +385,33 @@ internal static class EmperorPersonalityBatch2Tests
         Check(Enabled(e, 0, "higaonna-attack", higaonna.Id).TargetIds!.Contains(five.Id), "Ranged 4 +1 reaches a 5F card");
         Accept(e, Offer(e, 0, "higaonna-attack", higaonna.Id, five.Id));
         Check(e.State.Cards[five.Id].Zone == Zone.Dead, "and destroys it");
-        // Without Shishido a 5F card is out of reach.
+        // Without Shishido a 5F card is still a legal target (core rules) but out of reach of the strength: it survives.
         var p = Battle(); var h2 = Bf(p, Higaonna, 0); var out5 = Bf(p, "training-lion-samurai", 1); Force(out5, 1);
-        Check(!Enabled(MatchEngine.FromTestState(p), 0, "higaonna-attack", h2.Id).TargetIds!.Contains(out5.Id), "no bonus without Shishido");
+        var pe = MatchEngine.FromTestState(p);
+        Check(Enabled(pe, 0, "higaonna-attack", h2.Id).TargetIds!.Contains(out5.Id), "a 5F card is still a legal target without Shishido");
+        Accept(pe, Offer(pe, 0, "higaonna-attack", h2.Id, out5.Id));
+        Check(pe.State.Cards[out5.Id].Zone == Zone.Battlefield, "no bonus without Shishido: it survives");
         // Shishido at another battlefield is not in the army.
         var a = Battle(); a.UnresolvedBattlefields = [0, 1]; Add(a, Shishido, 0, Zone.Battlefield, province: 1); var h3 = Bf(a, Higaonna, 0); var t3 = Bf(a, "training-lion-samurai", 1); Force(t3, 1);
-        Check(!Enabled(MatchEngine.FromTestState(a), 0, "higaonna-attack", h3.Id).TargetIds!.Contains(t3.Id), "another army's Shishido gives nothing");
+        var ae = MatchEngine.FromTestState(a);
+        Accept(ae, Offer(ae, 0, "higaonna-attack", h3.Id, t3.Id));
+        Check(ae.State.Cards[t3.Id].Zone == Zone.Battlefield, "another army's Shishido gives nothing");
         // The opponent's Shishido does not help the other side.
         var o = Battle(); Bf(o, Shishido, 1); var h4 = Bf(o, Higaonna, 0); var t4 = Bf(o, "training-lion-samurai", 1); Force(t4, 1);
-        Check(!Enabled(MatchEngine.FromTestState(o), 0, "higaonna-attack", h4.Id).TargetIds!.Contains(t4.Id), "the enemy's Shishido gives nothing");
+        var oe = MatchEngine.FromTestState(o);
+        Accept(oe, Offer(oe, 0, "higaonna-attack", h4.Id, t4.Id));
+        Check(oe.State.Cards[t4.Id].Zone == Zone.Battlefield, "the enemy's Shishido gives nothing");
         // One +1 for each Shishido in the army.
         var d = Battle(); Bf(d, Shishido, 0); Bf(d, Shishido, 0); var h5 = Bf(d, Higaonna, 0); var t5 = Bf(d, "training-lion-samurai", 1); Force(t5, 2); // 6F
-        Check(Enabled(MatchEngine.FromTestState(d), 0, "higaonna-attack", h5.Id).TargetIds!.Contains(t5.Id), "two Shishido: +2");
-        // A Melee Attack gets nothing (training-weapon-attack is Melee 2).
+        var de = MatchEngine.FromTestState(d);
+        Check(Enabled(de, 0, "higaonna-attack", h5.Id).TargetIds!.Contains(t5.Id), "two Shishido: +2");
+        Accept(de, Offer(de, 0, "higaonna-attack", h5.Id, t5.Id));
+        Check(de.State.Cards[t5.Id].Zone == Zone.Dead, "two Shishido: +2 reaches a 6F card");
+        // A Melee Attack gets nothing (training-weapon-attack is Melee 2): a 4F target is legal but survives.
         var m = Battle(); Bf(m, Shishido, 0); var melee = Bf(m, "training-recon-attacker", 0); var t6 = Bf(m, "training-lion-samurai", 1); // 4F: beyond Melee 2 either way
-        Check(!Enabled(MatchEngine.FromTestState(m), 0, "training-weapon-attack", melee.Id).TargetIds!.Contains(t6.Id), "Melee is not boosted");
+        var me = MatchEngine.FromTestState(m);
+        Accept(me, Offer(me, 0, "training-weapon-attack", melee.Id, t6.Id));
+        Check(me.State.Cards[t6.Id].Zone == Zone.Battlefield, "Melee is not boosted");
     }
 
     private static void ShinjuDestroy()

@@ -15,7 +15,7 @@ internal static class FollowerPerformerTests
             ("First ability: Ranged 4 Attack only with Reconnaissance at the current battlefield (refused with the requirement otherwise), no cost, and Tensin himself performs", ReconnaissanceAttack),
             ("The Follower performer: one offered action per UNBOWED Follower attached to Tensin himself -- not a bowed one, not another unit's, not an enemy's, not Tensin -- and a command naming any of those is refused", OneOfferPerUnbowedFollowerInHisUnit),
             ("The performing Follower is bowed as the cost and then makes the Ranged 4 Attack: a legal target is destroyed, Tensin stays unbowed, the Attack's performer is the Follower, and priority passes", FollowerBowsThenAttacks),
-            ("Ranged 4 Attack targeting: a Follower, or a Personality without Followers, with Force 4 or less -- not a stronger card, not a followed Personality, not your own, not one away from the battlefield", AttackTargeting),
+            ("Ranged 4 Attack targeting: a Follower, or a Personality without Followers -- a stronger card is a legal target that survives, not a followed Personality, not your own, not one away from the battlefield", AttackTargeting),
             ("The two abilities are independent: each has its own once-per-turn use, so Tensin may take both in one turn (with Reconnaissance), and a bowed Tensin can take neither", TwoIndependentAbilities),
             ("The Attack opens the same reaction window as any Attack, with the performing Follower as its performer", AttackReactionWindow),
             ("Every offered Tensin command validates on a fresh engine, with every alternate target", OfferedTensinCommandsValidate),
@@ -120,10 +120,17 @@ internal static class FollowerPerformerTests
         var own = Put(r.S, "training-crane-samurai", 0, Zone.Battlefield, province: 0);
         var e = Engine(r.S);
         var targets = Offers(e, 0, ViaFollower).First(o => o.Enabled).TargetIds!;
-        Expect(targets.ToHashSet().SetEquals([r.Target.Id, followedFollower.Id]), $"a Force-4 Personality without Followers and a Follower; got {string.Join(", ", targets)}");
+        Expect(targets.ToHashSet().SetEquals([r.Target.Id, followedFollower.Id, strong.Id]), $"a Force-4 Personality without Followers, a Follower and (a stronger card is still a legal target) the Force-5 one; got {string.Join(", ", targets)}");
         var command = Offer(e, 0, ViaFollower, r.Tensin.Id, r.Target.Id, r.Follower.Id);
-        foreach (var bad in new[] { strong.Id, followed.Id, home.Id, own.Id })
+        foreach (var bad in new[] { followed.Id, home.Id, own.Id })
             Reject(e, command with { TargetId = bad });
+        // A target whose Force is above the Attack's strength is still legal (core rules): the Attack just fails to destroy it.
+        var above = Battle();
+        var aboveStrong = Put(above.S, "training-crane-veteran", 1, Zone.Battlefield, province: 0);
+        var ae = Engine(above.S);
+        Accept(ae, Offer(ae, 0, ViaFollower, above.Tensin.Id, aboveStrong.Id, above.Follower.Id));
+        Eq(ae.State.Cards[aboveStrong.Id].Zone, Zone.Battlefield, "the Force-5 target survives the Ranged 4 Attack");
+        Expect(ae.State.Cards[above.Follower.Id].Bowed, "the cost is still paid");
         // No target at all is legal for an Attack (chosen later, "not required up front").
         Accept(e, command with { TargetId = null });
         Expect(e.State.Cards[r.Follower.Id].Bowed, "the cost is still paid");
