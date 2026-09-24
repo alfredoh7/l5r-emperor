@@ -99,6 +99,12 @@ public sealed partial class MatchEngine
             // performed and that destroyed a Personality" -- scoped to Rata himself as the action's own performer
             // (facts.PerformerId), not merely his controller's action, and to either player's destroyed Personality.
             "rata-draw" => RataDestroyedAPersonality(source),
+            // Shinjo Byung - exp (Gempukku pass, issue #461): "After a Tactical Battle action resolves that Byung performed" -- his own performed action (facts.PerformerId), a Battle-timed
+            // ability classified Tactical through ActionCarriesKeyword (the ability's own tag, or the source card's keyword).
+            "byung-additional-action" => facts.PerformerId == source.Id && facts.PlayerId == playerId && AbilityCatalog.All[facts.AbilityId].Timing == "Battle"
+                && ActionCarriesKeyword(AbilityCatalog.All[facts.AbilityId], facts.SourceId is null ? null : Card(facts.SourceId), "Tactical"),
+            // Hida Yamadera - exp: "After another player's Battle action resolves, if its effects destroyed Yamadera."
+            "yamadera-attack" => facts.PlayerId != playerId && AbilityCatalog.All[facts.AbilityId].Timing == "Battle" && facts.Affected.Any(a => a.Kind == DestroyedKind && a.CardId == source.Id),
             // Advanced Intelligence (Seeds of Decay pass, issue #453, batch 1): "After a Recon Strategy's action resolves" -- either player's, classified through ActionCarriesKeyword.
             "advanced-intelligence-draw" => facts.SourceId is { } reconSourceId && _state.Cards.TryGetValue(reconSourceId, out var reconSource) && Definition(reconSource).Type == CardType.Strategy
                 && ActionCarriesKeyword(AbilityCatalog.All[facts.AbilityId], reconSource, "Recon"),

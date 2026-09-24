@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Emperor Edition Gempukku pass (#461): all 17 unwired cards wired (holding-wave-10: nine Market Holdings; personality-wave-65: Hida Yamadera, Doji Dainagon, Jade's Roar, Moshi Madoka, Kunji, Shosuro Hawado exp 2, Daigotsu Negishi, Shinjo Byung, all Experienced); Togashi Korimi was already wired, so no new blockers. New primitives: abilities taken from the dead pile (FromDead/RequiresHonorable, source-if-dead), a keyword-limited first Battle action (Jade's Roar's Terrain-only opportunity), PlayerState.AttachedFromHandThisTurn, Negishi's conditional destruction negation by unit Gold Cost, and a card-in-province target with face-up refill (Hawado). Removed the stale Jade's Roar blocker note. Shared scope: content packaging, wave registration and the inventory builder alongside rules-lane engine changes.",
+  "validation": "Full L5R.Core.Tests suite: zero failures, including the new gempukku-pass suite (10 scenarios). L5R.AI.Tests 74/74, L5R.Server.Tests 8/8, L5R.Client.Transport.Tests 12/12. Content suite 134/134 after the art pack republish. docs/CARD_INVENTORY.xlsx regenerated: 2172 cards, 803 wired (+17). Catalogue art pack pinned to catalogue-art-pr461-20260924-r1 (3250 scans).",
+  "remaining": "None; ready for review.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/461",
+  "branch": "claude/461-gempukku-pass",
+  "updated": "2026-09-24T08:22:00.492754+00:00"
+}
