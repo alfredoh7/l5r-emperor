@@ -294,6 +294,9 @@ public sealed partial class MatchEngine
             case "norimichi-negate":
                 return command.PlayerId != card.OwnerId && affected.OwnerId == card.OwnerId && Definition(affected).Type == CardType.Personality && Keyword(affected, "Shugenja") && Keyword(affected, "Earth")
                     && SameLocation(card, affected) && (subject.IsAttack || DestroysTarget(command.AbilityId));
+            // Yasuki Tanimura (Emperor Edition Personality pass, issue #477 batch 6): another player's Battle action targets him.
+            case "tanimura-political-pay":
+                return TanimuraApplies(card, subject, affected);
             default:
                 return false;
         }
