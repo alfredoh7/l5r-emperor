@@ -24,7 +24,7 @@ The set has 18 reference cards; one (Togashi Korimi - experienced 2) was already
 1. **Negishi's "when they performed it"** is read at the moment the destruction resolves, which for one action's effects is the moment it was performed; only an action's effect is negated, never a battle's own casualty resolution.
 2. **Kunji - "ignoring costs"** ignores his recruit Gold cost (and Honor Requirement, as every existing dead-pile recruit does); a non-Phoenix player pays the ordinary price. "Honorably dead" is read as dead and not Dishonorable.
 3. **Hawado - exp 2 refills from the province owner's Dynasty deck**, the same face-up placement Scavenging Party already makes; a destroyed province or an empty deck refills nothing.
-4. **Yamadera's Attack has no performing card in play**: it is an Attack whose source is the dead Yamadera, chosen target legal as for any Attack.
+4. **Yamadera performs his own Attack**: a printed action is performed by the card that prints it, so the dead Yamadera is the performer of his Melee 8 Attack (`ActionPerformingPersonality` accepts a dead source for a `FromDead` ability); the chosen target is legal as for any Attack.
 
 ## Verification
 
