@@ -7,7 +7,13 @@ public static class DeckBuilderDialog
     public static void Show(Node parent)
     {
         var root=parent.GetTree().Root;if(root.GetNodeOrNull("DeckBuilderLayer") is not null)return;
+        var returnFocus=parent.GetViewport().GuiGetFocusOwner();
         var layer=new CanvasLayer{Name="DeckBuilderLayer",Layer=85};root.AddChild(layer);
+        layer.TreeExited+=()=>
+        {
+            if(GodotObject.IsInstanceValid(returnFocus)&&returnFocus.IsInsideTree()&&returnFocus.IsVisibleInTree())
+                returnFocus.CallDeferred(Control.MethodName.GrabFocus);
+        };
         try{var screen=new DeckBuilderScreen();layer.AddChild(screen);screen.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.FullRect);screen.Closed+=layer.QueueFree;}
         catch(Exception e){layer.QueueFree();GD.PushError(e.Message);}
     }

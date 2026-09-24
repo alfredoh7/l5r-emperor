@@ -1,9 +1,9 @@
 {
-  "lane": "ui",
-  "summary": "Taking #470: native B6 Lantern Study menu from approved pixels, slow 85% lighting and functional navigation.",
-  "validation": "Approval hash recorded; current origin/main and open PRs inspected; no TitleMenu overlap. Implementation and native checks pending.",
-  "remaining": "Implement, compare native output, verify input and prepare review launchers. No merge.",
+  "lane": "shared",
+  "summary": "Implemented approved B6 main-menu artwork and slow 85% lighting, source-aligned native buttons and submenus; fixed overlay Escape routing and focus return. Product changes are UI-only; shared classification is for the native menu acceptance script. No engine, state, networking or rules changes.",
+  "validation": "Client build 0 warnings/errors, Godot import, 16 native cases across full and targeted runs; static source/native RGB exact; reduced-motion 0/22 frames identical; local launcher and native UI checked. F11 passed in isolated rerun. Hosted checks blocked by GitHub billing/spending limit. See docs/screenshots/lantern-menu/README.md.",
+  "remaining": "Prepare versioned Windows review candidate; hosted Windows validation and Mendon review pending. No merge authorized.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/470",
   "branch": "codex/470-lantern-main-menu",
-  "updated": "2026-09-24T10:51:22.303597+00:00"
+  "updated": "2026-09-24T11:22:54.149241+00:00"
 }
