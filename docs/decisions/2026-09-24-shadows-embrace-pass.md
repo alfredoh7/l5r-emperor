@@ -145,4 +145,26 @@ Every conflict was additive except these, which were merged by hand:
 
 ## Catalogue art pack
 
-The 110 newly bundled scans need a new release. Cloud sessions cannot create releases, so a kit was prepared as for #469: the 110 new WebP-85 scans, the manifest and `assemble.py`. The release is `catalogue-art-issue476-20260924-r1`: 3424 scans, incremental over `catalogue-art-pr469-20260924-r2`, sha256 `a09c56d7045e091dbbdddd2fd4086fd876743dd7fe93ee9f1bc79c09cf875b1a`. Mendon uploaded it; GitHub's asset digest matches, and the two art-pack JSON files are pinned to it.
+The 110 newly bundled scans need a new release. Cloud sessions cannot create releases, so each release was delivered as a kit for Mendon to upload. A kit holds the new WebP-85 scans, the manifest and `assemble.py`.
+
+- `catalogue-art-issue476-20260924-r1` (3424 scans, built on `catalogue-art-pr469-20260924-r2`) was uploaded first. It was superseded when main merged the Emperor Edition Personality pass (#480) with its own pack, `catalogue-art-pr477-20260924-r1`.
+- `catalogue-art-issue476-20260924-r2` covers both passes: 3495 scans, incremental over pr477, sha256 `2bb4633802eb3af3c5339a67ea0a315764d6ca345db9188b0faf9afcfad0b8c1`. Mendon uploaded it, and GitHub's asset digest matches. Both art-pack JSON files are pinned to it, and the content suite passes 134/134.
+
+## Second merge with main (#480)
+
+The Emperor Edition Personality pass (#480) merged while this PR was open. It used `personality-wave-68` to `73`, so this pass's Personality waves were renumbered from 68/69 to 74/75.
+
+24 files conflicted. Most conflicts were additive. These needed hand merging:
+- the ability dictionary's new `.AddEmperorPersonalityBatch2()` closing;
+- `;`-terminated id lists;
+- the target switch's default arm;
+- the `AttackStrength` and `PersonalityForce` chains;
+- `GoldProduced`: this pass's production adjustment plus #480's payment subject;
+- the movement and Twin Forks guards;
+- the decider ternary and verb map;
+- `DeckSearch.All`;
+- the pinned test lists.
+
+Three duplicates were removed: a duplicated `akikusa-honor` switch arm, two missing `break`s, and a second `AllAbilitiesUsageKey` constant. For the constant, this pass's `"*all*"` was dropped in favour of #480's `"*"`; both mean "every ability".
+
+`L5R.Core.Tests` passes 1496/1496 after the merge. The inventory now shows 1048 of 2173 cards wired.
