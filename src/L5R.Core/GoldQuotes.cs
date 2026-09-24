@@ -128,7 +128,8 @@ public sealed partial class MatchEngine
     {
         foreach (var id in AbilityIdsOf(card))
             if (AbilityCatalog.All.TryGetValue(id, out var ability) && ability.PaymentProduction is int amount
-                && !(card.AbilityUses.TryGetValue(ability.UsageKey ?? id, out var used) && used == _state.TurnNumber))
+                && !(card.AbilityUses.TryGetValue(ability.UsageKey ?? id, out var used) && used == _state.TurnNumber)
+                && !AbilityDisabled(card, id)) // Forgotten Legacy pass (issue #467), batch 1: "it may not be used"
                 return (id, amount);
         return null;
     }

@@ -2479,4 +2479,7 @@ public static class PublishedContent
     public static PublishedSnapshot PersonalityWave64 { get; } = Load("L5R.Published.PersonalityWave64.json", "personality-wave-64", requireDecks: false);
     /// <summary>Personality wave 62 (Embers of War pass, issue #460, batch 1): Akodo Uehara, Daigotsu Takayasu - exp, Goju Gochiso, Kaiu Onizuka, Kaiu Tojikana.</summary>
     public static PublishedSnapshot PersonalityWave62 { get; } = Load("L5R.Published.PersonalityWave62.json", "personality-wave-62", requireDecks: false);
+    /// <summary>Personality wave 65 (Forgotten Legacy pass, issue #467, batch 1): Asahina Shigemitsu, Asako Kaitoko, Bayushi Higaonna, Bayushi Toshimo, Daidoji
+    /// Takichi, Daigotsu Gyoken, Daigotsu Murota, Doji Hakuseki, Doji Rengetsu, Hiruma Nikaru, Iuchi Abodan, Kitsu Kagako.</summary>
+    public static PublishedSnapshot PersonalityWave65 { get; } = Load("L5R.Published.PersonalityWave65.json", "personality-wave-65", requireDecks: false);
 }

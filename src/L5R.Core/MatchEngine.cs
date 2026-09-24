@@ -2518,6 +2518,7 @@ public sealed partial class MatchEngine
         foreach(var check in _state.PendingTamokoHonorChecks)
             if(Card(check.TargetId).AssignedToAttackTurn != _state.TurnNumber) GainHonor(check.BeneficiaryPlayerId,1,"Tamori Tamoko",Card(check.TargetId));
         _state.PendingTamokoHonorChecks.Clear();
+        ResolveProvincesHeldHonorChecks(); // Forgotten Legacy pass (issue #467), batch 1: Asahina Shigemitsu's "before it ends" Honor.
         // Spirit of the Berserker: a destruction put off "until before this turn ends" happens now.
         ResolveDelayedDestructions();
         // A window a delayed destruction opened (Overconfident's draw) is answered first; the turn then ends when the player ends the phase again.

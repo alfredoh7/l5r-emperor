@@ -481,6 +481,8 @@ public sealed partial class MatchEngine
                 foreach (var id in loserIds) if (!StalwartNegatesBow(Card(id), challengerPlayerId)) Card(id).Bowed = true;
                 break;
             // Reckless Duel (oracle-l5r-6209, issue #460): "Bow the duel's loser. Move him home." -- Doji Mitsuru's own bow plus Daisuke's own move-home, combined.
+            // Doji Hakuseki (Forgotten Legacy pass, issue #467, batch 1; ForgottenLegacyBatch1.cs).
+            case "hakuseki-duel": HakusekiDuelOutcome(winnerId, loserIds, challengerPlayerId); break;
             case "reckless-duel":
                 foreach (var id in loserIds)
                 {

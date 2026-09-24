@@ -920,6 +920,13 @@ public sealed class MatchState
     // Seeds of Decay pass (issue #453), batch 2 (SeedsOfDecayBatch2.cs). Each record expires by comparison (a turn number, a phase instance, a player's turn count), never by a sweep.
     // Province strength for the turn (Incriminating Testimony, Bayushi Shibata - exp, Imperial Protection's standing rule) -- read by EffectiveProvinceStrength beside the permanent Strength.
     public List<ProvinceStrengthEffect> ProvinceStrengthEffects { get; set; } = [];
+    // Forgotten Legacy pass (issue #467), batch 1 (ForgottenLegacyBatch1.cs); each record expires by comparison with the turn number.
+    // "Choose one of his abilities; it may not be used" (Doji Hakuseki, Doji Rengetsu): one printed ability (by usage key) of one card, locked for the turn.
+    public List<DisabledAbility> DisabledAbilities { get; set; } = [];
+    // "If it is not your turn, before it ends, if none of your provinces were destroyed this turn, gain 1 Honor" (Asahina Shigemitsu): drained in EndTurn.
+    public List<ProvincesHeldHonorCheck> ProvincesHeldHonorChecks { get; set; } = [];
+    // "Unless Murota has performed a Dark Virtue action this turn": the action keywords each Personality has performed an action with, per turn.
+    public List<PerformedKeywordAction> PerformedKeywordActions { get; set; } = [];
     // "After the next time this turn he is assigned to attack [or is destroyed]" (Imperial Protection, Fair Warning): fired from Assign() and MarkDead.
     public List<AssignmentWatch> AssignmentWatches { get; set; } = [];
     // Sentinel Spirit: judged when the next Dynasty Phase begins (SetPhase).

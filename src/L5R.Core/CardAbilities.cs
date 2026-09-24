@@ -2889,6 +2889,69 @@ public static class AbilityCatalog
         // of the deck" is the top-1 LookSpec (Isawa Tamaki's own shape) with both a Discard and a Bottom rule instead of Bottom alone.
         ["uehara-look"] = new("Limited", "Look at the top card of your Fate deck. You may leave it there, discard it, or put it at the bottom of the deck", "none",
             Look: LookCatalog.UeharaLook),
+        // Forgotten Legacy pass (issue #467), batch 1: the declarative data only; every execution/validation helper and the small primitives are in
+        // ForgottenLegacyBatch1.cs, documented at their own use there.
+        // Asahina Shigemitsu (oracle-l5r-515): "Open: Bow Shigemitsu or one of his Spells: Give each of your provinces +1 strength. If it is not your turn,
+        // before it ends, if none of your provinces were destroyed this turn, gain 1 Honor." Moshi Tomiko's own "Bow X or one of her Spells" cost shape
+        // (own-source-or-unbowed-attached-spell + CostOption.Bow); the strength is the timed province strength (ProvinceStrengthEffect); the conditional gain is a
+        // delayed end-of-turn check (MatchState.ProvincesHeldHonorChecks), queued only when used on another player's turn.
+        ["shigemitsu-provinces"] = new("Open", "Bow Shigemitsu or one of his Spells: Give each of your provinces +1 strength. If it is not your turn, before it ends, if none of your provinces were destroyed this turn, gain 1 Honor", "none",
+            Performer: "own-source-or-unbowed-attached-spell", CostOptions: [CostOption.Bow]),
+        // Asako Kaitoko (oracle-l5r-549): "Battle: Target an enemy Personality: Reduce his Force to 0. Destroy a card without attachments in his unit if he is
+        // Kolat, Ninja, or Shadowlands." Weak Poison's own set-to-0 (a -CardForce penalty), then -- only if the target status holds -- the acting player picks
+        // which card of his unit without attachments is destroyed (him if he has none; otherwise one of his Followers, Volcano Tattoo's own reading of "a card
+        // without attachments in his unit"), chosen at resolution through the effect-choice decision with engine-listed options (ForgottenLegacyBatch1.cs).
+        ["kaitoko-weaken"] = new("Battle", "Target an enemy Personality: Reduce his Force to 0. Destroy a card without attachments in his unit if he is Kolat, Ninja, or Shadowlands", "enemy-personality",
+            IfTarget: TargetStatus.KolatNinjaOrShadowlands),
+        // Bayushi Higaonna (oracle-l5r-775): "Battle: Ranged 4 Attack. If the Ranged Attack destroyed a card, its owner loses 1 Honor." Sticks and Stones' own
+        // "did THIS Attack destroy its target" read, after the Attack resolves (AfterForgottenLegacyBatch1Attack).
+        ["higaonna-attack"] = new("Battle", "Ranged 4 Attack. If the Ranged Attack destroyed a card, its owner loses 1 Honor", "attack"),
+        // Bayushi Toshimo (oracle-l5r-916): "Battle: Bow a target enemy card without attachments. If Toshimo has a Weapon or you control a Courtier, the card
+        // cannot straighten." (His Kensai reminder is the printed keyword, already read by the Weapon cap.) "Cannot straighten" with no stated duration lasts the
+        // turn (core rules, Duration) -- the existing turn straighten-lock (LockStraightening, Basic Lesson's).
+        ["toshimo-bow"] = new("Battle", "Bow a target enemy card without attachments. If Toshimo has a Weapon or you control a Courtier, the card cannot straighten", "enemy-card-without-attachments"),
+        // Daidoji Takichi (oracle-l5r-1679): "Battle: Target a Personality opposing Takichi at the current battlefield: Move the Personality and Takichi to the
+        // same adjacent unresolved battlefield." Sea Troll Predator's printed action verbatim (predator-move's MoveSpec).
+        ["takichi-move"] = new("Battle", "Target a Personality opposing Takichi at the current battlefield: move the Personality and Takichi to the same adjacent unresolved battlefield", "enemy-personality",
+            Move: new(MoveSpec.SourceAndTarget, MoveSpec.AdjacentUnresolved)),
+        // Daigotsu Murota (oracle-l5r-1750): "After Murota enters play: Lose 2 Honor" is his EntryHonorLoss. "Battle: Target an enemy card, which must have no
+        // attachments unless Murota has performed a Dark Virtue action this turn: Bow it." -- the attachment condition is a target-legality Require read live
+        // against the per-card "performed a [keyword] action this turn" record (MatchState.PerformedKeywordActions).
+        // Daigotsu Gyoken (oracle-l5r-1719): "After Gyoken enters play: Lose 2 Honor" is his EntryHonorLoss. "Battle/Open: Target your Personality and a non-Unique
+        // attachment in any player's discard pile: Attach it to the Personality, paying all costs and ignoring Honor Requirements. You may take an additional
+        // action appropriate to this phase." Moto Jun-Ni's attach-from-a-discard-pile (AttachAction.cs, all costs through the Gold path) with two targets: the
+        // attachment (the primary target the AttachSpec reads) and "your Personality" as a target slot that receives it (AttachWielder.PersonalitySlot -- a
+        // target, not a performer: Gyoken performs), the Follower Honor Requirement ignored (AttachSpec.IgnoreHonorRequirement), then Shinjo Katsuo's own
+        // additional action.
+        ["gyoken-attach"] = new("BattleOrOpen", "Target your Personality and a non-Unique attachment in any player's discard pile: Attach it to the Personality, paying all costs and ignoring Honor Requirements. You may take an additional action appropriate to this phase", "slots",
+            Slots: [new("attachment", "attachment-in-discard", "A non-Unique attachment in any player's discard pile"), new("personality", "own-personality", "Your Personality to attach it to")],
+            Cost: GoldCostRule.AttachCost(),
+            Attach: new(AttachSource.Target, AttachPile.Any, AttachWielder.PersonalitySlot, [CardType.Follower, CardType.Item, CardType.Spell], ExcludedKeywords: ["Unique"], IgnoreHonorRequirement: true)),
+        ["murota-bow"] = new("Battle", "Target an enemy card, which must have no attachments unless Murota has performed a Dark Virtue action this turn: Bow it", "enemy-card"),
+        // Doji Hakuseki (oracle-l5r-2082): "Open: Target a Personality: Choose one of his abilities; it may not be used." -- the single-ability lock
+        // (MatchState.DisabledAbilities, for the turn), the ability chosen at resolution among his actions. "Battle: Target an enemy Personality: Hakuseki issues
+        // him an unrefusable challenge. The controller of the duel's winner gains 2 Honor. Bow the duel's loser, and destroy him if he is dishonorable."
+        ["hakuseki-disable"] = new("Open", "Target a Personality: Choose one of his abilities; it may not be used", "personality"),
+        ["hakuseki-duel"] = new("Battle", "Target an enemy Personality: Hakuseki issues him an unrefusable challenge. The controller of the duel's winner gains 2 Honor. Bow the duel's loser, and destroy him if he is dishonorable",
+            "enemy-personality", IssuesDuel: true),
+        // Doji Rengetsu (oracle-l5r-2142): "Favor Political Open: Discard the Imperial Favor to target a Personality or Holding. Choose one of its abilities; it
+        // may not be used." The Favor discard is paid like every other Favor action's (DiscardsFavorForBatch1); the lock is Hakuseki's.
+        ["rengetsu-disable"] = new("Open", "Favor Political Open: Discard the Imperial Favor to target a Personality or Holding. Choose one of its abilities; it may not be used", "personality-or-holding",
+            ActionKeywords: ["Favor", "Political"]),
+        // Hiruma Nikaru (oracle-l5r-3310): "Battle: Target an enemy Personality: Bow him. He may not perform actions." -- a bow plus the action lock (ActionLock.cs)
+        // for the turn, Hotako's own.
+        ["nikaru-bow-lock"] = new("Battle", "Target an enemy Personality: Bow him. He may not perform actions", "enemy-personality"),
+        // Iuchi Abodan (oracle-l5r-3974): "Battle: Choose a Personality in a discard pile, remove him from the game, and target an enemy Personality: Move him
+        // home. Bow him if the Personality you chose was dead." Two slots: the enemy Personality (the primary target) and the chosen discard-pile Personality,
+        // whose removal is a declared cost on that slot (CostSubject.Slot) so a negated action still pays it; whether he was dead is read before he is removed.
+        ["abodan-move"] = new("Battle", "Choose a Personality in a discard pile, remove him from the game, and target an enemy Personality: Move him home. Bow him if the Personality you chose was dead", "slots",
+            Slots: [new("target", "enemy-personality", "Enemy Personality to move home"), new("chosen", "personality-in-any-discard", "A Personality in a discard pile to remove from the game")],
+            Costs: [new(CostVerbs.Remove, CostSubject.Slot("chosen"))]),
+        // Kitsu Kagako (oracle-l5r-4382): "Reaction: After Kagako enters play: She summons an ancestor. Create a 2F/2C/3PH Lion Clan · Samurai · Ancestor · Spirit
+        // Personality. Gain 1 Honor." Kitsu Akai's own created Lion Ancestor (the published Proxy scan) from inside her entry window (Kitsune Ohsuki's shape),
+        // then Measure of Devotion's own Honor gain after the creation.
+        ["kagako-create"] = new("Reaction", "After Kagako enters play: Create a 2F/2C/3PH Lion Clan · Samurai · Ancestor · Spirit Personality. Gain 1 Honor", "none", Trigger: "own-enters-play",
+            Creates: new(CardType.Personality, Force: 2, Chi: 2, PersonalHonor: 3, Keywords: ["Lion Clan", "Samurai", "Ancestor", "Spirit"])),
     });
 }
 
@@ -3156,6 +3219,8 @@ public sealed partial class MatchEngine
         // Seeds of Decay pass (issue #453), batch 5: Moksha Patam and Okesa-goma move their target home, Nature's Wrath moves it to the battlefield;
         // Master of Beasts, Peace of the Kami (if a Spirit) and The Earth's Strength straighten theirs.
         "moksha-patam-move" or "okesa-goma-move" or "natures-wrath-move" => "move",
+        // Forgotten Legacy pass (issue #467), batch 1: Daidoji Takichi moves his target (Sea Troll Predator's shape), Iuchi Abodan sends his home.
+        "takichi-move" or "abodan-move" => "move",
         "master-of-beasts-straighten" or "peace-of-the-kami-negate" or "earths-strength-straighten" => "straighten",
         _ => null
     };
@@ -3215,7 +3280,9 @@ public sealed partial class MatchEngine
         // Seeds of Decay pass (issue #453), batch 4.
         or "nobukatsu-bow" or "hachis-revenge-bow"
         // Seeds of Decay pass (issue #453), batch 5.
-        or "celestial-sword-scorpion-bow" or "scent-of-dishonor-bow";
+        or "celestial-sword-scorpion-bow" or "scent-of-dishonor-bow"
+        // Forgotten Legacy pass (issue #467), batch 1: Toshimo, Murota and Nikaru bow their target; Abodan bows his (conditionally) and Hakuseki's duel its loser.
+        or "toshimo-bow" or "murota-bow" or "nikaru-bow-lock" or "abodan-move" or "hakuseki-duel";
     // Whether the command's TargetId is an Attack's OWN target, which reacts through the separate attackReaction
     // window instead of this one: an Attack-classified ability whose Target category is "attack". Bayushi Kahoku
     // - exp (issue #313) is Attack-classified too, but its TargetId is the separate "-4F" target (an ordinary
@@ -3508,6 +3575,7 @@ public sealed partial class MatchEngine
         "tomiko-attack" => 6, // Moshi Tomiko (oracle-l5r-5286): "Ranged 6 Attack".
         "junpei-attack" => 4, // Shinjo Junpei - experienced (oracle-l5r-6901): "Melee 4 Attack".
         "tomaru-attack" => 4, // Tsuruchi Tomaru - experienced (oracle-l5r-8894): "Ranged 4 Attack".
+        "higaonna-attack" => 4, // Bayushi Higaonna (oracle-l5r-775, Forgotten Legacy pass, issue #467 batch 1): "Ranged 4 Attack".
         "training-honor-cost-attack" => 3,
         "training-weapon-attack" => 2,
         "cavalry-flankers-attack" => 2,
@@ -3607,6 +3675,7 @@ public sealed partial class MatchEngine
         "shinjo-eun-sahng-attack" or "shosuro-konishi-attack" or "tsuruchi-kosoko-attack" or "tsuruchi-isas-attack" or "bayushi-kahoku-attack" or "asako-ume-attack" or "training-honor-cost-attack" => "Ranged",
         "taiken-attack" => "Ranged", // Isawa Taiken (issue #458)
         "tomiko-attack" or "tomaru-attack" => "Ranged", // Embers of War pass (issue #460 batch 2).
+        "higaonna-attack" => "Ranged", // Forgotten Legacy pass (issue #467 batch 1).
         "junpei-attack" => "Melee",
         "precision-attack" => "Ranged", // Precision (issue #460)
         "cavalry-flankers-attack" or "murderous-thieves-attack" => "Melee",
@@ -3830,6 +3899,7 @@ public sealed partial class MatchEngine
         // it happens whether or not the Attack actually hit, so it lives outside the hit branch above.
         if (abilityId == "tsuruchi-isas-attack" && sourceId is not null) MoveHome(Card(sourceId), false);
         AfterSticksAndStonesAttack(abilityId, playerId, targetId, targetInPlayBefore); // Seeds of Decay pass (issue #453), batch 1.
+        AfterForgottenLegacyBatch1Attack(abilityId, targetId, targetInPlayBefore, sourceId); // Forgotten Legacy pass (issue #467), batch 1: Bayushi Higaonna.
         // Tsuruchi Yakusho (issue #276 follow-up): this specific Attack's own resolution has now fully
         // completed -- the single funnel every Attack resolves through, deferred or not -- so any
         // immunity granted for it is cleared here, never carried into a later, unrelated Attack.
@@ -5466,7 +5536,10 @@ public sealed partial class MatchEngine
         if (id == "red-hunger-attachments")
             Require(SlotCards(command, "attachments").Sum(a => Definition(a).Type == CardType.Follower ? CardForce(a) : Definition(a).Force + StatModifier(a, "Force")) < CardForce(source!), "Their total Force must be lower than The Red Hunger's Force.");
         // Attach (issue #337): the wielder and the Equip legality of the attachment (see AttachAction.cs).
-        if (ability.Attach is { } attachSpec) ValidateAttach(command, attachSpec, player, source);
+        // A multi-target attach (Forgotten Legacy pass, issue #467, batch 1: Daigotsu Gyoken's Personality and attachment slots) is judged once, on the whole
+        // selection -- not again for each slot's candidate, whose own check (ValidateSlotCard) carries the selections but no ability Slots.
+        if (ability.Attach is { } attachSpec && !(ability.Slots is null && command.Selections is not null && attachSpec.Wielder == AttachWielder.PersonalitySlot))
+            ValidateAttach(command, attachSpec, player, source);
         // A created attachment must be one the chosen Personality could be equipped with.
         if (ability.Creates is { } createdSpec) ValidateCreate(command, createdSpec, player);
         else Require(command.CreatedCard is null, "This action creates no card.");
@@ -5489,6 +5562,8 @@ public sealed partial class MatchEngine
         }
         // Seeds of Decay pass (issue #453), batch 3: the per-id conditions of this batch's cards (SeedsOfDecayBatch3.cs).
         ValidateSeedsOfDecayBatch3(id, command, ability, player, source);
+        // Forgotten Legacy pass (issue #467), batch 1: the per-id conditions of this batch's cards (ForgottenLegacyBatch1.cs).
+        ValidateForgottenLegacyBatch1(id, command, player, source);
         // The Gold cost (issue #303): every ability's price -- Equip (Battle)/Soshi Neiru's Spell cost, Low
         // Market's "2 less, to a minimum of 1", Your Clan Needs You!'s recruit cost minus 6, Shinden
         // Shorai's "all costs", Singh Remnants' own cost, a Strategy/Discipline's printed cost, Kharmic's
@@ -5730,6 +5805,7 @@ public sealed partial class MatchEngine
             _state.FavorPlayerId = null;
             Emit("favorDiscarded", $"{player.Name} discarded the Imperial Favor.", player.Id);
         }
+        DiscardFavorForBatch1(id, player); // Forgotten Legacy pass (issue #467), batch 1: Doji Rengetsu's Favor discard.
         Emit("abilityUsed", $"{player.Name}: {(source is null ? "Imperial Favor" : Definition(source).Name)} — {ability.Label}.", player.Id, source?.Id);
         _state.CurrentActionHonorGained = false; // Moksha Patam (issue #453 batch 5): only Honor gained from here on is "from its effects".
         // Snapshot before the effect resolves so any Battle-action Honor loss it inflicts on an
@@ -5749,6 +5825,7 @@ public sealed partial class MatchEngine
         // same way ResolveOrDeferAttack does, until the whole duel resolves.
         // Doji Yuka (issue #453, batch 2): "After Yuka performs a Political action: Give her +3C until it ends" -- applied as her action begins to resolve, removed when it completes.
         BeginPerformerActionTraits(ability, command, source);
+        RecordPerformedKeywordActions(ability, command, source); // Forgotten Legacy pass (issue #467), batch 1: Daigotsu Murota's "has performed a Dark Virtue action this turn".
         if (ability.IssuesDuel)
         {
             if (source is not null && Definition(source).Type == CardType.Strategy && source.Zone == Zone.Hand) DiscardFate(player, source);
@@ -5765,6 +5842,7 @@ public sealed partial class MatchEngine
             return;
         }
         // The declared non-Gold costs (issue #351, AbilityCosts.cs), paid together and just before the effects: the same list a negated action pays.
+        CaptureBeforeCostsForBatch1(id, command); // Forgotten Legacy pass (issue #467), batch 1: what a cost is about to remove (Iuchi Abodan's chosen Personality).
         PayAbilityCosts(ability, command, player, source);
         switch (id)
         {
@@ -8070,6 +8148,12 @@ public sealed partial class MatchEngine
             case "tomaru-attack": if (ResolveOrDeferAttack(id, player, target?.Id, additional: consumedGrant)) return; break;
             case "makoto-lock": if (OpenEitherOr(EitherOrSpecs.MakotoPayOrDishonor, source!, player.Id, target!.OwnerId, target, "action")) return; break;
             case "kanaye-bow": KanayeBow(target!, command, player.Id); break;
+            // Forgotten Legacy pass (issue #467), batch 1: every case is in ForgottenLegacyBatch1.cs; true means the action paused (a choice, an Attack
+            // reaction window, a created card's entry window) and finishes from there.
+            case "shigemitsu-provinces": case "kaitoko-weaken": case "higaonna-attack": case "toshimo-bow": case "takichi-move": case "murota-bow":
+            case "hakuseki-disable": case "rengetsu-disable": case "nikaru-bow-lock": case "abodan-move": case "kagako-create": case "gyoken-attach":
+                if (RunForgottenLegacyBatch1Effect(id, command, ability, player, source, target, consumedGrant, playedFromDiscard, opponentHonorBeforeBattleAction, bowedBeforeAction, preExistingGrants)) return;
+                break;
             // Embers of War pass, batch 3 (issue #460; helpers in EmbersOfWarBatch3.cs).
             case "weak-poison-force-zero": ApplyModifier(target!, source!.Id, id, "Force", -CardForce(target!)); break;
             case "accusation-negate": NegateHeldAction(source!); break;
@@ -8212,6 +8296,12 @@ public sealed partial class MatchEngine
         // (see above), so the counter and the grant-check are shared here too, rather than
         // duplicated across each of the three execution cases.
         if (id is "shunya-honor" or "favor-cycle" or "favor-battle" or "jakuei-bow-favor" or "bonds-of-coin-draw" or "baiko-shame")
+        {
+            player.FavorActionsThisTurn++;
+            GrantRingRecruit(player, player.FavorActionsThisTurn >= 2, "ring-of-air-recruit");
+        }
+        // Forgotten Legacy pass (issue #467), batch 1: Doji Rengetsu's is a Favor action too.
+        if (id == "rengetsu-disable")
         {
             player.FavorActionsThisTurn++;
             GrantRingRecruit(player, player.FavorActionsThisTurn >= 2, "ring-of-air-recruit");
