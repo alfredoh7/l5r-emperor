@@ -633,7 +633,7 @@ internal static class BattleRulingsRound2Tests
             Accept(r.E,Use(r.E,0,"training-weapon-attack",r.Source.Id,target:r.Target.Id));
             Eq(r.E.State.PendingChoice?.Type,"attackReaction",$"{sourceDef}: the Attack defers behind its reaction window");
             Eq(r.E.State.PendingAttack!.Command!.CardId,r.Source.Id,$"{sourceDef}: the pending Attack keeps the card the ability is printed on");
-            Eq(r.E.State.PendingAttack.SourceId,r.Performer.Id,$"{sourceDef}: and still the performer");
+            Eq(r.E.State.PendingAttack.SourceId,CardCatalog.Get(sourceDef).Type==CardType.Follower?r.Source.Id:r.Performer.Id,$"{sourceDef}: and still the performer (a Follower performs its own action; an Item or Spell's is performed by its wielder)");
             Eq(ReconBonuses(r),0,"announced, not resolved: no bonus yet");
             Decline(r.E); Decline(r.E);
             Eq(ReconBonuses(r),1,$"{sourceDef}: the source card's Recon keyword makes the deferred Attack a Recon action when it resolves");
