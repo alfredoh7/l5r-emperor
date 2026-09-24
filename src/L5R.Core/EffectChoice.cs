@@ -48,6 +48,8 @@ public static class BranchCondition
     /// <summary>The action's optional target was chosen (Forgotten Legacy pass, issue #467, batch 4 -- Steadfast Defense: "you may target a Personality or Follower and bow or
     /// straighten it" asks bow-or-straighten only when a target was named).</summary>
     public const string TargetChosen = "target-chosen";
+    /// <summary>The target is dishonorable, Kolat, Ninja or Shadowlands (The Shadow's Embrace pass, issue #476 batch 3 -- Captured Convict, judged after he has moved home).</summary>
+    public const string TargetDishonorableKolatNinjaOrShadowlands = "target-dishonorable-kolat-ninja-or-shadowlands";
 }
 
 /// <summary>Effects an option may apply. Each goes through the same helper an ordinary effect would, so a negation a reaction set
@@ -123,6 +125,7 @@ public sealed partial class MatchEngine
         BranchCondition.TargetAtBattlefield => target is not null && target.Zone == Zone.Battlefield,
         BranchCondition.ProvinceHoldsCard => CurrentBattlefieldProvince() is { CardId: not null },
         BranchCondition.TargetChosen => target is not null,
+        BranchCondition.TargetDishonorableKolatNinjaOrShadowlands => target is not null && MatchesTargetStatus(target, TargetStatus.DishonorableKolatNinjaOrShadowlands),
         _ when condition.StartsWith("wielder-has:", StringComparison.Ordinal) => source.AttachedTo is { } wielderId && Keyword(Card(wielderId), condition["wielder-has:".Length..]),
         _ => throw new InvalidOperationException($"Unknown branch condition '{condition}'.")
     };
@@ -140,6 +143,7 @@ public sealed partial class MatchEngine
         }
         if (ApplyForgottenLegacyBatch1BranchEffect(effect, command)) return;
         if (ApplyShadowsEmbraceBatch1BranchEffect(effect, command)) return; // The Shadow's Embrace pass (issue #476), batch 1.
+        if (ApplyShadowsEmbraceBatch3BranchEffect(effect, command)) return; // The Shadow's Embrace pass (issue #476), batch 3
         switch (effect)
         {
             case BranchEffect.MoveSourceHome: MoveHome(source, false); break;

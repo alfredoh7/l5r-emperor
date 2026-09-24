@@ -822,6 +822,7 @@ public sealed partial class MatchEngine
         higher.MovementLocks.AddRange(lower.MovementLocks);
         higher.TargetShield = lower.TargetShield;
         higher.TargetShieldTurn = lower.TargetShieldTurn; higher.ForceModifiersNegatedTurn = lower.ForceModifiersNegatedTurn; // Forgotten Legacy pass, batch 3 (issue #467)
+        higher.DeepRootsTurn = lower.DeepRootsTurn; // The Shadow's Embrace pass, batch 3 (issue #476)
         higher.TargetBars.AddRange(lower.TargetBars);
         foreach (var other in _state.Cards.Values) for (var i = 0; i < other.TargetBars.Count; i++) if (other.TargetBars[i].ActorCardId == lower.Id) other.TargetBars[i] = other.TargetBars[i] with { ActorCardId = higher.Id };
         higher.AssignedToAttackTurn = Math.Max(higher.AssignedToAttackTurn, lower.AssignedToAttackTurn);
@@ -881,6 +882,7 @@ public sealed partial class MatchEngine
         card.TargetBars.Clear();
         card.ForcePenaltiesNegatedTurn = -1;
         card.ForceModifiersNegatedTurn = -1; card.TargetShieldTurn = -1; // Forgotten Legacy pass, batch 3 (issue #467)
+        card.DeepRootsTurn = -1; // The Shadow's Embrace pass, batch 3 (issue #476)
         card.AssignedToAttackTurn = -1;
     }
 
@@ -1446,6 +1448,8 @@ public sealed partial class MatchEngine
                 _state.PendingChoice=new("beforeBattleOptional",source.OwnerId,source.Id,$"Before this battle resolves: choose and bow zero to two cards at this battlefield with 4 or greater Force ({Definition(source).Name}).");
                 _state.PriorityPlayerId=source.OwnerId;
                 return;
+            // Fields of Victory (The Shadow's Embrace pass, issue #476 batch 3; ShadowsEmbraceBatch3.cs): mandatory, read now.
+            case "fields-of-victory-zero": FieldsOfVictory(source,pending); break;
         }
         FinishBeforeBattleEffect(pending);
     }
@@ -1582,6 +1586,7 @@ public sealed partial class MatchEngine
         }
         // After the losing units are destroyed, the province is destroyed and Honor is settled: the Reactions that name this moment (AfterResolution.cs), before the winners go home.
         MarkSeekingTheTruthResolution(destroyedByPlayer,provinceDestroyedNow?attacker:null); // Forgotten Legacy pass (issue #467 batch 4).
+        FireCowedAndDefeatedBattleWatches(a,d); // The Shadow's Embrace pass (issue #476), batch 3: "a battle resolves which destroyed him" (ShadowsEmbraceBatch3.cs).
         if(OpenAfterResolutionWindow(NewAfterResolutionFacts(provinceIndex,attacker,attackerWon,a,destroyedByPlayer,provinceDestroyedNow,losers))) return;
         ContinueAfterResolution(provinceIndex,attacker,attackerWon,a);
     }
@@ -1918,8 +1923,13 @@ public sealed partial class MatchEngine
             Emit("terrainPlayed",$"{Player(command.PlayerId).Name} played {def.Name} as Terrain at this battlefield.",command.PlayerId,card.Id);
             // Hasty Fortifications: "(including this card's)" -- putting it into play is one of the Battle actions it counts.
             if(def.Effect=="hasty-fortifications") AddHastyBonus(card);
-            if(OpenEntryReactionWindow(command.PlayerId,card,1-command.PlayerId)) return;
-            NextAction(command.PlayerId);
+            // The Shadow's Embrace pass (issue #476), batch 3 (ShadowsEmbraceBatch3.cs): playing a Terrain is an action on a Strategy (Forthrightness), and Crowded Streets
+            // lets the Defender take an additional Battle action.
+            NoteForthrightnessStrategyAction(command.PlayerId,card);
+            ResolveForthrightnessWatches(command.PlayerId,card);
+            var terrainGrant=CrowdedStreetsDefenderGrant(command.PlayerId,card);
+            if(OpenEntryReactionWindow(command.PlayerId,card,terrainGrant?command.PlayerId:1-command.PlayerId)) return;
+            NextAction(command.PlayerId,terrainGrant);
             return;
         }
         var target=Card(command.TargetId);
@@ -2221,7 +2231,8 @@ public sealed partial class MatchEngine
         // army even while bowed" -- broader than Bo of Water's own single-card AttachGrantsEliteEffectWhileWielderHas: every Spirit the
         // controller owns, not only the Spell's own wielder (EmbersOfWarBatch5.cs, InciteThePhantomsActive).
         || (Keyword(card,"Spirit") && InciteThePhantomsActive(card.OwnerId));
-    private int PersonalityBattleContribution(CardInstance card) => card.Bowed && !EliteEffect(card) || ForceContributionNegated(card) ? 0 : PersonalityForce(card);
+    // Deep Roots (The Shadow's Embrace pass, issue #476 batch 3): "He contributes Force even while bowed" (DeepRooted, ShadowsEmbraceBatch3.cs).
+    private int PersonalityBattleContribution(CardInstance card) => card.Bowed && !EliteEffect(card) && !DeepRooted(card) || ForceContributionNegated(card) ? 0 : PersonalityForce(card);
     private int FollowerBattleContribution(CardInstance card) => Attachments(card.Id)
         .Where(c=>(!c.Bowed || EliteEffect(c)) && !ForceContributionNegated(c) && Definition(c).Type==CardType.Follower)
         .Sum(FollowerForce);
@@ -2575,6 +2586,7 @@ public sealed partial class MatchEngine
         // Spirit of the Berserker: a destruction put off "until before this turn ends" happens now.
         ResolveDelayedDestructions();
         ResolveShadowsEmbraceBatch5TurnEnd(); // The Shadow's Embrace pass (issue #476), batch 5: Celestial Sword of the Phoenix's "remove him from the game before the turn ends".
+        ResolveReturnsToHandBeforeTurnEnds(); // The Shadow's Embrace pass (issue #476), batch 3: Methodical Questioning (ShadowsEmbraceBatch3.cs).
         // A window a delayed destruction opened (Overconfident's draw) is answered first; the turn then ends when the player ends the phase again.
         if(_state.WinnerId is not null || OpenOverconfidentDrawWindow(_state.ActivePlayerId)) return;
         // Lady Matsu's Rage: "this turn" (its own printed parenthetical) -- any watch that never fired

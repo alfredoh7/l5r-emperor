@@ -4,7 +4,8 @@ namespace L5R.Core;
 public sealed partial class MatchEngine
 {
     // ---- Defensive Blockade: "It does not contribute Force to its army's total Force this battle" ---------------------------------------------------------------
-    private bool ForceContributionNegated(CardInstance card) => card.ForceContributionNegatedBattle == _state.BattleNumber && _state.Phase == Phase.Battle;
+    // Deep Roots (The Shadow's Embrace pass, issue #476 batch 3) negates every effect which prevents its Personality from contributing Force (DeepRooted, ShadowsEmbraceBatch3.cs).
+    private bool ForceContributionNegated(CardInstance card) => card.ForceContributionNegatedBattle == _state.BattleNumber && _state.Phase == Phase.Battle && !DeepRooted(card);
     private void NegateForceContribution(CardInstance card, string sourceName)
     {
         card.ForceContributionNegatedBattle = _state.BattleNumber;

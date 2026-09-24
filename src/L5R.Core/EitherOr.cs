@@ -38,6 +38,19 @@ public static class EitherOrSpecs
     /// <summary>Yasuki Daiki (Forgotten Legacy pass, issue #467 batch 2): "His controller chooses to either pay 4 Gold, lose 2 Honor, or do neither. If he did not pay 4 Gold
     /// or lose 2 Honor, the Personality may not be assigned, and will not move, into attacking armies." -- Makoto's "the affected card's controller decides", three ways.</summary>
     public const string DaikiPayLoseOrLock = "daiki-pay-lose-or-lock";
+    /// <summary>Kitsuki Methods (The Shadow's Embrace pass, issue #476 batch 3): "That player may choose to discard a card at random from his hand. If he did not choose this, either
+    /// gain 2 Honor, or the target's controller loses Honor equal to his base Personal Honor." -- the target's controller decides first; a refusal hands the second choice
+    /// (KitsukiMethodsReward) to the acting player, chained (ShadowsEmbraceBatch3.cs).</summary>
+    public const string KitsukiMethodsDiscard = "kitsuki-methods-discard";
+    public const string KitsukiMethodsReward = "kitsuki-methods-reward";
+    /// <summary>Crowded Streets (The Shadow's Embrace pass, issue #476 batch 3): "After an action resolves that one or more of your Personalities at the current battlefield performed:
+    /// You may move any of those performers home." -- the Terrain's controller decides; the resolved action's own tail then carries on (Origin "after-action").</summary>
+    public const string CrowdedStreetsMoveHome = "crowded-streets-move-home";
+    /// <summary>Forge Your Soul (The Shadow's Embrace pass, issue #476 batch 3): "You may attach one of them that is a Weapon to him, paying 4 less Gold. You may shuffle your
+    /// deck." -- the attach (one option per shown Weapon, each with its own Gold cost), then the shuffle, chained; the shuffle's finish draws for a Kensai who showed no Weapon.</summary>
+    public const string ForgeYourSoulAttach = "forge-your-soul-attach";
+    public const string ForgeYourSoulShuffle = "forge-your-soul-shuffle";
+    public const string ForgeYourSoulShuffleNoWeapon = "forge-your-soul-shuffle-no-weapon";
 }
 
 /// <summary>What choosing an option amounts to, for a client to word and style it: "avoid" (accept a cost or a lesser loss so the
@@ -69,6 +82,8 @@ public sealed class PendingEitherOr
     public int ResumePlayerId { get; set; }
     public bool StayWithActor { get; set; }
     public List<string>? BowedBefore { get; set; }
+    /// <summary>The card that performed the action, when an option reads it (Kitsuki Methods: "gain 2 Honor" is its performer's; The Shadow's Embrace pass, issue #476 batch 3).</summary>
+    public string? PerformerId { get; set; }
 }
 
 /// <summary>One thing the deciding player may choose. Detail says in plain words what it does; Gold is the payment quote for an option
@@ -101,6 +116,8 @@ public sealed partial class MatchEngine
             EitherOrSpecs.InoStorm => $"{source}'s storm: discard a card, or bow {(affected == "" ? "the performer" : affected)}.",
             EitherOrSpecs.MakotoPayOrDishonor => $"{source}: pay 4 Gold and lose 1 Honor, or {affected} is dishonored and moved home.",
             EitherOrSpecs.DaikiPayLoseOrLock => $"{source}: pay 4 Gold, lose 2 Honor, or neither -- then {affected} may not be assigned, and will not move, into attacking armies this turn.",
+            EitherOrSpecs.KitsukiMethodsDiscard or EitherOrSpecs.KitsukiMethodsReward or EitherOrSpecs.CrowdedStreetsMoveHome
+                or EitherOrSpecs.ForgeYourSoulAttach or EitherOrSpecs.ForgeYourSoulShuffle or EitherOrSpecs.ForgeYourSoulShuffleNoWeapon => ShadowsEmbraceEitherOrPrompt(p, source, affected),
             _ => throw new RuleViolation("Unknown choice.")
         };
     }
@@ -168,6 +185,9 @@ public sealed partial class MatchEngine
                     new("neither", "Do neither", $"{name} may not be assigned, and will not move, into attacking armies this turn.", EitherOrKind.Accept, 0, true, null)
                 ];
             }
+            case EitherOrSpecs.KitsukiMethodsDiscard: case EitherOrSpecs.KitsukiMethodsReward: case EitherOrSpecs.CrowdedStreetsMoveHome:
+            case EitherOrSpecs.ForgeYourSoulAttach: case EitherOrSpecs.ForgeYourSoulShuffle: case EitherOrSpecs.ForgeYourSoulShuffleNoWeapon:
+                return ShadowsEmbraceEitherOrOptions(p, affected);
             default: throw new RuleViolation("Unknown choice.");
         }
     }
@@ -179,13 +199,13 @@ public sealed partial class MatchEngine
     /// taken and announced -- and the caller finishes the action itself. <paramref name="origin"/>: "window" suspends the reaction window
     /// that is open right now, "action" is the tail of an ordinary action (bowedBefore is the snapshot of what was already bowed).</summary>
     private bool OpenEitherOr(string specId, CardInstance source, int actingPlayerId, int deciderId, CardInstance? affected, string origin,
-        IEnumerable<string>? bowedBefore = null, bool stayWithActor = false)
+        IEnumerable<string>? bowedBefore = null, bool stayWithActor = false, string? performerId = null, int? resumePlayerId = null)
     {
         var pending = new PendingEitherOr
         {
             SpecId = specId, SourceCardId = source.Id, AffectedCardId = affected?.Id, ActingPlayerId = actingPlayerId, DeciderPlayerId = deciderId,
-            Origin = origin, BowedBefore = bowedBefore?.ToList(), StayWithActor = stayWithActor,
-            ResumePlayerId = origin == "window" ? source.OwnerId : actingPlayerId
+            Origin = origin, BowedBefore = bowedBefore?.ToList(), StayWithActor = stayWithActor, PerformerId = performerId,
+            ResumePlayerId = resumePlayerId ?? (origin == "window" ? source.OwnerId : actingPlayerId)
         };
         var options = EitherOrOptions(pending);
         var legal = options.Where(o => o.Legal).ToArray();
@@ -219,6 +239,8 @@ public sealed partial class MatchEngine
         if (option.GoldCost > 0) ValidatePayment(pending.DeciderPlayerId, option.GoldCost, command.SourceIds);
         else Require(command.SourceIds is null or { Length: 0 }, "This option needs no Gold sources.");
         ApplyEitherOr(pending, option, command.SourceIds);
+        // A decision that hands a further one to a player (Kitsuki Methods' refusal; The Shadow's Embrace pass, issue #476 batch 3): that one finishes the action when it is answered.
+        if (_state.PendingEitherOr is { } chained && !ReferenceEquals(chained, pending)) return;
         FinishEitherOr(pending);
     }
 
@@ -294,6 +316,10 @@ public sealed partial class MatchEngine
                 Emit("eitherOrChosen", $"{decider.Name} did neither ({Definition(source).Name}).", decider.Id, affected!.Id);
                 DaikiLock(affected!, source);
                 break;
+            case (EitherOrSpecs.KitsukiMethodsDiscard, _): case (EitherOrSpecs.KitsukiMethodsReward, _): case (EitherOrSpecs.CrowdedStreetsMoveHome, _):
+            case (EitherOrSpecs.ForgeYourSoulAttach, _): case (EitherOrSpecs.ForgeYourSoulShuffle, _): case (EitherOrSpecs.ForgeYourSoulShuffleNoWeapon, _):
+                ApplyShadowsEmbraceEitherOr(p, option, decider, affected, sourceIds);
+                break;
             default: throw new RuleViolation("Unknown choice.");
         }
     }
@@ -302,6 +328,9 @@ public sealed partial class MatchEngine
     private void FinishEitherOr(PendingEitherOr p)
     {
         _state.PendingEitherOr = null;
+        // The Shadow's Embrace pass (issue #476), batch 3 (ShadowsEmbraceBatch3.cs): Crowded Streets' trait decision carries on with the resolved action's own tail; Forge Your
+        // Soul's last decision draws and opens the attached Weapon's entering-play window first.
+        if (FinishShadowsEmbraceEitherOr(p)) return;
         if (p.Origin == "window")
         {
             // A Reaction was played inside a reaction window: the window stays open and priority flips, exactly as when any Reaction
