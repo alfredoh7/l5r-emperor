@@ -920,6 +920,11 @@ public sealed class MatchState
     // DestroyUnits/DestroyAttachment/MoveHome/MoveByRule as they run, snapshotted into LastResolvedAction and cleared once the action (and any
     // reaction windows of its own) finishes resolving. Never populated by a mass sweep outside a single action (battle resolution's own casualties).
     public List<AffectedCard> CurrentActionAffected { get; set; } = [];
+    // The Shadow's Embrace pass (issue #476), batch 6 (ShadowsEmbraceBatch6.cs). On: each player's Honor when the phase in progress began (null until a phase boundary
+    // has been crossed), and the Honor each gained from battle resolution since. Star-Crossed Lovers: the pairs that may not share a battlefield, for the rest of the game.
+    public int[]? PhaseStartHonor { get; set; }
+    public int[] PhaseBattleHonor { get; set; } = new int[2];
+    public List<string[]> StarCrossedPairs { get; set; } = [];
     public ResolvedActionFacts? LastResolvedAction { get; set; }
     // Revenge (oracle-l5r-6302, issue #437): "another player's action has destroyed one of your Personalities since the end of your last Battle
     // action this battle" -- per player, set true whenever another player's action destroys one of theirs (FinishActionEffectTracking), cleared
@@ -983,7 +988,8 @@ public sealed record PendingEndPhaseRecruit(int PlayerId, string CardId, string 
 
 /// <summary>One card the currently-resolving action affected, and how (issue #437: ActionEffectTracking.cs). Kind is "destroyed" or "moved" today;
 /// a bow is not tracked here yet (no single choke point narrates every one the way DestroyUnits/MoveHome already do -- see the file comment).</summary>
-public sealed record AffectedCard(string CardId, string Kind);
+// HostId (The Shadow's Embrace pass, issue #476 batch 6: Shieldman's "destroyed another card in this unit"): the Personality a destroyed attachment was attached to.
+public sealed record AffectedCard(string CardId, string Kind, string? HostId = null);
 
 /// <summary>What the LAST fully-resolved action did (issue #437): who performed it, which ability, and which cards it affected. Replaced, not
 /// merged, each time a new top-level action -- an ability's own synchronous resolution, a deferred Attack, or a duel -- finishes, including its

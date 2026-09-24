@@ -3237,6 +3237,40 @@ public static class AbilityCatalog
         // Hida Yamadera - exp (oracle-l5r-10220): "Reaction: After another player's Battle action resolves, if its effects destroyed Yamadera: Melee 8 Attack." A Reaction taken by its own
         // card from the dead pile (FromDead), read off the last resolved action's own destroyed list.
         ["yamadera-attack"] = new("Reaction", "After another player's Battle action resolves, if its effects destroyed Yamadera: Melee 8 Attack", "attack", Trigger: AfterActionReactionTriggers.AfterActionResolved, FromDead: true),
+        // The Shadow's Embrace pass (issue #476), batch 6: every entry below is documented at its own use in ShadowsEmbraceBatch6.cs.
+        // The Moon's Imperative (oracle-l5r-9789) and The Sun's Aspiration (oracle-l5r-9790), Celestials: two Opens each. The first changes a non-Unique Holding's production
+        // for the turn (either player's); the second is paid by removing the Celestial from the game and names one to three cards (Border Keep - experienced's slot shape).
+        ["moons-imperative-holding"] = new("Open", "Target a non-Unique Holding: It produces 1 less Gold when it bows to produce Gold", "non-unique-holding"),
+        ["moons-imperative-discard"] = new("Open", "Remove this card from the game and target one to three face-up Personalities in provinces: Discard them, refilling the provinces face-up", "slots",
+            Slots: [new("personalities", "face-up-personality-in-province", "One to three face-up Personalities in provinces", 1, 3)], Costs: ActionCost.RemoveSource),
+        ["suns-aspiration-holding"] = new("Open", "Target a non-Unique Holding: It produces 1 more Gold when it bows to produce Gold", "non-unique-holding"),
+        ["suns-aspiration-shuffle"] = new("Open", "Remove this card from the game and target one to three cards in your discard piles: Shuffle them into their appropriate decks", "slots",
+            Slots: [new("cards", "own-card-in-discard", "One to three cards in your discard piles", 1, 3)], Costs: ActionCost.RemoveSource),
+        // Fortress of Lidless Eyes (oracle-l5r-9796, a Kolat Holding): "This card's base ability will not be copied. All players have the ability, 'Open: Pay 6 Gold: Destroy a
+        // card titled Fortress of Lidless Eyes.' Open: Once per game, target a Personality: Bow him. Negate his straightening while this card remains in play." The granted
+        // ability is a player ability, listed only while such a card is in play.
+        ["fortress-lidless-bow"] = new("Open", "Once per game, target a Personality: Bow him. Negate his straightening while this card remains in play", "personality", OncePerGame: true, NotCopyable: true),
+        ["fortress-lidless-destroy"] = new("Open", "Fortress of Lidless Eyes: Pay 6 Gold: Destroy a card titled Fortress of Lidless Eyes", "card-titled-fortress-of-lidless-eyes", PlayerAbility: true,
+            Cost: GoldCostRule.Fixed(6)),
+        // Small-Time Bully (oracle-l5r-9800, a Holding): "After this card enters play, if you control a Courtier or Magistrate: You may dishonor a Personality (in play)." An
+        // entering-play trait whose "may" is taken or passed in the entry window (usable while the Holding is bowed, as a trait is).
+        ["small-time-bully-dishonor"] = new("Reaction", "After this card enters play, if you control a Courtier or Magistrate: You may dishonor a Personality (in play)", "personality", Trigger: "own-enters-play"),
+        // Versatile Farm (oracle-l5r-9801, a Holding): "Limited: Destroy this card: Search your Dynasty deck for a non-Unique Farm Holding with another title and put it into play,
+        // unbowed, paying 2 less Gold."
+        ["versatile-farm-search"] = new("Limited", "Destroy this card: Search your Dynasty deck for a non-Unique Farm Holding with another title and put it into play, unbowed, paying 2 less Gold", "none",
+            Search: SearchCatalog.VersatileFarm, Costs: [new(CostVerbs.Sacrifice)]),
+        // Elephant Caravan (oracle-l5r-9868, a Follower): "Fear Battle: Target an enemy card with equal or lower Force: If it is bowed or an attachment, destroy it. Bow it."
+        ["elephant-caravan-fear"] = new("Battle", "Fear Battle: Target an enemy card with equal or lower Force: If it is bowed or an attachment, destroy it. Bow it", "enemy-card-force-lte-self",
+            ActionKeywords: ["Fear"]),
+        // Wasteland Scout (oracle-l5r-9874, a Follower): "Recon Reaction: After engaging at this card's battlefield: You have Reconnaissance there. Give your other Followers there +1F."
+        ["wasteland-scout-recon"] = new("Reaction", "Recon Reaction: After engaging at this card's battlefield: You have Reconnaissance there. Give your other Followers there +1F", "none",
+            Trigger: "after-engaging-at-own-battlefield", ActionKeywords: ["Recon"]),
+        // Shieldman (oracle-l5r-9873, a Follower): "Reaction: After another player's action resolves which destroyed another card in this unit: Gain 2 Honor."
+        ["shieldman-honor"] = new("Reaction", "After another player's action resolves which destroyed another card in this unit: Gain 2 Honor", "none", Trigger: AfterActionReactionTriggers.AfterActionResolved),
+        // Bishamon's Tower (oracle-l5r-9945, a Crab Stronghold): "Battle: Choose your performing Berserker or unbowed Personality and target an enemy card with lower Force and no
+        // attachments: Destroy it."
+        ["bishamon-tower-destroy"] = new("Battle", "Choose your performing Berserker or unbowed Personality and target an enemy card with lower Force and no attachments: Destroy it",
+            "enemy-card-force-lt-performer-without-attachments", Performer: "own-personality-with-keyword-or-unbowed-at-battle", RequiredKeywords: ["Berserker"]),
     });
 }
 
@@ -3363,6 +3397,9 @@ public sealed partial class MatchEngine
             return true;
         }
         if (card.OwnerId == actingPlayerId) return false;
+        // The Shadow's Embrace pass (issue #476), batch 6: Twin Forks City's one-shot shield, and Wartime Preparations' second-bow negation (ShadowsEmbraceBatch6.cs).
+        if (TwinForksNegates(card, actingPlayerId, "bowing")) return true;
+        if (WartimePreparationsNegatesBow(card, actingPlayerId)) return true;
         // Togashi Korimi, Experienced (issue #207): "while Korimi is defending, negate her bowing
         // from other players' actions" -- an always-on, unlimited version of the same negation
         // (not the once-per-turn Stalwart keyword itself), gated on defending rather than a
@@ -4580,6 +4617,8 @@ public sealed partial class MatchEngine
                 or "rokku-move"
                 // Forgotten Legacy pass (issue #467), batch 2: The Vengeful ("Even if this card is bowed") and Togashi Osawa ("Even if Osawa is bowed").
                 or "vengeful-straighten" or "osawa-bow" or "osawa-straighten"
+                // The Shadow's Embrace pass (issue #476), batch 6: Small-Time Bully's entering-play trait (a Holding enters play bowed; a trait is usable while bowed).
+                or "small-time-bully-dishonor"
                 // Colonial Harbor (Forgotten Legacy pass, issue #467): "Your Stronghold's abilities have Tireless."
                 || TirelessStronghold(source), "Abilities on bowed cards cannot be used.");
             uses = source.AbilityUses;
@@ -4703,6 +4742,7 @@ public sealed partial class MatchEngine
         if (id is "lobby" or "dainagon-lobby") Require(!_state.Cards.Values.Any(c => c.OwnerId != player.Id && InPlay(c) && Definition(c).Effect == "saibankan-no-lobby"), "Another player's Saibankan's Justice forbids you to lobby.");
         if (id == "dainagon-lobby") Require(CardPersonalHonor(source!) >= 1, "Lobby needs a Personality with at least 1 Personal Honor.");
         ValidateForgottenLegacyBatch5(id, ability, command, source); // Forgotten Legacy pass (issue #467), batch 5.
+        ValidateShadowsEmbraceBatch6(id, command, player, source); // The Shadow's Embrace pass (issue #476), batch 6.
         // Barred Passage: "the only Personality in his army" -- none of the acting player's other Personalities stands at this battlefield.
         if (id == "barred-passage-bow") Require(Army(player.Id, _state.CurrentBattleProvince!.Value).Count(c => Definition(c).Type == CardType.Personality) == 1, "The performing Hero must be the only Personality in his army.");
         if (id is "tamoko-open" or "virtuous-charity-open") Require(_state.ActivePlayerId != player.Id, "Only usable when it is not your own turn.");
@@ -4959,6 +4999,10 @@ public sealed partial class MatchEngine
                 // Same actingAsBattle generalization as own-unbowed-personality-at-battle-with-keyword.
                 "own-personality-with-keyword-at-battle" => Definition(performer).Type == CardType.Personality &&
                     HasKeywords(performer, ability.RequiredKeywords) && (!actingAsBattle || AtBattle(performer)),
+                // Bishamon's Tower (The Shadow's Embrace pass, issue #476 batch 6): "your performing Berserker or unbowed Personality" -- a Personality with the RequiredKeywords
+                // (bowed or not), or any unbowed one, at the battle.
+                "own-personality-with-keyword-or-unbowed-at-battle" => Definition(performer).Type == CardType.Personality &&
+                    (HasKeywords(performer, ability.RequiredKeywords) || !performer.Bowed) && (!actingAsBattle || AtBattle(performer)),
                 // Hiruma Tensin (issue #337): "your performing Follower in Tensin's unit" -- the first Performer category that is not a
                 // Personality. A Follower of the source's own unit (the source's host, when the source is itself an attachment), unbowed
                 // because bowing it is the cost. Its location is its host's, so the shared presence checks already cover it.
@@ -5458,6 +5502,12 @@ public sealed partial class MatchEngine
                 // Brotherhood Schism (issue #453, batch 2): "an Event in another player's discard pile".
                 else if (ability.Target == "event-in-enemy-discard")
                     Require(target.OwnerId != player.Id && type == CardType.Event && target.Zone == Zone.DynastyDiscard, "Choose an Event in another player's discard pile.");
+                // The Shadow's Embrace pass (issue #476), batch 6. The Moon's Imperative: "face-up Personalities in provinces" (either player's); The Sun's Aspiration: "cards in
+                // your discard piles" (the Fate and the Dynasty pile, a dead Personality included).
+                else if (ability.Target == "face-up-personality-in-province")
+                    Require(type == CardType.Personality && target.Zone == Zone.Province && target.FaceUp, "Choose a face-up Personality in a province.");
+                else if (ability.Target == "own-card-in-discard")
+                    Require(target.OwnerId == player.Id && target.Zone is Zone.FateDiscard or Zone.DynastyDiscard or Zone.Dead, "Choose a card in your own discard piles.");
                 // Forgotten Legacy pass (issue #467), batch 5. Wind of the Moon: "a face-up Personality out of play" -- face up in a province, or in a discard pile (face up by nature); either player's.
                 else if (ability.Target == "face-up-personality-out-of-play")
                     Require(type == CardType.Personality && (target.Zone == Zone.Province && target.FaceUp || target.Zone is Zone.Dead or Zone.DynastyDiscard), "Choose a face-up Personality out of play.");
@@ -5685,6 +5735,12 @@ public sealed partial class MatchEngine
                         // Moving and Unmoving (oracle-l5r-5423, issue #460): "an enemy Personality with lower Force" -- lower-or-equal-honor-than-
                         // performer's own shape, off CardForce against the performer instead of CardPersonalHonor against the source.
                         "enemy-personality-force-lt-performer" => personality && !own && CardForce(target) < CardForce(Card(command.PerformerId!)),
+                        // The Shadow's Embrace pass (issue #476), batch 6. Bishamon's Tower: "an enemy card with lower Force and no attachments" -- an enemy Follower, or an enemy
+                        // Personality without attachments (enemy-card-without-attachments' reading), with Force strictly below the performer's.
+                        "enemy-card-force-lt-performer-without-attachments" => !own && (type == CardType.Follower || personality && !HasAttachments(target))
+                            && CardForce(target) < CardForce(Card(command.PerformerId!)),
+                        // Fortress of Lidless Eyes' granted ability: "a card titled Fortress of Lidless Eyes" (anyone's, in play).
+                        "card-titled-fortress-of-lidless-eyes" => Definition(target).Name == FortressOfLidlessEyesTitle,
                         // Forgotten Legacy pass (issue #467), batch 3. Consideration: "another of your target Personalities" -- any of the acting player's own, other than his performer.
                         "own-personality-other-than-performer" => personality && own && target.Id != command.PerformerId,
                         // Feint & Strike's optional second slot: an attachment in the first slot's enemy Personality's unit, listed only while the performing Commander has a Follower.
@@ -8717,6 +8773,12 @@ public sealed partial class MatchEngine
                 break;
             case "sundering-strike": SunderingStrike(command, target!, player.Id); break;
             default:
+                // The Shadow's Embrace pass (issue #476), batch 6 (ShadowsEmbraceBatch6.cs): true when a window opened and the action waits.
+                if (RunShadowsEmbraceBatch6(id, ability, command, player, source, target, bowedBeforeAction) is { } shadowsEmbrace6)
+                {
+                    if (shadowsEmbrace6) return;
+                    break;
+                }
                 // Forgotten Legacy pass (issue #467), batch 5 (ForgottenLegacyBatch5.cs): true when a window opened and the action waits.
                 if (RunForgottenLegacyBatch5(id, ability, command, player, source, target, consumedGrant, playedFromDiscard, opponentHonorBeforeBattleAction, bowedBeforeAction, preExistingGrants) is { } forgottenLegacy5)
                 {
@@ -9336,7 +9398,7 @@ public sealed partial class MatchEngine
         Emit("attachmentDestroyed", $"{Definition(card).Name} was destroyed.", card.OwnerId, card.Id);
         // Action-effect tracking (issue #437): unlike DestroyUnits, DestroyAttachment is only ever reached from within a specific action's own
         // effects (an attachment is never swept away in bulk the way a battle's own resolution destroys units), so this is recorded unconditionally.
-        RecordActionEffect(card.Id, DestroyedKind);
+        RecordActionEffect(card.Id, DestroyedKind, parent.Id);
         if (PersonalityChi(parent) <= 0) DestroyUnits([parent], true);
     }
 
@@ -9447,7 +9509,7 @@ public sealed partial class MatchEngine
         {
             if (inRecruitWindow && !RingRecruitGrantIds.Contains(id)) continue;
             var ability = AbilityCatalog.All[id];
-            if (ability.PlayerAbility && PlayerAbilityDormant(id)) continue; // Assault in the Jungle (issue #467): only while an Event grants it.
+            if (ability.PlayerAbility && (PlayerAbilityDormant(id) || ShadowsEmbraceBatch6PlayerAbilityDormant(id))) continue; // Assault in the Jungle (issue #467), Fortress of Lidless Eyes (issue #476): only while granted.
             if (inAfterResolutionWindow != IsAfterResolutionReaction(ability)) continue;
             if (inAfterActionResolvedWindow != IsAfterActionResolvedReaction(ability)) continue;
             var isEngageReaction = ability.Timing == "Reaction" && ability.Trigger is "after-engaging" or "after-engaging-at-own-battlefield";
@@ -9513,6 +9575,8 @@ public sealed partial class MatchEngine
                 // Kitsu Fukui / Fading Shadows (issue #337): the generic "performing [Keyword] Personality", bowed or not. It was missing from
                 // this listing, so an ability that used it (Again!'s shape) could only be played by a hand-built command.
                 "own-personality-with-keyword-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && (!actingAsBattle || AtBattle(c)) && HasKeywords(c, ability.RequiredKeywords)).Select(c => (string?)c.Id).ToArray(),
+                "own-personality-with-keyword-or-unbowed-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && (!actingAsBattle || AtBattle(c))
+                    && (HasKeywords(c, ability.RequiredKeywords) || !c.Bowed)).Select(c => (string?)c.Id).ToArray(),
                 // Hiruma Tensin (issue #337): the unbowed Followers of the source's own unit.
                 "own-unbowed-follower-in-source-unit" => source is null ? [] : Attachments(UnitHostId(source)).Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Follower && !c.Bowed).Select(c => (string?)c.Id).ToArray(),
                 "own-unbowed-shugenja-opposed-at-battle" => !Army(1 - playerId, _state.CurrentBattleProvince ?? -1).Any() ? [] :
@@ -9598,6 +9662,9 @@ public sealed partial class MatchEngine
                     "event-in-enemy-discard" => _state.Cards.Values.Where(c => c.OwnerId != playerId && Definition(c).Type == CardType.Event && c.Zone == Zone.DynastyDiscard).Select(c => (string?)c.Id).ToArray(),
                     // Forgotten Legacy pass (issue #467), batch 5: Wind of the Moon's out-of-play target.
                     "face-up-personality-out-of-play" => _state.Cards.Values.Where(c => Definition(c).Type == CardType.Personality && (c.Zone == Zone.Province && c.FaceUp || c.Zone is Zone.Dead or Zone.DynastyDiscard)).Select(c => (string?)c.Id).ToArray(),
+                    // The Shadow's Embrace pass (issue #476), batch 6: the two out-of-play categories.
+                    "face-up-personality-in-province" => _state.Cards.Values.Where(c => Definition(c).Type == CardType.Personality && c.Zone == Zone.Province && c.FaceUp).Select(c => (string?)c.Id).ToArray(),
+                    "own-card-in-discard" => _state.Cards.Values.Where(c => c.OwnerId == playerId && c.Zone is Zone.FateDiscard or Zone.DynastyDiscard or Zone.Dead).Select(c => (string?)c.Id).ToArray(),
                     _ => inPlay };
                 // Shosuro Hawado's battlefield half also needs its destination (command.Province): one
                 // candidate per battlefield not yet resolved this Battle phase -- ValidateAbility below

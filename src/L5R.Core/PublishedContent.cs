@@ -2511,4 +2511,14 @@ public static class PublishedContent
     public static PublishedSnapshot PersonalityWave65 { get; } = Load("L5R.Published.PersonalityWave65.json", "personality-wave-65", requireDecks: false);
     /// <summary>Holding wave 10 (Emperor Edition Gempukku pass, issue #461): the nine Market Holdings.</summary>
     public static PublishedSnapshot HoldingWave10 { get; } = Load("L5R.Published.HoldingWave10.json", "holding-wave-10", requireDecks: false);
+    /// <summary>Holding wave 12 (The Shadow's Embrace pass, issue #476, batch 6): Fortress of Lidless Eyes, Platinum Mine, Sheltered Port, Small-Time Bully, Versatile Farm, Whispering Archive.</summary>
+    public static PublishedSnapshot HoldingWave12 { get; } = Load("L5R.Published.HoldingWave12.json", "holding-wave-12", requireDecks: false);
+    /// <summary>Follower wave 30 (issue #476, batch 6): Clearing Crew, Elephant Caravan, Shieldman, Wasteland Scout.</summary>
+    public static PublishedSnapshot FollowerWave30 { get; } = Load("L5R.Published.FollowerWave30.json", "follower-wave-30", requireDecks: false);
+    /// <summary>Event wave 7 (issue #476, batch 6): Discovering the Temple, On, Star-Crossed Lovers, Wartime Preparations.</summary>
+    public static PublishedSnapshot EventWave7 { get; } = Load("L5R.Published.EventWave7.json", "event-wave-7", requireDecks: false);
+    /// <summary>Stronghold wave 16 (issue #476, batch 6): Bishamon's Tower, Twin Forks City.</summary>
+    public static PublishedSnapshot StrongholdWave16 { get; } = Load("L5R.Published.StrongholdWave16.json", "stronghold-wave-16", requireDecks: false);
+    /// <summary>Celestial wave 7 (issue #476, batch 6): The Moon's Imperative, The Sun's Aspiration.</summary>
+    public static PublishedSnapshot CelestialWave7 { get; } = Load("L5R.Published.CelestialWave7.json", "celestial-wave-7", requireDecks: false);
 }

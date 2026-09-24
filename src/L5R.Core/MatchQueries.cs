@@ -457,6 +457,9 @@ public sealed partial class MatchEngine
                 Add("offeringReverence","Offering Reverence: discard it",new GameCommand("offeringReverence",playerId,_state.Version,Choice:"discard"),cardId:reverence.CardId);
             }
         }
+        // The Shadow's Embrace pass (issue #476), batch 6: Star-Crossed Lovers' pair, for the revealing player only (ShadowsEmbraceBatch6.cs).
+        else if(_state.PendingChoice is { Type:"starCrossedLovers" })
+            result.AddRange(StarCrossedLoversActions(playerId));
         else if(_state.PendingChoice is { Type:"testedLandProvince" } testedLand)
         {
             if(playerId==testedLand.PlayerId)
