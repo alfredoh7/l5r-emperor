@@ -98,7 +98,10 @@ internal static class ForgottenLegacyBatch4Tests
         Add(p, "training-lion-samurai", 1, Zone.Battlefield, province: 0);
         var fromHand = Add(p, HeartOfDarkness, 0, Zone.Hand);
         var pe = MatchEngine.FromTestState(p);
-        Accept(pe, new GameCommand("playStrategy", 0, pe.Version, CardId: fromHand.Id));
+        // Offered as a legal action (a published Terrain was once playable by command only, never listed -- issue #467).
+        var terrainOption = pe.QueryActions(0).SingleOrDefault(a => a.Type == "playStrategy" && a.CardId == fromHand.Id);
+        Check(terrainOption is { Enabled: true, Command: not null }, "Heart of Darkness is offered enabled as a playStrategy action");
+        Accept(pe, terrainOption!.Command!);
         Eq(pe.State.Cards[fromHand.Id].Zone, Zone.Battlefield, "Heart of Darkness entered play at the current battlefield");
 
         // In play at the battlefield, controlled by the Defender (player 0): the Attacker's Force 4 and Force 5 Personalities outfight his Force 3 one.

@@ -496,7 +496,9 @@ public sealed partial class MatchEngine
                 foreach(var province in _state.UnresolvedBattlefields) Add("selectBattle",$"Fight at province {province+1}",Command("selectBattle",province:province));
                 break;
             case Phase.Battle:
-                foreach(var card in player.Hand.Select(Card).Where(c=>Definition(c).Type==CardType.Strategy && Definition(c).ScenarioOnly))
+                // A published Terrain is played through this same command (the generic Terrain rule -- it prints no Battle ability of its own), so it is listed
+                // here too; before issue #467 only scenario Strategies were, and every published Terrain was playable by command but never offered.
+                foreach(var card in player.Hand.Select(Card).Where(c=>Definition(c).Type==CardType.Strategy && (Definition(c).ScenarioOnly || Keyword(c,"Terrain"))))
                 {
                     var def=Definition(card);
                     // A Strategy played with playStrategy pays its printed cost (issue #303): one quote, with
