@@ -2558,4 +2558,7 @@ public static class PublishedContent
     public static PublishedSnapshot PersonalityWave68 { get; } = Load("L5R.Published.PersonalityWave68.json", "personality-wave-68", requireDecks: false);
     /// <summary>Personality wave 71 (Emperor Edition Personality pass, issue #477, batch 4): fifteen Crane, Scorpion and Ninja Personalities wired whole.</summary>
     public static PublishedSnapshot PersonalityWave71 { get; } = Load("L5R.Published.PersonalityWave71.json", "personality-wave-71", requireDecks: false);
+    /// <summary>Stronghold wave 18 (Emperor Edition Stronghold pass, issue #486, batch 2): Palace of the Breaking Dawn, Pillars of Virtue, Shiro Chugo, Steel Soul Dojo, Suitengu's Torch,
+    /// Temple of Purity, The Aerie.</summary>
+    public static PublishedSnapshot StrongholdWave18 { get; } = Load("L5R.Published.StrongholdWave18.json", "stronghold-wave-18", requireDecks: false);
 }

@@ -75,12 +75,14 @@ public sealed partial class MatchEngine
     }
 
     // Every negation or delay of a bow, a destruction or a movement asks this: true while such an action of Hiromi's is resolving.
-    private bool HiromiUnnegatable() => HiromiPerforms(_runningCommand ?? _attackCommandInResolution);
+    // Suitengu's Torch (Emperor Edition Stronghold pass, issue #486 batch 2) asks the same questions of one announced Thunder Battle action: nothing of it is negated or delayed.
+    private bool HiromiUnnegatable() => HiromiPerforms(_runningCommand ?? _attackCommandInResolution) || CurrentActionUnnegatable();
 
     // The action as a whole cannot be negated (Protection's shape) when it is one of Hiromi's Battle actions that bows, destroys or moves. Her other effects on the same action
     // (a Force change) are not named by the card; negating the action whole would also negate its bow, destruction or movement, which is what the card forbids.
     private bool HiromiProtects(GameCommand? command) =>
-        command?.AbilityId is { } id && HiromiPerforms(command)
+        CommandUnnegatable(command) // Suitengu's Torch's protected action and Temple of Purity's Force penalty (issue #486, batch 2): the whole action.
+        || command?.AbilityId is { } id && HiromiPerforms(command)
         && (ActionMayBowOrDestroy(id, AttackKind(id) != "") || MoveOrStraightenKind(id) == "move" || AbilityCatalog.All[id].Move is not null);
 
     // ---- validation --------------------------------------------------------------------------------------------------------------------------------------------------------------

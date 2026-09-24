@@ -83,14 +83,14 @@ public sealed partial class MatchEngine
         // hold -- checked against the command AS QUOTED, so a payment the engine just suggested is never itself
         // the reason. targetId/label serve a reaction whose own Target is a choice (Champion of Thunder's
         // "own-unit-member": one option per unit member); both default to the plain single-option shape.
-        void AddReaction(CardInstance card,string abilityId,string? reason=null,string? targetId=null,string? label=null,bool validate=false)
+        void AddReaction(CardInstance card,string abilityId,string? reason=null,string? targetId=null,string? label=null,bool validate=false,string? performerId=null)
         {
             // "Choose a player" (issue #389): the player is a command parameter (TargetPlayerId), not a card, so a Reaction whose Target is a player is offered
             // once per legal player -- either player (you, or your opponent), each carrying the id the command needs -- and validated as quoted.
             var chosenPlayers=AbilityCatalog.All[abilityId].Target=="player" ? new int?[]{playerId,1-playerId} : new int?[]{null};
             foreach(var chosenPlayer in chosenPlayers)
             {
-                var command=new GameCommand("useAbility",playerId,_state.Version,CardId:card.Id,TargetId:targetId,TargetPlayerId:chosenPlayer,AbilityId:abilityId);
+                var command=new GameCommand("useAbility",playerId,_state.Version,CardId:card.Id,TargetId:targetId,TargetPlayerId:chosenPlayer,AbilityId:abilityId,PerformerId:performerId);
                 // A Reaction whose move names a battlefield the player chooses (Shosuro Hawado - exp, issue #453): the command carries the first listed destination
                 // and the option lists them all (ActionOption.Provinces), as an ordinary move ability's offer does.
                 var destinations=AbilityCatalog.All[abilityId].Move is { ChoosesBattlefield:true } reactionMove ? MoveDestinations(reactionMove) : null;
@@ -221,6 +221,13 @@ public sealed partial class MatchEngine
                 foreach(var (card,reactionId) in BeforeActionReactionCandidates().Where(x=>x.Card.OwnerId==playerId && BeforeActionReactionApplies(x.Card,x.AbilityId,deferredAction)).ToArray())
                 {
                     var reaction=AbilityCatalog.All[reactionId];
+                    // Shiro Chugo (Emperor Edition Stronghold pass, issue #486 batch 2): a Reaction with a performer to choose is offered once per performer who could take it.
+                    if(reaction.Performer is not null)
+                    {
+                        foreach(var performer in BeforeActionReactionPerformers(playerId,reaction))
+                            AddReaction(card,reactionId,label:$"{reaction.Label} · {Definition(performer).Name} ({performer.Id})",validate:true,performerId:performer.Id);
+                        continue;
+                    }
                     string?[] candidates=reaction.Target=="own-unit-member"?UnitMembers(card).Select(c=>(string?)c.Id).ToArray()
                         // Issue #336 fixture: one option per Personality the deferred action would move.
                         :reaction.Target=="deferred-action-mover"?ActionMovers(deferredAction).Select(c=>(string?)c).ToArray()
@@ -260,7 +267,7 @@ public sealed partial class MatchEngine
             if(announcePending.PlayerId==playerId)
             {
                 var card=Card(announcePending.CardId!);
-                foreach(var reactionId in AbilityIdsOf(card).Where(a=>AbilityCatalog.All.TryGetValue(a,out var def) && def.Timing=="Reaction" && def.Trigger is "own-ranged-action-announced" or EntrenchedTrigger))
+                foreach(var reactionId in AbilityIdsOf(card).Where(a=>AbilityCatalog.All.TryGetValue(a,out var def) && def.Timing=="Reaction" && def.Trigger is "own-ranged-action-announced" or EntrenchedTrigger or EmperorStrongholdBatch2Triggers.TorchAnnounce))
                     AddReaction(card,reactionId);
             }
             Add("declineReaction","Pass reaction",Command("declineReaction"));

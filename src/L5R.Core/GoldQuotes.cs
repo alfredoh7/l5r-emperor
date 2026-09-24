@@ -519,6 +519,8 @@ public sealed partial class MatchEngine
         if (QuelsaAttachDiscount(card, target) is > 0 and var quelsaAttach) { raw -= quelsaAttach; kind = GoldCostKind.Derived; basis += $" − {quelsaAttach} (Quelsa)"; }
         // Whispering Archive (The Shadow's Embrace pass, issue #476 batch 6): "Your Spells enter play paying 1 less Gold."
         if (WhisperingArchiveDiscount(card, playerId) is > 0 and var archiveDiscount) { raw -= archiveDiscount; basis += $" − {archiveDiscount} (Whispering Archive)"; }
+        // Palace of the Breaking Dawn (Emperor Edition Stronghold pass, issue #486 batch 2): "Your Ronin cards enter play paying 1 less Gold."
+        if (RoninEntryDiscount(card, playerId) is > 0 and var roninDiscount) { raw -= roninDiscount; basis += $" − {roninDiscount} (Palace of the Breaking Dawn)"; }
         // Daigotsu Misaki (Emperor Edition Personality pass, issue #477): "Followers attaching to Misaki enter play paying 2 less Gold" -- any attach, from a hand or a discard pile.
         if (FollowerAttachDiscount(card, target) is > 0 and var misakiDiscount) { raw -= misakiDiscount; kind = GoldCostKind.Derived; basis += $" − {misakiDiscount} ({Definition(target).Name})"; }
         if (raw < 0) basis += " (min 0)";

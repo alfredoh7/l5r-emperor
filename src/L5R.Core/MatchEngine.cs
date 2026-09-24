@@ -476,7 +476,7 @@ public sealed partial class MatchEngine
                     var pending=_state.PendingAnnouncedAction; _state.PendingAnnouncedAction=null;
                     // Entrenched Position (Forgotten Legacy pass, issue #467 batch 3): a Reaction in this window negated the announced action.
                     if(_state.AnnouncedActionNegated) { _state.AnnouncedActionNegated=false; ResolveNegatedAction(pending); }
-                    else ExecuteAbilityEffects(pending);
+                    else ContinueAnnouncedAction(pending);
                 }
                 return;
             }
@@ -1011,7 +1011,8 @@ public sealed partial class MatchEngine
         // keyed on the RECRUITING player's own Clan -- this is the single check every entry path that
         // spends a recruit quote (Purchase, RecruitReserve, Your Clan Needs You!) already funnels through.
         else if(def.Type==CardType.Personality && def.HonorRequirement is int requirement && player.Honor<requirement && !clanAllegiance && !HonorRequirementWaived(def,player)
-            && !(ignoreHonorRequirementIfPersonalityClan is string waivedClan && HasClanAffiliation(card,waivedClan))) error="Family Honor is below the Honor Requirement; Clan allegiance may allow purchase.";
+            && !(ignoreHonorRequirementIfPersonalityClan is string waivedClan && HasClanAffiliation(card,waivedClan))
+            && !RoninIgnoresHonorRequirement(card,playerId)) error="Family Honor is below the Honor Requirement; Clan allegiance may allow purchase."; // Palace of the Breaking Dawn (issue #486, batch 2)
         var prosperous=def.Effect=="prosperous-discount"?_state.Cards.Values.Count(c=>c.OwnerId==playerId && InPlay(c) && Definition(c).Type==CardType.Personality):0;
         var reserveDiscount=viaReserve && def.Effect=="reserve-defender-discount"?4:0;
         // Akodo Ashiko (oracle-l5r-193, issue #440): "reducing her Gold Cost by 2 if there are more units on the enemy side of the current battle
@@ -1030,12 +1031,14 @@ public sealed partial class MatchEngine
         // Yasuki Makoto (oracle-l5r-9449, Embers of War pass, issue #460 batch 2): "Your Holdings enter play for 1 less Gold" -- the same
         // per-source-in-play term shape as Mukudori's own keywordDiscount above, narrowed to CardType.Holding rather than a keyword.
         var holdingDiscount=HoldingEntryDiscount(card,playerId);
+        // Palace of the Breaking Dawn (Emperor Edition Stronghold pass, issue #486 batch 2): "Your Ronin cards enter play paying 1 less Gold."
+        var roninDiscount=RoninEntryDiscount(card,playerId);
         // The Shakash / The Sleepless One (Forgotten Legacy pass, issue #467 batch 2): "Enters play paying 1 less Gold [for each Nonhuman you control, up to 3]" -- the card's own printed term.
         var (nagaDiscount,nagaTerm)=ForgottenLegacyEntryDiscount(card,playerId);
         // A Gold Cost modifier on the card itself (Wind of the Moon's "+1 Gold Cost" on a face-up Personality out of play, Forgotten Legacy pass issue #467) is part of
         // the price: CardGoldCost is the printed cost plus every GoldCost modifier (none survives a card's return to a province or a recruit from a dead pile).
         var goldCost=CardGoldCost(card);
-        var rawCost=goldCost-prosperous-reserveDiscount-ashikoDiscount-(entryDiscount?.Amount??0)-keywordDiscount-holdingDiscount-nagaDiscount+(clanAllegiance?2:0)-(clanDiscount?2:0);
+        var rawCost=goldCost-prosperous-reserveDiscount-ashikoDiscount-(entryDiscount?.Amount??0)-keywordDiscount-holdingDiscount-roninDiscount-nagaDiscount+(clanAllegiance?2:0)-(clanDiscount?2:0);
         var cost=Math.Max(0,rawCost);
         // The human-readable derivation the payment panel shows (issue #303), term by term.
         var basis=$"{def.Name} cost {goldCost}"+(prosperous>0?$" − {prosperous} (controlled Personalities)":"")+(reserveDiscount>0?$" − {reserveDiscount} (Reserve while defending)":"")
@@ -1043,6 +1046,7 @@ public sealed partial class MatchEngine
             +(entryDiscount is {} entry?$" − {entry.Amount} ({entry.Clan} Clan)":"")
             +(keywordDiscount>0?$" − {keywordDiscount} (Fudo, Mukudori)":"")
             +(holdingDiscount>0?$" − {holdingDiscount} (Yasuki Makoto)":"")
+            +(roninDiscount>0?$" − {roninDiscount} (Palace of the Breaking Dawn)":"")
             +(nagaDiscount>0?$" − {nagaDiscount} ({nagaTerm})":"")
             +(clanAllegiance?" + 2 (Clan allegiance)":"")+(clanDiscount?" − 2 (Clan discount)":"")+(rawCost<0?" (min 0)":"");
         if ((Keyword(card,"Unique") || Keyword(card,"Singular")) && ControlsCopyOf(playerId,def.Name)) error=$"You already control this {(Keyword(card,"Unique") ? "Unique" : "Singular")} card.";
@@ -1889,7 +1893,7 @@ public sealed partial class MatchEngine
         Require(def.AttachRequiresKeyword is null || KeywordOrHuman(target,def.AttachRequiresKeyword),$"Will only attach to a {def.AttachRequiresKeyword} Personality.");
         Require(def.AttachExcludesKeyword is null || !KeywordOrHuman(target,def.AttachExcludesKeyword),$"Will not attach to a {def.AttachExcludesKeyword} Personality.");
         Require(def.AttachRequiresName is null || Definition(target).Name==def.AttachRequiresName,$"Only attaches to {def.AttachRequiresName}.");
-        Require(def.Type!=CardType.Follower || def.HonorRequirement is null || IgnoresFollowerHonorRequirement(target) || CardPersonalHonor(target)>=def.HonorRequirement,"The Personality does not meet this Follower's Personal Honor Requirement.");
+        Require(def.Type!=CardType.Follower || def.HonorRequirement is null || IgnoresFollowerHonorRequirement(target) || CardPersonalHonor(target)>=def.HonorRequirement || RoninIgnoresHonorRequirement(card,command.PlayerId),"The Personality does not meet this Follower's Personal Honor Requirement.");
         Require(AttachmentAllowed(card,target),"A Personality may attach only one Armor and, without Kensai or a Kama, only one Weapon.");
         // Unique/Singular (issue #202): Equip had no in-play-duplicate check at all before this -- only
         // QuotePurchase (Personality/Holding) did. Generalizes that same check to cover Follower/Item/
@@ -1966,8 +1970,12 @@ public sealed partial class MatchEngine
             NoteForthrightnessStrategyAction(command.PlayerId,card);
             ResolveForthrightnessWatches(command.PlayerId,card);
             var terrainGrant=CrowdedStreetsDefenderGrant(command.PlayerId,card);
-            if(OpenEntryReactionWindow(command.PlayerId,card,terrainGrant?command.PlayerId:1-command.PlayerId)) return;
-            NextAction(command.PlayerId,terrainGrant);
+            // Plain of Gold (Emperor Edition Stronghold pass, issue #486 batch 2): "Take an additional Battle action to play it" -- a grant scoped to this very card is spent by its play, and the
+            // player keeps priority only while he holds another.
+            var scopedGrantUsed=_state.AdditionalActions.Any(g=>g.PlayerId==command.PlayerId && GrantUsableNow(g) && g.ScopeCardIds is not null && g.ScopeCardIds.Contains(card.Id)) && ConsumeAdditionalActionGrant(command.PlayerId,card.Id);
+            var scopedStays=scopedGrantUsed && _state.AdditionalActions.Any(g=>g.PlayerId==command.PlayerId && Forfeitable(g));
+            if(OpenEntryReactionWindow(command.PlayerId,card,terrainGrant||scopedStays?command.PlayerId:1-command.PlayerId)) return;
+            NextAction(command.PlayerId,terrainGrant||scopedStays);
             return;
         }
         var target=Card(command.TargetId);
@@ -2046,8 +2054,7 @@ public sealed partial class MatchEngine
         (attachmentDef.AttachRequiresKeyword is null || KeywordOrHuman(target,attachmentDef.AttachRequiresKeyword)) &&
         (attachmentDef.AttachExcludesKeyword is null || !KeywordOrHuman(target,attachmentDef.AttachExcludesKeyword)) &&
         (attachmentDef.AttachRequiresName is null || Definition(target).Name==attachmentDef.AttachRequiresName) &&
-        (attachmentDef.Type!=CardType.Follower || attachmentDef.HonorRequirement is null || IgnoresFollowerHonorRequirement(target) || CardPersonalHonor(target)>=attachmentDef.HonorRequirement); // Keep of the Dead (Stronghold pass, issue #486 batch 1): "You ignore Honor Requirements on your Followers."
-
+        (attachmentDef.Type!=CardType.Follower || attachmentDef.HonorRequirement is null || IgnoresFollowerHonorRequirement(target) || CardPersonalHonor(target)>=attachmentDef.HonorRequirement || RoninFollowerIgnoresHonorRequirement(attachmentDef,target)); // Keep of the Dead (Stronghold pass, issue #486 batch 1): "You ignore Honor Requirements on your Followers."
     // "Current" Personal Honor (core rules Glossary): a Dishonorable Personality's is fixed at 0 until
     // Rehonor restores them -- fixed at 0, not merely reduced, so a persistent modifier (e.g. a token)
     // is not removed by this and resumes applying once honorable again. The handful of rules that
@@ -3052,6 +3059,8 @@ public sealed partial class MatchEngine
     {
         ["training-honor-immunity"] = ("Spider", true),
         ["keep-of-the-dead"] = ("Spider", true), // Keep of the Dead (Stronghold pass, issue #486 batch 1): "You do not lose Honor from Spider Clan and Fate cards you own."
+        // Steel Soul Dojo (Emperor Edition Stronghold pass, issue #486 batch 2): "You do not lose Honor from Spider Clan and Fate cards you own." (its other trait is FireSteelSoulTrait).
+        ["steel-soul-dojo"] = ("Spider", true),
     };
     private static bool IsFateCardType(CardType type) => type is CardType.Strategy or CardType.Follower or CardType.Item or CardType.Spell or CardType.Ring; // core rules, Fate card types: Strategy and Ring, and the attachments
     private bool HonorLossNegated(int playerId, CardInstance? source)
@@ -3090,6 +3099,9 @@ public sealed partial class MatchEngine
             Emit("honorLossReduced",$"{Player(playerId).Name}'s Honor loss from {reason} was reduced by Unimpeachable Name.",playerId,source?.Id);
             amount=reduced;
         }
+        // Shiro Chugo (Emperor Edition Stronghold pass, issue #486 batch 2): "Reduce any Honor gain or loss from the action's effects by 2."
+        amount=ChugoReducedHonorChange(playerId,amount,reason);
+        if(amount==0) return;
         // Yamazaki - Experienced (The Shadow's Embrace pass, issue #476, batch 2): "Once per phase, before you lose exactly 1 Honor: Negate the loss." -- the loss as it would now happen.
         if(amount==-1 && YamazakiNegatesLoss(playerId,reason)) return;
         var player=Player(playerId); player.Honor+=amount;
