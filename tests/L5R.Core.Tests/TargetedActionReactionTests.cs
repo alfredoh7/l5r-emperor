@@ -179,7 +179,8 @@ internal static class TargetedActionReactionTests
         foreach (var (id, ability) in AbilityCatalog.All)
             Eq(ability.UsesPerTurn, formerlyExempt.Contains(id) || id == "kaname-ranged-attack" || id == "castle-of-order-redirect" /* once per BATTLE, its own stamp (issue #453) */
                 || id == "shihiro-boost" /* "each time" -- issue #458 */ ? AbilityUseLimit.Unlimited : id == "mochitoko-negate" ? 2 : id == "rika-bushido-virtue-bonus" ? 3
-                : id == "tsukimi-refresh" || id == "tomaru-attack" /* "Twice per turn" -- issue #460 batch 2 */ ? 2 : 1, $"the limit of {id}");
+                : id == "tsukimi-refresh" || id == "tomaru-attack" /* "Twice per turn" -- issue #460 batch 2 */
+                    || id == "sleepless-boost" /* "Twice per turn" -- issue #467 batch 2 */ ? 2 : 1, $"the limit of {id}");
         Eq(AbilityUseLimit.Unlimited, 0);
     }
 

@@ -150,7 +150,7 @@ public sealed partial class MatchEngine
                 if (stayed.Length > 0)
                 {
                     GainHonor(p.DeciderPlayerId, -stayed.Length, name, source);
-                    foreach (var card in stayed) Dishonor(card);
+                    foreach (var card in stayed) Dishonor(card, p.ActingPlayerId);
                 }
                 break;
             }

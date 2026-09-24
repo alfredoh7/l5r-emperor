@@ -2479,4 +2479,11 @@ public static class PublishedContent
     public static PublishedSnapshot PersonalityWave64 { get; } = Load("L5R.Published.PersonalityWave64.json", "personality-wave-64", requireDecks: false);
     /// <summary>Personality wave 62 (Embers of War pass, issue #460, batch 1): Akodo Uehara, Daigotsu Takayasu - exp, Goju Gochiso, Kaiu Onizuka, Kaiu Tojikana.</summary>
     public static PublishedSnapshot PersonalityWave62 { get; } = Load("L5R.Published.PersonalityWave62.json", "personality-wave-62", requireDecks: false);
+    /// <summary>Personality wave 66 (Forgotten Legacy pass, issue #467, batch 2): Matsu Koyama, Moshi Sasako, Moto Xiao, Ninube Shiho, Shiba Sawaken, Shinjo Junpei,
+    /// Shosuro Makiko, The Shakash, The Sleepless One, Togashi Osawa, Toritaka Chokichi, Utaku Ji-Yun, Yamazaki, Yasuki Daiki, Yoritomo Haruhiko.</summary>
+    public static PublishedSnapshot PersonalityWave66 { get; } = Load("L5R.Published.PersonalityWave66.json", "personality-wave-66", requireDecks: false);
+    /// <summary>Follower wave 29 (Forgotten Legacy pass, issue #467, batch 2): The Vengeful.</summary>
+    public static PublishedSnapshot FollowerWave29 { get; } = Load("L5R.Published.FollowerWave29.json", "follower-wave-29", requireDecks: false);
+    /// <summary>Stronghold wave 15 (Forgotten Legacy pass, issue #467, batch 2): The Forgotten Temple.</summary>
+    public static PublishedSnapshot StrongholdWave15 { get; } = Load("L5R.Published.StrongholdWave15.json", "stronghold-wave-15", requireDecks: false);
 }

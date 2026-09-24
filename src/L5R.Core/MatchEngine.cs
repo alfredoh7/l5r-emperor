@@ -1011,7 +1011,9 @@ public sealed partial class MatchEngine
         // Yasuki Makoto (oracle-l5r-9449, Embers of War pass, issue #460 batch 2): "Your Holdings enter play for 1 less Gold" -- the same
         // per-source-in-play term shape as Mukudori's own keywordDiscount above, narrowed to CardType.Holding rather than a keyword.
         var holdingDiscount=HoldingEntryDiscount(card,playerId);
-        var rawCost=def.GoldCost-prosperous-reserveDiscount-ashikoDiscount-(entryDiscount?.Amount??0)-keywordDiscount-holdingDiscount+(clanAllegiance?2:0)-(clanDiscount?2:0);
+        // The Shakash / The Sleepless One (Forgotten Legacy pass, issue #467 batch 2): "Enters play paying 1 less Gold [for each Nonhuman you control, up to 3]" -- the card's own printed term.
+        var (nagaDiscount,nagaTerm)=ForgottenLegacyEntryDiscount(card,playerId);
+        var rawCost=def.GoldCost-prosperous-reserveDiscount-ashikoDiscount-(entryDiscount?.Amount??0)-keywordDiscount-holdingDiscount-nagaDiscount+(clanAllegiance?2:0)-(clanDiscount?2:0);
         var cost=Math.Max(0,rawCost);
         // The human-readable derivation the payment panel shows (issue #303), term by term.
         var basis=$"{def.Name} cost {def.GoldCost}"+(prosperous>0?$" − {prosperous} (controlled Personalities)":"")+(reserveDiscount>0?$" − {reserveDiscount} (Reserve while defending)":"")
@@ -1019,6 +1021,7 @@ public sealed partial class MatchEngine
             +(entryDiscount is {} entry?$" − {entry.Amount} ({entry.Clan} Clan)":"")
             +(keywordDiscount>0?$" − {keywordDiscount} (Fudo, Mukudori)":"")
             +(holdingDiscount>0?$" − {holdingDiscount} (Yasuki Makoto)":"")
+            +(nagaDiscount>0?$" − {nagaDiscount} ({nagaTerm})":"")
             +(clanAllegiance?" + 2 (Clan allegiance)":"")+(clanDiscount?" − 2 (Clan discount)":"")+(rawCost<0?" (min 0)":"");
         if ((Keyword(card,"Unique") || Keyword(card,"Singular")) && ControlsCopyOf(playerId,def.Name)) error=$"You already control this {(Keyword(card,"Unique") ? "Unique" : "Singular")} card.";
         // Kakita Yusugi and Yogo Ugimori (issue #453, batch 2): the once-per-turn limit he ignores, and a lock on the player (ProclaimAllowed).
@@ -2112,7 +2115,8 @@ public sealed partial class MatchEngine
         // Item's bonus TO the wielder); here the Follower's own Force is keyed off the wielder instead.
         "force-equals-wielder-printed-force" => card.AttachedTo is null ? 0 : Definition(Card(card.AttachedTo)).Force,
         _ => 0
-    })+UnitFollowerBoost(card)+AkioFollowerBoost(card)+AshigaruBattleBoost(card)+ArmyBattleMaidenBoost(card)+ZanshoFollowerBoost(card));
+    })+UnitFollowerBoost(card)+AkioFollowerBoost(card)+AshigaruBattleBoost(card)+ArmyBattleMaidenBoost(card)+ZanshoFollowerBoost(card)
+        +XiaoFollowerBoost(card)); // Moto Xiao (Forgotten Legacy pass, issue #467 batch 2): "Followers in Xiao's army have +1F."
     // "Boost other cards in the unit" primitive (Senior Infantry Legion's shape): distinct from the
     // self-referential conditional bonuses above, this is a card that grants a static Force bonus to
     // every OTHER Follower attached to the same Personality (a unit is a Personality and all of its
@@ -2333,13 +2337,16 @@ public sealed partial class MatchEngine
     // treated as Personal Honor 0 (see CardPersonalHonor) until Rehonor restores them. The 180-degree
     // rotation the rules describe is purely visual, driven client-side off this same flag; no engine
     // state beyond it.
-    private void Dishonor(CardInstance card)
+    // byPlayerId: the player whose card's effect dishonors him, when the caller knows it better than the action being resolved (an Either/Or or a
+    // decider's choice answers a separate command); null reads it off the running action (Utaku Ji-Yun, Forgotten Legacy pass issue #467 batch 2).
+    private void Dishonor(CardInstance card,int? byPlayerId=null)
     {
         if(NegatesEffect(card,"all"))
         {
             Emit("dishonorNegated",$"{Definition(card).Name}'s dishonoring was negated before it resolved.",card.OwnerId,card.Id);
             return;
         }
+        if(JiYunNegatesDishonor(card,byPlayerId)) return;
         card.Dishonorable=true;
     }
     // A card already sitting in a discard pile (Zone.DynastyDiscard/FateDiscard) -- never destroyed
@@ -2913,6 +2920,9 @@ public sealed partial class MatchEngine
     }
     private void GainHonor(int playerId,int amount,string reason,CardInstance? source=null)
     {
+        if(amount==0) return;
+        // The Forgotten Temple (Forgotten Legacy pass, issue #467 batch 2): no gain at all, no loss from the player's own cards, and every other loss reduced to 1.
+        amount=ForgottenTempleHonorChange(playerId,amount,reason,source);
         if(amount==0) return;
         if(amount<0 && HonorLossNegated(playerId,source))
         {

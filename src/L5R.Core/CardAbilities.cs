@@ -2889,6 +2889,59 @@ public static class AbilityCatalog
         // of the deck" is the top-1 LookSpec (Isawa Tamaki's own shape) with both a Discard and a Bottom rule instead of Bottom alone.
         ["uehara-look"] = new("Limited", "Look at the top card of your Fate deck. You may leave it there, discard it, or put it at the bottom of the deck", "none",
             Look: LookCatalog.UeharaLook),
+        // ---- Forgotten Legacy pass (issue #467), batch 2 (helpers in ForgottenLegacyBatch2.cs; executed by RunForgottenLegacyBatch2Effect). ----
+        // The Vengeful (oracle-l5r-8409), a Follower: "Battle: Ranged 7 Attack." (Khol Regulars' own Follower-performed Attack) and "Battle: Even if this card is bowed,
+        // if this Personality is Nonhuman: Straighten this unit." (the bowed-source exemption list, like Strength of the Tsunami's own wielder-keyword condition).
+        ["vengeful-attack"] = new("Battle", "Ranged 7 Attack", "attack"),
+        ["vengeful-straighten"] = new("Battle", "Even if this card is bowed, if this Personality is Nonhuman: Straighten this unit", "none"),
+        // Matsu Koyama (oracle-l5r-4944): "Battle: Target an enemy unit: Reduce the Force of each Personality and Follower in it by Koyama's Personal Honor. Bow any cards
+        // in the unit whose Force is now 0." -- targeting a unit targets its Personality (core rules, Units); Costly Feud's penalty-then-bow-at-0, across the whole unit.
+        ["koyama-weaken"] = new("Battle", "Target an enemy unit: Reduce the Force of each Personality and Follower in it by Koyama's Personal Honor. Bow any cards in the unit whose Force is now 0", "enemy-personality"),
+        // Moto Xiao (oracle-l5r-5395): "Followers in Xiao's army have +1F." is his Effect (xiao-army-follower-force, a FollowerForce term); "Battle: Destroy a target
+        // enemy card without attachments." is Kojinrue's destroy without the bow.
+        ["xiao-destroy"] = new("Battle", "Destroy a target enemy card without attachments", "enemy-card-without-attachments"),
+        // Ninube Shiho (oracle-l5r-5591): "After you Recruit Shiho, lose 1 Honor." is his EntryHonorLoss. "Ninja Battle: Put Shiho on top of your Dynasty deck (face-down).
+        // Put all cards without attachments in a target enemy Personality's unit on the bottom of their appropriate deck." -- Goju House Guard's own unit sweep.
+        ["shiho-return"] = new("Battle", "Ninja Battle: Put Shiho on top of your Dynasty deck (face-down). Put all cards without attachments in a target enemy Personality's unit on the bottom of their appropriate deck",
+            "enemy-personality", ActionKeywords: ["Ninja"]),
+        // Shiba Sawaken (oracle-l5r-6804): "Iaijutsu Battle: Target an enemy Personality or Follower: Give it -5F."
+        ["sawaken-weaken"] = new("Battle", "Iaijutsu Battle: Target an enemy Personality or Follower: Give it -5F", "enemy-force", ActionKeywords: ["Iaijutsu"]),
+        // Shinjo Junpei (oracle-l5r-6900): "Battle: Even if Junpei is not at the current battlefield, target an enemy card without attachments: Bow it. If it is a
+        // Personality, negate his next movement." -- SourceUnitMayBeAway (Moto Aoi's own "even if at home" waiver; the acting player still needs presence), and a
+        // one-shot movement lock (MovementLock.NextOnly).
+        ["junpei-base-bow"] = new("Battle", "Even if Junpei is not at the current battlefield, target an enemy card without attachments: Bow it. If it is a Personality, negate his next movement",
+            "enemy-card-without-attachments", SourceUnitMayBeAway: true),
+        // Shosuro Makiko (oracle-l5r-7126): "Political Open: Bow Makiko: Take the Imperial Favor." -- Dazzling Attire's own shape on a Personality.
+        ["makiko-favor"] = new("Open", "Political Open: Bow Makiko: Take the Imperial Favor", "none", ActionKeywords: ["Political"], Costs: ActionCost.BowSource),
+        // The Shakash (oracle-l5r-8320): "Enters play paying 1 less Gold for each Nonhuman you control, up to 3 less Gold." is his Effect (a QuotePurchase term);
+        // "Battle: Target an enemy Personality: Bow him or move him home." -- two halves sharing one use (Hajime's own shape).
+        ["shakash-bow"] = new("Battle", "Target an enemy Personality: Bow him", "enemy-personality", UsageKey: "shakash"),
+        ["shakash-move-home"] = new("Battle", "Target an enemy Personality: Move him home", "enemy-personality", UsageKey: "shakash", Move: new(MoveSpec.Target, MoveSpec.Home)),
+        // The Sleepless One (oracle-l5r-8339): "Enters play paying 1 less Gold." is his Effect (a QuotePurchase term). "Battle: Twice per turn, bow one of your Forests
+        // or Pearls: Give each of your Nonhuman cards at the current battlefield +1F." -- Carpenter Castle's own bow-a-keyworded-card cost, with either keyword.
+        ["sleepless-boost"] = new("Battle", "Twice per turn, bow one of your Forests or Pearls: Give each of your Nonhuman cards at the current battlefield +1F", "none",
+            Performer: "own-unbowed-card-with-any-required-keyword", RequiredKeywords: ["Forest", "Pearl"], Costs: ActionCost.BowPerformer, UsesPerTurn: 2),
+        // Togashi Osawa (oracle-l5r-8565): "Battle/Open: Even if Osawa is bowed, target a Personality at Osawa's location: Bow or straighten him." -- Tamori Ruya's
+        // own personality-at-source-location (SameLocation: his battlefield while acting as Battle, his controller's home in the Action phase); one shared use.
+        ["osawa-bow"] = new("BattleOrOpen", "Even if Osawa is bowed, target a Personality at Osawa's location: Bow him", "personality-at-source-location", UsageKey: "osawa"),
+        ["osawa-straighten"] = new("BattleOrOpen", "Even if Osawa is bowed, target a Personality at Osawa's location: Straighten him", "personality-at-source-location", UsageKey: "osawa"),
+        // Toritaka Chokichi (oracle-l5r-8644): "Battle: Bow your performing Follower: Ranged 4 Attack which may target a Personality with attached Followers if you have
+        // Reconnaissance." -- Nijugun's own bowed-Follower performer and the printed Reconnaissance Follower exception (AttackFollowerException).
+        ["chokichi-attack"] = new("Battle", "Bow your performing Follower: Ranged 4 Attack which may target a Personality with attached Followers if you have Reconnaissance", "attack",
+            Performer: "own-unbowed-follower-at-battle", Costs: ActionCost.BowPerformer, FollowerException: new("Ranged", Condition: AttackFollowerException.Reconnaissance)),
+        // Yamazaki (oracle-l5r-9430): "Open: Target your Holding: Yamazaki threatens the workers. Straighten it."
+        ["yamazaki-straighten"] = new("Open", "Target your Holding: Yamazaki threatens the workers. Straighten it", "own-holding"),
+        // Yasuki Daiki (oracle-l5r-9436): "Political Open: Target another player's Personality: His controller chooses to either pay 4 Gold, lose 2 Honor, or do
+        // neither. If he did not pay 4 Gold or lose 2 Honor, the Personality may not be assigned, and will not move, into attacking armies." -- Makoto's Either/Or.
+        ["daiki-demand"] = new("Open", "Political Open: Target another player's Personality: His controller pays 4 Gold, loses 2 Honor, or neither; if neither, he may not be assigned, and will not move, into attacking armies",
+            "enemy-personality", ActionKeywords: ["Political"]),
+        // Yoritomo Haruhiko (oracle-l5r-9556): "Battle: Ranged 3 Attack with +2 strength if you have Reconnaissance."
+        ["haruhiko-attack"] = new("Battle", "Ranged 3 Attack with +2 strength if you have Reconnaissance", "attack"),
+        // The Forgotten Temple (oracle-l5r-8094), a Stronghold: its four traits are its Effect (forgotten-temple: GainHonor, ValidateAbility); "Limited: Target your
+        // discarded Nonhuman Personality and discard a card in one of your provinces: Refill the province face-up with the Personality." is Scavenging Party's refill,
+        // narrowed to Nonhuman, the province's card discarded as the cost (the province must hold one: ChoosesOwnProvince).
+        ["forgotten-temple-refill"] = new("Limited", "Target your discarded Nonhuman Personality and discard a card in one of your provinces: Refill the province face-up with the Personality",
+            "own-discarded-personality-with-keyword", RequiredKeywords: ["Nonhuman"], ChoosesOwnProvince: true),
     });
 }
 
@@ -3573,6 +3626,11 @@ public sealed partial class MatchEngine
         // Kaiu Onizuka: "Ranged Attack with strength equal to the current battlefield's province's strength" -- the defender's own province at the current
         // battlefield, read the exact way the Requires at line ~3992/4916/4971 already do (EffectiveProvinceStrength off the defender's Provinces list).
         "onizuka-attack" => EffectiveProvinceStrength(Player(1 - _state.ActivePlayerId).Provinces.Single(p => p.Index == _state.CurrentBattleProvince!.Value)),
+        // Forgotten Legacy pass (issue #467), batch 2. The Vengeful: "Ranged 7 Attack". Toritaka Chokichi: "Ranged 4 Attack". Yoritomo Haruhiko: "Ranged 3 Attack with +2
+        // strength if you have Reconnaissance" (the acting player's own Reconnaissance at the current battlefield).
+        "vengeful-attack" => 7,
+        "chokichi-attack" => 4,
+        "haruhiko-attack" => 3 + (HasReconnaissanceAtCurrentBattlefield(player.Id) ? 2 : 0),
         _ => 0
     };
     // AttackStrength plus every passive defense modifier applying to this specific target (Destrier/
@@ -3635,6 +3693,8 @@ public sealed partial class MatchEngine
         // Embers of War pass, batch 1 (issue #460).
         "takayasu-attack" => "Melee",
         "onizuka-attack" => "Ranged",
+        // Forgotten Legacy pass (issue #467), batch 2.
+        "vengeful-attack" or "chokichi-attack" or "haruhiko-attack" => "Ranged",
         _ => ""
     };
     // General "in play" Reaction primitive: a printed Reaction whose card must actually be in play
@@ -4180,9 +4240,13 @@ public sealed partial class MatchEngine
                 // Honor and Treachery pass (issue #458): Bayushi Utoro, Shosuro Chikata and Tsubo each print "Even if [he] is bowed".
                 or "utoro-straighten" or "chikata-bow" or "chikata-straighten" or "tsubo-straighten"
                 // Rokku - experienced (oracle-l5r-6376, Embers of War pass, issue #460 batch 2): "Even if Rokku is bowed, after engaging...".
-                or "rokku-move", "Abilities on bowed cards cannot be used.");
+                or "rokku-move"
+                // Forgotten Legacy pass (issue #467), batch 2: The Vengeful ("Even if this card is bowed") and Togashi Osawa ("Even if Osawa is bowed").
+                or "vengeful-straighten" or "osawa-bow" or "osawa-straighten", "Abilities on bowed cards cannot be used.");
             uses = source.AbilityUses;
         }
+        // The Forgotten Temple (Forgotten Legacy pass, issue #467 batch 2): "You may not take Political actions." (ForgottenLegacyBatch2.cs)
+        Require(!ForgottenTempleForbidsPolitical(id, ability, source, player), "The Forgotten Temple: you may not take Political actions.");
         // The per-turn limit is AbilityDefinition.UsesPerTurn (AbilityLimits.cs). A once-per-GAME ability (AbilityDefinition.OncePerGame: Border Keep's refresh, Bo of Water) never resets: any stamp spends it.
         var usageKey = ability.UsageKey ?? id;
         Require(ability.OncePerGame ? !uses.ContainsKey(usageKey) : !AbilityUseSpent(uses, ability, usageKey), "This ability has already been used within its limit.");
@@ -4563,6 +4627,8 @@ public sealed partial class MatchEngine
                 // Not a "performer" in the rules sense (Carpenter Castle names no performing card) --
                 // reused for the same "select one more card, separately from the effect's target" shape.
                 "own-castle-or-siege" => !performer.Bowed && (Keyword(performer, "Castle") || Keyword(performer, "Siege")),
+                // The Sleepless One (issue #467 batch 2): "bow one of your Forests or Pearls" -- Carpenter Castle's shape with ANY of the RequiredKeywords (Chikata's any-keyword reading).
+                "own-unbowed-card-with-any-required-keyword" => !performer.Bowed && (ability.RequiredKeywords ?? []).Any(k => Keyword(performer, k)),
                 // Xijkt / Tamori Shosei (issue #207 follow-up): "bow [source] or one of your [keyword]
                 // Holdings" -- the general "choose which of several eligible own cards to bow as a
                 // cost" shape, not the single-card simplification Mirumoto Kojinrue's own
@@ -4963,6 +5029,10 @@ public sealed partial class MatchEngine
                 // Scavenging Party (issue #420): "your discarded Personality" -- a dead Personality is a discarded one too (Mendon).
                 else if (ability.Target == "own-discarded-personality")
                     Require(type == CardType.Personality && target.OwnerId == player.Id && IsDiscardedPersonality(target), "Choose one of your own discarded Personalities.");
+                // The Forgotten Temple (issue #467 batch 2): "your discarded Nonhuman Personality" -- the same pile, narrowed by RequiredKeywords.
+                else if (ability.Target == "own-discarded-personality-with-keyword")
+                    Require(type == CardType.Personality && target.OwnerId == player.Id && IsDiscardedPersonality(target) && HasKeywords(target, ability.RequiredKeywords),
+                        "Choose one of your own discarded Personalities with the required keyword.");
                 // Kakita Yasunori (issue #431): "a card in your Fate discard pile".
                 else if (ability.Target == "own-fate-discard-card")
                     Require(target.OwnerId == player.Id && target.Zone == Zone.FateDiscard, "Choose a card in your own Fate discard pile.");
@@ -8070,6 +8140,12 @@ public sealed partial class MatchEngine
             case "tomaru-attack": if (ResolveOrDeferAttack(id, player, target?.Id, additional: consumedGrant)) return; break;
             case "makoto-lock": if (OpenEitherOr(EitherOrSpecs.MakotoPayOrDishonor, source!, player.Id, target!.OwnerId, target, "action")) return; break;
             case "kanaye-bow": KanayeBow(target!, command, player.Id); break;
+            // Forgotten Legacy pass (issue #467), batch 2: every case is in ForgottenLegacyBatch2.cs (true: the action is paused -- an Attack's reaction window, an Either/Or).
+            case "vengeful-attack": case "vengeful-straighten": case "koyama-weaken": case "xiao-destroy": case "shiho-return": case "sawaken-weaken": case "junpei-base-bow":
+            case "makiko-favor": case "shakash-bow": case "shakash-move-home": case "sleepless-boost": case "osawa-bow": case "osawa-straighten": case "chokichi-attack":
+            case "yamazaki-straighten": case "daiki-demand": case "haruhiko-attack": case "forgotten-temple-refill":
+                if (RunForgottenLegacyBatch2Effect(id, ability, command, player, source, target, consumedGrant)) return;
+                break;
             // Embers of War pass, batch 3 (issue #460; helpers in EmbersOfWarBatch3.cs).
             case "weak-poison-force-zero": ApplyModifier(target!, source!.Id, id, "Force", -CardForce(target!)); break;
             case "accusation-negate": NegateHeldAction(source!); break;
@@ -8465,7 +8541,7 @@ public sealed partial class MatchEngine
         var card = Card(pending.CardId!);
         if (command.Choice == "dishonor")
         {
-            Dishonor(card);
+            Dishonor(card, pending.ActingPlayerId);
             Emit("rinShameAccepted", $"{Definition(card).Name} was dishonored.", card.OwnerId, card.Id);
         }
         else
@@ -8893,6 +8969,7 @@ public sealed partial class MatchEngine
                 "own-shadowlands-ninja-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && HasClanAffiliation(c, "Shadowlands") && Keyword(c, "Ninja") && (!actingAsBattle || AtBattle(c))).Select(c => (string?)c.Id).ToArray(),
                 "own-unbowed-follower-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Follower && !c.Bowed && c.Zone == Zone.Attached && (!actingAsBattle || AtBattle(c))).Select(c => (string?)c.Id).ToArray(),
                 "own-castle-or-siege" => _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && !c.Bowed && (Keyword(c, "Castle") || Keyword(c, "Siege"))).Select(c => (string?)c.Id).ToArray(),
+                "own-unbowed-card-with-any-required-keyword" => _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && !c.Bowed && (ability.RequiredKeywords ?? []).Any(k => Keyword(c, k))).OrderBy(c => c.Id, StringComparer.Ordinal).Select(c => (string?)c.Id).ToArray(),
                 "own-source-or-unbowed-holding-with-keyword" => new[] { source?.Id }.Concat(_state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Holding && !c.Bowed && HasKeywords(c, ability.RequiredKeywords)).Select(c => (string?)c.Id)).ToArray(),
                 // Sutigu (issue #301): the source itself, or any of its own unbowed keyworded attachments.
                 "own-source-or-unbowed-spell-attached" => new[] { source?.Id }.Concat(_state.Cards.Values.Where(c => c.OwnerId == playerId && c.Zone == Zone.Attached && c.AttachedTo == source?.Id && !c.Bowed && Definition(c).Type == CardType.Spell).Select(c => (string?)c.Id)).ToArray(),
@@ -8974,6 +9051,7 @@ public sealed partial class MatchEngine
                     "discarded-personality" => _state.Cards.Values.Where(c => Definition(c).Type == CardType.Personality && c.Zone is Zone.DynastyDiscard or Zone.FateDiscard).Select(c => (string?)c.Id).ToArray(),
                     "dead-personality-any-discard" => _state.Cards.Values.Where(c => Definition(c).Type == CardType.Personality && c.Zone == Zone.Dead).Select(c => (string?)c.Id).ToArray(),
                     "own-discarded-personality" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && IsDiscardedPersonality(c)).Select(c => (string?)c.Id).ToArray(),
+                    "own-discarded-personality-with-keyword" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && IsDiscardedPersonality(c) && HasKeywords(c, ability.RequiredKeywords)).Select(c => (string?)c.Id).ToArray(),
                     "own-dead-samurai" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && c.Zone == Zone.Dead && Keyword(c, "Samurai")).Select(c => (string?)c.Id).ToArray(),
                     "own-personality-in-province" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && c.Zone == Zone.Province && c.FaceUp).Select(c => (string?)c.Id).ToArray(),
                     // Kharmic (issue #303): validated since #177 but never offered -- its target sits in the
