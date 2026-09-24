@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build Personality wave 69 (The Shadow's Embrace pass, issue #476, batch 2): the 19 of the batch's 23 candidate Personalities wired
+"""Build Personality wave 75 (The Shadow's Embrace pass, issue #476, batch 2): the 19 of the batch's 23 candidate Personalities wired
 off existing or small new primitives (src/L5R.Core/ShadowsEmbraceBatch2.cs) -- Kitsu Sorano (Experienced), Kitsuki Yoyugi, Longtooth,
 M'rika, Moshi Rukia, Moto Morio, Natsumi, Niiro no Oni, Quelsa, Shiba Kudome (Experienced), Shiba Shirou, Shinjo Jong-Ho, Shinjo Min-Hee,
 Shosuro Nobu, Shosuro Ryoken, Shugorei, Yamazaki (Experienced), Yasuki Ikke, Yoritomo Kanahashi. The other four (Kitsune Kichi, Kuni
@@ -19,7 +19,7 @@ from pathlib import Path
 from package_vanilla_wave import build_definition_fields
 
 ROOT = Path(__file__).resolve().parents[2]
-PROFILE = "personality-wave-69"
+PROFILE = "personality-wave-75"
 NL = chr(10)
 
 ABILITIES: dict[int, list[str]] = {

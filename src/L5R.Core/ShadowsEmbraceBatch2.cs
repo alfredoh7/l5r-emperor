@@ -1,6 +1,6 @@
 namespace L5R.Core;
 
-// The Shadow's Embrace pass (issue #476), batch 2: the execution cases and the small static rules of the Personalities wired in personality-wave-69. Each card's
+// The Shadow's Embrace pass (issue #476), batch 2: the execution cases and the small static rules of the Personalities wired in personality-wave-75. Each card's
 // printed text and reading is at its AbilityCatalog entry (CardAbilities.cs); this file holds the helpers, so the shared files only carry one-line hooks.
 // Mirrors ForgottenLegacyBatch2.cs's own shape.
 //

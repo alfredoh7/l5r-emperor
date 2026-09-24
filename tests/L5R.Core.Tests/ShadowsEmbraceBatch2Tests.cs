@@ -2,7 +2,7 @@ using L5R.Core;
 using static RegressionAssertions;
 using static Batch336Support;
 
-// The Shadow's Embrace pass (issue #476), batch 2: the 19 Personalities of personality-wave-69, driven through QueryActions and the commands it offers. Every scenario
+// The Shadow's Embrace pass (issue #476), batch 2: the 19 Personalities of personality-wave-75, driven through QueryActions and the commands it offers. Every scenario
 // is an explicit position on the economy table (player 0 the Crane, player 1 the Lion). The other four candidates (Kitsune Kichi, Kuni Renyu, Shosuro Keirei, Zlkyt)
 // stay unwired and unpublished (see BLOCKERS in tools/content/build_card_inventory.py).
 internal static class ShadowsEmbraceBatch2Tests
@@ -49,7 +49,7 @@ internal static class ShadowsEmbraceBatch2Tests
     }
 
     public static void Run(TestRunner runner) => runner.Run("shadows-embrace-batch-2", [
-        ("Published shape: exactly the 19 wired Personalities are published in personality-wave-69, with their catalogue stats, Effects, ability ids, art and manifest; the four blocked ones are not", PublishedShape),
+        ("Published shape: exactly the 19 wired Personalities are published in personality-wave-75, with their catalogue stats, Effects, ability ids, art and manifest; the four blocked ones are not", PublishedShape),
         ("Kitsu Sorano - exp: overlaying her base printing opens her entering-play Reaction, which creates two Lion Ancestors at home", SoranoOverlayCreates),
         ("Kitsuki Yoyugi: a non-Unique or Unicorn Clan target is locked for free, a Unique non-Unicorn one costs the bow; the target's printed abilities may not be used this turn", YoyugiLock),
         ("Longtooth: will not attach cards (Equip never offers him); destroys an enemy Follower or Personality without Followers", LongtoothRefusesAndDestroys),
@@ -73,8 +73,8 @@ internal static class ShadowsEmbraceBatch2Tests
     private static void PublishedShape()
     {
         var root = RepoRoot();
-        Eq(string.Join(",", PublishedContent.PersonalityWave69.Cards.Select(c => c.Id).Order(StringComparer.Ordinal)), string.Join(",", Wired.Order(StringComparer.Ordinal)),
-            "personality-wave-69 publishes exactly the wired Personalities");
+        Eq(string.Join(",", PublishedContent.PersonalityWave75.Cards.Select(c => c.Id).Order(StringComparer.Ordinal)), string.Join(",", Wired.Order(StringComparer.Ordinal)),
+            "personality-wave-75 publishes exactly the wired Personalities");
         foreach (var unwired in Unwired) Check(!CardCatalog.Cards.ContainsKey(unwired), $"{unwired} stays unpublished");
         foreach (var abilityId in Wired.SelectMany(id => CardCatalog.Get(id).Abilities ?? [])) Check(AbilityCatalog.All.ContainsKey(abilityId), $"{abilityId} is catalogued");
         Check(CreatedCards.Verify().Length == 0, "every creator resolves: " + string.Join("; ", CreatedCards.Verify()));
@@ -109,7 +109,7 @@ internal static class ShadowsEmbraceBatch2Tests
         Check(AbilityCatalog.All["yoyugi-lock"].ActionKeywords!.Contains("Political") && AbilityCatalog.All["minhee-destroy"].ActionKeywords!.Contains("Tactical")
             && AbilityCatalog.All["yamazaki-exp-threaten"].ActionKeywords!.Contains("Fear") && AbilityCatalog.All["ryoken-honor-loss"].ActionKeywords!.Contains("Political"), "the printed action keywords are tagged");
 
-        var listed = File.ReadAllLines(Path.Combine(root, "tests/L5R.Core.Tests/PublishedWaves/personality-wave-69.txt")).Where(l => l.Length > 0);
+        var listed = File.ReadAllLines(Path.Combine(root, "tests/L5R.Core.Tests/PublishedWaves/personality-wave-75.txt")).Where(l => l.Length > 0);
         Eq(string.Join(",", listed.Order(StringComparer.Ordinal)), string.Join(",", Wired.Order(StringComparer.Ordinal)), "the manifest lists exactly the wired cards");
         foreach (var id in Wired)
         {

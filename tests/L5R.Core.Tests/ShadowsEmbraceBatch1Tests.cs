@@ -2,7 +2,7 @@ using L5R.Core;
 using static RegressionAssertions;
 using static Batch336Support;
 
-// The Shadow's Embrace pass (issue #476), batch 1: the 22 of the batch's 23 candidate Personalities wired in personality-wave-68, driven through QueryActions and the
+// The Shadow's Embrace pass (issue #476), batch 1: the 22 of the batch's 23 candidate Personalities wired in personality-wave-74, driven through QueryActions and the
 // commands it offers on explicit positions of the economy table (player 0 the Crane, player 1 the Lion). The other one (Kakita Saki) stays unwired and unpublished
 // (BLOCKERS in tools/content/build_card_inventory.py).
 internal static class ShadowsEmbraceBatch1Tests
@@ -18,7 +18,7 @@ internal static class ShadowsEmbraceBatch1Tests
     private const string Lion = "training-lion-samurai", Veteran = "training-lion-veteran", Crane = "training-crane-samurai", Follower = "training-follower";
 
     public static void Run(TestRunner runner) => runner.Run("shadows-embrace-batch-1", [
-        ("Published shape: personality-wave-68 publishes exactly the 22 wired cards with their printed stats, keywords, Effects and ability ids, ships their art and lists them in its manifest; Kakita Saki is not in the catalogue", PublishedShape),
+        ("Published shape: personality-wave-74 publishes exactly the 22 wired cards with their printed stats, keywords, Effects and ability ids, ships their art and lists them in its manifest; Kakita Saki is not in the catalogue", PublishedShape),
         ("Agasha Kurou: attaches a non-Unique Spell from his controller's own discard pile (not a Unique one, not the opponent's), paying its cost, grants an additional action scoped to it, and the Spell is removed from the game as the turn ends", KurouAttachSpell),
         ("Asahina Keigo: bowing his controller's unbowed Temple pays for drawing a card; a bowed Temple is not offered", KeigoDraw),
         ("Asako Hayate: gives himself Cavalry, Naval or Tactician for the turn -- one shared use", HayateKeywords),
@@ -125,10 +125,10 @@ internal static class ShadowsEmbraceBatch1Tests
         Stats(Kazehime, "Kazehime", "Crane", 2, 3, 5, 3, 6, "Air,Crane Clan,Kodama,Nonhuman,Shugenja,Spirit", [], "increase-own-hand-size");
 
         // The wave publishes exactly the wired cards (the personality-wave-63 blank-card lesson): no unwired card, no blank card.
-        Check(PublishedContent.PersonalityWave68.Cards.Select(c => c.Id).OrderBy(i => i, StringComparer.Ordinal).SequenceEqual(Wired.OrderBy(i => i, StringComparer.Ordinal)),
-            "personality-wave-68 is exactly the wired cards: " + string.Join(",", PublishedContent.PersonalityWave68.Cards.Select(c => c.Id)));
-        Check(PublishedContent.PersonalityWave68.Cards.All(c => (c.Abilities ?? []).Length > 0 || c.Effect != "none"), "no card of the wave is blank");
-        var listed = File.ReadAllLines(Path.Combine(root, "tests/L5R.Core.Tests/PublishedWaves/personality-wave-68.txt")).Where(l => l.Length > 0).ToArray();
+        Check(PublishedContent.PersonalityWave74.Cards.Select(c => c.Id).OrderBy(i => i, StringComparer.Ordinal).SequenceEqual(Wired.OrderBy(i => i, StringComparer.Ordinal)),
+            "personality-wave-74 is exactly the wired cards: " + string.Join(",", PublishedContent.PersonalityWave74.Cards.Select(c => c.Id)));
+        Check(PublishedContent.PersonalityWave74.Cards.All(c => (c.Abilities ?? []).Length > 0 || c.Effect != "none"), "no card of the wave is blank");
+        var listed = File.ReadAllLines(Path.Combine(root, "tests/L5R.Core.Tests/PublishedWaves/personality-wave-74.txt")).Where(l => l.Length > 0).ToArray();
         Check(listed.OrderBy(i => i, StringComparer.Ordinal).SequenceEqual(Wired.OrderBy(i => i, StringComparer.Ordinal)), "the manifest pins exactly the wired cards");
         foreach (var id in Unwired) Check(!CardCatalog.Cards.ContainsKey(id), $"{id} is unwired and unpublished");
         foreach (var abilityId in Wired.SelectMany(id => CardCatalog.Get(id).Abilities ?? [])) Check(AbilityCatalog.All.ContainsKey(abilityId), $"{abilityId} is catalogued");

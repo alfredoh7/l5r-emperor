@@ -3493,7 +3493,7 @@ public static class AbilityCatalog
         // attachments: Destroy it."
         ["bishamon-tower-destroy"] = new("Battle", "Choose your performing Berserker or unbowed Personality and target an enemy card with lower Force and no attachments: Destroy it",
             "enemy-card-force-lt-performer-without-attachments", Performer: "own-personality-with-keyword-or-unbowed-at-battle", RequiredKeywords: ["Berserker"]),
-        // The Shadow's Embrace pass (issue #476), batch 1: personality-wave-68. The declarative data only; every execution/validation helper, trait and small primitive is in
+        // The Shadow's Embrace pass (issue #476), batch 1: personality-wave-74. The declarative data only; every execution/validation helper, trait and small primitive is in
         // ShadowsEmbraceBatch1.cs, documented at its own use there.
         // Agasha Kurou (oracle-l5r-9835): "Battle/Open: Target a non-Unique Spell in your discard pile or under your Stronghold: Attach it to Kurou, paying all costs. You may
         // take an additional action to use an ability on the Spell. Remove it from the game before the turn ends." Moto Jun-Ni's attach from a discard pile (AttachAction.cs,

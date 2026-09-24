@@ -19,8 +19,8 @@ Each batch keeps its new primitives in `src/L5R.Core/ShadowsEmbraceBatchN.cs` an
 
 | Batch | Waves | Cards | Wired |
 |---|---|---|---|
-| 1 | personality-wave-68 | 23 Personalities A-K | 22 |
-| 2 | personality-wave-69 | 23 Personalities K-Z | 19 |
+| 1 | personality-wave-74 | 23 Personalities A-K | 22 |
+| 2 | personality-wave-75 | 23 Personalities K-Z | 19 |
 | 3 | strategy-wave-56 | 21 Strategies A-O | 19 |
 | 4 | strategy-wave-57 | 20 Strategies O-W | 17 |
 | 5 | spell-wave-22, item-wave-14 | 10 Spells, 8 Items | 15 |
@@ -28,8 +28,8 @@ Each batch keeps its new primitives in `src/L5R.Core/ShadowsEmbraceBatchN.cs` an
 
 ## Wired (110)
 
-- **personality-wave-68**: Agasha Kurou, Asahina Keigo, Asako Hayate, Asako Jirou, Atosa, Bayushi Misaki, Bayushi Tarou, Bayushi Waru, Chiisai, Chuda Hitaka, Daidoji Sosuke, Daigotsu Arakan, Daigotsu Rafu, Goju Bunoro, Hida Bakari, Hiruma Hikazu, Hiruma Nikaru, Iuchi Haruma, Kaiu Fumiko, Kakita Ichigiku, Kakita Tadanobu, Kazehime.
-- **personality-wave-69**: Kitsu Sorano - exp, Kitsuki Yoyugi, Longtooth, M'rika, Moshi Rukia, Moto Morio, Natsumi, Niiro no Oni, Quelsa, Shiba Kudome - exp, Shiba Shirou, Shinjo Jong-Ho, Shinjo Min-Hee, Shosuro Nobu, Shosuro Ryoken, Shugorei, Yamazaki - exp, Yasuki Ikke, Yoritomo Kanahashi.
+- **personality-wave-74**: Agasha Kurou, Asahina Keigo, Asako Hayate, Asako Jirou, Atosa, Bayushi Misaki, Bayushi Tarou, Bayushi Waru, Chiisai, Chuda Hitaka, Daidoji Sosuke, Daigotsu Arakan, Daigotsu Rafu, Goju Bunoro, Hida Bakari, Hiruma Hikazu, Hiruma Nikaru, Iuchi Haruma, Kaiu Fumiko, Kakita Ichigiku, Kakita Tadanobu, Kazehime.
+- **personality-wave-75**: Kitsu Sorano - exp, Kitsuki Yoyugi, Longtooth, M'rika, Moshi Rukia, Moto Morio, Natsumi, Niiro no Oni, Quelsa, Shiba Kudome - exp, Shiba Shirou, Shinjo Jong-Ho, Shinjo Min-Hee, Shosuro Nobu, Shosuro Ryoken, Shugorei, Yamazaki - exp, Yasuki Ikke, Yoritomo Kanahashi.
 - **strategy-wave-56**: Burning Fury, Captured Convict, Cowed and Defeated, Crowded Streets, Deep Roots, Defensive Grill, Direct the Path, Duel to First Blood, Fields of Victory, Forge Your Soul, Forged Documents, Forthrightness, Grief, I Cast Two Shadows, Kitsuki Methods, Kuon's Legacy, Lessons Never Forgotten, Methodical Questioning, One Shout.
 - **strategy-wave-57**: Overcome Adversity, Paralyzing Touch, Preserving Beauty, Running Battle, Serenity in Air, Social Grace, Spiritual Manipulation, Subtle Games, Sudden Movement, Tactical Assault, The Game Has Changed, The Lesson of Earth, Theological Indecision, Thuggish Techniques, Unstable Ground, Void Tattoo, Watchers in the Dark.
 - **spell-wave-22**: Beseech Sakkaku, Channel the Moon, Purify the Soul, Set the Fields Aflame, Thunder's Stamina, Touch the Emptiness, Ward of Air, Your Heart's Enemy.

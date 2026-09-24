@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build Personality wave 68 (The Shadow's Embrace pass, issue #476, batch 1): the 22 of the batch's 23 candidate Personalities wired whole --
+"""Build Personality wave 74 (The Shadow's Embrace pass, issue #476, batch 1): the 22 of the batch's 23 candidate Personalities wired whole --
 Agasha Kurou, Asahina Keigo, Asako Hayate, Asako Jirou, Atosa, Bayushi Misaki, Bayushi Tarou, Bayushi Waru, Chiisai, Chuda Hitaka, Daidoji Sosuke,
 Daigotsu Arakan, Daigotsu Rafu, Goju Bunoro, Hida Bakari, Hiruma Hikazu, Hiruma Nikaru (Shadow's Embrace printing), Iuchi Haruma, Kaiu Fumiko,
 Kakita Ichigiku, Kakita Tadanobu, Kazehime. The other one (Kakita Saki) stays unwired -- see tools/content/build_card_inventory.py's BLOCKERS dict.
@@ -16,7 +16,7 @@ from pathlib import Path
 from package_vanilla_wave import build_definition_fields
 
 ROOT = Path(__file__).resolve().parents[2]
-PROFILE = "personality-wave-68"
+PROFILE = "personality-wave-74"
 NL = chr(10)
 
 ABILITIES: dict[int, list[str]] = {

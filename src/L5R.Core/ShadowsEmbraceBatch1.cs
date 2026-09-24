@@ -1,6 +1,6 @@
 namespace L5R.Core;
 
-// The Shadow's Embrace pass (issue #476), batch 1: the execution/validation helpers of the 22 Personalities this batch wires (personality-wave-68) and the
+// The Shadow's Embrace pass (issue #476), batch 1: the execution/validation helpers of the 22 Personalities this batch wires (personality-wave-74) and the
 // small general primitives they needed. The declarative data (ability ids, targets, costs) is in CardAbilities.cs; the traits are each card's Effect. Every
 // record below expires by comparison with the turn (or battle) number, and is cleared where it is drained.
 //
