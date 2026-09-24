@@ -511,7 +511,9 @@ public static class AbilityCatalog
         // is the point, so its own cost (discarding a card) is the only real limit on repeated use.
         // Battle-timing by default; a card that grants an Action-segment variant would need its own
         // catalog entry reusing the same UseAbility case, not a change to this one.
-        ["tactical-advantage"] = new("Battle", "Tactical Advantage: discard a card · performing Tactician +Force = its Focus Value", "hand", PlayerAbility: true, Performer: "own-tactician-at-battle", UsesPerTurn: AbilityUseLimit.Unlimited, Costs: ActionCost.DiscardTarget),
+        // The Shadow's Embrace pass (issue #476), batch 2: the rulebook's "Tactical Battle:" -- tagged Tactical so "after a Tactical action [he] performed resolves" (Shinjo Jong-Ho,
+        // Shinjo Byung - exp) and "your Tactical action" (Akodo Kobi - exp) see it.
+        ["tactical-advantage"] = new("Battle", "Tactical Advantage: discard a card · performing Tactician +Force = its Focus Value", "hand", PlayerAbility: true, Performer: "own-tactician-at-battle", UsesPerTurn: AbilityUseLimit.Unlimited, Costs: ActionCost.DiscardTarget, ActionKeywords: ["Tactical"]),
         // Every player always has this ability (core rules): "any number of times per turn" (see the
         // ValidateAbility exemption below), same shape as Tactical Advantage. Only a Shugenja can
         // ever hold a Spell attachment -- Follower Shugenja are excluded (own-unbowed-shugenja-
@@ -3294,6 +3296,82 @@ public static class AbilityCatalog
         // actions the target performs may not target this Shugenja." The Shugenja is the named performer (own-wielder) so the Chi comparison reads him; the bar is TargetBars.cs.
         ["hearts-enemy-weaken"] = new("Battle", "Target an enemy Personality with lower Chi than this Shugenja: Give the target -4F. If this Shugenja is Air, actions the target performs may not target this Shugenja",
             "enemy-personality-chi-lt-performer", Performer: "own-wielder"),
+        // ---- The Shadow's Embrace pass (issue #476), batch 2 (helpers in ShadowsEmbraceBatch2.cs; executed by RunShadowsEmbraceBatch2Effect). ----
+        // Kitsu Sorano - Experienced (oracle-l5r-9826): "Reaction: After Sorano enters play or overlays: Create two 2F/2C/3PH Lion Clan • Samurai • Ancestor • Spirit
+        // Personalities." Kitsune Ohsuki's entering-play creation with Count 2 (the Lion Ancestor Proxy, oracle-l5r-9785); an Experienced overlay opens the same entry window
+        // (MatchEngine.Overlay), so "or overlays" needs nothing further.
+        ["sorano-create"] = new("Reaction", "After Sorano enters play or overlays: Create two 2F/2C/3PH Lion Clan · Samurai · Ancestor · Spirit Personalities", "none", Trigger: "own-enters-play",
+            Creates: new(CardType.Personality, Force: 2, Chi: 2, PersonalHonor: 3, Keywords: ["Lion Clan", "Samurai", "Ancestor", "Spirit"], ProxyId: "oracle-l5r-9785", Count: 2)),
+        // Kitsuki Yoyugi (oracle-l5r-9817), read off the scan: "Political Open: Target a Personality and bow Yoyugi unless the target is non-Unique or Unicorn Clan: The target's
+        // base abilities may not be used." One printed action split by its target (a shared UsageKey, The Shakash's shape): a Unique non-Unicorn target costs the bow, any other
+        // is free. "May not be used" locks every printed ability of the target for the turn (the single-ability lock of Doji Hakuseki, ForgottenLegacyBatch1.cs, applied to all of them).
+        ["yoyugi-lock"] = new("Open", "Political Open: Target a Unique, non-Unicorn Clan Personality and bow Yoyugi: The target's base abilities may not be used", "se2-unique-non-unicorn-personality",
+            UsageKey: "yoyugi-lock", ActionKeywords: ["Political"], Costs: ActionCost.BowSource),
+        ["yoyugi-lock-free"] = new("Open", "Political Open: Target a non-Unique or Unicorn Clan Personality: The target's base abilities may not be used", "se2-non-unique-or-unicorn-personality",
+            UsageKey: "yoyugi-lock", ActionKeywords: ["Political"]),
+        // Longtooth (oracle-l5r-9860): "Will not attach cards." is his Effect (a host-side attach refusal, ShadowsEmbraceBatch2.cs); "Battle: Target an enemy Follower or Personality
+        // without Followers: Destroy it." -- The Towers of the Yogo's own target category.
+        ["longtooth-destroy"] = new("Battle", "Target an enemy Follower or Personality without Followers: Destroy it", "enemy-card-without-followers"),
+        // Moshi Rukia (oracle-l5r-9830): "Battle: Target an opposed attachment: Put it into its owner's hand. You may take an additional Battle action." -- an attachment at the
+        // current battlefield whose side faces at least one enemy unit (core rules Glossary, Opposed); Zinan's return to hand, then the grant.
+        ["rukia-return"] = new("Battle", "Target an opposed attachment: Put it into its owner's hand. You may take an additional Battle action", "se2-opposed-attachment"),
+        // Moto Morio (oracle-l5r-9861): "Battle: Choose your performing Follower: Melee Attack with strength equal to its Force." -- any of his controller's Followers at the
+        // current battlefield (bowed or not: the text names no "unbowed"), which performs the Attack; the strength is read off its current Force.
+        ["morio-attack"] = new("Battle", "Choose your performing Follower: Melee Attack with strength equal to its Force", "attack", Performer: "se2-own-follower-at-battle"),
+        // Natsumi (oracle-l5r-9839), read off the scan: "Will not attach Followers or Items." is her Effect; "Battle: Even if Natsumi is bowed: If it would be opposed, move it to
+        // the current battlefield. Straighten its unit if it moved." -- Asako Chukage's own tireless reinforce (bowed-exemption list, MovesToBattle).
+        ["natsumi-move"] = new("Battle", "Even if Natsumi is bowed: If it would be opposed, move it to the current battlefield. Straighten its unit if it moved", "none", MovesToBattle: true),
+        // Niiro no Oni (oracle-l5r-9856): "After Niiro enters play: Lose 3 Honor." is his EntryHonorLoss; "Will not attach cards." his Effect; "Battle: Melee 5 Attack. Give the
+        // target a -5F token (if he is still in play)." -- the token follows the Attack's resolution, hit or miss (AfterShadowsEmbraceBatch2Attack).
+        ["niiro-attack"] = new("Battle", "Melee 5 Attack. Give the target a -5F token (if he is still in play)", "attack"),
+        // Shiba Kudome - Experienced (oracle-l5r-9840): "Battle: Target an enemy Personality: Kudome duels him. Destroy the duel's loser. Give Kudome a +1F Fire token if she won and
+        // you control a Shugenja." -- her base printing's duel (shiba-kudome-duel) with Steel on Steel's destruction of the loser.
+        ["kudome-exp-duel"] = new("Battle", "Target an enemy Personality: Kudome duels him. Destroy the duel's loser. Give Kudome a +1F Fire token if she won and you control a Shugenja",
+            "enemy-personality", IssuesDuel: true),
+        // Shiba Shirou (oracle-l5r-9841): "Shirou has +2F while you control a Shugenja." is his Effect; "Battle: Melee 4 Attack."
+        ["shirou-attack"] = new("Battle", "Melee 4 Attack", "attack"),
+        // Shinjo Jong-Ho (oracle-l5r-9862): "Reaction: After a Tactical action Jong-Ho performed resolves, target a card opposing him with lower Force: Bow it." -- Shinjo Byung - exp's
+        // after-action-resolved trigger (the resolved action's performer, a Tactical action), with a target: an enemy Personality or Follower on the other side of Jong-Ho's battlefield
+        // whose Force is lower than his.
+        ["jongho-bow"] = new("Reaction", "After a Tactical action Jong-Ho performed resolves, target a card opposing him with lower Force: Bow it", "se2-card-opposing-source-with-lower-force",
+            Trigger: AfterActionReactionTriggers.AfterActionResolved),
+        // Shinjo Min-Hee (oracle-l5r-9863): "Limited: Target a Follower in your discard pile: Put it into your hand." "Tactical Battle: Target an enemy card without attachments:
+        // Destroy it. Remove it from the game if it is Dragon Clan. You may discard a Follower (from your hand); if you did, draw a card." -- the optional discard is a 0-1 slot of a
+        // Follower in her controller's hand (Akodo Tezuka's hand slot), discarded and replaced by a draw after the destruction.
+        ["minhee-return"] = new("Limited", "Target a Follower in your discard pile: Put it into your hand", "se2-own-follower-in-discard"),
+        ["minhee-destroy"] = new("Battle", "Tactical Battle: Target an enemy card without attachments: Destroy it. Remove it from the game if it is Dragon Clan. You may discard a Follower (from your hand); if you did, draw a card",
+            "slots", ActionKeywords: ["Tactical"],
+            Slots: [new("target", "enemy-card-without-attachments", "An enemy card without attachments"), new("follower", "se2-own-follower-in-hand", "A Follower in your hand to discard for a card (optional)", 0, 1)]),
+        // Shosuro Nobu (oracle-l5r-9846): "Battle: Target an enemy Personality: Move him home." -- The Shakash's own move-home half.
+        ["nobu-move-home"] = new("Battle", "Target an enemy Personality: Move him home", "enemy-personality", Move: new(MoveSpec.Target, MoveSpec.Home)),
+        // Shosuro Ryoken (oracle-l5r-9847): "Political Reaction: After Ryoken enters play, target a Personality: Dishonor him." (a targeted entering-play Reaction, Mastering the
+        // Elements' listing) and "Political Reaction: After a battle resolves, if Ryoken was at its battlefield during its resolution in which you destroyed a province or army: The
+        // enemy leader loses 2 Honor." -- the after-resolution window (AfterResolution.cs), Tales of Dishonor's "you destroyed any enemy units or a province", with Ryoken himself
+        // still at that battlefield.
+        ["ryoken-dishonor"] = new("Reaction", "Political Reaction: After Ryoken enters play, target a Personality: Dishonor him", "personality", Trigger: "own-enters-play", ActionKeywords: ["Political"]),
+        ["ryoken-honor-loss"] = new("Reaction", "Political Reaction: After a battle resolves, if Ryoken was at its battlefield during its resolution in which you destroyed a province or army: The enemy leader loses 2 Honor",
+            "none", Trigger: ReactionTriggers.AfterBattleResolution, ActionKeywords: ["Political"]),
+        // Shugorei (oracle-l5r-9820): "Shugorei has -2F while it is your turn." is its Effect; "Limited: If you are a Dragon Clan player and none of your provinces have been destroyed
+        // since your last turn ended: Gain 2 Honor." -- Ohsuki's Sparrow's own condition (MatchState.ProvinceDestroyedSinceTurnEnd), plus the Stronghold Clan.
+        ["shugorei-honor"] = new("Limited", "If you are a Dragon Clan player and none of your provinces have been destroyed since your last turn ended: Gain 2 Honor", "none"),
+        // Yamazaki - Experienced (oracle-l5r-9853): "Once per phase, before you lose exactly 1 Honor: Negate the loss." is his Effect (a GainHonor hook); "Fear Battle: Target another
+        // Personality: Yamazaki threatens him. Straighten him. If Yamazaki has a Weapon, you may target and bow an enemy card." -- a straighten, and an optional 0-1 slot open only while
+        // he has a Weapon.
+        ["yamazaki-exp-threaten"] = new("Battle", "Fear Battle: Target another Personality: Yamazaki threatens him. Straighten him. If Yamazaki has a Weapon, you may target and bow an enemy card",
+            "slots", ActionKeywords: ["Fear"],
+            Slots: [new("target", "se2-personality-other-than-source", "Another Personality to straighten"), new("bow", "se2-enemy-card-if-source-has-weapon", "An enemy card to bow, if Yamazaki has a Weapon (optional)", 0, 1)]),
+        // Yasuki Ikke (oracle-l5r-9809): "Reaction: After another player's Battle action targets one of your Merchants, pay 2 Gold: Either negate its effects on him or make the player
+        // lose 2 Honor." -- the targeted-by-action window (Jinn-Kuen's Merchant shape), the two outcomes as two halves sharing one use (Grappling the Snake's shape).
+        ["ikke-negate"] = new("Reaction", "After another player's Battle action targets one of your Merchants, pay 2 Gold: Negate its effects on him", "none",
+            Trigger: ReactionTriggers.TargetedByAction, UsageKey: "ikke-response", Cost: GoldCostRule.Fixed(2)),
+        ["ikke-honor-loss"] = new("Reaction", "After another player's Battle action targets one of your Merchants, pay 2 Gold: Make the player lose 2 Honor", "none",
+            Trigger: ReactionTriggers.TargetedByAction, UsageKey: "ikke-response", Cost: GoldCostRule.Fixed(2)),
+        // "Battle: Even if Ikke is not at the current battlefield, target your Merchant: Move him home." -- Shinjo Junpei's SourceUnitMayBeAway; the Merchant is at the battlefield.
+        ["ikke-move-home"] = new("Battle", "Even if Ikke is not at the current battlefield, target your Merchant: Move him home", "own-personality-with-keyword", RequiredKeywords: ["Merchant"],
+            SourceUnitMayBeAway: true, Move: new(MoveSpec.Target, MoveSpec.Home)),
+        // Yoritomo Kanahashi (oracle-l5r-9833): "Other players' Personalities and attachments (in play) have -2 Gold Cost." is his Effect (a CardGoldCost term); "Battle: Target an enemy
+        // Personality: Move him home. If he is Crane Clan, bow him."
+        ["kanahashi-move-home"] = new("Battle", "Target an enemy Personality: Move him home. If he is Crane Clan, bow him", "enemy-personality", Move: new(MoveSpec.Target, MoveSpec.Home)),
     });
 }
 
@@ -3456,8 +3534,8 @@ public sealed partial class MatchEngine
         }
         Emit("clanAlignmentRemoved", $"{Definition(card).Name} permanently loses his Clan Alignment keywords.", card.OwnerId, card.Id);
     }
-    private bool LoyaltyAllowsControl(CardInstance card, string clan) =>
-        (!Keyword(card, "Loyal") || ClanAlignments(card).Length == 0 || HasClanAffiliation(card, clan)) && !ControlRefusedByClan(card, clan);
+    private bool LoyaltyAllowsControl(CardInstance card, string clan, int? playerId = null) =>
+        (!Keyword(card, "Loyal") || ClanAlignments(card).Length == 0 || HasClanAffiliation(card, clan) || MrikaLoyalWaived(card, playerId)) && !ControlRefusedByClan(card, clan);
     // "Attachment": lasts while the granting attachment stays attached (cleared in DestroyAttachment).
     // "Turn": cleared at FinishTurn, the default for a keyword granted by an action's effect.
     // "Permanent": only when the granting card's text says so; never auto-cleared.
@@ -3520,7 +3598,9 @@ public sealed partial class MatchEngine
         // Before the Dawn (issue #431): Wrathful Dead, and the actions that destroy their target.
         or "wrathful-dead-destroy" or "anger-management-destroy" or "dismissing-the-cur-move" or "spirit-kensai-destroy" or "spirit-commander-destroy" or "embers-final-fire-destroy" or "red-hunger-personality" or "crimson-mark-destroy"
         // Forgotten Legacy pass (issue #467), batch 3: Broken Alliance destroys its target attachment; Cast Aside the Weak destroys its target when its Samurai is a Paragon.
-        or "broken-alliance-destroy" or "cast-aside-bow";
+        or "broken-alliance-destroy" or "cast-aside-bow"
+        // The Shadow's Embrace pass (issue #476), batch 2: Longtooth and Shinjo Min-Hee destroy their target.
+        or "longtooth-destroy" or "minhee-destroy";
     // The actions whose ONLY effect is to straighten their target: against a card that may not be straightened this turn (Basic Lesson) they are refused outright, where an action that
     // also does something else (Defensive Stance's +3F) still resolves and only its straightening is skipped (Straighten refuses it).
     private static bool StraightensOnly(string abilityId) => abilityId is "jinn-kuen-straighten" or "kodo-straighten" or "munefusa-straighten" or "mitsuko-straighten" or "ritual-preparation-straighten"
@@ -3574,6 +3654,8 @@ public sealed partial class MatchEngine
         "master-of-beasts-straighten" or "peace-of-the-kami-negate" or "earths-strength-straighten" => "straighten",
         // Forgotten Legacy pass (issue #467), batch 3: Feint & Strike moves its enemy target home; Creating Order's straighten half straightens its target's unit.
         "feint-strike-move" => "move",
+        // The Shadow's Embrace pass (issue #476), batch 2: Shosuro Nobu, Yoritomo Kanahashi and Yasuki Ikke move their target home.
+        "nobu-move-home" or "kanahashi-move-home" or "ikke-move-home" => "move",
         "creating-order-straighten" => "straighten",
         _ => null
     };
@@ -3620,6 +3702,8 @@ public sealed partial class MatchEngine
         or "kazan-shame" or "shinoda-exp-bow-destroy"
         // Forgotten Legacy pass (issue #467), batch 3: Cast Aside the Weak and Entrenched Position bow their enemy target unconditionally.
         or "cast-aside-bow" or "entrenched-bow"
+        // The Shadow's Embrace pass (issue #476), batch 2: Shinjo Jong-Ho bows his target; Yoritomo Kanahashi bows his when it is Crane Clan.
+        or "jongho-bow" or "kanahashi-move-home"
         // Kitsu Fukui (issue #337): bows an enemy card (the performer's bow-or-destroy is a cost, never the target).
         or "fukui-bow"
         // Issue #336: Doji Yoshitada, Gold and Steel's two bows and (its bow half) their target.
@@ -3901,7 +3985,8 @@ public sealed partial class MatchEngine
     // null); a target-dependent conditional simply falls back to its unconditional value then.
     // sourceId (issue #207 follow-up, Togashi Sakata): the performing card itself, needed to read a
     // live token count off it -- optional, since most Attacks here need no such thing.
-    private int AttackStrength(string abilityId, PlayerState player, CardInstance? target = null, string? sourceId = null) => ForgottenLegacyBatch5AttackStrength(abilityId, sourceId, target) ?? abilityId switch
+    private int AttackStrength(string abilityId, PlayerState player, CardInstance? target = null, string? sourceId = null) => ForgottenLegacyBatch5AttackStrength(abilityId, sourceId, target)
+        ?? ShadowsEmbraceBatch2AttackStrength(abilityId, sourceId) ?? abilityId switch
     {
         "carpenter-castle-siege" => 5,
         // Togashi Sakata: "Ranged 4 Attack, with +1 strength for each Sake token on Sakata" -- only
@@ -4045,6 +4130,7 @@ public sealed partial class MatchEngine
     // share the same resolution pathway (core rules Glossary — Ranged Attack/Melee Attack).
     private static string AttackKind(string abilityId) => abilityId switch
     {
+        "morio-attack" or "niiro-attack" or "shirou-attack" => "Melee", // The Shadow's Embrace pass (issue #476), batch 2.
         "carpenter-castle-siege" or "monastery-fire-attack" or "torazu-fire-attack" => "Ranged",
         "shiro-shiba-melee" or "stalking-tiger-attack" or "unparalleled-sword-attack" or "training-weapon-attack" => "Melee",
         "shinjo-eun-sahng-attack" or "shosuro-konishi-attack" or "tsuruchi-kosoko-attack" or "tsuruchi-isas-attack" or "bayushi-kahoku-attack" or "asako-ume-attack" or "training-honor-cost-attack" => "Ranged",
@@ -4283,6 +4369,7 @@ public sealed partial class MatchEngine
         AfterSticksAndStonesAttack(abilityId, playerId, targetId, targetInPlayBefore); // Seeds of Decay pass (issue #453), batch 1.
         AfterForgottenLegacyBatch1Attack(abilityId, targetId, targetInPlayBefore, sourceId); // Forgotten Legacy pass (issue #467), batch 1: Bayushi Higaonna.
         NoteThundersWrathAttack(abilityId, targetId, targetInPlayBefore); // Forgotten Legacy pass (issue #467), batch 5.
+        AfterShadowsEmbraceBatch2Attack(abilityId, targetId, sourceId); // The Shadow's Embrace pass (issue #476), batch 2: Niiro no Oni's -5F token.
         // Tsuruchi Yakusho (issue #276 follow-up): this specific Attack's own resolution has now fully
         // completed -- the single funnel every Attack resolves through, deferred or not -- so any
         // immunity granted for it is cleared here, never carried into a later, unrelated Attack.
@@ -4651,6 +4738,8 @@ public sealed partial class MatchEngine
                 or "vengeful-straighten" or "osawa-bow" or "osawa-straighten"
                 // The Shadow's Embrace pass (issue #476), batch 5: Celestial Sword of the Crab - exp ("Battle/Open: Even if this card is bowed: Straighten this unit").
                 or "celestial-sword-crab-straighten"
+                // The Shadow's Embrace pass (issue #476), batch 2: Natsumi ("Even if Natsumi is bowed").
+                or "natsumi-move"
                 // Colonial Harbor (Forgotten Legacy pass, issue #467): "Your Stronghold's abilities have Tireless."
                 || TirelessStronghold(source), "Abilities on bowed cards cannot be used.");
             uses = source.AbilityUses;
@@ -5024,6 +5113,8 @@ public sealed partial class MatchEngine
                 // Yoritomo Emoto: "your performing Follower" -- any unbowed Follower of the acting player's in play whose unit is at the current battlefield (a Follower is at the
                 // battlefield when its host is; only meaningful while acting as a Battle action).
                 "own-unbowed-follower-at-battle" => Definition(performer).Type == CardType.Follower && !performer.Bowed && performer.Zone == Zone.Attached && (!actingAsBattle || AtBattle(performer)),
+                // The Shadow's Embrace pass (issue #476), batch 2: Moto Morio's "your performing Follower" -- bowed or not (no "unbowed" is printed).
+                "se2-own-follower-at-battle" => Definition(performer).Type == CardType.Follower && performer.Zone == Zone.Attached && (!actingAsBattle || AtBattle(performer)),
                 // No "unbowed" qualifier printed -- Monastery of New Thought's performer may be bowed.
                 "own-personality-with-fire-token-at-battle" => Definition(performer).Type == CardType.Personality && AtBattle(performer) && HasToken(performer, "Fire"),
                 // Again!'s shape: also no "unbowed" qualifier -- the whole point is straightening an
@@ -5536,6 +5627,9 @@ public sealed partial class MatchEngine
                 // The Shadow's Embrace pass (issue #476), batch 5. Celestial Sword of the Phoenix: "your honorably dead Phoenix Clan Personality" -- the Clan named by RequiredKeywords.
                 else if (ability.Target == "own-honorably-dead-clan-personality")
                     Require(IsOwnHonorablyDeadClanPersonality(target, player.Id, ability), "Choose one of your own honorably dead Personalities of that Clan.");
+                // The Shadow's Embrace pass (issue #476), batch 2: Shinjo Min-Hee's Follower in a discard pile or in hand (ShadowsEmbraceBatch2.cs).
+                else if (IsShadowsEmbraceBatch2OutOfPlayTarget(ability.Target))
+                    ValidateShadowsEmbraceBatch2OutOfPlayTarget(ability.Target, player, target);
                 else
                 {
                     Require(InPlay(target), "Target a card in play.");
@@ -5997,6 +6091,8 @@ public sealed partial class MatchEngine
                         // Set the Fields Aflame (The Shadow's Embrace pass, issue #476 batch 5): "a Region" -- attached to any province, either player's.
                         "region" => type == CardType.Region && target.Zone == Zone.Region,
                         _ => false
+                        // The Shadow's Embrace pass (issue #476), batch 2: this batch's in-play categories (ShadowsEmbraceBatch2.cs).
+                        _ => ShadowsEmbraceBatch2TargetAllows(ability.Target, command, player, source, target)
                     }, "That card does not meet this ability's target or performer requirements.");
                 }
             }
@@ -6041,6 +6137,8 @@ public sealed partial class MatchEngine
         ValidateSeedsOfDecayBatch3(id, command, ability, player, source);
         // Forgotten Legacy pass (issue #467), batch 1: the per-id conditions of this batch's cards (ForgottenLegacyBatch1.cs).
         ValidateForgottenLegacyBatch1(id, command, player, source);
+        // The Shadow's Embrace pass (issue #476), batch 2: the per-id conditions of this batch's cards (ShadowsEmbraceBatch2.cs).
+        ValidateShadowsEmbraceBatch2(id, command, player, source);
         // The Gold cost (issue #303): every ability's price -- Equip (Battle)/Soshi Neiru's Spell cost, Low
         // Market's "2 less, to a minimum of 1", Your Clan Needs You!'s recruit cost minus 6, Shinden
         // Shorai's "all costs", Singh Remnants' own cost, a Strategy/Discipline's printed cost, Kharmic's
@@ -8658,6 +8756,22 @@ public sealed partial class MatchEngine
             case "hakuseki-disable": case "rengetsu-disable": case "nikaru-bow-lock": case "abodan-move": case "kagako-create": case "gyoken-attach":
                 if (RunForgottenLegacyBatch1Effect(id, command, ability, player, source, target, consumedGrant, playedFromDiscard, opponentHonorBeforeBattleAction, bowedBeforeAction, preExistingGrants)) return;
                 break;
+            // The Shadow's Embrace pass (issue #476), batch 2: every case is in ShadowsEmbraceBatch2.cs (true: the action is paused -- an Attack's or a duel's window).
+            // Natsumi: "If it would be opposed, move it to the current battlefield. Straighten its unit if it moved." (Asako Chukage's shape; kept here, where the MovesToBattle
+            // audit reads the move-to-a-battlefield cases.)
+            case "natsumi-move":
+            {
+                var natsumiBattle = _state.CurrentBattleProvince!.Value;
+                var natsumiThere = source!.Zone == Zone.Battlefield && source.ProvinceIndex == natsumiBattle;
+                if (Army(1 - player.Id, natsumiBattle).Any() && !natsumiThere && MoveToBattlefield(source, natsumiBattle)) StraightenUnit(source);
+                else Emit("effectFailed", $"{Definition(source).Name} did not move (it would not be opposed there, or is there already).", player.Id, source.Id);
+                break;
+            }
+            case "yoyugi-lock": case "yoyugi-lock-free": case "longtooth-destroy": case "rukia-return": case "morio-attack": case "niiro-attack":
+            case "shirou-attack": case "jongho-bow": case "minhee-return": case "minhee-destroy": case "nobu-move-home": case "ryoken-dishonor":
+            case "ryoken-honor-loss": case "shugorei-honor": case "yamazaki-exp-threaten": case "ikke-negate": case "ikke-honor-loss": case "ikke-move-home": case "kanahashi-move-home":
+                if (RunShadowsEmbraceBatch2Effect(id, ability, command, player, source, target, consumedGrant)) return;
+                break;
             // Embers of War pass, batch 3 (issue #460; helpers in EmbersOfWarBatch3.cs).
             case "weak-poison-force-zero": ApplyModifier(target!, source!.Id, id, "Force", -CardForce(target!)); break;
             case "accusation-negate": NegateHeldAction(source!); break;
@@ -9562,6 +9676,7 @@ public sealed partial class MatchEngine
                 "own-wielder" => source is { Zone: Zone.Attached, AttachedTo: { } wielderId } ? [wielderId] : [],
                 "own-shadowlands-ninja-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && HasClanAffiliation(c, "Shadowlands") && Keyword(c, "Ninja") && (!actingAsBattle || AtBattle(c))).Select(c => (string?)c.Id).ToArray(),
                 "own-unbowed-follower-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Follower && !c.Bowed && c.Zone == Zone.Attached && (!actingAsBattle || AtBattle(c))).Select(c => (string?)c.Id).ToArray(),
+                "se2-own-follower-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Follower && c.Zone == Zone.Attached && (!actingAsBattle || AtBattle(c))).OrderBy(c => c.Id, StringComparer.Ordinal).Select(c => (string?)c.Id).ToArray(),
                 "own-castle-or-siege" => _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && !c.Bowed && (Keyword(c, "Castle") || Keyword(c, "Siege"))).Select(c => (string?)c.Id).ToArray(),
                 "own-unbowed-card-with-any-required-keyword" => _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && !c.Bowed && (ability.RequiredKeywords ?? []).Any(k => Keyword(c, k))).OrderBy(c => c.Id, StringComparer.Ordinal).Select(c => (string?)c.Id).ToArray(),
                 "own-source-or-unbowed-holding-with-keyword" => new[] { source?.Id }.Concat(_state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Holding && !c.Bowed && HasKeywords(c, ability.RequiredKeywords)).Select(c => (string?)c.Id)).ToArray(),
@@ -9684,6 +9799,8 @@ public sealed partial class MatchEngine
                     "face-up-personality-out-of-play" => _state.Cards.Values.Where(c => Definition(c).Type == CardType.Personality && (c.Zone == Zone.Province && c.FaceUp || c.Zone is Zone.Dead or Zone.DynastyDiscard)).Select(c => (string?)c.Id).ToArray(),
                     // The Shadow's Embrace pass (issue #476), batch 5: Celestial Sword of the Phoenix's dead-pile target.
                     "own-honorably-dead-clan-personality" => _state.Cards.Values.Where(c => IsOwnHonorablyDeadClanPersonality(c, playerId, ability)).Select(c => (string?)c.Id).ToArray(),
+                    // The Shadow's Embrace pass (issue #476), batch 2: Shinjo Min-Hee's "a Follower in your discard pile".
+                    "se2-own-follower-in-discard" => ShadowsEmbraceBatch2OwnFollowersInDiscard(playerId).Select(c => (string?)c.Id).ToArray(),
                     _ => inPlay };
                 // Shosuro Hawado's battlefield half also needs its destination (command.Province): one
                 // candidate per battlefield not yet resolved this Battle phase -- ValidateAbility below

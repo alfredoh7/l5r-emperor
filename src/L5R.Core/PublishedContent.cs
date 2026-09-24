@@ -2515,4 +2515,8 @@ public static class PublishedContent
     public static PublishedSnapshot SpellWave22 { get; } = Load("L5R.Published.SpellWave22.json", "spell-wave-22", requireDecks: false);
     /// <summary>Item wave 14 (The Shadow's Embrace pass, issue #476, batch 5): Blood of the Preserver, Celestial Sword of the Crab, of the Crane and of the Phoenix, The String of the Colonies, The Victor, Vanquisher's Armor.</summary>
     public static PublishedSnapshot ItemWave14 { get; } = Load("L5R.Published.ItemWave14.json", "item-wave-14", requireDecks: false);
+    /// <summary>Personality wave 69 (The Shadow's Embrace pass, issue #476, batch 2): Kitsu Sorano (Experienced), Kitsuki Yoyugi, Longtooth, M'rika, Moshi Rukia, Moto Morio,
+    /// Natsumi, Niiro no Oni, Quelsa, Shiba Kudome (Experienced), Shiba Shirou, Shinjo Jong-Ho, Shinjo Min-Hee, Shosuro Nobu, Shosuro Ryoken, Shugorei, Yamazaki (Experienced),
+    /// Yasuki Ikke, Yoritomo Kanahashi.</summary>
+    public static PublishedSnapshot PersonalityWave69 { get; } = Load("L5R.Published.PersonalityWave69.json", "personality-wave-69", requireDecks: false);
 }

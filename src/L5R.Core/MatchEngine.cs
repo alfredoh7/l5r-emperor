@@ -580,6 +580,7 @@ public sealed partial class MatchEngine
         // Daigotsu Yamato loses Brash for good if another player is Scorpion Clan (SeedsOfDecayBatch4.cs).
         if(HasSenseiEntryEffect(Definition(card).Effect)) DiscardOtherSensei(playerId,card);
         if(Definition(card).Effect==YamatoEntryEffect) RemoveBrashIfOpponentIsScorpion(card);
+        ApplyShadowsEmbraceBatch2EntryEffects(playerId,card); // The Shadow's Embrace pass (issue #476), batch 2: M'rika's "After M'rika enters play: Gain 2 Honor."
     }
     // Sensei (Mirumoto Hikaro / Mirumoto Yozo, Experienced 2): "your OTHER Sensei Personalities" --
     // every OTHER Sensei-keyword Personality this same controller has, either unbowed-or-bowed in
@@ -772,7 +773,7 @@ public sealed partial class MatchEngine
             error = "Experienced Personalities may only overlay a Personality with the same title.";
         else if (higherLevel <= lowerLevel)
             error = "The overlaying Personality must have a higher Experience Level.";
-        else if (!LoyaltyAllowsControl(card, Player(playerId).Clan))
+        else if (!LoyaltyAllowsControl(card, Player(playerId).Clan, playerId))
             error = "Loyal Personalities can only be recruited by a Clan they are aligned with.";
         else if ((Keyword(card, "Unique") || Keyword(card, "Singular")) && _state.Cards.Values.Any(c => c.Id != target.Id && c.OwnerId == playerId && InPlay(c)
             && string.Equals(Experienced.BaseTitle(Definition(c).Name), Experienced.BaseTitle(Definition(card).Name), StringComparison.OrdinalIgnoreCase)))
@@ -992,7 +993,7 @@ public sealed partial class MatchEngine
         // Loyal (core rules Glossary): a Personality with one or more Clan affiliations may only be
         // controlled by a matching Clan. With none remaining it is Unaligned, so Loyal imposes no
         // Clan restriction, including for a player whose Stronghold represents no Clan.
-        else if(def.Type==CardType.Personality && !LoyaltyAllowsControl(card,player.Clan)) error="Loyal Personalities can only be recruited by a Clan they are aligned with.";
+        else if(def.Type==CardType.Personality && !LoyaltyAllowsControl(card,player.Clan,player.Id)) error="Loyal Personalities can only be recruited by a Clan they are aligned with.";
         else if((clanDiscount||clanAllegiance)&&!inClan) error="Clan discount and allegiance require your Clan's Personality.";
         // Akodo Chiyo / Kitsu Ririko (issue #299): a Personality's own printed "Clan X players may ignore
         // / it enters play ignoring Honor Requirement" waiver (CardDefinition.HonorRequirementWaiverClan),
@@ -1951,6 +1952,7 @@ public sealed partial class MatchEngine
     // two Weapons, not three.
     private bool AttachmentAllowed(CardInstance attachment,CardInstance target)
     {
+        if(HostRefusesAttachment(attachment,target)) return false; // The Shadow's Embrace pass (issue #476), batch 2: "Will not attach cards" / "Will not attach Followers or Items".
         if(Keyword(attachment,"Armor")) return !Attachments(target.Id).Any(c=>Keyword(c,"Armor"));
         if(Keyword(attachment,"Weapon"))
         {
@@ -1999,7 +2001,7 @@ public sealed partial class MatchEngine
     // "force-with-spell" (Asako Ume), "force-if-enemy-dishonorable" (Bayushi Kahoku) and
     // "force-max-dead-pile" (Moto Shunsuke) are always-on passive bonuses, unlike the attacking-only
     // attacking-two/attacking-four Effects above.
-    private int PersonalityForce(CardInstance card) => Math.Max(0,Definition(card).Force+StatModifier(card,"Force")+TerrainForceAdjustment(card)+ForgottenLegacyBatch5Force(card)+ShadowsEmbraceBatch5Force(card)+(IsAttacking(card)?(Definition(card).Effect=="attacking-two"?2:Definition(card).Effect=="attacking-four"?4:
+    private int PersonalityForce(CardInstance card) => Math.Max(0,Definition(card).Force+StatModifier(card,"Force")+TerrainForceAdjustment(card)+ForgottenLegacyBatch5Force(card)+ShadowsEmbraceBatch5Force(card)+ShadowsEmbraceBatch2Force(card)+(IsAttacking(card)?(Definition(card).Effect=="attacking-two"?2:Definition(card).Effect=="attacking-four"?4:
         // Matsu Kaido (oracle-l5r-4934, issue #299): "Kaido has +1F while attacking" -- the plain +1
         // counterpart to attacking-two/attacking-four (Matsu Yoshito's own conditional variant below
         // starts from the same +1 base).
@@ -2982,6 +2984,8 @@ public sealed partial class MatchEngine
             Emit("honorLossReduced",$"{Player(playerId).Name}'s Honor loss from {reason} was reduced by Unimpeachable Name.",playerId,source?.Id);
             amount=reduced;
         }
+        // Yamazaki - Experienced (The Shadow's Embrace pass, issue #476, batch 2): "Once per phase, before you lose exactly 1 Honor: Negate the loss." -- the loss as it would now happen.
+        if(amount==-1 && YamazakiNegatesLoss(playerId,reason)) return;
         var player=Player(playerId); player.Honor+=amount;
         if(amount<0) RecordHonorLoss(playerId); // An Insult Answered (issue #453, batch 2): the action that cost this player Honor.
         if(amount>0) _state.CurrentActionHonorGained=true; // Moksha Patam (issue #453 batch 5): read when the action in progress is done.

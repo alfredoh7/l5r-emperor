@@ -101,6 +101,9 @@ public sealed partial class MatchEngine
             "rata-draw" => RataDestroyedAPersonality(source),
             // Shinjo Byung - exp (Gempukku pass, issue #461): "After a Tactical Battle action resolves that Byung performed" -- his own performed action (facts.PerformerId), a Battle-timed
             // ability classified Tactical through ActionCarriesKeyword (the ability's own tag, or the source card's keyword).
+            // Shinjo Jong-Ho (The Shadow's Embrace pass, issue #476, batch 2): "After a Tactical action Jong-Ho performed resolves" -- Byung's shape, any Timing.
+            "jongho-bow" => facts.PerformerId == source.Id && facts.PlayerId == playerId
+                && ActionCarriesKeyword(AbilityCatalog.All[facts.AbilityId], facts.SourceId is null ? null : Card(facts.SourceId), "Tactical"),
             "byung-additional-action" => facts.PerformerId == source.Id && facts.PlayerId == playerId && AbilityCatalog.All[facts.AbilityId].Timing == "Battle"
                 && ActionCarriesKeyword(AbilityCatalog.All[facts.AbilityId], facts.SourceId is null ? null : Card(facts.SourceId), "Tactical"),
             // Hida Yamadera - exp: "After another player's Battle action resolves, if its effects destroyed Yamadera."

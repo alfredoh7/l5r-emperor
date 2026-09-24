@@ -302,9 +302,11 @@ public sealed partial class MatchEngine
                 var ringDiscount = RingEntryDiscount(Definition(target), command.PlayerId);
                 // Purify the Soul (The Shadow's Embrace pass, issue #476 batch 5): "Attaches to an Air Shugenja paying 2 less Gold" -- through Equip (Battle) the Shugenja is the performer.
                 var purifyDiscount = command.AbilityId == "equip-battle" && command.PerformerId is not null && _state.Cards.TryGetValue(command.PerformerId, out var equipper) ? PurifyTheSoulDiscount(target, equipper) : 0;
-                if (ringDiscount + purifyDiscount > 0)
-                    return new(rule, Clamp(Math.Max(0, printed - ringDiscount - purifyDiscount) + rule.Modifier, rule.Floor),
-                        $"{name} cost {printed}{(ringDiscount > 0 ? $" − {ringDiscount} (Rings you control)" : "")}{(purifyDiscount > 0 ? $" − {purifyDiscount} (Air Shugenja)" : "")}{Modified(rule.Modifier, rule.Floor)}", null, false, target);
+                // Quelsa (The Shadow's Embrace pass, issue #476, batch 2): "Quelsa attaches Spells paying 2 less Gold" -- a Spell attached to him through an ability that pays its printed cost.
+                var quelsaDiscount = QuelsaSpellDiscount(command, target);
+                if (ringDiscount + purifyDiscount + quelsaDiscount > 0)
+                    return new(rule, Clamp(Math.Max(0, printed - ringDiscount - purifyDiscount - quelsaDiscount) + rule.Modifier, rule.Floor),
+                        $"{name} cost {printed}{(ringDiscount > 0 ? $" − {ringDiscount} (Rings you control)" : "")}{(purifyDiscount > 0 ? $" − {purifyDiscount} (Air Shugenja)" : "")}{(quelsaDiscount > 0 ? $" − {quelsaDiscount} (Quelsa)" : "")}{Modified(rule.Modifier, rule.Floor)}", null, false, target);
                 return new(rule, Clamp(printed + rule.Modifier, rule.Floor), $"{name} cost {printed}{Modified(rule.Modifier, rule.Floor)}", null, false, target);
             }
             case GoldCostBasis.TargetCurrent:
@@ -505,6 +507,8 @@ public sealed partial class MatchEngine
         if (KeywordEntryDiscount(card, playerId) is > 0 and var fudoDiscount) { raw -= fudoDiscount; basis += $" − {fudoDiscount} (Fudo, Mukudori)"; }
         // Purify the Soul (The Shadow's Embrace pass, issue #476 batch 5): "Attaches to an Air Shugenja paying 2 less Gold" -- a wielder-dependent term, like Katagi's.
         if (PurifyTheSoulDiscount(card, target) is > 0 and var purifyDiscount) { raw -= purifyDiscount; kind = GoldCostKind.Derived; basis += $" − {purifyDiscount} (Air Shugenja)"; }
+        // Quelsa (The Shadow's Embrace pass, issue #476, batch 2): "Quelsa attaches Spells paying 2 less Gold."
+        if (QuelsaAttachDiscount(card, target) is > 0 and var quelsaAttach) { raw -= quelsaAttach; kind = GoldCostKind.Derived; basis += $" − {quelsaAttach} (Quelsa)"; }
         if (raw < 0) basis += " (min 0)";
         return (Math.Max(0, raw), basis, kind);
     }
