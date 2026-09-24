@@ -589,6 +589,7 @@ public static class CardCatalog
             .Concat(PublishedContent.FollowerWave27.Cards)
             .Concat(PublishedContent.PersonalityWave63.Cards)
             .Concat(PublishedContent.StrategyWave52.Cards)
+            .Concat(PublishedContent.StrategyWave54.Cards) // Forgotten Legacy pass, batch 3 (issue #467)
             .Concat(PublishedContent.StrategyWave53.Cards)
             .Concat(PublishedContent.StrategyWave55.Cards)
             .Concat(PublishedContent.SpellWave20.Cards)

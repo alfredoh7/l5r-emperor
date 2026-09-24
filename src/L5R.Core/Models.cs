@@ -251,6 +251,12 @@ public sealed class CardInstance
     // Tireless Efforts (Second City): "Negate all current and new Force penalties on him" -- the turn it was played; while TurnNumber equals it, a Force penalty
     // (a negative Force modifier or token) is not applied to this card. Reset with the card like the other per-turn flags.
     public int ForcePenaltiesNegatedTurn { get; set; } = -1;
+    // Creating Order (Forgotten Legacy pass, issue #467 batch 3): "negate all current and new Force bonuses and penalties on him from actions" -- the turn it was played;
+    // while TurnNumber equals it, no Force modifier or Force token from a resolving action is applied to this card (ForgottenLegacyBatch3.cs).
+    public int ForceModifiersNegatedTurn { get; set; } = -1;
+    // Consideration (Forgotten Legacy pass, issue #467 batch 3): "After the next time this turn another player's action targets him, negate its effects" -- the turn the
+    // shield was raised; spent by the first such action that turn (ForgottenLegacyBatch3.cs, TurnTargetShieldNegates).
+    public int TargetShieldTurn { get; set; } = -1;
     // "May not be straightened this turn" (issue #411, Basic Lesson's Stronghold): every effect that would straighten this card is refused for the whole of the turn with this number,
     // unlike the one-shot StraightenBlockedTurn above, which negates the next attempt only. Not swept: it simply stops holding when the turn number moves on, which is after the
     // End phase, so the next Straighten phase (which is not an effect) is untouched.
@@ -802,6 +808,12 @@ public sealed class MatchState
     // ExecuteAbilityEffects actually runs -- the same defer-then-reexecute shape PendingNegatableAbility
     // already uses for beforeActionReaction.
     public GameCommand? PendingAnnouncedAction { get; set; }
+    // Entrenched Position (Forgotten Legacy pass, issue #467 batch 3): set by its Reaction inside an "announceReaction" window; the announced action then resolves negated
+    // (ResolveNegatedAction: taken, its costs paid, no effects) when the window closes. Cleared as it is read.
+    public bool AnnouncedActionNegated { get; set; }
+    // Entrenched Position: the battle (BattleNumber) in which the Attacker holds the first opportunity to act and the Defender has not yet had his first normal
+    // opportunity to act or pass -- set when the Engage window closes with the Attacker holding it, cleared the moment the Attacker cedes priority (NextAction, Pass).
+    public int AttackerLeadBattle { get; set; } = -1;
     // True for the remainder of the currently-resolving Ranged Attack's own resolution once Tsuruchi
     // Yakusho's Reaction fires -- checked by every existing Attack-strength-reducing Reaction (Fallow
     // Lands, Training's own negate) before it applies, and cleared unconditionally once that specific

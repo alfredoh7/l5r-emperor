@@ -317,7 +317,10 @@ public sealed partial class MatchEngine
                 if (rule.MinusPerformerCost)
                 {
                     if (command.PerformerId is null || !_state.Cards.TryGetValue(command.PerformerId, out var performing)) return new(rule, 0, "Choose a performing card to see this cost.", null, true, null);
-                    performerCost = CardGoldCost(performing); performerNote = $" less {Definition(performing).Name}'s Gold Cost {performerCost}";
+                    // A Yojimbo's Duty (Forgotten Legacy pass, issue #467 batch 3): "for less Gold equal to your Yojimbo's PRINTED Gold Cost plus 1" -- StatBase (the flag
+                    // GoldCostRule.StatValue already uses for "the printed value") reads the performer's printed Gold Cost instead of his current one.
+                    performerCost = rule.StatBase ? Definition(performing).GoldCost : CardGoldCost(performing);
+                    performerNote = $" less {Definition(performing).Name}'s {(rule.StatBase ? "printed " : "")}Gold Cost {performerCost}";
                 }
                 return new(rule, Clamp(recruit.Cost + rule.Modifier - performerCost, rule.Floor), $"{name} recruit cost {recruit.Cost}{derivation}{performerNote}{Modified(rule.Modifier, rule.Floor)}", recruit.Error, false, target);
             }

@@ -2455,6 +2455,9 @@ public static class PublishedContent
     public static PublishedSnapshot StrategyWave51 { get; } = Load("L5R.Published.StrategyWave51.json", "strategy-wave-51", requireDecks: false);
     // Embers of War pass, batch 3 (issue #460).
     public static PublishedSnapshot StrategyWave52 { get; } = Load("L5R.Published.StrategyWave52.json", "strategy-wave-52", requireDecks: false);
+    /// <summary>Strategy wave 54 (Forgotten Legacy pass, batch 3, issue #467): A Game of Dice, A Yojimbo's Duty, Accidental Confession, Broken Alliance, Cast Aside the Weak,
+    /// Consideration, Creating Order, Duel of Haiku, Entrenched Position, Feint &amp; Strike.</summary>
+    public static PublishedSnapshot StrategyWave54 { get; } = Load("L5R.Published.StrategyWave54.json", "strategy-wave-54", requireDecks: false);
     /// <summary>Stronghold wave 13 (issue #458): The Sacred Temple of the Phoenix - inexperienced, The Towers of the Yogo.</summary>
     public static PublishedSnapshot StrongholdWave13 { get; } = Load("L5R.Published.StrongholdWave13.json", "stronghold-wave-13", requireDecks: false);
     /// <summary>Follower wave 27 (issue #458): Devoted Yojimbo.</summary>

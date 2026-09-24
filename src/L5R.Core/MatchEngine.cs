@@ -469,7 +469,9 @@ public sealed partial class MatchEngine
                 if (_state.PendingChoice is null && _state.PendingAnnouncedAction is not null)
                 {
                     var pending=_state.PendingAnnouncedAction; _state.PendingAnnouncedAction=null;
-                    ExecuteAbilityEffects(pending);
+                    // Entrenched Position (Forgotten Legacy pass, issue #467 batch 3): a Reaction in this window negated the announced action.
+                    if(_state.AnnouncedActionNegated) { _state.AnnouncedActionNegated=false; ResolveNegatedAction(pending); }
+                    else ExecuteAbilityEffects(pending);
                 }
                 return;
             }
@@ -813,6 +815,7 @@ public sealed partial class MatchEngine
         higher.PrintedHoldsSeeded = lower.PrintedHoldsSeeded;
         higher.MovementLocks.AddRange(lower.MovementLocks);
         higher.TargetShield = lower.TargetShield;
+        higher.TargetShieldTurn = lower.TargetShieldTurn; higher.ForceModifiersNegatedTurn = lower.ForceModifiersNegatedTurn; // Forgotten Legacy pass, batch 3 (issue #467)
         higher.TargetBars.AddRange(lower.TargetBars);
         foreach (var other in _state.Cards.Values) for (var i = 0; i < other.TargetBars.Count; i++) if (other.TargetBars[i].ActorCardId == lower.Id) other.TargetBars[i] = other.TargetBars[i] with { ActorCardId = higher.Id };
         higher.AssignedToAttackTurn = Math.Max(higher.AssignedToAttackTurn, lower.AssignedToAttackTurn);
@@ -871,6 +874,7 @@ public sealed partial class MatchEngine
         card.TargetShield = false;
         card.TargetBars.Clear();
         card.ForcePenaltiesNegatedTurn = -1;
+        card.ForceModifiersNegatedTurn = -1; card.TargetShieldTurn = -1; // Forgotten Legacy pass, batch 3 (issue #467)
         card.AssignedToAttackTurn = -1;
     }
 
@@ -1185,6 +1189,7 @@ public sealed partial class MatchEngine
                 // unused grants rather than letting them linger for a future, ordinary turn -- the
                 // whole point of an Additional Action is that it resolves immediately, in a burst.
                 _state.AdditionalActions.RemoveAll(g=>g.PlayerId==_state.PriorityPlayerId && Forfeitable(g));
+                EndAttackerLeadIfCeded(_state.PriorityPlayerId,false); // Entrenched Position (Forgotten Legacy pass, issue #467 batch 3)
                 if(++_state.ConsecutivePasses==2) ResolveBattle(); else _state.PriorityPlayerId=1-_state.PriorityPlayerId;
                 break;
             case Phase.Dynasty:
@@ -1916,7 +1921,7 @@ public sealed partial class MatchEngine
     // the player still has an unused grant afterward. An ordinary action never sets this, even if
     // unrelated grants happen to be sitting unused for this player -- only the specific action that
     // touched them may skip ceding priority.
-    private void NextAction(int playerId,bool stayWithPlayer=false) { _state.ConsecutivePasses=0; _state.PriorityPlayerId=stayWithPlayer?playerId:1-playerId; }
+    private void NextAction(int playerId,bool stayWithPlayer=false) { _state.ConsecutivePasses=0; _state.PriorityPlayerId=stayWithPlayer?playerId:1-playerId; EndAttackerLeadIfCeded(playerId,stayWithPlayer); }
     private IEnumerable<CardInstance> Army(int playerId,int province) => _state.Cards.Values.Where(c=>c.OwnerId==playerId && c.Zone==Zone.Battlefield && c.ProvinceIndex==province && Definition(c).Type==CardType.Personality);
     // Province adjacency (core rules): a player's provinces sit in a line, 1-2-3-4. A destroyed
     // province is skipped entirely -- its former neighbors become directly adjacent to each other,
