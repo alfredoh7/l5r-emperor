@@ -583,6 +583,7 @@ public sealed partial class MatchEngine
         if(Definition(card).Effect==YamatoEntryEffect) RemoveBrashIfOpponentIsScorpion(card);
         ApplyShadowsEmbraceBatch2EntryEffects(playerId,card); // The Shadow's Embrace pass (issue #476), batch 2: M'rika's "After M'rika enters play: Gain 2 Honor."
         ApplyShadowsEmbraceBatch6EntryEffects(playerId,card); // Clearing Crew (The Shadow's Embrace pass, issue #476 batch 6).
+        ApplyShadowsEmbraceBatch1EntryEffects(playerId,card); // The Shadow's Embrace pass (issue #476), batch 1: Atosa's Sensei discard.
     }
     // Sensei (Mirumoto Hikaro / Mirumoto Yozo, Experienced 2): "your OTHER Sensei Personalities" --
     // every OTHER Sensei-keyword Personality this same controller has, either unbowed-or-bowed in
@@ -1617,9 +1618,13 @@ public sealed partial class MatchEngine
     private void FinishBattleResolution(int attacker,int provinceIndex,CardInstance[] a,string? conquerorUnbowedId)
     {
         var willNotBow=_state.ResolutionWillNotBowPlayerIds.ToArray();
+        // Hiruma Hikazu (The Shadow's Embrace pass, issue #476 batch 1): the Personalities with unbowed Followers in his army, read before anything bows.
+        var hikazuSpared=HikazuSparedPersonalities(a);
         foreach(var card in a.Where(c=>c.Zone==Zone.Battlefield))
         {
+            var wasBowed=card.Bowed;
             ReturnHome(card,card.Id!=conquerorUnbowedId && !willNotBow.Contains(card.OwnerId) && !ResolutionWillNotBow(card));
+            if(hikazuSpared.Contains(card.Id)) card.Bowed=wasBowed; // "(Their Followers still bow.)"
             if(card.Id==conquerorUnbowedId) Emit("conquerorStraightened",$"{Definition(card).Name} returned home unbowed (Conqueror).",card.OwnerId,card.Id);
         }
         // Terrain leaves the battlefield here, after its printed effects (already applied earlier in
@@ -1960,6 +1965,7 @@ public sealed partial class MatchEngine
     private bool AttachmentAllowed(CardInstance attachment,CardInstance target)
     {
         if(HostRefusesAttachment(attachment,target)) return false; // The Shadow's Embrace pass (issue #476), batch 2: "Will not attach cards" / "Will not attach Followers or Items".
+        if(WillNotAttachItems(Definition(attachment),target)) return false; // Chiisai (The Shadow's Embrace pass, issue #476 batch 1): "Will not attach Items."
         if(Keyword(attachment,"Armor")) return !Attachments(target.Id).Any(c=>Keyword(c,"Armor"));
         if(Keyword(attachment,"Weapon"))
         {
@@ -1988,6 +1994,7 @@ public sealed partial class MatchEngine
     // checked together wherever a legal target is decided (Equip's own Require and the offered-action
     // legal-targets filter both call this, so they can never disagree).
     private bool AttachmentLegalTarget(CardDefinition attachmentDef,CardInstance target) =>
+        !WillNotAttachItems(attachmentDef,target) && // Chiisai (The Shadow's Embrace pass, issue #476 batch 1): "Will not attach Items."
         (attachmentDef.AttachRequiresKeyword is null || KeywordOrHuman(target,attachmentDef.AttachRequiresKeyword)) &&
         (attachmentDef.AttachExcludesKeyword is null || !KeywordOrHuman(target,attachmentDef.AttachExcludesKeyword)) &&
         (attachmentDef.AttachRequiresName is null || Definition(target).Name==attachmentDef.AttachRequiresName) &&
@@ -2008,7 +2015,7 @@ public sealed partial class MatchEngine
     // "force-with-spell" (Asako Ume), "force-if-enemy-dishonorable" (Bayushi Kahoku) and
     // "force-max-dead-pile" (Moto Shunsuke) are always-on passive bonuses, unlike the attacking-only
     // attacking-two/attacking-four Effects above.
-    private int PersonalityForce(CardInstance card) => Math.Max(0,Definition(card).Force+StatModifier(card,"Force")+TerrainForceAdjustment(card)+ForgottenLegacyBatch5Force(card)+ShadowsEmbraceBatch5Force(card)+ShadowsEmbraceBatch2Force(card)+(IsAttacking(card)?(Definition(card).Effect=="attacking-two"?2:Definition(card).Effect=="attacking-four"?4:
+    private int PersonalityForce(CardInstance card) => Math.Max(0,Definition(card).Force+StatModifier(card,"Force")+TerrainForceAdjustment(card)+ForgottenLegacyBatch5Force(card)+ShadowsEmbraceBatch5Force(card)+ShadowsEmbraceBatch2Force(card)+ShadowsEmbraceBatch1Force(card)+(IsAttacking(card)?(Definition(card).Effect=="attacking-two"?2:Definition(card).Effect=="attacking-four"?4:
         // Matsu Kaido (oracle-l5r-4934, issue #299): "Kaido has +1F while attacking" -- the plain +1
         // counterpart to attacking-two/attacking-four (Matsu Yoshito's own conditional variant below
         // starts from the same +1 base).
@@ -2546,8 +2553,10 @@ public sealed partial class MatchEngine
     private HandLimitView HandLimitFor(int playerId)
     {
         var modifiers = _state.Cards.Values
-            .Where(c => c.OwnerId != playerId && InPlay(c) && Definition(c).Effect is "increase-other-hand-size" or "decrease-other-hand-size")
-            .Select(c => new HandLimitModifier(c.Id, Definition(c).Name, Definition(c).Effect == "increase-other-hand-size" ? 1 : -1)).ToArray();
+            .Where(c => c.OwnerId != playerId && InPlay(c) && Definition(c).Effect is "increase-other-hand-size" or "decrease-other-hand-size"
+                // Kazehime (The Shadow's Embrace pass, issue #476 batch 1): "Your maximum hand size is increased by one."
+                || c.OwnerId == playerId && InPlay(c) && Definition(c).Effect == "increase-own-hand-size")
+            .Select(c => new HandLimitModifier(c.Id, Definition(c).Name, Definition(c).Effect is "increase-other-hand-size" or "increase-own-hand-size" ? 1 : -1)).ToArray();
         return new(8, 8 + modifiers.Sum(m => m.Amount), modifiers);
     }
     private int MaxHandSize(int playerId) => HandLimitFor(playerId).Maximum;
@@ -2562,6 +2571,7 @@ public sealed partial class MatchEngine
             if(Card(check.TargetId).AssignedToAttackTurn != _state.TurnNumber) GainHonor(check.BeneficiaryPlayerId,1,"Tamori Tamoko",Card(check.TargetId));
         _state.PendingTamokoHonorChecks.Clear();
         ResolveProvincesHeldHonorChecks(); // Forgotten Legacy pass (issue #467), batch 1: Asahina Shigemitsu's "before it ends" Honor.
+        ResolveShadowsEmbraceBatch1TurnEnd(); // The Shadow's Embrace pass (issue #476), batch 1: Bayushi Misaki's check, Agasha Kurou's removal.
         // Spirit of the Berserker: a destruction put off "until before this turn ends" happens now.
         ResolveDelayedDestructions();
         ResolveShadowsEmbraceBatch5TurnEnd(); // The Shadow's Embrace pass (issue #476), batch 5: Celestial Sword of the Phoenix's "remove him from the game before the turn ends".
@@ -3083,6 +3093,7 @@ public sealed partial class MatchEngine
         if(_state.Phase==Phase.Action && phase!=Phase.Action) AdvanceStraightenHolds(StraightenPoint.ActionPhaseEnds);
         // "until the phase ends" holds (issue #453 batch 5, Ronin Ambushers): the whole Attack-declaration-through-battle stretch is one phase (the War Weariness convention above).
         if(PhaseFamily(phase)!=PhaseFamily(_state.Phase)) AdvanceStraightenHolds(StraightenPoint.PhaseEnds);
+        ResolveShadowsEmbraceBatch1PhaseEnd(phase); // The Shadow's Embrace pass (issue #476), batch 1: Bayushi Misaki's "before this phase ends".
         if(phase==Phase.Dynasty) DragonsBreathHonor();
         // Sentinel Spirit (issue #453, batch 2): "after the next Dynasty Phase begins".
         if(phase==Phase.Dynasty) ResolveSentinelWatches();

@@ -2529,4 +2529,8 @@ public static class PublishedContent
     public static PublishedSnapshot StrongholdWave16 { get; } = Load("L5R.Published.StrongholdWave16.json", "stronghold-wave-16", requireDecks: false);
     /// <summary>Celestial wave 7 (issue #476, batch 6): The Moon's Imperative, The Sun's Aspiration.</summary>
     public static PublishedSnapshot CelestialWave7 { get; } = Load("L5R.Published.CelestialWave7.json", "celestial-wave-7", requireDecks: false);
+    /// <summary>Personality wave 68 (The Shadow's Embrace pass, issue #476, batch 1): Agasha Kurou, Asahina Keigo, Asako Hayate, Asako Jirou, Atosa, Bayushi Misaki,
+    /// Bayushi Tarou, Bayushi Waru, Chiisai, Chuda Hitaka, Daidoji Sosuke, Daigotsu Arakan, Daigotsu Rafu, Goju Bunoro, Hida Bakari, Hiruma Hikazu, Hiruma Nikaru
+    /// (Shadow's Embrace printing), Iuchi Haruma, Kaiu Fumiko, Kakita Ichigiku, Kakita Tadanobu, Kazehime.</summary>
+    public static PublishedSnapshot PersonalityWave68 { get; } = Load("L5R.Published.PersonalityWave68.json", "personality-wave-68", requireDecks: false);
 }
