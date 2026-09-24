@@ -8,6 +8,7 @@ public partial class Main
     private int _followupStep;
     private long _followupVersion;
     private string? _followupTarget;
+    private bool _followupCandidateInspected;
     private readonly List<string> _followupChecks=[];
     private double _followupTotal;
     private bool RunDuelFollowupProbe(double delta)
@@ -68,7 +69,18 @@ public partial class Main
                 break;
             case 3:
                 Check(screen!.SelectedFocusChoiceTarget==_followupTarget&&view.Version==_followupVersion,"selecting a target never submits it");Shot("selected");
+                if(_matchProbeScenario=="choice-crowded"&&!_followupCandidateInspected)
+                {
+                    var target=Descendants(screen).OfType<CardTile>().Single(c=>c.Name=="Choice "+_followupTarget);
+                    var inspect=target.GetParent().GetChildren().OfType<Button>().Single(b=>b.Text=="Inspect");
+                    var bar=Descendants(screen).OfType<ScrollContainer>().Single(c=>c.Name=="Focus choices").GetHScrollBar();
+                    Check(inspect.GetGlobalRect().End.Y<=bar.GetGlobalRect().Position.Y,"crowded inspection button stays clear of scrollbar");
+                    Click(inspect.GetGlobalRect().GetCenter());_followupStep=21;break;
+                }
                 var confirm=Descendants(screen).OfType<Button>().Single(b=>b.Name=="Resolve Focus choice");Click(confirm.GetGlobalRect().GetCenter());_followupStep=4;break;
+            case 21:
+                Check(screen!.InspectedCard?.Id==_followupTarget&&view.Version==_followupVersion,"last crowded candidate opens original inspector without submitting");
+                _followupCandidateInspected=true;Press("Close inspection");_followupStep=3;break;
             case 4:
                 Check(view.Version==_followupVersion+1,"choice submits exactly one engine command");
                 Check(view.LastDuel!.Beats!.Any(b=>b.Kind=="FocusEffect"&&b.Source?.Definition?.Id==(_matchProbeScenario=="choice-effect"?"oracle-l5r-10123":_matchProbeScenario=="choice-straighten"?"oracle-l5r-10139":_matchProbeScenario=="choice-attach"?"oracle-l5r-6702":_matchProbeScenario=="choice-destroy"?"oracle-l5r-8002":"oracle-l5r-2031")),"choice outcome retained as a source-linked beat");

@@ -61,6 +61,8 @@ public partial class DuelScreen
         Words(cardChoices.Length>0?"ELIGIBLE CARDS":"AVAILABLE EFFECTS",new(502,27),new(600,35),22);
         var scroll=new ScrollContainer{Name="Focus choices",Position=new(493,67),Size=new(615,312),VerticalScrollMode=ScrollContainer.ScrollMode.Disabled};tray.AddChild(scroll);
         var row=new HBoxContainer();row.AddThemeConstantOverride("separation",26);scroll.AddChild(row);
+        // Leave room for the horizontal scrollbar when the legal set exceeds one row.
+        var crowdedOffset=cardChoices.Length>2?16:0;
         foreach(var option in choices)
         {
             var card=FocusChoiceCard(option.Command!.TargetId);
@@ -74,18 +76,18 @@ public partial class DuelScreen
             }
             var isSelected=option.Command.TargetId==_focusChoiceTarget;
             void Pick(){if(InputLocked||_submitted)return;_focusChoiceTarget=option.Command.TargetId;RenderActions();}
-            var face=AddFocusChoiceFace(column,card,new Vector2(14,3),247,Pick);
+            var face=AddFocusChoiceFace(column,card,new Vector2(14,3),247-crowdedOffset,Pick);
             face.Name="Choice "+card.Id;
             if(isSelected)
             {
-                var outline=new Panel{Position=new(12,1),Size=new(185,251),MouseFilter=MouseFilterEnum.Ignore};
+                var outline=new Panel{Position=new(12,1),Size=new(185-crowdedOffset*.72f,251-crowdedOffset),MouseFilter=MouseFilterEnum.Ignore};
                 outline.AddThemeStyleboxOverride("panel",Palette.Box(Colors.Transparent,Palette.Gold,2,0));column.AddChild(outline);
             }
             var pick=DuelUi.Button(isSelected?"Selected":$"Select · {view.Players[card.OwnerId].Name}",Pick,fontSize:16);
-            pick.Position=new(0,255);pick.Size=new(210,25);column.AddChild(pick);
-            var inspect=DuelUi.Button("Inspect",()=>Inspect(card),fontSize:15);inspect.Position=new(47,285);inspect.Size=new(116,25);
+            pick.Position=new(0,255-crowdedOffset);pick.Size=new(210,25);column.AddChild(pick);
+            var inspect=DuelUi.Button("Inspect",()=>Inspect(card),fontSize:15);inspect.Position=new(47,285-crowdedOffset);inspect.Size=new(116,25);
             // Scroll content includes a separate inspection affordance; selecting never submits.
-            column.CustomMinimumSize=new(210,308);column.AddChild(inspect);
+            column.CustomMinimumSize=new(210,308-crowdedOffset);column.AddChild(inspect);
         }
         var rightX=1150f;
         Words(returns?"YOUR HAND":"RESOLVE EFFECT",new(rightX,47),new(392,36),24);
