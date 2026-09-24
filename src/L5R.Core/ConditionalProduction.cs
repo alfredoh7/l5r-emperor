@@ -34,7 +34,10 @@ public enum ProductionCondition
     PayingForExpensiveCard,
     /// <summary>Platinum Mine (The Shadow's Embrace pass, issue #476 batch 6): "Produce 5 Gold, or 6 Gold if paying for an attachment." A Follower, Item or Spell
     /// being attached and paid for (an Equip, or an attach from a discard pile priced as one) -- never an action, nor a card created as an attachment.</summary>
-    PayingForAttachment
+    PayingForAttachment,
+    /// <summary>Yasuki Palaces - experienced (Emperor Edition Stronghold pass, issue #486 batch 3): "This card produces 1 less Gold when paying for a Personality." A Personality bought
+    /// (PaymentKind.Recruit) -- never an action of one, and never another kind of card.</summary>
+    PayingForPersonality
 }
 
 /// <summary>A Holding's production that depends on what it is paying for (issue #416): while a payment meets <paramref name="When"/> the Holding produces
@@ -57,6 +60,8 @@ public static class ConditionalProductionCatalog
         "ageless-shrine-gold" => new(3, ProductionCondition.PayingForKeyword, "Nonhuman"),
         // Platinum Mine (The Shadow's Embrace pass, issue #476 batch 6).
         "platinum-mine-gold" => new(6, ProductionCondition.PayingForAttachment),
+        // Yasuki Palaces - experienced (Emperor Edition Stronghold pass, issue #486 batch 3): printed 5, 1 less (4) when paying for a Personality.
+        "yasuki-palaces-gold" => new(4, ProductionCondition.PayingForPersonality),
         _ => null
     };
 }
@@ -85,6 +90,7 @@ public sealed partial class MatchEngine
             ProductionCondition.PayingForExpensiveCard =>
                 paying.Kind != PaymentKind.Action && production.Threshold is int threshold && Definition(paying.Card).GoldCost >= threshold,
             ProductionCondition.PayingForAttachment => paying.Kind == PaymentKind.Equip && Definition(paying.Card).Type is CardType.Follower or CardType.Item or CardType.Spell,
+            ProductionCondition.PayingForPersonality => paying.Kind == PaymentKind.Recruit && Definition(paying.Card).Type == CardType.Personality,
             _ => false
         };
     }

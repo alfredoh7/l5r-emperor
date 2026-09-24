@@ -2545,6 +2545,11 @@ public static class PublishedContent
     public static PublishedSnapshot EventWave7 { get; } = Load("L5R.Published.EventWave7.json", "event-wave-7", requireDecks: false);
     /// <summary>Stronghold wave 16 (issue #476, batch 6): Bishamon's Tower, Twin Forks City.</summary>
     public static PublishedSnapshot StrongholdWave16 { get; } = Load("L5R.Published.StrongholdWave16.json", "stronghold-wave-16", requireDecks: false);
+    /// <summary>Stronghold wave 17 (Emperor Edition Stronghold pass, issue #486, batch 1): Eternal Victory Dojo, Hidden Falls Dojo, Keep of the Dead, Koshin Keep, Kyuden Otomo - exp, Library of Rebirth, Midday Shadow Court.</summary>
+    public static PublishedSnapshot StrongholdWave17 { get; } = Load("L5R.Published.StrongholdWave17.json", "stronghold-wave-17", requireDecks: false);
+    /// <summary>Stronghold wave 19 (Emperor Edition Stronghold pass, issue #486, batch 3): The Khan's Estate, The Otoro Estate, The Shadow's Lair, The Spider's Web, The Temple of Death,
+    /// Watchful Eye Dojo, Yasuki Palaces.</summary>
+    public static PublishedSnapshot StrongholdWave19 { get; } = Load("L5R.Published.StrongholdWave19.json", "stronghold-wave-19", requireDecks: false);
     /// <summary>Celestial wave 7 (issue #476, batch 6): The Moon's Imperative, The Sun's Aspiration.</summary>
     public static PublishedSnapshot CelestialWave7 { get; } = Load("L5R.Published.CelestialWave7.json", "celestial-wave-7", requireDecks: false);
     /// <summary>Personality wave 74 (The Shadow's Embrace pass, issue #476, batch 1): Agasha Kurou, Asahina Keigo, Asako Hayate, Asako Jirou, Atosa, Bayushi Misaki,
@@ -2556,4 +2561,7 @@ public static class PublishedContent
     public static PublishedSnapshot PersonalityWave68 { get; } = Load("L5R.Published.PersonalityWave68.json", "personality-wave-68", requireDecks: false);
     /// <summary>Personality wave 71 (Emperor Edition Personality pass, issue #477, batch 4): fifteen Crane, Scorpion and Ninja Personalities wired whole.</summary>
     public static PublishedSnapshot PersonalityWave71 { get; } = Load("L5R.Published.PersonalityWave71.json", "personality-wave-71", requireDecks: false);
+    /// <summary>Stronghold wave 18 (Emperor Edition Stronghold pass, issue #486, batch 2): Palace of the Breaking Dawn, Pillars of Virtue, Shiro Chugo, Steel Soul Dojo, Suitengu's Torch,
+    /// Temple of Purity, The Aerie.</summary>
+    public static PublishedSnapshot StrongholdWave18 { get; } = Load("L5R.Published.StrongholdWave18.json", "stronghold-wave-18", requireDecks: false);
 }

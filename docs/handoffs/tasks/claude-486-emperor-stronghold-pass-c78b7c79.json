@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Emperor Edition Stronghold pass (#486): 23 of 24 unwired Strongholds wired in stronghold-wave-17..19 (three merged batches) plus the Plain of Gold proxy; Halls of the Forgotten left unwired by decision (joint delay mechanism); inventory regenerated (1072 wired of 2174); art pack catalogue-art-pr486-20260924-r1 published and pinned. Shared: adds GameCommand.Provinces (server/client wire field) and MatchView.ProvinceSights (new private view field, no client display yet).",
+  "validation": "Core suite 0 failures (1534 pass); AI 74/74, Server 8/8, Client.Transport 12/12; content unittests and collaboration tests pass; new emperor-stronghold-batch1..3 suites",
+  "remaining": "Readings in docs/decisions/2026-09-24-emperor-edition-stronghold-pass.md need Mendon's confirmation; Attack-targeting correction (core rule vs engine) is a separate change; client has no ProvinceSights display; Halls of the Forgotten awaits the joint delay mechanism.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/486",
+  "branch": "claude/486-emperor-stronghold-pass",
+  "updated": "2026-09-24T21:30:51.434691+00:00"
+}

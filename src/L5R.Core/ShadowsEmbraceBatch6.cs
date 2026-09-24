@@ -109,7 +109,7 @@ public sealed partial class MatchEngine
     // LockMovement's hook: a lock that prevents assigning, from another player's card (the lock's source card's controller, else the player whose action is resolving).
     private bool WartimePreparationsNegatesAssignLock(CardInstance card, string source, MovementKinds kinds)
     {
-        if (!kinds.HasFlag(MovementKinds.Assign) || Definition(card).Type != CardType.Personality || !InPlay(card)) return false;
+        if ((kinds & (MovementKinds.Assign | MovementKinds.AssignAttack)) == 0 || Definition(card).Type != CardType.Personality || !InPlay(card)) return false;
         int? actor = _state.Cards.TryGetValue(source, out var sourceCard) ? sourceCard.OwnerId : _runningCommand?.PlayerId;
         if (actor is not int acting || acting == card.OwnerId) return false;
         if (WartimePreparationsOf(card.OwnerId) is not { } wartime || !WartimeSecondOrLater(wartime, WartimeAssignKey, _state.TurnNumber)) return false;

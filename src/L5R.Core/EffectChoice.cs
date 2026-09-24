@@ -54,6 +54,8 @@ public static class BranchCondition
     public const string Always = "always";
     /// <summary>The target is Kolat, Ninja, or Shadowlands (Emperor Edition Personality pass, issue #477 -- Asako Tsunefusa's second sentence).</summary>
     public const string TargetKolatNinjaOrShadowlands = "target-kolat-ninja-or-shadowlands";
+    /// <summary>The target is Kolat, Ninja, or Shadowlands, the acting player controls an Inquisitor, and it is not his turn (Emperor Edition Stronghold pass, issue #486 batch 2 -- Temple of Purity).</summary>
+    public const string TargetKolatNinjaOrShadowlandsWithInquisitorOffTurn = "target-kolat-ninja-or-shadowlands-inquisitor-off-turn";
 }
 
 /// <summary>Effects an option may apply. Each goes through the same helper an ordinary effect would, so a negation a reaction set
@@ -134,6 +136,7 @@ public sealed partial class MatchEngine
         BranchCondition.TargetDishonorableKolatNinjaOrShadowlands => target is not null && MatchesTargetStatus(target, TargetStatus.DishonorableKolatNinjaOrShadowlands),
         BranchCondition.Always => true,
         BranchCondition.TargetKolatNinjaOrShadowlands => target is not null && MatchesTargetStatus(target, TargetStatus.KolatNinjaOrShadowlands),
+        BranchCondition.TargetKolatNinjaOrShadowlandsWithInquisitorOffTurn => TempleHonorConditionMet(source, target),
         _ when condition.StartsWith("wielder-has:", StringComparison.Ordinal) => source.AttachedTo is { } wielderId && Keyword(Card(wielderId), condition["wielder-has:".Length..]),
         _ => throw new InvalidOperationException($"Unknown branch condition '{condition}'.")
     };

@@ -2,7 +2,12 @@ namespace L5R.Core;
 
 /// <summary>Kinds of movement a lock refuses.</summary>
 [Flags]
-public enum MovementKinds { None = 0, Home = 1, ToBattlefield = 2, Assign = 4 }
+public enum MovementKinds
+{
+    None = 0, Home = 1, ToBattlefield = 2, Assign = 4,
+    // Emperor Edition Stronghold pass (issue #486), batch 3 (The Khan's Estate: "He may not be assigned to attack this turn"): assignment to an ATTACKING army only -- he may still be assigned to defend.
+    AssignAttack = 8
+}
 
 /// <summary>"He may not be assigned, and will not move, to battlefields this turn" (A Quiet Transaction) and "negate his (future) movement" (Strength of the Tsunami): the
 /// kinds of movement a card's effects and assignment may not perform until the end of the turn numbered <see cref="Turn"/> (issue #415).</summary>
@@ -27,7 +32,7 @@ public sealed partial class MatchEngine
     }
 
     private static string DescribeKinds(MovementKinds kinds) =>
-        kinds == MovementKinds.Assign ? "assignment to battlefields" : kinds.HasFlag(MovementKinds.Assign) ? "assignment and movement to battlefields" : kinds.HasFlag(MovementKinds.Home) ? "movement" : "movement to battlefields";
+        kinds == MovementKinds.AssignAttack ? "assignment to attack" : kinds == MovementKinds.Assign ? "assignment to battlefields" : kinds.HasFlag(MovementKinds.Assign) ? "assignment and movement to battlefields" : kinds.HasFlag(MovementKinds.Home) ? "movement" : "movement to battlefields";
 
     private bool MovementLocked(CardInstance card, MovementKinds kind) =>
         card.MovementLocks.Any(l => l.Turn == _state.TurnNumber && (l.Kinds & kind) != 0 && MovementLockHolds(l));
