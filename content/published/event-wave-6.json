@@ -1,0 +1,76 @@
+{
+  "Profile": "event-wave-6",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-628",
+      "Name": "Assault in the Jungle",
+      "Type": "Event",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After you reveal cards in your Provinces at the start of your turn, if this Event is face-up in one of them, until your turn two turns from now begins, all players have the ability, \"Battle: Target your performing unbowed attacking Personality and bow all unbowed cards in his unit to destroy a target enemy card without attachments.\"",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-628.jpg",
+      "Keywords": [
+        "Unique"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "assault-in-the-jungle"
+    },
+    {
+      "Id": "oracle-l5r-1185",
+      "Name": "Burning Dreams",
+      "Type": "Event",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After you reveal cards in your Provinces at the start of your turn, if this Event is face-up in one of them, any player who controls the Imperial Favor discards it, until your turn two turns from now begins, actions that discard the Imperial Favor as a condition upon further effects have their effects negated if they target a Nonhuman Personality, and until the game ends, Nonhumans may not perform Political actions.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1185.jpg",
+      "Keywords": [
+        "Unique"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "burning-dreams"
+    },
+    {
+      "Id": "oracle-l5r-9337",
+      "Name": "Willing Spirits",
+      "Type": "Event",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After your next turn begins, permanently give each of your provinces +2 strength.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9337.jpg",
+      "Keywords": [
+        "Unique"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "willing-spirits"
+    }
+  ],
+  "Decks": []
+}

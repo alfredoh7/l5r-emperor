@@ -416,7 +416,7 @@ public sealed partial class MatchEngine
     {
         var card = Card(winnerId);
         var reactionId = DuelWonReactionAbility(card);
-        var broadcastWatchers = _state.Cards.Values.Where(c => c.OwnerId == winnerPlayerId && InPlay(c) && !c.Bowed && DuelWonBroadcastReactionAbility(c) is not null).ToArray();
+        var broadcastWatchers = _state.Cards.Values.Where(c => c.OwnerId == winnerPlayerId && InPlay(c) && !BowedBarsAbilities(c) && DuelWonBroadcastReactionAbility(c) is not null).ToArray();
         if (reactionId is null && broadcastWatchers.Length == 0) return false;
         // A fresh window per duel: clear any earlier use so the same card may react again to a later duel.
         if (reactionId is not null) card.AbilityUses.Remove(reactionId);

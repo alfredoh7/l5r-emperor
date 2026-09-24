@@ -1,0 +1,33 @@
+{
+  "Profile": "region-wave-8",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-8303",
+      "Name": "The Second City",
+      "Type": "Region",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Each of your cards that is Courtier or Magistrate has +1F.\nPolitical Open, Bow this card: Target a face-down card in a Province. You claim a new tract of land. Turn the face-down card face-up. You may increase the Province's strength by 2.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8303.jpg",
+      "Keywords": [
+        "Unique"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "second-city-reveal",
+        "second-city-reveal-raise"
+      ],
+      "Effect": "second-city-force"
+    }
+  ],
+  "Decks": []
+}

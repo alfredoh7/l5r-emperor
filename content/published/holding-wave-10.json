@@ -1,0 +1,109 @@
+{
+  "Profile": "holding-wave-10",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-166",
+      "Name": "Ageless Shrine",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 2,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Bow this card: Produce 2 Gold, or 3 Gold when paying for a Nonhuman.\nOpen: Bow this card and target a Nonhuman or Samurai: Straighten him. Straighten one of his attachments if he is Nonhuman.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-166.jpg",
+      "Keywords": [
+        "Forest",
+        "Temple"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "ageless-shrine-straighten"
+      ],
+      "Effect": "ageless-shrine-gold"
+    },
+    {
+      "Id": "oracle-l5r-680",
+      "Name": "Bamboo Harvesters",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 3,
+      "GoldProduction": 2,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "This card will not straighten before your third turn.\nBow this card: Produce 2 Gold.\nLimited, Bow this card: Draw a card. If you now have 6 or more cards in your hand, discard a card.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-680.jpg",
+      "Keywords": [
+        "Unique",
+        "Experienced",
+        "Forest"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "bamboo-exp-draw"
+      ],
+      "Effect": "bamboo-harvesters-exp"
+    },
+    {
+      "Id": "oracle-l5r-1107",
+      "Name": "Border Keep",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 3,
+      "GoldProduction": 2,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Bow this card: Produce 2 Gold.\nLimited: Once per game, put one to three cards in your hand at the bottom of your deck. Draw cards equal to the number you put at the bottom.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1107.jpg",
+      "Keywords": [
+        "Unique",
+        "Experienced"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "border-keep-exp-cycle"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-1431",
+      "Name": "Colonial Harbor",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 6,
+      "GoldProduction": 5,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Your Stronghold's abilities have Tireless (Tireless actions may be taken while bowed.).\nBow this card: Produce 5 Gold.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1431.jpg",
+      "Keywords": [
+        "Port"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "colonial-harbor-tireless"
+    }
+  ],
+  "Decks": []
+}

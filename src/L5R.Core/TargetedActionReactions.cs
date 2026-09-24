@@ -176,7 +176,7 @@ public sealed partial class MatchEngine
     private bool TargetedActionReactionAvailable(CardInstance card, string abilityId, ReactionSubject subject)
     {
         var ability = AbilityCatalog.All[abilityId];
-        return (!card.Bowed || abilityId == "red-crane-dojo-ninja") && !ActionLocked(card) && !AbilityUseSpent(card.AbilityUses, ability, ability.UsageKey ?? abilityId)
+        return (!BowedBarsAbilities(card) || abilityId == "red-crane-dojo-ninja") && !ActionLocked(card) && !AbilityUseSpent(card.AbilityUses, ability, ability.UsageKey ?? abilityId)
             && TargetedActionReactionApplies(card, abilityId, subject) && CanPayReaction(card, abilityId);
     }
 
@@ -276,6 +276,10 @@ public sealed partial class MatchEngine
             // Cavalry Detachment (Seeds of Decay, issue #453): another player's action targets the Personality this Follower is attached to.
             case "cavalry-detachment-spawn":
                 return command.PlayerId != card.OwnerId && card.Zone == Zone.Attached && affected.Id == card.AttachedTo && Definition(affected).Type == CardType.Personality;
+            // Ryoshun's Guidance (Forgotten Legacy pass, issue #467): another player's action targets one of its controller's cards, and another of his non-Stronghold cards
+            // at the same location could be the target instead.
+            case "ryoshun-redirect":
+                return command.PlayerId != card.OwnerId && card.Zone == Zone.Celestial && affected.OwnerId == card.OwnerId && RyoshunRedirectCandidates(card, subject, affected).Any();
             default:
                 return false;
         }
@@ -323,6 +327,8 @@ public sealed partial class MatchEngine
             // Seeds of Decay pass (issue #453), batch 1: one option per Personality/Ninja the action may be redirected to.
             "shifting-terrain-redirect" => ShiftingTerrainCandidates(card, subject).Select(c => ((string?)c.Id, (string?)$"{AbilityCatalog.All[abilityId].Label} · {Definition(c).Name} ({c.Id})")),
             "castle-of-order-redirect" => CastleOfOrderCandidates(card, subject, Card(subject.TargetId!)).Select(c => ((string?)c.Id, (string?)$"{AbilityCatalog.All[abilityId].Label} · {Definition(c).Name} ({c.Id})")),
+            // Forgotten Legacy pass (issue #467), batch 5: Ryoshun's Guidance, one option per card the action may be redirected to.
+            "ryoshun-redirect" => RyoshunRedirectCandidates(card, subject, Card(subject.TargetId!)).Select(c => ((string?)c.Id, (string?)$"{AbilityCatalog.All[abilityId].Label} · {Definition(c).Name} ({c.Id})")),
             _ => [(null, null)]
         };
 }

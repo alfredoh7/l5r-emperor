@@ -2479,4 +2479,16 @@ public static class PublishedContent
     public static PublishedSnapshot PersonalityWave64 { get; } = Load("L5R.Published.PersonalityWave64.json", "personality-wave-64", requireDecks: false);
     /// <summary>Personality wave 62 (Embers of War pass, issue #460, batch 1): Akodo Uehara, Daigotsu Takayasu - exp, Goju Gochiso, Kaiu Onizuka, Kaiu Tojikana.</summary>
     public static PublishedSnapshot PersonalityWave62 { get; } = Load("L5R.Published.PersonalityWave62.json", "personality-wave-62", requireDecks: false);
+    /// <summary>Spell wave 21 (Forgotten Legacy pass, issue #467, batch 5): Pearl of Rage, The Mountain's Power, Wind of the Moon, Thunder's Wrath.</summary>
+    public static PublishedSnapshot SpellWave21 { get; } = Load("L5R.Published.SpellWave21.json", "spell-wave-21", requireDecks: false);
+    /// <summary>Holding wave 10 (issue #467, batch 5): Ageless Shrine, Bamboo Harvesters - experienced, Border Keep - experienced, Colonial Harbor.</summary>
+    public static PublishedSnapshot HoldingWave10 { get; } = Load("L5R.Published.HoldingWave10.json", "holding-wave-10", requireDecks: false);
+    /// <summary>Item wave 13 (issue #467, batch 5): Black Pearl, Cursed Relic.</summary>
+    public static PublishedSnapshot ItemWave13 { get; } = Load("L5R.Published.ItemWave13.json", "item-wave-13", requireDecks: false);
+    /// <summary>Event wave 6 (issue #467, batch 5): Assault in the Jungle, Burning Dreams, Willing Spirits.</summary>
+    public static PublishedSnapshot EventWave6 { get; } = Load("L5R.Published.EventWave6.json", "event-wave-6", requireDecks: false);
+    /// <summary>Celestial wave 6 (issue #467, batch 5): Ryoshun's Guidance.</summary>
+    public static PublishedSnapshot CelestialWave6 { get; } = Load("L5R.Published.CelestialWave6.json", "celestial-wave-6", requireDecks: false);
+    /// <summary>Region wave 8 (issue #467, batch 5): The Second City.</summary>
+    public static PublishedSnapshot RegionWave8 { get; } = Load("L5R.Published.RegionWave8.json", "region-wave-8", requireDecks: false);
 }

@@ -11,8 +11,9 @@ public sealed partial class MatchEngine
     private static readonly string[] PenaltyStats = ["Force", "Chi", "GoldCost", "PersonalHonor"];
     private static bool IsStatPenalty(string stat, int amount) => amount < 0 && PenaltyStats.Contains(stat, StringComparer.Ordinal);
 
-    // The Gold cost of a card as it stands now: its printed cost plus every GoldCost modifier, never below zero. Nothing but a
-    // comparison against another card's cost ever reads it ("with a 0 Gold Cost", "equal or lower Gold Cost").
+    // The Gold cost of a card as it stands now: its printed cost plus every GoldCost modifier, never below zero. Read by the comparisons against another
+    // card's cost ("with a 0 Gold Cost", "equal or lower Gold Cost") and, since the Forgotten Legacy pass (issue #467, Wind of the Moon), by the recruit
+    // price itself (QuotePurchase).
     private int CardGoldCost(CardInstance card) => Math.Max(0, Definition(card).GoldCost + StatModifier(card, "GoldCost"));
 
     // "Reduce his Gold cost to zero" is a Gold cost penalty of exactly what the card costs now; a card that already costs nothing is not reduced.
