@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Implement approved live-duel confirmation and Focus Effect tray; fix opaque exterior button corners across shared lacquer and Practice controls after Alfredo review.",
-  "validation": "Prior full deterministic and live-duel checks passed. Corner revision: clean client compilation; native Concede and compact reduced-motion Focus scenarios passed; Practice and deck-builder native suites passed; actual four corner alpha values are zero while center remains opaque; before/after and state matrix inspected. Refreshed Mac Concede app launched and corrected confirmation verified through native UI. Windows revision 3 passed CI but predates the corner fix; revision 4 delivery is being prepared.",
-  "remaining": "Publish and validate the refreshed Windows review before notifying Mendon. Native Windows play, expert review and implementation approval remain open. Do not merge automatically. Legacy static-art precision failure on unchanged main remains documented.",
+  "summary": "Approved live-duel Concede and Focus Effect UI, with Alfredo review correction removing opaque exterior corners from shared lacquer and Practice buttons.",
+  "validation": "Prior full deterministic and duel suites passed. Corner correction: clean client build; native Concede and compact reduced-motion Focus checks, Practice and deck-builder suites passed; native alpha and contrasting-background inspection passed; refreshed Mac launcher opened and actual confirmation verified. Windows revision 4 built from 872bd4d0, archive/runtime/resources validated locally, uploaded asset checksum and size verified. Exact delivery-commit Windows CI pending.",
+  "remaining": "Run final Windows delivery CI, then send the revision 4 review notification. Mendon native Windows play and expert implementation/rules review remain open; no automatic merge. Previously documented baseline static-art precision failure is unchanged.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/448",
   "branch": "codex/448-duel-followups",
-  "updated": "2026-09-24T06:26:20.105341+00:00"
+  "updated": "2026-09-24T06:34:11.687371+00:00"
 }
