@@ -257,6 +257,9 @@ public sealed class CardInstance
     // Consideration (Forgotten Legacy pass, issue #467 batch 3): "After the next time this turn another player's action targets him, negate its effects" -- the turn the
     // shield was raised; spent by the first such action that turn (ForgottenLegacyBatch3.cs, TurnTargetShieldNegates).
     public int TargetShieldTurn { get; set; } = -1;
+    // Deep Roots (The Shadow's Embrace pass, issue #476 batch 3): "Negate ... effects which prevent him from contributing Force. He contributes Force even while bowed" -- the turn it
+    // was played; while TurnNumber equals it, he contributes his Force to his army while bowed and no contribution negation applies to him (ShadowsEmbraceBatch3.cs).
+    public int DeepRootsTurn { get; set; } = -1;
     // "May not be straightened this turn" (issue #411, Basic Lesson's Stronghold): every effect that would straighten this card is refused for the whole of the turn with this number,
     // unlike the one-shot StraightenBlockedTurn above, which negates the next attempt only. Not swept: it simply stops holding when the turn number moves on, which is after the
     // End phase, so the next Straighten phase (which is not an effect) is untouched.
@@ -681,6 +684,11 @@ public sealed class MatchState
     public List<string> YourClanNeedsYouWatchIds { get; set; } = [];
     /// <summary>Seeking the Truth (Forgotten Legacy pass, issue #467 batch 4): the players who owe a random discard after the battle they played it in ends, unless they destroyed its province or an army.</summary>
     public List<SeekingTheTruthWatch> SeekingTheTruthWatches { get; set; } = [];
+    // The Shadow's Embrace pass (issue #476), batch 3 (ShadowsEmbraceBatch3.cs): Cowed and Defeated's watches, Methodical Questioning's end-of-turn return to hand and
+    // Forthrightness's watches.
+    public List<CowedAndDefeatedWatch> CowedAndDefeatedWatches { get; set; } = [];
+    public List<ReturnToHandBeforeTurnEnds> ReturnsToHandBeforeTurnEnds { get; set; } = [];
+    public List<ForthrightnessWatch> ForthrightnessWatches { get; set; } = [];
     // Cards an action created "until the battle ends" (Kyuden Hida - exp's Scout Followers): removed from the game when their battle is over, wherever they are.
     public List<string> CreatedUntilBattleEndsIds { get; set; } = [];
     // Ashigaru Elite's shape: a per-player counter of the current battle's Force boost to each of the
@@ -983,7 +991,9 @@ public sealed record PendingEndPhaseRecruit(int PlayerId, string CardId, string 
 
 /// <summary>One card the currently-resolving action affected, and how (issue #437: ActionEffectTracking.cs). Kind is "destroyed" or "moved" today;
 /// a bow is not tracked here yet (no single choke point narrates every one the way DestroyUnits/MoveHome already do -- see the file comment).</summary>
-public sealed record AffectedCard(string CardId, string Kind);
+/// FromBattlefield (The Shadow's Embrace pass, issue #476 batch 3): for a move home, the battlefield (province index) the card was moved home FROM; null when it was not at one
+/// (I Cast Two Shadows: "move him to a different battlefield than the one from which he was moved home").
+public sealed record AffectedCard(string CardId, string Kind, int? FromBattlefield = null);
 
 /// <summary>What the LAST fully-resolved action did (issue #437): who performed it, which ability, and which cards it affected. Replaced, not
 /// merged, each time a new top-level action -- an ability's own synchronous resolution, a deferred Attack, or a duel -- finishes, including its

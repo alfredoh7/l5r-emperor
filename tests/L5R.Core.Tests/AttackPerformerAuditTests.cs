@@ -12,7 +12,9 @@ internal static class AttackPerformerAuditTests
     // bowed Castle/Siege card is not its performer (ActionPerformer returns the Stronghold).
     // Forgotten Legacy pass (#467), reviewed in #476: Toritaka Chokichi ("Bow your performing Follower"), Never Beyond My Reach ("your performing unbowed Kensai") and Pearls & Spirits'
     // three Attacks ("your performing Shugenja") each print a named performer.
-    private static readonly string[] NamedPerformer = ["akio-attack", "chokichi-attack", "junpei-attack", "metsubushi-attack", "monastery-fire-attack", "never-beyond-reach-attack",
+    // The Shadow's Embrace pass (#476), batch 3: Burning Fury ("Choose your performing unbowed Personality: Melee Attack") and Lessons Never Forgotten ("Choose your performing unbowed Yojimbo:
+    // Melee 4 Attack") each print a named performer.
+    private static readonly string[] NamedPerformer = ["akio-attack", "burning-fury-attack", "chokichi-attack", "junpei-attack", "lessons-never-forgotten-attack", "metsubushi-attack", "monastery-fire-attack", "never-beyond-reach-attack",
         "pearls-spirits-chi-attack", "pearls-spirits-force-attack", "pearls-spirits-sacrifice-attack", "shiro-shiba-melee", "tensin-follower-attack", "two-stings-attack", "two-stings-attack-from-discard"];
     // Thunder's Wrath (Forgotten Legacy pass, reviewed in #476): its own-wielder Performer names the Spell's wielder, the core rules' performer of a Spell's action anyway -- needed only because
     // the Spell is destroyed as the cost ("this Shugenja" is read after it has left play).

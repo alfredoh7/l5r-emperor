@@ -28,7 +28,7 @@ public sealed partial class MatchEngine
     public const string DestroyedKind = "destroyed";
     public const string MovedKind = "moved";
 
-    private void RecordActionEffect(string cardId, string kind) => _state.CurrentActionAffected.Add(new(cardId, kind));
+    private void RecordActionEffect(string cardId, string kind, int? fromBattlefield = null) => _state.CurrentActionAffected.Add(new(cardId, kind, fromBattlefield));
 
     // Snapshots what the just-finished action affected into LastResolvedAction, opens the Reaction window naming it if anyone holds one that
     // applies, and clears the accumulator either way. Called from the three points an action (its own reaction windows included) is truly done,
@@ -53,6 +53,8 @@ public sealed partial class MatchEngine
         CountReconStrategyAction(abilityId, playerId, sourceId); // Advanced Intelligence (Seeds of Decay pass, issue #453, batch 1).
         // Moksha Patam (issue #453 batch 5): "After an action resolves, if a player gained Honor from its effects" -- a trait, so applied here before any Reaction to the same point.
         ApplyMokshaPatamTokens();
+        // The Shadow's Embrace pass (issue #476), batch 3: Crowded Streets' trait -- a trait, so before any Reaction to the same point (ShadowsEmbraceBatch3.cs).
+        if (OpenCrowdedStreetsTrait(closesTo)) return true;
         if (OpenAfterActionResolvedWindow(closesTo)) return true;
         // Moshi Ino's storm (issue #453, batch 3; MoshiInoStorm.cs): the same "this action is truly done" moment, asked once no Reaction window opened over it.
         return OpenInoStorm(closesTo);
@@ -116,6 +118,11 @@ public sealed partial class MatchEngine
             // Air keyword attached to a Personality her controller controls (the Spell's action is her controller's own, so facts.PlayerId matches too).
             "akikusa-honor" => facts.SourceId is not null && _state.Cards.TryGetValue(facts.SourceId, out var akikusaSpell) && Definition(akikusaSpell).Type == CardType.Spell
                 && Keyword(akikusaSpell, "Air") && akikusaSpell.OwnerId == playerId && facts.PlayerId == playerId,
+            // The Shadow's Embrace pass (issue #476), batch 3. Grief: "After an action resolves whose effects destroyed a player's Personality" -- either player's action, either player's
+            // Personality. I Cast Two Shadows: "After an action resolves which moved your Personality in a Ninja unit home" -- from a battlefield (ShadowsEmbraceBatch3.cs).
+            "grief-dishonor" => facts.Affected.Any(a => a.Kind == DestroyedKind && Definition(Card(a.CardId)).Type == CardType.Personality),
+            "cast-two-shadows-move" => facts.Affected.Any(a => a.Kind == MovedKind && a.FromBattlefield is not null && Card(a.CardId) is { Zone: Zone.Home } moved
+                && moved.OwnerId == playerId && Definition(moved).Type == CardType.Personality && InNinjaUnit(moved)),
             _ => false
         };
     }

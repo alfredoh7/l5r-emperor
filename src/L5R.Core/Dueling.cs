@@ -79,6 +79,8 @@ public sealed partial class MatchEngine
         var refusalStart = _state.Events.Count - 1;
         // Doji Shigeyuki: "He may refuse; if he does, move him home."
         if (duel.AbilityId == "shigeyuki-duel") MoveHome(Card(duel.ChallengedId), false);
+        // Duel to First Blood (The Shadow's Embrace pass, issue #476 batch 3): "He may refuse; if he did, draw two cards." -- the challenger's player draws them.
+        if (duel.AbilityId is "first-blood-duel-battle" or "first-blood-duel-limited") { Draw(Player(duel.ChallengerPlayerId)); Draw(Player(duel.ChallengerPlayerId)); }
         _state.LastDuel = _state.LastDuel! with { Result = new("Refused", null, [], 0, 0, 0, 0, [], _state.Events.Skip(refusalStart).ToArray(), [], _state.Version + 1, _state.Phase, _state.PriorityPlayerId, "Challenge refused") };
         var challengerPlayerId = duel.ChallengerPlayerId;
         _state.PendingDuel = null;
@@ -278,8 +280,9 @@ public sealed partial class MatchEngine
     {
         var duel = _state.PendingDuel!;
         var challenger = Card(duel.ChallengerId); var challenged = Card(duel.ChallengedId);
-        var challengerTotal = DuelStatValue(challenger, duel.Stat) + duel.ChallengerFocused.Sum(id => Definition(Card(id)).Focus);
-        var challengedTotal = DuelStatValue(challenged, duel.Stat) + duel.ChallengedFocused.Sum(id => Definition(Card(id)).Focus);
+        // Duel to First Blood (The Shadow's Embrace pass, issue #476 batch 3): its Focus Effect, "Give +1 Focus Value to each of your focused cards", resolves before the totals (FirstBloodFocusBonus).
+        var challengerTotal = DuelStatValue(challenger, duel.Stat) + duel.ChallengerFocused.Sum(id => Definition(Card(id)).Focus) + FirstBloodFocusBonus(duel.ChallengerFocused);
+        var challengedTotal = DuelStatValue(challenged, duel.Stat) + duel.ChallengedFocused.Sum(id => Definition(Card(id)).Focus) + FirstBloodFocusBonus(duel.ChallengedFocused);
         string? winnerId; List<string> loserIds;
         var resolutionReason = "Higher duel total";
         if (challengerTotal > challengedTotal) { winnerId = duel.ChallengerId; loserIds = [duel.ChallengedId]; }
@@ -375,6 +378,7 @@ public sealed partial class MatchEngine
         // A duel-issuing ability resolves here, not in ExecuteAbilityEffects (which returned at IssueChallenge):
         // "after the resolution of your [keyword] action" traits fire once its whole outcome has applied.
         FireAfterOwnActionTraits(AbilityCatalog.All[duel.AbilityId], challengerPlayerId, duel.SourceCardId is null ? null : Card(duel.SourceCardId));
+        FireCowedAndDefeatedActionWatches(challengerPlayerId, null, duel.ChallengedId); // The Shadow's Embrace pass (issue #476), batch 3: a challenge targets the challenged Personality.
         var draft = duel.ResultDraft!;
         _state.LastDuel = _state.LastDuel! with { Result = draft with {
             Consequences = _state.Events.Skip(duel.ResultEventStart).ToArray(),
@@ -492,6 +496,10 @@ public sealed partial class MatchEngine
                 break;
             // Duel of Haiku (oracle-l5r-2245, Forgotten Legacy pass issue #467 batch 3): "The winner gains 1 Honor. Bow and dishonor the loser." -- the winning
             // Personality's controller gains the Honor (a tie has no winner); every loser is bowed and dishonored.
+            // Duel to First Blood (The Shadow's Embrace pass, issue #476 batch 3): "Bow the duel's loser."
+            case "first-blood-duel-battle": case "first-blood-duel-limited":
+                foreach (var id in loserIds) if (InPlay(Card(id)) && !StalwartNegatesBow(Card(id), challengerPlayerId)) Card(id).Bowed = true;
+                break;
             case "duel-of-haiku":
                 if (winnerId is not null) GainHonor(Card(winnerId).OwnerId, 1, "Duel of Haiku");
                 foreach (var id in loserIds)
