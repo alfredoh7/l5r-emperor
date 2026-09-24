@@ -940,6 +940,8 @@ public sealed class MatchState
     public int[]? PhaseStartHonor { get; set; }
     public int[] PhaseBattleHonor { get; set; } = new int[2];
     public List<string[]> StarCrossedPairs { get; set; } = [];
+    // Emperor Edition Stronghold pass (issue #486), batch 3 (The Otoro Estate: "Look at all face-down cards in one player's provinces"): what a player was shown, private to that viewer.
+    public List<ProvinceSight> ProvinceSights { get; set; } = [];
     public ResolvedActionFacts? LastResolvedAction { get; set; }
     // Revenge (oracle-l5r-6302, issue #437): "another player's action has destroyed one of your Personalities since the end of your last Battle
     // action this battle" -- per player, set true whenever another player's action destroys one of theirs (FinishActionEffectTracking), cleared
@@ -1225,5 +1227,12 @@ public sealed record MatchView(string ContentVersion, string Scenario, long Vers
     EitherOrView? PendingEitherOr = null,
     // The opposing player's variable payment (issue #373, see OpponentPayment.cs): PUBLIC -- both players see the first player's amount, the card and the
     // Honor at stake; only the paying player's view carries the payment quote and what each amount would do.
-    OpponentPaymentView? PendingOpponentPayment = null, DuelRecord? LastDuel = null);
+    OpponentPaymentView? PendingOpponentPayment = null, DuelRecord? LastDuel = null,
+    // Emperor Edition Stronghold pass (issue #486), batch 3 (see EmperorStrongholdBatch3.cs): the face-down province cards this viewer looked at this turn -- PRIVATE to the looker, null for
+    // everyone else. Never a card id: a face-down card is named by whose province and which.
+    ProvinceSightView[]? ProvinceSights = null);
+/// <summary>Engine-private record of one face-down province card a player looked at (MatchState.ProvinceSights). Turn is the turn number it was looked at.</summary>
+public sealed record ProvinceSight(int ViewerId, int OwnerId, int Province, string CardId, string DefinitionId, int Turn);
+/// <summary>PRIVATE to the looking player: what the face-down card in a province is (its owner's province Province).</summary>
+public sealed record ProvinceSightView(int OwnerId, int Province, string DefinitionId, CardDefinition Definition);
 public sealed record ReplayRecord(string ContentVersion, string Scenario, ulong Seed, GameCommand[] Commands, Deck[]? CustomDecks = null);

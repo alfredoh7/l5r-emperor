@@ -625,6 +625,7 @@ public static class CardCatalog
             .Concat(PublishedContent.FollowerWave30.Cards)
             .Concat(PublishedContent.EventWave7.Cards)
             .Concat(PublishedContent.StrongholdWave16.Cards)
+            .Concat(PublishedContent.StrongholdWave19.Cards)
             .Concat(PublishedContent.CelestialWave7.Cards)
             .Concat(PublishedContent.PersonalityWave74.Cards)
             .Concat(PublishedContent.PersonalityWave68.Cards)

@@ -3870,7 +3870,7 @@ public static class AbilityCatalog
         // Tamori Kusugi (oracle-l5r-7780): "Battle: Even if Kusugi is not at the current battlefield, bow him: Raise or lower the current battlefield's province's strength by 4."
         ["kusugi-raise"] = new("Battle", "Even if Kusugi is not at the current battlefield, bow him: Raise the current battlefield's province's strength by 4", "none", UsageKey: "kusugi-province", Costs: ActionCost.BowSource, SourceUnitMayBeAway: true),
         ["kusugi-lower"] = new("Battle", "Even if Kusugi is not at the current battlefield, bow him: Lower the current battlefield's province's strength by 4", "none", UsageKey: "kusugi-province", Costs: ActionCost.BowSource, SourceUnitMayBeAway: true),
-    }.AddEmperorPersonalityBatch2()); // Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs.
+    }.AddEmperorPersonalityBatch2().AddEmperorStrongholdBatch3()); // Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batch 3: EmperorStrongholdBatch3.cs.
 }
 
 public sealed partial class MatchEngine
@@ -4140,6 +4140,8 @@ public sealed partial class MatchEngine
             or "kinto-move"
             // Asahina Munefusa (issue #301): "Move him home" -- an ordinary negatable move of its Target.
             or "munefusa-move"
+            // Emperor Edition Stronghold pass (issue #486), batch 3: Yasuki Palaces moves its target home; The Shadow's Lair moves each of its targets home.
+            or "yasuki-palaces-move" or "shadows-lair-move"
             // Return to Action (issue #331): the first negatable move of its Target TO the battlefield -- its
             // execution case checks NegatesEffect("move") itself (MoveToBattlefield has no such check, since
             // every other move-to-battlefield ability moves its own source/performer, never a Target).
@@ -4664,6 +4666,8 @@ public sealed partial class MatchEngine
         // Emperor Edition Personality pass (issue #477), batch 5. Asako Nobunori "Melee 4"; Shiba Tsukimi - exp 4 "Melee 6, with +2 strength if you control a Shugenja" (Shiro Shiba's shape).
         "nobunori-attack" => 4,
         "tsukimi-attack" => 6 + (ControlsKeyword(player.Id, "Shugenja") ? 2 : 0),
+        // Emperor Edition Stronghold pass (issue #486), batch 3: The Otoro Estate's "Ranged 4 Attack".
+        "otoro-attack" or "otoro-attack-move" => 4,
         _ => 0
     };
     // AttackStrength plus every passive defense modifier applying to this specific target (Destrier/
@@ -4745,6 +4749,7 @@ public sealed partial class MatchEngine
         "burning-fury-attack" or "lessons-never-forgotten-attack" => "Melee",
         // Emperor Edition Personality pass (issue #477), batch 5.
         "nobunori-attack" or "tsukimi-attack" => "Melee",
+        "otoro-attack" or "otoro-attack-move" => "Ranged", // Emperor Edition Stronghold pass (issue #486), batch 3.
         _ => ""
     };
     // General "in play" Reaction primitive: a printed Reaction whose card must actually be in play
@@ -4943,6 +4948,7 @@ public sealed partial class MatchEngine
         AfterForgottenLegacyBatch1Attack(abilityId, targetId, targetInPlayBefore, sourceId); // Forgotten Legacy pass (issue #467), batch 1: Bayushi Higaonna.
         NoteThundersWrathAttack(abilityId, targetId, targetInPlayBefore); // Forgotten Legacy pass (issue #467), batch 5.
         AfterShadowsEmbraceBatch2Attack(abilityId, targetId, sourceId); // The Shadow's Embrace pass (issue #476), batch 2: Niiro no Oni's -5F token.
+        AfterEmperorStrongholdBatch3Attack(abilityId, sourceId); // Emperor Edition Stronghold pass (issue #486), batch 3: The Otoro Estate's "You may move your Ninja home".
         // Tsuruchi Yakusho (issue #276 follow-up): this specific Attack's own resolution has now fully
         // completed -- the single funnel every Attack resolves through, deferred or not -- so any
         // immunity granted for it is cleared here, never carried into a later, unrelated Attack.
@@ -5269,6 +5275,9 @@ public sealed partial class MatchEngine
                     && AfterActionResolvedApplies(afterActionSource, id, command.PlayerId),
                 // Turning the Story (issue #453, batch 2): the one reacting player, in the window Proclaim itself opened (SeedsOfDecayBatch2.cs).
                 "before-proclaim-resolves" => _state.PendingChoice.Type == "proclaimNegateReaction" && command.PlayerId == _state.PendingChoice.PlayerId && _state.HeldProclaim is not null,
+                // The Spider's Web (Emperor Edition Stronghold pass, issue #486 batch 3): an in-play card of the player's watching the entry of one of the player's own Personalities.
+                "own-personality-enters-play" => _state.PendingChoice.Type is "proclaim" or "entryReaction" && command.PlayerId == _state.PendingChoice.PlayerId
+                    && _state.PendingChoice.CardId is { } enteredId && _state.Cards.TryGetValue(enteredId, out var enteredCard) && enteredCard.OwnerId == command.PlayerId && Definition(enteredCard).Type == CardType.Personality,
                 _ => false
             },
             _ => false
@@ -5326,6 +5335,8 @@ public sealed partial class MatchEngine
                 or "small-time-bully-dishonor"
                 // Emperor Edition Personality pass (issue #477), batch 5: Isawa Kimi - exp 2's Reaction ("Even if Kimi is bowed").
                 or "kimi-exp2-discard"
+                // Emperor Edition Stronghold pass (issue #486), batch 3: Shadow's Lair, Watchful Eye Dojo and Yasuki Palaces ("Even if this card is bowed"), Spider's Web (a trait).
+                || EmperorStrongholdBatch3BowedOk(id)
                 // Colonial Harbor (Forgotten Legacy pass, issue #467): "Your Stronghold's abilities have Tireless."
                 || TirelessStronghold(source), "Abilities on bowed cards cannot be used.");
             uses = source.AbilityUses;
@@ -5451,6 +5462,7 @@ public sealed partial class MatchEngine
         ValidateForgottenLegacyBatch5(id, ability, command, source); // Forgotten Legacy pass (issue #467), batch 5.
         ValidateShadowsEmbraceBatch5(id, command, player, source); // The Shadow's Embrace pass (issue #476), batch 5.
         ValidateShadowsEmbraceBatch6(id, command, player, source); // The Shadow's Embrace pass (issue #476), batch 6.
+        ValidateEmperorStrongholdBatch3(id, ability, command, player, source); // Emperor Edition Stronghold pass (issue #486), batch 3.
         ValidateEmperorPersonalityBatch2(id, player, source); // Emperor Edition Personality pass (issue #477), batch 2: Kuni Shinoda's conditions.
         ValidateEmperorBatch4(id, ability, command, player, source); // Emperor Edition Personality pass (issue #477), batch 4.
         // Barred Passage: "the only Personality in his army" -- none of the acting player's other Personalities stands at this battlefield.
@@ -9658,6 +9670,12 @@ public sealed partial class MatchEngine
                 break;
             }
             default:
+                // Emperor Edition Stronghold pass (issue #486), batch 3 (EmperorStrongholdBatch3.cs): true when an Attack's window or an entering-play window opened and the action waits.
+                if (RunEmperorStrongholdBatch3(id, ability, command, player, source, target, consumedGrant) is { } emperorStronghold3)
+                {
+                    if (emperorStronghold3) return;
+                    break;
+                }
                 // The Shadow's Embrace pass (issue #476), batch 6 (ShadowsEmbraceBatch6.cs): true when a window opened and the action waits.
                 if (RunShadowsEmbraceBatch6(id, ability, command, player, source, target, bowedBeforeAction) is { } shadowsEmbrace6)
                 {

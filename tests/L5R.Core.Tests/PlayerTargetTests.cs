@@ -81,9 +81,9 @@ internal static class PlayerTargetTests
     private static void Inventory()
     {
         var singles = AbilityCatalog.All.Where(p => p.Value.Target == "player").OrderBy(p => p.Key, StringComparer.Ordinal).ToArray();
-        Eq(string.Join(",", singles.Select(p => p.Key)), "celestial-sword-scorpion-lose,horume-gain,horume-lose,know-their-minds-choose,mugoshi-slander,tarao-sacrifice,training-choose-player-gain,training-choose-player-lose,ugimori-proclaim-lock"); // celestial-sword-scorpion-lose: Seeds of Decay batch 5 (issue #453), an entering-play Reaction like Horume's
+        Eq(string.Join(",", singles.Select(p => p.Key)), "celestial-sword-scorpion-lose,horume-gain,horume-lose,know-their-minds-choose,mugoshi-slander,otoro-look,tarao-sacrifice,training-choose-player-gain,training-choose-player-lose,ugimori-proclaim-lock"); // celestial-sword-scorpion-lose: Seeds of Decay batch 5 (issue #453), an entering-play Reaction like Horume's
         // Every one is an entering-play Reaction (listed by the entry-reaction window) except the two Open actions that choose a player (Know Their Minds, issue #419; Tarao, issue #431): AbilityActions lists them once per player.
-        var openChoosers = new[] { "know-their-minds-choose", "tarao-sacrifice" };
+        var openChoosers = new[] { "know-their-minds-choose", "otoro-look" /* The Otoro Estate, Ninja Open: Emperor Edition Stronghold pass, issue #486 batch 3 */, "tarao-sacrifice" };
         Check(singles.Where(p => !openChoosers.Contains(p.Key)).All(p => p.Value.Timing == "Reaction" && p.Value.Trigger == "own-enters-play") && singles.Where(p => openChoosers.Contains(p.Key)).All(p => p.Value.Timing == "Open"), "the entering-play Reactions, and the two Open actions that choose a player");
         var slotted = AbilityCatalog.All.Where(p => p.Value.Slots?.Any(s => s.IsPlayer) == true).Select(p => p.Key).OrderBy(k => k, StringComparer.Ordinal).ToArray();
         Eq(string.Join(",", slotted), "fear-me-move,training-slots-mixed,tsunefusa-bow,yoshitada-bow"); // tsunefusa-bow: Asako Tsunefusa (issue #477 batch 5), a Yoshitada-shaped bow with a player follow-up
