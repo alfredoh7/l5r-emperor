@@ -329,6 +329,7 @@ public sealed partial class MatchEngine
                 // Reaction and was not itself Proclaim-eligible (e.g. bought with Clan Discount).
                 Require(command.Type is "useAbility" or "declineReaction" or "pass","Resolve the entry reaction window first.");
                 if (command.Type=="useAbility") UseAbility(command); else PassReaction();
+                FinishPendingAttachTracking(); // Hida Takeuchi (issue #477 batch 2): the Equip whose attached Follower opened this window is now finished.
                 return;
             }
             if (_state.PendingChoice.Type=="attackReaction")
@@ -1336,6 +1337,7 @@ public sealed partial class MatchEngine
     {
         var provinceIndex=_state.CurrentBattleProvince!.Value;
         var attacker=_state.ActivePlayerId; var defender=1-attacker;
+        ExpireUntilResolutionProvinceStrength(); // Kaiu Hideaki (issue #477 batch 2): "until the battle's resolution begins".
         // Before This Battle Resolves (issue #272): "occur after all players have passed but before
         // resolution is determined" -- deliberately checked BEFORE Army() is ever read below, since
         // Encircled Terrain's own effect (sending every other Personality home) changes who actually
@@ -1852,7 +1854,9 @@ public sealed partial class MatchEngine
         // discounts included) is EquipGoldCost in GoldQuotes.cs -- the same function that prices this
         // equip for QueryActions' quote, so the quote and the charge cannot drift (issue #303).
         Pay(command.PlayerId,card,EquipGoldCost(command.PlayerId,card,target).Cost,command.SourceIds,paying:new PaymentSubject(card,PaymentKind.Equip));
+        _state.CurrentActionAffected=[]; // Emperor Edition Personality pass (issue #477 batch 2): what Equip records (NoteAttachedFollowerFromHand) is this action's alone.
         Player(command.PlayerId).Hand.Remove(card.Id); Player(command.PlayerId).AttachedFromHandThisTurn=true;
+        NoteAttachedFollowerFromHand(card,target);
         card.Zone=Zone.Attached; card.AttachedTo=target.Id; card.FaceUp=true;
         if(inBattle) card.ProvinceIndex=target.ProvinceIndex; // the Weapon stands where its wielder does, so it is at the battlefield with him
         if(def.AttachGrantsKeyword is string granted) GrantKeyword(target,granted,card.Id,"Attachment");
@@ -1863,9 +1867,12 @@ public sealed partial class MatchEngine
             // A Battle action like any other: it uses an Additional Action grant of this player's when one is unscoped, and otherwise forfeits them.
             var usedGrant=ConsumeAdditionalActionGrant(command.PlayerId,null);
             if(!usedGrant) _state.AdditionalActions.RemoveAll(g=>g.PlayerId==command.PlayerId && Forfeitable(g));
-            NextAction(command.PlayerId,usedGrant && _state.AdditionalActions.Any(g=>g.PlayerId==command.PlayerId && Forfeitable(g)));
+            var stays=usedGrant && _state.AdditionalActions.Any(g=>g.PlayerId==command.PlayerId && Forfeitable(g));
+            if(FinishEquipTracking(command.PlayerId,stays ? command.PlayerId : 1-command.PlayerId)) return; // Hida Takeuchi (issue #477 batch 2).
+            NextAction(command.PlayerId,stays);
             return;
         }
+        if(FinishEquipTracking(command.PlayerId,1-command.PlayerId)) return; // Hida Takeuchi (issue #477 batch 2).
         NextAction(command.PlayerId);
     }
     private void PlayStrategy(GameCommand command)
@@ -2214,8 +2221,10 @@ public sealed partial class MatchEngine
     private (int Attacker,int Defender) ArmyForces(CardInstance[] a,CardInstance[] d,int attacker,int defender)
     {
         int af=0,df=0;
-        foreach(var c in a) { if(RedirectsTo(c,attacker,defender,a,d)==defender) df+=PersonalityBattleContribution(c); else af+=PersonalityBattleContribution(c); af+=FollowerBattleContribution(c); }
-        foreach(var c in d) { if(RedirectsTo(c,attacker,defender,a,d)==attacker) af+=PersonalityBattleContribution(c); else df+=PersonalityBattleContribution(c); df+=FollowerBattleContribution(c); }
+        // Hida Horu (Emperor Edition Personality pass, issue #477 batch 2): he contributes no Force while his army has two or more units (his Followers still do).
+        int Contribution(CardInstance c,CardInstance[] army) => HoruContributesNothing(c,army) ? 0 : PersonalityBattleContribution(c);
+        foreach(var c in a) { if(RedirectsTo(c,attacker,defender,a,d)==defender) df+=Contribution(c,a); else af+=Contribution(c,a); af+=FollowerBattleContribution(c); }
+        foreach(var c in d) { if(RedirectsTo(c,attacker,defender,a,d)==attacker) af+=Contribution(c,d); else df+=Contribution(c,d); df+=FollowerBattleContribution(c); }
         // Seeds of Decay pass (issue #453), batch 1: Megumi's Guidance's "+2 total Force, or +3 if you are the Defender, while your army is opposed" (SeedsOfDecayBatch1.cs).
         af+=CelestialArmyBonus(attacker,a,d,defending:false); df+=CelestialArmyBonus(defender,d,a,defending:true);
         return (af,df);
@@ -2889,6 +2898,7 @@ public sealed partial class MatchEngine
         // The CURRENT strength: raised and lowered by everything that has acted on the province, and by the Region and the Terrain bonuses still in play.
         var strength=province.Strength + (province.RegionId is string id && RegionStrengthBonus.TryGetValue(Definition(Card(id)).Effect,out var bonus) ? bonus : 0) + ProvinceSourceBonuses(province) + StaticProvinceBonus(province)
             + TimedProvinceStrength(province); // Seeds of Decay (issue #453), batch 2: strength given for the turn (SeedsOfDecayBatch2.cs).
+        strength=Math.Max(0,strength); // Core rules, Stats: most stats floor at zero (Kaiu Esumi's -2, issue #477 batch 2, is the first penalty that could take a province below it).
         // A limit (TerrainStatics.cs: Times of Strife, issue #259; Ancient Feud, issue #418) is a CEILING on what is read, never a lowering of the current strength: a province already at or
         // below it is untouched, and one above it reads as the maximum until the limit ends.
         return ProvinceStrengthMax(province) is int max ? Math.Min(strength,max) : strength;

@@ -3255,7 +3255,7 @@ public static class AbilityCatalog
         // Ninube Onchi: "Ninja Open: Remove a target Personality's abilities (until the turn ends)." -- "abilities" are a card's actions (core rules, Abilities: "a block of text describing an action a player can take", as
         // distinct from Traits); every action printed on or granted to the Personality may not be used until the turn ends (the single-ability lock, MatchState.DisabledAbilities, for all of them).
         ["onchi-remove-abilities"] = new("Open", "Ninja Open: Remove a target Personality's abilities (until the turn ends)", "personality", ActionKeywords: ["Ninja"]),
-    });
+    }.AddEmperorPersonalityBatch2()); // Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs.
 }
 
 public sealed partial class MatchEngine
@@ -3300,6 +3300,8 @@ public sealed partial class MatchEngine
         if (keyword == "Cavalry" && card.Zone == Zone.Attached && Definition(card).Type == CardType.Follower
             && card.AttachedTo is string hostId && _state.Cards.TryGetValue(hostId, out var host) && Definition(host).Effect == "unit-followers-cavalry")
             return true;
+        // Hida Watari (oracle-l5r-3227, Emperor Edition Personality pass, issue #477 batch 2): "While Watari has exactly one Follower, that Follower has Cavalry" -- live, like Jun-Ni's.
+        if (keyword == "Cavalry" && WatariGrantsCavalry(card)) return true;
         // A static rule of a card in play gives the keyword to a category of its controller's cards, in or out of play (Ikoma Aimi's Courtier, Seppun Nagi's Clan
         // keyword, Tsuruchi Nobukatsu - exp's Magistrate) -- StaticKeywordRules.cs, read live like the two conditional grants around it.
         if (StaticKeywordGranted(card, keyword)) return true;
@@ -3477,7 +3479,9 @@ public sealed partial class MatchEngine
         // Before the Dawn (issue #431): Wrathful Dead, and the actions that destroy their target.
         or "wrathful-dead-destroy" or "anger-management-destroy" or "dismissing-the-cur-move" or "spirit-kensai-destroy" or "spirit-commander-destroy" or "embers-final-fire-destroy" or "red-hunger-personality" or "crimson-mark-destroy"
         // Forgotten Legacy pass (issue #467), batch 3: Broken Alliance destroys its target attachment; Cast Aside the Weak destroys its target when its Samurai is a Paragon.
-        or "broken-alliance-destroy" or "cast-aside-bow";
+        or "broken-alliance-destroy" or "cast-aside-bow"
+        // Emperor Edition Personality pass (issue #477), batch 2: Hida Kisada and Ikoma Shinju destroy their target (Shinju's is the enemy card, its primary target).
+        or "kisada-destroy" or "shinju-destroy";
     // The actions whose ONLY effect is to straighten their target: against a card that may not be straightened this turn (Basic Lesson) they are refused outright, where an action that
     // also does something else (Defensive Stance's +3F) still resolves and only its straightening is skipped (Straighten refuses it).
     private static bool StraightensOnly(string abilityId) => abilityId is "jinn-kuen-straighten" or "kodo-straighten" or "munefusa-straighten" or "mitsuko-straighten" or "ritual-preparation-straighten"
@@ -3528,6 +3532,8 @@ public sealed partial class MatchEngine
         "moksha-patam-move" or "okesa-goma-move" or "natures-wrath-move" => "move",
         // Forgotten Legacy pass (issue #467), batch 1: Daidoji Takichi moves his target (Sea Troll Predator's shape), Iuchi Abodan sends his home.
         "takichi-move" or "abodan-move" => "move",
+        // Emperor Edition Personality pass (issue #477), batch 2: Kuni Shinoda moves himself and his (optional) target to the current battlefield.
+        "shinoda-move" => "move",
         "master-of-beasts-straighten" or "peace-of-the-kami-negate" or "earths-strength-straighten" => "straighten",
         // Forgotten Legacy pass (issue #467), batch 3: Feint & Strike moves its enemy target home; Creating Order's straighten half straightens its target's unit.
         "feint-strike-move" => "move",
@@ -3594,7 +3600,9 @@ public sealed partial class MatchEngine
         // Seeds of Decay pass (issue #453), batch 5.
         or "celestial-sword-scorpion-bow" or "scent-of-dishonor-bow"
         // Forgotten Legacy pass (issue #467), batch 1: Toshimo, Murota and Nikaru bow their target; Abodan bows his (conditionally) and Hakuseki's duel its loser.
-        or "toshimo-bow" or "murota-bow" or "nikaru-bow-lock" or "abodan-move" or "hakuseki-duel";
+        or "toshimo-bow" or "murota-bow" or "nikaru-bow-lock" or "abodan-move" or "hakuseki-duel"
+        // Emperor Edition Personality pass (issue #477), batch 2: Hida Komatsu bows his target; Matsu Hana bows her target (and its Followers).
+        or "komatsu-bow" or "hana-bow";
     // Whether the command's TargetId is an Attack's OWN target, which reacts through the separate attackReaction
     // window instead of this one: an Attack-classified ability whose Target category is "attack". Bayushi Kahoku
     // - exp (issue #313) is Attack-classified too, but its TargetId is the separate "-4F" target (an ordinary
@@ -3889,6 +3897,7 @@ public sealed partial class MatchEngine
         "junpei-attack" => 4, // Shinjo Junpei - experienced (oracle-l5r-6901): "Melee 4 Attack".
         "tomaru-attack" => 4, // Tsuruchi Tomaru - experienced (oracle-l5r-8894): "Ranged 4 Attack".
         "higaonna-attack" => 4, // Bayushi Higaonna (oracle-l5r-775, Forgotten Legacy pass, issue #467 batch 1): "Ranged 4 Attack".
+        "esumi-attack-raise" or "esumi-attack-lower" => 4, // Kaiu Esumi (oracle-l5r-4109, Emperor Edition Personality pass, issue #477 batch 2): "Ranged 4 Attack".
         "training-honor-cost-attack" => 3,
         "training-weapon-attack" => 2,
         "cavalry-flankers-attack" => 2,
@@ -3974,7 +3983,8 @@ public sealed partial class MatchEngine
     // declare-time validation and the strength baked into PendingAttack, so a Reaction's own further
     // adjustment always stacks on top of this, never bypasses it.
     private int EffectiveAttackStrength(string abilityId, PlayerState player, CardInstance? target, string? sourceId = null) =>
-        AttackStrength(abilityId, player, target, sourceId) + (target is null ? 0 : AttackDefenseModifier(target, AttackKind(abilityId)));
+        AttackStrength(abilityId, player, target, sourceId) + (target is null ? 0 : AttackDefenseModifier(target, AttackKind(abilityId)))
+        + ShishidoRangedBonus(abilityId, sourceId); // Toritaka Shishido (Emperor Edition Personality pass, issue #477 batch 2): +1 to a Ranged Attack performed by a card in his army.
     // Sums every card in `target`'s own unit (its parent Personality, plus every attachment) granting
     // a passive Attack-strength modifier of this `kind` that reaches `target` specifically: Scope
     // "Self" (protects only the granter itself), "Wielder" (an Item's default -- conveys to the
@@ -4003,6 +4013,7 @@ public sealed partial class MatchEngine
         "tomiko-attack" or "tomaru-attack" => "Ranged", // Embers of War pass (issue #460 batch 2).
         "misaki-follower-attack" => "Melee", // Emperor Edition Personality pass (issue #477), batch 1.
         "higaonna-attack" => "Ranged", // Forgotten Legacy pass (issue #467 batch 1).
+        "esumi-attack-raise" or "esumi-attack-lower" => "Ranged", // Emperor Edition Personality pass (issue #477 batch 2).
         "junpei-attack" => "Melee",
         "precision-attack" => "Ranged", // Precision (issue #460)
         "cursed-relic-attack" or "pearl-of-rage-attack" or "thunders-wrath-attack" or "thunders-wrath-followup-attack" => "Ranged", // Forgotten Legacy pass (issue #467), batch 5
@@ -4254,7 +4265,7 @@ public sealed partial class MatchEngine
     // when supplied, same final Strength field every other caller already relies on downstream.
     private bool ResolveOrDeferAttack(string abilityId, PlayerState attacker, string? targetId, string? sourceId = null, bool additional = false, int? strengthOverride = null)
     {
-        var strength = strengthOverride ?? EffectiveAttackStrength(abilityId, attacker, targetId is null ? null : Card(targetId), sourceId);
+        var strength = strengthOverride is int overridden ? overridden + ShishidoRangedBonus(abilityId, sourceId) : EffectiveAttackStrength(abilityId, attacker, targetId is null ? null : Card(targetId), sourceId);
         // An Attack that targets no card (no target, or a province) opens no reaction window: nothing card-targeted can react to it (issue #335).
         if (targetId is null || !AnyAttackReactionAvailable(attacker.Id, targetId))
         {
@@ -4277,6 +4288,7 @@ public sealed partial class MatchEngine
     private void AttackTargetedACard(string abilityId, int playerId, string? targetId)
     {
         if (targetId is not null && abilityId == "carpenter-castle-siege") GainHonor(playerId, 2, "Carpenter Castle");
+        AttackTargetedACardForBatch2(abilityId, targetId); // Kaiu Esumi (Emperor Edition Personality pass, issue #477 batch 2).
     }
 
     // Called once both players pass consecutively in the attackReaction window (Apply()).
@@ -4722,6 +4734,7 @@ public sealed partial class MatchEngine
         if (id is "lobby" or "dainagon-lobby") Require(!_state.Cards.Values.Any(c => c.OwnerId != player.Id && InPlay(c) && Definition(c).Effect == "saibankan-no-lobby"), "Another player's Saibankan's Justice forbids you to lobby.");
         if (id == "dainagon-lobby") Require(CardPersonalHonor(source!) >= 1, "Lobby needs a Personality with at least 1 Personal Honor.");
         ValidateForgottenLegacyBatch5(id, ability, command, source); // Forgotten Legacy pass (issue #467), batch 5.
+        ValidateEmperorPersonalityBatch2(id, player, source); // Emperor Edition Personality pass (issue #477), batch 2: Kuni Shinoda's conditions.
         // Barred Passage: "the only Personality in his army" -- none of the acting player's other Personalities stands at this battlefield.
         if (id == "barred-passage-bow") Require(Army(player.Id, _state.CurrentBattleProvince!.Value).Count(c => Definition(c).Type == CardType.Personality) == 1, "The performing Hero must be the only Personality in his army.");
         if (id is "tamoko-open" or "virtuous-charity-open") Require(_state.ActivePlayerId != player.Id, "Only usable when it is not your own turn.");
@@ -5505,7 +5518,7 @@ public sealed partial class MatchEngine
                     // -- own-personality-at-home is exempt for the same reason.
                     if (actingAsBattle && ability.Target is not ("personality-at-adjacent-battlefield" or "own-unbowed-farm" or "region-or-terrain" or "own-personality-at-home" or "personality-at-any-location" or "own-follower-at-any-location" or "enemy-personality-at-any-location" or "enemy-personality-not-at-battle")
                         && id is not ("intervening-spirit-move" or "earth-flows-move" or "sanctuary-of-the-waves-move" or "dislodge-the-foe" or "heijin-move"
-                            or "natures-wrath-move" or "irezu-move" or "mitsushen-move" or "pronouncement-guilt-move")) Require(AtBattle(target), "Target or performer must be at the current battlefield."); // Nature's Wrath (issue #453 batch 5): its target is brought TO the battlefield; Irezu (issue #458) moves the target HOME from wherever he stands; Mitsushen (issue #458) brings his target TO his own battlefield from wherever it stands; Pronouncement of Guilt (issue #460) brings its enemy target TO the battlefield the same way
+                            or "natures-wrath-move" or "irezu-move" or "mitsushen-move" or "pronouncement-guilt-move" or "shinoda-move")) Require(AtBattle(target), "Target or performer must be at the current battlefield."); // Nature's Wrath (issue #453 batch 5): its target is brought TO the battlefield; Irezu (issue #458) moves the target HOME from wherever he stands; Mitsushen (issue #458) brings his target TO his own battlefield from wherever it stands; Pronouncement of Guilt (issue #460) brings its enemy target TO the battlefield the same way
                     var personality = type == CardType.Personality;
                     var own = target.OwnerId == player.Id;
                     // TargetMustBe (P2): a target-status legality condition layered onto whichever category
@@ -5913,6 +5926,12 @@ public sealed partial class MatchEngine
                         "own-unbowed-ring" => type == CardType.Ring && own && !target.Bowed,
                         // Hida Kaiji: "an enemy card with lower Force" -- an enemy Personality or Follower (the cards in a unit with a Force of their own) strictly below his.
                         "enemy-force-lt-self" => !own && type is CardType.Personality or CardType.Follower && CardForce(target) < CardForce(source!),
+                        // Emperor Edition Personality pass (issue #477), batch 2. Hida Kisada: one of the reactor's own other Personalities at his location that the held action accepts as its target.
+                        "redirect-target-own-personality-at-source-location" => own && personality && target.Id != source!.Id && OpenReactionSubject() is { } kisadaAction && target.Id != kisadaAction.TargetId
+                            && SameLocation(target, source) && ActionAcceptsTarget(kisadaAction, target.Id),
+                        // Kuni Shinoda: "another Crab Clan Personality at Shinoda's battlefield" (a Battle-timed source at a battlefield; the target stands there too).
+                        "crab-personality-at-source-battlefield" => own && personality && target.Id != source!.Id && HasClanAffiliation(target, "Crab")
+                            && source.Zone == Zone.Battlefield && target.Zone == Zone.Battlefield && target.ProvinceIndex == source.ProvinceIndex,
                         // Hiruma Nitani - exp: "an enemy card with the base Shadowlands keyword" -- any enemy card in a unit whose PRINTED keywords include every RequiredKeywords entry
                         // (a granted keyword or a Shadowlands Clan alignment is not the base keyword).
                         "enemy-card-with-printed-keyword" => !own && (personality || target.Zone == Zone.Attached && type is CardType.Follower or CardType.Item or CardType.Spell)
@@ -6962,7 +6981,7 @@ public sealed partial class MatchEngine
                 
                 var performer = Card(command.PerformerId!);
                 var attachment = target!;
-                player.Hand.Remove(attachment.Id); player.AttachedFromHandThisTurn = true;
+                player.Hand.Remove(attachment.Id); player.AttachedFromHandThisTurn = true; NoteAttachedFollowerFromHand(attachment, performer); // Hida Takeuchi (issue #477 batch 2).
                 attachment.Zone = Zone.Attached; attachment.AttachedTo = performer.Id; attachment.FaceUp = true; attachment.ProvinceIndex = performer.ProvinceIndex;
                 if (Definition(attachment).AttachGrantsKeyword is string granted) GrantKeyword(performer, granted, attachment.Id, "Attachment");
                 Emit("equipped", $"{Definition(attachment).Name} attached to {Definition(performer).Name} via {(id == "low-market-equip" ? "Low Market" : "On the Hunt")}.", player.Id, attachment.Id);
@@ -7164,7 +7183,7 @@ public sealed partial class MatchEngine
             {
                 var performer = Card(command.PerformerId!);
                 var attachment = target!;
-                player.Hand.Remove(attachment.Id); player.AttachedFromHandThisTurn = true;
+                player.Hand.Remove(attachment.Id); player.AttachedFromHandThisTurn = true; NoteAttachedFollowerFromHand(attachment, performer); // Hida Takeuchi (issue #477 batch 2).
                 attachment.Zone = Zone.Attached; attachment.AttachedTo = performer.Id; attachment.FaceUp = true; attachment.ProvinceIndex = performer.ProvinceIndex;
                 // Reserve (issue #184): a non-Spell attachment can carry AttachGrantsKeyword too (a
                 // Spell never has, so this was never needed before) -- same as the ordinary Equip().
@@ -7921,7 +7940,7 @@ public sealed partial class MatchEngine
             {
                 var enteredPersonality = Card(_state.PendingChoice!.CardId!);
                 var attachDef = Definition(source!);
-                if (source!.Zone == Zone.Hand) { player.Hand.Remove(source.Id); player.AttachedFromHandThisTurn = true; }
+                if (source!.Zone == Zone.Hand) { player.Hand.Remove(source.Id); player.AttachedFromHandThisTurn = true; NoteAttachedFollowerFromHand(source, enteredPersonality); }
                 source.Zone = Zone.Attached; source.AttachedTo = enteredPersonality.Id; source.FaceUp = true;
                 if (attachDef.AttachGrantsKeyword is string granted) GrantKeyword(enteredPersonality, granted, source.Id, "Attachment");
                 GainHonor(player.Id, 1, attachDef.Name, source);
@@ -8602,6 +8621,11 @@ public sealed partial class MatchEngine
                 break;
             // Forgotten Legacy pass (issue #467), batch 1: every case is in ForgottenLegacyBatch1.cs; true means the action paused (a choice, an Attack
             // reaction window, a created card's entry window) and finishes from there.
+            // Emperor Edition Personality pass (issue #477), batch 2: every case is in EmperorPersonalityBatch2.cs (true: the action is paused -- an Attack's reaction window).
+            case "kisada-redirect": case "kisada-destroy": case "komatsu-bow": case "komatsu-destroy-attachment": case "takeuchi-draw": case "watari-fear-bow": case "esumi-attack-raise":
+            case "esumi-attack-lower": case "hideaki-province": case "shinoda-move": case "shinju-destroy": case "hana-bow":
+                if (RunEmperorPersonalityBatch2Effect(id, ability, command, player, source, target, consumedGrant)) return;
+                break;
             case "shigemitsu-provinces": case "kaitoko-weaken": case "higaonna-attack": case "toshimo-bow": case "takichi-move": case "murota-bow":
             case "hakuseki-disable": case "rengetsu-disable": case "nikaru-bow-lock": case "abodan-move": case "kagako-create": case "gyoken-attach":
                 if (RunForgottenLegacyBatch1Effect(id, command, ability, player, source, target, consumedGrant, playedFromDiscard, opponentHonorBeforeBattleAction, bowedBeforeAction, preExistingGrants)) return;
