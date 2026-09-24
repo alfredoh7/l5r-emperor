@@ -183,7 +183,9 @@ public sealed partial class MatchEngine
                 && rc.FaceUp && rc.Zone is not (Zone.Hand or Zone.FateDeck or Zone.DynastyDeck) ? ViewCard(rc) : null;
             var reactionLabel = _state.PendingChoice?.Type=="overconfidentDraw" ? "Overconfident" : null;
             var traitSnapshot = AfterCommandTraitSnapshot(); // "After this card bows/attaches" traits (issue #453 batch 5, SeedsOfDecayBatch5.cs)
+            UsePaymentDiscards(command); // Asahina Keigo (issue #477): the hand cards named for Gold sources that discard one.
             Apply(command);
+            _paymentDiscards=[];
             ApplyAfterCommandTraits(traitSnapshot);
             ReturnCardsOutOfPlayToTheirOwners();
             RemoveCreatedCardsLeftInPiles();
@@ -195,12 +197,12 @@ public sealed partial class MatchEngine
         }
         catch (RuleViolation error)
         {
-            _state=original;
+            _state=original; _paymentDiscards=[];
             return Reject(error.Message);
         }
         catch
         {
-            _state=original;
+            _state=original; _paymentDiscards=[];
             throw;
         }
     }
@@ -249,6 +251,7 @@ public sealed partial class MatchEngine
             // the recruited Personality back into, once this battle ends.
             if (_state.PendingChoice.Type=="yourClanNeedsYouProvince") { ResolveYourClanNeedsYouProvince(command); return; }
             if (_state.PendingChoice.Type=="declineStraighten") { ResolveDeclineStraighten(command); return; }
+            if (_state.PendingChoice.Type=="rentatsuLoss") { ResolveRentatsuLoss(command); return; } // Bayushi Rentatsu (issue #477, batch 4).
             if (_state.PendingChoice.Type=="conqueror") { ResolveConqueror(command); return; }
             // Before This Battle Resolves (issue #272): three tightly-scoped, mandatory choices, no
             // "useAbility"/pass alternative -- see PendingBeforeBattleResolve's own doc comment.
@@ -867,6 +870,7 @@ public sealed partial class MatchEngine
         card.ActionLocks.Clear();
         card.Tokens.Clear();
         card.AbilityUses.Clear();
+        card.RentatsuHeld = false; card.BarrierTurn = -1; // Emperor Edition Personality pass (issue #477), batch 4.
         card.Bowed = false;
         card.Dishonorable = false;
         card.StraightenBlockedTurn = -1;
@@ -1059,7 +1063,8 @@ public sealed partial class MatchEngine
     // discard pile pays the Discipline cost first, then the action's own cost from other sources; see SplitPaymentOptions).
     private PaymentOption[] PaymentOptionsExcluding(int playerId,int cost,IReadOnlySet<string>? exclude,PaymentSubject? paying=null)
     {
-        var sources=Producers(playerId,paying).Where(c=>exclude is null || !exclude.Contains(c.Id)).OrderBy(c=>c.Id,StringComparer.Ordinal).ToArray();
+        // A source whose amount is the payer's own choice (Asahina Keigo, issue #477) is never suggested.
+        var sources=Producers(playerId,paying).Where(c=>(exclude is null || !exclude.Contains(c.Id)) && !IsVariableGoldSource(c)).OrderBy(c=>c.Id,StringComparer.Ordinal).ToArray();
         if(cost==0) return [new([],0,0,0)];
         // Dynamic programming keeps useful alternatives without exponential work for large economies.
         var byTotal=new Dictionary<int,List<string[]>> { [0]=[[]] };
@@ -1092,6 +1097,7 @@ public sealed partial class MatchEngine
         Require(cost>0 || ids.Length==0,"No Gold sources are needed for this free action.");
         var producers=Producers(playerId,paying).Select(c=>c.Id).ToHashSet(StringComparer.Ordinal);
         Require(ids.All(producers.Contains),"Every Gold source must be yours, in play, unbowed and able to produce Gold.");
+        RequirePaymentDiscards(playerId,ids,paying); // Asahina Keigo (issue #477): the card each such source discards is named.
         var produced=ids.Sum(id=>GoldProduced(id,playerId,paying));
         Require(produced>=cost,$"This payment needs {cost} Gold; selected sources produce {produced}.");
     }
@@ -1107,6 +1113,7 @@ public sealed partial class MatchEngine
             {
                 _state.Cards[id].AbilityUses[AbilityCatalog.All[alternate.AbilityId].UsageKey ?? alternate.AbilityId]=_state.TurnNumber;
                 Emit("goldSourceUsed",$"{Definition(_state.Cards[id]).Name} bowed to produce {alternate.Amount} Gold.",playerId,id);
+                if(AbilityCatalog.All[alternate.AbilityId].PaymentDiscardsFocus) DiscardForVariableGoldSource(_state.Cards[id],playerId);
             }
         foreach(var id in ids) _state.Cards[id].Bowed=true;
         Emit("payment",$"{Player(playerId).Name} paid {cost} Gold for {Definition(target).Name}{(part is null?"":$" ({part})")}, producing {produced}; {produced-cost} excess was lost.",playerId,target.Id,produced-cost);
@@ -2519,6 +2526,9 @@ public sealed partial class MatchEngine
         card.Zone=Zone.Battlefield; card.ProvinceIndex=province;
         foreach(var attachment in Attachments(card.Id)) attachment.ProvinceIndex=province;
         if(arrivedFromElsewhere) _state.PendingMoveReactionCardId=card.Id;
+        // Bayushi Mitsuo (Emperor Edition Personality pass, issue #477, batch 4): "a Battle action that moved Mitsuo" -- every move an action makes is on the action's record, including the
+        // unit that moves itself (its own source or performer), which TryMoveToBattlefield's target moves are not the only ones.
+        if(arrivedFromElsewhere && _runningCommand is not null) RecordActionEffect(card.Id,MovedKind);
         return true;
     }
 
@@ -2628,6 +2638,12 @@ public sealed partial class MatchEngine
     private void StraightenPhase(PlayerState player)
     {
         SetPhase(Phase.Straighten,player.Id);
+        // Bayushi Rentatsu (Emperor Edition Personality pass, issue #477, batch 4): "after each of your turns begins, choose a player; he loses 2 Honor" while he remains bowed (EmperorPersonalityBatch4.cs).
+        if(BeginRentatsuLoss(player)) return;
+        ContinueStraightenPhase(player);
+    }
+    private void ContinueStraightenPhase(PlayerState player)
+    {
         // A card with the choose-straighten effect lets its controller decide, per turn, whether to
         // straighten it instead of that being automatic or a fixed forced-skip condition.
         if(EligibleForOptionalStraighten(player.Id).Length>0)
@@ -2637,8 +2653,8 @@ public sealed partial class MatchEngine
         }
         FinishStraightening(player,[]);
     }
-    private string[] EligibleForOptionalStraighten(int playerId)=>_state.Cards.Values.Where(c=>c.OwnerId==playerId && c.Bowed && c.Zone is Zone.Home or Zone.Stronghold or Zone.Attached
-        && Definition(c).Effect=="choose-straighten" && c.StraightenBlockedTurn!=_state.TurnNumber).Select(c=>c.Id).ToArray();
+    private string[] EligibleForOptionalStraighten(int playerId)=>_state.Cards.Values.Where(c=>c.OwnerId==playerId && (c.Bowed && c.Zone is Zone.Home or Zone.Stronghold or Zone.Attached
+        && Definition(c).Effect=="choose-straighten" && c.StraightenBlockedTurn!=_state.TurnNumber || RentatsuMayStayBowed(c))).Select(c=>c.Id).ToArray();
     private void ResolveDeclineStraighten(GameCommand command)
     {
         var pending=_state.PendingChoice!;

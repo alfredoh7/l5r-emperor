@@ -2511,4 +2511,6 @@ public static class PublishedContent
     public static PublishedSnapshot PersonalityWave65 { get; } = Load("L5R.Published.PersonalityWave65.json", "personality-wave-65", requireDecks: false);
     /// <summary>Holding wave 10 (Emperor Edition Gempukku pass, issue #461): the nine Market Holdings.</summary>
     public static PublishedSnapshot HoldingWave10 { get; } = Load("L5R.Published.HoldingWave10.json", "holding-wave-10", requireDecks: false);
+    /// <summary>Personality wave 71 (Emperor Edition Personality pass, issue #477, batch 4): fifteen Crane, Scorpion and Ninja Personalities wired whole.</summary>
+    public static PublishedSnapshot PersonalityWave71 { get; } = Load("L5R.Published.PersonalityWave71.json", "personality-wave-71", requireDecks: false);
 }

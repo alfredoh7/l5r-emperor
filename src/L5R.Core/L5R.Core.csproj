@@ -223,5 +223,6 @@
     <EmbeddedResource Include="../../content/published/region-wave-8.json" LogicalName="L5R.Published.RegionWave8.json" />
     <EmbeddedResource Include="../../content/published/personality-wave-65.json" LogicalName="L5R.Published.PersonalityWave65.json" />
     <EmbeddedResource Include="../../content/published/holding-wave-10.json" LogicalName="L5R.Published.HoldingWave10.json" />
+    <EmbeddedResource Include="../../content/published/personality-wave-71.json" LogicalName="L5R.Published.PersonalityWave71.json" />
   </ItemGroup>
 </Project>

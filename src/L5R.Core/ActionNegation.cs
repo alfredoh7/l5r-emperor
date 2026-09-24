@@ -49,6 +49,7 @@ public sealed partial class MatchEngine
             Emit("favorDiscarded", $"{player.Name} discarded the Imperial Favor.", player.Id);
         }
         DiscardFavorForBatch1(id, player); // Forgotten Legacy pass (issue #467), batch 1: Doji Rengetsu's Favor discard is a cost.
+        DiscardFavorForBatch4(id, player); // Emperor Edition Personality pass (issue #477), batch 4: Kakita Tadanobu's Favor discard is a cost.
         // A negated action was still performed (Forgotten Legacy pass, issue #467, batch 1: Daigotsu Murota's Dark Virtue record).
         RecordPerformedKeywordActions(ability, command, source);
         PayAbilityCosts(ability, command, player, source);

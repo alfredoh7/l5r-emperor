@@ -298,6 +298,11 @@ public sealed class CardInstance
     public int AssignBowedTurn { get; set; } = -1;
     // Megumi's Guidance: the turn through which this Personality's destruction from other players' cards' effects is negated (SeedsOfDecayBatch1.cs).
     public int DestructionShieldTurn { get; set; } = -1;
+    // Emperor Edition Personality pass (issue #477), batch 4. Asahina Michiru's barrier of air: the turn through which the NEXT destruction of this Personality by another player's action is
+    // negated and moves him home instead (spent by that destruction). Bayushi Rentatsu: true while the Limited action's "while Rentatsu remains bowed" effect stands
+    // (EmperorPersonalityBatch4.cs; ends when he straightens or leaves play).
+    public int BarrierTurn { get; set; } = -1;
+    public bool RentatsuHeld { get; set; }
     // Seeds of Decay pass (issue #453), batch 2. Sentinel Spirit ("if it was opposed this turn"): the last turn this card stood in a battle whose two armies opposed each other
     // (MarkOpposed, at the battle's resolution); the AssignedToAttackTurn convention. Dragon Tattoo - exp ("who has not performed an action from a Dragon Tattoo this game"):
     // the titles of the cards whose actions this Personality performed, kept for the game (never reset with the card: it is the same card).
@@ -1024,7 +1029,10 @@ public sealed record GameCommand(string Type, int PlayerId, long ExpectedVersion
     SlotSelection[]? Selections = null,
     // "Create a card" with a choice of cards (issue #394, "an Armor or Weapon Item"): the id of the scan the acting player chose among the ability's
     // CreatedCardSpec.Or alternatives; null for an ability that creates a single card.
-    string? CreatedCard = null);
+    string? CreatedCard = null,
+    // Emperor Edition Personality pass (issue #477), batch 4 (Asahina Keigo): for each Gold source that produces "Gold equal to the Focus Value of a card discarded", the id of the
+    // hand card the payer discards for it (source id -> hand card id). Null for every other payment.
+    Dictionary<string, string>? PaymentDiscards = null);
 public sealed record CommandResult(bool Accepted, string? Error, long Version, GameEvent[] Events);
 public sealed record PaymentOption(string[] SourceIds, int Produced, int Cost, int Excess);
 // Basis (issue #303): the human-readable derivation of Cost, e.g. "Training samurai cost 5 - 2 (Clan

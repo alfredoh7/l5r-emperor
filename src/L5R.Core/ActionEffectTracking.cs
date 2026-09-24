@@ -65,6 +65,9 @@ public sealed partial class MatchEngine
         return performer is not null && Definition(performer).Type == CardType.Personality ? performer.Id : null;
     }
 
+    // A Battle action: a Battle-timed ability, or a Battle/Open one resolved in a Combat Segment.
+    private bool IsBattleAction(string abilityId) => AbilityCatalog.All.TryGetValue(abilityId, out var ability) && (ability.Timing == "Battle" || ability.Timing == "BattleOrOpen" && _state.Phase == Phase.Battle);
+
     private static bool IsAfterActionResolvedReaction(AbilityDefinition ability) => ability.Timing == "Reaction" && ability.Trigger == AfterActionReactionTriggers.AfterActionResolved;
 
     // Whether the last resolved action's own effects destroyed a Personality of `playerId`'s.
@@ -103,6 +106,9 @@ public sealed partial class MatchEngine
             // ability classified Tactical through ActionCarriesKeyword (the ability's own tag, or the source card's keyword).
             "byung-additional-action" => facts.PerformerId == source.Id && facts.PlayerId == playerId && AbilityCatalog.All[facts.AbilityId].Timing == "Battle"
                 && ActionCarriesKeyword(AbilityCatalog.All[facts.AbilityId], facts.SourceId is null ? null : Card(facts.SourceId), "Tactical"),
+            // Bayushi Mitsuo (Emperor Edition Personality pass, issue #477, batch 4): "After the resolution of a Battle action that moved Mitsuo" -- either player's Battle action (a
+            // Battle/Open one taken in a Combat Segment is a Battle action), his own move on the action's record.
+            "mitsuo-additional-action" => IsBattleAction(facts.AbilityId) && facts.Affected.Any(a => a.Kind == MovedKind && a.CardId == source.Id),
             // Hida Yamadera - exp: "After another player's Battle action resolves, if its effects destroyed Yamadera."
             "yamadera-attack" => facts.PlayerId != playerId && AbilityCatalog.All[facts.AbilityId].Timing == "Battle" && facts.Affected.Any(a => a.Kind == DestroyedKind && a.CardId == source.Id),
             // Advanced Intelligence (Seeds of Decay pass, issue #453, batch 1): "After a Recon Strategy's action resolves" -- either player's, classified through ActionCarriesKeyword.

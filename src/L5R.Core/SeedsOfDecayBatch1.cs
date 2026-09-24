@@ -29,6 +29,7 @@ public sealed partial class MatchEngine
     // Read where an action's effect destroys a card (DestroyUnits with an acting player; DestroyAttackTarget): another player's effect only. A battle's own resolution is not a card's effect.
     private bool DestructionShielded(CardInstance card, int actingPlayerId)
     {
+        if (MichiruBarrierNegates(card, actingPlayerId)) return true; // Asahina Michiru (Emperor Edition Personality pass, issue #477, batch 4).
         if (MountainsPowerNegates(card, actingPlayerId)) return true; // The Mountain's Power (Forgotten Legacy pass, issue #467).
         if (card.DestructionShieldTurn != _state.TurnNumber || actingPlayerId == card.OwnerId) return false;
         Emit("destructionNegated", $"{Definition(card).Name}'s destruction was negated (Megumi's Guidance).", card.OwnerId, card.Id);

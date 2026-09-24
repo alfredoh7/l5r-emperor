@@ -422,6 +422,10 @@ public sealed partial class MatchEngine
             // legal-actions-driven client can stall in a search.
             result.AddRange(SearchActions(playerId));
         }
+        else if(_state.PendingChoice is { Type:"rentatsuLoss" })
+        {
+            result.AddRange(RentatsuLossActions(playerId)); // Bayushi Rentatsu (Emperor Edition Personality pass, issue #477, batch 4).
+        }
         else if(_state.PendingChoice is { Type:"declineStraighten" })
         {
             var optional=EligibleForOptionalStraighten(playerId);
