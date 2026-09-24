@@ -1,4 +1,5 @@
 using static RegressionAssertions;
+using static AboveStrengthAssertions;
 using System.Reflection;
 using System.Runtime.ExceptionServices;
 using System.Text.Json;
@@ -84,6 +85,7 @@ var tests = new (string Name, Action Run)[]
     ("Shamate Keep moves home a Personality with equal or lower Personal Honor; gains Honor only if uncontrolled", ShamateMove),
     ("Plains of the Maiden gains Honor per surviving Battle Maiden after the Attacker destroys an army", PlainsOfMaiden),
     ("Law of Darkness Dojo weakens and bows a dishonorable enemy; punishes further Honor loss from a Battle action", LawOfDarknessDojo),
+    ("Attack targeting (core rule): a target above the Attack's strength is a legal target that survives; no target is still fine; Honor/bow effects of the action are unchanged", AttackMayTargetAboveStrength),
     ("Carpenter Castle's Ranged Attack is legal with no target in sight; destroys a legal target and gains Honor if it targeted a card (Mendon, issue #335)", CarpenterCastleAttack),
     ("Shiro Shiba's Melee Attack strength rises with a controlled Shugenja", ShiroShibaAttack),
     ("Tokens create/move/destroy, persist across turns unlike Modifiers, and are removed when their host leaves play", TokenPrimitives),
@@ -1708,8 +1710,8 @@ static void FollowerWave11Primitives()
         var nikutai=Add(s,"oracle-l5r-9872",0,Zone.Attached,attachedTo:host.Id,province:0);
         var target=Add(s,"training-lion-veteran",1,Zone.Battlefield,province:0); // Force 6
         var e=MatchEngine.FromTestState(s);
-        Reject(e,new GameCommand("useAbility",0,e.Version,CardId:nikutai.Id,TargetId:target.Id,AbilityId:"nikutai-attack"));
-        Check(e.State.Cards[target.Id].Zone==Zone.Battlefield,"Force-6 target is above the Attack's strength and cannot even be legally targeted");
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:nikutai.Id,TargetId:target.Id,AbilityId:"nikutai-attack"));
+        Check(e.State.Cards[target.Id].Zone==Zone.Battlefield,"Force-6 target is above the Attack's strength: a legal target that survives");
     }
     {
         // AttackKind must classify as "Melee", not the missing-case default "": Seasoned Ashigaru is
@@ -2597,7 +2599,7 @@ static void UnconditionalAttackImportWave()
         var performer=Add(s,cardId,0,isFollower?Zone.Attached:Zone.Battlefield,province:0,attachedTo:host?.Id);
         var target=Add(s,"training-crane-veteran",1,Zone.Battlefield,province:0); // Force 5
         var e=MatchEngine.FromTestState(s);
-        if(strength<5) Reject(e,new GameCommand("useAbility",0,e.Version,CardId:performer.Id,TargetId:target.Id,AbilityId:abilityId));
+        if(strength<5) AcceptSurvive(e,new GameCommand("useAbility",0,e.Version,CardId:performer.Id,TargetId:target.Id,AbilityId:abilityId),target.Id);
         Accept(e,new GameCommand("useAbility",0,e.Version,CardId:performer.Id,TargetId:strength>=5?target.Id:null,AbilityId:abilityId));
         Equal(e.State.Cards[target.Id].Zone,strength>=5?Zone.Dead:Zone.Battlefield,$"{cardId}: hit expectation at strength {strength} vs Force 5");
     }
@@ -2623,7 +2625,7 @@ static void BayushiKahokuAttack()
     var honorable=Add(s,"training-crane-veteran",1,Zone.Battlefield,province:0); // Force 5, not dishonorable
     var e=MatchEngine.FromTestState(s);
     Equal(e.GetView(0).Players[0].Army.Single(c=>c.Id==kahoku.Id).Force,3,"No enemy is dishonorable: base Force 3");
-    Reject(e,new GameCommand("useAbility",0,e.Version,CardId:kahoku.Id,TargetId:honorable.Id,AbilityId:"bayushi-kahoku-attack"));
+    AcceptSurvive(e,new GameCommand("useAbility",0,e.Version,CardId:kahoku.Id,TargetId:honorable.Id,AbilityId:"bayushi-kahoku-attack"),honorable.Id);
 
     // A dishonorable enemy Personality both raises Kahoku's own Force (+2, always-on) and the Attack's
     // strength against that specific target (+2, target-dependent) -- two separate conditionals that
@@ -2726,7 +2728,7 @@ static void AttackFollowersExceptionShapes()
         var kosoko2=Add(s2,"oracle-l5r-9831",0,Zone.Battlefield,province:0);
         var (strong,_)=Followed(s2,"training-crane-veteran"); Add(s2,"training-item",1,Zone.Attached,province:0,attachedTo:strong.Id);
         var e2=MatchEngine.FromTestState(s2);
-        Reject(e2,UseAtk(e2,"tsuruchi-kosoko-exp-attack",kosoko2.Id,strong.Id));
+        AcceptSurvive(e2,UseAtk(e2,"tsuruchi-kosoko-exp-attack",kosoko2.Id,strong.Id),strong.Id); // legal target, but the strength check leaves it alive
     }
 
     // ---- The exception evaluator over every kind/condition/target-status combination (shapes (b), (c) and (e)), through granted
@@ -2908,7 +2910,7 @@ static void BayushiKahokuExpTrait()
         // The exception lifts the Follower immunity only, never the strength check: D4 (Force 4 > 3) is not made a legal target by the -4F on H.
         var (s2,kahoku2,h2,_,d4,_)=Table();
         var e2=MatchEngine.FromTestState(s2);
-        Reject(e2,UseAtk(e2,"kahoku-exp-attack",kahoku2.Id,h2.Id,[d4.Id]));
+        AcceptSurvive(e2,UseAtk(e2,"kahoku-exp-attack",kahoku2.Id,h2.Id,[d4.Id]),d4.Id); // still a legal target, but survives
         // ...but weakening D4 itself does bring him within reach (the strength check sees the -4F the same action applies).
         var e3=MatchEngine.FromTestState(s2);
         Accept(e3,UseAtk(e3,"kahoku-exp-attack",kahoku2.Id,d4.Id,[d4.Id]));
@@ -2923,7 +2925,7 @@ static void BayushiKahokuExpTrait()
             for(var i=0;i<items;i++) Add(s,"training-item",1,Zone.Attached,province:0,attachedTo:host.Id);
             var e=MatchEngine.FromTestState(s);
             var command=UseAtk(e,"kahoku-exp-attack",kahoku.Id,host.Id,[host.Id]);
-            if(legal) { Accept(e,command); Equal(e.State.Cards[host.Id].Zone,Zone.Dead); } else Reject(e,command);
+            if(legal) { Accept(e,command); Equal(e.State.Cards[host.Id].Zone,Zone.Dead); } else AcceptSurvive(e,command,host.Id);
         }
     }
     {
@@ -3177,7 +3179,7 @@ static void TargetStatusPredicate()
         var target=Add(t,"training-crane-veteran",1,Zone.Battlefield,province:0); target.Dishonorable=dishonorableTarget; // Force 5: needs the +2
         var ee=MatchEngine.FromTestState(t);
         var command=UseAtk(ee,"bayushi-kahoku-attack",kahoku.Id,target.Id);
-        if(dishonorableTarget) { Accept(ee,command); Equal(ee.State.Cards[target.Id].Zone,expectedZone); } else Reject(ee,command);
+        if(dishonorableTarget) { Accept(ee,command); Equal(ee.State.Cards[target.Id].Zone,expectedZone); } else AcceptSurvive(ee,command,target.Id);
     }
 
     // ---- As a target-LEGALITY layer: the existing honorable-personality / dishonorable-personality categories now ask the predicate, and
@@ -3257,7 +3259,7 @@ static void PersonalityWave24Cards()
         var target=Add(s,def,1,Zone.Battlefield,province:0); tweak?.Invoke(target);
         var e=MatchEngine.FromTestState(s);
         var command=UseAtk(e,"hiruma-nitani-attack",nitani.Id,target.Id);
-        if(expectHit) { Accept(e,command); Equal(e.State.Cards[target.Id].Zone,Zone.Dead,why); } else Reject(e,command);
+        if(expectHit) { Accept(e,command); Equal(e.State.Cards[target.Id].Zone,Zone.Dead,why); } else AcceptSurvive(e,command,target.Id);
     }
     {
         var s=FollowerAttackTable(); var nitani=Add(s,"oracle-l5r-3311",0,Zone.Battlefield,bowed:true,province:0); Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0);
@@ -3879,6 +3881,50 @@ static void PublicHandLimitView()
     Check(JsonSerializer.Deserialize<PlayerView>(legacy.ToJsonString())!.HandLimit is null, "Old snapshots report an unknown limit");
 }
 
+static void AttackMayTargetAboveStrength()
+{
+    {
+        // Ranged 3 (Dark Naga Scouts) targeting a Force-5 Personality: accepted, leaves him alive and in place, nothing else moves.
+        var s=StrongholdBattle("oracle-l5r-1218");
+        var host=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0);
+        var scouts=Add(s,"oracle-l5r-1839",0,Zone.Attached,province:0,attachedTo:host.Id); // Ranged 3, unconditional
+        var strong=Add(s,"training-crane-veteran",1,Zone.Battlefield,province:0); // Force 5 > 3
+        var e=MatchEngine.FromTestState(s);
+        var honor=(e.State.Players[0].Honor,e.State.Players[1].Honor);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:scouts.Id,TargetId:strong.Id,AbilityId:"dark-naga-scouts-attack"));
+        Equal(e.State.Cards[strong.Id].Zone,Zone.Battlefield,"The Force-5 target is legal but not destroyed by Ranged 3");
+        Check(!e.State.Cards[strong.Id].Bowed && e.State.Cards[strong.Id].Modifiers.Count==0,"...and is otherwise untouched");
+        Equal(e.State.Cards[scouts.Id].Zone,Zone.Attached,"The attacking Follower stays attached");
+        Equal((e.State.Players[0].Honor,e.State.Players[1].Honor),honor,"Honor unchanged: this Attack has no Honor effect");
+    }
+    {
+        // The same Attack at Force <= strength still destroys, and with no target at all it is still a legal action.
+        var s=StrongholdBattle("oracle-l5r-1218");
+        var host=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0);
+        var scouts=Add(s,"oracle-l5r-1839",0,Zone.Attached,province:0,attachedTo:host.Id);
+        var weak=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0); // Force 3
+        var strong=Add(s,"training-crane-veteran",1,Zone.Battlefield,province:0);
+        var e=MatchEngine.FromTestState(s);
+        AcceptSurvive(e,new GameCommand("useAbility",0,e.Version,CardId:scouts.Id,AbilityId:"dark-naga-scouts-attack"),weak.Id,strong.Id);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:scouts.Id,TargetId:weak.Id,AbilityId:"dark-naga-scouts-attack"));
+        Equal(e.State.Cards[weak.Id].Zone,Zone.Dead,"Force 3 <= Ranged 3 is destroyed");
+        Equal(e.State.Cards[strong.Id].Zone,Zone.Battlefield);
+    }
+    {
+        // An above-strength target of an Attack whose action pays a cost and grants Honor: cost and Honor still apply (Carpenter Castle, Ranged 5 vs Force 6).
+        var s=StrongholdBattle("oracle-l5r-1218");
+        Add(s,"training-lion-samurai",0,Zone.Battlefield,province:0);
+        var castle=Add(s,"training-castle",0,Zone.Home);
+        var strong=Add(s,"training-lion-veteran",1,Zone.Battlefield,province:0); // Force 6
+        var e=MatchEngine.FromTestState(s);
+        var before=e.State.Players[0].Honor;
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:s.Players[0].StrongholdId,PerformerId:castle.Id,TargetId:strong.Id,AbilityId:"carpenter-castle-siege"));
+        Check(e.State.Cards[castle.Id].Bowed,"The bow cost is paid");
+        Equal(e.State.Cards[strong.Id].Zone,Zone.Battlefield);
+        Equal(e.State.Players[0].Honor,before+2,"The Honor gain for having targeted a card still applies");
+    }
+}
+
 static void CarpenterCastleAttack()
 {
     {
@@ -3890,10 +3936,22 @@ static void CarpenterCastleAttack()
         var enemy=Add(s,"training-lion-veteran",1,Zone.Battlefield,province:0); // Force 6, above Ranged 5
         var e=MatchEngine.FromTestState(s);
         var before=e.State.Players[0].Honor;
-        Reject(e,new GameCommand("useAbility",0,e.Version,CardId:s.Players[0].StrongholdId,PerformerId:castle.Id,TargetId:enemy.Id,AbilityId:"carpenter-castle-siege"));
+        // Core rule: a target whose Force is above the strength is still legal; the Attack just fails to destroy it.
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:s.Players[0].StrongholdId,PerformerId:castle.Id,TargetId:enemy.Id,AbilityId:"carpenter-castle-siege"));
+        Check(e.State.Cards[castle.Id].Bowed,"Bowing the Castle/Siege card is a cost paid regardless of whether the Attack hits");
+        Check(e.State.Cards[enemy.Id].Zone==Zone.Battlefield,"An out-of-range enemy is a legal target but untouched");
+        Equal(e.State.Players[0].Honor,before+2,"Gains 2 Honor because the Attack targeted a card, even one above the strength");
+    }
+    {
+        var s=StrongholdBattle("oracle-l5r-1218");
+        Add(s,"training-lion-samurai",0,Zone.Battlefield,province:0); // Presence
+        var castle=Add(s,"training-castle",0,Zone.Home);
+        var enemy=Add(s,"training-lion-veteran",1,Zone.Battlefield,province:0); // Force 6, above Ranged 5
+        var e=MatchEngine.FromTestState(s);
+        var before=e.State.Players[0].Honor;
         Accept(e,new GameCommand("useAbility",0,e.Version,CardId:s.Players[0].StrongholdId,PerformerId:castle.Id,AbilityId:"carpenter-castle-siege"));
         Check(e.State.Cards[castle.Id].Bowed,"Bowing the Castle/Siege card is a cost paid regardless of whether the Attack hits");
-        Check(e.State.Cards[enemy.Id].Zone==Zone.Battlefield,"An out-of-range enemy is untouched");
+        Check(e.State.Cards[enemy.Id].Zone==Zone.Battlefield,"Untargeted Attack touches nothing");
         Equal(e.State.Players[0].Honor,before,"No Honor gain when it targeted no card");
     }
     {
@@ -3935,12 +3993,12 @@ static void CarpenterCastleAttack()
 static void ShiroShibaAttack()
 {
     {
-        // Base Melee 4 Attack: a Force-4 enemy without Followers is legal, a Force-5 one is not.
+        // Base Melee 4 Attack: a Force-4 enemy without Followers is destroyed; a Force-5 one is still a legal target but survives.
         var s=StrongholdBattle("oracle-l5r-7017");
         var performer=Add(s,"training-samurai",0,Zone.Battlefield,province:0);
         var tooStrong=Add(s,"training-crane-veteran",1,Zone.Battlefield,province:0); // Force 5
         var e=MatchEngine.FromTestState(s);
-        Reject(e,new GameCommand("useAbility",0,e.Version,CardId:s.Players[0].StrongholdId,PerformerId:performer.Id,TargetId:tooStrong.Id,AbilityId:"shiro-shiba-melee"));
+        AcceptSurvive(e,new GameCommand("useAbility",0,e.Version,CardId:s.Players[0].StrongholdId,PerformerId:performer.Id,TargetId:tooStrong.Id,AbilityId:"shiro-shiba-melee")); // legal target, simply not destroyed
         Accept(e,new GameCommand("useAbility",0,e.Version,CardId:s.Players[0].StrongholdId,PerformerId:performer.Id,AbilityId:"shiro-shiba-melee"));
         Check(e.State.Cards[tooStrong.Id].Zone==Zone.Battlefield,"Above-strength enemy is untouched; performer does not bow as a cost");
         Check(!e.State.Cards[performer.Id].Bowed,"The performing Samurai is not itself bowed by this ability");
@@ -3954,7 +4012,7 @@ static void ShiroShibaAttack()
         var stillTooStrong=Add(s,"training-lion-veteran",1,Zone.Battlefield,province:0); // Force 6
         Add(s,"training-item",1,Zone.Attached,attachedTo:stillTooStrong.Id,province:0); // +2 Force = 8, above even the boosted strength of 6
         var e=MatchEngine.FromTestState(s);
-        Reject(e,new GameCommand("useAbility",0,e.Version,CardId:s.Players[0].StrongholdId,PerformerId:performer.Id,TargetId:stillTooStrong.Id,AbilityId:"shiro-shiba-melee"));
+        AcceptSurvive(e,new GameCommand("useAbility",0,e.Version,CardId:s.Players[0].StrongholdId,PerformerId:performer.Id,TargetId:stillTooStrong.Id,AbilityId:"shiro-shiba-melee"),stillTooStrong.Id); // legal target, survives
         Accept(e,new GameCommand("useAbility",0,e.Version,CardId:s.Players[0].StrongholdId,PerformerId:performer.Id,TargetId:target.Id,AbilityId:"shiro-shiba-melee"));
         Equal(e.State.Cards[target.Id].Zone,Zone.Dead);
         Check(shugenja.Zone==Zone.Home,"The Shugenja need not be at this battlefield to grant the bonus");
@@ -4484,7 +4542,7 @@ static void FollowerWave2Cards()
             var performer=Add(s,cardId,0,Zone.Attached,province:0,attachedTo:host.Id);
             var target=Add(s,"training-crane-veteran",1,Zone.Battlefield,province:0); // Force 5
             var e=MatchEngine.FromTestState(s);
-            Reject(e,new GameCommand("useAbility",0,e.Version,CardId:performer.Id,TargetId:target.Id,AbilityId:abilityId));
+            AcceptSurvive(e,new GameCommand("useAbility",0,e.Version,CardId:performer.Id,TargetId:target.Id,AbilityId:abilityId),target.Id);
             Accept(e,new GameCommand("useAbility",0,e.Version,CardId:performer.Id,AbilityId:abilityId));
             Equal(e.State.Cards[target.Id].Zone,Zone.Battlefield,$"{cardId}: strength {strength} misses Force 5");
         }
@@ -4994,7 +5052,7 @@ static void PassiveAttackDefenseAndEntryWatch()
         var defenderHost=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0);
         var defended=Add(s,"training-attack-defense-self",1,Zone.Attached,province:0,attachedTo:defenderHost.Id); // Force 2
         var e=MatchEngine.FromTestState(s);
-        Reject(e,new GameCommand("useAbility",0,e.Version,CardId:attacker.Id,TargetId:defended.Id,AbilityId:"horse-archers-attack")); // effective 4-3=1 < Force 2
+        AcceptSurvive(e,new GameCommand("useAbility",0,e.Version,CardId:attacker.Id,TargetId:defended.Id,AbilityId:"horse-archers-attack"),defended.Id); // effective 4-3=1 < Force 2: a legal target, but it survives
     }
     {
         // Singh Remnants' shape: Scope "Unit", Ranged only -- protects every card in the unit, but a
@@ -5008,7 +5066,7 @@ static void PassiveAttackDefenseAndEntryWatch()
         var guard=Add(s,"training-attack-defense-unit",1,Zone.Attached,province:0,attachedTo:defenderHost.Id);
         var otherFollower=Add(s,"training-follower",1,Zone.Attached,province:0,attachedTo:defenderHost.Id); // Force 2, different card, same unit
         var e=MatchEngine.FromTestState(s);
-        Reject(e,new GameCommand("useAbility",0,e.Version,CardId:rangedAttacker.Id,TargetId:otherFollower.Id,AbilityId:"horse-archers-attack")); // Ranged: effective 4-3=1 < Force 2, protects the WHOLE unit
+        AcceptSurvive(e,new GameCommand("useAbility",0,e.Version,CardId:rangedAttacker.Id,TargetId:otherFollower.Id,AbilityId:"horse-archers-attack"),otherFollower.Id); // Ranged: effective 4-3=1 < Force 2, protects the WHOLE unit (legal target, survives)
         Accept(e,new GameCommand("useAbility",0,e.Version,CardId:meleeAttacker.Id,TargetId:otherFollower.Id,AbilityId:"cavalry-flankers-attack")); // Melee: unaffected, strength 2 = Force 2
         Equal(e.State.Cards[otherFollower.Id].Zone,Zone.FateDiscard,"Melee Attacks are not reduced -- Singh Remnants' shape only names Ranged (a destroyed Follower attachment lands in the Fate discard pile)");
     }
@@ -5673,7 +5731,7 @@ static void FocusOneBattleActionsWave()
         var nonCavalry=Add(s,"training-crane-veteran",1,Zone.Battlefield,province:0); // Force 5, no attachments, not Cavalry
         var cavalry=Add(s,"training-cavalry",1,Zone.Battlefield,province:0); // Force 2, well within either strength
         var e=MatchEngine.FromTestState(s);
-        Reject(e,new GameCommand("useAbility",0,e.Version,CardId:yari.Id,TargetId:nonCavalry.Id,AbilityId:"sankaku-yari-attack")); // Melee 4 < Force 5, no Cavalry bonus
+        AcceptSurvive(e,new GameCommand("useAbility",0,e.Version,CardId:yari.Id,TargetId:nonCavalry.Id,AbilityId:"sankaku-yari-attack"),nonCavalry.Id); // Melee 4 < Force 5, no Cavalry bonus: legal target, survives
         Accept(e,new GameCommand("useAbility",0,e.Version,CardId:yari.Id,TargetId:cavalry.Id,AbilityId:"sankaku-yari-attack"));
         Equal(e.State.Cards[cavalry.Id].Zone,Zone.Dead,"Destroys the Cavalry target");
     }
@@ -6940,7 +6998,7 @@ static void TogashiMitsuVariableAttack()
         var enemy=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0); // Force 3
         var e=MatchEngine.FromTestState(s);
         Reject(e,new GameCommand("useAbility",0,e.Version,CardId:mitsu.Id,TargetId:enemy.Id,AbilityId:"mitsu-fire-attack",CardIds:[t1.Id,t1.Id])); // duplicated id
-        Reject(e,new GameCommand("useAbility",0,e.Version,CardId:mitsu.Id,TargetId:enemy.Id,AbilityId:"mitsu-fire-attack",CardIds:[t1.Id,t2.Id])); // strength 2 < Force 3
+        AcceptSurvive(e,new GameCommand("useAbility",0,e.Version,CardId:mitsu.Id,TargetId:enemy.Id,AbilityId:"mitsu-fire-attack",CardIds:[t1.Id,t2.Id]),enemy.Id); // strength 2 < Force 3: legal target, survives
         Accept(e,new GameCommand("useAbility",0,e.Version,CardId:mitsu.Id,TargetId:enemy.Id,AbilityId:"mitsu-fire-attack",CardIds:[t1.Id,t2.Id,t3.Id]));
         Equal(e.State.Cards[mitsu.Id].Tokens.Count,0,"Every destroyed token is removed");
         Equal(e.State.Cards[enemy.Id].Zone,Zone.Dead,"Strength 3 (all 3 tokens destroyed) matches the Force-3 target");
@@ -7066,7 +7124,7 @@ static void RingBlockedCardsReview()
         target.Modifiers.Add(new("test-setup","test-setup","Force",-1)); // down to Force 1, within Ranged 1
         var tooStrong=Add(s,"training-lion-veteran",1,Zone.Battlefield,province:0); // Force 6, no attachments
         var e=MatchEngine.FromTestState(s);
-        Reject(e,new GameCommand("useAbility",0,e.Version,CardId:ikako.Id,TargetId:tooStrong.Id,AbilityId:"moshi-ikako-attack")); // Force 6 > Ranged 1
+        AcceptSurvive(e,new GameCommand("useAbility",0,e.Version,CardId:ikako.Id,TargetId:tooStrong.Id,AbilityId:"moshi-ikako-attack"),tooStrong.Id); // Force 6 > Ranged 1: legal target, survives
         Accept(e,new GameCommand("useAbility",0,e.Version,CardId:ikako.Id,TargetId:target.Id,AbilityId:"moshi-ikako-attack"));
         Equal(e.State.Cards[target.Id].Zone,Zone.FateDiscard,"Destroys the Force-1 (after modifier) Follower target");
     }
@@ -7110,7 +7168,7 @@ static void LionClanPersonalityReview()
         var kamina=Add(s,"oracle-l5r-10636",0,Zone.Battlefield,province:0);
         var craneTarget=Add(s,"training-crane-veteran",1,Zone.Battlefield,province:0); // Force 5 > Ranged 3
         var e=MatchEngine.FromTestState(s);
-        Reject(e,new GameCommand("useAbility",0,e.Version,CardId:kamina.Id,TargetId:craneTarget.Id,AbilityId:"kamina-exp-attack")); // no clan bonus: 3 < 5
+        AcceptSurvive(e,new GameCommand("useAbility",0,e.Version,CardId:kamina.Id,TargetId:craneTarget.Id,AbilityId:"kamina-exp-attack"),craneTarget.Id); // no clan bonus: 3 < 5, legal target, survives
         var s2=StrongholdBattle("oracle-l5r-1218"); s2.ActivePlayerId=0;
         var kamina2=Add(s2,"oracle-l5r-10636",0,Zone.Battlefield,province:0);
         var lionTarget=Add(s2,"training-lion-samurai",1,Zone.Battlefield,province:0); // Force 4 <= boosted Ranged 4
@@ -7534,27 +7592,33 @@ static void AttachmentRestrictions()
 static void NoAttachmentsFilter()
 {
     {
-        // A Ranged/Melee Attack target must have no attachments at all -- not just no Follower, the
-        // previous (too-narrow) check. An attached Item blocks targeting just as a Follower would.
+        // Core rule: a Ranged/Melee Attack may target a Personality "without Followers"; an attached Item does NOT block it
+        // (only the RequireNoAttachments abilities below need a bare target). The old Reject here was really the Force-4 > Ranged 3
+        // strength check, so Force is now held within strength to prove the Item itself changes nothing.
         var s=StrongholdBattle("oracle-l5r-1218");
         var host=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0);
         var attacker=Add(s,"oracle-l5r-1839",0,Zone.Attached,province:0,attachedTo:host.Id);
         var withItem=Add(s,"training-lion-samurai",1,Zone.Battlefield,province:0); // Force 4
         Add(s,"training-item",1,Zone.Attached,province:0,attachedTo:withItem.Id);
+        withItem.Modifiers=[new("test-fixture","test-fixture","Force",-3)]; // keep Force within Ranged 3 so only the attachment could matter
         var e=MatchEngine.FromTestState(s);
-        Reject(e,new GameCommand("useAbility",0,e.Version,CardId:attacker.Id,TargetId:withItem.Id,AbilityId:"dark-naga-scouts-attack"));
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:attacker.Id,TargetId:withItem.Id,AbilityId:"dark-naga-scouts-attack"));
+        Equal(e.State.Cards[withItem.Id].Zone,Zone.Dead,"An attached Item does not make a Personality an illegal Attack target");
     }
     {
-        // A Follower/Weapon/Armor *token* (no card attachment at all) also counts as an attachment...
+        // A Follower/Weapon/Armor *token* is not an attached Follower CARD, so it does not block an Attack either (the old Reject here was
+        // really the strength check, so Force is held within strength)...
         var s=StrongholdBattle("oracle-l5r-1218");
         var host=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0);
         var attacker=Add(s,"oracle-l5r-1839",0,Zone.Attached,province:0,attachedTo:host.Id);
         var withToken=Add(s,"training-lion-samurai",1,Zone.Battlefield,province:0); withToken.Tokens=[new("t1","Follower","test-fixture")];
+        withToken.Modifiers=[new("test-fixture","test-fixture","Force",-2)]; // Force 2, within Ranged 3: only the token could matter
         var e=MatchEngine.FromTestState(s);
-        Reject(e,new GameCommand("useAbility",0,e.Version,CardId:attacker.Id,TargetId:withToken.Id,AbilityId:"dark-naga-scouts-attack"));
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:attacker.Id,TargetId:withToken.Id,AbilityId:"dark-naga-scouts-attack"));
+        Equal(e.State.Cards[withToken.Id].Zone,Zone.Dead);
     }
     {
-        // ...but an ordinary stat/status token (Fire) does not -- still a legal target.
+        // ...and an ordinary stat/status token (Fire) does not either -- still a legal target.
         var s=StrongholdBattle("oracle-l5r-1218");
         var host=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0);
         var attacker=Add(s,"oracle-l5r-1839",0,Zone.Attached,province:0,attachedTo:host.Id);
@@ -9123,14 +9187,13 @@ static void FollowerWave14Primitives()
         Check(!e.State.Cards[raiders.Id].Bowed,"No printed bow cost, unlike Legulus's Legion above");
     }
     {
-        // Flat Melee 4 cannot even target a Force-5 card -- a card's own Force above the Attack's
-        // strength is illegal, not merely ineffective.
+        // Flat Melee 4 may target a Force-5 card (core rule: legal, targeting is not gated by Force) but does not destroy it.
         var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
         var host=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0);
         var raiders=Add(s,"oracle-l5r-9163",0,Zone.Attached,province:0,attachedTo:host.Id);
         var strong=Add(s,"training-crane-veteran",1,Zone.Battlefield,province:0); // Force 5
         var e=MatchEngine.FromTestState(s);
-        Reject(e,new GameCommand("useAbility",0,e.Version,CardId:raiders.Id,TargetId:strong.Id,AbilityId:"village-raiders-attack"));
+        AcceptSurvive(e,new GameCommand("useAbility",0,e.Version,CardId:raiders.Id,TargetId:strong.Id,AbilityId:"village-raiders-attack"),strong.Id);
     }
     // Water Spider Adept (oracle-l5r-10109): a pure attach restriction with no ability text at all.
     {
@@ -10148,7 +10211,7 @@ static void BatchEPrimitives()
         var chiyo=Add(s,"oracle-l5r-10290",0,Zone.Battlefield,province:0);
         var strong=Add(s,"training-crane-veteran",1,Zone.Battlefield,province:0); // Force 5
         var e=MatchEngine.FromTestState(s);
-        Reject(e,new GameCommand("useAbility",0,e.Version,CardId:chiyo.Id,TargetId:strong.Id,AbilityId:"chiyo-attack"));
+        AcceptSurvive(e,new GameCommand("useAbility",0,e.Version,CardId:chiyo.Id,TargetId:strong.Id,AbilityId:"chiyo-attack"),strong.Id); // Force 5 > Melee 4: legal target, survives
     }
 
     // ------------------------------------------------------------------------------------------
