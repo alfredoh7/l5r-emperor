@@ -9,6 +9,10 @@ public static class PracticeArt
     public static readonly Texture2D Background = GD.Load<Texture2D>("res://Art/Practice/backdrop.png");
     public static readonly Font Bold = GD.Load<FontFile>("res://Art/Fonts/Caudex-Bold.ttf");
     public static readonly Color Ready = new("9bdcd3"), Amber = new("e5b460");
+    private static Texture2D? _goldButton, _darkButton;
+    public static Texture2D ButtonTexture(bool gold) => gold
+        ? _goldButton ??= ButtonArtwork.Extract(ButtonPlate, new Rect2I(1250,822,385,72), 9)
+        : _darkButton ??= ButtonArtwork.Extract(A, new Rect2I(240,730,235,52), 9);
     public static void Frame(CanvasItem canvas, Rect2 rect, bool browser=false)
     {
         var source = browser?new Rect2(29,93,1030,790):new Rect2(155,120,666,686); var texture=browser?B:A;const int edge = 20;
@@ -60,13 +64,13 @@ public partial class PracticeButton : Button
         var gold=(Primary||Selected)&&!Disabled;
         var source=gold?new Rect2(1250,822,385,72):new Rect2(240,730,235,52);
         var rect=new Rect2(Vector2.Zero,Size);
-        if(gold)DrawTextureRectRegion(PracticeArt.ButtonPlate,rect,new Rect2(1250,822,385,72));
-        else if(!Bare)DrawTextureRect(CardChangeArt.Lacquer,rect,false,new Color(.27f,.27f,.27f));
+        if(gold)DrawTextureRect(PracticeArt.ButtonTexture(true),rect,false);
+        else if(!Bare)DrawTextureRect(CardChangeArt.Lacquer,Quiet?rect:rect.Grow(-9),false,new Color(.27f,.27f,.27f));
         const int edge=9;
         float[] x=[0,edge,source.Size.X-edge,source.Size.X], y=[0,edge,source.Size.Y-edge,source.Size.Y];
         float[] dx=[0,edge,Size.X-edge,Size.X],dy=[0,edge,Size.Y-edge,Size.Y];
         for(var j=0;j<3;j++)for(var i=0;i<3;i++)if((i!=1||j!=1)&&!Quiet&&!Bare)
-            DrawTextureRectRegion(PracticeArt.A,new Rect2(dx[i],dy[j],dx[i+1]-dx[i],dy[j+1]-dy[j]),new Rect2(source.Position+new Vector2(x[i],y[j]),new Vector2(x[i+1]-x[i],y[j+1]-y[j])));
+            DrawTextureRectRegion(PracticeArt.ButtonTexture(gold),new Rect2(dx[i],dy[j],dx[i+1]-dx[i],dy[j+1]-dy[j]),new Rect2(new Vector2(x[i],y[j]),new Vector2(x[i+1]-x[i],y[j+1]-y[j])));
         if(RichOutline)PracticeArt.SelectionFrame(this,rect);
         else if(Outline)DrawRect(rect.Grow(-2),OutlineColor,false,Selected?2:1);
         if(DividerAt>0)DrawLine(new(DividerAt,25),new(DividerAt,Size.Y-20),new Color("715931"),1);

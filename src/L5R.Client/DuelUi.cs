@@ -58,8 +58,9 @@ internal static class DuelUi
     }
     private static StyleBox ButtonStyle(string state,float scale,bool ink=false)
     {
-        // Keyboard focus remains a functional outline, separate from decorative art.
-        if(state=="focus")return Palette.Box(Colors.Transparent,Palette.Paper,1,0);
+        // Keep keyboard focus visible along the button silhouette, without a
+        // rectangular outline enclosing its transparent cut-away corners.
+        if(state=="focus")return ink?Palette.Box(Colors.Transparent,Palette.Paper,1,0):SidebarSkin.ButtonFocus();
         var tint=state switch {"hover"=>new Color(1.35f,1.3f,1.25f),"pressed"=>new Color(.75f,.75f,.75f),"disabled"=>new Color(.7f,.7f,.7f,.45f),_=>Colors.White};
         var box=ink?Ink(scale,tint):SidebarSkin.Surface(true,tint:tint);box.ContentMarginLeft=box.ContentMarginRight=18*scale;
         box.ContentMarginTop=box.ContentMarginBottom=9*scale;return box;

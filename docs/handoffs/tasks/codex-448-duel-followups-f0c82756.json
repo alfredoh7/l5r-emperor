@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Implement approved live-duel confirmation and Focus Effect tray, ordered public choice evidence and practice support. Prepare verified one-click Mac launches and versioned portable Windows review candidate for #448.",
-  "validation": "Clean client compile; full deterministic checks passed. Native: 13 follow-up scenarios, 8 final layout reruns, 14 live match, 5 sandbox/guidance, 5 transition cases pass. Latest, Concede and Return a Card Mac apps launched and visually verified. Windows export, bundled runtime/resources, archive checksum and private uploaded asset verified for source ae214dc0. Windows delivery CI is the remaining publication gate. Legacy static-art probe reproduces the same 0.50006104 px failure on unchanged main; documented separately.",
-  "remaining": "Delivery is gated on Windows CI and the package's ready-review notification on PR #466; after that only Mendon's native Windows play, expert review and implementation approval remain. Do not merge automatically. Other unmerged previews stay separate.",
+  "summary": "Implement approved live-duel confirmation and Focus Effect tray; fix opaque exterior button corners across shared lacquer and Practice controls after Alfredo review.",
+  "validation": "Prior full deterministic and live-duel checks passed. Corner revision: clean client compilation; native Concede and compact reduced-motion Focus scenarios passed; Practice and deck-builder native suites passed; actual four corner alpha values are zero while center remains opaque; before/after and state matrix inspected. Refreshed Mac Concede app launched and corrected confirmation verified through native UI. Windows revision 3 passed CI but predates the corner fix; revision 4 delivery is being prepared.",
+  "remaining": "Publish and validate the refreshed Windows review before notifying Mendon. Native Windows play, expert review and implementation approval remain open. Do not merge automatically. Legacy static-art precision failure on unchanged main remains documented.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/448",
   "branch": "codex/448-duel-followups",
-  "updated": "2026-09-24T02:24:13.028067+00:00"
+  "updated": "2026-09-24T06:26:20.105341+00:00"
 }

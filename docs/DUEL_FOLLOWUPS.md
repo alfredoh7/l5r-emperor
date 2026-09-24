@@ -35,3 +35,7 @@ Windows graphical play, expert rules acceptance and final human implementation r
 ## Concurrent work
 
 Checked current main `de672f58` and open PR #465 (Embers of War). The Core choice-resolution integration adds only evidence capture before/after an existing decision; it preserves eligibility and resolution. Public `focusEffectRevenge` is recognized for #465 compatibility. That PR's mechanics and the interaction fixes in #464 remain separate. Recheck current heads before merging.
+
+## Button corner review correction
+
+Alfredo requested transparent cut-away corners throughout the UI. Shared lacquer/gold buttons, tabs and duel controls now extract the approved artwork without the opaque exterior matte; Practice button crops receive the same treatment. Keyboard focus follows the actual frame. See [native before/after and verification](screenshots/button-corners/README.md). This revision supersedes the earlier button appearance; Windows revision 3 predates this correction.

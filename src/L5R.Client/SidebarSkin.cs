@@ -5,6 +5,15 @@ namespace L5R.Client;
 public static class SidebarSkin
 {
     private static Texture2D? _atlas;
+    private static readonly Dictionary<bool, Texture2D> ButtonTextures = [];
+    private static Texture2D ButtonTexture(bool gold)
+    {
+        if (!ButtonTextures.TryGetValue(gold, out var texture))
+            ButtonTextures[gold] = texture = ButtonArtwork.Extract(
+                GD.Load<Texture2D>("res://Art/Sidebar/lacquer-atlas.png"),
+                new Rect2I(718, gold ? 387 : 127, 781, 158), 32, .5f);
+        return texture;
+    }
     private static Texture2D Atlas
     {
         get
@@ -19,8 +28,8 @@ public static class SidebarSkin
     public static Font Italic => GD.Load<FontFile>("res://Art/Fonts/Caudex-Italic.ttf");
     public static StyleBoxTexture Surface(bool button = false, bool gold = false, Color? tint = null)
     {
-        var region = button ? new Rect2(718, gold ? 387 : 127, 781, 158) : new Rect2(36, 39, 631, 940);
-        var box = new StyleBoxTexture { Texture = new AtlasTexture { Atlas = Atlas, Region = new Rect2(region.Position / 2, region.Size / 2) },
+        var box = new StyleBoxTexture { Texture = button ? ButtonTexture(gold)
+                : new AtlasTexture { Atlas = Atlas, Region = new Rect2(18, 19.5f, 315.5f, 470) },
             ModulateColor = tint ?? Colors.White,
             ContentMarginLeft = button ? 22 : 26, ContentMarginRight = button ? 22 : 26,
             ContentMarginTop = button ? 16 : 28, ContentMarginBottom = button ? 16 : 28 };
@@ -40,6 +49,13 @@ public static class SidebarSkin
         box.ContentMarginTop = box.ContentMarginBottom = 14;
         return box;
     }
+    public static StyleBoxTexture ButtonFocus(bool gold = false)
+    {
+        var box = Surface(true, gold, new Color(1.85f, 1.85f, 1.85f));
+        box.DrawCenter = false;
+        box.ContentMarginLeft = box.ContentMarginRight = box.ContentMarginTop = box.ContentMarginBottom = 0;
+        return box;
+    }
     public static Theme Theme()
     {
         var t = Palette.MakeTheme();
@@ -48,10 +64,13 @@ public static class SidebarSkin
         t.SetStylebox("hover", "Button", Surface(true, tint: new Color(1.2f,1.15f,1.05f)));
         t.SetStylebox("pressed", "Button", Surface(true, tint: new Color(.8f,.8f,.8f)));
         t.SetStylebox("disabled", "Button", Surface(true, tint: new Color(.55f,.55f,.55f)));
-        t.SetStylebox("focus", "Button", Palette.Box(Colors.Transparent, Palette.Paper, 0, 0));
+        t.SetStylebox("focus", "Button", ButtonFocus());
         t.SetColor("font_disabled_color", "Button", new Color("a49d8d"));
         t.SetStylebox("normal", "OptionButton", Surface(true));
         t.SetStylebox("hover", "OptionButton", Surface(true));
+        t.SetStylebox("pressed", "OptionButton", Surface(true, tint: new Color(.8f,.8f,.8f)));
+        t.SetStylebox("disabled", "OptionButton", Surface(true, tint: new Color(.55f,.55f,.55f)));
+        t.SetStylebox("focus", "OptionButton", ButtonFocus());
         t.SetStylebox("panel", "PopupMenu", Surface());
         foreach (var kind in new[] { "AcceptDialog", "ConfirmationDialog", "PopupPanel" }) t.SetStylebox("panel", kind, Surface());
         t.SetConstant("buttons_min_height", "AcceptDialog", 60);
@@ -83,6 +102,7 @@ public static class SidebarSkin
             b.AddThemeStyleboxOverride("normal", Surface(true,true));
             b.AddThemeStyleboxOverride("hover", Surface(true,true,new Color(1.1f,1.08f,1)));
             b.AddThemeStyleboxOverride("pressed", Surface(true,true,new Color(.85f,.85f,.85f)));
+            b.AddThemeStyleboxOverride("focus", ButtonFocus(true));
             b.AddThemeColorOverride("font_color", new Color("17130c"));
             b.AddThemeColorOverride("font_hover_color", new Color("17130c"));
             b.AddThemeColorOverride("font_pressed_color", new Color("17130c"));
