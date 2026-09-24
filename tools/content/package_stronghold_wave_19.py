@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Build Stronghold wave 19 (Emperor Edition Stronghold pass, issue #486, batch 3): The Khan's Estate, The Otoro Estate, The Shadow's Lair, The Spider's Web, The Temple of Death - experienced,
-Watchful Eye Dojo and Yasuki Palaces - experienced. The Waystation of the Path stays unwired (see tools/content/ee_sh_batch3_blockers.json) and is therefore not published.
+Watchful Eye Dojo, Waystation of the Path and Yasuki Palaces - experienced.
 
 Only the cards this batch actually wired are published here (an unwired card is never published with a blank ability list). Every scan was read by eye; the published
 Text is the scan's own wording (the printing's text, not the catalogue's reworded Oracle text, where they differ), and each source receipt (with the working copy's sha256)
@@ -24,6 +24,7 @@ ABILITIES: dict[int, list[str]] = {
     8352: ["spiders-web-attach", "spiders-web-attach-kensai"],  # The Spider's Web
     8373: ["temple-of-death-dead", "temple-of-death-straighten", "temple-of-death-straighten-bow"],  # The Temple of Death - exp
     9246: ["watchful-eye-duel"],  # Watchful Eye Dojo
+    9267: ["waystation-reborn"],  # Waystation of the Path
     9459: ["yasuki-palaces-move"],  # Yasuki Palaces - exp
 }
 OVERRIDE: dict[int, dict] = {

@@ -63,6 +63,12 @@ public static class EmperorStrongholdBatch3Abilities
         // Asahina Munefusa's Absent move-home of an attacking Personality, with the Honor loss going to the target's controller.
         all["yasuki-palaces-move"] = new("Battle", "Even if this card is bowed, target an attacking Personality and pay 3 Gold: Move him home. If he moved, his controller loses 1 Honor", "attacking",
             Absent: true, Cost: GoldCostRule.Fixed(3));
+        // The Waystation of the Path (oracle-l5r-9267): "Reaction: After another player's action targets your performing Henshin, target another of your Personalities. Transfer his
+        // attachments and tokens to the other Personality. The action's effects that would destroy your Henshin instead overlay him onto the Personality." (Mendon's ruling: "The
+        // Henshin is reborn" is flavor text with no rules effect.) A targeted-by-action Reaction taking one option per other Personality of the controller's (Castle of Order's shape);
+        // the performing Henshin is the Personality the action targets.
+        all["waystation-reborn"] = new("Reaction", "After another player's action targets your performing Henshin, target another of your Personalities: Transfer his attachments and tokens to the other Personality. The action's effects that would destroy your Henshin instead overlay him onto the Personality",
+            "own-personality-other-than-held-target", Trigger: ReactionTriggers.TargetedByAction);
         return all;
     }
 }
@@ -173,6 +179,9 @@ public sealed partial class MatchEngine
                 return false;
             case "spiders-web-attach": case "spiders-web-attach-kensai":
                 return ExecuteAttach(command, ability.Attach!, player, source, target);
+            case "waystation-reborn":
+                WaystationReborn(Card(HeldAction().TargetId!), target!, source!);
+                return false;
         }
         return null;
     }
@@ -182,6 +191,46 @@ public sealed partial class MatchEngine
     {
         if (abilityId != "otoro-attack-move" || sourceId is null || !_state.Cards.TryGetValue(sourceId, out var ninja) || !InPlay(ninja) || ninja.Zone != Zone.Battlefield) return;
         MoveHome(ninja, false);
+    }
+
+    // ---- The Waystation of the Path ------------------------------------------------------------------------------------------------------------------------
+
+    private const string OverlayInsteadPrefix = "overlay-instead:";
+
+    // "After another player's action targets your performing Henshin": the Henshin is the Personality the held action targets (the performer this Reaction names), another player's action,
+    // and there is another Personality of the controller's to move his things to.
+    private bool WaystationApplies(CardInstance card, ReactionSubject subject, CardInstance affected) =>
+        subject.Command.PlayerId != card.OwnerId && affected.OwnerId == card.OwnerId && Definition(affected).Type == CardType.Personality && Keyword(affected, "Henshin")
+        && WaystationCandidates(card, affected).Any();
+
+    private IEnumerable<CardInstance> WaystationCandidates(CardInstance card, CardInstance henshin) =>
+        _state.Cards.Values.Where(c => c.OwnerId == card.OwnerId && c.Id != henshin.Id && InPlay(c) && Definition(c).Type == CardType.Personality).OrderBy(c => c.Id, StringComparer.Ordinal);
+
+    // The Reaction's effects: his attachments (those that may still attach to the other Personality -- attaching restrictions still apply; the rest stay with him) and all his tokens are
+    // transferred (AttachmentTransfers.cs, MoveToken), and the held action's destruction of the Henshin is replaced by his overlay onto the other Personality (OverlayInsteadOfDestruction).
+    private void WaystationReborn(CardInstance henshin, CardInstance other, CardInstance stronghold)
+    {
+        foreach (var attachment in Attachments(henshin.Id).ToArray())
+            if (CanTransferTo(attachment, other)) TransferAttachment(attachment, other, Definition(stronghold).Name);
+        foreach (var token in henshin.Tokens.ToArray()) MoveToken(henshin, token, other);
+        _state.NegatedEffects.Add(new(OverlayInsteadPrefix + other.Id, henshin.Id));
+        Emit("overlayInstead", $"{Definition(stronghold).Name}: the action's destruction of {Definition(henshin).Name} will instead overlay him onto {Definition(other).Name}.", stronghold.OwnerId, henshin.Id);
+    }
+
+    // NegatesEffect's hook for "destroy": a destruction of the Henshin the held action would cause is replaced by the overlay -- his card takes the other Personality's place with all the
+    // state, attachments and tokens the other Personality carries (the Experienced overlay's own transfer, TransferOverlayState), and that Personality's card leaves the game, without
+    // entering play. Nothing is replaced when the other Personality is no longer there to overlay: the destruction then happens.
+    private bool OverlayInsteadOfDestruction(CardInstance henshin)
+    {
+        var entry = _state.NegatedEffects.FirstOrDefault(n => n.CardId == henshin.Id && n.Kind.StartsWith(OverlayInsteadPrefix, StringComparison.Ordinal));
+        if (entry is null) return false;
+        _state.NegatedEffects.Remove(entry);
+        if (!_state.Cards.TryGetValue(entry.Kind[OverlayInsteadPrefix.Length..], out var other) || !InPlay(other) || !InPlay(henshin) || other.OwnerId != henshin.OwnerId || Definition(other).Type != CardType.Personality) return false;
+        var name = Definition(other).Name;
+        TransferOverlayState(other, henshin);
+        RemoveFromGame(other);
+        Emit("personalityOverlayed", $"{Definition(henshin).Name} was overlaid onto {name} instead of being destroyed.", henshin.OwnerId, henshin.Id);
+        return true;
     }
 
     // ---- The Spider's Web ------------------------------------------------------------------------------------------------------------------------------------

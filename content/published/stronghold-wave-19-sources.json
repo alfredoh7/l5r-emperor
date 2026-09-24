@@ -54,6 +54,15 @@
     "image_sha256": "1687a173b7390705dcc97ceff4d84852439ba16471da5e0749120c60aa9bebfd"
   },
   {
+    "card_id": "oracle-l5r-9267",
+    "printing_set": [
+      "Emperor Edition"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=9267",
+    "image_path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-9267-printing-1-image-1.webp",
+    "image_sha256": "b8553f022ef3ee295a0ff2e887272be8acfcdacffc9b9d457d21b6b9a4ea7b70"
+  },
+  {
     "card_id": "oracle-l5r-9459",
     "printing_set": [
       "Emperor Edition"

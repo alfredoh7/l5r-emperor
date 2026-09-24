@@ -3976,6 +3976,7 @@ public sealed partial class MatchEngine
         if (_state.NegatedEffects.Count == 0) return false;
         if (kind is "bow" or "destroy" or "move" && HiromiUnnegatable()) return false; // Yoritomo Hiromi (Emperor Edition Personality pass, issue #477): her Battle actions' bowing, destruction and movement.
         if (_state.NegatedEffects.Any(n => n.CardId == card.Id && n.Kind == "all")) return true;
+        if (kind == "destroy" && OverlayInsteadOfDestruction(card)) return true; // The Waystation of the Path (Emperor Edition Stronghold pass, issue #486 batch 3): overlaid instead of destroyed.
         var match = _state.NegatedEffects.FirstOrDefault(n => n.CardId == card.Id && n.Kind == kind);
         if (match is null) return false;
         _state.NegatedEffects.Remove(match);
@@ -6314,6 +6315,8 @@ public sealed partial class MatchEngine
                         // Blade of Champions: one of the reactor's own cards (the Blade included, judged bowed) that the held action accepts.
                         "redirect-target-own-card" => own && OpenReactionSubject() is { } redirectedAction
                             && target.Id != redirectedAction.TargetId && RedirectTargetAccepted(redirectedAction, target.Id, source!),
+                        // The Waystation of the Path (Emperor Edition Stronghold pass, issue #486 batch 3): another of the reactor's own Personalities than the one the held action targets.
+                        "own-personality-other-than-held-target" => own && personality && OpenReactionSubject() is { TargetId: { } heldHenshinId } && target.Id != heldHenshinId,
                         // Hida Mochitoko: a Follower the held action would bow or destroy, as its target or as a cost it pays.
                         "held-action-follower" => OpenReactionSubject() is { } followerAction && MochitokoFollowers(source!, followerAction).Any(f => f.Id == target.Id),
                         // Asahina Munefusa (issue #301): "your Temple Holding" -- an own Holding carrying

@@ -151,6 +151,31 @@
       "Effect": "none"
     },
     {
+      "Id": "oracle-l5r-9267",
+      "Name": "Waystation of the Path",
+      "Type": "Stronghold",
+      "Clan": "Phoenix",
+      "GoldCost": 0,
+      "GoldProduction": 4,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 6,
+      "StartingHonor": 6,
+      "Text": "Reaction: After another player's action targets your performing Henshin, target another of your Personalities. The Henshin is reborn. Transfer his attachments and tokens to the other Personality. The action's effects that would destroy your Henshin instead overlay him onto the Personality.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9267.jpg",
+      "Keywords": [
+        "Temple"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "waystation-reborn"
+      ],
+      "Effect": "none"
+    },
+    {
       "Id": "oracle-l5r-9459",
       "Name": "Yasuki Palaces",
       "Type": "Stronghold",

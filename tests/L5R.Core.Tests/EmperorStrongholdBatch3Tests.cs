@@ -3,7 +3,7 @@ using static RegressionAssertions;
 using static Batch336Support;
 
 // Emperor Edition Stronghold pass (issue #486), batch 3: stronghold-wave-19 -- The Khan's Estate, The Otoro Estate, The Shadow's Lair, The Spider's Web, The Temple of Death - experienced, Watchful Eye
-// Dojo and Yasuki Palaces - experienced -- driven through QueryActions and the commands it offers. The Waystation of the Path is not wired (tools/content/ee_sh_batch3_blockers.json).
+// Dojo and Yasuki Palaces - experienced -- driven through QueryActions and the commands it offers. all eight cards of the batch are wired.
 internal static class EmperorStrongholdBatch3Tests
 {
     private const string Khans = "oracle-l5r-8182", Otoro = "oracle-l5r-8246", Lair = "oracle-l5r-8316", Web = "oracle-l5r-8352", Temple = "oracle-l5r-8373", Dojo = "oracle-l5r-9246",
@@ -31,7 +31,7 @@ internal static class EmperorStrongholdBatch3Tests
     private static CardDefinition Def(CardInstance c) => CardCatalog.Get(c.DefinitionId);
 
     public static void Run(TestRunner runner) => runner.Run("emperor-stronghold-batch3", [
-        ("Published shape: the seven Strongholds print their catalogue stats, keywords, Effect and ability ids, ship their art and are listed in the stronghold-wave-19 manifest; the Waystation of the Path is not published", PublishedShape),
+        ("Published shape: the eight Strongholds print their catalogue stats, keywords, Effect and ability ids, ship their art and are listed in the stronghold-wave-19 manifest", PublishedShape),
         ("The Khan's Estate: a Tactical Limited draws a card and locks its performing Tactician out of attacking (he may still defend); only a Tactician may perform it", KhansEstate),
         ("The Otoro Estate: no Honor is lost from a Ninja card you own, but from another card it still is", OtoroHonor),
         ("The Otoro Estate: Ninja Battle -- a performing unbowed Ninja makes a Ranged 4 Attack, and the second half moves him home afterward", OtoroAttack),
@@ -43,6 +43,7 @@ internal static class EmperorStrongholdBatch3Tests
         ("The Temple of Death - exp: Limited makes a discarded Personality honorably dead", TempleDead),
         ("The Temple of Death - exp: Battle/Open straightens a Personality with an unbowed Shugenja while you own a dead Personality; the bowing half is for the Combat Segment only", TempleStraighten),
         ("Watchful Eye Dojo: an Iaijutsu Open duel even while bowed -- a refusal dishonors the target and gains 1 Honor, an accepted duel bows the loser", WatchfulEye),
+        ("The Waystation of the Path: after another player's action targets your Henshin, a Reaction transfers his attachments and tokens to another Personality, and a destruction by that action overlays him onto it instead", WaystationReaction),
         ("Yasuki Palaces - exp: produces 1 less Gold only when paying for a Personality", PalacesGold),
         ("Yasuki Palaces - exp: Absent Battle for 3 Gold moves an attacking Personality home even bowed; his controller loses 1 Honor only if he moved", PalacesMove),
     ]);
@@ -78,11 +79,11 @@ internal static class EmperorStrongholdBatch3Tests
         Shape(Web, "Spider", 4, 1, 7, "", "none", "spiders-web-attach", "spiders-web-attach-kensai");
         Shape(Temple, "Unicorn", 5, 4, 7, "Experienced,Temple", "none", "temple-of-death-dead", "temple-of-death-straighten", "temple-of-death-straighten-bow");
         Shape(Dojo, "Dragon", 4, 5, 7, "Dojo", "none", "watchful-eye-duel");
+        Shape(Waystation, "Phoenix", 4, 6, 6, "Temple", "none", "waystation-reborn");
         Shape(Palaces, "Crab", 5, 3, 7, "Experienced", "yasuki-palaces-gold", "yasuki-palaces-move");
         Check(CardCatalog.Get(Dojo).Text.StartsWith("Iaijutsu Open: Even if this card is bowed,"), "Watchful Eye Dojo prints the scan's own wording");
         Check(CardCatalog.Get(Palaces).Text.Contains("Even if this card is bowed and even if you control no units"), "Yasuki Palaces prints the scan's own wording");
-        Manifest(root, "stronghold-wave-19", Khans, Otoro, Lair, Web, Temple, Dojo, Palaces);
-        Check(!CardCatalog.Cards.ContainsKey(Waystation), "the unwired Waystation of the Path is never published");
+        Manifest(root, "stronghold-wave-19", Khans, Otoro, Lair, Web, Temple, Dojo, Waystation, Palaces);
         Check(AbilityCatalog.All["shadows-lair-move"] is { Absent: true, UsesPerTurn: 0 } && AbilityCatalog.All["yasuki-palaces-move"] is { Absent: true }, "the Absent flags");
     }
 
@@ -442,6 +443,61 @@ internal static class EmperorStrongholdBatch3Tests
         var battle = Table(Phase.Battle, 1); Stronghold(battle, 0, Dojo); battle.PriorityPlayerId = 0;
         var d3 = Add(battle, "training-crane-samurai", 0, Zone.Battlefield, province: 0); Add(battle, "training-lion-samurai", 1, Zone.Battlefield, province: 0);
         Check(!CanUse(MatchEngine.FromTestState(battle), 0, "watchful-eye-duel", battle.Players[0].StrongholdId, d3.Id), "Open, not Battle");
+    }
+
+    private static void WaystationReaction()
+    {
+        MatchState Setup(Phase phase, out CardInstance henshin, out CardInstance other, out CardInstance plain, out CardInstance enemySh, out CardInstance ninja)
+        {
+            var s = Table(phase, 1); s.PriorityPlayerId = 1;
+            Stronghold(s, 0, Waystation); Stronghold(s, 1, Otoro); enemySh = s.Cards[s.Players[1].StrongholdId];
+            var battle = phase == Phase.Battle;
+            henshin = Add(s, "training-henshin-personality", 0, battle ? Zone.Battlefield : Zone.Home, province: battle ? 0 : null);
+            other = Add(s, "training-crane-samurai", 0, Zone.Home); other.Bowed = true;
+            plain = Add(s, "training-crane-samurai", 0, battle ? Zone.Battlefield : Zone.Home, province: battle ? 0 : null);
+            Add(s, "training-weapon", 0, Zone.Attached, province: battle ? 0 : null, parent: henshin.Id);
+            henshin.Tokens.Add(new CardToken("fx-token-1", "Fire", "test", "Force", 1));
+            ninja = Add(s, "training-ninja-source", 1, battle ? Zone.Battlefield : Zone.Home, province: battle ? 0 : null);
+            return s;
+        }
+        void Pass(MatchEngine e) { for (var guard = 0; e.State.PendingChoice is not null && guard < 6; guard++) Accept(e, new("declineReaction", e.State.PriorityPlayerId, e.Version)); }
+        ActionOption? Reborn(MatchEngine e, string? target = null) =>
+            e.QueryActions(0).FirstOrDefault(a => a.Enabled && a.Command?.AbilityId == "waystation-reborn" && (target is null || a.Command.TargetId == target));
+        // A destroying Attack (Otoro's Ranged 4 against a 2F Henshin): the window opens, the Henshin's things move, and he is overlaid onto the other Personality instead of dying.
+        var e = MatchEngine.FromTestState(Setup(Phase.Battle, out var henshin, out var other, out var plain, out var enemySh, out var ninja));
+        GiveKeyword(e.State.Cards[ninja.Id], "Ninja");
+        var e1 = Edit(e, st => GiveKeyword(st.Cards[ninja.Id], "Ninja"));
+        Accept(e1, Offer(e1, 1, "otoro-attack", enemySh.Id, henshin.Id, ninja.Id));
+        Eq(e1.State.PendingChoice?.Type, "attackReaction", "the Attack opens its reaction window");
+        var offered = e1.QueryActions(0).Where(a => a.Command?.AbilityId == "waystation-reborn" && a.Enabled).Select(a => a.Command!.TargetId).OrderBy(x => x).ToArray();
+        Check(offered.SequenceEqual(new[] { other.Id, plain.Id }.OrderBy(x => x)), "one option per other Personality of the controller's (never the Henshin himself)");
+        var weaponId = e1.State.Cards.Values.First(c => c.AttachedTo == henshin.Id).Id;
+        Accept(e1, Reborn(e1, other.Id)!.Command!);
+        Eq(e1.State.Cards[weaponId].AttachedTo, other.Id, "his attachment is transferred");
+        Check(e1.State.Cards[henshin.Id].Tokens.Count == 0 && e1.State.Cards[other.Id].Tokens.Any(t => t.Id == "fx-token-1"), "and his token");
+        Pass(e1);
+        var covering = e1.State.Cards[henshin.Id];
+        Check(covering.Zone == Zone.Home && covering.Bowed, "the Henshin is not destroyed: he takes the other Personality's place and state (at home, bowed)");
+        Eq(e1.State.Cards[other.Id].Zone, Zone.RemovedFromGame, "the other Personality's card is the one covered (removed from the game, as an overlay does)");
+        Check(e1.State.Cards[weaponId].AttachedTo == henshin.Id && covering.Tokens.Any(t => t.Id == "fx-token-1"), "the transferred attachment and token are on the overlaying card");
+        // Not for a non-Henshin target, and not for the controller's own action.
+        var plainTarget = Edit(e, st => GiveKeyword(st.Cards[ninja.Id], "Ninja"));
+        Accept(plainTarget, Offer(plainTarget, 1, "otoro-attack", enemySh.Id, plain.Id, ninja.Id));
+        Check(Reborn(plainTarget) is null, "an action that targets a Personality that is not a Henshin");
+        var own = Setup(Phase.Action, out var h3, out _, out _, out _, out _); own.PriorityPlayerId = 0;
+        var bower = Add(own, "training-bow-any-source", 0, Zone.Home);
+        var e3 = MatchEngine.FromTestState(own);
+        Accept(e3, Offer(e3, 0, "training-bow-any", bower.Id, h3.Id));
+        Check(e3.State.PendingChoice is null || Reborn(e3) is null, "the controller's own action does not open it");
+        // Another player's non-destroying action: the transfer happens, the Henshin stays (bowed), nothing is overlaid.
+        var bowState = Setup(Phase.Action, out var h4, out var o4, out _, out _, out _);
+        var enemyBower = Add(bowState, "training-bow-any-source", 1, Zone.Home);
+        var e4 = MatchEngine.FromTestState(bowState);
+        Accept(e4, Offer(e4, 1, "training-bow-any", enemyBower.Id, h4.Id));
+        Check(Reborn(e4, o4.Id) is not null, "offered against another player's action that only bows him");
+        Accept(e4, Reborn(e4, o4.Id)!.Command!);
+        Pass(e4);
+        Check(e4.State.Cards[h4.Id].Bowed && e4.State.Cards[o4.Id].Zone == Zone.Home && e4.State.Cards[o4.Id].Tokens.Count == 1 && e4.State.Cards[h4.Id].Tokens.Count == 0, "he is bowed as the action says, keeps his place, and his token went to the other Personality");
     }
 
     private static void PalacesGold()
