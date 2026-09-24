@@ -256,6 +256,10 @@ public sealed partial class MatchEngine
                 return command.PlayerId != card.OwnerId && affected.Id == card.Id && IsBattleAction(command);
             case "yurishi-disappear":
                 return command.PlayerId != card.OwnerId && affected.Id == card.Id && IsBattleAction(command) && card.Zone == Zone.Battlefield;
+            // Yasuki Ikke (The Shadow's Embrace pass, issue #476, batch 2): "After another player's Battle action targets one of your Merchants".
+            case "ikke-negate":
+            case "ikke-honor-loss":
+                return command.PlayerId != card.OwnerId && IsBattleAction(command) && affected.OwnerId == card.OwnerId && Keyword(affected, "Merchant");
             case "jinn-kuen-negate":
             case "training-negate-merchant-free":
                 return affected.OwnerId == card.OwnerId && Keyword(affected, "Merchant");
@@ -284,6 +288,13 @@ public sealed partial class MatchEngine
                 return IsBattleAction(command) && command.PlayerId != card.OwnerId && affected.Id == card.Id && KisadaRedirectCandidates(card, subject).Any();
             case "ryoshun-redirect":
                 return command.PlayerId != card.OwnerId && card.Zone == Zone.Celestial && affected.OwnerId == card.OwnerId && RyoshunRedirectCandidates(card, subject, affected).Any();
+            // Ward of Air (The Shadow's Embrace pass, issue #476 batch 5): Taming the Beast's shape -- another player's Battle action targets its Shugenja (or, if he is Air, any
+            // Personality its controller controls) and could destroy him.
+            case "ward-of-air-negate":
+                return WardOfAirApplies(card, subject, affected);
+            // Social Grace (The Shadow's Embrace pass, issue #476, batch 4): another player's action targets one of its player's Courtiers and would dishonor him.
+            case "social-grace-negate":
+                return SocialGraceApplies(card, subject, affected);
             // Moto Shigeru (Emperor Edition Personality pass, issue #477, batch 3): a Limited action -- anyone's -- targets one of her controller's Personalities.
             case "shigeru-negate":
                 return acting.Timing == "Limited" && affected.OwnerId == card.OwnerId && Definition(affected).Type == CardType.Personality;

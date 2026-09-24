@@ -23,5 +23,19 @@
   "source_image_hash": "71/71",
   "source_url": "https://images.oracleofthevoid.com/l5r/71/71/printing_9857_1_master.jpg",
   "url_prefix": "https://images.oracleofthevoid.com/l5r/71/71/printing_9857_1_",
-  "width": 750
+  "width": 750,
+  "working_copy": {
+    "bytes": 108918,
+    "format": "WEBP",
+    "height": 600,
+    "width": 429,
+    "path": "assets/reference/oracle/the-shadow-s-embrace/webp/oracle-l5r-9857-printing-1-image-1.webp",
+    "sha256": "8adb1344c45db7fd0ea7f01777d039241548119b379ccfdcd9deeed4903e9bea",
+    "source": {
+      "supplied_by": "mdornbrook",
+      "supplied_via": "Claude Code session, issue #476",
+      "matched_by": "visual check against the selected printing: set, collector number 69, artist, stats, keywords, rules text and flavor",
+      "note": "Lower resolution than the Oracle master (429x600 vs 750x1050); the master path/sha256 above are unchanged and still unfetched."
+    }
+  }
 }

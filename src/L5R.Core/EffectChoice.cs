@@ -48,6 +48,10 @@ public static class BranchCondition
     /// <summary>The action's optional target was chosen (Forgotten Legacy pass, issue #467, batch 4 -- Steadfast Defense: "you may target a Personality or Follower and bow or
     /// straighten it" asks bow-or-straighten only when a target was named).</summary>
     public const string TargetChosen = "target-chosen";
+    /// <summary>The target is dishonorable, Kolat, Ninja or Shadowlands (The Shadow's Embrace pass, issue #476 batch 3 -- Captured Convict, judged after he has moved home).</summary>
+    public const string TargetDishonorableKolatNinjaOrShadowlands = "target-dishonorable-kolat-ninja-or-shadowlands";
+    /// <summary>No condition: the choice is always asked (The Shadow's Embrace pass, issue #476, batch 4 -- Running Battle's "You may move your Scout home").</summary>
+    public const string Always = "always";
     /// <summary>The target is Kolat, Ninja, or Shadowlands (Emperor Edition Personality pass, issue #477 -- Asako Tsunefusa's second sentence).</summary>
     public const string TargetKolatNinjaOrShadowlands = "target-kolat-ninja-or-shadowlands";
 }
@@ -77,6 +81,8 @@ public static class BranchEffect
     /// <summary>The target is bowed / straightened (Steadfast Defense, issue #467 batch 4).</summary>
     public const string BowTarget = "bow-target";
     public const string StraightenTarget = "straighten-target";
+    /// <summary>The action's named performer's unit moves home (Running Battle, issue #476 batch 4).</summary>
+    public const string MovePerformerHome = "move-performer-home";
 }
 
 /// <summary>The four answers to "choose a player who gains or loses N Honor" (issue #336): each player, each direction. Shared by every card that prints it.</summary>
@@ -125,6 +131,8 @@ public sealed partial class MatchEngine
         BranchCondition.TargetAtBattlefield => target is not null && target.Zone == Zone.Battlefield,
         BranchCondition.ProvinceHoldsCard => CurrentBattlefieldProvince() is { CardId: not null },
         BranchCondition.TargetChosen => target is not null,
+        BranchCondition.TargetDishonorableKolatNinjaOrShadowlands => target is not null && MatchesTargetStatus(target, TargetStatus.DishonorableKolatNinjaOrShadowlands),
+        BranchCondition.Always => true,
         BranchCondition.TargetKolatNinjaOrShadowlands => target is not null && MatchesTargetStatus(target, TargetStatus.KolatNinjaOrShadowlands),
         _ when condition.StartsWith("wielder-has:", StringComparison.Ordinal) => source.AttachedTo is { } wielderId && Keyword(Card(wielderId), condition["wielder-has:".Length..]),
         _ => throw new InvalidOperationException($"Unknown branch condition '{condition}'.")
@@ -142,6 +150,9 @@ public sealed partial class MatchEngine
             return;
         }
         if (ApplyForgottenLegacyBatch1BranchEffect(effect, command)) return;
+        if (ApplyShadowsEmbraceBatch1BranchEffect(effect, command)) return; // The Shadow's Embrace pass (issue #476), batch 1.
+        if (ApplyShadowsEmbraceBatch3BranchEffect(effect, command)) return; // The Shadow's Embrace pass (issue #476), batch 3
+        if (ApplyShadowsEmbraceBatch4BranchEffect(effect, command)) return; // The Shadow's Embrace pass (issue #476), batch 4: The Game Has Changed's steps.
         if (ApplyEmperorBatch4BranchEffect(effect, command)) return; // Emperor Edition Personality pass (issue #477), batch 4.
         switch (effect)
         {
@@ -154,6 +165,7 @@ public sealed partial class MatchEngine
             case BranchEffect.ScorpionSwordKeep: ScorpionSwordResolve(command, target!, discardFirst: false); break;
             case BranchEffect.BowTarget: if (InPlay(target!) && !StalwartNegatesBow(target!, command.PlayerId)) target!.Bowed = true; break;
             case BranchEffect.StraightenTarget: if (InPlay(target!)) Straighten(target!); break;
+            case BranchEffect.MovePerformerHome: if (command.PerformerId is not null && InPlay(Card(command.PerformerId))) MoveHome(Card(command.PerformerId), false); break;
             default: throw new InvalidOperationException($"Unknown branch effect '{effect}'.");
         }
     }
@@ -214,6 +226,8 @@ public sealed partial class MatchEngine
         _state.NegatedEffects = pending.Negated.ToList();
         foreach (var effect in option.Effects) ApplyBranchEffect(effect, pending.Command, source, target);
         _state.NegatedEffects.Clear();
+        // The Shadow's Embrace pass (issue #476), batch 4: a choice with further steps (The Game Has Changed) opens its next step and waits.
+        if (ContinueShadowsEmbraceBatch4Choice(pending, option!)) return;
         CompleteAbilityResolution(pending.Command, ability, pending.ConsumedGrant, pending.PlayedFromDiscard, pending.OpponentHonorBefore,
             pending.BowedBefore.ToHashSet(StringComparer.Ordinal), pending.PreExistingGrants);
     }

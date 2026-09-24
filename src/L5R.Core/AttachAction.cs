@@ -185,6 +185,9 @@ public sealed partial class MatchEngine
         attachment.Zone = Zone.Attached; attachment.AttachedTo = wielder.Id; attachment.FaceUp = true; attachment.ProvinceIndex = wielder.ProvinceIndex;
         if (def.AttachGrantsKeyword is string granted) GrantKeyword(wielder, granted, attachment.Id, "Attachment");
         Emit("equipped", $"{def.Name} attached to {Definition(wielder).Name}{(fromDiscard ? " from a discard pile" : "")}.", player.Id, attachment.Id);
-        return OpenEntryReactionWindow(player.Id, attachment, 1 - player.Id);
+        // Clearing Crew (issue #476 batch 6): an attach from a discard pile is not an entry "from your hand".
+        _attachingFromPileId = fromDiscard ? attachment.Id : null;
+        try { return OpenEntryReactionWindow(player.Id, attachment, 1 - player.Id); }
+        finally { _attachingFromPileId = null; }
     }
 }

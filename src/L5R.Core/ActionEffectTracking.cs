@@ -28,7 +28,7 @@ public sealed partial class MatchEngine
     public const string DestroyedKind = "destroyed";
     public const string MovedKind = "moved";
 
-    private void RecordActionEffect(string cardId, string kind) => _state.CurrentActionAffected.Add(new(cardId, kind));
+    private void RecordActionEffect(string cardId, string kind, string? hostId = null, int? fromBattlefield = null) => _state.CurrentActionAffected.Add(new(cardId, kind, hostId, fromBattlefield));
 
     // Snapshots what the just-finished action affected into LastResolvedAction, opens the Reaction window naming it if anyone holds one that
     // applies, and clears the accumulator either way. Called from the three points an action (its own reaction windows included) is truly done,
@@ -55,6 +55,8 @@ public sealed partial class MatchEngine
         CountReconStrategyAction(abilityId, playerId, sourceId); // Advanced Intelligence (Seeds of Decay pass, issue #453, batch 1).
         // Moksha Patam (issue #453 batch 5): "After an action resolves, if a player gained Honor from its effects" -- a trait, so applied here before any Reaction to the same point.
         ApplyMokshaPatamTokens();
+        // The Shadow's Embrace pass (issue #476), batch 3: Crowded Streets' trait -- a trait, so before any Reaction to the same point (ShadowsEmbraceBatch3.cs).
+        if (OpenCrowdedStreetsTrait(closesTo)) return true;
         if (OpenAfterActionResolvedWindow(closesTo)) return true;
         // Moshi Ino's storm (issue #453, batch 3; MoshiInoStorm.cs): the same "this action is truly done" moment, asked once no Reaction window opened over it.
         return OpenInoStorm(closesTo);
@@ -110,6 +112,9 @@ public sealed partial class MatchEngine
             "rata-draw" => RataDestroyedAPersonality(source),
             // Shinjo Byung - exp (Gempukku pass, issue #461): "After a Tactical Battle action resolves that Byung performed" -- his own performed action (facts.PerformerId), a Battle-timed
             // ability classified Tactical through ActionCarriesKeyword (the ability's own tag, or the source card's keyword).
+            // Shinjo Jong-Ho (The Shadow's Embrace pass, issue #476, batch 2): "After a Tactical action Jong-Ho performed resolves" -- Byung's shape, any Timing.
+            "jongho-bow" => facts.PerformerId == source.Id && facts.PlayerId == playerId
+                && ActionCarriesKeyword(AbilityCatalog.All[facts.AbilityId], facts.SourceId is null ? null : Card(facts.SourceId), "Tactical"),
             "byung-additional-action" => facts.PerformerId == source.Id && facts.PlayerId == playerId && AbilityCatalog.All[facts.AbilityId].Timing == "Battle"
                 && ActionCarriesKeyword(AbilityCatalog.All[facts.AbilityId], facts.SourceId is null ? null : Card(facts.SourceId), "Tactical"),
             // Bayushi Mitsuo (Emperor Edition Personality pass, issue #477, batch 4): "After the resolution of a Battle action that moved Mitsuo" -- either player's Battle action (a
@@ -126,10 +131,17 @@ public sealed partial class MatchEngine
                 && LastActionCostHonor(playerId) && LastActionPerformer() is not null,
             // Asahina Akikusa (oracle-l5r-10046, issue #453 batch 3): "After an action on your Air Spell resolves" -- the resolved action's source card is a Spell with the
             // Air keyword attached to a Personality her controller controls (the Spell's action is her controller's own, so facts.PlayerId matches too).
-            // Emperor Edition Personality pass (issue #477), batch 5 (EmperorPersonalityBatch5.cs): Isawa Kimi - exp 2 and Shiba Tsukimi - exp 4.
-            "kimi-exp2-discard" or "tsukimi-home" or "tsukimi-battlefield" => EmperorBatch5AfterActionApplies(source, abilityId, playerId, facts),
+            // Shieldman (The Shadow's Embrace pass, issue #476 batch 6): "After another player's action resolves which destroyed another card in this unit."
+            "shieldman-honor" => ShieldmanReactionApplies(source, playerId),
             "akikusa-honor" => facts.SourceId is not null && _state.Cards.TryGetValue(facts.SourceId, out var akikusaSpell) && Definition(akikusaSpell).Type == CardType.Spell
                 && Keyword(akikusaSpell, "Air") && akikusaSpell.OwnerId == playerId && facts.PlayerId == playerId,
+            // The Shadow's Embrace pass (issue #476), batch 3. Grief: "After an action resolves whose effects destroyed a player's Personality" -- either player's action, either player's
+            // Personality. I Cast Two Shadows: "After an action resolves which moved your Personality in a Ninja unit home" -- from a battlefield (ShadowsEmbraceBatch3.cs).
+            "grief-dishonor" => facts.Affected.Any(a => a.Kind == DestroyedKind && Definition(Card(a.CardId)).Type == CardType.Personality),
+            "cast-two-shadows-move" => facts.Affected.Any(a => a.Kind == MovedKind && a.FromBattlefield is not null && Card(a.CardId) is { Zone: Zone.Home } moved
+                && moved.OwnerId == playerId && Definition(moved).Type == CardType.Personality && InNinjaUnit(moved)),
+            // Emperor Edition Personality pass (issue #477), batch 5 (EmperorPersonalityBatch5.cs): Isawa Kimi - exp 2 and Shiba Tsukimi - exp 4.
+            "kimi-exp2-discard" or "tsukimi-home" or "tsukimi-battlefield" => EmperorBatch5AfterActionApplies(source, abilityId, playerId, facts),
             // Emperor Edition Personality pass (issue #477), batch 6 (EmperorPersonalityBatch6.cs). Yung: "After one of your Rings enters play". Daigotsu Kanpeki - exp: "After the resolution of a Battle
             // action from a Strategy, if Kanpeki performed it".
             "yung-search-ring" => YungRingEnteredPlay(facts, playerId),

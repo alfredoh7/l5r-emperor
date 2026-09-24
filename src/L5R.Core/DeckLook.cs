@@ -69,6 +69,10 @@ public static class LookCatalog
     public static LookSpec UeharaLook { get; } = new("uehara-look", "Look at the top card of your Fate deck", [new("Fate")], 1,
         [new(LookDisposition.Discard, 0, 1), new(LookDisposition.Bottom, 0, 1)]);
 
+    /// <summary>Methodical Questioning (oracle-l5r-9915, The Shadow's Embrace pass, issue #476 batch 3): "Look at the top 3 cards of any Fate deck. Put them back in any order." --
+    /// Signs and Portents' own either-player's-Fate-deck look, with nothing but a reorder.</summary>
+    public static LookSpec MethodicalQuestioning { get; } = new("methodical-questioning", "Look at the top three cards of any Fate deck", [new("Fate"), new("Fate", Opponent: true)], 3, [], Reorder: true);
+
     // Training fixtures (never in a playable deck): every parameter the 25 cards need, ahead of any published card needing it.
     /// <summary>Own Dynasty deck, two cards, one may go to the bottom (Asako Kikugoro's shape).</summary>
     public static LookSpec TrainingDynasty { get; } = new("training-look-dynasty", "Look at the top two cards of your Dynasty deck", [new("Dynasty")], 2, [new(LookDisposition.Bottom, 0, 1)]);
@@ -86,7 +90,7 @@ public static class LookCatalog
     public static LookSpec TrainingShowAny { get; } = new("training-look-show", "Look at the top cards of your Fate deck", [new("Fate")], 3, [new(LookDisposition.Show, 1, 1)], Reorder: true);
 
     public static IReadOnlyDictionary<string, LookSpec> All { get; } = new[] { PublicRecords, IsawaTamaki, BanishAllDoubt, BayushiKahokuExp2, SignsAndPortents, ControlYourDestiny, JurojinsBlessing,
-        UeharaLook, TrainingDynasty, TrainingAny, TrainingTakeItem, TrainingFixedOrder, TrainingShowAny }.ToDictionary(s => s.Id, StringComparer.Ordinal);
+        UeharaLook, MethodicalQuestioning, TrainingDynasty, TrainingAny, TrainingTakeItem, TrainingFixedOrder, TrainingShowAny }.ToDictionary(s => s.Id, StringComparer.Ordinal);
 
     /// <summary>The look an Event carries in its Effect (an Event has no abilities of its own to hang a spec on).</summary>
     public static LookSpec? ForEventEffect(string effect) => effect == "signs-and-portents" ? SignsAndPortents : null;

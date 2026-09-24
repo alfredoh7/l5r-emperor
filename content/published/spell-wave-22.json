@@ -1,0 +1,211 @@
+{
+  "Profile": "spell-wave-22",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-9884",
+      "Name": "Beseech Sakkaku",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 1,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Bow this Shugenja, you may destroy this card if he is Earth, and target your Spirit Personality: If you destroyed this card, gain Honor equal to the Spirit's Personal Honor; if you did not destroy it, gain 1 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9884.jpg",
+      "Keywords": [
+        "Earth"
+      ],
+      "Focus": 1,
+      "Abilities": [
+        "beseech-sakkaku-honor",
+        "beseech-sakkaku-destroy"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9885",
+      "Name": "Channel the Moon",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "While this Shugenja is Shadowlands, your opposed Nonhumans have +1F.\nOpen: Bow this card and choose your performing Nonhuman: Give him the ability, \"Battle: Melee Attack with strength equal to this card's Force.\" Lose 3 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9885.jpg",
+      "Keywords": [
+        "Maho"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "channel-moon-grant"
+      ],
+      "Effect": "channel-the-moon"
+    },
+    {
+      "Id": "oracle-l5r-9887",
+      "Name": "Purify the Soul",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Attaches to an Air Shugenja paying 2 less Gold.\nReaction: Before an action resolves, bow this card: Negate its effects which give Kolat, Ninja, or Shadowlands to Personalities you control.\nAttaches to an Air Shugenja paying 2 less Gold.\nReaction: Before an action resolves, bow this card: Negate its effects which give Kolat, Ninja, or Shadowlands to Personalities you control.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9887.jpg",
+      "Keywords": [
+        "Air"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "purify-soul-negate"
+      ],
+      "Effect": "purify-the-soul"
+    },
+    {
+      "Id": "oracle-l5r-9888",
+      "Name": "Set the Fields Aflame",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "While this Shugenja is Air or Fire, he has +1F.\nBattle: Target a Terrain and destroy this card: Destroy the Terrain.\nOpen: Target a Region and destroy this card: The Region's abilities may not be used.\nLimited: Target a Holding and destroy this card: Bow the Holding.\nWhile this Shugenja is Air or Fire, he has +1F.\nBattle: Target a Terrain and destroy this card: Destroy the Terrain.\nOpen: Target a Region and destroy this card: The Region's abilities may not be used.\nLimited: Target a Holding and destroy this card: Bow the Holding.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9888.jpg",
+      "Keywords": [
+        "Air",
+        "Fire"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "set-fields-terrain",
+        "set-fields-region",
+        "set-fields-holding"
+      ],
+      "Effect": "set-fields-aflame"
+    },
+    {
+      "Id": "oracle-l5r-9891",
+      "Name": "Thunder's Stamina",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "This Shugenja has +3F.\nWhile this Shugenja is Thunder, battle resolution will not bow cards in this unit.\nThis Shugenja has +3F.\nWhile this Shugenja is Thunder, battle resolution will not bow cards in this unit.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9891.jpg",
+      "Keywords": [
+        "Thunder"
+      ],
+      "Focus": 1,
+      "Abilities": [],
+      "Effect": "thunders-stamina"
+    },
+    {
+      "Id": "oracle-l5r-9892",
+      "Name": "Touch the Emptiness",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Bow this card and target an enemy Personality or Follower: Give it -2F. If this Shugenja is Void, negate the effects of the next action the target performs.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9892.jpg",
+      "Keywords": [
+        "Void"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "touch-emptiness-weaken"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9893",
+      "Name": "Ward of Air",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After another player's Battle action targets this Shugenja, or any Personality you control if this Shugenja is Air, destroy this card: Negate the target's destruction from the action's effects.\nBattle: Move this unit home.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9893.jpg",
+      "Keywords": [
+        "Air"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "ward-of-air-negate",
+        "ward-of-air-move-home"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9895",
+      "Name": "Your Heart's Enemy",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Target an enemy Personality with lower Chi than this Shugenja: Give the target -4F. If this Shugenja is Air, actions the target performs may not target this Shugenja.\nBattle: Target an enemy Personality with lower Chi than this Shugenja: Give the target -4F. If this Shugenja is Air, actions the target performs may not target this Shugenja.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9895.jpg",
+      "Keywords": [
+        "Air",
+        "Fear"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "hearts-enemy-weaken"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

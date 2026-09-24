@@ -4,7 +4,8 @@ namespace L5R.Core;
 public sealed partial class MatchEngine
 {
     // ---- Defensive Blockade: "It does not contribute Force to its army's total Force this battle" ---------------------------------------------------------------
-    private bool ForceContributionNegated(CardInstance card) => card.ForceContributionNegatedBattle == _state.BattleNumber && _state.Phase == Phase.Battle;
+    // Deep Roots (The Shadow's Embrace pass, issue #476 batch 3) negates every effect which prevents its Personality from contributing Force (DeepRooted, ShadowsEmbraceBatch3.cs).
+    private bool ForceContributionNegated(CardInstance card) => card.ForceContributionNegatedBattle == _state.BattleNumber && _state.Phase == Phase.Battle && !DeepRooted(card);
     private void NegateForceContribution(CardInstance card, string sourceName)
     {
         card.ForceContributionNegatedBattle = _state.BattleNumber;
@@ -32,6 +33,7 @@ public sealed partial class MatchEngine
         if (HiromiUnnegatable()) return false; // Yoritomo Hiromi (issue #477): the destruction from her Battle actions will not be negated.
         if (MichiruBarrierNegates(card, actingPlayerId)) return true; // Asahina Michiru (Emperor Edition Personality pass, issue #477, batch 4).
         if (MountainsPowerNegates(card, actingPlayerId)) return true; // The Mountain's Power (Forgotten Legacy pass, issue #467).
+        if (TwinForksNegates(card, actingPlayerId, "destruction")) return true; // Twin Forks City (The Shadow's Embrace pass, issue #476 batch 6).
         if (card.DestructionShieldTurn != _state.TurnNumber || actingPlayerId == card.OwnerId) return false;
         Emit("destructionNegated", $"{Definition(card).Name}'s destruction was negated (Megumi's Guidance).", card.OwnerId, card.Id);
         return true;

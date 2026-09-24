@@ -2467,6 +2467,12 @@ public static class PublishedContent
     /// <summary>Strategy wave 55 (Forgotten Legacy pass, issue #467, batch 4): Heart of Darkness, Intimidation, Never Beyond My Reach, Pearls &amp; Spirits, Returning Home,
     /// Rise of the Dark Naga, Seeking the Truth, Siege Volley, Steadfast Defense, Sundering Strike.</summary>
     public static PublishedSnapshot StrategyWave55 { get; } = Load("L5R.Published.StrategyWave55.json", "strategy-wave-55", requireDecks: false);
+    /// <summary>Strategy wave 56 (The Shadow's Embrace pass, batch 3, issue #476): Burning Fury, Captured Convict, Cowed and Defeated, Crowded Streets, Deep Roots, Defensive Grill,
+    /// Direct the Path, Duel to First Blood, Fields of Victory, Forge Your Soul, Forged Documents, Forthrightness, Grief, I Cast Two Shadows, Kitsuki Methods, Kuon's Legacy, Lessons Never Forgotten,
+    /// Methodical Questioning, One Shout.</summary>
+    public static PublishedSnapshot StrategyWave56 { get; } = Load("L5R.Published.StrategyWave56.json", "strategy-wave-56", requireDecks: false);
+    /// <summary>Strategy wave 57 (The Shadow's Embrace pass, issue #476, batch 4): the wired Strategies of the batch (package_strategy_wave_57.py lists them).</summary>
+    public static PublishedSnapshot StrategyWave57 { get; } = Load("L5R.Published.StrategyWave57.json", "strategy-wave-57", requireDecks: false);
     /// <summary>Spell wave 20 (Embers of War pass, issue #460, batch 5): Inescapable Snare, Incite the Phantoms, Sudden Guardian, The Swell of Strength.</summary>
     public static PublishedSnapshot SpellWave20 { get; } = Load("L5R.Published.SpellWave20.json", "spell-wave-20", requireDecks: false);
     /// <summary>Stronghold wave 14 (issue #460, batch 5): The Ki-Rin's Path.</summary>
@@ -2523,6 +2529,28 @@ public static class PublishedContent
     public static PublishedSnapshot PersonalityWave65 { get; } = Load("L5R.Published.PersonalityWave65.json", "personality-wave-65", requireDecks: false);
     /// <summary>Holding wave 10 (Emperor Edition Gempukku pass, issue #461): the nine Market Holdings.</summary>
     public static PublishedSnapshot HoldingWave10 { get; } = Load("L5R.Published.HoldingWave10.json", "holding-wave-10", requireDecks: false);
+    /// <summary>Spell wave 22 (The Shadow's Embrace pass, issue #476, batch 5): Beseech Sakkaku, Channel the Moon, Purify the Soul, Set the Fields Aflame, Thunder's Stamina, Touch the Emptiness, Ward of Air, Your Heart's Enemy.</summary>
+    public static PublishedSnapshot SpellWave22 { get; } = Load("L5R.Published.SpellWave22.json", "spell-wave-22", requireDecks: false);
+    /// <summary>Item wave 14 (The Shadow's Embrace pass, issue #476, batch 5): Blood of the Preserver, Celestial Sword of the Crab, of the Crane and of the Phoenix, The String of the Colonies, The Victor, Vanquisher's Armor.</summary>
+    public static PublishedSnapshot ItemWave14 { get; } = Load("L5R.Published.ItemWave14.json", "item-wave-14", requireDecks: false);
+    /// <summary>Personality wave 75 (The Shadow's Embrace pass, issue #476, batch 2): Kitsu Sorano (Experienced), Kitsuki Yoyugi, Longtooth, M'rika, Moshi Rukia, Moto Morio,
+    /// Natsumi, Niiro no Oni, Quelsa, Shiba Kudome (Experienced), Shiba Shirou, Shinjo Jong-Ho, Shinjo Min-Hee, Shosuro Nobu, Shosuro Ryoken, Shugorei, Yamazaki (Experienced),
+    /// Yasuki Ikke, Yoritomo Kanahashi.</summary>
+    public static PublishedSnapshot PersonalityWave75 { get; } = Load("L5R.Published.PersonalityWave75.json", "personality-wave-75", requireDecks: false);
+    /// <summary>Holding wave 12 (The Shadow's Embrace pass, issue #476, batch 6): Fortress of Lidless Eyes, Platinum Mine, Sheltered Port, Small-Time Bully, Versatile Farm, Whispering Archive.</summary>
+    public static PublishedSnapshot HoldingWave12 { get; } = Load("L5R.Published.HoldingWave12.json", "holding-wave-12", requireDecks: false);
+    /// <summary>Follower wave 30 (issue #476, batch 6): Clearing Crew, Elephant Caravan, Shieldman, Wasteland Scout.</summary>
+    public static PublishedSnapshot FollowerWave30 { get; } = Load("L5R.Published.FollowerWave30.json", "follower-wave-30", requireDecks: false);
+    /// <summary>Event wave 7 (issue #476, batch 6): Discovering the Temple, On, Star-Crossed Lovers, Wartime Preparations.</summary>
+    public static PublishedSnapshot EventWave7 { get; } = Load("L5R.Published.EventWave7.json", "event-wave-7", requireDecks: false);
+    /// <summary>Stronghold wave 16 (issue #476, batch 6): Bishamon's Tower, Twin Forks City.</summary>
+    public static PublishedSnapshot StrongholdWave16 { get; } = Load("L5R.Published.StrongholdWave16.json", "stronghold-wave-16", requireDecks: false);
+    /// <summary>Celestial wave 7 (issue #476, batch 6): The Moon's Imperative, The Sun's Aspiration.</summary>
+    public static PublishedSnapshot CelestialWave7 { get; } = Load("L5R.Published.CelestialWave7.json", "celestial-wave-7", requireDecks: false);
+    /// <summary>Personality wave 74 (The Shadow's Embrace pass, issue #476, batch 1): Agasha Kurou, Asahina Keigo, Asako Hayate, Asako Jirou, Atosa, Bayushi Misaki,
+    /// Bayushi Tarou, Bayushi Waru, Chiisai, Chuda Hitaka, Daidoji Sosuke, Daigotsu Arakan, Daigotsu Rafu, Goju Bunoro, Hida Bakari, Hiruma Hikazu, Hiruma Nikaru
+    /// (Shadow's Embrace printing), Iuchi Haruma, Kaiu Fumiko, Kakita Ichigiku, Kakita Tadanobu, Kazehime.</summary>
+    public static PublishedSnapshot PersonalityWave74 { get; } = Load("L5R.Published.PersonalityWave74.json", "personality-wave-74", requireDecks: false);
     /// <summary>Personality wave 68 (Emperor Edition Personality pass, issue #477, batch 1): Chuda Niiro, Daigotsu Aya, Daigotsu Gyoken, Daigotsu Matsuda, Daigotsu Negishi, Daigotsu Misaki, Ekichu no Oni,
     /// Goju Oyoto, Ninube Onchi, Nosloc no Oni, Ugulu no Oni.</summary>
     public static PublishedSnapshot PersonalityWave68 { get; } = Load("L5R.Published.PersonalityWave68.json", "personality-wave-68", requireDecks: false);

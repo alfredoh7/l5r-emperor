@@ -207,7 +207,8 @@ public sealed partial class MatchEngine
             {
                 case CostVerb.Bow: subject.Bowed = true; break;
                 case CostVerbs.Discard: DiscardFate(player, subject); break;
-                case CostVerbs.Remove: RemoveFromGame(subject); break;
+                // A Strategy still in its player's hand (Void Tattoo's "remove this card from the game", issue #476 batch 4) leaves the hand as well.
+                case CostVerbs.Remove: Player(subject.OwnerId).Hand.Remove(subject.Id); RemoveFromGame(subject); break;
                 case CostVerbs.Sacrifice:
                     if (subject.Zone == Zone.Attached) DestroyAttachment(subject); else DestroyUnits([subject], false, player.Id);
                     break;

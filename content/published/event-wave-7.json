@@ -1,0 +1,100 @@
+{
+  "Profile": "event-wave-7",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-9791",
+      "Name": "Discovering the Temple",
+      "Type": "Event",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Search your Fate deck or discard pile for a card titled Blood of the Preserver, show it, and put it into your hand.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9791.jpg",
+      "Keywords": [
+        "Unique"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "discovering-the-temple"
+    },
+    {
+      "Id": "oracle-l5r-9793",
+      "Name": "On",
+      "Type": "Event",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Until the game ends, at the end of each phase, lower each player's Honor to what it was at the start of that phase plus 3 plus any Honor he gained from battle resolution that phase; this Honor loss will not be negated, substituted or reduced.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9793.jpg",
+      "Keywords": [
+        "Unique"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "on-honor-limit"
+    },
+    {
+      "Id": "oracle-l5r-9794",
+      "Name": "Star-Crossed Lovers",
+      "Type": "Event",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Choose two Personalities controlled by the same player. Until the game ends, they may not be assigned, and will not move, to each other's battlefields.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9794.jpg",
+      "Keywords": [
+        "Unique",
+        "Political"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "star-crossed-lovers"
+    },
+    {
+      "Id": "oracle-l5r-9795",
+      "Name": "Wartime Preparations",
+      "Type": "Event",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Until the game ends, before the second or later time each turn another player's card's effect bows any of your Personalities during the Action Phase, negate that effect, and before the second or later time each turn another player's card's effect prevents any of your Personalities from assigning, negate that effect.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9795.jpg",
+      "Keywords": [
+        "Unique"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "wartime-preparations"
+    }
+  ],
+  "Decks": []
+}

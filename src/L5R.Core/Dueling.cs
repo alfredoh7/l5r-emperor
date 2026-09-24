@@ -40,6 +40,8 @@ public sealed partial class MatchEngine
             Stage = refusable ? "AwaitingAccept" : "Reaction",
             NegatedEffects = _state.NegatedEffects.ToList(),
         };
+        // Kakita Ichigiku (The Shadow's Embrace pass, issue #476 batch 1): a challenge he issues to a dishonorable Personality in a Combat Segment will not be refused.
+        if (IchigikuChallenge(challenger, challenged)) { _state.PendingDuel.IchigikuDestroysLoser = true; _state.PendingDuel.Refusable = false; _state.PendingDuel.Stage = "Reaction"; refusable = false; }
         Emit("duelChallenged", $"{Definition(challenger).Name} challenges {Definition(challenged).Name} to a duel.", challengerPlayerId, challengerId);
         var duelId = $"duel-{_state.Events[^1].Sequence}";
         _state.PendingDuel.DuelId = duelId;
@@ -81,6 +83,8 @@ public sealed partial class MatchEngine
         var refusalStart = _state.Events.Count - 1;
         // Doji Shigeyuki: "He may refuse; if he does, move him home."
         if (duel.AbilityId == "shigeyuki-duel") MoveHome(Card(duel.ChallengedId), false);
+        // Duel to First Blood (The Shadow's Embrace pass, issue #476 batch 3): "He may refuse; if he did, draw two cards." -- the challenger's player draws them.
+        if (duel.AbilityId is "first-blood-duel-battle" or "first-blood-duel-limited") { Draw(Player(duel.ChallengerPlayerId)); Draw(Player(duel.ChallengerPlayerId)); }
         _state.LastDuel = _state.LastDuel! with { Result = new("Refused", null, [], 0, 0, 0, 0, [], _state.Events.Skip(refusalStart).ToArray(), [], _state.Version + 1, _state.Phase, _state.PriorityPlayerId, "Challenge refused") };
         var challengerPlayerId = duel.ChallengerPlayerId;
         _state.PendingDuel = null;
@@ -269,7 +273,7 @@ public sealed partial class MatchEngine
     // The duel stat plus each side's own total focused Focus Value (revealed by the time this runs).
     // Any attachment modifying the stat applies as long as it is active right now -- CardForce/
     // CardPersonalHonor/PersonalityChi already read current, not printed, values.
-    private int DuelStatValue(CardInstance card, string stat) => stat switch
+    private int DuelStatValue(CardInstance card, string stat) => NikaruDuelStat(card) ?? stat switch
     {
         "Force" => CardForce(card),
         "PersonalHonor" => CardPersonalHonor(card),
@@ -280,8 +284,9 @@ public sealed partial class MatchEngine
     {
         var duel = _state.PendingDuel!;
         var challenger = Card(duel.ChallengerId); var challenged = Card(duel.ChallengedId);
-        var challengerTotal = DuelStatValue(challenger, duel.Stat) + duel.ChallengerFocused.Sum(id => Definition(Card(id)).Focus);
-        var challengedTotal = DuelStatValue(challenged, duel.Stat) + duel.ChallengedFocused.Sum(id => Definition(Card(id)).Focus);
+        // Duel to First Blood (The Shadow's Embrace pass, issue #476 batch 3): its Focus Effect, "Give +1 Focus Value to each of your focused cards", resolves before the totals (FirstBloodFocusBonus).
+        var challengerTotal = DuelStatValue(challenger, duel.Stat) + duel.ChallengerFocused.Sum(id => Definition(Card(id)).Focus) + FirstBloodFocusBonus(duel.ChallengerFocused);
+        var challengedTotal = DuelStatValue(challenged, duel.Stat) + duel.ChallengedFocused.Sum(id => Definition(Card(id)).Focus) + FirstBloodFocusBonus(duel.ChallengedFocused);
         string? winnerId; List<string> loserIds;
         var resolutionReason = "Higher duel total";
         if (challengerTotal > challengedTotal) { winnerId = duel.ChallengerId; loserIds = [duel.ChallengedId]; }
@@ -314,6 +319,8 @@ public sealed partial class MatchEngine
                 foreach (var loserId in loserIds) _state.NegatedEffects.Add(new("destroy", loserId));
         ExplainDuelEffect("Outcome", _state.LastDuel!.Challenge?.Source,
             () => ApplyDuelOutcome(duel.AbilityId, winnerId, loserIds, duel.ChallengerPlayerId));
+        // Kakita Ichigiku: "destroy that duel's loser in addition to other consequences of losing."
+        if (duel.IchigikuDestroysLoser) IchigikuDestroyLosers(loserIds, duel.ChallengerPlayerId);
         _state.NegatedEffects = [];
         // False Ring of Earth (oracle-l5r-10532, issue #295): "After you win a duel against a
         // Personality who shared no keywords with your Personality in the duel" -- Ring
@@ -377,12 +384,14 @@ public sealed partial class MatchEngine
         // A duel-issuing ability resolves here, not in ExecuteAbilityEffects (which returned at IssueChallenge):
         // "after the resolution of your [keyword] action" traits fire once its whole outcome has applied.
         FireAfterOwnActionTraits(AbilityCatalog.All[duel.AbilityId], challengerPlayerId, duel.SourceCardId is null ? null : Card(duel.SourceCardId));
+        FireCowedAndDefeatedActionWatches(challengerPlayerId, null, duel.ChallengedId); // The Shadow's Embrace pass (issue #476), batch 3: a challenge targets the challenged Personality.
         var draft = duel.ResultDraft!;
         _state.LastDuel = _state.LastDuel! with { Result = draft with {
             Consequences = _state.Events.Skip(duel.ResultEventStart).ToArray(),
             Provinces = draft.Provinces.Select(p => p with { After = EffectiveProvinceStrength(Player(p.PlayerId).Provinces[p.Index]) }).ToArray(),
             ResolutionVersion = _state.Version + 1, ReturnPhase = _state.Phase, ReturnPriority = _state.PriorityPlayerId } };
         _state.PendingDuel = null;
+        ApplyTwinForksCity(winnerId); // Twin Forks City (The Shadow's Embrace pass, issue #476 batch 6): a trait, before any Reaction to the duel's end.
         // The duel itself is a single, complete action from challenge to consequences (issue #209):
         // once everything above has applied, the winning card's own controller gets a chance to
         // react to it having won -- before handing play back exactly where the challenge was issued.
@@ -485,6 +494,10 @@ public sealed partial class MatchEngine
             // Reckless Duel (oracle-l5r-6209, issue #460): "Bow the duel's loser. Move him home." -- Doji Mitsuru's own bow plus Daisuke's own move-home, combined.
             // Doji Hakuseki (Forgotten Legacy pass, issue #467, batch 1; ForgottenLegacyBatch1.cs).
             case "hakuseki-duel": HakusekiDuelOutcome(winnerId, loserIds, challengerPlayerId); break;
+            // Shiba Kudome - Experienced (The Shadow's Embrace pass, issue #476, batch 2; ShadowsEmbraceBatch2.cs).
+            case "kudome-exp-duel": KudomeExpDuelOutcome(winnerId, loserIds, challengerPlayerId); break;
+            // The Shadow's Embrace pass (issue #476), batch 1: Kakita Tadanobu (ShadowsEmbraceBatch1.cs).
+            case "tadanobu-duel-battle": case "tadanobu-duel-limited": TadanobuDuelOutcome(winnerId, loserIds, challengerPlayerId); break;
             case "reckless-duel":
                 foreach (var id in loserIds)
                 {
@@ -494,6 +507,10 @@ public sealed partial class MatchEngine
                 break;
             // Duel of Haiku (oracle-l5r-2245, Forgotten Legacy pass issue #467 batch 3): "The winner gains 1 Honor. Bow and dishonor the loser." -- the winning
             // Personality's controller gains the Honor (a tie has no winner); every loser is bowed and dishonored.
+            // Duel to First Blood (The Shadow's Embrace pass, issue #476 batch 3): "Bow the duel's loser."
+            case "first-blood-duel-battle": case "first-blood-duel-limited":
+                foreach (var id in loserIds) if (InPlay(Card(id)) && !StalwartNegatesBow(Card(id), challengerPlayerId)) Card(id).Bowed = true;
+                break;
             case "duel-of-haiku":
                 if (winnerId is not null) GainHonor(Card(winnerId).OwnerId, 1, "Duel of Haiku");
                 foreach (var id in loserIds)
@@ -525,6 +542,14 @@ public sealed partial class MatchEngine
             case "shadow-tactics-focus": foreach (var loserPlayer in loserPlayerIds.Distinct().ToArray()) Draw(Player(loserPlayer)); break;
             case "simple-yari-focus":
                 if (_state.PendingDuel?.WinnerId is string yariWinnerId && InPlay(Card(yariWinnerId)) && !StalwartNegatesBow(Card(yariWinnerId), ownerId)) Card(yariWinnerId).Bowed = true;
+                break;
+            // Paralyzing Touch (The Shadow's Embrace pass, issue #476, batch 4): "After this duel ends, negate the effects of the next action performed by its winner" (a tie has none).
+            case "paralyzing-touch-focus":
+                if (_state.PendingDuel?.WinnerId is string paralyzedWinnerId && InPlay(Card(paralyzedWinnerId))) WatchParalyzingTouch(Card(paralyzedWinnerId), "Paralyzing Touch");
+                break;
+            // Sudden Movement (The Shadow's Embrace pass, issue #476, batch 4): "After this duel ends, give its winner +3F" (a tie has no winner).
+            case "sudden-movement-focus":
+                if (_state.PendingDuel?.WinnerId is string suddenWinnerId && InPlay(Card(suddenWinnerId))) ApplyModifier(Card(suddenWinnerId), suddenWinnerId, abilityId, "Force", 3);
                 break;
             // Scavenging Party: "After this duel ends, give its winner -3F" (a tie has no winner).
             case "scavenging-party-focus":

@@ -257,6 +257,9 @@ public sealed class CardInstance
     // Consideration (Forgotten Legacy pass, issue #467 batch 3): "After the next time this turn another player's action targets him, negate its effects" -- the turn the
     // shield was raised; spent by the first such action that turn (ForgottenLegacyBatch3.cs, TurnTargetShieldNegates).
     public int TargetShieldTurn { get; set; } = -1;
+    // Deep Roots (The Shadow's Embrace pass, issue #476 batch 3): "Negate ... effects which prevent him from contributing Force. He contributes Force even while bowed" -- the turn it
+    // was played; while TurnNumber equals it, he contributes his Force to his army while bowed and no contribution negation applies to him (ShadowsEmbraceBatch3.cs).
+    public int DeepRootsTurn { get; set; } = -1;
     // "May not be straightened this turn" (issue #411, Basic Lesson's Stronghold): every effect that would straighten this card is refused for the whole of the turn with this number,
     // unlike the one-shot StraightenBlockedTurn above, which negates the next attempt only. Not swept: it simply stops holding when the turn number moves on, which is after the
     // End phase, so the next Straighten phase (which is not an effect) is untouched.
@@ -557,6 +560,8 @@ public sealed class FieldsOfMercyWatch
 /// Focus-Effect-bearing focused cards) -> resolved (PendingDuel set back to null).</summary>
 public sealed class PendingDuel
 {
+    // Kakita Ichigiku (The Shadow's Embrace pass, issue #476 batch 1): he challenged a dishonorable Personality during a Combat Segment, so the loser is destroyed too.
+    public bool IchigikuDestroysLoser { get; set; }
     // Negations a Reaction set on the issuing action (To First Blood's "negate his destruction from the action's effects"): the duel's own outcome is one of that action's effects.
     public List<NegatedEffect> NegatedEffects { get; set; } = [];
     public string AbilityId { get; set; } = "";
@@ -686,6 +691,11 @@ public sealed class MatchState
     public List<string> YourClanNeedsYouWatchIds { get; set; } = [];
     /// <summary>Seeking the Truth (Forgotten Legacy pass, issue #467 batch 4): the players who owe a random discard after the battle they played it in ends, unless they destroyed its province or an army.</summary>
     public List<SeekingTheTruthWatch> SeekingTheTruthWatches { get; set; } = [];
+    // The Shadow's Embrace pass (issue #476), batch 3 (ShadowsEmbraceBatch3.cs): Cowed and Defeated's watches, Methodical Questioning's end-of-turn return to hand and
+    // Forthrightness's watches.
+    public List<CowedAndDefeatedWatch> CowedAndDefeatedWatches { get; set; } = [];
+    public List<ReturnToHandBeforeTurnEnds> ReturnsToHandBeforeTurnEnds { get; set; } = [];
+    public List<ForthrightnessWatch> ForthrightnessWatches { get; set; } = [];
     // Cards an action created "until the battle ends" (Kyuden Hida - exp's Scout Followers): removed from the game when their battle is over, wherever they are.
     public List<string> CreatedUntilBattleEndsIds { get; set; } = [];
     // Ashigaru Elite's shape: a per-player counter of the current battle's Force boost to each of the
@@ -925,6 +935,11 @@ public sealed class MatchState
     // DestroyUnits/DestroyAttachment/MoveHome/MoveByRule as they run, snapshotted into LastResolvedAction and cleared once the action (and any
     // reaction windows of its own) finishes resolving. Never populated by a mass sweep outside a single action (battle resolution's own casualties).
     public List<AffectedCard> CurrentActionAffected { get; set; } = [];
+    // The Shadow's Embrace pass (issue #476), batch 6 (ShadowsEmbraceBatch6.cs). On: each player's Honor when the phase in progress began (null until a phase boundary
+    // has been crossed), and the Honor each gained from battle resolution since. Star-Crossed Lovers: the pairs that may not share a battlefield, for the rest of the game.
+    public int[]? PhaseStartHonor { get; set; }
+    public int[] PhaseBattleHonor { get; set; } = new int[2];
+    public List<string[]> StarCrossedPairs { get; set; } = [];
     public ResolvedActionFacts? LastResolvedAction { get; set; }
     // Revenge (oracle-l5r-6302, issue #437): "another player's action has destroyed one of your Personalities since the end of your last Battle
     // action this battle" -- per player, set true whenever another player's action destroys one of theirs (FinishActionEffectTracking), cleared
@@ -956,6 +971,15 @@ public sealed class MatchState
     public List<PerformedKeywordAction> PerformedKeywordActions { get; set; } = [];
     // "After the next time this turn he is assigned to attack [or is destroyed]" (Imperial Protection, Fair Warning): fired from Assign() and MarkDead.
     public List<AssignmentWatch> AssignmentWatches { get; set; } = [];
+    // The Shadow's Embrace pass (issue #476), batch 4 (ShadowsEmbraceBatch4.cs): Preserving Beauty's "before this turn ends, gain 3 Honor if that battlefield's province
+    // has not been destroyed", one record per use, drained in EndTurn.
+    public List<PreservingBeautyCheck> PreservingBeautyChecks { get; set; } = [];
+    // Paralyzing Touch's "negate the effects of the next action performed by its winner" (for the turn), spent by that action.
+    public List<ParalyzingTouchWatch> ParalyzingTouchWatches { get; set; } = [];
+    // Spiritual Manipulation's "must declare a normal attack this turn and assign the target (if legal)".
+    public List<ForcedAttack> ForcedAttacks { get; set; } = [];
+    // The Game Has Changed: the attachments its resolving action has already transferred (each at most once), cleared as the action begins.
+    public List<string> GameHasChangedTransferred { get; set; } = [];
     // Sentinel Spirit: judged when the next Dynasty Phase begins (SetPhase).
     public List<SentinelWatch> SentinelWatches { get; set; } = [];
     // Urgency: "each player may only take two more non-Reaction actions this phase" -- ForcedPass's own shape, counted down by Apply().
@@ -975,6 +999,15 @@ public sealed class MatchState
     // Moksha Patam (oracle-l5r-10121, issue #453 batch 5): "After an action resolves, if a player gained Honor from its effects" -- set by GainHonor on any
     // gain, reset when an action begins (RunAbilityEffects) and read once when it is truly done (FinishActionEffectTracking, ApplyMokshaPatamTokens).
     public bool CurrentActionHonorGained { get; set; }
+    // The Shadow's Embrace pass (issue #476), batch 1 (ShadowsEmbraceBatch1.cs); each record expires by comparison with the turn (or battle) number.
+    // Bayushi Misaki: "Before this phase ends, straighten him. Before this turn ends, if the Personality was not assigned to attack this turn, dishonor him ..."
+    public List<MisakiWatch> MisakiWatches { get; set; } = [];
+    // Bayushi Waru: "negate the effects of the next action the target performs (this turn)" -- spent by that action.
+    public List<NextPerformedActionNegation> NextPerformedActionNegations { get; set; } = [];
+    // Hiruma Nikaru (Shadow's Embrace): "Negate the effects of the next Battle action this battle another player takes which targets Nikaru" -- spent by that action.
+    public List<BattleTargetShield> BattleTargetShields { get; set; } = [];
+    // Agasha Kurou: "Remove it from the game before the turn ends" -- the Spells he attached, drained in EndTurn.
+    public List<TurnEndRemoval> TurnEndRemovals { get; set; } = [];
     // Emperor Edition Personality pass (issue #477), batch 5 (EmperorPersonalityBatch5.cs).
     // Asako Ryo ("refill it face-up"): the province index LastProvinceEntryCardId last left (set beside it).
     public int? LastProvinceEntryProvinceIndex { get; set; }
@@ -1002,7 +1035,10 @@ public sealed record PendingEndPhaseRecruit(int PlayerId, string CardId, string 
 
 /// <summary>One card the currently-resolving action affected, and how (issue #437: ActionEffectTracking.cs). Kind is "destroyed" or "moved" today;
 /// a bow is not tracked here yet (no single choke point narrates every one the way DestroyUnits/MoveHome already do -- see the file comment).</summary>
-public sealed record AffectedCard(string CardId, string Kind);
+// HostId (The Shadow's Embrace pass, issue #476 batch 6: Shieldman's "destroyed another card in this unit"): the Personality a destroyed attachment was attached to.
+/// FromBattlefield (The Shadow's Embrace pass, issue #476 batch 3): for a move home, the battlefield (province index) the card was moved home FROM; null when it was not at one
+/// (I Cast Two Shadows: "move him to a different battlefield than the one from which he was moved home").
+public sealed record AffectedCard(string CardId, string Kind, string? HostId = null, int? FromBattlefield = null);
 
 /// <summary>What the LAST fully-resolved action did (issue #437): who performed it, which ability, and which cards it affected. Replaced, not
 /// merged, each time a new top-level action -- an ability's own synchronous resolution, a deferred Attack, or a duel -- finishes, including its

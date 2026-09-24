@@ -7,15 +7,22 @@ internal static class AttackPerformerAuditTests
 {
     private static void Check(bool ok, string message = "Assertion failed") => Batch336Support.Check(ok, message);
 
-    // Attack abilities that carry an explicit Performer, each reviewed against the printed text. The last seven do NOT print a named performer: the Performer field there only picks a card
-    // to bow (Yayu/Tomiko: one of the source's own Spells, so the acting Personality is still the source; Thunder's Wrath's own-wielder is the Spell's attached Shugenja, which the rule already makes its performer) or a target (Strength of the Divine's Paragon, a Strategy); Carpenter Castle's
+    // Attack abilities that carry an explicit Performer, each reviewed against the printed text. The last five do NOT print a named performer: the Performer field there only picks a card
+    // to bow (Yayu/Tomiko: one of the source's own Spells, so the acting Personality is still the source) or a target (Strength of the Divine's Paragon, a Strategy); Carpenter Castle's
     // bowed Castle/Siege card is not its performer (ActionPerformer returns the Stronghold).
+    // Forgotten Legacy pass (#467), reviewed in #476: Toritaka Chokichi ("Bow your performing Follower"), Never Beyond My Reach ("your performing unbowed Kensai") and Pearls & Spirits'
+    // three Attacks ("your performing Shugenja") each print a named performer. The Shadow's Embrace pass (#476), batch 2: Moto Morio ("Choose your performing Follower").
+    // The Shadow's Embrace pass (#476), batch 3: Burning Fury ("Choose your performing unbowed Personality: Melee Attack") and Lessons Never Forgotten ("Choose your performing unbowed Yojimbo:
+    // Melee 4 Attack") each print a named performer.
+    // Thunder's Wrath (Forgotten Legacy pass, reviewed in #476): its own-wielder Performer names the Spell's wielder, the core rules' performer of a Spell's action anyway -- needed only because
+    // the Spell is destroyed as the cost ("this Shugenja" is read after it has left play).
+    // Iuchi Haruma (The Shadow's Embrace pass, issue #476 batch 1): "Bow one of Haruma's Spells: Give him +2F. Ranged 4 Attack." -- Tamori Yayu's shape: the Spell is named only as
+    // the cost it pays (bowed), and the Attack is Haruma's own (the card it is printed on performs it, core rules Choose Performers).
     // Issue #477: Daigotsu Misaki ("Bow Misaki's performing Follower"), and -- reviewed against their printed text when this pass found the list already behind main -- Toritaka Chokichi ("Bow your performing
     // Follower"), Never Beyond My Reach ("choose your performing unbowed Kensai") and Pearls & Spirits ("Bow your performing Shugenja", three ids), all named performers. Thunder's Wrath prints no performer: the
     // Performer field there only picks the Spell (or its Shugenja) to destroy as a cost.
-    private static readonly string[] NamedPerformer = ["akio-attack", "chokichi-attack", "junpei-attack", "metsubushi-attack", "misaki-follower-attack", "monastery-fire-attack", "never-beyond-reach-attack",
-        "pearls-spirits-chi-attack", "pearls-spirits-force-attack", "pearls-spirits-sacrifice-attack", "shiro-shiba-melee", "tensin-follower-attack", "two-stings-attack", "two-stings-attack-from-discard"];
-    private static readonly string[] NotANamedPerformer = ["carpenter-castle-siege", "strength-of-the-divine-force", "strength-of-the-divine-honor", "thunders-wrath-attack", "tomiko-attack", "yayu-bow-attack", "yayu-destroy-attack"];
+    private static readonly string[] NamedPerformer = ["akio-attack", "burning-fury-attack", "chokichi-attack", "junpei-attack", "lessons-never-forgotten-attack", "metsubushi-attack", "misaki-follower-attack", "monastery-fire-attack", "morio-attack", "never-beyond-reach-attack", "pearls-spirits-chi-attack", "pearls-spirits-force-attack", "pearls-spirits-sacrifice-attack", "shiro-shiba-melee", "tensin-follower-attack", "two-stings-attack", "two-stings-attack-from-discard"];
+    private static readonly string[] NotANamedPerformer = ["carpenter-castle-siege", "haruma-attack", "strength-of-the-divine-force", "strength-of-the-divine-honor", "thunders-wrath-attack", "tomiko-attack", "yayu-bow-attack", "yayu-destroy-attack"];
 
     public static void Run(TestRunner runner) => runner.Run("attack-performer-audit", [
         ("Every Melee/Ranged Attack ability with an explicit Performer is one reviewed against its printed text", ExplicitPerformersAreReviewed),

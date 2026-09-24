@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "The Shadow's Embrace pass (#476): 110 of 128 unwired cards wired (personality-wave-74/69, strategy-wave-56/57, spell-wave-22, item-wave-14, holding-wave-12, follower-wave-30, event-wave-7, stronghold-wave-16, celestial-wave-7); 18 blocked with specific notes; attack-performer audit on main fixed for the Forgotten Legacy Attacks. Shared change: only the 110 bundled scans under src/L5R.Client/Content/Published/ and the art-pack manifests touch the client; no client code changed. See docs/decisions/2026-09-24-shadows-embrace-pass.md.",
+  "validation": "L5R.Core.Tests 1417/1417 (0 FAIL, +113 scenarios); AI 74/74; Server 8/8; Client.Transport 12/12; collaboration 45/45; content 134/134 with catalogue-art-issue476-20260924-r1 pinned (GitHub digest matches). SDK 10.0.112 (pinned 10.0.400 unreachable), global.json overridden locally only. Godot client not built; no native visual play.",
+  "remaining": "Mendon to confirm the rulings in docs/decisions/2026-09-24-shadows-embrace-pass.md (notably the duration precedent conflict: Kaiu Fumiko vs Siege Volley); 8 cards await created-card scans.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/476",
+  "branch": "claude/forgotten-legacy-wiring-vkwwic",
+  "updated": "2026-09-24T16:55:03.964347+00:00"
+}

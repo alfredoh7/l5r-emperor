@@ -27,6 +27,9 @@ public static class SearchDeck
 {
     public const string Dynasty = "Dynasty";
     public const string Fate = "Fate";
+    /// <summary>The searcher's own Fate discard pile (The Shadow's Embrace pass, issue #476 batch 6: Discovering the Temple's "search your Fate deck or discard
+    /// pile"). A public pile: its cards are listed like a deck's, it is never shuffled, and a card taken from it simply leaves the pile.</summary>
+    public const string FateDiscard = "FateDiscard";
 }
 
 /// <summary>What happens to the chosen card once it has been shown (the card's own printed effect).</summary>
@@ -39,6 +42,10 @@ public static class SearchEffect
     /// <summary>Attach the Region to one of the searcher's own provinces that has none, paying its Gold cost; a
     /// Region that cannot be attached (no free province, or it cannot be paid) goes to the Dynasty discard pile.</summary>
     public const string AttachRegion = "attach-region";
+    /// <summary>Versatile Farm (The Shadow's Embrace pass, issue #476 batch 6): "put it into play, unbowed, paying 2 less Gold" -- a Holding recruited from the
+    /// searched deck at its entry price less <see cref="SearchSpec.RecruitDiscount"/>, paid through the one payment path (a ChoosePayment stage when it costs
+    /// anything); a card whose price cannot be paid does not enter play and stays in the deck, which is shuffled as always.</summary>
+    public const string RecruitUnbowed = "recruit-unbowed";
 }
 
 /// <summary>The stage a pending search is in; also names which PendingChoice type is open.</summary>
@@ -48,6 +55,7 @@ public static class SearchStage
     public const string Select = "Select";                   // PendingChoice "searchSelect"
     public const string ChooseProvince = "ChooseProvince";   // PendingChoice "searchRegionProvince"
     public const string ChooseDiscard = "ChooseDiscard";     // PendingChoice "searchDiscard"
+    public const string ChoosePayment = "ChoosePayment";     // PendingChoice "searchRecruitPay" (issue #476 batch 6, Versatile Farm)
 }
 
 /// <summary>One numeric condition on a candidate card (Focus Value, Gold Cost, ...). Stat is one of
@@ -61,7 +69,9 @@ public sealed record SearchComparison(string Stat, string Op, int Value);
 public sealed record SearchCriteria(string Noun, CardType[]? Types = null, string[]? Keywords = null,
     string[]? ExcludedKeywords = null, bool NonUnique = false, string[]? Titles = null, SearchComparison[]? Comparisons = null,
     // "A card with Thunder or an element keyword" (Naka Mahatsu - exp, Seeds of Decay, issue #453): at least one of these keywords ("any of"), where Keywords is "all of".
-    string[]? AnyKeywords = null);
+    string[]? AnyKeywords = null,
+    // "A ... Holding with another title" (Versatile Farm, issue #476 batch 6): titles that may NOT be chosen.
+    string[]? ExcludedTitles = null);
 
 /// <summary>One searchable deck, the criteria that deck's candidates must meet, and what happens to the chosen
 /// card. A card that lets the player pick the deck (Ikoma Shizuka) lists two, each with its own criteria.</summary>
@@ -69,7 +79,7 @@ public sealed record SearchDeckOption(string Deck, SearchCriteria Criteria, stri
 
 /// <summary>A whole search: Optional is true only for a printed "you may search" (Pass is then legal even when a
 /// card qualifies); every other search must take an eligible card and may pass only when none qualifies.</summary>
-public sealed record SearchSpec(string Id, string Label, SearchDeckOption[] Decks, bool Optional = false);
+public sealed record SearchSpec(string Id, string Label, SearchDeckOption[] Decks, bool Optional = false, int RecruitDiscount = 0);
 
 public static class SearchCatalog
 {
@@ -104,11 +114,26 @@ public static class SearchCatalog
     public static SearchSpec NakaMahatsu { get; } = new("naka-mahatsu", "Search your Fate deck for a card with Thunder or an element keyword",
         [new(SearchDeck.Fate, new("card with Thunder or an element keyword", AnyKeywords: ["Thunder", "Air", "Earth", "Fire", "Water", "Void"]), SearchEffect.ToHand)]);
 
+    /// <summary>Discovering the Temple (oracle-l5r-9791, an Event; issue #476 batch 6): "Search your Fate deck or discard pile for a card titled Blood of the Preserver,
+    /// show it, and put it into your hand." The searcher picks the deck or the discard pile.</summary>
+    public static SearchSpec DiscoveringTheTemple { get; } = new("discovering-the-temple", "Search your Fate deck or discard pile for Blood of the Preserver",
+    [
+        new(SearchDeck.Fate, new("card titled Blood of the Preserver", Titles: ["Blood of the Preserver"]), SearchEffect.ToHand),
+        new(SearchDeck.FateDiscard, new("card titled Blood of the Preserver", Titles: ["Blood of the Preserver"]), SearchEffect.ToHand)
+    ]);
+
+    /// <summary>Versatile Farm (oracle-l5r-9801, issue #476 batch 6): "Search your Dynasty deck for a non-Unique Farm Holding with another title and put it into play,
+    /// unbowed, paying 2 less Gold."</summary>
+    public static SearchSpec VersatileFarm { get; } = new("versatile-farm", "Search your Dynasty deck for a non-Unique Farm Holding with another title",
+        [new(SearchDeck.Dynasty, new("non-Unique Farm Holding with another title", [CardType.Holding], ["Farm"], NonUnique: true, ExcludedTitles: ["Versatile Farm"]),
+            SearchEffect.RecruitUnbowed)], RecruitDiscount: 2);
+
     /// <summary>Yung (oracle-l5r-9697, Emperor Edition Personality pass, issue #477 batch 6): "Search your Fate deck for a Ring, show it, and put it in your hand."</summary>
     public static SearchSpec YungRing { get; } = new("yung-ring", "Search your Fate deck for a Ring",
         [new(SearchDeck.Fate, new("Ring", [CardType.Ring]), SearchEffect.ToHand)]);
 
-    public static IReadOnlyDictionary<string, SearchSpec> All { get; } = new[] { IkomaShizuka, ImperialGift, TrainingCheap, TrainingFocus, TrainingOptional, NakaMahatsu, YungRing }
+    public static IReadOnlyDictionary<string, SearchSpec> All { get; } = new[] { IkomaShizuka, ImperialGift, TrainingCheap, TrainingFocus, TrainingOptional, NakaMahatsu, YungRing,
+            DiscoveringTheTemple, VersatileFarm }
         .ToDictionary(s => s.Id, StringComparer.Ordinal);
 
     /// <summary>The search an Event carries in its Effect (an Event has no abilities of its own to hang a spec on).</summary>
@@ -168,13 +193,23 @@ public sealed record SearchView(string Stage, string SourceCardId, string Source
 
 public sealed partial class MatchEngine
 {
-    private static bool IsSearchChoice(string type) => type is "searchDeck" or "searchSelect" or "searchRegionProvince" or "searchDiscard";
+    private static bool IsSearchChoice(string type) => type is "searchDeck" or "searchSelect" or "searchRegionProvince" or "searchDiscard" or "searchRecruitPay";
 
     private sealed record SearchGroup(string DefinitionId, CardInstance Card, int Count, bool Eligible, string? Reason);
 
     private static string Article(string noun) => noun.Length > 0 && "AEIOUaeiou".Contains(noun[0]) ? $"an {noun}" : $"a {noun}";
 
-    private static List<string> SearchDeckList(PlayerState player, string deck) => deck == SearchDeck.Dynasty ? player.DynastyDeck : player.FateDeck;
+    // A discard pile is not a list of its own (its cards are known by their zone): the searched "deck" is then a fresh list of the pile's cards, and taking a card from it
+    // is its change of zone (removing it from this copy is harmless).
+    private List<string> SearchDeckList(PlayerState player, string deck) => deck switch
+    {
+        SearchDeck.Dynasty => player.DynastyDeck,
+        SearchDeck.FateDiscard => _state.Cards.Values.Where(c => c.OwnerId == player.Id && c.Zone == Zone.FateDiscard).OrderBy(c => c.Id, StringComparer.Ordinal).Select(c => c.Id).ToList(),
+        _ => player.FateDeck
+    };
+
+    // "your Fate deck" / "your Fate discard pile": how a searched place is named in prompts and the log.
+    private static string SearchPlace(string deck) => deck == SearchDeck.FateDiscard ? "Fate discard pile" : $"{deck} deck";
 
     private SearchSpec SearchSpecOf(PendingSearch search) => SearchCatalog.All.TryGetValue(search.SearchId, out var spec) ? spec
         : throw new RuleViolation("Unknown search.");
@@ -207,8 +242,8 @@ public sealed partial class MatchEngine
         var player = Player(search.PlayerId); var source = Card(search.SourceCardId);
         search.Deck = option.Deck; search.Stage = SearchStage.Select;
         _state.PendingChoice = new("searchSelect", search.PlayerId, source.Id,
-            $"{Definition(source).Name}: choose {Article(option.Criteria.Noun)} from your {option.Deck} deck, or pass if none qualifies.");
-        Emit("deckSearched", $"{player.Name} searches their {option.Deck} deck.", player.Id);
+            $"{Definition(source).Name}: choose {Article(option.Criteria.Noun)} from your {SearchPlace(option.Deck)}, or pass if none qualifies.");
+        Emit("deckSearched", $"{player.Name} searches their {SearchPlace(option.Deck)}.", player.Id);
     }
 
     private void ResolveSearchCommand(GameCommand command)
@@ -221,6 +256,7 @@ public sealed partial class MatchEngine
             case SearchStage.Select: SelectOrPassSearch(search, command); break;
             case SearchStage.ChooseProvince: ChooseSearchRegionProvince(search, command); break;
             case SearchStage.ChooseDiscard: ChooseSearchDiscard(search, command); break;
+            case SearchStage.ChoosePayment: ChooseSearchRecruitPayment(search, command); break; // ShadowsEmbraceBatch6.cs
             default: throw new RuleViolation("Unknown search stage.");
         }
     }
@@ -245,8 +281,8 @@ public sealed partial class MatchEngine
             // cannot skip a card they are obliged to take.
             Require(!anyEligible || spec.Optional, "A card in the deck qualifies, so you must choose one.");
             Emit("searchPassed", anyEligible
-                ? $"{player.Name} chose not to take a card from their {search.Deck} deck."
-                : $"{player.Name} found no eligible card in their {search.Deck} deck.", player.Id);
+                ? $"{player.Name} chose not to take a card from their {SearchPlace(search.Deck!)}."
+                : $"{player.Name} found no eligible card in their {SearchPlace(search.Deck!)}.", player.Id);
             FinishSearch(search);
             return;
         }
@@ -282,6 +318,9 @@ public sealed partial class MatchEngine
             case SearchEffect.AttachRegion:
                 BeginRegionAttach(search, card);
                 break;
+            case SearchEffect.RecruitUnbowed:
+                BeginSearchRecruit(search, card); // ShadowsEmbraceBatch6.cs
+                break;
             default: throw new RuleViolation("Unknown search effect.");
         }
     }
@@ -293,7 +332,7 @@ public sealed partial class MatchEngine
     private void RecordShown(int playerId, CardInstance card, CardInstance source, string deck, string how)
     {
         var player = Player(playerId);
-        var context = $"{Definition(source).Name}, {deck} deck {how}";
+        var context = $"{Definition(source).Name}, {SearchPlace(deck)} {how}";
         var eventSequence = _state.Events.Count + 1L;
         _state.ShownCards.Add(new ShownCard(_state.ShownCards.Count + 1, player.Id, card.DefinitionId, source.Id, source.DefinitionId, deck, context, _state.TurnNumber, eventSequence));
         // The event carries no card id: the shown card may end up in a hidden hand, and the record is keyed by sequence.
@@ -411,6 +450,7 @@ public sealed partial class MatchEngine
     /// server restart. Announces only that it happened.</summary>
     private void ShuffleDeck(PlayerState player, string deck)
     {
+        if (deck == SearchDeck.FateDiscard) return; // a discard pile is not shuffled (issue #476 batch 6)
         var random = new StableRandom(_state.RngState);
         random.Shuffle(SearchDeckList(player, deck));
         _state.RngState = random.State;
@@ -446,6 +486,7 @@ public sealed partial class MatchEngine
         if (criteria.ExcludedKeywords is { Length: > 0 } && criteria.ExcludedKeywords.FirstOrDefault(k => Keyword(card, k)) is string excluded)
             return (false, $"{excluded} cards cannot be chosen");
         if (criteria.Titles is { Length: > 0 } && !criteria.Titles.Contains(def.Name, StringComparer.OrdinalIgnoreCase)) return (false, notA);
+        if (criteria.ExcludedTitles is { Length: > 0 } && criteria.ExcludedTitles.Contains(def.Name, StringComparer.OrdinalIgnoreCase)) return (false, $"{def.Name} cannot be chosen");
         foreach (var comparison in criteria.Comparisons ?? [])
         {
             var actual = SearchStat(card, comparison.Stat);
@@ -473,7 +514,7 @@ public sealed partial class MatchEngine
         var sourceName = Definition(source).Name;
         if (search.Stage == SearchStage.ChooseDeck)
             return new(search.Stage, source.Id, sourceName, spec.Label, _state.PendingChoice.Prompt, null, null, 0,
-                spec.Decks.Select(d => new SearchDeckChoiceView(d.Deck, $"Search your {d.Deck} deck", SearchDeckList(player, d.Deck).Count, d.Criteria.Noun)).ToArray(), null, spec.Optional, false, null);
+                spec.Decks.Select(d => new SearchDeckChoiceView(d.Deck, $"Search your {SearchPlace(d.Deck)}", SearchDeckList(player, d.Deck).Count, d.Criteria.Noun)).ToArray(), null, spec.Optional, false, null);
         var option = SearchOptionOf(search);
         var remaining = SearchDeckList(player, search.Deck!).Count;
         var selected = search.SelectedCardId is null ? null : Copy(Definition(Card(search.SelectedCardId)));
@@ -506,7 +547,7 @@ public sealed partial class MatchEngine
         {
             case SearchStage.ChooseDeck:
                 foreach (var d in spec.Decks)
-                    yield return new("chooseSearchDeck", $"Search your {d.Deck} deck for {Article(d.Criteria.Noun)}", true, null, Command("chooseSearchDeck", choice: d.Deck));
+                    yield return new("chooseSearchDeck", $"Search your {SearchPlace(d.Deck)} for {Article(d.Criteria.Noun)}", true, null, Command("chooseSearchDeck", choice: d.Deck));
                 break;
             case SearchStage.Select:
                 var groups = SearchGroups(search);
@@ -525,6 +566,9 @@ public sealed partial class MatchEngine
             case SearchStage.ChooseDiscard:
                 foreach (var id in SearchDiscardCandidates(search))
                     yield return new("chooseSearchDiscard", $"Discard {Definition(Card(id)).Name}", true, null, Command("chooseSearchDiscard", target: id), id);
+                break;
+            case SearchStage.ChoosePayment:
+                foreach (var option in SearchRecruitPaymentActions(search, playerId)) yield return option; // ShadowsEmbraceBatch6.cs
                 break;
         }
     }
