@@ -968,7 +968,19 @@ public sealed class MatchState
     // Moksha Patam (oracle-l5r-10121, issue #453 batch 5): "After an action resolves, if a player gained Honor from its effects" -- set by GainHonor on any
     // gain, reset when an action begins (RunAbilityEffects) and read once when it is truly done (FinishActionEffectTracking, ApplyMokshaPatamTokens).
     public bool CurrentActionHonorGained { get; set; }
+    // Emperor Edition Personality pass (issue #477), batch 5 (EmperorPersonalityBatch5.cs).
+    // Asako Ryo ("refill it face-up"): the province index LastProvinceEntryCardId last left (set beside it).
+    public int? LastProvinceEntryProvinceIndex { get; set; }
+    // Isawa Norimichi ("your army has +5 total Force" until the battle ends): read by ArmyForces, expiring by comparison with BattleNumber.
+    public List<ArmyForceBonus> ArmyForceBonuses { get; set; } = [];
+    // Kitsu Tamasine ("if you have lost Honor from another player's action during an Action Phase since your last turn began"): per player, set as such an action resolves, cleared as that player's turn begins.
+    public bool[] HonorLostToOtherActionSinceTurnBegan { get; set; } = new bool[2];
+    // Isawa Kimi - exp 2 ("an action that put any cards into another player's hand"): the players whose hand the currently-resolving action put a card into, snapshotted into LastResolvedAction.HandRecipients.
+    public List<int> CurrentActionHandRecipients { get; set; } = [];
 }
+
+/// <summary>Isawa Norimichi: PlayerId's army has +Amount total Force in the battle numbered Battle (while it has any units).</summary>
+public sealed record ArmyForceBonus(int PlayerId, int Amount, int Battle);
 
 /// <summary>A standing redirect (Seeds of Decay, issue #453): Kind is a StandingRedirectKinds value, OwnerId the player whose cards it protects, ToCardId the card the action
 /// targets instead, Turn the turn it lasts (Battle: the battle it lasts, or null for the whole turn), SourceName the card that set it up.</summary>
@@ -997,6 +1009,8 @@ public sealed class ResolvedActionFacts
     // Seeds of Decay pass (issue #453), batch 2: the Personality who performed the action (the named performer, or the source resolved to its wielder), and the players it cost Honor.
     public string? PerformerId { get; set; }
     public List<int> HonorLosers { get; set; } = [];
+    // Emperor Edition Personality pass (issue #477), batch 5: the players whose hand the action put a card into (Isawa Kimi - exp 2).
+    public List<int> HandRecipients { get; set; } = [];
 }
 
 // DeckPosition ("Top"/"Bottom") is the acting player's own upfront choice of where a card goes in

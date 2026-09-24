@@ -300,7 +300,7 @@ public sealed partial class MatchEngine
     {
         var player = Player(search.PlayerId);
         SearchDeckList(player, search.Deck!).Remove(card.Id);
-        card.Zone = Zone.Hand; player.Hand.Add(card.Id);
+        card.Zone = Zone.Hand; player.Hand.Add(card.Id); NoteCardIntoHand(player.Id); // Isawa Kimi - exp 2 (issue #477, batch 5)
         Emit("searchToHand", $"{player.Name} put {Definition(card).Name} into their hand.", player.Id);
     }
 

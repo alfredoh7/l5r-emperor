@@ -280,6 +280,13 @@ public sealed partial class MatchEngine
             // at the same location could be the target instead.
             case "ryoshun-redirect":
                 return command.PlayerId != card.OwnerId && card.Zone == Zone.Celestial && affected.OwnerId == card.OwnerId && RyoshunRedirectCandidates(card, subject, affected).Any();
+            // Emperor Edition Personality pass (issue #477), batch 5 (EmperorPersonalityBatch5.cs). Shiba Sansesuke: an action (any player's) would target one of the reactor's own Shugenja at his
+            // location and is legal against him once he is bowed (the cost). Isawa Norimichi: another player's action targets his controller's Earth Shugenja at his location and could destroy him.
+            case "sansesuke-redirect":
+                return SansesukeRedirectApplies(card, subject, affected);
+            case "norimichi-negate":
+                return command.PlayerId != card.OwnerId && affected.OwnerId == card.OwnerId && Definition(affected).Type == CardType.Personality && Keyword(affected, "Shugenja") && Keyword(affected, "Earth")
+                    && SameLocation(card, affected) && (subject.IsAttack || DestroysTarget(command.AbilityId));
             default:
                 return false;
         }

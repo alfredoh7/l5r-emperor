@@ -1,0 +1,340 @@
+{
+  "Profile": "personality-wave-72",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-153",
+      "Name": "Agasha Ryo",
+      "Type": "Personality",
+      "Clan": "Phoenix",
+      "GoldCost": 5,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 2,
+      "PersonalHonor": 2,
+      "HonorRequirement": 5,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Void Reaction: After Ryo enters play from a Province, refill it face-up.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-153.jpg",
+      "Keywords": [
+        "Acolyte",
+        "Phoenix Clan",
+        "Shugenja",
+        "Soul of Agasha Seruma",
+        "Void"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "ryo-refill"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-572",
+      "Name": "Asako Nobunori",
+      "Type": "Personality",
+      "Clan": "Phoenix",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 5,
+      "Chi": 2,
+      "PersonalHonor": 1,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Melee 4 Attack that you may compare against base Force if the target has no attachments.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-572.jpg",
+      "Keywords": [
+        "Fire",
+        "Henshin",
+        "Monk",
+        "Phoenix Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "nobunori-attack"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-590",
+      "Name": "Asako Tsunefusa",
+      "Type": "Personality",
+      "Clan": "Phoenix",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 4,
+      "PersonalHonor": 3,
+      "HonorRequirement": 8,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: Target another player's Personality: Give him Kolat, Ninja, or Shadowlands.\nBattle: Target an enemy Personality: Bow him. If he is Kolat, Ninja, or Shadowlands, choose a player, who gains or loses 2 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-590.jpg",
+      "Keywords": [
+        "Earth",
+        "Inquisitor",
+        "Magistrate",
+        "Phoenix Clan",
+        "Shugenja"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "tsunefusa-kolat",
+        "tsunefusa-ninja",
+        "tsunefusa-shadowlands",
+        "tsunefusa-bow"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-595",
+      "Name": "Asako Yorisada",
+      "Type": "Personality",
+      "Clan": "Phoenix",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 2,
+      "PersonalHonor": 3,
+      "HonorRequirement": 6,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Target a Personality whose Force is different from his base Force: Bow or straighten him.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-595.jpg",
+      "Keywords": [
+        "Earth",
+        "Henshin",
+        "Monk",
+        "Phoenix Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "yorisada-bow",
+        "yorisada-straighten"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-3847",
+      "Name": "Isawa Kimi",
+      "Type": "Personality",
+      "Clan": "Phoenix",
+      "GoldCost": 10,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 5,
+      "PersonalHonor": 3,
+      "HonorRequirement": 6,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Your other Personalities at Kimi's location that share any element keywords with her or with any of her Spells have +1F.\nReaction: Even if Kimi is bowed, after the resolution of an action that put any cards into another player's hand: That player chooses and discards a card from his hand.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-3847.jpg",
+      "Keywords": [
+        "Enlightened",
+        "Experienced 2",
+        "Loyal",
+        "Unique",
+        "Elemental Master",
+        "Phoenix Clan",
+        "Shugenja",
+        "Void"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "kimi-exp2-discard"
+      ],
+      "Effect": "kimi-exp2-element-force"
+    },
+    {
+      "Id": "oracle-l5r-3881",
+      "Name": "Isawa Norimichi",
+      "Type": "Personality",
+      "Clan": "Phoenix",
+      "GoldCost": 9,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 5,
+      "PersonalHonor": 3,
+      "HonorRequirement": 6,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After another player's action targets your Earth Shugenja at Norimichi's location: Negate the Shugenja's destruction from the action's effects.\nBattle: Until this battle ends, while there are any units in your army, your army has +5 total Force.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-3881.jpg",
+      "Keywords": [
+        "Loyal",
+        "Unique",
+        "Earth",
+        "Elemental Master",
+        "Phoenix Clan",
+        "Shugenja"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "norimichi-negate",
+        "norimichi-army"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-6768",
+      "Name": "Shiba Kataken",
+      "Type": "Personality",
+      "Clan": "Phoenix",
+      "GoldCost": 9,
+      "GoldProduction": 0,
+      "Force": 5,
+      "Chi": 4,
+      "PersonalHonor": 3,
+      "HonorRequirement": 5,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Iaijutsu Battle: Target an enemy card without attachments: Bow it.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6768.jpg",
+      "Keywords": [
+        "Duelist",
+        "Phoenix Clan",
+        "Samurai",
+        "Soul of Shiba Goto",
+        "Yojimbo"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "kataken-bow"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-6803",
+      "Name": "Shiba Sansesuke",
+      "Type": "Personality",
+      "Clan": "Phoenix",
+      "GoldCost": 4,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 3,
+      "PersonalHonor": 1,
+      "HonorRequirement": 2,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: When an action would target your Shugenja at Sansesuke's location, bow Sansesuke: The action targets him instead, if legal.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6803.jpg",
+      "Keywords": [
+        "Phoenix Clan",
+        "Samurai",
+        "Soul of Shiba Danjuro",
+        "Yojimbo"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "sansesuke-redirect"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-6818",
+      "Name": "Shiba Tsukimi",
+      "Type": "Personality",
+      "Clan": "Phoenix",
+      "GoldCost": 12,
+      "GoldProduction": 0,
+      "Force": 8,
+      "Chi": 6,
+      "PersonalHonor": 5,
+      "HonorRequirement": 20,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: Twice per battle, after the resolution of another player's Battle action: Tsukimi displays incredible reflexes. Move her home or to the current battlefield.\nBattle: Melee 6 Attack, with +2 strength if you control a Shugenja.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6818.jpg",
+      "Keywords": [
+        "Duelist",
+        "Experienced 4",
+        "Loyal",
+        "Unique",
+        "Blind Phoenix",
+        "Clan Champion",
+        "Daimyo",
+        "Phoenix Clan",
+        "Samurai",
+        "Shiba's Soul"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "tsukimi-home",
+        "tsukimi-battlefield",
+        "tsukimi-attack"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-4397",
+      "Name": "Kitsu Tamasine",
+      "Type": "Personality",
+      "Clan": "Lion",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 4,
+      "PersonalHonor": 4,
+      "HonorRequirement": 7,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After Tamasine enters play: Create a 2F/2C/3PH Lion Clan • Samurai • Ancestor • Spirit Personality.\nBattle: Bow Tamasine and target your Ancestor, or one to four of your Ancestors if you have lost Honor from another player's action during an Action Phase since your last turn began: Give each target +4F.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-4397.jpg",
+      "Keywords": [
+        "Lion Clan",
+        "Shugenja",
+        "Sodan Senzo",
+        "Water"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "tamasine-create",
+        "tamasine-boost-one",
+        "tamasine-boost-many"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-7780",
+      "Name": "Tamori Kusugi",
+      "Type": "Personality",
+      "Clan": "Dragon",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Even if Kusugi is not at the current battlefield, bow him: Raise or lower the current battlefield's province's strength by 4.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7780.jpg",
+      "Keywords": [
+        "Dragon Clan",
+        "Earth",
+        "Shugenja",
+        "Soul of Tamori Sugi"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "kusugi-raise",
+        "kusugi-lower"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

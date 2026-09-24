@@ -39,8 +39,10 @@ public sealed partial class MatchEngine
     private bool FinishActionEffectTracking(string abilityId, int playerId, string? sourceId, int closesTo, string? performerId = null)
     {
         var affected = _state.CurrentActionAffected;
-        _state.LastResolvedAction = new ResolvedActionFacts { AbilityId = abilityId, PlayerId = playerId, SourceId = sourceId, Affected = affected, PerformerId = performerId, HonorLosers = _state.CurrentActionHonorLosers };
-        _state.CurrentActionAffected = []; _state.CurrentActionHonorLosers = [];
+        _state.LastResolvedAction = new ResolvedActionFacts { AbilityId = abilityId, PlayerId = playerId, SourceId = sourceId, Affected = affected, PerformerId = performerId, HonorLosers = _state.CurrentActionHonorLosers,
+            HandRecipients = _state.CurrentActionHandRecipients };
+        NoteHonorLostToOtherAction(playerId, _state.CurrentActionHonorLosers); // Kitsu Tamasine (issue #477, batch 5)
+        _state.CurrentActionAffected = []; _state.CurrentActionHonorLosers = []; _state.CurrentActionHandRecipients = [];
         // Revenge (issue #437): this action destroyed a Personality of some OTHER player's -- set that owner's flag.
         foreach (var a in affected)
         {
@@ -114,6 +116,8 @@ public sealed partial class MatchEngine
                 && LastActionCostHonor(playerId) && LastActionPerformer() is not null,
             // Asahina Akikusa (oracle-l5r-10046, issue #453 batch 3): "After an action on your Air Spell resolves" -- the resolved action's source card is a Spell with the
             // Air keyword attached to a Personality her controller controls (the Spell's action is her controller's own, so facts.PlayerId matches too).
+            // Emperor Edition Personality pass (issue #477), batch 5 (EmperorPersonalityBatch5.cs): Isawa Kimi - exp 2 and Shiba Tsukimi - exp 4.
+            "kimi-exp2-discard" or "tsukimi-home" or "tsukimi-battlefield" => EmperorBatch5AfterActionApplies(source, abilityId, playerId, facts),
             "akikusa-honor" => facts.SourceId is not null && _state.Cards.TryGetValue(facts.SourceId, out var akikusaSpell) && Definition(akikusaSpell).Type == CardType.Spell
                 && Keyword(akikusaSpell, "Air") && akikusaSpell.OwnerId == playerId && facts.PlayerId == playerId,
             _ => false

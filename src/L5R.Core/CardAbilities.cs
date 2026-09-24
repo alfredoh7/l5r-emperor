@@ -3237,6 +3237,53 @@ public static class AbilityCatalog
         // Hida Yamadera - exp (oracle-l5r-10220): "Reaction: After another player's Battle action resolves, if its effects destroyed Yamadera: Melee 8 Attack." A Reaction taken by its own
         // card from the dead pile (FromDead), read off the last resolved action's own destroyed list.
         ["yamadera-attack"] = new("Reaction", "After another player's Battle action resolves, if its effects destroyed Yamadera: Melee 8 Attack", "attack", Trigger: AfterActionReactionTriggers.AfterActionResolved, FromDead: true),
+        // Emperor Edition Personality pass (issue #477), batch 5 (personality-wave-72): every entry below is documented at its own use in EmperorPersonalityBatch5.cs.
+        // Agasha Ryo (oracle-l5r-153): "Void Reaction: After Ryo enters play from a Province, refill it face-up." Ugimori's "from a province" (a per-id Require).
+        ["ryo-refill"] = new("Reaction", "Void Reaction: After Ryo enters play from a Province, refill it face-up", "none", Trigger: "own-enters-play", ActionKeywords: ["Void"]),
+        // Asako Nobunori (oracle-l5r-572): "Battle: Melee 4 Attack that you may compare against base Force if the target has no attachments." (AttackComparedForce)
+        ["nobunori-attack"] = new("Battle", "Melee 4 Attack that you may compare against base Force if the target has no attachments", "attack"),
+        // Asako Tsunefusa (oracle-l5r-590): "Open: Target another player's Personality: Give him Kolat, Ninja, or Shadowlands." (three choices of one printed action, for the turn)
+        // "Battle: Target an enemy Personality: Bow him. If he is Kolat, Ninja, or Shadowlands, choose a player, who gains or loses 2 Honor." (Doji Yoshitada's shape, another condition)
+        ["tsunefusa-kolat"] = new("Open", "Target another player's Personality: Give him Kolat", "enemy-personality", UsageKey: "tsunefusa-give"),
+        ["tsunefusa-ninja"] = new("Open", "Target another player's Personality: Give him Ninja", "enemy-personality", UsageKey: "tsunefusa-give"),
+        ["tsunefusa-shadowlands"] = new("Open", "Target another player's Personality: Give him Shadowlands", "enemy-personality", UsageKey: "tsunefusa-give"),
+        ["tsunefusa-bow"] = new("Battle", "Target an enemy Personality: Bow him. If he is Kolat, Ninja, or Shadowlands, choose a player who gains or loses 2 Honor", "slots",
+            Slots: [new("target", "enemy-personality", "Enemy Personality to bow"),
+                new("honor", "player", "If he is Kolat, Ninja, or Shadowlands: a player gains or loses 2 Honor", 0, 0, Resolution: new(BranchCondition.TargetKolatNinjaOrShadowlands, HonorChoice.Options(2), HonorChoice.None))]),
+        // Asako Yorisada (oracle-l5r-595): "Battle: Target a Personality whose Force is different from his base Force: Bow or straighten him." (two halves of one printed action)
+        ["yorisada-bow"] = new("Battle", "Target a Personality whose Force is different from his base Force: Bow him", "personality-force-neq-own-base", UsageKey: "yorisada-toggle"),
+        ["yorisada-straighten"] = new("Battle", "Target a Personality whose Force is different from his base Force: Straighten him", "personality-force-neq-own-base", UsageKey: "yorisada-toggle"),
+        // Isawa Kimi - exp 2 (oracle-l5r-3847): the static +1F is EmperorBatch5Force; "Reaction: Even if Kimi is bowed, after the resolution of an action that put any cards into
+        // another player's hand: That player chooses and discards a card from his hand." -- the after-action-resolved window, the decider choice (DeciderChoice.cs).
+        ["kimi-exp2-discard"] = new("Reaction", "Even if Kimi is bowed, after the resolution of an action that put any cards into another player's hand: That player chooses and discards a card from his hand", "none",
+            Trigger: AfterActionReactionTriggers.AfterActionResolved),
+        // Isawa Norimichi (oracle-l5r-3881): "Reaction: After another player's action targets your Earth Shugenja at Norimichi's location: Negate the Shugenja's destruction from the
+        // action's effects." (Taming the Beast's negation) "Battle: Until this battle ends, while there are any units in your army, your army has +5 total Force." (ArmyForceBonus)
+        ["norimichi-negate"] = new("Reaction", "After another player's action targets your Earth Shugenja at Norimichi's location: Negate the Shugenja's destruction from the action's effects", "none", Trigger: ReactionTriggers.TargetedByAction),
+        ["norimichi-army"] = new("Battle", "Until this battle ends, while there are any units in your army, your army has +5 total Force", "none"),
+        // Shiba Kataken (oracle-l5r-6768): "Iaijutsu Battle: Target an enemy card without attachments: Bow it."
+        ["kataken-bow"] = new("Battle", "Iaijutsu Battle: Target an enemy card without attachments: Bow it", "enemy-card-without-attachments", ActionKeywords: ["Iaijutsu"]),
+        // Shiba Sansesuke (oracle-l5r-6803): "Reaction: When an action would target your Shugenja at Sansesuke's location, bow Sansesuke: The action targets him instead, if legal." (Ezuno's redirect, paid by a bow)
+        ["sansesuke-redirect"] = new("Reaction", "When an action would target your Shugenja at Sansesuke's location, bow Sansesuke: The action targets him instead, if legal", "none", Trigger: ReactionTriggers.TargetedByAction, Costs: ActionCost.BowSource),
+        // Shiba Tsukimi - exp 4 (oracle-l5r-6818): "Reaction: Twice per battle, after the resolution of another player's Battle action: Move her home or to the current battlefield." (two halves, a per-battle count)
+        // "Battle: Melee 6 Attack, with +2 strength if you control a Shugenja." (Shiro Shiba's shape)
+        ["tsukimi-home"] = new("Reaction", "Twice per battle, after the resolution of another player's Battle action: Tsukimi displays incredible reflexes. Move her home", "none", Trigger: AfterActionReactionTriggers.AfterActionResolved,
+            UsageKey: "tsukimi-reflexes", UsesPerTurn: AbilityUseLimit.Unlimited),
+        ["tsukimi-battlefield"] = new("Reaction", "Twice per battle, after the resolution of another player's Battle action: Tsukimi displays incredible reflexes. Move her to the current battlefield", "none", Trigger: AfterActionReactionTriggers.AfterActionResolved,
+            UsageKey: "tsukimi-reflexes", UsesPerTurn: AbilityUseLimit.Unlimited),
+        ["tsukimi-attack"] = new("Battle", "Melee 6 Attack, with +2 strength if you control a Shugenja", "attack"),
+        // Kitsu Tamasine (oracle-l5r-4397): "Reaction: After Tamasine enters play: Create a 2F/2C/3PH Lion Clan - Samurai - Ancestor - Spirit Personality." (Kagako's created Ancestor)
+        // "Battle: Bow Tamasine and target your Ancestor, or one to four of your Ancestors if you have lost Honor from another player's action during an Action Phase since your last turn
+        // began: Give each target +4F." -- one half for the single target, one for the several (usable only once the condition holds).
+        ["tamasine-create"] = new("Reaction", "After Tamasine enters play: Create a 2F/2C/3PH Lion Clan · Samurai · Ancestor · Spirit Personality", "none", Trigger: "own-enters-play",
+            Creates: new(CardType.Personality, Force: 2, Chi: 2, PersonalHonor: 3, Keywords: ["Lion Clan", "Samurai", "Ancestor", "Spirit"])),
+        ["tamasine-boost-one"] = new("Battle", "Bow Tamasine and target your Ancestor: Give it +4F", "slots", UsageKey: "tamasine-boost", RequiredKeywords: ["Ancestor"], Costs: ActionCost.BowSource,
+            Slots: [new("targets", "own-personality-with-keyword", "Your Ancestor")]),
+        ["tamasine-boost-many"] = new("Battle", "Bow Tamasine and target one to four of your Ancestors, having lost Honor from another player's action during an Action Phase since your last turn began: Give each target +4F", "slots",
+            UsageKey: "tamasine-boost", RequiredKeywords: ["Ancestor"], Costs: ActionCost.BowSource, Slots: [new("targets", "own-personality-with-keyword", "One to four of your Ancestors", 1, 4)]),
+        // Tamori Kusugi (oracle-l5r-7780): "Battle: Even if Kusugi is not at the current battlefield, bow him: Raise or lower the current battlefield's province's strength by 4."
+        ["kusugi-raise"] = new("Battle", "Even if Kusugi is not at the current battlefield, bow him: Raise the current battlefield's province's strength by 4", "none", UsageKey: "kusugi-province", Costs: ActionCost.BowSource, SourceUnitMayBeAway: true),
+        ["kusugi-lower"] = new("Battle", "Even if Kusugi is not at the current battlefield, bow him: Lower the current battlefield's province's strength by 4", "none", UsageKey: "kusugi-province", Costs: ActionCost.BowSource, SourceUnitMayBeAway: true),
     });
 }
 
@@ -3469,7 +3516,8 @@ public sealed partial class MatchEngine
         // Seeds of Decay pass (issue #453), batch 4: Second City Port (a Holding); Katsuo's also grants an additional action, so it is not "only" a straighten.
         or "second-city-port-straighten"
         // Seeds of Decay (issue #453, batch 3): Utaku Hirononri only straightens his target.
-        or "hirononri-straighten";
+        or "hirononri-straighten"
+        or "yorisada-straighten"; // Emperor Edition Personality pass (issue #477), batch 5
     private static string? MoveOrStraightenKind(string abilityId) => abilityId switch
     {
         "incapacitated" or "favor-battle" or "journeys-end-move" or "shamate-move" or "effortless-counterattack-move"
@@ -3576,7 +3624,9 @@ public sealed partial class MatchEngine
         // Seeds of Decay pass (issue #453), batch 5.
         or "celestial-sword-scorpion-bow" or "scent-of-dishonor-bow"
         // Forgotten Legacy pass (issue #467), batch 1: Toshimo, Murota and Nikaru bow their target; Abodan bows his (conditionally) and Hakuseki's duel its loser.
-        or "toshimo-bow" or "murota-bow" or "nikaru-bow-lock" or "abodan-move" or "hakuseki-duel";
+        or "toshimo-bow" or "murota-bow" or "nikaru-bow-lock" or "abodan-move" or "hakuseki-duel"
+        // Emperor Edition Personality pass (issue #477), batch 5: Asako Tsunefusa's, Asako Yorisada's and Shiba Kataken's bows.
+        or "tsunefusa-bow" or "yorisada-bow" or "kataken-bow";
     // Whether the command's TargetId is an Attack's OWN target, which reacts through the separate attackReaction
     // window instead of this one: an Attack-classified ability whose Target category is "attack". Bayushi Kahoku
     // - exp (issue #313) is Attack-classified too, but its TargetId is the separate "-4F" target (an ordinary
@@ -3949,6 +3999,9 @@ public sealed partial class MatchEngine
         "pearls-spirits-sacrifice-attack" => sourceId is not null ? CardForce(Card(sourceId)) + PersonalityChi(Card(sourceId)) : 0,
         "pearls-spirits-force-attack" => sourceId is not null ? CardForce(Card(sourceId)) : 0,
         "pearls-spirits-chi-attack" => sourceId is not null ? PersonalityChi(Card(sourceId)) : 0,
+        // Emperor Edition Personality pass (issue #477), batch 5. Asako Nobunori "Melee 4"; Shiba Tsukimi - exp 4 "Melee 6, with +2 strength if you control a Shugenja" (Shiro Shiba's shape).
+        "nobunori-attack" => 4,
+        "tsukimi-attack" => 6 + (ControlsKeyword(player.Id, "Shugenja") ? 2 : 0),
         _ => 0
     };
     // AttackStrength plus every passive defense modifier applying to this specific target (Destrier/
@@ -4017,6 +4070,8 @@ public sealed partial class MatchEngine
         "vengeful-attack" or "chokichi-attack" or "haruhiko-attack" => "Ranged",
         // Forgotten Legacy pass (issue #467), batch 4.
         "never-beyond-reach-attack" or "siege-volley-attack" or "pearls-spirits-sacrifice-attack" or "pearls-spirits-force-attack" or "pearls-spirits-chi-attack" => "Ranged",
+        // Emperor Edition Personality pass (issue #477), batch 5.
+        "nobunori-attack" or "tsukimi-attack" => "Melee",
         _ => ""
     };
     // General "in play" Reaction primitive: a printed Reaction whose card must actually be in play
@@ -4202,7 +4257,7 @@ public sealed partial class MatchEngine
             // AttackComparedForce is the one decision point for WHICH Force a Personality's Attack
             // strength is compared to (see AttackTargeting.cs) -- identical to CardForce for every target
             // that needs no Follower exception.
-            if (InPlay(target) && AtBattle(target) && AttackComparedForce(target) <= strength)
+            if (InPlay(target) && AtBattle(target) && AttackComparedForce(target, abilityId) <= strength)
             {
                 DestroyAttackTarget(target, playerId);
             }
@@ -4580,6 +4635,8 @@ public sealed partial class MatchEngine
                 or "rokku-move"
                 // Forgotten Legacy pass (issue #467), batch 2: The Vengeful ("Even if this card is bowed") and Togashi Osawa ("Even if Osawa is bowed").
                 or "vengeful-straighten" or "osawa-bow" or "osawa-straighten"
+                // Emperor Edition Personality pass (issue #477), batch 5: Isawa Kimi - exp 2's Reaction ("Even if Kimi is bowed").
+                or "kimi-exp2-discard"
                 // Colonial Harbor (Forgotten Legacy pass, issue #467): "Your Stronghold's abilities have Tireless."
                 || TirelessStronghold(source), "Abilities on bowed cards cannot be used.");
             uses = source.AbilityUses;
@@ -5919,6 +5976,8 @@ public sealed partial class MatchEngine
                         // The Towers of the Yogo's granted ability: "an enemy Follower or Personality without Followers" -- a Personality with no attached Follower,
                         // or any enemy Follower (a Follower cannot itself carry a Follower).
                         "enemy-card-without-followers" => !own && (type == CardType.Follower || personality && !Attachments(target.Id).Any(a => Definition(a).Type == CardType.Follower)),
+                        // Emperor Edition Personality pass (issue #477), batch 5. Asako Yorisada: "a Personality whose Force is different from his base Force" -- the target's own printed Force.
+                        "personality-force-neq-own-base" => personality && CardForce(target) != Definition(target).Force,
                         _ => false
                     }, "That card does not meet this ability's target or performer requirements.");
                 }
@@ -5964,6 +6023,8 @@ public sealed partial class MatchEngine
         ValidateSeedsOfDecayBatch3(id, command, ability, player, source);
         // Forgotten Legacy pass (issue #467), batch 1: the per-id conditions of this batch's cards (ForgottenLegacyBatch1.cs).
         ValidateForgottenLegacyBatch1(id, command, player, source);
+        // Emperor Edition Personality pass (issue #477), batch 5: the per-id conditions of this batch's cards (EmperorPersonalityBatch5.cs).
+        ValidateEmperorBatch5(id, command, ability, player, source);
         // The Gold cost (issue #303): every ability's price -- Equip (Battle)/Soshi Neiru's Spell cost, Low
         // Market's "2 less, to a minimum of 1", Your Clan Needs You!'s recruit cost minus 6, Shinden
         // Shorai's "all costs", Singh Remnants' own cost, a Strategy/Discipline's printed cost, Kharmic's
@@ -6904,6 +6965,7 @@ public sealed partial class MatchEngine
             case "dark-naga-scouts-attack": case "horse-archers-attack": case "hiruma-sniper-attack":
             case "spawn-of-vritra-attack": case "horseback-warriors-attack": case "khol-regulars-attack": case "unparalleled-sword-attack": case "training-weapon-attack": case "moshi-ikako-attack": case "kamina-exp-attack": case "shuji-attack": case "sankaku-yari-attack":
             case "shikaro-attack": case "moto-ming-gwok-attack": case "takasho-attack": case "champion-of-thunder-attack": case "nikutai-attack": case "village-raiders-attack": case "chiyo-attack": case "dairuko-melee":
+            case "nobunori-attack": case "tsukimi-attack": // Emperor Edition Personality pass (issue #477), batch 5
             case "ebizo-attack": case "training-recon-attack": case "training-province-attack":
                 if (ResolveOrDeferAttack(id, player, target?.Id, ActionPerformer(ability, command, source).Id, consumedGrant)) return;
                 break;
@@ -7799,7 +7861,7 @@ public sealed partial class MatchEngine
                 break;
             case "scholarly-hermit-search":
                 
-                player.Hand.Add(target!.Id); target.Zone = Zone.Hand; target.FaceUp = true;
+                player.Hand.Add(target!.Id); target.Zone = Zone.Hand; target.FaceUp = true; NoteCardIntoHand(player.Id);
                 DestroyUnits([source!], false, player.Id);
                 break;
             case "ring-of-void-draw":
@@ -8574,6 +8636,12 @@ public sealed partial class MatchEngine
             case "yamazaki-straighten": case "daiki-demand": case "haruhiko-attack": case "forgotten-temple-refill":
                 if (RunForgottenLegacyBatch2Effect(id, ability, command, player, source, target, consumedGrant)) return;
                 break;
+            // Emperor Edition Personality pass (issue #477), batch 5: every case is in EmperorPersonalityBatch5.cs; true means the action paused (a choice, a created card's entry window).
+            case "ryo-refill": case "tsunefusa-kolat": case "tsunefusa-ninja": case "tsunefusa-shadowlands": case "tsunefusa-bow": case "yorisada-bow": case "yorisada-straighten":
+            case "kimi-exp2-discard": case "norimichi-negate": case "norimichi-army": case "kataken-bow": case "sansesuke-redirect": case "tsukimi-home": case "tsukimi-battlefield":
+            case "tamasine-create": case "tamasine-boost-one": case "tamasine-boost-many": case "kusugi-raise": case "kusugi-lower":
+                if (RunEmperorBatch5Effect(id, command, ability, player, source, target, consumedGrant, playedFromDiscard, opponentHonorBeforeBattleAction, bowedBeforeAction, preExistingGrants)) return;
+                break;
             // Forgotten Legacy pass (issue #467), batch 1: every case is in ForgottenLegacyBatch1.cs; true means the action paused (a choice, an Attack
             // reaction window, a created card's entry window) and finishes from there.
             case "shigemitsu-provinces": case "kaitoko-weaken": case "higaonna-attack": case "toshimo-bow": case "takichi-move": case "murota-bow":
@@ -9229,7 +9297,7 @@ public sealed partial class MatchEngine
             card.Tokens.Clear(); card.Modifiers.Clear(); card.ActionLocks.Clear(); card.GrantedKeywords.Clear(); card.GrantedAbilities.Clear(); card.RemovedKeywords.Clear();
         }
         card.Zone = Zone.Hand; card.ProvinceIndex = null; card.FaceUp = true; card.AbilityUses.Clear();
-        Player(card.OwnerId).Hand.Add(card.Id);
+        Player(card.OwnerId).Hand.Add(card.Id); NoteCardIntoHand(card.OwnerId); // Isawa Kimi - exp 2 (issue #477, batch 5)
         Emit("returnedToHand", $"{Definition(card).Name} was returned to {Player(card.OwnerId).Name}'s hand.", card.OwnerId, card.Id);
         if (wasAttachedTo is not null && InPlay(wasAttachedTo) && Definition(wasAttachedTo).Type == CardType.Personality && PersonalityChi(wasAttachedTo) <= 0) DestroyUnits([wasAttachedTo], true);
     }
