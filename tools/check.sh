@@ -8,19 +8,22 @@ if ! command -v dotnet >/dev/null || [ "$(dotnet --version)" != "10.0.400" ]; th
   echo 'Install the pinned SDK first: python tools/bootstrap.py --install' >&2
   exit 1
 fi
-if [ "${1:-}" != "" ] && [ "$1" != "--skip-client" ]; then
-  echo 'Usage: bash tools/check.sh [--skip-client]' >&2
+if [ "${1:-}" != "" ] && [ "$1" != "--skip-client" ] && [ "$1" != "--client-only" ]; then
+  echo 'Usage: bash tools/check.sh [--skip-client | --client-only]' >&2
   exit 2
 fi
-l5r_python="${L5R_PYTHON:-python3}"
-if ! command -v "$l5r_python" >/dev/null; then l5r_python=python; fi
-"$l5r_python" -m unittest discover -s tools/collaboration -p 'test_*.py'
-"$l5r_python" -m unittest discover -s tools/content -p 'test_*.py'
-"$l5r_python" -m unittest discover -s tools -p 'test_meshy.py'
-for project in L5R.Core.Tests L5R.AI.Tests L5R.Server.Tests L5R.Client.Transport.Tests; do
-  dotnet build "tests/$project/$project.csproj" --disable-build-servers -p:UseSharedCompilation=false -m:1 --nologo
-  dotnet "tests/$project/bin/Debug/net10.0/$project.dll"
-done
+# --client-only runs just the native client build, Godot import and smoke run (CI runs it beside the rules checks, in parallel).
+if [ "${1:-}" != "--client-only" ]; then
+  l5r_python="${L5R_PYTHON:-python3}"
+  if ! command -v "$l5r_python" >/dev/null; then l5r_python=python; fi
+  "$l5r_python" -m unittest discover -s tools/collaboration -p 'test_*.py'
+  "$l5r_python" -m unittest discover -s tools/content -p 'test_*.py'
+  "$l5r_python" -m unittest discover -s tools -p 'test_meshy.py'
+  for project in L5R.Core.Tests L5R.AI.Tests L5R.Server.Tests L5R.Client.Transport.Tests; do
+    dotnet build "tests/$project/$project.csproj" --disable-build-servers -p:UseSharedCompilation=false -m:1 --nologo
+    dotnet "tests/$project/bin/Debug/net10.0/$project.dll"
+  done
+fi
 if [ "${1:-}" != "--skip-client" ]; then
   if [ ! -x "$GODOT" ]; then
     echo 'Install the pinned Godot .NET editor: python tools/bootstrap.py --install' >&2
