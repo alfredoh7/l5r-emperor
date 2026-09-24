@@ -447,7 +447,10 @@ internal static class ShadowsEmbraceBatch1Tests
         var s = Battle(1); var rafu = Bf(s, Rafu, 0); var prey = Bf(s, Lion, 1); var tough = Bf(s, Veteran, 1);
         var e = MatchEngine.FromTestState(s);
         Eq(e.AttackStrengthForTest("rafu-attack", rafu.Id), 4, "Melee 4");
-        Check(!Enabled(e, 0, "rafu-attack", rafu.Id).TargetIds!.Contains(tough.Id), "Force 6 is beyond it");
+        Check(Enabled(e, 0, "rafu-attack", rafu.Id).TargetIds!.Contains(tough.Id), "Force 6 is beyond it, but still a legal target");
+        var e2 = MatchEngine.FromTestState(s);
+        Accept(e2, Offer(e2, 0, "rafu-attack", rafu.Id, tough.Id));
+        Eq(e2.State.Cards[tough.Id].Zone, Zone.Battlefield, "Melee 4 does not destroy a Force 6 target");
         Accept(e, Offer(e, 0, "rafu-attack", rafu.Id, prey.Id));
         Eq(e.State.Cards[prey.Id].Zone, Zone.Dead, "destroyed");
     }

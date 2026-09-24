@@ -198,16 +198,24 @@ internal static class SecondCitySpiritTests
     {
         foreach (var (recon, bowed) in new[] { (false, true), (true, false) })
         {
-            var s = Table(Phase.Battle, 0); s.PriorityPlayerId = 0;
-            var holder = Add(s, "training-lion-samurai", 0, Zone.Battlefield, province: 0);
-            holder.GrantedAbilities.Add(new("spirit-scout-attack", "test-spirit", GrantDuration.Permanent));
-            var target = Add(s, "training-lion-samurai", 1, Zone.Battlefield, province: 0);   // Force 4
-            var strong = Add(s, "training-crane-veteran", 1, Zone.Battlefield, province: 0);   // Force 5
-            if (recon) s.Players[1].Provinces[0].Reconnaissance[0] = true;
-            var e = MatchEngine.FromTestState(s);
+            (MatchEngine E, CardInstance Holder, CardInstance Target, CardInstance Strong) Build()
+            {
+                var s = Table(Phase.Battle, 0); s.PriorityPlayerId = 0;
+                var holder = Add(s, "training-lion-samurai", 0, Zone.Battlefield, province: 0);
+                holder.GrantedAbilities.Add(new("spirit-scout-attack", "test-spirit", GrantDuration.Permanent));
+                var target = Add(s, "training-lion-samurai", 1, Zone.Battlefield, province: 0);   // Force 4
+                var strong = Add(s, "training-crane-veteran", 1, Zone.Battlefield, province: 0);   // Force 5
+                if (recon) s.Players[1].Provinces[0].Reconnaissance[0] = true;
+                return (MatchEngine.FromTestState(s), holder, target, strong);
+            }
+            var (e, holder, target, strong) = Build();
             var attack = Enabled(e, 0, "spirit-scout-attack", holder.Id);
             Check(attack.NoTarget, "an Attack may be taken with no target");
-            Reject(e, attack.Command! with { TargetId = strong.Id });
+            // A Force-5 target is still a legal target of a Ranged 4 Attack: it just is not destroyed (core rule); the bow cost is paid as usual.
+            var (e5, holder5, _, strong5) = Build();
+            Accept(e5, Enabled(e5, 0, "spirit-scout-attack", holder5.Id).Command! with { TargetId = strong5.Id });
+            Eq(e5.State.Cards[strong5.Id].Zone, Zone.Battlefield, "Ranged 4 does not destroy a Force-5 target");
+            Eq(e5.State.Cards[holder5.Id].Bowed, bowed, "the holder's bow is unchanged by the target's Force");
             Accept(e, attack.Command! with { TargetId = target.Id });
             Eq(e.State.Cards[target.Id].Zone, Zone.Dead, "Ranged 4 destroys a Force-4 Personality");
             Eq(e.State.Cards[holder.Id].Bowed, bowed, recon ? "with Reconnaissance he is not bowed" : "without Reconnaissance he bows");
