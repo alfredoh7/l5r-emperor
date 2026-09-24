@@ -2511,4 +2511,8 @@ public static class PublishedContent
     public static PublishedSnapshot PersonalityWave65 { get; } = Load("L5R.Published.PersonalityWave65.json", "personality-wave-65", requireDecks: false);
     /// <summary>Holding wave 10 (Emperor Edition Gempukku pass, issue #461): the nine Market Holdings.</summary>
     public static PublishedSnapshot HoldingWave10 { get; } = Load("L5R.Published.HoldingWave10.json", "holding-wave-10", requireDecks: false);
+    /// <summary>Spell wave 22 (The Shadow's Embrace pass, issue #476, batch 5): Beseech Sakkaku, Channel the Moon, Purify the Soul, Set the Fields Aflame, Thunder's Stamina, Touch the Emptiness, Ward of Air, Your Heart's Enemy.</summary>
+    public static PublishedSnapshot SpellWave22 { get; } = Load("L5R.Published.SpellWave22.json", "spell-wave-22", requireDecks: false);
+    /// <summary>Item wave 14 (The Shadow's Embrace pass, issue #476, batch 5): Blood of the Preserver, Celestial Sword of the Crab, of the Crane and of the Phoenix, The String of the Colonies, The Victor, Vanquisher's Armor.</summary>
+    public static PublishedSnapshot ItemWave14 { get; } = Load("L5R.Published.ItemWave14.json", "item-wave-14", requireDecks: false);
 }

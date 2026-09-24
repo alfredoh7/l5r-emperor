@@ -86,7 +86,9 @@ public sealed partial class MatchEngine
     // ResolveNegatedAction discard the Favor for.
     private static bool DiscardsImperialFavorAsCost(string abilityId) =>
         abilityId is "shunya-honor" or "favor-cycle" or "favor-battle" or "jakuei-bow-favor" or "bonds-of-coin-draw" or "insulting-gesture-shame" or "baiko-shame"
-            or "accidental-confession-dishonor"; // Accidental Confession (batch 3). Doji Rengetsu (batch 1) discards it through its own hook -- see BurningDreamsNegates.
+            or "accidental-confession-dishonor" // Accidental Confession (batch 3).
+            or "celestial-sword-crane-favor"; // Celestial Sword of the Crane - exp (The Shadow's Embrace pass, issue #476, batch 5).
+            // Doji Rengetsu (batch 1) discards it through its own hook -- see BurningDreamsNegates.
 
     // Burning Dreams, clause 2 (ExecuteAbilityEffects' hook, asked as the action resolves -- after any redirect): the action's effects are negated
     // when it discards the Favor as its cost and targets a Nonhuman Personality. The whole action is still taken and every cost (the Favor included) paid.

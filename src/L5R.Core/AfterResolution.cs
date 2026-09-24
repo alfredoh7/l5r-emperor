@@ -86,5 +86,6 @@ public sealed partial class MatchEngine
 
     // Redoubled Attack: "They will not bow from the battle's resolution" -- named cards, as opposed to a player's whole army (Akodo Dairuko).
     private bool ResolutionWillNotBow(CardInstance card) => _state.ResolutionWillNotBowCardIds.Contains(card.Id)
-        || SasakoUnitWillNotBow(card); // Moshi Sasako (Forgotten Legacy pass, issue #467 batch 2): "Battle resolution does not bow cards in this unit."
+        || SasakoUnitWillNotBow(card) // Moshi Sasako (Forgotten Legacy pass, issue #467 batch 2): "Battle resolution does not bow cards in this unit."
+        || ThundersStaminaUnitWillNotBow(card); // Thunder's Stamina (The Shadow's Embrace pass, issue #476 batch 5): "While this Shugenja is Thunder, battle resolution will not bow cards in this unit."
 }

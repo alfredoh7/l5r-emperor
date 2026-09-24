@@ -223,5 +223,7 @@
     <EmbeddedResource Include="../../content/published/region-wave-8.json" LogicalName="L5R.Published.RegionWave8.json" />
     <EmbeddedResource Include="../../content/published/personality-wave-65.json" LogicalName="L5R.Published.PersonalityWave65.json" />
     <EmbeddedResource Include="../../content/published/holding-wave-10.json" LogicalName="L5R.Published.HoldingWave10.json" />
+    <EmbeddedResource Include="../../content/published/spell-wave-22.json" LogicalName="L5R.Published.SpellWave22.json" />
+    <EmbeddedResource Include="../../content/published/item-wave-14.json" LogicalName="L5R.Published.ItemWave14.json" />
   </ItemGroup>
 </Project>

@@ -280,6 +280,10 @@ public sealed partial class MatchEngine
             // at the same location could be the target instead.
             case "ryoshun-redirect":
                 return command.PlayerId != card.OwnerId && card.Zone == Zone.Celestial && affected.OwnerId == card.OwnerId && RyoshunRedirectCandidates(card, subject, affected).Any();
+            // Ward of Air (The Shadow's Embrace pass, issue #476 batch 5): Taming the Beast's shape -- another player's Battle action targets its Shugenja (or, if he is Air, any
+            // Personality its controller controls) and could destroy him.
+            case "ward-of-air-negate":
+                return WardOfAirApplies(card, subject, affected);
             default:
                 return false;
         }

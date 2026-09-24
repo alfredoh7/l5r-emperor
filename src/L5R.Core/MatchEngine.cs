@@ -1999,7 +1999,7 @@ public sealed partial class MatchEngine
     // "force-with-spell" (Asako Ume), "force-if-enemy-dishonorable" (Bayushi Kahoku) and
     // "force-max-dead-pile" (Moto Shunsuke) are always-on passive bonuses, unlike the attacking-only
     // attacking-two/attacking-four Effects above.
-    private int PersonalityForce(CardInstance card) => Math.Max(0,Definition(card).Force+StatModifier(card,"Force")+TerrainForceAdjustment(card)+ForgottenLegacyBatch5Force(card)+(IsAttacking(card)?(Definition(card).Effect=="attacking-two"?2:Definition(card).Effect=="attacking-four"?4:
+    private int PersonalityForce(CardInstance card) => Math.Max(0,Definition(card).Force+StatModifier(card,"Force")+TerrainForceAdjustment(card)+ForgottenLegacyBatch5Force(card)+ShadowsEmbraceBatch5Force(card)+(IsAttacking(card)?(Definition(card).Effect=="attacking-two"?2:Definition(card).Effect=="attacking-four"?4:
         // Matsu Kaido (oracle-l5r-4934, issue #299): "Kaido has +1F while attacking" -- the plain +1
         // counterpart to attacking-two/attacking-four (Matsu Yoshito's own conditional variant below
         // starts from the same +1 base).
@@ -2098,13 +2098,17 @@ public sealed partial class MatchEngine
         "celestial-sword-force-lion" => ControlledClanPersonalities(wielder.OwnerId,"Lion"),
         "celestial-sword-force-unicorn" => ControlledClanPersonalities(wielder.OwnerId,"Unicorn"),
         "celestial-sword-force-spider" => ControlledClanPersonalities(wielder.OwnerId,"Spider"),
+        // The Shadow's Embrace pass (issue #476), batch 5: the Crab, Crane and Phoenix swords, the same shape.
+        "celestial-sword-force-crab" => ControlledClanPersonalities(wielder.OwnerId,"Crab"),
+        "celestial-sword-force-crane" => ControlledClanPersonalities(wielder.OwnerId,"Crane"),
+        "celestial-sword-force-phoenix" => ControlledClanPersonalities(wielder.OwnerId,"Phoenix"),
         _ => 0
     };
     // A Follower's own standalone Force, including any static conditional bonus it grants itself
     // (e.g. "+2F while defending") -- distinct from an Item's, which always conveys to the wielder
     // instead (see PersonalityForce/ItemForceToWielder). Feeds both CardForce (targeting, always
     // visible regardless of bow state) and BattleForce (unit total, gated on unbowed-or-Elite).
-    private int FollowerForce(CardInstance card) => Math.Max(0,Definition(card).Force+StatModifier(card,"Force")+TerrainForceAdjustment(card)+ForgottenLegacyBatch5Force(card)+(Definition(card).Effect switch
+    private int FollowerForce(CardInstance card) => Math.Max(0,Definition(card).Force+StatModifier(card,"Force")+TerrainForceAdjustment(card)+ForgottenLegacyBatch5Force(card)+ShadowsEmbraceBatch5Force(card)+(Definition(card).Effect switch
     {
         "force-while-defending" => IsDefendingUnit(card) ? 2 : 0,
         // Home Guard (oracle-l5r-3413, issue #435): "This card has +3F while defending" -- the same
@@ -2549,6 +2553,7 @@ public sealed partial class MatchEngine
         ResolveProvincesHeldHonorChecks(); // Forgotten Legacy pass (issue #467), batch 1: Asahina Shigemitsu's "before it ends" Honor.
         // Spirit of the Berserker: a destruction put off "until before this turn ends" happens now.
         ResolveDelayedDestructions();
+        ResolveShadowsEmbraceBatch5TurnEnd(); // The Shadow's Embrace pass (issue #476), batch 5: Celestial Sword of the Phoenix's "remove him from the game before the turn ends".
         // A window a delayed destruction opened (Overconfident's draw) is answered first; the turn then ends when the player ends the phase again.
         if(_state.WinnerId is not null || OpenOverconfidentDrawWindow(_state.ActivePlayerId)) return;
         // Lady Matsu's Rage: "this turn" (its own printed parenthetical) -- any watch that never fired
@@ -2621,6 +2626,7 @@ public sealed partial class MatchEngine
             expired.Zone=Zone.DynastyDiscard;
             Emit("eventExpired",$"{Definition(expired).Name}'s effect ended.",expired.OwnerId,expired.Id);
         }
+        ResolveShadowsEmbraceBatch5TurnBegins(); // The Shadow's Embrace pass (issue #476), batch 5: Blood of the Preserver's units re-enter play "after the next turn begins".
         AdvanceStraightenHolds(StraightenPoint.TurnBegins);
         StraightenPhase(player);
     }

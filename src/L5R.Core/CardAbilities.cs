@@ -3237,6 +3237,63 @@ public static class AbilityCatalog
         // Hida Yamadera - exp (oracle-l5r-10220): "Reaction: After another player's Battle action resolves, if its effects destroyed Yamadera: Melee 8 Attack." A Reaction taken by its own
         // card from the dead pile (FromDead), read off the last resolved action's own destroyed list.
         ["yamadera-attack"] = new("Reaction", "After another player's Battle action resolves, if its effects destroyed Yamadera: Melee 8 Attack", "attack", Trigger: AfterActionReactionTriggers.AfterActionResolved, FromDead: true),
+
+        // The Shadow's Embrace pass (issue #476), batch 5: every entry below is documented at its own use in ShadowsEmbraceBatch5.cs; the published text is each scan's.
+        // Blood of the Preserver (oracle-l5r-9875, an Item): "Battle: Remove this card from the game: Each player chooses zero to two Personalities at the current battlefield. Remove them
+        // from the game; cards and tokens stay attached to them. After the next turn begins, each unit enters play in its owner's home, ignoring costs, restrictions, and entering-play
+        // effects; then, give them each three +1F Blood tokens." The choices are made as it resolves (they name no target): the acting player's, then the other player's, each a
+        // decider choice of zero to two (DeciderChoice.cs).
+        ["blood-preserver-remove"] = new("Battle", "Remove this card from the game: Each player chooses zero to two Personalities at the current battlefield. Remove them from the game; cards and tokens stay attached to them. After the next turn begins, each unit enters play in its owner's home, ignoring costs, restrictions, and entering-play effects; then, give them each three +1F Blood tokens",
+            "none", Costs: ActionCost.RemoveSource),
+        // Celestial Sword of the Crab / Crane / Phoenix - exp (oracle-l5r-9876/9877/9878): the Celestial Sword family's "Will only attach to" (AttachRequiresKeyword), "+1F for each
+        // <Clan> Personality you control" (ItemForceToWielder) and "After this card enters play: Gain 2 Honor".
+        ["celestial-sword-crab-honor"] = new("Reaction", "After this card enters play: Gain 2 Honor", "none", Trigger: "own-enters-play"),
+        ["celestial-sword-crab-straighten"] = new("BattleOrOpen", "Even if this card is bowed: Straighten this unit", "none"),
+        ["celestial-sword-crane-honor"] = new("Reaction", "After this card enters play: Gain 2 Honor", "none", Trigger: "own-enters-play"),
+        // "Political Open: Target a Personality or Follower and you may discard the Imperial Favor: Give the target -4F. If you discarded the Imperial Favor, gain 1 Honor." The optional
+        // Favor discard is a cost, so the "may" is the choice between two abilities sharing one use (Readied Steel's shape); the discarding half is on the Favor-cost lists.
+        ["celestial-sword-crane-weaken"] = new("Open", "Political Open: Target a Personality or Follower: Give the target -4F", "personality-or-follower",
+            UsageKey: "celestial-sword-crane-open", ActionKeywords: ["Political"]),
+        ["celestial-sword-crane-favor"] = new("Open", "Political Open: Target a Personality or Follower and discard the Imperial Favor: Give the target -4F. Gain 1 Honor", "personality-or-follower",
+            UsageKey: "celestial-sword-crane-open", ActionKeywords: ["Political"]),
+        ["celestial-sword-phoenix-honor"] = new("Reaction", "After this card enters play: Gain 2 Honor", "none", Trigger: "own-enters-play"),
+        ["celestial-sword-phoenix-return"] = new("BattleOrOpen", "Target your honorably dead Phoenix Clan Personality: Bring him into play at this card's location, ignoring costs. Remove him from the game before the turn ends",
+            "own-honorably-dead-clan-personality", RequiredKeywords: ["Phoenix"]),
+        // The String of the Colonies (oracle-l5r-9880, an Item): "Battle: Bow this card: Ranged 5 Attack."
+        ["string-colonies-attack"] = new("Battle", "Bow this card: Ranged 5 Attack", "attack", Costs: ActionCost.BowSource),
+        // Beseech Sakkaku (oracle-l5r-9884, an Earth Spell; the scan): "Limited: Bow this Shugenja, you may destroy this card if he is Earth, and target your Spirit Personality: If you
+        // destroyed this card, gain Honor equal to the Spirit's Personal Honor; if you did not destroy it, gain 1 Honor." The optional destruction is a cost: two abilities, one use.
+        ["beseech-sakkaku-honor"] = new("Limited", "Bow this Shugenja and target your Spirit Personality: Gain 1 Honor", "own-personality-with-keyword",
+            RequiredKeywords: ["Spirit"], UsageKey: "beseech-sakkaku", Costs: ActionCost.BowWielder),
+        ["beseech-sakkaku-destroy"] = new("Limited", "Bow this Shugenja, destroy this card (he is Earth), and target your Spirit Personality: Gain Honor equal to the Spirit's Personal Honor", "own-personality-with-keyword",
+            RequiredKeywords: ["Spirit"], UsageKey: "beseech-sakkaku", Costs: [new(CostVerb.Bow, CostSubject.Wielder), new(CostVerbs.Sacrifice)]),
+        // Channel the Moon (oracle-l5r-9885, a Maho Spell; the scan): "While this Shugenja is Shadowlands, your opposed Nonhumans have +1F." (its Effect) and "Open: Bow this card and
+        // choose your performing Nonhuman: Give him the ability, 'Battle: Melee Attack with strength equal to this card's Force.' Lose 3 Honor." The granted ability is catalogued on its
+        // own (never printed on a card) and lasts for the turn; "this card" in it is the Nonhuman it is on (core rules, "From": a granted ability is from the card it is now on).
+        ["channel-moon-grant"] = new("Open", "Bow this card and choose your performing Nonhuman: Give him the ability, \"Battle: Melee Attack with strength equal to this card's Force.\" Lose 3 Honor", "none",
+            Performer: "own-personality-with-keyword", RequiredKeywords: ["Nonhuman"], Costs: ActionCost.BowSource),
+        ["channel-moon-melee"] = new("Battle", "Melee Attack with strength equal to this card's Force", "attack"),
+        // Purify the Soul (oracle-l5r-9887, an Air Spell): "Attaches to an Air Shugenja paying 2 less Gold." (its Effect, EquipGoldCost) and "Reaction: Before an action resolves, bow
+        // this card: Negate its effects which give Kolat, Ninja, or Shadowlands to Personalities you control."
+        ["purify-soul-negate"] = new("Reaction", "Before an action resolves, bow this card: Negate its effects which give Kolat, Ninja, or Shadowlands to Personalities you control", "none",
+            Trigger: "before-action-resolves", Costs: ActionCost.BowSource),
+        // Set the Fields Aflame (oracle-l5r-9888, an Air Fire Spell): "While this Shugenja is Air or Fire, he has +1F." (its Effect) and three actions, each paid by destroying the Spell.
+        ["set-fields-terrain"] = new("Battle", "Target a Terrain and destroy this card: Destroy the Terrain", "terrain-at-battle", Costs: [new(CostVerbs.Sacrifice)]),
+        ["set-fields-region"] = new("Open", "Target a Region and destroy this card: The Region's abilities may not be used", "region", Costs: [new(CostVerbs.Sacrifice)]),
+        ["set-fields-holding"] = new("Limited", "Target a Holding and destroy this card: Bow the Holding", "any-holding", Costs: [new(CostVerbs.Sacrifice)]),
+        // Touch the Emptiness (oracle-l5r-9892, a Void Spell; the scan): "Battle: Bow this card and target an enemy Personality or Follower: Give it -2F. If this Shugenja is Void, negate
+        // the effects of the next action the target performs."
+        ["touch-emptiness-weaken"] = new("Battle", "Bow this card and target an enemy Personality or Follower: Give it -2F. If this Shugenja is Void, negate the effects of the next action the target performs",
+            "enemy-force", Costs: ActionCost.BowSource),
+        // Ward of Air (oracle-l5r-9893, an Air Spell; the scan): "Reaction: After another player's Battle action targets this Shugenja, or any Personality you control if this Shugenja is
+        // Air, destroy this card: Negate the target's destruction from the action's effects." (Taming the Beast's own targeted-by-action shape) and "Battle: Move this unit home."
+        ["ward-of-air-negate"] = new("Reaction", "After another player's Battle action targets this Shugenja, or any Personality you control if this Shugenja is Air, destroy this card: Negate the target's destruction from the action's effects", "none",
+            Trigger: ReactionTriggers.TargetedByAction, Costs: [new(CostVerbs.Sacrifice)]),
+        ["ward-of-air-move-home"] = new("Battle", "Move this unit home", "none"),
+        // Your Heart's Enemy (oracle-l5r-9895, an Air Fear Spell): "Battle: Target an enemy Personality with lower Chi than this Shugenja: Give the target -4F. If this Shugenja is Air,
+        // actions the target performs may not target this Shugenja." The Shugenja is the named performer (own-wielder) so the Chi comparison reads him; the bar is TargetBars.cs.
+        ["hearts-enemy-weaken"] = new("Battle", "Target an enemy Personality with lower Chi than this Shugenja: Give the target -4F. If this Shugenja is Air, actions the target performs may not target this Shugenja",
+            "enemy-personality-chi-lt-performer", Performer: "own-wielder"),
     });
 }
 
@@ -3407,7 +3464,11 @@ public sealed partial class MatchEngine
     // A card already carrying a keyword (printed or previously granted) gains no redundant second
     // grant of it -- membership is boolean, so a duplicate entry would only ever complicate cleanup
     // (e.g. two Naval-granting attachments on the same Personality, one later detached) for no effect.
-    private void GrantKeyword(CardInstance card, string keyword, string source, string duration) { if (!Keyword(card, keyword)) card.GrantedKeywords.Add(new(keyword, source, duration)); }
+    private void GrantKeyword(CardInstance card, string keyword, string source, string duration)
+    {
+        if (PurifyTheSoulNegatesGrant(card, keyword)) return; // Purify the Soul (The Shadow's Embrace pass, issue #476 batch 5): a negated Kolat/Ninja/Shadowlands grant.
+        if (!Keyword(card, keyword)) card.GrantedKeywords.Add(new(keyword, source, duration));
+    }
     // "Protection" (issue #212, Tamori Takeshi): "effects of actions the target performs will not be
     // negated." Checked at the point a negation would otherwise apply -- the same convention
     // StalwartNegatesBow already uses (the negating card/ability is still legal to play; only its own
@@ -3672,6 +3733,9 @@ public sealed partial class MatchEngine
             // movement from the action's effects" -- any player's action that would move a defending Personality (DeferredActionDefendingMovers), negatable like Tamoko's.
             case "earths-strength-negate-move":
                 return negatable && DeferredActionDefendingMovers(command).Any();
+            // Purify the Soul (The Shadow's Embrace pass, issue #476 batch 5): an action that would give Kolat, Ninja or Shadowlands to a Personality its controller controls.
+            case "purify-soul-negate":
+                return PurifyTheSoulApplies(card, command, affected);
             default:
                 return false;
         }
@@ -3919,6 +3983,9 @@ public sealed partial class MatchEngine
         "training-province-attack" => 3,
         "strength-of-the-divine-honor" => sourceId is not null ? CardPersonalHonor(Card(sourceId)) : 0,
         "hiromis-vassals-attack" => 6,
+        // The Shadow's Embrace pass (issue #476), batch 5: The String of the Colonies' Ranged 5; Channel the Moon's granted Melee Attack, strength equal to the Force of the card it is on.
+        "string-colonies-attack" => 5,
+        "channel-moon-melee" => sourceId is not null ? CardForce(Card(sourceId)) : 0,
         // Seeds of Decay pass (issue #453), batch 1. The Arrow's Eye: +1 for each Follower in the target's unit (the Followers attached to the target's host Personality).
         "arrows-eye-attack" => 3 + (target is null ? 0 : Attachments(UnitHostId(target)).Count(a => Definition(a).Type == CardType.Follower)),
         "sticks-and-stones-attack" => 1,
@@ -4004,6 +4071,8 @@ public sealed partial class MatchEngine
         "kahoku-exp-attack" or "tsuruchi-kosoko-exp-attack" or "hiruma-nitani-attack" or "training-followed-recon-attack" or "spirit-scout-attack" or "engulfing-flames-attack" => "Ranged",
         "training-followed-dishonorable-melee-attack" => "Melee",
         "hiromis-vassals-attack" => "Ranged",
+        "string-colonies-attack" => "Ranged", // The Shadow's Embrace pass (issue #476), batch 5
+        "channel-moon-melee" => "Melee",
         // Seeds of Decay pass (issue #453), batch 1.
         "arrows-eye-attack" or "sticks-and-stones-attack" or "two-stings-attack" or "two-stings-attack-from-discard" or "metsubushi-attack" => "Ranged",
         // Seeds of Decay pass (issue #453), batch 5.
@@ -4580,6 +4649,8 @@ public sealed partial class MatchEngine
                 or "rokku-move"
                 // Forgotten Legacy pass (issue #467), batch 2: The Vengeful ("Even if this card is bowed") and Togashi Osawa ("Even if Osawa is bowed").
                 or "vengeful-straighten" or "osawa-bow" or "osawa-straighten"
+                // The Shadow's Embrace pass (issue #476), batch 5: Celestial Sword of the Crab - exp ("Battle/Open: Even if this card is bowed: Straighten this unit").
+                or "celestial-sword-crab-straighten"
                 // Colonial Harbor (Forgotten Legacy pass, issue #467): "Your Stronghold's abilities have Tireless."
                 || TirelessStronghold(source), "Abilities on bowed cards cannot be used.");
             uses = source.AbilityUses;
@@ -4694,7 +4765,7 @@ public sealed partial class MatchEngine
             Require(_state.CurrentBattleProvince is not null, "There is no current battlefield to move him to.");
             Require(player.Id != _state.ActivePlayerId, "Only the Defender may use Return to Action.");
         }
-        if (id is "shunya-honor" or "favor-cycle" or "favor-battle" or "jakuei-bow-favor" or "bonds-of-coin-draw" or "insulting-gesture-shame" or "baiko-shame" or "accidental-confession-dishonor")
+        if (id is "shunya-honor" or "favor-cycle" or "favor-battle" or "jakuei-bow-favor" or "bonds-of-coin-draw" or "insulting-gesture-shame" or "baiko-shame" or "accidental-confession-dishonor" or "celestial-sword-crane-favor")
             Require(_state.FavorPlayerId == player.Id, "You must control the Imperial Favor to discard it.");
         // Bonds of Coin (issue #336): "Bow your Stronghold" is a cost of the action, so a bowed Stronghold cannot pay it.
         if (id == "bonds-of-coin-draw") Require(!Card(player.StrongholdId).Bowed, "Your Stronghold is already bowed.");
@@ -4703,6 +4774,7 @@ public sealed partial class MatchEngine
         if (id is "lobby" or "dainagon-lobby") Require(!_state.Cards.Values.Any(c => c.OwnerId != player.Id && InPlay(c) && Definition(c).Effect == "saibankan-no-lobby"), "Another player's Saibankan's Justice forbids you to lobby.");
         if (id == "dainagon-lobby") Require(CardPersonalHonor(source!) >= 1, "Lobby needs a Personality with at least 1 Personal Honor.");
         ValidateForgottenLegacyBatch5(id, ability, command, source); // Forgotten Legacy pass (issue #467), batch 5.
+        ValidateShadowsEmbraceBatch5(id, command, player, source); // The Shadow's Embrace pass (issue #476), batch 5.
         // Barred Passage: "the only Personality in his army" -- none of the acting player's other Personalities stands at this battlefield.
         if (id == "barred-passage-bow") Require(Army(player.Id, _state.CurrentBattleProvince!.Value).Count(c => Definition(c).Type == CardType.Personality) == 1, "The performing Hero must be the only Personality in his army.");
         if (id is "tamoko-open" or "virtuous-charity-open") Require(_state.ActivePlayerId != player.Id, "Only usable when it is not your own turn.");
@@ -5461,6 +5533,9 @@ public sealed partial class MatchEngine
                 // Forgotten Legacy pass (issue #467), batch 5. Wind of the Moon: "a face-up Personality out of play" -- face up in a province, or in a discard pile (face up by nature); either player's.
                 else if (ability.Target == "face-up-personality-out-of-play")
                     Require(type == CardType.Personality && (target.Zone == Zone.Province && target.FaceUp || target.Zone is Zone.Dead or Zone.DynastyDiscard), "Choose a face-up Personality out of play.");
+                // The Shadow's Embrace pass (issue #476), batch 5. Celestial Sword of the Phoenix: "your honorably dead Phoenix Clan Personality" -- the Clan named by RequiredKeywords.
+                else if (ability.Target == "own-honorably-dead-clan-personality")
+                    Require(IsOwnHonorablyDeadClanPersonality(target, player.Id, ability), "Choose one of your own honorably dead Personalities of that Clan.");
                 else
                 {
                     Require(InPlay(target), "Target a card in play.");
@@ -5919,6 +5994,8 @@ public sealed partial class MatchEngine
                         // The Towers of the Yogo's granted ability: "an enemy Follower or Personality without Followers" -- a Personality with no attached Follower,
                         // or any enemy Follower (a Follower cannot itself carry a Follower).
                         "enemy-card-without-followers" => !own && (type == CardType.Follower || personality && !Attachments(target.Id).Any(a => Definition(a).Type == CardType.Follower)),
+                        // Set the Fields Aflame (The Shadow's Embrace pass, issue #476 batch 5): "a Region" -- attached to any province, either player's.
+                        "region" => type == CardType.Region && target.Zone == Zone.Region,
                         _ => false
                     }, "That card does not meet this ability's target or performer requirements.");
                 }
@@ -6018,6 +6095,7 @@ public sealed partial class MatchEngine
         // was played in is suspended behind them and reopened afterwards (ReactionsAreActions.cs).
         if (TargetShieldNegates(command)) return;
         if (TurnTargetShieldNegates(command)) return; // Consideration (Forgotten Legacy pass, issue #467 batch 3)
+        if (TouchTheEmptinessNegates(command)) return; // Touch the Emptiness (The Shadow's Embrace pass, issue #476 batch 5)
         if (ResolveOrDeferAnnounceReaction(command)) return;
         if (ResolveOrDeferEntrenchedReaction(command)) return; // Entrenched Position (Forgotten Legacy pass, issue #467 batch 3)
         if (ResolveOrDeferBeforeActionReaction(command)) return;
@@ -6204,7 +6282,7 @@ public sealed partial class MatchEngine
         PayForAbility(command, player);
         // The non-Gold cost the acting player chose (issue #337): bow or destroy the performer, paid right beside the Gold.
         PayCostOption(ability, command, player, source);
-        if (id is "shunya-honor" or "favor-cycle" or "favor-battle" or "jakuei-bow-favor" or "bonds-of-coin-draw" or "insulting-gesture-shame" or "baiko-shame" or "accidental-confession-dishonor")
+        if (id is "shunya-honor" or "favor-cycle" or "favor-battle" or "jakuei-bow-favor" or "bonds-of-coin-draw" or "insulting-gesture-shame" or "baiko-shame" or "accidental-confession-dishonor" or "celestial-sword-crane-favor")
         {
             _state.FavorPlayerId = null;
             Emit("favorDiscarded", $"{player.Name} discarded the Imperial Favor.", player.Id);
@@ -8723,6 +8801,12 @@ public sealed partial class MatchEngine
                     if (forgottenLegacy5) return;
                     break;
                 }
+                // The Shadow's Embrace pass (issue #476), batch 5 (ShadowsEmbraceBatch5.cs): true when a window or choice opened and the action waits.
+                if (RunShadowsEmbraceBatch5(id, ability, command, player, source, target, consumedGrant, playedFromDiscard, opponentHonorBeforeBattleAction, bowedBeforeAction, preExistingGrants) is { } shadowsEmbrace5)
+                {
+                    if (shadowsEmbrace5) return;
+                    break;
+                }
                 // Any ability with an AttachSpec (Moto Jun-Ni, Fading Shadows, Foothills Keep and the training shapes) needs no case of its own: the Gold was
                 // paid by PayForAbility, so the card now leaves its place and enters play attached. An entering-play window ends the action here.
                 if (ability.Attach is { } attachSpec)
@@ -9598,6 +9682,8 @@ public sealed partial class MatchEngine
                     "event-in-enemy-discard" => _state.Cards.Values.Where(c => c.OwnerId != playerId && Definition(c).Type == CardType.Event && c.Zone == Zone.DynastyDiscard).Select(c => (string?)c.Id).ToArray(),
                     // Forgotten Legacy pass (issue #467), batch 5: Wind of the Moon's out-of-play target.
                     "face-up-personality-out-of-play" => _state.Cards.Values.Where(c => Definition(c).Type == CardType.Personality && (c.Zone == Zone.Province && c.FaceUp || c.Zone is Zone.Dead or Zone.DynastyDiscard)).Select(c => (string?)c.Id).ToArray(),
+                    // The Shadow's Embrace pass (issue #476), batch 5: Celestial Sword of the Phoenix's dead-pile target.
+                    "own-honorably-dead-clan-personality" => _state.Cards.Values.Where(c => IsOwnHonorablyDeadClanPersonality(c, playerId, ability)).Select(c => (string?)c.Id).ToArray(),
                     _ => inPlay };
                 // Shosuro Hawado's battlefield half also needs its destination (command.Province): one
                 // candidate per battlefield not yet resolved this Battle phase -- ValidateAbility below
