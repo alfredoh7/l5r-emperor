@@ -9,6 +9,7 @@ public static class FallenArt
     // Canvas draw commands retain RIDs, not the managed resources. Keep the atlases
     // alive across redraws/GC, including the opponent's idle counter.
     private static Texture2D? _a, _b, _honorable;
+    private static readonly Dictionary<Rect2, Texture2D> ButtonTextures = [];
     public static Texture2D A => _a ??= GD.Load<Texture2D>("res://Art/Fallen/approved-A.png");
     public static Texture2D B => _b ??= GD.Load<Texture2D>("res://Art/Fallen/approved-B.png");
     private static Texture2D Honorable => _honorable ??= GD.Load<Texture2D>("res://Art/Fallen/honorable-medallion-v1.png");
@@ -22,10 +23,17 @@ public static class FallenArt
         && card.Dishonorable && card.Zone is Zone.Home or Zone.Battlefield or Zone.Attached;
     public static void Frame(CanvasItem canvas, Rect2 target, bool counter=false)
         => Border(canvas,target,counter?A:B,counter?CounterSource:GallerySource,counter?13:22);
-    public static void Border(CanvasItem canvas,Rect2 target,Texture2D art,Rect2 source,float edge,bool paper=false)
+    public static void Border(CanvasItem canvas,Rect2 target,Texture2D art,Rect2 source,float edge,bool paper=false,bool button=false)
     {
-        if(paper) canvas.DrawTextureRectRegion(art,target,new Rect2(600,171,12,26));
-        else canvas.DrawTextureRect(CardChangeArt.Lacquer,target,false,new Color(.27f,.27f,.27f));
+        var fill=button?target.Grow(-edge):target;
+        if(paper) canvas.DrawTextureRectRegion(art,fill,new Rect2(600,171,12,26));
+        else canvas.DrawTextureRect(CardChangeArt.Lacquer,fill,false,new Color(.27f,.27f,.27f));
+        if(button)
+        {
+            if(!ButtonTextures.TryGetValue(source,out var texture))
+                ButtonTextures[source]=texture=ButtonArtwork.Extract(art,(Rect2I)source,(int)edge);
+            art=texture;source=new Rect2(Vector2.Zero,source.Size);
+        }
         float[] xs=[0,edge,source.Size.X-edge,source.Size.X],ys=[0,edge,source.Size.Y-edge,source.Size.Y];
         float[] dx=[target.Position.X,target.Position.X+edge,target.End.X-edge,target.End.X];
         float[] dy=[target.Position.Y,target.Position.Y+edge,target.End.Y-edge,target.End.Y];
@@ -98,7 +106,7 @@ public partial class FallenButton : Button
     public override void _Draw()
     {
         var src=Tab?(Selected?new Rect2(593,160,179,51):new Rect2(781,160,179,48)):new Rect2(1390,620,215,43);
-        FallenArt.Border(this,new Rect2(Vector2.Zero,Size),FallenArt.B,src,8,Tab&&Selected);
+        FallenArt.Border(this,new Rect2(Vector2.Zero,Size),FallenArt.B,src,8,Tab&&Selected,button:true);
         if(IsHovered()||HasFocus())DrawRect(new Rect2(2,2,Size.X-4,Size.Y-4),Palette.Gold,false,1);
         var size=FontSize;
         while(size>12&&Palette.Body.GetStringSize(Caption,fontSize:size).X>Size.X-18)size--;

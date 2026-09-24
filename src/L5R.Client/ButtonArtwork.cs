@@ -5,7 +5,7 @@ namespace L5R.Client;
 /// <summary>Extracts approved button pixels without the sheet's opaque exterior matte.</summary>
 internal static class ButtonArtwork
 {
-    internal static Texture2D Extract(Texture2D sheet, Rect2I region, int rim, float scale = 1)
+    internal static Texture2D Extract(Texture2D sheet, Rect2I region, int rim, float scale = 1, float matteThreshold = .15f)
     {
         var image = sheet.GetImage().GetRegion(region);
         image.Convert(Image.Format.Rgba8);
@@ -29,7 +29,7 @@ internal static class ButtonArtwork
             visited[y * width + x] = true;
             if (x >= rim && x < width - rim && y >= rim && y < height - rim) return;
             var color = image.GetPixel(x, y);
-            if (Math.Max(color.R, Math.Max(color.G, color.B)) < .15f || color.A == 0)
+            if (Math.Max(color.R, Math.Max(color.G, color.B)) < matteThreshold || color.A == 0)
                 exterior.Enqueue(new Vector2I(x, y));
         }
         // Extend edge RGB into transparent pixels before filtering so scaling

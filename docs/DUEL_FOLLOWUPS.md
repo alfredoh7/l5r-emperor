@@ -38,4 +38,4 @@ Checked current main `de672f58` and open PR #465 (Embers of War). The Core choic
 
 ## Button corner review correction
 
-Alfredo requested transparent cut-away corners throughout the UI. Shared lacquer/gold buttons, tabs and duel controls now extract the approved artwork without the opaque exterior matte; Practice button crops receive the same treatment. Keyboard focus follows the actual frame. See [native before/after and verification](screenshots/button-corners/README.md). This revision supersedes the earlier button appearance; Windows revision 3 predates this correction.
+Alfredo requested transparent cut-away corners throughout the UI. Shared lacquer/gold buttons, tabs and duel controls now extract the approved artwork without the opaque exterior matte; Practice and Fallen-gallery button crops receive the same treatment; the phase-help badge also has a transparent exterior. Keyboard focus follows the actual frame. See [native before/after and verification](screenshots/button-corners/README.md). This revision supersedes the earlier button appearance; Windows revision 3 predates this correction.
