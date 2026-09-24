@@ -178,7 +178,7 @@ internal static class TargetedActionReactionTests
             "neiru-equip", "naval-invasion", "ring-of-air-straighten", "ring-of-water-move-home" };
         foreach (var (id, ability) in AbilityCatalog.All)
             Eq(ability.UsesPerTurn, formerlyExempt.Contains(id) || id == "kaname-ranged-attack" || id == "castle-of-order-redirect" /* once per BATTLE, its own stamp (issue #453) */
-                || id == "shihiro-boost" /* "each time" -- issue #458 */ ? AbilityUseLimit.Unlimited : id == "mochitoko-negate" ? 2 : id == "rika-bushido-virtue-bonus" ? 3
+                || id == "shihiro-boost" /* "each time" -- issue #458 */ || id == "cursed-relic-attack" /* "Any number of times per turn" -- issue #467 batch 5 */ ? AbilityUseLimit.Unlimited : id == "mochitoko-negate" ? 2 : id == "rika-bushido-virtue-bonus" ? 3
                 : id == "tsukimi-refresh" || id == "tomaru-attack" /* "Twice per turn" -- issue #460 batch 2 */
                     || id == "sleepless-boost" /* "Twice per turn" -- issue #467 batch 2 */ ? 2 : 1, $"the limit of {id}");
         Eq(AbilityUseLimit.Unlimited, 0);

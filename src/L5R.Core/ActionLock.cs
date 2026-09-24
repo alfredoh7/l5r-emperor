@@ -46,6 +46,7 @@ public sealed partial class MatchEngine
         // every ability printed on it, whoever the ability names as its performer (Shinden Asahina's is performed by a Shugenja).
         if (source is not null && HasActionLock(source) && Definition(source).Type is CardType.Stronghold or CardType.Holding or CardType.Region or CardType.Celestial)
             Require(false, $"{Definition(source).Name}'s abilities may not be used this turn.");
+        RequireBurningDreamsAllows(command, ability, source); // Burning Dreams (Forgotten Legacy pass, issue #467): Nonhumans may not perform Political actions.
     }
 
     // The reason the lock alone would refuse this command, or null. A Reaction listed inside a reaction window is offered before ValidateAbility ever

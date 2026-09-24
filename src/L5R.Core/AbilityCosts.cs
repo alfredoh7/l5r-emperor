@@ -42,6 +42,11 @@ public static class CostVerbs
     public const string DiscardFromPlay = "discard-from-play";
     /// <summary>The acting player's leftmost province that has not been destroyed is destroyed ("destroy your leftmost province:"). It names no card.</summary>
     public const string DestroyLeftmostProvince = "destroy-leftmost-province";
+    /// <summary>Bow the subject and every unbowed card in its unit ("bow all unbowed cards in his unit", Assault in the Jungle, Forgotten Legacy pass issue #467).</summary>
+    public const string BowUnit = "bow-unit";
+    /// <summary>Give the subject -Amount Chi ("give this Personality -1C:", Cursed Relic, issue #467): payable only when he has that much Chi to lose (core rules,
+    /// Pay Costs); a Personality it leaves at 0 Chi is destroyed by the ordinary Chi rule (ApplyModifier).</summary>
+    public const string ChiPenalty = "chi-penalty";
 }
 
 /// <summary>One cost: <paramref name="Verb"/> (CostVerb.Bow or CostVerbs.*) applied to <paramref name="Subject"/> (CostSubject.*: the ability's
@@ -127,13 +132,16 @@ public sealed partial class MatchEngine
             Require(wielder is not null && InPlay(wielder), "This card must be attached to a Personality.");
             if (cost.Verb == CostVerb.Bow && !CostExempt(cost, source))
                 Require(!wielder!.Bowed, $"{Definition(wielder).Name} is already bowed, so he cannot be bowed to pay this cost.");
+            // Cursed Relic (issue #467): a Chi penalty is paid in full or not at all.
+            if (cost.Verb == CostVerbs.ChiPenalty)
+                Require(PersonalityChi(wielder!) >= cost.Amount, $"{Definition(wielder!).Name} does not have {cost.Amount} Chi to lose.");
         }
     }
 
     // The kind of negation ("bow" / "destroy", MatchState.NegatedEffects) that stops a cost verb; null for a verb no negation of an effect stops.
     private static string? NegatableKind(string verb) => verb switch
     {
-        CostVerb.Bow => "bow",
+        CostVerb.Bow or CostVerbs.BowUnit => "bow",
         CostVerb.Destroy or CostVerbs.Sacrifice => "destroy",
         _ => null
     };
@@ -209,6 +217,12 @@ public sealed partial class MatchEngine
                     break;
                 case CostVerbs.DestroyToken: DestroyToken(subject, subject.Tokens.First(t => t.Type == cost.Token)); break;
                 case CostVerbs.ToDeck: ToOwnerDeck(subject, command.DeckPosition!); break;
+                case CostVerbs.BowUnit:
+                    subject.Bowed = true;
+                    foreach (var attached in Attachments(UnitHostId(subject)).Where(a => !a.Bowed)) attached.Bowed = true;
+                    if (UnitHostId(subject) != subject.Id) Card(UnitHostId(subject)).Bowed = true;
+                    break;
+                case CostVerbs.ChiPenalty: ApplyModifier(subject, source?.Id ?? subject.Id, command.AbilityId!, "Chi", -cost.Amount); break;
                 default: throw new InvalidOperationException($"Unknown cost verb '{cost.Verb}'.");
             }
         }

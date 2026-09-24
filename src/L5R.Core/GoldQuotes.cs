@@ -86,15 +86,20 @@ public static class CostStat
 /// that cost is 0.</param>
 public sealed record GoldCostRule(string Basis, int Amount = 0, int Modifier = 0, int? Floor = null,
     int? MaxAmount = null, string? HonorWaiverClan = null, bool Explicit = true, bool AtResolution = false, bool MinusPerformerCost = false,
-    string? StatOf = null, string? Stat = null, bool StatBase = false)
+    string? StatOf = null, string? Stat = null, bool StatBase = false,
+    // Black Pearl (Forgotten Legacy pass, issue #467): a recruit from ANY player's discard pile (AnyOwnerPile), "paying N less Gold if the Personality is
+    // [keyword]" (DiscountKeyword/KeywordDiscount).
+    bool AnyOwnerPile = false, string? DiscountKeyword = null, int KeywordDiscount = 0)
 {
     public static GoldCostRule Fixed(int amount) => new(GoldCostBasis.Fixed, amount);
     public static GoldCostRule SourcePrinted() => new(GoldCostBasis.SourcePrinted);
     public static GoldCostRule TargetPrinted(int modifier = 0, int? floor = null) => new(GoldCostBasis.TargetPrinted, Modifier: modifier, Floor: floor);
     public static GoldCostRule TargetUnitTotal(int modifier = 0, int? floor = null) => new(GoldCostBasis.TargetUnitTotal, Modifier: modifier, Floor: floor);
     /// <summary>minusPerformerCost: "reducing his Gold cost to enter play by the performer's Gold Cost" (Goju Plot) -- the performer's current Gold Cost comes off the recruit cost, to no less than 0.</summary>
-    public static GoldCostRule TargetRecruit(int modifier = 0, int? floor = null, string? honorWaiverClan = null, bool minusPerformerCost = false) =>
-        new(GoldCostBasis.TargetRecruit, Modifier: modifier, Floor: floor, HonorWaiverClan: honorWaiverClan, MinusPerformerCost: minusPerformerCost);
+    public static GoldCostRule TargetRecruit(int modifier = 0, int? floor = null, string? honorWaiverClan = null, bool minusPerformerCost = false,
+        bool anyOwnerPile = false, string? discountKeyword = null, int keywordDiscount = 0) =>
+        new(GoldCostBasis.TargetRecruit, Modifier: modifier, Floor: floor, HonorWaiverClan: honorWaiverClan, MinusPerformerCost: minusPerformerCost,
+            AnyOwnerPile: anyOwnerPile, DiscountKeyword: discountKeyword, KeywordDiscount: keywordDiscount);
     public static GoldCostRule TargetCurrent(int modifier = 0, int? floor = null) => new(GoldCostBasis.TargetCurrent, Modifier: modifier, Floor: floor);
     public static GoldCostRule Variable(int min = 0, int? max = null, bool atResolution = false) => new(GoldCostBasis.Variable, Amount: min, MaxAmount: max, AtResolution: atResolution);
     public static GoldCostRule AttachCost(int modifier = 0, int? floor = null) => new(GoldCostBasis.AttachCost, Modifier: modifier, Floor: floor);
@@ -311,7 +316,8 @@ public sealed partial class MatchEngine
             }
             case GoldCostBasis.TargetRecruit:
             {
-                var recruit = QuotePurchase(command.PlayerId, target.Id, ignoreHonorRequirementIfPersonalityClan: rule.HonorWaiverClan, fromDeadPile: target.Zone is Zone.Dead or Zone.DynastyDiscard);
+                var recruit = QuotePurchase(command.PlayerId, target.Id, ignoreHonorRequirementIfPersonalityClan: rule.HonorWaiverClan, fromDeadPile: target.Zone is Zone.Dead or Zone.DynastyDiscard,
+                    anyOwnerPile: rule.AnyOwnerPile);
                 var derivation = recruit.Error is null && recruit.Cost != Definition(target).GoldCost && recruit.Basis is { } terms ? $" ({terms})" : "";
                 var performerCost = 0; var performerNote = "";
                 if (rule.MinusPerformerCost)
@@ -322,7 +328,10 @@ public sealed partial class MatchEngine
                     performerCost = rule.StatBase ? Definition(performing).GoldCost : CardGoldCost(performing);
                     performerNote = $" less {Definition(performing).Name}'s {(rule.StatBase ? "printed " : "")}Gold Cost {performerCost}";
                 }
-                return new(rule, Clamp(recruit.Cost + rule.Modifier - performerCost, rule.Floor), $"{name} recruit cost {recruit.Cost}{derivation}{performerNote}{Modified(rule.Modifier, rule.Floor)}", recruit.Error, false, target);
+                // Black Pearl (issue #467): "paying 4 less Gold if the Personality is Nonhuman".
+                var keywordDiscount = rule.DiscountKeyword is { } discountKeyword && Keyword(target, discountKeyword) ? rule.KeywordDiscount : 0;
+                var keywordNote = keywordDiscount > 0 ? $" less {keywordDiscount} ({rule.DiscountKeyword})" : "";
+                return new(rule, Clamp(recruit.Cost + rule.Modifier - performerCost - keywordDiscount, rule.Floor), $"{name} recruit cost {recruit.Cost}{derivation}{performerNote}{keywordNote}{Modified(rule.Modifier, rule.Floor)}", recruit.Error, false, target);
             }
         }
         return new(rule, 0, "Unsupported Gold cost rule.", "Unsupported Gold cost rule.", false, null);

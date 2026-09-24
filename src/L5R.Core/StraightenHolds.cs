@@ -22,6 +22,8 @@ public sealed partial class MatchEngine
         "skip-first-straighten" => 2,
         // Temple to Fudo (Seeds of Decay, issue #453): "This Holding will not straighten before your third turn."
         TempleToFudoEffect => 3,
+        // Bamboo Harvesters - experienced (Forgotten Legacy pass, issue #467): "This card will not straighten before your third turn."
+        BambooHarvestersExpEffect => 3,
         _ => 0
     };
 

@@ -976,12 +976,13 @@ public sealed partial class MatchEngine
     // the recruiting PLAYER's Clan). Never set by an ordinary Purchase/Reserve recruit.
     // fromDeadPile (issue #373, At Any Cost): recruiting one of the player's own dead Personalities. Only where the card is differs: every restriction below,
     // the price with all its discounts, and Unique/Singular apply as for a province card -- except that such a Personality may not be proclaimed.
-    public PurchaseQuote QuotePurchase(int playerId,string cardId,bool clanDiscount=false,bool clanAllegiance=false,bool viaReserve=false,string? ignoreHonorRequirementIfPersonalityClan=null,bool fromDeadPile=false)
+    public PurchaseQuote QuotePurchase(int playerId,string cardId,bool clanDiscount=false,bool clanAllegiance=false,bool viaReserve=false,string? ignoreHonorRequirementIfPersonalityClan=null,bool fromDeadPile=false,bool anyOwnerPile=false)
     {
         if (playerId is <0 or >1 || !_state.Cards.TryGetValue(cardId,out var card)) return new(cardId,0,clanDiscount,clanAllegiance,false,"Unknown card or player.",[]);
         var def=Definition(card); var player=Player(playerId);
         // The dead pile is the Personality's discard pile: Zone.Dead once he died, Zone.DynastyDiscard when he was merely discarded from a province (Goju Plot: "in your discard pile").
-        if(fromDeadPile ? card.OwnerId!=playerId || card.Zone is not (Zone.Dead or Zone.DynastyDiscard) : card.OwnerId!=playerId || card.Zone!=Zone.Province || !card.FaceUp)
+        // Black Pearl (Forgotten Legacy pass, issue #467): anyOwnerPile -- "a Personality in any player's discard pile", brought into play under the payer's control (TakeControl).
+        if(fromDeadPile ? card.OwnerId!=playerId && !anyOwnerPile || card.Zone is not (Zone.Dead or Zone.DynastyDiscard) : card.OwnerId!=playerId || card.Zone!=Zone.Province || !card.FaceUp)
             return new(cardId,0,clanDiscount,clanAllegiance,false,fromDeadPile?"Choose one of your own dead Personalities.":"Choose your face-up province card.",[]);
         string? error=null;
         var inClan=def.Type==CardType.Personality && ClanAlignments(card).Contains(player.Clan);
@@ -1017,10 +1018,13 @@ public sealed partial class MatchEngine
         var holdingDiscount=HoldingEntryDiscount(card,playerId);
         // The Shakash / The Sleepless One (Forgotten Legacy pass, issue #467 batch 2): "Enters play paying 1 less Gold [for each Nonhuman you control, up to 3]" -- the card's own printed term.
         var (nagaDiscount,nagaTerm)=ForgottenLegacyEntryDiscount(card,playerId);
-        var rawCost=def.GoldCost-prosperous-reserveDiscount-ashikoDiscount-(entryDiscount?.Amount??0)-keywordDiscount-holdingDiscount-nagaDiscount+(clanAllegiance?2:0)-(clanDiscount?2:0);
+        // A Gold Cost modifier on the card itself (Wind of the Moon's "+1 Gold Cost" on a face-up Personality out of play, Forgotten Legacy pass issue #467) is part of
+        // the price: CardGoldCost is the printed cost plus every GoldCost modifier (none survives a card's return to a province or a recruit from a dead pile).
+        var goldCost=CardGoldCost(card);
+        var rawCost=goldCost-prosperous-reserveDiscount-ashikoDiscount-(entryDiscount?.Amount??0)-keywordDiscount-holdingDiscount-nagaDiscount+(clanAllegiance?2:0)-(clanDiscount?2:0);
         var cost=Math.Max(0,rawCost);
         // The human-readable derivation the payment panel shows (issue #303), term by term.
-        var basis=$"{def.Name} cost {def.GoldCost}"+(prosperous>0?$" − {prosperous} (controlled Personalities)":"")+(reserveDiscount>0?$" − {reserveDiscount} (Reserve while defending)":"")
+        var basis=$"{def.Name} cost {goldCost}"+(prosperous>0?$" − {prosperous} (controlled Personalities)":"")+(reserveDiscount>0?$" − {reserveDiscount} (Reserve while defending)":"")
             +(ashikoDiscount>0?$" − {ashikoDiscount} (outnumbered)":"")
             +(entryDiscount is {} entry?$" − {entry.Amount} ({entry.Clan} Clan)":"")
             +(keywordDiscount>0?$" − {keywordDiscount} (Fudo, Mukudori)":"")
@@ -1993,7 +1997,7 @@ public sealed partial class MatchEngine
     // "force-with-spell" (Asako Ume), "force-if-enemy-dishonorable" (Bayushi Kahoku) and
     // "force-max-dead-pile" (Moto Shunsuke) are always-on passive bonuses, unlike the attacking-only
     // attacking-two/attacking-four Effects above.
-    private int PersonalityForce(CardInstance card) => Math.Max(0,Definition(card).Force+StatModifier(card,"Force")+TerrainForceAdjustment(card)+(IsAttacking(card)?(Definition(card).Effect=="attacking-two"?2:Definition(card).Effect=="attacking-four"?4:
+    private int PersonalityForce(CardInstance card) => Math.Max(0,Definition(card).Force+StatModifier(card,"Force")+TerrainForceAdjustment(card)+ForgottenLegacyBatch5Force(card)+(IsAttacking(card)?(Definition(card).Effect=="attacking-two"?2:Definition(card).Effect=="attacking-four"?4:
         // Matsu Kaido (oracle-l5r-4934, issue #299): "Kaido has +1F while attacking" -- the plain +1
         // counterpart to attacking-two/attacking-four (Matsu Yoshito's own conditional variant below
         // starts from the same +1 base).
@@ -2098,7 +2102,7 @@ public sealed partial class MatchEngine
     // (e.g. "+2F while defending") -- distinct from an Item's, which always conveys to the wielder
     // instead (see PersonalityForce/ItemForceToWielder). Feeds both CardForce (targeting, always
     // visible regardless of bow state) and BattleForce (unit total, gated on unbowed-or-Elite).
-    private int FollowerForce(CardInstance card) => Math.Max(0,Definition(card).Force+StatModifier(card,"Force")+TerrainForceAdjustment(card)+(Definition(card).Effect switch
+    private int FollowerForce(CardInstance card) => Math.Max(0,Definition(card).Force+StatModifier(card,"Force")+TerrainForceAdjustment(card)+ForgottenLegacyBatch5Force(card)+(Definition(card).Effect switch
     {
         "force-while-defending" => IsDefendingUnit(card) ? 2 : 0,
         // Home Guard (oracle-l5r-3413, issue #435): "This card has +3F while defending" -- the same
@@ -2609,6 +2613,7 @@ public sealed partial class MatchEngine
         // just advanced, so only their own cards' expiry could possibly be reached right now.
         foreach(var expired in _state.Cards.Values.Where(c=>c.OwnerId==player.Id && c.Zone==Zone.EventInPlay && c.ExpiresAtTurnsTaken==player.TurnsTaken).ToArray())
         {
+            OnForgottenLegacyBatch5EventExpired(expired); // Willing Spirits' delayed effect (issue #467).
             expired.Zone=Zone.DynastyDiscard;
             Emit("eventExpired",$"{Definition(expired).Name}'s effect ended.",expired.OwnerId,expired.Id);
         }
@@ -2647,6 +2652,7 @@ public sealed partial class MatchEngine
             if(declinedIds.Contains(card.Id)) Emit("straightenDeclined",$"{Definition(card).Name} was left bowed by choice.",card.OwnerId,card.Id);
             else Straighten(card);
         }
+        StraightenWindOfTheMoonShugenja(player); // Wind of the Moon (issue #467): "he straightens during each player's Straighten Phase".
         Emit("straightened",$"{player.Name}'s turn: eligible cards straightened.",player.Id);
         AdvanceStraightenHolds(StraightenPoint.StraightenPhaseEnds);
         // Cultist Infiltrator (oracle-l5r-1595): "After each Straighten Phase: Give this Personality
@@ -2758,6 +2764,10 @@ public sealed partial class MatchEngine
                 card.ExpiresAtTurnsTaken=player.TurnsTaken+2;
                 Emit("eventEnteredPlay",$"{Definition(card).Name} stays in play until {player.Name}'s second turn from now begins.",player.Id,card.Id);
                 break;
+            // Forgotten Legacy pass (issue #467), batch 5: Assault in the Jungle, Burning Dreams, Willing Spirits (ForgottenLegacyBatch5.cs).
+            case AssaultInTheJungleEffect or BurningDreamsEffect or WillingSpiritsEffect:
+                ResolveForgottenLegacyBatch5Event(player,card);
+                break;
             default:
                 card.Zone=Zone.DynastyDiscard;
                 Emit("eventResolved",$"{Definition(card).Name} resolved and was discarded.",player.Id,card.Id);
@@ -2835,6 +2845,7 @@ public sealed partial class MatchEngine
     private void ResolveCelestial(PlayerState player,ProvinceState province,CardInstance card)
     {
         province.CardId=null; card.ProvinceIndex=null;
+        var hadRyoshun=ControlsCelestialEffect(player.Id,RyoshunsGuidanceEffect); // Ryoshun's Guidance (issue #467): its +1C leaves with it.
         foreach(var other in _state.Cards.Values.Where(c=>c.OwnerId==player.Id && c.Zone==Zone.Celestial).ToArray())
         {
             other.Zone=Zone.DynastyDiscard;
@@ -2842,6 +2853,7 @@ public sealed partial class MatchEngine
         }
         card.Zone=Zone.Celestial;
         Emit("celestialEnteredPlay",$"{Definition(card).Name} entered play.",player.Id,card.Id);
+        if(hadRyoshun && Definition(card).Effect!=RyoshunsGuidanceEffect) CheckChiAfterRyoshunLeaves(player.Id);
         Refill(player,province);
     }
     // Lady Matsu's Rage's own destroy-redirect trait is Effect-keyed the same way RegionStrengthBonus
