@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build Holding wave 10 (Forgotten Legacy pass, issue #467, batch 5): Ageless Shrine (a Nonhuman conditional production and a straighten),
+"""Build Holding wave 11 (Forgotten Legacy pass, issue #467, batch 5): Ageless Shrine (a Nonhuman conditional production and a straighten),
 Bamboo Harvesters - experienced (a third-turn straighten hold and a draw), Border Keep - experienced (a once-per-game hand cycle) and
 Colonial Harbor (Tireless for its controller's Stronghold).
 
@@ -14,7 +14,7 @@ from pathlib import Path
 from package_vanilla_wave import build_definition_fields
 
 ROOT = Path(__file__).resolve().parents[2]
-PROFILE = "holding-wave-10"
+PROFILE = "holding-wave-11"
 NL = chr(10)
 
 ABILITIES: dict[int, list[str]] = {

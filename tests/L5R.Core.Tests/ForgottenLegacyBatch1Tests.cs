@@ -2,7 +2,7 @@ using L5R.Core;
 using static RegressionAssertions;
 using static Batch336Support;
 
-// Forgotten Legacy pass (issue #467), batch 1: the 12 of the batch's 16 candidate cards wired in personality-wave-65, driven through QueryActions and the
+// Forgotten Legacy pass (issue #467), batch 1: the 12 of the batch's 16 candidate cards wired in personality-wave-67, driven through QueryActions and the
 // commands it offers on explicit positions of the economy table (player 0 the Crane, player 1 the Lion). The other four (Asako Chukage, Asako Karachu,
 // Kitsune Hisano, Hisano's Guide) stay unwired and unpublished (BLOCKERS in tools/content/build_card_inventory.py).
 internal static class ForgottenLegacyBatch1Tests
@@ -13,7 +13,7 @@ internal static class ForgottenLegacyBatch1Tests
     private static readonly string[] Unwired = ["oracle-l5r-533", "oracle-l5r-551", "oracle-l5r-4464", "oracle-l5r-10020"];
 
     public static void Run(TestRunner runner) => runner.Run("forgotten-legacy-batch-1", [
-        ("Published shape: personality-wave-65 publishes exactly the 12 wired cards with their printed stats, keywords and ability ids, ships their art and lists them in its manifest; the four unwired cards are not in the catalogue", PublishedShape),
+        ("Published shape: personality-wave-67 publishes exactly the 12 wired cards with their printed stats, keywords and ability ids, ships their art and lists them in its manifest; the four unwired cards are not in the catalogue", PublishedShape),
         ("Asahina Shigemitsu: bowing one of his Spells gives each of his controller's provinces +1 strength this turn; used on the opponent's turn he gains 1 Honor as it ends unless a province of his was destroyed, and on his own turn nothing is queued", ShigemitsuProvinces),
         ("Asako Kaitoko: the target's Force is reduced to 0; only a Kolat, Ninja or Shadowlands target loses a card without attachments in his unit -- himself when he has none, the only Follower at once, or the Follower the acting player chooses among several", KaitokoWeaken),
         ("Bayushi Higaonna: Ranged 4 Attack whose destruction costs the destroyed card's owner 1 Honor; a target that survives costs nothing", HigaonnaAttack),
@@ -78,10 +78,10 @@ internal static class ForgottenLegacyBatch1Tests
         Stats(Kagako, "Kitsu Kagako", "Lion", 1, 4, 6, 3, "Lion Clan,Shugenja,Water", ["kagako-create"]);
 
         // The wave publishes exactly the wired cards (the personality-wave-63 blank-card lesson): no unwired card, no blank ability list.
-        Check(PublishedContent.PersonalityWave65.Cards.Select(c => c.Id).OrderBy(i => i, StringComparer.Ordinal).SequenceEqual(Wired.OrderBy(i => i, StringComparer.Ordinal)),
-            "personality-wave-65 is exactly the wired cards: " + string.Join(",", PublishedContent.PersonalityWave65.Cards.Select(c => c.Id)));
-        Check(PublishedContent.PersonalityWave65.Cards.All(c => (c.Abilities ?? []).Length > 0), "no card of the wave is blank");
-        var listed = File.ReadAllLines(Path.Combine(root, "tests/L5R.Core.Tests/PublishedWaves/personality-wave-65.txt")).Where(l => l.Length > 0).ToArray();
+        Check(PublishedContent.PersonalityWave67.Cards.Select(c => c.Id).OrderBy(i => i, StringComparer.Ordinal).SequenceEqual(Wired.OrderBy(i => i, StringComparer.Ordinal)),
+            "personality-wave-67 is exactly the wired cards: " + string.Join(",", PublishedContent.PersonalityWave67.Cards.Select(c => c.Id)));
+        Check(PublishedContent.PersonalityWave67.Cards.All(c => (c.Abilities ?? []).Length > 0), "no card of the wave is blank");
+        var listed = File.ReadAllLines(Path.Combine(root, "tests/L5R.Core.Tests/PublishedWaves/personality-wave-67.txt")).Where(l => l.Length > 0).ToArray();
         Check(listed.OrderBy(i => i, StringComparer.Ordinal).SequenceEqual(Wired.OrderBy(i => i, StringComparer.Ordinal)), "the manifest pins exactly the wired cards");
         foreach (var id in Unwired) Check(!CardCatalog.Cards.ContainsKey(id), $"{id} is unwired and unpublished");
         foreach (var abilityId in Wired.SelectMany(id => CardCatalog.Get(id).Abilities ?? [])) Check(AbilityCatalog.All.ContainsKey(abilityId), $"{abilityId} is catalogued");

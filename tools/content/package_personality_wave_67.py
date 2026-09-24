@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build Personality wave 65 (Forgotten Legacy pass, issue #467, batch 1): the 12 of the batch's 16 candidate cards wired whole --
+"""Build Personality wave 67 (Forgotten Legacy pass, issue #467, batch 1): the 12 of the batch's 16 candidate cards wired whole --
 Asahina Shigemitsu, Asako Kaitoko, Bayushi Higaonna, Bayushi Toshimo, Daidoji Takichi, Daigotsu Gyoken, Daigotsu Murota, Doji Hakuseki,
 Doji Rengetsu, Hiruma Nikaru, Iuchi Abodan, Kitsu Kagako. The other four (Asako Chukage, Asako Karachu, Kitsune Hisano, and the Proxy
 Hisano's Guide) stay unwired -- see tools/content/build_card_inventory.py's BLOCKERS dict for the specific reason each is not wired. Per this
@@ -16,7 +16,7 @@ from pathlib import Path
 from package_vanilla_wave import build_definition_fields
 
 ROOT = Path(__file__).resolve().parents[2]
-PROFILE = "personality-wave-65"
+PROFILE = "personality-wave-67"
 NL = chr(10)
 
 ABILITIES: dict[int, list[str]] = {

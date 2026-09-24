@@ -1,6 +1,6 @@
 namespace L5R.Core;
 
-// Forgotten Legacy pass (issue #467), batch 5: the primitives of spell-wave-21, holding-wave-10, item-wave-13, event-wave-6, celestial-wave-6 and
+// Forgotten Legacy pass (issue #467), batch 5: the primitives of spell-wave-21, holding-wave-11, item-wave-13, event-wave-6, celestial-wave-6 and
 // region-wave-8. The shared engine files carry short, commented hooks into this file (each names its card); the catalog entries, Target categories and
 // Attack kinds live in CardAbilities.cs beside every other ability's, as they must (one dictionary literal, one switch each). Two shared cost verbs
 // (CostVerbs.BowUnit, CostVerbs.ChiPenalty) are in AbilityCosts.cs, and Black Pearl's any-pile recruit terms in GoldQuotes.cs/QuotePurchase.

@@ -2,7 +2,7 @@ using L5R.Core;
 using static RegressionAssertions;
 using static Batch336Support;
 
-// Forgotten Legacy pass (issue #467), batch 5: the cards of spell-wave-21, holding-wave-10, item-wave-13, event-wave-6, celestial-wave-6 and region-wave-8,
+// Forgotten Legacy pass (issue #467), batch 5: the cards of spell-wave-21, holding-wave-11, item-wave-13, event-wave-6, celestial-wave-6 and region-wave-8,
 // driven through QueryActions, the commands it offers and the turn flow. Every scenario is an explicit position on the economy table (player 0 the Crane,
 // player 1 the Lion), with training fixtures (and "test-fixture" keyword grants) standing in for the Personalities each card needs.
 internal static class ForgottenLegacyBatch5Tests
@@ -76,7 +76,7 @@ internal static class ForgottenLegacyBatch5Tests
         }
         string[] Ids(PublishedSnapshot wave) => wave.Cards.Select(c => c.Id).OrderBy(i => i, StringComparer.Ordinal).ToArray();
         Check(Ids(PublishedContent.SpellWave21).SequenceEqual(new[] { PearlOfRage, MountainsPower, WindOfTheMoon, ThundersWrath }.OrderBy(i => i, StringComparer.Ordinal)), "spell-wave-21");
-        Check(Ids(PublishedContent.HoldingWave10).SequenceEqual(new[] { AgelessShrine, BambooExp, BorderKeepExp, ColonialHarbor }.OrderBy(i => i, StringComparer.Ordinal)), "holding-wave-10");
+        Check(Ids(PublishedContent.HoldingWave11).SequenceEqual(new[] { AgelessShrine, BambooExp, BorderKeepExp, ColonialHarbor }.OrderBy(i => i, StringComparer.Ordinal)), "holding-wave-11");
         Check(Ids(PublishedContent.ItemWave13).SequenceEqual(new[] { BlackPearl, CursedRelic }.OrderBy(i => i, StringComparer.Ordinal)), "item-wave-13");
         Check(Ids(PublishedContent.EventWave6).SequenceEqual(new[] { AssaultInTheJungle, BurningDreams, WillingSpirits }.OrderBy(i => i, StringComparer.Ordinal)), "event-wave-6");
         Check(Ids(PublishedContent.CelestialWave6).SequenceEqual(new[] { RyoshunsGuidance }), "celestial-wave-6");
@@ -111,7 +111,7 @@ internal static class ForgottenLegacyBatch5Tests
         var harbor = CardCatalog.Get(ColonialHarbor);
         Check(harbor.Type == CardType.Holding && harbor.GoldCost == 6 && harbor.GoldProduction == 5 && Keywords(ColonialHarbor) == "Port" && harbor.Effect == "colonial-harbor-tireless", "Colonial Harbor");
         Abilities(ColonialHarbor);
-        Manifest(root, "holding-wave-10", AgelessShrine, BambooExp, BorderKeepExp, ColonialHarbor);
+        Manifest(root, "holding-wave-11", AgelessShrine, BambooExp, BorderKeepExp, ColonialHarbor);
 
         var blackPearl = CardCatalog.Get(BlackPearl);
         Check(blackPearl.Type == CardType.Item && blackPearl.GoldCost == 4 && blackPearl.Force == 0 && blackPearl.Chi == 1 && blackPearl.Focus == 4 && Keywords(BlackPearl) == "Experienced,Pearl,Unique", "Black Pearl");

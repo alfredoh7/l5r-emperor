@@ -2492,13 +2492,13 @@ public static class PublishedContent
     public static PublishedSnapshot FollowerWave29 { get; } = Load("L5R.Published.FollowerWave29.json", "follower-wave-29", requireDecks: false);
     /// <summary>Stronghold wave 15 (Forgotten Legacy pass, issue #467, batch 2): The Forgotten Temple.</summary>
     public static PublishedSnapshot StrongholdWave15 { get; } = Load("L5R.Published.StrongholdWave15.json", "stronghold-wave-15", requireDecks: false);
-    /// <summary>Personality wave 65 (Forgotten Legacy pass, issue #467, batch 1): Asahina Shigemitsu, Asako Kaitoko, Bayushi Higaonna, Bayushi Toshimo, Daidoji
+    /// <summary>Personality wave 67 (Forgotten Legacy pass, issue #467, batch 1): Asahina Shigemitsu, Asako Kaitoko, Bayushi Higaonna, Bayushi Toshimo, Daidoji
     /// Takichi, Daigotsu Gyoken, Daigotsu Murota, Doji Hakuseki, Doji Rengetsu, Hiruma Nikaru, Iuchi Abodan, Kitsu Kagako.</summary>
-    public static PublishedSnapshot PersonalityWave65 { get; } = Load("L5R.Published.PersonalityWave65.json", "personality-wave-65", requireDecks: false);
+    public static PublishedSnapshot PersonalityWave67 { get; } = Load("L5R.Published.PersonalityWave67.json", "personality-wave-67", requireDecks: false);
     /// <summary>Spell wave 21 (Forgotten Legacy pass, issue #467, batch 5): Pearl of Rage, The Mountain's Power, Wind of the Moon, Thunder's Wrath.</summary>
     public static PublishedSnapshot SpellWave21 { get; } = Load("L5R.Published.SpellWave21.json", "spell-wave-21", requireDecks: false);
-    /// <summary>Holding wave 10 (issue #467, batch 5): Ageless Shrine, Bamboo Harvesters - experienced, Border Keep - experienced, Colonial Harbor.</summary>
-    public static PublishedSnapshot HoldingWave10 { get; } = Load("L5R.Published.HoldingWave10.json", "holding-wave-10", requireDecks: false);
+    /// <summary>Holding wave 11 (issue #467, batch 5): Ageless Shrine, Bamboo Harvesters - experienced, Border Keep - experienced, Colonial Harbor.</summary>
+    public static PublishedSnapshot HoldingWave11 { get; } = Load("L5R.Published.HoldingWave11.json", "holding-wave-11", requireDecks: false);
     /// <summary>Item wave 13 (issue #467, batch 5): Black Pearl, Cursed Relic.</summary>
     public static PublishedSnapshot ItemWave13 { get; } = Load("L5R.Published.ItemWave13.json", "item-wave-13", requireDecks: false);
     /// <summary>Event wave 6 (issue #467, batch 5): Assault in the Jungle, Burning Dreams, Willing Spirits.</summary>

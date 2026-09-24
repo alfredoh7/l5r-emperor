@@ -10,20 +10,20 @@ This pass used the same parallel-batch shape as Embers of War. Five batches were
 
 | Batch | Waves | Cards | Wired |
 |---|---|---|---|
-| 1 | personality-wave-65 | 15 Personalities A-K + Proxy Hisano's Guide | 12 |
+| 1 | personality-wave-67 | 15 Personalities A-K + Proxy Hisano's Guide | 12 |
 | 2 | personality-wave-66, follower-wave-29, stronghold-wave-15 | 18 Personalities L-Z, The Vengeful, The Forgotten Temple | 17 |
 | 3 | strategy-wave-54 | 14 Strategies A-G | 10 |
 | 4 | strategy-wave-55 | 16 Strategies H-W | 10 |
-| 5 | spell-wave-21, holding-wave-10, item-wave-13, event-wave-6, celestial-wave-6, region-wave-8 | 4 Spells, 4 Holdings, 2 Items, 3 Events, Celestial, Region | 15 |
+| 5 | spell-wave-21, holding-wave-11, item-wave-13, event-wave-6, celestial-wave-6, region-wave-8 | 4 Spells, 4 Holdings, 2 Items, 3 Events, Celestial, Region | 15 |
 
 ## Wired (64)
 
-- **personality-wave-65**: Asahina Shigemitsu, Asako Kaitoko, Bayushi Higaonna, Bayushi Toshimo, Daidoji Takichi, Daigotsu Gyoken, Daigotsu Murota, Doji Hakuseki, Doji Rengetsu, Hiruma Nikaru, Iuchi Abodan, Kitsu Kagako.
+- **personality-wave-67**: Asahina Shigemitsu, Asako Kaitoko, Bayushi Higaonna, Bayushi Toshimo, Daidoji Takichi, Daigotsu Gyoken, Daigotsu Murota, Doji Hakuseki, Doji Rengetsu, Hiruma Nikaru, Iuchi Abodan, Kitsu Kagako.
 - **personality-wave-66**: Matsu Koyama, Moshi Sasako, Moto Xiao, Ninube Shiho, Shiba Sawaken, Shinjo Junpei, Shosuro Makiko, The Shakash, The Sleepless One, Togashi Osawa, Toritaka Chokichi, Utaku Ji-Yun, Yamazaki, Yasuki Daiki, Yoritomo Haruhiko.
 - **follower-wave-29**: The Vengeful. **stronghold-wave-15**: The Forgotten Temple.
 - **strategy-wave-54**: A Game of Dice, A Yojimbo's Duty, Accidental Confession, Broken Alliance, Cast Aside the Weak, Consideration, Creating Order, Duel of Haiku, Entrenched Position, Feint & Strike.
 - **strategy-wave-55**: Heart of Darkness, Intimidation, Never Beyond My Reach, Pearls & Spirits, Returning Home, Rise of the Dark Naga, Seeking the Truth, Siege Volley, Steadfast Defense, Sundering Strike.
-- **spell-wave-21**: Pearl of Rage, The Mountain's Power, Thunder's Wrath, Wind of the Moon. **holding-wave-10**: Ageless Shrine, Bamboo Harvesters (FL printing), Border Keep (FL printing), Colonial Harbor. **item-wave-13**: Black Pearl, Cursed Relic. **event-wave-6**: Assault in the Jungle, Burning Dreams, Willing Spirits. **celestial-wave-6**: Ryoshun's Guidance. **region-wave-8**: The Second City.
+- **spell-wave-21**: Pearl of Rage, The Mountain's Power, Thunder's Wrath, Wind of the Moon. **holding-wave-11**: Ageless Shrine, Bamboo Harvesters (FL printing), Border Keep (FL printing), Colonial Harbor. **item-wave-13**: Black Pearl, Cursed Relic. **event-wave-6**: Assault in the Jungle, Burning Dreams, Willing Spirits. **celestial-wave-6**: Ryoshun's Guidance. **region-wave-8**: The Second City.
 
 Nine older "not blocked, not yet wired" or stale notes were re-verified and wired: Daidoji Takichi, Hiruma Nikaru, Kitsu Kagako, Matsu Koyama, Togashi Osawa, The Vengeful, Intimidation, Never Beyond My Reach and Cursed Relic.
 

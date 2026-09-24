@@ -1,6 +1,6 @@
 namespace L5R.Core;
 
-// Forgotten Legacy pass (issue #467), batch 1: the execution/validation helpers of the twelve Personalities this batch wires (personality-wave-65) and
+// Forgotten Legacy pass (issue #467), batch 1: the execution/validation helpers of the twelve Personalities this batch wires (personality-wave-67) and
 // the small general primitives they needed. The declarative data (ability ids, targets, costs) is in CardAbilities.cs; each primitive expires by
 // comparison with the turn number, never by a sweep.
 //
