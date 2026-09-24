@@ -217,12 +217,14 @@ internal static class EmperorStrongholdBatch2Tests
             var s = WithStronghold(Table(Phase.Battle, 0), 0, Chugo);
             var chugo = StrongholdOf(s, 0);
             var performer = Add(s, performerDef, 0, Zone.Battlefield, province: 0);
-            var enemy = Add(s, "training-lion-samurai", 1, Zone.Battlefield, province: 0); Force(enemy, 5 - CardCatalog.Get("training-lion-samurai").Force); // Force 5: only a strength-5 Attack may target it
+            var enemy = Add(s, "training-lion-samurai", 1, Zone.Battlefield, province: 0); Force(enemy, 5 - CardCatalog.Get("training-lion-samurai").Force); // Force 5: only a strength-5 Attack destroys it
             var e = MatchEngine.FromTestState(s);
-            var offered = Batch336Support.Options(e, 0, "chugo-melee", chugo.Id, performer.Id).Any(a => a.Enabled && (a.TargetIds?.Contains(enemy.Id) ?? false));
-            return offered ? 5 : 4;
+            // Core rules (issue #488): a Force-5 target is legal at any strength; the Attack's strength is read from whether it destroys him.
+            Check(Batch336Support.Options(e, 0, "chugo-melee", chugo.Id, performer.Id).Any(a => a.Enabled && (a.TargetIds?.Contains(enemy.Id) ?? false)), "a Force 5 target is legal whatever the strength");
+            Accept(e, Offer(e, 0, "chugo-melee", chugo.Id, enemy.Id, performer.Id));
+            return e.State.Cards[enemy.Id].Zone == Zone.Dead ? 5 : 4;
         }
-        Eq(Strength("training-crane-samurai"), 4, "Melee 4 Attack: a Force 5 target is out of reach");
+        Eq(Strength("training-crane-samurai"), 4, "Melee 4 Attack: a Force 5 target is targeted and survives");
         Eq(Strength("training-loyal-crane"), 5, "+1 strength when the performer is Loyal: it may target Force 5");
         var bowedSetup = WithStronghold(Table(Phase.Battle, 0), 0, Chugo);
         var chugo2 = StrongholdOf(bowedSetup, 0);

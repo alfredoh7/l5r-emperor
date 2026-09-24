@@ -320,6 +320,14 @@ internal static class EmperorStrongholdBatch1Tests
         Settle(d);
         Check(!d.State.Cards.ContainsKey(targetD.Id) || d.State.Cards[targetD.Id].Zone != Zone.Battlefield, "the Attack destroyed its target");
         Check(!d.State.AdditionalActions.Any(), "so no additional Ranged Attack is granted");
+        // Core rules (issue #488): a target whose Force is above the strength is legal to target, and the Attack simply fails to destroy it -- the Keep's main use, with no destruction shield needed.
+        var strong0 = Engaged(true, false, out _, out var archerS, out var targetS, out _);
+        var strong = Edit(strong0, st => Force(st.Cards[targetS.Id], 3)); // Force 2 -> 5, above the Ranged 2 Attack
+        Accept(strong, Offer(strong, 0, "training-recon-attack", archerS.Id, targetS.Id));
+        Settle(strong);
+        Eq(strong.State.Cards[targetS.Id].Zone, Zone.Battlefield, "a Force 5 target survives the Ranged 2 Attack that was legally aimed at it");
+        Eq(Reductions(strong, targetS), 1, "and the Keep's reduction applies to it");
+        Check(strong.State.AdditionalActions.Any(g => g.PlayerId == 0 && g.RangedTargetId == targetS.Id), "and an additional Ranged Attack on the same card is granted");
 
         // The Keep's Reaction not used at the engagement: this battle's Ranged Attacks have no additional effects.
         var n = Engaged(false, true, out _, out var archerN, out var targetN, out _);

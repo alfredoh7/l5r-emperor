@@ -189,13 +189,8 @@ public sealed partial class MatchEngine
         // Honor the strength formula reads), not the ability's own source card, the same distinction
         // ExecuteAbilityEffects' own case already draws for it. Every existing "attack" ability without a
         // Performer of its own falls back to the source card.
-        var strength = id == "mitsu-fire-attack" ? (command.CardIds ?? []).Length + ShishidoRangedBonus(id, command.PerformerId ?? source?.Id) : EffectiveAttackStrength(id, player, target, command.PerformerId ?? source?.Id)
-            // Celestial Sword of the Mantis - exp (issue #453 batch 5): "strength equal to twice the amount paid" -- the Gold the command chooses, read here as at resolution.
-            + (id == "celestial-sword-mantis-attack" ? 2 * (command.GoldAmount ?? 0) : 0)
-            // Daigotsu Ishibashi (issue #477 batch 6): "strength equal to the card's Focus Value plus one" of the Dark Virtue shown from the hand.
-            + (id == "ishibashi-attack" ? IshibashiStrength(command) : 0);
-        var compared = AttackComparedValue(id, target);
-        if (forcePenaltyTargetId == target.Id) compared = Math.Max(0, compared - forcePenalty);
-        Require(compared <= strength, "That card's Force is above the Attack's strength.");
+        // Core rules (Ranged/Melee Attack, confirmed by Mendon 2026-09-24): "Target a Follower or a Personality without Followers in the current enemy army. If its Force is <= X, destroy it." A target whose
+        // Force (or compared stat) is above the strength is still a LEGAL target; the comparison happens as the Attack resolves (ResolveAttackNow), and it simply fails to destroy it. The strength and any
+        // predicted Force penalty therefore no longer take part in target legality (forcePenaltyTargetId/forcePenalty are kept for the callers that pass them).
     }
 }

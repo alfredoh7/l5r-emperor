@@ -102,10 +102,11 @@ internal static class ShadowsEmbraceBatch3Tests
             var e = MatchEngine.FromTestState(s);
             Eq(e.AttackStrengthForTest("burning-fury-attack", monk.Id), fueled ? 6 : 3, "3, plus two Fire tokens and one Ring");
             var option = Enabled(e, 0, "burning-fury-attack", fury.Id, monk.Id);
-            if (!fueled) { Check(!option.TargetIds!.Contains(victim.Id), "strength 3 cannot target a Force 6 Personality"); continue; }
+            Check(option.TargetIds!.Contains(victim.Id), "a Force 6 Personality is a legal target whatever the strength");
             Accept(e, Offer(e, 0, "burning-fury-attack", fury.Id, victim.Id, monk.Id));
             for (var guard = 0; e.State.PendingAttack is not null && guard < 4; guard++) Accept(e, new("declineReaction", e.State.PriorityPlayerId, e.Version));
-            Eq(e.State.Cards[victim.Id].Zone, Zone.Dead, "strength 6 destroys the Force 6 Personality");
+            if (fueled) Eq(e.State.Cards[victim.Id].Zone, Zone.Dead, "strength 6 destroys the Force 6 Personality");
+            else Eq(e.State.Cards[victim.Id].Zone, Zone.Battlefield, "strength 3 does not destroy the Force 6 Personality");
             Eq(e.State.Cards[fury.Id].Zone, Zone.FateDiscard, "the Strategy was spent");
         }
     }

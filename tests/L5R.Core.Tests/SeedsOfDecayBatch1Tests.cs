@@ -478,7 +478,12 @@ internal static class SeedsOfDecayBatch1Tests
         var arrow = Add(s, ArrowsEye, 0, Zone.Hand);
         var e = MatchEngine.FromTestState(s);
         var option = Enabled(e, 0, "arrows-eye-attack", arrow.Id);
-        Check(option.TargetIds!.Contains(strong.Id) && !option.TargetIds.Contains(lone.Id), "strength 5 against the Follower in a two-Follower unit, 3 against the lone Force 5 Personality: " + string.Join(",", option.TargetIds!));
+        Check(option.TargetIds!.Contains(strong.Id) && option.TargetIds.Contains(lone.Id), "both are legal targets (a target above the strength is still legal): " + string.Join(",", option.TargetIds!));
+        {   // strength 3 against the lone Force 5 Personality: legal, but it survives.
+            var g = MatchEngine.FromTestState(s);
+            Accept(g, Offer(g, 0, "arrows-eye-attack", arrow.Id, lone.Id));
+            Eq(g.State.Cards[lone.Id].Zone, Zone.Battlefield, "strength 3 cannot destroy the lone Force 5 Personality");
+        }
         Accept(e, Offer(e, 0, "arrows-eye-attack", arrow.Id, strong.Id));
         Eq(e.State.Cards[strong.Id].Zone, Zone.FateDiscard, "destroyed");
         // Vengeful Dismissal.

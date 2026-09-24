@@ -126,21 +126,25 @@ internal static class EmperorPersonalityBatch5Tests
         Drain(e);
         Eq(e.State.Cards[enemy.Id].Zone, Zone.Dead, "base Force 3 is within Melee 4");
 
-        // The same target with an attachment: current Force is compared, the Attack is refused.
+        // The same target with an attachment: current Force (8) is compared; the target is still legal (core rules) but survives the Melee 4 Attack.
         var s2 = Table(Phase.Battle, 0);
         var nob2 = Add(s2, Nobunori, 0, Zone.Battlefield, province: 0);
         var enemy2 = Add(s2, "training-crane-samurai", 1, Zone.Battlefield, province: 0);
         Force(enemy2, 5);
         Add(s2, AnItem().Id, 1, Zone.Attached, province: 0, parent: enemy2.Id);
         var e2 = MatchEngine.FromTestState(s2);
-        Check(Rejection(e2, Use(e2, 0, "nobunori-attack", nob2.Id, enemy2.Id)).Contains("Force"), "with an attachment the current Force (8) is compared");
+        Accept(e2, Offer(e2, 0, "nobunori-attack", nob2.Id, enemy2.Id));
+        Drain(e2);
+        Eq(e2.State.Cards[enemy2.Id].Zone, Zone.Battlefield, "with an attachment the current Force (8) is compared: above the strength, it survives");
 
         // No attachments, and no Force change: printed Force above 4 is not destroyed by the Attack (Force 8 base).
         var s3 = Table(Phase.Battle, 0);
         var nob3 = Add(s3, Nobunori, 0, Zone.Battlefield, province: 0);
         var strong = Add(s3, Tsukimi, 1, Zone.Battlefield, province: 0);
         var e3 = MatchEngine.FromTestState(s3);
-        Check(Rejection(e3, Use(e3, 0, "nobunori-attack", nob3.Id, strong.Id)).Contains("Force"), "a base Force above 4 is above the strength");
+        Accept(e3, Offer(e3, 0, "nobunori-attack", nob3.Id, strong.Id));
+        Drain(e3);
+        Eq(e3.State.Cards[strong.Id].Zone, Zone.Battlefield, "a base Force above 4 is above the strength: a legal target that survives");
         Eq(e3.AttackStrengthForTest("nobunori-attack", nob3.Id), 4, "Melee 4");
     }
 
@@ -413,7 +417,10 @@ internal static class EmperorPersonalityBatch5Tests
         Force(seven, 4);
         var e = MatchEngine.FromTestState(s);
         Eq(e.AttackStrengthForTest("tsukimi-attack", tsu.Id), 6, "Melee 6 without a Shugenja");
-        Check(Rejection(e, Use(e, 0, "tsukimi-attack", tsu.Id, seven.Id)).Contains("Force"), "Force 7 is above 6");
+        var eSeven = MatchEngine.FromTestState(s);
+        Accept(eSeven, Offer(eSeven, 0, "tsukimi-attack", tsu.Id, seven.Id));
+        Drain(eSeven);
+        Eq(eSeven.State.Cards[seven.Id].Zone, Zone.Battlefield, "Force 7 is above 6: a legal target that survives");
         Accept(e, Offer(e, 0, "tsukimi-attack", tsu.Id, six.Id));
         Drain(e);
         Eq(e.State.Cards[six.Id].Zone, Zone.Dead, "Force 6 destroyed");

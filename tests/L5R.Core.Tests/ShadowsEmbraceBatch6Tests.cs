@@ -511,9 +511,11 @@ internal static class ShadowsEmbraceBatch6Tests
             return MatchEngine.FromTestState(s4);
         }
         var e4 = Archery(true, out var archers4, out var target4);
-        Reject(e4, new GameCommand("useAbility", 0, e4.Version, CardId: archers4.Id, TargetId: target4.Id, AbilityId: "horse-archers-attack"));
+        Accept(e4, new GameCommand("useAbility", 0, e4.Version, CardId: archers4.Id, TargetId: target4.Id, AbilityId: "horse-archers-attack")); // still a legal target, just above the reduced strength
+        Eq(e4.State.Cards[target4.Id].Zone, Zone.Attached, "the guarded Follower survives the -3 strength Attack");
         var e5 = Archery(false, out var archers5, out var target5);
         Accept(e5, new GameCommand("useAbility", 0, e5.Version, CardId: archers5.Id, TargetId: target5.Id, AbilityId: "horse-archers-attack"));
+        Check(e5.State.Cards[target5.Id].Zone != Zone.Attached, "without Shieldman the Follower is destroyed");
     }
 
     // ---- Strongholds -------------------------------------------------------------------------------------------------------------------------------

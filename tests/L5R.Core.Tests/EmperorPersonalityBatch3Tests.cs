@@ -15,8 +15,8 @@ internal static class EmperorPersonalityBatch3Tests
 
     public static void Run(TestRunner runner) => runner.Run("emperor-personality-batch3", [
         ("Published shape: personality-wave-70 publishes exactly the 12 wired cards with their printed stats, keywords, Effect and ability ids, ships their art and lists them in its manifest; the three unwired cards are not in the catalogue", PublishedShape),
-        ("Tsuruchi Tomaru: Ranged 3 Attack twice per turn, never at Force 4, never a third time", TomaruAttack),
-        ("Tsuruchi Samuru: Ranged 6 Attack compared against Gold Cost -- a high-Force cheap Personality dies, a costly one is out of reach, a Personality with a Follower is not a target", SamuruAttack),
+        ("Tsuruchi Tomaru: Ranged 3 Attack twice per turn, Force 4 is a legal target that survives, never a third time", TomaruAttack),
+        ("Tsuruchi Samuru: Ranged 6 Attack compared against Gold Cost -- a high-Force cheap Personality dies, a costly one survives, a Personality with a Follower is not a target", SamuruAttack),
         ("Moto Tetsuo: only with a Cavalry unit of his controller's at the battlefield; moves him there and then Ranged 4 Attacks -- no Attack when he was already there", TetsuoMoveAttack),
         ("Shinjo Itao: after entering play attaches a Follower from the hand, paying its cost; an Item in the hand is not offered", ItaoAttach),
         ("Utaku Ryoko: after engaging at her battlefield gives an opposing Personality or Follower a Force penalty equal to her Personal Honor; not from home", RyokoPenalty),
@@ -83,7 +83,10 @@ internal static class EmperorPersonalityBatch3Tests
         var tough = Bf(s, "training-lion-samurai", 1); // Force 4
         var e = MatchEngine.FromTestState(s);
         var targets = Enabled(e, 0, "tomaru-attack-3", tomaru.Id).TargetIds!;
-        Check(targets.Contains(a.Id) && !targets.Contains(tough.Id), "Force 3 is within a Ranged 3 Attack, Force 4 is not");
+        Check(targets.Contains(a.Id) && targets.Contains(tough.Id), "Force 3 is within a Ranged 3 Attack, and Force 4 is still a legal target");
+        var e0 = MatchEngine.FromTestState(s);
+        Accept(e0, Offer(e0, 0, "tomaru-attack-3", tomaru.Id, tough.Id));
+        Check(!Gone(e0, tough), "but a Force 4 target survives the Ranged 3 Attack");
         Accept(e, Offer(e, 0, "tomaru-attack-3", tomaru.Id, a.Id));
         Check(Gone(e, a), "the first Attack destroyed its target");
         PassTo(e, 1);
@@ -103,7 +106,10 @@ internal static class EmperorPersonalityBatch3Tests
         var e = MatchEngine.FromTestState(s);
         var targets = Enabled(e, 0, "samuru-attack", samuru.Id).TargetIds!;
         Check(targets.Contains(cheap.Id), "Gold Cost 5 is within a Ranged 6 Attack though its Force is 9");
-        Check(!targets.Contains(dear.Id), "Gold Cost 8 is out of reach though its Force is 6");
+        Check(targets.Contains(dear.Id), "Gold Cost 8 is out of reach though its Force is 6, but still a legal target");
+        var e3 = MatchEngine.FromTestState(s);
+        Accept(e3, Offer(e3, 0, "samuru-attack", samuru.Id, dear.Id));
+        Check(!Gone(e3, dear), "Gold Cost 8 survives the Ranged 6 Attack though its Force is only 6");
         Check(targets.Contains(follower.Id) && !targets.Contains(host.Id), "a Follower is a target, a Personality with a Follower is not");
         Accept(e, Offer(e, 0, "samuru-attack", samuru.Id, cheap.Id));
         Check(Gone(e, cheap), "destroyed by comparing his Gold Cost");
@@ -121,7 +127,10 @@ internal static class EmperorPersonalityBatch3Tests
         var cavalry = Bf(s, "training-crane-samurai", 0); GiveKeyword(cavalry, "Cavalry");
         var enemy = Bf(s, "training-crane-samurai", 1); var tough = Bf(s, "training-lion-veteran", 1);
         var e = MatchEngine.FromTestState(s);
-        Check(!Enabled(e, 0, "tetsuo-move-attack", tetsuo.Id).TargetIds!.Contains(tough.Id), "Force 6 is out of a Ranged 4 Attack's reach");
+        Check(Enabled(e, 0, "tetsuo-move-attack", tetsuo.Id).TargetIds!.Contains(tough.Id), "Force 6 is out of a Ranged 4 Attack's reach but still a legal target");
+        var e1 = MatchEngine.FromTestState(s);
+        Accept(e1, Offer(e1, 0, "tetsuo-move-attack", tetsuo.Id, tough.Id));
+        Check(e1.State.Cards[tetsuo.Id].Zone == Zone.Battlefield && !Gone(e1, tough), "he moves, and the Force 6 target survives the Ranged 4 Attack");
         Accept(e, Offer(e, 0, "tetsuo-move-attack", tetsuo.Id, enemy.Id));
         Check(e.State.Cards[tetsuo.Id].Zone == Zone.Battlefield && e.State.Cards[tetsuo.Id].ProvinceIndex == 0, "Tetsuo moved to the battlefield");
         Check(Gone(e, enemy), "and his Ranged 4 Attack destroyed the Force 3 target");
