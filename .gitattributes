@@ -23,3 +23,12 @@ assets/reference/** -text
 assets/fonts/** -text
 content/oracle/** -text
 src/L5R.Client/Art/Fonts/** -text
+# Godot rereads every .import file's hash: a Windows checkout that converts them to CRLF makes the editor reimport all imported assets (~9 minutes of CI).
+*.import text eol=lf
+*.uid text eol=lf
+*.tscn text eol=lf
+*.tres text eol=lf
+*.gd text eol=lf
+*.godot text eol=lf
+*.cfg text eol=lf
+*.gdshader text eol=lf
