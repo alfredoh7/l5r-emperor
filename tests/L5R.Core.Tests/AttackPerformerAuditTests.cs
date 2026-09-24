@@ -7,8 +7,8 @@ internal static class AttackPerformerAuditTests
 {
     private static void Check(bool ok, string message = "Assertion failed") => Batch336Support.Check(ok, message);
 
-    // Attack abilities that carry an explicit Performer, each reviewed against the printed text. The last five do NOT print a named performer: the Performer field there only picks a card
-    // to bow (Yayu/Tomiko: one of the source's own Spells, so the acting Personality is still the source) or a target (Strength of the Divine's Paragon, a Strategy); Carpenter Castle's
+    // Attack abilities that carry an explicit Performer, each reviewed against the printed text. The last seven do NOT print a named performer: the Performer field there only picks a card
+    // to bow (Yayu/Tomiko: one of the source's own Spells, so the acting Personality is still the source; Thunder's Wrath's own-wielder is the Spell's attached Shugenja, which the rule already makes its performer) or a target (Strength of the Divine's Paragon, a Strategy); Carpenter Castle's
     // bowed Castle/Siege card is not its performer (ActionPerformer returns the Stronghold).
     // Issue #477: Daigotsu Misaki ("Bow Misaki's performing Follower"), and -- reviewed against their printed text when this pass found the list already behind main -- Toritaka Chokichi ("Bow your performing
     // Follower"), Never Beyond My Reach ("choose your performing unbowed Kensai") and Pearls & Spirits ("Bow your performing Shugenja", three ids), all named performers. Thunder's Wrath prints no performer: the
