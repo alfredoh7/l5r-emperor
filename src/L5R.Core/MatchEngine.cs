@@ -1421,6 +1421,11 @@ public sealed partial class MatchEngine
                 _state.PendingChoice=new("beforeBattleOptional",source.OwnerId,source.Id,$"Before this battle resolves: you may bow one enemy Personality at this battlefield ({Definition(source).Name}).");
                 _state.PriorityPlayerId=source.OwnerId;
                 return;
+            // Heart of Darkness (Forgotten Legacy pass, issue #467 batch 4): the same optional choice, naming zero to two cards (ForgottenLegacyBatch4.cs).
+            case "heart-of-darkness-bow":
+                _state.PendingChoice=new("beforeBattleOptional",source.OwnerId,source.Id,$"Before this battle resolves: choose and bow zero to two cards at this battlefield with 4 or greater Force ({Definition(source).Name}).");
+                _state.PriorityPlayerId=source.OwnerId;
+                return;
         }
         FinishBeforeBattleEffect(pending);
     }
@@ -1431,7 +1436,8 @@ public sealed partial class MatchEngine
         var pending=_state.PendingBeforeBattleResolve!;
         var choice=_state.PendingChoice!;
         Require(command.Type=="beforeBattleOptional" && command.PlayerId==choice.PlayerId && command.Choice is "use" or "decline","Use the effect or decline it.");
-        if(command.Choice=="use")
+        if(IsHeartOfDarknessChoice(pending)) ResolveHeartOfDarkness(command,pending,choice.PlayerId);
+        else if(command.Choice=="use")
         {
             var target=Card(command.TargetId);
             Require(target.OwnerId!=choice.PlayerId && target.Zone==Zone.Battlefield && target.ProvinceIndex==pending.ProvinceIndex && Definition(target).Type==CardType.Personality,"Choose an enemy Personality at this battlefield.");
@@ -1555,6 +1561,7 @@ public sealed partial class MatchEngine
             GrantRingRecruit(Player(defender),destroyedA>0,"ring-of-fire-recruit");
         }
         // After the losing units are destroyed, the province is destroyed and Honor is settled: the Reactions that name this moment (AfterResolution.cs), before the winners go home.
+        MarkSeekingTheTruthResolution(destroyedByPlayer,provinceDestroyedNow?attacker:null); // Forgotten Legacy pass (issue #467 batch 4).
         if(OpenAfterResolutionWindow(NewAfterResolutionFacts(provinceIndex,attacker,attackerWon,a,destroyedByPlayer,provinceDestroyedNow,losers))) return;
         ContinueAfterResolution(provinceIndex,attacker,attackerWon,a);
     }
@@ -1659,6 +1666,8 @@ public sealed partial class MatchEngine
         // play now sits. Deferring here (a province choice) re-enters this same function from scratch
         // once answered, so nothing below runs twice.
         if (CheckYourClanNeedsYouReturn()) return;
+        // Seeking the Truth (Forgotten Legacy pass, issue #467 batch 4): "After this battle ends, if you did not destroy the battlefield's province or an army, discard a card at random."
+        ResolveSeekingTheTruthWatches();
         // After This Battle Resolves (issue #272): "after the resolution of the current battle but
         // before the next battlefield is chosen. If it is the last battlefield to resolve, then
         // return the card to the player's hand and then end the battle phase" -- run first, so the

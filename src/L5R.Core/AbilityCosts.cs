@@ -105,9 +105,13 @@ public sealed partial class MatchEngine
     }
 
     // "...unless this Personality is [keyword]": "this Personality" is the source itself, or the Personality an attached source (a Spell, an Item) is attached to.
-    private bool CostExempt(ActionCost cost, CardInstance? source)
+    // Forgotten Legacy pass (issue #467), batch 4: a cost whose subject is the PERFORMER ("destroy him unless he is Nonhuman", Pearls & Spirits) is exempt by
+    // the performer's own keyword, not the source's -- the subject, when the caller has it, is who "he" is.
+    private bool CostExempt(ActionCost cost, CardInstance? source, CardInstance? subject = null)
     {
-        if (cost.UnlessKeyword is not { } keyword || source is null) return false;
+        if (cost.UnlessKeyword is not { } keyword) return false;
+        if (cost.Subject == CostSubject.Performer && subject is not null) return Keyword(subject, keyword);
+        if (source is null) return false;
         var holder = source is { Zone: Zone.Attached, AttachedTo: { } hostId } && _state.Cards.TryGetValue(hostId, out var host) ? host : source;
         return Keyword(holder, keyword);
     }
@@ -168,7 +172,7 @@ public sealed partial class MatchEngine
         {
             if (cost.UnlessInHand && source is { Zone: Zone.Hand }) continue;
             var subject = cost.Verb is CostVerbs.LoseHonor or CostVerbs.DestroyLeftmostProvince ? null : CostSubjectCard(new CostOption(cost.Verb, cost.Verb, cost.Verb, cost.Subject), ability, command, source);
-            if (CostExempt(cost, source)) continue;
+            if (CostExempt(cost, source, subject)) continue;
             yield return (cost, subject);
         }
     }
@@ -189,7 +193,7 @@ public sealed partial class MatchEngine
             }
             var subject = CostSubjectCard(new CostOption(cost.Verb, cost.Verb, cost.Verb, cost.Subject), ability, command, source);
             if (subject is null) continue;
-            if (CostExempt(cost, source)) continue;
+            if (CostExempt(cost, source, subject)) continue;
             switch (cost.Verb)
             {
                 case CostVerb.Bow: subject.Bowed = true; break;

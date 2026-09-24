@@ -312,6 +312,11 @@ public sealed partial class MatchEngine
             result.AddRange(AbilityActions(playerId));
             Add("declineReaction","Pass reaction",Command("declineReaction"));
         }
+        else if(_state.PendingChoice is { Type:"beforeBattleOptional" } heartPending && _state.PendingBeforeBattleResolve is { } heartResolve && IsHeartOfDarknessChoice(heartResolve))
+        {
+            // Heart of Darkness (Forgotten Legacy pass, issue #467 batch 4): bow no card, one card, or two cards (ForgottenLegacyBatch4.cs).
+            foreach(var option in HeartOfDarknessOptions(playerId,heartPending.CardId)) result.Add(option);
+        }
         else if(_state.PendingChoice is { Type:"beforeBattleOptional" } optionalPending)
         {
             // Before This Battle Resolves, an optional ("you may") effect: decline it, or name its one target.

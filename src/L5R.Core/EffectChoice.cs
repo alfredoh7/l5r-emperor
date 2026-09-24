@@ -45,6 +45,9 @@ public static class BranchCondition
     public const string ProvinceHoldsCard = "province-holds-card";
     /// <summary>The Personality the source is attached to has a keyword (Strength of the Tsunami: "if this Shugenja is Water").</summary>
     public static string WielderHas(string keyword) => $"wielder-has:{keyword}";
+    /// <summary>The action's optional target was chosen (Forgotten Legacy pass, issue #467, batch 4 -- Steadfast Defense: "you may target a Personality or Follower and bow or
+    /// straighten it" asks bow-or-straighten only when a target was named).</summary>
+    public const string TargetChosen = "target-chosen";
 }
 
 /// <summary>Effects an option may apply. Each goes through the same helper an ordinary effect would, so a negation a reaction set
@@ -69,6 +72,9 @@ public static class BranchEffect
     /// Personality or the acting player controls a Courtier; and the same conditional destroy with nothing discarded (MatchEngine.ScorpionSwordResolve).</summary>
     public const string ScorpionSwordDiscard = "scorpion-sword-discard";
     public const string ScorpionSwordKeep = "scorpion-sword-keep";
+    /// <summary>The target is bowed / straightened (Steadfast Defense, issue #467 batch 4).</summary>
+    public const string BowTarget = "bow-target";
+    public const string StraightenTarget = "straighten-target";
 }
 
 /// <summary>The four answers to "choose a player who gains or loses N Honor" (issue #336): each player, each direction. Shared by every card that prints it.</summary>
@@ -113,6 +119,7 @@ public sealed partial class MatchEngine
         BranchCondition.TargetMoved => targetMoved,
         BranchCondition.TargetAtBattlefield => target is not null && target.Zone == Zone.Battlefield,
         BranchCondition.ProvinceHoldsCard => CurrentBattlefieldProvince() is { CardId: not null },
+        BranchCondition.TargetChosen => target is not null,
         _ when condition.StartsWith("wielder-has:", StringComparison.Ordinal) => source.AttachedTo is { } wielderId && Keyword(Card(wielderId), condition["wielder-has:".Length..]),
         _ => throw new InvalidOperationException($"Unknown branch condition '{condition}'.")
     };
@@ -137,6 +144,8 @@ public sealed partial class MatchEngine
             case BranchEffect.MoveWielderHome: MoveHome(Card(source.AttachedTo), false); break;
             case BranchEffect.ScorpionSwordDiscard: ScorpionSwordResolve(command, target!, discardFirst: true); break;
             case BranchEffect.ScorpionSwordKeep: ScorpionSwordResolve(command, target!, discardFirst: false); break;
+            case BranchEffect.BowTarget: if (InPlay(target!) && !StalwartNegatesBow(target!, command.PlayerId)) target!.Bowed = true; break;
+            case BranchEffect.StraightenTarget: if (InPlay(target!)) Straighten(target!); break;
             default: throw new InvalidOperationException($"Unknown branch effect '{effect}'.");
         }
     }

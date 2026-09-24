@@ -667,6 +667,8 @@ public sealed class MatchState
     // (MatchEngine.CheckYourClanNeedsYouReturn), then removed from this list regardless of outcome.
     // A List (not a single nullable id), since more than one copy could resolve within one battle.
     public List<string> YourClanNeedsYouWatchIds { get; set; } = [];
+    /// <summary>Seeking the Truth (Forgotten Legacy pass, issue #467 batch 4): the players who owe a random discard after the battle they played it in ends, unless they destroyed its province or an army.</summary>
+    public List<SeekingTheTruthWatch> SeekingTheTruthWatches { get; set; } = [];
     // Cards an action created "until the battle ends" (Kyuden Hida - exp's Scout Followers): removed from the game when their battle is over, wherever they are.
     public List<string> CreatedUntilBattleEndsIds { get; set; } = [];
     // Ashigaru Elite's shape: a per-player counter of the current battle's Force boost to each of the

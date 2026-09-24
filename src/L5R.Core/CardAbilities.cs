@@ -2942,6 +2942,77 @@ public static class AbilityCatalog
         // narrowed to Nonhuman, the province's card discarded as the cost (the province must hold one: ChoosesOwnProvince).
         ["forgotten-temple-refill"] = new("Limited", "Target your discarded Nonhuman Personality and discard a card in one of your provinces: Refill the province face-up with the Personality",
             "own-discarded-personality-with-keyword", RequiredKeywords: ["Nonhuman"], ChoosesOwnProvince: true),
+        // Forgotten Legacy pass (issue #467), batch 4: strategy-wave-55 (helpers in ForgottenLegacyBatch4.cs).
+        // Heart of Darkness (oracle-l5r-3013): a Terrain (its "Battle: If no Terrain is at the current battlefield: Put this card into play there" is the
+        // generic Terrain play rule, Thick Marsh's own precedent). Its trait "Before this battle's resolution: Choose and bow zero to two cards at the current
+        // battlefield with 4 or greater Force" joins the before-resolution set (BeforeResolution.cs) and is answered through the existing optional
+        // "beforeBattleOptional" choice, widened for this trait to name zero, one or two cards of either side (HeartOfDarknessOptions/ResolveHeartOfDarkness).
+        ["heart-of-darkness-bow"] = new("BeforeResolution", "Before this battle's resolution: Choose and bow zero to two cards at the current battlefield with 4 or greater Force", "none", Trigger: "before-battle-resolves"),
+        // Intimidation (oracle-l5r-3790, re-evaluated per its own blocker note): "Battle: Choose your performing Berserker Personality and target another
+        // player's Personality not at the current battlefield: Move them both there. Straighten each unit that this moved." -- MoveSpec performer-and-target
+        // (issue #336) to the current battlefield plus a new Target category, enemy-personality-not-at-battle (in play at home or at another unresolved
+        // battlefield); the straighten is read off each mover's own before/after location.
+        ["intimidation-move"] = new("Battle", "Choose your performing Berserker Personality and target another player's Personality not at the current battlefield: Move them both there. Straighten each unit that this moved",
+            "enemy-personality-not-at-battle", Performer: "own-personality-with-keyword", RequiredKeywords: ["Berserker"], Move: new(MoveSpec.PerformerAndTarget, MoveSpec.CurrentBattlefield), MovesToBattle: true),
+        // Never Beyond My Reach (oracle-l5r-5533, re-evaluated per its own blocker note: the "exemption from the generic Battle-timing army-presence
+        // requirement" it named is AbilityDefinition.Absent, issue #331): "Battle: Even if you control no units at the current battlefield, choose your
+        // performing unbowed Kensai, who may be at an adjacent battlefield to the current one if he has a Weapon attached: Ranged 6 Attack (against a
+        // target at the current battlefield)." -- a new Performer category (the current battlefield, or an adjacent one with a Weapon attached;
+        // AdjacentBattlefields, MoveDestinations.cs, is the one adjacency rule), registered in both Performer switches.
+        ["never-beyond-reach-attack"] = new("Battle", "Even if you control no units at the current battlefield, choose your performing unbowed Kensai, who may be at an adjacent battlefield to the current one if he has a Weapon attached: Ranged 6 Attack (against a target at the current battlefield)",
+            "attack", Performer: "own-unbowed-personality-with-keyword-at-battle-or-adjacent-with-weapon", RequiredKeywords: ["Kensai"], Absent: true),
+        // Pearls & Spirits (oracle-l5r-5906): two Battle actions. "Bow your performing Shugenja, and destroy him unless he is Nonhuman: Ranged Attack with
+        // strength equal to his Force plus Chi" -- both halves of the cost are declared (the destruction is ActionCost Sacrifice on the performer, exempt
+        // by UnlessKeyword read off the PERFORMER, CostExempt), and the strength is read after the cost, as the core rules' Blood Wave ruling counts a
+        // destroyed Personality's Force (no Items). "Bow your performing Shugenja: Ranged Attack with strength equal to his Force or Chi" -- the choice of
+        // stat is two ability ids sharing one use (Strength of the Divine's own shape).
+        ["pearls-spirits-sacrifice-attack"] = new("Battle", "Bow your performing Shugenja, and destroy him unless he is Nonhuman: Ranged Attack with strength equal to his Force plus Chi", "attack",
+            Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeywords: ["Shugenja"],
+            Costs: [new(CostVerb.Bow, CostSubject.Performer), new(CostVerbs.Sacrifice, CostSubject.Performer, UnlessKeyword: "Nonhuman")]),
+        ["pearls-spirits-force-attack"] = new("Battle", "Bow your performing Shugenja: Ranged Attack with strength equal to his Force", "attack",
+            Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeywords: ["Shugenja"], Costs: ActionCost.BowPerformer, UsageKey: "pearls-spirits-stat"),
+        ["pearls-spirits-chi-attack"] = new("Battle", "Bow your performing Shugenja: Ranged Attack with strength equal to his Chi", "attack",
+            Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeywords: ["Shugenja"], Costs: ActionCost.BowPerformer, UsageKey: "pearls-spirits-stat"),
+        // Returning Home (oracle-l5r-6299): "Reaction: After a battle ends in which you destroyed a province as the Attacker: Create a Holding with the trait
+        // "Bow this card: Produce 3 Gold" (it enters play bowed). Draw a card." -- the after-resolution window (issue #417, AfterResolution.cs; Never Safe's
+        // own "after this battle ends" reading), its condition read off PendingAfterResolution.ProvinceDestroyedBy, and Basic Lesson's own bowed Questionable
+        // Resources Holding (oracle-l5r-10024).
+        ["returning-home-create"] = new("Reaction", "After a battle ends in which you destroyed a province as the Attacker: Create a Holding with the trait \"Bow this card: Produce 3 Gold\" (it enters play bowed). Draw a card", "none",
+            Trigger: ReactionTriggers.AfterBattleResolution, Creates: new(CardType.Holding, ProxyId: "oracle-l5r-10024") { EntersBowed = true }),
+        // Rise of the Dark Naga (oracle-l5r-6343): "Open: If you control two or more Nonhuman Personalities, choose your performing Nonhuman Personality
+        // face-up in your province: Bring him into play, paying all costs. Refill the province face-up." -- Requesting Reinforcements' own province-card
+        // Target (own-personality-in-province-with-keyword) and the shared recruit entry sequence into HOME (Shinden Shorai's shape), plus Kharmic's own
+        // face-up refill; the two-Nonhumans condition is a Require (ValidateForgottenLegacyBatch4).
+        ["dark-naga-rise-recruit"] = new("Open", "If you control two or more Nonhuman Personalities, choose your performing Nonhuman Personality face-up in your province: Bring him into play, paying all costs. Refill the province face-up",
+            "own-personality-in-province-with-keyword", RequiredKeywords: ["Nonhuman"], Cost: GoldCostRule.TargetRecruit()),
+        // Seeking the Truth (oracle-l5r-6566, a Recon card): "Reaction: After engaging, choose your performing unbowed Scout at the current battlefield: You
+        // have Reconnaissance there. Put a non-Unique Battle Strategy in your discard pile into your hand. After this battle ends, if you did not destroy the
+        // battlefield's province or an army, discard a card at random." -- the Engage window's own "after-engaging" trigger, a new explicitly-at-battle
+        // keyword Performer (a Reaction is never acting as Battle, so the with-keyword at-battle category would not check the location), an optional slot
+        // for the Strategy, and a watch (MatchState.SeekingTheTruthWatches) settled once the battle ends.
+        ["seeking-truth-recon"] = new("Reaction", "After engaging, choose your performing unbowed Scout at the current battlefield: You have Reconnaissance there. Put a non-Unique Battle Strategy in your discard pile into your hand. After this battle ends, if you did not destroy the battlefield's province or an army, discard a card at random",
+            "slots", Trigger: "after-engaging", Performer: "own-unbowed-personality-with-keyword-explicitly-at-battle", RequiredKeywords: ["Scout"],
+            Slots: [new("strategy", "own-nonunique-battle-strategy-in-discard", "A non-Unique Battle Strategy in your discard pile to put into your hand", 0, 1)]),
+        // Siege Volley (oracle-l5r-7248): "Siege Battle: Ranged 4 Attack." and "Siege Absent Battle: Give the current Province a strength bonus or penalty
+        // equal to the number of Castles you control." -- the bonus-or-penalty choice is two ability ids sharing one use (Expensive Achievement's own shape).
+        ["siege-volley-attack"] = new("Battle", "Siege Battle: Ranged 4 Attack", "attack", ActionKeywords: ["Siege"]),
+        ["siege-volley-raise"] = new("Battle", "Siege Absent Battle: Give the current Province a strength bonus equal to the number of Castles you control", "none", Absent: true, ActionKeywords: ["Siege"], UsageKey: "siege-volley-strength"),
+        ["siege-volley-lower"] = new("Battle", "Siege Absent Battle: Give the current Province a strength penalty equal to the number of Castles you control", "none", Absent: true, ActionKeywords: ["Siege"], UsageKey: "siege-volley-strength"),
+        // Steadfast Defense (oracle-l5r-7477, a Kiho card): "Battle: Choose your performing Monk: Straighten him. If you control a Temple, you may target a
+        // Personality or Follower and bow or straighten it." -- the optional target is an up-front slot (Min 0), legal only while its controller has a Temple
+        // (ValidateForgottenLegacyBatch4); bow-or-straighten is the conditional follow-up choice (EffectChoice.cs), asked only when a target was chosen.
+        ["steadfast-defense-straighten"] = new("Battle", "Choose your performing Monk: Straighten him. If you control a Temple, you may target a Personality or Follower and bow or straighten it", "slots",
+            Performer: "own-personality-with-keyword-at-battle", RequiredKeywords: ["Monk"],
+            Slots: [new("target", "personality-or-follower", "If you control a Temple: a Personality or Follower to bow or straighten", 0, 1),
+                new("mode", TargetSlotKinds.FollowUp, "Bow or straighten it", 0, 0, Resolution: new(BranchCondition.TargetChosen,
+                    [new("bow", "Bow it", [BranchEffect.BowTarget]), new("straighten", "Straighten it", [BranchEffect.StraightenTarget])], new("none", "No target", [])))]),
+        // Sundering Strike (oracle-l5r-7650): "Battle: Target an enemy Personality: You may target one of his attachments and pay Gold equal to its Gold Cost
+        // minus four. If you did, destroy it. Move the Personality home." -- two slots (the second optional, one of the FIRST slot's attachments: Hiruma Sawai's
+        // own slot-relative shape), and the Gold as a Variable cost pinned to exactly zero or the attachment's Gold Cost minus four (Kanaye's own narrowing).
+        ["sundering-strike"] = new("Battle", "Target an enemy Personality: You may target one of his attachments and pay Gold equal to its Gold Cost minus four. If you did, destroy it. Move the Personality home", "slots",
+            Cost: GoldCostRule.Variable(),
+            Slots: [new("target", "enemy-personality", "Enemy Personality to move home"),
+                new("attachment", "attachment-of-slot-target", "One of his attachments to destroy (pay its Gold Cost minus 4)", 0, 1)]),
     });
 }
 
@@ -3631,6 +3702,13 @@ public sealed partial class MatchEngine
         "vengeful-attack" => 7,
         "chokichi-attack" => 4,
         "haruhiko-attack" => 3 + (HasReconnaissanceAtCurrentBattlefield(player.Id) ? 2 : 0),
+        // Forgotten Legacy pass (issue #467), batch 4. Never Beyond My Reach "Ranged 6"; Siege Volley "Ranged 4"; Pearls & Spirits reads its performing Shugenja
+        // (sourceId, ebizo-attack's shape) live -- after its own cost, so a Shugenja destroyed as the cost counts without his (now discarded) Items.
+        "never-beyond-reach-attack" => 6,
+        "siege-volley-attack" => 4,
+        "pearls-spirits-sacrifice-attack" => sourceId is not null ? CardForce(Card(sourceId)) + PersonalityChi(Card(sourceId)) : 0,
+        "pearls-spirits-force-attack" => sourceId is not null ? CardForce(Card(sourceId)) : 0,
+        "pearls-spirits-chi-attack" => sourceId is not null ? PersonalityChi(Card(sourceId)) : 0,
         _ => 0
     };
     // AttackStrength plus every passive defense modifier applying to this specific target (Destrier/
@@ -3695,6 +3773,8 @@ public sealed partial class MatchEngine
         "onizuka-attack" => "Ranged",
         // Forgotten Legacy pass (issue #467), batch 2.
         "vengeful-attack" or "chokichi-attack" or "haruhiko-attack" => "Ranged",
+        // Forgotten Legacy pass (issue #467), batch 4.
+        "never-beyond-reach-attack" or "siege-volley-attack" or "pearls-spirits-sacrifice-attack" or "pearls-spirits-force-attack" or "pearls-spirits-chi-attack" => "Ranged",
         _ => ""
     };
     // General "in play" Reaction primitive: a printed Reaction whose card must actually be in play
@@ -4362,6 +4442,8 @@ public sealed partial class MatchEngine
         // Barred Passage: "the only Personality in his army" -- none of the acting player's other Personalities stands at this battlefield.
         if (id == "barred-passage-bow") Require(Army(player.Id, _state.CurrentBattleProvince!.Value).Count(c => Definition(c).Type == CardType.Personality) == 1, "The performing Hero must be the only Personality in his army.");
         if (id is "tamoko-open" or "virtuous-charity-open") Require(_state.ActivePlayerId != player.Id, "Only usable when it is not your own turn.");
+        // Forgotten Legacy pass (issue #467), batch 4: the per-card conditions of strategy-wave-55 (ForgottenLegacyBatch4.cs).
+        ValidateForgottenLegacyBatch4(id, command, player);
         // Embers of War batch 6 (issue #460): Surveillance Outpost -- "If you have fewer Provinces than each other player, or exactly one Province" (a 2-player
         // engine, so "each other player" is the one opponent; live province count, per Player.Provinces, excludes destroyed provinces).
         if (id == "surveillance-outpost-conqueror") Require(player.Provinces.Count(p => !p.Destroyed) is var mine && (mine < Player(1 - player.Id).Provinces.Count(p => !p.Destroyed) || mine == 1),
@@ -4673,6 +4755,11 @@ public sealed partial class MatchEngine
                 // Help from the Shadows (oracle-l5r-3055, issue #460): "your performing Personality in a Ninja unit" -- a UNIT-membership keyword check
                 // (the Personality himself, or any of his attached Followers, carries Ninja), not a keyword on the Personality alone.
                 "own-personality-in-ninja-unit" => Definition(performer).Type == CardType.Personality && (Keyword(performer, "Ninja") || Attachments(UnitHostId(performer)).Any(a => Keyword(a, "Ninja"))),
+                // Forgotten Legacy pass (issue #467), batch 4 (ForgottenLegacyBatch4.cs). Never Beyond My Reach: "your performing unbowed Kensai, who may be at an adjacent
+                // battlefield to the current one if he has a Weapon attached"; Seeking the Truth: "your performing unbowed Scout at the current battlefield" on a Reaction
+                // (never acting as Battle, so the location is checked explicitly).
+                "own-unbowed-personality-with-keyword-at-battle-or-adjacent-with-weapon" => AtBattleOrAdjacentWithWeapon(performer, ability),
+                "own-unbowed-personality-with-keyword-explicitly-at-battle" => Definition(performer).Type == CardType.Personality && !performer.Bowed && AtBattle(performer) && HasKeywords(performer, ability.RequiredKeywords),
                 // Hiruma Akio - exp: "Bow your performing Personality or Follower" -- an unbowed unit card of the player's at the current battlefield.
                 "own-unbowed-unit-at-battle" => Definition(performer).Type is CardType.Personality or CardType.Follower && !performer.Bowed && AtBattle(performer),
                 // Spirit of the Blade's granted action: "Bow one of this Personality's Weapons" -- an unbowed Weapon attached to the source.
@@ -4994,6 +5081,10 @@ public sealed partial class MatchEngine
                 else if (ability.Target == "own-nonunique-strategy-in-discard")
                     Require(target.OwnerId == player.Id && type == CardType.Strategy && !Keyword(target, "Unique") && target.Zone == Zone.FateDiscard,
                         "Choose a non-Unique Strategy card from your Fate discard pile.");
+                // Seeking the Truth (issue #467, batch 4): "a non-Unique Battle Strategy in your discard pile" -- a Strategy with a Battle (or Battle/Open) action.
+                else if (ability.Target == "own-nonunique-battle-strategy-in-discard")
+                    Require(target.OwnerId == player.Id && type == CardType.Strategy && !Keyword(target, "Unique") && target.Zone == Zone.FateDiscard && IsBattleStrategy(target),
+                        "Choose a non-Unique Battle Strategy from your Fate discard pile.");
                 else if (ability.Target == "own-kiho-strategy-in-discard")
                     Require(target.OwnerId == player.Id && type == CardType.Strategy && Keyword(target, "Kiho") && target.Zone == Zone.FateDiscard,
                         "Choose a Kiho Strategy card from your Fate discard pile.");
@@ -5103,7 +5194,7 @@ public sealed partial class MatchEngine
                     // (it is discarded when its battle resolves), so exempting the whole category is exact.
                     // Return to Action (issue #331): "your Personality at HOME" is by definition not at the battlefield
                     // -- own-personality-at-home is exempt for the same reason.
-                    if (actingAsBattle && ability.Target is not ("personality-at-adjacent-battlefield" or "own-unbowed-farm" or "region-or-terrain" or "own-personality-at-home" or "personality-at-any-location" or "own-follower-at-any-location" or "enemy-personality-at-any-location")
+                    if (actingAsBattle && ability.Target is not ("personality-at-adjacent-battlefield" or "own-unbowed-farm" or "region-or-terrain" or "own-personality-at-home" or "personality-at-any-location" or "own-follower-at-any-location" or "enemy-personality-at-any-location" or "enemy-personality-not-at-battle")
                         && id is not ("intervening-spirit-move" or "earth-flows-move" or "sanctuary-of-the-waves-move" or "dislodge-the-foe" or "heijin-move"
                             or "natures-wrath-move" or "irezu-move" or "mitsushen-move" or "pronouncement-guilt-move")) Require(AtBattle(target), "Target or performer must be at the current battlefield."); // Nature's Wrath (issue #453 batch 5): its target is brought TO the battlefield; Irezu (issue #458) moves the target HOME from wherever he stands; Mitsushen (issue #458) brings his target TO his own battlefield from wherever it stands; Pronouncement of Guilt (issue #460) brings its enemy target TO the battlefield the same way
                     var personality = type == CardType.Personality;
@@ -5223,6 +5314,14 @@ public sealed partial class MatchEngine
                         // anywhere but the current battlefield while acting as Battle. Sheathing the Sword (oracle-l5r-6727) and Tactical Trap (oracle-l5r-7717) are its
                         // first two consumers.
                         "enemy-personality-at-any-location" => personality && !own && (!actingAsBattle || AtAnyLocation(target)),
+                        // Forgotten Legacy pass (issue #467), batch 4. Intimidation: "another player's Personality not at the current battlefield" -- at home or at another
+                        // unresolved battlefield (AtAnyLocation), never the current one (exempt from the AtBattle Require above, since that is the point).
+                        "enemy-personality-not-at-battle" => personality && !own && AtAnyLocation(target) && !AtBattle(target),
+                        // Steadfast Defense: "a Personality or Follower" (either side's; at the current battlefield while acting as Battle, the ordinary check above).
+                        "personality-or-follower" => personality || type == CardType.Follower && target.Zone == Zone.Attached,
+                        // Sundering Strike: "one of his attachments" -- attached to the card chosen for the ability's "target" slot (Hiruma Sawai's slot-relative shape).
+                        "attachment-of-slot-target" => target.Zone == Zone.Attached && type is CardType.Follower or CardType.Item or CardType.Spell
+                            && SlotCards(command, "target").FirstOrDefault() is { } attachmentHost && target.AttachedTo == attachmentHost.Id,
                         // Thick Marsh (oracle-l5r-8445, issue #460 batch 4): its "bow an enemy card at the current battlefield" is a Reaction (Trigger
                         // own-enters-play), not a Battle-timed ability, so the generic actingAsBattle AtBattle enforcement below never applies to it --
                         // an explicit AtBattle check is required here instead (distinct from the plain "enemy-card" category, which several Battle-timed
@@ -8225,6 +8324,26 @@ public sealed partial class MatchEngine
             case "swell-of-strength-attack": ApplyModifier(target!, source!.Id, id, "Force", -CardForce(target!)); break;
             case "distant-reaches-bow": foreach (var slotAttachment in SlotCards(command, "target").ToArray()) slotAttachment.Bowed = true; break;
             case "ki-rins-path-boost": AddPermanentModifier(source!, source!.Id, id, "Force", 1); GrantKeyword(source!, "Cavalry", id, GrantDuration.Permanent); break;
+            // Forgotten Legacy pass (issue #467), batch 4 (helpers in ForgottenLegacyBatch4.cs).
+            case "intimidation-move": IntimidationMove(command, ability, source, target!); break;
+            case "never-beyond-reach-attack": case "siege-volley-attack":
+            case "pearls-spirits-sacrifice-attack": case "pearls-spirits-force-attack": case "pearls-spirits-chi-attack":
+                if (ResolveOrDeferAttack(id, player, target?.Id, ability.Performer is null ? null : command.PerformerId, consumedGrant)) return;
+                break;
+            case "returning-home-create":
+                if (ExecuteCreate(ability, ability.Creates!, command, player, () => Draw(player))) return;
+                break;
+            case "dark-naga-rise-recruit":
+                SpendHandPlayedCard(player, source);
+                if (RiseOfTheDarkNagaRecruit(player, target!)) return;
+                break;
+            case "seeking-truth-recon": SeekingTheTruth(command, player); break;
+            case "siege-volley-raise": case "siege-volley-lower": SiegeVolleyStrength(player.Id, id == "siege-volley-raise"); break;
+            case "steadfast-defense-straighten":
+                Straighten(Card(command.PerformerId!));
+                if (BeginConditionalChoice(command, ability, consumedGrant, playedFromDiscard, opponentHonorBeforeBattleAction, bowedBeforeAction, preExistingGrants)) return;
+                break;
+            case "sundering-strike": SunderingStrike(command, target!, player.Id); break;
             default:
                 // Any ability with an AttachSpec (Moto Jun-Ni, Fading Shadows, Foothills Keep and the training shapes) needs no case of its own: the Gold was
                 // paid by PayForAbility, so the card now leaves its place and enters play attached. An entering-play window ends the action here.
@@ -8987,6 +9106,9 @@ public sealed partial class MatchEngine
                 "own-personality-with-keyword" => _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && Definition(c).Type == CardType.Personality && HasKeywords(c, ability.RequiredKeywords)).Select(c => (string?)c.Id).ToArray(),
                 // Help from the Shadows (issue #460): mirrors the Performer validation switch's own own-personality-in-ninja-unit above.
                 "own-personality-in-ninja-unit" => _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && Definition(c).Type == CardType.Personality && (Keyword(c, "Ninja") || Attachments(UnitHostId(c)).Any(a => Keyword(a, "Ninja")))).Select(c => (string?)c.Id).ToArray(),
+                // Forgotten Legacy pass (issue #467), batch 4: the listing twins of the two Performer categories above.
+                "own-unbowed-personality-with-keyword-at-battle-or-adjacent-with-weapon" => _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && AtBattleOrAdjacentWithWeapon(c, ability)).Select(c => (string?)c.Id).ToArray(),
+                "own-unbowed-personality-with-keyword-explicitly-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && !c.Bowed && AtBattle(c) && HasKeywords(c, ability.RequiredKeywords)).Select(c => (string?)c.Id).ToArray(),
                 "own-unbowed-weapon-of-source" => _state.Cards.Values.Where(c => c.OwnerId == playerId && c.Zone == Zone.Attached && c.AttachedTo == source?.Id && !c.Bowed && Definition(c).Type == CardType.Item && Keyword(c, "Weapon")).Select(c => (string?)c.Id).ToArray(),
                 "own-unbowed-unit-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && Definition(c).Type is CardType.Personality or CardType.Follower && !c.Bowed && AtBattle(c)).Select(c => (string?)c.Id).ToArray(),
                 "own-personality-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && (!actingAsBattle || AtBattle(c))).Select(c => (string?)c.Id).ToArray(),
