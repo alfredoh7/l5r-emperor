@@ -23,7 +23,7 @@ namespace L5R.Core;
 //     performer, judged once on the whole selection (ValidateAbility).
 
 /// <summary>One printed ability (by UsageKey, else id) of one card that may not be used on turn <paramref name="Turn"/>.</summary>
-public sealed record DisabledAbility(string CardId, string UsageKey, int Turn, string Source);
+public sealed record DisabledAbility(string CardId, string UsageKey, int Turn, string Source, int? UntilPlayerId = null, int UntilTurnsTaken = 0);
 
 /// <summary>Asahina Shigemitsu: <paramref name="PlayerId"/> gains 1 Honor before turn <paramref name="Turn"/> ends if none of his provinces was destroyed that turn.</summary>
 public sealed record ProvincesHeldHonorCheck(int PlayerId, string SourceCardId, int Turn);
@@ -89,7 +89,8 @@ public sealed partial class MatchEngine
     private bool AbilityDisabled(CardInstance card, string abilityId)
     {
         var key = AbilityUsageKey(abilityId);
-        return _state.DisabledAbilities.Any(d => d.CardId == card.Id && d.UsageKey == key && d.Turn == _state.TurnNumber);
+        return BattleAbilityLocked(card) // Yoritomo Naoto (issue #477): every ability of a card that was in the unit, until the battle ends.
+            || _state.DisabledAbilities.Any(d => d.CardId == card.Id && (d.UsageKey == key || d.UsageKey == AllAbilitiesUsageKey) && DisabledAbilityHolds(d)); // AllAbilitiesUsageKey: Ninube Onchi
     }
 
     private void RequireAbilityNotDisabled(GameCommand command, CardInstance? source)
@@ -107,7 +108,7 @@ public sealed partial class MatchEngine
 
     private void DisableAbility(CardInstance card, string usageKey, string source)
     {
-        _state.DisabledAbilities.RemoveAll(d => d.Turn != _state.TurnNumber);
+        _state.DisabledAbilities.RemoveAll(d => !DisabledAbilityHolds(d));
         _state.DisabledAbilities.Add(new(card.Id, usageKey, _state.TurnNumber, source));
         Emit("abilityDisabled", $"{source}: one of {Definition(card).Name}'s abilities may not be used this turn.", card.OwnerId, card.Id);
     }
@@ -121,7 +122,7 @@ public sealed partial class MatchEngine
         if (options.Length == 0) return false;
         if (options.Length == 1)
         {
-            foreach (var effect in options[0].Effects) ApplyForgottenLegacyBatch1BranchEffect(effect, command);
+            foreach (var effect in options[0].Effects) if (!ApplyForgottenLegacyBatch1BranchEffect(effect, command)) ApplyEmperorBatch4BranchEffect(effect, command);
             return false;
         }
         _state.PendingEffectChoice = new()

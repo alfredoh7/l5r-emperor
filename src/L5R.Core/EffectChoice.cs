@@ -48,6 +48,8 @@ public static class BranchCondition
     /// <summary>The action's optional target was chosen (Forgotten Legacy pass, issue #467, batch 4 -- Steadfast Defense: "you may target a Personality or Follower and bow or
     /// straighten it" asks bow-or-straighten only when a target was named).</summary>
     public const string TargetChosen = "target-chosen";
+    /// <summary>The target is Kolat, Ninja, or Shadowlands (Emperor Edition Personality pass, issue #477 -- Asako Tsunefusa's second sentence).</summary>
+    public const string TargetKolatNinjaOrShadowlands = "target-kolat-ninja-or-shadowlands";
 }
 
 /// <summary>Effects an option may apply. Each goes through the same helper an ordinary effect would, so a negation a reaction set
@@ -123,6 +125,7 @@ public sealed partial class MatchEngine
         BranchCondition.TargetAtBattlefield => target is not null && target.Zone == Zone.Battlefield,
         BranchCondition.ProvinceHoldsCard => CurrentBattlefieldProvince() is { CardId: not null },
         BranchCondition.TargetChosen => target is not null,
+        BranchCondition.TargetKolatNinjaOrShadowlands => target is not null && MatchesTargetStatus(target, TargetStatus.KolatNinjaOrShadowlands),
         _ when condition.StartsWith("wielder-has:", StringComparison.Ordinal) => source.AttachedTo is { } wielderId && Keyword(Card(wielderId), condition["wielder-has:".Length..]),
         _ => throw new InvalidOperationException($"Unknown branch condition '{condition}'.")
     };
@@ -139,6 +142,7 @@ public sealed partial class MatchEngine
             return;
         }
         if (ApplyForgottenLegacyBatch1BranchEffect(effect, command)) return;
+        if (ApplyEmperorBatch4BranchEffect(effect, command)) return; // Emperor Edition Personality pass (issue #477), batch 4.
         switch (effect)
         {
             case BranchEffect.MoveSourceHome: MoveHome(source, false); break;

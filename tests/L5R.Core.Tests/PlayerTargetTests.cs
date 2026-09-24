@@ -86,7 +86,7 @@ internal static class PlayerTargetTests
         var openChoosers = new[] { "know-their-minds-choose", "tarao-sacrifice" };
         Check(singles.Where(p => !openChoosers.Contains(p.Key)).All(p => p.Value.Timing == "Reaction" && p.Value.Trigger == "own-enters-play") && singles.Where(p => openChoosers.Contains(p.Key)).All(p => p.Value.Timing == "Open"), "the entering-play Reactions, and the two Open actions that choose a player");
         var slotted = AbilityCatalog.All.Where(p => p.Value.Slots?.Any(s => s.IsPlayer) == true).Select(p => p.Key).OrderBy(k => k, StringComparer.Ordinal).ToArray();
-        Eq(string.Join(",", slotted), "fear-me-move,training-slots-mixed,yoshitada-bow");
+        Eq(string.Join(",", slotted), "fear-me-move,training-slots-mixed,tsunefusa-bow,yoshitada-bow"); // tsunefusa-bow: Asako Tsunefusa (issue #477 batch 5), a Yoshitada-shaped bow with a player follow-up
         // No card prints two player-target reactions of different kinds: Horume and the fixture print exactly a gain and a lose.
         // The entry-reaction window lists every own-enters-play reaction a card prints; only these cards print more than one, so no other card's listing changes.
         var several = CardCatalog.Cards.Values.Where(c => (c.Abilities ?? []).Count(a => AbilityCatalog.All.TryGetValue(a, out var d) && d.Timing == "Reaction" && d.Trigger == "own-enters-play") > 1)

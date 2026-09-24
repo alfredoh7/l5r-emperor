@@ -104,7 +104,11 @@ public static class SearchCatalog
     public static SearchSpec NakaMahatsu { get; } = new("naka-mahatsu", "Search your Fate deck for a card with Thunder or an element keyword",
         [new(SearchDeck.Fate, new("card with Thunder or an element keyword", AnyKeywords: ["Thunder", "Air", "Earth", "Fire", "Water", "Void"]), SearchEffect.ToHand)]);
 
-    public static IReadOnlyDictionary<string, SearchSpec> All { get; } = new[] { IkomaShizuka, ImperialGift, TrainingCheap, TrainingFocus, TrainingOptional, NakaMahatsu }
+    /// <summary>Yung (oracle-l5r-9697, Emperor Edition Personality pass, issue #477 batch 6): "Search your Fate deck for a Ring, show it, and put it in your hand."</summary>
+    public static SearchSpec YungRing { get; } = new("yung-ring", "Search your Fate deck for a Ring",
+        [new(SearchDeck.Fate, new("Ring", [CardType.Ring]), SearchEffect.ToHand)]);
+
+    public static IReadOnlyDictionary<string, SearchSpec> All { get; } = new[] { IkomaShizuka, ImperialGift, TrainingCheap, TrainingFocus, TrainingOptional, NakaMahatsu, YungRing }
         .ToDictionary(s => s.Id, StringComparer.Ordinal);
 
     /// <summary>The search an Event carries in its Effect (an Event has no abilities of its own to hang a spec on).</summary>
@@ -300,7 +304,7 @@ public sealed partial class MatchEngine
     {
         var player = Player(search.PlayerId);
         SearchDeckList(player, search.Deck!).Remove(card.Id);
-        card.Zone = Zone.Hand; player.Hand.Add(card.Id);
+        card.Zone = Zone.Hand; player.Hand.Add(card.Id); NoteCardIntoHand(player.Id); // Isawa Kimi - exp 2 (issue #477, batch 5)
         Emit("searchToHand", $"{player.Name} put {Definition(card).Name} into their hand.", player.Id);
     }
 

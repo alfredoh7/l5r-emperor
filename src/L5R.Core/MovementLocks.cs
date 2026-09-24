@@ -34,7 +34,7 @@ public sealed partial class MatchEngine
     // A card whose movement of this kind is locked stays where it is; the effect that moved it goes on with whatever else it does.
     private bool MovementLockNegates(CardInstance card, MovementKinds kind)
     {
-        if (!MovementLocked(card, kind)) return false;
+        if (!MovementLocked(card, kind) || HiromiUnnegatable()) return false; // Yoritomo Hiromi (issue #477): the movement from her Battle actions will not be negated.
         Emit("moveNegated", $"{Definition(card).Name}'s movement was negated: it may not move this turn.", card.OwnerId, card.Id);
         // A "next movement" lock is spent by the movement it just negated (Shinjo Junpei); a turn-long lock negating the same movement is not.
         card.MovementLocks.RemoveAll(l => l.NextOnly && l.Turn == _state.TurnNumber && (l.Kinds & kind) != 0 && MovementLockHolds(l));

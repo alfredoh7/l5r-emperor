@@ -87,7 +87,7 @@ public sealed partial class MatchEngine
     // his controller), his trait has not fired this turn, and the movement is not one that "will not be negated" (MovementCannotBeNegated). The stamp makes it once a turn.
     private bool EnemyActionMovementAutoNegated(CardInstance card)
     {
-        if (Definition(card).Effect != NegateFirstEnemyMoveEachTurnEffect || !InPlay(card)) return false;
+        if (Definition(card).Effect != NegateFirstEnemyMoveEachTurnEffect || !InPlay(card) || HiromiUnnegatable()) return false; // Yoritomo Hiromi (issue #477).
         if (_runningCommand is not { } acting || acting.PlayerId == card.OwnerId || MovementCannotBeNegated(acting)) return false;
         if (card.AbilityUses.TryGetValue(EnemyMoveNegatedTurnKey, out var turn) && turn == _state.TurnNumber) return false;
         card.AbilityUses[EnemyMoveNegatedTurnKey] = _state.TurnNumber;

@@ -15,7 +15,7 @@ public sealed partial class MatchEngine
     // read as the destruction resolves, which for one action's effects is the moment it was performed.
     private bool NegishiNegatesDestruction(CardInstance card)
     {
-        if (Definition(card).Effect != NegishiShieldEffect || CurrentActionPerformer() is not { } performer) return false;
+        if (Definition(card).Effect != NegishiShieldEffect || HiromiUnnegatable() || CurrentActionPerformer() is not { } performer) return false; // Yoritomo Hiromi (issue #477): not against her Battle actions.
         if (UnitTotalGoldCost(performer, out _) >= UnitTotalGoldCost(card, out _)) return false;
         Emit("destructionNegated", $"{Definition(card).Name}'s destruction was negated: the performing unit's total Gold Cost was lower than his own.", card.OwnerId, card.Id);
         return true;

@@ -1,0 +1,347 @@
+{
+  "Profile": "personality-wave-69",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-3108",
+      "Name": "Hida Horu",
+      "Type": "Personality",
+      "Clan": "Crab",
+      "GoldCost": 9,
+      "GoldProduction": 0,
+      "Force": 8,
+      "Chi": 3,
+      "PersonalHonor": 1,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Horu does not contribute Force to his army during battle resolution while there are two or more units in his army.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-3108.jpg",
+      "Keywords": [
+        "Berserker",
+        "Crab Clan",
+        "Soul of Hida Hebi"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "horu-crowded-army-no-force"
+    },
+    {
+      "Id": "oracle-l5r-3127",
+      "Name": "Hida Kisada (Emperor)",
+      "Type": "Personality",
+      "Clan": "Crab",
+      "GoldCost": 12,
+      "GoldProduction": 0,
+      "Force": 7,
+      "Chi": 5,
+      "PersonalHonor": 3,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: When another player's Battle action would target Kisada: He outmaneuvers it. Choose another Personality you control at Kisada's location. The action targets the Personality instead, if legal.\nBattle: Target an enemy card with lower Force: Destroy it.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-3127.jpg",
+      "Keywords": [
+        "Kensai",
+        "Loyal",
+        "Tactician",
+        "Unique",
+        "Clan Champion",
+        "Crab Clan",
+        "Little Bear",
+        "Samurai",
+        "Siege"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "kisada-redirect",
+        "kisada-destroy"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-3130",
+      "Name": "Hida Komatsu",
+      "Type": "Personality",
+      "Clan": "Crab",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 6,
+      "Chi": 2,
+      "PersonalHonor": 1,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Target an enemy Follower or Personality with lower Force and no attachments: Bow it.\nBattle: Target an enemy attachment: Destroy it.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-3130.jpg",
+      "Keywords": [
+        "Unique",
+        "Berserker",
+        "Crab Clan",
+        "Hero",
+        "Soul of Hida Rikyu Experienced"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "komatsu-bow",
+        "komatsu-destroy-attachment"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-3200",
+      "Name": "Hida Takeuchi",
+      "Type": "Personality",
+      "Clan": "Crab",
+      "GoldCost": 6,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 2,
+      "PersonalHonor": 1,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After the resolution of an action that attached a Follower from your hand to Takeuchi: Draw a card.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-3200.jpg",
+      "Keywords": [
+        "Crab Clan",
+        "Samurai",
+        "Soul of Hida Kosedo"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "takeuchi-draw"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-3227",
+      "Name": "Hida Watari",
+      "Type": "Personality",
+      "Clan": "Crab",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 5,
+      "Chi": 2,
+      "PersonalHonor": 1,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "While Watari has exactly one Follower, that Follower has Cavalry.\nFear Battle: Target an enemy unit: Bow all Followers with 3 or lower Force in it.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-3227.jpg",
+      "Keywords": [
+        "Cavalry",
+        "Unique",
+        "Crab Clan",
+        "Samurai",
+        "Soul of Hida Tobashi",
+        "Veteran",
+        "Wyrm Rider"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "watari-fear-bow"
+      ],
+      "Effect": "watari-sole-follower-cavalry"
+    },
+    {
+      "Id": "oracle-l5r-4109",
+      "Name": "Kaiu Esumi",
+      "Type": "Personality",
+      "Clan": "Crab",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Ranged 4 Attack. If this targeted a card, give the current battlefield's province +2 or -2 strength.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-4109.jpg",
+      "Keywords": [
+        "Tactician",
+        "Crab Clan",
+        "Samurai",
+        "Siege"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "esumi-attack-raise",
+        "esumi-attack-lower"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-4115",
+      "Name": "Kaiu Hideaki",
+      "Type": "Personality",
+      "Clan": "Crab",
+      "GoldCost": 4,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 2,
+      "PersonalHonor": 2,
+      "HonorRequirement": 3,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After engaging at Hideaki's battlefield: Increase its province's strength by 3 until the battle's resolution begins.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-4115.jpg",
+      "Keywords": [
+        "Crab Clan",
+        "Samurai",
+        "Siege",
+        "Soul of Kaiu Seison"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "hideaki-province"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-4587",
+      "Name": "Kuni Shinoda",
+      "Type": "Personality",
+      "Clan": "Crab",
+      "GoldCost": 4,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 2,
+      "PersonalHonor": 2,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: If any enemy units are at the current battlefield and Shinoda is at another battlefield: You may target another Crab Clan Personality at Shinoda's battlefield. Move Shinoda and the target, if any, to the current battlefield.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-4587.jpg",
+      "Keywords": [
+        "Crab Clan",
+        "Earth",
+        "Shugenja",
+        "Soul of Kuni Yasashii"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "shinoda-move"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-8651",
+      "Name": "Toritaka Shishido",
+      "Type": "Personality",
+      "Clan": "Crab",
+      "GoldCost": 6,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 3,
+      "PersonalHonor": 3,
+      "HonorRequirement": 3,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Ranged Attacks from actions performed by cards in Shishido's army have +1 strength.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8651.jpg",
+      "Keywords": [
+        "Crab Clan",
+        "Samurai",
+        "Scout",
+        "Soul of Toritaka Okabe"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "shishido-ranged-bonus"
+    },
+    {
+      "Id": "oracle-l5r-3638",
+      "Name": "Ikoma Shinju",
+      "Type": "Personality",
+      "Clan": "Lion",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": 2,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Target a Terrain and an enemy card without attachments: Destroy both targets.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-3638.jpg",
+      "Keywords": [
+        "Lion Clan",
+        "Samurai",
+        "Scout"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "shinju-destroy"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-4916",
+      "Name": "Matsu Hana",
+      "Type": "Personality",
+      "Clan": "Lion",
+      "GoldCost": 9,
+      "GoldProduction": 0,
+      "Force": 5,
+      "Chi": 3,
+      "PersonalHonor": 4,
+      "HonorRequirement": 6,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Fear Battle: Target an enemy unit: Bow each card in it with equal or lower Force than Hana. Gain 1 Honor for each card this bowed.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-4916.jpg",
+      "Keywords": [
+        "Unique",
+        "Lion Clan",
+        "Paragon",
+        "Samurai",
+        "Soul of Matsu Fumiyo Experienced"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "hana-bow"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-5010",
+      "Name": "Matsu Yuuto",
+      "Type": "Personality",
+      "Clan": "Lion",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 4,
+      "PersonalHonor": 2,
+      "HonorRequirement": 5,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Ranged Attacks may not target cards in this unit.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-5010.jpg",
+      "Keywords": [
+        "Cavalry",
+        "Lion Clan",
+        "Samurai",
+        "Soul of Matsu Agetoki"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "yuuto-unit-ranged-immune"
+    }
+  ],
+  "Decks": []
+}

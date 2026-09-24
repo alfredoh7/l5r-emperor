@@ -105,7 +105,7 @@ public sealed partial class MatchEngine
         if (command?.AbilityId is null || !AbilityCatalog.All.TryGetValue(command.AbilityId, out var ability)) return false;
         var source = command.CardId is not null && _state.Cards.TryGetValue(command.CardId, out var s) ? s : null;
         var performer = ActionPerformer(ability, command, source);
-        return Protected(performer)
+        return Protected(performer) || HiromiProtects(command) // Yoritomo Hiromi (issue #477)
             || Attachments(performer.Id).Any(a => Definition(a).Effect == "ki-uso-protect-political") && ActionCarriesKeyword(ability, source, "Political");
     }
 
