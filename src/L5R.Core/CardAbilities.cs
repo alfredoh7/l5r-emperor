@@ -4453,7 +4453,6 @@ public sealed partial class MatchEngine
             // strength is compared to (see AttackTargeting.cs) -- identical to CardForce for every target
             // that needs no Follower exception.
             if (InPlay(target) && AtBattle(target) && AttackComparedValue(abilityId, target) <= strength)
-            if (InPlay(target) && AtBattle(target) && AttackComparedForce(target, abilityId) <= strength)
             {
                 DestroyAttackTarget(target, playerId);
             }
