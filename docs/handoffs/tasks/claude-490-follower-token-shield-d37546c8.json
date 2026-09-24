@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Follower tokens shield their Personality from Ranged/Melee Attacks like Follower cards (Mendon's ruling); Items, Spells and Weapon/Armor tokens still only count as attachments for 'without attachments' effects. IsFollowedPersonality counts Follower tokens; NoAttachmentsFilter pins the ruling. Shared because the change is rules code plus a test and a decision doc; no UI or wire change.",
+  "validation": "Core suite 0 failures (1535 pass)",
+  "remaining": "None; ready for review.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/490",
+  "branch": "claude/490-follower-token-shield",
+  "updated": "2026-09-24T22:42:33.017020+00:00"
+}
