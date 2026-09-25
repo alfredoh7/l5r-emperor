@@ -2622,4 +2622,8 @@ public static class PublishedContent
     public static PublishedSnapshot ItemWave17 { get; } = Load("L5R.Published.ItemWave17.json", "item-wave-17", requireDecks: false);
     /// <summary>Personality wave 80 (Emperor Edition follow-ups, issue #498): Asako Chukage (Forgotten Legacy printing).</summary>
     public static PublishedSnapshot PersonalityWave80 { get; } = Load("L5R.Published.PersonalityWave80.json", "personality-wave-80", requireDecks: false);
+    /// <summary>Personality wave 92 (issue #501, mechanics group D): Daidoji Narizane and Daigotsu Yajinden - exp3 (EmperorMechD.cs).</summary>
+    public static PublishedSnapshot PersonalityWave92 { get; } = Load("L5R.Published.PersonalityWave92.json", "personality-wave-92", requireDecks: false);
+    /// <summary>Strategy wave 78 (issue #501, mechanics group D): Broken Cipher, Indecision and Amazing Feat (EmperorMechD.cs).</summary>
+    public static PublishedSnapshot StrategyWave78 { get; } = Load("L5R.Published.StrategyWave78.json", "strategy-wave-78", requireDecks: false);
 }
