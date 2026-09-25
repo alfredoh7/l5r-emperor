@@ -285,6 +285,7 @@ public sealed partial class MatchEngine
         FinishSpentBeforeBattleItem();
         FinishTwistOfFateAction(twistWasActive);
         OpenAssignedReactionWindow(); // Chrysanthemum Blossom (issue #492 group G): "After this Personality is assigned".
+        CheckInokuchiWatches(); // Mirumoto Inokuchi (issue #501, EmperorMechA.cs): "If you don't, bow him" -- once his additional action is gone without being taken.
     }
     private void ApplyCore(GameCommand command)
     {
@@ -595,9 +596,11 @@ public sealed partial class MatchEngine
             if (command.Type=="useAbility") CheckFirstActionRestriction(command);
             _state.FirstActionRestriction=null;
         }
+        NoteBattleActionTaken(command); // One Action, Two Strikes (issue #501, EmperorMechA.cs): "if the enemy leader has taken any Battle actions during this battle"
         switch(command.Type)
         {
             case "pass": Pass(); break;
+            case "declineAdditionalAction": DeclineAdditionalAction(command); break; // Mendon's item 2 (issue #501): declining a "may" additional action is not passing
             case "purchase": Purchase(command); break;
             case "overlay": Overlay(command); break;
             case "discardProvince": DiscardProvince(command); break;
@@ -1305,11 +1308,15 @@ public sealed partial class MatchEngine
         switch(_state.Phase)
         {
             case Phase.Action:
-                // An additional action in the Action phase (Seeds of Decay, issue #453: Daigotsu Yamato, Shinjo Katsuo) is forfeited by a pass, as in a battle below.
-                _state.AdditionalActions.RemoveAll(g=>g.PlayerId==_state.PriorityPlayerId && Forfeitable(g));
-                if(++_state.ConsecutivePasses==2) SetPhase(Phase.AttackDeclaration,_state.ActivePlayerId);
-                else _state.PriorityPlayerId=1-_state.PriorityPlayerId;
+            {
+                // An additional action in the Action phase (Seeds of Decay, issue #453: Daigotsu Yamato, Shinjo Katsuo) may be taken as a pass (Mendon's item 2, issue #501): the pass spends one
+                // grant, and the holder keeps the priority while he holds another. Only both players passing in succession ends the phase (CountPass), not one player passing twice.
+                var passer=_state.PriorityPlayerId;
+                var keeps=PassSpendsAdditionalAction(passer);
+                if(CountPass(passer)) { _state.AdditionalActions.RemoveAll(Forfeitable); SetPhase(Phase.AttackDeclaration,_state.ActivePlayerId); }
+                else _state.PriorityPlayerId=keeps?passer:1-passer;
                 break;
+            }
             // The Declaration Segment: passing IS declining to attack, and a declined attack ends the Attack Phase
             // right here -- no battlefield exists, so there are no Maneuvers segments and no defender prompts.
             case Phase.AttackDeclaration: DeclineAttackPhase(); break;
@@ -1339,9 +1346,12 @@ public sealed partial class MatchEngine
     // The rest of a pass in the Combat Segment (Pass, and the Killing Grounds decision that interrupts it).
     private void FinishBattlePass()
     {
-        _state.AdditionalActions.RemoveAll(g=>g.PlayerId==_state.PriorityPlayerId && Forfeitable(g));
-        EndAttackerLeadIfCeded(_state.PriorityPlayerId,false); // Entrenched Position (Forgotten Legacy pass, issue #467 batch 3)
-        if(++_state.ConsecutivePasses==2) ResolveBattle(); else _state.PriorityPlayerId=1-_state.PriorityPlayerId;
+        // Mendon's item 2 (issue #501, EmperorMechA.cs): a pass by a player holding additional actions is one of them taken as a pass -- it spends one grant, and he keeps the priority while he holds
+        // another; the battle resolves only when both players have passed in succession (CountPass), never on one player's passes alone.
+        var passer=_state.PriorityPlayerId;
+        var keeps=PassSpendsAdditionalAction(passer);
+        EndAttackerLeadIfCeded(passer,keeps); // Entrenched Position (Forgotten Legacy pass, issue #467 batch 3)
+        if(CountPass(passer)) ResolveBattle(); else _state.PriorityPlayerId=keeps?passer:1-passer;
     }
 
     private void DiscardProvince(GameCommand command)
@@ -1716,15 +1726,18 @@ public sealed partial class MatchEngine
         if(RendTheSoulTiesBattle(a,d,attackerWon,defenderWon)) { attackerWon=false; defenderWon=false; }
         // What the resolution did, for the Reactions that name it (AfterResolution.cs).
         var destroyedByPlayer=new int[2]; var provinceDestroyedNow=false; var losers=new List<int>();
+        // Aramasu's Legacy (issue #501, EmperorMechA.cs): during its Attack Phase "battle resolution does not destroy defending armies or provinces", and a win is recorded "(even against no units)".
+        var aramasuSpares=AramasuResolutionActive(attacker);
+        if(aramasuSpares && attackerWon) NoteAramasuBattleWon();
         if(attackerWon)
         {
             // Yoritomo Iwashi (issue #453, batch 3): every Personality of the winning attacking army remembers this victory (SeedsOfDecayBatch3.cs).
             MarkAttackVictory(a);
-            var destroyedDefenders=DestroyUnits(d);
+            var destroyedDefenders=aramasuSpares?0:DestroyUnits(d);
             destroyedByPlayer[attacker]=destroyedDefenders; losers.Add(defender);
             if(!RehonorWinners(a)) { GainHonor(attacker,destroyedDefenders*2,"Battle victory"); CheckEarthFlowsBonus(attacker,a); }
             var province=battleProvince;
-            var destroyedProvince=province is not null && !PerfectMomentBarsDestruction(attacker) && af>df+EffectiveProvinceStrength(province) && !RendBarsProvinceDestruction(attacker); // Rend the Soul (issue #498): "You will not destroy the province in this battle's resolution"
+            var destroyedProvince=province is not null && !aramasuSpares && !PerfectMomentBarsDestruction(attacker) && af>df+EffectiveProvinceStrength(province) && !RendBarsProvinceDestruction(attacker); // Rend the Soul (issue #498): "You will not destroy the province in this battle's resolution"
             if(destroyedProvince) { DestroyProvince(defender,province!); NotePerfectMomentDestruction(attacker); }
             if(destroyedProvince) AfterProvinceDestroyedByResolution(attacker,defender,province!,a); // Alter History, Boastful Proclamation (issue #492, group F).
             provinceDestroyedNow=destroyedProvince;
@@ -1762,7 +1775,7 @@ public sealed partial class MatchEngine
             // penalty (MarkDead) on top of this battle's own gain negation.
             var attackerHadDishonorable=RehonorWinners(a);
             var defenderHadDishonorable=RehonorWinners(d);
-            var destroyedA=DestroyUnits(a); var destroyedD=DestroyUnits(d);
+            var destroyedA=DestroyUnits(a); var destroyedD=aramasuSpares?0:DestroyUnits(d); // Aramasu's Legacy (issue #501): the defending army is not destroyed, the attacking one is
             // A tie: both players are the battle's loser (Mendon, issue #417: Tales of Dishonor).
             destroyedByPlayer[attacker]=destroyedD; destroyedByPlayer[defender]=destroyedA; losers.Add(attacker); losers.Add(defender);
             // The Earth Flows (issue #264) is deliberately NOT checked here: its own text requires
@@ -1783,7 +1796,7 @@ public sealed partial class MatchEngine
         ApplyShibasGuidanceTrait(destroyedByPlayer,provinceDestroyedNow?attacker:null); // Shiba's Guidance (Emperor Edition remaining-cards pass, issue #492, group E): "After a battle resolution ends in which a Phoenix Clan player destroyed ...".
         var resolutionFacts=NewAfterResolutionFacts(provinceIndex,attacker,attackerWon,a,destroyedByPlayer,provinceDestroyedNow,losers);
         // Words Have Strength (Emperor Edition remaining-cards pass, issue #492, group D): the cards the resolution destroyed are the losing army (both armies in a tie).
-        resolutionFacts.DestroyedCardIds=(attackerWon?d:defenderWon?a:(a.Length>0&&d.Length>0?a.Concat(d).ToArray():[])).Select(c=>c.Id).ToList();
+        resolutionFacts.DestroyedCardIds=(attackerWon?(aramasuSpares?[]:d):defenderWon?a:(a.Length>0&&d.Length>0?(aramasuSpares?a:a.Concat(d).ToArray()):[])).Select(c=>c.Id).ToList(); // Aramasu's Legacy (issue #501): a spared army was not destroyed
         // The Shadow Court (Emperor Edition remaining-cards pass, issue #492, group D): "after the next time this turn ... a battle resolution destroys your Courtier" -- a trait, before the Reactions.
         if(OpenShadowCourtResolutionTrait(resolutionFacts)) return;
         if(BeginBanditGangTraits(resolutionFacts)) return; // Bandit Gang (issue #492 group G): a trait, so before any Reaction to the resolution's end.
@@ -1825,6 +1838,7 @@ public sealed partial class MatchEngine
         var willNotBow=_state.ResolutionWillNotBowPlayerIds.ToArray();
         // Hiruma Hikazu (The Shadow's Embrace pass, issue #476 batch 1): the Personalities with unbowed Followers in his army, read before anything bows.
         var hikazuSpared=HikazuSparedPersonalities(a);
+        var aramasuUnbowed=AramasuResolutionActive(attacker)?AramasuUnbowedByResolution(a.Where(c=>c.Zone==Zone.Battlefield)):null; // Aramasu's Legacy (issue #501): "does not bow your Mantis Clan Magistrates or your attachments"
         foreach(var card in a.Where(c=>c.Zone==Zone.Battlefield))
         {
             // Conqueror (issue #492, ruling R5 on whole-unit bow/straighten): "Straighten his unit. It will not bow from the resolution" -- every card of it straightens (each unless its own straightening is
@@ -1835,6 +1849,7 @@ public sealed partial class MatchEngine
             if(hikazuSpared.Contains(card.Id)) card.Bowed=wasBowed; // "(Their Followers still bow.)"
             if(card.Id==conquerorUnbowedId) Emit("conquerorStraightened",$"{Definition(card).Name} returned home unbowed (Conqueror).",card.OwnerId,card.Id);
         }
+        RestoreAramasuUnbowed(aramasuUnbowed);
         // Terrain leaves the battlefield here, after its printed effects (already applied earlier in
         // ResolveBattle) but before the battlefield itself closes out -- never carried into a later
         // battle at the same province, or across turns. Looting the Ruins (issue #272) is the one
@@ -1925,7 +1940,9 @@ public sealed partial class MatchEngine
         if(_state.UnresolvedBattlefields.Count==0 && R1.Aside is not null) FinishAsideBattle(attacker); // a battle fought inside the Action Phase (Shinobi Assault, Chikushudo's Trickery)
         else if(_state.UnresolvedBattlefields.Count==0)
         {
+            var aramasuUnbowed=AramasuResolutionActive(attacker)?AramasuUnbowedByResolution(_state.Cards.Values.Where(c=>c.Zone==Zone.Battlefield && c.OwnerId==attacker)):null; // Aramasu's Legacy (issue #501)
             foreach(var card in _state.Cards.Values.Where(c=>c.Zone==Zone.Battlefield).ToArray()) ReturnHome(card,card.OwnerId==attacker);
+            RestoreAramasuUnbowed(aramasuUnbowed);
             ClearAdditionalBattlefields(); // the additional battlefields cease to exist with the Attack Phase
             EndAttackPhase(attacker); // Emperor Edition remaining-cards pass, group C (issue #492): Retribution's window, then the Dynasty Phase.
         }

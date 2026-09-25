@@ -664,6 +664,9 @@ public static class CardCatalog
             .Concat(PublishedContent.PersonalityWave80.Cards) // Emperor Edition follow-ups (issue #498): Asako Chukage
             .Concat(PublishedContent.PersonalityWave86.Cards) // issue #501, mechanics group B: Goju Asuka, Shadow Dragon - exp2, The Dark Naga, Yoritomo Sachina - exp
             .Concat(PublishedContent.StrategyWave72.Cards) // issue #501, mechanics group B: Black Marketeering, Only a Shadow
+            .Concat(PublishedContent.StrategyWave69.Cards) // Issue #501, mechanics group A: Beyond the Line, One Action, Two Strikes, String of Victories
+            .Concat(PublishedContent.PersonalityWave83.Cards) // Issue #501, mechanics group A: Isawa Momoko, Mirumoto Inokuchi
+            .Concat(PublishedContent.StrongholdWave23.Cards) // Issue #501, mechanics group A: Aramasu's Legacy
             .ToDictionary(c => c.Id, StringComparer.Ordinal);
     }
 }

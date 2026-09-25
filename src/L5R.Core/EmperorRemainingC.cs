@@ -581,7 +581,8 @@ public sealed partial class MatchEngine
     // ConsumeAdditionalActionGrant's condition: a grant with a PerformerId is spent only by an action that Personality performs (a printed action is performed by the card that prints it, an
     // Item's or Spell's by its wielder, a named "performing X" by X; a Strategy that names no performer is performed by no Personality at all).
     private bool PerformerGrantMatches(AdditionalActionGrant grant, GameCommand? command) =>
-        (grant.PerformerId is null || command is not null && ActionPerformingPersonality(command) is { } performer && performer.Id == grant.PerformerId) && BaseAbilityGrantMatches(grant, command); // issue #496: Honor Never Falls' base abilities only
+        (grant.PerformerId is null || command is not null && ActionPerformingPersonality(command) is { } performer && performer.Id == grant.PerformerId) && BaseAbilityGrantMatches(grant, command) // issue #496: Honor Never Falls' base abilities only
+        && MechAGrantMatches(grant, command); // issue #501 (EmperorMechA.cs): Inokuchi's Iaijutsu, Beyond the Line's Recon ability as a Battle action
 
     // ---- Retribution: an additional Attack Phase ----------------------------------------------------------------------------------------------------------------------
 
@@ -611,6 +612,7 @@ public sealed partial class MatchEngine
     // The Attack Phase (or the last of its additional ones) is over: the turn's own player is the active player again for the Dynasty Phase.
     private void FinishAttackPhaseEnd()
     {
+        if (FinishAramasuAttackPhase()) return; // Aramasu's Legacy (issue #501, EmperorMechA.cs): its Attack Phase ends inside the Action Phase, which resumes
         var turnPlayer = RemC.RetributionRoot >= 0 ? RemC.RetributionRoot : _state.ActivePlayerId;
         RemC.RetributionRoot = -1; RemC.RetributionAssigned = 0;
         R1.PerfectMoment = null; // its restrictions belong to that one Attack Phase (issue #492, rulings pass R1)

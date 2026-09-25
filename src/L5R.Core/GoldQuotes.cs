@@ -221,6 +221,7 @@ public sealed partial class MatchEngine
     private AbilityCost? AbilityGoldCost(GameCommand command)
     {
         var cost = BaseAbilityGoldCost(command);
+        if (cost is not null && MomokoWaivesCost(command, MechAGoldVerb)) return null; // Isawa Momoko (issue #501): a Gold cost is one of the action's non-destruction costs
         if (cost is null || command.AbilityId is null || !AbilityCatalog.All.TryGetValue(command.AbilityId, out var ability) || ability.Cost is null) return cost;
         var source = command.CardId is not null && _state.Cards.TryGetValue(command.CardId, out var s) ? s : null;
         // Discipline (Mendon's ruling, issue #353): played from a discard pile, the Discipline cost must be paid BEFORE the action's other costs can

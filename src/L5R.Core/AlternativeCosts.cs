@@ -110,6 +110,7 @@ public sealed partial class MatchEngine
         }
         var option = ChosenCostOption(ability, command);
         var subject = CostSubjectCard(option, ability, command, source) ?? throw new RuleViolation(option.Subject == CostSubject.Target ? "Choose a target." : "Choose a performing card.");
+        if (MomokoWaivesCost(command, option.Verb)) return; // Isawa Momoko (issue #501): an ignored cost need not be payable
         var reason = CostOptionUnpayable(option, subject);
         Require(reason is null, reason ?? "");
     }
@@ -121,6 +122,7 @@ public sealed partial class MatchEngine
         if (ability.CostOptions is null) return;
         var option = ChosenCostOption(ability, command);
         var subject = CostSubjectCard(option, ability, command, source)!;
+        if (MomokoWaivesCost(command, option.Verb)) { NoteMomokoWaivedCost(command, option.Verb); return; } // Isawa Momoko (issue #501)
         if (!InPlay(subject)) return; // a reaction between announcement and resolution already took it out of play: nothing is left to pay with
         switch (option.Verb)
         {

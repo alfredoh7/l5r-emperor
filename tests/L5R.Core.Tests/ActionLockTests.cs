@@ -277,6 +277,8 @@ internal static class ActionLockTests
         "endDynasty", "equip", "forcedDiscard", "overlay", "pass", "playStrategy", "proclaim", "purchase", "recruitReserve", "selectBattle", "wait",
         // Seeds of Decay pass (issue #453), batch 4: two Events Phase decisions of the revealing player's (Offering Reverence's shuffle-or-discard, Tested Land's enemy province).
         "offeringReverence", "testedLandProvince",
+        // Issue #501 (Mendon's item 2): declining an optional additional action is the player's decision, not an action a Personality performs.
+        "declineAdditionalAction",
     ];
 
     private static void InnateActionInventory()
