@@ -662,6 +662,9 @@ public static class CardCatalog
             .Concat(PublishedContent.FollowerWave32.Cards) // Emperor Edition follow-ups (issue #498): Enslaved Djinn
             .Concat(PublishedContent.ItemWave17.Cards) // Emperor Edition follow-ups (issue #498): Celestial Sword of the Dragon - exp
             .Concat(PublishedContent.PersonalityWave80.Cards) // Emperor Edition follow-ups (issue #498): Asako Chukage
+            .Concat(PublishedContent.PersonalityWave95.Cards) // Emperor Edition mechanics group E (issue #501): Kakita Kae, Moto Rani - exp, Yoritomo Singh - exp2, Zlkyt
+            .Concat(PublishedContent.StrategyWave81.Cards) // Emperor Edition mechanics group E (issue #501): Greasing the Wheels, The Heir's Wrath, The Host's Advantage
+            .Concat(PublishedContent.HoldingWave28.Cards) // Emperor Edition mechanics group E (issue #501): Seaside Bazaar
             .ToDictionary(c => c.Id, StringComparer.Ordinal);
     }
 }

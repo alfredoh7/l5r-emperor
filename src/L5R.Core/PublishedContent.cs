@@ -2622,4 +2622,10 @@ public static class PublishedContent
     public static PublishedSnapshot ItemWave17 { get; } = Load("L5R.Published.ItemWave17.json", "item-wave-17", requireDecks: false);
     /// <summary>Personality wave 80 (Emperor Edition follow-ups, issue #498): Asako Chukage (Forgotten Legacy printing).</summary>
     public static PublishedSnapshot PersonalityWave80 { get; } = Load("L5R.Published.PersonalityWave80.json", "personality-wave-80", requireDecks: false);
+    /// <summary>Personality wave 95 (Emperor Edition mechanics group E, issue #501): Kakita Kae, Moto Rani - exp, Yoritomo Singh - exp2, Zlkyt.</summary>
+    public static PublishedSnapshot PersonalityWave95 { get; } = Load("L5R.Published.PersonalityWave95.json", "personality-wave-95", requireDecks: false);
+    /// <summary>Strategy wave 81 (Emperor Edition mechanics group E, issue #501): Greasing the Wheels, The Heir's Wrath, The Host's Advantage.</summary>
+    public static PublishedSnapshot StrategyWave81 { get; } = Load("L5R.Published.StrategyWave81.json", "strategy-wave-81", requireDecks: false);
+    /// <summary>Holding wave 28 (Emperor Edition mechanics group E, issue #501): Seaside Bazaar.</summary>
+    public static PublishedSnapshot HoldingWave28 { get; } = Load("L5R.Published.HoldingWave28.json", "holding-wave-28", requireDecks: false);
 }
