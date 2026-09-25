@@ -66,7 +66,9 @@ public sealed partial class MatchEngine
     private void CompleteNegatedAction(GameCommand command, AbilityDefinition ability, PlayerState player, CardInstance? source, bool playedFromDiscard, bool consumedGrant)
     {
         SpendAbilityUse(source?.AbilityUses ?? player.AbilityUses, ability, ability.UsageKey ?? command.AbilityId!);
-        if (!ability.FromDiscard) SpendHandPlayedCard(player, source);
+        // The Sincerity of the Dragon (issue #492, Mendon): "If Sincerity's base action is negated it is still removed from the game" -- the removal is not one of the negatable effects.
+        if (command.AbilityId == "sincerity-dragon-name" && source is not null && source.Zone == Zone.Hand) { player.Hand.Remove(source.Id); RemoveFromGame(source); }
+        else if (!ability.FromDiscard) SpendHandPlayedCard(player, source);
         if (playedFromDiscard) RemoveFromGame(source!);
         if (!consumedGrant && ForfeitsAdditionalActions(ability)) _state.AdditionalActions.RemoveAll(g => g.PlayerId == player.Id && Forfeitable(g));
         if (OpenOverconfidentDrawWindow(1 - player.Id)) return;

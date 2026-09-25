@@ -145,6 +145,21 @@ internal static class EmperorRulingR3Tests
         Eq(dragon.State.SincerityWatches.Single().Number, 3, "the number is named");
         Eq(dragon.State.Cards[card2.Id].Zone, Zone.RemovedFromGame, "'Remove this card from the game': it is not in the discard pile");
         Check(!dragon.State.Players[0].Hand.Contains(card2.Id), "and no longer in the hand");
+        // Negated: "If Sincerity's base action is negated it is still removed from the game" (Mendon, issue #492).
+        foreach (var negated in new[] { false, true })
+        {
+            var n = Table(Phase.Action, 0); n.Players[0].Clan = "Dragon";
+            var negatedCard = Add(n, Sincerity, 0, Zone.Hand);
+            var negatedDragon = Add(n, dragonId, 0, Zone.Home);
+            Deck(n, 0);
+            var ne = MatchEngine.FromTestState(n);
+            ne.NegateEveryAction = negated;
+            Accept(ne, Enabled(ne, 0, "sincerity-dragon-name", negatedCard.Id, negatedDragon.Id).Command!);
+            if (!negated) Accept(ne, ne.QueryActions(0).Single(o => o.Type == "chooseEffect" && o.Command!.Choice == "name-1").Command!);
+            Eq(ne.State.Cards[negatedCard.Id].Zone, Zone.RemovedFromGame, negated ? "negated: still removed from the game" : "not negated: removed from the game");
+            Check(!ne.State.Players[0].Hand.Contains(negatedCard.Id), "and not in the hand");
+            Eq(ne.State.SincerityWatches.Count, negated ? 0 : 1, negated ? "a negated action sets no watch" : "the watch is set");
+        }
         // A bowed Dragon Personality cannot perform (unchanged): the performer must be unbowed.
         var bowed = Rig("Dragon", out var card3, out var tired, bowed: true);
         Check(!CanUse(bowed, 0, "sincerity-dragon-name", card3.Id, tired.Id), "the performing Dragon Clan Personality must be unbowed");

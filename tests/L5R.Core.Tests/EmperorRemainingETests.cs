@@ -1112,6 +1112,30 @@ internal static class EmperorRemainingETests
         var e4 = Rig("Mantis", false, 9);
         Accept(e4, e4.QueryActions(1).First(a => a.Type == "selectBattle").Command!);
         Eq(Strength(e4), 9, "no Yoritomo's Guidance");
+        // A trait: it happens at EVERY battle a Mantis Clan player attacks (Mendon, issue #492) -- two consecutive battles in one turn, and either player as the Attacker.
+        {
+            var s = Table(Phase.BattleSelection, 1); s.PriorityPlayerId = 1; s.Players[1].Clan = "Mantis";
+            s.UnresolvedBattlefields = [0, 1]; s.Players[0].Provinces[0].Strength = 9; s.Players[0].Provinces[1].Strength = 8;
+            Add(s, YoritomosGuidance, 0, Zone.Celestial);
+            Add(s, "training-lion-samurai", 1, Zone.Battlefield, province: 0); Add(s, "training-lion-samurai", 1, Zone.Battlefield, province: 1);
+            var t = MatchEngine.FromTestState(s);
+            Accept(t, t.QueryActions(1).First(a => a.Type == "selectBattle" && a.Command!.Province == 0).Command!);
+            Eq(t.ProvinceStrengthForTest(0, 0), 5, "the first battle: province 1 reduced to 5");
+            Eq(t.ProvinceStrengthForTest(0, 1), 8, "the other province is not touched yet");
+            var between = Batch336Support.Edit(t, st => { st.Phase = Phase.BattleSelection; st.CurrentBattleProvince = null; st.UnresolvedBattlefields = [1]; st.PriorityPlayerId = 1; });
+            Accept(between, between.QueryActions(1).First(a => a.Type == "selectBattle").Command!);
+            Eq(between.ProvinceStrengthForTest(0, 1), 5, "the second battle of the same turn: reduced to 5 again -- once per battle, not once per turn");
+            Eq(between.ProvinceStrengthForTest(0, 0), 5, "the first stays reduced this turn");
+            var raised = Batch336Support.Edit(between, st => st.ProvinceStrengthEffects.Add(new(0, 1, MatchEngine.ProvinceEffectFlat, 4, st.TurnNumber, "test")));
+            Eq(raised.ProvinceStrengthForTest(0, 1), 9, "a later raise the same turn lifts it above 5");
+            var u = Table(Phase.BattleSelection, 0); u.PriorityPlayerId = 0; u.Players[0].Clan = "Mantis";
+            u.UnresolvedBattlefields = [0]; u.Players[1].Provinces[0].Strength = 9;
+            Add(u, YoritomosGuidance, 1, Zone.Celestial); Add(u, "training-crane-samurai", 0, Zone.Battlefield, province: 0);
+            var ue = MatchEngine.FromTestState(u);
+            Accept(ue, ue.QueryActions(0).First(a => a.Type == "selectBattle").Command!);
+            Eq(ue.ProvinceStrengthForTest(1, 0), 5, "it fires for whichever player is the Mantis Clan Attacker, whoever controls the Celestial");
+            Eq(Batch336Support.StrengthNextTurn(ue, 1, 0), 9, "and only until end of turn (issue #492 ruling R3)");
+        }
         // The Limited: put a discarded Port Holding into play bowed, paying 2 less Gold.
         MatchEngine PortRig(string clan, out CardInstance yoritomo, out CardInstance port, out CardInstance farm, int gold)
         {
