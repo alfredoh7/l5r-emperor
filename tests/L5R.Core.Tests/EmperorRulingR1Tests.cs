@@ -5,11 +5,11 @@ using static Batch336Support;
 // Emperor Edition rulings pass R1 (issue #492): BATTLES WITHOUT A PROVINCE (Mendon's ruling, docs/rules/EMPEROR_EDITION_CORE_RULES.md). The engine model (EmperorRulingR1.cs): additional battlefields
 // numbered from 100, each created with or without an associated province and without one whenever its province is destroyed; a battle at one resolves as normal except that no province is destroyed;
 // no adjacent battlefields; its own Reconnaissance; a battle fought inside the Action Phase with the Attacker its card names. Cards: Surprise Attack (strategy-wave-62) and Chikushudo's Trickery
-// (spell-wave-25) are published; Shinobi Assault and Two Fronts have no scan in the repository, so their wiring is exercised through a card that carries its own printed definition.
+// (spell-wave-25) are published; Shinobi Assault, Two Fronts and The Perfect Moment (strategy-wave-64, issue #494: Mendon supplied their scans) are published too and exercised as the published cards.
 // Every scenario is an explicit position on the economy table (player 0 the Crane, player 1 the Lion), driven through QueryActions and the commands it offers.
 internal static class EmperorRulingR1Tests
 {
-    private const string SurpriseAttack = "oracle-l5r-7665", Trickery = "oracle-l5r-1323", KusugiId = "oracle-l5r-7780";
+    private const string SurpriseAttack = "oracle-l5r-7665", Trickery = "oracle-l5r-1323", KusugiId = "oracle-l5r-7780", ShinobiAssaultId = "oracle-l5r-9927", TwoFrontsId = "oracle-l5r-8922", PerfectMomentId = "oracle-l5r-8257";
     private const int Extra = MatchEngine.FirstAdditionalBattlefield;
 
     private static void Check(bool ok, string message = "Assertion failed") => Batch336Support.Check(ok, message);
@@ -44,9 +44,11 @@ internal static class EmperorRulingR1Tests
         ("Surprise Attack: the performers must be Nonhuman Personalities at the current battlefield, the target the enemy leader's Personality there or at home; it is a Battle action; a negated movement leaves the mover behind", SurpriseAttackRefusals),
         ("Chikushudo's Trickery: from the Action Phase the target attacks and the Spirits defend at a new battlefield, movement to it is negated, the target survives the Combat Segment but not the resolution, the Spell is destroyed and its Shugenja bowed, and the Action Phase resumes", TrickeryBattle),
         ("Chikushudo's Trickery: the attacker is the target's controller whoever plays it (Open on the opponent's turn too), it needs one or two unbowed Nonhuman Spirits and an unbowed enemy Personality, and only the Action Phase", TrickeryRefusalsAndTurns),
-        ("Shinobi Assault (wired, unpublished: no scan): the Ninja attacks a bowed target at a new battlefield with the first opportunity, then 5 Honor is lost and the Action Phase resumes", ShinobiAssault),
-        ("Two Fronts (wired, unpublished: no scan): Limited, needs a player with two provinces, marks the next normal Attack Phase of the turn", TwoFrontsCard),
-        ("The Perfect Moment (wired, unpublished: no scan): the Defender declares an additional Attack Phase and is its Attacker; only his Paragons and Battle Maidens assign or move, and at most one province is destroyed in it", PerfectMoment),
+        ("Shinobi Assault (strategy-wave-64): the Ninja attacks a bowed target at a new battlefield with the first opportunity, then 5 Honor is lost and the Action Phase resumes", ShinobiAssault),
+        ("Two Fronts (strategy-wave-64): Limited, needs a player with two provinces, marks the next normal Attack Phase of the turn", TwoFrontsCard),
+        ("The Perfect Moment (strategy-wave-64): the Defender declares an additional Attack Phase and is its Attacker; only his Paragons and Battle Maidens assign or move, and at most one province is destroyed in it", PerfectMoment),
+        ("The Perfect Moment: during its additional Attack Phase a Paragon and a Battle Maiden may assign and move, any other Personality may neither assign nor move (each tested on its own); Retribution's one-Personality limit does not apply", PerfectMomentExceptions),
+        ("Published shape: Shinobi Assault, Two Fronts and The Perfect Moment (strategy-wave-64) print their scans' stats, keywords, text and ability ids and ship their art", PublishedShapeWave64),
     ]);
 
     // ---- Published shape --------------------------------------------------------------------------------------------------------------------------------
@@ -457,14 +459,11 @@ internal static class EmperorRulingR1Tests
         Check(!CanUse(MatchEngine.FromTestState(battle), 1, "chikushudo-trickery-battle", bSpell.Id), "no battle is fought from inside another");
     }
 
-    // ---- Shinobi Assault and Two Fronts: wired to the same model, unpublished (no scan) -------------------------------------------------------------------------
-    private static CardDefinition ShinobiAssaultCard() => new("oracle-l5r-9927", "Shinobi Assault", CardType.Strategy, GoldCost: 0, Focus: 1, Keywords: ["Ninja"], ScenarioOnly: false, Abilities: ["shinobi-assault-battle"],
-        Text: "Limited: Choose your performing unbowed Ninja Personality and target another player's Personality: Create a battlefield (not at any province). Assign your Personality to attack there. Assign the target to defend there, even if he is bowed. Fight a battle there, in which you have the first opportunity to take a Battle action or pass. Lose 5 Honor.");
-
+    // ---- Shinobi Assault, Two Fronts and The Perfect Moment (strategy-wave-64): the published cards on the same model -------------------------------------------------------------------------
     private static void ShinobiAssault()
     {
         var s = Table(Phase.Action, 0);
-        var card = Add(s, "training-move-battle-strategy", 0, Zone.Hand); card.Printed = ShinobiAssaultCard();
+        var card = Add(s, ShinobiAssaultId, 0, Zone.Hand);
         var ninja = Kw(Add(s, "training-crane-samurai", 0, Zone.Home), "Ninja"); Force(ninja, 6);
         var plain = Add(s, "training-crane-courtier", 0, Zone.Home);
         var target = Add(s, "training-lion-samurai", 1, Zone.Home, bowed: true);
@@ -487,19 +486,16 @@ internal static class EmperorRulingR1Tests
         Eq(ProvincesDestroyed(e, 1), 0, "no province is destroyed");
         // A bowed Ninja cannot perform.
         var t = Table(Phase.Action, 0);
-        var c2 = Add(t, "training-move-battle-strategy", 0, Zone.Hand); c2.Printed = ShinobiAssaultCard();
+        var c2 = Add(t, ShinobiAssaultId, 0, Zone.Hand);
         var bowedNinja = Kw(Add(t, "training-crane-samurai", 0, Zone.Home, bowed: true), "Ninja");
         Add(t, "training-lion-samurai", 1, Zone.Home);
         Check(!CanUse(MatchEngine.FromTestState(t), 0, "shinobi-assault-battle", c2.Id, bowedNinja.Id), "the performer must be unbowed");
     }
 
-    private static CardDefinition TwoFrontsPrinted() => new("oracle-l5r-8922", "Two Fronts", CardType.Strategy, GoldCost: 0, Focus: 2, ScenarioOnly: false, Abilities: ["two-fronts-mark"],
-        Text: "Limited: Target a province whose player has two or more provinces: During your next normal Attack Phase (this turn), create two battlefields associated with it instead of one.");
-
     private static void TwoFrontsCard()
     {
         var s = Table(Phase.Action, 0);
-        var card = Add(s, "training-move-battle-strategy", 0, Zone.Hand); card.Printed = TwoFrontsPrinted();
+        var card = Add(s, TwoFrontsId, 0, Zone.Hand);
         Add(s, "training-crane-samurai", 0, Zone.Home);
         var e = MatchEngine.FromTestState(s);
         var option = Options(e, 0, "two-fronts-mark", card.Id).First(o => o.Enabled);
@@ -512,21 +508,18 @@ internal static class EmperorRulingR1Tests
         Eq(e.State.R1.Additional[Extra], 2, "associated with the targeted province");
         // A province whose player has fewer than two provinces is not a legal target.
         var t = Table(Phase.Action, 0);
-        var c2 = Add(t, "training-move-battle-strategy", 0, Zone.Hand); c2.Printed = TwoFrontsPrinted();
+        var c2 = Add(t, TwoFrontsId, 0, Zone.Hand);
         foreach (var p in t.Players[1].Provinces.Take(3)) p.Destroyed = true;
         Add(t, "training-crane-samurai", 0, Zone.Home);
         Check(!CanUse(MatchEngine.FromTestState(t), 0, "two-fronts-mark", c2.Id), "a player with one province cannot be the target");
     }
-
-    private static CardDefinition PerfectMomentPrinted() => new("oracle-l5r-8257", "The Perfect Moment", CardType.Strategy, GoldCost: 0, Focus: 4, ScenarioOnly: false, Abilities: ["perfect-moment-declare"],
-        Text: "Reaction: After the end of an Attack Phase in which you were the Defender: Create an additional Attack Phase with the previous phase's Attacker as the Defender. During this Attack Phase, you will not destroy more than one of the Defender's provinces and your Personalities may not assign and will not move unless they are Paragons or Battle Maidens.");
 
     private static void PerfectMoment()
     {
         var s = Table(Phase.Battle, 1);
         s.PriorityPlayerId = 0;
         s.CurrentBattleProvince = 3; s.UnresolvedBattlefields = [3];
-        var card = Add(s, "training-move-battle-strategy", 0, Zone.Hand); card.Printed = PerfectMomentPrinted();
+        var card = Add(s, PerfectMomentId, 0, Zone.Hand);
         var moveCard = Add(s, "training-move-battle-strategy", 0, Zone.Hand);
         var paragonA = Kw(Add(s, "training-crane-samurai", 0, Zone.Home), "Paragon"); Force(paragonA, 17);
         var paragonB = Kw(Add(s, "training-crane-samurai", 0, Zone.Home), "Battle Maiden"); Force(paragonB, 17);
@@ -566,5 +559,65 @@ internal static class EmperorRulingR1Tests
         Eq(e.State.ActivePlayerId, 1, "the turn's own player is the active player again");
         Check(e.State.R1.PerfectMoment is null && e.State.Players[1].Provinces.Count(p => p.Destroyed) == 1, "the restrictions ended with it, and exactly one province was destroyed");
         Check(e.State.RemC.RetributionRoot < 0, "no additional Attack Phase is left under way");
+    }
+
+    // ---- The Perfect Moment's exception, tested per kind of Personality (issue #494: the scan's "unless they are Paragons or Battle Maidens") ----------------------------------------------------
+    // The position: player 1's Attack Phase has ended, player 0 (its Defender) plays The Perfect Moment and holds an additional Attack Phase; `who` is the kind under test (null: a plain Personality).
+    private static MatchEngine PerfectMomentPhase(string? who, out CardInstance tested, out CardInstance anchor, out CardInstance moveCard)
+    {
+        var s = Table(Phase.Battle, 1);
+        s.PriorityPlayerId = 0;
+        s.CurrentBattleProvince = 3; s.UnresolvedBattlefields = [3];
+        var card = Add(s, PerfectMomentId, 0, Zone.Hand);
+        moveCard = Add(s, "training-move-battle-strategy", 0, Zone.Hand);
+        anchor = Kw(Add(s, "training-crane-samurai", 0, Zone.Home), "Paragon"); Force(anchor, 17);
+        tested = Add(s, "training-crane-samurai", 0, Zone.Home); if (who is not null) Kw(tested, who); Force(tested, 17);
+        var e = MatchEngine.FromTestState(s);
+        PassTwice(e);
+        Accept(e, Options(e, 0, "perfect-moment-declare", card.Id).First(o => o.Enabled).Command!);
+        return e;
+    }
+
+    private static void PerfectMomentExceptions()
+    {
+        foreach (var (who, free) in new (string?, bool)[] { ("Paragon", true), ("Battle Maiden", true), (null, false) })
+        {
+            var label = who ?? "a plain Personality";
+            // Assigning: two Personalities may attack at once (Retribution's one-Personality limit does not apply), the tested one only if he is a Paragon or a Battle Maiden.
+            var e = PerfectMomentPhase(who, out var tested, out var anchor, out _);
+            Check(e.State.R1.PerfectMoment is { PlayerId: 0 }, "the restrictions are in force");
+            var attack = new GameCommand("attack", 0, e.Version, Assignments: new() { [anchor.Id] = 0, [tested.Id] = 1 });
+            if (free) Accept(e, attack); else { Check(Rejection(e, attack).Length > 0, $"{label} may not assign"); Accept(e, new("attack", 0, e.Version, Assignments: new() { [anchor.Id] = 0 })); }
+            Eq(e.State.Cards[tested.Id].Zone == Zone.Battlefield, free, $"{label} assigned: {free}");
+            // Moving: the tested Personality, at home, moves to the first battle by an effect only if he is a Paragon or a Battle Maiden.
+            var m = PerfectMomentPhase(who, out tested, out anchor, out var mover);
+            Accept(m, new("attack", 0, m.Version, Assignments: new() { [anchor.Id] = 0 }));
+            Accept(m, new("assignDefense", 1, m.Version, Assignments: new()));
+            Accept(m, new("attack", 0, m.Version, Assignments: new()));
+            Accept(m, new("assignDefense", 1, m.Version, Assignments: new()));
+            Accept(m, new("selectBattle", 0, m.Version, Province: 0));
+            Accept(m, PassC(m));
+            Accept(m, Offer(m, 0, "training-move-to-battle", mover.Id, tested.Id));
+            Eq(m.State.Cards[tested.Id].Zone == Zone.Battlefield, free, $"{label} moved: {free}");
+            Eq(Event(m, "moveNegated"), !free, $"{label}: the movement was negated: {!free}");
+        }
+    }
+
+    private static void PublishedShapeWave64()
+    {
+        var root = RepoRoot();
+        var listed = File.ReadAllLines(Path.Combine(root, "tests/L5R.Core.Tests/PublishedWaves/strategy-wave-64.txt")).Where(l => l.Length > 0).ToArray();
+        Check(listed.SequenceEqual([PerfectMomentId, TwoFrontsId, ShinobiAssaultId]), "strategy-wave-64's manifest lists the three cards");
+        Eq(string.Join(",", PublishedContent.StrategyWave64.Cards.Select(c => c.Id).Order()), string.Join(",", listed), "strategy-wave-64");
+        foreach (var id in listed) { Check(File.Exists(Path.Combine(root, "src/L5R.Client/Content/Published", id + ".jpg")), $"{id}'s art is shipped"); Eq(CardCatalog.Get(id).ArtworkKey, $"res://Content/Published/{id}.jpg"); }
+        var shinobi = CardCatalog.Get(ShinobiAssaultId);
+        Check(shinobi.Type == CardType.Strategy && shinobi.Name == "Shinobi Assault" && shinobi.GoldCost == 4 && shinobi.Focus == 1 && string.Join(",", shinobi.Keywords ?? []) == "Ninja" && shinobi.Abilities!.SequenceEqual(["shinobi-assault-battle"])
+            && shinobi.Text == "Limited: Choose your performing unbowed Ninja Personality and target another player's Personality: Create a battlefield (not at any province). Assign your Personality to attack there. Assign the target to defend there, even if he is bowed. Fight a battle there, in which you have the first opportunity to take a Battle action or pass. Lose 5 Honor.", "Shinobi Assault's scan");
+        var fronts = CardCatalog.Get(TwoFrontsId);
+        Check(fronts.Type == CardType.Strategy && fronts.Name == "Two Fronts" && fronts.GoldCost == 0 && fronts.Focus == 2 && (fronts.Keywords ?? []).Length == 0 && fronts.Abilities!.SequenceEqual(["two-fronts-mark"])
+            && fronts.Text == "Limited: Target a province whose player has two or more provinces: During your next normal Attack Phase (this turn), create two battlefields associated with it instead of one.", "Two Fronts' scan");
+        var moment = CardCatalog.Get(PerfectMomentId);
+        Check(moment.Type == CardType.Strategy && moment.Name == "The Perfect Moment" && moment.GoldCost == 0 && moment.Focus == 4 && (moment.Keywords ?? []).Length == 0 && moment.Abilities!.SequenceEqual(["perfect-moment-declare"])
+            && moment.Text.StartsWith("Reaction: After the end of an Attack Phase in which you were the Defender:") && moment.Text.EndsWith("unless they are Paragons or Battle Maidens."), "The Perfect Moment's scan");
     }
 }

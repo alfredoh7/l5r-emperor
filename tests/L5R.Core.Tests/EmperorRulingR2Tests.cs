@@ -75,7 +75,7 @@ internal static class EmperorRulingR2Tests
         var listed = File.ReadAllLines(Path.Combine(root, "tests/L5R.Core.Tests/PublishedWaves/strategy-wave-63.txt"));
         foreach (var id in new[] { Compassion, Courage, Honesty, LionHonor, Loyalty }) Check(listed.Contains(id), $"{id} is in the strategy-wave-63 manifest");
         Eq(PublishedContent.StrategyWave63.Cards.Length, 5, "strategy-wave-63 holds exactly the five wired Strategies");
-        Check(CardCatalog.Get(Honesty).Text.Contains("Battle/Open: Choose your performing unbowed Phoenix Clan Personality: Name a card.") && !CardCatalog.Get(Honesty).Text.Contains("Remove this card"), "The Honesty of the Phoenix prints the scan's text");
+        Eq(CardCatalog.Get(Honesty).Text, "As a Focus Effect: You may choose (now) to delay the effects of losing this duel until after the next Dynasty Phase begins.\nBattle/Open: If you are a Phoenix Clan player, choose your performing unbowed Phoenix Clan Personality: Name a card. After the next resolution this turn of your action from another Strategy or Ring with that title, draw a card, and choose a player, who discards a card. Remove this card from the game.", "The Honesty of the Phoenix prints the corrected scan's text (issue #494)");
         Check(File.ReadAllText(Path.Combine(root, "content/published/strategy-wave-63-sources.json")).Contains("image_sha256"), "the source receipts record the scans' sha256");
 
         var halls = CardCatalog.Get(Halls);
@@ -718,6 +718,7 @@ internal static class EmperorRulingR2Tests
         MatchEngine Named(string title, out CardInstance menace, out CardInstance courtier, out CardInstance victim, out CardInstance honesty, bool inspect = false)
         {
             var a = Table(Phase.Action, 0);
+            a.Players[0].Clan = "Phoenix"; // "If you are a Phoenix Clan player" (the corrected scan, issue #494)
             honesty = Add(a, Honesty, 0, Zone.Hand);
             menace = Add(a, "oracle-l5r-9130", 0, Zone.Hand); // Veiled Menace
             var phoenix = Add(a, "training-samurai", 0, Zone.Home);   // Phoenix Clan
@@ -738,6 +739,8 @@ internal static class EmperorRulingR2Tests
             }
             Accept(ae, ae.QueryActions(0).Single(o => o.Type == "chooseEffect" && o.Command!.Choice == $"name:{title}").Command!);
             Eq(ae.State.SincerityWatches.Single().Title, title, "the title is recorded");
+            Eq(ae.State.Cards[honesty.Id].Zone, Zone.RemovedFromGame, "'Remove this card from the game': naming a card removes it, it is not discarded");
+            Check(!ae.State.Players[0].Hand.Contains(honesty.Id), "and it is no longer in the hand");
             return ae;
         }
         {
@@ -766,8 +769,38 @@ internal static class EmperorRulingR2Tests
         {
             // The card that named it is not "another" Strategy: naming its own title never triggers on itself; and a Personality who is not a Phoenix may not perform.
             var s = Table(Phase.Action, 0);
+            s.Players[0].Clan = "Phoenix";
             Add(s, Honesty, 0, Zone.Hand); Add(s, "training-crane-samurai", 0, Zone.Home);
             Check(!CanUse(MatchEngine.FromTestState(s), 0, "honesty-phoenix-name"), "only an unbowed Phoenix Clan Personality performs it");
+        }
+        {
+            // "If you are a Phoenix Clan player": a player of another Clan may not take the action even with a Phoenix Clan Personality; a bowed Phoenix Personality may not perform either.
+            foreach (var (clan, bowed, allowed) in new[] { ("Crane", false, false), ("Dragon", false, false), ("Phoenix", true, false), ("Phoenix", false, true) })
+            {
+                var s = Table(Phase.Action, 0);
+                s.Players[0].Clan = clan;
+                var card = Add(s, Honesty, 0, Zone.Hand); var phoenix = Add(s, "training-samurai", 0, Zone.Home, bowed: bowed);
+                var e = MatchEngine.FromTestState(s);
+                Eq(CanUse(e, 0, "honesty-phoenix-name", card.Id, phoenix.Id), allowed, $"a {(bowed ? "bowed " : "")}Phoenix Clan Personality of a {clan} Clan player: {allowed}");
+                if (!allowed) Eq(e.State.Cards[card.Id].Zone, Zone.Hand, "the card stays in hand");
+            }
+        }
+        {
+            // Negated, the card is still removed from the game (as Mendon ruled for The Sincerity of the Dragon): "Remove this card from the game" is not one of the negatable effects; no watch is set.
+            foreach (var negated in new[] { false, true })
+            {
+                var s = Table(Phase.Action, 0);
+                s.Players[0].Clan = "Phoenix";
+                var card = Add(s, Honesty, 0, Zone.Hand); var phoenix = Add(s, "training-samurai", 0, Zone.Home);
+                var deck = Add(s, "training-focus-strategy", 0, Zone.FateDeck); s.Players[0].FateDeck.Insert(0, deck.Id);
+                var e = MatchEngine.FromTestState(s);
+                e.NegateEveryAction = negated;
+                Accept(e, Enabled(e, 0, "honesty-phoenix-name", card.Id, phoenix.Id).Command!);
+                if (!negated) Accept(e, e.QueryActions(0).Single(o => o.Type == "chooseEffect" && o.Command!.Choice == "name:Veiled Menace").Command!);
+                Eq(e.State.Cards[card.Id].Zone, Zone.RemovedFromGame, negated ? "negated: still removed from the game" : "not negated: removed from the game");
+                Check(!e.State.Players[0].Hand.Contains(card.Id), "and not in the hand");
+                Eq(e.State.SincerityWatches.Count, negated ? 0 : 1, negated ? "a negated action sets no watch" : "the watch is set");
+            }
         }
     }
 

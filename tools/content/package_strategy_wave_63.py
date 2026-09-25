@@ -3,8 +3,8 @@
 Mantis, The Honesty of the Phoenix, The Honor of the Lion and The Loyalty of the Scorpion -- wired with the shared delay mechanism (src/L5R.Core/EmperorRulingR2.cs).
 
 Only the WIRED cards are published (the Embers of War pass's personality-wave-63 blank-card lesson). Every scan was read by eye and its source receipt (with the working copy's sha256) is recorded
-next to the wave. The published Text follows each scan (the Emperor Edition printing): The Honesty of the Phoenix's scan has no "If you are a Phoenix Clan player" condition and no "Remove this card from
-the game", both of which the catalogue's Oracle wording adds.
+next to the wave. The published Text follows each scan (the Emperor Edition printing). The Honesty of the Phoenix's scan was defective when this wave was first built (it lacked "If you are a Phoenix Clan
+player" and "Remove this card from the game"); Mendon supplied the corrected scan (issue #494) and the text now matches it and the Oracle wording.
 """
 from __future__ import annotations
 
@@ -28,8 +28,8 @@ DELAY = "As a Focus Effect: You may choose (now) to delay the effects of losing 
 TEXT: dict[int, str] = {
     7991: DELAY + NL + "Battle/Open: Choose your performing unbowed Unicorn Clan Personality and target another unit: Straighten it. Gain 1 Honor, or 2 Honor if you do not control the target.",
     7995: DELAY + NL + "Battle: If any enemy units are at the current battlefield, choose your performing unbowed Mantis Clan Personality: Move him there. You may take an additional Battle action.",
-    8137: DELAY + NL + "Battle/Open: Choose your performing unbowed Phoenix Clan Personality: Name a card. After the next resolution this turn of your action from another Strategy or Ring with that "
-          "title, draw a card, and choose a player, who discards a card.",
+    8137: DELAY + NL + "Battle/Open: If you are a Phoenix Clan player, choose your performing unbowed Phoenix Clan Personality: Name a card. After the next resolution this turn of your action from "
+          "another Strategy or Ring with that title, draw a card, and choose a player, who discards a card. Remove this card from the game.",
     8138: DELAY + NL + "Battle/Open: Choose your performing unbowed honorable Lion Clan Personality: Permanently give him a bonus raising his PH to 4 and the ability, "
           "\"Battle: Target an enemy Personality with equal or lower Personal Honor: Bow him. Gain 2 Honor.\"",
     8207: DELAY + NL + "Reaction: After an action targets your Scorpion Clan Personality, destroy your performing Scorpion Clan Personality: Negate either the bowing, movement, or destruction of the "

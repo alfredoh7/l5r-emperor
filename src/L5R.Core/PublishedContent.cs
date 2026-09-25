@@ -2574,6 +2574,8 @@ public static class PublishedContent
     /// <summary>Spell wave 24 (Emperor Edition remaining-cards pass, issue #492, proxy group X): Summon Swamp Spirits and the created-only Swamp Spirit Follower it creates.</summary>
     public static PublishedSnapshot SpellWave24 { get; } = Load("L5R.Published.SpellWave24.json", "spell-wave-24", requireDecks: false);
     public static PublishedSnapshot StrategyWave62 { get; } = Load("L5R.Published.StrategyWave62.json", "strategy-wave-62", requireDecks: false);
+    /// <summary>Strategy wave 64 (Emperor Edition rulings pass, issue #494): Shinobi Assault, Two Fronts and The Perfect Moment, published once Mendon supplied their scans.</summary>
+    public static PublishedSnapshot StrategyWave64 { get; } = Load("L5R.Published.StrategyWave64.json", "strategy-wave-64", requireDecks: false);
     public static PublishedSnapshot SpellWave25 { get; } = Load("L5R.Published.SpellWave25.json", "spell-wave-25", requireDecks: false);
     /// <summary>Personality wave 78 (Emperor Edition remaining-cards pass, issue #492, proxy group Z): Kitsune Denhei, Shosuro Rokuta and the Proxies they create (Denhei's Snake, Rokuta's Apprentice).</summary>
     public static PublishedSnapshot PersonalityWave78 { get; } = Load("L5R.Published.PersonalityWave78.json", "personality-wave-78", requireDecks: false);

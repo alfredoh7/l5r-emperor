@@ -15,7 +15,7 @@ internal static class ShadowsEmbraceBatch4Tests
         SuddenMovement, TacticalAssault, GameHasChanged, LessonOfEarth, TheologicalIndecision, ThuggishTechniques, UnstableGround, VoidTattoo, WatchersInTheDark];
 
     // The Strategies of the batch left unwired (each with a blocker note in tools/content/build_card_inventory.py): never published.
-    private static readonly string[] Unwired = ["oracle-l5r-9923", "oracle-l5r-9927", "oracle-l5r-9939"];
+    private static readonly string[] Unwired = ["oracle-l5r-9923", "oracle-l5r-9939"];
 
     private static void Check(bool ok, string message = "Assertion failed") => Batch336Support.Check(ok, message);
     private static void Eq<T>(T actual, T expected, string message = "Values differ") => Batch336Support.Eq(actual, expected, message);
@@ -80,6 +80,7 @@ internal static class ShadowsEmbraceBatch4Tests
         Shape(WatchersInTheDark, "Watchers in the Dark", 1, "Recon", "watchers-dark-recon");
         Check(CardCatalog.Get(SuddenMovement).Text.StartsWith("As a Focus Effect: After this duel ends, give its winner +3F."), "Sudden Movement publishes its scan's wording");
         Check(CardCatalog.Get(VoidTattoo).Text.StartsWith("Battle: Choose your performing unbowed Tattooed Personality, target a Tattoo Strategy"), "Void Tattoo publishes its scan's wording");
+        // issue #494: The Perfect Moment (8257) and Shinobi Assault (9927) are published now in strategy-wave-64 and left this list.
         foreach (var id in Unwired) Check(!CardCatalog.Cards.ContainsKey(id), $"{id} is unwired and so not published");
         var root = Batch336Support.RepoRoot();
         var listed = File.ReadAllLines(Path.Combine(root, "tests/L5R.Core.Tests/PublishedWaves/strategy-wave-57.txt"));

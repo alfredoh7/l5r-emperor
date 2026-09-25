@@ -45,11 +45,12 @@ public static class EmperorRulingR2Abilities
         all["courage-mantis-focus"] = new("FocusEffect", delayText, "none");
         all["courage-mantis-move"] = new("Battle", "If any enemy units are at the current battlefield, choose your performing unbowed Mantis Clan Personality: Move him there. You may take an additional Battle action", "none",
             Performer: "rr2-own-unbowed-clan-personality-any-location", RequiredKeywords: ["Mantis"], Move: new(MoveSpec.Performer, MoveSpec.CurrentBattlefield), MovesToBattle: true);
-        // The Honesty of the Phoenix (oracle-l5r-8137, the SCAN's text: no Phoenix-player condition and no removal from the game, unlike the Oracle wording): the Focus Effect / "Battle/Open: Choose your performing
-        // unbowed Phoenix Clan Personality: Name a card. After the next resolution this turn of your action from another Strategy or Ring with that title, draw a card, and choose a player, who discards a
-        // card." -- The Sincerity of the Dragon's watch, keyed on a title instead of a Focus Value; the card is named from the titles of the Strategies and Rings that can be played (engine-listed options).
+        // The Honesty of the Phoenix (oracle-l5r-8137, the corrected scan, issue #494): the Focus Effect / "Battle/Open: If you are a Phoenix Clan player, choose your performing unbowed Phoenix Clan
+        // Personality: Name a card. After the next resolution this turn of your action from another Strategy or Ring with that title, draw a card, and choose a player, who discards a card. Remove this
+        // card from the game." -- The Sincerity of the Dragon's shape, keyed on a title instead of a Focus Value: the Phoenix Clan player condition (ValidateEmperorRulingR2), the removal as part of the
+        // action even when it is negated (CompleteNegatedAction), and the card named from the titles of the Strategies and Rings that can be played (engine-listed options).
         all["honesty-phoenix-focus"] = new("FocusEffect", delayText, "none");
-        all["honesty-phoenix-name"] = new("BattleOrOpen", "Choose your performing unbowed Phoenix Clan Personality: Name a card. After the next resolution this turn of your action from another Strategy or Ring with that title, draw a card, and choose a player, who discards a card", "none",
+        all["honesty-phoenix-name"] = new("BattleOrOpen", "If you are a Phoenix Clan player, choose your performing unbowed Phoenix Clan Personality: Name a card. After the next resolution this turn of your action from another Strategy or Ring with that title, draw a card, and choose a player, who discards a card. Remove this card from the game", "none",
             Performer: "rr2-own-unbowed-clan-personality-at-battle", RequiredKeywords: ["Phoenix"]);
         // The Strength of the Spider (oracle-l5r-8362): the Focus Effect its wave-13 publication lacked.
         all["strength-spider-focus"] = new("FocusEffect", delayText, "none");
@@ -72,6 +73,10 @@ public sealed partial class MatchEngine
             // The Courage of the Mantis: "If any enemy units are at the current battlefield" -- a condition on taking the action.
             case "courage-mantis-move":
                 Require(_state.CurrentBattleProvince is int mantisBattle && Army(1 - player.Id, mantisBattle).Any(), "There are no enemy units at the current battlefield.");
+                break;
+            // The Honesty of the Phoenix: "If you are a Phoenix Clan player" -- a condition on taking the action (the corrected scan, issue #494).
+            case "honesty-phoenix-name":
+                Require(player.Clan == "Phoenix", "You must be a Phoenix Clan player.");
                 break;
         }
     }
@@ -214,6 +219,7 @@ public sealed partial class MatchEngine
         var source = Card(command.CardId);
         _state.SincerityWatches.RemoveAll(w => w.Turn != _state.TurnNumber);
         _state.SincerityWatches.Add(new(command.PlayerId, 0, _state.TurnNumber, source.Id, title));
+        Player(source.OwnerId).Hand.Remove(source.Id); RemoveFromGame(source); // "Remove this card from the game": part of the action's resolution (a negated action removes it too: CompleteNegatedAction).
         Emit("watchSet", $"{Definition(source).Name}: {Player(command.PlayerId).Name} named {title}. After the next resolution this turn of his action from another Strategy or Ring with that title, he draws a card and chooses a player who discards a card.", command.PlayerId, source.Id);
         return true;
     }

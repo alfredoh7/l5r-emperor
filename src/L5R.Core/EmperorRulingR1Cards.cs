@@ -2,9 +2,8 @@ namespace L5R.Core;
 
 // Emperor Edition rulings pass R1 (issue #492): the cards that were blocked on a battle without a province (EmperorRulingR1.cs has the engine model).
 //   * Surprise Attack (oracle-l5r-7665, strategy-wave-62) and Chikushudo's Trickery (oracle-l5r-1323, spell-wave-25) are published.
-//   * Shinobi Assault (oracle-l5r-9927, The Shadow's Embrace), Two Fronts (oracle-l5r-8922, Embers of War) and The Perfect Moment (oracle-l5r-8257, Forgotten Legacy) are wired to the same model but NOT
-//     published: their scans are not in the repository (only receipts), so neither the printed text nor the art can be verified or shipped. Their ability ids are here, tested through a card that carries
-//     its own printed definition, ready for the day the scans arrive.
+//   * Shinobi Assault (oracle-l5r-9927, The Shadow's Embrace), Two Fronts (oracle-l5r-8922, Embers of War) and The Perfect Moment (oracle-l5r-8257, Forgotten Legacy) are wired to the same model and
+//     published in strategy-wave-64 (issue #494: Mendon supplied their scans, which were read letter by letter against this wiring).
 public static class EmperorRulingR1Abilities
 {
     public const string OwnNonhumanPersonality = "r1-own-nonhuman-personality";
@@ -27,15 +26,15 @@ public static class EmperorRulingR1Abilities
             Costs: [new(CostVerb.Bow, CostSubject.Wielder), new(CostVerbs.Sacrifice)],
             Slots: [new("performers", OwnUnbowedNonhumanSpirit, "Your performing unbowed Nonhuman Spirit Personalities", 1, 2, Performing: true),
                     new("target", "enemy-unbowed-personality", "Another player's unbowed Personality")]);
-        // Shinobi Assault (oracle-l5r-9927, not published: no scan): "Limited: Choose your performing unbowed Ninja Personality and target another player's Personality: Create a battlefield (not at any
+        // Shinobi Assault (oracle-l5r-9927, strategy-wave-64): "Limited: Choose your performing unbowed Ninja Personality and target another player's Personality: Create a battlefield (not at any
         // province). Assign your Personality to attack there. Assign the target to defend there, even if he is bowed. Fight a battle there, in which you have the first opportunity to take a Battle
         // action or pass. Lose 5 Honor."
         all["shinobi-assault-battle"] = new("Limited", "Choose your performing unbowed Ninja Personality and target another player's Personality: Create a battlefield (not at any province). Assign your Personality to attack there. Assign the target to defend there, even if he is bowed. Fight a battle there, in which you have the first opportunity to take a Battle action or pass. Lose 5 Honor", "enemy-personality",
             Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeywords: ["Ninja"]);
-        // Two Fronts (oracle-l5r-8922, not published: no scan): "Limited: Target a province whose player has two or more provinces: During your next normal Attack Phase (this turn), create two battlefields
+        // Two Fronts (oracle-l5r-8922, strategy-wave-64): "Limited: Target a province whose player has two or more provinces: During your next normal Attack Phase (this turn), create two battlefields
         // associated with it instead of one."
         all["two-fronts-mark"] = new("Limited", "Target a province whose player has two or more provinces: During your next normal Attack Phase (this turn), create two battlefields associated with it instead of one", "enemy-province");
-        // The Perfect Moment (oracle-l5r-8257, not published: no scan): "Reaction: After the end of an Attack Phase in which you were the Defender: Create an additional Attack Phase with the previous phase's Attacker
+        // The Perfect Moment (oracle-l5r-8257, strategy-wave-64): "Reaction: After the end of an Attack Phase in which you were the Defender: Create an additional Attack Phase with the previous phase's Attacker
         // as the Defender. During this Attack Phase, you will not destroy more than one of the Defender's provinces and your Personalities may not assign and will not move unless they are Paragons or Battle
         // Maidens." Retribution's window and additional Attack Phase (EmperorRemainingC.cs): its player declares it and is its Attacker.
         all["perfect-moment-declare"] = new("Reaction", "After the end of an Attack Phase in which you were the Defender: Create an additional Attack Phase with the previous phase's Attacker as the Defender. During this Attack Phase, you will not destroy more than one of the Defender's provinces and your Personalities may not assign and will not move unless they are Paragons or Battle Maidens", "none",

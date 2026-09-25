@@ -651,6 +651,7 @@ public static class CardCatalog
             .Concat(PublishedContent.PersonalityWave76.Cards) // Emperor Edition remaining-cards pass (issue #492), proxy group X
             .Concat(PublishedContent.SpellWave24.Cards) // Emperor Edition remaining-cards pass (issue #492), proxy group X
             .Concat(PublishedContent.StrategyWave62.Cards) // Emperor Edition rulings pass R1 (issue #492): Surprise Attack
+            .Concat(PublishedContent.StrategyWave64.Cards) // Emperor Edition rulings pass (issue #494): Shinobi Assault, Two Fronts, The Perfect Moment
             .Concat(PublishedContent.SpellWave25.Cards) // Emperor Edition rulings pass R1 (issue #492): Chikushudo's Trickery
             .Concat(PublishedContent.RegionWave10.Cards) // Emperor Edition remaining-cards pass (issue #492), ruling R3: Kaiu Village
             .Concat(PublishedContent.ItemWave16.Cards) // Emperor Edition remaining-cards pass (issue #492), ruling R3: Kaiu Weapon
