@@ -224,6 +224,9 @@ public sealed partial class MatchEngine
                 // actually accepts it -- otherwise every unrelated Attack would offer a button that then errors.
                 AddReaction(card,reactionId,used?"This reaction has already been used.":null,validate:true);
             }
+            // Emperor Edition remaining-cards pass, group C (issue #492): a Strategy Reaction played from the hand ("After a Ranged Attack is targeted", Sniping; A Close Call and the like) is listed too.
+            foreach(var (card,reactionId) in OutOfPlayReactions(playerId,"before-attack-resolves").ToArray())
+                AddReaction(card,reactionId,validate:true);
             AddTargetedActionReactions();
             Add("declineReaction","Pass reaction",Command("declineReaction"));
         }
@@ -321,6 +324,12 @@ public sealed partial class MatchEngine
         else if(_state.PendingChoice is { Type:"afterResolutionReaction" })
         {
             // After a battle's resolution (issue #417): this player's Reactions that name it, from a hand, a discard pile or play, then the pass.
+            result.AddRange(AbilityActions(playerId));
+            Add("declineReaction","Pass reaction",Command("declineReaction"));
+        }
+        else if(_state.PendingChoice is { Type:"attackPhaseEndReaction" })
+        {
+            // Retribution (Emperor Edition remaining-cards pass, group C, issue #492): the Defender's Reactions that name the end of the Attack Phase, then the pass.
             result.AddRange(AbilityActions(playerId));
             Add("declineReaction","Pass reaction",Command("declineReaction"));
         }
@@ -541,6 +550,15 @@ public sealed partial class MatchEngine
                 // Hidden Falls Dojo (Stronghold pass, issue #486 batch 1): in the additional Infantry Maneuvers Segment only the acting player's Scouts, only to the provinces he targeted.
                 if(_state.ExtraInfantrySegment) (units,provinces)=HiddenFallsAssignmentChoices(playerId,attack);
                 var actionType=attack?"attack":"assignDefense";
+                // Retribution (issue #492, group C): an additional Attack Phase assigns one Personality at most, so each (unit, province) is its own option.
+                if(attack && _state.RemC.RetributionRoot>=0)
+                {
+                    foreach(var province in provinces)
+                        foreach(var unit in units)
+                            Add(actionType,$"Attack province {province+1} with {Definition(Card(unit)).Name}",Command(actionType,assignments:new Dictionary<string,int>{[unit]=province}),
+                                _state.RemC.RetributionAssigned>=1?"You may only assign one Personality in an additional Attack Phase.":null,targets:[unit],provinces:[province]);
+                }
+                else
                 foreach(var province in provinces)
                     Add(actionType,$"{(attack?"Attack":"Defend")} province {province+1} · {units.Length} {(cavalrySegment?"Cavalry":"Infantry")} units",
                         Command(actionType,assignments:units.ToDictionary(id=>id,_=>province)),units.Length==0?$"No unbowed {(cavalrySegment?"Cavalry":"Infantry")} Personalities at home.":null,

@@ -181,7 +181,7 @@ public sealed partial class MatchEngine
     }
 
     // The actions that discard the Imperial Favor as a cost ("as a condition upon further effects"), whichever pass wired them.
-    private static bool IsFavorDiscardAbility(string id) => DiscardsImperialFavorAsCost(id) || id is "rengetsu-disable" or "tadanobu-draw";
+    private static bool IsFavorDiscardAbility(string id) => DiscardsImperialFavorAsCost(id) || id is "rengetsu-disable" or "tadanobu-draw" or "solid-defense-negate-favor"; // Solid Defense (issue #492, group C)
 
     // A Favor token the player may discard in place of the Imperial Favor: on their Kyuden Otomo - exp.
     private CardInstance? FavorTokenSource(int playerId) =>

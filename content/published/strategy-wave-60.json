@@ -1,0 +1,501 @@
+{
+  "Profile": "strategy-wave-60",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-6290",
+      "Name": "Retribution",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After the end of an Attack Phase in which you were the Defender: Declare an additional Attack Phase against that phase's Attacker, in which neither player may invite allies and you may only assign one Personality. Give the Personality and each Follower in his unit +1F after he assigns.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6290.jpg",
+      "Keywords": [],
+      "Focus": 4,
+      "Abilities": [
+        "retribution-declare"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-6312",
+      "Name": "Rhetoric",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: Before a player gains or loses Honor from an action's effects, bow your performing Courtier: Choose another player. If the Courtier's Chi is higher than or equal to the Honor gain or loss, the chosen player instead of the original player takes the gain or loss.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6312.jpg",
+      "Keywords": [
+        "Political"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "rhetoric-redirect"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-6374",
+      "Name": "Rocky Terrain",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Before this battle's resolution: You may bow one or two attacking Personalities at the current battlefield.\nBattle: If there are no Terrains at the current battlefield: Put this card into play there.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6374.jpg",
+      "Keywords": [
+        "Terrain"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "rocky-terrain-bow"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-6406",
+      "Name": "Rumors Travel",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Until your next turn begins, before each time a player gains 1 or more Honor, reduce the gain by 1 if it is not during a battle or Attack Phase.\nBattle: If any enemy units are at the current battlefield, choose your performing Personality: Move him there. Straighten him if he moved.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6406.jpg",
+      "Keywords": [
+        "Political"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "rumors-travel-reduce",
+        "rumors-travel-move"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-6439",
+      "Name": "Sacrifice of Pawns",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Destroy your performing unbowed Courtier and target another player's Personality: His controller may destroy the target. If he did not choose this, search your Dynasty deck for a Personality and bring him into play, paying all costs but paying two more Gold. (Discard him if you are unable to play him.)",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6439.jpg",
+      "Keywords": [
+        "Political"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "sacrifice-pawns-destroy"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-6584",
+      "Name": "Selfless Defense",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing unbowed Yojimbo Personality and target an enemy Personality: Move him home. Bow him if you control a Courtier or Shugenja.\nBattle: Destroy your performing Yojimbo and target one or more of your Courtier or Shugenja Personalities: Move them home.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6584.jpg",
+      "Keywords": [],
+      "Focus": 4,
+      "Abilities": [
+        "selfless-defense-move",
+        "selfless-defense-destroy"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-6676",
+      "Name": "Shadows Walk",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 4,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: Bow one or more of your performing Shadowlands Ninja Personalities and target a card without attachments: If the card is an attachment, destroy it. If it is a Personality with Chi lower than or equal to the number of performers, permanently give him Ninja and Shadowlands and take control of him. Lose 3 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6676.jpg",
+      "Keywords": [
+        "Fear",
+        "Ninja"
+      ],
+      "Focus": 1,
+      "Abilities": [
+        "shadows-walk-take"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-6698",
+      "Name": "Shameful Injury",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Even if you control no units at the current battlefield, target a Personality: Negate all current and new Force bonuses and penalties on him from actions.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6698.jpg",
+      "Keywords": [],
+      "Focus": 4,
+      "Abilities": [
+        "shameful-injury-negate"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-7310",
+      "Name": "Snake Tattoo",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After another player's Battle action targets your Tattooed Personality: Move him to an adjacent battlefield. If he is no longer a legal target for that action, negate its effects.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7310.jpg",
+      "Keywords": [
+        "Tattoo"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "snake-tattoo-move"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-7312",
+      "Name": "Sniping",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After a Ranged Attack is targeted: Give it a strength bonus equal to its current strength.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7312.jpg",
+      "Keywords": [],
+      "Focus": 3,
+      "Abilities": [
+        "sniping-boost"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-7329",
+      "Name": "Solid Defense",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Political Reaction: Before the resolution of another player's action, discard the Imperial Favor unless you control a Personality with 5 or higher Force: Negate any Honor losses from the action's effects.\nBattle: Target a Personality without attachments: Move him home.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7329.jpg",
+      "Keywords": [],
+      "Focus": 3,
+      "Abilities": [
+        "solid-defense-negate",
+        "solid-defense-negate-favor",
+        "solid-defense-move"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-7413",
+      "Name": "Spinning Heel Kick",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing Monk: Straighten him. You may take an additional Battle action, which he must perform.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7413.jpg",
+      "Keywords": [
+        "Air",
+        "Kiho"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "spinning-heel-kick-straighten"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-7474",
+      "Name": "Stay Put",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing unbowed Kensai and target an enemy card without attached Weapons or Armor: Bow it. You may attach a Weapon to your Kensai from your hand, paying all costs but paying 4 less Gold if he is defending.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7474.jpg",
+      "Keywords": [],
+      "Focus": 3,
+      "Abilities": [
+        "stay-put-bow",
+        "stay-put-bow-attach",
+        "stay-put-bow-attach-discount"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-7525",
+      "Name": "Strategic Strike",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Bow your performing Scout Personality: Ranged 6 Attack, which may target a Personality with attached Followers if you have Reconnaissance.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7525.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "strategic-strike-attack"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-7639",
+      "Name": "Summoned to Justice",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing unbowed Courtier at any location and target an attacking Personality: Move him home. If he moved, bow him. If he is dishonorable, his controller loses Honor equal to his base Personal Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7639.jpg",
+      "Keywords": [
+        "Political"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "summoned-justice-move"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-7654",
+      "Name": "Superior Opponent",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "As a Focus Effect: You may destroy an attachment at the current battlefield if your Personality in this duel is there.\nBattle: Choose your performing unbowed Duelist and target an enemy unit: Bow each Follower and Personality in it with equal or lower Force than your Duelist's Chi.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7654.jpg",
+      "Keywords": [
+        "Fear",
+        "Iaijutsu"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "superior-opponent-focus",
+        "superior-opponent-bow"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-7862",
+      "Name": "Tell the Tale",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Gain 1 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7862.jpg",
+      "Keywords": [],
+      "Focus": 1,
+      "Abilities": [
+        "tell-the-tale-honor"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-8059",
+      "Name": "The Empress' Address",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After the resolution of an action or a battle that destroyed any of your Personalities in a defending army, bow your performing Courtier or Empress and target your non-Unique Personality with your Clan alignment in your discard pile: Bring him into play (in your home), ignoring costs. Gain 2 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8059.jpg",
+      "Keywords": [
+        "Political"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "empress-address-action",
+        "empress-address-battle"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-8084",
+      "Name": "The Fires of War",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle/Open: You may use each ability on your Stronghold a second time this turn.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8084.jpg",
+      "Keywords": [
+        "Unique"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "fires-of-war-second-use"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-8126",
+      "Name": "The Height of Courage",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: Before the resolution of another player's action, choose your performing Personality: Negate his movement from the action's effects.\nBattle: Choose your performing Personality: Give him and each of his Followers +1F.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8126.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "height-courage-negate",
+        "height-courage-boost"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

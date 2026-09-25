@@ -318,7 +318,7 @@ public sealed partial class MatchEngine
             case "hes-mine-substitute":
                 return HesMineApplies(card, subject, affected);
             default:
-                return RemATargetedActionReactionApplies(card, abilityId, subject, affected); // Emperor Edition remaining-cards pass, group A (issue #492): Ancestral Protection, Caught in the Act.
+                return RemATargetedActionReactionApplies(card, abilityId, subject, affected) || EmperorRemainingCTargetedReactionApplies(card, abilityId, subject, affected); // issue #492: group A (Ancestral Protection, Caught in the Act), group C (Snake Tattoo)
         }
     }
 

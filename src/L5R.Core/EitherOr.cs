@@ -56,6 +56,9 @@ public static class EitherOrSpecs
     public const string GenshiShame = "genshi-shame";
     /// <summary>Yasuki Tanimura (Emperor Edition Personality pass, issue #477 batch 6): "The player may pay 4 Gold. If he does not pay the Gold, he loses 3 Honor." -- the decider is the ACTING player.</summary>
     public const string TanimuraPayOrLose = "tanimura-pay-or-lose";
+    /// <summary>Sacrifice of Pawns (Emperor Edition remaining-cards pass, group C, issue #492): "His controller may destroy the target. If he did not choose this, search your Dynasty deck for a
+    /// Personality and bring him into play, paying all costs but paying two more Gold." -- the target's controller decides; a refusal opens the acting player's search (EmperorRemainingC.cs).</summary>
+    public const string SacrificeOfPawns = "sacrifice-of-pawns";
 }
 
 /// <summary>What choosing an option amounts to, for a client to word and style it: "avoid" (accept a cost or a lesser loss so the
@@ -136,6 +139,7 @@ public sealed partial class MatchEngine
             EmperorRemainingBSpecs.MercyBowOrHome => $"{source}: choose to either bow {affected} or move him home.", // Emperor Edition remaining-cards pass (issue #492), group B
             EmperorRemainingBSpecs.AncestorsDestroy => $"{source}: destroy {affected}, or discard a card at random from your hand and {Player(p.ActingPlayerId).Name} chooses a player, who gains or loses 3 Honor.",
             EmperorRemainingBSpecs.AncestorsHonor => $"{source}: choose a player, who gains or loses 3 Honor.",
+            EitherOrSpecs.SacrificeOfPawns => SacrificeOfPawnsPrompt(p, source, affected),
             _ => throw new RuleViolation("Unknown choice.")
         };
     }
@@ -216,6 +220,8 @@ public sealed partial class MatchEngine
                 ];
             }
             // Yasuki Tanimura (issue #477 batch 6): the decider is the player whose Battle action targeted him. Losing Honor is always possible (Family Honor may go negative).
+            case EitherOrSpecs.SacrificeOfPawns:
+                return SacrificeOfPawnsOptions(p, affected!);
             case EitherOrSpecs.TanimuraPayOrLose:
                 return [
                     new("pay", "Pay 4 Gold", "Nothing further happens.", EitherOrKind.Avoid, 4, payable(4), "You cannot produce 4 Gold."),
@@ -366,6 +372,9 @@ public sealed partial class MatchEngine
                 p.ChainAbilityLock = true;
                 break;
             // Yasuki Tanimura (issue #477 batch 6).
+            case (EitherOrSpecs.SacrificeOfPawns, _):
+                ApplySacrificeOfPawns(p, option, decider, source, affected);
+                break;
             case (EitherOrSpecs.TanimuraPayOrLose, "pay"):
                 Pay(decider.Id, source, option.GoldCost, sourceIds);
                 Emit("eitherOrChosen", $"{decider.Name} paid 4 Gold ({Definition(source).Name}).", decider.Id, source.Id);
@@ -388,6 +397,7 @@ public sealed partial class MatchEngine
     private void FinishEitherOr(PendingEitherOr p)
     {
         _state.PendingEitherOr = null;
+        if (p.SpecId == EitherOrSpecs.SacrificeOfPawns && _state.PendingSearch is not null) return; // Sacrifice of Pawns (issue #492, group C): the refusal opened a search, which finishes the action.
         // The Shadow's Embrace pass (issue #476), batch 3 (ShadowsEmbraceBatch3.cs): Crowded Streets' trait decision carries on with the resolved action's own tail; Forge Your
         // Soul's last decision draws and opens the attached Weapon's entering-play window first.
         if (FinishShadowsEmbraceEitherOr(p)) return;

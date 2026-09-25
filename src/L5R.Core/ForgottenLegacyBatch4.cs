@@ -146,11 +146,12 @@ public sealed partial class MatchEngine
     // ---- Heart of Darkness: its before-resolution trait, answered through "beforeBattleOptional" ----
 
     private bool IsHeartOfDarknessChoice(PendingBeforeBattleResolve pending) =>
-        pending.ActiveSourceId is { } itemId && _state.Cards.TryGetValue(itemId, out var source) && BeforeResolutionAbilityId(source) == "heart-of-darkness-bow";
+        pending.ActiveSourceId is { } itemId && _state.Cards.TryGetValue(itemId, out var source) && BeforeResolutionAbilityId(source) is "heart-of-darkness-bow" or "rocky-terrain-bow"; // Rocky Terrain: Emperor Edition remaining-cards pass, group C (issue #492)
 
     // "Cards at the current battlefield with 4 or greater Force": the Personalities, Followers and Items of every unit there, either side's. A bowed card is not
     // offered (bowing it again would do nothing).
-    private IEnumerable<CardInstance> HeartOfDarknessCandidates(int provinceIndex) =>
+    private IEnumerable<CardInstance> HeartOfDarknessCandidates(int provinceIndex, string? sourceId = null) =>
+        sourceId is not null && _state.Cards.TryGetValue(sourceId, out var trait) && BeforeResolutionAbilityId(trait) == "rocky-terrain-bow" ? RockyTerrainCandidates(provinceIndex) :
         _state.Cards.Values.Where(c => !c.Bowed && Definition(c).Type is CardType.Personality or CardType.Follower or CardType.Item
                 && (c.Zone == Zone.Battlefield && c.ProvinceIndex == provinceIndex
                     || c.Zone == Zone.Attached && c.AttachedTo is { } hostId && _state.Cards.TryGetValue(hostId, out var host) && host.Zone == Zone.Battlefield && host.ProvinceIndex == provinceIndex)
@@ -160,16 +161,17 @@ public sealed partial class MatchEngine
     // "use" names one card (TargetId) or two (TargetId and CardIds[0]); "decline" bows none -- "zero to two".
     private void ResolveHeartOfDarkness(GameCommand command, PendingBeforeBattleResolve pending, int playerId)
     {
-        if (command.Choice != "use") { Emit("beforeBattleEffect", "Heart of Darkness: no card was bowed.", playerId); return; }
+        var traitName = pending.ActiveSourceId is { } traitId && _state.Cards.TryGetValue(traitId, out var traitCard) ? Definition(traitCard).Name : "Heart of Darkness";
+        if (command.Choice != "use") { Emit("beforeBattleEffect", $"{traitName}: no card was bowed.", playerId); return; }
         var ids = new[] { command.TargetId }.Concat(command.CardIds ?? []).Where(i => i is not null).Select(i => i!).ToArray();
-        var legal = HeartOfDarknessCandidates(pending.ProvinceIndex).Select(c => c.Id).ToHashSet(StringComparer.Ordinal);
+        var legal = HeartOfDarknessCandidates(pending.ProvinceIndex, pending.ActiveSourceId).Select(c => c.Id).ToHashSet(StringComparer.Ordinal);
         Require(ids.Length is 1 or 2 && ids.Distinct(StringComparer.Ordinal).Count() == ids.Length && ids.All(legal.Contains),
-            "Choose one or two different unbowed cards at this battlefield with 4 or greater Force.");
+            legal.Count > 0 && pending.ActiveSourceId is { } rockyId && _state.Cards.TryGetValue(rockyId, out var rocky) && BeforeResolutionAbilityId(rocky) == "rocky-terrain-bow" ? "Choose one or two different unbowed attacking Personalities at this battlefield." : "Choose one or two different unbowed cards at this battlefield with 4 or greater Force.");
         foreach (var id in ids)
         {
             var card = Card(id);
             if (!StalwartNegatesBow(card, playerId)) card.Bowed = true;
-            Emit("beforeBattleEffect", $"Heart of Darkness: {Definition(card).Name} bowed.", playerId, card.Id);
+            Emit("beforeBattleEffect", $"{traitName}: {Definition(card).Name} bowed.", playerId, card.Id);
         }
     }
 
@@ -177,7 +179,7 @@ public sealed partial class MatchEngine
     {
         if (_state.PendingBeforeBattleResolve is not { } pending || _state.PendingChoice?.PlayerId != playerId) yield break;
         yield return new("beforeBattleOptional", "Bow no card", true, null, new GameCommand("beforeBattleOptional", playerId, _state.Version, Choice: "decline"), sourceId);
-        var candidates = HeartOfDarknessCandidates(pending.ProvinceIndex).ToArray();
+        var candidates = HeartOfDarknessCandidates(pending.ProvinceIndex, sourceId ?? pending.ActiveSourceId).ToArray();
         for (var i = 0; i < candidates.Length; i++)
         {
             yield return new("beforeBattleOptional", $"Bow {Definition(candidates[i]).Name}", true, null,
