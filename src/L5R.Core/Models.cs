@@ -386,6 +386,22 @@ public sealed class PlayerState
 }
 
 public sealed record PendingChoice(string Type, int PlayerId, string? CardId, string Prompt, int? ActingPlayerId = null);
+
+/// <summary>The Honor loss Ten Thousand Temples may negate, waiting for its controller's answer. <paramref name="Command"/> is the command that was being executed (the whole of it is replayed once every
+/// decision is made); Decisions are the answers so far (true: the Temple was destroyed to negate that loss), one per earlier loss of that command that the Temple could have negated; the Prior* fields are the
+/// pending choice, priority and pass count the state had before this decision took them over.</summary>
+public sealed class PendingHonorLossDecision
+{
+    public GameCommand Command { get; set; } = new("pass", 0, 0);
+    public List<bool> Decisions { get; set; } = [];
+    public int PlayerId { get; set; }
+    public string TempleId { get; set; } = "";
+    public int Amount { get; set; }
+    public string Reason { get; set; } = "";
+    public PendingChoice? PriorChoice { get; set; }
+    public int PriorPriority { get; set; }
+    public int PriorPasses { get; set; }
+}
 public sealed record GameEvent(long Sequence, string Type, string Message, int? PlayerId = null, string? CardId = null, int? Amount = null);
 
 /// <summary>A Ranged/Melee Attack awaiting resolution, open to reaction (core rules: "players must
@@ -1045,6 +1061,9 @@ public sealed class MatchState
     // Emperor Edition remaining-cards pass (issue #492), group F (EmperorRemainingFEvents.cs): the decision of an Event in progress, the ones queued behind it (an optional draw owed when a battle's
     // resolution or an attach finishes), and the Personality an Event was told to name (Delayed Arrival), by the Event's card id.
     public PendingEventChoice? PendingEventChoice { get; set; }
+    // Ten Thousand Temples (issue #492, group F): "Before you lose Honor, destroy this card: Negate the Honor loss." -- the command whose execution reached an Honor loss the Temple could negate, held whole
+    // while its controller decides (MatchEngine.Execute replays it with the decisions made).
+    public PendingHonorLossDecision? PendingHonorLossDecision { get; set; }
     public List<PendingEventChoice> PendingEventChoices { get; set; } = [];
     public Dictionary<string, string> EventTargets { get; set; } = [];
     // Isawa Kimi - exp 2 ("an action that put any cards into another player's hand"): the players whose hand the currently-resolving action put a card into, snapshotted into LastResolvedAction.HandRecipients.

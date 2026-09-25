@@ -42,6 +42,9 @@ public sealed partial class MatchEngine
         (nameof(MatchState.PendingBrashDraws), s => s.PendingBrashDraws > 0),
         (nameof(MatchState.PendingOverconfidentDraws), s => s.PendingOverconfidentDraws.Count > 0),
         (nameof(MatchState.PendingForcedDiscards), s => s.PendingForcedDiscards.Count > 0),
+        (nameof(MatchState.PendingHonorLossDecision), s => s.PendingHonorLossDecision is not null), // Ten Thousand Temples' open decision (issue #492, group F)
+        (nameof(MatchState.PendingEventChoice), s => s.PendingEventChoice is not null), // an Event's open decision (issue #492, group F)
+        (nameof(MatchState.PendingEventChoices), s => s.PendingEventChoices.Count > 0), // an optional draw an Event owes, queued behind the action in progress (issue #492, group F)
         (nameof(MatchState.PendingCopy), s => s.PendingCopy is not null),
         (nameof(MatchState.PendingEitherOr), s => s.PendingEitherOr is not null),
         (nameof(MatchState.PendingOpponentPayment), s => s.PendingOpponentPayment is not null),

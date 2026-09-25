@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Build Region wave 9 (Emperor Edition remaining-cards pass, issue #492, group F): the Regions of the Emperor Edition set that could be wired in full -- Blighted Region (a Defender's
-move to the battle) and Refuge of the Three Sisters (a Fate deck search bounded by a Personality's Chi).
+move to the battle), Refuge of the Three Sisters (a Fate deck search bounded by a Personality's Chi) and Ten Thousand Temples (an Honor loss negated by destroying it, and a Limited
+Honor gain). Kaiu Village (no Proxy scan for its created Weapon) and Plains of Otosan Uchi (a province with two Dynasty cards) are not wired: see ee_remF_blockers.json.
 
 Only the cards this group actually wired are published here (an unwired card is never published with a blank ability list). Every scan was read by eye; the published Text is the
 scan's own wording (the printing's text, not the catalogue's reworded Oracle text, where they differ), and each source receipt is recorded next to the wave.
@@ -19,13 +20,16 @@ NL = chr(10)
 ABILITIES: dict[int, list[str]] = {
     1042: ["blighted-region-move"],  # Blighted Region
     6226: ["refuge-three-sisters-search"],  # Refuge of the Three Sisters
+    7908: ["ten-thousand-temples-honor"],  # Ten Thousand Temples
 }
 OVERRIDE: dict[int, dict] = {
+    7908: {"Effect": "ten-thousand-temples"},
 }
 
 # The scans' own rules text (transcribed from each scan by eye): the Emperor Edition printing carries no text in the source record, and the catalogue's Oracle text is worded differently.
 TEXT: dict[int, str] = {
     1042: "Battle: If you are the Defender, bow this card and choose your performing Personality: Move him to the current battlefield. If he moved and is now opposed, straighten him and gain 2 Honor.",
+    7908: "Before you lose Honor, destroy this card: Negate the Honor loss." + NL + "Limited: If your Family Honor is 9 or lower, bow this card: Gain 1 Honor.",
     6226: "Limited: Destroy this card and remove your performing unbowed Personality from the game: Search your Fate deck for a card with a lower Focus Value than your Personality's Chi. Show it and put it in your hand.",
 }
 

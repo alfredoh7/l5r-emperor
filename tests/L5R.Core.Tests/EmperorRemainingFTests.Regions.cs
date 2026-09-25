@@ -20,8 +20,12 @@ internal static partial class EmperorRemainingFTests
         Region(BlightedRegion, "Blighted Region", ["blighted-region-move"], "Battle: If you are the Defender, bow this card and choose your performing Personality: Move him to the current battlefield. If he moved and is now opposed, straighten him and gain 2 Honor.", "Singular");
         Region(RefugeOfTheThreeSisters, "Refuge of the Three Sisters", ["refuge-three-sisters-search"],
             "Limited: Destroy this card and remove your performing unbowed Personality from the game: Search your Fate deck for a card with a lower Focus Value than your Personality's Chi. Show it and put it in your hand.", "Singular");
-        Manifest(root, "region-wave-9", BlightedRegion, RefugeOfTheThreeSisters);
-        Eq(PublishedContent.RegionWave9.Cards.Length, 2, "region-wave-9 holds exactly the wired Regions");
+        var temples = CardCatalog.Get(TenThousandTemples);
+        Check(temples.Type == CardType.Region && temples.Effect == "ten-thousand-temples" && temples.Abilities!.SequenceEqual(["ten-thousand-temples-honor"]), "Ten Thousand Temples");
+        Eq(temples.Text, "Before you lose Honor, destroy this card: Negate the Honor loss.\nLimited: If your Family Honor is 9 or lower, bow this card: Gain 1 Honor.", "Ten Thousand Temples prints the scan's text");
+        Eq(string.Join(",", temples.Keywords!.OrderBy(k => k, StringComparer.Ordinal)), "Singular,Temple", "Ten Thousand Temples' keywords");
+        Manifest(root, "region-wave-9", BlightedRegion, RefugeOfTheThreeSisters, TenThousandTemples);
+        Eq(PublishedContent.RegionWave9.Cards.Length, 3, "region-wave-9 holds exactly the wired Regions");
     }
 
     private static CardInstance AttachRegion(MatchState s, string definition, int owner, int province)
@@ -116,6 +120,63 @@ internal static partial class EmperorRemainingFTests
         // A Limited action: not on the opponent's turn.
         var s3 = Setup(out var region3, out var performer3, out _); s3.ActivePlayerId = 1;
         Check(!CanUse(MatchEngine.FromTestState(s3), 0, "refuge-three-sisters-search", region3.Id, performer3.Id), "Limited: only on your own turn");
+    }
+
+    private const string TenThousandTemples = "oracle-l5r-7908";
+
+    private static void TenThousandTemplesTests()
+    {
+        // Player 1's Tsujiken - exp dishonors player 0's Personality; his controller would lose 1 Honor. Player 0 controls Ten Thousand Temples: he is asked before the loss.
+        MatchState Setup(out CardInstance temple, out CardInstance tsujiken, out CardInstance victim, bool templeOwnedByOpponent = false)
+        {
+            var s = Table(Phase.Action, 1); s.PriorityPlayerId = 1;
+            temple = AttachRegion(s, TenThousandTemples, templeOwnedByOpponent ? 1 : 0, 1);
+            tsujiken = Add(s, TsujikenExp, 1, Zone.Home);
+            victim = Add(s, "training-crane-samurai", 0, Zone.Home);
+            s.Players[0].Honor = 12;
+            return s;
+        }
+        var s1 = Setup(out var temple1, out var tsujiken1, out var victim1);
+        var e1 = MatchEngine.FromTestState(s1);
+        Accept(e1, Offer(e1, 1, "tsujiken-exp-dishonor", tsujiken1.Id, victim1.Id));
+        Eq(e1.State.PendingChoice?.Type, "honorLossDecision", "the Temple's controller is asked before he loses Honor");
+        Eq(e1.State.PriorityPlayerId, 0, "player 0 decides");
+        Eq(Honor(e1, 0), 12, "nothing has happened yet");
+        Check(!e1.State.Cards[victim1.Id].Dishonorable && !e1.State.Cards[tsujiken1.Id].Bowed, "the action is held whole: no bow, no dishonor yet");
+        var options = e1.QueryActions(0).Where(o => o.Type == "honorLossChoice").Select(o => o.Label).ToArray();
+        Check(options.Length == 2 && options.Any(o => o.StartsWith("Destroy")) && options.Any(o => o.StartsWith("Lose")), "destroy it to negate the loss, or lose the Honor: " + string.Join("; ", options));
+        Check(!e1.QueryActions(1).Any(o => o.Type == "honorLossChoice"), "only the losing player answers");
+        Accept(e1, e1.QueryActions(0).First(o => o.Type == "honorLossChoice" && o.Label.StartsWith("Destroy")).Command!);
+        Eq(Honor(e1, 0), 12, "the Honor loss was negated");
+        Check(e1.State.Cards[temple1.Id].Zone == Zone.DynastyDiscard && e1.State.Players[0].Provinces[1].RegionId is null, "Ten Thousand Temples was destroyed");
+        Check(e1.State.Cards[victim1.Id].Dishonorable && e1.State.Cards[tsujiken1.Id].Bowed, "the rest of the action resolved");
+        Check(e1.State.PendingHonorLossDecision is null, "no decision is left open");
+        // Declined: the loss happens and the Temple stays.
+        var e2 = MatchEngine.FromTestState(Setup(out var temple2, out var tsujiken2, out var victim2));
+        Accept(e2, Offer(e2, 1, "tsujiken-exp-dishonor", tsujiken2.Id, victim2.Id));
+        Accept(e2, e2.QueryActions(0).First(o => o.Type == "honorLossChoice" && o.Label.StartsWith("Lose")).Command!);
+        Eq(Honor(e2, 0), 11, "he lost the Honor");
+        Eq(e2.State.Cards[temple2.Id].Zone, Zone.Region, "and kept the Temple");
+        // Not the opponent's loss; not without a Temple (nothing is asked).
+        var e3 = MatchEngine.FromTestState(Setup(out _, out var tsujiken3, out var victim3, templeOwnedByOpponent: true));
+        Accept(e3, Offer(e3, 1, "tsujiken-exp-dishonor", tsujiken3.Id, victim3.Id));
+        Check(e3.State.PendingChoice?.Type != "honorLossDecision", "a Temple only protects its own controller's Honor");
+        Eq(Honor(e3, 0), 11, "he lost the Honor (player 1's Temple is not his)");
+
+        // Limited: with Family Honor 9 or lower, bow it to gain 1 Honor.
+        MatchState Limited(int honor, out CardInstance region)
+        {
+            var s = Table(Phase.Action, 0); s.PriorityPlayerId = 0;
+            region = AttachRegion(s, TenThousandTemples, 0, 1);
+            s.Players[0].Honor = honor;
+            return s;
+        }
+        var l9 = MatchEngine.FromTestState(Limited(9, out var region9));
+        Accept(l9, Enabled(l9, 0, "ten-thousand-temples-honor", region9.Id).Command!);
+        Eq(Honor(l9, 0), 10, "gained 1 Honor");
+        Check(l9.State.Cards[region9.Id].Bowed, "bowed as its cost");
+        var l10 = MatchEngine.FromTestState(Limited(10, out var region10));
+        Check(!CanUse(l10, 0, "ten-thousand-temples-honor", region10.Id), "not with Family Honor above 9");
     }
 
     private static void RegionStraightens()

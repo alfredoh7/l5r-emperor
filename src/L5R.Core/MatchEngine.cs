@@ -173,7 +173,20 @@ public sealed partial class MatchEngine
         if (command.ExpectedVersion != _state.Version) return Reject("The board has changed. Refresh before acting.");
         if (_state.WinnerId is not null) return Reject("The match has finished.");
         var original = _state;
-        _state = Copy(original);
+        // Ten Thousand Temples (issue #492, group F): the answer to an Honor loss decision replays the command that reached it, from the state it started in, with the decisions made so far.
+        var execute = command; MatchState? cleanBase = null;
+        _honorLossOccurrence = 0; _honorLossDecisions = [];
+        if (command.Type == "honorLossChoice")
+        {
+            if (original.PendingHonorLossDecision is not { } decision) return Reject("No Honor loss decision is pending.");
+            if (command.PlayerId != decision.PlayerId || command.Choice is not ("yes" or "no")) return Reject("Answer the Honor loss decision: destroy Ten Thousand Temples to negate the loss, or not.");
+            cleanBase = Copy(original);
+            cleanBase.PendingHonorLossDecision = null; cleanBase.PendingChoice = decision.PriorChoice; cleanBase.PriorityPlayerId = decision.PriorPriority; cleanBase.ConsecutivePasses = decision.PriorPasses;
+            _state = Copy(cleanBase);
+            _honorLossDecisions = decision.Decisions.Append(command.Choice == "yes").ToList();
+            execute = decision.Command;
+        }
+        else _state = Copy(original);
         var firstEvent = _state.Events.Count;
         try
         {
@@ -183,8 +196,8 @@ public sealed partial class MatchEngine
                 && rc.FaceUp && rc.Zone is not (Zone.Hand or Zone.FateDeck or Zone.DynastyDeck) ? ViewCard(rc) : null;
             var reactionLabel = _state.PendingChoice?.Type=="overconfidentDraw" ? "Overconfident" : null;
             var traitSnapshot = AfterCommandTraitSnapshot(); // "After this card bows/attaches" traits (issue #453 batch 5, SeedsOfDecayBatch5.cs)
-            UsePaymentDiscards(command); // Asahina Keigo (issue #477): the hand cards named for Gold sources that discard one.
-            Apply(command);
+            UsePaymentDiscards(execute); // Asahina Keigo (issue #477): the hand cards named for Gold sources that discard one.
+            Apply(execute);
             _paymentDiscards=[];
             ApplyAfterCommandTraits(traitSnapshot);
             ReturnCardsOutOfPlayToTheirOwners();
@@ -194,6 +207,23 @@ public sealed partial class MatchEngine
             RefreshDuelRecord();
             _commands.Add(Copy(command));
             return new(true,null,_state.Version,_state.Events.Skip(firstEvent).ToArray());
+        }
+        catch (HonorLossDecisionNeeded need)
+        {
+            // The command reached an Honor loss Ten Thousand Temples may negate: nothing it did is kept; its controller is asked, and the command is replayed with his answer.
+            _paymentDiscards=[];
+            var pendingBase = cleanBase ?? original;
+            _state=pendingBase;
+            pendingBase.PendingHonorLossDecision=new PendingHonorLossDecision { Command=execute, Decisions=_honorLossDecisions.ToList(), PlayerId=need.PlayerId, TempleId=need.TempleId, Amount=need.Amount, Reason=need.Reason,
+                PriorChoice=pendingBase.PendingChoice, PriorPriority=pendingBase.PriorityPlayerId, PriorPasses=pendingBase.ConsecutivePasses };
+            pendingBase.PendingChoice=new("honorLossDecision",need.PlayerId,need.TempleId,$"Ten Thousand Temples: you would lose {-need.Amount} Honor ({need.Reason}). Destroy it to negate the loss?");
+            pendingBase.PriorityPlayerId=need.PlayerId; pendingBase.ConsecutivePasses=0;
+            var decisionEvents=_state.Events.Count;
+            Emit("honorLossDecision",$"{Player(need.PlayerId).Name} may destroy Ten Thousand Temples to negate an Honor loss of {-need.Amount} ({need.Reason}).",need.PlayerId,need.TempleId);
+            _state.Version++;
+            _commands.Add(Copy(command));
+            _honorLossDecisions=[];
+            return new(true,null,_state.Version,_state.Events.Skip(decisionEvents).ToArray());
         }
         catch (RuleViolation error)
         {
@@ -3136,6 +3166,8 @@ public sealed partial class MatchEngine
         if(amount==0) return;
         // Yamazaki - Experienced (The Shadow's Embrace pass, issue #476, batch 2): "Once per phase, before you lose exactly 1 Honor: Negate the loss." -- the loss as it would now happen.
         if(amount==-1 && YamazakiNegatesLoss(playerId,reason)) return;
+        // Ten Thousand Temples (issue #492, group F): "Before you lose Honor, destroy this card: Negate the Honor loss." -- asked before the loss happens (the command replays with the answer).
+        if(amount<0 && TenThousandTemplesNegates(playerId,amount,reason)) return;
         var player=Player(playerId); player.Honor+=amount;
         if(amount<0) RecordHonorLoss(playerId); // An Insult Answered (issue #453, batch 2): the action that cost this player Honor.
         if(amount>0) _state.CurrentActionHonorGained=true; // Moksha Patam (issue #453 batch 5): read when the action in progress is done.

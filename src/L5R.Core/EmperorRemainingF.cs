@@ -46,6 +46,9 @@ public static class EmperorRemainingFAbilities
         // "Limited: Bow this card and pay any amount of Gold: Put a number of Wealth tokens on this card equal to the amount of Gold you paid."
         all["moneylender-invest"] = new("Limited", "Bow this card and pay any amount of Gold: Put a number of Wealth tokens on this card equal to the amount of Gold you paid", "none",
             Cost: GoldCostRule.Variable(), Costs: ActionCost.BowSource);
+        // Ten Thousand Temples (oracle-l5r-7908): "Before you lose Honor, destroy this card: Negate the Honor loss." is its Effect (TenThousandTemplesNegates: asked before an Honor loss, the command
+        // replayed with the answer). "Limited: If your Family Honor is 9 or lower, bow this card: Gain 1 Honor."
+        all["ten-thousand-temples-honor"] = new("Limited", "If your Family Honor is 9 or lower, bow this card: Gain 1 Honor", "none", Costs: ActionCost.BowSource);
         // Rugashi Bazaar (oracle-l5r-6396): "This card will not be destroyed." is its Effect (WillNotBeDestroyed); "Bow this card: Produce 3 Gold." its production. "Revenge Battle/Open: If you have lost
         // Honor from another player's action during the Action Phase since your last turn ended, choose one to four of your performing Personalities: Give each of them a Force bonus equal to his
         // base Personal Honor." The performers are a Performing slot (Dislodge the Foe's shape); as a Battle action each is at the battle, as an Open action anywhere.
@@ -94,6 +97,44 @@ public sealed partial class MatchEngine
         _state.Cards.Values.Where(c => c.OwnerId == holding.OwnerId && c.Id != affected.Id && InPlay(c) && Definition(c).Type == CardType.Personality && Keyword(c, "Samurai")
                 && SameLocation(c, affected) && ActionAcceptsTarget(subject, c.Id))
             .OrderBy(c => c.Id, StringComparer.Ordinal);
+
+    // ---- Ten Thousand Temples ---------------------------------------------------------------------------------------------------------------------------------
+    internal const string TenThousandTemplesEffect = "ten-thousand-temples";
+
+    private sealed class HonorLossDecisionNeeded(int playerId, string templeId, int amount, string reason) : Exception("An Honor loss awaits a decision.")
+    {
+        public int PlayerId { get; } = playerId; public string TempleId { get; } = templeId; public int Amount { get; } = amount; public string Reason { get; } = reason;
+    }
+
+    // The decisions made so far for this command's Honor losses the Temple could negate, in the order they arise, and how many have arisen in this run.
+    private List<bool> _honorLossDecisions = [];
+    private int _honorLossOccurrence;
+
+    private CardInstance? TenThousandTemplesOf(int playerId) =>
+        _state.Cards.Values.Where(c => c.OwnerId == playerId && c.Zone == Zone.Region && Definition(c).Effect == TenThousandTemplesEffect).OrderBy(c => c.Id, StringComparer.Ordinal).FirstOrDefault();
+
+    // "Before you lose Honor, destroy this card: Negate the Honor loss." A loss the player's Ten Thousand Temples could negate is put to him first: with no answer for it yet the command is abandoned and
+    // asked about (Execute), and replayed with the answer; a "yes" destroys the Region and the loss does not happen.
+    private bool TenThousandTemplesNegates(int playerId, int amount, string reason)
+    {
+        var temple = TenThousandTemplesOf(playerId);
+        if (temple is null) return false;
+        var index = _honorLossOccurrence++;
+        if (index >= _honorLossDecisions.Count) throw new HonorLossDecisionNeeded(playerId, temple.Id, amount, reason);
+        if (!_honorLossDecisions[index]) return false;
+        DestroyRegion(temple);
+        Emit("honorLossNegated", $"{Player(playerId).Name}'s Honor loss from {reason} was negated: Ten Thousand Temples was destroyed.", playerId, temple.Id);
+        return true;
+    }
+
+    private IEnumerable<ActionOption> HonorLossDecisionActions(int playerId)
+    {
+        if (_state.PendingHonorLossDecision is not { } pending || pending.PlayerId != playerId) yield break;
+        yield return new("honorLossChoice", $"Destroy Ten Thousand Temples: negate the loss of {-pending.Amount} Honor ({pending.Reason})", true, null,
+            new GameCommand("honorLossChoice", playerId, _state.Version, CardId: pending.TempleId, Choice: "yes"), pending.TempleId);
+        yield return new("honorLossChoice", $"Lose {-pending.Amount} Honor ({pending.Reason})", true, null,
+            new GameCommand("honorLossChoice", playerId, _state.Version, CardId: pending.TempleId, Choice: "no"), pending.TempleId);
+    }
 
     // ---- Moneylender ------------------------------------------------------------------------------------------------------------------------------------
     internal const string MoneylenderEffect = "moneylender", MoneylenderTokenType = "Wealth", EntryGoldPaidKey = "entry-gold-paid";
@@ -178,11 +219,12 @@ public sealed partial class MatchEngine
 
     // The ability ids whose effects RunEmperorRemainingFEffect runs (RunAbilityEffects' guard case).
     private static bool IsEmperorRemainingFAbility(string id) => id is
-        "moneylender-invest" or "falling-rain-boost" or "chugo-seido-redirect" or "rugashi-revenge" or "governors-court-open" or "peddler-draw" or "temples-gisei-follower" or "temples-gisei-item" or "temples-gisei-spell" or "akodo-grave-destroy" or "refuge-three-sisters-search";
+        "ten-thousand-temples-honor" or "moneylender-invest" or "falling-rain-boost" or "chugo-seido-redirect" or "rugashi-revenge" or "governors-court-open" or "peddler-draw" or "temples-gisei-follower" or "temples-gisei-item" or "temples-gisei-spell" or "akodo-grave-destroy" or "refuge-three-sisters-search";
 
     // Per-id conditions of group F's abilities (ValidateAbility's hook).
     private void ValidateEmperorRemainingF(string id, AbilityDefinition ability, GameCommand command, PlayerState player, CardInstance? source)
     {
+        if (id == "ten-thousand-temples-honor") Require(player.Honor <= 9, "Your Family Honor must be 9 or lower.");
         // Cherry Blossom Festival: "No players may take Reactions". Disgrace: "other players may not target your Personalities with Limited actions".
         if (ability.Timing == "Reaction") Require(!ReactionsBarred(), "Cherry Blossom Festival: no players may take Reactions.");
         RequireDisgraceAllowsTargets(ability, command, player);
@@ -230,6 +272,9 @@ public sealed partial class MatchEngine
     {
         switch (id)
         {
+            case "ten-thousand-temples-honor":
+                GainHonor(player.Id, 1, "Ten Thousand Temples", source);
+                return false;
             case "moneylender-invest":
                 for (var i = 0; i < PaidGoldAmount(command); i++) CreateToken(source!, MoneylenderTokenType, id);
                 return false;

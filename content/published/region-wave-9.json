@@ -51,6 +51,32 @@
         "refuge-three-sisters-search"
       ],
       "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-7908",
+      "Name": "Ten Thousand Temples",
+      "Type": "Region",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Before you lose Honor, destroy this card: Negate the Honor loss.\nLimited: If your Family Honor is 9 or lower, bow this card: Gain 1 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7908.jpg",
+      "Keywords": [
+        "Singular",
+        "Temple"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "ten-thousand-temples-honor"
+      ],
+      "Effect": "ten-thousand-temples"
     }
   ],
   "Decks": []

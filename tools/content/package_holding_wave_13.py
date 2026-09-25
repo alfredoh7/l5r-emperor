@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
-"""Build Holding wave 13 (Emperor Edition remaining-cards pass, issue #492, group F): the Holdings of the Emperor Edition set that could be wired in full -- Akodo's Grave (a Battle
-action that destroys a Terrain), Fortifications (+1 province strength), Luxurious Silk (a Gold source for paying for an action, usable while bowed), Silk Works, Temples of Gisei Toshi
-(a named-type look at the Fate deck) and Traveling Peddler (a paid draw), plus the rest of the group as each was wired.
+"""Build Holding wave 13 (Emperor Edition remaining-cards pass, issue #492, group F): the eleven Holdings of the Emperor Edition set wired in full -- Akodo's Grave, Chugo Seido, Falling Rain
+Dojo, Fortifications, Governor's Court, Luxurious Silk, Moneylender, Rugashi Bazaar, Silk Works, Temples of Gisei Toshi and Traveling Peddler.
 
 Only the cards this group actually wired are published here (an unwired card is never published with a blank ability list). Every scan was read by eye; the published Text is the
 scan's own wording (the printing's text, not the catalogue's reworded Oracle text, where they differ), and each source receipt is recorded next to the wave.

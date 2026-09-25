@@ -55,9 +55,11 @@ internal static partial class EmperorRemainingFTests
         ("Rebuilding the Empire: a player with three or fewer provinces may gain one to the right; he is lowered to his starting Family Honor and may not declare an attack until the revealing player's next turn begins", RebuildingTheEmpireTests),
         ("Benefices of the Emperor: every player chooses a card in turn, all are discarded, the unique lowest Focus Value gains a province to the left of his row, the unique highest +3 maximum hand size and three cards", BeneficesTests),
         ("Abandoning the Fortunes: before each player's turn ends, with an empty Dynasty deck he chooses and destroys one Personality or Holding per province without a Dynasty card", AbandoningTheFortunesTests),
+        ("Alter History and Boastful Proclamation through a real battle resolution: the destroyed province costs the Defender 5 Honor, gives the attacking army +1F tokens and offers the Attacker a draw", EventsThroughARealBattle),
         ("Published shape: the wired Regions print their stats, keywords, scan text, Effect and ability ids, ship their art and are listed in region-wave-9's manifest", RegionsPublishedShape),
         ("Blighted Region: only the Defender; bows the Region and moves the performing Personality to the battle (Absent), straightening him and gaining 2 Honor if he moved and is opposed", BlightedRegionMove),
         ("Refuge of the Three Sisters: destroys the Region and removes the performing unbowed Personality from the game to search the Fate deck for a card with a Focus Value below his Chi", RefugeSearch),
+        ("Ten Thousand Temples: before an Honor loss its controller may destroy it to negate the loss (the command is held and replayed with his answer); Limited, bow it to gain 1 Honor at Family Honor 9 or lower", TenThousandTemplesTests),
         ("A bowed Region straightens with its province's owner's other cards at the start of his turn", RegionStraightens),
         ("Luxurious Silk: while bowed and without bowing, produces 2 Gold once a turn for an action's payment -- not for a recruit", LuxuriousSilkGold),
     ]);

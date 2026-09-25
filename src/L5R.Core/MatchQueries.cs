@@ -478,6 +478,8 @@ public sealed partial class MatchEngine
             result.AddRange(StarCrossedLoversActions(playerId));
         else if(_state.PendingChoice is { Type:"eventChoice" }) // Emperor Edition remaining-cards pass (issue #492), group F.
             result.AddRange(EventChoiceActions(playerId));
+        else if(_state.PendingChoice is { Type:"honorLossDecision" })
+            result.AddRange(HonorLossDecisionActions(playerId));
         else if(_state.PendingChoice is { Type:"testedLandProvince" } testedLand)
         {
             if(playerId==testedLand.PlayerId)
