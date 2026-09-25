@@ -319,7 +319,7 @@ internal static class SecondCitySpiritTests
         Accept(e2, Offer(e2, 1, "training-destroy-no-attachments", d2.Id, b2.Id));
         Accept(e2, ReactionOffer(e2, 0, "spirit-berserker-delay", b2.Id));
         ClosePassing(e2);
-        e2 = Edit(e2, st => { var c = st.Cards[b2.Id]; c.Zone = Zone.Home; c.ProvinceIndex = null; st.PendingDelayedDestructions.Clear(); st.PendingDelayedDestructions.Add(b2.Id); c.Zone = Zone.FateDiscard; });
+        e2 = Edit(e2, st => { var c = st.Cards[b2.Id]; c.Zone = Zone.Home; c.ProvinceIndex = null; st.DelayedEffects.Clear(); st.DelayedEffects.Add(new DelayedEffect { Kind = DelayedKinds.Destroy, Until = DelayUntil.EndOfTurn, CardId = b2.Id }); /* the delay store, issue #492 */ c.Zone = Zone.FateDiscard; });
         var t = e2.State.TurnNumber;
         RunUntil(e2, () => e2.State.TurnNumber > t);
         Eq(e2.State.Cards[b2.Id].Zone, Zone.FateDiscard, "a card no longer in play is left where it is");

@@ -307,6 +307,8 @@ public sealed partial class MatchEngine
             else if (challengedDuelist && !challengerDuelist) { winnerId = duel.ChallengedId; loserIds = [duel.ChallengerId]; }
             else { winnerId = null; loserIds = [duel.ChallengerId, duel.ChallengedId]; resolutionReason = "Equal totals · both lose"; }
         }
+        // The shared delay mechanism (issue #492, EmperorRulingR2Cards.cs): "You may choose (now) to delay the effects of losing this duel ..." is answered before the outcome applies.
+        if (BeginDuelLossDelayDecisions(duel, loserIds)) return;
         var resultStart = _state.Events.Count;
         var strengthsBefore = _state.Players.SelectMany(p => p.Provinces.Select(v => new DuelProvince(p.Id, v.Index, EffectiveProvinceStrength(v), EffectiveProvinceStrength(v)))).ToArray();
         var challengerStat = DuelStatValue(challenger, duel.Stat);
@@ -325,9 +327,9 @@ public sealed partial class MatchEngine
             if ((Definition(Card(focusedId)).Abilities ?? []).Contains("to-first-blood-focus"))
                 foreach (var loserId in loserIds) _state.NegatedEffects.Add(new("destroy", loserId));
         ExplainDuelEffect("Outcome", _state.LastDuel!.Challenge?.Source,
-            () => ApplyDuelOutcome(duel.AbilityId, winnerId, loserIds, duel.ChallengerPlayerId));
+            () => WithDuelLossDelays(duel, loserIds, () => ApplyDuelOutcome(duel.AbilityId, winnerId, loserIds, duel.ChallengerPlayerId)));
         // Kakita Ichigiku: "destroy that duel's loser in addition to other consequences of losing."
-        if (duel.IchigikuDestroysLoser) IchigikuDestroyLosers(loserIds, duel.ChallengerPlayerId);
+        if (duel.IchigikuDestroysLoser) WithDuelLossDelays(duel, loserIds, () => IchigikuDestroyLosers(loserIds, duel.ChallengerPlayerId));
         _state.NegatedEffects = [];
         // False Ring of Earth (oracle-l5r-10532, issue #295): "After you win a duel against a
         // Personality who shared no keywords with your Personality in the duel" -- Ring

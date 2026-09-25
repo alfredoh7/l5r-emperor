@@ -101,7 +101,8 @@ internal static class BattleAbsentMovesTests
         // + light-of-justice-move (Emperor Edition remaining-cards pass, issue #492, group D: The Light of Justice moves its performing Magistrate to the current battlefield).
         // + blighted-region-move (Emperor Edition remaining-cards pass, issue #492 group F: Blighted Region's Defender-only move of a performing Personality to the current battlefield).
         // + moto-house-guard-attack (Emperor Edition remaining-cards pass, issue #492 group G: Moto House Guard moves its host Personality to the current battlefield).
-        Eq(marked, "blighted-region-move,broken-alliance-move,charge-into-danger-move,chukage-move,dislodge-the-foe,earth-flows-move,falling-leaf-strike,guided-by-honor-move,hawado-move-battlefield,heijin-move,help-shadows-move,houken-exp-straighten,intervening-spirit-move,intimidation-move,irezu-move,keep-of-dead-move,lesson-of-earth-move,light-of-justice-move,mai-move-force-penalty,michi-move,moto-house-guard-attack,moving-unmoving-approach,natsumi-move,natures-wrath-move,pronouncement-guilt-move,requesting-reinforcements-recruit,return-to-action-move,rikyou-move,rumors-travel-move,sanctuary-of-the-waves-move,shinoda-move,skipping-the-puddle-move,sound-of-thunder-move,sudden-movement-switch,takasho-move,tetsuo-move-attack,training-move-current,training-move-to-battle,trusting-instinct-move,your-clan-needs-you");
+        // + courage-mantis-move (Emperor Edition ruling pass R2, issue #492: The Courage of the Mantis moves its performing Mantis Clan Personality to the current battlefield).
+        Eq(marked, "blighted-region-move,broken-alliance-move,charge-into-danger-move,chukage-move,courage-mantis-move,dislodge-the-foe,earth-flows-move,falling-leaf-strike,guided-by-honor-move,hawado-move-battlefield,heijin-move,help-shadows-move,houken-exp-straighten,intervening-spirit-move,intimidation-move,irezu-move,keep-of-dead-move,lesson-of-earth-move,light-of-justice-move,mai-move-force-penalty,michi-move,moto-house-guard-attack,moving-unmoving-approach,natsumi-move,natures-wrath-move,pronouncement-guilt-move,requesting-reinforcements-recruit,return-to-action-move,rikyou-move,rumors-travel-move,sanctuary-of-the-waves-move,shinoda-move,skipping-the-puddle-move,sound-of-thunder-move,sudden-movement-switch,takasho-move,tetsuo-move-attack,training-move-current,training-move-to-battle,trusting-instinct-move,your-clan-needs-you");
         foreach (var (id, ability) in AbilityCatalog.All.Where(p => p.Value.MovesToBattle))
             Check(ability.Timing is "Battle" or "BattleOrOpen", $"{id}: a move to the battle is a Battle action");
     }
@@ -199,6 +200,8 @@ internal static class BattleAbsentMovesTests
         if (ability == "guided-by-honor-move") maiden.GrantedKeywords.Add(new("Paragon", "test-fixture", GrantDuration.Permanent));
         // Emperor Edition remaining-cards pass (issue #492, group D): The Light of Justice's performing Magistrate (from home: an Absent move-to-battle action).
         if (ability == "light-of-justice-move") maiden.GrantedKeywords.Add(new("Magistrate", "test-fixture", GrantDuration.Permanent));
+        // The Courage of the Mantis (issue #492, ruling pass R2): "your performing unbowed Mantis Clan Personality" moves to the battle from home (an Absent move-to-battle action).
+        if (ability == "courage-mantis-move") Add(s, "training-moshi-ikako", actor, Zone.Home);
         CardInstance card;
         // A Stronghold is the player's own from the start of the match: the card is the actor's Stronghold, made this definition.
         if (definition.Type == CardType.Stronghold) { card = s.Cards[s.Players[actor].StrongholdId]; card.DefinitionId = definition.Id; }

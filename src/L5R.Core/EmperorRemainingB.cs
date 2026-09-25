@@ -217,7 +217,7 @@ public sealed partial class MatchEngine
                 var samurai = Card(command.PerformerId!);
                 Straighten(samurai);
                 ApplyModifier(samurai, source!.Id, id, "Force", 3);
-                if (!_state.PendingDelayedDestructions.Contains(samurai.Id)) _state.PendingDelayedDestructions.Add(samurai.Id);
+                ScheduleDelayedEffect(samurai, DelayedKinds.Destroy, DelayUntil.EndOfTurn, null, Definition(source!).Name, source.Id); // the shared delay store (issue #492, EmperorRulingR2.cs)
                 Emit("destructionScheduled", $"{Definition(samurai).Name} will be destroyed before this turn ends.", player.Id, samurai.Id);
                 return false;
             }

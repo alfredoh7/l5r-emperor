@@ -594,6 +594,10 @@ public sealed class PendingDuel
 {
     // Kakita Ichigiku (The Shadow's Embrace pass, issue #476 batch 1): he challenged a dishonorable Personality during a Combat Segment, so the loser is destroyed too.
     public bool IchigikuDestroysLoser { get; set; }
+    // The shared delay mechanism (issue #492, EmperorRulingR2.cs): the Focus Effects "you may choose (now) to delay the effects of losing this duel until ..." are answered before the duel's outcome
+    // applies -- DelayDecisionIndex is how far along the ordered Focus Effects those answers are, and DelayedLossPlayerIds the players whose Personalities' losing effects were delayed (with the trigger).
+    public int DelayDecisionIndex { get; set; }
+    public List<DelayedLossChoice> DelayedLosses { get; set; } = [];
     // Negations a Reaction set on the issuing action (To First Blood's "negate his destruction from the action's effects"): the duel's own outcome is one of that action's effects.
     public List<NegatedEffect> NegatedEffects { get; set; } = [];
     public string AbilityId { get; set; } = "";
@@ -901,7 +905,13 @@ public sealed class MatchState
     public List<LadyMatsusRageWatch> PendingLadyMatsusRageWatches { get; set; } = [];
     // Spirit of the Berserker (Second City): "Delay his destruction from the action's effects until before this turn ends" -- the Personalities whose destruction a
     // reaction has put off, destroyed for real at the top of EndTurn if they are still in play (DelayedDestruction.cs).
-    public List<string> PendingDelayedDestructions { get; set; } = [];
+    // Now a read-only view of the shared delay store (EmperorRulingR2.cs, issue #492): the destructions owed until the end of the turn.
+    [JsonIgnore]
+    public List<string> PendingDelayedDestructions => DelayedEffects.Where(e => e.Kind == DelayedKinds.Destroy && e.Until == DelayUntil.EndOfTurn).Select(e => e.CardId).ToList();
+    // The shared delay mechanism (Emperor Edition ruling pass R2, issue #492; EmperorRulingR2.cs): every effect an action (or a duel's outcome) applied to a card that a card delayed, kept in the
+    // order it was applied until its trigger point comes (end of battle, end of phase, end of turn, the next Dynasty Phase ...). DelayedEffectSequence numbers them.
+    public List<DelayedEffect> DelayedEffects { get; set; } = [];
+    public int DelayedEffectSequence { get; set; }
     // He's Mine! (Emperor Edition remaining-cards pass, issue #492, group B): the Samurai who took a Personality's place in a duel and bow once that duel has ended (cleared as the turn ends).
     public List<string> HesMineSubstitutes { get; set; } = [];
     // Keywords and Clan alignments taken off cards until an action or the turn ends (Red Crane Dojo, TemporaryRemovals.cs).
@@ -1027,7 +1037,6 @@ public sealed class MatchState
     public List<PreservingBeautyCheck> PreservingBeautyChecks { get; set; } = [];
     // Emperor Edition remaining-cards pass, group A (issue #492; EmperorRemainingA.cs): Followers Deadly Orders destroys once the battle's resolution is over; the held action a hand Reaction
     // (Bad Kharma, Footsteps of Madness) negated as a whole (and whether its costs are ignored); the number of cards Face of Ninube shuffled in.
-    public List<RemADeadlyOrdersMark> RemADeadlyOrders { get; set; } = [];
     public bool RemANegatesHeldAction { get; set; }
     public bool RemAIgnoresHeldCosts { get; set; }
     public int RemAShuffledCount { get; set; }

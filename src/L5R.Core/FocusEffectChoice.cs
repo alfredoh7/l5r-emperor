@@ -9,6 +9,8 @@ public sealed class PendingFocusChoice
     public int PlayerId { get; set; }
     public List<string> Candidates { get; set; } = [];
     public string AbilityId { get; set; } = "";
+    /// <summary>The "(now)" choice of a delay Focus Effect (EmperorRulingR2.cs): answered before the duel's outcome applies, not among the Focus Effects that resolve after it.</summary>
+    public bool DelayDecision { get; set; }
 }
 
 // A Focus Effect that needs a decision (issue #419, Mendon's ruling on Disreputable Deal: "a primitive that pauses the resolution of focus effects to allow a player to select a card ...
@@ -145,6 +147,7 @@ public sealed partial class MatchEngine
         var pending = _state.PendingFocusChoice ?? throw new RuleViolation("No Focus Effect is waiting for a choice.");
         Require(command.Type == "chooseFocusEffect", "Choose a card or decline.");
         Require(command.PlayerId == pending.PlayerId, "Only the Focus Effect's player may choose.");
+        if (pending.DelayDecision) { ResolveDelayDecision(command, pending); return; } // The delay Focus Effects' "(now)" choice (EmperorRulingR2Cards.cs).
         var focus = Card(pending.FocusCardId);
         var destroys = pending.AbilityId is "crimson-mark-focus" or "superior-opponent-focus";
         var attachSelf = IsAttachSelfFocusEffect(pending.AbilityId);
@@ -205,6 +208,7 @@ public sealed partial class MatchEngine
     private IEnumerable<ActionOption> FocusChoiceActions(int playerId)
     {
         if (_state.PendingFocusChoice is not { } p || p.PlayerId != playerId) yield break;
+        if (p.DelayDecision) { foreach (var option in DelayDecisionActions(p)) yield return option; yield break; }
         foreach (var id in p.Candidates)
             yield return new("chooseFocusEffect", IsFairWarningFocus(p.AbilityId) ? $"Give {Definition(Card(id)).Name} -4F"
                 : IsEffectKeyFocusEffect(p.AbilityId) ? (id == SandalwoodGainHonor ? "Gain 2 Honor" : "Draw a card")

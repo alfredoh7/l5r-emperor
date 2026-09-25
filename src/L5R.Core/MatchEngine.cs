@@ -1842,7 +1842,9 @@ public sealed partial class MatchEngine
         // play now sits. Deferring here (a province choice) re-enters this same function from scratch
         // once answered, so nothing below runs twice.
         if (CheckYourClanNeedsYouReturn()) return;
-        ResolveRemADeadlyOrders(); // Deadly Orders (Emperor Edition remaining-cards pass, group A, issue #492): "After this battle's resolution, destroy the Follower."
+        // The shared delay mechanism (issue #492, EmperorRulingR2.cs): what was delayed "until after this battle ends" is applied now, the units having returned home (Halls of the Forgotten, Deadly Orders).
+        // A window such a destruction opens (an Overconfident draw) is answered first; the battle's end resumes here afterwards, and nothing is left to apply the second time.
+        if (ApplyDelayedEffects(DelayUntil.EndOfBattle) && (_state.WinnerId is not null || OpenOverconfidentDrawWindow(attacker))) return;
         // Seeking the Truth (Forgotten Legacy pass, issue #467 batch 4): "After this battle ends, if you did not destroy the battlefield's province or an army, discard a card at random."
         ResolveSeekingTheTruthWatches();
         // After This Battle Resolves (issue #272): "after the resolution of the current battle but
@@ -2560,7 +2562,11 @@ public sealed partial class MatchEngine
         _state.PriorityPlayerId=resumeTo;
         _state.ConsecutivePasses=0;
     }
-    private void Rehonor(CardInstance card) => card.Dishonorable=false;
+    private void Rehonor(CardInstance card)
+    {
+        if(InPlay(card) && Delay(card,DelayedKinds.Rehonor)) return; // The shared delay mechanism (issue #492, EmperorRulingR2.cs).
+        card.Dishonorable=false;
+    }
     // Dishonor (core rules Glossary, issue #186): gives a Personality the Dishonorable status --
     // treated as Personal Honor 0 (see CardPersonalHonor) until Rehonor restores them. The 180-degree
     // rotation the rules describe is purely visual, driven client-side off this same flag; no engine
@@ -2575,6 +2581,7 @@ public sealed partial class MatchEngine
             Emit("dishonorNegated",$"{Definition(card).Name}'s dishonoring was negated before it resolved.",card.OwnerId,card.Id);
             return;
         }
+        if(Delay(card,DelayedKinds.Dishonor,byPlayerId)) return; // The shared delay mechanism (issue #492, EmperorRulingR2.cs).
         if(JiYunNegatesDishonor(card,byPlayerId)) return;
         var wasDishonorable=card.Dishonorable;
         card.Dishonorable=true;
@@ -2616,7 +2623,7 @@ public sealed partial class MatchEngine
                 Emit("destructionNegated",$"{Definition(card).Name}'s destruction was negated before it resolved.",card.OwnerId,card.Id);
                 continue;
             }
-            if(DestructionDelayed(card)) continue;
+            if(Delay(card,DelayedKinds.Destroy,actingPlayerId,arg:combatDestruction?"combat":null)) continue; // The shared delay mechanism (issue #492, EmperorRulingR2.cs): Spirit of the Berserker, Halls of the Forgotten, a delayed duel loss.
             // Seeds of Decay pass (issue #453), batch 1: an action's effect (actingPlayerId is set exactly then) is negated by Wide Valley at its battlefield and by Megumi's Guidance's shield.
             if(actingPlayerId is not null && WideValleyNegatesDestruction(card)) continue;
             if(actingPlayerId is int shieldActor && DestructionShielded(card,shieldActor)) continue;
@@ -2778,7 +2785,7 @@ public sealed partial class MatchEngine
         ResolveShadowsEmbraceBatch1TurnEnd(); // The Shadow's Embrace pass (issue #476), batch 1: Bayushi Misaki's check, Agasha Kurou's removal.
         ResolvePreservingBeautyChecks(); // The Shadow's Embrace pass (issue #476), batch 4: Preserving Beauty's "before this turn ends".
         // Spirit of the Berserker: a destruction put off "until before this turn ends" happens now.
-        ResolveDelayedDestructions();
+        ApplyDelayedEffects(DelayUntil.EndOfTurn); // The shared delay mechanism (issue #492, EmperorRulingR2.cs): what was delayed "until before this turn ends" (Spirit of the Berserker's destruction, In the Heart of Battle's).
         ResolveEmperorRemainingBTurnEnd(); // Emperor Edition remaining-cards pass (issue #492), group B.
         ResolveShadowsEmbraceBatch5TurnEnd(); // The Shadow's Embrace pass (issue #476), batch 5: Celestial Sword of the Phoenix's "remove him from the game before the turn ends".
         ResolveReturnsToHandBeforeTurnEnds(); // The Shadow's Embrace pass (issue #476), batch 3: Methodical Questioning (ShadowsEmbraceBatch3.cs).
@@ -3314,6 +3321,7 @@ public sealed partial class MatchEngine
     private void Win(int winner,string reason) { _state.WinnerId=winner; _state.VictoryReason=reason; _state.Phase=Phase.Finished; _state.PendingChoice=null; Emit("matchFinished",$"{Player(winner).Name} wins: {reason}.",winner); }
     private void SetPhase(Phase phase,int priority)
     {
+        if(PhaseFamily(phase)!=PhaseFamily(_state.Phase)) ApplyDelayedEffectsAtPhaseEnd(_state.Phase); // The shared delay mechanism (issue #492, EmperorRulingR2.cs): what waits for the end of the phase that is ending.
         OnPhaseBoundary(_state.Phase,phase); // On (The Shadow's Embrace pass, issue #476 batch 6): the end of one phase and the start of the next.
         // War Weariness (issue #259): reset only on the three phases that genuinely begin once per
         // turn -- NOT Phase.Battle, which this same function re-enters once per battlefield (see
@@ -3342,6 +3350,9 @@ public sealed partial class MatchEngine
             foreach(var waveMan in _state.Cards.Values.Where(c=>InPlay(c) && Definition(c).Effect=="wave-man-attack-phase-straighten"))
                 StraightenBowedUnit(waveMan);
         _state.Phase=phase; _state.PriorityPlayerId=priority; _state.ConsecutivePasses=0; Emit("phaseChanged",$"Phase: {phase}.");
+        // The shared delay mechanism (issue #492, EmperorRulingR2.cs): what waits for the next Dynasty Phase (or End Phase) to begin is applied as it does.
+        if(phase==Phase.Dynasty) ApplyDelayedEffects(DelayUntil.NextDynastyPhase);
+        if(phase==Phase.End) ApplyDelayedEffects(DelayUntil.EndPhaseBegins);
     }
     private void Emit(string type,string message,int? playerId=null,string? cardId=null,int? Amount=null) => _state.Events.Add(new(_state.Events.Count+1,type,message,playerId,cardId,Amount));
     private PlayerState Player(int id) => _state.Players[id];

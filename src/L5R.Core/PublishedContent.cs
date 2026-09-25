@@ -2481,6 +2481,8 @@ public static class PublishedContent
     public static PublishedSnapshot StrategyWave60 { get; } = Load("L5R.Published.StrategyWave60.json", "strategy-wave-60", requireDecks: false);
     /// <summary>Strategy wave 61 (Emperor Edition remaining-cards pass, issue #492, group D): the wired Strategies of the group (package_strategy_wave_61.py lists them).</summary>
     public static PublishedSnapshot StrategyWave61 { get; } = Load("L5R.Published.StrategyWave61.json", "strategy-wave-61", requireDecks: false);
+    /// <summary>Strategy wave 63 (Emperor Edition ruling pass R2, issue #492): the five Strategies whose Focus Effect delays the effects of losing a duel (package_strategy_wave_63.py lists them).</summary>
+    public static PublishedSnapshot StrategyWave63 { get; } = Load("L5R.Published.StrategyWave63.json", "strategy-wave-63", requireDecks: false);
     /// <summary>Spell wave 20 (Embers of War pass, issue #460, batch 5): Inescapable Snare, Incite the Phantoms, Sudden Guardian, The Swell of Strength.</summary>
     public static PublishedSnapshot SpellWave20 { get; } = Load("L5R.Published.SpellWave20.json", "spell-wave-20", requireDecks: false);
     /// <summary>Stronghold wave 14 (issue #460, batch 5): The Ki-Rin's Path.</summary>
@@ -2560,6 +2562,8 @@ public static class PublishedContent
     /// <summary>Stronghold wave 19 (Emperor Edition Stronghold pass, issue #486, batch 3): The Khan's Estate, The Otoro Estate, The Shadow's Lair, The Spider's Web, The Temple of Death,
     /// Watchful Eye Dojo, Yasuki Palaces.</summary>
     public static PublishedSnapshot StrongholdWave19 { get; } = Load("L5R.Published.StrongholdWave19.json", "stronghold-wave-19", requireDecks: false);
+    /// <summary>Stronghold wave 20 (Emperor Edition ruling pass R2, issue #492): Halls of the Forgotten (package_stronghold_wave_20.py).</summary>
+    public static PublishedSnapshot StrongholdWave20 { get; } = Load("L5R.Published.StrongholdWave20.json", "stronghold-wave-20", requireDecks: false);
     /// <summary>Celestial wave 7 (issue #476, batch 6): The Moon's Imperative, The Sun's Aspiration.</summary>
     public static PublishedSnapshot CelestialWave7 { get; } = Load("L5R.Published.CelestialWave7.json", "celestial-wave-7", requireDecks: false);
     /// <summary>Spell wave 23 (Emperor Edition remaining-cards pass, issue #492, group E): Capturing the Soul, Cleansing the Path, Consecration, Contemplate the Void, Hanabi, I Give You My Name,

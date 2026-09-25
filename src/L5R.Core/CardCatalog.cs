@@ -598,6 +598,7 @@ public static class CardCatalog
             .Concat(PublishedContent.StrategyWave59.Cards) // Emperor Edition remaining-cards pass, group B (issue #492)
             .Concat(PublishedContent.StrategyWave60.Cards) // Emperor Edition remaining-cards pass, group C (issue #492)
             .Concat(PublishedContent.StrategyWave61.Cards) // Emperor Edition remaining-cards pass, group D (issue #492)
+            .Concat(PublishedContent.StrategyWave63.Cards) // Emperor Edition ruling pass R2 (issue #492): the delay Strategies
             .Concat(PublishedContent.SpellWave20.Cards)
             .Concat(PublishedContent.StrongholdWave14.Cards)
             .Concat(PublishedContent.RegionWave7.Cards)
@@ -632,6 +633,7 @@ public static class CardCatalog
             .Concat(PublishedContent.StrongholdWave16.Cards)
             .Concat(PublishedContent.StrongholdWave17.Cards) // Emperor Edition Stronghold pass (issue #486), batch 1
             .Concat(PublishedContent.StrongholdWave19.Cards)
+            .Concat(PublishedContent.StrongholdWave20.Cards) // Emperor Edition ruling pass R2 (issue #492): Halls of the Forgotten
             .Concat(PublishedContent.CelestialWave7.Cards)
             .Concat(PublishedContent.PersonalityWave74.Cards)
             .Concat(PublishedContent.PersonalityWave68.Cards)

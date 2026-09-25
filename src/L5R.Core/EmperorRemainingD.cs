@@ -24,7 +24,7 @@ public sealed record ShadowCourtWatch(string CardId, int PlayerId, int Turn, str
 
 /// <summary>The Sincerity of the Dragon (oracle-l5r-8338): "After the next resolution this turn of your action from another Strategy or Ring with a base Focus Value equal to the number,
 /// draw a card, and choose a player, who discards a card." <paramref name="Number"/> is the named number.</summary>
-public sealed record SincerityWatch(int PlayerId, int Number, int Turn, string SourceId);
+public sealed record SincerityWatch(int PlayerId, int Number, int Turn, string SourceId, string? Title = null);
 
 public static class EmperorRemainingDAbilities
 {
@@ -572,7 +572,7 @@ public sealed partial class MatchEngine
     {
         if (_state.SincerityWatches.Count == 0 || _state.LastResolvedAction is not { } facts || facts.SourceId is not { } sourceId || !_state.Cards.TryGetValue(sourceId, out var acted)) return false;
         if (Definition(acted).Type is not (CardType.Strategy or CardType.Ring)) return false;
-        var watch = _state.SincerityWatches.FirstOrDefault(w => w.Turn == _state.TurnNumber && w.PlayerId == facts.PlayerId && w.SourceId != acted.Id && w.Number == Definition(acted).Focus);
+        var watch = _state.SincerityWatches.FirstOrDefault(w => w.Turn == _state.TurnNumber && w.PlayerId == facts.PlayerId && w.SourceId != acted.Id && (w.Title is null ? w.Number == Definition(acted).Focus : w.Title == Definition(acted).Name)); // The Honesty of the Phoenix (ruling pass R2) names a title instead of a number
         if (watch is null) return false;
         _state.SincerityWatches.Remove(watch);
         Draw(Player(watch.PlayerId));

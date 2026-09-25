@@ -15,7 +15,8 @@ internal static class EmperorRemainingDTests
         TorchsFlameFlickers, TwistOfFate, UndetectableEnemy, UnseenAssailant, UsefulConnections, VeiledMenace, WallOfHonor, WellPrepared, WhiteShorePlain, WordsHaveStrength];
 
     // The Strategies of the group left unwired (each with a blocker note in tools/content/ee_remD_blockers.json): never published.
-    private static readonly string[] Unwired = ["oracle-l5r-8138", "oracle-l5r-8207"];
+    // Issue #492, ruling pass R2: The Honor of the Lion and The Loyalty of the Scorpion (delay Strategies) are wired and published now, in strategy-wave-63 (EmperorRulingR2Tests), so none is left unwired here.
+    private static readonly string[] Unwired = [];
 
     private static void Check(bool ok, string message = "Assertion failed") => Batch336Support.Check(ok, message);
     private static void Eq<T>(T actual, T expected, string message = "Values differ") => Batch336Support.Eq(actual, expected, message);

@@ -1,8 +1,5 @@
 namespace L5R.Core;
 
-/// <summary>Deadly Orders (oracle-l5r-1885): "After this battle's resolution, destroy the Follower." The Follower is destroyed once the battle it was boosted in has resolved.</summary>
-public sealed record RemADeadlyOrdersMark(string FollowerId, int PlayerId, string Source);
-
 // Emperor Edition remaining-cards pass (issue #492), group A: the twenty-four Strategies of strategy-wave-58 -- A Forefather's Vengeance, A Paragon's Strength, A Pure Stroke,
 // A Time for Mortal Men, Ancestral Protection, Aramoro's Promise, Bad Kharma, Bend like a Reed, Besieged, Breath of the Heavens, Burn the Towers, Caught in the Act, Control the
 // Field, Dangerous Indulgence, Deadly Orders, Deception Revealed, Duel of Serpents, Extended Maneuvers, Face of Ninube, Falling Leaf Strike, Final Confrontation, Flooded Pass,
@@ -184,6 +181,8 @@ public sealed partial class MatchEngine
     {
         "own-personality-with-keyword" => _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && Definition(c).Type == CardType.Personality && HasKeywords(c, reaction.RequiredKeywords))
             .OrderBy(c => c.Id, StringComparer.Ordinal),
+        // The Loyalty of the Scorpion (ruling pass R2, issue #492): "your performing Scorpion Clan Personality" -- every Personality of the category the player controls.
+        { } category when category.StartsWith("rr2-", StringComparison.Ordinal) => _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && RulingR2PerformerAllows(reaction, c, false)).OrderBy(c => c.Id, StringComparer.Ordinal),
         _ => throw new InvalidOperationException($"A targeted-by-action Reaction with the performer '{reaction.Performer}' is not listed.")
     };
 
@@ -443,7 +442,7 @@ public sealed partial class MatchEngine
             // Deadly Orders: twice its current Force as a bonus now; destroyed when the battle's resolution is over.
             case "deadly-orders-boost":
                 ApplyModifier(target!, source!.Id, id, "Force", 2 * CardForce(target!));
-                _state.RemADeadlyOrders.Add(new(target!.Id, player.Id, name));
+                ScheduleDelayedEffect(target!, DelayedKinds.Destroy, DelayUntil.EndOfBattle, null, name, source.Id); // the shared delay store (issue #492, EmperorRulingR2.cs): destroyed once the battle has ended
                 return false;
             // Deception Revealed.
             case "deception-revealed-straighten":
@@ -536,20 +535,7 @@ public sealed partial class MatchEngine
         Emit("handShuffled", $"{player.Name} shuffled {cards.Length} card{(cards.Length == 1 ? "" : "s")} from hand into the Fate deck.", player.Id);
     }
 
-    // ---- Deadly Orders --------------------------------------------------------------------------------------------------------------------------------------------
-
-    // Drained once the battle's resolution (and its return home) is over: each marked Follower still in play is destroyed.
-    private void ResolveRemADeadlyOrders()
-    {
-        var marks = _state.RemADeadlyOrders.ToArray();
-        _state.RemADeadlyOrders.Clear();
-        foreach (var mark in marks)
-            if (_state.Cards.TryGetValue(mark.FollowerId, out var follower) && follower.Zone == Zone.Attached && Definition(follower).Type == CardType.Follower)
-            {
-                Emit("delayedDestruction", $"{mark.Source}: {Definition(follower).Name} is destroyed after this battle's resolution.", mark.PlayerId, follower.Id);
-                DestroyAttachment(follower);
-            }
-    }
+    // ---- Deadly Orders: its destruction "after this battle's resolution" is a delayed effect (DelayUntil.EndOfBattle, EmperorRulingR2.cs). ----
 
     // ---- Deception Revealed -------------------------------------------------------------------------------------------------------------------------------------
 
