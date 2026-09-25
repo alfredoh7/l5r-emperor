@@ -3,6 +3,29 @@
   "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
   "Cards": [
     {
+      "Id": "oracle-l5r-6290",
+      "Name": "Retribution",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After the end of an Attack Phase in which you were the Defender: Declare an additional Attack Phase against that phase's Attacker, in which neither player may invite allies and you may only assign one Personality. Give the Personality and each Follower in his unit +1F after he assigns.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6290.jpg",
+      "Keywords": [],
+      "Focus": 4,
+      "Abilities": [
+        "retribution-declare"
+      ],
+      "Effect": "none"
+    },
+    {
       "Id": "oracle-l5r-6312",
       "Name": "Rhetoric",
       "Type": "Strategy",
@@ -75,6 +98,31 @@
       "Abilities": [
         "rumors-travel-reduce",
         "rumors-travel-move"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-6439",
+      "Name": "Sacrifice of Pawns",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Destroy your performing unbowed Courtier and target another player's Personality: His controller may destroy the target. If he did not choose this, search your Dynasty deck for a Personality and bring him into play, paying all costs but paying two more Gold. (Discard him if you are unable to play him.)",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6439.jpg",
+      "Keywords": [
+        "Political"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "sacrifice-pawns-destroy"
       ],
       "Effect": "none"
     },

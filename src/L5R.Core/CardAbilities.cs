@@ -5333,6 +5333,8 @@ public sealed partial class MatchEngine
                 // Turning the Story (issue #453, batch 2): the one reacting player, in the window Proclaim itself opened (SeedsOfDecayBatch2.cs).
                 "before-proclaim-resolves" => _state.PendingChoice.Type == "proclaimNegateReaction" && command.PlayerId == _state.PendingChoice.PlayerId && _state.HeldProclaim is not null,
                 // The Spider's Web (Emperor Edition Stronghold pass, issue #486 batch 3): an in-play card of the player's watching the entry of one of the player's own Personalities.
+                // Retribution (Emperor Edition remaining-cards pass, group C, issue #492): "After the end of an Attack Phase" -- the Defender's own window.
+                EmperorRemainingCAbilities.AttackPhaseEnd => _state.PendingChoice.Type == "attackPhaseEndReaction" && command.PlayerId == _state.PendingChoice.PlayerId,
                 "own-personality-enters-play" => _state.PendingChoice.Type is "proclaim" or "entryReaction" && command.PlayerId == _state.PendingChoice.PlayerId
                     && _state.PendingChoice.CardId is { } enteredId && _state.Cards.TryGetValue(enteredId, out var enteredCard) && enteredCard.OwnerId == command.PlayerId && Definition(enteredCard).Type == CardType.Personality,
                 _ => false
@@ -9752,7 +9754,7 @@ public sealed partial class MatchEngine
             }
             default:
                 // Emperor Edition remaining-cards pass, group C (issue #492), EmperorRemainingC.cs: true when an Attack's window opened and the action waits.
-                if (RunEmperorRemainingC(id, ability, command, player, source, target, consumedGrant) is { } emperorRemC)
+                if (RunEmperorRemainingC(id, ability, command, player, source, target, consumedGrant, bowedBeforeAction) is { } emperorRemC)
                 {
                     if (emperorRemC) return;
                     break;
@@ -10520,6 +10522,7 @@ public sealed partial class MatchEngine
         var inAfterResolutionWindow = _state.PendingChoice?.Type == "afterResolutionReaction";
         // After an action's resolution (issue #437): only the Reactions that name it are on offer, and they are on offer nowhere else -- same shape as inAfterResolutionWindow above.
         var inAfterActionResolvedWindow = _state.PendingChoice?.Type == "afterActionResolvedReaction";
+        var inAttackPhaseEndWindow = _state.PendingChoice?.Type == "attackPhaseEndReaction"; // Retribution (issue #492, group C)
         foreach (var (source, id) in sources)
         {
             if (inRecruitWindow && !RingRecruitGrantIds.Contains(id)) continue;
@@ -10527,12 +10530,13 @@ public sealed partial class MatchEngine
             if (ability.PlayerAbility && (PlayerAbilityDormant(id) || ShadowsEmbraceBatch6PlayerAbilityDormant(id))) continue; // Assault in the Jungle (issue #467), Fortress of Lidless Eyes (issue #476): only while granted.
             if (inAfterResolutionWindow != IsAfterResolutionReaction(ability)) continue;
             if (inAfterActionResolvedWindow != IsAfterActionResolvedReaction(ability)) continue;
+            if (inAttackPhaseEndWindow != (ability.Timing == "Reaction" && ability.Trigger == EmperorRemainingCAbilities.AttackPhaseEnd)) continue;
             var isEngageReaction = ability.Timing == "Reaction" && ability.Trigger is "after-engaging" or "after-engaging-at-own-battlefield";
             if (inEngageWindow != isEngageReaction) continue;
             // "Bow this card:" with no hand alternative is offered only from play (issue #370): from a hand or a discard pile it is not even listed.
             if (source is not null && RequiresSourceInPlay(ability) && !InPlay(source)) continue;
             if ((beforeResolutionCard is not null) != IsBeforeResolutionReaction(ability) || beforeResolutionCard is not null && source?.Id != beforeResolutionCard) continue;
-            var phaseOk = inEngageWindow || inAfterResolutionWindow || inAfterActionResolvedWindow || beforeResolutionCard is not null ? true : ability.Timing switch { "Battle" => _state.Phase == Phase.Battle, "BattleOrOpen" => _state.Phase is Phase.Action or Phase.Battle, "BeforeResolution" => false, _ => _state.Phase == Phase.Action };
+            var phaseOk = inEngageWindow || inAfterResolutionWindow || inAfterActionResolvedWindow || inAttackPhaseEndWindow || beforeResolutionCard is not null ? true : ability.Timing switch { "Battle" => _state.Phase == Phase.Battle, "BattleOrOpen" => _state.Phase is Phase.Action or Phase.Battle, "BeforeResolution" => false, _ => _state.Phase == Phase.Action };
             if (!phaseOk) continue;
             if (ability.Timing == "Limited" && playerId != _state.ActivePlayerId) continue;
             // Battle/Open presence primitive (issue #267): the same actingAsBattle generalization

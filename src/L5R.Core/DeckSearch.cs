@@ -46,6 +46,9 @@ public static class SearchEffect
     /// searched deck at its entry price less <see cref="SearchSpec.RecruitDiscount"/>, paid through the one payment path (a ChoosePayment stage when it costs
     /// anything); a card whose price cannot be paid does not enter play and stays in the deck, which is shuffled as always.</summary>
     public const string RecruitUnbowed = "recruit-unbowed";
+    /// <summary>Sacrifice of Pawns (Emperor Edition remaining-cards pass, group C, issue #492): "bring him into play, paying all costs but paying two more Gold. (Discard him if you are unable to play him.)" -- a Personality
+    /// of the searched Dynasty deck recruited at home for his whole entry price plus 2, or discarded (EmperorRemainingC.cs).</summary>
+    public const string RecruitPersonality = "recruit-personality";
 }
 
 /// <summary>The stage a pending search is in; also names which PendingChoice type is open.</summary>
@@ -132,8 +135,12 @@ public static class SearchCatalog
     public static SearchSpec YungRing { get; } = new("yung-ring", "Search your Fate deck for a Ring",
         [new(SearchDeck.Fate, new("Ring", [CardType.Ring]), SearchEffect.ToHand)]);
 
+    /// <summary>Sacrifice of Pawns (oracle-l5r-6439, issue #492): "search your Dynasty deck for a Personality and bring him into play, paying all costs but paying two more Gold."</summary>
+    public static SearchSpec SacrificeOfPawns { get; } = new("sacrifice-of-pawns", "Search your Dynasty deck for a Personality",
+        [new(SearchDeck.Dynasty, new("Personality", [CardType.Personality]), SearchEffect.RecruitPersonality)]);
+
     public static IReadOnlyDictionary<string, SearchSpec> All { get; } = new[] { IkomaShizuka, ImperialGift, TrainingCheap, TrainingFocus, TrainingOptional, NakaMahatsu, YungRing,
-            DiscoveringTheTemple, VersatileFarm }
+            DiscoveringTheTemple, VersatileFarm, SacrificeOfPawns }
         .ToDictionary(s => s.Id, StringComparer.Ordinal);
 
     /// <summary>The search an Event carries in its Effect (an Event has no abilities of its own to hang a spec on).</summary>
@@ -320,6 +327,9 @@ public sealed partial class MatchEngine
                 break;
             case SearchEffect.RecruitUnbowed:
                 BeginSearchRecruit(search, card); // ShadowsEmbraceBatch6.cs
+                break;
+            case SearchEffect.RecruitPersonality:
+                BeginPersonalityRecruit(search, card); // EmperorRemainingC.cs
                 break;
             default: throw new RuleViolation("Unknown search effect.");
         }

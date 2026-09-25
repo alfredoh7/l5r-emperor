@@ -22,6 +22,10 @@ public sealed class EmperorRemainingCState
     public int RedirectToPlayer { get; set; }
     public string? RedirectCourtierId { get; set; }
     public bool RedirectSpent { get; set; }
+    /// <summary>Retribution: the player whose turn it is, while an ADDITIONAL Attack Phase is under way (-1 otherwise); the phase's Attacker is then the Defender who declared it (ActivePlayerId is swapped
+    /// for its duration and restored when the last such phase ends), and how many Personalities have been assigned to attack in it.</summary>
+    public int RetributionRoot { get; set; } = -1;
+    public int RetributionAssigned { get; set; }
     /// <summary>Solid Defense: the action whose Honor losses are negated.</summary>
     public string? NegateLossesActionKey { get; set; }
 }
@@ -29,6 +33,9 @@ public sealed class EmperorRemainingCState
 public static class EmperorRemainingCAbilities
 {
     /// <summary>The Reactions whose card is a Strategy played from a hand "before an action resolves" (see the file comment).</summary>
+    /// <summary>Retribution's trigger: "After the end of an Attack Phase" (a window offered to the phase's Defender, MatchState.PendingChoice "attackPhaseEndReaction").</summary>
+    public const string AttackPhaseEnd = "after-attack-phase-ends";
+
     /// <summary>A cost subject naming EVERY card of the ability's performing slot(s): "Bow one or more of your performing ..." (Shadows Walk).</summary>
     public const string AllPerformingSlots = "all-performing-slots";
 
@@ -118,6 +125,17 @@ public static class EmperorRemainingCAbilities
         all["empress-address-battle"] = new("Reaction", "After the resolution of a battle that destroyed any of your Personalities in a defending army, bow your performing Courtier or Empress and target your non-Unique Personality with your Clan alignment in your discard pile: Bring him into play (in your home), ignoring costs. Gain 2 Honor",
             "remc-own-clan-nonunique-discarded-personality", Performer: "own-unbowed-personality-with-any-keyword-at-battle", RequiredKeywords: ["Courtier", "Empress"],
             Trigger: ReactionTriggers.AfterBattleResolution, UsageKey: "empress-address", Costs: ActionCost.BowPerformer);
+        // Retribution (oracle-l5r-6290): "Reaction: After the end of an Attack Phase in which you were the Defender: Declare an additional Attack Phase against that phase's Attacker, in which neither player
+        // may invite allies and you may only assign one Personality. Give the Personality and each Follower in his unit +1F after he assigns." An additional Attack Phase is a whole Attack Phase with the roles
+        // swapped (EmperorRemainingC.cs: the turn player is the Attacker of the ended phase's Defender for its duration); "invite allies" is a multiplayer term with no meaning between two players.
+        all["retribution-declare"] = new("Reaction", "After the end of an Attack Phase in which you were the Defender: Declare an additional Attack Phase against that phase's Attacker, in which neither player may invite allies and you may only assign one Personality. Give the Personality and each Follower in his unit +1F after he assigns", "none",
+            Trigger: AttackPhaseEnd);
+        // Sacrifice of Pawns (oracle-l5r-6439, Political): "Limited: Destroy your performing unbowed Courtier and target another player's Personality: His controller may destroy the target. If he did not
+        // choose this, search your Dynasty deck for a Personality and bring him into play, paying all costs but paying two more Gold. (Discard him if you are unable to play him.)" The destruction of the
+        // Courtier is the cost (the Sacrifice verb); the target's controller decides (an Either/Or, EitherOr.cs), and a refusal starts a Dynasty deck search whose found Personality is recruited at his
+        // full entry price plus 2 (SearchEffect.RecruitPersonality) or discarded when it cannot be.
+        all["sacrifice-pawns-destroy"] = new("Limited", "Destroy your performing unbowed Courtier and target another player's Personality: His controller may destroy the target. If he did not choose this, search your Dynasty deck for a Personality and bring him into play, paying all costs but paying two more Gold",
+            "enemy-personality", Performer: "own-unbowed-personality-with-keyword-at-any-location", RequiredKeywords: ["Courtier"], Costs: [new(CostVerbs.Sacrifice, CostSubject.Performer)]);
         // Snake Tattoo (oracle-l5r-7310, Tattoo): "Reaction: After another player's Battle action targets your Tattooed Personality: Move him to an adjacent battlefield. If he is no longer a legal
         // target for that action, negate its effects." Yurishi's shape (TargetedActionReactions.cs) with the move to a chosen adjacent unresolved battlefield (Flanking Unit's reading of "adjacent"),
         // played from the hand; the Personality moved is the one the held action targets.
@@ -255,10 +273,24 @@ public sealed partial class MatchEngine
     // ---- execution ------------------------------------------------------------------------------------------------------------------------------------------------
 
     // true: the action paused (an Attack's reaction window) and finishes from there; false: it is finished here; null: not this group's.
-    private bool? RunEmperorRemainingC(string id, AbilityDefinition ability, GameCommand command, PlayerState player, CardInstance? source, CardInstance? target, bool consumedGrant)
+    private bool? RunEmperorRemainingC(string id, AbilityDefinition ability, GameCommand command, PlayerState player, CardInstance? source, CardInstance? target, bool consumedGrant, HashSet<string> bowedBeforeAction)
     {
         switch (id)
         {
+            // Retribution: the window it was played in closes, the Strategy is spent and the additional Attack Phase begins with its player as the Attacker.
+            case "retribution-declare":
+            {
+                SpendHandPlayedCard(player, source);
+                _state.SuspendedWindows.RemoveAll(w => w.Choice.Type == "attackPhaseEndReaction");
+                _state.PendingChoice = null;
+                if (RemC.RetributionRoot < 0) RemC.RetributionRoot = _state.ActivePlayerId;
+                RemC.RetributionAssigned = 0;
+                _state.ActivePlayerId = player.Id;
+                _state.UnresolvedBattlefields = Player(1 - player.Id).Provinces.Where(p => !p.Destroyed).Select(p => p.Index).Order().ToList();
+                Emit("attackDeclared", $"{player.Name} declared an additional Attack Phase ({Definition(source!).Name}): a battlefield exists at each of {Player(1 - player.Id).Name}'s provinces.", player.Id, source!.Id);
+                SetPhase(Phase.InfantryDeclaration, player.Id);
+                return true;
+            }
             case "tell-the-tale-honor":
                 GainHonor(player.Id, 1, "Tell the Tale", source);
                 return false;
@@ -328,6 +360,14 @@ public sealed partial class MatchEngine
                 ExecuteMove(command, ability, source, target);
                 if (!wasAtBattle && AtBattle(performer)) Straighten(performer);
                 return false;
+            }
+            // Sacrifice of Pawns: the Courtier's destruction was the cost. The played Strategy is spent now (the decision that follows finishes the action), then the target's controller chooses.
+            case "sacrifice-pawns-destroy":
+            {
+                SpendHandPlayedCard(player, source);
+                var opened = OpenEitherOr(EitherOrSpecs.SacrificeOfPawns, source!, player.Id, target!.OwnerId, target, "action", bowedBeforeAction, performerId: command.PerformerId);
+                // A refusal taken automatically (the target already gone) has begun the search itself.
+                return opened || _state.PendingSearch is not null;
             }
             case "stay-put-bow":
                 if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
@@ -431,6 +471,100 @@ public sealed partial class MatchEngine
         return true;
     }
 
+    // ---- Sacrifice of Pawns: the decision, and the recruit of the Personality the search finds ---------------------------------------------------------------------------
+
+    private string SacrificeOfPawnsPrompt(PendingEitherOr p, string source, string affected) =>
+        $"{source}: destroy {affected}, or {Player(p.ActingPlayerId).Name} searches their Dynasty deck for a Personality and brings him into play.";
+
+    private EitherOrOption[] SacrificeOfPawnsOptions(PendingEitherOr p, CardInstance affected)
+    {
+        var name = Definition(affected).Name;
+        return [
+            new("destroy", $"Destroy {name}", $"{name} is destroyed. Nothing further happens.", EitherOrKind.Avoid, 0, InPlay(affected), $"{name} is no longer in play."),
+            new("refuse", "Do not destroy him", $"{Player(p.ActingPlayerId).Name} searches their Dynasty deck for a Personality and brings him into play, paying two more Gold (he is discarded if it cannot be paid).", EitherOrKind.Accept, 0, true, null)
+        ];
+    }
+
+    private void ApplySacrificeOfPawns(PendingEitherOr p, EitherOrOption option, PlayerState decider, CardInstance source, CardInstance? affected)
+    {
+        if (option.Key == "destroy")
+        {
+            Emit("eitherOrChosen", $"{decider.Name} chose to destroy {Definition(affected!).Name} ({Definition(source).Name}).", decider.Id, affected!.Id);
+            DestroyTargetCard(affected, p.ActingPlayerId);
+            return;
+        }
+        Emit("eitherOrChosen", $"{decider.Name} did not destroy {Definition(affected!).Name} ({Definition(source).Name}): {Player(p.ActingPlayerId).Name} searches their Dynasty deck.", decider.Id, source.Id);
+        BeginSearch(SearchCatalog.SacrificeOfPawns, source, p.ActingPlayerId, "ability", p.BowedBefore);
+    }
+
+    // SearchEffect.RecruitPersonality: the found Personality is brought into play at home paying his whole entry price (QuotePurchase, as a card of the deck) plus 2. One that cannot be brought into play -- a Honor
+    // Requirement, a Loyal or Unique restriction, a price nothing pays -- is discarded, as the printed parenthesis says; one that can is paid for now (declining to pay is being unable to play him).
+    private void BeginPersonalityRecruit(PendingSearch search, CardInstance card)
+    {
+        var player = Player(search.PlayerId);
+        var quote = QuotePurchase(player.Id, card.Id, fromDynastyDeck: true);
+        var cost = quote.Cost + 2;
+        if (quote.Error is null && cost == 0)
+        {
+            RecruitSearchedPersonality(search, card);
+            return;
+        }
+        if (quote.Error is not null || PaymentOptions(player.Id, cost, new PaymentSubject(card, PaymentKind.Recruit)).Length == 0)
+        {
+            DiscardUnplayablePersonality(search, card, quote.Error ?? $"{player.Name} cannot pay {cost} Gold");
+            return;
+        }
+        search.Stage = SearchStage.ChoosePayment;
+        _state.PendingChoice = new("searchRecruitPay", search.PlayerId, search.SourceCardId, $"{Definition(Card(search.SourceCardId)).Name}: pay {cost} Gold to bring {Definition(card).Name} into play, or he is discarded.");
+    }
+
+    private void DiscardUnplayablePersonality(PendingSearch search, CardInstance card, string why)
+    {
+        SearchDeckList(Player(search.PlayerId), search.Deck!).Remove(card.Id);
+        card.Zone = Zone.DynastyDiscard; card.ProvinceIndex = null; card.FaceUp = true;
+        Emit("searchRecruitFailed", $"{Definition(card).Name} was discarded: {why}.", search.PlayerId, card.Id);
+        FinishPersonalityRecruit(search, null);
+    }
+
+    private void RecruitSearchedPersonality(PendingSearch search, CardInstance card)
+    {
+        var player = Player(search.PlayerId);
+        SearchDeckList(player, search.Deck!).Remove(card.Id);
+        EnterPlayFromRecruit(player, card, null, Definition(Card(search.SourceCardId)).Name);
+        FinishPersonalityRecruit(search, card);
+    }
+
+    // The search's own finish (shuffle, end of the search) with the entering-play windows of the Personality that came into play opened before the action ends.
+    private void FinishPersonalityRecruit(PendingSearch search, CardInstance? entered)
+    {
+        var player = Player(search.PlayerId);
+        ShuffleDeck(player, search.Deck!);
+        _state.PendingSearch = null; _state.PendingChoice = null;
+        if (entered is not null && OpenRecruitEntryWindows(player, entered, false, null)) return;
+        FinishDeferredAction(search.PlayerId, search.Origin, search.SourceCardId, search.BowedBefore);
+    }
+
+    private void ChoosePersonalityRecruitPayment(PendingSearch search, GameCommand command)
+    {
+        var card = Card(search.SelectedCardId);
+        if (command.Choice == "decline") { DiscardUnplayablePersonality(search, card, $"{Player(search.PlayerId).Name} did not pay for him"); return; }
+        var quote = QuotePurchase(search.PlayerId, card.Id, fromDynastyDeck: true);
+        Pay(search.PlayerId, card, quote.Cost + 2, command.SourceIds, paying: new PaymentSubject(card, PaymentKind.Recruit));
+        RecruitSearchedPersonality(search, card);
+    }
+
+    private IEnumerable<ActionOption> PersonalityRecruitPaymentActions(PendingSearch search, int playerId)
+    {
+        var card = Card(search.SelectedCardId);
+        var priced = QuotePurchase(playerId, card.Id, fromDynastyDeck: true);
+        var cost = priced.Cost + 2;
+        var paying = new PaymentSubject(card, PaymentKind.Recruit);
+        var quote = new GoldQuote(cost, GoldCostKind.Fixed, $"{Definition(card).Name} entry price {priced.Cost} + 2 ({Definition(Card(search.SourceCardId)).Name})", null, PaymentOptions(playerId, cost, paying));
+        yield return new("chooseSearchPayment", $"Pay {cost} Gold: bring {Definition(card).Name} into play", quote.Payments.Length > 0, quote.Payments.Length > 0 ? null : "You cannot pay for him.",
+            new GameCommand("chooseSearchPayment", playerId, _state.Version, SourceIds: quote.Payments.FirstOrDefault()?.SourceIds), card.Id, Gold: quote);
+        yield return new("chooseSearchPayment", $"Do not pay: {Definition(card).Name} is discarded", true, null, new GameCommand("chooseSearchPayment", playerId, _state.Version, Choice: "decline"), card.Id);
+    }
+
     // ---- The Fires of War: a second use of every Stronghold ability ---------------------------------------------------------------------------------------------------
 
     /// <summary>The mark on a Stronghold (its AbilityUses) that lets each of its abilities be used one more time on the turn it names.</summary>
@@ -483,6 +617,70 @@ public sealed partial class MatchEngine
     // Item's or Spell's by its wielder, a named "performing X" by X; a Strategy that names no performer is performed by no Personality at all).
     private bool PerformerGrantMatches(AdditionalActionGrant grant, GameCommand? command) =>
         grant.PerformerId is null || command is not null && ActionPerformingPersonality(command) is { } performer && performer.Id == grant.PerformerId;
+
+    // ---- Retribution: an additional Attack Phase ----------------------------------------------------------------------------------------------------------------------
+
+    // The last battle of an Attack Phase is done (CompleteBattleTransition): its Defender may declare an additional Attack Phase, in a window of his own; otherwise (or once he has declined) the phase
+    // ends and the Dynasty Phase of the turn's player begins.
+    private void EndAttackPhase(int attacker)
+    {
+        if (OpenAttackPhaseEndWindow(attacker)) return;
+        FinishAttackPhaseEnd();
+    }
+
+    // The Attack Phase (or the last of its additional ones) is over: the turn's own player is the active player again for the Dynasty Phase.
+    private void FinishAttackPhaseEnd()
+    {
+        var turnPlayer = RemC.RetributionRoot >= 0 ? RemC.RetributionRoot : _state.ActivePlayerId;
+        RemC.RetributionRoot = -1; RemC.RetributionAssigned = 0;
+        _state.ActivePlayerId = turnPlayer;
+        SetPhase(Phase.Dynasty, turnPlayer);
+    }
+
+    // The window opens only when the Defender holds a Reaction that names it and could play it now (the same "is anything playable" test every after-window uses).
+    private bool OpenAttackPhaseEndWindow(int attacker)
+    {
+        var defender = 1 - attacker;
+        var saved = _state.PendingChoice;
+        _state.PendingChoice = new("attackPhaseEndReaction", defender, null, "After this Attack Phase ended: use a Reaction, or pass.");
+        bool holds;
+        try { holds = AbilityActions(defender).Any(o => o.Enabled); }
+        finally { _state.PendingChoice = saved; }
+        if (!holds) return false;
+        _state.PendingChoice = new("attackPhaseEndReaction", defender, null, "After this Attack Phase ended: you may use a Reaction, or pass.", attacker);
+        _state.PriorityPlayerId = defender; _state.ConsecutivePasses = 0;
+        Emit("reactionWindow", "After-Attack-Phase window opened.", defender);
+        return true;
+    }
+
+    // Apply's handler for the window: a Reaction is played, or the Defender passes and the phase ends.
+    private void ResolveAttackPhaseEndCommand(GameCommand command)
+    {
+        Require(command.Type is "useAbility" or "declineReaction" or "pass", "Play a Reaction to the end of the Attack Phase or pass.");
+        if (command.Type == "useAbility") { UseAbility(command); return; }
+        Emit("reactionPassed", $"{Player(_state.PriorityPlayerId).Name} passed the reaction opportunity.", _state.PriorityPlayerId);
+        _state.PendingChoice = null;
+        FinishAttackPhaseEnd();
+    }
+
+    // "You may only assign one Personality" (AssignAttackers, before the assignment) and "Give the Personality and each Follower in his unit +1F after he assigns" (after).
+    private void RequireRetributionAssignment(GameCommand command)
+    {
+        if (RemC.RetributionRoot >= 0 && command.Assignments is { Count: > 0 } assignments)
+            Require(RemC.RetributionAssigned + assignments.Count <= 1, "In an additional Attack Phase you may only assign one Personality.");
+    }
+
+    private void NoteRetributionAssignments(GameCommand command)
+    {
+        if (RemC.RetributionRoot < 0) return;
+        foreach (var id in (command.Assignments ?? []).Keys)
+        {
+            RemC.RetributionAssigned++;
+            var assigned = Card(id);
+            ApplyModifier(assigned, id, "retribution-declare", "Force", 1);
+            foreach (var follower in Attachments(assigned.Id).Where(a => Definition(a).Type == CardType.Follower).ToArray()) ApplyModifier(follower, id, "retribution-declare", "Force", 1);
+        }
+    }
 
     // ---- Honor -------------------------------------------------------------------------------------------------------------------------------------------------------
 

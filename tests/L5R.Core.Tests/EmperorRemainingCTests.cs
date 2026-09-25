@@ -5,13 +5,13 @@ using static RegressionAssertions;
 // table (player 0 the Crane, player 1 the Lion), with training fixtures granted whichever keyword a card's text requires.
 internal static class EmperorRemainingCTests
 {
-    private const string Rhetoric = "oracle-l5r-6312", RockyTerrain = "oracle-l5r-6374", ShadowsWalk = "oracle-l5r-6676", StayPut = "oracle-l5r-7474", EmpressAddress = "oracle-l5r-8059", FiresOfWar = "oracle-l5r-8084", RumorsTravel = "oracle-l5r-6406", SelflessDefense = "oracle-l5r-6584", ShamefulInjury = "oracle-l5r-6698", SnakeTattoo = "oracle-l5r-7310", Sniping = "oracle-l5r-7312",
+    private const string Retribution = "oracle-l5r-6290", Rhetoric = "oracle-l5r-6312", SacrificeOfPawns = "oracle-l5r-6439", RockyTerrain = "oracle-l5r-6374", ShadowsWalk = "oracle-l5r-6676", StayPut = "oracle-l5r-7474", EmpressAddress = "oracle-l5r-8059", FiresOfWar = "oracle-l5r-8084", RumorsTravel = "oracle-l5r-6406", SelflessDefense = "oracle-l5r-6584", ShamefulInjury = "oracle-l5r-6698", SnakeTattoo = "oracle-l5r-7310", Sniping = "oracle-l5r-7312",
         SolidDefense = "oracle-l5r-7329", SpinningHeelKick = "oracle-l5r-7413", StrategicStrike = "oracle-l5r-7525", SummonedToJustice = "oracle-l5r-7639", SuperiorOpponent = "oracle-l5r-7654", TellTheTale = "oracle-l5r-7862",
         HeightOfCourage = "oracle-l5r-8126";
     private const string Incapacitated = "oracle-l5r-3730", OvercomeAdversity = "oracle-l5r-9918", WeakPoison = "oracle-l5r-99";
 
     // Every card of the group wired in this pass, in manifest order.
-    private static readonly string[] Wired = [Rhetoric, RockyTerrain, RumorsTravel, SelflessDefense, ShadowsWalk, ShamefulInjury, SnakeTattoo, Sniping, SolidDefense, SpinningHeelKick, StayPut, StrategicStrike, SummonedToJustice, SuperiorOpponent, TellTheTale, EmpressAddress, FiresOfWar, HeightOfCourage];
+    private static readonly string[] Wired = [Retribution, Rhetoric, RockyTerrain, RumorsTravel, SacrificeOfPawns, SelflessDefense, ShadowsWalk, ShamefulInjury, SnakeTattoo, Sniping, SolidDefense, SpinningHeelKick, StayPut, StrategicStrike, SummonedToJustice, SuperiorOpponent, TellTheTale, EmpressAddress, FiresOfWar, HeightOfCourage];
 
     // The group's Strategies left unwired (each with a note in tools/content/ee_remC_blockers.json): never published.
     private static readonly string[] Unwired = [];
@@ -44,6 +44,8 @@ internal static class EmperorRemainingCTests
         ("Rhetoric: a Courtier bows to make a chosen player take another player's Honor gain or loss instead, when his Chi covers it", RhetoricScenario),
         ("Snake Tattoo: after another player's Battle action targets your Tattooed Personality a Reaction from the hand moves him to an adjacent battlefield and, since he is then no longer a legal target, negates its effects", SnakeTattooScenario),
         ("Superior Opponent: as a Focus Effect its player may destroy an attachment at the current battlefield if his duelist is there; its Battle half bows each Follower and Personality in an enemy unit with Force up to his Duelist's Chi", SuperiorOpponentScenario),
+        ("Retribution: after an Attack Phase the Defender declares an additional one against the Attacker -- the roles swap for its whole length, only one Personality may be assigned and he and his Followers get +1F, and the turn's player is restored for the Dynasty Phase", RetributionScenario),
+        ("Sacrifice of Pawns: a Courtier is destroyed as the cost; the target's controller may destroy the target, or else the acting player searches the Dynasty deck for a Personality and brings him into play paying two more Gold (discarded when unplayable)", SacrificeOfPawnsScenario),
         ("Rocky Terrain: before the battle's resolution its controller may bow no, one or two attacking Personalities at the battlefield (a bowed one, and a defender, are not offered), which changes who wins", RockyTerrainScenario),
         ("Shadows Walk: bowing one or more Shadowlands Ninja performers it destroys a bare attachment, or takes control of a Personality with Chi up to their number and gives him Ninja and Shadowlands; it costs 3 Honor either way", ShadowsWalkScenario),
         ("Stay Put: a Kensai bows an enemy card without Weapons or Armor and may attach a Weapon from the hand -- at full price, or 4 less while he defends", StayPutScenario),
@@ -63,11 +65,13 @@ internal static class EmperorRemainingCTests
             Check(card.Abilities!.SequenceEqual(abilities), $"{name}'s abilities: {string.Join(",", card.Abilities!)}");
             Check(card.Text.Split('\n').Distinct().Count() == card.Text.Split('\n').Length, $"{name}'s text is printed once");
         }
+        Shape(Retribution, "Retribution", 4, "", "retribution-declare");
         Shape(Rhetoric, "Rhetoric", 3, "Political", "rhetoric-redirect");
         Shape(RumorsTravel, "Rumors Travel", 3, "Political", "rumors-travel-reduce", "rumors-travel-move");
         Shape(SelflessDefense, "Selfless Defense", 4, "", "selfless-defense-move", "selfless-defense-destroy");
         Shape(ShamefulInjury, "Shameful Injury", 4, "", "shameful-injury-negate");
         Shape(SnakeTattoo, "Snake Tattoo", 2, "Tattoo", "snake-tattoo-move");
+        Shape(SacrificeOfPawns, "Sacrifice of Pawns", 3, "Political", "sacrifice-pawns-destroy");
         Shape(RockyTerrain, "Rocky Terrain", 4, "Terrain", "rocky-terrain-bow");
         Shape(ShadowsWalk, "Shadows Walk", 1, "Fear,Ninja", "shadows-walk-take");
         Shape(StayPut, "Stay Put", 3, "", "stay-put-bow", "stay-put-bow-attach", "stay-put-bow-attach-discount");
@@ -798,5 +802,121 @@ internal static class EmperorRemainingCTests
         var e4 = MatchEngine.FromTestState(s4);
         PassUntil(e4, () => e4.State.PendingChoice is null);
         Check(!e4.State.Events.Any(x => x.Type == "reactionWindow" && x.Message.Contains("After-resolution")), "the Defender won: nothing was destroyed on its side, so no window opened");
+    }
+    private static void SacrificeOfPawnsScenario()
+    {
+        MatchEngine Build(out CardInstance card, out CardInstance courtier, out CardInstance target, params string[] deck)
+        {
+            var s = Table(Phase.Action, 0);
+            card = Add(s, SacrificeOfPawns, 0, Zone.Hand);
+            courtier = Kw(Add(s, "training-crane-courtier", 0, Zone.Home), "Courtier");
+            target = Add(s, "training-lion-samurai", 1, Zone.Home);
+            foreach (var def in deck) { var c = Add(s, def, 0, Zone.DynastyDeck); s.Players[0].DynastyDeck.Insert(0, c.Id); }
+            return MatchEngine.FromTestState(s);
+        }
+        GameCommand Decision(MatchEngine e, string key) => e.QueryActions(1).Single(o => o.Type == "chooseEitherOr" && o.Command!.Choice == key && o.Enabled).Command!;
+        // His controller destroys the target: nothing further happens.
+        var e = Build(out var card, out var courtier, out var target, "training-honor-personality");
+        var deckSize = e.State.Players[0].DynastyDeck.Count;
+        Accept(e, Offer(e, 0, "sacrifice-pawns-destroy", card.Id, target.Id, courtier.Id));
+        Eq(e.State.Cards[courtier.Id].Zone, Zone.Dead, "the performing Courtier was destroyed as the cost");
+        Eq(e.State.Cards[card.Id].Zone, Zone.FateDiscard, "the Strategy is spent");
+        Eq(e.State.PendingChoice?.Type, "eitherOr", "the target's controller decides");
+        Eq(e.State.PendingChoice!.PlayerId, 1);
+        Check(e.QueryActions(1).Count(o => o.Type == "chooseEitherOr") == 2, "destroy the target, or not");
+        Accept(e, Decision(e, "destroy"));
+        Eq(e.State.Cards[target.Id].Zone, Zone.Dead, "the target was destroyed");
+        Check(e.State.PendingSearch is null && e.State.Players[0].DynastyDeck.Count == deckSize, "no search: the deck is untouched");
+        // He refuses: the acting player searches the Dynasty deck and brings a Personality into play, paying his price plus 2.
+        var r = Build(out var card2, out var courtier2, out var target2, "training-honor-personality", "training-crane-dignitary", "training-unique-personality");
+        Accept(r, Offer(r, 0, "sacrifice-pawns-destroy", card2.Id, target2.Id, courtier2.Id));
+        Accept(r, Decision(r, "refuse"));
+        Eq(r.State.Cards[target2.Id].Zone, Zone.Home, "the target lives");
+        Eq(r.State.PendingChoice?.Type, "searchSelect", "the acting player searches");
+        var offered = r.QueryActions(0).Where(o => o.Type == "selectSearchCard").Select(o => o.Command!.Choice).ToArray();
+        Check(new[] { "training-honor-personality", "training-crane-dignitary", "training-unique-personality" }.All(offered.Contains), "every Personality of the deck may be chosen: " + string.Join(",", offered));
+        Check(!r.QueryActions(1).Any(o => o.Type == "selectSearchCard"), "only the searching player chooses");
+        Accept(r, r.QueryActions(0).Single(o => o.Type == "selectSearchCard" && o.Command!.Choice == "training-honor-personality").Command!);
+        Eq(r.State.PendingChoice?.Type, "searchRecruitPay", "the price is paid");
+        var pay = r.QueryActions(0).Single(o => o.Type == "chooseSearchPayment" && o.Command!.Choice != "decline");
+        Eq(pay.Gold!.Cost, 5, "Gold Cost 3 plus two more (no Clan discount, no allegiance)");
+        Accept(r, pay.Command!);
+        var entered = r.State.Cards.Values.Single(c => c.DefinitionId == "training-honor-personality");
+        Check(entered.Zone == Zone.Home && entered.OwnerId == 0 && !r.State.Players[0].DynastyDeck.Contains(entered.Id), "he came into play at home, out of the deck");
+        Check(r.State.PendingSearch is null && r.State.PendingChoice is null && r.State.PriorityPlayerId == 1, "the action finished and priority passed");
+        // A Personality that cannot be played is discarded: a Honor Requirement above the player's Honor.
+        var u = Build(out var card3, out var courtier3, out var target3, "training-crane-dignitary");
+        Accept(u, Offer(u, 0, "sacrifice-pawns-destroy", card3.Id, target3.Id, courtier3.Id));
+        Accept(u, Decision(u, "refuse"));
+        Accept(u, u.QueryActions(0).Single(o => o.Type == "selectSearchCard" && o.Command!.Choice == "training-crane-dignitary").Command!);
+        Check(u.State.Cards.Values.Any(c => c.DefinitionId == "training-crane-dignitary" && c.Zone == Zone.DynastyDiscard) && u.State.PendingSearch is null, "unable to play him (Honor Requirement 12): he is discarded");
+        // ...a Unique Personality the player already controls, and a Personality the payer cannot afford.
+        var s4 = Table(Phase.Action, 0);
+        var card4 = Add(s4, SacrificeOfPawns, 0, Zone.Hand);
+        var courtier4 = Kw(Add(s4, "training-crane-courtier", 0, Zone.Home), "Courtier");
+        var target4 = Add(s4, "training-lion-samurai", 1, Zone.Home);
+        Add(s4, "training-unique-personality", 0, Zone.Home);
+        var copy = Add(s4, "training-unique-personality", 0, Zone.DynastyDeck); s4.Players[0].DynastyDeck.Insert(0, copy.Id);
+        var e4 = MatchEngine.FromTestState(s4);
+        Accept(e4, Offer(e4, 0, "sacrifice-pawns-destroy", card4.Id, target4.Id, courtier4.Id));
+        Accept(e4, Decision(e4, "refuse"));
+        Accept(e4, e4.QueryActions(0).Single(o => o.Type == "selectSearchCard" && o.Command!.Choice == "training-unique-personality").Command!);
+        Eq(e4.State.Cards[copy.Id].Zone, Zone.DynastyDiscard, "a second Unique copy is discarded, not played");
+        // A bowed Courtier, and a Personality that is not a Courtier, may not perform it.
+        var s5 = Table(Phase.Action, 0);
+        var card5 = Add(s5, SacrificeOfPawns, 0, Zone.Hand);
+        var bowed = Kw(Add(s5, "training-crane-courtier", 0, Zone.Home, bowed: true), "Courtier");
+        var samurai = Add(s5, "training-crane-samurai", 0, Zone.Home);
+        Add(s5, "training-lion-samurai", 1, Zone.Home);
+        var e5 = MatchEngine.FromTestState(s5);
+        Check(!CanUse(e5, 0, "sacrifice-pawns-destroy", card5.Id, bowed.Id) && !CanUse(e5, 0, "sacrifice-pawns-destroy", card5.Id, samurai.Id), "an unbowed Courtier performs it");
+    }
+    private static void RetributionScenario()
+    {
+        MatchEngine Build(bool holdsIt, out CardInstance card, out CardInstance lead, out CardInstance second, out CardInstance follower, out CardInstance defender)
+        {
+            var s = Table(Phase.Battle, 1); s.PriorityPlayerId = 0;
+            for (var i = 1; i < 4; i++) s.Players[1].Provinces[i].Destroyed = true; // player 1 keeps one province: one battlefield in the additional phase
+            card = Add(s, Retribution, 0, holdsIt ? Zone.Hand : Zone.FateDiscard);
+            Add(s, "training-lion-veteran", 1, Zone.Battlefield, province: 0); // the first phase's attacker (Force 6) beats
+            Add(s, "training-crane-samurai", 0, Zone.Battlefield, province: 0); // ... player 0's lone defender (Force 3)
+            lead = Add(s, "training-crane-veteran", 0, Zone.Home); // Force 5, at home for the additional phase
+            second = Add(s, "training-crane-samurai", 0, Zone.Home);
+            follower = Add(s, "training-follower", 0, Zone.Attached, parent: lead.Id);
+            defender = Add(s, "training-lion-veteran", 1, Zone.Home);
+            return MatchEngine.FromTestState(s);
+        }
+        var e = Build(true, out var card, out var lead, out var second, out var follower, out var foe);
+        PassUntil(e, () => e.State.PendingChoice?.Type == "attackPhaseEndReaction");
+        Eq(e.State.PriorityPlayerId, 0, "the Defender holds the window");
+        Check(e.QueryActions(0).Any(o => o.Type == "useAbility" && o.Command?.AbilityId == "retribution-declare" && o.Enabled) && e.QueryActions(0).Any(o => o.Type == "declineReaction"), "the Reaction, or a pass");
+        Check(!e.QueryActions(1).Any(o => o.Type == "useAbility"), "the Attacker is offered nothing");
+        Accept(e, e.QueryActions(0).Single(o => o.Type == "useAbility" && o.Command?.AbilityId == "retribution-declare").Command!);
+        Eq(e.State.Phase, Phase.InfantryDeclaration, "an additional Attack Phase begins");
+        Eq(e.State.ActivePlayerId, 0, "the Defender is its Attacker");
+        Check(e.State.UnresolvedBattlefields.SequenceEqual([0]) && e.State.PriorityPlayerId == 0, "a battlefield at each of player 1's provinces; player 0 assigns");
+        Eq(e.State.Cards[card.Id].Zone, Zone.FateDiscard, "the Strategy is spent");
+        // Only one Personality may be assigned: both at once are refused; one at a time is offered per unit and province.
+        var attackOptions = e.QueryActions(0).Where(o => o.Type == "attack" && o.Command is not null).ToArray();
+        Check(attackOptions.Length == 2 && attackOptions.All(o => o.Command!.Assignments!.Count == 1), "one option per (unit, province): " + string.Join(";", attackOptions.Select(o => o.Label)));
+        Reject(e, new("attack", 0, e.Version, Assignments: new Dictionary<string, int> { [lead.Id] = 0, [second.Id] = 0 }));
+        Accept(e, attackOptions.Single(o => o.Command!.Assignments!.ContainsKey(lead.Id)).Command!);
+        Eq(ForceMods(e, lead.Id), 1, "the Personality has +1F after he assigns");
+        Eq(ForceMods(e, follower.Id), 1, "and so does each Follower in his unit");
+        Check(e.State.Cards[lead.Id].Zone == Zone.Battlefield, "he is assigned");
+        // The rest plays as an Attack Phase (the defenders assign, the battle is fought) and the turn's player is restored for the Dynasty Phase.
+        Batch336Support.RunUntil(e, () => e.State.Phase == Phase.Dynasty);
+        Eq(e.State.ActivePlayerId, 1, "player 1's turn goes on: the Dynasty Phase is his");
+        Eq(e.State.RemC.RetributionRoot, -1, "nothing of the swap remains");
+        // Declined: the phase just ends.
+        var d = Build(true, out _, out _, out _, out _, out _);
+        PassUntil(d, () => d.State.PendingChoice?.Type == "attackPhaseEndReaction");
+        Accept(d, d.QueryActions(0).Single(o => o.Type == "declineReaction").Command!);
+        Check(d.State.Phase == Phase.Dynasty && d.State.ActivePlayerId == 1 && d.State.PendingChoice is null, "declined: the Dynasty Phase of the turn's player");
+        // Without a Retribution in hand no window opens.
+        var n = Build(false, out _, out _, out _, out _, out _);
+        PassUntil(n, () => n.State.Phase == Phase.Dynasty);
+        Check(n.State.ActivePlayerId == 1, "no window: the Dynasty Phase follows the last battle");
+        Check(foe.Id.Length > 0, "fixture");
     }
 }

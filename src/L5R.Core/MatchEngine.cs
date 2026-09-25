@@ -429,6 +429,8 @@ public sealed partial class MatchEngine
                 if (command.Type=="useAbility") UseAbility(command); else PassReaction();
                 return;
             }
+            // Retribution (Emperor Edition remaining-cards pass, group C, issue #492): the Defender's window after an Attack Phase ends (EmperorRemainingC.cs).
+            if (_state.PendingChoice.Type=="attackPhaseEndReaction") { ResolveAttackPhaseEndCommand(command); return; }
             if (_state.PendingChoice.Type=="afterActionResolvedReaction")
             {
                 // After an action's resolution (issue #437): either player may play a Reaction that names it, or pass; two consecutive passes close the window (PassReaction),
@@ -991,13 +993,14 @@ public sealed partial class MatchEngine
     // the recruiting PLAYER's Clan). Never set by an ordinary Purchase/Reserve recruit.
     // fromDeadPile (issue #373, At Any Cost): recruiting one of the player's own dead Personalities. Only where the card is differs: every restriction below,
     // the price with all its discounts, and Unique/Singular apply as for a province card -- except that such a Personality may not be proclaimed.
-    public PurchaseQuote QuotePurchase(int playerId,string cardId,bool clanDiscount=false,bool clanAllegiance=false,bool viaReserve=false,string? ignoreHonorRequirementIfPersonalityClan=null,bool fromDeadPile=false,bool anyOwnerPile=false)
+    public PurchaseQuote QuotePurchase(int playerId,string cardId,bool clanDiscount=false,bool clanAllegiance=false,bool viaReserve=false,string? ignoreHonorRequirementIfPersonalityClan=null,bool fromDeadPile=false,bool anyOwnerPile=false,bool fromDynastyDeck=false)
     {
         if (playerId is <0 or >1 || !_state.Cards.TryGetValue(cardId,out var card)) return new(cardId,0,clanDiscount,clanAllegiance,false,"Unknown card or player.",[]);
         var def=Definition(card); var player=Player(playerId);
         // The dead pile is the Personality's discard pile: Zone.Dead once he died, Zone.DynastyDiscard when he was merely discarded from a province (Goju Plot: "in your discard pile").
         // Black Pearl (Forgotten Legacy pass, issue #467): anyOwnerPile -- "a Personality in any player's discard pile", brought into play under the payer's control (TakeControl).
-        if(fromDeadPile ? card.OwnerId!=playerId && !anyOwnerPile || card.Zone is not (Zone.Dead or Zone.DynastyDiscard) : card.OwnerId!=playerId || card.Zone!=Zone.Province || !card.FaceUp)
+        // fromDynastyDeck (Emperor Edition remaining-cards pass, group C, issue #492: Sacrifice of Pawns's search): one of the player's own Dynasty deck, priced like a province card.
+        if(fromDeadPile ? card.OwnerId!=playerId && !anyOwnerPile || card.Zone is not (Zone.Dead or Zone.DynastyDiscard) : fromDynastyDeck ? card.OwnerId!=playerId || card.Zone!=Zone.DynastyDeck : card.OwnerId!=playerId || card.Zone!=Zone.Province || !card.FaceUp)
             return new(cardId,0,clanDiscount,clanAllegiance,false,fromDeadPile?"Choose one of your own dead Personalities.":"Choose your face-up province card.",[]);
         string? error=null;
         var inClan=def.Type==CardType.Personality && ClanAlignments(card).Contains(player.Clan);
@@ -1052,7 +1055,7 @@ public sealed partial class MatchEngine
             +(clanAllegiance?" + 2 (Clan allegiance)":"")+(clanDiscount?" − 2 (Clan discount)":"")+(rawCost<0?" (min 0)":"");
         if ((Keyword(card,"Unique") || Keyword(card,"Singular")) && ControlsCopyOf(playerId,def.Name)) error=$"You already control this {(Keyword(card,"Unique") ? "Unique" : "Singular")} card.";
         // Kakita Yusugi and Yogo Ugimori (issue #453, batch 2): the once-per-turn limit he ignores, and a lock on the player (ProclaimAllowed).
-        var eligible=error is null && inClan && !clanDiscount && !fromDeadPile && playerId==_state.ActivePlayerId && ProclaimAllowed(player,def);
+        var eligible=error is null && inClan && !clanDiscount && !fromDeadPile && !fromDynastyDeck && playerId==_state.ActivePlayerId && ProclaimAllowed(player,def);
         return new(cardId,cost,clanDiscount,clanAllegiance,eligible,error,error is null ? PaymentOptions(playerId,cost,new PaymentSubject(card,PaymentKind.Recruit)) : [],basis);
     }
 
@@ -1279,10 +1282,12 @@ public sealed partial class MatchEngine
         // assignment (declining to attack) is always still legal.
         Require(!(command.Assignments?.Count>0) || !Player(command.PlayerId).MayNotAttackThisTurn,"You may not declare an attack this turn.");
         var cavalry=_state.Phase==Phase.CavalryDeclaration;
+        RequireRetributionAssignment(command); // Emperor Edition remaining-cards pass, group C (issue #492): an additional Attack Phase assigns one Personality at most.
         // Spiritual Manipulation (The Shadow's Embrace pass, issue #476, batch 4): "and assign the target (if legal)" -- in the segment he can be assigned in.
         if(ForcedAssignmentRefusal(command.PlayerId,command.Assignments,cavalry) is string forcedAssignment) throw new RuleViolation(forcedAssignment);
         var targets=Player(1-command.PlayerId).Provinces.Where(p=>!p.Destroyed).Select(p=>p.Index).ToHashSet();
         Assign(command,targets,cavalry,false);
+        NoteRetributionAssignments(command); // issue #492, group C: Retribution's +1F for the Personality and his Followers.
         Emit("attackersAssigned",$"{Player(command.PlayerId).Name} assigned {(command.Assignments?.Count??0)} {(cavalry?"Cavalry":"Infantry")} attacker(s).",command.PlayerId);
         // Brash (core rules keyword, issue #216): the Defender may draw a card, independently, once
         // per Brash card just assigned to attack -- deferred here, before the usual phase transition,
@@ -1756,7 +1761,7 @@ public sealed partial class MatchEngine
         if(_state.UnresolvedBattlefields.Count==0)
         {
             foreach(var card in _state.Cards.Values.Where(c=>c.Zone==Zone.Battlefield).ToArray()) ReturnHome(card,card.OwnerId==attacker);
-            SetPhase(Phase.Dynasty,attacker);
+            EndAttackPhase(attacker); // Emperor Edition remaining-cards pass, group C (issue #492): Retribution's window, then the Dynasty Phase.
         }
         else SetPhase(Phase.BattleSelection,attacker);
     }

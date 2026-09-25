@@ -18,9 +18,11 @@ PROFILE = "strategy-wave-60"
 NL = chr(10)
 
 ABILITIES: dict[int, list[str]] = {
+    6290: ["retribution-declare"],
     6312: ["rhetoric-redirect"],
     6406: ["rumors-travel-reduce", "rumors-travel-move"],
     6374: ["rocky-terrain-bow"],
+    6439: ["sacrifice-pawns-destroy"],
     6584: ["selfless-defense-move", "selfless-defense-destroy"],
     6676: ["shadows-walk-take"],
     6698: ["shameful-injury-negate"],
@@ -39,12 +41,16 @@ ABILITIES: dict[int, list[str]] = {
 }
 # The published Text follows each scan, read by eye (the Oracle text is shown with older wording for some cards, and joins the two halves with "//").
 TEXT: dict[int, str] = {
+    6290: "Reaction: After the end of an Attack Phase in which you were the Defender: Declare an additional Attack Phase against that phase's Attacker, in which neither player may invite "
+          "allies and you may only assign one Personality. Give the Personality and each Follower in his unit +1F after he assigns.",
     6312: "Reaction: Before a player gains or loses Honor from an action's effects, bow your performing Courtier: Choose another player. If the Courtier's Chi is higher than or equal to the "
           "Honor gain or loss, the chosen player instead of the original player takes the gain or loss.",
     6406: "Limited: Until your next turn begins, before each time a player gains 1 or more Honor, reduce the gain by 1 if it is not during a battle or Attack Phase.\n"
           "Battle: If any enemy units are at the current battlefield, choose your performing Personality: Move him there. Straighten him if he moved.",
     6374: "Before this battle's resolution: You may bow one or two attacking Personalities at the current battlefield.\n"
           "Battle: If there are no Terrains at the current battlefield: Put this card into play there.",
+    6439: "Limited: Destroy your performing unbowed Courtier and target another player's Personality: His controller may destroy the target. If he did not choose this, search your "
+          "Dynasty deck for a Personality and bring him into play, paying all costs but paying two more Gold. (Discard him if you are unable to play him.)",
     6584: "Battle: Choose your performing unbowed Yojimbo Personality and target an enemy Personality: Move him home. Bow him if you control a Courtier or Shugenja.\n"
           "Battle: Destroy your performing Yojimbo and target one or more of your Courtier or Shugenja Personalities: Move them home.",
     6676: "Open: Bow one or more of your performing Shadowlands Ninja Personalities and target a card without attachments: If the card is an attachment, destroy it. If it is a Personality "
