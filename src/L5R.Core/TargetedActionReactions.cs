@@ -176,7 +176,7 @@ public sealed partial class MatchEngine
     private bool TargetedActionReactionAvailable(CardInstance card, string abilityId, ReactionSubject subject)
     {
         var ability = AbilityCatalog.All[abilityId];
-        return (!BowedBarsAbilities(card) || abilityId == "red-crane-dojo-ninja") && !ActionLocked(card) && !BarredByCherryBlossom(abilityId) /* Cherry Blossom Festival (issue #492, group F; traits exempt, R4) */ && !AbilityUseSpent(card.AbilityUses, ability, ability.UsageKey ?? abilityId)
+        return (!BowedBarsAbilities(card) || abilityId == "red-crane-dojo-ninja" || MechEEvenIfBowed(abilityId) /* issue #501: Kakita Kae's trait */) && !ActionLocked(card) && !BarredByCherryBlossom(abilityId) /* Cherry Blossom Festival (issue #492, group F; traits exempt, R4) */ && !AbilityUseSpent(card.AbilityUses, ability, ability.UsageKey ?? abilityId)
             && TargetedActionReactionApplies(card, abilityId, subject) && CanPayReaction(card, abilityId);
     }
 
@@ -324,7 +324,7 @@ public sealed partial class MatchEngine
             case "chugo-seido-redirect":
                 return command.PlayerId != card.OwnerId && affected.OwnerId == card.OwnerId && Definition(affected).Type == CardType.Personality && ChugoSeidoCandidates(card, subject, affected).Any();
             default:
-                return RemATargetedActionReactionApplies(card, abilityId, subject, affected) || EmperorRemainingCTargetedReactionApplies(card, abilityId, subject, affected) || RulingR2TargetedReactionApplies(card, abilityId, subject, affected) || MechBTargetedReactionApplies(card, abilityId, subject, affected) || MechCTargetedReactionApplies(card, abilityId, subject, affected); /* issue #501: The Dark Naga */ // ruling pass R2; issue #492: group A (Ancestral Protection, Caught in the Act), group C (Snake Tattoo)
+                return RemATargetedActionReactionApplies(card, abilityId, subject, affected) || EmperorRemainingCTargetedReactionApplies(card, abilityId, subject, affected) || RulingR2TargetedReactionApplies(card, abilityId, subject, affected) || MechBTargetedReactionApplies(card, abilityId, subject, affected) || MechCTargetedReactionApplies(card, abilityId, subject, affected) || MechETargetedReactionApplies(card, abilityId, subject, affected); /* issue #501: The Dark Naga */ // ruling pass R2; issue #492: group A (Ancestral Protection, Caught in the Act), group C (Snake Tattoo)
         }
     }
 
@@ -360,7 +360,8 @@ public sealed partial class MatchEngine
         isAttack || BowsTarget(abilityId) || DestroysTarget(abilityId) || DestroysAttachmentTarget(abilityId);
 
     private static bool DestroysAttachmentTarget(string abilityId) => abilityId is "crushing-destroy" or "never-afraid" or "keppo-destroy" or "michitsu-destroy"
-        or "tetsuo-destroy-attachment" or "tokoru-bear-bow" or "hiroto-bow" or "komatsu-destroy-attachment";
+        or "tetsuo-destroy-attachment" or "tokoru-bear-bow" or "hiroto-bow" or "komatsu-destroy-attachment"
+        or EmperorMechEAbilities.HostsLimited; // issue #501: The Host's Advantage destroys its target attachment
 
     private IEnumerable<(string? TargetId, string? Label)> TargetedReactionChoices(CardInstance card, string abilityId, ReactionSubject subject) =>
         abilityId switch

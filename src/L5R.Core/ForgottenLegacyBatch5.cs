@@ -84,18 +84,14 @@ public sealed partial class MatchEngine
 
     // The actions that discard the Imperial Favor as their cost ("as a condition upon further effects"): the one list RunAbilityEffects and
     // ResolveNegatedAction discard the Favor for.
-    private static bool DiscardsImperialFavorAsCost(string abilityId) =>
-        abilityId is "shunya-honor" or "favor-cycle" or "favor-cycle-kurohito" or "favor-battle" or "jakuei-bow-favor" or "bonds-of-coin-draw" or "insulting-gesture-shame" or "baiko-shame"
-            or "accidental-confession-dishonor" // Accidental Confession (batch 3).
-            or "celestial-sword-crane-favor" // Celestial Sword of the Crane - exp (The Shadow's Embrace pass, issue #476, batch 5).
-            or "sosuke-tariffs"; // Daidoji Sosuke (The Shadow's Embrace pass, issue #476 batch 1).
-            // Doji Rengetsu (batch 1) discards it through its own hook -- see BurningDreamsNegates.
+    // Issue #501: the list became data -- each of these abilities declares CostVerbs.DiscardFavor among its Costs (EmperorMechE.cs, FavorDiscardMigrated), which is what this reads.
+    private static bool DiscardsImperialFavorAsCost(string abilityId) => DeclaresFavorDiscard(abilityId);
 
     // Burning Dreams, clause 2 (ExecuteAbilityEffects' hook, asked as the action resolves -- after any redirect): the action's effects are negated
     // when it discards the Favor as its cost and targets a Nonhuman Personality. The whole action is still taken and every cost (the Favor included) paid.
     private bool BurningDreamsNegates(GameCommand command)
     {
-        if (command.AbilityId is not { } id || !(DiscardsImperialFavorAsCost(id) || id == "rengetsu-disable") || !BurningDreamsNegationActive()) return false;
+        if (command.AbilityId is not { } id || !(DiscardsImperialFavorAsCost(id) || ChoseFavorDiscardOption(command)) || MechEUnnegatable(id) || !BurningDreamsNegationActive()) return false; // issue #501: The Heir's Wrath's effects will not be negated // issue #501: or the Favor discard chosen as an alternative cost
         var nonhuman = ActionTargetIds(command).Where(t => _state.Cards.ContainsKey(t)).Select(Card)
             .FirstOrDefault(t => Definition(t).Type == CardType.Personality && Keyword(t, "Nonhuman"));
         if (nonhuman is null) return false;

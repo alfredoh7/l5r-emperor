@@ -1,0 +1,129 @@
+{
+  "Profile": "personality-wave-95",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-4179",
+      "Name": "Kakita Kae",
+      "Type": "Personality",
+      "Clan": "Crane",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 4,
+      "PersonalHonor": 3,
+      "HonorRequirement": 6,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After a Battle action targets Kae, you may discard the Imperial Favor: If you did, negate Kae's destruction, bowing, and movement from the action's effects.\nBattle: Move Kae home.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-4179.jpg",
+      "Keywords": [
+        "Courtier",
+        "Crane Clan",
+        "Storyteller"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "kae-favor-negate",
+        "kae-move-home"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-5361",
+      "Name": "Moto Rani",
+      "Type": "Personality",
+      "Clan": "Unicorn",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 4,
+      "PersonalHonor": 1,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: When paying for a Spell attaching to Rani, remove a dead Personality in your discard pile from the game: Reduce the Spell's Gold Cost by the Personality's Chi.\nBattle: Even if Rani is bowed: Straighten her. You may move her home.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-5361.jpg",
+      "Keywords": [
+        "Cavalry",
+        "Unique",
+        "Death Priest",
+        "Experienced",
+        "Shugenja",
+        "Unicorn Clan",
+        "Water"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "rani-exp-spell-discount",
+        "rani-exp-straighten"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9630",
+      "Name": "Yoritomo Singh",
+      "Type": "Personality",
+      "Clan": "Mantis",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 4,
+      "PersonalHonor": 1,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: When paying an action's Gold cost: Produce 3 Gold.\nBattle: Target an enemy card without attachments and pay Gold equal to its Gold Cost: Destroy it.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9630.jpg",
+      "Keywords": [
+        "Experienced 2",
+        "Loyal",
+        "Naval",
+        "Unique",
+        "Ambassador",
+        "Courtier",
+        "Magistrate",
+        "Mantis Clan",
+        "Samurai"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "singh-exp2-gold",
+        "singh-exp2-destroy"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9828",
+      "Name": "Zlkyt",
+      "Type": "Personality",
+      "Clan": "Lion",
+      "GoldCost": 6,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 2,
+      "PersonalHonor": 1,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: When paying a Gold cost, destroy your target Mine or Farm: Produce Gold equal to its base Gold Cost.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9828.jpg",
+      "Keywords": [
+        "Earth",
+        "Lion Clan",
+        "Nonhuman",
+        "Zokujin"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "zlkyt-destroy-gold"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

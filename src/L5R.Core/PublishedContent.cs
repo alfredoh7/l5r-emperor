@@ -2640,4 +2640,10 @@ public static class PublishedContent
     public static PublishedSnapshot StrategyWave75 { get; } = Load("L5R.Published.StrategyWave75.json", "strategy-wave-75", requireDecks: false);
     /// <summary>Region wave 19 (Emperor Edition mechanics, issue #501, group C): Temple of the Seven Fortunes.</summary>
     public static PublishedSnapshot RegionWave19 { get; } = Load("L5R.Published.RegionWave19.json", "region-wave-19", requireDecks: false);
+    /// <summary>Personality wave 95 (Emperor Edition mechanics group E, issue #501): Kakita Kae, Moto Rani - exp, Yoritomo Singh - exp2, Zlkyt.</summary>
+    public static PublishedSnapshot PersonalityWave95 { get; } = Load("L5R.Published.PersonalityWave95.json", "personality-wave-95", requireDecks: false);
+    /// <summary>Strategy wave 81 (Emperor Edition mechanics group E, issue #501): Greasing the Wheels, The Heir's Wrath, The Host's Advantage.</summary>
+    public static PublishedSnapshot StrategyWave81 { get; } = Load("L5R.Published.StrategyWave81.json", "strategy-wave-81", requireDecks: false);
+    /// <summary>Holding wave 28 (Emperor Edition mechanics group E, issue #501): Seaside Bazaar.</summary>
+    public static PublishedSnapshot HoldingWave28 { get; } = Load("L5R.Published.HoldingWave28.json", "holding-wave-28", requireDecks: false);
 }

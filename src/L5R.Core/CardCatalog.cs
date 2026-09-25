@@ -671,6 +671,9 @@ public static class CardCatalog
             .Concat(PublishedContent.StrongholdWave29.Cards) // Emperor Edition mechanics group C (issue #501): The Marshalling Fields
             .Concat(PublishedContent.StrategyWave75.Cards) // Emperor Edition mechanics group C (issue #501): Ascending the Ranks, Fury of a Mob
             .Concat(PublishedContent.RegionWave19.Cards) // Emperor Edition mechanics group C (issue #501): Temple of the Seven Fortunes
+            .Concat(PublishedContent.PersonalityWave95.Cards) // Emperor Edition mechanics group E (issue #501): Kakita Kae, Moto Rani - exp, Yoritomo Singh - exp2, Zlkyt
+            .Concat(PublishedContent.StrategyWave81.Cards) // Emperor Edition mechanics group E (issue #501): Greasing the Wheels, The Heir's Wrath, The Host's Advantage
+            .Concat(PublishedContent.HoldingWave28.Cards) // Emperor Edition mechanics group E (issue #501): Seaside Bazaar
             .ToDictionary(c => c.Id, StringComparer.Ordinal);
     }
 }

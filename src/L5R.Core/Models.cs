@@ -1281,7 +1281,10 @@ public sealed record PaymentOption(string[] SourceIds, int Produced, int Cost, i
 // Basis (issue #303): the human-readable derivation of Cost, e.g. "Training samurai cost 5 - 2 (Clan
 // discount)". Null only for quotes serialized by an older engine.
 public sealed record PurchaseQuote(string CardId, int Cost, bool ClanDiscount, bool ClanAllegiance,
-    bool ProclaimEligible, string? Error, PaymentOption[] Payments, string? Basis = null);
+    bool ProclaimEligible, string? Error, PaymentOption[] Payments, string? Basis = null,
+    // Issue #501 (EmperorMechE.cs): the payment sources that are not a card's own production -- a Reaction's Gold used beside or instead of bowing (Seaside Bazaar, Luxurious Silk, Library of
+    // Rebirth), Zlkyt's "destroy your Mine or Farm" (one per Holding, highest Gold Cost first, always last) -- each a source id Payments and GameCommand.SourceIds may name. Null when there are none.
+    PaymentSource[]? Sources = null);
 public sealed record OverlayQuote(string CardId, string TargetId, int HigherLevel, int LowerLevel, string? Error);
 /// <summary>The one authoritative Gold quote (issue #303) for any action that costs Gold: recruiting,
 /// equipping, playing a Strategy and every costed ability. The client renders this and never derives a
@@ -1293,7 +1296,9 @@ public sealed record OverlayQuote(string CardId, string TargetId, int HigherLeve
 /// PaymentsByAmount holds them for every legal amount (keyed by amount) so the client can change the
 /// amount without a round trip. Error, when set, means this quote cannot be paid or used as it stands.</summary>
 public sealed record GoldQuote(int Cost, string Kind, string Basis, string? Error, PaymentOption[] Payments,
-    int? MinAmount = null, int? MaxAmount = null, Dictionary<int, PaymentOption[]>? PaymentsByAmount = null);
+    int? MinAmount = null, int? MaxAmount = null, Dictionary<int, PaymentOption[]>? PaymentsByAmount = null,
+    // Issue #501 (EmperorMechE.cs): the payment sources that are not a card's own production (see PurchaseQuote.Sources). Null when there are none.
+    PaymentSource[]? Sources = null);
 /// <param name="Gold">The quote for this option's own command (its first legal target when the cost is
 /// target-derived). Null when the action costs no Gold.</param>
 /// <param name="TargetGold">Per-target quotes (target id to quote) for a target-derived cost: the cost

@@ -34,6 +34,8 @@ public static class TraitReactions
         "never-safe-return", "castle-of-order-redirect", "spiders-web-attach", "spiders-web-attach-kensai", "otomo-favor-token", "rika-bushido-virtue-bonus", "shihiro-boost",
         // Issue #501: Goju Asuka's "After Asuka enters play: You may give control of her to another player."
         "goju-asuka-give",
+        // Issue #501 (Mendon): Kakita Kae's "After a Battle action targets Kae, you may discard the Imperial Favor: ..." triggers like a Reaction but is a trait (no designator): repeatable, usable while bowed.
+        "kae-favor-negate",
     };
 
     /// <summary>The trait-modelled Reaction-timed abilities, for the audit.</summary>

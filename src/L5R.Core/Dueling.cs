@@ -614,6 +614,10 @@ public sealed partial class MatchEngine
             case "feint-strike-focus":
                 if (winnerPlayerId is int feintWinner) _state.PendingForcedDiscards.Add(new(feintWinner, "Feint & Strike"));
                 break;
+            // Emperor Edition mechanics group E (issue #501): Greasing the Wheels (EmperorMechE.cs).
+            default:
+                ApplyMechEFocusEffect(abilityId);
+                break;
         }
     }
 }

@@ -1171,7 +1171,7 @@ public sealed partial class MatchEngine
         error??=AdditionalEntryCostUnpayable(card,playerId); // En'you (issue #501, EmperorMechC.cs): an additional cost of entering play he cannot pay bars the recruit.
         // Kakita Yusugi and Yogo Ugimori (issue #453, batch 2): the once-per-turn limit he ignores, and a lock on the player (ProclaimAllowed).
         var eligible=error is null && inClan && !clanDiscount && !fromDeadPile && !fromDynastyDeck && playerId==_state.ActivePlayerId && ProclaimAllowed(player,def);
-        return new(cardId,cost,clanDiscount,clanAllegiance,eligible,error,error is null ? PaymentOptions(playerId,cost,new PaymentSubject(card,PaymentKind.Recruit)) : [],basis);
+        return new(cardId,cost,clanDiscount,clanAllegiance,eligible,error,error is null ? PaymentOptions(playerId,cost,new PaymentSubject(card,PaymentKind.Recruit)) : [],basis,PaymentSourcesFor(playerId,new PaymentSubject(card,PaymentKind.Recruit))); // issue #501: the payment tokens
     }
 
     // True when the card's own printed waiver names the recruiting player's own Clan (see
@@ -1182,13 +1182,14 @@ public sealed partial class MatchEngine
     // paying: what the payment is for (ConditionalProduction.cs) -- a Holding that produces more for a kind of card or action says so only when it is asked for that one.
     public int GoldProduced(string cardId,int playerId,PaymentSubject? paying=null)
     {
+        if(IsPaymentToken(cardId)) return PaymentTokenAmount(cardId,playerId,paying); // Issue #501 (EmperorMechE.cs): a Reaction's Gold, Zlkyt's destroyed Holding, Moto Rani's discount.
         var card=Card(cardId); var def=Definition(card);
         if(def.Effect==MoneylenderEffect) return MoneylenderTokens(card); // Moneylender (issue #492, group F): Gold equal to the Wealth tokens it can remove.
         // The Shadow's Embrace pass (issue #476), batch 6: a production modifier for the turn (The Moon's Imperative, The Sun's Aspiration) and Sheltered Port's count.
         var adjustment=def.Type==CardType.Holding ? ShadowsEmbraceBatch6Production(card,playerId) : 0;
         if(ConditionalProductionOf(card) is { } conditional && ProductionConditionMet(conditional,paying)) return Math.Max(0,conditional.Amount+adjustment);
-        // Library of Rebirth (Stronghold pass, issue #486 batch 1): a Reaction that produces Gold for a Spell in a Combat Segment, even bowed and without bowing.
-        if(ReactiveGoldSource(card,paying) is { } reactive) return Math.Max(0,reactive.Amount+adjustment);
+        // Library of Rebirth (Stronghold pass, issue #486 batch 1), Luxurious Silk, Seaside Bazaar: a Reaction's Gold is its own payment source (issue #501: "<card>#reaction", EmperorMechE.cs),
+        // usable beside the card's bow; the card's own id is always its printed production.
         // A card with no printed production that can bow to produce Gold for a payment (Yoritomo Sakuma, issue #338) produces that much.
         if(def.GoldProduction==0 && AlternateGoldSource(card,paying) is { } alternate) return alternate.Amount;
         return Math.Max(0,def.GoldProduction+adjustment+(def.Effect=="crane-gold" && Player(playerId).Clan=="Crane" || def.Effect=="dragon-gold" && Player(playerId).Clan=="Dragon"?1:0));
@@ -1202,29 +1203,40 @@ public sealed partial class MatchEngine
         // A source whose amount is the payer's own choice (Asahina Keigo, issue #477) is never suggested.
         var sources=Producers(playerId,paying).Where(c=>(exclude is null || !exclude.Contains(c.Id)) && !IsVariableGoldSource(c)).OrderBy(c=>c.Id,StringComparer.Ordinal).ToArray();
         if(cost==0) return [new([],0,0,0)];
+        // Issue #501 (EmperorMechE.cs): the payment tokens -- a Reaction's Gold beside a card's bow, Zlkyt's destroyed Mine or Farm, Moto Rani's discount -- join the search as groups of
+        // alternatives: at most one token of a card per payment (each is that card's once-a-turn Reaction).
+        var groups=sources.Select(c=>new[] { (Id:c.Id,Amount:GoldProduced(c.Id,playerId,paying)) }).ToList();
+        foreach(var tokenGroup in PaymentTokens(playerId,paying).Where(t=>exclude is null || !exclude.Contains(t.Card.Id) && (t.Subject is null || !exclude.Contains(t.Subject.Id))).GroupBy(t=>t.Card.Id))
+            groups.Add(tokenGroup.Select(t=>(t.Id,t.Amount)).ToArray());
         // Dynamic programming keeps useful alternatives without exponential work for large economies.
         var byTotal=new Dictionary<int,List<string[]>> { [0]=[[]] };
-        foreach(var source in sources)
+        foreach(var group in groups)
         {
-            var production=GoldProduced(source.Id,playerId,paying);
             foreach(var pair in byTotal.OrderByDescending(p=>p.Key).ToArray())
             {
                 if(pair.Key>=cost) continue;
-                var total=pair.Key+production;
-                if(!byTotal.TryGetValue(total,out var combinations)) byTotal[total]=combinations=[];
-                foreach(var previous in pair.Value.ToArray())
-                    if(combinations.Count<12) combinations.Add([..previous,source.Id]);
+                foreach(var (id,production) in group)
+                {
+                    var total=pair.Key+production;
+                    if(!byTotal.TryGetValue(total,out var combinations)) byTotal[total]=combinations=[];
+                    foreach(var previous in pair.Value.ToArray())
+                        if(combinations.Count<12) combinations.Add([..previous,id]);
+                }
             }
         }
         return byTotal.Where(p=>p.Key>=cost).SelectMany(p=>p.Value.Select(ids=>new PaymentOption(ids,p.Key,cost,p.Key-cost)))
+            // Zlkyt's destruction of a Holding (issue #501) is suggested only when nothing else pays.
+            .OrderBy(p=>p.SourceIds.Count(IsDestroyingPaymentToken))
             // A payment that bows no alternate source (a Personality that can bow for Gold, issue #338) is always preferred to one that does:
             // the engine never suggests bowing Sakuma when printed producers cover the cost. With no such card in play every count is 0.
-            .OrderBy(p=>p.SourceIds.Count(id=>Definition(Card(id)).GoldProduction==0)).ThenBy(p=>p.Excess).ThenBy(p=>p.SourceIds.Length).ThenBy(p=>string.Join(",",p.SourceIds),StringComparer.Ordinal).Take(24).ToArray();
+            .ThenBy(p=>p.SourceIds.Count(id=>!IsPaymentToken(id) && Definition(Card(id)).GoldProduction==0)).ThenBy(p=>p.Excess)
+            // Issue #501: of two payments equally good, the one that bows fewer cards (a Reaction's Gold instead of the bow) is suggested first.
+            .ThenBy(p=>p.SourceIds.Count(id=>!IsPaymentToken(id))).ThenBy(p=>p.SourceIds.Length).ThenBy(p=>string.Join(",",p.SourceIds),StringComparer.Ordinal).Take(24).ToArray();
     }
 
     private IEnumerable<CardInstance> Producers(int playerId,PaymentSubject? paying=null) => _state.Cards.Values.Where(c=>c.OwnerId==playerId && c.Zone is Zone.Home or Zone.Stronghold or Zone.Battlefield
-        && (!c.Bowed && (Definition(c).GoldProduction>0 || MoneylenderTokens(c)>0 || AlternateGoldSource(c,paying) is not null || ConditionalProductionOf(c) is { } conditional && ProductionConditionMet(conditional,paying))
-            || ReactiveGoldSource(c,paying) is not null)); // Library of Rebirth (issue #486): "Even if this card is bowed".
+        && !c.Bowed && (Definition(c).GoldProduction>0 || MoneylenderTokens(c)>0 || AlternateGoldSource(c,paying) is not null || ConditionalProductionOf(c) is { } conditional && ProductionConditionMet(conditional,paying)));
+        // Library of Rebirth (issue #486, "Even if this card is bowed"), Luxurious Silk and Seaside Bazaar: their Reaction's Gold is a payment token (issue #501, PaymentSourceIds).
     // exclude: cards the paying action bows or destroys as another of its costs (AbilityCosts.CostPaidCards) -- a card cannot be bowed twice, so it produces no Gold for the same action.
     private void ValidatePayment(int playerId,int cost,string[]? sourceIds,IReadOnlySet<string>? exclude=null,PaymentSubject? paying=null)
     {
@@ -1232,25 +1244,27 @@ public sealed partial class MatchEngine
         Require(exclude is null || !ids.Any(exclude.Contains),"A card bowed or destroyed as part of the action's cost cannot also be bowed for its Gold.");
         Require(ids.Distinct(StringComparer.Ordinal).Count()==ids.Length,"A Gold source cannot be used twice in one payment.");
         Require(cost>0 || ids.Length==0,"No Gold sources are needed for this free action.");
-        var producers=Producers(playerId,paying).Select(c=>c.Id).ToHashSet(StringComparer.Ordinal);
+        var producers=PaymentSourceIds(playerId,paying); // issue #501: a card's own production, or one of the payment tokens (EmperorMechE.cs)
         Require(ids.All(producers.Contains),"Every Gold source must be yours, in play, unbowed and able to produce Gold.");
-        RequirePaymentDiscards(playerId,ids,paying); // Asahina Keigo (issue #477): the card each such source discards is named.
+        RequirePaymentTokens(ids,exclude); // issue #501: one token per card, a Holding destroyed by Zlkyt not also paid as another cost
+        RequirePaymentDiscards(playerId,ids.Where(id=>!IsPaymentToken(id)).ToArray(),paying); // Asahina Keigo (issue #477): the card each such source discards is named.
         var produced=ids.Sum(id=>GoldProduced(id,playerId,paying));
         Require(produced>=cost,$"This payment needs {cost} Gold; selected sources produce {produced}.");
     }
     private void Pay(int playerId,CardInstance target,int cost,string[]? sourceIds,string? part=null,IReadOnlySet<string>? exclude=null,PaymentSubject? paying=null)
     {
         ValidatePayment(playerId,cost,sourceIds,exclude,paying);
-        var ids=sourceIds??[];
-        var produced=ids.Sum(id=>GoldProduced(id,playerId,paying));
+        var allIds=sourceIds??[];
+        var tokens=PaymentTokensChosen(allIds,playerId,paying); // issue #501 (EmperorMechE.cs): read before anything is paid
+        var ids=allIds.Where(id=>!IsPaymentToken(id)).ToArray();
+        var produced=allIds.Sum(id=>GoldProduced(id,playerId,paying));
         produced-=SpendMoneylenderTokens(ids,cost,playerId,paying); // Moneylender (issue #492, group F): only the Wealth tokens the payment needs are removed.
         RecordGoldPaidForEntry(cost,paying); // Moneylender (issue #492, group F): "the amount of Gold you paid for it".
         // A card bowed for Gold through its own ability (Yoritomo Sakuma, issue #338) has used that Reaction: spent for the turn, and named
         // in the log so the opponent sees why it bowed.
         var staysStraight=new HashSet<string>(StringComparer.Ordinal); // Emperor Edition pass (issue #477), batch 6: Yasuki Tanimura produces without bowing.
         foreach(var id in ids)
-            if(UseReactiveGoldSource(_state.Cards[id],paying,playerId)) staysStraight.Add(id); // Library of Rebirth (Stronghold pass, issue #486 batch 1): produced by its Reaction, not bowed.
-            else if(Definition(_state.Cards[id]).GoldProduction==0 && AlternateGoldSource(_state.Cards[id],paying) is { } alternate)
+            if(Definition(_state.Cards[id]).GoldProduction==0 && AlternateGoldSource(_state.Cards[id],paying) is { } alternate)
             {
                 _state.Cards[id].AbilityUses[AbilityCatalog.All[alternate.AbilityId].UsageKey ?? alternate.AbilityId]=_state.TurnNumber;
                 var bows=AbilityCatalog.All[alternate.AbilityId].PaymentBows;
@@ -1259,6 +1273,7 @@ public sealed partial class MatchEngine
                 if(AbilityCatalog.All[alternate.AbilityId].PaymentDiscardsFocus) DiscardForVariableGoldSource(_state.Cards[id],playerId);
             }
         foreach(var id in ids) if(!staysStraight.Contains(id)) _state.Cards[id].Bowed=true;
+        UsePaymentTokens(tokens,playerId); // issue #501: each token's Reaction is spent (Library of Rebirth, Luxurious Silk, Seaside Bazaar produce without bowing; Zlkyt destroys; Rani removes)
         Emit("payment",$"{Player(playerId).Name} paid {cost} Gold for {Definition(target).Name}{(part is null?"":$" ({part})")}, producing {produced}; {produced-cost} excess was lost.",playerId,target.Id,produced-cost);
         // Temple to Fudo (Seeds of Decay, issue #453): ":bow:: Produce 2 Gold and lose 1 Honor" -- the loss is part of producing (SeedsOfDecayBatch4.cs).
         LoseHonorForProducers(playerId,ids);
@@ -2115,7 +2130,7 @@ public sealed partial class MatchEngine
         // The cost (Katagi's, Satoshi's Dual Warfans', Legion of the Bat's and Champion of Thunder's
         // discounts included) is EquipGoldCost in GoldQuotes.cs -- the same function that prices this
         // equip for QueryActions' quote, so the quote and the charge cannot drift (issue #303).
-        Pay(command.PlayerId,card,EquipGoldCost(command.PlayerId,card,target).Cost,command.SourceIds,paying:new PaymentSubject(card,PaymentKind.Equip));
+        Pay(command.PlayerId,card,EquipGoldCost(command.PlayerId,card,target).Cost,command.SourceIds,paying:new PaymentSubject(card,PaymentKind.Equip,Wielder:target)); // issue #501: the wielder
         _state.CurrentActionAffected=[]; // Emperor Edition Personality pass (issue #477 batch 2): what Equip records (NoteAttachedFollowerFromHand) is this action's alone.
         Player(command.PlayerId).Hand.Remove(card.Id); Player(command.PlayerId).AttachedFromHandThisTurn=true; NoteAttachedFromHandForGlory(command.PlayerId,card);
         NoteAttachedFollowerFromHand(card,target);
@@ -3343,7 +3358,7 @@ public sealed partial class MatchEngine
         // The Forgotten Temple (Forgotten Legacy pass, issue #467 batch 2): no gain at all, no loss from the player's own cards, and every other loss reduced to 1.
         amount=ForgottenTempleHonorChange(playerId,amount,reason,source);
         if(amount==0) return;
-        if(amount<0 && HonorLossNegated(playerId,source))
+        if(amount<0 && !CurrentActionUnnegatable() && HonorLossNegated(playerId,source)) // issue #501: an action whose effects will not be negated (The Heir's Wrath, Suitengu's Torch)
         {
             Emit("honorLossNegated",$"{Player(playerId).Name}'s Honor loss from {reason} was negated.",playerId,source?.Id);
             return;
@@ -3352,7 +3367,7 @@ public sealed partial class MatchEngine
         // (minimum 0)" -- active only while resolving the one specific command this player's own
         // just-played Reaction targeted (see ResolveOrDeferUnimpeachableName), so every negative
         // Honor change of theirs during that single resolution is reduced, not just the first.
-        if(amount<0 && HonorLossNegatedWithEffects(playerId))
+        if(amount<0 && !CurrentActionUnnegatable() && HonorLossNegatedWithEffects(playerId))
         {
             Emit("honorLossNegated",$"{Player(playerId).Name}'s Honor loss from {reason} was negated with the action's effects.",playerId,source?.Id);
             return;
@@ -3376,9 +3391,9 @@ public sealed partial class MatchEngine
         amount=ChugoReducedHonorChange(playerId,amount,reason);
         if(amount==0) return;
         // Yamazaki - Experienced (The Shadow's Embrace pass, issue #476, batch 2): "Once per phase, before you lose exactly 1 Honor: Negate the loss." -- the loss as it would now happen.
-        if(amount==-1 && YamazakiNegatesLoss(playerId,reason)) return;
+        if(amount==-1 && !CurrentActionUnnegatable() && YamazakiNegatesLoss(playerId,reason)) return; // issue #501: an unnegatable action's loss is not negated
         // Ten Thousand Temples (issue #492, group F): "Before you lose Honor, destroy this card: Negate the Honor loss." -- asked before the loss happens (the command replays with the answer).
-        if(amount<0 && TenThousandTemplesNegates(playerId,amount,reason)) return;
+        if(amount<0 && !CurrentActionUnnegatable() && TenThousandTemplesNegates(playerId,amount,reason)) return; // issue #501: nor by Ten Thousand Temples
         var player=Player(playerId); player.Honor+=amount;
         if(amount<0) RecordHonorLoss(playerId); // An Insult Answered (issue #453, batch 2): the action that cost this player Honor.
         if(amount>0) _state.CurrentActionHonorGained=true; // Moksha Patam (issue #453 batch 5): read when the action in progress is done.
