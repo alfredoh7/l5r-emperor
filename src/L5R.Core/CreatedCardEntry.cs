@@ -11,7 +11,8 @@ public sealed partial class MatchEngine
         if (spec.CopyOfTarget)
         {
             var copied = command.TargetId is not null && _state.Cards.TryGetValue(command.TargetId, out var target) ? target : throw new RuleViolation("Choose the card to copy.");
-            return CreatePersonality(player.Id, Definition(copied), insideEntryWindow, null, out _, copied.Printed, beforeWindow, createdCopy: true);
+            // Issue #501 item 32: the copy is marked before any entry window opens, so every view shows the duplicate frame and the original's scan.
+            return CreatePersonality(player.Id, Definition(copied), insideEntryWindow, null, out _, copied.Printed, beforeWindow, createdCopy: true, original: copied);
         }
         var scan = CreatedCards.Resolve(spec);
         var printed = DerivePrinted(scan, spec, command, player);

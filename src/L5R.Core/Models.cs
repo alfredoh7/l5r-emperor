@@ -303,6 +303,11 @@ public sealed class CardInstance
     // that says it is a created card: it has no physical card to return to (it is removed from the game when it leaves play) and the client marks it so. Every other created card is a
     // CardDefinition.CreatedOnly scan and needs no marker.
     public bool CreatedCopy { get; set; }
+    // Issue #501 (Mendon's item 32, EmperorMechBCopies.cs): what the client's "duplicate" frame shows for a copy -- the instance id and definition id of the card it copies (its scan
+    // is the original's), and the conditions on the copy (timed removal, ...), each a human-readable sentence. Null / empty for every card that is not a copy.
+    public string? CopyOfCardId { get; set; }
+    public string? CopyOfDefinitionId { get; set; }
+    public List<string> CopyConditions { get; set; } = [];
     // Seeds of Decay pass (issue #453), batch 1. Defensive Blockade: the battle (MatchState.BattleNumber) in which this card contributes no Force to its army's total.
     public int ForceContributionNegatedBattle { get; set; } = -1;
     // Embracing Battle / Military Promotion: the turn in which this Personality may be assigned to a battlefield even if bowed.
@@ -1288,7 +1293,12 @@ public sealed record CardView(string Id, CardDefinition? Definition, int OwnerId
     // A created copy of another card (issue #398): its Definition is the copied card's own; this says it is a created card, for the client's marker.
     bool CreatedCopy = false,
     // Read-only explanations of already enforced granted effects (duel presentation); null when none.
-    GrantedEffectView[]? GrantedEffects = null);
+    GrantedEffectView[]? GrantedEffects = null,
+    // Issue #501 (Mendon's item 32; the client's "duplicate" frame is issue #502): true for a copy of another card; the copied card's instance id (null when it is no longer known)
+    // and definition id (the scan the client shows); a human-readable sentence of every condition on the copy (timed removal, ...) for the frame's tooltip.
+    bool IsCopy = false, string? CopyOfCardId = null, string? CopyOfDefinitionId = null, string? CopyConditions = null,
+    // Issue #501 (control transfer): the card's OWNER when another player controls it (OwnerId is always the controller); null when its owner controls it.
+    int? RealOwnerId = null);
 /// <summary>One granted ability as the client shows it: the id, the engine's label for it, and where it came from.</summary>
 public sealed record GrantedAbilityView(string AbilityId, string Label, string Timing, string Source, string Duration, string? CopiedFrom, string? CopiedFromName,
     string? SourceName = null, int? UsesPerTurn = null, int? UsesRemaining = null);
