@@ -281,6 +281,8 @@ public sealed class CardInstance
     // set once, in Assign(), the turn this card is assigned during Infantry/Cavalry Maneuvers.
     public int AssignedToAttackTurn { get; set; } = -1;
     public Dictionary<string, int> AbilityUses { get; set; } = [];
+    // Emperor Edition remaining-cards pass (issue #492), group G: the Personality this card was attached to when it was last destroyed (Ikiryo's "the Personality to whom this card was last attached", Blade of Perfection's "its Personality").
+    public string? LastHostId { get; set; }
     // "Until your second turn from now begins" (issue #259 -- Rebuilding Kyuden Hida/Times of
     // Strife/War Weariness, the first Events with a bounded ongoing duration; Suspicions' own
     // "until the game ends" needs no expiry at all). Stamped with the OWNING player's own
@@ -698,6 +700,9 @@ public sealed class MatchState
     public List<string> ResolutionWillNotBowCardIds { get; set; } = [];
     // What the battle's resolution did, held while the after-resolution window is open (AfterResolution.cs).
     public PendingAfterResolution? PendingAfterResolution { get; set; }
+    // Emperor Edition remaining-cards pass (issue #492), group G: Bandit Gang's after-resolution trait in progress (EmperorRemainingG.cs), and the Personalities the assignment command just placed (Chrysanthemum Blossom).
+    public PendingBanditGangs? PendingBanditGangs { get; set; }
+    public List<string> AssignedThisCommand { get; set; } = [];
     // Battle Phase timing (issue #310). PendingEngage is non-null exactly while the Engage window is open
     // (PendingChoice "engageReaction"). FirstActionPlayerId/FirstActionReason record WHO holds the first
     // opportunity in the current battle and WHY ("Default", "Naval", "EngageGrant" or "DefenderOverride"),

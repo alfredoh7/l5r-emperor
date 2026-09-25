@@ -92,6 +92,9 @@ public sealed partial class MatchEngine
         // Hida Takeuchi (Emperor Edition Personality pass, issue #477 batch 2): "After the resolution of an action that attached a Follower from your hand to Takeuchi" -- any action,
         // Equip (a universal player action with no catalog entry) included, so it is read before the per-ability-id switch that indexes the catalog by the action's id.
         if (abilityId == "takeuchi-draw") return ActionAttachedFollowerFromHandTo(source, playerId);
+        // Chrysanthemum Blossom (Emperor Edition remaining-cards pass, issue #492 group G): "After this Personality is assigned" -- the assignment command's own record, not a catalogued action.
+        if (abilityId == "chrysanthemum-blossom-boost") return ChrysanthemumBlossomApplies(source, playerId, facts);
+        if (facts.AbilityId == AssignedSentinel) return false;
         if (!AbilityCatalog.All.ContainsKey(facts.AbilityId)) return false; // Equip's facts name no catalogued ability: only the Reaction above reads them.
         return abilityId switch
         {
@@ -123,6 +126,8 @@ public sealed partial class MatchEngine
             // Battle/Open one taken in a Combat Segment is a Battle action), his own move on the action's record.
             "mitsuo-additional-action" => IsBattleAction(facts.AbilityId) && facts.Affected.Any(a => a.Kind == MovedKind && a.CardId == source.Id),
             // Hida Yamadera - exp: "After another player's Battle action resolves, if its effects destroyed Yamadera."
+            // Blade of Perfection (Emperor Edition remaining-cards pass, issue #492 group G): "After the resolution of another player's action that destroyed this card or its Personality".
+            "blade-perfection-attach" => BladeOfPerfectionApplies(source, playerId, facts),
             "yamadera-attack" => facts.PlayerId != playerId && AbilityCatalog.All[facts.AbilityId].Timing == "Battle" && facts.Affected.Any(a => a.Kind == DestroyedKind && a.CardId == source.Id),
             // Advanced Intelligence (Seeds of Decay pass, issue #453, batch 1): "After a Recon Strategy's action resolves" -- either player's, classified through ActionCarriesKeyword.
             "advanced-intelligence-draw" => facts.SourceId is { } reconSourceId && _state.Cards.TryGetValue(reconSourceId, out var reconSource) && Definition(reconSource).Type == CardType.Strategy

@@ -148,7 +148,7 @@ public sealed partial class MatchEngine
             EitherOrSpecs.PowerOfWordLoseOrNegate => $"{source}: lose 3 Honor, or your action's effects are negated.",
             EitherOrSpecs.ShadowCourtHonor => $"{source}: choose a player who gains or loses 2 Honor.",
             EitherOrSpecs.SincerityDiscard => $"{source}: choose a player who discards a card.",
-            _ => throw new RuleViolation("Unknown choice.")
+            _ => RemainingGEitherOrPrompt(p, source) // Emperor Edition remaining-cards pass (issue #492), group G: Bandit Gang.
         };
     }
 
@@ -245,7 +245,7 @@ public sealed partial class MatchEngine
                 ];
             case EitherOrSpecs.ShadowCourtHonor: case EitherOrSpecs.SincerityDiscard:
                 return EmperorRemainingDEitherOrOptions(p);
-            default: throw new RuleViolation("Unknown choice.");
+            default: return RemainingGEitherOrOptions(p, source, payable); // Bandit Gang (issue #492 group G).
         }
     }
 
@@ -417,7 +417,9 @@ public sealed partial class MatchEngine
             case (EitherOrSpecs.ShadowCourtHonor, _): case (EitherOrSpecs.SincerityDiscard, _):
                 ApplyEmperorRemainingDEitherOr(p, option, decider);
                 break;
-            default: throw new RuleViolation("Unknown choice.");
+            default:
+                if (ApplyRemainingGEitherOr(p, option, source, decider, sourceIds)) break; // Bandit Gang (issue #492 group G).
+                throw new RuleViolation("Unknown choice.");
         }
     }
 
@@ -430,6 +432,7 @@ public sealed partial class MatchEngine
         // The Shadow's Embrace pass (issue #476), batch 3 (ShadowsEmbraceBatch3.cs): Crowded Streets' trait decision carries on with the resolved action's own tail; Forge Your
         // Soul's last decision draws and opens the attached Weapon's entering-play window first.
         if (FinishShadowsEmbraceEitherOr(p)) return;
+        if (FinishRemainingGEitherOr(p)) return; // Bandit Gang (issue #492 group G): the battle's resolution carries on.
         if (p.SpecId == EitherOrSpecs.GenshiShame && p.Origin == "action") { FinishGenshi(p); return; } // Kakita Genshi (issue #477 batch 4): the whole Iaijutsu action finishes together.
         if (p.Origin == "window")
         {

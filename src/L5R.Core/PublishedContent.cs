@@ -2583,4 +2583,9 @@ public static class PublishedContent
     public static PublishedSnapshot RegionWave9 { get; } = Load("L5R.Published.RegionWave9.json", "region-wave-9", requireDecks: false);
     /// <summary>Event wave 8 (Emperor Edition remaining-cards pass, issue #492, group F): the twelve Events wired in group F.</summary>
     public static PublishedSnapshot EventWave8 { get; } = Load("L5R.Published.EventWave8.json", "event-wave-8", requireDecks: false);
+    /// <summary>Item wave 15 (Emperor Edition remaining-cards pass, issue #492, group G): Armor of the Heavens, Blade of Perfection, Chrysanthemum Blossom, Clan Standard, Gift Armor, Kensai's Blade, Maga-yari,
+    /// Modifications, Reserve Weapon, Sasumata, Tsuruchi Daikyu.</summary>
+    public static PublishedSnapshot ItemWave15 { get; } = Load("L5R.Published.ItemWave15.json", "item-wave-15", requireDecks: false);
+    /// <summary>Follower wave 31 (issue #492, group G): Bandit Gang, Ikiryo, Ikoma House Guard, Kaiu House Guard, Legion of Pain, Moto House Guard, Tamori House Guard, Tsuruchi House Guard.</summary>
+    public static PublishedSnapshot FollowerWave31 { get; } = Load("L5R.Published.FollowerWave31.json", "follower-wave-31", requireDecks: false);
 }

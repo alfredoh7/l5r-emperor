@@ -308,6 +308,9 @@ public sealed partial class MatchEngine
             // Yasuki Tanimura (Emperor Edition Personality pass, issue #477 batch 6): another player's Battle action targets him.
             case "tanimura-political-pay":
                 return TanimuraApplies(card, subject, affected);
+            // Armor of the Heavens (Emperor Edition remaining-cards pass, issue #492 group G): another player's action targets the Personality this card is attached to.
+            case "armor-heavens-gain": case "armor-heavens-lose":
+                return ArmorOfTheHeavensApplies(card, subject, affected);
             // The Waystation of the Path (Emperor Edition Stronghold pass, issue #486 batch 3): another player's action targets the controller's Henshin.
             case "waystation-reborn":
                 return WaystationApplies(card, subject, affected);

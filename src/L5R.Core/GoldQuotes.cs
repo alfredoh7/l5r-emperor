@@ -309,7 +309,7 @@ public sealed partial class MatchEngine
                 // target-printed price, so the count-scaled discount is read here (never below zero).
                 var ringDiscount = RingEntryDiscount(Definition(target), command.PlayerId);
                 // Purify the Soul (The Shadow's Embrace pass, issue #476 batch 5): "Attaches to an Air Shugenja paying 2 less Gold" -- through Equip (Battle) the Shugenja is the performer.
-                var purifyDiscount = command.AbilityId == "equip-battle" && command.PerformerId is not null && _state.Cards.TryGetValue(command.PerformerId, out var equipper) ? PurifyTheSoulDiscount(target, equipper) : 0;
+                var purifyDiscount = command.AbilityId == "equip-battle" && command.PerformerId is not null && _state.Cards.TryGetValue(command.PerformerId, out var equipper) ? PurifyTheSoulDiscount(target, equipper) + MagaYariDiscount(target, equipper) : 0; // Maga-yari (issue #492 group G): the same kind of wielder discount
                 // Quelsa (The Shadow's Embrace pass, issue #476, batch 2): "Quelsa attaches Spells paying 2 less Gold" -- a Spell attached to him through an ability that pays its printed cost.
                 var quelsaDiscount = QuelsaSpellDiscount(command, target);
                 // Whispering Archive (The Shadow's Embrace pass, issue #476 batch 6): "Your Spells enter play paying 1 less Gold" -- a Spell priced by its printed cost is one entering
@@ -521,6 +521,8 @@ public sealed partial class MatchEngine
         if (KeywordEntryDiscount(card, playerId) is > 0 and var fudoDiscount) { raw -= fudoDiscount; basis += $" − {fudoDiscount} (Fudo, Mukudori)"; }
         // Purify the Soul (The Shadow's Embrace pass, issue #476 batch 5): "Attaches to an Air Shugenja paying 2 less Gold" -- a wielder-dependent term, like Katagi's.
         if (PurifyTheSoulDiscount(card, target) is > 0 and var purifyDiscount) { raw -= purifyDiscount; kind = GoldCostKind.Derived; basis += $" − {purifyDiscount} (Air Shugenja)"; }
+        // Maga-yari (Emperor Edition remaining-cards pass, issue #492 group G): "Attaches to a Paragon or Kensai paying 3 less Gold."
+        if (MagaYariDiscount(card, target) is > 0 and var magaYariDiscount) { raw -= magaYariDiscount; kind = GoldCostKind.Derived; basis += $" − {magaYariDiscount} (Paragon or Kensai)"; }
         // Quelsa (The Shadow's Embrace pass, issue #476, batch 2): "Quelsa attaches Spells paying 2 less Gold."
         if (QuelsaAttachDiscount(card, target) is > 0 and var quelsaAttach) { raw -= quelsaAttach; kind = GoldCostKind.Derived; basis += $" − {quelsaAttach} (Quelsa)"; }
         // Whispering Archive (The Shadow's Embrace pass, issue #476 batch 6): "Your Spells enter play paying 1 less Gold."

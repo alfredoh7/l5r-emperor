@@ -149,7 +149,7 @@ public sealed partial class MatchEngine
     private int AttackComparedValue(string abilityId, CardInstance target) =>
         abilityId == "samuru-attack" ? CardGoldCost(target)
         : abilityId == "unseen-assailant-attack" && Definition(target).Type == CardType.Personality ? Math.Min(AttackComparedForce(target, abilityId), PersonalityChi(target))
-        : AttackComparedForce(target, abilityId);
+        : AttackComparedValueRemainingG(abilityId, target);
 
     // An Attack that targets the current battlefield's province (issue #335): no card is targeted, so no reaction to a targeted Attack applies and nothing here compares
     // Force. The only such Attack today is the training fixture; a printed card adds its own case.

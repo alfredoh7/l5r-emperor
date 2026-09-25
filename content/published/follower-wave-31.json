@@ -1,0 +1,218 @@
+{
+  "Profile": "follower-wave-31",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-683",
+      "Name": "Bandit Gang",
+      "Type": "Follower",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After this card enters play: Lose 2 Honor.\nAfter a battle resolution ends, if this card is at the current battlefield: You may pay 2 Gold. If you do not, destroy this card.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-683.jpg",
+      "Keywords": [
+        "Bandit"
+      ],
+      "Focus": 1,
+      "Abilities": [],
+      "Effect": "bandit-gang",
+      "EntryHonorLoss": 2
+    },
+    {
+      "Id": "oracle-l5r-3589",
+      "Name": "Ikiryo",
+      "Type": "Follower",
+      "Clan": "Unaligned",
+      "GoldCost": 3,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Destroy this card: Ranged Attack, which may target a Personality with attached Followers, with strength equal to the Chi of the Personality to whom this card was last attached. Lose Honor equal to that Personality's Chi and dishonor him.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-3589.jpg",
+      "Keywords": [
+        "Nonhuman",
+        "Shadowlands",
+        "Spirit"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "ikiryo-attack"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-3611",
+      "Name": "Ikoma House Guard",
+      "Type": "Follower",
+      "Clan": "Unaligned",
+      "GoldCost": 4,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": 2,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Will only attach to a Lion Clan Personality.\nBattle: Melee Attack with strength equal to this Personality's Personal Honor plus two. If this Melee Attack destroyed a card, gain 1 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-3611.jpg",
+      "Keywords": [
+        "Unique",
+        "Scout"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "ikoma-house-guard-attack"
+      ],
+      "Effect": "none",
+      "AttachRequiresKeyword": "Lion Clan"
+    },
+    {
+      "Id": "oracle-l5r-4118",
+      "Name": "Kaiu House Guard",
+      "Type": "Follower",
+      "Clan": "Unaligned",
+      "GoldCost": 4,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Will only attach to a Crab Clan Personality.\nBattle: Target an enemy card without attachments whose unit has lower total Force than this unit: Destroy the target. Gain 1 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-4118.jpg",
+      "Keywords": [
+        "Unique",
+        "Siege"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "kaiu-house-guard-destroy"
+      ],
+      "Effect": "none",
+      "AttachRequiresKeyword": "Crab Clan"
+    },
+    {
+      "Id": "oracle-l5r-4699",
+      "Name": "Legion of Pain",
+      "Type": "Follower",
+      "Clan": "Unaligned",
+      "GoldCost": 6,
+      "GoldProduction": 0,
+      "Force": 5,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After this card enters play: Lose 2 Honor.\nActions performed by Personalities with a Gold Cost of 7 or lower may not target this Personality.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-4699.jpg",
+      "Keywords": [
+        "Lost",
+        "Shadowlands"
+      ],
+      "Focus": 3,
+      "Abilities": [],
+      "Effect": "legion-of-pain-bar",
+      "EntryHonorLoss": 2
+    },
+    {
+      "Id": "oracle-l5r-5329",
+      "Name": "Moto House Guard",
+      "Type": "Follower",
+      "Clan": "Unaligned",
+      "GoldCost": 5,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": 1,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Will only attach to a Unicorn Clan Personality.\nBattle: If any enemy units are at the current battlefield: Move this Personality there. If he is now there, Ranged 4 Attack.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-5329.jpg",
+      "Keywords": [
+        "Cavalry",
+        "Unique"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "moto-house-guard-attack"
+      ],
+      "Effect": "none",
+      "AttachRequiresKeyword": "Unicorn Clan"
+    },
+    {
+      "Id": "oracle-l5r-7776",
+      "Name": "Tamori House Guard",
+      "Type": "Follower",
+      "Clan": "Unaligned",
+      "GoldCost": 4,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": 1,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Will only attach to a Dragon Clan Personality.\nBattle: Target an enemy Personality or Follower: It is encased in stone. Give it -4F. It may not perform actions.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7776.jpg",
+      "Keywords": [
+        "Unique",
+        "Earth"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "tamori-house-guard-stone"
+      ],
+      "Effect": "none",
+      "AttachRequiresKeyword": "Dragon Clan"
+    },
+    {
+      "Id": "oracle-l5r-8837",
+      "Name": "Tsuruchi House Guard",
+      "Type": "Follower",
+      "Clan": "Unaligned",
+      "GoldCost": 4,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Will only attach to a Mantis Clan Personality.\nBattle: Ranged 5 Attack that you may compare against Gold Cost.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8837.jpg",
+      "Keywords": [
+        "Unique",
+        "Scout"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "tsuruchi-house-guard-attack"
+      ],
+      "Effect": "none",
+      "AttachRequiresKeyword": "Mantis Clan"
+    }
+  ],
+  "Decks": []
+}
