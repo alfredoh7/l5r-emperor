@@ -239,6 +239,7 @@ public sealed partial class MatchEngine
         {
             var index = duel.DelayDecisionIndex++;
             var focusId = duel.OrderedFocusEffects[index];
+            if (FocusEffectAbilityOf(focusId) == EmperorThreeSAbilities.HonorNeverFallsFocus) { RegisterHonorNeverFallsDelay(duel, Card(focusId), loserIds); continue; } // issue #496: mandatory, no "(now)" choice
             if (FocusEffectAbilityOf(focusId) is not { } abilityId || !IsDelayFocusEffect(abilityId)) continue;
             var focus = Card(focusId); var owner = focus.OwnerId;
             if (!loserIds.Any(id => Card(id).OwnerId == owner) || duel.DelayedLosses.Any(d => d.PlayerId == owner)) continue;

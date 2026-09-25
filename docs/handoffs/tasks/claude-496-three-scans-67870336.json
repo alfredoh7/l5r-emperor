@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Wired and published the last scan-blocked cards with Mendon's scans: Honor Never Falls (strategy-wave-65), Kurohito's Perfection (celestial-wave-9), Makito (personality-wave-79); inventory and art pack pr496-r1 updated; only Plains of Otosan Uchi, No Hiding Place and Rend the Soul remain unwired",
+  "validation": "Core suite 0 failures (1797 passes); AI 74/74; Server 8/8; Client.Transport 12/12; content tests OK; Godot client build left to CI",
+  "remaining": "None; ready for review. Follow-ups: Plains of Otosan Uchi, No Hiding Place, Rend the Soul; client Favor button for the Kurohito twin",
+  "issue": "496",
+  "branch": "claude/496-three-scans",
+  "updated": "2026-09-25T14:49:12.056913+00:00"
+}

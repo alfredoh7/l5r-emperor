@@ -139,7 +139,7 @@ public sealed partial class MatchEngine
     // "You may not take Political actions." -- an action is Political when its own keyword says so or its card carries the keyword (ActionCarriesKeyword); the rulebook's
     // Lobby ("Political Limited") and the Imperial Favor's abilities ("Favor Political") are Political too, though their catalogue entries carry no tag.
     private bool ForgottenTempleForbidsPolitical(string id, AbilityDefinition ability, CardInstance? source, PlayerState player) =>
-        ControlsForgottenTemple(player.Id) && (id is "lobby" or "dainagon-lobby" or "favor-cycle" or "favor-battle" || ActionCarriesKeyword(ability, source, "Political"));
+        ControlsForgottenTemple(player.Id) && (id is "lobby" or "dainagon-lobby" or "favor-cycle" or "favor-cycle-kurohito" or "favor-battle" || ActionCarriesKeyword(ability, source, "Political"));
 
     // "You do not gain Honor. You do not lose Honor from cards you own. Before you lose Honor: Reduce the loss to 1, which may not be increased." Applied first in GainHonor,
     // the one funnel of every Honor change. A loss is "from" the card named as its source, or else the card of the action being resolved; the rulebook's own dishonorable-

@@ -655,6 +655,9 @@ public static class CardCatalog
             .Concat(PublishedContent.SpellWave25.Cards) // Emperor Edition rulings pass R1 (issue #492): Chikushudo's Trickery
             .Concat(PublishedContent.RegionWave10.Cards) // Emperor Edition remaining-cards pass (issue #492), ruling R3: Kaiu Village
             .Concat(PublishedContent.ItemWave16.Cards) // Emperor Edition remaining-cards pass (issue #492), ruling R3: Kaiu Weapon
+            .Concat(PublishedContent.StrategyWave65.Cards) // Emperor Edition three-scans pass (issue #496): Honor Never Falls
+            .Concat(PublishedContent.CelestialWave9.Cards) // Emperor Edition three-scans pass (issue #496): Kurohito's Perfection
+            .Concat(PublishedContent.PersonalityWave79.Cards) // Emperor Edition three-scans pass (issue #496): Makito
             .ToDictionary(c => c.Id, StringComparer.Ordinal);
     }
 }

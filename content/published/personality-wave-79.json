@@ -1,0 +1,38 @@
+{
+  "Profile": "personality-wave-79",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-4806",
+      "Name": "Makito",
+      "Type": "Personality",
+      "Clan": "Unaligned",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 4,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Makito has +1F while a Phoenix Clan player controls him.\nAfter a card is destroyed: Give Makito +1F.\nMaho Battle: Target an enemy Personality with equal or lower Chi: Destroy a card without attachments in his unit; this destruction will not be negated or delayed.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-4806.jpg",
+      "Keywords": [
+        "Experienced Asako Makito",
+        "Unique",
+        "Bloodspeaker",
+        "Monk",
+        "Order of Death",
+        "Shadowlands",
+        "Student of Kinuye"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "makito-maho-destroy"
+      ],
+      "Effect": "makito-trait"
+    }
+  ],
+  "Decks": []
+}

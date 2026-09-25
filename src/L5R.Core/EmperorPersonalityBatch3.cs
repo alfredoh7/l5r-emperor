@@ -72,6 +72,7 @@ public sealed partial class MatchEngine
         if (command?.AbilityId is not { } id || !AbilityCatalog.All.TryGetValue(id, out var ability)) return false;
         // The Shadow's Lair (Emperor Edition Stronghold pass, issue #486 batch 3): "this will not be negated or delayed if you control a Ninja" -- read as the same unnegatable movement.
         if (id == "shadows-lair-move") return ControlsKeyword(command.PlayerId, "Ninja");
+        if (MakitoDestruction(command)) return true; // Makito (three-scans pass, issue #496): "this destruction will not be negated or delayed".
         if (!(ability.Timing == "Battle" || ability.Timing == "BattleOrOpen" && _state.Phase == Phase.Battle)) return false;
         return ActionPerformingPersonality(command) is { } performer && Definition(performer).Effect == HiromiUnnegatableEffect;
     }
@@ -84,6 +85,7 @@ public sealed partial class MatchEngine
     // (a Force change) are not named by the card; negating the action whole would also negate its bow, destruction or movement, which is what the card forbids.
     private bool HiromiProtects(GameCommand? command) =>
         CommandUnnegatable(command) // Suitengu's Torch's protected action and Temple of Purity's Force penalty (issue #486, batch 2): the whole action.
+        || MakitoDestruction(command) // Makito (issue #496): negating his action whole would negate the destruction that will not be negated.
         || command?.AbilityId is { } id && HiromiPerforms(command)
         && (ActionMayBowOrDestroy(id, AttackKind(id) != "") || MoveOrStraightenKind(id) == "move" || AbilityCatalog.All[id].Move is not null);
 

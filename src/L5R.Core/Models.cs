@@ -572,7 +572,9 @@ public sealed record FirstActionRestriction(int PlayerId, string? PerformerId, b
 ///  <param name="RangedTargetId">Emperor Edition Stronghold pass (issue #486), batch 1 (Koshin Keep: "an additional Ranged Attack Battle action that may only target the same card"): when set, the
 /// grant is used only by a Ranged Attack that targets that card, and while the player holds it nothing else may be taken (EmperorStrongholdBatch1.cs).</param>
 // PerformerId (Emperor Edition remaining-cards pass, group C, issue #492: Spinning Heel Kick): the additional action "which he must perform" -- spent only by an action that Personality performs.
-public sealed record AdditionalActionGrant(int PlayerId, string[]? ScopeCardIds, bool FromDiscard = false, int? Battle = null, bool AnyDiscardTiming = false, string? RangedTargetId = null, string? PerformerId = null);
+// BaseAbilityOnly (Emperor Edition three-scans pass, issue #496: Honor Never Falls -- "an additional Battle action to use one of his base abilities"): with a PerformerId, the grant is spent only by one of the abilities PRINTED on that Personality
+// (his own definition's abilities, not one an attachment provides or one granted to him).
+public sealed record AdditionalActionGrant(int PlayerId, string[]? ScopeCardIds, bool FromDiscard = false, int? Battle = null, bool AnyDiscardTiming = false, string? RangedTargetId = null, string? PerformerId = null, bool BaseAbilityOnly = false);
 
 /// <summary>A discard a player owes: they choose the card from their hand (Times of Strife, Daigotsu Bofana - exp's entry).
 /// Reason names the card or rule in the prompt and the event.</summary>

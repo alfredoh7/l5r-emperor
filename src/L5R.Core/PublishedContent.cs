@@ -2576,6 +2576,12 @@ public static class PublishedContent
     public static PublishedSnapshot StrategyWave62 { get; } = Load("L5R.Published.StrategyWave62.json", "strategy-wave-62", requireDecks: false);
     /// <summary>Strategy wave 64 (Emperor Edition rulings pass, issue #494): Shinobi Assault, Two Fronts and The Perfect Moment, published once Mendon supplied their scans.</summary>
     public static PublishedSnapshot StrategyWave64 { get; } = Load("L5R.Published.StrategyWave64.json", "strategy-wave-64", requireDecks: false);
+    /// <summary>Strategy wave 65 (Emperor Edition three-scans pass, issue #496): Honor Never Falls, published once Mendon supplied its scan.</summary>
+    public static PublishedSnapshot StrategyWave65 { get; } = Load("L5R.Published.StrategyWave65.json", "strategy-wave-65", requireDecks: false);
+    /// <summary>Celestial wave 9 (Emperor Edition three-scans pass, issue #496): Kurohito's Perfection, published once Mendon supplied its scan.</summary>
+    public static PublishedSnapshot CelestialWave9 { get; } = Load("L5R.Published.CelestialWave9.json", "celestial-wave-9", requireDecks: false);
+    /// <summary>Personality wave 79 (Emperor Edition three-scans pass, issue #496): Makito (Experienced Asako Makito), published once Mendon supplied his scan.</summary>
+    public static PublishedSnapshot PersonalityWave79 { get; } = Load("L5R.Published.PersonalityWave79.json", "personality-wave-79", requireDecks: false);
     public static PublishedSnapshot SpellWave25 { get; } = Load("L5R.Published.SpellWave25.json", "spell-wave-25", requireDecks: false);
     /// <summary>Personality wave 78 (Emperor Edition remaining-cards pass, issue #492, proxy group Z): Kitsune Denhei, Shosuro Rokuta and the Proxies they create (Denhei's Snake, Rokuta's Apprentice).</summary>
     public static PublishedSnapshot PersonalityWave78 { get; } = Load("L5R.Published.PersonalityWave78.json", "personality-wave-78", requireDecks: false);

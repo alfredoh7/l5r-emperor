@@ -2245,7 +2245,7 @@ public sealed partial class MatchEngine
     // "force-with-spell" (Asako Ume), "force-if-enemy-dishonorable" (Bayushi Kahoku) and
     // "force-max-dead-pile" (Moto Shunsuke) are always-on passive bonuses, unlike the attacking-only
     // attacking-two/attacking-four Effects above.
-    private int PersonalityForce(CardInstance card) => Math.Max(0,Definition(card).Force+StatModifier(card,"Force")+TerrainForceAdjustment(card)+GinasFoxForce(card)+EmperorRemainingEForce(card)+ForgottenLegacyBatch5Force(card)+EmperorBatch5Force(card)+EmperorPersonalityBatch3Force(card)+ShadowsEmbraceBatch5Force(card)+ShadowsEmbraceBatch2Force(card)+ShadowsEmbraceBatch1Force(card)+EmperorRemainingGForce(card)+(IsAttacking(card)?(Definition(card).Effect=="attacking-two"?2:Definition(card).Effect=="attacking-four"?4:
+    private int PersonalityForce(CardInstance card) => Math.Max(0,Definition(card).Force+StatModifier(card,"Force")+TerrainForceAdjustment(card)+GinasFoxForce(card)+EmperorRemainingEForce(card)+ThreeSForce(card)+ForgottenLegacyBatch5Force(card)+EmperorBatch5Force(card)+EmperorPersonalityBatch3Force(card)+ShadowsEmbraceBatch5Force(card)+ShadowsEmbraceBatch2Force(card)+ShadowsEmbraceBatch1Force(card)+EmperorRemainingGForce(card)+(IsAttacking(card)?(Definition(card).Effect=="attacking-two"?2:Definition(card).Effect=="attacking-four"?4:
         // Matsu Kaido (oracle-l5r-4934, issue #299): "Kaido has +1F while attacking" -- the plain +1
         // counterpart to attacking-two/attacking-four (Matsu Yoshito's own conditional variant below
         // starts from the same +1 base).
@@ -2684,6 +2684,7 @@ public sealed partial class MatchEngine
                 attachment.Zone=Zone.FateDiscard; attachment.AttachedTo=null; attachment.ProvinceIndex=null; attachment.Tokens.Clear(); count++;
                 DestroyedDuringBattleBonus(attachment);
                 ExpendableDraw(attachment);
+                AfterCardDestroyed(attachment); // Makito (issue #496)
             }
             // Fields of Mercy (oracle-l5r-2530): "if a card effect has destroyed another Personality
             // in that army while this card was in play: negate the Personality's destruction." Only
@@ -2727,6 +2728,7 @@ public sealed partial class MatchEngine
             DestroyedDuringBattleBonus(card);
             ExpendableDraw(card);
             Emit("unitDestroyed",$"{Definition(card).Name} and its attachments were destroyed.",card.OwnerId,card.Id);
+            AfterCardDestroyed(card); // Makito (issue #496): "After a card is destroyed: Give Makito +1F."
         }
         return count;
     }

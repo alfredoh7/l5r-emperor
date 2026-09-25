@@ -604,7 +604,7 @@ public sealed partial class MatchEngine
     // ConsumeAdditionalActionGrant's condition: a grant with a PerformerId is spent only by an action that Personality performs (a printed action is performed by the card that prints it, an
     // Item's or Spell's by its wielder, a named "performing X" by X; a Strategy that names no performer is performed by no Personality at all).
     private bool PerformerGrantMatches(AdditionalActionGrant grant, GameCommand? command) =>
-        grant.PerformerId is null || command is not null && ActionPerformingPersonality(command) is { } performer && performer.Id == grant.PerformerId;
+        (grant.PerformerId is null || command is not null && ActionPerformingPersonality(command) is { } performer && performer.Id == grant.PerformerId) && BaseAbilityGrantMatches(grant, command); // issue #496: Honor Never Falls' base abilities only
 
     // ---- Retribution: an additional Attack Phase ----------------------------------------------------------------------------------------------------------------------
 

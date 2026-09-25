@@ -146,7 +146,12 @@ public sealed partial class MatchEngine
     {
         var wasInFocusEffect = _resolvingFocusEffect; _resolvingFocusEffect = true; // a Focus Effect is not an action (Mendon's R4 ruling)
         var ringsBefore = BowedRingIds();
-        try { ResolveFocusEffectChoiceCommandCore(command); }
+        try
+        {
+            // Honor Never Falls (issue #496): what the choice does to the delaying player's loser is one of the duel's consequences "from any source".
+            if (_state.PendingDuel is { } duel && _state.PendingFocusChoice is { DelayDecision: false } pendingChoice) WithAnySourceLossDelays(duel, pendingChoice.PlayerId, () => ResolveFocusEffectChoiceCommandCore(command));
+            else ResolveFocusEffectChoiceCommandCore(command);
+        }
         finally { _resolvingFocusEffect = wasInFocusEffect; ExcludeFocusEffectRingBows(ringsBefore); }
     }
 
