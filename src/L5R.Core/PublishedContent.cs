@@ -2552,6 +2552,11 @@ public static class PublishedContent
     public static PublishedSnapshot StrongholdWave19 { get; } = Load("L5R.Published.StrongholdWave19.json", "stronghold-wave-19", requireDecks: false);
     /// <summary>Celestial wave 7 (issue #476, batch 6): The Moon's Imperative, The Sun's Aspiration.</summary>
     public static PublishedSnapshot CelestialWave7 { get; } = Load("L5R.Published.CelestialWave7.json", "celestial-wave-7", requireDecks: false);
+    /// <summary>Spell wave 23 (Emperor Edition remaining-cards pass, issue #492, group E): Capturing the Soul, Cleansing the Path, Consecration, Contemplate the Void, Hanabi, I Give You My Name,
+    /// Obscured Pathways, The Kami's Blessing, Thunder's Favor, Unnatural Flood, Warded Paths.</summary>
+    public static PublishedSnapshot SpellWave23 { get; } = Load("L5R.Published.SpellWave23.json", "spell-wave-23", requireDecks: false);
+    /// <summary>Celestial wave 8 (Emperor Edition remaining-cards pass, issue #492, group E): the Kami Guidance Celestials of Akodo, Bayushi, Daigotsu, Doji, Hida, Shiba, Shinjo, Togashi and Yoritomo.</summary>
+    public static PublishedSnapshot CelestialWave8 { get; } = Load("L5R.Published.CelestialWave8.json", "celestial-wave-8", requireDecks: false);
     /// <summary>Personality wave 74 (The Shadow's Embrace pass, issue #476, batch 1): Agasha Kurou, Asahina Keigo, Asako Hayate, Asako Jirou, Atosa, Bayushi Misaki,
     /// Bayushi Tarou, Bayushi Waru, Chiisai, Chuda Hitaka, Daidoji Sosuke, Daigotsu Arakan, Daigotsu Rafu, Goju Bunoro, Hida Bakari, Hiruma Hikazu, Hiruma Nikaru
     /// (Shadow's Embrace printing), Iuchi Haruma, Kaiu Fumiko, Kakita Ichigiku, Kakita Tadanobu, Kazehime.</summary>

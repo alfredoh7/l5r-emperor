@@ -327,7 +327,7 @@ public sealed partial class MatchEngine
         }
         if (!attackerStep && HiddenFallsStepPlayable(defender, false)) { SetPhase(Phase.DefenseAssignment, defender); return; }
         _state.ExtraInfantrySegment = false;
-        SetPhase(_state.UnresolvedBattlefields.Count > 0 ? Phase.BattleSelection : Phase.Dynasty, attacker);
+        SetPhaseAfterManeuvers(attacker); // Warded Paths (Emperor Edition remaining-cards pass, issue #492, group E): the battle order may be the Defender's.
     }
 
     // Assign's rule in the additional segment: the assigning player's Scouts, to the provinces he targeted.

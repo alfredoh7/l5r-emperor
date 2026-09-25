@@ -1317,9 +1317,9 @@ public sealed partial class MatchEngine
         var cavalry=_state.Phase==Phase.CavalryDefense;
         Assign(command,_state.UnresolvedBattlefields.ToHashSet(),cavalry,true);
         // Hidden Falls Dojo (Stronghold pass, issue #486 batch 1): "After each Cavalry Maneuvers Segment there is an additional Infantry Maneuvers Segment" -- and that segment ends the maneuvers.
-        if(_state.ExtraInfantrySegment) { _state.ExtraInfantrySegment=false; SetPhase(_state.UnresolvedBattlefields.Count>0?Phase.BattleSelection:Phase.Dynasty,_state.ActivePlayerId); return; }
+        if(_state.ExtraInfantrySegment) { _state.ExtraInfantrySegment=false; SetPhaseAfterManeuvers(_state.ActivePlayerId); return; }
         if(cavalry && BeginHiddenFallsSegment()) return;
-        SetPhase(cavalry?(_state.UnresolvedBattlefields.Count>0?Phase.BattleSelection:Phase.Dynasty):Phase.CavalryDeclaration,_state.ActivePlayerId);
+        if(cavalry) SetPhaseAfterManeuvers(_state.ActivePlayerId); else SetPhase(Phase.CavalryDeclaration,_state.ActivePlayerId); // Warded Paths (issue #492, group E): the Defender may choose the battle order.
     }
     private void Assign(GameCommand command,HashSet<int> provinces,bool cavalry,bool isDefender)
     {
@@ -1349,6 +1349,7 @@ public sealed partial class MatchEngine
             card.AssignedToAttackTurn=_state.TurnNumber;
             Emit("unitAssigned",$"{Definition(card).Name} assigned to province {assignment.Value+1}.",command.PlayerId,card.Id);
             FireMiddayShadowAssigned(card); // Midday Shadow Court (Stronghold pass, issue #486 batch 1): "After the next time this turn he is assigned" -- to either side.
+            if(!isDefender) FireConsecrationWatches(card,assignment.Value); // Consecration (Emperor Edition remaining-cards pass, issue #492, group E): "assigns ... to an attacking army".
             // "After the next time this turn he is assigned to attack" (Imperial Protection, Fair Warning; issue #453, batch 2): an attacker's assignment only.
             if(!isDefender) FireAssignedToAttackWatches(card);
         }
@@ -1373,6 +1374,7 @@ public sealed partial class MatchEngine
         // it; its claims can flip the first opportunity (CloseEngageWindow). Nothing playable: exactly the
         // pre-#310 flow, event stream included.
         _state.FirstActionPlayerId=1-_state.ActivePlayerId; _state.FirstActionReason=BattleSteps.ReasonDefault; _state.FirstActionRestriction=null;
+        ApplyYoritomosGuidanceAfterEngaging(command.Province!.Value); // Yoritomo's Guidance (Emperor Edition remaining-cards pass, issue #492, group E): "After engaging, if the Attacker is a Mantis Clan player".
         if(OpenEngageWindow(command.Province!.Value)) { Emit("battleStarted",$"Battle at province {command.Province+1}: engaged."); return; }
         Emit("battleStarted",$"Battle at province {command.Province+1}: defender acts first.");
     }
@@ -1621,6 +1623,7 @@ public sealed partial class MatchEngine
         // After the losing units are destroyed, the province is destroyed and Honor is settled: the Reactions that name this moment (AfterResolution.cs), before the winners go home.
         MarkSeekingTheTruthResolution(destroyedByPlayer,provinceDestroyedNow?attacker:null); // Forgotten Legacy pass (issue #467 batch 4).
         FireCowedAndDefeatedBattleWatches(a,d); // The Shadow's Embrace pass (issue #476), batch 3: "a battle resolves which destroyed him" (ShadowsEmbraceBatch3.cs).
+        ApplyShibasGuidanceTrait(destroyedByPlayer,provinceDestroyedNow?attacker:null); // Shiba's Guidance (Emperor Edition remaining-cards pass, issue #492, group E): "After a battle resolution ends in which a Phoenix Clan player destroyed ...".
         if(OpenAfterResolutionWindow(NewAfterResolutionFacts(provinceIndex,attacker,attackerWon,a,destroyedByPlayer,provinceDestroyedNow,losers))) return;
         ContinueAfterResolution(provinceIndex,attacker,attackerWon,a);
     }
@@ -1753,7 +1756,7 @@ public sealed partial class MatchEngine
             foreach(var card in _state.Cards.Values.Where(c=>c.Zone==Zone.Battlefield).ToArray()) ReturnHome(card,card.OwnerId==attacker);
             SetPhase(Phase.Dynasty,attacker);
         }
-        else SetPhase(Phase.BattleSelection,attacker);
+        else SetPhase(Phase.BattleSelection,BattleSelectionChooser(attacker)); // Warded Paths (Emperor Edition remaining-cards pass, issue #492, group E).
     }
     // Your Clan Needs You! (oracle-l5r-9687, issue #295): "discard all his attachments and put him
     // into one of your provinces, face-up, discarding any card there" -- checked once per watched id,
@@ -2073,7 +2076,7 @@ public sealed partial class MatchEngine
     // "force-with-spell" (Asako Ume), "force-if-enemy-dishonorable" (Bayushi Kahoku) and
     // "force-max-dead-pile" (Moto Shunsuke) are always-on passive bonuses, unlike the attacking-only
     // attacking-two/attacking-four Effects above.
-    private int PersonalityForce(CardInstance card) => Math.Max(0,Definition(card).Force+StatModifier(card,"Force")+TerrainForceAdjustment(card)+ForgottenLegacyBatch5Force(card)+EmperorBatch5Force(card)+EmperorPersonalityBatch3Force(card)+ShadowsEmbraceBatch5Force(card)+ShadowsEmbraceBatch2Force(card)+ShadowsEmbraceBatch1Force(card)+(IsAttacking(card)?(Definition(card).Effect=="attacking-two"?2:Definition(card).Effect=="attacking-four"?4:
+    private int PersonalityForce(CardInstance card) => Math.Max(0,Definition(card).Force+StatModifier(card,"Force")+TerrainForceAdjustment(card)+EmperorRemainingEForce(card)+ForgottenLegacyBatch5Force(card)+EmperorBatch5Force(card)+EmperorPersonalityBatch3Force(card)+ShadowsEmbraceBatch5Force(card)+ShadowsEmbraceBatch2Force(card)+ShadowsEmbraceBatch1Force(card)+(IsAttacking(card)?(Definition(card).Effect=="attacking-two"?2:Definition(card).Effect=="attacking-four"?4:
         // Matsu Kaido (oracle-l5r-4934, issue #299): "Kaido has +1F while attacking" -- the plain +1
         // counterpart to attacking-two/attacking-four (Matsu Yoshito's own conditional variant below
         // starts from the same +1 base).
@@ -2605,6 +2608,7 @@ public sealed partial class MatchEngine
         card.Zone=Zone.Battlefield; card.ProvinceIndex=province;
         foreach(var attachment in Attachments(card.Id)) attachment.ProvinceIndex=province;
         if(arrivedFromElsewhere) _state.PendingMoveReactionCardId=card.Id;
+        if(arrivedFromElsewhere) FireConsecrationWatches(card,province); // Consecration (issue #492, group E): "moves to an attacking army".
         // Bayushi Mitsuo (Emperor Edition Personality pass, issue #477, batch 4): "a Battle action that moved Mitsuo" -- every move an action makes is on the action's record, including the
         // unit that moves itself (its own source or performer), which TryMoveToBattlefield's target moves are not the only ones.
         if(arrivedFromElsewhere && _runningCommand is not null) RecordActionEffect(card.Id,MovedKind);
@@ -2623,7 +2627,8 @@ public sealed partial class MatchEngine
             .Where(c => c.OwnerId != playerId && InPlay(c) && Definition(c).Effect is "increase-other-hand-size" or "decrease-other-hand-size"
                 // Kazehime (The Shadow's Embrace pass, issue #476 batch 1): "Your maximum hand size is increased by one."
                 || c.OwnerId == playerId && InPlay(c) && Definition(c).Effect == "increase-own-hand-size")
-            .Select(c => new HandLimitModifier(c.Id, Definition(c).Name, Definition(c).Effect is "increase-other-hand-size" or "increase-own-hand-size" ? 1 : -1)).ToArray();
+            .Select(c => new HandLimitModifier(c.Id, Definition(c).Name, Definition(c).Effect is "increase-other-hand-size" or "increase-own-hand-size" ? 1 : -1))
+            .Concat(EmperorRemainingEHandLimit(playerId)).ToArray(); // Togashi's Guidance (Emperor Edition remaining-cards pass, issue #492, group E).
         return new(8, 8 + modifiers.Sum(m => m.Amount), modifiers);
     }
     private int MaxHandSize(int playerId) => HandLimitFor(playerId).Maximum;
@@ -2700,7 +2705,7 @@ public sealed partial class MatchEngine
         // elemental keyword too (e.g. False Ring of Air prints "Air"), so this alone is not enough
         // to exclude them -- but all five False Rings also carry "Fudo", which no real Ring does,
         // so that keyword is the actual False-Ring exclusion.
-        if(RingElements.All(e=>_state.Cards.Values.Any(c=>c.OwnerId==player.Id && InPlay(c) && Definition(c).Type==CardType.Ring && Keyword(c,e) && !Keyword(c,"Fudo"))))
+        if(RingElements.All(e=>_state.Cards.Values.Any(c=>c.OwnerId==player.Id && InPlay(c) && Definition(c).Type==CardType.Ring && Keyword(c,e) && !Keyword(c,"Fudo") && CountsForEnlightenment(c))))
         { Win(player.Id,"Enlightenment victory"); return; }
         player.TurnsTaken++;
         player.MayNotAttackThisTurn=false;
@@ -2721,6 +2726,7 @@ public sealed partial class MatchEngine
             Emit("eventExpired",$"{Definition(expired).Name}'s effect ended.",expired.OwnerId,expired.Id);
         }
         ResolveShadowsEmbraceBatch5TurnBegins(); // The Shadow's Embrace pass (issue #476), batch 5: Blood of the Preserver's units re-enter play "after the next turn begins".
+        ApplyBayushisGuidanceTrait(player); // Bayushi's Guidance (Emperor Edition remaining-cards pass, issue #492, group E): "After a player's turn begins, if he is Scorpion Clan: Each other player loses 1 Honor."
         AdvanceStraightenHolds(StraightenPoint.TurnBegins);
         StraightenPhase(player);
     }
@@ -2977,6 +2983,7 @@ public sealed partial class MatchEngine
         }
         card.Zone=Zone.Celestial;
         Emit("celestialEnteredPlay",$"{Definition(card).Name} entered play.",player.Id,card.Id);
+        ApplyDaigotsusGuidanceTrait(); // Daigotsu's Guidance (Emperor Edition remaining-cards pass, issue #492, group E): "After a Celestial enters play (including this one): Discard all Kami Celestials in play."
         if(hadRyoshun && Definition(card).Effect!=RyoshunsGuidanceEffect) CheckChiAfterRyoshunLeaves(player.Id);
         Refill(player,province);
     }
