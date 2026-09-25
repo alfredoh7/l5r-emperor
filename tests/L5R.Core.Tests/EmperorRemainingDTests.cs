@@ -7,11 +7,12 @@ internal static class EmperorRemainingDTests
 {
     private const string LawsStrength = "oracle-l5r-8194", LightOfJustice = "oracle-l5r-8199", PowerOfAWord = "oracle-l5r-8262", PowerOfOne = "oracle-l5r-8265", SerpentsDeception = "oracle-l5r-8311",
         SlowDeath = "oracle-l5r-8340", TrapIsSprung = "oracle-l5r-8394", UndetectableEnemy = "oracle-l5r-8961", UnseenAssailant = "oracle-l5r-9011", UsefulConnections = "oracle-l5r-9046",
-        VeiledMenace = "oracle-l5r-9130", WallOfHonor = "oracle-l5r-9198", WellPrepared = "oracle-l5r-9287", WordsHaveStrength = "oracle-l5r-9377";
+        VeiledMenace = "oracle-l5r-9130", WallOfHonor = "oracle-l5r-9198", WellPrepared = "oracle-l5r-9287", WordsHaveStrength = "oracle-l5r-9377",
+        KillingGrounds = "oracle-l5r-8188", ShadowCourt = "oracle-l5r-8313", SincerityOfTheDragon = "oracle-l5r-8338", TorchsFlameFlickers = "oracle-l5r-8639", WhiteShorePlain = "oracle-l5r-9323", TwistOfFate = "oracle-l5r-8917";
     private const string TacticalAssault = "oracle-l5r-9934";
 
-    private static readonly string[] Wired = [LawsStrength, LightOfJustice, PowerOfAWord, PowerOfOne, SerpentsDeception, SlowDeath, TrapIsSprung, UndetectableEnemy, UnseenAssailant,
-        UsefulConnections, VeiledMenace, WallOfHonor, WellPrepared, WordsHaveStrength];
+    private static readonly string[] Wired = [KillingGrounds, LawsStrength, LightOfJustice, PowerOfAWord, PowerOfOne, SerpentsDeception, ShadowCourt, SincerityOfTheDragon, SlowDeath, TrapIsSprung,
+        TorchsFlameFlickers, TwistOfFate, UndetectableEnemy, UnseenAssailant, UsefulConnections, VeiledMenace, WallOfHonor, WellPrepared, WhiteShorePlain, WordsHaveStrength];
 
     // The Strategies of the group left unwired (each with a blocker note in tools/content/ee_remD_blockers.json): never published.
     private static readonly string[] Unwired = ["oracle-l5r-8138", "oracle-l5r-8207"];
@@ -47,6 +48,12 @@ internal static class EmperorRemainingDTests
         ("The Power of a Word: its Reaction lets the acting player lose 3 Honor or have the Battle action negated (an action or an Attack); its Battle action moves one to three enemy dishonorable Personalities home", PowerOfAWordScenario),
         ("The Serpent's Deception: a Monk moves home an enemy Personality whose unit has lower total Force, contributes Force while bowed this turn, and his player loses 3 Honor", SerpentsDeceptionScenario),
         ("Words Have Strength: after another player's Battle action or a battle's resolution destroyed one of its player's Courtiers or Magistrates, a chosen player loses 3 Honor -- one copy per resolution", WordsHaveStrengthScenario),
+        ("Twist of Fate: as its player ends his Dynasty Phase he may use it to take one additional Limited or Open action, after which the Dynasty Phase carries on; a pass in the window, or in the action, ends the phase / the action, and only once a turn is he asked", TwistOfFateScenario),
+        ("Torch's Flame Flickers: after engaging its Scout gives Reconnaissance, and the next card effect that bows the player's Personalities at the battlefield is negated (the whole effect, once); an enemy's are not covered", TorchsFlameFlickersScenario),
+        ("White Shore Plain: a Terrain played at the battlefield gives each of its controller's Tacticians there the Reaction that adds his Chi to his Force before the battle resolves; nobody else has it", WhiteShorePlainScenario),
+        ("The Killing Grounds: the first pass in the Combat Segment makes the passing player destroy one of his Personalities there (asked when he has several) -- once, and never for a player with none", KillingGroundsScenario),
+        ("The Shadow Court: its defending Courtier bows an enemy Personality; when another player's action or a battle's resolution next destroys him this turn, its player draws and chooses a player who gains or loses 2 Honor", ShadowCourtScenario),
+        ("The Sincerity of the Dragon: as a Focus Effect a winner's provinces get +2 strength for the turn; its Dragon Clan Personality names a number, and after his action from another Strategy of that Focus Value resolves he draws and a chosen player discards", SincerityOfTheDragonScenario),
     ]);
 
     private static void PublishedShape()
@@ -60,12 +67,20 @@ internal static class EmperorRemainingDTests
             Check(card.Abilities!.SequenceEqual(abilities), $"{name}'s abilities: {string.Join(",", card.Abilities!)}");
             Check(card.Text.Split('\n').Distinct().Count() == card.Text.Split('\n').Length, $"{name}'s text is printed once");
         }
+        Shape(KillingGrounds, "The Killing Grounds", 1, "Terrain");
         Shape(LawsStrength, "The Law's Strength", 3, "Political", "laws-strength-move");
         Shape(LightOfJustice, "The Light of Justice", 4, "Imperial,Political", "light-of-justice-move");
         Shape(PowerOfAWord, "The Power of a Word", 3, "Political", "power-word-reaction", "power-word-move");
         Shape(PowerOfOne, "The Power of One", 2, "", "power-one-straighten", "power-one-bow");
         Shape(SerpentsDeception, "The Serpent's Deception", 1, "Fear,Kiho", "serpents-deception-move");
+        Shape(ShadowCourt, "The Shadow Court", 4, "", "shadow-court-bow");
+        Shape(SincerityOfTheDragon, "The Sincerity of the Dragon", 4, "", "sincerity-dragon-focus", "sincerity-dragon-name");
         Shape(SlowDeath, "The Slow Death", 4, "", "slow-death-focus", "slow-death-straighten");
+        Shape(TorchsFlameFlickers, "Torch's Flame Flickers", 1, "Recon", "torch-flame-recon");
+        Shape(TwistOfFate, "Twist of Fate", 2, "", "twist-of-fate-grant");
+        Shape(WhiteShorePlain, "White Shore Plain", 3, "Terrain");
+        Eq(CardCatalog.Get(KillingGrounds).Effect, "killing-grounds", "The Killing Grounds' trait is its Effect");
+        Eq(CardCatalog.Get(WhiteShorePlain).Effect, "white-shore-plain", "White Shore Plain's grant is its Effect");
         Shape(TrapIsSprung, "The Trap is Sprung!", 2, "", "trap-sprung-bow");
         Shape(UndetectableEnemy, "Undetectable Enemy", 1, "", "undetectable-enemy-negate");
         Shape(UnseenAssailant, "Unseen Assailant", 2, "Ninja", "unseen-assailant-attack");
@@ -103,6 +118,393 @@ internal static class EmperorRemainingDTests
     private static void DeclineWindows(MatchEngine e)
     {
         while (e.State.PendingChoice?.Type is "beforeActionReaction" or "attackReaction") Accept(e, new("declineReaction", e.State.PriorityPlayerId, e.Version));
+    }
+
+    private static void TwistOfFateScenario()
+    {
+        MatchEngine Build(out CardInstance twist, out CardInstance menace, out CardInstance courtier, out CardInstance victim, bool withTwist = true)
+        {
+            var s = Table(Phase.Dynasty, 0);
+            twist = withTwist ? Add(s, TwistOfFate, 0, Zone.Hand) : Add(s, "training-focus-strategy", 0, Zone.Hand);
+            menace = Add(s, VeiledMenace, 0, Zone.Hand); // an Open action
+            courtier = Kw(Add(s, "training-crane-courtier", 0, Zone.Home), "Courtier");
+            victim = Add(s, "training-lion-veteran", 1, Zone.Home); victim.Dishonorable = true;
+            return MatchEngine.FromTestState(s);
+        }
+        {
+            // The window opens as the Dynasty Phase is ended; the Reaction takes one additional Open action, then the Dynasty Phase carries on.
+            var e = Build(out var twist, out var menace, out var courtier, out var victim);
+            Accept(e, e.QueryActions(0).Single(a => a.Type == "endDynasty").Command!);
+            Eq(e.State.PendingChoice?.Type, "twistOfFateReaction", "the window opens");
+            Eq(e.State.Phase, Phase.Dynasty, "the Dynasty Phase has not ended");
+            var options = e.QueryActions(0);
+            Check(options.Any(a => a.Type == "useAbility" && a.Enabled && a.Command!.AbilityId == "twist-of-fate-grant") && options.Any(a => a.Type == "declineReaction"), "its Reaction and the pass are offered");
+            Check(options.All(a => a.Type is "useAbility" or "declineReaction" or "concede"), "nothing else is");
+            Accept(e, options.Single(a => a.Type == "useAbility" && a.Command!.AbilityId == "twist-of-fate-grant").Command!);
+            Eq(e.State.Cards[twist.Id].Zone, Zone.FateDiscard, "Twist of Fate was spent");
+            Eq(e.State.Phase, Phase.Action, "the additional action is taken in the Action Phase");
+            Eq(e.State.PriorityPlayerId, 0, "by its player");
+            Check(e.State.TwistOfFateActive && e.State.PendingChoice is null, "no window is left open");
+            var honor = Honor(e, 1);
+            Accept(e, Offer(e, 0, "veiled-menace-loss", menace.Id, victim.Id, courtier.Id));
+            Eq(Honor(e, 1), honor - 2, "the Open action resolved");
+            Eq(e.State.Phase, Phase.Dynasty, "and the Dynasty Phase carries on");
+            Eq(e.State.PriorityPlayerId, 0, "with its player");
+            Check(!e.State.TwistOfFateActive && e.State.AdditionalActions.Count == 0, "nothing of the additional action is left");
+            // No second action, and no second window: the phase may now end.
+            Check(!e.QueryActions(0).Any(a => a.Type == "useAbility"), "a second Open action is not on offer in the Dynasty Phase");
+            Accept(e, e.QueryActions(0).Single(a => a.Type == "endDynasty").Command!);
+            Check(e.State.PendingChoice?.Type != "twistOfFateReaction" && e.State.Phase != Phase.Dynasty, "the Dynasty Phase ended");
+        }
+        {
+            // A Limited action: Thuggish Techniques bows a Personality of lower Force.
+            var s = Table(Phase.Dynasty, 0);
+            Add(s, TwistOfFate, 0, Zone.Hand);
+            var thug = Add(s, "oracle-l5r-9938", 0, Zone.Hand);
+            var bully = Add(s, "training-crane-veteran", 0, Zone.Home); SetForce(bully, 4);
+            var weak = Add(s, "training-lion-samurai", 1, Zone.Home); SetForce(weak, 1);
+            var e = MatchEngine.FromTestState(s);
+            Accept(e, e.QueryActions(0).Single(a => a.Type == "endDynasty").Command!);
+            Accept(e, e.QueryActions(0).Single(a => a.Type == "useAbility" && a.Command!.AbilityId == "twist-of-fate-grant").Command!);
+            Accept(e, Offer(e, 0, "thuggish-techniques-bow", thug.Id, weak.Id, bully.Id));
+            Check(e.State.Cards[weak.Id].Bowed, "Thuggish Techniques, a Limited action, bowed him");
+            Eq(e.State.Phase, Phase.Dynasty, "and the Dynasty Phase carries on");
+        }
+        {
+            // Passing the window: the Dynasty Phase ends and it is not asked again (a pass in the Dynasty Phase is the other way to end it).
+            var e = Build(out var twist, out _, out _, out _);
+            Accept(e, e.QueryActions(0).Single(a => a.Type == "endDynasty").Command!);
+            Accept(e, e.QueryActions(0).Single(a => a.Type == "declineReaction").Command!);
+            Check(e.State.Phase != Phase.Dynasty && e.State.PendingChoice?.Type != "twistOfFateReaction", "the phase ended");
+            Eq(e.State.Cards[twist.Id].Zone, Zone.Hand, "Twist of Fate was not used");
+        }
+        {
+            // Passing the additional action: the Dynasty Phase carries on, the Strategy stays spent; the window does not open a second time for an unused copy.
+            var e = Build(out _, out _, out _, out _);
+            Accept(e, e.QueryActions(0).Single(a => a.Type == "endDynasty").Command!);
+            Accept(e, e.QueryActions(0).Single(a => a.Type == "useAbility" && a.Command!.AbilityId == "twist-of-fate-grant").Command!);
+            Accept(e, e.QueryActions(0).Single(a => a.Type == "pass").Command!);
+            Eq(e.State.Phase, Phase.Dynasty, "back in the Dynasty Phase");
+            Check(!e.State.TwistOfFateActive && e.State.PriorityPlayerId == 0, "with its player, the action forgone");
+        }
+        {
+            // A pass command in the Dynasty Phase opens the same window.
+            var e = Build(out _, out _, out _, out _);
+            Accept(e, new("pass", 0, e.Version));
+            Eq(e.State.PendingChoice?.Type, "twistOfFateReaction", "the window opens for a pass as well");
+        }
+        {
+            // Without the card there is no window; and a Reaction that is not Twist of Fate is never offered in it.
+            var e = Build(out _, out _, out _, out _, withTwist: false);
+            Accept(e, e.QueryActions(0).Single(a => a.Type == "endDynasty").Command!);
+            Check(e.State.PendingChoice?.Type != "twistOfFateReaction" && e.State.Phase != Phase.Dynasty, "no window: the Dynasty Phase ended");
+        }
+    }
+
+    private static void TorchsFlameFlickersScenario()
+    {
+        var s = Table(Phase.BattleSelection, 0); s.CurrentBattleProvince = null; s.UnresolvedBattlefields = [0];
+        var scout = Add(s, "training-scout-samurai", 0, Zone.Battlefield, province: 0, bowed: true); // no "unbowed" printed
+        var mine = Add(s, "training-crane-samurai", 0, Zone.Battlefield, province: 0);
+        var bowerA = Add(s, "training-battle-bower", 1, Zone.Battlefield, province: 0);
+        var bowerB = Add(s, "training-battle-bower", 1, Zone.Battlefield, province: 0);
+        var card = Add(s, TorchsFlameFlickers, 0, Zone.Hand);
+        var e = MatchEngine.FromTestState(s);
+        Accept(e, new GameCommand("selectBattle", 0, e.Version, Province: 0));
+        Eq(e.State.PendingChoice?.Type, "engageReaction", "the Engage window is open");
+        Check(!CanUse(e, 0, "torch-flame-recon", card.Id, mine.Id) && CanUse(e, 0, "torch-flame-recon", card.Id, scout.Id), "only a Scout may perform, bowed or not");
+        Accept(e, Enabled(e, 0, "torch-flame-recon", card.Id, scout.Id).Command!);
+        Check(e.State.Players[1].Provinces[0].Reconnaissance[0], "its player has Reconnaissance there");
+        PassUntil(e, () => e.State.PendingChoice is null);
+        // The first effect that bows one of his Personalities there is negated; the next is not.
+        Accept(e, Offer(e, 1, "training-bow-at-battle", bowerA.Id, mine.Id));
+        DeclineWindows(e);
+        Check(!e.State.Cards[mine.Id].Bowed, "the next card effect that bows his Personality was negated");
+        Check(e.State.TorchWatches.Single().Fired, "and the watch is spent");
+        var again = Batch336Support.Edit(e, st => st.PriorityPlayerId = 1);
+        Accept(again, Offer(again, 1, "training-bow-at-battle", bowerB.Id, mine.Id));
+        Check(again.State.Cards[mine.Id].Bowed, "a second effect bows him: only the next one was negated");
+
+        // The effect that is negated is negated whole: nothing of his unit bows.
+        var s2 = Table(Phase.Battle, 0); s2.PriorityPlayerId = 1;
+        var target = Add(s2, "training-crane-samurai", 0, Zone.Battlefield, province: 0);
+        var followerOfTarget = Add(s2, "training-follower", 0, Zone.Attached, province: 0, parent: target.Id);
+        var attacker = Add(s2, "training-battle-bower", 1, Zone.Battlefield, province: 0);
+        s2.TorchWatches.Add(new TorchWatch(0, 0, s2.BattleNumber, "Torch's Flame Flickers"));
+        var e2 = MatchEngine.FromTestState(s2);
+        Accept(e2, Offer(e2, 1, "training-bow-at-battle", attacker.Id, target.Id));
+        DeclineWindows(e2);
+        Check(!e2.State.Cards[target.Id].Bowed && !e2.State.Cards[followerOfTarget.Id].Bowed, "nothing of his unit bowed");
+
+        // A watch covers only its own player's Personalities: player 1's watch does nothing for player 0's.
+        var s3 = Table(Phase.Battle, 0); s3.PriorityPlayerId = 1;
+        var mine3 = Add(s3, "training-crane-samurai", 0, Zone.Battlefield, province: 0);
+        var attacker3 = Add(s3, "training-battle-bower", 1, Zone.Battlefield, province: 0);
+        s3.TorchWatches.Add(new TorchWatch(1, 0, s3.BattleNumber, "Torch's Flame Flickers"));
+        var e3 = MatchEngine.FromTestState(s3);
+        Accept(e3, Offer(e3, 1, "training-bow-at-battle", attacker3.Id, mine3.Id));
+        DeclineWindows(e3);
+        Check(e3.State.Cards[mine3.Id].Bowed, "a watch covers only its own player's Personalities");
+    }
+
+    private static void WhiteShorePlainScenario()
+    {
+        var s = Table(Phase.Battle, 0);
+        var terrain = Add(s, WhiteShorePlain, 0, Zone.Hand);
+        var tactician = Kw(Add(s, "training-crane-samurai", 0, Zone.Battlefield, province: 0), "Tactician");
+        var plain = Add(s, "training-crane-veteran", 0, Zone.Battlefield, province: 0);
+        var enemyTactician = Kw(Add(s, "training-lion-veteran", 1, Zone.Battlefield, province: 0), "Tactician");
+        var e = MatchEngine.FromTestState(s);
+        Accept(e, e.QueryActions(0).Single(a => a.Type == "playStrategy" && a.CardId == terrain.Id).Command!);
+        Eq(e.State.Cards[terrain.Id].Zone, Zone.Battlefield, "the Terrain is in play at the battlefield");
+        // Both players pass; before the battle resolves the controller's Tactician may use the granted Reaction.
+        PassUntil(e, () => e.State.PendingChoice?.Type == "beforeBattleReaction");
+        Eq(e.State.PendingChoice!.CardId, tactician.Id, "the controller's Tactician is asked (nobody else has the ability)");
+        var chi = e.PersonalityChiForTest(tactician.Id);
+        Accept(e, Enabled(e, 0, "white-shore-plain-boost", tactician.Id).Command!);
+        Eq(Mod(e, tactician.Id, "Force"), chi, "a Force bonus equal to his Chi");
+        Eq(Mod(e, enemyTactician.Id, "Force"), 0, "the other player's Tactician has nothing");
+        Eq(Mod(e, plain.Id, "Force"), 0, "and neither has a Personality who is not a Tactician");
+
+        // A Tactician of the controller's at home does not have it either.
+        var t = Table(Phase.Battle, 0);
+        Add(t, WhiteShorePlain, 0, Zone.Battlefield, province: 0);
+        var away = Kw(Add(t, "training-crane-samurai", 0, Zone.Home), "Tactician");
+        Add(t, "training-crane-veteran", 0, Zone.Battlefield, province: 0);
+        var te = MatchEngine.FromTestState(t);
+        Check(!te.QueryActions(0).Any(a => a.Type == "useAbility" && a.Command?.AbilityId == "white-shore-plain-boost" && a.CardId == away.Id), "a Tactician away from the battlefield does not have the ability");
+    }
+
+    private static void KillingGroundsScenario()
+    {
+        MatchEngine Build(int passerUnits, out CardInstance[] passers, out CardInstance grounds)
+        {
+            var s = Table(Phase.Battle, 0); s.PriorityPlayerId = 1;
+            grounds = Add(s, KillingGrounds, 0, Zone.Battlefield, province: 0);
+            Add(s, "training-crane-samurai", 0, Zone.Battlefield, province: 0);
+            var made = new List<CardInstance>();
+            for (var i = 0; i < passerUnits; i++) made.Add(Add(s, i % 2 == 0 ? "training-lion-samurai" : "training-lion-veteran", 1, Zone.Battlefield, province: 0));
+            passers = made.ToArray();
+            return MatchEngine.FromTestState(s);
+        }
+        {
+            // The Defender passes with two Personalities there: he chooses one, it is destroyed, and the pass then completes.
+            var e = Build(2, out var defenders, out _);
+            Accept(e, new("pass", 1, e.Version));
+            Eq(e.State.PendingChoice?.Type, "killingGroundsSelect", "the passing player must choose");
+            Eq(e.State.PendingChoice!.PlayerId, 1, "he is the one who chooses");
+            var options = e.QueryActions(1).Where(a => a.Type == "killingGroundsSelect").ToArray();
+            Eq(options.Length, 2, "one option per Personality of his at the battlefield");
+            Check(e.QueryActions(0).All(a => a.Type != "killingGroundsSelect"), "the other player has nothing to choose");
+            Accept(e, options[0].Command!);
+            Eq(defenders.Count(d => e.State.Cards[d.Id].Zone == Zone.Dead), 1, "one was destroyed");
+            Check(e.State.PendingChoice is null && e.State.PriorityPlayerId == 0, "the pass went on: the other player has the next opportunity");
+            // Once: the next pass asks for nothing (it ends the Combat Segment, and the battle's own resolution follows).
+            Accept(e, new("pass", 0, e.Version));
+            Check(e.State.PendingChoice?.Type != "killingGroundsSelect", "only the first time");
+            Eq(e.State.Events.Count(ev => ev.Type == "killingGrounds"), 1, "the trait fired once");
+        }
+        {
+            // One Personality: destroyed at once, no question.
+            var e = Build(1, out var defenders, out _);
+            Accept(e, new("pass", 1, e.Version));
+            Eq(e.State.Cards[defenders[0].Id].Zone, Zone.Dead, "his only Personality there is destroyed");
+            Check(e.State.PendingChoice is null, "nothing to ask");
+        }
+        {
+            // None of his own there: nothing to destroy, but the first time is spent.
+            var e = Build(0, out _, out var grounds);
+            Accept(e, new("pass", 1, e.Version));
+            Check(e.State.PendingChoice is null && e.State.Cards.Values.Count(c => c.Zone == Zone.Dead) == 0, "no Personality of his there: nothing is destroyed");
+            Check(e.State.Cards[grounds.Id].AbilityUses.Count > 0, "and the trait is spent");
+        }
+        {
+            // The Terrain is played from the hand as an ordinary Terrain, and whoever passes first loses his only Personality there.
+            var s = Table(Phase.Battle, 0);
+            var terrain = Add(s, KillingGrounds, 0, Zone.Hand);
+            var attacker = Add(s, "training-crane-samurai", 0, Zone.Battlefield, province: 0);
+            var defender = Add(s, "training-lion-samurai", 1, Zone.Battlefield, province: 0);
+            var e = MatchEngine.FromTestState(s);
+            var play = e.QueryActions(0).SingleOrDefault(a => a.Type == "playStrategy" && a.CardId == terrain.Id);
+            Check(play is { Enabled: true }, "offered as a Terrain play: " + play?.Reason);
+            Accept(e, play!.Command!);
+            Eq(e.State.Cards[terrain.Id].Zone, Zone.Battlefield, "in play at the battlefield");
+            PassUntil(e, () => e.State.Cards[attacker.Id].Zone == Zone.Dead || e.State.Cards[defender.Id].Zone == Zone.Dead);
+            Check(e.State.Cards[attacker.Id].Zone == Zone.Dead ^ e.State.Cards[defender.Id].Zone == Zone.Dead, "the first player to pass lost his only Personality there");
+        }
+    }
+
+    private static void ShadowCourtScenario()
+    {
+        {
+            var s = Table(Phase.Battle, 0); s.PriorityPlayerId = 1; // player 0 attacks, player 1 defends
+            var card = Add(s, ShadowCourt, 1, Zone.Hand);
+            var courtier = Kw(Add(s, "training-lion-samurai", 1, Zone.Battlefield, province: 0), "Courtier");
+            var enemy = Add(s, "training-crane-veteran", 0, Zone.Battlefield, province: 0);
+            var tactician = Kw(Add(s, "training-crane-samurai", 0, Zone.Battlefield, province: 0), "Tactician");
+            var assault = Add(s, TacticalAssault, 0, Zone.Hand);
+            Deck(s, 1);
+            var e = MatchEngine.FromTestState(s);
+            // The defending Courtier bows the enemy Personality; the watch is set.
+            Accept(e, Offer(e, 1, "shadow-court-bow", card.Id, enemy.Id, courtier.Id));
+            Check(e.State.Cards[enemy.Id].Bowed, "the target is bowed");
+            Eq(e.State.ShadowCourtWatches.Count, 1, "the Courtier is watched for the turn");
+            // Another player's action destroys him: his player draws and is asked whom, and how, to affect.
+            e = Batch336Support.Edit(e, st => st.PriorityPlayerId = 0);
+            var hand = e.State.Players[1].Hand.Count;
+            var honor = (Honor(e, 0), Honor(e, 1));
+            Accept(e, Offer(e, 0, "tactical-assault-destroy", assault.Id, courtier.Id, tactician.Id));
+            DeclineWindows(e);
+            Eq(e.State.Cards[courtier.Id].Zone, Zone.Dead, "the Courtier was destroyed by the other player's action");
+            Eq(e.State.PendingChoice?.Type, "eitherOr", "his player is asked");
+            Eq(e.State.PendingChoice!.PlayerId, 1, "the Courtier's controller decides");
+            Eq(e.State.Players[1].Hand.Count, hand + 1, "he drew a card");
+            Eq(e.QueryActions(1).Count(a => a.Type == "chooseEitherOr"), 4, "each player, gaining or losing 2 Honor");
+            Accept(e, e.QueryActions(1).Single(a => a.Type == "chooseEitherOr" && a.Command!.Choice == "opponent-lose").Command!);
+            Eq(Honor(e, 0), honor.Item1 - 2, "the chosen player lost 2 Honor");
+            Eq(Honor(e, 1), honor.Item2, "and the other's Honor is unchanged");
+            Eq(e.State.ShadowCourtWatches.Count, 0, "the watch is spent");
+        }
+        {
+            // The watch is for the Courtier who performed: another Courtier of his player's destroyed by another player's action starts nothing.
+            var s = Table(Phase.Battle, 0); s.PriorityPlayerId = 0;
+            var watched = Kw(Add(s, "training-lion-samurai", 1, Zone.Battlefield, province: 0), "Courtier");
+            var other = Kw(Add(s, "training-lion-veteran", 1, Zone.Battlefield, province: 0), "Courtier");
+            var assault = Add(s, TacticalAssault, 0, Zone.Hand);
+            var tactician = Kw(Add(s, "training-crane-samurai", 0, Zone.Battlefield, province: 0), "Tactician");
+            s.ShadowCourtWatches.Add(new ShadowCourtWatch(watched.Id, 1, s.TurnNumber, assault.Id));
+            var e = MatchEngine.FromTestState(s);
+            Accept(e, Offer(e, 0, "tactical-assault-destroy", assault.Id, other.Id, tactician.Id));
+            DeclineWindows(e);
+            Eq(e.State.Cards[other.Id].Zone, Zone.Dead, "another Courtier was destroyed");
+            Check(e.State.PendingChoice?.Type != "eitherOr", "no decision: the watched Courtier is untouched");
+            Eq(e.State.ShadowCourtWatches.Count, 1, "the watch waits");
+            // And a watch from an earlier turn does nothing.
+            var late = Batch336Support.Edit(MatchEngine.FromTestState(s), st => st.ShadowCourtWatches[0] = new ShadowCourtWatch(watched.Id, 1, st.TurnNumber - 1, assault.Id));
+            Accept(late, Offer(late, 0, "tactical-assault-destroy", assault.Id, watched.Id, tactician.Id));
+            DeclineWindows(late);
+            Eq(late.State.Cards[watched.Id].Zone, Zone.Dead, "he was destroyed");
+            Check(late.State.PendingChoice?.Type != "eitherOr", "the watch was for an earlier turn");
+        }
+        {
+            // A battle resolution destroys the Courtier (the Attacker wins big): the decision comes before the resolution's Reactions and the battle then carries on.
+            var s = Table(Phase.Battle, 0); s.PriorityPlayerId = 1;
+            var courtier = Kw(Add(s, "training-lion-samurai", 1, Zone.Battlefield, province: 0), "Courtier");
+            var raider = Add(s, "training-crane-veteran", 0, Zone.Battlefield, province: 0);
+            SetForce(raider, 20);
+            var card = Add(s, ShadowCourt, 1, Zone.FateDiscard);
+            s.ShadowCourtWatches.Add(new ShadowCourtWatch(courtier.Id, 1, s.TurnNumber, card.Id));
+            Deck(s, 1);
+            var e = MatchEngine.FromTestState(s);
+            var hand = e.State.Players[1].Hand.Count;
+            PassUntil(e, () => e.State.PendingChoice?.Type == "eitherOr");
+            Eq(e.State.Cards[courtier.Id].Zone, Zone.Dead, "the resolution destroyed him");
+            Eq(e.State.Players[1].Hand.Count, hand + 1, "his player drew");
+            var honor = Honor(e, 1);
+            Accept(e, e.QueryActions(1).Single(a => a.Type == "chooseEitherOr" && a.Command!.Choice == "self-gain").Command!);
+            Eq(Honor(e, 1), honor + 2, "he chose himself and gaining");
+            Check(e.State.PendingChoice?.Type != "eitherOr" && e.State.Phase != Phase.Finished, "the battle carried on");
+        }
+        {
+            // A Personality who is not a Courtier may not perform, and the performing Courtier must be defending.
+            var s = Table(Phase.Battle, 0); s.PriorityPlayerId = 1;
+            var card = Add(s, ShadowCourt, 1, Zone.Hand);
+            var plain = Add(s, "training-lion-samurai", 1, Zone.Battlefield, province: 0);
+            var attackingCourtier = Kw(Add(s, "training-crane-courtier", 0, Zone.Battlefield, province: 0), "Courtier");
+            Add(s, "training-crane-veteran", 0, Zone.Battlefield, province: 0);
+            var e = MatchEngine.FromTestState(s);
+            Check(!CanUse(e, 1, "shadow-court-bow", card.Id, plain.Id), "a Personality who is not a Courtier may not perform");
+            var t = Table(Phase.Battle, 0); // player 0 attacks
+            var card2 = Add(t, ShadowCourt, 0, Zone.Hand);
+            var attacker = Kw(Add(t, "training-crane-courtier", 0, Zone.Battlefield, province: 0), "Courtier");
+            Add(t, "training-lion-samurai", 1, Zone.Battlefield, province: 0);
+            Check(!CanUse(MatchEngine.FromTestState(t), 0, "shadow-court-bow", card2.Id, attacker.Id), "the performing Courtier must be defending");
+            Check(attackingCourtier.Id.Length > 0);
+        }
+    }
+
+    private static void SincerityOfTheDragonScenario()
+    {
+        var dragonId = CardCatalog.Cards.Values.First(c => c.Type == CardType.Personality && !c.ScenarioOnly && c.Clan == "Dragon").Id;
+        // The Focus Effect: player 0's Personality wins a Steel on Steel duel with the Sincerity focused: all his provinces +2 strength this turn.
+        var s = Table(Phase.Battle, 0);
+        var winner = Add(s, "training-crane-veteran", 0, Zone.Battlefield, province: 0);
+        winner.Modifiers.Add(new("test-source", "test", "Chi", 5));
+        var loser = Add(s, "training-lion-samurai", 1, Zone.Battlefield, province: 0);
+        var duelCard = Add(s, "training-plain-duel-strategy", 0, Zone.Hand);
+        var focused = Add(s, SincerityOfTheDragon, 0, Zone.Hand);
+        Deck(s, 1);
+        var e = MatchEngine.FromTestState(s);
+        var before = e.GetView(0).Players[0].Provinces.Select(p => p.Strength).ToArray();
+        Accept(e, Offer(e, 0, "steel-on-steel-duel", duelCard.Id, loser.Id, winner.Id));
+        Accept(e, new GameCommand("focus", 1, e.Version, Choice: "deck"));
+        Accept(e, new GameCommand("focus", 0, e.Version, CardId: focused.Id));
+        Accept(e, new GameCommand("strike", 1, e.Version));
+        Check(e.State.Cards[loser.Id].Zone == Zone.Dead, "player 0's Personality won the duel");
+        var after = e.GetView(0).Players[0].Provinces.Select(p => p.Strength).ToArray();
+        for (var i = 0; i < before.Length; i++) Eq(after[i], before[i] + 2, $"province {i + 1} has +2 strength");
+
+        // A duel its owner lost gives nothing.
+        var l = Table(Phase.Battle, 0);
+        var weak = Add(l, "training-crane-veteran", 0, Zone.Battlefield, province: 0);
+        var strong = Add(l, "training-lion-samurai", 1, Zone.Battlefield, province: 0);
+        strong.Modifiers.Add(new("test-source", "test", "Chi", 9));
+        var duel2 = Add(l, "training-plain-duel-strategy", 0, Zone.Hand);
+        var focused2 = Add(l, SincerityOfTheDragon, 0, Zone.Hand);
+        Deck(l, 1);
+        var le = MatchEngine.FromTestState(l);
+        var beforeLoss = le.GetView(0).Players[0].Provinces.Select(p => p.Strength).ToArray();
+        Accept(le, Offer(le, 0, "steel-on-steel-duel", duel2.Id, strong.Id, weak.Id));
+        Accept(le, new GameCommand("focus", 1, le.Version, Choice: "deck"));
+        Accept(le, new GameCommand("focus", 0, le.Version, CardId: focused2.Id));
+        Accept(le, new GameCommand("strike", 1, le.Version));
+        Check(le.GetView(0).Players[0].Provinces.Select(p => p.Strength).SequenceEqual(beforeLoss), "the duel was lost: no strength");
+
+        // The Open half: name a number; after the next resolution of an action from another Strategy with that base Focus Value it draws and a chosen player discards.
+        MatchEngine Named(int number, out CardInstance menace, out CardInstance courtier, out CardInstance victim)
+        {
+            var a = Table(Phase.Action, 0);
+            var sincerity = Add(a, SincerityOfTheDragon, 0, Zone.Hand);
+            menace = Add(a, VeiledMenace, 0, Zone.Hand); // base Focus Value 2
+            var dragon = Add(a, dragonId, 0, Zone.Home);
+            courtier = Kw(Add(a, "training-crane-courtier", 0, Zone.Home), "Courtier");
+            victim = Add(a, "training-lion-veteran", 1, Zone.Home); victim.Dishonorable = true;
+            Deck(a, 0);
+            Add(a, "training-focus-strategy", 1, Zone.Hand);
+            Add(a, "training-focus-strategy", 0, Zone.Hand);
+            var ae = MatchEngine.FromTestState(a);
+            var named = Enabled(ae, 0, "sincerity-dragon-name", sincerity.Id, dragon.Id);
+            Accept(ae, named.Command!);
+            Eq(ae.State.PendingChoice?.Type, "effectChoice", "the number is a choice");
+            Eq(ae.QueryActions(0).Count(o => o.Type == "chooseEffect"), 7, "numbers 0 to 6");
+            Accept(ae, ae.QueryActions(0).Single(o => o.Type == "chooseEffect" && o.Command!.Choice == $"name-{number}").Command!);
+            Eq(ae.State.SincerityWatches.Single().Number, number, "the number is recorded");
+            return ae;
+        }
+        {
+            var ae = Named(2, out var menace, out var courtier, out var victim);
+            var theirs = ae.State.Players[1].Hand.Count;
+            ae = Batch336Support.Edit(ae, st => st.PriorityPlayerId = 0);
+            var mine = ae.State.Players[0].Hand.Count;
+            Accept(ae, Offer(ae, 0, "veiled-menace-loss", menace.Id, victim.Id, courtier.Id));
+            Eq(ae.State.PendingChoice?.Type, "eitherOr", "the watched action resolved: its player chooses a player");
+            Eq(ae.State.Players[0].Hand.Count, mine, "he drew (Veiled Menace left the hand)");
+            Accept(ae, ae.QueryActions(0).Single(o => o.Type == "chooseEitherOr" && o.Command!.Choice == "opponent").Command!);
+            Eq(ae.State.PendingChoice?.Type, "forcedDiscard", "the chosen player must discard a card");
+            Eq(ae.State.PendingChoice!.PlayerId, 1, "player 1 is the one");
+            var discard = ae.State.Players[1].Hand.First();
+            Accept(ae, new GameCommand("forcedDiscard", 1, ae.Version, TargetId: discard));
+            Eq(ae.State.Players[1].Hand.Count, theirs - 1, "he discarded a card");
+            Eq(ae.State.SincerityWatches.Count, 0, "the watch is spent");
+        }
+        {
+            // A base Focus Value that is not the number does not trigger it, and the watch waits.
+            var ae = Named(3, out var menace, out var courtier, out var victim);
+            ae = Batch336Support.Edit(ae, st => st.PriorityPlayerId = 0);
+            Accept(ae, Offer(ae, 0, "veiled-menace-loss", menace.Id, victim.Id, courtier.Id));
+            Check(ae.State.PendingChoice?.Type != "eitherOr", "Veiled Menace has base Focus Value 2, not 3");
+            Eq(ae.State.SincerityWatches.Count, 1, "the watch waits");
+        }
     }
 
     private static void SlowDeathScenario()

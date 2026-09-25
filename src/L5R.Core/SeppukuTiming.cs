@@ -34,6 +34,7 @@ public sealed partial class MatchEngine
         (nameof(MatchState.PendingEffectChoice), s => s.PendingEffectChoice is not null),
         (nameof(MatchState.PendingBeforeBattleResolve), s => s.PendingBeforeBattleResolve is not null),
         (nameof(MatchState.PendingAfterResolution), s => s.PendingAfterResolution is not null),
+        (nameof(MatchState.PendingShadowCourtResolution), s => s.PendingShadowCourtResolution is not null), // The Shadow Court (Emperor Edition remaining-cards pass, issue #492, group D): a resolution paused for its decision
         (nameof(MatchState.PendingEngage), s => s.PendingEngage is not null),
         (nameof(MatchState.PendingAdditionalAction), s => s.PendingAdditionalAction is not null),
         (nameof(MatchState.PendingNegatableAbility), s => s.PendingNegatableAbility is not null),

@@ -157,6 +157,7 @@ public sealed partial class MatchEngine
         if (ApplyShadowsEmbraceBatch3BranchEffect(effect, command)) return; // The Shadow's Embrace pass (issue #476), batch 3
         if (ApplyShadowsEmbraceBatch4BranchEffect(effect, command)) return; // The Shadow's Embrace pass (issue #476), batch 4: The Game Has Changed's steps.
         if (ApplyEmperorBatch4BranchEffect(effect, command)) return; // Emperor Edition Personality pass (issue #477), batch 4.
+        if (ApplyEmperorRemainingDBranchEffect(effect, command)) return; // Emperor Edition remaining-cards pass (issue #492), group D: The Sincerity of the Dragon's named number.
         switch (effect)
         {
             case BranchEffect.MoveSourceHome: MoveHome(source, false); break;

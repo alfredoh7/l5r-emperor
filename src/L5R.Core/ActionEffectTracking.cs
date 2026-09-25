@@ -57,6 +57,8 @@ public sealed partial class MatchEngine
         ApplyMokshaPatamTokens();
         // The Shadow's Embrace pass (issue #476), batch 3: Crowded Streets' trait -- a trait, so before any Reaction to the same point (ShadowsEmbraceBatch3.cs).
         if (OpenCrowdedStreetsTrait(closesTo)) return true;
+        // Emperor Edition remaining-cards pass (issue #492), group D: The Shadow Court's and The Sincerity of the Dragon's traits (EmperorRemainingD.cs) -- also before any Reaction to the same moment.
+        if (OpenShadowCourtTrait(closesTo) || OpenSincerityTrait(closesTo)) return true;
         if (OpenAfterActionResolvedWindow(closesTo)) return true;
         // Moshi Ino's storm (issue #453, batch 3; MoshiInoStorm.cs): the same "this action is truly done" moment, asked once no Reaction window opened over it.
         return OpenInoStorm(closesTo);

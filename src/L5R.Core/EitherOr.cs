@@ -58,6 +58,9 @@ public static class EitherOrSpecs
     public const string TanimuraPayOrLose = "tanimura-pay-or-lose";
     /// <summary>The Power of a Word (Emperor Edition remaining-cards pass, issue #492, group D): "The player may choose to lose 3 Honor. If he did not choose this, negate the action's effects." -- the decider is the ACTING player.</summary>
     public const string PowerOfWordLoseOrNegate = "power-word-lose-or-negate";
+    /// <summary>The Shadow Court (issue #492): "draw a card, and choose a player, who gains or loses 2 Honor" -- the watch's controller decides. The Sincerity of the Dragon: "choose a player, who discards a card".</summary>
+    public const string ShadowCourtHonor = "shadow-court-honor";
+    public const string SincerityDiscard = "sincerity-discard";
 }
 
 /// <summary>What choosing an option amounts to, for a client to word and style it: "avoid" (accept a cost or a lesser loss so the
@@ -136,6 +139,8 @@ public sealed partial class MatchEngine
             EitherOrSpecs.GenshiShame => $"{source}: dishonor {affected}, or {Player(p.ActingPlayerId).Name} gains 1 Honor and locks one of his abilities until their next turn begins.",
             EitherOrSpecs.TanimuraPayOrLose => $"{source}: pay 4 Gold, or lose 3 Honor.",
             EitherOrSpecs.PowerOfWordLoseOrNegate => $"{source}: lose 3 Honor, or your action's effects are negated.",
+            EitherOrSpecs.ShadowCourtHonor => $"{source}: choose a player who gains or loses 2 Honor.",
+            EitherOrSpecs.SincerityDiscard => $"{source}: choose a player who discards a card.",
             _ => throw new RuleViolation("Unknown choice.")
         };
     }
@@ -227,6 +232,8 @@ public sealed partial class MatchEngine
                     new("lose", "Lose 3 Honor", "Your action goes ahead: it is not negated.", EitherOrKind.Avoid, 0, true, null),
                     new("negate", "Do not lose the Honor", "Your action's effects are negated.", EitherOrKind.Accept, 0, true, null)
                 ];
+            case EitherOrSpecs.ShadowCourtHonor: case EitherOrSpecs.SincerityDiscard:
+                return EmperorRemainingDEitherOrOptions(p);
             default: throw new RuleViolation("Unknown choice.");
         }
     }
@@ -387,6 +394,9 @@ public sealed partial class MatchEngine
                 Emit("eitherOrChosen", $"{decider.Name} did not lose the Honor ({Definition(source).Name}): the action's effects are negated.", decider.Id, source.Id);
                 NegateHeldActionFromEitherOr(p, source);
                 break;
+            case (EitherOrSpecs.ShadowCourtHonor, _): case (EitherOrSpecs.SincerityDiscard, _):
+                ApplyEmperorRemainingDEitherOr(p, option, decider);
+                break;
             default: throw new RuleViolation("Unknown choice.");
         }
     }
@@ -395,6 +405,7 @@ public sealed partial class MatchEngine
     private void FinishEitherOr(PendingEitherOr p)
     {
         _state.PendingEitherOr = null;
+        if (FinishEmperorRemainingDEitherOr(p)) return; // Emperor Edition remaining-cards pass (issue #492), group D: The Shadow Court and The Sincerity of the Dragon (EmperorRemainingD.cs).
         // The Shadow's Embrace pass (issue #476), batch 3 (ShadowsEmbraceBatch3.cs): Crowded Streets' trait decision carries on with the resolved action's own tail; Forge Your
         // Soul's last decision draws and opens the attached Weapon's entering-play window first.
         if (FinishShadowsEmbraceEitherOr(p)) return;

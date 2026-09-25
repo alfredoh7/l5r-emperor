@@ -3,6 +3,29 @@
   "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
   "Cards": [
     {
+      "Id": "oracle-l5r-8188",
+      "Name": "The Killing Grounds",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After the first time, while this card remains in play, that a player passes instead of announcing a Battle action: He chooses and destroys one of his Personalities at the current battlefield.\nBattle: If there are no Terrains at the current battlefield: Put this card into play there.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8188.jpg",
+      "Keywords": [
+        "Terrain"
+      ],
+      "Focus": 1,
+      "Abilities": [],
+      "Effect": "killing-grounds"
+    },
+    {
       "Id": "oracle-l5r-8194",
       "Name": "The Law's Strength",
       "Type": "Strategy",
@@ -130,6 +153,53 @@
       "Effect": "none"
     },
     {
+      "Id": "oracle-l5r-8313",
+      "Name": "The Shadow Court",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing defending Courtier and target an enemy Personality: Bow him. After the next time this turn another player's action or a battle resolution destroys your Courtier, draw a card, and choose a player, who gains or loses 2 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8313.jpg",
+      "Keywords": [],
+      "Focus": 4,
+      "Abilities": [
+        "shadow-court-bow"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-8338",
+      "Name": "The Sincerity of the Dragon",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "As a Focus Effect: After this duel ends, if you won it, give all your provinces +2 strength.\nBattle/Open: Choose your performing unbowed Dragon Clan Personality: Name a number. After the next resolution this turn of your action from another Strategy or Ring with a base Focus Value equal to the number, draw a card, and choose a player, who discards a card.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8338.jpg",
+      "Keywords": [],
+      "Focus": 4,
+      "Abilities": [
+        "sincerity-dragon-focus",
+        "sincerity-dragon-name"
+      ],
+      "Effect": "none"
+    },
+    {
       "Id": "oracle-l5r-8340",
       "Name": "The Slow Death",
       "Type": "Strategy",
@@ -173,6 +243,54 @@
       "Focus": 2,
       "Abilities": [
         "trap-sprung-bow"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-8639",
+      "Name": "Torch's Flame Flickers",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After engaging, choose your performing Scout at the current battlefield: You have Reconnaissance there. Negate the next card effect that bows one or more of your Personalities who is there (at the time).",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8639.jpg",
+      "Keywords": [
+        "Recon"
+      ],
+      "Focus": 1,
+      "Abilities": [
+        "torch-flame-recon"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-8917",
+      "Name": "Twist of Fate",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: Before your Dynasty Phase ends: Take an additional Limited or Open action.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8917.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "twist-of-fate-grant"
       ],
       "Effect": "none"
     },
@@ -321,6 +439,29 @@
         "well-prepared-straighten"
       ],
       "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9323",
+      "Name": "White Shore Plain",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "While at the current battlefield, each of your Tacticians has the ability, \"Tactical Reaction: Before this battle's resolution: Give this Tactician a Force bonus equal to his Chi.\"\nBattle: If there are no Terrains at the current battlefield: Put this card into play there.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9323.jpg",
+      "Keywords": [
+        "Terrain"
+      ],
+      "Focus": 3,
+      "Abilities": [],
+      "Effect": "white-shore-plain"
     },
     {
       "Id": "oracle-l5r-9377",

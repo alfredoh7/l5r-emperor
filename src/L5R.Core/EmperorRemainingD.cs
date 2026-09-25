@@ -12,10 +12,19 @@ namespace L5R.Core;
 //   * A ONE-SHOT NEGATION OF THE NEXT BOWING OF A PLAYER'S PERSONALITIES AT A BATTLEFIELD (MatchState.TorchWatches, Torch's Flame Flickers).
 public sealed record TorchWatch(int PlayerId, int ProvinceIndex, int Battle, string Source)
 {
-    /// <summary>The command whose bowing the watch negated: every other bowing of the same effect (a unit bowed as a whole) is negated with it. Reference identity.</summary>
+    /// <summary>The command whose bowing the watch negated: every other bowing of the same effect (a unit bowed as a whole) is negated with it. Reference identity; never serialized.</summary>
+    [System.Text.Json.Serialization.JsonIgnore]
     public object? FiredFor { get; set; }
     public bool Fired { get; set; }
 }
+
+/// <summary>The Shadow Court (oracle-l5r-8313): "After the next time this turn another player's action or a battle resolution destroys your Courtier, draw a card, and choose a player,
+/// who gains or loses 2 Honor." <paramref name="CardId"/> is the performing Courtier, <paramref name="PlayerId"/> his controller, <paramref name="SourceId"/> the Strategy.</summary>
+public sealed record ShadowCourtWatch(string CardId, int PlayerId, int Turn, string SourceId);
+
+/// <summary>The Sincerity of the Dragon (oracle-l5r-8338): "After the next resolution this turn of your action from another Strategy or Ring with a base Focus Value equal to the number,
+/// draw a card, and choose a player, who discards a card." <paramref name="Number"/> is the named number.</summary>
+public sealed record SincerityWatch(int PlayerId, int Number, int Turn, string SourceId);
 
 public static class EmperorRemainingDAbilities
 {
@@ -80,6 +89,29 @@ public static class EmperorRemainingDAbilities
         // of your Courtiers or Magistrates: Choose a player, who loses 3 Honor." Two Reactions (the two triggers); the once-per-resolution limit is a Require.
         all["words-strength-resolution"] = new("Reaction", "After a battle's resolution, if the resolution destroyed any of your Courtiers or Magistrates: Choose a player, who loses 3 Honor", "player", Trigger: MatchEngine.AfterResolutionTriggerId, UsageKey: "words-strength");
         all["words-strength-action"] = new("Reaction", "After the resolution of another player's Battle action, if the action destroyed any of your Courtiers or Magistrates: Choose a player, who loses 3 Honor", "player", Trigger: AfterActionReactionTriggers.AfterActionResolved, UsageKey: "words-strength");
+        // Torch's Flame Flickers (oracle-l5r-8639, a Recon card): "Reaction: After engaging, choose your performing Scout at the current battlefield: You have Reconnaissance there. Negate the next card
+        // effect that bows one or more of your Personalities who is there (at the time)." -- Watchers in the Dark's Engage-window Reaction (any bow state), and a one-shot watch on the bowing of the
+        // player's Personalities at the battlefield (MatchState.TorchWatches, asked where a card effect bows: StalwartNegatesBow).
+        all["torch-flame-recon"] = new("Reaction", "After engaging, choose your performing Scout at the current battlefield: You have Reconnaissance there. Negate the next card effect that bows one or more of your Personalities who is there (at the time)", "none",
+            Trigger: "after-engaging", Performer: "own-personality-with-keyword-explicitly-at-battle", RequiredKeywords: ["Scout"]);
+        // White Shore Plain (oracle-l5r-9323), a Terrain: "While at the current battlefield, each of your Tacticians has the ability, 'Tactical Reaction: Before this battle's resolution: Give this Tactician
+        // a Force bonus equal to his Chi.'" -- a controller-wide static ability grant (StaticGrantedAbilityIds), like The Ki-Rin's Path's; the Terrain itself is the generic play-as-Terrain card (its Effect
+        // is the grant's marker).
+        all["white-shore-plain-boost"] = new("Reaction", "Tactical Reaction: Before this battle's resolution: Give this Tactician a Force bonus equal to his Chi", "none", Trigger: "before-battle-resolves", ActionKeywords: ["Tactical"]);
+        // The Shadow Court (oracle-l5r-8313): "Battle: Choose your performing defending Courtier and target an enemy Personality: Bow him. After the next time this turn another player's action or a
+        // battle resolution destroys your Courtier, draw a card, and choose a player, who gains or loses 2 Honor." -- "your Courtier" is the performing one (ShadowCourtWatches).
+        all["shadow-court-bow"] = new("Battle", "Choose your performing defending Courtier and target an enemy Personality: Bow him. After the next time this turn another player's action or a battle resolution destroys your Courtier, draw a card, and choose a player, who gains or loses 2 Honor", "enemy-personality",
+            Performer: "rd-own-defending-personality-with-keyword", RequiredKeywords: ["Courtier"]);
+        // The Sincerity of the Dragon (oracle-l5r-8338): "As a Focus Effect: After this duel ends, if you won it, give all your provinces +2 strength." / "Battle/Open: Choose your performing unbowed Dragon
+        // Clan Personality: Name a number. After the next resolution this turn of your action from another Strategy or Ring with a base Focus Value equal to the number, draw a card, and choose a player,
+        // who discards a card." -- the number is a choice among the Focus Values a card may have (0 to 6), an effect choice; the watch is SincerityWatches.
+        all["sincerity-dragon-focus"] = new("FocusEffect", "As a Focus Effect: After this duel ends, if you won it, give all your provinces +2 strength", "none");
+        all["sincerity-dragon-name"] = new("BattleOrOpen", "Choose your performing unbowed Dragon Clan Personality: Name a number. After the next resolution this turn of your action from another Strategy or Ring with a base Focus Value equal to the number, draw a card, and choose a player, who discards a card", "none",
+            Performer: "rd-own-unbowed-clan-personality-at-battle", RequiredKeywords: ["Dragon"],
+            Branch: new(BranchCondition.Always, Enumerable.Range(0, 7).Select(n => new EffectOption($"name-{n}", $"Name {n}", [$"{MatchEngine.SincerityNameEffect}{n}"])).ToArray(), HonorChoice.None));
+        // Twist of Fate (oracle-l5r-8917): "Reaction: Before your Dynasty Phase ends: Take an additional Limited or Open action." -- a window as its player ends the Dynasty Phase (TwistOfFateWindow); the
+        // action is taken with the match sitting in the Action Phase for that one action (TwistOfFateActive), so every Limited and Open action there is takes its ordinary shape.
+        all["twist-of-fate-grant"] = new("Reaction", "Before your Dynasty Phase ends: Take an additional Limited or Open action", "none", Trigger: MatchEngine.BeforeDynastyEndsTrigger);
         return all;
     }
 }
@@ -152,6 +184,10 @@ public sealed partial class MatchEngine
     {
         // The Law's Strength: "your performing Courtier or Magistrate" -- any one of the RequiredKeywords, at the battle while acting as a Battle action; bowed or not.
         "rd-own-personality-with-any-keyword-at-battle" => Definition(performer).Type == CardType.Personality && (ability.RequiredKeywords ?? []).Any(k => Keyword(performer, k)) && (!actingAsBattle || AtBattle(performer)),
+        // The Shadow Court: "your performing defending Courtier" -- a defending unit (at the battlefield, on the Defender's side) whose Personality has the required keywords; bowed or not.
+        "rd-own-defending-personality-with-keyword" => Definition(performer).Type == CardType.Personality && IsDefendingUnit(performer) && HasKeywords(performer, ability.RequiredKeywords),
+        // The Sincerity of the Dragon: "your performing unbowed Dragon Clan Personality" (the Clan alignment named by RequiredKeywords), at the battle while acting as a Battle action.
+        "rd-own-unbowed-clan-personality-at-battle" => Definition(performer).Type == CardType.Personality && !performer.Bowed && HasClanAffiliation(performer, ability.RequiredKeywords![0]) && (!actingAsBattle || AtBattle(performer)),
         _ => false
     };
 
@@ -159,6 +195,9 @@ public sealed partial class MatchEngine
     {
         "rd-own-personality-with-any-keyword-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && Definition(c).Type == CardType.Personality
             && (ability.RequiredKeywords ?? []).Any(k => Keyword(c, k)) && (!actingAsBattle || AtBattle(c))).Select(c => (string?)c.Id).ToArray(),
+        "rd-own-defending-personality-with-keyword" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && InPlay(c) && IsDefendingUnit(c) && HasKeywords(c, ability.RequiredKeywords)).Select(c => (string?)c.Id).ToArray(),
+        "rd-own-unbowed-clan-personality-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && InPlay(c) && !c.Bowed
+            && HasClanAffiliation(c, ability.RequiredKeywords![0]) && (!actingAsBattle || AtBattle(c))).Select(c => (string?)c.Id).ToArray(),
         _ => null
     };
 
@@ -259,10 +298,69 @@ public sealed partial class MatchEngine
                 if (id == "words-strength-action" && _state.LastResolvedAction is { } resolved) resolved.WordsHaveStrengthPlayed = true;
                 GainHonor(command.TargetPlayerId!.Value, -3, name, source);
                 return false;
+            case "twist-of-fate-grant":
+                BeginTwistOfFateAction(player, source!);
+                return true;
+            // Torch's Flame Flickers: Reconnaissance now, and the watch on the next card effect that bows one of the player's Personalities at this battlefield.
+            case "torch-flame-recon":
+            {
+                GrantReconnaissanceAtCurrentBattlefield(player.Id);
+                _state.TorchWatches.RemoveAll(w => w.Battle != _state.BattleNumber);
+                _state.TorchWatches.Add(new(player.Id, _state.CurrentBattleProvince!.Value, _state.BattleNumber, name));
+                Emit("watchSet", $"{name}: the next card effect that bows one or more of {player.Name}'s Personalities at this battlefield will be negated.", player.Id, source!.Id);
+                return false;
+            }
+            // White Shore Plain's granted Reaction: the Tactician's own Force bonus, equal to his Chi as it resolves.
+            case "white-shore-plain-boost":
+                ApplyModifier(source!, source!.Id, id, "Force", PersonalityChi(source));
+                return false;
+            // The Shadow Court: bow him, then the performing Courtier is watched for the turn.
+            case "shadow-court-bow":
+            {
+                var courtier = Card(command.PerformerId!);
+                if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
+                _state.ShadowCourtWatches.Add(new(courtier.Id, player.Id, _state.TurnNumber, source!.Id));
+                Emit("watchSet", $"{name}: after the next time this turn another player's action or a battle resolution destroys {Definition(courtier).Name}, {player.Name} draws a card and chooses a player who gains or loses 2 Honor.", player.Id, courtier.Id);
+                return false;
+            }
             default:
                 return null;
         }
     }
+
+    // ---- Torch's Flame Flickers ----
+
+    // StalwartNegatesBow's hook: a card effect is bowing `card`. The first effect that bows one of the watching player's Personalities at the watched battlefield is negated -- and, as the effect
+    // is one, so is every other bowing of the same effect at that battlefield (a unit bowed as a whole: the Personality first, then his Followers).
+    private bool TorchNegatesBow(CardInstance card)
+    {
+        if (_state.TorchWatches.Count == 0) return false;
+        var host = Card(UnitHostId(card));
+        if (host.Zone != Zone.Battlefield || host.ProvinceIndex is not int province || Definition(host).Type != CardType.Personality) return false;
+        var effect = (object?)_runningCommand ?? _attackCommandInResolution;
+        var negated = false;
+        foreach (var watch in _state.TorchWatches.Where(w => w.PlayerId == host.OwnerId && w.ProvinceIndex == province && w.Battle == _state.BattleNumber))
+        {
+            if (!watch.Fired)
+            {
+                if (card.Id != host.Id) continue; // only a Personality's bowing triggers it
+                watch.Fired = true; watch.FiredFor = effect; negated = true;
+            }
+            else if (effect is not null && ReferenceEquals(watch.FiredFor, effect)) negated = true;
+        }
+        if (negated) Emit("bowNegated", $"{Definition(card).Name}'s bowing was negated (Torch's Flame Flickers).", card.OwnerId, card.Id);
+        return negated;
+    }
+
+    // ---- White Shore Plain ----
+
+    private const string WhiteShorePlainEffect = "white-shore-plain";
+    internal const string WhiteShorePlainAbilityId = "white-shore-plain-boost";
+
+    // "While at the current battlefield, each of your Tacticians has the ability ...": a Tactician of the Terrain's controller standing at the Terrain's battlefield (StaticGrantedAbilityIds).
+    private bool WhiteShorePlainGrants(CardInstance card) =>
+        card.Zone == Zone.Battlefield && card.ProvinceIndex is int province && Keyword(card, "Tactician")
+        && TerrainsAtBattlefield(province).Any(t => t.OwnerId == card.OwnerId && Definition(t).Effect == WhiteShorePlainEffect);
 
     // ---- Veiled Menace ----
 
@@ -307,4 +405,227 @@ public sealed partial class MatchEngine
     private bool ActionDestroyedCourtierOrMagistrate(ResolvedActionFacts facts, int playerId) =>
         facts.Affected.Any(a => a.Kind == DestroyedKind && Card(a.CardId) is { } c && c.OwnerId == playerId && Definition(c).Type == CardType.Personality
             && (Keyword(c, "Courtier") || Keyword(c, "Magistrate")));
+
+    // ---- Twist of Fate ----
+
+    internal const string BeforeDynastyEndsTrigger = "before-dynasty-ends";
+    private const string TwistOfFateWindow = "twistOfFateReaction";
+
+    private static bool IsTwistOfFateReaction(AbilityDefinition ability) => ability.Timing == "Reaction" && ability.Trigger == BeforeDynastyEndsTrigger;
+
+    // The one place a Dynasty Phase ends by its player's choice (the endDynasty command, and a pass in the Dynasty Phase): "Before your Dynasty Phase ends" -- a window in which he may use a Reaction
+    // that names it. It opens only when he holds one he could use now, and only once a turn unless he uses one (a second copy is a second Reaction). True when the window is open.
+    private bool BeginTwistOfFateWindow()
+    {
+        if (_state.Phase is not (Phase.Dynasty or Phase.DynastyDiscard) || _state.PendingChoice is not null || _state.TwistOfFateActive || _state.TwistOfFateDeclinedTurn == _state.TurnNumber) return false;
+        var playerId = _state.ActivePlayerId;
+        var window = new PendingChoice(TwistOfFateWindow, playerId, null, "Before your Dynasty Phase ends: you may use a Reaction, or pass.");
+        _state.PendingChoice = window;
+        bool usable;
+        try { usable = AbilityActions(playerId).Any(o => o.Enabled); }
+        finally { _state.PendingChoice = null; }
+        if (!usable) return false;
+        _state.PendingChoice = window;
+        _state.PriorityPlayerId = playerId; _state.ConsecutivePasses = 0;
+        Emit("reactionWindow", "Before-Dynasty-Phase-ends reaction window opened.", playerId);
+        return true;
+    }
+
+    // The window's answers: a Reaction (an action like any other), or the pass that lets the Dynasty Phase end.
+    private void ResolveTwistOfFateWindow(GameCommand command)
+    {
+        Require(command.Type is "useAbility" or "declineReaction" or "pass", "Use a Reaction, or pass, before your Dynasty Phase ends.");
+        if (command.Type == "useAbility") { UseAbility(command); return; }
+        _state.TwistOfFateDeclinedTurn = _state.TurnNumber;
+        _state.PendingChoice = null;
+        EndTurn();
+    }
+
+    // Twist of Fate's effect: the Strategy is spent, the window closes, and the match steps into the Action Phase for exactly one additional action of its player's (a Limited or an Open one -- and, being
+    // in that phase, only those). The Reaction's own tail is not run: it would hand the priority to the other player.
+    private void BeginTwistOfFateAction(PlayerState player, CardInstance source)
+    {
+        DiscardFate(player, source);
+        _state.PendingChoice = null;
+        _state.TwistOfFateActive = true; _state.TwistOfFateReturnPhase = _state.Phase;
+        _state.Phase = Phase.Action;
+        _state.PriorityPlayerId = player.Id; _state.ConsecutivePasses = 0;
+        GrantAdditionalAction(player.Id, null);
+        Emit("twistOfFate", $"{Definition(source).Name}: {player.Name} takes an additional Limited or Open action before his Dynasty Phase ends.", player.Id, source.Id);
+    }
+
+    // The additional action is over -- taken, or passed -- and the Dynasty Phase carries on where it was.
+    private void EndTwistOfFateAction()
+    {
+        _state.TwistOfFateActive = false;
+        _state.AdditionalActions.RemoveAll(g => g.PlayerId == _state.ActivePlayerId && Forfeitable(g));
+        _state.Phase = _state.TwistOfFateReturnPhase;
+        _state.PriorityPlayerId = _state.ActivePlayerId; _state.ConsecutivePasses = 0;
+        Emit("twistOfFateEnded", "The additional action is over: the Dynasty Phase carries on.", _state.ActivePlayerId);
+    }
+
+    // Apply's hook after a command completed: the first command taken during the additional action that leaves nothing open ends it (an action that opens a window or a decision waits for it).
+    private void FinishTwistOfFateAction(bool wasActive)
+    {
+        if (!wasActive || !_state.TwistOfFateActive || _state.WinnerId is not null) return;
+        if (DecisionStates.Any(d => d.Open(_state))) return;
+        EndTwistOfFateAction();
+    }
+
+    // ---- The Killing Grounds ----
+
+    private const string KillingGroundsEffect = "killing-grounds";
+    private const string KillingGroundsFiredKey = "killing-grounds:fired";
+
+    // Pass()'s hook, in the Combat Segment: "After the first time, while this card remains in play, that a player passes instead of announcing a Battle action: He chooses and destroys one of his
+    // Personalities at the current battlefield." The first pass while the Terrain stands spends it. One Personality is destroyed without asking; with several the passing player is asked
+    // (killingGroundsSelect) and the pass completes once he has chosen. True when a decision is open (the pass waits); false when the pass goes on.
+    private bool BeginKillingGroundsOnPass()
+    {
+        if (_state.PendingChoice is not null || _state.CurrentBattleProvince is not int battle) return false;
+        var grounds = TerrainsAtBattlefield(battle).FirstOrDefault(t => Definition(t).Effect == KillingGroundsEffect && !t.AbilityUses.ContainsKey(KillingGroundsFiredKey));
+        if (grounds is null) return false;
+        grounds.AbilityUses[KillingGroundsFiredKey] = _state.TurnNumber;
+        var passer = _state.PriorityPlayerId;
+        var own = Army(passer, battle).OrderBy(c => c.Id, StringComparer.Ordinal).ToArray();
+        Emit("killingGrounds", $"{Definition(grounds).Name}: {Player(passer).Name} passed instead of announcing a Battle action and must destroy one of his Personalities at this battlefield.", passer, grounds.Id);
+        if (own.Length == 0) return false;
+        if (own.Length == 1) { DestroyKillingGroundsVictim(own[0], grounds); return false; }
+        _state.PendingChoice = new("killingGroundsSelect", passer, grounds.Id, $"{Definition(grounds).Name}: choose and destroy one of your Personalities at this battlefield.");
+        _state.PriorityPlayerId = passer; _state.ConsecutivePasses = 0;
+        return true;
+    }
+
+    // The Terrain's trait, not an action: nobody performs it, so there is no acting player (and nothing an action's destruction is negated by applies).
+    private void DestroyKillingGroundsVictim(CardInstance victim, CardInstance grounds)
+    {
+        Emit("killingGroundsDestroyed", $"{Definition(grounds).Name}: {Definition(victim).Name} is destroyed.", victim.OwnerId, victim.Id);
+        DestroyUnits([victim]);
+    }
+
+    private void ResolveKillingGroundsSelect(GameCommand command)
+    {
+        var choice = _state.PendingChoice!;
+        Require(command.Type == "killingGroundsSelect" && command.PlayerId == choice.PlayerId && command.TargetId is not null && _state.CurrentBattleProvince is not null, "Choose one of your Personalities at this battlefield.");
+        var victim = Card(command.TargetId);
+        Require(victim.OwnerId == command.PlayerId && Army(command.PlayerId, _state.CurrentBattleProvince!.Value).Any(c => c.Id == victim.Id), "Choose one of your own Personalities at this battlefield.");
+        _state.PendingChoice = null;
+        DestroyKillingGroundsVictim(victim, Card(choice.CardId!));
+        FinishBattlePass();
+    }
+
+    private IEnumerable<ActionOption> KillingGroundsActions(int playerId)
+    {
+        if (_state.PendingChoice is not { Type: "killingGroundsSelect" } || _state.CurrentBattleProvince is not int battle) yield break;
+        foreach (var card in Army(playerId, battle).OrderBy(c => c.Id, StringComparer.Ordinal))
+            yield return new("killingGroundsSelect", $"Destroy {Definition(card).Name}", true, null, new GameCommand("killingGroundsSelect", playerId, _state.Version, TargetId: card.Id), card.Id);
+    }
+
+    // ---- The Shadow Court ----
+
+    // "After the next time this turn another player's action ... destroys your Courtier": the traits are asked where an action is truly done (FinishActionEffectTracking), before any Reaction to
+    // the same moment. The watch is spent, its controller draws, and he chooses a player and a direction (EitherOrSpecs.ShadowCourtHonor). True when the decision is open.
+    private bool OpenShadowCourtTrait(int closesTo)
+    {
+        if (_state.ShadowCourtWatches.Count == 0 || _state.LastResolvedAction is not { } facts) return false;
+        var watch = _state.ShadowCourtWatches.FirstOrDefault(w => w.Turn == _state.TurnNumber && Card(w.CardId).OwnerId != facts.PlayerId
+            && facts.Affected.Any(a => a.Kind == DestroyedKind && a.CardId == w.CardId));
+        if (watch is null) return false;
+        _state.ShadowCourtWatches.Remove(watch);
+        Draw(Player(watch.PlayerId));
+        SuspendOpenWindow();
+        return OpenEitherOr(EitherOrSpecs.ShadowCourtHonor, Card(watch.SourceId), facts.PlayerId, watch.PlayerId, null, ShadowsEmbraceAfterActionOrigin, resumePlayerId: closesTo);
+    }
+
+    private const string ShadowCourtResolutionOrigin = "shadow-court-resolution";
+
+    // "...or a battle resolution destroys your Courtier": asked as the resolution is done, before its Reactions (a trait). The resolution carries on from FinishEmperorRemainingDEitherOr.
+    private bool OpenShadowCourtResolutionTrait(PendingAfterResolution facts)
+    {
+        if (_state.ShadowCourtWatches.Count == 0) return false;
+        var watch = _state.ShadowCourtWatches.FirstOrDefault(w => w.Turn == _state.TurnNumber && facts.DestroyedCardIds.Contains(w.CardId) && Card(w.CardId).Zone == Zone.Dead);
+        if (watch is null) return false;
+        _state.ShadowCourtWatches.Remove(watch);
+        Draw(Player(watch.PlayerId));
+        _state.PendingShadowCourtResolution = facts;
+        return OpenEitherOr(EitherOrSpecs.ShadowCourtHonor, Card(watch.SourceId), facts.Attacker, watch.PlayerId, null, ShadowCourtResolutionOrigin, resumePlayerId: facts.Attacker);
+    }
+
+    // ---- The Sincerity of the Dragon ----
+
+    internal const string SincerityNameEffect = "sincerity-name:";
+
+    // ApplyBranchEffect's arm: naming the number sets the watch for the turn.
+    private bool ApplyEmperorRemainingDBranchEffect(string effect, GameCommand command)
+    {
+        if (!effect.StartsWith(SincerityNameEffect, StringComparison.Ordinal)) return false;
+        var number = int.Parse(effect[SincerityNameEffect.Length..]);
+        var source = Card(command.CardId);
+        _state.SincerityWatches.RemoveAll(w => w.Turn != _state.TurnNumber);
+        _state.SincerityWatches.Add(new(command.PlayerId, number, _state.TurnNumber, source.Id));
+        Emit("watchSet", $"{Definition(source).Name}: {Player(command.PlayerId).Name} named {number}. After the next resolution this turn of his action from another Strategy or Ring with a base Focus Value of {number}, he draws a card and chooses a player who discards a card.", command.PlayerId, source.Id);
+        return true;
+    }
+
+    // "After the next resolution this turn of your action from another Strategy or Ring with a base Focus Value equal to the number": asked where an action is truly done, as a trait.
+    private bool OpenSincerityTrait(int closesTo)
+    {
+        if (_state.SincerityWatches.Count == 0 || _state.LastResolvedAction is not { } facts || facts.SourceId is not { } sourceId || !_state.Cards.TryGetValue(sourceId, out var acted)) return false;
+        if (Definition(acted).Type is not (CardType.Strategy or CardType.Ring)) return false;
+        var watch = _state.SincerityWatches.FirstOrDefault(w => w.Turn == _state.TurnNumber && w.PlayerId == facts.PlayerId && w.SourceId != acted.Id && w.Number == Definition(acted).Focus);
+        if (watch is null) return false;
+        _state.SincerityWatches.Remove(watch);
+        Draw(Player(watch.PlayerId));
+        SuspendOpenWindow();
+        return OpenEitherOr(EitherOrSpecs.SincerityDiscard, Card(watch.SourceId), facts.PlayerId, watch.PlayerId, null, ShadowsEmbraceAfterActionOrigin, resumePlayerId: closesTo);
+    }
+
+    // ---- the two decisions (EitherOr.cs) ----
+
+    private EitherOrOption[] EmperorRemainingDEitherOrOptions(PendingEitherOr p) => p.SpecId switch
+    {
+        EitherOrSpecs.ShadowCourtHonor =>
+        [
+            new("self-gain", "You gain 2 Honor", "You gain 2 Honor.", EitherOrKind.Choose, 0, true, null),
+            new("opponent-gain", "Your opponent gains 2 Honor", "Your opponent gains 2 Honor.", EitherOrKind.Choose, 0, true, null),
+            new("self-lose", "You lose 2 Honor", "You lose 2 Honor.", EitherOrKind.Choose, 0, true, null),
+            new("opponent-lose", "Your opponent loses 2 Honor", "Your opponent loses 2 Honor.", EitherOrKind.Choose, 0, true, null),
+        ],
+        EitherOrSpecs.SincerityDiscard =>
+        [
+            new("self", "You discard a card", "You discard a card of your choice.", EitherOrKind.Choose, 0, true, null),
+            new("opponent", "Your opponent discards a card", "Your opponent discards a card of his choice.", EitherOrKind.Choose, 0, true, null),
+        ],
+        _ => throw new RuleViolation("Unknown choice.")
+    };
+
+    private void ApplyEmperorRemainingDEitherOr(PendingEitherOr p, EitherOrOption option, PlayerState decider)
+    {
+        var source = Card(p.SourceCardId);
+        var name = Definition(source).Name;
+        var chosen = option.Key.StartsWith("self", StringComparison.Ordinal) ? decider.Id : 1 - decider.Id;
+        Emit("eitherOrChosen", $"{decider.Name} chose: {option.Label} ({name}).", decider.Id, source.Id);
+        if (p.SpecId == EitherOrSpecs.ShadowCourtHonor) GainHonor(chosen, option.Key.EndsWith("gain", StringComparison.Ordinal) ? 2 : -2, name, source);
+        else _state.PendingForcedDiscards.Add(new(chosen, name));
+    }
+
+    // FinishEitherOr's hook: after a decision of this group is answered the resolved action's own tail carries on -- more watches due at the same moment first, then a discard the answer owed.
+    private bool FinishEmperorRemainingDEitherOr(PendingEitherOr p)
+    {
+        if (p.SpecId is not (EitherOrSpecs.ShadowCourtHonor or EitherOrSpecs.SincerityDiscard)) return false;
+        _state.PendingChoice = null;
+        if (p.Origin == ShadowCourtResolutionOrigin)
+        {
+            var facts = _state.PendingShadowCourtResolution!;
+            if (OpenShadowCourtResolutionTrait(facts)) return true;
+            _state.PendingShadowCourtResolution = null;
+            if (OpenAfterResolutionWindow(facts)) return true;
+            ContinueAfterResolution(facts.ProvinceIndex, facts.Attacker, facts.AttackerWon, facts.AttackerIds.Where(_state.Cards.ContainsKey).Select(Card).ToArray());
+            return true;
+        }
+        if (OpenShadowCourtTrait(p.ResumePlayerId) || OpenSincerityTrait(p.ResumePlayerId)) return true;
+        if (OpenOverconfidentDrawWindow(p.ResumePlayerId)) return true;
+        ContinueAfterActionTail(p.ActingPlayerId, p.ResumePlayerId);
+        return true;
+    }
 }
