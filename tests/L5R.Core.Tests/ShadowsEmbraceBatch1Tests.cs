@@ -114,7 +114,7 @@ internal static class ShadowsEmbraceBatch1Tests
         Stats(Sosuke, "Daidoji Sosuke", "Crane", 2, 4, 8, 4, 6, "Courtier,Crane Clan,Merchant", ["sosuke-tariffs"]);
         Stats(Arakan, "Daigotsu Arakan", "Spider", 5, 3, 8, 0, null, "Commander,Conqueror,Samurai,Shadowlands,Spider Clan", ["arakan-weaken"], entryLoss: 1);
         Stats(Rafu, "Daigotsu Rafu", "Spider", 4, 3, 7, 0, null, "Dark Dementia,Paragon,Samurai,Shadowlands,Spider Clan", ["rafu-attack"], entryLoss: 1);
-        Stats(Bunoro, "Goju Bunoro", "Ninja", 4, 2, 7, 0, null, "Displacer,Ninja,Shadowlands,Spider Clan", ["bunoro-displace"], entryLoss: 2);
+        Stats(Bunoro, "Goju Bunoro", "Spider", /* issue #492, ruling R5 */ 4, 2, 7, 0, null, "Displacer,Ninja,Shadowlands,Spider Clan", ["bunoro-displace"], entryLoss: 2);
         Stats(Bakari, "Hida Bakari", "Crab", 7, 1, 6, 0, null, "Berserker,Crab Clan", [], "bakari-unopposed-penalty");
         Stats(Hikazu, "Hiruma Hikazu", "Crab", 4, 3, 7, 1, null, "Crab Clan,Samurai,Scout", [], "hikazu-follower-resolution");
         Stats(Nikaru, "Hiruma Nikaru", "Crab", 8, 2, 10, 0, null, "Berserker,Crab Clan,Experienced,Unique", ["nikaru-exp-shield"], "nikaru-force-duel-stat");

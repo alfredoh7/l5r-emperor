@@ -2598,8 +2598,9 @@ public static class AbilityCatalog
         // (YojimboRedirectApplies), narrowed to Scorpion Clan and to an IssuesDuel action (TargetedActionReactions.cs).
         ["irezu-move"] = new("Battle", "Home Battle: If Irezu is at home, move home another target Scorpion Clan Personality you control. Move Irezu to the current battlefield",
             "own-scorpion-personality-other-than-source", MovesToBattle: true),
+        // Issue #492 (Mendon's ruling R5): a substitute takes the place of a participant only in an accepted (or mandatory) duel, so this is a "before the duel begins" Reaction (EmperorRulingR5.cs).
         ["irezu-duel-enter"] = new("Reaction", "Reaction, bow: Before your Scorpion Clan Personality enters a duel, Irezu enters the duel instead", "none",
-            Trigger: ReactionTriggers.TargetedByAction, Costs: ActionCost.BowSource),
+            Trigger: "before-duel-begins", Costs: ActionCost.BowSource),
         // Bayushi Kasumi (oracle-l5r-10247): printed Elite only, no ability.
         // Bayushi Utoro (oracle-l5r-10249): "Battle: Even if Utoro is bowed, discard a card and target a Personality: Straighten him." -- Akodo Tezuka's own two-slot shape
         // (a "hand" cost slot beside the real target), since the discarded card and the straightened target are independent choices.
@@ -5399,6 +5400,7 @@ public sealed partial class MatchEngine
                 EmperorRemainingCAbilities.AttackPhaseEnd => _state.PendingChoice.Type == "attackPhaseEndReaction" && command.PlayerId == _state.PendingChoice.PlayerId,
                 "own-personality-enters-play" or EmperorRulingR3Abilities.EntersFromProvinceTrigger => _state.PendingChoice.Type is "proclaim" or "entryReaction" && command.PlayerId == _state.PendingChoice.PlayerId
                     && _state.PendingChoice.CardId is { } enteredId && _state.Cards.TryGetValue(enteredId, out var enteredCard) && enteredCard.OwnerId == command.PlayerId && Definition(enteredCard).Type == CardType.Personality
+                    && command.CardId != enteredId // Ki-Chang (issue #492 ruling R5): a Personality has already entered play, so there is no trigger for his own Reaction against himself.
                     && (ability.Trigger == "own-personality-enters-play" || EnteredFromProvince(enteredCard)), // Kaiu Village (issue #492 ruling R3): "enters play from a province".
                 _ => false
             },
@@ -5597,6 +5599,7 @@ public sealed partial class MatchEngine
         ValidateEmperorRemainingB(id, ability, command, player, source); // Emperor Edition remaining-cards pass (issue #492), group B.
         ValidateEmperorRemainingE(id, ability, command, player, source); // Emperor Edition remaining-cards pass (issue #492), group E.
         ValidateEmperorRulingR1(id, ability!, command, player, source); // Emperor Edition rulings pass R1 (issue #492): battles without a province.
+        ValidateEmperorRulingR5(id, ability, command, player, source); // Issue #492, Mendon's rulings R5.
         // Barred Passage: "the only Personality in his army" -- none of the acting player's other Personalities stands at this battlefield.
         if (id == "barred-passage-bow") Require(Army(player.Id, _state.CurrentBattleProvince!.Value).Count(c => Definition(c).Type == CardType.Personality) == 1, "The performing Hero must be the only Personality in his army.");
         if (id is "tamoko-open" or "virtuous-charity-open") Require(_state.ActivePlayerId != player.Id, "Only usable when it is not your own turn.");
@@ -7313,7 +7316,7 @@ public sealed partial class MatchEngine
             case "air-straighten": case "paid-straighten": case "training-keyword-conditional-straighten": case "immovable-object-straighten": case "training-stain-straighten": Straighten(target!); break;
             case "paid-bow": case "unorthodox-attack": case "chokehold": case "immovable-object-bow": case "naga-remnants-bow": case "training-disgrace-bow": case "disgraceful-conduct-bow": case "water-bo-bow": case "tsuji-bow": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;
             case "disgraceful-conduct-bow-unit":
-                foreach (var member in Attachments(target!.Id).Prepend(target)) if (!StalwartNegatesBow(member, player.Id)) member.Bowed = true;
+                BowUnitByEffect(target!, player.Id); // "bow the Personality and every card attached to him": every card of the unit bows, each unless its own bowing is prevented
                 break;
             // Generalized Gold payment fixtures (issue #303): the Gold itself was already charged by
             // PayForAbility above; a variable-cost effect reads the amount the player actually chose.
@@ -7354,7 +7357,14 @@ public sealed partial class MatchEngine
             case "crushing-force": ApplyModifier(target!, source!.Id, id, "Force", 3); break;
             case "crushing-destroy": case "never-afraid": DestroyAttachment(target!); break;
             case "incapacitated": case "favor-battle": MoveHome(target!, false); break;
-            case "block-supply": MoveHome(target!, !StalwartNegatesBow(target!, player.Id)); break;
+            case "block-supply":
+            {
+                // "Move an attacking unit home bowed": once it has moved home every card of the unit bows, each unless its own bowing is prevented (issue #492, ruling R5).
+                var blockedFrom = target!.Zone;
+                MoveHome(target, false);
+                if (blockedFrom == Zone.Battlefield && target.Zone == Zone.Home) BowUnitByEffect(target, player.Id);
+                break;
+            }
             case "lobby": TakeImperialFavor(player.Id); Emit("favorTaken", $"{player.Name} took the Imperial Favor.", player.Id); break;
             case "favor-cycle":  Draw(player); break;
             case "journeys-end-move": MoveHome(target!, false); break;
@@ -8385,8 +8395,7 @@ public sealed partial class MatchEngine
             case "dainagon-lobby": TakeImperialFavor(player.Id); Emit("favorTaken", $"{player.Name} took the Imperial Favor.", player.Id); break;
             // Barred Passage: the Personality and every card attached to him bow.
             case "barred-passage-bow":
-                if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
-                foreach (var attached in Attachments(target!.Id)) attached.Bowed = true;
+                BowUnitByEffect(target!, player.Id); // his unit: the Personality and every card attached to him, each unless its own bowing is prevented (issue #492, ruling R5)
                 break;
             // A Fugitive Apprehended: the first target is bowed, then the Magistrate's second target (if he named one) is reduced to a Gold Cost of 0.
             case "fugitive-apprehended":
@@ -8590,7 +8599,7 @@ public sealed partial class MatchEngine
                 MoveHome(target, false);
                 if (movedFrom == Zone.Battlefield && target.Zone == Zone.Home)
                 {
-                    foreach (var member in Attachments(target.Id).Prepend(target)) if (!StalwartNegatesBow(member, player.Id)) member.Bowed = true;
+                    BowUnitByEffect(target, player.Id);
                     if (id == "detained-move") GainHonor(target.OwnerId, -2, Definition(source!).Name, source);
                 }
                 break;
@@ -9641,7 +9650,7 @@ public sealed partial class MatchEngine
             // Honor and Treachery pass (issue #458; helpers in HonorAndTreacheryPass.cs).
             case "shihiro-boost": ApplyModifier(source!, source!.Id, id, "Force", 1); break;
             case "irezu-move": IrezuMove(command, source!, target!, _state.CurrentBattleProvince!.Value); break;
-            case "irezu-duel-enter": RedirectAction(HeldAction(), source!.Id, source); break;
+            case "irezu-duel-enter": SubstituteDuelParticipant(OwnDuelParticipant(command.PlayerId)!, source!, source!); break;
             case "utoro-straighten": DiscardFate(player, SlotCards(command, "discard").Single()); Straighten(SlotCards(command, "target").Single()); break;
             case "communion-transfer": TransferAttachment(source!, target!, Definition(source!).Name); break;
             case "devoted-yojimbo-straighten": Straighten(target!); break;
@@ -10347,6 +10356,7 @@ public sealed partial class MatchEngine
 
     private void Straighten(CardInstance card)
     {
+        if (IsTerrainCard(card)) return; // Issue #492 (ruling R5): a Terrain may not be bowed or straightened.
         // Tamori Tamoko (issue #207 follow-up): "before an action resolves, negate ... his
         // straightening from the action's effects" -- consumed here, the single shared choke point
         // for every ability-triggered straighten (StraightenUnit calls through this too). Checked

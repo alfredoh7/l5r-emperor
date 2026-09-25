@@ -230,7 +230,11 @@ public sealed class CardInstance
     public Zone Zone { get; set; }
     public int? ProvinceIndex { get; set; }
     public bool FaceUp { get; set; }
-    public bool Bowed { get; set; }
+    // Issue #492 (Mendon's ruling R5): "Terrain may not be bowed or straightened." A Terrain (a Strategy with the Terrain keyword) is therefore never bowed, whichever path tries: every one of the
+    // hundred-odd places that set a card bowed goes through this one property.
+    private bool _bowed;
+    public bool Bowed { get => _bowed; set => _bowed = value && !IsTerrain(); }
+    private bool IsTerrain() => (Printed ?? (CardCatalog.Cards.TryGetValue(DefinitionId, out var printed) ? printed : null)) is { Type: CardType.Strategy, Keywords: { } keywords } && keywords.Contains("Terrain");
     public string? AttachedTo { get; set; }
     public List<AppliedModifier> Modifiers { get; set; } = [];
     public List<GrantedKeyword> GrantedKeywords { get; set; } = [];

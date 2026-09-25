@@ -76,7 +76,7 @@ internal static class ForgottenLegacyBatch2Tests
         Stats(Koyama, "Lion", 4, 3, 7, "Lion Clan,Paragon,Samurai", ["koyama-weaken"]);
         Stats(Sasako, "Mantis", 4, 3, 7, "Mantis Clan,Naval,Shugenja,Thunder", [], "sasako-unit-no-resolution-bow");
         Stats(Xiao, "Unicorn", 6, 4, 10, "Cavalry,Commander,Experienced,Samurai,Unicorn Clan,Unique", ["xiao-destroy"], "xiao-army-follower-force");
-        Stats(Shiho, "Ninja", 3, 3, 4, "Ninja,Shadowlands,Shugenja,Spider Clan,Unmaker", ["shiho-return"]);
+        Stats(Shiho, "Spider", /* issue #492, ruling R5 */ 3, 3, 4, "Ninja,Shadowlands,Shugenja,Spider Clan,Unmaker", ["shiho-return"]);
         Eq(CardCatalog.Get(Shiho).EntryHonorLoss, 1, "Shiho's recruit Honor loss");
         Stats(Sawaken, "Phoenix", 4, 3, 7, "Duelist,Phoenix Clan,Samurai,Yojimbo", ["sawaken-weaken"]);
         Stats(Junpei, "Unicorn", 3, 4, 7, "Samurai,Tactician,Unicorn Clan", ["junpei-base-bow"]);

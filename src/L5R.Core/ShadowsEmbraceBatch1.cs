@@ -145,7 +145,7 @@ public sealed partial class MatchEngine
             {
                 if (HasClanAffiliation(target!, "Mantis"))
                 {
-                    foreach (var member in Attachments(target!.Id).Prepend(target).ToArray()) if (!StalwartNegatesBow(member, player.Id)) member.Bowed = true;
+                    BowUnitByEffect(target!, player.Id);
                     return false;
                 }
                 CardInstance[] candidates = !HasAttachments(target!) ? [target!]

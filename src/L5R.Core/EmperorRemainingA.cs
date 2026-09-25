@@ -479,7 +479,7 @@ public sealed partial class MatchEngine
                 return false;
             // Fortitude.
             case "fortitude-bow":
-                if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
+                BowUnitByEffect(target!, player.Id); // "Bow the target" -- the target is an enemy unit (issue #492, ruling R5: every card in the unit bows, each unless its own bowing is prevented)
                 NegateForcePenalties(Card(command.PerformerId!));
                 return false;
             default:

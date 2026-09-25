@@ -135,13 +135,6 @@ public sealed partial class MatchEngine
             if(OpenReactionSubject() is not { } held) return;
             foreach(var (card,reactionId) in TargetedActionReactionCandidates().Where(x=>x.Card.OwnerId==playerId && TargetedActionReactionApplies(x.Card,x.AbilityId,held)).ToArray())
             {
-                // He's Mine! (Emperor Edition remaining-cards pass, issue #492, group B): one option per Samurai who may take the targeted Personality's place (EmperorRemainingB.cs).
-                if(reactionId=="hes-mine-substitute")
-                {
-                    foreach(var samurai in HesMinePerformers(card,held))
-                        AddReaction(card,reactionId,targetId:held.TargetId,label:$"{AbilityCatalog.All[reactionId].Label} · {Definition(samurai).Name} ({samurai.Id})",validate:true,performerId:samurai.Id);
-                    continue;
-                }
                 foreach(var (candidate,label) in TargetedReactionChoices(card,reactionId,held))
                 {
                     // Ancestral Protection (Emperor Edition remaining-cards pass, group A, issue #492): a Reaction with a performer to choose is offered once per performer who could take it.

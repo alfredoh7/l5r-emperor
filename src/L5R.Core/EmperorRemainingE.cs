@@ -491,8 +491,7 @@ public sealed partial class MatchEngine
                 // "Destroy all bowed cards in it": a bowed Personality takes his whole unit with him; otherwise each bowed attachment. Then "bow it": what is left of the unit.
                 if (target!.Bowed) DestroyTargetCard(target, player.Id);
                 else foreach (var bowedAttachment in Attachments(target.Id).Where(a => a.Bowed).ToArray()) if (bowedAttachment.Zone == Zone.Attached) DestroyTargetCard(bowedAttachment, player.Id);
-                if (InPlay(target))
-                    foreach (var member in UnitMembers(target).ToArray()) if (!StalwartNegatesBow(member, player.Id)) member.Bowed = true;
+                if (InPlay(target)) BowUnitByEffect(target, player.Id);
                 return false;
             case "dojis-guidance-return": case "shibas-guidance-return":
                 ReturnToHand(target!);
@@ -501,7 +500,7 @@ public sealed partial class MatchEngine
             {
                 var attacking = IsAttacking(target!); // as he stands when the action resolves, before he is bowed
                 if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
-                if (attacking) foreach (var member in Attachments(target!.Id).ToArray()) if (!StalwartNegatesBow(member, player.Id)) member.Bowed = true;
+                if (attacking) BowUnitByEffect(target!, player.Id, except: target!.Id); // his unit: the rest of its cards bow (the Personality already did or was prevented)
                 return false;
             }
             case "shinjos-guidance-search": case "togashis-guidance-ring-search":

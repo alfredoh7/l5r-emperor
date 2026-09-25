@@ -49,7 +49,7 @@ internal static class EmperorRemainingBTests
         ("Hidden Defenses: with no Personality of its player's in play, one or two Personalities anywhere are bowed and cannot be straightened this turn; its Reaction after engaging moves a Personality there and straightens him if he moved", HiddenDefensesScenario),
         ("Hundred-Fold Cut: a Kensai targeted by an action that could destroy him is saved by bowing or destroying one of his Weapons; its Battle action bows the Kensai or one of his Weapons to draw two cards", HundredFoldCutScenario),
         ("Remember Your Ancestors: the enemy attacking Personality's controller either destroys him or discards a card at random and lets the acting player choose who gains or loses 3 Honor", RememberYourAncestorsScenario),
-        ("He's Mine!: another player's duel-issuing action targeting your Personality is redirected to your unbowed Samurai at his location, the Personality bowed as the cost, and the Samurai bows when the duel has ended", HesMineScenario),
+        ("He's Mine! (ruling R5): before an accepted or mandatory duel begins, your unbowed Samurai at his location takes the place of your participant, who is bowed as the cost; the Samurai bows when the duel has ended", HesMineScenario),
         ("Plans Within Plans: the next opportunity to take an Open action may instead be a Limited action, even on the opponent's turn -- once, and taking an Open action or passing spends it", PlansWithinPlansScenario),
         ("Ninja Tricks: from the hand, after an action on a Strategy is announced, a Ninja at the battlefield bows and the action's effects are negated at the cost of 2 Honor; not for an action on a card in play, and not without a Ninja", NinjaTricksScenario),
     ]);
@@ -857,41 +857,45 @@ internal static class EmperorRemainingBTests
         Check(e.State.PendingDuel is null, "the duel did not finish");
     }
 
+    // Issue #492 (Mendon's ruling R5): the substitute takes the place of a participant only in an accepted (or mandatory) duel -- the "before the duel begins" window -- never in a challenge still awaiting
+    // its answer, so refusal cannot be moved to a new target. The refusable-challenge cases are in EmperorRulingR5Tests.
     private static void HesMineScenario()
     {
-        (MatchEngine E, CardInstance Card, CardInstance Victim, CardInstance Samurai, CardInstance Duelist, CardInstance Challenge) Setup(bool samuraiBowed = false, bool samuraiElsewhere = false)
+        (MatchEngine E, CardInstance Card, CardInstance Victim, CardInstance Samurai, CardInstance Duelist, CardInstance Challenge) Setup(bool samuraiBowed = false, bool samuraiElsewhere = false, string duel = "training-duel-force")
         {
             var s = Table(Phase.Battle, 1);
             var victim = Add(s, "training-crane-veteran", 0, Zone.Battlefield, province: 0);
             var samurai = Kw(Add(s, "training-crane-samurai", 0, samuraiElsewhere ? Zone.Home : Zone.Battlefield, bowed: samuraiBowed, province: samuraiElsewhere ? null : 0), "Samurai");
             var duelist = Add(s, "training-lion-samurai", 1, Zone.Battlefield, province: 0);
-            var challenge = Add(s, "training-duel-force", 1, Zone.Hand);
+            var challenge = Add(s, duel, 1, Zone.Hand);
             var card = Add(s, HesMine, 0, Zone.Hand);
             var e = MatchEngine.FromTestState(s);
-            Accept(e, Use(e, 1, "training-duel-force", challenge.Id, victim.Id, performerId: duelist.Id));
+            Accept(e, Use(e, 1, duel, challenge.Id, victim.Id, performerId: duelist.Id));
             return (e, card, victim, samurai, duelist, challenge);
         }
         {
             var (e, card, victim, samurai, duelist, _) = Setup();
-            Eq(e.State.PendingChoice?.Type, "beforeActionReaction", "the challenged Personality's controller may react");
+            Eq(e.State.PendingChoice?.Type, "duelReaction", "a mandatory duel opens the before-the-duel window at once");
+            Eq(e.State.PendingDuel?.ChallengedId, victim.Id, "the Personality is the challenged one until he is replaced");
             var reaction = Enabled(e, 0, "hes-mine-substitute", card.Id, samurai.Id);
             Accept(e, reaction.Command!);
             Check(e.State.Cards[victim.Id].Bowed, "the Personality was bowed as the cost");
             Eq(e.State.Cards[card.Id].Zone, Zone.FateDiscard, "He's Mine! was spent");
-            while (e.State.PendingChoice?.Type == "beforeActionReaction") Accept(e, new("declineReaction", e.State.PriorityPlayerId, e.Version));
-            Check(e.State.PendingDuel is { } duel && (duel.ChallengedId == samurai.Id || duel.ChallengerId == samurai.Id), "the duel is fought by the Samurai instead");
+            Check(e.State.PendingDuel is { } duel && duel.ChallengedId == samurai.Id && duel.ChallengerId == duelist.Id, "the duel is fought by the Samurai instead");
             Check(!e.State.Cards[samurai.Id].Bowed, "he is not bowed while the duel is under way");
+            Accept(e, new("declineReaction", e.State.PriorityPlayerId, e.Version));
+            while (e.State.PendingChoice?.Type == "duelReaction") Accept(e, new("declineReaction", e.State.PriorityPlayerId, e.Version));
             FinishDuel(e);
             Check(e.State.Cards[samurai.Id].Bowed, "he bows after the duel ends");
-            _ = duelist;
         }
         {
-            // A bowed Samurai, one elsewhere, and a bowed target give no reaction.
+            // A bowed Samurai and one elsewhere give no reaction (and open no window for it).
             var (e, card, _, samurai, _, _) = Setup(samuraiBowed: true);
             Check(!CanUse(e, 0, "hes-mine-substitute", card.Id, samurai.Id), "a bowed Samurai may not take his place");
+            Eq(e.State.PendingChoice?.Type != "duelReaction", true, "with nobody to substitute, no window opens for it");
             var (e2, card2, _, samurai2, _, _) = Setup(samuraiElsewhere: true);
             Check(!CanUse(e2, 0, "hes-mine-substitute", card2.Id, samurai2.Id), "a Samurai at another location may not");
-            Eq(e2.State.PendingChoice?.Type != "beforeActionReaction", true, "with nobody to substitute, no window opens for it");
+            Eq(e2.State.PendingChoice?.Type != "duelReaction", true, "with nobody to substitute, no window opens for it");
         }
         {
             // Not for a Personality that is not challenged: a duel is not involved in an ordinary Battle action.
@@ -902,7 +906,7 @@ internal static class EmperorRemainingBTests
             var strategy = Add(s, OgreSavagery, 1, Zone.Hand); var card = Add(s, HesMine, 0, Zone.Hand);
             _ = bower; _ = strategy;
             var e = MatchEngine.FromTestState(s);
-            Check(!CanUse(e, 0, "hes-mine-substitute", card.Id), "no duel action is held: nothing to react to");
+            Check(!CanUse(e, 0, "hes-mine-substitute", card.Id), "no duel is pending: nothing to react to");
         }
     }
 

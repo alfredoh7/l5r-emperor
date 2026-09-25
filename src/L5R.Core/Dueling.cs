@@ -20,10 +20,11 @@ public sealed partial class MatchEngine
     private bool SharesNoKeywords(CardInstance a, CardInstance b) =>
         !(Definition(a).Keywords ?? []).Concat(a.GrantedKeywords.Select(g => g.Keyword)).Distinct(StringComparer.Ordinal)
             .Where(k => !KeywordRemoved(a, k)).Any(k => Keyword(b, k));
+    // Issue #492 (ruling R5): He's Mine! and Irezu are counted only when they could substitute a participant (DuelReactionRelevant), so no window opens for nothing.
     private bool AnyDuelReactionAvailable(PendingDuel duel) =>
-        AnyInPlayReactionAvailable("before-duel-begins") ||
-        AnyOutOfPlayReactionAvailable(duel.ChallengerPlayerId, "before-duel-begins") ||
-        AnyOutOfPlayReactionAvailable(duel.ChallengedPlayerId, "before-duel-begins");
+        AnyInPlayReactionAvailable("before-duel-begins", DuelReactionRelevant) ||
+        OutOfPlayReactions(duel.ChallengerPlayerId, "before-duel-begins").Any(x => DuelReactionRelevant(x.Card, x.AbilityId)) ||
+        OutOfPlayReactions(duel.ChallengedPlayerId, "before-duel-begins").Any(x => DuelReactionRelevant(x.Card, x.AbilityId));
 
     // Called from ExecuteAbilityEffects for any ability with IssuesDuel set, after the card's own
     // cost/discard has already happened -- everything from here on is the deferred EFFECT (the duel
@@ -486,8 +487,7 @@ public sealed partial class MatchEngine
             // with, so checking the winner's OWNER matches the printed text precisely.
             // Doji Shigeyuki: "Bow the duel's loser's unit."
             case "shigeyuki-duel":
-                foreach (var loserId in loserIds)
-                    foreach (var member in Attachments(loserId).Prepend(Card(loserId))) if (!StalwartNegatesBow(member, challengerPlayerId)) member.Bowed = true;
+                foreach (var loserId in loserIds) BowUnitByEffect(Card(loserId), challengerPlayerId);
                 break;
             case "shiba-kudome-duel":
                 foreach (var id in loserIds) if (!StalwartNegatesBow(Card(id), challengerPlayerId)) Card(id).Bowed = true;

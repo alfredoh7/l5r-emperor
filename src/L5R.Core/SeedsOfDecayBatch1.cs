@@ -145,7 +145,7 @@ public sealed partial class MatchEngine
             {
                 _state.PendingGrapplingBows.Remove(pending);
                 if (!_state.Cards.TryGetValue(pending.PerformerId, out var performer) || !InPlay(performer)) continue;
-                foreach (var member in Attachments(performer.Id).Prepend(performer)) if (!StalwartNegatesBow(member, monk.OwnerId)) member.Bowed = true;
+                BowUnitByEffect(performer, monk.OwnerId);
                 Emit("unitBowed", $"{pending.SourceName}: {Definition(performer).Name}'s unit bowed after the action resolved.", monk.OwnerId, performer.Id);
             }
             SpendGrapplingWatch(monk);

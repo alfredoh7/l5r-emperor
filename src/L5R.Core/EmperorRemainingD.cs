@@ -244,10 +244,8 @@ public sealed partial class MatchEngine
                 return ResolveOrDeferAttack(id, player, target?.Id, ActionPerformer(ability, command, source).Id, consumedGrant);
             // "Bow it. Bow its unit if you are a Crane Clan player." Each bowing is an effect a bow negation may stop card by card.
             case "trap-sprung-bow":
-                if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
-                if (player.Clan == "Crane")
-                    foreach (var member in UnitMembers(target!).Where(m => m.Id != target!.Id).ToArray())
-                        if (!StalwartNegatesBow(member, player.Id)) member.Bowed = true;
+                BowByEffect(target!, player.Id);
+                if (player.Clan == "Crane") BowUnitByEffect(target!, player.Id, except: target!.Id); // the rest of its unit bows too (the target itself already did or was prevented)
                 return false;
             case "veiled-menace-loss":
                 GainHonor(target!.OwnerId, -2, name, source);
@@ -279,9 +277,7 @@ public sealed partial class MatchEngine
                 StraightenUnit(Card(command.PerformerId!));
                 return false;
             case "power-one-bow":
-                foreach (var unitTarget in SlotCards(command, "targets").ToArray())
-                    foreach (var member in UnitMembers(unitTarget).ToArray())
-                        if (!StalwartNegatesBow(member, player.Id)) member.Bowed = true;
+                foreach (var unitTarget in SlotCards(command, "targets").ToArray()) BowUnitByEffect(unitTarget, player.Id);
                 return false;
             case "power-word-reaction":
                 return BeginPowerOfWordChoice(source!);

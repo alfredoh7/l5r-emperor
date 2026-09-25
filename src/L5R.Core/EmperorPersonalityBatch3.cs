@@ -115,7 +115,7 @@ public sealed partial class MatchEngine
             {
                 var unit = UnitMembers(target!).ToArray();
                 var doomed = unit.Where(c => !HasAttachments(c) && !Keyword(c, "Cavalry")).ToArray();
-                foreach (var member in unit) if (!StalwartNegatesBow(member, player.Id)) member.Bowed = true;
+                BowUnitByEffect(target!, player.Id);
                 foreach (var card in doomed.Where(c => c.Zone == Zone.Attached)) if (InPlay(card)) DestroyAttachment(card);
                 foreach (var personality in doomed.Where(c => c.Zone != Zone.Attached && Definition(c).Type == CardType.Personality)) if (InPlay(personality)) DestroyUnits([personality], false, player.Id);
                 return false;
