@@ -47,6 +47,8 @@ public sealed partial class MatchEngine
         (nameof(MatchState.PendingHonorChange), s => s.PendingHonorChange is not null), // an Honor change awaiting Reactions (issue #492, R4)
         (nameof(MatchState.PendingEventChoice), s => s.PendingEventChoice is not null), // an Event's open decision (issue #492, group F)
         (nameof(MatchState.PendingEventChoices), s => s.PendingEventChoices.Count > 0), // an optional draw an Event owes, queued behind the action in progress (issue #492, group F)
+        (nameof(MatchState.PendingEntrySearches), s => s.PendingEntrySearches.Count > 0), // an "after this card enters play" search queued behind the entry windows (issue #498)
+        (nameof(MatchState.PendingAttackTargetSelection), s => s.PendingAttackTargetSelection is not null), // the Attack target selection step after an announce window (issue #498)
         (nameof(MatchState.PendingCopy), s => s.PendingCopy is not null),
         (nameof(MatchState.PendingEitherOr), s => s.PendingEitherOr is not null),
         (nameof(MatchState.PendingOpponentPayment), s => s.PendingOpponentPayment is not null),

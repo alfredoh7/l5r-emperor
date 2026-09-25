@@ -171,6 +171,9 @@ public static class TrainingOpponent
             // engine offers Pass (which it does only when nothing qualifies), attaches a found Region to the first
             // offered province, and discards its least useful hand card after a Terrain. Ties keep the engine's order.
             case "chooseSearchDeck": case "selectSearchCard": case "passSearch": case "chooseSearchProvince": return 100;
+            // "Put it into play or your hand" (issue #498): a modest bot puts the found Ring into play; the Attack target selection step: any offered target over none.
+            case "chooseSearchDestination": return command.Choice=="play" ? 100 : 90;
+            case "chooseAttackTarget": return command.TargetId is null ? 50 : 100;
             // Look at the top N cards (issue #322): a modest bot answers a look with the first arrangement the engine offers -- the
             // simplest legal one (keep everything in order when that is legal, otherwise take the top card that may be taken) -- and
             // picks the first offered deck.

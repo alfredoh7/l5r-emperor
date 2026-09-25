@@ -1,0 +1,54 @@
+{
+  "Profile": "strategy-wave-66",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-5599",
+      "Name": "No Hiding Place",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After you announce an action with a Ranged Attack: Give one Ranged Attack from the action -1 strength. That Ranged Attack may target a card in the Defender's home (if otherwise legal).",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-5599.jpg",
+      "Keywords": [],
+      "Focus": 3,
+      "Abilities": [
+        "no-hiding-place"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-6260",
+      "Name": "Rend the Soul",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "As a Focus Effect: Raise this card's Focus Value to 5. If your Personality wins this duel, he loses instead (the other Personality still also loses).\nBattle: Choose your performing opposed Personality: Give him +5F. If the army he is in during this battle's resolution wins, this battle is tied instead. You will not destroy the province in this battle's resolution.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6260.jpg",
+      "Keywords": [],
+      "Focus": 0,
+      "Abilities": [
+        "rend-the-soul-focus",
+        "rend-the-soul-battle"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}
