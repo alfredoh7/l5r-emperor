@@ -300,10 +300,10 @@ internal static class EmperorRemainingDTests
             Accept(e, options[0].Command!);
             Eq(defenders.Count(d => e.State.Cards[d.Id].Zone == Zone.Dead), 1, "one was destroyed");
             Check(e.State.PendingChoice is null && e.State.PriorityPlayerId == 0, "the pass went on: the other player has the next opportunity");
-            // Once: the next pass asks for nothing (it ends the Combat Segment, and the battle's own resolution follows).
+            // Mendon's ruling (issue #492, R4): "First time for each player" -- the OTHER player's first pass triggers it for him too (his lone Personality there is destroyed)...
             Accept(e, new("pass", 0, e.Version));
-            Check(e.State.PendingChoice?.Type != "killingGroundsSelect", "only the first time");
-            Eq(e.State.Events.Count(ev => ev.Type == "killingGrounds"), 1, "the trait fired once");
+            Eq(e.State.Events.Count(ev => ev.Type == "killingGrounds"), 2, "the trait fired once for each player");
+            Check(e.State.PendingChoice?.Type != "killingGroundsSelect", "one Personality: destroyed without asking");
         }
         {
             // One Personality: destroyed at once, no question.

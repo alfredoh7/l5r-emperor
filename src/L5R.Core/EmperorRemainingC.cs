@@ -32,6 +32,8 @@ public sealed class EmperorRemainingCState
     public int RedirectToPlayer { get; set; }
     public string? RedirectCourtierId { get; set; }
     public bool RedirectSpent { get; set; }
+    /// <summary>Which of the action's Honor changes (in order, from 0) the redirect is about: Rhetoric is played "before a player gains or loses Honor", so it applies to that one change only (R4, issue #492).</summary>
+    public int RedirectOccurrence { get; set; } = -1;
     /// <summary>Retribution: the player whose turn it is, while an ADDITIONAL Attack Phase is under way (-1 otherwise); the phase's Attacker is then the Defender who declared it (ActivePlayerId is swapped
     /// for its duration and restored when the last such phase ends), and how many Personalities have been assigned to attack in it.</summary>
     public int RetributionRoot { get; set; } = -1;
@@ -49,7 +51,8 @@ public static class EmperorRemainingCAbilities
     /// <summary>A cost subject naming EVERY card of the ability's performing slot(s): "Bow one or more of your performing ..." (Shadows Walk).</summary>
     public const string AllPerformingSlots = "all-performing-slots";
 
-    public static readonly string[] BeforeActionHandReactions = ["height-courage-negate", "rhetoric-redirect", "solid-defense-negate", "solid-defense-negate-favor"];
+    // Rhetoric and Solid Defense are no longer here: they are played in the window before an Honor change (Mendon's R4 ruling, EmperorRulingR4Honor.cs), not before an action whose label was guessed to change Honor.
+    public static readonly string[] BeforeActionHandReactions = ["height-courage-negate"];
 
     public static Dictionary<string, AbilityDefinition> AddEmperorRemainingC(this Dictionary<string, AbilityDefinition> all)
     {
@@ -89,14 +92,14 @@ public static class EmperorRemainingCAbilities
         // control a Personality with 5 or higher Force: Negate any Honor losses from the action's effects." The cost is conditional, so it is two actions sharing one use: without a Personality
         // of 5 or higher Force the Favor is discarded (a Favor-discard action, EmperorStrongholdBatch1), with one nothing is. "Battle: Target a Personality without attachments: Move him home."
         all["solid-defense-negate"] = new("Reaction", "Political Reaction: Before the resolution of another player's action, if you control a Personality with 5 or higher Force: Negate any Honor losses from the action's effects", "none",
-            Trigger: "before-action-resolves", UsageKey: "solid-defense-negate", ActionKeywords: ["Political"]);
+            Trigger: HonorChangeReactions.Trigger, UsageKey: "solid-defense-negate", ActionKeywords: ["Political"]);
         all["solid-defense-negate-favor"] = new("Reaction", "Political Reaction: Before the resolution of another player's action, discard the Imperial Favor: Negate any Honor losses from the action's effects", "none",
-            Trigger: "before-action-resolves", UsageKey: "solid-defense-negate", ActionKeywords: ["Political"]);
+            Trigger: HonorChangeReactions.Trigger, UsageKey: "solid-defense-negate", ActionKeywords: ["Political"]);
         all["solid-defense-move"] = new("Battle", "Target a Personality without attachments: Move him home", "personality", RequireNoAttachments: true, Move: new(MoveSpec.Target, MoveSpec.Home));
         // Rhetoric (oracle-l5r-6312, Political): "Reaction: Before a player gains or loses Honor from an action's effects, bow your performing Courtier: Choose another player. If the Courtier's Chi is
         // higher than or equal to the Honor gain or loss, the chosen player instead of the original player takes the gain or loss."
         all["rhetoric-redirect"] = new("Reaction", "Before a player gains or loses Honor from an action's effects, bow your performing Courtier: Choose another player. If the Courtier's Chi is higher than or equal to the Honor gain or loss, the chosen player instead of the original player takes the gain or loss",
-            "player", Performer: "own-unbowed-personality-with-keyword-at-any-location", RequiredKeywords: ["Courtier"], Trigger: "before-action-resolves", Costs: ActionCost.BowPerformer);
+            "player", Performer: "own-unbowed-personality-with-keyword-at-any-location", RequiredKeywords: ["Courtier"], Trigger: HonorChangeReactions.Trigger, Costs: ActionCost.BowPerformer);
         // Rumors Travel (oracle-l5r-6406, Political): "Limited: Until your next turn begins, before each time a player gains 1 or more Honor, reduce the gain by 1 if it is not during a battle or Attack
         // Phase." and "Battle: If any enemy units are at the current battlefield, choose your performing Personality: Move him there. Straighten him if he moved." (Broken Alliance's text).
         all["rumors-travel-reduce"] = new("Limited", "Limited: Until your next turn begins, before each time a player gains 1 or more Honor, reduce the gain by 1 if it is not during a battle or Attack Phase", "none");
@@ -176,15 +179,6 @@ public sealed partial class MatchEngine
 
     // ---- The Strategies played from a hand "before an action resolves" ------------------------------------------------------------------------------------------------
 
-    private static readonly Regex HonorLossText = new(@"\b(loses?|lost)\b[^.;:]{0,60}\bHonor\b|\bHonor loss", RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.CultureInvariant);
-
-    // Whether an announced action may change a player's Honor / cost one Honor: read off its printed label (the printed text), the way Shiro Chugo's window is (EmperorStrongholdBatch2),
-    // or off the curated list of actions whose effects lose Honor.
-    private static bool ActionMayChangeHonor(AbilityDefinition acting, string abilityId) =>
-        HonorChangeText.IsMatch(acting.Label) || AbilityMayCauseHonorLoss(abilityId);
-    private static bool ActionMayLoseHonor(AbilityDefinition acting, string abilityId) =>
-        HonorLossText.IsMatch(acting.Label) || AbilityMayCauseHonorLoss(abilityId);
-
     // The Personalities of `playerId`'s the held action would move: those its Move names, and the Personality a curated move-home or move action targets.
     private IEnumerable<CardInstance> OwnPersonalitiesActionWouldMove(int playerId, GameCommand command)
     {
@@ -206,14 +200,6 @@ public sealed partial class MatchEngine
             // Another player's action whose effects move one of the reactor's Personalities, and whose movement may be negated.
             case "height-courage-negate":
                 return command.PlayerId != card.OwnerId && !MovementCannotBeNegated(command) && OwnPersonalitiesActionWouldMove(card.OwnerId, command).Any();
-            // An action whose effects may change a player's Honor, and an unbowed Courtier to bow.
-            case "rhetoric-redirect":
-                return ActionMayChangeHonor(acting, command.AbilityId) && BeforeActionReactionPerformers(card.OwnerId, AbilityCatalog.All[abilityId]).Any();
-            // Another player's action whose effects may lose Honor, and a way to pay (a Personality of 5 or higher Force, or the Imperial Favor).
-            case "solid-defense-negate":
-                return command.PlayerId != card.OwnerId && ActionMayLoseHonor(acting, command.AbilityId) && ControlsPersonalityWithForce(card.OwnerId, 5);
-            case "solid-defense-negate-favor":
-                return command.PlayerId != card.OwnerId && ActionMayLoseHonor(acting, command.AbilityId) && !ControlsPersonalityWithForce(card.OwnerId, 5) && _state.FavorPlayerId == card.OwnerId;
             default:
                 return false;
         }
@@ -335,7 +321,7 @@ public sealed partial class MatchEngine
                 return false;
             case "solid-defense-negate":
             case "solid-defense-negate-favor":
-                if (_state.PendingNegatableAbility is { } heldForLosses) RemC.NegateLossesActionKey = ActionKey(heldForLosses);
+                if (_state.PendingHonorChange is { } heldForLosses) RemC.NegateLossesActionKey = heldForLosses.ActionKey;
                 Emit("honorLossesNegated", $"{Definition(source!).Name}: every Honor loss from the action's effects is negated.", player.Id, source!.Id);
                 return false;
             case "solid-defense-move":
@@ -343,9 +329,11 @@ public sealed partial class MatchEngine
                 return false;
             // The chosen player takes the first Honor change of another player that the Courtier's Chi covers, from this action's effects.
             case "rhetoric-redirect":
-                if (_state.PendingNegatableAbility is { } heldForRedirect)
+                if (_state.PendingHonorChange is { } heldForRedirect)
                 {
-                    RemC.RedirectActionKey = ActionKey(heldForRedirect); RemC.RedirectToPlayer = command.TargetPlayerId!.Value; RemC.RedirectCourtierId = command.PerformerId; RemC.RedirectSpent = false;
+                    // It is about THIS Honor change (the window's occurrence), the one "before" which it was played.
+                    RemC.RedirectActionKey = heldForRedirect.ActionKey; RemC.RedirectOccurrence = heldForRedirect.Occurrence;
+                    RemC.RedirectToPlayer = command.TargetPlayerId!.Value; RemC.RedirectCourtierId = command.PerformerId; RemC.RedirectSpent = false;
                 }
                 Emit("honorRedirectQueued", $"{Definition(source!).Name}: {Player(command.TargetPlayerId!.Value).Name} will take the action's Honor change instead.", player.Id, source!.Id);
                 return false;
@@ -707,7 +695,7 @@ public sealed partial class MatchEngine
         if (amount == 0) return (playerId, 0);
         if (!_payingActionCost && CurrentActionKey() is { } key)
         {
-            if (RemC.RedirectActionKey == key && !RemC.RedirectSpent && playerId != RemC.RedirectToPlayer
+            if (RemC.RedirectActionKey == key && !RemC.RedirectSpent && (RemC.RedirectOccurrence < 0 || RemC.RedirectOccurrence == _honorChangeOccurrence - 1) && playerId != RemC.RedirectToPlayer
                 && RemC.RedirectCourtierId is { } courtierId && _state.Cards.TryGetValue(courtierId, out var courtier) && InPlay(courtier) && PersonalityChi(courtier) >= Math.Abs(amount))
             {
                 RemC.RedirectSpent = true;

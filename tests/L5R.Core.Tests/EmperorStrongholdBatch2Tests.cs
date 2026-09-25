@@ -249,7 +249,7 @@ internal static class EmperorStrongholdBatch2Tests
         var e = Rig(true, false, out var chugo, out var courtierCard, out var striker, out var victim);
         var before = Honor(e, 0);
         Accept(e, Offer(e, 1, "training-honor-strike", striker.Id, victim.Id));
-        Eq(e.State.PendingChoice?.Type, "beforeActionReaction", "the before-action window opens for Shiro Chugo");
+        Eq(e.State.PendingChoice?.Type, "honorChangeReaction", "the window before the Honor loss opens for Shiro Chugo (Mendon's R4 ruling: at the change, not by a guess at the action's label)");
         Accept(e, ReactionOf(e, 0, "chugo-honor-reduce", chugo.Id, courtierCard.Id));
         ClosePassing(e);
         Eq(Honor(e, 0), before, "the 2 Honor loss was reduced to nothing");
@@ -299,11 +299,19 @@ internal static class EmperorStrongholdBatch2Tests
         var e7 = MatchEngine.FromTestState(s7);
         var honor7 = Honor(e7, 1);
         Accept(e7, Offer(e7, 1, "aerie-duel", aerie7.Id, mine.Id, samurai7.Id));
-        Eq(e7.State.PendingChoice?.Type, "beforeActionReaction", "the duel action's window opens for Chugo (its printed gain)");
-        Accept(e7, ReactionOf(e7, 0, "chugo-honor-reduce", chugo7.Id, courtier7.Id));
-        ClosePassing(e7);
-        for (var guard = 0; e7.State.PendingDuel is { } pending && guard < 8; guard++)
+        Check(e7.State.PendingChoice?.Type != "honorChangeReaction", "nothing yet: the duel's Honor gain has not been reached");
+        for (var guard = 0; (e7.State.PendingDuel is { } || e7.State.PendingChoice is { Type: "honorChangeReaction" }) && guard < 12; guard++)
+        {
+            if (e7.State.PendingChoice is { Type: "honorChangeReaction" })
+            {
+                // The window opens where the winner's Honor gain would be applied, once the duel is decided.
+                Accept(e7, ReactionOf(e7, 0, "chugo-honor-reduce", chugo7.Id, courtier7.Id));
+                ClosePassing(e7);
+                continue;
+            }
+            var pending = e7.State.PendingDuel!;
             Accept(e7, pending.Stage == "DuelistRefocus" ? new GameCommand("duelistRefocus", e7.State.PriorityPlayerId, e7.Version) : new GameCommand("strike", pending.TurnPlayerId, e7.Version));
+        }
         Eq(Honor(e7, 1), honor7, "the winner's 1 Honor gain was reduced to 0");
         Check(e7.State.Cards[mine.Id].Bowed && e7.State.Cards[mine.Id].Dishonorable, "the rest of the duel's outcome still applied");
     }

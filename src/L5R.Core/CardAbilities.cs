@@ -269,6 +269,8 @@ public static class AbilityCatalog
         ["tale-of-the-disgraced"] = new("Battle", "Bow your target unbowed Personality. Bow a target enemy card. If your Personality is Fallen or a Magistrate, straighten him before this battle resolves", "slots",
             Slots: [new("own", "own-unbowed-personality", "Your unbowed Personality to bow"), new("enemy", "enemy-card", "Enemy card to bow")]),
         // Training-only: protects its controller's Personality from the bow of an action (a reaction for the first slot of the Tale, whose target is the ACTING player's own).
+        // Mendon's R4 ruling on Deception Revealed (issue #492): "Focus effects are not actions" -- a fixture Focus Effect that bows every Ring in play, to prove the Rings it bows are not bowed by an action.
+        ["training-focus-bow-ring"] = new("FocusEffect", "Training: As a Focus Effect: after this duel ends, bow each unbowed Ring in play", "none"),
         ["training-bow-guard"] = new("Reaction", "Training: before an action resolves, negate the bowing of your Personality it targets", "none", Trigger: "before-action-resolves"),
         ["training-negate-mover"] = new("Reaction", "Training: before an action resolves, target a Personality it would move: negate his movement from the action's effects", "deferred-action-mover", Trigger: "before-action-resolves"),
         ["training-negate-action"] = new("Reaction", "Training: after another player's action targets a card of yours: negate the action's effects", "none", Trigger: "before-action-resolves"),
@@ -2762,8 +2764,8 @@ public static class AbilityCatalog
             "enemy-card", RequireNoAttachments: true, Cost: GoldCostRule.Variable(atResolution: true)),
         // Embers of War pass, batch 3 (issue #460; helpers in EmbersOfWarBatch3.cs).
         // A Weak Poison (oracle-l5r-99): "Open: Target a Personality: Reduce his Force to 0. Lose 2 Honor." -- Matsu Kaido's own delta-to-zero shape
-        // (kaido-force-zero), any Personality rather than enemy-only, and an unconditional flat Honor cost (ActionCost.LoseHonor).
-        ["weak-poison-force-zero"] = new("Open", "Target a Personality: Reduce his Force to 0. Lose 2 Honor", "personality", Costs: ActionCost.LoseHonor(2)),
+        // (kaido-force-zero), any Personality rather than enemy-only. "Lose 2 Honor." is printed after the colon: an EFFECT (Mendon's R4 audit; it used to be paid as a cost, ActionCost.LoseHonor).
+        ["weak-poison-force-zero"] = new("Open", "Target a Personality: Reduce his Force to 0. Lose 2 Honor", "personality"),
         // Astonishing Accusation (oracle-l5r-637): "Political Reaction: After another player's Political action targets your Personality, negate its
         // effects." -- Yoritomo Sakuma's own printed shape (sakuma-political-negate/taishuu-political-negate), reused verbatim.
         // "Political Limited: Target a Kolat, Ninja, Shadowlands, or dishonorable Personality. His controller loses Honor equal to his printed Personal
@@ -2787,9 +2789,10 @@ public static class AbilityCatalog
         // Exploited Advantage (oracle-l5r-2413): "Battle: Choose your performing unbowed Paragon and target an enemy Personality: Move him home. If he
         // moved, bow him and negate his (future) movement. Lose 2 Honor." -- Strength of the Tsunami's own movement-negation primitive
         // (MovementLocks.cs), applied only when the move actually happened (the same "If he moved" gate Mitsushen/The Earth Flows already read off
-        // ExecuteMove's own return value).
+        // ExecuteMove's own return value). "Lose 2 Honor." is printed after the colon, so it is an EFFECT (Mendon's R4 audit of Honor printed as a cost: the earlier reading paid it as a cost, even for a
+        // negated action, and kept it out of Rhetoric and Solid Defense).
         ["exploited-advantage-move"] = new("Battle", "Choose your performing unbowed Paragon and target an enemy Personality: Move him home. If he moved, bow him and negate his movement. Lose 2 Honor",
-            "enemy-personality", Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeywords: ["Paragon"], Move: new(MoveSpec.Target, MoveSpec.Home), Costs: ActionCost.LoseHonor(2)),
+            "enemy-personality", Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeywords: ["Paragon"], Move: new(MoveSpec.Target, MoveSpec.Home)),
         // Help from the Shadows (oracle-l5r-3055): "Battle: Choose your performing Personality in a Ninja unit: Move him to the current battlefield.
         // Straighten his unit if he moved." -- a new Performer category, own-personality-in-ninja-unit (the Personality himself or one of his attached
         // Followers carries Ninja -- "a Ninja unit" is a property of the unit, not only its own Personality), mirroring Skipping the Puddle's own
@@ -3588,9 +3591,9 @@ public static class AbilityCatalog
         // Pillars of Virtue (oracle-l5r-5957): "Reaction: After the resolution of a Kiho Battle action you took: Take an additional Battle action." (Byung's after-action-resolved shape.)
         ["pillars-virtue-additional-action"] = new("Reaction", "After the resolution of a Kiho Battle action you took: Take an additional Battle action", "none", Trigger: AfterActionReactionTriggers.AfterActionResolved),
         // Shiro Chugo (oracle-l5r-7008): "Political Reaction: Before an action's resolution, choose your performing unbowed Courtier: Reduce any Honor gain or loss from the action's effects by 2."
-        // (a before-action-resolves Reaction, offered against an action that could change Honor) and "Battle: Choose your performing unbowed Personality: Melee 4 Attack, with +1 strength if he is Loyal."
+        // (a Reaction played in the window before an Honor gain or loss from an action's effects, Mendon's R4 ruling: EmperorRulingR4Honor.cs) and "Battle: Choose your performing unbowed Personality: Melee 4 Attack, with +1 strength if he is Loyal."
         ["chugo-honor-reduce"] = new("Reaction", "Political Reaction: Before an action's resolution, choose your performing unbowed Courtier: Reduce any Honor gain or loss from the action's effects by 2", "none",
-            Performer: "own-unbowed-personality-with-keyword-at-any-location", RequiredKeywords: ["Courtier"], Trigger: "before-action-resolves", ActionKeywords: ["Political"]),
+            Performer: "own-unbowed-personality-with-keyword-at-any-location", RequiredKeywords: ["Courtier"], Trigger: HonorChangeReactions.Trigger, ActionKeywords: ["Political"]),
         ["chugo-melee"] = new("Battle", "Choose your performing unbowed Personality: Melee 4 Attack, with +1 strength if he is Loyal", "attack", Performer: "own-unbowed-personality-at-battle"),
         // Suitengu's Torch (oracle-l5r-7623, keyword Thunder): "Reaction: After you announce a Thunder Battle action: Its effects will not be negated or delayed." (the announce window) and
         // "Battle: Choose your performing unbowed Personality and target an enemy Personality: Move him home."
@@ -4382,8 +4385,6 @@ public sealed partial class MatchEngine
         if (abilityId == "mahatsu-negate") return MahatsuNegateApplies(card, command);
         // Ninja Tricks (Emperor Edition remaining-cards pass, issue #492, group B): a Strategy in a hand answering an action on a Strategy (EmperorRemainingB.cs).
         if (abilityId == "ninja-tricks-negate") return NinjaTricksApplies(card, command);
-        // Shiro Chugo (Emperor Edition Stronghold pass, issue #486 batch 2): any action that could change Honor, whatever it targets (EmperorStrongholdBatch2.cs).
-        if (abilityId == "chugo-honor-reduce") return ChugoApplies(card, command);
         // Emperor Edition remaining-cards pass, group C (issue #492): the Strategy Reactions played from a hand (EmperorRemainingC.cs), judged before any target check.
         if (EmperorRemainingCAbilities.BeforeActionHandReactions.Contains(abilityId)) return EmperorRemainingCBeforeActionApplies(card, abilityId, command);
         // Akodo Shihiro (issue #458): "Before (each time) another player's action resolves during a battle at Shihiro's battlefield" -- whatever the action targets, so
@@ -4453,7 +4454,7 @@ public sealed partial class MatchEngine
     // whether a player holds an opportunity at all, and what the window listing offers; ValidateAbility
     // remains the authority on a submitted command.
     private bool BeforeActionReactionAvailable(CardInstance card, string abilityId, GameCommand command, string? affectedId = null) =>
-        !BowedBarsAbilities(card) && !ActionLocked(card) && BeforeActionReactionApplies(card, abilityId, command, affectedId) // a locked Personality cannot perform a Reaction (ActionLock.cs)
+        !BowedBarsAbilities(card) && !ActionLocked(card) && !BarredByCherryBlossom(abilityId) && BeforeActionReactionApplies(card, abilityId, command, affectedId) // a locked Personality cannot perform a Reaction (ActionLock.cs)
         && (abilityId != "kakihara-force-bonus" || KakiharaCanReact(card, command.PlayerId))
         && !AbilityUseSpent(card.AbilityUses, AbilityCatalog.All[abilityId], AbilityCatalog.All[abilityId].UsageKey ?? abilityId);
     // Every before-action-resolves Reaction printed on an in-play card, on either side, paired with the card.
@@ -4543,7 +4544,9 @@ public sealed partial class MatchEngine
         // Emperor Edition remaining-cards pass, group C (issue #492): Summoned to Justice makes the dishonorable target's controller lose Honor.
         or "summoned-justice-move" or "shadows-walk-take"
         // Emperor Edition remaining-cards pass, proxy group Z (issue #492): Rokuta's chosen player loses 3 Honor.
-        or "rokuta-action-create" or "rokuta-battle-create";
+        or "rokuta-action-create" or "rokuta-battle-create"
+        // Mendon's R4 audit: A Weak Poison's and Exploited Advantage's "Lose 2 Honor." is an effect (it was a cost).
+        or "weak-poison-force-zero" or "exploited-advantage-move";
     private bool ControlsDishonorablePersonality(int playerId) => _state.Cards.Values.Any(c => c.OwnerId == playerId && InPlay(c) && Definition(c).Type == CardType.Personality && c.Dishonorable);
     // Gate for whether the window is even worth opening -- "if [neither a Dishonorable Personality
     // nor an Honor loss] occurs, do not trigger the reaction interrupt" (the user's own ruling).
@@ -4848,8 +4851,8 @@ public sealed partial class MatchEngine
     // OWN trigger condition is cheap to evaluate up front and would otherwise open a pointless window on
     // every Attack while the card sat in play (Kakihara only ever cares about an Attack that targets HIM);
     // every other caller omits it and keeps the existence-only behavior described above.
-    private bool AnyInPlayReactionAvailable(string trigger, Func<CardInstance, string, bool>? relevant = null) => !ReactionsBarred() /* Cherry Blossom Festival (issue #492, group F) */ && _state.Cards.Values.Any(c => InPlay(c) && !BowedBarsAbilities(c) &&
-        AbilityIdsOf(c).Any(id => AbilityCatalog.All.TryGetValue(id, out var a) && a.Timing == "Reaction" && a.Trigger == trigger &&
+    private bool AnyInPlayReactionAvailable(string trigger, Func<CardInstance, string, bool>? relevant = null) => _state.Cards.Values.Any(c => InPlay(c) && !BowedBarsAbilities(c) &&
+        AbilityIdsOf(c).Any(id => AbilityCatalog.All.TryGetValue(id, out var a) && a.Timing == "Reaction" && a.Trigger == trigger && !BarredByCherryBlossom(id) /* Cherry Blossom Festival (issue #492, group F; traits exempt, R4) */ &&
             !AbilityUseSpent(c.AbilityUses, a, a.UsageKey ?? id) && (relevant?.Invoke(c, id) ?? true)));
     // No kind-restricted in-play Reaction exists yet (see AttackKind); once one does, filter by
     // attack.Kind here rather than inside AnyInPlayReactionAvailable itself.
@@ -4908,11 +4911,11 @@ public sealed partial class MatchEngine
     // Both the window's existence check above and the reactions a window then offers (MatchQueries) are built on it.
     private IEnumerable<(CardInstance Card, string AbilityId)> OutOfPlayReactions(int playerId, string trigger)
     {
-        if (ReactionsBarred()) return []; // Cherry Blossom Festival (issue #492, group F): no players may take Reactions.
         var player = Player(playerId);
         return _state.Cards.Values.Where(c => c.OwnerId == playerId && c.Zone is Zone.Hand or Zone.FateDiscard or Zone.DynastyDiscard)
             .SelectMany(c => AbilityIdsOf(c).Select(id => (Card: c, AbilityId: id)))
-            .Where(x => AbilityCatalog.All.TryGetValue(x.AbilityId, out var a) && a.Timing == "Reaction" && a.Trigger == trigger && AbilitySourceZoneAllows(a, x.Card, player));
+            // Cherry Blossom Festival (issue #492, group F): no players may take Reactions -- a trait modelled as one is not barred (Mendon's R4 ruling, TraitReactions).
+            .Where(x => AbilityCatalog.All.TryGetValue(x.AbilityId, out var a) && a.Timing == "Reaction" && a.Trigger == trigger && !BarredByCherryBlossom(x.AbilityId) && AbilitySourceZoneAllows(a, x.Card, player));
     }
     private bool AnyPersonalityEntryReactionAvailable(int playerId) => AnyOutOfPlayReactionAvailable(playerId, "any-personality-enters-play");
     // Additional Action (issue #181): a grant is a Battle action the named player may take without
@@ -4997,6 +5000,7 @@ public sealed partial class MatchEngine
         // The window is Effortless Counterattack's ("before the resolution of a BATTLE action taken as an additional action"): an additional Limited/Open action in the Action phase (issue #453) opens none.
         if (_state.Phase != Phase.Battle || !AnyOutOfPlayReactionAvailable(1 - command.PlayerId, "before-additional-action-resolves"))
         {
+            if (ChainOutOfPlayReactionWindow(command, consumedGrant: true)) return; // R4 (issue #492): Bad Kharma, Footsteps of Madness and Unimpeachable Name are for any announced action, an additional one too.
             ExecuteAbilityEffects(command, consumedGrant: true);
             return;
         }
@@ -5099,6 +5103,7 @@ public sealed partial class MatchEngine
         else { AttackTargetedACard(attack.AbilityId, attack.PlayerId, attack.TargetId); _state.RangedAttackStrengthReductionImmune = false; }
         _state.NegatedEffects.Clear();
         RestoreTemporaryRemovals(TemporaryRemovals.Action);
+        if (attack.RingsBowedBefore is { } attackRings) RecordBowedRings(attackRings.ToHashSet()); // Deception Revealed (Mendon's R4 ruling): a Ring the Attack's action bowed goes on its record.
         // Thunder's Wrath (Forgotten Legacy pass, issue #467): a deferred first Attack that destroyed a Follower hands its second target to the player; the action then finishes there.
         if (BeginThundersWrathFollowUpAfterDeferredAttack(attack, grantsBeforeAttack)) return;
         // Lessons Never Forgotten (The Shadow's Embrace pass, issue #476 batch 3): the same hand-over of its optional attachment target after a deferred Attack.
@@ -5345,9 +5350,15 @@ public sealed partial class MatchEngine
                 // Unimpeachable Name (oracle-l5r-8989): out-of-play, like any-personality-enters-play
                 // above -- no CardId match (it is not watching a specific OTHER card's own entry, it
                 // is reacting to an action), just the reacting player's own id.
-                "before-any-action-resolves" => _state.PendingChoice.Type == "unimpeachableNameReaction" && command.PlayerId == _state.PendingChoice.PlayerId,
+                "before-any-action-resolves" => _state.PendingChoice.Type == "unimpeachableNameReaction" && command.PlayerId == _state.PendingChoice.PlayerId
+                    // Mendon's R4 ruling: Unimpeachable Name may also be played in the window before an Honor loss (EmperorRulingR4Honor.cs).
+                    || _state.PendingChoice.Type == "honorChangeReaction" && _state.PendingHonorChange is { } lossWindow && command.CardId is not null && _state.Cards.TryGetValue(command.CardId, out var lossReactor)
+                        && HonorChangeReactionApplies(lossReactor, id, lossWindow),
                 // Emperor Edition remaining-cards pass, group A (issue #492): Bad Kharma and Footsteps of Madness (the same window, Strategies played from a hand only); Bend like a Reed's duel window.
                 EmperorRemainingAAbilities.BeforeAnyActionStrategy => _state.PendingChoice.Type == "unimpeachableNameReaction" && command.PlayerId == _state.PendingChoice.PlayerId,
+                // Mendon's R4 ruling (issue #492): the window before an Honor gain or loss from an action's effects, open to either player (EmperorRulingR4Honor.cs).
+                HonorChangeReactions.Trigger => _state.PendingChoice.Type == "honorChangeReaction" && _state.PendingHonorChange is { } honorWindow
+                    && command.CardId is not null && _state.Cards.TryGetValue(command.CardId, out var honorReactor) && HonorChangeReactionApplies(honorReactor, id, honorWindow),
                 // Stormless Fury (issue #276 follow-up): both its out-of-play attach half and its
                 // in-play bow half share this one trigger, scoped to the one specific offered card by
                 // id -- same shape as own-won-duel/bowed-personality-at-own-battlefield above.
@@ -7169,9 +7180,10 @@ public sealed partial class MatchEngine
         _runningCommand = command;
         try { RunAbilityEffects(command, consumedGrant); }
         finally { _runningCommand = runningBefore; }
-        if (_state.PendingDuel is { } issued && !ReferenceEquals(issued, pendingDuelBefore)) issued.SourceCardId = command.CardId;
+        if (_state.PendingDuel is { } issued && !ReferenceEquals(issued, pendingDuelBefore)) { issued.SourceCardId = command.CardId; issued.RingsBowedBefore = _state.CurrentActionRingsBefore.ToList(); }
         if (_state.PendingAttack is { } declared && !ReferenceEquals(declared, pendingAttackBefore))
         {
+            declared.RingsBowedBefore = _state.CurrentActionRingsBefore.ToList();
             var spent = command.CardId is null ? null : Card(command.CardId);
             SpendHandPlayedCard(Player(command.PlayerId), spent);
             // The same for a card played from a discard pile (a Discipline play, issue #331, or Daigotsu Bofana - exp's granted play,
@@ -7191,6 +7203,9 @@ public sealed partial class MatchEngine
         var source = command.CardId is null ? null : Card(command.CardId);
         var target = command.TargetId is null ? null : Card(command.TargetId);
         var uses = source?.AbilityUses ?? player.AbilityUses;
+        // Deception Revealed (Mendon's R4 ruling): the Rings this action bows, as a cost or as an effect, are those bowed after this point -- read before it pays anything.
+        var ringsBowedAtStart = _state.Cards.Values.Where(c => c.Bowed && Definition(c).Type == CardType.Ring).Select(c => c.Id).ToList();
+        _state.CurrentActionRingsBefore = ringsBowedAtStart;
         SpendAbilityUse(uses, ability, ability.UsageKey ?? id);
         // Discipline (issue #331): decided once, up front, from where the card is BEFORE anything below moves it --
         // the discard-pile mode is the one that is removed from the game after the action resolves. So is a card played
@@ -7248,6 +7263,7 @@ public sealed partial class MatchEngine
         // Togashi Hizumi / Tamori Ruya (issue #216): snapshotted the same way, so any Personality this
         // action newly bows can be detected generically afterward -- see OpenBowReactionWindow.
         var bowedBeforeAction = _state.Cards.Values.Where(c => c.Bowed).Select(c => c.Id).ToHashSet();
+        bowedBeforeAction.RemoveWhere(bowed => Definition(Card(bowed)).Type == CardType.Ring); bowedBeforeAction.UnionWith(ringsBowedAtStart); // a Ring bowed by a cost paid above counts as bowed by the action (R4)
         // Snapshotted by reference (not just a count): a switch case that itself grants fresh actions
         // (Again!/Two Hands/equip-battle) must never accidentally spare an unrelated PRE-EXISTING
         // grant from forfeiture below just because the total count happens to end up higher.
@@ -8917,7 +8933,9 @@ public sealed partial class MatchEngine
             case "unimpeachable-name-reaction":
                 if (source!.Zone == Zone.Hand) player.Hand.Remove(source.Id);
                 source.Zone = Zone.FateDiscard; source.FaceUp = true;
-                _state.HonorLossReductionPlayerId = player.Id;
+                // Played in the window before an Honor loss (Mendon's R4 ruling) it names that action: the reduction is read while its effects apply and is not the pre-action window's flag.
+                if (_state.PendingHonorChange is { } lossWindowOfName) { _state.UnimpeachableActionKey = lossWindowOfName.ActionKey; _state.UnimpeachablePlayerId = player.Id; }
+                else _state.HonorLossReductionPlayerId = player.Id;
                 if (target is not null) Rehonor(target);
                 Emit("unimpeachableNameReaction", $"{Definition(source).Name} reduces Honor loss from this action by 3 (minimum 0){(target is not null ? $"; {Definition(target).Name} was rehonored" : "")}.", player.Id, source.Id);
                 break;
@@ -9746,7 +9764,7 @@ public sealed partial class MatchEngine
                 if (RunEmperorBatch4Effect(id, command, ability, player, source, target, consumedGrant, playedFromDiscard, opponentHonorBeforeBattleAction, bowedBeforeAction, preExistingGrants)) return;
                 break;
             // Embers of War pass, batch 3 (issue #460; helpers in EmbersOfWarBatch3.cs).
-            case "weak-poison-force-zero": ApplyModifier(target!, source!.Id, id, "Force", -CardForce(target!)); break;
+            case "weak-poison-force-zero": ApplyModifier(target!, source!.Id, id, "Force", -CardForce(target!)); GainHonor(player.Id, -2, "A Weak Poison", source); break;
             case "accusation-negate": NegateHeldAction(source!); break;
             case "accusation-honor-loss": GainHonor(target!.OwnerId, -Definition(target).PersonalHonor, "Astonishing Accusation", source); break;
             case "deadly-discipline-tokens":
@@ -9771,6 +9789,7 @@ public sealed partial class MatchEngine
                     if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
                     LockMovement(target!, id, MovementKinds.Home | MovementKinds.ToBattlefield);
                 }
+                GainHonor(player.Id, -2, "Exploited Advantage", source); // unconditional, whether or not he moved
                 break;
             }
             case "help-shadows-move":
@@ -10712,6 +10731,7 @@ public sealed partial class MatchEngine
         // Before a held action resolves, the out-of-play window (issue #492: Bad Kharma, Footsteps of Madness): a Reaction is on offer in any phase.
         var inHeldActionWindow = _state.PendingChoice?.Type == "unimpeachableNameReaction";
         var inAttackPhaseEndWindow = _state.PendingChoice?.Type == "attackPhaseEndReaction"; // Retribution (issue #492, group C)
+        var inHonorChangeWindow = _state.PendingChoice?.Type == "honorChangeReaction"; // Mendon's R4 ruling (issue #492): only the Reactions that name an Honor change are on offer, and they are on offer nowhere else.
         // Twist of Fate (Emperor Edition remaining-cards pass, issue #492, group D): the window as its player ends his Dynasty Phase -- only the Reactions that name it are on offer, and only there.
         var inTwistOfFateWindow = _state.PendingChoice?.Type == "twistOfFateReaction";
         foreach (var (source, id) in sources)
@@ -10722,6 +10742,8 @@ public sealed partial class MatchEngine
             if (inAfterResolutionWindow != IsAfterResolutionReaction(ability)) continue;
             if (inAfterActionResolvedWindow != IsAfterActionResolvedReaction(ability)) continue;
             if (inHeldActionWindow && ability.Timing != "Reaction") continue; // issue #492: only a Reaction is on offer against a held action.
+            var honorChangeTrigger = ability.Timing == "Reaction" && ability.Trigger == HonorChangeReactions.Trigger;
+            if (inHonorChangeWindow ? !(honorChangeTrigger || id == HonorChangeReactions.UnimpeachableName) : honorChangeTrigger) continue;
             if (inAttackPhaseEndWindow != (ability.Timing == "Reaction" && ability.Trigger == EmperorRemainingCAbilities.AttackPhaseEnd)) continue;
             if (inTwistOfFateWindow != IsTwistOfFateReaction(ability)) continue;
             var isEngageReaction = ability.Timing == "Reaction" && ability.Trigger is "after-engaging" or "after-engaging-at-own-battlefield";
@@ -10729,7 +10751,7 @@ public sealed partial class MatchEngine
             // "Bow this card:" with no hand alternative is offered only from play (issue #370): from a hand or a discard pile it is not even listed.
             if (source is not null && RequiresSourceInPlay(ability) && !InPlay(source)) continue;
             if ((beforeResolutionCard is not null) != IsBeforeResolutionReaction(ability) || beforeResolutionCard is not null && source?.Id != beforeResolutionCard) continue;
-            var phaseOk = inEngageWindow || inAfterResolutionWindow || inAfterActionResolvedWindow || inTwistOfFateWindow || inAttackPhaseEndWindow || inHeldActionWindow || beforeResolutionCard is not null ? true : ability.Timing switch { "Battle" => _state.Phase == Phase.Battle, "BattleOrOpen" => _state.Phase is Phase.Action or Phase.Battle, "BeforeResolution" => false, _ => _state.Phase == Phase.Action };
+            var phaseOk = inEngageWindow || inAfterResolutionWindow || inAfterActionResolvedWindow || inTwistOfFateWindow || inAttackPhaseEndWindow || inHeldActionWindow || inHonorChangeWindow || beforeResolutionCard is not null ? true : ability.Timing switch { "Battle" => _state.Phase == Phase.Battle, "BattleOrOpen" => _state.Phase is Phase.Action or Phase.Battle, "BeforeResolution" => false, _ => _state.Phase == Phase.Action };
             if (!phaseOk) continue;
             if (ability.Timing == "Limited" && playerId != _state.ActivePlayerId && !LimitedInsteadOfOpen(playerId)) continue; // Plans Within Plans (issue #492): a Limited action instead of an Open one.
             // Battle/Open presence primitive (issue #267): the same actingAsBattle generalization

@@ -401,6 +401,7 @@ public sealed partial class MatchEngine
             Provinces = draft.Provinces.Select(p => p with { After = EffectiveProvinceStrength(Player(p.PlayerId).Provinces[p.Index]) }).ToArray(),
             ResolutionVersion = _state.Version + 1, ReturnPhase = _state.Phase, ReturnPriority = _state.PriorityPlayerId } };
         _state.PendingDuel = null;
+        if (duel.RingsBowedBefore is { } duelRings) RecordBowedRings(duelRings.ToHashSet()); // Deception Revealed (Mendon's R4 ruling): a Ring the duel's action bowed goes on its record (a Focus Effect's bows do not: ApplyDuelFocusEffect).
         ApplyHesMineBows(duel.ChallengerId, duel.ChallengedId); // He's Mine! (Emperor Edition remaining-cards pass, issue #492, group B): the substitute bows once the duel has ended.
         ApplyTwinForksCity(winnerId); // Twin Forks City (The Shadow's Embrace pass, issue #476 batch 6): a trait, before any Reaction to the duel's end.
         // The duel itself is a single, complete action from challenge to consequences (issue #209):
@@ -540,6 +541,15 @@ public sealed partial class MatchEngine
     // order. winnerPlayerId/loserPlayerIds are null/empty-safe for a double-loss tie.
     private void ApplyDuelFocusEffect(string abilityId, int ownerId, int? winnerPlayerId, List<int> loserPlayerIds)
     {
+        // Mendon (R4, issue #492): "a Focus Effect is not an action" -- what it does is not "an action's effects" (no mark on the duel's action, no Honor-change window applies to it).
+        var wasInFocusEffect = _resolvingFocusEffect; _resolvingFocusEffect = true;
+        var ringsBefore = BowedRingIds();
+        try { ApplyDuelFocusEffectCore(abilityId, ownerId, winnerPlayerId, loserPlayerIds); }
+        finally { _resolvingFocusEffect = wasInFocusEffect; ExcludeFocusEffectRingBows(ringsBefore); }
+    }
+
+    private void ApplyDuelFocusEffectCore(string abilityId, int ownerId, int? winnerPlayerId, List<int> loserPlayerIds)
+    {
         switch (abilityId)
         {
             // The Sincerity of the Dragon and The Courtesy of the Crane: "After this duel ends, if you won it, give all your provinces +2 strength" -- until the turn ends (the default duration of an
@@ -558,6 +568,7 @@ public sealed partial class MatchEngine
             case "of-one-instant-focus":
                 if (_state.PendingDuel is { } instantDuel) GrantKeyword(Card(instantDuel.ChallengerPlayerId == ownerId ? instantDuel.ChallengerId : instantDuel.ChallengedId), "Tactician", abilityId, "Turn");
                 break;
+            case "training-focus-bow-ring": foreach (var ring in _state.Cards.Values.Where(c => InPlay(c) && Definition(c).Type == CardType.Ring && !c.Bowed).ToArray()) ring.Bowed = true; break;
             case "shadow-tactics-focus": foreach (var loserPlayer in loserPlayerIds.Distinct().ToArray()) Draw(Player(loserPlayer)); break;
             case "simple-yari-focus":
                 if (_state.PendingDuel?.WinnerId is string yariWinnerId && InPlay(Card(yariWinnerId)) && !StalwartNegatesBow(Card(yariWinnerId), ownerId)) Card(yariWinnerId).Bowed = true;

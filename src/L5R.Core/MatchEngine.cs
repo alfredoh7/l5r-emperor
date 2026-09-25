@@ -176,6 +176,7 @@ public sealed partial class MatchEngine
         // Ten Thousand Temples (issue #492, group F): the answer to an Honor loss decision replays the command that reached it, from the state it started in, with the decisions made so far.
         var execute = command; MatchState? cleanBase = null;
         _honorLossOccurrence = 0; _honorLossDecisions = [];
+        ResetHonorChangeReplay(); // Mendon's R4 ruling (issue #492): the windows of an Honor change replay the command that reached it (EmperorRulingR4.cs).
         if (command.Type == "honorLossChoice")
         {
             if (original.PendingHonorLossDecision is not { } decision) return Reject("No Honor loss decision is pending.");
@@ -184,27 +185,48 @@ public sealed partial class MatchEngine
             cleanBase.PendingHonorLossDecision = null; cleanBase.PendingChoice = decision.PriorChoice; cleanBase.PriorityPlayerId = decision.PriorPriority; cleanBase.ConsecutivePasses = decision.PriorPasses;
             _state = Copy(cleanBase);
             _honorLossDecisions = decision.Decisions.Append(command.Choice == "yes").ToList();
+            _honorWindowsDone = decision.HonorWindowsDone;
             execute = decision.Command;
         }
         else _state = Copy(original);
         var firstEvent = _state.Events.Count;
         try
         {
+            // Mendon's R4 ruling (issue #492): a command that reached an Honor change a Reaction may be played on was set aside and its window opened; when the window closes the command is run
+            // again (from the state the window left), so this body runs once for a command and once more for each such replay.
+            var replaying = false;
+            while (true)
+            {
             var aftermath = _state.LastDuel is { Complete:false, Result:not null } ? CaptureDuelEvidence() : null;
-            var reactionSource = command.CardId ?? _state.PendingChoice?.CardId;
+            var reactionSource = execute.CardId ?? _state.PendingChoice?.CardId;
             var reactionCard = aftermath is not null && reactionSource is not null && _state.Cards.TryGetValue(reactionSource, out var rc)
                 && rc.FaceUp && rc.Zone is not (Zone.Hand or Zone.FateDeck or Zone.DynastyDeck) ? ViewCard(rc) : null;
             var reactionLabel = _state.PendingChoice?.Type=="overconfidentDraw" ? "Overconfident" : null;
             var traitSnapshot = AfterCommandTraitSnapshot(); // "After this card bows/attaches" traits (issue #453 batch 5, SeedsOfDecayBatch5.cs)
             UsePaymentDiscards(execute); // Asahina Keigo (issue #477): the hand cards named for Gold sources that discard one.
             var plansSets = PlansOpportunitySets(execute); // Plans Within Plans (issue #492): is this command the armed player's opportunity to take an Open action?
-            Apply(execute);
+            if (replaying)
+            {
+                // The Reactions played in the window may have made the command it set aside illegal (a card it needs was bowed, a target left): it is then cancelled, and the window's state stands.
+                try { Apply(execute); }
+                catch (RuleViolation cancelled)
+                {
+                    _paymentDiscards=[];
+                    _state = Copy(_honorReplayBase ?? _state);
+                    Emit("actionCancelled", $"The action could not go on after the Reactions played before its Honor change: {cancelled.Message}");
+                    break;
+                }
+            }
+            else Apply(execute);
+            if (_honorReplayCommand is { } replay) { _paymentDiscards=[]; execute = replay; _honorReplayCommand = null; replaying = true; continue; }
             SpendPlansWithinPlans(execute, plansSets);
             _paymentDiscards=[];
             ApplyAfterCommandTraits(traitSnapshot);
             ReturnCardsOutOfPlayToTheirOwners();
             RemoveCreatedCardsLeftInPiles();
             if (aftermath is not null) RecordDuelChanges(aftermath, "Aftermath", reactionCard, sourceLabel: reactionLabel);
+            break;
+            }
             _state.Version++;
             RefreshDuelRecord();
             _commands.Add(Copy(command));
@@ -214,10 +236,10 @@ public sealed partial class MatchEngine
         {
             // The command reached an Honor loss Ten Thousand Temples may negate: nothing it did is kept; its controller is asked, and the command is replayed with his answer.
             _paymentDiscards=[];
-            var pendingBase = cleanBase ?? original;
+            var pendingBase = _honorReplayBase ?? cleanBase ?? original;
             _state=pendingBase;
             pendingBase.PendingHonorLossDecision=new PendingHonorLossDecision { Command=execute, Decisions=_honorLossDecisions.ToList(), PlayerId=need.PlayerId, TempleId=need.TempleId, Amount=need.Amount, Reason=need.Reason,
-                PriorChoice=pendingBase.PendingChoice, PriorPriority=pendingBase.PriorityPlayerId, PriorPasses=pendingBase.ConsecutivePasses };
+                PriorChoice=pendingBase.PendingChoice, PriorPriority=pendingBase.PriorityPlayerId, PriorPasses=pendingBase.ConsecutivePasses, HonorWindowsDone=_honorWindowsDone };
             pendingBase.PendingChoice=new("honorLossDecision",need.PlayerId,need.TempleId,$"Ten Thousand Temples: you would lose {-need.Amount} Honor ({need.Reason}). Destroy it to negate the loss?");
             pendingBase.PriorityPlayerId=need.PlayerId; pendingBase.ConsecutivePasses=0;
             var decisionEvents=_state.Events.Count;
@@ -226,6 +248,19 @@ public sealed partial class MatchEngine
             _commands.Add(Copy(command));
             _honorLossDecisions=[];
             return new(true,null,_state.Version,_state.Events.Skip(decisionEvents).ToArray());
+        }
+        catch (HonorChangeWindowNeeded need)
+        {
+            // The command reached an Honor change from an action's effects that a Reaction may be played on: nothing it did is kept, the window is opened on the state it started from
+            // (Reactions played in it change that state), and the command is run again when both players have passed (Execute's loop).
+            _paymentDiscards=[];
+            var pendingBase = _honorReplayBase ?? cleanBase ?? original;
+            _state=pendingBase;
+            var windowEvents = OpenHonorChangeWindow(need, execute);
+            _state.Version++;
+            _commands.Add(Copy(command));
+            _honorLossDecisions=[];
+            return new(true,null,_state.Version,_state.Events.Skip(windowEvents).ToArray());
         }
         catch (RuleViolation error)
         {
@@ -245,6 +280,7 @@ public sealed partial class MatchEngine
     {
         var twistWasActive=_state.TwistOfFateActive; // Twist of Fate (issue #492, group D): the additional action ends with the first command taken during it that leaves nothing open.
         ApplyCore(command);
+        if (_honorReplayCommand is not null) return; // an Honor-change window just closed: Execute runs the command it set aside again.
         ResumeIdleSuspendedWindow();
         FinishSpentBeforeBattleItem();
         FinishTwistOfFateAction(twistWasActive);
@@ -262,17 +298,17 @@ public sealed partial class MatchEngine
         {
             // Deck search (issue #312): deck choice, candidate selection/pass, a Region's province, the discard
             // after a Terrain. Every command a search accepts is validated in ResolveSearchCommand.
-            if (IsSearchChoice(_state.PendingChoice.Type)) { ResolveSearchCommand(command); return; }
+            if (IsSearchChoice(_state.PendingChoice.Type)) { WithResumedAction(() => ResolveSearchCommand(command)); return; }
             // Look at the top N cards (issue #322): the deck choice and the one arrangement command.
             if (IsLookChoice(_state.PendingChoice.Type)) { ResolveLookCommand(command); return; }
             // Copying keywords and abilities (issue #338): the two independent copy decisions (CardCopy.cs).
             if (IsCopyChoice(_state.PendingChoice.Type)) { ResolveCopyCommand(command); return; }
             // The opposing player's Either/Or choice (issue #338): answered by the deciding player, who holds priority (EitherOr.cs).
-            if (_state.PendingChoice.Type=="eitherOr") { ResolveEitherOrCommand(command); return; }
+            if (_state.PendingChoice.Type=="eitherOr") { WithResumedAction(() => ResolveEitherOrCommand(command)); return; }
             // The opposing player's variable payment (issue #373, Virtuous Charity): answered by the paying player, who holds priority (OpponentPayment.cs).
-            if (_state.PendingChoice.Type=="opponentPayment") { ResolveOpponentPaymentCommand(command); return; }
+            if (_state.PendingChoice.Type=="opponentPayment") { WithResumedAction(() => ResolveOpponentPaymentCommand(command)); return; }
             // Another player's choice inside an action (issue #419, DeciderChoice.cs): answered by the deciding player, who holds priority.
-            if (_state.PendingChoice.Type=="deciderChoice") { ResolveDeciderChoiceCommand(command); return; }
+            if (_state.PendingChoice.Type=="deciderChoice") { WithResumedAction(() => ResolveDeciderChoiceCommand(command)); return; }
             // A Focus Effect paused for its player's decision (issue #419, FocusEffectChoice.cs).
             if (_state.PendingChoice.Type=="focusEffectChoice") { ResolveFocusEffectChoiceCommand(command); return; }
             // The second target of a sequenced action (issue #419, SequencedTarget.cs).
@@ -317,7 +353,7 @@ public sealed partial class MatchEngine
             if (_state.PendingChoice.Type=="testedLandProvince") { ResolveTestedLandProvince(command); return; }
             if (_state.PendingChoice.Type=="forcedDiscard") { ResolveForcedDiscard(command); return; }
             // A conditional effect choice (issue #337, Mirumoto Yumaru): the acting player picks one of the options the engine listed.
-            if (_state.PendingChoice.Type=="effectChoice") { ResolveEffectChoice(command); return; }
+            if (_state.PendingChoice.Type=="effectChoice") { WithResumedAction(() => ResolveEffectChoice(command)); return; }
             if (_state.PendingChoice.Type=="proclaimNegateReaction")
             {
                 // Turning the Story (issue #453, batch 2): the one reacting player answers -- the Reaction (negating the held Proclaim) or a pass -- and the
@@ -403,7 +439,8 @@ public sealed partial class MatchEngine
                     // Negated (Effortless Counterattack): it is taken and pays its costs, only its effects are lost, and the burst it was part of goes on --
                     // the next additional action is the holder's to take (ResolveNegatedAction, consumedGrant).
                     var negated=_state.DeferredActionNegated; _state.DeferredActionNegated=false;
-                    if(negated) ResolveNegatedAction(pending,consumedGrant:true); else ExecuteAbilityEffects(pending,consumedGrant:true);
+                    if(negated) ResolveNegatedAction(pending,consumedGrant:true);
+                    else if(!ChainOutOfPlayReactionWindow(pending,consumedGrant:true)) ExecuteAbilityEffects(pending,consumedGrant:true); // R4 (issue #492): Bad Kharma and the like may still be played on top.
                 }
                 return;
             }
@@ -427,10 +464,12 @@ public sealed partial class MatchEngine
                     var pending=_state.PendingNegatableAbility; _state.PendingNegatableAbility=null;
                     // A redirect may have made a Bofana the target of an action his trait was not yet judged for (issue #335).
                     if(OpenForcedDiscardForTargetedTrait(pending,"action")) return;
-                    ResolveDeferredActionInItsWindow(pending);
+                    ResolveDeferredActionAfterItsWindows(pending);
                 }
                 return;
             }
+            // Mendon's R4 ruling (issue #492): the window before an Honor gain or loss from an action's effects (EmperorRulingR4.cs).
+            if (_state.PendingChoice.Type=="honorChangeReaction") { ResolveHonorChangeWindowCommand(command); return; }
             if (_state.PendingChoice.Type=="unimpeachableNameReaction")
             {
                 // Unimpeachable Name (oracle-l5r-8989): open only to the one reacting player (unlike
@@ -443,10 +482,16 @@ public sealed partial class MatchEngine
                 {
                     var pending=_state.PendingOutOfPlayActionReaction; _state.PendingOutOfPlayActionReaction=null;
                     var reduction=_state.HonorLossReductionPlayerId;
+                    // Mendon's R4 ruling (issue #492): this window can follow the before-action window and the additional-action window of the same action, and what they set (the negations of
+                    // effects, the additional action's grant) is carried through it.
+                    var carried=_state.PendingOutOfPlayNegations; var carriedGrant=_state.PendingOutOfPlayConsumedGrant;
+                    _state.PendingOutOfPlayNegations=null; _state.PendingOutOfPlayConsumedGrant=false;
                     var outer=ContinueSuspendedReaction(pending);
+                    if(carried is not null) _state.NegatedEffects=carried;
                     _state.HonorLossReductionPlayerId=reduction; var suspended=_state.SuspendedWindows.Count;
                     // Bad Kharma / Footsteps of Madness (Emperor Edition remaining-cards pass, group A, issue #492): the held action was negated as a whole in this window.
-                    if(RemATakeHeldNegation(out var remAIgnoreCosts)) ResolveNegatedAction(pending,ignoreCosts:remAIgnoreCosts); else ExecuteAbilityEffects(pending);
+                    if(RemATakeHeldNegation(out var remAIgnoreCosts)) ResolveNegatedAction(pending,consumedGrant:carriedGrant,ignoreCosts:remAIgnoreCosts); else ExecuteAbilityEffects(pending,consumedGrant:carriedGrant);
+                    if(carried is not null) { _state.NegatedEffects.Clear(); RestoreTemporaryRemovals(TemporaryRemovals.Action); if(_state.SuspendedWindows.Count<=suspended) _state.NegatedEffects=outer?.NegatedEffects ?? []; }
                     if(_state.SuspendedWindows.Count>suspended) _state.SuspendedWindows[^1].HonorLossReductionPlayerId=outer?.HonorLossReductionPlayerId;
                     else _state.HonorLossReductionPlayerId=outer?.HonorLossReductionPlayerId;
                 }
@@ -2500,7 +2545,7 @@ public sealed partial class MatchEngine
             Emit("forcedDiscardOffered",$"{Player(owed.PlayerId).Name} must discard a card ({owed.Reason}).",owed.PlayerId);
             return true;
         }
-        if(_state.PendingOverconfidentDraws.Count>0 && ReactionsBarred()) { _state.PendingOverconfidentDraws.Clear(); Emit("reactionsBarred","Cherry Blossom Festival: no players may take Reactions, so no Overconfident draw is offered."); } // Cherry Blossom Festival (issue #492, group F)
+        // Overconfident is not a Reaction (Mendon's R4 ruling on Cherry Blossom Festival: "Overconfident and traits are not reactions (despite triggering like them)"): its draw is offered whatever an Event bars.
         if(_state.PendingOverconfidentDraws.Count==0) return false;
         var playerId=_state.PendingOverconfidentDraws[0];
         _state.PendingOverconfidentDraws.RemoveAt(0);
@@ -2532,7 +2577,7 @@ public sealed partial class MatchEngine
         if(_state.ForcedDiscardContinuation is { } announced)
         {
             var resume=_state.ForcedDiscardResume; _state.ForcedDiscardContinuation=null; _state.ForcedDiscardResume=null;
-            if(resume=="action") ResolveDeferredActionInItsWindow(announced);
+            if(resume=="action") ResolveDeferredActionAfterItsWindows(announced);
             else if(resume=="attack") ResolveAttack();
             else { ContinueSuspendedReaction(announced); AnnounceAbility(announced); }
             return;
@@ -3233,6 +3278,7 @@ public sealed partial class MatchEngine
     private void GainHonor(int playerId,int amount,string reason,CardInstance? source=null)
     {
         if(amount==0) return;
+        OfferHonorChangeWindow(playerId,amount,reason); // Mendon's R4 ruling (issue #492): Rhetoric, Solid Defense and Shiro Chugo may be played on ANY Honor change from an action's effects.
         // Emperor Edition remaining-cards pass, group C (issue #492): Rhetoric's redirect, Solid Defense's negation of losses and Rumors Travel's reduction of a gain (EmperorRemainingC.cs).
         (playerId,amount)=EmperorRemainingCHonorChange(playerId,amount,reason);
         if(amount==0) return;
@@ -3252,6 +3298,14 @@ public sealed partial class MatchEngine
         {
             Emit("honorLossNegated",$"{Player(playerId).Name}'s Honor loss from {reason} was negated with the action's effects.",playerId,source?.Id);
             return;
+        }
+        // Unimpeachable Name played in the window before this loss (Mendon's R4 ruling): the same reduction, for the action it was played on.
+        if(amount<0 && playerId==_state.UnimpeachablePlayerId && _state.UnimpeachableActionKey is { } unimpeachableKey && unimpeachableKey==CurrentActionKey())
+        {
+            var reducedByName=Math.Min(0,amount+3);
+            Emit("honorLossReduced",$"{Player(playerId).Name}'s Honor loss from {reason} was reduced by Unimpeachable Name{(reducedByName==0 ? " to 0" : "")}.",playerId,source?.Id);
+            amount=reducedByName;
+            if(amount==0) return;
         }
         if(amount<0 && playerId==_state.HonorLossReductionPlayerId)
         {

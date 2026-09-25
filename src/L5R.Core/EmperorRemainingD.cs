@@ -480,18 +480,19 @@ public sealed partial class MatchEngine
     // ---- The Killing Grounds ----
 
     private const string KillingGroundsEffect = "killing-grounds";
-    private const string KillingGroundsFiredKey = "killing-grounds:fired";
+    // Mendon's ruling (issue #492, R4): "First time for each player" -- the trait is spent once PER PLAYER, so the key carries the passing player's id.
+    private static string KillingGroundsFiredKey(int playerId) => $"killing-grounds:fired:{playerId}";
 
     // Pass()'s hook, in the Combat Segment: "After the first time, while this card remains in play, that a player passes instead of announcing a Battle action: He chooses and destroys one of his
-    // Personalities at the current battlefield." The first pass while the Terrain stands spends it. One Personality is destroyed without asking; with several the passing player is asked
+    // Personalities at the current battlefield." The first pass BY EACH PLAYER while the Terrain stands spends that player's time (Mendon's ruling, R4). One Personality is destroyed without asking; with several the passing player is asked
     // (killingGroundsSelect) and the pass completes once he has chosen. True when a decision is open (the pass waits); false when the pass goes on.
     private bool BeginKillingGroundsOnPass()
     {
         if (_state.PendingChoice is not null || _state.CurrentBattleProvince is not int battle) return false;
-        var grounds = TerrainsAtBattlefield(battle).FirstOrDefault(t => Definition(t).Effect == KillingGroundsEffect && !t.AbilityUses.ContainsKey(KillingGroundsFiredKey));
+        var grounds = TerrainsAtBattlefield(battle).FirstOrDefault(t => Definition(t).Effect == KillingGroundsEffect && !t.AbilityUses.ContainsKey(KillingGroundsFiredKey(_state.PriorityPlayerId)));
         if (grounds is null) return false;
-        grounds.AbilityUses[KillingGroundsFiredKey] = _state.TurnNumber;
         var passer = _state.PriorityPlayerId;
+        grounds.AbilityUses[KillingGroundsFiredKey(passer)] = _state.TurnNumber;
         var own = Army(passer, battle).OrderBy(c => c.Id, StringComparer.Ordinal).ToArray();
         Emit("killingGrounds", $"{Definition(grounds).Name}: {Player(passer).Name} passed instead of announcing a Battle action and must destroy one of his Personalities at this battlefield.", passer, grounds.Id);
         if (own.Length == 0) return false;

@@ -237,7 +237,8 @@ public sealed partial class MatchEngine
         var player = Player(command.PlayerId);
         var card = Card(_state.PendingChoice!.CardId);
         player.ProclaimUsedTurn = _state.TurnNumber;
-        if (!negated) GainHonor(player.Id, Definition(card).PersonalHonor, "Proclaim");
+        // Proclaim is a Reaction (Mendon's R4 ruling), so its gain is from an action's effects: Rhetoric and the like may be played on it.
+        if (!negated) { var before = _proclaimAction; _proclaimAction = ($"{player.Id}|proclaim|{card.Id}", player.Id); try { GainHonor(player.Id, Definition(card).PersonalHonor, "Proclaim"); } finally { _proclaimAction = before; } }
         else Emit("proclaimNegated", $"{player.Name}'s Proclaim resolved with its effects negated.", player.Id, card.Id);
         ApplyPendingEntryEffects();
         _state.ConsecutivePasses = 0;

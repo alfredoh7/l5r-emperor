@@ -231,7 +231,7 @@ public sealed partial class MatchEngine
     {
         // The Unimpeachable Name window is opened for the Strategy Reactions below as well: Unimpeachable Name itself is offered only when its own condition holds.
         if (id == "unimpeachable-name-reaction")
-            Require(UnimpeachableNameAvailable(player.Id, _state.PendingOutOfPlayActionReaction?.AbilityId), "Unimpeachable Name needs a dishonorable Personality or an Honor loss to react to.");
+            Require(_state.PendingHonorChange is not null || UnimpeachableNameAvailable(player.Id, _state.PendingOutOfPlayActionReaction?.AbilityId), "Unimpeachable Name needs a dishonorable Personality or an Honor loss to react to.");
         CardInstance? performer = command.PerformerId is not null && _state.Cards.TryGetValue(command.PerformerId, out var chosen) ? chosen : null;
         switch (id)
         {
@@ -538,7 +538,18 @@ public sealed partial class MatchEngine
 
     // ---- Deception Revealed -------------------------------------------------------------------------------------------------------------------------------------
 
-    // The Rings this action bowed (as an effect or a cost), read off the same before/after snapshot as the bow-reaction windows, are put on its record.
+    // Mendon's R4 ruling (issue #492): "Focus effects are not actions, only effects that start with Limited, Open, Battle, Reaction ... that bow a ring may be used to straighten it. This includes the
+    // ring bowing to pay a cost or being bowed as an effect of an action." So the Rings an ACTION bowed -- as a cost or as an effect, whichever way the action resolved (an ability, the Attack or the
+    // duel it declared) -- are the ones on its record; a Ring bowed while a Focus Effect resolves is excluded from the duel's action.
+    private HashSet<string> BowedRingIds() => _state.Cards.Values.Where(c => c.Bowed && Definition(c).Type == CardType.Ring).Select(c => c.Id).ToHashSet();
+
+    private void ExcludeFocusEffectRingBows(HashSet<string> ringsBowedBefore)
+    {
+        if (_state.PendingDuel is not { RingsBowedBefore: { } tracked }) return;
+        foreach (var id in BowedRingIds()) if (!ringsBowedBefore.Contains(id) && !tracked.Contains(id)) tracked.Add(id);
+    }
+
+    // The Rings this action bowed (as an effect or a cost) are put on its record.
     private void RecordBowedRings(HashSet<string> bowedBeforeAction)
     {
         foreach (var ring in _state.Cards.Values.Where(c => Definition(c).Type == CardType.Ring && InPlay(c) && c.Bowed && !bowedBeforeAction.Contains(c.Id)))

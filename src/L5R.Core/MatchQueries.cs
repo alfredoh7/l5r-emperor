@@ -354,6 +354,31 @@ public sealed partial class MatchEngine
             result.AddRange(AbilityActions(playerId));
             Add("declineReaction","Pass reaction",Command("declineReaction"));
         }
+        else if(_state.PendingChoice is { Type:"honorChangeReaction" })
+        {
+            // Mendon's R4 ruling (issue #492): before an Honor gain or loss from an action's effects -- this player's Reactions for it (a Reaction with a performer to choose is offered once per
+            // performer who could take it), then the pass.
+            foreach(var (card,reactionId) in HonorChangeWindowOffers(playerId))
+            {
+                var reaction=AbilityCatalog.All[reactionId];
+                // Unimpeachable Name: played alone, or with a dishonorable Personality to rehonor (its optional target).
+                if(reactionId==HonorChangeReactions.UnimpeachableName)
+                {
+                    AddReaction(card,reactionId,validate:true);
+                    foreach(var dishonored in _state.Cards.Values.Where(c=>InPlay(c) && c.Dishonorable && Definition(c).Type==CardType.Personality).OrderBy(c=>c.Id,StringComparer.Ordinal))
+                        AddReaction(card,reactionId,targetId:dishonored.Id,label:$"{reaction.Label} · rehonor {Definition(dishonored).Name} ({dishonored.Id})",validate:true);
+                    continue;
+                }
+                if(reaction.Performer is not null)
+                {
+                    foreach(var performer in BeforeActionReactionPerformers(playerId,reaction))
+                        AddReaction(card,reactionId,label:$"{reaction.Label} · {Definition(performer).Name} ({performer.Id})",validate:true,performerId:performer.Id);
+                    continue;
+                }
+                AddReaction(card,reactionId,validate:true);
+            }
+            Add("declineReaction","Pass reaction",Command("declineReaction"));
+        }
         else if(_state.PendingChoice is { Type:"battleRecruit" })
         {
             // After a battle resolved (issue #379): the recruit grants of this battle this player still holds, then the pass.

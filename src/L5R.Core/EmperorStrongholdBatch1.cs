@@ -102,7 +102,7 @@ public sealed partial class MatchEngine
         if (paying is null || card.Zone is not (Zone.Home or Zone.Stronghold or Zone.Battlefield)) return null;
         foreach (var id in AbilityIdsOf(card))
             if (AbilityCatalog.All.TryGetValue(id, out var ability) && ability.PaymentWhen is { } when && ability.PaymentProduction is int amount
-                && (ability.PaymentEvenIfBowed || !card.Bowed)
+                && !BarredByCherryBlossom(id) /* Cherry Blossom Festival (R4) */ && (ability.PaymentEvenIfBowed || !card.Bowed)
                 && ReactivePaymentConditionMet(when, paying)
                 && !(card.AbilityUses.TryGetValue(ability.UsageKey ?? id, out var used) && used == _state.TurnNumber)
                 && !AbilityDisabled(card, id))

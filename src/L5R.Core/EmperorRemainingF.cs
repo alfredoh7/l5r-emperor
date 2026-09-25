@@ -227,7 +227,7 @@ public sealed partial class MatchEngine
     {
         if (id == "ten-thousand-temples-honor") Require(player.Honor <= 9, "Your Family Honor must be 9 or lower.");
         // Cherry Blossom Festival: "No players may take Reactions". Disgrace: "other players may not target your Personalities with Limited actions".
-        if (ability.Timing == "Reaction") Require(!ReactionsBarred(), "Cherry Blossom Festival: no players may take Reactions.");
+        if (ability.Timing == "Reaction") Require(!BarredByCherryBlossom(id), "Cherry Blossom Festival: no players may take Reactions.");
         RequireDisgraceAllowsTargets(ability, command, player);
         // Blighted Region: "If you are the Defender" (a condition on taking the action at all).
         if (id == "blighted-region-move") Require(player.Id != _state.ActivePlayerId, "Blighted Region: only the Defender may use this.");
@@ -319,7 +319,22 @@ public sealed partial class MatchEngine
     // ---- Luxurious Silk: paying for an action ---------------------------------------------------------------------------------------------------------------------
     private bool EmperorRemainingFPaymentConditionMet(string when, PaymentSubject paying) => when switch
     {
-        EmperorRemainingFAbilities.PayingForActionWhen => paying.Kind is PaymentKind.Action or PaymentKind.Play or PaymentKind.Equip,
+        EmperorRemainingFAbilities.PayingForActionWhen => PaymentIsForAnAction(paying),
         _ => false
     };
+
+    // "When paying for an action" (Luxurious Silk, Yasuki Tanimura). Mendon's ruling (issue #492, R4): "This does not reduce the cost of a personality recruited during the dynasty phase or if
+    // the recruit action requires a player to pay all costs normally. However, if a personality's gold cost is the cost of an action and the effect is to recruit them, then Luxurious Silk may be
+    // used to reduce its cost." So an Equip, a Strategy played from a hand and an ability's own cost are payments for an action; an ordinary recruit (a Dynasty purchase, a search that recruits, any
+    // recruit that carries no ability) is not; and a recruit BY AN ABILITY whose Gold cost is the Personality's Gold Cost is one -- unless the ability's printed text says he is brought into play
+    // "paying all costs" (the recruit's own costs, paid as for any recruit), which it is not.
+    internal static bool PaymentIsForAnAction(PaymentSubject? paying) => paying is not null && paying.Kind switch
+    {
+        PaymentKind.Action or PaymentKind.Play or PaymentKind.Equip => true,
+        PaymentKind.Recruit => paying.Ability is { Cost.Basis: GoldCostBasis.TargetRecruit } recruiting && !RecruitPaysAllCostsNormally(recruiting),
+        _ => false
+    };
+
+    /// <summary>Whether the recruit an ability makes is one that "pays all costs" as any recruit does (the printed phrase "paying all costs", modified or not).</summary>
+    internal static bool RecruitPaysAllCostsNormally(AbilityDefinition ability) => ability.Label.Contains("paying all costs", StringComparison.OrdinalIgnoreCase);
 }

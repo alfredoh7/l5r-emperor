@@ -144,6 +144,14 @@ public sealed partial class MatchEngine
 
     private void ResolveFocusEffectChoiceCommand(GameCommand command)
     {
+        var wasInFocusEffect = _resolvingFocusEffect; _resolvingFocusEffect = true; // a Focus Effect is not an action (Mendon's R4 ruling)
+        var ringsBefore = BowedRingIds();
+        try { ResolveFocusEffectChoiceCommandCore(command); }
+        finally { _resolvingFocusEffect = wasInFocusEffect; ExcludeFocusEffectRingBows(ringsBefore); }
+    }
+
+    private void ResolveFocusEffectChoiceCommandCore(GameCommand command)
+    {
         var pending = _state.PendingFocusChoice ?? throw new RuleViolation("No Focus Effect is waiting for a choice.");
         Require(command.Type == "chooseFocusEffect", "Choose a card or decline.");
         Require(command.PlayerId == pending.PlayerId, "Only the Focus Effect's player may choose.");

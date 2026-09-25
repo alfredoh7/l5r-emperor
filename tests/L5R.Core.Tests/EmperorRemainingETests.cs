@@ -956,7 +956,7 @@ internal static class EmperorRemainingETests
         Eq(e.State.PendingSearch!.Deck, SearchDeck.DynastyDiscard, "the discard pile");
         var takes = e.QueryActions(0).Where(a => a.Type == "selectSearchCard").ToArray();
         Eq(takes.Length, 1, "Moto Naleesh is offered from the pile");
-        Check(e.QueryActions(0).Any(a => a.Type == "passSearch"), "a player may pass on to the deck");
+        Check(!e.QueryActions(0).Any(a => a.Type == "passSearch"), "Mendon's R4 ruling: a card qualifies in the first place, so he must take it from there -- no passing on to the deck");
         Accept(e, takes[0].Command!);
         Eq(e.State.PendingChoice?.Type, "searchRegionProvince", "the province is chosen");
         var provinces = e.QueryActions(0).Where(a => a.Type == "chooseSearchProvince").ToArray();
@@ -966,30 +966,33 @@ internal static class EmperorRemainingETests
         Eq(e.State.Cards[old.Id].Zone, Zone.DynastyDiscard, "the card that was there was discarded");
         Check(e.State.PendingSearch is null && e.State.PendingChoice is null, "the search is over");
         Eq(e.State.Cards[deck.Id].Zone, Zone.DynastyDeck, "the other copy stays in the deck");
-        // Pass on the pile, then take her from the deck.
+        // A card in the pile qualifies: passing is refused, and the deck is never searched or shown (Mendon's R4 ruling).
         var e2 = SearchRig(true, true, out _, out var pile2, out var deck2, out _);
         Accept(e2, Opt(e2, 0, "shinjos-guidance-search").Command!);
-        Accept(e2, e2.QueryActions(0).Single(a => a.Type == "passSearch").Command!);
-        Eq(e2.State.PendingSearch!.Deck, SearchDeck.Dynasty, "then the Dynasty deck");
+        Check(e2.Execute(new("passSearch", 0, e2.Version)) is { Accepted: false }, "the pass is refused while the pile holds a qualifying card");
+        Eq(e2.State.PendingSearch!.Deck, SearchDeck.DynastyDiscard, "still the pile");
+        Check(e2.State.Events.All(ev => ev.Type != "deckShuffled"), "the deck was not searched, so it was not shuffled");
         Accept(e2, e2.QueryActions(0).Single(a => a.Type == "selectSearchCard").Command!);
         Accept(e2, e2.QueryActions(0).First(a => a.Type == "chooseSearchProvince").Command!);
-        Eq(e2.State.Cards[deck2.Id].Zone, Zone.Province, "taken from the deck");
-        Eq(e2.State.Cards[pile2.Id].Zone, Zone.Dead, "the pile copy stays");
-        Check(!e2.State.Players[0].DynastyDeck.Contains(deck2.Id), "and left the deck");
+        Eq(e2.State.Cards[pile2.Id].Zone, Zone.Province, "taken from the pile, the first place found");
+        Eq(e2.State.Cards[deck2.Id].Zone, Zone.DynastyDeck, "the deck copy stays");
+        Check(e2.State.Events.All(ev => ev.Type != "deckShuffled"), "a place that was never searched is not shuffled");
         // Nothing in the pile: the deck is searched without asking.
         var e3 = SearchRig(false, true, out _, out _, out var deck3, out _);
         Accept(e3, Opt(e3, 0, "shinjos-guidance-search").Command!);
         Check(!e3.QueryActions(0).Any(a => a.Type == "selectSearchCard"), "no Naleesh in the pile");
-        Accept(e3, e3.QueryActions(0).Single(a => a.Type == "passSearch").Command!);
+        Eq(e3.QueryActions(0).Count(a => a.Type == "passSearch"), 2, "he may search the deck next, or stop");
+        Accept(e3, e3.QueryActions(0).First(a => a.Type == "passSearch" && a.Command!.Choice is null).Command!);
         Accept(e3, e3.QueryActions(0).Single(a => a.Type == "selectSearchCard").Command!);
         Accept(e3, e3.QueryActions(0).First(a => a.Type == "chooseSearchProvince").Command!);
         Eq(e3.State.Cards[deck3.Id].Zone, Zone.Province, "found in the deck");
         // Nowhere: nothing found, the Celestial is spent all the same.
         var e4 = SearchRig(false, false, out var shinjo4, out _, out _, out _);
         Accept(e4, Opt(e4, 0, "shinjos-guidance-search").Command!);
-        Accept(e4, e4.QueryActions(0).Single(a => a.Type == "passSearch").Command!);
+        Accept(e4, e4.QueryActions(0).First(a => a.Type == "passSearch" && a.Command!.Choice is null).Command!);
         Accept(e4, e4.QueryActions(0).Single(a => a.Type == "passSearch").Command!);
         Check(e4.State.PendingSearch is null, "the search ended");
+        Eq(e4.State.Events.Count(ev => ev.Type == "deckShuffled"), 1, "the Dynasty deck was searched, so it is shuffled even though nothing was found");
         Eq(e4.State.Cards[shinjo4.Id].Zone, Zone.DynastyDiscard, "the Celestial is discarded regardless");
     }
 
@@ -1079,13 +1082,17 @@ internal static class EmperorRemainingETests
         Accept(e5, e5.QueryActions(0).Single(a => a.Type == "selectSearchCard").Command!);
         Eq(e5.State.Cards[pileRing5.Id].Zone, Zone.Hand, "the Ring from the pile is in the hand");
         Eq(e5.State.Cards[deckRing5.Id].Zone, Zone.FateDeck, "the deck was not searched");
-        var e6 = SearchRig(true, true, out _, out var pileRing6, out var deckRing6);
+        var e6 = SearchRig(true, true, out _, out _, out _);
         Accept(e6, Opt(e6, 0, "togashis-guidance-ring-search").Command!);
-        Accept(e6, e6.QueryActions(0).Single(a => a.Type == "passSearch").Command!);
+        Check(e6.Execute(new("passSearch", 0, e6.Version)) is { Accepted: false }, "Mendon's R4 ruling: a Ring qualifies in the pile, so he cannot pass on to the deck");
+        e6 = SearchRig(false, true, out _, out var pileRing6, out var deckRing6);
+        Accept(e6, Opt(e6, 0, "togashis-guidance-ring-search").Command!);
+        Accept(e6, e6.QueryActions(0).First(a => a.Type == "passSearch" && a.Command!.Choice is null).Command!);
         Eq(e6.State.PendingSearch!.Deck, SearchDeck.Fate, "then the Fate deck");
         Accept(e6, e6.QueryActions(0).Single(a => a.Type == "selectSearchCard").Command!);
         Eq(e6.State.Cards[deckRing6.Id].Zone, Zone.Hand, "the Ring from the deck is in the hand");
-        Eq(e6.State.Cards[pileRing6.Id].Zone, Zone.FateDiscard, "the pile Ring stays");
+        Check(pileRing6.Id == e6.State.Cards.Values.First(c => c.Id == pileRing6.Id).Id, "fixture");
+        Eq(e6.State.Events.Count(ev => ev.Type == "deckShuffled"), 1, "the Fate deck was searched and is shuffled");
     }
 
     private static void YoritomosGuidance_()
