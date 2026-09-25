@@ -7,7 +7,7 @@ public sealed partial class MatchEngine
     private bool ExecuteCreate(AbilityDefinition ability, CreatedCardSpec creates, GameCommand command, PlayerState player, Action? beforeWindow = null)
     {
         var spec = CreatedCards.Chosen(creates, command.CreatedCard) ?? throw new RuleViolation("Choose which card to create.");
-        var insideEntryWindow = ability.Timing == "Reaction" && ability.Trigger == "own-enters-play";
+        var insideEntryWindow = ability.Timing == "Reaction" && ability.Trigger is "own-enters-play" or "own-personality-enters-play"; // Shinjo Ki-Chang - exp (issue #492, proxy group Y) creates inside the window another Personality's entry opened.
         if (spec.CopyOfTarget)
         {
             var copied = command.TargetId is not null && _state.Cards.TryGetValue(command.TargetId, out var target) ? target : throw new RuleViolation("Choose the card to copy.");
@@ -43,7 +43,8 @@ public sealed partial class MatchEngine
     // The source itself ("attach it to him" on the creator's own entering-play Reaction: Masayoshi, issue #453), or -- for a multi-target creator -- every card of its FIRST
     // card slot ("one or two of your Personalities": Bayushi Makubesu; Kakita Yasunori's host slot is his first too), so a later slot (Yasunori's removed card) is never a host.
     private CardInstance[] CreateHosts(GameCommand command, CreatedCardSpec spec) =>
-        spec.HostIsSource ? (command.CardId is not null && _state.Cards.TryGetValue(command.CardId, out var creator) ? [creator] : [])
+        spec.HostIsEntered ? (_state.PendingChoice?.CardId is { } enteredId && _state.Cards.TryGetValue(enteredId, out var entered) ? [entered] : [])
+        : spec.HostIsSource ? (command.CardId is not null && _state.Cards.TryGetValue(command.CardId, out var creator) ? [creator] : [])
         : spec.HostIsPerformer ? (command.PerformerId is not null && _state.Cards.TryGetValue(command.PerformerId, out var performer) ? [performer] : [])
         : command.AbilityId is not null && AbilityCatalog.All.TryGetValue(command.AbilityId, out var creatorAbility) && creatorAbility.Slots?.FirstOrDefault(s => !s.IsPlayer && !s.Performing && !s.AtResolution) is { } hostSlot
             ? SlotCards(command, hostSlot.Id).ToArray()

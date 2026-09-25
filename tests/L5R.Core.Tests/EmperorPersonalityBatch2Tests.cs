@@ -88,7 +88,8 @@ internal static class EmperorPersonalityBatch2Tests
         Check(PublishedContent.PersonalityWave69.Cards.All(c => (c.Abilities ?? []).Length > 0 || c.Effect != "none"), "no card of the wave is blank");
         var listed = File.ReadAllLines(Path.Combine(root, "tests/L5R.Core.Tests/PublishedWaves/personality-wave-69.txt")).Where(l => l.Length > 0).ToArray();
         Check(listed.OrderBy(i => i, StringComparer.Ordinal).SequenceEqual(Wired.OrderBy(i => i, StringComparer.Ordinal)), "the manifest pins exactly the wired cards");
-        Check(!CardCatalog.Cards.ContainsKey(Makotai), "Akodo Makotai is unwired and unpublished");
+        // Issue #492 (proxy group Y): Akodo Makotai is now wired and published in personality-wave-77 with his Infantry Follower Proxy, not in wave 69.
+        Check(!PublishedContent.PersonalityWave69.Cards.Any(c => c.Id == Makotai), "Akodo Makotai is not in personality-wave-69 (personality-wave-77 publishes him, issue #492)");
         foreach (var abilityId in Wired.SelectMany(id => CardCatalog.Get(id).Abilities ?? [])) Check(AbilityCatalog.All.ContainsKey(abilityId), $"{abilityId} is catalogued");
     }
 
