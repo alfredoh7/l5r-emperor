@@ -6745,8 +6745,9 @@ public sealed partial class MatchEngine
                         // already uses above, but compared against the unit's own Personality's Chi
                         // (via PersonalityChi, which includes Item-attachment bonuses) rather than a
                         // Force/strength check.
-                        "enemy-unattached-unit-card-chi-lte-performer" => !own && (type == CardType.Follower || personality && !HasAttachments(target)) &&
-                            PersonalityChi(type == CardType.Personality ? target : Card(target.AttachedTo!)) <= PersonalityChi(Card(command.PerformerId!)),
+                        // Issue #498 (Makito's reading): any card of the unit without attachments -- a Follower, an Item, a Spell... -- or the Personality when he has none.
+                        "enemy-unattached-unit-card-chi-lte-performer" => !own && IsUnitCardWithoutAttachments(target) &&
+                            PersonalityChi(Card(UnitHostId(target))) <= PersonalityChi(Card(command.PerformerId!)),
                         "enemy-force-lower-than-performer" => !own && type is CardType.Personality or CardType.Follower && CardForce(target) < CardForce(Card(command.PerformerId!)),
                         // Bounty Hunter: "a target attachment or a target dishonorable Personality" --
                         // an OR of two otherwise-unrelated existing categories.
@@ -6915,7 +6916,7 @@ public sealed partial class MatchEngine
                         "source-itself" => source is not null && target.Id == source.Id,
                         // Shiba Iaimiko's optional second target: a card without attachments in the first slot's target's unit -- listed only while the printed condition can
                         // hold once the -4F applies (that target's Force is at most 4, so "now 0", and the acting player controls a Shugenja).
-                        "iaimiko-collateral" => (type == CardType.Follower || personality && !HasAttachments(target)) && SlotCards(command, "target").FirstOrDefault() is { } iaimikoPrimary
+                        "iaimiko-collateral" => IsUnitCardWithoutAttachments(target) && SlotCards(command, "target").FirstOrDefault() is { } iaimikoPrimary
                             && UnitHostId(target) == UnitHostId(iaimikoPrimary) && CardForce(iaimikoPrimary) <= 4 && ControlsKeyword(player.Id, "Shugenja"),
                         // Honor and Treachery pass (issue #458).
                         // Bayushi Irezu: "another target Scorpion Clan Personality you control" -- wherever he stands, other than Irezu himself.
@@ -8775,8 +8776,8 @@ public sealed partial class MatchEngine
             {
                 var performer = Card(command.PerformerId!);
                 
-                var destroyedAttachment = Definition(target!).Type == CardType.Follower;
-                DestroyUnits([target!], false, player.Id);
+                var destroyedAttachment = target!.Zone == Zone.Attached; // issue #498: any attachment of the unit (Follower, Item, Spell)
+                DestroyUnitCard(target!, player.Id);
                 if (destroyedAttachment && Keyword(performer, "Fire")) Straighten(performer);
                 break;
             }

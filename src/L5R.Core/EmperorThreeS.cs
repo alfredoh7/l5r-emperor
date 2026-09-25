@@ -113,8 +113,7 @@ public sealed partial class MatchEngine
             // Makito's Maho Battle: the acting player chooses the card without attachments in the target's unit to destroy (the Personality if he has none, else one of his attachments) as the action resolves.
             case EmperorThreeSAbilities.MakitoDestroy:
             {
-                CardInstance[] candidates = !HasAttachments(target!) ? [target!]
-                    : Attachments(target!.Id).Where(a => !HasAttachments(a)).OrderBy(a => a.Id, StringComparer.Ordinal).ToArray();
+                var candidates = UnitCardsWithoutAttachments(target!);
                 var options = candidates.Select(c => new EffectOption(c.Id, $"Destroy {Definition(c).Name}", [Batch1DestroyCardEffect + c.Id])).ToArray();
                 return BeginListedEffectChoice(command, options, $"{Definition(source!).Name}: choose the card without attachments in {Definition(target!).Name}'s unit to destroy (it will not be negated or delayed).",
                     consumedGrant, playedFromDiscard, opponentHonorBeforeBattleAction, bowedBeforeAction, preExistingGrants);

@@ -3412,7 +3412,7 @@ public sealed partial class MatchEngine
         _state.Phase=phase; _state.PriorityPlayerId=priority; _state.ConsecutivePasses=0; Emit("phaseChanged",$"Phase: {phase}.");
         // The shared delay mechanism (issue #492, EmperorRulingR2.cs): what waits for the next Dynasty Phase (or End Phase) to begin is applied as it does.
         if(phase==Phase.Dynasty) ApplyDelayedEffects(DelayUntil.NextDynastyPhase);
-        if(phase==Phase.End) ApplyDelayedEffects(DelayUntil.EndPhaseBegins);
+        if(phase==Phase.End) ApplyDelayedEffects(DelayUntil.EndPhaseBegins, EndPhaseIsOwners); // issue #498: "YOUR End Phase" -- only the active player's delayed effects are due
     }
     private void Emit(string type,string message,int? playerId=null,string? cardId=null,int? Amount=null) => _state.Events.Add(new(_state.Events.Count+1,type,message,playerId,cardId,Amount));
     private PlayerState Player(int id) => _state.Players[id];
