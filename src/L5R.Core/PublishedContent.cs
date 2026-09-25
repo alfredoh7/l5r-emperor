@@ -2569,6 +2569,8 @@ public static class PublishedContent
     public static PublishedSnapshot PersonalityWave76 { get; } = Load("L5R.Published.PersonalityWave76.json", "personality-wave-76", requireDecks: false);
     /// <summary>Spell wave 24 (Emperor Edition remaining-cards pass, issue #492, proxy group X): Summon Swamp Spirits and the created-only Swamp Spirit Follower it creates.</summary>
     public static PublishedSnapshot SpellWave24 { get; } = Load("L5R.Published.SpellWave24.json", "spell-wave-24", requireDecks: false);
+    /// <summary>Personality wave 78 (Emperor Edition remaining-cards pass, issue #492, proxy group Z): Kitsune Denhei, Shosuro Rokuta and the Proxies they create (Denhei's Snake, Rokuta's Apprentice).</summary>
+    public static PublishedSnapshot PersonalityWave78 { get; } = Load("L5R.Published.PersonalityWave78.json", "personality-wave-78", requireDecks: false);
     /// <summary>Celestial wave 8 (Emperor Edition remaining-cards pass, issue #492, group E): the Kami Guidance Celestials of Akodo, Bayushi, Daigotsu, Doji, Hida, Shiba, Shinjo, Togashi and Yoritomo.</summary>
     public static PublishedSnapshot CelestialWave8 { get; } = Load("L5R.Published.CelestialWave8.json", "celestial-wave-8", requireDecks: false);
     /// <summary>Personality wave 74 (The Shadow's Embrace pass, issue #476, batch 1): Agasha Kurou, Asahina Keigo, Asako Hayate, Asako Jirou, Atosa, Bayushi Misaki,

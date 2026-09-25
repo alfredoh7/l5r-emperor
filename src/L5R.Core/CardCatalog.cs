@@ -638,6 +638,7 @@ public static class CardCatalog
             .Concat(PublishedContent.PersonalityWave71.Cards)
             .Concat(PublishedContent.StrongholdWave18.Cards) // Emperor Edition Stronghold pass (issue #486), batch 2
             .Concat(PublishedContent.SpellWave23.Cards) // Emperor Edition remaining-cards pass (issue #492), group E
+            .Concat(PublishedContent.PersonalityWave78.Cards) // Emperor Edition remaining-cards pass (issue #492), proxy group Z
             .Concat(PublishedContent.CelestialWave8.Cards)
             .Concat(PublishedContent.HoldingWave13.Cards) // Emperor Edition remaining-cards pass (issue #492), group F
             .Concat(PublishedContent.RegionWave9.Cards) // Emperor Edition remaining-cards pass (issue #492), group F

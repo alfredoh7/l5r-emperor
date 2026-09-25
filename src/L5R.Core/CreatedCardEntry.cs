@@ -48,7 +48,7 @@ public sealed partial class MatchEngine
     // card slot ("one or two of your Personalities": Bayushi Makubesu; Kakita Yasunori's host slot is his first too), so a later slot (Yasunori's removed card) is never a host.
     private CardInstance[] CreateHosts(GameCommand command, CreatedCardSpec spec) =>
         spec.HostSlot is not null ? SlotCards(command, spec.HostSlot).ToArray()
-        spec.HostIsEntered ? (_state.PendingChoice?.CardId is { } enteredId && _state.Cards.TryGetValue(enteredId, out var entered) ? [entered] : [])
+        : spec.HostIsEntered ? (_state.PendingChoice?.CardId is { } enteredId && _state.Cards.TryGetValue(enteredId, out var entered) ? [entered] : [])
         : spec.HostIsSource ? (command.CardId is not null && _state.Cards.TryGetValue(command.CardId, out var creator) ? [creator] : [])
         : spec.HostIsPerformer ? (command.PerformerId is not null && _state.Cards.TryGetValue(command.PerformerId, out var performer) ? [performer] : [])
         : command.AbilityId is not null && AbilityCatalog.All.TryGetValue(command.AbilityId, out var creatorAbility) && creatorAbility.Slots?.FirstOrDefault(s => !s.IsPlayer && !s.Performing && !s.AtResolution) is { } hostSlot

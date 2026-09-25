@@ -128,6 +128,8 @@ public sealed partial class MatchEngine
             // Hida Yamadera - exp: "After another player's Battle action resolves, if its effects destroyed Yamadera."
             // Blade of Perfection (Emperor Edition remaining-cards pass, issue #492 group G): "After the resolution of another player's action that destroyed this card or its Personality".
             "blade-perfection-attach" => BladeOfPerfectionApplies(source, playerId, facts),
+            // Shosuro Rokuta (proxy group Z, issue #492): "After the resolution of an action ... from a card that another player owns, if the card destroyed Rokuta."
+            "rokuta-action-create" => RokutaActionApplies(source, playerId, facts),
             "yamadera-attack" => facts.PlayerId != playerId && AbilityCatalog.All[facts.AbilityId].Timing == "Battle" && facts.Affected.Any(a => a.Kind == DestroyedKind && a.CardId == source.Id),
             // Advanced Intelligence (Seeds of Decay pass, issue #453, batch 1): "After a Recon Strategy's action resolves" -- either player's, classified through ActionCarriesKeyword.
             "advanced-intelligence-draw" => facts.SourceId is { } reconSourceId && _state.Cards.TryGetValue(reconSourceId, out var reconSource) && Definition(reconSource).Type == CardType.Strategy
