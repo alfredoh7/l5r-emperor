@@ -360,7 +360,7 @@ public sealed partial class MatchEngine
             var focusEffectAbility = (Definition(Card(focusedId)).Abilities ?? []).First(a => AbilityCatalog.All.TryGetValue(a, out var def) && def.Timing == "FocusEffect");
             if (FocusEffectNeedsChoice(focusEffectAbility) && BeginFocusEffectChoice(i, focusedId, focusEffectAbility)) return;
             ExplainDuelEffect("FocusEffect", ViewCard(Card(focusedId)),
-                () => ApplyDuelFocusEffect(focusEffectAbility, Card(focusedId).OwnerId, winnerPlayerId, loserPlayerIds));
+                () => WithAnySourceLossDelays(duel, Card(focusedId).OwnerId, () => ApplyDuelFocusEffect(focusEffectAbility, Card(focusedId).OwnerId, winnerPlayerId, loserPlayerIds))); // issue #496: Honor Never Falls' "(from any source)"
         }
         FinishDuelResolution();
     }

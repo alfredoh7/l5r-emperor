@@ -227,7 +227,11 @@ public sealed partial class MatchEngine
         _state.PendingChoice = null; _state.PendingEffectChoice = null;
         Emit("effectChosen", $"{Player(pending.PlayerId).Name} chose: {option!.Label}.", pending.PlayerId, source.Id);
         _state.NegatedEffects = pending.Negated.ToList();
-        foreach (var effect in option.Effects) ApplyBranchEffect(effect, pending.Command, source, target);
+        // The chosen effects are the paused action's own: they resolve as ITS effects (issue #496: an action whose destruction will not be negated or delayed -- Makito's -- must still be that action here).
+        var runningBefore = _runningCommand;
+        _runningCommand = pending.Command;
+        try { foreach (var effect in option.Effects) ApplyBranchEffect(effect, pending.Command, source, target); }
+        finally { _runningCommand = runningBefore; }
         _state.NegatedEffects.Clear();
         // The Shadow's Embrace pass (issue #476), batch 4: a choice with further steps (The Game Has Changed) opens its next step and waits.
         if (ContinueShadowsEmbraceBatch4Choice(pending, option!)) return;

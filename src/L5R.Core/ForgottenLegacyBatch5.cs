@@ -85,7 +85,7 @@ public sealed partial class MatchEngine
     // The actions that discard the Imperial Favor as their cost ("as a condition upon further effects"): the one list RunAbilityEffects and
     // ResolveNegatedAction discard the Favor for.
     private static bool DiscardsImperialFavorAsCost(string abilityId) =>
-        abilityId is "shunya-honor" or "favor-cycle" or "favor-battle" or "jakuei-bow-favor" or "bonds-of-coin-draw" or "insulting-gesture-shame" or "baiko-shame"
+        abilityId is "shunya-honor" or "favor-cycle" or "favor-cycle-kurohito" or "favor-battle" or "jakuei-bow-favor" or "bonds-of-coin-draw" or "insulting-gesture-shame" or "baiko-shame"
             or "accidental-confession-dishonor" // Accidental Confession (batch 3).
             or "celestial-sword-crane-favor" // Celestial Sword of the Crane - exp (The Shadow's Embrace pass, issue #476, batch 5).
             or "sosuke-tariffs"; // Daidoji Sosuke (The Shadow's Embrace pass, issue #476 batch 1).

@@ -77,6 +77,8 @@ public static class DelayedKinds
     public const string Token = "token";
     public const string Keyword = "keyword";
     public const string Ability = "ability";
+    /// <summary>A card drawn by a delayed action (Kurohito's Perfection, issue #496): an effect on a PLAYER, not on a card. Its DelayedEffect has no card; PlayerId is who draws.</summary>
+    public const string Draw = "draw";
 }
 
 /// <summary>One effect an action applied to a card that a card delayed (MatchState.DelayedEffects). <paramref name="Seq"/> is the order in which effects were applied.</summary>
@@ -213,6 +215,7 @@ public sealed partial class MatchEngine
         DelayedKinds.Token => $"{text ?? "a"} token",
         DelayedKinds.Keyword => $"gaining {arg?.Split('/')[0]}",
         DelayedKinds.Ability => "gaining an ability",
+        DelayedKinds.Draw => "drawing a card",
         _ => $"{(amount >= 0 ? "+" : "")}{amount} {stat}"
     };
 
@@ -252,6 +255,13 @@ public sealed partial class MatchEngine
 
     private void ApplyDelayedEffect(DelayedEffect effect)
     {
+        // A delayed draw (Kurohito's Perfection, issue #496) is an effect on a player: nothing to re-validate but that the game is still on.
+        if (effect.Kind == DelayedKinds.Draw && effect.PlayerId is int drawer)
+        {
+            Emit("delayedEffectApplied", $"{Player(drawer).Name} draws a card, as delayed ({effect.Reason}).", drawer);
+            Draw(Player(drawer));
+            return;
+        }
         if (!_state.Cards.TryGetValue(effect.CardId, out var card)) return;
         if (!InPlay(card)) { NegateDelayedEffect(effect, card, "it left play"); return; }
         var name = Definition(card).Name;

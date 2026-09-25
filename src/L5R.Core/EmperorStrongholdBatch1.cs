@@ -245,19 +245,26 @@ public sealed partial class MatchEngine
     private bool RangedTargetGrantMatches(AdditionalActionGrant grant, GameCommand? command) =>
         grant.RangedTargetId is null || command?.AbilityId is { } id && AttackKind(id) == "Ranged" && AttackCommandTarget(command) == grant.RangedTargetId;
 
-    // The commands that are not abilities (Equip, a Terrain played from a hand, a Reserve recruit): none is a Ranged Attack, so none may be taken while only a restricted grant is held.
+    // A grant that limits WHICH action may spend it: Koshin Keep's "additional Ranged Attack that may only target the same card" and Honor Never Falls' "additional Battle action to use one of his base abilities" (issue #496).
+    private static bool RestrictedGrant(AdditionalActionGrant grant) => grant.RangedTargetId is not null || grant.BaseAbilityOnly;
+
+    private static string RestrictedGrantMessage(AdditionalActionGrant[] held) => held.Any(g => g.RangedTargetId is not null)
+        ? "Koshin Keep: the additional action must be a Ranged Attack that targets the same card."
+        : "Honor Never Falls: the additional action must use one of the Personality's base abilities.";
+
+    // The commands that are not abilities (Equip, a Terrain played from a hand, a Reserve recruit): none is a Ranged Attack or a Personality's base ability, so none may be taken while only a restricted grant is held.
     private void RequireNoRestrictedBurst(int playerId)
     {
         var held = _state.AdditionalActions.Where(g => g.PlayerId == playerId && Forfeitable(g)).ToArray();
-        Require(held.Length == 0 || held.Any(g => g.RangedTargetId is null), "Koshin Keep: the additional action must be a Ranged Attack that targets the same card.");
+        Require(held.Length == 0 || held.Any(g => !RestrictedGrant(g)), RestrictedGrantMessage(held));
     }
 
-    // While the only additional actions a player holds are Koshin Keep's, the action he takes must be that Ranged Attack (or a Reaction, which never uses up the burst).
+    // While the only additional actions a player holds are restricted ones, the action he takes must be one they allow (or a Reaction, which never uses up the burst).
     private void RequireRestrictedBurstAllows(AbilityDefinition ability, GameCommand command)
     {
         var held = _state.AdditionalActions.Where(g => g.PlayerId == command.PlayerId && Forfeitable(g)).ToArray();
-        if (held.Length == 0 || held.Any(g => g.RangedTargetId is null) || !ForfeitsAdditionalActions(ability)) return;
-        Require(held.Any(g => RangedTargetGrantMatches(g, command)), "Koshin Keep: the additional action must be a Ranged Attack that targets the same card.");
+        if (held.Length == 0 || held.Any(g => !RestrictedGrant(g)) || !ForfeitsAdditionalActions(ability)) return;
+        Require(held.Any(g => RangedTargetGrantMatches(g, command) && PerformerGrantMatches(g, command)), RestrictedGrantMessage(held));
     }
 
     // ---- Hidden Falls Dojo ----------------------------------------------------------------------------------------------------------------------------
