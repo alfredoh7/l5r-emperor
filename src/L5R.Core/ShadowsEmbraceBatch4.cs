@@ -82,7 +82,7 @@ public sealed partial class MatchEngine
             // Unstable Ground: "If there is no Terrain in play at the current battlefield" -- and it is played from the hand.
             case "unstable-ground-destroy":
                 Require(source!.Zone == Zone.Hand && player.Hand.Contains(source.Id), "Unstable Ground is played from your hand.");
-                Require(!TerrainAtCurrentBattlefield(), "There is already a Terrain in play at the current battlefield.");
+                Require(!TerrainAtCurrentBattlefield() || MarshallingFieldsWaiverAvailable(player.Id), "There is already a Terrain in play at the current battlefield."); // The Marshalling Fields (issue #501)
                 break;
         }
         // A Strategy played from the hand is not also the card it discards to pay for itself (Void Tattoo's "discard a card", judged for each "hand" slot candidate).
@@ -187,6 +187,7 @@ public sealed partial class MatchEngine
             // Unstable Ground: the Scout was bowed as the cost; the target is destroyed and the Terrain enters play at the battlefield.
             case "unstable-ground-destroy":
                 DestroyTargetCard(target!, player.Id);
+                if (TerrainAtCurrentBattlefield() && source!.Zone == Zone.Hand) SpendMarshallingFieldsWaiver(player.Id, source); // The Marshalling Fields (issue #501): the restriction was ignored
                 PutTerrainIntoPlay(player, source!);
                 return false;
             // Void Tattoo: the discard (unless Void) and the removal were the costs.

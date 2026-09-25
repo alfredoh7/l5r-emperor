@@ -400,6 +400,24 @@ public sealed record PendingChoice(string Type, int PlayerId, string? CardId, st
 /// <summary>The Honor loss Ten Thousand Temples may negate, waiting for its controller's answer. <paramref name="Command"/> is the command that was being executed (the whole of it is replayed once every
 /// decision is made); Decisions are the answers so far (true: the Temple was destroyed to negate that loss), one per earlier loss of that command that the Temple could have negated; the Prior* fields are the
 /// pending choice, priority and pass count the state had before this decision took them over.</summary>
+/// <summary>Emperor Edition mechanics group C (issue #501, EmperorMechC.cs): a command whose execution reached an additional cost of entering play (En'you) with more than one way to pay, held whole
+/// while the entering card's controller chooses (MatchEngine.Execute replays it with the answer, kept on MatchState.EntryCostAnswers).</summary>
+public sealed class PendingEntryCostDecision
+{
+    public GameCommand Command { get; set; } = new("pass", 0, 0);
+    public int PlayerId { get; set; }
+    public string CardId { get; set; } = "";
+    public List<EntryCostOption> Options { get; set; } = [];
+    public PendingChoice? PriorChoice { get; set; }
+    public int PriorPriority { get; set; }
+    public int PriorPasses { get; set; }
+    public List<bool> HonorDecisions { get; set; } = [];
+    public int HonorWindowsDone { get; set; }
+}
+
+/// <summary>One way to pay an additional cost of entering play: Key is "remove:&lt;hand card id&gt;" or "sake:&lt;token id&gt;".</summary>
+public sealed record EntryCostOption(string Key, string Label);
+
 public sealed class PendingHonorLossDecision
 {
     public GameCommand Command { get; set; } = new("pass", 0, 0);
@@ -1166,6 +1184,9 @@ public sealed class MatchState
     public PendingAttackTargetSelection? PendingAttackTargetSelection { get; set; }
     public List<AnnouncedAttackModifier> AnnouncedAttackModifiers { get; set; } = [];
     public List<RendTheSoulMark> RendTheSoulMarks { get; set; } = [];
+    // Emperor Edition mechanics group C (issue #501, EmperorMechC.cs): an additional cost of entering play awaiting its payer's choice, and the answers given so far to the command being replayed.
+    public PendingEntryCostDecision? PendingEntryCostDecision { get; set; }
+    public List<string> EntryCostAnswers { get; set; } = [];
 }
 
 /// <summary>Isawa Norimichi: PlayerId's army has +Amount total Force in the battle numbered Battle (while it has any units).</summary>
