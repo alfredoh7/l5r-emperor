@@ -146,6 +146,7 @@ internal static partial class EmperorRemainingFTests
         var options = e1.QueryActions(0).Where(o => o.Type == "honorLossChoice").Select(o => o.Label).ToArray();
         Check(options.Length == 2 && options.Any(o => o.StartsWith("Destroy")) && options.Any(o => o.StartsWith("Lose")), "destroy it to negate the loss, or lose the Honor: " + string.Join("; ", options));
         Check(!e1.QueryActions(1).Any(o => o.Type == "honorLossChoice"), "only the losing player answers");
+        Check(!e1.Execute(new GameCommand("pass", 0, e1.Version)).Accepted && !e1.Execute(new GameCommand("honorLossChoice", 1, e1.Version, Choice: "yes")).Accepted, "nothing else is accepted, and only he may answer");
         Accept(e1, e1.QueryActions(0).First(o => o.Type == "honorLossChoice" && o.Label.StartsWith("Destroy")).Command!);
         Eq(Honor(e1, 0), 12, "the Honor loss was negated");
         Check(e1.State.Cards[temple1.Id].Zone == Zone.DynastyDiscard && e1.State.Players[0].Provinces[1].RegionId is null, "Ten Thousand Temples was destroyed");

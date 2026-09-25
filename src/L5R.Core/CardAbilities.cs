@@ -4808,7 +4808,7 @@ public sealed partial class MatchEngine
     // OWN trigger condition is cheap to evaluate up front and would otherwise open a pointless window on
     // every Attack while the card sat in play (Kakihara only ever cares about an Attack that targets HIM);
     // every other caller omits it and keeps the existence-only behavior described above.
-    private bool AnyInPlayReactionAvailable(string trigger, Func<CardInstance, string, bool>? relevant = null) => _state.Cards.Values.Any(c => InPlay(c) && !BowedBarsAbilities(c) &&
+    private bool AnyInPlayReactionAvailable(string trigger, Func<CardInstance, string, bool>? relevant = null) => !ReactionsBarred() /* Cherry Blossom Festival (issue #492, group F) */ && _state.Cards.Values.Any(c => InPlay(c) && !BowedBarsAbilities(c) &&
         AbilityIdsOf(c).Any(id => AbilityCatalog.All.TryGetValue(id, out var a) && a.Timing == "Reaction" && a.Trigger == trigger &&
             !AbilityUseSpent(c.AbilityUses, a, a.UsageKey ?? id) && (relevant?.Invoke(c, id) ?? true)));
     // No kind-restricted in-play Reaction exists yet (see AttackKind); once one does, filter by
@@ -4868,6 +4868,7 @@ public sealed partial class MatchEngine
     // Both the window's existence check above and the reactions a window then offers (MatchQueries) are built on it.
     private IEnumerable<(CardInstance Card, string AbilityId)> OutOfPlayReactions(int playerId, string trigger)
     {
+        if (ReactionsBarred()) return []; // Cherry Blossom Festival (issue #492, group F): no players may take Reactions.
         var player = Player(playerId);
         return _state.Cards.Values.Where(c => c.OwnerId == playerId && c.Zone is Zone.Hand or Zone.FateDiscard or Zone.DynastyDiscard)
             .SelectMany(c => AbilityIdsOf(c).Select(id => (Card: c, AbilityId: id)))

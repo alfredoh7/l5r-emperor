@@ -188,7 +188,7 @@ public sealed partial class MatchEngine
     }
 
     private bool OwnsTargetedActionReaction(int playerId, ReactionSubject? subject) =>
-        subject is not null && TargetedActionReactionCandidates().Any(x => x.Card.OwnerId == playerId && TargetedActionReactionAvailable(x.Card, x.AbilityId, subject));
+        subject is not null && !ReactionsBarred() /* Cherry Blossom Festival (issue #492, group F) */ && TargetedActionReactionCandidates().Any(x => x.Card.OwnerId == playerId && TargetedActionReactionAvailable(x.Card, x.AbilityId, subject));
 
     private bool IsBattleAction(GameCommand command) =>
         AbilityCatalog.All.TryGetValue(command.AbilityId ?? "", out var ability) && (ability.Timing == "Battle" || ability.Timing == "BattleOrOpen" && _state.Phase == Phase.Battle);

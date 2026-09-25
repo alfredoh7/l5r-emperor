@@ -1,8 +1,18 @@
 namespace L5R.Core;
 
-// Emperor Edition remaining-cards pass (issue #492), group F: the Events, Regions and Holdings wired in event-wave-8, region-wave-9 and holding-wave-13. The declarative ability data lives here
-// (added to AbilityCatalog.All by one hook); the shared engine files carry short, commented hooks into this file, each naming its card. Every card's printed text (the SCAN's, which can
-// differ from the Oracle text) and the reading taken are at its entry. The cards left unwired, and why, are in tools/content/ee_remF_blockers.json.
+// Emperor Edition remaining-cards pass (issue #492), group F: the Events, Regions and Holdings wired in event-wave-8 (EmperorRemainingFEvents.cs), region-wave-9 and holding-wave-13. The declarative
+// ability data lives here (added to AbilityCatalog.All by one hook); the shared engine files carry short, commented hooks into this file, each naming its card. Every card's printed text (the SCAN's,
+// which can differ from the Oracle text) and the reading taken are at its entry. The cards left unwired, and why, are in tools/content/ee_remF_blockers.json.
+//
+// New primitives:
+//   * a Gold source that is a Reaction to paying for an action, usable while bowed (Luxurious Silk: Library of Rebirth's shape, PaymentWhen);
+//   * a Fate deck look for a named type (Temples of Gisei Toshi) and a search bounded by the performer's Chi (Refuge of the Three Sisters: PendingSearch.FocusBelow);
+//   * cost verbs that destroy a Region and remove a Personality in play from the game (Refuge); a Region bowed as a cost straightens (StraightenRegions);
+//   * a static province strength bonus (Fortifications), "will not be destroyed" (Rugashi Bazaar), and "lost Honor from another player's action since your last turn ENDED" (Rugashi Bazaar);
+//   * Performing target slots of a Battle/Open action, a decider who may decline (Governor's Court), an alternative bow cost;
+//   * a targeted-by-action redirect to a Samurai at the same location (Chugo Seido), "before Focus Effects resolve" as a duel reaction window and a per-duel stat bonus (Falling Rain Dojo);
+//   * Wealth tokens as a Gold source, removing only the tokens a payment needs, and the Gold paid for a recruit remembered as the card enters play (Moneylender);
+//   * "before you lose Honor" as a decision asked before the loss: the command is abandoned, its controller asked, and the command replayed with his answer (Ten Thousand Temples: Execute).
 public static class EmperorRemainingFAbilities
 {
     public static Dictionary<string, AbilityDefinition> AddEmperorRemainingF(this Dictionary<string, AbilityDefinition> all)

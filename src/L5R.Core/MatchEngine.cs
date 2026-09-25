@@ -251,6 +251,7 @@ public sealed partial class MatchEngine
         // Order Seppuku (issue #368): an action at the player's own turn to act, with nothing pending. Dispatched ahead of the pending-choice
         // handlers only so that its ONE timing predicate (SeppukuTimingReason) gives the reason, whatever is open.
         if (command.Type=="orderSeppuku") { OrderSeppuku(command); return; }
+        Require(_state.PendingHonorLossDecision is null,"Answer the Honor loss decision first (Ten Thousand Temples)."); // issue #492, group F: only "honorLossChoice" (handled by Execute) answers it.
         Require(command.PlayerId==_state.PriorityPlayerId,"Wait for your action opportunity.");
         if (_state.PendingChoice is not null)
         {

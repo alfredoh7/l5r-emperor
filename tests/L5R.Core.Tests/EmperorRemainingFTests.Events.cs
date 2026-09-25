@@ -86,6 +86,17 @@ internal static partial class EmperorRemainingFTests
         Check(barred is not null && !barred.Enabled && (barred.Reason ?? "").Contains("Cherry Blossom"), "Proclaim is refused while Cherry Blossom Festival is in play: " + string.Join("; ", with.QueryActions(0).Select(o => $"{o.Type} {o.Enabled} {o.Reason}")));
         var without = Proclaimable(false);
         Check(without.QueryActions(0).Any(o => o.Type == "proclaim" && o.Enabled), "and offered without it");
+        // A Reaction window opens for nobody: Chugo Seido's controller is not even offered the redirect the other player's action would open a window for.
+        var b = Table(Phase.Battle, 1);
+        Add(b, CherryBlossomFestival, 1, Zone.EventInPlay);
+        Add(b, ChugoSeido, 0, Zone.Home);
+        var targeted = Add(b, "training-samurai", 0, Zone.Battlefield, province: 0);
+        Add(b, "training-samurai", 0, Zone.Battlefield, province: 0);
+        Add(b, "training-crane-veteran", 1, Zone.Battlefield, province: 0);
+        var bushido = Add(b, "training-bushido-virtue", 1, Zone.Hand);
+        var eb = MatchEngine.FromTestState(b);
+        Accept(eb, Offer(eb, 1, "training-bow-at-battle", bushido.Id, targeted.Id));
+        Check(eb.State.PendingChoice is null && eb.State.Cards[targeted.Id].Bowed, "no window: the action landed on its target");
         // It ends as its owner's next Events Phase begins (not before).
         RunUntil(e, () => e.State.ActivePlayerId == 0 && e.State.Phase == Phase.Action);
         Eq(e.State.Cards[cherry.Id].Zone, Zone.EventInPlay, "still in play through the other player's turn");
