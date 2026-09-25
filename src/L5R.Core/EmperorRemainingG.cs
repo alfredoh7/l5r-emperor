@@ -113,9 +113,9 @@ public sealed partial class MatchEngine
         _ => ""
     };
 
-    // "Ranged 5 Attack that you may compare against Gold Cost": the player would always compare against the lower of the two, so that is what is compared.
+    // "Ranged 5 Attack that you may compare against Gold Cost": the player chooses Force or Gold Cost (issue #492, ruling R5).
     private int AttackComparedValueRemainingG(string abilityId, CardInstance target) =>
-        abilityId == "tsuruchi-house-guard-attack" ? Math.Min(AttackComparedForce(target, abilityId), CardGoldCost(target)) : AttackComparedForce(target, abilityId);
+        abilityId == "tsuruchi-house-guard-attack" && AttackCompareChoiceOf(abilityId) == "gold" ? CardGoldCost(target) : AttackComparedForce(target, abilityId);
 
     // Ikoma House Guard: "If this Melee Attack destroyed a card, gain 1 Honor."
     private void AfterEmperorRemainingGAttack(string abilityId, int playerId, string? targetId, bool targetInPlayBefore, string? sourceId)

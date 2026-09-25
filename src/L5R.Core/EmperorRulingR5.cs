@@ -58,6 +58,7 @@ public sealed partial class MatchEngine
 
     private void ValidateEmperorRulingR5(string id, AbilityDefinition ability, GameCommand command, PlayerState player, CardInstance? source)
     {
+        ValidateAttackCompareChoice(id, command);
         if (BowOnlyActionsOnAnyEnemyCard.Contains(id) && command.TargetId is not null && _state.Cards.TryGetValue(command.TargetId, out var bowTarget))
             Require(!IsTerrainCard(bowTarget), "A Terrain may not be bowed or straightened.");
         switch (id)
@@ -110,5 +111,37 @@ public sealed partial class MatchEngine
         foreach (var member in UnitMembers(card).Where(m => m.Id != except).ToArray())
             if (InPlay(member) && BowByEffect(member, actingPlayerId)) bowed++;
         return bowed;
+    }
+    // ---- Ruling 6: an Attack's "may compare" clause is the player's choice ---------------------------------------------------------------------------------------------------------------------------
+    // Mendon: "The player chooses." Unseen Assailant (Force or Chi, against a Personality), Tsuruchi House Guard (Force or Gold Cost) and Asako Nobunori (current Force or, against a target without
+    // attachments, base Force) print "you may compare against ...". The choice is made with the action: one offered action per choice (QueryActions, the way Kaiu Esumi's +2 / -2 are two listed
+    // actions), carried as GameCommand.Choice; a command without one compares Force as every Attack does. Tsuruchi Samuru's "that you compare against Gold Cost" has no choice.
+
+    /// <summary>The things an Attack may be compared against, first the ordinary one (Force); null for an ability with no "may compare" clause.</summary>
+    private static (string Key, string Label)[]? AttackCompareOptions(string abilityId) => abilityId switch
+    {
+        "unseen-assailant-attack" => [("force", "Force"), ("chi", "Chi")],
+        "tsuruchi-house-guard-attack" => [("force", "Force"), ("gold", "Gold Cost")],
+        "nobunori-attack" => [("force", "Force"), ("base", "base Force")],
+        _ => null
+    };
+
+    /// <summary>The compare choice of the Attack now resolving (its own command's), or null.</summary>
+    private string? AttackCompareChoiceOf(string abilityId)
+    {
+        var command = _attackCommandInResolution ?? _runningCommand;
+        return command is not null && command.AbilityId == abilityId ? command.Choice : null;
+    }
+
+    private void ValidateAttackCompareChoice(string id, GameCommand command)
+    {
+        if (AttackCompareOptions(id) is not { } options) return;
+        Require(command.Choice is null || options.Any(o => o.Key == command.Choice), "Choose what the Attack is compared against.");
+        var target = command.TargetId is not null && _state.Cards.TryGetValue(command.TargetId, out var card) ? card : null;
+        // "If the Ranged Attack targeted a Personality, you may compare it against his Chi."
+        if (command.Choice == "chi") Require(target is not null && Definition(target).Type == CardType.Personality, "The Attack can be compared against Chi only when it targets a Personality.");
+        // "...against base Force if the target has no attachments."
+        if (command.Choice == "base") Require(target is not null && !HasAttachments(target), "The Attack can be compared against base Force only when its target has no attachments.");
+        if (command.Choice == "gold") Require(target is not null, "The Attack can be compared against Gold Cost only when it targets a card.");
     }
 }

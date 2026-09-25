@@ -37,9 +37,10 @@ public sealed partial class MatchEngine
 
     // ---- Nobunori: compare against base Force ----
 
-    // "Melee 4 Attack that you may compare against base Force if the target has no attachments": the player would always pick the lower of the two, so that is what is compared.
+    // "Melee 4 Attack that you may compare against base Force if the target has no attachments": the player chooses (issue #492, ruling R5) -- current Force, or, for a target without attachments,
+    // its base Force (whichever it is, higher or lower than the current).
     private int AttackComparedForce(CardInstance target, string? abilityId) =>
-        abilityId == "nobunori-attack" && !HasAttachments(target) ? Math.Min(CardForce(target), Definition(target).Force) : CardForce(target);
+        abilityId == "nobunori-attack" && !HasAttachments(target) && AttackCompareChoiceOf(abilityId) == "base" ? Definition(target).Force : CardForce(target);
 
     // ---- Norimichi: +5 total Force ----
 

@@ -122,9 +122,14 @@ internal static class EmperorPersonalityBatch5Tests
         Force(enemy, 5);
         var e = MatchEngine.FromTestState(s);
         Eq(e.CardForceForTest(enemy.Id), 8);
-        Accept(e, Offer(e, 0, "nobunori-attack", nob.Id, enemy.Id));
+        // Issue #492 (ruling R5): the player chooses what to compare against -- the option "compare against base Force" is his to take (the default, Force, compares the current 8).
+        Accept(e, Batch336Support.OfferChoice(e, 0, "nobunori-attack", nob.Id, enemy.Id, "base"));
         Drain(e);
         Eq(e.State.Cards[enemy.Id].Zone, Zone.Dead, "base Force 3 is within Melee 4");
+        var eCurrent = MatchEngine.FromTestState(s);
+        Accept(eCurrent, Batch336Support.OfferChoice(eCurrent, 0, "nobunori-attack", nob.Id, enemy.Id, "force"));
+        Drain(eCurrent);
+        Eq(eCurrent.State.Cards[enemy.Id].Zone, Zone.Battlefield, "the player chose current Force (8): above the strength, it survives");
 
         // The same target with an attachment: current Force (8) is compared; the target is still legal (core rules) but survives the Melee 4 Attack.
         var s2 = Table(Phase.Battle, 0);
@@ -133,6 +138,7 @@ internal static class EmperorPersonalityBatch5Tests
         Force(enemy2, 5);
         Add(s2, AnItem().Id, 1, Zone.Attached, province: 0, parent: enemy2.Id);
         var e2 = MatchEngine.FromTestState(s2);
+        Check(!Batch336Support.Options(e2, 0, "nobunori-attack", nob2.Id).Any(o => o.Enabled && o.Command?.Choice == "base"), "base Force is not offered against a target with an attachment");
         Accept(e2, Offer(e2, 0, "nobunori-attack", nob2.Id, enemy2.Id));
         Drain(e2);
         Eq(e2.State.Cards[enemy2.Id].Zone, Zone.Battlefield, "with an attachment the current Force (8) is compared: above the strength, it survives");
@@ -142,7 +148,7 @@ internal static class EmperorPersonalityBatch5Tests
         var nob3 = Add(s3, Nobunori, 0, Zone.Battlefield, province: 0);
         var strong = Add(s3, Tsukimi, 1, Zone.Battlefield, province: 0);
         var e3 = MatchEngine.FromTestState(s3);
-        Accept(e3, Offer(e3, 0, "nobunori-attack", nob3.Id, strong.Id));
+        Accept(e3, Batch336Support.OfferChoice(e3, 0, "nobunori-attack", nob3.Id, strong.Id, "base"));
         Drain(e3);
         Eq(e3.State.Cards[strong.Id].Zone, Zone.Battlefield, "a base Force above 4 is above the strength: a legal target that survives");
         Eq(e3.AttackStrengthForTest("nobunori-attack", nob3.Id), 4, "Melee 4");

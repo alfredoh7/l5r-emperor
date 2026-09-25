@@ -1818,6 +1818,9 @@ public sealed partial class MatchEngine
         var hikazuSpared=HikazuSparedPersonalities(a);
         foreach(var card in a.Where(c=>c.Zone==Zone.Battlefield))
         {
+            // Conqueror (issue #492, ruling R5 on whole-unit bow/straighten): "Straighten his unit. It will not bow from the resolution" -- every card of it straightens (each unless its own straightening is
+            // prevented), not just the return home unbowed.
+            if(card.Id==conquerorUnbowedId) StraightenUnit(card);
             var wasBowed=card.Bowed;
             ReturnHome(card,card.Id!=conquerorUnbowedId && !willNotBow.Contains(card.OwnerId) && !ResolutionWillNotBow(card));
             if(hikazuSpared.Contains(card.Id)) card.Bowed=wasBowed; // "(Their Followers still bow.)"

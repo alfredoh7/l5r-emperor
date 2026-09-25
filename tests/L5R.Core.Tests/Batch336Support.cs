@@ -80,6 +80,15 @@ internal static class Batch336Support
         return option!.Command! with { TargetId = targetId };
     }
 
+    // Issue #492 (ruling R5): the offered command of an ability with a "may compare" choice, for the chosen comparison ("force", "chi", "gold", "base").
+    public static GameCommand OfferChoice(MatchEngine e, int player, string ability, string cardId, string targetId, string choice, string? performerId = null)
+    {
+        var option = Options(e, player, ability, cardId, performerId).FirstOrDefault(a => a.Enabled && a.Command?.Choice == choice && (a.TargetIds?.Contains(targetId) ?? false));
+        Check(option is not null, $"{ability} on {cardId} against {targetId} comparing {choice} was not offered to player {player}: "
+            + string.Join("; ", Options(e, player, ability, cardId, performerId).Select(a => $"{a.Label} [{a.Enabled}] {a.Reason}")));
+        return option!.Command! with { TargetId = targetId };
+    }
+
     public static string Rejection(MatchEngine e, GameCommand command)
     {
         var result = e.Execute(command);
