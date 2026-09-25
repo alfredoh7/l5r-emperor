@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Emperor Edition rulings pass: applied Mendon's rulings on the review of PR #493 (battles without a province, the shared delay mechanism, province-strength durations, Honor-change windows, Cherry Blossom Festival, Luxurious Silk, ordered searches, Deception Revealed, Ninja is a keyword not a Clan, unit bow/straighten, Terrain, may-compare choices); wired Surprise Attack, Chikushudo's Trickery, Halls of the Forgotten, the five delay Strategies, Kaiu Village and Kaiu Weapon; corrected Sincerity of the Dragon; only 3 Emperor Edition cards remain unwired; inventory and art pack r1 updated",
-  "validation": "Core suite 0 failures (1783 passes); AI 74/74; Server 8/8; Client.Transport 12/12; content tests 135 OK; Godot client build left to CI",
-  "remaining": "None; ready for review. Follow-ups: Plains of Otosan Uchi, No Hiding Place, Rend the Soul; scans for Shinobi Assault, Two Fronts and The Perfect Moment; client rendering of eventChoice, honorLossDecision, honorChangeReaction, killingGroundsSelect and the additional-battlefield lane in Godot",
+  "summary": "Emperor Edition rulings pass: applied Mendon's rulings on the review of PR #493 (battles without a province, the shared delay mechanism, province-strength durations, Honor-change windows, Cherry Blossom Festival, Luxurious Silk, ordered searches, Deception Revealed, Ninja is a keyword not a Clan, unit bow/straighten, Terrain, may-compare choices); wired and published Surprise Attack, Chikushudo's Trickery, Shinobi Assault, Two Fronts, The Perfect Moment, Halls of the Forgotten, the five delay Strategies, Kaiu Village and Kaiu Weapon; corrected Sincerity of the Dragon and The Honesty of the Phoenix to the corrected scans; only 3 Emperor Edition cards remain unwired; inventory and art pack r2 updated",
+  "validation": "Core suite 0 failures; AI 74/74; Server 8/8; Client.Transport 12/12; content tests 135 OK (art pack r2); Godot client build left to CI",
+  "remaining": "None; ready for review. Follow-ups: Plains of Otosan Uchi, No Hiding Place, Rend the Soul; client rendering of eventChoice, honorLossDecision, honorChangeReaction, killingGroundsSelect and the additional-battlefield lane in Godot",
   "issue": "494",
   "branch": "claude/494-rulings-pass",
-  "updated": "2026-09-25T12:47:11.928548+00:00"
+  "updated": "2026-09-25T13:25:20.070324+00:00"
 }
