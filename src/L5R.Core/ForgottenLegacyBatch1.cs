@@ -64,6 +64,7 @@ public sealed partial class MatchEngine
 
     private void RecordPerformedKeywordActions(AbilityDefinition ability, GameCommand command, CardInstance? source)
     {
+        CountReconActionTaken(ability, command, source); // Issue #501, mechanics group D (EmperorMechD.cs): Narizane's per-turn Recon-action counter (a Strategy's action has no performer).
         if (!IsAction(ability) || ActionPerformerIdOrNull(ability, command, source) is not { } performerId) return;
         _state.PerformedKeywordActions.RemoveAll(p => p.Turn != _state.TurnNumber);
         foreach (var keyword in RecordedPerformedKeywords)

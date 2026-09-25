@@ -2881,6 +2881,7 @@ public sealed partial class MatchEngine
     }
     private void FinishTurn()
     {
+        MechDTurnEnds(); // Issue #501, mechanics group D (EmperorMechD.cs): "remove him from the game when the turn ends" (Yajinden); the Recon counters and the attach log restart.
         ClearReconnaissanceAtTurnEnd(); // Hidden Falls Dojo (Stronghold pass, issue #486 batch 1): a battlefield exists only within its Attack Phase, and so does Reconnaissance at it.
         // A Ring's recruit grant made for a battle that was never fought (issue #379) does not carry into another turn; no other grant outlives its battle.
         _state.AdditionalActions.Clear();
@@ -2911,6 +2912,7 @@ public sealed partial class MatchEngine
         if(RingElements.All(e=>_state.Cards.Values.Any(c=>c.OwnerId==player.Id && InPlay(c) && Definition(c).Type==CardType.Ring && Keyword(c,e) && !Keyword(c,"Fudo") && CountsForEnlightenment(c))))
         { Win(player.Id,"Enlightenment victory"); return; }
         player.TurnsTaken++;
+        MechDTurnBegins(player); // Issue #501, mechanics group D (EmperorMechD.cs): "remove ... from the game when your next turn begins" (Amazing Feat).
         player.MayNotAttackThisTurn=false;
         player.FavorActionsThisTurn=0;
         player.AttachedFromHandThisTurn=false;
@@ -3394,6 +3396,7 @@ public sealed partial class MatchEngine
     {
         if(PhaseFamily(phase)!=PhaseFamily(_state.Phase)) ApplyDelayedEffectsAtPhaseEnd(_state.Phase); // The shared delay mechanism (issue #492, EmperorRulingR2.cs): what waits for the end of the phase that is ending.
         OnPhaseBoundary(_state.Phase,phase); // On (The Shadow's Embrace pass, issue #476 batch 6): the end of one phase and the start of the next.
+        ResetMechDPhaseRecords(_state.Phase,phase); // Issue #501, mechanics group D (EmperorMechD.cs): the per-phase cards-into-hand records.
         // War Weariness (issue #259): reset only on the three phases that genuinely begin once per
         // turn -- NOT Phase.Battle, which this same function re-enters once per battlefield (see
         // SelectBattle); the user's own clarification is that the whole Attack-Declaration-through-

@@ -142,6 +142,7 @@ public sealed partial class MatchEngine
         var card = new CardInstance { Id = $"created-{++_state.CreatedCardSequence:D4}", DefinitionId = definition.Id, Printed = printed, OwnerId = host.OwnerId, Zone = Zone.Attached, AttachedTo = host.Id, ProvinceIndex = host.ProvinceIndex, FaceUp = true };
         _state.Cards.Add(card.Id, card);
         if (definition.AttachGrantsKeyword is string granted) GrantKeyword(host, granted, card.Id, "Attachment");
+        NoteAttached(host.OwnerId, card, "created"); // Issue #501 (EmperorMechD.cs): the attach log.
         Emit("cardCreated", $"{Player(host.OwnerId).Name} created {(printed ?? definition).Name} and attached it to {Definition(host).Name}.", host.OwnerId, card.Id);
         return card;
     }

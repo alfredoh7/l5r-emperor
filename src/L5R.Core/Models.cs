@@ -1171,6 +1171,8 @@ public sealed class MatchState
     public PendingAttackTargetSelection? PendingAttackTargetSelection { get; set; }
     public List<AnnouncedAttackModifier> AnnouncedAttackModifiers { get; set; } = [];
     public List<RendTheSoulMark> RendTheSoulMarks { get; set; } = [];
+    // Issue #501, mechanics group D (EmperorMechD.cs): the Recon-action counter, the attach log, the cards-into-hand records and timed removals.
+    public MechDState MechD { get; set; } = new();
 }
 
 /// <summary>Isawa Norimichi: PlayerId's army has +Amount total Force in the battle numbered Battle (while it has any units).</summary>
