@@ -2,7 +2,9 @@
 
 Requested by Mendon: evaluate every remaining unwired card of the Emperor Edition set against `docs/rules/EMPEROR_EDITION_CORE_RULES.md` and the engine as it now stands, wire everything that fits within existing or new primitives that do not conflict with the core rules, and record a specific blocker for the rest.
 
-**151 of the 171 cards outside the Personality and Stronghold passes are now wired** (seven parallel groups merged into one branch). Counting the 8 Personalities and Halls of the Forgotten that earlier passes left, **20 Emperor Edition cards stay unwired**, each with a specific blocker in `tools/content/build_card_inventory.py` (`BLOCKERS`) and therefore in `docs/CARD_INVENTORY.xlsx` (2174 cards, 1223 wired). The 7 blocked Personalities were re-checked and are unchanged: their Proxy scans are still not on this machine.
+**151 of the 171 cards outside the Personality and Stronghold passes are wired** (seven parallel groups merged into one branch), and after Mendon authorised downloading the missing Proxy scans, **the 7 blocked Personalities and Summon Swamp Spirits are wired too** (three more groups, X, Y, Z). **12 Emperor Edition cards stay unwired**, each with a specific blocker in `tools/content/build_card_inventory.py` (`BLOCKERS`) and therefore in `docs/CARD_INVENTORY.xlsx` (2182 rows including 8 created-only Proxies, 1239 wired).
+
+The eight Proxy masters (Kobashi's Spawn, Suiteiru's Podling, the plain Infantry Follower, Dutiful Cavalry, Denhei's Snake, Gina's Fox, Rokuta's Apprentice, Swamp Spirit) were downloaded from the `source_url` in their receipts, sha256-verified against the receipts, converted to WebP quality 85 (the catalogue pack's encoding) and recorded as `working_copy` blocks on the receipts.
 
 | Group | Cards | Waves | Wired |
 |---|---|---|---|
@@ -13,18 +15,19 @@ Requested by Mendon: evaluate every remaining unwired card of the Emperor Editio
 | E | Spells, Celestials | spell-wave-23, celestial-wave-8 | 20 / 22 (11 + 9) |
 | F | Holdings, Regions, Events | holding-wave-13, region-wave-9, event-wave-8 | 26 / 28 (11 + 3 + 12) |
 | G | Items, Followers | item-wave-15, follower-wave-31 | 19 / 19 (11 + 8) |
+| X | Personalities, Spell (Proxy scans now local) | personality-wave-76, spell-wave-24 | 3 / 3 (Goju Kobashi, Suiteiru no Oni, Summon Swamp Spirits) |
+| Y | Personalities | personality-wave-77 | 3 / 3 (Akodo Makotai, Shinjo Ki-Chang - exp, Kitsune Gina) |
+| Z | Personalities | personality-wave-78 | 2 / 2 (Kitsune Denhei, Shosuro Rokuta) |
 
-## Not wired (13 here, plus the 8 from earlier passes)
+## Not wired (12)
 
 - **Delay cards (5, built jointly per Mendon's ruling):** The Honor of the Lion, The Loyalty of the Scorpion, The Compassion of the Unicorn, The Courage of the Mantis, The Honesty of the Phoenix (the last also names a card title). Each has the Focus Effect "delay the effects of losing this duel". Their other halves are wirable now but a partial card is never published. Halls of the Forgotten (Stronghold pass) is the sixth card of this family. Together they are the first users of the shared delay mechanism (effect-recording layer or per-ability re-execution filtered to one target).
 - **A battle with no province (2):** Surprise Attack and Chikushudo's Trickery. Every battlefield in the engine is one of the Defender's provinces (about 150 uses of `CurrentBattleProvince` and the client view). Needs a ruling on how such a battle is fought and resolved. Shinobi Assault and The Perfect Moment have the same gap.
 - **No Hiding Place:** an Attack's target is validated once at announcement and the announce window opens after that; a Reaction there cannot make a home target legal or re-select the target.
 - **Rend the Soul:** needs a "raise Focus to 5" Focus Effect and a duel outcome where the winner also loses; its Battle half needs a resolution hook that turns a win into a tie and suppresses province destruction.
 - **Plains of Otosan Uchi:** a province holding two Dynasty cards is a structural change (province, reveal, purchase, refill, destruction, `MatchView`, client all assume one slot).
-- **Kaiu Village:** its Weapon half creates a "+1F/+1C Weapon Item" and no such Proxy scan exists locally (the Armor half's Kaiu Armor, oracle-l5r-10007, does).
-- **Summon Swamp Spirits:** the Swamp Spirit Follower it creates (oracle-l5r-10014) has no scan; the wiring is a plain create-and-attach once the scan is available.
-
-The scan-blocked cards (7 Personalities, Kaiu Village, Summon Swamp Spirits) can be wired as soon as the Proxy scans exist locally; downloading them from the Oracle image host needs Mendon's explicit go-ahead.
+- **Kaiu Village:** its Weapon half creates a "+1F/+1C Weapon Item" and the Oracle data holds no Proxy card for it in any set (the Armor half's Kaiu Armor, oracle-l5r-10007, is wired), so there is no scan to download. Needs a scan or a name for that Weapon.
+- **Halls of the Forgotten** (Stronghold pass) waits on the delay mechanism with the five delay Strategies above.
 
 ## Rulings applied
 
@@ -92,6 +95,15 @@ New code is in `src/L5R.Core/EmperorRemainingA.cs` ... `EmperorRemainingG.cs` (a
 29. Boastful Proclamation: per the scan the tokens and draw apply regardless of the "another player controls a Personality" condition, which gates only the +3 strength and 3 Honor. Delayed Arrival only bars attacks on the Event's owner. Successful Bounty: "opposing" means at the same battlefield on the other side; "from an action" includes duels and Attacks.
 30. Naoharu's Gift: an accepted card goes to the taker's hand with ownership transferred and returns to its real owner's pile when it leaves his hand. Moon and Sun shuffles into the Dynasty deck. Rebuilding the Empire: the gained province may be revealed in the same Events Phase; the attack lock lasts through the next turn. Benefices of the Emperor: choices stay hidden until all players have chosen. Abandoning the Fortunes fires at the start of `EndTurn`. Glory of the Shogun's draw is optional, once per player per turn.
 
+**Groups X, Y, Z (the Proxy-scan cards)**
+- Goju Kobashi: "consumes it" has no rules text, so it is flavour and the destruction is the whole effect; his Follower is created whether or not the destruction did anything, if a Ninja was named. Kobashi's `Clan` is Spider (Goju Oyoto and Ninube Onchi, published earlier as `Ninja`, were not touched).
+- Suiteiru no Oni: the Podling count is the target's current Chi (modifiers included) read before he is destroyed; hosts are other Personalities (a host named twice gets two); he may destroy himself; a host that cannot carry Followers refuses the whole action.
+- Shinjo Ki-Chang: "your target Personality" is any Personality of his controller entering play, himself included; the Reaction is once per turn; the created Follower opens no second entry window.
+- Kitsune Gina's Fox: "attacking" means in the attacking army; the trait stays in force while bowed; Foxes stack; Force never drops below 0.
+- Kitsune Denhei's Snake: "bitten" is flavour, the lock lasts until end of turn (as Kitsuki Yoyugi's) and covers actions only, not traits; the Open action is once per turn and may target either side's Personality. The earlier note that a printed-abilities lock was missing is obsolete: `LockPrintedAbilities` covers it.
+- Shosuro Rokuta: "another player owns" is judged by the source card's original owner; any action timing counts; any battle resolution counts; no published trait destroys a Personality, so the "trait" clause never triggers; the Honor loss is plain (no rehonor) and may hit either player.
+- Akodo Makotai creates the plain Infantry Follower Proxy (2F, no keywords); Summon Swamp Spirits attaches a Swamp Spirit to any of your Personalities.
+
 **Group G**
 31. Armor of the Heavens: "this Personality" is the wielder; gain and lose are two actions sharing one use. Blade of Perfection follows the scan: any Personality of yours that can legally wield it is a valid performer; it attaches from the Fate discard pile for its full 4 Gold; only an action's own destruction counts, not a battle casualty.
 32. Chrysanthemum Blossom: the window opens after the assignment command and any Brash draws, for either player's assignment; a dishonorable host is rehonored instead of granting Honor. Clan Standard: "your Clan alignment" is the player's Clan; each Standard stacks. Gift Armor: an "unnegatable" action ignores both negations; permanent Chi modifiers are negated too.
@@ -100,8 +112,8 @@ New code is in `src/L5R.Core/EmperorRemainingA.cs` ... `EmperorRemainingG.cs` (a
 
 ## Verification
 
-- Full core suite: 0 failures (1697 passes) after merging all seven groups; each group's own suite (`emperor-remaining-A..G`) passes. AI 74/74, Server 8/8, Client.Transport 12/12; content tests 134 OK.
+- Full core suite: 0 failures (1716 passes) after merging all ten groups; each group's own suite (`emperor-remaining-A..G`, `emperor-proxy-X..Z`) passes. AI 74/74, Server 8/8, Client.Transport 12/12; content tests 134 OK.
 - Pinned lists updated where the new cards legitimately extend them, each with an "issue #492" comment: Recon-tagged, "absent" moves, move-to-battle inventory, player-target inventory, Seppuku decision states, use-limit exemptions, the attack-performer audit.
-- `docs/CARD_INVENTORY.xlsx` regenerated: 2174 cards, 1223 wired; 26 stale blocker notes of now-wired cards removed.
-- Catalogue art pack pinned to `catalogue-art-pr492-20260925-r1` (3670 images).
+- `docs/CARD_INVENTORY.xlsx` regenerated: 2182 rows, 1239 wired; stale blocker notes of now-wired cards removed.
+- Catalogue art pack pinned to `catalogue-art-pr492-20260925-r2` (3686 images).
 - Not run locally: the Godot client build and smoke run (CI runs it).
