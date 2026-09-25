@@ -1,0 +1,33 @@
+{
+  "Profile": "region-wave-19",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-7890",
+      "Name": "Temple of the Seven Fortunes",
+      "Type": "Region",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: If it is not your turn, choose your two performing unbowed Personalities with Clan alignments that do not share a Clan alignment, and bow one of them: Gain 1 Honor. Give your provinces +2 strength.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7890.jpg",
+      "Keywords": [
+        "Singular",
+        "Temple"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "temple-seven-fortunes-honor"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

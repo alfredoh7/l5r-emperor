@@ -662,6 +662,10 @@ public static class CardCatalog
             .Concat(PublishedContent.FollowerWave32.Cards) // Emperor Edition follow-ups (issue #498): Enslaved Djinn
             .Concat(PublishedContent.ItemWave17.Cards) // Emperor Edition follow-ups (issue #498): Celestial Sword of the Dragon - exp
             .Concat(PublishedContent.PersonalityWave80.Cards) // Emperor Edition follow-ups (issue #498): Asako Chukage
+            .Concat(PublishedContent.PersonalityWave89.Cards) // Emperor Edition mechanics group C (issue #501): Daigotsu Kazuko, En'you, Ikoma Shika - exp, Isawa Sakonoko
+            .Concat(PublishedContent.StrongholdWave29.Cards) // Emperor Edition mechanics group C (issue #501): The Marshalling Fields
+            .Concat(PublishedContent.StrategyWave75.Cards) // Emperor Edition mechanics group C (issue #501): Ascending the Ranks, Fury of a Mob
+            .Concat(PublishedContent.RegionWave19.Cards) // Emperor Edition mechanics group C (issue #501): Temple of the Seven Fortunes
             .ToDictionary(c => c.Id, StringComparer.Ordinal);
     }
 }

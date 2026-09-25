@@ -2622,4 +2622,12 @@ public static class PublishedContent
     public static PublishedSnapshot ItemWave17 { get; } = Load("L5R.Published.ItemWave17.json", "item-wave-17", requireDecks: false);
     /// <summary>Personality wave 80 (Emperor Edition follow-ups, issue #498): Asako Chukage (Forgotten Legacy printing).</summary>
     public static PublishedSnapshot PersonalityWave80 { get; } = Load("L5R.Published.PersonalityWave80.json", "personality-wave-80", requireDecks: false);
+    /// <summary>Personality wave 89 (Emperor Edition mechanics, issue #501, group C): Daigotsu Kazuko, En'you, Ikoma Shika - exp, Isawa Sakonoko.</summary>
+    public static PublishedSnapshot PersonalityWave89 { get; } = Load("L5R.Published.PersonalityWave89.json", "personality-wave-89", requireDecks: false);
+    /// <summary>Stronghold wave 29 (Emperor Edition mechanics, issue #501, group C): The Marshalling Fields.</summary>
+    public static PublishedSnapshot StrongholdWave29 { get; } = Load("L5R.Published.StrongholdWave29.json", "stronghold-wave-29", requireDecks: false);
+    /// <summary>Strategy wave 75 (Emperor Edition mechanics, issue #501, group C): Ascending the Ranks, Fury of a Mob.</summary>
+    public static PublishedSnapshot StrategyWave75 { get; } = Load("L5R.Published.StrategyWave75.json", "strategy-wave-75", requireDecks: false);
+    /// <summary>Region wave 19 (Emperor Edition mechanics, issue #501, group C): Temple of the Seven Fortunes.</summary>
+    public static PublishedSnapshot RegionWave19 { get; } = Load("L5R.Published.RegionWave19.json", "region-wave-19", requireDecks: false);
 }

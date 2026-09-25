@@ -1,0 +1,125 @@
+{
+  "Profile": "personality-wave-89",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-1734",
+      "Name": "Daigotsu Kazuko",
+      "Type": "Personality",
+      "Clan": "Spider",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 2,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After Kazuko enters play: Lose 1 Honor.\nFear Battle: You may destroy one of Kazuko's Followers: Melee 3 Attack, or Melee 6 Attack if you destroyed a Follower.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1734.jpg",
+      "Keywords": [
+        "Conqueror",
+        "Commander",
+        "Samurai",
+        "Shadowlands",
+        "Spider Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "kazuko-fear-melee",
+        "kazuko-fear-melee-destroy"
+      ],
+      "Effect": "none",
+      "EntryHonorLoss": 1
+    },
+    {
+      "Id": "oracle-l5r-2331",
+      "Name": "En'you",
+      "Type": "Personality",
+      "Clan": "Mantis",
+      "GoldCost": 2,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 2,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "As an additional cost of En'you entering play, either remove a card in your hand from the game or destroy one of your Sake tokens.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-2331.jpg",
+      "Keywords": [
+        "Mantis Clan",
+        "Nonhuman",
+        "Prophet",
+        "Shōjō"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "enyou-additional-entry-cost"
+    },
+    {
+      "Id": "oracle-l5r-3637",
+      "Name": "Ikoma Shika",
+      "Type": "Personality",
+      "Clan": "Lion",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 5,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": 4,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: You may discard a card: Ranged 4 Attack, with +2 strength if you discarded a card; if that card was a Terrain, draw a card.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-3637.jpg",
+      "Keywords": [
+        "Unique",
+        "Experienced",
+        "Lion Clan",
+        "Samurai",
+        "Scout"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "shika-ranged",
+        "shika-ranged-discard"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-3891",
+      "Name": "Isawa Sakonoko",
+      "Type": "Personality",
+      "Clan": "Phoenix",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 4,
+      "PersonalHonor": 4,
+      "HonorRequirement": 5,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After another player's action targets one of your other Personalities at Sakonoko's location, bow Sakonoko or one of his Spells: Negate the destruction of the Personality from the action's effects.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-3891.jpg",
+      "Keywords": [
+        "Unique",
+        "Inquisitor",
+        "Magistrate",
+        "Phoenix Clan",
+        "Shugenja",
+        "Water"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "sakonoko-negate",
+        "sakonoko-negate-spell"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}
