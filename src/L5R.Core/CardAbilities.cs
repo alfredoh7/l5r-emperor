@@ -4313,7 +4313,7 @@ public sealed partial class MatchEngine
         // Emperor Edition Personality pass (issue #477), batch 6: Nishimura bows its target.
         or "nishimura-bow"
         // Emperor Edition remaining-cards pass (issue #492), group B (EmperorRemainingB.cs).
-        or "ogre-savagery-bow" or "guided-by-honor-move" or "my-enemys-mercy-choose";
+        or "ogre-savagery-bow" or "guided-by-honor-move" or "my-enemys-mercy-choose" or "hidden-defenses-bow";
     // Whether the command's TargetId is an Attack's OWN target, which reacts through the separate attackReaction
     // window instead of this one: an Attack-classified ability whose Target category is "attack". Bayushi Kahoku
     // - exp (issue #313) is Attack-classified too, but its TargetId is the separate "-4F" target (an ordinary
@@ -5238,7 +5238,7 @@ public sealed partial class MatchEngine
         if (slotAbility is not null) ability = slotAbility;
         RequireNotBarredFromTargeting(command, ability!);
         Require(ability!.Timing switch {
-            "Limited" => _state.Phase == Phase.Action && command.PlayerId == _state.ActivePlayerId,
+            "Limited" => _state.Phase == Phase.Action && (command.PlayerId == _state.ActivePlayerId || LimitedInsteadOfOpen(command.PlayerId)),
             "Open" => _state.Phase == Phase.Action,
             "Battle" => _state.Phase == Phase.Battle,
             // Printed "Battle/Open" text (e.g. Immovable Object): usable in either phase. The
@@ -5738,7 +5738,7 @@ public sealed partial class MatchEngine
         if (ability.Performer is not null)
         {
             var performer = command.PerformerId is null ? throw new RuleViolation("Choose a performing card.") : Card(command.PerformerId);
-            Require(performer.OwnerId == player.Id && InPlay(performer), "Choose your own card to perform.");
+            Require(performer.OwnerId == player.Id && (InPlay(performer) || ability.Performer == "own-dead-personality-with-keyword" && performer.Zone == Zone.Dead), "Choose your own card to perform."); // Oyo's Second Lesson (issue #492): a dead Henshin performs it
             Require(ability.Performer switch {
                 "shugenja" => Definition(performer).Type == CardType.Personality && Keyword(performer, "Shugenja") && !performer.Bowed,
                 "own-unbowed-personality-at-battle" => Definition(performer).Type == CardType.Personality && !performer.Bowed && AtBattle(performer),
@@ -10529,7 +10529,7 @@ public sealed partial class MatchEngine
             if ((beforeResolutionCard is not null) != IsBeforeResolutionReaction(ability) || beforeResolutionCard is not null && source?.Id != beforeResolutionCard) continue;
             var phaseOk = inEngageWindow || inAfterResolutionWindow || inAfterActionResolvedWindow || beforeResolutionCard is not null ? true : ability.Timing switch { "Battle" => _state.Phase == Phase.Battle, "BattleOrOpen" => _state.Phase is Phase.Action or Phase.Battle, "BeforeResolution" => false, _ => _state.Phase == Phase.Action };
             if (!phaseOk) continue;
-            if (ability.Timing == "Limited" && playerId != _state.ActivePlayerId) continue;
+            if (ability.Timing == "Limited" && playerId != _state.ActivePlayerId && !LimitedInsteadOfOpen(playerId)) continue; // Plans Within Plans (issue #492): a Limited action instead of an Open one.
             // Battle/Open presence primitive (issue #267): the same actingAsBattle generalization
             // ValidateAbility itself uses, mirrored here so an offered command is never one
             // ValidateAbility would then reject (or, symmetrically, so a legal Open-phase performer

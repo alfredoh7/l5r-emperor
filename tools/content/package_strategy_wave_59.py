@@ -19,8 +19,11 @@ NL = chr(10)
 ABILITIES: dict[int, list[str]] = {
     2919: ["guided-by-honor-move"],
     2972: ["hard-pressed-move"],
+    3008: ["hes-mine-substitute"],
     3016: ["heart-of-rokugan-sweep"],
     3037: ["heavily-engaged-bow"],
+    3254: ["hidden-defenses-bow", "hidden-defenses-move"],
+    3513: ["hundred-fold-cut-bow", "hundred-fold-cut-destroy", "hundred-fold-cut-draw"],
     3725: ["heart-of-battle-surge"],
     3793: ["introspection-search"],
     4843: ["martial-instruction-search"],
@@ -32,7 +35,10 @@ ABILITIES: dict[int, list[str]] = {
     5585: ["ninja-tricks-negate"],
     5681: ["ogre-savagery-bow"],
     5766: ["opportunistic-advance-move"],
+    5853: ["oyos-second-lesson-reborn"],
+    5984: ["plans-within-plans-arm"],
     6247: ["relentless-conviction-destroy"],
+    6253: ["remember-ancestors-choose"],
 }
 # The published Text follows each scan (Emperor Edition printing), read by eye.
 TEXT: dict[int, str] = {
@@ -40,9 +46,15 @@ TEXT: dict[int, str] = {
           "target and bow an enemy Personality with equal or lower Personal Honor.",
     2972: "Before this battle's resolution: Move a unit home from the current battlefield. You may bow it.\n"
           "Battle: If there are no Terrains at the current battlefield: Put this card into play there.",
+    3008: "Reaction: Before your target Personality enters a duel, bow him and choose your performing unbowed Samurai at the same location: Your Samurai enters the duel instead. "
+          "Bow him after the duel ends.",
     3016: "Before this battle resolves: Give each of your Human Personalities and Followers at the current battlefield +1F, and give each Nonhuman Personality and Follower there -1F.\n"
           "Battle: If there are no Terrains at the current battlefield: Put this card into play there.",
     3037: "Battle: Even if you control no units at the current battlefield: Each player targets an unbowed Personality he controls there, if possible. Bow all targets.",
+    3254: "Battle: If you control no Personalities (in play), target one or two Personalities at any location: Bow them. Negate their straightening.\n"
+          "Reaction: After engaging, if any enemy units are at the current battlefield, choose your performing Personality: Move him there. Straighten him if he moved.",
+    3513: "Reaction: After another player's action targets your performing Kensai, bow or destroy one of his Weapons: Negate his destruction from the action's effects.\n"
+          "Battle: Bow your performing Kensai or one of his Weapons: Draw two cards.",
     3725: "Battle/Open: Choose your performing Samurai: Straighten him and give him +3F. Destroy him before this turn ends.",
     3793: "Reaction: After one of your Rings enters play: Search your Fate deck for a card. Put it in your hand.",
     4843: "Open: Bow your performing Monk and remove this card from the game: Search your Fate deck for a Kiho Battle Strategy, show it, and put it in your hand.",
@@ -58,7 +70,12 @@ TEXT: dict[int, str] = {
     5585: "Reaction: After an action on a Strategy is announced, bow your performing Ninja Personality at the current battlefield: Negate the action's effects. Lose 2 Honor.",
     5681: "Battle: Choose your performing unbowed Nonhuman Shadowlands Personality and target an enemy Personality: Bow him.",
     5766: "Battle: Choose your performing unbowed Commander and target another Personality in his army: Move the target to a battlefield.",
+    5853: "Battle/Open: Choose your performing dead Henshin and target your Personality: Your Henshin is reborn. Overlay him onto your Personality. Draw a card. "
+          "You may take an additional action.",
+    5984: "Open: At your next opportunity to take an Open action, you may instead take a Limited action.",
     6247: "Battle: Target a dishonorable Personality: Destroy him.",
+    6253: "Battle: Bow your performing Courtier at any location and target an enemy attacking Personality: His controller may destroy him. If he did not choose this, discard a "
+          "card at random from his hand, and choose a player, who gains or loses 3 Honor.",
 }
 OVERRIDE: dict[int, dict] = {}
 

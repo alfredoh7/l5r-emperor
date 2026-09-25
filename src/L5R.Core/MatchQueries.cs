@@ -134,8 +134,17 @@ public sealed partial class MatchEngine
         {
             if(OpenReactionSubject() is not { } held) return;
             foreach(var (card,reactionId) in TargetedActionReactionCandidates().Where(x=>x.Card.OwnerId==playerId && TargetedActionReactionApplies(x.Card,x.AbilityId,held)).ToArray())
+            {
+                // He's Mine! (Emperor Edition remaining-cards pass, issue #492, group B): one option per Samurai who may take the targeted Personality's place (EmperorRemainingB.cs).
+                if(reactionId=="hes-mine-substitute")
+                {
+                    foreach(var samurai in HesMinePerformers(card,held))
+                        AddReaction(card,reactionId,targetId:held.TargetId,label:$"{AbilityCatalog.All[reactionId].Label} · {Definition(samurai).Name} ({samurai.Id})",validate:true,performerId:samurai.Id);
+                    continue;
+                }
                 foreach(var (candidate,label) in TargetedReactionChoices(card,reactionId,held))
                     AddReaction(card,reactionId,targetId:candidate,label:label,validate:true);
+            }
         }
         // Order Seppuku is an Open action (issue #368): offered for any Dishonorable Samurai/Courtier/Shugenja the querying player controls, but
         // ONLY at their own turn to act in the Action Phase with nothing pending -- the same single predicate the command handler uses

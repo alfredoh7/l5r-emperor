@@ -1,7 +1,10 @@
 oracle-l5r-2919
 oracle-l5r-2972
+oracle-l5r-3008
 oracle-l5r-3016
 oracle-l5r-3037
+oracle-l5r-3254
+oracle-l5r-3513
 oracle-l5r-3725
 oracle-l5r-3793
 oracle-l5r-4843
@@ -13,4 +16,7 @@ oracle-l5r-5532
 oracle-l5r-5585
 oracle-l5r-5681
 oracle-l5r-5766
+oracle-l5r-5853
+oracle-l5r-5984
 oracle-l5r-6247
+oracle-l5r-6253

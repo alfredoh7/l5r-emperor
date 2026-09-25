@@ -51,6 +51,29 @@
       "Effect": "none"
     },
     {
+      "Id": "oracle-l5r-3008",
+      "Name": "He's Mine!",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: Before your target Personality enters a duel, bow him and choose your performing unbowed Samurai at the same location: Your Samurai enters the duel instead. Bow him after the duel ends.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-3008.jpg",
+      "Keywords": [],
+      "Focus": 3,
+      "Abilities": [
+        "hes-mine-substitute"
+      ],
+      "Effect": "none"
+    },
+    {
       "Id": "oracle-l5r-3016",
       "Name": "Heart of Rokugan",
       "Type": "Strategy",
@@ -95,6 +118,55 @@
       "Focus": 2,
       "Abilities": [
         "heavily-engaged-bow"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-3254",
+      "Name": "Hidden Defenses",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: If you control no Personalities (in play), target one or two Personalities at any location: Bow them. Negate their straightening.\nReaction: After engaging, if any enemy units are at the current battlefield, choose your performing Personality: Move him there. Straighten him if he moved.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-3254.jpg",
+      "Keywords": [],
+      "Focus": 3,
+      "Abilities": [
+        "hidden-defenses-bow",
+        "hidden-defenses-move"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-3513",
+      "Name": "Hundred-Fold Cut",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After another player's action targets your performing Kensai, bow or destroy one of his Weapons: Negate his destruction from the action's effects.\nBattle: Bow your performing Kensai or one of his Weapons: Draw two cards.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-3513.jpg",
+      "Keywords": [],
+      "Focus": 3,
+      "Abilities": [
+        "hundred-fold-cut-bow",
+        "hundred-fold-cut-destroy",
+        "hundred-fold-cut-draw"
       ],
       "Effect": "none"
     },
@@ -372,6 +444,54 @@
       "Effect": "none"
     },
     {
+      "Id": "oracle-l5r-5853",
+      "Name": "Oyo's Second Lesson",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle/Open: Choose your performing dead Henshin and target your Personality: Your Henshin is reborn. Overlay him onto your Personality. Draw a card. You may take an additional action.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-5853.jpg",
+      "Keywords": [
+        "Kiho"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "oyos-second-lesson-reborn"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-5984",
+      "Name": "Plans Within Plans",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: At your next opportunity to take an Open action, you may instead take a Limited action.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-5984.jpg",
+      "Keywords": [],
+      "Focus": 1,
+      "Abilities": [
+        "plans-within-plans-arm"
+      ],
+      "Effect": "none"
+    },
+    {
       "Id": "oracle-l5r-6247",
       "Name": "Relentless Conviction",
       "Type": "Strategy",
@@ -393,6 +513,31 @@
       "Focus": 3,
       "Abilities": [
         "relentless-conviction-destroy"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-6253",
+      "Name": "Remember Your Ancestors",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Bow your performing Courtier at any location and target an enemy attacking Personality: His controller may destroy him. If he did not choose this, discard a card at random from his hand, and choose a player, who gains or loses 3 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6253.jpg",
+      "Keywords": [
+        "Political"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "remember-ancestors-choose"
       ],
       "Effect": "none"
     }

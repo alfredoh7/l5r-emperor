@@ -11,6 +11,9 @@ public static class EmperorRemainingBSpecs
     public const string MysteriousDeathsFirst = "mysterious-deaths-first", MysteriousDeathsSecond = "mysterious-deaths-second";
     /// <summary>My Enemy's Mercy: "The enemy leader chooses to either bow him or move him home." (EitherOr.cs)</summary>
     public const string MercyBowOrHome = "my-enemys-mercy-bow-or-home";
+    /// <summary>Remember Your Ancestors: "His controller may destroy him. If he did not choose this, discard a card at random from his hand, and choose a player, who gains or loses 3 Honor." The
+    /// target's controller decides first; a refusal hands the second choice (the player who gains or loses) to the acting player (EitherOr.cs, chained).</summary>
+    public const string AncestorsDestroy = "remember-ancestors-destroy", AncestorsHonor = "remember-ancestors-honor";
 
     public static bool IsDeciderSpec(string spec) => spec is HeavilyEngagedFirst or HeavilyEngagedSecond or MysteriousDeathsFirst or MysteriousDeathsSecond;
     public static bool IsFirstDecider(string spec) => spec is HeavilyEngagedFirst or MysteriousDeathsFirst;
@@ -85,6 +88,41 @@ public static class EmperorRemainingBAbilities
         // Lose 2 Honor." A Reaction played from a hand in the before-action window (any player's action whose source is a Strategy); the performing Ninja is bowed as the cost.
         all["ninja-tricks-negate"] = new("Reaction", "After an action on a Strategy is announced, bow your performing Ninja Personality at the current battlefield: Negate the action's effects. Lose 2 Honor", "none",
             Trigger: "before-action-resolves", Performer: "own-unbowed-personality-with-keyword-explicitly-at-battle", RequiredKeywords: ["Ninja"], Costs: ActionCost.BowPerformer);
+        // Oyo's Second Lesson (oracle-l5r-5853, Kiho): "Battle/Open: Choose your performing dead Henshin and target your Personality: Your Henshin is reborn. Overlay him onto your Personality. Draw a card. You may
+        // take an additional action." The Henshin is a dead Personality of the acting player's (the performer need not be in play: the one exception to "choose your own card in play to perform"), the overlay is the
+        // Experienced overlay's own transfer (TransferOverlayState: his card takes the target's place with his state, attachments and tokens, and the target's card leaves the game without entering play).
+        all["oyos-second-lesson-reborn"] = new("BattleOrOpen", "Choose your performing dead Henshin and target your Personality: Your Henshin is reborn. Overlay him onto your Personality. Draw a card. You may take an additional action",
+            "own-personality", Performer: "own-dead-personality-with-keyword", RequiredKeywords: ["Henshin"]);
+        // Hidden Defenses (oracle-l5r-3254): "Battle: If you control no Personalities (in play), target one or two Personalities at any location: Bow them. Negate their straightening." and "Reaction: After
+        // engaging, if any enemy units are at the current battlefield, choose your performing Personality: Move him there. Straighten him if he moved." With no Personality of yours in play you control no unit, so
+        // the Battle action needs no presence (Absent; the card's text wins over the Rule of Presence, as for Heavily Engaged). "Negate their straightening" states no duration: it lasts until end of turn (core rules,
+        // Duration), the straighten lock of Toshimo's Battle action. The Reaction is Moving and Unmoving's shape: the performer moves himself (a Reaction is not a Battle action, so he may stand anywhere).
+        all["hidden-defenses-bow"] = new("Battle", "If you control no Personalities (in play), target one or two Personalities at any location: Bow them. Negate their straightening", "slots", Absent: true,
+            Slots: [new("targets", "personality-at-any-location", "One or two Personalities at any location", 1, 2)]);
+        all["hidden-defenses-move"] = new("Reaction", "After engaging, if any enemy units are at the current battlefield, choose your performing Personality: Move him there. Straighten him if he moved", "none",
+            Trigger: "after-engaging", Performer: "own-personality");
+        // Hundred-Fold Cut (oracle-l5r-3513): "Reaction: After another player's action targets your performing Kensai, bow or destroy one of his Weapons: Negate his destruction from the action's effects." and "Battle:
+        // Bow your performing Kensai or one of his Weapons: Draw two cards." The Kensai is the one the action targets (Know No Fear's reading of "performing"); "his Weapons" are the Kensai's own; the two
+        // ways to pay are two ids sharing one use, the Weapon being the Reaction's target. The Battle half's performer is the Kensai or an unbowed Weapon of his (Sutigu's cost choice), bowed as the cost.
+        all["hundred-fold-cut-bow"] = new("Reaction", "After another player's action targets your performing Kensai, bow one of his Weapons: Negate his destruction from the action's effects", "kensai-unbowed-weapon-of-held-target",
+            Trigger: ReactionTriggers.TargetedByAction, UsageKey: "hundred-fold-cut-response", Costs: ActionCost.BowTarget);
+        all["hundred-fold-cut-destroy"] = new("Reaction", "After another player's action targets your performing Kensai, destroy one of his Weapons: Negate his destruction from the action's effects", "kensai-weapon-of-held-target",
+            Trigger: ReactionTriggers.TargetedByAction, UsageKey: "hundred-fold-cut-response", Costs: [new(CostVerbs.Sacrifice, CostSubject.Target)]);
+        all["hundred-fold-cut-draw"] = new("Battle", "Bow your performing Kensai or one of his Weapons: Draw two cards", "none", Performer: "own-kensai-or-unbowed-weapon-at-battle", Costs: ActionCost.BowPerformer);
+        // Remember Your Ancestors (oracle-l5r-6253, Political): "Battle: Bow your performing Courtier at any location and target an enemy attacking Personality: His controller may destroy him. If he did not choose
+        // this, discard a card at random from his hand, and choose a player, who gains or loses 3 Honor." Kitsuki Methods' shape: the target's controller decides (EitherOr.cs); a refusal discards a random card
+        // of his hand (none when it is empty), then the acting player chooses the player (the four answers every "choose a player who gains or loses N" card gives).
+        all["remember-ancestors-choose"] = new("Battle", "Bow your performing Courtier at any location and target an enemy attacking Personality: His controller may destroy him. If he did not choose this, discard a card at random from his hand, and choose a player, who gains or loses 3 Honor",
+            "enemy-attacking", Performer: "own-unbowed-personality-with-keyword-at-any-location", RequiredKeywords: ["Courtier"], Costs: ActionCost.BowPerformer, ActionKeywords: ["Political"]);
+        // He's Mine! (oracle-l5r-3008): "Reaction: Before your target Personality enters a duel, bow him and choose your performing unbowed Samurai at the same location: Your Samurai enters the duel instead. Bow him
+        // after the duel ends." Irezu's redirect of a duel-issuing action (Ezuno's shape): the target is the Personality the action targets (the challenged one), bowed as the cost; the performer is the Samurai the
+        // action is redirected to; he is bowed once that duel has ended (MatchState.HesMineSubstitutes). A challenge he refuses is no duel, so he is not bowed.
+        all["hes-mine-substitute"] = new("Reaction", "Before your target Personality enters a duel, bow him and choose your performing unbowed Samurai at the same location: Your Samurai enters the duel instead. Bow him after the duel ends",
+            "held-action-target-own-personality", Trigger: ReactionTriggers.TargetedByAction, Performer: "own-unbowed-samurai-with-held-target", Costs: ActionCost.BowTarget);
+        // Plans Within Plans (oracle-l5r-5984): "Open: At your next opportunity to take an Open action, you may instead take a Limited action." An opportunity is a turn to act in the Action Phase (a command
+        // taken with nothing pending); the next one after this card resolves is the one the Limited action may replace, whoever's turn it is (a Limited action is otherwise its active player's). Whatever the
+        // player does with that opportunity -- a Limited action, an Open action, a pass -- spends it.
+        all["plans-within-plans-arm"] = new("Open", "At your next opportunity to take an Open action, you may instead take a Limited action", "none");
         return all;
     }
 }
@@ -97,12 +135,20 @@ public sealed partial class MatchEngine
         // Ogre Savagery: "your performing unbowed Nonhuman Shadowlands Personality" -- Shadowlands is a Clan alignment, not a printed keyword (HasClanAffiliation).
         "own-unbowed-nonhuman-shadowlands-at-battle" => Definition(performer).Type == CardType.Personality && !performer.Bowed && Keyword(performer, "Nonhuman") && HasClanAffiliation(performer, "Shadowlands")
             && (!actingAsBattle || AtBattle(performer)),
+        // Oyo's Second Lesson: "your performing dead Henshin" -- a dead Personality of the acting player's (a Henshin has the keyword printed).
+        "own-dead-personality-with-keyword" => Definition(performer).Type == CardType.Personality && performer.Zone == Zone.Dead && HasKeywords(performer, ability.RequiredKeywords),
+        // Hundred-Fold Cut's Battle action: "your performing Kensai or one of his Weapons" -- an unbowed Kensai at the battlefield, or an unbowed Weapon attached to a Kensai there.
+        "own-kensai-or-unbowed-weapon-at-battle" => !performer.Bowed && AtBattle(performer) && (Definition(performer).Type == CardType.Personality && Keyword(performer, "Kensai")
+            || Definition(performer).Type == CardType.Item && Keyword(performer, "Weapon") && performer.Zone == Zone.Attached && Card(performer.AttachedTo) is { } kensai && Keyword(kensai, "Kensai")),
+        // He's Mine!: "your performing unbowed Samurai at the same location" as the Personality the held action targets, who may take his place in it.
+        "own-unbowed-samurai-with-held-target" => HesMinePerformerAllows(performer),
         _ => false
     };
 
     private string?[] EmperorRemainingBPerformers(AbilityDefinition ability, int playerId, bool actingAsBattle) => ability.Performer switch
     {
-        "own-unbowed-nonhuman-shadowlands-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && EmperorRemainingBPerformerAllows(ability, c, actingAsBattle)).OrderBy(c => c.Id, StringComparer.Ordinal).Select(c => (string?)c.Id).ToArray(),
+        "own-unbowed-nonhuman-shadowlands-at-battle" or "own-dead-personality-with-keyword" or "own-kensai-or-unbowed-weapon-at-battle" =>
+            _state.Cards.Values.Where(c => c.OwnerId == playerId && (InPlay(c) || c.Zone == Zone.Dead) && EmperorRemainingBPerformerAllows(ability, c, actingAsBattle)).OrderBy(c => c.Id, StringComparer.Ordinal).Select(c => (string?)c.Id).ToArray(),
         _ => [null]
     };
 
@@ -114,6 +160,11 @@ public sealed partial class MatchEngine
         {
             // Opportunistic Advance: "another Personality in his army" -- a Personality of the performing Commander's controller at the current battlefield, not the Commander himself.
             "own-personality-in-performer-army" => personality && target.OwnerId == player.Id && target.Id != command.PerformerId && AtBattle(target),
+            // Hundred-Fold Cut: one of the Weapons of the Kensai the held action targets (the bowing way needs it unbowed).
+            "kensai-unbowed-weapon-of-held-target" => KensaiWeaponOfHeldTarget(target) && !target.Bowed,
+            "kensai-weapon-of-held-target" => KensaiWeaponOfHeldTarget(target),
+            // He's Mine!: the Personality the held action targets, one of the reactor's own.
+            "held-action-target-own-personality" => personality && target.OwnerId == player.Id && OpenReactionSubject() is { TargetId: { } heldId } && target.Id == heldId,
             _ => false
         };
     }
@@ -126,6 +177,13 @@ public sealed partial class MatchEngine
             // Guided by Honor: "If any enemy units are at the current battlefield".
             case "guided-by-honor-move":
                 Require(_state.CurrentBattleProvince is int current && Army(1 - player.Id, current).Any(), "Guided by Honor requires enemy units at the current battlefield.");
+                break;
+            // Hidden Defenses: "If you control no Personalities (in play)"; its Reaction: "if any enemy units are at the current battlefield".
+            case "hidden-defenses-bow":
+                Require(!_state.Cards.Values.Any(c => c.OwnerId == player.Id && InPlay(c) && Definition(c).Type == CardType.Personality), "Hidden Defenses requires that you control no Personalities.");
+                break;
+            case "hidden-defenses-move":
+                Require(_state.CurrentBattleProvince is int engaged && Army(1 - player.Id, engaged).Any(), "Hidden Defenses requires enemy units at the current battlefield.");
                 break;
             // Mysterious Deaths is a Limited action of the Action Phase like any other (ValidateAbility's timing check); nothing more is required to take it.
         }
@@ -215,6 +273,71 @@ public sealed partial class MatchEngine
                 NegateDeferredAction(source!);
                 GainHonor(player.Id, -2, Definition(source!).Name, source);
                 return false;
+            // Oyo's Second Lesson: the dead Henshin takes the target's place (overlay), then the draw and the additional action.
+            case "oyos-second-lesson-reborn":
+            {
+                var henshin = Card(command.PerformerId!);
+                var host = target!;
+                if (henshin.Zone == Zone.Dead && InPlay(host) && host.OwnerId == player.Id && Definition(host).Type == CardType.Personality)
+                {
+                    var hostName = Definition(host).Name;
+                    ResetCardState(henshin);
+                    TransferOverlayState(host, henshin);
+                    RemoveFromGame(host);
+                    Emit("personalityOverlayed", $"{Definition(henshin).Name} is reborn: overlaid onto {hostName}.", player.Id, henshin.Id);
+                }
+                Draw(player);
+                GrantAdditionalAction(player.Id, null);
+                return false;
+            }
+            // Hidden Defenses: bow them and lock their straightening for the turn (each effect independent of the other).
+            case "hidden-defenses-bow":
+                foreach (var victim in SlotCards(command, "targets").ToArray())
+                {
+                    if (InPlay(victim) && !StalwartNegatesBow(victim, player.Id)) victim.Bowed = true;
+                    if (InPlay(victim)) LockStraightening(victim);
+                }
+                return false;
+            case "hidden-defenses-move":
+            {
+                var mover = Card(command.PerformerId!);
+                var battlefield = _state.CurrentBattleProvince!.Value;
+                var wasThere = AtBattle(mover);
+                if (!wasThere && TryMoveToBattlefield(mover, battlefield) && AtBattle(mover)) Straighten(mover);
+                return false;
+            }
+            // Hundred-Fold Cut: the Weapon was bowed or destroyed as the cost; the held action's destruction of the Kensai is negated. The Battle half draws two.
+            case "hundred-fold-cut-bow":
+            case "hundred-fold-cut-destroy":
+                NegateEffects(Card(HeldAction().TargetId!), "destroy");
+                return false;
+            case "hundred-fold-cut-draw":
+                Draw(player); Draw(player);
+                return false;
+            // Remember Your Ancestors: the target's controller decides (EitherOr.cs).
+            case "remember-ancestors-choose":
+                if (NegatesEffect(target!, "all"))
+                {
+                    Emit("effectsNegated", $"{Definition(target!).Name}: the action's effects were negated before they resolved.", target!.OwnerId, target.Id);
+                    return false;
+                }
+                SpendHandPlayedCard(player, source);
+                if (!consumedGrant) _state.AdditionalActions.RemoveAll(preExistingGrants.Contains);
+                return OpenEitherOr(EmperorRemainingBSpecs.AncestorsDestroy, source!, player.Id, target!.OwnerId, target, "action", bowedBeforeAction,
+                    stayWithActor: _state.AdditionalActions.Any(g => g.PlayerId == player.Id && Forfeitable(g)), performerId: command.PerformerId);
+            // He's Mine!: the Personality bowed as the cost is replaced in the duel by the chosen Samurai, who bows when the duel has ended.
+            case "hes-mine-substitute":
+            {
+                var samurai = Card(command.PerformerId!);
+                RedirectAction(HeldAction(), samurai.Id, source!);
+                _state.HesMineSubstitutes.Add(samurai.Id);
+                return false;
+            }
+            // Plans Within Plans.
+            case "plans-within-plans-arm":
+                player.PlansWithinPlansArmed = true; player.PlansWithinPlansSets++;
+                Emit("plansWithinPlans", $"{player.Name}: at their next opportunity to take an Open action they may instead take a Limited action.", player.Id, source?.Id);
+                return false;
             // Opportunistic Advance: the target moves to the chosen battlefield.
             case "opportunistic-advance-move":
                 ExecuteMove(command, ability, source, target);
@@ -222,6 +345,116 @@ public sealed partial class MatchEngine
             default:
                 return null;
         }
+    }
+
+    // ---- Plans Within Plans ----
+    // A Limited action instead of an Open one: the player holds the armed card's option at an opportunity of the Action Phase (nothing pending; the top-level priority check already limits the commands to his turn to act).
+    private bool LimitedInsteadOfOpen(int playerId) => Player(playerId).PlansWithinPlansArmed && _state.Phase == Phase.Action && _state.PendingChoice is null;
+
+    // Before a command: the number of resolutions so far when this command is the armed player's opportunity, else null.
+    private int? PlansOpportunitySets(GameCommand command) =>
+        command.Type is not ("concede" or "orderSeppuku") && command.PlayerId == _state.PriorityPlayerId && LimitedInsteadOfOpen(command.PlayerId) ? Player(command.PlayerId).PlansWithinPlansSets : null;
+
+    // After it: the opportunity is spent (a copy played at it re-armed the card and keeps it).
+    private void SpendPlansWithinPlans(GameCommand command, int? setsBefore)
+    {
+        if (setsBefore is not int before || _state.WinnerId is not null) return;
+        var player = Player(command.PlayerId);
+        if (player.PlansWithinPlansArmed && player.PlansWithinPlansSets == before)
+        {
+            player.PlansWithinPlansArmed = false;
+            Emit("plansWithinPlansSpent", $"{player.Name}'s opportunity to take a Limited action instead of an Open one is over.", player.Id);
+        }
+    }
+
+    // ---- Hundred-Fold Cut ----
+    // "One of his Weapons": a Weapon attached to the Kensai the held action targets.
+    private bool KensaiWeaponOfHeldTarget(CardInstance target) =>
+        target.Zone == Zone.Attached && Definition(target).Type == CardType.Item && Keyword(target, "Weapon")
+        && OpenReactionSubject() is { TargetId: { } heldId } && target.AttachedTo == heldId;
+
+    private IEnumerable<CardInstance> KensaiWeapons(CardInstance kensai, bool unbowedOnly) =>
+        Attachments(kensai.Id).Where(a => Definition(a).Type == CardType.Item && Keyword(a, "Weapon") && (!unbowedOnly || !a.Bowed)).OrderBy(a => a.Id, StringComparer.Ordinal);
+
+    // "After another player's action targets your performing Kensai": an action that could destroy him (an Attack always could), against a Kensai of the reactor's with a Weapon to pay with.
+    private bool HundredFoldCutApplies(CardInstance card, string abilityId, ReactionSubject subject, CardInstance affected) =>
+        subject.Command.PlayerId != card.OwnerId && affected.OwnerId == card.OwnerId && Definition(affected).Type == CardType.Personality && Keyword(affected, "Kensai")
+        && (subject.IsAttack || DestroysTarget(subject.Command.AbilityId!)) && KensaiWeapons(affected, unbowedOnly: abilityId == "hundred-fold-cut-bow").Any();
+
+    // ---- He's Mine! ----
+    private bool HesMinePerformerAllows(CardInstance performer) =>
+        Definition(performer).Type == CardType.Personality && !performer.Bowed && Keyword(performer, "Samurai") && OpenReactionSubject() is { TargetId: { } heldId } held
+        && performer.Id != heldId && SameLocation(performer, Card(heldId)) && WithReactorBowed(Card(heldId), () => ActionAcceptsTarget(held, performer.Id));
+
+    // The Samurai who may take his place: the reactor's own, at the targeted Personality's location, that the held duel-issuing action accepts as its target once he is bowed.
+    private IEnumerable<CardInstance> HesMinePerformers(CardInstance card, ReactionSubject subject) =>
+        subject.TargetId is null ? [] : _state.Cards.Values.Where(c => c.OwnerId == card.OwnerId && InPlay(c) && Definition(c).Type == CardType.Personality && !c.Bowed && Keyword(c, "Samurai")
+            && c.Id != subject.TargetId && SameLocation(c, Card(subject.TargetId)) && WithReactorBowed(Card(subject.TargetId), () => ActionAcceptsTarget(subject, c.Id))).OrderBy(c => c.Id, StringComparer.Ordinal);
+
+    private bool HesMineApplies(CardInstance card, ReactionSubject subject, CardInstance affected) =>
+        AbilityCatalog.All.TryGetValue(subject.Command.AbilityId ?? "", out var acting) && acting.IssuesDuel && subject.Command.PlayerId != card.OwnerId && affected.OwnerId == card.OwnerId
+        && Definition(affected).Type == CardType.Personality && !affected.Bowed && HesMinePerformers(card, subject).Any();
+
+    // FinishDuelResolution's hook: the substitute of a duel that has ended is bowed.
+    private void ApplyHesMineBows(string challengerId, string challengedId)
+    {
+        foreach (var id in _state.HesMineSubstitutes.Where(i => i == challengedId || i == challengerId).ToArray())
+        {
+            _state.HesMineSubstitutes.Remove(id);
+            var samurai = Card(id);
+            if (InPlay(samurai) && !samurai.Bowed) { samurai.Bowed = true; Emit("hesMineBow", $"{Definition(samurai).Name} bows: the duel he entered has ended.", samurai.OwnerId, samurai.Id); }
+        }
+    }
+
+    // EndTurn's hook: a substitute whose challenge came to no duel is not bowed.
+    private void ResolveEmperorRemainingBTurnEnd() => _state.HesMineSubstitutes.Clear();
+
+    // ---- Remember Your Ancestors (EitherOr.cs hooks) ----
+    private EitherOrOption[] AncestorsOptions(PendingEitherOr p, CardInstance? affected)
+    {
+        var name = Definition(affected!).Name;
+        if (p.SpecId == EmperorRemainingBSpecs.AncestorsDestroy)
+            return [
+                new("destroy", $"Destroy {name}", $"{name} is destroyed. Nothing further happens.", EitherOrKind.Avoid, 0, InPlay(affected!), $"{name} is no longer in play."),
+                new("refuse", "Do not destroy him", $"A card is discarded at random from your hand, and {Player(p.ActingPlayerId).Name} chooses a player, who gains or loses 3 Honor.", EitherOrKind.Accept, 0, true, null)
+            ];
+        return [
+            new("self-gain", "You gain 3 Honor", "You gain 3 Honor.", EitherOrKind.Choose, 0, true, null),
+            new("opponent-gain", "Your opponent gains 3 Honor", "Your opponent gains 3 Honor.", EitherOrKind.Choose, 0, true, null),
+            new("self-lose", "You lose 3 Honor", "You lose 3 Honor.", EitherOrKind.Choose, 0, true, null),
+            new("opponent-lose", "Your opponent loses 3 Honor", "Your opponent loses 3 Honor.", EitherOrKind.Choose, 0, true, null)
+        ];
+    }
+
+    private void ApplyAncestors(PendingEitherOr p, EitherOrOption option, PlayerState decider, CardInstance? affected)
+    {
+        var source = Card(p.SourceCardId); var name = Definition(source).Name;
+        if (p.SpecId == EmperorRemainingBSpecs.AncestorsDestroy)
+        {
+            if (option.Key == "destroy")
+            {
+                Emit("eitherOrChosen", $"{decider.Name} chose to destroy {Definition(affected!).Name} ({name}).", decider.Id, affected!.Id);
+                if (InPlay(affected)) DestroyUnits([affected], false, p.ActingPlayerId);
+                return;
+            }
+            Emit("eitherOrChosen", $"{decider.Name} did not destroy {Definition(affected!).Name} ({name}).", decider.Id, source.Id);
+            if (decider.Hand.Count > 0)
+            {
+                var hand = decider.Hand.ToList();
+                var random = new StableRandom(_state.RngState);
+                random.Shuffle(hand);
+                _state.RngState = random.State;
+                DiscardFate(decider, Card(hand[0]));
+            }
+            OpenEitherOr(EmperorRemainingBSpecs.AncestorsHonor, source, p.ActingPlayerId, p.ActingPlayerId, affected, p.Origin, p.BowedBefore, p.StayWithActor, p.PerformerId);
+            return;
+        }
+        var self = option.Key.StartsWith("self", StringComparison.Ordinal);
+        var amount = option.Key.EndsWith("gain", StringComparison.Ordinal) ? 3 : -3;
+        var chosenPlayer = self ? p.ActingPlayerId : 1 - p.ActingPlayerId;
+        Emit("eitherOrChosen", $"{decider.Name} chose: {option.Label} ({name}).", decider.Id, source.Id);
+        var courtier = p.PerformerId is not null && _state.Cards.TryGetValue(p.PerformerId, out var named) ? named : source;
+        ApplyPlayerHonorChoice(courtier, chosenPlayer, amount);
     }
 
     // ---- Ninja Tricks / Meeting the Keepers: their triggers -----------------------------------------------------------------------------------------------------------------------------
