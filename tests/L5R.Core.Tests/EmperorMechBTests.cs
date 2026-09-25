@@ -579,7 +579,7 @@ internal static class EmperorMechBTests
         var silk = Add(s2, LuxuriousSilk, 0, Zone.Home, bowed: true);
         var card2 = Add(s2, Marketeering, 0, Zone.Hand);
         var e2 = MatchEngine.FromTestState(s2);
-        Check(e2.PaymentOptions(0, 2, new PaymentSubject(card2, PaymentKind.Play)).Any(p => p.SourceIds.SequenceEqual([silk.Id])), "the bowed Silk pays 2 Gold for Black Marketeering");
+        Check(e2.PaymentOptions(0, 2, new PaymentSubject(card2, PaymentKind.Play)).Any(p => p.SourceIds.SequenceEqual([silk.Id + "#reaction"])), "the bowed Silk pays 2 Gold for Black Marketeering"); // issue #501: group E made the Silk Reaction its own payment token
     }
 
     // ---- Only a Shadow ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
