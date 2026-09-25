@@ -214,6 +214,7 @@ public sealed partial class MatchEngine
         ApplyCore(command);
         ResumeIdleSuspendedWindow();
         FinishSpentBeforeBattleItem();
+        OpenAssignedReactionWindow(); // Chrysanthemum Blossom (issue #492 group G): "After this Personality is assigned".
     }
     private void ApplyCore(GameCommand command)
     {
@@ -850,7 +851,7 @@ public sealed partial class MatchEngine
             // left dangling on `lower` (about to be RemoveFromGame'd below, which does not itself
             // relocate an attachment still pointing at it). Its own OwnerId is untouched, so this
             // already lands in the correct original owner's discard pile by construction.
-            if (Definition(attachment).Effect == "cultist-infiltrator")
+            if (Definition(attachment).Effect == "cultist-infiltrator" || WillNotBeTransferred(attachment)) // Maga-yari (issue #492 group G) shares the printed text
             {
                 attachment.Zone = Zone.FateDiscard; attachment.AttachedTo = null; attachment.ProvinceIndex = null; attachment.Tokens.Clear();
                 Emit("attachmentDestroyed", $"{Definition(attachment).Name} was not transferred and was discarded.", attachment.OwnerId, attachment.Id);
@@ -1341,6 +1342,7 @@ public sealed partial class MatchEngine
             RequireShieldmanMayAssign(card,isDefender);
             RequireStarCrossedMayAssign(card,assignment.Value,command.Assignments!);
             card.Zone=Zone.Battlefield; card.ProvinceIndex=assignment.Value;
+            _state.AssignedThisCommand.Add(card.Id); // Chrysanthemum Blossom (issue #492 group G).
             foreach(var attached in Attachments(card.Id)) attached.ProvinceIndex=assignment.Value;
             // Tamori Tamoko's own Open action (issue #207 follow-up): "gain 1 Honor if he was NOT
             // assigned to attack your provinces this turn" -- a turn-stamped flag, the same
@@ -1621,7 +1623,9 @@ public sealed partial class MatchEngine
         // After the losing units are destroyed, the province is destroyed and Honor is settled: the Reactions that name this moment (AfterResolution.cs), before the winners go home.
         MarkSeekingTheTruthResolution(destroyedByPlayer,provinceDestroyedNow?attacker:null); // Forgotten Legacy pass (issue #467 batch 4).
         FireCowedAndDefeatedBattleWatches(a,d); // The Shadow's Embrace pass (issue #476), batch 3: "a battle resolves which destroyed him" (ShadowsEmbraceBatch3.cs).
-        if(OpenAfterResolutionWindow(NewAfterResolutionFacts(provinceIndex,attacker,attackerWon,a,destroyedByPlayer,provinceDestroyedNow,losers))) return;
+        var afterResolutionFacts=NewAfterResolutionFacts(provinceIndex,attacker,attackerWon,a,destroyedByPlayer,provinceDestroyedNow,losers);
+        if(BeginBanditGangTraits(afterResolutionFacts)) return; // Bandit Gang (issue #492 group G): a trait, so before any Reaction to the resolution's end.
+        if(OpenAfterResolutionWindow(afterResolutionFacts)) return;
         ContinueAfterResolution(provinceIndex,attacker,attackerWon,a);
     }
     // The rest of the resolution once its after-resolution Reactions are done: the Conqueror's choice, the return home, the close of the battlefield.
@@ -2073,7 +2077,7 @@ public sealed partial class MatchEngine
     // "force-with-spell" (Asako Ume), "force-if-enemy-dishonorable" (Bayushi Kahoku) and
     // "force-max-dead-pile" (Moto Shunsuke) are always-on passive bonuses, unlike the attacking-only
     // attacking-two/attacking-four Effects above.
-    private int PersonalityForce(CardInstance card) => Math.Max(0,Definition(card).Force+StatModifier(card,"Force")+TerrainForceAdjustment(card)+ForgottenLegacyBatch5Force(card)+EmperorBatch5Force(card)+EmperorPersonalityBatch3Force(card)+ShadowsEmbraceBatch5Force(card)+ShadowsEmbraceBatch2Force(card)+ShadowsEmbraceBatch1Force(card)+(IsAttacking(card)?(Definition(card).Effect=="attacking-two"?2:Definition(card).Effect=="attacking-four"?4:
+    private int PersonalityForce(CardInstance card) => Math.Max(0,Definition(card).Force+StatModifier(card,"Force")+TerrainForceAdjustment(card)+ForgottenLegacyBatch5Force(card)+EmperorBatch5Force(card)+EmperorPersonalityBatch3Force(card)+ShadowsEmbraceBatch5Force(card)+ShadowsEmbraceBatch2Force(card)+ShadowsEmbraceBatch1Force(card)+EmperorRemainingGForce(card)+(IsAttacking(card)?(Definition(card).Effect=="attacking-two"?2:Definition(card).Effect=="attacking-four"?4:
         // Matsu Kaido (oracle-l5r-4934, issue #299): "Kaido has +1F while attacking" -- the plain +1
         // counterpart to attacking-two/attacking-four (Matsu Yoshito's own conditional variant below
         // starts from the same +1 base).
@@ -2495,6 +2499,7 @@ public sealed partial class MatchEngine
             foreach(var attachment in Attachments(card.Id).ToArray())
             {
                 RemoveAttachmentGrants(card, attachment.Id);
+                attachment.LastHostId=card.Id; // issue #492 group G: Blade of Perfection's "its Personality".
                 attachment.Zone=Zone.FateDiscard; attachment.AttachedTo=null; attachment.ProvinceIndex=null; attachment.Tokens.Clear(); count++;
                 DestroyedDuringBattleBonus(attachment);
                 ExpendableDraw(attachment);

@@ -137,6 +137,8 @@ public sealed partial class MatchEngine
     private void Focus(GameCommand command)
     {
         var duel = _state.PendingDuel!;
+        // Reserve Weapon (issue #492 group G): "Before this Personality focuses: You may give him +3 to his duel stat until the duel ends instead of focusing."
+        if (command.Choice == "reserve") { ReserveWeaponFocus(command); return; }
         var isChallenger = command.PlayerId == duel.ChallengerPlayerId;
         var list = isChallenger ? duel.ChallengerFocused : duel.ChallengedFocused;
         Require(list.Count < 4, "You have already focused four times this duel and must Strike.");
@@ -275,12 +277,12 @@ public sealed partial class MatchEngine
     // The duel stat plus each side's own total focused Focus Value (revealed by the time this runs).
     // Any attachment modifying the stat applies as long as it is active right now -- CardForce/
     // CardPersonalHonor/PersonalityChi already read current, not printed, values.
-    private int DuelStatValue(CardInstance card, string stat) => NikaruDuelStat(card) ?? stat switch
+    private int DuelStatValue(CardInstance card, string stat) => (NikaruDuelStat(card) ?? stat switch
     {
         "Force" => CardForce(card),
         "PersonalHonor" => CardPersonalHonor(card),
         _ => PersonalityChi(card),
-    };
+    }) + DuelStatBonus(card); // Reserve Weapon (issue #492 group G): "+3 to his duel stat until the duel ends".
 
     private void ResolveDuel()
     {

@@ -144,7 +144,7 @@ public sealed partial class MatchEngine
 
     // "Ranged 6 Attack that you compare against Gold Cost" (Tsuruchi Samuru, Emperor Edition Personality pass, issue #477): core rules -- if an effect compares a stat other than Force,
     // that stat is compared to the Attack's strength instead. Every caller that compares an Attack's target to its strength asks here.
-    private int AttackComparedValue(string abilityId, CardInstance target) => abilityId == "samuru-attack" ? CardGoldCost(target) : AttackComparedForce(target, abilityId);
+    private int AttackComparedValue(string abilityId, CardInstance target) => abilityId == "samuru-attack" ? CardGoldCost(target) : AttackComparedValueRemainingG(abilityId, target);
 
     // An Attack that targets the current battlefield's province (issue #335): no card is targeted, so no reaction to a targeted Attack applies and nothing here compares
     // Force. The only such Attack today is the training fixture; a printed card adds its own case.

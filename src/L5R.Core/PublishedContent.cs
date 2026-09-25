@@ -2564,4 +2564,9 @@ public static class PublishedContent
     /// <summary>Stronghold wave 18 (Emperor Edition Stronghold pass, issue #486, batch 2): Palace of the Breaking Dawn, Pillars of Virtue, Shiro Chugo, Steel Soul Dojo, Suitengu's Torch,
     /// Temple of Purity, The Aerie.</summary>
     public static PublishedSnapshot StrongholdWave18 { get; } = Load("L5R.Published.StrongholdWave18.json", "stronghold-wave-18", requireDecks: false);
+    /// <summary>Item wave 15 (Emperor Edition remaining-cards pass, issue #492, group G): Armor of the Heavens, Blade of Perfection, Chrysanthemum Blossom, Clan Standard, Gift Armor, Kensai's Blade, Maga-yari,
+    /// Modifications, Reserve Weapon, Sasumata, Tsuruchi Daikyu.</summary>
+    public static PublishedSnapshot ItemWave15 { get; } = Load("L5R.Published.ItemWave15.json", "item-wave-15", requireDecks: false);
+    /// <summary>Follower wave 31 (issue #492, group G): Bandit Gang, Ikiryo, Ikoma House Guard, Kaiu House Guard, Legion of Pain, Moto House Guard, Tamori House Guard, Tsuruchi House Guard.</summary>
+    public static PublishedSnapshot FollowerWave31 { get; } = Load("L5R.Published.FollowerWave31.json", "follower-wave-31", requireDecks: false);
 }

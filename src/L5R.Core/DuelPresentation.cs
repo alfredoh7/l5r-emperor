@@ -152,6 +152,8 @@ public sealed partial class MatchEngine
                             foreach (var c in _state.Cards.Values.Where(c => c.OwnerId == playerId && c.Zone is Zone.FateDiscard or Zone.DynastyDiscard))
                                 Add(Command("focus", c.Id, choice: "discard"), $"Focus from discard · {Definition(c).Name}");
                     }
+                    foreach (var weapon in ReserveWeaponsFor(playerId, duel))
+                        Add(Command("focus", weapon.Id, choice: "reserve"), $"Reserve Weapon · +3 duel stat instead of focusing ({Definition(weapon).Name})");
                     Add(Command("strike"), "Strike");
                     break;
                 case "DuelistRefocus":

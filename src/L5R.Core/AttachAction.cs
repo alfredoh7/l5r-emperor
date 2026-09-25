@@ -131,7 +131,7 @@ public sealed partial class MatchEngine
         CardInstance attachment;
         if (spec.Card == AttachSource.Self)
         {
-            Require(source is not null && source.Zone == Zone.Hand && player.Hand.Contains(source.Id), "This card must be in your hand to be attached.");
+            Require(source is not null && (source.Zone == Zone.Hand && player.Hand.Contains(source.Id) || source.Zone == Zone.FateDiscard && source.OwnerId == player.Id && spec.Pile == AttachPile.Own), "This card must be in your hand (or, for a card that names its own discard pile, in it) to be attached.");
             Require(command.TargetId is null, "This action has no target.");
             attachment = source!;
         }
