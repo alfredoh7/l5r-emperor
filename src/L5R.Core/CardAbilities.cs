@@ -3906,7 +3906,7 @@ public static class AbilityCatalog
         // Tamori Kusugi (oracle-l5r-7780): "Battle: Even if Kusugi is not at the current battlefield, bow him: Raise or lower the current battlefield's province's strength by 4."
         ["kusugi-raise"] = new("Battle", "Even if Kusugi is not at the current battlefield, bow him: Raise the current battlefield's province's strength by 4", "none", UsageKey: "kusugi-province", Costs: ActionCost.BowSource, SourceUnitMayBeAway: true),
         ["kusugi-lower"] = new("Battle", "Even if Kusugi is not at the current battlefield, bow him: Lower the current battlefield's province's strength by 4", "none", UsageKey: "kusugi-province", Costs: ActionCost.BowSource, SourceUnitMayBeAway: true),
-    }.AddEmperorPersonalityBatch2().AddEmperorStrongholdBatch1().AddEmperorStrongholdBatch3().AddEmperorRemainingA().AddEmperorRemainingB().AddEmperorRemainingC().AddEmperorRemainingD().AddEmperorRemainingE()); //Emperor Edition remaining-cards pass, group A (issue #492): EmperorRemainingA.cs. Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition remaining-cards pass (issue #492), group E: EmperorRemainingE.cs. // Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs.
+    }.AddEmperorPersonalityBatch2().AddEmperorStrongholdBatch1().AddEmperorStrongholdBatch3().AddEmperorRemainingA().AddEmperorRemainingB().AddEmperorRemainingC().AddEmperorRemainingD().AddEmperorRemainingE().AddEmperorRemainingF()); //Emperor Edition remaining-cards pass, group A (issue #492): EmperorRemainingA.cs. Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition remaining-cards pass (issue #492), group E: EmperorRemainingE.cs. // Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs; remaining-cards pass (issue #492), group F: EmperorRemainingF.cs.
 }
 
 public sealed partial class MatchEngine
@@ -4847,7 +4847,7 @@ public sealed partial class MatchEngine
     // OWN trigger condition is cheap to evaluate up front and would otherwise open a pointless window on
     // every Attack while the card sat in play (Kakihara only ever cares about an Attack that targets HIM);
     // every other caller omits it and keeps the existence-only behavior described above.
-    private bool AnyInPlayReactionAvailable(string trigger, Func<CardInstance, string, bool>? relevant = null) => _state.Cards.Values.Any(c => InPlay(c) && !BowedBarsAbilities(c) &&
+    private bool AnyInPlayReactionAvailable(string trigger, Func<CardInstance, string, bool>? relevant = null) => !ReactionsBarred() /* Cherry Blossom Festival (issue #492, group F) */ && _state.Cards.Values.Any(c => InPlay(c) && !BowedBarsAbilities(c) &&
         AbilityIdsOf(c).Any(id => AbilityCatalog.All.TryGetValue(id, out var a) && a.Timing == "Reaction" && a.Trigger == trigger &&
             !AbilityUseSpent(c.AbilityUses, a, a.UsageKey ?? id) && (relevant?.Invoke(c, id) ?? true)));
     // No kind-restricted in-play Reaction exists yet (see AttackKind); once one does, filter by
@@ -4907,6 +4907,7 @@ public sealed partial class MatchEngine
     // Both the window's existence check above and the reactions a window then offers (MatchQueries) are built on it.
     private IEnumerable<(CardInstance Card, string AbilityId)> OutOfPlayReactions(int playerId, string trigger)
     {
+        if (ReactionsBarred()) return []; // Cherry Blossom Festival (issue #492, group F): no players may take Reactions.
         var player = Player(playerId);
         return _state.Cards.Values.Where(c => c.OwnerId == playerId && c.Zone is Zone.Hand or Zone.FateDiscard or Zone.DynastyDiscard)
             .SelectMany(c => AbilityIdsOf(c).Select(id => (Card: c, AbilityId: id)))
@@ -5294,7 +5295,9 @@ public sealed partial class MatchEngine
                 "before-additional-action-resolves" => _state.PendingChoice.Type == "additionalActionReaction",
                 // Dueling (issue #204): "a reaction to being challenged or entering a duel" -- open
                 // to either side, same shape as before-attack-resolves.
-                "before-duel-begins" => _state.PendingChoice.Type == "duelReaction",
+                "before-duel-begins" => _state.PendingChoice.Type == "duelReaction" && _state.PendingDuel is { Stage: "Reaction" },
+                // Falling Rain Dojo (issue #492, group F): the window between the Duelists' refocus and the Focus Effects.
+                "before-focus-effects" => _state.PendingChoice.Type == "duelReaction" && _state.PendingDuel is { Stage: BeforeFocusEffectsStage },
                 // Reaction to a duel's own resolution (issue #209): a duel is a single, complete
                 // action from challenge to consequences -- once it fully resolves (win/loss,
                 // outcomes, Focus Effects all applied), the card that WON it may react, the same
@@ -5331,7 +5334,6 @@ public sealed partial class MatchEngine
                 "before-any-action-resolves" => _state.PendingChoice.Type == "unimpeachableNameReaction" && command.PlayerId == _state.PendingChoice.PlayerId,
                 // Emperor Edition remaining-cards pass, group A (issue #492): Bad Kharma and Footsteps of Madness (the same window, Strategies played from a hand only); Bend like a Reed's duel window.
                 EmperorRemainingAAbilities.BeforeAnyActionStrategy => _state.PendingChoice.Type == "unimpeachableNameReaction" && command.PlayerId == _state.PendingChoice.PlayerId,
-                EmperorRemainingAAbilities.BeforeFocusEffects => _state.PendingChoice.Type == "duelReaction" && _state.PendingDuel is { Stage: "FocusEffectsReaction" },
                 // Stormless Fury (issue #276 follow-up): both its out-of-play attach half and its
                 // in-play bow half share this one trigger, scoped to the one specific offered card by
                 // id -- same shape as own-won-duel/bowed-personality-at-own-battlefield above.
@@ -5436,6 +5438,7 @@ public sealed partial class MatchEngine
                 // Colonial Harbor (Forgotten Legacy pass, issue #467): "Your Stronghold's abilities have Tireless."
                 // Emperor Edition Stronghold pass (issue #486), batch 1: Midday Shadow Court's Political Open ("Even if this card is bowed") and Kyuden Otomo - exp's Favor trait.
                 || StrongholdBatch1EvenIfBowed(id)
+                || EmperorRemainingFBowedOk(id) // Governor's Court (issue #492, group F): "Even if this card is bowed".
                 || TirelessStronghold(source), "Abilities on bowed cards cannot be used.");
             uses = source.AbilityUses;
         }
@@ -6807,6 +6810,9 @@ public sealed partial class MatchEngine
                         // The Castle of Order: one of the reactor's own Ninja cards at the targeted Ninja's location, other than it, that the action accepts.
                         "redirect-target-own-ninja-at-affected-location" => own && Keyword(target, "Ninja") && OpenReactionSubject() is { TargetId: { } affectedNinjaId } ninjaAction && target.Id != affectedNinjaId
                             && SameLocation(target, Card(affectedNinjaId)) && ActionAcceptsTarget(ninjaAction, target.Id),
+                        // Chugo Seido (issue #492, group F): one of the reactor's own Samurai at the targeted Personality's location, other than it, that the action accepts.
+                        "redirect-target-own-samurai-at-affected-location" => own && personality && Keyword(target, "Samurai") && OpenReactionSubject() is { TargetId: { } affectedSamuraiId } samuraiAction && target.Id != affectedSamuraiId
+                            && SameLocation(target, Card(affectedSamuraiId)) && ActionAcceptsTarget(samuraiAction, target.Id),
                         // Exchange of Letters: "another player's unbowed Personality".
                         "enemy-unbowed-personality" => personality && !own && !target.Bowed,
                         // Defensive Blockade: "an attacking Follower or Personality" -- a card of the Attacker's army at the battlefield (a Follower is attacking when its host is).
@@ -6958,6 +6964,7 @@ public sealed partial class MatchEngine
         ValidateEmperorBatch5(id, command, ability, player, source);
         // Emperor Edition Personality pass (issue #477), batch 6: the per-id conditions of this batch's cards (EmperorPersonalityBatch6.cs).
         ValidateEmperorBatch6(id, command, player, source);
+        ValidateEmperorRemainingF(id, ability, command, player, source); // Emperor Edition remaining-cards pass (issue #492), group F.
         // The Gold cost (issue #303): every ability's price -- Equip (Battle)/Soshi Neiru's Spell cost, Low
         // Market's "2 less, to a minimum of 1", Your Clan Needs You!'s recruit cost minus 6, Shinden
         // Shorai's "all costs", Singh Remnants' own cost, a Strategy/Discipline's printed cost, Kharmic's
@@ -7093,7 +7100,7 @@ public sealed partial class MatchEngine
     // entering-play moment inviting a THIRD nested reaction.
     private void AttachAsOutOfPlayReaction(CardInstance card, CardInstance target, int ownerId)
     {
-        Player(ownerId).Hand.Remove(card.Id); Player(ownerId).AttachedFromHandThisTurn = true;
+        Player(ownerId).Hand.Remove(card.Id); Player(ownerId).AttachedFromHandThisTurn = true; NoteAttachedFromHandForGlory(ownerId, card);
         // Equip (Battle)'s own convention: an attachment's ProvinceIndex must be copied from its
         // wielder for AtBattle() to ever recognize it (unlike ordinary Equip(), whose target is
         // always at Zone.Home -- ProvinceIndex null either way -- this attach can land on a
@@ -7244,11 +7251,16 @@ public sealed partial class MatchEngine
             return;
         }
         // The declared non-Gold costs (issue #351, AbilityCosts.cs), paid together and just before the effects: the same list a negated action pays.
+        CaptureBeforeCostsRemainingF(id, command); // Emperor Edition remaining-cards pass (issue #492), group F: Refuge of the Three Sisters' performer's Chi.
         CaptureBeforeCostsForBatch1(id, command); // Forgotten Legacy pass (issue #467), batch 1: what a cost is about to remove (Iuchi Abodan's chosen Personality).
         CaptureBeforeCostsForEmperorRemainingE(id, command); // Emperor Edition remaining-cards pass (issue #492), group E: I Give You My Name's Human.
         PayAbilityCosts(ability, command, player, source);
         switch (id)
         {
+            // Emperor Edition remaining-cards pass (issue #492), group F: every case is in EmperorRemainingF.cs; true means the action paused (a choice, a look).
+            case var remainingF when IsEmperorRemainingFAbility(remainingF):
+                if (RunEmperorRemainingFEffect(id, command, ability, player, source, target, consumedGrant, playedFromDiscard, opponentHonorBeforeBattleAction, bowedBeforeAction, preExistingGrants)) return;
+                break;
             case "border-first": case "border-game": CycleProvinces(player, command.CardIds!); break;
             case "shinden-choice":
                 
@@ -7960,7 +7972,7 @@ public sealed partial class MatchEngine
                 
                 var performer = Card(command.PerformerId!);
                 var attachment = target!;
-                player.Hand.Remove(attachment.Id); player.AttachedFromHandThisTurn = true; NoteAttachedFollowerFromHand(attachment, performer); // Hida Takeuchi (issue #477 batch 2).
+                player.Hand.Remove(attachment.Id); player.AttachedFromHandThisTurn = true; NoteAttachedFollowerFromHand(attachment, performer); NoteAttachedFromHandForGlory(player.Id, attachment); // Hida Takeuchi (issue #477 batch 2); Glory of the Shogun (issue #492).
                 attachment.Zone = Zone.Attached; attachment.AttachedTo = performer.Id; attachment.FaceUp = true; attachment.ProvinceIndex = performer.ProvinceIndex;
                 if (Definition(attachment).AttachGrantsKeyword is string granted) GrantKeyword(performer, granted, attachment.Id, "Attachment");
                 Emit("equipped", $"{Definition(attachment).Name} attached to {Definition(performer).Name} via {(id == "low-market-equip" ? "Low Market" : "On the Hunt")}.", player.Id, attachment.Id);
@@ -8110,7 +8122,7 @@ public sealed partial class MatchEngine
             case "neiru-equip":
             {
                 var spell = target!;
-                player.Hand.Remove(spell.Id); player.AttachedFromHandThisTurn = true;
+                player.Hand.Remove(spell.Id); player.AttachedFromHandThisTurn = true; NoteAttachedFromHandForGlory(player.Id, spell);
                 spell.Zone = Zone.Attached; spell.AttachedTo = source!.Id; spell.FaceUp = true; spell.ProvinceIndex = source.ProvinceIndex;
                 if (Definition(spell).AttachGrantsKeyword is string neiruGranted) GrantKeyword(source, neiruGranted, spell.Id, "Attachment");
                 Emit("equipped", $"{Definition(spell).Name} attached to {Definition(source).Name}.", player.Id, spell.Id);
@@ -8162,7 +8174,7 @@ public sealed partial class MatchEngine
             {
                 var performer = Card(command.PerformerId!);
                 var attachment = target!;
-                player.Hand.Remove(attachment.Id); player.AttachedFromHandThisTurn = true; NoteAttachedFollowerFromHand(attachment, performer); // Hida Takeuchi (issue #477 batch 2).
+                player.Hand.Remove(attachment.Id); player.AttachedFromHandThisTurn = true; NoteAttachedFollowerFromHand(attachment, performer); NoteAttachedFromHandForGlory(player.Id, attachment); // Hida Takeuchi (issue #477 batch 2); Glory of the Shogun (issue #492).
                 attachment.Zone = Zone.Attached; attachment.AttachedTo = performer.Id; attachment.FaceUp = true; attachment.ProvinceIndex = performer.ProvinceIndex;
                 // Reserve (issue #184): a non-Spell attachment can carry AttachGrantsKeyword too (a
                 // Spell never has, so this was never needed before) -- same as the ordinary Equip().
@@ -8544,7 +8556,7 @@ public sealed partial class MatchEngine
             case "simple-yari-attach":
             {
                 var yariHost = Card(_state.PendingChoice!.CardId!);
-                if (source!.Zone == Zone.Hand) { player.Hand.Remove(source.Id); player.AttachedFromHandThisTurn = true; }
+                if (source!.Zone == Zone.Hand) { player.Hand.Remove(source.Id); player.AttachedFromHandThisTurn = true; NoteAttachedFromHandForGlory(player.Id, source); }
                 source.Zone = Zone.Attached; source.AttachedTo = yariHost.Id; source.FaceUp = true;
                 if (Definition(source).AttachGrantsKeyword is string yariGranted) GrantKeyword(yariHost, yariGranted, source.Id, "Attachment");
                 Emit("equipped", $"{Definition(source).Name} attached to {Definition(yariHost).Name}.", player.Id, source.Id);
@@ -8919,7 +8931,7 @@ public sealed partial class MatchEngine
             {
                 var enteredPersonality = Card(_state.PendingChoice!.CardId!);
                 var attachDef = Definition(source!);
-                if (source!.Zone == Zone.Hand) { player.Hand.Remove(source.Id); player.AttachedFromHandThisTurn = true; NoteAttachedFollowerFromHand(source, enteredPersonality); }
+                if (source!.Zone == Zone.Hand) { player.Hand.Remove(source.Id); player.AttachedFromHandThisTurn = true; NoteAttachedFollowerFromHand(source, enteredPersonality); NoteAttachedFromHandForGlory(player.Id, source); }
                 source.Zone = Zone.Attached; source.AttachedTo = enteredPersonality.Id; source.FaceUp = true;
                 if (attachDef.AttachGrantsKeyword is string granted) GrantKeyword(enteredPersonality, granted, source.Id, "Attachment");
                 GainHonor(player.Id, 1, attachDef.Name, source);
@@ -9633,6 +9645,16 @@ public sealed partial class MatchEngine
                 var natsumiThere = source!.Zone == Zone.Battlefield && source.ProvinceIndex == natsumiBattle;
                 if (Army(1 - player.Id, natsumiBattle).Any() && !natsumiThere && MoveToBattlefield(source, natsumiBattle)) StraightenUnit(source);
                 else Emit("effectFailed", $"{Definition(source).Name} did not move (it would not be opposed there, or is there already).", player.Id, source.Id);
+                break;
+            }
+            // Blighted Region (issue #492, group F): "Move him to the current battlefield. If he moved and is now opposed, straighten him and gain 2 Honor." (inline: the move-to-battle scan reads this switch.)
+            case "blighted-region-move":
+            {
+                var blightedBattle = _state.CurrentBattleProvince!.Value;
+                var blightedMover = Card(command.PerformerId!);
+                var blightedMoved = !AtBattle(blightedMover) && TryMoveToBattlefield(blightedMover, blightedBattle);
+                if (blightedMoved && Army(1 - player.Id, blightedBattle).Any()) { Straighten(blightedMover); GainHonorFromPerformer(blightedMover, 2, "Blighted Region"); }
+                else Emit("effectFailed", $"{Definition(blightedMover).Name} {(blightedMoved ? "is not opposed there" : "did not move")}: no straightening and no Honor.", player.Id, blightedMover.Id);
                 break;
             }
             case "yoyugi-lock": case "yoyugi-lock-free": case "longtooth-destroy": case "rukia-return": case "morio-attack": case "niiro-attack":

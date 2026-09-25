@@ -32,7 +32,7 @@ public sealed partial class MatchEngine
     {
         if (_state.Phase != Phase.Action) return;
         foreach (var loser in losers)
-            if (loser != actingPlayerId) _state.HonorLostToOtherActionSinceTurnBegan[loser] = true;
+            if (loser != actingPlayerId) { _state.HonorLostToOtherActionSinceTurnBegan[loser] = true; _state.HonorLostToOtherActionSinceTurnEnded[loser] = true; }
     }
 
     // ---- Nobunori: compare against base Force ----

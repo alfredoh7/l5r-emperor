@@ -243,7 +243,9 @@ public sealed partial class MatchEngine
         if (duel.PendingDuelistDecisions.Count == 0) BeginOrderingEffectsAfterReactions(); else _state.PriorityPlayerId = duel.PendingDuelistDecisions[0];
     }
 
-    private void BeginOrderingEffects()
+    private void BeginOrderingEffects() => ContinueToOrderingEffects();
+
+    private void ContinueToOrderingEffects()
     {
         var duel = _state.PendingDuel!;
         duel.Stage = "OrderingEffects";
@@ -281,7 +283,7 @@ public sealed partial class MatchEngine
         "Force" => CardForce(card),
         "PersonalHonor" => CardPersonalHonor(card),
         _ => PersonalityChi(card),
-    }) + RemADuelStatBonus(card); // Bend like a Reed (issue #492): "+2 to his duel stat until the duel ends".
+    }) + RemADuelStatBonus(card); // Bend like a Reed (group A): "+2 to his duel stat until the duel ends"; Falling Rain Dojo (group F): +1 until the duel ends.
 
     private void ResolveDuel()
     {

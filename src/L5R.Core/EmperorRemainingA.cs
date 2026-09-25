@@ -587,8 +587,9 @@ public sealed partial class MatchEngine
     private void BeginOrderingEffectsAfterReactions()
     {
         var duel = _state.PendingDuel!;
-        if (!RemAHoldsFocusEffectsReaction(duel, 0) && !RemAHoldsFocusEffectsReaction(duel, 1)) { BeginOrderingEffects(); return; }
-        duel.Stage = "FocusEffectsReaction";
+        duel.Stage = "FocusEffectsReaction"; // one window for every "Before Focus Effects resolve" Reaction: a held one (Bend like a Reed, group A) or one in play (Falling Rain Dojo, group F)
+        _state.PendingChoice = new("duelReaction", _state.ActivePlayerId, null, "Before Focus Effects resolve: react or pass."); // set first: the in-play Reactions are validated against the open window
+        if (!RemAHoldsFocusEffectsReaction(duel, 0) && !RemAHoldsFocusEffectsReaction(duel, 1) && !InPlayBeforeFocusReactionAvailable()) { _state.PendingChoice = null; ContinueToOrderingEffects(); return; }
         var first = RemAHoldsFocusEffectsReaction(duel, _state.ActivePlayerId) || !RemAHoldsFocusEffectsReaction(duel, 1 - _state.ActivePlayerId) ? _state.ActivePlayerId : 1 - _state.ActivePlayerId;
         _state.PendingChoice = new("duelReaction", first, null, "Before Focus Effects resolve: react or pass.");
         _state.ConsecutivePasses = 0;

@@ -150,7 +150,7 @@ public sealed partial class MatchEngine
     private int? GoldSourceProduction(CardInstance card)
     {
         if (card.Zone is not (Zone.Home or Zone.Stronghold or Zone.Battlefield)) return null;
-        if (Definition(card).GoldProduction > 0) return GoldProduced(card.Id, card.OwnerId);
+        if (Definition(card).GoldProduction > 0 || Definition(card).Effect == MoneylenderEffect) return GoldProduced(card.Id, card.OwnerId);
         return IsVariableGoldSource(card) ? null : AlternateGoldSource(card)?.Amount;
     }
 

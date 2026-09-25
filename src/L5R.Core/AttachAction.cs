@@ -167,7 +167,8 @@ public sealed partial class MatchEngine
     // have already been resolved for the controller, as they should be.
     private void ReturnCardsOutOfPlayToTheirOwners()
     {
-        foreach (var card in _state.Cards.Values.Where(c => c.OriginalOwnerId is not null && !InPlay(c))) RestoreOwner(card);
+        // A gift in another player's hand (Naoharu's Gift, issue #492 group F) is his to play until it leaves the hand.
+        foreach (var card in _state.Cards.Values.Where(c => c.OriginalOwnerId is not null && !InPlay(c) && c.Zone != Zone.Hand)) RestoreOwner(card);
     }
 
     // ExecuteAbilityEffects' step: the Gold has already been paid (PayForAbility), so the card leaves its place and enters play attached.
@@ -178,7 +179,7 @@ public sealed partial class MatchEngine
         var wielder = WielderOfAttach(spec, command, source)!;
         var def = Definition(attachment);
         var fromDiscard = attachment.Zone == Zone.FateDiscard;
-        if (!fromDiscard && attachment.Zone == Zone.Hand) { Player(attachment.OwnerId).AttachedFromHandThisTurn = true; NoteAttachedFollowerFromHand(attachment, wielder); }
+        if (!fromDiscard && attachment.Zone == Zone.Hand) { Player(attachment.OwnerId).AttachedFromHandThisTurn = true; NoteAttachedFollowerFromHand(attachment, wielder); NoteAttachedFromHandForGlory(attachment.OwnerId, attachment); }
         Player(attachment.OwnerId).Hand.Remove(attachment.Id);
         if (fromDiscard)
         {

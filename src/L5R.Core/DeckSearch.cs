@@ -168,7 +168,7 @@ public static class SearchCatalog
         [new(SearchDeck.Dynasty, new("Personality", [CardType.Personality]), SearchEffect.RecruitPersonality)]);
 
     public static IReadOnlyDictionary<string, SearchSpec> All { get; } = new[] { IkomaShizuka, ImperialGift, TrainingCheap, TrainingFocus, TrainingOptional, NakaMahatsu, YungRing,
-            DiscoveringTheTemple, VersatileFarm, Introspection, MartialInstruction, MeetingTheKeepers, SacrificeOfPawns }
+            DiscoveringTheTemple, VersatileFarm, Introspection, MartialInstruction, MeetingTheKeepers, SacrificeOfPawns, EmperorRemainingFSearches.RefugeOfTheThreeSisters }
         .Concat(EmperorRemainingESearches.All) // Emperor Edition remaining-cards pass (issue #492), group E: EmperorRemainingE.cs.
         .ToDictionary(s => s.Id, StringComparer.Ordinal);
 
@@ -206,6 +206,9 @@ public sealed class PendingSearch
     public int? GoldLimit { get; set; }
     public int HonorLossOnFinish { get; set; }
     public string? EnteredCardId { get; set; }
+    /// <summary>Emperor Edition remaining-cards pass (issue #492), group F (Refuge of the Three Sisters: "a card with a lower Focus Value than your Personality's Chi"): a card qualifies only with a
+    /// printed Focus Value below this, read off the Personality when the action was taken. Null for every other search.</summary>
+    public int? FocusBelow { get; set; }
 }
 
 /// <summary>One entry of the public, append-only record of cards shown to the other player. Deliberately holds
@@ -549,6 +552,7 @@ public sealed partial class MatchEngine
             {
                 var representative = g.OrderBy(c => c.Id, StringComparer.Ordinal).First();
                 var (eligible, reason) = SearchEligibility(option.Criteria, representative, search.GoldLimit);
+                if (eligible && search.FocusBelow is int below && SearchStat(representative, "Focus") >= below) (eligible, reason) = (false, $"Focus {SearchStat(representative, "Focus")}, needs < {below}");
                 return new SearchGroup(g.Key, representative, g.Count(), eligible, reason);
             })
             .OrderBy(g => (int)Definition(g.Card).Type).ThenBy(g => Definition(g.Card).Name, StringComparer.Ordinal).ThenBy(g => g.DefinitionId, StringComparer.Ordinal).ToList();

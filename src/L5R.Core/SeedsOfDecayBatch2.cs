@@ -197,7 +197,8 @@ public sealed partial class MatchEngine
         (player.ProclaimUsedTurn != _state.TurnNumber || entering.Effect == "proclaim-ignores-turn-limit") && !ProclaimLocked(player.Id);
 
     private string? ProclaimRejection(PlayerState player, CardDefinition entering) =>
-        ProclaimLocked(player.Id) ? "You may not take the Proclaim Reaction until the locking player's next turn begins."
+        ReactionsBarred() ? "Cherry Blossom Festival: no players may take Reactions." // issue #492, group F
+        : ProclaimLocked(player.Id) ? "You may not take the Proclaim Reaction until the locking player's next turn begins."
         : player.ProclaimUsedTurn == _state.TurnNumber && entering.Effect != "proclaim-ignores-turn-limit" ? "Already used Proclaim this turn." : null;
 
     private const string BeforeProclaimTrigger = "before-proclaim-resolves";

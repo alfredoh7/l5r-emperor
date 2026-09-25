@@ -291,6 +291,8 @@ public sealed class CardInstance
     // StartTurn discards the card once the owner's own TurnsTaken reaches it. Null for an Event with
     // no bounded duration (Suspicions, Formal Apology) or any non-Event card.
     public int? ExpiresAtTurnsTaken { get; set; }
+    // Emperor Edition remaining-cards pass (issue #492), group F: "until your Events Phase N turns from now begins" -- the Event leaves play as its owner's Events Phase begins with this many turns taken.
+    public int? ExpiresAtEventsPhaseTurnsTaken { get; set; }
     // A created COPY of another card (issue #398, Mendon): this instance's DefinitionId is the copied card's own, so it behaves exactly as that card, and this flag is the only thing
     // that says it is a created card: it has no physical card to return to (it is removed from the game when it leaves play) and the client marks it so. Every other created card is a
     // CardDefinition.CreatedOnly scan and needs no marker.
@@ -356,6 +358,11 @@ public sealed class PlayerState
     public int FavorActionsThisTurn { get; set; }
     // Moshi Madoka - exp (Gempukku pass, issue #461): "If you have attached a card from your hand this turn" -- set wherever a card leaves the hand to become an attachment, reset every StartTurn.
     public bool AttachedFromHandThisTurn { get; set; }
+    // Emperor Edition remaining-cards pass (issue #492), group F. Alter History: "until the game ends, he may ignore Honor Requirements when bringing Personalities into play". Benefices of the Emperor:
+    // "permanently increase his maximum hand size by three". Rebuilding the Empire: "he may not declare an attack until your next turn begins" -- refused while the match's turn number is at or below this.
+    public bool IgnoresHonorRequirements { get; set; }
+    public int MaxHandBonus { get; set; }
+    public int AttackLockedThroughTurn { get; set; } = -1;
     // Ring of Fire's own recruitment condition (issue #194, the "Ring of Flame" printing): "after you
     // resolve your second or later action in one turn which destroyed a Personality you did not
     // control." Incremented once per qualifying ResolveBattle destruction (a simplification: only
@@ -383,6 +390,22 @@ public sealed class PlayerState
 }
 
 public sealed record PendingChoice(string Type, int PlayerId, string? CardId, string Prompt, int? ActingPlayerId = null);
+
+/// <summary>The Honor loss Ten Thousand Temples may negate, waiting for its controller's answer. <paramref name="Command"/> is the command that was being executed (the whole of it is replayed once every
+/// decision is made); Decisions are the answers so far (true: the Temple was destroyed to negate that loss), one per earlier loss of that command that the Temple could have negated; the Prior* fields are the
+/// pending choice, priority and pass count the state had before this decision took them over.</summary>
+public sealed class PendingHonorLossDecision
+{
+    public GameCommand Command { get; set; } = new("pass", 0, 0);
+    public List<bool> Decisions { get; set; } = [];
+    public int PlayerId { get; set; }
+    public string TempleId { get; set; } = "";
+    public int Amount { get; set; }
+    public string Reason { get; set; } = "";
+    public PendingChoice? PriorChoice { get; set; }
+    public int PriorPriority { get; set; }
+    public int PriorPasses { get; set; }
+}
 public sealed record GameEvent(long Sequence, string Type, string Message, int? PlayerId = null, string? CardId = null, int? Amount = null);
 
 /// <summary>A Ranged/Melee Attack awaiting resolution, open to reaction (core rules: "players must
@@ -1063,6 +1086,17 @@ public sealed class MatchState
     public List<ArmyForceBonus> ArmyForceBonuses { get; set; } = [];
     // Kitsu Tamasine ("if you have lost Honor from another player's action during an Action Phase since your last turn began"): per player, set as such an action resolves, cleared as that player's turn begins.
     public bool[] HonorLostToOtherActionSinceTurnBegan { get; set; } = new bool[2];
+    // Rugashi Bazaar (Emperor Edition remaining-cards pass, issue #492 group F): "lost Honor from another player's action during the Action Phase since your last turn ENDED" -- the same
+    // record, restarted when the loser's own turn ends rather than when it begins.
+    public bool[] HonorLostToOtherActionSinceTurnEnded { get; set; } = new bool[2];
+    // Emperor Edition remaining-cards pass (issue #492), group F (EmperorRemainingFEvents.cs): the decision of an Event in progress, the ones queued behind it (an optional draw owed when a battle's
+    // resolution or an attach finishes), and the Personality an Event was told to name (Delayed Arrival), by the Event's card id.
+    public PendingEventChoice? PendingEventChoice { get; set; }
+    // Ten Thousand Temples (issue #492, group F): "Before you lose Honor, destroy this card: Negate the Honor loss." -- the command whose execution reached an Honor loss the Temple could negate, held whole
+    // while its controller decides (MatchEngine.Execute replays it with the decisions made).
+    public PendingHonorLossDecision? PendingHonorLossDecision { get; set; }
+    public List<PendingEventChoice> PendingEventChoices { get; set; } = [];
+    public Dictionary<string, string> EventTargets { get; set; } = [];
     // Isawa Kimi - exp 2 ("an action that put any cards into another player's hand"): the players whose hand the currently-resolving action put a card into, snapshotted into LastResolvedAction.HandRecipients.
     public List<int> CurrentActionHandRecipients { get; set; } = [];
 }
