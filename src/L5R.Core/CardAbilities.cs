@@ -3906,7 +3906,7 @@ public static class AbilityCatalog
         // Tamori Kusugi (oracle-l5r-7780): "Battle: Even if Kusugi is not at the current battlefield, bow him: Raise or lower the current battlefield's province's strength by 4."
         ["kusugi-raise"] = new("Battle", "Even if Kusugi is not at the current battlefield, bow him: Raise the current battlefield's province's strength by 4", "none", UsageKey: "kusugi-province", Costs: ActionCost.BowSource, SourceUnitMayBeAway: true),
         ["kusugi-lower"] = new("Battle", "Even if Kusugi is not at the current battlefield, bow him: Lower the current battlefield's province's strength by 4", "none", UsageKey: "kusugi-province", Costs: ActionCost.BowSource, SourceUnitMayBeAway: true),
-    }.AddEmperorPersonalityBatch2().AddEmperorStrongholdBatch1().AddEmperorStrongholdBatch3()); // Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs.
+    }.AddEmperorPersonalityBatch2().AddEmperorStrongholdBatch1().AddEmperorStrongholdBatch3().AddEmperorRemainingC()); // Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs.
 }
 
 public sealed partial class MatchEngine
@@ -4217,6 +4217,8 @@ public sealed partial class MatchEngine
         // Emperor Edition Personality pass (issue #477), batch 2: Kuni Shinoda moves himself and his (optional) target to the current battlefield.
         "shinoda-move" => "move",
         "master-of-beasts-straighten" or "peace-of-the-kami-negate" or "earths-strength-straighten" => "straighten",
+        // Emperor Edition remaining-cards pass, group C (issue #492): Selfless Defense, Summoned to Justice and Solid Defense move their target home; Rumors Travel moves its performer.
+        "selfless-defense-move" or "summoned-justice-move" or "solid-defense-move" => "move",
         // Forgotten Legacy pass (issue #467), batch 3: Feint & Strike moves its enemy target home; Creating Order's straighten half straightens its target's unit.
         "feint-strike-move" => "move",
         // The Shadow's Embrace pass (issue #476), batch 2: Shosuro Nobu, Yoritomo Kanahashi and Yasuki Ikke move their target home.
@@ -4307,7 +4309,9 @@ public sealed partial class MatchEngine
         // Emperor Edition Personality pass (issue #477), batch 5: Asako Tsunefusa's, Asako Yorisada's and Shiba Kataken's bows.
         or "tsunefusa-bow" or "yorisada-bow" or "kataken-bow"
         // Emperor Edition Personality pass (issue #477), batch 6: Nishimura bows its target.
-        or "nishimura-bow";
+        or "nishimura-bow"
+        // Emperor Edition remaining-cards pass, group C (issue #492): Selfless Defense and Summoned to Justice bow their target (once moved / if a Courtier or Shugenja is controlled).
+        or "selfless-defense-move" or "summoned-justice-move";
     // Whether the command's TargetId is an Attack's OWN target, which reacts through the separate attackReaction
     // window instead of this one: an Attack-classified ability whose Target category is "attack". Bayushi Kahoku
     // - exp (issue #313) is Attack-classified too, but its TargetId is the separate "-4F" target (an ordinary
@@ -4353,6 +4357,8 @@ public sealed partial class MatchEngine
         if (abilityId == "mahatsu-negate") return MahatsuNegateApplies(card, command);
         // Shiro Chugo (Emperor Edition Stronghold pass, issue #486 batch 2): any action that could change Honor, whatever it targets (EmperorStrongholdBatch2.cs).
         if (abilityId == "chugo-honor-reduce") return ChugoApplies(card, command);
+        // Emperor Edition remaining-cards pass, group C (issue #492): the Strategy Reactions played from a hand (EmperorRemainingC.cs), judged before any target check.
+        if (EmperorRemainingCAbilities.BeforeActionHandReactions.Contains(abilityId)) return EmperorRemainingCBeforeActionApplies(card, abilityId, command);
         // Akodo Shihiro (issue #458): "Before (each time) another player's action resolves during a battle at Shihiro's battlefield" -- whatever the action targets, so
         // long as it is a genuine action (IsAction), taken by another player, while a battle is under way at Shihiro's own battlefield.
         if (abilityId == "shihiro-boost")
@@ -4425,7 +4431,7 @@ public sealed partial class MatchEngine
         && !AbilityUseSpent(card.AbilityUses, AbilityCatalog.All[abilityId], AbilityCatalog.All[abilityId].UsageKey ?? abilityId);
     // Every before-action-resolves Reaction printed on an in-play card, on either side, paired with the card.
     private IEnumerable<(CardInstance Card, string AbilityId)> BeforeActionReactionCandidates() =>
-        _state.Cards.Values.Where(InPlay).SelectMany(c => AbilityIdsOf(c)
+        _state.Cards.Values.Where(c => InPlay(c) || c.Zone == Zone.Hand && Definition(c).Type == CardType.Strategy).SelectMany(c => AbilityIdsOf(c) // Emperor Edition remaining-cards pass, group C (issue #492): a Strategy in a hand too.
             .Where(id => AbilityCatalog.All.TryGetValue(id, out var a) && a.Timing == "Reaction" && a.Trigger == "before-action-resolves")
             .Select(id => (Card: c, AbilityId: id)));
     private bool OwnsBeforeActionReaction(int playerId, GameCommand command, string? affectedId = null) =>
@@ -4502,7 +4508,9 @@ public sealed partial class MatchEngine
         // Emperor Edition Personality pass (issue #477), batch 4: Bayushi Nitoshi's frame and Shosuro Kameyoi's shame make the target's controller lose Honor.
         or "nitoshi-frame" or "kameyoi-shame"
         // Emperor Edition Personality pass (issue #477), batch 6: Yasuki Jekku's controller-of-the-target Honor loss.
-        or "jekku-dishonor";
+        or "jekku-dishonor"
+        // Emperor Edition remaining-cards pass, group C (issue #492): Summoned to Justice makes the dishonorable target's controller lose Honor.
+        or "summoned-justice-move";
     private bool ControlsDishonorablePersonality(int playerId) => _state.Cards.Values.Any(c => c.OwnerId == playerId && InPlay(c) && Definition(c).Type == CardType.Personality && c.Dishonorable);
     // Gate for whether the window is even worth opening -- "if [neither a Dishonorable Personality
     // nor an Honor loss] occurs, do not trigger the reaction interrupt" (the user's own ruling).
@@ -4711,6 +4719,7 @@ public sealed partial class MatchEngine
         "chugo-melee" => 4 + (sourceId is not null && Keyword(Card(sourceId), "Loyal") ? 1 : 0),
         // Emperor Edition Stronghold pass (issue #486), batch 3: The Otoro Estate's "Ranged 4 Attack".
         "otoro-attack" or "otoro-attack-move" => 4,
+        "strategic-strike-attack" => 6, // Strategic Strike (issue #492, group C): "Ranged 6 Attack".
         _ => 0
     };
     // AttackStrength plus every passive defense modifier applying to this specific target (Destrier/
@@ -4793,6 +4802,7 @@ public sealed partial class MatchEngine
         // Emperor Edition Personality pass (issue #477), batch 5.
         "nobunori-attack" or "tsukimi-attack" or "chugo-melee" => "Melee",
         "otoro-attack" or "otoro-attack-move" => "Ranged", // Emperor Edition Stronghold pass (issue #486), batch 3.
+        "strategic-strike-attack" => "Ranged", // Emperor Edition remaining-cards pass, group C (issue #492).
         _ => ""
     };
     // General "in play" Reaction primitive: a printed Reaction whose card must actually be in play
@@ -4878,10 +4888,10 @@ public sealed partial class MatchEngine
     // ceding priority to their opponent first -- Again!'s shape (ScopeCardIds null: any of the
     // player's own cards) or Two Hands' shape (a specific set: "from cards in his unit"). Two Hands'
     // own restriction blocks future GRANTS, not the use of ones already sitting here.
-    private void GrantAdditionalAction(int playerId, string[]? scopeCardIds, bool fromDiscard = false, int? battle = null, bool anyDiscardTiming = false, string? rangedTargetId = null)
+    private void GrantAdditionalAction(int playerId, string[]? scopeCardIds, bool fromDiscard = false, int? battle = null, bool anyDiscardTiming = false, string? rangedTargetId = null, string? performerId = null)
     {
         if (_state.NoNewAdditionalActionsThisBattle) return;
-        _state.AdditionalActions.Add(new(playerId, scopeCardIds, fromDiscard, battle, anyDiscardTiming, rangedTargetId));
+        _state.AdditionalActions.Add(new(playerId, scopeCardIds, fromDiscard, battle, anyDiscardTiming, rangedTargetId, performerId));
         Emit("additionalActionGranted", $"{Player(playerId).Name} may take an additional {(anyDiscardTiming ? "" : "Battle ")}action.", playerId);
     }
     // Ring recruitment (issue #194): rather than a forced mid-resolution interrupt, a satisfied
@@ -4939,8 +4949,8 @@ public sealed partial class MatchEngine
         // A grant for playing this very card from a discard pile (Daigotsu Bofana - exp) goes first: it is the permission the play
         // was validated against, and an unscoped grant must not be spent in its place.
         // Koshin Keep (Stronghold pass, issue #486 batch 1): a grant restricted to a Ranged Attack on one card is spent only by that Attack (and by nothing when no command is given).
-        var grant = _state.AdditionalActions.Where(g => g.PlayerId == playerId && GrantUsableNow(g) && (g.ScopeCardIds is null || cardId is not null && g.ScopeCardIds.Contains(cardId)) && RangedTargetGrantMatches(g, command) && (g.RangedTargetId is null || command is not null))
-            .OrderByDescending(g => g.FromDiscard).ThenByDescending(g => g.RangedTargetId is not null).ThenByDescending(g => g.ScopeCardIds is not null).FirstOrDefault();
+        var grant = _state.AdditionalActions.Where(g => g.PlayerId == playerId && GrantUsableNow(g) && (g.ScopeCardIds is null || cardId is not null && g.ScopeCardIds.Contains(cardId)) && RangedTargetGrantMatches(g, command) && (g.RangedTargetId is null || command is not null) && PerformerGrantMatches(g, command))
+            .OrderByDescending(g => g.FromDiscard).ThenByDescending(g => g.RangedTargetId is not null).ThenByDescending(g => g.PerformerId is not null).ThenByDescending(g => g.ScopeCardIds is not null).FirstOrDefault();
         if (grant is null) return false;
         _state.AdditionalActions.Remove(grant);
         return true;
@@ -5525,6 +5535,7 @@ public sealed partial class MatchEngine
         ValidateForgottenLegacyBatch4(id, command, player);
         // The Shadow's Embrace pass (issue #476), batch 4: the per-card conditions of strategy-wave-57 (ShadowsEmbraceBatch4.cs).
         ValidateShadowsEmbraceBatch4(id, ability, command, player, source);
+        ValidateEmperorRemainingC(id, ability, command, player, source); // Emperor Edition remaining-cards pass, group C (issue #492): EmperorRemainingC.cs.
         // Embers of War batch 6 (issue #460): Surveillance Outpost -- "If you have fewer Provinces than each other player, or exactly one Province" (a 2-player
         // engine, so "each other player" is the one opponent; live province count, per Player.Provinces, excludes destroyed provinces).
         if (id == "surveillance-outpost-conqueror") Require(player.Provinces.Count(p => !p.Destroyed) is var mine && (mine < Player(1 - player.Id).Provinces.Count(p => !p.Destroyed) || mine == 1),
@@ -6838,7 +6849,7 @@ public sealed partial class MatchEngine
                         // Emperor Edition Personality pass (issue #477), batch 5. Asako Yorisada: "a Personality whose Force is different from his base Force" -- the target's own printed Force.
                         "personality-force-neq-own-base" => personality && CardForce(target) != Definition(target).Force,
                         // The Shadow's Embrace pass (issue #476), batch 2: this batch's in-play categories (ShadowsEmbraceBatch2.cs).
-                        _ => ShadowsEmbraceBatch2TargetAllows(ability.Target, command, player, source, target)
+                        _ => ShadowsEmbraceBatch2TargetAllows(ability.Target, command, player, source, target) || EmperorRemainingCTargetAllows(ability.Target, command, player, source, target)
                     }, "That card does not meet this ability's target or performer requirements.");
                 }
             }
@@ -9737,6 +9748,12 @@ public sealed partial class MatchEngine
                 break;
             }
             default:
+                // Emperor Edition remaining-cards pass, group C (issue #492), EmperorRemainingC.cs: true when an Attack's window opened and the action waits.
+                if (RunEmperorRemainingC(id, ability, command, player, source, target, consumedGrant) is { } emperorRemC)
+                {
+                    if (emperorRemC) return;
+                    break;
+                }
                 // Emperor Edition Stronghold pass (issue #486), batch 1 (EmperorStrongholdBatch1.cs): its effects are simple, none opens a window.
                 if (RunEmperorStrongholdBatch1(id, ability, command, player, source, target) is not null) break;
                 // Emperor Edition Stronghold pass (issue #486), batch 3 (EmperorStrongholdBatch3.cs): true when an Attack's window or an entering-play window opened and the action waits.

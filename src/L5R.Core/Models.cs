@@ -512,7 +512,8 @@ public sealed record FirstActionRestriction(int PlayerId, string? PerformerId, b
 /// current phase" needs no extra check of its own.</param>
 ///  <param name="RangedTargetId">Emperor Edition Stronghold pass (issue #486), batch 1 (Koshin Keep: "an additional Ranged Attack Battle action that may only target the same card"): when set, the
 /// grant is used only by a Ranged Attack that targets that card, and while the player holds it nothing else may be taken (EmperorStrongholdBatch1.cs).</param>
-public sealed record AdditionalActionGrant(int PlayerId, string[]? ScopeCardIds, bool FromDiscard = false, int? Battle = null, bool AnyDiscardTiming = false, string? RangedTargetId = null);
+// PerformerId (Emperor Edition remaining-cards pass, group C, issue #492: Spinning Heel Kick): the additional action "which he must perform" -- spent only by an action that Personality performs.
+public sealed record AdditionalActionGrant(int PlayerId, string[]? ScopeCardIds, bool FromDiscard = false, int? Battle = null, bool AnyDiscardTiming = false, string? RangedTargetId = null, string? PerformerId = null);
 
 /// <summary>A discard a player owes: they choose the card from their hand (Times of Strife, Daigotsu Bofana - exp's entry).
 /// Reason names the card or rule in the prompt and the event.</summary>
@@ -838,6 +839,8 @@ public sealed class MatchState
     // (Suitengu's Torch), and the action whose Honor gain and loss is reduced by 2 (Shiro Chugo). Each is read while that action resolves and replaced by the next action announced.
     public string? UnnegatableActionKey { get; set; }
     public string? HonorReducedActionKey { get; set; }
+    // Emperor Edition remaining-cards pass, group C (issue #492): the state of Rumors Travel, Rhetoric and Solid Defense (EmperorRemainingC.cs).
+    public EmperorRemainingCState RemC { get; set; } = new();
     // Entrenched Position: the battle (BattleNumber) in which the Attacker holds the first opportunity to act and the Defender has not yet had his first normal
     // opportunity to act or pass -- set when the Engage window closes with the Attacker holding it, cleared the moment the Attacker cedes priority (NextAction, Pass).
     public int AttackerLeadBattle { get; set; } = -1;

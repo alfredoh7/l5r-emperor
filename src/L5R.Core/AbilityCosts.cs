@@ -193,7 +193,13 @@ public sealed partial class MatchEngine
         foreach (var cost in ability.Costs)
         {
             if (cost.UnlessInHand && source is { Zone: Zone.Hand }) continue;
-            if (cost.Verb == CostVerbs.LoseHonor) { GainHonor(player.Id, -cost.Amount, source is null ? "an action" : Definition(source).Name, source); continue; }
+            if (cost.Verb == CostVerbs.LoseHonor)
+            {
+                _payingActionCost = true; // Emperor Edition remaining-cards pass, group C (issue #492): Honor paid as a cost is not an effect (Rhetoric, Solid Defense).
+                try { GainHonor(player.Id, -cost.Amount, source is null ? "an action" : Definition(source).Name, source); }
+                finally { _payingActionCost = false; }
+                continue;
+            }
             if (cost.Verb == CostVerbs.DestroyLeftmostProvince)
             {
                 if (player.Provinces.Where(p => !p.Destroyed).OrderBy(p => p.Index).FirstOrDefault() is { } leftmost) DestroyProvince(player.Id, leftmost);

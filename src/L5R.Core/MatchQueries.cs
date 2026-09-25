@@ -206,6 +206,9 @@ public sealed partial class MatchEngine
                 // actually accepts it -- otherwise every unrelated Attack would offer a button that then errors.
                 AddReaction(card,reactionId,used?"This reaction has already been used.":null,validate:true);
             }
+            // Emperor Edition remaining-cards pass, group C (issue #492): a Strategy Reaction played from the hand ("After a Ranged Attack is targeted", Sniping; A Close Call and the like) is listed too.
+            foreach(var (card,reactionId) in OutOfPlayReactions(playerId,"before-attack-resolves").ToArray())
+                AddReaction(card,reactionId,validate:true);
             AddTargetedActionReactions();
             Add("declineReaction","Pass reaction",Command("declineReaction"));
         }

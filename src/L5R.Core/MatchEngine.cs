@@ -2706,6 +2706,7 @@ public sealed partial class MatchEngine
         player.MayNotAttackThisTurn=false;
         player.FavorActionsThisTurn=0;
         player.AttachedFromHandThisTurn=false;
+        ExpireEmperorRemainingCAtTurnStart(player); // Emperor Edition remaining-cards pass, group C (issue #492): Rumors Travel's "until your next turn begins".
         _state.HonorLostToOtherActionSinceTurnBegan[player.Id]=false; // Kitsu Tamasine (issue #477, batch 5): "since your last turn began".
         player.DestroyedEnemyPersonalityActionsThisTurn=0;
         // "Until your second turn from now begins" (issue #259): the one place a turn begins for
@@ -3076,6 +3077,9 @@ public sealed partial class MatchEngine
     }
     private void GainHonor(int playerId,int amount,string reason,CardInstance? source=null)
     {
+        if(amount==0) return;
+        // Emperor Edition remaining-cards pass, group C (issue #492): Rhetoric's redirect, Solid Defense's negation of losses and Rumors Travel's reduction of a gain (EmperorRemainingC.cs).
+        (playerId,amount)=EmperorRemainingCHonorChange(playerId,amount,reason);
         if(amount==0) return;
         // The Forgotten Temple (Forgotten Legacy pass, issue #467 batch 2): no gain at all, no loss from the player's own cards, and every other loss reduced to 1.
         amount=ForgottenTempleHonorChange(playerId,amount,reason,source);
