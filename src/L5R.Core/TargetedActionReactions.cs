@@ -312,7 +312,7 @@ public sealed partial class MatchEngine
             case "waystation-reborn":
                 return WaystationApplies(card, subject, affected);
             default:
-                return false;
+                return RemATargetedActionReactionApplies(card, abilityId, subject, affected); // Emperor Edition remaining-cards pass, group A (issue #492): Ancestral Protection, Caught in the Act.
         }
     }
 

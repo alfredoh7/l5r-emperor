@@ -33,9 +33,17 @@ public sealed partial class MatchEngine
     // (Mendon, AbilityCosts.cs): when paying any cost is blocked by a negation (CostPaymentBlockedByNegation, the one predicate) the ENTIRE action is negated --
     // nothing is paid, not even an Honor-loss cost (AbortActionForBlockedCost) -- and otherwise every cost is paid, an Honor-loss cost included, before the
     // (skipped) effects. `consumedGrant`: the action was taken as one of a burst of Additional Actions, and being negated loses only itself.
-    private void ResolveNegatedAction(GameCommand command, bool consumedGrant = false)
+    private void ResolveNegatedAction(GameCommand command, bool consumedGrant = false, bool ignoreCosts = false)
     {
         var id = command.AbilityId!; var ability = AbilityCatalog.All[id];
+        // Bad Kharma (Emperor Edition remaining-cards pass, group A, issue #492): "He ignores the action's costs" -- the action is taken, nothing of it is paid and nothing happens.
+        if (ignoreCosts)
+        {
+            var ignoring = Player(command.PlayerId); var ignoringSource = command.CardId is null ? null : Card(command.CardId);
+            Emit("abilityUsed", $"{ignoring.Name}: {(ignoringSource is null ? "Imperial Favor" : Definition(ignoringSource).Name)} — {ability.Label} (negated; its costs are ignored).", ignoring.Id, ignoringSource?.Id);
+            CompleteNegatedAction(command, ability, ignoring, ignoringSource, PlayedFromDiscard(ability, ignoringSource), consumedGrant);
+            return;
+        }
         if (CostPaymentBlockedByNegation(command)) { AbortActionForBlockedCost(command, consumedGrant); return; }
         var player = Player(command.PlayerId);
         var source = command.CardId is null ? null : Card(command.CardId);

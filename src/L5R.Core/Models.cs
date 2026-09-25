@@ -587,6 +587,10 @@ public sealed class PendingDuel
     // Whose turn to Focus or Strike, alternating, starting with ChallengedPlayerId.
     public int TurnPlayerId { get; set; }
     public bool Struck { get; set; }
+    // Bend like a Reed (Emperor Edition remaining-cards pass, group A, issue #492): the player who struck, whether a copy was played this duel, and the "+N to his duel stat until the duel ends" per Personality.
+    public int? StrikerPlayerId { get; set; }
+    public bool BendUsed { get; set; }
+    public Dictionary<string, int> StatBonuses { get; set; } = [];
     public List<string> ChallengerFocused { get; set; } = [];
     public List<string> ChallengedFocused { get; set; } = [];
     // Player ids still owed a Duelist discard-and-refocus decision, in the order they decide (the
@@ -982,6 +986,12 @@ public sealed class MatchState
     // The Shadow's Embrace pass (issue #476), batch 4 (ShadowsEmbraceBatch4.cs): Preserving Beauty's "before this turn ends, gain 3 Honor if that battlefield's province
     // has not been destroyed", one record per use, drained in EndTurn.
     public List<PreservingBeautyCheck> PreservingBeautyChecks { get; set; } = [];
+    // Emperor Edition remaining-cards pass, group A (issue #492; EmperorRemainingA.cs): Followers Deadly Orders destroys once the battle's resolution is over; the held action a hand Reaction
+    // (Bad Kharma, Footsteps of Madness) negated as a whole (and whether its costs are ignored); the number of cards Face of Ninube shuffled in.
+    public List<RemADeadlyOrdersMark> RemADeadlyOrders { get; set; } = [];
+    public bool RemANegatesHeldAction { get; set; }
+    public bool RemAIgnoresHeldCosts { get; set; }
+    public int RemAShuffledCount { get; set; }
     // Paralyzing Touch's "negate the effects of the next action performed by its winner" (for the turn), spent by that action.
     public List<ParalyzingTouchWatch> ParalyzingTouchWatches { get; set; } = [];
     // Spiritual Manipulation's "must declare a normal attack this turn and assign the target (if legal)".

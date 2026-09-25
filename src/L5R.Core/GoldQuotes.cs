@@ -62,6 +62,8 @@ public static class CostStatSubject
     public const string Target = "target";
     public const string Performer = "performer";
     public const string Source = "source";
+    /// <summary>Footsteps of Madness (issue #492): the Stronghold the action held in the Unimpeachable Name window is from.</summary>
+    public const string HeldActionSource = EmperorRemainingAAbilities.HeldActionSource;
 }
 
 /// <summary>The printed numbers a Gold cost can be made of. "Strength" on a Stronghold is its Province Strength; a unit's is its Force.</summary>
@@ -73,6 +75,8 @@ public static class CostStat
     public const string PersonalHonor = "PersonalHonor";
     public const string Focus = "Focus";
     public const string ProvinceStrength = "ProvinceStrength";
+    /// <summary>A Stronghold's printed Gold Production (Footsteps of Madness, issue #492).</summary>
+    public const string GoldProduction = "GoldProduction";
 }
 
 /// <summary>Data describing how one ability is priced. Interpreted only by MatchEngine.AbilityGoldCost.
@@ -201,6 +205,7 @@ public sealed partial class MatchEngine
             CostStat.PersonalHonor => basePrinted ? def.PersonalHonor : CardPersonalHonor(card),
             CostStat.Focus => basePrinted ? def.Focus : Math.Max(0, def.Focus + StatModifier(card, "Focus")),
             CostStat.ProvinceStrength => basePrinted ? def.ProvinceStrength : def.ProvinceStrength + StatModifier(card, "ProvinceStrength"),
+            CostStat.GoldProduction => def.GoldProduction,
             _ => throw new InvalidOperationException($"Unknown cost stat '{stat}'.")
         };
     }
@@ -265,6 +270,7 @@ public sealed partial class MatchEngine
                 {
                     CostStatSubject.Target => target,
                     CostStatSubject.Performer => command.PerformerId is not null && _state.Cards.TryGetValue(command.PerformerId, out var performing) ? performing : null,
+                    CostStatSubject.HeldActionSource => RemAHeldActionSourceCard(),
                     _ => source
                 };
                 if (statCard is null)

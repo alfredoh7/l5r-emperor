@@ -96,7 +96,7 @@ internal static class BattleAbsentMovesTests
         var marked = string.Join(",", AbilityCatalog.All.Where(p => p.Value.MovesToBattle).Select(p => p.Key).OrderBy(k => k, StringComparer.Ordinal));
         // Issue #477 (Emperor Edition Personality pass, batch 3): tetsuo-move-attack -- Moto Tetsuo moves himself to the current battlefield.
         // + keep-of-dead-move (Emperor Edition Stronghold pass, issue #486 batch 1: Keep of the Dead moves its performing Commander to the current battlefield).
-        Eq(marked, "broken-alliance-move,charge-into-danger-move,chukage-move,dislodge-the-foe,earth-flows-move,hawado-move-battlefield,heijin-move,help-shadows-move,houken-exp-straighten,intervening-spirit-move,intimidation-move,irezu-move,keep-of-dead-move,lesson-of-earth-move,mai-move-force-penalty,michi-move,moving-unmoving-approach,natsumi-move,natures-wrath-move,pronouncement-guilt-move,requesting-reinforcements-recruit,return-to-action-move,rikyou-move,sanctuary-of-the-waves-move,shinoda-move,skipping-the-puddle-move,sound-of-thunder-move,sudden-movement-switch,takasho-move,tetsuo-move-attack,training-move-current,training-move-to-battle,trusting-instinct-move,your-clan-needs-you");
+        Eq(marked, "broken-alliance-move,charge-into-danger-move,chukage-move,dislodge-the-foe,earth-flows-move,falling-leaf-strike,hawado-move-battlefield,heijin-move,help-shadows-move,houken-exp-straighten,intervening-spirit-move,intimidation-move,irezu-move,keep-of-dead-move,lesson-of-earth-move,mai-move-force-penalty,michi-move,moving-unmoving-approach,natsumi-move,natures-wrath-move,pronouncement-guilt-move,requesting-reinforcements-recruit,return-to-action-move,rikyou-move,sanctuary-of-the-waves-move,shinoda-move,skipping-the-puddle-move,sound-of-thunder-move,sudden-movement-switch,takasho-move,tetsuo-move-attack,training-move-current,training-move-to-battle,trusting-instinct-move,your-clan-needs-you");
         foreach (var (id, ability) in AbilityCatalog.All.Where(p => p.Value.MovesToBattle))
             Check(ability.Timing is "Battle" or "BattleOrOpen", $"{id}: a move to the battle is a Battle action");
     }
@@ -185,7 +185,8 @@ internal static class BattleAbsentMovesTests
         if (ability == "intimidation-move") { maiden.GrantedKeywords.Add(new("Berserker", "test-fixture", GrantDuration.Permanent)); Add(s, "training-lion-samurai", 1 - actor, Zone.Home); }
         // The Shadow's Embrace pass, batch 4 (issue #476): The Lesson of Earth's Monk performer (from home: an Absent move-to-battle action), and Sudden Movement's
         // two Personalities of one player at different locations -- the enemy's at the battlefield and another of his at home.
-        if (ability == "lesson-of-earth-move") maiden.GrantedKeywords.Add(new("Monk", "test-fixture", GrantDuration.Permanent));
+        // Emperor Edition remaining-cards pass, group A (issue #492): Falling Leaf Strike's performing Monk moves himself to the battle, from home.
+        if (ability is "lesson-of-earth-move" or "falling-leaf-strike") maiden.GrantedKeywords.Add(new("Monk", "test-fixture", GrantDuration.Permanent));
         if (ability == "sudden-movement-switch") Add(s, "training-lion-samurai", 1 - actor, Zone.Home);
         // Emperor Edition Stronghold pass (issue #486, batch 1): Keep of the Dead's performing Commander (from home: an Absent move-to-battle action).
         if (ability == "keep-of-dead-move") maiden.GrantedKeywords.Add(new("Commander", "test-fixture", GrantDuration.Permanent));

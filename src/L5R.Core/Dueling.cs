@@ -182,6 +182,7 @@ public sealed partial class MatchEngine
     {
         var duel = _state.PendingDuel!;
         duel.Struck = true;
+        duel.StrikerPlayerId = _state.PriorityPlayerId; // Bend like a Reed (Emperor Edition remaining-cards pass, group A, issue #492): who struck.
         foreach (var id in duel.ChallengerFocused) Card(id).FaceUp = true;
         foreach (var id in duel.ChallengedFocused) Card(id).FaceUp = true;
         Emit("duelStruck", "A Strike ends focusing; focused cards are revealed.", _state.PriorityPlayerId);
@@ -202,7 +203,7 @@ public sealed partial class MatchEngine
             ? [_state.ActivePlayerId, 1 - _state.ActivePlayerId]
             : challengerDuelist ? [duel.ChallengerPlayerId] : challengedDuelist ? [duel.ChallengedPlayerId] : [];
         duel.PendingDuelistDecisions = order;
-        if (order.Count == 0) { BeginOrderingEffects(); return; }
+        if (order.Count == 0) { BeginOrderingEffectsAfterReactions(); return; }
         _state.PriorityPlayerId = order[0];
         _state.ConsecutivePasses = 0;
     }
@@ -239,7 +240,7 @@ public sealed partial class MatchEngine
             Emit("duelistRefocused", $"{Player(playerId).Name} discarded a focused card to focus again.", playerId, newId);
         }
         if (command.CardId is not null) RecordDuelReveal("Replacement");
-        if (duel.PendingDuelistDecisions.Count == 0) BeginOrderingEffects(); else _state.PriorityPlayerId = duel.PendingDuelistDecisions[0];
+        if (duel.PendingDuelistDecisions.Count == 0) BeginOrderingEffectsAfterReactions(); else _state.PriorityPlayerId = duel.PendingDuelistDecisions[0];
     }
 
     private void BeginOrderingEffects()
@@ -275,12 +276,12 @@ public sealed partial class MatchEngine
     // The duel stat plus each side's own total focused Focus Value (revealed by the time this runs).
     // Any attachment modifying the stat applies as long as it is active right now -- CardForce/
     // CardPersonalHonor/PersonalityChi already read current, not printed, values.
-    private int DuelStatValue(CardInstance card, string stat) => NikaruDuelStat(card) ?? stat switch
+    private int DuelStatValue(CardInstance card, string stat) => (NikaruDuelStat(card) ?? stat switch
     {
         "Force" => CardForce(card),
         "PersonalHonor" => CardPersonalHonor(card),
         _ => PersonalityChi(card),
-    };
+    }) + RemADuelStatBonus(card); // Bend like a Reed (issue #492): "+2 to his duel stat until the duel ends".
 
     private void ResolveDuel()
     {
@@ -574,6 +575,10 @@ public sealed partial class MatchEngine
             // Seeds of Decay pass (issue #453), batch 1. Embracing Battle: "bow the winner" (A Simple Yari's). Ceaseless Vigil's "straighten a Personality" is a choice (FocusEffectChoice.cs).
             case "embracing-battle-focus":
                 if (_state.PendingDuel?.WinnerId is string embracingWinnerId && InPlay(Card(embracingWinnerId)) && !StalwartNegatesBow(Card(embracingWinnerId), ownerId)) Card(embracingWinnerId).Bowed = true;
+                break;
+            // Final Confrontation (Emperor Edition remaining-cards pass, group A, issue #492): "After this duel ends, if your Personality won it, take the Imperial Favor."
+            case "final-confrontation-focus":
+                if (ownerId == winnerPlayerId) TakeImperialFavor(ownerId);
                 break;
             // Feint & Strike (oracle-l5r-2506, Forgotten Legacy pass issue #467 batch 3): "After this duel's resolution, its winner's controller discards a card" -- queued
             // like Times of Strife's own forced discard and answered as the duel hands play back (FinishDuelResolution's OpenOverconfidentDrawWindow). A tie has no winner.

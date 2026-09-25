@@ -135,7 +135,16 @@ public sealed partial class MatchEngine
             if(OpenReactionSubject() is not { } held) return;
             foreach(var (card,reactionId) in TargetedActionReactionCandidates().Where(x=>x.Card.OwnerId==playerId && TargetedActionReactionApplies(x.Card,x.AbilityId,held)).ToArray())
                 foreach(var (candidate,label) in TargetedReactionChoices(card,reactionId,held))
+                {
+                    // Ancestral Protection (Emperor Edition remaining-cards pass, group A, issue #492): a Reaction with a performer to choose is offered once per performer who could take it.
+                    if(AbilityCatalog.All[reactionId].Performer is not null)
+                    {
+                        foreach(var performer in RemAReactionPerformers(playerId,AbilityCatalog.All[reactionId]))
+                            AddReaction(card,reactionId,targetId:candidate,label:$"{AbilityCatalog.All[reactionId].Label} · {Definition(performer).Name} ({performer.Id})",validate:true,performerId:performer.Id);
+                        continue;
+                    }
                     AddReaction(card,reactionId,targetId:candidate,label:label,validate:true);
+                }
         }
         // Order Seppuku is an Open action (issue #368): offered for any Dishonorable Samurai/Courtier/Shugenja the querying player controls, but
         // ONLY at their own turn to act in the Action Phase with nothing pending -- the same single predicate the command handler uses
@@ -318,6 +327,12 @@ public sealed partial class MatchEngine
             result.AddRange(BeforeProclaimReactionOptions(playerId));
             Add("declineReaction","Pass reaction",Command("declineReaction"));
         }
+        else if(_state.PendingChoice is { Type:"unimpeachableNameReaction" })
+        {
+            // Before a held action resolves (Unimpeachable Name's window; Bad Kharma and Footsteps of Madness, Emperor Edition remaining-cards pass group A, issue #492): this player's Reactions from a hand, then the pass.
+            result.AddRange(AbilityActions(playerId));
+            Add("declineReaction","Pass reaction",Command("declineReaction"));
+        }
         else if(_state.PendingChoice is { Type:"battleRecruit" })
         {
             // After a battle resolved (issue #379): the recruit grants of this battle this player still holds, then the pass.
@@ -328,6 +343,11 @@ public sealed partial class MatchEngine
         {
             // Heart of Darkness (Forgotten Legacy pass, issue #467 batch 4): bow no card, one card, or two cards (ForgottenLegacyBatch4.cs).
             foreach(var option in HeartOfDarknessOptions(playerId,heartPending.CardId)) result.Add(option);
+        }
+        else if(_state.PendingChoice is { Type:"beforeBattleOptional" } extendedPending && _state.PendingBeforeBattleResolve is { } extendedResolve && IsExtendedManeuversChoice(extendedResolve))
+        {
+            // Extended Maneuvers (Emperor Edition remaining-cards pass, group A, issue #492): straighten a Samurai, bow a non-Samurai, both, or neither (EmperorRemainingA.cs).
+            foreach(var option in ExtendedManeuversOptions(playerId,extendedPending.CardId)) result.Add(option);
         }
         else if(_state.PendingChoice is { Type:"beforeBattleOptional" } optionalPending)
         {
@@ -533,7 +553,7 @@ public sealed partial class MatchEngine
                     if(Keyword(card,"Terrain"))
                     {
                         var blocked=_state.Cards.Values.Any(c=>c.Zone==Zone.Battlefield && c.ProvinceIndex==_state.CurrentBattleProvince && Keyword(c,"Terrain"));
-                        var terrainReason=!Army(playerId,_state.CurrentBattleProvince!.Value).Any()?"You have no unit at the current battlefield."
+                        var terrainReason=!Army(playerId,_state.CurrentBattleProvince!.Value).Any() && !TerrainPlaysWithoutPresence(def)?"You have no unit at the current battlefield."
                             :blocked?"This battlefield already has a Terrain in play.":strategyReason;
                         Add("playStrategy",$"Play {def.Name}",terrainReason is null?Command("playStrategy",card.Id,strategyPay):null,terrainReason,card.Id,[],gold:strategyGold);
                         continue;

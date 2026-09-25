@@ -104,7 +104,7 @@ public sealed partial class MatchEngine
             // Yamazaki - Experienced: "another Personality", and "an enemy card" only while he has a Weapon.
             "se2-personality-other-than-source" => personality && target.Id != source?.Id,
             "se2-enemy-card-if-source-has-weapon" => Card(UnitHostId(target)).OwnerId != player.Id && source is not null && HasWeapon(source),
-            _ => false
+            _ => RemATargetAllows(category, command, player, source, target) // Emperor Edition remaining-cards pass, group A (issue #492)
         };
     }
 

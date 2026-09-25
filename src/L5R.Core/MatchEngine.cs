@@ -406,7 +406,8 @@ public sealed partial class MatchEngine
                     var reduction=_state.HonorLossReductionPlayerId;
                     var outer=ContinueSuspendedReaction(pending);
                     _state.HonorLossReductionPlayerId=reduction; var suspended=_state.SuspendedWindows.Count;
-                    ExecuteAbilityEffects(pending);
+                    // Bad Kharma / Footsteps of Madness (Emperor Edition remaining-cards pass, group A, issue #492): the held action was negated as a whole in this window.
+                    if(RemATakeHeldNegation(out var remAIgnoreCosts)) ResolveNegatedAction(pending,ignoreCosts:remAIgnoreCosts); else ExecuteAbilityEffects(pending);
                     if(_state.SuspendedWindows.Count>suspended) _state.SuspendedWindows[^1].HonorLossReductionPlayerId=outer?.HonorLossReductionPlayerId;
                     else _state.HonorLossReductionPlayerId=outer?.HonorLossReductionPlayerId;
                 }
@@ -420,6 +421,8 @@ public sealed partial class MatchEngine
                 Require(command.Type is "useAbility" or "declineReaction" or "pass","Resolve the duel reaction window first.");
                 if (command.Type=="useAbility") UseAbility(command); else PassReaction();
                 if (_state.PendingChoice is null && _state.PendingDuel is { Stage:"Reaction" }) BeginFocusing();
+                // Bend like a Reed (Emperor Edition remaining-cards pass, group A, issue #492): the window before the Focus Effects resolve closed.
+                else if (_state.PendingChoice is null && _state.PendingDuel is { Stage:"FocusEffectsReaction" }) BeginOrderingEffects();
                 return;
             }
             if (_state.PendingChoice.Type=="afterResolutionReaction")
@@ -1484,6 +1487,8 @@ public sealed partial class MatchEngine
                 return;
             // Fields of Victory (The Shadow's Embrace pass, issue #476 batch 3; ShadowsEmbraceBatch3.cs): mandatory, read now.
             case "fields-of-victory-zero": FieldsOfVictory(source,pending); break;
+            // Extended Maneuvers (Emperor Edition remaining-cards pass, group A, issue #492): its controller's two optional choices (EmperorRemainingA.cs), when there is anything to choose.
+            case "extended-maneuvers-before-battle": if(OpenExtendedManeuversChoice(source,pending)) return; break;
         }
         FinishBeforeBattleEffect(pending);
     }
@@ -1495,6 +1500,7 @@ public sealed partial class MatchEngine
         var choice=_state.PendingChoice!;
         Require(command.Type=="beforeBattleOptional" && command.PlayerId==choice.PlayerId && command.Choice is "use" or "decline","Use the effect or decline it.");
         if(IsHeartOfDarknessChoice(pending)) ResolveHeartOfDarkness(command,pending,choice.PlayerId);
+        else if(IsExtendedManeuversChoice(pending)) ResolveExtendedManeuvers(command,pending,choice.PlayerId); // Extended Maneuvers (issue #492)
         else if(command.Choice=="use")
         {
             var target=Card(command.TargetId);
@@ -1730,6 +1736,7 @@ public sealed partial class MatchEngine
         // play now sits. Deferring here (a province choice) re-enters this same function from scratch
         // once answered, so nothing below runs twice.
         if (CheckYourClanNeedsYouReturn()) return;
+        ResolveRemADeadlyOrders(); // Deadly Orders (Emperor Edition remaining-cards pass, group A, issue #492): "After this battle's resolution, destroy the Follower."
         // Seeking the Truth (Forgotten Legacy pass, issue #467 batch 4): "After this battle ends, if you did not destroy the battlefield's province or an army, discard a card at random."
         ResolveSeekingTheTruthWatches();
         // After This Battle Resolves (issue #272): "after the resolution of the current battle but
@@ -1934,7 +1941,7 @@ public sealed partial class MatchEngine
         var card=Card(command.CardId); var def=Definition(card);
         Require(card.OwnerId==command.PlayerId && card.Zone==Zone.Hand && def.Type==CardType.Strategy,"Choose a supported Strategy from your hand.");
         var province=_state.CurrentBattleProvince!.Value;
-        Require(Army(command.PlayerId,province).Any(),"You need a unit at the current battlefield to take a Battle action.");
+        Require(Army(command.PlayerId,province).Any() || TerrainPlaysWithoutPresence(def) && Keyword(card,"Terrain"),"You need a unit at the current battlefield to take a Battle action."); // Flooded Pass (issue #492): "Even if you control no units".
         // A Strategy pays its own printed Gold cost (issue #303: the same QuoteStrategyGold that
         // QueryActions ships to the client; free ones -- every training fixture -- charge nothing and,
         // as before, accept no sources).
@@ -2141,6 +2148,7 @@ public sealed partial class MatchEngine
         +(Definition(card).Effect=="force-per-other-magistrate-in-army"?OtherMagistratesInArmy(card):0)
         // Immolation (oracle-l5r-10127, issue #453 batch 5): "This Shugenja has +3F, or +4F while he is Fire" -- Effect-keyed on the attached Spell, like tsunami-force above.
         +Attachments(card.Id).Where(c=>Definition(c).Type==CardType.Spell && Definition(c).Effect=="immolation-force" && Keyword(card,"Shugenja")).Sum(_=>Keyword(card,"Fire")?4:3)
+        +RemAItemForceModifiers(card) // A Pure Stroke (Emperor Edition remaining-cards pass, group A, issue #492): the modifiers raised on the wielder's Items.
         +AshigaruBattleBoost(card)+ArmyBattleMaidenBoost(card));
     // "Her army" (Yoritomo Minori): every Personality the same owner has at the same battlefield --
     // Army(), the engine's own definition -- so a card not at a battlefield has no army and no bonus.
@@ -3008,7 +3016,8 @@ public sealed partial class MatchEngine
     {
         // The CURRENT strength: raised and lowered by everything that has acted on the province, and by the Region and the Terrain bonuses still in play.
         var strength=province.Strength + (province.RegionId is string id && RegionStrengthBonus.TryGetValue(Definition(Card(id)).Effect,out var bonus) ? bonus : 0) + ProvinceSourceBonuses(province) + StaticProvinceBonus(province)
-            + TimedProvinceStrength(province); // Seeds of Decay (issue #453), batch 2: strength given for the turn (SeedsOfDecayBatch2.cs).
+            + TimedProvinceStrength(province) // Seeds of Decay (issue #453), batch 2: strength given for the turn (SeedsOfDecayBatch2.cs).
+            + RemATerrainProvinceBonus(province); // Flooded Pass (Emperor Edition remaining-cards pass, group A, issue #492).
         strength=Math.Max(0,strength); // Core rules, Stats: most stats floor at zero (Kaiu Esumi's -2, issue #477 batch 2, is the first penalty that could take a province below it).
         // A limit (TerrainStatics.cs: Times of Strife, issue #259; Ancient Feud, issue #418) is a CEILING on what is read, never a lowering of the current strength: a province already at or
         // below it is untouched, and one above it reads as the maximum until the limit ends.

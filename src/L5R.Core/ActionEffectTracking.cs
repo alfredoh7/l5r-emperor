@@ -152,6 +152,8 @@ public sealed partial class MatchEngine
             "kanpeki-additional-action" => KanpekiPerformedStrategyBattleAction(source, facts, playerId),
             // Pillars of Virtue (Emperor Edition Stronghold pass, issue #486 batch 2): "After the resolution of a Kiho Battle action you took."
             "pillars-virtue-additional-action" => PillarsKihoBattleActionTaken(facts, playerId),
+            // Deception Revealed (Emperor Edition remaining-cards pass, group A, issue #492): "After the resolution of an action that bowed a Ring" -- either player's action, a Ring still bowed.
+            "deception-revealed-straighten" => facts.Affected.Any(a => a.Kind == BowedRingKind && Card(a.CardId).Bowed && InPlay(Card(a.CardId))),
             _ => false
         };
     }
