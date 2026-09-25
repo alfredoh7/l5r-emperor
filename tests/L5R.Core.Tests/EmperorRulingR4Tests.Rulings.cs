@@ -83,6 +83,7 @@ internal static partial class EmperorRulingR4Tests
     [
         "ancestral-sword-hantei-honor", "aya-entry-dark-virtue", "ayumi-entry", "castle-of-order-redirect", "celestial-sword-crab-honor", "celestial-sword-crane-honor",
         "celestial-sword-lion-honor", "celestial-sword-mantis-honor", "celestial-sword-phoenix-honor", "celestial-sword-scorpion-lose", "celestial-sword-unicorn-honor", "clay-kshatriya-invest",
+        "goju-asuka-give", // issue #501: Goju Asuka's "After Asuka enters play: You may give control of her to another player." is a trait
         "makubesu-create", "never-safe-return", "nojima-entry", "noritada-invest", "otomo-favor-token", "rika-bushido-virtue-bonus", "shihiro-boost", "small-time-bully-dishonor",
         "spiders-web-attach", "spiders-web-attach-kensai", "thick-marsh-entry", "tsudoken-exp2-entry",
     ];

@@ -32,6 +32,8 @@ public static class TraitReactions
         // Triggered traits with other triggers: Never Safe's return ("After this battle ends, if this card is in your discard pile..."), The Castle of Order's redirect, The Spider's Web's attach,
         // Kyuden Otomo's Favor token, Matsu Rika's bonus, Akodo Shihiro's bonus.
         "never-safe-return", "castle-of-order-redirect", "spiders-web-attach", "spiders-web-attach-kensai", "otomo-favor-token", "rika-bushido-virtue-bonus", "shihiro-boost",
+        // Issue #501: Goju Asuka's "After Asuka enters play: You may give control of her to another player."
+        "goju-asuka-give",
     };
 
     /// <summary>The trait-modelled Reaction-timed abilities, for the audit.</summary>

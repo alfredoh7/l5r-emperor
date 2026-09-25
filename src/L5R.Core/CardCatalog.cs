@@ -662,6 +662,8 @@ public static class CardCatalog
             .Concat(PublishedContent.FollowerWave32.Cards) // Emperor Edition follow-ups (issue #498): Enslaved Djinn
             .Concat(PublishedContent.ItemWave17.Cards) // Emperor Edition follow-ups (issue #498): Celestial Sword of the Dragon - exp
             .Concat(PublishedContent.PersonalityWave80.Cards) // Emperor Edition follow-ups (issue #498): Asako Chukage
+            .Concat(PublishedContent.PersonalityWave86.Cards) // issue #501, mechanics group B: Goju Asuka, Shadow Dragon - exp2, The Dark Naga, Yoritomo Sachina - exp
+            .Concat(PublishedContent.StrategyWave72.Cards) // issue #501, mechanics group B: Black Marketeering, Only a Shadow
             .ToDictionary(c => c.Id, StringComparer.Ordinal);
     }
 }

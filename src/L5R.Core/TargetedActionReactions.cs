@@ -324,7 +324,7 @@ public sealed partial class MatchEngine
             case "chugo-seido-redirect":
                 return command.PlayerId != card.OwnerId && affected.OwnerId == card.OwnerId && Definition(affected).Type == CardType.Personality && ChugoSeidoCandidates(card, subject, affected).Any();
             default:
-                return RemATargetedActionReactionApplies(card, abilityId, subject, affected) || EmperorRemainingCTargetedReactionApplies(card, abilityId, subject, affected) || RulingR2TargetedReactionApplies(card, abilityId, subject, affected); // ruling pass R2; issue #492: group A (Ancestral Protection, Caught in the Act), group C (Snake Tattoo)
+                return RemATargetedActionReactionApplies(card, abilityId, subject, affected) || EmperorRemainingCTargetedReactionApplies(card, abilityId, subject, affected) || RulingR2TargetedReactionApplies(card, abilityId, subject, affected) || MechBTargetedReactionApplies(card, abilityId, subject, affected); /* issue #501: The Dark Naga */ // ruling pass R2; issue #492: group A (Ancestral Protection, Caught in the Act), group C (Snake Tattoo)
         }
     }
 
@@ -378,6 +378,8 @@ public sealed partial class MatchEngine
             // Hundred-Fold Cut: one option per Weapon of the targeted Kensai the way to pay allows.
             "hundred-fold-cut-bow" or "hundred-fold-cut-destroy" => KensaiWeapons(Card(subject.TargetId!), unbowedOnly: abilityId == "hundred-fold-cut-bow")
                 .Select(c => ((string?)c.Id, (string?)$"{AbilityCatalog.All[abilityId].Label} · {Definition(c).Name} ({c.Id})")),
+            // The Dark Naga (issue #501): one option per unbowed Forest of its controller's to bow (EmperorMechB.cs).
+            EmperorMechBAbilities.DarkNagaForest => NagaForests(card).Select(c => ((string?)c.Id, (string?)$"{AbilityCatalog.All[abilityId].Label} · {Definition(c).Name} ({c.Id})")),
             _ => [(null, null)]
         };
 }

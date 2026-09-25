@@ -925,6 +925,8 @@ public sealed class MatchState
     public EmperorRemainingCState RemC { get; set; } = new();
     // Emperor Edition rulings pass R1 (issue #492): battlefields without a province, and a battle fought inside the Action Phase (EmperorRulingR1.cs).
     public RulingR1State R1 { get; set; } = new();
+    // Issue #501, mechanics group B (EmperorMechB.cs): control returns owed, the infiltrator straighten trait grants and its open choice.
+    public EmperorMechBState MechB { get; set; } = new();
     // Entrenched Position: the battle (BattleNumber) in which the Attacker holds the first opportunity to act and the Defender has not yet had his first normal
     // opportunity to act or pass -- set when the Engage window closes with the Attacker holding it, cleared the moment the Attacker cedes priority (NextAction, Pass).
     public int AttackerLeadBattle { get; set; } = -1;

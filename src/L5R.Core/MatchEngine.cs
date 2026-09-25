@@ -326,6 +326,7 @@ public sealed partial class MatchEngine
             if (_state.PendingChoice.Type=="yourClanNeedsYouProvince") { ResolveYourClanNeedsYouProvince(command); return; }
             if (_state.PendingChoice.Type=="declineStraighten") { ResolveDeclineStraighten(command); return; }
             if (_state.PendingChoice.Type=="rentatsuLoss") { ResolveRentatsuLoss(command); return; } // Bayushi Rentatsu (issue #477, batch 4).
+            if (_state.PendingChoice.Type=="infiltratorStraighten") { ResolveInfiltratorStraighten(command); return; } // Goju Asuka / Only a Shadow (issue #501, EmperorMechB.cs).
             if (_state.PendingChoice.Type=="conqueror") { ResolveConqueror(command); return; }
             // Before This Battle Resolves (issue #272): three tightly-scoped, mandatory choices, no
             // "useAbility"/pass alternative -- see PendingBeforeBattleResolve's own doc comment.
@@ -1452,6 +1453,7 @@ public sealed partial class MatchEngine
             Require(isDefender || !MovementLocked(card,MovementKinds.AssignAttack),$"{Definition(card).Name} may not be assigned to attack this turn."); // Emperor Edition Stronghold pass (issue #486), batch 3: The Khan's Estate.
             // The Shadow's Embrace pass (issue #476), batch 6: Shieldman's unit is never assigned to an attacking army; Star-Crossed Lovers never to each other's battlefields.
             RequireShieldmanMayAssign(card,isDefender);
+            RequireAsukaMayAssign(card,isDefender); // Goju Asuka (issue #501): "may not assign ... into a defending army".
             RequireDelayedArrivalMayAssign(card,isDefender); // Delayed Arrival (issue #492, group F): "may not be assigned to attack you until your next turn begins".
             RequireStarCrossedMayAssign(card,assignment.Value,command.Assignments!);
             card.Zone=Zone.Battlefield; card.ProvinceIndex=assignment.Value;
@@ -2793,6 +2795,7 @@ public sealed partial class MatchEngine
         if((card.Zone!=Zone.Battlefield || card.ProvinceIndex!=province) && (MovementLockNegates(card,MovementKinds.ToBattlefield) || MovementToBattlefieldNegated(card,province) || KitsuneNegatesMovement(card,province) || UguluNegatesMovement(card,province))) return false;
         // The Shadow's Embrace pass (issue #476), batch 6: Shieldman "will not move into an attacking army"; Star-Crossed Lovers "will not move to each other's battlefields".
         if((card.Zone!=Zone.Battlefield || card.ProvinceIndex!=province) && (ShieldmanNegatesMove(card) || StarCrossedNegatesMove(card,province))) return false;
+        if((card.Zone!=Zone.Battlefield || card.ProvinceIndex!=province) && AsukaNegatesMove(card)) return false; // Goju Asuka (issue #501): "will not move into a defending army".
         // Legion of the Bat (issue #279): "after the resolution of an action that moved a target
         // enemy Infantry Personality to this card's battlefield" -- every printed "move to the
         // current battlefield" ability (Mirumoto Michi/Togashi Rikyou/Intervening Spirit/Takasho/
@@ -2847,6 +2850,7 @@ public sealed partial class MatchEngine
         ResolveShadowsEmbraceBatch1TurnEnd(); // The Shadow's Embrace pass (issue #476), batch 1: Bayushi Misaki's check, Agasha Kurou's removal.
         ResolvePreservingBeautyChecks(); // The Shadow's Embrace pass (issue #476), batch 4: Preserving Beauty's "before this turn ends".
         // Spirit of the Berserker: a destruction put off "until before this turn ends" happens now.
+        ControlReturnsAtTurnEnd(); // Black Marketeering (issue #501, EmperorMechB.cs): "Give control of him to his owner before the turn ends."
         ApplyDelayedEffects(DelayUntil.EndOfTurn); // The shared delay mechanism (issue #492, EmperorRulingR2.cs): what was delayed "until before this turn ends" (Spirit of the Berserker's destruction, In the Heart of Battle's).
         ResolveEmperorRemainingBTurnEnd(); // Emperor Edition remaining-cards pass (issue #492), group B.
         ResolveShadowsEmbraceBatch5TurnEnd(); // The Shadow's Embrace pass (issue #476), batch 5: Celestial Sword of the Phoenix's "remove him from the game before the turn ends".
@@ -2945,6 +2949,8 @@ public sealed partial class MatchEngine
     }
     private void ContinueStraightenPhase(PlayerState player)
     {
+        // Goju Asuka / Only a Shadow (issue #501, EmperorMechB.cs): "After a Straighten Phase begins: Choose your bowed non-X Personality. Negate his straightening this phase."
+        if(BeginInfiltratorStraighten(player)) return;
         // A card with the choose-straighten effect lets its controller decide, per turn, whether to
         // straighten it instead of that being automatic or a fixed forced-skip condition.
         if(EligibleForOptionalStraighten(player.Id).Length>0)

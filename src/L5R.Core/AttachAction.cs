@@ -152,6 +152,7 @@ public sealed partial class MatchEngine
         if (card.OwnerId == controllerId) return;
         card.OriginalOwnerId ??= card.OwnerId;
         card.OwnerId = controllerId;
+        if (card.OriginalOwnerId == controllerId) card.OriginalOwnerId = null; // issue #501: control given back to the owner -- he controls his own card again
         Emit("controlTaken", $"{Player(controllerId).Name} took control of {Definition(card).Name}.", controllerId, card.Id);
     }
 
@@ -169,6 +170,7 @@ public sealed partial class MatchEngine
     {
         // A gift in another player's hand (Naoharu's Gift, issue #492 group F) is his to play until it leaves the hand.
         foreach (var card in _state.Cards.Values.Where(c => c.OriginalOwnerId is not null && !InPlay(c) && c.Zone != Zone.Hand)) RestoreOwner(card);
+        ApplyControlReturnsAfterCommand(); // issue #501 (EmperorMechB.cs): a return owed to a card that left play (Sachina), and returns blocked by Unique/Singular tried again.
     }
 
     // ExecuteAbilityEffects' step: the Gold has already been paid (PayForAbility), so the card leaves its place and enters play attached.

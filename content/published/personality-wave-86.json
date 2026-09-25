@@ -1,0 +1,131 @@
+{
+  "Profile": "personality-wave-86",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-6653",
+      "Name": "Shadow Dragon",
+      "Type": "Personality",
+      "Clan": "Spider",
+      "GoldCost": 20,
+      "GoldProduction": 0,
+      "Force": 10,
+      "Chi": 5,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After Shadow Dragon enters play: Lose 5 Honor.\nShadow Dragon's abilities will not be copied.\nBattle: Target an enemy Personality: Permanently give him Ninja and Shadowlands. Take control of him. Return control of him to his owner after the next time this game this ability is announced.\nOpen: If Shadow Dragon is dead: Bring it into play, paying all costs.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6653.jpg",
+      "Keywords": [
+        "Cavalry",
+        "Conqueror",
+        "Experienced 2",
+        "Unique",
+        "Dragon",
+        "Ninja",
+        "Nonhuman",
+        "Shadowlands",
+        "Shugenja",
+        "Spider Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "shadow-dragon-exp2-take",
+        "shadow-dragon-exp2-return"
+      ],
+      "Effect": "none",
+      "EntryHonorLoss": 5
+    },
+    {
+      "Id": "oracle-l5r-8012",
+      "Name": "The Dark Naga",
+      "Type": "Personality",
+      "Clan": "Unaligned",
+      "GoldCost": 12,
+      "GoldProduction": 0,
+      "Force": 9,
+      "Chi": 6,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After The Dark Naga enters play: Lose 3 Honor.\nReaction: After another player targets The Dark Naga with an action: You may bow one of your Forests. If you did, negate The Dark Naga's destruction from the action's effects.\nBattle: Target an enemy Personality: If he is Nonhuman, take control of him (he joins your army). If he is human, bow his unit. Destroy him before this turn ends.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8012.jpg",
+      "Keywords": [
+        "Unique",
+        "Champion",
+        "Naga",
+        "Nonhuman",
+        "Pearl",
+        "Shugenja"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "dark-naga-forest-negate",
+        "dark-naga-take"
+      ],
+      "Effect": "none",
+      "EntryHonorLoss": 3
+    },
+    {
+      "Id": "oracle-l5r-9623",
+      "Name": "Yoritomo Sachina",
+      "Type": "Personality",
+      "Clan": "Mantis",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 1,
+      "Chi": 5,
+      "PersonalHonor": 1,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Sachina's base ability will not be copied.\nPolitical Limited: Once per game, target a Personality, pay Gold equal to his unit's total Gold Cost plus four, and bow Sachina: Take control of him. After the next time this game Sachina leaves play, give control of him to his owner.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9623.jpg",
+      "Keywords": [
+        "Loyal",
+        "Unique",
+        "Courtier",
+        "Experienced",
+        "Mantis Clan",
+        "Seductress"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "sachina-exp-take"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10087",
+      "Name": "Goju Asuka",
+      "Type": "Personality",
+      "Clan": "Spider",
+      "GoldCost": 6,
+      "GoldProduction": 0,
+      "Force": 1,
+      "Chi": 3,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After Asuka enters play: You may give control of her to another player.\nAsuka may not assign, and will not move, into a defending army.\nAfter a Straighten Phase begins: Choose your bowed non-Spider Clan Personality. Negate his straightening this phase.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10087.jpg",
+      "Keywords": [
+        "Infiltrator",
+        "Spider Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "goju-asuka-give"
+      ],
+      "Effect": "goju-asuka"
+    }
+  ],
+  "Decks": []
+}

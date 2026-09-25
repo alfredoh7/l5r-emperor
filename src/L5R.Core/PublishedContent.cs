@@ -2622,4 +2622,8 @@ public static class PublishedContent
     public static PublishedSnapshot ItemWave17 { get; } = Load("L5R.Published.ItemWave17.json", "item-wave-17", requireDecks: false);
     /// <summary>Personality wave 80 (Emperor Edition follow-ups, issue #498): Asako Chukage (Forgotten Legacy printing).</summary>
     public static PublishedSnapshot PersonalityWave80 { get; } = Load("L5R.Published.PersonalityWave80.json", "personality-wave-80", requireDecks: false);
+    /// <summary>Personality wave 86 (issue #501, mechanics group B: control transfer): Goju Asuka, Shadow Dragon - exp2, The Dark Naga, Yoritomo Sachina - exp.</summary>
+    public static PublishedSnapshot PersonalityWave86 { get; } = Load("L5R.Published.PersonalityWave86.json", "personality-wave-86", requireDecks: false);
+    /// <summary>Strategy wave 72 (issue #501, mechanics group B: control transfer): Black Marketeering, Only a Shadow.</summary>
+    public static PublishedSnapshot StrategyWave72 { get; } = Load("L5R.Published.StrategyWave72.json", "strategy-wave-72", requireDecks: false);
 }

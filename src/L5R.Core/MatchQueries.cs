@@ -54,7 +54,7 @@ public sealed partial class MatchEngine
             def.Type==CardType.Personality && card.Zone is Zone.Home or Zone.Battlefield ? BattleForce(card) : null,card.Tokens.ToArray(),
             GrantedAbilityViews(card),
             GoldSourceProduction(card),ActionLocked(card),card.CreatedCopy,
-            card.Protections.Select(p=>new GrantedEffectView("Action protection", "Effects of actions this card performs will not be negated.",p.Source,p.Duration)).ToArray(),
+            card.Protections.Select(p=>new GrantedEffectView("Action protection", "Effects of actions this card performs will not be negated.",p.Source,p.Duration)).Concat(MechBGrantedEffects(card)).ToArray(), // issue #501: Only a Shadow's trait
             IsCopyCard(card),card.CopyOfCardId,CopyOfDefinition(card),CopyConditionsText(card), // issue #501 item 32 (EmperorMechBCopies.cs)
             card.OriginalOwnerId is int realOwner && realOwner!=card.OwnerId ? realOwner : null); // issue #501: the owner of a card another player controls
     }
@@ -517,6 +517,10 @@ public sealed partial class MatchEngine
             // legal-actions-driven client can stall in a search.
             result.AddRange(SearchActions(playerId));
         }
+        else if(_state.PendingChoice is { Type:"infiltratorStraighten" })
+        {
+            result.AddRange(InfiltratorStraightenActions(playerId)); // Goju Asuka / Only a Shadow (issue #501, EmperorMechB.cs).
+        }
         else if(_state.PendingChoice is { Type:"rentatsuLoss" })
         {
             result.AddRange(RentatsuLossActions(playerId)); // Bayushi Rentatsu (Emperor Edition Personality pass, issue #477, batch 4).
@@ -587,7 +591,8 @@ public sealed partial class MatchEngine
             case Phase.CavalryDefense:
                 var cavalrySegment=_state.Phase is Phase.CavalryDeclaration or Phase.CavalryDefense;
                 var units=_state.Cards.Values.Where(c=>c.OwnerId==playerId && c.Zone==Zone.Home && (!c.Bowed || MayAssignBowed(c)) && Definition(c).Type==CardType.Personality && IsCavalryUnit(c)==cavalrySegment
-                    && !DelayedArrivalBarsAttacker(c,_state.Phase is Phase.InfantryDeclaration or Phase.CavalryDeclaration)).Select(c=>c.Id).ToArray(); // Delayed Arrival (issue #492, group F)
+                    && !DelayedArrivalBarsAttacker(c,_state.Phase is Phase.InfantryDeclaration or Phase.CavalryDeclaration)
+                    && !(_state.Phase is Phase.DefenseAssignment or Phase.CavalryDefense && IsGojuAsuka(c))).Select(c=>c.Id).ToArray(); // Delayed Arrival (issue #492, group F); Goju Asuka never defends (issue #501)
                 var attack=_state.Phase is Phase.InfantryDeclaration or Phase.CavalryDeclaration;
                 // Defenders are offered only the battlefields AssignDefense accepts.
                 var provinces=Player(1-_state.ActivePlayerId).Provinces
