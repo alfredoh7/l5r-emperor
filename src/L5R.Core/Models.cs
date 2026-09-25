@@ -1038,6 +1038,9 @@ public sealed class MatchState
     public List<int> PendingEndPhaseDraws { get; set; } = [];
     public List<int> CurrentActionFavorTakers { get; set; } = [];
     public List<HiddenFallsGrant> HiddenFallsGrants { get; set; } = [];
+    // Emperor Edition remaining-cards pass (issue #492), group E (EmperorRemainingE.cs): Consecration's "after the first time this turn a Personality assigns or moves to an attacking army at one of those
+    // provinces' battlefields, gain 2 Honor" -- one record per use, each spent by the event or lapsing with the turn.
+    public List<ConsecrationWatch> ConsecrationWatches { get; set; } = [];
     public bool ExtraInfantrySegment { get; set; }
     // Brotherhood Schism: the turn in which "Rings will not enter play if their owner has already put a Ring into play this turn" stands.
     public int RingSchismTurn { get; set; } = -1;

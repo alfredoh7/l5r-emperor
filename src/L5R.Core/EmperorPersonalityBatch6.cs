@@ -70,7 +70,9 @@ public sealed partial class MatchEngine
     // Rings' recruits, and the Ring is in play now.
     private bool YungRingEnteredPlay(ResolvedActionFacts facts, int playerId) =>
         facts.PlayerId == playerId && facts.SourceId is { } sourceId && _state.Cards.TryGetValue(sourceId, out var ring)
-        && Definition(ring).Type == CardType.Ring && ring.OwnerId == playerId && ring.Zone == Zone.Home && facts.AbilityId.EndsWith("-recruit", StringComparison.Ordinal);
+        && Definition(ring).Type == CardType.Ring && ring.OwnerId == playerId && ring.Zone == Zone.Home && facts.AbilityId.EndsWith("-recruit", StringComparison.Ordinal)
+        // Togashi's Guidance (Emperor Edition remaining-cards pass, issue #492, group E) also puts a Ring into play: "After one of your Rings enters play".
+        || facts.PlayerId == playerId && facts.Affected.Any(a => a.Kind == RingEnteredKind && Card(a.CardId) is { Zone: Zone.Home } entered && entered.OwnerId == playerId);
 
     // ---- Daigotsu Kanpeki - exp ----
 
