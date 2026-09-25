@@ -1201,6 +1201,8 @@ public sealed class MatchState
     // Emperor Edition mechanics group C (issue #501, EmperorMechC.cs): an additional cost of entering play awaiting its payer's choice, and the answers given so far to the command being replayed.
     public PendingEntryCostDecision? PendingEntryCostDecision { get; set; }
     public List<string> EntryCostAnswers { get; set; } = [];
+    // Issue #501, mechanics group D (EmperorMechD.cs): the Recon-action counter, the attach log, the cards-into-hand records and timed removals.
+    public MechDState MechD { get; set; } = new();
 }
 
 /// <summary>Isawa Norimichi: PlayerId's army has +Amount total Force in the battle numbered Battle (while it has any units).</summary>

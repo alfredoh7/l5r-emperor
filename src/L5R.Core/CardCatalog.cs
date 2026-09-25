@@ -674,6 +674,8 @@ public static class CardCatalog
             .Concat(PublishedContent.PersonalityWave95.Cards) // Emperor Edition mechanics group E (issue #501): Kakita Kae, Moto Rani - exp, Yoritomo Singh - exp2, Zlkyt
             .Concat(PublishedContent.StrategyWave81.Cards) // Emperor Edition mechanics group E (issue #501): Greasing the Wheels, The Heir's Wrath, The Host's Advantage
             .Concat(PublishedContent.HoldingWave28.Cards) // Emperor Edition mechanics group E (issue #501): Seaside Bazaar
+            .Concat(PublishedContent.PersonalityWave92.Cards) // Issue #501, mechanics group D: Daidoji Narizane, Daigotsu Yajinden - exp3
+            .Concat(PublishedContent.StrategyWave78.Cards) // Issue #501, mechanics group D: Broken Cipher, Indecision, Amazing Feat
             .ToDictionary(c => c.Id, StringComparer.Ordinal);
     }
 }

@@ -60,6 +60,7 @@ public sealed partial class MatchEngine
         DeciderSpecs.KimiDiscard => $"{Definition(Card(p.SourceCardId)).Name}: {Player(p.DeciderPlayerId).Name}, choose a card from your hand. It is discarded.",
         DeciderSpecs.GovernorsCourt => $"{Definition(Card(p.SourceCardId)).Name}: {Player(p.DeciderPlayerId).Name}, you may choose one of your unbowed Personalities to bow; if you choose none, {Player(p.ActingPlayerId).Name} gains 2 Honor.",
         _ when EmperorRemainingBSpecs.IsDeciderSpec(p.SpecId) => EmperorRemainingBDeciderPrompt(p), // Emperor Edition remaining-cards pass (issue #492), group B
+        _ when EmperorMechDSpecs.IsDeciderSpec(p.SpecId) => MechDDeciderPrompt(p), // Issue #501, mechanics group D (EmperorMechD.cs)
         _ => throw new RuleViolation("Unknown choice.")
     };
 
@@ -88,6 +89,7 @@ public sealed partial class MatchEngine
             case DeciderSpecs.BloodOfThePreserverFirst:
                 return (BloodOfThePreserverCandidates([]), 0, 2);
             case var remainingB when EmperorRemainingBSpecs.IsDeciderSpec(remainingB): return EmperorRemainingBDeciderOptions(remainingB, deciderId); // Emperor Edition remaining-cards pass (issue #492), group B
+            case var mechD when EmperorMechDSpecs.IsDeciderSpec(mechD): return MechDDeciderOptions(mechD, deciderId, command); // Issue #501, mechanics group D (EmperorMechD.cs)
             default: throw new RuleViolation("Unknown choice.");
         }
     }
@@ -98,7 +100,8 @@ public sealed partial class MatchEngine
         HashSet<string> bowedBefore, List<AdditionalActionGrant> preExistingGrants)
     {
         var source = Card(command.CardId);
-        var deciderId = specId is DeciderSpecs.KnowTheirMinds or DeciderSpecs.TaraoSacrifice or DeciderSpecs.GovernorsCourt ? command.TargetPlayerId ?? command.PlayerId
+        var deciderId = EmperorMechDSpecs.IsDeciderSpec(specId) ? MechDDeciderId(specId, command) // Issue #501, mechanics group D (EmperorMechD.cs)
+            : specId is DeciderSpecs.KnowTheirMinds or DeciderSpecs.TaraoSacrifice or DeciderSpecs.GovernorsCourt ? command.TargetPlayerId ?? command.PlayerId
             : specId == DeciderSpecs.BloodOfThePreserverFirst || EmperorRemainingBSpecs.IsFirstDecider(specId) ? command.PlayerId : specId == DeciderSpecs.KimiDiscard ? 1 - command.PlayerId : _state.ActivePlayerId;
         var (candidates, min, max) = DeciderOptions(specId, deciderId, command);
         var pending = new PendingDeciderChoice
@@ -217,6 +220,9 @@ public sealed partial class MatchEngine
             case var remainingB when EmperorRemainingBSpecs.IsDeciderSpec(remainingB): // Emperor Edition remaining-cards pass (issue #492), group B
                 ApplyEmperorRemainingBDeciderChoice(p);
                 break;
+            case var mechD when EmperorMechDSpecs.IsDeciderSpec(mechD): // Issue #501, mechanics group D (EmperorMechD.cs)
+                ApplyMechDDeciderChoice(p);
+                break;
         }
         _state.NegatedEffects.Clear();
     }
@@ -238,7 +244,8 @@ public sealed partial class MatchEngine
         if (_state.PendingDeciderChoice is not { } p || p.DeciderPlayerId != playerId) yield break;
         var verb = p.SpecId switch { DeciderSpecs.ScandalousRumors => "Move home", DeciderSpecs.DragonsBreath => "Bow", DeciderSpecs.TaraoSacrifice => "Sacrifice", DeciderSpecs.KimiDiscard => "Discard", DeciderSpecs.GovernorsCourt => "Bow",
             DeciderSpecs.BloodOfThePreserverFirst or DeciderSpecs.BloodOfThePreserverSecond => "Remove from the game",
-            EmperorRemainingBSpecs.HeavilyEngagedFirst or EmperorRemainingBSpecs.HeavilyEngagedSecond => "Bow", EmperorRemainingBSpecs.MysteriousDeathsFirst or EmperorRemainingBSpecs.MysteriousDeathsSecond => "Destroy", _ => "Turn face-down" };
+            EmperorRemainingBSpecs.HeavilyEngagedFirst or EmperorRemainingBSpecs.HeavilyEngagedSecond => "Bow", EmperorRemainingBSpecs.MysteriousDeathsFirst or EmperorRemainingBSpecs.MysteriousDeathsSecond => "Destroy",
+            var mechD when EmperorMechDSpecs.IsDeciderSpec(mechD) => MechDDeciderVerb(mechD), _ => "Turn face-down" }; // issue #501
         if (p.Chosen.Count < p.Max)
             foreach (var id in p.Candidates.Where(c => !p.Chosen.Contains(c)))
                 yield return new("chooseDecider", $"{verb} · {Definition(Card(id)).Name}", true, null,
