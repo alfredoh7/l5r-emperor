@@ -767,10 +767,12 @@ public sealed partial class MatchEngine
     // battlefield (issue #394, "at this battlefield"): the province whose battle the card is created at, on its controller's side; null is home.
     // printed (issue #402): the card's own printed values when they are not the scan's; beforeWindow: the rest of the creating action, run before any entry window opens.
     // createdCopy (issue #398): the card is a created copy of another card, marked per instance (CardInstance.CreatedCopy); a copy of a card with printed values keeps them.
-    private bool CreatePersonality(int ownerId, CardDefinition definition, bool duringEntryReaction, int? battlefield, out CardInstance card, CardDefinition? printed = null, Action? beforeWindow = null, bool createdCopy = false)
+    // original (issue #501 item 32): the card copied, recorded for the view's duplicate frame (MarkAsCopy).
+    private bool CreatePersonality(int ownerId, CardDefinition definition, bool duringEntryReaction, int? battlefield, out CardInstance card, CardDefinition? printed = null, Action? beforeWindow = null, bool createdCopy = false, CardInstance? original = null)
     {
         card=new CardInstance{Id=$"created-{++_state.CreatedCardSequence:D4}",DefinitionId=definition.Id,Printed=printed,OwnerId=ownerId,Zone=battlefield is null?Zone.Home:Zone.Battlefield,ProvinceIndex=battlefield,FaceUp=true,CreatedCopy=createdCopy};
         _state.Cards.Add(card.Id,card);
+        if(original is not null) MarkAsCopy(card,original); // issue #501 item 32: the copy's frame and the original's scan
         var title=(printed??definition).Name; var where=battlefield is null?"":" at the battlefield";
         Emit("cardCreated",createdCopy?$"{Player(ownerId).Name} created a copy of {title}{where}.":$"{Player(ownerId).Name} created {title}{where}.",ownerId,card.Id);
         QueueOverconfidentDraw(card);
