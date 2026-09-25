@@ -246,10 +246,13 @@ public sealed partial class MatchEngine
         grant.RangedTargetId is null || command?.AbilityId is { } id && AttackKind(id) == "Ranged" && AttackCommandTarget(command) == grant.RangedTargetId;
 
     // A grant that limits WHICH action may spend it: Koshin Keep's "additional Ranged Attack that may only target the same card" and Honor Never Falls' "additional Battle action to use one of his base abilities" (issue #496).
-    private static bool RestrictedGrant(AdditionalActionGrant grant) => grant.RangedTargetId is not null || grant.BaseAbilityOnly;
+    private static bool RestrictedGrant(AdditionalActionGrant grant) => grant.RangedTargetId is not null || grant.BaseAbilityOnly
+        || grant.RequiredActionKeyword is not null || grant.Tag is not null; // issue #501 (EmperorMechA.cs): Inokuchi's Iaijutsu, Beyond the Line's Recon ability
 
     private static string RestrictedGrantMessage(AdditionalActionGrant[] held) => held.Any(g => g.RangedTargetId is not null)
         ? "Koshin Keep: the additional action must be a Ranged Attack that targets the same card."
+        : held.Any(g => g.Tag == EmperorMechAAbilities.BeyondTheLineTag) ? "Beyond the Line: the additional action must use a Limited or Open Recon ability as a Battle action that targets the current battlefield's province."
+        : held.Any(g => g.RequiredActionKeyword is not null) ? $"The additional action must be {held.First(g => g.RequiredActionKeyword is not null).RequiredActionKeyword}{(held.Any(g => g.PerformerId is not null) ? " and performed by the named Personality" : "")}."
         : "Honor Never Falls: the additional action must use one of the Personality's base abilities.";
 
     // The commands that are not abilities (Equip, a Terrain played from a hand, a Reserve recruit): none is a Ranged Attack or a Personality's base ability, so none may be taken while only a restricted grant is held.

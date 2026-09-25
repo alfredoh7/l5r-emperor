@@ -5316,8 +5316,11 @@ static void AdditionalActionPrimitive()
         var e=MatchEngine.FromTestState(s);
         Accept(e,new GameCommand("useAbility",0,e.Version,CardId:twoHands.Id,PerformerId:kensai.Id,AbilityId:"two-hands-grant"));
         Check(e.State.NoNewAdditionalActionsThisBattle);
-        Accept(e,new GameCommand("pass",0,e.Version)); // forfeits the still-unused grants; first of two consecutive passes
-        Check(!e.State.AdditionalActions.Any(),"A mere pass already forfeits the still-unused grants");
+        // Mendon's item 2 (issue #501): a pass by the holder takes ONE of his two grants as a pass (he keeps the priority), a second pass the other; one player's two passes count as one.
+        Accept(e,new GameCommand("pass",0,e.Version));
+        Check(e.State.AdditionalActions.Count==1 && e.State.PriorityPlayerId==0,"The first pass takes one grant as a pass; the holder keeps the priority");
+        Accept(e,new GameCommand("pass",0,e.Version));
+        Check(!e.State.AdditionalActions.Any() && e.State.PriorityPlayerId==1 && e.State.Phase==Phase.Battle,"The second pass takes the other; the battle is not over (only one player has passed)");
         Check(e.State.NoNewAdditionalActionsThisBattle,"But the restriction itself survives a pass");
         Accept(e,new GameCommand("pass",1,e.Version)); // second consecutive pass: resolves the battle
         Check(!e.State.NoNewAdditionalActionsThisBattle,"Cleared once the battle actually resolves");

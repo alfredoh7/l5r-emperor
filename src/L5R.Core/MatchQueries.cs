@@ -574,6 +574,7 @@ public sealed partial class MatchEngine
                 // Open equip of a Weapon in ANY player's action segment. The per-attachment timing is decided in EquipActions.
                 result.AddRange(EquipActions(playerId));
                 Add("pass","Pass action",Command("pass"));
+                if(MayDeclineAdditionalAction(playerId)) Add("declineAdditionalAction","Decline the additional action",Command("declineAdditionalAction")); // Mendon's item 2 (issue #501)
                 break;
             case Phase.AttackDeclaration:
                 Add("declareAttack","Declare an attack",Command("declareAttack"),player.MayNotAttackThisTurn||AttackLockedByEvent(playerId)?"You may not declare an attack this turn.":null);
@@ -662,6 +663,7 @@ public sealed partial class MatchEngine
                 // A Battle-timing equip granted by a card in play (Foothills Keep, TimingGrants.cs): a Weapon from hand to a Personality at the battlefield.
                 result.AddRange(EquipActions(playerId));
                 Add("pass","Pass battle action",Command("pass"));
+                if(MayDeclineAdditionalAction(playerId)) Add("declineAdditionalAction","Decline the additional action",Command("declineAdditionalAction")); // Mendon's item 2 (issue #501)
                 break;
             case Phase.Dynasty:
             case Phase.DynastyDiscard:

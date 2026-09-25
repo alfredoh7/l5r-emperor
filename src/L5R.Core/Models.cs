@@ -574,7 +574,12 @@ public sealed record FirstActionRestriction(int PlayerId, string? PerformerId, b
 // PerformerId (Emperor Edition remaining-cards pass, group C, issue #492: Spinning Heel Kick): the additional action "which he must perform" -- spent only by an action that Personality performs.
 // BaseAbilityOnly (Emperor Edition three-scans pass, issue #496: Honor Never Falls -- "an additional Battle action to use one of his base abilities"): with a PerformerId, the grant is spent only by one of the abilities PRINTED on that Personality
 // (his own definition's abilities, not one an attachment provides or one granted to him).
-public sealed record AdditionalActionGrant(int PlayerId, string[]? ScopeCardIds, bool FromDiscard = false, int? Battle = null, bool AnyDiscardTiming = false, string? RangedTargetId = null, string? PerformerId = null, bool BaseAbilityOnly = false);
+// Issue #501 (EmperorMechA.cs): RequiredActionKeyword -- the action spending the grant must carry that keyword (Mirumoto Inokuchi: "which must be Iaijutsu"; Beyond the Line: a Recon ability);
+// Tag -- a grant with a rule of its own (Beyond the Line: a Limited or Open Recon ability used as a Battle action that targets the current battlefield's province); Id -- a unique name, so a grant can be
+// followed after it leaves the list (Inokuchi's "If you don't, bow him") and is never equal to another grant; Mandatory -- the text does not say "may" (Beyond the Line: "Take an additional action"),
+// so the grant may be taken as a pass but not declined (Mendon's item 2).
+public sealed record AdditionalActionGrant(int PlayerId, string[]? ScopeCardIds, bool FromDiscard = false, int? Battle = null, bool AnyDiscardTiming = false, string? RangedTargetId = null, string? PerformerId = null, bool BaseAbilityOnly = false,
+    string? RequiredActionKeyword = null, string? Tag = null, string? Id = null, bool Mandatory = false);
 
 /// <summary>A discard a player owes: they choose the card from their hand (Times of Strife, Daigotsu Bofana - exp's entry).
 /// Reason names the card or rule in the prompt and the event.</summary>
@@ -920,6 +925,8 @@ public sealed class MatchState
     public EmperorRemainingCState RemC { get; set; } = new();
     // Emperor Edition rulings pass R1 (issue #492): battlefields without a province, and a battle fought inside the Action Phase (EmperorRulingR1.cs).
     public RulingR1State R1 { get; set; } = new();
+    // Issue #501, mechanics group A (EmperorMechA.cs): additional actions (pass and decline, conditional grants, the per-battle records) and Aramasu's Legacy's Attack Phase inside the Action Phase.
+    public MechAState MechA { get; set; } = new();
     // Entrenched Position: the battle (BattleNumber) in which the Attacker holds the first opportunity to act and the Defender has not yet had his first normal
     // opportunity to act or pass -- set when the Engage window closes with the Attacker holding it, cleared the moment the Attacker cedes priority (NextAction, Pass).
     public int AttackerLeadBattle { get; set; } = -1;
