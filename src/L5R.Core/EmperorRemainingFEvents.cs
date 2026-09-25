@@ -84,13 +84,13 @@ public sealed partial class MatchEngine
                 return BeginRevealChoice("delayed-arrival", player, card, _state.Cards.Values.Where(c => InPlay(c) && Definition(c).Type == CardType.Personality).Select(c => c.Id).Order(StringComparer.Ordinal).ToList(),
                     $"{Definition(card).Name}: choose a Personality in play. He may not be assigned to attack {player.Name} until {player.Name}'s next turn begins.");
             case MoonAndSunEffect:
-                return AskMoonAndSun(player, card, 0);
+                return AskMoonAndSun(player, card, 0) || DiscardResolvedEvent(player, province, card);
             case NaoharusGiftEffect:
                 return BeginRevealChoice("naoharu-show", player, card, player.Hand.ToList(), $"{Definition(card).Name}: choose a card in your hand to show to the other player and offer as a gift.");
             case RebuildingTheEmpireEffect:
-                return AskRebuilding(player, card, 0);
+                return AskRebuilding(player, card, 0) || DiscardResolvedEvent(player, province, card);
             case BeneficesEffect:
-                return AskBenefices(player, card, 0, []);
+                return AskBenefices(player, card, 0, []) || DiscardResolvedEvent(player, province, card);
             default:
                 throw new InvalidOperationException($"Unknown Emperor Edition group F Event '{Definition(card).Effect}'.");
         }
@@ -105,6 +105,15 @@ public sealed partial class MatchEngine
         if (eventsPhaseIn is int phases) card.ExpiresAtEventsPhaseTurnsTaken = player.TurnsTaken + phases;
         Emit("eventEnteredPlay", message, player.Id, card.Id);
         Refill(player, province);
+    }
+
+    // An Event that had nothing to ask is over: it is discarded and its province refills (always false: the reveal carries on).
+    private bool DiscardResolvedEvent(PlayerState player, ProvinceState province, CardInstance card)
+    {
+        province.CardId = null; card.ProvinceIndex = null; card.Zone = Zone.DynastyDiscard;
+        Emit("eventResolved", $"{Definition(card).Name}: nothing to decide, so it resolved and was discarded.", player.Id, card.Id);
+        Refill(player, province);
+        return false;
     }
 
     // The Event's province, wherever its row has moved it to: the one that still holds it.
@@ -240,7 +249,7 @@ public sealed partial class MatchEngine
             case "benefices":
             {
                 Require(command.Choice == "none" || command.TargetId is not null && pending.Candidates.Contains(command.TargetId), "Choose a card in your hand, or none.");
-                var data = pending.Data.Append(command.Choice == "none" ? "" : command.TargetId!).ToList();
+                var data = pending.Data.Append(command.Choice == "none" ? "" : $"{player.Id}|{command.TargetId}").ToList();
                 _state.PendingChoice = null; _state.PendingEventChoice = null;
                 if (AskBenefices(Player(card.OwnerId), card, pending.Step + 1, data)) return;
                 ResolveBenefices(card, data);
@@ -429,7 +438,7 @@ public sealed partial class MatchEngine
         for (var i = step; i < 2; i++)
         {
             var who = Player(i == 0 ? owner.Id : 1 - owner.Id);
-            if (who.Hand.Count == 0) { data = data.Append("").ToList(); continue; }
+            if (who.Hand.Count == 0) continue;
             OpenEventChoice(new PendingEventChoice { Kind = "benefices", EventCardId = card.Id, PlayerId = who.Id, Origin = "reveal", Candidates = who.Hand.ToList(), Step = i, Data = data,
                 Prompt = $"{Definition(card).Name}: you may choose a card in your hand. All chosen cards are discarded; the lowest and highest Focus Values win." });
             return true;
@@ -438,13 +447,15 @@ public sealed partial class MatchEngine
     }
 
     // Discard every chosen card, then: exactly one player's card with the lowest Focus Value of them all gains a province to the left of his leftmost province; exactly one player's with the highest
-    // gets +3 maximum hand size permanently and draws three cards. (data[i] is the card the i-th player asked chose, "" for none.)
+    // gets +3 maximum hand size permanently and draws three cards. (data holds "player|card" for each card chosen; "" for a player who chose none.)
     private void ResolveBenefices(CardInstance card, List<string> data)
     {
-        var owner = Player(card.OwnerId);
         var chosen = new List<(PlayerState Player, CardInstance Card)>();
-        for (var i = 0; i < data.Count; i++)
-            if (data[i].Length > 0) chosen.Add((Player(i == 0 ? owner.Id : 1 - owner.Id), Card(data[i])));
+        foreach (var entry in data.Where(d => d.Length > 0))
+        {
+            var parts = entry.Split('|');
+            chosen.Add((Player(int.Parse(parts[0])), Card(parts[1])));
+        }
         foreach (var (who, discarded) in chosen)
         {
             who.Hand.Remove(discarded.Id); discarded.Zone = Zone.FateDiscard; discarded.FaceUp = true;

@@ -17,10 +17,12 @@ internal static partial class EmperorRemainingFTests
     }
 
     // Player 0 is in his Action Phase; the engine is driven with offered commands until player 1's Events Phase has revealed the Event and either asked a question or handed him the Action Phase.
-    private static MatchEngine Reveal(string eventDefinition, out CardInstance evt, Action<MatchState>? prepare = null)
+    private static MatchEngine Reveal(string eventDefinition, out CardInstance evt, Action<MatchState>? prepare = null, int province = 3)
     {
         var s = Table(Phase.Action, 0); s.PriorityPlayerId = 0;
-        evt = FaceDownIn(s, eventDefinition, 1, 3);
+        // The other cards in player 1's provinces are plain Holdings, so no other Event gets revealed (or discarded) ahead of this one.
+        foreach (var other in s.Cards.Values.Where(c => c.OwnerId == 1 && c.Zone == Zone.Province)) other.DefinitionId = "training-marketplace";
+        evt = FaceDownIn(s, eventDefinition, 1, province);
         prepare?.Invoke(s);
         var e = MatchEngine.FromTestState(s);
         RunUntil(e, () => e.State.PendingChoice is { Type: "eventChoice" } || e.State.ActivePlayerId == 1 && e.State.Phase == Phase.Action);
