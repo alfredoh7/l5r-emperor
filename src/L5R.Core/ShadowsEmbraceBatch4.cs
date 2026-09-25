@@ -125,7 +125,9 @@ public sealed partial class MatchEngine
             }
             // Preserving Beauty: the check names the battlefield's province now; it is judged as the turn ends.
             case "preserving-beauty":
-                _state.PreservingBeautyChecks.Add(new(player.Id, 1 - _state.ActivePlayerId, _state.CurrentBattleProvince!.Value, _state.TurnNumber, Definition(source!).Name));
+                // A battlefield without a province has none to keep (issue #492, rulings pass R1): nothing is queued.
+                if (CurrentProvinceIndex() is not int beautyProvince) return false;
+                _state.PreservingBeautyChecks.Add(new(player.Id, 1 - _state.ActivePlayerId, beautyProvince, _state.TurnNumber, Definition(source!).Name));
                 Emit("delayedHonorQueued", $"{Definition(source!).Name}: {player.Name} gains 3 Honor before this turn ends if this battlefield's province has not been destroyed.", player.Id, source!.Id);
                 return false;
             // Running Battle: -4F; the chosen attachment (only with Reconnaissance) goes to its owner's hand; then the Scout may move home.

@@ -55,8 +55,9 @@ TEXT: dict[int, str] = {
     8313: "Battle: Choose your performing defending Courtier and target an enemy Personality: Bow him. After the next time this turn another player's action or "
           "a battle resolution destroys your Courtier, draw a card, and choose a player, who gains or loses 2 Honor.",
     8338: "As a Focus Effect: After this duel ends, if you won it, give all your provinces +2 strength.\n"
-          "Battle/Open: Choose your performing unbowed Dragon Clan Personality: Name a number. After the next resolution this turn of your action from another Strategy "
-          "or Ring with a base Focus Value equal to the number, draw a card, and choose a player, who discards a card.",
+          "Battle/Open: If you are a Dragon Clan player, choose your performing unbowed Dragon Clan Personality: Name a number. After the next resolution this turn of your "
+          "action from another Strategy or Ring with a base Focus Value equal to the number, draw a card, and choose a player, who discards a card. "
+          "Remove this card from the game.",
     8340: "As a Focus Effect: After this duel ends, give its winner +3F.\nBattle: Target an opposed unit: Straighten it.",
     8394: "Battle: If you have Reconnaissance, choose your performing unbowed Scout Personality, and target an enemy card: Bow it. Bow its unit if you are a Crane Clan player.",
     8639: "Reaction: After engaging, choose your performing Scout at the current battlefield: You have Reconnaissance there. Negate the next card effect that bows "

@@ -1,8 +1,5 @@
 namespace L5R.Core;
 
-/// <summary>Deadly Orders (oracle-l5r-1885): "After this battle's resolution, destroy the Follower." The Follower is destroyed once the battle it was boosted in has resolved.</summary>
-public sealed record RemADeadlyOrdersMark(string FollowerId, int PlayerId, string Source);
-
 // Emperor Edition remaining-cards pass (issue #492), group A: the twenty-four Strategies of strategy-wave-58 -- A Forefather's Vengeance, A Paragon's Strength, A Pure Stroke,
 // A Time for Mortal Men, Ancestral Protection, Aramoro's Promise, Bad Kharma, Bend like a Reed, Besieged, Breath of the Heavens, Burn the Towers, Caught in the Act, Control the
 // Field, Dangerous Indulgence, Deadly Orders, Deception Revealed, Duel of Serpents, Extended Maneuvers, Face of Ninube, Falling Leaf Strike, Final Confrontation, Flooded Pass,
@@ -184,6 +181,8 @@ public sealed partial class MatchEngine
     {
         "own-personality-with-keyword" => _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && Definition(c).Type == CardType.Personality && HasKeywords(c, reaction.RequiredKeywords))
             .OrderBy(c => c.Id, StringComparer.Ordinal),
+        // The Loyalty of the Scorpion (ruling pass R2, issue #492): "your performing Scorpion Clan Personality" -- every Personality of the category the player controls.
+        { } category when category.StartsWith("rr2-", StringComparison.Ordinal) => _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && RulingR2PerformerAllows(reaction, c, false)).OrderBy(c => c.Id, StringComparer.Ordinal),
         _ => throw new InvalidOperationException($"A targeted-by-action Reaction with the performer '{reaction.Performer}' is not listed.")
     };
 
@@ -232,7 +231,7 @@ public sealed partial class MatchEngine
     {
         // The Unimpeachable Name window is opened for the Strategy Reactions below as well: Unimpeachable Name itself is offered only when its own condition holds.
         if (id == "unimpeachable-name-reaction")
-            Require(UnimpeachableNameAvailable(player.Id, _state.PendingOutOfPlayActionReaction?.AbilityId), "Unimpeachable Name needs a dishonorable Personality or an Honor loss to react to.");
+            Require(_state.PendingHonorChange is not null || UnimpeachableNameAvailable(player.Id, _state.PendingOutOfPlayActionReaction?.AbilityId), "Unimpeachable Name needs a dishonorable Personality or an Honor loss to react to.");
         CardInstance? performer = command.PerformerId is not null && _state.Cards.TryGetValue(command.PerformerId, out var chosen) ? chosen : null;
         switch (id)
         {
@@ -399,8 +398,7 @@ public sealed partial class MatchEngine
             case "besieged-lower":
             {
                 var amount = Definition(Card(command.PerformerId!)).Chi * (id == "besieged-raise" ? 1 : -1);
-                foreach (var province in _state.Players.SelectMany(p => p.Provinces).Where(p => !p.Destroyed)) province.Strength += amount;
-                Emit("provinceStrengthRaised", $"{name}: every province has {amount:+#;-#;0} strength.", player.Id);
+                foreach (var owner in _state.Players) foreach (var province in owner.Provinces.Where(p => !p.Destroyed)) GiveProvinceStrengthThisTurn(owner.Id, province.Index, amount, name); // until end of turn (issue #492 ruling R3)
                 return false;
             }
             // Breath of the Heavens: the Ranged 3 Attack (+1 for each Fire token now on the Personality), then the new +1F Fire token.
@@ -414,7 +412,7 @@ public sealed partial class MatchEngine
             // Burn the Towers.
             case "burn-towers-recon":
                 GrantReconnaissanceAtCurrentBattlefield(player.Id);
-                if (CurrentBattlefieldProvince() is { } towered) { towered.Strength -= 3; Emit("provinceStrengthLowered", $"{name}: this battlefield's province has -3 strength.", player.Id); }
+                if (_state.CurrentBattleProvince is int towered) GiveProvinceStrengthThisTurn(1 - _state.ActivePlayerId, towered, -3, name); // until end of turn (issue #492 ruling R3)
                 return false;
             // Caught in the Act: the bowing of every Personality of the reactor's the held action targets is negated.
             case "caught-act-negate-bow":
@@ -443,7 +441,7 @@ public sealed partial class MatchEngine
             // Deadly Orders: twice its current Force as a bonus now; destroyed when the battle's resolution is over.
             case "deadly-orders-boost":
                 ApplyModifier(target!, source!.Id, id, "Force", 2 * CardForce(target!));
-                _state.RemADeadlyOrders.Add(new(target!.Id, player.Id, name));
+                ScheduleDelayedEffect(target!, DelayedKinds.Destroy, DelayUntil.EndOfBattle, null, name, source.Id); // the shared delay store (issue #492, EmperorRulingR2.cs): destroyed once the battle has ended
                 return false;
             // Deception Revealed.
             case "deception-revealed-straighten":
@@ -481,7 +479,7 @@ public sealed partial class MatchEngine
                 return false;
             // Fortitude.
             case "fortitude-bow":
-                if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
+                BowUnitByEffect(target!, player.Id); // "Bow the target" -- the target is an enemy unit (issue #492, ruling R5: every card in the unit bows, each unless its own bowing is prevented)
                 NegateForcePenalties(Card(command.PerformerId!));
                 return false;
             default:
@@ -536,24 +534,22 @@ public sealed partial class MatchEngine
         Emit("handShuffled", $"{player.Name} shuffled {cards.Length} card{(cards.Length == 1 ? "" : "s")} from hand into the Fate deck.", player.Id);
     }
 
-    // ---- Deadly Orders --------------------------------------------------------------------------------------------------------------------------------------------
-
-    // Drained once the battle's resolution (and its return home) is over: each marked Follower still in play is destroyed.
-    private void ResolveRemADeadlyOrders()
-    {
-        var marks = _state.RemADeadlyOrders.ToArray();
-        _state.RemADeadlyOrders.Clear();
-        foreach (var mark in marks)
-            if (_state.Cards.TryGetValue(mark.FollowerId, out var follower) && follower.Zone == Zone.Attached && Definition(follower).Type == CardType.Follower)
-            {
-                Emit("delayedDestruction", $"{mark.Source}: {Definition(follower).Name} is destroyed after this battle's resolution.", mark.PlayerId, follower.Id);
-                DestroyAttachment(follower);
-            }
-    }
+    // ---- Deadly Orders: its destruction "after this battle's resolution" is a delayed effect (DelayUntil.EndOfBattle, EmperorRulingR2.cs). ----
 
     // ---- Deception Revealed -------------------------------------------------------------------------------------------------------------------------------------
 
-    // The Rings this action bowed (as an effect or a cost), read off the same before/after snapshot as the bow-reaction windows, are put on its record.
+    // Mendon's R4 ruling (issue #492): "Focus effects are not actions, only effects that start with Limited, Open, Battle, Reaction ... that bow a ring may be used to straighten it. This includes the
+    // ring bowing to pay a cost or being bowed as an effect of an action." So the Rings an ACTION bowed -- as a cost or as an effect, whichever way the action resolved (an ability, the Attack or the
+    // duel it declared) -- are the ones on its record; a Ring bowed while a Focus Effect resolves is excluded from the duel's action.
+    private HashSet<string> BowedRingIds() => _state.Cards.Values.Where(c => c.Bowed && Definition(c).Type == CardType.Ring).Select(c => c.Id).ToHashSet();
+
+    private void ExcludeFocusEffectRingBows(HashSet<string> ringsBowedBefore)
+    {
+        if (_state.PendingDuel is not { RingsBowedBefore: { } tracked }) return;
+        foreach (var id in BowedRingIds()) if (!ringsBowedBefore.Contains(id) && !tracked.Contains(id)) tracked.Add(id);
+    }
+
+    // The Rings this action bowed (as an effect or a cost) are put on its record.
     private void RecordBowedRings(HashSet<string> bowedBeforeAction)
     {
         foreach (var ring in _state.Cards.Values.Where(c => Definition(c).Type == CardType.Ring && InPlay(c) && c.Bowed && !bowedBeforeAction.Contains(c.Id)))
@@ -565,9 +561,10 @@ public sealed partial class MatchEngine
     // "This province has +2 strength for each unit in the attacking army": read live, while the Terrain stands at the battlefield of that province during its battle.
     private int RemATerrainProvinceBonus(ProvinceState province)
     {
-        if (_state.CurrentBattleProvince != province.Index || !ProvinceIsBattlefieldOfCurrentBattle(province)) return 0;
-        var floods = TerrainsAtBattlefield(province.Index).Count(t => Definition(t).Effect == EmperorRemainingAAbilities.FloodedPassEffect);
-        return floods == 0 ? 0 : 2 * floods * Army(_state.ActivePlayerId, province.Index).Count();
+        if (CurrentProvinceIndex() != province.Index || !ProvinceIsBattlefieldOfCurrentBattle(province)) return 0;
+        var battlefield = _state.CurrentBattleProvince!.Value;
+        var floods = TerrainsAtBattlefield(battlefield).Count(t => Definition(t).Effect == EmperorRemainingAAbilities.FloodedPassEffect);
+        return floods == 0 ? 0 : 2 * floods * Army(_state.ActivePlayerId, battlefield).Count();
     }
 
     // "Battle: Even if you control no units at the current battlefield, if there are no Terrains there: Put this card into play there." -- the Terrain play needs no presence.

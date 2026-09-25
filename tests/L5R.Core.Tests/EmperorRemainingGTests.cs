@@ -19,7 +19,7 @@ internal static class EmperorRemainingGTests
         ("Tsuruchi Daikyu: bows to make a Ranged 5 Attack -- Force 5 dies, Force 6 is a legal target that survives, and it cannot be used again while bowed", DaikyuAttack),
         ("Modifications: a Battle action that draws a card", ModificationsDraw),
         ("Sasumata: bows itself to bow an enemy card without a Weapon or Armor -- a Personality with either is not a target, an attachment and a Follower are", SasumataBow),
-        ("Tsuruchi House Guard: Ranged 5 Attack compared against the lower of Force and Gold Cost", TsuruchiGuardAttack),
+        ("Tsuruchi House Guard: Ranged 5 Attack compared against Force or Gold Cost, the players choice (ruling R5)", TsuruchiGuardAttack),
         ("Tamori House Guard: an enemy Personality or Follower gets -4F and may not perform actions this turn", TamoriGuardStone),
         ("Ikoma House Guard: Melee Attack with strength equal to its Personality's Personal Honor plus two, and 1 Honor when it destroyed a card", IkomaGuardAttack),
         ("Kaiu House Guard: destroys an enemy card without attachments whose unit has lower total Force than its own, and gains 1 Honor", KaiuGuardDestroy),
@@ -159,10 +159,17 @@ internal static class EmperorRemainingGTests
         Accept(e1, Offer(e1, 0, "tsuruchi-house-guard-attack", guard.Id, dear.Id));
         Check(!Gone(e1, dear), "Force 6 and Gold Cost 8 are both above the strength: it survives");
         var e2 = MatchEngine.FromTestState(s);
-        Accept(e2, Offer(e2, 0, "tsuruchi-house-guard-attack", guard.Id, cheap.Id));
+        // Issue #492 (ruling R5): "you may compare against Gold Cost" is the player's choice, each way its own listed option.
+        Accept(e2, Batch336Support.OfferChoice(e2, 0, "tsuruchi-house-guard-attack", guard.Id, cheap.Id, "gold"));
         Check(Gone(e2, cheap), "compared against its Gold Cost (5), not its Force (9)");
-        Accept(e, Offer(e, 0, "tsuruchi-house-guard-attack", guard.Id, weak.Id));
+        var e2Force = MatchEngine.FromTestState(s);
+        Accept(e2Force, Batch336Support.OfferChoice(e2Force, 0, "tsuruchi-house-guard-attack", guard.Id, cheap.Id, "force"));
+        Check(!Gone(e2Force, cheap), "the player chose Force (9): above the strength, it survives");
+        Accept(e, Batch336Support.OfferChoice(e, 0, "tsuruchi-house-guard-attack", guard.Id, weak.Id, "force"));
         Check(Gone(e, weak), "compared against its Force (2), not its Gold Cost (6)");
+        var eGold = MatchEngine.FromTestState(s);
+        Accept(eGold, Batch336Support.OfferChoice(eGold, 0, "tsuruchi-house-guard-attack", guard.Id, weak.Id, "gold"));
+        Check(!Gone(eGold, weak), "the player chose Gold Cost (6): above the strength, it survives");
     }
 
     private static void TamoriGuardStone()

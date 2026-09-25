@@ -135,8 +135,8 @@ internal static class EmperorRemainingETests
         Manifest(root, "spell-wave-23", spells);
         Manifest(root, "celestial-wave-8", celestials);
         // Summon Swamp Spirits was unpublished here until its Swamp Spirit Proxy scan arrived; issue #492 (proxy group X) wired it in spell-wave-24 (EmperorProxyXTests).
-        foreach (var blocked in new[] { ChikushudosTrickery })
-            Check(!CardCatalog.Cards.ContainsKey(blocked), $"{blocked} is not published (unwired)");
+        // Chikushudo's Trickery was unpublished here until Mendon's battles-without-a-province ruling; issue #492 (rulings pass R1) wired it in spell-wave-25 (EmperorRulingR1Tests).
+        Check(CardCatalog.Cards.ContainsKey(ChikushudosTrickery), "Chikushudo's Trickery is published in spell-wave-25");
         // The scans' own wording, where the catalogue's reworded Oracle text differs.
         Check(CardCatalog.Get(CapturingSoul).Text.StartsWith("Limited: Bow this Shugenja and 0 or more of your other performing Shugenja, target a Personality, and remove this card from the game:"), "Capturing the Soul prints the scan's text");
         Check(CardCatalog.Get(KamisBlessing).Text.Contains("Give this Shugenja a Force bonus equal to his Chi") && !CardCatalog.Get(KamisBlessing).Text.Contains("Raise"), "The Kami's Blessing prints the scan's text");
@@ -956,7 +956,7 @@ internal static class EmperorRemainingETests
         Eq(e.State.PendingSearch!.Deck, SearchDeck.DynastyDiscard, "the discard pile");
         var takes = e.QueryActions(0).Where(a => a.Type == "selectSearchCard").ToArray();
         Eq(takes.Length, 1, "Moto Naleesh is offered from the pile");
-        Check(e.QueryActions(0).Any(a => a.Type == "passSearch"), "a player may pass on to the deck");
+        Check(!e.QueryActions(0).Any(a => a.Type == "passSearch"), "Mendon's R4 ruling: a card qualifies in the first place, so he must take it from there -- no passing on to the deck");
         Accept(e, takes[0].Command!);
         Eq(e.State.PendingChoice?.Type, "searchRegionProvince", "the province is chosen");
         var provinces = e.QueryActions(0).Where(a => a.Type == "chooseSearchProvince").ToArray();
@@ -966,30 +966,33 @@ internal static class EmperorRemainingETests
         Eq(e.State.Cards[old.Id].Zone, Zone.DynastyDiscard, "the card that was there was discarded");
         Check(e.State.PendingSearch is null && e.State.PendingChoice is null, "the search is over");
         Eq(e.State.Cards[deck.Id].Zone, Zone.DynastyDeck, "the other copy stays in the deck");
-        // Pass on the pile, then take her from the deck.
+        // A card in the pile qualifies: passing is refused, and the deck is never searched or shown (Mendon's R4 ruling).
         var e2 = SearchRig(true, true, out _, out var pile2, out var deck2, out _);
         Accept(e2, Opt(e2, 0, "shinjos-guidance-search").Command!);
-        Accept(e2, e2.QueryActions(0).Single(a => a.Type == "passSearch").Command!);
-        Eq(e2.State.PendingSearch!.Deck, SearchDeck.Dynasty, "then the Dynasty deck");
+        Check(e2.Execute(new("passSearch", 0, e2.Version)) is { Accepted: false }, "the pass is refused while the pile holds a qualifying card");
+        Eq(e2.State.PendingSearch!.Deck, SearchDeck.DynastyDiscard, "still the pile");
+        Check(e2.State.Events.All(ev => ev.Type != "deckShuffled"), "the deck was not searched, so it was not shuffled");
         Accept(e2, e2.QueryActions(0).Single(a => a.Type == "selectSearchCard").Command!);
         Accept(e2, e2.QueryActions(0).First(a => a.Type == "chooseSearchProvince").Command!);
-        Eq(e2.State.Cards[deck2.Id].Zone, Zone.Province, "taken from the deck");
-        Eq(e2.State.Cards[pile2.Id].Zone, Zone.Dead, "the pile copy stays");
-        Check(!e2.State.Players[0].DynastyDeck.Contains(deck2.Id), "and left the deck");
+        Eq(e2.State.Cards[pile2.Id].Zone, Zone.Province, "taken from the pile, the first place found");
+        Eq(e2.State.Cards[deck2.Id].Zone, Zone.DynastyDeck, "the deck copy stays");
+        Check(e2.State.Events.All(ev => ev.Type != "deckShuffled"), "a place that was never searched is not shuffled");
         // Nothing in the pile: the deck is searched without asking.
         var e3 = SearchRig(false, true, out _, out _, out var deck3, out _);
         Accept(e3, Opt(e3, 0, "shinjos-guidance-search").Command!);
         Check(!e3.QueryActions(0).Any(a => a.Type == "selectSearchCard"), "no Naleesh in the pile");
-        Accept(e3, e3.QueryActions(0).Single(a => a.Type == "passSearch").Command!);
+        Eq(e3.QueryActions(0).Count(a => a.Type == "passSearch"), 2, "he may search the deck next, or stop");
+        Accept(e3, e3.QueryActions(0).First(a => a.Type == "passSearch" && a.Command!.Choice is null).Command!);
         Accept(e3, e3.QueryActions(0).Single(a => a.Type == "selectSearchCard").Command!);
         Accept(e3, e3.QueryActions(0).First(a => a.Type == "chooseSearchProvince").Command!);
         Eq(e3.State.Cards[deck3.Id].Zone, Zone.Province, "found in the deck");
         // Nowhere: nothing found, the Celestial is spent all the same.
         var e4 = SearchRig(false, false, out var shinjo4, out _, out _, out _);
         Accept(e4, Opt(e4, 0, "shinjos-guidance-search").Command!);
-        Accept(e4, e4.QueryActions(0).Single(a => a.Type == "passSearch").Command!);
+        Accept(e4, e4.QueryActions(0).First(a => a.Type == "passSearch" && a.Command!.Choice is null).Command!);
         Accept(e4, e4.QueryActions(0).Single(a => a.Type == "passSearch").Command!);
         Check(e4.State.PendingSearch is null, "the search ended");
+        Eq(e4.State.Events.Count(ev => ev.Type == "deckShuffled"), 1, "the Dynasty deck was searched, so it is shuffled even though nothing was found");
         Eq(e4.State.Cards[shinjo4.Id].Zone, Zone.DynastyDiscard, "the Celestial is discarded regardless");
     }
 
@@ -1079,13 +1082,17 @@ internal static class EmperorRemainingETests
         Accept(e5, e5.QueryActions(0).Single(a => a.Type == "selectSearchCard").Command!);
         Eq(e5.State.Cards[pileRing5.Id].Zone, Zone.Hand, "the Ring from the pile is in the hand");
         Eq(e5.State.Cards[deckRing5.Id].Zone, Zone.FateDeck, "the deck was not searched");
-        var e6 = SearchRig(true, true, out _, out var pileRing6, out var deckRing6);
+        var e6 = SearchRig(true, true, out _, out _, out _);
         Accept(e6, Opt(e6, 0, "togashis-guidance-ring-search").Command!);
-        Accept(e6, e6.QueryActions(0).Single(a => a.Type == "passSearch").Command!);
+        Check(e6.Execute(new("passSearch", 0, e6.Version)) is { Accepted: false }, "Mendon's R4 ruling: a Ring qualifies in the pile, so he cannot pass on to the deck");
+        e6 = SearchRig(false, true, out _, out var pileRing6, out var deckRing6);
+        Accept(e6, Opt(e6, 0, "togashis-guidance-ring-search").Command!);
+        Accept(e6, e6.QueryActions(0).First(a => a.Type == "passSearch" && a.Command!.Choice is null).Command!);
         Eq(e6.State.PendingSearch!.Deck, SearchDeck.Fate, "then the Fate deck");
         Accept(e6, e6.QueryActions(0).Single(a => a.Type == "selectSearchCard").Command!);
         Eq(e6.State.Cards[deckRing6.Id].Zone, Zone.Hand, "the Ring from the deck is in the hand");
-        Eq(e6.State.Cards[pileRing6.Id].Zone, Zone.FateDiscard, "the pile Ring stays");
+        Check(pileRing6.Id == e6.State.Cards.Values.First(c => c.Id == pileRing6.Id).Id, "fixture");
+        Eq(e6.State.Events.Count(ev => ev.Type == "deckShuffled"), 1, "the Fate deck was searched and is shuffled");
     }
 
     private static void YoritomosGuidance_()
@@ -1112,6 +1119,30 @@ internal static class EmperorRemainingETests
         var e4 = Rig("Mantis", false, 9);
         Accept(e4, e4.QueryActions(1).First(a => a.Type == "selectBattle").Command!);
         Eq(Strength(e4), 9, "no Yoritomo's Guidance");
+        // A trait: it happens at EVERY battle a Mantis Clan player attacks (Mendon, issue #492) -- two consecutive battles in one turn, and either player as the Attacker.
+        {
+            var s = Table(Phase.BattleSelection, 1); s.PriorityPlayerId = 1; s.Players[1].Clan = "Mantis";
+            s.UnresolvedBattlefields = [0, 1]; s.Players[0].Provinces[0].Strength = 9; s.Players[0].Provinces[1].Strength = 8;
+            Add(s, YoritomosGuidance, 0, Zone.Celestial);
+            Add(s, "training-lion-samurai", 1, Zone.Battlefield, province: 0); Add(s, "training-lion-samurai", 1, Zone.Battlefield, province: 1);
+            var t = MatchEngine.FromTestState(s);
+            Accept(t, t.QueryActions(1).First(a => a.Type == "selectBattle" && a.Command!.Province == 0).Command!);
+            Eq(t.ProvinceStrengthForTest(0, 0), 5, "the first battle: province 1 reduced to 5");
+            Eq(t.ProvinceStrengthForTest(0, 1), 8, "the other province is not touched yet");
+            var between = Batch336Support.Edit(t, st => { st.Phase = Phase.BattleSelection; st.CurrentBattleProvince = null; st.UnresolvedBattlefields = [1]; st.PriorityPlayerId = 1; });
+            Accept(between, between.QueryActions(1).First(a => a.Type == "selectBattle").Command!);
+            Eq(between.ProvinceStrengthForTest(0, 1), 5, "the second battle of the same turn: reduced to 5 again -- once per battle, not once per turn");
+            Eq(between.ProvinceStrengthForTest(0, 0), 5, "the first stays reduced this turn");
+            var raised = Batch336Support.Edit(between, st => st.ProvinceStrengthEffects.Add(new(0, 1, MatchEngine.ProvinceEffectFlat, 4, st.TurnNumber, "test")));
+            Eq(raised.ProvinceStrengthForTest(0, 1), 9, "a later raise the same turn lifts it above 5");
+            var u = Table(Phase.BattleSelection, 0); u.PriorityPlayerId = 0; u.Players[0].Clan = "Mantis";
+            u.UnresolvedBattlefields = [0]; u.Players[1].Provinces[0].Strength = 9;
+            Add(u, YoritomosGuidance, 1, Zone.Celestial); Add(u, "training-crane-samurai", 0, Zone.Battlefield, province: 0);
+            var ue = MatchEngine.FromTestState(u);
+            Accept(ue, ue.QueryActions(0).First(a => a.Type == "selectBattle").Command!);
+            Eq(ue.ProvinceStrengthForTest(1, 0), 5, "it fires for whichever player is the Mantis Clan Attacker, whoever controls the Celestial");
+            Eq(Batch336Support.StrengthNextTurn(ue, 1, 0), 9, "and only until end of turn (issue #492 ruling R3)");
+        }
         // The Limited: put a discarded Port Holding into play bowed, paying 2 less Gold.
         MatchEngine PortRig(string clan, out CardInstance yoritomo, out CardInstance port, out CardInstance farm, int gold)
         {

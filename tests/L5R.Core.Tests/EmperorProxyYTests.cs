@@ -21,7 +21,7 @@ internal static class EmperorProxyYTests
         ("Published shape: Akodo Makotai, Shinjo Ki-Chang - exp and Kitsune Gina print their stats, keywords and ability ids; their three Proxies are published CreatedOnly with the scans' own stats; art and manifest ship", PublishedShape),
         ("Akodo Makotai: his Tactical Limited creates the 2F Infantry Follower Proxy attached to him -- once a turn, not while bowed, not for the other player", MakotaiCreate),
         ("Shinjo Ki-Chang - exp: after another of his controller's Personalities enters play, a 1F Cavalry Follower (Dutiful Cavalry) is created attached to THAT Personality -- once a turn, not while bowed, not for the other player's entries", KiChangCreate),
-        ("Shinjo Ki-Chang - exp: his own entry counts (the Follower goes to him); the Follower's own entry opens no second window", KiChangSelf),
+        ("Shinjo Ki-Chang - exp (ruling R5): his own entry does not trigger him (not listed, a crafted command is rejected); only another Personality's entry does", KiChangSelf),
         ("Kitsune Gina: after she enters play the Mantis Fox Personality is created at home with the scan's stats", GinaCreate),
         ("Gina's Fox: enemy attacking Personalities and Followers at its battlefield have -1F -- not its own side, not defenders, not another battlefield, not from home; two Foxes stack; Force never below 0", GinasFoxTrait),
     ]);
@@ -132,14 +132,22 @@ internal static class EmperorProxyYTests
         Check(!CanUse(MatchEngine.FromTestState(s2), 0, "kichang-exp-create", idle.Id), "not offered outside an entry window");
     }
 
+    // Issue #492 (Mendon's ruling R5): "Ki-chang may not target himself, as he has already entered play, so there is no trigger for his reaction against himself."
     private static void KiChangSelf()
     {
         var (r, kichangId) = Recruit(KiChang);
-        var before = r.State.Cards.Keys.ToHashSet();
-        Accept(r, Enabled(r, 0, "kichang-exp-create", kichangId).Command!);
-        var created = r.State.Cards.Values.Single(c => !before.Contains(c.Id));
-        Check(created.Zone == Zone.Attached && created.AttachedTo == kichangId && created.DefinitionId == DutifulCavalry, "his own entry: the Follower goes to him");
-        Check(r.State.PendingChoice?.Type != "entryReaction" || r.State.PendingChoice.CardId == kichangId, "the Follower's entry opens no window of its own over his");
+        Check(!CanUse(r, 0, "kichang-exp-create", kichangId), "his own entry does not offer his Reaction");
+        Check(Batch336Support.Options(r, 0, "kichang-exp-create", kichangId).Length == 0, "not even listed disabled: there is no trigger");
+        var rejection = Batch336Support.Rejection(r, Batch336Support.Use(r, 0, "kichang-exp-create", kichangId));
+        Check(rejection.Length > 0, "a crafted command for his own entry is rejected: " + rejection);
+        Check(Attached(r, kichangId).Length == 0, "no Follower was created for him");
+        // A later entry of ANOTHER Personality still triggers him (KiChangCreate); he never receives the Follower himself.
+        var (other, cardId) = Recruit("training-crane-samurai", s => Add(s, KiChang, 0, Zone.Home));
+        var kc = other.State.Cards.Values.Single(c => c.DefinitionId == KiChang);
+        var before = other.State.Cards.Keys.ToHashSet();
+        Accept(other, Enabled(other, 0, "kichang-exp-create", kc.Id).Command!);
+        var created = other.State.Cards.Values.Single(c => !before.Contains(c.Id));
+        Check(created.AttachedTo == cardId && created.AttachedTo != kc.Id, "the Follower goes to the entering Personality, never to Ki-Chang");
     }
 
     // ---- Kitsune Gina and Gina's Fox ----------------------------------------------------------------------------------------------------------------

@@ -158,6 +158,7 @@ public sealed partial class MatchEngine
         if (ApplyShadowsEmbraceBatch4BranchEffect(effect, command)) return; // The Shadow's Embrace pass (issue #476), batch 4: The Game Has Changed's steps.
         if (ApplyEmperorBatch4BranchEffect(effect, command)) return; // Emperor Edition Personality pass (issue #477), batch 4.
         if (ApplyEmperorRemainingDBranchEffect(effect, command)) return; // Emperor Edition remaining-cards pass (issue #492), group D: The Sincerity of the Dragon's named number.
+        if (ApplyRulingR2BranchEffect(effect, command)) return; // Emperor Edition ruling pass R2 (issue #492): The Honesty of the Phoenix's named card.
         switch (effect)
         {
             case BranchEffect.MoveSourceHome: MoveHome(source, false); break;
@@ -174,9 +175,7 @@ public sealed partial class MatchEngine
         }
     }
 
-    // The current battlefield's province is the Defender's province at that index (a battlefield is where the Defender's province is).
-    private ProvinceState? CurrentBattlefieldProvince() =>
-        _state.CurrentBattleProvince is int index ? Player(1 - _state.ActivePlayerId).Provinces.FirstOrDefault(p => p.Index == index && !p.Destroyed) : null;
+    // (The current battlefield's province, null when it is at none: EmperorRulingR1.cs.)
 
     // "Discard a card in the current battlefield's province": the Dynasty card sitting there, face up or face down (a discard pile is public, so it is shown), and the
     // province is refilled as after any discard from it.

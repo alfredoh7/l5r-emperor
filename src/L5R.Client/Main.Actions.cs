@@ -259,7 +259,7 @@ public partial class Main
             _inspector.AddChild(Palette.Wrapped($"{ShortName(card)}", 14));
             var provinces = action.Provinces ?? [];
             var picker = new OptionButton(); picker.AddItem("Stay at home");
-            foreach (var province in provinces) picker.AddItem($"Province {province + 1}");
+            foreach (var province in provinces) picker.AddItem(BattlefieldName(province));
             picker.Selected = _assignments.TryGetValue(id, out var assigned) ? Array.IndexOf(provinces, assigned) + 1 : 0;
             picker.ItemSelected += i => { _selected = card; _assignmentUnit = id; if (i == 0) _assignments.Remove(id); else _assignments[id] = provinces[(int)i - 1]; RenderBoard(); RenderInspector(); Highlight(); };
             _inspector.AddChild(picker);

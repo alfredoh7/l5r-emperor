@@ -20,10 +20,11 @@ public sealed partial class MatchEngine
     private bool SharesNoKeywords(CardInstance a, CardInstance b) =>
         !(Definition(a).Keywords ?? []).Concat(a.GrantedKeywords.Select(g => g.Keyword)).Distinct(StringComparer.Ordinal)
             .Where(k => !KeywordRemoved(a, k)).Any(k => Keyword(b, k));
+    // Issue #492 (ruling R5): He's Mine! and Irezu are counted only when they could substitute a participant (DuelReactionRelevant), so no window opens for nothing.
     private bool AnyDuelReactionAvailable(PendingDuel duel) =>
-        AnyInPlayReactionAvailable("before-duel-begins") ||
-        AnyOutOfPlayReactionAvailable(duel.ChallengerPlayerId, "before-duel-begins") ||
-        AnyOutOfPlayReactionAvailable(duel.ChallengedPlayerId, "before-duel-begins");
+        AnyInPlayReactionAvailable("before-duel-begins", DuelReactionRelevant) ||
+        OutOfPlayReactions(duel.ChallengerPlayerId, "before-duel-begins").Any(x => DuelReactionRelevant(x.Card, x.AbilityId)) ||
+        OutOfPlayReactions(duel.ChallengedPlayerId, "before-duel-begins").Any(x => DuelReactionRelevant(x.Card, x.AbilityId));
 
     // Called from ExecuteAbilityEffects for any ability with IssuesDuel set, after the card's own
     // cost/discard has already happened -- everything from here on is the deferred EFFECT (the duel
@@ -307,6 +308,8 @@ public sealed partial class MatchEngine
             else if (challengedDuelist && !challengerDuelist) { winnerId = duel.ChallengedId; loserIds = [duel.ChallengerId]; }
             else { winnerId = null; loserIds = [duel.ChallengerId, duel.ChallengedId]; resolutionReason = "Equal totals · both lose"; }
         }
+        // The shared delay mechanism (issue #492, EmperorRulingR2Cards.cs): "You may choose (now) to delay the effects of losing this duel ..." is answered before the outcome applies.
+        if (BeginDuelLossDelayDecisions(duel, loserIds)) return;
         var resultStart = _state.Events.Count;
         var strengthsBefore = _state.Players.SelectMany(p => p.Provinces.Select(v => new DuelProvince(p.Id, v.Index, EffectiveProvinceStrength(v), EffectiveProvinceStrength(v)))).ToArray();
         var challengerStat = DuelStatValue(challenger, duel.Stat);
@@ -325,9 +328,9 @@ public sealed partial class MatchEngine
             if ((Definition(Card(focusedId)).Abilities ?? []).Contains("to-first-blood-focus"))
                 foreach (var loserId in loserIds) _state.NegatedEffects.Add(new("destroy", loserId));
         ExplainDuelEffect("Outcome", _state.LastDuel!.Challenge?.Source,
-            () => ApplyDuelOutcome(duel.AbilityId, winnerId, loserIds, duel.ChallengerPlayerId));
+            () => WithDuelLossDelays(duel, loserIds, () => ApplyDuelOutcome(duel.AbilityId, winnerId, loserIds, duel.ChallengerPlayerId)));
         // Kakita Ichigiku: "destroy that duel's loser in addition to other consequences of losing."
-        if (duel.IchigikuDestroysLoser) IchigikuDestroyLosers(loserIds, duel.ChallengerPlayerId);
+        if (duel.IchigikuDestroysLoser) WithDuelLossDelays(duel, loserIds, () => IchigikuDestroyLosers(loserIds, duel.ChallengerPlayerId));
         _state.NegatedEffects = [];
         // False Ring of Earth (oracle-l5r-10532, issue #295): "After you win a duel against a
         // Personality who shared no keywords with your Personality in the duel" -- Ring
@@ -399,6 +402,7 @@ public sealed partial class MatchEngine
             Provinces = draft.Provinces.Select(p => p with { After = EffectiveProvinceStrength(Player(p.PlayerId).Provinces[p.Index]) }).ToArray(),
             ResolutionVersion = _state.Version + 1, ReturnPhase = _state.Phase, ReturnPriority = _state.PriorityPlayerId } };
         _state.PendingDuel = null;
+        if (duel.RingsBowedBefore is { } duelRings) RecordBowedRings(duelRings.ToHashSet()); // Deception Revealed (Mendon's R4 ruling): a Ring the duel's action bowed goes on its record (a Focus Effect's bows do not: ApplyDuelFocusEffect).
         ApplyHesMineBows(duel.ChallengerId, duel.ChallengedId); // He's Mine! (Emperor Edition remaining-cards pass, issue #492, group B): the substitute bows once the duel has ended.
         ApplyTwinForksCity(winnerId); // Twin Forks City (The Shadow's Embrace pass, issue #476 batch 6): a trait, before any Reaction to the duel's end.
         // The duel itself is a single, complete action from challenge to consequences (issue #209):
@@ -483,8 +487,7 @@ public sealed partial class MatchEngine
             // with, so checking the winner's OWNER matches the printed text precisely.
             // Doji Shigeyuki: "Bow the duel's loser's unit."
             case "shigeyuki-duel":
-                foreach (var loserId in loserIds)
-                    foreach (var member in Attachments(loserId).Prepend(Card(loserId))) if (!StalwartNegatesBow(member, challengerPlayerId)) member.Bowed = true;
+                foreach (var loserId in loserIds) BowUnitByEffect(Card(loserId), challengerPlayerId);
                 break;
             case "shiba-kudome-duel":
                 foreach (var id in loserIds) if (!StalwartNegatesBow(Card(id), challengerPlayerId)) Card(id).Bowed = true;
@@ -538,15 +541,24 @@ public sealed partial class MatchEngine
     // order. winnerPlayerId/loserPlayerIds are null/empty-safe for a double-loss tie.
     private void ApplyDuelFocusEffect(string abilityId, int ownerId, int? winnerPlayerId, List<int> loserPlayerIds)
     {
+        // Mendon (R4, issue #492): "a Focus Effect is not an action" -- what it does is not "an action's effects" (no mark on the duel's action, no Honor-change window applies to it).
+        var wasInFocusEffect = _resolvingFocusEffect; _resolvingFocusEffect = true;
+        var ringsBefore = BowedRingIds();
+        try { ApplyDuelFocusEffectCore(abilityId, ownerId, winnerPlayerId, loserPlayerIds); }
+        finally { _resolvingFocusEffect = wasInFocusEffect; ExcludeFocusEffectRingBows(ringsBefore); }
+    }
+
+    private void ApplyDuelFocusEffectCore(string abilityId, int ownerId, int? winnerPlayerId, List<int> loserPlayerIds)
+    {
         switch (abilityId)
         {
-            // The Sincerity of the Dragon (Emperor Edition remaining-cards pass, issue #492, group D): "After this duel ends, if you won it, give all your provinces +2 strength" -- until the turn ends (the
-            // default duration of an ongoing effect); Courtesy of the Crane's, below, has always raised the printed strength for good.
+            // The Sincerity of the Dragon and The Courtesy of the Crane: "After this duel ends, if you won it, give all your provinces +2 strength" -- until the turn ends (the default duration of an
+            // ongoing effect; Mendon's ruling, issue #492).
             case "sincerity-dragon-focus":
                 if (ownerId == winnerPlayerId) foreach (var province in Player(ownerId).Provinces.Where(p => !p.Destroyed)) GiveProvinceStrengthThisTurn(ownerId, province.Index, 2, "The Sincerity of the Dragon");
                 break;
             case "courtesy-of-the-crane-focus":
-                if (ownerId == winnerPlayerId) foreach (var province in Player(ownerId).Provinces) province.Strength += 2;
+                if (ownerId == winnerPlayerId) foreach (var province in Player(ownerId).Provinces.Where(p => !p.Destroyed)) GiveProvinceStrengthThisTurn(ownerId, province.Index, 2, "The Courtesy of the Crane");
                 break;
             // To First Blood: "its winner's controller gains 2 Honor" (the destruction it negates was applied before the Focus Effects, in ResolveDuel).
             case "to-first-blood-focus":
@@ -556,6 +568,7 @@ public sealed partial class MatchEngine
             case "of-one-instant-focus":
                 if (_state.PendingDuel is { } instantDuel) GrantKeyword(Card(instantDuel.ChallengerPlayerId == ownerId ? instantDuel.ChallengerId : instantDuel.ChallengedId), "Tactician", abilityId, "Turn");
                 break;
+            case "training-focus-bow-ring": foreach (var ring in _state.Cards.Values.Where(c => InPlay(c) && Definition(c).Type == CardType.Ring && !c.Bowed).ToArray()) ring.Bowed = true; break;
             case "shadow-tactics-focus": foreach (var loserPlayer in loserPlayerIds.Distinct().ToArray()) Draw(Player(loserPlayer)); break;
             case "simple-yari-focus":
                 if (_state.PendingDuel?.WinnerId is string yariWinnerId && InPlay(Card(yariWinnerId)) && !StalwartNegatesBow(Card(yariWinnerId), ownerId)) Card(yariWinnerId).Bowed = true;

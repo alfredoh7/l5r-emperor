@@ -319,8 +319,7 @@ public sealed partial class MatchEngine
                 Emit("provinceRevealed", $"{Definition(source!).Name}: {Definition(revealed).Name} in {owner.Name}'s province {province.Index + 1} is turned face-up.", player.Id, revealed.Id);
                 if (id == "second-city-reveal-raise")
                 {
-                    province.Strength += 2;
-                    Emit("provinceStrengthRaised", $"{Definition(source!).Name}: {owner.Name}'s province {province.Index + 1} gets +2 strength.", player.Id, revealed.Id);
+                    GiveProvinceStrengthThisTurn(owner.Id, province.Index, 2, Definition(source!).Name); // until end of turn (issue #492 ruling R3)
                 }
                 return false;
             }

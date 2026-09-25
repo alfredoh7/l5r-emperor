@@ -15,7 +15,8 @@ internal static class EmperorRemainingDTests
         TorchsFlameFlickers, TwistOfFate, UndetectableEnemy, UnseenAssailant, UsefulConnections, VeiledMenace, WallOfHonor, WellPrepared, WhiteShorePlain, WordsHaveStrength];
 
     // The Strategies of the group left unwired (each with a blocker note in tools/content/ee_remD_blockers.json): never published.
-    private static readonly string[] Unwired = ["oracle-l5r-8138", "oracle-l5r-8207"];
+    // Issue #492, ruling pass R2: The Honor of the Lion and The Loyalty of the Scorpion (delay Strategies) are wired and published now, in strategy-wave-63 (EmperorRulingR2Tests), so none is left unwired here.
+    private static readonly string[] Unwired = [];
 
     private static void Check(bool ok, string message = "Assertion failed") => Batch336Support.Check(ok, message);
     private static void Eq<T>(T actual, T expected, string message = "Values differ") => Batch336Support.Eq(actual, expected, message);
@@ -37,7 +38,7 @@ internal static class EmperorRemainingDTests
         ("The Slow Death: as a Focus Effect the duel's winner gets +3F; its Battle action straightens an opposed unit (either side's, Followers too) and has no target in an unopposed unit", SlowDeathScenario),
         ("Well Prepared: needs a Terrain the player controls; bows an unbowed card in a unit or straightens a bowed one -- one use between the two", WellPreparedScenario),
         ("Undetectable Enemy: after another player's action targets its player's Oni the action's effects are negated; no window for a non-Oni, and never against its own player's action", UndetectableEnemyScenario),
-        ("Unseen Assailant: its Ninja bows to make a Ranged 3 Attack; against a Personality it is compared with the lower of his Force and Chi, against a Follower with its Force", UnseenAssailantScenario),
+        ("Unseen Assailant: its Ninja bows to make a Ranged 3 Attack; against a Personality the player chooses to compare it with his Force or his Chi (ruling R5), against a Follower with its Force", UnseenAssailantScenario),
         ("The Trap is Sprung!: needs Reconnaissance and an unbowed Scout; bows an enemy card, and its whole unit for a Crane Clan player only", TrapIsSprungScenario),
         ("Veiled Menace: an unbowed Courtier makes a dishonorable Personality's controller lose 2 Honor, and 1 more each time he is assigned this turn, to either side", VeiledMenaceScenario),
         ("Useful Connections: a Courtier bows to give Cavalry, until the turn ends, to up to as many Personalities as his Chi and to each of their Followers", UsefulConnectionsScenario),
@@ -299,10 +300,10 @@ internal static class EmperorRemainingDTests
             Accept(e, options[0].Command!);
             Eq(defenders.Count(d => e.State.Cards[d.Id].Zone == Zone.Dead), 1, "one was destroyed");
             Check(e.State.PendingChoice is null && e.State.PriorityPlayerId == 0, "the pass went on: the other player has the next opportunity");
-            // Once: the next pass asks for nothing (it ends the Combat Segment, and the battle's own resolution follows).
+            // Mendon's ruling (issue #492, R4): "First time for each player" -- the OTHER player's first pass triggers it for him too (his lone Personality there is destroyed)...
             Accept(e, new("pass", 0, e.Version));
-            Check(e.State.PendingChoice?.Type != "killingGroundsSelect", "only the first time");
-            Eq(e.State.Events.Count(ev => ev.Type == "killingGrounds"), 1, "the trait fired once");
+            Eq(e.State.Events.Count(ev => ev.Type == "killingGrounds"), 2, "the trait fired once for each player");
+            Check(e.State.PendingChoice?.Type != "killingGroundsSelect", "one Personality: destroyed without asking");
         }
         {
             // One Personality: destroyed at once, no question.
@@ -464,6 +465,7 @@ internal static class EmperorRemainingDTests
         MatchEngine Named(int number, out CardInstance menace, out CardInstance courtier, out CardInstance victim)
         {
             var a = Table(Phase.Action, 0);
+            a.Players[0].Clan = "Dragon"; // "If you are a Dragon Clan player" (the corrected scan, issue #492 ruling R3)
             var sincerity = Add(a, SincerityOfTheDragon, 0, Zone.Hand);
             menace = Add(a, VeiledMenace, 0, Zone.Hand); // base Focus Value 2
             var dragon = Add(a, dragonId, 0, Zone.Home);
@@ -649,19 +651,24 @@ internal static class EmperorRemainingDTests
             Check(!CanUse(e, 0, "unseen-assailant-attack", card.Id, weakChi.Id), "only a Ninja may perform");
             var option = Enabled(e, 0, "unseen-assailant-attack", card.Id, ninja.Id);
             Check(option.NoTarget && option.TargetIds!.Contains(weakChi.Id) && option.TargetIds.Contains(follower.Id) && !option.TargetIds.Contains(followed.Id), "a Follower or a Personality without Followers, or no target at all");
-            Accept(e, Offer(e, 0, "unseen-assailant-attack", card.Id, weakChi.Id, ninja.Id));
+            // Issue #492 (ruling R5): "you may compare it against his Chi" is the player's choice: Force (the default) or Chi, each its own listed option.
+            var forceRun = Build(out var card1, out var ninja1, out var weak1, out _, out _, out _);
+            Accept(forceRun, Batch336Support.OfferChoice(forceRun, 0, "unseen-assailant-attack", card1.Id, weak1.Id, "force", ninja1.Id));
+            Eq(forceRun.State.Cards[weak1.Id].Zone, Zone.Battlefield, "the player compared Force (9): above the strength, he survives");
+            Accept(e, Batch336Support.OfferChoice(e, 0, "unseen-assailant-attack", card.Id, weakChi.Id, "chi", ninja.Id));
             Check(e.State.Cards[ninja.Id].Bowed, "the Ninja bowed as the cost");
             Eq(e.State.Cards[weakChi.Id].Zone, Zone.Dead, "Force 9 is above the strength, but the player compared his Chi 3");
         }
         {
             var e = Build(out var card, out var ninja, out _, out var strongChi, out _, out _);
-            Accept(e, Offer(e, 0, "unseen-assailant-attack", card.Id, strongChi.Id, ninja.Id));
+            Accept(e, Batch336Support.OfferChoice(e, 0, "unseen-assailant-attack", card.Id, strongChi.Id, "chi", ninja.Id));
             Eq(e.State.Cards[strongChi.Id].Zone, Zone.Battlefield, "Force 9 and Chi 6 are both above 3: he survives");
         }
         {
             var e = Build(out var card, out var ninja, out _, out _, out _, out var follower);
             Accept(e, Offer(e, 0, "unseen-assailant-attack", card.Id, follower.Id, ninja.Id));
             Eq(e.State.Cards[follower.Id].Zone, Zone.FateDiscard, "a Follower is compared with its Force (2): destroyed");
+            Check(!Batch336Support.Options(e, 0, "unseen-assailant-attack", card.Id, ninja.Id).Any(o => o.Enabled && o.Command?.Choice == "chi" && (o.TargetIds?.Contains(follower.Id) ?? false)), "Chi is not offered against a Follower");
         }
         {
             var s = Table(Phase.Battle, 0);

@@ -2481,6 +2481,8 @@ public static class PublishedContent
     public static PublishedSnapshot StrategyWave60 { get; } = Load("L5R.Published.StrategyWave60.json", "strategy-wave-60", requireDecks: false);
     /// <summary>Strategy wave 61 (Emperor Edition remaining-cards pass, issue #492, group D): the wired Strategies of the group (package_strategy_wave_61.py lists them).</summary>
     public static PublishedSnapshot StrategyWave61 { get; } = Load("L5R.Published.StrategyWave61.json", "strategy-wave-61", requireDecks: false);
+    /// <summary>Strategy wave 63 (Emperor Edition ruling pass R2, issue #492): the five Strategies whose Focus Effect delays the effects of losing a duel (package_strategy_wave_63.py lists them).</summary>
+    public static PublishedSnapshot StrategyWave63 { get; } = Load("L5R.Published.StrategyWave63.json", "strategy-wave-63", requireDecks: false);
     /// <summary>Spell wave 20 (Embers of War pass, issue #460, batch 5): Inescapable Snare, Incite the Phantoms, Sudden Guardian, The Swell of Strength.</summary>
     public static PublishedSnapshot SpellWave20 { get; } = Load("L5R.Published.SpellWave20.json", "spell-wave-20", requireDecks: false);
     /// <summary>Stronghold wave 14 (issue #460, batch 5): The Ki-Rin's Path.</summary>
@@ -2560,6 +2562,8 @@ public static class PublishedContent
     /// <summary>Stronghold wave 19 (Emperor Edition Stronghold pass, issue #486, batch 3): The Khan's Estate, The Otoro Estate, The Shadow's Lair, The Spider's Web, The Temple of Death,
     /// Watchful Eye Dojo, Yasuki Palaces.</summary>
     public static PublishedSnapshot StrongholdWave19 { get; } = Load("L5R.Published.StrongholdWave19.json", "stronghold-wave-19", requireDecks: false);
+    /// <summary>Stronghold wave 20 (Emperor Edition ruling pass R2, issue #492): Halls of the Forgotten (package_stronghold_wave_20.py).</summary>
+    public static PublishedSnapshot StrongholdWave20 { get; } = Load("L5R.Published.StrongholdWave20.json", "stronghold-wave-20", requireDecks: false);
     /// <summary>Celestial wave 7 (issue #476, batch 6): The Moon's Imperative, The Sun's Aspiration.</summary>
     public static PublishedSnapshot CelestialWave7 { get; } = Load("L5R.Published.CelestialWave7.json", "celestial-wave-7", requireDecks: false);
     /// <summary>Spell wave 23 (Emperor Edition remaining-cards pass, issue #492, group E): Capturing the Soul, Cleansing the Path, Consecration, Contemplate the Void, Hanabi, I Give You My Name,
@@ -2569,6 +2573,10 @@ public static class PublishedContent
     public static PublishedSnapshot PersonalityWave76 { get; } = Load("L5R.Published.PersonalityWave76.json", "personality-wave-76", requireDecks: false);
     /// <summary>Spell wave 24 (Emperor Edition remaining-cards pass, issue #492, proxy group X): Summon Swamp Spirits and the created-only Swamp Spirit Follower it creates.</summary>
     public static PublishedSnapshot SpellWave24 { get; } = Load("L5R.Published.SpellWave24.json", "spell-wave-24", requireDecks: false);
+    public static PublishedSnapshot StrategyWave62 { get; } = Load("L5R.Published.StrategyWave62.json", "strategy-wave-62", requireDecks: false);
+    /// <summary>Strategy wave 64 (Emperor Edition rulings pass, issue #494): Shinobi Assault, Two Fronts and The Perfect Moment, published once Mendon supplied their scans.</summary>
+    public static PublishedSnapshot StrategyWave64 { get; } = Load("L5R.Published.StrategyWave64.json", "strategy-wave-64", requireDecks: false);
+    public static PublishedSnapshot SpellWave25 { get; } = Load("L5R.Published.SpellWave25.json", "spell-wave-25", requireDecks: false);
     /// <summary>Personality wave 78 (Emperor Edition remaining-cards pass, issue #492, proxy group Z): Kitsune Denhei, Shosuro Rokuta and the Proxies they create (Denhei's Snake, Rokuta's Apprentice).</summary>
     public static PublishedSnapshot PersonalityWave78 { get; } = Load("L5R.Published.PersonalityWave78.json", "personality-wave-78", requireDecks: false);
     /// <summary>Celestial wave 8 (Emperor Edition remaining-cards pass, issue #492, group E): the Kami Guidance Celestials of Akodo, Bayushi, Daigotsu, Doji, Hida, Shiba, Shinjo, Togashi and Yoritomo.</summary>
@@ -2596,4 +2604,8 @@ public static class PublishedContent
     public static PublishedSnapshot ItemWave15 { get; } = Load("L5R.Published.ItemWave15.json", "item-wave-15", requireDecks: false);
     /// <summary>Follower wave 31 (issue #492, group G): Bandit Gang, Ikiryo, Ikoma House Guard, Kaiu House Guard, Legion of Pain, Moto House Guard, Tamori House Guard, Tsuruchi House Guard.</summary>
     public static PublishedSnapshot FollowerWave31 { get; } = Load("L5R.Published.FollowerWave31.json", "follower-wave-31", requireDecks: false);
+    /// <summary>Region wave 10 (Emperor Edition remaining-cards pass, issue #492, ruling R3): Kaiu Village.</summary>
+    public static PublishedSnapshot RegionWave10 { get; } = Load("L5R.Published.RegionWave10.json", "region-wave-10", requireDecks: false);
+    /// <summary>Item wave 16 (issue #492, ruling R3): Kaiu Weapon (oracle-l5r-10006, a locally allocated id for the Proxy scan Mendon supplied), the Item Kaiu Village creates.</summary>
+    public static PublishedSnapshot ItemWave16 { get; } = Load("L5R.Published.ItemWave16.json", "item-wave-16", requireDecks: false);
 }

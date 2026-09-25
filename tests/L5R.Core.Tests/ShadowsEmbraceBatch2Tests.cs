@@ -100,7 +100,7 @@ internal static class ShadowsEmbraceBatch2Tests
         Stats(Shirou, "Phoenix", 3, 4, 8, 3, "Duelist,Phoenix Clan,Samurai,Yojimbo", ["shirou-attack"], "se2-shirou-force");
         Stats(JongHo, "Unicorn", 3, 3, 8, 2, "Cavalry,Samurai,Tactician,Unicorn Clan", ["jongho-bow"]);
         Stats(MinHee, "Unicorn", 6, 4, 12, 3, "Cavalry,Commander,Loyal,Samurai,Tactician,The Khan,Unicorn Clan,Unique", ["minhee-return", "minhee-destroy"]);
-        Stats(Nobu, "Ninja", 5, 3, 8, 0, "Ninja,Scorpion Clan", ["nobu-move-home"]);
+        Stats(Nobu, "Scorpion", /* issue #492, ruling R5 */ 5, 3, 8, 0, "Ninja,Scorpion Clan", ["nobu-move-home"]);
         Stats(Ryoken, "Scorpion", 3, 2, 6, 0, "Magistrate,Samurai,Scorpion Clan", ["ryoken-dishonor", "ryoken-honor-loss"]);
         Stats(Shugorei, "Dragon", 5, 2, 7, 2, "Dragon Clan,Earth,Golem,Nonhuman,Protector,Shugenja,Spirit", ["shugorei-honor"], "se2-shugorei-force");
         Stats(Yamazaki, "Spider", 5, 3, 9, 1, "Experienced,Kensai,Monk,Order of the Spider,Spider Clan,Unique", ["yamazaki-exp-threaten"], "se2-yamazaki-negate");

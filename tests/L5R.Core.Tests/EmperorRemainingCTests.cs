@@ -14,7 +14,8 @@ internal static class EmperorRemainingCTests
     private static readonly string[] Wired = [Retribution, Rhetoric, RockyTerrain, RumorsTravel, SacrificeOfPawns, SelflessDefense, ShadowsWalk, ShamefulInjury, SnakeTattoo, Sniping, SolidDefense, SpinningHeelKick, StayPut, StrategicStrike, SummonedToJustice, SuperiorOpponent, TellTheTale, EmpressAddress, FiresOfWar, HeightOfCourage];
 
     // The group's Strategies left unwired (each with a note in tools/content/ee_remC_blockers.json): never published.
-    private static readonly string[] Unwired = ["oracle-l5r-7991", "oracle-l5r-7995", "oracle-l5r-8137", "oracle-l5r-7665"]; // The Compassion of the Unicorn, The Courage of the Mantis, The Honesty of the Phoenix (delay), Surprise Attack (a battlefield with no province)
+    // Issue #492: Surprise Attack was wired in strategy-wave-62 (rulings pass R1); The Compassion of the Unicorn, The Courage of the Mantis and The Honesty of the Phoenix in strategy-wave-63 (rulings pass R2).
+    private static readonly string[] Unwired = [];
 
     private static void Check(bool ok, string message = "Assertion failed") => Batch336Support.Check(ok, message);
     private static void Eq<T>(T actual, T expected, string message = "Values differ") => Batch336Support.Eq(actual, expected, message);
@@ -389,7 +390,7 @@ internal static class EmperorRemainingCTests
         var crane = e.State.Cards.Values.First(c => c.OwnerId == 0 && c.Zone == Zone.Battlefield);
         var honor = Honor(e, 1);
         Accept(e, Offer(e, 1, "overcome-adversity", adversity.Id, crane.Id, lion.Id));
-        Eq(e.State.PendingChoice?.Type, "beforeActionReaction", "the loss is offered for negation");
+        Eq(e.State.PendingChoice?.Type, "honorChangeReaction", "the loss is offered for negation, where it would be applied (Mendon's R4 ruling: Solid Defense may be played on any Honor change)");
         Check(!e.QueryActions(0).Any(a => a.Command?.AbilityId == "solid-defense-negate-favor" && a.Enabled), "with a 5-Force Personality the Favor is not the way to pay");
         Accept(e, e.QueryActions(0).Single(a => a.Type == "useAbility" && a.Command?.AbilityId == "solid-defense-negate" && a.Enabled).Command!);
         PassUntil(e, () => e.State.PendingChoice is null);
@@ -411,7 +412,7 @@ internal static class EmperorRemainingCTests
         var crane3 = g.State.Cards.Values.First(c => c.OwnerId == 0 && c.Zone == Zone.Battlefield);
         var lion3 = g.State.Cards.Values.First(c => c.OwnerId == 1 && c.Zone == Zone.Battlefield);
         Accept(g, Offer(g, 1, "overcome-adversity", adversity3.Id, crane3.Id, lion3.Id));
-        Check(g.State.PendingChoice is null || g.State.PendingChoice.Type != "beforeActionReaction", "nobody can pay for it: no window");
+        Check(g.State.PendingChoice is null || g.State.PendingChoice.Type != "honorChangeReaction", "nobody can pay for it: no window");
         Check(card.Id.Length > 0 && card2.Id.Length > 0, "fixture");
         // The Battle half: a Personality without attachments goes home; one with an attachment is no target.
         var b = Table(Phase.Battle, 0);
@@ -441,7 +442,7 @@ internal static class EmperorRemainingCTests
         var e = Build(0, out var rhetoric, out var courtier, out var tale);
         var h0 = Honor(e, 0); var h1 = Honor(e, 1);
         Accept(e, Enabled(e, 0, "tell-the-tale-honor", tale.Id).Command!);
-        Eq(e.State.PendingChoice?.Type, "beforeActionReaction", "an action that gains Honor opens the window, for either player's Rhetoric");
+        Eq(e.State.PendingChoice?.Type, "honorChangeReaction", "an action that gains Honor opens the window where the gain would be applied, for either player's Rhetoric (Mendon's R4 ruling)");
         var mine = e.QueryActions(1).Where(a => a.Type == "useAbility" && a.Command?.AbilityId == "rhetoric-redirect" && a.Enabled).ToArray();
         Check(mine.Any(o => o.Command!.TargetPlayerId == 1) && mine.Any(o => o.Command!.TargetPlayerId == 0), "either player may be the one chosen");
         Accept(e, mine.Single(o => o.Command!.TargetPlayerId == 1).Command!);

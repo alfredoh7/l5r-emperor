@@ -95,8 +95,10 @@ public sealed record SearchDeckOption(string Deck, SearchCriteria Criteria, stri
 /// <summary>A whole search: Optional is true only for a printed "you may search" (Pass is then legal even when a
 /// card qualifies); every other search must take an eligible card and may pass only when none qualifies.</summary>
 public sealed record SearchSpec(string Id, string Label, SearchDeckOption[] Decks, bool Optional = false, int RecruitDiscount = 0,
-    // "Search your discard pile, then Fate deck" (Togashi's Guidance, Shinjo's Guidance; issue #492): the places are searched IN ORDER -- no choice of deck, the first is searched first, and a player who
-    // takes no card from it (whether or not one qualified) goes on to the next.
+    // "Search your discard pile, then Fate deck" (Togashi's Guidance, Shinjo's Guidance; issue #492): the places are searched IN ORDER -- no choice of deck, the first is searched first. Mendon's ruling
+    // (R4): "If a card satisfies the search criteria, the player must take it from the first source found. If multiple cards in a searched location satisfy the search condition, the player may choose ...
+    // If the first search location has no card that satisfies the search conditions, they may search any named additional locations. Always reshuffle a deck after it is searched." So the next place is
+    // opened (and its cards shown) only when the current one held no qualifying card and the searcher goes on; a deck that was searched is reshuffled, found or not, as the search leaves it.
     bool Ordered = false);
 
 public static class SearchCatalog
@@ -181,6 +183,8 @@ public static class SearchCatalog
 public sealed class PendingSearch
 {
     public string SearchId { get; set; } = "";
+    /// <summary>The action (the command) whose effects started this search, so the Honor it changes when the search ends is still "from an action's effects" (Mendon's R4 ruling, EmperorRulingR4Honor.cs).</summary>
+    public GameCommand? Command { get; set; }
     /// <summary>The card whose text started the search (Ikoma Shizuka, or the revealed Event).</summary>
     public string SourceCardId { get; set; } = "";
     public int PlayerId { get; set; }
@@ -239,6 +243,9 @@ public sealed record SearchView(string Stage, string SourceCardId, string Source
 
 public sealed partial class MatchEngine
 {
+    /// <summary>The Choice of a "passSearch" that ends an ordered search where no card qualified, instead of going on to the next place.</summary>
+    public const string SearchStopChoice = "stop";
+
     private static bool IsSearchChoice(string type) => type is "searchDeck" or "searchSelect" or "searchRegionProvince" or "searchDiscard" or "searchRecruitPay";
 
     private sealed record SearchGroup(string DefinitionId, CardInstance Card, int Count, bool Eligible, string? Reason);
@@ -271,7 +278,7 @@ public sealed partial class MatchEngine
     private void BeginSearch(SearchSpec spec, CardInstance source, int playerId, string origin, IEnumerable<string>? bowedBefore = null)
     {
         var player = Player(playerId);
-        var search = new PendingSearch { SearchId = spec.Id, SourceCardId = source.Id, PlayerId = playerId, Origin = origin, BowedBefore = bowedBefore?.ToList() };
+        var search = new PendingSearch { SearchId = spec.Id, SourceCardId = source.Id, PlayerId = playerId, Origin = origin, BowedBefore = bowedBefore?.ToList(), Command = _runningCommand };
         _state.PendingSearch = search;
         _state.PriorityPlayerId = playerId; _state.ConsecutivePasses = 0;
         Emit("searchStarted", $"{player.Name} searches with {Definition(source).Name}.", playerId, source.Id);
@@ -325,12 +332,14 @@ public sealed partial class MatchEngine
         {
             var anyEligible = groups.Any(g => g.Eligible);
             // Pass is legal ONLY when nothing qualifies (or the printed text says "you may search"): a player
-            // cannot skip a card they are obliged to take. In an ordered search ("your discard pile, then Fate deck") a place that is not the last may always be passed: the next is searched.
+            // cannot skip a card they are obliged to take -- in an ordered search ("your discard pile, then Fate deck") too: he takes it from the first place found (Mendon's R4 ruling).
             var nextPlace = NextOrderedSearchPlace(spec, option);
-            Require(!anyEligible || spec.Optional || nextPlace is not null, "A card in the deck qualifies, so you must choose one.");
-            if (nextPlace is not null)
+            Require(!anyEligible || spec.Optional, "A card in the deck qualifies, so you must choose one.");
+            // Nothing qualified here: he may search the next named place (the default of a pass), or stop -- "stop" is the pass's Choice.
+            if (!anyEligible && nextPlace is not null && command.Choice != SearchStopChoice)
             {
-                Emit("searchPassed", $"{player.Name} took no card from their {SearchPlace(search.Deck!)}.", player.Id);
+                Emit("searchPassed", $"{player.Name} found no eligible card in their {SearchPlace(search.Deck!)}.", player.Id);
+                ShuffleDeck(player, search.Deck!); // a deck that was searched is reshuffled (a discard pile is not) before the next place is opened
                 OpenSearchSelection(search, nextPlace);
                 return;
             }
@@ -609,7 +618,7 @@ public sealed partial class MatchEngine
         var groups = SearchGroups(search);
         return new(search.Stage, source.Id, sourceName, spec.Label, _state.PendingChoice.Prompt, search.Deck, option.Criteria.Noun, remaining, null,
             groups.Select(g => new SearchEntryView(g.DefinitionId, Copy(Definition(g.Card)), g.Count, g.Eligible, g.Reason)).ToArray(),
-            spec.Optional, spec.Optional || groups.All(g => !g.Eligible) || NextOrderedSearchPlace(spec, option) is not null, null);
+            spec.Optional, spec.Optional || groups.All(g => !g.Eligible), null);
     }
 
     /// <summary>The public shown-cards record, identical in both players' views.</summary>
@@ -639,8 +648,12 @@ public sealed partial class MatchEngine
                 var groups = SearchGroups(search);
                 foreach (var g in groups.Where(g => g.Eligible))
                     yield return new("selectSearchCard", $"Take {Definition(g.Card).Name}{(g.Count > 1 ? $" ({g.Count} in the deck)" : "")}", true, null, Command("selectSearchCard", choice: g.DefinitionId));
-                if (NextOrderedSearchPlace(spec, SearchOptionOf(search)) is { } nextPlace)
-                    yield return new("passSearch", $"Take no card from the {SearchPlace(search.Deck!)}: search the {SearchPlace(nextPlace.Deck)} next", true, null, Command("passSearch"));
+                if (groups.All(g => !g.Eligible) && NextOrderedSearchPlace(spec, SearchOptionOf(search)) is { } nextPlace)
+                {
+                    // Mendon's R4 ruling: only a place with no qualifying card is left behind; the next is then searched, or the search stopped.
+                    yield return new("passSearch", $"No card qualifies in the {SearchPlace(search.Deck!)}: search the {SearchPlace(nextPlace.Deck)} next", true, null, Command("passSearch"));
+                    yield return new("passSearch", "No card qualifies: stop searching (the deck is still shuffled)", true, null, Command("passSearch", choice: SearchStopChoice));
+                }
                 else if (spec.Optional || groups.All(g => !g.Eligible))
                     yield return new("passSearch", groups.Any(g => g.Eligible) ? "Take no card (the deck is still shuffled)" : "No card qualifies: pass (the deck is still shuffled)", true, null, Command("passSearch"));
                 break;

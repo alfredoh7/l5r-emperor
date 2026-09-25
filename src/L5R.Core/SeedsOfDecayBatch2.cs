@@ -61,6 +61,7 @@ public sealed partial class MatchEngine
 
     private void GiveProvinceStrengthThisTurn(int playerId, int provinceIndex, int amount, string source)
     {
+        if (!Player(playerId).Provinces.Any(p => p.Index == provinceIndex)) return; // a battlefield without a province has no strength to change (issue #492, rulings pass R1 with R3)
         _state.ProvinceStrengthEffects.Add(new(playerId, provinceIndex, ProvinceEffectFlat, amount, _state.TurnNumber, source));
         Emit("provinceStrengthRaised", $"{source}: {Player(playerId).Name}'s province {provinceIndex + 1} has {amount:+#;-#;0} strength this turn.", playerId);
     }
@@ -236,7 +237,8 @@ public sealed partial class MatchEngine
         var player = Player(command.PlayerId);
         var card = Card(_state.PendingChoice!.CardId);
         player.ProclaimUsedTurn = _state.TurnNumber;
-        if (!negated) GainHonor(player.Id, Definition(card).PersonalHonor, "Proclaim");
+        // Proclaim is a Reaction (Mendon's R4 ruling), so its gain is from an action's effects: Rhetoric and the like may be played on it.
+        if (!negated) { var before = _proclaimAction; _proclaimAction = ($"{player.Id}|proclaim|{card.Id}", player.Id); try { GainHonor(player.Id, Definition(card).PersonalHonor, "Proclaim"); } finally { _proclaimAction = before; } }
         else Emit("proclaimNegated", $"{player.Name}'s Proclaim resolved with its effects negated.", player.Id, card.Id);
         ApplyPendingEntryEffects();
         _state.ConsecutivePasses = 0;
@@ -363,7 +365,7 @@ public sealed partial class MatchEngine
                 break;
             case "incriminating-testimony-bow":
                 if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
-                GiveProvinceStrengthThisTurn(1 - _state.ActivePlayerId, _state.CurrentBattleProvince!.Value, PersonalityChi(performer!), "Incriminating Testimony");
+                if (CurrentProvinceIndex() is int testimonyProvince) GiveProvinceStrengthThisTurn(1 - _state.ActivePlayerId, testimonyProvince, PersonalityChi(performer!), "Incriminating Testimony");
                 break;
             case "ingenuity-dishonor":
                 foreach (var dishonored in SlotCards(command, "targets").ToArray()) Dishonor(dishonored);
@@ -426,7 +428,7 @@ public sealed partial class MatchEngine
             }
             case "shibata-exp-bow":
                 if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
-                if (EffectConditionMet(id, target)) GiveProvinceStrengthThisTurn(1 - _state.ActivePlayerId, _state.CurrentBattleProvince!.Value, 3, "Bayushi Shibata");
+                if (EffectConditionMet(id, target) && CurrentProvinceIndex() is int shibataProvince) GiveProvinceStrengthThisTurn(1 - _state.ActivePlayerId, shibataProvince, 3, "Bayushi Shibata");
                 break;
             case "insult-answered-duel": break; // The duel itself is issued generically (IssuesDuel); its outcome is in Dueling.cs's ApplyDuelOutcome.
             default: throw new RuleViolation("Ability effect is not implemented.");

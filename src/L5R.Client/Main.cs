@@ -452,7 +452,7 @@ public partial class Main : Node
     {
         var tile = new CardTile(card, compact, SelectCard, _ => { }) { CustomMinimumSize = new Vector2(width, card.Zone == Zone.Hand ? height : PlaneHeight(height)), FaceHeight = height - 12, ReducedMotion = _reducedMotion, Highlighted = _selected?.Id == card.Id, SelectedSource = _sources.Contains(card.Id), PreviousBowed = Time.GetTicksMsec() - _bowChangedAt < 180 ? _previousBows.GetValueOrDefault(card.Id, card.Bowed) : card.Bowed, ContextualGoldProduction = Production(card, View.Players.Single(p => p.Id == card.OwnerId)) };
         tile.TokenSourceName = id => FindCard(id)?.Definition?.Name;
-        tile.ContextHelp = card.AttachedTo is { } parent ? "Attached to " + (FindCard(parent)?.Definition?.Name ?? parent) + ". Moves with this unit." : card.Zone == Zone.Battlefield ? $"At Province {card.ProvinceIndex + 1}'s battlefield. " + RulesHelp.Topic("force") : card.Zone == Zone.Home ? "At home. Not assigned to a province. " + (card.Bowed ? RulesHelp.Topic("bow") : "") : card.Zone == Zone.Hand ? "In your hand. Select to see legal actions and targets." : "Select to inspect available actions.";
+        tile.ContextHelp = card.AttachedTo is { } parent ? "Attached to " + (FindCard(parent)?.Definition?.Name ?? parent) + ". Moves with this unit." : card.Zone == Zone.Battlefield ? $"At {(card.ProvinceIndex is int at ? BattlefieldName(at) : "a battlefield")}'s battlefield. " + RulesHelp.Topic("force") : card.Zone == Zone.Home ? "At home. Not assigned to a province. " + (card.Bowed ? RulesHelp.Topic("bow") : "") : card.Zone == Zone.Hand ? "In your hand. Select to see legal actions and targets." : "Select to inspect available actions.";
         if (card.Zone == Zone.Province && card.ProvinceIndex is int province)
         {
             var owner = View.Players.Single(p => p.Id == card.OwnerId);
@@ -517,7 +517,7 @@ public partial class Main : Node
         foreach (var (province, label) in _laneSummaries)
         {
             label.Text = "";
-            label.TooltipText = $"Province {province + 1} battlefield";
+            label.TooltipText = $"{BattlefieldName(province)} battlefield";
         }
         _intentOverlay?.QueueRedraw();
     }

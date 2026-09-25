@@ -144,11 +144,12 @@ public sealed partial class MatchEngine
 
     // "Ranged 6 Attack that you compare against Gold Cost" (Tsuruchi Samuru, Emperor Edition Personality pass, issue #477): core rules -- if an effect compares a stat other than Force,
     // that stat is compared to the Attack's strength instead. Every caller that compares an Attack's target to its strength asks here.
-    // Unseen Assailant (Emperor Edition remaining-cards pass, issue #492, group D): "If the Ranged Attack targeted a Personality, you may compare it against his Chi" -- the player would always pick the lower of
-    // the two (Force or Chi), so that is what is compared (Asako Nobunori's shape).
+    // Unseen Assailant (Emperor Edition remaining-cards pass, issue #492, group D): "If the Ranged Attack targeted a Personality, you may compare it against his Chi" -- Force or Chi (see below).
+    // Issue #492 (Mendon's ruling R5): every "may compare" clause is the PLAYER's choice ("The player chooses."), made with the action (GameCommand.Choice, one listed option per choice) -- the engine no
+    // longer picks the lower value for him (EmperorRulingR5.cs, AttackCompareChoiceOf).
     private int AttackComparedValue(string abilityId, CardInstance target) =>
         abilityId == "samuru-attack" ? CardGoldCost(target)
-        : abilityId == "unseen-assailant-attack" && Definition(target).Type == CardType.Personality ? Math.Min(AttackComparedForce(target, abilityId), PersonalityChi(target))
+        : abilityId == "unseen-assailant-attack" && Definition(target).Type == CardType.Personality && AttackCompareChoiceOf(abilityId) == "chi" ? PersonalityChi(target)
         : AttackComparedValueRemainingG(abilityId, target);
 
     // An Attack that targets the current battlefield's province (issue #335): no card is targeted, so no reaction to a targeted Attack applies and nothing here compares
@@ -157,8 +158,8 @@ public sealed partial class MatchEngine
     {
         if (abilityId != "training-province-attack") return;
         var owner = 1 - _state.ActivePlayerId;
-        var province = Player(owner).Provinces.Single(p => p.Index == provinceIndex);
-        province.Strength = Math.Max(0, province.Strength - strength);
+        if (BattlefieldProvince(provinceIndex) is not { } province) return; // a battlefield without a province has no strength to lose (issue #492, rulings pass R1)
+        GiveProvinceStrengthThisTurn(owner, provinceIndex, -strength, "Ranged Attack"); // until end of turn (issue #492 ruling R3); the read floors at 0
         Emit("provinceAttacked", $"{Player(owner).Name}'s province {provinceIndex + 1} lost {strength} strength to a Ranged Attack.", owner);
     }
 

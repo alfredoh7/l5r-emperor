@@ -38,7 +38,7 @@ public static class ProvinceThresholdArt
         // No recoloring, synthetic grain or extra desaturation of the approved art.
         for (var i = 0; i < pixels.Length; i += 4)
             pixels[i + 3] = (byte)(255 * Math.Clamp((pixels[i] - pixels[i + 2] - 3f) / 24f, 0, 1));
-        if (province is null && (label.StartsWith("Province ", StringComparison.Ordinal) || label=="Removed"))
+        if (province is null && (IsCourtLabel(label) || label=="Removed"))
         {
             // Battlefields retain their crossed-swords identity, not Home's house.
             for (var y = 0; y < 80; y++) for (var x = 70; x < 195; x++) pixels[(y * rect.Size.X + x) * 4 + 3] = 0;
@@ -52,17 +52,20 @@ public static class ProvinceThresholdArt
     {
         if(label=="Removed") return new Rect2(bounds.Position+new Vector2(-6,-6),new Vector2(24,24));
         // A's icons interrupt the top stroke, near its left corner. No header row.
-        if (label.StartsWith("Province ", StringComparison.Ordinal)) return new Rect2(bounds.GetCenter().X - 24, (connectionAbove ? bounds.End.Y - 20 : bounds.Position.Y - 26), 48, 48);
+        if (IsCourtLabel(label)) return new Rect2(bounds.GetCenter().X - 24, (connectionAbove ? bounds.End.Y - 20 : bounds.Position.Y - 26), 48, 48);
         var local = label == "Holdings" ? new Rect2(77 * .55f, 0, 56 * .55f, 75 * .55f)
             : new Rect2(71 * .55f, 0, 121 * .55f, 69 * .55f);
         return new Rect2(bounds.Position + local.Position, local.Size);
     }
 
+    /// <summary>A battlefield's court: "Province N", or a battlefield without a province ("Battlefield ...", Emperor Edition rulings pass R1).</summary>
+    public static bool IsCourtLabel(string label) => label.StartsWith("Province ", StringComparison.Ordinal) || label.StartsWith("Battlefield ", StringComparison.Ordinal);
+
     public static Rect2 ThresholdBounds(Rect2 bounds) => new(bounds.Position.X, bounds.End.Y - Footer, bounds.Size.X, Footer);
 
     public static void Draw(Control canvas, Vector2 size, string label, int? province, float active = 0, bool connectionAbove = false, bool connected = false)
     {
-        if (province is null && label.StartsWith("Province ", StringComparison.Ordinal))
+        if (province is null && IsCourtLabel(label))
         { BattleInkArt.Court(canvas, size, active, connectionAbove); return; }
         var art = Plate(label, province);
         var source = art.GetSize();

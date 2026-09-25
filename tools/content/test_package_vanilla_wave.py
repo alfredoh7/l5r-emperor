@@ -7,13 +7,21 @@ import unittest
 from PIL import Image
 from io import BytesIO
 
-from package_vanilla_wave import build_definition, build_definition_fields, find_source, package, plain
+from package_vanilla_wave import build_definition, build_definition_fields, find_source, package, plain, real_clan
 
 
 class PackageVanillaWaveTests(unittest.TestCase):
     def test_plain_strips_markup_and_bow_shorthand(self):
         self.assertEqual(plain("<b>Kharmic</b>"), "Kharmic")
         self.assertEqual(plain(":bow: Produce 2 Gold."), "Bow this card Produce 2 Gold.")
+
+    def test_ninja_is_a_keyword_never_a_clan(self):
+        # Issue #492 (Mendon's ruling): there is no Ninja clan; the catalogue lists ["Ninja", "Spider"] for such cards and the first real Clan is the card's.
+        self.assertEqual(real_clan(["Ninja", "Spider"]), "Spider")
+        self.assertEqual(real_clan(["Ninja", "Scorpion"]), "Scorpion")
+        self.assertEqual(real_clan(["Ninja", "Unaligned"]), "Unaligned")
+        self.assertEqual(real_clan(["Ninja"]), "Unaligned")
+        self.assertEqual(real_clan(["Crane"]), "Crane")
 
     def fixture(self, root: Path, card_id: str, text_fields: list[str] | None = None) -> None:
         slug = "test-set"

@@ -41,7 +41,7 @@ internal static partial class EmperorRemainingATests
         PassUntil(e, () => e.State.CurrentBattleProvince is null && e.State.Phase != Phase.Battle || e.State.Cards[follower.Id].Zone != Zone.Attached);
         Eq(e.State.Cards[follower.Id].Zone, Zone.FateDiscard, "after the battle's resolution the Follower was destroyed");
         Check(e.State.Cards[plain.Id].Zone is Zone.Home or Zone.Battlefield, "its Personality lives");
-        Eq(e.State.RemADeadlyOrders.Count, 0, "the mark is spent");
+        Check(e.State.DelayedEffects.Count == 0, "the delayed destruction is spent (it was re-expressed through the shared delay store, issue #492)");
     }
 
     // ---- Deception Revealed ------------------------------------------------------------------------------------------------------------------------------------------

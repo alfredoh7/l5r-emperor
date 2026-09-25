@@ -32,16 +32,15 @@ public sealed partial class MatchEngine
     // The action whose effects are being applied now: an ability's synchronous resolution, the deferred Attack under way, or the duel a Battle action issued.
     private string? CurrentActionKey()
     {
-        var command = _runningCommand ?? _attackCommandInResolution ?? _state.PendingAttack?.Command;
-        if (command?.AbilityId is not null) return ActionKey(command);
-        return _state.PendingDuel is { } duel ? $"{duel.ChallengerPlayerId}|{duel.AbilityId}|{duel.SourceCardId}" : null;
+        return CurrentActionFacts(out var key, out _) ? key : null; // EmperorRulingR4Honor.cs: the ability being resolved, the Attack or duel it started, or the paused action being finished; never a Focus Effect
     }
 
     private void ClearActionMarkersForNewAction(string? abilityId)
     {
         if (abilityId is null || !AbilityCatalog.All.TryGetValue(abilityId, out var ability) || ability.Timing == "Reaction") return;
+        if (_honorWindowsDone > 0) return; // R4 (issue #492): the action's replay after an Honor-change window keeps the marks the Reactions played in it set.
         _state.UnnegatableActionKey = null;
-        _state.HonorReducedActionKey = null;
+        _state.HonorReducedActionKey = null; _state.UnimpeachableActionKey = null; _state.UnimpeachablePlayerId = null;
         _state.RemC.RedirectActionKey = null; _state.RemC.NegateLossesActionKey = null; // Emperor Edition remaining-cards pass, group C (issue #492): Rhetoric's and Solid Defense's marks.
     }
 
@@ -126,14 +125,7 @@ public sealed partial class MatchEngine
         && ActionCarriesKeyword(AbilityCatalog.All[facts.AbilityId], facts.SourceId is null ? null : Card(facts.SourceId), "Kiho");
 
     // ---- Shiro Chugo: "Before an action's resolution, choose your performing unbowed Courtier: Reduce any Honor gain or loss from the action's effects by 2" -------------------
-    // Whether an action's effects could change a player's Honor: read off its printed label (which is the printed text), so a new card of this kind needs no list. A window that
-    // opened for an action that never touches Honor would only be a pass, so it is not opened.
-    private static readonly Regex HonorChangeText = new(@"\b(gains?|loses?|lost)\b[^.;:]{0,60}\bHonor\b|\bHonor (gain|loss)", RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.CultureInvariant);
-
-    private bool ChugoApplies(CardInstance chugo, GameCommand command) =>
-        InPlay(chugo) && command.AbilityId is not null and not "chugo-honor-reduce" && AbilityCatalog.All.TryGetValue(command.AbilityId, out var acting) && IsAction(acting)
-        && (HonorChangeText.IsMatch(acting.Label) || AbilityMayCauseHonorLoss(command.AbilityId))
-        && BeforeActionReactionPerformers(chugo.OwnerId, AbilityCatalog.All["chugo-honor-reduce"]).Any(); // no unbowed Courtier, nobody to perform it: no window
+    // Played in the window before an Honor change from an action's effects (Mendon's R4 ruling, EmperorRulingR4Honor.cs); it used to read the action's printed label to guess whether one would happen.
 
     // GainHonor's hook: the Honor gained or lost by the marked action's effects is reduced by 2, to at most 0 (a gain of 1 becomes 0, a loss of 3 becomes a loss of 1).
     private int ChugoReducedHonorChange(int playerId, int amount, string reason)
@@ -209,7 +201,7 @@ public sealed partial class MatchEngine
                 return false;
             // Shiro Chugo's Reaction: the held action's Honor changes are reduced (the mark is read by GainHonor while that action resolves).
             case "chugo-honor-reduce":
-                if (_state.PendingNegatableAbility is { } held) _state.HonorReducedActionKey = ActionKey(held);
+                if (_state.PendingHonorChange is { } held) _state.HonorReducedActionKey = held.ActionKey;
                 Emit("honorChangeReduction", $"{Definition(source!).Name}: every Honor gain or loss from the action's effects is reduced by 2.", player.Id, source!.Id);
                 return false;
             // Shiro Chugo's Melee 4 Attack (+1 strength if the performer is Loyal, AttackStrength).

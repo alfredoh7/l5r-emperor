@@ -416,18 +416,19 @@ internal static class ForgottenLegacyBatch5Tests
         Eq(e.CardForceForTest(magistrate.Id), CardCatalog.Get("training-magistrate-personality").Force + 1, "a Magistrate +1F");
         Eq(e.CardForceForTest(plain.Id), CardCatalog.Get("training-crane-samurai").Force, "anyone else: no bonus");
         Eq(e.CardForceForTest(enemyCourtier.Id), CardCatalog.Get("training-courtier-personality").Force, "another player's Courtier: no bonus");
-        var strength = e.State.Players[1].Provinces[1].Strength;
+        var strength = e.ProvinceStrengthForTest(1, 1);
         GameCommand Reveal(MatchEngine engine, string ability, int owner, int province) => Opt(engine, 0, ability).Command! with { TargetPlayerId = owner, Province = province };
         var revealOption = Opt(e, 0, "second-city-reveal-raise", a => a.Label.EndsWith("an enemy Province"));
         Check(revealOption.Provinces!.Contains(1), "the enemy province holding a face-down card is offered");
         Accept(e, Reveal(e, "second-city-reveal-raise", 1, 1));
         Check(e.State.Cards[hidden.Id].FaceUp && e.State.Cards[city.Id].Bowed, "bowed; the face-down card is face-up");
-        Eq(e.State.Players[1].Provinces[1].Strength, strength + 2, "the Province's strength +2");
+        Eq(e.ProvinceStrengthForTest(1, 1), strength + 2, "the Province's strength +2");
+        Eq(Batch336Support.StrengthNextTurn(e, 1, 1), strength, "Second City's +2 lasts until end of turn (issue #492 ruling R3)");
         Check(!Listed(e, 0, "second-city-reveal").Any(a => a.Enabled), "one use: the plain reveal shares it");
         // The plain reveal: no strength.
         var e2 = MatchEngine.FromTestState(s);
         Accept(e2, Reveal(e2, "second-city-reveal", 1, 1));
-        Check(e2.State.Cards[hidden.Id].FaceUp, "turned face-up"); Eq(e2.State.Players[1].Provinces[1].Strength, strength, "no strength given");
+        Check(e2.State.Cards[hidden.Id].FaceUp, "turned face-up"); Eq(e2.ProvinceStrengthForTest(1, 1), strength, "no strength given");
         // A province whose card is face-up is refused, and the face-down card's identity never appears in the offer.
         var s3 = s; s3.Cards[hidden.Id].FaceUp = true;
         var e3 = MatchEngine.FromTestState(s3);

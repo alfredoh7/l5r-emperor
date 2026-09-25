@@ -161,6 +161,7 @@ public static class CardCatalog
             new("training-unique-weapon", "Training Unique weapon", CardType.Item, GoldCost:1, Force:1, Keywords:["Weapon","Unique"], Text:"Synthetic Weapon fixture that is also Unique. Never included in a playable deck."),
             new("training-kama", "Training kama", CardType.Item, GoldCost:1, Force:1, Keywords:["Weapon","Kama"], Text:"Synthetic Kama fixture: a Weapon that independently raises its wielder's Weapon cap to two without granting Kensai. Never included in a playable deck."),
             new("training-two-handed-weapon", "Training two-handed weapon", CardType.Item, GoldCost:1, Force:1, Keywords:["Weapon","Two-Handed"], Text:"Synthetic Two-Handed fixture: overrides Kensai/Kama entirely, capping its wielder at one Weapon. Never included in a playable deck."),
+            new("training-focus-ring-bower", "Training focus Ring bower", CardType.Strategy, Focus:3, Abilities:["training-focus-bow-ring"], Text:"Synthetic fixture: a hand card with a Focus Value whose Focus Effect bows every Ring in play (Deception Revealed's Focus Effect case). Never included in a playable deck."),
             new("training-focus-strategy", "Training focus strategy", CardType.Strategy, Focus:3, Text:"Synthetic Tactical Advantage fixture: a hand card with a nonzero Focus Value to discard. Never included in a playable deck."),
             new("training-cavalry", "Training cavalry", CardType.Personality, "Unaligned", GoldCost:3, Force:2, Chi:2, PersonalHonor:1, Keywords:["Cavalry"], Text:"Synthetic Cavalry Maneuvers fixture: carries the Cavalry keyword. Never included in a playable deck."),
             // Brash (core rules keyword, issue #216): "the Defender may draw a card after a Brash
@@ -598,6 +599,7 @@ public static class CardCatalog
             .Concat(PublishedContent.StrategyWave59.Cards) // Emperor Edition remaining-cards pass, group B (issue #492)
             .Concat(PublishedContent.StrategyWave60.Cards) // Emperor Edition remaining-cards pass, group C (issue #492)
             .Concat(PublishedContent.StrategyWave61.Cards) // Emperor Edition remaining-cards pass, group D (issue #492)
+            .Concat(PublishedContent.StrategyWave63.Cards) // Emperor Edition ruling pass R2 (issue #492): the delay Strategies
             .Concat(PublishedContent.SpellWave20.Cards)
             .Concat(PublishedContent.StrongholdWave14.Cards)
             .Concat(PublishedContent.RegionWave7.Cards)
@@ -632,6 +634,7 @@ public static class CardCatalog
             .Concat(PublishedContent.StrongholdWave16.Cards)
             .Concat(PublishedContent.StrongholdWave17.Cards) // Emperor Edition Stronghold pass (issue #486), batch 1
             .Concat(PublishedContent.StrongholdWave19.Cards)
+            .Concat(PublishedContent.StrongholdWave20.Cards) // Emperor Edition ruling pass R2 (issue #492): Halls of the Forgotten
             .Concat(PublishedContent.CelestialWave7.Cards)
             .Concat(PublishedContent.PersonalityWave74.Cards)
             .Concat(PublishedContent.PersonalityWave68.Cards)
@@ -647,6 +650,11 @@ public static class CardCatalog
             .Concat(PublishedContent.FollowerWave31.Cards)
             .Concat(PublishedContent.PersonalityWave76.Cards) // Emperor Edition remaining-cards pass (issue #492), proxy group X
             .Concat(PublishedContent.SpellWave24.Cards) // Emperor Edition remaining-cards pass (issue #492), proxy group X
+            .Concat(PublishedContent.StrategyWave62.Cards) // Emperor Edition rulings pass R1 (issue #492): Surprise Attack
+            .Concat(PublishedContent.StrategyWave64.Cards) // Emperor Edition rulings pass (issue #494): Shinobi Assault, Two Fronts, The Perfect Moment
+            .Concat(PublishedContent.SpellWave25.Cards) // Emperor Edition rulings pass R1 (issue #492): Chikushudo's Trickery
+            .Concat(PublishedContent.RegionWave10.Cards) // Emperor Edition remaining-cards pass (issue #492), ruling R3: Kaiu Village
+            .Concat(PublishedContent.ItemWave16.Cards) // Emperor Edition remaining-cards pass (issue #492), ruling R3: Kaiu Weapon
             .ToDictionary(c => c.Id, StringComparer.Ordinal);
     }
 }

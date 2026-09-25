@@ -83,8 +83,8 @@ internal static class EmperorPersonalityBatch1Tests
         Stats(Negishi, "Daigotsu Negishi", "Spider", 5, 2, 7, "Samurai,Shadowlands,Soul of Daigotsu Arima,Spider Clan", ["negishi-straighten"], 1);
         Stats(Misaki, "Daigotsu Misaki", "Spider", 6, 4, 10, "Commander,Conqueror,Samurai,Shadowlands,Spider Clan", ["misaki-follower-attack"], null, "misaki-follower-discount");
         Stats(Ekichu, "Ekichu no Oni", "Unaligned", 10, 4, 12, "Nonhuman,Oni,Shadowlands,Unique", ["tsuji-bow", "kuronada-destroy", "mihato-move"], 8);
-        Stats(Oyoto, "Goju Oyoto", "Ninja", 1, 3, 4, "Ninja,Shadowlands,Shugenja,Soul of Goju Utsuei,Spider Clan", [], 3);
-        Stats(Onchi, "Ninube Onchi", "Ninja", 4, 3, 8, "Cavalry,Ninja,Shadowlands,Shugenja,Spider Clan", ["onchi-remove-abilities"], 2);
+        Stats(Oyoto, "Goju Oyoto", "Spider", /* issue #492, ruling R5: Ninja is a keyword, not a Clan */ 1, 3, 4, "Ninja,Shadowlands,Shugenja,Soul of Goju Utsuei,Spider Clan", [], 3);
+        Stats(Onchi, "Ninube Onchi", "Spider", 4, 3, 8, "Cavalry,Ninja,Shadowlands,Shugenja,Spider Clan", ["onchi-remove-abilities"], 2);
         Stats(Nosloc, "Nosloc no Oni", "Unaligned", 6, 4, 6, "Cavalry,Nonhuman,Oni,Shadowlands", [], 4);
         Stats(Ugulu, "Ugulu no Oni", "Unaligned", 4, 2, 4, "Nonhuman,Oni,Shadowlands", [], 5, "ugulu-negate-human-movement");
         Manifest(root, "personality-wave-68", Wired);

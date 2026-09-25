@@ -114,11 +114,12 @@ public static class EmperorRemainingBAbilities
         // of his hand (none when it is empty), then the acting player chooses the player (the four answers every "choose a player who gains or loses N" card gives).
         all["remember-ancestors-choose"] = new("Battle", "Bow your performing Courtier at any location and target an enemy attacking Personality: His controller may destroy him. If he did not choose this, discard a card at random from his hand, and choose a player, who gains or loses 3 Honor",
             "enemy-attacking", Performer: "own-unbowed-personality-with-keyword-at-any-location", RequiredKeywords: ["Courtier"], Costs: ActionCost.BowPerformer, ActionKeywords: ["Political"]);
-        // He's Mine! (oracle-l5r-3008): "Reaction: Before your target Personality enters a duel, bow him and choose your performing unbowed Samurai at the same location: Your Samurai enters the duel instead. Bow him
-        // after the duel ends." Irezu's redirect of a duel-issuing action (Ezuno's shape): the target is the Personality the action targets (the challenged one), bowed as the cost; the performer is the Samurai the
-        // action is redirected to; he is bowed once that duel has ended (MatchState.HesMineSubstitutes). A challenge he refuses is no duel, so he is not bowed.
+        // He's Mine! (oracle-l5r-3008): "Reaction: Before your target Personality enters a duel, bow him and choose your performing unbowed Samurai at the same location: Your Samurai enters the duel
+        // instead. Bow him after the duel ends." Issue #492, Mendon's ruling R5: "The substitute may only take the place of a participant in an accepted (or mandatory) duel. He's Mine! cannot be
+        // used to move refusal effects to a new target." So it is a "before the duel begins" Reaction (the window a duel opens once it is accepted, or at once when it cannot be refused), its
+        // target the controller's own participant (bowed as the cost), its performer the Samurai who takes his place (EmperorRulingR5.cs); he is bowed once the duel has ended (MatchState.HesMineSubstitutes).
         all["hes-mine-substitute"] = new("Reaction", "Before your target Personality enters a duel, bow him and choose your performing unbowed Samurai at the same location: Your Samurai enters the duel instead. Bow him after the duel ends",
-            "held-action-target-own-personality", Trigger: ReactionTriggers.TargetedByAction, Performer: "own-unbowed-samurai-with-held-target", Costs: ActionCost.BowTarget);
+            "duel-own-participant", Trigger: "before-duel-begins", Performer: "own-unbowed-samurai-with-duel-target", Costs: ActionCost.BowTarget);
         // Plans Within Plans (oracle-l5r-5984): "Open: At your next opportunity to take an Open action, you may instead take a Limited action." An opportunity is a turn to act in the Action Phase (a command
         // taken with nothing pending); the next one after this card resolves is the one the Limited action may replace, whoever's turn it is (a Limited action is otherwise its active player's). Whatever the
         // player does with that opportunity -- a Limited action, an Open action, a pass -- spends it.
@@ -140,8 +141,8 @@ public sealed partial class MatchEngine
         // Hundred-Fold Cut's Battle action: "your performing Kensai or one of his Weapons" -- an unbowed Kensai at the battlefield, or an unbowed Weapon attached to a Kensai there.
         "own-kensai-or-unbowed-weapon-at-battle" => !performer.Bowed && AtBattle(performer) && (Definition(performer).Type == CardType.Personality && Keyword(performer, "Kensai")
             || Definition(performer).Type == CardType.Item && Keyword(performer, "Weapon") && performer.Zone == Zone.Attached && Card(performer.AttachedTo) is { } kensai && Keyword(kensai, "Kensai")),
-        // He's Mine!: "your performing unbowed Samurai at the same location" as the Personality the held action targets, who may take his place in it.
-        "own-unbowed-samurai-with-held-target" => HesMinePerformerAllows(performer),
+        // He's Mine!: "your performing unbowed Samurai at the same location" as the controller's own participant in the accepted (or mandatory) duel (EmperorRulingR5.cs).
+        "own-unbowed-samurai-with-duel-target" => HesMineDuelPerformerAllows(performer),
         _ => false
     };
 
@@ -163,8 +164,8 @@ public sealed partial class MatchEngine
             // Hundred-Fold Cut: one of the Weapons of the Kensai the held action targets (the bowing way needs it unbowed).
             "kensai-unbowed-weapon-of-held-target" => KensaiWeaponOfHeldTarget(target) && !target.Bowed,
             "kensai-weapon-of-held-target" => KensaiWeaponOfHeldTarget(target),
-            // He's Mine!: the Personality the held action targets, one of the reactor's own.
-            "held-action-target-own-personality" => personality && target.OwnerId == player.Id && OpenReactionSubject() is { TargetId: { } heldId } && target.Id == heldId,
+            // He's Mine!: the reactor's own participant in the accepted (or mandatory) duel, unbowed (he is bowed as the cost).
+            "duel-own-participant" => personality && !target.Bowed && OwnDuelParticipant(player.Id)?.Id == target.Id,
             _ => false
         };
     }
@@ -217,7 +218,7 @@ public sealed partial class MatchEngine
                 var samurai = Card(command.PerformerId!);
                 Straighten(samurai);
                 ApplyModifier(samurai, source!.Id, id, "Force", 3);
-                if (!_state.PendingDelayedDestructions.Contains(samurai.Id)) _state.PendingDelayedDestructions.Add(samurai.Id);
+                ScheduleDelayedEffect(samurai, DelayedKinds.Destroy, DelayUntil.EndOfTurn, null, Definition(source!).Name, source.Id); // the shared delay store (issue #492, EmperorRulingR2.cs)
                 Emit("destructionScheduled", $"{Definition(samurai).Name} will be destroyed before this turn ends.", player.Id, samurai.Id);
                 return false;
             }
@@ -329,7 +330,7 @@ public sealed partial class MatchEngine
             case "hes-mine-substitute":
             {
                 var samurai = Card(command.PerformerId!);
-                RedirectAction(HeldAction(), samurai.Id, source!);
+                SubstituteDuelParticipant(target!, samurai, source!);
                 _state.HesMineSubstitutes.Add(samurai.Id);
                 return false;
             }
@@ -381,20 +382,7 @@ public sealed partial class MatchEngine
         subject.Command.PlayerId != card.OwnerId && affected.OwnerId == card.OwnerId && Definition(affected).Type == CardType.Personality && Keyword(affected, "Kensai")
         && (subject.IsAttack || DestroysTarget(subject.Command.AbilityId!)) && KensaiWeapons(affected, unbowedOnly: abilityId == "hundred-fold-cut-bow").Any();
 
-    // ---- He's Mine! ----
-    private bool HesMinePerformerAllows(CardInstance performer) =>
-        Definition(performer).Type == CardType.Personality && !performer.Bowed && Keyword(performer, "Samurai") && OpenReactionSubject() is { TargetId: { } heldId } held
-        && performer.Id != heldId && SameLocation(performer, Card(heldId)) && WithReactorBowed(Card(heldId), () => ActionAcceptsTarget(held, performer.Id));
-
-    // The Samurai who may take his place: the reactor's own, at the targeted Personality's location, that the held duel-issuing action accepts as its target once he is bowed.
-    private IEnumerable<CardInstance> HesMinePerformers(CardInstance card, ReactionSubject subject) =>
-        subject.TargetId is null ? [] : _state.Cards.Values.Where(c => c.OwnerId == card.OwnerId && InPlay(c) && Definition(c).Type == CardType.Personality && !c.Bowed && Keyword(c, "Samurai")
-            && c.Id != subject.TargetId && SameLocation(c, Card(subject.TargetId)) && WithReactorBowed(Card(subject.TargetId), () => ActionAcceptsTarget(subject, c.Id))).OrderBy(c => c.Id, StringComparer.Ordinal);
-
-    private bool HesMineApplies(CardInstance card, ReactionSubject subject, CardInstance affected) =>
-        AbilityCatalog.All.TryGetValue(subject.Command.AbilityId ?? "", out var acting) && acting.IssuesDuel && subject.Command.PlayerId != card.OwnerId && affected.OwnerId == card.OwnerId
-        && Definition(affected).Type == CardType.Personality && !affected.Bowed && HesMinePerformers(card, subject).Any();
-
+    // ---- He's Mine! (the substitution itself is in EmperorRulingR5.cs) ----
     // FinishDuelResolution's hook: the substitute of a duel that has ended is bowed.
     private void ApplyHesMineBows(string challengerId, string challengedId)
     {
@@ -547,7 +535,8 @@ public sealed partial class MatchEngine
         var unit = Card(command.TargetId);
         MoveHome(unit, false);
         Emit("beforeBattleEffect", $"Hard Pressed: {Definition(unit).Name}'s unit was moved home.", playerId, unit.Id);
-        if (bow && InPlay(unit) && !StalwartNegatesBow(unit, playerId)) { unit.Bowed = true; Emit("beforeBattleEffect", $"Hard Pressed: {Definition(unit).Name} was bowed.", playerId, unit.Id); }
+        // "You may bow it": "it" is the unit, so every card of it bows, each unless its own bowing is prevented (issue #492, ruling R5).
+        if (bow && InPlay(unit) && BowUnitByEffect(unit, playerId) > 0) Emit("beforeBattleEffect", $"Hard Pressed: {Definition(unit).Name}'s unit was bowed.", playerId, unit.Id);
     }
 
     private IEnumerable<ActionOption> HardPressedOptions(int playerId, string? sourceId)

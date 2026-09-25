@@ -347,8 +347,9 @@ internal static partial class EmperorRemainingATests
         var before = e.State.Players.SelectMany(p => p.Provinces).Select(p => p.Strength).ToArray();
         var raise = Enabled(e, 0, "besieged-raise", card.Id, mine.Id);
         Accept(e, raise.Command!);
-        var after = e.State.Players.SelectMany(p => p.Provinces).Select(p => p.Strength).ToArray();
+        var after = e.State.Players.SelectMany(p => p.Provinces.Select(v => e.ProvinceStrengthForTest(p.Id, v.Index))).ToArray(); // until end of turn (issue #492 ruling R3)
         Check(before.Zip(after).All(x => x.Second == x.First + 4), "every province of every player has +4 strength (his base Chi)");
+        Check(before.Zip(e.State.Players.SelectMany(p => p.Provinces.Select(v => Batch336Support.StrengthNextTurn(e, p.Id, v.Index)))).All(x => x.Second == x.First), "Besieged: gone when the turn ends (issue #492 ruling R3)");
         Eq(e.State.Cards[mine.Id].Zone, Zone.Dead, "the Personality was destroyed");
         Check(!CanUse(e, 0, "besieged-lower", card.Id), "the two choices share one use");
         // Decrease, with a current Chi above the base: the base counts.
@@ -359,7 +360,8 @@ internal static partial class EmperorRemainingATests
         var e2 = MatchEngine.FromTestState(t);
         var before2 = e2.State.Players.SelectMany(p => p.Provinces).Select(p => p.Strength).ToArray();
         Accept(e2, Enabled(e2, 0, "besieged-lower", card2.Id, boosted.Id).Command!);
-        var after2 = e2.State.Players.SelectMany(p => p.Provinces).Select(p => p.Strength).ToArray();
+        var after2 = e2.State.Players.SelectMany(p => p.Provinces.Select(v => e2.ProvinceStrengthForTest(p.Id, v.Index))).ToArray();
         Check(before2.Zip(after2).All(x => x.Second == x.First - 3), "every province has -3 strength: the base Chi 3, not the current 5");
+        Check(before2.Zip(e2.State.Players.SelectMany(p => p.Provinces.Select(v => Batch336Support.StrengthNextTurn(e2, p.Id, v.Index)))).All(x => x.Second == x.First), "and the decrease too");
     }
 }

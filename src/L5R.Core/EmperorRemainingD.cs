@@ -24,7 +24,7 @@ public sealed record ShadowCourtWatch(string CardId, int PlayerId, int Turn, str
 
 /// <summary>The Sincerity of the Dragon (oracle-l5r-8338): "After the next resolution this turn of your action from another Strategy or Ring with a base Focus Value equal to the number,
 /// draw a card, and choose a player, who discards a card." <paramref name="Number"/> is the named number.</summary>
-public sealed record SincerityWatch(int PlayerId, int Number, int Turn, string SourceId);
+public sealed record SincerityWatch(int PlayerId, int Number, int Turn, string SourceId, string? Title = null);
 
 public static class EmperorRemainingDAbilities
 {
@@ -102,11 +102,12 @@ public static class EmperorRemainingDAbilities
         // battle resolution destroys your Courtier, draw a card, and choose a player, who gains or loses 2 Honor." -- "your Courtier" is the performing one (ShadowCourtWatches).
         all["shadow-court-bow"] = new("Battle", "Choose your performing defending Courtier and target an enemy Personality: Bow him. After the next time this turn another player's action or a battle resolution destroys your Courtier, draw a card, and choose a player, who gains or loses 2 Honor", "enemy-personality",
             Performer: "rd-own-defending-personality-with-keyword", RequiredKeywords: ["Courtier"]);
-        // The Sincerity of the Dragon (oracle-l5r-8338): "As a Focus Effect: After this duel ends, if you won it, give all your provinces +2 strength." / "Battle/Open: Choose your performing unbowed Dragon
-        // Clan Personality: Name a number. After the next resolution this turn of your action from another Strategy or Ring with a base Focus Value equal to the number, draw a card, and choose a player,
-        // who discards a card." -- the number is a choice among the Focus Values a card may have (0 to 6), an effect choice; the watch is SincerityWatches.
+        // The Sincerity of the Dragon (oracle-l5r-8338): "As a Focus Effect: After this duel ends, if you won it, give all your provinces +2 strength." / "Battle/Open: If you are a Dragon Clan player,
+        // choose your performing unbowed Dragon Clan Personality: Name a number. After the next resolution this turn of your action from another Strategy or Ring with a base Focus Value equal to the
+        // number, draw a card, and choose a player, who discards a card. Remove this card from the game." -- the number is a choice among the Focus Values a card may have (0 to 6), an effect choice;
+        // the watch is SincerityWatches. The corrected scan (Mendon, issue #492) adds the Dragon Clan player condition (ValidateEmperorRemainingD) and the removal (ApplyEmperorRemainingDBranchEffect).
         all["sincerity-dragon-focus"] = new("FocusEffect", "As a Focus Effect: After this duel ends, if you won it, give all your provinces +2 strength", "none");
-        all["sincerity-dragon-name"] = new("BattleOrOpen", "Choose your performing unbowed Dragon Clan Personality: Name a number. After the next resolution this turn of your action from another Strategy or Ring with a base Focus Value equal to the number, draw a card, and choose a player, who discards a card", "none",
+        all["sincerity-dragon-name"] = new("BattleOrOpen", "If you are a Dragon Clan player, choose your performing unbowed Dragon Clan Personality: Name a number. After the next resolution this turn of your action from another Strategy or Ring with a base Focus Value equal to the number, draw a card, and choose a player, who discards a card. Remove this card from the game", "none",
             Performer: "rd-own-unbowed-clan-personality-at-battle", RequiredKeywords: ["Dragon"],
             Branch: new(BranchCondition.Always, Enumerable.Range(0, 7).Select(n => new EffectOption($"name-{n}", $"Name {n}", [$"{MatchEngine.SincerityNameEffect}{n}"])).ToArray(), HonorChoice.None));
         // Twist of Fate (oracle-l5r-8917): "Reaction: Before your Dynasty Phase ends: Take an additional Limited or Open action." -- a window as its player ends the Dynasty Phase (TwistOfFateWindow); the
@@ -136,6 +137,10 @@ public sealed partial class MatchEngine
             case "well-prepared-bow":
             case "well-prepared-straighten":
                 Require(ControlsKeyword(player.Id, "Terrain"), "You do not control a Terrain.");
+                break;
+            // The Sincerity of the Dragon: "If you are a Dragon Clan player" -- a condition on taking the action (the corrected scan, issue #492).
+            case "sincerity-dragon-name":
+                Require(player.Clan == "Dragon", "You must be a Dragon Clan player.");
                 break;
             // The Trap is Sprung!: "If you have Reconnaissance".
             case "trap-sprung-bow":
@@ -239,10 +244,8 @@ public sealed partial class MatchEngine
                 return ResolveOrDeferAttack(id, player, target?.Id, ActionPerformer(ability, command, source).Id, consumedGrant);
             // "Bow it. Bow its unit if you are a Crane Clan player." Each bowing is an effect a bow negation may stop card by card.
             case "trap-sprung-bow":
-                if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
-                if (player.Clan == "Crane")
-                    foreach (var member in UnitMembers(target!).Where(m => m.Id != target!.Id).ToArray())
-                        if (!StalwartNegatesBow(member, player.Id)) member.Bowed = true;
+                BowByEffect(target!, player.Id);
+                if (player.Clan == "Crane") BowUnitByEffect(target!, player.Id, except: target!.Id); // the rest of its unit bows too (the target itself already did or was prevented)
                 return false;
             case "veiled-menace-loss":
                 GainHonor(target!.OwnerId, -2, name, source);
@@ -261,7 +264,7 @@ public sealed partial class MatchEngine
             {
                 var battle = _state.CurrentBattleProvince!.Value;
                 var units = Army(1 - player.Id, battle).Count();
-                GiveProvinceStrengthThisTurn(1 - _state.ActivePlayerId, battle, id == "wall-of-honor-raise" ? units : -units, name);
+                if (CurrentProvinceIndex() is int wallProvince) GiveProvinceStrengthThisTurn(1 - _state.ActivePlayerId, wallProvince, id == "wall-of-honor-raise" ? units : -units, name); // no province, no strength (issue #492, rulings pass R1)
                 GainHonor(player.Id, 2, name, source);
                 return false;
             }
@@ -274,9 +277,7 @@ public sealed partial class MatchEngine
                 StraightenUnit(Card(command.PerformerId!));
                 return false;
             case "power-one-bow":
-                foreach (var unitTarget in SlotCards(command, "targets").ToArray())
-                    foreach (var member in UnitMembers(unitTarget).ToArray())
-                        if (!StalwartNegatesBow(member, player.Id)) member.Bowed = true;
+                foreach (var unitTarget in SlotCards(command, "targets").ToArray()) BowUnitByEffect(unitTarget, player.Id);
                 return false;
             case "power-word-reaction":
                 return BeginPowerOfWordChoice(source!);
@@ -475,18 +476,19 @@ public sealed partial class MatchEngine
     // ---- The Killing Grounds ----
 
     private const string KillingGroundsEffect = "killing-grounds";
-    private const string KillingGroundsFiredKey = "killing-grounds:fired";
+    // Mendon's ruling (issue #492, R4): "First time for each player" -- the trait is spent once PER PLAYER, so the key carries the passing player's id.
+    private static string KillingGroundsFiredKey(int playerId) => $"killing-grounds:fired:{playerId}";
 
     // Pass()'s hook, in the Combat Segment: "After the first time, while this card remains in play, that a player passes instead of announcing a Battle action: He chooses and destroys one of his
-    // Personalities at the current battlefield." The first pass while the Terrain stands spends it. One Personality is destroyed without asking; with several the passing player is asked
+    // Personalities at the current battlefield." The first pass BY EACH PLAYER while the Terrain stands spends that player's time (Mendon's ruling, R4). One Personality is destroyed without asking; with several the passing player is asked
     // (killingGroundsSelect) and the pass completes once he has chosen. True when a decision is open (the pass waits); false when the pass goes on.
     private bool BeginKillingGroundsOnPass()
     {
         if (_state.PendingChoice is not null || _state.CurrentBattleProvince is not int battle) return false;
-        var grounds = TerrainsAtBattlefield(battle).FirstOrDefault(t => Definition(t).Effect == KillingGroundsEffect && !t.AbilityUses.ContainsKey(KillingGroundsFiredKey));
+        var grounds = TerrainsAtBattlefield(battle).FirstOrDefault(t => Definition(t).Effect == KillingGroundsEffect && !t.AbilityUses.ContainsKey(KillingGroundsFiredKey(_state.PriorityPlayerId)));
         if (grounds is null) return false;
-        grounds.AbilityUses[KillingGroundsFiredKey] = _state.TurnNumber;
         var passer = _state.PriorityPlayerId;
+        grounds.AbilityUses[KillingGroundsFiredKey(passer)] = _state.TurnNumber;
         var own = Army(passer, battle).OrderBy(c => c.Id, StringComparer.Ordinal).ToArray();
         Emit("killingGrounds", $"{Definition(grounds).Name}: {Player(passer).Name} passed instead of announcing a Battle action and must destroy one of his Personalities at this battlefield.", passer, grounds.Id);
         if (own.Length == 0) return false;
@@ -563,6 +565,7 @@ public sealed partial class MatchEngine
         var source = Card(command.CardId);
         _state.SincerityWatches.RemoveAll(w => w.Turn != _state.TurnNumber);
         _state.SincerityWatches.Add(new(command.PlayerId, number, _state.TurnNumber, source.Id));
+        Player(source.OwnerId).Hand.Remove(source.Id); RemoveFromGame(source); // "Remove this card from the game" (the corrected scan, issue #492): part of the action's resolution, so it never reaches the discard pile.
         Emit("watchSet", $"{Definition(source).Name}: {Player(command.PlayerId).Name} named {number}. After the next resolution this turn of his action from another Strategy or Ring with a base Focus Value of {number}, he draws a card and chooses a player who discards a card.", command.PlayerId, source.Id);
         return true;
     }
@@ -572,7 +575,7 @@ public sealed partial class MatchEngine
     {
         if (_state.SincerityWatches.Count == 0 || _state.LastResolvedAction is not { } facts || facts.SourceId is not { } sourceId || !_state.Cards.TryGetValue(sourceId, out var acted)) return false;
         if (Definition(acted).Type is not (CardType.Strategy or CardType.Ring)) return false;
-        var watch = _state.SincerityWatches.FirstOrDefault(w => w.Turn == _state.TurnNumber && w.PlayerId == facts.PlayerId && w.SourceId != acted.Id && w.Number == Definition(acted).Focus);
+        var watch = _state.SincerityWatches.FirstOrDefault(w => w.Turn == _state.TurnNumber && w.PlayerId == facts.PlayerId && w.SourceId != acted.Id && (w.Title is null ? w.Number == Definition(acted).Focus : w.Title == Definition(acted).Name)); // The Honesty of the Phoenix (ruling pass R2) names a title instead of a number
         if (watch is null) return false;
         _state.SincerityWatches.Remove(watch);
         Draw(Player(watch.PlayerId));

@@ -218,11 +218,12 @@ internal static partial class EmperorRemainingATests
             var e = Build(false, out var card, out var scout, out var plain);
             Eq(e.State.PendingChoice?.Type, "engageReaction", "the Engage window is open");
             Check(!CanUse(e, 0, "burn-towers-recon", card.Id, plain.Id), "a Personality who is not a Scout may not perform");
-            var strength = e.State.Players[1].Provinces[0].Strength;
+            var strength = e.ProvinceStrengthForTest(1, 0);
             Accept(e, Enabled(e, 0, "burn-towers-recon", card.Id, scout.Id).Command!);
             Check(e.State.Players[1].Provinces[0].Reconnaissance[0], "its player has Reconnaissance there");
-            Eq(e.State.Players[1].Provinces[0].Strength, strength - 3, "the battlefield's province has -3 strength");
-            Eq(e.State.Players[1].Provinces[1].Strength, e.State.Players[1].Provinces[0].Strength + 3, "another province is untouched");
+            Eq(e.ProvinceStrengthForTest(1, 0), strength - 3, "the battlefield's province has -3 strength");
+            Eq(Batch336Support.StrengthNextTurn(e, 1, 0), strength, "Burn the Towers: until end of turn (issue #492 ruling R3)");
+            Eq(e.ProvinceStrengthForTest(1, 1), e.ProvinceStrengthForTest(1, 0) + 3, "another province is untouched");
         }
         {
             var e = Build(true, out var card, out var scout, out _);

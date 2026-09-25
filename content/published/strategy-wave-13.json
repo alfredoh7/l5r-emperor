@@ -139,7 +139,8 @@
       "Keywords": [],
       "Focus": 1,
       "Abilities": [
-        "strength-of-the-spider"
+        "strength-of-the-spider",
+        "strength-spider-focus"
       ],
       "Effect": "none"
     },

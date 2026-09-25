@@ -10,7 +10,7 @@ internal static class ForgottenLegacyBatch4Tests
         SteadfastDefense = "oracle-l5r-7477", SunderingStrike = "oracle-l5r-7650";
 
     // The six Strategies of the batch left unwired (each with a blocker note in tools/content/build_card_inventory.py): never published.
-    private static readonly string[] Unwired = ["oracle-l5r-3426", "oracle-l5r-5648", "oracle-l5r-5939", "oracle-l5r-7696", "oracle-l5r-8257", "oracle-l5r-9208"];
+    private static readonly string[] Unwired = ["oracle-l5r-3426", "oracle-l5r-5648", "oracle-l5r-5939", "oracle-l5r-7696", "oracle-l5r-9208"];
 
     private static void Check(bool ok, string message = "Assertion failed") => Batch336Support.Check(ok, message);
     private static void Eq<T>(T actual, T expected, string message = "Values differ") => Batch336Support.Eq(actual, expected, message);
@@ -71,6 +71,7 @@ internal static class ForgottenLegacyBatch4Tests
         Shape(SiegeVolley, "Siege Volley", 0, "Siege", "siege-volley-attack", "siege-volley-raise", "siege-volley-lower");
         Shape(SteadfastDefense, "Steadfast Defense", 0, "Kiho", "steadfast-defense-straighten");
         Shape(SunderingStrike, "Sundering Strike", 0, "", "sundering-strike");
+        // issue #494: The Perfect Moment (8257) and Shinobi Assault (9927) are published now in strategy-wave-64 and left this list.
         foreach (var id in Unwired) Check(!CardCatalog.Cards.ContainsKey(id), $"{id} is unwired and so not published");
         Manifest(Batch336Support.RepoRoot(), "strategy-wave-55", wired);
     }
@@ -355,10 +356,11 @@ internal static class ForgottenLegacyBatch4Tests
             Add(t, "training-lion-samurai", 1, Zone.Battlefield, province: 0);
             var castles = t.Cards.Values.Count(c => c.OwnerId == 0 && c.Zone is Zone.Home or Zone.Stronghold && (CardCatalog.Get(c.DefinitionId).Keywords ?? []).Contains("Castle"));
             var f = MatchEngine.FromTestState(t);
-            var before = f.State.Players[1].Provinces[0].Strength;
+            var before = f.ProvinceStrengthForTest(1, 0);
             var ability = raise ? "siege-volley-raise" : "siege-volley-lower";
             Accept(f, Enabled(f, 0, ability, volley.Id).Command!);
-            Eq(f.State.Players[1].Provinces[0].Strength, before + (raise ? castles : -castles), $"{ability}: changed by the {castles} Castles");
+            Eq(f.ProvinceStrengthForTest(1, 0), before + (raise ? castles : -castles), $"{ability}: changed by the {castles} Castles");
+            Eq(Batch336Support.StrengthNextTurn(f, 1, 0), before, $"{ability}: until end of turn (issue #492 ruling R3)");
         }
     }
 

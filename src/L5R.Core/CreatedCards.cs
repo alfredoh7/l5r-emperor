@@ -178,7 +178,7 @@ public static class CreatedCards
                 var namesPerformer = alternative.HostIsPerformer || (alternative.Values ?? []).Any(v => v.From == CreatedSubject.Performer);
                 if (namesPerformer && AbilityCatalog.All.TryGetValue(abilityId, out var creator) && creator.Performer is null) problems.Add($"{abilityId}: {alternative.Describe()} names the performer, and the ability has none");
                 if (alternative.HostIsEntered && (!IsAttachment(scan.Type) || alternative.HostIsPerformer || alternative.HostIsSource
-                        || !AbilityCatalog.All.TryGetValue(abilityId, out var enterer) || enterer.Trigger != "own-personality-enters-play"))
+                        || !AbilityCatalog.All.TryGetValue(abilityId, out var enterer) || enterer.Trigger is not ("own-personality-enters-play" or EmperorRulingR3Abilities.EntersFromProvinceTrigger)))
                     problems.Add($"{abilityId}: {alternative.Describe()} attaches {scan.Name} to the entering Personality, which needs an attachment, no other host and an own-personality-enters-play Reaction");
                 if (alternative.ControllerClan && scan.Type != CardType.Personality) problems.Add($"{abilityId}: {alternative.Describe()} gives {scan.Name} a Clan, which only a Personality has");
                 foreach (var value in alternative.Values ?? [])

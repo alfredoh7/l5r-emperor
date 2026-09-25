@@ -176,6 +176,7 @@ public sealed partial class MatchEngine
         // Ten Thousand Temples (issue #492, group F): the answer to an Honor loss decision replays the command that reached it, from the state it started in, with the decisions made so far.
         var execute = command; MatchState? cleanBase = null;
         _honorLossOccurrence = 0; _honorLossDecisions = [];
+        ResetHonorChangeReplay(); // Mendon's R4 ruling (issue #492): the windows of an Honor change replay the command that reached it (EmperorRulingR4.cs).
         if (command.Type == "honorLossChoice")
         {
             if (original.PendingHonorLossDecision is not { } decision) return Reject("No Honor loss decision is pending.");
@@ -184,27 +185,48 @@ public sealed partial class MatchEngine
             cleanBase.PendingHonorLossDecision = null; cleanBase.PendingChoice = decision.PriorChoice; cleanBase.PriorityPlayerId = decision.PriorPriority; cleanBase.ConsecutivePasses = decision.PriorPasses;
             _state = Copy(cleanBase);
             _honorLossDecisions = decision.Decisions.Append(command.Choice == "yes").ToList();
+            _honorWindowsDone = decision.HonorWindowsDone;
             execute = decision.Command;
         }
         else _state = Copy(original);
         var firstEvent = _state.Events.Count;
         try
         {
+            // Mendon's R4 ruling (issue #492): a command that reached an Honor change a Reaction may be played on was set aside and its window opened; when the window closes the command is run
+            // again (from the state the window left), so this body runs once for a command and once more for each such replay.
+            var replaying = false;
+            while (true)
+            {
             var aftermath = _state.LastDuel is { Complete:false, Result:not null } ? CaptureDuelEvidence() : null;
-            var reactionSource = command.CardId ?? _state.PendingChoice?.CardId;
+            var reactionSource = execute.CardId ?? _state.PendingChoice?.CardId;
             var reactionCard = aftermath is not null && reactionSource is not null && _state.Cards.TryGetValue(reactionSource, out var rc)
                 && rc.FaceUp && rc.Zone is not (Zone.Hand or Zone.FateDeck or Zone.DynastyDeck) ? ViewCard(rc) : null;
             var reactionLabel = _state.PendingChoice?.Type=="overconfidentDraw" ? "Overconfident" : null;
             var traitSnapshot = AfterCommandTraitSnapshot(); // "After this card bows/attaches" traits (issue #453 batch 5, SeedsOfDecayBatch5.cs)
             UsePaymentDiscards(execute); // Asahina Keigo (issue #477): the hand cards named for Gold sources that discard one.
             var plansSets = PlansOpportunitySets(execute); // Plans Within Plans (issue #492): is this command the armed player's opportunity to take an Open action?
-            Apply(execute);
+            if (replaying)
+            {
+                // The Reactions played in the window may have made the command it set aside illegal (a card it needs was bowed, a target left): it is then cancelled, and the window's state stands.
+                try { Apply(execute); }
+                catch (RuleViolation cancelled)
+                {
+                    _paymentDiscards=[];
+                    _state = Copy(_honorReplayBase ?? _state);
+                    Emit("actionCancelled", $"The action could not go on after the Reactions played before its Honor change: {cancelled.Message}");
+                    break;
+                }
+            }
+            else Apply(execute);
+            if (_honorReplayCommand is { } replay) { _paymentDiscards=[]; execute = replay; _honorReplayCommand = null; replaying = true; continue; }
             SpendPlansWithinPlans(execute, plansSets);
             _paymentDiscards=[];
             ApplyAfterCommandTraits(traitSnapshot);
             ReturnCardsOutOfPlayToTheirOwners();
             RemoveCreatedCardsLeftInPiles();
             if (aftermath is not null) RecordDuelChanges(aftermath, "Aftermath", reactionCard, sourceLabel: reactionLabel);
+            break;
+            }
             _state.Version++;
             RefreshDuelRecord();
             _commands.Add(Copy(command));
@@ -214,10 +236,10 @@ public sealed partial class MatchEngine
         {
             // The command reached an Honor loss Ten Thousand Temples may negate: nothing it did is kept; its controller is asked, and the command is replayed with his answer.
             _paymentDiscards=[];
-            var pendingBase = cleanBase ?? original;
+            var pendingBase = _honorReplayBase ?? cleanBase ?? original;
             _state=pendingBase;
             pendingBase.PendingHonorLossDecision=new PendingHonorLossDecision { Command=execute, Decisions=_honorLossDecisions.ToList(), PlayerId=need.PlayerId, TempleId=need.TempleId, Amount=need.Amount, Reason=need.Reason,
-                PriorChoice=pendingBase.PendingChoice, PriorPriority=pendingBase.PriorityPlayerId, PriorPasses=pendingBase.ConsecutivePasses };
+                PriorChoice=pendingBase.PendingChoice, PriorPriority=pendingBase.PriorityPlayerId, PriorPasses=pendingBase.ConsecutivePasses, HonorWindowsDone=_honorWindowsDone };
             pendingBase.PendingChoice=new("honorLossDecision",need.PlayerId,need.TempleId,$"Ten Thousand Temples: you would lose {-need.Amount} Honor ({need.Reason}). Destroy it to negate the loss?");
             pendingBase.PriorityPlayerId=need.PlayerId; pendingBase.ConsecutivePasses=0;
             var decisionEvents=_state.Events.Count;
@@ -226,6 +248,19 @@ public sealed partial class MatchEngine
             _commands.Add(Copy(command));
             _honorLossDecisions=[];
             return new(true,null,_state.Version,_state.Events.Skip(decisionEvents).ToArray());
+        }
+        catch (HonorChangeWindowNeeded need)
+        {
+            // The command reached an Honor change from an action's effects that a Reaction may be played on: nothing it did is kept, the window is opened on the state it started from
+            // (Reactions played in it change that state), and the command is run again when both players have passed (Execute's loop).
+            _paymentDiscards=[];
+            var pendingBase = _honorReplayBase ?? cleanBase ?? original;
+            _state=pendingBase;
+            var windowEvents = OpenHonorChangeWindow(need, execute);
+            _state.Version++;
+            _commands.Add(Copy(command));
+            _honorLossDecisions=[];
+            return new(true,null,_state.Version,_state.Events.Skip(windowEvents).ToArray());
         }
         catch (RuleViolation error)
         {
@@ -245,6 +280,7 @@ public sealed partial class MatchEngine
     {
         var twistWasActive=_state.TwistOfFateActive; // Twist of Fate (issue #492, group D): the additional action ends with the first command taken during it that leaves nothing open.
         ApplyCore(command);
+        if (_honorReplayCommand is not null) return; // an Honor-change window just closed: Execute runs the command it set aside again.
         ResumeIdleSuspendedWindow();
         FinishSpentBeforeBattleItem();
         FinishTwistOfFateAction(twistWasActive);
@@ -262,17 +298,17 @@ public sealed partial class MatchEngine
         {
             // Deck search (issue #312): deck choice, candidate selection/pass, a Region's province, the discard
             // after a Terrain. Every command a search accepts is validated in ResolveSearchCommand.
-            if (IsSearchChoice(_state.PendingChoice.Type)) { ResolveSearchCommand(command); return; }
+            if (IsSearchChoice(_state.PendingChoice.Type)) { WithResumedAction(() => ResolveSearchCommand(command)); return; }
             // Look at the top N cards (issue #322): the deck choice and the one arrangement command.
             if (IsLookChoice(_state.PendingChoice.Type)) { ResolveLookCommand(command); return; }
             // Copying keywords and abilities (issue #338): the two independent copy decisions (CardCopy.cs).
             if (IsCopyChoice(_state.PendingChoice.Type)) { ResolveCopyCommand(command); return; }
             // The opposing player's Either/Or choice (issue #338): answered by the deciding player, who holds priority (EitherOr.cs).
-            if (_state.PendingChoice.Type=="eitherOr") { ResolveEitherOrCommand(command); return; }
+            if (_state.PendingChoice.Type=="eitherOr") { WithResumedAction(() => ResolveEitherOrCommand(command)); return; }
             // The opposing player's variable payment (issue #373, Virtuous Charity): answered by the paying player, who holds priority (OpponentPayment.cs).
-            if (_state.PendingChoice.Type=="opponentPayment") { ResolveOpponentPaymentCommand(command); return; }
+            if (_state.PendingChoice.Type=="opponentPayment") { WithResumedAction(() => ResolveOpponentPaymentCommand(command)); return; }
             // Another player's choice inside an action (issue #419, DeciderChoice.cs): answered by the deciding player, who holds priority.
-            if (_state.PendingChoice.Type=="deciderChoice") { ResolveDeciderChoiceCommand(command); return; }
+            if (_state.PendingChoice.Type=="deciderChoice") { WithResumedAction(() => ResolveDeciderChoiceCommand(command)); return; }
             // A Focus Effect paused for its player's decision (issue #419, FocusEffectChoice.cs).
             if (_state.PendingChoice.Type=="focusEffectChoice") { ResolveFocusEffectChoiceCommand(command); return; }
             // The second target of a sequenced action (issue #419, SequencedTarget.cs).
@@ -317,7 +353,7 @@ public sealed partial class MatchEngine
             if (_state.PendingChoice.Type=="testedLandProvince") { ResolveTestedLandProvince(command); return; }
             if (_state.PendingChoice.Type=="forcedDiscard") { ResolveForcedDiscard(command); return; }
             // A conditional effect choice (issue #337, Mirumoto Yumaru): the acting player picks one of the options the engine listed.
-            if (_state.PendingChoice.Type=="effectChoice") { ResolveEffectChoice(command); return; }
+            if (_state.PendingChoice.Type=="effectChoice") { WithResumedAction(() => ResolveEffectChoice(command)); return; }
             if (_state.PendingChoice.Type=="proclaimNegateReaction")
             {
                 // Turning the Story (issue #453, batch 2): the one reacting player answers -- the Reaction (negating the held Proclaim) or a pass -- and the
@@ -403,7 +439,8 @@ public sealed partial class MatchEngine
                     // Negated (Effortless Counterattack): it is taken and pays its costs, only its effects are lost, and the burst it was part of goes on --
                     // the next additional action is the holder's to take (ResolveNegatedAction, consumedGrant).
                     var negated=_state.DeferredActionNegated; _state.DeferredActionNegated=false;
-                    if(negated) ResolveNegatedAction(pending,consumedGrant:true); else ExecuteAbilityEffects(pending,consumedGrant:true);
+                    if(negated) ResolveNegatedAction(pending,consumedGrant:true);
+                    else if(!ChainOutOfPlayReactionWindow(pending,consumedGrant:true)) ExecuteAbilityEffects(pending,consumedGrant:true); // R4 (issue #492): Bad Kharma and the like may still be played on top.
                 }
                 return;
             }
@@ -427,10 +464,12 @@ public sealed partial class MatchEngine
                     var pending=_state.PendingNegatableAbility; _state.PendingNegatableAbility=null;
                     // A redirect may have made a Bofana the target of an action his trait was not yet judged for (issue #335).
                     if(OpenForcedDiscardForTargetedTrait(pending,"action")) return;
-                    ResolveDeferredActionInItsWindow(pending);
+                    ResolveDeferredActionAfterItsWindows(pending);
                 }
                 return;
             }
+            // Mendon's R4 ruling (issue #492): the window before an Honor gain or loss from an action's effects (EmperorRulingR4.cs).
+            if (_state.PendingChoice.Type=="honorChangeReaction") { ResolveHonorChangeWindowCommand(command); return; }
             if (_state.PendingChoice.Type=="unimpeachableNameReaction")
             {
                 // Unimpeachable Name (oracle-l5r-8989): open only to the one reacting player (unlike
@@ -443,10 +482,16 @@ public sealed partial class MatchEngine
                 {
                     var pending=_state.PendingOutOfPlayActionReaction; _state.PendingOutOfPlayActionReaction=null;
                     var reduction=_state.HonorLossReductionPlayerId;
+                    // Mendon's R4 ruling (issue #492): this window can follow the before-action window and the additional-action window of the same action, and what they set (the negations of
+                    // effects, the additional action's grant) is carried through it.
+                    var carried=_state.PendingOutOfPlayNegations; var carriedGrant=_state.PendingOutOfPlayConsumedGrant;
+                    _state.PendingOutOfPlayNegations=null; _state.PendingOutOfPlayConsumedGrant=false;
                     var outer=ContinueSuspendedReaction(pending);
+                    if(carried is not null) _state.NegatedEffects=carried;
                     _state.HonorLossReductionPlayerId=reduction; var suspended=_state.SuspendedWindows.Count;
                     // Bad Kharma / Footsteps of Madness (Emperor Edition remaining-cards pass, group A, issue #492): the held action was negated as a whole in this window.
-                    if(RemATakeHeldNegation(out var remAIgnoreCosts)) ResolveNegatedAction(pending,ignoreCosts:remAIgnoreCosts); else ExecuteAbilityEffects(pending);
+                    if(RemATakeHeldNegation(out var remAIgnoreCosts)) ResolveNegatedAction(pending,consumedGrant:carriedGrant,ignoreCosts:remAIgnoreCosts); else ExecuteAbilityEffects(pending,consumedGrant:carriedGrant);
+                    if(carried is not null) { _state.NegatedEffects.Clear(); RestoreTemporaryRemovals(TemporaryRemovals.Action); if(_state.SuspendedWindows.Count<=suspended) _state.NegatedEffects=outer?.NegatedEffects ?? []; }
                     if(_state.SuspendedWindows.Count>suspended) _state.SuspendedWindows[^1].HonorLossReductionPlayerId=outer?.HonorLossReductionPlayerId;
                     else _state.HonorLossReductionPlayerId=outer?.HonorLossReductionPlayerId;
                 }
@@ -846,6 +891,7 @@ public sealed partial class MatchEngine
         var player = Player(command.PlayerId);
         var province = player.Provinces.Single(p => p.CardId == card.Id);
         province.CardId = null;
+        _state.LastProvinceEntryCardId = card.Id; _state.LastProvinceEntryProvinceIndex = province.Index; // an overlay recruit enters play from a province too (Kaiu Village, issue #492 ruling R3)
 
         // The old Personality leaves play and the new one enters. Queue keyword triggers while each
         // card still has the state that determines its own trigger.
@@ -1315,6 +1361,7 @@ public sealed partial class MatchEngine
         Require(!Player(command.PlayerId).MayNotAttackThisTurn && !AttackLockedByEvent(command.PlayerId),"You may not declare an attack this turn.");
         _state.UnresolvedBattlefields=Player(1-command.PlayerId).Provinces.Where(p=>!p.Destroyed).Select(p=>p.Index).Order().ToList();
         Emit("attackDeclared",$"{Player(command.PlayerId).Name} declared an attack: a battlefield exists at each of {Player(1-command.PlayerId).Name}'s provinces.",command.PlayerId);
+        CreateTwoFrontsBattlefields(command.PlayerId); // Two Fronts (issue #492, rulings pass R1): a second battlefield at the marked province.
         SetPhase(Phase.InfantryDeclaration,command.PlayerId);
     }
     private void DeclineAttackPhase()
@@ -1322,7 +1369,7 @@ public sealed partial class MatchEngine
         // Spiritual Manipulation (The Shadow's Embrace pass, issue #476, batch 4): "must declare a normal attack this turn".
         if(ForcedAttackDeclineRefusal(_state.PriorityPlayerId) is string forcedDecline) throw new RuleViolation(forcedDecline);
         Emit("attackDeclined",$"{Player(_state.PriorityPlayerId).Name} declined to attack; the Attack Phase ends.",_state.PriorityPlayerId);
-        _state.UnresolvedBattlefields=[];
+        _state.UnresolvedBattlefields=[]; R1.TwoFronts.RemoveAll(m=>m.Turn<=_state.TurnNumber);
         SetPhase(Phase.Dynasty,_state.ActivePlayerId);
     }
     // Infantry Maneuvers (InfantryDeclaration/DefenseAssignment) runs first, then Cavalry Maneuvers
@@ -1341,7 +1388,7 @@ public sealed partial class MatchEngine
         RequireRetributionAssignment(command); // Emperor Edition remaining-cards pass, group C (issue #492): an additional Attack Phase assigns one Personality at most.
         // Spiritual Manipulation (The Shadow's Embrace pass, issue #476, batch 4): "and assign the target (if legal)" -- in the segment he can be assigned in.
         if(ForcedAssignmentRefusal(command.PlayerId,command.Assignments,cavalry) is string forcedAssignment) throw new RuleViolation(forcedAssignment);
-        var targets=Player(1-command.PlayerId).Provinces.Where(p=>!p.Destroyed).Select(p=>p.Index).ToHashSet();
+        var targets=AttackableBattlefields(command.PlayerId).ToHashSet(); // every battlefield the declaration created (a province's, and Two Fronts' additional ones)
         Assign(command,targets,cavalry,false);
         NoteRetributionAssignments(command); // issue #492, group C: Retribution's +1F for the Personality and his Followers.
         Emit("attackersAssigned",$"{Player(command.PlayerId).Name} assigned {(command.Assignments?.Count??0)} {(cavalry?"Cavalry":"Infantry")} attacker(s).",command.PlayerId);
@@ -1428,25 +1475,46 @@ public sealed partial class MatchEngine
     {
         Require(_state.Phase==Phase.BattleSelection,"Battle order may be chosen between battles.");
         Require(command.Province is int && _state.UnresolvedBattlefields.Contains(command.Province.Value),"Choose an unresolved battlefield.");
-        _state.CurrentBattleProvince=command.Province; _state.BattleNumber++;
+        EngageBattle(command.Province!.Value,null);
+    }
+    // The Attacker has chosen a battle (SelectBattle), or an effect fights one (Shinobi Assault, Chikushudo's Trickery: EmperorRulingR1.cs). `firstOpportunity` is the player an effect grants the first
+    // opportunity to take a Battle action or pass, a claim like any other (Defender's own wins); null for none.
+    private void EngageBattle(int battlefield,int? firstOpportunity)
+    {
+        _state.CurrentBattleProvince=battlefield; _state.BattleNumber++;
         _state.EnemyDestroyedOwnPersonalitySinceLastBattleAction=new bool[2]; // Revenge (issue #437): "this battle" bounds the window.
         _state.ReconStrategyActionsThisBattle=new int[2]; // Advanced Intelligence (Seeds of Decay pass, issue #453, batch 1): "this battle" too.
-        SetPhase(Phase.Battle,1-_state.ActivePlayerId);
+        // An effect's battle is fought inside the phase it was played in (BeginAsideBattle has already set it up); a chosen one is a phase of its own.
+        if(R1.Aside is null) SetPhase(Phase.Battle,1-_state.ActivePlayerId); else _state.PriorityPlayerId=1-_state.ActivePlayerId;
         // Battle Phase timing (issue #310): the Defender holds the first opportunity by default (spec 4.4).
         // "Engaging" is exactly this moment -- the Attacker has just selected the battle (spec 4.1) -- so the
         // Engage window (spec 4.2) opens here, before any Battle action, whenever something could be played in
         // it; its claims can flip the first opportunity (CloseEngageWindow). Nothing playable: exactly the
         // pre-#310 flow, event stream included.
         _state.FirstActionPlayerId=1-_state.ActivePlayerId; _state.FirstActionReason=BattleSteps.ReasonDefault; _state.FirstActionRestriction=null;
-        ApplyYoritomosGuidanceAfterEngaging(command.Province!.Value); // Yoritomo's Guidance (Emperor Edition remaining-cards pass, issue #492, group E): "After engaging, if the Attacker is a Mantis Clan player".
-        if(OpenEngageWindow(command.Province!.Value)) { Emit("battleStarted",$"Battle at province {command.Province+1}: engaged."); return; }
-        Emit("battleStarted",$"Battle at province {command.Province+1}: defender acts first.");
+        ApplyYoritomosGuidanceAfterEngaging(battlefield); // Yoritomo's Guidance (Emperor Edition remaining-cards pass, issue #492, group E): "After engaging, if the Attacker is a Mantis Clan player".
+        var label=BattlefieldLabel(battlefield);
+        if(OpenEngageWindow(battlefield))
+        {
+            if(firstOpportunity is int claimant) ClaimFirstOpportunity(claimant,claimant==_state.ActivePlayerId?"Grant":"Defender",null);
+            Emit("battleStarted",$"Battle at {label}: engaged.");
+            return;
+        }
+        if(firstOpportunity==_state.ActivePlayerId)
+        {
+            // No window opened: the Attacker's grant stands unopposed (ResolveFirstOpportunity's result for a lone Attacker claim).
+            _state.FirstActionPlayerId=_state.ActivePlayerId; _state.FirstActionReason=BattleSteps.ReasonEngageGrant; _state.PriorityPlayerId=_state.ActivePlayerId;
+            _state.AttackerLeadBattle=_state.BattleNumber;
+            Emit("firstOpportunity",$"{Player(_state.ActivePlayerId).Name} has the first opportunity to take a Battle action or pass ({BattleSteps.ReasonEngageGrant}).",_state.ActivePlayerId);
+        }
+        Emit("battleStarted",$"Battle at {label}: {(firstOpportunity==_state.ActivePlayerId?"attacker":"defender")} acts first.");
     }
     private void ResolveBattle()
     {
         var provinceIndex=_state.CurrentBattleProvince!.Value;
         var attacker=_state.ActivePlayerId; var defender=1-attacker;
         ExpireUntilResolutionProvinceStrength(); // Kaiu Hideaki (issue #477 batch 2): "until the battle's resolution begins".
+        EndCombatSegmentShields(); // Chikushudo's Trickery (issue #492, rulings pass R1): "will not be destroyed during the battle's Combat Segment".
         // Before This Battle Resolves (issue #272): "occur after all players have passed but before
         // resolution is determined" -- deliberately checked BEFORE Army() is ever read below, since
         // Encircled Terrain's own effect (sending every other Personality home) changes who actually
@@ -1629,10 +1697,13 @@ public sealed partial class MatchEngine
         var a=Army(attacker,provinceIndex).ToArray(); var d=Army(defender,provinceIndex).ToArray();
         MarkOpposed(a,d); // Sentinel Spirit (issue #453, batch 2): "if it was opposed this turn".
         var (af,df)=ArmyForces(a,d,attacker,defender);
-        Emit("battleResolved",$"Province {provinceIndex+1}: attacking Force {af}, defending Force {df}.");
+        // Battles without a province (Mendon, issue #492 rulings pass R1): a battlefield whose province is gone (created without one, or destroyed before now) resolves as normal except that
+        // no province may be destroyed, so nothing that triggers on destroying a province can trigger.
+        var battleProvince=BattlefieldProvince(provinceIndex);
+        Emit("battleResolved",$"{(battleProvince is null && provinceIndex>=FirstAdditionalBattlefield ? "A battlefield without a province" : $"Province {provinceIndex+1}")}: attacking Force {af}, defending Force {df}.");
         // Reconnaissance resets to No for both players at this battlefield once its battle resolves,
         // regardless of the outcome -- the only trigger that clears it.
-        Player(defender).Provinces.Single(p=>p.Index==provinceIndex).Reconnaissance=new bool[2];
+        ResetBattlefieldReconnaissance(provinceIndex,defender);
         var attackerWon=af>df;
         // What the resolution did, for the Reactions that name it (AfterResolution.cs).
         var destroyedByPlayer=new int[2]; var provinceDestroyedNow=false; var losers=new List<int>();
@@ -1643,10 +1714,10 @@ public sealed partial class MatchEngine
             var destroyedDefenders=DestroyUnits(d);
             destroyedByPlayer[attacker]=destroyedDefenders; losers.Add(defender);
             if(!RehonorWinners(a)) { GainHonor(attacker,destroyedDefenders*2,"Battle victory"); CheckEarthFlowsBonus(attacker,a); }
-            var province=Player(defender).Provinces.Single(p=>p.Index==provinceIndex);
-            var destroyedProvince=af>df+EffectiveProvinceStrength(province);
-            if(destroyedProvince) DestroyProvince(defender,province);
-            if(destroyedProvince) AfterProvinceDestroyedByResolution(attacker,defender,province,a); // Alter History, Boastful Proclamation (issue #492, group F).
+            var province=battleProvince;
+            var destroyedProvince=province is not null && !PerfectMomentBarsDestruction(attacker) && af>df+EffectiveProvinceStrength(province);
+            if(destroyedProvince) { DestroyProvince(defender,province!); NotePerfectMomentDestruction(attacker); }
+            if(destroyedProvince) AfterProvinceDestroyedByResolution(attacker,defender,province!,a); // Alter History, Boastful Proclamation (issue #492, group F).
             provinceDestroyedNow=destroyedProvince;
             // Vital Pathways (issue #272): "After this battlefield's province is destroyed, if you
             // are the Attacker" -- checked here, at the actual moment of destruction, since
@@ -1747,6 +1818,9 @@ public sealed partial class MatchEngine
         var hikazuSpared=HikazuSparedPersonalities(a);
         foreach(var card in a.Where(c=>c.Zone==Zone.Battlefield))
         {
+            // Conqueror (issue #492, ruling R5 on whole-unit bow/straighten): "Straighten his unit. It will not bow from the resolution" -- every card of it straightens (each unless its own straightening is
+            // prevented), not just the return home unbowed.
+            if(card.Id==conquerorUnbowedId) StraightenUnit(card);
             var wasBowed=card.Bowed;
             ReturnHome(card,card.Id!=conquerorUnbowedId && !willNotBow.Contains(card.OwnerId) && !ResolutionWillNotBow(card));
             if(hikazuSpared.Contains(card.Id)) card.Bowed=wasBowed; // "(Their Followers still bow.)"
@@ -1763,6 +1837,7 @@ public sealed partial class MatchEngine
         foreach(var terrain in _state.Cards.Values.Where(c=>c.Zone==Zone.Battlefield && c.ProvinceIndex==provinceIndex && Keyword(c,"Terrain") && Definition(c).Effect!="looting-return-to-hand").ToArray())
             DiscardTerrain(terrain);
         _state.UnresolvedBattlefields.Remove(provinceIndex); _state.CurrentBattleProvince=null;
+        R1.MovementNegated.Remove(provinceIndex); // Chikushudo's Trickery: "negate all movement to it" ends with the battlefield.
         // After This Battle Resolves (issue #272): stashed here since CurrentBattleProvince is
         // already cleared above, and the Overconfident draw window (below) may defer this whole tail
         // across a command boundary before FinishBattleReturnHomeAndTransition ever reads it back --
@@ -1816,7 +1891,9 @@ public sealed partial class MatchEngine
         // play now sits. Deferring here (a province choice) re-enters this same function from scratch
         // once answered, so nothing below runs twice.
         if (CheckYourClanNeedsYouReturn()) return;
-        ResolveRemADeadlyOrders(); // Deadly Orders (Emperor Edition remaining-cards pass, group A, issue #492): "After this battle's resolution, destroy the Follower."
+        // The shared delay mechanism (issue #492, EmperorRulingR2.cs): what was delayed "until after this battle ends" is applied now, the units having returned home (Halls of the Forgotten, Deadly Orders).
+        // A window such a destruction opens (an Overconfident draw) is answered first; the battle's end resumes here afterwards, and nothing is left to apply the second time.
+        if (ApplyDelayedEffects(DelayUntil.EndOfBattle) && (_state.WinnerId is not null || OpenOverconfidentDrawWindow(attacker))) return;
         // Seeking the Truth (Forgotten Legacy pass, issue #467 batch 4): "After this battle ends, if you did not destroy the battlefield's province or an army, discard a card at random."
         ResolveSeekingTheTruthWatches();
         // After This Battle Resolves (issue #272): "after the resolution of the current battle but
@@ -1836,9 +1913,11 @@ public sealed partial class MatchEngine
     {
         foreach (var card in _state.Cards.Values) card.GrantedAbilities.RemoveAll(g => g.Duration == GrantDuration.Battle);
         EndBattleActionLocks(); // Emperor Edition remaining-cards pass (issue #492), group B: Nerve Strike's lock lasts until the battle ends.
-        if(_state.UnresolvedBattlefields.Count==0)
+        if(_state.UnresolvedBattlefields.Count==0 && R1.Aside is not null) FinishAsideBattle(attacker); // a battle fought inside the Action Phase (Shinobi Assault, Chikushudo's Trickery)
+        else if(_state.UnresolvedBattlefields.Count==0)
         {
             foreach(var card in _state.Cards.Values.Where(c=>c.Zone==Zone.Battlefield).ToArray()) ReturnHome(card,card.OwnerId==attacker);
+            ClearAdditionalBattlefields(); // the additional battlefields cease to exist with the Attack Phase
             EndAttackPhase(attacker); // Emperor Edition remaining-cards pass, group C (issue #492): Retribution's window, then the Dynasty Phase.
         }
         else SetPhase(Phase.BattleSelection,BattleSelectionChooser(attacker)); // Warded Paths (Emperor Edition remaining-cards pass, issue #492, group E).
@@ -2202,7 +2281,7 @@ public sealed partial class MatchEngine
         // Ember's Final Fire: "While this Shugenja is Fire, he has +1F". Stone-Hewed Shrine: "Defending Earth Personalities have +1F while at this province's battlefield."
         +Attachments(card.Id).Count(c=>Definition(c).Type==CardType.Spell && Definition(c).Effect=="embers-final-fire-force" && Keyword(card,"Fire"))
         +2*Attachments(card.Id).Count(c=>Definition(c).Effect=="death-defeated-force")
-        +(card.Zone==Zone.Battlefield && Keyword(card,"Earth") && IsDefendingUnit(card) && _state.Cards.Values.Any(r=>r.Zone==Zone.Region && r.ProvinceIndex==card.ProvinceIndex && Definition(r).Effect=="stone-hewed-shrine-force")?1:0)
+        +(card.Zone==Zone.Battlefield && Keyword(card,"Earth") && IsDefendingUnit(card) && _state.Cards.Values.Any(r=>r.Zone==Zone.Region && r.ProvinceIndex==(card.ProvinceIndex is int shrineBattlefield ? BattlefieldProvinceIndex(shrineBattlefield) : null) && Definition(r).Effect=="stone-hewed-shrine-force")?1:0)
         +(Definition(card).Effect=="force-if-enemy-dishonorable"&&_state.Cards.Values.Any(c=>c.OwnerId!=card.OwnerId&&Definition(c).Type==CardType.Personality&&InPlay(c)&&c.Dishonorable)?2:0)
         // "The highest number of dead Personalities in any one discard pile" -- the greatest per-player
         // count of Zone.Dead Personalities, i.e. the largest single pile, not the combined total.
@@ -2469,7 +2548,7 @@ public sealed partial class MatchEngine
             Emit("forcedDiscardOffered",$"{Player(owed.PlayerId).Name} must discard a card ({owed.Reason}).",owed.PlayerId);
             return true;
         }
-        if(_state.PendingOverconfidentDraws.Count>0 && ReactionsBarred()) { _state.PendingOverconfidentDraws.Clear(); Emit("reactionsBarred","Cherry Blossom Festival: no players may take Reactions, so no Overconfident draw is offered."); } // Cherry Blossom Festival (issue #492, group F)
+        // Overconfident is not a Reaction (Mendon's R4 ruling on Cherry Blossom Festival: "Overconfident and traits are not reactions (despite triggering like them)"): its draw is offered whatever an Event bars.
         if(_state.PendingOverconfidentDraws.Count==0) return false;
         var playerId=_state.PendingOverconfidentDraws[0];
         _state.PendingOverconfidentDraws.RemoveAt(0);
@@ -2501,7 +2580,7 @@ public sealed partial class MatchEngine
         if(_state.ForcedDiscardContinuation is { } announced)
         {
             var resume=_state.ForcedDiscardResume; _state.ForcedDiscardContinuation=null; _state.ForcedDiscardResume=null;
-            if(resume=="action") ResolveDeferredActionInItsWindow(announced);
+            if(resume=="action") ResolveDeferredActionAfterItsWindows(announced);
             else if(resume=="attack") ResolveAttack();
             else { ContinueSuspendedReaction(announced); AnnounceAbility(announced); }
             return;
@@ -2532,7 +2611,11 @@ public sealed partial class MatchEngine
         _state.PriorityPlayerId=resumeTo;
         _state.ConsecutivePasses=0;
     }
-    private void Rehonor(CardInstance card) => card.Dishonorable=false;
+    private void Rehonor(CardInstance card)
+    {
+        if(InPlay(card) && Delay(card,DelayedKinds.Rehonor)) return; // The shared delay mechanism (issue #492, EmperorRulingR2.cs).
+        card.Dishonorable=false;
+    }
     // Dishonor (core rules Glossary, issue #186): gives a Personality the Dishonorable status --
     // treated as Personal Honor 0 (see CardPersonalHonor) until Rehonor restores them. The 180-degree
     // rotation the rules describe is purely visual, driven client-side off this same flag; no engine
@@ -2547,6 +2630,7 @@ public sealed partial class MatchEngine
             Emit("dishonorNegated",$"{Definition(card).Name}'s dishonoring was negated before it resolved.",card.OwnerId,card.Id);
             return;
         }
+        if(Delay(card,DelayedKinds.Dishonor,byPlayerId)) return; // The shared delay mechanism (issue #492, EmperorRulingR2.cs).
         if(JiYunNegatesDishonor(card,byPlayerId)) return;
         var wasDishonorable=card.Dishonorable;
         card.Dishonorable=true;
@@ -2588,7 +2672,7 @@ public sealed partial class MatchEngine
                 Emit("destructionNegated",$"{Definition(card).Name}'s destruction was negated before it resolved.",card.OwnerId,card.Id);
                 continue;
             }
-            if(DestructionDelayed(card)) continue;
+            if(Delay(card,DelayedKinds.Destroy,actingPlayerId,arg:combatDestruction?"combat":null)) continue; // The shared delay mechanism (issue #492, EmperorRulingR2.cs): Spirit of the Berserker, Halls of the Forgotten, a delayed duel loss.
             // Seeds of Decay pass (issue #453), batch 1: an action's effect (actingPlayerId is set exactly then) is negated by Wide Valley at its battlefield and by Megumi's Guidance's shield.
             if(actingPlayerId is not null && WideValleyNegatesDestruction(card)) continue;
             if(actingPlayerId is int shieldActor && DestructionShielded(card,shieldActor)) continue;
@@ -2693,7 +2777,7 @@ public sealed partial class MatchEngine
     // Returns whether the card moved: false only when Kyuden Kitsune negated the movement (the card stays where it was; callers ignore the result unless it matters).
     private bool MoveToBattlefield(CardInstance card,int province)
     {
-        if((card.Zone!=Zone.Battlefield || card.ProvinceIndex!=province) && (MovementLockNegates(card,MovementKinds.ToBattlefield) || KitsuneNegatesMovement(card,province) || UguluNegatesMovement(card,province))) return false;
+        if((card.Zone!=Zone.Battlefield || card.ProvinceIndex!=province) && (MovementLockNegates(card,MovementKinds.ToBattlefield) || MovementToBattlefieldNegated(card,province) || KitsuneNegatesMovement(card,province) || UguluNegatesMovement(card,province))) return false;
         // The Shadow's Embrace pass (issue #476), batch 6: Shieldman "will not move into an attacking army"; Star-Crossed Lovers "will not move to each other's battlefields".
         if((card.Zone!=Zone.Battlefield || card.ProvinceIndex!=province) && (ShieldmanNegatesMove(card) || StarCrossedNegatesMove(card,province))) return false;
         // Legion of the Bat (issue #279): "after the resolution of an action that moved a target
@@ -2750,7 +2834,7 @@ public sealed partial class MatchEngine
         ResolveShadowsEmbraceBatch1TurnEnd(); // The Shadow's Embrace pass (issue #476), batch 1: Bayushi Misaki's check, Agasha Kurou's removal.
         ResolvePreservingBeautyChecks(); // The Shadow's Embrace pass (issue #476), batch 4: Preserving Beauty's "before this turn ends".
         // Spirit of the Berserker: a destruction put off "until before this turn ends" happens now.
-        ResolveDelayedDestructions();
+        ApplyDelayedEffects(DelayUntil.EndOfTurn); // The shared delay mechanism (issue #492, EmperorRulingR2.cs): what was delayed "until before this turn ends" (Spirit of the Berserker's destruction, In the Heart of Battle's).
         ResolveEmperorRemainingBTurnEnd(); // Emperor Edition remaining-cards pass (issue #492), group B.
         ResolveShadowsEmbraceBatch5TurnEnd(); // The Shadow's Embrace pass (issue #476), batch 5: Celestial Sword of the Phoenix's "remove him from the game before the turn ends".
         ResolveReturnsToHandBeforeTurnEnds(); // The Shadow's Embrace pass (issue #476), batch 3: Methodical Questioning (ShadowsEmbraceBatch3.cs).
@@ -3197,6 +3281,7 @@ public sealed partial class MatchEngine
     private void GainHonor(int playerId,int amount,string reason,CardInstance? source=null)
     {
         if(amount==0) return;
+        OfferHonorChangeWindow(playerId,amount,reason); // Mendon's R4 ruling (issue #492): Rhetoric, Solid Defense and Shiro Chugo may be played on ANY Honor change from an action's effects.
         // Emperor Edition remaining-cards pass, group C (issue #492): Rhetoric's redirect, Solid Defense's negation of losses and Rumors Travel's reduction of a gain (EmperorRemainingC.cs).
         (playerId,amount)=EmperorRemainingCHonorChange(playerId,amount,reason);
         if(amount==0) return;
@@ -3216,6 +3301,14 @@ public sealed partial class MatchEngine
         {
             Emit("honorLossNegated",$"{Player(playerId).Name}'s Honor loss from {reason} was negated with the action's effects.",playerId,source?.Id);
             return;
+        }
+        // Unimpeachable Name played in the window before this loss (Mendon's R4 ruling): the same reduction, for the action it was played on.
+        if(amount<0 && playerId==_state.UnimpeachablePlayerId && _state.UnimpeachableActionKey is { } unimpeachableKey && unimpeachableKey==CurrentActionKey())
+        {
+            var reducedByName=Math.Min(0,amount+3);
+            Emit("honorLossReduced",$"{Player(playerId).Name}'s Honor loss from {reason} was reduced by Unimpeachable Name{(reducedByName==0 ? " to 0" : "")}.",playerId,source?.Id);
+            amount=reducedByName;
+            if(amount==0) return;
         }
         if(amount<0 && playerId==_state.HonorLossReductionPlayerId)
         {
@@ -3286,6 +3379,7 @@ public sealed partial class MatchEngine
     private void Win(int winner,string reason) { _state.WinnerId=winner; _state.VictoryReason=reason; _state.Phase=Phase.Finished; _state.PendingChoice=null; Emit("matchFinished",$"{Player(winner).Name} wins: {reason}.",winner); }
     private void SetPhase(Phase phase,int priority)
     {
+        if(PhaseFamily(phase)!=PhaseFamily(_state.Phase)) ApplyDelayedEffectsAtPhaseEnd(_state.Phase); // The shared delay mechanism (issue #492, EmperorRulingR2.cs): what waits for the end of the phase that is ending.
         OnPhaseBoundary(_state.Phase,phase); // On (The Shadow's Embrace pass, issue #476 batch 6): the end of one phase and the start of the next.
         // War Weariness (issue #259): reset only on the three phases that genuinely begin once per
         // turn -- NOT Phase.Battle, which this same function re-enters once per battlefield (see
@@ -3314,6 +3408,9 @@ public sealed partial class MatchEngine
             foreach(var waveMan in _state.Cards.Values.Where(c=>InPlay(c) && Definition(c).Effect=="wave-man-attack-phase-straighten"))
                 StraightenBowedUnit(waveMan);
         _state.Phase=phase; _state.PriorityPlayerId=priority; _state.ConsecutivePasses=0; Emit("phaseChanged",$"Phase: {phase}.");
+        // The shared delay mechanism (issue #492, EmperorRulingR2.cs): what waits for the next Dynasty Phase (or End Phase) to begin is applied as it does.
+        if(phase==Phase.Dynasty) ApplyDelayedEffects(DelayUntil.NextDynastyPhase);
+        if(phase==Phase.End) ApplyDelayedEffects(DelayUntil.EndPhaseBegins);
     }
     private void Emit(string type,string message,int? playerId=null,string? cardId=null,int? Amount=null) => _state.Events.Add(new(_state.Events.Count+1,type,message,playerId,cardId,Amount));
     private PlayerState Player(int id) => _state.Players[id];

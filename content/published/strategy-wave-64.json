@@ -1,0 +1,78 @@
+{
+  "Profile": "strategy-wave-64",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-8257",
+      "Name": "The Perfect Moment",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After the end of an Attack Phase in which you were the Defender: Create an additional Attack Phase with the previous phase's Attacker as the Defender. During this Attack Phase, you will not destroy more than one of the Defender's provinces and your Personalities may not assign and will not move unless they are Paragons or Battle Maidens.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8257.jpg",
+      "Keywords": [],
+      "Focus": 4,
+      "Abilities": [
+        "perfect-moment-declare"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-8922",
+      "Name": "Two Fronts",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Target a province whose player has two or more provinces: During your next normal Attack Phase (this turn), create two battlefields associated with it instead of one.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8922.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "two-fronts-mark"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9927",
+      "Name": "Shinobi Assault",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 4,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Choose your performing unbowed Ninja Personality and target another player's Personality: Create a battlefield (not at any province). Assign your Personality to attack there. Assign the target to defend there, even if he is bowed. Fight a battle there, in which you have the first opportunity to take a Battle action or pass. Lose 5 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9927.jpg",
+      "Keywords": [
+        "Ninja"
+      ],
+      "Focus": 1,
+      "Abilities": [
+        "shinobi-assault-battle"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

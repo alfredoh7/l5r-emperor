@@ -230,7 +230,11 @@ public sealed class CardInstance
     public Zone Zone { get; set; }
     public int? ProvinceIndex { get; set; }
     public bool FaceUp { get; set; }
-    public bool Bowed { get; set; }
+    // Issue #492 (Mendon's ruling R5): "Terrain may not be bowed or straightened." A Terrain (a Strategy with the Terrain keyword) is therefore never bowed, whichever path tries: every one of the
+    // hundred-odd places that set a card bowed goes through this one property.
+    private bool _bowed;
+    public bool Bowed { get => _bowed; set => _bowed = value && !IsTerrain(); }
+    private bool IsTerrain() => (Printed ?? (CardCatalog.Cards.TryGetValue(DefinitionId, out var printed) ? printed : null)) is { Type: CardType.Strategy, Keywords: { } keywords } && keywords.Contains("Terrain");
     public string? AttachedTo { get; set; }
     public List<AppliedModifier> Modifiers { get; set; } = [];
     public List<GrantedKeyword> GrantedKeywords { get; set; } = [];
@@ -407,6 +411,30 @@ public sealed class PendingHonorLossDecision
     public PendingChoice? PriorChoice { get; set; }
     public int PriorPriority { get; set; }
     public int PriorPasses { get; set; }
+    /// <summary>Honor-change windows (PendingHonorChange) already given to this command: its replay does not open them again (issue #492, R4).</summary>
+    public int HonorWindowsDone { get; set; }
+}
+
+/// <summary>An Honor gain or loss from an action's effects that is about to be applied and that a Reaction may be played on (Rhetoric, Solid Defense, Shiro Chugo: Mendon's R4 ruling, "may be played
+/// on any honor gain or loss"). <paramref name="Command"/> is the command that was being executed when the change was reached; nothing it did is kept, the window is open on the state it started
+/// from, and the command is replayed when both players have passed (MatchEngine.Execute, EmperorRulingR4.cs). The Prior* fields are the pending choice, priority and pass count the state had.</summary>
+public sealed class PendingHonorChange
+{
+    public GameCommand Command { get; set; } = new("pass", 0, 0);
+    /// <summary>The action whose effects change Honor (EmperorStrongholdBatch2.ActionKey, or the duel's), who took it, and which of its eligible Honor changes (in order) this is.</summary>
+    public string ActionKey { get; set; } = "";
+    public int ActionPlayerId { get; set; }
+    public int Occurrence { get; set; }
+    /// <summary>The Honor change itself: whose, how much (negative for a loss) and why.</summary>
+    public int PlayerId { get; set; }
+    public int Amount { get; set; }
+    public string Reason { get; set; } = "";
+    /// <summary>The Honor-change windows given so far, this one included; the Ten Thousand Temples answers the replayed command already has.</summary>
+    public int WindowsDone { get; set; }
+    public List<bool> TempleDecisions { get; set; } = [];
+    public PendingChoice? PriorChoice { get; set; }
+    public int PriorPriority { get; set; }
+    public int PriorPasses { get; set; }
 }
 public sealed record GameEvent(long Sequence, string Type, string Message, int? PlayerId = null, string? CardId = null, int? Amount = null);
 
@@ -437,6 +465,8 @@ public sealed class PendingAttack
     // card the ability is printed on (not always the performer: an Item, Spell, Follower or hand Strategy performs through a Personality), which is where the
     // inherited keywords of "was that a [keyword] action?" are read.
     public GameCommand? Command { get; set; }
+    // Mendon's R4 ruling on Deception Revealed (issue #492): the Rings bowed before the action that declared this Attack began.
+    public List<string>? RingsBowedBefore { get; set; }
     // The whole Attack was negated by a reaction (Yasuki Jinn-Kuen): it resolves without effect.
     public bool Negated { get; set; }
 }
@@ -592,8 +622,14 @@ public sealed class FieldsOfMercyWatch
 /// Focus-Effect-bearing focused cards) -> resolved (PendingDuel set back to null).</summary>
 public sealed class PendingDuel
 {
+    // Mendon's R4 ruling on Deception Revealed (issue #492): the Rings that were bowed before the action that issued this duel began; a Ring bowed since is one the action bowed, a Focus Effect's bows excepted.
+    public List<string>? RingsBowedBefore { get; set; }
     // Kakita Ichigiku (The Shadow's Embrace pass, issue #476 batch 1): he challenged a dishonorable Personality during a Combat Segment, so the loser is destroyed too.
     public bool IchigikuDestroysLoser { get; set; }
+    // The shared delay mechanism (issue #492, EmperorRulingR2.cs): the Focus Effects "you may choose (now) to delay the effects of losing this duel until ..." are answered before the duel's outcome
+    // applies -- DelayDecisionIndex is how far along the ordered Focus Effects those answers are, and DelayedLossPlayerIds the players whose Personalities' losing effects were delayed (with the trigger).
+    public int DelayDecisionIndex { get; set; }
+    public List<DelayedLossChoice> DelayedLosses { get; set; } = [];
     // Negations a Reaction set on the issuing action (To First Blood's "negate his destruction from the action's effects"): the duel's own outcome is one of that action's effects.
     public List<NegatedEffect> NegatedEffects { get; set; } = [];
     public string AbilityId { get; set; } = "";
@@ -875,8 +911,13 @@ public sealed class MatchState
     // (Suitengu's Torch), and the action whose Honor gain and loss is reduced by 2 (Shiro Chugo). Each is read while that action resolves and replaced by the next action announced.
     public string? UnnegatableActionKey { get; set; }
     public string? HonorReducedActionKey { get; set; }
+    // Mendon's R4 ruling (issue #492): Unimpeachable Name played in the window before an Honor loss -- the action whose losses of this player's are reduced by 3 (read while it resolves).
+    public string? UnimpeachableActionKey { get; set; }
+    public int? UnimpeachablePlayerId { get; set; }
     // Emperor Edition remaining-cards pass, group C (issue #492): the state of Rumors Travel, Rhetoric and Solid Defense (EmperorRemainingC.cs).
     public EmperorRemainingCState RemC { get; set; } = new();
+    // Emperor Edition rulings pass R1 (issue #492): battlefields without a province, and a battle fought inside the Action Phase (EmperorRulingR1.cs).
+    public RulingR1State R1 { get; set; } = new();
     // Entrenched Position: the battle (BattleNumber) in which the Attacker holds the first opportunity to act and the Defender has not yet had his first normal
     // opportunity to act or pass -- set when the Engage window closes with the Attacker holding it, cleared the moment the Attacker cedes priority (NextAction, Pass).
     public int AttackerLeadBattle { get; set; } = -1;
@@ -899,7 +940,13 @@ public sealed class MatchState
     public List<LadyMatsusRageWatch> PendingLadyMatsusRageWatches { get; set; } = [];
     // Spirit of the Berserker (Second City): "Delay his destruction from the action's effects until before this turn ends" -- the Personalities whose destruction a
     // reaction has put off, destroyed for real at the top of EndTurn if they are still in play (DelayedDestruction.cs).
-    public List<string> PendingDelayedDestructions { get; set; } = [];
+    // Now a read-only view of the shared delay store (EmperorRulingR2.cs, issue #492): the destructions owed until the end of the turn.
+    [JsonIgnore]
+    public List<string> PendingDelayedDestructions => DelayedEffects.Where(e => e.Kind == DelayedKinds.Destroy && e.Until == DelayUntil.EndOfTurn).Select(e => e.CardId).ToList();
+    // The shared delay mechanism (Emperor Edition ruling pass R2, issue #492; EmperorRulingR2.cs): every effect an action (or a duel's outcome) applied to a card that a card delayed, kept in the
+    // order it was applied until its trigger point comes (end of battle, end of phase, end of turn, the next Dynasty Phase ...). DelayedEffectSequence numbers them.
+    public List<DelayedEffect> DelayedEffects { get; set; } = [];
+    public int DelayedEffectSequence { get; set; }
     // He's Mine! (Emperor Edition remaining-cards pass, issue #492, group B): the Samurai who took a Personality's place in a duel and bow once that duel has ended (cleared as the turn ends).
     public List<string> HesMineSubstitutes { get; set; } = [];
     // Keywords and Clan alignments taken off cards until an action or the turn ends (Red Crane Dojo, TemporaryRemovals.cs).
@@ -930,6 +977,10 @@ public sealed class MatchState
     // the opponent a chance to play it (or pass) before the command actually resolves. See
     // CardAbilities.ResolveOrDeferUnimpeachableName / AbilityMayCauseHonorLoss.
     public GameCommand? PendingOutOfPlayActionReaction { get; set; }
+    // Mendon's R4 ruling (issue #492): the out-of-play Reaction window (Unimpeachable Name, Bad Kharma, Footsteps of Madness) that FOLLOWS the before-action window of the same action carries that
+    // window's negations of effects, and the fact that the action is an additional one (its grant already consumed), to the action's resolution.
+    public List<NegatedEffect>? PendingOutOfPlayNegations { get; set; }
+    public bool PendingOutOfPlayConsumedGrant { get; set; }
     // Set to the reacting player's own id for the duration of resolving PendingOutOfPlayActionReaction
     // only when Unimpeachable Name was actually played (not merely offered) -- consumed (amount
     // floored toward 0, never past it) by every negative GainHonor call for that same player while
@@ -982,6 +1033,8 @@ public sealed class MatchState
     // DestroyUnits/DestroyAttachment/MoveHome/MoveByRule as they run, snapshotted into LastResolvedAction and cleared once the action (and any
     // reaction windows of its own) finishes resolving. Never populated by a mass sweep outside a single action (battle resolution's own casualties).
     public List<AffectedCard> CurrentActionAffected { get; set; } = [];
+    // Mendon's R4 ruling on Deception Revealed (issue #492): the Rings bowed when the action now resolving began (before it paid anything), copied to the Attack or duel it declares.
+    public List<string> CurrentActionRingsBefore { get; set; } = [];
     // The Shadow's Embrace pass (issue #476), batch 6 (ShadowsEmbraceBatch6.cs). On: each player's Honor when the phase in progress began (null until a phase boundary
     // has been crossed), and the Honor each gained from battle resolution since. Star-Crossed Lovers: the pairs that may not share a battlefield, for the rest of the game.
     public int[]? PhaseStartHonor { get; set; }
@@ -1025,7 +1078,6 @@ public sealed class MatchState
     public List<PreservingBeautyCheck> PreservingBeautyChecks { get; set; } = [];
     // Emperor Edition remaining-cards pass, group A (issue #492; EmperorRemainingA.cs): Followers Deadly Orders destroys once the battle's resolution is over; the held action a hand Reaction
     // (Bad Kharma, Footsteps of Madness) negated as a whole (and whether its costs are ignored); the number of cards Face of Ninube shuffled in.
-    public List<RemADeadlyOrdersMark> RemADeadlyOrders { get; set; } = [];
     public bool RemANegatesHeldAction { get; set; }
     public bool RemAIgnoresHeldCosts { get; set; }
     public int RemAShuffledCount { get; set; }
@@ -1100,6 +1152,8 @@ public sealed class MatchState
     // Ten Thousand Temples (issue #492, group F): "Before you lose Honor, destroy this card: Negate the Honor loss." -- the command whose execution reached an Honor loss the Temple could negate, held whole
     // while its controller decides (MatchEngine.Execute replays it with the decisions made).
     public PendingHonorLossDecision? PendingHonorLossDecision { get; set; }
+    // Mendon's R4 ruling (issue #492): an Honor gain or loss from an action's effects that Reactions may be played on before it is applied (see PendingHonorChange).
+    public PendingHonorChange? PendingHonorChange { get; set; }
     public List<PendingEventChoice> PendingEventChoices { get; set; } = [];
     public Dictionary<string, string> EventTargets { get; set; } = [];
     // Isawa Kimi - exp 2 ("an action that put any cards into another player's hand"): the players whose hand the currently-resolving action put a card into, snapshotted into LastResolvedAction.HandRecipients.
@@ -1322,7 +1376,10 @@ public sealed record MatchView(string ContentVersion, string Scenario, long Vers
     OpponentPaymentView? PendingOpponentPayment = null, DuelRecord? LastDuel = null,
     // Emperor Edition Stronghold pass (issue #486), batch 3 (see EmperorStrongholdBatch3.cs): the face-down province cards this viewer looked at this turn -- PRIVATE to the looker, null for
     // everyone else. Never a card id: a face-down card is named by whose province and which.
-    ProvinceSightView[]? ProvinceSights = null);
+    ProvinceSightView[]? ProvinceSights = null,
+    // Emperor Edition rulings pass R1 (issue #492): every battlefield of the Attack Phase in progress and the province (an index into the Defender's row) it is at, null when it has
+    // none. An index below 100 is the battlefield of the Defender's province of that index; a higher one is an additional battlefield (EmperorRulingR1.cs).
+    BattlefieldView[]? Battlefields = null);
 /// <summary>Engine-private record of one face-down province card a player looked at (MatchState.ProvinceSights). Turn is the turn number it was looked at.</summary>
 public sealed record ProvinceSight(int ViewerId, int OwnerId, int Province, string CardId, string DefinitionId, int Turn);
 /// <summary>PRIVATE to the looking player: what the face-down card in a province is (its owner's province Province).</summary>

@@ -176,7 +176,7 @@ public sealed partial class MatchEngine
     private bool TargetedActionReactionAvailable(CardInstance card, string abilityId, ReactionSubject subject)
     {
         var ability = AbilityCatalog.All[abilityId];
-        return (!BowedBarsAbilities(card) || abilityId == "red-crane-dojo-ninja") && !ActionLocked(card) && !AbilityUseSpent(card.AbilityUses, ability, ability.UsageKey ?? abilityId)
+        return (!BowedBarsAbilities(card) || abilityId == "red-crane-dojo-ninja") && !ActionLocked(card) && !BarredByCherryBlossom(abilityId) /* Cherry Blossom Festival (issue #492, group F; traits exempt, R4) */ && !AbilityUseSpent(card.AbilityUses, ability, ability.UsageKey ?? abilityId)
             && TargetedActionReactionApplies(card, abilityId, subject) && CanPayReaction(card, abilityId);
     }
 
@@ -188,7 +188,7 @@ public sealed partial class MatchEngine
     }
 
     private bool OwnsTargetedActionReaction(int playerId, ReactionSubject? subject) =>
-        subject is not null && !ReactionsBarred() /* Cherry Blossom Festival (issue #492, group F) */ && TargetedActionReactionCandidates().Any(x => x.Card.OwnerId == playerId && TargetedActionReactionAvailable(x.Card, x.AbilityId, subject));
+        subject is not null && TargetedActionReactionCandidates().Any(x => x.Card.OwnerId == playerId && TargetedActionReactionAvailable(x.Card, x.AbilityId, subject));
 
     private bool IsBattleAction(GameCommand command) =>
         AbilityCatalog.All.TryGetValue(command.AbilityId ?? "", out var ability) && (ability.Timing == "Battle" || ability.Timing == "BattleOrOpen" && _state.Phase == Phase.Battle);
@@ -205,11 +205,6 @@ public sealed partial class MatchEngine
         {
             case "ezuno-redirect":
                 return YojimboRedirectApplies(card, subject, affected, "Shugenja");
-            // Bayushi Irezu (issue #458): "Before your Scorpion Clan Personality enters a duel, Irezu enters the duel instead" -- Ezuno's own shape, a Scorpion Clan
-            // restriction in place of his Shugenja one, narrowed to an action that actually issues a duel (a Battle action of another player's naming a Scorpion
-            // Clan Personality of Irezu's controller's as its target -- the challenged party).
-            case "irezu-duel-enter":
-                return acting.IssuesDuel && YojimboRedirectApplies(card, subject, affected, "Scorpion Clan");
             case "blade-of-champions-redirect":
                 return IsBattleAction(command) && UnitHostId(affected) == UnitHostId(card) && RedirectCandidates(card, subject).Any();
             // Spirit of the Yojimbo's granted Reaction: Ezuno's shape without his Shugenja restriction -- any of the reactor's own Personalities at his location.
@@ -318,8 +313,6 @@ public sealed partial class MatchEngine
             case "hundred-fold-cut-bow":
             case "hundred-fold-cut-destroy":
                 return HundredFoldCutApplies(card, abilityId, subject, affected);
-            case "hes-mine-substitute":
-                return HesMineApplies(card, subject, affected);
             // Emperor Edition remaining-cards pass (issue #492), group D. Undetectable Enemy: another player's action targets one of the reactor's own Oni. The Power of a Word: another player's Battle action
             // targets the reactor's own Courtier.
             case "undetectable-enemy-negate":
@@ -331,7 +324,7 @@ public sealed partial class MatchEngine
             case "chugo-seido-redirect":
                 return command.PlayerId != card.OwnerId && affected.OwnerId == card.OwnerId && Definition(affected).Type == CardType.Personality && ChugoSeidoCandidates(card, subject, affected).Any();
             default:
-                return RemATargetedActionReactionApplies(card, abilityId, subject, affected) || EmperorRemainingCTargetedReactionApplies(card, abilityId, subject, affected); // issue #492: group A (Ancestral Protection, Caught in the Act), group C (Snake Tattoo)
+                return RemATargetedActionReactionApplies(card, abilityId, subject, affected) || EmperorRemainingCTargetedReactionApplies(card, abilityId, subject, affected) || RulingR2TargetedReactionApplies(card, abilityId, subject, affected); // ruling pass R2; issue #492: group A (Ancestral Protection, Caught in the Act), group C (Snake Tattoo)
         }
     }
 

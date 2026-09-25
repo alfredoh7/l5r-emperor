@@ -69,8 +69,8 @@ public sealed partial class MatchEngine
             // Kaiu Fumiko: "Force LOWER than this battlefield's province's strength" (the shared category allows equal).
             case "fumiko-bow-raise":
             case "fumiko-bow-lower":
-                if (target is not null && _state.CurrentBattleProvince is int province)
-                    Require(CardForce(target) < EffectiveProvinceStrength(Player(1 - _state.ActivePlayerId).Provinces.Single(p => p.Index == province)),
+                if (target is not null && _state.CurrentBattleProvince is not null)
+                    Require(CardForce(target) < CurrentProvinceStrength(),
                         "The target's Force must be lower than this battlefield's province's strength.");
                 break;
             // Iuchi Haruma: "Bow one of Haruma's Spells" -- a cost must fully happen (core rules, Pay Costs), so the Spell must be unbowed.
@@ -145,7 +145,7 @@ public sealed partial class MatchEngine
             {
                 if (HasClanAffiliation(target!, "Mantis"))
                 {
-                    foreach (var member in Attachments(target!.Id).Prepend(target).ToArray()) if (!StalwartNegatesBow(member, player.Id)) member.Bowed = true;
+                    BowUnitByEffect(target!, player.Id);
                     return false;
                 }
                 CardInstance[] candidates = !HasAttachments(target!) ? [target!]
@@ -198,7 +198,7 @@ public sealed partial class MatchEngine
             case "fumiko-bow-raise":
             case "fumiko-bow-lower":
                 if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
-                if (_state.CurrentBattleProvince is int battleProvince)
+                if (CurrentProvinceIndex() is int battleProvince)
                     GiveProvinceStrengthThisTurn(1 - _state.ActivePlayerId, battleProvince, id == "fumiko-bow-raise" ? 2 : -2, name);
                 return false;
             default:

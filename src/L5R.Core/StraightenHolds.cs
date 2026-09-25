@@ -68,11 +68,11 @@ public sealed partial class MatchEngine
     }
 
     // A card the effect cannot straighten right now: for the legality of an action that would only straighten it.
-    private bool StraightenRefused(CardInstance card) => card.StraightenLockedTurn == _state.TurnNumber || StraightenHeld(card);
+    private bool StraightenRefused(CardInstance card) => card.StraightenLockedTurn == _state.TurnNumber || StraightenHeld(card) || IsTerrainCard(card); // issue #492 (ruling R5): a Terrain may not be straightened
 
     // The same for the view, which must not change the state: a printed hold not yet seeded counts when it would be created standing.
     private bool StraightenRefusedInView(CardInstance card) =>
-        card.StraightenLockedTurn == _state.TurnNumber
+        card.StraightenLockedTurn == _state.TurnNumber || IsTerrainCard(card)
         || card.StraightenHolds.Any(h => h.WhileInPlay is not { } source || _state.Cards.TryGetValue(source, out var held) && InPlay(held))
         || !card.PrintedHoldsSeeded && InPlay(card) && PrintedStraightenTurn(Definition(card)) is > 0 and var turn && turn - 1 - Player(card.OwnerId).TurnsTaken >= 0;
 

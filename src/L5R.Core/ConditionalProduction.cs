@@ -72,7 +72,9 @@ public static class ConditionalProductionCatalog
 // own: Gold does not carry over from one payment to another, so a source's whole production always pays for the one card or action it was chosen for.
 public sealed partial class MatchEngine
 {
-    private ConditionalProduction? ConditionalProductionOf(CardInstance card) => ConditionalProductionCatalog.For(Definition(card).Effect);
+    // Yasuki Dokansuto's production is a printed "Kolat Reaction": Cherry Blossom Festival bars it (Mendon's R4 ruling). Every other conditional production is a Holding's trait.
+    private ConditionalProduction? ConditionalProductionOf(CardInstance card) =>
+        Definition(card).Effect == "dokansuto-gold" && ReactionsBarred() ? null : ConditionalProductionCatalog.For(Definition(card).Effect);
 
     private bool ProductionConditionMet(ConditionalProduction production, PaymentSubject? paying)
     {

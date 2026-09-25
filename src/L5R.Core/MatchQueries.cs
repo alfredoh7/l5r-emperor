@@ -41,7 +41,7 @@ public sealed partial class MatchEngine
             BuildBattleStepView(),
             // Deck search (issue #312): the deck viewer is private to the searcher; the shown-cards record is public.
             BuildSearchView(playerId),BuildShownCards(),BuildLookView(playerId),BuildCopyView(playerId),BuildEitherOrView(playerId),BuildOpponentPaymentView(playerId),
-            _state.LastDuel is null?null:Copy(_state.LastDuel),BuildProvinceSights(playerId));
+            _state.LastDuel is null?null:Copy(_state.LastDuel),BuildProvinceSights(playerId),BuildBattlefieldViews());
     }
 
     private CardView ViewCard(CardInstance card,bool visible=true)
@@ -135,13 +135,6 @@ public sealed partial class MatchEngine
             if(OpenReactionSubject() is not { } held) return;
             foreach(var (card,reactionId) in TargetedActionReactionCandidates().Where(x=>x.Card.OwnerId==playerId && TargetedActionReactionApplies(x.Card,x.AbilityId,held)).ToArray())
             {
-                // He's Mine! (Emperor Edition remaining-cards pass, issue #492, group B): one option per Samurai who may take the targeted Personality's place (EmperorRemainingB.cs).
-                if(reactionId=="hes-mine-substitute")
-                {
-                    foreach(var samurai in HesMinePerformers(card,held))
-                        AddReaction(card,reactionId,targetId:held.TargetId,label:$"{AbilityCatalog.All[reactionId].Label} · {Definition(samurai).Name} ({samurai.Id})",validate:true,performerId:samurai.Id);
-                    continue;
-                }
                 foreach(var (candidate,label) in TargetedReactionChoices(card,reactionId,held))
                 {
                     // Ancestral Protection (Emperor Edition remaining-cards pass, group A, issue #492): a Reaction with a performer to choose is offered once per performer who could take it.
@@ -352,6 +345,31 @@ public sealed partial class MatchEngine
         {
             // Before a held action resolves (Unimpeachable Name's window; Bad Kharma and Footsteps of Madness, Emperor Edition remaining-cards pass group A, issue #492): this player's Reactions from a hand, then the pass.
             result.AddRange(AbilityActions(playerId));
+            Add("declineReaction","Pass reaction",Command("declineReaction"));
+        }
+        else if(_state.PendingChoice is { Type:"honorChangeReaction" })
+        {
+            // Mendon's R4 ruling (issue #492): before an Honor gain or loss from an action's effects -- this player's Reactions for it (a Reaction with a performer to choose is offered once per
+            // performer who could take it), then the pass.
+            foreach(var (card,reactionId) in HonorChangeWindowOffers(playerId))
+            {
+                var reaction=AbilityCatalog.All[reactionId];
+                // Unimpeachable Name: played alone, or with a dishonorable Personality to rehonor (its optional target).
+                if(reactionId==HonorChangeReactions.UnimpeachableName)
+                {
+                    AddReaction(card,reactionId,validate:true);
+                    foreach(var dishonored in _state.Cards.Values.Where(c=>InPlay(c) && c.Dishonorable && Definition(c).Type==CardType.Personality).OrderBy(c=>c.Id,StringComparer.Ordinal))
+                        AddReaction(card,reactionId,targetId:dishonored.Id,label:$"{reaction.Label} · rehonor {Definition(dishonored).Name} ({dishonored.Id})",validate:true);
+                    continue;
+                }
+                if(reaction.Performer is not null)
+                {
+                    foreach(var performer in BeforeActionReactionPerformers(playerId,reaction))
+                        AddReaction(card,reactionId,label:$"{reaction.Label} · {Definition(performer).Name} ({performer.Id})",validate:true,performerId:performer.Id);
+                    continue;
+                }
+                AddReaction(card,reactionId,validate:true);
+            }
             Add("declineReaction","Pass reaction",Command("declineReaction"));
         }
         else if(_state.PendingChoice is { Type:"battleRecruit" })
@@ -565,21 +583,22 @@ public sealed partial class MatchEngine
                 var attack=_state.Phase is Phase.InfantryDeclaration or Phase.CavalryDeclaration;
                 // Defenders are offered only the battlefields AssignDefense accepts.
                 var provinces=Player(1-_state.ActivePlayerId).Provinces
-                    .Where(p=>!p.Destroyed && (attack || _state.UnresolvedBattlefields.Contains(p.Index))).Select(p=>p.Index).ToArray();
+                    .Where(p=>!p.Destroyed && (attack || _state.UnresolvedBattlefields.Contains(p.Index))).Select(p=>p.Index)
+                    .Concat(_state.UnresolvedBattlefields.Where(b=>b>=FirstAdditionalBattlefield)).ToArray(); // a province's battlefield each, and Two Fronts' additional ones (issue #492, rulings pass R1)
                 // Hidden Falls Dojo (Stronghold pass, issue #486 batch 1): in the additional Infantry Maneuvers Segment only the acting player's Scouts, only to the provinces he targeted.
                 if(_state.ExtraInfantrySegment) (units,provinces)=HiddenFallsAssignmentChoices(playerId,attack);
                 var actionType=attack?"attack":"assignDefense";
                 // Retribution (issue #492, group C): an additional Attack Phase assigns one Personality at most, so each (unit, province) is its own option.
-                if(attack && _state.RemC.RetributionRoot>=0)
+                if(attack && RetributionRestricts())
                 {
                     foreach(var province in provinces)
                         foreach(var unit in units)
-                            Add(actionType,$"Attack province {province+1} with {Definition(Card(unit)).Name}",Command(actionType,assignments:new Dictionary<string,int>{[unit]=province}),
+                            Add(actionType,$"Attack {BattlefieldLabel(province)} with {Definition(Card(unit)).Name}",Command(actionType,assignments:new Dictionary<string,int>{[unit]=province}),
                                 _state.RemC.RetributionAssigned>=1?"You may only assign one Personality in an additional Attack Phase.":null,targets:[unit],provinces:[province]);
                 }
                 else
                 foreach(var province in provinces)
-                    Add(actionType,$"{(attack?"Attack":"Defend")} province {province+1} · {units.Length} {(cavalrySegment?"Cavalry":"Infantry")} units",
+                    Add(actionType,$"{(attack?"Attack":"Defend")} {BattlefieldLabel(province)} · {units.Length} {(cavalrySegment?"Cavalry":"Infantry")} units",
                         Command(actionType,assignments:units.ToDictionary(id=>id,_=>province)),units.Length==0?$"No unbowed {(cavalrySegment?"Cavalry":"Infantry")} Personalities at home.":null,
                         targets:units,provinces:provinces);
                 // Spiritual Manipulation (issue #476 batch 4): assigning no attackers is refused while a forced target can be assigned in this segment.
@@ -587,7 +606,7 @@ public sealed partial class MatchEngine
                     attack?ForcedAssignmentRefusal(playerId,null,cavalrySegment):null);
                 break;
             case Phase.BattleSelection:
-                foreach(var province in _state.UnresolvedBattlefields) Add("selectBattle",$"Fight at province {province+1}",Command("selectBattle",province:province));
+                foreach(var province in _state.UnresolvedBattlefields) Add("selectBattle",$"Fight at {BattlefieldLabel(province)}",Command("selectBattle",province:province));
                 break;
             case Phase.Battle:
                 // A published Terrain is played through this same command (the generic Terrain rule -- it prints no Battle ability of its own), so it is listed

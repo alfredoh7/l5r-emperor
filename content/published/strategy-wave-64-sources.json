@@ -1,0 +1,29 @@
+[
+  {
+    "card_id": "oracle-l5r-8257",
+    "printing_set": [
+      "Forgotten Legacy"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=8257",
+    "image_path": "assets/reference/oracle/forgotten-legacy/webp/oracle-l5r-8257-printing-1-image-1.webp",
+    "image_sha256": "2535807d3cb75a949b939e3d2ec8ea3572d430fe9364d956b4e733273b7bbf92"
+  },
+  {
+    "card_id": "oracle-l5r-8922",
+    "printing_set": [
+      "Embers of War"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=8922",
+    "image_path": "assets/reference/oracle/embers-of-war/webp/oracle-l5r-8922-printing-1-image-1.webp",
+    "image_sha256": "7641f81fa736a4d6b023de54c6e6f11ce1108f063528a0f0e4535af7f8702933"
+  },
+  {
+    "card_id": "oracle-l5r-9927",
+    "printing_set": [
+      "The Shadow's Embrace"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=9927",
+    "image_path": "assets/reference/oracle/the-shadow-s-embrace/webp/oracle-l5r-9927-printing-1-image-1.webp",
+    "image_sha256": "d3ccaa711a8dd3aead707b0abcd4732f2207df1cedd5c442bbc4bdafcf26f597"
+  }
+]

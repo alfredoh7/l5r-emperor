@@ -37,9 +37,10 @@ public sealed partial class MatchEngine
 
     // ---- Nobunori: compare against base Force ----
 
-    // "Melee 4 Attack that you may compare against base Force if the target has no attachments": the player would always pick the lower of the two, so that is what is compared.
+    // "Melee 4 Attack that you may compare against base Force if the target has no attachments": the player chooses (issue #492, ruling R5) -- current Force, or, for a target without attachments,
+    // its base Force (whichever it is, higher or lower than the current).
     private int AttackComparedForce(CardInstance target, string? abilityId) =>
-        abilityId == "nobunori-attack" && !HasAttachments(target) ? Math.Min(CardForce(target), Definition(target).Force) : CardForce(target);
+        abilityId == "nobunori-attack" && !HasAttachments(target) && AttackCompareChoiceOf(abilityId) == "base" ? Definition(target).Force : CardForce(target);
 
     // ---- Norimichi: +5 total Force ----
 
@@ -181,9 +182,9 @@ public sealed partial class MatchEngine
             case "tamasine-boost-one": case "tamasine-boost-many":
                 foreach (var ancestor in SlotCards(command, "targets").ToArray()) ApplyModifier(ancestor, source!.Id, id, "Force", 4);
                 return false;
-            // Tamori Kusugi: the defender's province at the current battlefield, raised or lowered by 4 (Ring of Earth's direct Strength change).
+            // Tamori Kusugi: the defender's province at the current battlefield, raised or lowered by 4 until end of turn (issue #492 ruling R3: nothing says permanent).
             case "kusugi-raise": case "kusugi-lower":
-                Player(1 - _state.ActivePlayerId).Provinces.Single(p => p.Index == _state.CurrentBattleProvince!.Value).Strength += id == "kusugi-raise" ? 4 : -4;
+                GiveProvinceStrengthThisTurn(1 - _state.ActivePlayerId, _state.CurrentBattleProvince!.Value, id == "kusugi-raise" ? 4 : -4, "Tamori Kusugi");
                 return false;
             default:
                 throw new InvalidOperationException($"Unknown Emperor Edition batch 5 ability '{id}'.");

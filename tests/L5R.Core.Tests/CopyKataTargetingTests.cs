@@ -317,10 +317,11 @@ internal static class CopyKataTargetingTests
         var before = t.Players[0].Provinces.Select(p => p.Strength).ToArray(); var enemyBefore = t.Players[1].Provinces.Select(p => p.Strength).ToArray();
         var f = MatchEngine.FromTestState(t);
         Accept(f, Enabled(f, 0, "scavenging-party-provinces", party.Id).Command!);
-        var after = f.State.Players[0].Provinces.Select(p => p.Strength).ToArray();
+        var after = f.State.Players[0].Provinces.Select(p => f.ProvinceStrengthForTest(0, p.Index)).ToArray();
         for (var i = 0; i < 3; i++) Eq(after[i], before[i] + 2, $"province {i + 1} +2");
         Eq(after[3], before[3], "a destroyed province gets nothing");
-        Check(f.State.Players[1].Provinces.Select(p => p.Strength).SequenceEqual(enemyBefore), "the other player's provinces are untouched");
+        Check(f.State.Players[1].Provinces.Select(p => f.ProvinceStrengthForTest(1, p.Index)).SequenceEqual(enemyBefore), "the other player's provinces are untouched");
+        for (var i = 0; i < 4; i++) Eq(Batch336Support.StrengthNextTurn(f, 0, i), before[i], $"province {i + 1}: Scavenging Party's +2 lasts until end of turn (issue #492 ruling R3)");
     }
 
     private static void ScavengingRefill()

@@ -44,6 +44,7 @@ public sealed partial class MatchEngine
         (nameof(MatchState.PendingOverconfidentDraws), s => s.PendingOverconfidentDraws.Count > 0),
         (nameof(MatchState.PendingForcedDiscards), s => s.PendingForcedDiscards.Count > 0),
         (nameof(MatchState.PendingHonorLossDecision), s => s.PendingHonorLossDecision is not null), // Ten Thousand Temples' open decision (issue #492, group F)
+        (nameof(MatchState.PendingHonorChange), s => s.PendingHonorChange is not null), // an Honor change awaiting Reactions (issue #492, R4)
         (nameof(MatchState.PendingEventChoice), s => s.PendingEventChoice is not null), // an Event's open decision (issue #492, group F)
         (nameof(MatchState.PendingEventChoices), s => s.PendingEventChoices.Count > 0), // an optional draw an Event owes, queued behind the action in progress (issue #492, group F)
         (nameof(MatchState.PendingCopy), s => s.PendingCopy is not null),
@@ -70,6 +71,8 @@ public sealed partial class MatchEngine
         nameof(MatchState.PendingGrapplingBows),           // Grappling the Snake's bows applied once the action resolves (Seeds of Decay, issue #453); no one is deciding anything
         nameof(MatchState.PendingEndPhaseDraws),           // Eternal Victory Dojo's delayed draws, taken as the next End Phase begins (issue #486); no one is deciding anything
         nameof(MatchState.PendingBanditGangs),             // Bandit Gang's queued pay-or-destroy traits (issue #492 group G); each waits behind its open Either/Or (PendingChoice)
+        nameof(MatchState.PendingOutOfPlayNegations),      // what the before-action window set, carried through the out-of-play window that follows it (issue #492, R4); that window is a PendingChoice
+        nameof(MatchState.PendingOutOfPlayConsumedGrant),  // the same window's flag that the held action is an additional one (issue #492, R4)
     ];
 
     /// <summary>The names the guard test compares with every <c>Pending*</c> property of <see cref="MatchState"/>.</summary>

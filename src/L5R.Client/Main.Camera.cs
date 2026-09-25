@@ -85,8 +85,9 @@ public partial class Main
         var lanes = View.CurrentBattleProvince is int active ? new[] { active }
             : View.Players.SelectMany(p => p.Army).Where(c => c.ProvinceIndex is not null).Select(c => c.ProvinceIndex!.Value).Distinct().ToArray();
         if (lanes.Length == 0) return;
-        var regions = lanes.Where(_battleCourts.ContainsKey).Select(i => _battleCourts[i]
-            .Merge(_matTargets.First(s => s.Id == $"province:{defender.Id}:{i}").Bounds));
+        // A battlefield without a province has no province mat to frame with its court.
+        var regions = lanes.Where(_battleCourts.ContainsKey).Select(i => _matTargets.FirstOrDefault(s => s.Id == $"province:{defender.Id}:{i}") is { } bay
+            ? _battleCourts[i].Merge(bay.Bounds) : _battleCourts[i]);
         if (!regions.Any()) return;
         var region = regions.Aggregate((a, b) => a.Merge(b)).Grow(24);
         _cameraFitted = false; _cameraGlide = false;

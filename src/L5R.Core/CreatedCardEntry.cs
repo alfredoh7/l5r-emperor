@@ -7,7 +7,7 @@ public sealed partial class MatchEngine
     private bool ExecuteCreate(AbilityDefinition ability, CreatedCardSpec creates, GameCommand command, PlayerState player, Action? beforeWindow = null)
     {
         var spec = CreatedCards.Chosen(creates, command.CreatedCard) ?? throw new RuleViolation("Choose which card to create.");
-        var insideEntryWindow = ability.Timing == "Reaction" && ability.Trigger is "own-enters-play" or "own-personality-enters-play"; // Shinjo Ki-Chang - exp (issue #492, proxy group Y) creates inside the window another Personality's entry opened.
+        var insideEntryWindow = ability.Timing == "Reaction" && ability.Trigger is "own-enters-play" or "own-personality-enters-play" or EmperorRulingR3Abilities.EntersFromProvinceTrigger; // Shinjo Ki-Chang - exp (issue #492, proxy group Y) creates inside the window another Personality's entry opened.
         if (spec.CopyOfTarget)
         {
             var copied = command.TargetId is not null && _state.Cards.TryGetValue(command.TargetId, out var target) ? target : throw new RuleViolation("Choose the card to copy.");

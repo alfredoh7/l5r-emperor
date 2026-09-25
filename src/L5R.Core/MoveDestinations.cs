@@ -24,7 +24,7 @@ public sealed partial class MatchEngine
     // The battlefields next to `current` (Mendon's ruling, issue #336): a battlefield is identified by the DEFENDER's province it is fought over, so
     // adjacency follows the DEFENDER's province line -- never the line of whichever player happens to own the card or take the action. Destroyed
     // provinces slide their neighbours together (AdjacentProvinces). The one place adjacency between battlefields is decided.
-    private IEnumerable<int> AdjacentBattlefields(int current) => AdjacentProvinces(1 - _state.ActivePlayerId, current);
+    // (Issue #492 rulings pass R1: AdjacentBattlefields is in EmperorRulingR1.cs -- a battlefield without a province has none, and a province's additional battlefield counts as at that province.)
 
     // The battlefields a chosen destination may name right now (empty for a destination that needs no choice, and when no battle is
     // under way). A battlefield is identified by the DEFENDER's province it is fought over, so adjacency is the defender's province line

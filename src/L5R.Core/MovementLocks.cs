@@ -35,7 +35,7 @@ public sealed partial class MatchEngine
         kinds == MovementKinds.AssignAttack ? "assignment to attack" : kinds == MovementKinds.Assign ? "assignment to battlefields" : kinds.HasFlag(MovementKinds.Assign) ? "assignment and movement to battlefields" : kinds.HasFlag(MovementKinds.Home) ? "movement" : "movement to battlefields";
 
     private bool MovementLocked(CardInstance card, MovementKinds kind) =>
-        card.MovementLocks.Any(l => l.Turn == _state.TurnNumber && (l.Kinds & kind) != 0 && MovementLockHolds(l));
+        card.MovementLocks.Any(l => l.Turn == _state.TurnNumber && (l.Kinds & kind) != 0 && MovementLockHolds(l)) || PerfectMomentLocks(card);
 
     // A card whose movement of this kind is locked stays where it is; the effect that moved it goes on with whatever else it does.
     private bool MovementLockNegates(CardInstance card, MovementKinds kind)

@@ -3,7 +3,7 @@ using static RegressionAssertions;
 using static Batch336Support;
 
 // Emperor Edition Stronghold pass (issue #486), batch 1: the seven Strongholds of stronghold-wave-17 (Eternal Victory Dojo, Hidden Falls Dojo, Keep of the Dead, Koshin Keep, Kyuden Otomo - exp,
-// Library of Rebirth, Midday Shadow Court), driven through QueryActions and the commands it offers. Halls of the Forgotten is not wired (tools/content/ee_sh_batch1_blockers.json) and not published.
+// Library of Rebirth, Midday Shadow Court), driven through QueryActions and the commands it offers. Halls of the Forgotten was not wired here (it waited for the shared delay mechanism); it is wired and published in stronghold-wave-20 (issue #492, ruling pass R2).
 internal static class EmperorStrongholdBatch1Tests
 {
     private const string EternalVictory = "oracle-l5r-2388", HallsOfTheForgotten = "oracle-l5r-2950", HiddenFalls = "oracle-l5r-3257", KeepOfTheDead = "oracle-l5r-4310", KoshinKeep = "oracle-l5r-4541",
@@ -28,7 +28,7 @@ internal static class EmperorStrongholdBatch1Tests
     private static void Pass(MatchEngine e) => Accept(e, new GameCommand("pass", e.State.PriorityPlayerId, e.Version));
 
     public static void Run(TestRunner runner) => runner.Run("emperor-stronghold-batch1", [
-        ("Published shape: seven Strongholds print their stats, keywords, Effect and ability ids, ship their art and are listed in stronghold-wave-17's manifest; Halls of the Forgotten is not published", PublishedShape),
+        ("Published shape: seven Strongholds print their stats, keywords, Effect and ability ids, ship their art and are listed in stronghold-wave-17's manifest; Halls of the Forgotten is published in stronghold-wave-20", PublishedShape),
         ("Eternal Victory Dojo: after your Tactical action resolves, a card is drawn after the next End Phase begins -- not for a non-Tactical action or another player's Tactical action; owed to its controller at whoever's End Phase", EternalVictoryDraw),
         ("Eternal Victory Dojo: the deck may hold four copies each of one or two non-Unique Strategies with Battle abilities -- not of a third, not without the Stronghold, not of a Unique or non-Battle Strategy", EternalVictoryDeckRule),
         ("Keep of the Dead: no Honor loss from Spider Clan and Fate cards you own, and Follower Honor Requirements are ignored -- for its controller only", KeepOfTheDeadStatics),
@@ -72,7 +72,8 @@ internal static class EmperorStrongholdBatch1Tests
         Stronghold(MiddayShadowCourt, "Midday Shadow Court", "Scorpion", 4, 7, 1, "midday-shadow-court", ["midday-shadow-watch"]);
         Manifest(root, "stronghold-wave-17", EternalVictory, HiddenFalls, KeepOfTheDead, KoshinKeep, KyudenOtomo, LibraryOfRebirth, MiddayShadowCourt);
         Eq(PublishedContent.StrongholdWave17.Cards.Length, 7, "stronghold-wave-17 holds exactly the seven wired Strongholds");
-        Check(!CardCatalog.Cards.ContainsKey(HallsOfTheForgotten), "Halls of the Forgotten is unwired and therefore not published");
+        // Issue #492, ruling pass R2: Halls of the Forgotten is wired now (the shared delay mechanism) and published in stronghold-wave-20 (EmperorRulingR2Tests).
+        Check(CardCatalog.Cards.ContainsKey(HallsOfTheForgotten) && PublishedContent.StrongholdWave20.Cards.Any(c => c.Id == HallsOfTheForgotten), "Halls of the Forgotten is published in stronghold-wave-20");
         // The scans' own wording (the catalogue's reworded Oracle text differs for Hidden Falls Dojo and Library of Rebirth).
         Check(CardCatalog.Get(HiddenFalls).Text.Contains("additional Infantry Maneuvers Segment") && CardCatalog.Get(HiddenFalls).Text.Contains("After each Cavalry Maneuvers Segment"), "Hidden Falls Dojo prints the scan's text");
         Check(CardCatalog.Get(LibraryOfRebirth).Text.Contains("when paying for a Spell during the Combat Segment"), "Library of Rebirth prints the scan's text");
