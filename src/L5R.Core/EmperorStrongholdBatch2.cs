@@ -50,7 +50,7 @@ public sealed partial class MatchEngine
     // Whether a command about to resolve is the one Suitengu's Torch protected, or is Temple of Purity's own Force penalty (a whole action that cannot be negated: the penalty is its
     // effect, and negating the action would negate the penalty).
     private bool CommandUnnegatable(GameCommand? command) =>
-        command?.AbilityId is { } id && (id == "temple-purity-weaken" || _state.UnnegatableActionKey == ActionKey(command));
+        command?.AbilityId is { } id && (id == "temple-purity-weaken" || _state.UnnegatableActionKey == ActionKey(command) || MechEUnnegatable(id)); // issue #501: The Heir's Wrath
 
     private bool ThunderBattleAction(GameCommand command, AbilityDefinition ability)
     {

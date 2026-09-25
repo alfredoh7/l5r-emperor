@@ -476,7 +476,7 @@ public sealed partial class MatchEngine
                 {
                     var weapon = ForgeShownCards(decider.Id)[int.Parse(option.Key["attach-".Length..])];
                     var smith = Card(p.PerformerId);
-                    Pay(decider.Id, weapon, option.GoldCost, sourceIds, paying: new PaymentSubject(weapon, PaymentKind.Equip));
+                    Pay(decider.Id, weapon, option.GoldCost, sourceIds, paying: new PaymentSubject(weapon, PaymentKind.Equip, Wielder: smith)); // issue #501: the wielder
                     decider.FateDeck.Remove(weapon.Id);
                     weapon.AbilityUses.Clear(); weapon.Bowed = false;
                     weapon.Zone = Zone.Attached; weapon.AttachedTo = smith.Id; weapon.FaceUp = true; weapon.ProvinceIndex = smith.ProvinceIndex;

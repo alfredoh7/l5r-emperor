@@ -165,7 +165,7 @@ public sealed partial class MatchEngine
 
     // "Will not be negated or delayed": the same promise NegatesEffect honours (Hiromi's bowing, destruction and movement, The Shadow's Lair's movement, Suitengu's Torch's whole action) plus Journey's End
     // Keep's printed "this will not be negated or delayed" for its movement.
-    private bool CannotBeDelayed(string kind) => kind is DelayedKinds.Bow or DelayedKinds.Destroy or DelayedKinds.MoveHome or DelayedKinds.MoveToBattlefield
+    private bool CannotBeDelayed(string kind) => !_notNegatedButDelayable && kind is DelayedKinds.Bow or DelayedKinds.Destroy or DelayedKinds.MoveHome or DelayedKinds.MoveToBattlefield
         ? HiromiUnnegatable() || kind is DelayedKinds.MoveHome or DelayedKinds.MoveToBattlefield && JourneysEndKeepAction(_runningCommand ?? _attackCommandInResolution)
         : CurrentActionUnnegatable();
 

@@ -117,14 +117,7 @@ public sealed partial class MatchEngine
         _ => EmperorRemainingFPaymentConditionMet(when, paying) // Luxurious Silk (issue #492, group F): paying for an action.
     };
 
-    // Pay's step for a card whose reactive source is in this payment: the use is spent and the card is not bowed for it.
-    private bool UseReactiveGoldSource(CardInstance card, PaymentSubject? paying, int playerId)
-    {
-        if (ReactiveGoldSource(card, paying) is not { } reactive) return false;
-        card.AbilityUses[AbilityCatalog.All[reactive.AbilityId].UsageKey ?? reactive.AbilityId] = _state.TurnNumber;
-        Emit("goldSourceUsed", $"{Definition(card).Name} produced {reactive.Amount} Gold{(card.Bowed ? " while bowed" : "")}.", playerId, card.Id);
-        return true;
-    }
+    // (Issue #501: the reactive source is a payment token of its own, "<card>#reaction", chosen beside or instead of the card's bow and spent by UsePaymentTokens, EmperorMechE.cs.)
 
     // ---- Midday Shadow Court ---------------------------------------------------------------------------------------------------------------------------
     // "When a Lobby action checks Family Honor, your Honor is treated as 20 points higher."
@@ -181,7 +174,8 @@ public sealed partial class MatchEngine
     }
 
     // The actions that discard the Imperial Favor as a cost ("as a condition upon further effects"), whichever pass wired them.
-    private static bool IsFavorDiscardAbility(string id) => DiscardsImperialFavorAsCost(id) || id is "rengetsu-disable" or "tadanobu-draw" or "solid-defense-negate-favor"; // Solid Defense (issue #492, group C)
+    // Issue #501 (EmperorMechE.cs): the Imperial Favor discard is a cost verb (CostVerbs.DiscardFavor) declared on the ability; every hard-coded Favor-discard ability was migrated to it.
+    private static bool IsFavorDiscardAbility(string id) => DeclaresFavorDiscard(id);
 
     // A Favor token the player may discard in place of the Imperial Favor: on their Kyuden Otomo - exp.
     private CardInstance? FavorTokenSource(int playerId) =>

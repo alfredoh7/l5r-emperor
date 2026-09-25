@@ -81,7 +81,10 @@ public sealed partial class MatchEngine
         var options = ability.CostOptions!;
         if (command.CostOption is null)
             return options.Length == 1 ? options[0] : throw new RuleViolation($"Choose how to pay: {string.Join(" or ", options.Select(o => o.Label))}.");
-        return options.FirstOrDefault(o => o.Id == command.CostOption) ?? throw new RuleViolation("That is not one of this action's cost options.");
+        return options.FirstOrDefault(o => o.Id == command.CostOption)
+            // Kyuden Otomo - exp (issue #486) with the Favor discard as an alternative cost (issue #501): a Favor token discarded is that option, paid with the token.
+            ?? (command.CostOption == FavorTokenCostOption ? options.FirstOrDefault(o => o.Verb == CostVerbs.DiscardFavor) : null)
+            ?? throw new RuleViolation("That is not one of this action's cost options.");
     }
 
     // Why this option cannot be paid by this subject right now, or null when it can.
@@ -109,6 +112,8 @@ public sealed partial class MatchEngine
             return;
         }
         var option = ChosenCostOption(ability, command);
+        // Issue #501: "or discard the Imperial Favor" -- the acting player must control it (or a Favor token, Kyuden Otomo - exp); it names no card.
+        if (option.Verb == CostVerbs.DiscardFavor) { RequireFavorDiscard(command, Player(command.PlayerId)); return; }
         var subject = CostSubjectCard(option, ability, command, source) ?? throw new RuleViolation(option.Subject == CostSubject.Target ? "Choose a target." : "Choose a performing card.");
         var reason = CostOptionUnpayable(option, subject);
         Require(reason is null, reason ?? "");
@@ -120,6 +125,7 @@ public sealed partial class MatchEngine
     {
         if (ability.CostOptions is null) return;
         var option = ChosenCostOption(ability, command);
+        if (option.Verb == CostVerbs.DiscardFavor) { DiscardImperialFavorCost(command, player); return; } // issue #501
         var subject = CostSubjectCard(option, ability, command, source)!;
         if (!InPlay(subject)) return; // a reaction between announcement and resolution already took it out of play: nothing is left to pay with
         switch (option.Verb)

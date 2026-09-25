@@ -79,7 +79,10 @@ public sealed partial class MatchEngine
     // Gold Cost (a binary choice, not an open range) with a per-id Require next to Irezu's/Hawado's own precedent.
     private void KanayeBow(CardInstance target, GameCommand command, int playerId)
     {
+        // Issue #501: "you may pay Gold equal to its Gold Cost" is paid as the action resolves (GoldCostRule.AtResolution) -- it was validated but never charged. A payment the sources can no longer
+        // make (bowed in a window since the announcement) is not made: "If you paid the Gold" is then false.
+        var paid = PaidGoldAmount(command) > 0 && TryPayAtResolution(command, Player(playerId));
         if (!StalwartNegatesBow(target, playerId)) target.Bowed = true;
-        if (PaidGoldAmount(command) > 0) DestroyTargetCard(target, playerId);
+        if (paid) DestroyTargetCard(target, playerId);
     }
 }

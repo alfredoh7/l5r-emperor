@@ -59,6 +59,9 @@ public static class CostVerbs
     public const string DestroyRegion = "destroy-region";
     /// <summary>Remove the subject Personality in play from the game, with his attachments discarded ("remove your performing unbowed Personality from the game:", issue #492 group F).</summary>
     public const string RemoveUnit = "remove-unit";
+    /// <summary>Discard the Imperial Favor ("Discard the Imperial Favor to ...", issue #501, EmperorMechE.cs): the acting player must control it (or discard a Favor token of Kyuden Otomo - exp's instead).
+    /// Names no card. Declared in Costs it is mandatory; as one of CostOptions it is the alternative ("bow him or discard the Imperial Favor"). Nothing can block it (it is not a bow or a destruction).</summary>
+    public const string DiscardFavor = "discard-favor";
 }
 
 /// <summary>One cost: <paramref name="Verb"/> (CostVerb.Bow or CostVerbs.*) applied to <paramref name="Subject"/> (CostSubject.*: the ability's
@@ -197,7 +200,7 @@ public sealed partial class MatchEngine
         if (ability.CostOptions is not null)
         {
             var option = ChosenCostOption(ability, command);
-            yield return (new ActionCost(option.Verb, option.Subject), CostSubjectCard(option, ability, command, source));
+            yield return (new ActionCost(option.Verb, option.Subject), option.Verb == CostVerbs.DiscardFavor ? null : CostSubjectCard(option, ability, command, source)); // issue #501: the Favor names no card
         }
         foreach (var cost in ability.Costs ?? [])
         {
@@ -210,7 +213,7 @@ public sealed partial class MatchEngine
                 foreach (var slotCard in SlotCostCards(command, cost)) yield return (new ActionCost(CostVerb.Bow, cost.Subject), slotCard);
                 continue;
             }
-            var subject = cost.Verb is CostVerbs.LoseHonor or CostVerbs.DestroyLeftmostProvince or CostVerbs.ShuffleHand or CostVerbs.DiscardHand ? null : CostSubjectCard(new CostOption(cost.Verb, cost.Verb, cost.Verb, cost.Subject), ability, command, source);
+            var subject = cost.Verb is CostVerbs.LoseHonor or CostVerbs.DestroyLeftmostProvince or CostVerbs.ShuffleHand or CostVerbs.DiscardHand or CostVerbs.DiscardFavor ? null : CostSubjectCard(new CostOption(cost.Verb, cost.Verb, cost.Verb, cost.Subject), ability, command, source);
             if (CostExempt(cost, source, subject) || YorimiWaivesBow(ability, cost, source, subject)) continue; // Soshi Yorimi (issue #477, batch 4): ignored, so not planned.
             yield return (cost, subject);
         }
@@ -233,6 +236,7 @@ public sealed partial class MatchEngine
                 continue;
             }
             if (cost.Verb == CostVerbs.ShuffleHand) { RemAShuffleHandIntoDeck(player, source); continue; }
+            if (cost.Verb == CostVerbs.DiscardFavor) continue; // issue #501: paid with the other Favor discards (DiscardImperialFavorCost, beside the Gold)
             // Contemplate the Void (issue #492): "discard your hand (even if empty)".
             if (cost.Verb == CostVerbs.DiscardHand) { foreach (var handId in player.Hand.ToArray()) DiscardFate(player, Card(handId)); continue; }
             // Capturing the Soul (issue #492): "bow ... 0 or more of your other performing Shugenja".

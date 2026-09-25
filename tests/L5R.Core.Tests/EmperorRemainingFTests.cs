@@ -249,9 +249,10 @@ internal static partial class EmperorRemainingFTests
         var s1 = Setup(true, out var silk1, out var spell1, out var shugenja1);
         var e1 = MatchEngine.FromTestState(s1);
         var cost = CardCatalog.Get("training-spell").GoldCost;
-        Check(e1.PaymentOptions(0, Math.Min(cost, 2), new PaymentSubject(spell1, PaymentKind.Equip)).Any(p => p.SourceIds.SequenceEqual([silk1.Id])), "the bowed Silk pays 2 Gold for an action");
+        // Issue #501: the Reaction's Gold is its own payment token ("<card>#reaction"); the card's own id is its bow.
+        Check(e1.PaymentOptions(0, Math.Min(cost, 2), new PaymentSubject(spell1, PaymentKind.Equip)).Any(p => p.SourceIds.SequenceEqual([silk1.Id + "#reaction"])), "the bowed Silk pays 2 Gold for an action");
         // It produces exactly 2: a payment of more than 2 cannot be met by it alone.
-        Check(!e1.PaymentOptions(0, 3, new PaymentSubject(spell1, PaymentKind.Equip)).Any(p => p.SourceIds.SequenceEqual([silk1.Id])), "2 Gold is all it produces");
+        Check(!e1.PaymentOptions(0, 3, new PaymentSubject(spell1, PaymentKind.Equip)).Any(p => p.SourceIds.SequenceEqual([silk1.Id + "#reaction"])), "2 Gold is all it produces");
         // For a recruit it produces nothing.
         Check(e1.PaymentOptions(0, 1, new PaymentSubject(Add(s1, "training-crane-samurai", 0, Zone.Hand), PaymentKind.Recruit)).Length == 0, "not for a recruit");
         // Once a turn.

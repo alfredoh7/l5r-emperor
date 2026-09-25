@@ -440,7 +440,8 @@ internal static class EmperorStrongholdBatch1Tests
         }
         var s1 = Setup(true, out var library1, out var spell1, out var shugenja1);
         var e1 = MatchEngine.FromTestState(s1);
-        Check(e1.PaymentOptions(0, 1, new PaymentSubject(spell1, PaymentKind.Equip)).Any(p => p.SourceIds.SequenceEqual([library1.Id])), "in a Combat Segment the bowed Library pays for a Spell");
+        // Issue #501: the Reaction's Gold is its own payment token ("<card>#reaction"); the Stronghold's own id is its bow.
+        Check(e1.PaymentOptions(0, 1, new PaymentSubject(spell1, PaymentKind.Equip)).Any(p => p.SourceIds.SequenceEqual([library1.Id + "#reaction"])), "in a Combat Segment the bowed Library pays for a Spell");
         Check(e1.PaymentOptions(0, 1, new PaymentSubject(Add(s1, "training-follower", 0, Zone.Hand), PaymentKind.Equip)).Length == 0, "but not for a Follower");
         var equip = Enabled(e1, 0, "equip-battle", performerId: shugenja1.Id);
         Accept(e1, equip.Command! with { TargetId = spell1.Id });

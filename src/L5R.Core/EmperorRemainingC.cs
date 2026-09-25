@@ -702,7 +702,7 @@ public sealed partial class MatchEngine
                 Emit("honorRedirected", $"{Player(RemC.RedirectToPlayer).Name} takes the Honor {(amount > 0 ? "gain" : "loss")} of {Math.Abs(amount)} from {reason} instead of {Player(playerId).Name} (Rhetoric).", RemC.RedirectToPlayer);
                 playerId = RemC.RedirectToPlayer;
             }
-            if (amount < 0 && RemC.NegateLossesActionKey == key)
+            if (amount < 0 && RemC.NegateLossesActionKey == key && !CurrentActionUnnegatable()) // issue #501: The Heir's Wrath's loss "will not be negated"
             {
                 Emit("honorLossNegated", $"{Player(playerId).Name}'s Honor loss from {reason} was negated (Solid Defense).", playerId);
                 return (playerId, 0);
