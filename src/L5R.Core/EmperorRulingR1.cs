@@ -88,12 +88,6 @@ public sealed partial class MatchEngine
     /// <summary>The current battlefield's province's strength as read now; null when the battlefield has no province.</summary>
     private int? CurrentProvinceStrength() => CurrentBattlefieldProvince() is { } province ? EffectiveProvinceStrength(province) : null;
 
-    /// <summary>Raises or lowers the current battlefield's province's strength directly (a Ring of Earth's shape); does nothing for a battlefield without a province.</summary>
-    private void AddCurrentProvinceStrength(int amount)
-    {
-        if (CurrentBattlefieldProvince() is { } province) province.Strength += amount;
-    }
-
     /// <summary>Creates an additional battlefield (optionally associated with one of the Defender's provinces), adds it to the battlefields still to be fought and returns its index.</summary>
     private int CreateAdditionalBattlefield(int? associatedProvince)
     {

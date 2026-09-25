@@ -156,14 +156,13 @@ internal static class EmperorRulingR2Tests
         Accept(e, ReactionOffer(e, 0, "halls-forgotten-delay", halls.Id));
         ClosePassing(e);
         Check(e.State.Cards[berserker.Id].Zone == Zone.Battlefield && !e.State.Cards[berserker.Id].Bowed, "neither the bowing nor the movement has happened");
-        Eq(string.Join(",", e.State.DelayedEffects.OrderBy(x => x.Seq).Select(x => x.Kind)), $"{DelayedKinds.Bow},{DelayedKinds.MoveHome}", "both effects are recorded, in the order the action applied them");
+        Eq(string.Join(",", e.State.DelayedEffects.OrderBy(x => x.Seq).Select(x => x.Kind)), DelayedKinds.MoveHome, "the move home is recorded (Block Supply Lines bows his unit \"as he moves\": the bow is part of the move, ruling R5, so only the move is recorded)");
         Check(e.State.DelayedEffects.All(x => x.Until == DelayUntil.EndOfBattle && x.CardId == berserker.Id), "all wait for the end of the battle");
         // The battle: his army wins; the attacking units bow and return home as the battle ends -- the delayed move home then has nowhere to send him from.
         FinishBattle(e);
         Eq(e.State.Cards[berserker.Id].Zone, Zone.Home, "he went home with the battle's own aftermath");
-        Check(e.State.Cards[berserker.Id].Bowed, "and is bowed (the delayed bow, and the attackers' own bow)");
+        Check(e.State.Cards[berserker.Id].Bowed, "and is bowed (the attackers' own bow at the battle's end; the action's bow belonged to the move that never happened)");
         Check(e.State.Events.Any(x => x.Type == "delayedEffectNegated" && x.Message.Contains("moving home") && x.Message.Contains("already home")), "the move home is negated: he is home already");
-        Check(e.State.Events.Any(x => x.Type == "delayedEffectApplied" && x.Message.Contains("is bowed, as delayed")), "the bow is applied from home");
         Check(e.State.DelayedEffects.Count == 0, "the store is empty");
     }
 
