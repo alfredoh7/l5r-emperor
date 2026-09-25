@@ -50,7 +50,7 @@ internal static class EmperorRemainingETests
     }
 
     public static void Run(TestRunner runner) => runner.Run("emperor-remaining-E", [
-        ("Published shape: the eleven wired Spells and nine Celestials print their stats, keywords, Effects and ability ids, ship their art and are listed in their waves' manifests; Chikushudo's Trickery and Summon Swamp Spirits are not published", PublishedShape),
+        ("Published shape: the eleven wired Spells and nine Celestials print their stats, keywords, Effects and ability ids, ship their art and are listed in their waves' manifests; Chikushudo's Trickery is not published (Summon Swamp Spirits is, in spell-wave-24)", PublishedShape),
         ("Cleansing the Path: destroyed as the cost, its Shugenja performs a Ranged 4 Attack, or Ranged 5 if he is Fire -- a 5F target survives the first and dies to the second", CleansingThePath),
         ("Thunder's Favor: bowing the Spell is the cost of a Ranged 4 Attack, or Ranged 6 if its Shugenja is Thunder", ThundersFavorAttack),
         ("Hanabi: a Political Limited action -- bow its Shugenja, destroy the Spell: gain 4 Honor (a dishonorable Shugenja is rehonored instead)", HanabiHonor),
@@ -134,7 +134,8 @@ internal static class EmperorRemainingETests
         Check(Ids(PublishedContent.CelestialWave8).SequenceEqual(celestials.OrderBy(i => i, StringComparer.Ordinal)), "celestial-wave-8");
         Manifest(root, "spell-wave-23", spells);
         Manifest(root, "celestial-wave-8", celestials);
-        foreach (var blocked in new[] { ChikushudosTrickery, SummonSwampSpirits })
+        // Summon Swamp Spirits was unpublished here until its Swamp Spirit Proxy scan arrived; issue #492 (proxy group X) wired it in spell-wave-24 (EmperorProxyXTests).
+        foreach (var blocked in new[] { ChikushudosTrickery })
             Check(!CardCatalog.Cards.ContainsKey(blocked), $"{blocked} is not published (unwired)");
         // The scans' own wording, where the catalogue's reworded Oracle text differs.
         Check(CardCatalog.Get(CapturingSoul).Text.StartsWith("Limited: Bow this Shugenja and 0 or more of your other performing Shugenja, target a Personality, and remove this card from the game:"), "Capturing the Soul prints the scan's text");

@@ -21,6 +21,13 @@ public sealed record CreatedCardSpec(CardType Type, int? Force = null, int? Chi 
     public bool HostIsSource { get; init; }
     public bool ControllerClan { get; init; }
     public bool EntersBowed { get; init; }
+    /// <summary>The slot whose cards are the hosts of a created attachment, when it is not the ability's first card slot (Goju Kobashi: "target one of your Ninja ... attach it to him" is his SECOND target;
+    /// Emperor Edition proxy pass, issue #492).</summary>
+    public string? HostSlot { get; init; }
+    /// <summary>"You may target ..., create ...": with no host chosen nothing is created and the action still resolves (Goju Kobashi).</summary>
+    public bool HostOptional { get; init; }
+    /// <summary>Count is the target's Chi as it stood before the action's costs were paid ("a number of Followers equal to his Chi", Suiteiru no Oni: the target is destroyed as a cost).</summary>
+    public bool CountFromTargetChi { get; init; }
     public CreatedValue[]? Values { get; init; }
 
     public bool HasInstanceValues => ControllerClan || Values is { Length: > 0 };

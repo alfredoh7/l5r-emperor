@@ -18,6 +18,8 @@ namespace L5R.Core;
 public sealed record TargetSlot(string Id, string Category, string Label, int Min = 1, int Max = 1, TargetStatus? MustBe = null,
     ConditionalChoice? Resolution = null, bool Performing = false)
 {
+    /// <summary>The same card may be chosen more than once: each choice is one share ("attach them to one or more of your Personalities", Suiteiru no Oni: a host named twice takes two Followers; emperor proxy pass, issue #492).</summary>
+    public bool Repeatable { get; init; }
     public bool IsPlayer => Category == TargetSlotKinds.Player;
     public bool AtResolution => Resolution is not null;
 }
@@ -100,7 +102,7 @@ public sealed partial class MatchEngine
             Require(selection?.PlayerId is null, $"{slot.Label}: choose cards, not a player.");
             Require(ids.Length >= slot.Min && ids.Length <= slot.Max, slot.Min == slot.Max ? $"{slot.Label}: choose exactly {slot.Min}."
                 : $"{slot.Label}: choose {slot.Min} to {slot.Max}.");
-            Require(ids.Distinct().Count() == ids.Length, $"{slot.Label}: choose different cards.");
+            Require(slot.Repeatable || ids.Distinct().Count() == ids.Length, $"{slot.Label}: choose different cards.");
             foreach (var id in ids) ValidateSlotCard(command, ability, slot, id);
         }
         // Dislodge the Foe: every performing Tactician stands at the SAME battlefield, and the one Personality they oppose stands there too.

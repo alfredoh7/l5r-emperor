@@ -249,6 +249,8 @@
     <EmbeddedResource Include="../../content/published/stronghold-wave-18.json" LogicalName="L5R.Published.StrongholdWave18.json" />
     <EmbeddedResource Include="../../content/published/spell-wave-23.json" LogicalName="L5R.Published.SpellWave23.json" />
     <EmbeddedResource Include="../../content/published/celestial-wave-8.json" LogicalName="L5R.Published.CelestialWave8.json" />
+    <EmbeddedResource Include="../../content/published/personality-wave-76.json" LogicalName="L5R.Published.PersonalityWave76.json" />
+    <EmbeddedResource Include="../../content/published/spell-wave-24.json" LogicalName="L5R.Published.SpellWave24.json" />
     <EmbeddedResource Include="../../content/published/holding-wave-13.json" LogicalName="L5R.Published.HoldingWave13.json" />
     <EmbeddedResource Include="../../content/published/region-wave-9.json" LogicalName="L5R.Published.RegionWave9.json" />
     <EmbeddedResource Include="../../content/published/event-wave-8.json" LogicalName="L5R.Published.EventWave8.json" />

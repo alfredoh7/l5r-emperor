@@ -643,6 +643,8 @@ public static class CardCatalog
             .Concat(PublishedContent.EventWave8.Cards) // Emperor Edition remaining-cards pass (issue #492), group F
             .Concat(PublishedContent.ItemWave15.Cards) // Emperor Edition remaining-cards pass (issue #492), group G
             .Concat(PublishedContent.FollowerWave31.Cards)
+            .Concat(PublishedContent.PersonalityWave76.Cards) // Emperor Edition remaining-cards pass (issue #492), proxy group X
+            .Concat(PublishedContent.SpellWave24.Cards) // Emperor Edition remaining-cards pass (issue #492), proxy group X
             .ToDictionary(c => c.Id, StringComparer.Ordinal);
     }
 }

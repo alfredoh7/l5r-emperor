@@ -15,6 +15,8 @@ public sealed partial class MatchEngine
         }
         var scan = CreatedCards.Resolve(spec);
         var printed = DerivePrinted(scan, spec, command, player);
+        // Emperor Edition proxy pass (issue #492): the count is read from the target before it was destroyed as a cost (Suiteiru no Oni); a count of 0 creates nothing.
+        if (spec.CountFromTargetChi) { spec = spec with { Count = _createdCountFromTargetChi }; if (spec.Count < 1) { beforeWindow?.Invoke(); return false; } }
         if (scan.Type == CardType.Personality)
         {
             var opened = false;
@@ -29,7 +31,9 @@ public sealed partial class MatchEngine
         if (scan.Type == CardType.Holding) return CreateInPlay(player.Id, scan, Zone.Home, null, spec.EntersBowed, " at home", insideEntryWindow, beforeWindow);
         if (CreatedCards.IsTerrain(scan)) return CreateInPlay(player.Id, scan, Zone.Battlefield, _state.CurrentBattleProvince ?? throw new RuleViolation(NoBattlefieldForTerrain), false, " at the battlefield", insideEntryWindow, beforeWindow);
         if (!CreatedCards.IsAttachment(scan.Type)) throw new InvalidOperationException($"{scan.Name} ({scan.Id}) is a {scan.Type}: creating one is not built.");
-        return CreateAttachments(player.Id, scan, printed, spec, CreateHosts(command, spec), insideEntryWindow, beforeWindow);
+        var attachHosts = CreateHosts(command, spec);
+        if (attachHosts.Length == 0 && spec.HostOptional) { beforeWindow?.Invoke(); return false; }
+        return CreateAttachments(player.Id, scan, printed, spec, attachHosts, insideEntryWindow, beforeWindow);
     }
 
     private const string GreatDeathEntryEffect = "great-death-entry";
@@ -43,7 +47,8 @@ public sealed partial class MatchEngine
     // The source itself ("attach it to him" on the creator's own entering-play Reaction: Masayoshi, issue #453), or -- for a multi-target creator -- every card of its FIRST
     // card slot ("one or two of your Personalities": Bayushi Makubesu; Kakita Yasunori's host slot is his first too), so a later slot (Yasunori's removed card) is never a host.
     private CardInstance[] CreateHosts(GameCommand command, CreatedCardSpec spec) =>
-        spec.HostIsSource ? (command.CardId is not null && _state.Cards.TryGetValue(command.CardId, out var creator) ? [creator] : [])
+        spec.HostSlot is not null ? SlotCards(command, spec.HostSlot).ToArray()
+        : spec.HostIsSource ? (command.CardId is not null && _state.Cards.TryGetValue(command.CardId, out var creator) ? [creator] : [])
         : spec.HostIsPerformer ? (command.PerformerId is not null && _state.Cards.TryGetValue(command.PerformerId, out var performer) ? [performer] : [])
         : command.AbilityId is not null && AbilityCatalog.All.TryGetValue(command.AbilityId, out var creatorAbility) && creatorAbility.Slots?.FirstOrDefault(s => !s.IsPlayer && !s.Performing && !s.AtResolution) is { } hostSlot
             ? SlotCards(command, hostSlot.Id).ToArray()
@@ -68,6 +73,7 @@ public sealed partial class MatchEngine
         }
         if (!CreatedCards.IsAttachment(scan.Type)) return;
         var hosts = CreateHosts(command, spec);
+        if (hosts.Length == 0 && spec.HostOptional) return;
         Require(hosts.Length > 0, spec.HostIsPerformer ? "Choose the performing Personality." : "Choose a Personality to attach it to.");
         foreach (var host in hosts)
             RequireAttachable(new CardInstance { Id = "created-preview", DefinitionId = scan.Id, OwnerId = player.Id, Zone = Zone.Hand, FaceUp = true }, host, player.Id);

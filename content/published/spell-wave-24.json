@@ -1,0 +1,59 @@
+{
+  "Profile": "spell-wave-24",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-7633",
+      "Name": "Summon Swamp Spirits",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Bow this Shugenja and target your Personality: Create a 1F Shadowlands • Nonhuman • Spirit • Swamp Spirit Follower and attach it to him.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7633.jpg",
+      "Keywords": [
+        "Maho"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "summon-swamp-spirits-create"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10014",
+      "Name": "Swamp Spirit",
+      "Type": "Follower",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 1,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "May not be included in decks.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10014.jpg",
+      "Keywords": [
+        "Shadowlands",
+        "Nonhuman",
+        "Swamp Spirit",
+        "Spirit"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "none",
+      "CreatedOnly": true
+    }
+  ],
+  "Decks": []
+}
