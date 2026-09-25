@@ -28,6 +28,31 @@
       "Effect": "none"
     },
     {
+      "Id": "oracle-l5r-6374",
+      "Name": "Rocky Terrain",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Before this battle's resolution: You may bow one or two attacking Personalities at the current battlefield.\nBattle: If there are no Terrains at the current battlefield: Put this card into play there.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6374.jpg",
+      "Keywords": [
+        "Terrain"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "rocky-terrain-bow"
+      ],
+      "Effect": "none"
+    },
+    {
       "Id": "oracle-l5r-6406",
       "Name": "Rumors Travel",
       "Type": "Strategy",
@@ -78,6 +103,32 @@
       "Effect": "none"
     },
     {
+      "Id": "oracle-l5r-6676",
+      "Name": "Shadows Walk",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 4,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: Bow one or more of your performing Shadowlands Ninja Personalities and target a card without attachments: If the card is an attachment, destroy it. If it is a Personality with Chi lower than or equal to the number of performers, permanently give him Ninja and Shadowlands and take control of him. Lose 3 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6676.jpg",
+      "Keywords": [
+        "Fear",
+        "Ninja"
+      ],
+      "Focus": 1,
+      "Abilities": [
+        "shadows-walk-take"
+      ],
+      "Effect": "none"
+    },
+    {
       "Id": "oracle-l5r-6698",
       "Name": "Shameful Injury",
       "Type": "Strategy",
@@ -97,6 +148,31 @@
       "Focus": 4,
       "Abilities": [
         "shameful-injury-negate"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-7310",
+      "Name": "Snake Tattoo",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After another player's Battle action targets your Tattooed Personality: Move him to an adjacent battlefield. If he is no longer a legal target for that action, negate its effects.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7310.jpg",
+      "Keywords": [
+        "Tattoo"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "snake-tattoo-move"
       ],
       "Effect": "none"
     },
@@ -175,6 +251,31 @@
       "Effect": "none"
     },
     {
+      "Id": "oracle-l5r-7474",
+      "Name": "Stay Put",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing unbowed Kensai and target an enemy card without attached Weapons or Armor: Bow it. You may attach a Weapon to your Kensai from your hand, paying all costs but paying 4 less Gold if he is defending.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7474.jpg",
+      "Keywords": [],
+      "Focus": 3,
+      "Abilities": [
+        "stay-put-bow",
+        "stay-put-bow-attach",
+        "stay-put-bow-attach-discount"
+      ],
+      "Effect": "none"
+    },
+    {
       "Id": "oracle-l5r-7525",
       "Name": "Strategic Strike",
       "Type": "Strategy",
@@ -223,6 +324,33 @@
       "Effect": "none"
     },
     {
+      "Id": "oracle-l5r-7654",
+      "Name": "Superior Opponent",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "As a Focus Effect: You may destroy an attachment at the current battlefield if your Personality in this duel is there.\nBattle: Choose your performing unbowed Duelist and target an enemy unit: Bow each Follower and Personality in it with equal or lower Force than your Duelist's Chi.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7654.jpg",
+      "Keywords": [
+        "Fear",
+        "Iaijutsu"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "superior-opponent-focus",
+        "superior-opponent-bow"
+      ],
+      "Effect": "none"
+    },
+    {
       "Id": "oracle-l5r-7862",
       "Name": "Tell the Tale",
       "Type": "Strategy",
@@ -242,6 +370,57 @@
       "Focus": 1,
       "Abilities": [
         "tell-the-tale-honor"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-8059",
+      "Name": "The Empress' Address",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After the resolution of an action or a battle that destroyed any of your Personalities in a defending army, bow your performing Courtier or Empress and target your non-Unique Personality with your Clan alignment in your discard pile: Bring him into play (in your home), ignoring costs. Gain 2 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8059.jpg",
+      "Keywords": [
+        "Political"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "empress-address-action",
+        "empress-address-battle"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-8084",
+      "Name": "The Fires of War",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle/Open: You may use each ability on your Stronghold a second time this turn.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8084.jpg",
+      "Keywords": [
+        "Unique"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "fires-of-war-second-use"
       ],
       "Effect": "none"
     },

@@ -74,6 +74,7 @@ public sealed partial class MatchEngine
             "returning-home-create" => facts.ProvinceDestroyedBy == playerId && facts.Attacker == playerId,
             // Shosuro Ryoken (The Shadow's Embrace pass, issue #476, batch 2): "if Ryoken was at its battlefield during its resolution in which you destroyed a province or army".
             "ryoken-honor-loss" => ResolutionDestroyedForPlayer(playerId) && source.Zone == Zone.Battlefield && source.ProvinceIndex == facts.ProvinceIndex,
+            "empress-address-battle" => EmpressAddressBattleApplies(facts, playerId), // Emperor Edition remaining-cards pass, group C (issue #492)
             _ => true
         };
     }

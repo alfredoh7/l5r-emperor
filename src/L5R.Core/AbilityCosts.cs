@@ -179,6 +179,8 @@ public sealed partial class MatchEngine
         foreach (var cost in ability.Costs ?? [])
         {
             if (cost.UnlessInHand && source is { Zone: Zone.Hand }) continue;
+            // Emperor Edition remaining-cards pass, group C (issue #492): "Bow one or more of your performing X" -- every card of the performing slot pays.
+            if (cost.Subject == EmperorRemainingCAbilities.AllPerformingSlots) { foreach (var performing in PerformingSlotCards(command, ability)) yield return (cost, performing); continue; }
             var subject = cost.Verb is CostVerbs.LoseHonor or CostVerbs.DestroyLeftmostProvince ? null : CostSubjectCard(new CostOption(cost.Verb, cost.Verb, cost.Verb, cost.Subject), ability, command, source);
             if (CostExempt(cost, source, subject) || YorimiWaivesBow(ability, cost, source, subject)) continue; // Soshi Yorimi (issue #477, batch 4): ignored, so not planned.
             yield return (cost, subject);
@@ -193,6 +195,7 @@ public sealed partial class MatchEngine
         foreach (var cost in ability.Costs)
         {
             if (cost.UnlessInHand && source is { Zone: Zone.Hand }) continue;
+            if (cost.Subject == EmperorRemainingCAbilities.AllPerformingSlots) { foreach (var performing in PerformingSlotCards(command, ability).ToArray()) performing.Bowed = true; continue; } // issue #492, group C
             if (cost.Verb == CostVerbs.LoseHonor)
             {
                 _payingActionCost = true; // Emperor Edition remaining-cards pass, group C (issue #492): Honor paid as a cost is not an effect (Rhetoric, Solid Defense).

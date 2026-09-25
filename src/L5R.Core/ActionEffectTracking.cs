@@ -152,7 +152,7 @@ public sealed partial class MatchEngine
             "kanpeki-additional-action" => KanpekiPerformedStrategyBattleAction(source, facts, playerId),
             // Pillars of Virtue (Emperor Edition Stronghold pass, issue #486 batch 2): "After the resolution of a Kiho Battle action you took."
             "pillars-virtue-additional-action" => PillarsKihoBattleActionTaken(facts, playerId),
-            _ => false
+            _ => EmperorRemainingCAfterActionApplies(abilityId, facts, playerId) // Emperor Edition remaining-cards pass, group C (issue #492): The Empress' Address.
         };
     }
 

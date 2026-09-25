@@ -36,7 +36,8 @@ public sealed partial class MatchEngine
         or "sandalwood-incense-focus" // issue #453, batch 5
         or "cycle-of-vengeance-focus" // issue #460, batch 4
         or "swell-of-strength-focus" // issue #460, batch 5: Hiromi's Vassals/Shamsir's own attach-self shape, narrowed to Water Shugenja by AttachRequiresKeyword.
-        || abilityId == "fair-warning-focus"; // issue #453, batch 2
+        || abilityId == "fair-warning-focus" // issue #453, batch 2
+        || abilityId == "superior-opponent-focus"; // Emperor Edition remaining-cards pass, group C (issue #492)
     // Fair Warning (issue #453, batch 2): "if your Personality won it, you may give a Personality -4F" -- any Personality in play, only when the focus card's player's side won.
     private static bool IsFairWarningFocus(string abilityId) => abilityId == "fair-warning-focus";
     private List<string> FairWarningCandidates(int playerId) =>
@@ -66,6 +67,7 @@ public sealed partial class MatchEngine
         : IsEffectKeyFocusEffect(abilityId) ? SandalwoodCandidates(playerId)
         : IsAttachSelfFocusEffect(abilityId) ? AttachWielderCandidates(playerId, focusCardId)
         : IsCycleOfVengeanceFocus(abilityId) ? CycleOfVengeanceCandidates(playerId)
+        : abilityId == "superior-opponent-focus" ? SuperiorOpponentCandidates(playerId)
         : IsStraightenFocusEffect(abilityId) ? StraightenFocusCandidates() : DiscardStrategyCandidates(playerId);
 
     // The attachments on the Personalities involved in the duel: the challenger and the challenged.
@@ -94,7 +96,7 @@ public sealed partial class MatchEngine
     {
         var focus = Card(focusCardId); var owner = focus.OwnerId;
         var candidates = FocusChoiceCandidates(owner, abilityId, focusCardId);
-        var attachments = abilityId == "crimson-mark-focus";
+        var attachments = abilityId is "crimson-mark-focus" or "superior-opponent-focus";
         var attachSelf = IsAttachSelfFocusEffect(abilityId);
         if (candidates.Count == 0 && IsEffectKeyFocusEffect(abilityId))
         {
@@ -113,6 +115,7 @@ public sealed partial class MatchEngine
         {
             Emit("focusEffectNothing", IsFairWarningFocus(abilityId) ? $"{Definition(focus).Name}: {Player(owner).Name}'s Personality did not win the duel."
                 : IsCycleOfVengeanceFocus(abilityId) ? $"{Definition(focus).Name}: {Player(owner).Name}'s Personality did not lose the duel."
+                : abilityId == "superior-opponent-focus" ? $"{Definition(focus).Name}: {Player(owner).Name}'s Personality is not at the current battlefield, or no attachment is there."
                 : attachments ? $"{Definition(focus).Name}: no Personality involved in the duel has an attachment."
                 : IsStraightenFocusEffect(abilityId) ? $"{Definition(focus).Name}: no Personality in play is bowed."
                 : attachSelf ? $"{Definition(focus).Name}: {Player(owner).Name} controls no Personality it may attach to."
@@ -123,6 +126,7 @@ public sealed partial class MatchEngine
         _state.PendingChoice = new("focusEffectChoice", owner, focusCardId, IsFairWarningFocus(abilityId)
             ? $"{Definition(focus).Name} (Focus Effect): {Player(owner).Name}, you may give a Personality -4F."
             : IsCycleOfVengeanceFocus(abilityId) ? $"{Definition(focus).Name} (Focus Effect): {Player(owner).Name}, you may give one of your Personalities two +1F Revenge tokens."
+            : abilityId == "superior-opponent-focus" ? $"{Definition(focus).Name} (Focus Effect): {Player(owner).Name}, you may destroy an attachment at the current battlefield."
             : attachments
             ? $"{Definition(focus).Name} (Focus Effect): {Player(owner).Name}, you may destroy an attachment on a Personality involved in this duel."
             : IsStraightenFocusEffect(abilityId) ? $"{Definition(focus).Name} (Focus Effect): {Player(owner).Name}, straighten a Personality."
@@ -142,7 +146,7 @@ public sealed partial class MatchEngine
         Require(command.Type == "chooseFocusEffect", "Choose a card or decline.");
         Require(command.PlayerId == pending.PlayerId, "Only the Focus Effect's player may choose.");
         var focus = Card(pending.FocusCardId);
-        var destroys = pending.AbilityId == "crimson-mark-focus";
+        var destroys = pending.AbilityId is "crimson-mark-focus" or "superior-opponent-focus";
         var attachSelf = IsAttachSelfFocusEffect(pending.AbilityId);
         Require(command.Choice != "decline" || !IsStraightenFocusEffect(pending.AbilityId), "This Focus Effect is not optional: choose a Personality to straighten.");
         if (command.Choice == "decline") Emit("focusEffectDeclined", $"{Player(pending.PlayerId).Name} took nothing ({Definition(focus).Name}).", pending.PlayerId, pending.FocusCardId);
@@ -204,7 +208,7 @@ public sealed partial class MatchEngine
         foreach (var id in p.Candidates)
             yield return new("chooseFocusEffect", IsFairWarningFocus(p.AbilityId) ? $"Give {Definition(Card(id)).Name} -4F"
                 : IsEffectKeyFocusEffect(p.AbilityId) ? (id == SandalwoodGainHonor ? "Gain 2 Honor" : "Draw a card")
-                : p.AbilityId == "crimson-mark-focus" ? $"Destroy {Definition(Card(id)).Name}"
+                : p.AbilityId is "crimson-mark-focus" or "superior-opponent-focus" ? $"Destroy {Definition(Card(id)).Name}"
                 : IsAttachSelfFocusEffect(p.AbilityId) ? $"Attach to {Definition(Card(id)).Name}"
                 : IsCycleOfVengeanceFocus(p.AbilityId) ? $"Give {Definition(Card(id)).Name} two Revenge tokens"
                 : IsStraightenFocusEffect(p.AbilityId) ? $"Straighten {Definition(Card(id)).Name}" : $"Put {Definition(Card(id)).Name} into your hand", true, null,

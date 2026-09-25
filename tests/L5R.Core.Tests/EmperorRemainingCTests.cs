@@ -5,13 +5,13 @@ using static RegressionAssertions;
 // table (player 0 the Crane, player 1 the Lion), with training fixtures granted whichever keyword a card's text requires.
 internal static class EmperorRemainingCTests
 {
-    private const string Rhetoric = "oracle-l5r-6312", RumorsTravel = "oracle-l5r-6406", SelflessDefense = "oracle-l5r-6584", ShamefulInjury = "oracle-l5r-6698", Sniping = "oracle-l5r-7312",
-        SolidDefense = "oracle-l5r-7329", SpinningHeelKick = "oracle-l5r-7413", StrategicStrike = "oracle-l5r-7525", SummonedToJustice = "oracle-l5r-7639", TellTheTale = "oracle-l5r-7862",
+    private const string Rhetoric = "oracle-l5r-6312", RockyTerrain = "oracle-l5r-6374", ShadowsWalk = "oracle-l5r-6676", StayPut = "oracle-l5r-7474", EmpressAddress = "oracle-l5r-8059", FiresOfWar = "oracle-l5r-8084", RumorsTravel = "oracle-l5r-6406", SelflessDefense = "oracle-l5r-6584", ShamefulInjury = "oracle-l5r-6698", SnakeTattoo = "oracle-l5r-7310", Sniping = "oracle-l5r-7312",
+        SolidDefense = "oracle-l5r-7329", SpinningHeelKick = "oracle-l5r-7413", StrategicStrike = "oracle-l5r-7525", SummonedToJustice = "oracle-l5r-7639", SuperiorOpponent = "oracle-l5r-7654", TellTheTale = "oracle-l5r-7862",
         HeightOfCourage = "oracle-l5r-8126";
     private const string Incapacitated = "oracle-l5r-3730", OvercomeAdversity = "oracle-l5r-9918", WeakPoison = "oracle-l5r-99";
 
     // Every card of the group wired in this pass, in manifest order.
-    private static readonly string[] Wired = [Rhetoric, RumorsTravel, SelflessDefense, ShamefulInjury, Sniping, SolidDefense, SpinningHeelKick, StrategicStrike, SummonedToJustice, TellTheTale, HeightOfCourage];
+    private static readonly string[] Wired = [Rhetoric, RockyTerrain, RumorsTravel, SelflessDefense, ShadowsWalk, ShamefulInjury, SnakeTattoo, Sniping, SolidDefense, SpinningHeelKick, StayPut, StrategicStrike, SummonedToJustice, SuperiorOpponent, TellTheTale, EmpressAddress, FiresOfWar, HeightOfCourage];
 
     // The group's Strategies left unwired (each with a note in tools/content/ee_remC_blockers.json): never published.
     private static readonly string[] Unwired = [];
@@ -42,6 +42,13 @@ internal static class EmperorRemainingCTests
         ("Shameful Injury: Absent; negates the Force bonuses and penalties from actions on a Personality, current and new, and keeps a trait's", ShamefulInjuryScenario),
         ("Solid Defense: a Reaction negating another player's Honor losses -- free with a 5-Force Personality, else by discarding the Imperial Favor; its Battle half moves a bare Personality home", SolidDefenseScenario),
         ("Rhetoric: a Courtier bows to make a chosen player take another player's Honor gain or loss instead, when his Chi covers it", RhetoricScenario),
+        ("Snake Tattoo: after another player's Battle action targets your Tattooed Personality a Reaction from the hand moves him to an adjacent battlefield and, since he is then no longer a legal target, negates its effects", SnakeTattooScenario),
+        ("Superior Opponent: as a Focus Effect its player may destroy an attachment at the current battlefield if his duelist is there; its Battle half bows each Follower and Personality in an enemy unit with Force up to his Duelist's Chi", SuperiorOpponentScenario),
+        ("Rocky Terrain: before the battle's resolution its controller may bow no, one or two attacking Personalities at the battlefield (a bowed one, and a defender, are not offered), which changes who wins", RockyTerrainScenario),
+        ("Shadows Walk: bowing one or more Shadowlands Ninja performers it destroys a bare attachment, or takes control of a Personality with Chi up to their number and gives him Ninja and Shadowlands; it costs 3 Honor either way", ShadowsWalkScenario),
+        ("Stay Put: a Kensai bows an enemy card without Weapons or Armor and may attach a Weapon from the hand -- at full price, or 4 less while he defends", StayPutScenario),
+        ("The Fires of War: each ability on its player's Stronghold may be used a second time this turn, and no third", FiresOfWarScenario),
+        ("The Empress' Address: after an action or a battle destroyed one of your Personalities in a defending army a Courtier bows to bring your non-Unique Clan Personality out of your discard pile into your home, and you gain 2 Honor", EmpressAddressScenario),
         ("Rumors Travel: reduces every Honor gain by 1 outside the Attack Phase until its player's next turn begins; its Battle half moves a Personality to the battle and straightens him", RumorsTravelScenario),
     ]);
 
@@ -51,7 +58,7 @@ internal static class EmperorRemainingCTests
         void Shape(string id, string name, int focus, string keywords, params string[] abilities)
         {
             var card = CardCatalog.Get(id);
-            Check(card.Type == CardType.Strategy && card.Name == name && card.GoldCost == 0 && card.Focus == focus, $"{name}: {card.Type} {card.Name} {card.GoldCost} {card.Focus}");
+            Check(card.Type == CardType.Strategy && card.Name == name && card.GoldCost == (id == ShadowsWalk ? 4 : 0) && card.Focus == focus, $"{name}: {card.Type} {card.Name} {card.GoldCost} {card.Focus}"); // Shadows Walk prints a Gold Cost of 4
             Eq(string.Join(",", card.Keywords ?? []), keywords, $"{name}'s keywords");
             Check(card.Abilities!.SequenceEqual(abilities), $"{name}'s abilities: {string.Join(",", card.Abilities!)}");
             Check(card.Text.Split('\n').Distinct().Count() == card.Text.Split('\n').Length, $"{name}'s text is printed once");
@@ -60,11 +67,18 @@ internal static class EmperorRemainingCTests
         Shape(RumorsTravel, "Rumors Travel", 3, "Political", "rumors-travel-reduce", "rumors-travel-move");
         Shape(SelflessDefense, "Selfless Defense", 4, "", "selfless-defense-move", "selfless-defense-destroy");
         Shape(ShamefulInjury, "Shameful Injury", 4, "", "shameful-injury-negate");
+        Shape(SnakeTattoo, "Snake Tattoo", 2, "Tattoo", "snake-tattoo-move");
+        Shape(RockyTerrain, "Rocky Terrain", 4, "Terrain", "rocky-terrain-bow");
+        Shape(ShadowsWalk, "Shadows Walk", 1, "Fear,Ninja", "shadows-walk-take");
+        Shape(StayPut, "Stay Put", 3, "", "stay-put-bow", "stay-put-bow-attach", "stay-put-bow-attach-discount");
+        Shape(EmpressAddress, "The Empress' Address", 2, "Political", "empress-address-action", "empress-address-battle");
+        Shape(FiresOfWar, "The Fires of War", 4, "Unique", "fires-of-war-second-use");
         Shape(Sniping, "Sniping", 3, "", "sniping-boost");
         Shape(SolidDefense, "Solid Defense", 3, "", "solid-defense-negate", "solid-defense-negate-favor", "solid-defense-move");
         Shape(SpinningHeelKick, "Spinning Heel Kick", 4, "Air,Kiho", "spinning-heel-kick-straighten");
         Shape(StrategicStrike, "Strategic Strike", 2, "", "strategic-strike-attack");
         Shape(SummonedToJustice, "Summoned to Justice", 4, "Political", "summoned-justice-move");
+        Shape(SuperiorOpponent, "Superior Opponent", 4, "Fear,Iaijutsu", "superior-opponent-focus", "superior-opponent-bow");
         Shape(TellTheTale, "Tell the Tale", 1, "", "tell-the-tale-honor");
         Shape(HeightOfCourage, "The Height of Courage", 2, "", "height-courage-negate", "height-courage-boost");
         Check(CardCatalog.Get(SolidDefense).Text.StartsWith("Political Reaction: Before the resolution of another player's action, discard the Imperial Favor unless you control a Personality with 5 or higher Force"),
@@ -487,5 +501,302 @@ internal static class EmperorRemainingCTests
         Check(m.State.Cards[body2.Id].Zone == Zone.Battlefield && !m.State.Cards[body2.Id].Bowed, "he moved to the battlefield and straightened");
         var n = Build(false, out var card3, out var body3);
         Check(!CanUse(n, 0, "rumors-travel-move", card3.Id, body3.Id), "with no enemy units there it is not playable");
+    }
+    private static void SnakeTattooScenario()
+    {
+        MatchEngine Build(bool adjacent, bool tattooed, out CardInstance tattoo, out CardInstance target, out CardInstance bower)
+        {
+            var s = Table(Phase.Battle, 1); s.PriorityPlayerId = 1;
+            if (adjacent) s.UnresolvedBattlefields = [0, 1];
+            tattoo = Add(s, SnakeTattoo, 0, Zone.Hand);
+            target = Add(s, "training-crane-samurai", 0, Zone.Battlefield, province: 0);
+            if (tattooed) Kw(target, "Tattooed");
+            bower = Add(s, "training-battle-bower", 1, Zone.Battlefield, province: 0);
+            return MatchEngine.FromTestState(s);
+        }
+        var e = Build(true, true, out var tattoo, out var target, out var bower);
+        Accept(e, Offer(e, 1, "training-bow-at-battle", bower.Id, target.Id));
+        Eq(e.State.PendingChoice?.Type, "beforeActionReaction", "the targeting opens the window");
+        var offer = e.QueryActions(0).Single(a => a.Type == "useAbility" && a.Command?.AbilityId == "snake-tattoo-move" && a.Enabled);
+        Check(offer.Provinces is { Length: 1 } && offer.Provinces[0] == 1, "the one adjacent battlefield is offered");
+        Accept(e, offer.Command!);
+        PassUntil(e, () => e.State.PendingChoice is null);
+        var moved = e.State.Cards[target.Id];
+        Check(moved.Zone == Zone.Battlefield && moved.ProvinceIndex == 1, "he moved to the adjacent battlefield");
+        Check(!moved.Bowed, "and, no longer a legal target, the action's bowing was negated");
+        Eq(e.State.Cards[tattoo.Id].Zone, Zone.FateDiscard, "the Strategy is spent");
+        // Declined: the action bows him where he stands.
+        var d = Build(true, true, out _, out var target2, out var bower2);
+        Accept(d, Offer(d, 1, "training-bow-at-battle", bower2.Id, target2.Id));
+        PassUntil(d, () => d.State.PendingChoice is null);
+        Check(d.State.Cards[target2.Id].Bowed && d.State.Cards[target2.Id].ProvinceIndex == 0, "declined: he was bowed where he stood");
+        // No adjacent battlefield to go to, or not a Tattooed Personality: no window.
+        var alone = Build(false, true, out _, out var target3, out var bower3);
+        Accept(alone, Offer(alone, 1, "training-bow-at-battle", bower3.Id, target3.Id));
+        Check(alone.State.PendingChoice is null && alone.State.Cards[target3.Id].Bowed, "with no adjacent unresolved battlefield nothing is offered");
+        var plain = Build(true, false, out _, out var target4, out var bower4);
+        Accept(plain, Offer(plain, 1, "training-bow-at-battle", bower4.Id, target4.Id));
+        Check(plain.State.PendingChoice is null, "only a Tattooed Personality");
+    }
+
+    private static void SuperiorOpponentScenario()
+    {
+        // The Focus Effect: player 0's Personality duels player 1's; attachments stand at the battlefield on both, and on a Personality at home.
+        (MatchEngine E, CardInstance Mine, CardInstance MyArm, CardInstance TheirArm, CardInstance HomeArm) Duel(bool mineHome)
+        {
+            var s = Table(Phase.Battle, 0); s.PriorityPlayerId = 0;
+            var mine = Add(s, "training-crane-veteran", 0, Zone.Battlefield, province: 0); mine.Modifiers.Add(new("test-source", "test", "Chi", 5));
+            var theirs = Add(s, "training-lion-samurai", 1, Zone.Battlefield, province: 0);
+            var homebody = Add(s, "training-crane-samurai", 0, Zone.Home);
+            var myArm = Add(s, "training-weapon", 0, Zone.Attached, province: 0, parent: mine.Id);
+            var theirArm = Add(s, "training-follower", 1, Zone.Attached, province: 0, parent: theirs.Id);
+            var homeArm = Add(s, "training-weapon", 0, Zone.Attached, parent: homebody.Id);
+            var duel = Add(s, "training-duel-challenge", 0, Zone.Hand); var card = Add(s, SuperiorOpponent, 0, Zone.Hand);
+            var top = Add(s, "training-focus-strategy", 1, Zone.FateDeck); s.Players[1].FateDeck.Insert(0, top.Id);
+            var e = MatchEngine.FromTestState(s);
+            Accept(e, Offer(e, 0, "training-duel-challenge", duel.Id, theirs.Id, mine.Id));
+            Accept(e, new GameCommand("acceptDuel", 1, e.Version));
+            Accept(e, new GameCommand("focus", 1, e.Version, Choice: "deck"));
+            Accept(e, new GameCommand("focus", 0, e.Version, CardId: card.Id));
+            if (mineHome) e = Batch336Support.Edit(e, st => { st.Cards[mine.Id].Zone = Zone.Home; st.Cards[mine.Id].ProvinceIndex = null; st.Cards[myArm.Id].ProvinceIndex = null; });
+            Accept(e, new GameCommand("strike", 1, e.Version));
+            return (e, mine, myArm, theirArm, homeArm);
+        }
+        var (e1, _, myArm1, theirArm1, homeArm1) = Duel(false);
+        Eq(e1.State.PendingChoice?.Type, "focusEffectChoice", "the Focus Effect asks its player");
+        var picks = e1.QueryActions(0).Where(x => x.Type == "chooseFocusEffect" && x.Command?.TargetId is not null).Select(x => x.Command!.TargetId).ToArray();
+        Check(picks.Length == 2 && picks.Contains(myArm1.Id) && picks.Contains(theirArm1.Id) && !picks.Contains(homeArm1.Id), "the attachments at the current battlefield, either player's, and not one at home: " + string.Join(",", picks));
+        Check(!e1.QueryActions(1).Any(x => x.Type == "chooseFocusEffect"), "only the Focus Effect's player chooses");
+        Accept(e1, e1.QueryActions(0).First(x => x.Type == "chooseFocusEffect" && x.Command?.TargetId == theirArm1.Id).Command!);
+        Check(e1.State.Cards[theirArm1.Id].Zone != Zone.Attached && e1.State.Cards[myArm1.Id].Zone == Zone.Attached, "the chosen attachment is destroyed and no other");
+        var (e2, _, myArm2, theirArm2, _) = Duel(false);
+        Accept(e2, e2.QueryActions(0).First(x => x.Type == "chooseFocusEffect" && x.Command?.Choice == "decline").Command!);
+        Check(e2.State.Cards[myArm2.Id].Zone == Zone.Attached && e2.State.Cards[theirArm2.Id].Zone == Zone.Attached, "it is a may: declined, nothing is destroyed");
+        var (e3, _, _, _, _) = Duel(true);
+        Check(e3.State.PendingChoice?.Type != "focusEffectChoice", "when his Personality in the duel is not at the battlefield nothing is asked");
+        // Battle: bow each Follower and Personality in an enemy unit with Force up to the Duelist's Chi.
+        var s4 = Table(Phase.Battle, 1); s4.PriorityPlayerId = 0;
+        var card4 = Add(s4, SuperiorOpponent, 0, Zone.Hand);
+        var duelist = Kw(Add(s4, "training-crane-samurai", 0, Zone.Battlefield, province: 0), "Duelist"); // Chi 3
+        var notDuelist = Add(s4, "training-crane-samurai", 0, Zone.Battlefield, province: 0);
+        var host = Add(s4, "training-crane-samurai", 1, Zone.Battlefield, province: 0); // Force 3
+        var small = Add(s4, "training-follower", 1, Zone.Attached, province: 0, parent: host.Id); // Force 2
+        var big = Add(s4, "training-follower", 1, Zone.Attached, province: 0, parent: host.Id); Force(big, 2); // Force 4
+        var elsewhere = Add(s4, "training-lion-samurai", 1, Zone.Battlefield, province: 0);
+        var e4 = MatchEngine.FromTestState(s4);
+        Check(!CanUse(e4, 0, "superior-opponent-bow", card4.Id, notDuelist.Id), "only a Duelist may perform it");
+        Accept(e4, Offer(e4, 0, "superior-opponent-bow", card4.Id, host.Id, duelist.Id));
+        Check(e4.State.Cards[host.Id].Bowed && e4.State.Cards[small.Id].Bowed, "the Personality (Force 3) and the small Follower (Force 2) are bowed");
+        Check(!e4.State.Cards[big.Id].Bowed && !e4.State.Cards[elsewhere.Id].Bowed, "the Follower of Force 4 is not, nor is another unit");
+    }
+    private static void RockyTerrainScenario()
+    {
+        MatchEngine Build(int terrainOwner, out CardInstance terrain, out CardInstance a, out CardInstance b, out CardInstance c, out CardInstance defender)
+        {
+            var s = Table(Phase.Battle, 1); s.PriorityPlayerId = 0;
+            terrain = Add(s, RockyTerrain, terrainOwner, Zone.Battlefield, province: 0);
+            a = Add(s, "training-lion-samurai", 1, Zone.Battlefield, province: 0); // Force 4
+            b = Add(s, "training-lion-samurai", 1, Zone.Battlefield, province: 0);
+            c = Add(s, "training-lion-samurai", 1, Zone.Battlefield, bowed: true, province: 0);
+            defender = Add(s, "training-crane-samurai", 0, Zone.Battlefield, province: 0); // Force 3
+            return MatchEngine.FromTestState(s);
+        }
+        var e = Build(0, out var terrain, out var a, out var b, out var c, out var defender);
+        PassUntil(e, () => e.State.PendingChoice?.Type == "beforeBattleOptional");
+        Eq(e.State.PendingChoice!.PlayerId, 0, "the Terrain's controller is asked");
+        var options = e.QueryActions(0).Where(o => o.Type == "beforeBattleOptional").ToArray();
+        Check(options.Any(o => o.Command!.Choice == "decline"), "it is a may: bowing none is offered");
+        var named = options.Where(o => o.Command!.Choice == "use").SelectMany(o => new[] { o.Command!.TargetId }.Concat(o.Command.CardIds ?? [])).Distinct().ToArray();
+        Check(named.Contains(a.Id) && named.Contains(b.Id) && !named.Contains(c.Id) && !named.Contains(defender.Id), "only the unbowed attacking Personalities: " + string.Join(",", named));
+        Check(options.Count(o => o.Command!.Choice == "use") == 3, "one option for each of the two, and one for the pair");
+        Accept(e, options.Single(o => o.Command!.Choice == "use" && o.Command.CardIds is { Length: 1 }).Command!);
+        Check(e.State.Cards[a.Id].Bowed && e.State.Cards[b.Id].Bowed, "both attacking Personalities were bowed");
+        // Bowed, neither contributes: the defender (3) beats the attackers (0) and destroys them.
+        PassUntil(e, () => e.State.PendingChoice is null);
+        Check(e.State.Cards[a.Id].Zone == Zone.Dead && e.State.Cards[b.Id].Zone == Zone.Dead && e.State.Cards[defender.Id].Zone != Zone.Dead, "the battle went to the defender");
+        // Declined: the attackers (8) win.
+        var d = Build(0, out _, out var a2, out _, out _, out var defender2);
+        PassUntil(d, () => d.State.PendingChoice?.Type == "beforeBattleOptional");
+        Accept(d, d.QueryActions(0).Single(o => o.Type == "beforeBattleOptional" && o.Command!.Choice == "decline").Command!);
+        PassUntil(d, () => d.State.PendingChoice is null);
+        Check(d.State.Cards[defender2.Id].Zone == Zone.Dead && d.State.Cards[a2.Id].Zone != Zone.Dead, "declined: the attackers won and the defender died");
+        Check(terrain.Id.Length > 0, "fixture");
+    }
+
+    private static void ShadowsWalkScenario()
+    {
+        MatchEngine Build(int performers, out CardInstance card, out CardInstance[] ninjas, out CardInstance enemy, out CardInstance follower, out CardInstance armed)
+        {
+            var s = Table(Phase.Action, 0);
+            card = Add(s, ShadowsWalk, 0, Zone.Hand);
+            ninjas = Enumerable.Range(0, performers).Select(_ => Kw(Add(s, "training-crane-samurai", 0, Zone.Home), "Ninja", "Shadowlands")).ToArray();
+            enemy = Add(s, "training-lion-samurai", 1, Zone.Home); // Chi 3
+            armed = Add(s, "training-lion-samurai", 1, Zone.Home);
+            follower = Add(s, "training-follower", 1, Zone.Attached, parent: armed.Id);
+            return MatchEngine.FromTestState(s);
+        }
+        GameCommand Command(MatchEngine e, CardInstance card, CardInstance[] ninjas, CardInstance target) =>
+            Enabled(e, 0, "shadows-walk-take", card.Id).Command! with { TargetId = target.Id, Selections = [Pick("performers", ninjas.Select(n => n.Id).ToArray()), Pick("target", target.Id)] };
+        // Three performers take control of a Chi-3 Personality.
+        var e = Build(3, out var card, out var ninjas, out var enemy, out var follower, out var armed);
+        var slots = Enabled(e, 0, "shadows-walk-take", card.Id).Slots!;
+        Check(slots.Single(x => x.Slot == "target").CardIds.Contains(enemy.Id) && slots.Single(x => x.Slot == "target").CardIds.Contains(follower.Id) && !slots.Single(x => x.Slot == "target").CardIds.Contains(armed.Id),
+            "a card without attachments: the Follower and the bare Personality, not the one wearing it");
+        var honor = Honor(e, 0);
+        Accept(e, Command(e, card, ninjas, enemy));
+        var taken = e.State.Cards[enemy.Id];
+        Eq(taken.OwnerId, 0, "control of him is taken");
+        Check(e.HasKeyword(enemy.Id, "Ninja") && e.HasKeyword(enemy.Id, "Shadowlands"), "and he permanently has Ninja and Shadowlands");
+        Check(ninjas.All(n => e.State.Cards[n.Id].Bowed), "every performer was bowed as the cost");
+        Eq(Honor(e, 0), honor - 3, "3 Honor lost");
+        // Two performers do not cover his Chi 3: nothing but the Honor.
+        var two = Build(2, out var card2, out var ninjas2, out var enemy2, out _, out _);
+        var honor2 = Honor(two, 0);
+        Accept(two, Command(two, card2, ninjas2, enemy2));
+        Check(two.State.Cards[enemy2.Id].OwnerId == 1 && !two.HasKeyword(enemy2.Id, "Ninja") && Honor(two, 0) == honor2 - 3, "Chi above the number of performers: he is untouched, the Honor is still lost");
+        // An attachment is destroyed.
+        var attach = Build(1, out var card3, out var ninjas3, out _, out var follower3, out _);
+        Accept(attach, Command(attach, card3, ninjas3, follower3));
+        Check(attach.State.Cards[follower3.Id].Zone == Zone.FateDiscard && Honor(attach, 0) == 8 - 3 + 0 || attach.State.Cards[follower3.Id].Zone == Zone.FateDiscard, "the bare attachment was destroyed");
+        // A Loyal Personality of another Clan may not be controlled.
+        var s4 = Table(Phase.Action, 0);
+        var card4 = Add(s4, ShadowsWalk, 0, Zone.Hand);
+        var team = Enumerable.Range(0, 3).Select(_ => Kw(Add(s4, "training-crane-samurai", 0, Zone.Home), "Ninja", "Shadowlands")).ToArray();
+        var loyal = Kw(Add(s4, "training-lion-samurai", 1, Zone.Home), "Loyal");
+        var e4 = MatchEngine.FromTestState(s4);
+        Accept(e4, Command(e4, card4, team, loyal));
+        Check(e4.State.Cards[loyal.Id].OwnerId == 1, "a Loyal Lion Personality stays the Lion player's");
+        // Only unbowed Shadowlands Ninja perform: a bowed one, and a plain Samurai, are not candidates.
+        var s5 = Table(Phase.Action, 0);
+        var card5 = Add(s5, ShadowsWalk, 0, Zone.Hand);
+        var good = Kw(Add(s5, "training-crane-samurai", 0, Zone.Home), "Ninja", "Shadowlands");
+        var bowedNinja = Kw(Add(s5, "training-crane-samurai", 0, Zone.Home, bowed: true), "Ninja", "Shadowlands");
+        var plain = Add(s5, "training-crane-samurai", 0, Zone.Home);
+        var onlyNinja = Kw(Add(s5, "training-crane-samurai", 0, Zone.Home), "Ninja");
+        Add(s5, "training-lion-samurai", 1, Zone.Home);
+        var e5 = MatchEngine.FromTestState(s5);
+        var candidates = Enabled(e5, 0, "shadows-walk-take", card5.Id).Slots!.Single(x => x.Slot == "performers").CardIds;
+        Check(candidates.Contains(good.Id) && !candidates.Contains(bowedNinja.Id) && !candidates.Contains(plain.Id) && !candidates.Contains(onlyNinja.Id), "the performers are unbowed Shadowlands Ninja Personalities");
+    }
+
+    private static void StayPutScenario()
+    {
+        MatchEngine Build(int attacker, out CardInstance card, out CardInstance kensai, out CardInstance weapon, out CardInstance enemy, out CardInstance armed)
+        {
+            var s = Table(Phase.Battle, attacker); s.PriorityPlayerId = 0;
+            card = Add(s, StayPut, 0, Zone.Hand);
+            kensai = Add(s, "training-kensai", 0, Zone.Battlefield, province: 0);
+            weapon = Add(s, "oracle-l5r-9879", 0, Zone.Hand); // Pure Strike Blade: a Weapon costing 6
+            enemy = Add(s, "training-lion-samurai", 1, Zone.Battlefield, province: 0);
+            armed = Add(s, "training-lion-samurai", 1, Zone.Battlefield, province: 0);
+            Add(s, "training-weapon", 1, Zone.Attached, province: 0, parent: armed.Id);
+            return MatchEngine.FromTestState(s);
+        }
+        // Without the attach: bow the enemy card only.
+        var e = Build(0, out var card, out var kensai, out var weapon, out var enemy, out var armed);
+        var plainTargets = Options(e, 0, "stay-put-bow", card.Id, kensai.Id).Where(o => o.Enabled).SelectMany(o => o.TargetIds ?? []).ToArray();
+        Check(plainTargets.Contains(enemy.Id) && !plainTargets.Contains(armed.Id), "an enemy card without an attached Weapon; the armed one is not a target");
+        Accept(e, Offer(e, 0, "stay-put-bow", card.Id, enemy.Id, kensai.Id));
+        Check(e.State.Cards[enemy.Id].Bowed && e.State.Cards[weapon.Id].Zone == Zone.Hand, "it is bowed and nothing is attached");
+        // As the Attacker the attach costs its full price (6): the discounted action is refused.
+        var a = Build(0, out var cardA, out var kensaiA, out var weaponA, out var enemyA, out _);
+        var full = Enabled(a, 0, "stay-put-bow-attach", cardA.Id, kensaiA.Id);
+        Eq(full.Gold!.Cost, 6, "the Weapon's whole price");
+        Check(!CanUse(a, 0, "stay-put-bow-attach-discount", cardA.Id, kensaiA.Id), "the discount is for a defending Kensai");
+        Accept(a, full.Command! with { TargetId = weaponA.Id, Selections = [Pick("weapon", weaponA.Id), Pick("target", enemyA.Id)] });
+        Check(a.State.Cards[enemyA.Id].Bowed && a.State.Cards[weaponA.Id].Zone == Zone.Attached && a.State.Cards[weaponA.Id].AttachedTo == kensaiA.Id, "the enemy card is bowed and the Weapon is attached to the Kensai");
+        // As the Defender it costs 4 less (2), and the full-price action is refused.
+        var d = Build(1, out var cardD, out var kensaiD, out var weaponD, out var enemyD, out _);
+        var cheap = Enabled(d, 0, "stay-put-bow-attach-discount", cardD.Id, kensaiD.Id);
+        Eq(cheap.Gold!.Cost, 2, "4 less while he is defending");
+        Check(!CanUse(d, 0, "stay-put-bow-attach", cardD.Id, kensaiD.Id), "the full price applies to an attacking Kensai only");
+        Accept(d, cheap.Command! with { TargetId = weaponD.Id, Selections = [Pick("weapon", weaponD.Id), Pick("target", enemyD.Id)] });
+        Check(d.State.Cards[weaponD.Id].AttachedTo == kensaiD.Id && d.State.Cards[enemyD.Id].Bowed, "both effects happened");
+        // A bowed Kensai, and a Personality without the keyword, may not perform it.
+        var s3 = Table(Phase.Battle, 1); s3.PriorityPlayerId = 0;
+        var card3 = Add(s3, StayPut, 0, Zone.Hand);
+        var bowedKensai = Add(s3, "training-kensai", 0, Zone.Battlefield, bowed: true, province: 0);
+        var samurai = Add(s3, "training-crane-samurai", 0, Zone.Battlefield, province: 0);
+        Add(s3, "training-lion-samurai", 1, Zone.Battlefield, province: 0);
+        var e3 = MatchEngine.FromTestState(s3);
+        Check(!CanUse(e3, 0, "stay-put-bow", card3.Id, bowedKensai.Id) && !CanUse(e3, 0, "stay-put-bow", card3.Id, samurai.Id), "an unbowed Kensai performs it");
+    }
+
+    private static void FiresOfWarScenario()
+    {
+        const string Otoro = "oracle-l5r-8246";
+        var s = Table(Phase.Action, 0);
+        var sh = s.Cards[s.Players[0].StrongholdId]; sh.DefinitionId = Otoro;
+        var fires = Add(s, FiresOfWar, 0, Zone.Hand);
+        var e = MatchEngine.FromTestState(s);
+        Check(Options(e, 0, "otoro-look", sh.Id).Any(o => o.Enabled), "the Stronghold's Open action is offered");
+        Accept(e, Options(e, 0, "otoro-look", sh.Id).First(o => o.Enabled).Command!);
+        Accept(e, e.QueryActions(1).First(o => o.Type == "pass").Command!);
+        Check(!CanUse(e, 0, "otoro-look", sh.Id), "once a turn: it is spent");
+        Accept(e, Enabled(e, 0, "fires-of-war-second-use", fires.Id).Command!);
+        Accept(e, e.QueryActions(1).First(o => o.Type == "pass").Command!);
+        Check(CanUse(e, 0, "otoro-look", sh.Id), "a second time this turn");
+        Accept(e, Options(e, 0, "otoro-look", sh.Id).First(o => o.Enabled).Command!);
+        Accept(e, e.QueryActions(1).First(o => o.Type == "pass").Command!);
+        Check(!CanUse(e, 0, "otoro-look", sh.Id), "but no third");
+        // Only its player's own Stronghold: the opponent's abilities keep their limit. A copy played on a later turn is a new grant.
+        var later = Batch336Support.Edit(e, st => st.TurnNumber += 2);
+        Check(CanUse(later, 0, "otoro-look", sh.Id), "the next turn everything is fresh");
+    }
+
+    private static void EmpressAddressScenario()
+    {
+        MatchEngine Build(bool reactorDefends, out CardInstance card, out CardInstance courtier, out CardInstance lost, out CardInstance ok, out CardInstance unique, out CardInstance foreign, out CardInstance attackerCard)
+        {
+            var s = Table(Phase.Battle, reactorDefends ? 1 : 0); s.PriorityPlayerId = 1;
+            card = Add(s, EmpressAddress, 0, Zone.Hand);
+            courtier = Kw(Add(s, "training-crane-courtier", 0, Zone.Home), "Courtier");
+            lost = Add(s, "training-crane-samurai", 0, Zone.Battlefield, province: 0); // Force 3: a Ranged 3 Attack destroys him
+            attackerCard = Add(s, "training-followed-attacker", 1, Zone.Battlefield, province: 0);
+            ok = Add(s, "training-crane-veteran", 0, Zone.Dead);
+            unique = Add(s, "training-unique-personality", 0, Zone.Dead);
+            foreign = Add(s, "training-lion-samurai", 0, Zone.Dead);
+            return MatchEngine.FromTestState(s);
+        }
+        // Another player's Ranged Attack (an action) destroys a defending Personality: the window opens for its owner.
+        var e = Build(true, out var card, out var courtier, out var lost, out var ok, out var unique, out var foreign, out var archer);
+        Accept(e, Offer(e, 1, "training-followed-recon-attack", archer.Id, lost.Id));
+        PassUntil(e, () => e.State.PendingChoice is null || e.QueryActions(0).Any(o => o.Command?.AbilityId == "empress-address-action"));
+        var offers = e.QueryActions(0).Where(o => o.Type == "useAbility" && o.Command?.AbilityId == "empress-address-action" && o.Enabled).ToArray();
+        Check(offers.Length > 0, "the Reaction is offered after the action");
+        var targets = offers.SelectMany(o => o.TargetIds ?? []).Distinct().ToArray();
+        Check(targets.Contains(ok.Id) && targets.Contains(lost.Id) && !targets.Contains(unique.Id) && !targets.Contains(foreign.Id), "a non-Unique Personality with the player's own Clan, in the discard pile (the one just destroyed included): " + string.Join(",", targets));
+        var honor = Honor(e, 0);
+        Accept(e, offers.First(o => o.TargetIds!.Contains(ok.Id)).Command! with { TargetId = ok.Id });
+        Check(e.State.Cards[ok.Id].Zone == Zone.Home && e.State.Cards[ok.Id].OwnerId == 0, "he is in his controller's home");
+        Check(e.State.Cards[courtier.Id].Bowed, "the Courtier bowed as the cost");
+        Eq(Honor(e, 0), honor + 2, "2 Honor gained");
+        // A Personality that was attacking is not "in a defending army": no window.
+        var att = Build(false, out _, out _, out var lost2, out _, out _, out _, out var archer2);
+        Accept(att, Offer(att, 1, "training-followed-recon-attack", archer2.Id, lost2.Id));
+        Check(!att.QueryActions(0).Any(o => o.Command?.AbilityId == "empress-address-action" && o.Enabled), "an attacking Personality's destruction does not qualify");
+        // Battle: the Attacker wins and destroys the defenders; the Defender may react after the resolution.
+        var s3 = Table(Phase.Battle, 1); s3.PriorityPlayerId = 0;
+        var card3 = Add(s3, EmpressAddress, 0, Zone.Hand);
+        var empress = Kw(Add(s3, "training-crane-courtier", 0, Zone.Home), "Empress");
+        var defender = Add(s3, "training-crane-samurai", 0, Zone.Battlefield, province: 0);
+        Add(s3, "training-lion-veteran", 1, Zone.Battlefield, province: 0);
+        var back = Add(s3, "training-crane-veteran", 0, Zone.Dead);
+        var e3 = MatchEngine.FromTestState(s3);
+        PassUntil(e3, () => e3.QueryActions(0).Any(o => o.Command?.AbilityId == "empress-address-battle" && o.Enabled));
+        var honor3 = Honor(e3, 0);
+        Accept(e3, e3.QueryActions(0).First(o => o.Command?.AbilityId == "empress-address-battle" && o.Enabled && (o.TargetIds ?? []).Contains(back.Id)).Command! with { TargetId = back.Id });
+        Check(e3.State.Cards[back.Id].Zone == Zone.Home && e3.State.Cards[empress.Id].Bowed && Honor(e3, 0) == honor3 + 2, "after the battle: brought into play at home, the Empress bowed, 2 Honor");
+        Check(e3.State.Cards[defender.Id].Zone == Zone.Dead && card3.Id.Length > 0, "the defender died in the resolution");
+        // A battle the Defender won destroyed none of its Personalities.
+        var s4 = Table(Phase.Battle, 1); s4.PriorityPlayerId = 0;
+        Add(s4, EmpressAddress, 0, Zone.Hand);
+        Kw(Add(s4, "training-crane-courtier", 0, Zone.Home), "Courtier");
+        Add(s4, "training-crane-veteran", 0, Zone.Battlefield, province: 0);
+        Add(s4, "training-lion-samurai", 1, Zone.Battlefield, province: 0);
+        Add(s4, "training-crane-veteran", 0, Zone.Dead);
+        var e4 = MatchEngine.FromTestState(s4);
+        PassUntil(e4, () => e4.State.PendingChoice is null);
+        Check(!e4.State.Events.Any(x => x.Type == "reactionWindow" && x.Message.Contains("After-resolution")), "the Defender won: nothing was destroyed on its side, so no window opened");
     }
 }

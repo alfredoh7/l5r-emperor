@@ -312,7 +312,7 @@ public sealed partial class MatchEngine
             case "waystation-reborn":
                 return WaystationApplies(card, subject, affected);
             default:
-                return false;
+                return EmperorRemainingCTargetedReactionApplies(card, abilityId, subject, affected); // Emperor Edition remaining-cards pass, group C (issue #492): Snake Tattoo.
         }
     }
 

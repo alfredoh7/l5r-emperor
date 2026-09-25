@@ -29,6 +29,9 @@ public sealed class EmperorRemainingCState
 public static class EmperorRemainingCAbilities
 {
     /// <summary>The Reactions whose card is a Strategy played from a hand "before an action resolves" (see the file comment).</summary>
+    /// <summary>A cost subject naming EVERY card of the ability's performing slot(s): "Bow one or more of your performing ..." (Shadows Walk).</summary>
+    public const string AllPerformingSlots = "all-performing-slots";
+
     public static readonly string[] BeforeActionHandReactions = ["height-courage-negate", "rhetoric-redirect", "solid-defense-negate", "solid-defense-negate-favor"];
 
     public static Dictionary<string, AbilityDefinition> AddEmperorRemainingC(this Dictionary<string, AbilityDefinition> all)
@@ -82,6 +85,50 @@ public static class EmperorRemainingCAbilities
         all["rumors-travel-reduce"] = new("Limited", "Limited: Until your next turn begins, before each time a player gains 1 or more Honor, reduce the gain by 1 if it is not during a battle or Attack Phase", "none");
         all["rumors-travel-move"] = new("Battle", "If any enemy units are at the current battlefield, choose your performing Personality: Move him there. Straighten him if he moved", "none",
             Performer: "own-personality", Move: new(MoveSpec.Performer, MoveSpec.CurrentBattlefield), MovesToBattle: true);
+        // Stay Put (oracle-l5r-7474): "Battle: Choose your performing unbowed Kensai and target an enemy card without attached Weapons or Armor: Bow it. You may attach a Weapon to your Kensai from your
+        // hand, paying all costs but paying 4 less Gold if he is defending." The "may" is three actions sharing one use: without the attach; with it at full price; with it 4 less while he defends
+        // (the discount is not optional, Hailung's shape). The attaching ones name the Weapon first (the primary target, so its Gold cost is the attach's) and the enemy card second.
+        all["stay-put-bow"] = new("Battle", "Choose your performing unbowed Kensai and target an enemy card without attached Weapons or Armor: Bow it", "remc-enemy-card-without-weapon-or-armor",
+            Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeywords: ["Kensai"], UsageKey: "stay-put");
+        all["stay-put-bow-attach"] = new("Battle", "Choose your performing unbowed Kensai and target an enemy card without attached Weapons or Armor: Bow it. Attach a Weapon to your Kensai from your hand, paying all costs", "slots",
+            Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeywords: ["Kensai"], UsageKey: "stay-put", Cost: GoldCostRule.AttachCost(),
+            Attach: new(AttachSource.Target, AttachPile.OwnHand, AttachWielder.Performer, [CardType.Item], ["Weapon"]),
+            Slots: [new("weapon", "attachment-in-discard", "A Weapon in your hand"), new("target", "remc-enemy-card-without-weapon-or-armor", "An enemy card without attached Weapons or Armor")]);
+        all["stay-put-bow-attach-discount"] = new("Battle", "Choose your performing unbowed Kensai and target an enemy card without attached Weapons or Armor: Bow it. Attach a Weapon to your Kensai from your hand, paying all costs and paying 4 less Gold, as he is defending", "slots",
+            Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeywords: ["Kensai"], UsageKey: "stay-put", Cost: GoldCostRule.AttachCost(-4, 0),
+            Attach: new(AttachSource.Target, AttachPile.OwnHand, AttachWielder.Performer, [CardType.Item], ["Weapon"]),
+            Slots: [new("weapon", "attachment-in-discard", "A Weapon in your hand"), new("target", "remc-enemy-card-without-weapon-or-armor", "An enemy card without attached Weapons or Armor")]);
+        // Shadows Walk (oracle-l5r-6676, Fear Ninja): "Open: Bow one or more of your performing Shadowlands Ninja Personalities and target a card without attachments: If the card is an attachment, destroy
+        // it. If it is a Personality with Chi lower than or equal to the number of performers, permanently give him Ninja and Shadowlands and take control of him. Lose 3 Honor." The performers are a
+        // performing slot (Dislodge the Foe's shape) all bowed as the cost; the target is any card in play without attachments.
+        all["shadows-walk-take"] = new("Open", "Bow one or more of your performing Shadowlands Ninja Personalities and target a card without attachments: If the card is an attachment, destroy it. If it is a Personality with Chi lower than or equal to the number of performers, permanently give him Ninja and Shadowlands and take control of him. Lose 3 Honor", "slots",
+            Costs: [new(CostVerb.Bow, EmperorRemainingCAbilities.AllPerformingSlots)],
+            Slots: [new("performers", "remc-own-unbowed-shadowlands-ninja", "Your performing Shadowlands Ninja Personalities", 1, 12, Performing: true), new("target", "remc-card-without-attachments", "A card without attachments")]);
+        // The Fires of War (oracle-l5r-8084, Unique): "Battle/Open: You may use each ability on your Stronghold a second time this turn." -- a mark on the Stronghold read by the per-turn limits (AbilityLimits.cs).
+        all["fires-of-war-second-use"] = new("BattleOrOpen", "You may use each ability on your Stronghold a second time this turn", "none");
+        // Rocky Terrain (oracle-l5r-6374, Terrain): "Before this battle's resolution: You may bow one or two attacking Personalities at the current battlefield." -- Heart of Darkness's before-resolution choice
+        // (ForgottenLegacyBatch4.cs) over the attacking Personalities; the Terrain's own "Battle: If there are no Terrains at the current battlefield: Put this card into play there." is the generic Terrain play rule.
+        all["rocky-terrain-bow"] = new("BeforeResolution", "Before this battle's resolution: You may bow one or two attacking Personalities at the current battlefield", "none", Trigger: "before-battle-resolves");
+        // The Empress' Address (oracle-l5r-8059, Political): "Reaction: After the resolution of an action or a battle that destroyed any of your Personalities in a defending army, bow your performing Courtier or
+        // Empress and target your non-Unique Personality with your Clan alignment in your discard pile: Bring him into play (in your home), ignoring costs. Gain 2 Honor." Two Reactions (an action's and a battle's
+        // resolution) sharing one use; the Personality comes from the dead or discard pile (a discarded Personality is one).
+        all["empress-address-action"] = new("Reaction", "After the resolution of an action that destroyed any of your Personalities in a defending army, bow your performing Courtier or Empress and target your non-Unique Personality with your Clan alignment in your discard pile: Bring him into play (in your home), ignoring costs. Gain 2 Honor",
+            "remc-own-clan-nonunique-discarded-personality", Performer: "own-unbowed-personality-with-any-keyword-at-battle", RequiredKeywords: ["Courtier", "Empress"],
+            Trigger: AfterActionReactionTriggers.AfterActionResolved, UsageKey: "empress-address", Costs: ActionCost.BowPerformer);
+        all["empress-address-battle"] = new("Reaction", "After the resolution of a battle that destroyed any of your Personalities in a defending army, bow your performing Courtier or Empress and target your non-Unique Personality with your Clan alignment in your discard pile: Bring him into play (in your home), ignoring costs. Gain 2 Honor",
+            "remc-own-clan-nonunique-discarded-personality", Performer: "own-unbowed-personality-with-any-keyword-at-battle", RequiredKeywords: ["Courtier", "Empress"],
+            Trigger: ReactionTriggers.AfterBattleResolution, UsageKey: "empress-address", Costs: ActionCost.BowPerformer);
+        // Snake Tattoo (oracle-l5r-7310, Tattoo): "Reaction: After another player's Battle action targets your Tattooed Personality: Move him to an adjacent battlefield. If he is no longer a legal
+        // target for that action, negate its effects." Yurishi's shape (TargetedActionReactions.cs) with the move to a chosen adjacent unresolved battlefield (Flanking Unit's reading of "adjacent"),
+        // played from the hand; the Personality moved is the one the held action targets.
+        all["snake-tattoo-move"] = new("Reaction", "After another player's Battle action targets your Tattooed Personality: Move him to an adjacent battlefield. If he is no longer a legal target for that action, negate its effects", "none",
+            Trigger: ReactionTriggers.TargetedByAction, Move: new(MoveSpec.Target, MoveSpec.AdjacentUnresolved));
+        // Superior Opponent (oracle-l5r-7654, Fear Iaijutsu): "As a Focus Effect: You may destroy an attachment at the current battlefield if your Personality in this duel is there." (a choice among the
+        // attachments there, Crimson Mark's shape: FocusEffectChoice.cs) and "Battle: Choose your performing unbowed Duelist and target an enemy unit: Bow each Follower and Personality in it with equal or
+        // lower Force than your Duelist's Chi." -- the unit is its Personality and his Followers, each judged on its own Force.
+        all["superior-opponent-focus"] = new("FocusEffect", "As a Focus Effect: You may destroy an attachment at the current battlefield if your Personality in this duel is there", "none");
+        all["superior-opponent-bow"] = new("Battle", "Choose your performing unbowed Duelist and target an enemy unit: Bow each Follower and Personality in it with equal or lower Force than your Duelist's Chi", "enemy-unit",
+            Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeywords: ["Duelist"]);
         return all;
     }
 }
@@ -175,7 +222,12 @@ public sealed partial class MatchEngine
             case "rumors-travel-move":
                 Require(_state.CurrentBattleProvince is int rumorsBattle && Army(1 - player.Id, rumorsBattle).Any(), "There are no enemy units at the current battlefield.");
                 break;
-            case "selfless-defense-destroy" when ability.Slots is not null:
+            // Stay Put: the discount applies exactly while the performing Kensai is defending, and is not optional.
+            case "stay-put-bow-attach" when ability.Slots is not null && command.PerformerId is not null:
+                Require(!IsDefendingUnit(Card(command.PerformerId)), "The discounted attach applies while he is defending.");
+                break;
+            case "stay-put-bow-attach-discount" when ability.Slots is not null && command.PerformerId is not null:
+                Require(IsDefendingUnit(Card(command.PerformerId)), "The discount applies only while he is defending.");
                 break;
         }
     }
@@ -189,6 +241,12 @@ public sealed partial class MatchEngine
         return category switch
         {
             // Selfless Defense: "one or more of your Courtier or Shugenja Personalities" -- not the Yojimbo destroyed as the cost.
+            // Stay Put: "an enemy card without attached Weapons or Armor" -- a Personality, or a Follower, Item or Spell, of the enemy's, none of whose attachments is a Weapon or an Armor.
+            "remc-enemy-card-without-weapon-or-armor" => !own && (personality || target.Zone == Zone.Attached && type is CardType.Follower or CardType.Item or CardType.Spell)
+                && !Attachments(target.Id).Any(a => Keyword(a, "Weapon") || Keyword(a, "Armor")),
+            // Shadows Walk: "your performing Shadowlands Ninja Personalities" (unbowed: bowing them is the cost; Shadowlands as a Clan alignment or as the keyword the action itself grants), and "a card without attachments".
+            "remc-own-unbowed-shadowlands-ninja" => personality && own && !target.Bowed && (HasClanAffiliation(target, "Shadowlands") || Keyword(target, "Shadowlands")) && Keyword(target, "Ninja"),
+            "remc-card-without-attachments" => !HasAttachments(target),
             "remc-own-courtier-or-shugenja-other-than-performer" => personality && own && (Keyword(target, "Courtier") || Keyword(target, "Shugenja")) && target.Id != command.PerformerId,
             _ => false
         };
@@ -271,9 +329,152 @@ public sealed partial class MatchEngine
                 if (!wasAtBattle && AtBattle(performer)) Straighten(performer);
                 return false;
             }
+            case "stay-put-bow":
+                if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
+                return false;
+            // The enemy card is bowed, then the Weapon (the action's primary target) is attached to the performing Kensai; an entering-play window ends the action here.
+            case "stay-put-bow-attach":
+            case "stay-put-bow-attach-discount":
+            {
+                if (SlotCards(command, "target").FirstOrDefault() is { } bowed && InPlay(bowed) && !StalwartNegatesBow(bowed, player.Id)) bowed.Bowed = true;
+                var opened = ExecuteAttach(command, ability.Attach!, player, source, target);
+                if (opened) SpendHandPlayedCard(player, source);
+                return opened;
+            }
+            case "shadows-walk-take":
+            {
+                var performers = PerformingSlotCards(command, ability).Count();
+                if (target!.Zone == Zone.Attached && Definition(target).Type is CardType.Follower or CardType.Item or CardType.Spell) DestroyAttachment(target);
+                else if (Definition(target).Type == CardType.Personality && InPlay(target) && PersonalityChi(target) <= performers)
+                {
+                    GrantKeyword(target, "Ninja", id, GrantDuration.Permanent);
+                    GrantKeyword(target, "Shadowlands", id, GrantDuration.Permanent);
+                    TakeControlOfPersonality(target, player.Id, Definition(source!).Name);
+                }
+                GainHonor(player.Id, -3, Definition(source!).Name, source);
+                return false;
+            }
+            case "fires-of-war-second-use":
+                Card(player.StrongholdId).AbilityUses[SecondUseKey] = _state.TurnNumber;
+                Emit("secondUseGranted", $"{Definition(source!).Name}: each ability on {player.Name}'s Stronghold may be used a second time this turn.", player.Id, source!.Id);
+                return false;
+            // The Empress' Address: the Personality returns to his controller's home, ignoring costs, and its player gains 2 Honor once he is in play.
+            case "empress-address-action":
+            case "empress-address-battle":
+                return BringDeadPersonalityIntoPlay(player, target!, Definition(source!).Name, null, _ => GainHonor(player.Id, 2, Definition(source!).Name, source));
+            // Snake Tattoo: the Personality the action targets moves to the chosen adjacent battlefield; if he is then no longer a legal target the action's effects on him are negated.
+            case "snake-tattoo-move":
+            {
+                var held = HeldAction();
+                var moving = Card(held.TargetId!);
+                MoveByRule(moving, ability.Move!, command.Province);
+                RecheckTarget(held, moving);
+                return false;
+            }
+            case "superior-opponent-bow":
+            {
+                var chi = PersonalityChi(Card(command.PerformerId!));
+                foreach (var member in UnitMembers(target!).Where(m => Definition(m).Type is CardType.Personality or CardType.Follower && CardForce(m) <= chi).ToArray())
+                    if (InPlay(member) && !StalwartNegatesBow(member, player.Id)) member.Bowed = true;
+                return false;
+            }
             default:
                 return null;
         }
+    }
+
+    // TargetedActionReactionApplies' fallback (this group's targeted-by-action Reactions).
+    private bool EmperorRemainingCTargetedReactionApplies(CardInstance card, string abilityId, ReactionSubject subject, CardInstance affected)
+    {
+        var command = subject.Command;
+        switch (abilityId)
+        {
+            // Snake Tattoo: another player's Battle action targets a Tattooed Personality of the reactor's, who stands at the battlefield with an adjacent one to go to.
+            case "snake-tattoo-move":
+                return command.PlayerId != card.OwnerId && IsBattleAction(command) && affected.OwnerId == card.OwnerId && Definition(affected).Type == CardType.Personality
+                    && Keyword(affected, "Tattooed") && affected.Zone == Zone.Battlefield && MoveDestinations(AbilityCatalog.All[abilityId].Move!).Length > 0;
+            default:
+                return false;
+        }
+    }
+
+    // ---- control of a Personality in play (Shadows Walk) ------------------------------------------------------------------------------------------------------------
+
+    // "Take control of him": a Personality (and, an attachment always being controlled by its Personality's controller, his unit) changes controller. Loyal (a Personality of another Clan) and
+    // Unique/Singular (a card sharing a title with one the new controller already controls) refuse it, as they refuse any way of gaining control; an attachment of the unit the new controller
+    // already has a copy of is discarded. The real owner is remembered (CardInstance.OriginalOwnerId) and every card returns to its owner's piles when it leaves play (TakeControl). A Personality at a
+    // battlefield is then on the new controller's side (a card's side is its controller's), one at home in the new controller's home. Returns whether control changed.
+    private bool TakeControlOfPersonality(CardInstance personality, int controllerId, string via)
+    {
+        if (personality.OwnerId == controllerId || !InPlay(personality) || Definition(personality).Type != CardType.Personality) return false;
+        var name = Definition(personality).Name;
+        if (!LoyaltyAllowsControl(personality, Player(controllerId).Clan, controllerId))
+        {
+            Emit("controlRefused", $"{via}: {name} is Loyal and cannot be controlled by {Player(controllerId).Name}.", controllerId, personality.Id);
+            return false;
+        }
+        if ((Keyword(personality, "Unique") || Keyword(personality, "Singular")) && ControlsCopyOf(controllerId, Definition(personality).Name))
+        {
+            Emit("controlRefused", $"{via}: {Player(controllerId).Name} already controls a {name}.", controllerId, personality.Id);
+            return false;
+        }
+        TakeControl(personality, controllerId);
+        foreach (var attachment in Attachments(personality.Id).ToArray())
+        {
+            if ((Keyword(attachment, "Unique") || Keyword(attachment, "Singular")) && _state.Cards.Values.Any(c => c.OwnerId == controllerId && InPlay(c) && c.Id != attachment.Id && Definition(c).Name == Definition(attachment).Name))
+            {
+                DestroyAttachment(attachment);
+                continue;
+            }
+            TakeControl(attachment, controllerId);
+        }
+        return true;
+    }
+
+    // ---- The Fires of War: a second use of every Stronghold ability ---------------------------------------------------------------------------------------------------
+
+    /// <summary>The mark on a Stronghold (its AbilityUses) that lets each of its abilities be used one more time on the turn it names.</summary>
+    internal const string SecondUseKey = "fires-of-war:second-use";
+
+    // ---- Rocky Terrain ------------------------------------------------------------------------------------------------------------------------------------------------
+
+    // "Attacking Personalities at the current battlefield": the Attacker's Personalities there; a bowed one is not offered (bowing it again would do nothing), as Heart of Darkness offers none.
+    private IEnumerable<CardInstance> RockyTerrainCandidates(int provinceIndex) =>
+        _state.Cards.Values.Where(c => !c.Bowed && Definition(c).Type == CardType.Personality && c.Zone == Zone.Battlefield && c.ProvinceIndex == provinceIndex && c.OwnerId == _state.ActivePlayerId)
+            .OrderBy(c => c.Id, StringComparer.Ordinal);
+
+    // ---- The Empress' Address ---------------------------------------------------------------------------------------------------------------------------------------------
+
+    // AfterActionResolvedApplies' fallback: the action destroyed a Personality of the reactor's that stood in a DEFENDING army (at a battlefield, on the side that is not the Attacker's).
+    private bool EmperorRemainingCAfterActionApplies(string abilityId, ResolvedActionFacts facts, int playerId) => abilityId switch
+    {
+        "empress-address-action" => playerId != _state.ActivePlayerId && facts.Affected.Any(a => a.Kind == DestroyedKind && a.FromBattlefield is not null && Card(a.CardId) is { } destroyed
+            && destroyed.OwnerId == playerId && Definition(destroyed).Type == CardType.Personality),
+        _ => false
+    };
+
+    // A battle's resolution destroyed one of the reactor's Personalities in the defending army: the reactor is the Defender and the Attacker's army destroyed some of its units (every unit is led by a Personality).
+    private bool EmpressAddressBattleApplies(PendingAfterResolution facts, int playerId) => facts.Attacker != playerId && facts.DestroyedEnemyUnits[facts.Attacker] > 0;
+
+    private static bool IsEmperorRemainingCOutOfPlayTarget(string category) => category == "remc-own-clan-nonunique-discarded-personality";
+
+    private bool EmperorRemainingCOutOfPlayTargetAllows(string category, PlayerState player, CardInstance target) =>
+        category == "remc-own-clan-nonunique-discarded-personality" && Definition(target).Type == CardType.Personality && target.OwnerId == player.Id && IsDiscardedPersonality(target)
+            && !Keyword(target, "Unique") && HasClanAffiliation(target, player.Clan);
+
+    private IEnumerable<CardInstance> EmperorRemainingCOutOfPlayCandidates(string category, int playerId) =>
+        _state.Cards.Values.Where(c => EmperorRemainingCOutOfPlayTargetAllows(category, Player(playerId), c)).OrderBy(c => c.Id, StringComparer.Ordinal);
+
+    // ---- Superior Opponent's Focus Effect ---------------------------------------------------------------------------------------------------------------------------
+
+    // The attachments "at the current battlefield" (on a unit standing there, either player's), when the focusing player's Personality in the duel is there.
+    private List<string> SuperiorOpponentCandidates(int playerId)
+    {
+        if (_state.PendingDuel is not { } duel || _state.CurrentBattleProvince is not int province) return [];
+        var mine = new[] { duel.ChallengerId, duel.ChallengedId }.Select(Card).FirstOrDefault(c => c.OwnerId == playerId);
+        if (mine is not { Zone: Zone.Battlefield } || mine.ProvinceIndex != province) return [];
+        return _state.Cards.Values.Where(a => a.Zone == Zone.Attached && a.AttachedTo is { } hostId && _state.Cards.TryGetValue(hostId, out var host) && host.Zone == Zone.Battlefield && host.ProvinceIndex == province)
+            .Select(a => a.Id).Order(StringComparer.Ordinal).ToList();
     }
 
     // ---- The additional action a named Personality must perform (Spinning Heel Kick) ------------------------------------------------------------------------------------

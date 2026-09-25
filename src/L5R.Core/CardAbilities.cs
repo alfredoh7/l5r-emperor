@@ -4311,7 +4311,7 @@ public sealed partial class MatchEngine
         // Emperor Edition Personality pass (issue #477), batch 6: Nishimura bows its target.
         or "nishimura-bow"
         // Emperor Edition remaining-cards pass, group C (issue #492): Selfless Defense and Summoned to Justice bow their target (once moved / if a Courtier or Shugenja is controlled).
-        or "selfless-defense-move" or "summoned-justice-move";
+        or "selfless-defense-move" or "summoned-justice-move" or "superior-opponent-bow" or "stay-put-bow" or "stay-put-bow-attach" or "stay-put-bow-attach-discount";
     // Whether the command's TargetId is an Attack's OWN target, which reacts through the separate attackReaction
     // window instead of this one: an Attack-classified ability whose Target category is "attack". Bayushi Kahoku
     // - exp (issue #313) is Attack-classified too, but its TargetId is the separate "-4F" target (an ordinary
@@ -4510,7 +4510,7 @@ public sealed partial class MatchEngine
         // Emperor Edition Personality pass (issue #477), batch 6: Yasuki Jekku's controller-of-the-target Honor loss.
         or "jekku-dishonor"
         // Emperor Edition remaining-cards pass, group C (issue #492): Summoned to Justice makes the dishonorable target's controller lose Honor.
-        or "summoned-justice-move";
+        or "summoned-justice-move" or "shadows-walk-take";
     private bool ControlsDishonorablePersonality(int playerId) => _state.Cards.Values.Any(c => c.OwnerId == playerId && InPlay(c) && Definition(c).Type == CardType.Personality && c.Dishonorable);
     // Gate for whether the window is even worth opening -- "if [neither a Dishonorable Personality
     // nor an Honor loss] occurs, do not trigger the reaction interrupt" (the user's own ruling).
@@ -6337,6 +6337,9 @@ public sealed partial class MatchEngine
                 // The Shadow's Embrace pass (issue #476), batch 2: Shinjo Min-Hee's Follower in a discard pile or in hand (ShadowsEmbraceBatch2.cs).
                 else if (IsShadowsEmbraceBatch2OutOfPlayTarget(ability.Target))
                     ValidateShadowsEmbraceBatch2OutOfPlayTarget(ability.Target, player, target);
+                // Emperor Edition remaining-cards pass, group C (issue #492): The Empress' Address's "your non-Unique Personality with your Clan alignment in your discard pile".
+                else if (IsEmperorRemainingCOutOfPlayTarget(ability.Target))
+                    Require(EmperorRemainingCOutOfPlayTargetAllows(ability.Target, player, target), "Choose a non-Unique Personality with your Clan alignment in your discard pile.");
                 else
                 {
                     Require(InPlay(target), "Target a card in play.");
@@ -10715,6 +10718,7 @@ public sealed partial class MatchEngine
                     // The Shadow's Embrace pass (issue #476), batch 6: the two out-of-play categories.
                     "face-up-personality-in-province" => _state.Cards.Values.Where(c => Definition(c).Type == CardType.Personality && c.Zone == Zone.Province && c.FaceUp).Select(c => (string?)c.Id).ToArray(),
                     "own-card-in-discard" => _state.Cards.Values.Where(c => c.OwnerId == playerId && c.Zone is Zone.FateDiscard or Zone.DynastyDiscard or Zone.Dead).Select(c => (string?)c.Id).ToArray(),
+                    "remc-own-clan-nonunique-discarded-personality" => EmperorRemainingCOutOfPlayCandidates(ability.Target, playerId).Select(c => (string?)c.Id).ToArray(), // issue #492, group C: The Empress' Address
                     _ => inPlay };
                 // Shosuro Hawado's battlefield half also needs its destination (command.Province): one
                 // candidate per battlefield not yet resolved this Battle phase -- ValidateAbility below

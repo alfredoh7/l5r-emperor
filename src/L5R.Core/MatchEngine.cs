@@ -1482,6 +1482,11 @@ public sealed partial class MatchEngine
                 _state.PendingChoice=new("beforeBattleOptional",source.OwnerId,source.Id,$"Before this battle resolves: choose and bow zero to two cards at this battlefield with 4 or greater Force ({Definition(source).Name}).");
                 _state.PriorityPlayerId=source.OwnerId;
                 return;
+            // Rocky Terrain (Emperor Edition remaining-cards pass, group C, issue #492): the same choice over the attacking Personalities (EmperorRemainingC.cs).
+            case "rocky-terrain-bow":
+                _state.PendingChoice=new("beforeBattleOptional",source.OwnerId,source.Id,$"Before this battle resolves: you may bow one or two attacking Personalities at this battlefield ({Definition(source).Name}).");
+                _state.PriorityPlayerId=source.OwnerId;
+                return;
             // Fields of Victory (The Shadow's Embrace pass, issue #476 batch 3; ShadowsEmbraceBatch3.cs): mandatory, read now.
             case "fields-of-victory-zero": FieldsOfVictory(source,pending); break;
         }
@@ -2510,12 +2515,13 @@ public sealed partial class MatchEngine
                 Emit("destructionNegated",$"{Definition(card).Name}'s destruction was negated by Fields of Mercy (attachments were still destroyed).",card.OwnerId,card.Id);
                 continue;
             }
+            var destroyedFrom=card.Zone==Zone.Battlefield ? card.ProvinceIndex : null; // Emperor Edition remaining-cards pass, group C (issue #492): where he stood, for "in a defending army" (The Empress' Address).
             card.ProvinceIndex=null;
             MarkDead(card);
             count++;
             // Action-effect tracking (issue #437): only ever recorded when this destruction came from a specific action (actingPlayerId is set) --
             // never for the mass casualty sweep a battle's own resolution performs directly (see the comment above on IsCreatedCard's own check).
-            if(actingPlayerId is not null) RecordActionEffect(card.Id,DestroyedKind);
+            if(actingPlayerId is not null) RecordActionEffect(card.Id,DestroyedKind,fromBattlefield:destroyedFrom);
             // The destruction itself, and everything it normally triggers (the Dishonorable-death
             // penalty MarkDead already applied above, ExpendableDraw, DestroyedDuringBattleBonus,
             // Overconfident), still fully happens -- Lady Matsu's Rage only overrides where the
