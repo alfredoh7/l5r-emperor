@@ -292,9 +292,10 @@ public sealed partial class MatchEngine
     {
         var duel = _state.PendingDuel!;
         var challenger = Card(duel.ChallengerId); var challenged = Card(duel.ChallengedId);
-        // Duel to First Blood (The Shadow's Embrace pass, issue #476 batch 3): its Focus Effect, "Give +1 Focus Value to each of your focused cards", resolves before the totals (FirstBloodFocusBonus).
-        var challengerTotal = DuelStatValue(challenger, duel.Stat) + duel.ChallengerFocused.Sum(id => Definition(Card(id)).Focus) + FirstBloodFocusBonus(duel.ChallengerFocused);
-        var challengedTotal = DuelStatValue(challenged, duel.Stat) + duel.ChallengedFocused.Sum(id => Definition(Card(id)).Focus) + FirstBloodFocusBonus(duel.ChallengedFocused);
+        // The Focus Effects that adjust Focus Values resolve before the totals, in the duel's Focus Effect order (issue #498, EmperorFollowupsDuel.cs): Duel to First Blood's "+1 Focus Value to each of your
+        // focused cards" (The Shadow's Embrace pass, issue #476 batch 3) and Rend the Soul's "Raise this card's Focus Value to 5".
+        var challengerTotal = DuelStatValue(challenger, duel.Stat) + FocusedTotal(duel, duel.ChallengerFocused);
+        var challengedTotal = DuelStatValue(challenged, duel.Stat) + FocusedTotal(duel, duel.ChallengedFocused);
         string? winnerId; List<string> loserIds;
         var resolutionReason = "Higher duel total";
         if (challengerTotal > challengedTotal) { winnerId = duel.ChallengerId; loserIds = [duel.ChallengedId]; }
@@ -308,9 +309,14 @@ public sealed partial class MatchEngine
             else if (challengedDuelist && !challengerDuelist) { winnerId = duel.ChallengedId; loserIds = [duel.ChallengerId]; }
             else { winnerId = null; loserIds = [duel.ChallengerId, duel.ChallengedId]; resolutionReason = "Equal totals · both lose"; }
         }
+        // Rend the Soul (issue #498): "If your Personality wins this duel, he loses instead (the other Personality still also loses)" -- the duel becomes a tie (no winner, both lose), before anything
+        // that asks who lost (the R2 delays, Honor Never Falls), the duel's own outcome and the other Focus Effects.
+        var rendOfWinner = winnerId is null ? null : RendTheSoulOfWinner(duel, winnerId);
+        if (rendOfWinner is not null) { winnerId = null; loserIds = [duel.ChallengerId, duel.ChallengedId]; resolutionReason = "Rend the Soul · the winner loses too"; }
         // The shared delay mechanism (issue #492, EmperorRulingR2Cards.cs): "You may choose (now) to delay the effects of losing this duel ..." is answered before the outcome applies.
         if (BeginDuelLossDelayDecisions(duel, loserIds)) return;
         var resultStart = _state.Events.Count;
+        if (rendOfWinner is not null) Emit("duelWinnerLoses", $"{Definition(rendOfWinner).Name}: {Player(rendOfWinner.OwnerId).Name}'s Personality won the duel, so he loses instead; the other Personality still also loses.", rendOfWinner.OwnerId, rendOfWinner.Id);
         var strengthsBefore = _state.Players.SelectMany(p => p.Provinces.Select(v => new DuelProvince(p.Id, v.Index, EffectiveProvinceStrength(v), EffectiveProvinceStrength(v)))).ToArray();
         var challengerStat = DuelStatValue(challenger, duel.Stat);
         var challengedStat = DuelStatValue(challenged, duel.Stat);

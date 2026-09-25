@@ -658,6 +658,10 @@ public static class CardCatalog
             .Concat(PublishedContent.StrategyWave65.Cards) // Emperor Edition three-scans pass (issue #496): Honor Never Falls
             .Concat(PublishedContent.CelestialWave9.Cards) // Emperor Edition three-scans pass (issue #496): Kurohito's Perfection
             .Concat(PublishedContent.PersonalityWave79.Cards) // Emperor Edition three-scans pass (issue #496): Makito
+            .Concat(PublishedContent.StrategyWave66.Cards) // Emperor Edition follow-ups (issue #498): Rend the Soul, No Hiding Place
+            .Concat(PublishedContent.FollowerWave32.Cards) // Emperor Edition follow-ups (issue #498): Enslaved Djinn
+            .Concat(PublishedContent.ItemWave17.Cards) // Emperor Edition follow-ups (issue #498): Celestial Sword of the Dragon - exp
+            .Concat(PublishedContent.PersonalityWave80.Cards) // Emperor Edition follow-ups (issue #498): Asako Chukage
             .ToDictionary(c => c.Id, StringComparer.Ordinal);
     }
 }

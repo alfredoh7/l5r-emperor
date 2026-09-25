@@ -162,8 +162,7 @@ public sealed partial class MatchEngine
             {
                 ApplyModifier(target!, source!.Id, id, "Force", -CardForce(target!));
                 if (!InPlay(target!) || !EffectConditionMet(id, target)) return false;
-                CardInstance[] candidates = !HasAttachments(target!) ? [target!]
-                    : Attachments(target!.Id).Where(a => Definition(a).Type == CardType.Follower && !HasAttachments(a)).OrderBy(a => a.Id, StringComparer.Ordinal).ToArray();
+                var candidates = UnitCardsWithoutAttachments(target!); // Makito's reading (issue #498): any card of the unit without attachments, not only Followers.
                 var options = candidates.Select(c => new EffectOption(c.Id, $"Destroy {Definition(c).Name}", [Batch1DestroyCardEffect + c.Id])).ToArray();
                 return BeginListedEffectChoice(command, options, $"{Definition(source).Name}: choose the card without attachments in {Definition(target!).Name}'s unit to destroy.",
                     consumedGrant, playedFromDiscard, opponentHonorBefore, bowedBefore, preExistingGrants);

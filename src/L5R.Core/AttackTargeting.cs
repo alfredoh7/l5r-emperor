@@ -171,7 +171,8 @@ public sealed partial class MatchEngine
     private void RequireLegalAttackTarget(string id, AbilityDefinition ability, GameCommand command, PlayerState player, CardInstance? source, CardInstance target,
         string? forcePenaltyTargetId = null, int forcePenalty = 0)
     {
-        Require(InPlay(target) && AtBattle(target) && target.OwnerId != player.Id, "Target a card in the current enemy army.");
+        // No Hiding Place (issue #498): "That Ranged Attack may target a card in the Defender's home (if otherwise legal)" -- every other rule below still applies.
+        Require(InPlay(target) && (AtBattle(target) || MayTargetInDefendersHome(command, target)) && target.OwnerId != player.Id, "Target a card in the current enemy army.");
         var type = Definition(target).Type;
         // Core rules: a Personality with an attached FOLLOWER is immune to a Ranged/Melee Attack (attack the
         // Follower instead), unless the Attack is explicitly allowed to target one -- an exception printed

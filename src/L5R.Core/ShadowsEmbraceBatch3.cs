@@ -75,9 +75,8 @@ public sealed partial class MatchEngine
     // Deep Roots.
     private bool DeepRooted(CardInstance card) => card.DeepRootsTurn == _state.TurnNumber;
 
-    // Duel to First Blood's Focus Effect: each of its copies among a side's focused cards gives every one of that side's focused cards +1 Focus Value.
-    private int FirstBloodFocusBonus(List<string> focused) =>
-        focused.Count(id => (Definition(Card(id)).Abilities ?? []).Contains("first-blood-focus")) * focused.Count;
+    // Duel to First Blood's Focus Effect: each of its copies among a side's focused cards gives every one of that side's focused cards +1 Focus Value -- applied with the other Focus Value effects, in the
+    // duel's Focus Effect order (DuelFocusValues, EmperorFollowupsDuel.cs, issue #498).
 
     private int RingsControlled(int playerId) => _state.Cards.Values.Count(c => c.OwnerId == playerId && InPlay(c) && Definition(c).Type == CardType.Ring);
 

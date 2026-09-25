@@ -33,6 +33,9 @@ public static class SearchDeck
     /// <summary>The searcher's own Dynasty discard pile, the dead Personalities included (Emperor Edition remaining-cards pass, issue #492: I Give You My Name's "Dynasty deck or discard pile", Shinjo's
     /// Guidance's "discard pile, then Dynasty deck"). A public pile, listed like a deck, never shuffled; a card taken from it leaves it by changing zone.</summary>
     public const string DynastyDiscard = "DynastyDiscard";
+    /// <summary>The searcher's own hand (Emperor Edition follow-ups, issue #498: Asako Chukage's "search your discard pile, then hand, then deck"). Known to its owner, listed like a discard pile, never
+    /// shuffled; a card taken from it leaves the hand by changing zone (put into play), or simply stays there (put into the hand).</summary>
+    public const string Hand = "Hand";
 }
 
 /// <summary>What happens to the chosen card once it has been shown (the card's own printed effect).</summary>
@@ -59,6 +62,9 @@ public static class SearchEffect
     public const string PutIntoPlay = "put-into-play";
     /// <summary>Shinjo's Guidance (issue #492): "put her into one of your provinces, face-up, discarding the card that was there" -- the searcher picks the province.</summary>
     public const string ToProvinceFaceUp = "to-province-face-up";
+    /// <summary>Celestial Sword of the Dragon, Asako Chukage (issue #498): "Put it into play or your hand" -- the searcher chooses (SearchStage.ChooseDestination); a Ring put into play by the search enters
+    /// through the Ring entry path marked so it does not count towards an Enlightenment Victory while it remains in play (EmperorFollowupsSearch.cs).</summary>
+    public const string RingIntoPlayOrHand = "ring-into-play-or-hand";
 }
 
 /// <summary>The stage a pending search is in; also names which PendingChoice type is open.</summary>
@@ -69,6 +75,7 @@ public static class SearchStage
     public const string ChooseProvince = "ChooseProvince";   // PendingChoice "searchRegionProvince"
     public const string ChooseDiscard = "ChooseDiscard";     // PendingChoice "searchDiscard"
     public const string ChoosePayment = "ChoosePayment";     // PendingChoice "searchRecruitPay" (issue #476 batch 6, Versatile Farm)
+    public const string ChooseDestination = "ChooseDestination"; // PendingChoice "searchDestination" (issue #498: "put it into play or your hand")
 }
 
 /// <summary>One numeric condition on a candidate card (Focus Value, Gold Cost, ...). Stat is one of
@@ -172,6 +179,7 @@ public static class SearchCatalog
     public static IReadOnlyDictionary<string, SearchSpec> All { get; } = new[] { IkomaShizuka, ImperialGift, TrainingCheap, TrainingFocus, TrainingOptional, NakaMahatsu, YungRing,
             DiscoveringTheTemple, VersatileFarm, Introspection, MartialInstruction, MeetingTheKeepers, SacrificeOfPawns, EmperorRemainingFSearches.RefugeOfTheThreeSisters }
         .Concat(EmperorRemainingESearches.All) // Emperor Edition remaining-cards pass (issue #492), group E: EmperorRemainingE.cs.
+        .Concat(EmperorFollowupsSearches.All) // Emperor Edition follow-ups (issue #498): EmperorFollowupsSearch.cs.
         .ToDictionary(s => s.Id, StringComparer.Ordinal);
 
     /// <summary>The search an Event carries in its Effect (an Event has no abilities of its own to hang a spec on).</summary>
@@ -213,6 +221,8 @@ public sealed class PendingSearch
     /// <summary>Emperor Edition remaining-cards pass (issue #492), group F (Refuge of the Three Sisters: "a card with a lower Focus Value than your Personality's Chi"): a card qualifies only with a
     /// printed Focus Value below this, read off the Personality when the action was taken. Null for every other search.</summary>
     public int? FocusBelow { get; set; }
+    /// <summary>Emperor Edition follow-ups (issue #498): an "entry" search (an "After this card enters play" trait queued behind the entry windows) hands priority back to this player when it ends.</summary>
+    public int? ResumeTo { get; set; }
 }
 
 /// <summary>One entry of the public, append-only record of cards shown to the other player. Deliberately holds
@@ -246,7 +256,7 @@ public sealed partial class MatchEngine
     /// <summary>The Choice of a "passSearch" that ends an ordered search where no card qualified, instead of going on to the next place.</summary>
     public const string SearchStopChoice = "stop";
 
-    private static bool IsSearchChoice(string type) => type is "searchDeck" or "searchSelect" or "searchRegionProvince" or "searchDiscard" or "searchRecruitPay";
+    private static bool IsSearchChoice(string type) => type is "searchDeck" or "searchSelect" or "searchRegionProvince" or "searchDiscard" or "searchRecruitPay" or "searchDestination";
 
     private sealed record SearchGroup(string DefinitionId, CardInstance Card, int Count, bool Eligible, string? Reason);
 
@@ -259,11 +269,12 @@ public sealed partial class MatchEngine
         SearchDeck.Dynasty => player.DynastyDeck,
         SearchDeck.FateDiscard => _state.Cards.Values.Where(c => c.OwnerId == player.Id && c.Zone == Zone.FateDiscard).OrderBy(c => c.Id, StringComparer.Ordinal).Select(c => c.Id).ToList(),
         SearchDeck.DynastyDiscard => _state.Cards.Values.Where(c => c.OwnerId == player.Id && c.Zone is Zone.DynastyDiscard or Zone.Dead).OrderBy(c => c.Id, StringComparer.Ordinal).Select(c => c.Id).ToList(),
+        SearchDeck.Hand => player.Hand.ToList(), // issue #498: a copy, like a discard pile's -- a card leaves the hand by changing zone
         _ => player.FateDeck
     };
 
     // "your Fate deck" / "your Fate discard pile": how a searched place is named in prompts and the log.
-    private static string SearchPlace(string deck) => deck == SearchDeck.FateDiscard ? "Fate discard pile" : deck == SearchDeck.DynastyDiscard ? "Dynasty discard pile" : $"{deck} deck";
+    private static string SearchPlace(string deck) => deck == SearchDeck.FateDiscard ? "Fate discard pile" : deck == SearchDeck.DynastyDiscard ? "Dynasty discard pile" : deck == SearchDeck.Hand ? "hand" : $"{deck} deck";
 
     private SearchSpec SearchSpecOf(PendingSearch search) => SearchCatalog.All.TryGetValue(search.SearchId, out var spec) ? spec
         : throw new RuleViolation("Unknown search.");
@@ -311,6 +322,7 @@ public sealed partial class MatchEngine
             case SearchStage.ChooseProvince: ChooseSearchRegionProvince(search, command); break;
             case SearchStage.ChooseDiscard: ChooseSearchDiscard(search, command); break;
             case SearchStage.ChoosePayment: ChooseSearchRecruitPayment(search, command); break; // ShadowsEmbraceBatch6.cs
+            case SearchStage.ChooseDestination: ChooseSearchDestination(search, command); break; // EmperorFollowupsSearch.cs (issue #498)
             default: throw new RuleViolation("Unknown search stage.");
         }
     }
@@ -399,6 +411,10 @@ public sealed partial class MatchEngine
             case SearchEffect.ToProvinceFaceUp:
                 BeginSearchProvincePlacement(search, card);
                 break;
+            // Emperor Edition follow-ups (issue #498): "Put it into play or your hand" (EmperorFollowupsSearch.cs).
+            case SearchEffect.RingIntoPlayOrHand:
+                BeginSearchDestination(search, card);
+                break;
             default: throw new RuleViolation("Unknown search effect.");
         }
     }
@@ -420,6 +436,7 @@ public sealed partial class MatchEngine
     private void MoveSearchedCardToHand(PendingSearch search, CardInstance card)
     {
         var player = Player(search.PlayerId);
+        if (search.Deck == SearchDeck.Hand) { Emit("searchToHand", $"{player.Name} kept {Definition(card).Name} in their hand.", player.Id); return; } // issue #498: it is already there
         SearchDeckList(player, search.Deck!).Remove(card.Id);
         card.Zone = Zone.Hand; player.Hand.Add(card.Id); NoteCardIntoHand(player.Id); // Isawa Kimi - exp 2 (issue #477, batch 5)
         Emit("searchToHand", $"{player.Name} put {Definition(card).Name} into their hand.", player.Id);
@@ -506,6 +523,8 @@ public sealed partial class MatchEngine
             _state.PendingChoice = null;
             if (OpenRecruitEntryWindows(Player(search.PlayerId), Card(enteredId), false, null)) return;
         }
+        // Emperor Edition follow-ups (issue #498): an "After this card enters play" search hands priority back where its entry left it (EmperorFollowupsSearch.cs).
+        if (search.Origin == EntrySearchOrigin) { _state.PendingChoice = null; ResumeAfterDeferredWindow(search.ResumeTo ?? search.PlayerId); return; }
         FinishDeferredAction(search.PlayerId, search.Origin, search.SourceCardId, search.BowedBefore);
     }
 
@@ -541,7 +560,7 @@ public sealed partial class MatchEngine
     /// server restart. Announces only that it happened.</summary>
     private void ShuffleDeck(PlayerState player, string deck)
     {
-        if (deck is SearchDeck.FateDiscard or SearchDeck.DynastyDiscard) return; // a discard pile is not shuffled (issue #476 batch 6)
+        if (deck is SearchDeck.FateDiscard or SearchDeck.DynastyDiscard or SearchDeck.Hand) return; // a discard pile is not shuffled (issue #476 batch 6), nor is a hand (issue #498)
         var random = new StableRandom(_state.RngState);
         random.Shuffle(SearchDeckList(player, deck));
         _state.RngState = random.State;
@@ -673,6 +692,9 @@ public sealed partial class MatchEngine
                 break;
             case SearchStage.ChoosePayment:
                 foreach (var option in SearchRecruitPaymentActions(search, playerId)) yield return option; // ShadowsEmbraceBatch6.cs
+                break;
+            case SearchStage.ChooseDestination:
+                foreach (var option in SearchDestinationActions(search, playerId)) yield return option; // EmperorFollowupsSearch.cs (issue #498)
                 break;
         }
     }

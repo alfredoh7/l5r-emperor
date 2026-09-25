@@ -65,10 +65,10 @@ public sealed partial class MatchEngine
     {
         var ranged = ability.Timing == "Battle" && AttackKind(command.AbilityId!) == "Ranged";
         var thunder = ThunderBattleAction(command, ability);
-        if (!ranged && !thunder) return null;
-        return _state.Cards.Values.FirstOrDefault(c => c.OwnerId == command.PlayerId && InPlay(c) && !c.Bowed
+        var inPlay = !ranged && !thunder ? null : _state.Cards.Values.FirstOrDefault(c => c.OwnerId == command.PlayerId && InPlay(c) && !c.Bowed
             && AbilityIdsOf(c).Any(a => AbilityCatalog.All.TryGetValue(a, out var d) && d.Timing == "Reaction"
                 && (ranged && d.Trigger == "own-ranged-action-announced" && AtBattle(c) || thunder && d.Trigger == TorchAnnounceTrigger && Unspent(c, a))));
+        return inPlay ?? NoHidingPlaceWatcher(command); // No Hiding Place (issue #498): a Strategy in the announcing player's hand (EmperorFollowupsAttack.cs).
     }
 
     // The rest of an announced action once its announce window has closed (Suitengu's Torch, Tsuruchi Yakusho): the "before an action resolves" windows every announced action

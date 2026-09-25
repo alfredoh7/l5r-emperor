@@ -148,8 +148,7 @@ public sealed partial class MatchEngine
                     BowUnitByEffect(target!, player.Id);
                     return false;
                 }
-                CardInstance[] candidates = !HasAttachments(target!) ? [target!]
-                    : Attachments(target!.Id).Where(a => Definition(a).Type == CardType.Follower && !HasAttachments(a)).OrderBy(a => a.Id, StringComparer.Ordinal).ToArray();
+                var candidates = UnitCardsWithoutAttachments(target!); // Makito's reading (issue #498): any card of the unit without attachments, not only Followers.
                 var options = candidates.Select(c => new EffectOption(c.Id, $"Bow {Definition(c).Name}", [Se1BowCardEffect + c.Id])).ToArray();
                 return BeginShadowsEmbraceBatch1Choice(command, options, $"{name}: choose the card without attachments in {Definition(target!).Name}'s unit to bow.",
                     consumedGrant, playedFromDiscard, opponentHonorBefore, bowedBefore, preExistingGrants);

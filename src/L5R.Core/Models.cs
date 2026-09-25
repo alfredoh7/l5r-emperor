@@ -1160,6 +1160,12 @@ public sealed class MatchState
     public Dictionary<string, string> EventTargets { get; set; } = [];
     // Isawa Kimi - exp 2 ("an action that put any cards into another player's hand"): the players whose hand the currently-resolving action put a card into, snapshotted into LastResolvedAction.HandRecipients.
     public List<int> CurrentActionHandRecipients { get; set; } = [];
+    // Emperor Edition follow-ups (issue #498, EmperorFollowups*.cs). An "After this card enters play: search ..." trait queued behind the entry windows (Enslaved Djinn, Celestial Sword of the Dragon,
+    // Asako Chukage); the Attack target selection step after an announce window (No Hiding Place); the changes an announce Reaction made to the Attacks of the announced action; Rend the Soul's marks.
+    public List<PendingEntrySearch> PendingEntrySearches { get; set; } = [];
+    public PendingAttackTargetSelection? PendingAttackTargetSelection { get; set; }
+    public List<AnnouncedAttackModifier> AnnouncedAttackModifiers { get; set; } = [];
+    public List<RendTheSoulMark> RendTheSoulMarks { get; set; } = [];
 }
 
 /// <summary>Isawa Norimichi: PlayerId's army has +Amount total Force in the battle numbered Battle (while it has any units).</summary>

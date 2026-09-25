@@ -2614,4 +2614,12 @@ public static class PublishedContent
     public static PublishedSnapshot RegionWave10 { get; } = Load("L5R.Published.RegionWave10.json", "region-wave-10", requireDecks: false);
     /// <summary>Item wave 16 (issue #492, ruling R3): Kaiu Weapon (oracle-l5r-10006, a locally allocated id for the Proxy scan Mendon supplied), the Item Kaiu Village creates.</summary>
     public static PublishedSnapshot ItemWave16 { get; } = Load("L5R.Published.ItemWave16.json", "item-wave-16", requireDecks: false);
+    /// <summary>Strategy wave 66 (Emperor Edition follow-ups, issue #498): Rend the Soul and No Hiding Place, wired with Mendon's rulings.</summary>
+    public static PublishedSnapshot StrategyWave66 { get; } = Load("L5R.Published.StrategyWave66.json", "strategy-wave-66", requireDecks: false);
+    /// <summary>Follower wave 32 (Emperor Edition follow-ups, issue #498): Enslaved Djinn (Gates of Chaos).</summary>
+    public static PublishedSnapshot FollowerWave32 { get; } = Load("L5R.Published.FollowerWave32.json", "follower-wave-32", requireDecks: false);
+    /// <summary>Item wave 17 (Emperor Edition follow-ups, issue #498): Celestial Sword of the Dragon - exp (Seeds of Decay).</summary>
+    public static PublishedSnapshot ItemWave17 { get; } = Load("L5R.Published.ItemWave17.json", "item-wave-17", requireDecks: false);
+    /// <summary>Personality wave 80 (Emperor Edition follow-ups, issue #498): Asako Chukage (Forgotten Legacy printing).</summary>
+    public static PublishedSnapshot PersonalityWave80 { get; } = Load("L5R.Published.PersonalityWave80.json", "personality-wave-80", requireDecks: false);
 }

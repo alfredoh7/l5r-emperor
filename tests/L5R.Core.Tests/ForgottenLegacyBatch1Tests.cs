@@ -10,10 +10,11 @@ internal static class ForgottenLegacyBatch1Tests
     private const string Shigemitsu = "oracle-l5r-515", Kaitoko = "oracle-l5r-549", Higaonna = "oracle-l5r-775", Toshimo = "oracle-l5r-916", Takichi = "oracle-l5r-1679", Gyoken = "oracle-l5r-1719",
         Murota = "oracle-l5r-1750", Hakuseki = "oracle-l5r-2082", Rengetsu = "oracle-l5r-2142", Nikaru = "oracle-l5r-3310", Abodan = "oracle-l5r-3974", Kagako = "oracle-l5r-4382";
     private static readonly string[] Wired = [Shigemitsu, Kaitoko, Higaonna, Toshimo, Takichi, Gyoken, Murota, Hakuseki, Rengetsu, Nikaru, Abodan, Kagako];
-    private static readonly string[] Unwired = ["oracle-l5r-533", "oracle-l5r-551", "oracle-l5r-4464", "oracle-l5r-10020"];
+    // Issue #498: Asako Chukage (oracle-l5r-533) has since been wired and published in personality-wave-80 (Emperor Edition follow-ups).
+    private static readonly string[] Unwired = ["oracle-l5r-551", "oracle-l5r-4464", "oracle-l5r-10020"];
 
     public static void Run(TestRunner runner) => runner.Run("forgotten-legacy-batch-1", [
-        ("Published shape: personality-wave-67 publishes exactly the 12 wired cards with their printed stats, keywords and ability ids, ships their art and lists them in its manifest; the four unwired cards are not in the catalogue", PublishedShape),
+        ("Published shape: personality-wave-67 publishes exactly the 12 wired cards with their printed stats, keywords and ability ids, ships their art and lists them in its manifest; the cards still unwired are not in the catalogue (Asako Chukage has since been published, issue #498)", PublishedShape),
         ("Asahina Shigemitsu: bowing one of his Spells gives each of his controller's provinces +1 strength this turn; used on the opponent's turn he gains 1 Honor as it ends unless a province of his was destroyed, and on his own turn nothing is queued", ShigemitsuProvinces),
         ("Asako Kaitoko: the target's Force is reduced to 0; only a Kolat, Ninja or Shadowlands target loses a card without attachments in his unit -- himself when he has none, the only Follower at once, or the Follower the acting player chooses among several", KaitokoWeaken),
         ("Bayushi Higaonna: Ranged 4 Attack whose destruction costs the destroyed card's owner 1 Honor; a target that survives costs nothing", HigaonnaAttack),

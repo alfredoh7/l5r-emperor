@@ -299,6 +299,8 @@ public sealed partial class MatchEngine
             // Deck search (issue #312): deck choice, candidate selection/pass, a Region's province, the discard
             // after a Terrain. Every command a search accepts is validated in ResolveSearchCommand.
             if (IsSearchChoice(_state.PendingChoice.Type)) { WithResumedAction(() => ResolveSearchCommand(command)); return; }
+            // The Attack target selection step after an announce window (issue #498, EmperorFollowupsAttack.cs).
+            if (_state.PendingChoice.Type=="attackTargetSelect") { ResolveAttackTargetSelection(command); return; }
             // Look at the top N cards (issue #322): the deck choice and the one arrangement command.
             if (IsLookChoice(_state.PendingChoice.Type)) { ResolveLookCommand(command); return; }
             // Copying keywords and abilities (issue #338): the two independent copy decisions (CardCopy.cs).
@@ -565,7 +567,7 @@ public sealed partial class MatchEngine
                     var pending=_state.PendingAnnouncedAction; _state.PendingAnnouncedAction=null;
                     // Entrenched Position (Forgotten Legacy pass, issue #467 batch 3): a Reaction in this window negated the announced action.
                     if(_state.AnnouncedActionNegated) { _state.AnnouncedActionNegated=false; ResolveNegatedAction(pending); }
-                    else ContinueAnnouncedAction(pending);
+                    else if(!BeginAttackTargetSelection(pending)) ContinueAnnouncedAction(pending); // No Hiding Place (issue #498): the Attack's target is selected after the announce window.
                 }
                 return;
             }
@@ -679,6 +681,7 @@ public sealed partial class MatchEngine
         ApplyShadowsEmbraceBatch6EntryEffects(playerId,card); // Clearing Crew (The Shadow's Embrace pass, issue #476 batch 6).
         ApplyShadowsEmbraceBatch1EntryEffects(playerId,card); // The Shadow's Embrace pass (issue #476), batch 1: Atosa's Sensei discard.
         ApplyEmperorRemainingFEntryEffects(playerId,card); // Emperor Edition remaining-cards pass (issue #492), group F: Moneylender's Wealth tokens.
+        ApplyEmperorFollowupsEntryEffects(playerId,card); // Emperor Edition follow-ups (issue #498): the Dragon Sword's Honor; the entry searches queued (EmperorFollowupsSearch.cs).
     }
     // Sensei (Mirumoto Hikaro / Mirumoto Yozo, Experienced 2): "your OTHER Sensei Personalities" --
     // every OTHER Sensei-keyword Personality this same controller has, either unbowed-or-bowed in
@@ -1704,7 +1707,9 @@ public sealed partial class MatchEngine
         // Reconnaissance resets to No for both players at this battlefield once its battle resolves,
         // regardless of the outcome -- the only trigger that clears it.
         ResetBattlefieldReconnaissance(provinceIndex,defender);
-        var attackerWon=af>df;
+        var attackerWon=af>df; var defenderWon=df>af;
+        // Rend the Soul (issue #498, EmperorFollowupsDuel.cs): the army a marked Personality is in would win, so the battle is tied instead.
+        if(RendTheSoulTiesBattle(a,d,attackerWon,defenderWon)) { attackerWon=false; defenderWon=false; }
         // What the resolution did, for the Reactions that name it (AfterResolution.cs).
         var destroyedByPlayer=new int[2]; var provinceDestroyedNow=false; var losers=new List<int>();
         if(attackerWon)
@@ -1715,7 +1720,7 @@ public sealed partial class MatchEngine
             destroyedByPlayer[attacker]=destroyedDefenders; losers.Add(defender);
             if(!RehonorWinners(a)) { GainHonor(attacker,destroyedDefenders*2,"Battle victory"); CheckEarthFlowsBonus(attacker,a); }
             var province=battleProvince;
-            var destroyedProvince=province is not null && !PerfectMomentBarsDestruction(attacker) && af>df+EffectiveProvinceStrength(province);
+            var destroyedProvince=province is not null && !PerfectMomentBarsDestruction(attacker) && af>df+EffectiveProvinceStrength(province) && !RendBarsProvinceDestruction(attacker); // Rend the Soul (issue #498): "You will not destroy the province in this battle's resolution"
             if(destroyedProvince) { DestroyProvince(defender,province!); NotePerfectMomentDestruction(attacker); }
             if(destroyedProvince) AfterProvinceDestroyedByResolution(attacker,defender,province!,a); // Alter History, Boastful Proclamation (issue #492, group F).
             provinceDestroyedNow=destroyedProvince;
@@ -1736,7 +1741,7 @@ public sealed partial class MatchEngine
             CheckRingOfWaterRecruit(Player(attacker),destroyedDefenders>0||destroyedProvince);
             GrantRingRecruit(Player(attacker),destroyedDefenders>0||destroyedProvince,"ring-of-fire-recruit");
         }
-        else if(df>af)
+        else if(defenderWon)
         {
             var destroyedAttackers=DestroyUnits(a);
             destroyedByPlayer[defender]=destroyedAttackers; losers.Add(attacker);
@@ -1774,7 +1779,7 @@ public sealed partial class MatchEngine
         ApplyShibasGuidanceTrait(destroyedByPlayer,provinceDestroyedNow?attacker:null); // Shiba's Guidance (Emperor Edition remaining-cards pass, issue #492, group E): "After a battle resolution ends in which a Phoenix Clan player destroyed ...".
         var resolutionFacts=NewAfterResolutionFacts(provinceIndex,attacker,attackerWon,a,destroyedByPlayer,provinceDestroyedNow,losers);
         // Words Have Strength (Emperor Edition remaining-cards pass, issue #492, group D): the cards the resolution destroyed are the losing army (both armies in a tie).
-        resolutionFacts.DestroyedCardIds=(attackerWon?d:df>af?a:(a.Length>0&&d.Length>0?a.Concat(d).ToArray():[])).Select(c=>c.Id).ToList();
+        resolutionFacts.DestroyedCardIds=(attackerWon?d:defenderWon?a:(a.Length>0&&d.Length>0?a.Concat(d).ToArray():[])).Select(c=>c.Id).ToList();
         // The Shadow Court (Emperor Edition remaining-cards pass, issue #492, group D): "after the next time this turn ... a battle resolution destroys your Courtier" -- a trait, before the Reactions.
         if(OpenShadowCourtResolutionTrait(resolutionFacts)) return;
         if(BeginBanditGangTraits(resolutionFacts)) return; // Bandit Gang (issue #492 group G): a trait, so before any Reaction to the resolution's end.
@@ -2170,6 +2175,7 @@ public sealed partial class MatchEngine
         _state.ConsecutivePasses=0; _state.PriorityPlayerId=stayWithPlayer?playerId:1-playerId; EndAttackerLeadIfCeded(playerId,stayWithPlayer);
         // Glory of the Shogun (issue #492, group F): an optional draw the action owes (its attach) is asked before priority passes on.
         if(_state.PendingChoice is null && _state.PendingEventChoices.Count>0) OpenQueuedEventChoice(stayWithPlayer?playerId:1-playerId);
+        if(_state.PendingChoice is null && _state.PendingEntrySearches.Count>0) OpenQueuedEntrySearch(stayWithPlayer?playerId:1-playerId); // issue #498: an entry search the action (an Equip) owes
     }
     private IEnumerable<CardInstance> Army(int playerId,int province) => _state.Cards.Values.Where(c=>c.OwnerId==playerId && c.Zone==Zone.Battlefield && c.ProvinceIndex==province && Definition(c).Type==CardType.Personality);
     // Province adjacency (core rules): a player's provinces sit in a line, 1-2-3-4. A destroyed
@@ -2349,6 +2355,8 @@ public sealed partial class MatchEngine
         "celestial-sword-force-crab" => ControlledClanPersonalities(wielder.OwnerId,"Crab"),
         "celestial-sword-force-crane" => ControlledClanPersonalities(wielder.OwnerId,"Crane"),
         "celestial-sword-force-phoenix" => ControlledClanPersonalities(wielder.OwnerId,"Phoenix"),
+        // Emperor Edition follow-ups (issue #498): Celestial Sword of the Dragon - exp, the same shape.
+        DragonSwordEffect => ControlledClanPersonalities(wielder.OwnerId,"Dragon"),
         _ => 0
     };
     // A Follower's own standalone Force, including any static conditional bonus it grants itself
@@ -2538,6 +2546,7 @@ public sealed partial class MatchEngine
     {
         // Emperor Edition remaining-cards pass (issue #492), group F: an optional draw owed by an Event (Boastful Proclamation, Glory of the Shogun), asked here like the forced discards below.
         if(OpenQueuedEventChoice(closesTo)) return true;
+        if(OpenQueuedEntrySearch(closesTo)) return true; // Emperor Edition follow-ups (issue #498): an "After this card enters play: search ..." trait, once the entry windows are done.
         if(_state.PendingForcedDiscards.Count>0)
         {
             var owed=_state.PendingForcedDiscards[0];
@@ -3412,7 +3421,7 @@ public sealed partial class MatchEngine
         _state.Phase=phase; _state.PriorityPlayerId=priority; _state.ConsecutivePasses=0; Emit("phaseChanged",$"Phase: {phase}.");
         // The shared delay mechanism (issue #492, EmperorRulingR2.cs): what waits for the next Dynasty Phase (or End Phase) to begin is applied as it does.
         if(phase==Phase.Dynasty) ApplyDelayedEffects(DelayUntil.NextDynastyPhase);
-        if(phase==Phase.End) ApplyDelayedEffects(DelayUntil.EndPhaseBegins);
+        if(phase==Phase.End) ApplyDelayedEffects(DelayUntil.EndPhaseBegins, EndPhaseIsOwners); // issue #498: "YOUR End Phase" -- only the active player's delayed effects are due
     }
     private void Emit(string type,string message,int? playerId=null,string? cardId=null,int? Amount=null) => _state.Events.Add(new(_state.Events.Count+1,type,message,playerId,cardId,Amount));
     private PlayerState Player(int id) => _state.Players[id];

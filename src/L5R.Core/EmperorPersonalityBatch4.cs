@@ -36,13 +36,12 @@ public sealed partial class MatchEngine
     private bool Batch4VictimOtherThanTarget(CardInstance candidate, GameCommand command, int playerId) =>
         Definition(candidate).Type == CardType.Personality && candidate.OwnerId == playerId && (SlotCards(command, "target").FirstOrDefault() is not { } chosen || chosen.Id != candidate.Id);
 
-    // Bayushi Nitoshi's Battle: "a dishonorable Personality or a card without attachments in a unit" -- a card in a unit is a Personality or a Follower, and only one with no attachments
-    // counts for the second half (a Personality with a Follower, Item or Spell is a legal target only while dishonorable).
+    // Bayushi Nitoshi's Battle: "a dishonorable Personality or a card without attachments in a unit" -- a card in a unit is a Personality or any card attached to him (issue #498),
+    // and only one with no attachments counts for the second half (a Personality with a Follower, Item or Spell is a legal target only while dishonorable).
     private bool Batch4DishonorableOrUnattachedUnitCard(CardInstance target)
     {
-        var type = Definition(target).Type;
-        if (type == CardType.Follower) return target.Zone == Zone.Attached;
-        return type == CardType.Personality && (target.Dishonorable || !HasAttachments(target));
+        // Issue #498 (Makito's reading): the unit is everything attached to the Personality, so an Item or a Spell without attachments counts as well as a Follower.
+        return Definition(target).Type == CardType.Personality && target.Dishonorable || IsUnitCardWithoutAttachments(target);
     }
 
     // ---- effects ----

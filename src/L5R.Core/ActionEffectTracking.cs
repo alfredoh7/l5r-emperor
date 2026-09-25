@@ -95,7 +95,8 @@ public sealed partial class MatchEngine
         // Chrysanthemum Blossom (Emperor Edition remaining-cards pass, issue #492 group G): "After this Personality is assigned" -- the assignment command's own record, not a catalogued action.
         if (abilityId == "chrysanthemum-blossom-boost") return ChrysanthemumBlossomApplies(source, playerId, facts);
         if (facts.AbilityId == AssignedSentinel) return false;
-        if (!AbilityCatalog.All.ContainsKey(facts.AbilityId)) return false; // Equip's facts name no catalogued ability: only the Reaction above reads them.
+        if (!AbilityCatalog.All.ContainsKey(facts.AbilityId)) return false;
+        if (FollowupsAfterActionApplies(source, abilityId, playerId) is { } followups) return followups; // Asako Chukage (issue #498) // Equip's facts name no catalogued ability: only the Reaction above reads them.
         return abilityId switch
         {
             // Measure of Devotion (oracle-l5r-5013): "After the resolution of a Battle action that destroyed one of your Deathseekers."

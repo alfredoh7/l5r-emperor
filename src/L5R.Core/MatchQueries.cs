@@ -287,9 +287,11 @@ public sealed partial class MatchEngine
             if(announcePending.PlayerId==playerId)
             {
                 var card=Card(announcePending.CardId!);
-                foreach(var reactionId in AbilityIdsOf(card).Where(a=>AbilityCatalog.All.TryGetValue(a,out var def) && def.Timing=="Reaction" && def.Trigger is "own-ranged-action-announced" or EntrenchedTrigger or EmperorStrongholdBatch2Triggers.TorchAnnounce))
+                foreach(var reactionId in AbilityIdsOf(card).Where(a=>AbilityCatalog.All.TryGetValue(a,out var def) && def.Timing=="Reaction" && def.Trigger is "own-ranged-action-announced" or EntrenchedTrigger or EmperorStrongholdBatch2Triggers.TorchAnnounce or EmperorFollowupsAbilities.NoHidingPlaceTrigger))
                     AddReaction(card,reactionId);
             }
+            // No Hiding Place (issue #498): the announcing player's copies in hand, whichever card the window was opened for.
+            foreach(var (noHidingPlace,noHidingId) in NoHidingPlaceOptions(playerId)) AddReaction(noHidingPlace,noHidingId);
             Add("declineReaction","Pass reaction",Command("declineReaction"));
         }
         else if(_state.PendingChoice is { Type:"engageReaction" })
@@ -497,6 +499,10 @@ public sealed partial class MatchEngine
         else if(_state.PendingChoice is { Type:"sequencedTarget" })
         {
             result.AddRange(SequencedTargetActions(playerId));
+        }
+        else if(_state.PendingChoice is { Type:"attackTargetSelect" })
+        {
+            result.AddRange(AttackTargetSelectionActions(playerId)); // the Attack target selection step after an announce window (issue #498)
         }
         else if(_state.PendingChoice is { Type:"opponentPayment" })
         {

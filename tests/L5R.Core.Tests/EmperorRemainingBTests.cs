@@ -13,7 +13,8 @@ internal static class EmperorRemainingBTests
     private const string Oni = "training-seeds5-shadowlands-oni", FalseRingOfWater = "training-false-ring-of-water", RingOfAir = "training-ring-of-air", ImperialGift = "oracle-l5r-3694";
 
     // The cards of the group left unwired (each with a blocker note in tools/content/ee_remB_blockers.json): never published.
-    private static readonly string[] Unwired = ["oracle-l5r-5599", "oracle-l5r-6260"];
+    // Issue #498: both have since been wired and published in strategy-wave-66 (Emperor Edition follow-ups), so none of the group's cards is left unpublished.
+    private static readonly string[] Unwired = [];
 
     private static void Check(bool ok, string message = "Assertion failed") => Batch336Support.Check(ok, message);
     private static void Eq<T>(T actual, T expected, string message = "Values differ") => Batch336Support.Eq(actual, expected, message);
