@@ -113,7 +113,7 @@ internal static class EmperorPersonalityBatch4Tests
         Check(AbilityCatalog.All["tadanobu-draw"].ActionKeywords!.SequenceEqual(["Favor", "Political"]), "Tadanobu's is a Favor Political Reaction");
         Check(PublishedContent.PersonalityWave71.Cards.All(c => (c.Abilities ?? []).Length > 0 || c.Effect != "none"), "no card of the wave is blank");
         Manifest(root, Keigo, Kitiaru, Michiru, Genshi, Seishi, Tadanobu, Makoto, Hurunayi, Mitsuo, Nitoshi, Rentatsu, Waru, Kameyoi, Tanzaki, Yorimi);
-        Check(!CardCatalog.Cards.ContainsKey("oracle-l5r-7156"), "Shosuro Rokuta is not published while unwired");
+        // Shosuro Rokuta (oracle-l5r-7156) is wired in personality-wave-78 by proxy group Z (issue #492) once his Apprentice scan arrived: EmperorProxyZTests covers him.
     }
 
     // ---- Keigo ------------------------------------------------------------------------------------------------------------------------------------

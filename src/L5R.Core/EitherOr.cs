@@ -56,6 +56,14 @@ public static class EitherOrSpecs
     public const string GenshiShame = "genshi-shame";
     /// <summary>Yasuki Tanimura (Emperor Edition Personality pass, issue #477 batch 6): "The player may pay 4 Gold. If he does not pay the Gold, he loses 3 Honor." -- the decider is the ACTING player.</summary>
     public const string TanimuraPayOrLose = "tanimura-pay-or-lose";
+    /// <summary>Sacrifice of Pawns (Emperor Edition remaining-cards pass, group C, issue #492): "His controller may destroy the target. If he did not choose this, search your Dynasty deck for a
+    /// Personality and bring him into play, paying all costs but paying two more Gold." -- the target's controller decides; a refusal opens the acting player's search (EmperorRemainingC.cs).</summary>
+    public const string SacrificeOfPawns = "sacrifice-of-pawns";
+    /// <summary>The Power of a Word (Emperor Edition remaining-cards pass, issue #492, group D): "The player may choose to lose 3 Honor. If he did not choose this, negate the action's effects." -- the decider is the ACTING player.</summary>
+    public const string PowerOfWordLoseOrNegate = "power-word-lose-or-negate";
+    /// <summary>The Shadow Court (issue #492): "draw a card, and choose a player, who gains or loses 2 Honor" -- the watch's controller decides. The Sincerity of the Dragon: "choose a player, who discards a card".</summary>
+    public const string ShadowCourtHonor = "shadow-court-honor";
+    public const string SincerityDiscard = "sincerity-discard";
 }
 
 /// <summary>What choosing an option amounts to, for a client to word and style it: "avoid" (accept a cost or a lesser loss so the
@@ -133,7 +141,14 @@ public sealed partial class MatchEngine
                 or EitherOrSpecs.ForgeYourSoulAttach or EitherOrSpecs.ForgeYourSoulShuffle or EitherOrSpecs.ForgeYourSoulShuffleNoWeapon => ShadowsEmbraceEitherOrPrompt(p, source, affected),
             EitherOrSpecs.GenshiShame => $"{source}: dishonor {affected}, or {Player(p.ActingPlayerId).Name} gains 1 Honor and locks one of his abilities until their next turn begins.",
             EitherOrSpecs.TanimuraPayOrLose => $"{source}: pay 4 Gold, or lose 3 Honor.",
-            _ => throw new RuleViolation("Unknown choice.")
+            EmperorRemainingBSpecs.MercyBowOrHome => $"{source}: choose to either bow {affected} or move him home.", // Emperor Edition remaining-cards pass (issue #492), group B
+            EmperorRemainingBSpecs.AncestorsDestroy => $"{source}: destroy {affected}, or discard a card at random from your hand and {Player(p.ActingPlayerId).Name} chooses a player, who gains or loses 3 Honor.",
+            EmperorRemainingBSpecs.AncestorsHonor => $"{source}: choose a player, who gains or loses 3 Honor.",
+            EitherOrSpecs.SacrificeOfPawns => SacrificeOfPawnsPrompt(p, source, affected),
+            EitherOrSpecs.PowerOfWordLoseOrNegate => $"{source}: lose 3 Honor, or your action's effects are negated.",
+            EitherOrSpecs.ShadowCourtHonor => $"{source}: choose a player who gains or loses 2 Honor.",
+            EitherOrSpecs.SincerityDiscard => $"{source}: choose a player who discards a card.",
+            _ => RemainingGEitherOrPrompt(p, source) // Emperor Edition remaining-cards pass (issue #492), group G: Bandit Gang.
         };
     }
 
@@ -213,12 +228,24 @@ public sealed partial class MatchEngine
                 ];
             }
             // Yasuki Tanimura (issue #477 batch 6): the decider is the player whose Battle action targeted him. Losing Honor is always possible (Family Honor may go negative).
+            case EitherOrSpecs.SacrificeOfPawns:
+                return SacrificeOfPawnsOptions(p, affected!);
             case EitherOrSpecs.TanimuraPayOrLose:
                 return [
                     new("pay", "Pay 4 Gold", "Nothing further happens.", EitherOrKind.Avoid, 4, payable(4), "You cannot produce 4 Gold."),
                     new("lose", "Do not pay", "You lose 3 Honor.", EitherOrKind.Accept, 0, true, null)
                 ];
-            default: throw new RuleViolation("Unknown choice.");
+            case EmperorRemainingBSpecs.MercyBowOrHome: return MercyOptions(affected); // Emperor Edition remaining-cards pass (issue #492), group B
+            case EmperorRemainingBSpecs.AncestorsDestroy: case EmperorRemainingBSpecs.AncestorsHonor: return AncestorsOptions(p, affected);
+            // The Power of a Word (issue #492): the decider is the player whose Battle action targeted the Courtier. Losing Honor is always possible (Family Honor may go negative).
+            case EitherOrSpecs.PowerOfWordLoseOrNegate:
+                return [
+                    new("lose", "Lose 3 Honor", "Your action goes ahead: it is not negated.", EitherOrKind.Avoid, 0, true, null),
+                    new("negate", "Do not lose the Honor", "Your action's effects are negated.", EitherOrKind.Accept, 0, true, null)
+                ];
+            case EitherOrSpecs.ShadowCourtHonor: case EitherOrSpecs.SincerityDiscard:
+                return EmperorRemainingDEitherOrOptions(p);
+            default: return RemainingGEitherOrOptions(p, source, payable); // Bandit Gang (issue #492 group G).
         }
     }
 
@@ -361,6 +388,9 @@ public sealed partial class MatchEngine
                 p.ChainAbilityLock = true;
                 break;
             // Yasuki Tanimura (issue #477 batch 6).
+            case (EitherOrSpecs.SacrificeOfPawns, _):
+                ApplySacrificeOfPawns(p, option, decider, source, affected);
+                break;
             case (EitherOrSpecs.TanimuraPayOrLose, "pay"):
                 Pay(decider.Id, source, option.GoldCost, sourceIds);
                 Emit("eitherOrChosen", $"{decider.Name} paid 4 Gold ({Definition(source).Name}).", decider.Id, source.Id);
@@ -369,7 +399,27 @@ public sealed partial class MatchEngine
                 Emit("eitherOrChosen", $"{decider.Name} did not pay ({Definition(source).Name}): {decider.Name} loses 3 Honor.", decider.Id, source.Id);
                 GainHonor(decider.Id, -3, Definition(source).Name, source);
                 break;
-            default: throw new RuleViolation("Unknown choice.");
+            case (EmperorRemainingBSpecs.MercyBowOrHome, _): // Emperor Edition remaining-cards pass (issue #492), group B (EmperorRemainingB.cs)
+                ApplyMercy(p, option, decider, affected);
+                break;
+            case (EmperorRemainingBSpecs.AncestorsDestroy, _): case (EmperorRemainingBSpecs.AncestorsHonor, _):
+                ApplyAncestors(p, option, decider, affected);
+                break;
+            // The Power of a Word (issue #492; EmperorRemainingD.cs).
+            case (EitherOrSpecs.PowerOfWordLoseOrNegate, "lose"):
+                Emit("eitherOrChosen", $"{decider.Name} chose to lose 3 Honor ({Definition(source).Name}).", decider.Id, source.Id);
+                GainHonor(decider.Id, -3, Definition(source).Name, source);
+                break;
+            case (EitherOrSpecs.PowerOfWordLoseOrNegate, "negate"):
+                Emit("eitherOrChosen", $"{decider.Name} did not lose the Honor ({Definition(source).Name}): the action's effects are negated.", decider.Id, source.Id);
+                NegateHeldActionFromEitherOr(p, source);
+                break;
+            case (EitherOrSpecs.ShadowCourtHonor, _): case (EitherOrSpecs.SincerityDiscard, _):
+                ApplyEmperorRemainingDEitherOr(p, option, decider);
+                break;
+            default:
+                if (ApplyRemainingGEitherOr(p, option, source, decider, sourceIds)) break; // Bandit Gang (issue #492 group G).
+                throw new RuleViolation("Unknown choice.");
         }
     }
 
@@ -377,9 +427,12 @@ public sealed partial class MatchEngine
     private void FinishEitherOr(PendingEitherOr p)
     {
         _state.PendingEitherOr = null;
+        if (p.SpecId == EitherOrSpecs.SacrificeOfPawns && _state.PendingSearch is not null) return; // Sacrifice of Pawns (issue #492, group C): the refusal opened a search, which finishes the action.
+        if (FinishEmperorRemainingDEitherOr(p)) return; // Emperor Edition remaining-cards pass (issue #492), group D: The Shadow Court and The Sincerity of the Dragon (EmperorRemainingD.cs).
         // The Shadow's Embrace pass (issue #476), batch 3 (ShadowsEmbraceBatch3.cs): Crowded Streets' trait decision carries on with the resolved action's own tail; Forge Your
         // Soul's last decision draws and opens the attached Weapon's entering-play window first.
         if (FinishShadowsEmbraceEitherOr(p)) return;
+        if (FinishRemainingGEitherOr(p)) return; // Bandit Gang (issue #492 group G): the battle's resolution carries on.
         if (p.SpecId == EitherOrSpecs.GenshiShame && p.Origin == "action") { FinishGenshi(p); return; } // Kakita Genshi (issue #477 batch 4): the whole Iaijutsu action finishes together.
         if (p.Origin == "window")
         {

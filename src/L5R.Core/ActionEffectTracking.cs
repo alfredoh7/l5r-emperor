@@ -57,6 +57,8 @@ public sealed partial class MatchEngine
         ApplyMokshaPatamTokens();
         // The Shadow's Embrace pass (issue #476), batch 3: Crowded Streets' trait -- a trait, so before any Reaction to the same point (ShadowsEmbraceBatch3.cs).
         if (OpenCrowdedStreetsTrait(closesTo)) return true;
+        // Emperor Edition remaining-cards pass (issue #492), group D: The Shadow Court's and The Sincerity of the Dragon's traits (EmperorRemainingD.cs) -- also before any Reaction to the same moment.
+        if (OpenShadowCourtTrait(closesTo) || OpenSincerityTrait(closesTo)) return true;
         if (OpenAfterActionResolvedWindow(closesTo)) return true;
         // Moshi Ino's storm (issue #453, batch 3; MoshiInoStorm.cs): the same "this action is truly done" moment, asked once no Reaction window opened over it.
         return OpenInoStorm(closesTo);
@@ -90,6 +92,9 @@ public sealed partial class MatchEngine
         // Hida Takeuchi (Emperor Edition Personality pass, issue #477 batch 2): "After the resolution of an action that attached a Follower from your hand to Takeuchi" -- any action,
         // Equip (a universal player action with no catalog entry) included, so it is read before the per-ability-id switch that indexes the catalog by the action's id.
         if (abilityId == "takeuchi-draw") return ActionAttachedFollowerFromHandTo(source, playerId);
+        // Chrysanthemum Blossom (Emperor Edition remaining-cards pass, issue #492 group G): "After this Personality is assigned" -- the assignment command's own record, not a catalogued action.
+        if (abilityId == "chrysanthemum-blossom-boost") return ChrysanthemumBlossomApplies(source, playerId, facts);
+        if (facts.AbilityId == AssignedSentinel) return false;
         if (!AbilityCatalog.All.ContainsKey(facts.AbilityId)) return false; // Equip's facts name no catalogued ability: only the Reaction above reads them.
         return abilityId switch
         {
@@ -121,6 +126,10 @@ public sealed partial class MatchEngine
             // Battle/Open one taken in a Combat Segment is a Battle action), his own move on the action's record.
             "mitsuo-additional-action" => IsBattleAction(facts.AbilityId) && facts.Affected.Any(a => a.Kind == MovedKind && a.CardId == source.Id),
             // Hida Yamadera - exp: "After another player's Battle action resolves, if its effects destroyed Yamadera."
+            // Blade of Perfection (Emperor Edition remaining-cards pass, issue #492 group G): "After the resolution of another player's action that destroyed this card or its Personality".
+            "blade-perfection-attach" => BladeOfPerfectionApplies(source, playerId, facts),
+            // Shosuro Rokuta (proxy group Z, issue #492): "After the resolution of an action ... from a card that another player owns, if the card destroyed Rokuta."
+            "rokuta-action-create" => RokutaActionApplies(source, playerId, facts),
             "yamadera-attack" => facts.PlayerId != playerId && AbilityCatalog.All[facts.AbilityId].Timing == "Battle" && facts.Affected.Any(a => a.Kind == DestroyedKind && a.CardId == source.Id),
             // Advanced Intelligence (Seeds of Decay pass, issue #453, batch 1): "After a Recon Strategy's action resolves" -- either player's, classified through ActionCarriesKeyword.
             "advanced-intelligence-draw" => facts.SourceId is { } reconSourceId && _state.Cards.TryGetValue(reconSourceId, out var reconSource) && Definition(reconSource).Type == CardType.Strategy
@@ -149,10 +158,18 @@ public sealed partial class MatchEngine
             // Emperor Edition Personality pass (issue #477), batch 6 (EmperorPersonalityBatch6.cs). Yung: "After one of your Rings enters play". Daigotsu Kanpeki - exp: "After the resolution of a Battle
             // action from a Strategy, if Kanpeki performed it".
             "yung-search-ring" => YungRingEnteredPlay(facts, playerId),
+            // Emperor Edition remaining-cards pass (issue #492), group B: Introspection ("After one of your Rings enters play", Yung's trigger) and Meeting the Keepers ("After the resolution of an action
+            // from one of your Rings") -- a Strategy's Reaction played from a hand (EmperorRemainingB.cs).
+            "introspection-search" => YungRingEnteredPlay(facts, playerId),
+            "keepers-search" => RingActionResolved(facts, playerId),
             "kanpeki-additional-action" => KanpekiPerformedStrategyBattleAction(source, facts, playerId),
             // Pillars of Virtue (Emperor Edition Stronghold pass, issue #486 batch 2): "After the resolution of a Kiho Battle action you took."
             "pillars-virtue-additional-action" => PillarsKihoBattleActionTaken(facts, playerId),
-            _ => false
+            // Deception Revealed (Emperor Edition remaining-cards pass, group A, issue #492): "After the resolution of an action that bowed a Ring" -- either player's action, a Ring still bowed.
+            "deception-revealed-straighten" => facts.Affected.Any(a => a.Kind == BowedRingKind && Card(a.CardId).Bowed && InPlay(Card(a.CardId))),
+            // Words Have Strength (Emperor Edition remaining-cards pass, issue #492, group D): "the resolution of another player's Battle action, if ... the action destroyed any of your Courtiers or Magistrates".
+            "words-strength-action" => facts.PlayerId != playerId && IsBattleAction(facts.AbilityId) && ActionDestroyedCourtierOrMagistrate(facts, playerId),
+            _ => EmperorRemainingCAfterActionApplies(abilityId, facts, playerId) // Emperor Edition remaining-cards pass, group C (issue #492): The Empress' Address.
         };
     }
 

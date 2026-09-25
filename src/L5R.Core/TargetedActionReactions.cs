@@ -188,7 +188,7 @@ public sealed partial class MatchEngine
     }
 
     private bool OwnsTargetedActionReaction(int playerId, ReactionSubject? subject) =>
-        subject is not null && TargetedActionReactionCandidates().Any(x => x.Card.OwnerId == playerId && TargetedActionReactionAvailable(x.Card, x.AbilityId, subject));
+        subject is not null && !ReactionsBarred() /* Cherry Blossom Festival (issue #492, group F) */ && TargetedActionReactionCandidates().Any(x => x.Card.OwnerId == playerId && TargetedActionReactionAvailable(x.Card, x.AbilityId, subject));
 
     private bool IsBattleAction(GameCommand command) =>
         AbilityCatalog.All.TryGetValue(command.AbilityId ?? "", out var ability) && (ability.Timing == "Battle" || ability.Timing == "BattleOrOpen" && _state.Phase == Phase.Battle);
@@ -308,11 +308,30 @@ public sealed partial class MatchEngine
             // Yasuki Tanimura (Emperor Edition Personality pass, issue #477 batch 6): another player's Battle action targets him.
             case "tanimura-political-pay":
                 return TanimuraApplies(card, subject, affected);
+            // Armor of the Heavens (Emperor Edition remaining-cards pass, issue #492 group G): another player's action targets the Personality this card is attached to.
+            case "armor-heavens-gain": case "armor-heavens-lose":
+                return ArmorOfTheHeavensApplies(card, subject, affected);
             // The Waystation of the Path (Emperor Edition Stronghold pass, issue #486 batch 3): another player's action targets the controller's Henshin.
             case "waystation-reborn":
                 return WaystationApplies(card, subject, affected);
+            // Emperor Edition remaining-cards pass (issue #492), group B (EmperorRemainingB.cs): Hundred-Fold Cut (either way to pay) and He's Mine!.
+            case "hundred-fold-cut-bow":
+            case "hundred-fold-cut-destroy":
+                return HundredFoldCutApplies(card, abilityId, subject, affected);
+            case "hes-mine-substitute":
+                return HesMineApplies(card, subject, affected);
+            // Emperor Edition remaining-cards pass (issue #492), group D. Undetectable Enemy: another player's action targets one of the reactor's own Oni. The Power of a Word: another player's Battle action
+            // targets the reactor's own Courtier.
+            case "undetectable-enemy-negate":
+                return subject.Command.PlayerId != card.OwnerId && affected.OwnerId == card.OwnerId && Definition(affected).Type == CardType.Personality && Keyword(affected, "Oni");
+            case "power-word-reaction":
+                return PowerOfWordApplies(card, subject, affected);
+            // Chugo Seido (Emperor Edition remaining-cards pass, issue #492 group F): another player's action targets one of its controller's Personalities, and a Samurai of his at the same location
+            // could be the target instead.
+            case "chugo-seido-redirect":
+                return command.PlayerId != card.OwnerId && affected.OwnerId == card.OwnerId && Definition(affected).Type == CardType.Personality && ChugoSeidoCandidates(card, subject, affected).Any();
             default:
-                return false;
+                return RemATargetedActionReactionApplies(card, abilityId, subject, affected) || EmperorRemainingCTargetedReactionApplies(card, abilityId, subject, affected); // issue #492: group A (Ancestral Protection, Caught in the Act), group C (Snake Tattoo)
         }
     }
 
@@ -360,8 +379,12 @@ public sealed partial class MatchEngine
             "castle-of-order-redirect" => CastleOfOrderCandidates(card, subject, Card(subject.TargetId!)).Select(c => ((string?)c.Id, (string?)$"{AbilityCatalog.All[abilityId].Label} · {Definition(c).Name} ({c.Id})")),
             // Forgotten Legacy pass (issue #467), batch 5: Ryoshun's Guidance, one option per card the action may be redirected to.
             "waystation-reborn" => WaystationCandidates(card, Card(subject.TargetId!)).Select(c => ((string?)c.Id, (string?)$"{AbilityCatalog.All[abilityId].Label} · {Definition(c).Name} ({c.Id})")),
+            "chugo-seido-redirect" => ChugoSeidoCandidates(card, subject, Card(subject.TargetId!)).Select(c => ((string?)c.Id, (string?)$"{AbilityCatalog.All[abilityId].Label} · {Definition(c).Name} ({c.Id})")),
             "kisada-redirect" => KisadaRedirectCandidates(card, subject).Select(c => ((string?)c.Id, (string?)$"{AbilityCatalog.All[abilityId].Label} · {Definition(c).Name} ({c.Id})")),
             "ryoshun-redirect" => RyoshunRedirectCandidates(card, subject, Card(subject.TargetId!)).Select(c => ((string?)c.Id, (string?)$"{AbilityCatalog.All[abilityId].Label} · {Definition(c).Name} ({c.Id})")),
+            // Hundred-Fold Cut: one option per Weapon of the targeted Kensai the way to pay allows.
+            "hundred-fold-cut-bow" or "hundred-fold-cut-destroy" => KensaiWeapons(Card(subject.TargetId!), unbowedOnly: abilityId == "hundred-fold-cut-bow")
+                .Select(c => ((string?)c.Id, (string?)$"{AbilityCatalog.All[abilityId].Label} · {Definition(c).Name} ({c.Id})")),
             _ => [(null, null)]
         };
 }

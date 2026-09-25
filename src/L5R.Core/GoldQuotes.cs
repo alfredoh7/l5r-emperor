@@ -62,6 +62,8 @@ public static class CostStatSubject
     public const string Target = "target";
     public const string Performer = "performer";
     public const string Source = "source";
+    /// <summary>Footsteps of Madness (issue #492): the Stronghold the action held in the Unimpeachable Name window is from.</summary>
+    public const string HeldActionSource = EmperorRemainingAAbilities.HeldActionSource;
 }
 
 /// <summary>The printed numbers a Gold cost can be made of. "Strength" on a Stronghold is its Province Strength; a unit's is its Force.</summary>
@@ -73,6 +75,8 @@ public static class CostStat
     public const string PersonalHonor = "PersonalHonor";
     public const string Focus = "Focus";
     public const string ProvinceStrength = "ProvinceStrength";
+    /// <summary>A Stronghold's printed Gold Production (Footsteps of Madness, issue #492).</summary>
+    public const string GoldProduction = "GoldProduction";
 }
 
 /// <summary>Data describing how one ability is priced. Interpreted only by MatchEngine.AbilityGoldCost.
@@ -146,7 +150,7 @@ public sealed partial class MatchEngine
     private int? GoldSourceProduction(CardInstance card)
     {
         if (card.Zone is not (Zone.Home or Zone.Stronghold or Zone.Battlefield)) return null;
-        if (Definition(card).GoldProduction > 0) return GoldProduced(card.Id, card.OwnerId);
+        if (Definition(card).GoldProduction > 0 || Definition(card).Effect == MoneylenderEffect) return GoldProduced(card.Id, card.OwnerId);
         return IsVariableGoldSource(card) ? null : AlternateGoldSource(card)?.Amount;
     }
 
@@ -201,6 +205,7 @@ public sealed partial class MatchEngine
             CostStat.PersonalHonor => basePrinted ? def.PersonalHonor : CardPersonalHonor(card),
             CostStat.Focus => basePrinted ? def.Focus : Math.Max(0, def.Focus + StatModifier(card, "Focus")),
             CostStat.ProvinceStrength => basePrinted ? def.ProvinceStrength : def.ProvinceStrength + StatModifier(card, "ProvinceStrength"),
+            CostStat.GoldProduction => def.GoldProduction,
             _ => throw new InvalidOperationException($"Unknown cost stat '{stat}'.")
         };
     }
@@ -265,6 +270,7 @@ public sealed partial class MatchEngine
                 {
                     CostStatSubject.Target => target,
                     CostStatSubject.Performer => command.PerformerId is not null && _state.Cards.TryGetValue(command.PerformerId, out var performing) ? performing : null,
+                    CostStatSubject.HeldActionSource => RemAHeldActionSourceCard(),
                     _ => source
                 };
                 if (statCard is null)
@@ -303,7 +309,7 @@ public sealed partial class MatchEngine
                 // target-printed price, so the count-scaled discount is read here (never below zero).
                 var ringDiscount = RingEntryDiscount(Definition(target), command.PlayerId);
                 // Purify the Soul (The Shadow's Embrace pass, issue #476 batch 5): "Attaches to an Air Shugenja paying 2 less Gold" -- through Equip (Battle) the Shugenja is the performer.
-                var purifyDiscount = command.AbilityId == "equip-battle" && command.PerformerId is not null && _state.Cards.TryGetValue(command.PerformerId, out var equipper) ? PurifyTheSoulDiscount(target, equipper) : 0;
+                var purifyDiscount = command.AbilityId == "equip-battle" && command.PerformerId is not null && _state.Cards.TryGetValue(command.PerformerId, out var equipper) ? PurifyTheSoulDiscount(target, equipper) + MagaYariDiscount(target, equipper) : 0; // Maga-yari (issue #492 group G): the same kind of wielder discount
                 // Quelsa (The Shadow's Embrace pass, issue #476, batch 2): "Quelsa attaches Spells paying 2 less Gold" -- a Spell attached to him through an ability that pays its printed cost.
                 var quelsaDiscount = QuelsaSpellDiscount(command, target);
                 // Whispering Archive (The Shadow's Embrace pass, issue #476 batch 6): "Your Spells enter play paying 1 less Gold" -- a Spell priced by its printed cost is one entering
@@ -515,6 +521,8 @@ public sealed partial class MatchEngine
         if (KeywordEntryDiscount(card, playerId) is > 0 and var fudoDiscount) { raw -= fudoDiscount; basis += $" − {fudoDiscount} (Fudo, Mukudori)"; }
         // Purify the Soul (The Shadow's Embrace pass, issue #476 batch 5): "Attaches to an Air Shugenja paying 2 less Gold" -- a wielder-dependent term, like Katagi's.
         if (PurifyTheSoulDiscount(card, target) is > 0 and var purifyDiscount) { raw -= purifyDiscount; kind = GoldCostKind.Derived; basis += $" − {purifyDiscount} (Air Shugenja)"; }
+        // Maga-yari (Emperor Edition remaining-cards pass, issue #492 group G): "Attaches to a Paragon or Kensai paying 3 less Gold."
+        if (MagaYariDiscount(card, target) is > 0 and var magaYariDiscount) { raw -= magaYariDiscount; kind = GoldCostKind.Derived; basis += $" − {magaYariDiscount} (Paragon or Kensai)"; }
         // Quelsa (The Shadow's Embrace pass, issue #476, batch 2): "Quelsa attaches Spells paying 2 less Gold."
         if (QuelsaAttachDiscount(card, target) is > 0 and var quelsaAttach) { raw -= quelsaAttach; kind = GoldCostKind.Derived; basis += $" − {quelsaAttach} (Quelsa)"; }
         // Whispering Archive (The Shadow's Embrace pass, issue #476 batch 6): "Your Spells enter play paying 1 less Gold."

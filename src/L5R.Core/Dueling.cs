@@ -137,6 +137,8 @@ public sealed partial class MatchEngine
     private void Focus(GameCommand command)
     {
         var duel = _state.PendingDuel!;
+        // Reserve Weapon (issue #492 group G): "Before this Personality focuses: You may give him +3 to his duel stat until the duel ends instead of focusing."
+        if (command.Choice == "reserve") { ReserveWeaponFocus(command); return; }
         var isChallenger = command.PlayerId == duel.ChallengerPlayerId;
         var list = isChallenger ? duel.ChallengerFocused : duel.ChallengedFocused;
         Require(list.Count < 4, "You have already focused four times this duel and must Strike.");
@@ -182,6 +184,7 @@ public sealed partial class MatchEngine
     {
         var duel = _state.PendingDuel!;
         duel.Struck = true;
+        duel.StrikerPlayerId = _state.PriorityPlayerId; // Bend like a Reed (Emperor Edition remaining-cards pass, group A, issue #492): who struck.
         foreach (var id in duel.ChallengerFocused) Card(id).FaceUp = true;
         foreach (var id in duel.ChallengedFocused) Card(id).FaceUp = true;
         Emit("duelStruck", "A Strike ends focusing; focused cards are revealed.", _state.PriorityPlayerId);
@@ -202,7 +205,7 @@ public sealed partial class MatchEngine
             ? [_state.ActivePlayerId, 1 - _state.ActivePlayerId]
             : challengerDuelist ? [duel.ChallengerPlayerId] : challengedDuelist ? [duel.ChallengedPlayerId] : [];
         duel.PendingDuelistDecisions = order;
-        if (order.Count == 0) { BeginOrderingEffects(); return; }
+        if (order.Count == 0) { BeginOrderingEffectsAfterReactions(); return; }
         _state.PriorityPlayerId = order[0];
         _state.ConsecutivePasses = 0;
     }
@@ -239,10 +242,12 @@ public sealed partial class MatchEngine
             Emit("duelistRefocused", $"{Player(playerId).Name} discarded a focused card to focus again.", playerId, newId);
         }
         if (command.CardId is not null) RecordDuelReveal("Replacement");
-        if (duel.PendingDuelistDecisions.Count == 0) BeginOrderingEffects(); else _state.PriorityPlayerId = duel.PendingDuelistDecisions[0];
+        if (duel.PendingDuelistDecisions.Count == 0) BeginOrderingEffectsAfterReactions(); else _state.PriorityPlayerId = duel.PendingDuelistDecisions[0];
     }
 
-    private void BeginOrderingEffects()
+    private void BeginOrderingEffects() => ContinueToOrderingEffects();
+
+    private void ContinueToOrderingEffects()
     {
         var duel = _state.PendingDuel!;
         duel.Stage = "OrderingEffects";
@@ -275,12 +280,12 @@ public sealed partial class MatchEngine
     // The duel stat plus each side's own total focused Focus Value (revealed by the time this runs).
     // Any attachment modifying the stat applies as long as it is active right now -- CardForce/
     // CardPersonalHonor/PersonalityChi already read current, not printed, values.
-    private int DuelStatValue(CardInstance card, string stat) => NikaruDuelStat(card) ?? stat switch
+    private int DuelStatValue(CardInstance card, string stat) => (NikaruDuelStat(card) ?? stat switch
     {
         "Force" => CardForce(card),
         "PersonalHonor" => CardPersonalHonor(card),
         _ => PersonalityChi(card),
-    };
+    }) + RemADuelStatBonus(card); // Bend like a Reed (group A): "+2 to his duel stat until the duel ends"; Falling Rain Dojo (group F): +1 until the duel ends.
 
     private void ResolveDuel()
     {
@@ -394,6 +399,7 @@ public sealed partial class MatchEngine
             Provinces = draft.Provinces.Select(p => p with { After = EffectiveProvinceStrength(Player(p.PlayerId).Provinces[p.Index]) }).ToArray(),
             ResolutionVersion = _state.Version + 1, ReturnPhase = _state.Phase, ReturnPriority = _state.PriorityPlayerId } };
         _state.PendingDuel = null;
+        ApplyHesMineBows(duel.ChallengerId, duel.ChallengedId); // He's Mine! (Emperor Edition remaining-cards pass, issue #492, group B): the substitute bows once the duel has ended.
         ApplyTwinForksCity(winnerId); // Twin Forks City (The Shadow's Embrace pass, issue #476 batch 6): a trait, before any Reaction to the duel's end.
         // The duel itself is a single, complete action from challenge to consequences (issue #209):
         // once everything above has applied, the winning card's own controller gets a chance to
@@ -534,6 +540,11 @@ public sealed partial class MatchEngine
     {
         switch (abilityId)
         {
+            // The Sincerity of the Dragon (Emperor Edition remaining-cards pass, issue #492, group D): "After this duel ends, if you won it, give all your provinces +2 strength" -- until the turn ends (the
+            // default duration of an ongoing effect); Courtesy of the Crane's, below, has always raised the printed strength for good.
+            case "sincerity-dragon-focus":
+                if (ownerId == winnerPlayerId) foreach (var province in Player(ownerId).Provinces.Where(p => !p.Destroyed)) GiveProvinceStrengthThisTurn(ownerId, province.Index, 2, "The Sincerity of the Dragon");
+                break;
             case "courtesy-of-the-crane-focus":
                 if (ownerId == winnerPlayerId) foreach (var province in Player(ownerId).Provinces) province.Strength += 2;
                 break;
@@ -554,7 +565,7 @@ public sealed partial class MatchEngine
                 if (_state.PendingDuel?.WinnerId is string paralyzedWinnerId && InPlay(Card(paralyzedWinnerId))) WatchParalyzingTouch(Card(paralyzedWinnerId), "Paralyzing Touch");
                 break;
             // Sudden Movement (The Shadow's Embrace pass, issue #476, batch 4): "After this duel ends, give its winner +3F" (a tie has no winner).
-            case "sudden-movement-focus":
+            case "sudden-movement-focus": case "slow-death-focus": // The Slow Death (Emperor Edition remaining-cards pass, issue #492, group D): "After this duel ends, give its winner +3F."
                 if (_state.PendingDuel?.WinnerId is string suddenWinnerId && InPlay(Card(suddenWinnerId))) ApplyModifier(Card(suddenWinnerId), suddenWinnerId, abilityId, "Force", 3);
                 break;
             // Scavenging Party: "After this duel ends, give its winner -3F" (a tie has no winner).
@@ -574,6 +585,10 @@ public sealed partial class MatchEngine
             // Seeds of Decay pass (issue #453), batch 1. Embracing Battle: "bow the winner" (A Simple Yari's). Ceaseless Vigil's "straighten a Personality" is a choice (FocusEffectChoice.cs).
             case "embracing-battle-focus":
                 if (_state.PendingDuel?.WinnerId is string embracingWinnerId && InPlay(Card(embracingWinnerId)) && !StalwartNegatesBow(Card(embracingWinnerId), ownerId)) Card(embracingWinnerId).Bowed = true;
+                break;
+            // Final Confrontation (Emperor Edition remaining-cards pass, group A, issue #492): "After this duel ends, if your Personality won it, take the Imperial Favor."
+            case "final-confrontation-focus":
+                if (ownerId == winnerPlayerId) TakeImperialFavor(ownerId);
                 break;
             // Feint & Strike (oracle-l5r-2506, Forgotten Legacy pass issue #467 batch 3): "After this duel's resolution, its winner's controller discards a card" -- queued
             // like Times of Strife's own forced discard and answered as the duel hands play back (FinishDuelResolution's OpenOverconfidentDrawWindow). A tie has no winner.

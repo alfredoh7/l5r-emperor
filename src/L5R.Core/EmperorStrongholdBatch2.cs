@@ -42,6 +42,7 @@ public sealed partial class MatchEngine
         if (abilityId is null || !AbilityCatalog.All.TryGetValue(abilityId, out var ability) || ability.Timing == "Reaction") return;
         _state.UnnegatableActionKey = null;
         _state.HonorReducedActionKey = null;
+        _state.RemC.RedirectActionKey = null; _state.RemC.NegateLossesActionKey = null; // Emperor Edition remaining-cards pass, group C (issue #492): Rhetoric's and Solid Defense's marks.
     }
 
     // ---- Suitengu's Torch: "Its effects will not be negated or delayed" ------------------------------------------------------------------------------------------------
@@ -148,7 +149,10 @@ public sealed partial class MatchEngine
     {
         "own-unbowed-personality-with-keyword-at-any-location" => _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && Definition(c).Type == CardType.Personality && !c.Bowed
             && HasKeywords(c, reaction.RequiredKeywords)).OrderBy(c => c.Id, StringComparer.Ordinal),
-        _ => throw new InvalidOperationException($"A before-action Reaction with the performer '{reaction.Performer}' is not listed."),
+        // Ninja Tricks (Emperor Edition remaining-cards pass, issue #492, group B): "your performing Ninja Personality at the current battlefield".
+        "own-unbowed-personality-with-keyword-explicitly-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && !c.Bowed && AtBattle(c)
+            && HasKeywords(c, reaction.RequiredKeywords)).OrderBy(c => c.Id, StringComparer.Ordinal),
+        _ => EmperorRemainingCBeforeActionPerformers(playerId, reaction), // Emperor Edition remaining-cards pass, group C (issue #492): The Height of Courage.
     };
 
     // ---- Temple of Purity: "Give him -4F, which will not be negated" ------------------------------------------------------------------------------------------------------

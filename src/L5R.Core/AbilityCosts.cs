@@ -47,6 +47,18 @@ public static class CostVerbs
     /// <summary>Give the subject -Amount Chi ("give this Personality -1C:", Cursed Relic, issue #467): payable only when he has that much Chi to lose (core rules,
     /// Pay Costs); a Personality it leaves at 0 Chi is destroyed by the ordinary Chi rule (ApplyModifier).</summary>
     public const string ChiPenalty = "chi-penalty";
+    /// <summary>Shuffle the acting player's hand (the card played from it excepted) into his Fate deck (Face of Ninube, Emperor Edition remaining-cards pass, group A, issue #492); the count is what the action then draws.</summary>
+    public const string ShuffleHand = "shuffle-hand";
+    /// <summary>Move the subject (his unit) home ("Move your performing opposed Personality home:", Wall of Honor, issue #492): a cost, so it is paid whatever happens to the effects and no negation of an effect stops it.</summary>
+    public const string MoveHome = "move-home";
+    /// <summary>Discard every card in the acting player's hand, even if it is empty ("discard your hand (even if empty):", Contemplate the Void, Emperor Edition remaining-cards pass, issue #492). Names no card.</summary>
+    public const string DiscardHand = "discard-hand";
+    /// <summary>Bow every card chosen for the multi-target slot the cost's Subject names (CostSubject.Slot): "bow ... 0 or more of your other performing Shugenja" (Capturing the Soul, issue #492).</summary>
+    public const string BowSlotCards = "bow-slot-cards";
+    /// <summary>Destroy the subject Region ("Destroy this card:" on a Region, Refuge of the Three Sisters, issue #492 group F): it leaves its province for its owner's Dynasty discard pile.</summary>
+    public const string DestroyRegion = "destroy-region";
+    /// <summary>Remove the subject Personality in play from the game, with his attachments discarded ("remove your performing unbowed Personality from the game:", issue #492 group F).</summary>
+    public const string RemoveUnit = "remove-unit";
 }
 
 /// <summary>One cost: <paramref name="Verb"/> (CostVerb.Bow or CostVerbs.*) applied to <paramref name="Subject"/> (CostSubject.*: the ability's
@@ -54,7 +66,9 @@ public static class CostVerbs
 /// nothing is paid when the source is played from the hand (the hand play is spent as any hand-played card is). <paramref name="Amount"/> is the
 /// Honor of LoseHonor. <paramref name="UnlessKeyword"/>: "...unless he is Void" -- the cost is not paid when this Personality (the source, or the Personality an attached source
 /// is attached to) has that keyword.</summary>
-public sealed record ActionCost(string Verb, string Subject = CostSubject.Source, bool UnlessInHand = false, string? Token = null, int Amount = 0, string? UnlessKeyword = null)
+public sealed record ActionCost(string Verb, string Subject = CostSubject.Source, bool UnlessInHand = false, string? Token = null, int Amount = 0, string? UnlessKeyword = null,
+    // "Bow this Shugenja if he is home" (Obscured Pathways, issue #492): the cost is owed only while its subject stands at home; away from home it is neither owed nor needs him unbowed.
+    bool IfSubjectHome = false)
 {
     /// <summary>"Bow this Shugenja" (the wielder of the Spell the ability is on).</summary>
     public static ActionCost[] BowWielder { get; } = [new(CostVerb.Bow, CostSubject.Wielder)];
@@ -114,6 +128,11 @@ public sealed partial class MatchEngine
     // the performer's own keyword, not the source's -- the subject, when the caller has it, is who "he" is.
     private bool CostExempt(ActionCost cost, CardInstance? source, CardInstance? subject = null)
     {
+        if (cost.IfSubjectHome)
+        {
+            var judged = subject ?? (source is null ? null : cost.Subject == CostSubject.Wielder ? WielderOf(source) : source);
+            if (judged is null || judged.Zone != Zone.Home) return true;
+        }
         if (cost.UnlessKeyword is not { } keyword) return false;
         if (cost.Subject == CostSubject.Performer && subject is not null) return Keyword(subject, keyword);
         if (source is null) return false;
@@ -142,7 +161,7 @@ public sealed partial class MatchEngine
     private static string? NegatableKind(string verb) => verb switch
     {
         CostVerb.Bow or CostVerbs.BowUnit => "bow",
-        CostVerb.Destroy or CostVerbs.Sacrifice => "destroy",
+        CostVerb.Destroy or CostVerbs.Sacrifice or CostVerbs.DestroyRegion => "destroy",
         _ => null
     };
 
@@ -152,6 +171,10 @@ public sealed partial class MatchEngine
         var ids = PlannedCostsOf(command).Where(c => c.Cost.Verb is CostVerb.Bow or CostVerbs.Sacrifice && c.Subject is not null).Select(c => c.Subject!.Id).ToHashSet(StringComparer.Ordinal);
         return ids.Count == 0 ? null : ids;
     }
+
+    // The cards a slot-wide cost applies to (CostVerbs.BowSlotCards): the cards the command chose for the slot the cost's Subject names.
+    private IEnumerable<CardInstance> SlotCostCards(GameCommand command, ActionCost cost) =>
+        cost.Subject.StartsWith(CostSubject.SlotPrefix, StringComparison.Ordinal) ? SlotCards(command, cost.Subject[CostSubject.SlotPrefix.Length..]) : [];
 
     // Every cost the action would pay (see PlannedCosts), listed safely: empty for a command that names no valid ability or option.
     private List<(ActionCost Cost, CardInstance? Subject)> PlannedCostsOf(GameCommand command)
@@ -179,7 +202,15 @@ public sealed partial class MatchEngine
         foreach (var cost in ability.Costs ?? [])
         {
             if (cost.UnlessInHand && source is { Zone: Zone.Hand }) continue;
-            var subject = cost.Verb is CostVerbs.LoseHonor or CostVerbs.DestroyLeftmostProvince ? null : CostSubjectCard(new CostOption(cost.Verb, cost.Verb, cost.Verb, cost.Subject), ability, command, source);
+            // Emperor Edition remaining-cards pass, group C (issue #492): "Bow one or more of your performing X" -- every card of the performing slot pays.
+            if (cost.Subject == EmperorRemainingCAbilities.AllPerformingSlots) { foreach (var performing in PerformingSlotCards(command, ability)) yield return (cost, performing); continue; }
+            // Capturing the Soul (issue #492): every card chosen for the slot is bowed, each a cost of its own.
+            if (cost.Verb == CostVerbs.BowSlotCards)
+            {
+                foreach (var slotCard in SlotCostCards(command, cost)) yield return (new ActionCost(CostVerb.Bow, cost.Subject), slotCard);
+                continue;
+            }
+            var subject = cost.Verb is CostVerbs.LoseHonor or CostVerbs.DestroyLeftmostProvince or CostVerbs.ShuffleHand or CostVerbs.DiscardHand ? null : CostSubjectCard(new CostOption(cost.Verb, cost.Verb, cost.Verb, cost.Subject), ability, command, source);
             if (CostExempt(cost, source, subject) || YorimiWaivesBow(ability, cost, source, subject)) continue; // Soshi Yorimi (issue #477, batch 4): ignored, so not planned.
             yield return (cost, subject);
         }
@@ -193,7 +224,19 @@ public sealed partial class MatchEngine
         foreach (var cost in ability.Costs)
         {
             if (cost.UnlessInHand && source is { Zone: Zone.Hand }) continue;
-            if (cost.Verb == CostVerbs.LoseHonor) { GainHonor(player.Id, -cost.Amount, source is null ? "an action" : Definition(source).Name, source); continue; }
+            if (cost.Subject == EmperorRemainingCAbilities.AllPerformingSlots) { foreach (var performing in PerformingSlotCards(command, ability).ToArray()) performing.Bowed = true; continue; } // issue #492, group C
+            if (cost.Verb == CostVerbs.LoseHonor)
+            {
+                _payingActionCost = true; // Emperor Edition remaining-cards pass, group C (issue #492): Honor paid as a cost is not an effect (Rhetoric, Solid Defense).
+                try { GainHonor(player.Id, -cost.Amount, source is null ? "an action" : Definition(source).Name, source); }
+                finally { _payingActionCost = false; }
+                continue;
+            }
+            if (cost.Verb == CostVerbs.ShuffleHand) { RemAShuffleHandIntoDeck(player, source); continue; }
+            // Contemplate the Void (issue #492): "discard your hand (even if empty)".
+            if (cost.Verb == CostVerbs.DiscardHand) { foreach (var handId in player.Hand.ToArray()) DiscardFate(player, Card(handId)); continue; }
+            // Capturing the Soul (issue #492): "bow ... 0 or more of your other performing Shugenja".
+            if (cost.Verb == CostVerbs.BowSlotCards) { foreach (var slotCard in SlotCostCards(command, cost)) slotCard.Bowed = true; continue; }
             if (cost.Verb == CostVerbs.DestroyLeftmostProvince)
             {
                 if (player.Provinces.Where(p => !p.Destroyed).OrderBy(p => p.Index).FirstOrDefault() is { } leftmost) DestroyProvince(player.Id, leftmost);
@@ -212,6 +255,8 @@ public sealed partial class MatchEngine
                 case CostVerbs.Sacrifice:
                     if (subject.Zone == Zone.Attached) DestroyAttachment(subject); else DestroyUnits([subject], false, player.Id);
                     break;
+                case CostVerbs.DestroyRegion: DestroyRegion(subject); break;
+                case CostVerbs.RemoveUnit: RemoveUnitFromGame(subject); break;
                 case CostVerbs.DiscardFromPlay:
                     subject.Zone = IsDynastyCardType(Definition(subject).Type) ? Zone.DynastyDiscard : Zone.FateDiscard;
                     subject.ProvinceIndex = null; subject.FaceUp = true;
@@ -225,6 +270,10 @@ public sealed partial class MatchEngine
                     if (UnitHostId(subject) != subject.Id) Card(UnitHostId(subject)).Bowed = true;
                     break;
                 case CostVerbs.ChiPenalty: ApplyModifier(subject, source?.Id ?? subject.Id, command.AbilityId!, "Chi", -cost.Amount); break;
+                case CostVerbs.MoveHome:
+                    ReturnHome(subject, false);
+                    Emit("unitMovedHome", $"{Definition(subject).Name}'s unit moved home (a cost).", subject.OwnerId, subject.Id);
+                    break;
                 default: throw new InvalidOperationException($"Unknown cost verb '{cost.Verb}'.");
             }
         }

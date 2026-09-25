@@ -114,7 +114,7 @@ public sealed partial class MatchEngine
     {
         // "Paying for a Spell during the Combat Segment": a Spell equipped or attached (a payment for the card itself, never an action of a Spell already in play).
         EmperorStrongholdBatch1Abilities.LibraryOfRebirthPaymentWhen => _state.Phase == Phase.Battle && paying.Kind == PaymentKind.Equip && Definition(paying.Card).Type == CardType.Spell,
-        _ => false
+        _ => EmperorRemainingFPaymentConditionMet(when, paying) // Luxurious Silk (issue #492, group F): paying for an action.
     };
 
     // Pay's step for a card whose reactive source is in this payment: the use is spent and the card is not bowed for it.
@@ -181,7 +181,7 @@ public sealed partial class MatchEngine
     }
 
     // The actions that discard the Imperial Favor as a cost ("as a condition upon further effects"), whichever pass wired them.
-    private static bool IsFavorDiscardAbility(string id) => DiscardsImperialFavorAsCost(id) || id is "rengetsu-disable" or "tadanobu-draw";
+    private static bool IsFavorDiscardAbility(string id) => DiscardsImperialFavorAsCost(id) || id is "rengetsu-disable" or "tadanobu-draw" or "solid-defense-negate-favor"; // Solid Defense (issue #492, group C)
 
     // A Favor token the player may discard in place of the Imperial Favor: on their Kyuden Otomo - exp.
     private CardInstance? FavorTokenSource(int playerId) =>
@@ -327,7 +327,7 @@ public sealed partial class MatchEngine
         }
         if (!attackerStep && HiddenFallsStepPlayable(defender, false)) { SetPhase(Phase.DefenseAssignment, defender); return; }
         _state.ExtraInfantrySegment = false;
-        SetPhase(_state.UnresolvedBattlefields.Count > 0 ? Phase.BattleSelection : Phase.Dynasty, attacker);
+        SetPhaseAfterManeuvers(attacker); // Warded Paths (Emperor Edition remaining-cards pass, issue #492, group E): the battle order may be the Defender's.
     }
 
     // Assign's rule in the additional segment: the assigning player's Scouts, to the provinces he targeted.

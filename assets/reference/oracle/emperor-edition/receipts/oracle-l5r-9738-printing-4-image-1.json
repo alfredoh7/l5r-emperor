@@ -23,5 +23,18 @@
   "source_image_hash": "b3/cd",
   "source_url": "https://images.oracleofthevoid.com/l5r/b3/cd/printing_9738_4_master.jpg",
   "url_prefix": "https://images.oracleofthevoid.com/l5r/b3/cd/printing_9738_4_",
-  "width": 750
+  "width": 750,
+  "working_copy": {
+    "bytes": 156624,
+    "format": "WEBP",
+    "height": 1050,
+    "path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-9738-printing-4-image-1.webp",
+    "sha256": "7ac34ac884f7e22ce6a096f9c8f643c49c69e184f7db92d567ede2059cac9fd3",
+    "source": {
+      "asset": "cwebp 1.4.0 quality 85 of the master downloaded from source_url (sha256 verified), same encoding as the Catalogue WebP 85 pack",
+      "matched_by": "original_sha256",
+      "release": null
+    },
+    "width": 750
+  }
 }

@@ -1,0 +1,117 @@
+{
+  "Profile": "personality-wave-78",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-4456",
+      "Name": "Kitsune Denhei",
+      "Type": "Personality",
+      "Clan": "Mantis",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 1,
+      "Chi": 4,
+      "PersonalHonor": 3,
+      "HonorRequirement": 4,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After Denhei enters play: Create a 2F/2C/3PH Mantis Clan • Nonhuman • Snake • Spirit Personality with the ability, \"Open: Target a Personality: He is bitten. His base abilities may not be used.\"",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-4456.jpg",
+      "Keywords": [
+        "Earth",
+        "Mantis Clan",
+        "Shugenja"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "denhei-create"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-7156",
+      "Name": "Shosuro Rokuta",
+      "Type": "Personality",
+      "Clan": "Scorpion",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 1,
+      "Chi": 4,
+      "PersonalHonor": 1,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After the resolution of a battle, or an action or trait from a card that another player owns, if the resolution or card destroyed Rokuta: Create a 0F/2C/1PH Scorpion Clan • Courtier • Apprentice Personality (in your home). Choose a player, who loses 3 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7156.jpg",
+      "Keywords": [
+        "Courtier",
+        "Scorpion Clan",
+        "Soul of Shosuro Takuro"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "rokuta-action-create",
+        "rokuta-battle-create"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10002",
+      "Name": "Denhei's Snake",
+      "Type": "Personality",
+      "Clan": "Mantis",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 2,
+      "PersonalHonor": 3,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "May not be included in decks.\nOpen: Target a Personality: He is bitten. His base abilities may not be used.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10002.jpg",
+      "Keywords": [
+        "Mantis Clan",
+        "Nonhuman",
+        "Snake",
+        "Spirit"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "denhei-snake-bite"
+      ],
+      "Effect": "none",
+      "CreatedOnly": true
+    },
+    {
+      "Id": "oracle-l5r-10013",
+      "Name": "Rokuta's Apprentice",
+      "Type": "Personality",
+      "Clan": "Scorpion",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 2,
+      "PersonalHonor": 1,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "May not be included in decks.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10013.jpg",
+      "Keywords": [
+        "Scorpion Clan",
+        "Courtier",
+        "Apprentice"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "none",
+      "CreatedOnly": true
+    }
+  ],
+  "Decks": []
+}

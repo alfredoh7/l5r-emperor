@@ -14,6 +14,9 @@ public sealed class PendingAfterResolution
     public int? ProvinceDestroyedBy { get; set; }
     /// <summary>The battle's loser or losers: the Defender or the Attacker who was beaten; BOTH players in a tie (Mendon, issue #417); none when nothing was fought.</summary>
     public List<int> Losers { get; set; } = [];
+    /// <summary>Emperor Edition remaining-cards pass (issue #492), group D (Words Have Strength): the cards the resolution destroyed (the losing army or armies), and whether a copy of Words Have Strength was played in reaction to it.</summary>
+    public List<string> DestroyedCardIds { get; set; } = [];
+    public bool WordsHaveStrengthPlayed { get; set; }
 }
 
 // The after-resolution window (issue #417, Mendon's rulings of 2026-09-21). "After a battle's resolution ends" -- after the losing units are destroyed, the province is destroyed
@@ -74,6 +77,11 @@ public sealed partial class MatchEngine
             "returning-home-create" => facts.ProvinceDestroyedBy == playerId && facts.Attacker == playerId,
             // Shosuro Ryoken (The Shadow's Embrace pass, issue #476, batch 2): "if Ryoken was at its battlefield during its resolution in which you destroyed a province or army".
             "ryoken-honor-loss" => ResolutionDestroyedForPlayer(playerId) && source.Zone == Zone.Battlefield && source.ProvinceIndex == facts.ProvinceIndex,
+            // Shosuro Rokuta (proxy group Z, issue #492): "After the resolution of a battle, if the resolution destroyed Rokuta."
+            "rokuta-battle-create" => RokutaBattleApplies(source, facts),
+            "empress-address-battle" => EmpressAddressBattleApplies(facts, playerId), // Emperor Edition remaining-cards pass, group C (issue #492)
+            // Words Have Strength (Emperor Edition remaining-cards pass, issue #492, group D): "if the resolution destroyed any of your Courtiers or Magistrates".
+            "words-strength-resolution" => ResolutionDestroyedCourtierOrMagistrate(facts, playerId),
             _ => true
         };
     }

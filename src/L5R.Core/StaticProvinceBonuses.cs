@@ -22,6 +22,10 @@ public sealed partial class MatchEngine
                 case "ebisu-provinces":
                     if (mine) total += 2;
                     break;
+                // Fortifications (issue #492, group F): "Your provinces have +1 strength."
+                case FortificationsEffect:
+                    if (mine) total += 1;
+                    break;
             }
         }
         return total;

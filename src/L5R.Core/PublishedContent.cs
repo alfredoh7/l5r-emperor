@@ -2473,6 +2473,14 @@ public static class PublishedContent
     public static PublishedSnapshot StrategyWave56 { get; } = Load("L5R.Published.StrategyWave56.json", "strategy-wave-56", requireDecks: false);
     /// <summary>Strategy wave 57 (The Shadow's Embrace pass, issue #476, batch 4): the wired Strategies of the batch (package_strategy_wave_57.py lists them).</summary>
     public static PublishedSnapshot StrategyWave57 { get; } = Load("L5R.Published.StrategyWave57.json", "strategy-wave-57", requireDecks: false);
+    /// <summary>Strategy wave 58 (Emperor Edition remaining-cards pass, issue #492, group A): the wired Strategies of the group (package_strategy_wave_58.py lists them).</summary>
+    public static PublishedSnapshot StrategyWave58 { get; } = Load("L5R.Published.StrategyWave58.json", "strategy-wave-58", requireDecks: false);
+    /// <summary>Strategy wave 59 (Emperor Edition remaining-cards pass, issue #492, group B): the wired Strategies of the group (package_strategy_wave_59.py lists them).</summary>
+    public static PublishedSnapshot StrategyWave59 { get; } = Load("L5R.Published.StrategyWave59.json", "strategy-wave-59", requireDecks: false);
+    /// <summary>Strategy wave 60 (Emperor Edition remaining-cards pass, issue #492, group C): the wired Strategies of the group (package_strategy_wave_60.py lists them).</summary>
+    public static PublishedSnapshot StrategyWave60 { get; } = Load("L5R.Published.StrategyWave60.json", "strategy-wave-60", requireDecks: false);
+    /// <summary>Strategy wave 61 (Emperor Edition remaining-cards pass, issue #492, group D): the wired Strategies of the group (package_strategy_wave_61.py lists them).</summary>
+    public static PublishedSnapshot StrategyWave61 { get; } = Load("L5R.Published.StrategyWave61.json", "strategy-wave-61", requireDecks: false);
     /// <summary>Spell wave 20 (Embers of War pass, issue #460, batch 5): Inescapable Snare, Incite the Phantoms, Sudden Guardian, The Swell of Strength.</summary>
     public static PublishedSnapshot SpellWave20 { get; } = Load("L5R.Published.SpellWave20.json", "spell-wave-20", requireDecks: false);
     /// <summary>Stronghold wave 14 (issue #460, batch 5): The Ki-Rin's Path.</summary>
@@ -2537,6 +2545,8 @@ public static class PublishedContent
     /// Natsumi, Niiro no Oni, Quelsa, Shiba Kudome (Experienced), Shiba Shirou, Shinjo Jong-Ho, Shinjo Min-Hee, Shosuro Nobu, Shosuro Ryoken, Shugorei, Yamazaki (Experienced),
     /// Yasuki Ikke, Yoritomo Kanahashi.</summary>
     public static PublishedSnapshot PersonalityWave75 { get; } = Load("L5R.Published.PersonalityWave75.json", "personality-wave-75", requireDecks: false);
+    /// <summary>Personality wave 77 (Emperor Edition remaining-cards pass, issue #492, proxy group Y): Akodo Makotai, Shinjo Ki-Chang (Experienced), Kitsune Gina and the three Proxies they create (Infantry Follower, Dutiful Cavalry, Gina's Fox).</summary>
+    public static PublishedSnapshot PersonalityWave77 { get; } = Load("L5R.Published.PersonalityWave77.json", "personality-wave-77", requireDecks: false);
     /// <summary>Holding wave 12 (The Shadow's Embrace pass, issue #476, batch 6): Fortress of Lidless Eyes, Platinum Mine, Sheltered Port, Small-Time Bully, Versatile Farm, Whispering Archive.</summary>
     public static PublishedSnapshot HoldingWave12 { get; } = Load("L5R.Published.HoldingWave12.json", "holding-wave-12", requireDecks: false);
     /// <summary>Follower wave 30 (issue #476, batch 6): Clearing Crew, Elephant Caravan, Shieldman, Wasteland Scout.</summary>
@@ -2552,6 +2562,17 @@ public static class PublishedContent
     public static PublishedSnapshot StrongholdWave19 { get; } = Load("L5R.Published.StrongholdWave19.json", "stronghold-wave-19", requireDecks: false);
     /// <summary>Celestial wave 7 (issue #476, batch 6): The Moon's Imperative, The Sun's Aspiration.</summary>
     public static PublishedSnapshot CelestialWave7 { get; } = Load("L5R.Published.CelestialWave7.json", "celestial-wave-7", requireDecks: false);
+    /// <summary>Spell wave 23 (Emperor Edition remaining-cards pass, issue #492, group E): Capturing the Soul, Cleansing the Path, Consecration, Contemplate the Void, Hanabi, I Give You My Name,
+    /// Obscured Pathways, The Kami's Blessing, Thunder's Favor, Unnatural Flood, Warded Paths.</summary>
+    public static PublishedSnapshot SpellWave23 { get; } = Load("L5R.Published.SpellWave23.json", "spell-wave-23", requireDecks: false);
+    /// <summary>Personality wave 76 (Emperor Edition remaining-cards pass, issue #492, proxy group X): Goju Kobashi and Suiteiru no Oni, with the created-only Follower Proxies they create (Kobashi's Spawn, Suiteiru's Podling).</summary>
+    public static PublishedSnapshot PersonalityWave76 { get; } = Load("L5R.Published.PersonalityWave76.json", "personality-wave-76", requireDecks: false);
+    /// <summary>Spell wave 24 (Emperor Edition remaining-cards pass, issue #492, proxy group X): Summon Swamp Spirits and the created-only Swamp Spirit Follower it creates.</summary>
+    public static PublishedSnapshot SpellWave24 { get; } = Load("L5R.Published.SpellWave24.json", "spell-wave-24", requireDecks: false);
+    /// <summary>Personality wave 78 (Emperor Edition remaining-cards pass, issue #492, proxy group Z): Kitsune Denhei, Shosuro Rokuta and the Proxies they create (Denhei's Snake, Rokuta's Apprentice).</summary>
+    public static PublishedSnapshot PersonalityWave78 { get; } = Load("L5R.Published.PersonalityWave78.json", "personality-wave-78", requireDecks: false);
+    /// <summary>Celestial wave 8 (Emperor Edition remaining-cards pass, issue #492, group E): the Kami Guidance Celestials of Akodo, Bayushi, Daigotsu, Doji, Hida, Shiba, Shinjo, Togashi and Yoritomo.</summary>
+    public static PublishedSnapshot CelestialWave8 { get; } = Load("L5R.Published.CelestialWave8.json", "celestial-wave-8", requireDecks: false);
     /// <summary>Personality wave 74 (The Shadow's Embrace pass, issue #476, batch 1): Agasha Kurou, Asahina Keigo, Asako Hayate, Asako Jirou, Atosa, Bayushi Misaki,
     /// Bayushi Tarou, Bayushi Waru, Chiisai, Chuda Hitaka, Daidoji Sosuke, Daigotsu Arakan, Daigotsu Rafu, Goju Bunoro, Hida Bakari, Hiruma Hikazu, Hiruma Nikaru
     /// (Shadow's Embrace printing), Iuchi Haruma, Kaiu Fumiko, Kakita Ichigiku, Kakita Tadanobu, Kazehime.</summary>
@@ -2564,4 +2585,15 @@ public static class PublishedContent
     /// <summary>Stronghold wave 18 (Emperor Edition Stronghold pass, issue #486, batch 2): Palace of the Breaking Dawn, Pillars of Virtue, Shiro Chugo, Steel Soul Dojo, Suitengu's Torch,
     /// Temple of Purity, The Aerie.</summary>
     public static PublishedSnapshot StrongholdWave18 { get; } = Load("L5R.Published.StrongholdWave18.json", "stronghold-wave-18", requireDecks: false);
+    /// <summary>Holding wave 13 (Emperor Edition remaining-cards pass, issue #492, group F): the Emperor Edition Holdings wired whole (group F).</summary>
+    public static PublishedSnapshot HoldingWave13 { get; } = Load("L5R.Published.HoldingWave13.json", "holding-wave-13", requireDecks: false);
+    /// <summary>Region wave 9 (Emperor Edition remaining-cards pass, issue #492, group F): Blighted Region and Refuge of the Three Sisters (group F).</summary>
+    public static PublishedSnapshot RegionWave9 { get; } = Load("L5R.Published.RegionWave9.json", "region-wave-9", requireDecks: false);
+    /// <summary>Event wave 8 (Emperor Edition remaining-cards pass, issue #492, group F): the twelve Events wired in group F.</summary>
+    public static PublishedSnapshot EventWave8 { get; } = Load("L5R.Published.EventWave8.json", "event-wave-8", requireDecks: false);
+    /// <summary>Item wave 15 (Emperor Edition remaining-cards pass, issue #492, group G): Armor of the Heavens, Blade of Perfection, Chrysanthemum Blossom, Clan Standard, Gift Armor, Kensai's Blade, Maga-yari,
+    /// Modifications, Reserve Weapon, Sasumata, Tsuruchi Daikyu.</summary>
+    public static PublishedSnapshot ItemWave15 { get; } = Load("L5R.Published.ItemWave15.json", "item-wave-15", requireDecks: false);
+    /// <summary>Follower wave 31 (issue #492, group G): Bandit Gang, Ikiryo, Ikoma House Guard, Kaiu House Guard, Legion of Pain, Moto House Guard, Tamori House Guard, Tsuruchi House Guard.</summary>
+    public static PublishedSnapshot FollowerWave31 { get; } = Load("L5R.Published.FollowerWave31.json", "follower-wave-31", requireDecks: false);
 }

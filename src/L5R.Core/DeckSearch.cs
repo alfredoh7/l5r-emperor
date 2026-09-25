@@ -30,6 +30,9 @@ public static class SearchDeck
     /// <summary>The searcher's own Fate discard pile (The Shadow's Embrace pass, issue #476 batch 6: Discovering the Temple's "search your Fate deck or discard
     /// pile"). A public pile: its cards are listed like a deck's, it is never shuffled, and a card taken from it simply leaves the pile.</summary>
     public const string FateDiscard = "FateDiscard";
+    /// <summary>The searcher's own Dynasty discard pile, the dead Personalities included (Emperor Edition remaining-cards pass, issue #492: I Give You My Name's "Dynasty deck or discard pile", Shinjo's
+    /// Guidance's "discard pile, then Dynasty deck"). A public pile, listed like a deck, never shuffled; a card taken from it leaves it by changing zone.</summary>
+    public const string DynastyDiscard = "DynastyDiscard";
 }
 
 /// <summary>What happens to the chosen card once it has been shown (the card's own printed effect).</summary>
@@ -46,6 +49,16 @@ public static class SearchEffect
     /// searched deck at its entry price less <see cref="SearchSpec.RecruitDiscount"/>, paid through the one payment path (a ChoosePayment stage when it costs
     /// anything); a card whose price cannot be paid does not enter play and stays in the deck, which is shuffled as always.</summary>
     public const string RecruitUnbowed = "recruit-unbowed";
+    /// <summary>Meeting the Keepers (Emperor Edition remaining-cards pass, issue #492, group B): "put it on top of the deck after shuffling" -- the card stays in the searched deck, which is
+    /// shuffled as every search ends, and only then is put on top (PendingSearch.PutOnTopId).</summary>
+    public const string PutOnTopAfterShuffle = "put-on-top-after-shuffle";
+    /// <summary>Sacrifice of Pawns (Emperor Edition remaining-cards pass, group C, issue #492): "bring him into play, paying all costs but paying two more Gold. (Discard him if you are unable to play him.)" -- a Personality
+    /// of the searched Dynasty deck recruited at home for his whole entry price plus 2, or discarded (EmperorRemainingC.cs).</summary>
+    public const string RecruitPersonality = "recruit-personality";
+    /// <summary>I Give You My Name (issue #492): "Put the Oni into play, ignoring Gold cost" -- a Personality enters the searcher's home free (no Honor Requirement, no price).</summary>
+    public const string PutIntoPlay = "put-into-play";
+    /// <summary>Shinjo's Guidance (issue #492): "put her into one of your provinces, face-up, discarding the card that was there" -- the searcher picks the province.</summary>
+    public const string ToProvinceFaceUp = "to-province-face-up";
 }
 
 /// <summary>The stage a pending search is in; also names which PendingChoice type is open.</summary>
@@ -71,7 +84,9 @@ public sealed record SearchCriteria(string Noun, CardType[]? Types = null, strin
     // "A card with Thunder or an element keyword" (Naka Mahatsu - exp, Seeds of Decay, issue #453): at least one of these keywords ("any of"), where Keywords is "all of".
     string[]? AnyKeywords = null,
     // "A ... Holding with another title" (Versatile Farm, issue #476 batch 6): titles that may NOT be chosen.
-    string[]? ExcludedTitles = null);
+    string[]? ExcludedTitles = null,
+    // "A Kiho Battle Strategy" (Martial Instruction, issue #492): a card with a printed Battle action -- an ability whose timing is Battle or Battle/Open.
+    bool BattleStrategy = false);
 
 /// <summary>One searchable deck, the criteria that deck's candidates must meet, and what happens to the chosen
 /// card. A card that lets the player pick the deck (Ikoma Shizuka) lists two, each with its own criteria.</summary>
@@ -79,7 +94,10 @@ public sealed record SearchDeckOption(string Deck, SearchCriteria Criteria, stri
 
 /// <summary>A whole search: Optional is true only for a printed "you may search" (Pass is then legal even when a
 /// card qualifies); every other search must take an eligible card and may pass only when none qualifies.</summary>
-public sealed record SearchSpec(string Id, string Label, SearchDeckOption[] Decks, bool Optional = false, int RecruitDiscount = 0);
+public sealed record SearchSpec(string Id, string Label, SearchDeckOption[] Decks, bool Optional = false, int RecruitDiscount = 0,
+    // "Search your discard pile, then Fate deck" (Togashi's Guidance, Shinjo's Guidance; issue #492): the places are searched IN ORDER -- no choice of deck, the first is searched first, and a player who
+    // takes no card from it (whether or not one qualified) goes on to the next.
+    bool Ordered = false);
 
 public static class SearchCatalog
 {
@@ -132,8 +150,26 @@ public static class SearchCatalog
     public static SearchSpec YungRing { get; } = new("yung-ring", "Search your Fate deck for a Ring",
         [new(SearchDeck.Fate, new("Ring", [CardType.Ring]), SearchEffect.ToHand)]);
 
+    /// <summary>Introspection (oracle-l5r-3793, Emperor Edition remaining-cards pass, issue #492, group B): "Search your Fate deck for a card. Put it in your hand." Nothing is said to show it, so it is
+    /// put into the hand without being shown; a search's own record still shows the card (the one flow every search shares).</summary>
+    public static SearchSpec Introspection { get; } = new("introspection", "Search your Fate deck for a card",
+        [new(SearchDeck.Fate, new("card"), SearchEffect.ToHand)]);
+
+    /// <summary>Martial Instruction (oracle-l5r-4843): "Search your Fate deck for a Kiho Battle Strategy, show it, and put it in your hand."</summary>
+    public static SearchSpec MartialInstruction { get; } = new("martial-instruction", "Search your Fate deck for a Kiho Battle Strategy",
+        [new(SearchDeck.Fate, new("Kiho Battle Strategy", [CardType.Strategy], ["Kiho"], BattleStrategy: true), SearchEffect.ToHand)]);
+
+    /// <summary>Meeting the Keepers (oracle-l5r-5018): "Search your Dynasty deck for an Event, show it, and put it on top of the deck after shuffling."</summary>
+    public static SearchSpec MeetingTheKeepers { get; } = new("meeting-the-keepers", "Search your Dynasty deck for an Event",
+        [new(SearchDeck.Dynasty, new("Event", [CardType.Event]), SearchEffect.PutOnTopAfterShuffle)]);
+
+    /// <summary>Sacrifice of Pawns (oracle-l5r-6439, issue #492): "search your Dynasty deck for a Personality and bring him into play, paying all costs but paying two more Gold."</summary>
+    public static SearchSpec SacrificeOfPawns { get; } = new("sacrifice-of-pawns", "Search your Dynasty deck for a Personality",
+        [new(SearchDeck.Dynasty, new("Personality", [CardType.Personality]), SearchEffect.RecruitPersonality)]);
+
     public static IReadOnlyDictionary<string, SearchSpec> All { get; } = new[] { IkomaShizuka, ImperialGift, TrainingCheap, TrainingFocus, TrainingOptional, NakaMahatsu, YungRing,
-            DiscoveringTheTemple, VersatileFarm }
+            DiscoveringTheTemple, VersatileFarm, Introspection, MartialInstruction, MeetingTheKeepers, SacrificeOfPawns, EmperorRemainingFSearches.RefugeOfTheThreeSisters }
+        .Concat(EmperorRemainingESearches.All) // Emperor Edition remaining-cards pass (issue #492), group E: EmperorRemainingE.cs.
         .ToDictionary(s => s.Id, StringComparer.Ordinal);
 
     /// <summary>The search an Event carries in its Effect (an Event has no abilities of its own to hang a spec on).</summary>
@@ -155,6 +191,8 @@ public sealed class PendingSearch
     /// <summary>The instance picked from the deck once one has been selected. Still physically in the deck list
     /// while a follow-up choice (a Region's province) is pending, so the deck and the card zones never disagree.</summary>
     public string? SelectedCardId { get; set; }
+    /// <summary>Meeting the Keepers (issue #492): the card put on top of the searched deck once it has been shuffled.</summary>
+    public string? PutOnTopId { get; set; }
     /// <summary>"ability" (a Limited action: the action resolves afterwards) or "event" (an Events Phase reveal:
     /// the Event is discarded and the reveal loop resumes afterwards).</summary>
     public string Origin { get; set; } = "ability";
@@ -163,6 +201,14 @@ public sealed class PendingSearch
     /// Togashi Hizumi) see exactly the Personalities this action bowed (Shizuka's own cost) -- the check the tail of an
     /// ordinary action does, which a deferred action would otherwise skip. Null when none was captured.</summary>
     public List<string>? BowedBefore { get; set; }
+    // Emperor Edition remaining-cards pass (issue #492), group E (EmperorRemainingE.cs). GoldLimit: "with Gold Cost lower than or equal to ..." where the number is read from the action (I Give You My Name);
+    // HonorLossOnFinish: "Lose 2 Honor" after the search whether or not a card was found; EnteredCardId: the Personality the search put into play, whose entering-play window opens as the search ends.
+    public int? GoldLimit { get; set; }
+    public int HonorLossOnFinish { get; set; }
+    public string? EnteredCardId { get; set; }
+    /// <summary>Emperor Edition remaining-cards pass (issue #492), group F (Refuge of the Three Sisters: "a card with a lower Focus Value than your Personality's Chi"): a card qualifies only with a
+    /// printed Focus Value below this, read off the Personality when the action was taken. Null for every other search.</summary>
+    public int? FocusBelow { get; set; }
 }
 
 /// <summary>One entry of the public, append-only record of cards shown to the other player. Deliberately holds
@@ -205,11 +251,12 @@ public sealed partial class MatchEngine
     {
         SearchDeck.Dynasty => player.DynastyDeck,
         SearchDeck.FateDiscard => _state.Cards.Values.Where(c => c.OwnerId == player.Id && c.Zone == Zone.FateDiscard).OrderBy(c => c.Id, StringComparer.Ordinal).Select(c => c.Id).ToList(),
+        SearchDeck.DynastyDiscard => _state.Cards.Values.Where(c => c.OwnerId == player.Id && c.Zone is Zone.DynastyDiscard or Zone.Dead).OrderBy(c => c.Id, StringComparer.Ordinal).Select(c => c.Id).ToList(),
         _ => player.FateDeck
     };
 
     // "your Fate deck" / "your Fate discard pile": how a searched place is named in prompts and the log.
-    private static string SearchPlace(string deck) => deck == SearchDeck.FateDiscard ? "Fate discard pile" : $"{deck} deck";
+    private static string SearchPlace(string deck) => deck == SearchDeck.FateDiscard ? "Fate discard pile" : deck == SearchDeck.DynastyDiscard ? "Dynasty discard pile" : $"{deck} deck";
 
     private SearchSpec SearchSpecOf(PendingSearch search) => SearchCatalog.All.TryGetValue(search.SearchId, out var spec) ? spec
         : throw new RuleViolation("Unknown search.");
@@ -228,7 +275,7 @@ public sealed partial class MatchEngine
         _state.PendingSearch = search;
         _state.PriorityPlayerId = playerId; _state.ConsecutivePasses = 0;
         Emit("searchStarted", $"{player.Name} searches with {Definition(source).Name}.", playerId, source.Id);
-        if (spec.Decks.Length > 1)
+        if (spec.Decks.Length > 1 && !spec.Ordered)
         {
             search.Stage = SearchStage.ChooseDeck;
             _state.PendingChoice = new("searchDeck", playerId, source.Id, $"{Definition(source).Name}: choose which deck to search.");
@@ -278,8 +325,15 @@ public sealed partial class MatchEngine
         {
             var anyEligible = groups.Any(g => g.Eligible);
             // Pass is legal ONLY when nothing qualifies (or the printed text says "you may search"): a player
-            // cannot skip a card they are obliged to take.
-            Require(!anyEligible || spec.Optional, "A card in the deck qualifies, so you must choose one.");
+            // cannot skip a card they are obliged to take. In an ordered search ("your discard pile, then Fate deck") a place that is not the last may always be passed: the next is searched.
+            var nextPlace = NextOrderedSearchPlace(spec, option);
+            Require(!anyEligible || spec.Optional || nextPlace is not null, "A card in the deck qualifies, so you must choose one.");
+            if (nextPlace is not null)
+            {
+                Emit("searchPassed", $"{player.Name} took no card from their {SearchPlace(search.Deck!)}.", player.Id);
+                OpenSearchSelection(search, nextPlace);
+                return;
+            }
             Emit("searchPassed", anyEligible
                 ? $"{player.Name} chose not to take a card from their {SearchPlace(search.Deck!)}."
                 : $"{player.Name} found no eligible card in their {SearchPlace(search.Deck!)}.", player.Id);
@@ -320,6 +374,21 @@ public sealed partial class MatchEngine
                 break;
             case SearchEffect.RecruitUnbowed:
                 BeginSearchRecruit(search, card); // ShadowsEmbraceBatch6.cs
+                break;
+            case SearchEffect.PutOnTopAfterShuffle:
+                search.PutOnTopId = card.Id;
+                FinishSearch(search);
+                break;
+            case SearchEffect.RecruitPersonality:
+                BeginPersonalityRecruit(search, card); // EmperorRemainingC.cs
+                break;
+            // Emperor Edition remaining-cards pass (issue #492), group E (EmperorRemainingE.cs).
+            case SearchEffect.PutIntoPlay:
+                EnterSearchedPersonality(search, card);
+                FinishSearch(search);
+                break;
+            case SearchEffect.ToProvinceFaceUp:
+                BeginSearchProvincePlacement(search, card);
                 break;
             default: throw new RuleViolation("Unknown search effect.");
         }
@@ -382,6 +451,7 @@ public sealed partial class MatchEngine
 
     private void ChooseSearchRegionProvince(PendingSearch search, GameCommand command)
     {
+        if (SearchOptionOf(search).Effect == SearchEffect.ToProvinceFaceUp) { ChooseSearchProvincePlacement(search, command); return; } // issue #492, group E
         Require(command.Type == "chooseSearchProvince" && command.Province is not null, "Choose a province to attach the Region to.");
         var player = Player(search.PlayerId); var region = Card(search.SelectedCardId);
         var province = player.Provinces.FirstOrDefault(p => p.Index == command.Province);
@@ -413,8 +483,20 @@ public sealed partial class MatchEngine
     // taken and its effect done, a Region discarded, and a pass.
     private void FinishSearch(PendingSearch search)
     {
+        // Emperor Edition remaining-cards pass (issue #492), group E: I Give You My Name's "Lose 2 Honor" (whether or not a card was found), then the entering-play window of a Personality it put into play.
+        if (search.HonorLossOnFinish > 0) GainHonor(search.PlayerId, -search.HonorLossOnFinish, Definition(Card(search.SourceCardId)).Name, Card(search.SourceCardId));
         ShuffleDeck(Player(search.PlayerId), search.Deck!);
+        if (search.PutOnTopId is { } topId)
+        {
+            var deck = SearchDeckList(Player(search.PlayerId), search.Deck!);
+            if (deck.Remove(topId)) { deck.Insert(0, topId); Emit("searchedCardOnTop", $"{Player(search.PlayerId).Name} put the found card on top of their {SearchPlace(search.Deck!)} after shuffling.", search.PlayerId); }
+        }
         _state.PendingSearch = null;
+        if (search.EnteredCardId is { } enteredId && _state.WinnerId is null)
+        {
+            _state.PendingChoice = null;
+            if (OpenRecruitEntryWindows(Player(search.PlayerId), Card(enteredId), false, null)) return;
+        }
         FinishDeferredAction(search.PlayerId, search.Origin, search.SourceCardId, search.BowedBefore);
     }
 
@@ -450,7 +532,7 @@ public sealed partial class MatchEngine
     /// server restart. Announces only that it happened.</summary>
     private void ShuffleDeck(PlayerState player, string deck)
     {
-        if (deck == SearchDeck.FateDiscard) return; // a discard pile is not shuffled (issue #476 batch 6)
+        if (deck is SearchDeck.FateDiscard or SearchDeck.DynastyDiscard) return; // a discard pile is not shuffled (issue #476 batch 6)
         var random = new StableRandom(_state.RngState);
         random.Shuffle(SearchDeckList(player, deck));
         _state.RngState = random.State;
@@ -469,19 +551,21 @@ public sealed partial class MatchEngine
             .Select(g =>
             {
                 var representative = g.OrderBy(c => c.Id, StringComparer.Ordinal).First();
-                var (eligible, reason) = SearchEligibility(option.Criteria, representative);
+                var (eligible, reason) = SearchEligibility(option.Criteria, representative, search.GoldLimit);
+                if (eligible && search.FocusBelow is int below && SearchStat(representative, "Focus") >= below) (eligible, reason) = (false, $"Focus {SearchStat(representative, "Focus")}, needs < {below}");
                 return new SearchGroup(g.Key, representative, g.Count(), eligible, reason);
             })
             .OrderBy(g => (int)Definition(g.Card).Type).ThenBy(g => Definition(g.Card).Name, StringComparer.Ordinal).ThenBy(g => g.DefinitionId, StringComparer.Ordinal).ToList();
     }
 
-    private (bool Eligible, string? Reason) SearchEligibility(SearchCriteria criteria, CardInstance card)
+    private (bool Eligible, string? Reason) SearchEligibility(SearchCriteria criteria, CardInstance card, int? goldLimit = null)
     {
         var def = Definition(card);
         var notA = $"Not {Article(criteria.Noun)}";
         if (criteria.Types is { Length: > 0 } && !criteria.Types.Contains(def.Type)) return (false, notA);
         if (criteria.Keywords is { Length: > 0 } && !criteria.Keywords.All(k => Keyword(card, k))) return (false, notA);
         if (criteria.AnyKeywords is { Length: > 0 } && !criteria.AnyKeywords.Any(k => Keyword(card, k))) return (false, notA);
+        if (criteria.BattleStrategy && !(Definition(card).Abilities ?? []).Any(a => AbilityCatalog.All.TryGetValue(a, out var battle) && battle.Timing is "Battle" or "BattleOrOpen")) return (false, notA);
         if (criteria.NonUnique && Keyword(card, "Unique")) return (false, "Unique cards cannot be chosen");
         if (criteria.ExcludedKeywords is { Length: > 0 } && criteria.ExcludedKeywords.FirstOrDefault(k => Keyword(card, k)) is string excluded)
             return (false, $"{excluded} cards cannot be chosen");
@@ -494,6 +578,8 @@ public sealed partial class MatchEngine
                 ">" => actual > comparison.Value, "==" => actual == comparison.Value, _ => throw new RuleViolation("Unknown search comparison.") };
             if (!holds) return (false, $"{comparison.Stat} {actual}, needs {comparison.Op} {comparison.Value}");
         }
+        // The Gold Cost ceiling an action names (I Give You My Name, issue #492).
+        if (goldLimit is int limit && def.GoldCost > limit) return (false, $"GoldCost {def.GoldCost}, needs <= {limit}");
         return (true, null);
     }
 
@@ -523,7 +609,7 @@ public sealed partial class MatchEngine
         var groups = SearchGroups(search);
         return new(search.Stage, source.Id, sourceName, spec.Label, _state.PendingChoice.Prompt, search.Deck, option.Criteria.Noun, remaining, null,
             groups.Select(g => new SearchEntryView(g.DefinitionId, Copy(Definition(g.Card)), g.Count, g.Eligible, g.Reason)).ToArray(),
-            spec.Optional, spec.Optional || groups.All(g => !g.Eligible), null);
+            spec.Optional, spec.Optional || groups.All(g => !g.Eligible) || NextOrderedSearchPlace(spec, option) is not null, null);
     }
 
     /// <summary>The public shown-cards record, identical in both players' views.</summary>
@@ -553,8 +639,13 @@ public sealed partial class MatchEngine
                 var groups = SearchGroups(search);
                 foreach (var g in groups.Where(g => g.Eligible))
                     yield return new("selectSearchCard", $"Take {Definition(g.Card).Name}{(g.Count > 1 ? $" ({g.Count} in the deck)" : "")}", true, null, Command("selectSearchCard", choice: g.DefinitionId));
-                if (spec.Optional || groups.All(g => !g.Eligible))
+                if (NextOrderedSearchPlace(spec, SearchOptionOf(search)) is { } nextPlace)
+                    yield return new("passSearch", $"Take no card from the {SearchPlace(search.Deck!)}: search the {SearchPlace(nextPlace.Deck)} next", true, null, Command("passSearch"));
+                else if (spec.Optional || groups.All(g => !g.Eligible))
                     yield return new("passSearch", groups.Any(g => g.Eligible) ? "Take no card (the deck is still shuffled)" : "No card qualifies: pass (the deck is still shuffled)", true, null, Command("passSearch"));
+                break;
+            case SearchStage.ChooseProvince when SearchOptionOf(search).Effect == SearchEffect.ToProvinceFaceUp: // issue #492, group E
+                foreach (var placement in SearchProvincePlacementActions(search, playerId)) yield return placement;
                 break;
             case SearchStage.ChooseProvince:
                 var region = Card(search.SelectedCardId);

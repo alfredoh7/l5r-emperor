@@ -594,6 +594,10 @@ public static class CardCatalog
             .Concat(PublishedContent.StrategyWave55.Cards)
             .Concat(PublishedContent.StrategyWave56.Cards) // The Shadow's Embrace pass, batch 3 (issue #476)
             .Concat(PublishedContent.StrategyWave57.Cards)
+            .Concat(PublishedContent.StrategyWave58.Cards) // Emperor Edition remaining-cards pass, group A (issue #492)
+            .Concat(PublishedContent.StrategyWave59.Cards) // Emperor Edition remaining-cards pass, group B (issue #492)
+            .Concat(PublishedContent.StrategyWave60.Cards) // Emperor Edition remaining-cards pass, group C (issue #492)
+            .Concat(PublishedContent.StrategyWave61.Cards) // Emperor Edition remaining-cards pass, group D (issue #492)
             .Concat(PublishedContent.SpellWave20.Cards)
             .Concat(PublishedContent.StrongholdWave14.Cards)
             .Concat(PublishedContent.RegionWave7.Cards)
@@ -621,6 +625,7 @@ public static class CardCatalog
             .Concat(PublishedContent.SpellWave22.Cards)
             .Concat(PublishedContent.ItemWave14.Cards)
             .Concat(PublishedContent.PersonalityWave75.Cards) // The Shadow's Embrace pass (issue #476), batch 2
+            .Concat(PublishedContent.PersonalityWave77.Cards) // Emperor Edition remaining-cards pass, proxy group Y (issue #492)
             .Concat(PublishedContent.HoldingWave12.Cards)
             .Concat(PublishedContent.FollowerWave30.Cards)
             .Concat(PublishedContent.EventWave7.Cards)
@@ -632,6 +637,16 @@ public static class CardCatalog
             .Concat(PublishedContent.PersonalityWave68.Cards)
             .Concat(PublishedContent.PersonalityWave71.Cards)
             .Concat(PublishedContent.StrongholdWave18.Cards) // Emperor Edition Stronghold pass (issue #486), batch 2
+            .Concat(PublishedContent.SpellWave23.Cards) // Emperor Edition remaining-cards pass (issue #492), group E
+            .Concat(PublishedContent.PersonalityWave78.Cards) // Emperor Edition remaining-cards pass (issue #492), proxy group Z
+            .Concat(PublishedContent.CelestialWave8.Cards)
+            .Concat(PublishedContent.HoldingWave13.Cards) // Emperor Edition remaining-cards pass (issue #492), group F
+            .Concat(PublishedContent.RegionWave9.Cards) // Emperor Edition remaining-cards pass (issue #492), group F
+            .Concat(PublishedContent.EventWave8.Cards) // Emperor Edition remaining-cards pass (issue #492), group F
+            .Concat(PublishedContent.ItemWave15.Cards) // Emperor Edition remaining-cards pass (issue #492), group G
+            .Concat(PublishedContent.FollowerWave31.Cards)
+            .Concat(PublishedContent.PersonalityWave76.Cards) // Emperor Edition remaining-cards pass (issue #492), proxy group X
+            .Concat(PublishedContent.SpellWave24.Cards) // Emperor Edition remaining-cards pass (issue #492), proxy group X
             .ToDictionary(c => c.Id, StringComparer.Ordinal);
     }
 }

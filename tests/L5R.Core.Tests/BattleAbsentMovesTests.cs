@@ -95,8 +95,13 @@ internal static class BattleAbsentMovesTests
         // + shinoda-move (Emperor Edition Personality pass, issue #477 batch 2: Kuni Shinoda moves himself and an optional Crab Clan Personality to the current battlefield).
         var marked = string.Join(",", AbilityCatalog.All.Where(p => p.Value.MovesToBattle).Select(p => p.Key).OrderBy(k => k, StringComparer.Ordinal));
         // Issue #477 (Emperor Edition Personality pass, batch 3): tetsuo-move-attack -- Moto Tetsuo moves himself to the current battlefield.
+        // + guided-by-honor-move (Emperor Edition remaining-cards pass, issue #492 group B: Guided by Honor moves its performing Paragon to the current battlefield).
         // + keep-of-dead-move (Emperor Edition Stronghold pass, issue #486 batch 1: Keep of the Dead moves its performing Commander to the current battlefield).
-        Eq(marked, "broken-alliance-move,charge-into-danger-move,chukage-move,dislodge-the-foe,earth-flows-move,hawado-move-battlefield,heijin-move,help-shadows-move,houken-exp-straighten,intervening-spirit-move,intimidation-move,irezu-move,keep-of-dead-move,lesson-of-earth-move,mai-move-force-penalty,michi-move,moving-unmoving-approach,natsumi-move,natures-wrath-move,pronouncement-guilt-move,requesting-reinforcements-recruit,return-to-action-move,rikyou-move,sanctuary-of-the-waves-move,shinoda-move,skipping-the-puddle-move,sound-of-thunder-move,sudden-movement-switch,takasho-move,tetsuo-move-attack,training-move-current,training-move-to-battle,trusting-instinct-move,your-clan-needs-you");
+        // + rumors-travel-move (Emperor Edition remaining-cards pass, issue #492 group C: Rumors Travel's Battle half is Broken Alliance's text).
+        // + light-of-justice-move (Emperor Edition remaining-cards pass, issue #492, group D: The Light of Justice moves its performing Magistrate to the current battlefield).
+        // + blighted-region-move (Emperor Edition remaining-cards pass, issue #492 group F: Blighted Region's Defender-only move of a performing Personality to the current battlefield).
+        // + moto-house-guard-attack (Emperor Edition remaining-cards pass, issue #492 group G: Moto House Guard moves its host Personality to the current battlefield).
+        Eq(marked, "blighted-region-move,broken-alliance-move,charge-into-danger-move,chukage-move,dislodge-the-foe,earth-flows-move,falling-leaf-strike,guided-by-honor-move,hawado-move-battlefield,heijin-move,help-shadows-move,houken-exp-straighten,intervening-spirit-move,intimidation-move,irezu-move,keep-of-dead-move,lesson-of-earth-move,light-of-justice-move,mai-move-force-penalty,michi-move,moto-house-guard-attack,moving-unmoving-approach,natsumi-move,natures-wrath-move,pronouncement-guilt-move,requesting-reinforcements-recruit,return-to-action-move,rikyou-move,rumors-travel-move,sanctuary-of-the-waves-move,shinoda-move,skipping-the-puddle-move,sound-of-thunder-move,sudden-movement-switch,takasho-move,tetsuo-move-attack,training-move-current,training-move-to-battle,trusting-instinct-move,your-clan-needs-you");
         foreach (var (id, ability) in AbilityCatalog.All.Where(p => p.Value.MovesToBattle))
             Check(ability.Timing is "Battle" or "BattleOrOpen", $"{id}: a move to the battle is a Battle action");
     }
@@ -185,10 +190,15 @@ internal static class BattleAbsentMovesTests
         if (ability == "intimidation-move") { maiden.GrantedKeywords.Add(new("Berserker", "test-fixture", GrantDuration.Permanent)); Add(s, "training-lion-samurai", 1 - actor, Zone.Home); }
         // The Shadow's Embrace pass, batch 4 (issue #476): The Lesson of Earth's Monk performer (from home: an Absent move-to-battle action), and Sudden Movement's
         // two Personalities of one player at different locations -- the enemy's at the battlefield and another of his at home.
-        if (ability == "lesson-of-earth-move") maiden.GrantedKeywords.Add(new("Monk", "test-fixture", GrantDuration.Permanent));
+        // Emperor Edition remaining-cards pass, group A (issue #492): Falling Leaf Strike's performing Monk moves himself to the battle, from home.
+        if (ability is "lesson-of-earth-move" or "falling-leaf-strike") maiden.GrantedKeywords.Add(new("Monk", "test-fixture", GrantDuration.Permanent));
         if (ability == "sudden-movement-switch") Add(s, "training-lion-samurai", 1 - actor, Zone.Home);
         // Emperor Edition Stronghold pass (issue #486, batch 1): Keep of the Dead's performing Commander (from home: an Absent move-to-battle action).
         if (ability == "keep-of-dead-move") maiden.GrantedKeywords.Add(new("Commander", "test-fixture", GrantDuration.Permanent));
+        // Emperor Edition remaining-cards pass (issue #492, group B): Guided by Honor's performing unbowed Paragon (from home: an Absent move-to-battle action).
+        if (ability == "guided-by-honor-move") maiden.GrantedKeywords.Add(new("Paragon", "test-fixture", GrantDuration.Permanent));
+        // Emperor Edition remaining-cards pass (issue #492, group D): The Light of Justice's performing Magistrate (from home: an Absent move-to-battle action).
+        if (ability == "light-of-justice-move") maiden.GrantedKeywords.Add(new("Magistrate", "test-fixture", GrantDuration.Permanent));
         CardInstance card;
         // A Stronghold is the player's own from the start of the match: the card is the actor's Stronghold, made this definition.
         if (definition.Type == CardType.Stronghold) { card = s.Cards[s.Players[actor].StrongholdId]; card.DefinitionId = definition.Id; }
@@ -213,7 +223,10 @@ internal static class BattleAbsentMovesTests
         // has a unit there: the no-presence position this test rigs cannot arise for it. It is still marked (its effect brings a Personality to the battle).
         // Moto Tetsuo (issue #477, Emperor Edition Personality pass, batch 3) prints "If you control any Cavalry units at the current battlefield:" before its colon, so its acting player always
         // has a unit there (a Cavalry one): the no-presence position this test rigs cannot arise for it. It is still marked (its effect moves Tetsuo, who is at home, to the battle).
-        foreach (var ability in AbilityCatalog.All.Where(p => p.Value.MovesToBattle && !p.Key.StartsWith("training-") && p.Key != "requesting-reinforcements-recruit" && p.Key != "tetsuo-move-attack").Select(p => p.Key).OrderBy(k => k, StringComparer.Ordinal))
+        // Blighted Region (issue #492, group F) is a Region's action that names a performing Personality and is the Defender's alone (taken with no unit at the battlefield, Absent); it needs its own
+        // rig (a Region attached to a province and a performer), and emperor-remaining-F's BlightedRegionMove proves it is offered to the Defender with no unit there.
+        // Moto House Guard (issue #492 group G) prints "If any enemy units are at the current battlefield:" before its colon: its actor needs the enemy there (the rig has none), not a unit of his own -- still marked.
+        foreach (var ability in AbilityCatalog.All.Where(p => p.Value.MovesToBattle && !p.Key.StartsWith("training-") && p.Key != "requesting-reinforcements-recruit" && p.Key != "tetsuo-move-attack" && p.Key != "moto-house-guard-attack" && p.Key != "blighted-region-move").Select(p => p.Key).OrderBy(k => k, StringComparer.Ordinal))
         {
             var offeredTo = new List<int>();
             var reasons = new List<string>();

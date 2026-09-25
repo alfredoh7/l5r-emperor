@@ -10,10 +10,11 @@ internal static class EmperorPersonalityBatch1Tests
     private const string Niiro = "oracle-l5r-1363", Aya = "oracle-l5r-1704", Gyoken = "oracle-l5r-1720", Matsuda = "oracle-l5r-1744", Negishi = "oracle-l5r-1751", Misaki = "oracle-l5r-1749",
         Ekichu = "oracle-l5r-2286", Oyoto = "oracle-l5r-2855", Onchi = "oracle-l5r-5590", Nosloc = "oracle-l5r-5626", Ugulu = "oracle-l5r-8929";
     private static readonly string[] Wired = [Niiro, Aya, Gyoken, Matsuda, Negishi, Misaki, Ekichu, Oyoto, Onchi, Nosloc, Ugulu];
-    private static readonly string[] Unwired = ["oracle-l5r-2853", "oracle-l5r-7618"];
+    // Goju Kobashi (2853) and Suiteiru no Oni (7618) were unwired here until their Proxy scans arrived; issue #492 (proxy group X) wired and published them in personality-wave-76 (EmperorProxyXTests).
+    private static readonly string[] Unwired = [];
 
     public static void Run(TestRunner runner) => runner.Run("emperor-personality-batch1", [
-        ("Published shape: personality-wave-68 publishes exactly the 11 wired cards with their printed stats, keywords, Effect and ability ids, ships their art and lists them in its manifest; Kobashi and Suiteiru are not in the catalogue", PublishedShape),
+        ("Published shape: personality-wave-68 publishes exactly the 11 wired cards with their printed stats, keywords, Effect and ability ids, ships their art and lists them in its manifest; Kobashi and Suiteiru are published later, in personality-wave-76 (issue #492)", PublishedShape),
         ("Entry Honor loss: each Personality loses exactly the printed amount when it enters play, and none of the six bare ones has an ability of its own", EntryHonorLosses),
         ("Daigotsu Aya: after entering play her controller may put any Dark Virtue from his discard pile into his hand (nothing else, nobody else's), or pass", AyaEntryRetrieval),
         ("Daigotsu Aya: Open gives her Cavalry, Duelist or Tactician for the turn -- one choice a turn, and it wears off", AyaKeywordChoice),

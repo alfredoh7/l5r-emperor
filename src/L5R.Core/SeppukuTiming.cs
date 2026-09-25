@@ -34,6 +34,7 @@ public sealed partial class MatchEngine
         (nameof(MatchState.PendingEffectChoice), s => s.PendingEffectChoice is not null),
         (nameof(MatchState.PendingBeforeBattleResolve), s => s.PendingBeforeBattleResolve is not null),
         (nameof(MatchState.PendingAfterResolution), s => s.PendingAfterResolution is not null),
+        (nameof(MatchState.PendingShadowCourtResolution), s => s.PendingShadowCourtResolution is not null), // The Shadow Court (Emperor Edition remaining-cards pass, issue #492, group D): a resolution paused for its decision
         (nameof(MatchState.PendingEngage), s => s.PendingEngage is not null),
         (nameof(MatchState.PendingAdditionalAction), s => s.PendingAdditionalAction is not null),
         (nameof(MatchState.PendingNegatableAbility), s => s.PendingNegatableAbility is not null),
@@ -42,6 +43,9 @@ public sealed partial class MatchEngine
         (nameof(MatchState.PendingBrashDraws), s => s.PendingBrashDraws > 0),
         (nameof(MatchState.PendingOverconfidentDraws), s => s.PendingOverconfidentDraws.Count > 0),
         (nameof(MatchState.PendingForcedDiscards), s => s.PendingForcedDiscards.Count > 0),
+        (nameof(MatchState.PendingHonorLossDecision), s => s.PendingHonorLossDecision is not null), // Ten Thousand Temples' open decision (issue #492, group F)
+        (nameof(MatchState.PendingEventChoice), s => s.PendingEventChoice is not null), // an Event's open decision (issue #492, group F)
+        (nameof(MatchState.PendingEventChoices), s => s.PendingEventChoices.Count > 0), // an optional draw an Event owes, queued behind the action in progress (issue #492, group F)
         (nameof(MatchState.PendingCopy), s => s.PendingCopy is not null),
         (nameof(MatchState.PendingEitherOr), s => s.PendingEitherOr is not null),
         (nameof(MatchState.PendingOpponentPayment), s => s.PendingOpponentPayment is not null),
@@ -65,6 +69,7 @@ public sealed partial class MatchEngine
         nameof(MatchState.PendingEndPhaseRecruits),        // Akodo Kobi's delayed recruits, resolved at the next End Phase; no one is deciding anything
         nameof(MatchState.PendingGrapplingBows),           // Grappling the Snake's bows applied once the action resolves (Seeds of Decay, issue #453); no one is deciding anything
         nameof(MatchState.PendingEndPhaseDraws),           // Eternal Victory Dojo's delayed draws, taken as the next End Phase begins (issue #486); no one is deciding anything
+        nameof(MatchState.PendingBanditGangs),             // Bandit Gang's queued pay-or-destroy traits (issue #492 group G); each waits behind its open Either/Or (PendingChoice)
     ];
 
     /// <summary>The names the guard test compares with every <c>Pending*</c> property of <see cref="MatchState"/>.</summary>

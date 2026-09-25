@@ -26,6 +26,8 @@ public static class ActionClass
 {
     /// <summary>Equipping a Weapon from your hand (the ordinary Equip command with a Weapon-keyword Item).</summary>
     public const string EquipWeapon = "equip-weapon";
+    /// <summary>Equipping any Item or Follower from your hand (Glory of the Shogun, issue #492 group F: "Equipping is a Battle/Open action (for all players)").</summary>
+    public const string EquipAny = "equip-any";
 }
 
 /// <summary>An additional timing (<paramref name="Timing"/>: "Battle", "Open" or "BattleOrOpen") a card gives its controller for one class of action.</summary>
@@ -56,7 +58,7 @@ public sealed partial class MatchEngine
     private string? EquipTimingError(int playerId, CardInstance attachment)
     {
         var actionClass = EquipActionClass(attachment);
-        var grants = actionClass is null ? [] : TimingGrantsOf(playerId, actionClass).ToArray();
+        var grants = (actionClass is null ? [] : TimingGrantsOf(playerId, actionClass).ToArray()).Concat(GloryOfTheShogunGrants()).ToArray(); // Glory of the Shogun (issue #492, group F)
         if (_state.Phase == Phase.Action)
             return playerId == _state.ActivePlayerId || grants.Any(x => x.Grant.GrantsOpen) ? null : "Equip is a Limited action on your turn.";
         if (_state.Phase == Phase.Battle)

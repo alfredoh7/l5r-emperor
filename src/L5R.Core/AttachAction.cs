@@ -131,7 +131,7 @@ public sealed partial class MatchEngine
         CardInstance attachment;
         if (spec.Card == AttachSource.Self)
         {
-            Require(source is not null && source.Zone == Zone.Hand && player.Hand.Contains(source.Id), "This card must be in your hand to be attached.");
+            Require(source is not null && (source.Zone == Zone.Hand && player.Hand.Contains(source.Id) || source.Zone == Zone.FateDiscard && source.OwnerId == player.Id && spec.Pile == AttachPile.Own), "This card must be in your hand (or, for a card that names its own discard pile, in it) to be attached.");
             Require(command.TargetId is null, "This action has no target.");
             attachment = source!;
         }
@@ -167,7 +167,8 @@ public sealed partial class MatchEngine
     // have already been resolved for the controller, as they should be.
     private void ReturnCardsOutOfPlayToTheirOwners()
     {
-        foreach (var card in _state.Cards.Values.Where(c => c.OriginalOwnerId is not null && !InPlay(c))) RestoreOwner(card);
+        // A gift in another player's hand (Naoharu's Gift, issue #492 group F) is his to play until it leaves the hand.
+        foreach (var card in _state.Cards.Values.Where(c => c.OriginalOwnerId is not null && !InPlay(c) && c.Zone != Zone.Hand)) RestoreOwner(card);
     }
 
     // ExecuteAbilityEffects' step: the Gold has already been paid (PayForAbility), so the card leaves its place and enters play attached.
@@ -178,7 +179,7 @@ public sealed partial class MatchEngine
         var wielder = WielderOfAttach(spec, command, source)!;
         var def = Definition(attachment);
         var fromDiscard = attachment.Zone == Zone.FateDiscard;
-        if (!fromDiscard && attachment.Zone == Zone.Hand) { Player(attachment.OwnerId).AttachedFromHandThisTurn = true; NoteAttachedFollowerFromHand(attachment, wielder); }
+        if (!fromDiscard && attachment.Zone == Zone.Hand) { Player(attachment.OwnerId).AttachedFromHandThisTurn = true; NoteAttachedFollowerFromHand(attachment, wielder); NoteAttachedFromHandForGlory(attachment.OwnerId, attachment); }
         Player(attachment.OwnerId).Hand.Remove(attachment.Id);
         if (fromDiscard)
         {

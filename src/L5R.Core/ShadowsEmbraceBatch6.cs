@@ -305,6 +305,7 @@ public sealed partial class MatchEngine
     {
         Require(command.Type == "chooseSearchPayment", "Pay for the card you found, or decline.");
         var card = Card(search.SelectedCardId);
+        if (Definition(card).Type == CardType.Personality) { ChoosePersonalityRecruitPayment(search, command); return; } // Sacrifice of Pawns (issue #492, group C)
         if (command.Choice == "decline")
         {
             Emit("searchRecruitDeclined", $"{Player(search.PlayerId).Name} did not pay for {Definition(card).Name}; it stays in the deck.", search.PlayerId);
@@ -319,6 +320,7 @@ public sealed partial class MatchEngine
     private IEnumerable<ActionOption> SearchRecruitPaymentActions(PendingSearch search, int playerId)
     {
         var card = Card(search.SelectedCardId);
+        if (Definition(card).Type == CardType.Personality) { foreach (var personalityOption in PersonalityRecruitPaymentActions(search, playerId)) yield return personalityOption; yield break; } // Sacrifice of Pawns (issue #492, group C)
         var cost = SearchRecruitCost(search, card);
         var paying = new PaymentSubject(card, PaymentKind.Recruit);
         var quote = new GoldQuote(cost, GoldCostKind.Fixed, $"{Definition(card).Name} cost {CardGoldCost(card)} − {SearchSpecOf(search).RecruitDiscount} ({Definition(Card(search.SourceCardId)).Name})",
