@@ -2568,4 +2568,6 @@ public static class PublishedContent
     public static PublishedSnapshot HoldingWave13 { get; } = Load("L5R.Published.HoldingWave13.json", "holding-wave-13", requireDecks: false);
     /// <summary>Region wave 9 (Emperor Edition remaining-cards pass, issue #492, group F): Blighted Region and Refuge of the Three Sisters (group F).</summary>
     public static PublishedSnapshot RegionWave9 { get; } = Load("L5R.Published.RegionWave9.json", "region-wave-9", requireDecks: false);
+    /// <summary>Event wave 8 (Emperor Edition remaining-cards pass, issue #492, group F): the twelve Events wired in group F.</summary>
+    public static PublishedSnapshot EventWave8 { get; } = Load("L5R.Published.EventWave8.json", "event-wave-8", requireDecks: false);
 }

@@ -275,6 +275,7 @@ public sealed partial class MatchEngine
             // Seeds of Decay pass (issue #453), batch 4: two decisions inside the Events Phase reveal (SeedsOfDecayBatch4.cs).
             if (_state.PendingChoice.Type=="offeringReverence") { ResolveOfferingReverenceChoice(command); return; }
             if (_state.PendingChoice.Type=="starCrossedLovers") { ResolveStarCrossedLoversChoice(command); return; } // The Shadow's Embrace pass (issue #476), batch 6.
+            if (_state.PendingChoice.Type=="eventChoice") { ResolveEventChoiceCommand(command); return; } // Emperor Edition remaining-cards pass (issue #492), group F (EmperorRemainingFEvents.cs).
             if (_state.PendingChoice.Type=="testedLandProvince") { ResolveTestedLandProvince(command); return; }
             if (_state.PendingChoice.Type=="forcedDiscard") { ResolveForcedDiscard(command); return; }
             // A conditional effect choice (issue #337, Mirumoto Yumaru): the acting player picks one of the options the engine listed.
@@ -1013,7 +1014,7 @@ public sealed partial class MatchEngine
         // / it enters play ignoring Honor Requirement" waiver (CardDefinition.HonorRequirementWaiverClan),
         // keyed on the RECRUITING player's own Clan -- this is the single check every entry path that
         // spends a recruit quote (Purchase, RecruitReserve, Your Clan Needs You!) already funnels through.
-        else if(def.Type==CardType.Personality && def.HonorRequirement is int requirement && player.Honor<requirement && !clanAllegiance && !HonorRequirementWaived(def,player)
+        else if(def.Type==CardType.Personality && def.HonorRequirement is int requirement && player.Honor<requirement && !clanAllegiance && !HonorRequirementWaived(def,player) && !player.IgnoresHonorRequirements // Alter History (issue #492, group F)
             && !(ignoreHonorRequirementIfPersonalityClan is string waivedClan && HasClanAffiliation(card,waivedClan))
             && !RoninIgnoresHonorRequirement(card,playerId)) error="Family Honor is below the Honor Requirement; Clan allegiance may allow purchase."; // Palace of the Breaking Dawn (issue #486, batch 2)
         var prosperous=def.Effect=="prosperous-discount"?_state.Cards.Values.Count(c=>c.OwnerId==playerId && InPlay(c) && Definition(c).Type==CardType.Personality):0;
@@ -1258,7 +1259,7 @@ public sealed partial class MatchEngine
     private void DeclareAttackPhase(GameCommand command)
     {
         Require(_state.Phase==Phase.AttackDeclaration,"Declare an attack after the Action Phase.");
-        Require(!Player(command.PlayerId).MayNotAttackThisTurn,"You may not declare an attack this turn.");
+        Require(!Player(command.PlayerId).MayNotAttackThisTurn && !AttackLockedByEvent(command.PlayerId),"You may not declare an attack this turn.");
         _state.UnresolvedBattlefields=Player(1-command.PlayerId).Provinces.Where(p=>!p.Destroyed).Select(p=>p.Index).Order().ToList();
         Emit("attackDeclared",$"{Player(command.PlayerId).Name} declared an attack: a battlefield exists at each of {Player(1-command.PlayerId).Name}'s provinces.",command.PlayerId);
         SetPhase(Phase.InfantryDeclaration,command.PlayerId);
@@ -1282,7 +1283,7 @@ public sealed partial class MatchEngine
         // of what would otherwise grant the assignment opportunity (a future "Ambush"-style card
         // included, since this checks the assignment itself, not a specific path to it). An empty
         // assignment (declining to attack) is always still legal.
-        Require(!(command.Assignments?.Count>0) || !Player(command.PlayerId).MayNotAttackThisTurn,"You may not declare an attack this turn.");
+        Require(!(command.Assignments?.Count>0) || !Player(command.PlayerId).MayNotAttackThisTurn && !AttackLockedByEvent(command.PlayerId),"You may not declare an attack this turn.");
         var cavalry=_state.Phase==Phase.CavalryDeclaration;
         // Spiritual Manipulation (The Shadow's Embrace pass, issue #476, batch 4): "and assign the target (if legal)" -- in the segment he can be assigned in.
         if(ForcedAssignmentRefusal(command.PlayerId,command.Assignments,cavalry) is string forcedAssignment) throw new RuleViolation(forcedAssignment);
@@ -1344,6 +1345,7 @@ public sealed partial class MatchEngine
             Require(isDefender || !MovementLocked(card,MovementKinds.AssignAttack),$"{Definition(card).Name} may not be assigned to attack this turn."); // Emperor Edition Stronghold pass (issue #486), batch 3: The Khan's Estate.
             // The Shadow's Embrace pass (issue #476), batch 6: Shieldman's unit is never assigned to an attacking army; Star-Crossed Lovers never to each other's battlefields.
             RequireShieldmanMayAssign(card,isDefender);
+            RequireDelayedArrivalMayAssign(card,isDefender); // Delayed Arrival (issue #492, group F): "may not be assigned to attack you until your next turn begins".
             RequireStarCrossedMayAssign(card,assignment.Value,command.Assignments!);
             card.Zone=Zone.Battlefield; card.ProvinceIndex=assignment.Value;
             foreach(var attached in Attachments(card.Id)) attached.ProvinceIndex=assignment.Value;
@@ -1573,6 +1575,7 @@ public sealed partial class MatchEngine
             var province=Player(defender).Provinces.Single(p=>p.Index==provinceIndex);
             var destroyedProvince=af>df+EffectiveProvinceStrength(province);
             if(destroyedProvince) DestroyProvince(defender,province);
+            if(destroyedProvince) AfterProvinceDestroyedByResolution(attacker,defender,province,a); // Alter History, Boastful Proclamation (issue #492, group F).
             provinceDestroyedNow=destroyedProvince;
             // Vital Pathways (issue #272): "After this battlefield's province is destroyed, if you
             // are the Attacker" -- checked here, at the actual moment of destruction, since
@@ -1912,7 +1915,7 @@ public sealed partial class MatchEngine
         // equip for QueryActions' quote, so the quote and the charge cannot drift (issue #303).
         Pay(command.PlayerId,card,EquipGoldCost(command.PlayerId,card,target).Cost,command.SourceIds,paying:new PaymentSubject(card,PaymentKind.Equip));
         _state.CurrentActionAffected=[]; // Emperor Edition Personality pass (issue #477 batch 2): what Equip records (NoteAttachedFollowerFromHand) is this action's alone.
-        Player(command.PlayerId).Hand.Remove(card.Id); Player(command.PlayerId).AttachedFromHandThisTurn=true;
+        Player(command.PlayerId).Hand.Remove(card.Id); Player(command.PlayerId).AttachedFromHandThisTurn=true; NoteAttachedFromHandForGlory(command.PlayerId,card);
         NoteAttachedFollowerFromHand(card,target);
         card.Zone=Zone.Attached; card.AttachedTo=target.Id; card.FaceUp=true;
         if(inBattle) card.ProvinceIndex=target.ProvinceIndex; // the Weapon stands where its wielder does, so it is at the battlefield with him
@@ -2003,7 +2006,12 @@ public sealed partial class MatchEngine
     // the player still has an unused grant afterward. An ordinary action never sets this, even if
     // unrelated grants happen to be sitting unused for this player -- only the specific action that
     // touched them may skip ceding priority.
-    private void NextAction(int playerId,bool stayWithPlayer=false) { _state.ConsecutivePasses=0; _state.PriorityPlayerId=stayWithPlayer?playerId:1-playerId; EndAttackerLeadIfCeded(playerId,stayWithPlayer); }
+    private void NextAction(int playerId,bool stayWithPlayer=false)
+    {
+        _state.ConsecutivePasses=0; _state.PriorityPlayerId=stayWithPlayer?playerId:1-playerId; EndAttackerLeadIfCeded(playerId,stayWithPlayer);
+        // Glory of the Shogun (issue #492, group F): an optional draw the action owes (its attach) is asked before priority passes on.
+        if(_state.PendingChoice is null && _state.PendingEventChoices.Count>0) OpenQueuedEventChoice(stayWithPlayer?playerId:1-playerId);
+    }
     private IEnumerable<CardInstance> Army(int playerId,int province) => _state.Cards.Values.Where(c=>c.OwnerId==playerId && c.Zone==Zone.Battlefield && c.ProvinceIndex==province && Definition(c).Type==CardType.Personality);
     // Province adjacency (core rules): a player's provinces sit in a line, 1-2-3-4. A destroyed
     // province is skipped entirely -- its former neighbors become directly adjacent to each other,
@@ -2368,6 +2376,8 @@ public sealed partial class MatchEngine
     // an empty hand owes nothing.
     private bool OpenOverconfidentDrawWindow(int closesTo)
     {
+        // Emperor Edition remaining-cards pass (issue #492), group F: an optional draw owed by an Event (Boastful Proclamation, Glory of the Shogun), asked here like the forced discards below.
+        if(OpenQueuedEventChoice(closesTo)) return true;
         if(_state.PendingForcedDiscards.Count>0)
         {
             var owed=_state.PendingForcedDiscards[0];
@@ -2378,6 +2388,7 @@ public sealed partial class MatchEngine
             Emit("forcedDiscardOffered",$"{Player(owed.PlayerId).Name} must discard a card ({owed.Reason}).",owed.PlayerId);
             return true;
         }
+        if(_state.PendingOverconfidentDraws.Count>0 && ReactionsBarred()) { _state.PendingOverconfidentDraws.Clear(); Emit("reactionsBarred","Cherry Blossom Festival: no players may take Reactions, so no Overconfident draw is offered."); } // Cherry Blossom Festival (issue #492, group F)
         if(_state.PendingOverconfidentDraws.Count==0) return false;
         var playerId=_state.PendingOverconfidentDraws[0];
         _state.PendingOverconfidentDraws.RemoveAt(0);
@@ -2456,7 +2467,9 @@ public sealed partial class MatchEngine
             return;
         }
         if(JiYunNegatesDishonor(card,byPlayerId)) return;
+        var wasDishonorable=card.Dishonorable;
         card.Dishonorable=true;
+        if(!wasDishonorable) AfterPersonalityDishonored(card,byPlayerId); // Successful Bounty (issue #492, group F).
     }
     // A card already sitting in a discard pile (Zone.DynastyDiscard/FateDiscard) -- never destroyed
     // via DestroyUnits, so it carries no attachments/tokens to cascade -- becomes dead. "Honorably
@@ -2631,11 +2644,15 @@ public sealed partial class MatchEngine
                 // Kazehime (The Shadow's Embrace pass, issue #476 batch 1): "Your maximum hand size is increased by one."
                 || c.OwnerId == playerId && InPlay(c) && Definition(c).Effect == "increase-own-hand-size")
             .Select(c => new HandLimitModifier(c.Id, Definition(c).Name, Definition(c).Effect is "increase-other-hand-size" or "increase-own-hand-size" ? 1 : -1)).ToArray();
+        // Benefices of the Emperor (issue #492, group F): "permanently increase his maximum hand size by three".
+        if (Player(playerId).MaxHandBonus > 0) modifiers = [.. modifiers, new HandLimitModifier("", "Benefices of the Emperor", Player(playerId).MaxHandBonus)];
         return new(8, 8 + modifiers.Sum(m => m.Amount), modifiers);
     }
     private int MaxHandSize(int playerId) => HandLimitFor(playerId).Maximum;
     private void EndTurn()
     {
+        // Abandoning the Fortunes (issue #492, group F): "before each player's turn ends" -- the player whose turn is ending may owe a choice first.
+        if(BeginAbandoningTheFortunes()) return;
         // Tamori Tamoko's own Open action (issue #207 follow-up): "before the turn ends, gain 1
         // Honor if he was not assigned to attack your provinces this turn" -- drained here,
         // unconditionally, the same turn every one of these was queued (her own Open Timing is only
@@ -2725,6 +2742,7 @@ public sealed partial class MatchEngine
         foreach(var expired in _state.Cards.Values.Where(c=>c.OwnerId==player.Id && c.Zone==Zone.EventInPlay && c.ExpiresAtTurnsTaken==player.TurnsTaken).ToArray())
         {
             OnForgottenLegacyBatch5EventExpired(expired); // Willing Spirits' delayed effect (issue #467).
+            OnEmperorRemainingFEventExpired(expired); // Boastful Proclamation's start-of-turn effect, Delayed Arrival's target (issue #492, group F).
             expired.Zone=Zone.DynastyDiscard;
             Emit("eventExpired",$"{Definition(expired).Name}'s effect ended.",expired.OwnerId,expired.Id);
         }
@@ -2788,6 +2806,7 @@ public sealed partial class MatchEngine
     private void EventsPhase(PlayerState player)
     {
         SetPhase(Phase.Events,player.Id);
+        ExpireEmperorRemainingFEventsAtEventsPhase(player); // Cherry Blossom Festival, Disgrace, Successful Bounty (issue #492, group F): "until your Events Phase ... begins".
         _state.EventsRevealNext=0;
         ContinueEventsReveal(player);
     }
@@ -2868,6 +2887,8 @@ public sealed partial class MatchEngine
         // like Offering Reverence's.
         if(Definition(card).Effect==DiscoveringTheTempleEffect) { BeginSearch(SearchCatalog.DiscoveringTheTemple,card,player.Id,"event"); return true; }
         if(Definition(card).Effect==StarCrossedLoversEffect) return ResolveStarCrossedLovers(player,province,card);
+        // Emperor Edition remaining-cards pass (issue #492), group F (EmperorRemainingFEvents.cs): twelve Events, most of which stay in play for a while or ask a player a question.
+        if(IsEmperorRemainingFEvent(Definition(card).Effect)) return ResolveEmperorRemainingFEvent(player,province,card);
         province.CardId=null; card.ProvinceIndex=null;
         switch(Definition(card).Effect)
         {

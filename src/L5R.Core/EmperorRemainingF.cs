@@ -183,6 +183,9 @@ public sealed partial class MatchEngine
     // Per-id conditions of group F's abilities (ValidateAbility's hook).
     private void ValidateEmperorRemainingF(string id, AbilityDefinition ability, GameCommand command, PlayerState player, CardInstance? source)
     {
+        // Cherry Blossom Festival: "No players may take Reactions". Disgrace: "other players may not target your Personalities with Limited actions".
+        if (ability.Timing == "Reaction") Require(!ReactionsBarred(), "Cherry Blossom Festival: no players may take Reactions.");
+        RequireDisgraceAllowsTargets(ability, command, player);
         // Blighted Region: "If you are the Defender" (a condition on taking the action at all).
         if (id == "blighted-region-move") Require(player.Id != _state.ActivePlayerId, "Blighted Region: only the Defender may use this.");
         // Falling Rain Dojo: "if your Duelist has a lower duel stat than the Personality facing him".

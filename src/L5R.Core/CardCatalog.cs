@@ -634,6 +634,7 @@ public static class CardCatalog
             .Concat(PublishedContent.StrongholdWave18.Cards) // Emperor Edition Stronghold pass (issue #486), batch 2
             .Concat(PublishedContent.HoldingWave13.Cards) // Emperor Edition remaining-cards pass (issue #492), group F
             .Concat(PublishedContent.RegionWave9.Cards) // Emperor Edition remaining-cards pass (issue #492), group F
+            .Concat(PublishedContent.EventWave8.Cards) // Emperor Edition remaining-cards pass (issue #492), group F
             .ToDictionary(c => c.Id, StringComparer.Ordinal);
     }
 }

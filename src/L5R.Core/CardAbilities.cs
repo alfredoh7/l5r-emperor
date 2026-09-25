@@ -7036,7 +7036,7 @@ public sealed partial class MatchEngine
     // entering-play moment inviting a THIRD nested reaction.
     private void AttachAsOutOfPlayReaction(CardInstance card, CardInstance target, int ownerId)
     {
-        Player(ownerId).Hand.Remove(card.Id); Player(ownerId).AttachedFromHandThisTurn = true;
+        Player(ownerId).Hand.Remove(card.Id); Player(ownerId).AttachedFromHandThisTurn = true; NoteAttachedFromHandForGlory(ownerId, card);
         // Equip (Battle)'s own convention: an attachment's ProvinceIndex must be copied from its
         // wielder for AtBattle() to ever recognize it (unlike ordinary Equip(), whose target is
         // always at Zone.Home -- ProvinceIndex null either way -- this attach can land on a
@@ -7894,7 +7894,7 @@ public sealed partial class MatchEngine
                 
                 var performer = Card(command.PerformerId!);
                 var attachment = target!;
-                player.Hand.Remove(attachment.Id); player.AttachedFromHandThisTurn = true; NoteAttachedFollowerFromHand(attachment, performer); // Hida Takeuchi (issue #477 batch 2).
+                player.Hand.Remove(attachment.Id); player.AttachedFromHandThisTurn = true; NoteAttachedFollowerFromHand(attachment, performer); NoteAttachedFromHandForGlory(player.Id, attachment); // Hida Takeuchi (issue #477 batch 2); Glory of the Shogun (issue #492).
                 attachment.Zone = Zone.Attached; attachment.AttachedTo = performer.Id; attachment.FaceUp = true; attachment.ProvinceIndex = performer.ProvinceIndex;
                 if (Definition(attachment).AttachGrantsKeyword is string granted) GrantKeyword(performer, granted, attachment.Id, "Attachment");
                 Emit("equipped", $"{Definition(attachment).Name} attached to {Definition(performer).Name} via {(id == "low-market-equip" ? "Low Market" : "On the Hunt")}.", player.Id, attachment.Id);
@@ -8044,7 +8044,7 @@ public sealed partial class MatchEngine
             case "neiru-equip":
             {
                 var spell = target!;
-                player.Hand.Remove(spell.Id); player.AttachedFromHandThisTurn = true;
+                player.Hand.Remove(spell.Id); player.AttachedFromHandThisTurn = true; NoteAttachedFromHandForGlory(player.Id, spell);
                 spell.Zone = Zone.Attached; spell.AttachedTo = source!.Id; spell.FaceUp = true; spell.ProvinceIndex = source.ProvinceIndex;
                 if (Definition(spell).AttachGrantsKeyword is string neiruGranted) GrantKeyword(source, neiruGranted, spell.Id, "Attachment");
                 Emit("equipped", $"{Definition(spell).Name} attached to {Definition(source).Name}.", player.Id, spell.Id);
@@ -8096,7 +8096,7 @@ public sealed partial class MatchEngine
             {
                 var performer = Card(command.PerformerId!);
                 var attachment = target!;
-                player.Hand.Remove(attachment.Id); player.AttachedFromHandThisTurn = true; NoteAttachedFollowerFromHand(attachment, performer); // Hida Takeuchi (issue #477 batch 2).
+                player.Hand.Remove(attachment.Id); player.AttachedFromHandThisTurn = true; NoteAttachedFollowerFromHand(attachment, performer); NoteAttachedFromHandForGlory(player.Id, attachment); // Hida Takeuchi (issue #477 batch 2); Glory of the Shogun (issue #492).
                 attachment.Zone = Zone.Attached; attachment.AttachedTo = performer.Id; attachment.FaceUp = true; attachment.ProvinceIndex = performer.ProvinceIndex;
                 // Reserve (issue #184): a non-Spell attachment can carry AttachGrantsKeyword too (a
                 // Spell never has, so this was never needed before) -- same as the ordinary Equip().
@@ -8478,7 +8478,7 @@ public sealed partial class MatchEngine
             case "simple-yari-attach":
             {
                 var yariHost = Card(_state.PendingChoice!.CardId!);
-                if (source!.Zone == Zone.Hand) { player.Hand.Remove(source.Id); player.AttachedFromHandThisTurn = true; }
+                if (source!.Zone == Zone.Hand) { player.Hand.Remove(source.Id); player.AttachedFromHandThisTurn = true; NoteAttachedFromHandForGlory(player.Id, source); }
                 source.Zone = Zone.Attached; source.AttachedTo = yariHost.Id; source.FaceUp = true;
                 if (Definition(source).AttachGrantsKeyword is string yariGranted) GrantKeyword(yariHost, yariGranted, source.Id, "Attachment");
                 Emit("equipped", $"{Definition(source).Name} attached to {Definition(yariHost).Name}.", player.Id, source.Id);
@@ -8853,7 +8853,7 @@ public sealed partial class MatchEngine
             {
                 var enteredPersonality = Card(_state.PendingChoice!.CardId!);
                 var attachDef = Definition(source!);
-                if (source!.Zone == Zone.Hand) { player.Hand.Remove(source.Id); player.AttachedFromHandThisTurn = true; NoteAttachedFollowerFromHand(source, enteredPersonality); }
+                if (source!.Zone == Zone.Hand) { player.Hand.Remove(source.Id); player.AttachedFromHandThisTurn = true; NoteAttachedFollowerFromHand(source, enteredPersonality); NoteAttachedFromHandForGlory(player.Id, source); }
                 source.Zone = Zone.Attached; source.AttachedTo = enteredPersonality.Id; source.FaceUp = true;
                 if (attachDef.AttachGrantsKeyword is string granted) GrantKeyword(enteredPersonality, granted, source.Id, "Attachment");
                 GainHonor(player.Id, 1, attachDef.Name, source);

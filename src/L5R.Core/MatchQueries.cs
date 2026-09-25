@@ -476,6 +476,8 @@ public sealed partial class MatchEngine
         // The Shadow's Embrace pass (issue #476), batch 6: Star-Crossed Lovers' pair, for the revealing player only (ShadowsEmbraceBatch6.cs).
         else if(_state.PendingChoice is { Type:"starCrossedLovers" })
             result.AddRange(StarCrossedLoversActions(playerId));
+        else if(_state.PendingChoice is { Type:"eventChoice" }) // Emperor Edition remaining-cards pass (issue #492), group F.
+            result.AddRange(EventChoiceActions(playerId));
         else if(_state.PendingChoice is { Type:"testedLandProvince" } testedLand)
         {
             if(playerId==testedLand.PlayerId)
@@ -491,7 +493,7 @@ public sealed partial class MatchEngine
                 Add("pass","Pass action",Command("pass"));
                 break;
             case Phase.AttackDeclaration:
-                Add("declareAttack","Declare an attack",Command("declareAttack"),player.MayNotAttackThisTurn?"You may not declare an attack this turn.":null);
+                Add("declareAttack","Declare an attack",Command("declareAttack"),player.MayNotAttackThisTurn||AttackLockedByEvent(playerId)?"You may not declare an attack this turn.":null);
                 Add("pass","Decline to attack",Command("pass"),ForcedAttackDeclineRefusal(playerId)); // Spiritual Manipulation (issue #476 batch 4): an owed attack may not be declined
                 break;
             case Phase.InfantryDeclaration:
@@ -499,7 +501,8 @@ public sealed partial class MatchEngine
             case Phase.CavalryDeclaration:
             case Phase.CavalryDefense:
                 var cavalrySegment=_state.Phase is Phase.CavalryDeclaration or Phase.CavalryDefense;
-                var units=_state.Cards.Values.Where(c=>c.OwnerId==playerId && c.Zone==Zone.Home && (!c.Bowed || MayAssignBowed(c)) && Definition(c).Type==CardType.Personality && IsCavalryUnit(c)==cavalrySegment).Select(c=>c.Id).ToArray();
+                var units=_state.Cards.Values.Where(c=>c.OwnerId==playerId && c.Zone==Zone.Home && (!c.Bowed || MayAssignBowed(c)) && Definition(c).Type==CardType.Personality && IsCavalryUnit(c)==cavalrySegment
+                    && !DelayedArrivalBarsAttacker(c,_state.Phase is Phase.InfantryDeclaration or Phase.CavalryDeclaration)).Select(c=>c.Id).ToArray(); // Delayed Arrival (issue #492, group F)
                 var attack=_state.Phase is Phase.InfantryDeclaration or Phase.CavalryDeclaration;
                 // Defenders are offered only the battlefields AssignDefense accepts.
                 var provinces=Player(1-_state.ActivePlayerId).Provinces
