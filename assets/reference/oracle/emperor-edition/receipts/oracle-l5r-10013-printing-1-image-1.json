@@ -23,5 +23,18 @@
   "source_image_hash": "a4/d7",
   "source_url": "https://images.oracleofthevoid.com/l5r/a4/d7/printing_10013_1_master.jpg",
   "url_prefix": "https://images.oracleofthevoid.com/l5r/a4/d7/printing_10013_1_",
-  "width": 750
+  "width": 750,
+  "working_copy": {
+    "bytes": 118916,
+    "format": "WEBP",
+    "height": 1050,
+    "path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-10013-printing-1-image-1.webp",
+    "sha256": "1cc7ab6b0750f25f65d9f7dd3fb13da61c27399c6413a383b632289bc677c4e7",
+    "source": {
+      "asset": "cwebp 1.4.0 quality 85 of the master downloaded from source_url (sha256 verified), same encoding as the Catalogue WebP 85 pack",
+      "matched_by": "original_sha256",
+      "release": null
+    },
+    "width": 750
+  }
 }
