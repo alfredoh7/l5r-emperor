@@ -975,7 +975,7 @@ static void TimesOfStrifeProvinceClampAndDiscard()
         var ring=Add(s,"training-ring-of-earth-stub",0,Zone.Home);
         var e=MatchEngine.FromTestState(s);
         Accept(e,new GameCommand("useAbility",0,e.Version,CardId:ring.Id,AbilityId:"ring-of-earth-raise",TargetPlayerId:1,Province:0));
-        Equal(e.State.Players[1].Provinces[0].Strength,printed+3,"The raw raise still applies underneath");
+        Equal(e.State.ProvinceStrengthEffects.Where(x=>x.PlayerId==1&&x.ProvinceIndex==0).Sum(x=>x.Amount),3,"The raise (until end of turn, issue #492 ruling R3) still applies underneath");
         Equal(e.GetView(0).Players[1].Provinces[0].Strength,printed,"But the EFFECTIVE (client-visible) strength is clamped back down to printed");
     }
     // Discard trigger: "another player who controls no units at the current battlefield announces a
@@ -1227,7 +1227,8 @@ static void SecondCityPersonalityWave18()
         var strengthBefore=s.Players[0].Provinces[0].Strength;
         var e=MatchEngine.FromTestState(s);
         Accept(e,new GameCommand("useAbility",0,e.Version,CardId:adi.Id,TargetId:target.Id,AbilityId:"yogo-adi-choice"));
-        Check(e.State.Players[0].Provinces.All(p=>p.Strength==strengthBefore+2),"Not dishonorable: all of Adi's own provinces gain +2 strength instead");
+        Check(e.State.Players[0].Provinces.All(p=>e.ProvinceStrengthForTest(0,p.Index)==strengthBefore+2),"Not dishonorable: all of Adi's own provinces gain +2 strength instead");
+        Check(e.State.Players[0].Provinces.All(p=>Batch336Support.StrengthNextTurn(e,0,p.Index)==strengthBefore),"Yogo Adi: the +2 lasts until end of turn (issue #492 ruling R3)");
     }
 }
 static void SecondCityRestBatch()
@@ -1544,12 +1545,13 @@ static void BattleOpenPresencePrimitive()
         Add(s,"training-lion-samurai",0,Zone.Battlefield,province:0); // the acting player's own presence at the battlefield, via a different unit
         var fateDeck=s.Players[0].FateDeck; fateDeck.Insert(0,Add(s,"training-item",0,Zone.FateDeck).Id); // top card, Focus 0 by default
         var e=MatchEngine.FromTestState(s);
-        var strengthBefore=e.State.Players[1].Provinces[0].Strength;
+        var strengthBefore=e.ProvinceStrengthForTest(1, 0);
         var deckBefore=e.State.Players[0].FateDeck.Count;
         Accept(e,new GameCommand("useAbility",0,e.Version,CardId:strat.Id,AbilityId:"improved-defenses-strength",PerformerId:artisan.Id));
         Check(e.State.Cards[artisan.Id].Bowed,"Bowed as cost");
         Equal(e.State.Players[0].FateDeck.Count,deckBefore-1,"Discarded the top card of the Fate deck");
-        Equal(e.State.Players[1].Provinces[0].Strength,strengthBefore+1,"Focus Value 0 + 1");
+        Equal(e.ProvinceStrengthForTest(1, 0),strengthBefore+1,"Focus Value 0 + 1");
+        Equal(Batch336Support.StrengthNextTurn(e,1,0),strengthBefore,"Improved Defenses: until end of turn (issue #492 ruling R3)");
     }
     // ...or at another battlefield that has not yet resolved this Battle phase...
     {
@@ -5907,9 +5909,10 @@ static void RingOfEarth()
         var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Battle; s.CurrentBattleProvince=0; s.UnresolvedBattlefields=[0]; s.PriorityPlayerId=0; s.ActivePlayerId=0;
         var ring=Add(s,"training-ring-of-earth-stub",0,Zone.Home); // in play, no units of player 0's own anywhere at this battlefield
         var e=MatchEngine.FromTestState(s);
-        var enemyStrengthBefore=e.State.Players[1].Provinces[0].Strength;
+        var enemyStrengthBefore=e.ProvinceStrengthForTest(1, 0);
         Accept(e,new GameCommand("useAbility",0,e.Version,CardId:ring.Id,AbilityId:"ring-of-earth-raise",TargetPlayerId:1,Province:0));
-        Equal(e.State.Players[1].Provinces[0].Strength,enemyStrengthBefore+3,"Raises the enemy's own province by 3, even with no units of its own present");
+        Equal(e.ProvinceStrengthForTest(1, 0),enemyStrengthBefore+3,"Raises the enemy's own province by 3, even with no units of its own present");
+        Equal(Batch336Support.StrengthNextTurn(e,1,0),enemyStrengthBefore,"Ring of Earth: until end of turn (issue #492 ruling R3, Mendon)");
         Check(e.State.Cards[ring.Id].Bowed,"Bows itself as the in-play cost");
         Reject(e,new GameCommand("useAbility",0,e.Version,CardId:ring.Id,AbilityId:"ring-of-earth-lower",TargetPlayerId:0,Province:0)); // already used this turn (shared UsageKey) and now bowed
     }
@@ -5919,9 +5922,10 @@ static void RingOfEarth()
         var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Battle; s.CurrentBattleProvince=0; s.UnresolvedBattlefields=[0]; s.PriorityPlayerId=0; s.ActivePlayerId=0;
         var ring=Add(s,"training-ring-of-earth-stub",0,Zone.Hand);
         var e=MatchEngine.FromTestState(s);
-        var ownStrengthBefore=e.State.Players[0].Provinces[0].Strength;
+        var ownStrengthBefore=e.ProvinceStrengthForTest(0, 0);
         Accept(e,new GameCommand("useAbility",0,e.Version,CardId:ring.Id,AbilityId:"ring-of-earth-lower",TargetPlayerId:0,Province:0));
-        Equal(e.State.Players[0].Provinces[0].Strength,ownStrengthBefore-3,"May target its own controller's own province too");
+        Equal(e.ProvinceStrengthForTest(0, 0),ownStrengthBefore-3,"May target its own controller's own province too");
+        Equal(Batch336Support.StrengthNextTurn(e,0,0),ownStrengthBefore,"Ring of Earth (lower): until end of turn");
         Equal(e.State.Cards[ring.Id].Zone,Zone.FateDiscard,"Discarded from hand instead of bowed");
     }
 }
@@ -7757,7 +7761,8 @@ static void Dueling()
         Equal(e.State.Cards[paidOff.Id].Zone,Zone.FateDiscard);
         // "As a Focus Effect: After this duel ends, if you won it, give all your provinces +2
         // strength" -- Doji Tatsuki's controller (Crane, player 1) won, so only their provinces gain.
-        var craneProvincesAfter=e.State.Players[1].Provinces.Select(p=>p.Strength).ToArray();
+        var craneProvincesAfter=e.State.Players[1].Provinces.Select(p => e.ProvinceStrengthForTest(1, p.Index)).ToArray();
+        for(var i=0;i<craneProvincesBefore.Length;i++) Equal(Batch336Support.StrengthNextTurn(e,1,i),craneProvincesBefore[i],$"Courtesy of the Crane: province {i} is back to its strength when the turn ends (issue #492 ruling R3)");
         for(var i=0;i<craneProvincesBefore.Length;i++) Equal(craneProvincesAfter[i],craneProvincesBefore[i]+2,$"Province {i} should gain +2 strength");
         Check(e.State.PendingDuel is null,"The duel is fully resolved");
         // The game returns to exactly the state it was in when the challenge was issued (the Crane

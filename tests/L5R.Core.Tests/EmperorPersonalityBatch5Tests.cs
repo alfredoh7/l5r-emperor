@@ -559,7 +559,8 @@ internal static class EmperorPersonalityBatch5Tests
             s.Players[1].Provinces[0].Strength = 6;
             var e = MatchEngine.FromTestState(s);
             Accept(e, Enabled(e, 0, ability, kusugi.Id).Command!);
-            Eq(e.State.Players[1].Provinces[0].Strength, 6 + delta, $"{ability}: province strength");
+            Eq(e.ProvinceStrengthForTest(1, 0), 6 + delta, $"{ability}: province strength");
+            Eq(Batch336Support.StrengthNextTurn(e, 1, 0), 6, $"{ability}: Kusugi's change lasts until end of turn (issue #492 ruling R3)");
             Check(e.State.Cards[kusugi.Id].Bowed, "Kusugi bowed as his cost");
         }
         // Even if he is not there, the acting player needs a unit at the battle; and a bowed Kusugi cannot pay.

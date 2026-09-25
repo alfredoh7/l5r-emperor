@@ -398,8 +398,7 @@ public sealed partial class MatchEngine
             case "besieged-lower":
             {
                 var amount = Definition(Card(command.PerformerId!)).Chi * (id == "besieged-raise" ? 1 : -1);
-                foreach (var province in _state.Players.SelectMany(p => p.Provinces).Where(p => !p.Destroyed)) province.Strength += amount;
-                Emit("provinceStrengthRaised", $"{name}: every province has {amount:+#;-#;0} strength.", player.Id);
+                foreach (var owner in _state.Players) foreach (var province in owner.Provinces.Where(p => !p.Destroyed)) GiveProvinceStrengthThisTurn(owner.Id, province.Index, amount, name); // until end of turn (issue #492 ruling R3)
                 return false;
             }
             // Breath of the Heavens: the Ranged 3 Attack (+1 for each Fire token now on the Personality), then the new +1F Fire token.
@@ -413,7 +412,7 @@ public sealed partial class MatchEngine
             // Burn the Towers.
             case "burn-towers-recon":
                 GrantReconnaissanceAtCurrentBattlefield(player.Id);
-                if (CurrentBattlefieldProvince() is { } towered) { towered.Strength -= 3; Emit("provinceStrengthLowered", $"{name}: this battlefield's province has -3 strength.", player.Id); }
+                if (_state.CurrentBattleProvince is int towered) GiveProvinceStrengthThisTurn(1 - _state.ActivePlayerId, towered, -3, name); // until end of turn (issue #492 ruling R3)
                 return false;
             // Caught in the Act: the bowing of every Personality of the reactor's the held action targets is negated.
             case "caught-act-negate-bow":

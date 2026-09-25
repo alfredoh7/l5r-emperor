@@ -18,6 +18,13 @@ internal static class Batch336Support
     }
 
     // MatchEngine.State is a detached copy, so a mid-test change is made on a copy and the engine rebuilt from it.
+    /// <summary>A province's strength as read once the turn has ended (issue #492 ruling R3: an effect lasts until end of turn unless it is permanent): read from a copy of the state with the turn number stepped forward.</summary>
+    public static int StrengthNextTurn(MatchEngine e, int owner, int index)
+    {
+        var later = e.State; // a copy: stepping its turn forward leaves the engine alone
+        later.TurnNumber++;
+        return MatchEngine.FromTestState(later).ProvinceStrengthForTest(owner, index);
+    }
     public static MatchEngine Edit(MatchEngine e, Action<MatchState> edit) { var st = e.State; edit(st); return MatchEngine.FromTestState(st); }
 
     public static void Force(CardInstance card, int amount) => card.Modifiers.Add(new("test-source", "test", "Force", amount));

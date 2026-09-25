@@ -102,11 +102,12 @@ public static class EmperorRemainingDAbilities
         // battle resolution destroys your Courtier, draw a card, and choose a player, who gains or loses 2 Honor." -- "your Courtier" is the performing one (ShadowCourtWatches).
         all["shadow-court-bow"] = new("Battle", "Choose your performing defending Courtier and target an enemy Personality: Bow him. After the next time this turn another player's action or a battle resolution destroys your Courtier, draw a card, and choose a player, who gains or loses 2 Honor", "enemy-personality",
             Performer: "rd-own-defending-personality-with-keyword", RequiredKeywords: ["Courtier"]);
-        // The Sincerity of the Dragon (oracle-l5r-8338): "As a Focus Effect: After this duel ends, if you won it, give all your provinces +2 strength." / "Battle/Open: Choose your performing unbowed Dragon
-        // Clan Personality: Name a number. After the next resolution this turn of your action from another Strategy or Ring with a base Focus Value equal to the number, draw a card, and choose a player,
-        // who discards a card." -- the number is a choice among the Focus Values a card may have (0 to 6), an effect choice; the watch is SincerityWatches.
+        // The Sincerity of the Dragon (oracle-l5r-8338): "As a Focus Effect: After this duel ends, if you won it, give all your provinces +2 strength." / "Battle/Open: If you are a Dragon Clan player,
+        // choose your performing unbowed Dragon Clan Personality: Name a number. After the next resolution this turn of your action from another Strategy or Ring with a base Focus Value equal to the
+        // number, draw a card, and choose a player, who discards a card. Remove this card from the game." -- the number is a choice among the Focus Values a card may have (0 to 6), an effect choice;
+        // the watch is SincerityWatches. The corrected scan (Mendon, issue #492) adds the Dragon Clan player condition (ValidateEmperorRemainingD) and the removal (ApplyEmperorRemainingDBranchEffect).
         all["sincerity-dragon-focus"] = new("FocusEffect", "As a Focus Effect: After this duel ends, if you won it, give all your provinces +2 strength", "none");
-        all["sincerity-dragon-name"] = new("BattleOrOpen", "Choose your performing unbowed Dragon Clan Personality: Name a number. After the next resolution this turn of your action from another Strategy or Ring with a base Focus Value equal to the number, draw a card, and choose a player, who discards a card", "none",
+        all["sincerity-dragon-name"] = new("BattleOrOpen", "If you are a Dragon Clan player, choose your performing unbowed Dragon Clan Personality: Name a number. After the next resolution this turn of your action from another Strategy or Ring with a base Focus Value equal to the number, draw a card, and choose a player, who discards a card. Remove this card from the game", "none",
             Performer: "rd-own-unbowed-clan-personality-at-battle", RequiredKeywords: ["Dragon"],
             Branch: new(BranchCondition.Always, Enumerable.Range(0, 7).Select(n => new EffectOption($"name-{n}", $"Name {n}", [$"{MatchEngine.SincerityNameEffect}{n}"])).ToArray(), HonorChoice.None));
         // Twist of Fate (oracle-l5r-8917): "Reaction: Before your Dynasty Phase ends: Take an additional Limited or Open action." -- a window as its player ends the Dynasty Phase (TwistOfFateWindow); the
@@ -136,6 +137,10 @@ public sealed partial class MatchEngine
             case "well-prepared-bow":
             case "well-prepared-straighten":
                 Require(ControlsKeyword(player.Id, "Terrain"), "You do not control a Terrain.");
+                break;
+            // The Sincerity of the Dragon: "If you are a Dragon Clan player" -- a condition on taking the action (the corrected scan, issue #492).
+            case "sincerity-dragon-name":
+                Require(player.Clan == "Dragon", "You must be a Dragon Clan player.");
                 break;
             // The Trap is Sprung!: "If you have Reconnaissance".
             case "trap-sprung-bow":
@@ -563,6 +568,7 @@ public sealed partial class MatchEngine
         var source = Card(command.CardId);
         _state.SincerityWatches.RemoveAll(w => w.Turn != _state.TurnNumber);
         _state.SincerityWatches.Add(new(command.PlayerId, number, _state.TurnNumber, source.Id));
+        Player(source.OwnerId).Hand.Remove(source.Id); RemoveFromGame(source); // "Remove this card from the game" (the corrected scan, issue #492): part of the action's resolution, so it never reaches the discard pile.
         Emit("watchSet", $"{Definition(source).Name}: {Player(command.PlayerId).Name} named {number}. After the next resolution this turn of his action from another Strategy or Ring with a base Focus Value of {number}, he draws a card and chooses a player who discards a card.", command.PlayerId, source.Id);
         return true;
     }

@@ -542,13 +542,13 @@ public sealed partial class MatchEngine
     {
         switch (abilityId)
         {
-            // The Sincerity of the Dragon (Emperor Edition remaining-cards pass, issue #492, group D): "After this duel ends, if you won it, give all your provinces +2 strength" -- until the turn ends (the
-            // default duration of an ongoing effect); Courtesy of the Crane's, below, has always raised the printed strength for good.
+            // The Sincerity of the Dragon and The Courtesy of the Crane: "After this duel ends, if you won it, give all your provinces +2 strength" -- until the turn ends (the default duration of an
+            // ongoing effect; Mendon's ruling, issue #492).
             case "sincerity-dragon-focus":
                 if (ownerId == winnerPlayerId) foreach (var province in Player(ownerId).Provinces.Where(p => !p.Destroyed)) GiveProvinceStrengthThisTurn(ownerId, province.Index, 2, "The Sincerity of the Dragon");
                 break;
             case "courtesy-of-the-crane-focus":
-                if (ownerId == winnerPlayerId) foreach (var province in Player(ownerId).Provinces) province.Strength += 2;
+                if (ownerId == winnerPlayerId) foreach (var province in Player(ownerId).Provinces.Where(p => !p.Destroyed)) GiveProvinceStrengthThisTurn(ownerId, province.Index, 2, "The Courtesy of the Crane");
                 break;
             // To First Blood: "its winner's controller gains 2 Honor" (the destruction it negates was applied before the Focus Effects, in ResolveDuel).
             case "to-first-blood-focus":

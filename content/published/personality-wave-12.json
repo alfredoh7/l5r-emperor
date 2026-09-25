@@ -57,7 +57,9 @@
       ],
       "Focus": 0,
       "Abilities": [
-        "hizumi-negate-straighten"
+        "hizumi-negate-straighten",
+        "hizumi-province-raise",
+        "hizumi-province-lower"
       ],
       "Effect": "none"
     },

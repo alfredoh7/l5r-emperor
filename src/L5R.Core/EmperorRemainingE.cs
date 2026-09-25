@@ -255,8 +255,7 @@ public sealed partial class MatchEngine
         if (BattlefieldProvince(provinceIndex) is not { } province) return; // a battlefield without a province has no strength (issue #492, rulings pass R1)
         var current = EffectiveProvinceStrength(province);
         if (current <= 5) return;
-        province.Strength -= current - 5;
-        Emit("provinceStrengthReduced", $"Yoritomo's Guidance: province {provinceIndex + 1}'s strength is reduced to 5.", 1 - _state.ActivePlayerId);
+        GiveProvinceStrengthThisTurn(1 - _state.ActivePlayerId, provinceIndex, 5 - current, "Yoritomo's Guidance"); // reduced to 5 until end of turn (issue #492 ruling R3)
     }
 
     // ---- Consecration (Assign's and MoveToBattlefield's hook) ---------------------------------------------------------------------------------------------------

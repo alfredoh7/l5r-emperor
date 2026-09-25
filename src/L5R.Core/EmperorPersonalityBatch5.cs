@@ -181,9 +181,9 @@ public sealed partial class MatchEngine
             case "tamasine-boost-one": case "tamasine-boost-many":
                 foreach (var ancestor in SlotCards(command, "targets").ToArray()) ApplyModifier(ancestor, source!.Id, id, "Force", 4);
                 return false;
-            // Tamori Kusugi: the defender's province at the current battlefield, raised or lowered by 4 (Ring of Earth's direct Strength change).
+            // Tamori Kusugi: the defender's province at the current battlefield, raised or lowered by 4 until end of turn (issue #492 ruling R3: nothing says permanent).
             case "kusugi-raise": case "kusugi-lower":
-                AddCurrentProvinceStrength(id == "kusugi-raise" ? 4 : -4);
+                GiveProvinceStrengthThisTurn(1 - _state.ActivePlayerId, _state.CurrentBattleProvince!.Value, id == "kusugi-raise" ? 4 : -4, "Tamori Kusugi");
                 return false;
             default:
                 throw new InvalidOperationException($"Unknown Emperor Edition batch 5 ability '{id}'.");

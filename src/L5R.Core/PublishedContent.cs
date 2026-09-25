@@ -2602,4 +2602,8 @@ public static class PublishedContent
     public static PublishedSnapshot ItemWave15 { get; } = Load("L5R.Published.ItemWave15.json", "item-wave-15", requireDecks: false);
     /// <summary>Follower wave 31 (issue #492, group G): Bandit Gang, Ikiryo, Ikoma House Guard, Kaiu House Guard, Legion of Pain, Moto House Guard, Tamori House Guard, Tsuruchi House Guard.</summary>
     public static PublishedSnapshot FollowerWave31 { get; } = Load("L5R.Published.FollowerWave31.json", "follower-wave-31", requireDecks: false);
+    /// <summary>Region wave 10 (Emperor Edition remaining-cards pass, issue #492, ruling R3): Kaiu Village.</summary>
+    public static PublishedSnapshot RegionWave10 { get; } = Load("L5R.Published.RegionWave10.json", "region-wave-10", requireDecks: false);
+    /// <summary>Item wave 16 (issue #492, ruling R3): Kaiu Weapon (oracle-l5r-10006, a locally allocated id for the Proxy scan Mendon supplied), the Item Kaiu Village creates.</summary>
+    public static PublishedSnapshot ItemWave16 { get; } = Load("L5R.Published.ItemWave16.json", "item-wave-16", requireDecks: false);
 }

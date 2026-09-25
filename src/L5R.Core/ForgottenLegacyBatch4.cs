@@ -132,8 +132,7 @@ public sealed partial class MatchEngine
     {
         var castles = _state.Cards.Values.Count(c => c.OwnerId == playerId && InPlay(c) && Keyword(c, "Castle"));
         if (CurrentBattlefieldProvince() is not { } province) return; // a battlefield without a province has no strength to change (issue #492, rulings pass R1)
-        province.Strength += raise ? castles : -castles;
-        Emit("provinceStrengthChanged", $"Siege Volley: province {province.Index + 1} {(raise ? "+" : "-")}{castles} strength ({castles} Castle{(castles == 1 ? "" : "s")}).", playerId);
+                GiveProvinceStrengthThisTurn(1 - _state.ActivePlayerId, province.Index, raise ? castles : -castles, "Siege Volley"); // until end of turn (issue #492 ruling R3)
     }
 
     // Sundering Strike: "If you did, destroy it. Move the Personality home."

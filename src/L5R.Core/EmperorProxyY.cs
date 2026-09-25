@@ -37,9 +37,10 @@ public sealed partial class MatchEngine
     private IEnumerable<(CardInstance Card, string AbilityId)> InPlayEntryWatchers(int playerId, CardInstance entered)
     {
         if (Definition(entered).Type != CardType.Personality || entered.OwnerId != playerId) yield break;
-        foreach (var card in _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && Definition(c).Type == CardType.Personality).OrderBy(c => c.Id, StringComparer.Ordinal).ToArray())
+        // Ruling R3 (issue #492): a Region attached to one of the player's provinces watches too (Kaiu Village: "After your performing Personality enters play from a province"), EmperorRulingR3.cs.
+        foreach (var card in _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && (Definition(c).Type == CardType.Personality || c.Zone == Zone.Region)).OrderBy(c => c.Id, StringComparer.Ordinal).ToArray())
             foreach (var abilityId in AbilityIdsOf(card))
-                if (AbilityCatalog.All.TryGetValue(abilityId, out var ability) && ability.Timing == "Reaction" && ability.Trigger == "own-personality-enters-play") yield return (card, abilityId);
+                if (AbilityCatalog.All.TryGetValue(abilityId, out var ability) && ability.Timing == "Reaction" && EntryWatchTriggerApplies(ability, entered, card)) yield return (card, abilityId);
     }
 
     // Gina's Fox: "Enemy attacking Personalities and Followers at this card's battlefield have -1F." Read live for the card: every Fox in play at the battlefield of the battle this card is

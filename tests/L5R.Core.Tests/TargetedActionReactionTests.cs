@@ -1120,7 +1120,7 @@ internal static class TargetedActionReactionTests
             Eq(Window(e), "beforeActionReaction", "the window opens for player 0");
             return (e, adi, shugenja, ez, sakuma);
         }
-        int Strength(MatchEngine e) => e.State.Players[1].Provinces[0].Strength;
+        int Strength(MatchEngine e) => e.ProvinceStrengthForTest(1, 0);
         void Answer(MatchEngine e, string choice) =>
             Accept(e, e.QueryActions(1).Single(a => a.Type == "chooseEitherOr" && a.Command?.Choice == choice && a.Enabled).Command!);
 
@@ -1371,22 +1371,22 @@ internal static class TargetedActionReactionTests
             var option = e.QueryActions(1).Single(a => a.Type == "useAbility" && a.CardId == attacker.Id && a.Command?.AbilityId == "training-province-attack");
             Check(option.Enabled && option.NoTarget && option.Provinces!.SequenceEqual(new[] { 0 }), "no target, a card, or the province");
             var weak = e.State.Cards.Values.First(c => c.DefinitionId == "training-crane-samurai"); Check(option.TargetIds!.Contains(weak.Id), "a card target is still offered");
-            var strength = e.State.Players[0].Provinces[0].Strength;
+            var strength = e.ProvinceStrengthForTest(0, 0);
             var onProvince = new GameCommand("useAbility", 1, e.Version, CardId: attacker.Id, AbilityId: "training-province-attack", Province: 0);
             Reject(e, onProvince with { TargetId = weak.Id }); Reject(e, onProvince with { Province = 1 });
             var siegeOnProvince = new GameCommand("useAbility", 1, e.Version, CardId: stronghold, PerformerId: castle.Id, AbilityId: "carpenter-castle-siege", Province: 0);
             Reject(e, siegeOnProvince); // an Attack that names no province cannot be aimed at one
             Accept(e, onProvince);
             Check(Window(e) is null && e.State.PendingAttack is null && e.State.PendingNegatableAbility is null, "a province is not a card: no card-targeted reaction, no redirect, no window");
-            Eq(e.State.Players[0].Provinces[0].Strength, Math.Max(0, strength - 3), "the Attack's own effect on the province happened");
+            Eq(e.ProvinceStrengthForTest(0, 0), Math.Max(0, strength - 3), "the Attack's own effect on the province happened");
             Check(EventLogged(e, "provinceAttacked"));
         }
         {
             // The same Attack with no target at all resolves and does nothing to the province.
             var s = Table(); var attacker = Add(s, "training-province-attacker", 1, Zone.Battlefield, province: 0); Add(s, "training-shugenja", 0, Zone.Battlefield, province: 0);
-            var e = MatchEngine.FromTestState(s); var strength = e.State.Players[0].Provinces[0].Strength;
+            var e = MatchEngine.FromTestState(s); var strength = e.ProvinceStrengthForTest(0, 0);
             Accept(e, new GameCommand("useAbility", 1, e.Version, CardId: attacker.Id, AbilityId: "training-province-attack"));
-            Eq(e.State.Players[0].Provinces[0].Strength, strength, "no target, no province: nothing happens");
+            Eq(e.ProvinceStrengthForTest(0, 0), strength, "no target, no province: nothing happens");
         }
     }
 

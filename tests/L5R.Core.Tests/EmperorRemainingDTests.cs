@@ -465,6 +465,7 @@ internal static class EmperorRemainingDTests
         MatchEngine Named(int number, out CardInstance menace, out CardInstance courtier, out CardInstance victim)
         {
             var a = Table(Phase.Action, 0);
+            a.Players[0].Clan = "Dragon"; // "If you are a Dragon Clan player" (the corrected scan, issue #492 ruling R3)
             var sincerity = Add(a, SincerityOfTheDragon, 0, Zone.Hand);
             menace = Add(a, VeiledMenace, 0, Zone.Hand); // base Focus Value 2
             var dragon = Add(a, dragonId, 0, Zone.Home);

@@ -355,10 +355,11 @@ internal static class ForgottenLegacyBatch4Tests
             Add(t, "training-lion-samurai", 1, Zone.Battlefield, province: 0);
             var castles = t.Cards.Values.Count(c => c.OwnerId == 0 && c.Zone is Zone.Home or Zone.Stronghold && (CardCatalog.Get(c.DefinitionId).Keywords ?? []).Contains("Castle"));
             var f = MatchEngine.FromTestState(t);
-            var before = f.State.Players[1].Provinces[0].Strength;
+            var before = f.ProvinceStrengthForTest(1, 0);
             var ability = raise ? "siege-volley-raise" : "siege-volley-lower";
             Accept(f, Enabled(f, 0, ability, volley.Id).Command!);
-            Eq(f.State.Players[1].Provinces[0].Strength, before + (raise ? castles : -castles), $"{ability}: changed by the {castles} Castles");
+            Eq(f.ProvinceStrengthForTest(1, 0), before + (raise ? castles : -castles), $"{ability}: changed by the {castles} Castles");
+            Eq(Batch336Support.StrengthNextTurn(f, 1, 0), before, $"{ability}: until end of turn (issue #492 ruling R3)");
         }
     }
 

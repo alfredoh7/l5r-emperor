@@ -188,7 +188,7 @@
       "HonorRequirement": null,
       "ProvinceStrength": 0,
       "StartingHonor": 0,
-      "Text": "As a Focus Effect: After this duel ends, if you won it, give all your provinces +2 strength.\nBattle/Open: Choose your performing unbowed Dragon Clan Personality: Name a number. After the next resolution this turn of your action from another Strategy or Ring with a base Focus Value equal to the number, draw a card, and choose a player, who discards a card.",
+      "Text": "As a Focus Effect: After this duel ends, if you won it, give all your provinces +2 strength.\nBattle/Open: If you are a Dragon Clan player, choose your performing unbowed Dragon Clan Personality: Name a number. After the next resolution this turn of your action from another Strategy or Ring with a base Focus Value equal to the number, draw a card, and choose a player, who discards a card. Remove this card from the game.",
       "ScenarioOnly": false,
       "ArtworkKey": "res://Content/Published/oracle-l5r-8338.jpg",
       "Keywords": [],

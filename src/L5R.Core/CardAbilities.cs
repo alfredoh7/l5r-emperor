@@ -3906,7 +3906,7 @@ public static class AbilityCatalog
         // Tamori Kusugi (oracle-l5r-7780): "Battle: Even if Kusugi is not at the current battlefield, bow him: Raise or lower the current battlefield's province's strength by 4."
         ["kusugi-raise"] = new("Battle", "Even if Kusugi is not at the current battlefield, bow him: Raise the current battlefield's province's strength by 4", "none", UsageKey: "kusugi-province", Costs: ActionCost.BowSource, SourceUnitMayBeAway: true),
         ["kusugi-lower"] = new("Battle", "Even if Kusugi is not at the current battlefield, bow him: Lower the current battlefield's province's strength by 4", "none", UsageKey: "kusugi-province", Costs: ActionCost.BowSource, SourceUnitMayBeAway: true),
-    }.AddEmperorPersonalityBatch2().AddEmperorStrongholdBatch1().AddEmperorStrongholdBatch3().AddEmperorRemainingA().AddEmperorRemainingB().AddEmperorRemainingC().AddEmperorRemainingD().AddEmperorRemainingE().AddEmperorRemainingF().AddEmperorRemainingG().AddEmperorProxyX().AddEmperorProxyY().AddEmperorProxyZ().AddEmperorRulingR1().AddEmperorRulingR2()); //Emperor Edition remaining-cards pass, group A (issue #492): EmperorRemainingA.cs. Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition remaining-cards pass (issue #492), group E: EmperorRemainingE.cs. // Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs; remaining-cards pass (issue #492), group F: EmperorRemainingF.cs. | Emperor Edition remaining-cards pass (issue #492), group G: EmperorRemainingG.cs // Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition remaining-cards pass, group A (issue #492): EmperorRemainingA.cs. Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition remaining-cards pass (issue #492), group E: EmperorRemainingE.cs. // Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs; remaining-cards pass (issue #492), group F: EmperorRemainingF.cs. | Emperor Edition remaining-cards pass (issue #492), group G: EmperorRemainingG.cs // Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition remaining-cards pass, group A (issue #492): EmperorRemainingA.cs. Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition remaining-cards pass (issue #492), group E: EmperorRemainingE.cs. // Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs; remaining-cards pass (issue #492), group F: EmperorRemainingF.cs. | Emperor Edition remaining-cards pass (issue #492), group G: EmperorRemainingG.cs // Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs.
+    }.AddEmperorPersonalityBatch2().AddEmperorStrongholdBatch1().AddEmperorStrongholdBatch3().AddEmperorRemainingA().AddEmperorRemainingB().AddEmperorRemainingC().AddEmperorRemainingD().AddEmperorRemainingE().AddEmperorRemainingF().AddEmperorRemainingG().AddEmperorProxyX().AddEmperorProxyY().AddEmperorProxyZ().AddEmperorRulingR1().AddEmperorRulingR2().AddEmperorRulingR3()); //Emperor Edition remaining-cards pass, group A (issue #492): EmperorRemainingA.cs. Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition remaining-cards pass (issue #492), group E: EmperorRemainingE.cs. // Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs; remaining-cards pass (issue #492), group F: EmperorRemainingF.cs. | Emperor Edition remaining-cards pass (issue #492), group G: EmperorRemainingG.cs // Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition remaining-cards pass, group A (issue #492): EmperorRemainingA.cs. Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition remaining-cards pass (issue #492), group E: EmperorRemainingE.cs. // Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs; remaining-cards pass (issue #492), group F: EmperorRemainingF.cs. | Emperor Edition remaining-cards pass (issue #492), group G: EmperorRemainingG.cs // Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition remaining-cards pass, group A (issue #492): EmperorRemainingA.cs. Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition remaining-cards pass (issue #492), group E: EmperorRemainingE.cs. // Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs; remaining-cards pass (issue #492), group F: EmperorRemainingF.cs. | Emperor Edition remaining-cards pass (issue #492), group G: EmperorRemainingG.cs // Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs.
 }
 
 public sealed partial class MatchEngine
@@ -5386,8 +5386,9 @@ public sealed partial class MatchEngine
                 // The Spider's Web (Emperor Edition Stronghold pass, issue #486 batch 3): an in-play card of the player's watching the entry of one of the player's own Personalities.
                 // Retribution (Emperor Edition remaining-cards pass, group C, issue #492): "After the end of an Attack Phase" -- the Defender's own window.
                 EmperorRemainingCAbilities.AttackPhaseEnd => _state.PendingChoice.Type == "attackPhaseEndReaction" && command.PlayerId == _state.PendingChoice.PlayerId,
-                "own-personality-enters-play" => _state.PendingChoice.Type is "proclaim" or "entryReaction" && command.PlayerId == _state.PendingChoice.PlayerId
-                    && _state.PendingChoice.CardId is { } enteredId && _state.Cards.TryGetValue(enteredId, out var enteredCard) && enteredCard.OwnerId == command.PlayerId && Definition(enteredCard).Type == CardType.Personality,
+                "own-personality-enters-play" or EmperorRulingR3Abilities.EntersFromProvinceTrigger => _state.PendingChoice.Type is "proclaim" or "entryReaction" && command.PlayerId == _state.PendingChoice.PlayerId
+                    && _state.PendingChoice.CardId is { } enteredId && _state.Cards.TryGetValue(enteredId, out var enteredCard) && enteredCard.OwnerId == command.PlayerId && Definition(enteredCard).Type == CardType.Personality
+                    && (ability.Trigger == "own-personality-enters-play" || EnteredFromProvince(enteredCard)), // Kaiu Village (issue #492 ruling R3): "enters play from a province".
                 _ => false
             },
             _ => false
@@ -7458,7 +7459,7 @@ public sealed partial class MatchEngine
             case "improved-defenses-strength":
                 Card(command.PerformerId!).Bowed = true;
                 if (DiscardTopOfFateDeck(player) is int idFocus)
-                    AddCurrentProvinceStrength(idFocus + 1);
+                    GiveProvinceStrengthThisTurn(1 - _state.ActivePlayerId, _state.CurrentBattleProvince!.Value, idFocus + 1, "Improved Defenses"); // until end of turn (issue #492 ruling R3)
                 break;
             // Strategy wave 13 (issue #287): Batch B of the "Not blocked; deferred for scope"
             // BLOCKERS audit. Scorn the Weak (oracle-l5r-9925): a flat -5F, then (only when the
@@ -7694,7 +7695,7 @@ public sealed partial class MatchEngine
                 break;
             case "yogo-adi-choice":
                 if (target!.Dishonorable) GainHonor(target.OwnerId, -1, "Yogo Adi", source);
-                else foreach (var province in player.Provinces) province.Strength += 2;
+                else foreach (var province in player.Provinces.Where(p => !p.Destroyed)) GiveProvinceStrengthThisTurn(player.Id, province.Index, 2, "Yogo Adi"); // until end of turn (issue #492 ruling R3)
                 break;
             case "archery-range-reaction": _state.PendingAttack!.Strength += 1; break;
             case "slanderer-dishonor":  Dishonor(target!); break;
@@ -7732,9 +7733,9 @@ public sealed partial class MatchEngine
             // MoveOrStraightenKind); if it was negated he stays at home, and nothing is straightened: the straighten
             // is conditional on the movement having resolved. Only HE is straightened, not his unit.
             case "expensive-achievement-raise": case "expensive-achievement-lower":
-                // "This Province": the current battlefield's, always the Defender's. Like every other Province Strength change in the engine (Ring of
-                // Earth, Improved Defenses) it is applied to the province's own Strength directly.
-                AddCurrentProvinceStrength(id == "expensive-achievement-raise" ? 2 : -2);
+                // "This Province": the current battlefield's, always the Defender's. An effect lasts until end of turn unless it says it is permanent
+                // (Mendon's ruling, issue #492): the timed province strength (GiveProvinceStrengthThisTurn).
+                GiveProvinceStrengthThisTurn(1 - _state.ActivePlayerId, _state.CurrentBattleProvince!.Value, id == "expensive-achievement-raise" ? 2 : -2, "Expensive Achievement");
                 break;
             case "knowledge-and-power":
             {
@@ -8588,8 +8589,8 @@ public sealed partial class MatchEngine
                 break;
             }
             case "embers-final-fire-destroy": DestroyAttachment(target!); break;
-            case "genji-province-raise": Player(command.TargetPlayerId!.Value).Provinces[command.Province!.Value].Strength += 3; break;
-            case "genji-province-lower": Player(command.TargetPlayerId!.Value).Provinces[command.Province!.Value].Strength -= 3; break;
+            case "genji-province-raise": GiveProvinceStrengthThisTurn(command.TargetPlayerId!.Value, command.Province!.Value, 3, "Genji's Students"); break;
+            case "genji-province-lower": GiveProvinceStrengthThisTurn(command.TargetPlayerId!.Value, command.Province!.Value, -3, "Genji's Students"); break;
             case "genji-attack": case "dragons-favor-attack":
                 if (ResolveOrDeferAttack(id, player, target?.Id, ActionPerformer(ability, command, source).Id, consumedGrant)) return;
                 break;
@@ -8609,8 +8610,8 @@ public sealed partial class MatchEngine
                 foreach (var removed in SlotCards(command, "removed").ToArray()) RemoveFromGame(removed);
                 if (ExecuteCreate(ability, ability.Creates!, command, player)) return;
                 break;
-            case "indomitable-home-strength": AddCurrentProvinceStrength(2); break;
-            case "stone-hewed-shrine-strength": AddCurrentProvinceStrength(3); break;
+            case "indomitable-home-strength": GiveProvinceStrengthThisTurn(1 - _state.ActivePlayerId, _state.CurrentBattleProvince!.Value, 2, "Indomitable Home"); break;
+            case "stone-hewed-shrine-strength": GiveProvinceStrengthThisTurn(1 - _state.ActivePlayerId, _state.CurrentBattleProvince!.Value, 3, "Stone-Hewed Shrine"); break;
             case "ebisu-destroy-province":
             {
                 var rightmost = player.Provinces.Where(p => !p.Destroyed).OrderByDescending(p => p.Index).FirstOrDefault();
@@ -8675,7 +8676,7 @@ public sealed partial class MatchEngine
                 ApplyModifier(target!, source!.Id, id, "Force", -CardForce(target!));
                 AddTargetBar(Card(command.PerformerId!), target!.Id, "Weapon");
                 break;
-            case "scavenging-party-provinces": foreach (var province in player.Provinces.Where(p => !p.Destroyed)) province.Strength += 2; break;
+            case "scavenging-party-provinces": foreach (var province in player.Provinces.Where(p => !p.Destroyed)) GiveProvinceStrengthThisTurn(player.Id, province.Index, 2, "Scavenging Party"); break;
             case "scavenging-party-refill": RefillProvinceWithDiscardedPersonality(player, target!, command.Province!.Value, Definition(source!).Name); break;
             // Engulfing Flames: the first effect destroys the chosen attachment (its own negation leaves the second alone); the second, only if the Monk has Fire tokens, is a Ranged 4 Attack whose
             // target is chosen now that the first has resolved.
@@ -8774,8 +8775,8 @@ public sealed partial class MatchEngine
             case "ring-of-air-straighten": Straighten(target!);  break;
             case "ring-of-water-move-home": MoveHome(target!, false);  break;
             case "false-ring-of-air-force": ApplyModifier(target!, source!.Id, id, "Force", -3);  break;
-            case "ring-of-earth-raise":  Player(command.TargetPlayerId!.Value).Provinces[command.Province!.Value].Strength += 3; break;
-            case "ring-of-earth-lower":  Player(command.TargetPlayerId!.Value).Provinces[command.Province!.Value].Strength -= 3; break;
+            case "ring-of-earth-raise":  GiveProvinceStrengthThisTurn(command.TargetPlayerId!.Value, command.Province!.Value, 3, "Ring of Earth"); break; // until end of turn (issue #492 ruling R3)
+            case "ring-of-earth-lower":  GiveProvinceStrengthThisTurn(command.TargetPlayerId!.Value, command.Province!.Value, -3, "Ring of Earth"); break;
             case "ring-of-fire-destroy":
             {
                 
@@ -9674,6 +9675,10 @@ public sealed partial class MatchEngine
             case "kimi-exp2-discard": case "norimichi-negate": case "norimichi-army": case "kataken-bow": case "sansesuke-redirect": case "tsukimi-home": case "tsukimi-battlefield":
             case "tamasine-create": case "tamasine-boost-one": case "tamasine-boost-many": case "kusugi-raise": case "kusugi-lower":
                 if (RunEmperorBatch5Effect(id, command, ability, player, source, target, consumedGrant, playedFromDiscard, opponentHonorBeforeBattleAction, bowedBeforeAction, preExistingGrants)) return;
+                break;
+            // Emperor Edition remaining-cards pass (issue #492), ruling R3: Togashi Hizumi's Battle half (EmperorRulingR3.cs).
+            case "hizumi-province-raise": case "hizumi-province-lower":
+                GiveProvinceStrengthThisTurn(1 - _state.ActivePlayerId, _state.CurrentBattleProvince!.Value, id == "hizumi-province-raise" ? 4 : -4, "Togashi Hizumi");
                 break;
             // Forgotten Legacy pass (issue #467), batch 1: every case is in ForgottenLegacyBatch1.cs; true means the action paused (a choice, an Attack
             // reaction window, a created card's entry window) and finishes from there.

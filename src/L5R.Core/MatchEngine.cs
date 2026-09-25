@@ -846,6 +846,7 @@ public sealed partial class MatchEngine
         var player = Player(command.PlayerId);
         var province = player.Provinces.Single(p => p.CardId == card.Id);
         province.CardId = null;
+        _state.LastProvinceEntryCardId = card.Id; _state.LastProvinceEntryProvinceIndex = province.Index; // an overlay recruit enters play from a province too (Kaiu Village, issue #492 ruling R3)
 
         // The old Personality leaves play and the new one enters. Queue keyword triggers while each
         // card still has the state that determines its own trigger.
