@@ -11,7 +11,7 @@ internal static class EmperorPersonalityBatch3Tests
         Samuru = "oracle-l5r-8874", Tomaru = "oracle-l5r-8893", Unmei = "oracle-l5r-8995", Hama = "oracle-l5r-9552", Hiromi = "oracle-l5r-9558", Naoto = "oracle-l5r-9611",
         Tsujiken = "oracle-l5r-10045", WaterBo = "oracle-l5r-10026";
     private static readonly string[] Wired = [Naleesh, Shigeru, Tetsuo, Itao, Ryoko, Shunshi, Samuru, Tomaru, Unmei, Hama, Hiromi, Naoto];
-    private static readonly string[] Unwired = ["oracle-l5r-6905", "oracle-l5r-4456", "oracle-l5r-4460"];
+    private static readonly string[] Unwired = ["oracle-l5r-4456"]; // issue #492 (proxy group Y): Shinjo Ki-Chang - exp (6905) and Kitsune Gina (4460) are now wired in personality-wave-77
 
     public static void Run(TestRunner runner) => runner.Run("emperor-personality-batch3", [
         ("Published shape: personality-wave-70 publishes exactly the 12 wired cards with their printed stats, keywords, Effect and ability ids, ships their art and lists them in its manifest; the three unwired cards are not in the catalogue", PublishedShape),

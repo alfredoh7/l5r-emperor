@@ -207,6 +207,9 @@ public sealed partial class MatchEngine
                 // The Spider's Web (issue #486, batch 3): the controller's own Stronghold watching the entry, one option per legal Weapon in the hand.
                 foreach(var watchId in StrongholdEntryWatchers(playerId,enteringCard))
                     AddTargetedEntryReaction(Card(player.StrongholdId),watchId,null);
+                // Shinjo Ki-Chang - exp (issue #492, proxy group Y): an in-play Personality watching the entry, listed disabled with the reason while it cannot be used (spent, bowed).
+                foreach(var (watcher,watchId) in InPlayEntryWatchers(playerId,enteringCard))
+                    AddReaction(watcher,watchId,validate:true);
             }
             Add("declineReaction","Pass reaction",Command("declineReaction"));
         }

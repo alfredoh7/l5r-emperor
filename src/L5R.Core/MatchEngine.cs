@@ -584,7 +584,7 @@ public sealed partial class MatchEngine
         // Singh Remnants' shape: a DIFFERENT card (in hand or a discard pile) watching for this entry,
         // not the entering card's own reaction -- only relevant when a Personality is what entered.
         // Emperor Edition Stronghold pass (issue #486), batch 3: or the controller's own Stronghold watching the entry (The Spider's Web).
-        var watchingReactionAvailable = Definition(card).Type==CardType.Personality && (AnyPersonalityEntryReactionAvailable(playerId) || StrongholdEntryWatcherAvailable(playerId,card));
+        var watchingReactionAvailable = Definition(card).Type==CardType.Personality && (AnyPersonalityEntryReactionAvailable(playerId) || StrongholdEntryWatcherAvailable(playerId,card) || InPlayEntryWatchers(playerId,card).Any());
         if (reactionId is null && !watchingReactionAvailable) return false;
         // Kitsuki Horume's own "choose a player, gain or lose" (issue #210) is the first
         // entry-reaction to share a UsageKey across two catalog entries -- the actual dedupe stamp
@@ -2166,7 +2166,7 @@ public sealed partial class MatchEngine
     // "force-with-spell" (Asako Ume), "force-if-enemy-dishonorable" (Bayushi Kahoku) and
     // "force-max-dead-pile" (Moto Shunsuke) are always-on passive bonuses, unlike the attacking-only
     // attacking-two/attacking-four Effects above.
-    private int PersonalityForce(CardInstance card) => Math.Max(0,Definition(card).Force+StatModifier(card,"Force")+TerrainForceAdjustment(card)+EmperorRemainingEForce(card)+ForgottenLegacyBatch5Force(card)+EmperorBatch5Force(card)+EmperorPersonalityBatch3Force(card)+ShadowsEmbraceBatch5Force(card)+ShadowsEmbraceBatch2Force(card)+ShadowsEmbraceBatch1Force(card)+EmperorRemainingGForce(card)+(IsAttacking(card)?(Definition(card).Effect=="attacking-two"?2:Definition(card).Effect=="attacking-four"?4:
+    private int PersonalityForce(CardInstance card) => Math.Max(0,Definition(card).Force+StatModifier(card,"Force")+TerrainForceAdjustment(card)+GinasFoxForce(card)+EmperorRemainingEForce(card)+ForgottenLegacyBatch5Force(card)+EmperorBatch5Force(card)+EmperorPersonalityBatch3Force(card)+ShadowsEmbraceBatch5Force(card)+ShadowsEmbraceBatch2Force(card)+ShadowsEmbraceBatch1Force(card)+EmperorRemainingGForce(card)+(IsAttacking(card)?(Definition(card).Effect=="attacking-two"?2:Definition(card).Effect=="attacking-four"?4:
         // Matsu Kaido (oracle-l5r-4934, issue #299): "Kaido has +1F while attacking" -- the plain +1
         // counterpart to attacking-two/attacking-four (Matsu Yoshito's own conditional variant below
         // starts from the same +1 base).
@@ -2276,7 +2276,7 @@ public sealed partial class MatchEngine
     // (e.g. "+2F while defending") -- distinct from an Item's, which always conveys to the wielder
     // instead (see PersonalityForce/ItemForceToWielder). Feeds both CardForce (targeting, always
     // visible regardless of bow state) and BattleForce (unit total, gated on unbowed-or-Elite).
-    private int FollowerForce(CardInstance card) => Math.Max(0,Definition(card).Force+StatModifier(card,"Force")+TerrainForceAdjustment(card)+ForgottenLegacyBatch5Force(card)+ShadowsEmbraceBatch5Force(card)+(Definition(card).Effect switch
+    private int FollowerForce(CardInstance card) => Math.Max(0,Definition(card).Force+StatModifier(card,"Force")+TerrainForceAdjustment(card)+GinasFoxForce(card)+ForgottenLegacyBatch5Force(card)+ShadowsEmbraceBatch5Force(card)+(Definition(card).Effect switch
     {
         "force-while-defending" => IsDefendingUnit(card) ? 2 : 0,
         // Home Guard (oracle-l5r-3413, issue #435): "This card has +3F while defending" -- the same

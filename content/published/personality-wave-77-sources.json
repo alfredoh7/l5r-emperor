@@ -1,0 +1,56 @@
+[
+  {
+    "card_id": "oracle-l5r-241",
+    "printing_set": [
+      "Emperor Edition"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=241",
+    "image_path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-241-printing-1-image-1.webp",
+    "image_sha256": "091c7b23628005133866f1aa8ba4107eef8ceaea496a40afcf5fa01234d85d70"
+  },
+  {
+    "card_id": "oracle-l5r-6905",
+    "printing_set": [
+      "Emperor Edition"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=6905",
+    "image_path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-6905-printing-1-image-1.webp",
+    "image_sha256": "32d4d1c1cf1563b8bbbbd1ea225410ac6854019842f7328a366189a114916139"
+  },
+  {
+    "card_id": "oracle-l5r-4460",
+    "printing_set": [
+      "Emperor Edition"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=4460",
+    "image_path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-4460-printing-1-image-1.webp",
+    "image_sha256": "07c06532ca62c65fcf79e24aee797dcc2c7214672b0415da4220aeeafeba605a"
+  },
+  {
+    "card_id": "oracle-l5r-9738",
+    "printing_set": [
+      "Emperor Edition"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=9738",
+    "image_path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-9738-printing-4-image-1.webp",
+    "image_sha256": "7ac34ac884f7e22ce6a096f9c8f643c49c69e184f7db92d567ede2059cac9fd3"
+  },
+  {
+    "card_id": "oracle-l5r-10003",
+    "printing_set": [
+      "Emperor Edition"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10003",
+    "image_path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-10003-printing-1-image-1.webp",
+    "image_sha256": "c31c0f8d91c4d4e0531e2571dbfaf538246fc7535aee731805ab3e30f2f8457f"
+  },
+  {
+    "card_id": "oracle-l5r-10005",
+    "printing_set": [
+      "Emperor Edition"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10005",
+    "image_path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-10005-printing-1-image-1.webp",
+    "image_sha256": "a299f762e1be9baf9789432f3ff6b190f15ddba3d7f1078dee1cd835d80a7a4d"
+  }
+]

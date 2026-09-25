@@ -2545,6 +2545,8 @@ public static class PublishedContent
     /// Natsumi, Niiro no Oni, Quelsa, Shiba Kudome (Experienced), Shiba Shirou, Shinjo Jong-Ho, Shinjo Min-Hee, Shosuro Nobu, Shosuro Ryoken, Shugorei, Yamazaki (Experienced),
     /// Yasuki Ikke, Yoritomo Kanahashi.</summary>
     public static PublishedSnapshot PersonalityWave75 { get; } = Load("L5R.Published.PersonalityWave75.json", "personality-wave-75", requireDecks: false);
+    /// <summary>Personality wave 77 (Emperor Edition remaining-cards pass, issue #492, proxy group Y): Akodo Makotai, Shinjo Ki-Chang (Experienced), Kitsune Gina and the three Proxies they create (Infantry Follower, Dutiful Cavalry, Gina's Fox).</summary>
+    public static PublishedSnapshot PersonalityWave77 { get; } = Load("L5R.Published.PersonalityWave77.json", "personality-wave-77", requireDecks: false);
     /// <summary>Holding wave 12 (The Shadow's Embrace pass, issue #476, batch 6): Fortress of Lidless Eyes, Platinum Mine, Sheltered Port, Small-Time Bully, Versatile Farm, Whispering Archive.</summary>
     public static PublishedSnapshot HoldingWave12 { get; } = Load("L5R.Published.HoldingWave12.json", "holding-wave-12", requireDecks: false);
     /// <summary>Follower wave 30 (issue #476, batch 6): Clearing Crew, Elephant Caravan, Shieldman, Wasteland Scout.</summary>
