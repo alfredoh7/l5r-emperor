@@ -584,6 +584,22 @@ internal static class EmperorRemainingETests
         Accept(e3, e3.QueryActions(0).Single(a => a.Type == "passSearch").Command!);
         Eq(Honor(e3, 0), honor3 - 2, "the Honor is lost though nothing was found");
         Eq(e3.State.Cards[deckOni.Id].Zone, Zone.DynastyDeck, "the Oni stays in the deck");
+        // An entering-play Reaction of the Oni that enters (a Personality that prints one stands in, given the Oni keyword): its window opens as the search ends, and priority passes on when it closes.
+        var s5 = Table(Phase.Action, 0); s5.PriorityPlayerId = 0;
+        var w5 = Add(s5, "training-shugenja", 0, Zone.Home); var spell5 = Add(s5, IGiveYouMyName, 0, Zone.Attached, parent: w5.Id);
+        var human5 = Add(s5, "training-crane-samurai", 0, Zone.Home);
+        var meiyu = Add(s5, "oracle-l5r-8550", 0, Zone.Home); ToDeck(s5, meiyu, 0); GiveKeyword(meiyu, "Oni");
+        var e5 = MatchEngine.FromTestState(s5); var honor5 = Honor(e5, 0);
+        Accept(e5, Offer(e5, 0, "i-give-you-my-name-search", spell5.Id, human5.Id));
+        Accept(e5, e5.QueryActions(0).First(a => a.Type == "chooseSearchDeck" && a.Command!.Choice == SearchDeck.Dynasty).Command!);
+        Accept(e5, e5.QueryActions(0).Single(a => a.Type == "selectSearchCard").Command!);
+        Eq(e5.State.Cards[meiyu.Id].Zone, Zone.Home, "the Personality is in play");
+        Eq(e5.State.PendingChoice?.Type, "entryReaction", "its entering-play Reaction window opened");
+        Eq(e5.State.PendingChoice?.CardId, meiyu.Id, "for the Personality that entered");
+        Eq(Honor(e5, 0), honor5 - 2, "the Honor was already lost");
+        Accept(e5, new GameCommand("pass", 0, e5.Version)); Accept(e5, new GameCommand("pass", 1, e5.Version));
+        Check(e5.State.PendingChoice is null, "the window closed");
+        Eq(e5.State.PriorityPlayerId, 1, "and the Limited action passed priority on");
         // Only your own Human.
         var s4 = Table(Phase.Action, 0); s4.PriorityPlayerId = 0;
         var w4 = Add(s4, "training-shugenja", 0, Zone.Home); GiveKeyword(w4, "Nonhuman"); Add(s4, IGiveYouMyName, 0, Zone.Attached, parent: w4.Id); Add(s4, "training-lion-samurai", 1, Zone.Home);
@@ -761,6 +777,11 @@ internal static class EmperorRemainingETests
         Check(!Offered(FavorRig("Crane", false), 1, "favor-battle"), "without the Celestial the Rule of Presence applies");
         Check(Offered(FavorRig("Crane", true), 1, "favor-battle"), "a Crane Clan player needs no unit at the battlefield (either player's Celestial)");
         Check(!Offered(FavorRig("Lion", true), 1, "favor-battle"), "not a Crane Clan player: " + Why(FavorRig("Lion", true), 1, "favor-battle"));
+        var favor = FavorRig("Crane", true);
+        var attackerCard = favor.State.Cards.Values.First(c => c.OwnerId == 0 && c.Zone == Zone.Battlefield && c.DefinitionId == "training-lion-samurai");
+        Accept(favor, Opt(favor, 1, "favor-battle", a => a.TargetIds!.Contains(attackerCard.Id)).Command! with { TargetId = attackerCard.Id });
+        Eq(favor.State.Cards[attackerCard.Id].Zone, Zone.Home, "the attacker was moved home although the Crane player had no unit there");
+        Check(favor.State.FavorPlayerId is null, "the Favor was discarded");
         // The Open: return a non-Unique Strategy with a Political ability from the discard pile.
         var s = Table(Phase.Action, 0); s.PriorityPlayerId = 0;
         var doji = Add(s, DojisGuidance, 0, Zone.Celestial);
@@ -806,6 +827,17 @@ internal static class EmperorRemainingETests
         e3 = Edit(e3, st => st.BattleNumber++);
         Check(e3.StraightenForTest(ally4.Id) == false, "the next battle has a first straightening of its own: negated again");
         Check(e3.StraightenForTest(ally4.Id), "and a second that is not");
+        // Through real actions: two Battle-timed straightens of the same bowed Personality -- the first is negated (its action is still taken), the second straightens him.
+        var sa = Table(Phase.Battle, 0); sa.PriorityPlayerId = 0; sa.Players[1].Clan = "Crab"; Add(sa, HidasGuidance, 0, Zone.Celestial);
+        var bowedAlly = Add(sa, "training-crane-samurai", 0, Zone.Battlefield, bowed: true, province: 0);
+        var straightenerA = Add(sa, "training-battle-straightener", 0, Zone.Battlefield, province: 0); var straightenerB = Add(sa, "training-battle-straightener", 0, Zone.Battlefield, province: 0);
+        Add(sa, "training-lion-samurai", 1, Zone.Battlefield, province: 0);
+        var ea = MatchEngine.FromTestState(sa);
+        Accept(ea, Offer(ea, 0, "training-straighten-at-battle", straightenerA.Id, bowedAlly.Id)); DeclineWindows(ea);
+        Check(ea.State.Cards[bowedAlly.Id].Bowed, "the first straightening this battle was negated");
+        ea = Edit(ea, st => { st.PriorityPlayerId = 0; st.PendingChoice = null; });
+        Accept(ea, Offer(ea, 0, "training-straighten-at-battle", straightenerB.Id, bowedAlly.Id)); DeclineWindows(ea);
+        Check(!ea.State.Cards[bowedAlly.Id].Bowed, "the second one straightened him");
         // Not in a battle: the Straighten Phase straightens as ever.
         var s5 = Table(Phase.Action, 0); s5.Players[1].Clan = "Crab"; Add(s5, HidasGuidance, 0, Zone.Celestial);
         var out5 = Add(s5, "training-crane-samurai", 0, Zone.Home, bowed: true);
@@ -1013,6 +1045,13 @@ internal static class EmperorRemainingETests
         var e2 = RingRig(Phase.Action, out var t2, out var ring2, out _);
         Accept(e2, Offer(e2, 0, "togashis-guidance-ring-play", t2.Id, ring2.Id));
         Check(e2.State.Cards[ring2.Id].AbilityUses.ContainsKey("ee-e:no-enlightenment"), "the Ring is marked");
+        // "After one of your Rings enters play" (Yung): a Ring another card put into play is one.
+        var sy = Table(Phase.Action, 0); sy.PriorityPlayerId = 0; sy.Players[0].Clan = "Dragon";
+        var togashiY = Add(sy, TogashisGuidance, 0, Zone.Celestial); var ringY = Add(sy, RingOfAir, 0, Zone.Hand); var yung = Add(sy, "oracle-l5r-9697", 0, Zone.Home);
+        var ey = MatchEngine.FromTestState(sy);
+        Accept(ey, Offer(ey, 0, "togashis-guidance-ring-play", togashiY.Id, ringY.Id));
+        Eq(ey.State.PendingChoice?.Type, "afterActionResolvedReaction", "the window after the action opened");
+        Check(Offered(ey, 0, "yung-search-ring"), "Yung may react: a Ring entered play");
         // Not a Dragon Clan player; Brotherhood Schism.
         var s3 = Table(Phase.Action, 0); s3.PriorityPlayerId = 0; Add(s3, TogashisGuidance, 0, Zone.Celestial); Add(s3, RingOfAir, 0, Zone.Hand);
         Check(!Offered(MatchEngine.FromTestState(s3), 0, "togashis-guidance-ring-play"), "a Crane Clan player cannot");
