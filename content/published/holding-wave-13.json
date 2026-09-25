@@ -1,0 +1,150 @@
+{
+  "Profile": "holding-wave-13",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-309",
+      "Name": "Akodo's Grave",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 2,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Bow this card: Produce 2 Gold.\nBattle: Bow and destroy this card and target a Terrain: Destroy it.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-309.jpg",
+      "Keywords": [],
+      "Focus": 0,
+      "Abilities": [
+        "akodo-grave-destroy"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-2662",
+      "Name": "Fortifications",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Your provinces have +1 strength.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-2662.jpg",
+      "Keywords": [
+        "Castle"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "fortifications-provinces"
+    },
+    {
+      "Id": "oracle-l5r-4787",
+      "Name": "Luxurious Silk",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 3,
+      "GoldProduction": 2,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Bow this card: Produce 2 Gold.\nReaction: Even if this card is bowed, when paying for an action: Produce 2 Gold.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-4787.jpg",
+      "Keywords": [],
+      "Focus": 0,
+      "Abilities": [
+        "luxurious-silk-gold"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-7265",
+      "Name": "Silk Works",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 5,
+      "GoldProduction": 4,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Bow this card: Produce 4 Gold.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7265.jpg",
+      "Keywords": [],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-7898",
+      "Name": "Temples of Gisei Toshi",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 2,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Bow this card: Produce 2 Gold.\nLimited: Bow this card: Name \"Follower\", \"Item\", or \"Spell\". Look at the top four cards of your Fate deck. You may show one of those cards that is of the type you named, then put it in your hand.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7898.jpg",
+      "Keywords": [
+        "Unique",
+        "Temple"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "temples-gisei-follower",
+        "temples-gisei-item",
+        "temples-gisei-spell"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-8729",
+      "Name": "Traveling Peddler",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 2,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Bow this card: Produce 2 Gold.\nLimited: Bow this card and pay 3 Gold: Draw a card.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8729.jpg",
+      "Keywords": [
+        "Singular"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "peddler-draw"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

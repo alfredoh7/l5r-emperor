@@ -1,0 +1,56 @@
+[
+  {
+    "card_id": "oracle-l5r-309",
+    "printing_set": [
+      "Emperor Edition"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=309",
+    "image_path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-309-printing-1-image-1.webp",
+    "image_sha256": "def12282b13ac5ea618825daee86913c65e1f6409b636972346bf5b41a708cd1"
+  },
+  {
+    "card_id": "oracle-l5r-2662",
+    "printing_set": [
+      "Emperor Edition"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=2662",
+    "image_path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-2662-printing-1-image-1.webp",
+    "image_sha256": "1a6611a6ec8ce9079d2f336241724b0fb7065220dc4eaf1f507d86c8a9c9b239"
+  },
+  {
+    "card_id": "oracle-l5r-4787",
+    "printing_set": [
+      "Emperor Edition"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=4787",
+    "image_path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-4787-printing-1-image-1.webp",
+    "image_sha256": "028ca0332bbc61159d12a0a848119cb7370e718f10916c5408cddfd50196545d"
+  },
+  {
+    "card_id": "oracle-l5r-7265",
+    "printing_set": [
+      "Emperor Edition"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=7265",
+    "image_path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-7265-printing-1-image-1.webp",
+    "image_sha256": "1c0e3ff981039035356d903577450202c9271444425a53d1ddca3c1bdddc5aee"
+  },
+  {
+    "card_id": "oracle-l5r-7898",
+    "printing_set": [
+      "Emperor Edition"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=7898",
+    "image_path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-7898-printing-1-image-1.webp",
+    "image_sha256": "d1bdf1e2a1265167af373d92041374802e103dda469f90d3a55d4057700adf4a"
+  },
+  {
+    "card_id": "oracle-l5r-8729",
+    "printing_set": [
+      "Emperor Edition"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=8729",
+    "image_path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-8729-printing-1-image-1.webp",
+    "image_sha256": "91d8dea9e8f694dcbc00b5a4a2d4029de7f8f43c6ff5bb32265ace6749699413"
+  }
+]

@@ -96,7 +96,8 @@ internal static class BattleAbsentMovesTests
         var marked = string.Join(",", AbilityCatalog.All.Where(p => p.Value.MovesToBattle).Select(p => p.Key).OrderBy(k => k, StringComparer.Ordinal));
         // Issue #477 (Emperor Edition Personality pass, batch 3): tetsuo-move-attack -- Moto Tetsuo moves himself to the current battlefield.
         // + keep-of-dead-move (Emperor Edition Stronghold pass, issue #486 batch 1: Keep of the Dead moves its performing Commander to the current battlefield).
-        Eq(marked, "broken-alliance-move,charge-into-danger-move,chukage-move,dislodge-the-foe,earth-flows-move,hawado-move-battlefield,heijin-move,help-shadows-move,houken-exp-straighten,intervening-spirit-move,intimidation-move,irezu-move,keep-of-dead-move,lesson-of-earth-move,mai-move-force-penalty,michi-move,moving-unmoving-approach,natsumi-move,natures-wrath-move,pronouncement-guilt-move,requesting-reinforcements-recruit,return-to-action-move,rikyou-move,sanctuary-of-the-waves-move,shinoda-move,skipping-the-puddle-move,sound-of-thunder-move,sudden-movement-switch,takasho-move,tetsuo-move-attack,training-move-current,training-move-to-battle,trusting-instinct-move,your-clan-needs-you");
+        // + blighted-region-move (Emperor Edition remaining-cards pass, issue #492 group F: Blighted Region's Defender-only move of a performing Personality to the current battlefield).
+        Eq(marked, "blighted-region-move,broken-alliance-move,charge-into-danger-move,chukage-move,dislodge-the-foe,earth-flows-move,hawado-move-battlefield,heijin-move,help-shadows-move,houken-exp-straighten,intervening-spirit-move,intimidation-move,irezu-move,keep-of-dead-move,lesson-of-earth-move,mai-move-force-penalty,michi-move,moving-unmoving-approach,natsumi-move,natures-wrath-move,pronouncement-guilt-move,requesting-reinforcements-recruit,return-to-action-move,rikyou-move,sanctuary-of-the-waves-move,shinoda-move,skipping-the-puddle-move,sound-of-thunder-move,sudden-movement-switch,takasho-move,tetsuo-move-attack,training-move-current,training-move-to-battle,trusting-instinct-move,your-clan-needs-you");
         foreach (var (id, ability) in AbilityCatalog.All.Where(p => p.Value.MovesToBattle))
             Check(ability.Timing is "Battle" or "BattleOrOpen", $"{id}: a move to the battle is a Battle action");
     }
@@ -213,7 +214,9 @@ internal static class BattleAbsentMovesTests
         // has a unit there: the no-presence position this test rigs cannot arise for it. It is still marked (its effect brings a Personality to the battle).
         // Moto Tetsuo (issue #477, Emperor Edition Personality pass, batch 3) prints "If you control any Cavalry units at the current battlefield:" before its colon, so its acting player always
         // has a unit there (a Cavalry one): the no-presence position this test rigs cannot arise for it. It is still marked (its effect moves Tetsuo, who is at home, to the battle).
-        foreach (var ability in AbilityCatalog.All.Where(p => p.Value.MovesToBattle && !p.Key.StartsWith("training-") && p.Key != "requesting-reinforcements-recruit" && p.Key != "tetsuo-move-attack").Select(p => p.Key).OrderBy(k => k, StringComparer.Ordinal))
+        // Blighted Region (issue #492, group F) is a Region's action that names a performing Personality and is the Defender's alone (taken with no unit at the battlefield, Absent); it needs its own
+        // rig (a Region attached to a province and a performer), and emperor-remaining-F's BlightedRegionMove proves it is offered to the Defender with no unit there.
+        foreach (var ability in AbilityCatalog.All.Where(p => p.Value.MovesToBattle && !p.Key.StartsWith("training-") && p.Key != "requesting-reinforcements-recruit" && p.Key != "tetsuo-move-attack" && p.Key != "blighted-region-move").Select(p => p.Key).OrderBy(k => k, StringComparer.Ordinal))
         {
             var offeredTo = new List<int>();
             var reasons = new List<string>();

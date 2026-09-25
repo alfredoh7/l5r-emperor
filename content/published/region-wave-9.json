@@ -1,0 +1,57 @@
+{
+  "Profile": "region-wave-9",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-1042",
+      "Name": "Blighted Region",
+      "Type": "Region",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: If you are the Defender, bow this card and choose your performing Personality: Move him to the current battlefield. If he moved and is now opposed, straighten him and gain 2 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1042.jpg",
+      "Keywords": [
+        "Singular"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "blighted-region-move"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-6226",
+      "Name": "Refuge of the Three Sisters",
+      "Type": "Region",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Destroy this card and remove your performing unbowed Personality from the game: Search your Fate deck for a card with a lower Focus Value than your Personality's Chi. Show it and put it in your hand.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6226.jpg",
+      "Keywords": [
+        "Singular"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "refuge-three-sisters-search"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

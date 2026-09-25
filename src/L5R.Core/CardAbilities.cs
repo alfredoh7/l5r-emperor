@@ -3906,7 +3906,7 @@ public static class AbilityCatalog
         // Tamori Kusugi (oracle-l5r-7780): "Battle: Even if Kusugi is not at the current battlefield, bow him: Raise or lower the current battlefield's province's strength by 4."
         ["kusugi-raise"] = new("Battle", "Even if Kusugi is not at the current battlefield, bow him: Raise the current battlefield's province's strength by 4", "none", UsageKey: "kusugi-province", Costs: ActionCost.BowSource, SourceUnitMayBeAway: true),
         ["kusugi-lower"] = new("Battle", "Even if Kusugi is not at the current battlefield, bow him: Lower the current battlefield's province's strength by 4", "none", UsageKey: "kusugi-province", Costs: ActionCost.BowSource, SourceUnitMayBeAway: true),
-    }.AddEmperorPersonalityBatch2().AddEmperorStrongholdBatch1().AddEmperorStrongholdBatch3()); // Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs.
+    }.AddEmperorPersonalityBatch2().AddEmperorStrongholdBatch1().AddEmperorStrongholdBatch3().AddEmperorRemainingF()); // Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs; remaining-cards pass (issue #492), group F: EmperorRemainingF.cs.
 }
 
 public sealed partial class MatchEngine
@@ -6894,6 +6894,7 @@ public sealed partial class MatchEngine
         ValidateEmperorBatch5(id, command, ability, player, source);
         // Emperor Edition Personality pass (issue #477), batch 6: the per-id conditions of this batch's cards (EmperorPersonalityBatch6.cs).
         ValidateEmperorBatch6(id, command, player, source);
+        ValidateEmperorRemainingF(id, ability, command, player, source); // Emperor Edition remaining-cards pass (issue #492), group F.
         // The Gold cost (issue #303): every ability's price -- Equip (Battle)/Soshi Neiru's Spell cost, Low
         // Market's "2 less, to a minimum of 1", Your Clan Needs You!'s recruit cost minus 6, Shinden
         // Shorai's "all costs", Singh Remnants' own cost, a Strategy/Discipline's printed cost, Kharmic's
@@ -7180,10 +7181,15 @@ public sealed partial class MatchEngine
             return;
         }
         // The declared non-Gold costs (issue #351, AbilityCosts.cs), paid together and just before the effects: the same list a negated action pays.
+        CaptureBeforeCostsRemainingF(id, command); // Emperor Edition remaining-cards pass (issue #492), group F: Refuge of the Three Sisters' performer's Chi.
         CaptureBeforeCostsForBatch1(id, command); // Forgotten Legacy pass (issue #467), batch 1: what a cost is about to remove (Iuchi Abodan's chosen Personality).
         PayAbilityCosts(ability, command, player, source);
         switch (id)
         {
+            // Emperor Edition remaining-cards pass (issue #492), group F: every case is in EmperorRemainingF.cs; true means the action paused (a choice, a look).
+            case var remainingF when IsEmperorRemainingFAbility(remainingF):
+                if (RunEmperorRemainingFEffect(id, command, ability, player, source, target, consumedGrant, playedFromDiscard, opponentHonorBeforeBattleAction, bowedBeforeAction, preExistingGrants)) return;
+                break;
             case "border-first": case "border-game": CycleProvinces(player, command.CardIds!); break;
             case "shinden-choice":
                 
@@ -9555,6 +9561,16 @@ public sealed partial class MatchEngine
                 var natsumiThere = source!.Zone == Zone.Battlefield && source.ProvinceIndex == natsumiBattle;
                 if (Army(1 - player.Id, natsumiBattle).Any() && !natsumiThere && MoveToBattlefield(source, natsumiBattle)) StraightenUnit(source);
                 else Emit("effectFailed", $"{Definition(source).Name} did not move (it would not be opposed there, or is there already).", player.Id, source.Id);
+                break;
+            }
+            // Blighted Region (issue #492, group F): "Move him to the current battlefield. If he moved and is now opposed, straighten him and gain 2 Honor." (inline: the move-to-battle scan reads this switch.)
+            case "blighted-region-move":
+            {
+                var blightedBattle = _state.CurrentBattleProvince!.Value;
+                var blightedMover = Card(command.PerformerId!);
+                var blightedMoved = !AtBattle(blightedMover) && TryMoveToBattlefield(blightedMover, blightedBattle);
+                if (blightedMoved && Army(1 - player.Id, blightedBattle).Any()) { Straighten(blightedMover); GainHonorFromPerformer(blightedMover, 2, "Blighted Region"); }
+                else Emit("effectFailed", $"{Definition(blightedMover).Name} {(blightedMoved ? "is not opposed there" : "did not move")}: no straightening and no Honor.", player.Id, blightedMover.Id);
                 break;
             }
             case "yoyugi-lock": case "yoyugi-lock-free": case "longtooth-destroy": case "rukia-return": case "morio-attack": case "niiro-attack":

@@ -47,6 +47,10 @@ public static class CostVerbs
     /// <summary>Give the subject -Amount Chi ("give this Personality -1C:", Cursed Relic, issue #467): payable only when he has that much Chi to lose (core rules,
     /// Pay Costs); a Personality it leaves at 0 Chi is destroyed by the ordinary Chi rule (ApplyModifier).</summary>
     public const string ChiPenalty = "chi-penalty";
+    /// <summary>Destroy the subject Region ("Destroy this card:" on a Region, Refuge of the Three Sisters, issue #492 group F): it leaves its province for its owner's Dynasty discard pile.</summary>
+    public const string DestroyRegion = "destroy-region";
+    /// <summary>Remove the subject Personality in play from the game, with his attachments discarded ("remove your performing unbowed Personality from the game:", issue #492 group F).</summary>
+    public const string RemoveUnit = "remove-unit";
 }
 
 /// <summary>One cost: <paramref name="Verb"/> (CostVerb.Bow or CostVerbs.*) applied to <paramref name="Subject"/> (CostSubject.*: the ability's
@@ -142,7 +146,7 @@ public sealed partial class MatchEngine
     private static string? NegatableKind(string verb) => verb switch
     {
         CostVerb.Bow or CostVerbs.BowUnit => "bow",
-        CostVerb.Destroy or CostVerbs.Sacrifice => "destroy",
+        CostVerb.Destroy or CostVerbs.Sacrifice or CostVerbs.DestroyRegion => "destroy",
         _ => null
     };
 
@@ -212,6 +216,8 @@ public sealed partial class MatchEngine
                 case CostVerbs.Sacrifice:
                     if (subject.Zone == Zone.Attached) DestroyAttachment(subject); else DestroyUnits([subject], false, player.Id);
                     break;
+                case CostVerbs.DestroyRegion: DestroyRegion(subject); break;
+                case CostVerbs.RemoveUnit: RemoveUnitFromGame(subject); break;
                 case CostVerbs.DiscardFromPlay:
                     subject.Zone = IsDynastyCardType(Definition(subject).Type) ? Zone.DynastyDiscard : Zone.FateDiscard;
                     subject.ProvinceIndex = null; subject.FaceUp = true;

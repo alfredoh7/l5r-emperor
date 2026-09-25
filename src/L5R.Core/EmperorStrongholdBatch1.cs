@@ -114,7 +114,7 @@ public sealed partial class MatchEngine
     {
         // "Paying for a Spell during the Combat Segment": a Spell equipped or attached (a payment for the card itself, never an action of a Spell already in play).
         EmperorStrongholdBatch1Abilities.LibraryOfRebirthPaymentWhen => _state.Phase == Phase.Battle && paying.Kind == PaymentKind.Equip && Definition(paying.Card).Type == CardType.Spell,
-        _ => false
+        _ => EmperorRemainingFPaymentConditionMet(when, paying) // Luxurious Silk (issue #492, group F): paying for an action.
     };
 
     // Pay's step for a card whose reactive source is in this payment: the use is spent and the card is not bowed for it.

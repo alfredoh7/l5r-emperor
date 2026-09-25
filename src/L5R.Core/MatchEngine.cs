@@ -2762,6 +2762,7 @@ public sealed partial class MatchEngine
             if(declinedIds.Contains(card.Id)) Emit("straightenDeclined",$"{Definition(card).Name} was left bowed by choice.",card.OwnerId,card.Id);
             else Straighten(card);
         }
+        StraightenRegions(player); // Emperor Edition remaining-cards pass (issue #492), group F: a Region bowed as a cost straightens with its province's owner's other cards.
         StraightenWindOfTheMoonShugenja(player); // Wind of the Moon (issue #467): "he straightens during each player's Straighten Phase".
         StraightenNaleeshUnits(player); // Moto Naleesh (issue #477): "Naleesh's unit straightens during each player's Straighten Phase".
         Emit("straightened",$"{player.Name}'s turn: eligible cards straightened.",player.Id);
