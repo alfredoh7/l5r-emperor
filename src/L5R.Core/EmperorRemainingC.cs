@@ -6,13 +6,23 @@ namespace L5R.Core;
 // engine as it stands. The declarative ability data is in EmperorRemainingCAbilities (added to AbilityCatalog.All by one hook); each card's printed text (the scan's, read by eye) and the
 // reading taken are documented at its entry. The engine helpers below are documented where they are used; the shared files gained only small additive hooks, each marked "issue #492".
 //
-// New primitives:
+// New primitives (each documented where it is built):
 //   * STRATEGY REACTIONS "before an action resolves" PLAYED FROM THE HAND (The Height of Courage, Rhetoric, Solid Defense): BeforeActionReactionCandidates also lists Strategies in a hand, so
 //     the alternating before-action window opens for a Strategy holder exactly as it does for an in-play watcher (either player may react to any action -- Rhetoric's own text names no
 //     "another player's"), and lists them with their performers;
 //   * A REDIRECT OF THE ACTION'S HONOR CHANGE (Rhetoric) and a NEGATION OF ITS HONOR LOSSES (Solid Defense), both marks on the held action read where Honor changes (GainHonor);
 //   * A REDUCTION OF EVERY HONOR GAIN outside the Attack Phase until its controller's next turn begins (Rumors Travel), read there too;
-//   * AN ADDITIONAL ACTION THE NAMED PERFORMER MUST PERFORM (Spinning Heel Kick): AdditionalActionGrant.PerformerId.
+//   * AN ADDITIONAL ACTION THE NAMED PERFORMER MUST PERFORM (Spinning Heel Kick): AdditionalActionGrant.PerformerId;
+//   * A HAND STRATEGY'S "AFTER ANOTHER PLAYER'S BATTLE ACTION TARGETS YOUR ..." (Snake Tattoo, Yurishi's shape with a chosen adjacent battlefield), an ATTACK-WINDOW list of hand Reactions
+//     (Sniping; the before-attack-resolves window now lists Strategies in a hand), and a FOCUS EFFECT that destroys an attachment at the battlefield (Superior Opponent, Crimson Mark's choice);
+//   * A COST PAID BY EVERY CARD OF A PERFORMING SLOT (Shadows Walk: ActionCost subject AllPerformingSlots) and TAKING CONTROL OF A PERSONALITY IN PLAY (TakeControlOfPersonality: Loyal and Unique
+//     refuse it, the unit changes controller, every card returns to its owner when it leaves play);
+//   * A SECOND USE OF EVERY STRONGHOLD ABILITY (The Fires of War: a per-turn mark on the Stronghold read by AbilityLimits.EffectiveUsesPerTurn);
+//   * ROCKY TERRAIN: Heart of Darkness's "beforeBattleOptional" choice over the attacking Personalities; THE EMPRESS' ADDRESS: an after-action and an after-battle Reaction bringing a discarded
+//     Personality into play (the destroyed Personalities' locations are now on the action's record, AffectedCard.FromBattlefield);
+//   * SACRIFICE OF PAWNS: an Either/Or whose refusal opens a Dynasty deck search that RECRUITS a Personality for his entry price plus 2 (SearchEffect.RecruitPersonality, QuotePurchase's fromDynastyDeck);
+//   * RETRIBUTION: an ADDITIONAL ATTACK PHASE -- a window offered to the Defender after the last battle (MatchState.PendingChoice "attackPhaseEndReaction"), whose Reaction swaps the roles for
+//     a whole further Attack Phase (ActivePlayerId is the new Attacker for its length and restored for the Dynasty Phase).
 public sealed class EmperorRemainingCState
 {
     /// <summary>Rumors Travel: the players whose Limited action is in force until THEIR next turn begins, one entry per copy played (each reduces every gain by 1).</summary>

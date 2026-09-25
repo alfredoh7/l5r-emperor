@@ -14,7 +14,7 @@ internal static class EmperorRemainingCTests
     private static readonly string[] Wired = [Retribution, Rhetoric, RockyTerrain, RumorsTravel, SacrificeOfPawns, SelflessDefense, ShadowsWalk, ShamefulInjury, SnakeTattoo, Sniping, SolidDefense, SpinningHeelKick, StayPut, StrategicStrike, SummonedToJustice, SuperiorOpponent, TellTheTale, EmpressAddress, FiresOfWar, HeightOfCourage];
 
     // The group's Strategies left unwired (each with a note in tools/content/ee_remC_blockers.json): never published.
-    private static readonly string[] Unwired = [];
+    private static readonly string[] Unwired = ["oracle-l5r-7991", "oracle-l5r-7995", "oracle-l5r-8137", "oracle-l5r-7665"]; // The Compassion of the Unicorn, The Courage of the Mantis, The Honesty of the Phoenix (delay), Surprise Attack (a battlefield with no province)
 
     private static void Check(bool ok, string message = "Assertion failed") => Batch336Support.Check(ok, message);
     private static void Eq<T>(T actual, T expected, string message = "Values differ") => Batch336Support.Eq(actual, expected, message);
@@ -541,6 +541,17 @@ internal static class EmperorRemainingCTests
         var plain = Build(true, false, out _, out var target4, out var bower4);
         Accept(plain, Offer(plain, 1, "training-bow-at-battle", bower4.Id, target4.Id));
         Check(plain.State.PendingChoice is null, "only a Tattooed Personality");
+        // An Attack is a Battle action that targets him too: he moves away and the Attack, no longer having a legal target, does nothing.
+        var s5 = Table(Phase.Battle, 1); s5.PriorityPlayerId = 1; s5.UnresolvedBattlefields = [0, 1];
+        Add(s5, SnakeTattoo, 0, Zone.Hand);
+        var tattooed = Kw(Add(s5, "training-crane-samurai", 0, Zone.Battlefield, province: 0), "Tattooed"); // Force 3
+        var archer = Add(s5, "training-followed-attacker", 1, Zone.Battlefield, province: 0); // Ranged 3
+        var e5 = MatchEngine.FromTestState(s5);
+        Accept(e5, Offer(e5, 1, "training-followed-recon-attack", archer.Id, tattooed.Id));
+        Eq(e5.State.PendingChoice?.Type, "attackReaction", "the Attack's window opens");
+        Accept(e5, e5.QueryActions(0).Single(a => a.Type == "useAbility" && a.Command?.AbilityId == "snake-tattoo-move" && a.Enabled).Command!);
+        PassUntil(e5, () => e5.State.PendingChoice is null);
+        Check(e5.State.Cards[tattooed.Id].Zone == Zone.Battlefield && e5.State.Cards[tattooed.Id].ProvinceIndex == 1, "he moved to the adjacent battlefield and survived the Attack");
     }
 
     private static void SuperiorOpponentScenario()
