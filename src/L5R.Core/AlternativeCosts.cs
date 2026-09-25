@@ -49,6 +49,8 @@ public static class CostSubject
     /// in a discard pile, remove him from the game"): a card the action names beside its target, whose own treatment is a cost.</summary>
     public const string SlotPrefix = "slot:";
     public static string Slot(string slotId) => SlotPrefix + slotId;
+    /// <summary>The one card the command names on CardIds as the card an optional cost spends (Emperor Edition mechanics group C, issue #501: Daigotsu Kazuko's Follower, Ikoma Shika's discard).</summary>
+    public const string Chosen = "chosen-card";
 }
 
 /// <summary>One way to pay an ability's non-Gold cost. <paramref name="Id"/> is what GameCommand.CostOption names; <paramref name="Label"/> is
@@ -69,6 +71,7 @@ public sealed partial class MatchEngine
         CostSubject.Target => command.TargetId is not null && _state.Cards.TryGetValue(command.TargetId, out var target) ? target : null,
         CostSubject.Stronghold => Player(command.PlayerId).StrongholdId is { } strongholdId && _state.Cards.TryGetValue(strongholdId, out var stronghold) ? stronghold : null,
         CostSubject.Wielder => source is { Zone: Zone.Attached, AttachedTo: { } hostId } && _state.Cards.TryGetValue(hostId, out var wielder) ? wielder : null,
+        CostSubject.Chosen => command.CardIds is [var chosenId] && _state.Cards.TryGetValue(chosenId, out var chosen) ? chosen : null, // issue #501, EmperorMechC.cs
         { } slotSubject when slotSubject.StartsWith(CostSubject.SlotPrefix, StringComparison.Ordinal) =>
             command.Selections?.FirstOrDefault(s => s.Slot == slotSubject[CostSubject.SlotPrefix.Length..])?.CardIds is [var slotCardId, ..] && _state.Cards.TryGetValue(slotCardId, out var slotCard) ? slotCard : null,
         _ => ability.Performer is not null ? (command.PerformerId is not null && _state.Cards.TryGetValue(command.PerformerId, out var performer) ? performer : null) : source

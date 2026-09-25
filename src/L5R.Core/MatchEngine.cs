@@ -176,8 +176,14 @@ public sealed partial class MatchEngine
         // Ten Thousand Temples (issue #492, group F): the answer to an Honor loss decision replays the command that reached it, from the state it started in, with the decisions made so far.
         var execute = command; MatchState? cleanBase = null;
         _honorLossOccurrence = 0; _honorLossDecisions = [];
+        _entryCostOccurrence = 0; // issue #501 (EmperorMechC.cs)
         ResetHonorChangeReplay(); // Mendon's R4 ruling (issue #492): the windows of an Honor change replay the command that reached it (EmperorRulingR4.cs).
-        if (command.Type == "honorLossChoice")
+        if (command.Type == "entryCostChoice") // Emperor Edition mechanics group C (issue #501): the answer to an additional cost of entering play replays the command that reached it (EmperorMechC.cs).
+        {
+            if (AnswerEntryCost(command, original, out cleanBase, out var entryReplay) is { } entryError) { _state = original; return Reject(entryError); }
+            execute = entryReplay!;
+        }
+        else if (command.Type == "honorLossChoice")
         {
             if (original.PendingHonorLossDecision is not { } decision) return Reject("No Honor loss decision is pending.");
             if (command.PlayerId != decision.PlayerId || command.Choice is not ("yes" or "no")) return Reject("Answer the Honor loss decision: destroy Ten Thousand Temples to negate the loss, or not.");
@@ -227,6 +233,7 @@ public sealed partial class MatchEngine
             if (aftermath is not null) RecordDuelChanges(aftermath, "Aftermath", reactionCard, sourceLabel: reactionLabel);
             break;
             }
+            if (_state.PendingHonorChange is null) _state.EntryCostAnswers.Clear(); // issue #501: the replayed command has finished; its entry-cost answers are spent
             _state.Version++;
             RefreshDuelRecord();
             _commands.Add(Copy(command));
@@ -248,6 +255,11 @@ public sealed partial class MatchEngine
             _commands.Add(Copy(command));
             _honorLossDecisions=[];
             return new(true,null,_state.Version,_state.Events.Skip(decisionEvents).ToArray());
+        }
+        catch (EntryCostDecisionNeeded need)
+        {
+            // Emperor Edition mechanics group C (issue #501): the command reached an additional cost of entering play with several ways to pay -- nothing it did is kept; its payer is asked.
+            return SetAsideForEntryCost(need, command, execute, _honorReplayBase ?? cleanBase ?? original);
         }
         catch (HonorChangeWindowNeeded need)
         {
@@ -294,6 +306,7 @@ public sealed partial class MatchEngine
         // handlers only so that its ONE timing predicate (SeppukuTimingReason) gives the reason, whatever is open.
         if (command.Type=="orderSeppuku") { OrderSeppuku(command); return; }
         Require(_state.PendingHonorLossDecision is null,"Answer the Honor loss decision first (Ten Thousand Temples)."); // issue #492, group F: only "honorLossChoice" (handled by Execute) answers it.
+        Require(_state.PendingEntryCostDecision is null,"Choose how to pay the additional cost of entering play first."); // issue #501: only "entryCostChoice" (handled by Execute) answers it.
         Require(command.PlayerId==_state.PriorityPlayerId,"Wait for your action opportunity.");
         if (_state.PendingChoice is not null)
         {
@@ -720,6 +733,7 @@ public sealed partial class MatchEngine
         var card=Card(command.CardId);
         var quote=QuotePurchase(command.PlayerId,card.Id,command.ClanDiscount,command.ClanAllegiance);
         Require(quote.Error is null,quote.Error??"");
+        PayAdditionalEntryCost(command.PlayerId,card); // En'you (issue #501, EmperorMechC.cs): an additional cost of entering play.
         Pay(command.PlayerId,card,quote.Cost,command.SourceIds,paying:new PaymentSubject(card,PaymentKind.Recruit));
         var province=Player(command.PlayerId).Provinces.Single(p=>p.CardId==card.Id);
         province.CardId=null;
@@ -839,6 +853,7 @@ public sealed partial class MatchEngine
 
     private void EnterPlayFromRecruit(PlayerState player,CardInstance card,int? battlefield,string via)
     {
+        PayAdditionalEntryCost(player.Id,card); // En'you (issue #501, EmperorMechC.cs): an additional cost of entering play, whatever recruits him.
         card.Zone=battlefield is null?Zone.Home:Zone.Battlefield; card.ProvinceIndex=battlefield; card.FaceUp=true;
         card.Bowed=Definition(card).Effect=="enters-bowed";
         if(Definition(card).Effect=="enters-dishonored") Dishonor(card);
@@ -1022,6 +1037,7 @@ public sealed partial class MatchEngine
         Require(Army(1-command.PlayerId,provinceIndex).Any(),"The enemy must have presence at this battlefield.");
         var quote=QuotePurchase(command.PlayerId,card.Id,command.ClanDiscount,command.ClanAllegiance,viaReserve:true);
         Require(quote.Error is null,quote.Error??"");
+        PayAdditionalEntryCost(command.PlayerId,card); // issue #501 (EmperorMechC.cs)
         Pay(command.PlayerId,card,quote.Cost,command.SourceIds,paying:new PaymentSubject(card,PaymentKind.Recruit));
         var province=Player(command.PlayerId).Provinces.Single(p=>p.CardId==card.Id);
         province.CardId=null;
@@ -1152,6 +1168,7 @@ public sealed partial class MatchEngine
             +(nagaDiscount>0?$" − {nagaDiscount} ({nagaTerm})":"")
             +(clanAllegiance?" + 2 (Clan allegiance)":"")+(clanDiscount?" − 2 (Clan discount)":"")+(rawCost<0?" (min 0)":"");
         if ((Keyword(card,"Unique") || Keyword(card,"Singular")) && ControlsCopyOf(playerId,def.Name)) error=$"You already control this {(Keyword(card,"Unique") ? "Unique" : "Singular")} card.";
+        error??=AdditionalEntryCostUnpayable(card,playerId); // En'you (issue #501, EmperorMechC.cs): an additional cost of entering play he cannot pay bars the recruit.
         // Kakita Yusugi and Yogo Ugimori (issue #453, batch 2): the once-per-turn limit he ignores, and a lock on the player (ProclaimAllowed).
         var eligible=error is null && inClan && !clanDiscount && !fromDeadPile && !fromDynastyDeck && playerId==_state.ActivePlayerId && ProclaimAllowed(player,def);
         return new(cardId,cost,clanDiscount,clanAllegiance,eligible,error,error is null ? PaymentOptions(playerId,cost,new PaymentSubject(card,PaymentKind.Recruit)) : [],basis);
@@ -2147,8 +2164,9 @@ public sealed partial class MatchEngine
                 // able). Put this Terrain into play" -- unlike the ordinary "at most one Terrain per
                 // battlefield" default (Vital Pathways' own "if there is no Terrain in play" plays by
                 // that default unchanged), these two may replace an already-in-play Terrain outright.
-                Require(def.Effect is "encircled-before-battle" or "looting-return-to-hand" or "ancient-feud","This battlefield already has a Terrain in play.");
-                DiscardTerrain(existingTerrain);
+                if(def.Effect is "encircled-before-battle" or "looting-return-to-hand" or "ancient-feud") DiscardTerrain(existingTerrain);
+                // The Marshalling Fields (issue #501): once per battle its controller ignores the restriction of another Terrain being in play -- the new Terrain enters play beside it.
+                else { Require(MarshallingFieldsWaiverAvailable(command.PlayerId),"This battlefield already has a Terrain in play."); SpendMarshallingFieldsWaiver(command.PlayerId,card); }
             }
             Player(command.PlayerId).Hand.Remove(card.Id);
             card.Zone=Zone.Battlefield; card.ProvinceIndex=province; card.FaceUp=true;
@@ -2158,6 +2176,7 @@ public sealed partial class MatchEngine
             // play. A fresh watch per entry (DiscardTerrain removes this one's entry when it leaves).
             if(def.Effect=="fields-of-mercy") _state.FieldsOfMercyWatches.Add(new(){CardId=card.Id});
             Emit("terrainPlayed",$"{Player(command.PlayerId).Name} played {def.Name} as Terrain at this battlefield.",command.PlayerId,card.Id);
+            FireMarshallingFieldsDraw(command.PlayerId); // The Marshalling Fields (issue #501): playing a Terrain is a Terrain action that resolved.
             // Hasty Fortifications: "(including this card's)" -- putting it into play is one of the Battle actions it counts.
             if(def.Effect=="hasty-fortifications") AddHastyBonus(card);
             // The Shadow's Embrace pass (issue #476), batch 3 (ShadowsEmbraceBatch3.cs): playing a Terrain is an action on a Strategy (Forthrightness), and Crowded Streets

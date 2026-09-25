@@ -667,6 +667,10 @@ public static class CardCatalog
             .Concat(PublishedContent.StrategyWave69.Cards) // Issue #501, mechanics group A: Beyond the Line, One Action, Two Strikes, String of Victories
             .Concat(PublishedContent.PersonalityWave83.Cards) // Issue #501, mechanics group A: Isawa Momoko, Mirumoto Inokuchi
             .Concat(PublishedContent.StrongholdWave23.Cards) // Issue #501, mechanics group A: Aramasu's Legacy
+            .Concat(PublishedContent.PersonalityWave89.Cards) // Emperor Edition mechanics group C (issue #501): Daigotsu Kazuko, En'you, Ikoma Shika - exp, Isawa Sakonoko
+            .Concat(PublishedContent.StrongholdWave29.Cards) // Emperor Edition mechanics group C (issue #501): The Marshalling Fields
+            .Concat(PublishedContent.StrategyWave75.Cards) // Emperor Edition mechanics group C (issue #501): Ascending the Ranks, Fury of a Mob
+            .Concat(PublishedContent.RegionWave19.Cards) // Emperor Edition mechanics group C (issue #501): Temple of the Seven Fortunes
             .ToDictionary(c => c.Id, StringComparer.Ordinal);
     }
 }
