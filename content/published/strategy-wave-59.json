@@ -1,0 +1,401 @@
+{
+  "Profile": "strategy-wave-59",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-2919",
+      "Name": "Guided by Honor",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: If any enemy units are at the current battlefield, choose your performing unbowed Paragon: Move him to the current battlefield. If he moved, you may target and bow an enemy Personality with equal or lower Personal Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-2919.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "guided-by-honor-move"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-2972",
+      "Name": "Hard Pressed",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Before this battle's resolution: Move a unit home from the current battlefield. You may bow it.\nBattle: If there are no Terrains at the current battlefield: Put this card into play there.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-2972.jpg",
+      "Keywords": [
+        "Terrain"
+      ],
+      "Focus": 1,
+      "Abilities": [
+        "hard-pressed-move"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-3016",
+      "Name": "Heart of Rokugan",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Before this battle resolves: Give each of your Human Personalities and Followers at the current battlefield +1F, and give each Nonhuman Personality and Follower there -1F.\nBattle: If there are no Terrains at the current battlefield: Put this card into play there.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-3016.jpg",
+      "Keywords": [
+        "Terrain"
+      ],
+      "Focus": 1,
+      "Abilities": [
+        "heart-of-rokugan-sweep"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-3037",
+      "Name": "Heavily Engaged",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Even if you control no units at the current battlefield: Each player targets an unbowed Personality he controls there, if possible. Bow all targets.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-3037.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "heavily-engaged-bow"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-3725",
+      "Name": "In the Heart of Battle",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle/Open: Choose your performing Samurai: Straighten him and give him +3F. Destroy him before this turn ends.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-3725.jpg",
+      "Keywords": [
+        "Bushido Virtue",
+        "Duty"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "heart-of-battle-surge"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-3793",
+      "Name": "Introspection",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After one of your Rings enters play: Search your Fate deck for a card. Put it in your hand.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-3793.jpg",
+      "Keywords": [],
+      "Focus": 4,
+      "Abilities": [
+        "introspection-search"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-4843",
+      "Name": "Martial Instruction",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: Bow your performing Monk and remove this card from the game: Search your Fate deck for a Kiho Battle Strategy, show it, and put it in your hand.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-4843.jpg",
+      "Keywords": [
+        "Kiho"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "martial-instruction-search"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-5018",
+      "Name": "Meeting the Keepers",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After the resolution of an action from one of your Rings: Search your Dynasty deck for an Event, show it, and put it on top of the deck after shuffling.\nOpen: Bow your target Ring: Draw two cards.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-5018.jpg",
+      "Keywords": [
+        "Void"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "keepers-search",
+        "keepers-draw"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-5444",
+      "Name": "Murderous Intent",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle/Open: Choose your performing Paragon: Give him +1F for each of his keywords except \"Soul of\" keywords. Lose 4 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-5444.jpg",
+      "Keywords": [],
+      "Focus": 1,
+      "Abilities": [
+        "murderous-intent-boost"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-5457",
+      "Name": "My Enemy's Mercy",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing unbowed Samurai and target an enemy Personality with equal or lower Personal Honor: The enemy leader chooses to either bow him or move him home. Gain 2 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-5457.jpg",
+      "Keywords": [
+        "Bushido Virtue",
+        "Compassion"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "my-enemys-mercy-choose"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-5468",
+      "Name": "Mysterious Deaths",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 6,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Each player targets a unit he controls with the lowest total Gold Cost of all units he controls, if possible. Destroy all targets. Remove this card from the game. Lose 4 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-5468.jpg",
+      "Keywords": [
+        "Unique",
+        "Kolat"
+      ],
+      "Focus": 1,
+      "Abilities": [
+        "mysterious-deaths-destroy"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-5532",
+      "Name": "Nerve Strike",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Bow your performing Monk and target an enemy Personality with equal or lower Chi: Reduce his Force and the Force of each of his Followers to 0. Cards in that unit may not perform actions until this battle ends.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-5532.jpg",
+      "Keywords": [
+        "Kiho"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "nerve-strike-freeze"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-5585",
+      "Name": "Ninja Tricks",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 1,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After an action on a Strategy is announced, bow your performing Ninja Personality at the current battlefield: Negate the action's effects. Lose 2 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-5585.jpg",
+      "Keywords": [
+        "Ninja"
+      ],
+      "Focus": 1,
+      "Abilities": [
+        "ninja-tricks-negate"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-5681",
+      "Name": "Ogre Savagery",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing unbowed Nonhuman Shadowlands Personality and target an enemy Personality: Bow him.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-5681.jpg",
+      "Keywords": [
+        "Fear"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "ogre-savagery-bow"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-5766",
+      "Name": "Opportunistic Advance",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing unbowed Commander and target another Personality in his army: Move the target to a battlefield.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-5766.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "opportunistic-advance-move"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-6247",
+      "Name": "Relentless Conviction",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Target a dishonorable Personality: Destroy him.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6247.jpg",
+      "Keywords": [
+        "Unique"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "relentless-conviction-destroy"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

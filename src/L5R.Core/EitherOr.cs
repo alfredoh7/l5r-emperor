@@ -133,6 +133,7 @@ public sealed partial class MatchEngine
                 or EitherOrSpecs.ForgeYourSoulAttach or EitherOrSpecs.ForgeYourSoulShuffle or EitherOrSpecs.ForgeYourSoulShuffleNoWeapon => ShadowsEmbraceEitherOrPrompt(p, source, affected),
             EitherOrSpecs.GenshiShame => $"{source}: dishonor {affected}, or {Player(p.ActingPlayerId).Name} gains 1 Honor and locks one of his abilities until their next turn begins.",
             EitherOrSpecs.TanimuraPayOrLose => $"{source}: pay 4 Gold, or lose 3 Honor.",
+            EmperorRemainingBSpecs.MercyBowOrHome => $"{source}: choose to either bow {affected} or move him home.", // Emperor Edition remaining-cards pass (issue #492), group B
             _ => throw new RuleViolation("Unknown choice.")
         };
     }
@@ -218,6 +219,7 @@ public sealed partial class MatchEngine
                     new("pay", "Pay 4 Gold", "Nothing further happens.", EitherOrKind.Avoid, 4, payable(4), "You cannot produce 4 Gold."),
                     new("lose", "Do not pay", "You lose 3 Honor.", EitherOrKind.Accept, 0, true, null)
                 ];
+            case EmperorRemainingBSpecs.MercyBowOrHome: return MercyOptions(affected); // Emperor Edition remaining-cards pass (issue #492), group B
             default: throw new RuleViolation("Unknown choice.");
         }
     }
@@ -368,6 +370,9 @@ public sealed partial class MatchEngine
             case (EitherOrSpecs.TanimuraPayOrLose, "lose"):
                 Emit("eitherOrChosen", $"{decider.Name} did not pay ({Definition(source).Name}): {decider.Name} loses 3 Honor.", decider.Id, source.Id);
                 GainHonor(decider.Id, -3, Definition(source).Name, source);
+                break;
+            case (EmperorRemainingBSpecs.MercyBowOrHome, _): // Emperor Edition remaining-cards pass (issue #492), group B (EmperorRemainingB.cs)
+                ApplyMercy(p, option, decider, affected);
                 break;
             default: throw new RuleViolation("Unknown choice.");
         }

@@ -56,6 +56,7 @@ public sealed partial class MatchEngine
         DeciderSpecs.TaraoSacrifice => $"{Definition(Card(p.SourceCardId)).Name}: {Player(p.DeciderPlayerId).Name}, choose one of your unbowed Personalities or Holdings, or a card in your hand. A card in your hand is discarded; any other is bowed.",
         DeciderSpecs.BloodOfThePreserverFirst or DeciderSpecs.BloodOfThePreserverSecond => BloodOfThePreserverPrompt(p),
         DeciderSpecs.KimiDiscard => $"{Definition(Card(p.SourceCardId)).Name}: {Player(p.DeciderPlayerId).Name}, choose a card from your hand. It is discarded.",
+        _ when EmperorRemainingBSpecs.IsDeciderSpec(p.SpecId) => EmperorRemainingBDeciderPrompt(p), // Emperor Edition remaining-cards pass (issue #492), group B
         _ => throw new RuleViolation("Unknown choice.")
     };
 
@@ -81,6 +82,7 @@ public sealed partial class MatchEngine
                 return (_state.CurrentBattleProvince is int battle ? Army(deciderId, battle).Where(c => Definition(c).Type == CardType.Personality && !c.Bowed).Select(c => c.Id).Order(StringComparer.Ordinal).ToList() : [], 1, 1);
             case DeciderSpecs.BloodOfThePreserverFirst:
                 return (BloodOfThePreserverCandidates([]), 0, 2);
+            case var remainingB when EmperorRemainingBSpecs.IsDeciderSpec(remainingB): return EmperorRemainingBDeciderOptions(remainingB, deciderId); // Emperor Edition remaining-cards pass (issue #492), group B
             default: throw new RuleViolation("Unknown choice.");
         }
     }
@@ -92,7 +94,7 @@ public sealed partial class MatchEngine
     {
         var source = Card(command.CardId);
         var deciderId = specId is DeciderSpecs.KnowTheirMinds or DeciderSpecs.TaraoSacrifice ? command.TargetPlayerId ?? command.PlayerId
-            : specId == DeciderSpecs.BloodOfThePreserverFirst ? command.PlayerId : specId == DeciderSpecs.KimiDiscard ? 1 - command.PlayerId : _state.ActivePlayerId;
+            : specId == DeciderSpecs.BloodOfThePreserverFirst || EmperorRemainingBSpecs.IsFirstDecider(specId) ? command.PlayerId : specId == DeciderSpecs.KimiDiscard ? 1 - command.PlayerId : _state.ActivePlayerId;
         var (candidates, min, max) = DeciderOptions(specId, deciderId, command);
         var pending = new PendingDeciderChoice
         {
@@ -202,6 +204,9 @@ public sealed partial class MatchEngine
             case DeciderSpecs.BloodOfThePreserverSecond:
                 ApplyBloodOfThePreserverChoice(p);
                 break;
+            case var remainingB when EmperorRemainingBSpecs.IsDeciderSpec(remainingB): // Emperor Edition remaining-cards pass (issue #492), group B
+                ApplyEmperorRemainingBDeciderChoice(p);
+                break;
         }
         _state.NegatedEffects.Clear();
     }
@@ -222,7 +227,8 @@ public sealed partial class MatchEngine
     {
         if (_state.PendingDeciderChoice is not { } p || p.DeciderPlayerId != playerId) yield break;
         var verb = p.SpecId switch { DeciderSpecs.ScandalousRumors => "Move home", DeciderSpecs.DragonsBreath => "Bow", DeciderSpecs.TaraoSacrifice => "Sacrifice", DeciderSpecs.KimiDiscard => "Discard",
-            DeciderSpecs.BloodOfThePreserverFirst or DeciderSpecs.BloodOfThePreserverSecond => "Remove from the game", _ => "Turn face-down" };
+            DeciderSpecs.BloodOfThePreserverFirst or DeciderSpecs.BloodOfThePreserverSecond => "Remove from the game",
+            EmperorRemainingBSpecs.HeavilyEngagedFirst or EmperorRemainingBSpecs.HeavilyEngagedSecond => "Bow", EmperorRemainingBSpecs.MysteriousDeathsFirst or EmperorRemainingBSpecs.MysteriousDeathsSecond => "Destroy", _ => "Turn face-down" };
         if (p.Chosen.Count < p.Max)
             foreach (var id in p.Candidates.Where(c => !p.Chosen.Contains(c)))
                 yield return new("chooseDecider", $"{verb} · {Definition(Card(id)).Name}", true, null,

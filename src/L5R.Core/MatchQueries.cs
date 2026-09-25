@@ -329,6 +329,11 @@ public sealed partial class MatchEngine
             // Heart of Darkness (Forgotten Legacy pass, issue #467 batch 4): bow no card, one card, or two cards (ForgottenLegacyBatch4.cs).
             foreach(var option in HeartOfDarknessOptions(playerId,heartPending.CardId)) result.Add(option);
         }
+        else if(_state.PendingChoice is { Type:"beforeBattleOptional" } hardPending && _state.PendingBeforeBattleResolve is { } hardResolve && IsHardPressedChoice(hardResolve))
+        {
+            // Hard Pressed (Emperor Edition remaining-cards pass, issue #492, group B): the unit to move home, with or without the bow (EmperorRemainingB.cs).
+            foreach(var option in HardPressedOptions(playerId,hardPending.CardId)) result.Add(option);
+        }
         else if(_state.PendingChoice is { Type:"beforeBattleOptional" } optionalPending)
         {
             // Before This Battle Resolves, an optional ("you may") effect: decline it, or name its one target.

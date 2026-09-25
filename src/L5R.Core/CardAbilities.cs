@@ -3906,7 +3906,7 @@ public static class AbilityCatalog
         // Tamori Kusugi (oracle-l5r-7780): "Battle: Even if Kusugi is not at the current battlefield, bow him: Raise or lower the current battlefield's province's strength by 4."
         ["kusugi-raise"] = new("Battle", "Even if Kusugi is not at the current battlefield, bow him: Raise the current battlefield's province's strength by 4", "none", UsageKey: "kusugi-province", Costs: ActionCost.BowSource, SourceUnitMayBeAway: true),
         ["kusugi-lower"] = new("Battle", "Even if Kusugi is not at the current battlefield, bow him: Lower the current battlefield's province's strength by 4", "none", UsageKey: "kusugi-province", Costs: ActionCost.BowSource, SourceUnitMayBeAway: true),
-    }.AddEmperorPersonalityBatch2().AddEmperorStrongholdBatch1().AddEmperorStrongholdBatch3()); // Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs.
+    }.AddEmperorPersonalityBatch2().AddEmperorStrongholdBatch1().AddEmperorStrongholdBatch3().AddEmperorRemainingB()); // Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs.
 }
 
 public sealed partial class MatchEngine
@@ -4153,7 +4153,9 @@ public sealed partial class MatchEngine
         // Emperor Edition Personality pass (issue #477), batch 4: Bayushi Nitoshi's Battle action destroys its target.
         or "nitoshi-destroy"
         // Emperor Edition Personality pass (issue #477), batch 6: Daigotsu Kanpeki - exp destroys his target outright.
-        or "kanpeki-destroy";
+        or "kanpeki-destroy"
+        // Emperor Edition remaining-cards pass (issue #492), group B: Relentless Conviction destroys its target.
+        or "relentless-conviction-destroy";
     // The actions whose ONLY effect is to straighten their target: against a card that may not be straightened this turn (Basic Lesson) they are refused outright, where an action that
     // also does something else (Defensive Stance's +3F) still resolves and only its straightening is skipped (Straighten refuses it).
     private static bool StraightensOnly(string abilityId) => abilityId is "jinn-kuen-straighten" or "kodo-straighten" or "munefusa-straighten" or "mitsuko-straighten" or "ritual-preparation-straighten"
@@ -4193,7 +4195,9 @@ public sealed partial class MatchEngine
             // Before the Dawn (issue #431): the move-home actions.
             // Seeds of Decay pass (issue #453), batch 1: Vengeful Dismissal moves its target home.
             or "vengeful-dismissal-move"
-            or "ryuba-move" or "masafuni-move" or "nijugun-move" or "omigawa-move" or "dismissing-the-cur-move" or "second-feint-bow" or "tsunami-tattoo-move" or "detained-move" or "shadow-tactics-home" => "move",
+            or "ryuba-move" or "masafuni-move" or "nijugun-move" or "omigawa-move" or "dismissing-the-cur-move" or "second-feint-bow" or "tsunami-tattoo-move" or "detained-move" or "shadow-tactics-home"
+            // Emperor Edition remaining-cards pass (issue #492), group B: My Enemy's Mercy may move its target home; Opportunistic Advance moves its target to a battlefield.
+            or "my-enemys-mercy-choose" or "opportunistic-advance-move" => "move",
         "air-straighten" or "paid-straighten" or "training-keyword-conditional-straighten" or "immovable-object-straighten"
             or "defensive-stance" or "ritual-preparation-straighten" or "training-straighten-at-battle" or "horibe-straighten"
             or "furu-straighten" or "tsudoken-exp2-straighten" or "tsukasa-straighten" or "atsumichi-straighten"
@@ -4307,7 +4311,9 @@ public sealed partial class MatchEngine
         // Emperor Edition Personality pass (issue #477), batch 5: Asako Tsunefusa's, Asako Yorisada's and Shiba Kataken's bows.
         or "tsunefusa-bow" or "yorisada-bow" or "kataken-bow"
         // Emperor Edition Personality pass (issue #477), batch 6: Nishimura bows its target.
-        or "nishimura-bow";
+        or "nishimura-bow"
+        // Emperor Edition remaining-cards pass (issue #492), group B (EmperorRemainingB.cs).
+        or "ogre-savagery-bow" or "guided-by-honor-move" or "my-enemys-mercy-choose";
     // Whether the command's TargetId is an Attack's OWN target, which reacts through the separate attackReaction
     // window instead of this one: an Attack-classified ability whose Target category is "attack". Bayushi Kahoku
     // - exp (issue #313) is Attack-classified too, but its TargetId is the separate "-4F" target (an ordinary
@@ -4351,6 +4357,8 @@ public sealed partial class MatchEngine
                 && (abilityId != "training-negate-honor-gain" || command.AbilityId is "virtuous-charity-open" or "training-opponent-payment");
         // Naka Mahatsu - exp (Seeds of Decay, issue #453): any player's action with Thunder or an element keyword, whatever it targets (SeedsOfDecayBatch4.cs).
         if (abilityId == "mahatsu-negate") return MahatsuNegateApplies(card, command);
+        // Ninja Tricks (Emperor Edition remaining-cards pass, issue #492, group B): a Strategy in a hand answering an action on a Strategy (EmperorRemainingB.cs).
+        if (abilityId == "ninja-tricks-negate") return NinjaTricksApplies(card, command);
         // Shiro Chugo (Emperor Edition Stronghold pass, issue #486 batch 2): any action that could change Honor, whatever it targets (EmperorStrongholdBatch2.cs).
         if (abilityId == "chugo-honor-reduce") return ChugoApplies(card, command);
         // Akodo Shihiro (issue #458): "Before (each time) another player's action resolves during a battle at Shihiro's battlefield" -- whatever the action targets, so
@@ -4425,7 +4433,7 @@ public sealed partial class MatchEngine
         && !AbilityUseSpent(card.AbilityUses, AbilityCatalog.All[abilityId], AbilityCatalog.All[abilityId].UsageKey ?? abilityId);
     // Every before-action-resolves Reaction printed on an in-play card, on either side, paired with the card.
     private IEnumerable<(CardInstance Card, string AbilityId)> BeforeActionReactionCandidates() =>
-        _state.Cards.Values.Where(InPlay).SelectMany(c => AbilityIdsOf(c)
+        _state.Cards.Values.Where(c => InPlay(c) || c.Zone == Zone.Hand && IsHandBeforeActionReactor(c)).SelectMany(c => AbilityIdsOf(c)
             .Where(id => AbilityCatalog.All.TryGetValue(id, out var a) && a.Timing == "Reaction" && a.Trigger == "before-action-resolves")
             .Select(id => (Card: c, AbilityId: id)));
     private bool OwnsBeforeActionReaction(int playerId, GameCommand command, string? affectedId = null) =>
@@ -5518,6 +5526,7 @@ public sealed partial class MatchEngine
         ValidateEmperorStrongholdBatch3(id, ability, command, player, source); // Emperor Edition Stronghold pass (issue #486), batch 3.
         ValidateEmperorPersonalityBatch2(id, player, source); // Emperor Edition Personality pass (issue #477), batch 2: Kuni Shinoda's conditions.
         ValidateEmperorBatch4(id, ability, command, player, source); // Emperor Edition Personality pass (issue #477), batch 4.
+        ValidateEmperorRemainingB(id, ability, command, player, source); // Emperor Edition remaining-cards pass (issue #492), group B.
         // Barred Passage: "the only Personality in his army" -- none of the acting player's other Personalities stands at this battlefield.
         if (id == "barred-passage-bow") Require(Army(player.Id, _state.CurrentBattleProvince!.Value).Count(c => Definition(c).Type == CardType.Personality) == 1, "The performing Hero must be the only Personality in his army.");
         if (id is "tamoko-open" or "virtuous-charity-open") Require(_state.ActivePlayerId != player.Id, "Only usable when it is not your own turn.");
@@ -5932,7 +5941,7 @@ public sealed partial class MatchEngine
                 "own-personality-base-force-7-plus" => Definition(performer).Type == CardType.Personality && Definition(performer).Force >= 7 && (!actingAsBattle || AtBattle(performer)),
                 "own-unbowed-personality-with-any-keyword-at-battle" => Definition(performer).Type == CardType.Personality && !performer.Bowed
                     && (ability.RequiredKeywords ?? []).Any(k => Keyword(performer, k)) && (!actingAsBattle || AtBattle(performer)),
-                _ => false
+                _ => EmperorRemainingBPerformerAllows(ability, performer, actingAsBattle) // Emperor Edition remaining-cards pass (issue #492), group B
             }, "That card does not meet this ability's performer requirement.");
         }
         else Require(command.PerformerId is null || command.PerformerId == command.TargetId && id is "prepared-death" or "defensive-stance" or "lobby", "Unexpected performing card.");
@@ -9775,6 +9784,12 @@ public sealed partial class MatchEngine
                     if (shadowsEmbrace5) return;
                     break;
                 }
+                // Emperor Edition remaining-cards pass (issue #492), group B (EmperorRemainingB.cs): true when a window or choice opened and the action waits.
+                if (RunEmperorRemainingB(id, ability, command, player, source, target, consumedGrant, playedFromDiscard, opponentHonorBeforeBattleAction, bowedBeforeAction, preExistingGrants) is { } remainingB)
+                {
+                    if (remainingB) return;
+                    break;
+                }
                 // Any ability with an AttachSpec (Moto Jun-Ni, Fading Shadows, Foothills Keep and the training shapes) needs no case of its own: the Gold was
                 // paid by PayForAbility, so the card now leaves its place and enters play attached. An entering-play window ends the action here.
                 if (ability.Attach is { } attachSpec)
@@ -10608,7 +10623,7 @@ public sealed partial class MatchEngine
                     && (!actingAsBattle || AtBattle(c))).Select(c => (string?)c.Id).ToArray(),
                 "own-unbowed-personality-with-any-keyword-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && Definition(c).Type == CardType.Personality && !c.Bowed
                     && (ability.RequiredKeywords ?? []).Any(k => Keyword(c, k)) && (!actingAsBattle || AtBattle(c))).Select(c => (string?)c.Id).ToArray(),
-                _ => [null]
+                _ => EmperorRemainingBPerformers(ability, playerId, actingAsBattle) // Emperor Edition remaining-cards pass (issue #492), group B: its own performer categories, else no performer
             };
             // Unlike every other Performer-based ability (still offered, disabled, with no eligible
             // performer -- see the generic fallback below), Equip (Battle) is not offered at all
