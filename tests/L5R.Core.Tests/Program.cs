@@ -7606,16 +7606,32 @@ static void NoAttachmentsFilter()
         Equal(e.State.Cards[withItem.Id].Zone,Zone.Dead,"An attached Item does not make a Personality an illegal Attack target");
     }
     {
-        // A Follower/Weapon/Armor *token* is not an attached Follower CARD, so it does not block an Attack either (the old Reject here was
-        // really the strength check, so Force is held within strength)...
+        // Mendon (2026-09-24): a Follower TOKEN shields its Personality from Ranged and Melee Attacks exactly like a Follower card (Force is held within strength so only the token could matter)...
         var s=StrongholdBattle("oracle-l5r-1218");
         var host=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0);
         var attacker=Add(s,"oracle-l5r-1839",0,Zone.Attached,province:0,attachedTo:host.Id);
         var withToken=Add(s,"training-lion-samurai",1,Zone.Battlefield,province:0); withToken.Tokens=[new("t1","Follower","test-fixture")];
         withToken.Modifiers=[new("test-fixture","test-fixture","Force",-2)]; // Force 2, within Ranged 3: only the token could matter
         var e=MatchEngine.FromTestState(s);
-        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:attacker.Id,TargetId:withToken.Id,AbilityId:"dark-naga-scouts-attack"));
-        Equal(e.State.Cards[withToken.Id].Zone,Zone.Dead);
+        Reject(e,new GameCommand("useAbility",0,e.Version,CardId:attacker.Id,TargetId:withToken.Id,AbilityId:"dark-naga-scouts-attack"));
+        Equal(e.State.Cards[withToken.Id].Zone,Zone.Battlefield,"A Follower token shields its Personality from the Attack");
+    }
+    {
+        // ...while Item, Spell, Weapon and Armor attachments/tokens do not block an Attack (they only count for "without attachments" effects, below).
+        foreach(var (kind,attach) in new (string,Action<MatchState,CardInstance>)[]{
+            ("Spell",(st,host)=>Add(st,"training-spell",1,Zone.Attached,province:0,attachedTo:host.Id)),
+            ("Weapon token",(st,host)=>host.Tokens=[new("t1","Weapon","test-fixture")]),
+            ("Armor token",(st,host)=>host.Tokens=[new("t1","Armor","test-fixture")])})
+        {
+            var s=StrongholdBattle("oracle-l5r-1218");
+            var host=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0);
+            var attacker=Add(s,"oracle-l5r-1839",0,Zone.Attached,province:0,attachedTo:host.Id);
+            var target=Add(s,"training-lion-samurai",1,Zone.Battlefield,province:0); attach(s,target);
+            target.Modifiers=[new("test-fixture","test-fixture","Force",-2)];
+            var e=MatchEngine.FromTestState(s);
+            Accept(e,new GameCommand("useAbility",0,e.Version,CardId:attacker.Id,TargetId:target.Id,AbilityId:"dark-naga-scouts-attack"));
+            Equal(e.State.Cards[target.Id].Zone,Zone.Dead,$"A {kind} does not shield a Personality from an Attack");
+        }
     }
     {
         // ...and an ordinary stat/status token (Fire) does not either -- still a legal target.

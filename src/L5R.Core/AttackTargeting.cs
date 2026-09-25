@@ -67,10 +67,12 @@ public sealed partial class MatchEngine
         ["ranged-attacks-may-target-dishonorable-with-followers"] = new("Ranged", TargetIs: TargetStatus.IsDishonorable),
     };
 
-    // True when `target` is a Personality with at least one attached FOLLOWER. An Item or Spell attachment
-    // never counts (A Close Call's premise -- an Armor-wearing Personality is a legal Attack target).
+    // True when `target` is a Personality with at least one attached FOLLOWER -- a Follower CARD or a Follower TOKEN (Mendon, 2026-09-24: both shield their Personality from Ranged and Melee Attacks).
+    // An Item or Spell attachment never counts (A Close Call's premise -- an Armor-wearing Personality is a legal Attack target); they are attachments only for "without attachments" effects
+    // (HasAttachments), and so is a Weapon or Armor token.
     private bool IsFollowedPersonality(CardInstance target) =>
-        Definition(target).Type == CardType.Personality && Attachments(target.Id).Any(a => Definition(a).Type == CardType.Follower);
+        Definition(target).Type == CardType.Personality
+        && (Attachments(target.Id).Any(a => Definition(a).Type == CardType.Follower) || target.Tokens.Any(t => t.Type == "Follower"));
 
     private bool HasReconnaissanceAtCurrentBattlefield(int playerId) =>
         _state.CurrentBattleProvince is int province && HasReconnaissance(playerId, 1 - _state.ActivePlayerId, province);
