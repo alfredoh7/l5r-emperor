@@ -25,6 +25,7 @@ public sealed partial class MatchEngine
             yield return TowersOfYogoAbilityId;
         if (Keyword(card, "Tactician") && _state.Cards.Values.Any(c => c.OwnerId == card.OwnerId && InPlay(c) && Definition(c).Effect == KiRinsPathGrantEffect))
             yield return KiRinsPathAbilityId;
+        if (WhiteShorePlainGrants(card)) yield return WhiteShorePlainAbilityId; // White Shore Plain (Emperor Edition remaining-cards pass, issue #492, group D).
         if (Definition(card).Effect == UnmeiMirrorEffect && (Keyword(card, "Samurai") || Keyword(card, "Shugenja")))
             yield return UnmeiAttackAbilityId; // Unmei (Emperor Edition Personality pass, issue #477, batch 3): the ability she has while she has Samurai or Shugenja.
     }

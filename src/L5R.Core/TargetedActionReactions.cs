@@ -317,6 +317,12 @@ public sealed partial class MatchEngine
                 return HundredFoldCutApplies(card, abilityId, subject, affected);
             case "hes-mine-substitute":
                 return HesMineApplies(card, subject, affected);
+            // Emperor Edition remaining-cards pass (issue #492), group D. Undetectable Enemy: another player's action targets one of the reactor's own Oni. The Power of a Word: another player's Battle action
+            // targets the reactor's own Courtier.
+            case "undetectable-enemy-negate":
+                return subject.Command.PlayerId != card.OwnerId && affected.OwnerId == card.OwnerId && Definition(affected).Type == CardType.Personality && Keyword(affected, "Oni");
+            case "power-word-reaction":
+                return PowerOfWordApplies(card, subject, affected);
             default:
                 return RemATargetedActionReactionApplies(card, abilityId, subject, affected) || EmperorRemainingCTargetedReactionApplies(card, abilityId, subject, affected); // issue #492: group A (Ancestral Protection, Caught in the Act), group C (Snake Tattoo)
         }

@@ -1001,6 +1001,17 @@ public sealed class MatchState
     public bool RemANegatesHeldAction { get; set; }
     public bool RemAIgnoresHeldCosts { get; set; }
     public int RemAShuffledCount { get; set; }
+    // Emperor Edition remaining-cards pass (issue #492), group D (EmperorRemainingD.cs): Torch's Flame Flickers' "negate the next card effect that bows ...", The Shadow Court's "after the next time
+    // this turn ... destroys your Courtier" and The Sincerity of the Dragon's named number -- one record per use; and the battle resolution paused for a Shadow Court decision.
+    public List<TorchWatch> TorchWatches { get; set; } = [];
+    public List<ShadowCourtWatch> ShadowCourtWatches { get; set; } = [];
+    public List<SincerityWatch> SincerityWatches { get; set; } = [];
+    public PendingAfterResolution? PendingShadowCourtResolution { get; set; }
+    // Twist of Fate (issue #492, group D): "Before your Dynasty Phase ends: Take an additional Limited or Open action" -- while the additional action is being taken the match sits in the Action Phase
+    // (TwistOfFateActive) and returns to TwistOfFateReturnPhase once it is done; a player who passed the window is not asked again this turn (TwistOfFateDeclinedTurn).
+    public bool TwistOfFateActive { get; set; }
+    public Phase TwistOfFateReturnPhase { get; set; }
+    public int TwistOfFateDeclinedTurn { get; set; } = -1;
     // Paralyzing Touch's "negate the effects of the next action performed by its winner" (for the turn), spent by that action.
     public List<ParalyzingTouchWatch> ParalyzingTouchWatches { get; set; } = [];
     // Spiritual Manipulation's "must declare a normal attack this turn and assign the target (if legal)".
@@ -1090,6 +1101,8 @@ public sealed class ResolvedActionFacts
     public List<int> HandRecipients { get; set; } = [];
     // Emperor Edition Stronghold pass (issue #486), batch 1 (Kyuden Otomo - exp): the players who took the Imperial Favor during the action.
     public List<int> FavorTakers { get; set; } = [];
+    // Emperor Edition remaining-cards pass (issue #492), group D (Words Have Strength): "You may only play one copy ... in reaction to any one resolution" -- set once a copy is played.
+    public bool WordsHaveStrengthPlayed { get; set; }
 }
 
 // DeckPosition ("Top"/"Bottom") is the acting player's own upfront choice of where a card goes in

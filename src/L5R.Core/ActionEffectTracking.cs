@@ -57,6 +57,8 @@ public sealed partial class MatchEngine
         ApplyMokshaPatamTokens();
         // The Shadow's Embrace pass (issue #476), batch 3: Crowded Streets' trait -- a trait, so before any Reaction to the same point (ShadowsEmbraceBatch3.cs).
         if (OpenCrowdedStreetsTrait(closesTo)) return true;
+        // Emperor Edition remaining-cards pass (issue #492), group D: The Shadow Court's and The Sincerity of the Dragon's traits (EmperorRemainingD.cs) -- also before any Reaction to the same moment.
+        if (OpenShadowCourtTrait(closesTo) || OpenSincerityTrait(closesTo)) return true;
         if (OpenAfterActionResolvedWindow(closesTo)) return true;
         // Moshi Ino's storm (issue #453, batch 3; MoshiInoStorm.cs): the same "this action is truly done" moment, asked once no Reaction window opened over it.
         return OpenInoStorm(closesTo);
@@ -158,6 +160,8 @@ public sealed partial class MatchEngine
             "pillars-virtue-additional-action" => PillarsKihoBattleActionTaken(facts, playerId),
             // Deception Revealed (Emperor Edition remaining-cards pass, group A, issue #492): "After the resolution of an action that bowed a Ring" -- either player's action, a Ring still bowed.
             "deception-revealed-straighten" => facts.Affected.Any(a => a.Kind == BowedRingKind && Card(a.CardId).Bowed && InPlay(Card(a.CardId))),
+            // Words Have Strength (Emperor Edition remaining-cards pass, issue #492, group D): "the resolution of another player's Battle action, if ... the action destroyed any of your Courtiers or Magistrates".
+            "words-strength-action" => facts.PlayerId != playerId && IsBattleAction(facts.AbilityId) && ActionDestroyedCourtierOrMagistrate(facts, playerId),
             _ => EmperorRemainingCAfterActionApplies(abilityId, facts, playerId) // Emperor Edition remaining-cards pass, group C (issue #492): The Empress' Address.
         };
     }

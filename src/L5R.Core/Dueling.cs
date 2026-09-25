@@ -536,6 +536,11 @@ public sealed partial class MatchEngine
     {
         switch (abilityId)
         {
+            // The Sincerity of the Dragon (Emperor Edition remaining-cards pass, issue #492, group D): "After this duel ends, if you won it, give all your provinces +2 strength" -- until the turn ends (the
+            // default duration of an ongoing effect); Courtesy of the Crane's, below, has always raised the printed strength for good.
+            case "sincerity-dragon-focus":
+                if (ownerId == winnerPlayerId) foreach (var province in Player(ownerId).Provinces.Where(p => !p.Destroyed)) GiveProvinceStrengthThisTurn(ownerId, province.Index, 2, "The Sincerity of the Dragon");
+                break;
             case "courtesy-of-the-crane-focus":
                 if (ownerId == winnerPlayerId) foreach (var province in Player(ownerId).Provinces) province.Strength += 2;
                 break;
@@ -556,7 +561,7 @@ public sealed partial class MatchEngine
                 if (_state.PendingDuel?.WinnerId is string paralyzedWinnerId && InPlay(Card(paralyzedWinnerId))) WatchParalyzingTouch(Card(paralyzedWinnerId), "Paralyzing Touch");
                 break;
             // Sudden Movement (The Shadow's Embrace pass, issue #476, batch 4): "After this duel ends, give its winner +3F" (a tie has no winner).
-            case "sudden-movement-focus":
+            case "sudden-movement-focus": case "slow-death-focus": // The Slow Death (Emperor Edition remaining-cards pass, issue #492, group D): "After this duel ends, give its winner +3F."
                 if (_state.PendingDuel?.WinnerId is string suddenWinnerId && InPlay(Card(suddenWinnerId))) ApplyModifier(Card(suddenWinnerId), suddenWinnerId, abilityId, "Force", 3);
                 break;
             // Scavenging Party: "After this duel ends, give its winner -3F" (a tie has no winner).

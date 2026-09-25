@@ -49,6 +49,8 @@ public static class CostVerbs
     public const string ChiPenalty = "chi-penalty";
     /// <summary>Shuffle the acting player's hand (the card played from it excepted) into his Fate deck (Face of Ninube, Emperor Edition remaining-cards pass, group A, issue #492); the count is what the action then draws.</summary>
     public const string ShuffleHand = "shuffle-hand";
+    /// <summary>Move the subject (his unit) home ("Move your performing opposed Personality home:", Wall of Honor, issue #492): a cost, so it is paid whatever happens to the effects and no negation of an effect stops it.</summary>
+    public const string MoveHome = "move-home";
 }
 
 /// <summary>One cost: <paramref name="Verb"/> (CostVerb.Bow or CostVerbs.*) applied to <paramref name="Subject"/> (CostSubject.*: the ability's
@@ -237,6 +239,10 @@ public sealed partial class MatchEngine
                     if (UnitHostId(subject) != subject.Id) Card(UnitHostId(subject)).Bowed = true;
                     break;
                 case CostVerbs.ChiPenalty: ApplyModifier(subject, source?.Id ?? subject.Id, command.AbilityId!, "Chi", -cost.Amount); break;
+                case CostVerbs.MoveHome:
+                    ReturnHome(subject, false);
+                    Emit("unitMovedHome", $"{Definition(subject).Name}'s unit moved home (a cost).", subject.OwnerId, subject.Id);
+                    break;
                 default: throw new InvalidOperationException($"Unknown cost verb '{cost.Verb}'.");
             }
         }

@@ -59,6 +59,11 @@ public static class EitherOrSpecs
     /// <summary>Sacrifice of Pawns (Emperor Edition remaining-cards pass, group C, issue #492): "His controller may destroy the target. If he did not choose this, search your Dynasty deck for a
     /// Personality and bring him into play, paying all costs but paying two more Gold." -- the target's controller decides; a refusal opens the acting player's search (EmperorRemainingC.cs).</summary>
     public const string SacrificeOfPawns = "sacrifice-of-pawns";
+    /// <summary>The Power of a Word (Emperor Edition remaining-cards pass, issue #492, group D): "The player may choose to lose 3 Honor. If he did not choose this, negate the action's effects." -- the decider is the ACTING player.</summary>
+    public const string PowerOfWordLoseOrNegate = "power-word-lose-or-negate";
+    /// <summary>The Shadow Court (issue #492): "draw a card, and choose a player, who gains or loses 2 Honor" -- the watch's controller decides. The Sincerity of the Dragon: "choose a player, who discards a card".</summary>
+    public const string ShadowCourtHonor = "shadow-court-honor";
+    public const string SincerityDiscard = "sincerity-discard";
 }
 
 /// <summary>What choosing an option amounts to, for a client to word and style it: "avoid" (accept a cost or a lesser loss so the
@@ -140,6 +145,9 @@ public sealed partial class MatchEngine
             EmperorRemainingBSpecs.AncestorsDestroy => $"{source}: destroy {affected}, or discard a card at random from your hand and {Player(p.ActingPlayerId).Name} chooses a player, who gains or loses 3 Honor.",
             EmperorRemainingBSpecs.AncestorsHonor => $"{source}: choose a player, who gains or loses 3 Honor.",
             EitherOrSpecs.SacrificeOfPawns => SacrificeOfPawnsPrompt(p, source, affected),
+            EitherOrSpecs.PowerOfWordLoseOrNegate => $"{source}: lose 3 Honor, or your action's effects are negated.",
+            EitherOrSpecs.ShadowCourtHonor => $"{source}: choose a player who gains or loses 2 Honor.",
+            EitherOrSpecs.SincerityDiscard => $"{source}: choose a player who discards a card.",
             _ => throw new RuleViolation("Unknown choice.")
         };
     }
@@ -229,6 +237,14 @@ public sealed partial class MatchEngine
                 ];
             case EmperorRemainingBSpecs.MercyBowOrHome: return MercyOptions(affected); // Emperor Edition remaining-cards pass (issue #492), group B
             case EmperorRemainingBSpecs.AncestorsDestroy: case EmperorRemainingBSpecs.AncestorsHonor: return AncestorsOptions(p, affected);
+            // The Power of a Word (issue #492): the decider is the player whose Battle action targeted the Courtier. Losing Honor is always possible (Family Honor may go negative).
+            case EitherOrSpecs.PowerOfWordLoseOrNegate:
+                return [
+                    new("lose", "Lose 3 Honor", "Your action goes ahead: it is not negated.", EitherOrKind.Avoid, 0, true, null),
+                    new("negate", "Do not lose the Honor", "Your action's effects are negated.", EitherOrKind.Accept, 0, true, null)
+                ];
+            case EitherOrSpecs.ShadowCourtHonor: case EitherOrSpecs.SincerityDiscard:
+                return EmperorRemainingDEitherOrOptions(p);
             default: throw new RuleViolation("Unknown choice.");
         }
     }
@@ -389,6 +405,18 @@ public sealed partial class MatchEngine
             case (EmperorRemainingBSpecs.AncestorsDestroy, _): case (EmperorRemainingBSpecs.AncestorsHonor, _):
                 ApplyAncestors(p, option, decider, affected);
                 break;
+            // The Power of a Word (issue #492; EmperorRemainingD.cs).
+            case (EitherOrSpecs.PowerOfWordLoseOrNegate, "lose"):
+                Emit("eitherOrChosen", $"{decider.Name} chose to lose 3 Honor ({Definition(source).Name}).", decider.Id, source.Id);
+                GainHonor(decider.Id, -3, Definition(source).Name, source);
+                break;
+            case (EitherOrSpecs.PowerOfWordLoseOrNegate, "negate"):
+                Emit("eitherOrChosen", $"{decider.Name} did not lose the Honor ({Definition(source).Name}): the action's effects are negated.", decider.Id, source.Id);
+                NegateHeldActionFromEitherOr(p, source);
+                break;
+            case (EitherOrSpecs.ShadowCourtHonor, _): case (EitherOrSpecs.SincerityDiscard, _):
+                ApplyEmperorRemainingDEitherOr(p, option, decider);
+                break;
             default: throw new RuleViolation("Unknown choice.");
         }
     }
@@ -398,6 +426,7 @@ public sealed partial class MatchEngine
     {
         _state.PendingEitherOr = null;
         if (p.SpecId == EitherOrSpecs.SacrificeOfPawns && _state.PendingSearch is not null) return; // Sacrifice of Pawns (issue #492, group C): the refusal opened a search, which finishes the action.
+        if (FinishEmperorRemainingDEitherOr(p)) return; // Emperor Edition remaining-cards pass (issue #492), group D: The Shadow Court and The Sincerity of the Dragon (EmperorRemainingD.cs).
         // The Shadow's Embrace pass (issue #476), batch 3 (ShadowsEmbraceBatch3.cs): Crowded Streets' trait decision carries on with the resolved action's own tail; Forge Your
         // Soul's last decision draws and opens the attached Weapon's entering-play window first.
         if (FinishShadowsEmbraceEitherOr(p)) return;

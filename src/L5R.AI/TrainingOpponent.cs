@@ -196,6 +196,10 @@ public static class TrainingOpponent
                 var kept=self.Army.FirstOrDefault(c=>c.Id==command.TargetId);
                 return 100+(kept?.Force??0);
             case "encircledOrder": case "beforeBattleOrder": return 50;
+            // The Killing Grounds (Emperor Edition remaining-cards pass, issue #492, group D): destroy the weakest of its own Personalities at the battlefield.
+            case "killingGroundsSelect":
+                var doomed=self.Army.FirstOrDefault(c=>c.Id==command.TargetId);
+                return 100-(doomed?.Force??0);
             // A conditional effect choice (issue #337, Mirumoto Yumaru): a modest bot never stalls on it; every offered option is legal, so it
             // takes the first one the engine lists (ties keep the engine's order).
             case "chooseEffect": return 100;

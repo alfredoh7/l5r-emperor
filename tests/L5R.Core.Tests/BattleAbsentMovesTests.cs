@@ -98,7 +98,8 @@ internal static class BattleAbsentMovesTests
         // + guided-by-honor-move (Emperor Edition remaining-cards pass, issue #492 group B: Guided by Honor moves its performing Paragon to the current battlefield).
         // + keep-of-dead-move (Emperor Edition Stronghold pass, issue #486 batch 1: Keep of the Dead moves its performing Commander to the current battlefield).
         // + rumors-travel-move (Emperor Edition remaining-cards pass, issue #492 group C: Rumors Travel's Battle half is Broken Alliance's text).
-        Eq(marked, "broken-alliance-move,charge-into-danger-move,chukage-move,dislodge-the-foe,earth-flows-move,falling-leaf-strike,guided-by-honor-move,hawado-move-battlefield,heijin-move,help-shadows-move,houken-exp-straighten,intervening-spirit-move,intimidation-move,irezu-move,keep-of-dead-move,lesson-of-earth-move,mai-move-force-penalty,michi-move,moving-unmoving-approach,natsumi-move,natures-wrath-move,pronouncement-guilt-move,requesting-reinforcements-recruit,return-to-action-move,rikyou-move,rumors-travel-move,sanctuary-of-the-waves-move,shinoda-move,skipping-the-puddle-move,sound-of-thunder-move,sudden-movement-switch,takasho-move,tetsuo-move-attack,training-move-current,training-move-to-battle,trusting-instinct-move,your-clan-needs-you");
+        // + light-of-justice-move (Emperor Edition remaining-cards pass, issue #492, group D: The Light of Justice moves its performing Magistrate to the current battlefield).
+        Eq(marked, "broken-alliance-move,charge-into-danger-move,chukage-move,dislodge-the-foe,earth-flows-move,falling-leaf-strike,guided-by-honor-move,hawado-move-battlefield,heijin-move,help-shadows-move,houken-exp-straighten,intervening-spirit-move,intimidation-move,irezu-move,keep-of-dead-move,lesson-of-earth-move,light-of-justice-move,mai-move-force-penalty,michi-move,moving-unmoving-approach,natsumi-move,natures-wrath-move,pronouncement-guilt-move,requesting-reinforcements-recruit,return-to-action-move,rikyou-move,rumors-travel-move,sanctuary-of-the-waves-move,shinoda-move,skipping-the-puddle-move,sound-of-thunder-move,sudden-movement-switch,takasho-move,tetsuo-move-attack,training-move-current,training-move-to-battle,trusting-instinct-move,your-clan-needs-you");
         foreach (var (id, ability) in AbilityCatalog.All.Where(p => p.Value.MovesToBattle))
             Check(ability.Timing is "Battle" or "BattleOrOpen", $"{id}: a move to the battle is a Battle action");
     }
@@ -194,6 +195,8 @@ internal static class BattleAbsentMovesTests
         if (ability == "keep-of-dead-move") maiden.GrantedKeywords.Add(new("Commander", "test-fixture", GrantDuration.Permanent));
         // Emperor Edition remaining-cards pass (issue #492, group B): Guided by Honor's performing unbowed Paragon (from home: an Absent move-to-battle action).
         if (ability == "guided-by-honor-move") maiden.GrantedKeywords.Add(new("Paragon", "test-fixture", GrantDuration.Permanent));
+        // Emperor Edition remaining-cards pass (issue #492, group D): The Light of Justice's performing Magistrate (from home: an Absent move-to-battle action).
+        if (ability == "light-of-justice-move") maiden.GrantedKeywords.Add(new("Magistrate", "test-fixture", GrantDuration.Permanent));
         CardInstance card;
         // A Stronghold is the player's own from the start of the match: the card is the actor's Stronghold, made this definition.
         if (definition.Type == CardType.Stronghold) { card = s.Cards[s.Players[actor].StrongholdId]; card.DefinitionId = definition.Id; }

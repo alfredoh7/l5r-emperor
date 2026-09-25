@@ -401,6 +401,17 @@ public sealed partial class MatchEngine
             foreach(var card in Army(playerId,_state.PendingBeforeBattleResolve!.ProvinceIndex))
                 Add("encircledSelect",$"Keep {Definition(card).Name} at this battlefield",Command("encircledSelect",target:card.Id),cardId:card.Id);
         }
+        else if(_state.PendingChoice is { Type:"twistOfFateReaction" })
+        {
+            // Twist of Fate (Emperor Edition remaining-cards pass, issue #492, group D): before its player's Dynasty Phase ends, the Reactions that name it, then the pass.
+            result.AddRange(AbilityActions(playerId));
+            Add("declineReaction","Pass reaction",Command("declineReaction"));
+        }
+        else if(_state.PendingChoice is { Type:"killingGroundsSelect" })
+        {
+            // The Killing Grounds (Emperor Edition remaining-cards pass, issue #492, group D): the passing player names one of his own Personalities at the battlefield to destroy.
+            result.AddRange(KillingGroundsActions(playerId));
+        }
         else if(_state.PendingChoice is { Type:"shinden" })
         {
             Add("chooseShinden","Bow and prevent straightening this turn",Command("chooseShinden") with {Choice="bow"});

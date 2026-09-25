@@ -1,0 +1,494 @@
+{
+  "Profile": "strategy-wave-61",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-8188",
+      "Name": "The Killing Grounds",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After the first time, while this card remains in play, that a player passes instead of announcing a Battle action: He chooses and destroys one of his Personalities at the current battlefield.\nBattle: If there are no Terrains at the current battlefield: Put this card into play there.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8188.jpg",
+      "Keywords": [
+        "Terrain"
+      ],
+      "Focus": 1,
+      "Abilities": [],
+      "Effect": "killing-grounds"
+    },
+    {
+      "Id": "oracle-l5r-8194",
+      "Name": "The Law's Strength",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing Courtier or Magistrate and target a Personality: Move him home. If this did not move him home, destroy him.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8194.jpg",
+      "Keywords": [
+        "Political"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "laws-strength-move"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-8199",
+      "Name": "The Light of Justice",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: If any enemy units are at the current battlefield, choose your performing Magistrate Personality at home: Move him to the current battlefield. If he moved, straighten his unit. If any dishonorable Personalities are now opposing him, you may take an additional Battle action.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8199.jpg",
+      "Keywords": [
+        "Imperial",
+        "Political"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "light-of-justice-move"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-8262",
+      "Name": "The Power of a Word",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After another player's Battle action targets your Courtier: The player may choose to lose 3 Honor. If he did not choose this, negate the action's effects.\nBattle: Target one to three enemy dishonorable Personalities: The shadow of their shame shall fall upon their shoulders. Move them home.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8262.jpg",
+      "Keywords": [
+        "Political"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "power-word-reaction",
+        "power-word-move"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-8265",
+      "Name": "The Power of One",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle/Open: Choose your performing Commander: Straighten his unit.\nBattle: Choose your performing unbowed Commander and target one or two enemy units with a combined total Gold Cost equal to or lower than your Commander's unit's total Gold Cost: Bow the targets.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8265.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "power-one-straighten",
+        "power-one-bow"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-8311",
+      "Name": "The Serpent's Deception",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing Monk and target an enemy Personality whose unit has lower total Force than your Monk's unit: Move the target home. Your Monk feigns his injuries. He contributes Force to his army even if bowed. Lose 3 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8311.jpg",
+      "Keywords": [
+        "Fear",
+        "Kiho"
+      ],
+      "Focus": 1,
+      "Abilities": [
+        "serpents-deception-move"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-8313",
+      "Name": "The Shadow Court",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing defending Courtier and target an enemy Personality: Bow him. After the next time this turn another player's action or a battle resolution destroys your Courtier, draw a card, and choose a player, who gains or loses 2 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8313.jpg",
+      "Keywords": [],
+      "Focus": 4,
+      "Abilities": [
+        "shadow-court-bow"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-8338",
+      "Name": "The Sincerity of the Dragon",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "As a Focus Effect: After this duel ends, if you won it, give all your provinces +2 strength.\nBattle/Open: Choose your performing unbowed Dragon Clan Personality: Name a number. After the next resolution this turn of your action from another Strategy or Ring with a base Focus Value equal to the number, draw a card, and choose a player, who discards a card.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8338.jpg",
+      "Keywords": [],
+      "Focus": 4,
+      "Abilities": [
+        "sincerity-dragon-focus",
+        "sincerity-dragon-name"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-8340",
+      "Name": "The Slow Death",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "As a Focus Effect: After this duel ends, give its winner +3F.\nBattle: Target an opposed unit: Straighten it.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8340.jpg",
+      "Keywords": [],
+      "Focus": 4,
+      "Abilities": [
+        "slow-death-focus",
+        "slow-death-straighten"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-8394",
+      "Name": "The Trap is Sprung!",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: If you have Reconnaissance, choose your performing unbowed Scout Personality, and target an enemy card: Bow it. Bow its unit if you are a Crane Clan player.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8394.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "trap-sprung-bow"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-8639",
+      "Name": "Torch's Flame Flickers",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After engaging, choose your performing Scout at the current battlefield: You have Reconnaissance there. Negate the next card effect that bows one or more of your Personalities who is there (at the time).",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8639.jpg",
+      "Keywords": [
+        "Recon"
+      ],
+      "Focus": 1,
+      "Abilities": [
+        "torch-flame-recon"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-8917",
+      "Name": "Twist of Fate",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: Before your Dynasty Phase ends: Take an additional Limited or Open action.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8917.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "twist-of-fate-grant"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-8961",
+      "Name": "Undetectable Enemy",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After another player's action targets your Oni: Negate its effects.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8961.jpg",
+      "Keywords": [],
+      "Focus": 1,
+      "Abilities": [
+        "undetectable-enemy-negate"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9011",
+      "Name": "Unseen Assailant",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Bow your performing Ninja: Ranged 3 Attack. If the Ranged Attack targeted a Personality, you may compare it against his Chi.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9011.jpg",
+      "Keywords": [
+        "Ninja"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "unseen-assailant-attack"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9046",
+      "Name": "Useful Connections",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: Bow your performing Courtier and target one or more Personalities, up to an amount equal to your Courtier's Chi: Give Cavalry to them and to each of their Followers.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9046.jpg",
+      "Keywords": [
+        "Political"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "useful-connections-cavalry"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9130",
+      "Name": "Veiled Menace",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: Choose your performing unbowed Courtier and target a dishonorable Personality: His controller loses 2 Honor. After each time he is assigned (this turn), his controller loses 1 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9130.jpg",
+      "Keywords": [
+        "Political"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "veiled-menace-loss"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9198",
+      "Name": "Wall of Honor",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Move your performing opposed Personality home: Increase or decrease the strength of the current battlefield's province by an amount equal to the number of units on the enemy side there. Gain 2 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9198.jpg",
+      "Keywords": [],
+      "Focus": 3,
+      "Abilities": [
+        "wall-of-honor-raise",
+        "wall-of-honor-lower"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9287",
+      "Name": "Well Prepared",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: If you control a Terrain, target a card in a unit: Bow or straighten the target.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9287.jpg",
+      "Keywords": [],
+      "Focus": 3,
+      "Abilities": [
+        "well-prepared-bow",
+        "well-prepared-straighten"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9323",
+      "Name": "White Shore Plain",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "While at the current battlefield, each of your Tacticians has the ability, \"Tactical Reaction: Before this battle's resolution: Give this Tactician a Force bonus equal to his Chi.\"\nBattle: If there are no Terrains at the current battlefield: Put this card into play there.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9323.jpg",
+      "Keywords": [
+        "Terrain"
+      ],
+      "Focus": 3,
+      "Abilities": [],
+      "Effect": "white-shore-plain"
+    },
+    {
+      "Id": "oracle-l5r-9377",
+      "Name": "Words Have Strength",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "You may only play one copy of Words Have Strength in reaction to any one resolution.\nReaction: After a battle's resolution, or the resolution of another player's Battle action, if the resolution or action destroyed any of your Courtiers or Magistrates: Choose a player, who loses 3 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9377.jpg",
+      "Keywords": [
+        "Political"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "words-strength-resolution",
+        "words-strength-action"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

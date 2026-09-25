@@ -213,9 +213,11 @@ public sealed partial class MatchEngine
     // A window a Reaction set aside (ReactionsAreActions.cs) is reopened the moment nothing that Reaction started is still waiting.
     private void Apply(GameCommand command)
     {
+        var twistWasActive=_state.TwistOfFateActive; // Twist of Fate (issue #492, group D): the additional action ends with the first command taken during it that leaves nothing open.
         ApplyCore(command);
         ResumeIdleSuspendedWindow();
         FinishSpentBeforeBattleItem();
+        FinishTwistOfFateAction(twistWasActive);
     }
     private void ApplyCore(GameCommand command)
     {
@@ -271,6 +273,8 @@ public sealed partial class MatchEngine
             }
             if (_state.PendingChoice.Type=="encircledOrder") { ResolveEncircledOrder(command); return; }
             if (_state.PendingChoice.Type=="encircledSelect") { ResolveEncircledSelect(command); return; }
+            if (_state.PendingChoice.Type=="twistOfFateReaction") { ResolveTwistOfFateWindow(command); return; } // Twist of Fate (Emperor Edition remaining-cards pass, issue #492, group D).
+            if (_state.PendingChoice.Type=="killingGroundsSelect") { ResolveKillingGroundsSelect(command); return; } // The Killing Grounds (Emperor Edition remaining-cards pass, issue #492, group D).
             if (_state.PendingChoice.Type=="brashDraw") { ResolveBrashDraw(command); return; }
             if (_state.PendingChoice.Type=="overconfidentDraw") { ResolveOverconfidentDraw(command); return; }
             if (_state.PendingChoice.Type=="harshChoices") { ResolveHarshChoices(command); return; }
@@ -516,7 +520,7 @@ public sealed partial class MatchEngine
             case "purchase": Purchase(command); break;
             case "overlay": Overlay(command); break;
             case "discardProvince": DiscardProvince(command); break;
-            case "endDynasty": Require(_state.Phase is Phase.Dynasty or Phase.DynastyDiscard,"Not in the Dynasty Phase."); EndTurn(); break;
+            case "endDynasty": Require(_state.Phase is Phase.Dynasty or Phase.DynastyDiscard,"Not in the Dynasty Phase."); if(BeginTwistOfFateWindow()) break; EndTurn(); break;
             case "declareAttack": DeclareAttackPhase(command); break;
             case "attack": AssignAttackers(command); break;
             case "assignDefense": AssignDefense(command); break;
@@ -1207,6 +1211,8 @@ public sealed partial class MatchEngine
     private void Pass()
     {
         Emit("passed", $"{Player(_state.PriorityPlayerId).Name} passed.", _state.PriorityPlayerId);
+        // Twist of Fate (Emperor Edition remaining-cards pass, issue #492, group D): passing the additional action ends it, and the Dynasty Phase carries on.
+        if(_state.TwistOfFateActive) { EndTwistOfFateAction(); return; }
         switch(_state.Phase)
         {
             case Phase.Action:
@@ -1231,14 +1237,22 @@ public sealed partial class MatchEngine
                 // Additional Action (issue #181): passing forfeits any of this player's own still-
                 // unused grants rather than letting them linger for a future, ordinary turn -- the
                 // whole point of an Additional Action is that it resolves immediately, in a burst.
-                _state.AdditionalActions.RemoveAll(g=>g.PlayerId==_state.PriorityPlayerId && Forfeitable(g));
-                EndAttackerLeadIfCeded(_state.PriorityPlayerId,false); // Entrenched Position (Forgotten Legacy pass, issue #467 batch 3)
-                if(++_state.ConsecutivePasses==2) ResolveBattle(); else _state.PriorityPlayerId=1-_state.PriorityPlayerId;
+                // The Killing Grounds (Emperor Edition remaining-cards pass, issue #492, group D): the first pass while it stands makes the passing player destroy one of his Personalities there.
+                if(BeginKillingGroundsOnPass()) break;
+                FinishBattlePass();
                 break;
             case Phase.Dynasty:
-            case Phase.DynastyDiscard: EndTurn(); break;
+            case Phase.DynastyDiscard: if(BeginTwistOfFateWindow()) break; EndTurn(); break;
             default: throw new RuleViolation("Choose a battlefield before continuing.");
         }
+    }
+
+    // The rest of a pass in the Combat Segment (Pass, and the Killing Grounds decision that interrupts it).
+    private void FinishBattlePass()
+    {
+        _state.AdditionalActions.RemoveAll(g=>g.PlayerId==_state.PriorityPlayerId && Forfeitable(g));
+        EndAttackerLeadIfCeded(_state.PriorityPlayerId,false); // Entrenched Position (Forgotten Legacy pass, issue #467 batch 3)
+        if(++_state.ConsecutivePasses==2) ResolveBattle(); else _state.PriorityPlayerId=1-_state.PriorityPlayerId;
     }
 
     private void DiscardProvince(GameCommand command)
@@ -1359,6 +1373,7 @@ public sealed partial class MatchEngine
             card.AssignedToAttackTurn=_state.TurnNumber;
             Emit("unitAssigned",$"{Definition(card).Name} assigned to province {assignment.Value+1}.",command.PlayerId,card.Id);
             FireMiddayShadowAssigned(card); // Midday Shadow Court (Stronghold pass, issue #486 batch 1): "After the next time this turn he is assigned" -- to either side.
+            FireVeiledMenaceAssigned(card); // Veiled Menace (Emperor Edition remaining-cards pass, issue #492, group D): "After each time he is assigned (this turn)" -- to either side.
             // "After the next time this turn he is assigned to attack" (Imperial Protection, Fair Warning; issue #453, batch 2): an attacker's assignment only.
             if(!isDefender) FireAssignedToAttackWatches(card);
         }
@@ -1643,7 +1658,12 @@ public sealed partial class MatchEngine
         // After the losing units are destroyed, the province is destroyed and Honor is settled: the Reactions that name this moment (AfterResolution.cs), before the winners go home.
         MarkSeekingTheTruthResolution(destroyedByPlayer,provinceDestroyedNow?attacker:null); // Forgotten Legacy pass (issue #467 batch 4).
         FireCowedAndDefeatedBattleWatches(a,d); // The Shadow's Embrace pass (issue #476), batch 3: "a battle resolves which destroyed him" (ShadowsEmbraceBatch3.cs).
-        if(OpenAfterResolutionWindow(NewAfterResolutionFacts(provinceIndex,attacker,attackerWon,a,destroyedByPlayer,provinceDestroyedNow,losers))) return;
+        var resolutionFacts=NewAfterResolutionFacts(provinceIndex,attacker,attackerWon,a,destroyedByPlayer,provinceDestroyedNow,losers);
+        // Words Have Strength (Emperor Edition remaining-cards pass, issue #492, group D): the cards the resolution destroyed are the losing army (both armies in a tie).
+        resolutionFacts.DestroyedCardIds=(attackerWon?d:df>af?a:(a.Length>0&&d.Length>0?a.Concat(d).ToArray():[])).Select(c=>c.Id).ToList();
+        // The Shadow Court (Emperor Edition remaining-cards pass, issue #492, group D): "after the next time this turn ... a battle resolution destroys your Courtier" -- a trait, before the Reactions.
+        if(OpenShadowCourtResolutionTrait(resolutionFacts)) return;
+        if(OpenAfterResolutionWindow(resolutionFacts)) return;
         ContinueAfterResolution(provinceIndex,attacker,attackerWon,a);
     }
     // The rest of the resolution once its after-resolution Reactions are done: the Conqueror's choice, the return home, the close of the battlefield.
