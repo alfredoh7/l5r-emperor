@@ -252,7 +252,7 @@ public sealed partial class MatchEngine
     private void ApplyYoritomosGuidanceAfterEngaging(int provinceIndex)
     {
         if (CelestialsInPlay(YoritomosGuidanceEffect) == 0 || Player(_state.ActivePlayerId).Clan != "Mantis") return;
-        var province = Player(1 - _state.ActivePlayerId).Provinces.Single(p => p.Index == provinceIndex);
+        if (BattlefieldProvince(provinceIndex) is not { } province) return; // a battlefield without a province has no strength (issue #492, rulings pass R1)
         var current = EffectiveProvinceStrength(province);
         if (current <= 5) return;
         province.Strength -= current - 5;

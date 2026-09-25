@@ -565,9 +565,10 @@ public sealed partial class MatchEngine
     // "This province has +2 strength for each unit in the attacking army": read live, while the Terrain stands at the battlefield of that province during its battle.
     private int RemATerrainProvinceBonus(ProvinceState province)
     {
-        if (_state.CurrentBattleProvince != province.Index || !ProvinceIsBattlefieldOfCurrentBattle(province)) return 0;
-        var floods = TerrainsAtBattlefield(province.Index).Count(t => Definition(t).Effect == EmperorRemainingAAbilities.FloodedPassEffect);
-        return floods == 0 ? 0 : 2 * floods * Army(_state.ActivePlayerId, province.Index).Count();
+        if (CurrentProvinceIndex() != province.Index || !ProvinceIsBattlefieldOfCurrentBattle(province)) return 0;
+        var battlefield = _state.CurrentBattleProvince!.Value;
+        var floods = TerrainsAtBattlefield(battlefield).Count(t => Definition(t).Effect == EmperorRemainingAAbilities.FloodedPassEffect);
+        return floods == 0 ? 0 : 2 * floods * Army(_state.ActivePlayerId, battlefield).Count();
     }
 
     // "Battle: Even if you control no units at the current battlefield, if there are no Terrains there: Put this card into play there." -- the Terrain play needs no presence.

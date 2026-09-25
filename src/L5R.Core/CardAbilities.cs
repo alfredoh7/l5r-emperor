@@ -3906,7 +3906,7 @@ public static class AbilityCatalog
         // Tamori Kusugi (oracle-l5r-7780): "Battle: Even if Kusugi is not at the current battlefield, bow him: Raise or lower the current battlefield's province's strength by 4."
         ["kusugi-raise"] = new("Battle", "Even if Kusugi is not at the current battlefield, bow him: Raise the current battlefield's province's strength by 4", "none", UsageKey: "kusugi-province", Costs: ActionCost.BowSource, SourceUnitMayBeAway: true),
         ["kusugi-lower"] = new("Battle", "Even if Kusugi is not at the current battlefield, bow him: Lower the current battlefield's province's strength by 4", "none", UsageKey: "kusugi-province", Costs: ActionCost.BowSource, SourceUnitMayBeAway: true),
-    }.AddEmperorPersonalityBatch2().AddEmperorStrongholdBatch1().AddEmperorStrongholdBatch3().AddEmperorRemainingA().AddEmperorRemainingB().AddEmperorRemainingC().AddEmperorRemainingD().AddEmperorRemainingE().AddEmperorRemainingF().AddEmperorRemainingG().AddEmperorProxyX().AddEmperorProxyY().AddEmperorProxyZ()); //Emperor Edition remaining-cards pass, group A (issue #492): EmperorRemainingA.cs. Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition remaining-cards pass (issue #492), group E: EmperorRemainingE.cs. // Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs; remaining-cards pass (issue #492), group F: EmperorRemainingF.cs. | Emperor Edition remaining-cards pass (issue #492), group G: EmperorRemainingG.cs // Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition remaining-cards pass, group A (issue #492): EmperorRemainingA.cs. Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition remaining-cards pass (issue #492), group E: EmperorRemainingE.cs. // Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs; remaining-cards pass (issue #492), group F: EmperorRemainingF.cs. | Emperor Edition remaining-cards pass (issue #492), group G: EmperorRemainingG.cs // Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition remaining-cards pass, group A (issue #492): EmperorRemainingA.cs. Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition remaining-cards pass (issue #492), group E: EmperorRemainingE.cs. // Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs; remaining-cards pass (issue #492), group F: EmperorRemainingF.cs. | Emperor Edition remaining-cards pass (issue #492), group G: EmperorRemainingG.cs // Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs.
+    }.AddEmperorPersonalityBatch2().AddEmperorStrongholdBatch1().AddEmperorStrongholdBatch3().AddEmperorRemainingA().AddEmperorRemainingB().AddEmperorRemainingC().AddEmperorRemainingD().AddEmperorRemainingE().AddEmperorRemainingF().AddEmperorRemainingG().AddEmperorProxyX().AddEmperorProxyY().AddEmperorProxyZ().AddEmperorRulingR1()); //Emperor Edition remaining-cards pass, group A (issue #492): EmperorRemainingA.cs. Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition remaining-cards pass (issue #492), group E: EmperorRemainingE.cs. // Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs; remaining-cards pass (issue #492), group F: EmperorRemainingF.cs. | Emperor Edition remaining-cards pass (issue #492), group G: EmperorRemainingG.cs // Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition remaining-cards pass, group A (issue #492): EmperorRemainingA.cs. Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition remaining-cards pass (issue #492), group E: EmperorRemainingE.cs. // Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs; remaining-cards pass (issue #492), group F: EmperorRemainingF.cs. | Emperor Edition remaining-cards pass (issue #492), group G: EmperorRemainingG.cs // Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition remaining-cards pass, group A (issue #492): EmperorRemainingA.cs. Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition remaining-cards pass (issue #492), group E: EmperorRemainingE.cs. // Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs; remaining-cards pass (issue #492), group F: EmperorRemainingF.cs. | Emperor Edition remaining-cards pass (issue #492), group G: EmperorRemainingG.cs // Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs.
 }
 
 public sealed partial class MatchEngine
@@ -4601,7 +4601,7 @@ public sealed partial class MatchEngine
     // engine's earlier assumption that a Defender can only hold it at an enemy province is gone). The real question every
     // reader asks is HasReconnaissanceAtCurrentBattlefield(player); the raw (player, province owner, index) form below is
     // only for the province-index-targeted training grant, and must never be answered with "1 - player" as the owner.
-    private bool HasReconnaissance(int playerId, int provinceOwnerId, int provinceIndex) => Player(provinceOwnerId).Provinces[provinceIndex].Reconnaissance[playerId];
+    private bool HasReconnaissance(int playerId, int provinceOwnerId, int provinceIndex) => BattlefieldReconnaissance(playerId, provinceOwnerId, provinceIndex); // a battlefield without a province holds its own (EmperorRulingR1.cs)
     // "You have Reconnaissance at the current battlefield" (Yuki, and every Recon Reaction like him): the battlefield's
     // province row is always the DEFENDER's (a battlefield only ever sits at a defending player's province), whichever
     // player is being granted it -- so the owner is 1 - ActivePlayerId for the Attacker and the Defender alike.
@@ -4609,13 +4609,7 @@ public sealed partial class MatchEngine
     {
         if (_state.CurrentBattleProvince is int province) GrantReconnaissance(playerId, 1 - _state.ActivePlayerId, province);
     }
-    private void GrantReconnaissance(int playerId, int provinceOwnerId, int provinceIndex)
-    {
-        var province = Player(provinceOwnerId).Provinces[provinceIndex];
-        if (province.Reconnaissance[playerId]) return;
-        province.Reconnaissance[playerId] = true;
-        Emit("reconnaissanceGained", $"{Player(playerId).Name} gained Reconnaissance in {Player(provinceOwnerId).Name}'s province {provinceIndex + 1}.", playerId);
-    }
+    private void GrantReconnaissance(int playerId, int provinceOwnerId, int provinceIndex) => GrantBattlefieldReconnaissance(playerId, provinceOwnerId, provinceIndex);
     // Ranged/Melee Attack strength; conditional bonuses (e.g. Shiro Shiba's Shugenja check) live here.
     // target is the candidate/chosen target, when one exists (deferred targeting means it may be
     // null); a target-dependent conditional simply falls back to its unconditional value then.
@@ -4728,7 +4722,7 @@ public sealed partial class MatchEngine
         "yamadera-attack" => 8,
         // Kaiu Onizuka: "Ranged Attack with strength equal to the current battlefield's province's strength" -- the defender's own province at the current
         // battlefield, read the exact way the Requires at line ~3992/4916/4971 already do (EffectiveProvinceStrength off the defender's Provinces list).
-        "onizuka-attack" => EffectiveProvinceStrength(Player(1 - _state.ActivePlayerId).Provinces.Single(p => p.Index == _state.CurrentBattleProvince!.Value)),
+        "onizuka-attack" => CurrentProvinceStrength() ?? 0, // no province, no strength (issue #492, rulings pass R1)
         // Forgotten Legacy pass (issue #467), batch 2. The Vengeful: "Ranged 7 Attack". Toritaka Chokichi: "Ranged 4 Attack". Yoritomo Haruhiko: "Ranged 3 Attack with +2
         // strength if you have Reconnaissance" (the acting player's own Reconnaissance at the current battlefield).
         "vengeful-attack" => 7,
@@ -5503,7 +5497,7 @@ public sealed partial class MatchEngine
             // Overgrown Grove (issue #264): a Region sits in Zone.Region, never AtBattle-eligible at
             // all (its own Zone check always fails) -- needs its own province-index comparison instead.
             if (id == "overgrown-grove-move")
-                Require(source!.ProvinceIndex == _state.CurrentBattleProvince, "Overgrown Grove only affects a battle at its own province.");
+                Require(source!.ProvinceIndex is not null && source.ProvinceIndex == CurrentProvinceIndex(), "Overgrown Grove only affects a battle at its own province.");
             // Trusting Instinct (oracle-l5r-10402, issue #289): "Move him to a battlefield where he
             // would be opposed" -- this engine resolves one battle at a time, so "a battlefield" is
             // always the current one (Houken, Experienced's own "if he would be opposed there" shape);
@@ -5583,6 +5577,7 @@ public sealed partial class MatchEngine
         ValidateEmperorBatch4(id, ability, command, player, source); // Emperor Edition Personality pass (issue #477), batch 4.
         ValidateEmperorRemainingB(id, ability, command, player, source); // Emperor Edition remaining-cards pass (issue #492), group B.
         ValidateEmperorRemainingE(id, ability, command, player, source); // Emperor Edition remaining-cards pass (issue #492), group E.
+        ValidateEmperorRulingR1(id, ability!, command, player, source); // Emperor Edition rulings pass R1 (issue #492): battles without a province.
         // Barred Passage: "the only Personality in his army" -- none of the acting player's other Personalities stands at this battlefield.
         if (id == "barred-passage-bow") Require(Army(player.Id, _state.CurrentBattleProvince!.Value).Count(c => Definition(c).Type == CardType.Personality) == 1, "The performing Hero must be the only Personality in his army.");
         if (id is "tamoko-open" or "virtuous-charity-open") Require(_state.ActivePlayerId != player.Id, "Only usable when it is not your own turn.");
@@ -5640,7 +5635,7 @@ public sealed partial class MatchEngine
         // usable any time it holds, like an ordinary Battle ability. The current battlefield's own
         // province always belongs to the Defender.
         if (id == "false-ring-of-water-recruit")
-            Require(EffectiveProvinceStrength(Player(1 - _state.ActivePlayerId).Provinces.Single(p => p.Index == _state.CurrentBattleProvince!.Value)) >= 11,
+            Require(CurrentProvinceStrength() >= 11,
                 "The current battlefield's Province Strength must be 11 or greater.");
         if (id == "kano-destroy-token") Require(source!.Tokens.Any(t => t.Type == "Master"), "Akodo Kano needs a Master token.");
         if (id == "dairuko-rally") Require(AtBattle(source!), "Akodo Dairuko must be at the battlefield.");
@@ -6429,7 +6424,7 @@ public sealed partial class MatchEngine
                     // Return to Action (issue #331): "your Personality at HOME" is by definition not at the battlefield
                     // -- own-personality-at-home is exempt for the same reason.
                     if (actingAsBattle && ability.Target is not ("personality-at-adjacent-battlefield" or "own-unbowed-farm" or "region-or-terrain" or "own-personality-at-home" or "personality-at-any-location" or "own-follower-at-any-location" or "enemy-personality-at-any-location" or "enemy-personality-not-at-battle"
-                        or "personality-same-controller-as-first-elsewhere" or "personality-with-switch-partner")
+                        or "personality-same-controller-as-first-elsewhere" or "personality-with-switch-partner" or EmperorRulingR1Abilities.EnemyPersonalityAtBattleOrHome)
                         && id is not ("intervening-spirit-move" or "earth-flows-move" or "sanctuary-of-the-waves-move" or "dislodge-the-foe" or "heijin-move"
                             or "natures-wrath-move" or "irezu-move" or "mitsushen-move" or "pronouncement-guilt-move" or "shinoda-move")) Require(AtBattle(target), "Target or performer must be at the current battlefield."); // Nature's Wrath (issue #453 batch 5): its target is brought TO the battlefield; Irezu (issue #458) moves the target HOME from wherever he stands; Mitsushen (issue #458) brings his target TO his own battlefield from wherever it stands; Pronouncement of Guilt (issue #460) brings its enemy target TO the battlefield the same way
                     var personality = type == CardType.Personality;
@@ -6753,7 +6748,7 @@ public sealed partial class MatchEngine
                         // current battlefield's province" is always the Defender's own, the same
                         // lookup false-ring-of-water-recruit's own Require already uses.
                         "force-lte-province-strength" => type is CardType.Personality or CardType.Follower &&
-                            CardForce(target) <= EffectiveProvinceStrength(Player(1 - _state.ActivePlayerId).Provinces.Single(p => p.Index == _state.CurrentBattleProvince!.Value)),
+                            CardForce(target) <= CurrentProvinceStrength(),
                         // The Weakness of Man (issue #267): "Force is different from his [the
                         // performer's] own BASE Force" -- the performer's side of the comparison is
                         // its own printed Force (Definition(...).Force), not CardForce's live value, so
@@ -6808,7 +6803,7 @@ public sealed partial class MatchEngine
                         "enemy-personality-honor-lt-source-chi" => personality && !own && CardPersonalHonor(target) < PersonalityChi(source!),
                         "enemy-personality-honor-lte-source-chi" => personality && !own && CardPersonalHonor(target) <= PersonalityChi(source!),
                         "enemy-force-lte-province-strength" => type is CardType.Personality or CardType.Follower && !own
-                            && CardForce(target) <= EffectiveProvinceStrength(Player(1 - _state.ActivePlayerId).Provinces.Single(p => p.Index == _state.CurrentBattleProvince!.Value)),
+                            && CardForce(target) <= CurrentProvinceStrength(),
                         "personality-lower-force-than-source" => personality && CardForce(target) < CardForce(source!),
                         "non-unique-personality" => personality && !Keyword(target, "Unique"),
                         "enemy-personality-honor-lte-performer" => personality && !own && CardPersonalHonor(target) <= CardPersonalHonor(Card(command.PerformerId!)),
@@ -6926,7 +6921,7 @@ public sealed partial class MatchEngine
                         // Emperor Edition Personality pass (issue #477), batch 5. Asako Yorisada: "a Personality whose Force is different from his base Force" -- the target's own printed Force.
                         "personality-force-neq-own-base" => personality && CardForce(target) != Definition(target).Force,
                         // The Shadow's Embrace pass (issue #476), batch 2: this batch's in-play categories (ShadowsEmbraceBatch2.cs).
-                        _ => ShadowsEmbraceBatch2TargetAllows(ability.Target, command, player, source, target) || EmperorRemainingCTargetAllows(ability.Target, command, player, source, target) || RemainingDTargetAllows(ability.Target, command, player, source, target) || EmperorRemainingETargetAllows(ability.Target, command, player, source, target) || EmperorProxyXTargetAllows(ability.Target, command, player, source, target) // issue #492, group D; proxy group X
+                        _ => ShadowsEmbraceBatch2TargetAllows(ability.Target, command, player, source, target) || EmperorRemainingCTargetAllows(ability.Target, command, player, source, target) || RemainingDTargetAllows(ability.Target, command, player, source, target) || EmperorRemainingETargetAllows(ability.Target, command, player, source, target) || EmperorProxyXTargetAllows(ability.Target, command, player, source, target) || RulingR1TargetAllows(ability.Target, command, player, source, target) // issue #492, group D; proxy group X; rulings pass R1
                     }, "That card does not meet this ability's target or performer requirements.");
                 }
             }
@@ -7455,7 +7450,7 @@ public sealed partial class MatchEngine
             case "improved-defenses-strength":
                 Card(command.PerformerId!).Bowed = true;
                 if (DiscardTopOfFateDeck(player) is int idFocus)
-                    Player(1 - _state.ActivePlayerId).Provinces.Single(p => p.Index == _state.CurrentBattleProvince!.Value).Strength += idFocus + 1;
+                    AddCurrentProvinceStrength(idFocus + 1);
                 break;
             // Strategy wave 13 (issue #287): Batch B of the "Not blocked; deferred for scope"
             // BLOCKERS audit. Scorn the Weak (oracle-l5r-9925): a flat -5F, then (only when the
@@ -7731,7 +7726,7 @@ public sealed partial class MatchEngine
             case "expensive-achievement-raise": case "expensive-achievement-lower":
                 // "This Province": the current battlefield's, always the Defender's. Like every other Province Strength change in the engine (Ring of
                 // Earth, Improved Defenses) it is applied to the province's own Strength directly.
-                Player(1 - _state.ActivePlayerId).Provinces.Single(p => p.Index == _state.CurrentBattleProvince!.Value).Strength += id == "expensive-achievement-raise" ? 2 : -2;
+                AddCurrentProvinceStrength(id == "expensive-achievement-raise" ? 2 : -2);
                 break;
             case "knowledge-and-power":
             {
@@ -8606,8 +8601,8 @@ public sealed partial class MatchEngine
                 foreach (var removed in SlotCards(command, "removed").ToArray()) RemoveFromGame(removed);
                 if (ExecuteCreate(ability, ability.Creates!, command, player)) return;
                 break;
-            case "indomitable-home-strength": Player(1 - _state.ActivePlayerId).Provinces.Single(p => p.Index == _state.CurrentBattleProvince!.Value).Strength += 2; break;
-            case "stone-hewed-shrine-strength": Player(1 - _state.ActivePlayerId).Provinces.Single(p => p.Index == _state.CurrentBattleProvince!.Value).Strength += 3; break;
+            case "indomitable-home-strength": AddCurrentProvinceStrength(2); break;
+            case "stone-hewed-shrine-strength": AddCurrentProvinceStrength(3); break;
             case "ebisu-destroy-province":
             {
                 var rightmost = player.Provinces.Where(p => !p.Destroyed).OrderByDescending(p => p.Index).FirstOrDefault();
@@ -9389,6 +9384,10 @@ public sealed partial class MatchEngine
             case "tsuruchi-daikyu-attack": case "tsuruchi-house-guard-attack": case "ikoma-house-guard-attack": case "ikiryo-attack": case "kaiu-house-guard-destroy": case "tamori-house-guard-stone":
                 if (RunEmperorRemainingGEffect(id, command, ability, player, source, target, consumedGrant)) return;
                 break;
+            // Emperor Edition rulings pass R1 (issue #492): every case is in EmperorRulingR1Cards.cs; true means the action paused (a battle is fought inside the Action Phase).
+            case "surprise-attack-create": case "chikushudo-trickery-battle": case "shinobi-assault-battle": case "two-fronts-mark":
+                if (RunEmperorRulingR1Effect(id, ability, command, player, source, target, consumedGrant, playedFromDiscard, opponentHonorBeforeBattleAction, bowedBeforeAction, preExistingGrants)) return;
+                break;
             // Emperor Edition proxy pass (issue #492), group X: every case is in EmperorProxyX.cs; true means an entering-play window opened.
             case "kobashi-consume": case "suiteiru-create":
                 if (RunEmperorProxyXEffect(id, ability, command, player, source, target)) return;
@@ -10095,7 +10094,7 @@ public sealed partial class MatchEngine
     private string? BowedNearRegionReactionAbility(CardInstance card) =>
         AbilityIdsOf(card).FirstOrDefault(a => AbilityCatalog.All.TryGetValue(a, out var def) && def.Timing == "Reaction" && def.Trigger == "bowed-personality-near-region");
     private bool RegionIsNear(CardInstance region, CardInstance personality) =>
-        region.ProvinceIndex is int regionProvince && personality.ProvinceIndex is int battlefield && Math.Abs(regionProvince - battlefield) <= 1 && region.OwnerId != _state.ActivePlayerId;
+        region.ProvinceIndex is int regionProvince && personality.ProvinceIndex is int battlefield && BattlefieldProvinceIndex(battlefield) is int battlefieldProvince && Math.Abs(regionProvince - battlefieldProvince) <= 1 && region.OwnerId != _state.ActivePlayerId;
     private string? OwnActionBowedPersonalityReactionAbility(CardInstance card) =>
         AbilityIdsOf(card).FirstOrDefault(a => AbilityCatalog.All.TryGetValue(a, out var def) && def.Timing == "Reaction" && def.Trigger == "own-action-bowed-personality");
     private bool OpenBowReactionWindow(int actingPlayerId, HashSet<string> bowedBeforeAction, int closesTo)

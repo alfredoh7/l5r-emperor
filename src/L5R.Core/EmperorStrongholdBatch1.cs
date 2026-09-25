@@ -293,6 +293,7 @@ public sealed partial class MatchEngine
     {
         foreach (var owner in _state.Players)
             foreach (var province in owner.Provinces) province.Reconnaissance = new bool[2];
+        R1.AdditionalReconnaissance.Clear(); // additional battlefields' too (issue #492, rulings pass R1)
         _state.HiddenFallsGrants.Clear();
         _state.ExtraInfantrySegment = false;
     }

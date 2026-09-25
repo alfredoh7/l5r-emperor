@@ -261,7 +261,7 @@ public sealed partial class MatchEngine
             {
                 var battle = _state.CurrentBattleProvince!.Value;
                 var units = Army(1 - player.Id, battle).Count();
-                GiveProvinceStrengthThisTurn(1 - _state.ActivePlayerId, battle, id == "wall-of-honor-raise" ? units : -units, name);
+                if (CurrentProvinceIndex() is int wallProvince) GiveProvinceStrengthThisTurn(1 - _state.ActivePlayerId, wallProvince, id == "wall-of-honor-raise" ? units : -units, name); // no province, no strength (issue #492, rulings pass R1)
                 GainHonor(player.Id, 2, name, source);
                 return false;
             }

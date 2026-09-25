@@ -174,9 +174,7 @@ public sealed partial class MatchEngine
         }
     }
 
-    // The current battlefield's province is the Defender's province at that index (a battlefield is where the Defender's province is).
-    private ProvinceState? CurrentBattlefieldProvince() =>
-        _state.CurrentBattleProvince is int index ? Player(1 - _state.ActivePlayerId).Provinces.FirstOrDefault(p => p.Index == index && !p.Destroyed) : null;
+    // (The current battlefield's province, null when it is at none: EmperorRulingR1.cs.)
 
     // "Discard a card in the current battlefield's province": the Dynasty card sitting there, face up or face down (a discard pile is public, so it is shown), and the
     // province is refilled as after any discard from it.

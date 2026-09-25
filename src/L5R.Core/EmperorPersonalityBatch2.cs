@@ -95,7 +95,7 @@ public sealed partial class MatchEngine
     // ---- Kaiu Esumi / Kaiu Hideaki: the current battlefield's province (the Defender's) ------------------------------------------------------------------------------------
     private void AttackTargetedACardForBatch2(string abilityId, string? targetId)
     {
-        if (targetId is null || _state.CurrentBattleProvince is not int province) return;
+        if (targetId is null || CurrentProvinceIndex() is not int province) return;
         var amount = abilityId switch { "esumi-attack-raise" => 2, "esumi-attack-lower" => -2, _ => 0 };
         if (amount != 0) GiveProvinceStrengthThisTurn(1 - _state.ActivePlayerId, province, amount, "Kaiu Esumi");
     }
@@ -176,7 +176,7 @@ public sealed partial class MatchEngine
             case "esumi-attack-raise": case "esumi-attack-lower":
                 return ResolveOrDeferAttack(id, player, target?.Id, ActionPerformer(ability, command, source).Id, consumedGrant);
             case "hideaki-province":
-                if (_state.CurrentBattleProvince is int province) GiveProvinceStrengthUntilResolution(1 - _state.ActivePlayerId, province, 3, "Kaiu Hideaki");
+                if (CurrentProvinceIndex() is int province) GiveProvinceStrengthUntilResolution(1 - _state.ActivePlayerId, province, 3, "Kaiu Hideaki");
                 return false;
             case "shinoda-move": ExecuteMove(command, ability, source, target); return false;
             case "shinju-destroy":

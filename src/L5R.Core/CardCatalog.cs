@@ -647,6 +647,8 @@ public static class CardCatalog
             .Concat(PublishedContent.FollowerWave31.Cards)
             .Concat(PublishedContent.PersonalityWave76.Cards) // Emperor Edition remaining-cards pass (issue #492), proxy group X
             .Concat(PublishedContent.SpellWave24.Cards) // Emperor Edition remaining-cards pass (issue #492), proxy group X
+            .Concat(PublishedContent.StrategyWave62.Cards) // Emperor Edition rulings pass R1 (issue #492): Surprise Attack
+            .Concat(PublishedContent.SpellWave25.Cards) // Emperor Edition rulings pass R1 (issue #492): Chikushudo's Trickery
             .ToDictionary(c => c.Id, StringComparer.Ordinal);
     }
 }

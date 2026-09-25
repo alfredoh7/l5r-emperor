@@ -142,7 +142,7 @@ public sealed partial class MatchEngine
             {
                 GrantReconnaissanceAtCurrentBattlefield(player.Id);
                 // "Its province" is the province of the battlefield being engaged, the Defender's own.
-                if (_state.CurrentBattleProvince is int battlefield)
+                if (CurrentProvinceIndex() is int battlefield)
                     GiveProvinceStrengthThisTurn(1 - _state.ActivePlayerId, battlefield, id == "qalyar-recon-plus" ? 2 : -2, Definition(source!).Name);
                 return false;
             }

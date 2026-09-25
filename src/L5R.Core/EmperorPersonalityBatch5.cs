@@ -183,7 +183,7 @@ public sealed partial class MatchEngine
                 return false;
             // Tamori Kusugi: the defender's province at the current battlefield, raised or lowered by 4 (Ring of Earth's direct Strength change).
             case "kusugi-raise": case "kusugi-lower":
-                Player(1 - _state.ActivePlayerId).Provinces.Single(p => p.Index == _state.CurrentBattleProvince!.Value).Strength += id == "kusugi-raise" ? 4 : -4;
+                AddCurrentProvinceStrength(id == "kusugi-raise" ? 4 : -4);
                 return false;
             default:
                 throw new InvalidOperationException($"Unknown Emperor Edition batch 5 ability '{id}'.");

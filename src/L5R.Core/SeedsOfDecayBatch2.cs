@@ -363,7 +363,7 @@ public sealed partial class MatchEngine
                 break;
             case "incriminating-testimony-bow":
                 if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
-                GiveProvinceStrengthThisTurn(1 - _state.ActivePlayerId, _state.CurrentBattleProvince!.Value, PersonalityChi(performer!), "Incriminating Testimony");
+                if (CurrentProvinceIndex() is int testimonyProvince) GiveProvinceStrengthThisTurn(1 - _state.ActivePlayerId, testimonyProvince, PersonalityChi(performer!), "Incriminating Testimony");
                 break;
             case "ingenuity-dishonor":
                 foreach (var dishonored in SlotCards(command, "targets").ToArray()) Dishonor(dishonored);
@@ -426,7 +426,7 @@ public sealed partial class MatchEngine
             }
             case "shibata-exp-bow":
                 if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
-                if (EffectConditionMet(id, target)) GiveProvinceStrengthThisTurn(1 - _state.ActivePlayerId, _state.CurrentBattleProvince!.Value, 3, "Bayushi Shibata");
+                if (EffectConditionMet(id, target) && CurrentProvinceIndex() is int shibataProvince) GiveProvinceStrengthThisTurn(1 - _state.ActivePlayerId, shibataProvince, 3, "Bayushi Shibata");
                 break;
             case "insult-answered-duel": break; // The duel itself is issued generically (IssuesDuel); its outcome is in Dueling.cs's ApplyDuelOutcome.
             default: throw new RuleViolation("Ability effect is not implemented.");

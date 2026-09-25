@@ -1315,6 +1315,7 @@ public sealed partial class MatchEngine
         Require(!Player(command.PlayerId).MayNotAttackThisTurn && !AttackLockedByEvent(command.PlayerId),"You may not declare an attack this turn.");
         _state.UnresolvedBattlefields=Player(1-command.PlayerId).Provinces.Where(p=>!p.Destroyed).Select(p=>p.Index).Order().ToList();
         Emit("attackDeclared",$"{Player(command.PlayerId).Name} declared an attack: a battlefield exists at each of {Player(1-command.PlayerId).Name}'s provinces.",command.PlayerId);
+        CreateTwoFrontsBattlefields(command.PlayerId); // Two Fronts (issue #492, rulings pass R1): a second battlefield at the marked province.
         SetPhase(Phase.InfantryDeclaration,command.PlayerId);
     }
     private void DeclineAttackPhase()
@@ -1322,7 +1323,7 @@ public sealed partial class MatchEngine
         // Spiritual Manipulation (The Shadow's Embrace pass, issue #476, batch 4): "must declare a normal attack this turn".
         if(ForcedAttackDeclineRefusal(_state.PriorityPlayerId) is string forcedDecline) throw new RuleViolation(forcedDecline);
         Emit("attackDeclined",$"{Player(_state.PriorityPlayerId).Name} declined to attack; the Attack Phase ends.",_state.PriorityPlayerId);
-        _state.UnresolvedBattlefields=[];
+        _state.UnresolvedBattlefields=[]; R1.TwoFronts.RemoveAll(m=>m.Turn<=_state.TurnNumber);
         SetPhase(Phase.Dynasty,_state.ActivePlayerId);
     }
     // Infantry Maneuvers (InfantryDeclaration/DefenseAssignment) runs first, then Cavalry Maneuvers
@@ -1341,7 +1342,7 @@ public sealed partial class MatchEngine
         RequireRetributionAssignment(command); // Emperor Edition remaining-cards pass, group C (issue #492): an additional Attack Phase assigns one Personality at most.
         // Spiritual Manipulation (The Shadow's Embrace pass, issue #476, batch 4): "and assign the target (if legal)" -- in the segment he can be assigned in.
         if(ForcedAssignmentRefusal(command.PlayerId,command.Assignments,cavalry) is string forcedAssignment) throw new RuleViolation(forcedAssignment);
-        var targets=Player(1-command.PlayerId).Provinces.Where(p=>!p.Destroyed).Select(p=>p.Index).ToHashSet();
+        var targets=AttackableBattlefields(command.PlayerId).ToHashSet(); // every battlefield the declaration created (a province's, and Two Fronts' additional ones)
         Assign(command,targets,cavalry,false);
         NoteRetributionAssignments(command); // issue #492, group C: Retribution's +1F for the Personality and his Followers.
         Emit("attackersAssigned",$"{Player(command.PlayerId).Name} assigned {(command.Assignments?.Count??0)} {(cavalry?"Cavalry":"Infantry")} attacker(s).",command.PlayerId);
@@ -1428,25 +1429,46 @@ public sealed partial class MatchEngine
     {
         Require(_state.Phase==Phase.BattleSelection,"Battle order may be chosen between battles.");
         Require(command.Province is int && _state.UnresolvedBattlefields.Contains(command.Province.Value),"Choose an unresolved battlefield.");
-        _state.CurrentBattleProvince=command.Province; _state.BattleNumber++;
+        EngageBattle(command.Province!.Value,null);
+    }
+    // The Attacker has chosen a battle (SelectBattle), or an effect fights one (Shinobi Assault, Chikushudo's Trickery: EmperorRulingR1.cs). `firstOpportunity` is the player an effect grants the first
+    // opportunity to take a Battle action or pass, a claim like any other (Defender's own wins); null for none.
+    private void EngageBattle(int battlefield,int? firstOpportunity)
+    {
+        _state.CurrentBattleProvince=battlefield; _state.BattleNumber++;
         _state.EnemyDestroyedOwnPersonalitySinceLastBattleAction=new bool[2]; // Revenge (issue #437): "this battle" bounds the window.
         _state.ReconStrategyActionsThisBattle=new int[2]; // Advanced Intelligence (Seeds of Decay pass, issue #453, batch 1): "this battle" too.
-        SetPhase(Phase.Battle,1-_state.ActivePlayerId);
+        // An effect's battle is fought inside the phase it was played in (BeginAsideBattle has already set it up); a chosen one is a phase of its own.
+        if(R1.Aside is null) SetPhase(Phase.Battle,1-_state.ActivePlayerId); else _state.PriorityPlayerId=1-_state.ActivePlayerId;
         // Battle Phase timing (issue #310): the Defender holds the first opportunity by default (spec 4.4).
         // "Engaging" is exactly this moment -- the Attacker has just selected the battle (spec 4.1) -- so the
         // Engage window (spec 4.2) opens here, before any Battle action, whenever something could be played in
         // it; its claims can flip the first opportunity (CloseEngageWindow). Nothing playable: exactly the
         // pre-#310 flow, event stream included.
         _state.FirstActionPlayerId=1-_state.ActivePlayerId; _state.FirstActionReason=BattleSteps.ReasonDefault; _state.FirstActionRestriction=null;
-        ApplyYoritomosGuidanceAfterEngaging(command.Province!.Value); // Yoritomo's Guidance (Emperor Edition remaining-cards pass, issue #492, group E): "After engaging, if the Attacker is a Mantis Clan player".
-        if(OpenEngageWindow(command.Province!.Value)) { Emit("battleStarted",$"Battle at province {command.Province+1}: engaged."); return; }
-        Emit("battleStarted",$"Battle at province {command.Province+1}: defender acts first.");
+        ApplyYoritomosGuidanceAfterEngaging(battlefield); // Yoritomo's Guidance (Emperor Edition remaining-cards pass, issue #492, group E): "After engaging, if the Attacker is a Mantis Clan player".
+        var label=BattlefieldLabel(battlefield);
+        if(OpenEngageWindow(battlefield))
+        {
+            if(firstOpportunity is int claimant) ClaimFirstOpportunity(claimant,claimant==_state.ActivePlayerId?"Grant":"Defender",null);
+            Emit("battleStarted",$"Battle at {label}: engaged.");
+            return;
+        }
+        if(firstOpportunity==_state.ActivePlayerId)
+        {
+            // No window opened: the Attacker's grant stands unopposed (ResolveFirstOpportunity's result for a lone Attacker claim).
+            _state.FirstActionPlayerId=_state.ActivePlayerId; _state.FirstActionReason=BattleSteps.ReasonEngageGrant; _state.PriorityPlayerId=_state.ActivePlayerId;
+            _state.AttackerLeadBattle=_state.BattleNumber;
+            Emit("firstOpportunity",$"{Player(_state.ActivePlayerId).Name} has the first opportunity to take a Battle action or pass ({BattleSteps.ReasonEngageGrant}).",_state.ActivePlayerId);
+        }
+        Emit("battleStarted",$"Battle at {label}: {(firstOpportunity==_state.ActivePlayerId?"attacker":"defender")} acts first.");
     }
     private void ResolveBattle()
     {
         var provinceIndex=_state.CurrentBattleProvince!.Value;
         var attacker=_state.ActivePlayerId; var defender=1-attacker;
         ExpireUntilResolutionProvinceStrength(); // Kaiu Hideaki (issue #477 batch 2): "until the battle's resolution begins".
+        EndCombatSegmentShields(); // Chikushudo's Trickery (issue #492, rulings pass R1): "will not be destroyed during the battle's Combat Segment".
         // Before This Battle Resolves (issue #272): "occur after all players have passed but before
         // resolution is determined" -- deliberately checked BEFORE Army() is ever read below, since
         // Encircled Terrain's own effect (sending every other Personality home) changes who actually
@@ -1629,10 +1651,13 @@ public sealed partial class MatchEngine
         var a=Army(attacker,provinceIndex).ToArray(); var d=Army(defender,provinceIndex).ToArray();
         MarkOpposed(a,d); // Sentinel Spirit (issue #453, batch 2): "if it was opposed this turn".
         var (af,df)=ArmyForces(a,d,attacker,defender);
-        Emit("battleResolved",$"Province {provinceIndex+1}: attacking Force {af}, defending Force {df}.");
+        // Battles without a province (Mendon, issue #492 rulings pass R1): a battlefield whose province is gone (created without one, or destroyed before now) resolves as normal except that
+        // no province may be destroyed, so nothing that triggers on destroying a province can trigger.
+        var battleProvince=BattlefieldProvince(provinceIndex);
+        Emit("battleResolved",$"{(battleProvince is null && provinceIndex>=FirstAdditionalBattlefield ? "A battlefield without a province" : $"Province {provinceIndex+1}")}: attacking Force {af}, defending Force {df}.");
         // Reconnaissance resets to No for both players at this battlefield once its battle resolves,
         // regardless of the outcome -- the only trigger that clears it.
-        Player(defender).Provinces.Single(p=>p.Index==provinceIndex).Reconnaissance=new bool[2];
+        ResetBattlefieldReconnaissance(provinceIndex,defender);
         var attackerWon=af>df;
         // What the resolution did, for the Reactions that name it (AfterResolution.cs).
         var destroyedByPlayer=new int[2]; var provinceDestroyedNow=false; var losers=new List<int>();
@@ -1643,10 +1668,10 @@ public sealed partial class MatchEngine
             var destroyedDefenders=DestroyUnits(d);
             destroyedByPlayer[attacker]=destroyedDefenders; losers.Add(defender);
             if(!RehonorWinners(a)) { GainHonor(attacker,destroyedDefenders*2,"Battle victory"); CheckEarthFlowsBonus(attacker,a); }
-            var province=Player(defender).Provinces.Single(p=>p.Index==provinceIndex);
-            var destroyedProvince=af>df+EffectiveProvinceStrength(province);
-            if(destroyedProvince) DestroyProvince(defender,province);
-            if(destroyedProvince) AfterProvinceDestroyedByResolution(attacker,defender,province,a); // Alter History, Boastful Proclamation (issue #492, group F).
+            var province=battleProvince;
+            var destroyedProvince=province is not null && af>df+EffectiveProvinceStrength(province);
+            if(destroyedProvince) DestroyProvince(defender,province!);
+            if(destroyedProvince) AfterProvinceDestroyedByResolution(attacker,defender,province!,a); // Alter History, Boastful Proclamation (issue #492, group F).
             provinceDestroyedNow=destroyedProvince;
             // Vital Pathways (issue #272): "After this battlefield's province is destroyed, if you
             // are the Attacker" -- checked here, at the actual moment of destruction, since
@@ -1763,6 +1788,7 @@ public sealed partial class MatchEngine
         foreach(var terrain in _state.Cards.Values.Where(c=>c.Zone==Zone.Battlefield && c.ProvinceIndex==provinceIndex && Keyword(c,"Terrain") && Definition(c).Effect!="looting-return-to-hand").ToArray())
             DiscardTerrain(terrain);
         _state.UnresolvedBattlefields.Remove(provinceIndex); _state.CurrentBattleProvince=null;
+        R1.MovementNegated.Remove(provinceIndex); // Chikushudo's Trickery: "negate all movement to it" ends with the battlefield.
         // After This Battle Resolves (issue #272): stashed here since CurrentBattleProvince is
         // already cleared above, and the Overconfident draw window (below) may defer this whole tail
         // across a command boundary before FinishBattleReturnHomeAndTransition ever reads it back --
@@ -1836,9 +1862,11 @@ public sealed partial class MatchEngine
     {
         foreach (var card in _state.Cards.Values) card.GrantedAbilities.RemoveAll(g => g.Duration == GrantDuration.Battle);
         EndBattleActionLocks(); // Emperor Edition remaining-cards pass (issue #492), group B: Nerve Strike's lock lasts until the battle ends.
-        if(_state.UnresolvedBattlefields.Count==0)
+        if(_state.UnresolvedBattlefields.Count==0 && R1.Aside is not null) FinishAsideBattle(attacker); // a battle fought inside the Action Phase (Shinobi Assault, Chikushudo's Trickery)
+        else if(_state.UnresolvedBattlefields.Count==0)
         {
             foreach(var card in _state.Cards.Values.Where(c=>c.Zone==Zone.Battlefield).ToArray()) ReturnHome(card,card.OwnerId==attacker);
+            ClearAdditionalBattlefields(); // the additional battlefields cease to exist with the Attack Phase
             EndAttackPhase(attacker); // Emperor Edition remaining-cards pass, group C (issue #492): Retribution's window, then the Dynasty Phase.
         }
         else SetPhase(Phase.BattleSelection,BattleSelectionChooser(attacker)); // Warded Paths (Emperor Edition remaining-cards pass, issue #492, group E).
@@ -2202,7 +2230,7 @@ public sealed partial class MatchEngine
         // Ember's Final Fire: "While this Shugenja is Fire, he has +1F". Stone-Hewed Shrine: "Defending Earth Personalities have +1F while at this province's battlefield."
         +Attachments(card.Id).Count(c=>Definition(c).Type==CardType.Spell && Definition(c).Effect=="embers-final-fire-force" && Keyword(card,"Fire"))
         +2*Attachments(card.Id).Count(c=>Definition(c).Effect=="death-defeated-force")
-        +(card.Zone==Zone.Battlefield && Keyword(card,"Earth") && IsDefendingUnit(card) && _state.Cards.Values.Any(r=>r.Zone==Zone.Region && r.ProvinceIndex==card.ProvinceIndex && Definition(r).Effect=="stone-hewed-shrine-force")?1:0)
+        +(card.Zone==Zone.Battlefield && Keyword(card,"Earth") && IsDefendingUnit(card) && _state.Cards.Values.Any(r=>r.Zone==Zone.Region && r.ProvinceIndex==(card.ProvinceIndex is int shrineBattlefield ? BattlefieldProvinceIndex(shrineBattlefield) : null) && Definition(r).Effect=="stone-hewed-shrine-force")?1:0)
         +(Definition(card).Effect=="force-if-enemy-dishonorable"&&_state.Cards.Values.Any(c=>c.OwnerId!=card.OwnerId&&Definition(c).Type==CardType.Personality&&InPlay(c)&&c.Dishonorable)?2:0)
         // "The highest number of dead Personalities in any one discard pile" -- the greatest per-player
         // count of Zone.Dead Personalities, i.e. the largest single pile, not the combined total.
@@ -2693,7 +2721,7 @@ public sealed partial class MatchEngine
     // Returns whether the card moved: false only when Kyuden Kitsune negated the movement (the card stays where it was; callers ignore the result unless it matters).
     private bool MoveToBattlefield(CardInstance card,int province)
     {
-        if((card.Zone!=Zone.Battlefield || card.ProvinceIndex!=province) && (MovementLockNegates(card,MovementKinds.ToBattlefield) || KitsuneNegatesMovement(card,province) || UguluNegatesMovement(card,province))) return false;
+        if((card.Zone!=Zone.Battlefield || card.ProvinceIndex!=province) && (MovementLockNegates(card,MovementKinds.ToBattlefield) || MovementToBattlefieldNegated(card,province) || KitsuneNegatesMovement(card,province) || UguluNegatesMovement(card,province))) return false;
         // The Shadow's Embrace pass (issue #476), batch 6: Shieldman "will not move into an attacking army"; Star-Crossed Lovers "will not move to each other's battlefields".
         if((card.Zone!=Zone.Battlefield || card.ProvinceIndex!=province) && (ShieldmanNegatesMove(card) || StarCrossedNegatesMove(card,province))) return false;
         // Legion of the Bat (issue #279): "after the resolution of an action that moved a target

@@ -131,7 +131,7 @@ public sealed partial class MatchEngine
     private void SiegeVolleyStrength(int playerId, bool raise)
     {
         var castles = _state.Cards.Values.Count(c => c.OwnerId == playerId && InPlay(c) && Keyword(c, "Castle"));
-        var province = Player(1 - _state.ActivePlayerId).Provinces.Single(p => p.Index == _state.CurrentBattleProvince!.Value);
+        if (CurrentBattlefieldProvince() is not { } province) return; // a battlefield without a province has no strength to change (issue #492, rulings pass R1)
         province.Strength += raise ? castles : -castles;
         Emit("provinceStrengthChanged", $"Siege Volley: province {province.Index + 1} {(raise ? "+" : "-")}{castles} strength ({castles} Castle{(castles == 1 ? "" : "s")}).", playerId);
     }

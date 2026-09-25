@@ -157,7 +157,7 @@ public sealed partial class MatchEngine
     {
         if (abilityId != "training-province-attack") return;
         var owner = 1 - _state.ActivePlayerId;
-        var province = Player(owner).Provinces.Single(p => p.Index == provinceIndex);
+        if (BattlefieldProvince(provinceIndex) is not { } province) return; // a battlefield without a province has no strength to lose (issue #492, rulings pass R1)
         province.Strength = Math.Max(0, province.Strength - strength);
         Emit("provinceAttacked", $"{Player(owner).Name}'s province {provinceIndex + 1} lost {strength} strength to a Ranged Attack.", owner);
     }

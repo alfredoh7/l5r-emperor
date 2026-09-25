@@ -64,7 +64,7 @@ public sealed partial class MatchEngine
     private void AddHastyBonus(CardInstance hasty)
     {
         if (hasty.ProvinceIndex is not int index) return;
-        var province = _state.Players[1 - _state.ActivePlayerId].Provinces.FirstOrDefault(p => p.Index == index && !p.Destroyed);
+        var province = BattlefieldProvince(index); // a battlefield without a province has none to strengthen (issue #492, rulings pass R1)
         if (province is null) return;
         province.SourceBonuses.Add(new ProvinceBonus(hasty.Id, 1));
         Emit("provinceStrengthRaised", $"{Definition(hasty).Name}: province {index + 1} has +1 strength until it leaves play.", hasty.OwnerId, hasty.Id);

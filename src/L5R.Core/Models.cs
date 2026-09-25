@@ -877,6 +877,8 @@ public sealed class MatchState
     public string? HonorReducedActionKey { get; set; }
     // Emperor Edition remaining-cards pass, group C (issue #492): the state of Rumors Travel, Rhetoric and Solid Defense (EmperorRemainingC.cs).
     public EmperorRemainingCState RemC { get; set; } = new();
+    // Emperor Edition rulings pass R1 (issue #492): battlefields without a province, and a battle fought inside the Action Phase (EmperorRulingR1.cs).
+    public RulingR1State R1 { get; set; } = new();
     // Entrenched Position: the battle (BattleNumber) in which the Attacker holds the first opportunity to act and the Defender has not yet had his first normal
     // opportunity to act or pass -- set when the Engage window closes with the Attacker holding it, cleared the moment the Attacker cedes priority (NextAction, Pass).
     public int AttackerLeadBattle { get; set; } = -1;
@@ -1322,7 +1324,10 @@ public sealed record MatchView(string ContentVersion, string Scenario, long Vers
     OpponentPaymentView? PendingOpponentPayment = null, DuelRecord? LastDuel = null,
     // Emperor Edition Stronghold pass (issue #486), batch 3 (see EmperorStrongholdBatch3.cs): the face-down province cards this viewer looked at this turn -- PRIVATE to the looker, null for
     // everyone else. Never a card id: a face-down card is named by whose province and which.
-    ProvinceSightView[]? ProvinceSights = null);
+    ProvinceSightView[]? ProvinceSights = null,
+    // Emperor Edition rulings pass R1 (issue #492): every battlefield of the Attack Phase in progress and the province (an index into the Defender's row) it is at, null when it has
+    // none. An index below 100 is the battlefield of the Defender's province of that index; a higher one is an additional battlefield (EmperorRulingR1.cs).
+    BattlefieldView[]? Battlefields = null);
 /// <summary>Engine-private record of one face-down province card a player looked at (MatchState.ProvinceSights). Turn is the turn number it was looked at.</summary>
 public sealed record ProvinceSight(int ViewerId, int OwnerId, int Province, string CardId, string DefinitionId, int Turn);
 /// <summary>PRIVATE to the looking player: what the face-down card in a province is (its owner's province Province).</summary>
