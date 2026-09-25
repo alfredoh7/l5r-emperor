@@ -1,0 +1,30 @@
+{
+  "Profile": "stronghold-wave-23",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10184",
+      "Name": "Aramasu's Legacy",
+      "Type": "Stronghold",
+      "Clan": "Mantis",
+      "GoldCost": 0,
+      "GoldProduction": 4,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 7,
+      "StartingHonor": 2,
+      "Text": "Limited: Create an additional Attack Phase, during which battle resolution does not destroy defending armies or provinces and does not bow your Mantis Clan Magistrates or your attachments. After it ends, if you won any of its battles (even against no units at resolution), you may target a Personality or Holding, bow it, and negate its straightening until after your next Straighten Phase ends.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10184.jpg",
+      "Keywords": [],
+      "Focus": 0,
+      "Abilities": [
+        "aramasus-legacy-attack-phase"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

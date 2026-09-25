@@ -662,6 +662,9 @@ public static class CardCatalog
             .Concat(PublishedContent.FollowerWave32.Cards) // Emperor Edition follow-ups (issue #498): Enslaved Djinn
             .Concat(PublishedContent.ItemWave17.Cards) // Emperor Edition follow-ups (issue #498): Celestial Sword of the Dragon - exp
             .Concat(PublishedContent.PersonalityWave80.Cards) // Emperor Edition follow-ups (issue #498): Asako Chukage
+            .Concat(PublishedContent.StrategyWave69.Cards) // Issue #501, mechanics group A: Beyond the Line, One Action, Two Strikes, String of Victories
+            .Concat(PublishedContent.PersonalityWave83.Cards) // Issue #501, mechanics group A: Isawa Momoko, Mirumoto Inokuchi
+            .Concat(PublishedContent.StrongholdWave23.Cards) // Issue #501, mechanics group A: Aramasu's Legacy
             .ToDictionary(c => c.Id, StringComparer.Ordinal);
     }
 }

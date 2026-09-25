@@ -2622,4 +2622,10 @@ public static class PublishedContent
     public static PublishedSnapshot ItemWave17 { get; } = Load("L5R.Published.ItemWave17.json", "item-wave-17", requireDecks: false);
     /// <summary>Personality wave 80 (Emperor Edition follow-ups, issue #498): Asako Chukage (Forgotten Legacy printing).</summary>
     public static PublishedSnapshot PersonalityWave80 { get; } = Load("L5R.Published.PersonalityWave80.json", "personality-wave-80", requireDecks: false);
+    /// <summary>Strategy wave 69 (issue #501, mechanics group A): Beyond the Line, One Action, Two Strikes, String of Victories (package_strategy_wave_69.py).</summary>
+    public static PublishedSnapshot StrategyWave69 { get; } = Load("L5R.Published.StrategyWave69.json", "strategy-wave-69", requireDecks: false);
+    /// <summary>Personality wave 83 (issue #501, mechanics group A): Isawa Momoko, Mirumoto Inokuchi (package_personality_wave_83.py).</summary>
+    public static PublishedSnapshot PersonalityWave83 { get; } = Load("L5R.Published.PersonalityWave83.json", "personality-wave-83", requireDecks: false);
+    /// <summary>Stronghold wave 23 (issue #501, mechanics group A): Aramasu's Legacy (package_stronghold_wave_23.py).</summary>
+    public static PublishedSnapshot StrongholdWave23 { get; } = Load("L5R.Published.StrongholdWave23.json", "stronghold-wave-23", requireDecks: false);
 }
