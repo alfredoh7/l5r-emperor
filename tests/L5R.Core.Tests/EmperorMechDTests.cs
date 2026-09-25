@@ -50,6 +50,9 @@ internal static class EmperorMechDTests
         ("Negation, Recon counter: a wholly negated Recon action (the whole-action negation path) is not counted; a partially negated one (its destruction of the target negated) is", NegationRecon),
         ("Negation, Indecision's record: a wholly negated draw action is not counted (and opens no window); a partially negated one that still puts a card into the hand (Subtle Games, its dishonor negated) is", NegationHandActions),
         ("Negation, Broken Cipher's records: a wholly negated Equip (Battle) attaches nothing and logs nothing, so Broken Cipher stays unavailable; a wholly negated draw puts no card into the hand, so it stays available", NegationCipherRecords),
+        // Mendon's ruling (via the coordinator): the rulebook Equip (Limited) attaches Spells too, to a Shugenja only.
+        ("Equip (Limited) of a Spell: offered in the Action Phase for the player's Shugenja at home only, attached paying its cost, in the attach log and so counting for Broken Cipher's 'attached a Spell this turn'", EquipLimitedSpell),
+        ("Equip (Limited) of a Spell, refusals: a non-Shugenja host; a Spell's 'will only attach to' keyword or name requirement; a second copy of a Unique Spell; the command in a battle (Equip (Battle) is unchanged and still attaches)", EquipLimitedSpellRefusals),
         ("Amazing Feat, edges: abilities that copy abilities are not copied; a Unique Personality may not be targeted; without an unbowed Artisan it may not be taken; a copied ability is usable by the copy", AmazingFeatEdges),
     ]);
 
@@ -558,6 +561,68 @@ internal static class EmperorMechDTests
         Check(!negated.State.MechD.CardsIntoHandThisPhase[0], "the wholly negated draw put no card into the hand");
         var again = Edit(negated, st => st.PriorityPlayerId = 0);
         Check(CanUse(again, 0, "broken-cipher-draw", second.Id), "so the second copy is still available");
+    }
+
+    // ---- Equip (Limited) of a Spell (Mendon's ruling) ----------------------------------------------------------------------------------------------------------------------------------------
+
+    private static GameCommand EquipCommand(MatchEngine e, int player, CardInstance card, CardInstance host) =>
+        new("equip", player, e.Version, CardId: card.Id, SourceIds: e.PaymentOptions(player, CardCatalog.Get(card.DefinitionId).GoldCost).FirstOrDefault()?.SourceIds ?? [], TargetId: host.Id);
+
+    private static void EquipLimitedSpell()
+    {
+        var s = Table(Phase.Action, 1); RealStronghold(s, 1);
+        var shugenja = Add(s, "training-shugenja", 1, Zone.Home);
+        var samurai = Add(s, "training-crane-samurai", 1, Zone.Home);
+        var spell = Add(s, "training-spell", 1, Zone.Hand);
+        var e = MatchEngine.FromTestState(s);
+        var option = e.QueryActions(1).FirstOrDefault(a => a.Type == "equip" && a.CardId == spell.Id);
+        Check(option is { Enabled: true }, "Equip (Limited) of the Spell is offered");
+        Check(option!.TargetIds!.Contains(shugenja.Id) && !option.TargetIds!.Contains(samurai.Id), "to the Shugenja only");
+        Accept(e, option.Command!);
+        Eq(e.State.Cards[spell.Id].Zone, Zone.Attached); Eq(e.State.Cards[spell.Id].AttachedTo, shugenja.Id, "attached to the Shugenja");
+        Check(e.State.MechD.AttachLog.Any(r => r.CardId == spell.Id && r.CardType == CardType.Spell && r.Phase == Phase.Action && r.PlayerId == 1), "in the attach log");
+        // Later this turn, in a battle, Broken Cipher sees the Spell attached this turn.
+        var cipher = Edit(e, st =>
+        {
+            st.Phase = Phase.Battle; st.CurrentBattleProvince = 0; st.UnresolvedBattlefields = [0]; st.PriorityPlayerId = 1;
+            st.Cards[shugenja.Id].Zone = Zone.Battlefield; st.Cards[shugenja.Id].ProvinceIndex = 0;
+            Add(st, "training-lion-samurai", 0, Zone.Battlefield, province: 0);
+            Add(st, Cipher, 1, Zone.Hand);
+        });
+        Check(CanUse(cipher, 1, "broken-cipher-draw"), "Broken Cipher: a Spell was attached this turn");
+    }
+
+    private static void EquipLimitedSpellRefusals()
+    {
+        var s = Table(Phase.Action, 1); RealStronghold(s, 1);
+        var samurai = Add(s, "training-crane-samurai", 1, Zone.Home);
+        var shugenja = Add(s, "training-shugenja", 1, Zone.Home);
+        var water = Add(s, "training-water-shugenja", 1, Zone.Home);
+        var spell = Add(s, "training-spell", 1, Zone.Hand);
+        var swell = Add(s, "oracle-l5r-8366", 1, Zone.Hand); // The Swell of Strength: "will only attach to a Water Shugenja"
+        var named = Add(s, "training-spell", 1, Zone.Hand);
+        named.Printed = CardCatalog.Get("training-spell") with { AttachRequiresName = "Nobody In Play" };
+        var unique = Add(s, "training-unique-spell", 1, Zone.Hand);
+        var uniqueInPlay = Add(s, "training-unique-spell", 1, Zone.Attached, parent: water.Id);
+        var e = MatchEngine.FromTestState(s);
+        Check(!e.Execute(EquipCommand(e, 1, spell, samurai)).Accepted, "a non-Shugenja host is refused");
+        Check(!e.Execute(EquipCommand(e, 1, swell, shugenja)).Accepted, "a Spell's keyword requirement: a non-Water Shugenja is refused");
+        Check(e.QueryActions(1).First(a => a.Type == "equip" && a.CardId == swell.Id).TargetIds!.SequenceEqual([water.Id]), "only the Water Shugenja is offered for it");
+        Check(!e.Execute(EquipCommand(e, 1, named, shugenja)).Accepted, "a Spell's name requirement refuses every other Personality");
+        Check(e.QueryActions(1).First(a => a.Type == "equip" && a.CardId == named.Id) is { Enabled: false }, "and it is offered disabled");
+        Check(!e.Execute(EquipCommand(e, 1, unique, shugenja)).Accepted, "a second copy of a Unique Spell is refused");
+        Accept(e, EquipCommand(e, 1, swell, water));
+        Eq(e.State.Cards[swell.Id].AttachedTo, water.Id, "the Water Shugenja takes The Swell of Strength");
+        // In a battle the Equip command does not attach a Spell: Equip (Battle) does, unchanged.
+        var b = Table(Phase.Battle, 1); b.PriorityPlayerId = 0; RealStronghold(b, 0);
+        var bShugenja = Add(b, "training-shugenja", 0, Zone.Battlefield, province: 0);
+        Add(b, "training-lion-samurai", 1, Zone.Battlefield, province: 0);
+        var bSpell = Add(b, "training-spell", 0, Zone.Hand);
+        var be = MatchEngine.FromTestState(b);
+        Check(!be.QueryActions(0).Any(a => a.Type == "equip" && a.CardId == bSpell.Id), "no Equip (Limited) of a Spell in a battle");
+        Check(!be.Execute(EquipCommand(be, 0, bSpell, bShugenja)).Accepted, "and the command is refused");
+        EquipBattle(be, 0, bShugenja, bSpell);
+        Eq(be.State.Cards[bSpell.Id].AttachedTo, bShugenja.Id, "Equip (Battle) attaches it");
     }
 
     // ---- item 32 and Amazing Feat -----------------------------------------------------------------------------------------------------------------------------------------------------------

@@ -2050,7 +2050,10 @@ public sealed partial class MatchEngine
     {
         if(_state.Phase==Phase.Battle) RequireNoRestrictedBurst(command.PlayerId); // Koshin Keep (Stronghold pass, issue #486 batch 1).
         var card=Card(command.CardId); var target=Card(command.TargetId); var def=Definition(card);
-        Require(card.OwnerId==command.PlayerId && card.Zone==Zone.Hand && def.Type is CardType.Item or CardType.Follower,"Choose a supported attachment from your hand.");
+        Require(card.OwnerId==command.PlayerId && card.Zone==Zone.Hand && def.Type is CardType.Item or CardType.Follower or CardType.Spell,"Choose a supported attachment from your hand.");
+        // Equip (Limited) attaches a Spell too (Mendon's ruling, issue #501): only to a Shugenja (core rules Glossary), every other restriction as for any attachment. A Spell in a battle
+        // is Equip (Battle)'s, a separate player ability with its own rules; the timing grants (Foothills Keep, Glory of the Shogun) name Weapons, Items and Followers only (EquipTimingError).
+        Require(def.Type!=CardType.Spell || Keyword(target,"Shugenja"),"Only a Shugenja can attach a Spell.");
         // Equip (Limited) -- or, with a player-level timing grant (Foothills Keep: "Equipping Weapons is a Battle/Open action for you", TimingGrants.cs), an
         // Open equip in any player's action segment or a Battle equip: then the wielder must be a Personality at the current battlefield, not at Home.
         var equipTimingError=EquipTimingError(command.PlayerId,card);
