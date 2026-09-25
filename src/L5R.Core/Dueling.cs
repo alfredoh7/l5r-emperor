@@ -244,6 +244,13 @@ public sealed partial class MatchEngine
 
     private void BeginOrderingEffects()
     {
+        // Falling Rain Dojo (issue #492, group F): "Before Focus Effects resolve" -- a Reaction window after the Duelists' refocus, before the Focus Effects are ordered.
+        if (BeginBeforeFocusEffectsWindow()) return;
+        ContinueToOrderingEffects();
+    }
+
+    private void ContinueToOrderingEffects()
+    {
         var duel = _state.PendingDuel!;
         duel.Stage = "OrderingEffects";
         var focusEffectCards = FocusEffectCardIds(duel);
@@ -275,12 +282,12 @@ public sealed partial class MatchEngine
     // The duel stat plus each side's own total focused Focus Value (revealed by the time this runs).
     // Any attachment modifying the stat applies as long as it is active right now -- CardForce/
     // CardPersonalHonor/PersonalityChi already read current, not printed, values.
-    private int DuelStatValue(CardInstance card, string stat) => NikaruDuelStat(card) ?? stat switch
+    private int DuelStatValue(CardInstance card, string stat) => (NikaruDuelStat(card) ?? stat switch
     {
         "Force" => CardForce(card),
         "PersonalHonor" => CardPersonalHonor(card),
         _ => PersonalityChi(card),
-    };
+    }) + (_state.PendingDuel?.StatBonus.GetValueOrDefault(card.Id) ?? 0); // Falling Rain Dojo (issue #492, group F): +1 until the duel ends.
 
     private void ResolveDuel()
     {

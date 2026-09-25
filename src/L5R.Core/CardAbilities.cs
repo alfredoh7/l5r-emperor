@@ -5254,7 +5254,9 @@ public sealed partial class MatchEngine
                 "before-additional-action-resolves" => _state.PendingChoice.Type == "additionalActionReaction",
                 // Dueling (issue #204): "a reaction to being challenged or entering a duel" -- open
                 // to either side, same shape as before-attack-resolves.
-                "before-duel-begins" => _state.PendingChoice.Type == "duelReaction",
+                "before-duel-begins" => _state.PendingChoice.Type == "duelReaction" && _state.PendingDuel is { Stage: "Reaction" },
+                // Falling Rain Dojo (issue #492, group F): the window between the Duelists' refocus and the Focus Effects.
+                "before-focus-effects" => _state.PendingChoice.Type == "duelReaction" && _state.PendingDuel is { Stage: BeforeFocusEffectsStage },
                 // Reaction to a duel's own resolution (issue #209): a duel is a single, complete
                 // action from challenge to consequences -- once it fully resolves (win/loss,
                 // outcomes, Focus Effects all applied), the card that WON it may react, the same
@@ -5389,6 +5391,7 @@ public sealed partial class MatchEngine
                 // Colonial Harbor (Forgotten Legacy pass, issue #467): "Your Stronghold's abilities have Tireless."
                 // Emperor Edition Stronghold pass (issue #486), batch 1: Midday Shadow Court's Political Open ("Even if this card is bowed") and Kyuden Otomo - exp's Favor trait.
                 || StrongholdBatch1EvenIfBowed(id)
+                || EmperorRemainingFBowedOk(id) // Governor's Court (issue #492, group F): "Even if this card is bowed".
                 || TirelessStronghold(source), "Abilities on bowed cards cannot be used.");
             uses = source.AbilityUses;
         }
@@ -6743,6 +6746,9 @@ public sealed partial class MatchEngine
                         // The Castle of Order: one of the reactor's own Ninja cards at the targeted Ninja's location, other than it, that the action accepts.
                         "redirect-target-own-ninja-at-affected-location" => own && Keyword(target, "Ninja") && OpenReactionSubject() is { TargetId: { } affectedNinjaId } ninjaAction && target.Id != affectedNinjaId
                             && SameLocation(target, Card(affectedNinjaId)) && ActionAcceptsTarget(ninjaAction, target.Id),
+                        // Chugo Seido (issue #492, group F): one of the reactor's own Samurai at the targeted Personality's location, other than it, that the action accepts.
+                        "redirect-target-own-samurai-at-affected-location" => own && personality && Keyword(target, "Samurai") && OpenReactionSubject() is { TargetId: { } affectedSamuraiId } samuraiAction && target.Id != affectedSamuraiId
+                            && SameLocation(target, Card(affectedSamuraiId)) && ActionAcceptsTarget(samuraiAction, target.Id),
                         // Exchange of Letters: "another player's unbowed Personality".
                         "enemy-unbowed-personality" => personality && !own && !target.Bowed,
                         // Defensive Blockade: "an attacking Follower or Personality" -- a card of the Attacker's army at the battlefield (a Follower is attacking when its host is).

@@ -26,6 +26,58 @@
       "Effect": "none"
     },
     {
+      "Id": "oracle-l5r-1373",
+      "Name": "Chugo Seido",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 2,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Bow this card: Produce 2 Gold.\nReaction: When another player's action would target one of your Personalities, destroy this card: Choose one of your Samurai at the same location. The action targets him instead, if legal.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1373.jpg",
+      "Keywords": [
+        "Singular",
+        "Temple"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "chugo-seido-redirect"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-2455",
+      "Name": "Falling Rain Dojo",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 2,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Bow this card: Produce 2 Gold.\nReaction: Before Focus Effects resolve, if your Duelist has a lower duel stat than the Personality facing him: Give your Duelist +1 to his duel stat until the duel ends.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-2455.jpg",
+      "Keywords": [
+        "Singular",
+        "Dojo"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "falling-rain-boost"
+      ],
+      "Effect": "none"
+    },
+    {
       "Id": "oracle-l5r-2662",
       "Name": "Fortifications",
       "Type": "Holding",
@@ -49,6 +101,29 @@
       "Effect": "fortifications-provinces"
     },
     {
+      "Id": "oracle-l5r-2878",
+      "Name": "Governor's Court",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 2,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Bow this card: Produce 2 Gold.\nPolitical Open: Even if this card is bowed, choose your performing Courtier and bow him or this card: Choose another player with an unbowed Personality in play. He may choose to target and bow one of his unbowed Personalities. If he did not choose this, gain 2 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-2878.jpg",
+      "Keywords": [],
+      "Focus": 0,
+      "Abilities": [
+        "governors-court-open"
+      ],
+      "Effect": "none"
+    },
+    {
       "Id": "oracle-l5r-4787",
       "Name": "Luxurious Silk",
       "Type": "Holding",
@@ -70,6 +145,52 @@
         "luxurious-silk-gold"
       ],
       "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-5224",
+      "Name": "Moneylender",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After this card enters play: Put a number of Wealth tokens on it equal to the amount of Gold you paid for it.\nBow this card and remove one or more Wealth tokens from it: Produce Gold equal to the number of tokens removed.\nLimited: Bow this card and pay any amount of Gold: Put a number of Wealth tokens on this card equal to the amount of Gold you paid.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-5224.jpg",
+      "Keywords": [],
+      "Focus": 0,
+      "Abilities": [
+        "moneylender-invest"
+      ],
+      "Effect": "moneylender"
+    },
+    {
+      "Id": "oracle-l5r-6396",
+      "Name": "Rugashi Bazaar",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 4,
+      "GoldProduction": 3,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "This card will not be destroyed.\nBow this card: Produce 3 Gold.\nRevenge Battle/Open: If you have lost Honor from another player's action during the Action Phase since your last turn ended, choose one to four of your performing Personalities: Give each of them a Force bonus equal to his base Personal Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6396.jpg",
+      "Keywords": [],
+      "Focus": 0,
+      "Abilities": [
+        "rugashi-revenge"
+      ],
+      "Effect": "will-not-be-destroyed"
     },
     {
       "Id": "oracle-l5r-7265",

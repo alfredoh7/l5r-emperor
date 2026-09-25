@@ -584,6 +584,8 @@ public sealed class PendingDuel
     public string Stat { get; set; } = "Chi";
     public bool Refusable { get; set; }
     public string Stage { get; set; } = "AwaitingAccept";
+    // Falling Rain Dojo (Emperor Edition remaining-cards pass, issue #492 group F): "+1 to his duel stat until the duel ends" -- a bonus per Personality in the duel, added by DuelStatValue.
+    public Dictionary<string, int> StatBonus { get; set; } = [];
     // Whose turn to Focus or Strike, alternating, starting with ChallengedPlayerId.
     public int TurnPlayerId { get; set; }
     public bool Struck { get; set; }
@@ -1030,6 +1032,9 @@ public sealed class MatchState
     public List<ArmyForceBonus> ArmyForceBonuses { get; set; } = [];
     // Kitsu Tamasine ("if you have lost Honor from another player's action during an Action Phase since your last turn began"): per player, set as such an action resolves, cleared as that player's turn begins.
     public bool[] HonorLostToOtherActionSinceTurnBegan { get; set; } = new bool[2];
+    // Rugashi Bazaar (Emperor Edition remaining-cards pass, issue #492 group F): "lost Honor from another player's action during the Action Phase since your last turn ENDED" -- the same
+    // record, restarted when the loser's own turn ends rather than when it begins.
+    public bool[] HonorLostToOtherActionSinceTurnEnded { get; set; } = new bool[2];
     // Isawa Kimi - exp 2 ("an action that put any cards into another player's hand"): the players whose hand the currently-resolving action put a card into, snapshotted into LastResolvedAction.HandRecipients.
     public List<int> CurrentActionHandRecipients { get; set; } = [];
 }

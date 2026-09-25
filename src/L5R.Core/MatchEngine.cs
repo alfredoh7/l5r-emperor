@@ -420,6 +420,7 @@ public sealed partial class MatchEngine
                 Require(command.Type is "useAbility" or "declineReaction" or "pass","Resolve the duel reaction window first.");
                 if (command.Type=="useAbility") UseAbility(command); else PassReaction();
                 if (_state.PendingChoice is null && _state.PendingDuel is { Stage:"Reaction" }) BeginFocusing();
+                else if (_state.PendingChoice is null && _state.PendingDuel is { Stage:BeforeFocusEffectsStage }) ContinueToOrderingEffects(); // Falling Rain Dojo (issue #492, group F)
                 return;
             }
             if (_state.PendingChoice.Type=="afterResolutionReaction")
@@ -589,6 +590,7 @@ public sealed partial class MatchEngine
         ApplyShadowsEmbraceBatch2EntryEffects(playerId,card); // The Shadow's Embrace pass (issue #476), batch 2: M'rika's "After M'rika enters play: Gain 2 Honor."
         ApplyShadowsEmbraceBatch6EntryEffects(playerId,card); // Clearing Crew (The Shadow's Embrace pass, issue #476 batch 6).
         ApplyShadowsEmbraceBatch1EntryEffects(playerId,card); // The Shadow's Embrace pass (issue #476), batch 1: Atosa's Sensei discard.
+        ApplyEmperorRemainingFEntryEffects(playerId,card); // Emperor Edition remaining-cards pass (issue #492), group F: Moneylender's Wealth tokens.
     }
     // Sensei (Mirumoto Hikaro / Mirumoto Yozo, Experienced 2): "your OTHER Sensei Personalities" --
     // every OTHER Sensei-keyword Personality this same controller has, either unbowed-or-bowed in
@@ -1065,6 +1067,7 @@ public sealed partial class MatchEngine
     public int GoldProduced(string cardId,int playerId,PaymentSubject? paying=null)
     {
         var card=Card(cardId); var def=Definition(card);
+        if(def.Effect==MoneylenderEffect) return MoneylenderTokens(card); // Moneylender (issue #492, group F): Gold equal to the Wealth tokens it can remove.
         // The Shadow's Embrace pass (issue #476), batch 6: a production modifier for the turn (The Moon's Imperative, The Sun's Aspiration) and Sheltered Port's count.
         var adjustment=def.Type==CardType.Holding ? ShadowsEmbraceBatch6Production(card,playerId) : 0;
         if(ConditionalProductionOf(card) is { } conditional && ProductionConditionMet(conditional,paying)) return Math.Max(0,conditional.Amount+adjustment);
@@ -1104,7 +1107,7 @@ public sealed partial class MatchEngine
     }
 
     private IEnumerable<CardInstance> Producers(int playerId,PaymentSubject? paying=null) => _state.Cards.Values.Where(c=>c.OwnerId==playerId && c.Zone is Zone.Home or Zone.Stronghold or Zone.Battlefield
-        && (!c.Bowed && (Definition(c).GoldProduction>0 || AlternateGoldSource(c,paying) is not null || ConditionalProductionOf(c) is { } conditional && ProductionConditionMet(conditional,paying))
+        && (!c.Bowed && (Definition(c).GoldProduction>0 || MoneylenderTokens(c)>0 || AlternateGoldSource(c,paying) is not null || ConditionalProductionOf(c) is { } conditional && ProductionConditionMet(conditional,paying))
             || ReactiveGoldSource(c,paying) is not null)); // Library of Rebirth (issue #486): "Even if this card is bowed".
     // exclude: cards the paying action bows or destroys as another of its costs (AbilityCosts.CostPaidCards) -- a card cannot be bowed twice, so it produces no Gold for the same action.
     private void ValidatePayment(int playerId,int cost,string[]? sourceIds,IReadOnlySet<string>? exclude=null,PaymentSubject? paying=null)
@@ -1124,6 +1127,8 @@ public sealed partial class MatchEngine
         ValidatePayment(playerId,cost,sourceIds,exclude,paying);
         var ids=sourceIds??[];
         var produced=ids.Sum(id=>GoldProduced(id,playerId,paying));
+        produced-=SpendMoneylenderTokens(ids,cost,playerId,paying); // Moneylender (issue #492, group F): only the Wealth tokens the payment needs are removed.
+        RecordGoldPaidForEntry(cost,paying); // Moneylender (issue #492, group F): "the amount of Gold you paid for it".
         // A card bowed for Gold through its own ability (Yoritomo Sakuma, issue #338) has used that Reaction: spent for the turn, and named
         // in the log so the opponent sees why it bowed.
         var staysStraight=new HashSet<string>(StringComparer.Ordinal); // Emperor Edition pass (issue #477), batch 6: Yasuki Tanimura produces without bowing.
@@ -2476,6 +2481,8 @@ public sealed partial class MatchEngine
         var count=0;
         foreach(var card in cards)
         {
+            // Rugashi Bazaar (issue #492, group F): "This card will not be destroyed." -- the destruction simply fails (it is not a negation).
+            if(WillNotBeDestroyed(card)) { Emit("destructionFailed",$"{Definition(card).Name} will not be destroyed.",card.OwnerId,card.Id); continue; }
             // Mirumoto Rokai (issue #207 follow-up): "another player's action targets your
             // Personality at Rokai's location, destroy Rokai: negate your Personality's destruction
             // from the action's effects" -- consumed here, the single shared choke point behind
@@ -2685,6 +2692,7 @@ public sealed partial class MatchEngine
         // flag (which may already be set by destruction during this very turn) is left untouched until
         // THEIR turn ends.
         _state.ProvinceDestroyedSinceTurnEnd[_state.ActivePlayerId]=false;
+        _state.HonorLostToOtherActionSinceTurnEnded[_state.ActivePlayerId]=false; // Rugashi Bazaar (issue #492, group F): "since your last turn ended".
         _state.TurnNumber++; _state.ActivePlayerId=1-_state.ActivePlayerId;
         StartTurn();
     }

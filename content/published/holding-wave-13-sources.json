@@ -9,6 +9,24 @@
     "image_sha256": "def12282b13ac5ea618825daee86913c65e1f6409b636972346bf5b41a708cd1"
   },
   {
+    "card_id": "oracle-l5r-1373",
+    "printing_set": [
+      "Emperor Edition"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=1373",
+    "image_path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-1373-printing-1-image-1.webp",
+    "image_sha256": "0bb171fcc3578890c742bc6d7e56fa03a9946a14f2fd91491f124622925fdda9"
+  },
+  {
+    "card_id": "oracle-l5r-2455",
+    "printing_set": [
+      "Emperor Edition"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=2455",
+    "image_path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-2455-printing-1-image-1.webp",
+    "image_sha256": "2288ffd3eacbe21fcb4685a4ae64d8114dc3ecdf5f2aa6cbd600e9c8a74a5cd1"
+  },
+  {
     "card_id": "oracle-l5r-2662",
     "printing_set": [
       "Emperor Edition"
@@ -18,6 +36,15 @@
     "image_sha256": "1a6611a6ec8ce9079d2f336241724b0fb7065220dc4eaf1f507d86c8a9c9b239"
   },
   {
+    "card_id": "oracle-l5r-2878",
+    "printing_set": [
+      "Emperor Edition"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=2878",
+    "image_path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-2878-printing-1-image-1.webp",
+    "image_sha256": "b88cb9874718ec365705599205ea9b8252d7f98ef6a107ce2458852134b6b7f3"
+  },
+  {
     "card_id": "oracle-l5r-4787",
     "printing_set": [
       "Emperor Edition"
@@ -25,6 +52,24 @@
     "source_url": "https://oracleofthevoid.com/#cardid=4787",
     "image_path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-4787-printing-1-image-1.webp",
     "image_sha256": "028ca0332bbc61159d12a0a848119cb7370e718f10916c5408cddfd50196545d"
+  },
+  {
+    "card_id": "oracle-l5r-5224",
+    "printing_set": [
+      "Emperor Edition"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=5224",
+    "image_path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-5224-printing-1-image-1.webp",
+    "image_sha256": "cc2307786dfad3d623e9a2994cafe2a0b2030815fa30353b8175a7ea0eb2aeb0"
+  },
+  {
+    "card_id": "oracle-l5r-6396",
+    "printing_set": [
+      "Emperor Edition"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=6396",
+    "image_path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-6396-printing-1-image-1.webp",
+    "image_sha256": "2f18075c95e7a7f79b5518b8e81b272276d2f6ecca872268b95221c0a8149b18"
   },
   {
     "card_id": "oracle-l5r-7265",

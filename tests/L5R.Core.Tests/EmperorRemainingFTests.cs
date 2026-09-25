@@ -37,6 +37,11 @@ internal static partial class EmperorRemainingFTests
         ("Fortifications: its controller's provinces have +1 strength while it is in play -- not the opponent's, not once it is gone", FortificationsStrength),
         ("Temples of Gisei Toshi: name a type, look at the top four Fate cards, show one of that type into the hand; the other cards stay where they were", TemplesLook),
         ("Akodo's Grave: bow and destroy it to destroy a Terrain in a battle -- not without a Terrain, not while bowed", AkodosGraveDestroy),
+        ("Moneylender: enters with Wealth tokens equal to the Gold paid for it; Limited, bow and pay any amount to add that many; removes only the tokens a payment needs to produce that Gold", MoneylenderTests),
+        ("Falling Rain Dojo: before Focus Effects resolve, a Duelist with a lower duel stat than the Personality facing him gets +1 to it until the duel ends -- not an equal stat, not a non-Duelist, not a bowed Dojo, not the opponent's Dojo", FallingRainDojoTests),
+        ("Chugo Seido: when another player's action would target one of your Personalities, destroy it to redirect the action to another Samurai of yours at the same location, if legal", ChugoSeidoTests),
+        ("Rugashi Bazaar: will not be destroyed, produces 3 Gold; Revenge (Battle/Open) after Honor lost to another player's action since your last turn ended gives one to four performers Force equal to base Personal Honor", RugashiBazaarTests),
+        ("Governor's Court: bow the Courtier or the Court (even while the Court is bowed); another player with an unbowed Personality may bow one of his, otherwise the Court's controller gains 2 Honor", GovernorsCourtTests),
         ("Published shape: the wired Regions print their stats, keywords, scan text, Effect and ability ids, ship their art and are listed in region-wave-9's manifest", RegionsPublishedShape),
         ("Blighted Region: only the Defender; bows the Region and moves the performing Personality to the battle (Absent), straightening him and gaining 2 Honor if he moved and is opposed", BlightedRegionMove),
         ("Refuge of the Three Sisters: destroys the Region and removes the performing unbowed Personality from the game to search the Fate deck for a card with a Focus Value below his Chi", RefugeSearch),
@@ -70,13 +75,23 @@ internal static partial class EmperorRemainingFTests
             Eq(c.Text, text, $"{name} prints the scan's text");
         }
         Holding(AkodosGrave, "Akodo's Grave", 2, 2, "none", ["akodo-grave-destroy"], "Bow this card: Produce 2 Gold.\nBattle: Bow and destroy this card and target a Terrain: Destroy it.");
+        Holding(ChugoSeido, "Chugo Seido", 2, 2, "none", ["chugo-seido-redirect"],
+            "Bow this card: Produce 2 Gold.\nReaction: When another player's action would target one of your Personalities, destroy this card: Choose one of your Samurai at the same location. The action targets him instead, if legal.", "Singular", "Temple");
+        Holding(FallingRainDojo, "Falling Rain Dojo", 2, 2, "none", ["falling-rain-boost"],
+            "Bow this card: Produce 2 Gold.\nReaction: Before Focus Effects resolve, if your Duelist has a lower duel stat than the Personality facing him: Give your Duelist +1 to his duel stat until the duel ends.", "Dojo", "Singular");
         Holding(Fortifications, "Fortifications", 0, 0, "fortifications-provinces", [], "Your provinces have +1 strength.", "Castle");
+        Holding(GovernorsCourt, "Governor's Court", 2, 2, "none", ["governors-court-open"],
+            "Bow this card: Produce 2 Gold.\nPolitical Open: Even if this card is bowed, choose your performing Courtier and bow him or this card: Choose another player with an unbowed Personality in play. He may choose to target and bow one of his unbowed Personalities. If he did not choose this, gain 2 Honor.");
+        Holding(Moneylender, "Moneylender", 0, 0, "moneylender", ["moneylender-invest"],
+            "After this card enters play: Put a number of Wealth tokens on it equal to the amount of Gold you paid for it.\nBow this card and remove one or more Wealth tokens from it: Produce Gold equal to the number of tokens removed.\nLimited: Bow this card and pay any amount of Gold: Put a number of Wealth tokens on this card equal to the amount of Gold you paid.");
+        Holding(RugashiBazaar, "Rugashi Bazaar", 4, 3, "will-not-be-destroyed", ["rugashi-revenge"],
+            "This card will not be destroyed.\nBow this card: Produce 3 Gold.\nRevenge Battle/Open: If you have lost Honor from another player's action during the Action Phase since your last turn ended, choose one to four of your performing Personalities: Give each of them a Force bonus equal to his base Personal Honor.");
         Holding(LuxuriousSilk, "Luxurious Silk", 3, 2, "none", ["luxurious-silk-gold"], "Bow this card: Produce 2 Gold.\nReaction: Even if this card is bowed, when paying for an action: Produce 2 Gold.");
         Holding(SilkWorks, "Silk Works", 5, 4, "none", [], "Bow this card: Produce 4 Gold.");
         Holding(TemplesOfGiseiToshi, "Temples of Gisei Toshi", 2, 2, "none", ["temples-gisei-follower", "temples-gisei-item", "temples-gisei-spell"],
             "Bow this card: Produce 2 Gold.\nLimited: Bow this card: Name \"Follower\", \"Item\", or \"Spell\". Look at the top four cards of your Fate deck. You may show one of those cards that is of the type you named, then put it in your hand.", "Temple", "Unique");
         Holding(TravelingPeddler, "Traveling Peddler", 2, 2, "none", ["peddler-draw"], "Bow this card: Produce 2 Gold.\nLimited: Bow this card and pay 3 Gold: Draw a card.", "Singular");
-        Manifest(root, "holding-wave-13", AkodosGrave, Fortifications, LuxuriousSilk, SilkWorks, TemplesOfGiseiToshi, TravelingPeddler);
+        Manifest(root, "holding-wave-13", AkodosGrave, ChugoSeido, FallingRainDojo, Fortifications, GovernorsCourt, LuxuriousSilk, Moneylender, RugashiBazaar, SilkWorks, TemplesOfGiseiToshi, TravelingPeddler);
     }
 
     private static void PeddlerDraw()

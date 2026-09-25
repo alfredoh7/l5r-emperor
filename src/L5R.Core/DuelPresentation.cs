@@ -127,7 +127,7 @@ public sealed partial class MatchEngine
             foreach (var card in _state.Cards.Values.Where(c => c.OwnerId == playerId))
                 foreach (var id in Definition(card).Abilities ?? [])
                 {
-                    if (!AbilityCatalog.All.TryGetValue(id, out var def) || def.Timing != "Reaction" || def.Trigger is not ("before-duel-begins" or "own-won-duel" or "own-personality-won-duel")) continue;
+                    if (!AbilityCatalog.All.TryGetValue(id, out var def) || def.Timing != "Reaction" || def.Trigger is not ("before-duel-begins" or "before-focus-effects" or "own-won-duel" or "own-personality-won-duel")) continue;
                     var command = new GameCommand("useAbility", playerId, _state.Version, CardId: card.Id, AbilityId: id);
                     try { ValidateAbility(command); Add(command, def.Label); }
                     catch (RuleViolation) { }
