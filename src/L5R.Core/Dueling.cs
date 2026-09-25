@@ -395,6 +395,7 @@ public sealed partial class MatchEngine
             Provinces = draft.Provinces.Select(p => p with { After = EffectiveProvinceStrength(Player(p.PlayerId).Provinces[p.Index]) }).ToArray(),
             ResolutionVersion = _state.Version + 1, ReturnPhase = _state.Phase, ReturnPriority = _state.PriorityPlayerId } };
         _state.PendingDuel = null;
+        ApplyHesMineBows(duel.ChallengerId, duel.ChallengedId); // He's Mine! (Emperor Edition remaining-cards pass, issue #492, group B): the substitute bows once the duel has ended.
         ApplyTwinForksCity(winnerId); // Twin Forks City (The Shadow's Embrace pass, issue #476 batch 6): a trait, before any Reaction to the duel's end.
         // The duel itself is a single, complete action from challenge to consequences (issue #209):
         // once everything above has applied, the winning card's own controller gets a chance to

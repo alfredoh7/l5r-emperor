@@ -595,6 +595,7 @@ public static class CardCatalog
             .Concat(PublishedContent.StrategyWave56.Cards) // The Shadow's Embrace pass, batch 3 (issue #476)
             .Concat(PublishedContent.StrategyWave57.Cards)
             .Concat(PublishedContent.StrategyWave58.Cards) // Emperor Edition remaining-cards pass, group A (issue #492)
+            .Concat(PublishedContent.StrategyWave59.Cards) // Emperor Edition remaining-cards pass, group B (issue #492)
             .Concat(PublishedContent.SpellWave20.Cards)
             .Concat(PublishedContent.StrongholdWave14.Cards)
             .Concat(PublishedContent.RegionWave7.Cards)

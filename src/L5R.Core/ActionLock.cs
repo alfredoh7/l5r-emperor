@@ -18,7 +18,7 @@ public sealed partial class MatchEngine
     private void LockActions(CardInstance card, string sourceId, string duration = ActionLockUntilTurnEnd)
     {
         card.ActionLocks.Add(new(sourceId, duration));
-        Emit("actionsLocked", $"{Definition(card).Name} may not perform actions {(duration == ActionLockUntilTurnEnd ? "this turn" : "until the phase ends")}.", card.OwnerId, card.Id);
+        Emit("actionsLocked", $"{Definition(card).Name} may not perform actions {(duration == ActionLockUntilTurnEnd ? "this turn" : duration == ActionLockUntilBattleEnd ? "until this battle ends" : "until the phase ends")}.", card.OwnerId, card.Id);
     }
 
     // The card is locked, or it is an attachment (Item, Spell, Follower) of a locked Personality: an action printed on it is

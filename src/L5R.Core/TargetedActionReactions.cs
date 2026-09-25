@@ -311,6 +311,12 @@ public sealed partial class MatchEngine
             // The Waystation of the Path (Emperor Edition Stronghold pass, issue #486 batch 3): another player's action targets the controller's Henshin.
             case "waystation-reborn":
                 return WaystationApplies(card, subject, affected);
+            // Emperor Edition remaining-cards pass (issue #492), group B (EmperorRemainingB.cs): Hundred-Fold Cut (either way to pay) and He's Mine!.
+            case "hundred-fold-cut-bow":
+            case "hundred-fold-cut-destroy":
+                return HundredFoldCutApplies(card, abilityId, subject, affected);
+            case "hes-mine-substitute":
+                return HesMineApplies(card, subject, affected);
             default:
                 return RemATargetedActionReactionApplies(card, abilityId, subject, affected); // Emperor Edition remaining-cards pass, group A (issue #492): Ancestral Protection, Caught in the Act.
         }
@@ -362,6 +368,9 @@ public sealed partial class MatchEngine
             "waystation-reborn" => WaystationCandidates(card, Card(subject.TargetId!)).Select(c => ((string?)c.Id, (string?)$"{AbilityCatalog.All[abilityId].Label} · {Definition(c).Name} ({c.Id})")),
             "kisada-redirect" => KisadaRedirectCandidates(card, subject).Select(c => ((string?)c.Id, (string?)$"{AbilityCatalog.All[abilityId].Label} · {Definition(c).Name} ({c.Id})")),
             "ryoshun-redirect" => RyoshunRedirectCandidates(card, subject, Card(subject.TargetId!)).Select(c => ((string?)c.Id, (string?)$"{AbilityCatalog.All[abilityId].Label} · {Definition(c).Name} ({c.Id})")),
+            // Hundred-Fold Cut: one option per Weapon of the targeted Kensai the way to pay allows.
+            "hundred-fold-cut-bow" or "hundred-fold-cut-destroy" => KensaiWeapons(Card(subject.TargetId!), unbowedOnly: abilityId == "hundred-fold-cut-bow")
+                .Select(c => ((string?)c.Id, (string?)$"{AbilityCatalog.All[abilityId].Label} · {Definition(c).Name} ({c.Id})")),
             _ => [(null, null)]
         };
 }

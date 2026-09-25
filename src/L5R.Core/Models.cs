@@ -376,6 +376,10 @@ public sealed class PlayerState
     public List<ProvinceState> Provinces { get; set; } = [];
     // Brotherhood Schism (issue #453, batch 2): the last turn this player put a Ring into play (its own recruit action), the AssignedToAttackTurn convention.
     public int RingPutIntoPlayTurn { get; set; } = -1;
+    // Plans Within Plans (Emperor Edition remaining-cards pass, issue #492, group B): "At your next opportunity to take an Open action, you may instead take a Limited action" -- armed when the card
+    // resolves, spent by the player's next command at an opportunity of the Action Phase (whatever he does with it); Sets counts the resolutions, so a copy played at that very opportunity re-arms it.
+    public bool PlansWithinPlansArmed { get; set; }
+    public int PlansWithinPlansSets { get; set; }
 }
 
 public sealed record PendingChoice(string Type, int PlayerId, string? CardId, string Prompt, int? ActingPlayerId = null);
@@ -865,6 +869,8 @@ public sealed class MatchState
     // Spirit of the Berserker (Second City): "Delay his destruction from the action's effects until before this turn ends" -- the Personalities whose destruction a
     // reaction has put off, destroyed for real at the top of EndTurn if they are still in play (DelayedDestruction.cs).
     public List<string> PendingDelayedDestructions { get; set; } = [];
+    // He's Mine! (Emperor Edition remaining-cards pass, issue #492, group B): the Samurai who took a Personality's place in a duel and bow once that duel has ended (cleared as the turn ends).
+    public List<string> HesMineSubstitutes { get; set; } = [];
     // Keywords and Clan alignments taken off cards until an action or the turn ends (Red Crane Dojo, TemporaryRemovals.cs).
     public List<TemporaryRemoval> TemporaryRemovals { get; set; } = [];
     // Kyuden Kitsune: the battles ("turn:province") whose one negated movement has been used.

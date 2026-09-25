@@ -184,7 +184,9 @@ public sealed partial class MatchEngine
             var reactionLabel = _state.PendingChoice?.Type=="overconfidentDraw" ? "Overconfident" : null;
             var traitSnapshot = AfterCommandTraitSnapshot(); // "After this card bows/attaches" traits (issue #453 batch 5, SeedsOfDecayBatch5.cs)
             UsePaymentDiscards(command); // Asahina Keigo (issue #477): the hand cards named for Gold sources that discard one.
+            var plansSets = PlansOpportunitySets(command); // Plans Within Plans (issue #492): is this command the armed player's opportunity to take an Open action?
             Apply(command);
+            SpendPlansWithinPlans(command, plansSets);
             _paymentDiscards=[];
             ApplyAfterCommandTraits(traitSnapshot);
             ReturnCardsOutOfPlayToTheirOwners();
@@ -1489,6 +1491,9 @@ public sealed partial class MatchEngine
             case "fields-of-victory-zero": FieldsOfVictory(source,pending); break;
             // Extended Maneuvers (Emperor Edition remaining-cards pass, group A, issue #492): its controller's two optional choices (EmperorRemainingA.cs), when there is anything to choose.
             case "extended-maneuvers-before-battle": if(OpenExtendedManeuversChoice(source,pending)) return; break;
+            // Emperor Edition remaining-cards pass (issue #492), group B (EmperorRemainingB.cs): Heart of Rokugan's mandatory sweep; Hard Pressed's choice of a unit to move home.
+            case "heart-of-rokugan-sweep": HeartOfRokuganSweep(source,pending); break;
+            case "hard-pressed-move": if(BeginHardPressed(source,pending)) return; break;
         }
         FinishBeforeBattleEffect(pending);
     }
@@ -1501,6 +1506,7 @@ public sealed partial class MatchEngine
         Require(command.Type=="beforeBattleOptional" && command.PlayerId==choice.PlayerId && command.Choice is "use" or "decline","Use the effect or decline it.");
         if(IsHeartOfDarknessChoice(pending)) ResolveHeartOfDarkness(command,pending,choice.PlayerId);
         else if(IsExtendedManeuversChoice(pending)) ResolveExtendedManeuvers(command,pending,choice.PlayerId); // Extended Maneuvers (issue #492)
+        else if(IsHardPressedChoice(pending)) ResolveHardPressed(command,pending,choice.PlayerId);
         else if(command.Choice=="use")
         {
             var target=Card(command.TargetId);
@@ -1755,6 +1761,7 @@ public sealed partial class MatchEngine
     private void CompleteBattleTransition(int attacker)
     {
         foreach (var card in _state.Cards.Values) card.GrantedAbilities.RemoveAll(g => g.Duration == GrantDuration.Battle);
+        EndBattleActionLocks(); // Emperor Edition remaining-cards pass (issue #492), group B: Nerve Strike's lock lasts until the battle ends.
         if(_state.UnresolvedBattlefields.Count==0)
         {
             foreach(var card in _state.Cards.Values.Where(c=>c.Zone==Zone.Battlefield).ToArray()) ReturnHome(card,card.OwnerId==attacker);
@@ -2650,6 +2657,7 @@ public sealed partial class MatchEngine
         ResolvePreservingBeautyChecks(); // The Shadow's Embrace pass (issue #476), batch 4: Preserving Beauty's "before this turn ends".
         // Spirit of the Berserker: a destruction put off "until before this turn ends" happens now.
         ResolveDelayedDestructions();
+        ResolveEmperorRemainingBTurnEnd(); // Emperor Edition remaining-cards pass (issue #492), group B.
         ResolveShadowsEmbraceBatch5TurnEnd(); // The Shadow's Embrace pass (issue #476), batch 5: Celestial Sword of the Phoenix's "remove him from the game before the turn ends".
         ResolveReturnsToHandBeforeTurnEnds(); // The Shadow's Embrace pass (issue #476), batch 3: Methodical Questioning (ShadowsEmbraceBatch3.cs).
         // A window a delayed destruction opened (Overconfident's draw) is answered first; the turn then ends when the player ends the phase again.

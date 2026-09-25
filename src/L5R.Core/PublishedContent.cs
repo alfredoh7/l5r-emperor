@@ -2475,6 +2475,8 @@ public static class PublishedContent
     public static PublishedSnapshot StrategyWave57 { get; } = Load("L5R.Published.StrategyWave57.json", "strategy-wave-57", requireDecks: false);
     /// <summary>Strategy wave 58 (Emperor Edition remaining-cards pass, issue #492, group A): the wired Strategies of the group (package_strategy_wave_58.py lists them).</summary>
     public static PublishedSnapshot StrategyWave58 { get; } = Load("L5R.Published.StrategyWave58.json", "strategy-wave-58", requireDecks: false);
+    /// <summary>Strategy wave 59 (Emperor Edition remaining-cards pass, issue #492, group B): the wired Strategies of the group (package_strategy_wave_59.py lists them).</summary>
+    public static PublishedSnapshot StrategyWave59 { get; } = Load("L5R.Published.StrategyWave59.json", "strategy-wave-59", requireDecks: false);
     /// <summary>Spell wave 20 (Embers of War pass, issue #460, batch 5): Inescapable Snare, Incite the Phantoms, Sudden Guardian, The Swell of Strength.</summary>
     public static PublishedSnapshot SpellWave20 { get; } = Load("L5R.Published.SpellWave20.json", "spell-wave-20", requireDecks: false);
     /// <summary>Stronghold wave 14 (issue #460, batch 5): The Ki-Rin's Path.</summary>

@@ -149,6 +149,10 @@ public sealed partial class MatchEngine
             // Emperor Edition Personality pass (issue #477), batch 6 (EmperorPersonalityBatch6.cs). Yung: "After one of your Rings enters play". Daigotsu Kanpeki - exp: "After the resolution of a Battle
             // action from a Strategy, if Kanpeki performed it".
             "yung-search-ring" => YungRingEnteredPlay(facts, playerId),
+            // Emperor Edition remaining-cards pass (issue #492), group B: Introspection ("After one of your Rings enters play", Yung's trigger) and Meeting the Keepers ("After the resolution of an action
+            // from one of your Rings") -- a Strategy's Reaction played from a hand (EmperorRemainingB.cs).
+            "introspection-search" => YungRingEnteredPlay(facts, playerId),
+            "keepers-search" => RingActionResolved(facts, playerId),
             "kanpeki-additional-action" => KanpekiPerformedStrategyBattleAction(source, facts, playerId),
             // Pillars of Virtue (Emperor Edition Stronghold pass, issue #486 batch 2): "After the resolution of a Kiho Battle action you took."
             "pillars-virtue-additional-action" => PillarsKihoBattleActionTaken(facts, playerId),

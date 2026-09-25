@@ -134,6 +134,14 @@ public sealed partial class MatchEngine
         {
             if(OpenReactionSubject() is not { } held) return;
             foreach(var (card,reactionId) in TargetedActionReactionCandidates().Where(x=>x.Card.OwnerId==playerId && TargetedActionReactionApplies(x.Card,x.AbilityId,held)).ToArray())
+            {
+                // He's Mine! (Emperor Edition remaining-cards pass, issue #492, group B): one option per Samurai who may take the targeted Personality's place (EmperorRemainingB.cs).
+                if(reactionId=="hes-mine-substitute")
+                {
+                    foreach(var samurai in HesMinePerformers(card,held))
+                        AddReaction(card,reactionId,targetId:held.TargetId,label:$"{AbilityCatalog.All[reactionId].Label} · {Definition(samurai).Name} ({samurai.Id})",validate:true,performerId:samurai.Id);
+                    continue;
+                }
                 foreach(var (candidate,label) in TargetedReactionChoices(card,reactionId,held))
                 {
                     // Ancestral Protection (Emperor Edition remaining-cards pass, group A, issue #492): a Reaction with a performer to choose is offered once per performer who could take it.
@@ -145,6 +153,7 @@ public sealed partial class MatchEngine
                     }
                     AddReaction(card,reactionId,targetId:candidate,label:label,validate:true);
                 }
+            }
         }
         // Order Seppuku is an Open action (issue #368): offered for any Dishonorable Samurai/Courtier/Shugenja the querying player controls, but
         // ONLY at their own turn to act in the Action Phase with nothing pending -- the same single predicate the command handler uses
@@ -348,6 +357,11 @@ public sealed partial class MatchEngine
         {
             // Extended Maneuvers (Emperor Edition remaining-cards pass, group A, issue #492): straighten a Samurai, bow a non-Samurai, both, or neither (EmperorRemainingA.cs).
             foreach(var option in ExtendedManeuversOptions(playerId,extendedPending.CardId)) result.Add(option);
+        }
+        else if(_state.PendingChoice is { Type:"beforeBattleOptional" } hardPending && _state.PendingBeforeBattleResolve is { } hardResolve && IsHardPressedChoice(hardResolve))
+        {
+            // Hard Pressed (Emperor Edition remaining-cards pass, issue #492, group B): the unit to move home, with or without the bow (EmperorRemainingB.cs).
+            foreach(var option in HardPressedOptions(playerId,hardPending.CardId)) result.Add(option);
         }
         else if(_state.PendingChoice is { Type:"beforeBattleOptional" } optionalPending)
         {

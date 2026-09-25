@@ -46,6 +46,9 @@ public static class SearchEffect
     /// searched deck at its entry price less <see cref="SearchSpec.RecruitDiscount"/>, paid through the one payment path (a ChoosePayment stage when it costs
     /// anything); a card whose price cannot be paid does not enter play and stays in the deck, which is shuffled as always.</summary>
     public const string RecruitUnbowed = "recruit-unbowed";
+    /// <summary>Meeting the Keepers (Emperor Edition remaining-cards pass, issue #492, group B): "put it on top of the deck after shuffling" -- the card stays in the searched deck, which is
+    /// shuffled as every search ends, and only then is put on top (PendingSearch.PutOnTopId).</summary>
+    public const string PutOnTopAfterShuffle = "put-on-top-after-shuffle";
 }
 
 /// <summary>The stage a pending search is in; also names which PendingChoice type is open.</summary>
@@ -71,7 +74,9 @@ public sealed record SearchCriteria(string Noun, CardType[]? Types = null, strin
     // "A card with Thunder or an element keyword" (Naka Mahatsu - exp, Seeds of Decay, issue #453): at least one of these keywords ("any of"), where Keywords is "all of".
     string[]? AnyKeywords = null,
     // "A ... Holding with another title" (Versatile Farm, issue #476 batch 6): titles that may NOT be chosen.
-    string[]? ExcludedTitles = null);
+    string[]? ExcludedTitles = null,
+    // "A Kiho Battle Strategy" (Martial Instruction, issue #492): a card with a printed Battle action -- an ability whose timing is Battle or Battle/Open.
+    bool BattleStrategy = false);
 
 /// <summary>One searchable deck, the criteria that deck's candidates must meet, and what happens to the chosen
 /// card. A card that lets the player pick the deck (Ikoma Shizuka) lists two, each with its own criteria.</summary>
@@ -132,8 +137,21 @@ public static class SearchCatalog
     public static SearchSpec YungRing { get; } = new("yung-ring", "Search your Fate deck for a Ring",
         [new(SearchDeck.Fate, new("Ring", [CardType.Ring]), SearchEffect.ToHand)]);
 
+    /// <summary>Introspection (oracle-l5r-3793, Emperor Edition remaining-cards pass, issue #492, group B): "Search your Fate deck for a card. Put it in your hand." Nothing is said to show it, so it is
+    /// put into the hand without being shown; a search's own record still shows the card (the one flow every search shares).</summary>
+    public static SearchSpec Introspection { get; } = new("introspection", "Search your Fate deck for a card",
+        [new(SearchDeck.Fate, new("card"), SearchEffect.ToHand)]);
+
+    /// <summary>Martial Instruction (oracle-l5r-4843): "Search your Fate deck for a Kiho Battle Strategy, show it, and put it in your hand."</summary>
+    public static SearchSpec MartialInstruction { get; } = new("martial-instruction", "Search your Fate deck for a Kiho Battle Strategy",
+        [new(SearchDeck.Fate, new("Kiho Battle Strategy", [CardType.Strategy], ["Kiho"], BattleStrategy: true), SearchEffect.ToHand)]);
+
+    /// <summary>Meeting the Keepers (oracle-l5r-5018): "Search your Dynasty deck for an Event, show it, and put it on top of the deck after shuffling."</summary>
+    public static SearchSpec MeetingTheKeepers { get; } = new("meeting-the-keepers", "Search your Dynasty deck for an Event",
+        [new(SearchDeck.Dynasty, new("Event", [CardType.Event]), SearchEffect.PutOnTopAfterShuffle)]);
+
     public static IReadOnlyDictionary<string, SearchSpec> All { get; } = new[] { IkomaShizuka, ImperialGift, TrainingCheap, TrainingFocus, TrainingOptional, NakaMahatsu, YungRing,
-            DiscoveringTheTemple, VersatileFarm }
+            DiscoveringTheTemple, VersatileFarm, Introspection, MartialInstruction, MeetingTheKeepers }
         .ToDictionary(s => s.Id, StringComparer.Ordinal);
 
     /// <summary>The search an Event carries in its Effect (an Event has no abilities of its own to hang a spec on).</summary>
@@ -155,6 +173,8 @@ public sealed class PendingSearch
     /// <summary>The instance picked from the deck once one has been selected. Still physically in the deck list
     /// while a follow-up choice (a Region's province) is pending, so the deck and the card zones never disagree.</summary>
     public string? SelectedCardId { get; set; }
+    /// <summary>Meeting the Keepers (issue #492): the card put on top of the searched deck once it has been shuffled.</summary>
+    public string? PutOnTopId { get; set; }
     /// <summary>"ability" (a Limited action: the action resolves afterwards) or "event" (an Events Phase reveal:
     /// the Event is discarded and the reveal loop resumes afterwards).</summary>
     public string Origin { get; set; } = "ability";
@@ -321,6 +341,10 @@ public sealed partial class MatchEngine
             case SearchEffect.RecruitUnbowed:
                 BeginSearchRecruit(search, card); // ShadowsEmbraceBatch6.cs
                 break;
+            case SearchEffect.PutOnTopAfterShuffle:
+                search.PutOnTopId = card.Id;
+                FinishSearch(search);
+                break;
             default: throw new RuleViolation("Unknown search effect.");
         }
     }
@@ -414,6 +438,11 @@ public sealed partial class MatchEngine
     private void FinishSearch(PendingSearch search)
     {
         ShuffleDeck(Player(search.PlayerId), search.Deck!);
+        if (search.PutOnTopId is { } topId)
+        {
+            var deck = SearchDeckList(Player(search.PlayerId), search.Deck!);
+            if (deck.Remove(topId)) { deck.Insert(0, topId); Emit("searchedCardOnTop", $"{Player(search.PlayerId).Name} put the found card on top of their {SearchPlace(search.Deck!)} after shuffling.", search.PlayerId); }
+        }
         _state.PendingSearch = null;
         FinishDeferredAction(search.PlayerId, search.Origin, search.SourceCardId, search.BowedBefore);
     }
@@ -482,6 +511,7 @@ public sealed partial class MatchEngine
         if (criteria.Types is { Length: > 0 } && !criteria.Types.Contains(def.Type)) return (false, notA);
         if (criteria.Keywords is { Length: > 0 } && !criteria.Keywords.All(k => Keyword(card, k))) return (false, notA);
         if (criteria.AnyKeywords is { Length: > 0 } && !criteria.AnyKeywords.Any(k => Keyword(card, k))) return (false, notA);
+        if (criteria.BattleStrategy && !(Definition(card).Abilities ?? []).Any(a => AbilityCatalog.All.TryGetValue(a, out var battle) && battle.Timing is "Battle" or "BattleOrOpen")) return (false, notA);
         if (criteria.NonUnique && Keyword(card, "Unique")) return (false, "Unique cards cannot be chosen");
         if (criteria.ExcludedKeywords is { Length: > 0 } && criteria.ExcludedKeywords.FirstOrDefault(k => Keyword(card, k)) is string excluded)
             return (false, $"{excluded} cards cannot be chosen");

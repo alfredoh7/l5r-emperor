@@ -148,6 +148,9 @@ public sealed partial class MatchEngine
     {
         "own-unbowed-personality-with-keyword-at-any-location" => _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && Definition(c).Type == CardType.Personality && !c.Bowed
             && HasKeywords(c, reaction.RequiredKeywords)).OrderBy(c => c.Id, StringComparer.Ordinal),
+        // Ninja Tricks (Emperor Edition remaining-cards pass, issue #492, group B): "your performing Ninja Personality at the current battlefield".
+        "own-unbowed-personality-with-keyword-explicitly-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && !c.Bowed && AtBattle(c)
+            && HasKeywords(c, reaction.RequiredKeywords)).OrderBy(c => c.Id, StringComparer.Ordinal),
         _ => throw new InvalidOperationException($"A before-action Reaction with the performer '{reaction.Performer}' is not listed."),
     };
 
