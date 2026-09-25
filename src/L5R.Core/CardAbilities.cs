@@ -3906,7 +3906,7 @@ public static class AbilityCatalog
         // Tamori Kusugi (oracle-l5r-7780): "Battle: Even if Kusugi is not at the current battlefield, bow him: Raise or lower the current battlefield's province's strength by 4."
         ["kusugi-raise"] = new("Battle", "Even if Kusugi is not at the current battlefield, bow him: Raise the current battlefield's province's strength by 4", "none", UsageKey: "kusugi-province", Costs: ActionCost.BowSource, SourceUnitMayBeAway: true),
         ["kusugi-lower"] = new("Battle", "Even if Kusugi is not at the current battlefield, bow him: Lower the current battlefield's province's strength by 4", "none", UsageKey: "kusugi-province", Costs: ActionCost.BowSource, SourceUnitMayBeAway: true),
-    }.AddEmperorPersonalityBatch2().AddEmperorStrongholdBatch1().AddEmperorStrongholdBatch3()); // Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs.
+    }.AddEmperorPersonalityBatch2().AddEmperorStrongholdBatch1().AddEmperorStrongholdBatch3().AddEmperorRemainingD()); // Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs.
 }
 
 public sealed partial class MatchEngine
@@ -4153,10 +4153,12 @@ public sealed partial class MatchEngine
         // Emperor Edition Personality pass (issue #477), batch 4: Bayushi Nitoshi's Battle action destroys its target.
         or "nitoshi-destroy"
         // Emperor Edition Personality pass (issue #477), batch 6: Daigotsu Kanpeki - exp destroys his target outright.
-        or "kanpeki-destroy";
+        or "kanpeki-destroy"
+        // Emperor Edition remaining-cards pass (issue #492), group D: The Law's Strength destroys its target when the move home did not happen.
+        or "laws-strength-move";
     // The actions whose ONLY effect is to straighten their target: against a card that may not be straightened this turn (Basic Lesson) they are refused outright, where an action that
     // also does something else (Defensive Stance's +3F) still resolves and only its straightening is skipped (Straighten refuses it).
-    private static bool StraightensOnly(string abilityId) => abilityId is "jinn-kuen-straighten" or "kodo-straighten" or "munefusa-straighten" or "mitsuko-straighten" or "ritual-preparation-straighten"
+    private static bool StraightensOnly(string abilityId) => abilityId is "slow-death-straighten" or "well-prepared-straighten" or "jinn-kuen-straighten" or "kodo-straighten" or "munefusa-straighten" or "mitsuko-straighten" or "ritual-preparation-straighten"
         or "training-straighten-at-battle" or "horibe-straighten" or "furu-straighten" or "tsudoken-exp2-straighten" or "tsukasa-straighten" or "atsumichi-straighten" or "ring-of-air-straighten"
         or "mitoshi-straighten" or "negishi-straighten" // Emperor Edition Personality pass (issue #477), batch 1
         or "tsujiken-exp-straighten" // Seeds of Decay pass (issue #453), batch 2
@@ -4228,6 +4230,9 @@ public sealed partial class MatchEngine
         "lesson-of-earth-move" or "paralyzing-touch-move" => "move",
         "serenity-air-straighten" or "serenity-air-straighten-open" => "straighten",
         "hama-straighten" => "straighten", // Emperor Edition Personality pass (issue #477), batch 3
+        // Emperor Edition remaining-cards pass (issue #492), group D: The Law's Strength, The Power of a Word and The Serpent's Deception move their target home; The Slow Death and Well Prepared straighten theirs.
+        "laws-strength-move" or "power-word-move" or "serpents-deception-move" => "move",
+        "slow-death-straighten" or "well-prepared-straighten" => "straighten",
         _ => null
     };
     // Champion of Thunder / Brothers of Goemon's own narrower half (Brothers only ever negates a
@@ -4307,7 +4312,9 @@ public sealed partial class MatchEngine
         // Emperor Edition Personality pass (issue #477), batch 5: Asako Tsunefusa's, Asako Yorisada's and Shiba Kataken's bows.
         or "tsunefusa-bow" or "yorisada-bow" or "kataken-bow"
         // Emperor Edition Personality pass (issue #477), batch 6: Nishimura bows its target.
-        or "nishimura-bow";
+        or "nishimura-bow"
+        // Emperor Edition remaining-cards pass (issue #492), group D: The Trap is Sprung!, Well Prepared and The Power of One bow their target.
+        or "trap-sprung-bow" or "well-prepared-bow" or "power-one-bow";
     // Whether the command's TargetId is an Attack's OWN target, which reacts through the separate attackReaction
     // window instead of this one: an Attack-classified ability whose Target category is "attack". Bayushi Kahoku
     // - exp (issue #313) is Attack-classified too, but its TargetId is the separate "-4F" target (an ordinary
@@ -4711,6 +4718,7 @@ public sealed partial class MatchEngine
         "chugo-melee" => 4 + (sourceId is not null && Keyword(Card(sourceId), "Loyal") ? 1 : 0),
         // Emperor Edition Stronghold pass (issue #486), batch 3: The Otoro Estate's "Ranged 4 Attack".
         "otoro-attack" or "otoro-attack-move" => 4,
+        "unseen-assailant-attack" => 3, // Emperor Edition remaining-cards pass (issue #492), group D: Unseen Assailant's "Ranged 3 Attack".
         _ => 0
     };
     // AttackStrength plus every passive defense modifier applying to this specific target (Destrier/
@@ -4793,6 +4801,7 @@ public sealed partial class MatchEngine
         // Emperor Edition Personality pass (issue #477), batch 5.
         "nobunori-attack" or "tsukimi-attack" or "chugo-melee" => "Melee",
         "otoro-attack" or "otoro-attack-move" => "Ranged", // Emperor Edition Stronghold pass (issue #486), batch 3.
+        "unseen-assailant-attack" => "Ranged", // Emperor Edition remaining-cards pass (issue #492), group D.
         _ => ""
     };
     // General "in play" Reaction primitive: a printed Reaction whose card must actually be in play
@@ -5525,6 +5534,8 @@ public sealed partial class MatchEngine
         ValidateForgottenLegacyBatch4(id, command, player);
         // The Shadow's Embrace pass (issue #476), batch 4: the per-card conditions of strategy-wave-57 (ShadowsEmbraceBatch4.cs).
         ValidateShadowsEmbraceBatch4(id, ability, command, player, source);
+        // Emperor Edition remaining-cards pass (issue #492), group D: the per-id conditions of this group's cards (EmperorRemainingD.cs); also run for each candidate of a slot.
+        ValidateEmperorRemainingD(id, ability!, command, player, source);
         // Embers of War batch 6 (issue #460): Surveillance Outpost -- "If you have fewer Provinces than each other player, or exactly one Province" (a 2-player
         // engine, so "each other player" is the one opponent; live province count, per Player.Provinces, excludes destroyed provinces).
         if (id == "surveillance-outpost-conqueror") Require(player.Provinces.Count(p => !p.Destroyed) is var mine && (mine < Player(1 - player.Id).Provinces.Count(p => !p.Destroyed) || mine == 1),
@@ -5932,7 +5943,8 @@ public sealed partial class MatchEngine
                 "own-personality-base-force-7-plus" => Definition(performer).Type == CardType.Personality && Definition(performer).Force >= 7 && (!actingAsBattle || AtBattle(performer)),
                 "own-unbowed-personality-with-any-keyword-at-battle" => Definition(performer).Type == CardType.Personality && !performer.Bowed
                     && (ability.RequiredKeywords ?? []).Any(k => Keyword(performer, k)) && (!actingAsBattle || AtBattle(performer)),
-                _ => false
+                // Emperor Edition remaining-cards pass (issue #492), group D: this group's performer categories (EmperorRemainingD.cs).
+                _ => RemainingDPerformerAllows(ability, performer, actingAsBattle)
             }, "That card does not meet this ability's performer requirement.");
         }
         else Require(command.PerformerId is null || command.PerformerId == command.TargetId && id is "prepared-death" or "defensive-stance" or "lobby", "Unexpected performing card.");
@@ -6838,7 +6850,7 @@ public sealed partial class MatchEngine
                         // Emperor Edition Personality pass (issue #477), batch 5. Asako Yorisada: "a Personality whose Force is different from his base Force" -- the target's own printed Force.
                         "personality-force-neq-own-base" => personality && CardForce(target) != Definition(target).Force,
                         // The Shadow's Embrace pass (issue #476), batch 2: this batch's in-play categories (ShadowsEmbraceBatch2.cs).
-                        _ => ShadowsEmbraceBatch2TargetAllows(ability.Target, command, player, source, target)
+                        _ => ShadowsEmbraceBatch2TargetAllows(ability.Target, command, player, source, target) || RemainingDTargetAllows(ability.Target, command, player, source, target) // Emperor Edition remaining-cards pass (issue #492), group D: EmperorRemainingD.cs.
                     }, "That card does not meet this ability's target or performer requirements.");
                 }
             }
@@ -7486,6 +7498,19 @@ public sealed partial class MatchEngine
             {
                 var keepCommander = Card(command.PerformerId!);
                 if (KeepOfTheDeadMayMove(player, keepCommander) && MoveToBattlefield(keepCommander, _state.CurrentBattleProvince!.Value)) StraightenUnit(keepCommander);
+                break;
+            }
+            // The Light of Justice (Emperor Edition remaining-cards pass, issue #492, group D): "Move him to the current battlefield. If he moved, straighten his unit. If any dishonorable Personalities are
+            // now opposing him, you may take an additional Battle action." (The condition and "at home" are in ValidateEmperorRemainingD; the move is inline so the MovesToBattle scan reads it.)
+            case "light-of-justice-move":
+            {
+                var justicePerformer = Card(command.PerformerId!);
+                var justiceBattle = _state.CurrentBattleProvince!.Value;
+                if (MoveToBattlefield(justicePerformer, justiceBattle))
+                {
+                    StraightenUnit(justicePerformer);
+                    if (Army(1 - player.Id, justiceBattle).Any(c => MatchesTargetStatus(c, TargetStatus.IsDishonorable))) GrantAdditionalAction(player.Id, null);
+                }
                 break;
             }
             case "charge-into-danger-move":
@@ -9775,6 +9800,12 @@ public sealed partial class MatchEngine
                     if (shadowsEmbrace5) return;
                     break;
                 }
+                // Emperor Edition remaining-cards pass (issue #492), group D (EmperorRemainingD.cs): true when an Attack's window or a decision opened and the action waits.
+                if (RunEmperorRemainingD(id, ability, command, player, source, target, consumedGrant, playedFromDiscard, opponentHonorBeforeBattleAction, bowedBeforeAction, preExistingGrants) is { } remainingD)
+                {
+                    if (remainingD) return;
+                    break;
+                }
                 // Any ability with an AttachSpec (Moto Jun-Ni, Fading Shadows, Foothills Keep and the training shapes) needs no case of its own: the Gold was
                 // paid by PayForAbility, so the card now leaves its place and enters play attached. An entering-play window ends the action here.
                 if (ability.Attach is { } attachSpec)
@@ -10608,7 +10639,7 @@ public sealed partial class MatchEngine
                     && (!actingAsBattle || AtBattle(c))).Select(c => (string?)c.Id).ToArray(),
                 "own-unbowed-personality-with-any-keyword-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && Definition(c).Type == CardType.Personality && !c.Bowed
                     && (ability.RequiredKeywords ?? []).Any(k => Keyword(c, k)) && (!actingAsBattle || AtBattle(c))).Select(c => (string?)c.Id).ToArray(),
-                _ => [null]
+                _ => RemainingDPerformers(ability, playerId, actingAsBattle) ?? [null]
             };
             // Unlike every other Performer-based ability (still offered, disabled, with no eligible
             // performer -- see the generic fallback below), Equip (Battle) is not offered at all

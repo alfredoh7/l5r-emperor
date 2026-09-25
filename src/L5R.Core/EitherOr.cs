@@ -56,6 +56,8 @@ public static class EitherOrSpecs
     public const string GenshiShame = "genshi-shame";
     /// <summary>Yasuki Tanimura (Emperor Edition Personality pass, issue #477 batch 6): "The player may pay 4 Gold. If he does not pay the Gold, he loses 3 Honor." -- the decider is the ACTING player.</summary>
     public const string TanimuraPayOrLose = "tanimura-pay-or-lose";
+    /// <summary>The Power of a Word (Emperor Edition remaining-cards pass, issue #492, group D): "The player may choose to lose 3 Honor. If he did not choose this, negate the action's effects." -- the decider is the ACTING player.</summary>
+    public const string PowerOfWordLoseOrNegate = "power-word-lose-or-negate";
 }
 
 /// <summary>What choosing an option amounts to, for a client to word and style it: "avoid" (accept a cost or a lesser loss so the
@@ -133,6 +135,7 @@ public sealed partial class MatchEngine
                 or EitherOrSpecs.ForgeYourSoulAttach or EitherOrSpecs.ForgeYourSoulShuffle or EitherOrSpecs.ForgeYourSoulShuffleNoWeapon => ShadowsEmbraceEitherOrPrompt(p, source, affected),
             EitherOrSpecs.GenshiShame => $"{source}: dishonor {affected}, or {Player(p.ActingPlayerId).Name} gains 1 Honor and locks one of his abilities until their next turn begins.",
             EitherOrSpecs.TanimuraPayOrLose => $"{source}: pay 4 Gold, or lose 3 Honor.",
+            EitherOrSpecs.PowerOfWordLoseOrNegate => $"{source}: lose 3 Honor, or your action's effects are negated.",
             _ => throw new RuleViolation("Unknown choice.")
         };
     }
@@ -217,6 +220,12 @@ public sealed partial class MatchEngine
                 return [
                     new("pay", "Pay 4 Gold", "Nothing further happens.", EitherOrKind.Avoid, 4, payable(4), "You cannot produce 4 Gold."),
                     new("lose", "Do not pay", "You lose 3 Honor.", EitherOrKind.Accept, 0, true, null)
+                ];
+            // The Power of a Word (issue #492): the decider is the player whose Battle action targeted the Courtier. Losing Honor is always possible (Family Honor may go negative).
+            case EitherOrSpecs.PowerOfWordLoseOrNegate:
+                return [
+                    new("lose", "Lose 3 Honor", "Your action goes ahead: it is not negated.", EitherOrKind.Avoid, 0, true, null),
+                    new("negate", "Do not lose the Honor", "Your action's effects are negated.", EitherOrKind.Accept, 0, true, null)
                 ];
             default: throw new RuleViolation("Unknown choice.");
         }
@@ -368,6 +377,15 @@ public sealed partial class MatchEngine
             case (EitherOrSpecs.TanimuraPayOrLose, "lose"):
                 Emit("eitherOrChosen", $"{decider.Name} did not pay ({Definition(source).Name}): {decider.Name} loses 3 Honor.", decider.Id, source.Id);
                 GainHonor(decider.Id, -3, Definition(source).Name, source);
+                break;
+            // The Power of a Word (issue #492; EmperorRemainingD.cs).
+            case (EitherOrSpecs.PowerOfWordLoseOrNegate, "lose"):
+                Emit("eitherOrChosen", $"{decider.Name} chose to lose 3 Honor ({Definition(source).Name}).", decider.Id, source.Id);
+                GainHonor(decider.Id, -3, Definition(source).Name, source);
+                break;
+            case (EitherOrSpecs.PowerOfWordLoseOrNegate, "negate"):
+                Emit("eitherOrChosen", $"{decider.Name} did not lose the Honor ({Definition(source).Name}): the action's effects are negated.", decider.Id, source.Id);
+                NegateHeldActionFromEitherOr(p, source);
                 break;
             default: throw new RuleViolation("Unknown choice.");
         }

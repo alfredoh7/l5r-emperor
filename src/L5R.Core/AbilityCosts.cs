@@ -47,6 +47,8 @@ public static class CostVerbs
     /// <summary>Give the subject -Amount Chi ("give this Personality -1C:", Cursed Relic, issue #467): payable only when he has that much Chi to lose (core rules,
     /// Pay Costs); a Personality it leaves at 0 Chi is destroyed by the ordinary Chi rule (ApplyModifier).</summary>
     public const string ChiPenalty = "chi-penalty";
+    /// <summary>Move the subject (his unit) home ("Move your performing opposed Personality home:", Wall of Honor, issue #492): a cost, so it is paid whatever happens to the effects and no negation of an effect stops it.</summary>
+    public const string MoveHome = "move-home";
 }
 
 /// <summary>One cost: <paramref name="Verb"/> (CostVerb.Bow or CostVerbs.*) applied to <paramref name="Subject"/> (CostSubject.*: the ability's
@@ -225,6 +227,10 @@ public sealed partial class MatchEngine
                     if (UnitHostId(subject) != subject.Id) Card(UnitHostId(subject)).Bowed = true;
                     break;
                 case CostVerbs.ChiPenalty: ApplyModifier(subject, source?.Id ?? subject.Id, command.AbilityId!, "Chi", -cost.Amount); break;
+                case CostVerbs.MoveHome:
+                    ReturnHome(subject, false);
+                    Emit("unitMovedHome", $"{Definition(subject).Name}'s unit moved home (a cost).", subject.OwnerId, subject.Id);
+                    break;
                 default: throw new InvalidOperationException($"Unknown cost verb '{cost.Verb}'.");
             }
         }

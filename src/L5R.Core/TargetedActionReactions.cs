@@ -311,6 +311,12 @@ public sealed partial class MatchEngine
             // The Waystation of the Path (Emperor Edition Stronghold pass, issue #486 batch 3): another player's action targets the controller's Henshin.
             case "waystation-reborn":
                 return WaystationApplies(card, subject, affected);
+            // Emperor Edition remaining-cards pass (issue #492), group D. Undetectable Enemy: another player's action targets one of the reactor's own Oni. The Power of a Word: another player's Battle action
+            // targets the reactor's own Courtier.
+            case "undetectable-enemy-negate":
+                return subject.Command.PlayerId != card.OwnerId && affected.OwnerId == card.OwnerId && Definition(affected).Type == CardType.Personality && Keyword(affected, "Oni");
+            case "power-word-reaction":
+                return PowerOfWordApplies(card, subject, affected);
             default:
                 return false;
         }

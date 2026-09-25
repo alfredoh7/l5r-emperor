@@ -554,7 +554,7 @@ public sealed partial class MatchEngine
                 if (_state.PendingDuel?.WinnerId is string paralyzedWinnerId && InPlay(Card(paralyzedWinnerId))) WatchParalyzingTouch(Card(paralyzedWinnerId), "Paralyzing Touch");
                 break;
             // Sudden Movement (The Shadow's Embrace pass, issue #476, batch 4): "After this duel ends, give its winner +3F" (a tie has no winner).
-            case "sudden-movement-focus":
+            case "sudden-movement-focus": case "slow-death-focus": // The Slow Death (Emperor Edition remaining-cards pass, issue #492, group D): "After this duel ends, give its winner +3F."
                 if (_state.PendingDuel?.WinnerId is string suddenWinnerId && InPlay(Card(suddenWinnerId))) ApplyModifier(Card(suddenWinnerId), suddenWinnerId, abilityId, "Force", 3);
                 break;
             // Scavenging Party: "After this duel ends, give its winner -3F" (a tie has no winner).

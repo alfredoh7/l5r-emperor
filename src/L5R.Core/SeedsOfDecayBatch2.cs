@@ -85,7 +85,7 @@ public sealed partial class MatchEngine
 
     private void FireAssignedToAttackWatches(CardInstance card)
     {
-        foreach (var watch in _state.AssignmentWatches.Where(w => w.CardId == card.Id && w.Turn == _state.TurnNumber).ToArray())
+        foreach (var watch in _state.AssignmentWatches.Where(w => w.CardId == card.Id && w.Turn == _state.TurnNumber && w.Kind != WatchVeiledMenace).ToArray()) // Veiled Menace (issue #492) fires on either side's assignment (FireVeiledMenaceAssigned).
         {
             // Social Grace (The Shadow's Embrace pass, issue #476, batch 4): "after EACH time he is assigned to attack this turn" -- it stays for the turn.
             if (watch.Kind != WatchSocialGrace) _state.AssignmentWatches.Remove(watch);
@@ -123,6 +123,11 @@ public sealed partial class MatchEngine
             case WatchFairWarning:
                 Emit("watchFired", $"{watch.Source}: {Definition(card).Name} {what}.", watch.BeneficiaryPlayerId, card.Id);
                 GainHonor(watch.BeneficiaryPlayerId, 2, watch.Source);
+                break;
+            // Veiled Menace (Emperor Edition remaining-cards pass, issue #492, group D): "After each time he is assigned (this turn), his controller loses 1 Honor."
+            case WatchVeiledMenace:
+                Emit("watchFired", $"{watch.Source}: {Definition(card).Name} {what}.", watch.BeneficiaryPlayerId, card.Id);
+                GainHonor(card.OwnerId, -1, watch.Source);
                 break;
         }
     }

@@ -152,6 +152,8 @@ public sealed partial class MatchEngine
             "kanpeki-additional-action" => KanpekiPerformedStrategyBattleAction(source, facts, playerId),
             // Pillars of Virtue (Emperor Edition Stronghold pass, issue #486 batch 2): "After the resolution of a Kiho Battle action you took."
             "pillars-virtue-additional-action" => PillarsKihoBattleActionTaken(facts, playerId),
+            // Words Have Strength (Emperor Edition remaining-cards pass, issue #492, group D): "the resolution of another player's Battle action, if ... the action destroyed any of your Courtiers or Magistrates".
+            "words-strength-action" => facts.PlayerId != playerId && IsBattleAction(facts.AbilityId) && ActionDestroyedCourtierOrMagistrate(facts, playerId),
             _ => false
         };
     }
