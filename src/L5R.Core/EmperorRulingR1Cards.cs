@@ -35,13 +35,18 @@ public static class EmperorRulingR1Abilities
         // Two Fronts (oracle-l5r-8922, not published: no scan): "Limited: Target a province whose player has two or more provinces: During your next normal Attack Phase (this turn), create two battlefields
         // associated with it instead of one."
         all["two-fronts-mark"] = new("Limited", "Target a province whose player has two or more provinces: During your next normal Attack Phase (this turn), create two battlefields associated with it instead of one", "enemy-province");
+        // The Perfect Moment (oracle-l5r-8257, not published: no scan): "Reaction: After the end of an Attack Phase in which you were the Defender: Create an additional Attack Phase with the previous phase's Attacker
+        // as the Defender. During this Attack Phase, you will not destroy more than one of the Defender's provinces and your Personalities may not assign and will not move unless they are Paragons or Battle
+        // Maidens." Retribution's window and additional Attack Phase (EmperorRemainingC.cs): its player declares it and is its Attacker.
+        all["perfect-moment-declare"] = new("Reaction", "After the end of an Attack Phase in which you were the Defender: Create an additional Attack Phase with the previous phase's Attacker as the Defender. During this Attack Phase, you will not destroy more than one of the Defender's provinces and your Personalities may not assign and will not move unless they are Paragons or Battle Maidens", "none",
+            Trigger: EmperorRemainingCAbilities.AttackPhaseEnd);
         return all;
     }
 }
 
 public sealed partial class MatchEngine
 {
-    private static bool IsEmperorRulingR1Ability(string id) => id is "surprise-attack-create" or "chikushudo-trickery-battle" or "shinobi-assault-battle" or "two-fronts-mark";
+    private static bool IsEmperorRulingR1Ability(string id) => id is "surprise-attack-create" or "chikushudo-trickery-battle" or "shinobi-assault-battle" or "two-fronts-mark" or "perfect-moment-declare";
 
     // The in-play Target categories of this pass (the shared category switch's fallback): false for any category that is not one of them.
     private bool RulingR1TargetAllows(string category, GameCommand command, PlayerState player, CardInstance? source, CardInstance target)
@@ -127,6 +132,11 @@ public sealed partial class MatchEngine
                 }, loseHonorAfter: 5);
                 return true;
             }
+            // The Perfect Moment: the additional Attack Phase, with its player's restrictions until it ends.
+            case "perfect-moment-declare":
+                R1.PerfectMoment = new PerfectMomentState { PlayerId = player.Id };
+                DeclareAdditionalAttackPhase(player, source!);
+                return true;
             case "two-fronts-mark":
                 MarkTwoFronts(player.Id, command.Province ?? throw new RuleViolation("Choose a province."));
                 Emit("twoFronts", $"{Definition(source!).Name}: {player.Name}'s next normal Attack Phase this turn creates two battlefields at province {command.Province + 1}.", player.Id, source!.Id);

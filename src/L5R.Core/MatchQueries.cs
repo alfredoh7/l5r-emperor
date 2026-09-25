@@ -571,7 +571,7 @@ public sealed partial class MatchEngine
                 if(_state.ExtraInfantrySegment) (units,provinces)=HiddenFallsAssignmentChoices(playerId,attack);
                 var actionType=attack?"attack":"assignDefense";
                 // Retribution (issue #492, group C): an additional Attack Phase assigns one Personality at most, so each (unit, province) is its own option.
-                if(attack && _state.RemC.RetributionRoot>=0)
+                if(attack && RetributionRestricts())
                 {
                     foreach(var province in provinces)
                         foreach(var unit in units)

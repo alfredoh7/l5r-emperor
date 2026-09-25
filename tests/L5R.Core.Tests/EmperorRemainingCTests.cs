@@ -14,7 +14,7 @@ internal static class EmperorRemainingCTests
     private static readonly string[] Wired = [Retribution, Rhetoric, RockyTerrain, RumorsTravel, SacrificeOfPawns, SelflessDefense, ShadowsWalk, ShamefulInjury, SnakeTattoo, Sniping, SolidDefense, SpinningHeelKick, StayPut, StrategicStrike, SummonedToJustice, SuperiorOpponent, TellTheTale, EmpressAddress, FiresOfWar, HeightOfCourage];
 
     // The group's Strategies left unwired (each with a note in tools/content/ee_remC_blockers.json): never published.
-    private static readonly string[] Unwired = ["oracle-l5r-7991", "oracle-l5r-7995", "oracle-l5r-8137", "oracle-l5r-7665"]; // The Compassion of the Unicorn, The Courage of the Mantis, The Honesty of the Phoenix (delay), Surprise Attack (a battlefield with no province)
+    private static readonly string[] Unwired = ["oracle-l5r-7991", "oracle-l5r-7995", "oracle-l5r-8137"]; // (Surprise Attack, oracle-l5r-7665, was wired in strategy-wave-62 by rulings pass R1, issue #492) // The Compassion of the Unicorn, The Courage of the Mantis, The Honesty of the Phoenix (delay), Surprise Attack (a battlefield with no province)
 
     private static void Check(bool ok, string message = "Assertion failed") => Batch336Support.Check(ok, message);
     private static void Eq<T>(T actual, T expected, string message = "Values differ") => Batch336Support.Eq(actual, expected, message);

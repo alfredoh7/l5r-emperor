@@ -1669,8 +1669,8 @@ public sealed partial class MatchEngine
             destroyedByPlayer[attacker]=destroyedDefenders; losers.Add(defender);
             if(!RehonorWinners(a)) { GainHonor(attacker,destroyedDefenders*2,"Battle victory"); CheckEarthFlowsBonus(attacker,a); }
             var province=battleProvince;
-            var destroyedProvince=province is not null && af>df+EffectiveProvinceStrength(province);
-            if(destroyedProvince) DestroyProvince(defender,province!);
+            var destroyedProvince=province is not null && !PerfectMomentBarsDestruction(attacker) && af>df+EffectiveProvinceStrength(province);
+            if(destroyedProvince) { DestroyProvince(defender,province!); NotePerfectMomentDestruction(attacker); }
             if(destroyedProvince) AfterProvinceDestroyedByResolution(attacker,defender,province!,a); // Alter History, Boastful Proclamation (issue #492, group F).
             provinceDestroyedNow=destroyedProvince;
             // Vital Pathways (issue #272): "After this battlefield's province is destroyed, if you

@@ -289,18 +289,8 @@ public sealed partial class MatchEngine
         {
             // Retribution: the window it was played in closes, the Strategy is spent and the additional Attack Phase begins with its player as the Attacker.
             case "retribution-declare":
-            {
-                SpendHandPlayedCard(player, source);
-                _state.SuspendedWindows.RemoveAll(w => w.Choice.Type == "attackPhaseEndReaction");
-                _state.PendingChoice = null;
-                if (RemC.RetributionRoot < 0) RemC.RetributionRoot = _state.ActivePlayerId;
-                RemC.RetributionAssigned = 0;
-                _state.ActivePlayerId = player.Id;
-                _state.UnresolvedBattlefields = Player(1 - player.Id).Provinces.Where(p => !p.Destroyed).Select(p => p.Index).Order().ToList();
-                Emit("attackDeclared", $"{player.Name} declared an additional Attack Phase ({Definition(source!).Name}): a battlefield exists at each of {Player(1 - player.Id).Name}'s provinces.", player.Id, source!.Id);
-                SetPhase(Phase.InfantryDeclaration, player.Id);
+                DeclareAdditionalAttackPhase(player, source!);
                 return true;
-            }
             case "tell-the-tale-honor":
                 GainHonor(player.Id, 1, "Tell the Tale", source);
                 return false;
@@ -630,6 +620,21 @@ public sealed partial class MatchEngine
 
     // ---- Retribution: an additional Attack Phase ----------------------------------------------------------------------------------------------------------------------
 
+    // The Reaction played in the window after an Attack Phase ended (Retribution; The Perfect Moment, issue #492 rulings pass R1): its player -- the Defender of the phase that ended -- DECLARES an additional
+    // Attack Phase and so is its Attacker (Mendon: "the player who declared the attack phase is the attacker"); the card is spent, the window closes and the Declaration Segment's battlefields exist at once.
+    private void DeclareAdditionalAttackPhase(PlayerState player, CardInstance source)
+    {
+        SpendHandPlayedCard(player, source);
+        _state.SuspendedWindows.RemoveAll(w => w.Choice.Type == "attackPhaseEndReaction");
+        _state.PendingChoice = null;
+        if (RemC.RetributionRoot < 0) RemC.RetributionRoot = _state.ActivePlayerId;
+        RemC.RetributionAssigned = 0;
+        _state.ActivePlayerId = player.Id;
+        _state.UnresolvedBattlefields = Player(1 - player.Id).Provinces.Where(p => !p.Destroyed).Select(p => p.Index).Order().ToList();
+        Emit("attackDeclared", $"{player.Name} declared an additional Attack Phase ({Definition(source).Name}): a battlefield exists at each of {Player(1 - player.Id).Name}'s provinces.", player.Id, source.Id);
+        SetPhase(Phase.InfantryDeclaration, player.Id);
+    }
+
     // The last battle of an Attack Phase is done (CompleteBattleTransition): its Defender may declare an additional Attack Phase, in a window of his own; otherwise (or once he has declined) the phase
     // ends and the Dynasty Phase of the turn's player begins.
     private void EndAttackPhase(int attacker)
@@ -643,6 +648,7 @@ public sealed partial class MatchEngine
     {
         var turnPlayer = RemC.RetributionRoot >= 0 ? RemC.RetributionRoot : _state.ActivePlayerId;
         RemC.RetributionRoot = -1; RemC.RetributionAssigned = 0;
+        R1.PerfectMoment = null; // its restrictions belong to that one Attack Phase (issue #492, rulings pass R1)
         _state.ActivePlayerId = turnPlayer;
         SetPhase(Phase.Dynasty, turnPlayer);
     }
@@ -676,13 +682,13 @@ public sealed partial class MatchEngine
     // "You may only assign one Personality" (AssignAttackers, before the assignment) and "Give the Personality and each Follower in his unit +1F after he assigns" (after).
     private void RequireRetributionAssignment(GameCommand command)
     {
-        if (RemC.RetributionRoot >= 0 && command.Assignments is { Count: > 0 } assignments)
+        if (RetributionRestricts() && command.Assignments is { Count: > 0 } assignments)
             Require(RemC.RetributionAssigned + assignments.Count <= 1, "In an additional Attack Phase you may only assign one Personality.");
     }
 
     private void NoteRetributionAssignments(GameCommand command)
     {
-        if (RemC.RetributionRoot < 0) return;
+        if (!RetributionRestricts()) return;
         foreach (var id in (command.Assignments ?? []).Keys)
         {
             RemC.RetributionAssigned++;

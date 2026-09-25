@@ -41,8 +41,18 @@ public sealed class RulingR1State
     /// <summary>Cards that "will not be destroyed during the battle's Combat Segment" (Chikushudo's Trickery's attacker): lifted when the Resolution Segment begins.</summary>
     public List<string> CombatShields { get; set; } = [];
     public AsideBattle? Aside { get; set; }
+    /// <summary>The Perfect Moment: the additional Attack Phase it declared is in progress (null otherwise).</summary>
+    public PerfectMomentState? PerfectMoment { get; set; }
     /// <summary>Two Fronts: the players' provinces marked "create two battlefields associated with it instead of one" for their next normal Attack Phase of the given turn.</summary>
     public List<TwoFrontsMark> TwoFronts { get; set; } = [];
+}
+
+/// <summary>The Perfect Moment's restrictions on its player during the additional Attack Phase it declared: "you will not destroy more than one of the Defender's provinces and your Personalities may not
+/// assign and will not move unless they are Paragons or Battle Maidens". Destroyed counts the provinces its player has destroyed in it.</summary>
+public sealed class PerfectMomentState
+{
+    public int PlayerId { get; set; }
+    public int Destroyed { get; set; }
 }
 
 /// <summary>Player is the marker's controller (the Attacker), Province the Defender's province, Turn the turn whose next normal Attack Phase is meant.</summary>
@@ -192,6 +202,23 @@ public sealed partial class MatchEngine
 
     /// <summary>The Combat Segment is over (ResolveBattle): the shields lift before anything is destroyed by the resolution.</summary>
     private void EndCombatSegmentShields() => R1.CombatShields.Clear();
+
+    // ---- The Perfect Moment (an additional Attack Phase with restrictions) ---------------------------------------------------------------------------------------------------
+
+    /// <summary>Whether the Retribution restrictions of an additional Attack Phase apply (one Personality assigned, +1F): it is one, and it is Retribution's, not The Perfect Moment's.</summary>
+    private bool RetributionRestricts() => RemC.RetributionRoot >= 0 && R1.PerfectMoment is null;
+
+    /// <summary>"Your Personalities may not assign and will not move unless they are Paragons or Battle Maidens": every movement and assignment of a Personality of the player, MovementLocked's question.</summary>
+    private bool PerfectMomentLocks(CardInstance card) =>
+        R1.PerfectMoment is { } moment && card.OwnerId == moment.PlayerId && Definition(card).Type == CardType.Personality && !Keyword(card, "Paragon") && !Keyword(card, "Battle Maiden");
+
+    /// <summary>"You will not destroy more than one of the Defender's provinces": the second one survives however large the win.</summary>
+    private bool PerfectMomentBarsDestruction(int attacker) => R1.PerfectMoment is { } moment && moment.PlayerId == attacker && moment.Destroyed >= 1;
+
+    private void NotePerfectMomentDestruction(int attacker)
+    {
+        if (R1.PerfectMoment is { } moment && moment.PlayerId == attacker) moment.Destroyed++;
+    }
 
     // ---- assigning a unit to a created battlefield ----------------------------------------------------------------------------------------------------------------
 

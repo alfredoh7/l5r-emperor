@@ -135,8 +135,8 @@ internal static class EmperorRemainingETests
         Manifest(root, "spell-wave-23", spells);
         Manifest(root, "celestial-wave-8", celestials);
         // Summon Swamp Spirits was unpublished here until its Swamp Spirit Proxy scan arrived; issue #492 (proxy group X) wired it in spell-wave-24 (EmperorProxyXTests).
-        foreach (var blocked in new[] { ChikushudosTrickery })
-            Check(!CardCatalog.Cards.ContainsKey(blocked), $"{blocked} is not published (unwired)");
+        // Chikushudo's Trickery was unpublished here until Mendon's battles-without-a-province ruling; issue #492 (rulings pass R1) wired it in spell-wave-25 (EmperorRulingR1Tests).
+        Check(CardCatalog.Cards.ContainsKey(ChikushudosTrickery), "Chikushudo's Trickery is published in spell-wave-25");
         // The scans' own wording, where the catalogue's reworded Oracle text differs.
         Check(CardCatalog.Get(CapturingSoul).Text.StartsWith("Limited: Bow this Shugenja and 0 or more of your other performing Shugenja, target a Personality, and remove this card from the game:"), "Capturing the Soul prints the scan's text");
         Check(CardCatalog.Get(KamisBlessing).Text.Contains("Give this Shugenja a Force bonus equal to his Chi") && !CardCatalog.Get(KamisBlessing).Text.Contains("Raise"), "The Kami's Blessing prints the scan's text");

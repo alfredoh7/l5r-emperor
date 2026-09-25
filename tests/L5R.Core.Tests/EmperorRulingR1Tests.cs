@@ -46,6 +46,7 @@ internal static class EmperorRulingR1Tests
         ("Chikushudo's Trickery: the attacker is the target's controller whoever plays it (Open on the opponent's turn too), it needs one or two unbowed Nonhuman Spirits and an unbowed enemy Personality, and only the Action Phase", TrickeryRefusalsAndTurns),
         ("Shinobi Assault (wired, unpublished: no scan): the Ninja attacks a bowed target at a new battlefield with the first opportunity, then 5 Honor is lost and the Action Phase resumes", ShinobiAssault),
         ("Two Fronts (wired, unpublished: no scan): Limited, needs a player with two provinces, marks the next normal Attack Phase of the turn", TwoFrontsCard),
+        ("The Perfect Moment (wired, unpublished: no scan): the Defender declares an additional Attack Phase and is its Attacker; only his Paragons and Battle Maidens assign or move, and at most one province is destroyed in it", PerfectMoment),
     ]);
 
     // ---- Published shape --------------------------------------------------------------------------------------------------------------------------------
@@ -515,5 +516,55 @@ internal static class EmperorRulingR1Tests
         foreach (var p in t.Players[1].Provinces.Take(3)) p.Destroyed = true;
         Add(t, "training-crane-samurai", 0, Zone.Home);
         Check(!CanUse(MatchEngine.FromTestState(t), 0, "two-fronts-mark", c2.Id), "a player with one province cannot be the target");
+    }
+
+    private static CardDefinition PerfectMomentPrinted() => new("oracle-l5r-8257", "The Perfect Moment", CardType.Strategy, GoldCost: 0, Focus: 4, ScenarioOnly: false, Abilities: ["perfect-moment-declare"],
+        Text: "Reaction: After the end of an Attack Phase in which you were the Defender: Create an additional Attack Phase with the previous phase's Attacker as the Defender. During this Attack Phase, you will not destroy more than one of the Defender's provinces and your Personalities may not assign and will not move unless they are Paragons or Battle Maidens.");
+
+    private static void PerfectMoment()
+    {
+        var s = Table(Phase.Battle, 1);
+        s.PriorityPlayerId = 0;
+        s.CurrentBattleProvince = 3; s.UnresolvedBattlefields = [3];
+        var card = Add(s, "training-move-battle-strategy", 0, Zone.Hand); card.Printed = PerfectMomentPrinted();
+        var moveCard = Add(s, "training-move-battle-strategy", 0, Zone.Hand);
+        var paragonA = Kw(Add(s, "training-crane-samurai", 0, Zone.Home), "Paragon"); Force(paragonA, 17);
+        var paragonB = Kw(Add(s, "training-crane-samurai", 0, Zone.Home), "Battle Maiden"); Force(paragonB, 17);
+        var plain = Add(s, "training-crane-samurai", 0, Zone.Home); Force(plain, 17);
+        var e = MatchEngine.FromTestState(s);
+        PassTwice(e); // the last battle of player 1's Attack Phase is over
+        Eq(e.State.PendingChoice?.Type, "attackPhaseEndReaction", "the Defender may react to the end of the Attack Phase");
+        var honor = Honor(e, 0);
+        Accept(e, Options(e, 0, "perfect-moment-declare", card.Id).First(o => o.Enabled).Command!);
+        Eq(e.State.ActivePlayerId, 0, "its player declared the additional Attack Phase and is its Attacker");
+        Eq(e.State.Phase, Phase.InfantryDeclaration);
+        Eq(string.Join(",", e.State.UnresolvedBattlefields), "0,1,2,3", "a battlefield at each of the previous Attacker's provinces");
+        Check(e.State.R1.PerfectMoment is { PlayerId: 0 }, "its restrictions are in force");
+        // "May not assign unless they are Paragons or Battle Maidens": a plain Personality is refused, and Retribution's one-Personality limit does not apply.
+        Check(Rejection(e, new("attack", 0, e.Version, Assignments: new() { [plain.Id] = 0 })).Length > 0, "a Personality who is neither a Paragon nor a Battle Maiden may not assign");
+        Accept(e, new("attack", 0, e.Version, Assignments: new() { [paragonA.Id] = 0, [paragonB.Id] = 1 }));
+        Accept(e, new("assignDefense", 1, e.Version, Assignments: new()));
+        Accept(e, new("attack", 0, e.Version, Assignments: new()));
+        Accept(e, new("assignDefense", 1, e.Version, Assignments: new()));
+        Eq(e.State.Phase, Phase.BattleSelection);
+        // "Will not move unless": in the first battle a plain Personality's movement to it is negated, a Paragon's is not.
+        Accept(e, new("selectBattle", 0, e.Version, Province: 0));
+        Eq(e.State.CurrentBattleProvince, 0);
+        // (player 1, the Defender, has the first opportunity and passes)
+        Accept(e, PassC(e));
+        Accept(e, Offer(e, 0, "training-move-to-battle", moveCard.Id, plain.Id));
+        Eq(e.State.Cards[plain.Id].Zone, Zone.Home, "the movement of a plain Personality was negated");
+        Check(Event(e, "moveNegated"), "and the log says it was");
+        PassTwice(e);
+        Check(e.State.Players[1].Provinces[0].Destroyed, "the first battle destroyed province 0");
+        // "You will not destroy more than one of the Defender's provinces": the second win destroys none.
+        Accept(e, new("selectBattle", 0, e.Version, Province: 1));
+        PassTwice(e);
+        Check(!e.State.Players[1].Provinces[1].Destroyed, "the second province survives a victory that would have destroyed it");
+        foreach (var other in new[] { 2, 3 }) { Accept(e, new("selectBattle", 0, e.Version, Province: other)); PassTwice(e); }
+        Eq(e.State.Phase, Phase.Dynasty, "the additional Attack Phase is over");
+        Eq(e.State.ActivePlayerId, 1, "the turn's own player is the active player again");
+        Check(e.State.R1.PerfectMoment is null && e.State.Players[1].Provinces.Count(p => p.Destroyed) == 1, "the restrictions ended with it, and exactly one province was destroyed");
+        Check(e.State.RemC.RetributionRoot < 0, "no additional Attack Phase is left under way");
     }
 }

@@ -9385,7 +9385,7 @@ public sealed partial class MatchEngine
                 if (RunEmperorRemainingGEffect(id, command, ability, player, source, target, consumedGrant)) return;
                 break;
             // Emperor Edition rulings pass R1 (issue #492): every case is in EmperorRulingR1Cards.cs; true means the action paused (a battle is fought inside the Action Phase).
-            case "surprise-attack-create": case "chikushudo-trickery-battle": case "shinobi-assault-battle": case "two-fronts-mark":
+            case "surprise-attack-create": case "chikushudo-trickery-battle": case "shinobi-assault-battle": case "two-fronts-mark": case "perfect-moment-declare":
                 if (RunEmperorRulingR1Effect(id, ability, command, player, source, target, consumedGrant, playedFromDiscard, opponentHonorBeforeBattleAction, bowedBeforeAction, preExistingGrants)) return;
                 break;
             // Emperor Edition proxy pass (issue #492), group X: every case is in EmperorProxyX.cs; true means an entering-play window opened.

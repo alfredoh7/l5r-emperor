@@ -66,7 +66,9 @@ public partial class Main
     private const float CardHeight = 210, RowGap = 8, CardGap = 10;
     private float WorldWidth = 1360;
     private readonly float[] _laneWidths = [170, 170, 170, 170];
-    private readonly float[] _slotCenters = new float[8];
+    // Slots 0-7 are the fixed lanes (piles, four provinces); 8 upward are the lanes of additional battlefields, which exist only while one does (Emperor Edition rulings pass R1, issue #492).
+    private const int MaxExtraLanes = 4;
+    private readonly float[] _slotCenters = new float[8 + MaxExtraLanes];
     private float _enemyHomeY, _battleY, _battleHeight, _selfHomeY, _selfProvinceY;
     private float _worldHeight = 820;
     private readonly Dictionary<int, float> _homeHeights = [];
@@ -149,7 +151,7 @@ public partial class Main
             close.AddThemeFontSizeOverride("font_size", 12); heading.AddChild(close);
             var detailSide = Math.Min(210, (BoardWidth - 60) / (2.4f + Math.Max(0, attachments.Length - 1) * .8f));
             content.AddChild(UnitStack(personality, owner, detailSide, true));
-            var location = personality.Zone == Zone.Battlefield ? $"{owner.Clan} · battlefield at Province {personality.ProvinceIndex + 1}" : $"{owner.Clan} · at home";
+            var location = personality.Zone == Zone.Battlefield ? $"{owner.Clan} · battlefield: {(personality.ProvinceIndex is int at ? BattlefieldName(at) : "")}" : $"{owner.Clan} · at home";
             content.AddChild(Palette.Text(location + "   ·   Hover any card to read it. Each card retains its own bow state.", 12, Palette.PaperDim));
             var placeholder = new Button { Text = ShortName(personality) + "\nUnit open below", CustomMinimumSize = new Vector2(UnitWidth(personality, owner), PlaneHeight(side)), Flat = true };
             placeholder.AddThemeFontSizeOverride("font_size", 10); CompactButton(placeholder);
@@ -242,7 +244,7 @@ public partial class Main
         {
             var court = Place(_board, new Control { MouseFilter = Control.MouseFilterEnum.Ignore }, bounds.Position.X, bounds.Position.Y, bounds.Size.X, bounds.Size.Y);
             court.SetMeta("battle_province", index);
-            var target = new Button { Text = "", Flat = true, TooltipText = $"Province {index + 1} battlefield" };
+            var target = new Button { Text = "", Flat = true, TooltipText = $"{BattlefieldName(index)} battlefield" };
             CompactButton(target); target.Pressed += () => SelectProvince(defender.Id, index);
             Place(court, target, 0, 0, bounds.Size.X, MatHeader); _laneSummaries[index] = target;
             foreach (var player in View.Players)
@@ -261,12 +263,13 @@ public partial class Main
         {
             if (owner != 1 - View.ActivePlayerId || action.Provinces?.Contains(province) != true || _assignmentUnit is null) return;
             _assignments[_assignmentUnit] = province;
-            SetNotice($"{ShortName(FindCard(_assignmentUnit)!)} → Province {province + 1}. Confirm assignments when ready.");
+            SetNotice($"{ShortName(FindCard(_assignmentUnit)!)} → {BattlefieldName(province)}. Confirm assignments when ready.");
             RenderBoard(); RenderInspector(); Highlight(); return;
         }
         if (_chosen is not null) return;
         var battle = Actions.FirstOrDefault(a => a.Enabled && a.Type == "selectBattle" && a.Command?.Province == province);
         if (owner == 1 - View.ActivePlayerId && battle is not null) { Submit(battle.Command!); return; }
+        if (province >= MatchEngine.FirstAdditionalBattlefield) return; // a battlefield without a province has no province card to inspect
         if (View.Players.Single(p => p.Id == owner).Provinces.Single(p => p.Index == province).Card is { } card) SelectCard(card);
     }
 
