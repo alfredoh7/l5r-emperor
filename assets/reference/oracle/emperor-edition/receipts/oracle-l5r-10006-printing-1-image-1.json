@@ -1,0 +1,35 @@
+{
+  "bytes": 177010,
+  "card_id": "oracle-l5r-10006",
+  "format": "WEBP",
+  "height": 1483,
+  "id": "oracle-l5r-10006-printing-1-image-1",
+  "image_index": 1,
+  "name": "Kaiu Weapon",
+  "note": "Kaiu Weapon (Proxy, Weapon Item, +1F/+1C, 'May not be included in decks.', EE Illus Anthony Grabski, AEG 19). No such card exists in the Oracle export; the scan was supplied by Mendon on 2026-09-25 and the id oracle-l5r-10006 is a local allocation in the gap between Gina's Fox (10005) and Kaiu Armor (10007) -- replace it if the real Oracle id turns up.",
+  "numbers": [
+    "19"
+  ],
+  "oracle_id": 10006,
+  "path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-10006-printing-1-image-1.webp",
+  "playable": false,
+  "printing_association": "supplied_by_user",
+  "printing_id": "1",
+  "printing_set": "Emperor Edition",
+  "quality": "working_copy",
+  "sha256": "e4128f04ad732fcdf8bc2ba37e2821cd466659509a63da1331091606e1dd1649",
+  "width": 1061,
+  "working_copy": {
+    "bytes": 177010,
+    "format": "WEBP",
+    "height": 1483,
+    "path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-10006-printing-1-image-1.webp",
+    "sha256": "e4128f04ad732fcdf8bc2ba37e2821cd466659509a63da1331091606e1dd1649",
+    "source": {
+      "asset": "user-supplied scan (Mendon, 2026-09-25; 1061x1483 WebP quality 85, not resized)",
+      "matched_by": "supplied by Mendon on 2026-09-25",
+      "release": null
+    },
+    "width": 1061
+  }
+}
