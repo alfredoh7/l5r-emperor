@@ -45,6 +45,8 @@ internal static class EmperorMechATests
         ("Mirumoto Inokuchi: even if bowed he straightens and may take an additional Battle action that must be Iaijutsu and that he performs -- one he performs (a granted Iaijutsu Battle) is taken and he stays unbowed; a non-Iaijutsu action of his and another Personality's Iaijutsu action are refused", InokuchiIaijutsu),
         ("Mirumoto Inokuchi, \"If you don't, bow him\": declining the additional action bows him, and so does taking it as a pass; the priority then passes", InokuchiIfYouDont),
         ("Beyond the Line: a mandatory additional action to use a Limited or Open Recon ability as a Battle action targeting the current battlefield's province (Hidden Falls Dojo's Recon Open); the player draws a card after it resolves; another province, a Recon ability with no province target, a non-Recon ability and an ordinary Battle action are refused; it may not be declined", BeyondTheLineRecon),
+        ("Mendon's ruling on item 2 (issue #501): a player may always pass -- holding a mandatory grant (Beyond the Line), a restricted optional one (Inokuchi's) or several with no legal action to take, the pass is offered and accepted, and each pass takes one grant", PassAlwaysAvailable),
+        ("Mendon's ruling on Beyond the Line (issue #501): either the Attacker or the Defender may play it, and only the player who played it gets the additional action -- the other player holds no grant and cannot use his own Recon Open as a Battle action", BeyondTheLineOnlyItsPlayer),
         ("Beyond the Line, edges: without it no Limited or Open ability is a Battle action; taken as a pass the grant is spent and nothing is drawn", BeyondTheLineEdges),
         ("One Action, Two Strikes: after the enemy leader took a Battle action this battle it grants two additional Battle actions; no other additional action is created for its player this battle (training-grant-bow's grant is not), and the priority passes after the two", OneActionTwoStrikesGrants),
         ("One Action, Two Strikes, edges: not offered when the other player has taken no Battle action this battle (a pass is not one), nor in a later battle; its lock and the record are per battle", OneActionTwoStrikesEdges),
@@ -347,6 +349,64 @@ internal static class EmperorMechATests
         Eq(e.State.Players[1].Hand.Count, hand, "no card is drawn");
         Eq(e.State.PriorityPlayerId, 0);
         Rejection(e, Cmd(e, "declineAdditionalAction", 0));
+    }
+
+    private static void PassAlwaysAvailable()
+    {
+        static void PassOffered(MatchEngine e, int player, string what)
+        {
+            var pass = e.QueryActions(player).SingleOrDefault(a => a.Type == "pass");
+            Check(pass is { Enabled: true }, $"{what}: the pass is offered");
+        }
+        // A mandatory, restricted grant (Beyond the Line) with no Recon ability to take: pass it.
+        var s = Table(Phase.Battle, 1); ClearPersonalities(s);
+        Add(s, "training-battle-bower", 1, Zone.Battlefield, province: 0);
+        Add(s, "training-crane-samurai", 0, Zone.Battlefield, province: 0);
+        var btl = Add(s, BeyondTheLine, 1, Zone.Hand);
+        var e = MatchEngine.FromTestState(s);
+        Accept(e, Enabled(e, 1, "beyond-the-line-recon", btl.Id).Command!);
+        Check(!e.QueryActions(1).Any(a => a.Type == "useAbility" && a.Enabled && AbilityCatalog.All[a.Command!.AbilityId!].Timing != "Reaction"), "no legal action to take with the grant");
+        PassOffered(e, 1, "mandatory grant, nothing to take");
+        Accept(e, Cmd(e, "pass", 1));
+        Eq(Grants(e, 1), 0); Eq(e.State.PriorityPlayerId, 0);
+        // A restricted optional grant (Inokuchi's Iaijutsu) plus a mandatory one and an unrestricted one: three passes, one grant each, the priority kept until the last.
+        var (i, inokuchi, _, _) = InokuchiRig(bowed: false, granted: null);
+        Accept(i, Enabled(i, 1, "inokuchi-straighten", inokuchi.Id).Command!); // an ordinary action: it would forfeit grants held before it, so the other two are added after
+        i = Edit(i, st => { st.AdditionalActions.Add(new(1, null, Id: "extra-1")); st.AdditionalActions.Add(new(1, null, Tag: "beyond-the-line", RequiredActionKeyword: "Recon", Id: "extra-2", Mandatory: true)); });
+        Eq(Grants(i, 1), 3, "three additional actions held");
+        for (var left = 2; left >= 0; left--)
+        {
+            PassOffered(i, 1, $"{left + 1} grants held");
+            Accept(i, Cmd(i, "pass", 1));
+            Eq(Grants(i, 1), left, "each pass takes one grant");
+            Eq(i.State.PriorityPlayerId, left > 0 ? 1 : 0, "the priority is kept while a grant is held");
+        }
+        Eq(i.State.Phase, Phase.Battle, "one player's passes never end the battle");
+        Check(i.State.Cards[inokuchi.Id].Bowed, "Inokuchi's grant was passed, so he bows (the ruling on item 2 of the report)");
+    }
+
+    private static void BeyondTheLineOnlyItsPlayer()
+    {
+        foreach (var player in new[] { 1, 0 }) // the Attacker (player 1), then the Defender (player 0)
+        {
+            var s = Table(Phase.Battle, 1); ClearPersonalities(s); s.PriorityPlayerId = player;
+            var dojos = new[] { StrongholdOf(s, 0, HiddenFalls), StrongholdOf(s, 1, HiddenFalls) };
+            Add(s, "training-battle-bower", 1, Zone.Battlefield, province: 0);
+            Add(s, "training-crane-samurai", 0, Zone.Battlefield, province: 0);
+            var btl = Add(s, BeyondTheLine, player, Zone.Hand);
+            var e = MatchEngine.FromTestState(s);
+            Accept(e, Enabled(e, player, "beyond-the-line-recon", btl.Id).Command!);
+            Eq(Grants(e, player), 1, $"player {player} played it and holds the grant");
+            Eq(Grants(e, 1 - player), 0, "the other player holds none");
+            Check(CanUse(e, player, "hidden-falls-recon", dojos[player].Id), $"player {player} may take the granted action");
+            var other = Edit(e, st => st.PriorityPlayerId = 1 - player);
+            Check(!Options(other, 1 - player, "hidden-falls-recon", dojos[1 - player].Id).Any(a => a.Enabled), "the other player cannot use his own Recon Open as a Battle action");
+            Rejection(other, new GameCommand("useAbility", 1 - player, other.Version, dojos[1 - player].Id, AbilityId: "hidden-falls-recon", Province: 0, Provinces: [0]));
+            var hand = e.State.Players[player].Hand.Count;
+            Accept(e, Options(e, player, "hidden-falls-recon", dojos[player].Id).Single(a => a.Enabled).Command!);
+            Eq(e.State.Players[player].Hand.Count, hand + 1, "its player took it and drew");
+            Check(e.State.Players[0].Provinces[0].Reconnaissance[player] && !e.State.Players[0].Provinces[0].Reconnaissance[1 - player], "Reconnaissance is his alone");
+        }
     }
 
     // ---- One Action, Two Strikes -----------------------------------------------------------------------------------------------------------------------
