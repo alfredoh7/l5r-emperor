@@ -7292,6 +7292,9 @@ public sealed partial class MatchEngine
         // Doji Yuka (issue #453, batch 2): "After Yuka performs a Political action: Give her +3C until it ends" -- applied as her action begins to resolve, removed when it completes.
         BeginPerformerActionTraits(ability, command, source);
         RecordPerformedKeywordActions(ability, command, source); // Forgotten Legacy pass (issue #467), batch 1: Daigotsu Murota's "has performed a Dark Virtue action this turn".
+        // Issue #501, mechanics group D (EmperorMechD.cs): Narizane's per-turn Recon-action counter. Counted only here, where the action's effects resolve (partially negated ones included);
+        // a wholly negated action (ResolveNegatedAction / AbortActionForBlockedCost) never reaches this point and does not count (Mendon's ruling).
+        CountReconActionTaken(ability, command, source);
         if (ability.IssuesDuel)
         {
             if (source is not null && Definition(source).Type == CardType.Strategy && source.Zone == Zone.Hand) DiscardFate(player, source);

@@ -5,9 +5,13 @@ namespace L5R.Core;
 // Yajinden - exp3 (personality-wave-92), Broken Cipher, Indecision and Amazing Feat (strategy-wave-78). Each was read against its scan.
 //
 // New primitives (each reads the core rules; none conflicts with them):
-//   * A PER-PLAYER PER-TURN RECON-ACTION COUNTER (item 28): every action a player TAKES that is a Recon action (ActionCarriesKeyword: the ability's own "Recon" tag or its card's keyword) counts,
-//     negated or not, at the moment its use is spent (RecordPerformedKeywordActions, reached by RunAbilityEffects and ResolveNegatedAction). Both players' counters return to 0 as each End Phase
-//     finishes (FinishTurn: every player's End Phase is the end of a turn, so the count is always "this turn").
+//   * A PER-PLAYER PER-TURN RECON-ACTION COUNTER (item 28): every Recon action a player takes (ActionCarriesKeyword: the ability's own "Recon" tag or its card's keyword) counts as its effects
+//     begin to resolve (RunAbilityEffects). Mendon's ruling: a partially negated action counts, a wholly negated one does not. "Wholly negated" is the engine's whole-action negation path --
+//     ResolveNegatedAction (the held action's negation, Burning Dreams, Paralyzing Touch, Bad Kharma ...) and AbortActionForBlockedCost -- which pays the costs but never enters
+//     RunAbilityEffects; "partially negated" is an action that does resolve with some of its effects stopped per card (MatchState.NegatedEffects: a negated bow, move, destruction ...).
+//     Both players' counters return to 0 as each End Phase finishes (FinishTurn: every player's End Phase is the end of a turn, so the count is always "this turn").
+//     The same rule holds for the other records by construction: the hand-action count is taken in FinishActionEffectTracking, which a wholly negated action never reaches (CompleteNegatedAction
+//     opens no after-action window), and the attach log and cards-into-hand record note what actually happened, which a wholly negated action never does.
 //   * "BOW UP TO N DIFFERENT CARDS OF ONE UNIT", N READ LIVE (Narizane): N is read when the action is taken (UseAbility, after validation; stored on MechDState so a paused action keeps it) and the acting
 //     player chooses 0..N different unbowed cards of the target's unit as the action resolves (a DeciderChoice of the acting player's, spec "narizane-bow").
 //   * THE ATTACH LOG (item 29): every card a player attaches -- an Equip (Limited or Battle), an ability's attach from a hand or a discard pile, a Focus Effect's attach, a created attachment --
@@ -110,7 +114,7 @@ public sealed partial class MatchEngine
 
     // ---- item 28: the Recon-action counter --------------------------------------------------------------------------------------------------------------------------------------------------
 
-    // Called where an action's use is spent (RecordPerformedKeywordActions: an action resolving, or resolving negated). A Strategy's action has no performer, so this is asked before that check.
+    // Called from RunAbilityEffects only: an action whose effects resolve, wholly or in part. A wholly negated action never gets here.
     private void CountReconActionTaken(AbilityDefinition ability, GameCommand command, CardInstance? source)
     {
         if (!IsAction(ability) || TraitReactions.Is(command.AbilityId ?? "") || !ActionCarriesKeyword(ability, source, "Recon")) return;

@@ -46,6 +46,10 @@ internal static class EmperorMechDTests
         ("Daigotsu Yajinden, edges: his own dead Personality comes back too; a Loyal Personality who will not be controlled stays dead; one destroyed again before the turn ends stays in the discard pile; Yajinden loses 4 Honor as he enters play", YajindenEdges),
         // Item 32 (engine half) and Amazing Feat.
         ("Amazing Feat: bowing an Artisan, it creates a copy of a non-Unique Personality with his base Force, Chi, Personal Honor, keywords and base abilities (not his traits); the view marks it as a copy with its conditions; it is removed as its player's next turn begins, not before", AmazingFeatCopies),
+        // Mendon's ruling (via the coordinator): a partially negated action counts, a wholly negated one does not.
+        ("Negation, Recon counter: a wholly negated Recon action (the whole-action negation path) is not counted; a partially negated one (its destruction of the target negated) is", NegationRecon),
+        ("Negation, Indecision's record: a wholly negated draw action is not counted (and opens no window); a partially negated one that still puts a card into the hand (Subtle Games, its dishonor negated) is", NegationHandActions),
+        ("Negation, Broken Cipher's records: a wholly negated Equip (Battle) attaches nothing and logs nothing, so Broken Cipher stays unavailable; a wholly negated draw puts no card into the hand, so it stays available", NegationCipherRecords),
         ("Amazing Feat, edges: abilities that copy abilities are not copied; a Unique Personality may not be targeted; without an unbowed Artisan it may not be taken; a copied ability is usable by the copy", AmazingFeatEdges),
     ]);
 
@@ -469,6 +473,91 @@ internal static class EmperorMechDTests
         Check(!Options(pe, 1, "yajinden-raise", y3.Id).Any(o => o.Enabled && (o.TargetIds?.Contains(alive.Id) ?? false)), "a Personality in play is not a target");
         // After Yajinden enters play: lose 4 Honor (his trait, the shared EntryHonorLoss).
         Eq(CardCatalog.Get(Yajinden).EntryHonorLoss, 4, "the entry trait is EntryHonorLoss 4");
+    }
+
+    // ---- whole vs partial negation (Mendon's ruling) -----------------------------------------------------------------------------------------------------------------------------------------
+
+    private static void NegationRecon()
+    {
+        // Wholly negated: the engine's whole-action negation path (its costs paid, nothing of it resolves).
+        var s = Table(Phase.Action, 1);
+        var actor = Add(s, "training-recon-actor", 1, Zone.Home);
+        var e = MatchEngine.FromTestState(s); e.NegateEveryAction = true;
+        Accept(e, Use(e, 1, "training-recon-open", actor.Id));
+        Check(Logged(e, "abilityUsed") && e.State.Events.Any(x => x.Message.Contains("(negated)")), "the action was taken, wholly negated");
+        Eq(Recon(e, 1), 0, "a wholly negated Recon action is not counted");
+        // Partially negated: the Recon Ranged Attack resolves, but its destruction of the target is negated.
+        var b = Table(Phase.Battle, 1);
+        var scout = Add(b, "training-recon-actor", 1, Zone.Battlefield, province: 0);
+        var enemy = Add(b, "training-follower", 0, Zone.Attached, province: 0, parent: Add(b, "training-lion-samurai", 0, Zone.Battlefield, province: 0).Id);
+        b.NegatedEffects.Add(new("destroy", enemy.Id));
+        var be = MatchEngine.FromTestState(b);
+        Accept(be, Offer(be, 1, "training-recon-attack", scout.Id, enemy.Id));
+        for (var guard = 0; be.State.PendingChoice is { } pending && guard < 8; guard++)
+        {
+            var decline = be.QueryActions(pending.PlayerId).FirstOrDefault(a => a.Enabled && a.Command is not null && a.Type is "declineReaction" or "pass" or "chooseAttackTarget");
+            if (decline is null) break;
+            Accept(be, decline.Command!);
+        }
+        Eq(be.State.Cards[enemy.Id].Zone, Zone.Attached, "its destruction was negated: the target survives");
+        Eq(Recon(be, 1), 1, "a partially negated Recon action is counted");
+    }
+
+    private static void NegationHandActions()
+    {
+        // Wholly negated second draw: the count stays at one, no Indecision window.
+        var (e, first, second, indecision) = IndecisionTable();
+        Accept(e, Use(e, 1, "training-limited-draw", first.Id)); Accept(e, PassC(e));
+        var hand = e.State.Players[1].Hand.Count;
+        var negating = Edit(e, st => { }); negating.NegateEveryAction = true;
+        Accept(negating, Use(negating, 1, "training-limited-draw", second.Id));
+        Eq(negating.State.Players[1].Hand.Count, hand - 1, "the wholly negated action drew nothing (the Strategy left the hand)");
+        Eq(negating.State.MechD.HandActionsThisPhase[1], 1, "a wholly negated action is not counted");
+        Check(negating.State.PendingChoice?.Type != "afterActionResolvedReaction", "no Indecision window");
+        // Partially negated: Subtle Games ("Dishonor him. Draw a card") with the dishonor negated still draws, so it counts -- the second such action opens Indecision's window.
+        var s = Table(Phase.Action, 1);
+        var courtier = Add(s, "training-crane-samurai", 1, Zone.Home); GiveKeyword(courtier, "Courtier");
+        var victim = Add(s, "training-lion-samurai", 0, Zone.Home);
+        var draw = Add(s, "training-bushido-virtue", 1, Zone.Hand);
+        var games = Add(s, "oracle-l5r-9932", 1, Zone.Hand);
+        Add(s, "training-item", 1, Zone.Hand); Add(s, "training-item", 1, Zone.Hand);
+        var holder = Add(s, Indecision, 0, Zone.Hand);
+        var p = MatchEngine.FromTestState(s);
+        Accept(p, Use(p, 1, "training-limited-draw", draw.Id)); Accept(p, PassC(p));
+        var partial = Edit(p, st => st.NegatedEffects.Add(new("dishonor", victim.Id)));
+        Accept(partial, Use(partial, 1, "subtle-games-dishonor", games.Id, victim.Id, courtier.Id));
+        Check(!partial.State.Cards[victim.Id].Dishonorable, "its dishonor was negated");
+        Eq(partial.State.MechD.HandActionsThisPhase[1], 2, "the partially negated action still put a card into the hand: counted");
+        Eq(partial.State.PendingChoice?.Type, "afterActionResolvedReaction", "the second such action opens the window");
+        Check(CanUse(partial, 0, "indecision-discard", holder.Id), "Indecision is offered");
+    }
+
+    private static void NegationCipherRecords()
+    {
+        var s = Table(Phase.Battle, 1); s.PriorityPlayerId = 0; RealStronghold(s, 0);
+        var shugenja = Add(s, "training-shugenja", 0, Zone.Battlefield, province: 0);
+        Add(s, "training-lion-samurai", 1, Zone.Battlefield, province: 0);
+        var spell = Add(s, "training-spell", 0, Zone.Hand);
+        var cipher = Add(s, Cipher, 0, Zone.Hand);
+        var e = MatchEngine.FromTestState(s); e.NegateEveryAction = true;
+        EquipBattle(e, 0, shugenja, spell);
+        Check(e.State.Cards[spell.Id].Zone != Zone.Attached, "the wholly negated Equip attached nothing");
+        Eq(e.State.MechD.AttachLog.Count, 0, "and logged nothing");
+        var later = Edit(e, st => st.PriorityPlayerId = 0);
+        Check(!CanUse(later, 0, "broken-cipher-draw", cipher.Id), "so Broken Cipher may not be taken");
+        // A wholly negated draw puts no card into the hand: with a Spell attached, Broken Cipher stays available.
+        var t = Table(Phase.Battle, 1); t.PriorityPlayerId = 0; RealStronghold(t, 0);
+        var sh2 = Add(t, "training-shugenja", 0, Zone.Battlefield, province: 0);
+        Add(t, "training-lion-samurai", 1, Zone.Battlefield, province: 0);
+        var sp2 = Add(t, "training-spell", 0, Zone.Hand);
+        var first = Add(t, Cipher, 0, Zone.Hand); var second = Add(t, Cipher, 0, Zone.Hand);
+        var te = MatchEngine.FromTestState(t);
+        EquipBattle(te, 0, sh2, sp2);
+        var negated = Edit(te, st => st.PriorityPlayerId = 0); negated.NegateEveryAction = true;
+        Accept(negated, Use(negated, 0, "broken-cipher-draw", first.Id));
+        Check(!negated.State.MechD.CardsIntoHandThisPhase[0], "the wholly negated draw put no card into the hand");
+        var again = Edit(negated, st => st.PriorityPlayerId = 0);
+        Check(CanUse(again, 0, "broken-cipher-draw", second.Id), "so the second copy is still available");
     }
 
     // ---- item 32 and Amazing Feat -----------------------------------------------------------------------------------------------------------------------------------------------------------
