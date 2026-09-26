@@ -289,7 +289,7 @@ public sealed partial class MatchEngine
         "Force" => CardForce(card),
         "PersonalHonor" => CardPersonalHonor(card),
         _ => PersonalityChi(card),
-    }) + RemADuelStatBonus(card); // Bend like a Reed (group A): "+2 to his duel stat until the duel ends"; Falling Rain Dojo (group F): +1 until the duel ends.
+    }) + RemADuelStatBonus(card) + P4DuelStatBonus(card, stat); // Secret Reserve (issue #503): +1C for each Weapon on the duelist. // Bend like a Reed (group A): "+2 to his duel stat until the duel ends"; Falling Rain Dojo (group F): +1 until the duel ends.
 
     private void ResolveDuel()
     {

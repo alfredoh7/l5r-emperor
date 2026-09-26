@@ -686,6 +686,11 @@ public static class CardCatalog
             .Concat(PublishedContent.ItemWave22.Cards) // Issue #503, pass group P2: Armor of the Uruwashii, Pillowbook
             .Concat(PublishedContent.HoldingWave33.Cards) // Issue #503, pass group P2: Shrine to Nimuro
             .Concat(PublishedContent.EventWave13.Cards) // Issue #503, pass group P2: Growing Hostility, Gaining Advantage, The Agony of Her Gaze, The Scorpion Wall is Finished
+            .Concat(PublishedContent.PersonalityWave108.Cards) // Issue #503, group P4: Bayushi Tenzan, Gozaru no Oni, Ikoma Shinohara, Shinjo Hayan, Shinjo Sarang, Tsuruchi Nobukatsu
+            .Concat(PublishedContent.StrategyWave94.Cards) // Issue #503, group P4: Asset Denial, Firm Censure, Games of Will, No Time for Games, Pillar Tattoo, Power of Strength, Preceding Reputation, Ride the Breeze, Scars of War, Secret Reserve, Show of Restraint, The Snow Has Teeth, Too Much for Mortals, Yojimbo Assemble
+            .Concat(PublishedContent.SpellWave38.Cards) // Issue #503, group P4: Drawing on the Mountain, The Menacing Sky
+            .Concat(PublishedContent.ItemWave30.Cards) // Issue #503, group P4: Hunger
+            .Concat(PublishedContent.EventWave21.Cards) // Issue #503, group P4: Too Close to Home
             .ToDictionary(c => c.Id, StringComparer.Ordinal);
     }
 }

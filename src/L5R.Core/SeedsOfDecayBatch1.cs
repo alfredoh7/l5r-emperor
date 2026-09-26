@@ -5,10 +5,11 @@ public sealed partial class MatchEngine
 {
     // ---- Defensive Blockade: "It does not contribute Force to its army's total Force this battle" ---------------------------------------------------------------
     // Deep Roots (The Shadow's Embrace pass, issue #476 batch 3) negates every effect which prevents its Personality from contributing Force (DeepRooted, ShadowsEmbraceBatch3.cs).
-    private bool ForceContributionNegated(CardInstance card) => card.ForceContributionNegatedBattle == _state.BattleNumber && _state.Phase == Phase.Battle && !DeepRooted(card);
+    private bool ForceContributionNegated(CardInstance card) => card.ForceContributionNegatedBattle == _state.BattleNumber && _state.Phase == Phase.Battle && !DeepRooted(card) && !GamesOfWillShields(card); // Games of Will (issue #503)
     private void NegateForceContribution(CardInstance card, string sourceName)
     {
         card.ForceContributionNegatedBattle = _state.BattleNumber;
+        NoteForceContributionNegated(card); // Games of Will (issue #503)
         Emit("forceContributionNegated", $"{sourceName}: {Definition(card).Name} contributes no Force to its army's total this battle.", card.OwnerId, card.Id);
     }
 

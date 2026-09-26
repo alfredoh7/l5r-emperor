@@ -1207,6 +1207,8 @@ public sealed class MatchState
     public EmperorP1State P1 { get; set; } = new(); // Issue #503, group P1 (EmperorP1.cs).
     // Issue #503, pass group P2 (EmperorP2*.cs).
     public EmperorP2State P2 { get; set; } = new();
+    // Issue #503, group P4 (EmperorP4.cs): watches, shields and records of the target/lock/watch pass.
+    public EmperorP4State P4 { get; set; } = new();
 }
 
 /// <summary>Isawa Norimichi: PlayerId's army has +Amount total Force in the battle numbered Battle (while it has any units).</summary>

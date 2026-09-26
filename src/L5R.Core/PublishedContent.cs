@@ -2670,4 +2670,14 @@ public static class PublishedContent
     public static PublishedSnapshot HoldingWave33 { get; } = Load("L5R.Published.HoldingWave33.json", "holding-wave-33", requireDecks: false);
     /// <summary>Event wave 13 (issue #503, pass group P2): Growing Hostility, Gaining Advantage, The Agony of Her Gaze, The Scorpion Wall is Finished (EmperorP2*.cs).</summary>
     public static PublishedSnapshot EventWave13 { get; } = Load("L5R.Published.EventWave13.json", "event-wave-13", requireDecks: false);
+    /// <summary>Personality wave 108 (issue #503, group P4: EmperorP4*.cs): Bayushi Tenzan, Gozaru no Oni, Ikoma Shinohara, Shinjo Hayan, Shinjo Sarang, Tsuruchi Nobukatsu.</summary>
+    public static PublishedSnapshot PersonalityWave108 { get; } = Load("L5R.Published.PersonalityWave108.json", "personality-wave-108", requireDecks: false);
+    /// <summary>Strategy wave 94 (issue #503, group P4: EmperorP4*.cs): Asset Denial, Firm Censure, Games of Will, No Time for Games, Pillar Tattoo, Power of Strength, Preceding Reputation, Ride the Breeze, Scars of War, Secret Reserve, Show of Restraint, The Snow Has Teeth, Too Much for Mortals, Yojimbo Assemble.</summary>
+    public static PublishedSnapshot StrategyWave94 { get; } = Load("L5R.Published.StrategyWave94.json", "strategy-wave-94", requireDecks: false);
+    /// <summary>Spell wave 38 (issue #503, group P4: EmperorP4*.cs): Drawing on the Mountain, The Menacing Sky.</summary>
+    public static PublishedSnapshot SpellWave38 { get; } = Load("L5R.Published.SpellWave38.json", "spell-wave-38", requireDecks: false);
+    /// <summary>Item wave 30 (issue #503, group P4: EmperorP4*.cs): Hunger.</summary>
+    public static PublishedSnapshot ItemWave30 { get; } = Load("L5R.Published.ItemWave30.json", "item-wave-30", requireDecks: false);
+    /// <summary>Event wave 21 (issue #503, group P4: EmperorP4*.cs): Too Close to Home.</summary>
+    public static PublishedSnapshot EventWave21 { get; } = Load("L5R.Published.EventWave21.json", "event-wave-21", requireDecks: false);
 }

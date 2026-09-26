@@ -233,6 +233,7 @@ public sealed partial class MatchEngine
         Emit("unitAssigned", $"{Definition(card).Name} assigned to {BattlefieldLabel(battlefield)}.", card.OwnerId, card.Id);
         FireMiddayShadowAssigned(card);
         FireVeiledMenaceAssigned(card);
+        P4Assigned(card); // The Menacing Sky (issue #503)
         if (attacking) FireConsecrationWatches(card, battlefield);
         if (attacking) FireAssignedToAttackWatches(card);
         return true;
