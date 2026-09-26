@@ -60,6 +60,7 @@ public sealed partial class MatchEngine
         CountReconStrategyAction(abilityId, playerId, sourceId); // Advanced Intelligence (Seeds of Decay pass, issue #453, batch 1).
         // Moksha Patam (issue #453 batch 5): "After an action resolves, if a player gained Honor from its effects" -- a trait, so applied here before any Reaction to the same point.
         ApplyMokshaPatamTokens();
+        ApplyP3AfterActionTraits(affected); // Deep Snows (issue #503, EmperorP3.cs): its trait, before any Reaction to the same point.
         // The Shadow's Embrace pass (issue #476), batch 3: Crowded Streets' trait -- a trait, so before any Reaction to the same point (ShadowsEmbraceBatch3.cs).
         if (OpenCrowdedStreetsTrait(closesTo)) return true;
         // Emperor Edition remaining-cards pass (issue #492), group D: The Shadow Court's and The Sincerity of the Dragon's traits (EmperorRemainingD.cs) -- also before any Reaction to the same moment.
@@ -100,11 +101,13 @@ public sealed partial class MatchEngine
         if (abilityId == "takeuchi-draw") return ActionAttachedFollowerFromHandTo(source, playerId);
         // Chrysanthemum Blossom (Emperor Edition remaining-cards pass, issue #492 group G): "After this Personality is assigned" -- the assignment command's own record, not a catalogued action.
         if (abilityId == "chrysanthemum-blossom-boost") return ChrysanthemumBlossomApplies(source, playerId, facts);
+        if (P3AssignmentOrActionApplies(source, abilityId, facts) is { } p3Assigned) return p3Assigned; // Utaku Tairu - exp (issue #503): "after a Personality assigns or moves"
         if (facts.AbilityId == AssignedSentinel) return false;
         if (!AbilityCatalog.All.ContainsKey(facts.AbilityId)) return false;
         if (FollowupsAfterActionApplies(source, abilityId, playerId) is { } followups) return followups;
         if (EmperorP1AfterActionApplies(source, abilityId, playerId) is { } p1) return p1; // Issue #503 (EmperorP1.cs): Itoku, Hida Bakishi
         if (P2AfterActionApplies(abilityId, playerId, facts) is { } p2After) return p2After; // issue #503: A Champion in Court (EmperorP2.cs)
+        if (P3AfterActionApplies(source, abilityId, playerId, facts) is { } p3) return p3; // issue #503 (EmperorP3.cs)
         if (MechDAfterActionApplies(source, abilityId, playerId, facts) is { } mechD) return mechD; // Indecision (issue #501, EmperorMechD.cs) // Asako Chukage (issue #498) // Equip's facts name no catalogued ability: only the Reaction above reads them.
         return abilityId switch
         {

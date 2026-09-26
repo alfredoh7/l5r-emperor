@@ -90,6 +90,12 @@ public sealed partial class MatchEngine
             _state.FirstActionRestriction = new(holder, null, false, keyword);
             Emit("firstActionLimited", $"{Player(holder).Name}'s first Battle action must be a {keyword} action.", holder);
         }
+        // Shosuro Toson - exp2 (issue #503, EmperorP3.cs): the claimant's first action must be performed by the card that claimed it.
+        if (_state.FirstActionRestriction is null && P3FirstActionPerformerLimit(engage, holder) is { } forcedPerformer)
+        {
+            _state.FirstActionRestriction = forcedPerformer;
+            Emit("firstActionLimited", $"{Player(holder).Name}'s first Battle action must be performed by {forcedPerformer.Reason}.", holder, forcedPerformer.PerformerId);
+        }
         return holder;
     }
 
@@ -116,7 +122,7 @@ public sealed partial class MatchEngine
     private string FirstActionLimitMessage(FirstActionRestriction limit) => limit.MustPass
         ? "Rebuilding Kyuden Hida: the Attacker may not announce a Battle action before the Defender's first normal opportunity to act or pass."
         : limit.ActionKeyword is { } keyword ? $"Jade's Roar: your first Battle action must be a {keyword} action."
-        : $"{FirstPerformerSource()}: your first Battle action must be performed by {Definition(Card(limit.PerformerId)).Name}."; // issue #503: or Scouting the Pass
+        : $"{limit.Reason ?? FirstPerformerSource()}: your first Battle action must be performed by {Definition(Card(limit.PerformerId)).Name}."; // issue #503: or Scouting the Pass
 
     // Applied to a useAbility by ValidateAbility (so offered actions already respect it) and to the two other
     // Battle-action commands by Apply. Ignored inside any reaction window (a Reaction is not the first Battle action).

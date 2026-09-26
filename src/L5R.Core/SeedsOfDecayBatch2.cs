@@ -295,7 +295,7 @@ public sealed partial class MatchEngine
 
     // "+1PH if any other player is Dragon Clan".
     private int StaticPersonalHonorBonus(CardInstance card) =>
-        Definition(card).Effect == "hotaka-paragon" && _state.Players.Any(p => p.Id != card.OwnerId && p.Clan == "Dragon") ? 1 : 0;
+        (Definition(card).Effect == "hotaka-paragon" && _state.Players.Any(p => p.Id != card.OwnerId && p.Clan == "Dragon") ? 1 : 0) + P3PersonalHonorBonus(card); // + Utaku Lishan (issue #503)
 
     // "The amount of Honor you need in order to win an Honor Victory is reduced by Hotaka's Personal Honor minus one" -- each copy in play.
     private int HonorVictoryThreshold(int playerId) =>

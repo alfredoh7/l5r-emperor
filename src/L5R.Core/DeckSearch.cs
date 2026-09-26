@@ -97,6 +97,7 @@ public sealed record SearchCriteria(string Noun, CardType[]? Types = null, strin
     // "A Kiho Battle Strategy" (Martial Instruction, issue #492): a card with a printed Battle action -- an ability whose timing is Battle or Battle/Open.
     bool BattleStrategy = false,
     // "A Strategy with a Political ability" (Gaining Advantage, issue #503): one of the card's printed actions is an action with this keyword (EmperorP2Search.cs).
+    // "A card with a Recon ability" (Daidoji Akeha, issue #503): one of the card's printed actions carries the keyword (its own tag, or the card's keyword).
     string? AbilityKeyword = null);
 
 /// <summary>One searchable deck, the criteria that deck's candidates must meet, and what happens to the chosen
@@ -186,6 +187,7 @@ public static class SearchCatalog
         .Concat(EmperorFollowupsSearches.All) // Emperor Edition follow-ups (issue #498): EmperorFollowupsSearch.cs.
         .Concat(EmperorP2Searches.All) // Issue #503, pass group P2: EmperorP2Search.cs.
         .Concat(EmperorP6Searches.All) // issue #503: EmperorP6.cs.
+        .Concat([EmperorP3Abilities.AkehaReconSearch]) // Daidoji Akeha (issue #503, EmperorP3.cs).
         .ToDictionary(s => s.Id, StringComparer.Ordinal);
 
     /// <summary>The search an Event carries in its Effect (an Event has no abilities of its own to hang a spec on).</summary>
@@ -550,6 +552,7 @@ public sealed partial class MatchEngine
     private void FinishDeferredAction(int playerId, string origin, string sourceCardId, List<string>? bowedBefore)
     {
         _state.PendingChoice = null;
+        P3AfterDeferredAction(playerId, sourceCardId); // issue #503: an action that ended in a search or a look has ended (a Reaction lockout ends)
         if (origin == "event") { ResumeEventAfterDeferral(playerId, sourceCardId); return; }
         if (bowedBefore is not null && OpenBowReactionWindow(playerId, bowedBefore.ToHashSet(StringComparer.Ordinal), 1 - playerId)) return;
         if (OpenOverconfidentDrawWindow(1 - playerId)) return;

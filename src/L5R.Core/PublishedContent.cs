@@ -2706,4 +2706,12 @@ public static class PublishedContent
     public static PublishedSnapshot ItemWave38 { get; } = Load("L5R.Published.ItemWave38.json", "item-wave-38", requireDecks: false);
     /// <summary>Spell wave 46 (issue #503, pass group P6): Illusory Defense (EmperorP6.cs).</summary>
     public static PublishedSnapshot SpellWave46 { get; } = Load("L5R.Published.SpellWave46.json", "spell-wave-46", requireDecks: false);
+    /// <summary>Personality wave 104 (Emperor Edition group P3, issue #503): Asako Kikugoro, Daidoji Akeha, Daigotsu Miki, Daigotsu Tenbatsu, Hida Fujita, Ikoma Ayumu, Kakita Kenta, Shosuro Aroru - exp2, Shosuro Toson - exp2, Utaku Lishan, Utaku Tairu - exp, Thunder Dragon - exp2.</summary>
+    public static PublishedSnapshot PersonalityWave104 { get; } = Load("L5R.Published.PersonalityWave104.json", "personality-wave-104", requireDecks: false);
+    /// <summary>Spell wave 34 (Emperor Edition group P3, issue #503): Centering the Soul, Erosion.</summary>
+    public static PublishedSnapshot SpellWave34 { get; } = Load("L5R.Published.SpellWave34.json", "spell-wave-34", requireDecks: false);
+    /// <summary>Strategy wave 90 (Emperor Edition group P3, issue #503): Deep Snows, Destructive Priorities, Forging Destiny, Iron Will, Request Authorization, Easy Persuasion.</summary>
+    public static PublishedSnapshot StrategyWave90 { get; } = Load("L5R.Published.StrategyWave90.json", "strategy-wave-90", requireDecks: false);
+    /// <summary>Follower wave 41 (Emperor Edition group P3, issue #503): Hida Defenders, Vigilant Riders.</summary>
+    public static PublishedSnapshot FollowerWave41 { get; } = Load("L5R.Published.FollowerWave41.json", "follower-wave-41", requireDecks: false);
 }

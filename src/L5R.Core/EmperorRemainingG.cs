@@ -234,7 +234,7 @@ public sealed partial class MatchEngine
         var assigned = _state.AssignedThisCommand.ToArray();
         var playerId = Card(assigned[0]).OwnerId;
         _state.AssignedThisCommand = [];
-        if (!assigned.Any(id => _state.Cards.TryGetValue(id, out var c) && c.Zone == Zone.Battlefield && Attachments(id).Any(a => AbilityIdsOf(a).Contains("chrysanthemum-blossom-boost")))) return;
+        if (!assigned.Any(id => _state.Cards.TryGetValue(id, out var c) && c.Zone == Zone.Battlefield && Attachments(id).Any(a => AbilityIdsOf(a).Contains("chrysanthemum-blossom-boost"))) && !P3WatchesAssignment(assigned)) return; // + Utaku Tairu - exp (issue #503)
         _state.LastResolvedAction = new ResolvedActionFacts
         {
             AbilityId = AssignedSentinel, PlayerId = playerId, SourceId = null, PerformerId = null,

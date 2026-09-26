@@ -75,9 +75,11 @@ public sealed partial class MatchEngine
     // GainHonor's first step. Nothing happens unless a Reaction could be played on this change now.
     private void OfferHonorChangeWindow(int playerId, int amount, string reason)
     {
+        _p3LastHonorChange = null;
         if (_payingActionCost || _state.PendingHonorChange is not null || _state.PendingChoice is { Type: "honorChangeReaction" }) return;
-        if (!CurrentActionFacts(out var key, out var actorId)) return;
+        if (!CurrentActionFacts(out var key, out var actorId) && !P3NonActionHonorChange(playerId, amount, out key, out actorId)) return; // Destructive Priorities (issue #503): a gain no action made
         var occurrence = _honorChangeOccurrence++;
+        _p3LastHonorChange = (key, occurrence);
         if (occurrence < _honorWindowsDone) return;
         var change = new PendingHonorChange { ActionKey = key, ActionPlayerId = actorId, Occurrence = occurrence, PlayerId = playerId, Amount = amount, Reason = reason };
         if (!HonorChangeReactionAvailable(0, change) && !HonorChangeReactionAvailable(1, change)) return;
@@ -96,13 +98,14 @@ public sealed partial class MatchEngine
     private bool HonorChangeReactionAvailable(int reactorId, PendingHonorChange change) => HonorChangeReactionsOf(reactorId, change).Any();
 
     private bool HonorChangeReactionAvailable(CardInstance card, string abilityId, PendingHonorChange change) =>
-        !BowedBarsAbilities(card) && !ActionLocked(card) && !BarredByCherryBlossom(abilityId) && Unspent(card, abilityId) && CanPayReaction(card, abilityId)
+        !BowedBarsAbilities(card) && !ActionLocked(card) && !BarredByCherryBlossom(abilityId) && !P3ReactionLocked(card.OwnerId, abilityId) /* issue #503 */ && Unspent(card, abilityId) && CanPayReaction(card, abilityId)
         && HonorChangeReactionApplies(card, abilityId, change);
 
     // Each Reaction's own printed condition (its cost's affordability is asked by the caller).
     private bool HonorChangeReactionApplies(CardInstance card, string abilityId, PendingHonorChange change)
     {
         var reactor = card.OwnerId;
+        if (P3HonorChangeApplies(card, abilityId, change) is { } p3) return p3; // Destructive Priorities (issue #503)
         switch (abilityId)
         {
             // "Before a player gains or loses Honor from an action's effects, bow your performing Courtier": any change, and an unbowed Courtier to bow.

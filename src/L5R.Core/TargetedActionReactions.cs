@@ -176,7 +176,7 @@ public sealed partial class MatchEngine
     private bool TargetedActionReactionAvailable(CardInstance card, string abilityId, ReactionSubject subject)
     {
         var ability = AbilityCatalog.All[abilityId];
-        return (!BowedBarsAbilities(card) || abilityId == "red-crane-dojo-ninja" || MechEEvenIfBowed(abilityId) /* issue #501: Kakita Kae's trait */) && !ActionLocked(card) && !BarredByCherryBlossom(abilityId) /* Cherry Blossom Festival (issue #492, group F; traits exempt, R4) */ && !AbilityUseSpent(card.AbilityUses, ability, ability.UsageKey ?? abilityId)
+        return (!BowedBarsAbilities(card) || abilityId == "red-crane-dojo-ninja" || MechEEvenIfBowed(abilityId) /* issue #501: Kakita Kae's trait */) && !ActionLocked(card) && !BarredByCherryBlossom(abilityId) /* Cherry Blossom Festival (issue #492, group F; traits exempt, R4) */ && !P3ReactionLocked(card.OwnerId, abilityId) /* issue #503 */ && !AbilityUseSpent(card.AbilityUses, ability, ability.UsageKey ?? abilityId)
             && TargetedActionReactionApplies(card, abilityId, subject) && CanPayReaction(card, abilityId);
     }
 
@@ -324,7 +324,7 @@ public sealed partial class MatchEngine
             case "chugo-seido-redirect":
                 return command.PlayerId != card.OwnerId && affected.OwnerId == card.OwnerId && Definition(affected).Type == CardType.Personality && ChugoSeidoCandidates(card, subject, affected).Any();
             default:
-                return RemATargetedActionReactionApplies(card, abilityId, subject, affected) || EmperorRemainingCTargetedReactionApplies(card, abilityId, subject, affected) || RulingR2TargetedReactionApplies(card, abilityId, subject, affected) || MechBTargetedReactionApplies(card, abilityId, subject, affected) || MechCTargetedReactionApplies(card, abilityId, subject, affected) || MechETargetedReactionApplies(card, abilityId, subject, affected) || P4TargetedReactionApplies(card, abilityId, subject, affected) || P5TargetedReactionApplies(card, abilityId, subject, affected); /* issue #501: The Dark Naga */ // ruling pass R2; issue #492: group A (Ancestral Protection, Caught in the Act), group C (Snake Tattoo)
+                return RemATargetedActionReactionApplies(card, abilityId, subject, affected) || EmperorRemainingCTargetedReactionApplies(card, abilityId, subject, affected) || RulingR2TargetedReactionApplies(card, abilityId, subject, affected) || MechBTargetedReactionApplies(card, abilityId, subject, affected) || MechCTargetedReactionApplies(card, abilityId, subject, affected) || MechETargetedReactionApplies(card, abilityId, subject, affected) || P4TargetedReactionApplies(card, abilityId, subject, affected) || P5TargetedReactionApplies(card, abilityId, subject, affected) || P3TargetedReactionApplies(card, abilityId, subject, affected); /* issue #501: The Dark Naga */ // ruling pass R2; issue #492: group A (Ancestral Protection, Caught in the Act), group C (Snake Tattoo)
         }
     }
 
@@ -381,6 +381,6 @@ public sealed partial class MatchEngine
                 .Select(c => ((string?)c.Id, (string?)$"{AbilityCatalog.All[abilityId].Label} · {Definition(c).Name} ({c.Id})")),
             // The Dark Naga (issue #501): one option per unbowed Forest of its controller's to bow (EmperorMechB.cs).
             EmperorMechBAbilities.DarkNagaForest => NagaForests(card).Select(c => ((string?)c.Id, (string?)$"{AbilityCatalog.All[abilityId].Label} · {Definition(c).Name} ({c.Id})")),
-            _ => MechCTargetedReactionChoices(card, abilityId) ?? [(null, null)] // Isawa Sakonoko (issue #501): one option per Spell he may bow
+            _ => P3TargetedReactionChoices(card, abilityId, subject) /* issue #503: Shosuro Aroru - exp2 */ ?? MechCTargetedReactionChoices(card, abilityId) ?? [(null, null)] // Isawa Sakonoko (issue #501): one option per Spell he may bow
         };
 }

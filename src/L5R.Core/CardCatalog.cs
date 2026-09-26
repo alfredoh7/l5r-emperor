@@ -704,6 +704,10 @@ public static class CardCatalog
             .Concat(PublishedContent.EventWave29.Cards) // Issue #503, pass group P6: Incredible Tragedy, In Search of Guidance, Dark Experiments, Distant Expansion
             .Concat(PublishedContent.ItemWave38.Cards) // Issue #503, pass group P6: Mining Apparatus
             .Concat(PublishedContent.SpellWave46.Cards) // Issue #503, pass group P6: Illusory Defense
+            .Concat(PublishedContent.PersonalityWave104.Cards) // Emperor Edition group P3 (issue #503): Asako Kikugoro, Daidoji Akeha, Daigotsu Miki, Daigotsu Tenbatsu, Hida Fujita, Ikoma Ayumu, Kakita Kenta, Shosuro Aroru - exp2, Shosuro Toson - exp2, Utaku Lishan, Utaku Tairu - exp, Thunder Dragon - exp2
+            .Concat(PublishedContent.SpellWave34.Cards) // Emperor Edition group P3 (issue #503): Centering the Soul, Erosion
+            .Concat(PublishedContent.StrategyWave90.Cards) // Emperor Edition group P3 (issue #503): Deep Snows, Destructive Priorities, Forging Destiny, Iron Will, Request Authorization, Easy Persuasion
+            .Concat(PublishedContent.FollowerWave41.Cards) // Emperor Edition group P3 (issue #503): Hida Defenders, Vigilant Riders
             .ToDictionary(c => c.Id, StringComparer.Ordinal);
     }
 }

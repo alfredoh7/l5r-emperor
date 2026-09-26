@@ -15,6 +15,7 @@ public sealed partial class MatchEngine
             if (effect.Length == 0 || effect == "none") continue;
             var mine = card.OwnerId == ownerId;
             total += P4StaticProvinceBonus(card, mine); // Drawing on the Mountain (issue #503, EmperorP4Watches.cs)
+            total += P3StaticProvinceBonus(card, mine); // Erosion (issue #503, EmperorP3.cs)
             switch (effect)
             {
                 case "shibata-provinces":

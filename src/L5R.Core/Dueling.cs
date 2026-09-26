@@ -406,6 +406,8 @@ public sealed partial class MatchEngine
         FireCowedAndDefeatedActionWatches(challengerPlayerId, null, duel.ChallengedId); // The Shadow's Embrace pass (issue #476), batch 3: a challenge targets the challenged Personality.
         MiddayShadowPerformerActionEnded(performer); // Emperor Edition Stronghold pass (issue #486), batch 1: the challenger performed the duel-issuing action.
         var draft = duel.ResultDraft!;
+        P3RecordDuelWinner(winnerId); // Kakita Kenta (issue #503): the duel's winner goes on the action's record
+        P3RecordBowedPersonalities(duel.BowedBefore); // Hida Defenders (issue #503)
         _state.LastDuel = _state.LastDuel! with { Result = draft with {
             Consequences = _state.Events.Skip(duel.ResultEventStart).ToArray(),
             Provinces = draft.Provinces.Select(p => p with { After = EffectiveProvinceStrength(Player(p.PlayerId).Provinces[p.Index]) }).ToArray(),
@@ -417,7 +419,8 @@ public sealed partial class MatchEngine
         // The duel itself is a single, complete action from challenge to consequences (issue #209):
         // once everything above has applied, the winning card's own controller gets a chance to
         // react to it having won -- before handing play back exactly where the challenge was issued.
-        if (winnerId is not null && OpenDuelWonReactionWindow(winnerId, winnerPlayerId!.Value, 1 - challengerPlayerId)) return;
+        P3EndLockouts(new(challengerPlayerId, duel.SourceCardId, duel.AbilityId)); // issue #503: the duel's action has ended (a Reaction lockout ends)
+        if (winnerId is not null && P3OpenDuelWonWindow(duel, winnerId, winnerPlayerId!.Value, 1 - challengerPlayerId)) return; // issue #503: the duel's after-action tracking runs when the window closes
         // Overconfident (issue #223): a chance to react to whichever side the duel's own outcome
         // destroyed (ApplyDuelOutcome/ApplyDuelFocusEffect, both above, already queued it via MarkDead).
         if (OpenOverconfidentDrawWindow(1 - challengerPlayerId)) return;

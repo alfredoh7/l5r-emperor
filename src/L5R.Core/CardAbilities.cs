@@ -3910,7 +3910,7 @@ public static class AbilityCatalog
         // Tamori Kusugi (oracle-l5r-7780): "Battle: Even if Kusugi is not at the current battlefield, bow him: Raise or lower the current battlefield's province's strength by 4."
         ["kusugi-raise"] = new("Battle", "Even if Kusugi is not at the current battlefield, bow him: Raise the current battlefield's province's strength by 4", "none", UsageKey: "kusugi-province", Costs: ActionCost.BowSource, SourceUnitMayBeAway: true),
         ["kusugi-lower"] = new("Battle", "Even if Kusugi is not at the current battlefield, bow him: Lower the current battlefield's province's strength by 4", "none", UsageKey: "kusugi-province", Costs: ActionCost.BowSource, SourceUnitMayBeAway: true),
-    }.AddEmperorPersonalityBatch2().AddEmperorStrongholdBatch1().AddEmperorStrongholdBatch3().AddEmperorRemainingA().AddEmperorRemainingB().AddEmperorRemainingC().AddEmperorRemainingD().AddEmperorRemainingE().AddEmperorRemainingF().AddEmperorRemainingG().AddEmperorProxyX().AddEmperorProxyY().AddEmperorProxyZ().AddEmperorRulingR1().AddEmperorRulingR2().AddEmperorRulingR3().AddEmperorThreeS().AddEmperorFollowups().AddEmperorMechB().AddEmperorMechA().AddEmperorMechC().AddEmperorMechE().AddEmperorMechD().AddEmperorP1().AddEmperorP2().AddEmperorP4().AddEmperorP4Watches().AddEmperorP4Units().AddEmperorP4More().AddEmperorP5().AddEmperorP6()); // issue #503 group P1 (EmperorP1.cs) //Emperor Edition remaining-cards pass, group A (issue #492): EmperorRemainingA.cs. Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition remaining-cards pass (issue #492), group E: EmperorRemainingE.cs. // Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs; remaining-cards pass (issue #492), group F: EmperorRemainingF.cs. | Emperor Edition remaining-cards pass (issue #492), group G: EmperorRemainingG.cs // Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition remaining-cards pass, group A (issue #492): EmperorRemainingA.cs. Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition remaining-cards pass (issue #492), group E: EmperorRemainingE.cs. // Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs; remaining-cards pass (issue #492), group F: EmperorRemainingF.cs. | Emperor Edition remaining-cards pass (issue #492), group G: EmperorRemainingG.cs // Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition remaining-cards pass, group A (issue #492): EmperorRemainingA.cs. Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition remaining-cards pass (issue #492), group E: EmperorRemainingE.cs. // Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs; remaining-cards pass (issue #492), group F: EmperorRemainingF.cs. | Emperor Edition remaining-cards pass (issue #492), group G: EmperorRemainingG.cs // Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs.
+    }.AddEmperorPersonalityBatch2().AddEmperorStrongholdBatch1().AddEmperorStrongholdBatch3().AddEmperorRemainingA().AddEmperorRemainingB().AddEmperorRemainingC().AddEmperorRemainingD().AddEmperorRemainingE().AddEmperorRemainingF().AddEmperorRemainingG().AddEmperorProxyX().AddEmperorProxyY().AddEmperorProxyZ().AddEmperorRulingR1().AddEmperorRulingR2().AddEmperorRulingR3().AddEmperorThreeS().AddEmperorFollowups().AddEmperorMechB().AddEmperorMechA().AddEmperorMechC().AddEmperorMechE().AddEmperorMechD().AddEmperorP1().AddEmperorP2().AddEmperorP4().AddEmperorP4Watches().AddEmperorP4Units().AddEmperorP4More().AddEmperorP5().AddEmperorP6().AddEmperorP3().AddEmperorP3Priority().AddEmperorP3Entries()); // issue #503 group P1 (EmperorP1.cs) //Emperor Edition remaining-cards pass, group A (issue #492): EmperorRemainingA.cs. Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition remaining-cards pass (issue #492), group E: EmperorRemainingE.cs. // Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs; remaining-cards pass (issue #492), group F: EmperorRemainingF.cs. | Emperor Edition remaining-cards pass (issue #492), group G: EmperorRemainingG.cs // Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition remaining-cards pass, group A (issue #492): EmperorRemainingA.cs. Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition remaining-cards pass (issue #492), group E: EmperorRemainingE.cs. // Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs; remaining-cards pass (issue #492), group F: EmperorRemainingF.cs. | Emperor Edition remaining-cards pass (issue #492), group G: EmperorRemainingG.cs // Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition remaining-cards pass, group A (issue #492): EmperorRemainingA.cs. Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition remaining-cards pass (issue #492), group E: EmperorRemainingE.cs. // Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs. | Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs; remaining-cards pass (issue #492), group F: EmperorRemainingF.cs. | Emperor Edition remaining-cards pass (issue #492), group G: EmperorRemainingG.cs // Emperor Edition Personality pass (issue #477), batch 2: EmperorPersonalityBatch2.cs; Stronghold pass (issue #486), batches 1 and 3: EmperorStrongholdBatch1.cs, EmperorStrongholdBatch3.cs.
 }
 
 public sealed partial class MatchEngine
@@ -4256,7 +4256,7 @@ public sealed partial class MatchEngine
         "laws-strength-move" or "power-word-move" or "serpents-deception-move" => "move",
         "slow-death-straighten" or "well-prepared-straighten" => "straighten",
         _ => EmperorRemainingEMoveKind(abilityId) ?? RulingR2MoveKind(abilityId) // Emperor Edition remaining-cards pass (issue #492), group E: Obscured Pathways and Unnatural Flood move their target home.
-            ?? (abilityId == EmperorMechEAbilities.GreasingBattle ? "move" : null) // issue #501: Greasing the Wheels moves its target home (or straightens his unit)
+            ?? (abilityId is EmperorMechEAbilities.GreasingBattle or EmperorP3Abilities.RequestMove or EmperorP3Abilities.KentaMove or EmperorP3EntryAbilities.PersuasionMove ? "move" : null) // issue #501: Greasing the Wheels moves its target home (or straightens his unit)
     };
     // Champion of Thunder / Brothers of Goemon's own narrower half (Brothers only ever negates a
     // bow, and must not even offer the reaction when the resolving effect could never bow the
@@ -4269,7 +4269,7 @@ public sealed partial class MatchEngine
     // end up bowing -- offering the reaction anyway there is a harmless, unconsumed choice, not a
     // rules violation (Brothers' own negation, if used, still only ever removes a bow that would
     // otherwise have applied, via the NegatesEffect check StalwartNegatesBow now performs first).
-    private static bool BowsTarget(string abilityId) => abilityId is "sasumata-bow" /* issue #492 group G */ or "paid-bow" or "unorthodox-attack" or "chokehold" or "immovable-object-bow"
+    private static bool BowsTarget(string abilityId) => abilityId is "sasumata-bow" /* issue #492 group G */ or EmperorP3PriorityAbilities.ThunderDragonBow /* issue #503 */ or "paid-bow" or "unorthodox-attack" or "chokehold" or "immovable-object-bow"
         or "kuons-legacy-rage" // The Shadow's Embrace pass (issue #476), batch 3: Kuon's Legacy bows its optional target.
         or "naga-remnants-bow" or "costly-feud" or "block-supply" or "bow-before-my-will" or "surety-of-purpose" or "unexpected-support" or "spirit-monk-bow" or "spirit-paragon-bow"
         or "discovering-conspiracy-expose" or "insulting-gesture-shame" or "barred-passage-bow" or "silent-terror-bow" or "fugitive-apprehended" or "visitation-bow"
@@ -4393,6 +4393,7 @@ public sealed partial class MatchEngine
         if (abilityId == "ninja-tricks-negate") return NinjaTricksApplies(card, command);
         // Emperor Edition remaining-cards pass, group C (issue #492): the Strategy Reactions played from a hand (EmperorRemainingC.cs), judged before any target check.
         if (EmperorRemainingCAbilities.BeforeActionHandReactions.Contains(abilityId)) return EmperorRemainingCBeforeActionApplies(card, abilityId, command);
+        if (P3BeforeActionApplies(card, abilityId, command) is { } p3Before) return p3Before; // Request Authorization (issue #503, EmperorP3.cs)
         // Akodo Shihiro (issue #458): "Before (each time) another player's action resolves during a battle at Shihiro's battlefield" -- whatever the action targets, so
         // long as it is a genuine action (IsAction), taken by another player, while a battle is under way at Shihiro's own battlefield.
         if (P2BeforeActionApplies(card, abilityId, command) is { } p2Before) return p2Before; // issue #503: Armor of the Uruwashii (EmperorP2.cs)
@@ -4461,7 +4462,7 @@ public sealed partial class MatchEngine
     // whether a player holds an opportunity at all, and what the window listing offers; ValidateAbility
     // remains the authority on a submitted command.
     private bool BeforeActionReactionAvailable(CardInstance card, string abilityId, GameCommand command, string? affectedId = null) =>
-        !BowedBarsAbilities(card) && !ActionLocked(card) && !BarredByCherryBlossom(abilityId) && BeforeActionReactionApplies(card, abilityId, command, affectedId) // a locked Personality cannot perform a Reaction (ActionLock.cs)
+        !BowedBarsAbilities(card) && !ActionLocked(card) && !BarredByCherryBlossom(abilityId) && !P3ReactionLocked(card.OwnerId, abilityId) /* issue #503 */ && BeforeActionReactionApplies(card, abilityId, command, affectedId) // a locked Personality cannot perform a Reaction (ActionLock.cs)
         && (abilityId != "kakihara-force-bonus" || KakiharaCanReact(card, command.PlayerId))
         && !AbilityUseSpent(card.AbilityUses, AbilityCatalog.All[abilityId], AbilityCatalog.All[abilityId].UsageKey ?? abilityId);
     // Every before-action-resolves Reaction printed on an in-play card, on either side, paired with the card.
@@ -4629,7 +4630,7 @@ public sealed partial class MatchEngine
     // null); a target-dependent conditional simply falls back to its unconditional value then.
     // sourceId (issue #207 follow-up, Togashi Sakata): the performing card itself, needed to read a
     // live token count off it -- optional, since most Attacks here need no such thing.
-    private int AttackStrength(string abilityId, PlayerState player, CardInstance? target = null, string? sourceId = null) => EmperorRemainingEAttackStrength(abilityId, sourceId) ?? EmperorRemainingGAttackStrength(abilityId, sourceId) ?? ShadowsEmbraceBatch3AttackStrength(abilityId, sourceId) ?? ForgottenLegacyBatch5AttackStrength(abilityId, sourceId, target) ?? EmperorPersonalityBatch1AttackStrength(abilityId, sourceId)
+    private int AttackStrength(string abilityId, PlayerState player, CardInstance? target = null, string? sourceId = null) => P3AttackStrength(abilityId) /* issue #503 P3 */ ?? EmperorRemainingEAttackStrength(abilityId, sourceId) ?? EmperorRemainingGAttackStrength(abilityId, sourceId) ?? ShadowsEmbraceBatch3AttackStrength(abilityId, sourceId) ?? ForgottenLegacyBatch5AttackStrength(abilityId, sourceId, target) ?? EmperorPersonalityBatch1AttackStrength(abilityId, sourceId)
         ?? ShadowsEmbraceBatch2AttackStrength(abilityId, sourceId) ?? RemAAttackStrength(abilityId, sourceId) ?? P5AttackStrength(abilityId) /* issue #503 */ ?? abilityId switch
     {
         "carpenter-castle-siege" => 5,
@@ -4844,6 +4845,7 @@ public sealed partial class MatchEngine
         "paragon-strength-attack" or "breath-heavens-attack" => "Ranged", // Emperor Edition remaining-cards pass, group A (issue #492).
         "strategic-strike-attack" => "Ranged", // Emperor Edition remaining-cards pass, group C (issue #492).
         "unseen-assailant-attack" => "Ranged", // Emperor Edition remaining-cards pass (issue #492), group D.
+        EmperorP3PriorityAbilities.AroruAttack => "Ranged", // Shosuro Aroru - exp2 (issue #503).
         _ => (MechCAttackKind(abilityId) ?? EmperorP1AttackKind(abilityId)) is { } mechC ? mechC // issue #503 P1; Emperor Edition mechanics group C (issue #501).
             : P2AttackKind(abilityId) is { } p2Kind ? p2Kind // issue #503 (EmperorP2.cs)
             : P4AttackKind(abilityId) is { } p4Kind ? p4Kind // issue #503 (EmperorP4.cs)
@@ -4864,7 +4866,7 @@ public sealed partial class MatchEngine
     // every Attack while the card sat in play (Kakihara only ever cares about an Attack that targets HIM);
     // every other caller omits it and keeps the existence-only behavior described above.
     private bool AnyInPlayReactionAvailable(string trigger, Func<CardInstance, string, bool>? relevant = null) => _state.Cards.Values.Any(c => InPlay(c) && !BowedBarsAbilities(c) &&
-        AbilityIdsOf(c).Any(id => AbilityCatalog.All.TryGetValue(id, out var a) && a.Timing == "Reaction" && a.Trigger == trigger && !BarredByCherryBlossom(id) /* Cherry Blossom Festival (issue #492, group F; traits exempt, R4) */ &&
+        AbilityIdsOf(c).Any(id => AbilityCatalog.All.TryGetValue(id, out var a) && a.Timing == "Reaction" && a.Trigger == trigger && !BarredByCherryBlossom(id) /* Cherry Blossom Festival (issue #492, group F; traits exempt, R4) */ && !P3ReactionLocked(c.OwnerId, id) /* issue #503 */ &&
             !AbilityUseSpent(c.AbilityUses, a, a.UsageKey ?? id) && (relevant?.Invoke(c, id) ?? true)));
     // No kind-restricted in-play Reaction exists yet (see AttackKind); once one does, filter by
     // attack.Kind here rather than inside AnyInPlayReactionAvailable itself.
@@ -4927,7 +4929,7 @@ public sealed partial class MatchEngine
         return _state.Cards.Values.Where(c => c.OwnerId == playerId && c.Zone is Zone.Hand or Zone.FateDiscard or Zone.DynastyDiscard)
             .SelectMany(c => AbilityIdsOf(c).Select(id => (Card: c, AbilityId: id)))
             // Cherry Blossom Festival (issue #492, group F): no players may take Reactions -- a trait modelled as one is not barred (Mendon's R4 ruling, TraitReactions).
-            .Where(x => AbilityCatalog.All.TryGetValue(x.AbilityId, out var a) && a.Timing == "Reaction" && a.Trigger == trigger && !BarredByCherryBlossom(x.AbilityId) && AbilitySourceZoneAllows(a, x.Card, player));
+            .Where(x => AbilityCatalog.All.TryGetValue(x.AbilityId, out var a) && a.Timing == "Reaction" && a.Trigger == trigger && !BarredByCherryBlossom(x.AbilityId) && !P3ReactionLocked(playerId, x.AbilityId) /* issue #503 */ && AbilitySourceZoneAllows(a, x.Card, player));
     }
     private bool AnyPersonalityEntryReactionAvailable(int playerId) => AnyOutOfPlayReactionAvailable(playerId, "any-personality-enters-play");
     // Additional Action (issue #181): a grant is a Battle action the named player may take without
@@ -5012,6 +5014,7 @@ public sealed partial class MatchEngine
     // negate) fires, so the closing check below finds nothing left to resolve.
     private void ResolveOrDeferAdditionalAction(GameCommand command)
     {
+        if (P3AnnounceAdditionalAction(command)) return; // Ikoma Ayumu, Utaku Lishan (issue #503): an additional Battle action is announced too
         // The window is Effortless Counterattack's ("before the resolution of a BATTLE action taken as an additional action"): an additional Limited/Open action in the Action phase (issue #453) opens none.
         if (_state.Phase != Phase.Battle || !AnyOutOfPlayReactionAvailable(1 - command.PlayerId, "before-additional-action-resolves"))
         {
@@ -5137,11 +5140,13 @@ public sealed partial class MatchEngine
         FireAfterOwnActionTraits(AbilityCatalog.All[attack.AbilityId], attack.PlayerId, attack.Command?.CardId is { } sourceCardId ? Card(sourceCardId) : null);
         // Same "an unrelated action forfeits dangling grants" rule as ExecuteAbilityEffects' own tail.
         if (!attack.Additional) _state.AdditionalActions.RemoveAll(grantsBeforeAttack.Contains);
+        P3AfterHeldAction(attack.Command); // Iron Will (issue #503): the additional Battle action it owes the attacking player
         var attackBurstContinues = _state.AdditionalActions.Any(g => g.PlayerId == attack.PlayerId && Forfeitable(g));
         FinishGrapplingWatches(attack.Command); // Seeds of Decay pass (issue #453), batch 1: the deferred Attack is the action's resolution.
         MiddayShadowActionEnded(attack.Command); // Emperor Edition Stronghold pass (issue #486), batch 1: Midday Shadow Court's "an action that he performed ends".
         FireCowedAndDefeatedActionWatches(attack.PlayerId, attack.Command, attack.TargetId); // The Shadow's Embrace pass (issue #476), batch 3
         // Action-effect tracking (issue #437): the deferred Attack is the action's resolution, the same reasoning FireAfterOwnActionTraits above already follows.
+        P3RecordBowedPersonalities(attack.BowedBefore); // Hida Defenders (issue #503): the Personalities the Attack's action bowed go on its record
         if (FinishActionEffectTracking(attack.AbilityId, attack.PlayerId, attack.SourceId, attackBurstContinues ? attack.PlayerId : 1 - attack.PlayerId)) return;
         NextAction(attack.PlayerId, attackBurstContinues);
     }
@@ -5431,6 +5436,11 @@ public sealed partial class MatchEngine
                     && (ability.Trigger == "own-personality-enters-play" || EnteredFromProvince(enteredCard)), // Kaiu Village (issue #492 ruling R3): "enters play from a province".
                 // No Hiding Place (issue #498): the announce window of an action of this player's with a Ranged Attack (EmperorFollowupsAttack.cs).
                 EmperorFollowupsAbilities.NoHidingPlaceTrigger => NoHidingPlaceWindowOpen(command),
+                // Forging Destiny (issue #503): the window before an Event resolves, open to either player.
+                EmperorP3Abilities.BeforeEventTrigger => _state.PendingChoice.Type == "p3BeforeEventReaction",
+                EmperorP3EntryAbilities.EntryTrigger => P3EntryWindowApplies(command), // Easy Persuasion (issue #503)
+                // Ikoma Ayumu, Utaku Lishan (issue #503): the announce window of this card, for its player's Tactical / Battle action.
+                EmperorP3PriorityAbilities.OwnTacticalAnnounced or EmperorP3PriorityAbilities.OwnBattleAnnounced => P3AnnounceWindowOpen(ability.Trigger!, command),
                 _ => false
             },
             _ => false
@@ -5497,6 +5507,7 @@ public sealed partial class MatchEngine
                 || StrongholdBatch1EvenIfBowed(id)
                 || EmperorRemainingFBowedOk(id) // Governor's Court (issue #492, group F): "Even if this card is bowed".
                 || FollowupsEvenIfBowed(id) // Asako Chukage (issue #498): "Even if Chukage is bowed".
+                || id == EmperorP3PriorityAbilities.AyumuStraighten // Ikoma Ayumu (issue #503): "Even if Ayumu is bowed".
                 || MechAEvenIfBowed(id) // Mirumoto Inokuchi (issue #501): "Even if Inokuchi is bowed".
                 || id == EmperorP4UnitAbilities.HayanAssign // Shinjo Hayan's trait (issue #503): a trait is usable while its card is bowed
                 || MechEEvenIfBowed(id) // issue #501: Moto Rani - exp ("Even if Rani is bowed"); Kakita Kae's trait (a trait is usable while bowed)
@@ -6996,7 +7007,7 @@ public sealed partial class MatchEngine
                         // Emperor Edition Personality pass (issue #477), batch 5. Asako Yorisada: "a Personality whose Force is different from his base Force" -- the target's own printed Force.
                         "personality-force-neq-own-base" => personality && CardForce(target) != Definition(target).Force,
                         // The Shadow's Embrace pass (issue #476), batch 2: this batch's in-play categories (ShadowsEmbraceBatch2.cs).
-                        _ => ShadowsEmbraceBatch2TargetAllows(ability.Target, command, player, source, target) || EmperorRemainingCTargetAllows(ability.Target, command, player, source, target) || RemainingDTargetAllows(ability.Target, command, player, source, target) || EmperorRemainingETargetAllows(ability.Target, command, player, source, target) || EmperorProxyXTargetAllows(ability.Target, command, player, source, target) || RulingR1TargetAllows(ability.Target, command, player, source, target) || RulingR2TargetAllows(ability.Target, command, player, source, target) || ThreeSTargetAllows(ability.Target, command, player, source, target) || FollowupsTargetAllows(ability.Target, command, player, source, target) || MechBTargetAllows(ability.Target, command, player, source, target) || EmperorMechCTargetAllows(ability.Target, command, player, source, target) || EmperorP1TargetAllows(ability.Target, command, player, source, target) || EmperorP2TargetAllows(ability.Target, command, player, source, target) || EmperorP4TargetAllows(ability.Target, command, player, source, target) || P5TargetAllows(ability.Target, command, player, source, target) || EmperorP6TargetAllows(ability.Target, player, target) // issue #503 P1; issue #492, group D; proxy group X; rulings pass R1; issue #496; issue #498
+                        _ => ShadowsEmbraceBatch2TargetAllows(ability.Target, command, player, source, target) || EmperorRemainingCTargetAllows(ability.Target, command, player, source, target) || RemainingDTargetAllows(ability.Target, command, player, source, target) || EmperorRemainingETargetAllows(ability.Target, command, player, source, target) || EmperorProxyXTargetAllows(ability.Target, command, player, source, target) || RulingR1TargetAllows(ability.Target, command, player, source, target) || RulingR2TargetAllows(ability.Target, command, player, source, target) || ThreeSTargetAllows(ability.Target, command, player, source, target) || FollowupsTargetAllows(ability.Target, command, player, source, target) || MechBTargetAllows(ability.Target, command, player, source, target) || EmperorMechCTargetAllows(ability.Target, command, player, source, target) || EmperorP1TargetAllows(ability.Target, command, player, source, target) || EmperorP2TargetAllows(ability.Target, command, player, source, target) || EmperorP4TargetAllows(ability.Target, command, player, source, target) || P5TargetAllows(ability.Target, command, player, source, target) || EmperorP6TargetAllows(ability.Target, player, target) || P3TargetAllows(ability.Target, command, player, source, target) // issue #503 P1; issue #492, group D; proxy group X; rulings pass R1; issue #496; issue #498
                     }, "That card does not meet this ability's target or performer requirements.");
                 }
             }
@@ -7055,6 +7066,7 @@ public sealed partial class MatchEngine
         ValidateEmperorRemainingF(id, ability, command, player, source); // Emperor Edition remaining-cards pass (issue #492), group F.
         // Emperor Edition remaining-cards pass (issue #492), group G: the per-id conditions of this group's cards (EmperorRemainingG.cs).
         ValidateEmperorRemainingG(id, command, player, source);
+        ValidateEmperorP3(id, command, player, source); // issue #503, group P3 (EmperorP3.cs)
         ValidateEmperorProxyX(id, command); // Emperor Edition proxy pass (issue #492), group X: Suiteiru no Oni's hosts.
         // The Gold cost (issue #303): every ability's price -- Equip (Battle)/Soshi Neiru's Spell cost, Low
         // Market's "2 less, to a minimum of 1", Your Clan Needs You!'s recruit cost minus 6, Shinden
@@ -7101,6 +7113,7 @@ public sealed partial class MatchEngine
         // ever consumed before; nothing changes for a grant made in a battle.
         // Issue #501 (EmperorMechA.cs): Momoko's watch is spent by the announcement of an action on one of her Spells (before anything is paid).
         NoteMomokoAnnouncement(command);
+        P3NoteAnnouncement(command); // issue #503 (EmperorP3Priority.cs): Thunder Dragon's Reaction lockout; the announce watchers asked afresh
         // Issue #501: a Battle/Open action taken in a battle is a Battle action and spends a grant like any other (it used to end the burst instead); a Limited or Open Recon ability used as a Battle
         // action is only ever Beyond the Line's additional action (MechAActsAsBattle).
         if ((ability.Timing == "Battle" || ability.Timing == "BattleOrOpen" && _state.Phase == Phase.Battle || _state.Phase == Phase.Action && ability.Timing is "Limited" or "Open" or "BattleOrOpen"
@@ -7241,11 +7254,13 @@ public sealed partial class MatchEngine
         var pendingDuelBefore = _state.PendingDuel;
         var runningBefore = _runningCommand;
         _runningCommand = command;
+        var p3BowedBefore = P3BowedPersonalityIds(); // Hida Defenders (issue #503): the Personalities bowed before the action
         try { RunAbilityEffects(command, consumedGrant); }
         finally { _runningCommand = runningBefore; }
-        if (_state.PendingDuel is { } issued && !ReferenceEquals(issued, pendingDuelBefore)) { issued.SourceCardId = command.CardId; issued.RingsBowedBefore = _state.CurrentActionRingsBefore.ToList(); }
+        if (_state.PendingDuel is { } issued && !ReferenceEquals(issued, pendingDuelBefore)) { issued.SourceCardId = command.CardId; issued.RingsBowedBefore = _state.CurrentActionRingsBefore.ToList(); issued.BowedBefore = p3BowedBefore; }
         if (_state.PendingAttack is { } declared && !ReferenceEquals(declared, pendingAttackBefore))
         {
+            declared.BowedBefore = p3BowedBefore; // Hida Defenders (issue #503)
             declared.RingsBowedBefore = _state.CurrentActionRingsBefore.ToList();
             var spent = command.CardId is null ? null : Card(command.CardId);
             SpendHandPlayedCard(Player(command.PlayerId), spent);
@@ -10136,6 +10151,12 @@ public sealed partial class MatchEngine
                     if (p6) return;
                     break;
                 }
+                // Issue #503, group P3 (EmperorP3.cs).
+                if (RunEmperorP3(id, ability, command, player, source, target, bowedBeforeAction, consumedGrant) is { } p3)
+                {
+                    if (p3) return;
+                    break;
+                }
                 // Any ability with an AttachSpec (Moto Jun-Ni, Fading Shadows, Foothills Keep and the training shapes) needs no case of its own: the Gold was
                 // paid by PayForAbility, so the card now leaves its place and enters play attached. An entering-play window ends the action here.
                 if (ability.Attach is { } attachSpec)
@@ -10236,6 +10257,7 @@ public sealed partial class MatchEngine
         // A fresh grant this same action creates (Again!/Two Hands/equip-battle, above) is untouched
         // by this -- it was never in preExistingGrants -- and still keeps priority with the player.
         if (!consumedGrant && ForfeitsAdditionalActions(ability)) _state.AdditionalActions.RemoveAll(preExistingGrants.Contains);
+        P3AfterHeldAction(command); // Iron Will (issue #503): a Protected action it could not negate still gives its player the additional Battle action
         // A burst the acting player still holds keeps its priority through every window this action opens (a Reaction, being played inside a window
         // that alternates on its own, never does: the window's own alternation goes on, and the burst waits behind it).
         var burstContinues = ForfeitsAdditionalActions(ability) && _state.AdditionalActions.Any(g => g.PlayerId == player.Id && Forfeitable(g));
@@ -10264,6 +10286,7 @@ public sealed partial class MatchEngine
         if (_state.PendingChoice is null && OpenOverconfidentDrawWindow(closesTo)) return;
         // Action-effect tracking (issue #437): this action's own resolution is now truly done -- snapshot what it affected and offer the
         // Reaction that names it, same placement in the chain as the "after this action" windows above.
+        P3RecordBowedPersonalities(bowedBeforeAction); // Hida Defenders (issue #503): the Personalities this action bowed go on its record
         RecordBowedRings(bowedBeforeAction); // Deception Revealed (Emperor Edition remaining-cards pass, group A, issue #492): the Rings this action bowed go on its record.
         if (FinishActionEffectTracking(id, player.Id, source?.Id, closesTo, ActionPerformerIdOrNull(ability, command, source))) return;
         NextAction(player.Id, burstContinues);
@@ -10753,6 +10776,7 @@ public sealed partial class MatchEngine
             Emit("destructionNegated", $"{Definition(card).Name}'s destruction was negated before it resolved.", card.OwnerId, card.Id);
             return;
         }
+        if (P3FollowerShielded(card)) { Emit("destructionNegated", $"{Definition(card).Name}'s destruction was negated (Hida Fujita).", card.OwnerId, card.Id); return; } // issue #503
         if (Delay(card, DelayedKinds.Destroy)) return; // The shared delay mechanism (issue #492, EmperorRulingR2.cs).
         if (WideValleyNegatesDestruction(card)) return; // Seeds of Decay pass (issue #453), batch 1: an attachment's destruction is always an action's effect (see RecordActionEffect below).
         // Gift Armor (issue #492 group G): "Negate any destruction of this card, except for its Personality being destroyed" (DestroyUnits, which does not come through here).
@@ -10891,6 +10915,8 @@ public sealed partial class MatchEngine
         var inHonorChangeWindow = _state.PendingChoice?.Type == "honorChangeReaction"; // Mendon's R4 ruling (issue #492): only the Reactions that name an Honor change are on offer, and they are on offer nowhere else.
         // Twist of Fate (Emperor Edition remaining-cards pass, issue #492, group D): the window as its player ends his Dynasty Phase -- only the Reactions that name it are on offer, and only there.
         var inTwistOfFateWindow = _state.PendingChoice?.Type == "twistOfFateReaction";
+        var inBeforeEventWindow = _state.PendingChoice?.Type == "p3BeforeEventReaction";
+        var inP3EntryWindow = _state.PendingChoice?.Type == "p3EntryReaction"; // Easy Persuasion (issue #503): only the Reactions after a Personality entered play, and only there // Forging Destiny (issue #503): only the Reactions before an Event resolves, and only there
         foreach (var (source, id) in sources)
         {
             if (inRecruitWindow && !RingRecruitGrantIds.Contains(id)) continue;
@@ -10903,12 +10929,14 @@ public sealed partial class MatchEngine
             if (inHonorChangeWindow ? !(honorChangeTrigger || id == HonorChangeReactions.UnimpeachableName) : honorChangeTrigger) continue;
             if (inAttackPhaseEndWindow != (ability.Timing == "Reaction" && ability.Trigger == EmperorRemainingCAbilities.AttackPhaseEnd)) continue;
             if (inTwistOfFateWindow != IsTwistOfFateReaction(ability)) continue;
+            if (inBeforeEventWindow != (ability.Timing == "Reaction" && ability.Trigger == EmperorP3Abilities.BeforeEventTrigger)) continue;
+            if (inP3EntryWindow != (ability.Timing == "Reaction" && ability.Trigger == EmperorP3EntryAbilities.EntryTrigger)) continue;
             var isEngageReaction = ability.Timing == "Reaction" && ability.Trigger is "after-engaging" or "after-engaging-at-own-battlefield";
             if (inEngageWindow != isEngageReaction) continue;
             // "Bow this card:" with no hand alternative is offered only from play (issue #370): from a hand or a discard pile it is not even listed.
             if (source is not null && RequiresSourceInPlay(ability) && !InPlay(source)) continue;
             if ((beforeResolutionCard is not null) != IsBeforeResolutionReaction(ability) || beforeResolutionCard is not null && source?.Id != beforeResolutionCard) continue;
-            var phaseOk = inEngageWindow || inAfterResolutionWindow || inAfterActionResolvedWindow || inTwistOfFateWindow || inAttackPhaseEndWindow || inHeldActionWindow || inHonorChangeWindow || beforeResolutionCard is not null ? true : ability.Timing switch { "Battle" => _state.Phase == Phase.Battle, "BattleOrOpen" => _state.Phase is Phase.Action or Phase.Battle, "BeforeResolution" => false, _ => _state.Phase == Phase.Action };
+            var phaseOk = inEngageWindow || inBeforeEventWindow || inP3EntryWindow || inAfterResolutionWindow || inAfterActionResolvedWindow || inTwistOfFateWindow || inAttackPhaseEndWindow || inHeldActionWindow || inHonorChangeWindow || beforeResolutionCard is not null ? true : ability.Timing switch { "Battle" => _state.Phase == Phase.Battle, "BattleOrOpen" => _state.Phase is Phase.Action or Phase.Battle, "BeforeResolution" => false, _ => _state.Phase == Phase.Action };
             var mechAAsBattle = MechAActsAsBattle(playerId, ability, source); // Beyond the Line (issue #501): a Limited or Open Recon ability used as a Battle action
             if (!phaseOk && !mechAAsBattle) continue;
             if (ability.Timing == "Limited" && playerId != _state.ActivePlayerId && !LimitedInsteadOfOpen(playerId) && !mechAAsBattle) continue; // Plans Within Plans (issue #492): a Limited action instead of an Open one.
