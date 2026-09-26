@@ -28,6 +28,7 @@ public sealed partial class MatchEngine
         if (WhiteShorePlainGrants(card)) yield return WhiteShorePlainAbilityId; // White Shore Plain (Emperor Edition remaining-cards pass, issue #492, group D).
         if (Definition(card).Effect == UnmeiMirrorEffect && (Keyword(card, "Samurai") || Keyword(card, "Shugenja")))
             yield return UnmeiAttackAbilityId; // Unmei (Emperor Edition Personality pass, issue #477, batch 3): the ability she has while she has Samurai or Shugenja.
+        foreach (var p3Granted in P3StaticGrantedAbilityIds(card)) yield return p3Granted; // Thunder Dragon - exp2 (issue #503)
     }
 
     // Shiba Tsukimi (oracle-l5r-10246): "Twice per turn, target a card in a unit: Straighten it. It may use its abilities a second time this

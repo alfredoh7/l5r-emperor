@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build Strategy wave 90 (Emperor Edition group P3, issue #503): Deep Snows, Forging Destiny, Iron Will, Request Authorization.
+"""Build Strategy wave 90 (Emperor Edition group P3, issue #503): Deep Snows, Destructive Priorities, Forging Destiny, Iron Will, Request Authorization, Easy Persuasion.
 
 New Reaction trigger points, announcement/interrupt windows and priority overrides (src/L5R.Core/EmperorP3.cs). Every scan was read by eye (WebP working copies with receipts, sha256-verified
 against the catalogue art release); the published Text is the scan's own wording, and each source receipt (with the working copy's sha256) is recorded next to the wave.
@@ -17,9 +17,11 @@ NL = chr(10)
 
 ABILITIES: dict[int, list[str]] = {
     1921: ["deep-snows-enter"],  # Deep Snows
+    1983: ["destructive-priorities-reaction", "destructive-priorities-kata"],  # Destructive Priorities
     2652: ["forging-destiny-negate", "forging-destiny-move"],  # Forging Destiny
     3813: ["iron-will-negate"],  # Iron Will
     6265: ["request-authorization-move", "request-authorization-negate"],  # Request Authorization
+    9905: ["easy-persuasion-honor", "easy-persuasion-move"],  # Easy Persuasion
 }
 OVERRIDE: dict[int, dict] = {
     1921: {"Effect": "deep-snows-bow-moved"},
@@ -28,11 +30,15 @@ OVERRIDE: dict[int, dict] = {
 TEXT: dict[int, str] = {
     1921: "After an action resolves: Bow any Personalities it moved. (Reactions trigger after traits.)" + NL
           + "Reaction: After a Battle action resolves, if there are no Terrains in play at the current battlefield: Put this card into play there.",
+    1983: "You have the ability, \"Political Reaction: Before you gain Honor during your turn, bow your performing Courtier: Negate the gain. Choose a player. He loses 2 Honor.\"" + NL
+          + "Limited: Put this card into play. Discard all your other Katas.",
     2652: "Reaction: Before an Event resolves: Negate its effects." + NL
           + "Battle: Choose your performing Personality: Move him home. Straighten his unit if he moved.",
     3813: "Reaction: After another player targets your Paragon with a Battle action performed by a Personality with lower Personal Honor: The action's costs are ignored and its effects are negated. That player may take an additional Battle action.",
     6265: "Battle: Bow your performing Courtier at any location and target a Personality: Move him home." + NL
           + "Reaction: Before another player's Battle action resolves, target a Personality: Negate his movement to the current battlefield from the action's effects.",
+    9905: "Reaction: After a Personality enters play, if his controller paid less than his base Gold Cost for him, bow your performing Merchant: The Personality's controller loses Honor equal to his base Personal Honor, or 3, whichever is lower." + NL
+          + "Battle: Pay Gold equal to a target unit's total Gold Cost minus 5: Move it home. Its controller loses 2 Honor.",
 }
 
 

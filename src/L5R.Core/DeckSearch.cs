@@ -540,6 +540,7 @@ public sealed partial class MatchEngine
     private void FinishDeferredAction(int playerId, string origin, string sourceCardId, List<string>? bowedBefore)
     {
         _state.PendingChoice = null;
+        P3AfterDeferredAction(playerId, sourceCardId); // issue #503: an action that ended in a search or a look has ended (a Reaction lockout ends)
         if (origin == "event") { ResumeEventAfterDeferral(playerId, sourceCardId); return; }
         if (bowedBefore is not null && OpenBowReactionWindow(playerId, bowedBefore.ToHashSet(StringComparer.Ordinal), 1 - playerId)) return;
         if (OpenOverconfidentDrawWindow(1 - playerId)) return;

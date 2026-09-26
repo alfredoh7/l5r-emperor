@@ -294,6 +294,9 @@ public sealed partial class MatchEngine
             }
             // No Hiding Place (issue #498): the announcing player's copies in hand, whichever card the window was opened for.
             foreach(var (noHidingPlace,noHidingId) in NoHidingPlaceOptions(playerId)) AddReaction(noHidingPlace,noHidingId);
+            // Ikoma Ayumu, Utaku Lishan (issue #503): the watcher's own P3 Reactions, one option per target.
+            if(announcePending.PlayerId==playerId && announcePending.CardId is { } announceWatcherId)
+                foreach(var (p3Id,p3Target,p3Label) in P3AnnounceOptions(Card(announceWatcherId))) AddReaction(Card(announceWatcherId),p3Id,targetId:p3Target,label:p3Label,validate:true);
             Add("declineReaction","Pass reaction",Command("declineReaction"));
         }
         else if(_state.PendingChoice is { Type:"engageReaction" })
@@ -525,6 +528,15 @@ public sealed partial class MatchEngine
         {
             result.AddRange(AbilityActions(playerId)); // Forging Destiny (issue #503, EmperorP3Windows.cs): the Reactions before an Event resolves, then the pass.
             Add("declineReaction","Pass reaction",Command("declineReaction"));
+        }
+        else if(_state.PendingChoice is { Type:"p3EntryReaction" })
+        {
+            result.AddRange(AbilityActions(playerId)); // Easy Persuasion (issue #503, EmperorP3Entries.cs): the Reactions after a Personality entered play, then the pass.
+            Add("declineReaction","Pass reaction",Command("declineReaction"));
+        }
+        else if(_state.PendingChoice is { Type:"p3AroruMove" })
+        {
+            result.AddRange(P3AroruMoveActions(playerId)); // Shosuro Aroru - exp2 (issue #503, EmperorP3Priority.cs).
         }
         else if(_state.PendingChoice is { Type:"p3MikiDarkVirtue" })
         {

@@ -3,6 +3,36 @@
   "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
   "Cards": [
     {
+      "Id": "oracle-l5r-556",
+      "Name": "Asako Kikugoro",
+      "Type": "Personality",
+      "Clan": "Phoenix",
+      "GoldCost": 6,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 1,
+      "PersonalHonor": 2,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After your Ring or Henshin (including Kikugoro) enters play or overlays: Look at the top two cards of your Dynasty deck. You may put one of them at the bottom of the deck.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-556.jpg",
+      "Keywords": [
+        "Henshin",
+        "Monk",
+        "Phoenix Clan",
+        "Void"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "kikugoro-self-entry",
+        "kikugoro-henshin-entry",
+        "kikugoro-ring-entry"
+      ],
+      "Effect": "none"
+    },
+    {
       "Id": "oracle-l5r-1621",
       "Name": "Daidoji Akeha",
       "Type": "Personality",
@@ -121,6 +151,33 @@
       "Effect": "none"
     },
     {
+      "Id": "oracle-l5r-3595",
+      "Name": "Ikoma Ayumu",
+      "Type": "Personality",
+      "Clan": "Lion",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 4,
+      "PersonalHonor": 3,
+      "HonorRequirement": 7,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: Even if Ayumu is bowed, after you announce a Tactical action, if he is at the current battlefield: Straighten him.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-3595.jpg",
+      "Keywords": [
+        "Tactician",
+        "Lion Clan",
+        "Samurai"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "ayumu-straighten"
+      ],
+      "Effect": "none"
+    },
+    {
       "Id": "oracle-l5r-4189",
       "Name": "Kakita Kenta",
       "Type": "Personality",
@@ -147,6 +204,36 @@
         "kenta-move-home"
       ],
       "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-7089",
+      "Name": "Shosuro Aroru",
+      "Type": "Personality",
+      "Clan": "Scorpion",
+      "GoldCost": 9,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 5,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Will not attach non-Ninja Followers.\nReaction: When an action would target a Ninja at Aroru's location: Choose another of your cards. The action targets it instead, if legal. After the action's resolution, you may move Aroru to a different location.\nBattle: Other players may not take Reactions until this action ends. Ranged 5 Attack.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7089.jpg",
+      "Keywords": [
+        "Duelist",
+        "Experienced 2",
+        "Unique",
+        "Ninja",
+        "Scorpion Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "aroru-exp2-redirect",
+        "aroru-exp2-attack"
+      ],
+      "Effect": "aroru-refuses-non-ninja-followers"
     },
     {
       "Id": "oracle-l5r-7177",
@@ -179,6 +266,35 @@
       "Effect": "none"
     },
     {
+      "Id": "oracle-l5r-9083",
+      "Name": "Utaku Lishan",
+      "Type": "Personality",
+      "Clan": "Unicorn",
+      "GoldCost": 9,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 3,
+      "HonorRequirement": 5,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "While Lishan is attacking, she has +1F and +1PH.\nReaction: After you announce a Battle action, if Lishan is at the current battlefield, target a Personality or Follower opposing her: Give it a Force penalty equal to Lishan's Personal Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9083.jpg",
+      "Keywords": [
+        "Cavalry",
+        "Battle Maiden",
+        "Paragon",
+        "Samurai",
+        "Unicorn Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "lishan-penalty"
+      ],
+      "Effect": "lishan-attacking-bonus"
+    },
+    {
       "Id": "oracle-l5r-9100",
       "Name": "Utaku Tairu",
       "Type": "Personality",
@@ -207,6 +323,39 @@
         "tairu-exp-draw"
       ],
       "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10067",
+      "Name": "Thunder Dragon",
+      "Type": "Personality",
+      "Clan": "Mantis",
+      "GoldCost": 13,
+      "GoldProduction": 0,
+      "Force": 8,
+      "Chi": 5,
+      "PersonalHonor": 4,
+      "HonorRequirement": 10,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After Thunder Dragon performs an action: Other players may not take Reactions until it ends.\nThe Thunder Dragon inspires. Your Mantis Clan Personalities have +1F and the ability, \"Battle: Target an enemy card without unbowed attachments: Bow it.\"",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10067.jpg",
+      "Keywords": [
+        "Cavalry",
+        "Experienced 2",
+        "Loyal",
+        "Naval",
+        "Unique",
+        "Dragon",
+        "Hero",
+        "Mantis Clan",
+        "Nonhuman",
+        "Shugenja",
+        "Thunder"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "thunder-dragon"
     }
   ],
   "Decks": []

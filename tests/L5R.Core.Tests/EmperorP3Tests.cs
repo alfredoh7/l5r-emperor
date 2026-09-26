@@ -69,6 +69,8 @@ internal static partial class EmperorP3Tests
         ("Iron Will: another player's Battle action by a lower-Personal-Honor Personality targets a Paragon -- its costs are ignored, its effects negated, and that player may take an additional Battle action", IronWillScenario),
         ("Iron Will, edges: not offered when the performer's Personal Honor is not lower or the target is not a Paragon", IronWillEdges),
         .. PartB,
+        .. PartC,
+        .. PartD,
     ]);
 
     // ---- published shape --------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -100,7 +102,7 @@ internal static partial class EmperorP3Tests
             "Reaction: After engaging at Tenbatsu's battlefield: Look at the top three cards of your Fate deck. Put them back in any order. You may discard a Dark Virtue; if you did, draw a card.");
         Person(Toson, "Shosuro Toson", "Scorpion", 9, 4, 4, 1, null, "Daimyo,Experienced 2,Loyal,Ninja,Scorpion Clan,Unique", "toson-exp2-engage",
             "Reaction: After engaging at Toson's battlefield: Discard a card from the current battlefield's province. If this discarded a Personality, you have the first opportunity to take a Battle action in this battle, which must be performed by Toson.");
-        Manifest("personality-wave-104", Akeha, "oracle-l5r-1747", Tenbatsu, "oracle-l5r-3093", "oracle-l5r-4189", Toson, "oracle-l5r-9100");
+        Manifest("personality-wave-104", "oracle-l5r-556", "oracle-l5r-1621", "oracle-l5r-1747", "oracle-l5r-1778", "oracle-l5r-3093", "oracle-l5r-3595", "oracle-l5r-4189", "oracle-l5r-7089", "oracle-l5r-7177", "oracle-l5r-9083", "oracle-l5r-9100", "oracle-l5r-10067");
         void Other(string id, CardType type, string name, int focus, string keywords, string effect, string abilities, string text)
         {
             var c = CardCatalog.Get(id);
@@ -118,7 +120,7 @@ internal static partial class EmperorP3Tests
             "Reaction: After another player targets your Paragon with a Battle action performed by a Personality with lower Personal Honor: The action's costs are ignored and its effects are negated. That player may take an additional Battle action.");
         Other(RequestAuthorization, CardType.Strategy, "Request Authorization", 3, "Political", "none", "request-authorization-move,request-authorization-negate",
             "Battle: Bow your performing Courtier at any location and target a Personality: Move him home.\nReaction: Before another player's Battle action resolves, target a Personality: Negate his movement to the current battlefield from the action's effects.");
-        Manifest("strategy-wave-90", DeepSnows, "oracle-l5r-2652", IronWill, RequestAuthorization);
+        Manifest("strategy-wave-90", "oracle-l5r-1921", "oracle-l5r-1983", "oracle-l5r-2652", "oracle-l5r-3813", "oracle-l5r-6265", "oracle-l5r-9905");
         Eq(AbilityCatalog.All["centering-soul-straighten"].UsageKey, "centering-the-soul"); Eq(AbilityCatalog.All["centering-soul-straighten-destroy"].UsageKey, "centering-the-soul");
     }
 

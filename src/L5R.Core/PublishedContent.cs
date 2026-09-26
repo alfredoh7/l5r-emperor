@@ -2650,11 +2650,11 @@ public static class PublishedContent
     public static PublishedSnapshot PersonalityWave92 { get; } = Load("L5R.Published.PersonalityWave92.json", "personality-wave-92", requireDecks: false);
     /// <summary>Strategy wave 78 (issue #501, mechanics group D): Broken Cipher, Indecision and Amazing Feat (EmperorMechD.cs).</summary>
     public static PublishedSnapshot StrategyWave78 { get; } = Load("L5R.Published.StrategyWave78.json", "strategy-wave-78", requireDecks: false);
-    /// <summary>Personality wave 104 (Emperor Edition group P3, issue #503): Daidoji Akeha, Daigotsu Miki, Daigotsu Tenbatsu, Hida Fujita, Kakita Kenta, Shosuro Toson - exp2, Utaku Tairu - exp.</summary>
+    /// <summary>Personality wave 104 (Emperor Edition group P3, issue #503): Asako Kikugoro, Daidoji Akeha, Daigotsu Miki, Daigotsu Tenbatsu, Hida Fujita, Ikoma Ayumu, Kakita Kenta, Shosuro Aroru - exp2, Shosuro Toson - exp2, Utaku Lishan, Utaku Tairu - exp, Thunder Dragon - exp2.</summary>
     public static PublishedSnapshot PersonalityWave104 { get; } = Load("L5R.Published.PersonalityWave104.json", "personality-wave-104", requireDecks: false);
     /// <summary>Spell wave 34 (Emperor Edition group P3, issue #503): Centering the Soul, Erosion.</summary>
     public static PublishedSnapshot SpellWave34 { get; } = Load("L5R.Published.SpellWave34.json", "spell-wave-34", requireDecks: false);
-    /// <summary>Strategy wave 90 (Emperor Edition group P3, issue #503): Deep Snows, Forging Destiny, Iron Will, Request Authorization.</summary>
+    /// <summary>Strategy wave 90 (Emperor Edition group P3, issue #503): Deep Snows, Destructive Priorities, Forging Destiny, Iron Will, Request Authorization, Easy Persuasion.</summary>
     public static PublishedSnapshot StrategyWave90 { get; } = Load("L5R.Published.StrategyWave90.json", "strategy-wave-90", requireDecks: false);
     /// <summary>Follower wave 41 (Emperor Edition group P3, issue #503): Hida Defenders, Vigilant Riders.</summary>
     public static PublishedSnapshot FollowerWave41 { get; } = Load("L5R.Published.FollowerWave41.json", "follower-wave-41", requireDecks: false);

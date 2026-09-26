@@ -297,6 +297,8 @@ public sealed partial class MatchEngine
         FinishSpentBeforeBattleItem();
         FinishTwistOfFateAction(twistWasActive);
         OpenAssignedReactionWindow(); // Chrysanthemum Blossom (issue #492 group G): "After this Personality is assigned".
+        OpenP3EntryWindow(); // Easy Persuasion (issue #503): the window after a Personality entered play, for either player
+        OpenP3OwedChoices(); // Shosuro Aroru - exp2 (issue #503): "After the action's resolution, you may move Aroru to a different location."
         CheckInokuchiWatches(); // Mirumoto Inokuchi (issue #501, EmperorMechA.cs): "If you don't, bow him" -- once his additional action is gone without being taken.
     }
     private void ApplyCore(GameCommand command)
@@ -343,7 +345,9 @@ public sealed partial class MatchEngine
             if (_state.PendingChoice.Type=="infiltratorStraighten") { ResolveInfiltratorStraighten(command); return; }
             if (_state.PendingChoice.Type=="p3DarkVirtueDiscard") { ResolveP3DarkVirtueDiscard(command); return; } // Daigotsu Tenbatsu (issue #503, EmperorP3.cs).
             if (_state.PendingChoice.Type=="p3BeforeEventReaction") { ResolveP3BeforeEventCommand(command); return; } // Forging Destiny (issue #503, EmperorP3Windows.cs).
-            if (_state.PendingChoice.Type=="p3MikiDarkVirtue") { ResolveP3MikiCommand(command); return; } // Daigotsu Miki (issue #503, EmperorP3Windows.cs). // Goju Asuka / Only a Shadow (issue #501, EmperorMechB.cs).
+            if (_state.PendingChoice.Type=="p3MikiDarkVirtue") { ResolveP3MikiCommand(command); return; } // Daigotsu Miki (issue #503, EmperorP3Windows.cs).
+            if (_state.PendingChoice.Type=="p3AroruMove") { ResolveP3AroruMove(command); return; }
+            if (_state.PendingChoice.Type=="p3EntryReaction") { ResolveP3EntryWindowCommand(command); return; } // Easy Persuasion (issue #503, EmperorP3Entries.cs). // Shosuro Aroru - exp2 (issue #503, EmperorP3Priority.cs). // Goju Asuka / Only a Shadow (issue #501, EmperorMechB.cs).
             if (_state.PendingChoice.Type=="conqueror") { ResolveConqueror(command); return; }
             // Before This Battle Resolves (issue #272): three tightly-scoped, mandatory choices, no
             // "useAbility"/pass alternative -- see PendingBeforeBattleResolve's own doc comment.
@@ -583,6 +587,7 @@ public sealed partial class MatchEngine
                 if (_state.PendingChoice is null && _state.PendingAnnouncedAction is not null)
                 {
                     var pending=_state.PendingAnnouncedAction; _state.PendingAnnouncedAction=null;
+                    if(P3ContinueAnnounce(pending,RunSetAsideBattleCommand)) return; // Ikoma Ayumu, Utaku Lishan (issue #503): the next watcher, or the set-aside additional action or command goes on
                     // Entrenched Position (Forgotten Legacy pass, issue #467 batch 3): a Reaction in this window negated the announced action.
                     if(_state.AnnouncedActionNegated) { _state.AnnouncedActionNegated=false; ResolveNegatedAction(pending); }
                     else if(!BeginAttackTargetSelection(pending)) ContinueAnnouncedAction(pending); // No Hiding Place (issue #498): the Attack's target is selected after the announce window.
@@ -625,9 +630,9 @@ public sealed partial class MatchEngine
             case "attack": AssignAttackers(command); break;
             case "assignDefense": AssignDefense(command); break;
             case "selectBattle": SelectBattle(command); break;
-            case "equip": Equip(command); break;
-            case "playStrategy": PlayStrategy(command); break;
-            case "recruitReserve": RecruitReserve(command); break;
+            case "equip": if(!P3AnnounceCommand(command,()=>Equip(command))) Equip(command); break; // issue #503: a Battle action that is not an ability is announced too (Ikoma Ayumu, Utaku Lishan)
+            case "playStrategy": if(!P3AnnounceCommand(command,()=>PlayStrategy(command))) PlayStrategy(command); break;
+            case "recruitReserve": if(!P3AnnounceCommand(command,()=>RecruitReserve(command))) RecruitReserve(command); break;
             case "useAbility": UseAbility(command); break;
             default: throw new RuleViolation("Unsupported command.");
         }
@@ -671,6 +676,7 @@ public sealed partial class MatchEngine
     // opening a second window on top of, and thereby clobbering, the first.
     private void ApplyMandatoryEntryEffects(int playerId, CardInstance card)
     {
+        P3NoteEntry(card); // Easy Persuasion (issue #503): a Personality entered play, with what was paid for him
         // Destined keyword (core rules): a mandatory Fate-deck draw every time a card carrying it
         // enters play -- unconditional, not an opt-in Reaction, so it fires here unconditionally
         // rather than through any Reaction window. Every entry point (Purchase, Equip, a played
@@ -928,6 +934,7 @@ public sealed partial class MatchEngine
         Emit("personalityOverlayed", $"{player.Name} overlayed {Definition(target).Name} with Experience Level {quote.HigherLevel}.", player.Id, card.Id, quote.HigherLevel);
         QueueOverconfidentDraw(card);
         Refill(player, province);
+        P3NoteOverlay(card); // Easy Persuasion (issue #503): an overlay is not an entry
         if (!OpenEntryReactionWindow(player.Id, card)) OpenOverconfidentDrawWindow(player.Id);
     }
 
@@ -1263,6 +1270,7 @@ public sealed partial class MatchEngine
         var produced=allIds.Sum(id=>GoldProduced(id,playerId,paying));
         produced-=SpendMoneylenderTokens(ids,cost,playerId,paying); // Moneylender (issue #492, group F): only the Wealth tokens the payment needs are removed.
         RecordGoldPaidForEntry(cost,paying); // Moneylender (issue #492, group F): "the amount of Gold you paid for it".
+        P3RecordEntryPayment(cost,paying); // Easy Persuasion (issue #503): what was paid for a Personality entering play
         // A card bowed for Gold through its own ability (Yoritomo Sakuma, issue #338) has used that Reaction: spent for the turn, and named
         // in the log so the opponent sees why it bowed.
         var staysStraight=new HashSet<string>(StringComparer.Ordinal); // Emperor Edition pass (issue #477), batch 6: Yasuki Tanimura produces without bowing.
@@ -1328,6 +1336,16 @@ public sealed partial class MatchEngine
     // The deferred action, once its window has closed: negated as a whole (a reaction negated it: Yoritomo Sakuma, issue #338; Jinn-Kuen, issue #335) it is taken and
     // its costs paid but its effects are not applied (ActionNegation.cs), otherwise it resolves. A negation signal must never survive the one re-invocation it was set
     // for, so the per-card ones are cleared here.
+    // A Battle action that is not an ability, set aside behind an announce window (issue #503, EmperorP3Priority.cs), runs as the window closes.
+    private void RunSetAsideBattleCommand(GameCommand pending)
+    {
+        switch(pending.Type)
+        {
+            case "equip": Equip(pending); break;
+            case "playStrategy": PlayStrategy(pending); break;
+            case "recruitReserve": RecruitReserve(pending); break;
+        }
+    }
     private void ResolveDeferredAction(GameCommand pending)
     {
         var negated=_state.DeferredActionNegated; _state.DeferredActionNegated=false;
@@ -2313,7 +2331,7 @@ public sealed partial class MatchEngine
     // "force-with-spell" (Asako Ume), "force-if-enemy-dishonorable" (Bayushi Kahoku) and
     // "force-max-dead-pile" (Moto Shunsuke) are always-on passive bonuses, unlike the attacking-only
     // attacking-two/attacking-four Effects above.
-    private int PersonalityForce(CardInstance card) => Math.Max(0,Definition(card).Force+StatModifier(card,"Force")+TerrainForceAdjustment(card)+GinasFoxForce(card)+EmperorRemainingEForce(card)+ThreeSForce(card)+ForgottenLegacyBatch5Force(card)+EmperorBatch5Force(card)+EmperorPersonalityBatch3Force(card)+ShadowsEmbraceBatch5Force(card)+ShadowsEmbraceBatch2Force(card)+ShadowsEmbraceBatch1Force(card)+EmperorRemainingGForce(card)+(IsAttacking(card)?(Definition(card).Effect=="attacking-two"?2:Definition(card).Effect=="attacking-four"?4:
+    private int PersonalityForce(CardInstance card) => Math.Max(0,Definition(card).Force+StatModifier(card,"Force")+P3Force(card)/* issue #503: Thunder Dragon, Utaku Lishan */+TerrainForceAdjustment(card)+GinasFoxForce(card)+EmperorRemainingEForce(card)+ThreeSForce(card)+ForgottenLegacyBatch5Force(card)+EmperorBatch5Force(card)+EmperorPersonalityBatch3Force(card)+ShadowsEmbraceBatch5Force(card)+ShadowsEmbraceBatch2Force(card)+ShadowsEmbraceBatch1Force(card)+EmperorRemainingGForce(card)+(IsAttacking(card)?(Definition(card).Effect=="attacking-two"?2:Definition(card).Effect=="attacking-four"?4:
         // Matsu Kaido (oracle-l5r-4934, issue #299): "Kaido has +1F while attacking" -- the plain +1
         // counterpart to attacking-two/attacking-four (Matsu Yoshito's own conditional variant below
         // starts from the same +1 base).
@@ -3363,6 +3381,7 @@ public sealed partial class MatchEngine
     {
         if(amount==0) return;
         OfferHonorChangeWindow(playerId,amount,reason); // Mendon's R4 ruling (issue #492): Rhetoric, Solid Defense and Shiro Chugo may be played on ANY Honor change from an action's effects.
+        if(P3HonorGainNegated(playerId,amount,reason)) return; // Destructive Priorities (issue #503): "Negate the gain."
         // Emperor Edition remaining-cards pass, group C (issue #492): Rhetoric's redirect, Solid Defense's negation of losses and Rumors Travel's reduction of a gain (EmperorRemainingC.cs).
         (playerId,amount)=EmperorRemainingCHonorChange(playerId,amount,reason);
         if(amount==0) return;

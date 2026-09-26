@@ -123,7 +123,7 @@ public static class EmperorP3Looks
 {
     /// <summary>Daigotsu Tenbatsu: the top three cards of his controller's Fate deck, put back in any order (Public Records' shape, its own id so the Dark Virtue follow-up knows it).</summary>
     public static LookSpec Tenbatsu { get; } = new("tenbatsu-look", "Look at the top three cards of your Fate deck", [new("Fate")], 3, [], Reorder: true);
-    public static IEnumerable<LookSpec> All => [Tenbatsu];
+    public static IEnumerable<LookSpec> All => [Tenbatsu, EmperorP3PriorityAbilities.KikugoroLook];
 }
 
 /// <summary>What this group keeps between commands (issue #503).</summary>
@@ -147,6 +147,10 @@ public sealed class EmperorP3State
     public string? MikiAsking { get; set; }
     /// <summary>Hida Fujita: "Negate the destruction of your Followers from its effects" -- the protected player and the held action.</summary>
     public List<FollowerShield> FollowerShields { get; set; } = [];
+    /// <summary>Lockouts, Aroru's owed move, announce watchers and negated Honor gains (EmperorP3Priority.cs).</summary>
+    public EmperorP3PriorityState Priority { get; set; } = new();
+    /// <summary>Easy Persuasion: what was paid for each entry, and the window after it (EmperorP3Entries.cs).</summary>
+    public EmperorP3EntryState Entries { get; set; } = new();
 }
 
 /// <summary>What a duel's action affected, set aside while its duel-won window is open.</summary>
@@ -190,7 +194,7 @@ public sealed partial class MatchEngine
         // Kakita Kenta: "a dishonorable enemy Personality at the current battlefield".
         EmperorP3Abilities.DishonorableEnemyAtBattleTarget => Definition(target).Type == CardType.Personality && target.OwnerId != player.Id && AtBattle(target)
             && MatchesTargetStatus(target, TargetStatus.IsDishonorable),
-        _ => false
+        _ => P3PriorityTargetAllows(category, player, source, target) // EmperorP3Priority.cs
     };
 
     // The after-action-resolved Reactions' conditions (AfterActionResolvedApplies' hook); null when the id is not this group's.
@@ -216,7 +220,7 @@ public sealed partial class MatchEngine
             case EmperorP3Abilities.DefendersHonor:
                 return facts.PlayerId == playerId && DefendersApplies(source, facts);
             default:
-                return null;
+                return P3PriorityAfterActionApplies(source, abilityId, playerId, facts, out var priorityApplies) ? priorityApplies : null; // Asako Kikugoro's Ring half
         }
     }
 
@@ -268,6 +272,7 @@ public sealed partial class MatchEngine
     // The targeted-by-action Reactions' conditions (TargetedActionReactionApplies' fallback).
     private bool P3TargetedReactionApplies(CardInstance card, string abilityId, ReactionSubject subject, CardInstance affected)
     {
+        if (P3PriorityTargetedApplies(card, abilityId, subject, affected)) return true; // Shosuro Aroru - exp2 (EmperorP3Priority.cs)
         // Vigilant Riders: another player's action targets a card in this unit.
         if (abilityId == EmperorP3Abilities.RidersNegate)
             return card is { Zone: Zone.Attached } && subject.Command.PlayerId != card.OwnerId && UnitHostId(affected) == UnitHostId(card);
@@ -281,6 +286,7 @@ public sealed partial class MatchEngine
     // The per-id conditions of ValidateAbility.
     private void ValidateEmperorP3(string id, GameCommand command, PlayerState player, CardInstance? source)
     {
+        ValidateEmperorP3Priority(id, command, player, source); // EmperorP3Priority.cs: the Reaction lockout and its cards' conditions
         switch (id)
         {
             case EmperorP3Abilities.CenteringStraightenVoid:
@@ -294,7 +300,7 @@ public sealed partial class MatchEngine
     }
 
     // The execution switch's hook: null when the id is not this group's; false when its effects are done; true when a decision opened (the action finishes from there).
-    private bool? RunEmperorP3(string id, AbilityDefinition ability, GameCommand command, PlayerState player, CardInstance? source, CardInstance? target, HashSet<string> bowedBefore)
+    private bool? RunEmperorP3(string id, AbilityDefinition ability, GameCommand command, PlayerState player, CardInstance? source, CardInstance? target, HashSet<string> bowedBefore, bool consumedGrant)
     {
         var name = source is null ? "an action" : Definition(source).Name;
         switch (id)
@@ -387,7 +393,7 @@ public sealed partial class MatchEngine
                 Draw(player);
                 return false;
             default:
-                return null;
+                return RunEmperorP3Priority(id, ability, command, player, source, target, consumedGrant, bowedBefore); // EmperorP3Priority.cs
         }
     }
 
@@ -505,6 +511,7 @@ public sealed partial class MatchEngine
     private void P3AfterHeldAction(GameCommand? command)
     {
         if (KeyOf(command) is not { } key) return;
+        P3EndLockouts(key); // Thunder Dragon, Aroru (EmperorP3Priority.cs): the action has ended
         if (P3.CostsIgnored == key) P3.CostsIgnored = null;
         if (!P3.OwedGrants.Remove(key)) return;
         GrantAdditionalAction(key.PlayerId, null);

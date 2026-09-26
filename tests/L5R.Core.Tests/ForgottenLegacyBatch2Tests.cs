@@ -62,7 +62,7 @@ internal static class ForgottenLegacyBatch2Tests
         Eq(Ids(PublishedContent.PersonalityWave66), string.Join(",", personalities.Order(StringComparer.Ordinal)), "personality-wave-66 publishes exactly the wired Personalities");
         Eq(Ids(PublishedContent.FollowerWave29), Vengeful, "follower-wave-29 publishes exactly The Vengeful");
         Eq(Ids(PublishedContent.StrongholdWave15), Temple, "stronghold-wave-15 publishes exactly The Forgotten Temple");
-        foreach (var unwired in new[] { "oracle-l5r-7089", "oracle-l5r-8861" }) // The Dark Naga (oracle-l5r-8012) is published in personality-wave-86 (issue #501)
+        foreach (var unwired in new[] { "oracle-l5r-8861" }) // Shosuro Aroru - exp2 (oracle-l5r-7089) is published in personality-wave-104 (issue #503). The Dark Naga (oracle-l5r-8012) is published in personality-wave-86 (issue #501)
             Check(!CardCatalog.Cards.ContainsKey(unwired), $"{unwired} stays unpublished");
 
         string Keywords(string id) => string.Join(",", (CardCatalog.Get(id).Keywords ?? []).OrderBy(k => k, StringComparer.Ordinal));

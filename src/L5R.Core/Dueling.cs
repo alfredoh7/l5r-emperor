@@ -416,6 +416,7 @@ public sealed partial class MatchEngine
         // The duel itself is a single, complete action from challenge to consequences (issue #209):
         // once everything above has applied, the winning card's own controller gets a chance to
         // react to it having won -- before handing play back exactly where the challenge was issued.
+        P3EndLockouts(new(challengerPlayerId, duel.SourceCardId, duel.AbilityId)); // issue #503: the duel's action has ended (a Reaction lockout ends)
         if (winnerId is not null && P3OpenDuelWonWindow(duel, winnerId, winnerPlayerId!.Value, 1 - challengerPlayerId)) return; // issue #503: the duel's after-action tracking runs when the window closes
         // Overconfident (issue #223): a chance to react to whichever side the duel's own outcome
         // destroyed (ApplyDuelOutcome/ApplyDuelFocusEffect, both above, already queued it via MarkDead).
