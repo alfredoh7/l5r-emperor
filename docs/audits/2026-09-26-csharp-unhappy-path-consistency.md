@@ -57,17 +57,19 @@ Three occurrence quotes were also dropped (T14-01 at `DuelDemoChecks.cs:192`, T1
 
 ## 3. #510 re-check and "Extends #510"
 
-#510's fixer, PR #512, is open and unmerged. All seven #510 items are still present on `830d2a4a`:
+All seven #510 items were present on the audited head, `830d2a4a`. #510's fixer, PR #512, merged to main during the audit as `6382ed27`, and the audit branch was then merged with main. The last column re-checks each item on the merged tree:
 
-| #510 item | Evidence at `830d2a4a` | State |
+| #510 item | Evidence at `830d2a4a` | After #512 (merged tree) |
 |---|---|---|
-| `ArgumentException` for player input in `CustomPractice.cs`, `DeckWorkshop.cs`, `GoldShowcase.cs` | `rg -c "throw new ArgumentException"`: 2, 3 and 1 | still present |
-| `CheckFirstActionRestriction` naming | `BattleTiming.cs:129` `private void CheckFirstActionRestriction(GameCommand command)` | still present |
-| Unordered choice lists at `CardAbilities.cs` ~10893 and ~10968 | both lines have no `OrderBy` | still present |
-| Client `async void` | 21 sites; `Main.cs:536` `private async void Submit(GameCommand command)` | still present |
-| Server `CancellationToken` | `RoomManager.cs:82/95/110` take no token | still present |
-| Server rejection logging | `SubmitAsync` rejection branches log nothing (inventory C10) | still present |
-| `TreatWarningsAsErrors` for Client and AI | absent from both `.csproj` files | still present |
+| `ArgumentException` for player input in `CustomPractice.cs`, `DeckWorkshop.cs`, `GoldShowcase.cs` | `rg -c "throw new ArgumentException"`: 2, 3 and 1 | still present (2, 3 and 1) |
+| `CheckFirstActionRestriction` naming | `BattleTiming.cs:129` `private void CheckFirstActionRestriction(GameCommand command)` | fixed (`ValidateFirstActionRestriction`) |
+| Unordered choice lists at `CardAbilities.cs` ~10893 and ~10968 | both lines have no `OrderBy` | fixed (the #512 diff adds 43 `StringComparer.Ordinal` lines to `CardAbilities.cs`) |
+| Client `async void` | 21 sites; `Main.cs:536` `private async void Submit(GameCommand command)` | 9 remain: 8 Godot `_Ready` overrides in probe or review harness files, plus `Main.InkFilm.cs:22` |
+| Server `CancellationToken` | `RoomManager.cs:82/95/110` take no token | fixed (tokens threaded through) |
+| Server rejection logging | `SubmitAsync` rejection branches log nothing (inventory C10) | logging added (8 `Log` references in `RoomManager.cs`) |
+| `TreatWarningsAsErrors` for Client and AI | absent from both `.csproj` files | fixed (both `.csproj` files) |
+
+On the merged tree every `src/` finding quote still matches. Two moved lines: E5-02 is now `RoomManager.cs:163` (was 154) and T19-01's `session_replaced` is now `RoomManager.cs:121` (was 118). #512's added logging does not cover AUD-13: a non-`RuleViolation` exception still escapes `SubmitAsync`.
 
 **Extends #510** (posted as one comment on #510, not a new issue): AUD-09. The `branch-dispatch` default arms throw `InvalidOperationException` instead of `RuleViolation` at sites #510 does not list: `EffectChoice.cs:141/176`, `AbilityCosts.cs:297`, `AttackTargeting.cs:99`, `GoldQuotes.cs:209`, `AlternativeCosts.cs:103`, `CreatedCardEntry.cs:34`, and the per-batch dispatchers `ForgottenLegacyBatch1.cs:206` and `EmperorProxyX.cs:91`. All of them are unreachable wiring guards under the current catalogue.
 
@@ -437,15 +439,15 @@ One attempted fix was reverted because it failed: removing `|| true` at `BeforeT
 
 ### Checks
 
-`bash tools/check.sh --skip-client` was run on the branch with all eight fixes applied. It exited 0 with "All requested checks passed.":
+`bash tools/check.sh --skip-client` was run twice on the branch with all eight fixes applied, and exited 0 with "All requested checks passed." both times:
 
-| Suite | Result |
-|---|---|
-| Python content tests (4 runs) | 45, 135, 6 and 9 tests, all OK |
-| Core suites (133) | 2105/2105 |
-| AI | 74/74 |
-| Server integration | 8/8 |
-| Client transport | 13/13 |
+| Suite | Before merging current main | Final branch (after merging main, including #512 and #515) |
+|---|---|---|
+| Python content tests (4 runs) | 45, 135, 6 and 9 tests, all OK | 55, 135, 6 and 9 tests, all OK |
+| Core suites (133) | 2105/2105 | 2105/2105 |
+| AI | 74/74 | 74/74 |
+| Server integration | 8/8 | 8/8 |
+| Client transport | 13/13 | 13/13 |
 
 No client file changed, so no client build was needed. Nothing was run on macOS, and there was no native or graphical check.
 
