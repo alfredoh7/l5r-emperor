@@ -19,7 +19,7 @@ public sealed partial class MatchEngine
                 units.Where(c=>c.Zone==Zone.Battlefield || c.Zone==Zone.Attached && Card(c.AttachedTo).Zone==Zone.Battlefield).Select(c=>ViewCard(c)).ToArray(),
                 player.Provinces.Select(p=>new ProvinceView(p.Index,EffectiveProvinceStrength(p),p.Destroyed,
                     p.CardId is null?null:ViewCard(Card(p.CardId),Card(p.CardId).FaceUp),
-                    p.RegionId is null?null:ViewCard(Card(p.RegionId)),ProvinceStrengthMax(p))).ToArray(),
+                    p.RegionId is null?null:ViewCard(Card(p.RegionId)),ProvinceStrengthMax(p),p.HoldsNoDynastyCards,p.DarkExperimentsMarked)).ToArray(), // issue #503
                 player.Id==playerId?player.Hand.Select(id=>ViewCard(Card(id))).ToArray():[],player.Hand.Count,
                 player.DynastyDeck.Count,player.FateDeck.Count,
                 owned.Where(c=>c.Zone is Zone.DynastyDiscard or Zone.FateDiscard or Zone.Dead).Select(c=>ViewCard(c)).ToArray(),
@@ -466,7 +466,7 @@ public sealed partial class MatchEngine
             Add("chooseRinShame","Refuse: he is bowed and cannot straighten this turn",Command("chooseRinShame") with {Choice="decline"});
         }
         else if(_state.PendingChoice is { Type:"yourClanNeedsYouProvince" })
-            foreach(var p in Player(playerId).Provinces.Where(p=>!p.Destroyed))
+            foreach(var p in Player(playerId).Provinces.Where(p=>!p.Destroyed && !p.HoldsNoDynastyCards)) // issue #503
                 Add("chooseYourClanNeedsYouProvince",$"Place into province {p.Index+1}"+(p.CardId is not null?$" (discarding {Definition(Card(p.CardId)).Name})":""),
                     Command("chooseYourClanNeedsYouProvince",province:p.Index));
         else if(_state.PendingChoice is { Type:"conqueror" })
@@ -595,7 +595,8 @@ public sealed partial class MatchEngine
                 var cavalrySegment=_state.Phase is Phase.CavalryDeclaration or Phase.CavalryDefense;
                 var units=_state.Cards.Values.Where(c=>c.OwnerId==playerId && c.Zone==Zone.Home && (!c.Bowed || MayAssignBowed(c)) && Definition(c).Type==CardType.Personality && IsCavalryUnit(c)==cavalrySegment
                     && !DelayedArrivalBarsAttacker(c,_state.Phase is Phase.InfantryDeclaration or Phase.CavalryDeclaration)
-                    && !(_state.Phase is Phase.DefenseAssignment or Phase.CavalryDefense && IsGojuAsuka(c))).Select(c=>c.Id).ToArray(); // Delayed Arrival (issue #492, group F); Goju Asuka never defends (issue #501)
+                    && !(_state.Phase is Phase.DefenseAssignment or Phase.CavalryDefense && IsGojuAsuka(c))
+                    && !(cavalrySegment && CavalryAssignmentBarredP6()) && !SuikihimeMovementLocked(c,MovementKinds.Assign)).Select(c=>c.Id).ToArray(); // issue #503: Incredible Tragedy, Otomo Suikihime // Delayed Arrival (issue #492, group F); Goju Asuka never defends (issue #501)
                 var attack=_state.Phase is Phase.InfantryDeclaration or Phase.CavalryDeclaration;
                 // Defenders are offered only the battlefields AssignDefense accepts.
                 var provinces=Player(1-_state.ActivePlayerId).Provinces

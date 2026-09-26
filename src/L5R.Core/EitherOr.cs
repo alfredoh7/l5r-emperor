@@ -148,7 +148,7 @@ public sealed partial class MatchEngine
             EitherOrSpecs.PowerOfWordLoseOrNegate => $"{source}: lose 3 Honor, or your action's effects are negated.",
             EitherOrSpecs.ShadowCourtHonor => $"{source}: choose a player who gains or loses 2 Honor.",
             EitherOrSpecs.SincerityDiscard => $"{source}: choose a player who discards a card.",
-            _ => RemainingGEitherOrPrompt(p, source) // Emperor Edition remaining-cards pass (issue #492), group G: Bandit Gang.
+            _ => EmperorP6EitherOrPrompt(p, source, affected) ?? RemainingGEitherOrPrompt(p, source) // issue #503: Kuni Renyu (EmperorP6.cs). Emperor Edition remaining-cards pass (issue #492), group G: Bandit Gang.
         };
     }
 
@@ -245,7 +245,7 @@ public sealed partial class MatchEngine
                 ];
             case EitherOrSpecs.ShadowCourtHonor: case EitherOrSpecs.SincerityDiscard:
                 return EmperorRemainingDEitherOrOptions(p);
-            default: return RemainingGEitherOrOptions(p, source, payable); // Bandit Gang (issue #492 group G).
+            default: return EmperorP6EitherOrOptions(p, affected) ?? RemainingGEitherOrOptions(p, source, payable); // issue #503: Kuni Renyu. // Bandit Gang (issue #492 group G).
         }
     }
 
@@ -418,6 +418,7 @@ public sealed partial class MatchEngine
                 ApplyEmperorRemainingDEitherOr(p, option, decider);
                 break;
             default:
+                if (ApplyEmperorP6EitherOr(p, option, source, decider)) break; // issue #503: Kuni Renyu (EmperorP6.cs).
                 if (ApplyRemainingGEitherOr(p, option, source, decider, sourceIds)) break; // Bandit Gang (issue #492 group G).
                 throw new RuleViolation("Unknown choice.");
         }

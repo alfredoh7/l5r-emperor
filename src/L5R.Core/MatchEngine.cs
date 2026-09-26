@@ -297,6 +297,7 @@ public sealed partial class MatchEngine
         FinishSpentBeforeBattleItem();
         FinishTwistOfFateAction(twistWasActive);
         OpenAssignedReactionWindow(); // Chrysanthemum Blossom (issue #492 group G): "After this Personality is assigned".
+        OpenEmperorP6QueuedDecision(); // Issue #503 (EmperorP6.cs): Suikihime's leaves-play watch; the refill decisions owed by the command.
         CheckInokuchiWatches(); // Mirumoto Inokuchi (issue #501, EmperorMechA.cs): "If you don't, bow him" -- once his additional action is gone without being taken.
     }
     private void ApplyCore(GameCommand command)
@@ -744,6 +745,7 @@ public sealed partial class MatchEngine
         card.Bowed=Definition(card).Type==CardType.Holding || (Definition(card).Type==CardType.Personality && Definition(card).Effect=="enters-bowed");
         if(Definition(card).Type==CardType.Personality && Definition(card).Effect=="enters-dishonored") Dishonor(card);
         Emit("cardEnteredPlay",$"{Player(command.PlayerId).Name} brought {Definition(card).Name} into play{(card.Bowed ? " bowed" : "") }.",command.PlayerId,card.Id);
+        AfterHoldingEnteredFromProvinceP6(province,card); // Dark Experiments (issue #503, EmperorP6.cs)
         QueueOverconfidentDraw(card);
         Refill(Player(command.PlayerId),province);
         var reactionId=EntryReactionAbility(card);
@@ -1489,6 +1491,7 @@ public sealed partial class MatchEngine
             // removes his own default Infantry eligibility, only adds Cavalry while defending.
             var cavalryEligible=IsCavalryUnit(card) || isDefender && Definition(card).Effect=="cavalry-if-defender";
             Require(cavalry?cavalryEligible:!IsCavalryUnit(card),cavalry?"Only a Cavalry unit may assign during Cavalry Maneuvers.":"An Infantry unit must assign during Infantry Maneuvers.");
+            Require(!(cavalry && CavalryAssignmentBarredP6()),"Incredible Tragedy: Personalities may not be assigned during the Cavalry Maneuvers Segment."); // issue #503
             Require(provinces.Contains(assignment.Value),"Choose an existing enemy province battlefield.");
             Require(!MovementLocked(card,MovementKinds.Assign),$"{Definition(card).Name} may not be assigned to a battlefield this turn.");
             if(_state.ExtraInfantrySegment) RequireHiddenFallsAssignment(card,assignment.Value); // Hidden Falls Dojo (Stronghold pass, issue #486 batch 1): its Scouts, to the provinces it targeted.
@@ -2022,7 +2025,7 @@ public sealed partial class MatchEngine
     {
         var pending=_state.PendingChoice!;
         Require(command.Type=="chooseYourClanNeedsYouProvince" && command.PlayerId==pending.PlayerId && command.Province is int provinceIndex
-            && Player(pending.PlayerId).Provinces.Any(p=>p.Index==provinceIndex && !p.Destroyed),
+            && Player(pending.PlayerId).Provinces.Any(p=>p.Index==provinceIndex && !p.Destroyed && !p.HoldsNoDynastyCards), // issue #503: Illusory Defense's province
             "Choose one of your own non-destroyed provinces.");
         var card=Card(pending.CardId!);
         var province=Player(pending.PlayerId).Provinces.Single(p=>p.Index==command.Province!.Value);
@@ -2699,6 +2702,7 @@ public sealed partial class MatchEngine
         }
         if(Delay(card,DelayedKinds.Dishonor,byPlayerId)) return; // The shared delay mechanism (issue #492, EmperorRulingR2.cs).
         if(JiYunNegatesDishonor(card,byPlayerId)) return;
+        if(SuikihimeRefusesDishonor(card)) return; // Otomo Suikihime (issue #503): will not become dishonorable.
         var wasDishonorable=card.Dishonorable;
         card.Dishonorable=true;
         if(!wasDishonorable) AfterPersonalityDishonored(card,byPlayerId); // Successful Bounty (issue #492, group F).
@@ -3136,6 +3140,7 @@ public sealed partial class MatchEngine
         if(Definition(card).Effect==StarCrossedLoversEffect) return ResolveStarCrossedLovers(player,province,card);
         // Emperor Edition remaining-cards pass (issue #492), group F (EmperorRemainingFEvents.cs): twelve Events, most of which stay in play for a while or ask a player a question.
         if(IsEmperorRemainingFEvent(Definition(card).Effect)) return ResolveEmperorRemainingFEvent(player,province,card);
+        if(IsEmperorP6Event(Definition(card).Effect)) return ResolveEmperorP6Event(player,province,card); // Issue #503 (EmperorP6.cs): four Events.
         province.CardId=null; card.ProvinceIndex=null;
         switch(Definition(card).Effect)
         {
@@ -3231,6 +3236,7 @@ public sealed partial class MatchEngine
     {
         card.Zone=Zone.Region; card.ProvinceIndex=province.Index; card.FaceUp=true; province.RegionId=card.Id;
         Emit("regionAttached",$"{Definition(card).Name} attached to {player.Name}'s province {province.Index+1}.",player.Id,card.Id);
+        AfterRegionAttachedP6(province,card); // Dark Experiments (issue #503, EmperorP6.cs)
     }
     // A Celestial (core rules Glossary): unlike Event/Region, it enters play the instant it is
     // revealed regardless of WHICH phase that reveal happens in -- today the Events Phase reveal loop
@@ -3324,10 +3330,11 @@ public sealed partial class MatchEngine
     }
     private void Refill(PlayerState player,ProvinceState province)
     {
-        if(province.Destroyed || province.CardId is not null || player.DynastyDeck.Count==0) return;
+        if(province.Destroyed || province.CardId is not null || player.DynastyDeck.Count==0 || province.HoldsNoDynastyCards) return; // issue #503: Illusory Defense's province holds no Dynasty cards
         var id=player.DynastyDeck[0]; player.DynastyDeck.RemoveAt(0);
         province.CardId=id; var card=Card(id); card.Zone=Zone.Province; card.ProvinceIndex=province.Index; card.FaceUp=false;
         Emit("provinceRefilled",$"{player.Name} refilled province {province.Index+1} face down.",player.Id); // Neither player can inspect it.
+        AfterProvinceRefilledP6(player,province,faceUp:false); // Issue #503 (EmperorP6.cs): Susaiken's / Distant Expansion's face-up refill, Ietsuno's look.
     }
     // Honor loss/gain is permanent by default, with no floor or ceiling and no memory of past
     // changes -- but a standing passive (a Stronghold's printed text, keyed by its Effect below) can
@@ -3385,6 +3392,7 @@ public sealed partial class MatchEngine
             amount=reducedByName;
             if(amount==0) return;
         }
+        if(RenyuReducesLoss(playerId,amount,reason)) return; // Kuni Renyu (issue #503, EmperorP6.cs): Honor losses from an action that targeted him are reduced to 0.
         if(amount<0 && playerId==_state.HonorLossReductionPlayerId)
         {
             var reduced=Math.Min(0,amount+3);

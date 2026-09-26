@@ -338,6 +338,10 @@ public sealed class ProvinceState
     public int PrintedStrength { get; set; }
     public bool Destroyed { get; set; }
     public string? CardId { get; set; }
+    // Issue #503 (EmperorP6.cs): Illusory Defense's created province "permanently does not hold Dynasty cards" (never refilled, nothing put into it); Dark Experiments' permanent mark ("until the
+    // game ends, after a Region attaches to it, destroy the Region, and after a Holding enters play from it, give the Holding a -1GP token").
+    public bool HoldsNoDynastyCards { get; set; }
+    public bool DarkExperimentsMarked { get; set; }
     // Reconnaissance (core rules Glossary): a per-player boolean at this specific province, indexed
     // by player id, defaulted to false. No ability removes it directly; it resets to false for both
     // players only once a battle at this province resolves (ResolveBattle), regardless of outcome.
@@ -1203,6 +1207,8 @@ public sealed class MatchState
     public List<string> EntryCostAnswers { get; set; } = [];
     // Issue #501, mechanics group D (EmperorMechD.cs): the Recon-action counter, the attach log, the cards-into-hand records and timed removals.
     public MechDState MechD { get; set; } = new();
+    /// <summary>Issue #503 (EmperorP6.cs): the refill decisions (Daigotsu Susaiken, Distant Expansion, Shosuro Ietsuno), In Search of Guidance's found Sensei, Otomo Suikihime's leaves-play watch.</summary>
+    public EmperorP6State P6 { get; set; } = new();
 }
 
 /// <summary>Isawa Norimichi: PlayerId's army has +Amount total Force in the battle numbered Battle (while it has any units).</summary>
@@ -1343,7 +1349,9 @@ public sealed record GrantedAbilityView(string AbilityId, string Label, string T
 // Lands) -- what a player actually needs to beat to destroy the province, not the raw mutable field.
 /// <param name="Strength">What anything reads the province's strength as now: the current strength, or the maximum while a limit holds it down.</param>
 /// <param name="MaxStrength">The limit in force (Times of Strife, Ancient Feud), or null. While it holds, the current strength may be higher and returns when the limit ends.</param>
-public sealed record ProvinceView(int Index, int Strength, bool Destroyed, CardView? Card, CardView? Region, int? MaxStrength = null);
+public sealed record ProvinceView(int Index, int Strength, bool Destroyed, CardView? Card, CardView? Region, int? MaxStrength = null,
+    // Issue #503 (EmperorP6.cs): Illusory Defense's province that never holds a Dynasty card, and Dark Experiments' permanent mark (both public).
+    bool HoldsNoDynastyCards = false, bool DarkExperimentsMarked = false);
 // DeadCount (issue #221): the authoritative count of this player's own Zone.Dead Personalities --
 // already present, individually, within Discard (each CardView's own Zone tells a dead card apart
 // from a merely-discarded one), but computed here as a single number the same way UnitForce is, so

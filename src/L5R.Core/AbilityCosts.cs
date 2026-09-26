@@ -62,6 +62,8 @@ public static class CostVerbs
     /// <summary>Discard the Imperial Favor ("Discard the Imperial Favor to ...", issue #501, EmperorMechE.cs): the acting player must control it (or discard a Favor token of Kyuden Otomo - exp's instead).
     /// Names no card. Declared in Costs it is mandatory; as one of CostOptions it is the alternative ("bow him or discard the Imperial Favor"). Nothing can block it (it is not a bow or a destruction).</summary>
     public const string DiscardFavor = "discard-favor";
+    /// <summary>Remove every card chosen for the slot the cost's Subject names from the game ("remove ... any number of Holdings you control ... from the game", Mining Apparatus, issue #503).</summary>
+    public const string RemoveSlotCards = "remove-slot-cards";
 }
 
 /// <summary>One cost: <paramref name="Verb"/> (CostVerb.Bow or CostVerbs.*) applied to <paramref name="Subject"/> (CostSubject.*: the ability's
@@ -214,6 +216,11 @@ public sealed partial class MatchEngine
                 foreach (var slotCard in SlotCostCards(command, cost)) yield return (new ActionCost(CostVerb.Bow, cost.Subject), slotCard);
                 continue;
             }
+            if (cost.Verb == CostVerbs.RemoveSlotCards) // Mining Apparatus (issue #503)
+            {
+                foreach (var slotCard in SlotCostCards(command, cost)) yield return (new ActionCost(CostVerbs.Remove, cost.Subject), slotCard);
+                continue;
+            }
             var subject = cost.Verb is CostVerbs.LoseHonor or CostVerbs.DestroyLeftmostProvince or CostVerbs.ShuffleHand or CostVerbs.DiscardHand or CostVerbs.DiscardFavor ? null : CostSubjectCard(new CostOption(cost.Verb, cost.Verb, cost.Verb, cost.Subject), ability, command, source);
             if (CostExempt(cost, source, subject) || YorimiWaivesBow(ability, cost, source, subject)) continue; // Soshi Yorimi (issue #477, batch 4): ignored, so not planned.
             if (MomokoWaivesCost(command, cost.Verb)) continue; // Isawa Momoko (issue #501): the action's non-destruction costs are ignored
@@ -244,6 +251,7 @@ public sealed partial class MatchEngine
             if (cost.Verb == CostVerbs.DiscardHand) { foreach (var handId in player.Hand.ToArray()) DiscardFate(player, Card(handId)); continue; }
             // Capturing the Soul (issue #492): "bow ... 0 or more of your other performing Shugenja".
             if (cost.Verb == CostVerbs.BowSlotCards) { foreach (var slotCard in SlotCostCards(command, cost)) slotCard.Bowed = true; continue; }
+            if (cost.Verb == CostVerbs.RemoveSlotCards) { foreach (var slotCard in SlotCostCards(command, cost).ToArray()) RemoveFromGame(slotCard); continue; } // Mining Apparatus (issue #503)
             if (cost.Verb == CostVerbs.DestroyLeftmostProvince)
             {
                 if (player.Provinces.Where(p => !p.Destroyed).OrderBy(p => p.Index).FirstOrDefault() is { } leftmost) DestroyProvince(player.Id, leftmost);
