@@ -1,0 +1,154 @@
+{
+  "Profile": "strategy-wave-98",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-2035",
+      "Name": "Disrupting Communication",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Bow your performing Scout and target an enemy card: Bow it. The enemy leader discards a card of his choice, or a random card if you have Reconnaissance.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-2035.jpg",
+      "Keywords": [],
+      "Focus": 1,
+      "Abilities": [
+        "p5-disrupting-communication"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-2280",
+      "Name": "Economic Repercussions",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Other players' Personalities and Followers in play have -2 Gold Cost and all players have the ability, \"Political Limited: Discard the Imperial Favor or pay 6 Gold: Discard a card titled Economic Repercussions from play.\"\nLimited: Put this card into play.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-2280.jpg",
+      "Keywords": [
+        "Political"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "p5-econ-enter"
+      ],
+      "Effect": "p5-economic-repercussions"
+    },
+    {
+      "Id": "oracle-l5r-3010",
+      "Name": "Headbutt",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing Berserker, bow him unless he was not in play when this Combat Segment began, and target an enemy card without attachments and with equal or lower Force: Destroy it.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-3010.jpg",
+      "Keywords": [],
+      "Focus": 1,
+      "Abilities": [
+        "p5-headbutt-destroy",
+        "p5-headbutt-destroy-fresh"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-3733",
+      "Name": "Inciting Mistrust",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After another player's Melee or Ranged Attack targets your Ninja: Show the card in the current battlefield's province. If it is a Personality, negate the Melee or Ranged Attack's effects.\nBattle: Discard a card in the current battlefield's province. Draw a card.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-3733.jpg",
+      "Keywords": [
+        "Ninja"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "p5-inciting-mistrust-negate",
+        "p5-inciting-mistrust-discard"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-5928",
+      "Name": "Perplexing Guests",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After another player's action targets your Personality: Discard him.\nBattle: Create a 1F/1C/1PH Monk Personality on your side at the current battlefield. Remove him from the game when the turn ends.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-5928.jpg",
+      "Keywords": [],
+      "Focus": 1,
+      "Abilities": [
+        "p5-perplexing-guests-discard",
+        "p5-perplexing-guests-create"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-7972",
+      "Name": "The Bite of Winter",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Personalities and Followers have -1F. All players have the ability, \"Open: Bow your Stronghold: Discard a card titled The Bite of Winter from play.\"\nLimited: Put this card into play.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7972.jpg",
+      "Keywords": [
+        "Winter"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "p5-bite-winter-enter"
+      ],
+      "Effect": "p5-bite-of-winter"
+    }
+  ],
+  "Decks": []
+}

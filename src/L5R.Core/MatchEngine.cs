@@ -1556,6 +1556,7 @@ public sealed partial class MatchEngine
             _state.AttackerLeadBattle=_state.BattleNumber;
             Emit("firstOpportunity",$"{Player(_state.ActivePlayerId).Name} has the first opportunity to take a Battle action or pass ({BattleSteps.ReasonEngageGrant}).",_state.ActivePlayerId);
         }
+        MarkCombatSegmentBegan(); // Issue #503 (EmperorP5.cs): no Engage window, so the Combat Segment begins now (Headbutt).
         Emit("battleStarted",$"Battle at {label}: {(firstOpportunity==_state.ActivePlayerId?"attacker":"defender")} acts first.");
     }
     private void ResolveBattle()
@@ -2309,7 +2310,7 @@ public sealed partial class MatchEngine
     // "force-with-spell" (Asako Ume), "force-if-enemy-dishonorable" (Bayushi Kahoku) and
     // "force-max-dead-pile" (Moto Shunsuke) are always-on passive bonuses, unlike the attacking-only
     // attacking-two/attacking-four Effects above.
-    private int PersonalityForce(CardInstance card) => Math.Max(0,Definition(card).Force+StatModifier(card,"Force")+TerrainForceAdjustment(card)+GinasFoxForce(card)+EmperorRemainingEForce(card)+ThreeSForce(card)+ForgottenLegacyBatch5Force(card)+EmperorBatch5Force(card)+EmperorPersonalityBatch3Force(card)+ShadowsEmbraceBatch5Force(card)+ShadowsEmbraceBatch2Force(card)+ShadowsEmbraceBatch1Force(card)+EmperorRemainingGForce(card)+(IsAttacking(card)?(Definition(card).Effect=="attacking-two"?2:Definition(card).Effect=="attacking-four"?4:
+    private int PersonalityForce(CardInstance card) => Math.Max(0,Definition(card).Force+StatModifier(card,"Force")+P5Force(card)/* issue #503 */+TerrainForceAdjustment(card)+GinasFoxForce(card)+EmperorRemainingEForce(card)+ThreeSForce(card)+ForgottenLegacyBatch5Force(card)+EmperorBatch5Force(card)+EmperorPersonalityBatch3Force(card)+ShadowsEmbraceBatch5Force(card)+ShadowsEmbraceBatch2Force(card)+ShadowsEmbraceBatch1Force(card)+EmperorRemainingGForce(card)+(IsAttacking(card)?(Definition(card).Effect=="attacking-two"?2:Definition(card).Effect=="attacking-four"?4:
         // Matsu Kaido (oracle-l5r-4934, issue #299): "Kaido has +1F while attacking" -- the plain +1
         // counterpart to attacking-two/attacking-four (Matsu Yoshito's own conditional variant below
         // starts from the same +1 base).
@@ -2421,7 +2422,7 @@ public sealed partial class MatchEngine
     // (e.g. "+2F while defending") -- distinct from an Item's, which always conveys to the wielder
     // instead (see PersonalityForce/ItemForceToWielder). Feeds both CardForce (targeting, always
     // visible regardless of bow state) and BattleForce (unit total, gated on unbowed-or-Elite).
-    private int FollowerForce(CardInstance card) => Math.Max(0,Definition(card).Force+StatModifier(card,"Force")+TerrainForceAdjustment(card)+GinasFoxForce(card)+ForgottenLegacyBatch5Force(card)+ShadowsEmbraceBatch5Force(card)+(Definition(card).Effect switch
+    private int FollowerForce(CardInstance card) => Math.Max(0,Definition(card).Force+StatModifier(card,"Force")+P5Force(card)/* issue #503 */+TerrainForceAdjustment(card)+GinasFoxForce(card)+ForgottenLegacyBatch5Force(card)+ShadowsEmbraceBatch5Force(card)+(Definition(card).Effect switch
     {
         "force-while-defending" => IsDefendingUnit(card) ? 2 : 0,
         // Home Guard (oracle-l5r-3413, issue #435): "This card has +3F while defending" -- the same
@@ -3136,6 +3137,7 @@ public sealed partial class MatchEngine
         if(Definition(card).Effect==StarCrossedLoversEffect) return ResolveStarCrossedLovers(player,province,card);
         // Emperor Edition remaining-cards pass (issue #492), group F (EmperorRemainingFEvents.cs): twelve Events, most of which stay in play for a while or ask a player a question.
         if(IsEmperorRemainingFEvent(Definition(card).Effect)) return ResolveEmperorRemainingFEvent(player,province,card);
+        if(IsEmperorP5Event(Definition(card).Effect)) return ResolveEmperorP5Event(player,province,card); // Issue #503 (EmperorP5.cs): Starting on the Path, Never Enough Soldiers.
         province.CardId=null; card.ProvinceIndex=null;
         switch(Definition(card).Effect)
         {

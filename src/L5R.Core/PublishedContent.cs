@@ -2650,4 +2650,14 @@ public static class PublishedContent
     public static PublishedSnapshot PersonalityWave92 { get; } = Load("L5R.Published.PersonalityWave92.json", "personality-wave-92", requireDecks: false);
     /// <summary>Strategy wave 78 (issue #501, mechanics group D): Broken Cipher, Indecision and Amazing Feat (EmperorMechD.cs).</summary>
     public static PublishedSnapshot StrategyWave78 { get; } = Load("L5R.Published.StrategyWave78.json", "strategy-wave-78", requireDecks: false);
+    /// <summary>Personality wave 112 (issue #503, pass group P5, EmperorP5.cs): Hida Yamadera, Kakita Nara, Raido no Oni, Shiba Jouta - exp, Tokiko, Daigotsu Yutaka.</summary>
+    public static PublishedSnapshot PersonalityWave112 { get; } = Load("L5R.Published.PersonalityWave112.json", "personality-wave-112", requireDecks: false);
+    /// <summary>Strategy wave 98 (issue #503, pass group P5, EmperorP5.cs): Disrupting Communication, Economic Repercussions, Headbutt, Inciting Mistrust, Perplexing Guests, The Bite of Winter.</summary>
+    public static PublishedSnapshot StrategyWave98 { get; } = Load("L5R.Published.StrategyWave98.json", "strategy-wave-98", requireDecks: false);
+    /// <summary>Item wave 34 (issue #503, pass group P5, EmperorP5.cs): Tsubute.</summary>
+    public static PublishedSnapshot ItemWave34 { get; } = Load("L5R.Published.ItemWave34.json", "item-wave-34", requireDecks: false);
+    /// <summary>Spell wave 42 (issue #503, pass group P5, EmperorP5.cs): Seek the Stain.</summary>
+    public static PublishedSnapshot SpellWave42 { get; } = Load("L5R.Published.SpellWave42.json", "spell-wave-42", requireDecks: false);
+    /// <summary>Event wave 25 (issue #503, pass group P5, EmperorP5.cs): Never Enough Soldiers, Starting on the Path.</summary>
+    public static PublishedSnapshot EventWave25 { get; } = Load("L5R.Published.EventWave25.json", "event-wave-25", requireDecks: false);
 }

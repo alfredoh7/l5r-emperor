@@ -1,0 +1,56 @@
+[
+  {
+    "card_id": "oracle-l5r-2035",
+    "printing_set": [
+      "Before the Dawn"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=2035",
+    "image_path": "assets/reference/oracle/before-the-dawn/webp/oracle-l5r-2035-printing-1-image-1.webp",
+    "image_sha256": "ade6662a08c52e6d580dd77bd7659f2d61645c51e82a6c60ebfd28eb8be275a8"
+  },
+  {
+    "card_id": "oracle-l5r-2280",
+    "printing_set": [
+      "Forgotten Legacy"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=2280",
+    "image_path": "assets/reference/oracle/forgotten-legacy/webp/oracle-l5r-2280-printing-1-image-1.webp",
+    "image_sha256": "9f06142b24193e398c017a1af7c2d8714a4bb805384b1d163e06780b86ab8b11"
+  },
+  {
+    "card_id": "oracle-l5r-3010",
+    "printing_set": [
+      "Before the Dawn"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=3010",
+    "image_path": "assets/reference/oracle/before-the-dawn/webp/oracle-l5r-3010-printing-1-image-1.webp",
+    "image_sha256": "bfa1af286a9f2f9c325e588db764eef13e71d61a35bd4c6ddb04b93742eb4b07"
+  },
+  {
+    "card_id": "oracle-l5r-3733",
+    "printing_set": [
+      "Embers of War"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=3733",
+    "image_path": "assets/reference/oracle/embers-of-war/webp/oracle-l5r-3733-printing-1-image-1.webp",
+    "image_sha256": "217e8c5adddd6dd575f10f1c7d404ae12134b1eb00a33ff51a278159ca71e660"
+  },
+  {
+    "card_id": "oracle-l5r-5928",
+    "printing_set": [
+      "Embers of War"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=5928",
+    "image_path": "assets/reference/oracle/embers-of-war/webp/oracle-l5r-5928-printing-1-image-1.webp",
+    "image_sha256": "5fd45765d55337c4df34a390f3c2d7e66fc8016bc72392641cf6562ece73565c"
+  },
+  {
+    "card_id": "oracle-l5r-7972",
+    "printing_set": [
+      "Embers of War"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=7972",
+    "image_path": "assets/reference/oracle/embers-of-war/webp/oracle-l5r-7972-printing-1-image-1.webp",
+    "image_sha256": "bbcfcda302ad34537d845eaf6fb845102c7c7d34b5f23757ea99c7b05482c361"
+  }
+]

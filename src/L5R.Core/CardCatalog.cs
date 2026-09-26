@@ -676,6 +676,11 @@ public static class CardCatalog
             .Concat(PublishedContent.HoldingWave28.Cards) // Emperor Edition mechanics group E (issue #501): Seaside Bazaar
             .Concat(PublishedContent.PersonalityWave92.Cards) // Issue #501, mechanics group D: Daidoji Narizane, Daigotsu Yajinden - exp3
             .Concat(PublishedContent.StrategyWave78.Cards) // Issue #501, mechanics group D: Broken Cipher, Indecision, Amazing Feat
+            .Concat(PublishedContent.PersonalityWave112.Cards) // Issue #503, pass group P5: Hida Yamadera, Kakita Nara, Raido no Oni, Shiba Jouta - exp, Tokiko, Daigotsu Yutaka
+            .Concat(PublishedContent.StrategyWave98.Cards) // Issue #503, pass group P5: Disrupting Communication, Economic Repercussions, Headbutt, Inciting Mistrust, Perplexing Guests, The Bite of Winter
+            .Concat(PublishedContent.ItemWave34.Cards) // Issue #503, pass group P5: Tsubute
+            .Concat(PublishedContent.SpellWave42.Cards) // Issue #503, pass group P5: Seek the Stain
+            .Concat(PublishedContent.EventWave25.Cards) // Issue #503, pass group P5: Never Enough Soldiers, Starting on the Path
             .ToDictionary(c => c.Id, StringComparer.Ordinal);
     }
 }

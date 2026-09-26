@@ -1,0 +1,180 @@
+{
+  "Profile": "personality-wave-112",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-3242",
+      "Name": "Hida Yamadera",
+      "Type": "Personality",
+      "Clan": "Crab",
+      "GoldCost": 11,
+      "GoldProduction": 0,
+      "Force": 8,
+      "Chi": 3,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After Yamadera enters play from a province: Refill it face-up.\nBattle: Target an enemy card with lower Force: Bow it.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-3242.jpg",
+      "Keywords": [
+        "Berserker",
+        "Crab Clan",
+        "Damned",
+        "Shadowlands"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "p5-yamadera-refill",
+        "p5-yamadera-bow"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-4206",
+      "Name": "Kakita Nara",
+      "Type": "Personality",
+      "Clan": "Crane",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 4,
+      "PersonalHonor": 3,
+      "HonorRequirement": 6,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "You may use your Stronghold's abilities even if it is bowed.\nPolitical Open: Discard the Imperial Favor: Give each of your provinces +2 strength.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-4206.jpg",
+      "Keywords": [
+        "Courtier",
+        "Crane Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "p5-nara-provinces"
+      ],
+      "Effect": "colonial-harbor-tireless"
+    },
+    {
+      "Id": "oracle-l5r-6142",
+      "Name": "Raido no Oni",
+      "Type": "Personality",
+      "Clan": "Unaligned",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 10,
+      "Chi": 2,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After Raido enters play: Lose 6 Honor.\nRaido may not perform Battle actions while your current army has higher total Force than the current enemy army.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6142.jpg",
+      "Keywords": [
+        "Nonhuman",
+        "Oni",
+        "Shadowlands"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "p5-raido-no-oni",
+      "EntryHonorLoss": 6
+    },
+    {
+      "Id": "oracle-l5r-6766",
+      "Name": "Shiba Jouta",
+      "Type": "Personality",
+      "Clan": "Phoenix",
+      "GoldCost": 9,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 4,
+      "PersonalHonor": 2,
+      "HonorRequirement": 5,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Even if Jouta is dead, choose your performing Shugenja, who may be at any location unless Jouta is dead: Ranged 5 Attack.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6766.jpg",
+      "Keywords": [
+        "Unique",
+        "Experienced",
+        "Phoenix Clan",
+        "Samurai",
+        "Yojimbo"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "p5-jouta-attack",
+        "p5-jouta-attack-dead"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-8613",
+      "Name": "Tokiko",
+      "Type": "Personality",
+      "Clan": "Unaligned",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 5,
+      "PersonalHonor": 3,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Tokiko has +1F while a Phoenix Clan player controls her.\nBattle/Open: Destroy Tokiko and target your dead Personality: Bring him into play in your home or at the current battlefield, paying all costs but paying 7 less Gold.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8613.jpg",
+      "Keywords": [
+        "Experienced Isawa Tokiko",
+        "Unique",
+        "Brothers of Rebirth",
+        "Monk",
+        "Shugenja",
+        "Void"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "p5-tokiko-home",
+        "p5-tokiko-battlefield"
+      ],
+      "Effect": "p5-tokiko-phoenix-force"
+    },
+    {
+      "Id": "oracle-l5r-10086",
+      "Name": "Daigotsu Yutaka",
+      "Type": "Personality",
+      "Clan": "Spider",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 5,
+      "Chi": 2,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After Yutaka enters play: Lose 1 Honor.\nYutaka may not perform Bushido Virtue actions.\nBattle: If Yutaka is dead and he would be opposed: Bring him into play at the current battlefield, paying 3 less Gold if you have taken a Dark Virtue action this phase.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10086.jpg",
+      "Keywords": [
+        "Dark Will",
+        "Paragon",
+        "Samurai",
+        "Shadowlands",
+        "Spider Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "p5-yutaka-return",
+        "p5-yutaka-return-dark"
+      ],
+      "Effect": "p5-yutaka-no-bushido",
+      "EntryHonorLoss": 1
+    }
+  ],
+  "Decks": []
+}
