@@ -17,7 +17,6 @@ from importlib import metadata
 import os
 from pathlib import Path, PurePosixPath
 import platform
-import re
 import shutil
 import stat
 import subprocess
@@ -79,36 +78,8 @@ def version(executable, *arguments):
     return result.stdout.strip().splitlines()[-1]
 
 
-# Only exact pins are checked: name, optional [extras], ==version, optional ; marker (not evaluated).
-PIN = re.compile(r"^([A-Za-z0-9][A-Za-z0-9._-]*)\s*(?:\[[^\]]*\])?\s*==\s*([^\s;=]+)\s*(?:;.*)?$")
-
-
-def installed_version(name):
-    # Distribution names treat case, "-", "_" and "." alike; try the spellings metadata may resolve.
-    normalized = re.sub(r"[-_.]+", "-", name).lower()
-    for candidate in dict.fromkeys((name, normalized, normalized.replace("-", "_"))):
-        try:
-            return metadata.version(candidate)
-        except metadata.PackageNotFoundError:
-            pass
-    return None
-
-
-def same_version(installed, required):
-    if re.fullmatch(r"\d+(\.\d+)*", installed) and re.fullmatch(r"\d+(\.\d+)*", required):
-        a, b = ([int(part) for part in value.split(".")] for value in (installed, required))
-        width = max(len(a), len(b))
-        return a + [0] * (width - len(a)) == b + [0] * (width - len(b))
-    return installed == required
-
-
 def python_packages():
-    """Report the pinned content-tool packages for the running interpreter.
-
-    Returns a warning with the pip command when any is missing or differs, or when the
-    requirements file cannot be read. Never raises for bad input: this check must not
-    change bootstrap's exit code.
-    """
+    # Reports exact name==version pins for this interpreter; returns a warning, never raises for bad input.
     install = (f'"{sys.executable}" -m pip install -r "{CONTENT_REQUIREMENTS}" (tools/check.sh uses '
                "$L5R_PYTHON, then python3, then python; install into that interpreter)")
     try:
@@ -116,21 +87,17 @@ def python_packages():
     except (OSError, ValueError) as error:
         return f"Could not read {CONTENT_REQUIREMENTS.name} ({error}); install the content-tool packages yourself: {install}"
     mismatched = False
-    for line in lines:
-        pin = line.split("#")[0].strip()
-        if not pin:
+    for pin in filter(None, (line.split("#")[0].strip() for line in lines)):
+        name, separator, required = (part.strip() for part in pin.partition("=="))
+        if not separator or not name or not required:
+            print(f"Python requirement not checked (only name==version pins are): {pin}")
             continue
-        match = PIN.match(pin)
-        if not match:
-            print(f"Python requirement not checked (bootstrap reads only name==version pins): {pin}")
-            continue
-        name, required = match.groups()
         try:
-            installed = installed_version(name)
-        except ValueError:
+            installed = metadata.version(name)
+        except (metadata.PackageNotFoundError, ValueError):
             installed = None
         print(f"Python {name}: {installed or 'missing'} (required {required})")
-        mismatched |= installed is None or not same_version(installed, required)
+        mismatched |= installed != required
     if mismatched:
         return f"Content tools and tools/check.sh need the pinned Python packages; install them yourself: {install}"
     return None
@@ -265,7 +232,7 @@ def main():
                 ready = True
             print(f"Desktop export templates: {'ready' if ready else 'missing'}")
             missing |= not ready
-    # Warning only: launchers run bootstrap under set -e and the game itself needs none of these packages.
+    # Warning only: set -e launchers call bootstrap, and the game needs none of these packages.
     warning = python_packages()
     if warning:
         print(warning)

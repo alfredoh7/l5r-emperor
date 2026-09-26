@@ -1,4 +1,3 @@
-# tools/bootstrap.py checks exact name==version pins only; other lines are installed by pip but not checked.
 # Full image decoding is used to validate downloaded source scans.
 Pillow==12.3.0
 # Writes the card inventory workbook (build_card_inventory.py).

@@ -4,7 +4,9 @@ This pipeline preserves supplied card scans and deck text as reference material.
 It does not reuse Sun and Moon code and does not turn English card text into live
 game behavior. Local archive and metadata intake use Python's standard library.
 Downloading/validating Oracle scans and running the complete content test suite
-also require Pillow, pinned in `tools/content/requirements.txt`.
+also require Pillow and openpyxl (for the card inventory workbook), pinned in
+`tools/content/requirements.txt`. `python3 tools/bootstrap.py` reports whether they are
+installed but never installs them.
 
 Run from the project root:
 

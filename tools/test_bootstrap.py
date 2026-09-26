@@ -43,16 +43,6 @@ class PythonPackageTests(unittest.TestCase):
     def test_version_mismatch_returns_pip_command(self):
         self.assertIsNotNone(self.report("Pillow==12.3.0\n", {"Pillow": "11.0.0"}))
 
-    def test_spaced_pin_with_extras_and_marker_is_recognised(self):
-        text = "Pillow == 12.3.0\nopenpyxl[extra]==3.1.5 ; python_version >= '3.12'\n"
-        self.assertIsNone(self.report(text, {"Pillow": "12.3.0", "openpyxl": "3.1.5"}))
-
-    def test_trailing_zero_release_is_equal(self):
-        self.assertIsNone(self.report("Pillow==12.3\n", {"Pillow": "12.3.0"}))
-
-    def test_underscore_spelling_resolves_normalized_name(self):
-        self.assertIsNone(self.report("Open_PyXL==3.1.5\n", {"open-pyxl": "3.1.5"}))
-
     def test_unsupported_lines_are_reported_not_counted(self):
         text = "-r other.txt\n--index-url https://example.invalid\npillow>=12\n==1.0\n"
         self.assertIsNone(self.report(text, {}))
