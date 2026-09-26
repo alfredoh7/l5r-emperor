@@ -621,6 +621,7 @@ public sealed partial class MatchEngine
             // Emperor Edition mechanics group E (issue #501): Greasing the Wheels (EmperorMechE.cs).
             default:
                 ApplyMechEFocusEffect(abilityId);
+                ApplyP5FocusEffect(abilityId, ownerId, winnerPlayerId); // issue #503: Searching for Answers (EmperorP5Hidden.cs)
                 break;
         }
     }

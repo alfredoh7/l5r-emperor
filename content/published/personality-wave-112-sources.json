@@ -1,0 +1,56 @@
+[
+  {
+    "card_id": "oracle-l5r-3242",
+    "printing_set": [
+      "Before the Dawn"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=3242",
+    "image_path": "assets/reference/oracle/before-the-dawn/webp/oracle-l5r-3242-printing-1-image-1.webp",
+    "image_sha256": "72330856489d4d15beaf23611912437377aac4b0fc6586b6b20f447f22ac0242"
+  },
+  {
+    "card_id": "oracle-l5r-4206",
+    "printing_set": [
+      "Before the Dawn"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=4206",
+    "image_path": "assets/reference/oracle/before-the-dawn/webp/oracle-l5r-4206-printing-1-image-1.webp",
+    "image_sha256": "607307d991af4ae28800b937ca37c3fd54391169ce4dfea92229d9187ea68954"
+  },
+  {
+    "card_id": "oracle-l5r-6142",
+    "printing_set": [
+      "Before the Dawn"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=6142",
+    "image_path": "assets/reference/oracle/before-the-dawn/webp/oracle-l5r-6142-printing-1-image-1.webp",
+    "image_sha256": "02d3d507d28543f731ae9585883a033d0ae807c4c0b57218e30fd3c8eca2789f"
+  },
+  {
+    "card_id": "oracle-l5r-6766",
+    "printing_set": [
+      "Before the Dawn"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=6766",
+    "image_path": "assets/reference/oracle/before-the-dawn/webp/oracle-l5r-6766-printing-1-image-1.webp",
+    "image_sha256": "dc37001dc5ebc92363287b1dfed0855e94530bb425ca362fe225866b91edad51"
+  },
+  {
+    "card_id": "oracle-l5r-8613",
+    "printing_set": [
+      "Embers of War"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=8613",
+    "image_path": "assets/reference/oracle/embers-of-war/webp/oracle-l5r-8613-printing-1-image-1.webp",
+    "image_sha256": "aee1884ee25420313c69c3a520830c255d282e29dd679b9ee2a1a47a24068cb9"
+  },
+  {
+    "card_id": "oracle-l5r-10086",
+    "printing_set": [
+      "Seeds of Decay"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10086",
+    "image_path": "assets/reference/oracle/seeds-of-decay/webp/oracle-l5r-10086-printing-1-image-1.webp",
+    "image_sha256": "80e137a5cd2cf383074b1c09bfdf69c70640867fdba3b904ef41b55100578c85"
+  }
+]

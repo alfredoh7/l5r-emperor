@@ -27,7 +27,9 @@ public static class LookDisposition
     public const string Hand = "hand";
     public const string Show = "show";
     public const string Discard = "discard";
-    public static readonly string[] All = [Top, Bottom, Hand, Show, Discard];
+    /// <summary>Put the card into play at the current battlefield (issue #503, Searching for Answers; EmperorP5Hidden.cs).</summary>
+    public const string Play = "play";
+    public static readonly string[] All = [Top, Bottom, Hand, Show, Discard, Play];
 }
 
 /// <summary>One deck a look may target: which of the viewer's decks ("Fate" or "Dynasty") and whether it is the
@@ -90,7 +92,7 @@ public static class LookCatalog
     public static LookSpec TrainingShowAny { get; } = new("training-look-show", "Look at the top cards of your Fate deck", [new("Fate")], 3, [new(LookDisposition.Show, 1, 1)], Reorder: true);
 
     public static IReadOnlyDictionary<string, LookSpec> All { get; } = new[] { PublicRecords, IsawaTamaki, BanishAllDoubt, BayushiKahokuExp2, SignsAndPortents, ControlYourDestiny, JurojinsBlessing,
-        UeharaLook, MethodicalQuestioning, TrainingDynasty, TrainingAny, TrainingTakeItem, TrainingFixedOrder, TrainingShowAny }.Concat(EmperorRemainingFLooks.All).Concat(EmperorP1Looks.All).Concat(EmperorP2Searches.Looks /* issue #503 P2 */).ToDictionary(s => s.Id, StringComparer.Ordinal); // + Temples of Gisei Toshi (issue #492, group F)
+        UeharaLook, MethodicalQuestioning, TrainingDynasty, TrainingAny, TrainingTakeItem, TrainingFixedOrder, TrainingShowAny }.Concat(EmperorRemainingFLooks.All).Concat(EmperorP1Looks.All).Concat(EmperorP2Searches.Looks /* issue #503 P2 */).Concat(EmperorP5Looks.All).ToDictionary(s => s.Id, StringComparer.Ordinal); // + Temples of Gisei Toshi (issue #492, group F)
 
     /// <summary>The look an Event carries in its Effect (an Event has no abilities of its own to hang a spec on).</summary>
     public static LookSpec? ForEventEffect(string effect) => effect == "signs-and-portents" ? SignsAndPortents : null;
@@ -149,6 +151,7 @@ public sealed partial class MatchEngine
         LookDisposition.Hand => "Put in your hand",
         LookDisposition.Show => "Show and put in your hand",
         LookDisposition.Discard => "Discard",
+        LookDisposition.Play => "Put into play at the current battlefield",
         _ => disposition
     };
 
@@ -211,6 +214,7 @@ public sealed partial class MatchEngine
 
     private void FinishLook(PendingLook look)
     {
+        if (OpenP5LookEntryWindows(look)) return; // issue #503: the Personality Searching for Answers put into play gets his entering-play windows
         _state.PendingLook = null;
         FinishDeferredAction(look.PlayerId, look.Origin, look.SourceCardId, look.BowedBefore);
     }
@@ -231,6 +235,7 @@ public sealed partial class MatchEngine
         var rule = spec.Rules.First(r => r.Disposition == disposition);
         if (disposition is LookDisposition.Hand or LookDisposition.Show && look.DeckOwnerId != look.PlayerId) return (false, "Only cards from your own deck may be put in your hand");
         if (rule.Criteria is not null) { var (eligible, reason) = SearchEligibility(rule.Criteria, card); if (!eligible) return (false, reason); }
+        if (disposition == LookDisposition.Play) return P5PlayDispositionLegal(look, card); // issue #503 (EmperorP5Hidden.cs)
         return (true, null);
     }
 
@@ -299,6 +304,7 @@ public sealed partial class MatchEngine
                     RecordShown(viewer.Id, card, source, look.Deck!, "look");
                     if (P2CardIntoHandBlocked(viewer.Id)) { top.Add(card.Id); break; } // issue #503
                     card.Zone = Zone.Hand; viewer.Hand.Add(card.Id); NoteCardIntoHand(viewer.Id); shown++; break;
+                case LookDisposition.Play: PutIntoPlayFromLook(look, card, source); break; // issue #503 (EmperorP5Hidden.cs)
                 case LookDisposition.Discard:
                     if (!P2BeforeLookDiscard(look, source)) { top.Add(card.Id); break; } // issue #503: The Tapestry Perceived destroys itself first
                     card.Zone = look.Deck == SearchDeck.Dynasty ? Zone.DynastyDiscard : Zone.FateDiscard; card.FaceUp = true; discarded++;

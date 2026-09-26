@@ -242,7 +242,9 @@ internal static class SeppukuTimingTests
         // commit Order Seppuku outside the Action phase belongs in SeppukuTimingReason next to the phase test, with its own test here.
         // Moto Shigeru (oracle-l5r-5370, issue #477 Emperor Edition Personality pass, batch 3) is the one wired mention so far, read for a phase allowance: "If her Personal Honor is now 0, she
         // commits seppuku" is an EFFECT of her own Reaction (rehonor her, destroy her), not an Order Seppuku action or a timing for it, so it grants nothing in another phase.
-        var mentioning = CardCatalog.Cards.Values.Where(c => !c.ScenarioOnly && c.Text.Contains("seppuku", StringComparison.OrdinalIgnoreCase) && c.Id != "oracle-l5r-5370").Select(c => c.Id).ToArray();
+        // The Price of Honor (oracle-l5r-8268, issue #503) read for a phase allowance: "his Personality may not perform the rulebook seppuku action" only BARS Order Seppuku for that Personality
+        // (this turn); it grants the action in no other phase.
+        var mentioning = CardCatalog.Cards.Values.Where(c => !c.ScenarioOnly && c.Text.Contains("seppuku", StringComparison.OrdinalIgnoreCase) && c.Id != "oracle-l5r-5370" && c.Id != "oracle-l5r-8268").Select(c => c.Id).ToArray();
         Check(mentioning.Length == 0, "Published cards now mention seppuku -- check each for a phase allowance for Order Seppuku (SeppukuTiming.cs): " + string.Join(", ", mentioning));
     }
 }

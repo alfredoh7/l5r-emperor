@@ -32,6 +32,7 @@ public sealed partial class MatchEngine
     private bool DestructionShielded(CardInstance card, int actingPlayerId)
     {
         if (HiromiUnnegatable()) return false; // Yoritomo Hiromi (issue #477): the destruction from her Battle actions will not be negated.
+        if (BlessingsShieldNegates(card, "destruction")) return true; // Blessings of the Shi-Tien Yen-Wang (issue #503).
         if (MichiruBarrierNegates(card, actingPlayerId)) return true; // Asahina Michiru (Emperor Edition Personality pass, issue #477, batch 4).
         if (MountainsPowerNegates(card, actingPlayerId)) return true; // The Mountain's Power (Forgotten Legacy pass, issue #467).
         if (TwinForksNegates(card, actingPlayerId, "destruction")) return true; // Twin Forks City (The Shadow's Embrace pass, issue #476 batch 6).

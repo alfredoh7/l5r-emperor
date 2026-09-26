@@ -340,7 +340,8 @@ public sealed partial class MatchEngine
             // the recruited Personality back into, once this battle ends.
             if (_state.PendingChoice.Type=="yourClanNeedsYouProvince") { ResolveYourClanNeedsYouProvince(command); return; }
             if (_state.PendingChoice.Type=="declineStraighten") { ResolveDeclineStraighten(command); return; }
-            if (_state.PendingChoice.Type=="rentatsuLoss") { ResolveRentatsuLoss(command); return; } // Bayushi Rentatsu (issue #477, batch 4).
+            if (_state.PendingChoice.Type=="rentatsuLoss") { ResolveRentatsuLoss(command); return; }
+            if (_state.PendingChoice.Type=="p5BlessingsTop") { ResolveBlessingsTop(command); return; } // Blessings of the Shi-Tien Yen-Wang (issue #503, EmperorP5Zones.cs). // Bayushi Rentatsu (issue #477, batch 4).
             if (_state.PendingChoice.Type=="infiltratorStraighten") { ResolveInfiltratorStraighten(command); return; } // Goju Asuka / Only a Shadow (issue #501, EmperorMechB.cs).
             if (_state.PendingChoice.Type=="conqueror") { ResolveConqueror(command); return; }
             // Before This Battle Resolves (issue #272): three tightly-scoped, mandatory choices, no
@@ -1080,6 +1081,7 @@ public sealed partial class MatchEngine
         Require(card.OwnerId==command.PlayerId,"You may only order Seppuku for your own Personality.");
         Require(InPlay(card) && Definition(card).Type==CardType.Personality,"Choose your Personality in play.");
         Require(card.Dishonorable,"Only a Dishonorable Personality may perform Seppuku.");
+        Require(!SeppukuBarredByPriceOfHonor(card),$"{Definition(card).Name} is not affected by the rulebook seppuku action this turn (The Price of Honor)."); // issue #503
         // "May not perform actions" (issue #336, Mendon: even innate actions): Order Seppuku is the one action a Personality has of its own.
         Require(!ActionLocked(card),$"{Definition(card).Name} may not perform actions this turn.");
         Require(Keyword(card,"Samurai") || Keyword(card,"Courtier") || Keyword(card,"Shugenja"),"Only a Samurai, Courtier, or Shugenja may perform Seppuku.");
@@ -1561,6 +1563,7 @@ public sealed partial class MatchEngine
             _state.AttackerLeadBattle=_state.BattleNumber;
             Emit("firstOpportunity",$"{Player(_state.ActivePlayerId).Name} has the first opportunity to take a Battle action or pass ({BattleSteps.ReasonEngageGrant}).",_state.ActivePlayerId);
         }
+        MarkCombatSegmentBegan(); // Issue #503 (EmperorP5.cs): no Engage window, so the Combat Segment begins now (Headbutt).
         Emit("battleStarted",$"Battle at {label}: {(firstOpportunity==_state.ActivePlayerId?"attacker":"defender")} acts first.");
     }
     private void ResolveBattle()
@@ -1847,6 +1850,8 @@ public sealed partial class MatchEngine
         // (a) is untouched in that branch (only defenders are destroyed), so candidates read off it
         // here are still accurate even if the choice must be deferred to the attacker.
         var conquerorCandidates=attackerWon ? a.Where(c=>c.Zone==Zone.Battlefield && Keyword(c,"Conqueror")).Select(c=>c.Id).ToArray() : [];
+        // The Plain of Glass (issue #503, EmperorP5.cs): "You may use the rulebook Conquest ability twice per turn during the same battle" -- two Conquerors of the battle.
+        if(PlainOfGlassConquestTwice(attacker) && conquerorCandidates.Length==2) { FinishBattleResolution(attacker,provinceIndex,a,conquerorCandidates[0],conquerorCandidates[1]); return; }
         if(conquerorCandidates.Length>1)
         {
             _state.PendingConqueror=new PendingConqueror { PlayerId=attacker, ProvinceIndex=provinceIndex, CandidateIds=conquerorCandidates };
@@ -1865,13 +1870,16 @@ public sealed partial class MatchEngine
         var chosenId=command.TargetId!;
         var a=Army(pending.PlayerId,pending.ProvinceIndex).ToArray();
         _state.PendingChoice=null; _state.PendingConqueror=null;
-        FinishBattleResolution(pending.PlayerId,pending.ProvinceIndex,a,chosenId);
+        if(ReopenConquerorChoiceForPlainOfGlass(pending,chosenId)) return; // The Plain of Glass (issue #503, EmperorP5.cs): its second Conquest in the same battle.
+        var firstConqueror=P5.FirstConquerorId;
+        FinishBattleResolution(pending.PlayerId,pending.ProvinceIndex,a,firstConqueror ?? chosenId,firstConqueror is null ? null : chosenId);
     }
     // Common tail of battle resolution: attacking units return home (bowed, except the Conqueror
     // choice, if any), then the battlefield closes out. Split out so a deferred Conqueror choice can
     // reach the same completion as the immediate (0 or 1 candidate) path.
-    private void FinishBattleResolution(int attacker,int provinceIndex,CardInstance[] a,string? conquerorUnbowedId)
+    private void FinishBattleResolution(int attacker,int provinceIndex,CardInstance[] a,string? conquerorUnbowedId,string? secondConquerorId=null)
     {
+        P5.FirstConquerorId=null; // issue #503: The Plain of Glass's pending first choice is spent
         var willNotBow=_state.ResolutionWillNotBowPlayerIds.ToArray();
         // Hiruma Hikazu (The Shadow's Embrace pass, issue #476 batch 1): the Personalities with unbowed Followers in his army, read before anything bows.
         var hikazuSpared=HikazuSparedPersonalities(a);
@@ -1880,11 +1888,12 @@ public sealed partial class MatchEngine
         {
             // Conqueror (issue #492, ruling R5 on whole-unit bow/straighten): "Straighten his unit. It will not bow from the resolution" -- every card of it straightens (each unless its own straightening is
             // prevented), not just the return home unbowed.
-            if(card.Id==conquerorUnbowedId) StraightenUnit(card);
+            var conquered=card.Id==conquerorUnbowedId || card.Id==secondConquerorId; // issue #503: The Plain of Glass's second Conqueror
+            if(conquered) StraightenUnit(card);
             var wasBowed=card.Bowed;
-            ReturnHome(card,card.Id!=conquerorUnbowedId && !willNotBow.Contains(card.OwnerId) && !ResolutionWillNotBow(card));
+            ReturnHome(card,!conquered && !willNotBow.Contains(card.OwnerId) && !ResolutionWillNotBow(card));
             if(hikazuSpared.Contains(card.Id)) card.Bowed=wasBowed; // "(Their Followers still bow.)"
-            if(card.Id==conquerorUnbowedId) Emit("conquerorStraightened",$"{Definition(card).Name} returned home unbowed (Conqueror).",card.OwnerId,card.Id);
+            if(conquered) Emit("conquerorStraightened",$"{Definition(card).Name} returned home unbowed (Conqueror).",card.OwnerId,card.Id);
         }
         RestoreAramasuUnbowed(aramasuUnbowed);
         // Terrain leaves the battlefield here, after its printed effects (already applied earlier in
@@ -1915,6 +1924,7 @@ public sealed partial class MatchEngine
         foreach(var createdId in _state.CreatedUntilBattleEndsIds.ToArray())
             if(_state.Cards.TryGetValue(createdId,out var created) && created.Zone!=Zone.RemovedFromGame) RemoveFromGame(created);
         _state.CreatedUntilBattleEndsIds.Clear();
+        DiscardP5AfterBattle(); // issue #503 (EmperorP5Hidden.cs): Searching for Answers' "Discard him after the battle ends".
         // Additional Action grants/restrictions (issue #181) are battle-scoped too -- Two Hands'
         // "ceases during battle resolution" is explicit, and an unused Again!/Equip(Battle) grant
         // makes no sense carried into a battle it was never meant for.
@@ -2317,7 +2327,7 @@ public sealed partial class MatchEngine
     // "force-with-spell" (Asako Ume), "force-if-enemy-dishonorable" (Bayushi Kahoku) and
     // "force-max-dead-pile" (Moto Shunsuke) are always-on passive bonuses, unlike the attacking-only
     // attacking-two/attacking-four Effects above.
-    private int PersonalityForce(CardInstance card) => Math.Max(0,Definition(card).Force+StatModifier(card,"Force")+TerrainForceAdjustment(card)+GinasFoxForce(card)+EmperorRemainingEForce(card)+ThreeSForce(card)+EmperorP1Force(card)+P2Force(card)/*issue #503 P2*/+ForgottenLegacyBatch5Force(card)+EmperorBatch5Force(card)+EmperorPersonalityBatch3Force(card)+ShadowsEmbraceBatch5Force(card)+ShadowsEmbraceBatch2Force(card)+ShadowsEmbraceBatch1Force(card)+EmperorRemainingGForce(card)+(IsAttacking(card)?(Definition(card).Effect=="attacking-two"?2:Definition(card).Effect=="attacking-four"?4:
+    private int PersonalityForce(CardInstance card) => Math.Max(0,Definition(card).Force+StatModifier(card,"Force")+TerrainForceAdjustment(card)+GinasFoxForce(card)+EmperorRemainingEForce(card)+ThreeSForce(card)+EmperorP1Force(card)+P5Force(card)/* issue #503 P5 */+P2Force(card)/*issue #503 P2*/+ForgottenLegacyBatch5Force(card)+EmperorBatch5Force(card)+EmperorPersonalityBatch3Force(card)+ShadowsEmbraceBatch5Force(card)+ShadowsEmbraceBatch2Force(card)+ShadowsEmbraceBatch1Force(card)+EmperorRemainingGForce(card)+(IsAttacking(card)?(Definition(card).Effect=="attacking-two"?2:Definition(card).Effect=="attacking-four"?4:
         // Matsu Kaido (oracle-l5r-4934, issue #299): "Kaido has +1F while attacking" -- the plain +1
         // counterpart to attacking-two/attacking-four (Matsu Yoshito's own conditional variant below
         // starts from the same +1 base).
@@ -2429,7 +2439,7 @@ public sealed partial class MatchEngine
     // (e.g. "+2F while defending") -- distinct from an Item's, which always conveys to the wielder
     // instead (see PersonalityForce/ItemForceToWielder). Feeds both CardForce (targeting, always
     // visible regardless of bow state) and BattleForce (unit total, gated on unbowed-or-Elite).
-    private int FollowerForce(CardInstance card) => Math.Max(0,Definition(card).Force+StatModifier(card,"Force")+TerrainForceAdjustment(card)+GinasFoxForce(card)+ForgottenLegacyBatch5Force(card)+ShadowsEmbraceBatch5Force(card)+(Definition(card).Effect switch
+    private int FollowerForce(CardInstance card) => Math.Max(0,Definition(card).Force+StatModifier(card,"Force")+P5Force(card)/* issue #503 */+TerrainForceAdjustment(card)+GinasFoxForce(card)+ForgottenLegacyBatch5Force(card)+ShadowsEmbraceBatch5Force(card)+(Definition(card).Effect switch
     {
         "force-while-defending" => IsDefendingUnit(card) ? 2 : 0,
         // Home Guard (oracle-l5r-3413, issue #435): "This card has +3F while defending" -- the same
@@ -2916,7 +2926,8 @@ public sealed partial class MatchEngine
         ResolvePreservingBeautyChecks(); // The Shadow's Embrace pass (issue #476), batch 4: Preserving Beauty's "before this turn ends".
         // Spirit of the Berserker: a destruction put off "until before this turn ends" happens now.
         ControlReturnsAtTurnEnd(); // Black Marketeering (issue #501, EmperorMechB.cs): "Give control of him to his owner before the turn ends."
-        ApplyDelayedEffects(DelayUntil.EndOfTurn); // The shared delay mechanism (issue #492, EmperorRulingR2.cs): what was delayed "until before this turn ends" (Spirit of the Berserker's destruction, In the Heart of Battle's).
+        ApplyDelayedEffects(DelayUntil.EndOfTurn);
+        ReturnSteppedUnits(); // Step Through the Void (issue #503, EmperorP5Zones.cs): "Before this turn ends, put his unit into play". // The shared delay mechanism (issue #492, EmperorRulingR2.cs): what was delayed "until before this turn ends" (Spirit of the Berserker's destruction, In the Heart of Battle's).
         ResolveEmperorRemainingBTurnEnd(); // Emperor Edition remaining-cards pass (issue #492), group B.
         ResolveShadowsEmbraceBatch5TurnEnd(); // The Shadow's Embrace pass (issue #476), batch 5: Celestial Sword of the Phoenix's "remove him from the game before the turn ends".
         ResolveReturnsToHandBeforeTurnEnds(); // The Shadow's Embrace pass (issue #476), batch 3: Methodical Questioning (ShadowsEmbraceBatch3.cs).
@@ -3011,6 +3022,7 @@ public sealed partial class MatchEngine
     {
         SetPhase(Phase.Straighten,player.Id);
         // Bayushi Rentatsu (Emperor Edition Personality pass, issue #477, batch 4): "after each of your turns begins, choose a player; he loses 2 Honor" while he remains bowed (EmperorPersonalityBatch4.cs).
+        if(BeginBlessingsChoice(player)) return; // Blessings of the Shi-Tien Yen-Wang (issue #503, EmperorP5Zones.cs): "After your turn begins: You may choose your dead Personality ..."
         if(BeginRentatsuLoss(player)) return;
         ContinueStraightenPhase(player);
     }
@@ -3149,6 +3161,7 @@ public sealed partial class MatchEngine
         if(IsEmperorRemainingFEvent(Definition(card).Effect)) return ResolveEmperorRemainingFEvent(player,province,card);
         if(IsEmperorP2Event(Definition(card).Effect)) return ResolveEmperorP2Event(player,province,card); // issue #503 (EmperorP2*.cs)
         if(Definition(card).Effect==EmperorP4WatchAbilities.TooCloseToHomeEffect) return ResolveTooCloseToHome(player,province,card); // Too Close to Home (issue #503, EmperorP4Watches.cs)
+        if(IsEmperorP5Event(Definition(card).Effect)) return ResolveEmperorP5Event(player,province,card); // Issue #503 (EmperorP5.cs): Starting on the Path, Never Enough Soldiers.
         province.CardId=null; card.ProvinceIndex=null;
         switch(Definition(card).Effect)
         {
@@ -3356,6 +3369,7 @@ public sealed partial class MatchEngine
         ["keep-of-the-dead"] = ("Spider", true), // Keep of the Dead (Stronghold pass, issue #486 batch 1): "You do not lose Honor from Spider Clan and Fate cards you own."
         // Steel Soul Dojo (Emperor Edition Stronghold pass, issue #486 batch 2): "You do not lose Honor from Spider Clan and Fate cards you own." (its other trait is FireSteelSoulTrait).
         ["steel-soul-dojo"] = ("Spider", true),
+        ["p5-plain-of-glass"] = ("Spider", true), // The Plain of Glass (issue #503, EmperorP5.cs): "You do not lose Honor from Spider Clan and Fate cards you own."
     };
     private static bool IsFateCardType(CardType type) => type is CardType.Strategy or CardType.Follower or CardType.Item or CardType.Spell or CardType.Ring; // core rules, Fate card types: Strategy and Ring, and the attachments
     private bool HonorLossNegated(int playerId, CardInstance? source)

@@ -76,7 +76,7 @@ public sealed partial class MatchEngine
     // never lists) and every public discard pile. Whether a candidate is legal is decided by ValidateSlotCard, never here.
     // A face-up province card is public too (The Moon's Imperative, The Shadow's Embrace pass issue #476 batch 6: "face-up Personalities in provinces").
     private IEnumerable<CardInstance> SlotCandidateCards(int playerId) =>
-        _state.Cards.Values.Where(c => InPlay(c) || c.OwnerId == playerId && c.Zone == Zone.Hand || c.Zone is Zone.FateDiscard or Zone.DynastyDiscard or Zone.Dead || c.Zone == Zone.Province && c.FaceUp)
+        _state.Cards.Values.Where(c => InPlay(c) || c.OwnerId == playerId && c.Zone == Zone.Hand || c.Zone is Zone.FateDiscard or Zone.DynastyDiscard or Zone.Dead || c.Zone == Zone.Province && c.FaceUp || c.Zone == Zone.Underneath /* issue #503: The New Foundries' Spells, public */)
             .OrderBy(c => c.Id, StringComparer.Ordinal);
 
     // ValidateAbility's arm for a multi-target ability: the whole selection, slot by slot.

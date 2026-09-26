@@ -42,7 +42,8 @@ public enum Phase { Straighten, Events, Action, AttackDeclaration, InfantryDecla
 // use Zone.Home internally), until something removes it. A player may control more than one Celestial
 // only in passing -- entering play immediately discards every OTHER Celestial that same player
 // controls, so at most one survives at rest.
-public enum Zone { Stronghold, Home, Province, DynastyDeck, FateDeck, Hand, DynastyDiscard, FateDiscard, Dead, Battlefield, Attached, RemovedFromGame, Focused, EventInPlay, Region, Celestial }
+// Underneath (issue #503, The New Foundries): a card set face-up under a Stronghold -- public, not in play (EmperorP5Zones.cs).
+public enum Zone { Stronghold, Home, Province, DynastyDeck, FateDeck, Hand, DynastyDiscard, FateDiscard, Dead, Battlefield, Attached, RemovedFromGame, Focused, EventInPlay, Region, Celestial, Underneath }
 
 public sealed record CardDefinition(string Id, string Name, CardType Type, string Clan = "Unaligned", int GoldCost = 0,
     int GoldProduction = 0, int Force = 0, int Chi = 0, int PersonalHonor = 0, int? HonorRequirement = null,
@@ -1209,6 +1210,8 @@ public sealed class MatchState
     public EmperorP2State P2 { get; set; } = new();
     // Issue #503, group P4 (EmperorP4.cs): watches, shields and records of the target/lock/watch pass.
     public EmperorP4State P4 { get; set; } = new();
+    // Issue #503, pass group P5 (EmperorP5.cs): the records of this group's cards.
+    public EmperorP5State P5 { get; set; } = new();
 }
 
 /// <summary>Isawa Norimichi: PlayerId's army has +Amount total Force in the battle numbered Battle (while it has any units).</summary>
@@ -1362,7 +1365,9 @@ public sealed record PlayerView(int Id, string Name, string Clan, int Honor, int
     // Zone.EventInPlay (Suspicions): public, like RemovedFromGame -- no visibility gate needed.
     CardView[]? EventsInPlay = null,
     // Zone.Celestial (Lady Matsu's Rage): also public -- no visibility gate needed.
-    CardView[]? Celestials = null, int FocusCount = 0)
+    CardView[]? Celestials = null, int FocusCount = 0,
+    // Zone.Underneath (issue #503, The New Foundries): the cards face-up under the player's Stronghold -- public.
+    CardView[]? Underneath = null)
 {
     public HandLimitView? HandLimit { get; init; }
 }
@@ -1440,7 +1445,9 @@ public sealed record MatchView(string ContentVersion, string Scenario, long Vers
     ProvinceSightView[]? ProvinceSights = null,
     // Emperor Edition rulings pass R1 (issue #492): every battlefield of the Attack Phase in progress and the province (an index into the Defender's row) it is at, null when it has
     // none. An index below 100 is the battlefield of the Defender's province of that index; a higher one is an additional battlefield (EmperorRulingR1.cs).
-    BattlefieldView[]? Battlefields = null);
+    BattlefieldView[]? Battlefields = null,
+    // Issue #503 (EmperorP5Hidden.cs): the cards of another player's hand this viewer looked at this turn (Scouting the Pass, The Price of Honor) -- PRIVATE to the looker, never an instance id.
+    HandSightView[]? HandSights = null);
 /// <summary>Engine-private record of one face-down province card a player looked at (MatchState.ProvinceSights). Turn is the turn number it was looked at.</summary>
 public sealed record ProvinceSight(int ViewerId, int OwnerId, int Province, string CardId, string DefinitionId, int Turn);
 /// <summary>PRIVATE to the looking player: what the face-down card in a province is (its owner's province Province).</summary>

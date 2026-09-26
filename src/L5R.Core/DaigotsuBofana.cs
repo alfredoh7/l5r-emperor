@@ -110,7 +110,8 @@ public sealed partial class MatchEngine
     // A card played as an action from a discard pile leaves the game afterward: the Discipline play and the granted play are the
     // only two ways to use a non-Reaction ability from a discard pile (ValidateAbility's zone check).
     private static bool PlayedFromDiscard(AbilityDefinition ability, CardInstance? source) =>
-        source is { Zone: Zone.FateDiscard or Zone.DynastyDiscard } && ability.Timing != "Reaction";
+        source is { Zone: Zone.FateDiscard or Zone.DynastyDiscard } && ability.Timing != "Reaction"
+        && ability.Attach?.Card != AttachSource.Self; // issue #503 (Seek the Stain): a card that attaches ITSELF from the pile enters play; it is not played and removed
     // Same-turn replay is refused PER ACTION (Mendon's ruling): the once-per-turn stamp lives under each ability's own UsageKey on the card
     // and survives the move to the discard pile, so an action performed this turn (from hand, in play, or earlier from the pile) cannot be
     // performed again, while another action of the same card can. The Discipline play uses the very same stamp, so both rules are one mechanism.

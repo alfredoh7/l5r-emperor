@@ -31,7 +31,8 @@ public sealed partial class MatchEngine
                 owned.Where(c=>c.Zone==Zone.Focused && (player.Id==playerId || c.FaceUp)).Select(c=>ViewCard(c)).ToArray(),
                 EventsInPlay:owned.Where(c=>c.Zone==Zone.EventInPlay).Select(c=>ViewCard(c)).ToArray(),
                 Celestials:owned.Where(c=>c.Zone==Zone.Celestial).Select(c=>ViewCard(c)).ToArray(),
-                FocusCount:owned.Count(c=>c.Zone==Zone.Focused)) { HandLimit = HandLimitFor(player.Id) };
+                FocusCount:owned.Count(c=>c.Zone==Zone.Focused),
+                Underneath:owned.Where(c=>c.Zone==Zone.Underneath).Select(c=>ViewCard(c)).ToArray()) { HandLimit = HandLimitFor(player.Id) }; // issue #503: The New Foundries
         }).ToArray();
         var duel=_state.PendingDuel;
         return new(ContentVersion,_scenario,_state.Version,_state.TurnNumber,playerId,_state.ActivePlayerId,_state.PriorityPlayerId,
@@ -41,7 +42,7 @@ public sealed partial class MatchEngine
             BuildBattleStepView(),
             // Deck search (issue #312): the deck viewer is private to the searcher; the shown-cards record is public.
             BuildSearchView(playerId),BuildShownCards(),BuildLookView(playerId),BuildCopyView(playerId),BuildEitherOrView(playerId),BuildOpponentPaymentView(playerId),
-            _state.LastDuel is null?null:Copy(_state.LastDuel),BuildProvinceSights(playerId),BuildBattlefieldViews());
+            _state.LastDuel is null?null:Copy(_state.LastDuel),BuildProvinceSights(playerId),BuildBattlefieldViews(),BuildHandSights(playerId)); // issue #503: hand sights
     }
 
     private CardView ViewCard(CardInstance card,bool visible=true)
@@ -154,7 +155,7 @@ public sealed partial class MatchEngine
         // ONLY at their own turn to act in the Action Phase with nothing pending -- the same single predicate the command handler uses
         // (SeppukuTiming.cs), so an offered Seppuku is never one the engine would refuse for its timing.
         if(SeppukuTimingReason(playerId) is null)
-            foreach(var card in _state.Cards.Values.Where(c=>c.OwnerId==playerId && InPlay(c) && c.Dishonorable && Definition(c).Type==CardType.Personality &&
+            foreach(var card in _state.Cards.Values.Where(c=>c.OwnerId==playerId && InPlay(c) && c.Dishonorable && Definition(c).Type==CardType.Personality && !SeppukuBarredByPriceOfHonor(c) /* issue #503 */ &&
                 (Keyword(c,"Samurai") || Keyword(c,"Courtier") || Keyword(c,"Shugenja"))))
                 Add("orderSeppuku",$"Order Seppuku · {Definition(card).Name}",OwesForcedPass(playerId)?null:Command("orderSeppuku",card.Id),
                     OwesForcedPass(playerId)?ForcedPassReason:ActionLocked(card)?$"{Definition(card).Name} may not perform actions this turn.":null,card.Id);
@@ -524,6 +525,10 @@ public sealed partial class MatchEngine
         else if(_state.PendingChoice is { Type:"rentatsuLoss" })
         {
             result.AddRange(RentatsuLossActions(playerId)); // Bayushi Rentatsu (Emperor Edition Personality pass, issue #477, batch 4).
+        }
+        else if(_state.PendingChoice is { Type:"p5BlessingsTop" })
+        {
+            result.AddRange(BlessingsTopActions(playerId)); // issue #503: Blessings of the Shi-Tien Yen-Wang (EmperorP5Zones.cs)
         }
         else if(_state.PendingChoice is { Type:"declineStraighten" })
         {

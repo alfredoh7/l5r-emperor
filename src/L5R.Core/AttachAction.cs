@@ -169,8 +169,10 @@ public sealed partial class MatchEngine
     private void ReturnCardsOutOfPlayToTheirOwners()
     {
         // A gift in another player's hand (Naoharu's Gift, issue #492 group F) is his to play until it leaves the hand.
-        foreach (var card in _state.Cards.Values.Where(c => c.OriginalOwnerId is not null && !InPlay(c) && c.Zone != Zone.Hand)) RestoreOwner(card);
-        ApplyControlReturnsAfterCommand(); // issue #501 (EmperorMechB.cs): a return owed to a card that left play (Sachina), and returns blocked by Unique/Singular tried again.
+        foreach (var card in _state.Cards.Values.Where(c => c.OriginalOwnerId is not null && !InPlay(c) && c.Zone != Zone.Hand && !P5Borrowed(c))) RestoreOwner(card); // issue #503: Learning's borrowed Strategy
+        SweepP5Borrowed();
+        ApplyControlReturnsAfterCommand();
+        SweepP5Records(); // issue #503 (EmperorP5Zones.cs): a Ring whose abilities were removed is a new object once it has left play. // issue #501 (EmperorMechB.cs): a return owed to a card that left play (Sachina), and returns blocked by Unique/Singular tried again.
     }
 
     // ExecuteAbilityEffects' step: the Gold has already been paid (PayForAbility), so the card leaves its place and enters play attached.

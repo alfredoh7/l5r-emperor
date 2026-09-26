@@ -2680,4 +2680,20 @@ public static class PublishedContent
     public static PublishedSnapshot ItemWave30 { get; } = Load("L5R.Published.ItemWave30.json", "item-wave-30", requireDecks: false);
     /// <summary>Event wave 21 (issue #503, group P4: EmperorP4*.cs): Too Close to Home.</summary>
     public static PublishedSnapshot EventWave21 { get; } = Load("L5R.Published.EventWave21.json", "event-wave-21", requireDecks: false);
+    /// <summary>Personality wave 112 (issue #503, pass group P5, EmperorP5.cs): Hida Yamadera, Kakita Nara, Raido no Oni, Shiba Jouta - exp, Tokiko, Daigotsu Yutaka.</summary>
+    public static PublishedSnapshot PersonalityWave112 { get; } = Load("L5R.Published.PersonalityWave112.json", "personality-wave-112", requireDecks: false);
+    /// <summary>Strategy wave 98 (issue #503, pass group P5, EmperorP5*.cs): Disrupting Communication, Economic Repercussions, Headbutt, Inciting Mistrust, Perplexing Guests, The Bite of Winter, Unsettling Doubts, Riddle of Rebirth, Two-Fold Virtue, The Price of Honor, Petty Squabbles, Searching for Answers, Scouting the Pass, Learning.</summary>
+    public static PublishedSnapshot StrategyWave98 { get; } = Load("L5R.Published.StrategyWave98.json", "strategy-wave-98", requireDecks: false);
+    /// <summary>Item wave 34 (issue #503, pass group P5, EmperorP5.cs): Tsubute.</summary>
+    public static PublishedSnapshot ItemWave34 { get; } = Load("L5R.Published.ItemWave34.json", "item-wave-34", requireDecks: false);
+    /// <summary>Spell wave 42 (issue #503, pass group P5, EmperorP5*.cs): Seek the Stain, Step Through the Void.</summary>
+    public static PublishedSnapshot SpellWave42 { get; } = Load("L5R.Published.SpellWave42.json", "spell-wave-42", requireDecks: false);
+    /// <summary>Event wave 25 (issue #503, pass group P5, EmperorP5.cs): Never Enough Soldiers, Starting on the Path.</summary>
+    public static PublishedSnapshot EventWave25 { get; } = Load("L5R.Published.EventWave25.json", "event-wave-25", requireDecks: false);
+    /// <summary>Celestial wave 26 (issue #503, pass group P5, EmperorP5.cs): Blessings of the Shi-Tien Yen-Wang.</summary>
+    public static PublishedSnapshot CelestialWave26 { get; } = Load("L5R.Published.CelestialWave26.json", "celestial-wave-26", requireDecks: false);
+    /// <summary>Stronghold wave 46 (issue #503, pass group P5, EmperorP5.cs): The Plain of Glass, The New Foundries.</summary>
+    public static PublishedSnapshot StrongholdWave46 { get; } = Load("L5R.Published.StrongholdWave46.json", "stronghold-wave-46", requireDecks: false);
+    /// <summary>Holding wave 45 (issue #503, pass group P5, EmperorP5.cs): Stolen Merchandise.</summary>
+    public static PublishedSnapshot HoldingWave45 { get; } = Load("L5R.Published.HoldingWave45.json", "holding-wave-45", requireDecks: false);
 }
