@@ -1,0 +1,149 @@
+{
+  "Profile": "personality-wave-116",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-1771",
+      "Name": "Daigotsu Susaiken",
+      "Type": "Personality",
+      "Clan": "Spider",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After Susaiken enters play: Discard all your other Sensei Personalities.\nOnce per turn, you may refill one of your provinces face-up.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1771.jpg",
+      "Keywords": [
+        "Conqueror",
+        "Loyal",
+        "Samurai",
+        "Sensei",
+        "Shadowlands",
+        "Spider Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "discard-other-sensei"
+    },
+    {
+      "Id": "oracle-l5r-4462",
+      "Name": "Kitsune Haruki",
+      "Type": "Personality",
+      "Clan": "Mantis",
+      "GoldCost": 6,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 2,
+      "PersonalHonor": 3,
+      "HonorRequirement": 4,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After Haruki enters play: Create a 2F/2C/3PH Mantis Clan • Nonhuman • Deer • Spirit Personality with the ability, \"Limited: If another player has higher Family Honor than you: Gain 2 Honor.\"",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-4462.jpg",
+      "Keywords": [
+        "Earth",
+        "Mantis Clan",
+        "Shugenja"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "haruki-create"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-7110",
+      "Name": "Shosuro Ietsuno",
+      "Type": "Personality",
+      "Clan": "Scorpion",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After a card from a deck refills Ietsuno's battlefield's province: Look at it. You may switch it with a card owned by the same player in another province.\nBattle: Target an enemy card without attachments: Bow it.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7110.jpg",
+      "Keywords": [
+        "Assassin",
+        "Ninja",
+        "Scorpion Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "ietsuno-bow"
+      ],
+      "Effect": "ietsuno-refill-look"
+    },
+    {
+      "Id": "oracle-l5r-9808",
+      "Name": "Kuni Renyu",
+      "Type": "Personality",
+      "Clan": "Crab",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 4,
+      "PersonalHonor": 3,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After an action targets Renyu: Reduce any Honor losses from its effects to 0.\nBattle: Target an enemy unit: Its controller may choose to bow it and destroy all Shadowlands cards in it. If he did not choose this, create a province with a base strength of 4 to the left of your leftmost province.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9808.jpg",
+      "Keywords": [
+        "Loyal",
+        "Unique",
+        "Crab Clan",
+        "Daimyo",
+        "Earth",
+        "Jade",
+        "Shugenja",
+        "Witch Hunter"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "renyu-purge"
+      ],
+      "Effect": "renyu-honor-shield"
+    },
+    {
+      "Id": "oracle-l5r-10094",
+      "Name": "Otomo Suikihime",
+      "Type": "Personality",
+      "Clan": "Unaligned",
+      "GoldCost": 10,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 3,
+      "PersonalHonor": 4,
+      "HonorRequirement": 8,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "You may not assign, and will not move, Suikihime to battlefields. Suikihime will not become dishonorable. Other players' Political actions may not target Suikihime.\nReaction: Once per game, after Suikihime enters play, if no other player controls The Forgotten Temple: Suikihime grants you new lands in the Colonies. Gain a province to the left of your leftmost province. After the next time this game Suikihime leaves play, destroy your leftmost province.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10094.jpg",
+      "Keywords": [
+        "Unique",
+        "Courtier",
+        "Imperial",
+        "Second City Governor"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "suikihime-lands"
+      ],
+      "Effect": "suikihime-governor"
+    }
+  ],
+  "Decks": []
+}

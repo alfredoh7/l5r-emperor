@@ -65,6 +65,8 @@ public static class SearchEffect
     /// <summary>Celestial Sword of the Dragon, Asako Chukage (issue #498): "Put it into play or your hand" -- the searcher chooses (SearchStage.ChooseDestination); a Ring put into play by the search enters
     /// through the Ring entry path marked so it does not count towards an Enlightenment Victory while it remains in play (EmperorFollowupsSearch.cs).</summary>
     public const string RingIntoPlayOrHand = "ring-into-play-or-hand";
+    /// <summary>In Search of Guidance (issue #503): "Refill this province with him, face-up" -- the found card is held until the revealed Event leaves its province, then refills it face-up (EmperorP6.cs).</summary>
+    public const string RefillSourceProvinceFaceUp = "refill-source-province-face-up";
 }
 
 /// <summary>The stage a pending search is in; also names which PendingChoice type is open.</summary>
@@ -183,6 +185,7 @@ public static class SearchCatalog
         .Concat(EmperorRemainingESearches.All) // Emperor Edition remaining-cards pass (issue #492), group E: EmperorRemainingE.cs.
         .Concat(EmperorFollowupsSearches.All) // Emperor Edition follow-ups (issue #498): EmperorFollowupsSearch.cs.
         .Concat(EmperorP2Searches.All) // Issue #503, pass group P2: EmperorP2Search.cs.
+        .Concat(EmperorP6Searches.All) // issue #503: EmperorP6.cs.
         .ToDictionary(s => s.Id, StringComparer.Ordinal);
 
     /// <summary>The search an Event carries in its Effect (an Event has no abilities of its own to hang a spec on).</summary>
@@ -420,6 +423,10 @@ public sealed partial class MatchEngine
             case SearchEffect.RingIntoPlayOrHand:
                 BeginSearchDestination(search, card);
                 break;
+            case SearchEffect.RefillSourceProvinceFaceUp: // issue #503 (EmperorP6.cs)
+                HoldSearchedRefill(search, card);
+                FinishSearch(search);
+                break;
             default: throw new RuleViolation("Unknown search effect.");
         }
     }
@@ -557,7 +564,7 @@ public sealed partial class MatchEngine
         var province = player.Provinces[card.ProvinceIndex!.Value];
         province.CardId = null; card.ProvinceIndex = null; card.Zone = Zone.DynastyDiscard;
         Emit("eventResolved", $"{Definition(card).Name} resolved and was discarded.", player.Id, card.Id);
-        Refill(player, province);
+        if (!RefillWithSearchedSensei(player, province, card)) Refill(player, province); // In Search of Guidance (issue #503, EmperorP6.cs)
         ContinueEventsReveal(player);
     }
 

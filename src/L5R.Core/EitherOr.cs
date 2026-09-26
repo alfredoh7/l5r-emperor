@@ -149,7 +149,7 @@ public sealed partial class MatchEngine
             EitherOrSpecs.ShadowCourtHonor => $"{source}: choose a player who gains or loses 2 Honor.",
             EitherOrSpecs.SincerityDiscard => $"{source}: choose a player who discards a card.",
             _ when EmperorP1Specs.Is(p.SpecId) => EmperorP1EitherOrPrompt(p, source), // issue #503
-            _ => P5EitherOrPrompt(p, source, affected) ?? RemainingGEitherOrPrompt(p, source) // issue #503: The Price of Honor (EmperorP5Zones.cs). Emperor Edition remaining-cards pass (issue #492), group G: Bandit Gang.
+            _ => P5EitherOrPrompt(p, source, affected) ?? EmperorP6EitherOrPrompt(p, source, affected) ?? RemainingGEitherOrPrompt(p, source) // issue #503: The Price of Honor (EmperorP5Zones.cs). Emperor Edition remaining-cards pass (issue #492), group G: Bandit Gang.
         };
     }
 
@@ -247,7 +247,7 @@ public sealed partial class MatchEngine
             case EitherOrSpecs.ShadowCourtHonor: case EitherOrSpecs.SincerityDiscard:
                 return EmperorRemainingDEitherOrOptions(p);
             case var p1 when EmperorP1Specs.Is(p1): return EmperorP1EitherOrOptions(p); // issue #503 (EmperorP1.cs)
-            default: return P5EitherOrOptions(p, affected) ?? RemainingGEitherOrOptions(p, source, payable); // issue #503: The Price of Honor // Bandit Gang (issue #492 group G).
+            default: return P5EitherOrOptions(p, affected) ?? EmperorP6EitherOrOptions(p, affected) ?? RemainingGEitherOrOptions(p, source, payable); // issue #503: The Price of Honor // Bandit Gang (issue #492 group G).
         }
     }
 
@@ -422,6 +422,7 @@ public sealed partial class MatchEngine
             default:
                 if (ApplyEmperorP1EitherOr(p, option, source, decider)) break; // issue #503
                 if (ApplyP5EitherOr(p, option, decider, affected, sourceIds)) break; // issue #503: The Price of Honor (EmperorP5Zones.cs)
+                if (ApplyEmperorP6EitherOr(p, option, source, decider)) break; // issue #503: Kuni Renyu (EmperorP6.cs).
                 if (ApplyRemainingGEitherOr(p, option, source, decider, sourceIds)) break; // Bandit Gang (issue #492 group G).
                 throw new RuleViolation("Unknown choice.");
         }

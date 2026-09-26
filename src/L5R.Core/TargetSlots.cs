@@ -179,6 +179,7 @@ public sealed partial class MatchEngine
     {
         var (options, defaultCommand, error) = BuildSlotOffer(prototype, ability);
         if (defaultCommand is null) return new("useAbility", label, false, error ?? "No legal target.", prototype, sourceId, Slots: options);
+        defaultCommand = EmperorP6DefaultSelection(defaultCommand, ability, options) ?? defaultCommand; // issue #503: an aggregate condition's default (EmperorP6.cs)
         var quote = QuoteAbilityGold(defaultCommand);
         defaultCommand = defaultCommand with { SourceIds = quote is null ? [] : quote.Payments.FirstOrDefault()?.SourceIds };
         try { ValidateAbility(defaultCommand); }

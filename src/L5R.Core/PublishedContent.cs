@@ -2696,4 +2696,14 @@ public static class PublishedContent
     public static PublishedSnapshot StrongholdWave46 { get; } = Load("L5R.Published.StrongholdWave46.json", "stronghold-wave-46", requireDecks: false);
     /// <summary>Holding wave 45 (issue #503, pass group P5, EmperorP5.cs): Stolen Merchandise.</summary>
     public static PublishedSnapshot HoldingWave45 { get; } = Load("L5R.Published.HoldingWave45.json", "holding-wave-45", requireDecks: false);
+    /// <summary>Personality wave 116 (issue #503, pass group P6): Kitsune Haruki, Daigotsu Susaiken, Kuni Renyu, Otomo Suikihime, Shosuro Ietsuno (EmperorP6.cs).</summary>
+    public static PublishedSnapshot PersonalityWave116 { get; } = Load("L5R.Published.PersonalityWave116.json", "personality-wave-116", requireDecks: false);
+    /// <summary>Strategy wave 102 (issue #503, pass group P6): Perfect Sacrifice (EmperorP6.cs).</summary>
+    public static PublishedSnapshot StrategyWave102 { get; } = Load("L5R.Published.StrategyWave102.json", "strategy-wave-102", requireDecks: false);
+    /// <summary>Event wave 29 (issue #503, pass group P6): Incredible Tragedy, In Search of Guidance, Dark Experiments, Distant Expansion (EmperorP6.cs).</summary>
+    public static PublishedSnapshot EventWave29 { get; } = Load("L5R.Published.EventWave29.json", "event-wave-29", requireDecks: false);
+    /// <summary>Item wave 38 (issue #503, pass group P6): Mining Apparatus (EmperorP6.cs).</summary>
+    public static PublishedSnapshot ItemWave38 { get; } = Load("L5R.Published.ItemWave38.json", "item-wave-38", requireDecks: false);
+    /// <summary>Spell wave 46 (issue #503, pass group P6): Illusory Defense (EmperorP6.cs).</summary>
+    public static PublishedSnapshot SpellWave46 { get; } = Load("L5R.Published.SpellWave46.json", "spell-wave-46", requireDecks: false);
 }

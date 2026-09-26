@@ -374,7 +374,7 @@ public sealed partial class MatchEngine
     private IEnumerable<CardInstance> ForcedAssigneesNow(int playerId, bool cavalry) =>
         ForcedAttacksOf(playerId).Select(f => _state.Cards.TryGetValue(f.TargetId, out var c) ? c : null).OfType<CardInstance>().Distinct()
             .Where(c => c.OwnerId == playerId && c.Zone == Zone.Home && Definition(c).Type == CardType.Personality && (!c.Bowed || MayAssignBowed(c))
-                && IsCavalryUnit(c) == cavalry && !MovementLocked(c, MovementKinds.Assign) && !MovementLocked(c, MovementKinds.AssignAttack));
+                && IsCavalryUnit(c) == cavalry && !(cavalry && CavalryAssignmentBarredP6()) && !MovementLocked(c, MovementKinds.Assign) && !MovementLocked(c, MovementKinds.AssignAttack));
 
     // The attackers' assignment (AssignAttackers): every forced target assignable now is in it. Null when the assignment is acceptable.
     private string? ForcedAssignmentRefusal(int playerId, IReadOnlyDictionary<string, int>? assignments, bool cavalry) =>

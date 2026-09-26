@@ -699,6 +699,11 @@ public static class CardCatalog
             .Concat(PublishedContent.CelestialWave26.Cards) // Issue #503, pass group P5: Blessings of the Shi-Tien Yen-Wang
             .Concat(PublishedContent.StrongholdWave46.Cards) // Issue #503, pass group P5: The Plain of Glass, The New Foundries
             .Concat(PublishedContent.HoldingWave45.Cards) // Issue #503, pass group P5: Stolen Merchandise
+            .Concat(PublishedContent.PersonalityWave116.Cards) // Issue #503, pass group P6: Kitsune Haruki, Daigotsu Susaiken, Kuni Renyu, Otomo Suikihime, Shosuro Ietsuno
+            .Concat(PublishedContent.StrategyWave102.Cards) // Issue #503, pass group P6: Perfect Sacrifice
+            .Concat(PublishedContent.EventWave29.Cards) // Issue #503, pass group P6: Incredible Tragedy, In Search of Guidance, Dark Experiments, Distant Expansion
+            .Concat(PublishedContent.ItemWave38.Cards) // Issue #503, pass group P6: Mining Apparatus
+            .Concat(PublishedContent.SpellWave46.Cards) // Issue #503, pass group P6: Illusory Defense
             .ToDictionary(c => c.Id, StringComparer.Ordinal);
     }
 }
