@@ -1,0 +1,147 @@
+{
+  "Profile": "personality-wave-100",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-820",
+      "Name": "Bayushi Kazutoshi",
+      "Type": "Personality",
+      "Clan": "Scorpion",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 1,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After Kazutoshi enters play: Discard all your other Sensei Personalities.\nOther players' Personalities in and out of play have their Honor Requirements increased by 10.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-820.jpg",
+      "Keywords": [
+        "Experienced The Student",
+        "Loyal",
+        "Courtier",
+        "Samurai",
+        "Scorpion Clan",
+        "Sensei"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "p2-kazutoshi-honor-requirement"
+    },
+    {
+      "Id": "oracle-l5r-3660",
+      "Name": "Ikoma Yamahatsu",
+      "Type": "Personality",
+      "Clan": "Lion",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": 4,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "While you control a Terrain, your Ranged Attacks have +1 strength.\nBattle: Ranged 4 Attack.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-3660.jpg",
+      "Keywords": [
+        "Elite",
+        "Imperial",
+        "Lion Clan",
+        "Samurai",
+        "Scout"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "p2-yamahatsu-ranged"
+      ],
+      "Effect": "p2-yamahatsu-terrain-ranged-bonus"
+    },
+    {
+      "Id": "oracle-l5r-3861",
+      "Name": "Isawa Mina",
+      "Type": "Personality",
+      "Clan": "Phoenix",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": 4,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Target an attachment or token at the current battlefield: Destroy it. If this destroyed a card or token, give Mina two +1F Fire tokens.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-3861.jpg",
+      "Keywords": [
+        "Fire",
+        "Phoenix Clan",
+        "Shugenja"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "p2-mina-destroy"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-4127",
+      "Name": "Kaiu Nakano",
+      "Type": "Personality",
+      "Clan": "Crab",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": 3,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Tactical Battle/Open: Nakano has +3F while he is in an army and while all Personalities in that army are Siege.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-4127.jpg",
+      "Keywords": [
+        "Tactician",
+        "Crab Clan",
+        "Hero",
+        "Samurai",
+        "Siege"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "p2-nakano-force"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-4167",
+      "Name": "Kakita Gonji",
+      "Type": "Personality",
+      "Clan": "Crane",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 5,
+      "PersonalHonor": 3,
+      "HonorRequirement": 5,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After Gonji enters play: Discard all your other Sensei Personalities.\nBefore you focus: Once per duel, instead of focusing that time, you may give your Crane Clan Personality in the duel +4 to his duel stat until the duel ends.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-4167.jpg",
+      "Keywords": [
+        "Duelist",
+        "Loyal",
+        "Crane Clan",
+        "Samurai",
+        "Sensei"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "p2-gonji-focus"
+    }
+  ],
+  "Decks": []
+}

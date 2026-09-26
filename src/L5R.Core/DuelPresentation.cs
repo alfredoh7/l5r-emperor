@@ -154,8 +154,9 @@ public sealed partial class MatchEngine
                     if (duel.Refusable) Add(Command("declineDuel"), "Refuse challenge");
                     break;
                 case "Focusing":
-                    if (focused.Count < 4)
+                    if (focused.Count + P2FocusSubstitutions(playerId) < 4) // issue #503: Kakita Gonji's replaced focus counts against the cap
                     {
+                        foreach (var gonji in GonjiFocusSources(playerId, duel)) Add(Command("focus", gonji.Id, choice: GonjiFocusChoice), $"Kakita Gonji · +4 duel stat instead of focusing ({Definition(gonji).Name})");
                         foreach (var id in Player(playerId).Hand) Add(Command("focus", id), $"Focus · {Definition(Card(id)).Name}");
                         if (Player(playerId).FateDeck.Count > 0) Add(Command("focus", choice: "deck"), "Focus from deck");
                         if (CanFocusDiscard(playerId, duel))
@@ -175,6 +176,9 @@ public sealed partial class MatchEngine
                         if (Player(playerId).FateDeck.Count > 0)
                             Add(Command("duelistRefocus", id, choice: "deck"), $"Replace {Definition(Card(id)).Name} from deck");
                     }
+                    break;
+                case P2FocusChoiceStage: // issue #503 (EmperorP2Duel.cs)
+                    foreach (var (p2Command, p2Label) in P2FocusChoiceActions(playerId)) Add(p2Command, p2Label);
                     break;
                 case "OrderingEffects":
                     var ids = FocusEffectCardIds(duel).ToArray();

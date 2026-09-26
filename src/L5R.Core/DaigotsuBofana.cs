@@ -87,7 +87,7 @@ public sealed partial class MatchEngine
     {
         foreach (var other in _state.Players.Where(p => p.Id != controllerId))
             for (var n = other.Clan == "Crab" ? 2 : 1; n > 0; n--)
-                _state.PendingForcedDiscards.Add(new(other.Id, "Daigotsu Bofana"));
+                if (!P2HandDiscardBlocked(other.Id, controllerId, false, "Daigotsu Bofana")) _state.PendingForcedDiscards.Add(new(other.Id, "Daigotsu Bofana")); // issue #503: Pillowbook
     }
 
     // "Play it for one of its Battle actions ... After it resolves, remove the card from the game" (Daigotsu Bofana - exp's

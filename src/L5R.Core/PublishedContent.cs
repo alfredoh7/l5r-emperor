@@ -2650,4 +2650,16 @@ public static class PublishedContent
     public static PublishedSnapshot PersonalityWave92 { get; } = Load("L5R.Published.PersonalityWave92.json", "personality-wave-92", requireDecks: false);
     /// <summary>Strategy wave 78 (issue #501, mechanics group D): Broken Cipher, Indecision and Amazing Feat (EmperorMechD.cs).</summary>
     public static PublishedSnapshot StrategyWave78 { get; } = Load("L5R.Published.StrategyWave78.json", "strategy-wave-78", requireDecks: false);
+    /// <summary>Personality wave 100 (issue #503, pass group P2): Kazutoshi, Yamahatsu, Nakano, Mina, Gonji (EmperorP2*.cs).</summary>
+    public static PublishedSnapshot PersonalityWave100 { get; } = Load("L5R.Published.PersonalityWave100.json", "personality-wave-100", requireDecks: false);
+    /// <summary>Strategy wave 86 (issue #503, pass group P2): Honest Assessment, Surrounded!, Brothers in Battle, Spirit of the Shadows, Killing Intent, A Champion in Court, Turning Away (EmperorP2*.cs).</summary>
+    public static PublishedSnapshot StrategyWave86 { get; } = Load("L5R.Published.StrategyWave86.json", "strategy-wave-86", requireDecks: false);
+    /// <summary>Spell wave 30 (issue #503, pass group P2): Delving into History, The Tapestry Perceived (EmperorP2*.cs).</summary>
+    public static PublishedSnapshot SpellWave30 { get; } = Load("L5R.Published.SpellWave30.json", "spell-wave-30", requireDecks: false);
+    /// <summary>Item wave 22 (issue #503, pass group P2): Armor of the Uruwashii, Pillowbook (EmperorP2*.cs).</summary>
+    public static PublishedSnapshot ItemWave22 { get; } = Load("L5R.Published.ItemWave22.json", "item-wave-22", requireDecks: false);
+    /// <summary>Holding wave 33 (issue #503, pass group P2): Shrine to Nimuro (EmperorP2*.cs).</summary>
+    public static PublishedSnapshot HoldingWave33 { get; } = Load("L5R.Published.HoldingWave33.json", "holding-wave-33", requireDecks: false);
+    /// <summary>Event wave 13 (issue #503, pass group P2): Growing Hostility, Gaining Advantage, The Agony of Her Gaze, The Scorpion Wall is Finished (EmperorP2*.cs).</summary>
+    public static PublishedSnapshot EventWave13 { get; } = Load("L5R.Published.EventWave13.json", "event-wave-13", requireDecks: false);
 }

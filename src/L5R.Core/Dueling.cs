@@ -121,6 +121,7 @@ public sealed partial class MatchEngine
                 Require(command.PlayerId == _state.ActivePlayerId, "Only the active player orders Focus Effects.");
                 OrderDuelFocusEffects(command);
                 break;
+            case P2FocusChoiceStage: ResolveP2FocusChoice(command); break; // issue #503 (EmperorP2Duel.cs)
             default: throw new RuleViolation("Unknown duel stage.");
         }
     }
@@ -140,9 +141,10 @@ public sealed partial class MatchEngine
         var duel = _state.PendingDuel!;
         // Reserve Weapon (issue #492 group G): "Before this Personality focuses: You may give him +3 to his duel stat until the duel ends instead of focusing."
         if (command.Choice == "reserve") { ReserveWeaponFocus(command); return; }
+        if (command.Choice == GonjiFocusChoice) { GonjiFocus(command); return; } // Kakita Gonji (issue #503, EmperorP2Duel.cs): "instead of focusing that time"
         var isChallenger = command.PlayerId == duel.ChallengerPlayerId;
         var list = isChallenger ? duel.ChallengerFocused : duel.ChallengedFocused;
-        Require(list.Count < 4, "You have already focused four times this duel and must Strike.");
+        Require(list.Count + P2FocusSubstitutions(command.PlayerId) < 4, "You have already focused four times this duel and must Strike."); // issue #503: a focus replaced "instead of focusing" counts
         string cardId; var fromDiscard = false;
         if (command.Choice == "deck")
         {
@@ -275,13 +277,14 @@ public sealed partial class MatchEngine
     private void ResolveDuelFocusEffectsInOrder(IEnumerable<string> orderedFocusEffectIds)
     {
         _state.PendingDuel!.OrderedFocusEffects = orderedFocusEffectIds.ToList();
+        if (BeginP2PreTotalFocusEffects(0)) return; // issue #503 (EmperorP2Duel.cs): Killing Intent, A Champion in Court, Turning Away resolve before the totals
         ResolveDuel();
     }
 
     // The duel stat plus each side's own total focused Focus Value (revealed by the time this runs).
     // Any attachment modifying the stat applies as long as it is active right now -- CardForce/
     // CardPersonalHonor/PersonalityChi already read current, not printed, values.
-    private int DuelStatValue(CardInstance card, string stat) => (NikaruDuelStat(card) ?? stat switch
+    private int DuelStatValue(CardInstance card, string stat) => (P2DuelStat(card) /* issue #503: Killing Intent */ ?? NikaruDuelStat(card) ?? stat switch
     {
         "Force" => CardForce(card),
         "PersonalHonor" => CardPersonalHonor(card),
@@ -612,7 +615,7 @@ public sealed partial class MatchEngine
             // Feint & Strike (oracle-l5r-2506, Forgotten Legacy pass issue #467 batch 3): "After this duel's resolution, its winner's controller discards a card" -- queued
             // like Times of Strife's own forced discard and answered as the duel hands play back (FinishDuelResolution's OpenOverconfidentDrawWindow). A tie has no winner.
             case "feint-strike-focus":
-                if (winnerPlayerId is int feintWinner) _state.PendingForcedDiscards.Add(new(feintWinner, "Feint & Strike"));
+                if (winnerPlayerId is int feintWinner && !P2HandDiscardBlocked(feintWinner, ownerId, false, "Feint & Strike")) _state.PendingForcedDiscards.Add(new(feintWinner, "Feint & Strike")); // issue #503: Pillowbook
                 break;
             // Emperor Edition mechanics group E (issue #501): Greasing the Wheels (EmperorMechE.cs).
             default:

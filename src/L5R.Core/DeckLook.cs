@@ -90,7 +90,7 @@ public static class LookCatalog
     public static LookSpec TrainingShowAny { get; } = new("training-look-show", "Look at the top cards of your Fate deck", [new("Fate")], 3, [new(LookDisposition.Show, 1, 1)], Reorder: true);
 
     public static IReadOnlyDictionary<string, LookSpec> All { get; } = new[] { PublicRecords, IsawaTamaki, BanishAllDoubt, BayushiKahokuExp2, SignsAndPortents, ControlYourDestiny, JurojinsBlessing,
-        UeharaLook, MethodicalQuestioning, TrainingDynasty, TrainingAny, TrainingTakeItem, TrainingFixedOrder, TrainingShowAny }.Concat(EmperorRemainingFLooks.All).ToDictionary(s => s.Id, StringComparer.Ordinal); // + Temples of Gisei Toshi (issue #492, group F)
+        UeharaLook, MethodicalQuestioning, TrainingDynasty, TrainingAny, TrainingTakeItem, TrainingFixedOrder, TrainingShowAny }.Concat(EmperorRemainingFLooks.All).Concat(EmperorP2Searches.Looks /* issue #503 */).ToDictionary(s => s.Id, StringComparer.Ordinal); // + Temples of Gisei Toshi (issue #492, group F)
 
     /// <summary>The look an Event carries in its Effect (an Event has no abilities of its own to hang a spec on).</summary>
     public static LookSpec? ForEventEffect(string effect) => effect == "signs-and-portents" ? SignsAndPortents : null;
@@ -293,11 +293,14 @@ public sealed partial class MatchEngine
                 case LookDisposition.Top: top.Add(card.Id); break;
                 case LookDisposition.Bottom: bottom.Add(card.Id); break;
                 case LookDisposition.Hand:
+                    if (P2CardIntoHandBlocked(viewer.Id)) { top.Add(card.Id); break; } // issue #503: The Scorpion Wall is Finished
                     card.Zone = Zone.Hand; viewer.Hand.Add(card.Id); NoteCardIntoHand(viewer.Id); hand++; break;
                 case LookDisposition.Show:
                     RecordShown(viewer.Id, card, source, look.Deck!, "look");
+                    if (P2CardIntoHandBlocked(viewer.Id)) { top.Add(card.Id); break; } // issue #503
                     card.Zone = Zone.Hand; viewer.Hand.Add(card.Id); NoteCardIntoHand(viewer.Id); shown++; break;
                 case LookDisposition.Discard:
+                    if (!P2BeforeLookDiscard(look, source)) { top.Add(card.Id); break; } // issue #503: The Tapestry Perceived destroys itself first
                     card.Zone = look.Deck == SearchDeck.Dynasty ? Zone.DynastyDiscard : Zone.FateDiscard; card.FaceUp = true; discarded++;
                     // A discard is public (a discard pile is a public zone): the event names the card and carries its id.
                     Emit("cardDiscarded", $"{Player(ownerId).Name}'s {look.Deck} deck: {Definition(card).Name} was discarded.", ownerId, card.Id);

@@ -676,6 +676,12 @@ public static class CardCatalog
             .Concat(PublishedContent.HoldingWave28.Cards) // Emperor Edition mechanics group E (issue #501): Seaside Bazaar
             .Concat(PublishedContent.PersonalityWave92.Cards) // Issue #501, mechanics group D: Daidoji Narizane, Daigotsu Yajinden - exp3
             .Concat(PublishedContent.StrategyWave78.Cards) // Issue #501, mechanics group D: Broken Cipher, Indecision, Amazing Feat
+            .Concat(PublishedContent.PersonalityWave100.Cards) // Issue #503, pass group P2: Kazutoshi, Yamahatsu, Nakano, Mina, Gonji
+            .Concat(PublishedContent.StrategyWave86.Cards) // Issue #503, pass group P2: Honest Assessment, Surrounded!, Brothers in Battle, Spirit of the Shadows, Killing Intent, A Champion in Court, Turning Away
+            .Concat(PublishedContent.SpellWave30.Cards) // Issue #503, pass group P2: Delving into History, The Tapestry Perceived
+            .Concat(PublishedContent.ItemWave22.Cards) // Issue #503, pass group P2: Armor of the Uruwashii, Pillowbook
+            .Concat(PublishedContent.HoldingWave33.Cards) // Issue #503, pass group P2: Shrine to Nimuro
+            .Concat(PublishedContent.EventWave13.Cards) // Issue #503, pass group P2: Growing Hostility, Gaining Advantage, The Agony of Her Gaze, The Scorpion Wall is Finished
             .ToDictionary(c => c.Id, StringComparer.Ordinal);
     }
 }

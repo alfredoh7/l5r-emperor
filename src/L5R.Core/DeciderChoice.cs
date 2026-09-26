@@ -198,7 +198,7 @@ public sealed partial class MatchEngine
                 foreach (var id in p.Chosen) { var card = Card(id); if (!StalwartNegatesBow(card, p.ActingPlayerId)) card.Bowed = true; }
                 break;
             case DeciderSpecs.KimiDiscard:
-                foreach (var id in p.Chosen) { var card = Card(id); if (card.Zone == Zone.Hand) DiscardFate(Player(card.OwnerId), card); }
+                foreach (var id in p.Chosen) { var card = Card(id); if (card.Zone == Zone.Hand && !P2HandDiscardBlocked(card.OwnerId, p.ActingPlayerId, true, Definition(Card(p.SourceCardId)).Name)) DiscardFate(Player(card.OwnerId), card); } // issue #503
                 break;
             case DeciderSpecs.GovernorsCourt:
                 // "If he did not choose this, gain 2 Honor": the action was performed by the Courtier (a dishonorable one is rehonored instead).

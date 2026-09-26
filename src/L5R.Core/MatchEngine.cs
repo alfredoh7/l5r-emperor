@@ -1128,7 +1128,7 @@ public sealed partial class MatchEngine
         // / it enters play ignoring Honor Requirement" waiver (CardDefinition.HonorRequirementWaiverClan),
         // keyed on the RECRUITING player's own Clan -- this is the single check every entry path that
         // spends a recruit quote (Purchase, RecruitReserve, Your Clan Needs You!) already funnels through.
-        else if(def.Type==CardType.Personality && def.HonorRequirement is int requirement && player.Honor<requirement && !clanAllegiance && !HonorRequirementWaived(def,player) && !player.IgnoresHonorRequirements // Alter History (issue #492, group F)
+        else if(def.Type==CardType.Personality && def.HonorRequirement is int requirement && player.Honor<requirement+KazutoshiHonorRequirementIncrease(playerId)/*issue #503: Bayushi Kazutoshi*/ && !clanAllegiance && !HonorRequirementWaived(def,player) && !player.IgnoresHonorRequirements // Alter History (issue #492, group F)
             && !(ignoreHonorRequirementIfPersonalityClan is string waivedClan && HasClanAffiliation(card,waivedClan))
             && !RoninIgnoresHonorRequirement(card,playerId)) error="Family Honor is below the Honor Requirement; Clan allegiance may allow purchase."; // Palace of the Breaking Dawn (issue #486, batch 2)
         var prosperous=def.Effect=="prosperous-discount"?_state.Cards.Values.Count(c=>c.OwnerId==playerId && InPlay(c) && Definition(c).Type==CardType.Personality):0;
@@ -2309,7 +2309,7 @@ public sealed partial class MatchEngine
     // "force-with-spell" (Asako Ume), "force-if-enemy-dishonorable" (Bayushi Kahoku) and
     // "force-max-dead-pile" (Moto Shunsuke) are always-on passive bonuses, unlike the attacking-only
     // attacking-two/attacking-four Effects above.
-    private int PersonalityForce(CardInstance card) => Math.Max(0,Definition(card).Force+StatModifier(card,"Force")+TerrainForceAdjustment(card)+GinasFoxForce(card)+EmperorRemainingEForce(card)+ThreeSForce(card)+ForgottenLegacyBatch5Force(card)+EmperorBatch5Force(card)+EmperorPersonalityBatch3Force(card)+ShadowsEmbraceBatch5Force(card)+ShadowsEmbraceBatch2Force(card)+ShadowsEmbraceBatch1Force(card)+EmperorRemainingGForce(card)+(IsAttacking(card)?(Definition(card).Effect=="attacking-two"?2:Definition(card).Effect=="attacking-four"?4:
+    private int PersonalityForce(CardInstance card) => Math.Max(0,Definition(card).Force+StatModifier(card,"Force")+P2Force(card)/*issue #503*/+TerrainForceAdjustment(card)+GinasFoxForce(card)+EmperorRemainingEForce(card)+ThreeSForce(card)+ForgottenLegacyBatch5Force(card)+EmperorBatch5Force(card)+EmperorPersonalityBatch3Force(card)+ShadowsEmbraceBatch5Force(card)+ShadowsEmbraceBatch2Force(card)+ShadowsEmbraceBatch1Force(card)+EmperorRemainingGForce(card)+(IsAttacking(card)?(Definition(card).Effect=="attacking-two"?2:Definition(card).Effect=="attacking-four"?4:
         // Matsu Kaido (oracle-l5r-4934, issue #299): "Kaido has +1F while attacking" -- the plain +1
         // counterpart to attacking-two/attacking-four (Matsu Yoshito's own conditional variant below
         // starts from the same +1 base).
@@ -2883,6 +2883,7 @@ public sealed partial class MatchEngine
                 || c.OwnerId == playerId && InPlay(c) && Definition(c).Effect == "increase-own-hand-size")
             .Select(c => new HandLimitModifier(c.Id, Definition(c).Name, Definition(c).Effect is "increase-other-hand-size" or "increase-own-hand-size" ? 1 : -1))
             .Concat(EmperorRemainingEHandLimit(playerId)).ToArray(); // Togashi's Guidance (Emperor Edition remaining-cards pass, issue #492, group E).
+        modifiers = [.. modifiers, .. P2HandLimit(playerId, 8 + modifiers.Sum(m => m.Amount) + Player(playerId).MaxHandBonus)]; // issue #503: The Tapestry Perceived, Pillowbook (EmperorP2Hand.cs)
         // Benefices of the Emperor (issue #492, group F): "permanently increase his maximum hand size by three".
         if (Player(playerId).MaxHandBonus > 0) modifiers = [.. modifiers, new HandLimitModifier("", "Benefices of the Emperor", Player(playerId).MaxHandBonus)];
         return new(8, 8 + modifiers.Sum(m => m.Amount), modifiers);
@@ -3136,6 +3137,7 @@ public sealed partial class MatchEngine
         if(Definition(card).Effect==StarCrossedLoversEffect) return ResolveStarCrossedLovers(player,province,card);
         // Emperor Edition remaining-cards pass (issue #492), group F (EmperorRemainingFEvents.cs): twelve Events, most of which stay in play for a while or ask a player a question.
         if(IsEmperorRemainingFEvent(Definition(card).Effect)) return ResolveEmperorRemainingFEvent(player,province,card);
+        if(IsEmperorP2Event(Definition(card).Effect)) return ResolveEmperorP2Event(player,province,card); // issue #503 (EmperorP2*.cs)
         province.CardId=null; card.ProvinceIndex=null;
         switch(Definition(card).Effect)
         {
@@ -3317,6 +3319,7 @@ public sealed partial class MatchEngine
     private void Draw(PlayerState player)
     {
         if(player.FateDeck.Count==0) { Emit("deckEmpty",$"{player.Name}'s Fate deck is empty; no card drawn.",player.Id); return; }
+        if(P2CardIntoHandBlocked(player.Id)) return; // issue #503: The Scorpion Wall is Finished
         var id=player.FateDeck[0]; player.FateDeck.RemoveAt(0); player.Hand.Add(id);
         Card(id).Zone=Zone.Hand;
         NoteCardIntoHand(player.Id); // Isawa Kimi - exp 2 (issue #477, batch 5): "an action that put any cards into another player's hand".
