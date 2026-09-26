@@ -19,7 +19,7 @@ public partial class Main
             if(duel.Challenge is {} stakes){_inspector.AddChild(Palette.Wrapped(stakes.AbilityLabel,19,Palette.Gold));_inspector.AddChild(Palette.Wrapped(stakes.LossTerms,17));if(stakes.Refusable)_inspector.AddChild(Palette.Wrapped(stakes.RefusalTerms,17,Palette.PaperDim));}
             if(View.PendingChoice is {} reaction)_inspector.AddChild(Palette.Wrapped(reaction.Prompt,18));
             foreach(var option in Actions.Where(a=>a.Enabled&&a.Command is not null&&a.Type is not ("concede" or "declineReaction")))
-            {var command=option.Command!;_inspector.AddChild(SidebarSkin.Button(option.Label,()=>Submit(command)));}
+            {var command=option.Command!;_inspector.AddChild(SidebarSkin.Button(option.Label,()=>_ = Submit(command)));}
             return;
         }
         if (RenderBattleFlow()) return;
@@ -224,7 +224,7 @@ public partial class Main
     // sources; a costed one names its cost and waits until the chosen sources cover it.
     private void AddConfirm(string verb, int required, bool ready, Func<GameCommand> build, string cancel, bool enabled = true)
     {
-        _paymentConfirm = SidebarSkin.Button(required > 0 ? $"{verb} · {required} Gold" : verb, () => Submit(build()), true);
+        _paymentConfirm = SidebarSkin.Button(required > 0 ? $"{verb} · {required} Gold" : verb, () => _ = Submit(build()), true);
         _paymentConfirm.Disabled = !enabled || !ready || _session.Busy;
         _decisionActions.AddChild(_paymentConfirm);
         _decisionActions.AddChild(SidebarSkin.Button(cancel, CancelChoice));
@@ -265,7 +265,7 @@ public partial class Main
             _inspector.AddChild(picker);
         }
         _decisionActions.AddChild(SidebarSkin.Button("Keep selected unit home", () => { if (_assignmentUnit is string id) _assignments.Remove(id); RenderBoard(); RenderInspector(); Highlight(); }));
-        _decisionActions.AddChild(SidebarSkin.Button("Confirm assignments", () => Submit(new GameCommand(action.Type, View.ViewerId, reviewedVersion, Assignments: new Dictionary<string, int>(_assignments))), true));
+        _decisionActions.AddChild(SidebarSkin.Button("Confirm assignments", () => _ = Submit(new GameCommand(action.Type, View.ViewerId, reviewedVersion, Assignments: new Dictionary<string, int>(_assignments))), true));
         _decisionActions.AddChild(SidebarSkin.Button("Cancel assignment", CancelChoice));
     }
 
@@ -304,7 +304,7 @@ public partial class Main
         _inspector.AddChild(Palette.Wrapped(action.Label, 18, Palette.Gold));
         _inspector.AddChild(Palette.Wrapped("Select one or more province cards in the order you want them placed on the bottom of the Dynasty deck. Replacements will be revealed face-up.", 14, Palette.PaperDim));
         var order = Palette.Wrapped("No cards selected.", 13, Palette.Crane);
-        var confirm = SidebarSkin.Button("Refresh selected provinces", () => Submit(action.Command! with { CardIds = selected.ToArray() }), true);
+        var confirm = SidebarSkin.Button("Refresh selected provinces", () => _ = Submit(action.Command! with { CardIds = selected.ToArray() }), true);
         confirm.Disabled = true;
         foreach (var id in action.TargetIds ?? [])
         {
@@ -329,7 +329,7 @@ public partial class Main
         var reviewedVersion = _chosen?.Command?.ExpectedVersion ?? View.Version;
         var selected = new HashSet<string>();
         _inspector.AddChild(Palette.Wrapped($"Choose {count} card(s) to discard.", 17));
-        var confirm = SidebarSkin.Button("Confirm discard", () => Submit(new GameCommand("discardHand", View.ViewerId, reviewedVersion, CardIds: selected.ToArray())), true);
+        var confirm = SidebarSkin.Button("Confirm discard", () => _ = Submit(new GameCommand("discardHand", View.ViewerId, reviewedVersion, CardIds: selected.ToArray())), true);
         confirm.Disabled = true;
         foreach (var c in Self.Hand)
         {
@@ -349,8 +349,8 @@ public partial class Main
         var button = SidebarSkin.Button(label, () =>
         {
             if (option.Type is "purchase" or "recruitReserve" or "equip" or "playStrategy" or "attack" or "assignDefense" or "discardHand" or "useAbility") Choose(option);
-            else if (option.Type == "discardProvince") Confirm("Discard this province card?", "Discarding starts the Dynasty discard step. You cannot recruit more cards this phase.", () => Submit(option.Command!));
-            else if (option.Command is { } command) Submit(command);
+            else if (option.Type == "discardProvince") Confirm("Discard this province card?", "Discarding starts the Dynasty discard step. You cannot recruit more cards this phase.", () => _ = Submit(option.Command!));
+            else if (option.Command is { } command) _ = Submit(command);
         }, option.Type is "pass" or "endDynasty" or "declineReaction");
         button.Disabled = !option.Enabled || _session.Busy || _session.Online && !_session.Connected;
         button.TooltipText = RulesHelp.Tooltip((option.Reason is { } reasonText ? "Unavailable: " + reasonText + "\n\n" : option.Label + "\n\n") + RulesHelp.ActionGuide(option.Type));

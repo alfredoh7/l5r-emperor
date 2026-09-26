@@ -26,7 +26,7 @@ public partial class DeckBuilderScreen
             row.DrawLine(new Vector2(2,row.Size.Y-1),new Vector2(row.Size.X-3,row.Size.Y-1),new Color(.62f,.47f,.25f,.6f),1);
             if(name.IsHovered()||name.HasFocus())row.DrawRect(new Rect2(0,1,row.Size.X,row.Size.Y-2),DeckSkin.Gold,false,1);
         };
-        row.Resized+=Layout;name.MouseEntered+=()=>{row.QueueRedraw();Hover(card,name);};name.MouseExited+=()=>{row.QueueRedraw();HideHover();};name.FocusEntered+=()=>Hover(card,name);name.FocusExited+=HideHover;
+        row.Resized+=Layout;name.MouseEntered+=()=>{row.QueueRedraw();_ = Hover(card,name);};name.MouseExited+=()=>{row.QueueRedraw();HideHover();};name.FocusEntered+=()=>_ = Hover(card,name);name.FocusExited+=HideHover;
         row.GuiInput+=e=>{if(e is InputEventMouseButton{Pressed:true,ButtonIndex:MouseButton.Left})ShowComparison([card]);};
         return row;
     }
@@ -34,7 +34,7 @@ public partial class DeckBuilderScreen
     {
         if(_list&&_setupSlot.Length==0)return MakeRow(card,false);
         var item=new Control();var face=new DeckFace(card,Scans){Copies=Draft.Count(card.Id),Selected=_compare.Contains(card.Id)||(_setupSlot.Length>0&&Draft.Count(card.Id)==1)};item.AddChild(face);
-        face.MouseEntered+=()=>Hover(card,face);face.MouseExited+=HideHover;face.FocusEntered+=()=>Hover(card,face);face.FocusExited+=HideHover;face.Pressed+=()=>ShowComparison([card]);
+        face.MouseEntered+=()=>_ = Hover(card,face);face.MouseExited+=HideHover;face.FocusEntered+=()=>_ = Hover(card,face);face.FocusExited+=HideHover;face.Pressed+=()=>ShowComparison([card]);
         var note=CatalogueArt.Label(card.Playable?"":"Not implemented",13);note.HorizontalAlignment=HorizontalAlignment.Center;item.AddChild(note);
         if(_setupSlot.Length>0)
         {
@@ -59,7 +59,7 @@ public partial class DeckBuilderScreen
         }
         return item;
     }
-    private async void Hover(CatalogueData.Card card,Control target)
+    private async Task Hover(CatalogueData.Card card,Control target)
     {
         var ticket=++_hoverTicket;await ToSignal(GetTree().CreateTimer(.5),SceneTreeTimer.SignalName.Timeout);
         if(!IsInstanceValid(this)||!IsInsideTree()||ticket!=_hoverTicket||_overlay.Visible||!IsInstanceValid(target)||!target.IsInsideTree())return;

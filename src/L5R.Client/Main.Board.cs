@@ -268,7 +268,7 @@ public partial class Main
         }
         if (_chosen is not null) return;
         var battle = Actions.FirstOrDefault(a => a.Enabled && a.Type == "selectBattle" && a.Command?.Province == province);
-        if (owner == 1 - View.ActivePlayerId && battle is not null) { Submit(battle.Command!); return; }
+        if (owner == 1 - View.ActivePlayerId && battle is not null) { _ = Submit(battle.Command!); return; }
         if (province >= MatchEngine.FirstAdditionalBattlefield) return; // a battlefield without a province has no province card to inspect
         if (View.Players.Single(p => p.Id == owner).Provinces.Single(p => p.Index == province).Card is { } card) SelectCard(card);
     }

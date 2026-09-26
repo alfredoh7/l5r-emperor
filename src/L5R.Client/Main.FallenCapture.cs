@@ -6,7 +6,7 @@ namespace L5R.Client;
 public partial class Main
 {
     private bool _fallenProbeDone;
-    private async void PrepareFallenCapture()
+    private async Task PrepareFallenCapture()
     {
         if(_capturePath is null||!_captureMode.StartsWith("published-fallen",StringComparison.Ordinal))return;
         try
