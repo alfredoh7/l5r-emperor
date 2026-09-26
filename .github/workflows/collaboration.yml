@@ -6,6 +6,7 @@ on:
 
 permissions:
   contents: read
+  pull-requests: read
 
 jobs:
   handoff:
@@ -27,5 +28,9 @@ jobs:
         env:
           TASK_BRANCH: ${{ github.head_ref }}
           TASK_BASE: ${{ github.event.pull_request.base.sha }}
+          TASK_BASE_REF: ${{ github.event.pull_request.base.ref }}
           TASK_HEAD: ${{ github.event.pull_request.head.sha }}
-        run: python tools/collab.py audit --base "$TASK_BASE" --head "$TASK_HEAD" --branch "$TASK_BRANCH"
+          # Read-only: lets the stale-base check ask whether the PR's base branch was
+          # already the head of a merged PR (the squash-merge case `git` alone can't see).
+          GH_TOKEN: ${{ github.token }}
+        run: python tools/collab.py audit --base "$TASK_BASE" --head "$TASK_HEAD" --branch "$TASK_BRANCH" --base-ref "$TASK_BASE_REF"

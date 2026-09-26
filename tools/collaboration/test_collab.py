@@ -158,6 +158,19 @@ class GitRehearsals(unittest.TestCase):
         self.record('shared'); self.save('current shared handoff')
         self.assertEqual(c.audit(self.root, 'origin/main', name=c.branch(self.root))['errors'], [])
 
+    def test_handoff_mismatch_message_names_both_branches_and_fix_command(self):
+        self.git('switch', '-c', 'claude/dependency')
+        self.write('src/L5R.Core/CardAbilities.cs', 'dependency rules')
+        self.record('rules'); self.save('dependency handoff')
+        self.git('switch', '-c', 'codex/stacked-ui')
+        self.write('src/L5R.Client/CardTile.cs', 'UI using dependency')
+        self.save('ui change, no own handoff yet')
+        result = c.audit(self.root, 'origin/main', name=c.branch(self.root))
+        message = next(e for e in result['errors'] if 'another branch' in e)
+        self.assertIn('claude/dependency', message)
+        self.assertIn('codex/stacked-ui', message)
+        self.assertIn('collab.py handoff --lane', message)
+
     def test_malformed_foreign_handoff_is_not_ignored(self):
         self.git('switch', '-c', 'codex/stacked-ui')
         self.record('ui')
@@ -224,6 +237,100 @@ class GitRehearsals(unittest.TestCase):
         self.assertTrue(any('behind' in e for e in result['errors']))
         self.assertEqual(self.git('status','--porcelain'),before)
         self.assertEqual((self.root/'src/L5R.Client/CardTile.cs').read_text(),'my unsaved change')
+
+    def test_stale_base_skips_default_branch_and_no_base_ref(self):
+        self.assertIsNone(c.stale_base_error(self.root, 'main'))
+        self.assertIsNone(c.stale_base_error(self.root, None))
+
+    def test_stale_base_reports_a_base_branch_whose_tip_already_reached_main(self):
+        self.git('switch', '-c', 'feature')
+        self.write('src/L5R.Core/CardAbilities.cs', 'feature work')
+        self.save('feature work')
+        feature_tip = self.git('rev-parse', 'HEAD')
+        self.git('update-ref', 'refs/remotes/origin/feature', feature_tip)
+        self.git('switch', 'main')
+        self.git('merge', '--no-edit', 'feature')
+        self.git('update-ref', 'refs/remotes/origin/main', 'HEAD')
+        with patch.object(c, 'gh', side_effect=RuntimeError('no live access in this test')):
+            error = c.stale_base_error(self.root, 'feature')
+        self.assertIsNotNone(error)
+        self.assertIn('already been fully merged', error)
+        self.assertIn('feature', error)
+
+    def test_stale_base_reports_a_base_branch_deleted_upstream(self):
+        with patch.object(c, 'gh', side_effect=RuntimeError('no live access in this test')):
+            error = c.stale_base_error(self.root, 'long-gone-branch')
+        self.assertIsNotNone(error)
+        self.assertIn('no longer exists', error)
+
+    def test_stale_base_leaves_an_active_unmerged_stack_alone(self):
+        self.git('switch', '-c', 'feature2')
+        self.write('src/L5R.Core/CardAbilities.cs', 'feature2 work still ahead of main')
+        self.save('feature2 work')
+        self.git('update-ref', 'refs/remotes/origin/feature2', 'HEAD')
+        with patch.object(c, 'gh', return_value='[]'):
+            self.assertIsNone(c.stale_base_error(self.root, 'feature2'))
+
+    def test_stale_base_catches_a_squash_merged_branch_the_git_signals_cannot_see(self):
+        # This reproduces the actual #505/#506 shape: claude/501-mechanics-batch was
+        # squash-merged as #504, so its tip was never an ancestor of `main`, and it
+        # was never deleted -- only asking GitHub whether its own PR concluded works.
+        self.git('switch', '-c', 'claude/501-mechanics-batch')
+        self.write('src/L5R.Core/CardAbilities.cs', 'more work stacked after the squash merge landed')
+        self.save('more work')
+        self.git('update-ref', 'refs/remotes/origin/claude/501-mechanics-batch', 'HEAD')
+        self.git('switch', 'main')
+        self.write('src/L5R.Client/CardTile.cs', 'unrelated squash-merge commit object')
+        self.save('squash merge of an earlier PR (simulated)')
+        self.git('update-ref', 'refs/remotes/origin/main', 'HEAD')
+
+        def fake_gh(args, root):
+            self.assertEqual(args[:2], ['pr', 'list'])
+            self.assertIn('claude/501-mechanics-batch', args)
+            return json.dumps([{'number': 504, 'state': 'MERGED'}])
+        with patch.object(c, 'gh', side_effect=fake_gh):
+            error = c.stale_base_error(self.root, 'claude/501-mechanics-batch')
+        self.assertIsNotNone(error)
+        self.assertIn('already merged', error)
+
+    def test_stale_base_leaves_an_open_pr_stack_alone_even_without_ancestry(self):
+        self.git('switch', '-c', 'claude/dependency')
+        self.write('src/L5R.Core/CardAbilities.cs', 'dependency work still in review')
+        self.save('dependency work')
+        self.git('update-ref', 'refs/remotes/origin/claude/dependency', 'HEAD')
+        with patch.object(c, 'gh', return_value=json.dumps([{'number': 42, 'state': 'OPEN'}])):
+            self.assertIsNone(c.stale_base_error(self.root, 'claude/dependency'))
+
+    def test_stale_base_does_not_guess_when_github_is_unavailable(self):
+        self.git('switch', '-c', 'claude/dependency')
+        self.write('src/L5R.Core/CardAbilities.cs', 'work')
+        self.save('work')
+        self.git('update-ref', 'refs/remotes/origin/claude/dependency', 'HEAD')
+        with patch.object(c, 'gh', side_effect=RuntimeError('gh unavailable')):
+            self.assertIsNone(c.stale_base_error(self.root, 'claude/dependency'))
+
+    def test_audit_wires_base_ref_into_the_stale_base_check(self):
+        self.git('switch', '-c', 'feature')
+        self.write('src/L5R.Core/CardAbilities.cs', 'feature work')
+        self.save('feature work')
+        feature_tip = self.git('rev-parse', 'HEAD')
+        self.git('update-ref', 'refs/remotes/origin/feature', feature_tip)
+        self.git('switch', 'main')
+        self.git('merge', '--no-edit', 'feature')
+        self.git('update-ref', 'refs/remotes/origin/main', 'HEAD')
+        self.git('switch', '-c', 'claude/stack-on-feature')
+        self.write('src/L5R.Client/CardTile.cs', 'new work stacked on a stale base')
+        self.record('ui')
+        with patch.object(c, 'gh', side_effect=RuntimeError('no live access in this test')):
+            result = c.audit(self.root, 'origin/main', name=c.branch(self.root), working=True,
+                base_ref='feature')
+        self.assertTrue(any('already been fully merged' in e for e in result['errors']))
+
+    def test_audit_pr_based_directly_on_main_is_not_flagged_stale(self):
+        self.git('switch', '-c', 'codex/on-main'); self.record('ui')
+        self.write('src/L5R.Client/CardTile.cs', 'ordinary change')
+        result = c.audit(self.root, 'origin/main', name=c.branch(self.root), working=True, base_ref='main')
+        self.assertFalse(any('base branch' in e for e in result['errors']))
 
     def test_unexpected_remote_is_not_fetched(self):
         self.git('remote','add','origin','https://example.invalid/unrelated.git')
