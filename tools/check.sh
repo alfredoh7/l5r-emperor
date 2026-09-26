@@ -19,6 +19,7 @@ if [ "${1:-}" != "--client-only" ]; then
   "$l5r_python" -m unittest discover -s tools/collaboration -p 'test_*.py'
   "$l5r_python" -m unittest discover -s tools/content -p 'test_*.py'
   "$l5r_python" -m unittest discover -s tools -p 'test_meshy.py'
+  "$l5r_python" -m unittest discover -s tools -p 'test_bootstrap.py'
   for project in L5R.Core.Tests L5R.AI.Tests L5R.Server.Tests L5R.Client.Transport.Tests; do
     dotnet build "tests/$project/$project.csproj" --disable-build-servers -p:UseSharedCompilation=false -m:1 --nologo
     dotnet "tests/$project/bin/Debug/net10.0/$project.dll"
