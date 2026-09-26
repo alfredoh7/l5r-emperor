@@ -91,7 +91,8 @@ internal static class ShadowsEmbraceBatch6Tests
         Check(Ids(PublishedContent.StrongholdWave16).SequenceEqual(Sorted(BishamonsTower, TwinForksCity)), "stronghold-wave-16");
         Check(Ids(PublishedContent.CelestialWave7).SequenceEqual(Sorted(MoonsImperative, SunsAspiration)), "celestial-wave-7");
         // The unwired cards of the batch are never published (the blank-card guard).
-        foreach (var unwired in new[] { "oracle-l5r-9797", "oracle-l5r-9866", "oracle-l5r-9870", "oracle-l5r-9947", "oracle-l5r-9792" })
+        // Issue #503: Distant Expansion (oracle-l5r-9792) is wired and published in event-wave-29 (pass group P6), so it left this list.
+        foreach (var unwired in new[] { "oracle-l5r-9797", "oracle-l5r-9866", "oracle-l5r-9870", "oracle-l5r-9947" })
             Check(!CardCatalog.Cards.ContainsKey(unwired), $"{unwired} is not published");
 
         var fortress = CardCatalog.Get(Fortress);

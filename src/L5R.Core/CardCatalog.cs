@@ -676,6 +676,11 @@ public static class CardCatalog
             .Concat(PublishedContent.HoldingWave28.Cards) // Emperor Edition mechanics group E (issue #501): Seaside Bazaar
             .Concat(PublishedContent.PersonalityWave92.Cards) // Issue #501, mechanics group D: Daidoji Narizane, Daigotsu Yajinden - exp3
             .Concat(PublishedContent.StrategyWave78.Cards) // Issue #501, mechanics group D: Broken Cipher, Indecision, Amazing Feat
+            .Concat(PublishedContent.PersonalityWave116.Cards) // Issue #503, pass group P6: Kitsune Haruki, Daigotsu Susaiken, Kuni Renyu, Otomo Suikihime, Shosuro Ietsuno
+            .Concat(PublishedContent.StrategyWave102.Cards) // Issue #503, pass group P6: Perfect Sacrifice
+            .Concat(PublishedContent.EventWave29.Cards) // Issue #503, pass group P6: Incredible Tragedy, In Search of Guidance, Dark Experiments, Distant Expansion
+            .Concat(PublishedContent.ItemWave38.Cards) // Issue #503, pass group P6: Mining Apparatus
+            .Concat(PublishedContent.SpellWave46.Cards) // Issue #503, pass group P6: Illusory Defense
             .ToDictionary(c => c.Id, StringComparer.Ordinal);
     }
 }

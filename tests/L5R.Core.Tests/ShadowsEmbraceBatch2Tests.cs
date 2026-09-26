@@ -16,7 +16,8 @@ internal static class ShadowsEmbraceBatch2Tests
         Spell = "training-spell", Shugenja = "training-shugenja";
     private static readonly string[] Wired = [Sorano, Yoyugi, Longtooth, Mrika, Rukia, Morio, Natsumi, Niiro, Quelsa, Kudome, Shirou, JongHo, MinHee, Nobu, Ryoken, Shugorei, Yamazaki, Ikke, Kanahashi];
     // Issue #501: Zlkyt (oracle-l5r-9828) is wired and published in personality-wave-95 (Mendon's item 19), so it left this list.
-    private static readonly string[] Unwired = ["oracle-l5r-9829", "oracle-l5r-9808", "oracle-l5r-9845"];
+    // Issue #503: Kuni Renyu (oracle-l5r-9808) is wired and published in personality-wave-116 (pass group P6), so it left this list.
+    private static readonly string[] Unwired = ["oracle-l5r-9829", "oracle-l5r-9845"];
 
     private static void Check(bool ok, string message = "Assertion failed") => Batch336Support.Check(ok, message);
     private static void Eq<T>(T actual, T expected, string message = "Values differ") => Batch336Support.Eq(actual, expected, message);
