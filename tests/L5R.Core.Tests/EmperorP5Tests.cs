@@ -4,7 +4,7 @@ using static Batch336Support;
 
 // Issue #503, pass group P5 (EmperorP5.cs): zones, rulebook-action changes, created cards, granted abilities, provenance records and hidden information. Every position is built explicitly and
 // driven through QueryActions and the commands the engine offers.
-internal static class EmperorP5Tests
+internal static partial class EmperorP5Tests
 {
     private const string Nara = "oracle-l5r-4206", Yamadera = "oracle-l5r-3242", Raido = "oracle-l5r-6142", Jouta = "oracle-l5r-6766", Yutaka = "oracle-l5r-10086", Tokiko = "oracle-l5r-8613",
         Headbutt = "oracle-l5r-3010", Disrupting = "oracle-l5r-2035", Bite = "oracle-l5r-7972", Econ = "oracle-l5r-2280", Guests = "oracle-l5r-5928", Mistrust = "oracle-l5r-3733",
@@ -67,6 +67,7 @@ internal static class EmperorP5Tests
         ("Starting on the Path: revealed it stays until its owner's second turn from now begins; meanwhile he may put a Ring from his hand into play (it does not count towards Enlightenment); without the Event the ability is not listed", StartingPathCard),
         ("Never Enough Soldiers: revealed it stays until its owner's Events Phase three turns from now; meanwhile he may Equip a Follower from his discard pile to a Personality at home, paying its cost; without the Event, not listed", NesCard),
         ("Seek the Stain: attached from the discard pile to a Void Shugenja at home (Equip Limited) or an opposed Void Shugenja at the battle (Equip Battle), not to a non-Void Shugenja; its Open bows it to give another player's Personality Kolat, Ninja or Shadowlands", SeekStainCard),
+        .. ZoneTests,
     ]);
 
     // ---- published shape --------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -112,12 +113,10 @@ internal static class EmperorP5Tests
         Card(Econ, CardType.Strategy, "Economic Repercussions", "p5-econ-enter", "p5-economic-repercussions");
         Card(Guests, CardType.Strategy, "Perplexing Guests", "p5-perplexing-guests-discard,p5-perplexing-guests-create");
         Card(Mistrust, CardType.Strategy, "Inciting Mistrust", "p5-inciting-mistrust-negate,p5-inciting-mistrust-discard");
-        Manifest("strategy-wave-98", Headbutt, Disrupting, Bite, Econ, Guests, Mistrust);
         Card(Tsubute, CardType.Item, "Tsubute", "p5-tsubute-attack,p5-tsubute-attack-hand");
         Eq(CardCatalog.Get(Tsubute).AttachRequiresKeyword, "Ninja", "Tsubute will only attach to a Ninja");
         Manifest("item-wave-34", Tsubute);
         Card(SeekStain, CardType.Spell, "Seek the Stain", "p5-seek-stain-equip-limited,p5-seek-stain-equip-battle,p5-seek-stain-kolat,p5-seek-stain-ninja,p5-seek-stain-shadowlands");
-        Manifest("spell-wave-42", SeekStain);
         Card(StartingPath, CardType.Event, "Starting on the Path", "", "p5-starting-on-the-path");
         Card(Nes, CardType.Event, "Never Enough Soldiers", "", "p5-never-enough-soldiers");
         Manifest("event-wave-25", StartingPath, Nes);

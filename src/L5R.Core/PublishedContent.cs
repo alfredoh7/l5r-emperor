@@ -2660,4 +2660,8 @@ public static class PublishedContent
     public static PublishedSnapshot SpellWave42 { get; } = Load("L5R.Published.SpellWave42.json", "spell-wave-42", requireDecks: false);
     /// <summary>Event wave 25 (issue #503, pass group P5, EmperorP5.cs): Never Enough Soldiers, Starting on the Path.</summary>
     public static PublishedSnapshot EventWave25 { get; } = Load("L5R.Published.EventWave25.json", "event-wave-25", requireDecks: false);
+    /// <summary>Celestial wave 26 (issue #503, pass group P5, EmperorP5.cs): Blessings of the Shi-Tien Yen-Wang.</summary>
+    public static PublishedSnapshot CelestialWave26 { get; } = Load("L5R.Published.CelestialWave26.json", "celestial-wave-26", requireDecks: false);
+    /// <summary>Stronghold wave 46 (issue #503, pass group P5, EmperorP5.cs): The Plain of Glass, The New Foundries.</summary>
+    public static PublishedSnapshot StrongholdWave46 { get; } = Load("L5R.Published.StrongholdWave46.json", "stronghold-wave-46", requireDecks: false);
 }

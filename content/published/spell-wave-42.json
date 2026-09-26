@@ -30,6 +30,31 @@
         "p5-seek-stain-shadowlands"
       ],
       "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10132",
+      "Name": "Step Through the Void",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle/Open: Destroy this card unless this Shugenja is Void: Remove this Shugenja from the game; his attachments stay attached. Before this turn ends, put his unit into play, ignoring costs, entering-play effects, and restrictions.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10132.jpg",
+      "Keywords": [
+        "Void"
+      ],
+      "Focus": 1,
+      "Abilities": [
+        "p5-step-through-void"
+      ],
+      "Effect": "none"
     }
   ],
   "Decks": []

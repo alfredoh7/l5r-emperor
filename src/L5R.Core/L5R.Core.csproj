@@ -291,5 +291,7 @@
     <EmbeddedResource Include="../../content/published/item-wave-34.json" LogicalName="L5R.Published.ItemWave34.json" />
     <EmbeddedResource Include="../../content/published/spell-wave-42.json" LogicalName="L5R.Published.SpellWave42.json" />
     <EmbeddedResource Include="../../content/published/event-wave-25.json" LogicalName="L5R.Published.EventWave25.json" />
+    <EmbeddedResource Include="../../content/published/celestial-wave-26.json" LogicalName="L5R.Published.CelestialWave26.json" />
+    <EmbeddedResource Include="../../content/published/stronghold-wave-46.json" LogicalName="L5R.Published.StrongholdWave46.json" />
   </ItemGroup>
 </Project>

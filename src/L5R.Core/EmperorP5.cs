@@ -35,7 +35,7 @@ public static class EmperorP5Abilities
     public const string BiteEnter = "p5-bite-winter-enter", BiteDiscard = "p5-bite-winter-discard";
     public const string EconEnter = "p5-econ-enter", EconDiscardFavor = "p5-econ-discard-favor", EconDiscardPay = "p5-econ-discard-pay";
     public const string StartingPathRing = "p5-starting-path-ring";
-    public const string NesEquip = "p5-nes-equip";
+    public const string NesEquip = "p5-nes-equip", NesEquipOpen = "p5-nes-equip-open", NesEquipBattle = "p5-nes-equip-battle";
     public const string SeekStainLimited = "p5-seek-stain-equip-limited", SeekStainBattle = "p5-seek-stain-equip-battle";
     public const string SeekStainKolat = "p5-seek-stain-kolat", SeekStainNinja = "p5-seek-stain-ninja", SeekStainShadowlands = "p5-seek-stain-shadowlands";
     public const string GuestsDiscard = "p5-perplexing-guests-discard", GuestsCreate = "p5-perplexing-guests-create";
@@ -60,6 +60,7 @@ public static class EmperorP5Abilities
     public const string EconEffect = "p5-economic-repercussions";
     public const string StartingPathEffect = "p5-starting-on-the-path";
     public const string NesEffect = "p5-never-enough-soldiers";
+    public const string PlainOfGlassEffect = "p5-plain-of-glass";
 
     public const string BiteOfWinterTitle = "The Bite of Winter";
     public const string EconTitle = "Economic Repercussions";
@@ -127,6 +128,12 @@ public static class EmperorP5Abilities
         // rulebook Equip (Limited): "Any number of times per turn, choose your performing Personality and target an attachment card: Attach it to him, paying all costs" -- the Personality at home.
         all[NesEquip] = new("Limited", "Never Enough Soldiers: Equip a Follower from your discard pile to your performing Personality, paying all costs", "attachment-in-discard", PlayerAbility: true,
             Performer: OwnPersonalityAtHome, Cost: GoldCostRule.AttachCost(), UsesPerTurn: AbilityUseLimit.Unlimited, Attach: new(AttachSource.Target, AttachPile.Own, AttachWielder.Performer, Types: [CardType.Follower]));
+        // The same Equip where a card changes when equipping a Follower may be taken (TimingGrants.cs: The Plain of Glass's Battle, Glory of the Shogun's Battle/Open): the Open equip in
+        // another player's action segment (a Personality at home) and the Battle equip (a Personality at the current battlefield) -- each only while such a grant stands.
+        all[NesEquipOpen] = new("Open", "Never Enough Soldiers: Equip a Follower from your discard pile to your performing Personality, paying all costs (Open)", "attachment-in-discard", PlayerAbility: true,
+            Performer: OwnPersonalityAtHome, Cost: GoldCostRule.AttachCost(), UsesPerTurn: AbilityUseLimit.Unlimited, Attach: new(AttachSource.Target, AttachPile.Own, AttachWielder.Performer, Types: [CardType.Follower]));
+        all[NesEquipBattle] = new("Battle", "Never Enough Soldiers: Equip a Follower from your discard pile to your performing Personality at the current battlefield, paying all costs (Battle)", "attachment-in-discard", PlayerAbility: true,
+            Performer: "own-personality-explicitly-at-battle", Cost: GoldCostRule.AttachCost(), UsesPerTurn: AbilityUseLimit.Unlimited, Attach: new(AttachSource.Target, AttachPile.Own, AttachWielder.Performer, Types: [CardType.Follower]));
         // Seek the Stain (oracle-l5r-6559, a Spell): "You may attach this card from your discard pile to your Void Shugenja." -- the Equip rulebook actions with this card in the discard pile: Equip
         // (Limited) to a Void Shugenja at home, Equip (Battle) to an unbowed opposed Void Shugenja at the battle; paying all costs, any number of times per turn.
         all[SeekStainLimited] = new("Limited", "Equip this card from your discard pile to your Void Shugenja, paying all costs", "none", FromDiscard: true, Performer: OwnPersonalityWithKeywordsAtHome,
@@ -149,7 +156,7 @@ public static class EmperorP5Abilities
         all[MistrustNegate] = new("Reaction", "After another player's Melee or Ranged Attack targets your Ninja: Show the card in the current battlefield's province. If it is a Personality, negate the Attack's effects", "none",
             Trigger: ReactionTriggers.TargetedByAction);
         all[MistrustDiscard] = new("Battle", "Discard a card in the current battlefield's province. Draw a card", "none");
-        return all;
+        return all.AddEmperorP5Zones(); // EmperorP5Zones.cs
     }
 }
 
@@ -162,6 +169,16 @@ public sealed class EmperorP5State
     public List<string> SegmentInPlay { get; set; } = [];
     /// <summary>The printed phase instance in which each player last took a Dark Virtue action (Daigotsu Yutaka); -1 for none.</summary>
     public int[] DarkVirtuePhase { get; set; } = [-1, -1];
+    /// <summary>Unsettling Doubts: cards whose abilities were permanently removed (while they stay in play).</summary>
+    public List<string> AbilitiesRemoved { get; set; } = [];
+    /// <summary>Blessings of the Shi-Tien Yen-Wang: the turn its start-of-turn trait was last asked.</summary>
+    public int BlessingsAskedTurn { get; set; } = -1;
+    /// <summary>Step Through the Void: units removed from the game, put back before the turn ends.</summary>
+    public List<SteppedUnit> SteppedUnits { get; set; } = [];
+    /// <summary>The Price of Honor: Personalities the rulebook seppuku action does not affect this turn.</summary>
+    public List<SeppukuBar> SeppukuBars { get; set; } = [];
+    /// <summary>The Plain of Glass: the first Conqueror chosen in a battle whose second Conquest is still being chosen.</summary>
+    public string? FirstConquerorId { get; set; }
 }
 
 public sealed partial class MatchEngine
@@ -215,6 +232,30 @@ public sealed partial class MatchEngine
         return -2 * _state.Cards.Values.Count(c => InPlay(c) && Definition(c).Effect == EmperorP5Abilities.EconEffect && c.OwnerId != card.OwnerId);
     }
 
+    // ---- The Plain of Glass: the second Conquest ------------------------------------------------------------------------------------------------------------------------------------------
+
+    private bool PlainOfGlassConquestTwice(int playerId) => Definition(Card(Player(playerId).StrongholdId)).Effect == EmperorP5Abilities.PlainOfGlassEffect;
+
+    // ResolveConqueror's hook: after the first of two Conquests is chosen, the second is chosen among the others (with one left, it is that one). True when the choice was reopened or the
+    // resolution already finished here.
+    private bool ReopenConquerorChoiceForPlainOfGlass(PendingConqueror pending, string chosenId)
+    {
+        if (!PlainOfGlassConquestTwice(pending.PlayerId) || P5.FirstConquerorId is not null) return false;
+        var others = pending.CandidateIds.Where(id => id != chosenId).ToArray();
+        if (others.Length == 0) return false;
+        if (others.Length == 1)
+        {
+            FinishBattleResolution(pending.PlayerId, pending.ProvinceIndex, Army(pending.PlayerId, pending.ProvinceIndex).ToArray(), chosenId, others[0]);
+            return true;
+        }
+        P5.FirstConquerorId = chosenId;
+        _state.PendingConqueror = new PendingConqueror { PlayerId = pending.PlayerId, ProvinceIndex = pending.ProvinceIndex, CandidateIds = others };
+        _state.PendingChoice = new("conqueror", pending.PlayerId, null, "The Plain of Glass: choose a second Conqueror personality to straighten.");
+        _state.PriorityPlayerId = pending.PlayerId;
+        Emit("conquerorChoice", "The Plain of Glass: choose a second Conqueror personality to straighten.", pending.PlayerId);
+        return true;
+    }
+
     // ---- player abilities that exist only while granted -------------------------------------------------------------------------------------------------------------------------------------
 
     private bool ActiveP5Event(int playerId, string effect) =>
@@ -225,7 +266,7 @@ public sealed partial class MatchEngine
         EmperorP5Abilities.BiteDiscard => BitesOfWinterInPlay() == 0,
         EmperorP5Abilities.EconDiscardFavor or EmperorP5Abilities.EconDiscardPay => !_state.Cards.Values.Any(c => InPlay(c) && Definition(c).Name == EmperorP5Abilities.EconTitle),
         EmperorP5Abilities.StartingPathRing => !ActiveP5Event(playerId, EmperorP5Abilities.StartingPathEffect),
-        EmperorP5Abilities.NesEquip => !ActiveP5Event(playerId, EmperorP5Abilities.NesEffect),
+        EmperorP5Abilities.NesEquip or EmperorP5Abilities.NesEquipOpen or EmperorP5Abilities.NesEquipBattle => !ActiveP5Event(playerId, EmperorP5Abilities.NesEffect),
         _ => false
     };
 
@@ -272,7 +313,7 @@ public sealed partial class MatchEngine
             EmperorP5Abilities.EnemyUnitCard => !own && (type == CardType.Personality || card.Zone == Zone.Attached),
             EmperorP5Abilities.BiteOfWinterTitled => Definition(card).Name == EmperorP5Abilities.BiteOfWinterTitle,
             EmperorP5Abilities.EconTitled => Definition(card).Name == EmperorP5Abilities.EconTitle,
-            _ => false
+            _ => P5ZoneTargetAllows(target, command, player, source, card) // EmperorP5Zones.cs
         };
     }
 
@@ -307,6 +348,7 @@ public sealed partial class MatchEngine
     {
         EmperorP5Abilities.TsubuteDestroy or EmperorP5Abilities.TsubuteHand => 3,
         EmperorP5Abilities.JoutaAttack or EmperorP5Abilities.JoutaDeadAttack => 5,
+        EmperorP5ZoneAbilities.FoundriesAttack => 4,
         _ => null
     };
     private static string? P5AttackKind(string abilityId) => P5AttackStrength(abilityId) is null ? null : "Ranged";
@@ -348,6 +390,7 @@ public sealed partial class MatchEngine
                 Require(mine <= theirs, $"{Definition(performer).Name} may not perform Battle actions while your current army has higher total Force than the current enemy army ({mine} to {theirs}).");
             }
         }
+        ValidateEmperorP5Zones(id, ability, command, player, source); // EmperorP5Zones.cs
         switch (id)
         {
             case EmperorP5Abilities.YamaderaRefill:
@@ -402,7 +445,12 @@ public sealed partial class MatchEngine
                 Require(_state.RingSchismTurn != _state.TurnNumber || player.RingPutIntoPlayTurn != _state.TurnNumber, "Brotherhood Schism: you already put a Ring into play this turn.");
                 break;
             case EmperorP5Abilities.NesEquip:
+            case EmperorP5Abilities.NesEquipOpen:
+            case EmperorP5Abilities.NesEquipBattle:
                 Require(ActiveP5Event(player.Id, EmperorP5Abilities.NesEffect), "You do not have this ability.");
+                // The Equip rulebook action's own timing for a Follower (Limited on the player's own turn; Open or Battle only while a card grants it).
+                if (id == EmperorP5Abilities.NesEquipOpen) Require(player.Id != _state.ActivePlayerId, "On your own turn this is the Limited Equip.");
+                if (command.TargetId is { } nesTarget && _state.Cards.TryGetValue(nesTarget, out var nesFollower) && EquipTimingError(player.Id, nesFollower) is { } timing) Require(false, timing);
                 break;
         }
     }
@@ -506,7 +554,8 @@ public sealed partial class MatchEngine
                 if (CurrentBattlefieldProvince() is { CardId: { } shownId })
                 {
                     var shown = Card(shownId);
-                    Emit("cardShown", $"{name}: {Player(shown.OwnerId).Name} shows the card in the current battlefield's province: {Definition(shown).Name}.", player.Id, shown.Id);
+                    Emit("cardShown", $"{name}: {Player(player.Id).Name} shows the card in the current battlefield's province: {Definition(shown).Name}.", player.Id, shown.Id);
+                    RecordShown(player.Id, shown, source!, "Province", "reaction"); // the public shown-cards record
                     if (Definition(shown).Type == CardType.Personality) NegateHeldAction(source!);
                 }
                 else Emit("cardShown", $"{name}: the current battlefield's province holds no card.", player.Id, source!.Id);
@@ -517,7 +566,7 @@ public sealed partial class MatchEngine
                 Draw(player);
                 return false;
             default:
-                return null;
+                return RunEmperorP5Zones(id, ability, command, player, source, target, consumedGrant, playedFromDiscard, opponentHonorBeforeBattleAction, bowedBeforeAction, preExistingGrants); // EmperorP5Zones.cs
         }
     }
 }

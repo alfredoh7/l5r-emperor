@@ -681,6 +681,8 @@ public static class CardCatalog
             .Concat(PublishedContent.ItemWave34.Cards) // Issue #503, pass group P5: Tsubute
             .Concat(PublishedContent.SpellWave42.Cards) // Issue #503, pass group P5: Seek the Stain
             .Concat(PublishedContent.EventWave25.Cards) // Issue #503, pass group P5: Never Enough Soldiers, Starting on the Path
+            .Concat(PublishedContent.CelestialWave26.Cards) // Issue #503, pass group P5: Blessings of the Shi-Tien Yen-Wang
+            .Concat(PublishedContent.StrongholdWave46.Cards) // Issue #503, pass group P5: The Plain of Glass, The New Foundries
             .ToDictionary(c => c.Id, StringComparer.Ordinal);
     }
 }

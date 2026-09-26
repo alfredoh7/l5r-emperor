@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Build Strategy wave 98 (issue #503, pass group P5): Disrupting Communication, Economic Repercussions, Headbutt, Inciting Mistrust, Perplexing Guests, The Bite of Winter.
+"""Build Strategy wave 98 (issue #503, pass group P5): Disrupting Communication, Economic Repercussions, Headbutt, Inciting Mistrust, Perplexing Guests, Riddle of Rebirth, The Bite of Winter, The Price of Honor, Two-Fold Virtue, Unsettling Doubts.
 
-Headbutt (the Combat Segment entry record), Disrupting Communication (a chosen or random discard), The Bite of Winter and Economic Repercussions (Strategies put into play that grant every player an ability and change Force / Gold Cost), Perplexing Guests (a created Monk removed as the turn ends), Inciting Mistrust (a province card shown to negate an Attack).
+Headbutt (the Combat Segment entry record), Disrupting Communication (a chosen or random discard), The Bite of Winter and Economic Repercussions (Strategies put into play that grant every player an ability and change Force / Gold Cost), Perplexing Guests (a created Monk removed as the turn ends), Inciting Mistrust (a province card shown to negate an Attack). Unsettling Doubts (a Ring's abilities removed for good; a bottom-of-deck face-up refill), Riddle of Rebirth (a unit to the bottom of its owners' decks in a chosen order), Two-Fold Virtue (a created copy of a Paragon's values, removed after the battle), The Price of Honor (the opponent's hand shown to the acting player, or a bar on the rulebook seppuku action).
 
 Every scan was read by eye (WebP working copies with receipts, sha256-verified); the published Text is the scan's own wording where the catalogue's Oracle text differs, and each source receipt
 (with the working copy's sha256) is recorded next to the wave. The engine side is src/L5R.Core/EmperorP5.cs.
@@ -23,7 +23,11 @@ ABILITIES: dict[int, list[str]] = {
     3010: ["p5-headbutt-destroy", "p5-headbutt-destroy-fresh"],  # Headbutt
     3733: ["p5-inciting-mistrust-negate", "p5-inciting-mistrust-discard"],  # Inciting Mistrust
     5928: ["p5-perplexing-guests-discard", "p5-perplexing-guests-create"],  # Perplexing Guests
+    6316: ["p5-riddle-of-rebirth"],  # Riddle of Rebirth
     7972: ["p5-bite-winter-enter"],  # The Bite of Winter
+    8268: ["p5-price-of-honor"],  # The Price of Honor
+    9939: ["p5-two-fold-virtue"],  # Two-Fold Virtue
+    10178: ["p5-doubts-remove", "p5-doubts-refill"],  # Unsettling Doubts
 }
 OVERRIDE: dict[int, dict] = {
     2280: {"Effect": "p5-economic-repercussions"},
@@ -36,7 +40,11 @@ TEXT: dict[int, str] = {
     3010: "Battle: Choose your performing Berserker, bow him unless he was not in play when this Combat Segment began, and target an enemy card without attachments and with equal or lower Force: Destroy it.",
     3733: "Reaction: After another player's Melee or Ranged Attack targets your Ninja: Show the card in the current battlefield's province. If it is a Personality, negate the Melee or Ranged Attack's effects.\nBattle: Discard a card in the current battlefield's province. Draw a card.",
     5928: "Reaction: After another player's action targets your Personality: Discard him.\nBattle: Create a 1F/1C/1PH Monk Personality on your side at the current battlefield. Remove him from the game when the turn ends.",
+    6316: "Limited: Bow your performing Henshin, remove this card from the game, and target a Personality that shares a keyword with your Henshin: Put all cards in the target's unit at the bottom of his owner's appropriate decks in any order.",
     7972: "Personalities and Followers have -1F. All players have the ability, \"Open: Bow your Stronghold: Discard a card titled The Bite of Winter from play.\"\nLimited: Put this card into play.",
+    8268: "Limited: Choose your performing Courtier and target another player's dishonorable Personality: He is asked to make a sacrifice. The player may show you his hand. If he does, you may discard a card from it. If he does not choose this, his Personality may not perform the rulebook seppuku action.",
+    9939: "Battle: Target your Paragon: Create a Personality with the same base Chi, Personal Honor and keywords as the target, and whose base Force equals that target's Personal Honor. Remove the Personality from the game after the battle ends.",
+    10178: "Open: Target a Ring which did not last enter play by its own text: This is not true enlightenment. Permanently remove its abilities.\nLimited: Target one or more cards in your provinces: Discard them. Refill the provinces face-up from the bottom of your deck.",
 }
 
 

@@ -45,6 +45,15 @@
     "image_sha256": "5fd45765d55337c4df34a390f3c2d7e66fc8016bc72392641cf6562ece73565c"
   },
   {
+    "card_id": "oracle-l5r-6316",
+    "printing_set": [
+      "Embers of War"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=6316",
+    "image_path": "assets/reference/oracle/embers-of-war/webp/oracle-l5r-6316-printing-1-image-1.webp",
+    "image_sha256": "afb0ffdb423b969670d8ba1894f40147746d55e050e1a4104662ae2487202b62"
+  },
+  {
     "card_id": "oracle-l5r-7972",
     "printing_set": [
       "Embers of War"
@@ -52,5 +61,32 @@
     "source_url": "https://oracleofthevoid.com/#cardid=7972",
     "image_path": "assets/reference/oracle/embers-of-war/webp/oracle-l5r-7972-printing-1-image-1.webp",
     "image_sha256": "bbcfcda302ad34537d845eaf6fb845102c7c7d34b5f23757ea99c7b05482c361"
+  },
+  {
+    "card_id": "oracle-l5r-8268",
+    "printing_set": [
+      "Before the Dawn"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=8268",
+    "image_path": "assets/reference/oracle/before-the-dawn/webp/oracle-l5r-8268-printing-1-image-1.webp",
+    "image_sha256": "dbc76932ab25bb0399c3f8ae7947cc8a18588fe9498eadc673bc554fa662b9b0"
+  },
+  {
+    "card_id": "oracle-l5r-9939",
+    "printing_set": [
+      "The Shadow's Embrace"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=9939",
+    "image_path": "assets/reference/oracle/the-shadow-s-embrace/webp/oracle-l5r-9939-printing-1-image-1.webp",
+    "image_sha256": "63662d0ea3dfa327b0932fef8e5aa089c1a4779e2e5ed7e5ddb77e302458d0bd"
+  },
+  {
+    "card_id": "oracle-l5r-10178",
+    "printing_set": [
+      "Seeds of Decay"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10178",
+    "image_path": "assets/reference/oracle/seeds-of-decay/webp/oracle-l5r-10178-printing-1-image-1.webp",
+    "image_sha256": "8ad80a37a36ca91d1fd1427465be1c7fb35960487c766dbc029ea841f7746b28"
   }
 ]

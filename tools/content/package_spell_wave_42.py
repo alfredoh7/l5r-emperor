@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Build Spell wave 42 (issue #503, pass group P5): Seek the Stain.
+"""Build Spell wave 42 (issue #503, pass group P5): Seek the Stain, Step Through the Void.
 
-Seek the Stain: the Equip rulebook actions from the discard pile, to a Void Shugenja.
+Seek the Stain: the Equip rulebook actions from the discard pile, to a Void Shugenja. Step Through the Void: a unit removed from the game whole and put back before the turn ends.
 
 Every scan was read by eye (WebP working copies with receipts, sha256-verified); the published Text is the scan's own wording where the catalogue's Oracle text differs, and each source receipt
 (with the working copy's sha256) is recorded next to the wave. The engine side is src/L5R.Core/EmperorP5.cs.
@@ -19,6 +19,7 @@ NL = chr(10)
 
 ABILITIES: dict[int, list[str]] = {
     6559: ["p5-seek-stain-equip-limited", "p5-seek-stain-equip-battle", "p5-seek-stain-kolat", "p5-seek-stain-ninja", "p5-seek-stain-shadowlands"],  # Seek the Stain
+    10132: ["p5-step-through-void"],  # Step Through the Void
 }
 OVERRIDE: dict[int, dict] = {
 
@@ -26,6 +27,7 @@ OVERRIDE: dict[int, dict] = {
 # The published Text is each scan's own wording (read by eye).
 TEXT: dict[int, str] = {
     6559: "You may attach this card from your discard pile to your Void Shugenja.\nOpen: Bow this card and target another player's Personality: You find out his dark secret. Give him Kolat, Ninja, or Shadowlands.",
+    10132: "Battle/Open: Destroy this card unless this Shugenja is Void: Remove this Shugenja from the game; his attachments stay attached. Before this turn ends, put his unit into play, ignoring costs, entering-play effects, and restrictions.",
 }
 
 

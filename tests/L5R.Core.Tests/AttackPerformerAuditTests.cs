@@ -54,6 +54,8 @@ internal static class AttackPerformerAuditTests
     {
         foreach (var (id, ability) in Attacks().Where(a => a.Value.Performer is null))
             foreach (var card in CardCatalog.Cards.Values.Where(c => !c.ScenarioOnly && c.Abilities!.Contains(id)))
-                Check(card.Type is CardType.Personality or CardType.Follower or CardType.Item or CardType.Spell or CardType.Strategy or CardType.Ring, $"{card.Name} ({id}) is a {card.Type}: check its performer against the core rules");
+                Check(card.Type is CardType.Personality or CardType.Follower or CardType.Item or CardType.Spell or CardType.Strategy or CardType.Ring
+                    || id == "p5-foundries-attack" /* issue #503: The New Foundries, a Stronghold, prints a Ranged 4 Attack with no performer (a Stronghold is not in a unit; its Battle action names none, as a Strategy's) */,
+                    $"{card.Name} ({id}) is a {card.Type}: check its performer against the core rules");
     }
 }
