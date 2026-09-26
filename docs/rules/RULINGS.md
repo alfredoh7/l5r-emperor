@@ -152,17 +152,15 @@ windows close.
 ## Duels and focus
 
 ### R-013 — A Focus Effect is not an action
-Bad Kharma and Footsteps of Madness may be played at any time, on top of other modifiers, because
-a Focus Effect is not itself an action (so it is not subject to action-scoped negation or
-timing restrictions).
+Bad Kharma and Footsteps of Madness may be played at any time, on top of other modifiers. A Focus
+Effect is not an action.
 
 - **Cards/primitives:** Bad Kharma, Footsteps of Madness.
 - **Date:** 2026-09-25
 - **Source:** [Emperor Edition rulings pass](../decisions/2026-09-25-emperor-edition-rulings-pass.md) (R4)
 
 ### R-014 — He's Mine! and Bayushi Irezu act only in an accepted or mandatory duel
-Both cards' substitute-duelist effect only functions inside a duel that is accepted or mandatory;
-neither creates or forces a duel by itself.
+He's Mine! and Bayushi Irezu (same shape) act only in an accepted or mandatory duel.
 
 - **Cards/primitives:** He's Mine!, Bayushi Irezu.
 - **Date:** 2026-09-25
@@ -213,5 +211,23 @@ Rhetoric and Solid Defense are offered whenever an action's effects cause an Hon
 Honor as a cost before the colon (audited).
 
 - **Cards/primitives:** Rhetoric, Solid Defense, `honorChangeReaction`.
+- **Date:** 2026-09-25
+- **Source:** [Emperor Edition rulings pass](../decisions/2026-09-25-emperor-edition-rulings-pass.md) (R4)
+
+## Reaction scope and triggers
+
+### R-020 — Cherry Blossom Festival bars Reactions, Proclaim included, not every trait-modelled ability
+Cherry Blossom Festival bars Reactions, including Proclaim, but not Overconfident and not the 24
+abilities the engine models as traits rather than Reactions.
+
+- **Cards/primitives:** Cherry Blossom Festival, Proclaim, Overconfident; `TraitReactions`
+  (audited against all 248 Reaction-timed abilities).
+- **Date:** 2026-09-25
+- **Source:** [Emperor Edition rulings pass](../decisions/2026-09-25-emperor-edition-rulings-pass.md) (R4)
+
+### R-021 — The Killing Grounds fires once per player
+The Killing Grounds fires once per player.
+
+- **Cards/primitives:** The Killing Grounds.
 - **Date:** 2026-09-25
 - **Source:** [Emperor Edition rulings pass](../decisions/2026-09-25-emperor-edition-rulings-pass.md) (R4)
