@@ -476,10 +476,11 @@ public sealed partial class MatchEngine
                 {
                     var weapon = ForgeShownCards(decider.Id)[int.Parse(option.Key["attach-".Length..])];
                     var smith = Card(p.PerformerId);
-                    Pay(decider.Id, weapon, option.GoldCost, sourceIds, paying: new PaymentSubject(weapon, PaymentKind.Equip));
+                    Pay(decider.Id, weapon, option.GoldCost, sourceIds, paying: new PaymentSubject(weapon, PaymentKind.Equip, Wielder: smith)); // issue #501: the wielder
                     decider.FateDeck.Remove(weapon.Id);
                     weapon.AbilityUses.Clear(); weapon.Bowed = false;
                     weapon.Zone = Zone.Attached; weapon.AttachedTo = smith.Id; weapon.FaceUp = true; weapon.ProvinceIndex = smith.ProvinceIndex;
+                    NoteAttached(decider.Id, weapon, "deck"); // Issue #501 (EmperorMechD.cs): the attach log.
                     if (Definition(weapon).AttachGrantsKeyword is string granted) GrantKeyword(smith, granted, weapon.Id, "Attachment");
                     Emit("equipped", $"{Definition(weapon).Name} attached to {Definition(smith).Name} from the top of the Fate deck ({name}).", decider.Id, weapon.Id);
                     attached = weapon;

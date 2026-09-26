@@ -1,0 +1,55 @@
+{
+  "Profile": "strategy-wave-72",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10137",
+      "Name": "Black Marketeering",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 10,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Target an enemy Personality whose unit's total Gold cost is 10 or lower: He defects. Take control of him (he joins your army). Dishonor him. Destroy any of his Followers whose Honor Requirement he now fails to meet. Give control of him to his owner before the turn ends.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10137.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "black-marketeering-take"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10161",
+      "Name": "Only a Shadow",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Choose your performing unbowed Ninja Personality: He infiltrates the enemy ranks. Permanently give him the trait, \"After a Straighten Phase begins: Choose your bowed non-Ninja Personality. Negate his straightening this phase.\" Give control of him to another player.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10161.jpg",
+      "Keywords": [
+        "Ninja"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "only-a-shadow-infiltrate"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

@@ -58,7 +58,8 @@ public sealed partial class MatchEngine
     private string? EquipTimingError(int playerId, CardInstance attachment)
     {
         var actionClass = EquipActionClass(attachment);
-        var grants = (actionClass is null ? [] : TimingGrantsOf(playerId, actionClass).ToArray()).Concat(GloryOfTheShogunGrants()).ToArray(); // Glory of the Shogun (issue #492, group F)
+        // A Spell (Equip (Limited) since issue #501) takes no granted timing: in a battle a Spell is attached with Equip (Battle), unchanged.
+        var grants = Definition(attachment).Type == CardType.Spell ? [] : (actionClass is null ? [] : TimingGrantsOf(playerId, actionClass).ToArray()).Concat(GloryOfTheShogunGrants()).ToArray(); // Glory of the Shogun (issue #492, group F)
         if (_state.Phase == Phase.Action)
             return playerId == _state.ActivePlayerId || grants.Any(x => x.Grant.GrantsOpen) ? null : "Equip is a Limited action on your turn.";
         if (_state.Phase == Phase.Battle)
@@ -80,11 +81,12 @@ public sealed partial class MatchEngine
         var wielders = battle
             ? (_state.CurrentBattleProvince is int province ? Army(playerId, province).ToArray() : [])
             : _state.Cards.Values.Where(c => c.OwnerId == playerId && c.Zone == Zone.Home && Definition(c).Type == CardType.Personality).ToArray();
-        foreach (var card in Player(playerId).Hand.Select(Card).Where(c => Definition(c).Type is CardType.Item or CardType.Follower))
+        // Equip (Limited) offers Spells too (Mendon's ruling, issue #501), to a Shugenja only; EquipTimingError keeps them out of a battle (Equip (Battle) is their Battle action).
+        foreach (var card in Player(playerId).Hand.Select(Card).Where(c => Definition(c).Type is CardType.Item or CardType.Follower or CardType.Spell))
         {
             if (EquipTimingError(playerId, card) is not null) continue;
             var def = Definition(card);
-            var legalTargets = wielders.Where(t => AttachmentAllowed(card, t) && AttachmentLegalTarget(def, t)).Select(t => t.Id).ToArray();
+            var legalTargets = wielders.Where(t => AttachmentAllowed(card, t) && AttachmentLegalTarget(def, t) && (def.Type != CardType.Spell || Keyword(t, "Shugenja"))).Select(t => t.Id).ToArray();
             // One Gold quote per candidate wielder (issue #303): Katagi's discount depends on the wielder, so the price can differ per target.
             var quotes = legalTargets.ToDictionary(id => id, id => QuoteEquipGold(playerId, card, Card(id)));
             var affordable = legalTargets.Where(id => quotes[id].Payments.Length > 0).ToArray();

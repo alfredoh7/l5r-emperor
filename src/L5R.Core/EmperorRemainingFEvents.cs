@@ -595,6 +595,7 @@ public sealed partial class MatchEngine
     // "After the first time each turn each player attaches a card with a base Gold Cost of 5 or more from his hand, that player may draw a card." Called wherever a card leaves a hand to attach.
     private void NoteAttachedFromHandForGlory(int playerId, CardInstance attachment)
     {
+        NoteAttached(playerId, attachment, "hand"); // Issue #501 (EmperorMechD.cs): every attach from a hand is in the attach log.
         if (Definition(attachment).GoldCost < 5) return;
         foreach (var glory in EventsInPlay(GloryOfTheShogunEffect))
         {

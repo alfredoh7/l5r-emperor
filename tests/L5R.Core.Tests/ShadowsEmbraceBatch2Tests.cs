@@ -15,7 +15,8 @@ internal static class ShadowsEmbraceBatch2Tests
     private const string Lion = "training-lion-samurai", Crane = "training-crane-samurai", Follower = "training-follower", Item = "training-item", Weapon = "training-weapon",
         Spell = "training-spell", Shugenja = "training-shugenja";
     private static readonly string[] Wired = [Sorano, Yoyugi, Longtooth, Mrika, Rukia, Morio, Natsumi, Niiro, Quelsa, Kudome, Shirou, JongHo, MinHee, Nobu, Ryoken, Shugorei, Yamazaki, Ikke, Kanahashi];
-    private static readonly string[] Unwired = ["oracle-l5r-9829", "oracle-l5r-9808", "oracle-l5r-9845", "oracle-l5r-9828"];
+    // Issue #501: Zlkyt (oracle-l5r-9828) is wired and published in personality-wave-95 (Mendon's item 19), so it left this list.
+    private static readonly string[] Unwired = ["oracle-l5r-9829", "oracle-l5r-9808", "oracle-l5r-9845"];
 
     private static void Check(bool ok, string message = "Assertion failed") => Batch336Support.Check(ok, message);
     private static void Eq<T>(T actual, T expected, string message = "Values differ") => Batch336Support.Eq(actual, expected, message);

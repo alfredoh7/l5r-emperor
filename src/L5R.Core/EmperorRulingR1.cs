@@ -220,7 +220,7 @@ public sealed partial class MatchEngine
     /// locks apply (a movement lock, the Shieldman's refusal to attack), no Infantry/Cavalry segment. `mayBeBowed` is "even if he is bowed".</summary>
     private bool MayBeAssignedToCreatedBattlefield(CardInstance card, bool attacking, bool mayBeBowed) =>
         InPlay(card) && card.Zone == Zone.Home && Definition(card).Type == CardType.Personality && (!card.Bowed || mayBeBowed || MayAssignBowed(card))
-        && !MovementLocked(card, MovementKinds.Assign) && !(attacking && MovementLocked(card, MovementKinds.AssignAttack)) && !(attacking && UnitHasShieldman(card));
+        && !MovementLocked(card, MovementKinds.Assign) && !(attacking && MovementLocked(card, MovementKinds.AssignAttack)) && !(attacking && UnitHasShieldman(card)) && !(!attacking && IsGojuAsuka(card)); // Goju Asuka (issue #501): never into a defending army
 
     /// <summary>Assigns him (and his attachments) from home to the battlefield; false, changing nothing, when he may not be assigned. The same "after he is assigned" Reactions as the Maneuvers Segment.</summary>
     private bool AssignToCreatedBattlefield(CardInstance card, int battlefield, bool attacking, bool mayBeBowed)

@@ -303,6 +303,11 @@ public sealed class CardInstance
     // that says it is a created card: it has no physical card to return to (it is removed from the game when it leaves play) and the client marks it so. Every other created card is a
     // CardDefinition.CreatedOnly scan and needs no marker.
     public bool CreatedCopy { get; set; }
+    // Issue #501 (Mendon's item 32, EmperorMechBCopies.cs): what the client's "duplicate" frame shows for a copy -- the instance id and definition id of the card it copies (its scan
+    // is the original's), and the conditions on the copy (timed removal, ...), each a human-readable sentence. Null / empty for every card that is not a copy.
+    public string? CopyOfCardId { get; set; }
+    public string? CopyOfDefinitionId { get; set; }
+    public List<string> CopyConditions { get; set; } = [];
     // Seeds of Decay pass (issue #453), batch 1. Defensive Blockade: the battle (MatchState.BattleNumber) in which this card contributes no Force to its army's total.
     public int ForceContributionNegatedBattle { get; set; } = -1;
     // Embracing Battle / Military Promotion: the turn in which this Personality may be assigned to a battlefield even if bowed.
@@ -400,6 +405,24 @@ public sealed record PendingChoice(string Type, int PlayerId, string? CardId, st
 /// <summary>The Honor loss Ten Thousand Temples may negate, waiting for its controller's answer. <paramref name="Command"/> is the command that was being executed (the whole of it is replayed once every
 /// decision is made); Decisions are the answers so far (true: the Temple was destroyed to negate that loss), one per earlier loss of that command that the Temple could have negated; the Prior* fields are the
 /// pending choice, priority and pass count the state had before this decision took them over.</summary>
+/// <summary>Emperor Edition mechanics group C (issue #501, EmperorMechC.cs): a command whose execution reached an additional cost of entering play (En'you) with more than one way to pay, held whole
+/// while the entering card's controller chooses (MatchEngine.Execute replays it with the answer, kept on MatchState.EntryCostAnswers).</summary>
+public sealed class PendingEntryCostDecision
+{
+    public GameCommand Command { get; set; } = new("pass", 0, 0);
+    public int PlayerId { get; set; }
+    public string CardId { get; set; } = "";
+    public List<EntryCostOption> Options { get; set; } = [];
+    public PendingChoice? PriorChoice { get; set; }
+    public int PriorPriority { get; set; }
+    public int PriorPasses { get; set; }
+    public List<bool> HonorDecisions { get; set; } = [];
+    public int HonorWindowsDone { get; set; }
+}
+
+/// <summary>One way to pay an additional cost of entering play: Key is "remove:&lt;hand card id&gt;" or "sake:&lt;token id&gt;".</summary>
+public sealed record EntryCostOption(string Key, string Label);
+
 public sealed class PendingHonorLossDecision
 {
     public GameCommand Command { get; set; } = new("pass", 0, 0);
@@ -574,7 +597,12 @@ public sealed record FirstActionRestriction(int PlayerId, string? PerformerId, b
 // PerformerId (Emperor Edition remaining-cards pass, group C, issue #492: Spinning Heel Kick): the additional action "which he must perform" -- spent only by an action that Personality performs.
 // BaseAbilityOnly (Emperor Edition three-scans pass, issue #496: Honor Never Falls -- "an additional Battle action to use one of his base abilities"): with a PerformerId, the grant is spent only by one of the abilities PRINTED on that Personality
 // (his own definition's abilities, not one an attachment provides or one granted to him).
-public sealed record AdditionalActionGrant(int PlayerId, string[]? ScopeCardIds, bool FromDiscard = false, int? Battle = null, bool AnyDiscardTiming = false, string? RangedTargetId = null, string? PerformerId = null, bool BaseAbilityOnly = false);
+// Issue #501 (EmperorMechA.cs): RequiredActionKeyword -- the action spending the grant must carry that keyword (Mirumoto Inokuchi: "which must be Iaijutsu"; Beyond the Line: a Recon ability);
+// Tag -- a grant with a rule of its own (Beyond the Line: a Limited or Open Recon ability used as a Battle action that targets the current battlefield's province); Id -- a unique name, so a grant can be
+// followed after it leaves the list (Inokuchi's "If you don't, bow him") and is never equal to another grant; Mandatory -- the text does not say "may" (Beyond the Line: "Take an additional action"),
+// so the grant may be taken as a pass but not declined (Mendon's item 2).
+public sealed record AdditionalActionGrant(int PlayerId, string[]? ScopeCardIds, bool FromDiscard = false, int? Battle = null, bool AnyDiscardTiming = false, string? RangedTargetId = null, string? PerformerId = null, bool BaseAbilityOnly = false,
+    string? RequiredActionKeyword = null, string? Tag = null, string? Id = null, bool Mandatory = false);
 
 /// <summary>A discard a player owes: they choose the card from their hand (Times of Strife, Daigotsu Bofana - exp's entry).
 /// Reason names the card or rule in the prompt and the event.</summary>
@@ -920,6 +948,10 @@ public sealed class MatchState
     public EmperorRemainingCState RemC { get; set; } = new();
     // Emperor Edition rulings pass R1 (issue #492): battlefields without a province, and a battle fought inside the Action Phase (EmperorRulingR1.cs).
     public RulingR1State R1 { get; set; } = new();
+    // Issue #501, mechanics group B (EmperorMechB.cs): control returns owed, the infiltrator straighten trait grants and its open choice.
+    public EmperorMechBState MechB { get; set; } = new();
+    // Issue #501, mechanics group A (EmperorMechA.cs): additional actions (pass and decline, conditional grants, the per-battle records) and Aramasu's Legacy's Attack Phase inside the Action Phase.
+    public MechAState MechA { get; set; } = new();
     // Entrenched Position: the battle (BattleNumber) in which the Attacker holds the first opportunity to act and the Defender has not yet had his first normal
     // opportunity to act or pass -- set when the Engage window closes with the Attacker holding it, cleared the moment the Attacker cedes priority (NextAction, Pass).
     public int AttackerLeadBattle { get; set; } = -1;
@@ -1166,6 +1198,11 @@ public sealed class MatchState
     public PendingAttackTargetSelection? PendingAttackTargetSelection { get; set; }
     public List<AnnouncedAttackModifier> AnnouncedAttackModifiers { get; set; } = [];
     public List<RendTheSoulMark> RendTheSoulMarks { get; set; } = [];
+    // Emperor Edition mechanics group C (issue #501, EmperorMechC.cs): an additional cost of entering play awaiting its payer's choice, and the answers given so far to the command being replayed.
+    public PendingEntryCostDecision? PendingEntryCostDecision { get; set; }
+    public List<string> EntryCostAnswers { get; set; } = [];
+    // Issue #501, mechanics group D (EmperorMechD.cs): the Recon-action counter, the attach log, the cards-into-hand records and timed removals.
+    public MechDState MechD { get; set; } = new();
 }
 
 /// <summary>Isawa Norimichi: PlayerId's army has +Amount total Force in the battle numbered Battle (while it has any units).</summary>
@@ -1246,7 +1283,10 @@ public sealed record PaymentOption(string[] SourceIds, int Produced, int Cost, i
 // Basis (issue #303): the human-readable derivation of Cost, e.g. "Training samurai cost 5 - 2 (Clan
 // discount)". Null only for quotes serialized by an older engine.
 public sealed record PurchaseQuote(string CardId, int Cost, bool ClanDiscount, bool ClanAllegiance,
-    bool ProclaimEligible, string? Error, PaymentOption[] Payments, string? Basis = null);
+    bool ProclaimEligible, string? Error, PaymentOption[] Payments, string? Basis = null,
+    // Issue #501 (EmperorMechE.cs): the payment sources that are not a card's own production -- a Reaction's Gold used beside or instead of bowing (Seaside Bazaar, Luxurious Silk, Library of
+    // Rebirth), Zlkyt's "destroy your Mine or Farm" (one per Holding, highest Gold Cost first, always last) -- each a source id Payments and GameCommand.SourceIds may name. Null when there are none.
+    PaymentSource[]? Sources = null);
 public sealed record OverlayQuote(string CardId, string TargetId, int HigherLevel, int LowerLevel, string? Error);
 /// <summary>The one authoritative Gold quote (issue #303) for any action that costs Gold: recruiting,
 /// equipping, playing a Strategy and every costed ability. The client renders this and never derives a
@@ -1258,7 +1298,9 @@ public sealed record OverlayQuote(string CardId, string TargetId, int HigherLeve
 /// PaymentsByAmount holds them for every legal amount (keyed by amount) so the client can change the
 /// amount without a round trip. Error, when set, means this quote cannot be paid or used as it stands.</summary>
 public sealed record GoldQuote(int Cost, string Kind, string Basis, string? Error, PaymentOption[] Payments,
-    int? MinAmount = null, int? MaxAmount = null, Dictionary<int, PaymentOption[]>? PaymentsByAmount = null);
+    int? MinAmount = null, int? MaxAmount = null, Dictionary<int, PaymentOption[]>? PaymentsByAmount = null,
+    // Issue #501 (EmperorMechE.cs): the payment sources that are not a card's own production (see PurchaseQuote.Sources). Null when there are none.
+    PaymentSource[]? Sources = null);
 /// <param name="Gold">The quote for this option's own command (its first legal target when the cost is
 /// target-derived). Null when the action costs no Gold.</param>
 /// <param name="TargetGold">Per-target quotes (target id to quote) for a target-derived cost: the cost
@@ -1288,7 +1330,12 @@ public sealed record CardView(string Id, CardDefinition? Definition, int OwnerId
     // A created copy of another card (issue #398): its Definition is the copied card's own; this says it is a created card, for the client's marker.
     bool CreatedCopy = false,
     // Read-only explanations of already enforced granted effects (duel presentation); null when none.
-    GrantedEffectView[]? GrantedEffects = null);
+    GrantedEffectView[]? GrantedEffects = null,
+    // Issue #501 (Mendon's item 32; the client's "duplicate" frame is issue #502): true for a copy of another card; the copied card's instance id (null when it is no longer known)
+    // and definition id (the scan the client shows); a human-readable sentence of every condition on the copy (timed removal, ...) for the frame's tooltip.
+    bool IsCopy = false, string? CopyOfCardId = null, string? CopyOfDefinitionId = null, string? CopyConditions = null,
+    // Issue #501 (control transfer): the card's OWNER when another player controls it (OwnerId is always the controller); null when its owner controls it.
+    int? RealOwnerId = null);
 /// <summary>One granted ability as the client shows it: the id, the engine's label for it, and where it came from.</summary>
 public sealed record GrantedAbilityView(string AbilityId, string Label, string Timing, string Source, string Duration, string? CopiedFrom, string? CopiedFromName,
     string? SourceName = null, int? UsesPerTurn = null, int? UsesRemaining = null);

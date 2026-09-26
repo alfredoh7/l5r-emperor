@@ -38,10 +38,12 @@ public sealed partial class MatchEngine
     // the action cost (RecordHonorLoss, from GainHonor) rides along the same way.
     private bool FinishActionEffectTracking(string abilityId, int playerId, string? sourceId, int closesTo, string? performerId = null)
     {
+        AfterMechAActionResolved(abilityId, playerId, sourceId); // issue #501 (EmperorMechA.cs): Beyond the Line's draw "after the action's resolution"; Momoko's waiver is spent
         var affected = _state.CurrentActionAffected;
         _state.LastResolvedAction = new ResolvedActionFacts { AbilityId = abilityId, PlayerId = playerId, SourceId = sourceId, Affected = affected, PerformerId = performerId, HonorLosers = _state.CurrentActionHonorLosers,
             HandRecipients = _state.CurrentActionHandRecipients, FavorTakers = _state.CurrentActionFavorTakers };
         NoteHonorLostToOtherAction(playerId, _state.CurrentActionHonorLosers); // Kitsu Tamasine (issue #477, batch 5)
+        CountHandActionResolved(playerId, _state.CurrentActionHandRecipients); // Indecision (issue #501, EmperorMechD.cs): "actions which put cards into his hand this phase".
         _state.CurrentActionAffected = []; _state.CurrentActionHonorLosers = []; _state.CurrentActionHandRecipients = []; _state.CurrentActionFavorTakers = [];
         // Revenge (issue #437): this action destroyed a Personality of some OTHER player's -- set that owner's flag.
         foreach (var a in affected)
@@ -96,7 +98,8 @@ public sealed partial class MatchEngine
         if (abilityId == "chrysanthemum-blossom-boost") return ChrysanthemumBlossomApplies(source, playerId, facts);
         if (facts.AbilityId == AssignedSentinel) return false;
         if (!AbilityCatalog.All.ContainsKey(facts.AbilityId)) return false;
-        if (FollowupsAfterActionApplies(source, abilityId, playerId) is { } followups) return followups; // Asako Chukage (issue #498) // Equip's facts name no catalogued ability: only the Reaction above reads them.
+        if (FollowupsAfterActionApplies(source, abilityId, playerId) is { } followups) return followups;
+        if (MechDAfterActionApplies(source, abilityId, playerId, facts) is { } mechD) return mechD; // Indecision (issue #501, EmperorMechD.cs) // Asako Chukage (issue #498) // Equip's facts name no catalogued ability: only the Reaction above reads them.
         return abilityId switch
         {
             // Measure of Devotion (oracle-l5r-5013): "After the resolution of a Battle action that destroyed one of your Deathseekers."

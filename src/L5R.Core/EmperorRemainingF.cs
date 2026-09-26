@@ -320,7 +320,7 @@ public sealed partial class MatchEngine
     private bool EmperorRemainingFPaymentConditionMet(string when, PaymentSubject paying) => when switch
     {
         EmperorRemainingFAbilities.PayingForActionWhen => PaymentIsForAnAction(paying),
-        _ => false
+        _ => MechEPaymentConditionMet(when, paying) // Seaside Bazaar (issue #501, EmperorMechE.cs): any Gold Cost
     };
 
     // "When paying for an action" (Luxurious Silk, Yasuki Tanimura). Mendon's ruling (issue #492, R4): "This does not reduce the cost of a personality recruited during the dynasty phase or if

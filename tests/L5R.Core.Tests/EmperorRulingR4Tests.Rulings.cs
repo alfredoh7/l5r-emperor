@@ -61,11 +61,12 @@ internal static partial class EmperorRulingR4Tests
         var open = Producers(false, out var sakuma1, out var dokansuto1, out var silk1, out var spell1, out var holding1);
         Eq(open.GoldProduced(sakuma1.Id, 0, new PaymentSubject(spell1, PaymentKind.Play)), 2, "Sakuma produces 2 Gold for a payment");
         Eq(open.GoldProduced(dokansuto1.Id, 0, new PaymentSubject(holding1, PaymentKind.Recruit)), 2, "Dokansuto produces 2 Gold for a Holding");
-        Check(open.PaymentOptions(0, 2, new PaymentSubject(spell1, PaymentKind.Equip)).Any(p => p.SourceIds.SequenceEqual([silk1.Id])), "the bowed Silk pays 2 Gold for an action");
+        // Issue #501: a Reaction's Gold is a payment token of its own ("<card>#reaction"); the card's own id is its bow.
+        Check(open.PaymentOptions(0, 2, new PaymentSubject(spell1, PaymentKind.Equip)).Any(p => p.SourceIds.SequenceEqual([silk1.Id + "#reaction"])), "the bowed Silk pays 2 Gold for an action");
         var barred = Producers(true, out var sakuma2, out var dokansuto2, out var silk2, out var spell2, out var holding2);
         Eq(barred.GoldProduced(sakuma2.Id, 0, new PaymentSubject(spell2, PaymentKind.Play)), 0, "Cherry Blossom Festival: Sakuma's Reaction produces nothing");
         Eq(barred.GoldProduced(dokansuto2.Id, 0, new PaymentSubject(holding2, PaymentKind.Recruit)), 0, "and Dokansuto's neither");
-        Check(!barred.PaymentOptions(0, 2, new PaymentSubject(spell2, PaymentKind.Equip)).Any(p => p.SourceIds.SequenceEqual([silk2.Id])), "and the bowed Silk cannot pay");
+        Check(!barred.PaymentOptions(0, 2, new PaymentSubject(spell2, PaymentKind.Equip)).Any(p => p.SourceIds.Any(id => id.StartsWith(silk2.Id, StringComparison.Ordinal))), "and the bowed Silk cannot pay");
 
         // A hand Reaction is barred at its window (Solid Defense on Weak Poison's loss): none opens.
         var s3 = Table(Phase.Action, 0);
@@ -83,6 +84,8 @@ internal static partial class EmperorRulingR4Tests
     [
         "ancestral-sword-hantei-honor", "aya-entry-dark-virtue", "ayumi-entry", "castle-of-order-redirect", "celestial-sword-crab-honor", "celestial-sword-crane-honor",
         "celestial-sword-lion-honor", "celestial-sword-mantis-honor", "celestial-sword-phoenix-honor", "celestial-sword-scorpion-lose", "celestial-sword-unicorn-honor", "clay-kshatriya-invest",
+        "goju-asuka-give", // issue #501: Goju Asuka's "After Asuka enters play: You may give control of her to another player." is a trait
+        "kae-favor-negate", // issue #501 (Mendon's item 16): Kakita Kae's Favor discard triggers like a Reaction but is a trait
         "makubesu-create", "never-safe-return", "nojima-entry", "noritada-invest", "otomo-favor-token", "rika-bushido-virtue-bonus", "shihiro-boost", "small-time-bully-dishonor",
         "spiders-web-attach", "spiders-web-attach-kensai", "thick-marsh-entry", "tsudoken-exp2-entry",
     ];
@@ -146,7 +149,7 @@ internal static partial class EmperorRulingR4Tests
             return MatchEngine.FromTestState(t);
         }
         var rig = Rig(out var silk1, out var recruit1);
-        bool SilkAlone(PaymentSubject subject) => rig.PaymentOptions(0, 2, subject).Any(p => p.SourceIds.SequenceEqual([silk1.Id]));
+        bool SilkAlone(PaymentSubject subject) => rig.PaymentOptions(0, 2, subject).Any(p => p.SourceIds.SequenceEqual([silk1.Id + "#reaction"])); // issue #501: the Reaction's token
         Check(SilkAlone(new(recruit1, PaymentKind.Recruit, AbilityCatalog.All["yojimbos-duty-recruit"])), "Silk pays for the ability's recruit");
         Check(!SilkAlone(new(recruit1, PaymentKind.Recruit)), "not for the ordinary recruit of the Dynasty phase");
         Check(!SilkAlone(new(recruit1, PaymentKind.Recruit, AbilityCatalog.All["your-clan-needs-you"])), "not for a recruit that pays all costs");
@@ -165,7 +168,7 @@ internal static partial class EmperorRulingR4Tests
         var option = Enabled(ue, 0, "yojimbos-duty-recruit", duty.Id, yojimbo.Id);
         var quote = option.TargetGold![courtier.Id];
         Eq(quote.Cost, 2, "the Courtier costs 2 after the discount");
-        Check(quote.Payments.Length > 0 && quote.Payments.Any(p => p.SourceIds.Contains(silk2.Id)), "and the bowed Silk is among the ways to pay it");
+        Check(quote.Payments.Length > 0 && quote.Payments.Any(p => p.SourceIds.Contains(silk2.Id + "#reaction")), "and the bowed Silk is among the ways to pay it"); // issue #501: the Reaction's token
         Accept(ue, Offer(ue, 0, "yojimbos-duty-recruit", duty.Id, courtier.Id, yojimbo.Id));
         Eq(ue.State.Cards[courtier.Id].Zone, Zone.Home, "he entered play");
         Check(ue.State.Cards[silk2.Id].Bowed, "and Silk stayed bowed");

@@ -39,7 +39,8 @@ public sealed partial class MatchEngine
         or "cycle-of-vengeance-focus" // issue #460, batch 4
         or "swell-of-strength-focus" // issue #460, batch 5: Hiromi's Vassals/Shamsir's own attach-self shape, narrowed to Water Shugenja by AttachRequiresKeyword.
         || abilityId == "fair-warning-focus" // issue #453, batch 2
-        || abilityId == "superior-opponent-focus"; // Emperor Edition remaining-cards pass, group C (issue #492)
+        || abilityId == "superior-opponent-focus" // Emperor Edition remaining-cards pass, group C (issue #492)
+        || IsMechDFocusChoice(abilityId); // Broken Cipher (issue #501, EmperorMechD.cs)
     // Fair Warning (issue #453, batch 2): "if your Personality won it, you may give a Personality -4F" -- any Personality in play, only when the focus card's player's side won.
     private static bool IsFairWarningFocus(string abilityId) => abilityId == "fair-warning-focus";
     private List<string> FairWarningCandidates(int playerId) =>
@@ -96,6 +97,7 @@ public sealed partial class MatchEngine
     /// <summary>Opens the choice for the Focus Effect at `index`. False (and nothing is asked) when nothing qualifies.</summary>
     private bool BeginFocusEffectChoice(int index, string focusCardId, string abilityId)
     {
+        if (IsMechDFocusChoice(abilityId)) return BeginMechDFocusChoice(index, focusCardId, abilityId); // Broken Cipher's transfer (issue #501, EmperorMechD.cs)
         var focus = Card(focusCardId); var owner = focus.OwnerId;
         var candidates = FocusChoiceCandidates(owner, abilityId, focusCardId);
         var attachments = abilityId is "crimson-mark-focus" or "superior-opponent-focus";
@@ -161,6 +163,7 @@ public sealed partial class MatchEngine
         Require(command.Type == "chooseFocusEffect", "Choose a card or decline.");
         Require(command.PlayerId == pending.PlayerId, "Only the Focus Effect's player may choose.");
         if (pending.DelayDecision) { ResolveDelayDecision(command, pending); return; } // The delay Focus Effects' "(now)" choice (EmperorRulingR2Cards.cs).
+        if (IsMechDFocusChoice(pending.AbilityId)) { ResolveMechDFocusChoice(command, pending); return; } // Broken Cipher's transfer (issue #501, EmperorMechD.cs)
         var focus = Card(pending.FocusCardId);
         var destroys = pending.AbilityId is "crimson-mark-focus" or "superior-opponent-focus";
         var attachSelf = IsAttachSelfFocusEffect(pending.AbilityId);
@@ -215,6 +218,7 @@ public sealed partial class MatchEngine
         TakeControl(attachment, wielder.OwnerId);
         attachment.Zone = Zone.Attached; attachment.AttachedTo = wielder.Id; attachment.FaceUp = true; attachment.ProvinceIndex = wielder.ProvinceIndex;
         if (def.AttachGrantsKeyword is string granted) GrantKeyword(wielder, granted, attachment.Id, "Attachment");
+        NoteAttached(playerId, attachment, "focus-effect"); // Issue #501 (EmperorMechD.cs): the attach log.
         Emit("equipped", $"{def.Name} attached to {Definition(wielder).Name} as a Focus Effect.", playerId, attachment.Id);
     }
 
@@ -222,6 +226,7 @@ public sealed partial class MatchEngine
     {
         if (_state.PendingFocusChoice is not { } p || p.PlayerId != playerId) yield break;
         if (p.DelayDecision) { foreach (var option in DelayDecisionActions(p)) yield return option; yield break; }
+        if (IsMechDFocusChoice(p.AbilityId)) { foreach (var option in MechDFocusChoiceActions(p, playerId)) yield return option; yield break; } // Broken Cipher (issue #501)
         foreach (var id in p.Candidates)
             yield return new("chooseFocusEffect", IsFairWarningFocus(p.AbilityId) ? $"Give {Definition(Card(id)).Name} -4F"
                 : IsEffectKeyFocusEffect(p.AbilityId) ? (id == SandalwoodGainHonor ? "Gain 2 Honor" : "Draw a card")

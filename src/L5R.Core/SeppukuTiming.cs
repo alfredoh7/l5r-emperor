@@ -44,6 +44,7 @@ public sealed partial class MatchEngine
         (nameof(MatchState.PendingOverconfidentDraws), s => s.PendingOverconfidentDraws.Count > 0),
         (nameof(MatchState.PendingForcedDiscards), s => s.PendingForcedDiscards.Count > 0),
         (nameof(MatchState.PendingHonorLossDecision), s => s.PendingHonorLossDecision is not null), // Ten Thousand Temples' open decision (issue #492, group F)
+        (nameof(MatchState.PendingEntryCostDecision), s => s.PendingEntryCostDecision is not null), // En'you's additional cost of entering play (issue #501)
         (nameof(MatchState.PendingHonorChange), s => s.PendingHonorChange is not null), // an Honor change awaiting Reactions (issue #492, R4)
         (nameof(MatchState.PendingEventChoice), s => s.PendingEventChoice is not null), // an Event's open decision (issue #492, group F)
         (nameof(MatchState.PendingEventChoices), s => s.PendingEventChoices.Count > 0), // an optional draw an Event owes, queued behind the action in progress (issue #492, group F)

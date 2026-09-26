@@ -29,7 +29,8 @@ try
         ("client rejects insecure remote URLs and invalid room reservations", () => InvalidConnections(url)),
         ("client command payload carries every GameCommand field the server accepts (issue #303)", () => { OutgoingPayload(); return Task.CompletedTask; }),
         ("deck search: the searcher's deck viewer, the public shown-cards record and every search action survive the server envelope and the client's deserialization (issue #312)", () => { SearchViewsCrossTheWire(); return Task.CompletedTask; }),
-        ("look at the top cards: the viewer's ordered cards, the deck choice over any of four decks (the opponent's included) and every look action survive the server envelope and the client's deserialization (issue #322)", () => { LookViewsCrossTheWire(); return Task.CompletedTask; })
+        ("look at the top cards: the viewer's ordered cards, the deck choice over any of four decks (the opponent's included) and every look action survive the server envelope and the client's deserialization (issue #322)", () => { LookViewsCrossTheWire(); return Task.CompletedTask; }),
+        ("a copied card's frame fields (IsCopy, CopyOfCardId, CopyOfDefinitionId, CopyConditions) and a controlled card's RealOwnerId survive the server envelope and the client's deserialization (issue #501)", () => { CopyAndControlFieldsCrossTheWire(); return Task.CompletedTask; })
     };
     foreach (var (name, test) in cases)
     {
@@ -405,6 +406,29 @@ static async Task WaitFor(Func<bool> condition)
     using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(10));
     while (!condition()) await Task.Delay(10, timeout.Token);
 }
+// Issue #501: the new optional CardView fields (item 32's copy frame, the real owner of a controlled card) are carried online exactly as the engine sets them.
+static void CopyAndControlFieldsCrossTheWire()
+{
+    var web = new System.Text.Json.JsonSerializerOptions(System.Text.Json.JsonSerializerDefaults.Web);
+    var engine = MatchEngine.CreateEconomyScenario();
+    var view = engine.GetView(0);
+    var home = view.Players[0].Home;
+    Check(home.Length >= 2, "the scenario has two cards at home");
+    var marked = home.Select((c, i) => i == 0 ? c with { IsCopy = true, CopyOfCardId = "original-card", CopyOfDefinitionId = "training-lion-veteran", CopyConditions = "Removed from the game when your next turn begins." }
+        : i == 1 ? c with { RealOwnerId = 1 } : c).ToArray();
+    var players = view.Players.Select((p, i) => i == 0 ? p with { Home = marked } : p).ToArray();
+    var sent = view with { Players = players };
+    var message = new StateMessage("state", "ABCDEFGH", 0, sent.Version, sent, [], [true, true]);
+    var json = System.Text.Json.JsonSerializer.Serialize(message, Protocol.Json);
+    using var document = System.Text.Json.JsonDocument.Parse(json);
+    var received = document.RootElement.GetProperty("view").Deserialize<MatchView>(web)!;
+    Check(System.Text.Json.JsonSerializer.Serialize(received, web) == System.Text.Json.JsonSerializer.Serialize(sent, web), "the client's MatchView differs from the engine's");
+    var copy = received.Players[0].Home[0];
+    Check(copy.IsCopy && copy.CopyOfCardId == "original-card" && copy.CopyOfDefinitionId == "training-lion-veteran" && copy.CopyConditions == "Removed from the game when your next turn begins.", "the copy's frame fields arrived");
+    Check(received.Players[0].Home[1].RealOwnerId == 1 && !received.Players[0].Home[1].IsCopy, "the real owner arrived");
+    Check(received.Players[1].Home.All(c => !c.IsCopy && c.CopyOfCardId is null && c.RealOwnerId is null), "ordinary cards carry none of them");
+}
+
 static void Check(bool condition, string message) { if (!condition) throw new InvalidOperationException(message); }
 
 static async Task PublishedPlay(string url)

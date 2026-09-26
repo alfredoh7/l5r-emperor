@@ -14,7 +14,8 @@ public enum PaymentKind
 }
 
 /// <summary>What a Gold payment is for: the card being bought, equipped, played or acting, and the ability when the payment is an ability's.</summary>
-public sealed record PaymentSubject(CardInstance Card, PaymentKind Kind, AbilityDefinition? Ability = null);
+/// <param name="Wielder">Issue #501 (Moto Rani - exp): the Personality an attachment being paid for attaches to, when the payment is an Equip; null otherwise.</param>
+public sealed record PaymentSubject(CardInstance Card, PaymentKind Kind, AbilityDefinition? Ability = null, CardInstance? Wielder = null);
 
 /// <summary>What has to be true of a payment for a conditional production to apply.</summary>
 public enum ProductionCondition
@@ -103,10 +104,10 @@ public sealed partial class MatchEngine
         if (command.AbilityId is null || !AbilityCatalog.All.TryGetValue(command.AbilityId, out var ability)) return null;
         var source = command.CardId is not null && _state.Cards.TryGetValue(command.CardId, out var s) ? s : null;
         if (ability.Cost?.Basis == GoldCostBasis.TargetRecruit && priced is not null) return new(priced, PaymentKind.Recruit, ability);
-        if (ability.Cost?.Basis == GoldCostBasis.AttachCost && priced is not null) return new(priced, PaymentKind.Equip, ability);
+        if (ability.Cost?.Basis == GoldCostBasis.AttachCost && priced is not null) return new(priced, PaymentKind.Equip, ability, ability.Attach is { } attach ? WielderOfAttach(attach, command, source) : null); // issue #501: the wielder
         // Equip (Battle) and Soshi Neiru's equip price the attachment by its printed cost: they pay for that attachment too (Platinum Mine, The Shadow's Embrace pass issue #476 batch 6).
         if (command.AbilityId is "equip-battle" or "neiru-equip" && priced is not null && Definition(priced).Type is CardType.Follower or CardType.Item or CardType.Spell)
-            return new(priced, PaymentKind.Equip, ability);
+            return new(priced, PaymentKind.Equip, ability, command.PerformerId is not null && _state.Cards.TryGetValue(command.PerformerId, out var equipper) ? equipper : null); // issue #501: the wielder
         return source is null ? null : new(source, source.Zone == Zone.Hand ? PaymentKind.Play : PaymentKind.Action, ability);
     }
 }

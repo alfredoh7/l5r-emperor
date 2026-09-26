@@ -432,32 +432,9 @@ public sealed partial class MatchEngine
     // Unique/Singular (a card sharing a title with one the new controller already controls) refuse it, as they refuse any way of gaining control; an attachment of the unit the new controller
     // already has a copy of is discarded. The real owner is remembered (CardInstance.OriginalOwnerId) and every card returns to its owner's piles when it leaves play (TakeControl). A Personality at a
     // battlefield is then on the new controller's side (a card's side is its controller's), one at home in the new controller's home. Returns whether control changed.
-    private bool TakeControlOfPersonality(CardInstance personality, int controllerId, string via)
-    {
-        if (personality.OwnerId == controllerId || !InPlay(personality) || Definition(personality).Type != CardType.Personality) return false;
-        var name = Definition(personality).Name;
-        if (!LoyaltyAllowsControl(personality, Player(controllerId).Clan, controllerId))
-        {
-            Emit("controlRefused", $"{via}: {name} is Loyal and cannot be controlled by {Player(controllerId).Name}.", controllerId, personality.Id);
-            return false;
-        }
-        if ((Keyword(personality, "Unique") || Keyword(personality, "Singular")) && ControlsCopyOf(controllerId, Definition(personality).Name))
-        {
-            Emit("controlRefused", $"{via}: {Player(controllerId).Name} already controls a {name}.", controllerId, personality.Id);
-            return false;
-        }
-        TakeControl(personality, controllerId);
-        foreach (var attachment in Attachments(personality.Id).ToArray())
-        {
-            if ((Keyword(attachment, "Unique") || Keyword(attachment, "Singular")) && _state.Cards.Values.Any(c => c.OwnerId == controllerId && InPlay(c) && c.Id != attachment.Id && Definition(c).Name == Definition(attachment).Name))
-            {
-                DestroyAttachment(attachment);
-                continue;
-            }
-            TakeControl(attachment, controllerId);
-        }
-        return true;
-    }
+    // Issue #501: the whole-unit control change is TransferUnitControl (EmperorMechB.cs), shared by every take, give and return; a duplicate Unique/Singular attachment is now discarded (core rules).
+    private bool TakeControlOfPersonality(CardInstance personality, int controllerId, string via) =>
+        TransferUnitControl(personality, controllerId, via, checkLoyal: true, fromEffect: true);
 
     // ---- Sacrifice of Pawns: the decision, and the recruit of the Personality the search finds ---------------------------------------------------------------------------
 
@@ -604,7 +581,8 @@ public sealed partial class MatchEngine
     // ConsumeAdditionalActionGrant's condition: a grant with a PerformerId is spent only by an action that Personality performs (a printed action is performed by the card that prints it, an
     // Item's or Spell's by its wielder, a named "performing X" by X; a Strategy that names no performer is performed by no Personality at all).
     private bool PerformerGrantMatches(AdditionalActionGrant grant, GameCommand? command) =>
-        (grant.PerformerId is null || command is not null && ActionPerformingPersonality(command) is { } performer && performer.Id == grant.PerformerId) && BaseAbilityGrantMatches(grant, command); // issue #496: Honor Never Falls' base abilities only
+        (grant.PerformerId is null || command is not null && ActionPerformingPersonality(command) is { } performer && performer.Id == grant.PerformerId) && BaseAbilityGrantMatches(grant, command) // issue #496: Honor Never Falls' base abilities only
+        && MechAGrantMatches(grant, command); // issue #501 (EmperorMechA.cs): Inokuchi's Iaijutsu, Beyond the Line's Recon ability as a Battle action
 
     // ---- Retribution: an additional Attack Phase ----------------------------------------------------------------------------------------------------------------------
 
@@ -634,6 +612,7 @@ public sealed partial class MatchEngine
     // The Attack Phase (or the last of its additional ones) is over: the turn's own player is the active player again for the Dynasty Phase.
     private void FinishAttackPhaseEnd()
     {
+        if (FinishAramasuAttackPhase()) return; // Aramasu's Legacy (issue #501, EmperorMechA.cs): its Attack Phase ends inside the Action Phase, which resumes
         var turnPlayer = RemC.RetributionRoot >= 0 ? RemC.RetributionRoot : _state.ActivePlayerId;
         RemC.RetributionRoot = -1; RemC.RetributionAssigned = 0;
         R1.PerfectMoment = null; // its restrictions belong to that one Attack Phase (issue #492, rulings pass R1)
@@ -702,7 +681,7 @@ public sealed partial class MatchEngine
                 Emit("honorRedirected", $"{Player(RemC.RedirectToPlayer).Name} takes the Honor {(amount > 0 ? "gain" : "loss")} of {Math.Abs(amount)} from {reason} instead of {Player(playerId).Name} (Rhetoric).", RemC.RedirectToPlayer);
                 playerId = RemC.RedirectToPlayer;
             }
-            if (amount < 0 && RemC.NegateLossesActionKey == key)
+            if (amount < 0 && RemC.NegateLossesActionKey == key && !CurrentActionUnnegatable()) // issue #501: The Heir's Wrath's loss "will not be negated"
             {
                 Emit("honorLossNegated", $"{Player(playerId).Name}'s Honor loss from {reason} was negated (Solid Defense).", playerId);
                 return (playerId, 0);

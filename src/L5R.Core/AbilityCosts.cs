@@ -59,6 +59,9 @@ public static class CostVerbs
     public const string DestroyRegion = "destroy-region";
     /// <summary>Remove the subject Personality in play from the game, with his attachments discarded ("remove your performing unbowed Personality from the game:", issue #492 group F).</summary>
     public const string RemoveUnit = "remove-unit";
+    /// <summary>Discard the Imperial Favor ("Discard the Imperial Favor to ...", issue #501, EmperorMechE.cs): the acting player must control it (or discard a Favor token of Kyuden Otomo - exp's instead).
+    /// Names no card. Declared in Costs it is mandatory; as one of CostOptions it is the alternative ("bow him or discard the Imperial Favor"). Nothing can block it (it is not a bow or a destruction).</summary>
+    public const string DiscardFavor = "discard-favor";
 }
 
 /// <summary>One cost: <paramref name="Verb"/> (CostVerb.Bow or CostVerbs.*) applied to <paramref name="Subject"/> (CostSubject.*: the ability's
@@ -149,7 +152,7 @@ public sealed partial class MatchEngine
             if (cost.Subject != CostSubject.Wielder) continue;
             var wielder = CostSubjectCard(new CostOption(cost.Verb, cost.Verb, cost.Verb, cost.Subject), ability, command, source);
             Require(wielder is not null && InPlay(wielder), "This card must be attached to a Personality.");
-            if (cost.Verb == CostVerb.Bow && !CostExempt(cost, source) && !YorimiWaivesBow(ability, cost, source, wielder))
+            if (cost.Verb == CostVerb.Bow && !CostExempt(cost, source) && !YorimiWaivesBow(ability, cost, source, wielder) && !MomokoWaivesCost(command, cost.Verb)) // Isawa Momoko (issue #501)
                 Require(!wielder!.Bowed, $"{Definition(wielder).Name} is already bowed, so he cannot be bowed to pay this cost.");
             // Cursed Relic (issue #467): a Chi penalty is paid in full or not at all.
             if (cost.Verb == CostVerbs.ChiPenalty)
@@ -197,7 +200,8 @@ public sealed partial class MatchEngine
         if (ability.CostOptions is not null)
         {
             var option = ChosenCostOption(ability, command);
-            yield return (new ActionCost(option.Verb, option.Subject), CostSubjectCard(option, ability, command, source));
+            if (!MomokoWaivesCost(command, option.Verb)) // Isawa Momoko (issue #501)
+                yield return (new ActionCost(option.Verb, option.Subject), option.Verb == CostVerbs.DiscardFavor ? null : CostSubjectCard(option, ability, command, source)); // issue #501: the Favor names no card
         }
         foreach (var cost in ability.Costs ?? [])
         {
@@ -210,8 +214,9 @@ public sealed partial class MatchEngine
                 foreach (var slotCard in SlotCostCards(command, cost)) yield return (new ActionCost(CostVerb.Bow, cost.Subject), slotCard);
                 continue;
             }
-            var subject = cost.Verb is CostVerbs.LoseHonor or CostVerbs.DestroyLeftmostProvince or CostVerbs.ShuffleHand or CostVerbs.DiscardHand ? null : CostSubjectCard(new CostOption(cost.Verb, cost.Verb, cost.Verb, cost.Subject), ability, command, source);
+            var subject = cost.Verb is CostVerbs.LoseHonor or CostVerbs.DestroyLeftmostProvince or CostVerbs.ShuffleHand or CostVerbs.DiscardHand or CostVerbs.DiscardFavor ? null : CostSubjectCard(new CostOption(cost.Verb, cost.Verb, cost.Verb, cost.Subject), ability, command, source);
             if (CostExempt(cost, source, subject) || YorimiWaivesBow(ability, cost, source, subject)) continue; // Soshi Yorimi (issue #477, batch 4): ignored, so not planned.
+            if (MomokoWaivesCost(command, cost.Verb)) continue; // Isawa Momoko (issue #501): the action's non-destruction costs are ignored
             yield return (cost, subject);
         }
     }
@@ -224,6 +229,7 @@ public sealed partial class MatchEngine
         foreach (var cost in ability.Costs)
         {
             if (cost.UnlessInHand && source is { Zone: Zone.Hand }) continue;
+            if (MomokoWaivesCost(command, cost.Verb)) { NoteMomokoWaivedCost(command, cost.Verb); continue; } // Isawa Momoko (issue #501): the action's non-destruction costs are ignored
             if (cost.Subject == EmperorRemainingCAbilities.AllPerformingSlots) { foreach (var performing in PerformingSlotCards(command, ability).ToArray()) performing.Bowed = true; continue; } // issue #492, group C
             if (cost.Verb == CostVerbs.LoseHonor)
             {
@@ -233,6 +239,7 @@ public sealed partial class MatchEngine
                 continue;
             }
             if (cost.Verb == CostVerbs.ShuffleHand) { RemAShuffleHandIntoDeck(player, source); continue; }
+            if (cost.Verb == CostVerbs.DiscardFavor) continue; // issue #501: paid with the other Favor discards (DiscardImperialFavorCost, beside the Gold)
             // Contemplate the Void (issue #492): "discard your hand (even if empty)".
             if (cost.Verb == CostVerbs.DiscardHand) { foreach (var handId in player.Hand.ToArray()) DiscardFate(player, Card(handId)); continue; }
             // Capturing the Soul (issue #492): "bow ... 0 or more of your other performing Shugenja".

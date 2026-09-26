@@ -220,7 +220,9 @@ public sealed partial class MatchEngine
     /// rule that cannot be priced reports Error.</summary>
     private AbilityCost? AbilityGoldCost(GameCommand command)
     {
+        if (MechEPaymentDeclined(command)) return null; // Greasing the Wheels (issue #501, EmperorMechE.cs): "You may pay ..." declined -- nothing is paid.
         var cost = BaseAbilityGoldCost(command);
+        if (cost is not null && MomokoWaivesCost(command, MechAGoldVerb)) return null; // Isawa Momoko (issue #501): a Gold cost is one of the action's non-destruction costs
         if (cost is null || command.AbilityId is null || !AbilityCatalog.All.TryGetValue(command.AbilityId, out var ability) || ability.Cost is null) return cost;
         var source = command.CardId is not null && _state.Cards.TryGetValue(command.CardId, out var s) ? s : null;
         // Discipline (Mendon's ruling, issue #353): played from a discard pile, the Discipline cost must be paid BEFORE the action's other costs can
@@ -405,9 +407,10 @@ public sealed partial class MatchEngine
     {
         var ids = sourceIds ?? [];
         Require(ids.Distinct(StringComparer.Ordinal).Count() == ids.Length, "A Gold source cannot be used twice in one payment.");
-        var producers = Producers(playerId, paying).Select(c => c.Id).ToHashSet(StringComparer.Ordinal);
+        var producers = PaymentSourceIds(playerId, paying); // issue #501: the payment tokens too (EmperorMechE.cs)
         Require(ids.All(producers.Contains), "Every Gold source must be yours, in play, unbowed and able to produce Gold.");
-        RequirePaymentDiscards(playerId, ids, paying);
+        RequirePaymentTokens(ids, null);
+        RequirePaymentDiscards(playerId, ids.Where(id => !IsPaymentToken(id)).ToArray(), paying);
         Require(TrySplitPayment(playerId, lead, rest, ids, out _, out var restIds, paying) && (rest > 0 || restIds.Length == 0),
             $"This play needs its Discipline cost ({lead} Gold) paid first and then {rest} Gold for the action itself, each from its own sources (Gold does not carry over); the selected sources cannot do that.");
     }
@@ -428,7 +431,7 @@ public sealed partial class MatchEngine
         foreach (var first in PaymentOptions(playerId, lead, paying).Take(8))
             foreach (var second in PaymentOptionsExcluding(playerId, rest, first.SourceIds.ToHashSet(StringComparer.Ordinal), paying).Take(4))
                 options.Add(new([.. first.SourceIds, .. second.SourceIds], first.Produced + second.Produced, lead + rest, first.Excess + second.Excess));
-        return options.OrderBy(p => p.SourceIds.Count(id => Definition(Card(id)).GoldProduction == 0)).ThenBy(p => p.Excess).ThenBy(p => p.SourceIds.Length)
+        return options.OrderBy(p => p.SourceIds.Count(id => IsPaymentToken(id) || Definition(Card(id)).GoldProduction == 0)).ThenBy(p => p.Excess).ThenBy(p => p.SourceIds.Length)
             .ThenBy(p => string.Join(",", p.SourceIds), StringComparer.Ordinal).Take(24).ToArray();
     }
 
@@ -461,7 +464,8 @@ public sealed partial class MatchEngine
         var error = cost.Error ?? (cost.NeedsTarget ? cost.Basis : null);
         if (cost.Rule.Basis != GoldCostBasis.Variable)
             return new(cost.Amount, cost.Rule.Kind, cost.Basis, error,
-                error is not null ? [] : cost.LeadAmount > 0 ? SplitPaymentOptions(playerId, cost.LeadAmount, cost.Amount - cost.LeadAmount, paying) : PaymentOptionsExcluding(playerId, cost.Amount, exclude, paying));
+                error is not null ? [] : cost.LeadAmount > 0 ? SplitPaymentOptions(playerId, cost.LeadAmount, cost.Amount - cost.LeadAmount, paying) : PaymentOptionsExcluding(playerId, cost.Amount, exclude, paying),
+                Sources: PaymentSourcesFor(playerId, paying)); // issue #501
         return VariableGoldQuote(playerId, cost.Min ?? 0, cost.Max, cost.Amount, cost.Basis, error, paying);
     }
 
@@ -469,7 +473,7 @@ public sealed partial class MatchEngine
     /// each with the engine's suggested sources, so the acting player's own variable cost and the opposing player's payment share one shape.</summary>
     private GoldQuote VariableGoldQuote(int playerId, int min, int? cap, int chosen, string basis, string? error = null, PaymentSubject? paying = null)
     {
-        var production = Producers(playerId, paying).Sum(c => GoldProduced(c.Id, playerId, paying));
+        var production = Producers(playerId, paying).Sum(c => GoldProduced(c.Id, playerId, paying)) + MaxPaymentTokenProduction(playerId, paying); // issue #501: the best token of each card
         var max = Math.Max(min, Math.Min(cap ?? int.MaxValue, production));
         var byAmount = new Dictionary<int, PaymentOption[]>();
         for (var amount = min; amount <= max && error is null; amount++)
@@ -478,7 +482,7 @@ public sealed partial class MatchEngine
             if (options.Length > 0) byAmount[amount] = options;
         }
         var payments = error is null && byAmount.TryGetValue(chosen, out var suggested) ? suggested : [];
-        return new(chosen, GoldCostKind.Variable, basis, error, payments, min, max, byAmount);
+        return new(chosen, GoldCostKind.Variable, basis, error, payments, min, max, byAmount, PaymentSourcesFor(playerId, paying));
     }
 
     /// <summary>Wraps a purchase/recruit quote in the general shape the payment panel renders, so the
@@ -538,7 +542,8 @@ public sealed partial class MatchEngine
     private GoldQuote QuoteEquipGold(int playerId, CardInstance card, CardInstance target)
     {
         var (cost, basis, kind) = EquipGoldCost(playerId, card, target);
-        return new(cost, kind, basis, null, PaymentOptions(playerId, cost, new PaymentSubject(card, PaymentKind.Equip)));
+        var paying = new PaymentSubject(card, PaymentKind.Equip, Wielder: target); // issue #501: the wielder (Moto Rani - exp)
+        return new(cost, kind, basis, null, PaymentOptions(playerId, cost, paying), Sources: PaymentSourcesFor(playerId, paying));
     }
 
     /// <summary>A Region attached by a deck search (issue #312, Ikoma Shizuka: "attach it to one of your provinces, paying
@@ -554,6 +559,7 @@ public sealed partial class MatchEngine
     private GoldQuote? QuoteStrategyGold(int playerId, CardInstance card)
     {
         var def = Definition(card);
-        return def.GoldCost > 0 ? new(def.GoldCost, GoldCostKind.Fixed, $"{def.Name} cost {def.GoldCost}", null, PaymentOptions(playerId, def.GoldCost, new PaymentSubject(card, PaymentKind.Play))) : null;
+        return def.GoldCost > 0 ? new(def.GoldCost, GoldCostKind.Fixed, $"{def.Name} cost {def.GoldCost}", null, PaymentOptions(playerId, def.GoldCost, new PaymentSubject(card, PaymentKind.Play)),
+            Sources: PaymentSourcesFor(playerId, new PaymentSubject(card, PaymentKind.Play))) : null; // issue #501
     }
 }

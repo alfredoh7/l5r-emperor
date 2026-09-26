@@ -662,6 +662,20 @@ public static class CardCatalog
             .Concat(PublishedContent.FollowerWave32.Cards) // Emperor Edition follow-ups (issue #498): Enslaved Djinn
             .Concat(PublishedContent.ItemWave17.Cards) // Emperor Edition follow-ups (issue #498): Celestial Sword of the Dragon - exp
             .Concat(PublishedContent.PersonalityWave80.Cards) // Emperor Edition follow-ups (issue #498): Asako Chukage
+            .Concat(PublishedContent.PersonalityWave86.Cards) // issue #501, mechanics group B: Goju Asuka, Shadow Dragon - exp2, The Dark Naga, Yoritomo Sachina - exp
+            .Concat(PublishedContent.StrategyWave72.Cards) // issue #501, mechanics group B: Black Marketeering, Only a Shadow
+            .Concat(PublishedContent.StrategyWave69.Cards) // Issue #501, mechanics group A: Beyond the Line, One Action, Two Strikes, String of Victories
+            .Concat(PublishedContent.PersonalityWave83.Cards) // Issue #501, mechanics group A: Isawa Momoko, Mirumoto Inokuchi
+            .Concat(PublishedContent.StrongholdWave23.Cards) // Issue #501, mechanics group A: Aramasu's Legacy
+            .Concat(PublishedContent.PersonalityWave89.Cards) // Emperor Edition mechanics group C (issue #501): Daigotsu Kazuko, En'you, Ikoma Shika - exp, Isawa Sakonoko
+            .Concat(PublishedContent.StrongholdWave29.Cards) // Emperor Edition mechanics group C (issue #501): The Marshalling Fields
+            .Concat(PublishedContent.StrategyWave75.Cards) // Emperor Edition mechanics group C (issue #501): Ascending the Ranks, Fury of a Mob
+            .Concat(PublishedContent.RegionWave19.Cards) // Emperor Edition mechanics group C (issue #501): Temple of the Seven Fortunes
+            .Concat(PublishedContent.PersonalityWave95.Cards) // Emperor Edition mechanics group E (issue #501): Kakita Kae, Moto Rani - exp, Yoritomo Singh - exp2, Zlkyt
+            .Concat(PublishedContent.StrategyWave81.Cards) // Emperor Edition mechanics group E (issue #501): Greasing the Wheels, The Heir's Wrath, The Host's Advantage
+            .Concat(PublishedContent.HoldingWave28.Cards) // Emperor Edition mechanics group E (issue #501): Seaside Bazaar
+            .Concat(PublishedContent.PersonalityWave92.Cards) // Issue #501, mechanics group D: Daidoji Narizane, Daigotsu Yajinden - exp3
+            .Concat(PublishedContent.StrategyWave78.Cards) // Issue #501, mechanics group D: Broken Cipher, Indecision, Amazing Feat
             .ToDictionary(c => c.Id, StringComparer.Ordinal);
     }
 }

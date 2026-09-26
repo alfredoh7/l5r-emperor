@@ -186,6 +186,7 @@ public sealed partial class MatchEngine
     // Called after the destruction has happened, so a Makito destroyed himself is out of play and gains nothing.
     private void AfterCardDestroyed(CardInstance destroyed)
     {
+        ControlReturnsOnDestruction(destroyed); // issue #501 (EmperorMechB.cs): Sachina's return, the moment she is destroyed.
         foreach (var makito in _state.Cards.Values.Where(c => c.Id != destroyed.Id && InPlay(c) && Definition(c).Effect == EmperorThreeSAbilities.MakitoEffect && Definition(c).Type == CardType.Personality).ToArray())
         {
             Emit("makitoGrows", $"{Definition(makito).Name}: {Definition(destroyed).Name} was destroyed, so he gets +1F.", makito.OwnerId, makito.Id);

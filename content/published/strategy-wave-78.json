@@ -1,0 +1,78 @@
+{
+  "Profile": "strategy-wave-78",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-340",
+      "Name": "Amazing Feat",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Bow your performing Artisan Personality and target a non-Unique Personality: Create a Personality with the same base Force, Chi, Personal Honor and keywords as the targeted Personality, who permanently copies all his base abilities except those that copy abilities. Remove the created Personality from the game when your next turn begins.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-340.jpg",
+      "Keywords": [],
+      "Focus": 4,
+      "Abilities": [
+        "amazing-feat-create"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-1151",
+      "Name": "Broken Cipher",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "As a Focus Effect: You may transfer a Spell from your Personality in this duel to another of your Shugenja at the same location.\nBattle: If you have not put cards into your hand this phase and you have attached a Spell this turn: Draw two cards.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1151.jpg",
+      "Keywords": [],
+      "Focus": 1,
+      "Abilities": [
+        "broken-cipher-focus",
+        "broken-cipher-draw"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-3736",
+      "Name": "Indecision",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After an action resolves, if its player has resolved two or more actions which put cards into his hand this phase: He discards two cards.\nBattle: If any enemy units are at the current battlefield, choose your performing Personality: Move him there. Straighten him if he moved.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-3736.jpg",
+      "Keywords": [],
+      "Focus": 4,
+      "Abilities": [
+        "indecision-discard",
+        "indecision-move"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

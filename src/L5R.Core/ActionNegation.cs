@@ -72,6 +72,7 @@ public sealed partial class MatchEngine
         else if (!ability.FromDiscard) SpendHandPlayedCard(player, source);
         if (playedFromDiscard) RemoveFromGame(source!);
         if (!consumedGrant && ForfeitsAdditionalActions(ability)) _state.AdditionalActions.RemoveAll(g => g.PlayerId == player.Id && Forfeitable(g));
+        AfterMechAActionResolved(command.AbilityId!, player.Id, source?.Id); // issue #501: a negated action was still taken (Beyond the Line's "If you do, draw a card after the action's resolution")
         if (OpenOverconfidentDrawWindow(1 - player.Id)) return;
         NextAction(player.Id, ForfeitsAdditionalActions(ability) && _state.AdditionalActions.Any(g => g.PlayerId == player.Id && Forfeitable(g)));
     }

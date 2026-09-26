@@ -2622,4 +2622,32 @@ public static class PublishedContent
     public static PublishedSnapshot ItemWave17 { get; } = Load("L5R.Published.ItemWave17.json", "item-wave-17", requireDecks: false);
     /// <summary>Personality wave 80 (Emperor Edition follow-ups, issue #498): Asako Chukage (Forgotten Legacy printing).</summary>
     public static PublishedSnapshot PersonalityWave80 { get; } = Load("L5R.Published.PersonalityWave80.json", "personality-wave-80", requireDecks: false);
+    /// <summary>Personality wave 86 (issue #501, mechanics group B: control transfer): Goju Asuka, Shadow Dragon - exp2, The Dark Naga, Yoritomo Sachina - exp.</summary>
+    public static PublishedSnapshot PersonalityWave86 { get; } = Load("L5R.Published.PersonalityWave86.json", "personality-wave-86", requireDecks: false);
+    /// <summary>Strategy wave 72 (issue #501, mechanics group B: control transfer): Black Marketeering, Only a Shadow.</summary>
+    public static PublishedSnapshot StrategyWave72 { get; } = Load("L5R.Published.StrategyWave72.json", "strategy-wave-72", requireDecks: false);
+    /// <summary>Strategy wave 69 (issue #501, mechanics group A): Beyond the Line, One Action, Two Strikes, String of Victories (package_strategy_wave_69.py).</summary>
+    public static PublishedSnapshot StrategyWave69 { get; } = Load("L5R.Published.StrategyWave69.json", "strategy-wave-69", requireDecks: false);
+    /// <summary>Personality wave 83 (issue #501, mechanics group A): Isawa Momoko, Mirumoto Inokuchi (package_personality_wave_83.py).</summary>
+    public static PublishedSnapshot PersonalityWave83 { get; } = Load("L5R.Published.PersonalityWave83.json", "personality-wave-83", requireDecks: false);
+    /// <summary>Stronghold wave 23 (issue #501, mechanics group A): Aramasu's Legacy (package_stronghold_wave_23.py).</summary>
+    public static PublishedSnapshot StrongholdWave23 { get; } = Load("L5R.Published.StrongholdWave23.json", "stronghold-wave-23", requireDecks: false);
+    /// <summary>Personality wave 89 (Emperor Edition mechanics, issue #501, group C): Daigotsu Kazuko, En'you, Ikoma Shika - exp, Isawa Sakonoko.</summary>
+    public static PublishedSnapshot PersonalityWave89 { get; } = Load("L5R.Published.PersonalityWave89.json", "personality-wave-89", requireDecks: false);
+    /// <summary>Stronghold wave 29 (Emperor Edition mechanics, issue #501, group C): The Marshalling Fields.</summary>
+    public static PublishedSnapshot StrongholdWave29 { get; } = Load("L5R.Published.StrongholdWave29.json", "stronghold-wave-29", requireDecks: false);
+    /// <summary>Strategy wave 75 (Emperor Edition mechanics, issue #501, group C): Ascending the Ranks, Fury of a Mob.</summary>
+    public static PublishedSnapshot StrategyWave75 { get; } = Load("L5R.Published.StrategyWave75.json", "strategy-wave-75", requireDecks: false);
+    /// <summary>Region wave 19 (Emperor Edition mechanics, issue #501, group C): Temple of the Seven Fortunes.</summary>
+    public static PublishedSnapshot RegionWave19 { get; } = Load("L5R.Published.RegionWave19.json", "region-wave-19", requireDecks: false);
+    /// <summary>Personality wave 95 (Emperor Edition mechanics group E, issue #501): Kakita Kae, Moto Rani - exp, Yoritomo Singh - exp2, Zlkyt.</summary>
+    public static PublishedSnapshot PersonalityWave95 { get; } = Load("L5R.Published.PersonalityWave95.json", "personality-wave-95", requireDecks: false);
+    /// <summary>Strategy wave 81 (Emperor Edition mechanics group E, issue #501): Greasing the Wheels, The Heir's Wrath, The Host's Advantage.</summary>
+    public static PublishedSnapshot StrategyWave81 { get; } = Load("L5R.Published.StrategyWave81.json", "strategy-wave-81", requireDecks: false);
+    /// <summary>Holding wave 28 (Emperor Edition mechanics group E, issue #501): Seaside Bazaar.</summary>
+    public static PublishedSnapshot HoldingWave28 { get; } = Load("L5R.Published.HoldingWave28.json", "holding-wave-28", requireDecks: false);
+    /// <summary>Personality wave 92 (issue #501, mechanics group D): Daidoji Narizane and Daigotsu Yajinden - exp3 (EmperorMechD.cs).</summary>
+    public static PublishedSnapshot PersonalityWave92 { get; } = Load("L5R.Published.PersonalityWave92.json", "personality-wave-92", requireDecks: false);
+    /// <summary>Strategy wave 78 (issue #501, mechanics group D): Broken Cipher, Indecision and Amazing Feat (EmperorMechD.cs).</summary>
+    public static PublishedSnapshot StrategyWave78 { get; } = Load("L5R.Published.StrategyWave78.json", "strategy-wave-78", requireDecks: false);
 }

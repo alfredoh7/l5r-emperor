@@ -23,6 +23,7 @@ public sealed partial class MatchEngine
     // A card went into a player's hand: while an action is resolving, it is one that "put a card into his hand".
     private void NoteCardIntoHand(int playerId)
     {
+        NoteCardIntoHandThisPhase(playerId); // Broken Cipher (issue #501, EmperorMechD.cs): any card put into a hand, during an action or not.
         if (_runningCommand is null && _state.PendingAttack is null && _state.PendingDuel is null) return;
         if (!_state.CurrentActionHandRecipients.Contains(playerId)) _state.CurrentActionHandRecipients.Add(playerId);
     }
