@@ -68,6 +68,7 @@ internal static partial class EmperorP5Tests
         ("Never Enough Soldiers: revealed it stays until its owner's Events Phase three turns from now; meanwhile he may Equip a Follower from his discard pile to a Personality at home, paying its cost; without the Event, not listed", NesCard),
         ("Seek the Stain: attached from the discard pile to a Void Shugenja at home (Equip Limited) or an opposed Void Shugenja at the battle (Equip Battle), not to a non-Void Shugenja; its Open bows it to give another player's Personality Kolat, Ninja or Shadowlands", SeekStainCard),
         .. ZoneTests,
+        .. HiddenTests,
     ]);
 
     // ---- published shape --------------------------------------------------------------------------------------------------------------------------------------------------------------------

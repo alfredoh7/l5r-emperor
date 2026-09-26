@@ -45,6 +45,15 @@
     "image_sha256": "5fd45765d55337c4df34a390f3c2d7e66fc8016bc72392641cf6562ece73565c"
   },
   {
+    "card_id": "oracle-l5r-5939",
+    "printing_set": [
+      "Forgotten Legacy"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=5939",
+    "image_path": "assets/reference/oracle/forgotten-legacy/webp/oracle-l5r-5939-printing-1-image-1.webp",
+    "image_sha256": "1da5960754fcc73662f0317d7bfe7207848feb767dc3bdb5a97fe03cf023fd13"
+  },
+  {
     "card_id": "oracle-l5r-6316",
     "printing_set": [
       "Embers of War"
@@ -52,6 +61,24 @@
     "source_url": "https://oracleofthevoid.com/#cardid=6316",
     "image_path": "assets/reference/oracle/embers-of-war/webp/oracle-l5r-6316-printing-1-image-1.webp",
     "image_sha256": "afb0ffdb423b969670d8ba1894f40147746d55e050e1a4104662ae2487202b62"
+  },
+  {
+    "card_id": "oracle-l5r-6513",
+    "printing_set": [
+      "Embers of War"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=6513",
+    "image_path": "assets/reference/oracle/embers-of-war/webp/oracle-l5r-6513-printing-1-image-1.webp",
+    "image_sha256": "5b9d41cf7b7cb41fdec0314e0a7c6411356c8d6e02fc963af6ef25caf0ea86df"
+  },
+  {
+    "card_id": "oracle-l5r-6526",
+    "printing_set": [
+      "Embers of War"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=6526",
+    "image_path": "assets/reference/oracle/embers-of-war/webp/oracle-l5r-6526-printing-1-image-1.webp",
+    "image_sha256": "c4631183f62772367b348da7b03a570dcd06c14e174e4e2efe411903d83608d3"
   },
   {
     "card_id": "oracle-l5r-7972",
@@ -79,6 +106,15 @@
     "source_url": "https://oracleofthevoid.com/#cardid=9939",
     "image_path": "assets/reference/oracle/the-shadow-s-embrace/webp/oracle-l5r-9939-printing-1-image-1.webp",
     "image_sha256": "63662d0ea3dfa327b0932fef8e5aa089c1a4779e2e5ed7e5ddb77e302458d0bd"
+  },
+  {
+    "card_id": "oracle-l5r-10155",
+    "printing_set": [
+      "Seeds of Decay"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10155",
+    "image_path": "assets/reference/oracle/seeds-of-decay/webp/oracle-l5r-10155-printing-1-image-1.webp",
+    "image_sha256": "3f433d3d835bd83186b76fdec3b11d28744a04c06630659a81b851141e8d30eb"
   },
   {
     "card_id": "oracle-l5r-10178",

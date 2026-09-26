@@ -677,12 +677,13 @@ public static class CardCatalog
             .Concat(PublishedContent.PersonalityWave92.Cards) // Issue #501, mechanics group D: Daidoji Narizane, Daigotsu Yajinden - exp3
             .Concat(PublishedContent.StrategyWave78.Cards) // Issue #501, mechanics group D: Broken Cipher, Indecision, Amazing Feat
             .Concat(PublishedContent.PersonalityWave112.Cards) // Issue #503, pass group P5: Hida Yamadera, Kakita Nara, Raido no Oni, Shiba Jouta - exp, Tokiko, Daigotsu Yutaka
-            .Concat(PublishedContent.StrategyWave98.Cards) // Issue #503, pass group P5: Disrupting Communication, Economic Repercussions, Headbutt, Inciting Mistrust, Perplexing Guests, The Bite of Winter
+            .Concat(PublishedContent.StrategyWave98.Cards) // Issue #503, pass group P5: Disrupting Communication, Economic Repercussions, Headbutt, Inciting Mistrust, Perplexing Guests, The Bite of Winter and eight more (EmperorP5*.cs)
             .Concat(PublishedContent.ItemWave34.Cards) // Issue #503, pass group P5: Tsubute
-            .Concat(PublishedContent.SpellWave42.Cards) // Issue #503, pass group P5: Seek the Stain
+            .Concat(PublishedContent.SpellWave42.Cards) // Issue #503, pass group P5: Seek the Stain, Step Through the Void
             .Concat(PublishedContent.EventWave25.Cards) // Issue #503, pass group P5: Never Enough Soldiers, Starting on the Path
             .Concat(PublishedContent.CelestialWave26.Cards) // Issue #503, pass group P5: Blessings of the Shi-Tien Yen-Wang
             .Concat(PublishedContent.StrongholdWave46.Cards) // Issue #503, pass group P5: The Plain of Glass, The New Foundries
+            .Concat(PublishedContent.HoldingWave45.Cards) // Issue #503, pass group P5: Stolen Merchandise
             .ToDictionary(c => c.Id, StringComparer.Ordinal);
     }
 }

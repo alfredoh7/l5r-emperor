@@ -42,7 +42,7 @@ public sealed partial class MatchEngine
             BuildBattleStepView(),
             // Deck search (issue #312): the deck viewer is private to the searcher; the shown-cards record is public.
             BuildSearchView(playerId),BuildShownCards(),BuildLookView(playerId),BuildCopyView(playerId),BuildEitherOrView(playerId),BuildOpponentPaymentView(playerId),
-            _state.LastDuel is null?null:Copy(_state.LastDuel),BuildProvinceSights(playerId),BuildBattlefieldViews());
+            _state.LastDuel is null?null:Copy(_state.LastDuel),BuildProvinceSights(playerId),BuildBattlefieldViews(),BuildHandSights(playerId)); // issue #503: hand sights
     }
 
     private CardView ViewCard(CardInstance card,bool visible=true)

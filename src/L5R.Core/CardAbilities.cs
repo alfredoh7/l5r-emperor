@@ -6061,7 +6061,7 @@ public sealed partial class MatchEngine
         // Alternative cost (issue #337): the way the acting player pays the non-Gold cost is part of the command, and payable.
         ValidateCostOption(ability, command, source);
         ValidateWielderCosts(ability, command, source);
-        Require(command.Choice is null || command.AbilityId is not null && (AttackCompareOptions(command.AbilityId) is not null || MechEChoiceOptions(command.AbilityId) is not null), "Choices are resolved by a separate decision command."); // issue #492, ruling R5: the "may compare" choice rides on the command; issue #501: Greasing the Wheels' pay-or-straighten
+        Require(command.Choice is null || command.AbilityId is not null && (AttackCompareOptions(command.AbilityId) is not null || MechEChoiceOptions(command.AbilityId) is not null || P5AllowsChoice(command.AbilityId)), "Choices are resolved by a separate decision command."); // issue #492, ruling R5: the "may compare" choice rides on the command; issue #501: Greasing the Wheels' pay-or-straighten
         // Goju House Guard (issue #192): the only current DeckPosition consumer, so this stays a
         // per-id check rather than a generic AbilityDefinition flag until a second card needs it.
         Require(id == "goju-house-guard-return" ? command.DeckPosition is "Top" or "Bottom" : command.DeckPosition is null,
@@ -6094,6 +6094,7 @@ public sealed partial class MatchEngine
         }
         // Hidden Falls Dojo (Stronghold pass, issue #486 batch 1): "Target one or two provinces" -- the Defender's, the provinces a battlefield will sit at.
         else if (ability.Target == EmperorStrongholdBatch1Abilities.HiddenFallsTarget) ValidateHiddenFallsTargets(command);
+        else if (ability.Target == EmperorP5HiddenAbilities.FaceDownProvinceCards) ValidatePettyTargets(command); // issue #503: Petty Squabbles (EmperorP5Hidden.cs)
         // Consecration (Emperor Edition remaining-cards pass, issue #492, group E): "one or two of your provinces".
         else if (ability.Target == EmperorRemainingEAbilities.OwnProvincesTarget) ValidateOwnProvinceSet(command, player);
         // Ring of Earth (issue #194): "give A province +3 or -3 strength" -- either side's own,
@@ -10868,6 +10869,12 @@ public sealed partial class MatchEngine
             // is actually offered instead of silently requiring AtBattle year-round).
             var actingAsBattle = ability.Timing == "Battle" || ability.Timing == "BattleOrOpen" && _state.Phase == Phase.Battle || mechAAsBattle;
             // Hidden Falls Dojo (Stronghold pass, issue #486 batch 1): one offered action per set of one or two provinces (a province set is not a card, so it is enumerated here).
+            // Petty Squabbles and Stolen Merchandise (issue #503, EmperorP5Hidden.cs): one offered action per set of face-down province cards / per Holding and thing to copy.
+            if (HasP5CustomOptions(id))
+            {
+                foreach (var option in P5CustomOptions(id, ability, source, playerId)) yield return option;
+                continue;
+            }
             if (ability.Target == EmperorStrongholdBatch1Abilities.HiddenFallsTarget)
             {
                 foreach (var option in HiddenFallsOptions(id, ability, source, playerId)) yield return option;
@@ -10986,7 +10993,8 @@ public sealed partial class MatchEngine
                 : MechCCostCardChoices(id, player, source) ?? P5CostCardChoices(id, player, source) /* issue #503: The New Foundries */ ?? [null]; // Emperor Edition mechanics group C (issue #501): one offered action per card an optional cost may spend.
             // "You may compare it against ..." (issue #492, ruling R5): one offered action per thing the player may compare against; the choice rides on the command.
             string?[] compareChoices = AttackCompareOptions(id) is { } compareOptions ? compareOptions.Select(o => (string?)o.Key).ToArray()
-                : MechEChoiceOptions(id) is { } mechEChoices ? mechEChoices.Select(o => (string?)o.Key).ToArray() : [null]; // issue #501: Greasing the Wheels' pay-or-straighten
+                : MechEChoiceOptions(id) is { } mechEChoices ? mechEChoices.Select(o => (string?)o.Key).ToArray()
+                : P5ChoiceOptions(id, playerId) is { } p5Choices ? p5Choices.Select(o => (string?)o.Key).ToArray() : [null]; // issue #503: Learning's keyword // issue #501: Greasing the Wheels' pay-or-straighten
             foreach (var performer in performers)
             foreach (var costOption in costOptions)
             foreach (var createChoice in createChoices)
@@ -11101,7 +11109,7 @@ public sealed partial class MatchEngine
                     ? quotes.Where(q => q.Command.TargetId is not null && q.Quote is not null).GroupBy(q => q.Command.TargetId!).ToDictionary(g => g.Key, g => g.First().Quote!) : null;
                 var label = AbilityOptionLabel(id, ability, performer, source, costOption) + (createChoice is null ? "" : $" · {createChoice.Name}")
                     + (shownChoice is null ? "" : $" · {MechCCostCardVerb(id) ?? P5CostCardVerb(id) ?? "shows"} {Definition(Card(shownChoice)).Name} ({shownChoice})")
-                    + (compareChoice is null ? "" : AttackCompareOptions(id) is { } compareLabels ? $" · compare against {compareLabels.First(o => o.Key == compareChoice).Label}" : $" · {MechEChoiceOptions(id)!.First(o => o.Key == compareChoice).Label}")
+                    + (compareChoice is null ? "" : AttackCompareOptions(id) is { } compareLabels ? $" · compare against {compareLabels.First(o => o.Key == compareChoice).Label}" : $" · {(MechEChoiceOptions(id) ?? P5ChoiceOptions(id, playerId))!.First(o => o.Key == compareChoice).Label}")
                     + (provinceOwner is int owner ? ability.Target == "player" ? (owner == playerId ? " · you" : " · your opponent") : (owner == playerId ? " · your Province" : " · an enemy Province") : "");
                 yield return new("useAbility", label, legal.Count > 0, legal.Count > 0 ? null : error ?? "No legal target or performer.",
                     legal.FirstOrDefault(), source?.Id, ability.Target == "provinces" ? provinces : legal.Where(c => c.TargetId is not null).Select(c => c.TargetId!).Distinct().ToArray(),

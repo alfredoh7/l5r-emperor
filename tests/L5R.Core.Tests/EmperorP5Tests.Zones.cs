@@ -38,7 +38,6 @@ internal static partial class EmperorP5Tests
         Card(TwoFold, CardType.Strategy, "Two-Fold Virtue", "p5-two-fold-virtue");
         Eq(CardCatalog.Get(TwoFold).GoldCost, 3, "Two-Fold Virtue costs 3 Gold");
         Card(PriceOfHonor, CardType.Strategy, "The Price of Honor", "p5-price-of-honor");
-        Manifest("strategy-wave-98", Headbutt, Disrupting, Bite, Econ, Guests, Mistrust, Doubts, Riddle, TwoFold, PriceOfHonor);
     }
 
     private static void FoundriesCard()

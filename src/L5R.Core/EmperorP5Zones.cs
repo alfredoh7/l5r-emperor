@@ -76,7 +76,7 @@ public static class EmperorP5ZoneAbilities
         // hand. If he does, you may discard a card from it. If he does not choose this, his Personality will not be affected by the rulebook seppuku action."
         all[PriceOfHonor] = new("Limited", "Choose your performing Courtier and target another player's dishonorable Personality: The player may show you his hand. If he does, you may discard a card from it. If he does not choose this, his Personality will not be affected by the rulebook seppuku action",
             "enemy-personality", Performer: "own-personality-with-keyword", RequiredKeywords: ["Courtier"], TargetMustBe: TargetStatus.IsDishonorable);
-        return all;
+        return all.AddEmperorP5Hidden(); // EmperorP5Hidden.cs
     }
 }
 
@@ -213,9 +213,15 @@ public sealed partial class MatchEngine
         Emit("removedFromGame", $"{Definition(source).Name}: {Definition(shugenja).Name} was removed from the game with his attachments; his unit returns before this turn ends.", shugenja.OwnerId, shugenja.Id);
     }
 
-    // The top of EndTurn ("before this turn ends"): every stepped unit re-enters play at home, whole, unbowed, ignoring costs, entering-play effects and restrictions.
+    // The top of EndTurn ("before this turn ends"): every stepped unit re-enters play at home, whole, unbowed, ignoring costs, entering-play effects and restrictions. Stolen Merchandise's copied
+    // Gold-producing trait ends with the turn too.
     private void ReturnSteppedUnits()
     {
+        foreach (var stolen in P5.StolenTraits.ToArray())
+        {
+            P5.StolenTraits.Remove(stolen);
+            if (_state.Cards.TryGetValue(stolen.CardId, out var holding)) holding.Printed = null;
+        }
         foreach (var stepped in P5.SteppedUnits.ToArray())
         {
             P5.SteppedUnits.Remove(stepped);
@@ -291,22 +297,23 @@ public sealed partial class MatchEngine
     private bool SeppukuBarredByPriceOfHonor(CardInstance card) => P5.SeppukuBars.Any(b => b.CardId == card.Id && b.Turn == _state.TurnNumber);
 
     private string? P5EitherOrPrompt(PendingEitherOr p, string source, string affected) =>
-        p.SpecId == EmperorP5Specs.PriceShowHand ? $"{source}: show your hand to {Player(p.ActingPlayerId).Name} (who may discard a card from it), or {affected} will not be affected by the rulebook seppuku action this turn." : null;
+        p.SpecId == EmperorP5Specs.PriceShowHand ? $"{source}: show your hand to {Player(p.ActingPlayerId).Name} (who may discard a card from it), or {affected} will not be affected by the rulebook seppuku action this turn." : P5HiddenEitherOrPrompt(p, source, affected);
 
     private EitherOrOption[]? P5EitherOrOptions(PendingEitherOr p, CardInstance? affected) =>
-        p.SpecId != EmperorP5Specs.PriceShowHand ? null :
+        p.SpecId != EmperorP5Specs.PriceShowHand ? P5HiddenEitherOrOptions(p, affected) :
         [
             new("show", "Show your hand", $"{Player(p.ActingPlayerId).Name} sees your hand and may discard a card from it.", EitherOrKind.Avoid, 0, true, null),
             new("refuse", "Do not show it", $"{(affected is null ? "The Personality" : Definition(affected).Name)} will not be affected by the rulebook seppuku action this turn.", EitherOrKind.Accept, 0, true, null)
         ];
 
-    private bool ApplyP5EitherOr(PendingEitherOr p, EitherOrOption option, PlayerState decider, CardInstance? affected)
+    private bool ApplyP5EitherOr(PendingEitherOr p, EitherOrOption option, PlayerState decider, CardInstance? affected, string[]? sourceIds)
     {
-        if (p.SpecId != EmperorP5Specs.PriceShowHand) return false;
+        if (p.SpecId != EmperorP5Specs.PriceShowHand) return ApplyP5HiddenEitherOr(p, option, decider, affected, sourceIds);
         var source = Card(p.SourceCardId);
         if (option.Key == "show")
         {
             Emit("eitherOrChosen", $"{decider.Name} showed his hand to {Player(p.ActingPlayerId).Name} ({Definition(source).Name}).", decider.Id, source.Id);
+            SeeHandCards(p.ActingPlayerId, decider.Id, decider.Hand.ToArray(), Definition(source).Name); // private to the acting player (MatchView.HandSights)
             BeginDeciderChoice(EmperorP5Specs.PriceDiscard, p.Command!, p.ConsumedGrant, p.PlayedFromDiscard, p.OpponentHonorBefore, (p.BowedBefore ?? []).ToHashSet(StringComparer.Ordinal), p.PreExistingGrants);
         }
         else
@@ -332,24 +339,26 @@ public sealed partial class MatchEngine
             EmperorP5ZoneAbilities.SharesKeywordWithPerformer => personality && command.PerformerId is { } henshinId && _state.Cards.TryGetValue(henshinId, out var henshin)
                 && CurrentKeywordList(card).Intersect(CurrentKeywordList(henshin), StringComparer.Ordinal).Any(),
             EmperorP5ZoneAbilities.OwnParagon => personality && own && Keyword(card, "Paragon"),
-            _ => false
+            _ => P5HiddenTargetAllows(target, command, player, source, card) // EmperorP5Hidden.cs
         };
     }
 
-    private static bool IsP5ZoneOutOfPlayTarget(string target) => target is EmperorP5ZoneAbilities.OwnSpellInHand or EmperorP5ZoneAbilities.UnderAirOrWaterSpell;
+    private static bool IsP5ZoneOutOfPlayTarget(string target) => target is EmperorP5ZoneAbilities.OwnSpellInHand or EmperorP5ZoneAbilities.UnderAirOrWaterSpell || IsP5HiddenOutOfPlayTarget(target);
 
     private void ValidateP5ZoneOutOfPlayTarget(string target, PlayerState player, CardInstance card)
     {
-        if (target == EmperorP5ZoneAbilities.UnderAirOrWaterSpell)
+        if (IsP5HiddenOutOfPlayTarget(target)) ValidateP5HiddenOutOfPlayTarget(player, card);
+        else if (target == EmperorP5ZoneAbilities.UnderAirOrWaterSpell)
             Require(card.OwnerId == player.Id && card.Zone == Zone.Underneath && Definition(card).Type == CardType.Spell && (Keyword(card, "Air") || Keyword(card, "Water")), "Choose an Air or Water Spell under this card.");
         else Require(card.OwnerId == player.Id && card.Zone == Zone.Hand && player.Hand.Contains(card.Id) && Definition(card).Type == CardType.Spell, "Choose a Spell in your hand.");
     }
 
     private string?[]? P5ZoneCandidates(string target, int playerId) =>
-        target == EmperorP5ZoneAbilities.OwnSpellInHand ? Player(playerId).Hand.Where(h => Definition(Card(h)).Type == CardType.Spell).Cast<string?>().ToArray() : null;
+        target == EmperorP5ZoneAbilities.OwnSpellInHand ? Player(playerId).Hand.Where(h => Definition(Card(h)).Type == CardType.Spell).Cast<string?>().ToArray() : P5HiddenCandidates(target, playerId);
 
     private void ValidateEmperorP5Zones(string id, AbilityDefinition ability, GameCommand command, PlayerState player, CardInstance? source)
     {
+        ValidateEmperorP5Hidden(id, ability, command, player, source); // EmperorP5Hidden.cs
         switch (id)
         {
             case EmperorP5ZoneAbilities.FoundriesAttack:
@@ -442,7 +451,7 @@ public sealed partial class MatchEngine
                 return true;
             }
             default:
-                return null;
+                return RunEmperorP5Hidden(id, ability, command, player, source, target, consumedGrant, playedFromDiscard, opponentHonorBeforeBattleAction, bowedBeforeAction, preExistingGrants); // EmperorP5Hidden.cs
         }
     }
 

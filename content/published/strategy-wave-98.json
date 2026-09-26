@@ -125,6 +125,30 @@
       "Effect": "none"
     },
     {
+      "Id": "oracle-l5r-5939",
+      "Name": "Petty Squabbles",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Target one or two face-down cards in provinces: Turn them face-up.\nBattle/Open: Target an attachment owned by another player: He may pay 4 Gold. If he did not, return it to its owner's hand.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-5939.jpg",
+      "Keywords": [],
+      "Focus": 3,
+      "Abilities": [
+        "p5-petty-reveal",
+        "p5-petty-return"
+      ],
+      "Effect": "none"
+    },
+    {
       "Id": "oracle-l5r-6316",
       "Name": "Riddle of Rebirth",
       "Type": "Strategy",
@@ -149,6 +173,55 @@
       "Focus": 0,
       "Abilities": [
         "p5-riddle-of-rebirth"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-6513",
+      "Name": "Scouting the Pass",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After engaging, if you are the Attacker, choose your performing unbowed Scout at the current battlefield: You have Reconnaissance there. Choose and look at two cards in the Defender's hand. You have the first chance to take a Battle action in this battle, which must be performed by that Scout.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6513.jpg",
+      "Keywords": [
+        "Recon"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "p5-scouting-pass"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-6526",
+      "Name": "Searching for Answers",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "As a Focus Effect: After this duel ends, if your Personality won it, gain 1 Honor.\nBattle: If you are the Defender: Look at the top four cards of your Dynasty deck. If one of them is a Personality, you may put him into play at the current battlefield, ignoring Gold cost. Put the remaining cards back in any order. Discard him after the battle ends.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6526.jpg",
+      "Keywords": [],
+      "Focus": 4,
+      "Abilities": [
+        "p5-searching-focus",
+        "p5-searching-look"
       ],
       "Effect": "none"
     },
@@ -222,6 +295,29 @@
       "Focus": 3,
       "Abilities": [
         "p5-two-fold-virtue"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10155",
+      "Name": "Learning",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing Personality and a Battle Strategy in another player's discard pile: Its abilities may be used an additional time this turn. Your Personality copies a keyword on an enemy Personality. You may take an additional action to play the Strategy for one of its actions. After it resolves, remove it from the game.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10155.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "p5-learning"
       ],
       "Effect": "none"
     },

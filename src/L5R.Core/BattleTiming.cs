@@ -81,7 +81,7 @@ public sealed partial class MatchEngine
             else if (engage.NavalPerformerId is not null)
             {
                 _state.FirstActionRestriction = new(holder, engage.NavalPerformerId, false);
-                Emit("firstActionLimited", $"{Player(holder).Name}'s first Battle action must be performed by {Definition(Card(engage.NavalPerformerId)).Name} (Naval Invasion).", holder, engage.NavalPerformerId);
+                Emit("firstActionLimited", $"{Player(holder).Name}'s first Battle action must be performed by {Definition(Card(engage.NavalPerformerId)).Name} ({FirstPerformerSource()}).", holder, engage.NavalPerformerId); // issue #503: or Scouting the Pass
             }
         }
         // Jade's Roar - exp: the claimant's first action must carry the keyword -- whether they hold the opportunity as the Attacker or as the Defender.
@@ -116,7 +116,7 @@ public sealed partial class MatchEngine
     private string FirstActionLimitMessage(FirstActionRestriction limit) => limit.MustPass
         ? "Rebuilding Kyuden Hida: the Attacker may not announce a Battle action before the Defender's first normal opportunity to act or pass."
         : limit.ActionKeyword is { } keyword ? $"Jade's Roar: your first Battle action must be a {keyword} action."
-        : $"Naval Invasion: your first Battle action must be performed by {Definition(Card(limit.PerformerId)).Name}.";
+        : $"{FirstPerformerSource()}: your first Battle action must be performed by {Definition(Card(limit.PerformerId)).Name}."; // issue #503: or Scouting the Pass
 
     // Applied to a useAbility by ValidateAbility (so offered actions already respect it) and to the two other
     // Battle-action commands by Apply. Ignored inside any reaction window (a Reaction is not the first Battle action).

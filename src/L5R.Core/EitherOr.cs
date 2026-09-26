@@ -418,7 +418,7 @@ public sealed partial class MatchEngine
                 ApplyEmperorRemainingDEitherOr(p, option, decider);
                 break;
             default:
-                if (ApplyP5EitherOr(p, option, decider, affected)) break; // issue #503: The Price of Honor (EmperorP5Zones.cs)
+                if (ApplyP5EitherOr(p, option, decider, affected, sourceIds)) break; // issue #503: The Price of Honor (EmperorP5Zones.cs)
                 if (ApplyRemainingGEitherOr(p, option, source, decider, sourceIds)) break; // Bandit Gang (issue #492 group G).
                 throw new RuleViolation("Unknown choice.");
         }

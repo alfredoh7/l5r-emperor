@@ -177,6 +177,17 @@ public sealed class EmperorP5State
     public List<SteppedUnit> SteppedUnits { get; set; } = [];
     /// <summary>The Price of Honor: Personalities the rulebook seppuku action does not affect this turn.</summary>
     public List<SeppukuBar> SeppukuBars { get; set; } = [];
+    /// <summary>Scouting the Pass, The Price of Honor: cards of another player's hand a player looked at (private to him).</summary>
+    public List<HandSight> HandSights { get; set; } = [];
+    /// <summary>Searching for Answers: Personalities discarded after their battle ends; and the one its look just put into play (his entry windows open when the look closes).</summary>
+    public List<DiscardAfterBattle> DiscardAfterBattle { get; set; } = [];
+    public string? LookEntryId { get; set; }
+    /// <summary>Stolen Merchandise: Holdings with a copied Gold-producing trait for the turn.</summary>
+    public List<StolenTrait> StolenTraits { get; set; } = [];
+    /// <summary>Learning: other players' Strategies a player may play with an additional action.</summary>
+    public List<string> Borrowed { get; set; } = [];
+    /// <summary>Scouting the Pass: the battle whose first-action performer limit it set.</summary>
+    public int ScoutingBattle { get; set; } = -1;
     /// <summary>The Plain of Glass: the first Conqueror chosen in a battle whose second Conquest is still being chosen.</summary>
     public string? FirstConquerorId { get; set; }
 }

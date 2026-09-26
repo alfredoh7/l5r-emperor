@@ -1919,6 +1919,7 @@ public sealed partial class MatchEngine
         foreach(var createdId in _state.CreatedUntilBattleEndsIds.ToArray())
             if(_state.Cards.TryGetValue(createdId,out var created) && created.Zone!=Zone.RemovedFromGame) RemoveFromGame(created);
         _state.CreatedUntilBattleEndsIds.Clear();
+        DiscardP5AfterBattle(); // issue #503 (EmperorP5Hidden.cs): Searching for Answers' "Discard him after the battle ends".
         // Additional Action grants/restrictions (issue #181) are battle-scoped too -- Two Hands'
         // "ceases during battle resolution" is explicit, and an unused Again!/Equip(Battle) grant
         // makes no sense carried into a battle it was never meant for.
