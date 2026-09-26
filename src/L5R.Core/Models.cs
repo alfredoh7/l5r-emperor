@@ -212,7 +212,8 @@ public sealed class StraightenHold
 /// does not grant its host a keyword. Stat/Amount, when set, is a persistent bonus/penalty carried
 /// by this specific token -- unlike a Modifier, it is not cleared at turn end, only when the token
 /// itself is destroyed or its host card leaves play.</summary>
-public sealed record CardToken(string Id, string Type, string Source, string? Stat = null, int Amount = 0);
+// Issue #503 (Shosuro Keirei's "-1F/-1C Poison tokens"): a token may carry a second stat bonus/penalty (Stat2/Amount2); StatModifier reads both.
+public sealed record CardToken(string Id, string Type, string Source, string? Stat = null, int Amount = 0, string? Stat2 = null, int Amount2 = 0);
 
 public sealed class CardInstance
 {

@@ -5151,7 +5151,8 @@ public sealed partial class MatchEngine
     // can negate one specific prior effect, e.g. RemoveModifiers(target, m => m.Source == someCardId).
     // Tokens contribute here too: unlike Modifiers (cleared every FinishTurn), a token's stat bonus
     // persists until the token itself is destroyed or its host leaves play (core rules Glossary — Token).
-    private static int StatModifier(CardInstance card, string stat) => card.Modifiers.Where(m => m.Stat == stat).Sum(m => m.Amount) + card.Tokens.Where(t => t.Stat == stat).Sum(t => t.Amount);
+    private static int StatModifier(CardInstance card, string stat) => card.Modifiers.Where(m => m.Stat == stat).Sum(m => m.Amount) + card.Tokens.Where(t => t.Stat == stat).Sum(t => t.Amount)
+        + card.Tokens.Where(t => t.Stat2 == stat).Sum(t => t.Amount2); // issue #503: a two-stat token (Shosuro Keirei's Poison)
     // A Personality reduced to 0 Chi is destroyed immediately, by any means — centralized here so
     // every current and future Chi-reducing effect enforces it without needing its own check.
     // "Permanently give him +2F" (Spirit of the Berserker): a stat change no turn end removes (AppliedModifier.Permanent).
@@ -10083,7 +10084,7 @@ public sealed partial class MatchEngine
                     break;
                 }
                 // Issue #503, pass group P2 (EmperorP2*.cs).
-                if (RunEmperorP2(id, ability, command, player, source, target, consumedGrant) is { } p2Run)
+                if (RunEmperorP2(id, ability, command, player, source, target, consumedGrant, playedFromDiscard, opponentHonorBeforeBattleAction, bowedBeforeAction, preExistingGrants) is { } p2Run)
                 {
                     if (p2Run) return;
                     break;

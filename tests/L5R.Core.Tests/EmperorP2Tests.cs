@@ -10,7 +10,7 @@ internal static partial class EmperorP2Tests
         Honest = "oracle-l5r-3415", SurroundedDef = "oracle-l5r-7668", Brothers = "oracle-l5r-1164", SpiritShadows = "oracle-l5r-7427", KillingIntent = "oracle-l5r-4352",
         Champion = "oracle-l5r-6", TurningAway = "oracle-l5r-10173", Delving = "oracle-l5r-1945", Tapestry = "oracle-l5r-8371", Uruwashii = "oracle-l5r-453",
         Pillowbook = "oracle-l5r-5958", Shrine = "oracle-l5r-7227", Hostility = "oracle-l5r-2911", Advantage = "oracle-l5r-2759", Agony = "oracle-l5r-7954", Wall = "oracle-l5r-8298",
-        Ichizo = "oracle-l5r-5104";
+        Ichizo = "oracle-l5r-5104", Keirei = "oracle-l5r-9845";
 
     private static void Check(bool ok, string message = "Assertion failed") => Batch336Support.Check(ok, message);
     private static void Eq<T>(T actual, T expected, string message = "Values differ") => Batch336Support.Eq(actual, expected, message);
@@ -69,6 +69,8 @@ internal static partial class EmperorP2Tests
         ("The Agony of Her Gaze: stays in play; after a Battle action its owner's Nonhuman performer gets a +1F Frenzy token; a Human or the other player's Nonhuman does not", AgonyOfHerGaze),
         ("Pillowbook: +1 to its player's maximum hand size, -1 to the other player's down to 7", PillowbookHandSizes),
         ("Pillowbook: another player's card effect (Times of Strife) does not discard from its player's hand", PillowbookImmunity),
+        ("Shosuro Keirei: moves to any other battlefield of the Attack Phase (a fought one included); he may give a Personality at his new or previous location two -1F/-1C Poison tokens (0 Chi destroys); home is not a location offered", ShosuroKeirei),
+        ("Shosuro Keirei's Poison: a two-stat token loses only its Force penalty to Incense-Mill-style cleansing and only its Chi penalty to Gift Armor-style purging", PoisonTokenStats),
         ("The Scorpion Wall is Finished: after two actions put cards in a player's hand this phase no more go in; its player's hand is safe from another player's action (Indecision)", ScorpionWall),
     ]);
 
@@ -89,7 +91,7 @@ internal static partial class EmperorP2Tests
                 foreach (var ability in CardCatalog.Get(id).Abilities ?? []) Check(AbilityCatalog.All.ContainsKey(ability), $"{id}: {ability} is catalogued");
             }
         }
-        Manifest("personality-wave-100", Kazutoshi, Yamahatsu, Nakano, Mina, Gonji);
+        Manifest("personality-wave-100", Kazutoshi, Yamahatsu, Nakano, Mina, Gonji, Keirei);
         Manifest("strategy-wave-86", Honest, SurroundedDef, Brothers, SpiritShadows, KillingIntent, Champion, TurningAway);
         Manifest("spell-wave-30", Delving, Tapestry);
         Manifest("item-wave-22", Uruwashii, Pillowbook);

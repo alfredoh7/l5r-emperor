@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build Personality wave 100 (issue #503, pass group P2): Bayushi Kazutoshi - exp, Ikoma Yamahatsu, Kaiu Nakano, Isawa Mina, Kakita Gonji.
+"""Build Personality wave 100 (issue #503, pass group P2): Bayushi Kazutoshi - exp, Ikoma Yamahatsu, Kaiu Nakano, Isawa Mina, Shosuro Keirei - exp, Kakita Gonji.
 
 Wired in src/L5R.Core/EmperorP2*.cs (issue #503: search and look, Honor and hand-discard, new effects, stat pipelines, tokens, duels). Wave 100 = the highest Personality wave at
 packaging time + 5 (the P2 offset of the parallel passes). Every scan was read by eye (WebP working copies with receipts, sha256-verified); the published Text is the scan's own wording, and each
@@ -21,6 +21,7 @@ ABILITIES: dict[int, list[str]] = {
     3660: ["p2-yamahatsu-ranged"],  # Ikoma Yamahatsu
     4127: ["p2-nakano-force"],  # Kaiu Nakano
     3861: ["p2-mina-destroy"],  # Isawa Mina
+    9845: ["p2-keirei-move"],  # Shosuro Keirei - exp
     4167: [],  # Kakita Gonji
 }
 OVERRIDE: dict[int, dict] = {
@@ -36,6 +37,7 @@ TEXT: dict[int, str] = {
           + "Battle: Ranged 4 Attack.",
     4127: "Tactical Battle/Open: Nakano has +3F while he is in an army and while all Personalities in that army are Siege.",
     3861: "Battle: Target an attachment or token at the current battlefield: Destroy it. If this destroyed a card or token, give Mina two +1F Fire tokens.",
+    9845: "Battle: Move Keirei from the current battlefield to a different battlefield. You may target and give a Personality at Keirei's new or previous location two -1F/-1C Poison tokens.",
     4167: "After Gonji enters play: Discard all your other Sensei Personalities." + NL
           + "Before you focus: Once per duel, instead of focusing that time, you may give your Crane Clan Personality in the duel +4 to his duel stat until the duel ends.",
 }

@@ -43,5 +43,14 @@
     "source_url": "https://oracleofthevoid.com/#cardid=4167",
     "image_path": "assets/reference/oracle/embers-of-war/webp/oracle-l5r-4167-printing-1-image-1.webp",
     "image_sha256": "61f3c55b8087347179c964ccfeb0050996a26798258af65510f81638994a3e81"
+  },
+  {
+    "card_id": "oracle-l5r-9845",
+    "printing_set": [
+      "The Shadow's Embrace"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=9845",
+    "image_path": "assets/reference/oracle/the-shadow-s-embrace/webp/oracle-l5r-9845-printing-1-image-1.webp",
+    "image_sha256": "803c2e41d14b034b5621ce674f177d9324da02fd3ae7d06f915692f1ede69fd3"
   }
 ]

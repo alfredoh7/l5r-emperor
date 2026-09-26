@@ -447,3 +447,72 @@ internal static partial class EmperorP2Tests
         Check(Logged(w, "handDiscardPrevented"), "logged");
     }
 }
+
+internal static partial class EmperorP2Tests
+{
+    private static (MatchEngine E, CardInstance Keirei, CardInstance Here, CardInstance There, CardInstance Home) KeireiTable()
+    {
+        var s = Table(Phase.Battle, 1);
+        s.UnresolvedBattlefields = [0, 1];
+        var keirei = Add(s, Keirei, 1, Zone.Battlefield, province: 0);
+        var here = Add(s, "training-samurai", 0, Zone.Battlefield, province: 0);   // 2F/2C
+        var there = Add(s, "training-lion-veteran", 0, Zone.Battlefield, province: 1); // 6F/4C
+        var home = Add(s, "training-ancestor", 0, Zone.Home);
+        return (MatchEngine.FromTestState(s), keirei, here, there, home);
+    }
+
+    private static void ShosuroKeirei()
+    {
+        var (e, keirei, here, there, home) = KeireiTable();
+        var option = Options(e, 1, "p2-keirei-move", keirei.Id).First(o => o.Enabled);
+        Eq(string.Join(",", option.Provinces ?? []), "1", "the other battlefield is offered, not the current one");
+        var fought = Edit(e, st => { st.P2.FoughtPhaseKey = $"{st.TurnNumber}|{st.ActivePlayerId}"; st.P2.FoughtBattlefields = [2]; });
+        Eq(string.Join(",", Options(fought, 1, "p2-keirei-move", keirei.Id).First(o => o.Enabled).Provinces ?? []), "1,2", "a battlefield already fought this Attack Phase is offered too");
+        Accept(e, option.Command! with { Province = 1 });
+        Settle(e);
+        Check(e.State.Cards[keirei.Id].Zone == Zone.Battlefield && e.State.Cards[keirei.Id].ProvinceIndex == 1, "Keirei moved");
+        Eq(e.State.PendingChoice?.Type, "deciderChoice", "he may target a Personality");
+        var picks = Actions(e, 1, "chooseDecider").Where(c => c.TargetId is not null).Select(c => c.TargetId!).ToArray();
+        Check(picks.Contains(here.Id) && picks.Contains(there.Id) && picks.Contains(keirei.Id), "Personalities at his previous and new locations are offered");
+        Check(!picks.Contains(home.Id), "not one at home");
+        Accept(e, Actions(e, 1, "chooseDecider").First(c => c.TargetId == there.Id));
+        Settle(e);
+        var tokens = e.State.Cards[there.Id].Tokens.Where(t => t.Type == "Poison").ToArray();
+        Eq(tokens.Length, 2, "two Poison tokens");
+        Check(tokens.All(t => t.Stat == "Force" && t.Amount == -1 && t.Stat2 == "Chi" && t.Amount2 == -1), "each -1F/-1C");
+        Eq(e.CardForceForTest(there.Id), 4, "-2F");
+        Eq(e.PersonalityChiForTest(there.Id), 2, "-2C");
+        // A 2C Personality at the previous location dies of it.
+        var (d, dk, dHere, _, _) = KeireiTable();
+        Accept(d, Options(d, 1, "p2-keirei-move", dk.Id).First(o => o.Enabled).Command! with { Province = 1 });
+        Accept(d, Actions(d, 1, "chooseDecider").First(c => c.TargetId == dHere.Id));
+        Settle(d);
+        Check(d.State.Cards[dHere.Id].Zone == Zone.Dead, "0 Chi: destroyed");
+        // "May": zero is a legal answer.
+        var (z, zk, _, zThere, _) = KeireiTable();
+        Accept(z, Options(z, 1, "p2-keirei-move", zk.Id).First(o => o.Enabled).Command! with { Province = 1 });
+        Accept(z, Actions(z, 1, "chooseDecider").First(c => c.Choice == "done"));
+        Check(z.State.Cards[zThere.Id].Tokens.Count == 0 && z.State.PendingDeciderChoice is null, "no target: no tokens");
+        // No other battlefield: not offered.
+        var only = Edit(KeireiTable().E, st => st.UnresolvedBattlefields = [0]);
+        Check(!CanUse(only, 1, "p2-keirei-move"), "no different battlefield: not offered");
+    }
+
+    private static void PoisonTokenStats()
+    {
+        var (e, keirei, _, there, _) = KeireiTable();
+        Accept(e, Options(e, 1, "p2-keirei-move", keirei.Id).First(o => o.Enabled).Command! with { Province = 1 });
+        Accept(e, Actions(e, 1, "chooseDecider").First(c => c.TargetId == there.Id));
+        Settle(e);
+        // Gift Armor purges Chi penalties: attach one and the tokens keep their Force penalty only.
+        var gift = CardCatalog.Cards.Values.First(c => c.Effect == "gift-armor");
+        var armored = Edit(e, st => st.Cards.Add("fx-gift", new CardInstance { Id = "fx-gift", DefinitionId = gift.Id, OwnerId = 0, Zone = Zone.Attached, AttachedTo = there.Id, ProvinceIndex = 1, FaceUp = true }));
+        armored.PurgeChiPenaltiesForTest(there.Id);
+        Check(armored.State.Cards[there.Id].Tokens.Where(t => t.Type == "Poison").All(t => t.Stat == "Force" && t.Stat2 is null), "only the Force penalty stays");
+        Eq(armored.PersonalityChiForTest(there.Id), 4, "Chi back to 4");
+        var cleansed = Edit(e, st => { });
+        cleansed.CleanseForcePenaltiesForTest(there.Id);
+        Check(cleansed.State.Cards[there.Id].Tokens.Where(t => t.Type == "Poison").All(t => t.Stat == "Chi" && t.Amount == -1 && t.Stat2 is null), "only the Chi penalty stays");
+        Eq(cleansed.CardForceForTest(there.Id), 6, "Force back to 6");
+    }
+}

@@ -141,6 +141,35 @@
       "Focus": 0,
       "Abilities": [],
       "Effect": "p2-gonji-focus"
+    },
+    {
+      "Id": "oracle-l5r-9845",
+      "Name": "Shosuro Keirei",
+      "Type": "Personality",
+      "Clan": "Scorpion",
+      "GoldCost": 9,
+      "GoldProduction": 0,
+      "Force": 5,
+      "Chi": 3,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Move Keirei from the current battlefield to a different battlefield. You may target and give a Personality at Keirei's new or previous location two -1F/-1C Poison tokens.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9845.jpg",
+      "Keywords": [
+        "Experienced Bayushi Keirei",
+        "Unique",
+        "Acrobat",
+        "Ninja",
+        "Scorpion Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "p2-keirei-move"
+      ],
+      "Effect": "none"
     }
   ],
   "Decks": []

@@ -43,6 +43,11 @@ public sealed class EmperorP2State
     public List<string> DuelStatBaseForce { get; set; } = [];
     /// <summary>The performers of each action whose effects are resolving ("ability id|player id"), read when it is done (The Agony of Her Gaze).</summary>
     public Dictionary<string, List<string>> Performers { get; set; } = [];
+    /// <summary>Shosuro Keirei: the Attack Phase whose fought battlefields are recorded ("turn|Attacker"), and those battlefields.</summary>
+    public string? FoughtPhaseKey { get; set; }
+    public List<int> FoughtBattlefields { get; set; } = [];
+    /// <summary>Shosuro Keirei: his previous and new battlefields, read by the optional target choice (keyed by his card id).</summary>
+    public Dictionary<string, List<int>> KeireiLocations { get; set; } = [];
 }
 
 public sealed record P2BattleBonus(int PlayerId, int Battle, int Amount);
@@ -70,6 +75,9 @@ public static class EmperorP2Abilities
     public const string TapestryEffect = "p2-tapestry-hand-size";
     public const string AgonyEffect = "p2-agony-of-her-gaze";
     public const string GainingAdvantageEffect = "p2-gaining-advantage";
+    public const string KeireiMove = "p2-keirei-move";
+    /// <summary>Shosuro Keirei's optional target, chosen after his move (a DeciderChoice of the acting player's).</summary>
+    public const string KeireiPoisonSpec = "p2-keirei-poison";
 
     // Card Effects.
     public const string YamahatsuEffect = "p2-yamahatsu-terrain-ranged-bonus";
@@ -151,6 +159,10 @@ public static class EmperorP2Abilities
         // top card of any Fate deck. You may destroy this card; if you do, discard the card you looked at." (a look whose discard destroys the Spell first: EmperorP2Search.cs)
         all[TapestryLook] = new("Limited", "Bow this card: Look at the top card of any Fate deck. You may destroy this card; if you do, discard the card you looked at", "none",
             Costs: ActionCost.BowSource, Look: EmperorP2Searches.TapestryPerceived);
+        // Shosuro Keirei - exp (oracle-l5r-9845, The Shadow's Embrace): "Battle: Move Keirei from the current battlefield to a different battlefield. You may target and give a Personality at Keirei's new
+        // or previous location two -1F/-1C Poison tokens." (EmperorP2Keirei.cs)
+        all[KeireiMove] = new("Battle", "Move Keirei from the current battlefield to a different battlefield. You may target and give a Personality at Keirei's new or previous location two -1F/-1C Poison tokens",
+            "none", Move: new(MoveSpec.Source, MoveSpec.AnyOther));
         return all;
     }
 }
@@ -249,10 +261,13 @@ public sealed partial class MatchEngine
     }
 
     // The execution switch's hook: null when the id is not this group's; false when its effects are done; true when a decision or an Attack's window opened and the action waits.
-    private bool? RunEmperorP2(string id, AbilityDefinition ability, GameCommand command, PlayerState player, CardInstance? source, CardInstance? target, bool consumedGrant)
+    private bool? RunEmperorP2(string id, AbilityDefinition ability, GameCommand command, PlayerState player, CardInstance? source, CardInstance? target, bool consumedGrant, bool playedFromDiscard,
+        int? opponentHonorBefore, HashSet<string> bowedBefore, List<AdditionalActionGrant> preExistingGrants)
     {
         switch (id)
         {
+            case EmperorP2Abilities.KeireiMove:
+                return KeireiMoves(ability, command, player, source!, consumedGrant, playedFromDiscard, opponentHonorBefore, bowedBefore, preExistingGrants);
             case EmperorP2Abilities.HonestAssessment:
             {
                 var performer = Card(command.PerformerId!);

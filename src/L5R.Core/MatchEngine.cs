@@ -1531,6 +1531,7 @@ public sealed partial class MatchEngine
     private void EngageBattle(int battlefield,int? firstOpportunity)
     {
         _state.CurrentBattleProvince=battlefield; _state.BattleNumber++;
+        NoteP2BattlefieldFought(battlefield); // issue #503 (EmperorP2Keirei.cs): the battlefields of this Attack Phase, fought ones included
         _state.EnemyDestroyedOwnPersonalitySinceLastBattleAction=new bool[2]; // Revenge (issue #437): "this battle" bounds the window.
         _state.ReconStrategyActionsThisBattle=new int[2]; // Advanced Intelligence (Seeds of Decay pass, issue #453, batch 1): "this battle" too.
         // An effect's battle is fought inside the phase it was played in (BeginAsideBattle has already set it up); a chosen one is a phase of its own.
