@@ -25,7 +25,7 @@ The engine's `MatchView.Limitations` records unsupported mechanics. Training fix
 
 The playable client supports windowed and fullscreen play (F11 toggles), complete card scans, an expanded navy mat, upright lanterns and warm animated light. The phase bar uses raster lacquer/brass artwork with live Musashi Brush headings and a subtle glow. Physical piles expose counts on hover, and the compact sidebar handles decisions. See [the bitmap phase-bar pass](docs/PHASE_BAR_ART.md) and [the next development phase](docs/NEXT_PHASE.md). For a static historical environment-only view, launch `tools/review-table.command` on this configured Mac.
 
-Prerequisites: **Python 3.12 or later**, macOS or Windows on x64/ARM64, and **Git Bash on Windows** for the shell scripts. The bootstrap installs **.NET SDK 10.0.400** and **Godot 4.7.2 .NET** into `.tools/` using pinned official HTTPS downloads and checksums.
+Prerequisites: **Python 3.12 or later**, macOS or Windows on x64/ARM64, and **Git Bash on Windows** for the shell scripts. The bootstrap installs **.NET SDK 10.0.400** and **Godot 4.7.2 .NET** into `.tools/` using pinned official HTTPS downloads and checksums. The content tools and their tests in `tools/check.sh` also need Python packages that bootstrap reports but never installs; see [Content intake](tools/content/README.md) for the install command.
 
 ```sh
 # Inspect the local toolchain without downloading anything.
