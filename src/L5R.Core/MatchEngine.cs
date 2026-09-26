@@ -340,7 +340,8 @@ public sealed partial class MatchEngine
             if (_state.PendingChoice.Type=="yourClanNeedsYouProvince") { ResolveYourClanNeedsYouProvince(command); return; }
             if (_state.PendingChoice.Type=="declineStraighten") { ResolveDeclineStraighten(command); return; }
             if (_state.PendingChoice.Type=="rentatsuLoss") { ResolveRentatsuLoss(command); return; } // Bayushi Rentatsu (issue #477, batch 4).
-            if (_state.PendingChoice.Type=="infiltratorStraighten") { ResolveInfiltratorStraighten(command); return; } // Goju Asuka / Only a Shadow (issue #501, EmperorMechB.cs).
+            if (_state.PendingChoice.Type=="infiltratorStraighten") { ResolveInfiltratorStraighten(command); return; }
+            if (_state.PendingChoice.Type=="p3DarkVirtueDiscard") { ResolveP3DarkVirtueDiscard(command); return; } // Daigotsu Tenbatsu (issue #503, EmperorP3.cs). // Goju Asuka / Only a Shadow (issue #501, EmperorMechB.cs).
             if (_state.PendingChoice.Type=="conqueror") { ResolveConqueror(command); return; }
             // Before This Battle Resolves (issue #272): three tightly-scoped, mandatory choices, no
             // "useAbility"/pass alternative -- see PendingBeforeBattleResolve's own doc comment.
@@ -1327,7 +1328,7 @@ public sealed partial class MatchEngine
     private void ResolveDeferredAction(GameCommand pending)
     {
         var negated=_state.DeferredActionNegated; _state.DeferredActionNegated=false;
-        if(negated) ResolveNegatedAction(pending); else ExecuteAbilityEffects(pending);
+        if(negated) ResolveNegatedAction(pending,ignoreCosts:P3CostsIgnored(pending)); else ExecuteAbilityEffects(pending); // Iron Will (issue #503): its costs ignored
         _state.NegatedEffects.Clear();
         RestoreTemporaryRemovals(TemporaryRemovals.Action);
     }

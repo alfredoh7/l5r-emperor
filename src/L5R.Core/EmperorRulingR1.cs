@@ -186,6 +186,7 @@ public sealed partial class MatchEngine
     /// <summary>"Negate all movement to it" (Chikushudo's Trickery): MoveToBattlefield's first question.</summary>
     private bool MovementToBattlefieldNegated(CardInstance card, int battlefield)
     {
+        if (P3MoveToBattlefieldNegated(card, battlefield)) { Emit("moveNegated", $"{Definition(card).Name}'s movement to the current battlefield was negated.", card.OwnerId, card.Id); return true; } // Request Authorization (issue #503)
         if (!R1.MovementNegated.Contains(battlefield)) return false;
         Emit("moveNegated", $"{Definition(card).Name}'s movement to {BattlefieldLabel(battlefield)} was negated.", card.OwnerId, card.Id);
         return true;

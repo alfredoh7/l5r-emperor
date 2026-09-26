@@ -1,0 +1,82 @@
+{
+  "Profile": "strategy-wave-90",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-1921",
+      "Name": "Deep Snows",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After an action resolves: Bow any Personalities it moved. (Reactions trigger after traits.)\nReaction: After a Battle action resolves, if there are no Terrains in play at the current battlefield: Put this card into play there.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1921.jpg",
+      "Keywords": [
+        "Terrain",
+        "Winter"
+      ],
+      "Focus": 1,
+      "Abilities": [
+        "deep-snows-enter"
+      ],
+      "Effect": "deep-snows-bow-moved"
+    },
+    {
+      "Id": "oracle-l5r-3813",
+      "Name": "Iron Will",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After another player targets your Paragon with a Battle action performed by a Personality with lower Personal Honor: The action's costs are ignored and its effects are negated. That player may take an additional Battle action.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-3813.jpg",
+      "Keywords": [],
+      "Focus": 3,
+      "Abilities": [
+        "iron-will-negate"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-6265",
+      "Name": "Request Authorization",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Bow your performing Courtier at any location and target a Personality: Move him home.\nReaction: Before another player's Battle action resolves, target a Personality: Negate his movement to the current battlefield from the action's effects.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6265.jpg",
+      "Keywords": [
+        "Political"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "request-authorization-move",
+        "request-authorization-negate"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

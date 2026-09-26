@@ -90,7 +90,7 @@ public static class LookCatalog
     public static LookSpec TrainingShowAny { get; } = new("training-look-show", "Look at the top cards of your Fate deck", [new("Fate")], 3, [new(LookDisposition.Show, 1, 1)], Reorder: true);
 
     public static IReadOnlyDictionary<string, LookSpec> All { get; } = new[] { PublicRecords, IsawaTamaki, BanishAllDoubt, BayushiKahokuExp2, SignsAndPortents, ControlYourDestiny, JurojinsBlessing,
-        UeharaLook, MethodicalQuestioning, TrainingDynasty, TrainingAny, TrainingTakeItem, TrainingFixedOrder, TrainingShowAny }.Concat(EmperorRemainingFLooks.All).ToDictionary(s => s.Id, StringComparer.Ordinal); // + Temples of Gisei Toshi (issue #492, group F)
+        UeharaLook, MethodicalQuestioning, TrainingDynasty, TrainingAny, TrainingTakeItem, TrainingFixedOrder, TrainingShowAny }.Concat(EmperorRemainingFLooks.All).Concat(EmperorP3Looks.All).ToDictionary(s => s.Id, StringComparer.Ordinal); // + Temples of Gisei Toshi (issue #492, group F)
 
     /// <summary>The look an Event carries in its Effect (an Event has no abilities of its own to hang a spec on).</summary>
     public static LookSpec? ForEventEffect(string effect) => effect == "signs-and-portents" ? SignsAndPortents : null;
@@ -211,6 +211,7 @@ public sealed partial class MatchEngine
 
     private void FinishLook(PendingLook look)
     {
+        if (P3AfterLook(look)) return; // Daigotsu Tenbatsu (issue #503, EmperorP3.cs): "You may discard a Dark Virtue; if you did, draw a card."
         _state.PendingLook = null;
         FinishDeferredAction(look.PlayerId, look.Origin, look.SourceCardId, look.BowedBefore);
     }

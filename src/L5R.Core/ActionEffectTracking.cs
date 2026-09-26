@@ -57,6 +57,7 @@ public sealed partial class MatchEngine
         CountReconStrategyAction(abilityId, playerId, sourceId); // Advanced Intelligence (Seeds of Decay pass, issue #453, batch 1).
         // Moksha Patam (issue #453 batch 5): "After an action resolves, if a player gained Honor from its effects" -- a trait, so applied here before any Reaction to the same point.
         ApplyMokshaPatamTokens();
+        ApplyP3AfterActionTraits(affected); // Deep Snows (issue #503, EmperorP3.cs): its trait, before any Reaction to the same point.
         // The Shadow's Embrace pass (issue #476), batch 3: Crowded Streets' trait -- a trait, so before any Reaction to the same point (ShadowsEmbraceBatch3.cs).
         if (OpenCrowdedStreetsTrait(closesTo)) return true;
         // Emperor Edition remaining-cards pass (issue #492), group D: The Shadow Court's and The Sincerity of the Dragon's traits (EmperorRemainingD.cs) -- also before any Reaction to the same moment.
@@ -99,6 +100,7 @@ public sealed partial class MatchEngine
         if (facts.AbilityId == AssignedSentinel) return false;
         if (!AbilityCatalog.All.ContainsKey(facts.AbilityId)) return false;
         if (FollowupsAfterActionApplies(source, abilityId, playerId) is { } followups) return followups;
+        if (P3AfterActionApplies(source, abilityId, playerId, facts) is { } p3) return p3; // issue #503 (EmperorP3.cs)
         if (MechDAfterActionApplies(source, abilityId, playerId, facts) is { } mechD) return mechD; // Indecision (issue #501, EmperorMechD.cs) // Asako Chukage (issue #498) // Equip's facts name no catalogued ability: only the Reaction above reads them.
         return abilityId switch
         {

@@ -93,7 +93,9 @@ public sealed record SearchCriteria(string Noun, CardType[]? Types = null, strin
     // "A ... Holding with another title" (Versatile Farm, issue #476 batch 6): titles that may NOT be chosen.
     string[]? ExcludedTitles = null,
     // "A Kiho Battle Strategy" (Martial Instruction, issue #492): a card with a printed Battle action -- an ability whose timing is Battle or Battle/Open.
-    bool BattleStrategy = false);
+    bool BattleStrategy = false,
+    // "A card with a Recon ability" (Daidoji Akeha, issue #503): one of the card's printed actions carries the keyword (its own tag, or the card's keyword).
+    string? AbilityKeyword = null);
 
 /// <summary>One searchable deck, the criteria that deck's candidates must meet, and what happens to the chosen
 /// card. A card that lets the player pick the deck (Ikoma Shizuka) lists two, each with its own criteria.</summary>
@@ -180,6 +182,7 @@ public static class SearchCatalog
             DiscoveringTheTemple, VersatileFarm, Introspection, MartialInstruction, MeetingTheKeepers, SacrificeOfPawns, EmperorRemainingFSearches.RefugeOfTheThreeSisters }
         .Concat(EmperorRemainingESearches.All) // Emperor Edition remaining-cards pass (issue #492), group E: EmperorRemainingE.cs.
         .Concat(EmperorFollowupsSearches.All) // Emperor Edition follow-ups (issue #498): EmperorFollowupsSearch.cs.
+        .Concat([EmperorP3Abilities.AkehaReconSearch]) // Daidoji Akeha (issue #503, EmperorP3.cs).
         .ToDictionary(s => s.Id, StringComparer.Ordinal);
 
     /// <summary>The search an Event carries in its Effect (an Event has no abilities of its own to hang a spec on).</summary>
@@ -594,6 +597,7 @@ public sealed partial class MatchEngine
         if (criteria.Keywords is { Length: > 0 } && !criteria.Keywords.All(k => Keyword(card, k))) return (false, notA);
         if (criteria.AnyKeywords is { Length: > 0 } && !criteria.AnyKeywords.Any(k => Keyword(card, k))) return (false, notA);
         if (criteria.BattleStrategy && !(Definition(card).Abilities ?? []).Any(a => AbilityCatalog.All.TryGetValue(a, out var battle) && battle.Timing is "Battle" or "BattleOrOpen")) return (false, notA);
+        if (criteria.AbilityKeyword is { } abilityKeyword && !HasActionWithKeyword(card, abilityKeyword)) return (false, notA); // issue #503
         if (criteria.NonUnique && Keyword(card, "Unique")) return (false, "Unique cards cannot be chosen");
         if (criteria.ExcludedKeywords is { Length: > 0 } && criteria.ExcludedKeywords.FirstOrDefault(k => Keyword(card, k)) is string excluded)
             return (false, $"{excluded} cards cannot be chosen");

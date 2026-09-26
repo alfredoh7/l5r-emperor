@@ -254,7 +254,7 @@ public sealed partial class MatchEngine
                         // Issue #336 fixture: one option per Personality the deferred action would move.
                         :reaction.Target=="deferred-action-mover"?ActionMovers(deferredAction).Select(c=>(string?)c).ToArray()
                         // The Earth's Strength (issue #453 batch 5): one option per defending Personality the deferred action would move.
-                        :reaction.Target=="deferred-action-defending-mover"?DeferredActionDefendingMovers(deferredAction).Select(c=>(string?)c).ToArray():[null];
+                        :reaction.Target=="deferred-action-defending-mover"?DeferredActionDefendingMovers(deferredAction).Select(c=>(string?)c).ToArray():P3BeforeActionTargets(reaction.Target); // issue #503: Request Authorization targets any Personality
                     foreach(var candidate in candidates)
                         AddReaction(card,reactionId,targetId:candidate,label:candidate is null?null:$"{reaction.Label} · {Definition(Card(candidate)).Name} ({candidate})",validate:true);
                 }
@@ -520,6 +520,10 @@ public sealed partial class MatchEngine
         else if(_state.PendingChoice is { Type:"infiltratorStraighten" })
         {
             result.AddRange(InfiltratorStraightenActions(playerId)); // Goju Asuka / Only a Shadow (issue #501, EmperorMechB.cs).
+        }
+        else if(_state.PendingChoice is { Type:"p3DarkVirtueDiscard" })
+        {
+            result.AddRange(P3DarkVirtueActions(playerId)); // Daigotsu Tenbatsu (issue #503, EmperorP3.cs).
         }
         else if(_state.PendingChoice is { Type:"rentatsuLoss" })
         {

@@ -1,0 +1,97 @@
+{
+  "Profile": "personality-wave-104",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-1621",
+      "Name": "Daidoji Akeha",
+      "Type": "Personality",
+      "Clan": "Crane",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 5,
+      "Chi": 3,
+      "PersonalHonor": 3,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After your Recon action from a Strategy resolves: Draw a card.\nRecon Limited: Discard a card: Search your Fate deck for a non-Unique card with a Recon ability, show it, and put it in your hand.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1621.jpg",
+      "Keywords": [
+        "Loyal",
+        "Unique",
+        "Crane Clan",
+        "Daimyo",
+        "Iron Crane",
+        "Samurai",
+        "Scout"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "akeha-recon-draw",
+        "akeha-recon-search"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-1778",
+      "Name": "Daigotsu Tenbatsu",
+      "Type": "Personality",
+      "Clan": "Spider",
+      "GoldCost": 6,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 2,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After engaging at Tenbatsu's battlefield: Look at the top three cards of your Fate deck. Put them back in any order. You may discard a Dark Virtue; if you did, draw a card.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1778.jpg",
+      "Keywords": [
+        "Dark Prophet",
+        "Paragon",
+        "Samurai",
+        "Spider Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "tenbatsu-engage-look"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-7177",
+      "Name": "Shosuro Toson",
+      "Type": "Personality",
+      "Clan": "Scorpion",
+      "GoldCost": 9,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 4,
+      "PersonalHonor": 1,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After engaging at Toson's battlefield: Discard a card from the current battlefield's province. If this discarded a Personality, you have the first opportunity to take a Battle action in this battle, which must be performed by Toson.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7177.jpg",
+      "Keywords": [
+        "Experienced 2",
+        "Loyal",
+        "Unique",
+        "Daimyo",
+        "Ninja",
+        "Scorpion Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "toson-exp2-engage"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

@@ -568,13 +568,16 @@ public sealed class PendingEngage
     // claimant's first action must carry, and who claimed it (the restriction applies only if that player actually ends up holding the first opportunity).
     public string? FirstActionKeyword { get; set; }
     public int? FirstActionKeywordPlayerId { get; set; }
+    // Shosuro Toson - exp2 (issue #503, EmperorP3.cs): "you have the first opportunity to take a Battle action in this battle, which must be performed by Toson" -- the performer and who claimed it.
+    public string? FirstActionPerformerId { get; set; }
+    public int? FirstActionPerformerPlayerId { get; set; }
 }
 
 /// <summary>A limit on the FIRST Battle action a player takes in a battle, set when the Engage window closes
 /// and consumed by that player's next accepted command: Naval Invasion's "which he must perform"
 /// (PerformerId), or Rebuilding Kyuden Hida's "the Attacker may not announce a Battle action before the
 /// Defender's first normal opportunity to act or pass" (MustPass).</summary>
-public sealed record FirstActionRestriction(int PlayerId, string? PerformerId, bool MustPass, string? ActionKeyword = null);
+public sealed record FirstActionRestriction(int PlayerId, string? PerformerId, bool MustPass, string? ActionKeyword = null, string? Reason = null); // Reason: the card naming the performer (issue #503; Naval Invasion when null)
 
 /// <summary>An Additional Action grant (core rules Glossary; issue #181): one Battle action the
 /// named player may take out of the normal back-and-forth alternation, without ceding priority to
@@ -1203,6 +1206,8 @@ public sealed class MatchState
     public List<string> EntryCostAnswers { get; set; } = [];
     // Issue #501, mechanics group D (EmperorMechD.cs): the Recon-action counter, the attach log, the cards-into-hand records and timed removals.
     public MechDState MechD { get; set; } = new();
+    // Issue #503, group P3 (EmperorP3.cs): Iron Will's ignored costs and owed grants, Tenbatsu's look follow-up.
+    public EmperorP3State P3 { get; set; } = new();
 }
 
 /// <summary>Isawa Norimichi: PlayerId's army has +Amount total Force in the battle numbered Battle (while it has any units).</summary>

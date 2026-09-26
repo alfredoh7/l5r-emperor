@@ -2650,4 +2650,10 @@ public static class PublishedContent
     public static PublishedSnapshot PersonalityWave92 { get; } = Load("L5R.Published.PersonalityWave92.json", "personality-wave-92", requireDecks: false);
     /// <summary>Strategy wave 78 (issue #501, mechanics group D): Broken Cipher, Indecision and Amazing Feat (EmperorMechD.cs).</summary>
     public static PublishedSnapshot StrategyWave78 { get; } = Load("L5R.Published.StrategyWave78.json", "strategy-wave-78", requireDecks: false);
+    /// <summary>Personality wave 104 (Emperor Edition group P3, issue #503): Daidoji Akeha, Daigotsu Tenbatsu, Shosuro Toson - exp2.</summary>
+    public static PublishedSnapshot PersonalityWave104 { get; } = Load("L5R.Published.PersonalityWave104.json", "personality-wave-104", requireDecks: false);
+    /// <summary>Spell wave 34 (Emperor Edition group P3, issue #503): Centering the Soul, Erosion.</summary>
+    public static PublishedSnapshot SpellWave34 { get; } = Load("L5R.Published.SpellWave34.json", "spell-wave-34", requireDecks: false);
+    /// <summary>Strategy wave 90 (Emperor Edition group P3, issue #503): Deep Snows, Iron Will, Request Authorization.</summary>
+    public static PublishedSnapshot StrategyWave90 { get; } = Load("L5R.Published.StrategyWave90.json", "strategy-wave-90", requireDecks: false);
 }

@@ -254,6 +254,7 @@ public sealed partial class MatchEngine
     /// which come before the announcement). Destruction costs are paid.</summary>
     private bool MomokoWaivesCost(GameCommand command, string verb)
     {
+        if (P3CostsIgnored(command)) return true; // Iron Will (issue #503): every cost of the held action is ignored
         if (IsDestructionCostVerb(verb) || command.AbilityId is null) return false;
         if (MechA.Waived is { } waived && waived.Turn == _state.TurnNumber && waived.PlayerId == command.PlayerId && waived.SourceId == command.CardId && waived.AbilityId == command.AbilityId) return true;
         return MomokoWatchFor(command) is not null;

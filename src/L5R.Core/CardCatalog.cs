@@ -676,6 +676,9 @@ public static class CardCatalog
             .Concat(PublishedContent.HoldingWave28.Cards) // Emperor Edition mechanics group E (issue #501): Seaside Bazaar
             .Concat(PublishedContent.PersonalityWave92.Cards) // Issue #501, mechanics group D: Daidoji Narizane, Daigotsu Yajinden - exp3
             .Concat(PublishedContent.StrategyWave78.Cards) // Issue #501, mechanics group D: Broken Cipher, Indecision, Amazing Feat
+            .Concat(PublishedContent.PersonalityWave104.Cards) // Emperor Edition group P3 (issue #503): Daidoji Akeha, Daigotsu Tenbatsu, Shosuro Toson - exp2
+            .Concat(PublishedContent.SpellWave34.Cards) // Emperor Edition group P3 (issue #503): Centering the Soul, Erosion
+            .Concat(PublishedContent.StrategyWave90.Cards) // Emperor Edition group P3 (issue #503): Deep Snows, Iron Will, Request Authorization
             .ToDictionary(c => c.Id, StringComparer.Ordinal);
     }
 }
