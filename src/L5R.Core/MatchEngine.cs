@@ -3411,6 +3411,7 @@ public sealed partial class MatchEngine
         NoteBattleResolutionHonor(playerId,amount,reason); // On (The Shadow's Embrace pass, issue #476 batch 6).
         if(player.Honor<=-20) player.DishonorLossPending=true;
         Emit("honorChanged",$"{player.Name}: {amount:+#;-#;0} Honor ({reason}).",playerId,Amount:amount);
+        if(amount<0) P4HonorLost(playerId,source); // No Time for Games (issue #503, EmperorP4More.cs): "after the next time (this turn) you lose Honor from another player's card effect".
         // Formal Apology (issue #259): checked after EVERY Honor change, gain or loss alike, since the
         // single shared choke point every Honor change already funnels through here means "may be
         // negated, modified, or redirected by cards that affect honor gains" (the user's own

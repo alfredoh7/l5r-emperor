@@ -39,7 +39,7 @@ internal static partial class EmperorP4Tests
     private static void HayanAssigns()
     {
         var s = SelectionTable();
-        var hayan = Add(s, Hayan, 0, Zone.Home);
+        var hayan = Add(s, Hayan, 0, Zone.Home, bowed: true); // a trait: usable while he is bowed
         Add(s, Samurai, 0, Zone.Battlefield, province: 0);
         Add(s, Samurai, 1, Zone.Battlefield, province: 0);
         var unicorn = Add(s, Sarang, 0, Zone.Home);

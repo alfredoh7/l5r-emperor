@@ -53,7 +53,8 @@ internal static partial class EmperorP4Tests
             "Reaction: After engaging: The current battlefield's province has a maximum strength equal to its base strength until the end of the battle. Negate the next effect that would move one of your Personalities from its battlefield. After the next time this battle a Terrain enters play, destroy it.", "Winter");
         foreach (var (id, gold, focus) in new[] { (FirmCensure, 0, 1), (ScarsOfWar, 2, 1), (ShowOfRestraint, 0, 3), (SnowHasTeeth, 0, 1) })
             Check(CardCatalog.Get(id).GoldCost == gold && CardCatalog.Get(id).Focus == focus, $"{id}'s Gold Cost and Focus");
-        Manifest("strategy-wave-94", GamesOfWill, PillarTattoo, PrecedingReputation, TooMuch, YojimboAssemble, RideTheBreeze, FirmCensure, ScarsOfWar, ShowOfRestraint, SnowHasTeeth);
+        Manifest("strategy-wave-94", GamesOfWill, PillarTattoo, PrecedingReputation, TooMuch, YojimboAssemble, RideTheBreeze, FirmCensure, ScarsOfWar, ShowOfRestraint, SnowHasTeeth,
+            "oracle-l5r-6034", "oracle-l5r-634", "oracle-l5r-5605", "oracle-l5r-6552");
     }
 
     // ---- Drawing on the Mountain ---------------------------------------------------------------------------------------------------------------------------------------------------------

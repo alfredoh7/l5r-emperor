@@ -3,6 +3,33 @@
   "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
   "Cards": [
     {
+      "Id": "oracle-l5r-634",
+      "Name": "Asset Denial",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: Bow your performing Ninja Personality and target a Retainer: Destroy it.\nBattle: Choose your performing Ninja Personality with no non-Ninja Followers at the current battlefield: Move him to a different location. If he moved, straighten his unit. Discard a card in a province.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-634.jpg",
+      "Keywords": [
+        "Ninja"
+      ],
+      "Focus": 1,
+      "Abilities": [
+        "asset-denial-destroy",
+        "asset-denial-home",
+        "asset-denial-battlefield"
+      ],
+      "Effect": "none"
+    },
+    {
       "Id": "oracle-l5r-2580",
       "Name": "Firm Censure",
       "Type": "Strategy",
@@ -50,6 +77,32 @@
       "Effect": "none"
     },
     {
+      "Id": "oracle-l5r-5605",
+      "Name": "No Time for Games",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After an attacking player announces a Battle action before the Defender's first normal opportunity to act or pass: Negate its effects.\nOpen: Choose your performing dishonorable Personality: Rehonor him. After the next time (this turn) you lose Honor from another player's card effect, give him three +1F Revenge tokens.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-5605.jpg",
+      "Keywords": [
+        "Political"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "no-time-for-games-negate",
+        "no-time-for-games-rehonor"
+      ],
+      "Effect": "none"
+    },
+    {
       "Id": "oracle-l5r-5956",
       "Name": "Pillar Tattoo",
       "Type": "Strategy",
@@ -72,6 +125,29 @@
       "Focus": 3,
       "Abilities": [
         "pillar-tattoo-boost"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-6034",
+      "Name": "Power of Strength",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing unbowed Personality with 7 or higher base Force and target two enemy Personalities, each with unit Gold Cost lower than your performer's Gold Cost: Bow one of them. Ranged Attack with strength equal to the first target's Force, which may only target the other Personality (if legal).",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6034.jpg",
+      "Keywords": [],
+      "Focus": 1,
+      "Abilities": [
+        "power-of-strength-bow"
       ],
       "Effect": "none"
     },
@@ -146,6 +222,30 @@
       "Focus": 1,
       "Abilities": [
         "scars-of-war-mark"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-6552",
+      "Name": "Secret Reserve",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "As a Focus Effect: Until this duel ends, give +1C to each Weapon attached to your Personality in this duel.\nBattle/Open: Target one or more of your Items: Straighten them. You may transfer them to other Personalities you control.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6552.jpg",
+      "Keywords": [],
+      "Focus": 3,
+      "Abilities": [
+        "secret-reserve-focus",
+        "secret-reserve-straighten"
       ],
       "Effect": "none"
     },

@@ -2652,7 +2652,7 @@ public static class PublishedContent
     public static PublishedSnapshot StrategyWave78 { get; } = Load("L5R.Published.StrategyWave78.json", "strategy-wave-78", requireDecks: false);
     /// <summary>Personality wave 108 (issue #503, group P4: EmperorP4*.cs): Bayushi Tenzan, Gozaru no Oni, Ikoma Shinohara, Shinjo Hayan, Shinjo Sarang, Tsuruchi Nobukatsu.</summary>
     public static PublishedSnapshot PersonalityWave108 { get; } = Load("L5R.Published.PersonalityWave108.json", "personality-wave-108", requireDecks: false);
-    /// <summary>Strategy wave 94 (issue #503, group P4: EmperorP4*.cs): Firm Censure, Games of Will, Pillar Tattoo, Preceding Reputation, Ride the Breeze, Scars of War, Show of Restraint, The Snow Has Teeth, Too Much for Mortals, Yojimbo Assemble.</summary>
+    /// <summary>Strategy wave 94 (issue #503, group P4: EmperorP4*.cs): Asset Denial, Firm Censure, Games of Will, No Time for Games, Pillar Tattoo, Power of Strength, Preceding Reputation, Ride the Breeze, Scars of War, Secret Reserve, Show of Restraint, The Snow Has Teeth, Too Much for Mortals, Yojimbo Assemble.</summary>
     public static PublishedSnapshot StrategyWave94 { get; } = Load("L5R.Published.StrategyWave94.json", "strategy-wave-94", requireDecks: false);
     /// <summary>Spell wave 38 (issue #503, group P4: EmperorP4*.cs): Drawing on the Mountain, The Menacing Sky.</summary>
     public static PublishedSnapshot SpellWave38 { get; } = Load("L5R.Published.SpellWave38.json", "spell-wave-38", requireDecks: false);

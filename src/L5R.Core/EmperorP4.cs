@@ -109,6 +109,10 @@ public sealed class EmperorP4State
     public List<P4ProvinceCap> ProvinceCaps { get; set; } = [];
     public List<P4Watch> SnowMoveShields { get; set; } = [];
     public List<P4Watch> SnowTerrainWatches { get; set; } = [];
+    /// <summary>No Time for Games: the watches on the next Honor loss from another player's card effect.</summary>
+    public List<P4Watch> NoTimeWatches { get; set; } = [];
+    /// <summary>Secret Reserve: the Items still to be offered a transfer, in order.</summary>
+    public List<string> TransferQueue { get; set; } = [];
 }
 
 public sealed partial class MatchEngine
@@ -119,11 +123,11 @@ public sealed partial class MatchEngine
     // ---- hooks into the shared switches (CardAbilities.cs) ------------------------------------------------------------------------------------------------------------------------------
 
     private static int? P4AttackStrength(string abilityId) => abilityId == EmperorP4Abilities.NobukatsuRanged ? 4 : null;
-    private static string? P4AttackKind(string abilityId) => abilityId == EmperorP4Abilities.NobukatsuRanged ? "Ranged" : null;
+    private static string? P4AttackKind(string abilityId) => abilityId == EmperorP4Abilities.NobukatsuRanged ? "Ranged" : P4MoreAttackKind(abilityId);
 
     private static bool P4BowsTarget(string abilityId) => abilityId is EmperorP4WatchAbilities.FirmCensure or EmperorP4Abilities.GozaruBow or EmperorP4Abilities.GamesOfWillBow or EmperorP4Abilities.PrecedingReputation
-        or EmperorP4Abilities.TooMuchForMortals or EmperorP4Abilities.YojimboAssemble;
-    private static bool P4DestroysTarget(string abilityId) => abilityId is EmperorP4Abilities.GozaruBow or EmperorP4Abilities.YojimboAssemble;
+        or EmperorP4Abilities.TooMuchForMortals or EmperorP4Abilities.YojimboAssemble || P4MoreBowsTarget(abilityId);
+    private static bool P4DestroysTarget(string abilityId) => abilityId is EmperorP4Abilities.GozaruBow or EmperorP4Abilities.YojimboAssemble || P4MoreDestroysTarget(abilityId);
 
     // Target categories (ValidateAbility's default chain; slot candidates are judged through it too).
     private bool EmperorP4TargetAllows(string category, GameCommand command, PlayerState player, CardInstance? source, CardInstance target)
@@ -160,19 +164,20 @@ public sealed partial class MatchEngine
         // Too Much for Mortals: "your performing unbowed Spirit" -- a Personality or a Follower with the keyword.
         EmperorP4Abilities.UnbowedSpiritPerformer => Definition(performer).Type is CardType.Personality or CardType.Follower && InPlay(performer) && !performer.Bowed && Keyword(performer, "Spirit")
             && (!actingAsBattle || AtBattle(performer)),
-        _ => null
+        _ => EmperorP4MorePerformerAllows(ability, performer, actingAsBattle)
     };
 
     private string?[]? EmperorP4Performers(AbilityDefinition ability, int playerId, bool actingAsBattle) => ability.Performer switch
     {
         EmperorP4Abilities.UnbowedSpiritPerformer => _state.Cards.Values.Where(c => c.OwnerId == playerId && EmperorP4PerformerAllows(ability, c, actingAsBattle) == true)
             .OrderBy(c => c.Id, StringComparer.Ordinal).Select(c => (string?)c.Id).ToArray(),
-        _ => null
+        _ => EmperorP4MorePerformers(ability, playerId, actingAsBattle)
     };
 
     // The per-card conditions of taking the action (ValidateAbility; also run for each slot candidate).
     private void ValidateEmperorP4(string id, AbilityDefinition ability, GameCommand command, PlayerState player, CardInstance? source)
     {
+        ValidateEmperorP4More(id, command);
         switch (id)
         {
             // "or one or two Personalities if you control a Courtier": a second target only while the acting player controls a Courtier.
@@ -294,7 +299,8 @@ public sealed partial class MatchEngine
                 return false;
             }
             default:
-                return RunEmperorP4Watches(id, command, player, source, target) ?? RunEmperorP4Units(id, ability, command, player, source, target);
+                return RunEmperorP4Watches(id, command, player, source, target) ?? RunEmperorP4Units(id, ability, command, player, source, target)
+                    ?? RunEmperorP4More(id, ability, command, player, source, target, consumedGrant, playedFromDiscard, opponentHonorBefore, bowedBefore, preExistingGrants);
         }
     }
 
@@ -341,7 +347,7 @@ public sealed partial class MatchEngine
             if (InPlay(card)) Straighten(card);
             return true;
         }
-        return false;
+        return ApplyEmperorP4MoreBranchEffect(effect, command);
     }
 
     // ---- Tsuruchi Nobukatsu ----------------------------------------------------------------------------------------------------------------------------------------------------------------

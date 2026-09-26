@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build Strategy wave 94 (issue #503, group P4: target/slot model, movement and assignment locks, one-shot watches and shields): Games of Will, Pillar Tattoo, Preceding Reputation, Too Much for Mortals, Yojimbo Assemble, Ride the Breeze, Firm Censure, Scars of War, Show of Restraint, The Snow Has Teeth.
+"""Build Strategy wave 94 (issue #503, group P4: target/slot model, movement and assignment locks, one-shot watches and shields): Games of Will, Pillar Tattoo, Preceding Reputation, Too Much for Mortals, Yojimbo Assemble, Ride the Breeze, Firm Censure, Scars of War, Show of Restraint, The Snow Has Teeth, Power of Strength, Asset Denial, No Time for Games, Secret Reserve.
 
 The engine side is src/L5R.Core/EmperorP4*.cs. Every scan was read by eye (WebP working copies, sha256-verified against their receipts' working_copy); the published Text is each scan's own wording.
 """
@@ -25,6 +25,10 @@ ABILITIES: dict[int, list[str]] = {
     6490: ["scars-of-war-mark"],  # Scars of War
     7197: ["show-of-restraint"],  # Show of Restraint
     8342: ["snow-has-teeth"],  # The Snow Has Teeth
+    6034: ["power-of-strength-bow"],  # Power of Strength
+    634: ["asset-denial-destroy", "asset-denial-home", "asset-denial-battlefield"],  # Asset Denial (the Battle action's two destinations share one use)
+    5605: ["no-time-for-games-negate", "no-time-for-games-rehonor"],  # No Time for Games
+    6552: ["secret-reserve-focus", "secret-reserve-straighten"],  # Secret Reserve
 }
 OVERRIDE: dict[int, dict] = {
 }
@@ -40,6 +44,13 @@ TEXT: dict[int, str] = {
     2580: "Open: Choose your performing Samurai and target another player's Personality or Follower: Negate the effects of the next action performed by the targeted card (this turn). Bow it if it has no attachments and is not a Samurai.",
     6490: "Limited: Bow your performing Courtier and target a Holding: Until the game ends, after each time it bows or an ability on it resolves, its controller loses 1 Honor.",
     7197: "Battle: Choose your performing Monk: Negate all current Force penalties on him from actions. If he has a Weapon, negate the next card effect that moves him home or bows him.",
+    6034: "Battle: Choose your performing unbowed Personality with 7 or higher base Force and target two enemy Personalities, each with unit Gold Cost lower than your performer's Gold Cost: Bow one of them. Ranged Attack with strength equal to the first target's Force, which may only target the other Personality (if legal).",
+    634: "Open: Bow your performing Ninja Personality and target a Retainer: Destroy it." + NL
+         + "Battle: Choose your performing Ninja Personality with no non-Ninja Followers at the current battlefield: Move him to a different location. If he moved, straighten his unit. Discard a card in a province.",
+    5605: "Reaction: After an attacking player announces a Battle action before the Defender's first normal opportunity to act or pass: Negate its effects." + NL
+          + "Open: Choose your performing dishonorable Personality: Rehonor him. After the next time (this turn) you lose Honor from another player's card effect, give him three +1F Revenge tokens.",
+    6552: "As a Focus Effect: Until this duel ends, give +1C to each Weapon attached to your Personality in this duel." + NL
+          + "Battle/Open: Target one or more of your Items: Straighten them. You may transfer them to other Personalities you control.",
     8342: "Reaction: After engaging: The current battlefield's province has a maximum strength equal to its base strength until the end of the battle. Negate the next effect that would move one of your Personalities from its battlefield. After the next time this battle a Terrain enters play, destroy it.",
 }
 

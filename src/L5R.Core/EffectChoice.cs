@@ -237,6 +237,7 @@ public sealed partial class MatchEngine
         _state.NegatedEffects.Clear();
         // The Shadow's Embrace pass (issue #476), batch 4: a choice with further steps (The Game Has Changed) opens its next step and waits.
         if (ContinueShadowsEmbraceBatch4Choice(pending, option!)) return;
+        if (ContinueEmperorP4Choice(pending, option!)) return; // Issue #503 (EmperorP4More.cs): Secret Reserve's next Item, Power of Strength's deferred Attack.
         CompleteAbilityResolution(pending.Command, ability, pending.ConsumedGrant, pending.PlayedFromDiscard, pending.OpponentHonorBefore,
             pending.BowedBefore.ToHashSet(StringComparer.Ordinal), pending.PreExistingGrants);
     }

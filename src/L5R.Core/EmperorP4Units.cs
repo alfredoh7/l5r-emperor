@@ -18,7 +18,8 @@ public static class EmperorP4UnitAbilities
     public static Dictionary<string, AbilityDefinition> AddEmperorP4Units(this Dictionary<string, AbilityDefinition> all)
     {
         // Shinjo Hayan (oracle-l5r-6883): "After Hayan enters play: Discard all your other Sensei Personalities." (the Sensei entry trait, Effect "discard-other-sensei") and
-        // "After engaging: Once per turn, you may assign your (unbowed) Unicorn Clan Personality in your home to the current battlefield." A trait-free Reaction: "you may".
+        // "After engaging: Once per turn, you may assign your (unbowed) Unicorn Clan Personality in your home to the current battlefield." No designator: a triggered trait (TraitReactions), modelled
+        // with Reaction timing in the Engage window; "you may" leaves the assignment itself optional, its printed "Once per turn" is its use limit, and it is usable while Hayan is bowed.
         all[HayanAssign] = new("Reaction", "After engaging: Once per turn, you may assign your (unbowed) Unicorn Clan Personality in your home to the current battlefield", UnicornAtHome, Trigger: "after-engaging");
         // Ikoma Shinohara (oracle-l5r-3639): "Battle: Target a Follower in your hand and one of your Personalities: Attach the Follower to the Personality, paying all costs."
         all[ShinoharaAttach] = new("Battle", "Target a Follower in your hand and one of your Personalities: Attach the Follower to the Personality, paying all costs", "slots",
@@ -35,7 +36,7 @@ public sealed partial class MatchEngine
         // Hayan: "your (unbowed) Unicorn Clan Personality in your home" -- one who may be assigned now.
         EmperorP4UnitAbilities.UnicornAtHome => target.OwnerId == player.Id && Definition(target).Type == CardType.Personality && target.Zone == Zone.Home && !target.Bowed
             && HasClanAffiliation(target, "Unicorn") && _state.CurrentBattleProvince is not null && MayBeAssignedToCreatedBattlefield(target, player.Id == _state.ActivePlayerId, mayBeBowed: false),
-        _ => false
+        _ => P4MoreTargetAllows(category, command, player, source, target)
     };
 
     private bool? RunEmperorP4Units(string id, AbilityDefinition ability, GameCommand command, PlayerState player, CardInstance? source, CardInstance? target)

@@ -46,6 +46,7 @@ internal static partial class EmperorP4Tests
         ("Ride the Breeze: an Air Monk moves the target home and negates his later movement this turn; a non-Air Monk only moves him", RideTheBreezeMove),
         .. WatchTests(),
         .. UnitTests(),
+        .. MoreTests(),
     ]);
 
     // ---- published shape ---------------------------------------------------------------------------------------------------------------------------------------------------------------
