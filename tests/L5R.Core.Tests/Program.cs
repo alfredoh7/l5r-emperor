@@ -3399,12 +3399,16 @@ static void TacticalAdvantage()
     Equal(e.GetView(0).Players[0].Army.Single(c=>c.Id==tactician.Id).Force,5,"Base 2 + discarded card's Focus Value 3");
     Equal(e.State.Cards[focus1.Id].Zone,Zone.FateDiscard,"The discarded card moves to the Fate discard pile");
     // Any number of times per turn: a second use in the same turn is not blocked by the normal
-    // once-per-turn dedupe -- only its own cost (discarding another card) limits it. Priority passed
+    // once-per-turn dedupe -- only its own cost (discarding another card) limits it -- but each individual
+    // Tactician may perform at most one Tactical action per turn (core rules Glossary, Tactical / Tactician;
+    // enforced since issue #503, Moto Taigo), so the second use needs a second Tactician. Priority passed
     // to the opponent after the first use (like any action), so they must act (or pass) before it
     // returns to player 0 for the second use.
     Accept(e,new GameCommand("pass",1,e.Version));
-    Accept(e,new GameCommand("useAbility",0,e.Version,PerformerId:tactician.Id,TargetId:focus2.Id,AbilityId:"tactical-advantage"));
-    Equal(e.GetView(0).Players[0].Army.Single(c=>c.Id==tactician.Id).Force,8,"Two uses stack: base 2 + 3 + 3");
+    Reject(e,new GameCommand("useAbility",0,e.Version,PerformerId:tactician.Id,TargetId:focus2.Id,AbilityId:"tactical-advantage"));
+    var s2=e.State; var second=Add(s2,"training-tactician",0,Zone.Battlefield,province:0); var e2=MatchEngine.FromTestState(s2);
+    Accept(e2,new GameCommand("useAbility",0,e2.Version,PerformerId:second.Id,TargetId:focus2.Id,AbilityId:"tactical-advantage"));
+    Equal(e2.GetView(0).Players[0].Army.Single(c=>c.Id==second.Id).Force,5,"The second Tactician's own use: base 2 + 3");
 }
 static void ConquerorStraightensAfterVictory()
 {

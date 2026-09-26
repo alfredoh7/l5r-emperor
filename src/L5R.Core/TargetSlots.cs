@@ -20,6 +20,8 @@ public sealed record TargetSlot(string Id, string Category, string Label, int Mi
 {
     /// <summary>The same card may be chosen more than once: each choice is one share ("attach them to one or more of your Personalities", Suiteiru no Oni: a host named twice takes two Followers; emperor proxy pass, issue #492).</summary>
     public bool Repeatable { get; init; }
+    /// <summary>The slot names a card only to pay a cost with (Isawa Koiso's Shugenja to destroy, his card to discard; issue #503): not a target of the action.</summary>
+    public bool CostOnly { get; init; }
     public bool IsPlayer => Category == TargetSlotKinds.Player;
     public bool AtResolution => Resolution is not null;
 }
@@ -55,7 +57,7 @@ public sealed partial class MatchEngine
     private static string? PrimarySlotCardId(AbilityDefinition ability, SlotSelection[]? selections)
     {
         foreach (var slot in ability.Slots ?? [])
-            if (!slot.IsPlayer && !slot.Performing && selections?.FirstOrDefault(s => s.Slot == slot.Id)?.CardIds is { Length: > 0 } ids) return ids[0];
+            if (!slot.IsPlayer && !slot.Performing && !slot.CostOnly && selections?.FirstOrDefault(s => s.Slot == slot.Id)?.CardIds is { Length: > 0 } ids) return ids[0];
         return null;
     }
 

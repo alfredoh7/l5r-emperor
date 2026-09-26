@@ -2644,6 +2644,14 @@ public static class PublishedContent
     public static PublishedSnapshot PersonalityWave95 { get; } = Load("L5R.Published.PersonalityWave95.json", "personality-wave-95", requireDecks: false);
     /// <summary>Strategy wave 81 (Emperor Edition mechanics group E, issue #501): Greasing the Wheels, The Heir's Wrath, The Host's Advantage.</summary>
     public static PublishedSnapshot StrategyWave81 { get; } = Load("L5R.Published.StrategyWave81.json", "strategy-wave-81", requireDecks: false);
+    /// <summary>Personality wave 96 (issue #503, group P1: EmperorP1.cs): Akodo Tamisu, Asako Megu, Bayushi Nomen, Hida Bakishi, Hida Osote, Ikoma Hakige, Isawa Koiso, Isawa Sanetomo, Itoku, Tsuruchi Shichiro, Moto Taigo.</summary>
+    public static PublishedSnapshot PersonalityWave96 { get; } = Load("L5R.Published.PersonalityWave96.json", "personality-wave-96", requireDecks: false);
+    /// <summary>Spell wave 26 (issue #503, group P1: EmperorP1.cs): Damning Ceremony, Extending Influence, Mara's Touch, Ochiai's Bravery.</summary>
+    public static PublishedSnapshot SpellWave26 { get; } = Load("L5R.Published.SpellWave26.json", "spell-wave-26", requireDecks: false);
+    /// <summary>Strategy wave 82 (issue #503, group P1: EmperorP1.cs): Seeking the Question.</summary>
+    public static PublishedSnapshot StrategyWave82 { get; } = Load("L5R.Published.StrategyWave82.json", "strategy-wave-82", requireDecks: false);
+    /// <summary>Celestial wave 10 (issue #503, group P1: EmperorP1.cs): Hotei's Contentment.</summary>
+    public static PublishedSnapshot CelestialWave10 { get; } = Load("L5R.Published.CelestialWave10.json", "celestial-wave-10", requireDecks: false);
     /// <summary>Holding wave 28 (Emperor Edition mechanics group E, issue #501): Seaside Bazaar.</summary>
     public static PublishedSnapshot HoldingWave28 { get; } = Load("L5R.Published.HoldingWave28.json", "holding-wave-28", requireDecks: false);
     /// <summary>Personality wave 92 (issue #501, mechanics group D): Daidoji Narizane and Daigotsu Yajinden - exp3 (EmperorMechD.cs).</summary>

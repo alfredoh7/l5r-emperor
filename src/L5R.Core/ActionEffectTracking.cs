@@ -42,6 +42,7 @@ public sealed partial class MatchEngine
         var affected = _state.CurrentActionAffected;
         _state.LastResolvedAction = new ResolvedActionFacts { AbilityId = abilityId, PlayerId = playerId, SourceId = sourceId, Affected = affected, PerformerId = performerId, HonorLosers = _state.CurrentActionHonorLosers,
             HandRecipients = _state.CurrentActionHandRecipients, FavorTakers = _state.CurrentActionFavorTakers };
+        QueueP1AfterActionTraits(_state.LastResolvedAction); // Issue #503 (EmperorP1.cs): Osote's owed discard is due, Bakishi's shield drops, Tamisu's and Shichiro's traits are queued.
         NoteHonorLostToOtherAction(playerId, _state.CurrentActionHonorLosers); // Kitsu Tamasine (issue #477, batch 5)
         CountHandActionResolved(playerId, _state.CurrentActionHandRecipients); // Indecision (issue #501, EmperorMechD.cs): "actions which put cards into his hand this phase".
         _state.CurrentActionAffected = []; _state.CurrentActionHonorLosers = []; _state.CurrentActionHandRecipients = []; _state.CurrentActionFavorTakers = [];
@@ -61,6 +62,7 @@ public sealed partial class MatchEngine
         if (OpenCrowdedStreetsTrait(closesTo)) return true;
         // Emperor Edition remaining-cards pass (issue #492), group D: The Shadow Court's and The Sincerity of the Dragon's traits (EmperorRemainingD.cs) -- also before any Reaction to the same moment.
         if (OpenShadowCourtTrait(closesTo) || OpenSincerityTrait(closesTo)) return true;
+        if (OpenP1AfterActionTraits(closesTo, playerId)) return true; // Issue #503 (EmperorP1.cs): traits resolve before the Reactions to the same moment.
         if (OpenAfterActionResolvedWindow(closesTo)) return true;
         // Moshi Ino's storm (issue #453, batch 3; MoshiInoStorm.cs): the same "this action is truly done" moment, asked once no Reaction window opened over it.
         return OpenInoStorm(closesTo);
@@ -99,6 +101,7 @@ public sealed partial class MatchEngine
         if (facts.AbilityId == AssignedSentinel) return false;
         if (!AbilityCatalog.All.ContainsKey(facts.AbilityId)) return false;
         if (FollowupsAfterActionApplies(source, abilityId, playerId) is { } followups) return followups;
+        if (EmperorP1AfterActionApplies(source, abilityId, playerId) is { } p1) return p1; // Issue #503 (EmperorP1.cs): Itoku, Hida Bakishi
         if (MechDAfterActionApplies(source, abilityId, playerId, facts) is { } mechD) return mechD; // Indecision (issue #501, EmperorMechD.cs) // Asako Chukage (issue #498) // Equip's facts name no catalogued ability: only the Reaction above reads them.
         return abilityId switch
         {

@@ -47,6 +47,8 @@ public static class CostVerbs
     /// <summary>Give the subject -Amount Chi ("give this Personality -1C:", Cursed Relic, issue #467): payable only when he has that much Chi to lose (core rules,
     /// Pay Costs); a Personality it leaves at 0 Chi is destroyed by the ordinary Chi rule (ApplyModifier).</summary>
     public const string ChiPenalty = "chi-penalty";
+    /// <summary>Give the subject -Amount Force ("Give this Shugenja -2F:", Mara's Touch, issue #503): payable only when he has that much Force to lose.</summary>
+    public const string ForcePenalty = "force-penalty";
     /// <summary>Shuffle the acting player's hand (the card played from it excepted) into his Fate deck (Face of Ninube, Emperor Edition remaining-cards pass, group A, issue #492); the count is what the action then draws.</summary>
     public const string ShuffleHand = "shuffle-hand";
     /// <summary>Move the subject (his unit) home ("Move your performing opposed Personality home:", Wall of Honor, issue #492): a cost, so it is paid whatever happens to the effects and no negation of an effect stops it.</summary>
@@ -157,6 +159,8 @@ public sealed partial class MatchEngine
             // Cursed Relic (issue #467): a Chi penalty is paid in full or not at all.
             if (cost.Verb == CostVerbs.ChiPenalty)
                 Require(PersonalityChi(wielder!) >= cost.Amount, $"{Definition(wielder!).Name} does not have {cost.Amount} Chi to lose.");
+            if (cost.Verb == CostVerbs.ForcePenalty) // Mara's Touch (issue #503): a Force penalty is paid in full or not at all.
+                Require(CardForce(wielder!) >= cost.Amount && wielder!.ForcePenaltiesNegatedTurn != _state.TurnNumber, $"{Definition(wielder!).Name} does not have {cost.Amount} Force to lose.");
         }
     }
 
@@ -277,6 +281,7 @@ public sealed partial class MatchEngine
                     if (UnitHostId(subject) != subject.Id) Card(UnitHostId(subject)).Bowed = true;
                     break;
                 case CostVerbs.ChiPenalty: ApplyModifier(subject, source?.Id ?? subject.Id, command.AbilityId!, "Chi", -cost.Amount); break;
+                case CostVerbs.ForcePenalty: ApplyModifier(subject, source?.Id ?? subject.Id, command.AbilityId!, "Force", -cost.Amount); break; // issue #503
                 case CostVerbs.MoveHome:
                     ReturnHome(subject, false);
                     Emit("unitMovedHome", $"{Definition(subject).Name}'s unit moved home (a cost).", subject.OwnerId, subject.Id);
