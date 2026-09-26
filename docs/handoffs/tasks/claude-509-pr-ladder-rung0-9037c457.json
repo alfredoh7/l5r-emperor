@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Rung 0 of the PR ladder: docs/rules/RULINGS.md seeded with 19 confirmed rulings from 3 of the 6 named decision docs (rulings-pass, mechanics-batch, rend/no-hiding-place/ring-search), docs/PR_LADDER.md, links from docs/decisions/README.md and AGENTS.md's read list. Epic issue #509 and the three labels (needs-mendon-ruling, ready-for-agent, client-lane) already existed from a prior attempt and are unchanged.",
+  "validation": "python -m unittest discover -s tools/content -p test*.py: 135 passed. All relative Markdown links in the four changed docs verified to resolve to existing files. No engine tests run: no code changed (docs and GitHub metadata only).",
+  "remaining": "None; ready for review. Candidate rulings left out as ambiguous (see PR description): control-transfer specifics (mechanics-batch describes them as implemented primitives, not stated as an explicit Mendon ruling separate from the engineering description); everything in honor-never-falls-kurohito-makito.md and 2026-09-26-remaining-cards-pass.md (both contain only readings awaiting Mendon's confirmation, no new confirmed rulings).",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/509",
+  "branch": "claude/509-pr-ladder-rung0",
+  "updated": "2026-09-26T13:04:05.984720+00:00"
+}
