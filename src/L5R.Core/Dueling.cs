@@ -532,6 +532,7 @@ public sealed partial class MatchEngine
                 break;
             // The Aerie (Emperor Edition Stronghold pass, issue #486 batch 2): Duel of Haiku's outcome.
             case "aerie-duel": AerieDuelOutcome(winnerId, loserIds, challengerPlayerId); break;
+            case EmperorP1Abilities.OchiaiDuel: QueueOchiaiDestruction(loserIds, challengerPlayerId); break; // Ochiai's Bravery (issue #503, EmperorP1.cs)
             case "duel-of-haiku":
                 if (winnerId is not null) GainHonor(Card(winnerId).OwnerId, 1, "Duel of Haiku");
                 foreach (var id in loserIds)

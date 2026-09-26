@@ -699,6 +699,7 @@ public sealed partial class MatchEngine
         ApplyShadowsEmbraceBatch1EntryEffects(playerId,card); // The Shadow's Embrace pass (issue #476), batch 1: Atosa's Sensei discard.
         ApplyEmperorRemainingFEntryEffects(playerId,card); // Emperor Edition remaining-cards pass (issue #492), group F: Moneylender's Wealth tokens.
         ApplyEmperorFollowupsEntryEffects(playerId,card); // Emperor Edition follow-ups (issue #498): the Dragon Sword's Honor; the entry searches queued (EmperorFollowupsSearch.cs).
+        ApplyEmperorP1EntryEffects(playerId,card); // Issue #503 (EmperorP1.cs): its Sensei discards and Extending Influence's Honor loss.
     }
     // Sensei (Mirumoto Hikaro / Mirumoto Yozo, Experienced 2): "your OTHER Sensei Personalities" --
     // every OTHER Sensei-keyword Personality this same controller has, either unbowed-or-bowed in
@@ -1496,6 +1497,7 @@ public sealed partial class MatchEngine
             // The Shadow's Embrace pass (issue #476), batch 6: Shieldman's unit is never assigned to an attacking army; Star-Crossed Lovers never to each other's battlefields.
             RequireShieldmanMayAssign(card,isDefender);
             RequireAsukaMayAssign(card,isDefender); // Goju Asuka (issue #501): "may not assign ... into a defending army".
+            RequireHoteiMayAssign(card,isDefender); // Hotei's Contentment (issue #503)
             RequireDelayedArrivalMayAssign(card,isDefender); // Delayed Arrival (issue #492, group F): "may not be assigned to attack you until your next turn begins".
             RequireStarCrossedMayAssign(card,assignment.Value,command.Assignments!);
             card.Zone=Zone.Battlefield; card.ProvinceIndex=assignment.Value;
@@ -2195,6 +2197,7 @@ public sealed partial class MatchEngine
             if(def.Effect=="fields-of-mercy") _state.FieldsOfMercyWatches.Add(new(){CardId=card.Id});
             Emit("terrainPlayed",$"{Player(command.PlayerId).Name} played {def.Name} as Terrain at this battlefield.",command.PlayerId,card.Id);
             FireMarshallingFieldsDraw(command.PlayerId); // The Marshalling Fields (issue #501): playing a Terrain is a Terrain action that resolved.
+            QueueP1TerrainPlayTraits(command.PlayerId); // Akodo Tamisu (issue #503): a Terrain action resolved.
             // Hasty Fortifications: "(including this card's)" -- putting it into play is one of the Battle actions it counts.
             if(def.Effect=="hasty-fortifications") AddHastyBonus(card);
             // The Shadow's Embrace pass (issue #476), batch 3 (ShadowsEmbraceBatch3.cs): playing a Terrain is an action on a Strategy (Forthrightness), and Crowded Streets
@@ -2234,6 +2237,7 @@ public sealed partial class MatchEngine
         // Glory of the Shogun (issue #492, group F): an optional draw the action owes (its attach) is asked before priority passes on.
         if(_state.PendingChoice is null && _state.PendingEventChoices.Count>0) OpenQueuedEventChoice(stayWithPlayer?playerId:1-playerId);
         if(_state.PendingChoice is null && _state.PendingEntrySearches.Count>0) OpenQueuedEntrySearch(stayWithPlayer?playerId:1-playerId); // issue #498: an entry search the action (an Equip) owes
+        OpenEmperorP1Deferred(stayWithPlayer?playerId:1-playerId,playerId); // Issue #503 (EmperorP1.cs): a queued trait, then a discard Hida Osote owes.
     }
     private IEnumerable<CardInstance> Army(int playerId,int province) => _state.Cards.Values.Where(c=>c.OwnerId==playerId && c.Zone==Zone.Battlefield && c.ProvinceIndex==province && Definition(c).Type==CardType.Personality);
     // Province adjacency (core rules): a player's provinces sit in a line, 1-2-3-4. A destroyed
@@ -2309,7 +2313,7 @@ public sealed partial class MatchEngine
     // "force-with-spell" (Asako Ume), "force-if-enemy-dishonorable" (Bayushi Kahoku) and
     // "force-max-dead-pile" (Moto Shunsuke) are always-on passive bonuses, unlike the attacking-only
     // attacking-two/attacking-four Effects above.
-    private int PersonalityForce(CardInstance card) => Math.Max(0,Definition(card).Force+StatModifier(card,"Force")+TerrainForceAdjustment(card)+GinasFoxForce(card)+EmperorRemainingEForce(card)+ThreeSForce(card)+ForgottenLegacyBatch5Force(card)+EmperorBatch5Force(card)+EmperorPersonalityBatch3Force(card)+ShadowsEmbraceBatch5Force(card)+ShadowsEmbraceBatch2Force(card)+ShadowsEmbraceBatch1Force(card)+EmperorRemainingGForce(card)+(IsAttacking(card)?(Definition(card).Effect=="attacking-two"?2:Definition(card).Effect=="attacking-four"?4:
+    private int PersonalityForce(CardInstance card) => Math.Max(0,Definition(card).Force+StatModifier(card,"Force")+TerrainForceAdjustment(card)+GinasFoxForce(card)+EmperorRemainingEForce(card)+ThreeSForce(card)+EmperorP1Force(card)+ForgottenLegacyBatch5Force(card)+EmperorBatch5Force(card)+EmperorPersonalityBatch3Force(card)+ShadowsEmbraceBatch5Force(card)+ShadowsEmbraceBatch2Force(card)+ShadowsEmbraceBatch1Force(card)+EmperorRemainingGForce(card)+(IsAttacking(card)?(Definition(card).Effect=="attacking-two"?2:Definition(card).Effect=="attacking-four"?4:
         // Matsu Kaido (oracle-l5r-4934, issue #299): "Kaido has +1F while attacking" -- the plain +1
         // counterpart to attacking-two/attacking-four (Matsu Yoshito's own conditional variant below
         // starts from the same +1 base).
@@ -2848,8 +2852,8 @@ public sealed partial class MatchEngine
     {
         if((card.Zone!=Zone.Battlefield || card.ProvinceIndex!=province) && (MovementLockNegates(card,MovementKinds.ToBattlefield) || MovementToBattlefieldNegated(card,province) || KitsuneNegatesMovement(card,province) || UguluNegatesMovement(card,province))) return false;
         // The Shadow's Embrace pass (issue #476), batch 6: Shieldman "will not move into an attacking army"; Star-Crossed Lovers "will not move to each other's battlefields".
-        if((card.Zone!=Zone.Battlefield || card.ProvinceIndex!=province) && (ShieldmanNegatesMove(card) || StarCrossedNegatesMove(card,province))) return false;
-        if((card.Zone!=Zone.Battlefield || card.ProvinceIndex!=province) && AsukaNegatesMove(card)) return false; // Goju Asuka (issue #501): "will not move into a defending army".
+        if((card.Zone!=Zone.Battlefield || card.ProvinceIndex!=province) && (ShieldmanNegatesMove(card) || StarCrossedNegatesMove(card,province))) return false; // Goju Asuka (issue #501): "will not move into a defending army".
+        if((card.Zone!=Zone.Battlefield || card.ProvinceIndex!=province) && (AsukaNegatesMove(card) || HoteiNegatesMove(card))) return false; // Hotei's Contentment (issue #503)
         // Legion of the Bat (issue #279): "after the resolution of an action that moved a target
         // enemy Infantry Personality to this card's battlefield" -- every printed "move to the
         // current battlefield" ability (Mirumoto Michi/Togashi Rikyou/Intervening Spirit/Takasho/
