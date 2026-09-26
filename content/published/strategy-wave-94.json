@@ -1,0 +1,152 @@
+{
+  "Profile": "strategy-wave-94",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-2771",
+      "Name": "Games of Will",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing unbowed Personality and target an enemy card with lower Gold Cost: Bow it.\nBattle: Choose your performing Personality: Negate all current and new Force penalties to him from actions. Negate all current and new effects from other players' cards that prevent him from contributing Force to his army.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-2771.jpg",
+      "Keywords": [],
+      "Focus": 3,
+      "Abilities": [
+        "games-of-will-bow",
+        "games-of-will-negate"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-5956",
+      "Name": "Pillar Tattoo",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing unbowed Tattooed Monk: Give him +3F. If he is Earth, you may target and bow an enemy card without attachments.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-5956.jpg",
+      "Keywords": [
+        "Earth",
+        "Tattoo"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "pillar-tattoo-boost"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-6043",
+      "Name": "Preceding Reputation",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing unbowed Personality and target an enemy Personality with fewer keywords, ignoring \"Soul of\" keywords: Bow all cards without attachments in his unit.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6043.jpg",
+      "Keywords": [],
+      "Focus": 3,
+      "Abilities": [
+        "preceding-reputation-bow"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-6317",
+      "Name": "Ride the Breeze",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing unbowed Monk and target an enemy Personality: Move him home. If he moved and your Monk is Air, negate the Personality's (future) movement.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6317.jpg",
+      "Keywords": [
+        "Air",
+        "Kiho"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "ride-the-breeze-move"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-8634",
+      "Name": "Too Much for Mortals",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing unbowed Spirit and target an enemy Personality: Bow him or destroy one of his attachments.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8634.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "too-much-for-mortals"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9507",
+      "Name": "Yojimbo Assemble",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing unbowed Yojimbo, and target an enemy card with Force lower than your Yojimbo's Force plus the highest Chi among all Shugenja and Courtiers you control: Bow the target. Destroy it if it has no attachments.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9507.jpg",
+      "Keywords": [],
+      "Focus": 3,
+      "Abilities": [
+        "yojimbo-assemble-bow"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

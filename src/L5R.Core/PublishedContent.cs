@@ -2650,4 +2650,8 @@ public static class PublishedContent
     public static PublishedSnapshot PersonalityWave92 { get; } = Load("L5R.Published.PersonalityWave92.json", "personality-wave-92", requireDecks: false);
     /// <summary>Strategy wave 78 (issue #501, mechanics group D): Broken Cipher, Indecision and Amazing Feat (EmperorMechD.cs).</summary>
     public static PublishedSnapshot StrategyWave78 { get; } = Load("L5R.Published.StrategyWave78.json", "strategy-wave-78", requireDecks: false);
+    /// <summary>Personality wave 108 (issue #503, group P4: EmperorP4*.cs): Bayushi Tenzan, Gozaru no Oni, Shinjo Sarang, Tsuruchi Nobukatsu.</summary>
+    public static PublishedSnapshot PersonalityWave108 { get; } = Load("L5R.Published.PersonalityWave108.json", "personality-wave-108", requireDecks: false);
+    /// <summary>Strategy wave 94 (issue #503, group P4: EmperorP4*.cs): Games of Will, Pillar Tattoo, Preceding Reputation, Ride the Breeze, Too Much for Mortals, Yojimbo Assemble.</summary>
+    public static PublishedSnapshot StrategyWave94 { get; } = Load("L5R.Published.StrategyWave94.json", "strategy-wave-94", requireDecks: false);
 }

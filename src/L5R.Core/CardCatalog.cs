@@ -676,6 +676,8 @@ public static class CardCatalog
             .Concat(PublishedContent.HoldingWave28.Cards) // Emperor Edition mechanics group E (issue #501): Seaside Bazaar
             .Concat(PublishedContent.PersonalityWave92.Cards) // Issue #501, mechanics group D: Daidoji Narizane, Daigotsu Yajinden - exp3
             .Concat(PublishedContent.StrategyWave78.Cards) // Issue #501, mechanics group D: Broken Cipher, Indecision, Amazing Feat
+            .Concat(PublishedContent.PersonalityWave108.Cards) // Issue #503, group P4: Bayushi Tenzan, Gozaru no Oni, Shinjo Sarang, Tsuruchi Nobukatsu
+            .Concat(PublishedContent.StrategyWave94.Cards) // Issue #503, group P4: Games of Will, Pillar Tattoo, Preceding Reputation, Ride the Breeze, Too Much for Mortals, Yojimbo Assemble
             .ToDictionary(c => c.Id, StringComparer.Ordinal);
     }
 }

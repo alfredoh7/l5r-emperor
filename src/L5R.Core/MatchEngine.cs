@@ -2796,6 +2796,7 @@ public sealed partial class MatchEngine
             ExpendableDraw(card);
             Emit("unitDestroyed",$"{Definition(card).Name} and its attachments were destroyed.",card.OwnerId,card.Id);
             AfterCardDestroyed(card); // Makito (issue #496): "After a card is destroyed: Give Makito +1F."
+            P4AfterDestroyed(card); // Gozaru no Oni (issue #503, EmperorP4.cs): "After Gozaru is destroyed: It becomes discarded (not dead)."
         }
         return count;
     }
