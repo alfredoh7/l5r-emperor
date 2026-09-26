@@ -347,7 +347,7 @@ public sealed partial class MatchEngine
         foreach (var id in p.Chosen)
         {
             var card = Card(id);
-            if (p.SpecId == EmperorMechDSpecs.IndecisionDiscard) { if (card.Zone == Zone.Hand) DiscardFate(Player(card.OwnerId), card); }
+            if (p.SpecId == EmperorMechDSpecs.IndecisionDiscard) { if (card.Zone == Zone.Hand && !P2HandDiscardBlocked(card.OwnerId, Card(p.SourceCardId).OwnerId, true, "Indecision")) DiscardFate(Player(card.OwnerId), card); } // issue #503: Pillowbook, The Scorpion Wall is Finished
             else if (InPlay(card) && !StalwartNegatesBow(card, p.ActingPlayerId)) card.Bowed = true;
         }
     }

@@ -1,0 +1,38 @@
+[
+  {
+    "card_id": "oracle-l5r-3723",
+    "printing_set": [
+      "Embers of War"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=3723",
+    "image_path": "assets/reference/oracle/embers-of-war/webp/oracle-l5r-3723-printing-1-image-1.webp",
+    "image_sha256": "432be300cfa43d74d47f8ee8f97dc500f16ad0104949d2492057d73588756fb2"
+  },
+  {
+    "card_id": "oracle-l5r-9792",
+    "printing_set": [
+      "The Shadow's Embrace"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=9792",
+    "image_path": "assets/reference/oracle/the-shadow-s-embrace/webp/oracle-l5r-9792-printing-1-image-1.webp",
+    "image_sha256": "e81c33f16d5df1ab7300d822da602370faa2ade94f14eec420d7879227f93372"
+  },
+  {
+    "card_id": "oracle-l5r-10029",
+    "printing_set": [
+      "Seeds of Decay"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10029",
+    "image_path": "assets/reference/oracle/seeds-of-decay/webp/oracle-l5r-10029-printing-1-image-1.webp",
+    "image_sha256": "7950c7cb90437218a90e3be2c288d3893b94c4fe55fdf3f8fa5fcc32eeab53e8"
+  },
+  {
+    "card_id": "oracle-l5r-10030",
+    "printing_set": [
+      "Seeds of Decay"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10030",
+    "image_path": "assets/reference/oracle/seeds-of-decay/webp/oracle-l5r-10030-printing-1-image-1.webp",
+    "image_sha256": "32cb0878f2d3b1403a8b1fdffce6536b6edc17e5cd1c28c677dc2b1a00c0e3f2"
+  }
+]

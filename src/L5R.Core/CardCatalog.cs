@@ -673,9 +673,41 @@ public static class CardCatalog
             .Concat(PublishedContent.RegionWave19.Cards) // Emperor Edition mechanics group C (issue #501): Temple of the Seven Fortunes
             .Concat(PublishedContent.PersonalityWave95.Cards) // Emperor Edition mechanics group E (issue #501): Kakita Kae, Moto Rani - exp, Yoritomo Singh - exp2, Zlkyt
             .Concat(PublishedContent.StrategyWave81.Cards) // Emperor Edition mechanics group E (issue #501): Greasing the Wheels, The Heir's Wrath, The Host's Advantage
+            .Concat(PublishedContent.PersonalityWave96.Cards) // Issue #503, group P1: Akodo Tamisu, Asako Megu, Bayushi Nomen, Hida Bakishi, Hida Osote, Ikoma Hakige, Isawa Koiso, Isawa Sanetomo, Itoku, Tsuruchi Shichiro, Moto Taigo
+            .Concat(PublishedContent.SpellWave26.Cards) // Issue #503, group P1: Damning Ceremony, Extending Influence, Mara's Touch, Ochiai's Bravery
+            .Concat(PublishedContent.StrategyWave82.Cards) // Issue #503, group P1: Seeking the Question
+            .Concat(PublishedContent.CelestialWave10.Cards) // Issue #503, group P1: Hotei's Contentment
             .Concat(PublishedContent.HoldingWave28.Cards) // Emperor Edition mechanics group E (issue #501): Seaside Bazaar
             .Concat(PublishedContent.PersonalityWave92.Cards) // Issue #501, mechanics group D: Daidoji Narizane, Daigotsu Yajinden - exp3
             .Concat(PublishedContent.StrategyWave78.Cards) // Issue #501, mechanics group D: Broken Cipher, Indecision, Amazing Feat
+            .Concat(PublishedContent.PersonalityWave100.Cards) // Issue #503, pass group P2: Kazutoshi, Yamahatsu, Nakano, Mina, Gonji
+            .Concat(PublishedContent.StrategyWave86.Cards) // Issue #503, pass group P2: Honest Assessment, Surrounded!, Brothers in Battle, Spirit of the Shadows, Killing Intent, A Champion in Court, Turning Away
+            .Concat(PublishedContent.SpellWave30.Cards) // Issue #503, pass group P2: Delving into History, The Tapestry Perceived
+            .Concat(PublishedContent.ItemWave22.Cards) // Issue #503, pass group P2: Armor of the Uruwashii, Pillowbook
+            .Concat(PublishedContent.HoldingWave33.Cards) // Issue #503, pass group P2: Shrine to Nimuro
+            .Concat(PublishedContent.EventWave13.Cards) // Issue #503, pass group P2: Growing Hostility, Gaining Advantage, The Agony of Her Gaze, The Scorpion Wall is Finished
+            .Concat(PublishedContent.PersonalityWave108.Cards) // Issue #503, group P4: Bayushi Tenzan, Gozaru no Oni, Ikoma Shinohara, Shinjo Hayan, Shinjo Sarang, Tsuruchi Nobukatsu
+            .Concat(PublishedContent.StrategyWave94.Cards) // Issue #503, group P4: Asset Denial, Firm Censure, Games of Will, No Time for Games, Pillar Tattoo, Power of Strength, Preceding Reputation, Ride the Breeze, Scars of War, Secret Reserve, Show of Restraint, The Snow Has Teeth, Too Much for Mortals, Yojimbo Assemble
+            .Concat(PublishedContent.SpellWave38.Cards) // Issue #503, group P4: Drawing on the Mountain, The Menacing Sky
+            .Concat(PublishedContent.ItemWave30.Cards) // Issue #503, group P4: Hunger
+            .Concat(PublishedContent.EventWave21.Cards) // Issue #503, group P4: Too Close to Home
+            .Concat(PublishedContent.PersonalityWave112.Cards) // Issue #503, pass group P5: Hida Yamadera, Kakita Nara, Raido no Oni, Shiba Jouta - exp, Tokiko, Daigotsu Yutaka
+            .Concat(PublishedContent.StrategyWave98.Cards) // Issue #503, pass group P5: Disrupting Communication, Economic Repercussions, Headbutt, Inciting Mistrust, Perplexing Guests, The Bite of Winter and eight more (EmperorP5*.cs)
+            .Concat(PublishedContent.ItemWave34.Cards) // Issue #503, pass group P5: Tsubute
+            .Concat(PublishedContent.SpellWave42.Cards) // Issue #503, pass group P5: Seek the Stain, Step Through the Void
+            .Concat(PublishedContent.EventWave25.Cards) // Issue #503, pass group P5: Never Enough Soldiers, Starting on the Path
+            .Concat(PublishedContent.CelestialWave26.Cards) // Issue #503, pass group P5: Blessings of the Shi-Tien Yen-Wang
+            .Concat(PublishedContent.StrongholdWave46.Cards) // Issue #503, pass group P5: The Plain of Glass, The New Foundries
+            .Concat(PublishedContent.HoldingWave45.Cards) // Issue #503, pass group P5: Stolen Merchandise
+            .Concat(PublishedContent.PersonalityWave116.Cards) // Issue #503, pass group P6: Kitsune Haruki, Daigotsu Susaiken, Kuni Renyu, Otomo Suikihime, Shosuro Ietsuno
+            .Concat(PublishedContent.StrategyWave102.Cards) // Issue #503, pass group P6: Perfect Sacrifice
+            .Concat(PublishedContent.EventWave29.Cards) // Issue #503, pass group P6: Incredible Tragedy, In Search of Guidance, Dark Experiments, Distant Expansion
+            .Concat(PublishedContent.ItemWave38.Cards) // Issue #503, pass group P6: Mining Apparatus
+            .Concat(PublishedContent.SpellWave46.Cards) // Issue #503, pass group P6: Illusory Defense
+            .Concat(PublishedContent.PersonalityWave104.Cards) // Emperor Edition group P3 (issue #503): Asako Kikugoro, Daidoji Akeha, Daigotsu Miki, Daigotsu Tenbatsu, Hida Fujita, Ikoma Ayumu, Kakita Kenta, Shosuro Aroru - exp2, Shosuro Toson - exp2, Utaku Lishan, Utaku Tairu - exp, Thunder Dragon - exp2
+            .Concat(PublishedContent.SpellWave34.Cards) // Emperor Edition group P3 (issue #503): Centering the Soul, Erosion
+            .Concat(PublishedContent.StrategyWave90.Cards) // Emperor Edition group P3 (issue #503): Deep Snows, Destructive Priorities, Forging Destiny, Iron Will, Request Authorization, Easy Persuasion
+            .Concat(PublishedContent.FollowerWave41.Cards) // Emperor Edition group P3 (issue #503): Hida Defenders, Vigilant Riders
             .ToDictionary(c => c.Id, StringComparer.Ordinal);
     }
 }

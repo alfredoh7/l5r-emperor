@@ -40,6 +40,6 @@ public sealed partial class MatchEngine
 
     // Whether an in-play card's Reaction with this trigger watches the entry of this Personality (InPlayEntryWatchers).
     private bool EntryWatchTriggerApplies(AbilityDefinition ability, CardInstance entered, CardInstance watcher) =>
-        ability.Trigger == "own-personality-enters-play" && watcher.Zone != Zone.Region
+        ability.Trigger == "own-personality-enters-play" && watcher.Zone != Zone.Region && P3EntryWatchAllows(ability, entered) // Asako Kikugoro (issue #503): only a Henshin
         || ability.Trigger == EmperorRulingR3Abilities.EntersFromProvinceTrigger && EnteredFromProvince(entered);
 }

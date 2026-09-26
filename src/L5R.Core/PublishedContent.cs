@@ -2644,10 +2644,74 @@ public static class PublishedContent
     public static PublishedSnapshot PersonalityWave95 { get; } = Load("L5R.Published.PersonalityWave95.json", "personality-wave-95", requireDecks: false);
     /// <summary>Strategy wave 81 (Emperor Edition mechanics group E, issue #501): Greasing the Wheels, The Heir's Wrath, The Host's Advantage.</summary>
     public static PublishedSnapshot StrategyWave81 { get; } = Load("L5R.Published.StrategyWave81.json", "strategy-wave-81", requireDecks: false);
+    /// <summary>Personality wave 96 (issue #503, group P1: EmperorP1.cs): Akodo Tamisu, Asako Megu, Bayushi Nomen, Hida Bakishi, Hida Osote, Ikoma Hakige, Isawa Koiso, Isawa Sanetomo, Itoku, Tsuruchi Shichiro, Moto Taigo.</summary>
+    public static PublishedSnapshot PersonalityWave96 { get; } = Load("L5R.Published.PersonalityWave96.json", "personality-wave-96", requireDecks: false);
+    /// <summary>Spell wave 26 (issue #503, group P1: EmperorP1.cs): Damning Ceremony, Extending Influence, Mara's Touch, Ochiai's Bravery.</summary>
+    public static PublishedSnapshot SpellWave26 { get; } = Load("L5R.Published.SpellWave26.json", "spell-wave-26", requireDecks: false);
+    /// <summary>Strategy wave 82 (issue #503, group P1: EmperorP1.cs): Seeking the Question.</summary>
+    public static PublishedSnapshot StrategyWave82 { get; } = Load("L5R.Published.StrategyWave82.json", "strategy-wave-82", requireDecks: false);
+    /// <summary>Celestial wave 10 (issue #503, group P1: EmperorP1.cs): Hotei's Contentment.</summary>
+    public static PublishedSnapshot CelestialWave10 { get; } = Load("L5R.Published.CelestialWave10.json", "celestial-wave-10", requireDecks: false);
     /// <summary>Holding wave 28 (Emperor Edition mechanics group E, issue #501): Seaside Bazaar.</summary>
     public static PublishedSnapshot HoldingWave28 { get; } = Load("L5R.Published.HoldingWave28.json", "holding-wave-28", requireDecks: false);
     /// <summary>Personality wave 92 (issue #501, mechanics group D): Daidoji Narizane and Daigotsu Yajinden - exp3 (EmperorMechD.cs).</summary>
     public static PublishedSnapshot PersonalityWave92 { get; } = Load("L5R.Published.PersonalityWave92.json", "personality-wave-92", requireDecks: false);
     /// <summary>Strategy wave 78 (issue #501, mechanics group D): Broken Cipher, Indecision and Amazing Feat (EmperorMechD.cs).</summary>
     public static PublishedSnapshot StrategyWave78 { get; } = Load("L5R.Published.StrategyWave78.json", "strategy-wave-78", requireDecks: false);
+    /// <summary>Personality wave 100 (issue #503, pass group P2): Kazutoshi, Yamahatsu, Nakano, Mina, Gonji (EmperorP2*.cs).</summary>
+    public static PublishedSnapshot PersonalityWave100 { get; } = Load("L5R.Published.PersonalityWave100.json", "personality-wave-100", requireDecks: false);
+    /// <summary>Strategy wave 86 (issue #503, pass group P2): Honest Assessment, Surrounded!, Brothers in Battle, Spirit of the Shadows, Killing Intent, A Champion in Court, Turning Away (EmperorP2*.cs).</summary>
+    public static PublishedSnapshot StrategyWave86 { get; } = Load("L5R.Published.StrategyWave86.json", "strategy-wave-86", requireDecks: false);
+    /// <summary>Spell wave 30 (issue #503, pass group P2): Delving into History, The Tapestry Perceived (EmperorP2*.cs).</summary>
+    public static PublishedSnapshot SpellWave30 { get; } = Load("L5R.Published.SpellWave30.json", "spell-wave-30", requireDecks: false);
+    /// <summary>Item wave 22 (issue #503, pass group P2): Armor of the Uruwashii, Pillowbook (EmperorP2*.cs).</summary>
+    public static PublishedSnapshot ItemWave22 { get; } = Load("L5R.Published.ItemWave22.json", "item-wave-22", requireDecks: false);
+    /// <summary>Holding wave 33 (issue #503, pass group P2): Shrine to Nimuro (EmperorP2*.cs).</summary>
+    public static PublishedSnapshot HoldingWave33 { get; } = Load("L5R.Published.HoldingWave33.json", "holding-wave-33", requireDecks: false);
+    /// <summary>Event wave 13 (issue #503, pass group P2): Growing Hostility, Gaining Advantage, The Agony of Her Gaze, The Scorpion Wall is Finished (EmperorP2*.cs).</summary>
+    public static PublishedSnapshot EventWave13 { get; } = Load("L5R.Published.EventWave13.json", "event-wave-13", requireDecks: false);
+    /// <summary>Personality wave 108 (issue #503, group P4: EmperorP4*.cs): Bayushi Tenzan, Gozaru no Oni, Ikoma Shinohara, Shinjo Hayan, Shinjo Sarang, Tsuruchi Nobukatsu.</summary>
+    public static PublishedSnapshot PersonalityWave108 { get; } = Load("L5R.Published.PersonalityWave108.json", "personality-wave-108", requireDecks: false);
+    /// <summary>Strategy wave 94 (issue #503, group P4: EmperorP4*.cs): Asset Denial, Firm Censure, Games of Will, No Time for Games, Pillar Tattoo, Power of Strength, Preceding Reputation, Ride the Breeze, Scars of War, Secret Reserve, Show of Restraint, The Snow Has Teeth, Too Much for Mortals, Yojimbo Assemble.</summary>
+    public static PublishedSnapshot StrategyWave94 { get; } = Load("L5R.Published.StrategyWave94.json", "strategy-wave-94", requireDecks: false);
+    /// <summary>Spell wave 38 (issue #503, group P4: EmperorP4*.cs): Drawing on the Mountain, The Menacing Sky.</summary>
+    public static PublishedSnapshot SpellWave38 { get; } = Load("L5R.Published.SpellWave38.json", "spell-wave-38", requireDecks: false);
+    /// <summary>Item wave 30 (issue #503, group P4: EmperorP4*.cs): Hunger.</summary>
+    public static PublishedSnapshot ItemWave30 { get; } = Load("L5R.Published.ItemWave30.json", "item-wave-30", requireDecks: false);
+    /// <summary>Event wave 21 (issue #503, group P4: EmperorP4*.cs): Too Close to Home.</summary>
+    public static PublishedSnapshot EventWave21 { get; } = Load("L5R.Published.EventWave21.json", "event-wave-21", requireDecks: false);
+    /// <summary>Personality wave 112 (issue #503, pass group P5, EmperorP5.cs): Hida Yamadera, Kakita Nara, Raido no Oni, Shiba Jouta - exp, Tokiko, Daigotsu Yutaka.</summary>
+    public static PublishedSnapshot PersonalityWave112 { get; } = Load("L5R.Published.PersonalityWave112.json", "personality-wave-112", requireDecks: false);
+    /// <summary>Strategy wave 98 (issue #503, pass group P5, EmperorP5*.cs): Disrupting Communication, Economic Repercussions, Headbutt, Inciting Mistrust, Perplexing Guests, The Bite of Winter, Unsettling Doubts, Riddle of Rebirth, Two-Fold Virtue, The Price of Honor, Petty Squabbles, Searching for Answers, Scouting the Pass, Learning.</summary>
+    public static PublishedSnapshot StrategyWave98 { get; } = Load("L5R.Published.StrategyWave98.json", "strategy-wave-98", requireDecks: false);
+    /// <summary>Item wave 34 (issue #503, pass group P5, EmperorP5.cs): Tsubute.</summary>
+    public static PublishedSnapshot ItemWave34 { get; } = Load("L5R.Published.ItemWave34.json", "item-wave-34", requireDecks: false);
+    /// <summary>Spell wave 42 (issue #503, pass group P5, EmperorP5*.cs): Seek the Stain, Step Through the Void.</summary>
+    public static PublishedSnapshot SpellWave42 { get; } = Load("L5R.Published.SpellWave42.json", "spell-wave-42", requireDecks: false);
+    /// <summary>Event wave 25 (issue #503, pass group P5, EmperorP5.cs): Never Enough Soldiers, Starting on the Path.</summary>
+    public static PublishedSnapshot EventWave25 { get; } = Load("L5R.Published.EventWave25.json", "event-wave-25", requireDecks: false);
+    /// <summary>Celestial wave 26 (issue #503, pass group P5, EmperorP5.cs): Blessings of the Shi-Tien Yen-Wang.</summary>
+    public static PublishedSnapshot CelestialWave26 { get; } = Load("L5R.Published.CelestialWave26.json", "celestial-wave-26", requireDecks: false);
+    /// <summary>Stronghold wave 46 (issue #503, pass group P5, EmperorP5.cs): The Plain of Glass, The New Foundries.</summary>
+    public static PublishedSnapshot StrongholdWave46 { get; } = Load("L5R.Published.StrongholdWave46.json", "stronghold-wave-46", requireDecks: false);
+    /// <summary>Holding wave 45 (issue #503, pass group P5, EmperorP5.cs): Stolen Merchandise.</summary>
+    public static PublishedSnapshot HoldingWave45 { get; } = Load("L5R.Published.HoldingWave45.json", "holding-wave-45", requireDecks: false);
+    /// <summary>Personality wave 116 (issue #503, pass group P6): Kitsune Haruki, Daigotsu Susaiken, Kuni Renyu, Otomo Suikihime, Shosuro Ietsuno (EmperorP6.cs).</summary>
+    public static PublishedSnapshot PersonalityWave116 { get; } = Load("L5R.Published.PersonalityWave116.json", "personality-wave-116", requireDecks: false);
+    /// <summary>Strategy wave 102 (issue #503, pass group P6): Perfect Sacrifice (EmperorP6.cs).</summary>
+    public static PublishedSnapshot StrategyWave102 { get; } = Load("L5R.Published.StrategyWave102.json", "strategy-wave-102", requireDecks: false);
+    /// <summary>Event wave 29 (issue #503, pass group P6): Incredible Tragedy, In Search of Guidance, Dark Experiments, Distant Expansion (EmperorP6.cs).</summary>
+    public static PublishedSnapshot EventWave29 { get; } = Load("L5R.Published.EventWave29.json", "event-wave-29", requireDecks: false);
+    /// <summary>Item wave 38 (issue #503, pass group P6): Mining Apparatus (EmperorP6.cs).</summary>
+    public static PublishedSnapshot ItemWave38 { get; } = Load("L5R.Published.ItemWave38.json", "item-wave-38", requireDecks: false);
+    /// <summary>Spell wave 46 (issue #503, pass group P6): Illusory Defense (EmperorP6.cs).</summary>
+    public static PublishedSnapshot SpellWave46 { get; } = Load("L5R.Published.SpellWave46.json", "spell-wave-46", requireDecks: false);
+    /// <summary>Personality wave 104 (Emperor Edition group P3, issue #503): Asako Kikugoro, Daidoji Akeha, Daigotsu Miki, Daigotsu Tenbatsu, Hida Fujita, Ikoma Ayumu, Kakita Kenta, Shosuro Aroru - exp2, Shosuro Toson - exp2, Utaku Lishan, Utaku Tairu - exp, Thunder Dragon - exp2.</summary>
+    public static PublishedSnapshot PersonalityWave104 { get; } = Load("L5R.Published.PersonalityWave104.json", "personality-wave-104", requireDecks: false);
+    /// <summary>Spell wave 34 (Emperor Edition group P3, issue #503): Centering the Soul, Erosion.</summary>
+    public static PublishedSnapshot SpellWave34 { get; } = Load("L5R.Published.SpellWave34.json", "spell-wave-34", requireDecks: false);
+    /// <summary>Strategy wave 90 (Emperor Edition group P3, issue #503): Deep Snows, Destructive Priorities, Forging Destiny, Iron Will, Request Authorization, Easy Persuasion.</summary>
+    public static PublishedSnapshot StrategyWave90 { get; } = Load("L5R.Published.StrategyWave90.json", "strategy-wave-90", requireDecks: false);
+    /// <summary>Follower wave 41 (Emperor Edition group P3, issue #503): Hida Defenders, Vigilant Riders.</summary>
+    public static PublishedSnapshot FollowerWave41 { get; } = Load("L5R.Published.FollowerWave41.json", "follower-wave-41", requireDecks: false);
 }

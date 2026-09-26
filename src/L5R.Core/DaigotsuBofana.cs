@@ -53,7 +53,7 @@ public sealed partial class MatchEngine
         if (command.AbilityId == "kahoku-exp-attack" && command.CardIds is { Length: 1 } attackTarget) yield return attackTarget[0];
         // A multi-target action (issue #336) targets every card of every card slot; the first is TargetId, yielded above.
         var slots = command.AbilityId is not null && AbilityCatalog.All.TryGetValue(command.AbilityId, out var slotted) ? slotted.Slots : null;
-        foreach (var id in (command.Selections ?? []).Where(s => slots?.FirstOrDefault(x => x.Id == s.Slot)?.Performing != true).SelectMany(s => s.CardIds ?? []))
+        foreach (var id in (command.Selections ?? []).Where(s => slots?.FirstOrDefault(x => x.Id == s.Slot) is not ({ Performing: true } or { CostOnly: true })).SelectMany(s => s.CardIds ?? []))
             if (id != command.TargetId) yield return id;
     }
 
@@ -87,7 +87,7 @@ public sealed partial class MatchEngine
     {
         foreach (var other in _state.Players.Where(p => p.Id != controllerId))
             for (var n = other.Clan == "Crab" ? 2 : 1; n > 0; n--)
-                _state.PendingForcedDiscards.Add(new(other.Id, "Daigotsu Bofana"));
+                if (!P2HandDiscardBlocked(other.Id, controllerId, false, "Daigotsu Bofana")) _state.PendingForcedDiscards.Add(new(other.Id, "Daigotsu Bofana")); // issue #503: Pillowbook
     }
 
     // "Play it for one of its Battle actions ... After it resolves, remove the card from the game" (Daigotsu Bofana - exp's
@@ -110,7 +110,8 @@ public sealed partial class MatchEngine
     // A card played as an action from a discard pile leaves the game afterward: the Discipline play and the granted play are the
     // only two ways to use a non-Reaction ability from a discard pile (ValidateAbility's zone check).
     private static bool PlayedFromDiscard(AbilityDefinition ability, CardInstance? source) =>
-        source is { Zone: Zone.FateDiscard or Zone.DynastyDiscard } && ability.Timing != "Reaction";
+        source is { Zone: Zone.FateDiscard or Zone.DynastyDiscard } && ability.Timing != "Reaction"
+        && ability.Attach?.Card != AttachSource.Self; // issue #503 (Seek the Stain): a card that attaches ITSELF from the pile enters play; it is not played and removed
     // Same-turn replay is refused PER ACTION (Mendon's ruling): the once-per-turn stamp lives under each ability's own UsageKey on the card
     // and survives the move to the discard pile, so an action performed this turn (from hand, in play, or earlier from the pile) cannot be
     // performed again, while another action of the same card can. The Discipline play uses the very same stamp, so both rules are one mechanism.

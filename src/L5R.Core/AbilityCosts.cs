@@ -47,6 +47,8 @@ public static class CostVerbs
     /// <summary>Give the subject -Amount Chi ("give this Personality -1C:", Cursed Relic, issue #467): payable only when he has that much Chi to lose (core rules,
     /// Pay Costs); a Personality it leaves at 0 Chi is destroyed by the ordinary Chi rule (ApplyModifier).</summary>
     public const string ChiPenalty = "chi-penalty";
+    /// <summary>Give the subject -Amount Force ("Give this Shugenja -2F:", Mara's Touch, issue #503): payable only when he has that much Force to lose.</summary>
+    public const string ForcePenalty = "force-penalty";
     /// <summary>Shuffle the acting player's hand (the card played from it excepted) into his Fate deck (Face of Ninube, Emperor Edition remaining-cards pass, group A, issue #492); the count is what the action then draws.</summary>
     public const string ShuffleHand = "shuffle-hand";
     /// <summary>Move the subject (his unit) home ("Move your performing opposed Personality home:", Wall of Honor, issue #492): a cost, so it is paid whatever happens to the effects and no negation of an effect stops it.</summary>
@@ -62,6 +64,8 @@ public static class CostVerbs
     /// <summary>Discard the Imperial Favor ("Discard the Imperial Favor to ...", issue #501, EmperorMechE.cs): the acting player must control it (or discard a Favor token of Kyuden Otomo - exp's instead).
     /// Names no card. Declared in Costs it is mandatory; as one of CostOptions it is the alternative ("bow him or discard the Imperial Favor"). Nothing can block it (it is not a bow or a destruction).</summary>
     public const string DiscardFavor = "discard-favor";
+    /// <summary>Remove every card chosen for the slot the cost's Subject names from the game ("remove ... any number of Holdings you control ... from the game", Mining Apparatus, issue #503).</summary>
+    public const string RemoveSlotCards = "remove-slot-cards";
 }
 
 /// <summary>One cost: <paramref name="Verb"/> (CostVerb.Bow or CostVerbs.*) applied to <paramref name="Subject"/> (CostSubject.*: the ability's
@@ -157,6 +161,8 @@ public sealed partial class MatchEngine
             // Cursed Relic (issue #467): a Chi penalty is paid in full or not at all.
             if (cost.Verb == CostVerbs.ChiPenalty)
                 Require(PersonalityChi(wielder!) >= cost.Amount, $"{Definition(wielder!).Name} does not have {cost.Amount} Chi to lose.");
+            if (cost.Verb == CostVerbs.ForcePenalty) // Mara's Touch (issue #503): a Force penalty is paid in full or not at all.
+                Require(CardForce(wielder!) >= cost.Amount && wielder!.ForcePenaltiesNegatedTurn != _state.TurnNumber, $"{Definition(wielder!).Name} does not have {cost.Amount} Force to lose.");
         }
     }
 
@@ -214,6 +220,11 @@ public sealed partial class MatchEngine
                 foreach (var slotCard in SlotCostCards(command, cost)) yield return (new ActionCost(CostVerb.Bow, cost.Subject), slotCard);
                 continue;
             }
+            if (cost.Verb == CostVerbs.RemoveSlotCards) // Mining Apparatus (issue #503)
+            {
+                foreach (var slotCard in SlotCostCards(command, cost)) yield return (new ActionCost(CostVerbs.Remove, cost.Subject), slotCard);
+                continue;
+            }
             var subject = cost.Verb is CostVerbs.LoseHonor or CostVerbs.DestroyLeftmostProvince or CostVerbs.ShuffleHand or CostVerbs.DiscardHand or CostVerbs.DiscardFavor ? null : CostSubjectCard(new CostOption(cost.Verb, cost.Verb, cost.Verb, cost.Subject), ability, command, source);
             if (CostExempt(cost, source, subject) || YorimiWaivesBow(ability, cost, source, subject)) continue; // Soshi Yorimi (issue #477, batch 4): ignored, so not planned.
             if (MomokoWaivesCost(command, cost.Verb)) continue; // Isawa Momoko (issue #501): the action's non-destruction costs are ignored
@@ -244,6 +255,7 @@ public sealed partial class MatchEngine
             if (cost.Verb == CostVerbs.DiscardHand) { foreach (var handId in player.Hand.ToArray()) DiscardFate(player, Card(handId)); continue; }
             // Capturing the Soul (issue #492): "bow ... 0 or more of your other performing Shugenja".
             if (cost.Verb == CostVerbs.BowSlotCards) { foreach (var slotCard in SlotCostCards(command, cost)) slotCard.Bowed = true; continue; }
+            if (cost.Verb == CostVerbs.RemoveSlotCards) { foreach (var slotCard in SlotCostCards(command, cost).ToArray()) RemoveFromGame(slotCard); continue; } // Mining Apparatus (issue #503)
             if (cost.Verb == CostVerbs.DestroyLeftmostProvince)
             {
                 if (player.Provinces.Where(p => !p.Destroyed).OrderBy(p => p.Index).FirstOrDefault() is { } leftmost) DestroyProvince(player.Id, leftmost);
@@ -277,6 +289,7 @@ public sealed partial class MatchEngine
                     if (UnitHostId(subject) != subject.Id) Card(UnitHostId(subject)).Bowed = true;
                     break;
                 case CostVerbs.ChiPenalty: ApplyModifier(subject, source?.Id ?? subject.Id, command.AbilityId!, "Chi", -cost.Amount); break;
+                case CostVerbs.ForcePenalty: ApplyModifier(subject, source?.Id ?? subject.Id, command.AbilityId!, "Force", -cost.Amount); break; // issue #503
                 case CostVerbs.MoveHome:
                     ReturnHome(subject, false);
                     Emit("unitMovedHome", $"{Definition(subject).Name}'s unit moved home (a cost).", subject.OwnerId, subject.Id);

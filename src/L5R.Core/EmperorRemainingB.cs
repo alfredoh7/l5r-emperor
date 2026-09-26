@@ -426,7 +426,7 @@ public sealed partial class MatchEngine
                 return;
             }
             Emit("eitherOrChosen", $"{decider.Name} did not destroy {Definition(affected!).Name} ({name}).", decider.Id, source.Id);
-            if (decider.Hand.Count > 0)
+            if (decider.Hand.Count > 0 && !P2HandDiscardBlocked(decider.Id, p.ActingPlayerId, true, name)) // issue #503: Pillowbook, The Scorpion Wall is Finished
             {
                 var hand = decider.Hand.ToList();
                 var random = new StableRandom(_state.RngState);

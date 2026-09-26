@@ -82,7 +82,7 @@ public sealed partial class MatchEngine
     // The ability ids a card has now: printed, plus granted (a permanent grant, a copy), plus a controller-wide STATIC grant (issue #458, The Towers of
     // the Yogo: "Each of your Scorpion Clan Personalities has the ability ..." -- StaticAbilityGrants.cs). The ONE place a granted ability is joined
     // to the printed ones; every scan of "the abilities this card has" goes through it.
-    private IEnumerable<string> AbilityIdsOf(CardInstance card) =>
+    private IEnumerable<string> AbilityIdsOf(CardInstance card) => P5AbilitiesRemoved(card) ? [] : // Unsettling Doubts (issue #503): "Permanently remove its abilities".
         // Issue #501: a copy of a card does not have the printed abilities that "will not be copied" (Shadow Dragon's, Sachina's, Matsu Nimuro's).
         (Definition(card).Abilities ?? []).Where(id => !IsCopyCard(card) || !(AbilityCatalog.All.TryGetValue(id, out var printed) && printed.NotCopyable)).Concat(card.GrantedAbilities.Where(g => GrantHolds(g.Duration, card)).Select(g => g.AbilityId)).Concat(StaticGrantedAbilityIds(card)).Distinct(StringComparer.Ordinal);
 

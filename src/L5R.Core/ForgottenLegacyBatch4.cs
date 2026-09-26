@@ -92,7 +92,7 @@ public sealed partial class MatchEngine
         GrantReconnaissanceAtCurrentBattlefield(player.Id);
         foreach (var strategy in SlotCards(command, "strategy").ToArray())
         {
-            if (strategy.Zone != Zone.FateDiscard) continue;
+            if (strategy.Zone != Zone.FateDiscard || P2CardIntoHandBlocked(player.Id)) continue; // issue #503: The Scorpion Wall is Finished
             strategy.Zone = Zone.Hand; strategy.FaceUp = true;
             player.Hand.Add(strategy.Id); NoteCardIntoHand(player.Id); // Isawa Kimi - exp 2 (issue #477, batch 5)
             Emit("cardReturnedToHand", $"{player.Name} put {Definition(strategy).Name} from the discard pile into their hand.", player.Id, strategy.Id);

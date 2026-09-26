@@ -51,7 +51,10 @@ public sealed partial class MatchEngine
     private void CleanseForcePenaltiesAndLocks(CardInstance card)
     {
         var modifiers = card.Modifiers.RemoveAll(m => m.Stat == "Force" && m.Amount < 0);
-        var tokens = card.Tokens.RemoveAll(t => t.Stat == "Force" && t.Amount < 0);
+        // Issue #503: a two-stat token (-1F/-1C Poison) loses its Force penalty and keeps its other stat.
+        var twoStat = card.Tokens.Where(t => t.Stat == "Force" && t.Amount < 0 && t.Stat2 is not null).ToArray();
+        foreach (var token in twoStat) card.Tokens[card.Tokens.IndexOf(token)] = token with { Stat = token.Stat2, Amount = token.Amount2, Stat2 = null, Amount2 = 0 };
+        var tokens = card.Tokens.RemoveAll(t => t.Stat == "Force" && t.Amount < 0) + twoStat.Length;
         var locks = card.ActionLocks.Count; card.ActionLocks.Clear();
         Emit("penaltiesAndLocksNegated", $"{Definition(card).Name}: {modifiers + tokens} Force {(modifiers + tokens == 1 ? "penalty" : "penalties")} and {locks} action {(locks == 1 ? "lock" : "locks")} negated.", card.OwnerId, card.Id);
     }

@@ -42,7 +42,8 @@ public enum Phase { Straighten, Events, Action, AttackDeclaration, InfantryDecla
 // use Zone.Home internally), until something removes it. A player may control more than one Celestial
 // only in passing -- entering play immediately discards every OTHER Celestial that same player
 // controls, so at most one survives at rest.
-public enum Zone { Stronghold, Home, Province, DynastyDeck, FateDeck, Hand, DynastyDiscard, FateDiscard, Dead, Battlefield, Attached, RemovedFromGame, Focused, EventInPlay, Region, Celestial }
+// Underneath (issue #503, The New Foundries): a card set face-up under a Stronghold -- public, not in play (EmperorP5Zones.cs).
+public enum Zone { Stronghold, Home, Province, DynastyDeck, FateDeck, Hand, DynastyDiscard, FateDiscard, Dead, Battlefield, Attached, RemovedFromGame, Focused, EventInPlay, Region, Celestial, Underneath }
 
 public sealed record CardDefinition(string Id, string Name, CardType Type, string Clan = "Unaligned", int GoldCost = 0,
     int GoldProduction = 0, int Force = 0, int Chi = 0, int PersonalHonor = 0, int? HonorRequirement = null,
@@ -212,7 +213,8 @@ public sealed class StraightenHold
 /// does not grant its host a keyword. Stat/Amount, when set, is a persistent bonus/penalty carried
 /// by this specific token -- unlike a Modifier, it is not cleared at turn end, only when the token
 /// itself is destroyed or its host card leaves play.</summary>
-public sealed record CardToken(string Id, string Type, string Source, string? Stat = null, int Amount = 0);
+// Issue #503 (Shosuro Keirei's "-1F/-1C Poison tokens"): a token may carry a second stat bonus/penalty (Stat2/Amount2); StatModifier reads both.
+public sealed record CardToken(string Id, string Type, string Source, string? Stat = null, int Amount = 0, string? Stat2 = null, int Amount2 = 0);
 
 public sealed class CardInstance
 {
@@ -338,6 +340,10 @@ public sealed class ProvinceState
     public int PrintedStrength { get; set; }
     public bool Destroyed { get; set; }
     public string? CardId { get; set; }
+    // Issue #503 (EmperorP6.cs): Illusory Defense's created province "permanently does not hold Dynasty cards" (never refilled, nothing put into it); Dark Experiments' permanent mark ("until the
+    // game ends, after a Region attaches to it, destroy the Region, and after a Holding enters play from it, give the Holding a -1GP token").
+    public bool HoldsNoDynastyCards { get; set; }
+    public bool DarkExperimentsMarked { get; set; }
     // Reconnaissance (core rules Glossary): a per-player boolean at this specific province, indexed
     // by player id, defaulted to false. No ability removes it directly; it resets to false for both
     // players only once a battle at this province resolves (ResolveBattle), regardless of outcome.
@@ -467,6 +473,8 @@ public sealed record GameEvent(long Sequence, string Type, string Message, int? 
 /// Kind/Strength are compared against the target's current Force at actual resolution time.</summary>
 public sealed class PendingAttack
 {
+    // Hida Defenders (issue #503, EmperorP3Windows.cs): the Personalities bowed before the action that declared this Attack began.
+    public List<string>? BowedBefore { get; set; }
     public string AbilityId { get; set; } = "";
     public int PlayerId { get; set; }
     // The Personality that made the attack (an attached Item/Weapon's own wielder, when the attack
@@ -568,13 +576,16 @@ public sealed class PendingEngage
     // claimant's first action must carry, and who claimed it (the restriction applies only if that player actually ends up holding the first opportunity).
     public string? FirstActionKeyword { get; set; }
     public int? FirstActionKeywordPlayerId { get; set; }
+    // Shosuro Toson - exp2 (issue #503, EmperorP3.cs): "you have the first opportunity to take a Battle action in this battle, which must be performed by Toson" -- the performer and who claimed it.
+    public string? FirstActionPerformerId { get; set; }
+    public int? FirstActionPerformerPlayerId { get; set; }
 }
 
 /// <summary>A limit on the FIRST Battle action a player takes in a battle, set when the Engage window closes
 /// and consumed by that player's next accepted command: Naval Invasion's "which he must perform"
 /// (PerformerId), or Rebuilding Kyuden Hida's "the Attacker may not announce a Battle action before the
 /// Defender's first normal opportunity to act or pass" (MustPass).</summary>
-public sealed record FirstActionRestriction(int PlayerId, string? PerformerId, bool MustPass, string? ActionKeyword = null);
+public sealed record FirstActionRestriction(int PlayerId, string? PerformerId, bool MustPass, string? ActionKeyword = null, string? Reason = null); // Reason: the card naming the performer (issue #503; Naval Invasion when null)
 
 /// <summary>An Additional Action grant (core rules Glossary; issue #181): one Battle action the
 /// named player may take out of the normal back-and-forth alternation, without ceding priority to
@@ -652,6 +663,8 @@ public sealed class FieldsOfMercyWatch
 /// Focus-Effect-bearing focused cards) -> resolved (PendingDuel set back to null).</summary>
 public sealed class PendingDuel
 {
+    // Hida Defenders (issue #503, EmperorP3Windows.cs): the Personalities bowed before the action that issued this duel began.
+    public List<string>? BowedBefore { get; set; }
     // Mendon's R4 ruling on Deception Revealed (issue #492): the Rings that were bowed before the action that issued this duel began; a Ring bowed since is one the action bowed, a Focus Effect's bows excepted.
     public List<string>? RingsBowedBefore { get; set; }
     // Kakita Ichigiku (The Shadow's Embrace pass, issue #476 batch 1): he challenged a dishonorable Personality during a Combat Segment, so the loser is destroyed too.
@@ -1203,6 +1216,17 @@ public sealed class MatchState
     public List<string> EntryCostAnswers { get; set; } = [];
     // Issue #501, mechanics group D (EmperorMechD.cs): the Recon-action counter, the attach log, the cards-into-hand records and timed removals.
     public MechDState MechD { get; set; } = new();
+    public EmperorP1State P1 { get; set; } = new(); // Issue #503, group P1 (EmperorP1.cs).
+    // Issue #503, pass group P2 (EmperorP2*.cs).
+    public EmperorP2State P2 { get; set; } = new();
+    // Issue #503, group P4 (EmperorP4.cs): watches, shields and records of the target/lock/watch pass.
+    public EmperorP4State P4 { get; set; } = new();
+    // Issue #503, pass group P5 (EmperorP5.cs): the records of this group's cards.
+    public EmperorP5State P5 { get; set; } = new();
+    /// <summary>Issue #503 (EmperorP6.cs): the refill decisions (Daigotsu Susaiken, Distant Expansion, Shosuro Ietsuno), In Search of Guidance's found Sensei, Otomo Suikihime's leaves-play watch.</summary>
+    public EmperorP6State P6 { get; set; } = new();
+    // Issue #503, group P3 (EmperorP3.cs): Iron Will's ignored costs and owed grants, Tenbatsu's look follow-up.
+    public EmperorP3State P3 { get; set; } = new();
 }
 
 /// <summary>Isawa Norimichi: PlayerId's army has +Amount total Force in the battle numbered Battle (while it has any units).</summary>
@@ -1343,7 +1367,9 @@ public sealed record GrantedAbilityView(string AbilityId, string Label, string T
 // Lands) -- what a player actually needs to beat to destroy the province, not the raw mutable field.
 /// <param name="Strength">What anything reads the province's strength as now: the current strength, or the maximum while a limit holds it down.</param>
 /// <param name="MaxStrength">The limit in force (Times of Strife, Ancient Feud), or null. While it holds, the current strength may be higher and returns when the limit ends.</param>
-public sealed record ProvinceView(int Index, int Strength, bool Destroyed, CardView? Card, CardView? Region, int? MaxStrength = null);
+public sealed record ProvinceView(int Index, int Strength, bool Destroyed, CardView? Card, CardView? Region, int? MaxStrength = null,
+    // Issue #503 (EmperorP6.cs): Illusory Defense's province that never holds a Dynasty card, and Dark Experiments' permanent mark (both public).
+    bool HoldsNoDynastyCards = false, bool DarkExperimentsMarked = false);
 // DeadCount (issue #221): the authoritative count of this player's own Zone.Dead Personalities --
 // already present, individually, within Discard (each CardView's own Zone tells a dead card apart
 // from a merely-discarded one), but computed here as a single number the same way UnitForce is, so
@@ -1356,7 +1382,9 @@ public sealed record PlayerView(int Id, string Name, string Clan, int Honor, int
     // Zone.EventInPlay (Suspicions): public, like RemovedFromGame -- no visibility gate needed.
     CardView[]? EventsInPlay = null,
     // Zone.Celestial (Lady Matsu's Rage): also public -- no visibility gate needed.
-    CardView[]? Celestials = null, int FocusCount = 0)
+    CardView[]? Celestials = null, int FocusCount = 0,
+    // Zone.Underneath (issue #503, The New Foundries): the cards face-up under the player's Stronghold -- public.
+    CardView[]? Underneath = null)
 {
     public HandLimitView? HandLimit { get; init; }
 }
@@ -1434,7 +1462,9 @@ public sealed record MatchView(string ContentVersion, string Scenario, long Vers
     ProvinceSightView[]? ProvinceSights = null,
     // Emperor Edition rulings pass R1 (issue #492): every battlefield of the Attack Phase in progress and the province (an index into the Defender's row) it is at, null when it has
     // none. An index below 100 is the battlefield of the Defender's province of that index; a higher one is an additional battlefield (EmperorRulingR1.cs).
-    BattlefieldView[]? Battlefields = null);
+    BattlefieldView[]? Battlefields = null,
+    // Issue #503 (EmperorP5Hidden.cs): the cards of another player's hand this viewer looked at this turn (Scouting the Pass, The Price of Honor) -- PRIVATE to the looker, never an instance id.
+    HandSightView[]? HandSights = null);
 /// <summary>Engine-private record of one face-down province card a player looked at (MatchState.ProvinceSights). Turn is the turn number it was looked at.</summary>
 public sealed record ProvinceSight(int ViewerId, int OwnerId, int Province, string CardId, string DefinitionId, int Turn);
 /// <summary>PRIVATE to the looking player: what the face-down card in a province is (its owner's province Province).</summary>

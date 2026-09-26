@@ -307,7 +307,7 @@ public sealed partial class MatchEngine
     // ---- Unstable Ground ----
 
     // The Terrains whose own ability puts them into play: never played through the generic playStrategy Terrain rule (MatchQueries, PlayStrategy).
-    private static bool TerrainPlaysThroughOwnAbility(CardInstance card) => (Definition(card).Abilities ?? []).Contains("unstable-ground-destroy");
+    private static bool TerrainPlaysThroughOwnAbility(CardInstance card) => (Definition(card).Abilities ?? []).Any(a => a is "unstable-ground-destroy" or EmperorP3Abilities.DeepSnowsEnter); // Deep Snows (issue #503): put into play by its Reaction
 
     // "Put this card into play there": PlayStrategy's own Terrain placement, from the hand to the current battlefield.
     private void PutTerrainIntoPlay(PlayerState player, CardInstance terrain)
@@ -317,6 +317,7 @@ public sealed partial class MatchEngine
         terrain.Zone = Zone.Battlefield; terrain.ProvinceIndex = province; terrain.FaceUp = true;
         player.TerrainPlayedThisBattle = true; // Ring of Water's own recruitment condition
         Emit("terrainPlayed", $"{player.Name} put {Definition(terrain).Name} into play as Terrain at this battlefield.", player.Id, terrain.Id);
+        P4TerrainEnteredPlay(terrain); // The Snow Has Teeth (issue #503)
     }
 
     // ---- Paralyzing Touch ----
@@ -362,7 +363,7 @@ public sealed partial class MatchEngine
     // ---- Spiritual Manipulation ----
 
     private IEnumerable<ForcedAttack> ForcedAttacksOf(int playerId) =>
-        Player(playerId).MayNotAttackThisTurn ? [] : _state.ForcedAttacks.Where(f => f.PlayerId == playerId && f.Turn == _state.TurnNumber);
+        (Player(playerId).MayNotAttackThisTurn ? [] : _state.ForcedAttacks.Where(f => f.PlayerId == playerId && f.Turn == _state.TurnNumber)).Concat(P4ForcedAttacks(playerId)); // Hunger (issue #503)
 
     // The Attack Declaration: the decline is refused while an attack is owed. Null when the player may decline.
     private string? ForcedAttackDeclineRefusal(int playerId) =>
@@ -373,12 +374,12 @@ public sealed partial class MatchEngine
     private IEnumerable<CardInstance> ForcedAssigneesNow(int playerId, bool cavalry) =>
         ForcedAttacksOf(playerId).Select(f => _state.Cards.TryGetValue(f.TargetId, out var c) ? c : null).OfType<CardInstance>().Distinct()
             .Where(c => c.OwnerId == playerId && c.Zone == Zone.Home && Definition(c).Type == CardType.Personality && (!c.Bowed || MayAssignBowed(c))
-                && IsCavalryUnit(c) == cavalry && !MovementLocked(c, MovementKinds.Assign) && !MovementLocked(c, MovementKinds.AssignAttack));
+                && IsCavalryUnit(c) == cavalry && !(cavalry && CavalryAssignmentBarredP6()) && !MovementLocked(c, MovementKinds.Assign) && !MovementLocked(c, MovementKinds.AssignAttack));
 
     // The attackers' assignment (AssignAttackers): every forced target assignable now is in it. Null when the assignment is acceptable.
     private string? ForcedAssignmentRefusal(int playerId, IReadOnlyDictionary<string, int>? assignments, bool cavalry) =>
         ForcedAssigneesNow(playerId, cavalry).FirstOrDefault(c => assignments?.ContainsKey(c.Id) != true) is { } missing
-            ? $"{_state.ForcedAttacks.First(f => f.TargetId == missing.Id && f.Turn == _state.TurnNumber).Source}: {Definition(missing).Name} must be assigned to attack." : null;
+            ? $"{ForcedAttacksOf(playerId).First(f => f.TargetId == missing.Id).Source}: {Definition(missing).Name} must be assigned to attack." : null; // issue #503: Hunger's owed attacks are listed there too
 
     // ---- The Game Has Changed ----
 

@@ -19,7 +19,7 @@ public sealed partial class MatchEngine
                 units.Where(c=>c.Zone==Zone.Battlefield || c.Zone==Zone.Attached && Card(c.AttachedTo).Zone==Zone.Battlefield).Select(c=>ViewCard(c)).ToArray(),
                 player.Provinces.Select(p=>new ProvinceView(p.Index,EffectiveProvinceStrength(p),p.Destroyed,
                     p.CardId is null?null:ViewCard(Card(p.CardId),Card(p.CardId).FaceUp),
-                    p.RegionId is null?null:ViewCard(Card(p.RegionId)),ProvinceStrengthMax(p))).ToArray(),
+                    p.RegionId is null?null:ViewCard(Card(p.RegionId)),ProvinceStrengthMax(p),p.HoldsNoDynastyCards,p.DarkExperimentsMarked)).ToArray(), // issue #503
                 player.Id==playerId?player.Hand.Select(id=>ViewCard(Card(id))).ToArray():[],player.Hand.Count,
                 player.DynastyDeck.Count,player.FateDeck.Count,
                 owned.Where(c=>c.Zone is Zone.DynastyDiscard or Zone.FateDiscard or Zone.Dead).Select(c=>ViewCard(c)).ToArray(),
@@ -31,7 +31,8 @@ public sealed partial class MatchEngine
                 owned.Where(c=>c.Zone==Zone.Focused && (player.Id==playerId || c.FaceUp)).Select(c=>ViewCard(c)).ToArray(),
                 EventsInPlay:owned.Where(c=>c.Zone==Zone.EventInPlay).Select(c=>ViewCard(c)).ToArray(),
                 Celestials:owned.Where(c=>c.Zone==Zone.Celestial).Select(c=>ViewCard(c)).ToArray(),
-                FocusCount:owned.Count(c=>c.Zone==Zone.Focused)) { HandLimit = HandLimitFor(player.Id) };
+                FocusCount:owned.Count(c=>c.Zone==Zone.Focused),
+                Underneath:owned.Where(c=>c.Zone==Zone.Underneath).Select(c=>ViewCard(c)).ToArray()) { HandLimit = HandLimitFor(player.Id) }; // issue #503: The New Foundries
         }).ToArray();
         var duel=_state.PendingDuel;
         return new(ContentVersion,_scenario,_state.Version,_state.TurnNumber,playerId,_state.ActivePlayerId,_state.PriorityPlayerId,
@@ -41,7 +42,7 @@ public sealed partial class MatchEngine
             BuildBattleStepView(),
             // Deck search (issue #312): the deck viewer is private to the searcher; the shown-cards record is public.
             BuildSearchView(playerId),BuildShownCards(),BuildLookView(playerId),BuildCopyView(playerId),BuildEitherOrView(playerId),BuildOpponentPaymentView(playerId),
-            _state.LastDuel is null?null:Copy(_state.LastDuel),BuildProvinceSights(playerId),BuildBattlefieldViews());
+            _state.LastDuel is null?null:Copy(_state.LastDuel),BuildProvinceSights(playerId),BuildBattlefieldViews(),BuildHandSights(playerId)); // issue #503: hand sights
     }
 
     private CardView ViewCard(CardInstance card,bool visible=true)
@@ -154,7 +155,7 @@ public sealed partial class MatchEngine
         // ONLY at their own turn to act in the Action Phase with nothing pending -- the same single predicate the command handler uses
         // (SeppukuTiming.cs), so an offered Seppuku is never one the engine would refuse for its timing.
         if(SeppukuTimingReason(playerId) is null)
-            foreach(var card in _state.Cards.Values.Where(c=>c.OwnerId==playerId && InPlay(c) && c.Dishonorable && Definition(c).Type==CardType.Personality &&
+            foreach(var card in _state.Cards.Values.Where(c=>c.OwnerId==playerId && InPlay(c) && c.Dishonorable && Definition(c).Type==CardType.Personality && !SeppukuBarredByPriceOfHonor(c) /* issue #503 */ &&
                 (Keyword(c,"Samurai") || Keyword(c,"Courtier") || Keyword(c,"Shugenja"))))
                 Add("orderSeppuku",$"Order Seppuku · {Definition(card).Name}",OwesForcedPass(playerId)?null:Command("orderSeppuku",card.Id),
                     OwesForcedPass(playerId)?ForcedPassReason:ActionLocked(card)?$"{Definition(card).Name} may not perform actions this turn.":null,card.Id);
@@ -254,7 +255,7 @@ public sealed partial class MatchEngine
                         // Issue #336 fixture: one option per Personality the deferred action would move.
                         :reaction.Target=="deferred-action-mover"?ActionMovers(deferredAction).Select(c=>(string?)c).ToArray()
                         // The Earth's Strength (issue #453 batch 5): one option per defending Personality the deferred action would move.
-                        :reaction.Target=="deferred-action-defending-mover"?DeferredActionDefendingMovers(deferredAction).Select(c=>(string?)c).ToArray():[null];
+                        :reaction.Target=="deferred-action-defending-mover"?DeferredActionDefendingMovers(deferredAction).Select(c=>(string?)c).ToArray():P3BeforeActionTargets(reaction.Target); // issue #503: Request Authorization targets any Personality
                     foreach(var candidate in candidates)
                         AddReaction(card,reactionId,targetId:candidate,label:candidate is null?null:$"{reaction.Label} · {Definition(Card(candidate)).Name} ({candidate})",validate:true);
                 }
@@ -294,6 +295,9 @@ public sealed partial class MatchEngine
             }
             // No Hiding Place (issue #498): the announcing player's copies in hand, whichever card the window was opened for.
             foreach(var (noHidingPlace,noHidingId) in NoHidingPlaceOptions(playerId)) AddReaction(noHidingPlace,noHidingId);
+            // Ikoma Ayumu, Utaku Lishan (issue #503): the watcher's own P3 Reactions, one option per target.
+            if(announcePending.PlayerId==playerId && announcePending.CardId is { } announceWatcherId)
+                foreach(var (p3Id,p3Target,p3Label) in P3AnnounceOptions(Card(announceWatcherId))) AddReaction(Card(announceWatcherId),p3Id,targetId:p3Target,label:p3Label,validate:true);
             Add("declineReaction","Pass reaction",Command("declineReaction"));
         }
         else if(_state.PendingChoice is { Type:"engageReaction" })
@@ -466,7 +470,7 @@ public sealed partial class MatchEngine
             Add("chooseRinShame","Refuse: he is bowed and cannot straighten this turn",Command("chooseRinShame") with {Choice="decline"});
         }
         else if(_state.PendingChoice is { Type:"yourClanNeedsYouProvince" })
-            foreach(var p in Player(playerId).Provinces.Where(p=>!p.Destroyed))
+            foreach(var p in Player(playerId).Provinces.Where(p=>!p.Destroyed && !p.HoldsNoDynastyCards)) // issue #503
                 Add("chooseYourClanNeedsYouProvince",$"Place into province {p.Index+1}"+(p.CardId is not null?$" (discarding {Definition(Card(p.CardId)).Name})":""),
                     Command("chooseYourClanNeedsYouProvince",province:p.Index));
         else if(_state.PendingChoice is { Type:"conqueror" })
@@ -521,9 +525,35 @@ public sealed partial class MatchEngine
         {
             result.AddRange(InfiltratorStraightenActions(playerId)); // Goju Asuka / Only a Shadow (issue #501, EmperorMechB.cs).
         }
+        else if(_state.PendingChoice is { Type:"p3BeforeEventReaction" })
+        {
+            result.AddRange(AbilityActions(playerId)); // Forging Destiny (issue #503, EmperorP3Windows.cs): the Reactions before an Event resolves, then the pass.
+            Add("declineReaction","Pass reaction",Command("declineReaction"));
+        }
+        else if(_state.PendingChoice is { Type:"p3EntryReaction" })
+        {
+            result.AddRange(AbilityActions(playerId)); // Easy Persuasion (issue #503, EmperorP3Entries.cs): the Reactions after a Personality entered play, then the pass.
+            Add("declineReaction","Pass reaction",Command("declineReaction"));
+        }
+        else if(_state.PendingChoice is { Type:"p3AroruMove" })
+        {
+            result.AddRange(P3AroruMoveActions(playerId)); // Shosuro Aroru - exp2 (issue #503, EmperorP3Priority.cs).
+        }
+        else if(_state.PendingChoice is { Type:"p3MikiDarkVirtue" })
+        {
+            result.AddRange(P3MikiActions(playerId)); // Daigotsu Miki (issue #503, EmperorP3Windows.cs).
+        }
+        else if(_state.PendingChoice is { Type:"p3DarkVirtueDiscard" })
+        {
+            result.AddRange(P3DarkVirtueActions(playerId)); // Daigotsu Tenbatsu (issue #503, EmperorP3.cs).
+        }
         else if(_state.PendingChoice is { Type:"rentatsuLoss" })
         {
             result.AddRange(RentatsuLossActions(playerId)); // Bayushi Rentatsu (Emperor Edition Personality pass, issue #477, batch 4).
+        }
+        else if(_state.PendingChoice is { Type:"p5BlessingsTop" })
+        {
+            result.AddRange(BlessingsTopActions(playerId)); // issue #503: Blessings of the Shi-Tien Yen-Wang (EmperorP5Zones.cs)
         }
         else if(_state.PendingChoice is { Type:"declineStraighten" })
         {
@@ -595,7 +625,8 @@ public sealed partial class MatchEngine
                 var cavalrySegment=_state.Phase is Phase.CavalryDeclaration or Phase.CavalryDefense;
                 var units=_state.Cards.Values.Where(c=>c.OwnerId==playerId && c.Zone==Zone.Home && (!c.Bowed || MayAssignBowed(c)) && Definition(c).Type==CardType.Personality && IsCavalryUnit(c)==cavalrySegment
                     && !DelayedArrivalBarsAttacker(c,_state.Phase is Phase.InfantryDeclaration or Phase.CavalryDeclaration)
-                    && !(_state.Phase is Phase.DefenseAssignment or Phase.CavalryDefense && IsGojuAsuka(c))).Select(c=>c.Id).ToArray(); // Delayed Arrival (issue #492, group F); Goju Asuka never defends (issue #501)
+                    && !(_state.Phase is Phase.DefenseAssignment or Phase.CavalryDefense && IsGojuAsuka(c))
+                    && !(cavalrySegment && CavalryAssignmentBarredP6()) && !SuikihimeMovementLocked(c,MovementKinds.Assign)).Select(c=>c.Id).ToArray(); // issue #503: Incredible Tragedy, Otomo Suikihime // Delayed Arrival (issue #492, group F); Goju Asuka never defends (issue #501)
                 var attack=_state.Phase is Phase.InfantryDeclaration or Phase.CavalryDeclaration;
                 // Defenders are offered only the battlefields AssignDefense accepts.
                 var provinces=Player(1-_state.ActivePlayerId).Provinces

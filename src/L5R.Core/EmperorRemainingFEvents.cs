@@ -222,7 +222,8 @@ public sealed partial class MatchEngine
                 Require(command.Choice is "yes" or "no", "Choose whether to put the card in your hand.");
                 var giver = Player(card.OwnerId); var shown = Card(pending.Data[0]);
                 _state.PendingChoice = null; _state.PendingEventChoice = null;
-                if (command.Choice == "yes")
+                if (command.Choice == "yes" && P2CardIntoHandBlocked(player.Id)) { } // issue #503: The Scorpion Wall is Finished -- the gift is not put into his hand and stays with its giver
+                else if (command.Choice == "yes")
                 {
                     giver.Hand.Remove(shown.Id); player.Hand.Add(shown.Id); shown.OriginalOwnerId ??= giver.Id; shown.OwnerId = player.Id; // his to play; it returns to its owner's pile when it leaves his hand
                     Emit("eventResolved", $"{Definition(card).Name}: {player.Name} put the gift in their hand.", player.Id, shown.Id);
@@ -274,6 +275,8 @@ public sealed partial class MatchEngine
                 return;
             }
             default:
+                if (ResolveP4EventChoice(command, pending)) return; // Too Close to Home (issue #503, EmperorP4Watches.cs)
+                if (ResolveEmperorP6Choice(pending, command)) return; // issue #503 (EmperorP6.cs): Dark Experiments, the face-up refills, Ietsuno's switch
                 throw new RuleViolation("Unknown Event decision.");
         }
     }
@@ -286,6 +289,9 @@ public sealed partial class MatchEngine
         GameCommand Answer(string? target = null, string? choice = null) => new("eventChoice", playerId, _state.Version, CardId: pending.EventCardId, TargetId: target, Choice: choice);
         switch (pending.Kind)
         {
+            case "p4-too-close": // Too Close to Home (issue #503, EmperorP4Watches.cs)
+                foreach (var option in P4EventChoiceActions(pending, playerId)) yield return option;
+                break;
             case "moon-sun": case "benefices":
                 foreach (var id in pending.Candidates)
                     yield return new("eventChoice", $"{eventName}: {Definition(Card(id)).Name}", true, null, Answer(id), id);
@@ -306,6 +312,9 @@ public sealed partial class MatchEngine
             case "draw":
                 yield return new("eventChoice", $"{eventName}: draw a card", true, null, Answer(choice: "yes"), pending.EventCardId);
                 yield return new("eventChoice", $"{eventName}: do not draw", true, null, Answer(choice: "no"), pending.EventCardId);
+                break;
+            default:
+                foreach (var option in EmperorP6ChoiceActions(pending, playerId)) yield return option; // issue #503 (EmperorP6.cs)
                 break;
         }
     }
@@ -406,10 +415,11 @@ public sealed partial class MatchEngine
 
     // A new province at the left or right end of the row, at the Stronghold's base strength, filled face-down from the Dynasty deck. A province to the LEFT renumbers the row: every province,
     // and every card that names one of this player's provinces by its index, moves up by one (Events resolve in the Events Phase, when no battlefield exists).
-    private ProvinceState GainProvince(PlayerState player, bool left)
+    private ProvinceState GainProvince(PlayerState player, bool left, int? baseStrength = null, bool holdsNoDynastyCards = false)
     {
-        var strength = Definition(Card(player.StrongholdId)).ProvinceStrength;
-        var province = new ProvinceState { Strength = strength, PrintedStrength = strength };
+        // Issue #503 (EmperorP6.cs): Kuni Renyu's "a province with a base strength of 4" and Illusory Defense's "which permanently does not hold Dynasty cards".
+        var strength = baseStrength ?? Definition(Card(player.StrongholdId)).ProvinceStrength;
+        var province = new ProvinceState { Strength = strength, PrintedStrength = strength, HoldsNoDynastyCards = holdsNoDynastyCards };
         if (left)
         {
             foreach (var existing in player.Provinces) existing.Index++;
@@ -417,6 +427,7 @@ public sealed partial class MatchEngine
             foreach (var evt in _state.Cards.Values.Where(c => c.OwnerId == player.Id && c.Zone == Zone.EventInPlay && c.AbilityUses.ContainsKey(BoastProvinceKey))) evt.AbilityUses[BoastProvinceKey]++;
             _state.ProvinceSights = _state.ProvinceSights.Select(s => s.OwnerId == player.Id ? s with { Province = s.Province + 1 } : s).ToList();
             if (_state.Phase == Phase.Events && _state.ActivePlayerId == player.Id) _state.EventsRevealNext++;
+            ShiftProvinceKeysForGainedLeftProvince(player); // Issue #503 (EmperorP6.cs): every other record naming one of his provinces by index (a battle at them included).
             province.Index = 0;
             player.Provinces.Insert(0, province);
         }
