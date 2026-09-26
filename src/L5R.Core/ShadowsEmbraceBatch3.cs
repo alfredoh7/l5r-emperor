@@ -346,11 +346,12 @@ public sealed partial class MatchEngine
         }
         foreach (var province in emptied)
         {
-            if (province.Destroyed || owner.DynastyDeck.Count == 0) continue;
+            if (province.Destroyed || owner.DynastyDeck.Count == 0 || province.HoldsNoDynastyCards) continue; // issue #503: Illusory Defense's province
             var refillId = owner.DynastyDeck[0]; owner.DynastyDeck.RemoveAt(0);
             var refill = Card(refillId);
             province.CardId = refillId; refill.Zone = Zone.Province; refill.ProvinceIndex = province.Index; refill.FaceUp = true;
             Emit("provinceRefilled", $"{owner.Name} refilled province {province.Index + 1} face up with {Definition(refill).Name} ({name}).", owner.Id, refillId);
+            AfterProvinceRefilledP6(owner, province, faceUp: true); // issue #503: Shosuro Ietsuno
         }
     }
 
@@ -497,6 +498,7 @@ public sealed partial class MatchEngine
                 break;
             case (EitherOrSpecs.KitsukiMethodsDiscard, "discard"):
             {
+                if (P2HandDiscardBlocked(decider.Id, p.ActingPlayerId, true, name)) break; // issue #503: Pillowbook, The Scorpion Wall is Finished
                 var hand = decider.Hand.ToList();
                 var random = new StableRandom(_state.RngState);
                 random.Shuffle(hand);

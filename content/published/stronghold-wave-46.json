@@ -1,0 +1,54 @@
+{
+  "Profile": "stronghold-wave-46",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-8260",
+      "Name": "The Plain of Glass",
+      "Type": "Stronghold",
+      "Clan": "Spider",
+      "GoldCost": 0,
+      "GoldProduction": 4,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 7,
+      "StartingHonor": 0,
+      "Text": "You do not lose Honor from Spider Clan and Fate cards you own.\nYou may use the rulebook Conquest ability twice per turn during the same battle.\nEquipping Followers is a Battle/Limited ability for you.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8260.jpg",
+      "Keywords": [],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "p5-plain-of-glass"
+    },
+    {
+      "Id": "oracle-l5r-9947",
+      "Name": "The New Foundries",
+      "Type": "Stronghold",
+      "Clan": "Phoenix",
+      "GoldCost": 0,
+      "GoldProduction": 4,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 6,
+      "StartingHonor": 6,
+      "Text": "Limited: Put a Spell from your hand face-up underneath this card.\nBattle: Any number of times per turn, discard a Spell from under this card: Either straighten one to three Shugenja at the current battlefield if the Spell is Air or Water, or Ranged 4 Attack if it is Earth or Fire, or draw a card if it is Void.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9947.jpg",
+      "Keywords": [],
+      "Focus": 0,
+      "Abilities": [
+        "p5-foundries-put",
+        "p5-foundries-straighten",
+        "p5-foundries-attack",
+        "p5-foundries-draw"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

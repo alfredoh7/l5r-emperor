@@ -1,0 +1,33 @@
+{
+  "Profile": "spell-wave-46",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-3666",
+      "Name": "Illusory Defense",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Your Air Shugenja have +1C.\nLimited: Bow one or more of your performing Shugenja with 10 or greater total Chi, and remove this card from the game: Create a province to the left of your leftmost province which permanently does not hold Dynasty cards.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-3666.jpg",
+      "Keywords": [
+        "Air",
+        "Ritual"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "illusory-defense-province"
+      ],
+      "Effect": "illusory-defense-air-chi"
+    }
+  ],
+  "Decks": []
+}

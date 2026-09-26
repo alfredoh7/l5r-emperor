@@ -66,7 +66,7 @@ public sealed partial class MatchEngine
         var source = Card(p.SourceCardId);
         if (option.Key == "discard")
         {
-            _state.PendingForcedDiscards.Add(new(decider.Id, $"{Definition(source).Name}'s storm"));
+            if (!P2HandDiscardBlocked(decider.Id, source.OwnerId, false, $"{Definition(source).Name}'s storm")) _state.PendingForcedDiscards.Add(new(decider.Id, $"{Definition(source).Name}'s storm")); // issue #503: Pillowbook
             Emit("eitherOrChosen", $"{decider.Name} chose to discard a card ({Definition(source).Name}'s storm).", decider.Id, source.Id);
             return;
         }

@@ -1,0 +1,57 @@
+{
+  "Profile": "spell-wave-38",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-2236",
+      "Name": "Drawing on the Mountain",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "While this Shugenja is Earth, your provinces have +1 strength.\nBattle/Open: Bow this Shugenja, destroy this card, and target a bowed Personality: Negate his next straightening this game.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-2236.jpg",
+      "Keywords": [
+        "Earth"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "drawing-mountain-negate"
+      ],
+      "Effect": "drawing-mountain-provinces"
+    },
+    {
+      "Id": "oracle-l5r-8219",
+      "Name": "The Menacing Sky",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Bow this Shugenja unless he is Thunder, and target a Personality: After the next time (this turn) he assigns or an action resolves which moved him to a battlefield, bow him.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8219.jpg",
+      "Keywords": [
+        "Thunder"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "menacing-sky-watch"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

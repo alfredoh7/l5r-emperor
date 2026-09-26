@@ -1,0 +1,20 @@
+[
+  {
+    "card_id": "oracle-l5r-5534",
+    "printing_set": [
+      "Before the Dawn"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=5534",
+    "image_path": "assets/reference/oracle/before-the-dawn/webp/oracle-l5r-5534-printing-1-image-1.webp",
+    "image_sha256": "c037f321906cee4b02142f0ffc1bfe7dd0c71a24698572c62949ae0201d708ce"
+  },
+  {
+    "card_id": "oracle-l5r-10032",
+    "printing_set": [
+      "Seeds of Decay"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10032",
+    "image_path": "assets/reference/oracle/seeds-of-decay/webp/oracle-l5r-10032-printing-1-image-1.webp",
+    "image_sha256": "36ca6f4e78f61ebd77725c6389d84d138bb3ee0abe74c8899c56a8b3ce43d2c4"
+  }
+]

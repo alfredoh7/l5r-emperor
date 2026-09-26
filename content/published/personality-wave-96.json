@@ -1,0 +1,323 @@
+{
+  "Profile": "personality-wave-96",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-294",
+      "Name": "Akodo Tamisu",
+      "Type": "Personality",
+      "Clan": "Lion",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": 6,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After Tamisu enters play: Discard all your other Sensei Personalities.\nAfter your Tactical, Bushido Virtue, or Terrain action resolves: Give a Lion Clan Personality +1F.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-294.jpg",
+      "Keywords": [
+        "Loyal",
+        "Tactician",
+        "Lion Clan",
+        "Samurai",
+        "Sensei"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "tamisu-sensei-lion-bonus"
+    },
+    {
+      "Id": "oracle-l5r-561",
+      "Name": "Asako Megu",
+      "Type": "Personality",
+      "Clan": "Phoenix",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 4,
+      "PersonalHonor": 3,
+      "HonorRequirement": 6,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Target an enemy Personality: Bow him. You may target and straighten a Personality. If the enemy Personality is Kolat, Ninja, or Shadowlands, gain 2 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-561.jpg",
+      "Keywords": [
+        "Earth",
+        "Inquisitor",
+        "Magistrate",
+        "Phoenix Clan",
+        "Shugenja"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "megu-bow-straighten"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-853",
+      "Name": "Bayushi Nomen",
+      "Type": "Personality",
+      "Clan": "Scorpion",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 4,
+      "PersonalHonor": 1,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Political Battle: Even if Nomen is not at the current battlefield, bow her and target a Personality: Move him home.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-853.jpg",
+      "Keywords": [
+        "Experienced 2",
+        "Courtier",
+        "Scorpion Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "nomen-exp2-move-home"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-3075",
+      "Name": "Hida Bakishi",
+      "Type": "Personality",
+      "Clan": "Crab",
+      "GoldCost": 9,
+      "GoldProduction": 0,
+      "Force": 7,
+      "Chi": 2,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After an action resolves that Bakishi performed and that destroyed a card at the current battlefield: The next time (this turn) another player's action targets Bakishi, negate its effects on him.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-3075.jpg",
+      "Keywords": [
+        "Berserker",
+        "Crab Clan",
+        "Friend of Thunder"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "bakishi-shield"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-3165",
+      "Name": "Hida Osote",
+      "Type": "Personality",
+      "Clan": "Crab",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 1,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After Osote enters play: Discard all your other Sensei Personalities.\nAfter the first time each turn another player's action targets your Crab Clan Personality at Osote's location: The player discards a card after the action ends.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-3165.jpg",
+      "Keywords": [
+        "Loyal",
+        "Crab Clan",
+        "Samurai",
+        "Sensei"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "osote-sensei-discard-trait"
+    },
+    {
+      "Id": "oracle-l5r-3607",
+      "Name": "Ikoma Hakige",
+      "Type": "Personality",
+      "Clan": "Lion",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 4,
+      "PersonalHonor": 4,
+      "HonorRequirement": 12,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Target another Personality: Move him home or give him a Force bonus equal to his Personal Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-3607.jpg",
+      "Keywords": [
+        "Cavalry",
+        "Loyal",
+        "Unique",
+        "Daimyo",
+        "Lion Clan",
+        "Paragon",
+        "Samurai"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "hakige-move-home",
+        "hakige-force-bonus"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-3849",
+      "Name": "Isawa Koiso",
+      "Type": "Personality",
+      "Clan": "Phoenix",
+      "GoldCost": 11,
+      "GoldProduction": 0,
+      "Force": 5,
+      "Chi": 4,
+      "PersonalHonor": 2,
+      "HonorRequirement": 4,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Bow Koiso, destroy your Shugenja with the base Fire keyword, discard a card, and target a non-Unique card without attachments in a unit: Destroy it.\nBattle: Target a card without attachments in a unit: Destroy it.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-3849.jpg",
+      "Keywords": [
+        "Loyal",
+        "Unique",
+        "Elemental Master",
+        "Fire",
+        "Phoenix Clan",
+        "Shugenja"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "koiso-limited-destroy",
+        "koiso-battle-destroy"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-3892",
+      "Name": "Isawa Sanetomo",
+      "Type": "Personality",
+      "Clan": "Phoenix",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 4,
+      "PersonalHonor": 3,
+      "HonorRequirement": 6,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After Sanetomo enters play: Discard all your other Sensei Personalities.\nOnce per battle, one of your Phoenix Clan Shugenja may perform the Equip Battle action even if bowed and even if unopposed.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-3892.jpg",
+      "Keywords": [
+        "Loyal",
+        "Air",
+        "Phoenix Clan",
+        "Sensei",
+        "Shugenja"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "sanetomo-sensei-equip"
+    },
+    {
+      "Id": "oracle-l5r-3972",
+      "Name": "Itoku",
+      "Type": "Personality",
+      "Clan": "Unaligned",
+      "GoldCost": 6,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 3,
+      "PersonalHonor": 4,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Itoku has +1F while a Lion Clan player controls him.\nReaction: After an action resolves which bowed your non-Void Ring: Straighten it. You may use each of its abilities an additional time this turn.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-3972.jpg",
+      "Keywords": [
+        "Experienced Akodo Itoku",
+        "Tactician",
+        "Unique",
+        "Monk",
+        "Order of Strength",
+        "Paragon"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "itoku-exp-ring-straighten"
+      ],
+      "Effect": "itoku-exp-lion-force"
+    },
+    {
+      "Id": "oracle-l5r-8878",
+      "Name": "Tsuruchi Shichiro",
+      "Type": "Personality",
+      "Clan": "Mantis",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 1,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After Shichiro enters play: Discard all your other Sensei Personalities.\nAfter a Ranged Attack action resolves that your Mantis Clan Personality performed: Once per battle, you may move him home.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8878.jpg",
+      "Keywords": [
+        "Loyal",
+        "Naval",
+        "Mantis Clan",
+        "Samurai",
+        "Sensei"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "shichiro-sensei-ranged-home"
+    },
+    {
+      "Id": "oracle-l5r-10100",
+      "Name": "Moto Taigo",
+      "Type": "Personality",
+      "Clan": "Unicorn",
+      "GoldCost": 11,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 4,
+      "PersonalHonor": 2,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Taigo may perform up to three Tactical actions per turn.\nTactical Battle: Target an enemy Personality: Bow him. If he is Infantry, you may target and destroy a card without attachments in his unit.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10100.jpg",
+      "Keywords": [
+        "Cavalry",
+        "Conqueror",
+        "Loyal",
+        "Tactician",
+        "Unique",
+        "Commander",
+        "Samurai",
+        "Shogun",
+        "Unicorn Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "taigo-tactical-bow"
+      ],
+      "Effect": "taigo-three-tactical"
+    }
+  ],
+  "Decks": []
+}

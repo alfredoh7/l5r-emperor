@@ -206,10 +206,11 @@ public sealed partial class MatchEngine
             }
             return;
         }
-        if (player.DynastyDeck.Count == 0) return;
+        if (player.DynastyDeck.Count == 0 || province.HoldsNoDynastyCards) return; // issue #503: Illusory Defense's province
         var refillId = player.DynastyDeck[0]; player.DynastyDeck.RemoveAt(0);
         var refill = Card(refillId);
         province.CardId = refillId; refill.Zone = Zone.Province; refill.ProvinceIndex = provinceIndex; refill.FaceUp = true;
         Emit("provinceRefilled", $"{Definition(source).Name}: {player.Name} refilled province {provinceIndex + 1} face up with {Definition(refill).Name}.", player.Id, refillId);
+        AfterProvinceRefilledP6(player, province, faceUp: true); // issue #503: Shosuro Ietsuno
     }
 }

@@ -88,6 +88,7 @@ public sealed partial class MatchEngine
     private bool EnemyActionMovementAutoNegated(CardInstance card)
     {
         // Twin Forks City (The Shadow's Embrace pass, issue #476 batch 6): a one-shot shield against another player's card's effect moving him.
+        if (BlessingsShieldNegatesMove(card)) return true; // Blessings of the Shi-Tien Yen-Wang (issue #503).
         if (_runningCommand is { } mover && !MovementCannotBeNegated(mover) && TwinForksNegates(card, mover.PlayerId, "movement")) return true;
         if (Definition(card).Effect != NegateFirstEnemyMoveEachTurnEffect || !InPlay(card) || HiromiUnnegatable()) return false; // Yoritomo Hiromi (issue #477).
         if (_runningCommand is not { } acting || acting.PlayerId == card.OwnerId || MovementCannotBeNegated(acting)) return false;

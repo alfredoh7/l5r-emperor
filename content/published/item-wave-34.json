@@ -1,0 +1,35 @@
+{
+  "Profile": "item-wave-34",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-8772",
+      "Name": "Tsubute",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 1,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Will only attach to a Ninja.\nBattle: Choose your performing Ninja, and destroy this card or discard it from your hand: Ranged 3 Attack.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8772.jpg",
+      "Keywords": [
+        "Weapon",
+        "Ninja"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "p5-tsubute-attack",
+        "p5-tsubute-attack-hand"
+      ],
+      "Effect": "none",
+      "AttachRequiresKeyword": "Ninja"
+    }
+  ],
+  "Decks": []
+}
