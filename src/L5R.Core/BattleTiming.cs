@@ -126,7 +126,7 @@ public sealed partial class MatchEngine
 
     // Applied to a useAbility by ValidateAbility (so offered actions already respect it) and to the two other
     // Battle-action commands by Apply. Ignored inside any reaction window (a Reaction is not the first Battle action).
-    private void CheckFirstActionRestriction(GameCommand command)
+    private void ValidateFirstActionRestriction(GameCommand command)
     {
         if (_state.FirstActionRestriction is not { } limit || _state.PendingChoice is not null || command.PlayerId != limit.PlayerId) return;
         Require(!limit.MustPass, FirstActionLimitMessage(limit));

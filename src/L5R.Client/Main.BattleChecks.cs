@@ -16,7 +16,7 @@ public partial class Main
         var path = System.IO.Path.ChangeExtension(_capturePath!, null) + "-" + suffix + ".png";
         if (image.SavePng(path) != Error.Ok) throw new Exception("Could not capture " + path);
     }
-    private async void ProbeBattleCourts()
+    private async Task ProbeBattleCourts()
     {
         try
         {

@@ -82,7 +82,7 @@ public partial class Main
     private void ShowConcede()
     {
         if (_session.Snapshot is null || View.WinnerId is not null) return;
-        Confirm("Concede this match?", "The other player will win the current match.", () => Submit(new L5R.Core.GameCommand("concede", View.ViewerId, View.Version)));
+        Confirm("Concede this match?", "The other player will win the current match.", () => _ = Submit(new L5R.Core.GameCommand("concede", View.ViewerId, View.Version)));
     }
     private void ShowFrontendOptions() { ShowMainMenu(); _titleMenu!.ShowOptions(); }
     private void EnterTable()
