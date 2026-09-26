@@ -437,18 +437,40 @@ One attempted fix was reverted because it failed: removing `|| true` at `BeforeT
 
 ### Checks
 
-The `bash tools/check.sh --skip-client` result on the final branch is recorded in the PR description and the handoff. No client file changed, so no client build was needed.
+`bash tools/check.sh --skip-client` was run on the branch with all eight fixes applied. It exited 0 with "All requested checks passed.":
+
+| Suite | Result |
+|---|---|
+| Python content tests (4 runs) | 45, 135, 6 and 9 tests, all OK |
+| Core suites (133) | 2105/2105 |
+| AI | 74/74 |
+| Server integration | 8/8 |
+| Client transport | 13/13 |
+
+No client file changed, so no client build was needed. Nothing was run on macOS, and there was no native or graphical check.
 
 ### Files changed
 
 `git diff origin/main --stat` lists only:
 - `docs/audits/README.md`
 - this report
-- `docs/handoffs/tasks/claude-513-csharp-audit.json`
+- `docs/handoffs/tasks/claude-513-csharp-audit-b53eae21.json`
 - the eight test files above
 
 No `src/` file changed. No repro test, scratch file or `.jpg.import` file is committed.
 
 ## 9. Follow-up issues
 
-See the "Follow-up issues" list added below after the issues were created.
+None of the issues below is assigned. Each links this report and #513.
+
+| Issue | Labels | Covers |
+|---|---|---|
+| #516 | bug, lane:rules | AUD-01 (blocker; full repro inline) |
+| #517 | bug, lane:rules | AUD-02 (blocker) |
+| #518 | lane:rules | Core: AUD-03 to AUD-08, AUD-10, AUD-11 |
+| #519 | lane:shared | Server: AUD-12, AUD-13, AUD-14, AUD-22 |
+| #520 | lane:ui | Client and AI: AUD-15 to AUD-19 |
+| #521 | lane:rules | Tests: AUD-20, AUD-21, AUD-23 to AUD-26, AUD-29 to AUD-32 |
+| #522 | lane:rules, needs-mendon-ruling | AUD-27: Dragon's Favor rules question |
+
+AUD-09 was posted as a single "Extends #510" comment on #510 rather than as a new issue. AUD-28 is fixed in this PR.
