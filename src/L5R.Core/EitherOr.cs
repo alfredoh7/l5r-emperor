@@ -148,7 +148,8 @@ public sealed partial class MatchEngine
             EitherOrSpecs.PowerOfWordLoseOrNegate => $"{source}: lose 3 Honor, or your action's effects are negated.",
             EitherOrSpecs.ShadowCourtHonor => $"{source}: choose a player who gains or loses 2 Honor.",
             EitherOrSpecs.SincerityDiscard => $"{source}: choose a player who discards a card.",
-            _ => RemainingGEitherOrPrompt(p, source) // Emperor Edition remaining-cards pass (issue #492), group G: Bandit Gang.
+            _ when EmperorP1Specs.Is(p.SpecId) => EmperorP1EitherOrPrompt(p, source), // issue #503
+            _ => P5EitherOrPrompt(p, source, affected) ?? EmperorP6EitherOrPrompt(p, source, affected) ?? RemainingGEitherOrPrompt(p, source) // issue #503: The Price of Honor (EmperorP5Zones.cs). Emperor Edition remaining-cards pass (issue #492), group G: Bandit Gang.
         };
     }
 
@@ -245,7 +246,8 @@ public sealed partial class MatchEngine
                 ];
             case EitherOrSpecs.ShadowCourtHonor: case EitherOrSpecs.SincerityDiscard:
                 return EmperorRemainingDEitherOrOptions(p);
-            default: return RemainingGEitherOrOptions(p, source, payable); // Bandit Gang (issue #492 group G).
+            case var p1 when EmperorP1Specs.Is(p1): return EmperorP1EitherOrOptions(p); // issue #503 (EmperorP1.cs)
+            default: return P5EitherOrOptions(p, affected) ?? EmperorP6EitherOrOptions(p, affected) ?? RemainingGEitherOrOptions(p, source, payable); // issue #503: The Price of Honor // Bandit Gang (issue #492 group G).
         }
     }
 
@@ -418,6 +420,9 @@ public sealed partial class MatchEngine
                 ApplyEmperorRemainingDEitherOr(p, option, decider);
                 break;
             default:
+                if (ApplyEmperorP1EitherOr(p, option, source, decider)) break; // issue #503
+                if (ApplyP5EitherOr(p, option, decider, affected, sourceIds)) break; // issue #503: The Price of Honor (EmperorP5Zones.cs)
+                if (ApplyEmperorP6EitherOr(p, option, source, decider)) break; // issue #503: Kuni Renyu (EmperorP6.cs).
                 if (ApplyRemainingGEitherOr(p, option, source, decider, sourceIds)) break; // Bandit Gang (issue #492 group G).
                 throw new RuleViolation("Unknown choice.");
         }
@@ -432,7 +437,9 @@ public sealed partial class MatchEngine
         // The Shadow's Embrace pass (issue #476), batch 3 (ShadowsEmbraceBatch3.cs): Crowded Streets' trait decision carries on with the resolved action's own tail; Forge Your
         // Soul's last decision draws and opens the attached Weapon's entering-play window first.
         if (FinishShadowsEmbraceEitherOr(p)) return;
-        if (FinishRemainingGEitherOr(p)) return; // Bandit Gang (issue #492 group G): the battle's resolution carries on.
+        if (FinishRemainingGEitherOr(p)) return;
+        if (FinishEmperorP1EitherOr(p)) return; // issue #503 (EmperorP1.cs) // Bandit Gang (issue #492 group G): the battle's resolution carries on.
+        if (FinishP5EitherOr(p)) return; // issue #503: The Price of Honor's shown hand opened the acting player's discard choice // Bandit Gang (issue #492 group G): the battle's resolution carries on.
         if (p.SpecId == EitherOrSpecs.GenshiShame && p.Origin == "action") { FinishGenshi(p); return; } // Kakita Genshi (issue #477 batch 4): the whole Iaijutsu action finishes together.
         if (p.Origin == "window")
         {

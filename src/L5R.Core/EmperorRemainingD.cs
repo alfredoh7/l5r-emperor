@@ -609,7 +609,7 @@ public sealed partial class MatchEngine
         var chosen = option.Key.StartsWith("self", StringComparison.Ordinal) ? decider.Id : 1 - decider.Id;
         Emit("eitherOrChosen", $"{decider.Name} chose: {option.Label} ({name}).", decider.Id, source.Id);
         if (p.SpecId == EitherOrSpecs.ShadowCourtHonor) GainHonor(chosen, option.Key.EndsWith("gain", StringComparison.Ordinal) ? 2 : -2, name, source);
-        else _state.PendingForcedDiscards.Add(new(chosen, name));
+        else if (!P2HandDiscardBlocked(chosen, source.OwnerId, false, name)) _state.PendingForcedDiscards.Add(new(chosen, name)); // issue #503: Pillowbook
     }
 
     // FinishEitherOr's hook: after a decision of this group is answered the resolved action's own tail carries on -- more watches due at the same moment first, then a discard the answer owed.

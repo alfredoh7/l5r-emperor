@@ -28,6 +28,8 @@ public static class ActionClass
     public const string EquipWeapon = "equip-weapon";
     /// <summary>Equipping any Item or Follower from your hand (Glory of the Shogun, issue #492 group F: "Equipping is a Battle/Open action (for all players)").</summary>
     public const string EquipAny = "equip-any";
+    /// <summary>Equipping a Follower from your hand (The Plain of Glass, issue #503).</summary>
+    public const string EquipFollower = "equip-follower";
 }
 
 /// <summary>An additional timing (<paramref name="Timing"/>: "Battle", "Open" or "BattleOrOpen") a card gives its controller for one class of action.</summary>
@@ -43,10 +45,12 @@ public sealed partial class MatchEngine
     private static readonly IReadOnlyDictionary<string, TimingGrant[]> EffectTimingGrants = new Dictionary<string, TimingGrant[]>(StringComparer.Ordinal)
     {
         ["equip-weapons-battle-open"] = [new(ActionClass.EquipWeapon, "BattleOrOpen", BattleRequiresUnbowedSource: true)],
+        // The Plain of Glass (issue #503, EmperorP5.cs): "Equipping Followers is a Battle/Limited ability for you." -- Limited it already is; the grant adds Battle.
+        [EmperorP5Abilities.PlainOfGlassEffect] = [new(ActionClass.EquipFollower, "Battle")],
     };
 
     // The class of action equipping this card is, when a timing grant can name it.
-    private string? EquipActionClass(CardInstance attachment) => Keyword(attachment, "Weapon") ? ActionClass.EquipWeapon : null;
+    private string? EquipActionClass(CardInstance attachment) => Keyword(attachment, "Weapon") ? ActionClass.EquipWeapon : Definition(attachment).Type == CardType.Follower ? ActionClass.EquipFollower : null; // issue #503: Followers
 
     // Every grant of this class that the player's cards in play give them, with the card that gives it.
     private IEnumerable<(CardInstance Source, TimingGrant Grant)> TimingGrantsOf(int playerId, string actionClass) =>

@@ -254,6 +254,7 @@ public sealed partial class MatchEngine
     /// which come before the announcement). Destruction costs are paid.</summary>
     private bool MomokoWaivesCost(GameCommand command, string verb)
     {
+        if (P3CostsIgnored(command)) return true; // Iron Will (issue #503): every cost of the held action is ignored
         if (IsDestructionCostVerb(verb) || command.AbilityId is null) return false;
         if (MechA.Waived is { } waived && waived.Turn == _state.TurnNumber && waived.PlayerId == command.PlayerId && waived.SourceId == command.CardId && waived.AbilityId == command.AbilityId) return true;
         return MomokoWatchFor(command) is not null;
@@ -349,7 +350,7 @@ public sealed partial class MatchEngine
         {
             var ring = Card(effect[RingToHandEffect.Length..]);
             var player = Player(command.PlayerId);
-            if (ring.Zone != Zone.FateDiscard || ring.OwnerId != player.Id) return true;
+            if (ring.Zone != Zone.FateDiscard || ring.OwnerId != player.Id || P2CardIntoHandBlocked(player.Id)) return true; // issue #503: The Scorpion Wall is Finished
             player.Hand.Add(ring.Id); ring.Zone = Zone.Hand; ring.FaceUp = true; NoteCardIntoHand(player.Id);
             Emit("returnedToHand", $"{Definition(ring).Name} was put into {player.Name}'s hand from the Fate discard pile.", player.Id, ring.Id);
             return true;

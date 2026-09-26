@@ -184,7 +184,7 @@ public sealed partial class MatchEngine
     {
         RefusesAllAttachmentsEffect => true,
         RefusesFollowersAndItemsEffect => Definition(attachment).Type is CardType.Follower or CardType.Item,
-        _ => false
+        _ => P3HostRefuses(attachment, host) // Shosuro Aroru - exp2 (issue #503): "Will not attach non-Ninja Followers."
     };
 
     // M'rika: "You may ignore M'rika's Loyal restriction if your Stronghold is The Forgotten Temple." -- the recruiting player's own Stronghold.

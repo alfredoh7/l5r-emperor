@@ -1,0 +1,362 @@
+{
+  "Profile": "personality-wave-104",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-556",
+      "Name": "Asako Kikugoro",
+      "Type": "Personality",
+      "Clan": "Phoenix",
+      "GoldCost": 6,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 1,
+      "PersonalHonor": 2,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After your Ring or Henshin (including Kikugoro) enters play or overlays: Look at the top two cards of your Dynasty deck. You may put one of them at the bottom of the deck.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-556.jpg",
+      "Keywords": [
+        "Henshin",
+        "Monk",
+        "Phoenix Clan",
+        "Void"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "kikugoro-self-entry",
+        "kikugoro-henshin-entry",
+        "kikugoro-ring-entry"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-1621",
+      "Name": "Daidoji Akeha",
+      "Type": "Personality",
+      "Clan": "Crane",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 5,
+      "Chi": 3,
+      "PersonalHonor": 3,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After your Recon action from a Strategy resolves: Draw a card.\nRecon Limited: Discard a card: Search your Fate deck for a non-Unique card with a Recon ability, show it, and put it in your hand.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1621.jpg",
+      "Keywords": [
+        "Loyal",
+        "Unique",
+        "Crane Clan",
+        "Daimyo",
+        "Iron Crane",
+        "Samurai",
+        "Scout"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "akeha-recon-draw",
+        "akeha-recon-search"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-1747",
+      "Name": "Daigotsu Miki",
+      "Type": "Personality",
+      "Clan": "Spider",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 8,
+      "Chi": 2,
+      "PersonalHonor": 1,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After Miki enters play: Lose 1 Honor.\nAfter your Events Phase: You may remove a Dark Virtue in your hand or discard pile from the game. If you did not remove one, destroy Miki.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1747.jpg",
+      "Keywords": [
+        "Conqueror",
+        "Dark Fist of Iron",
+        "Paragon",
+        "Samurai",
+        "Shadowlands",
+        "Spider Clan",
+        "Undead"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "miki-events-dark-virtue",
+      "EntryHonorLoss": 1
+    },
+    {
+      "Id": "oracle-l5r-1778",
+      "Name": "Daigotsu Tenbatsu",
+      "Type": "Personality",
+      "Clan": "Spider",
+      "GoldCost": 6,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 2,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After engaging at Tenbatsu's battlefield: Look at the top three cards of your Fate deck. Put them back in any order. You may discard a Dark Virtue; if you did, draw a card.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1778.jpg",
+      "Keywords": [
+        "Dark Prophet",
+        "Paragon",
+        "Samurai",
+        "Spider Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "tenbatsu-engage-look"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-3093",
+      "Name": "Hida Fujita",
+      "Type": "Personality",
+      "Clan": "Crab",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 5,
+      "Chi": 3,
+      "PersonalHonor": 1,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: Before the resolution of another player's action, if Fujita is at the current battlefield: Negate the destruction of your Followers from its effects.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-3093.jpg",
+      "Keywords": [
+        "Blessed of the Fortune of Persistence",
+        "Commander",
+        "Crab Clan",
+        "Samurai"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "fujita-negate-follower-destruction"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-3595",
+      "Name": "Ikoma Ayumu",
+      "Type": "Personality",
+      "Clan": "Lion",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 4,
+      "PersonalHonor": 3,
+      "HonorRequirement": 7,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: Even if Ayumu is bowed, after you announce a Tactical action, if he is at the current battlefield: Straighten him.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-3595.jpg",
+      "Keywords": [
+        "Tactician",
+        "Lion Clan",
+        "Samurai"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "ayumu-straighten"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-4189",
+      "Name": "Kakita Kenta",
+      "Type": "Personality",
+      "Clan": "Crane",
+      "GoldCost": 6,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 3,
+      "PersonalHonor": 3,
+      "HonorRequirement": 3,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Iaijutsu Reaction: After an action resolves during which Kenta won a duel, target a dishonorable enemy Personality at the current battlefield: Move him home.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-4189.jpg",
+      "Keywords": [
+        "Duelist",
+        "Crane Clan",
+        "Magistrate",
+        "Samurai"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "kenta-move-home"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-7089",
+      "Name": "Shosuro Aroru",
+      "Type": "Personality",
+      "Clan": "Scorpion",
+      "GoldCost": 9,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 5,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Will not attach non-Ninja Followers.\nReaction: When an action would target a Ninja at Aroru's location: Choose another of your cards. The action targets it instead, if legal. After the action's resolution, you may move Aroru to a different location.\nBattle: Other players may not take Reactions until this action ends. Ranged 5 Attack.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7089.jpg",
+      "Keywords": [
+        "Duelist",
+        "Experienced 2",
+        "Unique",
+        "Ninja",
+        "Scorpion Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "aroru-exp2-redirect",
+        "aroru-exp2-attack"
+      ],
+      "Effect": "aroru-refuses-non-ninja-followers"
+    },
+    {
+      "Id": "oracle-l5r-7177",
+      "Name": "Shosuro Toson",
+      "Type": "Personality",
+      "Clan": "Scorpion",
+      "GoldCost": 9,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 4,
+      "PersonalHonor": 1,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After engaging at Toson's battlefield: Discard a card from the current battlefield's province. If this discarded a Personality, you have the first opportunity to take a Battle action in this battle, which must be performed by Toson.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7177.jpg",
+      "Keywords": [
+        "Experienced 2",
+        "Loyal",
+        "Unique",
+        "Daimyo",
+        "Ninja",
+        "Scorpion Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "toson-exp2-engage"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9083",
+      "Name": "Utaku Lishan",
+      "Type": "Personality",
+      "Clan": "Unicorn",
+      "GoldCost": 9,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 3,
+      "HonorRequirement": 5,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "While Lishan is attacking, she has +1F and +1PH.\nReaction: After you announce a Battle action, if Lishan is at the current battlefield, target a Personality or Follower opposing her: Give it a Force penalty equal to Lishan's Personal Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9083.jpg",
+      "Keywords": [
+        "Cavalry",
+        "Battle Maiden",
+        "Paragon",
+        "Samurai",
+        "Unicorn Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "lishan-penalty"
+      ],
+      "Effect": "lishan-attacking-bonus"
+    },
+    {
+      "Id": "oracle-l5r-9100",
+      "Name": "Utaku Tairu",
+      "Type": "Personality",
+      "Clan": "Unicorn",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": 4,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After a Personality assigns or moves, if he is now opposing Tairu: Draw a card.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9100.jpg",
+      "Keywords": [
+        "Tactician",
+        "Unique",
+        "Advisor to the Amethyst Champion",
+        "Experienced",
+        "Samurai",
+        "Unicorn Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "tairu-exp-draw"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10067",
+      "Name": "Thunder Dragon",
+      "Type": "Personality",
+      "Clan": "Mantis",
+      "GoldCost": 13,
+      "GoldProduction": 0,
+      "Force": 8,
+      "Chi": 5,
+      "PersonalHonor": 4,
+      "HonorRequirement": 10,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After Thunder Dragon performs an action: Other players may not take Reactions until it ends.\nThe Thunder Dragon inspires. Your Mantis Clan Personalities have +1F and the ability, \"Battle: Target an enemy card without unbowed attachments: Bow it.\"",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10067.jpg",
+      "Keywords": [
+        "Cavalry",
+        "Experienced 2",
+        "Loyal",
+        "Naval",
+        "Unique",
+        "Dragon",
+        "Hero",
+        "Mantis Clan",
+        "Nonhuman",
+        "Shugenja",
+        "Thunder"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "thunder-dragon"
+    }
+  ],
+  "Decks": []
+}

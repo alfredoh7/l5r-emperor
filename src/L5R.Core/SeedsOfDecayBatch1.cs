@@ -5,10 +5,11 @@ public sealed partial class MatchEngine
 {
     // ---- Defensive Blockade: "It does not contribute Force to its army's total Force this battle" ---------------------------------------------------------------
     // Deep Roots (The Shadow's Embrace pass, issue #476 batch 3) negates every effect which prevents its Personality from contributing Force (DeepRooted, ShadowsEmbraceBatch3.cs).
-    private bool ForceContributionNegated(CardInstance card) => card.ForceContributionNegatedBattle == _state.BattleNumber && _state.Phase == Phase.Battle && !DeepRooted(card);
+    private bool ForceContributionNegated(CardInstance card) => card.ForceContributionNegatedBattle == _state.BattleNumber && _state.Phase == Phase.Battle && !DeepRooted(card) && !GamesOfWillShields(card); // Games of Will (issue #503)
     private void NegateForceContribution(CardInstance card, string sourceName)
     {
         card.ForceContributionNegatedBattle = _state.BattleNumber;
+        NoteForceContributionNegated(card); // Games of Will (issue #503)
         Emit("forceContributionNegated", $"{sourceName}: {Definition(card).Name} contributes no Force to its army's total this battle.", card.OwnerId, card.Id);
     }
 
@@ -31,6 +32,7 @@ public sealed partial class MatchEngine
     private bool DestructionShielded(CardInstance card, int actingPlayerId)
     {
         if (HiromiUnnegatable()) return false; // Yoritomo Hiromi (issue #477): the destruction from her Battle actions will not be negated.
+        if (BlessingsShieldNegates(card, "destruction")) return true; // Blessings of the Shi-Tien Yen-Wang (issue #503).
         if (MichiruBarrierNegates(card, actingPlayerId)) return true; // Asahina Michiru (Emperor Edition Personality pass, issue #477, batch 4).
         if (MountainsPowerNegates(card, actingPlayerId)) return true; // The Mountain's Power (Forgotten Legacy pass, issue #467).
         if (TwinForksNegates(card, actingPlayerId, "destruction")) return true; // Twin Forks City (The Shadow's Embrace pass, issue #476 batch 6).

@@ -16,7 +16,9 @@ public sealed record MoveSpec(string Movers, string Destination)
     /// Hawado - exp's "target a Personality that performed it: Move him from his current location to another" (issue #453).</summary>
     public const string BattleActionPerformer = "battle-action-performer";
     public const string Home = "home", CurrentBattlefield = "current-battlefield", AdjacentUnresolved = "adjacent-unresolved-battlefield", AnyUnresolved = "unresolved-battlefield";
-    public bool ChoosesBattlefield => Destination is AdjacentUnresolved or AnyUnresolved;
+    /// <summary>Issue #503 (Shosuro Keirei: "Move Keirei from the current battlefield to a different battlefield"): any other battlefield of the Attack Phase, resolved or not.</summary>
+    public const string AnyOther = "any-other-battlefield";
+    public bool ChoosesBattlefield => Destination is AdjacentUnresolved or AnyUnresolved or AnyOther;
 }
 
 public sealed partial class MatchEngine
@@ -33,6 +35,7 @@ public sealed partial class MatchEngine
     {
         if (!move.ChoosesBattlefield || _state.CurrentBattleProvince is not int current) return [];
         var unresolved = _state.UnresolvedBattlefields;
+        if (move.Destination == MoveSpec.AnyOther) return P2OtherBattlefields(current); // issue #503 (EmperorP2Keirei.cs)
         return move.Destination == MoveSpec.AdjacentUnresolved
             ? AdjacentBattlefields(current).Where(unresolved.Contains).ToArray()
             : unresolved.Where(p => p != current).ToArray();
@@ -44,7 +47,7 @@ public sealed partial class MatchEngine
         if (ability.Move is not { } move) return;
         if (move.ChoosesBattlefield)
             Require(command.Province is int province && MoveDestinations(move).Contains(province), move.Destination == MoveSpec.AdjacentUnresolved
-                ? "Choose an adjacent unresolved battlefield." : "Choose another unresolved battlefield.");
+                ? "Choose an adjacent unresolved battlefield." : move.Destination == MoveSpec.AnyOther ? "Choose a different battlefield." : "Choose another unresolved battlefield.");
         else Require(command.Province is null, "This move names no battlefield.");
     }
 

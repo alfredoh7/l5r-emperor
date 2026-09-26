@@ -36,6 +36,8 @@ public static class TraitReactions
         "goju-asuka-give",
         // Issue #501 (Mendon): Kakita Kae's "After a Battle action targets Kae, you may discard the Imperial Favor: ..." triggers like a Reaction but is a trait (no designator): repeatable, usable while bowed.
         "kae-favor-negate",
+        // Issue #503: Shinjo Hayan's "After engaging: Once per turn, you may assign ..." (no designator: a trait; "you may" leaves the assignment optional, usable while he is bowed).
+        "hayan-assign",
     };
 
     /// <summary>The trait-modelled Reaction-timed abilities, for the audit.</summary>

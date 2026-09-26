@@ -483,6 +483,8 @@ internal static class EmperorMechCTests
             if (!targetedShape) continue;
             if (ability.Trigger == ReactionTriggers.TargetedByAction) continue;
             if (beforeActionShape.Contains(id)) continue;
+            // Issue #503: Hida Bakishi's Reaction is triggered after an action RESOLVES; "the next time another player's action targets Bakishi" is its effect's one-shot watch, not its trigger.
+            if (id == "bakishi-shield" && ability.Trigger == AfterActionReactionTriggers.AfterActionResolved) continue;
             offenders.Add($"{id} ({ability.Trigger})");
         }
         Check(offenders.Count == 0, "Reactions to a card being targeted that use neither the common trigger nor a pinned shape: " + string.Join("; ", offenders));

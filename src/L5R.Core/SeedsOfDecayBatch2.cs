@@ -238,7 +238,7 @@ public sealed partial class MatchEngine
         var card = Card(_state.PendingChoice!.CardId);
         player.ProclaimUsedTurn = _state.TurnNumber;
         // Proclaim is a Reaction (Mendon's R4 ruling), so its gain is from an action's effects: Rhetoric and the like may be played on it.
-        if (!negated) { var before = _proclaimAction; _proclaimAction = ($"{player.Id}|proclaim|{card.Id}", player.Id); try { GainHonor(player.Id, Definition(card).PersonalHonor, "Proclaim"); } finally { _proclaimAction = before; } }
+        if (!negated) { var before = _proclaimAction; _proclaimAction = ($"{player.Id}|proclaim|{card.Id}", player.Id); try { GainHonor(player.Id, Definition(card).PersonalHonor + HoteiProclaimBonus(player.Id, card), "Proclaim"); /* Hotei's Contentment (issue #503) */ } finally { _proclaimAction = before; } }
         else Emit("proclaimNegated", $"{player.Name}'s Proclaim resolved with its effects negated.", player.Id, card.Id);
         ApplyPendingEntryEffects();
         _state.ConsecutivePasses = 0;
@@ -295,7 +295,7 @@ public sealed partial class MatchEngine
 
     // "+1PH if any other player is Dragon Clan".
     private int StaticPersonalHonorBonus(CardInstance card) =>
-        Definition(card).Effect == "hotaka-paragon" && _state.Players.Any(p => p.Id != card.OwnerId && p.Clan == "Dragon") ? 1 : 0;
+        (Definition(card).Effect == "hotaka-paragon" && _state.Players.Any(p => p.Id != card.OwnerId && p.Clan == "Dragon") ? 1 : 0) + P3PersonalHonorBonus(card); // + Utaku Lishan (issue #503)
 
     // "The amount of Honor you need in order to win an Honor Victory is reduced by Hotaka's Personal Honor minus one" -- each copy in play.
     private int HonorVictoryThreshold(int playerId) =>
