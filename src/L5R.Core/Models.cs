@@ -212,7 +212,8 @@ public sealed class StraightenHold
 /// does not grant its host a keyword. Stat/Amount, when set, is a persistent bonus/penalty carried
 /// by this specific token -- unlike a Modifier, it is not cleared at turn end, only when the token
 /// itself is destroyed or its host card leaves play.</summary>
-public sealed record CardToken(string Id, string Type, string Source, string? Stat = null, int Amount = 0);
+// Issue #503 (Shosuro Keirei's "-1F/-1C Poison tokens"): a token may carry a second stat bonus/penalty (Stat2/Amount2); StatModifier reads both.
+public sealed record CardToken(string Id, string Type, string Source, string? Stat = null, int Amount = 0, string? Stat2 = null, int Amount2 = 0);
 
 public sealed class CardInstance
 {
@@ -1204,6 +1205,8 @@ public sealed class MatchState
     // Issue #501, mechanics group D (EmperorMechD.cs): the Recon-action counter, the attach log, the cards-into-hand records and timed removals.
     public MechDState MechD { get; set; } = new();
     public EmperorP1State P1 { get; set; } = new(); // Issue #503, group P1 (EmperorP1.cs).
+    // Issue #503, pass group P2 (EmperorP2*.cs).
+    public EmperorP2State P2 { get; set; } = new();
 }
 
 /// <summary>Isawa Norimichi: PlayerId's army has +Amount total Force in the battle numbered Battle (while it has any units).</summary>

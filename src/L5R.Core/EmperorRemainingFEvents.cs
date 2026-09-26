@@ -222,7 +222,8 @@ public sealed partial class MatchEngine
                 Require(command.Choice is "yes" or "no", "Choose whether to put the card in your hand.");
                 var giver = Player(card.OwnerId); var shown = Card(pending.Data[0]);
                 _state.PendingChoice = null; _state.PendingEventChoice = null;
-                if (command.Choice == "yes")
+                if (command.Choice == "yes" && P2CardIntoHandBlocked(player.Id)) { } // issue #503: The Scorpion Wall is Finished -- the gift is not put into his hand and stays with its giver
+                else if (command.Choice == "yes")
                 {
                     giver.Hand.Remove(shown.Id); player.Hand.Add(shown.Id); shown.OriginalOwnerId ??= giver.Id; shown.OwnerId = player.Id; // his to play; it returns to its owner's pile when it leaves his hand
                     Emit("eventResolved", $"{Definition(card).Name}: {player.Name} put the gift in their hand.", player.Id, shown.Id);

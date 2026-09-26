@@ -120,5 +120,6 @@ public sealed partial class MatchEngine
 
     // The Sensei entry trait ("After X enters play: Discard all your other Sensei Personalities") on a card whose Effect field is taken by its OTHER static trait: the five
     // Seeds of Decay Sensei. discard-other-sensei itself stays the Effect of a card with no other trait.
-    private static bool HasSenseiEntryEffect(string effect) => effect is ZanshoFollowerForceEffect or MukudoriFudoDiscountEffect or AimiLionCourtierEffect or NagiMagistrateClanEffect or NobukatsuMantisMagistrateEffect;
+    private static bool HasSenseiEntryEffect(string effect) => effect is ZanshoFollowerForceEffect or MukudoriFudoDiscountEffect or AimiLionCourtierEffect or NagiMagistrateClanEffect or NobukatsuMantisMagistrateEffect
+        || EmperorP2Abilities.IsSenseiEntryEffect(effect); // issue #503: Bayushi Kazutoshi, Kakita Gonji
 }

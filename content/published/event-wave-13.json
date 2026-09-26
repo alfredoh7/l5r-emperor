@@ -1,0 +1,101 @@
+{
+  "Profile": "event-wave-13",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-2759",
+      "Name": "Gaining Advantage",
+      "Type": "Event",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "You may search your Fate deck for a non-Unique Strategy with a Political ability, show it, put it in your hand, and discard a card.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-2759.jpg",
+      "Keywords": [
+        "Unique",
+        "Political",
+        "Winter"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "p2-gaining-advantage"
+    },
+    {
+      "Id": "oracle-l5r-2911",
+      "Name": "Growing Hostility",
+      "Type": "Event",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Destroy all non-Unique Holdings with a base Gold Cost of 0. Until the game ends, Holdings in and out of play have a minimum Gold Cost of 1.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-2911.jpg",
+      "Keywords": [
+        "Unique"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "p2-growing-hostility"
+    },
+    {
+      "Id": "oracle-l5r-7954",
+      "Name": "The Agony of Her Gaze",
+      "Type": "Event",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Until your Events Phase two turns from now begins, after the resolution of any Battle action, give each of your Nonhumans who performed it a +1F Frenzy token.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7954.jpg",
+      "Keywords": [
+        "Unique"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "p2-agony-of-her-gaze"
+    },
+    {
+      "Id": "oracle-l5r-8298",
+      "Name": "The Scorpion Wall is Finished",
+      "Type": "Event",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Until the game ends, other players' actions will not discard cards from your hand, and after a player has resolved two actions that put cards in his hand in one phase, no more cards will be put into his hand that phase.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8298.jpg",
+      "Keywords": [
+        "Unique"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "p2-scorpion-wall-finished"
+    }
+  ],
+  "Decks": []
+}

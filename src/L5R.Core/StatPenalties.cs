@@ -14,7 +14,7 @@ public sealed partial class MatchEngine
     // The Gold cost of a card as it stands now: its printed cost plus every GoldCost modifier, never below zero. Read by the comparisons against another
     // card's cost ("with a 0 Gold Cost", "equal or lower Gold Cost") and, since the Forgotten Legacy pass (issue #467, Wind of the Moon), by the recruit
     // price itself (QuotePurchase).
-    private int CardGoldCost(CardInstance card) => Math.Max(0, Definition(card).GoldCost + StatModifier(card, "GoldCost")
+    private int CardGoldCost(CardInstance card) => Math.Max(P2GoldCostMinimum(card) /* issue #503: Growing Hostility */, Definition(card).GoldCost + StatModifier(card, "GoldCost")
         + KanahashiGoldCostPenalty(card)); // The Shadow's Embrace pass (issue #476), batch 2: Yoritomo Kanahashi's "-2 Gold Cost" on other players' cards in play.
 
     // "Reduce his Gold cost to zero" is a Gold cost penalty of exactly what the card costs now; a card that already costs nothing is not reduced.

@@ -38,7 +38,9 @@ public enum ProductionCondition
     PayingForAttachment,
     /// <summary>Yasuki Palaces - experienced (Emperor Edition Stronghold pass, issue #486 batch 3): "This card produces 1 less Gold when paying for a Personality." A Personality bought
     /// (PaymentKind.Recruit) -- never an action of one, and never another kind of card.</summary>
-    PayingForPersonality
+    PayingForPersonality,
+    /// <summary>Issue #503 (Shrine to Nimuro: "or 3 Gold if you control a Tactician"): a condition on the producing card's controller, already judged when the production was asked for.</summary>
+    ControllerCondition
 }
 
 /// <summary>A Holding's production that depends on what it is paying for (issue #416): while a payment meets <paramref name="When"/> the Holding produces
@@ -75,10 +77,11 @@ public sealed partial class MatchEngine
 {
     // Yasuki Dokansuto's production is a printed "Kolat Reaction": Cherry Blossom Festival bars it (Mendon's R4 ruling). Every other conditional production is a Holding's trait.
     private ConditionalProduction? ConditionalProductionOf(CardInstance card) =>
-        Definition(card).Effect == "dokansuto-gold" && ReactionsBarred() ? null : ConditionalProductionCatalog.For(Definition(card).Effect);
+        Definition(card).Effect == "dokansuto-gold" && ReactionsBarred() ? null : ConditionalProductionCatalog.For(Definition(card).Effect) ?? P2ConditionalProduction(card); // issue #503
 
     private bool ProductionConditionMet(ConditionalProduction production, PaymentSubject? paying)
     {
+        if (production.When == ProductionCondition.ControllerCondition) return true; // issue #503: judged by P2ConditionalProduction
         if (paying is null) return false;
         return production.When switch
         {

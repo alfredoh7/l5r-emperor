@@ -93,7 +93,9 @@ public sealed record SearchCriteria(string Noun, CardType[]? Types = null, strin
     // "A ... Holding with another title" (Versatile Farm, issue #476 batch 6): titles that may NOT be chosen.
     string[]? ExcludedTitles = null,
     // "A Kiho Battle Strategy" (Martial Instruction, issue #492): a card with a printed Battle action -- an ability whose timing is Battle or Battle/Open.
-    bool BattleStrategy = false);
+    bool BattleStrategy = false,
+    // "A Strategy with a Political ability" (Gaining Advantage, issue #503): one of the card's printed actions is an action with this keyword (EmperorP2Search.cs).
+    string? AbilityKeyword = null);
 
 /// <summary>One searchable deck, the criteria that deck's candidates must meet, and what happens to the chosen
 /// card. A card that lets the player pick the deck (Ikoma Shizuka) lists two, each with its own criteria.</summary>
@@ -180,6 +182,7 @@ public static class SearchCatalog
             DiscoveringTheTemple, VersatileFarm, Introspection, MartialInstruction, MeetingTheKeepers, SacrificeOfPawns, EmperorRemainingFSearches.RefugeOfTheThreeSisters }
         .Concat(EmperorRemainingESearches.All) // Emperor Edition remaining-cards pass (issue #492), group E: EmperorRemainingE.cs.
         .Concat(EmperorFollowupsSearches.All) // Emperor Edition follow-ups (issue #498): EmperorFollowupsSearch.cs.
+        .Concat(EmperorP2Searches.All) // Issue #503, pass group P2: EmperorP2Search.cs.
         .ToDictionary(s => s.Id, StringComparer.Ordinal);
 
     /// <summary>The search an Event carries in its Effect (an Event has no abilities of its own to hang a spec on).</summary>
@@ -223,6 +226,8 @@ public sealed class PendingSearch
     public int? FocusBelow { get; set; }
     /// <summary>Emperor Edition follow-ups (issue #498): an "entry" search (an "After this card enters play" trait queued behind the entry windows) hands priority back to this player when it ends.</summary>
     public int? ResumeTo { get; set; }
+    /// <summary>Issue #503 (Delving into History): a card qualifies only if it shares one of these keywords (the performer's); null for no such condition.</summary>
+    public string[]? SharedKeywords { get; set; }
 }
 
 /// <summary>One entry of the public, append-only record of cards shown to the other player. Deliberately holds
@@ -437,6 +442,7 @@ public sealed partial class MatchEngine
     {
         var player = Player(search.PlayerId);
         if (search.Deck == SearchDeck.Hand) { Emit("searchToHand", $"{player.Name} kept {Definition(card).Name} in their hand.", player.Id); return; } // issue #498: it is already there
+        if (P2CardIntoHandBlocked(player.Id)) return; // issue #503: The Scorpion Wall is Finished -- it stays in the searched deck
         SearchDeckList(player, search.Deck!).Remove(card.Id);
         card.Zone = Zone.Hand; player.Hand.Add(card.Id); NoteCardIntoHand(player.Id); // Isawa Kimi - exp 2 (issue #477, batch 5)
         Emit("searchToHand", $"{player.Name} put {Definition(card).Name} into their hand.", player.Id);
@@ -581,6 +587,7 @@ public sealed partial class MatchEngine
                 var representative = g.OrderBy(c => c.Id, StringComparer.Ordinal).First();
                 var (eligible, reason) = SearchEligibility(option.Criteria, representative, search.GoldLimit);
                 if (eligible && search.FocusBelow is int below && SearchStat(representative, "Focus") >= below) (eligible, reason) = (false, $"Focus {SearchStat(representative, "Focus")}, needs < {below}");
+                (eligible, reason) = P2SearchFilter(search, representative, eligible, reason); // issue #503: Delving into History
                 return new SearchGroup(g.Key, representative, g.Count(), eligible, reason);
             })
             .OrderBy(g => (int)Definition(g.Card).Type).ThenBy(g => Definition(g.Card).Name, StringComparer.Ordinal).ThenBy(g => g.DefinitionId, StringComparer.Ordinal).ToList();
@@ -594,6 +601,7 @@ public sealed partial class MatchEngine
         if (criteria.Keywords is { Length: > 0 } && !criteria.Keywords.All(k => Keyword(card, k))) return (false, notA);
         if (criteria.AnyKeywords is { Length: > 0 } && !criteria.AnyKeywords.Any(k => Keyword(card, k))) return (false, notA);
         if (criteria.BattleStrategy && !(Definition(card).Abilities ?? []).Any(a => AbilityCatalog.All.TryGetValue(a, out var battle) && battle.Timing is "Battle" or "BattleOrOpen")) return (false, notA);
+        if (criteria.AbilityKeyword is { } abilityKeyword && !HasAbilityWithKeyword(card, abilityKeyword)) return (false, notA); // issue #503: Gaining Advantage
         if (criteria.NonUnique && Keyword(card, "Unique")) return (false, "Unique cards cannot be chosen");
         if (criteria.ExcludedKeywords is { Length: > 0 } && criteria.ExcludedKeywords.FirstOrDefault(k => Keyword(card, k)) is string excluded)
             return (false, $"{excluded} cards cannot be chosen");

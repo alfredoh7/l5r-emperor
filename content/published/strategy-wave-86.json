@@ -1,0 +1,183 @@
+{
+  "Profile": "strategy-wave-86",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-6",
+      "Name": "A Champion in Court",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "As a Focus Effect: You may substitute one of your Yojimbo Personalities for your Personality in this duel.\nReaction: After another player's action destroys one of your Courtier or Shugenja Personalities, choose your performing Yojimbo Personality: Give him three +1F Revenge tokens.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6.jpg",
+      "Keywords": [],
+      "Focus": 3,
+      "Abilities": [
+        "p2-champion-court-focus",
+        "p2-champion-court-revenge"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-1164",
+      "Name": "Brothers in Battle",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle/Open: Choose two or three of your performing Samurai: Each of them has +1F and the ability, \"Battle: Ranged 4 Attack\" while in an army with one or more of the others.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1164.jpg",
+      "Keywords": [
+        "Bushido Virtue",
+        "Duty"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "p2-brothers-in-battle"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-3415",
+      "Name": "Honest Assessment",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing unbowed Samurai and target an enemy Personality with equal or lower Personal Honor: Bow him. Gain 1 Honor, or 3 Honor if your Family Honor is 9 or less.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-3415.jpg",
+      "Keywords": [
+        "Bushido Virtue",
+        "Honesty"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "p2-honest-assessment-bow"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-4352",
+      "Name": "Killing Intent",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "As a Focus Effect: You may choose (now) to use the base Force of your Personality in this duel as his duel stat if he is at a battlefield.\nBattle: Choose your performing Personality: Straighten him. You may move him home.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-4352.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "p2-killing-intent-focus",
+        "p2-killing-intent-straighten",
+        "p2-killing-intent-straighten-home"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-7427",
+      "Name": "Spirit of the Shadows",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Choose your performing unbowed Personality: If he is a Ninja, permanently give him the ability, \"Ninja Battle: Target two Personalities controlled by the same player at different locations: Switch their locations.\" Otherwise, permanently give him Ninja.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7427.jpg",
+      "Keywords": [],
+      "Focus": 4,
+      "Abilities": [
+        "p2-spirit-shadows"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-7668",
+      "Name": "Surrounded!",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After engaging, choose your performing unbowed Scout at the current battlefield: You have Reconnaissance there. Ranged Attacks from your card effects during this battle have +2 strength.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7668.jpg",
+      "Keywords": [
+        "Recon"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "p2-surrounded-recon"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10173",
+      "Name": "Turning Away",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "As a Focus Effect: You may discard your Personality in this duel (ending the duel without resolution).\nBattle: Even if you control no units at the current battlefield, choose your performing Monk at any location and bow your target Ring: Give the current battlefield's province +3 or -3 strength.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10173.jpg",
+      "Keywords": [
+        "Kiho"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "p2-turning-away-focus",
+        "p2-turning-away-raise",
+        "p2-turning-away-lower"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

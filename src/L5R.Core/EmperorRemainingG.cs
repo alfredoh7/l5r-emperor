@@ -270,6 +270,7 @@ public sealed partial class MatchEngine
     {
         var removed = card.Modifiers.RemoveAll(m => m.Stat == "Chi" && m.Amount < 0);
         foreach (var token in card.Tokens.Where(t => t.Stat == "Chi" && t.Amount < 0).ToArray()) { DestroyToken(card, token); removed++; }
+        foreach (var token in card.Tokens.Where(t => t.Stat2 == "Chi" && t.Amount2 < 0).ToArray()) { card.Tokens[card.Tokens.IndexOf(token)] = token with { Stat2 = null, Amount2 = 0 }; removed++; } // issue #503: a two-stat token keeps its other stat
         if (removed > 0) Emit("penaltiesNegated", $"{Definition(card).Name}: {removed} Chi penalt{(removed == 1 ? "y" : "ies")} negated (Gift Armor).", card.OwnerId, card.Id);
     }
 

@@ -497,6 +497,7 @@ public sealed partial class MatchEngine
                 break;
             case (EitherOrSpecs.KitsukiMethodsDiscard, "discard"):
             {
+                if (P2HandDiscardBlocked(decider.Id, p.ActingPlayerId, true, name)) break; // issue #503: Pillowbook, The Scorpion Wall is Finished
                 var hand = decider.Hand.ToList();
                 var random = new StableRandom(_state.RngState);
                 random.Shuffle(hand);
