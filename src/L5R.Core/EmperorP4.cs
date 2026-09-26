@@ -96,6 +96,19 @@ public sealed class EmperorP4State
     public Dictionary<string, int> ContributionNegatedBy { get; set; } = [];
     /// <summary>Tsuruchi Nobukatsu: whether the Attack of the action now resolving destroyed a card.</summary>
     public bool AttackDestroyedACard { get; set; }
+    /// <summary>Drawing on the Mountain: the cards whose next straightening this game is negated.</summary>
+    public List<string> NextStraightenNegated { get; set; } = [];
+    /// <summary>Scars of War: one mark per copy on a Holding, and whether each marked Holding was bowed when last seen.</summary>
+    public List<P4Watch> ScarsMarks { get; set; } = [];
+    public Dictionary<string, bool> ScarsLastBowed { get; set; } = [];
+    /// <summary>Show of Restraint: the one-shot shield against the next card effect that moves him home or bows him, with its turn.</summary>
+    public Dictionary<string, int> RestraintShields { get; set; } = [];
+    /// <summary>The Menacing Sky's watches.</summary>
+    public List<P4Watch> MenacingSkyWatches { get; set; } = [];
+    /// <summary>The Snow Has Teeth: the province ceilings, the players' one-shot move shields and the Terrain watches.</summary>
+    public List<P4ProvinceCap> ProvinceCaps { get; set; } = [];
+    public List<P4Watch> SnowMoveShields { get; set; } = [];
+    public List<P4Watch> SnowTerrainWatches { get; set; } = [];
 }
 
 public sealed partial class MatchEngine
@@ -108,7 +121,7 @@ public sealed partial class MatchEngine
     private static int? P4AttackStrength(string abilityId) => abilityId == EmperorP4Abilities.NobukatsuRanged ? 4 : null;
     private static string? P4AttackKind(string abilityId) => abilityId == EmperorP4Abilities.NobukatsuRanged ? "Ranged" : null;
 
-    private static bool P4BowsTarget(string abilityId) => abilityId is EmperorP4Abilities.GozaruBow or EmperorP4Abilities.GamesOfWillBow or EmperorP4Abilities.PrecedingReputation
+    private static bool P4BowsTarget(string abilityId) => abilityId is EmperorP4WatchAbilities.FirmCensure or EmperorP4Abilities.GozaruBow or EmperorP4Abilities.GamesOfWillBow or EmperorP4Abilities.PrecedingReputation
         or EmperorP4Abilities.TooMuchForMortals or EmperorP4Abilities.YojimboAssemble;
     private static bool P4DestroysTarget(string abilityId) => abilityId is EmperorP4Abilities.GozaruBow or EmperorP4Abilities.YojimboAssemble;
 
@@ -134,7 +147,7 @@ public sealed partial class MatchEngine
             case EmperorP4Abilities.OwnFollowerForPerformer:
                 return own && type == CardType.Follower && target.Zone == Zone.Attached && AtAnyLocation(Card(target.AttachedTo)) && Performer() is { } host && CanTransferTo(target, host);
             default:
-                return false;
+                return P4WatchTargetAllows(category, command, player, source, target);
         }
     }
 
@@ -281,7 +294,7 @@ public sealed partial class MatchEngine
                 return false;
             }
             default:
-                return null;
+                return RunEmperorP4Watches(id, command, player, source, target) ?? RunEmperorP4Units(id, ability, command, player, source, target);
         }
     }
 

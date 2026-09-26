@@ -3,6 +3,29 @@
   "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
   "Cards": [
     {
+      "Id": "oracle-l5r-2580",
+      "Name": "Firm Censure",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: Choose your performing Samurai and target another player's Personality or Follower: Negate the effects of the next action performed by the targeted card (this turn). Bow it if it has no attachments and is not a Samurai.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-2580.jpg",
+      "Keywords": [],
+      "Focus": 1,
+      "Abilities": [
+        "firm-censure-negate"
+      ],
+      "Effect": "none"
+    },
+    {
       "Id": "oracle-l5r-2771",
       "Name": "Games of Will",
       "Type": "Strategy",
@@ -98,6 +121,81 @@
       "Focus": 2,
       "Abilities": [
         "ride-the-breeze-move"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-6490",
+      "Name": "Scars of War",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Bow your performing Courtier and target a Holding: Until the game ends, after each time it bows or an ability on it resolves, its controller loses 1 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6490.jpg",
+      "Keywords": [
+        "Political"
+      ],
+      "Focus": 1,
+      "Abilities": [
+        "scars-of-war-mark"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-7197",
+      "Name": "Show of Restraint",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing Monk: Negate all current Force penalties on him from actions. If he has a Weapon, negate the next card effect that moves him home or bows him.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7197.jpg",
+      "Keywords": [
+        "Kiho"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "show-of-restraint"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-8342",
+      "Name": "The Snow Has Teeth",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After engaging: The current battlefield's province has a maximum strength equal to its base strength until the end of the battle. Negate the next effect that would move one of your Personalities from its battlefield. After the next time this battle a Terrain enters play, destroy it.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8342.jpg",
+      "Keywords": [
+        "Winter"
+      ],
+      "Focus": 1,
+      "Abilities": [
+        "snow-has-teeth"
       ],
       "Effect": "none"
     },

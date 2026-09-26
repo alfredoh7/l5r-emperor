@@ -2650,8 +2650,14 @@ public static class PublishedContent
     public static PublishedSnapshot PersonalityWave92 { get; } = Load("L5R.Published.PersonalityWave92.json", "personality-wave-92", requireDecks: false);
     /// <summary>Strategy wave 78 (issue #501, mechanics group D): Broken Cipher, Indecision and Amazing Feat (EmperorMechD.cs).</summary>
     public static PublishedSnapshot StrategyWave78 { get; } = Load("L5R.Published.StrategyWave78.json", "strategy-wave-78", requireDecks: false);
-    /// <summary>Personality wave 108 (issue #503, group P4: EmperorP4*.cs): Bayushi Tenzan, Gozaru no Oni, Shinjo Sarang, Tsuruchi Nobukatsu.</summary>
+    /// <summary>Personality wave 108 (issue #503, group P4: EmperorP4*.cs): Bayushi Tenzan, Gozaru no Oni, Ikoma Shinohara, Shinjo Hayan, Shinjo Sarang, Tsuruchi Nobukatsu.</summary>
     public static PublishedSnapshot PersonalityWave108 { get; } = Load("L5R.Published.PersonalityWave108.json", "personality-wave-108", requireDecks: false);
-    /// <summary>Strategy wave 94 (issue #503, group P4: EmperorP4*.cs): Games of Will, Pillar Tattoo, Preceding Reputation, Ride the Breeze, Too Much for Mortals, Yojimbo Assemble.</summary>
+    /// <summary>Strategy wave 94 (issue #503, group P4: EmperorP4*.cs): Firm Censure, Games of Will, Pillar Tattoo, Preceding Reputation, Ride the Breeze, Scars of War, Show of Restraint, The Snow Has Teeth, Too Much for Mortals, Yojimbo Assemble.</summary>
     public static PublishedSnapshot StrategyWave94 { get; } = Load("L5R.Published.StrategyWave94.json", "strategy-wave-94", requireDecks: false);
+    /// <summary>Spell wave 38 (issue #503, group P4: EmperorP4*.cs): Drawing on the Mountain, The Menacing Sky.</summary>
+    public static PublishedSnapshot SpellWave38 { get; } = Load("L5R.Published.SpellWave38.json", "spell-wave-38", requireDecks: false);
+    /// <summary>Item wave 30 (issue #503, group P4: EmperorP4*.cs): Hunger.</summary>
+    public static PublishedSnapshot ItemWave30 { get; } = Load("L5R.Published.ItemWave30.json", "item-wave-30", requireDecks: false);
+    /// <summary>Event wave 21 (issue #503, group P4: EmperorP4*.cs): Too Close to Home.</summary>
+    public static PublishedSnapshot EventWave21 { get; } = Load("L5R.Published.EventWave21.json", "event-wave-21", requireDecks: false);
 }

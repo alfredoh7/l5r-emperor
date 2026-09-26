@@ -297,6 +297,7 @@ public sealed partial class MatchEngine
         FinishSpentBeforeBattleItem();
         FinishTwistOfFateAction(twistWasActive);
         OpenAssignedReactionWindow(); // Chrysanthemum Blossom (issue #492 group G): "After this Personality is assigned".
+        P4CommandTail(); // Scars of War (issue #503, EmperorP4Watches.cs): "after each time it bows".
         CheckInokuchiWatches(); // Mirumoto Inokuchi (issue #501, EmperorMechA.cs): "If you don't, bow him" -- once his additional action is gone without being taken.
     }
     private void ApplyCore(GameCommand command)
@@ -1508,6 +1509,7 @@ public sealed partial class MatchEngine
             card.AssignedToAttackTurn=_state.TurnNumber;
             Emit("unitAssigned",$"{Definition(card).Name} assigned to province {assignment.Value+1}.",command.PlayerId,card.Id);
             FireMiddayShadowAssigned(card); // Midday Shadow Court (Stronghold pass, issue #486 batch 1): "After the next time this turn he is assigned" -- to either side.
+            P4Assigned(card); // The Menacing Sky (issue #503, EmperorP4Watches.cs): "after the next time he assigns".
             FireVeiledMenaceAssigned(card); // Veiled Menace (Emperor Edition remaining-cards pass, issue #492, group D): "After each time he is assigned (this turn)" -- to either side.
             if(!isDefender) FireConsecrationWatches(card,assignment.Value); // Consecration (Emperor Edition remaining-cards pass, issue #492, group E): "assigns ... to an attacking army".
             // "After the next time this turn he is assigned to attack" (Imperial Protection, Fair Warning; issue #453, batch 2): an attacker's assignment only.
@@ -2194,6 +2196,7 @@ public sealed partial class MatchEngine
             // play. A fresh watch per entry (DiscardTerrain removes this one's entry when it leaves).
             if(def.Effect=="fields-of-mercy") _state.FieldsOfMercyWatches.Add(new(){CardId=card.Id});
             Emit("terrainPlayed",$"{Player(command.PlayerId).Name} played {def.Name} as Terrain at this battlefield.",command.PlayerId,card.Id);
+            P4TerrainEnteredPlay(card); // The Snow Has Teeth (issue #503): "After the next time this battle a Terrain enters play, destroy it."
             FireMarshallingFieldsDraw(command.PlayerId); // The Marshalling Fields (issue #501): playing a Terrain is a Terrain action that resolved.
             // Hasty Fortifications: "(including this card's)" -- putting it into play is one of the Battle actions it counts.
             if(def.Effect=="hasty-fortifications") AddHastyBonus(card);
@@ -2850,7 +2853,8 @@ public sealed partial class MatchEngine
         if((card.Zone!=Zone.Battlefield || card.ProvinceIndex!=province) && (MovementLockNegates(card,MovementKinds.ToBattlefield) || MovementToBattlefieldNegated(card,province) || KitsuneNegatesMovement(card,province) || UguluNegatesMovement(card,province))) return false;
         // The Shadow's Embrace pass (issue #476), batch 6: Shieldman "will not move into an attacking army"; Star-Crossed Lovers "will not move to each other's battlefields".
         if((card.Zone!=Zone.Battlefield || card.ProvinceIndex!=province) && (ShieldmanNegatesMove(card) || StarCrossedNegatesMove(card,province))) return false;
-        if((card.Zone!=Zone.Battlefield || card.ProvinceIndex!=province) && AsukaNegatesMove(card)) return false; // Goju Asuka (issue #501): "will not move into a defending army".
+        if((card.Zone!=Zone.Battlefield || card.ProvinceIndex!=province) && AsukaNegatesMove(card)) return false;
+        if(P4NegatesMoveToBattlefield(card,province)) return false; // The Snow Has Teeth (issue #503, EmperorP4Watches.cs): a move from its battlefield. // Goju Asuka (issue #501): "will not move into a defending army".
         // Legion of the Bat (issue #279): "after the resolution of an action that moved a target
         // enemy Infantry Personality to this card's battlefield" -- every printed "move to the
         // current battlefield" ability (Mirumoto Michi/Togashi Rikyou/Intervening Spirit/Takasho/
@@ -3137,6 +3141,7 @@ public sealed partial class MatchEngine
         if(Definition(card).Effect==StarCrossedLoversEffect) return ResolveStarCrossedLovers(player,province,card);
         // Emperor Edition remaining-cards pass (issue #492), group F (EmperorRemainingFEvents.cs): twelve Events, most of which stay in play for a while or ask a player a question.
         if(IsEmperorRemainingFEvent(Definition(card).Effect)) return ResolveEmperorRemainingFEvent(player,province,card);
+        if(Definition(card).Effect==EmperorP4WatchAbilities.TooCloseToHomeEffect) return ResolveTooCloseToHome(player,province,card); // Too Close to Home (issue #503, EmperorP4Watches.cs)
         province.CardId=null; card.ProvinceIndex=null;
         switch(Definition(card).Effect)
         {

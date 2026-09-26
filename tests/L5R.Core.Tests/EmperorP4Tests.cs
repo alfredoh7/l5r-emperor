@@ -44,6 +44,8 @@ internal static partial class EmperorP4Tests
         ("Too Much for Mortals: the acting player bows the target or destroys one of his attachments; with no attachment he is bowed at once", TooMuchForMortals_),
         ("Yojimbo Assemble: Force below the Yojimbo's Force plus the highest Shugenja/Courtier Chi -- bowed, and destroyed without attachments; bowed only with one; equal Force is refused", YojimboAssembleBow),
         ("Ride the Breeze: an Air Monk moves the target home and negates his later movement this turn; a non-Air Monk only moves him", RideTheBreezeMove),
+        .. WatchTests(),
+        .. UnitTests(),
     ]);
 
     // ---- published shape ---------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -93,7 +95,7 @@ internal static partial class EmperorP4Tests
         Check(nobukatsu.Clan == "Mantis" && nobukatsu.GoldCost == 7 && nobukatsu.Force == 4 && nobukatsu.Chi == 3 && nobukatsu.PersonalHonor == 2 && nobukatsu.HonorRequirement == 0, "Nobukatsu's stats");
         Shape(Nobukatsu, CardType.Personality, "Tsuruchi Nobukatsu", "nobukatsu-inexp-ranged",
             "Battle: Ranged 4 Attack. If the Ranged Attack destroyed a card, you may target and straighten a Holding.", "Bounty Hunter,Magistrate,Mantis Clan,Samurai");
-        Manifest("personality-wave-108", Tenzan, Gozaru, Sarang, Nobukatsu);
+        // personality-wave-108's manifest is checked with Hayan and Shinohara (UnitsPublishedShape).
 
         Shape(GamesOfWill, CardType.Strategy, "Games of Will", "games-of-will-bow,games-of-will-negate",
             "Battle: Choose your performing unbowed Personality and target an enemy card with lower Gold Cost: Bow it.\nBattle: Choose your performing Personality: Negate all current and new Force penalties to him from actions. Negate all current and new effects from other players' cards that prevent him from contributing Force to his army.");
@@ -109,7 +111,7 @@ internal static partial class EmperorP4Tests
             "Battle: Choose your performing unbowed Monk and target an enemy Personality: Move him home. If he moved and your Monk is Air, negate the Personality's (future) movement.", "Air,Kiho");
         foreach (var (id, focus) in new[] { (GamesOfWill, 3), (PillarTattoo, 3), (PrecedingReputation, 3), (TooMuch, 2), (YojimboAssemble, 3), (RideTheBreeze, 2) })
             Check(CardCatalog.Get(id).GoldCost == 0 && CardCatalog.Get(id).Focus == focus, $"{id}'s Gold Cost and Focus");
-        Manifest("strategy-wave-94", GamesOfWill, PillarTattoo, PrecedingReputation, TooMuch, YojimboAssemble, RideTheBreeze);
+        // strategy-wave-94's manifest is checked with the watch Strategies (WatchesPublishedShape).
         Eq(AbilityCatalog.All["tenzan-penalty-battle"].UsageKey, AbilityCatalog.All["tenzan-penalty-limited"].UsageKey, "Tenzan's two designators share one use");
     }
 

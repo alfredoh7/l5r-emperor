@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build Personality wave 108 (issue #503, group P4: target/slot model, movement and assignment locks, one-shot watches and shields): Bayushi Tenzan, Gozaru no Oni, Shinjo Sarang, Tsuruchi Nobukatsu.
+"""Build Personality wave 108 (issue #503, group P4: target/slot model, movement and assignment locks, one-shot watches and shields): Bayushi Tenzan, Gozaru no Oni, Shinjo Sarang, Tsuruchi Nobukatsu, Shinjo Hayan, Ikoma Shinohara.
 
 The engine side is src/L5R.Core/EmperorP4*.cs. Every scan was read by eye (WebP working copies, sha256-verified against their receipts' working_copy); the published Text is each scan's own wording.
 """
@@ -19,8 +19,11 @@ ABILITIES: dict[int, list[str]] = {
     2880: ["gozaru-bow"],  # Gozaru no Oni
     6934: ["sarang-transfer"],  # Shinjo Sarang
     8861: ["nobukatsu-inexp-ranged"],  # Tsuruchi Nobukatsu
+    6883: ["hayan-assign"],  # Shinjo Hayan
+    3639: ["shinohara-attach"],  # Ikoma Shinohara
 }
 OVERRIDE: dict[int, dict] = {
+    6883: {"Effect": "discard-other-sensei"},  # "After Hayan enters play: Discard all your other Sensei Personalities." (the Sensei entry trait)
     2880: {"EntryHonorLoss": 5, "Effect": "gozaru-becomes-discarded"},  # "After Gozaru enters play: Lose 5 Honor." / "After Gozaru is destroyed: It becomes discarded (not dead)."
 }
 # The published Text is each scan's own wording (read by eye).
@@ -31,6 +34,9 @@ TEXT: dict[int, str] = {
           + "Battle: Target one or two enemy cards: Bow them. If you only targeted one card, destroy it.",
     6934: "Battle: Choose your performing Personality, and target your Follower at any location: Transfer it to the Personality. Straighten the Follower if the Personality is opposed or Spider Clan.",
     8861: "Battle: Ranged 4 Attack. If the Ranged Attack destroyed a card, you may target and straighten a Holding.",
+    6883: "After Hayan enters play: Discard all your other Sensei Personalities." + NL
+          + "After engaging: Once per turn, you may assign your (unbowed) Unicorn Clan Personality in your home to the current battlefield.",
+    3639: "Battle: Target a Follower in your hand and one of your Personalities: Attach the Follower to the Personality, paying all costs.",
 }
 
 

@@ -1,6 +1,10 @@
+oracle-l5r-2580
 oracle-l5r-2771
 oracle-l5r-5956
 oracle-l5r-6043
 oracle-l5r-6317
+oracle-l5r-6490
+oracle-l5r-7197
+oracle-l5r-8342
 oracle-l5r-8634
 oracle-l5r-9507

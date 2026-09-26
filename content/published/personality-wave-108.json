@@ -63,6 +63,62 @@
       "EntryHonorLoss": 5
     },
     {
+      "Id": "oracle-l5r-3639",
+      "Name": "Ikoma Shinohara",
+      "Type": "Personality",
+      "Clan": "Lion",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 2,
+      "PersonalHonor": 3,
+      "HonorRequirement": 7,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Target a Follower in your hand and one of your Personalities: Attach the Follower to the Personality, paying all costs.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-3639.jpg",
+      "Keywords": [
+        "Commander",
+        "Lion Clan",
+        "Samurai"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "shinohara-attach"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-6883",
+      "Name": "Shinjo Hayan",
+      "Type": "Personality",
+      "Clan": "Unicorn",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": 4,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After Hayan enters play: Discard all your other Sensei Personalities.\nAfter engaging: Once per turn, you may assign your (unbowed) Unicorn Clan Personality in your home to the current battlefield.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6883.jpg",
+      "Keywords": [
+        "Cavalry",
+        "Loyal",
+        "Samurai",
+        "Sensei",
+        "Unicorn Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "hayan-assign"
+      ],
+      "Effect": "discard-other-sensei"
+    },
+    {
       "Id": "oracle-l5r-6934",
       "Name": "Shinjo Sarang",
       "Type": "Personality",

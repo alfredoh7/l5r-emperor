@@ -288,5 +288,8 @@
     <EmbeddedResource Include="../../content/published/strategy-wave-78.json" LogicalName="L5R.Published.StrategyWave78.json" />
     <EmbeddedResource Include="../../content/published/personality-wave-108.json" LogicalName="L5R.Published.PersonalityWave108.json" />
     <EmbeddedResource Include="../../content/published/strategy-wave-94.json" LogicalName="L5R.Published.StrategyWave94.json" />
+    <EmbeddedResource Include="../../content/published/spell-wave-38.json" LogicalName="L5R.Published.SpellWave38.json" />
+    <EmbeddedResource Include="../../content/published/item-wave-30.json" LogicalName="L5R.Published.ItemWave30.json" />
+    <EmbeddedResource Include="../../content/published/event-wave-21.json" LogicalName="L5R.Published.EventWave21.json" />
   </ItemGroup>
 </Project>

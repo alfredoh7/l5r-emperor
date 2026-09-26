@@ -676,8 +676,11 @@ public static class CardCatalog
             .Concat(PublishedContent.HoldingWave28.Cards) // Emperor Edition mechanics group E (issue #501): Seaside Bazaar
             .Concat(PublishedContent.PersonalityWave92.Cards) // Issue #501, mechanics group D: Daidoji Narizane, Daigotsu Yajinden - exp3
             .Concat(PublishedContent.StrategyWave78.Cards) // Issue #501, mechanics group D: Broken Cipher, Indecision, Amazing Feat
-            .Concat(PublishedContent.PersonalityWave108.Cards) // Issue #503, group P4: Bayushi Tenzan, Gozaru no Oni, Shinjo Sarang, Tsuruchi Nobukatsu
-            .Concat(PublishedContent.StrategyWave94.Cards) // Issue #503, group P4: Games of Will, Pillar Tattoo, Preceding Reputation, Ride the Breeze, Too Much for Mortals, Yojimbo Assemble
+            .Concat(PublishedContent.PersonalityWave108.Cards) // Issue #503, group P4: Bayushi Tenzan, Gozaru no Oni, Ikoma Shinohara, Shinjo Hayan, Shinjo Sarang, Tsuruchi Nobukatsu
+            .Concat(PublishedContent.StrategyWave94.Cards) // Issue #503, group P4: Firm Censure, Games of Will, Pillar Tattoo, Preceding Reputation, Ride the Breeze, Scars of War, Show of Restraint, The Snow Has Teeth, Too Much for Mortals, Yojimbo Assemble
+            .Concat(PublishedContent.SpellWave38.Cards) // Issue #503, group P4: Drawing on the Mountain, The Menacing Sky
+            .Concat(PublishedContent.ItemWave30.Cards) // Issue #503, group P4: Hunger
+            .Concat(PublishedContent.EventWave21.Cards) // Issue #503, group P4: Too Close to Home
             .ToDictionary(c => c.Id, StringComparer.Ordinal);
     }
 }

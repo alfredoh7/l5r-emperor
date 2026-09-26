@@ -317,6 +317,7 @@ public sealed partial class MatchEngine
         terrain.Zone = Zone.Battlefield; terrain.ProvinceIndex = province; terrain.FaceUp = true;
         player.TerrainPlayedThisBattle = true; // Ring of Water's own recruitment condition
         Emit("terrainPlayed", $"{player.Name} put {Definition(terrain).Name} into play as Terrain at this battlefield.", player.Id, terrain.Id);
+        P4TerrainEnteredPlay(terrain); // The Snow Has Teeth (issue #503)
     }
 
     // ---- Paralyzing Touch ----
@@ -362,7 +363,7 @@ public sealed partial class MatchEngine
     // ---- Spiritual Manipulation ----
 
     private IEnumerable<ForcedAttack> ForcedAttacksOf(int playerId) =>
-        Player(playerId).MayNotAttackThisTurn ? [] : _state.ForcedAttacks.Where(f => f.PlayerId == playerId && f.Turn == _state.TurnNumber);
+        (Player(playerId).MayNotAttackThisTurn ? [] : _state.ForcedAttacks.Where(f => f.PlayerId == playerId && f.Turn == _state.TurnNumber)).Concat(P4ForcedAttacks(playerId)); // Hunger (issue #503)
 
     // The Attack Declaration: the decline is refused while an attack is owed. Null when the player may decline.
     private string? ForcedAttackDeclineRefusal(int playerId) =>
@@ -378,7 +379,7 @@ public sealed partial class MatchEngine
     // The attackers' assignment (AssignAttackers): every forced target assignable now is in it. Null when the assignment is acceptable.
     private string? ForcedAssignmentRefusal(int playerId, IReadOnlyDictionary<string, int>? assignments, bool cavalry) =>
         ForcedAssigneesNow(playerId, cavalry).FirstOrDefault(c => assignments?.ContainsKey(c.Id) != true) is { } missing
-            ? $"{_state.ForcedAttacks.First(f => f.TargetId == missing.Id && f.Turn == _state.TurnNumber).Source}: {Definition(missing).Name} must be assigned to attack." : null;
+            ? $"{ForcedAttacksOf(playerId).First(f => f.TargetId == missing.Id).Source}: {Definition(missing).Name} must be assigned to attack." : null; // issue #503: Hunger's owed attacks are listed there too
 
     // ---- The Game Has Changed ----
 

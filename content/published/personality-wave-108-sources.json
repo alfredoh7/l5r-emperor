@@ -18,6 +18,24 @@
     "image_sha256": "feac4a749d110c120de79669685c6cc34085db384812a1b1ae23a5708affdee9"
   },
   {
+    "card_id": "oracle-l5r-3639",
+    "printing_set": [
+      "Before the Dawn"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=3639",
+    "image_path": "assets/reference/oracle/before-the-dawn/webp/oracle-l5r-3639-printing-1-image-1.webp",
+    "image_sha256": "9d2deee15b8a8669982136bad15a6995bcf80a0969accd50d0e403935f4e2b19"
+  },
+  {
+    "card_id": "oracle-l5r-6883",
+    "printing_set": [
+      "Embers of War"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=6883",
+    "image_path": "assets/reference/oracle/embers-of-war/webp/oracle-l5r-6883-printing-1-image-1.webp",
+    "image_sha256": "e9169a7fe0223129976c30df2f243491d677dfd6d23165fa2d8a2964df5bd28f"
+  },
+  {
     "card_id": "oracle-l5r-6934",
     "printing_set": [
       "Embers of War"

@@ -274,6 +274,7 @@ public sealed partial class MatchEngine
                 return;
             }
             default:
+                if (ResolveP4EventChoice(command, pending)) return; // Too Close to Home (issue #503, EmperorP4Watches.cs)
                 throw new RuleViolation("Unknown Event decision.");
         }
     }
@@ -286,6 +287,9 @@ public sealed partial class MatchEngine
         GameCommand Answer(string? target = null, string? choice = null) => new("eventChoice", playerId, _state.Version, CardId: pending.EventCardId, TargetId: target, Choice: choice);
         switch (pending.Kind)
         {
+            case "p4-too-close": // Too Close to Home (issue #503, EmperorP4Watches.cs)
+                foreach (var option in P4EventChoiceActions(pending, playerId)) yield return option;
+                break;
             case "moon-sun": case "benefices":
                 foreach (var id in pending.Candidates)
                     yield return new("eventChoice", $"{eventName}: {Definition(Card(id)).Name}", true, null, Answer(id), id);

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build Strategy wave 94 (issue #503, group P4: target/slot model, movement and assignment locks, one-shot watches and shields): Games of Will, Pillar Tattoo, Preceding Reputation, Too Much for Mortals, Yojimbo Assemble, Ride the Breeze.
+"""Build Strategy wave 94 (issue #503, group P4: target/slot model, movement and assignment locks, one-shot watches and shields): Games of Will, Pillar Tattoo, Preceding Reputation, Too Much for Mortals, Yojimbo Assemble, Ride the Breeze, Firm Censure, Scars of War, Show of Restraint, The Snow Has Teeth.
 
 The engine side is src/L5R.Core/EmperorP4*.cs. Every scan was read by eye (WebP working copies, sha256-verified against their receipts' working_copy); the published Text is each scan's own wording.
 """
@@ -21,6 +21,10 @@ ABILITIES: dict[int, list[str]] = {
     8634: ["too-much-for-mortals"],  # Too Much for Mortals
     9507: ["yojimbo-assemble-bow"],  # Yojimbo Assemble
     6317: ["ride-the-breeze-move"],  # Ride the Breeze
+    2580: ["firm-censure-negate"],  # Firm Censure
+    6490: ["scars-of-war-mark"],  # Scars of War
+    7197: ["show-of-restraint"],  # Show of Restraint
+    8342: ["snow-has-teeth"],  # The Snow Has Teeth
 }
 OVERRIDE: dict[int, dict] = {
 }
@@ -33,6 +37,10 @@ TEXT: dict[int, str] = {
     8634: "Battle: Choose your performing unbowed Spirit and target an enemy Personality: Bow him or destroy one of his attachments.",
     9507: "Battle: Choose your performing unbowed Yojimbo, and target an enemy card with Force lower than your Yojimbo's Force plus the highest Chi among all Shugenja and Courtiers you control: Bow the target. Destroy it if it has no attachments.",
     6317: "Battle: Choose your performing unbowed Monk and target an enemy Personality: Move him home. If he moved and your Monk is Air, negate the Personality's (future) movement.",
+    2580: "Open: Choose your performing Samurai and target another player's Personality or Follower: Negate the effects of the next action performed by the targeted card (this turn). Bow it if it has no attachments and is not a Samurai.",
+    6490: "Limited: Bow your performing Courtier and target a Holding: Until the game ends, after each time it bows or an ability on it resolves, its controller loses 1 Honor.",
+    7197: "Battle: Choose your performing Monk: Negate all current Force penalties on him from actions. If he has a Weapon, negate the next card effect that moves him home or bows him.",
+    8342: "Reaction: After engaging: The current battlefield's province has a maximum strength equal to its base strength until the end of the battle. Negate the next effect that would move one of your Personalities from its battlefield. After the next time this battle a Terrain enters play, destroy it.",
 }
 
 

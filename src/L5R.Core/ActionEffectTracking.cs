@@ -40,6 +40,7 @@ public sealed partial class MatchEngine
     {
         AfterMechAActionResolved(abilityId, playerId, sourceId); // issue #501 (EmperorMechA.cs): Beyond the Line's draw "after the action's resolution"; Momoko's waiver is spent
         var affected = _state.CurrentActionAffected;
+        P4AfterActionResolved(affected, abilityId, playerId, sourceId); // Scars of War, The Menacing Sky (issue #503, EmperorP4Watches.cs)
         _state.LastResolvedAction = new ResolvedActionFacts { AbilityId = abilityId, PlayerId = playerId, SourceId = sourceId, Affected = affected, PerformerId = performerId, HonorLosers = _state.CurrentActionHonorLosers,
             HandRecipients = _state.CurrentActionHandRecipients, FavorTakers = _state.CurrentActionFavorTakers };
         NoteHonorLostToOtherAction(playerId, _state.CurrentActionHonorLosers); // Kitsu Tamasine (issue #477, batch 5)
