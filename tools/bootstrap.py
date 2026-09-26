@@ -4,13 +4,16 @@
 Status (default) does not download anything. Install with --install; add
 --with-templates for the large desktop export-template archive. Requires HTTPS.
 No package manager, installer, system PATH, certificate trust, or user preferences
-are modified. The .NET CLI's first-run files and package caches use .cache/;
+are modified. Python packages pinned in tools/content/requirements.txt are
+reported, never installed: the content tools and tools/check.sh need them, the
+game does not. The .NET CLI's first-run files and package caches use .cache/;
 DOTNET_GENERATE_ASPNET_CERTIFICATE=false suppresses development-cert creation.
 """
 from __future__ import annotations
 
 import argparse
 import hashlib
+from importlib import metadata
 import os
 from pathlib import Path, PurePosixPath
 import platform
@@ -26,6 +29,7 @@ import zipfile
 ROOT = Path(__file__).resolve().parents[1]
 TOOLS = ROOT / ".tools"
 DOWNLOADS = TOOLS / "downloads"
+CONTENT_REQUIREMENTS = ROOT / "tools/content/requirements.txt"
 DOTNET_VERSION = "10.0.400"
 GODOT_VERSION = "4.7.2"
 GODOT_RELEASE = f"https://github.com/godotengine/godot-builds/releases/download/{GODOT_VERSION}-stable/"
@@ -72,6 +76,23 @@ def version(executable, *arguments):
     if result.returncode:
         return None
     return result.stdout.strip().splitlines()[-1]
+
+
+def python_packages():
+    """Report the pinned content-tool packages. Returns the pip command when any is missing or differs."""
+    pins = [line.split("#")[0].strip() for line in CONTENT_REQUIREMENTS.read_text(encoding="utf-8").splitlines()]
+    mismatched = False
+    for pin in filter(None, pins):
+        name, _, required = pin.partition("==")
+        try:
+            installed = metadata.version(name)
+        except metadata.PackageNotFoundError:
+            installed = None
+        print(f"Python {name}: {installed or 'missing'} (required {required or 'any'})")
+        mismatched |= installed is None or bool(required) and installed != required
+    if mismatched:
+        return f"{Path(sys.executable).name} -m pip install -r tools/content/requirements.txt"
+    return None
 
 
 def download(name, url, expected, algorithm):
@@ -203,6 +224,10 @@ def main():
                 ready = True
             print(f"Desktop export templates: {'ready' if ready else 'missing'}")
             missing |= not ready
+    # Warning only: launchers run bootstrap under set -e and the game itself needs none of these packages.
+    pip = python_packages()
+    if pip:
+        print(f"Content tools and tools/check.sh need the pinned Python packages; install them yourself: {pip}")
     if missing:
         print("Run python tools/bootstrap.py --install [--with-templates] to install missing pinned tools.")
         return 1

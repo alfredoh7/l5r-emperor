@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Document the tools/content Python requirements (Pillow, openpyxl) in the README setup steps and make tools/bootstrap.py report them against their pins. Bootstrap only warns (exit code unchanged) and never runs pip, preserving its no-package-manager guarantee and the set -e launchers that call it.",
+  "validation": "python tools/bootstrap.py on Windows 11: with openpyxl missing it listed each pin, printed the pip command and exited 0; with both installed it printed matching versions and Ready, exit 0. bash tools/check.sh --skip-client: All requested checks passed (previously 10 tools/content tests errored with No module named PIL). Not run on macOS.",
+  "remaining": "Umbrella branch for #507: further setup/tooling findings will be added here. Client build/run and memory profiling not yet exercised on this machine.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/507",
+  "branch": "claude/507-dev-setup-cleanup",
+  "updated": "2026-09-26T10:42:21.933500+00:00"
+}

@@ -25,7 +25,7 @@ The engine's `MatchView.Limitations` records unsupported mechanics. Training fix
 
 The playable client supports windowed and fullscreen play (F11 toggles), complete card scans, an expanded navy mat, upright lanterns and warm animated light. The phase bar uses raster lacquer/brass artwork with live Musashi Brush headings and a subtle glow. Physical piles expose counts on hover, and the compact sidebar handles decisions. See [the bitmap phase-bar pass](docs/PHASE_BAR_ART.md) and [the next development phase](docs/NEXT_PHASE.md). For a static historical environment-only view, launch `tools/review-table.command` on this configured Mac.
 
-Prerequisites: **Python 3.12 or later**, macOS or Windows on x64/ARM64, and **Git Bash on Windows** for the shell scripts. The bootstrap installs **.NET SDK 10.0.400** and **Godot 4.7.2 .NET** into `.tools/` using pinned official HTTPS downloads and checksums.
+Prerequisites: **Python 3.12 or later**, macOS or Windows on x64/ARM64, and **Git Bash on Windows** for the shell scripts. The bootstrap installs **.NET SDK 10.0.400** and **Godot 4.7.2 .NET** into `.tools/` using pinned official HTTPS downloads and checksums. The content tools and their tests in `tools/check.sh` also need the Python packages pinned in `tools/content/requirements.txt` (Pillow and openpyxl); bootstrap reports them but never runs a package manager, so install them yourself, preferably in a virtual environment.
 
 ```sh
 # Inspect the local toolchain without downloading anything.
@@ -33,6 +33,9 @@ python3 tools/bootstrap.py
 
 # Explicitly install missing tools. On Windows, use python if python3 is unavailable.
 python3 tools/bootstrap.py --install
+
+# Install the content-tool Python packages (Pillow, openpyxl) used by tools/check.sh.
+python3 -m pip install -r tools/content/requirements.txt
 
 # Run the native client.
 bash tools/run.sh
