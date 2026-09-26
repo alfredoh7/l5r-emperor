@@ -138,8 +138,8 @@ public partial class Main : Node
                 _capturePrepared = true;
                 _captureClock = 0;
                 if (_captureMode.StartsWith("published-home", StringComparison.Ordinal)) PreparePersistentHomeCapture();
-                if (_captureMode.StartsWith("published-grants", StringComparison.Ordinal)) PreparePermanentGrantCapture();
-                if (_captureMode.StartsWith("published-fallen", StringComparison.Ordinal)) PrepareFallenCapture();
+                if (_captureMode.StartsWith("published-grants", StringComparison.Ordinal)) _ = PreparePermanentGrantCapture();
+                if (_captureMode.StartsWith("published-fallen", StringComparison.Ordinal)) _ = PrepareFallenCapture();
                 if (_captureMode is "published-choice" or "published-choice-confirm")
                 {
                     for (var fixtureAttempt = 0; fixtureAttempt < 6 && View.PendingChoice?.Type != "shinden"; fixtureAttempt++)
@@ -533,7 +533,7 @@ public partial class Main : Node
         RenderBoard(); RenderInspector(); RenderPhaseActions(); Highlight();
     }
 
-    private async void Submit(GameCommand command)
+    private async Task Submit(GameCommand command)
     {
         if (PresentationBusy) return;
         if (_session.Online && (_session.Snapshot?.PlayersConnected?.Any(p => !p) ?? false))

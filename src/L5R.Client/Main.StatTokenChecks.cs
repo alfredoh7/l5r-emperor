@@ -9,7 +9,7 @@ public partial class Main
     private IEnumerable<CardTile> InlaidCards => _tiles.Where(t=>t.ShowsStatInlays);
     private bool _tokenClickChecked;
     private string? _tokenProbeError;
-    private async void ProbeStatTokenInput()
+    private async Task ProbeStatTokenInput()
     {
         try
         {

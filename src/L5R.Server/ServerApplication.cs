@@ -91,7 +91,7 @@ public static class ServerApplication
                 }
             }
 
-            await manager.AttachAsync(seat, connection);
+            await manager.AttachAsync(seat, connection, context.RequestAborted);
             attached = true;
             while (socket.State == WebSocketState.Open && !context.RequestAborted.IsCancellationRequested)
             {
@@ -110,7 +110,7 @@ public static class ServerApplication
                     await connection.SendAsync(new ErrorMessage("error", new ServerError("invalid_json", "Expected a JSON object.")));
                     continue;
                 }
-                await manager.SubmitAsync(seat, connection, envelope);
+                await manager.SubmitAsync(seat, connection, envelope, context.RequestAborted);
             }
         }
         catch (JsonException)
@@ -127,7 +127,8 @@ public static class ServerApplication
         }
         finally
         {
-            if (attached) await manager.DetachAsync(seat, connection);
+            // Cleanup must run even though context.RequestAborted is typically already canceled here.
+            if (attached) await manager.DetachAsync(seat, connection, CancellationToken.None);
             if (socket.State is WebSocketState.Open or WebSocketState.CloseReceived)
             {
                 using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(2));

@@ -617,7 +617,7 @@ public sealed partial class MatchEngine
             // Jade's Roar - exp (Gempukku pass, issue #461): a Terrain is played by playStrategy, so a keyword-limited first action lets a card carrying that keyword through.
             var keywordCardPlayed = firstActionLimit.ActionKeyword is { } limitKeyword && command.Type=="playStrategy" && command.CardId is not null && _state.Cards.TryGetValue(command.CardId,out var limitCard) && Keyword(limitCard,limitKeyword);
             if (command.Type is "playStrategy" or "recruitReserve" or "equip" && !keywordCardPlayed) throw new RuleViolation(FirstActionLimitMessage(firstActionLimit));
-            if (command.Type=="useAbility") CheckFirstActionRestriction(command);
+            if (command.Type=="useAbility") ValidateFirstActionRestriction(command);
             _state.FirstActionRestriction=null;
         }
         NoteBattleActionTaken(command); // One Action, Two Strikes (issue #501, EmperorMechA.cs): "if the enemy leader has taken any Battle actions during this battle"

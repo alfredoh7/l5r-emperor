@@ -171,14 +171,14 @@ public partial class Main
                 _uiQueue.Clear(); Render();
                 if (_resolutionMessage is null) throw new Exception("Native battle result was not presented");
             }
-            ProbeUnitStandardInput();
+            _ = ProbeUnitStandardInput();
         }
-        if (_captureMode.Contains("courts", StringComparison.Ordinal)) { if (!compactMode) FocusBattle(); ProbeBattleCourts(); }
-        if (_captureMode.Contains("ink", StringComparison.Ordinal)) { if (_captureMode.Contains("focus", StringComparison.Ordinal)) FocusMySide(); ProbeInkMat(); }
-        if (_captureMode.Contains("deselect", StringComparison.Ordinal)) ProbeDeselection();
-        if (_captureMode.Contains("clarity", StringComparison.Ordinal)) PrepareClarityCapture();
-        if (_captureMode.Contains("tokens", StringComparison.Ordinal)) { if (_captureMode.Contains("focus", StringComparison.Ordinal)) FocusMySide(); ProbeStatTokenInput(); }
-        if (_captureMode.Contains("hudicons", StringComparison.Ordinal)) ProbeHudIcons();
+        if (_captureMode.Contains("courts", StringComparison.Ordinal)) { if (!compactMode) FocusBattle(); _ = ProbeBattleCourts(); }
+        if (_captureMode.Contains("ink", StringComparison.Ordinal)) { if (_captureMode.Contains("focus", StringComparison.Ordinal)) FocusMySide(); _ = ProbeInkMat(); }
+        if (_captureMode.Contains("deselect", StringComparison.Ordinal)) _ = ProbeDeselection();
+        if (_captureMode.Contains("clarity", StringComparison.Ordinal)) _ = PrepareClarityCapture();
+        if (_captureMode.Contains("tokens", StringComparison.Ordinal)) { if (_captureMode.Contains("focus", StringComparison.Ordinal)) FocusMySide(); _ = ProbeStatTokenInput(); }
+        if (_captureMode.Contains("hudicons", StringComparison.Ordinal)) _ = ProbeHudIcons();
         if (_captureMode.Contains("piles", StringComparison.Ordinal)) ValidatePileControls();
         if (_captureMode.EndsWith("settings", StringComparison.Ordinal)) ShowSettings();
         if (_captureMode.Contains("gate", StringComparison.Ordinal))
@@ -194,12 +194,12 @@ public partial class Main
             else
             {
                 // The menu branch hosts Options in its own canvas rather than a dialog.
-                ResumeCapturedOptions();
+                _ = ResumeCapturedOptions();
             }
         }
     }
 
-    private async void ResumeCapturedOptions()
+    private async Task ResumeCapturedOptions()
     {
         // Let each menu page finish its deferred focus operation before leaving it.
         for (var page = 0; page < 2; page++)
