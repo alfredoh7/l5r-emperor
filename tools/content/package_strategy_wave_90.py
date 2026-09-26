@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build Strategy wave 90 (Emperor Edition group P3, issue #503): Deep Snows, Iron Will, Request Authorization.
+"""Build Strategy wave 90 (Emperor Edition group P3, issue #503): Deep Snows, Forging Destiny, Iron Will, Request Authorization.
 
 New Reaction trigger points, announcement/interrupt windows and priority overrides (src/L5R.Core/EmperorP3.cs). Every scan was read by eye (WebP working copies with receipts, sha256-verified
 against the catalogue art release); the published Text is the scan's own wording, and each source receipt (with the working copy's sha256) is recorded next to the wave.
@@ -17,6 +17,7 @@ NL = chr(10)
 
 ABILITIES: dict[int, list[str]] = {
     1921: ["deep-snows-enter"],  # Deep Snows
+    2652: ["forging-destiny-negate", "forging-destiny-move"],  # Forging Destiny
     3813: ["iron-will-negate"],  # Iron Will
     6265: ["request-authorization-move", "request-authorization-negate"],  # Request Authorization
 }
@@ -27,6 +28,8 @@ OVERRIDE: dict[int, dict] = {
 TEXT: dict[int, str] = {
     1921: "After an action resolves: Bow any Personalities it moved. (Reactions trigger after traits.)" + NL
           + "Reaction: After a Battle action resolves, if there are no Terrains in play at the current battlefield: Put this card into play there.",
+    2652: "Reaction: Before an Event resolves: Negate its effects." + NL
+          + "Battle: Choose your performing Personality: Move him home. Straighten his unit if he moved.",
     3813: "Reaction: After another player targets your Paragon with a Battle action performed by a Personality with lower Personal Honor: The action's costs are ignored and its effects are negated. That player may take an additional Battle action.",
     6265: "Battle: Bow your performing Courtier at any location and target a Personality: Move him home." + NL
           + "Reaction: Before another player's Battle action resolves, target a Personality: Negate his movement to the current battlefield from the action's effects.",

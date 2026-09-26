@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build Personality wave 104 (Emperor Edition group P3, issue #503): Daidoji Akeha, Daigotsu Tenbatsu, Shosuro Toson - exp2.
+"""Build Personality wave 104 (Emperor Edition group P3, issue #503): Daidoji Akeha, Daigotsu Miki, Daigotsu Tenbatsu, Hida Fujita, Kakita Kenta, Shosuro Toson - exp2, Utaku Tairu - exp.
 
 New Reaction trigger points, announcement/interrupt windows and priority overrides (src/L5R.Core/EmperorP3.cs). Every scan was read by eye (WebP working copies with receipts, sha256-verified
 against the catalogue art release); the published Text is the scan's own wording, and each source receipt (with the working copy's sha256) is recorded next to the wave.
@@ -17,17 +17,27 @@ NL = chr(10)
 
 ABILITIES: dict[int, list[str]] = {
     1621: ["akeha-recon-draw", "akeha-recon-search"],  # Daidoji Akeha
+    1747: [],  # Daigotsu Miki
     1778: ["tenbatsu-engage-look"],  # Daigotsu Tenbatsu
+    3093: ["fujita-negate-follower-destruction"],  # Hida Fujita
+    4189: ["kenta-move-home"],  # Kakita Kenta
     7177: ["toson-exp2-engage"],  # Shosuro Toson - exp2
+    9100: ["tairu-exp-draw"],  # Utaku Tairu - exp
 }
 OVERRIDE: dict[int, dict] = {
+    1747: {"Effect": "miki-events-dark-virtue", "EntryHonorLoss": 1},
 }
 # The published Text is each scan's own wording (read by eye).
 TEXT: dict[int, str] = {
     1621: "Reaction: After your Recon action from a Strategy resolves: Draw a card." + NL
           + "Recon Limited: Discard a card: Search your Fate deck for a non-Unique card with a Recon ability, show it, and put it in your hand.",
+    1747: "After Miki enters play: Lose 1 Honor." + NL
+          + "After your Events Phase: You may remove a Dark Virtue in your hand or discard pile from the game. If you did not remove one, destroy Miki.",
     1778: "Reaction: After engaging at Tenbatsu's battlefield: Look at the top three cards of your Fate deck. Put them back in any order. You may discard a Dark Virtue; if you did, draw a card.",
+    3093: "Reaction: Before the resolution of another player's action, if Fujita is at the current battlefield: Negate the destruction of your Followers from its effects.",
+    4189: "Iaijutsu Reaction: After an action resolves during which Kenta won a duel, target a dishonorable enemy Personality at the current battlefield: Move him home.",
     7177: "Reaction: After engaging at Toson's battlefield: Discard a card from the current battlefield's province. If this discarded a Personality, you have the first opportunity to take a Battle action in this battle, which must be performed by Toson.",
+    9100: "Reaction: After a Personality assigns or moves, if he is now opposing Tairu: Draw a card.",
 }
 
 

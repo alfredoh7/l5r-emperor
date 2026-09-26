@@ -35,6 +35,18 @@ public static class EmperorP3Abilities
     public const string RequestNegate = "request-authorization-negate";
     public const string IronWill = "iron-will-negate";
 
+    public const string KentaMove = "kenta-move-home";
+    public const string ForgingNegate = "forging-destiny-negate";
+    public const string ForgingMove = "forging-destiny-move";
+    public const string DefendersHonor = "hida-defenders-honor";
+    public const string FujitaNegate = "fujita-negate-follower-destruction";
+    public const string RidersNegate = "vigilant-riders-negate";
+    public const string RidersEffect = "vigilant-riders-straighten";
+    public const string TairuDraw = "tairu-exp-draw";
+    public const string MikiEffect = "miki-events-dark-virtue";
+    /// <summary>Forging Destiny's trigger: the window before an Event resolves ("p3BeforeEventReaction").</summary>
+    public const string BeforeEventTrigger = "p3-before-event-resolves";
+    public const string DishonorableEnemyAtBattleTarget = "p3-dishonorable-enemy-personality-at-battle";
     public const string MovedToCurrentBattlefieldTarget = "p3-moved-to-current-battlefield";
     public const string OwnRingBowedByLastActionTarget = "p3-own-ring-bowed-by-last-action";
 
@@ -81,6 +93,27 @@ public static class EmperorP3Abilities
         // costs are ignored and its effects are negated. That player may take an additional Battle action."
         all[IronWill] = new("Reaction", "After another player targets your Paragon with a Battle action performed by a Personality with lower Personal Honor: The action's costs are ignored and its effects are negated. That player may take an additional Battle action",
             "none", Trigger: ReactionTriggers.TargetedByAction);
+        // Kakita Kenta (oracle-l5r-4189, Embers of War): "Iaijutsu Reaction: After an action resolves during which Kenta won a duel, target a dishonorable enemy Personality at the current
+        // battlefield: Move him home."
+        all[KentaMove] = new("Reaction", "Iaijutsu Reaction: After an action resolves during which Kenta won a duel, target a dishonorable enemy Personality at the current battlefield: Move him home",
+            DishonorableEnemyAtBattleTarget, Trigger: AfterActionReactionTriggers.AfterActionResolved, ActionKeywords: ["Iaijutsu"]);
+        // Forging Destiny (oracle-l5r-2652, Before the Dawn): "Reaction: Before an Event resolves: Negate its effects." and "Battle: Choose your performing Personality: Move him home.
+        // Straighten his unit if he moved."
+        all[ForgingNegate] = new("Reaction", "Before an Event resolves: Negate its effects", "none", Trigger: BeforeEventTrigger);
+        all[ForgingMove] = new("Battle", "Choose your performing Personality: Move him home. Straighten his unit if he moved", "none", Performer: "own-personality-at-battle");
+        // Hida Defenders (oracle-l5r-3083, Before the Dawn, Follower): "Reaction: After the resolution of your action that bowed, destroyed, or moved a Personality who has opposed this card at
+        // the current battlefield: Gain 2 Honor."
+        all[DefendersHonor] = new("Reaction", "After the resolution of your action that bowed, destroyed, or moved a Personality who has opposed this card at the current battlefield: Gain 2 Honor", "none",
+            Trigger: AfterActionReactionTriggers.AfterActionResolved);
+        // Hida Fujita (oracle-l5r-3093, Before the Dawn): "Reaction: Before the resolution of another player's action, if Fujita is at the current battlefield: Negate the destruction of your
+        // Followers from its effects."
+        all[FujitaNegate] = new("Reaction", "Before the resolution of another player's action, if Fujita is at the current battlefield: Negate the destruction of your Followers from its effects", "none",
+            Trigger: "before-action-resolves");
+        // Vigilant Riders (oracle-l5r-9158, Before the Dawn, Cavalry Follower): "After this card bows: Straighten it." (a trait: its Effect) and "Reaction: After another player's action targets
+        // a card in this unit: Negate this card's destruction from the action's effects."
+        all[RidersNegate] = new("Reaction", "After another player's action targets a card in this unit: Negate this card's destruction from the action's effects", "none", Trigger: ReactionTriggers.TargetedByAction);
+        // Utaku Tairu - exp (oracle-l5r-9100, Before the Dawn): "Reaction: After a Personality assigns or moves, if he is now opposing Tairu: Draw a card."
+        all[TairuDraw] = new("Reaction", "After a Personality assigns or moves, if he is now opposing Tairu: Draw a card", "none", Trigger: AfterActionReactionTriggers.AfterActionResolved);
         return all;
     }
 }
@@ -102,7 +135,35 @@ public sealed class EmperorP3State
     public List<HeldActionKey> OwedGrants { get; set; } = [];
     /// <summary>Tenbatsu's look, finished and waiting for the Dark Virtue decision: how to finish the Reaction afterwards.</summary>
     public PendingLook? DarkVirtueLook { get; set; }
+    /// <summary>A duel's action whose after-action tracking waits behind its duel-won window (Kakita Kenta).</summary>
+    public StashedDuelTracking? StashedDuel { get; set; }
+    /// <summary>Forging Destiny: the Event whose window is open or was asked about, and whether its effects are negated.</summary>
+    public string? EventWindowCardId { get; set; }
+    public int EventWindowPlayerId { get; set; }
+    public string? EventAskedCardId { get; set; }
+    public string? EventNegatedCardId { get; set; }
+    /// <summary>Daigotsu Miki: the Mikis whose Events Phase trait was applied ("card|turn"), and the one asking now.</summary>
+    public List<string> MikiHandled { get; set; } = [];
+    public string? MikiAsking { get; set; }
+    /// <summary>Hida Fujita: "Negate the destruction of your Followers from its effects" -- the protected player and the held action.</summary>
+    public List<FollowerShield> FollowerShields { get; set; } = [];
 }
+
+/// <summary>What a duel's action affected, set aside while its duel-won window is open.</summary>
+public sealed class StashedDuelTracking
+{
+    public string AbilityId { get; set; } = "";
+    public int PlayerId { get; set; }
+    public string? SourceId { get; set; }
+    public string? PerformerId { get; set; }
+    public List<AffectedCard> Affected { get; set; } = [];
+    public List<int> HonorLosers { get; set; } = [];
+    public List<int> HandRecipients { get; set; } = [];
+    public List<int> FavorTakers { get; set; } = [];
+}
+
+/// <summary>Hida Fujita's negation: the Followers of PlayerId are not destroyed by the effects of the held action Action (this turn).</summary>
+public sealed record FollowerShield(int PlayerId, HeldActionKey Action, int Turn);
 
 /// <summary>An announced action named by who took it, from which card and which ability.</summary>
 public sealed record HeldActionKey(int PlayerId, string? CardId, string AbilityId);
@@ -126,6 +187,9 @@ public sealed partial class MatchEngine
         // Centering the Soul: "one of your Rings the action bowed".
         EmperorP3Abilities.OwnRingBowedByLastActionTarget => Definition(target).Type == CardType.Ring && InPlay(target) && target.OwnerId == player.Id
             && _state.LastResolvedAction is { } bowed && bowed.Affected.Any(a => a.Kind == BowedRingKind && a.CardId == target.Id),
+        // Kakita Kenta: "a dishonorable enemy Personality at the current battlefield".
+        EmperorP3Abilities.DishonorableEnemyAtBattleTarget => Definition(target).Type == CardType.Personality && target.OwnerId != player.Id && AtBattle(target)
+            && MatchesTargetStatus(target, TargetStatus.IsDishonorable),
         _ => false
     };
 
@@ -146,14 +210,50 @@ public sealed partial class MatchEngine
                 return facts.Affected.Any(a => a.Kind == BowedRingKind && Card(a.CardId) is { } ring && ring.OwnerId == playerId && InPlay(ring));
             case EmperorP3Abilities.DeepSnowsEnter:
                 return IsBattleAction(facts.AbilityId) && _state.CurrentBattleProvince is not null;
+            // "After an action resolves during which Kenta won a duel".
+            case EmperorP3Abilities.KentaMove:
+                return facts.Affected.Any(a => a.Kind == WonDuelKind && a.CardId == source.Id);
+            case EmperorP3Abilities.DefendersHonor:
+                return facts.PlayerId == playerId && DefendersApplies(source, facts);
             default:
                 return null;
         }
     }
 
+    // Utaku Tairu - exp: read BEFORE AfterActionResolvedApplies' assignment-sentinel check (an assignment is not a catalogued action); null when the id is not his.
+    private bool? P3AssignmentOrActionApplies(CardInstance source, string abilityId, ResolvedActionFacts facts) =>
+        abilityId == EmperorP3Abilities.TairuDraw ? TairuApplies(source, facts) : null;
+
+    // "After a Personality assigns or moves, if he is now opposing Tairu": a Personality the assignment placed or the action moved stands at Tairu's battlefield on the other side.
+    private bool TairuApplies(CardInstance tairu, ResolvedActionFacts facts) =>
+        tairu.Zone == Zone.Battlefield && tairu.ProvinceIndex is int here
+        && facts.Affected.Any(a => a.Kind is AssignedKind or MovedKind && Card(a.CardId) is { Zone: Zone.Battlefield } p && p.ProvinceIndex == here && p.OwnerId != tairu.OwnerId
+            && Definition(p).Type == CardType.Personality);
+
+    // OpenAssignedReactionWindow's hook: an assignment worth a window for this group (Tairu may be opposed by it).
+    private bool P3WatchesAssignment(IEnumerable<string> assigned) =>
+        _state.Cards.Values.Any(t => t.Zone == Zone.Battlefield && AbilityIdsOf(t).Contains(EmperorP3Abilities.TairuDraw)
+            && assigned.Any(id => _state.Cards.TryGetValue(id, out var p) && p.Zone == Zone.Battlefield && p.ProvinceIndex == t.ProvinceIndex && p.OwnerId != t.OwnerId));
+
+    // Hida Defenders: "your action that bowed, destroyed, or moved a Personality who has opposed this card at the current battlefield" -- the Defenders' unit is at the current battlefield, and
+    // the Personality stands on the other side there now, or was destroyed or moved from there by the action.
+    private bool DefendersApplies(CardInstance defenders, ResolvedActionFacts facts)
+    {
+        if (defenders is not { Zone: Zone.Attached, AttachedTo: { } hostId } || _state.CurrentBattleProvince is not int battle) return false;
+        var host = Card(hostId);
+        if (host.Zone != Zone.Battlefield || host.ProvinceIndex != battle) return false;
+        return facts.Affected.Any(a => a.Kind is BowedPersonalityKind or DestroyedKind or MovedKind && Card(a.CardId) is { } p && Definition(p).Type == CardType.Personality
+            && p.OwnerId != defenders.OwnerId && (p.Zone == Zone.Battlefield && p.ProvinceIndex == battle || a.FromBattlefield == battle));
+    }
+
     // The before-action Reactions' conditions (BeforeActionReactionApplies' hook); null when the id is not this group's.
     private bool? P3BeforeActionApplies(CardInstance card, string abilityId, GameCommand command)
     {
+        // Hida Fujita: another player's action, Fujita at the current battlefield, and a Follower of his controller's in play that its effects could destroy.
+        if (abilityId == EmperorP3Abilities.FujitaNegate)
+            return InPlay(card) && card.Zone == Zone.Battlefield && card.ProvinceIndex == _state.CurrentBattleProvince && command.PlayerId != card.OwnerId && command.AbilityId is { } fujitaActing
+                && AbilityCatalog.All.TryGetValue(fujitaActing, out var fujitaAction) && IsAction(fujitaAction)
+                && _state.Cards.Values.Any(f => f.OwnerId == card.OwnerId && f.Zone == Zone.Attached && Definition(f).Type == CardType.Follower);
         if (abilityId != EmperorP3Abilities.RequestNegate) return null;
         // A Strategy in its player's hand; another player's Battle action whose effects move Personalities to the battle, and whose movement may be negated.
         return card.Zone == Zone.Hand && Definition(card).Type == CardType.Strategy && command.PlayerId != card.OwnerId && command.AbilityId is { } acting
@@ -168,6 +268,9 @@ public sealed partial class MatchEngine
     // The targeted-by-action Reactions' conditions (TargetedActionReactionApplies' fallback).
     private bool P3TargetedReactionApplies(CardInstance card, string abilityId, ReactionSubject subject, CardInstance affected)
     {
+        // Vigilant Riders: another player's action targets a card in this unit.
+        if (abilityId == EmperorP3Abilities.RidersNegate)
+            return card is { Zone: Zone.Attached } && subject.Command.PlayerId != card.OwnerId && UnitHostId(affected) == UnitHostId(card);
         if (abilityId != EmperorP3Abilities.IronWill) return false;
         var command = subject.Command;
         if (card.Zone != Zone.Hand || command.PlayerId == card.OwnerId || !IsBattleAction(command)) return false;
@@ -247,6 +350,41 @@ public sealed partial class MatchEngine
                 return false;
             case EmperorP3Abilities.IronWill:
                 IronWillNegates(source!);
+                return false;
+            case EmperorP3Abilities.KentaMove:
+                MoveHome(target!, false);
+                return false;
+            case EmperorP3Abilities.ForgingNegate:
+                if (P3.EventWindowCardId is { } eventId)
+                {
+                    P3.EventNegatedCardId = eventId;
+                    Emit("eventNegated", $"{name}: the effects of {Definition(Card(eventId)).Name} are negated.", player.Id, eventId);
+                }
+                return false;
+            case EmperorP3Abilities.ForgingMove:
+            {
+                var performer = Card(command.PerformerId!);
+                var wasAway = performer.Zone == Zone.Battlefield;
+                MoveHome(performer, false);
+                if (wasAway && performer.Zone == Zone.Home) StraightenBowedUnit(performer); // "Straighten his unit if he moved."
+                return false;
+            }
+            case EmperorP3Abilities.DefendersHonor:
+                GainHonor(player.Id, 2, name, source);
+                return false;
+            case EmperorP3Abilities.FujitaNegate:
+                if (KeyOf(_state.PendingNegatableAbility) is { } held)
+                {
+                    P3.FollowerShields.RemoveAll(s => s.Turn != _state.TurnNumber);
+                    P3.FollowerShields.Add(new(player.Id, held, _state.TurnNumber));
+                    Emit("effectsNegated", $"{name}: the destruction of {player.Name}'s Followers from the action's effects is negated.", player.Id, source?.Id);
+                }
+                return false;
+            case EmperorP3Abilities.RidersNegate:
+                NegateEffects(source!, "destroy");
+                return false;
+            case EmperorP3Abilities.TairuDraw:
+                Draw(player);
                 return false;
             default:
                 return null;

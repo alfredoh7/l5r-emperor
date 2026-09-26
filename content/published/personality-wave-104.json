@@ -35,6 +35,36 @@
       "Effect": "none"
     },
     {
+      "Id": "oracle-l5r-1747",
+      "Name": "Daigotsu Miki",
+      "Type": "Personality",
+      "Clan": "Spider",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 8,
+      "Chi": 2,
+      "PersonalHonor": 1,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After Miki enters play: Lose 1 Honor.\nAfter your Events Phase: You may remove a Dark Virtue in your hand or discard pile from the game. If you did not remove one, destroy Miki.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1747.jpg",
+      "Keywords": [
+        "Conqueror",
+        "Dark Fist of Iron",
+        "Paragon",
+        "Samurai",
+        "Shadowlands",
+        "Spider Clan",
+        "Undead"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "miki-events-dark-virtue",
+      "EntryHonorLoss": 1
+    },
+    {
       "Id": "oracle-l5r-1778",
       "Name": "Daigotsu Tenbatsu",
       "Type": "Personality",
@@ -59,6 +89,62 @@
       "Focus": 0,
       "Abilities": [
         "tenbatsu-engage-look"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-3093",
+      "Name": "Hida Fujita",
+      "Type": "Personality",
+      "Clan": "Crab",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 5,
+      "Chi": 3,
+      "PersonalHonor": 1,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: Before the resolution of another player's action, if Fujita is at the current battlefield: Negate the destruction of your Followers from its effects.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-3093.jpg",
+      "Keywords": [
+        "Blessed of the Fortune of Persistence",
+        "Commander",
+        "Crab Clan",
+        "Samurai"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "fujita-negate-follower-destruction"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-4189",
+      "Name": "Kakita Kenta",
+      "Type": "Personality",
+      "Clan": "Crane",
+      "GoldCost": 6,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 3,
+      "PersonalHonor": 3,
+      "HonorRequirement": 3,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Iaijutsu Reaction: After an action resolves during which Kenta won a duel, target a dishonorable enemy Personality at the current battlefield: Move him home.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-4189.jpg",
+      "Keywords": [
+        "Duelist",
+        "Crane Clan",
+        "Magistrate",
+        "Samurai"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "kenta-move-home"
       ],
       "Effect": "none"
     },
@@ -89,6 +175,36 @@
       "Focus": 0,
       "Abilities": [
         "toson-exp2-engage"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9100",
+      "Name": "Utaku Tairu",
+      "Type": "Personality",
+      "Clan": "Unicorn",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": 4,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After a Personality assigns or moves, if he is now opposing Tairu: Draw a card.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9100.jpg",
+      "Keywords": [
+        "Tactician",
+        "Unique",
+        "Advisor to the Amethyst Champion",
+        "Experienced",
+        "Samurai",
+        "Unicorn Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "tairu-exp-draw"
       ],
       "Effect": "none"
     }

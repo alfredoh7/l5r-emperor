@@ -9,6 +9,15 @@
     "image_sha256": "f435ed35d93d66e3b5a1ab353f9f1c2f6b306f720e760a1842905a4d4c10da89"
   },
   {
+    "card_id": "oracle-l5r-1747",
+    "printing_set": [
+      "Before the Dawn"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=1747",
+    "image_path": "assets/reference/oracle/before-the-dawn/webp/oracle-l5r-1747-printing-1-image-1.webp",
+    "image_sha256": "431b2f83725f5be1438b2c49bebee651a3d08bff4152e8d441c5930b82320ee0"
+  },
+  {
     "card_id": "oracle-l5r-1778",
     "printing_set": [
       "Embers of War"
@@ -18,6 +27,24 @@
     "image_sha256": "981bb5960b4b2daa2fa32bdc27a39de15fdf84dd68f115b0b0d8b9e33242a3d3"
   },
   {
+    "card_id": "oracle-l5r-3093",
+    "printing_set": [
+      "Before the Dawn"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=3093",
+    "image_path": "assets/reference/oracle/before-the-dawn/webp/oracle-l5r-3093-printing-1-image-1.webp",
+    "image_sha256": "2304411dbb3c426834a828d0aca8a2faa10ad6020d1662d5a4328f88a7b1b0fa"
+  },
+  {
+    "card_id": "oracle-l5r-4189",
+    "printing_set": [
+      "Embers of War"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=4189",
+    "image_path": "assets/reference/oracle/embers-of-war/webp/oracle-l5r-4189-printing-1-image-1.webp",
+    "image_sha256": "51f0854a1e78c2794607fbaa14714aee39701e6a3128ce73c8351c5f0bb0ce78"
+  },
+  {
     "card_id": "oracle-l5r-7177",
     "printing_set": [
       "Before the Dawn"
@@ -25,5 +52,14 @@
     "source_url": "https://oracleofthevoid.com/#cardid=7177",
     "image_path": "assets/reference/oracle/before-the-dawn/webp/oracle-l5r-7177-printing-1-image-1.webp",
     "image_sha256": "89dbb3cd15526bdeaf3d3a05b978951caa31b9a8b861abfde23e9a0be5eede99"
+  },
+  {
+    "card_id": "oracle-l5r-9100",
+    "printing_set": [
+      "Before the Dawn"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=9100",
+    "image_path": "assets/reference/oracle/before-the-dawn/webp/oracle-l5r-9100-printing-1-image-1.webp",
+    "image_sha256": "ea3df721f11314640da8c19ae02040b5aa1fdda79cb2dc85c314295c6ab4e397"
   }
 ]

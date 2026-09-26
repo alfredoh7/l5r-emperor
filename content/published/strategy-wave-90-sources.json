@@ -9,6 +9,15 @@
     "image_sha256": "233069b6f5c2c2655d93f446098d42d5b826477b1b265f158df65d6698aad328"
   },
   {
+    "card_id": "oracle-l5r-2652",
+    "printing_set": [
+      "Before the Dawn"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=2652",
+    "image_path": "assets/reference/oracle/before-the-dawn/webp/oracle-l5r-2652-printing-1-image-1.webp",
+    "image_sha256": "cbe8d97f2e7bc07eb64ce0fc1c6aa5c0669feceebb53e462615ffdc52aa04ac3"
+  },
+  {
     "card_id": "oracle-l5r-3813",
     "printing_set": [
       "Before the Dawn"

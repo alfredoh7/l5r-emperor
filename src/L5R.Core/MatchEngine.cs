@@ -341,7 +341,9 @@ public sealed partial class MatchEngine
             if (_state.PendingChoice.Type=="declineStraighten") { ResolveDeclineStraighten(command); return; }
             if (_state.PendingChoice.Type=="rentatsuLoss") { ResolveRentatsuLoss(command); return; } // Bayushi Rentatsu (issue #477, batch 4).
             if (_state.PendingChoice.Type=="infiltratorStraighten") { ResolveInfiltratorStraighten(command); return; }
-            if (_state.PendingChoice.Type=="p3DarkVirtueDiscard") { ResolveP3DarkVirtueDiscard(command); return; } // Daigotsu Tenbatsu (issue #503, EmperorP3.cs). // Goju Asuka / Only a Shadow (issue #501, EmperorMechB.cs).
+            if (_state.PendingChoice.Type=="p3DarkVirtueDiscard") { ResolveP3DarkVirtueDiscard(command); return; } // Daigotsu Tenbatsu (issue #503, EmperorP3.cs).
+            if (_state.PendingChoice.Type=="p3BeforeEventReaction") { ResolveP3BeforeEventCommand(command); return; } // Forging Destiny (issue #503, EmperorP3Windows.cs).
+            if (_state.PendingChoice.Type=="p3MikiDarkVirtue") { ResolveP3MikiCommand(command); return; } // Daigotsu Miki (issue #503, EmperorP3Windows.cs). // Goju Asuka / Only a Shadow (issue #501, EmperorMechB.cs).
             if (_state.PendingChoice.Type=="conqueror") { ResolveConqueror(command); return; }
             // Before This Battle Resolves (issue #272): three tightly-scoped, mandatory choices, no
             // "useAbility"/pass alternative -- see PendingBeforeBattleResolve's own doc comment.
@@ -1312,6 +1314,7 @@ public sealed partial class MatchEngine
             // The Engage window (issue #310) is the one window that decides WHO resumes: whoever holds the
             // first opportunity once its claims resolve (the Defender by default).
             var resumeTo=pending.Type=="engageReaction" ? CloseEngageWindow() : pending.ActingPlayerId ?? _state.ActivePlayerId;
+            if(pending.Type=="duelWonReaction" && P3FinishStashedDuel(resumeTo)) return; // Kakita Kenta (issue #503): the duel's action is now truly done
             // Overconfident (issue #223): a chance to react to anything THIS window's own resolution
             // caused to enter or leave play (Bayushi Mugoshi entering during a Proclaim/entryReaction
             // window and being slandered elsewhere, a Reaction that destroyed something, etc.) before
@@ -3092,6 +3095,7 @@ public sealed partial class MatchEngine
         // not just the phase that reveals them, so a card already sitting in Zone.EventInPlay from a
         // previous turn triggers here too.
         ResolveOngoingEvents(player);
+        if(P3AfterEventsPhase(player)) return; // Daigotsu Miki (issue #503): "After your Events Phase"
         SetPhase(Phase.Action,player.Id);
     }
     // An Event (core rules Glossary): removed from its province and resolved immediately upon reveal --
@@ -3105,6 +3109,7 @@ public sealed partial class MatchEngine
     // in which case ContinueEventsReveal's own loop must stop here; ResolveHarshChoices resumes it.
     private bool ResolveEvent(PlayerState player,ProvinceState province,CardInstance card)
     {
+        if(P3BeforeEvent(player,province,card) is { } p3Event) return p3Event; // Forging Destiny (issue #503): the window before an Event resolves
         if(Definition(card).Effect=="harsh-choices")
         {
             _state.PendingChoice=new("harshChoices",player.Id,card.Id,"Harsh Choices: you may destroy this province to draw 3 cards.");

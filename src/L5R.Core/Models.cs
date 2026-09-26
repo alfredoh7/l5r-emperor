@@ -467,6 +467,8 @@ public sealed record GameEvent(long Sequence, string Type, string Message, int? 
 /// Kind/Strength are compared against the target's current Force at actual resolution time.</summary>
 public sealed class PendingAttack
 {
+    // Hida Defenders (issue #503, EmperorP3Windows.cs): the Personalities bowed before the action that declared this Attack began.
+    public List<string>? BowedBefore { get; set; }
     public string AbilityId { get; set; } = "";
     public int PlayerId { get; set; }
     // The Personality that made the attack (an attached Item/Weapon's own wielder, when the attack
@@ -655,6 +657,8 @@ public sealed class FieldsOfMercyWatch
 /// Focus-Effect-bearing focused cards) -> resolved (PendingDuel set back to null).</summary>
 public sealed class PendingDuel
 {
+    // Hida Defenders (issue #503, EmperorP3Windows.cs): the Personalities bowed before the action that issued this duel began.
+    public List<string>? BowedBefore { get; set; }
     // Mendon's R4 ruling on Deception Revealed (issue #492): the Rings that were bowed before the action that issued this duel began; a Ring bowed since is one the action bowed, a Focus Effect's bows excepted.
     public List<string>? RingsBowedBefore { get; set; }
     // Kakita Ichigiku (The Shadow's Embrace pass, issue #476 batch 1): he challenged a dishonorable Personality during a Combat Segment, so the loser is destroyed too.

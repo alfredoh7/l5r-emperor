@@ -29,6 +29,30 @@
       "Effect": "deep-snows-bow-moved"
     },
     {
+      "Id": "oracle-l5r-2652",
+      "Name": "Forging Destiny",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: Before an Event resolves: Negate its effects.\nBattle: Choose your performing Personality: Move him home. Straighten his unit if he moved.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-2652.jpg",
+      "Keywords": [],
+      "Focus": 4,
+      "Abilities": [
+        "forging-destiny-negate",
+        "forging-destiny-move"
+      ],
+      "Effect": "none"
+    },
+    {
       "Id": "oracle-l5r-3813",
       "Name": "Iron Will",
       "Type": "Strategy",

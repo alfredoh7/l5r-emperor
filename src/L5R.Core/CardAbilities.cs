@@ -4252,7 +4252,7 @@ public sealed partial class MatchEngine
         "laws-strength-move" or "power-word-move" or "serpents-deception-move" => "move",
         "slow-death-straighten" or "well-prepared-straighten" => "straighten",
         _ => EmperorRemainingEMoveKind(abilityId) ?? RulingR2MoveKind(abilityId) // Emperor Edition remaining-cards pass (issue #492), group E: Obscured Pathways and Unnatural Flood move their target home.
-            ?? (abilityId is EmperorMechEAbilities.GreasingBattle or EmperorP3Abilities.RequestMove ? "move" : null) // issue #501: Greasing the Wheels moves its target home (or straightens his unit)
+            ?? (abilityId is EmperorMechEAbilities.GreasingBattle or EmperorP3Abilities.RequestMove or EmperorP3Abilities.KentaMove ? "move" : null) // issue #501: Greasing the Wheels moves its target home (or straightens his unit)
     };
     // Champion of Thunder / Brothers of Goemon's own narrower half (Brothers only ever negates a
     // bow, and must not even offer the reaction when the resolving effect could never bow the
@@ -5133,6 +5133,7 @@ public sealed partial class MatchEngine
         MiddayShadowActionEnded(attack.Command); // Emperor Edition Stronghold pass (issue #486), batch 1: Midday Shadow Court's "an action that he performed ends".
         FireCowedAndDefeatedActionWatches(attack.PlayerId, attack.Command, attack.TargetId); // The Shadow's Embrace pass (issue #476), batch 3
         // Action-effect tracking (issue #437): the deferred Attack is the action's resolution, the same reasoning FireAfterOwnActionTraits above already follows.
+        P3RecordBowedPersonalities(attack.BowedBefore); // Hida Defenders (issue #503): the Personalities the Attack's action bowed go on its record
         if (FinishActionEffectTracking(attack.AbilityId, attack.PlayerId, attack.SourceId, attackBurstContinues ? attack.PlayerId : 1 - attack.PlayerId)) return;
         NextAction(attack.PlayerId, attackBurstContinues);
     }
@@ -5420,6 +5421,8 @@ public sealed partial class MatchEngine
                     && (ability.Trigger == "own-personality-enters-play" || EnteredFromProvince(enteredCard)), // Kaiu Village (issue #492 ruling R3): "enters play from a province".
                 // No Hiding Place (issue #498): the announce window of an action of this player's with a Ranged Attack (EmperorFollowupsAttack.cs).
                 EmperorFollowupsAbilities.NoHidingPlaceTrigger => NoHidingPlaceWindowOpen(command),
+                // Forging Destiny (issue #503): the window before an Event resolves, open to either player.
+                EmperorP3Abilities.BeforeEventTrigger => _state.PendingChoice.Type == "p3BeforeEventReaction",
                 _ => false
             },
             _ => false
@@ -7218,11 +7221,13 @@ public sealed partial class MatchEngine
         var pendingDuelBefore = _state.PendingDuel;
         var runningBefore = _runningCommand;
         _runningCommand = command;
+        var p3BowedBefore = P3BowedPersonalityIds(); // Hida Defenders (issue #503): the Personalities bowed before the action
         try { RunAbilityEffects(command, consumedGrant); }
         finally { _runningCommand = runningBefore; }
-        if (_state.PendingDuel is { } issued && !ReferenceEquals(issued, pendingDuelBefore)) { issued.SourceCardId = command.CardId; issued.RingsBowedBefore = _state.CurrentActionRingsBefore.ToList(); }
+        if (_state.PendingDuel is { } issued && !ReferenceEquals(issued, pendingDuelBefore)) { issued.SourceCardId = command.CardId; issued.RingsBowedBefore = _state.CurrentActionRingsBefore.ToList(); issued.BowedBefore = p3BowedBefore; }
         if (_state.PendingAttack is { } declared && !ReferenceEquals(declared, pendingAttackBefore))
         {
+            declared.BowedBefore = p3BowedBefore; // Hida Defenders (issue #503)
             declared.RingsBowedBefore = _state.CurrentActionRingsBefore.ToList();
             var spent = command.CardId is null ? null : Card(command.CardId);
             SpendHandPlayedCard(Player(command.PlayerId), spent);
@@ -10214,6 +10219,7 @@ public sealed partial class MatchEngine
         if (_state.PendingChoice is null && OpenOverconfidentDrawWindow(closesTo)) return;
         // Action-effect tracking (issue #437): this action's own resolution is now truly done -- snapshot what it affected and offer the
         // Reaction that names it, same placement in the chain as the "after this action" windows above.
+        P3RecordBowedPersonalities(bowedBeforeAction); // Hida Defenders (issue #503): the Personalities this action bowed go on its record
         RecordBowedRings(bowedBeforeAction); // Deception Revealed (Emperor Edition remaining-cards pass, group A, issue #492): the Rings this action bowed go on its record.
         if (FinishActionEffectTracking(id, player.Id, source?.Id, closesTo, ActionPerformerIdOrNull(ability, command, source))) return;
         NextAction(player.Id, burstContinues);
@@ -10700,6 +10706,7 @@ public sealed partial class MatchEngine
             Emit("destructionNegated", $"{Definition(card).Name}'s destruction was negated before it resolved.", card.OwnerId, card.Id);
             return;
         }
+        if (P3FollowerShielded(card)) { Emit("destructionNegated", $"{Definition(card).Name}'s destruction was negated (Hida Fujita).", card.OwnerId, card.Id); return; } // issue #503
         if (Delay(card, DelayedKinds.Destroy)) return; // The shared delay mechanism (issue #492, EmperorRulingR2.cs).
         if (WideValleyNegatesDestruction(card)) return; // Seeds of Decay pass (issue #453), batch 1: an attachment's destruction is always an action's effect (see RecordActionEffect below).
         // Gift Armor (issue #492 group G): "Negate any destruction of this card, except for its Personality being destroyed" (DestroyUnits, which does not come through here).
@@ -10838,6 +10845,7 @@ public sealed partial class MatchEngine
         var inHonorChangeWindow = _state.PendingChoice?.Type == "honorChangeReaction"; // Mendon's R4 ruling (issue #492): only the Reactions that name an Honor change are on offer, and they are on offer nowhere else.
         // Twist of Fate (Emperor Edition remaining-cards pass, issue #492, group D): the window as its player ends his Dynasty Phase -- only the Reactions that name it are on offer, and only there.
         var inTwistOfFateWindow = _state.PendingChoice?.Type == "twistOfFateReaction";
+        var inBeforeEventWindow = _state.PendingChoice?.Type == "p3BeforeEventReaction"; // Forging Destiny (issue #503): only the Reactions before an Event resolves, and only there
         foreach (var (source, id) in sources)
         {
             if (inRecruitWindow && !RingRecruitGrantIds.Contains(id)) continue;
@@ -10850,12 +10858,13 @@ public sealed partial class MatchEngine
             if (inHonorChangeWindow ? !(honorChangeTrigger || id == HonorChangeReactions.UnimpeachableName) : honorChangeTrigger) continue;
             if (inAttackPhaseEndWindow != (ability.Timing == "Reaction" && ability.Trigger == EmperorRemainingCAbilities.AttackPhaseEnd)) continue;
             if (inTwistOfFateWindow != IsTwistOfFateReaction(ability)) continue;
+            if (inBeforeEventWindow != (ability.Timing == "Reaction" && ability.Trigger == EmperorP3Abilities.BeforeEventTrigger)) continue;
             var isEngageReaction = ability.Timing == "Reaction" && ability.Trigger is "after-engaging" or "after-engaging-at-own-battlefield";
             if (inEngageWindow != isEngageReaction) continue;
             // "Bow this card:" with no hand alternative is offered only from play (issue #370): from a hand or a discard pile it is not even listed.
             if (source is not null && RequiresSourceInPlay(ability) && !InPlay(source)) continue;
             if ((beforeResolutionCard is not null) != IsBeforeResolutionReaction(ability) || beforeResolutionCard is not null && source?.Id != beforeResolutionCard) continue;
-            var phaseOk = inEngageWindow || inAfterResolutionWindow || inAfterActionResolvedWindow || inTwistOfFateWindow || inAttackPhaseEndWindow || inHeldActionWindow || inHonorChangeWindow || beforeResolutionCard is not null ? true : ability.Timing switch { "Battle" => _state.Phase == Phase.Battle, "BattleOrOpen" => _state.Phase is Phase.Action or Phase.Battle, "BeforeResolution" => false, _ => _state.Phase == Phase.Action };
+            var phaseOk = inEngageWindow || inBeforeEventWindow || inAfterResolutionWindow || inAfterActionResolvedWindow || inTwistOfFateWindow || inAttackPhaseEndWindow || inHeldActionWindow || inHonorChangeWindow || beforeResolutionCard is not null ? true : ability.Timing switch { "Battle" => _state.Phase == Phase.Battle, "BattleOrOpen" => _state.Phase is Phase.Action or Phase.Battle, "BeforeResolution" => false, _ => _state.Phase == Phase.Action };
             var mechAAsBattle = MechAActsAsBattle(playerId, ability, source); // Beyond the Line (issue #501): a Limited or Open Recon ability used as a Battle action
             if (!phaseOk && !mechAAsBattle) continue;
             if (ability.Timing == "Limited" && playerId != _state.ActivePlayerId && !LimitedInsteadOfOpen(playerId) && !mechAAsBattle) continue; // Plans Within Plans (issue #492): a Limited action instead of an Open one.

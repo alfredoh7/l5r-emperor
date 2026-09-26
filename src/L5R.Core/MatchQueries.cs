@@ -521,6 +521,15 @@ public sealed partial class MatchEngine
         {
             result.AddRange(InfiltratorStraightenActions(playerId)); // Goju Asuka / Only a Shadow (issue #501, EmperorMechB.cs).
         }
+        else if(_state.PendingChoice is { Type:"p3BeforeEventReaction" })
+        {
+            result.AddRange(AbilityActions(playerId)); // Forging Destiny (issue #503, EmperorP3Windows.cs): the Reactions before an Event resolves, then the pass.
+            Add("declineReaction","Pass reaction",Command("declineReaction"));
+        }
+        else if(_state.PendingChoice is { Type:"p3MikiDarkVirtue" })
+        {
+            result.AddRange(P3MikiActions(playerId)); // Daigotsu Miki (issue #503, EmperorP3Windows.cs).
+        }
         else if(_state.PendingChoice is { Type:"p3DarkVirtueDiscard" })
         {
             result.AddRange(P3DarkVirtueActions(playerId)); // Daigotsu Tenbatsu (issue #503, EmperorP3.cs).

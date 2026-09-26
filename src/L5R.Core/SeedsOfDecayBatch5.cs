@@ -30,6 +30,7 @@ public sealed partial class MatchEngine
         {
             var effect = Definition(card).Effect;
             var was = before.TryGetValue(card.Id, out var b) ? b : (Bowed: false, AttachedTo: (string?)null);
+            P3AfterCommandTrait(card, was.Bowed); // Vigilant Riders (issue #503): "After this card bows: Straighten it."
             ApplyRemainingGAfterCommandTraits(card, was.Bowed); // Blade of Perfection (issue #492 group G): "After this card bows: Straighten it."
             // Ronin Ambushers (oracle-l5r-10108): "After this card bows: Straighten it and, if you do not control a Terrain, negate its (future)
             // straightening until the phase ends." A straighten hold released when the phase changes (StraightenPoint.PhaseEnds) is the (future)
