@@ -1,0 +1,108 @@
+{
+  "Profile": "spell-wave-26",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-1808",
+      "Name": "Damning Ceremony",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 4,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Once per game: Give this Personality a permanent Force bonus raising his Force to equal his base Gold Cost. Permanently give him Shadowlands • Nonhuman • Oni. Lose 2 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1808.jpg",
+      "Keywords": [
+        "Maho"
+      ],
+      "Focus": 1,
+      "Abilities": [
+        "damning-ceremony"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-2420",
+      "Name": "Extending Influence",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After this card enters play, if this Shugenja is Air: Each other player loses 1 Honor.\nOpen: Destroy this card and target a Personality: The performing Shugenja copies one of the target's abilities which does not copy abilities.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-2420.jpg",
+      "Keywords": [
+        "Air"
+      ],
+      "Focus": 1,
+      "Abilities": [
+        "extending-influence-copy"
+      ],
+      "Effect": "extending-influence-air-honor"
+    },
+    {
+      "Id": "oracle-l5r-4833",
+      "Name": "Mara's Touch",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "While this Shugenja is Nonhuman, he has +2F.\nOpen: Give this Shugenja –2F: He changes shape. Give him Cavalry.\nBattle: Give this Shugenja –2F: Ranged 6 Attack.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-4833.jpg",
+      "Keywords": [
+        "Pearl"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "maras-touch-cavalry",
+        "maras-touch-attack"
+      ],
+      "Effect": "maras-touch-nonhuman-force"
+    },
+    {
+      "Id": "oracle-l5r-5666",
+      "Name": "Ochiai's Bravery",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 3,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "While this Shugenja is Fire, he has Duelist.\nBattle: If this Shugenja is unbowed, bow this card and target an enemy Personality: This Shugenja duels him. Destroy a card without attachments in the unit of the duel's loser.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-5666.jpg",
+      "Keywords": [
+        "Fire"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "ochiai-bravery-duel"
+      ],
+      "Effect": "ochiai-bravery-fire-duelist"
+    }
+  ],
+  "Decks": []
+}

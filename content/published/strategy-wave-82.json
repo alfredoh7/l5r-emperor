@@ -1,0 +1,34 @@
+{
+  "Profile": "strategy-wave-82",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-6565",
+      "Name": "Seeking the Question",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: If this card is in play: Look at the top card of any deck. You may put it at the bottom of that deck.\nLimited: Put this card into play. Discard all your other Kata (in play).",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6565.jpg",
+      "Keywords": [
+        "Kata",
+        "Void"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "seeking-question-look",
+        "seeking-question-enter"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}
