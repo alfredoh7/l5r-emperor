@@ -33,6 +33,12 @@
       "Bash(python3 -m unittest discover -s tools -p test_meshy.py:*)",
       "Bash(python -m unittest discover -s tools -p test_bootstrap.py:*)",
       "Bash(python3 -m unittest discover -s tools -p test_bootstrap.py:*)",
+      "Bash(python -m unittest discover -s tools -p test_lint_comment_swallow.py:*)",
+      "Bash(python3 -m unittest discover -s tools -p test_lint_comment_swallow.py:*)",
+      "Bash(python -m unittest discover -s tools/hooks:*)",
+      "Bash(python3 -m unittest discover -s tools/hooks:*)",
+      "Bash(python tools/lint_comment_swallow.py:*)",
+      "Bash(python3 tools/lint_comment_swallow.py:*)",
       "Bash(bash tools/check.sh:*)",
       "Bash(bash tools/run.sh:*)",
       "Bash(dotnet build:*)",
@@ -44,6 +50,30 @@
       "Bash(dotnet tests/L5R.AI.Tests/bin/Debug/net10.0/L5R.AI.Tests.dll:*)",
       "Bash(dotnet tests/L5R.Server.Tests/bin/Debug/net10.0/L5R.Server.Tests.dll:*)",
       "Bash(dotnet tests/L5R.Client.Transport.Tests/bin/Debug/net10.0/L5R.Client.Transport.Tests.dll:*)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if command -v python3 >/dev/null 2>&1; then python3 \"${CLAUDE_PROJECT_DIR}/tools/hooks/block_generated_edit.py\"; else python \"${CLAUDE_PROJECT_DIR}/tools/hooks/block_generated_edit.py\"; fi"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if command -v python3 >/dev/null 2>&1; then python3 \"${CLAUDE_PROJECT_DIR}/tools/hooks/handoff_reminder.py\"; else python \"${CLAUDE_PROJECT_DIR}/tools/hooks/handoff_reminder.py\"; fi"
+          }
+        ]
+      }
     ]
   }
 }

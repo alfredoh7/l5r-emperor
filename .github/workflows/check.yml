@@ -61,6 +61,12 @@ jobs:
           # Windows runners start from an empty disk: skip ~2.2 GB of screenshots, videos and table source art that no check reads.
           sparse-checkout: ${{ matrix.sparse }}
           sparse-checkout-cone-mode: false
+      - name: Fetch main's tip for the diff-scoped comment-swallow lint
+        # A single branch tip, not fetch-depth 0: this checkout is intentionally
+        # shallow/sparse for slow, fresh-disk Windows runners, and full history
+        # for all branches would undo that. tools/lint_comment_swallow.py only
+        # needs origin/main to exist locally to compute its diff.
+        run: git fetch --no-tags --depth=1 origin +refs/heads/main:refs/remotes/origin/main
       - uses: actions/setup-python@v5
         if: runner.os == 'Windows'
         with:

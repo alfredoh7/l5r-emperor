@@ -100,6 +100,28 @@ for the full detection logic and its documented limits.
 **Fix:** if you're stacking a new branch on someone else's in-progress work, retarget to `main` as
 soon as that base branch's own PR merges, rather than leaving your branch pointed at it.
 
+## A `??`/`||`/`.Concat` chain can silently swallow an appended term
+
+This codebase's "shared registration files" (`CardAbilities.cs` and friends) lean on long,
+one-line `??`/`||`/`.Concat(...)` chains, often ending with a trailing attribution comment, e.g.
+`... ?? EmperorP1AttackStrength(abilityId) ?? 0 // issue #501`. Appending a new term to such a
+line by inserting it right before the `//` is safe; inserting it AFTER the `//` (a natural mistake
+during a parallel merge/append) lands the new code inside the comment — it compiles fine and
+simply never runs, with no test catching it, since the card that needed it was never wired.
+
+This actually happened (issue #498, `docs/decisions/2026-09-25-rend-no-hiding-place-ring-search.md`):
+a statement's trailing comment had a whole extra call, `RingEnteredByOwnText(source!);`, appended
+straight after the `//`, silently inert until PR 16d2ca6b restored it. `tools/lint_comment_swallow.py`
+(Rung 3, wired into `tools/check.sh` and CI) now flags both this exact shape and the more general
+"a `??`/`||`/`.Concat` chain ends right before a trailing comment" risk, scoped to lines a branch
+actually changed (never the whole repository, since a handful of existing, currently-safe
+occurrences of the second shape are already accepted in `CardAbilities.cs`).
+
+**Fix:** when appending a term to a chain that ends in a trailing comment, insert it before the
+`//`, never after; if the lint flags a line, read its message — `chain-before-comment` is just a
+proactive warning about the line's shape, `swallowed-code` means a comment already looks like it
+contains real code and needs a closer look.
+
 ## `.tools`/`.cache` are large, gitignored, and per-checkout by default
 
 `.tools` (the pinned .NET SDK 10.0.400 + Godot 4.7.2 .NET editor; ~1.4 GB measured on this
