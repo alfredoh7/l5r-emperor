@@ -65,8 +65,13 @@ jobs:
         # A single branch tip, not fetch-depth 0: this checkout is intentionally
         # shallow/sparse for slow, fresh-disk Windows runners, and full history
         # for all branches would undo that. tools/lint_comment_swallow.py only
-        # needs origin/main to exist locally to compute its diff.
-        run: git fetch --no-tags --depth=1 origin +refs/heads/main:refs/remotes/origin/main
+        # needs origin/main to exist locally to compute its diff. The checkout
+        # above uses persist-credentials: false (this is a private repo), so
+        # this one fetch authenticates itself with the ephemeral job token
+        # instead of turning credential persistence back on repo-wide.
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: git fetch --no-tags --depth=1 "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git" +refs/heads/main:refs/remotes/origin/main
       - uses: actions/setup-python@v5
         if: runner.os == 'Windows'
         with:
