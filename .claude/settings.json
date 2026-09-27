@@ -36,8 +36,14 @@
       "Bash(bash tools/check.sh:*)",
       "Bash(bash tools/run.sh:*)",
       "Bash(dotnet build:*)",
-      "Bash(dotnet run --project tests/*)",
-      "Bash(dotnet tests/*/bin/Debug/net10.0/*.dll:*)"
+      "Bash(dotnet run --project tests/L5R.Core.Tests:*)",
+      "Bash(dotnet run --project tests/L5R.AI.Tests:*)",
+      "Bash(dotnet run --project tests/L5R.Server.Tests:*)",
+      "Bash(dotnet run --project tests/L5R.Client.Transport.Tests:*)",
+      "Bash(dotnet tests/L5R.Core.Tests/bin/Debug/net10.0/L5R.Core.Tests.dll:*)",
+      "Bash(dotnet tests/L5R.AI.Tests/bin/Debug/net10.0/L5R.AI.Tests.dll:*)",
+      "Bash(dotnet tests/L5R.Server.Tests/bin/Debug/net10.0/L5R.Server.Tests.dll:*)",
+      "Bash(dotnet tests/L5R.Client.Transport.Tests/bin/Debug/net10.0/L5R.Client.Transport.Tests.dll:*)"
     ]
   }
 }
