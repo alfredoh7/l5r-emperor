@@ -40,7 +40,7 @@ git fetch origin
 git worktree add -b claude/124-reconnect ../l5r-reconnect origin/main
 ```
 
-Each worktree may need its own ignored bootstrap tools/caches; do not commit those directories.
+Each worktree may need its own ignored bootstrap tools/caches; do not commit those directories. See [known pitfalls](docs/PITFALLS.md) for traps a fresh clone/worktree or session commonly hits (Godot's first-run import, a locked `docs/CARD_INVENTORY.xlsx`, gitignored scan working copies, the catalogue art pack, stale PR bases, and `.tools`/`.cache` sizing) before spending time rediscovering them.
 
 ## Checks and evidence
 
