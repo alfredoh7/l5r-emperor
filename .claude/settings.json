@@ -1,0 +1,43 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git show:*)",
+      "Bash(git branch)",
+      "Bash(git branch -a)",
+      "Bash(git branch --show-current)",
+      "Bash(git fetch:*)",
+      "Bash(git worktree list:*)",
+      "Bash(git pull --ff-only:*)",
+      "Bash(gh pr view:*)",
+      "Bash(gh pr list:*)",
+      "Bash(gh pr checks:*)",
+      "Bash(gh pr diff:*)",
+      "Bash(gh issue view:*)",
+      "Bash(gh issue list:*)",
+      "Bash(gh run view:*)",
+      "Bash(gh run list:*)",
+      "Bash(python tools/collab.py context:*)",
+      "Bash(python3 tools/collab.py context:*)",
+      "Bash(python tools/collab.py audit:*)",
+      "Bash(python3 tools/collab.py audit:*)",
+      "Bash(python tools/collab.py handoff:*)",
+      "Bash(python3 tools/collab.py handoff:*)",
+      "Bash(python -m unittest discover -s tools/content:*)",
+      "Bash(python3 -m unittest discover -s tools/content:*)",
+      "Bash(python -m unittest discover -s tools/collaboration:*)",
+      "Bash(python3 -m unittest discover -s tools/collaboration:*)",
+      "Bash(python -m unittest discover -s tools -p test_meshy.py:*)",
+      "Bash(python3 -m unittest discover -s tools -p test_meshy.py:*)",
+      "Bash(python -m unittest discover -s tools -p test_bootstrap.py:*)",
+      "Bash(python3 -m unittest discover -s tools -p test_bootstrap.py:*)",
+      "Bash(bash tools/check.sh:*)",
+      "Bash(bash tools/run.sh:*)",
+      "Bash(dotnet build:*)",
+      "Bash(dotnet run --project tests/*)",
+      "Bash(dotnet tests/*/bin/Debug/net10.0/*.dll:*)"
+    ]
+  }
+}
