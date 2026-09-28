@@ -419,3 +419,16 @@ public sealed partial class MatchEngine
         EngineHooks.Abilities.Register("AddEmperorRemainingG", 1000, static abilities => abilities.AddEmperorRemainingG());
     }
 }
+
+public sealed partial class MatchEngine
+{
+    // Registration only: callbacks are not invoked during module initialization.
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
+    [System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void RegisterEmperorRemainingG_Rung4b2()
+    {
+        EngineHooks.AttackStrengthBefore.Register("EmperorRemainingGAttackStrength", 300, static (engine, context) => engine.EmperorRemainingGAttackStrength(context.abilityId, context.sourceId));
+        EngineHooks.AttackKind.Register("RemainingGAttackKind", 700, static context => NullIfEmpty(RemainingGAttackKind(context.abilityId)));
+        EngineHooks.PersonalityForce.Register("EmperorRemainingGForce", 1400, static (engine, context) => engine.EmperorRemainingGForce(context.card));
+    }
+}

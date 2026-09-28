@@ -530,3 +530,16 @@ public sealed partial class MatchEngine
         EngineHooks.Searches.Register("EmperorP3Abilities", 500, static () => [EmperorP3Abilities.AkehaReconSearch]);
     }
 }
+
+public sealed partial class MatchEngine
+{
+    // Registration only: callbacks are not invoked during module initialization.
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
+    [System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void RegisterEmperorP3_Rung4b2()
+    {
+        EngineHooks.TargetAllows.Register("P3TargetAllows", 1700, static (engine, context) => engine.P3TargetAllows(context.ability.Target, context.command, context.player, context.source, context.target));
+        EngineHooks.ProvinceBonus.Register("P3StaticProvinceBonus", 200, static (engine, context) => engine.P3StaticProvinceBonus(context.card, context.mine));
+        EngineHooks.TargetedReaction.Register("P3TargetedReactionApplies", 900, static (engine, context) => engine.P3TargetedReactionApplies(context.card, context.abilityId, context.subject, context.affected));
+    }
+}

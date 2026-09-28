@@ -4173,7 +4173,7 @@ public sealed partial class MatchEngine
         // Emperor Edition remaining-cards pass (issue #492), group D: The Law's Strength destroys its target when the move home did not happen.
         or "laws-strength-move"
         // Emperor Edition remaining-cards pass (issue #492), group E: Daigotsu's Guidance destroys the bowed cards of its target unit.
-        or "daigotsu-guidance-destroy" || P5DestroysTarget(abilityId) || RulingR2DestroysTarget(abilityId) || MechCDestroysTarget(abilityId) || MechEDestroysTarget(abilityId) || P4DestroysTarget(abilityId); // ... and the ruling pass R2 (EmperorRulingR2.cs)
+        or "daigotsu-guidance-destroy" || RegisteredDestroysTarget(abilityId); // ... and the ruling pass R2 (EmperorRulingR2.cs)
     // The actions whose ONLY effect is to straighten their target: against a card that may not be straightened this turn (Basic Lesson) they are refused outright, where an action that
     // also does something else (Defensive Stance's +3F) still resolves and only its straightening is skipped (Straighten refuses it).
     private static bool StraightensOnly(string abilityId) => abilityId is "slow-death-straighten" or "well-prepared-straighten" or "jinn-kuen-straighten" or "kodo-straighten" or "munefusa-straighten" or "mitsuko-straighten" or "ritual-preparation-straighten"
@@ -4345,7 +4345,7 @@ public sealed partial class MatchEngine
         // Emperor Edition remaining-cards pass (issue #492), group E: Unnatural Flood bows its target if it moved; Hida's and Daigotsu's Guidance bow theirs.
         or "unnatural-flood-move" or "hidas-guidance-bow" or "daigotsu-guidance-destroy"
         // Emperor Edition remaining-cards pass, group A (issue #492): Duel of Serpents, Dangerous Indulgence, Deception Revealed, Fortitude, Falling Leaf Strike and Final Confrontation bow their target.
-        || RemABowsTarget(abilityId) || P5BowsTarget(abilityId) || RulingR2BowsTarget(abilityId) || MechCBowsTarget(abilityId) || P2BowsTarget(abilityId) || abilityId == EmperorMechEAbilities.HostsBattle || P4BowsTarget(abilityId); // ... and the ruling pass R2 (EmperorRulingR2.cs)
+        || RegisteredBowsTarget(abilityId); // ... and the ruling pass R2 (EmperorRulingR2.cs)
     // Whether the command's TargetId is an Attack's OWN target, which reacts through the separate attackReaction
     // window instead of this one: an Attack-classified ability whose Target category is "attack". Bayushi Kahoku
     // - exp (issue #313) is Attack-classified too, but its TargetId is the separate "-4F" target (an ordinary
@@ -4630,8 +4630,7 @@ public sealed partial class MatchEngine
     // null); a target-dependent conditional simply falls back to its unconditional value then.
     // sourceId (issue #207 follow-up, Togashi Sakata): the performing card itself, needed to read a
     // live token count off it -- optional, since most Attacks here need no such thing.
-    private int AttackStrength(string abilityId, PlayerState player, CardInstance? target = null, string? sourceId = null) => P3AttackStrength(abilityId) /* issue #503 P3 */ ?? EmperorRemainingEAttackStrength(abilityId, sourceId) ?? EmperorRemainingGAttackStrength(abilityId, sourceId) ?? ShadowsEmbraceBatch3AttackStrength(abilityId, sourceId) ?? ForgottenLegacyBatch5AttackStrength(abilityId, sourceId, target) ?? EmperorPersonalityBatch1AttackStrength(abilityId, sourceId)
-        ?? ShadowsEmbraceBatch2AttackStrength(abilityId, sourceId) ?? RemAAttackStrength(abilityId, sourceId) ?? P5AttackStrength(abilityId) /* issue #503 */ ?? abilityId switch
+    private int AttackStrength(string abilityId, PlayerState player, CardInstance? target = null, string? sourceId = null) => RegisteredAttackStrengthBefore(abilityId, player, target, sourceId) ?? abilityId switch
     {
         "carpenter-castle-siege" => 5,
         // Togashi Sakata: "Ranged 4 Attack, with +1 strength for each Sake token on Sakata" -- only
@@ -4759,7 +4758,7 @@ public sealed partial class MatchEngine
         "otoro-attack" or "otoro-attack-move" => 4,
         "strategic-strike-attack" => 6, // Strategic Strike (issue #492, group C): "Ranged 6 Attack".
         "unseen-assailant-attack" => 3, // Emperor Edition remaining-cards pass (issue #492), group D: Unseen Assailant's "Ranged 3 Attack".
-        _ => MechCAttackStrength(abilityId) ?? EmperorP1AttackStrength(abilityId) ?? P2AttackStrength(abilityId) ?? P4AttackStrength(abilityId) ?? 0 // issue #503 P1; Emperor Edition mechanics group C (issue #501): Daigotsu Kazuko, Ikoma Shika - exp (EmperorMechC.cs).
+        _ => RegisteredAttackStrengthAfter(abilityId, player, target, sourceId) ?? 0
     };
     // AttackStrength plus every passive defense modifier applying to this specific target (Destrier/
     // Singh Remnants/Elephant Cavalry's shape -- see CardDefinition.AttackDefenseKind). Used at both
@@ -4846,11 +4845,7 @@ public sealed partial class MatchEngine
         "strategic-strike-attack" => "Ranged", // Emperor Edition remaining-cards pass, group C (issue #492).
         "unseen-assailant-attack" => "Ranged", // Emperor Edition remaining-cards pass (issue #492), group D.
         EmperorP3PriorityAbilities.AroruAttack => "Ranged", // Shosuro Aroru - exp2 (issue #503).
-        _ => (MechCAttackKind(abilityId) ?? EmperorP1AttackKind(abilityId)) is { } mechC ? mechC // issue #503 P1; Emperor Edition mechanics group C (issue #501).
-            : P2AttackKind(abilityId) is { } p2Kind ? p2Kind // issue #503 (EmperorP2.cs)
-            : P4AttackKind(abilityId) is { } p4Kind ? p4Kind // issue #503 (EmperorP4.cs)
-            : P5AttackKind(abilityId) is { } p5Kind ? p5Kind // issue #503 (EmperorP5.cs)
-            : EmperorRemainingEAttackKind(abilityId) is { Length: > 0 } remE ? remE : RemainingGAttackKind(abilityId) // Emperor Edition remaining-cards pass (issue #492), group E.
+        _ => RegisteredAttackKind(abilityId) ?? ""
     };
     // General "in play" Reaction primitive: a printed Reaction whose card must actually be in play
     // (recruited or attached -- Personality, Item, Follower, Spell, Holding, Region, Ring, Celestial
@@ -6078,7 +6073,7 @@ public sealed partial class MatchEngine
                 "own-personality-base-force-7-plus" => Definition(performer).Type == CardType.Personality && Definition(performer).Force >= 7 && (!actingAsBattle || AtBattle(performer)),
                 "own-unbowed-personality-with-any-keyword-at-battle" => Definition(performer).Type == CardType.Personality && !performer.Bowed
                     && (ability.RequiredKeywords ?? []).Any(k => Keyword(performer, k)) && (!actingAsBattle || AtBattle(performer)),
-                _ => (RemAPerformerAllows(ability.Performer, performer, ability, actingAsBattle)) || (EmperorRemainingBPerformerAllows(ability, performer, actingAsBattle)) || RemainingDPerformerAllows(ability, performer, actingAsBattle) || RulingR2PerformerAllows(ability, performer, actingAsBattle) || ThreeSPerformerAllows(ability, performer, actingAsBattle) || MechEPerformerAllows(ability, performer) || P5PerformerAllows(ability, performer, actingAsBattle) /* issue #503 P5 */ || EmperorP4PerformerAllows(ability, performer, actingAsBattle) == true // Emperor Edition remaining-cards pass (issue #492), groups B, D; three-scans pass (issue #496); issue #501
+                _ => RegisteredPerformerAllows(ability, performer, actingAsBattle)
             }, "That card does not meet this ability's performer requirement.");
         }
         else Require(command.PerformerId is null || command.PerformerId == command.TargetId && id is "prepared-death" or "defensive-stance" or "lobby", "Unexpected performing card.");
@@ -7007,7 +7002,7 @@ public sealed partial class MatchEngine
                         // Emperor Edition Personality pass (issue #477), batch 5. Asako Yorisada: "a Personality whose Force is different from his base Force" -- the target's own printed Force.
                         "personality-force-neq-own-base" => personality && CardForce(target) != Definition(target).Force,
                         // The Shadow's Embrace pass (issue #476), batch 2: this batch's in-play categories (ShadowsEmbraceBatch2.cs).
-                        _ => ShadowsEmbraceBatch2TargetAllows(ability.Target, command, player, source, target) || EmperorRemainingCTargetAllows(ability.Target, command, player, source, target) || RemainingDTargetAllows(ability.Target, command, player, source, target) || EmperorRemainingETargetAllows(ability.Target, command, player, source, target) || EmperorProxyXTargetAllows(ability.Target, command, player, source, target) || RulingR1TargetAllows(ability.Target, command, player, source, target) || RulingR2TargetAllows(ability.Target, command, player, source, target) || ThreeSTargetAllows(ability.Target, command, player, source, target) || FollowupsTargetAllows(ability.Target, command, player, source, target) || MechBTargetAllows(ability.Target, command, player, source, target) || EmperorMechCTargetAllows(ability.Target, command, player, source, target) || EmperorP1TargetAllows(ability.Target, command, player, source, target) || EmperorP2TargetAllows(ability.Target, command, player, source, target) || EmperorP4TargetAllows(ability.Target, command, player, source, target) || P5TargetAllows(ability.Target, command, player, source, target) || EmperorP6TargetAllows(ability.Target, player, target) || P3TargetAllows(ability.Target, command, player, source, target) // issue #503 P1; issue #492, group D; proxy group X; rulings pass R1; issue #496; issue #498
+                        _ => RegisteredTargetAllows(ability, command, player, source, target)
                     }, "That card does not meet this ability's target or performer requirements.");
                 }
             }
@@ -11051,7 +11046,7 @@ public sealed partial class MatchEngine
                     && (!actingAsBattle || AtBattle(c))).OrderBy(c => c.Id, StringComparer.Ordinal).Select(c => (string?)c.Id).ToArray(),
                 "own-unbowed-personality-with-any-keyword-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && Definition(c).Type == CardType.Personality && !c.Bowed
                     && (ability.RequiredKeywords ?? []).Any(k => Keyword(c, k)) && (!actingAsBattle || AtBattle(c))).OrderBy(c => c.Id, StringComparer.Ordinal).Select(c => (string?)c.Id).ToArray(),
-                _ => P5PerformerCandidates(ability, playerId, actingAsBattle) /* issue #503 */ ?? RemAPerformerCandidates(ability, playerId, actingAsBattle) ?? RemainingDPerformers(ability, playerId, actingAsBattle) ?? RulingR2Performers(ability, playerId, actingAsBattle) ?? ThreeSPerformers(ability, playerId, actingAsBattle) ?? MechEPerformers(ability, playerId) ?? EmperorP4Performers(ability, playerId, actingAsBattle) ?? EmperorRemainingBPerformers(ability, playerId, actingAsBattle) // issue #492, groups A, D, B; issue #501
+                _ => RegisteredPerformerCandidates(ability, playerId, actingAsBattle) ?? [null]
             };
             // Unlike every other Performer-based ability (still offered, disabled, with no eligible
             // performer -- see the generic fallback below), Equip (Battle) is not offered at all

@@ -606,3 +606,17 @@ public sealed partial class MatchEngine
         EngineHooks.Looks.Register("EmperorP1Looks", 200, static () => EmperorP1Looks.All);
     }
 }
+
+public sealed partial class MatchEngine
+{
+    // Registration only: callbacks are not invoked during module initialization.
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
+    [System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void RegisterEmperorP1_Rung4b2()
+    {
+        EngineHooks.AttackStrengthAfter.Register("EmperorP1AttackStrength", 200, static (engine, context) => EmperorP1AttackStrength(context.abilityId));
+        EngineHooks.AttackKind.Register("EmperorP1AttackKind", 200, static context => EmperorP1AttackKind(context.abilityId));
+        EngineHooks.TargetAllows.Register("EmperorP1TargetAllows", 1200, static (engine, context) => engine.EmperorP1TargetAllows(context.ability.Target, context.command, context.player, context.source, context.target));
+        EngineHooks.PersonalityForce.Register("EmperorP1Force", 400, static (engine, context) => engine.EmperorP1Force(context.card));
+    }
+}

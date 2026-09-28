@@ -649,3 +649,14 @@ public sealed partial class MatchEngine
         }
     }
 }
+
+public sealed partial class MatchEngine
+{
+    // Registration only: callbacks are not invoked during module initialization.
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
+    [System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void RegisterShadowsEmbraceBatch3_Rung4b2()
+    {
+        EngineHooks.AttackStrengthBefore.Register("ShadowsEmbraceBatch3AttackStrength", 400, static (engine, context) => engine.ShadowsEmbraceBatch3AttackStrength(context.abilityId, context.sourceId));
+    }
+}

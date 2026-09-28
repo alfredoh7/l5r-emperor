@@ -302,3 +302,19 @@ public sealed partial class MatchEngine
         EngineHooks.Abilities.Register("AddEmperorRulingR2", 1500, static abilities => abilities.AddEmperorRulingR2());
     }
 }
+
+public sealed partial class MatchEngine
+{
+    // Registration only: callbacks are not invoked during module initialization.
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
+    [System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void RegisterEmperorRulingR2Cards_Rung4b2()
+    {
+        EngineHooks.PerformerAllows.Register("RulingR2PerformerAllows", 400, static (engine, context) => engine.RulingR2PerformerAllows(context.ability, context.performer, context.actingAsBattle));
+        EngineHooks.TargetAllows.Register("RulingR2TargetAllows", 700, static (engine, context) => engine.RulingR2TargetAllows(context.ability.Target, context.command, context.player, context.source, context.target));
+        EngineHooks.PerformerCandidates.Register("RulingR2Performers", 400, static (engine, context) => engine.RulingR2Performers(context.ability, context.playerId, context.actingAsBattle));
+        EngineHooks.DestroysTarget.Register("RulingR2DestroysTarget", 200, static context => RulingR2DestroysTarget(context.abilityId));
+        EngineHooks.BowsTarget.Register("RulingR2BowsTarget", 300, static context => RulingR2BowsTarget(context.abilityId));
+        EngineHooks.TargetedReaction.Register("RulingR2TargetedReactionApplies", 300, static (engine, context) => engine.RulingR2TargetedReactionApplies(context.card, context.abilityId, context.subject, context.affected));
+    }
+}

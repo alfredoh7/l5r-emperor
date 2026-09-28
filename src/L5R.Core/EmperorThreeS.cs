@@ -208,3 +208,17 @@ public sealed partial class MatchEngine
         EngineHooks.Abilities.Register("AddEmperorThreeS", 1700, static abilities => abilities.AddEmperorThreeS());
     }
 }
+
+public sealed partial class MatchEngine
+{
+    // Registration only: callbacks are not invoked during module initialization.
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
+    [System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void RegisterEmperorThreeS_Rung4b2()
+    {
+        EngineHooks.PerformerAllows.Register("ThreeSPerformerAllows", 500, static (engine, context) => engine.ThreeSPerformerAllows(context.ability, context.performer, context.actingAsBattle));
+        EngineHooks.TargetAllows.Register("ThreeSTargetAllows", 800, static (engine, context) => engine.ThreeSTargetAllows(context.ability.Target, context.command, context.player, context.source, context.target));
+        EngineHooks.PerformerCandidates.Register("ThreeSPerformers", 500, static (engine, context) => engine.ThreeSPerformers(context.ability, context.playerId, context.actingAsBattle));
+        EngineHooks.PersonalityForce.Register("ThreeSForce", 300, static (engine, context) => engine.ThreeSForce(context.card));
+    }
+}

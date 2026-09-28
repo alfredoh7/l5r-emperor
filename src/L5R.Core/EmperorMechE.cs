@@ -384,3 +384,23 @@ public sealed partial class MatchEngine
         EngineHooks.Abilities.Register("AddEmperorMechE", 2200, static abilities => abilities.AddEmperorMechE());
     }
 }
+
+public sealed partial class MatchEngine
+{
+    private static bool MechEHostsBattleBows(string abilityId) => abilityId == EmperorMechEAbilities.HostsBattle;
+}
+
+public sealed partial class MatchEngine
+{
+    // Registration only: callbacks are not invoked during module initialization.
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
+    [System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void RegisterEmperorMechE_Rung4b2()
+    {
+        EngineHooks.PerformerAllows.Register("MechEPerformerAllows", 600, static (engine, context) => engine.MechEPerformerAllows(context.ability, context.performer));
+        EngineHooks.PerformerCandidates.Register("MechEPerformers", 600, static (engine, context) => engine.MechEPerformers(context.ability, context.playerId));
+        EngineHooks.DestroysTarget.Register("MechEDestroysTarget", 400, static context => MechEDestroysTarget(context.abilityId));
+        EngineHooks.BowsTarget.Register("MechEHostsBattleBows", 600, static context => MechEHostsBattleBows(context.abilityId));
+        EngineHooks.TargetedReaction.Register("MechETargetedReactionApplies", 600, static (engine, context) => engine.MechETargetedReactionApplies(context.card, context.abilityId, context.subject, context.affected));
+    }
+}

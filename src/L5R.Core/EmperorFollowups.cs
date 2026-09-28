@@ -107,3 +107,14 @@ public sealed partial class MatchEngine
         EngineHooks.Abilities.Register("AddEmperorFollowups", 1800, static abilities => abilities.AddEmperorFollowups());
     }
 }
+
+public sealed partial class MatchEngine
+{
+    // Registration only: callbacks are not invoked during module initialization.
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
+    [System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void RegisterEmperorFollowups_Rung4b2()
+    {
+        EngineHooks.TargetAllows.Register("FollowupsTargetAllows", 900, static (engine, context) => engine.FollowupsTargetAllows(context.ability.Target, context.command, context.player, context.source, context.target));
+    }
+}

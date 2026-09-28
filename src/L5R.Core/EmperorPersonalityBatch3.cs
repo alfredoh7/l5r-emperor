@@ -170,3 +170,14 @@ public sealed partial class MatchEngine
         Emit("seppuku", $"{Definition(card).Name} committed seppuku, dying honorably.", card.OwnerId, card.Id);
     }
 }
+
+public sealed partial class MatchEngine
+{
+    // Registration only: callbacks are not invoked during module initialization.
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
+    [System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void RegisterEmperorPersonalityBatch3_Rung4b2()
+    {
+        EngineHooks.PersonalityForce.Register("EmperorPersonalityBatch3Force", 1000, static (engine, context) => engine.EmperorPersonalityBatch3Force(context.card));
+    }
+}

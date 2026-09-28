@@ -2352,7 +2352,7 @@ public sealed partial class MatchEngine
     // "force-with-spell" (Asako Ume), "force-if-enemy-dishonorable" (Bayushi Kahoku) and
     // "force-max-dead-pile" (Moto Shunsuke) are always-on passive bonuses, unlike the attacking-only
     // attacking-two/attacking-four Effects above.
-    private int PersonalityForce(CardInstance card) => Math.Max(0,Definition(card).Force+StatModifier(card,"Force")+TerrainForceAdjustment(card)+GinasFoxForce(card)+EmperorRemainingEForce(card)+ThreeSForce(card)+EmperorP1Force(card)+P3Force(card)/* issue #503 P3 */+P5Force(card)/* issue #503 P5 */+P2Force(card)/*issue #503 P2*/+ForgottenLegacyBatch5Force(card)+EmperorBatch5Force(card)+EmperorPersonalityBatch3Force(card)+ShadowsEmbraceBatch5Force(card)+ShadowsEmbraceBatch2Force(card)+ShadowsEmbraceBatch1Force(card)+EmperorRemainingGForce(card)+(IsAttacking(card)?(Definition(card).Effect=="attacking-two"?2:Definition(card).Effect=="attacking-four"?4:
+    private int PersonalityForce(CardInstance card) => Math.Max(0,Definition(card).Force+StatModifier(card,"Force")+TerrainForceAdjustment(card)+RegisteredPersonalityForce(card)+(IsAttacking(card)?(Definition(card).Effect=="attacking-two"?2:Definition(card).Effect=="attacking-four"?4:
         // Matsu Kaido (oracle-l5r-4934, issue #299): "Kaido has +1F while attacking" -- the plain +1
         // counterpart to attacking-two/attacking-four (Matsu Yoshito's own conditional variant below
         // starts from the same +1 base).

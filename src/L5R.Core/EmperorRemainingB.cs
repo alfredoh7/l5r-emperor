@@ -146,11 +146,11 @@ public sealed partial class MatchEngine
         _ => false
     };
 
-    private string?[] EmperorRemainingBPerformers(AbilityDefinition ability, int playerId, bool actingAsBattle) => ability.Performer switch
+    private string?[]? EmperorRemainingBPerformers(AbilityDefinition ability, int playerId, bool actingAsBattle) => ability.Performer switch
     {
         "own-unbowed-nonhuman-shadowlands-at-battle" or "own-dead-personality-with-keyword" or "own-kensai-or-unbowed-weapon-at-battle" =>
             _state.Cards.Values.Where(c => c.OwnerId == playerId && (InPlay(c) || c.Zone == Zone.Dead) && EmperorRemainingBPerformerAllows(ability, c, actingAsBattle)).OrderBy(c => c.Id, StringComparer.Ordinal).Select(c => (string?)c.Id).ToArray(),
-        _ => [null]
+        _ => null
     };
 
     // ---- Target categories (ShadowsEmbraceBatch2TargetAllows' default) --------------------------------------------------------------------------------------------------------------
@@ -640,5 +640,17 @@ public sealed partial class MatchEngine
     internal static void RegisterEmperorRemainingB_Rung4b1()
     {
         EngineHooks.Abilities.Register("AddEmperorRemainingB", 500, static abilities => abilities.AddEmperorRemainingB());
+    }
+}
+
+public sealed partial class MatchEngine
+{
+    // Registration only: callbacks are not invoked during module initialization.
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
+    [System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void RegisterEmperorRemainingB_Rung4b2()
+    {
+        EngineHooks.PerformerAllows.Register("EmperorRemainingBPerformerAllows", 200, static (engine, context) => engine.EmperorRemainingBPerformerAllows(context.ability, context.performer, context.actingAsBattle));
+        EngineHooks.PerformerCandidates.Register("EmperorRemainingBPerformers", 800, static (engine, context) => engine.EmperorRemainingBPerformers(context.ability, context.playerId, context.actingAsBattle));
     }
 }

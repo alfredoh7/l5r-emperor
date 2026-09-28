@@ -592,3 +592,22 @@ public sealed partial class MatchEngine
         EngineHooks.Abilities.Register("AddEmperorP5", 3000, static abilities => abilities.AddEmperorP5());
     }
 }
+
+public sealed partial class MatchEngine
+{
+    // Registration only: callbacks are not invoked during module initialization.
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
+    [System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void RegisterEmperorP5_Rung4b2()
+    {
+        EngineHooks.AttackStrengthBefore.Register("P5AttackStrength", 900, static (engine, context) => P5AttackStrength(context.abilityId));
+        EngineHooks.AttackKind.Register("P5AttackKind", 500, static context => P5AttackKind(context.abilityId));
+        EngineHooks.PerformerAllows.Register("P5PerformerAllows", 700, static (engine, context) => engine.P5PerformerAllows(context.ability, context.performer, context.actingAsBattle));
+        EngineHooks.TargetAllows.Register("P5TargetAllows", 1500, static (engine, context) => engine.P5TargetAllows(context.ability.Target, context.command, context.player, context.source, context.target));
+        EngineHooks.PerformerCandidates.Register("P5PerformerCandidates", 100, static (engine, context) => engine.P5PerformerCandidates(context.ability, context.playerId, context.actingAsBattle));
+        EngineHooks.DestroysTarget.Register("P5DestroysTarget", 100, static context => P5DestroysTarget(context.abilityId));
+        EngineHooks.BowsTarget.Register("P5BowsTarget", 200, static context => P5BowsTarget(context.abilityId));
+        EngineHooks.PersonalityForce.Register("P5Force", 600, static (engine, context) => engine.P5Force(context.card));
+        EngineHooks.TargetedReaction.Register("P5TargetedReactionApplies", 800, static (engine, context) => engine.P5TargetedReactionApplies(context.card, context.abilityId, context.subject, context.affected));
+    }
+}

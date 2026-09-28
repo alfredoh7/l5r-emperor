@@ -417,3 +417,20 @@ public sealed partial class MatchEngine
         EngineHooks.Abilities.Register("AddEmperorP4", 2600, static abilities => abilities.AddEmperorP4());
     }
 }
+
+public sealed partial class MatchEngine
+{
+    // Registration only: callbacks are not invoked during module initialization.
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
+    [System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void RegisterEmperorP4_Rung4b2()
+    {
+        EngineHooks.AttackStrengthAfter.Register("P4AttackStrength", 400, static (engine, context) => P4AttackStrength(context.abilityId));
+        EngineHooks.AttackKind.Register("P4AttackKind", 400, static context => P4AttackKind(context.abilityId));
+        EngineHooks.PerformerAllows.Register("EmperorP4PerformerAllows", 800, static (engine, context) => engine.EmperorP4PerformerAllows(context.ability, context.performer, context.actingAsBattle) == true);
+        EngineHooks.TargetAllows.Register("EmperorP4TargetAllows", 1400, static (engine, context) => engine.EmperorP4TargetAllows(context.ability.Target, context.command, context.player, context.source, context.target));
+        EngineHooks.PerformerCandidates.Register("EmperorP4Performers", 700, static (engine, context) => engine.EmperorP4Performers(context.ability, context.playerId, context.actingAsBattle));
+        EngineHooks.DestroysTarget.Register("P4DestroysTarget", 500, static context => P4DestroysTarget(context.abilityId));
+        EngineHooks.BowsTarget.Register("P4BowsTarget", 700, static context => P4BowsTarget(context.abilityId));
+    }
+}

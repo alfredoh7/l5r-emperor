@@ -389,3 +389,15 @@ public sealed partial class MatchEngine
         _ => null
     };
 }
+
+public sealed partial class MatchEngine
+{
+    // Registration only: callbacks are not invoked during module initialization.
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
+    [System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void RegisterForgottenLegacyBatch5_Rung4b2()
+    {
+        EngineHooks.AttackStrengthBefore.Register("ForgottenLegacyBatch5AttackStrength", 500, static (engine, context) => engine.ForgottenLegacyBatch5AttackStrength(context.abilityId, context.sourceId, context.target));
+        EngineHooks.PersonalityForce.Register("ForgottenLegacyBatch5Force", 800, static (engine, context) => engine.ForgottenLegacyBatch5Force(context.card));
+    }
+}
