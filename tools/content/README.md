@@ -124,4 +124,27 @@ period sources must be reviewed before implementing a historical ability.
 
 ## Publishing a card wave
 
-A wave adds its `content/published/<wave>.json`, an `EmbeddedResource` in `src/L5R.Core/L5R.Core.csproj`, a loader in `PublishedContent.cs` and a link in the `CardCatalog.cs` chain. Then run `python3 tools/content/pin_wave_ids.py` and commit the new `tests/L5R.Core.Tests/PublishedWaves/<wave>.txt`, the wave's own card-id manifest. There is no card total to update: `PublishedTests` derives the expected catalogue from `content/published/*.json` and compares each wave with its manifest (see `docs/decisions/2026-09-19-published-count-guard.md`). Change an existing wave's cards deliberately with `pin_wave_ids.py --update`.
+A wave adds its reviewed `content/published/<type>-wave-<N>.json`, its provenance
+`-sources.json`, its packager and art. MSBuild embeds wave JSON automatically (excluding
+provenance sidecars), and `PublishedContent.Waves` discovers it at startup. No edit to
+`L5R.Core.csproj`, `PublishedContent.cs`, `CardCatalog.cs`, or any shared registration
+file is needed. Keep the filename/profile identical, use a lowercase type and a positive
+integer wave number without leading zeroes.
+
+Run `python3 tools/content/pin_wave_ids.py --wave <type>-wave-<N>` and commit the new
+`tests/L5R.Core.Tests/PublishedWaves/<type>-wave-<N>.txt`. The optional `--wave` can be
+repeated; omitting it still pins every missing manifest. Use `--update --wave <profile>`
+only for an intentional change to an existing wave. There is no card total or shared
+test list to update: `PublishedTests` enumerates the JSON and manifests itself.
+
+The 306 legacy waves retain their exact catalogue order. Do not append to the frozen
+`PublishedWaveOrder.txt`; new waves are appended automatically in ordinal type/numeric
+wave order. Duplicate card IDs still fail startup. Existing named snapshot properties
+are compatibility entry points, not a pattern to copy for new waves. See the
+[ordering decision](../../docs/decisions/2026-09-28-wave-registration.md) for the exact
+mapping and resource-name migration.
+
+Run `python3 -m unittest discover -s tools/content -p 'test*.py'` and
+`bash tools/check.sh --skip-client`. The Python suite includes a temporary-repository
+regression that merges two independent wave additions and builds the core engine to
+prove both are discovered. It requires the pinned .NET SDK on PATH (`source tools/env.sh`).

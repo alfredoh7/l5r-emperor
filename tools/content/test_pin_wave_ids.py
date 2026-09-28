@@ -36,6 +36,19 @@ class PinWaveIdsTests(unittest.TestCase):
         self.assertEqual(pin(self.root, update=True), ["item-wave-1.txt"])
         self.assertEqual(self.manifest("item-wave-1"), "a\nb\n")
 
+    def test_selecting_a_wave_leaves_other_unpinned_waves_alone(self):
+        self.wave("item-wave-42", "a")
+        self.wave("follower-wave-42", "b")
+        self.assertEqual(pin(self.root, waves=["item-wave-42"]), ["item-wave-42.txt"])
+        self.assertFalse((self.root / PINS / "follower-wave-42.txt").exists())
+
+    def test_invalid_or_missing_selection_writes_nothing(self):
+        self.wave("item-wave-42", "a")
+        for selection in (["item-wave-42", "item-wave-43"], ["../item-wave-42"], ["item-wave-0"]):
+            with self.assertRaises(ValueError):
+                pin(self.root, waves=selection)
+        self.assertFalse((self.root / PINS).exists())
+
 
 if __name__ == "__main__":
     unittest.main()
