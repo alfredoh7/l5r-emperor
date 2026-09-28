@@ -668,3 +668,31 @@ public sealed partial class MatchEngine
         EngineHooks.RunEffects.Register("RunEmperorRemainingD", 1200, static (engine, context) => engine.RunEmperorRemainingD(context.id, context.ability, context.command, context.player, context.source, context.target, context.consumedGrant, context.playedFromDiscard, context.opponentHonorBeforeBattleAction, context.bowedBeforeAction, context.preExistingGrants));
     }
 }
+
+public sealed partial class MatchEngine
+{
+    private bool HandleRegisteredTwistOfFateReaction(string type, GameCommand command)
+    {
+        if (type != "twistOfFateReaction") return false;
+        ResolveTwistOfFateWindow(command);
+        return true;
+    }
+    private bool HandleRegisteredKillingGroundsSelect(string type, GameCommand command)
+    {
+        if (type != "killingGroundsSelect") return false;
+        ResolveKillingGroundsSelect(command);
+        return true;
+    }
+}
+
+public sealed partial class MatchEngine
+{
+    // Registration only: callbacks are not invoked during module initialization.
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
+    [System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void RegisterEmperorRemainingD_Rung4b4()
+    {
+        EngineHooks.PendingChoice.Register("HandleRegisteredTwistOfFateReaction", 3100, static (engine, type, command) => engine.HandleRegisteredTwistOfFateReaction(type, command));
+        EngineHooks.PendingChoice.Register("HandleRegisteredKillingGroundsSelect", 3200, static (engine, type, command) => engine.HandleRegisteredKillingGroundsSelect(type, command));
+    }
+}

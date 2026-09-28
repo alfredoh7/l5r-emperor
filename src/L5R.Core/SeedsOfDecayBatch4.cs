@@ -215,3 +215,31 @@ public sealed partial class MatchEngine
         Refill(player, province);
     }
 }
+
+public sealed partial class MatchEngine
+{
+    private bool HandleRegisteredOfferingReverence(string type, GameCommand command)
+    {
+        if (type != "offeringReverence") return false;
+        ResolveOfferingReverenceChoice(command);
+        return true;
+    }
+    private bool HandleRegisteredTestedLandProvince(string type, GameCommand command)
+    {
+        if (type != "testedLandProvince") return false;
+        ResolveTestedLandProvince(command);
+        return true;
+    }
+}
+
+public sealed partial class MatchEngine
+{
+    // Registration only: callbacks are not invoked during module initialization.
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
+    [System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void RegisterSeedsOfDecayBatch4_Rung4b4()
+    {
+        EngineHooks.PendingChoice.Register("HandleRegisteredOfferingReverence", 3600, static (engine, type, command) => engine.HandleRegisteredOfferingReverence(type, command));
+        EngineHooks.PendingChoice.Register("HandleRegisteredTestedLandProvince", 3900, static (engine, type, command) => engine.HandleRegisteredTestedLandProvince(type, command));
+    }
+}

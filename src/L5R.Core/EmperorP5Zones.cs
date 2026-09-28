@@ -473,3 +473,24 @@ public sealed partial class MatchEngine
         }, createdCopy: true, original: target);
     }
 }
+
+public sealed partial class MatchEngine
+{
+    private bool HandleRegisteredP5BlessingsTop(string type, GameCommand command)
+    {
+        if (type != "p5BlessingsTop") return false;
+        ResolveBlessingsTop(command);
+        return true;
+    }
+}
+
+public sealed partial class MatchEngine
+{
+    // Registration only: callbacks are not invoked during module initialization.
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
+    [System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void RegisterEmperorP5Zones_Rung4b4()
+    {
+        EngineHooks.PendingChoice.Register("HandleRegisteredP5BlessingsTop", 1700, static (engine, type, command) => engine.HandleRegisteredP5BlessingsTop(type, command));
+    }
+}

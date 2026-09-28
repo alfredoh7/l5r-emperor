@@ -555,3 +555,24 @@ public sealed partial class MatchEngine
         EngineHooks.RunEffects.Register("RunEmperorP3", 2600, static (engine, context) => engine.RunEmperorP3(context.id, context.ability, context.command, context.player, context.source, context.target, context.bowedBeforeAction, context.consumedGrant));
     }
 }
+
+public sealed partial class MatchEngine
+{
+    private bool HandleRegisteredP3DarkVirtueDiscard(string type, GameCommand command)
+    {
+        if (type != "p3DarkVirtueDiscard") return false;
+        ResolveP3DarkVirtueDiscard(command);
+        return true;
+    }
+}
+
+public sealed partial class MatchEngine
+{
+    // Registration only: callbacks are not invoked during module initialization.
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
+    [System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void RegisterEmperorP3_Rung4b4()
+    {
+        EngineHooks.PendingChoice.Register("HandleRegisteredP3DarkVirtueDiscard", 1900, static (engine, type, command) => engine.HandleRegisteredP3DarkVirtueDiscard(type, command));
+    }
+}

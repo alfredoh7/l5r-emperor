@@ -189,3 +189,50 @@ public sealed partial class MatchEngine
     private IEnumerable<(CardInstance Card, string AbilityId)> HonorChangeWindowOffers(int playerId) =>
         _state.PendingHonorChange is { } change ? HonorChangeReactionsOf(playerId, change) : [];
 }
+
+public sealed partial class MatchEngine
+{
+    private bool HandleRegisteredBeforeActionReaction(string type, GameCommand command)
+    {
+        if (type != "beforeActionReaction") return false;
+        // Rokai / Tamoko / Champion of Thunder / Brothers of Goemon / Akodo Kakihara (issues #207,
+        // #278, #305, #318): an alternating window open to EITHER player -- the active player has the
+        // first opportunity when they hold a reaction, then the other player, alternating (a reaction
+        // played resets the pass count and flips priority, exactly like attackReaction above; a pass
+        // flips it too) until both pass consecutively. Any number of applicable reactions may be
+        // played, each re-checked live by ValidateAbility (BeforeActionReactionApplies) and limited
+        // by its own once-per-turn UsageKey. Only when the window closes does the deferred command
+        // actually resolve.
+        Require(command.Type is "useAbility" or "declineReaction" or "pass","Resolve the pending reaction first.");
+        if (command.Type=="useAbility") UseAbility(command); else PassReaction();
+        if (_state.PendingChoice is null && _state.PendingNegatableAbility is not null)
+        {
+            // A multi-target action's next target with a possible reactor gets its own window (TargetWindows.cs); a negated action needs no more.
+            if (!_state.DeferredActionNegated && OpenNextRemainingTargetWindow()) return true;
+            _state.ReactionWindowTargetId=null; _state.ReactionWindowRemaining=[];
+            var pending=_state.PendingNegatableAbility; _state.PendingNegatableAbility=null;
+            // A redirect may have made a Bofana the target of an action his trait was not yet judged for (issue #335).
+            if(OpenForcedDiscardForTargetedTrait(pending,"action")) return true;
+            ResolveDeferredActionAfterItsWindows(pending);
+        }
+        return true;
+    }
+    private bool HandleRegisteredHonorChangeReaction(string type, GameCommand command)
+    {
+        if (type != "honorChangeReaction") return false;
+        ResolveHonorChangeWindowCommand(command);
+        return true;
+    }
+}
+
+public sealed partial class MatchEngine
+{
+    // Registration only: callbacks are not invoked during module initialization.
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
+    [System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void RegisterEmperorRulingR4Honor_Rung4b4()
+    {
+        EngineHooks.PendingChoice.Register("HandleRegisteredBeforeActionReaction", 5000, static (engine, type, command) => engine.HandleRegisteredBeforeActionReaction(type, command));
+        EngineHooks.PendingChoice.Register("HandleRegisteredHonorChangeReaction", 5100, static (engine, type, command) => engine.HandleRegisteredHonorChangeReaction(type, command));
+    }
+}

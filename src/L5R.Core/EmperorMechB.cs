@@ -472,3 +472,24 @@ public sealed partial class MatchEngine
         EngineHooks.RunEffects.Register("RunEmperorMechB", 1800, static (engine, context) => engine.RunEmperorMechB(context.id, context.ability, context.command, context.player, context.source, context.target));
     }
 }
+
+public sealed partial class MatchEngine
+{
+    private bool HandleRegisteredInfiltratorStraighten(string type, GameCommand command)
+    {
+        if (type != "infiltratorStraighten") return false;
+        ResolveInfiltratorStraighten(command);
+        return true;
+    }
+}
+
+public sealed partial class MatchEngine
+{
+    // Registration only: callbacks are not invoked during module initialization.
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
+    [System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void RegisterEmperorMechB_Rung4b4()
+    {
+        EngineHooks.PendingChoice.Register("HandleRegisteredInfiltratorStraighten", 1800, static (engine, type, command) => engine.HandleRegisteredInfiltratorStraighten(type, command));
+    }
+}

@@ -255,3 +255,24 @@ public sealed partial class MatchEngine
                 new(type, playerId, _state.Version, Choice: value), copy.ReceiverId);
     }
 }
+
+public sealed partial class MatchEngine
+{
+    private bool HandleRegisteredCopyChoice(string type, GameCommand command)
+    {
+        if (!IsCopyChoice(type)) return false;
+        ResolveCopyCommand(command);
+        return true;
+    }
+}
+
+public sealed partial class MatchEngine
+{
+    // Registration only: callbacks are not invoked during module initialization.
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
+    [System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void RegisterCardCopy_Rung4b4()
+    {
+        EngineHooks.PendingChoice.Register("HandleRegisteredCopyChoice", 400, static (engine, type, command) => engine.HandleRegisteredCopyChoice(type, command));
+    }
+}

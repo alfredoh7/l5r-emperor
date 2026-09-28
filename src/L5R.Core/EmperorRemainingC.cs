@@ -741,3 +741,24 @@ public sealed partial class MatchEngine
         EngineHooks.RunEffects.Register("RunEmperorRemainingC", 200, static (engine, context) => engine.RunEmperorRemainingC(context.id, context.ability, context.command, context.player, context.source, context.target, context.consumedGrant, context.bowedBeforeAction));
     }
 }
+
+public sealed partial class MatchEngine
+{
+    private bool HandleRegisteredAttackPhaseEndReaction(string type, GameCommand command)
+    {
+        if (type != "attackPhaseEndReaction") return false;
+        ResolveAttackPhaseEndCommand(command);
+        return true;
+    }
+}
+
+public sealed partial class MatchEngine
+{
+    // Registration only: callbacks are not invoked during module initialization.
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
+    [System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void RegisterEmperorRemainingC_Rung4b4()
+    {
+        EngineHooks.PendingChoice.Register("HandleRegisteredAttackPhaseEndReaction", 5500, static (engine, type, command) => engine.HandleRegisteredAttackPhaseEndReaction(type, command));
+    }
+}
