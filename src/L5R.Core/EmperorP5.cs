@@ -623,3 +623,10 @@ public sealed partial class MatchEngine
         EngineHooks.RunEffects.Register("RunEmperorP5", 2200, static (engine, context) => engine.RunEmperorP5(context.id, context.ability, context.command, context.player, context.source, context.target, context.consumedGrant, context.playedFromDiscard, context.opponentHonorBeforeBattleAction, context.bowedBeforeAction, context.preExistingGrants));
     }
 }
+
+// This property keeps its original JSON name and tail position in old saved MatchState payloads.
+public sealed partial class MatchState
+{
+    [System.Text.Json.Serialization.JsonPropertyOrder(1005)]
+    public EmperorP5State P5 { get; set; } = new();
+}

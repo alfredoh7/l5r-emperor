@@ -576,3 +576,10 @@ public sealed partial class MatchEngine
         EngineHooks.PendingChoice.Register("HandleRegisteredP3DarkVirtueDiscard", 1900, static (engine, type, command) => engine.HandleRegisteredP3DarkVirtueDiscard(type, command));
     }
 }
+
+// This property keeps its original JSON name and tail position in old saved MatchState payloads.
+public sealed partial class MatchState
+{
+    [System.Text.Json.Serialization.JsonPropertyOrder(1007)]
+    public EmperorP3State P3 { get; set; } = new();
+}

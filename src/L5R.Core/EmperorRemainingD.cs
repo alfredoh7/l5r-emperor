@@ -469,7 +469,7 @@ public sealed partial class MatchEngine
     private void FinishTwistOfFateAction(bool wasActive)
     {
         if (!wasActive || !_state.TwistOfFateActive || _state.WinnerId is not null) return;
-        if (DecisionStates.Any(d => d.Open(_state))) return;
+        if (HasOpenDecisionState()) return;
         EndTwistOfFateAction();
     }
 

@@ -7,6 +7,8 @@ internal sealed class OrderedHooks<T> where T : Delegate
     private readonly List<(string Id, int Priority, T Callback)> registrations = [];
     private readonly object gate = new();
     private T[]? snapshot;
+    private IReadOnlyList<string>? names;
+    internal IReadOnlyList<string> Names { get { _ = Items; return names!; } }
     internal void Register(string id, int priority, T callback)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(id);
@@ -30,6 +32,7 @@ internal sealed class OrderedHooks<T> where T : Delegate
                 registrations.Sort((a, b) => a.Priority != b.Priority ? a.Priority.CompareTo(b.Priority) : StringComparer.Ordinal.Compare(a.Id, b.Id));
                 var result = new T[registrations.Count];
                 for (var i = 0; i < result.Length; i++) result[i] = registrations[i].Callback;
+                names = Array.AsReadOnly(registrations.Select(entry => entry.Id).ToArray());
                 System.Threading.Volatile.Write(ref snapshot, result);
                 return result;
             }
