@@ -10,6 +10,7 @@ internal static class PublishedTests
             ("Published pool pins card definitions and the ability-free vanilla wave", Catalogue),
             ("Published catalogue is exactly content/published/*.json: nothing missing, extra, duplicated or unembedded", CatalogueMatchesDisk),
             ("Published wave files match their PublishedWaves manifests: no wave dropped, shrunk or added unpinned", WaveManifests),
+            ("Published wave discovery preserves legacy order and named snapshot identity", WaveDiscovery),
             ("CatalogueDecks/live: Lion and Crane retain 40/40 decks", () => CatalogueDecks(PublishedContent.Snapshot)),
             ("CatalogueDecks/frozen: Lion and Crane test fixture retains 40/40 decks", () => CatalogueDecks(PublishedContent.TestSnapshot)),
             ("Published setup pins Lion first turn, Honor, province strengths and Crane Bamboo", Setup),
@@ -136,7 +137,7 @@ internal static class PublishedTests
         Check(Directory.Exists(dir),"tests/L5R.Core.Tests/PublishedWaves is missing; it holds one manifest per wave file");
         var pinned=Directory.GetFiles(dir,"*.txt").ToDictionary(f=>Path.GetFileNameWithoutExtension(f),f=>File.ReadAllLines(f).Where(l=>l.Length>0).ToArray(),StringComparer.Ordinal);
         foreach(var stem in disk.Keys.Where(k=>!pinned.ContainsKey(k)).Order(StringComparer.Ordinal))problems.Add($"content/published/{stem}.json has no manifest; run python3 tools/content/pin_wave_ids.py and commit tests/L5R.Core.Tests/PublishedWaves/{stem}.txt");
-        foreach(var stem in pinned.Keys.Where(k=>!disk.ContainsKey(k)).Order(StringComparer.Ordinal))problems.Add($"PublishedWaves/{stem}.txt pins a wave whose content/published/{stem}.json is gone; restore the wave file with its loader, CardCatalog chain and csproj entry, or delete the manifest only if the wave was removed on purpose");
+        foreach(var stem in pinned.Keys.Where(k=>!disk.ContainsKey(k)).Order(StringComparer.Ordinal))problems.Add($"PublishedWaves/{stem}.txt pins a wave whose content/published/{stem}.json is gone; restore the wave file, or delete the manifest only if the wave was removed on purpose");
         foreach(var (stem,ids) in pinned.Where(p=>disk.ContainsKey(p.Key)).OrderBy(p=>p.Key,StringComparer.Ordinal))
         {
             var actual=disk[stem].Cards.Select(c=>c.Id).ToHashSet(StringComparer.Ordinal);
@@ -144,6 +145,21 @@ internal static class PublishedTests
             if(missing.Length>0||added.Length>0)problems.Add($"{stem}.json no longer matches PublishedWaves/{stem}.txt: missing [{string.Join(", ",missing)}], not pinned [{string.Join(", ",added)}]; a card removed on purpose or added to an existing wave needs python3 tools/content/pin_wave_ids.py --update");
         }
         NoProblems(problems,"Published wave files differ from their manifests");
+    }
+    private static void WaveDiscovery()
+    {
+        var waves = PublishedContent.Waves;
+        var disk = DiskWaves();
+        var expected = disk.Keys.Where(profile => profile.Contains("-wave-", StringComparison.Ordinal)).Order(StringComparer.Ordinal);
+        Eq(string.Join(",", waves.Select(wave => wave.Profile).Order(StringComparer.Ordinal)), string.Join(",", expected));
+        var legacy = File.ReadAllLines(Path.Combine(Support337.RepoRoot(), "src/L5R.Core/PublishedWaveOrder.txt"))
+            .Where(line => line.Length > 0 && !line.StartsWith('#')).ToArray();
+        Eq(string.Join(",", waves.Take(legacy.Length).Select(wave => wave.Profile)), string.Join(",", legacy));
+        foreach(var property in typeof(PublishedContent).GetProperties().Where(property => property.PropertyType == typeof(PublishedSnapshot) && property.Name.Contains("Wave", StringComparison.Ordinal)))
+        {
+            var named = (PublishedSnapshot)property.GetValue(null)!;
+            Check(ReferenceEquals(named, waves.Single(wave => wave.Profile == named.Profile)), $"{property.Name} must share the discovered snapshot");
+        }
     }
     private static void CatalogueDecks(PublishedSnapshot snapshot)
     {
