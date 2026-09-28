@@ -696,3 +696,14 @@ public sealed partial class MatchEngine
         EngineHooks.PendingChoice.Register("HandleRegisteredKillingGroundsSelect", 3200, static (engine, type, command) => engine.HandleRegisteredKillingGroundsSelect(type, command));
     }
 }
+
+public sealed partial class MatchEngine
+{
+    // Registration only: callbacks are not invoked during module initialization.
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
+    [System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void RegisterEmperorRemainingD_Rung4b6()
+    {
+        EngineHooks.FinishEitherOr.Register("FinishEmperorRemainingDEitherOr", 100, static (engine, p) => engine.FinishEmperorRemainingDEitherOr(p));
+    }
+}

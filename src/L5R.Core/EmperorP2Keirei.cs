@@ -84,3 +84,28 @@ public sealed partial class MatchEngine
     internal void PurgeChiPenaltiesForTest(string cardId) => PurgeChiPenalties(Card(cardId));
     internal void CleanseForcePenaltiesForTest(string cardId) => CleanseForcePenaltiesAndLocks(Card(cardId));
 }
+
+public sealed partial class MatchEngine
+{
+    private bool RegisteredApplyKeireiPoison(PendingDeciderChoice p)
+    {
+        if (!(p.SpecId == EmperorP2Abilities.KeireiPoisonSpec)) return false;
+        ApplyKeireiPoison(p);
+        return true;
+    }
+}
+
+public sealed partial class MatchEngine
+{
+    // Registration only: callbacks are not invoked during module initialization.
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
+    [System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void RegisterEmperorP2Keirei_Rung4b6()
+    {
+        EngineHooks.DeciderPrompt.Register("KeireiDeciderPrompt", 300, static (engine, p) => p.SpecId == EmperorP2Abilities.KeireiPoisonSpec ? engine.KeireiDeciderPrompt(p) : null);
+        EngineHooks.DeciderOptions.Register("KeireiDeciderOptions", 300, static (engine, specId, deciderId, command) => specId == EmperorP2Abilities.KeireiPoisonSpec ? engine.KeireiDeciderOptions(command) : null);
+        EngineHooks.ApplyDecider.Register("ApplyKeireiPoison", 300, static (engine, p) => engine.RegisteredApplyKeireiPoison(p));
+        EngineHooks.DeciderVerb.Register("KeireiDeciderPrompt", 200, static (engine, specId) => specId == EmperorP2Abilities.KeireiPoisonSpec ? "Poison" : null);
+        EngineHooks.DeciderIdAfter.Register("KeireiDeciderOptions", 200, static (engine, specId, command) => specId == EmperorP2Abilities.KeireiPoisonSpec ? command.PlayerId : null);
+    }
+}

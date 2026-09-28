@@ -618,3 +618,16 @@ public sealed partial class MatchState
     [System.Text.Json.Serialization.JsonPropertyOrder(1006)]
     public EmperorP6State P6 { get; set; } = new();
 }
+
+public sealed partial class MatchEngine
+{
+    // Registration only: callbacks are not invoked during module initialization.
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
+    [System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void RegisterEmperorP6_Rung4b6()
+    {
+        EngineHooks.EitherOrPrompt.Register("EmperorP6EitherOrPrompt", 300, static (engine, p, source, affected) => engine.EmperorP6EitherOrPrompt(p, source, affected));
+        EngineHooks.EitherOrOptions.Register("EmperorP6EitherOrOptions", 300, static (engine, p, affected, source, payable) => engine.EmperorP6EitherOrOptions(p, affected));
+        EngineHooks.ApplyEitherOr.Register("ApplyEmperorP6EitherOr", 300, static (engine, p, option, source, decider, affected, sourceIds) => engine.ApplyEmperorP6EitherOr(p, option, source, decider));
+    }
+}

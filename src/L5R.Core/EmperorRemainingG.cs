@@ -443,3 +443,17 @@ public sealed partial class MatchEngine
         EngineHooks.ValidateLate.Register("ValidateEmperorRemainingG", 1000, static (engine, context) => engine.ValidateEmperorRemainingG(context.id, context.command, context.player, context.source));
     }
 }
+
+public sealed partial class MatchEngine
+{
+    // Registration only: callbacks are not invoked during module initialization.
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
+    [System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void RegisterEmperorRemainingG_Rung4b6()
+    {
+        EngineHooks.EitherOrPrompt.Register("RemainingGEitherOrPrompt", 400, static (engine, p, source, affected) => p.SpecId == EmperorRemainingGSpecs.BanditGangPay ? engine.RemainingGEitherOrPrompt(p, source) : null);
+        EngineHooks.EitherOrOptions.Register("RemainingGEitherOrOptions", 400, static (engine, p, affected, source, payable) => p.SpecId == EmperorRemainingGSpecs.BanditGangPay ? engine.RemainingGEitherOrOptions(p, source, payable) : null);
+        EngineHooks.ApplyEitherOr.Register("ApplyRemainingGEitherOr", 400, static (engine, p, option, source, decider, affected, sourceIds) => engine.ApplyRemainingGEitherOr(p, option, source, decider, sourceIds));
+        EngineHooks.FinishEitherOr.Register("FinishRemainingGEitherOr", 300, static (engine, p) => engine.FinishRemainingGEitherOr(p));
+    }
+}

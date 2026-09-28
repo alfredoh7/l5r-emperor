@@ -439,3 +439,28 @@ public sealed partial class MatchState
     [System.Text.Json.Serialization.JsonPropertyOrder(1001)]
     public MechDState MechD { get; set; } = new();
 }
+
+public sealed partial class MatchEngine
+{
+    private bool RegisteredApplyMechDDeciderChoice(PendingDeciderChoice p)
+    {
+        if (!(EmperorMechDSpecs.IsDeciderSpec(p.SpecId))) return false;
+        ApplyMechDDeciderChoice(p);
+        return true;
+    }
+}
+
+public sealed partial class MatchEngine
+{
+    // Registration only: callbacks are not invoked during module initialization.
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
+    [System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void RegisterEmperorMechD_Rung4b6()
+    {
+        EngineHooks.DeciderPrompt.Register("MechDDeciderPrompt", 200, static (engine, p) => EmperorMechDSpecs.IsDeciderSpec(p.SpecId) ? engine.MechDDeciderPrompt(p) : null);
+        EngineHooks.DeciderOptions.Register("MechDDeciderOptions", 200, static (engine, specId, deciderId, command) => EmperorMechDSpecs.IsDeciderSpec(specId) ? engine.MechDDeciderOptions(specId, deciderId, command) : null);
+        EngineHooks.ApplyDecider.Register("ApplyMechDDeciderChoice", 200, static (engine, p) => engine.RegisteredApplyMechDDeciderChoice(p));
+        EngineHooks.DeciderVerb.Register("MechDDeciderVerb", 100, static (engine, specId) => EmperorMechDSpecs.IsDeciderSpec(specId) ? MechDDeciderVerb(specId) : null);
+        EngineHooks.DeciderIdBefore.Register("MechDDeciderId", 200, static (engine, specId, command) => EmperorMechDSpecs.IsDeciderSpec(specId) ? engine.MechDDeciderId(specId, command) : null);
+    }
+}

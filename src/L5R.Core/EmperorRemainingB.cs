@@ -666,3 +666,27 @@ public sealed partial class MatchEngine
         EngineHooks.RunEffects.Register("RunEmperorRemainingB", 1100, static (engine, context) => engine.RunEmperorRemainingB(context.id, context.ability, context.command, context.player, context.source, context.target, context.consumedGrant, context.playedFromDiscard, context.opponentHonorBeforeBattleAction, context.bowedBeforeAction, context.preExistingGrants));
     }
 }
+
+public sealed partial class MatchEngine
+{
+    private bool RegisteredApplyEmperorRemainingBDeciderChoice(PendingDeciderChoice p)
+    {
+        if (!(EmperorRemainingBSpecs.IsDeciderSpec(p.SpecId))) return false;
+        ApplyEmperorRemainingBDeciderChoice(p);
+        return true;
+    }
+}
+
+public sealed partial class MatchEngine
+{
+    // Registration only: callbacks are not invoked during module initialization.
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
+    [System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void RegisterEmperorRemainingB_Rung4b6()
+    {
+        EngineHooks.DeciderPrompt.Register("EmperorRemainingBDeciderPrompt", 100, static (engine, p) => EmperorRemainingBSpecs.IsDeciderSpec(p.SpecId) ? engine.EmperorRemainingBDeciderPrompt(p) : null);
+        EngineHooks.DeciderOptions.Register("EmperorRemainingBDeciderOptions", 100, static (engine, specId, deciderId, command) => EmperorRemainingBSpecs.IsDeciderSpec(specId) ? engine.EmperorRemainingBDeciderOptions(specId, deciderId) : null);
+        EngineHooks.ApplyDecider.Register("ApplyEmperorRemainingBDeciderChoice", 100, static (engine, p) => engine.RegisteredApplyEmperorRemainingBDeciderChoice(p));
+        EngineHooks.DeciderIdAfter.Register("IsFirstDecider", 100, static (engine, specId, command) => EmperorRemainingBSpecs.IsFirstDecider(specId) ? command.PlayerId : null);
+    }
+}
