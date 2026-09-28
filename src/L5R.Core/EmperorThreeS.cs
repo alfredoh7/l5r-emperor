@@ -197,3 +197,20 @@ public sealed partial class MatchEngine
     // Makito's Maho Battle action (the running command, or the Attack under way): its destruction will not be negated or delayed (HiromiPerforms' hook).
     private static bool MakitoDestruction(GameCommand? command) => command?.AbilityId == EmperorThreeSAbilities.MakitoDestroy;
 }
+
+public sealed partial class MatchEngine
+{
+    // Registration only: callbacks are not invoked during module initialization.
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
+    [System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void RegisterEmperorThreeSHooks()
+    {
+        EngineHooks.Abilities.Register("AddEmperorThreeS", 1700, static abilities => abilities.AddEmperorThreeS());
+        EngineHooks.PerformerAllows.Register("ThreeSPerformerAllows", 500, static (engine, context) => engine.ThreeSPerformerAllows(context.ability, context.performer, context.actingAsBattle));
+        EngineHooks.TargetAllows.Register("ThreeSTargetAllows", 800, static (engine, context) => engine.ThreeSTargetAllows(context.ability.Target, context.command, context.player, context.source, context.target));
+        EngineHooks.PerformerCandidates.Register("ThreeSPerformers", 500, static (engine, context) => engine.ThreeSPerformers(context.ability, context.playerId, context.actingAsBattle));
+        EngineHooks.PersonalityForce.Register("ThreeSForce", 300, static (engine, context) => engine.ThreeSForce(context.card));
+        EngineHooks.ValidateMiddle.Register("ValidateEmperorThreeS", 700, static (engine, context) => engine.ValidateEmperorThreeS(context.id, context.ability, context.command, context.player, context.source));
+        EngineHooks.RunEffects.Register("RunEmperorThreeS", 1500, static (engine, context) => engine.RunEmperorThreeS(context.id, context.ability, context.command, context.player, context.source, context.target, context.consumedGrant, context.playedFromDiscard, context.opponentHonorBeforeBattleAction, context.bowedBeforeAction, context.preExistingGrants));
+    }
+}

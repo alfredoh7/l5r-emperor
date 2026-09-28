@@ -398,3 +398,22 @@ public sealed partial class MatchEngine
         return null;
     }
 }
+
+public sealed partial class MatchEngine
+{
+    // Registration only: callbacks are not invoked during module initialization.
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
+    [System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void RegisterEmperorMechCHooks()
+    {
+        EngineHooks.Abilities.Register("AddEmperorMechC", 2100, static abilities => abilities.AddEmperorMechC());
+        EngineHooks.AttackStrengthAfter.Register("MechCAttackStrength", 100, static (engine, context) => MechCAttackStrength(context.abilityId));
+        EngineHooks.AttackKind.Register("MechCAttackKind", 100, static context => MechCAttackKind(context.abilityId));
+        EngineHooks.TargetAllows.Register("EmperorMechCTargetAllows", 1100, static (engine, context) => engine.EmperorMechCTargetAllows(context.ability.Target, context.command, context.player, context.source, context.target));
+        EngineHooks.DestroysTarget.Register("MechCDestroysTarget", 300, static context => MechCDestroysTarget(context.abilityId));
+        EngineHooks.BowsTarget.Register("MechCBowsTarget", 400, static context => MechCBowsTarget(context.abilityId));
+        EngineHooks.TargetedReaction.Register("MechCTargetedReactionApplies", 500, static (engine, context) => engine.MechCTargetedReactionApplies(context.card, context.abilityId, context.subject, context.affected));
+        EngineHooks.ValidateEarly.Register("ValidateEmperorMechC", 1300, static (engine, context) => engine.ValidateEmperorMechC(context.id, context.ability, context.command, context.player, context.source));
+        EngineHooks.RunEffects.Register("RunEmperorMechC", 1900, static (engine, context) => engine.RunEmperorMechC(context.id, context.ability, context.command, context.player, context.source, context.target, context.consumedGrant));
+    }
+}

@@ -373,3 +373,26 @@ public sealed partial class MatchEngine
         }
     }
 }
+
+public sealed partial class MatchEngine
+{
+    private static bool MechEHostsBattleBows(string abilityId) => abilityId == EmperorMechEAbilities.HostsBattle;
+}
+
+public sealed partial class MatchEngine
+{
+    // Registration only: callbacks are not invoked during module initialization.
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
+    [System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void RegisterEmperorMechEHooks()
+    {
+        EngineHooks.Abilities.Register("AddEmperorMechE", 2200, static abilities => abilities.AddEmperorMechE());
+        EngineHooks.PerformerAllows.Register("MechEPerformerAllows", 600, static (engine, context) => engine.MechEPerformerAllows(context.ability, context.performer));
+        EngineHooks.PerformerCandidates.Register("MechEPerformers", 600, static (engine, context) => engine.MechEPerformers(context.ability, context.playerId));
+        EngineHooks.DestroysTarget.Register("MechEDestroysTarget", 400, static context => MechEDestroysTarget(context.abilityId));
+        EngineHooks.BowsTarget.Register("MechEHostsBattleBows", 600, static context => MechEHostsBattleBows(context.abilityId));
+        EngineHooks.TargetedReaction.Register("MechETargetedReactionApplies", 600, static (engine, context) => engine.MechETargetedReactionApplies(context.card, context.abilityId, context.subject, context.affected));
+        EngineHooks.ValidateMiddle.Register("ValidateEmperorMechE", 1000, static (engine, context) => engine.ValidateEmperorMechE(context.id, context.command));
+        EngineHooks.RunEffects.Register("RunEmperorMechE", 2000, static (engine, context) => engine.RunEmperorMechE(context.id, context.ability, context.command, context.player, context.source, context.target, context.consumedGrant, context.playedFromDiscard, context.opponentHonorBeforeBattleAction, context.bowedBeforeAction, context.preExistingGrants));
+    }
+}

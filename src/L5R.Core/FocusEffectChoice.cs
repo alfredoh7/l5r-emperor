@@ -239,3 +239,24 @@ public sealed partial class MatchEngine
         yield return new("chooseFocusEffect", "Take nothing", true, null, new GameCommand("chooseFocusEffect", playerId, _state.Version, CardId: p.FocusCardId, Choice: "decline"), p.FocusCardId);
     }
 }
+
+public sealed partial class MatchEngine
+{
+    private bool HandleRegisteredFocusEffectChoice(string type, GameCommand command)
+    {
+        if (type != "focusEffectChoice") return false;
+        ResolveFocusEffectChoiceCommand(command);
+        return true;
+    }
+}
+
+public sealed partial class MatchEngine
+{
+    // Registration only: callbacks are not invoked during module initialization.
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
+    [System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void RegisterFocusEffectChoiceHooks()
+    {
+        EngineHooks.PendingChoice.Register("HandleRegisteredFocusEffectChoice", 800, static (engine, type, command) => engine.HandleRegisteredFocusEffectChoice(type, command));
+    }
+}

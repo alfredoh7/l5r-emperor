@@ -437,3 +437,29 @@ public sealed partial class MatchEngine
         MechB.InfiltratorGrants.Where(g => g.CardId == card.Id).Select(g => new GrantedEffectView("Infiltrator trait",
             $"After a Straighten Phase begins: Choose your bowed non-{g.ExcludedKeyword} Personality. Negate his straightening this phase.", g.Source, GrantDuration.Permanent, "Trait"));
 }
+
+public sealed partial class MatchEngine
+{
+    private bool HandleRegisteredInfiltratorStraighten(string type, GameCommand command)
+    {
+        if (type != "infiltratorStraighten") return false;
+        ResolveInfiltratorStraighten(command);
+        return true;
+    }
+}
+
+public sealed partial class MatchEngine
+{
+    // Registration only: callbacks are not invoked during module initialization.
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
+    [System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void RegisterEmperorMechBHooks()
+    {
+        EngineHooks.Abilities.Register("AddEmperorMechB", 1900, static abilities => abilities.AddEmperorMechB());
+        EngineHooks.TargetAllows.Register("MechBTargetAllows", 1000, static (engine, context) => engine.MechBTargetAllows(context.ability.Target, context.command, context.player, context.source, context.target));
+        EngineHooks.TargetedReaction.Register("MechBTargetedReactionApplies", 400, static (engine, context) => engine.MechBTargetedReactionApplies(context.card, context.abilityId, context.subject, context.affected));
+        EngineHooks.ValidateMiddle.Register("ValidateEmperorMechB", 800, static (engine, context) => engine.ValidateEmperorMechB(context.id, context.command, context.player, context.source));
+        EngineHooks.RunEffects.Register("RunEmperorMechB", 1800, static (engine, context) => engine.RunEmperorMechB(context.id, context.ability, context.command, context.player, context.source, context.target));
+        EngineHooks.PendingChoice.Register("HandleRegisteredInfiltratorStraighten", 1800, static (engine, type, command) => engine.HandleRegisteredInfiltratorStraighten(type, command));
+    }
+}

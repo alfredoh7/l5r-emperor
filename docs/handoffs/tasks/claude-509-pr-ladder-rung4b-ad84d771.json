@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Rung 4b implemented for #509 / PR #531: 296 feature-owned typed callbacks retain exact legacy order across 29 dispatch channels; startup seals delegate arrays. Seven feature-state properties moved without changing saved JSON. New mechanisms register in their own files. No card, rules, wire-format or view changes.",
+  "validation": "Full tools/check.sh --skip-client passed before/after: Core 2109 to 2114, AI 74, Server 8, Client.Transport 13, Python content 138 to 139; zero FAIL. Inventory unchanged 2183/1419. Six fingerprints and 19 same-seed AI outcomes identical. Old populated state and real searchDeck saved decision round-trip/resume exactly. Warm dispatch allocation delta zero. Actual two-branch mechanism merge: no conflicts, feature-only files, both callbacks execute and state round-trips. AI wall time 338.8s before / 277.1s after; baseline overlapped Core, not a controlled benchmark. Separate green commits: 2109 / 840 / 2109 / 384 / 59 / 71 targeted Core checks; final full run covers cleanup.",
+  "remaining": "PR #531 ready for review after final push; do not merge. Godot client build/import/smoke left to CI. Card-wiring freeze remains until 4b merges; then edit issue #509 freeze comments. Known compatibility remainders documented in decision and PR: base per-card switches and curated ID lists, direct effect calls inside case arms, older scalar state fields, specialized lifecycle/event/watch flows and nested feature dispatch. No board token configured; coordination recorded on GitHub.",
+  "issue": "509",
+  "branch": "claude/509-pr-ladder-rung4b",
+  "updated": "2026-09-28T16:55:21.919695+00:00"
+}

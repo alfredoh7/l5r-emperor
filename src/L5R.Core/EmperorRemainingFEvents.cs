@@ -617,3 +617,24 @@ public sealed partial class MatchEngine
         }
     }
 }
+
+public sealed partial class MatchEngine
+{
+    private bool HandleRegisteredEventChoice(string type, GameCommand command)
+    {
+        if (type != "eventChoice") return false;
+        ResolveEventChoiceCommand(command);
+        return true;
+    }
+}
+
+public sealed partial class MatchEngine
+{
+    // Registration only: callbacks are not invoked during module initialization.
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
+    [System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void RegisterEmperorRemainingFEventsHooks()
+    {
+        EngineHooks.PendingChoice.Register("HandleRegisteredEventChoice", 3800, static (engine, type, command) => engine.HandleRegisteredEventChoice(type, command));
+    }
+}

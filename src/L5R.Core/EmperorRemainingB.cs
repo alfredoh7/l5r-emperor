@@ -146,11 +146,11 @@ public sealed partial class MatchEngine
         _ => false
     };
 
-    private string?[] EmperorRemainingBPerformers(AbilityDefinition ability, int playerId, bool actingAsBattle) => ability.Performer switch
+    private string?[]? EmperorRemainingBPerformers(AbilityDefinition ability, int playerId, bool actingAsBattle) => ability.Performer switch
     {
         "own-unbowed-nonhuman-shadowlands-at-battle" or "own-dead-personality-with-keyword" or "own-kensai-or-unbowed-weapon-at-battle" =>
             _state.Cards.Values.Where(c => c.OwnerId == playerId && (InPlay(c) || c.Zone == Zone.Dead) && EmperorRemainingBPerformerAllows(ability, c, actingAsBattle)).OrderBy(c => c.Id, StringComparer.Ordinal).Select(c => (string?)c.Id).ToArray(),
-        _ => [null]
+        _ => null
     };
 
     // ---- Target categories (ShadowsEmbraceBatch2TargetAllows' default) --------------------------------------------------------------------------------------------------------------
@@ -629,5 +629,34 @@ public sealed partial class MatchEngine
         if (!InPlay(affected)) return;
         if (option.Key == "bow") { if (!StalwartNegatesBow(affected, p.ActingPlayerId)) affected.Bowed = true; }
         else if (affected.Zone == Zone.Battlefield) MoveHome(affected, false);
+    }
+}
+
+public sealed partial class MatchEngine
+{
+    private bool RegisteredApplyEmperorRemainingBDeciderChoice(PendingDeciderChoice p)
+    {
+        if (!(EmperorRemainingBSpecs.IsDeciderSpec(p.SpecId))) return false;
+        ApplyEmperorRemainingBDeciderChoice(p);
+        return true;
+    }
+}
+
+public sealed partial class MatchEngine
+{
+    // Registration only: callbacks are not invoked during module initialization.
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
+    [System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void RegisterEmperorRemainingBHooks()
+    {
+        EngineHooks.Abilities.Register("AddEmperorRemainingB", 500, static abilities => abilities.AddEmperorRemainingB());
+        EngineHooks.PerformerAllows.Register("EmperorRemainingBPerformerAllows", 200, static (engine, context) => engine.EmperorRemainingBPerformerAllows(context.ability, context.performer, context.actingAsBattle));
+        EngineHooks.PerformerCandidates.Register("EmperorRemainingBPerformers", 800, static (engine, context) => engine.EmperorRemainingBPerformers(context.ability, context.playerId, context.actingAsBattle));
+        EngineHooks.ValidateEarly.Register("ValidateEmperorRemainingB", 800, static (engine, context) => engine.ValidateEmperorRemainingB(context.id, context.ability, context.command, context.player, context.source));
+        EngineHooks.RunEffects.Register("RunEmperorRemainingB", 1100, static (engine, context) => engine.RunEmperorRemainingB(context.id, context.ability, context.command, context.player, context.source, context.target, context.consumedGrant, context.playedFromDiscard, context.opponentHonorBeforeBattleAction, context.bowedBeforeAction, context.preExistingGrants));
+        EngineHooks.DeciderPrompt.Register("EmperorRemainingBDeciderPrompt", 100, static (engine, p) => EmperorRemainingBSpecs.IsDeciderSpec(p.SpecId) ? engine.EmperorRemainingBDeciderPrompt(p) : null);
+        EngineHooks.DeciderOptions.Register("EmperorRemainingBDeciderOptions", 100, static (engine, specId, deciderId, command) => EmperorRemainingBSpecs.IsDeciderSpec(specId) ? engine.EmperorRemainingBDeciderOptions(specId, deciderId) : null);
+        EngineHooks.ApplyDecider.Register("ApplyEmperorRemainingBDeciderChoice", 100, static (engine, p) => engine.RegisteredApplyEmperorRemainingBDeciderChoice(p));
+        EngineHooks.DeciderIdAfter.Register("IsFirstDecider", 100, static (engine, specId, command) => EmperorRemainingBSpecs.IsFirstDecider(specId) ? command.PlayerId : null);
     }
 }

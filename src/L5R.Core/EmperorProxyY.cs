@@ -53,3 +53,15 @@ public sealed partial class MatchEngine
         return -_state.Cards.Values.Count(c => c.Zone == Zone.Battlefield && c.ProvinceIndex == battlefield && c.OwnerId != unit.OwnerId && Definition(c).Effect == EmperorProxyYAbilities.GinasFoxEffect);
     }
 }
+
+public sealed partial class MatchEngine
+{
+    // Registration only: callbacks are not invoked during module initialization.
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
+    [System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void RegisterEmperorProxyYHooks()
+    {
+        EngineHooks.Abilities.Register("AddEmperorProxyY", 1200, static abilities => abilities.AddEmperorProxyY());
+        EngineHooks.PersonalityForce.Register("GinasFoxForce", 100, static (engine, context) => engine.GinasFoxForce(context.card));
+    }
+}

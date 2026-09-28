@@ -79,8 +79,17 @@ public sealed partial class MatchEngine
     ];
 
     /// <summary>The names the guard test compares with every <c>Pending*</c> property of <see cref="MatchState"/>.</summary>
-    public static IReadOnlyList<string> SeppukuDecisionStateNames { get; } = DecisionStates.Select(d => d.Name).ToArray();
-    public static IReadOnlyList<string> SeppukuNonDecisionStateNames => NotDecisionStates;
+    private static readonly Lazy<IReadOnlyList<string>> DecisionStateNames = new(() => Array.AsReadOnly(DecisionStates.Select(d => d.Name).Concat(EngineHooks.DecisionState.Names).ToArray()));
+    public static IReadOnlyList<string> SeppukuDecisionStateNames => DecisionStateNames.Value;
+    private static readonly Lazy<IReadOnlyList<string>> NonDecisionStateNames = new(() => Array.AsReadOnly(NotDecisionStates.Concat(EngineHooks.NonDecisionState.Names).ToArray()));
+    public static IReadOnlyList<string> SeppukuNonDecisionStateNames => NonDecisionStateNames.Value;
+
+    private bool HasOpenDecisionState()
+    {
+        foreach (var decision in DecisionStates) if (decision.Open(_state)) return true;
+        foreach (var decision in EngineHooks.DecisionState.Items) if (decision(_state)) return true;
+        return false;
+    }
 
     /// <summary>The one rule for the MOMENT of Order Seppuku: null when <paramref name="playerId"/> may order it now, otherwise the reason it
     /// is not their time. Cards are judged separately (dishonorable, keyword, locked) and Unfortunate Hesitation's owed pass is checked beside it.</summary>
@@ -88,7 +97,7 @@ public sealed partial class MatchEngine
     {
         if (_state.Phase != Phase.Action) return SeppukuPhaseReason;
         if (_state.PriorityPlayerId != playerId) return SeppukuTurnReason;
-        if (DecisionStates.Any(d => d.Open(_state))) return SeppukuPendingReason;
+        if (HasOpenDecisionState()) return SeppukuPendingReason;
         return null;
     }
 }

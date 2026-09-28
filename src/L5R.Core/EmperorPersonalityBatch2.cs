@@ -206,3 +206,15 @@ public sealed partial class MatchEngine
         if (bowed > 0) GainHonorFromPerformer(hana, bowed, Definition(hana).Name);
     }
 }
+
+public sealed partial class MatchEngine
+{
+    // Registration only: callbacks are not invoked during module initialization.
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
+    [System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void RegisterEmperorPersonalityBatch2Hooks()
+    {
+        EngineHooks.Abilities.Register("AddEmperorPersonalityBatch2", 100, static abilities => abilities.AddEmperorPersonalityBatch2());
+        EngineHooks.ValidateEarly.Register("ValidateEmperorPersonalityBatch2", 600, static (engine, context) => engine.ValidateEmperorPersonalityBatch2(context.id, context.player, context.source));
+    }
+}

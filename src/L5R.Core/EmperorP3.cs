@@ -517,3 +517,39 @@ public sealed partial class MatchEngine
         GrantAdditionalAction(key.PlayerId, null);
     }
 }
+
+public sealed partial class MatchEngine
+{
+    private bool HandleRegisteredP3DarkVirtueDiscard(string type, GameCommand command)
+    {
+        if (type != "p3DarkVirtueDiscard") return false;
+        ResolveP3DarkVirtueDiscard(command);
+        return true;
+    }
+}
+
+// This property keeps its original JSON name and tail position in old saved MatchState payloads.
+public sealed partial class MatchState
+{
+    [System.Text.Json.Serialization.JsonPropertyOrder(1007)]
+    public EmperorP3State P3 { get; set; } = new();
+}
+
+public sealed partial class MatchEngine
+{
+    // Registration only: callbacks are not invoked during module initialization.
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
+    [System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void RegisterEmperorP3Hooks()
+    {
+        EngineHooks.Abilities.Register("AddEmperorP3", 3200, static abilities => abilities.AddEmperorP3());
+        EngineHooks.Looks.Register("EmperorP3Looks", 500, static () => EmperorP3Looks.All);
+        EngineHooks.Searches.Register("EmperorP3Abilities", 500, static () => [EmperorP3Abilities.AkehaReconSearch]);
+        EngineHooks.TargetAllows.Register("P3TargetAllows", 1700, static (engine, context) => engine.P3TargetAllows(context.ability.Target, context.command, context.player, context.source, context.target));
+        EngineHooks.ProvinceBonus.Register("P3StaticProvinceBonus", 200, static (engine, context) => engine.P3StaticProvinceBonus(context.card, context.mine));
+        EngineHooks.TargetedReaction.Register("P3TargetedReactionApplies", 900, static (engine, context) => engine.P3TargetedReactionApplies(context.card, context.abilityId, context.subject, context.affected));
+        EngineHooks.ValidateLate.Register("ValidateEmperorP3", 1100, static (engine, context) => engine.ValidateEmperorP3(context.id, context.command, context.player, context.source));
+        EngineHooks.RunEffects.Register("RunEmperorP3", 2600, static (engine, context) => engine.RunEmperorP3(context.id, context.ability, context.command, context.player, context.source, context.target, context.bowedBeforeAction, context.consumedGrant));
+        EngineHooks.PendingChoice.Register("HandleRegisteredP3DarkVirtueDiscard", 1900, static (engine, type, command) => engine.HandleRegisteredP3DarkVirtueDiscard(type, command));
+    }
+}

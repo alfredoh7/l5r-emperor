@@ -214,3 +214,15 @@ public sealed partial class MatchEngine
         AfterProvinceRefilledP6(player, province, faceUp: true); // issue #503: Shosuro Ietsuno
     }
 }
+
+public sealed partial class MatchEngine
+{
+    // Registration only: callbacks are not invoked during module initialization.
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
+    [System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void RegisterEmperorPersonalityBatch5Hooks()
+    {
+        EngineHooks.PersonalityForce.Register("EmperorBatch5Force", 900, static (engine, context) => engine.EmperorBatch5Force(context.card));
+        EngineHooks.ValidateLate.Register("ValidateEmperorBatch5", 700, static (engine, context) => engine.ValidateEmperorBatch5(context.id, context.command, context.ability, context.player, context.source));
+    }
+}

@@ -419,3 +419,16 @@ public sealed partial class MatchEngine
         }
     }
 }
+
+public sealed partial class MatchEngine
+{
+    // Registration only: callbacks are not invoked during module initialization.
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
+    [System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void RegisterEmperorStrongholdBatch1Hooks()
+    {
+        EngineHooks.Abilities.Register("AddEmperorStrongholdBatch1", 200, static abilities => abilities.AddEmperorStrongholdBatch1());
+        EngineHooks.ValidateEarly.Register("ValidateEmperorStrongholdBatch1", 400, static (engine, context) => engine.ValidateEmperorStrongholdBatch1(context.id, context.ability, context.command, context.player, context.source));
+        EngineHooks.RunEffects.Register("RunEmperorStrongholdBatch1", 400, static (engine, context) => engine.RunEmperorStrongholdBatch1(context.id, context.ability, context.command, context.player, context.source, context.target) is not null ? false : null);
+    }
+}

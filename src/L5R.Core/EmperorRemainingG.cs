@@ -408,3 +408,22 @@ public sealed partial class MatchEngine
         return true;
     }
 }
+
+public sealed partial class MatchEngine
+{
+    // Registration only: callbacks are not invoked during module initialization.
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
+    [System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void RegisterEmperorRemainingGHooks()
+    {
+        EngineHooks.Abilities.Register("AddEmperorRemainingG", 1000, static abilities => abilities.AddEmperorRemainingG());
+        EngineHooks.AttackStrengthBefore.Register("EmperorRemainingGAttackStrength", 300, static (engine, context) => engine.EmperorRemainingGAttackStrength(context.abilityId, context.sourceId));
+        EngineHooks.AttackKind.Register("RemainingGAttackKind", 700, static context => NullIfEmpty(RemainingGAttackKind(context.abilityId)));
+        EngineHooks.PersonalityForce.Register("EmperorRemainingGForce", 1400, static (engine, context) => engine.EmperorRemainingGForce(context.card));
+        EngineHooks.ValidateLate.Register("ValidateEmperorRemainingG", 1000, static (engine, context) => engine.ValidateEmperorRemainingG(context.id, context.command, context.player, context.source));
+        EngineHooks.EitherOrPrompt.Register("RemainingGEitherOrPrompt", 400, static (engine, p, source, affected) => p.SpecId == EmperorRemainingGSpecs.BanditGangPay ? engine.RemainingGEitherOrPrompt(p, source) : null);
+        EngineHooks.EitherOrOptions.Register("RemainingGEitherOrOptions", 400, static (engine, p, affected, source, payable) => p.SpecId == EmperorRemainingGSpecs.BanditGangPay ? engine.RemainingGEitherOrOptions(p, source, payable) : null);
+        EngineHooks.ApplyEitherOr.Register("ApplyRemainingGEitherOr", 400, static (engine, p, option, source, decider, affected, sourceIds) => engine.ApplyRemainingGEitherOr(p, option, source, decider, sourceIds));
+        EngineHooks.FinishEitherOr.Register("FinishRemainingGEitherOr", 300, static (engine, p) => engine.FinishRemainingGEitherOr(p));
+    }
+}

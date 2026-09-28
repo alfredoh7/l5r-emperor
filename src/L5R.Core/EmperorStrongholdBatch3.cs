@@ -284,3 +284,16 @@ public sealed partial class MatchEngine
         GainHonor(duel.ChallengerPlayerId, 1, "Watchful Eye Dojo");
     }
 }
+
+public sealed partial class MatchEngine
+{
+    // Registration only: callbacks are not invoked during module initialization.
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
+    [System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void RegisterEmperorStrongholdBatch3Hooks()
+    {
+        EngineHooks.Abilities.Register("AddEmperorStrongholdBatch3", 300, static abilities => abilities.AddEmperorStrongholdBatch3());
+        EngineHooks.ValidateEarly.Register("ValidateEmperorStrongholdBatch3", 500, static (engine, context) => engine.ValidateEmperorStrongholdBatch3(context.id, context.ability, context.command, context.player, context.source));
+        EngineHooks.RunEffects.Register("RunEmperorStrongholdBatch3", 500, static (engine, context) => engine.RunEmperorStrongholdBatch3(context.id, context.ability, context.command, context.player, context.source, context.target, context.consumedGrant));
+    }
+}

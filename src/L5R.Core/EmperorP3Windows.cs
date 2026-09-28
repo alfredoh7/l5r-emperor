@@ -211,3 +211,31 @@ public sealed partial class MatchEngine
         Emit("traitStraightened", $"{Definition(card).Name} bowed, and straightens.", card.OwnerId, card.Id);
     }
 }
+
+public sealed partial class MatchEngine
+{
+    private bool HandleRegisteredP3BeforeEventReaction(string type, GameCommand command)
+    {
+        if (type != "p3BeforeEventReaction") return false;
+        ResolveP3BeforeEventCommand(command);
+        return true;
+    }
+    private bool HandleRegisteredP3MikiDarkVirtue(string type, GameCommand command)
+    {
+        if (type != "p3MikiDarkVirtue") return false;
+        ResolveP3MikiCommand(command);
+        return true;
+    }
+}
+
+public sealed partial class MatchEngine
+{
+    // Registration only: callbacks are not invoked during module initialization.
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
+    [System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void RegisterEmperorP3WindowsHooks()
+    {
+        EngineHooks.PendingChoice.Register("HandleRegisteredP3BeforeEventReaction", 2000, static (engine, type, command) => engine.HandleRegisteredP3BeforeEventReaction(type, command));
+        EngineHooks.PendingChoice.Register("HandleRegisteredP3MikiDarkVirtue", 2100, static (engine, type, command) => engine.HandleRegisteredP3MikiDarkVirtue(type, command));
+    }
+}

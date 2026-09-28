@@ -145,3 +145,16 @@ public sealed partial class MatchEngine
         }
     }
 }
+
+public sealed partial class MatchEngine
+{
+    // Registration only: callbacks are not invoked during module initialization.
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
+    [System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void RegisterEmperorRulingR1CardsHooks()
+    {
+        EngineHooks.Abilities.Register("AddEmperorRulingR1", 1400, static abilities => abilities.AddEmperorRulingR1());
+        EngineHooks.TargetAllows.Register("RulingR1TargetAllows", 600, static (engine, context) => engine.RulingR1TargetAllows(context.ability.Target, context.command, context.player, context.source, context.target));
+        EngineHooks.ValidateEarly.Register("ValidateEmperorRulingR1", 1000, static (engine, context) => engine.ValidateEmperorRulingR1(context.id, context.ability, context.command, context.player, context.source));
+    }
+}

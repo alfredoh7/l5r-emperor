@@ -594,3 +594,32 @@ public sealed partial class MatchEngine
         return true;
     }
 }
+
+// This property keeps its original JSON name and tail position in old saved MatchState payloads.
+public sealed partial class MatchState
+{
+    [System.Text.Json.Serialization.JsonPropertyOrder(1002)]
+    public EmperorP1State P1 { get; set; } = new();
+}
+
+public sealed partial class MatchEngine
+{
+    // Registration only: callbacks are not invoked during module initialization.
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
+    [System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void RegisterEmperorP1Hooks()
+    {
+        EngineHooks.Abilities.Register("AddEmperorP1", 2400, static abilities => abilities.AddEmperorP1());
+        EngineHooks.Looks.Register("EmperorP1Looks", 200, static () => EmperorP1Looks.All);
+        EngineHooks.AttackStrengthAfter.Register("EmperorP1AttackStrength", 200, static (engine, context) => EmperorP1AttackStrength(context.abilityId));
+        EngineHooks.AttackKind.Register("EmperorP1AttackKind", 200, static context => EmperorP1AttackKind(context.abilityId));
+        EngineHooks.TargetAllows.Register("EmperorP1TargetAllows", 1200, static (engine, context) => engine.EmperorP1TargetAllows(context.ability.Target, context.command, context.player, context.source, context.target));
+        EngineHooks.PersonalityForce.Register("EmperorP1Force", 400, static (engine, context) => engine.EmperorP1Force(context.card));
+        EngineHooks.ValidateMiddle.Register("ValidateEmperorP1", 1200, static (engine, context) => engine.ValidateEmperorP1(context.id, context.ability, context.command, context.player, context.source));
+        EngineHooks.RunEffects.Register("RunEmperorP1", 1400, static (engine, context) => engine.RunEmperorP1(context.id, context.ability, context.command, context.player, context.source, context.target, context.consumedGrant, context.playedFromDiscard, context.opponentHonorBeforeBattleAction, context.bowedBeforeAction, context.preExistingGrants));
+        EngineHooks.EitherOrPrompt.Register("EmperorP1EitherOrPrompt", 100, static (engine, p, source, affected) => EmperorP1Specs.Is(p.SpecId) ? engine.EmperorP1EitherOrPrompt(p, source) : null);
+        EngineHooks.EitherOrOptions.Register("EmperorP1EitherOrOptions", 100, static (engine, p, affected, source, payable) => EmperorP1Specs.Is(p.SpecId) ? engine.EmperorP1EitherOrOptions(p) : null);
+        EngineHooks.ApplyEitherOr.Register("ApplyEmperorP1EitherOr", 100, static (engine, p, option, source, decider, affected, sourceIds) => engine.ApplyEmperorP1EitherOr(p, option, source, decider));
+        EngineHooks.FinishEitherOr.Register("FinishEmperorP1EitherOr", 400, static (engine, p) => engine.FinishEmperorP1EitherOr(p));
+    }
+}

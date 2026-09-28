@@ -329,3 +329,16 @@ public sealed partial class MatchEngine
         }
     }
 }
+
+public sealed partial class MatchEngine
+{
+    // Registration only: callbacks are not invoked during module initialization.
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
+    [System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void RegisterShadowsEmbraceBatch5Hooks()
+    {
+        EngineHooks.PersonalityForce.Register("ShadowsEmbraceBatch5Force", 1100, static (engine, context) => engine.ShadowsEmbraceBatch5Force(context.card));
+        EngineHooks.ValidateEarly.Register("ValidateShadowsEmbraceBatch5", 200, static (engine, context) => engine.ValidateShadowsEmbraceBatch5(context.id, context.command, context.player, context.source));
+        EngineHooks.RunEffects.Register("RunShadowsEmbraceBatch5", 1000, static (engine, context) => engine.RunShadowsEmbraceBatch5(context.id, context.ability, context.command, context.player, context.source, context.target, context.consumedGrant, context.playedFromDiscard, context.opponentHonorBeforeBattleAction, context.bowedBeforeAction, context.preExistingGrants));
+    }
+}

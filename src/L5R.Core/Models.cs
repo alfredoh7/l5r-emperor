@@ -720,7 +720,7 @@ public sealed class PendingDuel
     public List<string> DiscardFocusedIds { get; set; } = [];
 }
 
-public sealed class MatchState
+public sealed partial class MatchState
 {
     public long Version { get; set; }
     public int TokenSequence { get; set; }
@@ -1214,19 +1214,7 @@ public sealed class MatchState
     // Emperor Edition mechanics group C (issue #501, EmperorMechC.cs): an additional cost of entering play awaiting its payer's choice, and the answers given so far to the command being replayed.
     public PendingEntryCostDecision? PendingEntryCostDecision { get; set; }
     public List<string> EntryCostAnswers { get; set; } = [];
-    // Issue #501, mechanics group D (EmperorMechD.cs): the Recon-action counter, the attach log, the cards-into-hand records and timed removals.
-    public MechDState MechD { get; set; } = new();
-    public EmperorP1State P1 { get; set; } = new(); // Issue #503, group P1 (EmperorP1.cs).
-    // Issue #503, pass group P2 (EmperorP2*.cs).
-    public EmperorP2State P2 { get; set; } = new();
-    // Issue #503, group P4 (EmperorP4.cs): watches, shields and records of the target/lock/watch pass.
-    public EmperorP4State P4 { get; set; } = new();
-    // Issue #503, pass group P5 (EmperorP5.cs): the records of this group's cards.
-    public EmperorP5State P5 { get; set; } = new();
-    /// <summary>Issue #503 (EmperorP6.cs): the refill decisions (Daigotsu Susaiken, Distant Expansion, Shosuro Ietsuno), In Search of Guidance's found Sensei, Otomo Suikihime's leaves-play watch.</summary>
-    public EmperorP6State P6 { get; set; } = new();
-    // Issue #503, group P3 (EmperorP3.cs): Iron Will's ignored costs and owed grants, Tenbatsu's look follow-up.
-    public EmperorP3State P3 { get; set; } = new();
+
 }
 
 /// <summary>Isawa Norimichi: PlayerId's army has +Amount total Force in the battle numbered Battle (while it has any units).</summary>

@@ -576,3 +576,28 @@ public static class EmperorP6Searches
 
     public static IEnumerable<SearchSpec> All => [InSearchOfGuidance];
 }
+
+// This property keeps its original JSON name and tail position in old saved MatchState payloads.
+public sealed partial class MatchState
+{
+    [System.Text.Json.Serialization.JsonPropertyOrder(1006)]
+    public EmperorP6State P6 { get; set; } = new();
+}
+
+public sealed partial class MatchEngine
+{
+    // Registration only: callbacks are not invoked during module initialization.
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
+    [System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void RegisterEmperorP6Hooks()
+    {
+        EngineHooks.Abilities.Register("AddEmperorP6", 3100, static abilities => abilities.AddEmperorP6());
+        EngineHooks.Searches.Register("EmperorP6Searches", 400, static () => EmperorP6Searches.All);
+        EngineHooks.TargetAllows.Register("EmperorP6TargetAllows", 1600, static (engine, context) => engine.EmperorP6TargetAllows(context.ability.Target, context.player, context.target));
+        EngineHooks.ValidateMiddle.Register("ValidateEmperorP6", 1500, static (engine, context) => engine.ValidateEmperorP6(context.id, context.ability, context.command, context.player, context.source));
+        EngineHooks.RunEffects.Register("RunEmperorP6", 2500, static (engine, context) => engine.RunEmperorP6(context.id, context.command, context.player, context.source, context.target, context.bowedBeforeAction));
+        EngineHooks.EitherOrPrompt.Register("EmperorP6EitherOrPrompt", 300, static (engine, p, source, affected) => engine.EmperorP6EitherOrPrompt(p, source, affected));
+        EngineHooks.EitherOrOptions.Register("EmperorP6EitherOrOptions", 300, static (engine, p, affected, source, payable) => engine.EmperorP6EitherOrOptions(p, affected));
+        EngineHooks.ApplyEitherOr.Register("ApplyEmperorP6EitherOr", 300, static (engine, p, option, source, decider, affected, sourceIds) => engine.ApplyEmperorP6EitherOr(p, option, source, decider));
+    }
+}

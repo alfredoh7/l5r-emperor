@@ -435,3 +435,30 @@ public sealed partial class MatchEngine
         }
     }
 }
+
+public sealed partial class MatchEngine
+{
+    private bool HandleRegisteredProclaimNegateReaction(string type, GameCommand command)
+    {
+        if (type != "proclaimNegateReaction") return false;
+        // Turning the Story (issue #453, batch 2): the one reacting player answers -- the Reaction (negating the held Proclaim) or a pass -- and the
+        // Proclaim then resolves, negated or not, back inside the Proclaim window it interrupted (SeedsOfDecayBatch2.cs).
+        Require(command.Type is "useAbility" or "declineReaction" or "pass","Resolve the before-Proclaim reaction window first.");
+        if (command.Type=="useAbility") UseAbility(command);
+        else Emit("reactionPassed",$"{Player(command.PlayerId).Name} passed the reaction opportunity.",command.PlayerId);
+        // The window closes the instant the one reacting player has answered: a pass, or the Reaction that negated the Proclaim.
+        if (_state.HeldProclaim is { } held && (command.Type!="useAbility" || held.Negated)) { _state.PendingChoice=null; _state.ConsecutivePasses=0; ResolveHeldProclaim(); }
+        return true;
+    }
+}
+
+public sealed partial class MatchEngine
+{
+    // Registration only: callbacks are not invoked during module initialization.
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
+    [System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void RegisterSeedsOfDecayBatch2Hooks()
+    {
+        EngineHooks.PendingChoice.Register("HandleRegisteredProclaimNegateReaction", 4200, static (engine, type, command) => engine.HandleRegisteredProclaimNegateReaction(type, command));
+    }
+}

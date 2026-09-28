@@ -469,7 +469,7 @@ public sealed partial class MatchEngine
     private void FinishTwistOfFateAction(bool wasActive)
     {
         if (!wasActive || !_state.TwistOfFateActive || _state.WinnerId is not null) return;
-        if (DecisionStates.Any(d => d.Open(_state))) return;
+        if (HasOpenDecisionState()) return;
         EndTwistOfFateAction();
     }
 
@@ -630,5 +630,40 @@ public sealed partial class MatchEngine
         if (OpenOverconfidentDrawWindow(p.ResumePlayerId)) return true;
         ContinueAfterActionTail(p.ActingPlayerId, p.ResumePlayerId);
         return true;
+    }
+}
+
+public sealed partial class MatchEngine
+{
+    private bool HandleRegisteredTwistOfFateReaction(string type, GameCommand command)
+    {
+        if (type != "twistOfFateReaction") return false;
+        ResolveTwistOfFateWindow(command);
+        return true;
+    }
+    private bool HandleRegisteredKillingGroundsSelect(string type, GameCommand command)
+    {
+        if (type != "killingGroundsSelect") return false;
+        ResolveKillingGroundsSelect(command);
+        return true;
+    }
+}
+
+public sealed partial class MatchEngine
+{
+    // Registration only: callbacks are not invoked during module initialization.
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
+    [System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void RegisterEmperorRemainingDHooks()
+    {
+        EngineHooks.Abilities.Register("AddEmperorRemainingD", 700, static abilities => abilities.AddEmperorRemainingD());
+        EngineHooks.PerformerAllows.Register("RemainingDPerformerAllows", 300, static (engine, context) => engine.RemainingDPerformerAllows(context.ability, context.performer, context.actingAsBattle));
+        EngineHooks.TargetAllows.Register("RemainingDTargetAllows", 300, static (engine, context) => engine.RemainingDTargetAllows(context.ability.Target, context.command, context.player, context.source, context.target));
+        EngineHooks.PerformerCandidates.Register("RemainingDPerformers", 300, static (engine, context) => engine.RemainingDPerformers(context.ability, context.playerId, context.actingAsBattle));
+        EngineHooks.ValidateMiddle.Register("ValidateEmperorRemainingD", 500, static (engine, context) => engine.ValidateEmperorRemainingD(context.id, context.ability, context.command, context.player, context.source));
+        EngineHooks.RunEffects.Register("RunEmperorRemainingD", 1200, static (engine, context) => engine.RunEmperorRemainingD(context.id, context.ability, context.command, context.player, context.source, context.target, context.consumedGrant, context.playedFromDiscard, context.opponentHonorBeforeBattleAction, context.bowedBeforeAction, context.preExistingGrants));
+        EngineHooks.PendingChoice.Register("HandleRegisteredTwistOfFateReaction", 3100, static (engine, type, command) => engine.HandleRegisteredTwistOfFateReaction(type, command));
+        EngineHooks.PendingChoice.Register("HandleRegisteredKillingGroundsSelect", 3200, static (engine, type, command) => engine.HandleRegisteredKillingGroundsSelect(type, command));
+        EngineHooks.FinishEitherOr.Register("FinishEmperorRemainingDEitherOr", 100, static (engine, p) => engine.FinishEmperorRemainingDEitherOr(p));
     }
 }

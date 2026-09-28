@@ -146,3 +146,24 @@ public sealed partial class MatchEngine
         FinishBeforeBattleEffect(pending);
     }
 }
+
+public sealed partial class MatchEngine
+{
+    private bool HandleRegisteredBeforeBattleReaction(string type, GameCommand command)
+    {
+        if (type != "beforeBattleReaction") return false;
+        ResolveBeforeBattleReaction(command);
+        return true;
+    }
+}
+
+public sealed partial class MatchEngine
+{
+    // Registration only: callbacks are not invoked during module initialization.
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
+    [System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void RegisterBeforeResolutionHooks()
+    {
+        EngineHooks.PendingChoice.Register("HandleRegisteredBeforeBattleReaction", 2700, static (engine, type, command) => engine.HandleRegisteredBeforeBattleReaction(type, command));
+    }
+}

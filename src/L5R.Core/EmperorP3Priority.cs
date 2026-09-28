@@ -464,3 +464,27 @@ public sealed partial class MatchEngine
             ? AroruCandidates(card, Card(affected)).Select(c => ((string?)c.Id, (string?)$"{AbilityCatalog.All[abilityId].Label} · {Definition(c).Name} ({c.Id})")).ToArray()
             : null;
 }
+
+public sealed partial class MatchEngine
+{
+    private bool HandleRegisteredP3AroruMove(string type, GameCommand command)
+    {
+        if (type != "p3AroruMove") return false;
+        ResolveP3AroruMove(command);
+        return true;
+    }
+}
+
+public sealed partial class MatchEngine
+{
+    // Registration only: callbacks are not invoked during module initialization.
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
+    [System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void RegisterEmperorP3PriorityHooks()
+    {
+        EngineHooks.Abilities.Register("AddEmperorP3Priority", 3300, static abilities => abilities.AddEmperorP3Priority());
+        EngineHooks.AttackStrengthBefore.Register("P3AttackStrength", 100, static (engine, context) => P3AttackStrength(context.abilityId));
+        EngineHooks.PersonalityForce.Register("P3Force", 500, static (engine, context) => engine.P3Force(context.card));
+        EngineHooks.PendingChoice.Register("HandleRegisteredP3AroruMove", 2200, static (engine, type, command) => engine.HandleRegisteredP3AroruMove(type, command));
+    }
+}

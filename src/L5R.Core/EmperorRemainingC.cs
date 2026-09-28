@@ -706,3 +706,29 @@ public sealed partial class MatchEngine
     // StartTurn's hook: "until your next turn begins".
     private void ExpireEmperorRemainingCAtTurnStart(PlayerState player) => RemC.RumorsTravelOwners.RemoveAll(o => o == player.Id);
 }
+
+public sealed partial class MatchEngine
+{
+    private bool HandleRegisteredAttackPhaseEndReaction(string type, GameCommand command)
+    {
+        if (type != "attackPhaseEndReaction") return false;
+        ResolveAttackPhaseEndCommand(command);
+        return true;
+    }
+}
+
+public sealed partial class MatchEngine
+{
+    // Registration only: callbacks are not invoked during module initialization.
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
+    [System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void RegisterEmperorRemainingCHooks()
+    {
+        EngineHooks.Abilities.Register("AddEmperorRemainingC", 600, static abilities => abilities.AddEmperorRemainingC());
+        EngineHooks.TargetAllows.Register("EmperorRemainingCTargetAllows", 200, static (engine, context) => engine.EmperorRemainingCTargetAllows(context.ability.Target, context.command, context.player, context.source, context.target));
+        EngineHooks.TargetedReaction.Register("EmperorRemainingCTargetedReactionApplies", 200, static (engine, context) => engine.EmperorRemainingCTargetedReactionApplies(context.card, context.abilityId, context.subject, context.affected));
+        EngineHooks.ValidateMiddle.Register("ValidateEmperorRemainingC", 400, static (engine, context) => engine.ValidateEmperorRemainingC(context.id, context.ability, context.command, context.player, context.source));
+        EngineHooks.RunEffects.Register("RunEmperorRemainingC", 200, static (engine, context) => engine.RunEmperorRemainingC(context.id, context.ability, context.command, context.player, context.source, context.target, context.consumedGrant, context.bowedBeforeAction));
+        EngineHooks.PendingChoice.Register("HandleRegisteredAttackPhaseEndReaction", 5500, static (engine, type, command) => engine.HandleRegisteredAttackPhaseEndReaction(type, command));
+    }
+}

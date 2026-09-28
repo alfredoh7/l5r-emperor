@@ -181,3 +181,24 @@ public sealed partial class MatchEngine
         yield return new("chooseAttackTarget", "Attack no target", true, null, new GameCommand("chooseAttackTarget", playerId, _state.Version, CardId: p.Command.CardId, Choice: "none"), p.Command.CardId);
     }
 }
+
+public sealed partial class MatchEngine
+{
+    private bool HandleRegisteredAttackTargetSelect(string type, GameCommand command)
+    {
+        if (type != "attackTargetSelect") return false;
+        ResolveAttackTargetSelection(command);
+        return true;
+    }
+}
+
+public sealed partial class MatchEngine
+{
+    // Registration only: callbacks are not invoked during module initialization.
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
+    [System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void RegisterEmperorFollowupsAttackHooks()
+    {
+        EngineHooks.PendingChoice.Register("HandleRegisteredAttackTargetSelect", 200, static (engine, type, command) => engine.HandleRegisteredAttackTargetSelect(type, command));
+    }
+}

@@ -288,3 +288,14 @@ public sealed partial class MatchEngine
     internal int P4DuelStatValueForTest(string cardId, string stat) => DuelStatValue(Card(cardId), stat);
     internal void P4LoseHonorFromForTest(int playerId, int amount, string sourceCardId) => GainHonor(playerId, -amount, "test", Card(sourceCardId));
 }
+
+public sealed partial class MatchEngine
+{
+    // Registration only: callbacks are not invoked during module initialization.
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
+    [System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void RegisterEmperorP4MoreHooks()
+    {
+        EngineHooks.Abilities.Register("AddEmperorP4More", 2900, static abilities => abilities.AddEmperorP4More());
+    }
+}

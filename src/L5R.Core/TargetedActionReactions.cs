@@ -20,7 +20,7 @@ public sealed partial class MatchEngine
 
     /// <summary>The held action: its command and the card it targets now (null for a non-Attack action that targets no card, whose cost may still name
     /// a Follower of Mochitoko's). For an Attack that is the Attack's own target (Kahoku exp carries it in CardIds).</summary>
-    private sealed record ReactionSubject(GameCommand Command, string? TargetId, bool IsAttack);
+    internal sealed record ReactionSubject(GameCommand Command, string? TargetId, bool IsAttack);
 
     private static GameCommand WithActionTarget(GameCommand command, string targetId, bool attackTarget) =>
         attackTarget && !TargetsThroughAttackPipeline(command.AbilityId!) ? command with { CardIds = [targetId] } : command with { TargetId = targetId };
@@ -324,7 +324,7 @@ public sealed partial class MatchEngine
             case "chugo-seido-redirect":
                 return command.PlayerId != card.OwnerId && affected.OwnerId == card.OwnerId && Definition(affected).Type == CardType.Personality && ChugoSeidoCandidates(card, subject, affected).Any();
             default:
-                return RemATargetedActionReactionApplies(card, abilityId, subject, affected) || EmperorRemainingCTargetedReactionApplies(card, abilityId, subject, affected) || RulingR2TargetedReactionApplies(card, abilityId, subject, affected) || MechBTargetedReactionApplies(card, abilityId, subject, affected) || MechCTargetedReactionApplies(card, abilityId, subject, affected) || MechETargetedReactionApplies(card, abilityId, subject, affected) || P4TargetedReactionApplies(card, abilityId, subject, affected) || P5TargetedReactionApplies(card, abilityId, subject, affected) || P3TargetedReactionApplies(card, abilityId, subject, affected); /* issue #501: The Dark Naga */ // ruling pass R2; issue #492: group A (Ancestral Protection, Caught in the Act), group C (Snake Tattoo)
+                return RegisteredTargetedReaction(card, abilityId, subject, affected); /* issue #501: The Dark Naga */ // ruling pass R2; issue #492: group A (Ancestral Protection, Caught in the Act), group C (Snake Tattoo)
         }
     }
 

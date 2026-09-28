@@ -79,3 +79,87 @@ public sealed partial class MatchEngine
         NextAction(player.Id, ForfeitsAdditionalActions(ability) && _state.AdditionalActions.Any(g => g.PlayerId == player.Id && Forfeitable(g)));
     }
 }
+
+public sealed partial class MatchEngine
+{
+    private bool HandleRegisteredAdditionalActionReaction(string type, GameCommand command)
+    {
+        if (type != "additionalActionReaction") return false;
+        // Additional Action (issue #181): open to either side, same shape as attackReaction
+        // above -- the opponent may play Effortless Counterattack's Reaction (negating the
+        // pending effects) or pass; the granting player may also pass here to decline this
+        // specific opportunity outright (forfeiting it -- see ConsumeAdditionalActionGrant,
+        // already removed the grant regardless of what happens next).
+        Require(command.Type is "useAbility" or "declineReaction" or "pass","Resolve the pending additional action first.");
+        if (command.Type=="useAbility") UseAbility(command); else PassReaction();
+        if (_state.PendingChoice is null && _state.PendingAdditionalAction is not null)
+        {
+            var pending=_state.PendingAdditionalAction; _state.PendingAdditionalAction=null;
+            // Negated (Effortless Counterattack): it is taken and pays its costs, only its effects are lost, and the burst it was part of goes on --
+            // the next additional action is the holder's to take (ResolveNegatedAction, consumedGrant).
+            var negated=_state.DeferredActionNegated; _state.DeferredActionNegated=false;
+            if(negated) ResolveNegatedAction(pending,consumedGrant:true);
+            else if(!ChainOutOfPlayReactionWindow(pending,consumedGrant:true)) ExecuteAbilityEffects(pending,consumedGrant:true); // R4 (issue #492): Bad Kharma and the like may still be played on top.
+        }
+        return true;
+    }
+    private bool HandleRegisteredUnimpeachableNameReaction(string type, GameCommand command)
+    {
+        if (type != "unimpeachableNameReaction") return false;
+        // Unimpeachable Name (oracle-l5r-8989): open only to the one reacting player (unlike
+        // attackReaction/additionalActionReaction, which are open to either side) -- the
+        // top-level priority check already enforces that, so this window closes the instant
+        // they answer either way, same single-pass shape as entryReaction/bowReaction above.
+        Require(command.Type is "useAbility" or "declineReaction" or "pass","Resolve the pending reaction first.");
+        if (command.Type=="useAbility") UseAbility(command); else PassReaction();
+        if (_state.PendingChoice is null && _state.PendingOutOfPlayActionReaction is not null)
+        {
+            var pending=_state.PendingOutOfPlayActionReaction; _state.PendingOutOfPlayActionReaction=null;
+            var reduction=_state.HonorLossReductionPlayerId;
+            // Mendon's R4 ruling (issue #492): this window can follow the before-action window and the additional-action window of the same action, and what they set (the negations of
+            // effects, the additional action's grant) is carried through it.
+            var carried=_state.PendingOutOfPlayNegations; var carriedGrant=_state.PendingOutOfPlayConsumedGrant;
+            _state.PendingOutOfPlayNegations=null; _state.PendingOutOfPlayConsumedGrant=false;
+            var outer=ContinueSuspendedReaction(pending);
+            if(carried is not null) _state.NegatedEffects=carried;
+            _state.HonorLossReductionPlayerId=reduction; var suspended=_state.SuspendedWindows.Count;
+            // Bad Kharma / Footsteps of Madness (Emperor Edition remaining-cards pass, group A, issue #492): the held action was negated as a whole in this window.
+            if(RemATakeHeldNegation(out var remAIgnoreCosts)) ResolveNegatedAction(pending,consumedGrant:carriedGrant,ignoreCosts:remAIgnoreCosts); else ExecuteAbilityEffects(pending,consumedGrant:carriedGrant);
+            if(carried is not null) { _state.NegatedEffects.Clear(); RestoreTemporaryRemovals(TemporaryRemovals.Action); if(_state.SuspendedWindows.Count<=suspended) _state.NegatedEffects=outer?.NegatedEffects ?? []; }
+            if(_state.SuspendedWindows.Count>suspended) _state.SuspendedWindows[^1].HonorLossReductionPlayerId=outer?.HonorLossReductionPlayerId;
+            else _state.HonorLossReductionPlayerId=outer?.HonorLossReductionPlayerId;
+        }
+        return true;
+    }
+    private bool HandleRegisteredAnnounceReaction(string type, GameCommand command)
+    {
+        if (type != "announceReaction") return false;
+        // Tsuruchi Yakusho (issue #276 follow-up): the general "after you announce an action"
+        // primitive -- once the window closes, the originally-announced command finally runs,
+        // the same defer-then-reexecute shape beforeActionReaction/PendingNegatableAbility uses.
+        Require(command.Type is "useAbility" or "declineReaction" or "pass","Resolve the announce reaction window first.");
+        if (command.Type=="useAbility") UseAbility(command); else PassReaction();
+        if (_state.PendingChoice is null && _state.PendingAnnouncedAction is not null)
+        {
+            var pending=_state.PendingAnnouncedAction; _state.PendingAnnouncedAction=null;
+            if(P3ContinueAnnounce(pending,RunSetAsideBattleCommand)) return true; // Ikoma Ayumu, Utaku Lishan (issue #503): the next watcher, or the set-aside additional action or command goes on
+            // Entrenched Position (Forgotten Legacy pass, issue #467 batch 3): a Reaction in this window negated the announced action.
+            if(_state.AnnouncedActionNegated) { _state.AnnouncedActionNegated=false; ResolveNegatedAction(pending); }
+            else if(!BeginAttackTargetSelection(pending)) ContinueAnnouncedAction(pending); // No Hiding Place (issue #498): the Attack's target is selected after the announce window.
+        }
+        return true;
+    }
+}
+
+public sealed partial class MatchEngine
+{
+    // Registration only: callbacks are not invoked during module initialization.
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
+    [System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void RegisterActionNegationHooks()
+    {
+        EngineHooks.PendingChoice.Register("HandleRegisteredAdditionalActionReaction", 4900, static (engine, type, command) => engine.HandleRegisteredAdditionalActionReaction(type, command));
+        EngineHooks.PendingChoice.Register("HandleRegisteredUnimpeachableNameReaction", 5200, static (engine, type, command) => engine.HandleRegisteredUnimpeachableNameReaction(type, command));
+        EngineHooks.PendingChoice.Register("HandleRegisteredAnnounceReaction", 6000, static (engine, type, command) => engine.HandleRegisteredAnnounceReaction(type, command));
+    }
+}

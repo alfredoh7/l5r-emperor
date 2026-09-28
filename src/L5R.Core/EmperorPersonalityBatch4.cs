@@ -258,3 +258,25 @@ public sealed partial class MatchEngine
                 new GameCommand("chooseRentatsuLoss", playerId, _state.Version, TargetPlayerId: chosen), pending.CardId);
     }
 }
+
+public sealed partial class MatchEngine
+{
+    private bool HandleRegisteredRentatsuLoss(string type, GameCommand command)
+    {
+        if (type != "rentatsuLoss") return false;
+        ResolveRentatsuLoss(command);
+        return true;
+    }
+}
+
+public sealed partial class MatchEngine
+{
+    // Registration only: callbacks are not invoked during module initialization.
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
+    [System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void RegisterEmperorPersonalityBatch4Hooks()
+    {
+        EngineHooks.ValidateEarly.Register("ValidateEmperorBatch4", 700, static (engine, context) => engine.ValidateEmperorBatch4(context.id, context.ability, context.command, context.player, context.source));
+        EngineHooks.PendingChoice.Register("HandleRegisteredRentatsuLoss", 1600, static (engine, type, command) => engine.HandleRegisteredRentatsuLoss(type, command));
+    }
+}
