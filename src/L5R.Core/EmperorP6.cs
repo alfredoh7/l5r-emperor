@@ -576,3 +576,15 @@ public static class EmperorP6Searches
 
     public static IEnumerable<SearchSpec> All => [InSearchOfGuidance];
 }
+
+public sealed partial class MatchEngine
+{
+    // Registration only: callbacks are not invoked during module initialization.
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
+    [System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void RegisterEmperorP6_Rung4b1()
+    {
+        EngineHooks.Abilities.Register("AddEmperorP6", 3100, static abilities => abilities.AddEmperorP6());
+        EngineHooks.Searches.Register("EmperorP6Searches", 400, static () => EmperorP6Searches.All);
+    }
+}

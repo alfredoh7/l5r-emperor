@@ -517,3 +517,16 @@ public sealed partial class MatchEngine
         GrantAdditionalAction(key.PlayerId, null);
     }
 }
+
+public sealed partial class MatchEngine
+{
+    // Registration only: callbacks are not invoked during module initialization.
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
+    [System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void RegisterEmperorP3_Rung4b1()
+    {
+        EngineHooks.Abilities.Register("AddEmperorP3", 3200, static abilities => abilities.AddEmperorP3());
+        EngineHooks.Looks.Register("EmperorP3Looks", 500, static () => EmperorP3Looks.All);
+        EngineHooks.Searches.Register("EmperorP3Abilities", 500, static () => [EmperorP3Abilities.AkehaReconSearch]);
+    }
+}

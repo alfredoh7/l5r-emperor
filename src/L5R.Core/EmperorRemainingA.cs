@@ -646,3 +646,14 @@ public sealed partial class MatchEngine
                     new GameCommand("beforeBattleOptional", playerId, _state.Version, TargetId: s.Id, CardIds: [o.Id], Choice: "use"), s.Id);
     }
 }
+
+public sealed partial class MatchEngine
+{
+    // Registration only: callbacks are not invoked during module initialization.
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
+    [System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void RegisterEmperorRemainingA_Rung4b1()
+    {
+        EngineHooks.Abilities.Register("AddEmperorRemainingA", 400, static abilities => abilities.AddEmperorRemainingA());
+    }
+}

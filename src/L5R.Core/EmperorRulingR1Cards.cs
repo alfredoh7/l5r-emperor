@@ -145,3 +145,14 @@ public sealed partial class MatchEngine
         }
     }
 }
+
+public sealed partial class MatchEngine
+{
+    // Registration only: callbacks are not invoked during module initialization.
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
+    [System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void RegisterEmperorRulingR1Cards_Rung4b1()
+    {
+        EngineHooks.Abilities.Register("AddEmperorRulingR1", 1400, static abilities => abilities.AddEmperorRulingR1());
+    }
+}

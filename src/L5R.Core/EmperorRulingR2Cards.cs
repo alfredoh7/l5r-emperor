@@ -291,3 +291,14 @@ public sealed partial class MatchEngine
         finally { foreach (var scope in scopes) _delayScopes.Remove(scope); }
     }
 }
+
+public sealed partial class MatchEngine
+{
+    // Registration only: callbacks are not invoked during module initialization.
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
+    [System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void RegisterEmperorRulingR2Cards_Rung4b1()
+    {
+        EngineHooks.Abilities.Register("AddEmperorRulingR2", 1500, static abilities => abilities.AddEmperorRulingR2());
+    }
+}

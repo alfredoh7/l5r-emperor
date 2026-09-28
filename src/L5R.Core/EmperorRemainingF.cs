@@ -338,3 +338,15 @@ public sealed partial class MatchEngine
     /// <summary>Whether the recruit an ability makes is one that "pays all costs" as any recruit does (the printed phrase "paying all costs", modified or not).</summary>
     internal static bool RecruitPaysAllCostsNormally(AbilityDefinition ability) => ability.Label.Contains("paying all costs", StringComparison.OrdinalIgnoreCase);
 }
+
+public sealed partial class MatchEngine
+{
+    // Registration only: callbacks are not invoked during module initialization.
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
+    [System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void RegisterEmperorRemainingF_Rung4b1()
+    {
+        EngineHooks.Abilities.Register("AddEmperorRemainingF", 900, static abilities => abilities.AddEmperorRemainingF());
+        EngineHooks.Looks.Register("EmperorRemainingFLooks", 100, static () => EmperorRemainingFLooks.All);
+    }
+}

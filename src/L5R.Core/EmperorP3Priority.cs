@@ -464,3 +464,14 @@ public sealed partial class MatchEngine
             ? AroruCandidates(card, Card(affected)).Select(c => ((string?)c.Id, (string?)$"{AbilityCatalog.All[abilityId].Label} · {Definition(c).Name} ({c.Id})")).ToArray()
             : null;
 }
+
+public sealed partial class MatchEngine
+{
+    // Registration only: callbacks are not invoked during module initialization.
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
+    [System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void RegisterEmperorP3Priority_Rung4b1()
+    {
+        EngineHooks.Abilities.Register("AddEmperorP3Priority", 3300, static abilities => abilities.AddEmperorP3Priority());
+    }
+}

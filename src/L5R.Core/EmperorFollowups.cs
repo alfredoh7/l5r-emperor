@@ -96,3 +96,14 @@ public sealed partial class MatchEngine
     // Limited-instead-of-Open) draws as its taker's next End Phase begins, not as the current turn's does. An effect recorded without a player is due at the first End Phase.
     private bool EndPhaseIsOwners(DelayedEffect effect) => effect.PlayerId is not int owner || owner == _state.ActivePlayerId;
 }
+
+public sealed partial class MatchEngine
+{
+    // Registration only: callbacks are not invoked during module initialization.
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
+    [System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void RegisterEmperorFollowups_Rung4b1()
+    {
+        EngineHooks.Abilities.Register("AddEmperorFollowups", 1800, static abilities => abilities.AddEmperorFollowups());
+    }
+}

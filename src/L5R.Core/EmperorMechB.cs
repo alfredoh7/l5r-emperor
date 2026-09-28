@@ -437,3 +437,14 @@ public sealed partial class MatchEngine
         MechB.InfiltratorGrants.Where(g => g.CardId == card.Id).Select(g => new GrantedEffectView("Infiltrator trait",
             $"After a Straighten Phase begins: Choose your bowed non-{g.ExcludedKeyword} Personality. Negate his straightening this phase.", g.Source, GrantDuration.Permanent, "Trait"));
 }
+
+public sealed partial class MatchEngine
+{
+    // Registration only: callbacks are not invoked during module initialization.
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
+    [System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void RegisterEmperorMechB_Rung4b1()
+    {
+        EngineHooks.Abilities.Register("AddEmperorMechB", 1900, static abilities => abilities.AddEmperorMechB());
+    }
+}

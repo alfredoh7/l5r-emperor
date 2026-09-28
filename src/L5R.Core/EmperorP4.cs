@@ -406,3 +406,14 @@ public sealed partial class MatchEngine
         P4.ContributionShields.TryGetValue(card.Id, out var turn) && turn == _state.TurnNumber
         && (!P4.ContributionNegatedBy.TryGetValue(card.Id, out var by) || by != card.OwnerId);
 }
+
+public sealed partial class MatchEngine
+{
+    // Registration only: callbacks are not invoked during module initialization.
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
+    [System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void RegisterEmperorP4_Rung4b1()
+    {
+        EngineHooks.Abilities.Register("AddEmperorP4", 2600, static abilities => abilities.AddEmperorP4());
+    }
+}

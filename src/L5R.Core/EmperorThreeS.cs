@@ -197,3 +197,14 @@ public sealed partial class MatchEngine
     // Makito's Maho Battle action (the running command, or the Attack under way): its destruction will not be negated or delayed (HiromiPerforms' hook).
     private static bool MakitoDestruction(GameCommand? command) => command?.AbilityId == EmperorThreeSAbilities.MakitoDestroy;
 }
+
+public sealed partial class MatchEngine
+{
+    // Registration only: callbacks are not invoked during module initialization.
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
+    [System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void RegisterEmperorThreeS_Rung4b1()
+    {
+        EngineHooks.Abilities.Register("AddEmperorThreeS", 1700, static abilities => abilities.AddEmperorThreeS());
+    }
+}

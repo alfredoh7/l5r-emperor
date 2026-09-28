@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Rung 4b in progress: migrate ability catalogue, deck-look and deck-search extensions into feature-owned startup registrations. Preserve explicit legacy priorities and catalogue order.",
+  "validation": "Baseline full check passed: Core 2109, AI 74, Server 8, Transport 13, content 138; inventory 2183/1419. Initial catalogue migration full Core 2109 passed, zero FAIL. Baseline AI 338.8s; this timing overlaps the first Core validation and is not a performance benchmark.",
+  "remaining": "Implementation in progress: remaining query, validation, effect, pending-choice, state and choice-dispatch hooks; compatibility and parallel-mechanism tests; final full validation. Freeze stays through 4b merge. Do not merge.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/509",
+  "branch": "claude/509-pr-ladder-rung4b",
+  "updated": "2026-09-28T16:06:56.733570+00:00"
+}

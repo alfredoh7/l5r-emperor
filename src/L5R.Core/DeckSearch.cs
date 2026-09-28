@@ -181,14 +181,8 @@ public static class SearchCatalog
     public static SearchSpec SacrificeOfPawns { get; } = new("sacrifice-of-pawns", "Search your Dynasty deck for a Personality",
         [new(SearchDeck.Dynasty, new("Personality", [CardType.Personality]), SearchEffect.RecruitPersonality)]);
 
-    public static IReadOnlyDictionary<string, SearchSpec> All { get; } = new[] { IkomaShizuka, ImperialGift, TrainingCheap, TrainingFocus, TrainingOptional, NakaMahatsu, YungRing,
-            DiscoveringTheTemple, VersatileFarm, Introspection, MartialInstruction, MeetingTheKeepers, SacrificeOfPawns, EmperorRemainingFSearches.RefugeOfTheThreeSisters }
-        .Concat(EmperorRemainingESearches.All) // Emperor Edition remaining-cards pass (issue #492), group E: EmperorRemainingE.cs.
-        .Concat(EmperorFollowupsSearches.All) // Emperor Edition follow-ups (issue #498): EmperorFollowupsSearch.cs.
-        .Concat(EmperorP2Searches.All) // Issue #503, pass group P2: EmperorP2Search.cs.
-        .Concat(EmperorP6Searches.All) // issue #503: EmperorP6.cs.
-        .Concat([EmperorP3Abilities.AkehaReconSearch]) // Daidoji Akeha (issue #503, EmperorP3.cs).
-        .ToDictionary(s => s.Id, StringComparer.Ordinal);
+    public static IReadOnlyDictionary<string, SearchSpec> All { get; } = EngineHooks.Catalogue(new[] { IkomaShizuka, ImperialGift, TrainingCheap, TrainingFocus, TrainingOptional, NakaMahatsu, YungRing,
+            DiscoveringTheTemple, VersatileFarm, Introspection, MartialInstruction, MeetingTheKeepers, SacrificeOfPawns, EmperorRemainingFSearches.RefugeOfTheThreeSisters }, EngineHooks.Searches, static entry => entry.Id);
 
     /// <summary>The search an Event carries in its Effect (an Event has no abilities of its own to hang a spec on).</summary>
     public static SearchSpec? ForEventEffect(string effect) => effect == "imperial-gift" ? ImperialGift : null;

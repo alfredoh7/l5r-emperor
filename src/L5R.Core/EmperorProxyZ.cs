@@ -59,3 +59,14 @@ public sealed partial class MatchEngine
     // "After the resolution of a battle, if the resolution destroyed Rokuta" (AfterResolutionApplies).
     private static bool RokutaBattleApplies(CardInstance rokuta, PendingAfterResolution facts) => rokuta.Zone == Zone.Dead && facts.DestroyedCardIds.Contains(rokuta.Id);
 }
+
+public sealed partial class MatchEngine
+{
+    // Registration only: callbacks are not invoked during module initialization.
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
+    [System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void RegisterEmperorProxyZ_Rung4b1()
+    {
+        EngineHooks.Abilities.Register("AddEmperorProxyZ", 1300, static abilities => abilities.AddEmperorProxyZ());
+    }
+}
