@@ -9,4 +9,5 @@ Lead with the cards and resulting supported behavior. Use evidence from the actu
 - Client-lane items: command/choice/view change, authorized viewer(s), required controls/assets, existing UI support, remaining review.
 - Artwork: exact scans and unresolved requests, generated pack tag/hash/image count, installation/coverage status, publication status.
 - Validation: exact commands, suite counts and failures, deterministic comparison if run, CI/native/human checks actually completed, explicit gaps.
+- Process measures when observed: shared-registration conflicts, ruling reply/merge timestamps, handoff/audit CI failures, nightly failures caught before merge. Distinguish not measured from zero.
 - Handoff: reviewable PR/commit, known remainders and next actions. Keep any required attribution/footer from the task.

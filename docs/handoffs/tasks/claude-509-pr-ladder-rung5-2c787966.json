@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Rung 5 in progress: four repository skills with Codex and Claude discovery; isolated fresh-session two-card-wave acceptance exercise.",
-  "validation": "Started from main after merged Rung 4b #531. Working tree clean before task; open PRs have no skill-path overlaps. Rung 4 freeze notices updated after merge. No board token configured; ownership recorded on epic #509.",
-  "remaining": "Write and validate skills, test skill-only two-card wave in scratch checkout, record acceptance evidence and publish PR. No gameplay cards or art releases will be published.",
+  "summary": "Rung 5 implemented: four repository skills, portable discovery mirrors and a reproducible independent two-card acceptance exercise.",
+  "validation": "Fresh session completed synthetic wave: Core 4/4, build 0 warnings/errors, packaging 3/3; inventory 2183/1419 to 2185/1421. Broader scratch discovery 134 passed with one missing art-tool import, documented. Skill metadata and mirrors passed; hooks 26, collaboration 55, lint 16 passed. main current; PR #434 overlaps a separate AGENTS policy paragraph only. No production gameplay/content changes.",
+  "remaining": "Review and merge PR #532 after standard CI. No fixture cards or art release published; full production/client acceptance remains required for actual card waves.",
   "issue": "509",
   "branch": "claude/509-pr-ladder-rung5",
-  "updated": "2026-09-28T22:14:50.939443+00:00"
+  "updated": "2026-09-28T22:36:01.259363+00:00"
 }

@@ -37,6 +37,8 @@ Reuse existing generic mechanics when they exactly implement the reviewed card. 
 
 Feature state belongs in a partial MatchState in the feature file, with a unique explicit JsonPropertyOrder above 1007. Classify new Pending properties using DecisionState or NonDecisionState with nameof(MatchState.Property); decision registrations also supply an open-state predicate. Explain any nondecision classification. See docs/decisions/2026-09-28-engine-hook-registry.md for channel contracts and compatibility remainders.
 
+Abilities callbacks return the dictionary after adding entries; Dictionary.Add alone returns void. In Core tests, qualify or wrap imported assertion helpers if their names collide with the runner's top-level helpers. Maintained feature examples show both patterns.
+
 Do not add registration lines to L5R.Core.csproj, PublishedContent.cs, CardCatalog.cs or the shared CardAbilities/Models chains for an ordinary new wave/mechanism. Wave resources are embedded/discovered automatically. Do not append to PublishedWaveOrder.txt or rewrite the frozen legacy-hook fixture. A new hook kind or an entangled legacy case is separate shared-interface work, not a reason to disguise a shared edit.
 
 ## Pin, test and report
