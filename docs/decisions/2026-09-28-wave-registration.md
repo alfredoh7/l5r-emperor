@@ -17,7 +17,12 @@ This refactor preserves the entire prefix, including JSON card order inside each
 Never append new waves to it. Existing waves keep their exact positions. Additional
 waves follow the frozen prefix, sorted by type using ordinal comparison and then by
 numeric wave number. The merge regression adds wave 10 before wave 2 to verify this.
-Missing or duplicate legacy entries fail startup instead of silently dropping content.
+Missing or duplicate legacy entries fail startup instead of silently dropping content. The
+discovery test also pins a normalized SHA-256 of the original 306-profile sequence,
+independently of the runtime order file, so accidental edits to that file fail the suite.
+Focused tests exercise missing/duplicate legacy entries, malformed resource names (including
+an overflowing number), and ordinal-type/numeric-wave ordering with reversed resource
+enumeration.
 
 ## Resources and compatibility
 
