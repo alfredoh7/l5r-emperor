@@ -318,3 +318,15 @@ public sealed partial class MatchEngine
         EngineHooks.TargetedReaction.Register("RulingR2TargetedReactionApplies", 300, static (engine, context) => engine.RulingR2TargetedReactionApplies(context.card, context.abilityId, context.subject, context.affected));
     }
 }
+
+public sealed partial class MatchEngine
+{
+    // Registration only: callbacks are not invoked during module initialization.
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
+    [System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void RegisterEmperorRulingR2Cards_Rung4b3()
+    {
+        EngineHooks.ValidateMiddle.Register("ValidateEmperorRulingR2", 600, static (engine, context) => engine.ValidateEmperorRulingR2(context.id, context.ability, context.command, context.player, context.source));
+        EngineHooks.RunEffects.Register("RunEmperorRulingR2", 1300, static (engine, context) => engine.RunEmperorRulingR2(context.id, context.ability, context.command, context.player, context.source, context.target, context.consumedGrant, context.playedFromDiscard, context.opponentHonorBeforeBattleAction, context.bowedBeforeAction, context.preExistingGrants));
+    }
+}

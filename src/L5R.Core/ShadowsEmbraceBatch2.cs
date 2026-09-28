@@ -254,3 +254,14 @@ public sealed partial class MatchEngine
         EngineHooks.PersonalityForce.Register("ShadowsEmbraceBatch2Force", 1200, static (engine, context) => engine.ShadowsEmbraceBatch2Force(context.card));
     }
 }
+
+public sealed partial class MatchEngine
+{
+    // Registration only: callbacks are not invoked during module initialization.
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
+    [System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void RegisterShadowsEmbraceBatch2_Rung4b3()
+    {
+        EngineHooks.ValidateLate.Register("ValidateShadowsEmbraceBatch2", 300, static (engine, context) => engine.ValidateShadowsEmbraceBatch2(context.id, context.command, context.player, context.source));
+    }
+}

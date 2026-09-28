@@ -432,3 +432,14 @@ public sealed partial class MatchEngine
         EngineHooks.PersonalityForce.Register("EmperorRemainingGForce", 1400, static (engine, context) => engine.EmperorRemainingGForce(context.card));
     }
 }
+
+public sealed partial class MatchEngine
+{
+    // Registration only: callbacks are not invoked during module initialization.
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
+    [System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void RegisterEmperorRemainingG_Rung4b3()
+    {
+        EngineHooks.ValidateLate.Register("ValidateEmperorRemainingG", 1000, static (engine, context) => engine.ValidateEmperorRemainingG(context.id, context.command, context.player, context.source));
+    }
+}

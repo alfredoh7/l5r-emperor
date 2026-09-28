@@ -729,3 +729,15 @@ public sealed partial class MatchEngine
         EngineHooks.TargetedReaction.Register("EmperorRemainingCTargetedReactionApplies", 200, static (engine, context) => engine.EmperorRemainingCTargetedReactionApplies(context.card, context.abilityId, context.subject, context.affected));
     }
 }
+
+public sealed partial class MatchEngine
+{
+    // Registration only: callbacks are not invoked during module initialization.
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
+    [System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void RegisterEmperorRemainingC_Rung4b3()
+    {
+        EngineHooks.ValidateMiddle.Register("ValidateEmperorRemainingC", 400, static (engine, context) => engine.ValidateEmperorRemainingC(context.id, context.ability, context.command, context.player, context.source));
+        EngineHooks.RunEffects.Register("RunEmperorRemainingC", 200, static (engine, context) => engine.RunEmperorRemainingC(context.id, context.ability, context.command, context.player, context.source, context.target, context.consumedGrant, context.bowedBeforeAction));
+    }
+}

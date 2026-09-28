@@ -460,3 +460,15 @@ public sealed partial class MatchEngine
         EngineHooks.TargetedReaction.Register("MechBTargetedReactionApplies", 400, static (engine, context) => engine.MechBTargetedReactionApplies(context.card, context.abilityId, context.subject, context.affected));
     }
 }
+
+public sealed partial class MatchEngine
+{
+    // Registration only: callbacks are not invoked during module initialization.
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
+    [System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void RegisterEmperorMechB_Rung4b3()
+    {
+        EngineHooks.ValidateMiddle.Register("ValidateEmperorMechB", 800, static (engine, context) => engine.ValidateEmperorMechB(context.id, context.command, context.player, context.source));
+        EngineHooks.RunEffects.Register("RunEmperorMechB", 1800, static (engine, context) => engine.RunEmperorMechB(context.id, context.ability, context.command, context.player, context.source, context.target));
+    }
+}

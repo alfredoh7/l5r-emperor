@@ -434,3 +434,15 @@ public sealed partial class MatchEngine
         EngineHooks.BowsTarget.Register("P4BowsTarget", 700, static context => P4BowsTarget(context.abilityId));
     }
 }
+
+public sealed partial class MatchEngine
+{
+    // Registration only: callbacks are not invoked during module initialization.
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
+    [System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void RegisterEmperorP4_Rung4b3()
+    {
+        EngineHooks.ValidateEarly.Register("ValidateEmperorP4", 1200, static (engine, context) => engine.ValidateEmperorP4(context.id, context.ability, context.command, context.player, context.source));
+        EngineHooks.RunEffects.Register("RunEmperorP4", 2100, static (engine, context) => engine.RunEmperorP4(context.id, context.ability, context.command, context.player, context.source, context.target, context.consumedGrant, context.playedFromDiscard, context.opponentHonorBeforeBattleAction, context.bowedBeforeAction, context.preExistingGrants));
+    }
+}

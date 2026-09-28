@@ -543,3 +543,15 @@ public sealed partial class MatchEngine
         EngineHooks.TargetedReaction.Register("P3TargetedReactionApplies", 900, static (engine, context) => engine.P3TargetedReactionApplies(context.card, context.abilityId, context.subject, context.affected));
     }
 }
+
+public sealed partial class MatchEngine
+{
+    // Registration only: callbacks are not invoked during module initialization.
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
+    [System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void RegisterEmperorP3_Rung4b3()
+    {
+        EngineHooks.ValidateLate.Register("ValidateEmperorP3", 1100, static (engine, context) => engine.ValidateEmperorP3(context.id, context.command, context.player, context.source));
+        EngineHooks.RunEffects.Register("RunEmperorP3", 2600, static (engine, context) => engine.RunEmperorP3(context.id, context.ability, context.command, context.player, context.source, context.target, context.bowedBeforeAction, context.consumedGrant));
+    }
+}

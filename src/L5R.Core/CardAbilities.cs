@@ -5628,41 +5628,11 @@ public sealed partial class MatchEngine
         // Saibankan's Justice: "Other players may not lobby."
         if (id is "lobby" or "dainagon-lobby") Require(!_state.Cards.Values.Any(c => c.OwnerId != player.Id && InPlay(c) && Definition(c).Effect == "saibankan-no-lobby"), "Another player's Saibankan's Justice forbids you to lobby.");
         if (id == "dainagon-lobby") Require(CardPersonalHonor(source!) >= 1, "Lobby needs a Personality with at least 1 Personal Honor.");
-        ValidateForgottenLegacyBatch5(id, ability, command, source); // Forgotten Legacy pass (issue #467), batch 5.
-        ValidateShadowsEmbraceBatch5(id, command, player, source); // The Shadow's Embrace pass (issue #476), batch 5.
-        ValidateShadowsEmbraceBatch6(id, command, player, source); // The Shadow's Embrace pass (issue #476), batch 6.
-        ValidateEmperorStrongholdBatch1(id, ability, command, player, source); // Emperor Edition Stronghold pass (issue #486), batch 1.
-        ValidateEmperorStrongholdBatch3(id, ability, command, player, source); // Emperor Edition Stronghold pass (issue #486), batch 3.
-        ValidateEmperorPersonalityBatch2(id, player, source); // Emperor Edition Personality pass (issue #477), batch 2: Kuni Shinoda's conditions.
-        ValidateEmperorBatch4(id, ability, command, player, source); // Emperor Edition Personality pass (issue #477), batch 4.
-        ValidateEmperorRemainingB(id, ability, command, player, source); // Emperor Edition remaining-cards pass (issue #492), group B.
-        ValidateEmperorRemainingE(id, ability, command, player, source); // Emperor Edition remaining-cards pass (issue #492), group E.
-        ValidateEmperorRulingR1(id, ability!, command, player, source); // Emperor Edition rulings pass R1 (issue #492): battles without a province.
-        ValidateEmperorRulingR5(id, ability, command, player, source); // Issue #492, Mendon's rulings R5.
-        ValidateEmperorP4(id, ability, command, player, source); // Issue #503, group P4 (EmperorP4.cs).
-        ValidateEmperorMechC(id, ability, command, player, source); // Emperor Edition mechanics group C (issue #501, EmperorMechC.cs); also run for each slot candidate.
+        RegisteredValidateEarly(new ValidationHookContext(id, ability!, command, player, source));
         // Barred Passage: "the only Personality in his army" -- none of the acting player's other Personalities stands at this battlefield.
         if (id == "barred-passage-bow") Require(Army(player.Id, _state.CurrentBattleProvince!.Value).Count(c => Definition(c).Type == CardType.Personality) == 1, "The performing Hero must be the only Personality in his army.");
         if (id is "tamoko-open" or "virtuous-charity-open") Require(_state.ActivePlayerId != player.Id, "Only usable when it is not your own turn.");
-        // Forgotten Legacy pass (issue #467), batch 4: the per-card conditions of strategy-wave-55 (ForgottenLegacyBatch4.cs).
-        ValidateForgottenLegacyBatch4(id, command, player);
-        // The Shadow's Embrace pass (issue #476), batch 4: the per-card conditions of strategy-wave-57 (ShadowsEmbraceBatch4.cs).
-        ValidateShadowsEmbraceBatch4(id, ability, command, player, source);
-        // Emperor Edition remaining-cards pass, group A (issue #492): the per-card conditions of strategy-wave-58 (EmperorRemainingA.cs).
-        ValidateEmperorRemainingA(id, ability, command, player, source);
-        ValidateEmperorRemainingC(id, ability, command, player, source); // Emperor Edition remaining-cards pass, group C (issue #492): EmperorRemainingC.cs.
-        // Emperor Edition remaining-cards pass (issue #492), group D: the per-id conditions of this group's cards (EmperorRemainingD.cs); also run for each candidate of a slot.
-        ValidateEmperorRemainingD(id, ability!, command, player, source);
-        ValidateEmperorRulingR2(id, ability!, command, player, source); // Emperor Edition ruling pass R2 (issue #492): the delay cards (EmperorRulingR2Cards.cs).
-        ValidateEmperorThreeS(id, ability!, command, player, source); // Emperor Edition three-scans pass (issue #496): Honor Never Falls, Kurohito's Perfection, Makito (EmperorThreeS.cs).
-        ValidateEmperorMechB(id, command, player, source); // issue #501, mechanics group B: control transfer (EmperorMechB.cs).
-        ValidateEmperorMechA(id, ability!, command, player, source); // Issue #501, mechanics group A (EmperorMechA.cs): additional actions and Aramasu's Legacy.
-        ValidateEmperorMechE(id, command); // Emperor Edition mechanics group E (issue #501): Greasing the Wheels' choice (EmperorMechE.cs).
-        ValidateEmperorMechD(id, ability!, command, player, source); // Issue #501, mechanics group D (EmperorMechD.cs).
-        ValidateEmperorP1(id, ability!, command, player, source); // Issue #503, group P1 (EmperorP1.cs).
-        ValidateEmperorP2(id, ability!, command, player, source); // Issue #503, pass group P2 (EmperorP2*.cs).
-        ValidateEmperorP5(id, ability!, command, player, source); // Issue #503, pass group P5 (EmperorP5.cs).
-        ValidateEmperorP6(id, ability!, command, player, source); // Issue #503, pass group P6 (EmperorP6.cs).
+        RegisteredValidateMiddle(new ValidationHookContext(id, ability!, command, player, source));
         // Embers of War batch 6 (issue #460): Surveillance Outpost -- "If you have fewer Provinces than each other player, or exactly one Province" (a 2-player
         // engine, so "each other player" is the one opponent; live province count, per Player.Provinces, excludes destroyed provinces).
         if (id == "surveillance-outpost-conqueror") Require(player.Provinces.Count(p => !p.Destroyed) is var mine && (mine < Player(1 - player.Id).Provinces.Count(p => !p.Destroyed) || mine == 1),
@@ -7043,26 +7013,7 @@ public sealed partial class MatchEngine
             var recruitQuote = QuotePurchase(player.Id, recruit.Id, ignoreHonorRequirementIfPersonalityClan: "Lion");
             Require(recruitQuote.Error is null, recruitQuote.Error ?? "");
         }
-        // Seeds of Decay pass (issue #453), batch 3: the per-id conditions of this batch's cards (SeedsOfDecayBatch3.cs).
-        ValidateSeedsOfDecayBatch3(id, command, ability, player, source);
-        // Forgotten Legacy pass (issue #467), batch 1: the per-id conditions of this batch's cards (ForgottenLegacyBatch1.cs).
-        ValidateForgottenLegacyBatch1(id, command, player, source);
-        // The Shadow's Embrace pass (issue #476), batch 2: the per-id conditions of this batch's cards (ShadowsEmbraceBatch2.cs).
-        ValidateShadowsEmbraceBatch2(id, command, player, source);
-        // The Shadow's Embrace pass (issue #476), batch 1: the per-id conditions of this batch's cards (ShadowsEmbraceBatch1.cs).
-        ValidateShadowsEmbraceBatch1(id, command, player, source);
-        // The Shadow's Embrace pass (issue #476), batch 3: the per-id conditions of this batch's cards (ShadowsEmbraceBatch3.cs).
-        ValidateShadowsEmbraceBatch3(id, command, player);
-        ValidateEmperorPersonalityBatch3(id, command, source); // Emperor Edition Personality pass (issue #477), batch 3.
-        // Emperor Edition Personality pass (issue #477), batch 5: the per-id conditions of this batch's cards (EmperorPersonalityBatch5.cs).
-        ValidateEmperorBatch5(id, command, ability, player, source);
-        // Emperor Edition Personality pass (issue #477), batch 6: the per-id conditions of this batch's cards (EmperorPersonalityBatch6.cs).
-        ValidateEmperorBatch6(id, command, player, source);
-        ValidateEmperorRemainingF(id, ability, command, player, source); // Emperor Edition remaining-cards pass (issue #492), group F.
-        // Emperor Edition remaining-cards pass (issue #492), group G: the per-id conditions of this group's cards (EmperorRemainingG.cs).
-        ValidateEmperorRemainingG(id, command, player, source);
-        ValidateEmperorP3(id, command, player, source); // issue #503, group P3 (EmperorP3.cs)
-        ValidateEmperorProxyX(id, command); // Emperor Edition proxy pass (issue #492), group X: Suiteiru no Oni's hosts.
+        RegisteredValidateLate(new ValidationHookContext(id, ability!, command, player, source));
         // The Gold cost (issue #303): every ability's price -- Equip (Battle)/Soshi Neiru's Spell cost, Low
         // Market's "2 less, to a minimum of 1", Your Clan Needs You!'s recruit cost minus 6, Shinden
         // Shorai's "all costs", Singh Remnants' own cost, a Strategy/Discipline's printed cost, Kharmic's
@@ -10000,156 +9951,10 @@ public sealed partial class MatchEngine
                 break;
             }
             default:
-                // Emperor Edition remaining-cards pass, group A (issue #492; EmperorRemainingA.cs): true when an Attack's window opened and the action waits.
-                if (RunEmperorRemainingA(id, ability, command, player, source, target, consumedGrant) is { } emperorRemA)
+                if (RegisteredRunEffects(new RunHookContext(id, ability, command, player, source, target, consumedGrant,
+                    playedFromDiscard, opponentHonorBeforeBattleAction, bowedBeforeAction, preExistingGrants)) is { } registeredEffect)
                 {
-                    if (emperorRemA) return;
-                    break;
-                }
-                // Emperor Edition remaining-cards pass, group C (issue #492), EmperorRemainingC.cs: true when an Attack's window opened and the action waits.
-                if (RunEmperorRemainingC(id, ability, command, player, source, target, consumedGrant, bowedBeforeAction) is { } emperorRemC)
-                {
-                    if (emperorRemC) return;
-                    break;
-                }
-                // Emperor Edition remaining-cards pass (issue #492), group E (EmperorRemainingE.cs): true when a search or a window opened and the action waits.
-                if (RunEmperorRemainingE(id, ability, command, player, source, target, consumedGrant, bowedBeforeAction) is { } emperorRemainingE)
-                {
-                    if (emperorRemainingE) return;
-                    break;
-                }
-                // Emperor Edition Stronghold pass (issue #486), batch 1 (EmperorStrongholdBatch1.cs): its effects are simple, none opens a window.
-                if (RunEmperorStrongholdBatch1(id, ability, command, player, source, target) is not null) break;
-                // Emperor Edition Stronghold pass (issue #486), batch 3 (EmperorStrongholdBatch3.cs): true when an Attack's window or an entering-play window opened and the action waits.
-                if (RunEmperorStrongholdBatch3(id, ability, command, player, source, target, consumedGrant) is { } emperorStronghold3)
-                {
-                    if (emperorStronghold3) return;
-                    break;
-                }
-                // The Shadow's Embrace pass (issue #476), batch 6 (ShadowsEmbraceBatch6.cs): true when a window opened and the action waits.
-                if (RunShadowsEmbraceBatch6(id, ability, command, player, source, target, bowedBeforeAction) is { } shadowsEmbrace6)
-                {
-                    if (shadowsEmbrace6) return;
-                    break;
-                }
-                // The Shadow's Embrace pass (issue #476), batch 3 (ShadowsEmbraceBatch3.cs): true when a window or a choice opened and the action waits.
-                if (RunShadowsEmbraceBatch3(id, ability, command, player, source, target, consumedGrant, playedFromDiscard, opponentHonorBeforeBattleAction, bowedBeforeAction, preExistingGrants) is { } shadowsEmbrace3)
-                {
-                    if (shadowsEmbrace3) return;
-                    break;
-                }
-                // The Shadow's Embrace pass (issue #476), batch 4 (ShadowsEmbraceBatch4.cs): true when a window opened and the action waits.
-                if (RunShadowsEmbraceBatch4(id, ability, command, player, source, target, consumedGrant, playedFromDiscard, opponentHonorBeforeBattleAction, bowedBeforeAction, preExistingGrants) is { } shadowsEmbrace4)
-                {
-                    if (shadowsEmbrace4) return;
-                    break;
-                }
-                // Forgotten Legacy pass (issue #467), batch 5 (ForgottenLegacyBatch5.cs): true when a window opened and the action waits.
-                if (RunForgottenLegacyBatch5(id, ability, command, player, source, target, consumedGrant, playedFromDiscard, opponentHonorBeforeBattleAction, bowedBeforeAction, preExistingGrants) is { } forgottenLegacy5)
-                {
-                    if (forgottenLegacy5) return;
-                    break;
-                }
-                // The Shadow's Embrace pass (issue #476), batch 5 (ShadowsEmbraceBatch5.cs): true when a window or choice opened and the action waits.
-                if (RunShadowsEmbraceBatch5(id, ability, command, player, source, target, consumedGrant, playedFromDiscard, opponentHonorBeforeBattleAction, bowedBeforeAction, preExistingGrants) is { } shadowsEmbrace5)
-                {
-                    if (shadowsEmbrace5) return;
-                    break;
-                }
-                // Emperor Edition remaining-cards pass (issue #492), group B (EmperorRemainingB.cs): true when a window or choice opened and the action waits.
-                if (RunEmperorRemainingB(id, ability, command, player, source, target, consumedGrant, playedFromDiscard, opponentHonorBeforeBattleAction, bowedBeforeAction, preExistingGrants) is { } remainingB)
-                {
-                    if (remainingB) return;
-                    break;
-                }
-                // Emperor Edition remaining-cards pass (issue #492), group D (EmperorRemainingD.cs): true when an Attack's window or a decision opened and the action waits.
-                if (RunEmperorRemainingD(id, ability, command, player, source, target, consumedGrant, playedFromDiscard, opponentHonorBeforeBattleAction, bowedBeforeAction, preExistingGrants) is { } remainingD)
-                {
-                    if (remainingD) return;
-                    break;
-                }
-                // Emperor Edition ruling pass R2 (issue #492): the delay cards (EmperorRulingR2Cards.cs).
-                if (RunEmperorRulingR2(id, ability, command, player, source, target, consumedGrant, playedFromDiscard, opponentHonorBeforeBattleAction, bowedBeforeAction, preExistingGrants) is { } rulingR2)
-                {
-                    if (rulingR2) return;
-                    break;
-                }
-                // Issue #503, group P1 (EmperorP1.cs).
-                if (RunEmperorP1(id, ability, command, player, source, target, consumedGrant, playedFromDiscard, opponentHonorBeforeBattleAction, bowedBeforeAction, preExistingGrants) is { } p1)
-                {
-                    if (p1) return;
-                    break;
-                }
-                // Emperor Edition three-scans pass (issue #496): Honor Never Falls, Kurohito's Perfection, Makito (EmperorThreeS.cs).
-                if (RunEmperorThreeS(id, ability, command, player, source, target, consumedGrant, playedFromDiscard, opponentHonorBeforeBattleAction, bowedBeforeAction, preExistingGrants) is { } threeS)
-                {
-                    if (threeS) return;
-                    break;
-                }
-                // Issue #501, mechanics group A (EmperorMechA.cs): Isawa Momoko, Mirumoto Inokuchi, Beyond the Line, One Action Two Strikes, String of Victories, Aramasu's Legacy.
-                if (RunEmperorMechA(id, ability, command, player, source, target, consumedGrant, playedFromDiscard, opponentHonorBeforeBattleAction, bowedBeforeAction, preExistingGrants) is { } mechA)
-                {
-                    if (mechA) return;
-                    break;
-                }
-                // Emperor Edition follow-ups (issue #498): Asako Chukage's Reaction, Rend the Soul's Battle half, No Hiding Place (EmperorFollowups*.cs).
-                if (RunEmperorFollowups(id, ability, command, player, source, target) is { } followups)
-                {
-                    if (followups) return;
-                    break;
-                }
-                // Issue #501, mechanics group B: control transfer (EmperorMechB.cs): Goju Asuka, Shadow Dragon - exp2, The Dark Naga, Yoritomo Sachina - exp, Black Marketeering, Only a Shadow.
-                if (RunEmperorMechB(id, ability, command, player, source, target) is { } mechB)
-                {
-                    if (mechB) return;
-                    break;
-                }
-                // Emperor Edition mechanics group C (issue #501, EmperorMechC.cs): true when an Attack's window opened and the action waits.
-                if (RunEmperorMechC(id, ability, command, player, source, target, consumedGrant) is { } mechC)
-                {
-                    if (mechC) return;
-                    break;
-                }
-                // Emperor Edition mechanics group E (issue #501): gold sources, payment and the Imperial Favor cost (EmperorMechE.cs).
-                if (RunEmperorMechE(id, ability, command, player, source, target, consumedGrant, playedFromDiscard, opponentHonorBeforeBattleAction, bowedBeforeAction, preExistingGrants) is { } mechE)
-                {
-                    if (mechE) return;
-                    break;
-                }
-                // Issue #503, group P4 (EmperorP4.cs).
-                if (RunEmperorP4(id, ability, command, player, source, target, consumedGrant, playedFromDiscard, opponentHonorBeforeBattleAction, bowedBeforeAction, preExistingGrants) is { } p4)
-                {
-                    if (p4) return;
-                    break;
-                }
-                // Issue #503, pass group P5 (EmperorP5.cs).
-                if (RunEmperorP5(id, ability, command, player, source, target, consumedGrant, playedFromDiscard, opponentHonorBeforeBattleAction, bowedBeforeAction, preExistingGrants) is { } p5)
-                {
-                    if (p5) return;
-                    break;
-                }
-                // Issue #501, mechanics group D: Narizane, Broken Cipher, Indecision, Yajinden, Amazing Feat (EmperorMechD.cs).
-                if (RunEmperorMechD(id, ability, command, player, source, target, consumedGrant, playedFromDiscard, opponentHonorBeforeBattleAction, bowedBeforeAction, preExistingGrants) is { } mechD)
-                {
-                    if (mechD) return;
-                    break;
-                }
-                // Issue #503, pass group P2 (EmperorP2*.cs).
-                if (RunEmperorP2(id, ability, command, player, source, target, consumedGrant, playedFromDiscard, opponentHonorBeforeBattleAction, bowedBeforeAction, preExistingGrants) is { } p2Run)
-                {
-                    if (p2Run) return;
-                    break;
-                }
-                // Issue #503, pass group P6 (EmperorP6.cs): true when a decision opened (Kuni Renyu's Either/Or).
-                if (RunEmperorP6(id, command, player, source, target, bowedBeforeAction) is { } p6)
-                {
-                    if (p6) return;
-                    break;
-                }
-                // Issue #503, group P3 (EmperorP3.cs).
-                if (RunEmperorP3(id, ability, command, player, source, target, bowedBeforeAction, consumedGrant) is { } p3)
-                {
-                    if (p3) return;
+                    if (registeredEffect) return;
                     break;
                 }
                 // Any ability with an AttachSpec (Moto Jun-Ni, Fading Shadows, Foothills Keep and the training shapes) needs no case of its own: the Gold was

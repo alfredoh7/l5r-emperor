@@ -654,3 +654,15 @@ public sealed partial class MatchEngine
         EngineHooks.PerformerCandidates.Register("EmperorRemainingBPerformers", 800, static (engine, context) => engine.EmperorRemainingBPerformers(context.ability, context.playerId, context.actingAsBattle));
     }
 }
+
+public sealed partial class MatchEngine
+{
+    // Registration only: callbacks are not invoked during module initialization.
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
+    [System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void RegisterEmperorRemainingB_Rung4b3()
+    {
+        EngineHooks.ValidateEarly.Register("ValidateEmperorRemainingB", 800, static (engine, context) => engine.ValidateEmperorRemainingB(context.id, context.ability, context.command, context.player, context.source));
+        EngineHooks.RunEffects.Register("RunEmperorRemainingB", 1100, static (engine, context) => engine.RunEmperorRemainingB(context.id, context.ability, context.command, context.player, context.source, context.target, context.consumedGrant, context.playedFromDiscard, context.opponentHonorBeforeBattleAction, context.bowedBeforeAction, context.preExistingGrants));
+    }
+}

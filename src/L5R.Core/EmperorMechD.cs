@@ -420,3 +420,15 @@ public sealed partial class MatchEngine
         EngineHooks.Abilities.Register("AddEmperorMechD", 2300, static abilities => abilities.AddEmperorMechD());
     }
 }
+
+public sealed partial class MatchEngine
+{
+    // Registration only: callbacks are not invoked during module initialization.
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
+    [System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void RegisterEmperorMechD_Rung4b3()
+    {
+        EngineHooks.ValidateMiddle.Register("ValidateEmperorMechD", 1100, static (engine, context) => engine.ValidateEmperorMechD(context.id, context.ability, context.command, context.player, context.source));
+        EngineHooks.RunEffects.Register("RunEmperorMechD", 2300, static (engine, context) => engine.RunEmperorMechD(context.id, context.ability, context.command, context.player, context.source, context.target, context.consumedGrant, context.playedFromDiscard, context.opponentHonorBeforeBattleAction, context.bowedBeforeAction, context.preExistingGrants));
+    }
+}

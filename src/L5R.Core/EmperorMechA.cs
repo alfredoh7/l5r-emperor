@@ -462,3 +462,15 @@ public sealed partial class MatchEngine
         EngineHooks.Abilities.Register("AddEmperorMechA", 2000, static abilities => abilities.AddEmperorMechA());
     }
 }
+
+public sealed partial class MatchEngine
+{
+    // Registration only: callbacks are not invoked during module initialization.
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
+    [System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void RegisterEmperorMechA_Rung4b3()
+    {
+        EngineHooks.ValidateMiddle.Register("ValidateEmperorMechA", 900, static (engine, context) => engine.ValidateEmperorMechA(context.id, context.ability, context.command, context.player, context.source));
+        EngineHooks.RunEffects.Register("RunEmperorMechA", 1600, static (engine, context) => engine.RunEmperorMechA(context.id, context.ability, context.command, context.player, context.source, context.target, context.consumedGrant, context.playedFromDiscard, context.opponentHonorBeforeBattleAction, context.bowedBeforeAction, context.preExistingGrants));
+    }
+}

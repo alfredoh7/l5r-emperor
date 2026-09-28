@@ -110,3 +110,14 @@ public sealed partial class MatchEngine
     // "[Card] will not be controlled by a [Clan] player": a Loyal-like refusal keyed on the controlling player's Clan, read wherever Loyal is (recruiting, overlaying).
     private static bool ControlRefusedByClan(CardInstance card, string clan) => Definition(card).Effect == TanemonoNoPhoenixControlEffect && clan == "Phoenix";
 }
+
+public sealed partial class MatchEngine
+{
+    // Registration only: callbacks are not invoked during module initialization.
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
+    [System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void RegisterSeedsOfDecayBatch3_Rung4b3()
+    {
+        EngineHooks.ValidateLate.Register("ValidateSeedsOfDecayBatch3", 100, static (engine, context) => engine.ValidateSeedsOfDecayBatch3(context.id, context.command, context.ability, context.player, context.source));
+    }
+}
