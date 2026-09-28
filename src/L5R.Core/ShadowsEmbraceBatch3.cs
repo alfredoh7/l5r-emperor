@@ -655,31 +655,11 @@ public sealed partial class MatchEngine
     // Registration only: callbacks are not invoked during module initialization.
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
     [System.Runtime.CompilerServices.ModuleInitializer]
-    internal static void RegisterShadowsEmbraceBatch3_Rung4b2()
+    internal static void RegisterShadowsEmbraceBatch3Hooks()
     {
         EngineHooks.AttackStrengthBefore.Register("ShadowsEmbraceBatch3AttackStrength", 400, static (engine, context) => engine.ShadowsEmbraceBatch3AttackStrength(context.abilityId, context.sourceId));
-    }
-}
-
-public sealed partial class MatchEngine
-{
-    // Registration only: callbacks are not invoked during module initialization.
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
-    [System.Runtime.CompilerServices.ModuleInitializer]
-    internal static void RegisterShadowsEmbraceBatch3_Rung4b3()
-    {
         EngineHooks.ValidateLate.Register("ValidateShadowsEmbraceBatch3", 500, static (engine, context) => engine.ValidateShadowsEmbraceBatch3(context.id, context.command, context.player));
         EngineHooks.RunEffects.Register("RunShadowsEmbraceBatch3", 700, static (engine, context) => engine.RunShadowsEmbraceBatch3(context.id, context.ability, context.command, context.player, context.source, context.target, context.consumedGrant, context.playedFromDiscard, context.opponentHonorBeforeBattleAction, context.bowedBeforeAction, context.preExistingGrants));
-    }
-}
-
-public sealed partial class MatchEngine
-{
-    // Registration only: callbacks are not invoked during module initialization.
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
-    [System.Runtime.CompilerServices.ModuleInitializer]
-    internal static void RegisterShadowsEmbraceBatch3_Rung4b6()
-    {
         EngineHooks.FinishEitherOr.Register("FinishShadowsEmbraceEitherOr", 200, static (engine, p) => engine.FinishShadowsEmbraceEitherOr(p));
     }
 }

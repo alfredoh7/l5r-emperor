@@ -634,41 +634,6 @@ public sealed partial class MatchEngine
 
 public sealed partial class MatchEngine
 {
-    // Registration only: callbacks are not invoked during module initialization.
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
-    [System.Runtime.CompilerServices.ModuleInitializer]
-    internal static void RegisterEmperorRemainingB_Rung4b1()
-    {
-        EngineHooks.Abilities.Register("AddEmperorRemainingB", 500, static abilities => abilities.AddEmperorRemainingB());
-    }
-}
-
-public sealed partial class MatchEngine
-{
-    // Registration only: callbacks are not invoked during module initialization.
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
-    [System.Runtime.CompilerServices.ModuleInitializer]
-    internal static void RegisterEmperorRemainingB_Rung4b2()
-    {
-        EngineHooks.PerformerAllows.Register("EmperorRemainingBPerformerAllows", 200, static (engine, context) => engine.EmperorRemainingBPerformerAllows(context.ability, context.performer, context.actingAsBattle));
-        EngineHooks.PerformerCandidates.Register("EmperorRemainingBPerformers", 800, static (engine, context) => engine.EmperorRemainingBPerformers(context.ability, context.playerId, context.actingAsBattle));
-    }
-}
-
-public sealed partial class MatchEngine
-{
-    // Registration only: callbacks are not invoked during module initialization.
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
-    [System.Runtime.CompilerServices.ModuleInitializer]
-    internal static void RegisterEmperorRemainingB_Rung4b3()
-    {
-        EngineHooks.ValidateEarly.Register("ValidateEmperorRemainingB", 800, static (engine, context) => engine.ValidateEmperorRemainingB(context.id, context.ability, context.command, context.player, context.source));
-        EngineHooks.RunEffects.Register("RunEmperorRemainingB", 1100, static (engine, context) => engine.RunEmperorRemainingB(context.id, context.ability, context.command, context.player, context.source, context.target, context.consumedGrant, context.playedFromDiscard, context.opponentHonorBeforeBattleAction, context.bowedBeforeAction, context.preExistingGrants));
-    }
-}
-
-public sealed partial class MatchEngine
-{
     private bool RegisteredApplyEmperorRemainingBDeciderChoice(PendingDeciderChoice p)
     {
         if (!(EmperorRemainingBSpecs.IsDeciderSpec(p.SpecId))) return false;
@@ -682,8 +647,13 @@ public sealed partial class MatchEngine
     // Registration only: callbacks are not invoked during module initialization.
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
     [System.Runtime.CompilerServices.ModuleInitializer]
-    internal static void RegisterEmperorRemainingB_Rung4b6()
+    internal static void RegisterEmperorRemainingBHooks()
     {
+        EngineHooks.Abilities.Register("AddEmperorRemainingB", 500, static abilities => abilities.AddEmperorRemainingB());
+        EngineHooks.PerformerAllows.Register("EmperorRemainingBPerformerAllows", 200, static (engine, context) => engine.EmperorRemainingBPerformerAllows(context.ability, context.performer, context.actingAsBattle));
+        EngineHooks.PerformerCandidates.Register("EmperorRemainingBPerformers", 800, static (engine, context) => engine.EmperorRemainingBPerformers(context.ability, context.playerId, context.actingAsBattle));
+        EngineHooks.ValidateEarly.Register("ValidateEmperorRemainingB", 800, static (engine, context) => engine.ValidateEmperorRemainingB(context.id, context.ability, context.command, context.player, context.source));
+        EngineHooks.RunEffects.Register("RunEmperorRemainingB", 1100, static (engine, context) => engine.RunEmperorRemainingB(context.id, context.ability, context.command, context.player, context.source, context.target, context.consumedGrant, context.playedFromDiscard, context.opponentHonorBeforeBattleAction, context.bowedBeforeAction, context.preExistingGrants));
         EngineHooks.DeciderPrompt.Register("EmperorRemainingBDeciderPrompt", 100, static (engine, p) => EmperorRemainingBSpecs.IsDeciderSpec(p.SpecId) ? engine.EmperorRemainingBDeciderPrompt(p) : null);
         EngineHooks.DeciderOptions.Register("EmperorRemainingBDeciderOptions", 100, static (engine, specId, deciderId, command) => EmperorRemainingBSpecs.IsDeciderSpec(specId) ? engine.EmperorRemainingBDeciderOptions(specId, deciderId) : null);
         EngineHooks.ApplyDecider.Register("ApplyEmperorRemainingBDeciderChoice", 100, static (engine, p) => engine.RegisteredApplyEmperorRemainingBDeciderChoice(p));

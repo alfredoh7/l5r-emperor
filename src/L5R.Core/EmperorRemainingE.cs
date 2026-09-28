@@ -633,34 +633,14 @@ public sealed partial class MatchEngine
     // Registration only: callbacks are not invoked during module initialization.
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
     [System.Runtime.CompilerServices.ModuleInitializer]
-    internal static void RegisterEmperorRemainingE_Rung4b1()
+    internal static void RegisterEmperorRemainingEHooks()
     {
         EngineHooks.Abilities.Register("AddEmperorRemainingE", 800, static abilities => abilities.AddEmperorRemainingE());
         EngineHooks.Searches.Register("EmperorRemainingESearches", 100, static () => EmperorRemainingESearches.All);
-    }
-}
-
-public sealed partial class MatchEngine
-{
-    // Registration only: callbacks are not invoked during module initialization.
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
-    [System.Runtime.CompilerServices.ModuleInitializer]
-    internal static void RegisterEmperorRemainingE_Rung4b2()
-    {
         EngineHooks.AttackStrengthBefore.Register("EmperorRemainingEAttackStrength", 200, static (engine, context) => engine.EmperorRemainingEAttackStrength(context.abilityId, context.sourceId));
         EngineHooks.AttackKind.Register("EmperorRemainingEAttackKind", 600, static context => NullIfEmpty(EmperorRemainingEAttackKind(context.abilityId)));
         EngineHooks.TargetAllows.Register("EmperorRemainingETargetAllows", 400, static (engine, context) => engine.EmperorRemainingETargetAllows(context.ability.Target, context.command, context.player, context.source, context.target));
         EngineHooks.PersonalityForce.Register("EmperorRemainingEForce", 200, static (engine, context) => engine.EmperorRemainingEForce(context.card));
-    }
-}
-
-public sealed partial class MatchEngine
-{
-    // Registration only: callbacks are not invoked during module initialization.
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
-    [System.Runtime.CompilerServices.ModuleInitializer]
-    internal static void RegisterEmperorRemainingE_Rung4b3()
-    {
         EngineHooks.ValidateEarly.Register("ValidateEmperorRemainingE", 900, static (engine, context) => engine.ValidateEmperorRemainingE(context.id, context.ability, context.command, context.player, context.source));
         EngineHooks.RunEffects.Register("RunEmperorRemainingE", 300, static (engine, context) => engine.RunEmperorRemainingE(context.id, context.ability, context.command, context.player, context.source, context.target, context.consumedGrant, context.bowedBeforeAction));
     }

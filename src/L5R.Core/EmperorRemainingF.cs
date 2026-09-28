@@ -344,20 +344,10 @@ public sealed partial class MatchEngine
     // Registration only: callbacks are not invoked during module initialization.
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
     [System.Runtime.CompilerServices.ModuleInitializer]
-    internal static void RegisterEmperorRemainingF_Rung4b1()
+    internal static void RegisterEmperorRemainingFHooks()
     {
         EngineHooks.Abilities.Register("AddEmperorRemainingF", 900, static abilities => abilities.AddEmperorRemainingF());
         EngineHooks.Looks.Register("EmperorRemainingFLooks", 100, static () => EmperorRemainingFLooks.All);
-    }
-}
-
-public sealed partial class MatchEngine
-{
-    // Registration only: callbacks are not invoked during module initialization.
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
-    [System.Runtime.CompilerServices.ModuleInitializer]
-    internal static void RegisterEmperorRemainingF_Rung4b3()
-    {
         EngineHooks.ValidateLate.Register("ValidateEmperorRemainingF", 900, static (engine, context) => engine.ValidateEmperorRemainingF(context.id, context.ability, context.command, context.player, context.source));
     }
 }

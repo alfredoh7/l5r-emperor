@@ -410,29 +410,6 @@ public sealed partial class MatchEngine
     }
 }
 
-public sealed partial class MatchEngine
-{
-    // Registration only: callbacks are not invoked during module initialization.
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
-    [System.Runtime.CompilerServices.ModuleInitializer]
-    internal static void RegisterEmperorMechD_Rung4b1()
-    {
-        EngineHooks.Abilities.Register("AddEmperorMechD", 2300, static abilities => abilities.AddEmperorMechD());
-    }
-}
-
-public sealed partial class MatchEngine
-{
-    // Registration only: callbacks are not invoked during module initialization.
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
-    [System.Runtime.CompilerServices.ModuleInitializer]
-    internal static void RegisterEmperorMechD_Rung4b3()
-    {
-        EngineHooks.ValidateMiddle.Register("ValidateEmperorMechD", 1100, static (engine, context) => engine.ValidateEmperorMechD(context.id, context.ability, context.command, context.player, context.source));
-        EngineHooks.RunEffects.Register("RunEmperorMechD", 2300, static (engine, context) => engine.RunEmperorMechD(context.id, context.ability, context.command, context.player, context.source, context.target, context.consumedGrant, context.playedFromDiscard, context.opponentHonorBeforeBattleAction, context.bowedBeforeAction, context.preExistingGrants));
-    }
-}
-
 // This property keeps its original JSON name and tail position in old saved MatchState payloads.
 public sealed partial class MatchState
 {
@@ -455,8 +432,11 @@ public sealed partial class MatchEngine
     // Registration only: callbacks are not invoked during module initialization.
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
     [System.Runtime.CompilerServices.ModuleInitializer]
-    internal static void RegisterEmperorMechD_Rung4b6()
+    internal static void RegisterEmperorMechDHooks()
     {
+        EngineHooks.Abilities.Register("AddEmperorMechD", 2300, static abilities => abilities.AddEmperorMechD());
+        EngineHooks.ValidateMiddle.Register("ValidateEmperorMechD", 1100, static (engine, context) => engine.ValidateEmperorMechD(context.id, context.ability, context.command, context.player, context.source));
+        EngineHooks.RunEffects.Register("RunEmperorMechD", 2300, static (engine, context) => engine.RunEmperorMechD(context.id, context.ability, context.command, context.player, context.source, context.target, context.consumedGrant, context.playedFromDiscard, context.opponentHonorBeforeBattleAction, context.bowedBeforeAction, context.preExistingGrants));
         EngineHooks.DeciderPrompt.Register("MechDDeciderPrompt", 200, static (engine, p) => EmperorMechDSpecs.IsDeciderSpec(p.SpecId) ? engine.MechDDeciderPrompt(p) : null);
         EngineHooks.DeciderOptions.Register("MechDDeciderOptions", 200, static (engine, specId, deciderId, command) => EmperorMechDSpecs.IsDeciderSpec(specId) ? engine.MechDDeciderOptions(specId, deciderId, command) : null);
         EngineHooks.ApplyDecider.Register("ApplyMechDDeciderChoice", 200, static (engine, p) => engine.RegisteredApplyMechDDeciderChoice(p));

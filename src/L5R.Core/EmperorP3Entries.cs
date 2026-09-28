@@ -132,17 +132,6 @@ public sealed partial class MatchEngine
 
 public sealed partial class MatchEngine
 {
-    // Registration only: callbacks are not invoked during module initialization.
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
-    [System.Runtime.CompilerServices.ModuleInitializer]
-    internal static void RegisterEmperorP3Entries_Rung4b1()
-    {
-        EngineHooks.Abilities.Register("AddEmperorP3Entries", 3400, static abilities => abilities.AddEmperorP3Entries());
-    }
-}
-
-public sealed partial class MatchEngine
-{
     private bool HandleRegisteredP3EntryReaction(string type, GameCommand command)
     {
         if (type != "p3EntryReaction") return false;
@@ -156,8 +145,9 @@ public sealed partial class MatchEngine
     // Registration only: callbacks are not invoked during module initialization.
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
     [System.Runtime.CompilerServices.ModuleInitializer]
-    internal static void RegisterEmperorP3Entries_Rung4b4()
+    internal static void RegisterEmperorP3EntriesHooks()
     {
+        EngineHooks.Abilities.Register("AddEmperorP3Entries", 3400, static abilities => abilities.AddEmperorP3Entries());
         EngineHooks.PendingChoice.Register("HandleRegisteredP3EntryReaction", 2300, static (engine, type, command) => engine.HandleRegisteredP3EntryReaction(type, command));
     }
 }

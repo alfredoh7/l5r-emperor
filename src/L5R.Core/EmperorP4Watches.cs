@@ -342,19 +342,9 @@ public sealed partial class MatchEngine
     // Registration only: callbacks are not invoked during module initialization.
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
     [System.Runtime.CompilerServices.ModuleInitializer]
-    internal static void RegisterEmperorP4Watches_Rung4b1()
+    internal static void RegisterEmperorP4WatchesHooks()
     {
         EngineHooks.Abilities.Register("AddEmperorP4Watches", 2700, static abilities => abilities.AddEmperorP4Watches());
-    }
-}
-
-public sealed partial class MatchEngine
-{
-    // Registration only: callbacks are not invoked during module initialization.
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
-    [System.Runtime.CompilerServices.ModuleInitializer]
-    internal static void RegisterEmperorP4Watches_Rung4b2()
-    {
         EngineHooks.ProvinceBonus.Register("P4StaticProvinceBonus", 100, static (engine, context) => engine.P4StaticProvinceBonus(context.card, context.mine));
         EngineHooks.TargetedReaction.Register("P4TargetedReactionApplies", 700, static (engine, context) => engine.P4TargetedReactionApplies(context.card, context.abilityId, context.subject, context.affected));
     }

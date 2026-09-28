@@ -180,7 +180,7 @@ public sealed partial class MatchEngine
     // Registration only: callbacks are not invoked during module initialization.
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
     [System.Runtime.CompilerServices.ModuleInitializer]
-    internal static void RegisterEmperorPersonalityBatch6_Rung4b3()
+    internal static void RegisterEmperorPersonalityBatch6Hooks()
     {
         EngineHooks.ValidateLate.Register("ValidateEmperorBatch6", 800, static (engine, context) => engine.ValidateEmperorBatch6(context.id, context.command, context.player, context.source));
     }

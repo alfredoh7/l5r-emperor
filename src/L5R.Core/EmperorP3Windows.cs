@@ -233,7 +233,7 @@ public sealed partial class MatchEngine
     // Registration only: callbacks are not invoked during module initialization.
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
     [System.Runtime.CompilerServices.ModuleInitializer]
-    internal static void RegisterEmperorP3Windows_Rung4b4()
+    internal static void RegisterEmperorP3WindowsHooks()
     {
         EngineHooks.PendingChoice.Register("HandleRegisteredP3BeforeEventReaction", 2000, static (engine, type, command) => engine.HandleRegisteredP3BeforeEventReaction(type, command));
         EngineHooks.PendingChoice.Register("HandleRegisteredP3MikiDarkVirtue", 2100, static (engine, type, command) => engine.HandleRegisteredP3MikiDarkVirtue(type, command));

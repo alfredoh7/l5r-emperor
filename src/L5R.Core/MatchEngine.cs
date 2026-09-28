@@ -16,7 +16,7 @@ public sealed partial class MatchEngine
         "Not implemented: published card abilities, Border Keep filtering, Imperial Favor, cavalry, duels, dishonored cards, Rings, events, regions, spells and general nested reactions."
     ];
 
-    private MatchEngine(MatchState state, ulong seed, string scenario) { _state = state; _seed = seed; _scenario = scenario; }
+    private MatchEngine(MatchState state, ulong seed, string scenario) { _state = state; _seed = seed; _scenario = scenario; EngineHooks.Initialize(); }
     /// <summary>Detached diagnostic snapshot, containing hidden information. Never send to a client.</summary>
     public MatchState State => Copy(_state);
     public long Version => _state.Version;

@@ -84,8 +84,6 @@ public sealed partial class MatchEngine
     private static readonly Lazy<IReadOnlyList<string>> NonDecisionStateNames = new(() => Array.AsReadOnly(NotDecisionStates.Concat(EngineHooks.NonDecisionState.Names).ToArray()));
     public static IReadOnlyList<string> SeppukuNonDecisionStateNames => NonDecisionStateNames.Value;
 
-    /// <summary>The one rule for the MOMENT of Order Seppuku: null when <paramref name="playerId"/> may order it now, otherwise the reason it
-    /// is not their time. Cards are judged separately (dishonorable, keyword, locked) and Unfortunate Hesitation's owed pass is checked beside it.</summary>
     private bool HasOpenDecisionState()
     {
         foreach (var decision in DecisionStates) if (decision.Open(_state)) return true;
@@ -93,6 +91,8 @@ public sealed partial class MatchEngine
         return false;
     }
 
+    /// <summary>The one rule for the MOMENT of Order Seppuku: null when <paramref name="playerId"/> may order it now, otherwise the reason it
+    /// is not their time. Cards are judged separately (dishonorable, keyword, locked) and Unfortunate Hesitation's owed pass is checked beside it.</summary>
     public string? SeppukuTimingReason(int playerId)
     {
         if (_state.Phase != Phase.Action) return SeppukuPhaseReason;

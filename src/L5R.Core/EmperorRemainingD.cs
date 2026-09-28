@@ -635,42 +635,6 @@ public sealed partial class MatchEngine
 
 public sealed partial class MatchEngine
 {
-    // Registration only: callbacks are not invoked during module initialization.
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
-    [System.Runtime.CompilerServices.ModuleInitializer]
-    internal static void RegisterEmperorRemainingD_Rung4b1()
-    {
-        EngineHooks.Abilities.Register("AddEmperorRemainingD", 700, static abilities => abilities.AddEmperorRemainingD());
-    }
-}
-
-public sealed partial class MatchEngine
-{
-    // Registration only: callbacks are not invoked during module initialization.
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
-    [System.Runtime.CompilerServices.ModuleInitializer]
-    internal static void RegisterEmperorRemainingD_Rung4b2()
-    {
-        EngineHooks.PerformerAllows.Register("RemainingDPerformerAllows", 300, static (engine, context) => engine.RemainingDPerformerAllows(context.ability, context.performer, context.actingAsBattle));
-        EngineHooks.TargetAllows.Register("RemainingDTargetAllows", 300, static (engine, context) => engine.RemainingDTargetAllows(context.ability.Target, context.command, context.player, context.source, context.target));
-        EngineHooks.PerformerCandidates.Register("RemainingDPerformers", 300, static (engine, context) => engine.RemainingDPerformers(context.ability, context.playerId, context.actingAsBattle));
-    }
-}
-
-public sealed partial class MatchEngine
-{
-    // Registration only: callbacks are not invoked during module initialization.
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
-    [System.Runtime.CompilerServices.ModuleInitializer]
-    internal static void RegisterEmperorRemainingD_Rung4b3()
-    {
-        EngineHooks.ValidateMiddle.Register("ValidateEmperorRemainingD", 500, static (engine, context) => engine.ValidateEmperorRemainingD(context.id, context.ability, context.command, context.player, context.source));
-        EngineHooks.RunEffects.Register("RunEmperorRemainingD", 1200, static (engine, context) => engine.RunEmperorRemainingD(context.id, context.ability, context.command, context.player, context.source, context.target, context.consumedGrant, context.playedFromDiscard, context.opponentHonorBeforeBattleAction, context.bowedBeforeAction, context.preExistingGrants));
-    }
-}
-
-public sealed partial class MatchEngine
-{
     private bool HandleRegisteredTwistOfFateReaction(string type, GameCommand command)
     {
         if (type != "twistOfFateReaction") return false;
@@ -690,20 +654,16 @@ public sealed partial class MatchEngine
     // Registration only: callbacks are not invoked during module initialization.
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
     [System.Runtime.CompilerServices.ModuleInitializer]
-    internal static void RegisterEmperorRemainingD_Rung4b4()
+    internal static void RegisterEmperorRemainingDHooks()
     {
+        EngineHooks.Abilities.Register("AddEmperorRemainingD", 700, static abilities => abilities.AddEmperorRemainingD());
+        EngineHooks.PerformerAllows.Register("RemainingDPerformerAllows", 300, static (engine, context) => engine.RemainingDPerformerAllows(context.ability, context.performer, context.actingAsBattle));
+        EngineHooks.TargetAllows.Register("RemainingDTargetAllows", 300, static (engine, context) => engine.RemainingDTargetAllows(context.ability.Target, context.command, context.player, context.source, context.target));
+        EngineHooks.PerformerCandidates.Register("RemainingDPerformers", 300, static (engine, context) => engine.RemainingDPerformers(context.ability, context.playerId, context.actingAsBattle));
+        EngineHooks.ValidateMiddle.Register("ValidateEmperorRemainingD", 500, static (engine, context) => engine.ValidateEmperorRemainingD(context.id, context.ability, context.command, context.player, context.source));
+        EngineHooks.RunEffects.Register("RunEmperorRemainingD", 1200, static (engine, context) => engine.RunEmperorRemainingD(context.id, context.ability, context.command, context.player, context.source, context.target, context.consumedGrant, context.playedFromDiscard, context.opponentHonorBeforeBattleAction, context.bowedBeforeAction, context.preExistingGrants));
         EngineHooks.PendingChoice.Register("HandleRegisteredTwistOfFateReaction", 3100, static (engine, type, command) => engine.HandleRegisteredTwistOfFateReaction(type, command));
         EngineHooks.PendingChoice.Register("HandleRegisteredKillingGroundsSelect", 3200, static (engine, type, command) => engine.HandleRegisteredKillingGroundsSelect(type, command));
-    }
-}
-
-public sealed partial class MatchEngine
-{
-    // Registration only: callbacks are not invoked during module initialization.
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
-    [System.Runtime.CompilerServices.ModuleInitializer]
-    internal static void RegisterEmperorRemainingD_Rung4b6()
-    {
         EngineHooks.FinishEitherOr.Register("FinishEmperorRemainingDEitherOr", 100, static (engine, p) => engine.FinishEmperorRemainingDEitherOr(p));
     }
 }

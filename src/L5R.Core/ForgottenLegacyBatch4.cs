@@ -195,7 +195,7 @@ public sealed partial class MatchEngine
     // Registration only: callbacks are not invoked during module initialization.
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
     [System.Runtime.CompilerServices.ModuleInitializer]
-    internal static void RegisterForgottenLegacyBatch4_Rung4b3()
+    internal static void RegisterForgottenLegacyBatch4Hooks()
     {
         EngineHooks.ValidateMiddle.Register("ValidateForgottenLegacyBatch4", 100, static (engine, context) => engine.ValidateForgottenLegacyBatch4(context.id, context.command, context.player));
     }

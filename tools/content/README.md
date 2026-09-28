@@ -148,3 +148,13 @@ Run `python3 -m unittest discover -s tools/content -p 'test*.py'` and
 `bash tools/check.sh --skip-client`. The Python suite includes a temporary-repository
 regression that merges two independent wave additions and builds the core engine to
 prove both are discovered. It requires the pinned .NET SDK on PATH (`source tools/env.sh`).
+
+## Adding a mechanism
+
+Put the mechanism in its own `src/L5R.Core/<Feature>.cs` file, using partial MatchEngine methods. Add one static module initializer that registers static callbacks or catalogue factories on the existing EngineHooks channels. Give every registration a stable unique ID and explicit priority >= 10000; ties use ordinal ID order. Legacy priorities are reserved. Registration must not execute rules or instantiate an engine.
+
+Return null for an unhandled first-answer/effect hook and false for an unhandled predicate or pending-choice handler. RunEffects uses false for a handled completed effect and true for a handled effect that opened a pending window. Empty candidate arrays are handled answers. Additive bonuses return zero when inapplicable. Validation callbacks must preserve their channel's checkpoint assumptions.
+
+Declare new state in a partial MatchState in the same file with a unique JsonPropertyOrder above 1007. Classify new Pending properties using DecisionState or NonDecisionState registration with nameof and, for decisions, an open-state predicate; explain nondecision classification in a comment. Add mechanism tests in a new automatically discovered Core test class. Published waves still use the recipe above. Do not edit shared registration chains or the frozen legacy-order fixture.
+
+See the [engine-hook decision](../../docs/decisions/2026-09-28-engine-hook-registry.md) for the exact legacy mapping, continuation semantics, save compatibility, and explicit compatibility remainders. Run the Core tests and `bash tools/check.sh --skip-client`; the content suite builds and executes two independently merged mechanism files.

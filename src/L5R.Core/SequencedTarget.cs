@@ -109,7 +109,7 @@ public sealed partial class MatchEngine
     // Registration only: callbacks are not invoked during module initialization.
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
     [System.Runtime.CompilerServices.ModuleInitializer]
-    internal static void RegisterSequencedTarget_Rung4b4()
+    internal static void RegisterSequencedTargetHooks()
     {
         EngineHooks.PendingChoice.Register("HandleRegisteredSequencedTarget", 900, static (engine, type, command) => engine.HandleRegisteredSequencedTarget(type, command));
     }

@@ -407,15 +407,11 @@ public sealed partial class MatchEngine
         && (!P4.ContributionNegatedBy.TryGetValue(card.Id, out var by) || by != card.OwnerId);
 }
 
-public sealed partial class MatchEngine
+// This property keeps its original JSON name and tail position in old saved MatchState payloads.
+public sealed partial class MatchState
 {
-    // Registration only: callbacks are not invoked during module initialization.
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
-    [System.Runtime.CompilerServices.ModuleInitializer]
-    internal static void RegisterEmperorP4_Rung4b1()
-    {
-        EngineHooks.Abilities.Register("AddEmperorP4", 2600, static abilities => abilities.AddEmperorP4());
-    }
+    [System.Text.Json.Serialization.JsonPropertyOrder(1004)]
+    public EmperorP4State P4 { get; set; } = new();
 }
 
 public sealed partial class MatchEngine
@@ -423,8 +419,9 @@ public sealed partial class MatchEngine
     // Registration only: callbacks are not invoked during module initialization.
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
     [System.Runtime.CompilerServices.ModuleInitializer]
-    internal static void RegisterEmperorP4_Rung4b2()
+    internal static void RegisterEmperorP4Hooks()
     {
+        EngineHooks.Abilities.Register("AddEmperorP4", 2600, static abilities => abilities.AddEmperorP4());
         EngineHooks.AttackStrengthAfter.Register("P4AttackStrength", 400, static (engine, context) => P4AttackStrength(context.abilityId));
         EngineHooks.AttackKind.Register("P4AttackKind", 400, static context => P4AttackKind(context.abilityId));
         EngineHooks.PerformerAllows.Register("EmperorP4PerformerAllows", 800, static (engine, context) => engine.EmperorP4PerformerAllows(context.ability, context.performer, context.actingAsBattle) == true);
@@ -432,24 +429,7 @@ public sealed partial class MatchEngine
         EngineHooks.PerformerCandidates.Register("EmperorP4Performers", 700, static (engine, context) => engine.EmperorP4Performers(context.ability, context.playerId, context.actingAsBattle));
         EngineHooks.DestroysTarget.Register("P4DestroysTarget", 500, static context => P4DestroysTarget(context.abilityId));
         EngineHooks.BowsTarget.Register("P4BowsTarget", 700, static context => P4BowsTarget(context.abilityId));
-    }
-}
-
-public sealed partial class MatchEngine
-{
-    // Registration only: callbacks are not invoked during module initialization.
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
-    [System.Runtime.CompilerServices.ModuleInitializer]
-    internal static void RegisterEmperorP4_Rung4b3()
-    {
         EngineHooks.ValidateEarly.Register("ValidateEmperorP4", 1200, static (engine, context) => engine.ValidateEmperorP4(context.id, context.ability, context.command, context.player, context.source));
         EngineHooks.RunEffects.Register("RunEmperorP4", 2100, static (engine, context) => engine.RunEmperorP4(context.id, context.ability, context.command, context.player, context.source, context.target, context.consumedGrant, context.playedFromDiscard, context.opponentHonorBeforeBattleAction, context.bowedBeforeAction, context.preExistingGrants));
     }
-}
-
-// This property keeps its original JSON name and tail position in old saved MatchState payloads.
-public sealed partial class MatchState
-{
-    [System.Text.Json.Serialization.JsonPropertyOrder(1004)]
-    public EmperorP4State P4 { get; set; } = new();
 }

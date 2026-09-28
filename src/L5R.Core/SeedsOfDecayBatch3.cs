@@ -116,7 +116,7 @@ public sealed partial class MatchEngine
     // Registration only: callbacks are not invoked during module initialization.
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
     [System.Runtime.CompilerServices.ModuleInitializer]
-    internal static void RegisterSeedsOfDecayBatch3_Rung4b3()
+    internal static void RegisterSeedsOfDecayBatch3Hooks()
     {
         EngineHooks.ValidateLate.Register("ValidateSeedsOfDecayBatch3", 100, static (engine, context) => engine.ValidateSeedsOfDecayBatch3(context.id, context.command, context.ability, context.player, context.source));
     }

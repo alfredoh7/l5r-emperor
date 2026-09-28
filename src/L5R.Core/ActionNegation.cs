@@ -156,7 +156,7 @@ public sealed partial class MatchEngine
     // Registration only: callbacks are not invoked during module initialization.
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
     [System.Runtime.CompilerServices.ModuleInitializer]
-    internal static void RegisterActionNegation_Rung4b4()
+    internal static void RegisterActionNegationHooks()
     {
         EngineHooks.PendingChoice.Register("HandleRegisteredAdditionalActionReaction", 4900, static (engine, type, command) => engine.HandleRegisteredAdditionalActionReaction(type, command));
         EngineHooks.PendingChoice.Register("HandleRegisteredUnimpeachableNameReaction", 5200, static (engine, type, command) => engine.HandleRegisteredUnimpeachableNameReaction(type, command));

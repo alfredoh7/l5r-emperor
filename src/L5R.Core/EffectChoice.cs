@@ -267,7 +267,7 @@ public sealed partial class MatchEngine
     // Registration only: callbacks are not invoked during module initialization.
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
     [System.Runtime.CompilerServices.ModuleInitializer]
-    internal static void RegisterEffectChoice_Rung4b4()
+    internal static void RegisterEffectChoiceHooks()
     {
         EngineHooks.PendingChoice.Register("HandleRegisteredEffectChoice", 4100, static (engine, type, command) => engine.HandleRegisteredEffectChoice(type, command));
     }

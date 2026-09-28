@@ -479,47 +479,27 @@ public sealed partial class MatchEngine
     }
 }
 
-public sealed partial class MatchEngine
-{
-    // Registration only: callbacks are not invoked during module initialization.
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
-    [System.Runtime.CompilerServices.ModuleInitializer]
-    internal static void RegisterEmperorP2_Rung4b1()
-    {
-        EngineHooks.Abilities.Register("AddEmperorP2", 2500, static abilities => abilities.AddEmperorP2());
-    }
-}
-
-public sealed partial class MatchEngine
-{
-    // Registration only: callbacks are not invoked during module initialization.
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
-    [System.Runtime.CompilerServices.ModuleInitializer]
-    internal static void RegisterEmperorP2_Rung4b2()
-    {
-        EngineHooks.AttackStrengthAfter.Register("P2AttackStrength", 300, static (engine, context) => P2AttackStrength(context.abilityId));
-        EngineHooks.AttackKind.Register("P2AttackKind", 300, static context => P2AttackKind(context.abilityId));
-        EngineHooks.TargetAllows.Register("EmperorP2TargetAllows", 1300, static (engine, context) => engine.EmperorP2TargetAllows(context.ability.Target, context.command, context.player, context.source, context.target));
-        EngineHooks.BowsTarget.Register("P2BowsTarget", 500, static context => P2BowsTarget(context.abilityId));
-        EngineHooks.PersonalityForce.Register("P2Force", 700, static (engine, context) => engine.P2Force(context.card));
-    }
-}
-
-public sealed partial class MatchEngine
-{
-    // Registration only: callbacks are not invoked during module initialization.
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
-    [System.Runtime.CompilerServices.ModuleInitializer]
-    internal static void RegisterEmperorP2_Rung4b3()
-    {
-        EngineHooks.ValidateMiddle.Register("ValidateEmperorP2", 1300, static (engine, context) => engine.ValidateEmperorP2(context.id, context.ability, context.command, context.player, context.source));
-        EngineHooks.RunEffects.Register("RunEmperorP2", 2400, static (engine, context) => engine.RunEmperorP2(context.id, context.ability, context.command, context.player, context.source, context.target, context.consumedGrant, context.playedFromDiscard, context.opponentHonorBeforeBattleAction, context.bowedBeforeAction, context.preExistingGrants));
-    }
-}
-
 // This property keeps its original JSON name and tail position in old saved MatchState payloads.
 public sealed partial class MatchState
 {
     [System.Text.Json.Serialization.JsonPropertyOrder(1003)]
     public EmperorP2State P2 { get; set; } = new();
+}
+
+public sealed partial class MatchEngine
+{
+    // Registration only: callbacks are not invoked during module initialization.
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
+    [System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void RegisterEmperorP2Hooks()
+    {
+        EngineHooks.Abilities.Register("AddEmperorP2", 2500, static abilities => abilities.AddEmperorP2());
+        EngineHooks.AttackStrengthAfter.Register("P2AttackStrength", 300, static (engine, context) => P2AttackStrength(context.abilityId));
+        EngineHooks.AttackKind.Register("P2AttackKind", 300, static context => P2AttackKind(context.abilityId));
+        EngineHooks.TargetAllows.Register("EmperorP2TargetAllows", 1300, static (engine, context) => engine.EmperorP2TargetAllows(context.ability.Target, context.command, context.player, context.source, context.target));
+        EngineHooks.BowsTarget.Register("P2BowsTarget", 500, static context => P2BowsTarget(context.abilityId));
+        EngineHooks.PersonalityForce.Register("P2Force", 700, static (engine, context) => engine.P2Force(context.card));
+        EngineHooks.ValidateMiddle.Register("ValidateEmperorP2", 1300, static (engine, context) => engine.ValidateEmperorP2(context.id, context.ability, context.command, context.player, context.source));
+        EngineHooks.RunEffects.Register("RunEmperorP2", 2400, static (engine, context) => engine.RunEmperorP2(context.id, context.ability, context.command, context.player, context.source, context.target, context.consumedGrant, context.playedFromDiscard, context.opponentHonorBeforeBattleAction, context.bowedBeforeAction, context.preExistingGrants));
+    }
 }

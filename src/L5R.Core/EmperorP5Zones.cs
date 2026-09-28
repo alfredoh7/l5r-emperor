@@ -486,17 +486,6 @@ public sealed partial class MatchEngine
 
 public sealed partial class MatchEngine
 {
-    // Registration only: callbacks are not invoked during module initialization.
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
-    [System.Runtime.CompilerServices.ModuleInitializer]
-    internal static void RegisterEmperorP5Zones_Rung4b4()
-    {
-        EngineHooks.PendingChoice.Register("HandleRegisteredP5BlessingsTop", 1700, static (engine, type, command) => engine.HandleRegisteredP5BlessingsTop(type, command));
-    }
-}
-
-public sealed partial class MatchEngine
-{
     private bool RegisteredApplyP5DeciderChoice(PendingDeciderChoice p)
     {
         if (!(EmperorP5Specs.IsDeciderSpec(p.SpecId))) return false;
@@ -510,8 +499,9 @@ public sealed partial class MatchEngine
     // Registration only: callbacks are not invoked during module initialization.
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
     [System.Runtime.CompilerServices.ModuleInitializer]
-    internal static void RegisterEmperorP5Zones_Rung4b6()
+    internal static void RegisterEmperorP5ZonesHooks()
     {
+        EngineHooks.PendingChoice.Register("HandleRegisteredP5BlessingsTop", 1700, static (engine, type, command) => engine.HandleRegisteredP5BlessingsTop(type, command));
         EngineHooks.EitherOrPrompt.Register("P5EitherOrPrompt", 200, static (engine, p, source, affected) => engine.P5EitherOrPrompt(p, source, affected));
         EngineHooks.EitherOrOptions.Register("P5EitherOrOptions", 200, static (engine, p, affected, source, payable) => engine.P5EitherOrOptions(p, affected));
         EngineHooks.ApplyEitherOr.Register("ApplyP5EitherOr", 200, static (engine, p, option, source, decider, affected, sourceIds) => engine.ApplyP5EitherOr(p, option, decider, affected, sourceIds));
