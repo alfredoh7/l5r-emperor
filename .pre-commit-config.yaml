@@ -1,0 +1,11 @@
+# Optional: install pre-commit yourself, then run `pre-commit install`.
+# Nothing installs this hook automatically or changes global Git configuration.
+repos:
+  - repo: local
+    hooks:
+      - id: changed-csharp-format
+        name: Verify changed C# formatting (pinned SDK must be on PATH)
+        entry: python tools/quality/check_format.py
+        language: system
+        pass_filenames: false
+        types: [c#]
