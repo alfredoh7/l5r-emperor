@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Rung 7 in progress: separate nightly self-play/replay and published-command validation with failure issue reporting.",
+  "validation": "Started from current main after #533 merge. Existing seeded AI/replay APIs identified. No overlapping nightly runner/workflow paths. Board token unavailable; ownership recorded on epic #509.",
+  "remaining": "Implement runner, scheduled workflow and deduplicated issue reporting; prove deliberate failure creates an issue; publish PR without merging.",
+  "issue": "509",
+  "branch": "codex/509-pr-ladder-rung7",
+  "updated": "2026-09-29T08:13:59.355856+00:00"
+}
