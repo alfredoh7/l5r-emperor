@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Implemented Rung 7 separate nightly validation/reporting workflow and documented merge convention. Guarded Houken Open missing-battle crash in existing dispatch; both controllers retain owner/control. Legacy whitespace isolated. AI capped-game limitation tracked in #536.",
+  "validation": "Full default local nightly passed: 64 soaks (62 victories, 2 capped), 20727 accepted decisions, 243 replay round-trips, 1419 definitions, 47784 command probes, 0 failures, 19.79 minutes. Full rules check passed: Core 2116, AI 74, server 8, transport 13 plus Python suites (2 normal SDK-dependent quality skips). Reporter 8/8; zero-warning builds; formatting passed. Injected local failure created/reused real acceptance issue #535, now closed. All normal CI passed on implementation commit 33143e4f.",
+  "remaining": "Ready for review; leave PR #534 unmerged. Final docs/test-label commit reruns normal CI. Nightly scheduled/manual activation and first hosted default run occur after merge to main. AI mutual-passing completion quality remains #536; capped games are explicit, not claimed victories.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/509",
+  "branch": "codex/509-pr-ladder-rung7",
+  "updated": "2026-09-29T09:18:44.232587+00:00"
+}
