@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Starting Rung 8 supply-chain checks after merged #534: NuGet/Actions Dependabot, zizmor workflow audit and advisory CODEOWNERS matching collaboration policy. Private CodeQL availability not confirmed; code-scanning API returns disabled 403.",
-  "validation": "Refreshed context; clean isolated checkout based on current main; reviewed .github overlap #434 preview-checks (pin-only change planned); CodeQL capability read-only probe documented.",
-  "remaining": "Implement configurations, audit/fix workflows, validate ownership map and hosted zizmor job. Dependabot first service run activates after default-branch merge. Leave task PR unmerged.",
+  "summary": "Rung 8 implemented: Dependabot Actions/NuGet, pedantic offline zizmor CI, generated advisory CODEOWNERS, hash-pinned current action majors, guarded metadata-only privileged routing exception, narrower permissions and safe shell interpolation. CodeQL omitted because private capability is unconfirmed/disabled.",
+  "validation": "Local pedantic audit green with one narrow routing exception; ownership checker passed; nine security regressions passed including a real negative unpinned-action audit. Current main integrated; no game/runtime source changes. Hosted CI and GitHub CODEOWNERS parse pending.",
+  "remaining": "Verify hosted security job and normal CI, finalize acceptance docs. First actual Dependabot ecosystem run/update PRs require default-branch merge and eligible dependencies; do not claim feature-branch acceptance. Leave PR #537 unmerged.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/509",
   "branch": "codex/509-pr-ladder-rung8",
-  "updated": "2026-09-29T09:52:02.957901+00:00"
+  "updated": "2026-09-29T10:01:22.867255+00:00"
 }

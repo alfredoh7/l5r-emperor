@@ -71,8 +71,8 @@ jobs:
         # instead of turning credential persistence back on repo-wide.
         env:
           GH_TOKEN: ${{ github.token }}
-        run: git fetch --no-tags --depth=1 "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git" +refs/heads/main:refs/remotes/origin/main
-      - uses: actions/setup-python@v5
+        run: git fetch --no-tags --depth=1 "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" +refs/heads/main:refs/remotes/origin/main
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         if: runner.os == 'Windows'
         with:
           python-version: '3.12'
@@ -89,17 +89,19 @@ jobs:
       # Godot only reimports what changed when it finds the previous import: restore the newest cache for this Godot pin, save a new one after a passing run.
       - name: Restore Godot import cache
         if: matrix.args == '--client-only'
-        uses: actions/cache@v4
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
           path: src/L5R.Client/.godot
           key: godot-import-${{ runner.os }}-${{ hashFiles('tools/bootstrap.py', 'src/L5R.Client/project.godot') }}-${{ github.sha }}
           restore-keys: |
             godot-import-${{ runner.os }}-${{ hashFiles('tools/bootstrap.py', 'src/L5R.Client/project.godot') }}-
       - name: ${{ matrix.args == '--client-only' && 'Native client build, Godot import and smoke run' || 'Rules, AI, server, client transport and content (plus the native client on the Mac)' }}
-        run: bash tools/check.sh ${{ matrix.args }}
+        env:
+          CHECK_ARGS: ${{ matrix.args }}
+        run: bash tools/check.sh "$CHECK_ARGS"
       - name: Keep the Godot logs of a failed run
         if: failure() && matrix.args != '--skip-client'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: godot-logs-${{ matrix.os }}
           path: artifacts/checks/*.log
