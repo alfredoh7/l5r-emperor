@@ -79,7 +79,7 @@ public partial class CardTile : Button
         AdvanceStatFeedback(delta);
         // The rail cap must stay under the pointer. Enlarging its parent moves this
         // small target into/out of the card face and repeatedly restarts the tooltip.
-        var inspecting = IsInspectionHover && TokenRail?.GrantSeal?.IsHovered()!=true;
+        var inspecting = IsInspectionHover && TokenRail?.GrantSeal?.IsHovered() != true;
         var targetLift = inspecting ? Card.Zone == Zone.Hand ? 40f : ProjectToScreen is null ? 4f : 0f : 0f;
         var targetScale = inspecting ? Card.Zone == Zone.Hand ? 1.22f : 1.06f : 1f;
         ZIndex = _hover ? 30 : HasFocus() ? 20 : IsSelected ? 10 : 0;
@@ -104,7 +104,7 @@ public partial class CardTile : Button
     public bool ShowTokenRail { get; set; } = true;
     public float TokenRailOffset { get; set; }
     public CardTile[] TokenRailCompanions { get; set; } = [];
-    public Func<string,string?>? TokenSourceName { get; set; }
+    public Func<string, string?>? TokenSourceName { get; set; }
     public CardTokenRail? TokenRail { get; private set; }
 
     private Vector2 ProjectFacePoint(Vector2 point, Vector2 face)
@@ -186,34 +186,34 @@ public partial class CardTile : Button
         (Card.GrantedKeywords ?? []).Where(k => !CardChanges.IsPermanent(k.Duration)).Select(k => "+ " + k.Keyword).Distinct().ToArray();
     private void DrawDishonorMarker()
     {
-        if(UprightPreview||!FallenArt.TurnsOnTable(Card))return;
-        var corners=LocalFaceCorners();
-        var width=Math.Max(10,FaceSize().Y*.10f);
+        if (UprightPreview || !FallenArt.TurnsOnTable(Card)) return;
+        var corners = LocalFaceCorners();
+        var width = Math.Max(10, FaceSize().Y * .10f);
         // Lower right stays clear of the left/near token rail and upper-right Force tab.
         // The marker remains readable while the physical printed face turns.
-        FallenArt.Medallion(this,new Vector2(corners.Max(p=>p.X)+3+width/2,corners.Max(p=>p.Y)-width/2),width,true);
+        FallenArt.Medallion(this, new Vector2(corners.Max(p => p.X) + 3 + width / 2, corners.Max(p => p.Y) - width / 2), width, true);
     }
     private void DrawPublicStatus()
     {
         var labels = PublicStatusLabels;
         if (labels.Length == 0) return;
-        var face=FaceSize();
-        var origin=ProjectFacePoint(Vector2.Zero,face);
-        var x=(ProjectFacePoint(Vector2.Right,face)-origin);
-        var y=(ProjectFacePoint(Vector2.Down,face)-origin);
-        DrawSetTransformMatrix(new Transform2D(x,y,origin));
+        var face = FaceSize();
+        var origin = ProjectFacePoint(Vector2.Zero, face);
+        var x = (ProjectFacePoint(Vector2.Right, face) - origin);
+        var y = (ProjectFacePoint(Vector2.Down, face) - origin);
+        DrawSetTransformMatrix(new Transform2D(x, y, origin));
         // Two slim overlay bands across the lower artwork; never cover printed statistics/name/rules.
         var shown = labels.Take(2).ToArray();
-        if(labels.Length>2) shown[1]+=$" · {labels.Length-2} more";
-        for(var i=0;i<shown.Length;i++)
+        if (labels.Length > 2) shown[1] += $" · {labels.Length - 2} more";
+        for (var i = 0; i < shown.Length; i++)
         {
-            var rect=new Rect2(face.X*.035f,face.Y*.395f+i*face.Y*.08f,face.X*.93f,face.Y*.074f);
-            var dishonorable=shown[i]=="Dishonorable";
-            var statusHeading=shown[i].ToUpperInvariant();
-            DrawStyleBox(Palette.Box(dishonorable?new Color("492924"):new Color("202f33"),dishonorable?new Color("b37c67"):Palette.Gold,0,1),rect);
-            var size=Math.Max(11,(int)(face.Y*.06f));
-            while(size>8 && Palette.Title.GetStringSize(statusHeading,fontSize:size).X>rect.Size.X-6) size--;
-            DrawString(Palette.Title,rect.Position+new Vector2(3,rect.Size.Y*.80f),statusHeading,HorizontalAlignment.Center,rect.Size.X-6,size,Palette.Paper);
+            var rect = new Rect2(face.X * .035f, face.Y * .395f + i * face.Y * .08f, face.X * .93f, face.Y * .074f);
+            var dishonorable = shown[i] == "Dishonorable";
+            var statusHeading = shown[i].ToUpperInvariant();
+            DrawStyleBox(Palette.Box(dishonorable ? new Color("492924") : new Color("202f33"), dishonorable ? new Color("b37c67") : Palette.Gold, 0, 1), rect);
+            var size = Math.Max(11, (int)(face.Y * .06f));
+            while (size > 8 && Palette.Title.GetStringSize(statusHeading, fontSize: size).X > rect.Size.X - 6) size--;
+            DrawString(Palette.Title, rect.Position + new Vector2(3, rect.Size.Y * .80f), statusHeading, HorizontalAlignment.Center, rect.Size.X - 6, size, Palette.Paper);
         }
         DrawSetTransformMatrix(Transform2D.Identity);
     }

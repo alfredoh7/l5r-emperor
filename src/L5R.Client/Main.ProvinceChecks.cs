@@ -51,11 +51,11 @@ public partial class Main
             await Capture("03-order-tray");
             // Exercise the production layout path without the fixture toolbar guard.
             var reviewBar = _provinceReviewBar; _provinceReviewBar = null;
-            GetWindow().Size = new Vector2I(1440,900); await CoverageFrames();
+            GetWindow().Size = new Vector2I(1440, 900); await CoverageFrames();
             RequireCamera(_provinceOrderTray!.Position.X >= 144 && _provinceOrderTray.GetRect().End.X < _layoutWidth - SidebarWidth,
                 "resizing a live tray obscured its confirmation behind the sidebar");
             _provinceReviewBar = reviewBar;
-            GetWindow().Size = new Vector2I(1920,1080); await CoverageFrames();
+            GetWindow().Size = new Vector2I(1920, 1080); await CoverageFrames();
             RequireCamera(!_provinceOrderConfirm!.Disabled, "valid order cannot be confirmed");
             await CoverageFocus();
             var confirmPoint = _provinceOrderConfirm.GetGlobalRect().GetCenter(); MoveProbeMouse(confirmPoint);

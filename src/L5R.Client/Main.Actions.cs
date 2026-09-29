@@ -11,23 +11,29 @@ public partial class Main
         _guide.Text = View.PendingChoice?.Prompt ?? (_chosen is { Type: "attack" or "assignDefense" } ? "Select a unit, then its destination province. Review the arrows and confirm assignments." : _chosen is { Type: "purchase" or "recruitReserve" } ? "Choose ready Gold sources. Confirm pays the cost and brings the card into play." : _chosen is not null && QuoteFor(_chosen) is not null ? "Review the cost and its basis, then choose ready Gold sources. Confirm pays and resolves; cancel changes your plan." : _chosen is not null ? "Review the highlighted target. Confirm to resolve, or cancel to change your plan." : View.PriorityPlayerId != View.ViewerId ? "Your opponent is deciding. You can hover over visible cards to read them while you wait." : RulesHelp.PhaseGuide(View.Phase));
         _guide.Visible = View.PendingChoice is not null || _chosen is not null;
         _guide.TooltipText = RulesHelp.Tooltip(RulesHelp.PhaseGuide(View.Phase) + "\n\n" + RulesHelp.Topic("targets"));
-        if(View.WinnerId is null && View.PendingDuel?.Stage is ("AwaitingAccept" or "Reaction") && View.LastDuel is {} duel)
+        if (View.WinnerId is null && View.PendingDuel?.Stage is ("AwaitingAccept" or "Reaction") && View.LastDuel is { } duel)
         {
             _guide.Hide();
-            _inspector.AddChild(Palette.Text("CHALLENGE",25,title:true));
-            _inspector.AddChild(Palette.Wrapped($"{duel.Challenger.Definition!.Name} challenges {duel.Challenged.Definition!.Name}",22));
-            if(duel.Challenge is {} stakes){_inspector.AddChild(Palette.Wrapped(stakes.AbilityLabel,19,Palette.Gold));_inspector.AddChild(Palette.Wrapped(stakes.LossTerms,17));if(stakes.Refusable)_inspector.AddChild(Palette.Wrapped(stakes.RefusalTerms,17,Palette.PaperDim));}
-            if(View.PendingChoice is {} reaction)_inspector.AddChild(Palette.Wrapped(reaction.Prompt,18));
-            foreach(var option in Actions.Where(a=>a.Enabled&&a.Command is not null&&a.Type is not ("concede" or "declineReaction")))
-            {var command=option.Command!;_inspector.AddChild(SidebarSkin.Button(option.Label,()=>_ = Submit(command)));}
+            _inspector.AddChild(Palette.Text("CHALLENGE", 25, title: true));
+            _inspector.AddChild(Palette.Wrapped($"{duel.Challenger.Definition!.Name} challenges {duel.Challenged.Definition!.Name}", 22));
+            if (duel.Challenge is { } stakes) { _inspector.AddChild(Palette.Wrapped(stakes.AbilityLabel, 19, Palette.Gold)); _inspector.AddChild(Palette.Wrapped(stakes.LossTerms, 17)); if (stakes.Refusable) _inspector.AddChild(Palette.Wrapped(stakes.RefusalTerms, 17, Palette.PaperDim)); }
+            if (View.PendingChoice is { } reaction) _inspector.AddChild(Palette.Wrapped(reaction.Prompt, 18));
+            foreach (var option in Actions.Where(a => a.Enabled && a.Command is not null && a.Type is not ("concede" or "declineReaction")))
+            { var command = option.Command!; _inspector.AddChild(SidebarSkin.Button(option.Label, () => _ = Submit(command))); }
             return;
         }
         if (RenderBattleFlow()) return;
         if (PresentationBusy)
         {
             _guide.Visible = false;
-            _sidebarHeader.AddChild(new BattleTracker { Snapshot = View, ReducedMotion = _reducedMotion,
-                ResolutionMessage = _battleOutcomeText, PresentationInProgress = true, ActionOutcome = _actionOutcome });
+            _sidebarHeader.AddChild(new BattleTracker
+            {
+                Snapshot = View,
+                ReducedMotion = _reducedMotion,
+                ResolutionMessage = _battleOutcomeText,
+                PresentationInProgress = true,
+                ActionOutcome = _actionOutcome
+            });
             return;
         }
         if (View.WinnerId is { } winner)
@@ -58,9 +64,9 @@ public partial class Main
             var details = new VBoxContainer(); details.AddThemeConstantOverride("separation", 12); panel.AddChild(details); _inspector.AddChild(panel);
             AddInspectionCaption("Card details", details);
             var name = Palette.Wrapped(def.Name, 24); name.AddThemeFontOverride("font", SidebarSkin.Bold); details.AddChild(name);
-            if(CardChanges.Entries(_selected).Length>0)
-                details.AddChild(CardChangePanel.Create(_selected,id=>FindCard(id)?.Definition?.Name,compact:true,
-                    inspectSource:id=> { if(FindCard(id) is { } source)SelectCard(source); }));
+            if (CardChanges.Entries(_selected).Length > 0)
+                details.AddChild(CardChangePanel.Create(_selected, id => FindCard(id)?.Definition?.Name, compact: true,
+                    inspectSource: id => { if (FindCard(id) is { } source) SelectCard(source); }));
             var artwork = CardTile.Artwork(def);
             if (artwork is not null)
             {
@@ -390,8 +396,8 @@ public partial class Main
         {
             _phaseActions.AddChild(Palette.Wrapped($"Room {_session.Snapshot.RoomCode}\nWaiting for your opponent to connect.", 16, Palette.Crane)); return;
         }
-        if (View.Phase==Phase.Battle && View.PendingChoice is null && View.PriorityPlayerId==View.ViewerId && View.Events.LastOrDefault()?.Type=="passed")
-            _phaseActions.AddChild(Palette.Wrapped("Passing now ends Battle actions.",16,Palette.PaperDim));
+        if (View.Phase == Phase.Battle && View.PendingChoice is null && View.PriorityPlayerId == View.ViewerId && View.Events.LastOrDefault()?.Type == "passed")
+            _phaseActions.AddChild(Palette.Wrapped("Passing now ends Battle actions.", 16, Palette.PaperDim));
         foreach (var a in Actions.Where(a => a.Type is "pass" or "endDynasty" or "proclaim" or "declineReaction" or "chooseShinden" or "declareAttack")) AddAction(_phaseActions, a);
         if (View.PriorityPlayerId != View.ViewerId) _phaseActions.AddChild(Palette.Wrapped($"Waiting for {View.Players[View.PriorityPlayerId].Clan}…", 15, Palette.Crane));
         if (!_session.Online && !_autoOpponent) _phaseActions.AddChild(SidebarSkin.Button("Pass device to other player", SwitchSeat));

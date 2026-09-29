@@ -34,13 +34,27 @@ public static class ProvincePresentationChecks
         var definition = CardCatalog.Cards.Values.First(c => c.Type == CardType.Personality && !c.ScenarioOnly);
         var a = new CardView("receipt-a", definition, 0, Zone.Province, true, false, 1, null, definition.Force);
         var b = a with { Id = "receipt-b" };
-        var before = view with { Phase = Phase.Battle, Events = [], Players = view.Players.Select(p => p.Id != 0 ? p : p with
-        { Provinces = p.Provinces.Select(province => province.Index != 1 ? province : province with
-            { Card = null, DynastySlots = [new(0,a),new(1,b)] }).ToArray() }).ToArray() };
-        var after = before with { Version = before.Version + 1, Events = [new(1,"battleResolved","Battle resolved")], Players = before.Players.Select(p => p.Id != 0 ? p : p with
-        { Provinces = p.Provinces.Select(province => province.Index != 1 ? province : province with { Destroyed = true, DynastySlots = [] }).ToArray(),
-            Discard = [..p.Discard, a with { Zone = Zone.DynastyDiscard }, b with { Zone = Zone.DynastyDiscard }] }).ToArray() };
-        var journal = new BattleJournal(); journal.Observe(before,null); journal.Observe(after,before);
+        var before = view with
+        {
+            Phase = Phase.Battle,
+            Events = [],
+            Players = view.Players.Select(p => p.Id != 0 ? p : p with
+            {
+                Provinces = p.Provinces.Select(province => province.Index != 1 ? province : province with
+                { Card = null, DynastySlots = [new(0, a), new(1, b)] }).ToArray()
+            }).ToArray()
+        };
+        var after = before with
+        {
+            Version = before.Version + 1,
+            Events = [new(1, "battleResolved", "Battle resolved")],
+            Players = before.Players.Select(p => p.Id != 0 ? p : p with
+            {
+                Provinces = p.Provinces.Select(province => province.Index != 1 ? province : province with { Destroyed = true, DynastySlots = [] }).ToArray(),
+                Discard = [.. p.Discard, a with { Zone = Zone.DynastyDiscard }, b with { Zone = Zone.DynastyDiscard }]
+            }).ToArray()
+        };
+        var journal = new BattleJournal(); journal.Observe(before, null); journal.Observe(after, before);
         Require(journal.Aftermath.Count(r => r.CardId is "receipt-a" or "receipt-b") == 2, "Battle history omitted a province slot.");
     }
 
@@ -48,7 +62,7 @@ public static class ProvincePresentationChecks
     {
         var view = MatchEngine.CreatePublishedMatch(91).GetView(0);
         var command = new GameCommand("engineOrder", 0, view.Version, Choice: "engine-opaque-choice", Province: 1);
-        var option = new ProvinceOrderOption("b-a", "B then A", [1,0], command);
+        var option = new ProvinceOrderOption("b-a", "B then A", [1, 0], command);
         view = view with { PendingProvinceOrder = new("decision-1", 0, 0, 1, "Choose the order", [option]) };
         var copy = JsonSerializer.Deserialize<MatchView>(JsonSerializer.Serialize(view))!;
         Require(ProvincePresentation.CurrentOption(copy, "decision-1", view.Version, "b-a")?.Command == command,

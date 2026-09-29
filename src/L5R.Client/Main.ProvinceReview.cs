@@ -20,7 +20,7 @@ public partial class Main
         _autoOpponent = false;
         _provinceReviewSeed = MatchEngine.CreatePublishedMatch(91);
         _session.StartPractice(false, true);
-        _provinceReviewBar = new HBoxContainer { Theme = SidebarSkin.Theme(), Position = new Vector2(370,150), Size = new Vector2(940,60) };
+        _provinceReviewBar = new HBoxContainer { Theme = SidebarSkin.Theme(), Position = new Vector2(370, 150), Size = new Vector2(940, 60) };
         _provinceReviewBar.AddThemeConstantOverride("separation", 10);
         _root.AddChild(_provinceReviewBar);
         var picker = new OptionButton { CustomMinimumSize = new Vector2(460, 54) };
@@ -32,7 +32,7 @@ public partial class Main
         var focus = SidebarSkin.Button("Focus province", FocusProvinceReview);
         foreach (var button in new[] { seat, focus })
         {
-            button.CustomMinimumSize = new Vector2(190,60); button.AutowrapMode = TextServer.AutowrapMode.Off;
+            button.CustomMinimumSize = new Vector2(190, 60); button.AutowrapMode = TextServer.AutowrapMode.Off;
             _provinceReviewBar.AddChild(button);
         }
         PrepareProvinceReview(); EnterTable();
@@ -57,7 +57,8 @@ public partial class Main
         CardView Hidden(int owner, int province, int slot) => new($"hidden-p{owner}-province{province}-slot{slot}", null, owner, Zone.Province, false, false, province, null, 0);
         var players = snapshot.Players.Select(player => player with
         {
-            Home = player.Home.Where(c => c.Definition?.Type == CardType.Holding).ToArray(), Army = [],
+            Home = player.Home.Where(c => c.Definition?.Type == CardType.Holding).ToArray(),
+            Army = [],
             Provinces = player.Provinces.Select(province =>
             {
                 if (province.Index != 1 && _provinceReviewScenario != 5) return province;
@@ -69,8 +70,12 @@ public partial class Main
                     _ => Face($"preview-{player.Id}-{province.Index}-b", second, player.Id, province.Index)
                 };
                 if (_provinceReviewScenario is 2 or 3) a = Hidden(player.Id, province.Index, 0);
-                return province with { Card = a, Region = Face($"preview-region-{player.Id}-{province.Index}", regionDefinition, player.Id, province.Index, Zone.Region),
-                    DynastySlots = [new(0, a), new(1, b)] };
+                return province with
+                {
+                    Card = a,
+                    Region = Face($"preview-region-{player.Id}-{province.Index}", regionDefinition, player.Id, province.Index, Zone.Region),
+                    DynastySlots = [new(0, a), new(1, b)]
+                };
             }).ToArray()
         }).ToArray();
         var revision = ++_provinceReviewRevision;
@@ -81,8 +86,18 @@ public partial class Main
                 _provinceReviewSeat != 0 ? [] :
                 [new("a-b", "A first · B second", [0,1], new GameCommand("previewOnly", 0, revision, Choice: "a-b")),
                  new("b-a", "B first · A second", [1,0], new GameCommand("previewOnly", 0, revision, Choice: "b-a"))]);
-        _provinceReviewView = snapshot with { Version = revision, Scenario = "province-presentation-preview", Players = players,
-            Phase = Phase.Dynasty, PendingChoice = null, PriorityPlayerId = 0, ActivePlayerId = 0, Events = [], PendingProvinceOrder = order };
+        _provinceReviewView = snapshot with
+        {
+            Version = revision,
+            Scenario = "province-presentation-preview",
+            Players = players,
+            Phase = Phase.Dynasty,
+            PendingChoice = null,
+            PriorityPlayerId = 0,
+            ActivePlayerId = 0,
+            Events = [],
+            PendingProvinceOrder = order
+        };
         _provinceReviewConfirmed = null; _selected = null; _chosen = null; _motionView = null; _tableLayoutSeen = false;
         Render(); FocusProvinceReview();
         SetNotice("Presentation preview · " + ProvinceReviewScenarios[_provinceReviewScenario] + " · card effects are not running.");

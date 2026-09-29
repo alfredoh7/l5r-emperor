@@ -48,9 +48,14 @@ public partial class Main
             if (slot.Card is { } card)
             {
                 var face = new CardTile(card, true, _ => SelectFirstProvinceSlot(slot.Index), _ => { })
-                { CustomMinimumSize = new Vector2(170, 226), FaceHeight = 214, ReducedMotion = _reducedMotion, QuietSelection = true,
+                {
+                    CustomMinimumSize = new Vector2(170, 226),
+                    FaceHeight = 214,
+                    ReducedMotion = _reducedMotion,
+                    QuietSelection = true,
                     Highlighted = selected?.Slots.FirstOrDefault(-1) == slot.Index,
-                    ContextHelp = "Choose this slot first. Confirm the order below." };
+                    ContextHelp = "Choose this slot first. Confirm the order below."
+                };
                 item.AddChild(face);
             }
             else item.AddChild(Palette.Wrapped("Empty slot", 20, Palette.PaperDim));
