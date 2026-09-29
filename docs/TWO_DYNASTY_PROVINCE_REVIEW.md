@@ -20,3 +20,7 @@ This is a presentation review. It does not certify or enable Plains of Otosan Uc
 Four independent governance-lite source passes reviewed the implementation. Rules boundary review found no authoritative logic or printing change. Privacy found a stale legacy-card selection path, client contract found a missing second-slot battle receipt, and client/edge passes found tray resizing and hotseat/reconnect omissions. These have been corrected, with focused regressions/native probes. These reviews do not substitute for execution evidence or human acceptance; final exact outcomes are in the task handoff.
 
 Runtime keeps the existing approved province and lacquer artwork and full original scans. The generated image supplies the layout; native camera/light and actual cards differ, so this is not a claim of full-screen pixel identity.
+
+## Windows distribution size
+
+The first full export exceeded GitHub’s 2 GiB per-asset limit (2,477,749,433 bytes). The Windows preset now omits old standalone DuelArenaReview v3–v6 scenery, the unused war-room-m1/aged-column/chest/table-lantern assets and obsolete m4/m6 floor maps. These sources remain in Git and Mac development imports. Current gameplay uses CrimsonDuel and the B3 layout with column-timber-m7, chest-m7, stone-a/b-m7, dais-fit-m7, brazier/coals, room lanterns and the m7 floor map. Original card scans and the full catalogue pack remain included. Exported runtime resource/dependency checks cover the retained assets; historical source-only DuelArenaReview is not a Windows package entry point.
