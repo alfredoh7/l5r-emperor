@@ -76,6 +76,8 @@ public partial class Main
     private readonly Dictionary<int, CardView[][]> _homeRows = [];
     private float PlaneHeight(float side) => side - 4;
     private float ProvinceRowY(PlayerView player) => player.Id == View.ViewerId ? _selfProvinceY : _enemyProvinceY;
+    private static float ProvinceContentWidth(ProvinceView province) =>
+        Math.Max(CardHeight, ProvincePresentation.Slots(province).Length * 164 + (province.Region is null ? 0 : 184));
     private float SlotX(PlayerView player, int slot) =>
         _playLeft + (player.Id == View.ViewerId ? _slotCenters[slot] : _playWidth - _slotCenters[slot]) - CardHeight / 2;
     private CardView[] HomeCards(PlayerView player) => player.Home
@@ -222,17 +224,40 @@ public partial class Main
             }
             // Province positions remain stable after destruction: an absent province
             // must never renumber or shift another battlefield's physical destination.
-            var area = Place(_board, new Control { MouseFilter = Control.MouseFilterEnum.Ignore }, SlotX(owner, 2 + province.Index), ProvinceRowY(owner), CardHeight, PlaneHeight(CardHeight));
+            var width = ProvinceContentWidth(province);
+            var area = Place(_board, new Control { MouseFilter = Control.MouseFilterEnum.Ignore },
+                SlotX(owner, 2 + province.Index) + (CardHeight - width) / 2, ProvinceRowY(owner), width, PlaneHeight(CardHeight));
             var button = new Button { Text = "", Flat = true };
             CompactButton(button);
             button.Pressed += () => SelectProvince(owner.Id, province.Index);
-            Place(area, button, 28, 0, CardHeight - 56, PlaneHeight(CardHeight)); _provinceButtons[(owner.Id, province.Index)] = button;
-            if (province.Card is { } card)
+            Place(area, button, 0, -28, width, PlaneHeight(CardHeight) + 28); _provinceButtons[(owner.Id, province.Index)] = button;
+            var slots = ProvincePresentation.Slots(province);
+            var x = (width - slots.Length * 164 - (province.Region is null ? 0 : 184)) / 2;
+            if (province.Region is { } region)
             {
-                var tile = Tile(card, true, CardHeight, CardHeight);
-                Place(area, tile, 0, 0, CardHeight, PlaneHeight(CardHeight));
+                Place(area, Tile(region, true, 164, CardHeight), x, 0, 164, PlaneHeight(CardHeight));
+                var divider = new ColorRect { Color = new Color(.62f, .49f, .27f, .38f), MouseFilter = Control.MouseFilterEnum.Ignore };
+                Place(area, divider, x + 175, 8, 1, PlaneHeight(CardHeight) - 16);
+                x += 184;
             }
-
+            foreach (var slot in slots)
+            {
+                if (slot.Card is { } card)
+                    Place(area, Tile(card, true, 164, CardHeight), x, 0, 164, PlaneHeight(CardHeight));
+                else
+                {
+                    var empty = Palette.Wrapped(province.HoldsNoDynastyCards ? "" : "Empty", 16, Palette.PaperDim);
+                    empty.HorizontalAlignment = HorizontalAlignment.Center;
+                    Place(area, empty, x, 82, 164, 35);
+                }
+                if (slots.Length > 1)
+                {
+                    var label = Palette.Text("DYNASTY " + ProvincePresentation.SlotName(slot.Index), 16, Palette.PaperDim);
+                    label.HorizontalAlignment = HorizontalAlignment.Center;
+                    Place(area, label, x, -30, 164, 25);
+                }
+                x += 164;
+            }
         }
     }
 
@@ -270,7 +295,9 @@ public partial class Main
         var battle = Actions.FirstOrDefault(a => a.Enabled && a.Type == "selectBattle" && a.Command?.Province == province);
         if (owner == 1 - View.ActivePlayerId && battle is not null) { _ = Submit(battle.Command!); return; }
         if (province >= MatchEngine.FirstAdditionalBattlefield) return; // a battlefield without a province has no province card to inspect
-        if (View.Players.Single(p => p.Id == owner).Provinces.Single(p => p.Index == province).Card is { } card) SelectCard(card);
+        var target = View.Players.Single(p => p.Id == owner).Provinces.Single(p => p.Index == province);
+        if (ProvincePresentation.Slots(target) is [{ Card: { } card }]) SelectCard(card);
+        else SetNotice($"Province {province + 1} · Select either Dynasty card or its attached Region to inspect it.");
     }
 
     private IEnumerable<IntentArrow> IntentArrows()

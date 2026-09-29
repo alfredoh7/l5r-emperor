@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Implementing approved two-Dynasty province view, native layout and temporary ordering tray for issue 499.",
+  "validation": "Work in progress: compilation, native checks and governance review underway; no validation claimed yet.",
+  "remaining": "Complete native validation, launcher and portable preview; request Mendon review of view contract. Full card rules and engine producer follow in rules lane. No merge authorized.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/499",
+  "branch": "codex/499-two-dynasty-province",
+  "updated": "2026-09-29T19:39:31.607214+00:00"
+}

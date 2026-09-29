@@ -90,7 +90,8 @@ public partial class Main
             var unitWidth = View.Players.SelectMany(p => CourtUnits(p, i)
                 .Select(c => UnitWidth(c, p))).DefaultIfEmpty(154).Max();
             _laneWidths[i] = _reservedLaneWidths[i] = Math.Max(_reservedLaneWidths[i],
-                Math.Max(210, ArmyColumns(i) * (unitWidth + CardGap) + MatPadding * 2 + 10));
+                Math.Max(View.Players.Max(p => ProvinceContentWidth(p.Provinces.Single(v => v.Index == i))) + 8,
+                    ArmyColumns(i) * (unitWidth + CardGap) + MatPadding * 2 + 10));
         }
         // This inner play area mirrors by seat. Holdings deliberately remain on
         // screen-left for both owners and never enter this mirrored slot system.
@@ -175,7 +176,7 @@ public partial class Main
             // Destroying one never shifts or renumbers its surviving neighbours.
             foreach (var province in player.Provinces.Where(p => !p.Destroyed))
             {
-                var bayWidth = Math.Min(CardHeight + 8, _laneWidths[province.Index] - 12);
+                var bayWidth = ProvinceContentWidth(province) + 8;
                 _matTargets.Add(new($"province:{player.Id}:{province.Index}", $"Province {province.Index + 1}",
                     new Rect2(SlotX(player, province.Index + 2) + (CardHeight - bayWidth) / 2,
                         ProvinceRowY(player) - MatHeader, bayWidth, provinceHeight),

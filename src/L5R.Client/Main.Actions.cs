@@ -363,6 +363,21 @@ public partial class Main
         if (PresentationBusy) { Palette.Clear(_phaseActions); _phaseActions.AddChild(SidebarSkin.Button("Review battle", ShowBattleHistory)); return; }
         Palette.Clear(_phaseActions);
         if (_session.Snapshot is null) return;
+        if (View.PendingProvinceOrder is { } order)
+        {
+            _phaseActions.AddChild(Palette.Wrapped(order.PlayerId == View.ViewerId ? "Choose an order in the tray." : "Waiting for the province's controller to choose an order.", 18, Palette.Gold));
+            if (_session.Online && !_session.Connected)
+                _phaseActions.AddChild(SidebarSkin.Button("Reconnect", () => _ = Reconnect(), true));
+            else if (!_session.Online && !_autoOpponent && _provinceReviewView is null && order.PlayerId != View.ViewerId)
+                _phaseActions.AddChild(SidebarSkin.Button("Pass device to deciding player", PassProvinceDecision));
+            return;
+        }
+        if (_provinceReviewView is not null)
+        {
+            _phaseActions.AddChild(Palette.Wrapped("Presentation preview\nUse the prepared scenarios above the table. Card effects are not running.", 17, Palette.PaperDim));
+            _phaseActions.AddChild(SidebarSkin.Button("Focus province", FocusProvinceReview));
+            return;
+        }
         if (View.WinnerId is not null) return;
         if (_chosen is not null) return;
         _phaseActions.AddChild(new HSeparator());

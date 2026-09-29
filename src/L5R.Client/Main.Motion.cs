@@ -38,7 +38,7 @@ public partial class Main
                 _world.GetGlobalTransform().AffineInverse() * p.GlobalPosition)));
     }
     private static IEnumerable<CardView> VisibleCards(MatchView view) => view.Players.SelectMany(p => p.Home.Concat(p.Army)
-        .Concat(p.Hand).Concat(p.Discard).Concat(p.Provinces.Where(v=>v.Card is not null).Select(v=>v.Card!)).Append(p.Stronghold));
+        .Concat(p.Hand).Concat(p.Discard).Concat(p.Provinces.SelectMany(ProvincePresentation.Cards)).Append(p.Stronghold));
     private void EndTableMotion(MotionFrame? before)
     {
         _motionView = View;
@@ -116,7 +116,10 @@ public partial class Main
             {
                 var priorPlayer=before.View.Players.Single(p=>p.Id==card.OwnerId);
                 var nowPlayer=View.Players.Single(p=>p.Id==card.OwnerId);
-                var hidden=priorPlayer.Provinces.FirstOrDefault(p=>p.Index==card.ProvinceIndex)?.Card;
+                var nowProvince = nowPlayer.Provinces.FirstOrDefault(p => p.Index == card.ProvinceIndex);
+                var priorProvince = priorPlayer.Provinces.FirstOrDefault(p => p.Index == card.ProvinceIndex);
+                var slot = nowProvince is null ? null : ProvincePresentation.Slots(nowProvince).FirstOrDefault(s => s.Card?.Id == card.Id);
+                var hidden = priorProvince is null || slot is null ? null : ProvincePresentation.Slots(priorProvince).FirstOrDefault(s => s.Index == slot.Index)?.Card;
                 if(hidden?.Definition is null && hidden is not null && priorPlayer.DynastyDeckCount==nowPlayer.DynastyDeckCount)
                     from=before.Cards.GetValueOrDefault(hidden.Id);
             }

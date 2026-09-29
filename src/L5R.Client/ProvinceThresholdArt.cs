@@ -74,10 +74,10 @@ public static class ProvinceThresholdArt
         var sy = isProvince ? 48f : 80f;
         var right = isProvince ? 35f : 60f;
         var bottom = isProvince ? 66f : 55f;
-        var scale = isProvince ? size.X / source.X : .55f;
+        var scale = isProvince ? Math.Min(size.X, 218) / source.X : .55f;
         float[] sourceX = [0, sx, source.X - right, source.X];
         float[] sourceY = [0, sy, source.Y - bottom, source.Y];
-        var footHeight = isProvince ? bottom * size.X / source.X : bottom * scale;
+        var footHeight = bottom * scale;
         float[] destX = [0, sx * scale, size.X - right * scale, size.X];
         float[] destY = [0, sy * scale, size.Y - footHeight, size.Y];
         if (isProvince && active > .001f)
@@ -89,8 +89,15 @@ public static class ProvinceThresholdArt
             {
                 // Keep the entire gate roof, circular number and supports in one
                 // proportional image. Stretch only the plain side strokes above it.
-                canvas.DrawTextureRectRegion(art, new Rect2(0, destY[2], size.X, footHeight),
-                    new Rect2(0, sourceY[2], source.X, bottom), tint);
+                var gateWidth = source.X * scale;
+                var left = (size.X - gateWidth) / 2;
+                if (left > 0)
+                {
+                    // Extend plain rails; never stretch the roof or the single circular province number.
+                    canvas.DrawTextureRectRegion(art, new Rect2(0, destY[2], left, footHeight), new Rect2(30, sourceY[2], 12, bottom), tint);
+                    canvas.DrawTextureRectRegion(art, new Rect2(left + gateWidth, destY[2], left, footHeight), new Rect2(218, sourceY[2], 12, bottom), tint);
+                }
+                canvas.DrawTextureRectRegion(art, new Rect2(left, destY[2], gateWidth, footHeight), new Rect2(0, sourceY[2], source.X, bottom), tint);
                 continue;
             }
             for (var x = 0; x < 3; x++)

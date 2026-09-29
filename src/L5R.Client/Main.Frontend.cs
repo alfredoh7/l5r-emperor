@@ -73,6 +73,7 @@ public partial class Main
     }
     private void ShowMainMenu()
     {
+        ClearProvinceReview();
         if (_titleMenu is null) return;
         _cameraDragging = false; HideTableTooltip(); ReleaseTableFocus();
         _root.Hide(); _table.Hide(); _table.SetProcess(false);

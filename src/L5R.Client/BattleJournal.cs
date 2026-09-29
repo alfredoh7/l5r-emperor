@@ -56,5 +56,5 @@ public sealed class BattleJournal
         _inBattle=BattlePhase(next.Phase);
         if(Exchanges.Count>80) Exchanges.RemoveRange(0,Exchanges.Count-80);
     }
-    public static IEnumerable<CardView> Visible(MatchView view) => view.Players.SelectMany(p=>p.Home.Concat(p.Army).Concat(p.Hand).Concat(p.Discard).Concat(p.Provinces.Where(q=>q.Card is not null).Select(q=>q.Card!)));
+    public static IEnumerable<CardView> Visible(MatchView view) => view.Players.SelectMany(p=>p.Home.Concat(p.Army).Concat(p.Hand).Concat(p.Discard).Concat(p.Provinces.SelectMany(ProvincePresentation.Cards)));
 }

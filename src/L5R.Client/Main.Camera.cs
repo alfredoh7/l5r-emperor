@@ -169,7 +169,7 @@ public partial class Main
     {
         static bool Covers(Control? control, Vector2 p) => control is not null &&
             control.IsVisibleInTree() && control.GetGlobalRect().HasPoint(p);
-        return Covers(_inspectorPanel, point) || Covers(_hand, point) || Covers(_timeline, point) || Covers(_menu, point)
+        return Covers(_provinceOrderTray, point) || Covers(_provinceReviewBar, point) || Covers(_inspectorPanel, point) || Covers(_hand, point) || Covers(_timeline, point) || Covers(_menu, point)
             || _clanHud.GetChildren().OfType<Control>().Any(c => Covers(c, point))
             // A hovered hand face can rise above the hand container.
             || _hand.GetChildren().OfType<CardTile>().Any(c => Covers(c, point));
@@ -318,7 +318,7 @@ public partial class Main
             while (hovered is not null && !hovered.HasMeta("flat_tooltip") && hovered is not (CardTile or PermanentGrantSeal or CardTokenRail)) hovered = hovered.GetParent() as Control;
         var provinceHover = hovered?.HasMeta("province_marker") == true ? hovered.GetMeta("province_marker").AsString()
             : hovered is CardTile provinceCard && provinceCard.Card.Zone == L5R.Core.Zone.Province
-                ? View.Players.SelectMany(p => p.Provinces.Where(q => q.Card?.Id == provinceCard.Card.Id).Select(q => $"province:{p.Id}:{q.Index}")).FirstOrDefault() : null;
+                ? View.Players.SelectMany(p => p.Provinces.Where(q => ProvincePresentation.Cards(q).Any(c => c.Id == provinceCard.Card.Id)).Select(q => $"province:{p.Id}:{q.Index}")).FirstOrDefault() : null;
         _matSections.Emphasize(provinceHover, hover:true);
         if (hovered != _tableHover) { HideTableTooltip(); _tableHover = hovered; }
         if (hovered is null || _tableTooltip is not null || (_tableHoverTime += delta) < .5) return;
