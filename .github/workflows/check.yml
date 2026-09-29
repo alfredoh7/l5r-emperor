@@ -89,7 +89,7 @@ jobs:
       # Godot only reimports what changed when it finds the previous import: restore the newest cache for this Godot pin, save a new one after a passing run.
       - name: Restore Godot import cache
         if: matrix.args == '--client-only'
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: src/L5R.Client/.godot
           key: godot-import-${{ runner.os }}-${{ hashFiles('tools/bootstrap.py', 'src/L5R.Client/project.godot') }}-${{ github.sha }}
