@@ -10,6 +10,7 @@ var tests = new (string Name, Action Run)[]
 {
     ("Province slots retain empty/hidden positions and legacy wire compatibility", ProvincePresentationChecks.SlotsAndSerialization),
     ("Province order retains exact engine command and rejects stale/other-seat choices", ProvincePresentationChecks.DecisionFreshness),
+    ("Battle receipts include both explicit Dynasty slots", ProvincePresentationChecks.BattleReceipts),
     ("Granted-effect view is public, detached, duration-accurate and absent from hidden cards/older payloads", GrantedEffectPresentationView),
     ("Public hand limit matches End Phase enforcement, follows visible modifiers and preserves hand privacy", PublicHandLimitView),
     ("Duel Demo canonical commands, privacy and retained result", DuelDemoChecks.Canonical),

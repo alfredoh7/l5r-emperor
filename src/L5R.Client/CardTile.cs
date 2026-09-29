@@ -7,6 +7,7 @@ public partial class CardTile : Button
 {
     public CardView Card { get; private set; } = null!;
     public bool Highlighted { get; set; }
+    public bool QuietSelection { get; set; }
     public bool LegalTarget { get; set; }
     public bool ChosenTarget { get; set; }
     public bool? PreviousBowed { get; set; }
@@ -148,6 +149,7 @@ public partial class CardTile : Button
     private void DrawInteractionHalo()
     {
         if (!IsSelected && !IsInspectionHover && !LegalTarget) return;
+        if (QuietSelection) return;
         var color = IsSelected ? SelectionColor : HoverColor;
         var strength = IsSelected ? 1f : IsInspectionHover ? .82f : .28f;
         var edge = LocalFaceCorners(2);
@@ -161,9 +163,9 @@ public partial class CardTile : Button
     private void DrawInteractionEdge()
     {
         var active = IsSelected || IsInspectionHover || LegalTarget;
-        var color = IsSelected ? SelectionColor : IsInspectionHover || LegalTarget ? HoverColor : new Color("8e866b");
+        var color = IsSelected ? QuietSelection ? Palette.Gold : SelectionColor : IsInspectionHover || LegalTarget ? HoverColor : new Color("8e866b");
         var edge = LocalFaceCorners(active ? 1.6f : 1);
-        DrawPolyline(edge.Append(edge[0]).ToArray(), color with { A = active ? 1 : .58f }, active ? (IsSelected ? 3.2f : 2.3f) * (ProjectToScreen is null ? 1 : 2) : .9f, true);
+        DrawPolyline(edge.Append(edge[0]).ToArray(), color with { A = active ? 1 : .58f }, QuietSelection ? 1.5f : active ? (IsSelected ? 3.2f : 2.3f) * (ProjectToScreen is null ? 1 : 2) : .9f, true);
     }
 
     private void DrawPrintedFace(Texture2D texture)

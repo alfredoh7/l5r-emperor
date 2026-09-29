@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Implementing approved two-Dynasty province view, native layout and temporary ordering tray for issue 499.",
-  "validation": "Work in progress: compilation, native checks and governance review underway; no validation claimed yet.",
-  "remaining": "Complete native validation, launcher and portable preview; request Mendon review of view contract. Full card rules and engine producer follow in rules lane. No merge authorized.",
+  "summary": "Implemented approved two-Dynasty province view/client, full scans, temporary ordering tray, isolated six-scenario review and direct local launcher for the province portion of #499.",
+  "validation": "Client build passed (0 warnings/errors). Full skip-client checks passed: 2214 C# PASS records and 275 Python checks. Native province input/privacy/order/stale/seat/resize checks passed at 1920x1080, 1440x900 and 2560x1080. Existing compact board/court/projection smoke passed. Four independent governance-lite reviews completed and confirmed defects corrected. Evidence in docs/TWO_DYNASTY_PROVINCE_REVIEW.md.",
+  "remaining": "Finish changed-file whitespace CI and portable Windows delivery. Mendon review of proposed view/command contract and native Windows play remains. Full authoritative Plains state/reveal/refill/purchase/destruction and other #499 requests are separate engine work. No merge authorized.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/499",
   "branch": "codex/499-two-dynasty-province",
-  "updated": "2026-09-29T19:39:31.607214+00:00"
+  "updated": "2026-09-29T20:07:08.616765+00:00"
 }

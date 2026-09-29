@@ -8,6 +8,7 @@ public partial class Main
     private MatchView? _provinceReviewView;
     private MatchEngine? _provinceReviewSeed;
     private HBoxContainer? _provinceReviewBar;
+    private OptionButton? _provinceReviewPicker;
     private int _provinceReviewScenario, _provinceReviewSeat;
     private long _provinceReviewRevision = 1000;
     private string? _provinceReviewConfirmed;
@@ -19,24 +20,31 @@ public partial class Main
         _autoOpponent = false;
         _provinceReviewSeed = MatchEngine.CreatePublishedMatch(91);
         _session.StartPractice(false, true);
-        _provinceReviewBar = new HBoxContainer { Theme = SidebarSkin.Theme() };
+        _provinceReviewBar = new HBoxContainer { Theme = SidebarSkin.Theme(), Position = new Vector2(370,150), Size = new Vector2(940,60) };
         _provinceReviewBar.AddThemeConstantOverride("separation", 10);
         _root.AddChild(_provinceReviewBar);
         var picker = new OptionButton { CustomMinimumSize = new Vector2(460, 54) };
+        _provinceReviewPicker = picker;
         foreach (var name in ProvinceReviewScenarios) picker.AddItem(name);
         picker.ItemSelected += index => { _provinceReviewScenario = (int)index; PrepareProvinceReview(); };
         _provinceReviewBar.AddChild(picker);
-        _provinceReviewBar.AddChild(SidebarSkin.Button("Other seat", () => { _provinceReviewSeat = 1 - _provinceReviewSeat; PrepareProvinceReview(); }));
-        _provinceReviewBar.AddChild(SidebarSkin.Button("Focus province", FocusProvinceReview));
+        var seat = SidebarSkin.Button("Other seat", () => { _provinceReviewSeat = 1 - _provinceReviewSeat; PrepareProvinceReview(); });
+        var focus = SidebarSkin.Button("Focus province", FocusProvinceReview);
+        foreach (var button in new[] { seat, focus })
+        {
+            button.CustomMinimumSize = new Vector2(190,60); button.AutowrapMode = TextServer.AutowrapMode.Off;
+            _provinceReviewBar.AddChild(button);
+        }
         PrepareProvinceReview(); EnterTable();
         Callable.From(FocusProvinceReview).CallDeferred();
         var output = OS.GetCmdlineUserArgs().FirstOrDefault(a => a.StartsWith("--province-review-checks="))?[25..];
-        if (output is not null) Callable.From(() => _ = CheckProvinceReview(output)).CallDeferred();
+        if (output is not null) Callable.From(() => { _ = CheckProvinceReview(output); }).CallDeferred();
         GD.Print("PROVINCE_REVIEW_READY: isolated presentation fixtures; no Plains rules executed.");
     }
 
     private void PrepareProvinceReview()
     {
+        _provinceReviewPicker?.Select(_provinceReviewScenario);
         var snapshot = _provinceReviewSeed!.GetView(_provinceReviewSeat);
         var visible = CardCatalog.Cards.Values.Where(c => !c.ScenarioOnly && c.Type == CardType.Personality && c.ArtworkKey is not null).ToArray();
         var first = visible.First(c => c.Name.Contains("Hakuseki", StringComparison.Ordinal));
@@ -49,7 +57,7 @@ public partial class Main
         CardView Hidden(int owner, int province, int slot) => new($"hidden-p{owner}-province{province}-slot{slot}", null, owner, Zone.Province, false, false, province, null, 0);
         var players = snapshot.Players.Select(player => player with
         {
-            Hand = [], HandCount = 0, Home = player.Home.Where(c => c.Definition?.Type == CardType.Holding).ToArray(), Army = [],
+            Home = player.Home.Where(c => c.Definition?.Type == CardType.Holding).ToArray(), Army = [],
             Provinces = player.Provinces.Select(province =>
             {
                 if (province.Index != 1 && _provinceReviewScenario != 5) return province;
@@ -104,8 +112,17 @@ public partial class Main
     {
         if (_provinceReviewView is null) return;
         _provinceReviewView = null; _provinceReviewSeed = null; _motionView = null;
+        _provinceReviewPicker = null;
         if (_provinceReviewBar is not null) { _provinceReviewBar.GetParent().RemoveChild(_provinceReviewBar); _provinceReviewBar.QueueFree(); _provinceReviewBar = null; }
         if (_provinceOrderTray is not null) { _provinceOrderTray.GetParent().RemoveChild(_provinceOrderTray); _provinceOrderTray.QueueFree(); _provinceOrderTray = null; }
         _selected = null; _tableLayoutSeen = false; _cameraFitted = true;
+    }
+
+    private async Task CaptureProvinceStartup(string path)
+    {
+        for (var i = 0; i < 12; i++) await CoverageFrames();
+        if (_provinceReviewView is null) return;
+        using var image = GetViewport().GetTexture().GetImage();
+        image.SavePng(path);
     }
 }

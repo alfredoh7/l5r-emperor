@@ -236,7 +236,13 @@ public partial class Main
             if (province.Region is { } region)
             {
                 Place(area, Tile(region, true, 164, CardHeight), x, 0, 164, PlaneHeight(CardHeight));
-                var divider = new ColorRect { Color = new Color(.62f, .49f, .27f, .38f), MouseFilter = Control.MouseFilterEnum.Ignore };
+                if (slots.Length > 1)
+                {
+                    var label = Palette.Text("REGION", 16, Palette.PaperDim);
+                    label.HorizontalAlignment = HorizontalAlignment.Center;
+                    Place(area, label, x, -30, 164, 25);
+                }
+                var divider = new ColorRect { Color = new Color(.62f, .49f, .27f, .65f), MouseFilter = Control.MouseFilterEnum.Ignore };
                 Place(area, divider, x + 175, 8, 1, PlaneHeight(CardHeight) - 16);
                 x += 184;
             }

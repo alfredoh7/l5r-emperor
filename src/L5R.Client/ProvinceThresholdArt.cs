@@ -94,8 +94,11 @@ public static class ProvinceThresholdArt
                 if (left > 0)
                 {
                     // Extend plain rails; never stretch the roof or the single circular province number.
-                    canvas.DrawTextureRectRegion(art, new Rect2(0, destY[2], left, footHeight), new Rect2(30, sourceY[2], 12, bottom), tint);
-                    canvas.DrawTextureRectRegion(art, new Rect2(left + gateWidth, destY[2], left, footHeight), new Rect2(218, sourceY[2], 12, bottom), tint);
+                    var railY = size.Y - 21 * scale;
+                    canvas.DrawTextureRectRegion(art, new Rect2(0, railY, left, 12 * scale), new Rect2(60,334,24,12), tint);
+                    canvas.DrawTextureRectRegion(art, new Rect2(left + gateWidth, railY, left, 12 * scale), new Rect2(60,334,24,12), tint);
+                    canvas.DrawTextureRectRegion(art, new Rect2(0, destY[2], 12 * scale, footHeight - 9 * scale), new Rect2(0,200,12,40), tint);
+                    canvas.DrawTextureRectRegion(art, new Rect2(size.X - 14 * scale, destY[2], 14 * scale, footHeight - 9 * scale), new Rect2(244,200,14,40), tint);
                 }
                 canvas.DrawTextureRectRegion(art, new Rect2(left, destY[2], gateWidth, footHeight), new Rect2(0, sourceY[2], source.X, bottom), tint);
                 continue;

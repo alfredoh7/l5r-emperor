@@ -43,12 +43,12 @@ public partial class Main
         {
             var item = new VBoxContainer { CustomMinimumSize = new Vector2(170, 0) };
             var label = selected is null ? "DYNASTY " + ProvincePresentation.SlotName(slot.Index)
-                : Array.IndexOf(selected.Slots, slot.Index) switch { 0 => "1ST", 1 => "2ND", _ => "—" };
+                : ProvincePresentation.SlotName(slot.Index) + " · " + (Array.IndexOf(selected.Slots, slot.Index) switch { 0 => "1ST", 1 => "2ND", _ => "—" });
             var heading = Palette.Text(label, 19, Palette.Gold); heading.HorizontalAlignment = HorizontalAlignment.Center; item.AddChild(heading);
             if (slot.Card is { } card)
             {
                 var face = new CardTile(card, true, _ => SelectFirstProvinceSlot(slot.Index), _ => { })
-                { CustomMinimumSize = new Vector2(170, 226), FaceHeight = 214, ReducedMotion = _reducedMotion,
+                { CustomMinimumSize = new Vector2(170, 226), FaceHeight = 214, ReducedMotion = _reducedMotion, QuietSelection = true,
                     Highlighted = selected?.Slots.FirstOrDefault(-1) == slot.Index,
                     ContextHelp = "Choose this slot first. Confirm the order below." };
                 item.AddChild(face);

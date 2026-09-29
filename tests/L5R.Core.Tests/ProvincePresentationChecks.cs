@@ -20,8 +20,28 @@ public static class ProvincePresentationChecks
         Require(ProvincePresentation.Cards(roundTrip).Count() == 1 && ProvincePresentation.Cards(roundTrip).Single().Id == hidden.Id,
             "Legacy Card was duplicated after explicit slot payload replaced it.");
         Require(ProvincePresentation.Slots(original with { HoldsNoDynastyCards = true }).Length == 0, "No-Dynasty province gained an inferred slot.");
+        Require(ProvincePresentation.Cards(original with { DynastySlots = [new(0, hidden)] }).Single().Id == hidden.Id,
+            "Explicit single hidden slot inherited a legacy face.");
+        Require(!ProvincePresentation.Cards(original with { DynastySlots = [new(0, null)] }).Any(),
+            "Explicit single empty slot inherited a legacy face.");
         var oldJson = "{\"Index\":0,\"Strength\":5,\"Destroyed\":false,\"Card\":null,\"Region\":null}";
         Require(ProvincePresentation.Slots(JsonSerializer.Deserialize<ProvinceView>(oldJson)!).Length == 1, "Older wire payload rejected.");
+    }
+
+    public static void BattleReceipts()
+    {
+        var view = MatchEngine.CreatePublishedMatch(91).GetView(0);
+        var definition = CardCatalog.Cards.Values.First(c => c.Type == CardType.Personality && !c.ScenarioOnly);
+        var a = new CardView("receipt-a", definition, 0, Zone.Province, true, false, 1, null, definition.Force);
+        var b = a with { Id = "receipt-b" };
+        var before = view with { Phase = Phase.Battle, Events = [], Players = view.Players.Select(p => p.Id != 0 ? p : p with
+        { Provinces = p.Provinces.Select(province => province.Index != 1 ? province : province with
+            { Card = null, DynastySlots = [new(0,a),new(1,b)] }).ToArray() }).ToArray() };
+        var after = before with { Version = before.Version + 1, Events = [new(1,"battleResolved","Battle resolved")], Players = before.Players.Select(p => p.Id != 0 ? p : p with
+        { Provinces = p.Provinces.Select(province => province.Index != 1 ? province : province with { Destroyed = true, DynastySlots = [] }).ToArray(),
+            Discard = [..p.Discard, a with { Zone = Zone.DynastyDiscard }, b with { Zone = Zone.DynastyDiscard }] }).ToArray() };
+        var journal = new BattleJournal(); journal.Observe(before,null); journal.Observe(after,before);
+        Require(journal.Aftermath.Count(r => r.CardId is "receipt-a" or "receipt-b") == 2, "Battle history omitted a province slot.");
     }
 
     public static void DecisionFreshness()

@@ -11,24 +11,29 @@ public partial class Main
             System.IO.Directory.CreateDirectory(directory);
             async Task Capture(string name)
             {
-                MoveProbeMouse(_menu.GetGlobalRect().GetCenter()); HideTableTooltip();
+                MoveProbeMouse(new Vector2(8, GetViewport().GetVisibleRect().Size.Y / 2)); HideTableTooltip();
                 await CoverageFrames();
                 using var image = GetViewport().GetTexture().GetImage();
                 RequireCamera(image.SavePng(System.IO.Path.Combine(directory, name + ".png")) == Error.Ok, "province capture failed");
             }
             await CoverageFrames(); await CoverageFocus();
             _reducedMotion = true; PrepareProvinceReview(); await CoverageFrames();
+            await Capture("00-initial");
             foreach (var id in new[] { "preview-0-1-a", "preview-0-1-b", "preview-region-0-1" })
             {
+                await CoverageFocus();
                 var tile = _tiles.Single(t => t.Card.Id == id);
+                RequireCamera(tile.Card.Definition is { } definition && CardTile.Artwork(definition) is not null,
+                    "full scan missing for " + id);
                 var point = ScreenCenter(tile); MoveProbeMouse(point);
                 CameraMouse(MouseButton.Left, true, point); CameraMouse(MouseButton.Left, false, point);
-                RequireCamera(_selected?.Id == id, "independent province selection: " + id);
+                RequireCamera(_selected?.Id == id, $"independent province selection: {id}; selected={_selected?.Id}, point={point}, pointer={PointerOnTable(point)}, blocked={CameraBlocked}, focus={GetWindow().HasFocus()}, hovered={TableHovered?.Name}");
                 await CoverageFrames();
             }
             DeselectCard(); await Capture("01-two-cards");
             _provinceReviewScenario = 1; PrepareProvinceReview(); await CoverageFrames();
             var hidden = _tiles.Single(t => t.Card.Id == "hidden-p0-province1-slot1");
+            await CoverageFocus();
             var hiddenPoint = ScreenCenter(hidden); MoveProbeMouse(hiddenPoint);
             CameraMouse(MouseButton.Left, true, hiddenPoint); CameraMouse(MouseButton.Left, false, hiddenPoint);
             RequireCamera(_selected is { Definition: null, FaceUp: false }, "face-down slot inspection disclosed identity");
@@ -36,8 +41,23 @@ public partial class Main
             _provinceReviewScenario = 2; PrepareProvinceReview(); await CoverageFrames();
             RequireCamera(_provinceOrderConfirm!.Disabled, "order preselected without input");
             var staleId = View.PendingProvinceOrder!.Id; var staleVersion = View.Version;
-            SelectFirstProvinceSlot(1); await Capture("03-order-tray");
+            if (Self.Hand.FirstOrDefault() is { } handCard) SelectCard(handCard);
+            var firstChoice = HudDescendants(_provinceOrderTray!).OfType<CardTile>().Single(t => t.Card.Id == "hidden-p0-province1-slot1");
+            await CoverageFocus();
+            var choicePoint = firstChoice.GetGlobalRect().GetCenter(); MoveProbeMouse(choicePoint);
+            CameraMouse(MouseButton.Left, true, choicePoint); CameraMouse(MouseButton.Left, false, choicePoint);
+            await CoverageFrames();
+            RequireCamera(_provinceOrderSelection == "b-a", "native slot choice was blocked by hand or board input");
+            await Capture("03-order-tray");
+            // Exercise the production layout path without the fixture toolbar guard.
+            var reviewBar = _provinceReviewBar; _provinceReviewBar = null;
+            GetWindow().Size = new Vector2I(1440,900); await CoverageFrames();
+            RequireCamera(_provinceOrderTray!.Position.X >= 144 && _provinceOrderTray.GetRect().End.X < _layoutWidth - SidebarWidth,
+                "resizing a live tray obscured its confirmation behind the sidebar");
+            _provinceReviewBar = reviewBar;
+            GetWindow().Size = new Vector2I(1920,1080); await CoverageFrames();
             RequireCamera(!_provinceOrderConfirm!.Disabled, "valid order cannot be confirmed");
+            await CoverageFocus();
             var confirmPoint = _provinceOrderConfirm.GetGlobalRect().GetCenter(); MoveProbeMouse(confirmPoint);
             CameraMouse(MouseButton.Left, true, confirmPoint); CameraMouse(MouseButton.Left, false, confirmPoint);
             await CoverageFrames();

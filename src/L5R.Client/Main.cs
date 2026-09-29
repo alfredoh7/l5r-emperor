@@ -90,7 +90,12 @@ public partial class Main : Node
         _table = new TableArtStage { ReviewMode = false }; AddChild(_table);
         BuildShell();
         InitializeFrontend();
-        if(OS.GetCmdlineUserArgs().Contains("--province-review")){StartProvinceReview();return;}
+        if(OS.GetCmdlineUserArgs().Contains("--province-review") || _captureMode == "province-review")
+        {
+            var startupCapture = _capturePath; _capturePath = null; StartProvinceReview();
+            if (startupCapture is not null) Callable.From(() => { _ = CaptureProvinceStartup(startupCapture); }).CallDeferred();
+            return;
+        }
         if(OS.GetCmdlineUserArgs().Contains("--duel-match-review")){StartMatchDuelCapture();return;}
         if(OS.GetCmdlineUserArgs().Contains("--duel-transition-review")){StartTransitionReview();return;}
         if (_capturePath is null || _captureMode.StartsWith("menu", StringComparison.Ordinal)) return;
