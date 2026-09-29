@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "slug": "two-dynasty-province",
+  "title": "Two Dynasty Cards in One Province",
+  "source_pr": 544,
+  "source_commit": "b3138044194cf159070131899a558779a62d990f",
+  "revision": 2,
+  "reviewer": "mdornbrook",
+  "summary": "Alfredo approved the shared province layout and temporary ordering tray. Please review the native UI and proposed view/command contract for the province portion of #499.",
+  "review_steps": [
+    "Extract the ZIP and open Start Review.cmd. It opens directly to the prepared two-card province.",
+    "Inspect the attached Region and each Dynasty card independently. Confirm that they share one province perimeter and number, while Dynasty slots A and B are distinct.",
+    "Use the scenario selector for a concealed second slot, an empty slot and a crowded row. Inspect each card and use Other seat to check both player views.",
+    "Choose reveal order or refill order, select A or B first, and confirm. The temporary tray should disappear and report the chosen order. This fixture deliberately does not execute card effects.",
+    "Resize the window and use Focus province to recenter. Check full scans, labels, separate click targets, tray readability and room around the cards.",
+    "Review docs/decisions/2026-09-29-two-dynasty-province.md on PR #544 for the proposed view/command contract. Report UI/QoL or contract changes on Send Feedback.url before engine integration."
+  ],
+  "known_limitations": [
+    "Alfredo approved the concept direction; native playability and mechanical acceptance remain for Mendon. Nothing has been merged into main.",
+    "This is an isolated presentation fixture with real period scans and intercepted order confirmations. Plains of Otosan Uchi is not made playable by this preview.",
+    "The proposed DTO/client contract awaits Mendon review. Authoritative multi-slot state, reveal/resolve/refill/purchase/destruction, private-view production, save/replay, AI and reconnect wiring are follow-up engine work.",
+    "Province-less battlefields and the other pending choices in #499 are outside this preview.",
+    "Automated Windows packaging/runtime checks do not establish native Windows graphical playability or expert rules acceptance.",
+    "Obsolete standalone DuelArenaReview art iterations are source-only; the Windows export keeps current CrimsonDuel gameplay and all card scans."
+  ],
+  "scenarios": [
+    {
+      "name": "Start Review",
+      "mode": "province-review"
+    },
+    {
+      "name": "Open Full Game",
+      "mode": null
+    }
+  ]
+}

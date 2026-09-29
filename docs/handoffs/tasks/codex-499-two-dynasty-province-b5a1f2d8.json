@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Implemented and natively validated the approved two-Dynasty province view/client and isolated review. Removed obsolete art-review resources from the Windows export to keep its single portable ZIP within GitHub release limits.",
-  "validation": "Client build and changed-file formatting passed. Full skip-client checks: 2214 C# PASS records and 275 Python checks. Native province input/privacy/order/stale/seat/resize checks and compact board/court/projection passed. Clickable Mac review app opened successfully. Four independent governance-lite reviews completed and confirmed defects corrected. First full Windows export validated but its 2477749433-byte ZIP was too large to publish; revised export validation underway.",
-  "remaining": "Validate and publish smaller Windows package, wait CI, notify Mendon. Mendon review of view/command contract and native Windows play remains. Full Plains engine behavior and other #499 work remain outside this UI scope. No merge authorized.",
+  "summary": "Implemented approved two-Dynasty province view/client, temporary ordering tray, isolated six-scenario review and working local launcher. Staged a self-contained Windows preview from b313804419; obsolete art-review resources are excluded from the Windows export to fit the release asset limit.",
+  "validation": "Client build and changed-file formatting passed. Full skip-client checks: 2214 C# PASS records and 275 Python checks. Native province input/privacy/order/stale/seat/resize and compact board/court/projection checks passed. Local Mac app opened and visually verified. Windows strict export passed; isolated exported-PCK check passed 1676 retained assets, 19 model dependency loads and 55 obsolete exclusions. Uploaded 2086886320-byte ZIP size/SHA256 verified against GitHub. Windows review-package CI is triggered by this delivery commit; final publication/notification evidence is recorded on PR #544 after that check passes.",
+  "remaining": "Await Windows delivery CI before notifying Mendon. Mendon reviews native Windows play and proposed shared view/command contract. Full authoritative Plains mechanics and other #499 requests remain separate engine work. No merge authorized.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/499",
   "branch": "codex/499-two-dynasty-province",
-  "updated": "2026-09-29T20:21:47.587976+00:00"
+  "updated": "2026-09-29T20:29:20.963115+00:00"
 }

@@ -2,7 +2,7 @@
 
 Part of issue #499; draft PR #544. Alfredo approved A's shared horizontal layout with C's temporary ordering cues. The contract is in [the decision](decisions/2026-09-29-two-dynasty-province.md).
 
-Open **Review Two Dynasty Cards.command**, or the locally generated **L5R Two Dynasty Cards - Review.app**. This launches the exact checkout with no branch switching or fetching. On Windows, the versioned portable preview will supply Start Review.cmd once validated.
+Open **Review Two Dynasty Cards.command**, or the locally generated **L5R Two Dynasty Cards - Review.app**. This launches the exact checkout with no branch switching or fetching. The [versioned Windows review](https://github.com/alfredoh7/l5r-emperor/releases/tag/preview-pr544-b313804419-r2-windows) supplies Start Review.cmd. Its release title and PR checks distinguish a validation candidate from a ready review.
 
 The scenario selector provides two visible cards, a concealed second slot, reveal order, refill order, an empty second slot and a crowded row. Other seat switches between independently prepared views. Selecting a card inspects its complete scan; the province perimeter and number are shared. In the order tray select A or B first, then confirm. The tray disappears and the preview reports the chosen order without executing a game effect.
 
@@ -24,3 +24,5 @@ Runtime keeps the existing approved province and lacquer artwork and full origin
 ## Windows distribution size
 
 The first full export exceeded GitHub’s 2 GiB per-asset limit (2,477,749,433 bytes). The Windows preset now omits old standalone DuelArenaReview v3–v6 scenery, the unused war-room-m1/aged-column/chest/table-lantern assets and obsolete m4/m6 floor maps. These sources remain in Git and Mac development imports. Current gameplay uses CrimsonDuel and the B3 layout with column-timber-m7, chest-m7, stone-a/b-m7, dais-fit-m7, brazier/coals, room lanterns and the m7 floor map. Original card scans and the full catalogue pack remain included. Exported runtime resource/dependency checks cover the retained assets; historical source-only DuelArenaReview is not a Windows package entry point.
+
+The revised portable ZIP is 2,086,886,320 bytes, pinned to game source `b3138044194cf159070131899a558779a62d990f`. An isolated Godot process mounted the exported PCK without a source checkout fallback: 1,676 retained resources exist, all 19 retained GLB models load with their dependencies, and 55 obsolete resources are absent. No resource/script errors occurred. The Mac `.app` launcher was opened and visually verified at the two-card province. The package receipt and hosted Windows check carry the final distribution evidence; Mendon's graphical acceptance remains separate.
