@@ -1,9 +1,9 @@
 {
   "lane": "shared",
   "summary": "Rung 9: four governance reviewer profiles and mirrored skill; read-only diff contract ledger with advisory Actions summary; explicit client-lane PR checklist.",
-  "validation": "71 collaboration tests: 70 passed, 1 Windows symlink skip; 27 hooks and 9 security tests passed; historical #504 contract sets matched independently; four roles reviewed and parser fixes rechecked; policy/zizmor, skill validator/mirror, lint and diff checks passed.",
-  "remaining": "Leave PR unmerged for Mendon review; hosted CI must exercise Linux symlink case. Ledger is heuristic and needs semantic supplement; no native UI/gameplay or Claude-session acceptance claimed.",
+  "validation": "71 collaboration tests: 70 passed, 1 Windows symlink skip; 27 hooks and 9 security tests passed; #504 contract sets matched independently; four roles reviewed and parser fixes rechecked; policy/zizmor, skill/mirror, lint and diff checks passed. Hosted jobs rejected before execution by GitHub account payment/spending-limit block.",
+  "remaining": "PR #543 ready for review and unmerged. Resolve GitHub account billing/spending-limit block, then rerun relevant CI including Linux containment and ledger summary; Mac was queued. Ledger needs semantic supplement; no native UI/gameplay or Claude-session acceptance claimed.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/509",
   "branch": "codex/509-pr-ladder-rung9",
-  "updated": "2026-09-29T11:31:53.670739+00:00"
+  "updated": "2026-09-29T11:35:18.212584+00:00"
 }
