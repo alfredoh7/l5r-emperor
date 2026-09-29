@@ -9,22 +9,32 @@ internal static class HoukenOpenActionTests
 
     private static void Open()
     {
-        var state = Batch336Support.Table(Phase.Action, 0);
-        var houken = Batch336Support.Add(state, "oracle-l5r-10053", 0, Zone.Home, bowed: true);
-        var game = MatchEngine.FromTestState(state);
-        var command = Batch336Support.Enabled(game, 0, "houken-exp-straighten", houken.Id).Command!;
-        Batch336Support.Check(game.Execute(command).Accepted);
-        Batch336Support.Check(!game.State.Cards[houken.Id].Bowed && game.State.Cards[houken.Id].Zone == Zone.Home);
+        for (var controller = 0; controller < 2; controller++)
+        {
+            var state = Batch336Support.Table(Phase.Action, controller);
+            var houken = Batch336Support.Add(state, "oracle-l5r-10053", controller, Zone.Home, bowed: true);
+            var game = MatchEngine.FromTestState(state);
+            var command = Batch336Support.Enabled(game, controller, "houken-exp-straighten", houken.Id).Command!;
+            Batch336Support.Check(game.Execute(command).Accepted);
+            var after = game.State.Cards[houken.Id];
+            Batch336Support.Check(!after.Bowed && after.Zone == Zone.Home);
+            Batch336Support.Check(after.OwnerId == controller && after.OriginalOwnerId is null, "Houken must retain his controller and owner.");
+        }
     }
 
     private static void Battle()
     {
-        var state = Batch336Support.Table(Phase.Battle, 0);
-        var houken = Batch336Support.Add(state, "oracle-l5r-10053", 0, Zone.Home, bowed: true);
-        Batch336Support.Add(state, "training-crane-samurai", 1, Zone.Battlefield, province: 0);
-        var game = MatchEngine.FromTestState(state);
-        var command = Batch336Support.Enabled(game, 0, "houken-exp-straighten", houken.Id).Command!;
-        Batch336Support.Check(game.Execute(command).Accepted);
-        Batch336Support.Check(!game.State.Cards[houken.Id].Bowed && game.State.Cards[houken.Id].Zone == Zone.Battlefield);
+        for (var controller = 0; controller < 2; controller++)
+        {
+            var state = Batch336Support.Table(Phase.Battle, controller);
+            var houken = Batch336Support.Add(state, "oracle-l5r-10053", controller, Zone.Home, bowed: true);
+            Batch336Support.Add(state, "training-crane-samurai", 1 - controller, Zone.Battlefield, province: 0);
+            var game = MatchEngine.FromTestState(state);
+            var command = Batch336Support.Enabled(game, controller, "houken-exp-straighten", houken.Id).Command!;
+            Batch336Support.Check(game.Execute(command).Accepted);
+            var after = game.State.Cards[houken.Id];
+            Batch336Support.Check(!after.Bowed && after.Zone == Zone.Battlefield && after.ProvinceIndex == 0);
+            Batch336Support.Check(after.OwnerId == controller && after.OriginalOwnerId is null, "Moving to an opposed battlefield must not transfer control.");
+        }
     }
 }

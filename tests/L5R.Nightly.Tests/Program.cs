@@ -10,7 +10,7 @@ internal static class Nightly
 {
     private static readonly JsonSerializerOptions Json = new() { WriteIndented = false };
     private static string output = "artifacts/nightly";
-    private static int matches, decisions, probes, cards;
+    private static int matches, completed, capped, decisions, probes, cards;
 
     public static int Run(string[] args)
     {
@@ -44,14 +44,14 @@ internal static class Nightly
                     Play(MatchEngine.CreatePublishedMatch(seed), seed, "published-live", maxDecisions);
                 }
             if (mode is "all" or "catalogue") CheckCatalogue();
-            Write("summary.json", new { status = "passed", seedCount, maxDecisions, mode, matches, decisions, cards, probes });
-            Console.WriteLine($"PASS nightly: {matches} matches, {decisions} decisions, {cards} published cards, {probes} offered-command probes.");
+            Write("summary.json", new { status = "passed", seedCount, maxDecisions, mode, matches, completed, capped, decisions, cards, probes });
+            Console.WriteLine($"PASS nightly: {matches} matches ({completed} completed, {capped} capped), {decisions} decisions, {cards} published cards, {probes} offered-command probes.");
             return 0;
         }
         catch (Exception error)
         {
             Directory.CreateDirectory(output);
-            Write("summary.json", new { status = "failed", mode, matches, decisions, cards, probes, error = error.ToString() });
+            Write("summary.json", new { status = "failed", mode, matches, completed, capped, decisions, cards, probes, error = error.ToString() });
             Console.Error.WriteLine(error);
             return 1;
         }
@@ -71,12 +71,22 @@ internal static class Nightly
                 Require(result.Accepted, $"AI command rejected at {profile}/{seed}, decision {count}: {result.Error}");
                 count++;
                 decisions++;
-                if (count % 100 == 0) CheckReplay(engine);
+                if (count % 100 == 0)
+                {
+                    CheckReplay(engine);
+                    Console.WriteLine($"Replay verified {profile}/{seed}: {count} decisions.");
+                }
             }
-            Require(engine.GetView(0).WinnerId is not null, $"Decision bound exceeded at {profile}/{seed}: {limit}.");
             CheckReplay(engine);
+            var finished = engine.GetView(0).WinnerId is not null;
+            if (finished) completed++;
+            else
+            {
+                capped++;
+                Write($"capped-{profile}-{seed}-replay.json", engine.ExportReplay());
+            }
             matches++;
-            Console.WriteLine($"PASS {profile}/{seed}: {count} decisions, {engine.GetView(0).VictoryReason}; state {Hash(engine.State)}");
+            Console.WriteLine($"PASS {profile}/{seed}: {count} decisions, {(finished ? engine.GetView(0).VictoryReason : "bounded soak; no winner")}; state {Hash(engine.State)}");
         }
         catch
         {

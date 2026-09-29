@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Rung 7 nightly workflow and runner implemented; complete baseline running. Catalogue discovered Houken Open null-battle failure; migrated its effect to a registered hook with a guarded battle destination. Legacy formatting isolated in its own commit.",
-  "validation": "Nightly build: 0 warnings/errors; focused Houken Open/Battle: 2/2; reporter units: 8/8. Injected runner failure automatically opened acceptance issue #535, repeated report reused it, then issue closed. Full default nightly and rules checks in progress.",
-  "remaining": "Finish full default 64-match/replay/catalogue baseline and full rules check; record results and ready PR #534. Scheduled/manual workflow activates after merge to default branch. Do not merge this PR.",
+  "summary": "Rung 7 separate nightly workflow, extended bounded AI/replay soaks and all-published-card command sweep. Fixed Houken missing-battle crash with a one-line guard in existing dispatch; no controller/ownership changes. Whitespace formatting isolated.",
+  "validation": "Nightly/reporter build checks and injected real GitHub issue #535 creation/reuse/closure verified. Reporter 8/8. Full rules run identified source-audit integration mismatch in hook migration; retaining the existing dispatch resolves it. Final baseline and full rules rerun pending. AI mutual-passing seed tracked in #536; capped games counted separately and retained.",
+  "remaining": "Complete final full baseline and rules rerun, verify both-controller Houken regression assertions, record evidence and ready PR #534. Do not merge; nightly activates on default branch after merge.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/509",
   "branch": "codex/509-pr-ladder-rung7",
-  "updated": "2026-09-29T08:45:24.730957+00:00"
+  "updated": "2026-09-29T08:57:16.010531+00:00"
 }

@@ -9133,6 +9133,11 @@ public sealed partial class MatchEngine
             case "nubane-bow": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;
             case "hatsuto-weaken": ApplyModifier(target!, source!.Id, id, "Force", -3); break;
             case "houken-straighten": StraightenUnit(target!); break;
+            case "houken-exp-straighten":
+                StraightenUnit(source!);
+                if (_state.CurrentBattleProvince is int houkenBattlefield && Army(1 - player.Id, houkenBattlefield).Any()) MoveToBattlefield(source!, houkenBattlefield);
+                else MoveHome(source!, false);
+                break;
             case "kojinrue-destroy": DestroyUnits([target!], actingPlayerId: player.Id); break;
             case "xijkt-bow":
                 if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
