@@ -32,3 +32,5 @@ Check `gh issue list --state open --label nightly-broken` before merging. While 
 To inspect/report an actual failure locally, run `python tools/nightly/report_failure.py --repository alfredoh7/l5r-emperor --commit COMMIT_SHA --run-url REPOSITORY_EVIDENCE_URL --summary artifacts/nightly/summary.json`. Missing summaries still report infrastructure failures with the run link. --acceptance uses a separate marker and a clearly labelled test issue, allowing deliberate failure testing without representing a defect on main. Close that temporary issue after verifying creation and reuse. Never run an injected failure as evidence of a game regression.
 
 Reporter unit tests: `python -m unittest discover -s tools/nightly -p 'test_*.py' -v`. These are fast and run in the nightly workflow; the long runner is deliberately absent from tools/check.sh and the solution's normal test loop.
+
+The initial full local baseline and deliberate issue-reporting acceptance are recorded in [the Rung 7 decision](decisions/2026-09-29-nightly-validation.md): 64 bounded soaks, 20,727 decisions and 47,784 probes across 1,419 definitions, with zero probe failures.

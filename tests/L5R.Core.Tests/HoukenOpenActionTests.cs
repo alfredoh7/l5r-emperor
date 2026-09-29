@@ -4,7 +4,7 @@ internal static class HoukenOpenActionTests
 {
     public static void Run(TestRunner runner) => runner.Run("nightly-houken", [
         ("Offered Open action outside a battle straightens the unit without throwing", Open),
-        ("Battle path still straightens Houken and joins an opposing army", Battle)
+        ("Battle path straightens Houken and moves to an opposed battlefield without changing control", Battle)
     ]);
 
     private static void Open()
