@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Starting Rung 9 governance-lite: reviewer recipes and a diff-based client-contract ledger.",
+  "validation": "Confirmed #537 merged and branched from current origin/main; implementation checks not yet run.",
+  "remaining": "Implement ledger, four reviewer profiles and skill; compare #504 acceptance; run checks; leave PR unmerged.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/509",
+  "branch": "codex/509-pr-ladder-rung9",
+  "updated": "2026-09-29T11:10:08.772934+00:00"
+}
