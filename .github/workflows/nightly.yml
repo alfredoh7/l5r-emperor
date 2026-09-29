@@ -1,0 +1,93 @@
+name: Nightly validation
+
+on:
+  schedule:
+    - cron: '23 3 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: nightly-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  validation:
+    name: Seeded soak, replay and published commands
+    runs-on: windows-2022
+    timeout-minutes: 45
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /*
+            !/assets/
+            !/docs/
+            !/src/L5R.Client/
+            !/content/oracle/
+            !/content/legacy/
+            !/content/web-research/
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install pinned rules SDK only
+        run: python tools/bootstrap.py --install --dotnet-only
+      - name: Check nightly issue reporting regressions
+        run: python -m unittest discover -s tools/nightly -p 'test_*.py' -v
+      - name: Build nightly runner
+        run: |
+          $env:DOTNET_ROOT = "$pwd/.tools/dotnet"
+          $env:PATH = "$env:DOTNET_ROOT;$env:PATH"
+          $env:DOTNET_CLI_HOME = "$pwd/.cache/dotnet"
+          dotnet build tests/L5R.Nightly.Tests/L5R.Nightly.Tests.csproj --disable-build-servers -p:UseSharedCompilation=false -m:1 --nologo
+      - name: Run extended checks
+        run: |
+          $env:DOTNET_ROOT = "$pwd/.tools/dotnet"
+          $env:PATH = "$env:DOTNET_ROOT;$env:PATH"
+          $env:DOTNET_CLI_HOME = "$pwd/.cache/dotnet"
+          New-Item -ItemType Directory -Force artifacts/nightly | Out-Null
+          & dotnet tests/L5R.Nightly.Tests/bin/Debug/net10.0/L5R.Nightly.Tests.dll --output artifacts/nightly *> artifacts/nightly/run.log
+          $nightlyExit = $LASTEXITCODE
+          Get-Content artifacts/nightly/run.log -Tail 20
+          exit $nightlyExit
+      - name: Preserve summary, coverage and reproduction evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nightly-evidence
+          path: artifacts/nightly/
+          if-no-files-found: ignore
+          retention-days: 14
+
+  report:
+    name: Report failed main nightly
+    needs: validation
+    if: always() && needs.validation.result == 'failure' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+          sparse-checkout: tools/nightly
+      - uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: nightly-evidence
+          path: artifacts/nightly
+      - name: Open or update nightly-broken issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NIGHTLY_REPOSITORY: ${{ github.repository }}
+          NIGHTLY_COMMIT: ${{ github.sha }}
+          NIGHTLY_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: python3 tools/nightly/report_failure.py --repository "$NIGHTLY_REPOSITORY" --commit "$NIGHTLY_COMMIT" --run-url "$NIGHTLY_RUN_URL" --summary artifacts/nightly/summary.json
