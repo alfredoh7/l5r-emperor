@@ -47,3 +47,7 @@ Official behavior references: [Codex project instructions](https://learn.chatgpt
 ## Optional authenticated board integration
 
 See [PROJECT_BOARD.md](PROJECT_BOARD.md) for the separate Netlify application and `tools/board.py`. The helper reads live board context when configured, without changing the local-only behavior of `collab.py handoff`. Explicit board claim and handoff commands coordinate executor ownership. Preserve existing GitHub coordination when the service is unavailable. No autonomous developer permission is removed.
+
+## Focused governance review
+
+For requested governance review or a shared card/mechanics pass, [governance-lite](GOVERNANCE_LITE.md) supplies four review profiles and `python tools/collab.py ledger --base origin/main --format markdown`. The ledger is offline/read-only and lists contract candidates, including new choices, commands and public view/state declarations. Reviewers reconcile semantic changes the heuristic cannot detect. Record actual client-lane obligations in the PR template; these reviews are advisory evidence, not additional owner-approval gates.

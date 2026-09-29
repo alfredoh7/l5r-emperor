@@ -23,6 +23,8 @@
       "Bash(python3 tools/collab.py context:*)",
       "Bash(python tools/collab.py audit:*)",
       "Bash(python3 tools/collab.py audit:*)",
+      "Bash(python tools/collab.py ledger:*)",
+      "Bash(python3 tools/collab.py ledger:*)",
       "Bash(python tools/collab.py handoff:*)",
       "Bash(python3 tools/collab.py handoff:*)",
       "Bash(python -m unittest discover -s tools/content:*)",

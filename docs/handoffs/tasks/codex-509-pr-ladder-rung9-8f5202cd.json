@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Starting Rung 9 governance-lite: reviewer recipes and a diff-based client-contract ledger.",
-  "validation": "Confirmed #537 merged and branched from current origin/main; implementation checks not yet run.",
-  "remaining": "Implement ledger, four reviewer profiles and skill; compare #504 acceptance; run checks; leave PR unmerged.",
+  "summary": "Rung 9: four governance reviewer profiles and mirrored skill; read-only diff contract ledger with advisory Actions summary; explicit client-lane PR checklist.",
+  "validation": "71 collaboration tests: 70 passed, 1 Windows symlink skip; 27 hooks and 9 security tests passed; historical #504 contract sets matched independently; four roles reviewed and parser fixes rechecked; policy/zizmor, skill validator/mirror, lint and diff checks passed.",
+  "remaining": "Leave PR unmerged for Mendon review; hosted CI must exercise Linux symlink case. Ledger is heuristic and needs semantic supplement; no native UI/gameplay or Claude-session acceptance claimed.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/509",
   "branch": "codex/509-pr-ladder-rung9",
-  "updated": "2026-09-29T11:10:08.772934+00:00"
+  "updated": "2026-09-29T11:31:53.670739+00:00"
 }
