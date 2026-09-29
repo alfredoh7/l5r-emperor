@@ -1,0 +1,38 @@
+[
+  {
+    "card_id": "oracle-l5r-9883",
+    "printing_set": [
+      "The Shadow's Embrace"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=9883",
+    "image_path": "assets/reference/oracle/the-shadow-s-embrace/webp/oracle-l5r-9883-printing-1-image-1.webp",
+    "image_sha256": "5a8ae8309f7c449208c428b023c75755ef81b254134e5f74d05c5a1be93dafdd"
+  },
+  {
+    "card_id": "oracle-l5r-9749",
+    "printing_set": [
+      "Promotional&ndash;Celestial"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=9749",
+    "image_path": "assets/requested-scans/readied-blade.png",
+    "image_sha256": "51e06e8b239cc9c02e174a4419ae82601b3130804ba209a10d2449371372012c"
+  },
+  {
+    "card_id": "user-scan-kakita-armor",
+    "printing_set": [
+      "User-supplied scan"
+    ],
+    "source_url": "user-supplied-in-chat-2026-09-29",
+    "image_path": "assets/requested-scans/kakita-armor.png",
+    "image_sha256": "3e4587cc24ed749407cc08cf28410c5f1e87b941e52622552e00f9ab13c2eee6"
+  },
+  {
+    "card_id": "user-scan-air-yari",
+    "printing_set": [
+      "User-supplied scan"
+    ],
+    "source_url": "user-supplied-in-chat-2026-09-29",
+    "image_path": "assets/requested-scans/air-yari.png",
+    "image_sha256": "20fb1e0ae6eee9789002d3c127e788b912c1ac1f80a6f5d7b7c4483a058ecc82"
+  }
+]

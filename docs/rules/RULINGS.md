@@ -231,3 +231,14 @@ The Killing Grounds fires once per player.
 - **Cards/primitives:** The Killing Grounds.
 - **Date:** 2026-09-25
 - **Source:** [Emperor Edition rulings pass](../decisions/2026-09-25-emperor-edition-rulings-pass.md) (R4)
+
+### R-022 — Personality-destruction Reactions fire on a qualifying play-to-dead transition
+A Reaction to "your Personality is destroyed" is eligible when that Personality leaves play dead,
+including from any action type or battle resolution; marking an already-discarded Personality dead
+does not trigger it. Wording that requires destruction by or as an effect of an action excludes
+battle-resolution deaths, and wording such as "another player's action destroyed" also requires
+that source player.
+
+- **Cards/primitives:** Crippled Sensei (oracle-l5r-9899); play-to-dead destruction Reaction window and action-source filters.
+- **Date:** 2026-09-29
+- **Source:** [Personality-destruction Reaction triggers](../decisions/2026-09-29-personality-destruction-reactions.md) (Mendon's clarifications in this task)

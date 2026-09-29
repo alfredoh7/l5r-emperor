@@ -412,6 +412,7 @@ public sealed partial class MatchEngine
             Consequences = _state.Events.Skip(duel.ResultEventStart).ToArray(),
             Provinces = draft.Provinces.Select(p => p with { After = EffectiveProvinceStrength(Player(p.PlayerId).Provinces[p.Index]) }).ToArray(),
             ResolutionVersion = _state.Version + 1, ReturnPhase = _state.Phase, ReturnPriority = _state.PriorityPlayerId } };
+        FinishSwordForHireDuel(duel.AbilityId, duel.ChallengerId);
         _state.PendingDuel = null;
         if (duel.RingsBowedBefore is { } duelRings) RecordBowedRings(duelRings.ToHashSet()); // Deception Revealed (Mendon's R4 ruling): a Ring the duel's action bowed goes on its record (a Focus Effect's bows do not: ApplyDuelFocusEffect).
         ApplyHesMineBows(duel.ChallengerId, duel.ChallengedId); // He's Mine! (Emperor Edition remaining-cards pass, issue #492, group B): the substitute bows once the duel has ended.
@@ -489,6 +490,7 @@ public sealed partial class MatchEngine
         switch (abilityId)
         {
             case "steel-on-steel-duel": DestroyUnits(loserIds.Select(Card).ToArray(), actingPlayerId: challengerPlayerId); break;
+            case "sword-for-hire-create": DestroyUnits(loserIds.Select(Card).ToArray(), actingPlayerId: challengerPlayerId); break;
             case "training-duel-force": case "training-duel-honor": case "training-duel-open":
             case "training-duel-challenge": foreach (var id in loserIds) ApplyModifier(Card(id), id, abilityId, "Force", -1); break;
             // Dragon Clan review (issue #207): three real self-performer Iaijutsu duels.

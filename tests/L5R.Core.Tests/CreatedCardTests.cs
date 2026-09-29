@@ -102,7 +102,8 @@ internal static class CreatedCardTests
             Check(!AbilityCatalog.All[id].Target.Contains("proxy"), "no ability names a card in its target");
         }
         Eq(CreatedCards.Resolve(new(CardType.Personality, Force: 2, Chi: 2, PersonalHonor: 3, Keywords: ["Ancestor", "Lion Clan", "Samurai", "Spirit"])).Name, "Lion Ancestor");
-        Check(!CreatedCards.Scans.Any(c => c.Keywords!.Contains("Ancestor") && !c.Keywords.Contains("Lion Clan")), "the catalogue holds no other-Clan Ancestor scan");
+        Check(CreatedCards.Scans.Any(c => c.Id == "user-scan-ancestor-spirit" && c.Keywords!.Contains("Ancestor") && !c.Keywords.Contains("Lion Clan")),
+            "the clan-aligned Ancestor Spirit is now a separate created scan");
     }
 
     private static CardDefinition Scan(string id, CardType type, int force, int chi, string[] keywords, string text = "May not be included in decks.", bool createdOnly = true, int honor = 0) =>

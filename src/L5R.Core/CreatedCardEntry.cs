@@ -34,6 +34,15 @@ public sealed partial class MatchEngine
         if (!CreatedCards.IsAttachment(scan.Type)) throw new InvalidOperationException($"{scan.Name} ({scan.Id}) is a {scan.Type}: creating one is not built.");
         var attachHosts = CreateHosts(command, spec);
         if (attachHosts.Length == 0 && spec.HostOptional) { beforeWindow?.Invoke(); return false; }
+        if (spec.HostOptional)
+        {
+            attachHosts = attachHosts.Where(host =>
+            {
+                try { RequireAttachable(new CardInstance { Id = "created-preview", DefinitionId = scan.Id, OwnerId = player.Id, Zone = Zone.Hand, FaceUp = true }, host, player.Id); return true; }
+                catch (RuleViolation) { return false; }
+            }).ToArray();
+            if (attachHosts.Length == 0) { beforeWindow?.Invoke(); return false; }
+        }
         return CreateAttachments(player.Id, scan, printed, spec, attachHosts, insideEntryWindow, beforeWindow);
     }
 
@@ -51,6 +60,7 @@ public sealed partial class MatchEngine
         spec.HostSlot is not null ? SlotCards(command, spec.HostSlot).ToArray()
         : spec.HostIsEntered ? (_state.PendingChoice?.CardId is { } enteredId && _state.Cards.TryGetValue(enteredId, out var entered) ? [entered] : [])
         : spec.HostIsSource ? (command.CardId is not null && _state.Cards.TryGetValue(command.CardId, out var creator) ? [creator] : [])
+        : spec.HostIsWielder ? (command.CardId is not null && _state.Cards.TryGetValue(command.CardId, out var equipped) && equipped.AttachedTo is { } wielderId && _state.Cards.TryGetValue(wielderId, out var wielder) ? [wielder] : [])
         : spec.HostIsPerformer ? (command.PerformerId is not null && _state.Cards.TryGetValue(command.PerformerId, out var performer) ? [performer] : [])
         : command.AbilityId is not null && AbilityCatalog.All.TryGetValue(command.AbilityId, out var creatorAbility) && creatorAbility.Slots?.FirstOrDefault(s => !s.IsPlayer && !s.Performing && !s.AtResolution) is { } hostSlot
             ? SlotCards(command, hostSlot.Id).ToArray()
@@ -77,6 +87,7 @@ public sealed partial class MatchEngine
         var hosts = CreateHosts(command, spec);
         if (hosts.Length == 0 && spec.HostOptional) return;
         Require(hosts.Length > 0, spec.HostIsPerformer ? "Choose the performing Personality." : "Choose a Personality to attach it to.");
+        if (spec.HostOptional) return;
         foreach (var host in hosts)
             RequireAttachable(new CardInstance { Id = "created-preview", DefinitionId = scan.Id, OwnerId = player.Id, Zone = Zone.Hand, FaceUp = true }, host, player.Id);
     }
@@ -96,15 +107,11 @@ public sealed partial class MatchEngine
     // What one created card prints when that is not what the catalogue prints for its scan: its creator's Stronghold Clan, and values read from other cards. Null when the spec sets none.
     private CardDefinition? DerivePrinted(CardDefinition scan, CreatedCardSpec spec, GameCommand command, PlayerState player)
     {
-        if (!spec.HasInstanceValues) return null;
+        var hasClanAlignment = spec.ControllerClan || scan.Type == CardType.Personality &&
+            scan.Text.Contains("your Clan alignment", StringComparison.OrdinalIgnoreCase);
+        if (!hasClanAlignment && !spec.HasInstanceValues) return null;
         var printed = scan;
-        if (spec.ControllerClan)
-        {
-            var stronghold = Definition(Card(player.StrongholdId));
-            var clans = (stronghold.Clans ?? [stronghold.Clan]).Where(clan => clan != "Unaligned").ToArray();
-            if (clans.Length > 0)
-                printed = printed with { Clan = clans[0], Clans = clans.Length > 1 ? clans : null, Keywords = (printed.Keywords ?? []).Concat(clans.Select(clan => $"{clan} Clan")).Distinct(StringComparer.Ordinal).ToArray() };
-        }
+        if (hasClanAlignment) printed = WithControllerClan(printed, player);
         foreach (var value in spec.Values ?? [])
         {
             var subject = ValueSubject(value.From, command) ?? throw new RuleViolation($"There is no {value.From.ToString().ToLowerInvariant()} to take the {value.Stat} from.");
@@ -122,6 +129,17 @@ public sealed partial class MatchEngine
             };
         }
         return printed;
+    }
+
+    private CardDefinition WithControllerClan(CardDefinition printed, PlayerState player)
+    {
+        var stronghold = Definition(Card(player.StrongholdId));
+        var clans = (stronghold.Clans ?? [stronghold.Clan]).Where(clan => clan != "Unaligned").ToArray();
+        return clans.Length == 0 ? printed : printed with
+        {
+            Clan = clans[0], Clans = clans.Length > 1 ? clans : null,
+            Keywords = (printed.Keywords ?? []).Concat(clans.Select(clan => $"{clan} Clan")).Distinct(StringComparer.Ordinal).ToArray()
+        };
     }
 
     private const string NoBattlefieldForTerrain = "A Terrain is put into play at the current battlefield, and there is none.";

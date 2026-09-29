@@ -78,8 +78,8 @@ internal static class ShadowsEmbraceBatch5Tests
         var items = new[] { BloodOfThePreserver, CrabSword, CraneSword, PhoenixSword, StringOfTheColonies, TheVictor, VanquishersArmor };
         Check(Ids(PublishedContent.SpellWave22).SequenceEqual(spells.OrderBy(i => i, StringComparer.Ordinal)), "spell-wave-22");
         Check(Ids(PublishedContent.ItemWave14).SequenceEqual(items.OrderBy(i => i, StringComparer.Ordinal)), "item-wave-14");
-        foreach (var blocked in new[] { VanquishersBlades, OurAncestorsCall, YariOfAir })
-            Check(!CardCatalog.Cards.ContainsKey(blocked), $"{blocked} is not published (its created card has no scan)");
+        foreach (var unblocked in new[] { VanquishersBlades, OurAncestorsCall, YariOfAir })
+            Check(CardCatalog.Cards.ContainsKey(unblocked), $"{unblocked} is published with its created scan");
 
         void Spell(string id, int cost, int focus, string keywords, string effect)
         {

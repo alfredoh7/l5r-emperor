@@ -15,7 +15,7 @@ internal static class ShadowsEmbraceBatch3Tests
     private static readonly string[] Wave = [BurningFury, CapturedConvict, CowedAndDefeated, CrowdedStreets, DeepRoots, DefensiveGrill, DirectThePath, DuelToFirstBlood, FieldsOfVictory,
         ForgeYourSoul, ForgedDocuments, Forthrightness, Grief, CastTwoShadows, KitsukiMethods, KuonsLegacy, LessonsNeverForgotten, MethodicalQuestioning, OneShout];
     // Crippled Sensei and Easy Persuasion stay unwired (their blockers are in tools/content/build_card_inventory.py).
-    private static readonly string[] Unwired = ["oracle-l5r-9899"]; // Easy Persuasion (oracle-l5r-9905) is published in strategy-wave-90 (issue #503, group P3)
+    private static readonly string[] Unwired = []; // Crippled Sensei is published in strategy-wave-103; Easy Persuasion in wave 90.
 
     private static void Check(bool ok, string message = "Assertion failed") => Batch336Support.Check(ok, message);
     private static void Eq<T>(T actual, T expected, string message = "Values differ") => Batch336Support.Eq(actual, expected, message);

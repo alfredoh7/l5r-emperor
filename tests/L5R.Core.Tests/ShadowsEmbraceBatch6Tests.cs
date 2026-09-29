@@ -92,7 +92,7 @@ internal static class ShadowsEmbraceBatch6Tests
         Check(Ids(PublishedContent.CelestialWave7).SequenceEqual(Sorted(MoonsImperative, SunsAspiration)), "celestial-wave-7");
         // The unwired cards of the batch are never published (the blank-card guard).
         // Issue #503: The New Foundries (9947) and Distant Expansion (9792) are wired and published, so they left this list.
-        foreach (var unwired in new[] { "oracle-l5r-9797", "oracle-l5r-9866", "oracle-l5r-9870" })
+        foreach (var unwired in new[] { "oracle-l5r-9797", "oracle-l5r-9870" })
             Check(!CardCatalog.Cards.ContainsKey(unwired), $"{unwired} is not published");
 
         var fortress = CardCatalog.Get(Fortress);

@@ -11,7 +11,7 @@ internal static class ForgottenLegacyBatch1Tests
         Murota = "oracle-l5r-1750", Hakuseki = "oracle-l5r-2082", Rengetsu = "oracle-l5r-2142", Nikaru = "oracle-l5r-3310", Abodan = "oracle-l5r-3974", Kagako = "oracle-l5r-4382";
     private static readonly string[] Wired = [Shigemitsu, Kaitoko, Higaonna, Toshimo, Takichi, Gyoken, Murota, Hakuseki, Rengetsu, Nikaru, Abodan, Kagako];
     // Issue #498: Asako Chukage (oracle-l5r-533) has since been wired and published in personality-wave-80 (Emperor Edition follow-ups).
-    private static readonly string[] Unwired = ["oracle-l5r-551", "oracle-l5r-4464", "oracle-l5r-10020"];
+    private static readonly string[] Unwired = ["oracle-l5r-551"];
 
     public static void Run(TestRunner runner) => runner.Run("forgotten-legacy-batch-1", [
         ("Published shape: personality-wave-67 publishes exactly the 12 wired cards with their printed stats, keywords and ability ids, ships their art and lists them in its manifest; the cards still unwired are not in the catalogue (Asako Chukage has since been published, issue #498)", PublishedShape),

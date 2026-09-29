@@ -124,6 +124,7 @@ public sealed partial class MatchEngine
             // Timing/keyword narrowing, exercising AfterActionResolvedApplies/the window itself directly rather than through a real card's own
             // extra conditions.
             "training-after-action-resolved-gain" => LastActionDestroyedOwnPersonality(playerId),
+            "crippled-sensei-create-action" => LastActionDestroyedOwnPersonality(playerId),
             // Rata (oracle-l5r-6165, Embers of War pass, issue #460 batch 2): "After an action resolves that Rata
             // performed and that destroyed a Personality" -- scoped to Rata himself as the action's own performer
             // (facts.PerformerId), not merely his controller's action, and to either player's destroyed Personality.

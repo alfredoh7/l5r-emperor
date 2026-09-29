@@ -431,6 +431,7 @@ public sealed partial class MatchEngine
         ApplyEmperorRemainingFEntryEffects(playerId,card); // Emperor Edition remaining-cards pass (issue #492), group F: Moneylender's Wealth tokens.
         ApplyEmperorFollowupsEntryEffects(playerId,card); // Emperor Edition follow-ups (issue #498): the Dragon Sword's Honor; the entry searches queued (EmperorFollowupsSearch.cs).
         ApplyEmperorP1EntryEffects(playerId,card); // Issue #503 (EmperorP1.cs): its Sensei discards and Extending Influence's Honor loss.
+        ApplyRequestedCreatedCardsEntryEffects(playerId,card); // Yari of Air's mandatory Air-wielder Honor gain.
     }
     // Sensei (Mirumoto Hikaro / Mirumoto Yozo, Experienced 2): "your OTHER Sensei Personalities" --
     // every OTHER Sensei-keyword Personality this same controller has, either unbowed-or-bowed in
