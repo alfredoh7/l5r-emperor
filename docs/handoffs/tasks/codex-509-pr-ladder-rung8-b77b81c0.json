@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Rung 8 implemented: Dependabot Actions/NuGet, pedantic offline zizmor CI, generated advisory CODEOWNERS, hash-pinned current action majors, guarded metadata-only privileged routing exception, narrower permissions and safe shell interpolation. CodeQL omitted because private capability is unconfirmed/disabled.",
-  "validation": "Local pedantic audit green with one narrow routing exception; ownership checker passed; nine security regressions passed including a real negative unpinned-action audit. Current main integrated; no game/runtime source changes. Hosted CI and GitHub CODEOWNERS parse pending.",
-  "remaining": "Verify hosted security job and normal CI, finalize acceptance docs. First actual Dependabot ecosystem run/update PRs require default-branch merge and eligible dependencies; do not claim feature-branch acceptance. Leave PR #537 unmerged.",
+  "summary": "Implemented Rung 8 Dependabot Actions/NuGet, offline pedantic zizmor CI and advisory generated CODEOWNERS. Pinned existing action majors and constrained trusted-base routing exception. No game/runtime changes or automatic merges.",
+  "validation": "Hosted security job 36552946645 green on e07fc471; nine local/hosted regression tests passed, including real failing unpinned-action fixture. Local pedantic audit green with narrow routing exception; GitHub CODEOWNERS errors array empty. Normal CI runs on workflow changes; no C# changes. Code-scanning API disabled 403 and private entitlement unconfirmed, so conditional CodeQL omitted.",
+  "remaining": "Ready for review, leave PR #537 unmerged. Final evidence commit reruns CI. After default-branch merge verify first actual Dependabot ecosystem logs and eligible bot PRs; this cannot be truthfully demonstrated on the feature branch. No bot PR or CodeQL scan claimed.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/509",
   "branch": "codex/509-pr-ladder-rung8",
-  "updated": "2026-09-29T10:01:22.867255+00:00"
+  "updated": "2026-09-29T10:04:26.343103+00:00"
 }
