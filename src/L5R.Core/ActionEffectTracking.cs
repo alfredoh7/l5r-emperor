@@ -28,17 +28,35 @@ public sealed partial class MatchEngine
     public const string DestroyedKind = "destroyed";
     public const string MovedKind = "moved";
 
-    private void RecordActionEffect(string cardId, string kind) => _state.CurrentActionAffected.Add(new(cardId, kind));
+    private void RecordActionEffect(string cardId, string kind, string? hostId = null, int? fromBattlefield = null) => _state.CurrentActionAffected.Add(new(cardId, kind, hostId, fromBattlefield));
 
     // Snapshots what the just-finished action affected into LastResolvedAction, opens the Reaction window naming it if anyone holds one that
     // applies, and clears the accumulator either way. Called from the three points an action (its own reaction windows included) is truly done,
     // in the same chain as CompleteAbilityResolution's own OpenBowReactionWindow/OpenMoveReactionWindow/OpenOverconfidentDrawWindow (closesTo is
     // the same "who priority returns to once every window this action opens has closed" every one of those already threads through).
-    private bool FinishActionEffectTracking(string abilityId, int playerId, string? sourceId, int closesTo)
+    // performerId (issue #453, batch 2): the Personality who performed the action, for a Reaction that targets "the action's performer" (An Insult Answered); the Honor
+    // the action cost (RecordHonorLoss, from GainHonor) rides along the same way.
+    private bool FinishActionEffectTracking(string abilityId, int playerId, string? sourceId, int closesTo, string? performerId = null)
     {
+        AfterMechAActionResolved(abilityId, playerId, sourceId); // issue #501 (EmperorMechA.cs): Beyond the Line's draw "after the action's resolution"; Momoko's waiver is spent
+        ApplyAgonyOfHerGaze(abilityId, playerId); // issue #503 (EmperorP2.cs): The Agony of Her Gaze's trait, before any Reaction to the same moment
         var affected = _state.CurrentActionAffected;
-        _state.LastResolvedAction = new ResolvedActionFacts { AbilityId = abilityId, PlayerId = playerId, SourceId = sourceId, Affected = affected };
-        _state.CurrentActionAffected = [];
+        P4AfterActionResolved(affected, abilityId, playerId, sourceId); // Scars of War, The Menacing Sky (issue #503, EmperorP4Watches.cs)
+        _state.LastResolvedAction = new ResolvedActionFacts
+        {
+            AbilityId = abilityId,
+            PlayerId = playerId,
+            SourceId = sourceId,
+            Affected = affected,
+            PerformerId = performerId,
+            HonorLosers = _state.CurrentActionHonorLosers,
+            HandRecipients = _state.CurrentActionHandRecipients,
+            FavorTakers = _state.CurrentActionFavorTakers
+        };
+        QueueP1AfterActionTraits(_state.LastResolvedAction); // Issue #503 (EmperorP1.cs): Osote's owed discard is due, Bakishi's shield drops, Tamisu's and Shichiro's traits are queued.
+        NoteHonorLostToOtherAction(playerId, _state.CurrentActionHonorLosers); // Kitsu Tamasine (issue #477, batch 5)
+        CountHandActionResolved(playerId, _state.CurrentActionHandRecipients); // Indecision (issue #501, EmperorMechD.cs): "actions which put cards into his hand this phase".
+        _state.CurrentActionAffected = []; _state.CurrentActionHonorLosers = []; _state.CurrentActionHandRecipients = []; _state.CurrentActionFavorTakers = [];
         // Revenge (issue #437): this action destroyed a Personality of some OTHER player's -- set that owner's flag.
         foreach (var a in affected)
         {
@@ -48,8 +66,29 @@ public sealed partial class MatchEngine
         }
         // Revenge: the window resets once the acting player's OWN Battle action finishes resolving.
         if (AbilityCatalog.All[abilityId].Timing == "Battle") _state.EnemyDestroyedOwnPersonalitySinceLastBattleAction[playerId] = false;
-        return OpenAfterActionResolvedWindow(closesTo);
+        CountReconStrategyAction(abilityId, playerId, sourceId); // Advanced Intelligence (Seeds of Decay pass, issue #453, batch 1).
+        // Moksha Patam (issue #453 batch 5): "After an action resolves, if a player gained Honor from its effects" -- a trait, so applied here before any Reaction to the same point.
+        ApplyMokshaPatamTokens();
+        ApplyP3AfterActionTraits(affected); // Deep Snows (issue #503, EmperorP3.cs): its trait, before any Reaction to the same point.
+        // The Shadow's Embrace pass (issue #476), batch 3: Crowded Streets' trait -- a trait, so before any Reaction to the same point (ShadowsEmbraceBatch3.cs).
+        if (OpenCrowdedStreetsTrait(closesTo)) return true;
+        // Emperor Edition remaining-cards pass (issue #492), group D: The Shadow Court's and The Sincerity of the Dragon's traits (EmperorRemainingD.cs) -- also before any Reaction to the same moment.
+        if (OpenShadowCourtTrait(closesTo) || OpenSincerityTrait(closesTo)) return true;
+        if (OpenP1AfterActionTraits(closesTo, playerId)) return true; // Issue #503 (EmperorP1.cs): traits resolve before the Reactions to the same moment.
+        if (OpenAfterActionResolvedWindow(closesTo)) return true;
+        // Moshi Ino's storm (issue #453, batch 3; MoshiInoStorm.cs): the same "this action is truly done" moment, asked once no Reaction window opened over it.
+        return OpenInoStorm(closesTo);
     }
+
+    // The Personality who performs an ability: the named performer, else the source resolved to its wielder; null for a player ability or a non-Personality source.
+    private string? ActionPerformerIdOrNull(AbilityDefinition ability, GameCommand command, CardInstance? source)
+    {
+        var performer = ability.Performer is not null ? (command.PerformerId is null ? null : ActingPersonality(Card(command.PerformerId))) : source is null ? null : ActingPersonality(source);
+        return performer is not null && Definition(performer).Type == CardType.Personality ? performer.Id : null;
+    }
+
+    // A Battle action: a Battle-timed ability, or a Battle/Open one resolved in a Combat Segment.
+    private bool IsBattleAction(string abilityId) => AbilityCatalog.All.TryGetValue(abilityId, out var ability) && (ability.Timing == "Battle" || ability.Timing == "BattleOrOpen" && _state.Phase == Phase.Battle);
 
     private static bool IsAfterActionResolvedReaction(AbilityDefinition ability) => ability.Timing == "Reaction" && ability.Trigger == AfterActionReactionTriggers.AfterActionResolved;
 
@@ -66,6 +105,19 @@ public sealed partial class MatchEngine
     private bool AfterActionResolvedApplies(CardInstance source, string abilityId, int playerId)
     {
         if (_state.LastResolvedAction is not { } facts || source.OwnerId != playerId) return false;
+        // Hida Takeuchi (Emperor Edition Personality pass, issue #477 batch 2): "After the resolution of an action that attached a Follower from your hand to Takeuchi" -- any action,
+        // Equip (a universal player action with no catalog entry) included, so it is read before the per-ability-id switch that indexes the catalog by the action's id.
+        if (abilityId == "takeuchi-draw") return ActionAttachedFollowerFromHandTo(source, playerId);
+        // Chrysanthemum Blossom (Emperor Edition remaining-cards pass, issue #492 group G): "After this Personality is assigned" -- the assignment command's own record, not a catalogued action.
+        if (abilityId == "chrysanthemum-blossom-boost") return ChrysanthemumBlossomApplies(source, playerId, facts);
+        if (P3AssignmentOrActionApplies(source, abilityId, facts) is { } p3Assigned) return p3Assigned; // Utaku Tairu - exp (issue #503): "after a Personality assigns or moves"
+        if (facts.AbilityId == AssignedSentinel) return false;
+        if (!AbilityCatalog.All.ContainsKey(facts.AbilityId)) return false;
+        if (FollowupsAfterActionApplies(source, abilityId, playerId) is { } followups) return followups;
+        if (EmperorP1AfterActionApplies(source, abilityId, playerId) is { } p1) return p1; // Issue #503 (EmperorP1.cs): Itoku, Hida Bakishi
+        if (P2AfterActionApplies(abilityId, playerId, facts) is { } p2After) return p2After; // issue #503: A Champion in Court (EmperorP2.cs)
+        if (P3AfterActionApplies(source, abilityId, playerId, facts) is { } p3) return p3; // issue #503 (EmperorP3.cs)
+        if (MechDAfterActionApplies(source, abilityId, playerId, facts) is { } mechD) return mechD; // Indecision (issue #501, EmperorMechD.cs) // Asako Chukage (issue #498) // Equip's facts name no catalogued ability: only the Reaction above reads them.
         return abilityId switch
         {
             // Measure of Devotion (oracle-l5r-5013): "After the resolution of a Battle action that destroyed one of your Deathseekers."
@@ -81,7 +133,66 @@ public sealed partial class MatchEngine
             // Timing/keyword narrowing, exercising AfterActionResolvedApplies/the window itself directly rather than through a real card's own
             // extra conditions.
             "training-after-action-resolved-gain" => LastActionDestroyedOwnPersonality(playerId),
-            _ => false
+            "crippled-sensei-create-action" => LastActionDestroyedOwnPersonality(playerId),
+            // Rata (oracle-l5r-6165, Embers of War pass, issue #460 batch 2): "After an action resolves that Rata
+            // performed and that destroyed a Personality" -- scoped to Rata himself as the action's own performer
+            // (facts.PerformerId), not merely his controller's action, and to either player's destroyed Personality.
+            "rata-draw" => RataDestroyedAPersonality(source),
+            // Shinjo Byung - exp (Gempukku pass, issue #461): "After a Tactical Battle action resolves that Byung performed" -- his own performed action (facts.PerformerId), a Battle-timed
+            // ability classified Tactical through ActionCarriesKeyword (the ability's own tag, or the source card's keyword).
+            // Shinjo Jong-Ho (The Shadow's Embrace pass, issue #476, batch 2): "After a Tactical action Jong-Ho performed resolves" -- Byung's shape, any Timing.
+            "jongho-bow" => facts.PerformerId == source.Id && facts.PlayerId == playerId
+                && ActionCarriesKeyword(AbilityCatalog.All[facts.AbilityId], facts.SourceId is null ? null : Card(facts.SourceId), "Tactical"),
+            "byung-additional-action" => facts.PerformerId == source.Id && facts.PlayerId == playerId && AbilityCatalog.All[facts.AbilityId].Timing == "Battle"
+                && ActionCarriesKeyword(AbilityCatalog.All[facts.AbilityId], facts.SourceId is null ? null : Card(facts.SourceId), "Tactical"),
+            // Bayushi Mitsuo (Emperor Edition Personality pass, issue #477, batch 4): "After the resolution of a Battle action that moved Mitsuo" -- either player's Battle action (a
+            // Battle/Open one taken in a Combat Segment is a Battle action), his own move on the action's record.
+            "mitsuo-additional-action" => IsBattleAction(facts.AbilityId) && facts.Affected.Any(a => a.Kind == MovedKind && a.CardId == source.Id),
+            // Hida Yamadera - exp: "After another player's Battle action resolves, if its effects destroyed Yamadera."
+            // Blade of Perfection (Emperor Edition remaining-cards pass, issue #492 group G): "After the resolution of another player's action that destroyed this card or its Personality".
+            "blade-perfection-attach" => BladeOfPerfectionApplies(source, playerId, facts),
+            // Shosuro Rokuta (proxy group Z, issue #492): "After the resolution of an action ... from a card that another player owns, if the card destroyed Rokuta."
+            "rokuta-action-create" => RokutaActionApplies(source, playerId, facts),
+            "yamadera-attack" => facts.PlayerId != playerId && AbilityCatalog.All[facts.AbilityId].Timing == "Battle" && facts.Affected.Any(a => a.Kind == DestroyedKind && a.CardId == source.Id),
+            // Advanced Intelligence (Seeds of Decay pass, issue #453, batch 1): "After a Recon Strategy's action resolves" -- either player's, classified through ActionCarriesKeyword.
+            "advanced-intelligence-draw" => facts.SourceId is { } reconSourceId && _state.Cards.TryGetValue(reconSourceId, out var reconSource) && Definition(reconSource).Type == CardType.Strategy
+                && ActionCarriesKeyword(AbilityCatalog.All[facts.AbilityId], reconSource, "Recon"),
+            // An Insult Answered (oracle-l5r-10136, issue #453 batch 2): "After another player's performed Limited or Open action resolves which caused you an Honor loss" -- a
+            // Limited or Open ability (its Open half when Battle/Open was taken in the Action Phase) with a Personality performer still in play, that cost this player Honor.
+            "insult-answered-duel" => facts.PlayerId != playerId && AbilityCatalog.All[facts.AbilityId].Timing is "Limited" or "Open" or "BattleOrOpen" && _state.Phase == Phase.Action
+                && LastActionCostHonor(playerId) && LastActionPerformer() is not null,
+            // Asahina Akikusa (oracle-l5r-10046, issue #453 batch 3): "After an action on your Air Spell resolves" -- the resolved action's source card is a Spell with the
+            // Air keyword attached to a Personality her controller controls (the Spell's action is her controller's own, so facts.PlayerId matches too).
+            // Shieldman (The Shadow's Embrace pass, issue #476 batch 6): "After another player's action resolves which destroyed another card in this unit."
+            "shieldman-honor" => ShieldmanReactionApplies(source, playerId),
+            "akikusa-honor" => facts.SourceId is not null && _state.Cards.TryGetValue(facts.SourceId, out var akikusaSpell) && Definition(akikusaSpell).Type == CardType.Spell
+                && Keyword(akikusaSpell, "Air") && akikusaSpell.OwnerId == playerId && facts.PlayerId == playerId,
+            // The Shadow's Embrace pass (issue #476), batch 3. Grief: "After an action resolves whose effects destroyed a player's Personality" -- either player's action, either player's
+            // Personality. I Cast Two Shadows: "After an action resolves which moved your Personality in a Ninja unit home" -- from a battlefield (ShadowsEmbraceBatch3.cs).
+            // Emperor Edition Stronghold pass (issue #486), batch 1. Eternal Victory Dojo: "After your Tactical action resolves" -- Jong-Ho's Tactical classification, any performer.
+            // Kyuden Otomo - exp: "After you take the Imperial Favor" (the resolved action took it for him, and he still holds it).
+            "eternal-victory-draw" => facts.PlayerId == playerId && ActionCarriesKeyword(AbilityCatalog.All[facts.AbilityId], facts.SourceId is null ? null : Card(facts.SourceId), "Tactical"),
+            "otomo-favor-token" => OtomoFavorTraitApplies(playerId),
+            "grief-dishonor" => facts.Affected.Any(a => a.Kind == DestroyedKind && Definition(Card(a.CardId)).Type == CardType.Personality),
+            "cast-two-shadows-move" => facts.Affected.Any(a => a.Kind == MovedKind && a.FromBattlefield is not null && Card(a.CardId) is { Zone: Zone.Home } moved
+                && moved.OwnerId == playerId && Definition(moved).Type == CardType.Personality && InNinjaUnit(moved)),
+            // Emperor Edition Personality pass (issue #477), batch 5 (EmperorPersonalityBatch5.cs): Isawa Kimi - exp 2 and Shiba Tsukimi - exp 4.
+            "kimi-exp2-discard" or "tsukimi-home" or "tsukimi-battlefield" => EmperorBatch5AfterActionApplies(source, abilityId, playerId, facts),
+            // Emperor Edition Personality pass (issue #477), batch 6 (EmperorPersonalityBatch6.cs). Yung: "After one of your Rings enters play". Daigotsu Kanpeki - exp: "After the resolution of a Battle
+            // action from a Strategy, if Kanpeki performed it".
+            "yung-search-ring" => YungRingEnteredPlay(facts, playerId),
+            // Emperor Edition remaining-cards pass (issue #492), group B: Introspection ("After one of your Rings enters play", Yung's trigger) and Meeting the Keepers ("After the resolution of an action
+            // from one of your Rings") -- a Strategy's Reaction played from a hand (EmperorRemainingB.cs).
+            "introspection-search" => YungRingEnteredPlay(facts, playerId),
+            "keepers-search" => RingActionResolved(facts, playerId),
+            "kanpeki-additional-action" => KanpekiPerformedStrategyBattleAction(source, facts, playerId),
+            // Pillars of Virtue (Emperor Edition Stronghold pass, issue #486 batch 2): "After the resolution of a Kiho Battle action you took."
+            "pillars-virtue-additional-action" => PillarsKihoBattleActionTaken(facts, playerId),
+            // Deception Revealed (Emperor Edition remaining-cards pass, group A, issue #492): "After the resolution of an action that bowed a Ring" -- either player's action, a Ring still bowed.
+            "deception-revealed-straighten" => facts.Affected.Any(a => a.Kind == BowedRingKind && Card(a.CardId).Bowed && InPlay(Card(a.CardId))),
+            // Words Have Strength (Emperor Edition remaining-cards pass, issue #492, group D): "the resolution of another player's Battle action, if ... the action destroyed any of your Courtiers or Magistrates".
+            "words-strength-action" => facts.PlayerId != playerId && IsBattleAction(facts.AbilityId) && ActionDestroyedCourtierOrMagistrate(facts, playerId),
+            _ => EmperorRemainingCAfterActionApplies(abilityId, facts, playerId) // Emperor Edition remaining-cards pass, group C (issue #492): The Empress' Address.
         };
     }
 

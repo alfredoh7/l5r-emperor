@@ -178,6 +178,11 @@ public static class TrainingOpponent
             // engine offers Pass (which it does only when nothing qualifies), attaches a found Region to the first
             // offered province, and discards its least useful hand card after a Terrain. Ties keep the engine's order.
             case "chooseSearchDeck": case "selectSearchCard": case "passSearch": case "chooseSearchProvince": return 100;
+            // "Put it into play or your hand" (issue #498): a modest bot puts the found Ring into play; the Attack target selection step: any offered target over none.
+            case "chooseSearchDestination": return command.Choice=="play" ? 100 : 90;
+            case "chooseAttackTarget": return command.TargetId is null ? 50 : 100;
+            // Goju Asuka / Only a Shadow (issue #501): the Personality kept bowed is the engine's first listed candidate (every answer is legal and one is owed).
+            case "chooseInfiltratorStraighten": return 100;
             // Look at the top N cards (issue #322): a modest bot answers a look with the first arrangement the engine offers -- the
             // simplest legal one (keep everything in order when that is legal, otherwise take the top card that may be taken) -- and
             // picks the first offered deck.
@@ -203,6 +208,10 @@ public static class TrainingOpponent
                 var kept=self.Army.FirstOrDefault(c=>c.Id==command.TargetId);
                 return 100+(kept?.Force??0);
             case "encircledOrder": case "beforeBattleOrder": return 50;
+            // The Killing Grounds (Emperor Edition remaining-cards pass, issue #492, group D): destroy the weakest of its own Personalities at the battlefield.
+            case "killingGroundsSelect":
+                var doomed=self.Army.FirstOrDefault(c=>c.Id==command.TargetId);
+                return 100-(doomed?.Force??0);
             // A conditional effect choice (issue #337, Mirumoto Yumaru): a modest bot never stalls on it; every offered option is legal, so it
             // takes the first one the engine lists (ties keep the engine's order).
             case "chooseEffect": return 100;

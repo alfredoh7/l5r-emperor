@@ -20,10 +20,11 @@ public sealed partial class MatchEngine
     private bool SharesNoKeywords(CardInstance a, CardInstance b) =>
         !(Definition(a).Keywords ?? []).Concat(a.GrantedKeywords.Select(g => g.Keyword)).Distinct(StringComparer.Ordinal)
             .Where(k => !KeywordRemoved(a, k)).Any(k => Keyword(b, k));
+    // Issue #492 (ruling R5): He's Mine! and Irezu are counted only when they could substitute a participant (DuelReactionRelevant), so no window opens for nothing.
     private bool AnyDuelReactionAvailable(PendingDuel duel) =>
-        AnyInPlayReactionAvailable("before-duel-begins") ||
-        AnyOutOfPlayReactionAvailable(duel.ChallengerPlayerId, "before-duel-begins") ||
-        AnyOutOfPlayReactionAvailable(duel.ChallengedPlayerId, "before-duel-begins");
+        AnyInPlayReactionAvailable("before-duel-begins", DuelReactionRelevant) ||
+        OutOfPlayReactions(duel.ChallengerPlayerId, "before-duel-begins").Any(x => DuelReactionRelevant(x.Card, x.AbilityId)) ||
+        OutOfPlayReactions(duel.ChallengedPlayerId, "before-duel-begins").Any(x => DuelReactionRelevant(x.Card, x.AbilityId));
 
     // Called from ExecuteAbilityEffects for any ability with IssuesDuel set, after the card's own
     // cost/discard has already happened -- everything from here on is the deferred EFFECT (the duel
@@ -31,13 +32,22 @@ public sealed partial class MatchEngine
     private void IssueChallenge(string abilityId, int challengerPlayerId, string challengerId, string challengedId, string stat, bool refusable, CardInstance? source = null)
     {
         var challenger = Card(challengerId); var challenged = Card(challengedId);
+        // Kitsuki Yataku (issue #477 batch 6): "The Samurai's controller may not choose to refuse any challenge created by the action."
+        if (refusable && !ChallengeMayBeRefused(challengedId)) { refusable = false; Emit("refusalForbidden", $"{Definition(challenged).Name} may not refuse this challenge.", challenged.OwnerId, challengedId); }
         _state.PendingDuel = new PendingDuel
         {
-            AbilityId = abilityId, ChallengerPlayerId = challengerPlayerId, ChallengedPlayerId = challenged.OwnerId,
-            ChallengerId = challengerId, ChallengedId = challengedId, Stat = stat, Refusable = refusable,
+            AbilityId = abilityId,
+            ChallengerPlayerId = challengerPlayerId,
+            ChallengedPlayerId = challenged.OwnerId,
+            ChallengerId = challengerId,
+            ChallengedId = challengedId,
+            Stat = stat,
+            Refusable = refusable,
             Stage = refusable ? "AwaitingAccept" : "Reaction",
             NegatedEffects = _state.NegatedEffects.ToList(),
         };
+        // Kakita Ichigiku (The Shadow's Embrace pass, issue #476 batch 1): a challenge he issues to a dishonorable Personality in a Combat Segment will not be refused.
+        if (IchigikuChallenge(challenger, challenged)) { _state.PendingDuel.IchigikuDestroysLoser = true; _state.PendingDuel.Refusable = false; _state.PendingDuel.Stage = "Reaction"; refusable = false; }
         Emit("duelChallenged", $"{Definition(challenger).Name} challenges {Definition(challenged).Name} to a duel.", challengerPlayerId, challengerId);
         var duelId = $"duel-{_state.Events[^1].Sequence}";
         _state.PendingDuel.DuelId = duelId;
@@ -79,6 +89,10 @@ public sealed partial class MatchEngine
         var refusalStart = _state.Events.Count - 1;
         // Doji Shigeyuki: "He may refuse; if he does, move him home."
         if (duel.AbilityId == "shigeyuki-duel") MoveHome(Card(duel.ChallengedId), false);
+        // Duel to First Blood (The Shadow's Embrace pass, issue #476 batch 3): "He may refuse; if he did, draw two cards." -- the challenger's player draws them.
+        if (duel.AbilityId is "first-blood-duel-battle" or "first-blood-duel-limited") { Draw(Player(duel.ChallengerPlayerId)); Draw(Player(duel.ChallengerPlayerId)); }
+        // Watchful Eye Dojo (Emperor Edition Stronghold pass, issue #486 batch 3): "He may refuse; if he did, dishonor him and gain 1 Honor."
+        if (duel.AbilityId == "watchful-eye-duel") WatchfulEyeRefusal(duel);
         _state.LastDuel = _state.LastDuel! with { Result = new("Refused", null, [], 0, 0, 0, 0, [], _state.Events.Skip(refusalStart).ToArray(), [], _state.Version + 1, _state.Phase, _state.PriorityPlayerId, "Challenge refused") };
         var challengerPlayerId = duel.ChallengerPlayerId;
         _state.PendingDuel = null;
@@ -112,6 +126,7 @@ public sealed partial class MatchEngine
                 Require(command.PlayerId == _state.ActivePlayerId, "Only the active player orders Focus Effects.");
                 OrderDuelFocusEffects(command);
                 break;
+            case P2FocusChoiceStage: ResolveP2FocusChoice(command); break; // issue #503 (EmperorP2Duel.cs)
             default: throw new RuleViolation("Unknown duel stage.");
         }
     }
@@ -129,9 +144,12 @@ public sealed partial class MatchEngine
     private void Focus(GameCommand command)
     {
         var duel = _state.PendingDuel!;
+        // Reserve Weapon (issue #492 group G): "Before this Personality focuses: You may give him +3 to his duel stat until the duel ends instead of focusing."
+        if (command.Choice == "reserve") { ReserveWeaponFocus(command); return; }
+        if (command.Choice == GonjiFocusChoice) { GonjiFocus(command); return; } // Kakita Gonji (issue #503, EmperorP2Duel.cs): "instead of focusing that time"
         var isChallenger = command.PlayerId == duel.ChallengerPlayerId;
         var list = isChallenger ? duel.ChallengerFocused : duel.ChallengedFocused;
-        Require(list.Count < 4, "You have already focused four times this duel and must Strike.");
+        Require(list.Count + P2FocusSubstitutions(command.PlayerId) < 4, "You have already focused four times this duel and must Strike."); // issue #503: a focus replaced "instead of focusing" counts
         string cardId; var fromDiscard = false;
         if (command.Choice == "deck")
         {
@@ -174,6 +192,7 @@ public sealed partial class MatchEngine
     {
         var duel = _state.PendingDuel!;
         duel.Struck = true;
+        duel.StrikerPlayerId = _state.PriorityPlayerId; // Bend like a Reed (Emperor Edition remaining-cards pass, group A, issue #492): who struck.
         foreach (var id in duel.ChallengerFocused) Card(id).FaceUp = true;
         foreach (var id in duel.ChallengedFocused) Card(id).FaceUp = true;
         Emit("duelStruck", "A Strike ends focusing; focused cards are revealed.", _state.PriorityPlayerId);
@@ -194,7 +213,7 @@ public sealed partial class MatchEngine
             ? [_state.ActivePlayerId, 1 - _state.ActivePlayerId]
             : challengerDuelist ? [duel.ChallengerPlayerId] : challengedDuelist ? [duel.ChallengedPlayerId] : [];
         duel.PendingDuelistDecisions = order;
-        if (order.Count == 0) { BeginOrderingEffects(); return; }
+        if (order.Count == 0) { BeginOrderingEffectsAfterReactions(); return; }
         _state.PriorityPlayerId = order[0];
         _state.ConsecutivePasses = 0;
     }
@@ -231,10 +250,12 @@ public sealed partial class MatchEngine
             Emit("duelistRefocused", $"{Player(playerId).Name} discarded a focused card to focus again.", playerId, newId);
         }
         if (command.CardId is not null) RecordDuelReveal("Replacement");
-        if (duel.PendingDuelistDecisions.Count == 0) BeginOrderingEffects(); else _state.PriorityPlayerId = duel.PendingDuelistDecisions[0];
+        if (duel.PendingDuelistDecisions.Count == 0) BeginOrderingEffectsAfterReactions(); else _state.PriorityPlayerId = duel.PendingDuelistDecisions[0];
     }
 
-    private void BeginOrderingEffects()
+    private void BeginOrderingEffects() => ContinueToOrderingEffects();
+
+    private void ContinueToOrderingEffects()
     {
         var duel = _state.PendingDuel!;
         duel.Stage = "OrderingEffects";
@@ -261,25 +282,28 @@ public sealed partial class MatchEngine
     private void ResolveDuelFocusEffectsInOrder(IEnumerable<string> orderedFocusEffectIds)
     {
         _state.PendingDuel!.OrderedFocusEffects = orderedFocusEffectIds.ToList();
+        if (BeginP2PreTotalFocusEffects(0)) return; // issue #503 (EmperorP2Duel.cs): Killing Intent, A Champion in Court, Turning Away resolve before the totals
         ResolveDuel();
     }
 
     // The duel stat plus each side's own total focused Focus Value (revealed by the time this runs).
     // Any attachment modifying the stat applies as long as it is active right now -- CardForce/
     // CardPersonalHonor/PersonalityChi already read current, not printed, values.
-    private int DuelStatValue(CardInstance card, string stat) => stat switch
+    private int DuelStatValue(CardInstance card, string stat) => (P2DuelStat(card) /* issue #503: Killing Intent */ ?? NikaruDuelStat(card) ?? stat switch
     {
         "Force" => CardForce(card),
         "PersonalHonor" => CardPersonalHonor(card),
         _ => PersonalityChi(card),
-    };
+    }) + RemADuelStatBonus(card) + P4DuelStatBonus(card, stat); // Secret Reserve (issue #503): +1C for each Weapon on the duelist. // Bend like a Reed (group A): "+2 to his duel stat until the duel ends"; Falling Rain Dojo (group F): +1 until the duel ends.
 
     private void ResolveDuel()
     {
         var duel = _state.PendingDuel!;
         var challenger = Card(duel.ChallengerId); var challenged = Card(duel.ChallengedId);
-        var challengerTotal = DuelStatValue(challenger, duel.Stat) + duel.ChallengerFocused.Sum(id => Definition(Card(id)).Focus);
-        var challengedTotal = DuelStatValue(challenged, duel.Stat) + duel.ChallengedFocused.Sum(id => Definition(Card(id)).Focus);
+        // The Focus Effects that adjust Focus Values resolve before the totals, in the duel's Focus Effect order (issue #498, EmperorFollowupsDuel.cs): Duel to First Blood's "+1 Focus Value to each of your
+        // focused cards" (The Shadow's Embrace pass, issue #476 batch 3) and Rend the Soul's "Raise this card's Focus Value to 5".
+        var challengerTotal = DuelStatValue(challenger, duel.Stat) + FocusedTotal(duel, duel.ChallengerFocused);
+        var challengedTotal = DuelStatValue(challenged, duel.Stat) + FocusedTotal(duel, duel.ChallengedFocused);
         string? winnerId; List<string> loserIds;
         var resolutionReason = "Higher duel total";
         if (challengerTotal > challengedTotal) { winnerId = duel.ChallengerId; loserIds = [duel.ChallengedId]; }
@@ -293,7 +317,14 @@ public sealed partial class MatchEngine
             else if (challengedDuelist && !challengerDuelist) { winnerId = duel.ChallengedId; loserIds = [duel.ChallengerId]; }
             else { winnerId = null; loserIds = [duel.ChallengerId, duel.ChallengedId]; resolutionReason = "Equal totals · both lose"; }
         }
+        // Rend the Soul (issue #498): "If your Personality wins this duel, he loses instead (the other Personality still also loses)" -- the duel becomes a tie (no winner, both lose), before anything
+        // that asks who lost (the R2 delays, Honor Never Falls), the duel's own outcome and the other Focus Effects.
+        var rendOfWinner = winnerId is null ? null : RendTheSoulOfWinner(duel, winnerId);
+        if (rendOfWinner is not null) { winnerId = null; loserIds = [duel.ChallengerId, duel.ChallengedId]; resolutionReason = "Rend the Soul · the winner loses too"; }
+        // The shared delay mechanism (issue #492, EmperorRulingR2Cards.cs): "You may choose (now) to delay the effects of losing this duel ..." is answered before the outcome applies.
+        if (BeginDuelLossDelayDecisions(duel, loserIds)) return;
         var resultStart = _state.Events.Count;
+        if (rendOfWinner is not null) Emit("duelWinnerLoses", $"{Definition(rendOfWinner).Name}: {Player(rendOfWinner.OwnerId).Name}'s Personality won the duel, so he loses instead; the other Personality still also loses.", rendOfWinner.OwnerId, rendOfWinner.Id);
         var strengthsBefore = _state.Players.SelectMany(p => p.Provinces.Select(v => new DuelProvince(p.Id, v.Index, EffectiveProvinceStrength(v), EffectiveProvinceStrength(v)))).ToArray();
         var challengerStat = DuelStatValue(challenger, duel.Stat);
         var challengedStat = DuelStatValue(challenged, duel.Stat);
@@ -311,7 +342,9 @@ public sealed partial class MatchEngine
             if ((Definition(Card(focusedId)).Abilities ?? []).Contains("to-first-blood-focus"))
                 foreach (var loserId in loserIds) _state.NegatedEffects.Add(new("destroy", loserId));
         ExplainDuelEffect("Outcome", _state.LastDuel!.Challenge?.Source,
-            () => ApplyDuelOutcome(duel.AbilityId, winnerId, loserIds, duel.ChallengerPlayerId));
+            () => WithDuelLossDelays(duel, loserIds, () => ApplyDuelOutcome(duel.AbilityId, winnerId, loserIds, duel.ChallengerPlayerId)));
+        // Kakita Ichigiku: "destroy that duel's loser in addition to other consequences of losing."
+        if (duel.IchigikuDestroysLoser) WithDuelLossDelays(duel, loserIds, () => IchigikuDestroyLosers(loserIds, duel.ChallengerPlayerId));
         _state.NegatedEffects = [];
         // False Ring of Earth (oracle-l5r-10532, issue #295): "After you win a duel against a
         // Personality who shared no keywords with your Personality in the duel" -- Ring
@@ -341,7 +374,7 @@ public sealed partial class MatchEngine
             var focusEffectAbility = (Definition(Card(focusedId)).Abilities ?? []).First(a => AbilityCatalog.All.TryGetValue(a, out var def) && def.Timing == "FocusEffect");
             if (FocusEffectNeedsChoice(focusEffectAbility) && BeginFocusEffectChoice(i, focusedId, focusEffectAbility)) return;
             ExplainDuelEffect("FocusEffect", ViewCard(Card(focusedId)),
-                () => ApplyDuelFocusEffect(focusEffectAbility, Card(focusedId).OwnerId, winnerPlayerId, loserPlayerIds));
+                () => WithAnySourceLossDelays(duel, Card(focusedId).OwnerId, () => ApplyDuelFocusEffect(focusEffectAbility, Card(focusedId).OwnerId, winnerPlayerId, loserPlayerIds))); // issue #496: Honor Never Falls' "(from any source)"
         }
         FinishDuelResolution();
     }
@@ -375,28 +408,44 @@ public sealed partial class MatchEngine
         // A duel-issuing ability resolves here, not in ExecuteAbilityEffects (which returned at IssueChallenge):
         // "after the resolution of your [keyword] action" traits fire once its whole outcome has applied.
         FireAfterOwnActionTraits(AbilityCatalog.All[duel.AbilityId], challengerPlayerId, duel.SourceCardId is null ? null : Card(duel.SourceCardId));
+        FireCowedAndDefeatedActionWatches(challengerPlayerId, null, duel.ChallengedId); // The Shadow's Embrace pass (issue #476), batch 3: a challenge targets the challenged Personality.
+        MiddayShadowPerformerActionEnded(performer); // Emperor Edition Stronghold pass (issue #486), batch 1: the challenger performed the duel-issuing action.
         var draft = duel.ResultDraft!;
-        _state.LastDuel = _state.LastDuel! with { Result = draft with {
-            Consequences = _state.Events.Skip(duel.ResultEventStart).ToArray(),
-            Provinces = draft.Provinces.Select(p => p with { After = EffectiveProvinceStrength(Player(p.PlayerId).Provinces[p.Index]) }).ToArray(),
-            ResolutionVersion = _state.Version + 1, ReturnPhase = _state.Phase, ReturnPriority = _state.PriorityPlayerId } };
+        P3RecordDuelWinner(winnerId); // Kakita Kenta (issue #503): the duel's winner goes on the action's record
+        P3RecordBowedPersonalities(duel.BowedBefore); // Hida Defenders (issue #503)
+        _state.LastDuel = _state.LastDuel! with
+        {
+            Result = draft with
+            {
+                Consequences = _state.Events.Skip(duel.ResultEventStart).ToArray(),
+                Provinces = draft.Provinces.Select(p => p with { After = EffectiveProvinceStrength(Player(p.PlayerId).Provinces[p.Index]) }).ToArray(),
+                ResolutionVersion = _state.Version + 1,
+                ReturnPhase = _state.Phase,
+                ReturnPriority = _state.PriorityPlayerId
+            }
+        };
+        FinishSwordForHireDuel(duel.AbilityId, duel.ChallengerId);
         _state.PendingDuel = null;
+        if (duel.RingsBowedBefore is { } duelRings) RecordBowedRings(duelRings.ToHashSet()); // Deception Revealed (Mendon's R4 ruling): a Ring the duel's action bowed goes on its record (a Focus Effect's bows do not: ApplyDuelFocusEffect).
+        ApplyHesMineBows(duel.ChallengerId, duel.ChallengedId); // He's Mine! (Emperor Edition remaining-cards pass, issue #492, group B): the substitute bows once the duel has ended.
+        ApplyTwinForksCity(winnerId); // Twin Forks City (The Shadow's Embrace pass, issue #476 batch 6): a trait, before any Reaction to the duel's end.
         // The duel itself is a single, complete action from challenge to consequences (issue #209):
         // once everything above has applied, the winning card's own controller gets a chance to
         // react to it having won -- before handing play back exactly where the challenge was issued.
-        if (winnerId is not null && OpenDuelWonReactionWindow(winnerId, winnerPlayerId!.Value, 1 - challengerPlayerId)) return;
+        P3EndLockouts(new(challengerPlayerId, duel.SourceCardId, duel.AbilityId)); // issue #503: the duel's action has ended (a Reaction lockout ends)
+        if (winnerId is not null && P3OpenDuelWonWindow(duel, winnerId, winnerPlayerId!.Value, 1 - challengerPlayerId)) return; // issue #503: the duel's after-action tracking runs when the window closes
         // Overconfident (issue #223): a chance to react to whichever side the duel's own outcome
         // destroyed (ApplyDuelOutcome/ApplyDuelFocusEffect, both above, already queued it via MarkDead).
         if (OpenOverconfidentDrawWindow(1 - challengerPlayerId)) return;
         // Action-effect tracking (issue #437): the duel is the action's resolution, the same reasoning FireAfterOwnActionTraits above already follows.
-        if (FinishActionEffectTracking(duel.AbilityId, challengerPlayerId, duel.SourceCardId, challengerPlayerId)) return;
+        if (FinishActionEffectTracking(duel.AbilityId, challengerPlayerId, duel.SourceCardId, challengerPlayerId, duel.ChallengerId)) return;
         NextAction(challengerPlayerId);
     }
 
     // "After a duel resolves during which [this card] won" (issue #209): scoped to the one specific
     // card that won, the same shape own-enters-play already uses for entering-play Reactions (see
     // OpenEntryReactionWindow) -- a tie has no single winner, so there is nothing to react with here.
-    private static string? DuelWonReactionAbility(CardInstance card) =>
+    private string? DuelWonReactionAbility(CardInstance card) =>
         AbilityIdsOf(card).FirstOrDefault(a => AbilityCatalog.All.TryGetValue(a, out var def) && def.Timing == "Reaction" && def.Trigger == "own-won-duel");
 
     // Kakita Maratai (issue #299): "After a duel ends that your Personality won" -- the same window,
@@ -409,14 +458,14 @@ public sealed partial class MatchEngine
     // watchers ever match ValidateAbility's own trigger check. The "duelWonReaction" PendingChoice
     // itself is untouched (CardId is still the winning card), so every consumer of the existing own-won-
     // duel window -- Apply()'s pass/close handling included -- needs no change.
-    private static string? DuelWonBroadcastReactionAbility(CardInstance card) =>
+    private string? DuelWonBroadcastReactionAbility(CardInstance card) =>
         AbilityIdsOf(card).FirstOrDefault(a => AbilityCatalog.All.TryGetValue(a, out var def) && def.Timing == "Reaction" && def.Trigger == "own-personality-won-duel");
 
     private bool OpenDuelWonReactionWindow(string winnerId, int winnerPlayerId, int closesTo)
     {
         var card = Card(winnerId);
         var reactionId = DuelWonReactionAbility(card);
-        var broadcastWatchers = _state.Cards.Values.Where(c => c.OwnerId == winnerPlayerId && InPlay(c) && !c.Bowed && DuelWonBroadcastReactionAbility(c) is not null).ToArray();
+        var broadcastWatchers = _state.Cards.Values.Where(c => c.OwnerId == winnerPlayerId && InPlay(c) && !BowedBarsAbilities(c) && DuelWonBroadcastReactionAbility(c) is not null).ToArray();
         if (reactionId is null && broadcastWatchers.Length == 0) return false;
         // A fresh window per duel: clear any earlier use so the same card may react again to a later duel.
         if (reactionId is not null) card.AbilityUses.Remove(reactionId);
@@ -453,23 +502,68 @@ public sealed partial class MatchEngine
         switch (abilityId)
         {
             case "steel-on-steel-duel": DestroyUnits(loserIds.Select(Card).ToArray(), actingPlayerId: challengerPlayerId); break;
-            case "training-duel-force": case "training-duel-honor": case "training-duel-open":
+            case "sword-for-hire-create": DestroyUnits(loserIds.Select(Card).ToArray(), actingPlayerId: challengerPlayerId); break;
+            case "training-duel-force":
+            case "training-duel-honor":
+            case "training-duel-open":
             case "training-duel-challenge": foreach (var id in loserIds) ApplyModifier(Card(id), id, abilityId, "Force", -1); break;
             // Dragon Clan review (issue #207): three real self-performer Iaijutsu duels.
             case "daisuke-duel": case "spirit-duelist-duel": foreach (var id in loserIds) MoveHome(Card(id), false); break;
-            case "ichizo-exp-duel": case "shikei-duel": DestroyUnits(loserIds.Select(Card).ToArray(), actingPlayerId: challengerPlayerId); break;
+            case "ichizo-exp-duel": case "shikei-duel": case "makoto-duel": DestroyUnits(loserIds.Select(Card).ToArray(), actingPlayerId: challengerPlayerId); break;
             // Second City unwired-card audit (issue #264): "she won" is exactly "the challenger's own
             // side won" in a self-performer 1v1 duel -- there is no ally on that side to conflate her
             // with, so checking the winner's OWNER matches the printed text precisely.
             // Doji Shigeyuki: "Bow the duel's loser's unit."
             case "shigeyuki-duel":
-                foreach (var loserId in loserIds)
-                    foreach (var member in Attachments(loserId).Prepend(Card(loserId))) if (!StalwartNegatesBow(member, challengerPlayerId)) member.Bowed = true;
+                foreach (var loserId in loserIds) BowUnitByEffect(Card(loserId), challengerPlayerId);
                 break;
             case "shiba-kudome-duel":
                 foreach (var id in loserIds) if (!StalwartNegatesBow(Card(id), challengerPlayerId)) Card(id).Bowed = true;
                 if (winnerId is not null && Card(winnerId).OwnerId == challengerPlayerId && ControlsKeyword(challengerPlayerId, "Shugenja"))
                     CreateToken(Card(winnerId), "Fire", abilityId, "Force", 1);
+                break;
+            // An Insult Answered (issue #453, batch 2): "Destroy the duel's loser. Give the duel's winner two +1F Revenge tokens."
+            case "insult-answered-duel":
+                DestroyUnits(loserIds.Select(Card).ToArray(), actingPlayerId: challengerPlayerId);
+                if (winnerId is not null && InPlay(Card(winnerId))) { CreateToken(Card(winnerId), "Revenge", abilityId, "Force", 1); CreateToken(Card(winnerId), "Revenge", abilityId, "Force", 1); }
+                break;
+            // Doji Mitsuru (issue #453, batch 3): "Bow the duel's loser."
+            case "mitsuru-duel":
+                foreach (var id in loserIds) if (!StalwartNegatesBow(Card(id), challengerPlayerId)) Card(id).Bowed = true;
+                break;
+            // Reckless Duel (oracle-l5r-6209, issue #460): "Bow the duel's loser. Move him home." -- Doji Mitsuru's own bow plus Daisuke's own move-home, combined.
+            // Doji Hakuseki (Forgotten Legacy pass, issue #467, batch 1; ForgottenLegacyBatch1.cs).
+            case "hakuseki-duel": HakusekiDuelOutcome(winnerId, loserIds, challengerPlayerId); break;
+            // Shiba Kudome - Experienced (The Shadow's Embrace pass, issue #476, batch 2; ShadowsEmbraceBatch2.cs).
+            case "kudome-exp-duel": KudomeExpDuelOutcome(winnerId, loserIds, challengerPlayerId); break;
+            // The Shadow's Embrace pass (issue #476), batch 1: Kakita Tadanobu (ShadowsEmbraceBatch1.cs).
+            case "tadanobu-duel-battle": case "tadanobu-duel-limited": TadanobuDuelOutcome(winnerId, loserIds, challengerPlayerId); break;
+            case "reckless-duel":
+                foreach (var id in loserIds)
+                {
+                    if (!StalwartNegatesBow(Card(id), challengerPlayerId)) Card(id).Bowed = true;
+                    MoveHome(Card(id), false);
+                }
+                break;
+            // Duel of Haiku (oracle-l5r-2245, Forgotten Legacy pass issue #467 batch 3): "The winner gains 1 Honor. Bow and dishonor the loser." -- the winning
+            // Personality's controller gains the Honor (a tie has no winner); every loser is bowed and dishonored.
+            // Duel to First Blood (The Shadow's Embrace pass, issue #476 batch 3): "Bow the duel's loser."
+            // Watchful Eye Dojo (Emperor Edition Stronghold pass, issue #486 batch 3): "Bow the duel's loser."
+            case "first-blood-duel-battle":
+            case "first-blood-duel-limited":
+            case "watchful-eye-duel":
+                foreach (var id in loserIds) if (InPlay(Card(id)) && !StalwartNegatesBow(Card(id), challengerPlayerId)) Card(id).Bowed = true;
+                break;
+            // The Aerie (Emperor Edition Stronghold pass, issue #486 batch 2): Duel of Haiku's outcome.
+            case "aerie-duel": AerieDuelOutcome(winnerId, loserIds, challengerPlayerId); break;
+            case EmperorP1Abilities.OchiaiDuel: QueueOchiaiDestruction(loserIds, challengerPlayerId); break; // Ochiai's Bravery (issue #503, EmperorP1.cs)
+            case "duel-of-haiku":
+                if (winnerId is not null) GainHonor(Card(winnerId).OwnerId, 1, "Duel of Haiku");
+                foreach (var id in loserIds)
+                {
+                    if (!StalwartNegatesBow(Card(id), challengerPlayerId)) Card(id).Bowed = true;
+                    Dishonor(Card(id));
+                }
                 break;
         }
     }
@@ -478,10 +572,24 @@ public sealed partial class MatchEngine
     // order. winnerPlayerId/loserPlayerIds are null/empty-safe for a double-loss tie.
     private void ApplyDuelFocusEffect(string abilityId, int ownerId, int? winnerPlayerId, List<int> loserPlayerIds)
     {
+        // Mendon (R4, issue #492): "a Focus Effect is not an action" -- what it does is not "an action's effects" (no mark on the duel's action, no Honor-change window applies to it).
+        var wasInFocusEffect = _resolvingFocusEffect; _resolvingFocusEffect = true;
+        var ringsBefore = BowedRingIds();
+        try { ApplyDuelFocusEffectCore(abilityId, ownerId, winnerPlayerId, loserPlayerIds); }
+        finally { _resolvingFocusEffect = wasInFocusEffect; ExcludeFocusEffectRingBows(ringsBefore); }
+    }
+
+    private void ApplyDuelFocusEffectCore(string abilityId, int ownerId, int? winnerPlayerId, List<int> loserPlayerIds)
+    {
         switch (abilityId)
         {
+            // The Sincerity of the Dragon and The Courtesy of the Crane: "After this duel ends, if you won it, give all your provinces +2 strength" -- until the turn ends (the default duration of an
+            // ongoing effect; Mendon's ruling, issue #492).
+            case "sincerity-dragon-focus":
+                if (ownerId == winnerPlayerId) foreach (var province in Player(ownerId).Provinces.Where(p => !p.Destroyed)) GiveProvinceStrengthThisTurn(ownerId, province.Index, 2, "The Sincerity of the Dragon");
+                break;
             case "courtesy-of-the-crane-focus":
-                if (ownerId == winnerPlayerId) foreach (var province in Player(ownerId).Provinces) province.Strength += 2;
+                if (ownerId == winnerPlayerId) foreach (var province in Player(ownerId).Provinces.Where(p => !p.Destroyed)) GiveProvinceStrengthThisTurn(ownerId, province.Index, 2, "The Courtesy of the Crane");
                 break;
             // To First Blood: "its winner's controller gains 2 Honor" (the destruction it negates was applied before the Focus Effects, in ResolveDuel).
             case "to-first-blood-focus":
@@ -491,9 +599,19 @@ public sealed partial class MatchEngine
             case "of-one-instant-focus":
                 if (_state.PendingDuel is { } instantDuel) GrantKeyword(Card(instantDuel.ChallengerPlayerId == ownerId ? instantDuel.ChallengerId : instantDuel.ChallengedId), "Tactician", abilityId, "Turn");
                 break;
+            case "training-focus-bow-ring": foreach (var ring in _state.Cards.Values.Where(c => InPlay(c) && Definition(c).Type == CardType.Ring && !c.Bowed).ToArray()) ring.Bowed = true; break;
             case "shadow-tactics-focus": foreach (var loserPlayer in loserPlayerIds.Distinct().ToArray()) Draw(Player(loserPlayer)); break;
             case "simple-yari-focus":
                 if (_state.PendingDuel?.WinnerId is string yariWinnerId && InPlay(Card(yariWinnerId)) && !StalwartNegatesBow(Card(yariWinnerId), ownerId)) Card(yariWinnerId).Bowed = true;
+                break;
+            // Paralyzing Touch (The Shadow's Embrace pass, issue #476, batch 4): "After this duel ends, negate the effects of the next action performed by its winner" (a tie has none).
+            case "paralyzing-touch-focus":
+                if (_state.PendingDuel?.WinnerId is string paralyzedWinnerId && InPlay(Card(paralyzedWinnerId))) WatchParalyzingTouch(Card(paralyzedWinnerId), "Paralyzing Touch");
+                break;
+            // Sudden Movement (The Shadow's Embrace pass, issue #476, batch 4): "After this duel ends, give its winner +3F" (a tie has no winner).
+            case "sudden-movement-focus":
+            case "slow-death-focus": // The Slow Death (Emperor Edition remaining-cards pass, issue #492, group D): "After this duel ends, give its winner +3F."
+                if (_state.PendingDuel?.WinnerId is string suddenWinnerId && InPlay(Card(suddenWinnerId))) ApplyModifier(Card(suddenWinnerId), suddenWinnerId, abilityId, "Force", 3);
                 break;
             // Scavenging Party: "After this duel ends, give its winner -3F" (a tie has no winner).
             case "scavenging-party-focus":
@@ -508,6 +626,24 @@ public sealed partial class MatchEngine
             case "home-guard-focus":
                 if (_state.PendingDuel is { } homeGuardDuel)
                     ApplyModifier(Card(homeGuardDuel.ChallengerPlayerId == ownerId ? homeGuardDuel.ChallengerId : homeGuardDuel.ChallengedId), abilityId, abilityId, "Force", 3);
+                break;
+            // Seeds of Decay pass (issue #453), batch 1. Embracing Battle: "bow the winner" (A Simple Yari's). Ceaseless Vigil's "straighten a Personality" is a choice (FocusEffectChoice.cs).
+            case "embracing-battle-focus":
+                if (_state.PendingDuel?.WinnerId is string embracingWinnerId && InPlay(Card(embracingWinnerId)) && !StalwartNegatesBow(Card(embracingWinnerId), ownerId)) Card(embracingWinnerId).Bowed = true;
+                break;
+            // Final Confrontation (Emperor Edition remaining-cards pass, group A, issue #492): "After this duel ends, if your Personality won it, take the Imperial Favor."
+            case "final-confrontation-focus":
+                if (ownerId == winnerPlayerId) TakeImperialFavor(ownerId);
+                break;
+            // Feint & Strike (oracle-l5r-2506, Forgotten Legacy pass issue #467 batch 3): "After this duel's resolution, its winner's controller discards a card" -- queued
+            // like Times of Strife's own forced discard and answered as the duel hands play back (FinishDuelResolution's OpenOverconfidentDrawWindow). A tie has no winner.
+            case "feint-strike-focus":
+                if (winnerPlayerId is int feintWinner && !P2HandDiscardBlocked(feintWinner, ownerId, false, "Feint & Strike")) _state.PendingForcedDiscards.Add(new(feintWinner, "Feint & Strike")); // issue #503: Pillowbook
+                break;
+            // Emperor Edition mechanics group E (issue #501): Greasing the Wheels (EmperorMechE.cs).
+            default:
+                ApplyMechEFocusEffect(abilityId);
+                ApplyP5FocusEffect(abilityId, ownerId, winnerPlayerId); // issue #503: Searching for Answers (EmperorP5Hidden.cs)
                 break;
         }
     }

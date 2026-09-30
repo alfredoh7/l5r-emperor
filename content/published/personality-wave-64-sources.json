@@ -1,0 +1,20 @@
+[
+  {
+    "card_id": "oracle-l5r-9998",
+    "printing_set": [
+      "Embers of War"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=9998",
+    "image_path": "assets/reference/oracle/embers-of-war/images/oracle-l5r-9998-printing-1-image-1.jpg",
+    "image_sha256": "de1eae363847b9ed64d1492ddddea172f7a94a92aed3ff317e1fbb4f403df393"
+  },
+  {
+    "card_id": "oracle-l5r-9999",
+    "printing_set": [
+      "Embers of War"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=9999",
+    "image_path": "assets/reference/oracle/embers-of-war/images/oracle-l5r-9999-printing-1-image-1.jpg",
+    "image_sha256": "6c5a16288401fcb4e950933f46da9f26f05271987834f83e6befce6ea2b654dd"
+  }
+]

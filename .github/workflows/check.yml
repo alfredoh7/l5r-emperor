@@ -21,13 +21,36 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        # The Windows work is split in two parallel jobs: the rules/AI/server/content checks (windows-2022) and the native Godot client
+        # build, import and smoke run (windows-2022-client). The Godot import of ~1500 scans and the art dominated the single job (about
+        # 9 of its 17 minutes) and pushed slow runs past the timeout; the client job now also restores the previous import cache.
+        # The Mac runner keeps one job with every check (its workspace persists, so it is already fast).
         include:
           - os: macos-local
             runner: [self-hosted, macOS, ARM64, l5r-mac-studio]
+            args: ''
+            timeout: 25
+            sparse: ''
           - os: windows-2022
             runner: [windows-2022]
+            args: --skip-client
+            timeout: 25
+            sparse: |
+              /*
+              !/docs/screenshots/
+              !/docs/videos/
+              !/assets/table/
+          - os: windows-2022-client
+            runner: [windows-2022]
+            args: --client-only
+            timeout: 30
+            sparse: |
+              /*
+              !/docs/screenshots/
+              !/docs/videos/
+              !/assets/table/
     runs-on: ${{ matrix.runner }}
-    timeout-minutes: 25
+    timeout-minutes: ${{ matrix.timeout }}
     defaults:
       run:
         shell: bash
@@ -35,7 +58,21 @@ jobs:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           persist-credentials: false
-      - uses: actions/setup-python@v5
+          # Windows runners start from an empty disk: skip ~2.2 GB of screenshots, videos and table source art that no check reads.
+          sparse-checkout: ${{ matrix.sparse }}
+          sparse-checkout-cone-mode: false
+      - name: Fetch main's tip for the diff-scoped comment-swallow lint
+        # A single branch tip, not fetch-depth 0: this checkout is intentionally
+        # shallow/sparse for slow, fresh-disk Windows runners, and full history
+        # for all branches would undo that. tools/lint_comment_swallow.py only
+        # needs origin/main to exist locally to compute its diff. The checkout
+        # above uses persist-credentials: false (this is a private repo), so
+        # this one fetch authenticates itself with the ephemeral job token
+        # instead of turning credential persistence back on repo-wide.
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: git fetch --no-tags --depth=1 "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" +refs/heads/main:refs/remotes/origin/main
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         if: runner.os == 'Windows'
         with:
           python-version: '3.12'
@@ -49,5 +86,24 @@ jobs:
         run: python -m pip install -r tools/content/requirements.txt
       - name: Install pinned project tools
         run: python tools/bootstrap.py --install
-      - name: Rules, AI, server, client transport, content and native client
-        run: bash tools/check.sh
+      # Godot only reimports what changed when it finds the previous import: restore the newest cache for this Godot pin, save a new one after a passing run.
+      - name: Restore Godot import cache
+        if: matrix.args == '--client-only'
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: src/L5R.Client/.godot
+          key: godot-import-${{ runner.os }}-${{ hashFiles('tools/bootstrap.py', 'src/L5R.Client/project.godot') }}-${{ github.sha }}
+          restore-keys: |
+            godot-import-${{ runner.os }}-${{ hashFiles('tools/bootstrap.py', 'src/L5R.Client/project.godot') }}-
+      - name: ${{ matrix.args == '--client-only' && 'Native client build, Godot import and smoke run' || 'Rules, AI, server, client transport and content (plus the native client on the Mac)' }}
+        env:
+          CHECK_ARGS: ${{ matrix.args }}
+        run: bash tools/check.sh "$CHECK_ARGS"
+      - name: Keep the Godot logs of a failed run
+        if: failure() && matrix.args != '--skip-client'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: godot-logs-${{ matrix.os }}
+          path: artifacts/checks/*.log
+          if-no-files-found: ignore
+          retention-days: 7

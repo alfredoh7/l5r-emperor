@@ -48,10 +48,10 @@ public partial class Main
         }
         if(View.Phase==Phase.BattleSelection)
         {
-            FlowText("Choose the province to fight next.",22,Palette.Paper);
+            FlowText("Choose the battlefield to fight next.",22,Palette.Paper);
             foreach(var option in Actions.Where(a=>a.Type=="selectBattle" && a.Enabled))
-                AddAction(_inspector,option with {Label=$"Province {option.Command!.Province+1}  ›"});
-            FlowText("Selecting a province begins that battle.",15,Palette.PaperDim);
+                AddAction(_inspector,option with {Label=$"{BattlefieldName(option.Command!.Province!.Value)}  ›"});
+            FlowText("Selecting a battlefield begins that battle.",15,Palette.PaperDim);
         }
         else if(View.Phase==Phase.AttackDeclaration)
         {
@@ -72,7 +72,7 @@ public partial class Main
             // Committed units stay legible while the next maneuvers segment is considered.
             foreach(var player in View.Players)
                 foreach(var group in player.Army.Where(c=>c.AttachedTo is null).GroupBy(c=>c.ProvinceIndex))
-                    FlowCard($"Province {group.Key+1}",$"{player.Clan} · {group.Count()} committed unit{(group.Count()==1?"":"s")}");
+                    FlowCard(group.Key is int committedAt?BattlefieldName(committedAt):"Home",$"{player.Clan} · {group.Count()} committed unit{(group.Count()==1?"":"s")}");
         }
         else if(View.Phase==Phase.Battle)
         {

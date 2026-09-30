@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Honor and Treachery pass (#458): 16 of the set's 17 new printings wired (personality-wave-61, holding-wave-8, spell-wave-19, strategy-wave-51, stronghold-wave-13, follower-wave-27); Bayushi Nitoshi - inexperienced (10248) stays blocked, needing a new peek-then-type-conditional-attach-or-grant primitive. New engine primitives: a controller-wide static ability grant (Towers of the Yogo), a combined payment-kind-or-Shugenja ConditionalProduction condition (Sacred Temple), Irezu's home/battlefield swap plus a duel-substitution Reaction, Tsukimi's generalized per-turn-use refresh, and a shared army-membership Target/Performer category (Devoted Yojimbo). Shared scope: touches the content packaging pipeline (tools/content/package_*.py, wave registration in L5R.Core.csproj/PublishedContent.cs/CardCatalog.cs), the inventory builder, and the catalogue art pack pointer files, alongside rules-lane engine changes -- the same shared-file shape the Seeds of Decay pass (#453) already used. Also corrected a stale blocker note for Devoted Yojimbo (10248's own note is new; 1992's old one is removed).",
+  "validation": "Full L5R.Core.Tests suite: zero failures, including the new honor-and-treachery suite (17/17). L5R.AI.Tests, L5R.Server.Tests, L5R.Client.Transport.Tests: all pass. Content suite: 134/134 after the catalogue art pack was republished. docs/CARD_INVENTORY.xlsx regenerated: 2170 cards, 732 wired (+16). Catalogue art pack pinned to catalogue-art-pr459-20260923-r1 (3179 scans).",
+  "remaining": "None; ready for review.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/458",
+  "branch": "claude/458-honor-and-treachery-pass",
+  "updated": "2026-09-23T19:30:55.364582+00:00"
+}

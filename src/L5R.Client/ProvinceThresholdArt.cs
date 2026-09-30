@@ -10,8 +10,11 @@ public static class ProvinceThresholdArt
     private static readonly int[] NumberCenters = [543, 810, 1078, 1346];
     private static readonly Texture2D Glow = new GradientTexture2D
     {
-        Width = 256, Height = 96, Fill = GradientTexture2D.FillEnum.Radial,
-        FillFrom = new Vector2(.5f, .5f), FillTo = new Vector2(1, .5f),
+        Width = 256,
+        Height = 96,
+        Fill = GradientTexture2D.FillEnum.Radial,
+        FillFrom = new Vector2(.5f, .5f),
+        FillTo = new Vector2(1, .5f),
         Gradient = new Gradient { Colors = [new Color(1, .65f, .24f, .38f), new Color(1, .65f, .24f, .1f), new Color(1, .65f, .24f, 0)], Offsets = [0, .45f, 1] }
     };
     public static Texture2D Plate(string label, int? province)
@@ -38,7 +41,7 @@ public static class ProvinceThresholdArt
         // No recoloring, synthetic grain or extra desaturation of the approved art.
         for (var i = 0; i < pixels.Length; i += 4)
             pixels[i + 3] = (byte)(255 * Math.Clamp((pixels[i] - pixels[i + 2] - 3f) / 24f, 0, 1));
-        if (province is null && (label.StartsWith("Province ", StringComparison.Ordinal) || label=="Removed"))
+        if (province is null && (IsCourtLabel(label) || label == "Removed"))
         {
             // Battlefields retain their crossed-swords identity, not Home's house.
             for (var y = 0; y < 80; y++) for (var x = 70; x < 195; x++) pixels[(y * rect.Size.X + x) * 4 + 3] = 0;
@@ -50,19 +53,22 @@ public static class ProvinceThresholdArt
 
     public static Rect2 IconBounds(Rect2 bounds, string label, bool connectionAbove = false)
     {
-        if(label=="Removed") return new Rect2(bounds.Position+new Vector2(-6,-6),new Vector2(24,24));
+        if (label == "Removed") return new Rect2(bounds.Position + new Vector2(-6, -6), new Vector2(24, 24));
         // A's icons interrupt the top stroke, near its left corner. No header row.
-        if (label.StartsWith("Province ", StringComparison.Ordinal)) return new Rect2(bounds.GetCenter().X - 24, (connectionAbove ? bounds.End.Y - 20 : bounds.Position.Y - 26), 48, 48);
+        if (IsCourtLabel(label)) return new Rect2(bounds.GetCenter().X - 24, (connectionAbove ? bounds.End.Y - 20 : bounds.Position.Y - 26), 48, 48);
         var local = label == "Holdings" ? new Rect2(77 * .55f, 0, 56 * .55f, 75 * .55f)
             : new Rect2(71 * .55f, 0, 121 * .55f, 69 * .55f);
         return new Rect2(bounds.Position + local.Position, local.Size);
     }
 
+    /// <summary>A battlefield's court: "Province N", or a battlefield without a province ("Battlefield ...", Emperor Edition rulings pass R1).</summary>
+    public static bool IsCourtLabel(string label) => label.StartsWith("Province ", StringComparison.Ordinal) || label.StartsWith("Battlefield ", StringComparison.Ordinal);
+
     public static Rect2 ThresholdBounds(Rect2 bounds) => new(bounds.Position.X, bounds.End.Y - Footer, bounds.Size.X, Footer);
 
     public static void Draw(Control canvas, Vector2 size, string label, int? province, float active = 0, bool connectionAbove = false, bool connected = false)
     {
-        if (province is null && label.StartsWith("Province ", StringComparison.Ordinal))
+        if (province is null && IsCourtLabel(label))
         { BattleInkArt.Court(canvas, size, active, connectionAbove); return; }
         var art = Plate(label, province);
         var source = art.GetSize();
@@ -71,14 +77,14 @@ public static class ProvinceThresholdArt
         var sy = isProvince ? 48f : 80f;
         var right = isProvince ? 35f : 60f;
         var bottom = isProvince ? 66f : 55f;
-        var scale = isProvince ? size.X / source.X : .55f;
+        var scale = isProvince ? Math.Min(size.X, 218) / source.X : .55f;
         float[] sourceX = [0, sx, source.X - right, source.X];
         float[] sourceY = [0, sy, source.Y - bottom, source.Y];
-        var footHeight = isProvince ? bottom * size.X / source.X : bottom * scale;
+        var footHeight = bottom * scale;
         float[] destX = [0, sx * scale, size.X - right * scale, size.X];
         float[] destY = [0, sy * scale, size.Y - footHeight, size.Y];
         if (isProvince && active > .001f)
-            canvas.DrawTextureRect(Glow, new Rect2(-8, size.Y - footHeight - 15, size.X + 16, footHeight + 24), false, new Color(1,1,1,active));
+            canvas.DrawTextureRect(Glow, new Rect2(-8, size.Y - footHeight - 15, size.X + 16, footHeight + 24), false, new Color(1, 1, 1, active));
         var tint = Colors.White.Lerp(new Color(1.22f, 1.13f, 1.02f), active);
         for (var y = 0; y < 3; y++)
         {
@@ -86,8 +92,18 @@ public static class ProvinceThresholdArt
             {
                 // Keep the entire gate roof, circular number and supports in one
                 // proportional image. Stretch only the plain side strokes above it.
-                canvas.DrawTextureRectRegion(art, new Rect2(0, destY[2], size.X, footHeight),
-                    new Rect2(0, sourceY[2], source.X, bottom), tint);
+                var gateWidth = source.X * scale;
+                var left = (size.X - gateWidth) / 2;
+                if (left > 0)
+                {
+                    // Extend plain rails; never stretch the roof or the single circular province number.
+                    var railY = size.Y - 21 * scale;
+                    canvas.DrawTextureRectRegion(art, new Rect2(0, railY, left, 12 * scale), new Rect2(60, 334, 24, 12), tint);
+                    canvas.DrawTextureRectRegion(art, new Rect2(left + gateWidth, railY, left, 12 * scale), new Rect2(60, 334, 24, 12), tint);
+                    canvas.DrawTextureRectRegion(art, new Rect2(0, destY[2], 12 * scale, footHeight - 9 * scale), new Rect2(0, 200, 12, 40), tint);
+                    canvas.DrawTextureRectRegion(art, new Rect2(size.X - 14 * scale, destY[2], 14 * scale, footHeight - 9 * scale), new Rect2(244, 200, 14, 40), tint);
+                }
+                canvas.DrawTextureRectRegion(art, new Rect2(left, destY[2], gateWidth, footHeight), new Rect2(0, sourceY[2], source.X, bottom), tint);
                 continue;
             }
             for (var x = 0; x < 3; x++)
@@ -109,6 +125,6 @@ public static class ProvinceThresholdArt
                 else canvas.DrawTextureRectRegion(art, dest, src, tint);
             }
         }
-        if(label=="Removed") canvas.DrawTextureRect(RemovedPileArt.Seal,new Rect2(-6,-6,24,24),false);
+        if (label == "Removed") canvas.DrawTextureRect(RemovedPileArt.Seal, new Rect2(-6, -6, 24, 24), false);
     }
 }

@@ -1,0 +1,429 @@
+{
+  "Profile": "personality-wave-66",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-4944",
+      "Name": "Matsu Koyama",
+      "Type": "Personality",
+      "Clan": "Lion",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 4,
+      "HonorRequirement": 7,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Target an enemy unit: Reduce the Force of each Personality and Follower in it by Koyama's Personal Honor. Bow any cards in the unit whose Force is now 0.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-4944.jpg",
+      "Keywords": [
+        "Lion Clan",
+        "Paragon",
+        "Samurai"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "koyama-weaken"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-5279",
+      "Name": "Moshi Sasako",
+      "Type": "Personality",
+      "Clan": "Mantis",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 1,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle resolution does not bow cards in this unit.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-5279.jpg",
+      "Keywords": [
+        "Naval",
+        "Mantis Clan",
+        "Shugenja",
+        "Thunder"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "sasako-unit-no-resolution-bow"
+    },
+    {
+      "Id": "oracle-l5r-5395",
+      "Name": "Moto Xiao",
+      "Type": "Personality",
+      "Clan": "Unicorn",
+      "GoldCost": 10,
+      "GoldProduction": 0,
+      "Force": 6,
+      "Chi": 4,
+      "PersonalHonor": 3,
+      "HonorRequirement": 4,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Followers in Xiao's army have +1F.\nBattle: Destroy a target enemy card without attachments.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-5395.jpg",
+      "Keywords": [
+        "Cavalry",
+        "Unique",
+        "Commander",
+        "Experienced",
+        "Samurai",
+        "Unicorn Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "xiao-destroy"
+      ],
+      "Effect": "xiao-army-follower-force"
+    },
+    {
+      "Id": "oracle-l5r-5591",
+      "Name": "Ninube Shiho",
+      "Type": "Personality",
+      "Clan": "Spider",
+      "GoldCost": 4,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 3,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After you Recruit Shiho, lose 1 Honor. \nNinja Battle: Put Shiho on top of your Dynasty deck (face-down). Put all cards without attachments in a target enemy Personality's unit on the bottom of their appropriate deck.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-5591.jpg",
+      "Keywords": [
+        "Ninja",
+        "Shadowlands",
+        "Shugenja",
+        "Spider Clan",
+        "Unmaker"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "shiho-return"
+      ],
+      "Effect": "none",
+      "EntryHonorLoss": 1
+    },
+    {
+      "Id": "oracle-l5r-6804",
+      "Name": "Shiba Sawaken",
+      "Type": "Personality",
+      "Clan": "Phoenix",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 3,
+      "HonorRequirement": 6,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Iaijutsu Battle: Target an enemy Personality or Follower: Give it -5F.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6804.jpg",
+      "Keywords": [
+        "Duelist",
+        "Phoenix Clan",
+        "Samurai",
+        "Yojimbo"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "sawaken-weaken"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-6900",
+      "Name": "Shinjo Junpei",
+      "Type": "Personality",
+      "Clan": "Unicorn",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 4,
+      "PersonalHonor": 2,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Even if Junpei is not at the current battlefield, target an enemy card without attachments: Bow it. If it is a Personality, negate his next movement.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6900.jpg",
+      "Keywords": [
+        "Tactician",
+        "Samurai",
+        "Unicorn Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "junpei-base-bow"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-7126",
+      "Name": "Shosuro Makiko",
+      "Type": "Personality",
+      "Clan": "Scorpion",
+      "GoldCost": 6,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 4,
+      "PersonalHonor": 1,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Political Open: Bow Makiko: Take the Imperial Favor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7126.jpg",
+      "Keywords": [
+        "Loyal",
+        "Courtier",
+        "Scorpion Clan",
+        "Seductress"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "makiko-favor"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-8320",
+      "Name": "The Shakash",
+      "Type": "Personality",
+      "Clan": "Unaligned",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 2,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Enters play paying 1 less Gold for each Nonhuman you control, up to 3 less Gold.\nBattle: Target an enemy Personality: Bow him or move him home.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8320.jpg",
+      "Keywords": [
+        "Conqueror",
+        "Commander",
+        "Naga",
+        "Nonhuman"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "shakash-bow",
+        "shakash-move-home"
+      ],
+      "Effect": "shakash-nonhuman-discount"
+    },
+    {
+      "Id": "oracle-l5r-8339",
+      "Name": "The Sleepless One",
+      "Type": "Personality",
+      "Clan": "Unaligned",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 2,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Enters play paying 1 less Gold.\nBattle: Twice per turn, bow one of your Forests or Pearls: Give each of your Nonhuman cards at the current battlefield +1F.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8339.jpg",
+      "Keywords": [
+        "Abomination",
+        "Naga",
+        "Nonhuman",
+        "Pearl",
+        "Shugenja"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "sleepless-boost"
+      ],
+      "Effect": "sleepless-discount"
+    },
+    {
+      "Id": "oracle-l5r-8565",
+      "Name": "Togashi Osawa",
+      "Type": "Personality",
+      "Clan": "Dragon",
+      "GoldCost": 9,
+      "GoldProduction": 0,
+      "Force": 5,
+      "Chi": 4,
+      "PersonalHonor": 2,
+      "HonorRequirement": 1,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle/Open: Even if Osawa is bowed, target a Personality at Osawa's location: Bow or straighten him.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8565.jpg",
+      "Keywords": [
+        "Unique",
+        "Air",
+        "Dragon Clan",
+        "Experienced",
+        "Monk",
+        "Tattooed"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "osawa-bow",
+        "osawa-straighten"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-8644",
+      "Name": "Toritaka Chokichi",
+      "Type": "Personality",
+      "Clan": "Crab",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Bow your performing Follower: Ranged 4 Attack which may target a Personality with attached Followers if you have Reconnaissance.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8644.jpg",
+      "Keywords": [
+        "Crab Clan",
+        "Samurai",
+        "Scout"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "chokichi-attack"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9071",
+      "Name": "Utaku Ji-Yun",
+      "Type": "Personality",
+      "Clan": "Unicorn",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 5,
+      "Chi": 3,
+      "PersonalHonor": 4,
+      "HonorRequirement": 4,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Negate Ji-Yun's dishonoring from other players' cards' effects.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9071.jpg",
+      "Keywords": [
+        "Cavalry",
+        "Battle Maiden",
+        "Paragon",
+        "Samurai",
+        "Unicorn Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "jiyun-dishonor-immunity"
+    },
+    {
+      "Id": "oracle-l5r-9430",
+      "Name": "Yamazaki",
+      "Type": "Personality",
+      "Clan": "Spider",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 1,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: Target your Holding: Yamazaki threatens the workers. Straighten it.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9430.jpg",
+      "Keywords": [
+        "Kensai",
+        "Monk",
+        "Order of Venom",
+        "Spider Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "yamazaki-straighten"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9436",
+      "Name": "Yasuki Daiki",
+      "Type": "Personality",
+      "Clan": "Crab",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 4,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Political Open: Target another player's Personality: His controller chooses to either pay 4 Gold, lose 2 Honor, or do neither. If he did not pay 4 Gold or lose 2 Honor, the Personality may not be assigned, and will not move, into attacking armies.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9436.jpg",
+      "Keywords": [
+        "Courtier",
+        "Crab Clan",
+        "Merchant"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "daiki-demand"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9556",
+      "Name": "Yoritomo Haruhiko",
+      "Type": "Personality",
+      "Clan": "Mantis",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 1,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Ranged 3 Attack with +2 strength if you have Reconnaissance.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9556.jpg",
+      "Keywords": [
+        "Naval",
+        "Mantis Clan",
+        "Samurai",
+        "Scout"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "haruhiko-attack"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

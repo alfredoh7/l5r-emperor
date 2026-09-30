@@ -275,6 +275,12 @@ internal static class ActionLockTests
         "beforeBattleOptional", "beforeBattleOrder", "chooseConqueror", "choosePreservingHonor", "chooseRikateDetach", "chooseRinShame", "chooseShinden", "harshChoices",
         "chooseYourClanNeedsYouProvince", "concede", "declareAttack", "declineReaction", "declineStraighten", "discardHand", "discardProvince", "encircledOrder", "encircledSelect",
         "endDynasty", "equip", "forcedDiscard", "overlay", "pass", "playStrategy", "proclaim", "purchase", "recruitReserve", "selectBattle", "wait",
+        // Seeds of Decay pass (issue #453), batch 4: two Events Phase decisions of the revealing player's (Offering Reverence's shuffle-or-discard, Tested Land's enemy province).
+        "offeringReverence", "testedLandProvince",
+        // Issue #501 (Mendon's item 2): declining an optional additional action is the player's decision, not an action a Personality performs.
+        "declineAdditionalAction",
+        // Plains of Otosan Uchi (issue #554): the reveal-order choice and the province-card-targeting disambiguation (Shosuro Toson) are both the province's own controller's decisions.
+        "provinceCardChoice", "provinceOrder",
     ];
 
     private static void InnateActionInventory()
@@ -287,7 +293,7 @@ internal static class ActionLockTests
         Check(offered.SequenceEqual(known), "the offered action types changed -- classify the new one (a Personality performs it: bar it under a lock; else list it as the player's): "
             + "new [" + string.Join(", ", offered.Except(known)) + "], gone [" + string.Join(", ", known.Except(offered)) + "]");
         // The two assignment types are built from a variable, not a literal: they are assignments, not actions (the next test).
-        Check(source.Contains("var actionType=attack?\"attack\":\"assignDefense\""), "attack and assignDefense are still the one assignment construction");
+        Check(source.Contains("var actionType = attack ? \"attack\" : \"assignDefense\""), "attack and assignDefense are still the one assignment construction");
         // Behaviour, for the one of the two that is not an ability: Order Seppuku is listed disabled for a locked Personality and every ability on him too;
         // and a Personality's lock changes none of the player's own actions in the Dynasty and Action Phases (buying, passing).
         var s = Table(Phase.Action, actor: 0);

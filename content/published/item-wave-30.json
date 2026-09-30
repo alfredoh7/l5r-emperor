@@ -1,0 +1,33 @@
+{
+  "Profile": "item-wave-30",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-3514",
+      "Name": "Hunger",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 6,
+      "GoldProduction": 0,
+      "Force": 5,
+      "Chi": 1,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "You must declare an attack each turn and assign this Personality to attack if possible.\nReaction: After an action targets this Personality: Negate this Personality's movement from the action's effects.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-3514.jpg",
+      "Keywords": [
+        "Weapon",
+        "Unique"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "hunger-negate-move"
+      ],
+      "Effect": "hunger-must-attack"
+    }
+  ],
+  "Decks": []
+}

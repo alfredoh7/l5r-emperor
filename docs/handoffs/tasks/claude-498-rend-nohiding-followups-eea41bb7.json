@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Wired Rend the Soul, No Hiding Place, Enslaved Djinn, Celestial Sword of the Dragon - exp and Asako Chukage (focus-value primitive, attack target step, Ring/hand search); applied Mendon's Kurohito and unit-reading rulings; inventory gains Blocker Category column; art pack pr498-r1",
+  "validation": "Core suite 0 failures (1816 passes); AI 74/74; Server 8/8; Client.Transport 12/12; collab 45; content tests OK; Godot client build left to CI",
+  "remaining": "None; ready for review. Follow-ups: Plains of Otosan Uchi (issue #499, Alfredo: two-card province view and battlefield without a province)",
+  "issue": "498",
+  "branch": "claude/498-rend-nohiding-followups",
+  "updated": "2026-09-25T16:30:20.601240+00:00"
+}

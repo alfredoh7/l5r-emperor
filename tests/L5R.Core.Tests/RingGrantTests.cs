@@ -90,19 +90,19 @@ internal static class RingGrantTests
         var ring = Add(s, Earth, 0, Zone.Hand);
         var e = MatchEngine.FromTestState(s);
         EarthEnumeration(e, ring, enabled: true);
-        var before = e.State.Players[1].Provinces.Select(p => p.Strength).ToArray();
+        var before = e.State.Players[1].Provinces.Select(p => e.ProvinceStrengthForTest(1, p.Index)).ToArray();
         PlayEarth(e, ring, "ring-of-earth-raise", 1, 2);
         var after = e.State;
         Eq(after.Cards[ring.Id].Zone, Zone.FateDiscard, "the discard-from-hand cost is paid: the Ring goes to the discard pile");
         Check(!after.Players[0].Hand.Contains(ring.Id), "and leaves the hand");
-        Eq(after.Players[1].Provinces[2].Strength, before[2] + 3, "an enemy Province is raised by 3");
-        Check(after.Players[1].Provinces.Where((p, i) => i != 2).Select(p => p.Strength).SequenceEqual(before.Where((_, i) => i != 2)), "no other Province changes");
+        Eq(e.ProvinceStrengthForTest(1, 2), before[2] + 3, "an enemy Province is raised by 3 (until end of turn)");
+        Check(after.Players[1].Provinces.Where((p, i) => i != 2).Select(p => e.ProvinceStrengthForTest(1, p.Index)).SequenceEqual(before.Where((_, i) => i != 2)), "no other Province changes");
 
         var s2 = BattleTable(); var ring2 = Add(s2, Earth, 0, Zone.Hand);
         var e2 = MatchEngine.FromTestState(s2);
-        var own = e2.State.Players[0].Provinces[1].Strength;
+        var own = e2.ProvinceStrengthForTest(0, 1);
         PlayEarth(e2, ring2, "ring-of-earth-lower", 0, 1);
-        Eq(e2.State.Players[0].Provinces[1].Strength, own - 3, "one's own Province is lowered by 3");
+        Eq(e2.ProvinceStrengthForTest(0, 1), own - 3, "one's own Province is lowered by 3");
         Eq(e2.State.Cards[ring2.Id].Zone, Zone.FateDiscard);
     }
 
@@ -114,9 +114,9 @@ internal static class RingGrantTests
         Add(s, "training-crane-samurai", 1, Zone.Battlefield, province: 0);
         var e = MatchEngine.FromTestState(s);
         EarthEnumeration(e, ring, enabled: true);
-        var before = e.State.Players[1].Provinces[0].Strength;
+        var before = e.ProvinceStrengthForTest(1, 0);
         PlayEarth(e, ring, "ring-of-earth-lower", 1, 0);
-        Eq(e.State.Players[1].Provinces[0].Strength, before - 3);
+        Eq(e.ProvinceStrengthForTest(1, 0), before - 3);
         Eq(e.State.Cards[ring.Id].Zone, Zone.FateDiscard);
     }
 
@@ -129,9 +129,9 @@ internal static class RingGrantTests
             if (withUnits) Add(s, "training-crane-samurai", 0, Zone.Battlefield, province: 0);
             var e = MatchEngine.FromTestState(s);
             EarthEnumeration(e, ring, enabled: true);
-            var before = e.State.Players[0].Provinces[3].Strength;
+            var before = e.ProvinceStrengthForTest(0, 3);
             PlayEarth(e, ring, "ring-of-earth-raise", 0, 3);
-            Eq(e.State.Players[0].Provinces[3].Strength, before + 3);
+            Eq(e.ProvinceStrengthForTest(0, 3), before + 3);
             Eq(e.State.Cards[ring.Id].Zone, Zone.Home, "an in-play Ring bows instead and stays in play");
             Check(e.State.Cards[ring.Id].Bowed, "bowed");
             // Bowed, and the once-per-turn use is spent: both abilities are still listed (the choice), disabled, and refused when submitted anyway.

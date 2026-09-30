@@ -1,0 +1,146 @@
+{
+  "Profile": "item-wave-12",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-1268",
+      "Name": "Celestial Sword of the Lion",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 1,
+      "Chi": 1,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Will only attach to a Lion Clan Personality.\nThis card has +1F for each Lion Clan Personality you control.\nAfter this card enters play: Gain 2 Honor.\nBattle: Create a 2F/2C/3PH Lion Clan • Samurai • Ancestor • Spirit Personality at the current battlefield.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1268.jpg",
+      "Keywords": [
+        "Unique",
+        "Weapon",
+        "Experienced",
+        "Shinrai"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "celestial-sword-lion-honor",
+        "celestial-sword-lion-create"
+      ],
+      "Effect": "celestial-sword-force-lion",
+      "AttachRequiresKeyword": "Lion Clan"
+    },
+    {
+      "Id": "oracle-l5r-1273",
+      "Name": "Celestial Sword of the Unicorn",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 1,
+      "Chi": 1,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Will only attach to a Unicorn Clan Personality.\nThis card has +1F for each Unicorn Clan Personality you control.\nAfter this card enters play: Gain 2 Honor.\nBattle: Target an enemy card: Bow it. Destroy it if it is not Cavalry and has no attachments.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1273.jpg",
+      "Keywords": [
+        "Unique",
+        "Weapon",
+        "Enginoshi",
+        "Experienced"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "celestial-sword-unicorn-honor",
+        "celestial-sword-unicorn-bow"
+      ],
+      "Effect": "celestial-sword-force-unicorn",
+      "AttachRequiresKeyword": "Unicorn Clan"
+    },
+    {
+      "Id": "oracle-l5r-1875",
+      "Name": "Dazzling Attire",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Political Open, Bow this card: Take the Imperial Favor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1875.jpg",
+      "Keywords": [],
+      "Focus": 3,
+      "Abilities": [
+        "dazzling-attire-favor"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-7435",
+      "Name": "Splintered Weapon",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 4,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "As a Focus Effect: You may transfer an attachment from your Personality in this duel to another of your Personalities.\nBattle: Target an enemy card without attachments: Bow it. Destroy it if this Personality is a Berserker.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7435.jpg",
+      "Keywords": [
+        "Weapon"
+      ],
+      "Focus": 1,
+      "Abilities": [
+        "splintered-weapon-focus",
+        "splintered-weapon-bow"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-7958",
+      "Name": "The Ancestral Sword of Hantei",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 1,
+      "Chi": 1,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Will only attach to a Spider Clan Personality.\nThis card has +1F for each Spider Clan Personality you control.\nAfter this card enters play: Gain 2 Honor.\nBattle: Target a card in a unit: You may destroy it if it is bowed or an attachment. Bow it. Straighten this Personality.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7958.jpg",
+      "Keywords": [
+        "Unique",
+        "Weapon",
+        "Akkuai-uo",
+        "Experienced"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "ancestral-sword-hantei-honor",
+        "ancestral-sword-hantei-bow"
+      ],
+      "Effect": "celestial-sword-force-spider",
+      "AttachRequiresKeyword": "Spider Clan"
+    }
+  ],
+  "Decks": []
+}

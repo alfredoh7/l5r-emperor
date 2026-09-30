@@ -12,8 +12,13 @@ public sealed record MoveSpec(string Movers, string Destination)
     public const string Target = "target", Source = "source", SourceAndTarget = "source-and-target", Performer = "performer", PerformerAndTarget = "performer-and-target";
     /// <summary>Every card of the ability's performing slot moves ("Move the targets to the current battlefield", Dislodge the Foe).</summary>
     public const string PerformingSlot = "performing-slot";
+    /// <summary>The Personality that performed the Battle action an "after a Battle action resolves" Reaction reacts to (MatchState.BattleActionReactionPerformerId): Shosuro
+    /// Hawado - exp's "target a Personality that performed it: Move him from his current location to another" (issue #453).</summary>
+    public const string BattleActionPerformer = "battle-action-performer";
     public const string Home = "home", CurrentBattlefield = "current-battlefield", AdjacentUnresolved = "adjacent-unresolved-battlefield", AnyUnresolved = "unresolved-battlefield";
-    public bool ChoosesBattlefield => Destination is AdjacentUnresolved or AnyUnresolved;
+    /// <summary>Issue #503 (Shosuro Keirei: "Move Keirei from the current battlefield to a different battlefield"): any other battlefield of the Attack Phase, resolved or not.</summary>
+    public const string AnyOther = "any-other-battlefield";
+    public bool ChoosesBattlefield => Destination is AdjacentUnresolved or AnyUnresolved or AnyOther;
 }
 
 public sealed partial class MatchEngine
@@ -32,7 +37,7 @@ public sealed partial class MatchEngine
     // The battlefields next to `current` (Mendon's ruling, issue #336): a battlefield is identified by the DEFENDER's province it is fought over, so
     // adjacency follows the DEFENDER's province line -- never the line of whichever player happens to own the card or take the action. Destroyed
     // provinces slide their neighbours together (AdjacentProvinces). The one place adjacency between battlefields is decided.
-    private IEnumerable<int> AdjacentBattlefields(int current) => AdjacentProvinces(1 - _state.ActivePlayerId, current);
+    // (Issue #492 rulings pass R1: AdjacentBattlefields is in EmperorRulingR1.cs -- a battlefield without a province has none, and a province's additional battlefield counts as at that province.)
 
     // The battlefields a chosen destination may name right now (empty for a destination that needs no choice, and when no battle is
     // under way). A battlefield is identified by the DEFENDER's province it is fought over, so adjacency is the defender's province line
@@ -41,6 +46,7 @@ public sealed partial class MatchEngine
     {
         if (!move.ChoosesBattlefield || _state.CurrentBattleProvince is not int current) return [];
         var unresolved = _state.UnresolvedBattlefields;
+        if (move.Destination == MoveSpec.AnyOther) return P2OtherBattlefields(current); // issue #503 (EmperorP2Keirei.cs)
         return move.Destination == MoveSpec.AdjacentUnresolved
             ? AdjacentBattlefields(current).Where(unresolved.Contains).ToArray()
             : unresolved.Where(p => p != current).ToArray();
@@ -52,7 +58,7 @@ public sealed partial class MatchEngine
         if (ability.Move is not { } move) return;
         if (move.ChoosesBattlefield)
             Require(command.Province is int province && MoveDestinations(move).Contains(province), move.Destination == MoveSpec.AdjacentUnresolved
-                ? "Choose an adjacent unresolved battlefield." : "Choose another unresolved battlefield.");
+                ? "Choose an adjacent unresolved battlefield." : move.Destination == MoveSpec.AnyOther ? "Choose a different battlefield." : "Choose another unresolved battlefield.");
         else Require(command.Province is null, "This move names no battlefield.");
     }
 
@@ -68,7 +74,10 @@ public sealed partial class MatchEngine
         if (move.Movers is MoveSpec.Source or MoveSpec.SourceAndTarget) MoveByRule(source!, move, battlefield);
         if (move.Movers is MoveSpec.Performer or MoveSpec.PerformerAndTarget) MoveByRule(Card(command.PerformerId), move, battlefield);
         if (move.Movers == MoveSpec.PerformingSlot) foreach (var mover in PerformingSlotCards(command, ability).ToArray()) MoveByRule(mover, move, battlefield);
-        return move.Movers is MoveSpec.Target or MoveSpec.SourceAndTarget or MoveSpec.PerformerAndTarget && MoveByRule(target!, move, battlefield);
+        if (move.Movers == MoveSpec.BattleActionPerformer && _state.BattleActionReactionPerformerId is { } reactedPerformerId && _state.Cards.TryGetValue(reactedPerformerId, out var reactedPerformer) && InPlay(reactedPerformer))
+            MoveByRule(reactedPerformer, move, battlefield);
+        // An optional target (Kuni Shinoda's "the target, if any") leaves only the source to move.
+        return move.Movers is MoveSpec.Target or MoveSpec.SourceAndTarget or MoveSpec.PerformerAndTarget && target is not null && MoveByRule(target, move, battlefield);
     }
 
     private bool MoveByRule(CardInstance card, MoveSpec move, int? battlefield)

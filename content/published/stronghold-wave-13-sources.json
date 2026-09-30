@@ -1,0 +1,20 @@
+[
+  {
+    "card_id": "oracle-l5r-10256",
+    "printing_set": [
+      "Honor and Treachery"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10256",
+    "image_path": "assets/reference/oracle/honor-and-treachery/webp/oracle-l5r-10256-printing-1-image-1.webp",
+    "image_sha256": "e057492d3eda2d5a0332d90abb764bbe4b4cd5e26a8b09b92fd7d64db785b5d7"
+  },
+  {
+    "card_id": "oracle-l5r-8392",
+    "printing_set": [
+      "Honor and Treachery"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=8392",
+    "image_path": "assets/reference/oracle/honor-and-treachery/webp/oracle-l5r-8392-printing-8-image-1.webp",
+    "image_sha256": "dfad51be493bd70d7b70fe9db17657698f0ab31fd5733d5cacf4539694691311"
+  }
+]

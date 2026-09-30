@@ -8,7 +8,7 @@ public partial class Main
     private bool _standardProbeDone;
     private string? _standardProbeError;
     private IEnumerable<UnitStandard> Standards(Node node) => node.GetChildren().SelectMany(n => n is UnitStandard b ? new[] { b } : Standards(n));
-    private async void ProbeUnitStandardInput()
+    private async Task ProbeUnitStandardInput()
     {
         try
         {

@@ -1,0 +1,33 @@
+{
+  "Profile": "celestial-wave-10",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-3484",
+      "Name": "Hotei's Contentment",
+      "Type": "Celestial",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Before you gain Honor from the Proclaim action, if the Personality's base PH is 3 or lower: Increase the Honor gain by 1.\nOpen: Discard this card and target a Personality: He may not assign to, and will not move into, an attacking army.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-3484.jpg",
+      "Keywords": [
+        "Unique",
+        "Fortune"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "hotei-contentment-lock"
+      ],
+      "Effect": "hotei-contentment-proclaim"
+    }
+  ],
+  "Decks": []
+}

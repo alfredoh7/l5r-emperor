@@ -1,0 +1,32 @@
+{
+  "Profile": "follower-wave-27",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-1992",
+      "Name": "Devoted Yojimbo",
+      "Type": "Follower",
+      "Clan": "Unaligned",
+      "GoldCost": 3,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": 2,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Bow one of your Followers or Personalities in this army to straighten a target Follower or Personality in this army.\nBattle: Bow one of your Personalities or Followers in this army and target a Personality or Follower in this army: Straighten it.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1992.jpg",
+      "Keywords": [
+        "Yojimbo"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "devoted-yojimbo-straighten"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

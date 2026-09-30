@@ -21,7 +21,9 @@ public static class CustomPractice
         {
             var def = CardCatalog.Cards.GetValueOrDefault(c.Id);
             return new DeckCardInfo(c.Id, c.Name, c.Types, c.DeckTypes, def?.Keywords?.ToArray() ?? c.Keywords,
-                def is { ScenarioOnly: false } && c.Id.StartsWith("oracle-l5r-", StringComparison.Ordinal), def?.CreatedOnly ?? false);
+                def is { ScenarioOnly: false } && c.Id.StartsWith("oracle-l5r-", StringComparison.Ordinal), def?.CreatedOnly ?? false,
+                FateMinimumReduction: def is null ? 0 : DeckWorkshop.FateMinimumReductionOf(def),
+                StrategyCopyRule: def is not null && DeckWorkshop.StrategyCopyRuleOf(def), BattleStrategy: def is not null && DeckWorkshop.BattleStrategyOf(def)); // Eternal Victory Dojo (issue #486)
         }).ToArray();
     });
     public static DeckWorkshop Workshop() => new(PoolCards.Value);

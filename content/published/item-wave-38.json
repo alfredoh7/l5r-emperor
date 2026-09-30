@@ -1,0 +1,32 @@
+{
+  "Profile": "item-wave-38",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10120",
+      "Name": "Mining Apparatus",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 10,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Remove this card and any number of Holdings you control with total base Gold Cost of 10 or higher from the game: Gain a province to the left of your leftmost province.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10120.jpg",
+      "Keywords": [
+        "Unique"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "mining-apparatus-province"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

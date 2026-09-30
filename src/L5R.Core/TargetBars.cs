@@ -37,6 +37,8 @@ public sealed partial class MatchEngine
 
     private void RequireNotBarredFromTargeting(GameCommand command, AbilityDefinition ability)
     {
+        RequireNotBarredByLegionOfPain(command, ability); // Emperor Edition remaining-cards pass (issue #492), group G: Legion of Pain's static bar.
+        RequireSuikihimeNotPoliticallyTargeted(command, ability); // Otomo Suikihime (issue #503, EmperorP6.cs).
         if (!_state.Cards.Values.Any(c => c.TargetBars.Count > 0)) return;
         var actor = PerformingCard(command, ability);
         if (actor is null) return;

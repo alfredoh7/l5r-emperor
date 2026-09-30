@@ -1,0 +1,38 @@
+[
+  {
+    "card_id": "oracle-l5r-166",
+    "printing_set": [
+      "Forgotten Legacy"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=166",
+    "image_path": "assets/reference/oracle/forgotten-legacy/webp/oracle-l5r-166-printing-1-image-1.webp",
+    "image_sha256": "6b53c377dc858f04708147c1baa292a5867e41b539634dad1db7e6d259ba5f3b"
+  },
+  {
+    "card_id": "oracle-l5r-680",
+    "printing_set": [
+      "Forgotten Legacy"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=680",
+    "image_path": "assets/reference/oracle/forgotten-legacy/webp/oracle-l5r-680-printing-1-image-1.webp",
+    "image_sha256": "a23d49e8b74f68741f053c1c2b1e30ba00a0018ab07b9399970b5f90b76cc0c0"
+  },
+  {
+    "card_id": "oracle-l5r-1107",
+    "printing_set": [
+      "Forgotten Legacy"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=1107",
+    "image_path": "assets/reference/oracle/forgotten-legacy/webp/oracle-l5r-1107-printing-1-image-1.webp",
+    "image_sha256": "566647298e7c37bdf24456845a7bd1a7241d0c688b80c1806699c0685d982d6c"
+  },
+  {
+    "card_id": "oracle-l5r-1431",
+    "printing_set": [
+      "Forgotten Legacy"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=1431",
+    "image_path": "assets/reference/oracle/forgotten-legacy/webp/oracle-l5r-1431-printing-1-image-1.webp",
+    "image_sha256": "63645bea1b45715dd74de268df1bef6e5165c466de7fc79f307dfa83a0312941"
+  }
+]

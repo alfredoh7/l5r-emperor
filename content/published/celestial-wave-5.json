@@ -1,0 +1,33 @@
+{
+  "Profile": "celestial-wave-5",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10028",
+      "Name": "Megumi's Guidance",
+      "Type": "Celestial",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "While your army is opposed, it has +2 total Force, or +3 if you are the Defender.\nBattle/Open: Discard this card and choose your performing Personality: Negate his destruction from other players' cards' effects (until the turn ends).",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10028.jpg",
+      "Keywords": [
+        "Unique",
+        "Fortune"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "megumis-guidance-shield"
+      ],
+      "Effect": "megumis-guidance"
+    }
+  ],
+  "Decks": []
+}

@@ -52,8 +52,8 @@ public partial class Main : Node
     /// so they can be hand-edited or dropped into another player's local install.</summary>
     private string DecksDirectory => ProjectSettings.GlobalizePath("user://Decks");
     private static readonly JsonSerializerOptions Json = new(JsonSerializerDefaults.Web) { WriteIndented = true };
-    private MatchView View => (_presentationSnapshot ?? _session.Snapshot)!.View;
-    private ActionOption[] Actions => PresentationBusy ? [] : _session.Snapshot!.Actions;
+    private MatchView View => _provinceReviewView ?? (_presentationSnapshot ?? _session.Snapshot)!.View;
+    private ActionOption[] Actions => PresentationBusy || _provinceReviewView is not null || View.PendingProvinceOrder is not null ? [] : _session.Snapshot!.Actions;
     private PlayerView Self => View.Players.Single(p => p.Id == View.ViewerId);
 
     public override void _Ready()
@@ -62,12 +62,12 @@ public partial class Main : Node
         _session.Changed += () =>
         {
             // Capture every permitted snapshot, even when several packets arrive within one rendered frame.
-            var snapshot=_session.Snapshot;var generation=_session.Generation;
+            var snapshot = _session.Snapshot; var generation = _session.Generation;
             _uiQueue.Enqueue(() =>
             {
-                if(generation!=_session.Generation)return;
-                if(_matchDuelGeneration!=generation){_matchDuelFlow.Reset();_matchDuelGeneration=generation;}
-                _matchDuelFlow.Observe(snapshot);Render();
+                if (generation != _session.Generation) return;
+                if (_matchDuelGeneration != generation) { _matchDuelFlow.Reset(); _matchDuelGeneration = generation; }
+                _matchDuelFlow.Observe(snapshot); Render();
             });
         };
         _session.Notice += message => _uiQueue.Enqueue(() => SetNotice(message));
@@ -92,8 +92,14 @@ public partial class Main : Node
         _table = new TableArtStage { ReviewMode = false }; AddChild(_table);
         BuildShell();
         InitializeFrontend();
-        if(OS.GetCmdlineUserArgs().Contains("--duel-match-review")){StartMatchDuelCapture();return;}
-        if(OS.GetCmdlineUserArgs().Contains("--duel-transition-review")){StartTransitionReview();return;}
+        if (OS.GetCmdlineUserArgs().Contains("--province-review") || _captureMode == "province-review")
+        {
+            var startupCapture = _capturePath; _capturePath = null; StartProvinceReview();
+            if (startupCapture is not null) Callable.From(() => { _ = CaptureProvinceStartup(startupCapture); }).CallDeferred();
+            return;
+        }
+        if (OS.GetCmdlineUserArgs().Contains("--duel-match-review")) { StartMatchDuelCapture(); return; }
+        if (OS.GetCmdlineUserArgs().Contains("--duel-transition-review")) { StartTransitionReview(); return; }
         if (_capturePath is null || _captureMode.StartsWith("menu", StringComparison.Ordinal)) return;
         var published = _capturePath is null || _captureMode.StartsWith("published", StringComparison.Ordinal);
         if (_captureMode.StartsWith("gold-", StringComparison.Ordinal)) _session.StartShowcase(_captureMode.Split('-')[1]);
@@ -105,15 +111,16 @@ public partial class Main : Node
     public override void _Process(double delta)
     {
         while (_uiQueue.TryDequeue(out var update)) update();
-        if(_transitionReview){try{ProcessTransitionReview(delta);}catch(Exception e){GD.PushError(e.ToString());GetTree().Quit(1);}return;}
+        if (_transitionReview) { try { ProcessTransitionReview(delta); } catch (Exception e) { GD.PushError(e.ToString()); GetTree().Quit(1); } return; }
         if (_captureMode.StartsWith("menu", StringComparison.Ordinal) && _capturePath is not null) { try { ProcessMenuCapture(delta); } catch (Exception e) { GD.PushError(e.ToString()); GetTree().Quit(1); } return; }
-        if(MatchDuelOpen){ProcessMatchDuel(delta);ProcessMatchDuelCapture(delta);return;}
-        if(ProcessMatchDuelCapture(delta))return;
+        if (MatchDuelOpen) { ProcessMatchDuel(delta); ProcessMatchDuelCapture(delta); return; }
+        if (ProcessMatchDuelCapture(delta)) return;
         if (MenuVisible || DuelDemoOpen || PracticeVisible && _capturePath is null) return;
         ProcessBattlePresentation(delta);
         if (_session.Snapshot is not null) SyncBloodCourts();
         ProcessTableCamera(delta);
         ProcessShownCards(delta);
+        LayoutProvinceReview();
         if (_session.Snapshot is not null && _matSections.ReducedMotion != _reducedMotion) SyncMatSections();
         ExpireBattleResolution();
         foreach (var tracker in _sidebarHeader.GetChildren().OfType<BattleTracker>()) tracker.ReducedMotion = _reducedMotion;
@@ -125,7 +132,7 @@ public partial class Main : Node
             if (_opponentClock > (_reducedMotion ? .12 : .7))
             {
                 _opponentClock = 0;
-                _session.StepPracticeOpponent((view, actions) => view.PendingDuel is not null ? DuelOpponent.Choose(view,actions) : TrainingOpponent.Choose(view, actions).Command);
+                _session.StepPracticeOpponent((view, actions) => view.PendingDuel is not null ? DuelOpponent.Choose(view, actions) : TrainingOpponent.Choose(view, actions).Command);
             }
             // No delay: this only fires when declining is the player's sole legal option, so there is
             // nothing for them to weigh — unlike the opponent's move above, it needs no "thinking" pause.
@@ -157,8 +164,8 @@ public partial class Main : Node
                 _capturePrepared = true;
                 _captureClock = 0;
                 if (_captureMode.StartsWith("published-home", StringComparison.Ordinal)) PreparePersistentHomeCapture();
-                if (_captureMode.StartsWith("published-grants", StringComparison.Ordinal)) PreparePermanentGrantCapture();
-                if (_captureMode.StartsWith("published-fallen", StringComparison.Ordinal)) PrepareFallenCapture();
+                if (_captureMode.StartsWith("published-grants", StringComparison.Ordinal)) _ = PreparePermanentGrantCapture();
+                if (_captureMode.StartsWith("published-fallen", StringComparison.Ordinal)) _ = PrepareFallenCapture();
                 if (_captureMode is "published-choice" or "published-choice-confirm")
                 {
                     for (var fixtureAttempt = 0; fixtureAttempt < 6 && View.PendingChoice?.Type != "shinden"; fixtureAttempt++)
@@ -226,7 +233,7 @@ public partial class Main : Node
                 if (_captureMode == "published-lacquer-tooltip")
                     Place(_root, ReadingTooltip.Create(this, "Bowed / unbowed\nA sideways card is bowed. Each attachment keeps its own bowed state."), 600, 260, 460, 180);
                 if (_captureMode == "published-lacquer-card")
-                    Place(_root, CardPreview.Create(View.Players.SelectMany(p=>p.Home.Concat(p.Provinces.Where(x=>x.Card is not null).Select(x=>x.Card!))).First(c=>c.Definition is not null), "Your hand", null), 430, 200, 750, 558);
+                    Place(_root, CardPreview.Create(View.Players.SelectMany(p => p.Home.Concat(p.Provinces.Where(x => x.Card is not null).Select(x => x.Card!))).First(c => c.Definition is not null), "Your hand", null), 430, 200, 750, 558);
                 if (_captureMode is "payment" or "purchase")
                 {
                     var option = Actions.First(a => a.Type == "purchase" && a.Enabled && a.Quote is { ClanDiscount: false, ClanAllegiance: false, ProclaimEligible: true });
@@ -315,7 +322,7 @@ public partial class Main : Node
 
     private void FitPresentation()
     {
-        if(_transitionReview && _transitionRoom is not null)return;
+        if (_transitionReview && _transitionRoom is not null) return;
         var available = GetViewport().GetVisibleRect().Size;
         var scale = available.Y / 1080f;
         // Root controls use an explicit scale, so rasterize system fonts at the
@@ -445,7 +452,7 @@ public partial class Main : Node
 
     private void Render()
     {
-        if(_transitionReview && _transitionRoom is not null)return;
+        if (_transitionReview && _transitionRoom is not null) return;
         if (MenuVisible && _enteringPrivate && _session.Online && _session.Connected && _session.Snapshot is not null) { EnterTable(); return; }
         if (MenuVisible || DuelDemoOpen || PracticeVisible) return;
         if (_session.Snapshot is null)
@@ -464,10 +471,12 @@ public partial class Main : Node
             Palette.Clear(_board); Palette.Clear(_hand); Palette.Clear(_inspector); Palette.Clear(_phaseActions); Palette.Clear(_decisionActions);
             return;
         }
-        if(RouteMatchDuel())return;
+        if (RouteMatchDuel()) return;
         ObserveBattleJournal();
         PrepareBattlePresentation();
         RenderBattleFeedback();
+        RenderProvinceOrder();
+        FitTableViewport();
         ObserveBattleResolution();
         FitBattleSequence();
         FitTableViewport();
@@ -514,7 +523,7 @@ public partial class Main : Node
     {
         var tile = new CardTile(card, compact, SelectCard, _ => { }) { CustomMinimumSize = new Vector2(width, card.Zone == Zone.Hand ? height : PlaneHeight(height)), FaceHeight = height - 12, ReducedMotion = _reducedMotion, Highlighted = _selected?.Id == card.Id, SelectedSource = _sources.Contains(card.Id), PreviousBowed = Time.GetTicksMsec() - _bowChangedAt < 180 ? _previousBows.GetValueOrDefault(card.Id, card.Bowed) : card.Bowed, ContextualGoldProduction = Production(card, View.Players.Single(p => p.Id == card.OwnerId)) };
         tile.TokenSourceName = id => FindCard(id)?.Definition?.Name;
-        tile.ContextHelp = card.AttachedTo is { } parent ? "Attached to " + (FindCard(parent)?.Definition?.Name ?? parent) + ". Moves with this unit." : card.Zone == Zone.Battlefield ? $"At Province {card.ProvinceIndex + 1}'s battlefield. " + RulesHelp.Topic("force") : card.Zone == Zone.Home ? "At home. Not assigned to a province. " + (card.Bowed ? RulesHelp.Topic("bow") : "") : card.Zone == Zone.Hand ? "In your hand. Select to see legal actions and targets." : "Select to inspect available actions.";
+        tile.ContextHelp = card.AttachedTo is { } parent ? "Attached to " + (FindCard(parent)?.Definition?.Name ?? parent) + ". Moves with this unit." : card.Zone == Zone.Battlefield ? $"At {(card.ProvinceIndex is int at ? BattlefieldName(at) : "a battlefield")}'s battlefield. " + RulesHelp.Topic("force") : card.Zone == Zone.Home ? "At home. Not assigned to a province. " + (card.Bowed ? RulesHelp.Topic("bow") : "") : card.Zone == Zone.Hand ? "In your hand. Select to see legal actions and targets." : "Select to inspect available actions.";
         if (card.Zone == Zone.Province && card.ProvinceIndex is int province)
         {
             var owner = View.Players.Single(p => p.Id == card.OwnerId);
@@ -563,12 +572,14 @@ public partial class Main : Node
         var assign = Actions.FirstOrDefault(a => a.Enabled && a.Type is "attack" or "assignDefense" && a.TargetIds?.Contains(card.Id) == true);
         if (assign is not null) { Choose(assign); _assignmentUnit = card.Id; RenderInspector(); Highlight(); return; }
         var purchase = Actions.FirstOrDefault(a => a.Type == "purchase" && a.CardId == card.Id && a.Enabled);
-        if (purchase is not null) Choose(purchase); else { RenderInspector(); RenderPhaseActions(); Highlight(); }
+        var multiSlot = card.ProvinceIndex is int index && card.Zone == Zone.Province &&
+            ProvincePresentation.Slots(View.Players.Single(p => p.Id == card.OwnerId).Provinces.Single(p => p.Index == index)).Length > 1;
+        if (purchase is not null && !multiSlot) Choose(purchase); else { RenderInspector(); RenderPhaseActions(); Highlight(); }
     }
 
     private void Highlight()
     {
-        var selectedProvince = View.Players.SelectMany(p => p.Provinces.Where(q => (q.Card?.Id == _selected?.Id || q.Region?.Id == _selected?.Id) && _selected is not null)
+        var selectedProvince = View.Players.SelectMany(p => p.Provinces.Where(q => _selected is not null && ProvincePresentation.Cards(q).Any(c => c.Id == _selected.Id))
             .Select(q => $"province:{p.Id}:{q.Index}")).FirstOrDefault();
         var rootId = _selected?.AttachedTo ?? _assignmentUnit ?? _selected?.Id;
         var selectedUnit = rootId is null ? null : FindCard(rootId);
@@ -603,7 +614,7 @@ public partial class Main : Node
         foreach (var (province, label) in _laneSummaries)
         {
             label.Text = "";
-            label.TooltipText = $"Province {province + 1} battlefield"+(MovementDestination(1-View.ActivePlayerId,province)?" · choose this destination":"");
+            label.TooltipText = $"{BattlefieldName(province)} battlefield"+(MovementDestination(1-View.ActivePlayerId,province)?" · choose this destination":"");
         }
         _intentOverlay?.QueueRedraw();
     }
@@ -628,8 +639,9 @@ public partial class Main : Node
         if(MultiTargetActive)FocusMultiTargets();
     }
 
-    private async void Submit(GameCommand command)
+    private async Task Submit(GameCommand command)
     {
+        if (_provinceReviewView is not null) { SetNotice("Presentation preview · game actions are disabled."); return; }
         if (PresentationBusy) return;
         if (_session.Online && (_session.Snapshot?.PlayersConnected?.Any(p => !p) ?? false))
         {
@@ -645,7 +657,7 @@ public partial class Main : Node
     // Sakuma, issue #338) when it sends one; the printed-card fallback is for payloads from an older engine.
     private static int Production(CardView card, PlayerView owner) => card.GoldProduced ?? ((card.Definition?.Effect == "crane-gold" && owner.Clan == "Crane" || card.Definition?.Effect == "dragon-gold" && owner.Clan == "Dragon") ? 3 : card.Definition?.GoldProduction ?? 0);
     private static int UnitForce(CardView unit, PlayerView owner) => (unit.Bowed ? 0 : unit.Force) + owner.Home.Concat(owner.Army).Where(c => c.AttachedTo == unit.Id && c.Definition?.Type == CardType.Follower && !c.Bowed).Sum(c => c.Force);
-    private CardView? FindCard(string id) => View.Players.SelectMany(p => p.Home.Concat(p.Army).Concat(p.Hand).Concat(p.Discard).Concat(p.RemovedFromGame).Concat(p.EventsInPlay??[]).Concat(p.Celestials??[]).Concat(p.Provinces.Where(p => p.Card is not null).Select(p => p.Card!)).Concat(p.Provinces.Where(p=>p.Region is not null).Select(p=>p.Region!)).Append(p.Stronghold)).FirstOrDefault(c => c.Id == id);
+    private CardView? FindCard(string id) => View.Players.SelectMany(p => p.Home.Concat(p.Army).Concat(p.Hand).Concat(p.Discard).Concat(p.RemovedFromGame).Concat(p.EventsInPlay ?? []).Concat(p.Celestials ?? []).Concat(p.Provinces.SelectMany(ProvincePresentation.Cards)).Append(p.Stronghold)).FirstOrDefault(c => c.Id == id);
     private static string HumanPhase(Phase phase) => phase switch { Phase.AttackDeclaration => "Declare an attack", Phase.InfantryDeclaration => "Assign attackers", Phase.DefenseAssignment => "Assign defenders", Phase.BattleSelection => "Choose a battlefield", Phase.DynastyDiscard => "Dynasty · discard", _ => phase.ToString() };
     private void SetNotice(string message) { _matchDuel?.Notify(message); _notice.Text = message; _notice.TooltipText = message; if (MenuVisible) _titleMenu!.Notify(message); }
     public override void _ExitTree() => _session.Dispose();

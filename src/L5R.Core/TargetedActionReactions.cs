@@ -20,7 +20,7 @@ public sealed partial class MatchEngine
 
     /// <summary>The held action: its command and the card it targets now (null for a non-Attack action that targets no card, whose cost may still name
     /// a Follower of Mochitoko's). For an Attack that is the Attack's own target (Kahoku exp carries it in CardIds).</summary>
-    private sealed record ReactionSubject(GameCommand Command, string? TargetId, bool IsAttack);
+    internal sealed record ReactionSubject(GameCommand Command, string? TargetId, bool IsAttack);
 
     private static GameCommand WithActionTarget(GameCommand command, string targetId, bool attackTarget) =>
         attackTarget && !TargetsThroughAttackPipeline(command.AbilityId!) ? command with { CardIds = [targetId] } : command with { TargetId = targetId };
@@ -120,7 +120,7 @@ public sealed partial class MatchEngine
     {
         if (_state.PendingChoice?.Type == "attackReaction" && _state.PendingAttack is { } attack)
         {
-            if (attack.SourceId is not null && Protected(ActingPersonality(Card(attack.SourceId))))
+            if (attack.SourceId is not null && (Protected(ActingPersonality(Card(attack.SourceId))) || ActionProtected(attack.Command))) // Ki-Uso too (issue #453 batch 5)
             {
                 Emit("actionProtected", "Protection negates the negation -- this action cannot be negated.", negator.OwnerId, negator.Id);
                 return;
@@ -176,7 +176,7 @@ public sealed partial class MatchEngine
     private bool TargetedActionReactionAvailable(CardInstance card, string abilityId, ReactionSubject subject)
     {
         var ability = AbilityCatalog.All[abilityId];
-        return (!card.Bowed || abilityId == "red-crane-dojo-ninja") && !ActionLocked(card) && !AbilityUseSpent(card.AbilityUses, ability, ability.UsageKey ?? abilityId)
+        return (!BowedBarsAbilities(card) || abilityId == "red-crane-dojo-ninja" || MechEEvenIfBowed(abilityId) /* issue #501: Kakita Kae's trait */) && !ActionLocked(card) && !BarredByCherryBlossom(abilityId) /* Cherry Blossom Festival (issue #492, group F; traits exempt, R4) */ && !P3ReactionLocked(card.OwnerId, abilityId) /* issue #503 */ && !AbilityUseSpent(card.AbilityUses, ability, ability.UsageKey ?? abilityId)
             && TargetedActionReactionApplies(card, abilityId, subject) && CanPayReaction(card, abilityId);
     }
 
@@ -242,16 +242,89 @@ public sealed partial class MatchEngine
             case "taishuu-political-negate":
                 return command.PlayerId != card.OwnerId && affected.OwnerId == card.OwnerId && Definition(affected).Type == CardType.Personality
                     && ActionCarriesKeyword(acting, command.CardId is not null && _state.Cards.TryGetValue(command.CardId, out var politicalSource) ? politicalSource : null, "Political");
+            // Astonishing Accusation (oracle-l5r-637, issue #460): Taishuu's own shape verbatim.
+            case "accusation-negate":
+                return command.PlayerId != card.OwnerId && affected.OwnerId == card.OwnerId && Definition(affected).Type == CardType.Personality
+                    && ActionCarriesKeyword(acting, command.CardId is not null && _state.Cards.TryGetValue(command.CardId, out var accusationSource) ? accusationSource : null, "Political");
             // Goju Sawaki: another player's Battle action targets him where he stands.
             case "sawaki-spawn":
                 return command.PlayerId != card.OwnerId && affected.Id == card.Id && IsBattleAction(command);
             case "yurishi-disappear":
                 return command.PlayerId != card.OwnerId && affected.Id == card.Id && IsBattleAction(command) && card.Zone == Zone.Battlefield;
+            // Yasuki Ikke (The Shadow's Embrace pass, issue #476, batch 2): "After another player's Battle action targets one of your Merchants".
+            case "ikke-negate":
+            case "ikke-honor-loss":
+                return command.PlayerId != card.OwnerId && IsBattleAction(command) && affected.OwnerId == card.OwnerId && Keyword(affected, "Merchant");
             case "jinn-kuen-negate":
             case "training-negate-merchant-free":
                 return affected.OwnerId == card.OwnerId && Keyword(affected, "Merchant");
+            // Seeds of Decay pass (issue #453), batch 1. Shifting Terrain (in play at a battlefield): another player's action targets one of its controller's Personalities, and a
+            // Personality of the controller's at the Terrain's battlefield could be the target instead.
+            case "shifting-terrain-redirect":
+                return card.Zone == Zone.Battlefield && command.PlayerId != card.OwnerId && affected.OwnerId == card.OwnerId && Definition(affected).Type == CardType.Personality
+                    && ShiftingTerrainCandidates(card, subject).Any();
+            // The Castle of Order: another player's Battle action targets one of its controller's Ninja cards, once per battle, with another Ninja of his at the same location the action accepts.
+            case "castle-of-order-redirect":
+                return IsBattleAction(command) && command.PlayerId != card.OwnerId && affected.OwnerId == card.OwnerId && Keyword(affected, "Ninja")
+                    && !CastleOfOrderUsedThisBattle(card) && CastleOfOrderCandidates(card, subject, affected).Any();
+            // Grappling the Snake's granted choice: any action targets the Monk himself; the bow option only when a Personality performed the action.
+            case "grappling-snake-negate":
+                return affected.Id == card.Id;
+            case "grappling-snake-bow":
+                return affected.Id == card.Id && ActionPerformingPersonality(command) is not null;
+            // Cavalry Detachment (Seeds of Decay, issue #453): another player's action targets the Personality this Follower is attached to.
+            case "cavalry-detachment-spawn":
+                return command.PlayerId != card.OwnerId && card.Zone == Zone.Attached && affected.Id == card.AttachedTo && Definition(affected).Type == CardType.Personality;
+            // Ryoshun's Guidance (Forgotten Legacy pass, issue #467): another player's action targets one of its controller's cards, and another of his non-Stronghold cards
+            // at the same location could be the target instead.
+            // Hida Kisada (Emperor Edition Personality pass, issue #477 batch 2): another player's Battle action targets Kisada himself, and another Personality of his controller's at his
+            // location could be the target instead.
+            case "kisada-redirect":
+                return IsBattleAction(command) && command.PlayerId != card.OwnerId && affected.Id == card.Id && KisadaRedirectCandidates(card, subject).Any();
+            case "ryoshun-redirect":
+                return command.PlayerId != card.OwnerId && card.Zone == Zone.Celestial && affected.OwnerId == card.OwnerId && RyoshunRedirectCandidates(card, subject, affected).Any();
+            // Ward of Air (The Shadow's Embrace pass, issue #476 batch 5): Taming the Beast's shape -- another player's Battle action targets its Shugenja (or, if he is Air, any
+            // Personality its controller controls) and could destroy him.
+            case "ward-of-air-negate":
+                return WardOfAirApplies(card, subject, affected);
+            // Social Grace (The Shadow's Embrace pass, issue #476, batch 4): another player's action targets one of its player's Courtiers and would dishonor him.
+            case "social-grace-negate":
+                return SocialGraceApplies(card, subject, affected);
+            // Moto Shigeru (Emperor Edition Personality pass, issue #477, batch 3): a Limited action -- anyone's -- targets one of her controller's Personalities.
+            case "shigeru-negate":
+                return acting.Timing == "Limited" && affected.OwnerId == card.OwnerId && Definition(affected).Type == CardType.Personality;
+            // Emperor Edition Personality pass (issue #477), batch 5 (EmperorPersonalityBatch5.cs). Shiba Sansesuke: an action (any player's) would target one of the reactor's own Shugenja at his
+            // location and is legal against him once he is bowed (the cost). Isawa Norimichi: another player's action targets his controller's Earth Shugenja at his location and could destroy him.
+            case "sansesuke-redirect":
+                return SansesukeRedirectApplies(card, subject, affected);
+            case "norimichi-negate":
+                return command.PlayerId != card.OwnerId && affected.OwnerId == card.OwnerId && Definition(affected).Type == CardType.Personality && Keyword(affected, "Shugenja") && Keyword(affected, "Earth")
+                    && SameLocation(card, affected) && (subject.IsAttack || DestroysTarget(command.AbilityId));
+            // Yasuki Tanimura (Emperor Edition Personality pass, issue #477 batch 6): another player's Battle action targets him.
+            case "tanimura-political-pay":
+                return TanimuraApplies(card, subject, affected);
+            // Armor of the Heavens (Emperor Edition remaining-cards pass, issue #492 group G): another player's action targets the Personality this card is attached to.
+            case "armor-heavens-gain": case "armor-heavens-lose":
+                return ArmorOfTheHeavensApplies(card, subject, affected);
+            // The Waystation of the Path (Emperor Edition Stronghold pass, issue #486 batch 3): another player's action targets the controller's Henshin.
+            case "waystation-reborn":
+                return WaystationApplies(card, subject, affected);
+            // Emperor Edition remaining-cards pass (issue #492), group B (EmperorRemainingB.cs): Hundred-Fold Cut (either way to pay) and He's Mine!.
+            case "hundred-fold-cut-bow":
+            case "hundred-fold-cut-destroy":
+                return HundredFoldCutApplies(card, abilityId, subject, affected);
+            // Emperor Edition remaining-cards pass (issue #492), group D. Undetectable Enemy: another player's action targets one of the reactor's own Oni. The Power of a Word: another player's Battle action
+            // targets the reactor's own Courtier.
+            case "undetectable-enemy-negate":
+                return subject.Command.PlayerId != card.OwnerId && affected.OwnerId == card.OwnerId && Definition(affected).Type == CardType.Personality && Keyword(affected, "Oni");
+            case "power-word-reaction":
+                return PowerOfWordApplies(card, subject, affected);
+            // Chugo Seido (Emperor Edition remaining-cards pass, issue #492 group F): another player's action targets one of its controller's Personalities, and a Samurai of his at the same location
+            // could be the target instead.
+            case "chugo-seido-redirect":
+                return command.PlayerId != card.OwnerId && affected.OwnerId == card.OwnerId && Definition(affected).Type == CardType.Personality && ChugoSeidoCandidates(card, subject, affected).Any();
             default:
-                return false;
+                return RegisteredTargetedReaction(card, abilityId, subject, affected); /* issue #501: The Dark Naga */ // ruling pass R2; issue #492: group A (Ancestral Protection, Caught in the Act), group C (Snake Tattoo)
         }
     }
 
@@ -287,13 +360,27 @@ public sealed partial class MatchEngine
         isAttack || BowsTarget(abilityId) || DestroysTarget(abilityId) || DestroysAttachmentTarget(abilityId);
 
     private static bool DestroysAttachmentTarget(string abilityId) => abilityId is "crushing-destroy" or "never-afraid" or "keppo-destroy" or "michitsu-destroy"
-        or "tetsuo-destroy-attachment" or "tokoru-bear-bow" or "hiroto-bow";
+        or "tetsuo-destroy-attachment" or "tokoru-bear-bow" or "hiroto-bow" or "komatsu-destroy-attachment"
+        or EmperorMechEAbilities.HostsLimited; // issue #501: The Host's Advantage destroys its target attachment
 
     private IEnumerable<(string? TargetId, string? Label)> TargetedReactionChoices(CardInstance card, string abilityId, ReactionSubject subject) =>
         abilityId switch
         {
             "blade-of-champions-redirect" => RedirectCandidates(card, subject).Select(c => ((string?)c.Id, (string?)$"{AbilityCatalog.All[abilityId].Label} · {Definition(c).Name} ({c.Id})")),
             "mochitoko-negate" => MochitokoFollowers(card, subject).Select(c => ((string?)c.Id, (string?)$"{AbilityCatalog.All[abilityId].Label} · {Definition(c).Name} ({c.Id})")),
-            _ => [(null, null)]
+            // Seeds of Decay pass (issue #453), batch 1: one option per Personality/Ninja the action may be redirected to.
+            "shifting-terrain-redirect" => ShiftingTerrainCandidates(card, subject).Select(c => ((string?)c.Id, (string?)$"{AbilityCatalog.All[abilityId].Label} · {Definition(c).Name} ({c.Id})")),
+            "castle-of-order-redirect" => CastleOfOrderCandidates(card, subject, Card(subject.TargetId!)).Select(c => ((string?)c.Id, (string?)$"{AbilityCatalog.All[abilityId].Label} · {Definition(c).Name} ({c.Id})")),
+            // Forgotten Legacy pass (issue #467), batch 5: Ryoshun's Guidance, one option per card the action may be redirected to.
+            "waystation-reborn" => WaystationCandidates(card, Card(subject.TargetId!)).Select(c => ((string?)c.Id, (string?)$"{AbilityCatalog.All[abilityId].Label} · {Definition(c).Name} ({c.Id})")),
+            "chugo-seido-redirect" => ChugoSeidoCandidates(card, subject, Card(subject.TargetId!)).Select(c => ((string?)c.Id, (string?)$"{AbilityCatalog.All[abilityId].Label} · {Definition(c).Name} ({c.Id})")),
+            "kisada-redirect" => KisadaRedirectCandidates(card, subject).Select(c => ((string?)c.Id, (string?)$"{AbilityCatalog.All[abilityId].Label} · {Definition(c).Name} ({c.Id})")),
+            "ryoshun-redirect" => RyoshunRedirectCandidates(card, subject, Card(subject.TargetId!)).Select(c => ((string?)c.Id, (string?)$"{AbilityCatalog.All[abilityId].Label} · {Definition(c).Name} ({c.Id})")),
+            // Hundred-Fold Cut: one option per Weapon of the targeted Kensai the way to pay allows.
+            "hundred-fold-cut-bow" or "hundred-fold-cut-destroy" => KensaiWeapons(Card(subject.TargetId!), unbowedOnly: abilityId == "hundred-fold-cut-bow")
+                .Select(c => ((string?)c.Id, (string?)$"{AbilityCatalog.All[abilityId].Label} · {Definition(c).Name} ({c.Id})")),
+            // The Dark Naga (issue #501): one option per unbowed Forest of its controller's to bow (EmperorMechB.cs).
+            EmperorMechBAbilities.DarkNagaForest => NagaForests(card).Select(c => ((string?)c.Id, (string?)$"{AbilityCatalog.All[abilityId].Label} · {Definition(c).Name} ({c.Id})")),
+            _ => P3TargetedReactionChoices(card, abilityId, subject) /* issue #503: Shosuro Aroru - exp2 */ ?? MechCTargetedReactionChoices(card, abilityId) ?? [(null, null)] // Isawa Sakonoko (issue #501): one option per Spell he may bow
         };
 }

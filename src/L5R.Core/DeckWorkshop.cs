@@ -5,7 +5,12 @@ namespace L5R.Core;
 /// compiling unchanged. A created-only card ("May not be included in decks.") never enters a DeckWorkshop's pool.</summary>
 // CopyLimit (issue #337): the copy limit the card itself prints ("You may include up to 10 copies of this card in your deck" -- Fading
 // Shadows), read from CardDefinition.DeckCopyLimit; null, like CreatedOnly, for a caller or a card that has none, which keeps the usual 3 (1 if Unique).
-public sealed record DeckCardInfo(string Id, string Name, string[] Types, string[] Families, string[] Keywords, bool Implemented, bool CreatedOnly = false, int? CopyLimit = null)
+// FateMinimumReduction (issue #453 batch 5, Hato-gurama: "Your minimum Fate deck size is decreased by one"): how much each copy of the card in the deck lowers the 40-card Fate minimum,
+// read from CardDefinition.Effect == "hato-gurama" (the card's one Effect id also carries its hand-discard restriction, CardAbilities.cs); 0 for every other card.
+// StrategyCopyRule / BattleStrategy (Emperor Edition Stronghold pass, issue #486 batch 1, Eternal Victory Dojo: "Your deck may include four copies each of one or two non-Unique Strategies with Battle
+// abilities"): a Stronghold carrying that deck-construction text, and a Strategy that has a Battle ability; both read from the card's definition (DeckWorkshop.StrategyCopyRuleOf / BattleStrategyOf).
+public sealed record DeckCardInfo(string Id, string Name, string[] Types, string[] Families, string[] Keywords, bool Implemented, bool CreatedOnly = false, int? CopyLimit = null, int FateMinimumReduction = 0,
+    bool StrategyCopyRule = false, bool BattleStrategy = false)
 {
     public int ExperienceLevel => Experienced.Level(Keywords);
     public string DeckName => Experienced.DeckName(Name, Keywords);
@@ -24,6 +29,15 @@ public sealed record DeckReview(int Dynasty, int Fate, string[] Warnings, string
 public sealed class DeckWorkshop
 {
     public static readonly string[] SetupSlots = ["Stronghold", "Border Keep", "Bamboo Harvesters"];
+    /// <summary>Hato-gurama (issue #453 batch 5): the Fate-minimum reduction a card's printed trait gives, for a DeckCardInfo built from its definition.</summary>
+    public static int FateMinimumReductionOf(CardDefinition definition) => definition.Effect == "hato-gurama" ? 1 : 0;
+    /// <summary>Eternal Victory Dojo (issue #486 batch 1): the Stronghold's printed deck-construction text lets the deck hold four copies each of one or two non-Unique Strategies with Battle abilities.</summary>
+    public static bool StrategyCopyRuleOf(CardDefinition definition) => definition.Effect == "eternal-victory-dojo";
+    /// <summary>A Strategy that has a Battle ability (a Battle or Battle/Open ability among its own abilities).</summary>
+    public static bool BattleStrategyOf(CardDefinition definition) =>
+        definition.Type == CardType.Strategy && (definition.Abilities ?? []).Any(id => AbilityCatalog.All.TryGetValue(id, out var ability) && ability.Timing is "Battle" or "BattleOrOpen");
+    /// <summary>The most titles a Stronghold with the strategy-copy rule lets the deck hold four copies of, and the limit for each.</summary>
+    public const int StrategyCopyRuleTitles = 2, StrategyCopyRuleLimit = 4;
     private readonly Dictionary<string, DeckCardInfo> _pool;
     private readonly Dictionary<string, DeckCardInfo> _poolById;
     private readonly Dictionary<string, int> _counts = new(StringComparer.OrdinalIgnoreCase);
@@ -94,9 +108,18 @@ public sealed class DeckWorkshop
         int Total(string family) => Cards.Where(c => c.SetupSlot.Length == 0 && c.Families.Contains(family)).Sum(c => Count(c.Id));
         var dynasty = Total("Dynasty"); var fate = Total("Fate");
         if (dynasty < 40) warnings.Add($"Dynasty needs {40 - dynasty} more cards (40 minimum).");
-        if (fate < 40) warnings.Add($"Fate needs {40 - fate} more cards (40 minimum).");
-        var limits = DeckFormat.CheckLegality(ToDeck(), name => _pool[name].Keywords, name => _pool[name].CopyLimit);
-        foreach (var v in limits.Violations) warnings.Add(_pool[v.CardName].CopyLimit is not null
+        // Hato-gurama (issue #453 batch 5): each copy in the deck lowers the Fate minimum by one.
+        var fateMinimum = 40 - Cards.Where(c => c.FateMinimumReduction > 0).Sum(c => Count(c.Id) * c.FateMinimumReduction);
+        if (fate < fateMinimum) warnings.Add($"Fate needs {fateMinimum - fate} more cards ({fateMinimum} minimum).");
+        // Eternal Victory Dojo (issue #486 batch 1): with that Stronghold, the (at most two) non-Unique Strategies with Battle abilities the deck holds most copies of may have four.
+        var extraCopies = Cards.Any(c => c.SetupSlot == "Stronghold" && c.StrategyCopyRule)
+            ? Cards.Where(c => c.BattleStrategy && !c.Keywords.Contains("Unique", StringComparer.Ordinal) && Count(c.Id) > 3)
+                .OrderByDescending(c => Count(c.Id)).ThenBy(c => c.DeckName, StringComparer.OrdinalIgnoreCase).Take(StrategyCopyRuleTitles).Select(c => c.DeckName).ToHashSet(StringComparer.OrdinalIgnoreCase)
+            : [];
+        var limits = DeckFormat.CheckLegality(ToDeck(), name => _pool[name].Keywords, name => extraCopies.Contains(name) ? StrategyCopyRuleLimit : _pool[name].CopyLimit);
+        foreach (var v in limits.Violations) warnings.Add(extraCopies.Contains(v.CardName)
+            ? $"{v.CardName}: {v.Count} exceeds the {v.Limit} copies your Stronghold allows."
+            : _pool[v.CardName].CopyLimit is not null
             ? $"{v.CardName}: {v.Count} exceeds the card's own limit of {v.Limit} copies."
             : $"{v.CardName}: {v.Count} exceeds the usual {v.Limit} limit. Card-specific exceptions require review.");
         var unsupported = Cards.Count(c => !c.Implemented);

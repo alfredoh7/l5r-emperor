@@ -16,15 +16,15 @@ public partial class Main
         _guide.Text = View.PendingChoice?.Prompt ?? (_chosen is { Type: "attack" or "assignDefense" } ? "Select a unit, then its destination province. Review the arrows and confirm assignments." : _chosen is { Type: "purchase" or "recruitReserve" } ? "Choose ready Gold sources. Confirm pays the cost and brings the card into play." : _chosen is not null && QuoteFor(_chosen) is not null ? "Review the cost and its basis, then choose ready Gold sources. Confirm pays and resolves; cancel changes your plan." : _chosen is not null ? "Review the highlighted target. Confirm to resolve, or cancel to change your plan." : View.PriorityPlayerId != View.ViewerId ? "Your opponent is deciding. You can hover over visible cards to read them while you wait." : RulesHelp.PhaseGuide(View.Phase));
         _guide.Visible = View.PendingChoice is not null || _chosen is not null;
         _guide.TooltipText = RulesHelp.Tooltip(RulesHelp.PhaseGuide(View.Phase) + "\n\n" + RulesHelp.Topic("targets"));
-        if(View.WinnerId is null && View.PendingDuel?.Stage is ("AwaitingAccept" or "Reaction") && View.LastDuel is {} duel)
+        if (View.WinnerId is null && View.PendingDuel?.Stage is ("AwaitingAccept" or "Reaction") && View.LastDuel is { } duel)
         {
             _guide.Hide();
-            _inspector.AddChild(Palette.Text("CHALLENGE",25,title:true));
-            _inspector.AddChild(Palette.Wrapped($"{duel.Challenger.Definition!.Name} challenges {duel.Challenged.Definition!.Name}",22));
-            if(duel.Challenge is {} stakes){_inspector.AddChild(Palette.Wrapped(stakes.AbilityLabel,19,Palette.Gold));_inspector.AddChild(Palette.Wrapped(stakes.LossTerms,17));if(stakes.Refusable)_inspector.AddChild(Palette.Wrapped(stakes.RefusalTerms,17,Palette.PaperDim));}
-            if(View.PendingChoice is {} reaction)_inspector.AddChild(Palette.Wrapped(reaction.Prompt,18));
-            foreach(var option in Actions.Where(a=>a.Enabled&&a.Command is not null&&a.Type is not ("concede" or "declineReaction")))
-            {var command=option.Command!;_inspector.AddChild(SidebarSkin.Button(option.Label,()=>Submit(command)));}
+            _inspector.AddChild(Palette.Text("CHALLENGE", 25, title: true));
+            _inspector.AddChild(Palette.Wrapped($"{duel.Challenger.Definition!.Name} challenges {duel.Challenged.Definition!.Name}", 22));
+            if (duel.Challenge is { } stakes) { _inspector.AddChild(Palette.Wrapped(stakes.AbilityLabel, 19, Palette.Gold)); _inspector.AddChild(Palette.Wrapped(stakes.LossTerms, 17)); if (stakes.Refusable) _inspector.AddChild(Palette.Wrapped(stakes.RefusalTerms, 17, Palette.PaperDim)); }
+            if (View.PendingChoice is { } reaction) _inspector.AddChild(Palette.Wrapped(reaction.Prompt, 18));
+            foreach (var option in Actions.Where(a => a.Enabled && a.Command is not null && a.Type is not ("concede" or "declineReaction")))
+            { var command = option.Command!; _inspector.AddChild(SidebarSkin.Button(option.Label, () => _ = Submit(command))); }
             return;
         }
         if (RenderBattleSequence()) return;
@@ -42,8 +42,14 @@ public partial class Main
         if (PresentationBusy)
         {
             _guide.Visible = false;
-            _sidebarHeader.AddChild(new BattleTracker { Snapshot = View, ReducedMotion = _reducedMotion,
-                ResolutionMessage = _battleOutcomeText, PresentationInProgress = true, ActionOutcome = _actionOutcome });
+            _sidebarHeader.AddChild(new BattleTracker
+            {
+                Snapshot = View,
+                ReducedMotion = _reducedMotion,
+                ResolutionMessage = _battleOutcomeText,
+                PresentationInProgress = true,
+                ActionOutcome = _actionOutcome
+            });
             return;
         }
         if (View.WinnerId is { } winner)
@@ -273,7 +279,7 @@ public partial class Main
     // sources; a costed one names its cost and waits until the chosen sources cover it.
     private void AddConfirm(string verb, int required, bool ready, Func<GameCommand> build, string cancel, bool enabled = true)
     {
-        _paymentConfirm = SidebarSkin.Button(required > 0 ? $"{verb} · {required} Gold" : verb, () => Submit(build()), true);
+        _paymentConfirm = SidebarSkin.Button(required > 0 ? $"{verb} · {required} Gold" : verb, () => _ = Submit(build()), true);
         _paymentConfirm.Disabled = !enabled || !ready || _session.Busy;
         _decisionActions.AddChild(_paymentConfirm);
         _decisionActions.AddChild(SidebarSkin.Button(cancel, CancelChoice));
@@ -308,13 +314,13 @@ public partial class Main
             _inspector.AddChild(Palette.Wrapped($"{ShortName(card)}", 14));
             var provinces = action.Provinces ?? [];
             var picker = new OptionButton(); picker.AddItem("Stay at home");
-            foreach (var province in provinces) picker.AddItem($"Province {province + 1}");
+            foreach (var province in provinces) picker.AddItem(BattlefieldName(province));
             picker.Selected = _assignments.TryGetValue(id, out var assigned) ? Array.IndexOf(provinces, assigned) + 1 : 0;
             picker.ItemSelected += i => { _selected = card; _assignmentUnit = id; if (i == 0) _assignments.Remove(id); else _assignments[id] = provinces[(int)i - 1]; RenderBoard(); RenderInspector(); Highlight(); };
             _inspector.AddChild(picker);
         }
         _decisionActions.AddChild(SidebarSkin.Button("Keep selected unit home", () => { if (_assignmentUnit is string id) _assignments.Remove(id); RenderBoard(); RenderInspector(); Highlight(); }));
-        _decisionActions.AddChild(SidebarSkin.Button("Confirm assignments", () => Submit(new GameCommand(action.Type, View.ViewerId, reviewedVersion, Assignments: new Dictionary<string, int>(_assignments))), true));
+        _decisionActions.AddChild(SidebarSkin.Button("Confirm assignments", () => _ = Submit(new GameCommand(action.Type, View.ViewerId, reviewedVersion, Assignments: new Dictionary<string, int>(_assignments))), true));
         _decisionActions.AddChild(SidebarSkin.Button("Cancel assignment", CancelChoice));
     }
 
@@ -360,7 +366,7 @@ public partial class Main
         _inspector.AddChild(Palette.Wrapped(action.Label, 18, Palette.Gold));
         _inspector.AddChild(Palette.Wrapped("Select one or more province cards in the order you want them placed on the bottom of the Dynasty deck. Replacements will be revealed face-up.", 14, Palette.PaperDim));
         var order = Palette.Wrapped("No cards selected.", 13, Palette.Crane);
-        var confirm = SidebarSkin.Button("Refresh selected provinces", () => Submit(action.Command! with { CardIds = selected.ToArray() }), true);
+        var confirm = SidebarSkin.Button("Refresh selected provinces", () => _ = Submit(action.Command! with { CardIds = selected.ToArray() }), true);
         confirm.Disabled = true;
         foreach (var id in action.TargetIds ?? [])
         {
@@ -385,7 +391,7 @@ public partial class Main
         var reviewedVersion = _chosen?.Command?.ExpectedVersion ?? View.Version;
         var selected = new HashSet<string>();
         _inspector.AddChild(Palette.Wrapped($"Choose {count} card(s) to discard.", 17));
-        var confirm = SidebarSkin.Button("Confirm discard", () => Submit(new GameCommand("discardHand", View.ViewerId, reviewedVersion, CardIds: selected.ToArray())), true);
+        var confirm = SidebarSkin.Button("Confirm discard", () => _ = Submit(new GameCommand("discardHand", View.ViewerId, reviewedVersion, CardIds: selected.ToArray())), true);
         confirm.Disabled = true;
         foreach (var c in Self.Hand)
         {
@@ -417,10 +423,10 @@ public partial class Main
         var label = option.Type == "discardProvince" ? "Discard from province…" : option.Type is "purchase" or "recruitReserve" ? "Review payment…" : option.Label;
         var button = SidebarSkin.Button(label, () =>
         {
-            if (option.Type=="useAbility" && View.PendingChoice?.Type is "bowReaction" or "beforeActionReaction" && option.TargetIds is {Length:0} && option.Command is { } reaction && QuoteFor(option) is null) Submit(reaction);
+            if (option.Type=="useAbility" && View.PendingChoice?.Type is "bowReaction" or "beforeActionReaction" && option.TargetIds is {Length:0} && option.Command is { } reaction && QuoteFor(option) is null) _ = Submit(reaction);
             else if (option.Type is "purchase" or "recruitReserve" or "equip" or "playStrategy" or "attack" or "assignDefense" or "discardHand" or "useAbility" or "chooseOpponentPayment") Choose(option);
-            else if (option.Type == "discardProvince") Confirm("Discard this province card?", "Discarding starts the Dynasty discard step. You cannot recruit more cards this phase.", () => Submit(option.Command!));
-            else if (option.Command is { } command) Submit(command);
+            else if (option.Type == "discardProvince") Confirm("Discard this province card?", "Discarding starts the Dynasty discard step. You cannot recruit more cards this phase.", () => _ = Submit(option.Command!));
+            else if (option.Command is { } command) _ = Submit(command);
         }, option.Type is "pass" or "endDynasty" or "declineReaction");
         button.Disabled = !option.Enabled || _session.Busy || _session.Online && !_session.Connected;
         button.TooltipText = RulesHelp.Tooltip((option.Reason is { } reasonText ? "Unavailable: " + reasonText + "\n\n" : option.Label + "\n\n") + RulesHelp.ActionGuide(option.Type));
@@ -435,6 +441,21 @@ public partial class Main
         if (PresentationBusy) { Palette.Clear(_phaseActions); _phaseActions.AddChild(SidebarSkin.Button("Review battle", ShowBattleHistory)); return; }
         Palette.Clear(_phaseActions);
         if (_session.Snapshot is null) return;
+        if (View.PendingProvinceOrder is { } order)
+        {
+            _phaseActions.AddChild(Palette.Wrapped(order.PlayerId == View.ViewerId ? "Choose an order in the tray." : "Waiting for the province's controller to choose an order.", 18, Palette.Gold));
+            if (_session.Online && !_session.Connected)
+                _phaseActions.AddChild(SidebarSkin.Button("Reconnect", () => _ = Reconnect(), true));
+            else if (!_session.Online && !_autoOpponent && _provinceReviewView is null && order.PlayerId != View.ViewerId)
+                _phaseActions.AddChild(SidebarSkin.Button("Pass device to deciding player", PassProvinceDecision));
+            return;
+        }
+        if (_provinceReviewView is not null)
+        {
+            _phaseActions.AddChild(Palette.Wrapped("Presentation preview\nUse the prepared scenarios above the table. Card effects are not running.", 17, Palette.PaperDim));
+            _phaseActions.AddChild(SidebarSkin.Button("Focus province", FocusProvinceReview));
+            return;
+        }
         if (View.WinnerId is not null) return;
         if (_chosen is not null || EventDecisionActive || GenericDecisionActive || EitherOrActive || OpponentPaymentActive || CopyDecisionActive || LookDecisionActive) return;
         _phaseActions.AddChild(new HSeparator());

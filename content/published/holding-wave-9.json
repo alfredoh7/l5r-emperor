@@ -1,0 +1,108 @@
+{
+  "Profile": "holding-wave-9",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-7444",
+      "Name": "Staging Grounds",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 4,
+      "GoldProduction": 3,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Bow this card: Produce 3 Gold, or 4 Gold if paying for a card with a printed Gold Cost of 9 or more which may only pay for that card.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7444.jpg",
+      "Keywords": [
+        "Castle"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "staging-grounds-gold"
+    },
+    {
+      "Id": "oracle-l5r-7671",
+      "Name": "Surveillance Outpost",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 2,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Bow this card: Produce 2 Gold.\nLimited: If you have fewer Provinces than each other player, or exactly one Province, give your performing Siege Personality Conqueror.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7671.jpg",
+      "Keywords": [
+        "Castle"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "surveillance-outpost-conqueror"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-7897",
+      "Name": "Temple to the Elements",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 6,
+      "GoldProduction": 5,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Bow this card: Produce 5 Gold. \nOpen: Give your target Monk or Shugenja Air, Earth, Fire, or Water.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7897.jpg",
+      "Keywords": [
+        "Temple"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "temple-elements-air",
+        "temple-elements-earth",
+        "temple-elements-fire",
+        "temple-elements-water"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-7915",
+      "Name": "Terraced Farm",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 2,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Bow this card: Produce 2 Gold.\nBattle, Bow this card: Give each of your Ashigaru cards at the current battlefield +1F.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7915.jpg",
+      "Keywords": [
+        "Farm"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "terraced-farm-boost"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

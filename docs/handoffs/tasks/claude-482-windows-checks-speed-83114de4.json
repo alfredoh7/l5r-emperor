@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Desktop foundation checks: split the Windows verify into parallel rules (windows-2022) and native-client (windows-2022-client) jobs, add tools/check.sh --client-only, cache the Godot import between runs, sparse-checkout docs/screenshots, docs/videos and assets/table on Windows, upload Godot logs on failure.",
+  "validation": "Measured a passing Windows run (17 min: checkout 88s, rules ~5.5 min, Godot client ~9 min); verified locally in a 1.6 GB sparse tree: collaboration 45, content 134, meshy, Core, Server and Client.Transport tests pass; workflow YAML parsed. Cache effect verified by re-running the PR's CI.",
+  "remaining": "Confirm the second CI run restores the Godot cache; AI tests (~2.5 min) could be parallelised later.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/482",
+  "branch": "claude/482-windows-checks-speed",
+  "updated": "2026-09-24T18:21:07.679412+00:00"
+}

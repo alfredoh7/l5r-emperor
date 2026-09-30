@@ -79,10 +79,12 @@ public sealed partial class MatchEngine
 {
     private static bool IsCopyChoice(string type) => type is "copyKeyword" or "copyAbility";
 
-    // The ability ids a card has now: printed, plus granted (a permanent grant, a copy). The ONE place a granted ability is joined
+    // The ability ids a card has now: printed, plus granted (a permanent grant, a copy), plus a controller-wide STATIC grant (issue #458, The Towers of
+    // the Yogo: "Each of your Scorpion Clan Personalities has the ability ..." -- StaticAbilityGrants.cs). The ONE place a granted ability is joined
     // to the printed ones; every scan of "the abilities this card has" goes through it.
-    private static IEnumerable<string> AbilityIdsOf(CardInstance card) =>
-        (Definition(card).Abilities ?? []).Concat(card.GrantedAbilities.Where(g => GrantHolds(g.Duration, card)).Select(g => g.AbilityId)).Distinct(StringComparer.Ordinal);
+    private IEnumerable<string> AbilityIdsOf(CardInstance card) => P5AbilitiesRemoved(card) ? [] : // Unsettling Doubts (issue #503): "Permanently remove its abilities".
+        // Issue #501: a copy of a card does not have the printed abilities that "will not be copied" (Shadow Dragon's, Sachina's, Matsu Nimuro's).
+        (Definition(card).Abilities ?? []).Where(id => !IsCopyCard(card) || !(AbilityCatalog.All.TryGetValue(id, out var printed) && printed.NotCopyable)).Concat(card.GrantedAbilities.Where(g => GrantHolds(g.Duration, card)).Select(g => g.AbilityId)).Concat(StaticGrantedAbilityIds(card)).Distinct(StringComparer.Ordinal);
 
     // A grant that is still "on" a card that is not in play: a permanent one, or a copy (which lasts until the copying ability is
     // used again, wherever the receiver is). A turn or attachment grant belongs to a card in play -- it does not follow a Personality
@@ -128,7 +130,7 @@ public sealed partial class MatchEngine
     /// so it may already have left the game as the action's cost. Returns true when a decision was opened (the action does not finish
     /// until it is answered: FinishCopy resumes it); false when nothing needed deciding, and the caller finishes the action itself.</summary>
     private bool BeginCopy(CardInstance receiver, CardInstance source, string copierAbilityId, string[] steps, int playerId, string origin,
-        IEnumerable<string>? bowedBefore = null, string duration = GrantDuration.Copy)
+        IEnumerable<string>? bowedBefore = null, string duration = GrantDuration.Copy, string? abilityActionKeyword = null)
     {
         var copy = new PendingCopy
         {
@@ -139,7 +141,12 @@ public sealed partial class MatchEngine
         // copy provided is not "already had" and may be chosen again.
         if (duration == GrantDuration.Copy) foreach (var step in steps) EndPreviousCopies(receiver, copierAbilityId, step);
         if (steps.Contains(CopyStep.Keyword)) copy.KeywordChoices = CopyableKeywords(source, receiver).ToList();
-        if (steps.Contains(CopyStep.Ability)) copy.AbilityChoices = CopyableAbilityIds(source, receiver).ToList();
+        if (steps.Contains(CopyStep.Ability))
+        {
+            copy.AbilityChoices = CopyableAbilityIds(source, receiver).ToList();
+            // Asahina Kitiaru (Emperor Edition Personality pass, issue #477): "one of his Political abilities" -- only abilities carrying the action keyword are offered.
+            if (abilityActionKeyword is not null) copy.AbilityChoices = copy.AbilityChoices.Where(id => AbilityCatalog.All[id].ActionKeywords?.Contains(abilityActionKeyword, StringComparer.Ordinal) == true || Keyword(source, abilityActionKeyword)).ToList();
+        }
         Emit("copyBegun", $"{Definition(receiver).Name} copies from {copy.SourceName}.", playerId, receiver.Id);
         return AdvanceCopy(copy);
     }
@@ -246,5 +253,26 @@ public sealed partial class MatchEngine
         foreach (var value in step == CopyStep.Keyword ? copy.KeywordChoices : copy.AbilityChoices)
             yield return new(type, step == CopyStep.Keyword ? $"Copy the keyword {value}" : $"Copy: {AbilityCatalog.All[value].Label}", true, null,
                 new(type, playerId, _state.Version, Choice: value), copy.ReceiverId);
+    }
+}
+
+public sealed partial class MatchEngine
+{
+    private bool HandleRegisteredCopyChoice(string type, GameCommand command)
+    {
+        if (!IsCopyChoice(type)) return false;
+        ResolveCopyCommand(command);
+        return true;
+    }
+}
+
+public sealed partial class MatchEngine
+{
+    // Registration only: callbacks are not invoked during module initialization.
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
+    [System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void RegisterCardCopyHooks()
+    {
+        EngineHooks.PendingChoice.Register("HandleRegisteredCopyChoice", 400, static (engine, type, command) => engine.HandleRegisteredCopyChoice(type, command));
     }
 }

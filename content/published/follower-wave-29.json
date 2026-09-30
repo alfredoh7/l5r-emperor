@@ -1,0 +1,35 @@
+{
+  "Profile": "follower-wave-29",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-8409",
+      "Name": "The Vengeful",
+      "Type": "Follower",
+      "Clan": "Unaligned",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 6,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Ranged 7 Attack.\nBattle: Even if this card is bowed, if this Personality is Nonhuman: Straighten this unit.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8409.jpg",
+      "Keywords": [
+        "Unique",
+        "Naga",
+        "Nonhuman"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "vengeful-attack",
+        "vengeful-straighten"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

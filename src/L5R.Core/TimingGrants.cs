@@ -26,6 +26,10 @@ public static class ActionClass
 {
     /// <summary>Equipping a Weapon from your hand (the ordinary Equip command with a Weapon-keyword Item).</summary>
     public const string EquipWeapon = "equip-weapon";
+    /// <summary>Equipping any Item or Follower from your hand (Glory of the Shogun, issue #492 group F: "Equipping is a Battle/Open action (for all players)").</summary>
+    public const string EquipAny = "equip-any";
+    /// <summary>Equipping a Follower from your hand (The Plain of Glass, issue #503).</summary>
+    public const string EquipFollower = "equip-follower";
 }
 
 /// <summary>An additional timing (<paramref name="Timing"/>: "Battle", "Open" or "BattleOrOpen") a card gives its controller for one class of action.</summary>
@@ -41,10 +45,12 @@ public sealed partial class MatchEngine
     private static readonly IReadOnlyDictionary<string, TimingGrant[]> EffectTimingGrants = new Dictionary<string, TimingGrant[]>(StringComparer.Ordinal)
     {
         ["equip-weapons-battle-open"] = [new(ActionClass.EquipWeapon, "BattleOrOpen", BattleRequiresUnbowedSource: true)],
+        // The Plain of Glass (issue #503, EmperorP5.cs): "Equipping Followers is a Battle/Limited ability for you." -- Limited it already is; the grant adds Battle.
+        [EmperorP5Abilities.PlainOfGlassEffect] = [new(ActionClass.EquipFollower, "Battle")],
     };
 
     // The class of action equipping this card is, when a timing grant can name it.
-    private string? EquipActionClass(CardInstance attachment) => Keyword(attachment, "Weapon") ? ActionClass.EquipWeapon : null;
+    private string? EquipActionClass(CardInstance attachment) => Keyword(attachment, "Weapon") ? ActionClass.EquipWeapon : Definition(attachment).Type == CardType.Follower ? ActionClass.EquipFollower : null; // issue #503: Followers
 
     // Every grant of this class that the player's cards in play give them, with the card that gives it.
     private IEnumerable<(CardInstance Source, TimingGrant Grant)> TimingGrantsOf(int playerId, string actionClass) =>
@@ -56,7 +62,8 @@ public sealed partial class MatchEngine
     private string? EquipTimingError(int playerId, CardInstance attachment)
     {
         var actionClass = EquipActionClass(attachment);
-        var grants = actionClass is null ? [] : TimingGrantsOf(playerId, actionClass).ToArray();
+        // A Spell (Equip (Limited) since issue #501) takes no granted timing: in a battle a Spell is attached with Equip (Battle), unchanged.
+        var grants = Definition(attachment).Type == CardType.Spell ? [] : (actionClass is null ? [] : TimingGrantsOf(playerId, actionClass).ToArray()).Concat(GloryOfTheShogunGrants()).ToArray(); // Glory of the Shogun (issue #492, group F)
         if (_state.Phase == Phase.Action)
             return playerId == _state.ActivePlayerId || grants.Any(x => x.Grant.GrantsOpen) ? null : "Equip is a Limited action on your turn.";
         if (_state.Phase == Phase.Battle)
@@ -78,11 +85,12 @@ public sealed partial class MatchEngine
         var wielders = battle
             ? (_state.CurrentBattleProvince is int province ? Army(playerId, province).ToArray() : [])
             : _state.Cards.Values.Where(c => c.OwnerId == playerId && c.Zone == Zone.Home && Definition(c).Type == CardType.Personality).ToArray();
-        foreach (var card in Player(playerId).Hand.Select(Card).Where(c => Definition(c).Type is CardType.Item or CardType.Follower))
+        // Equip (Limited) offers Spells too (Mendon's ruling, issue #501), to a Shugenja only; EquipTimingError keeps them out of a battle (Equip (Battle) is their Battle action).
+        foreach (var card in Player(playerId).Hand.Select(Card).Where(c => Definition(c).Type is CardType.Item or CardType.Follower or CardType.Spell))
         {
             if (EquipTimingError(playerId, card) is not null) continue;
             var def = Definition(card);
-            var legalTargets = wielders.Where(t => AttachmentAllowed(card, t) && AttachmentLegalTarget(def, t)).Select(t => t.Id).ToArray();
+            var legalTargets = wielders.Where(t => AttachmentAllowed(card, t) && AttachmentLegalTarget(def, t) && (def.Type != CardType.Spell || Keyword(t, "Shugenja"))).Select(t => t.Id).ToArray();
             // One Gold quote per candidate wielder (issue #303): Katagi's discount depends on the wielder, so the price can differ per target.
             var quotes = legalTargets.ToDictionary(id => id, id => QuoteEquipGold(playerId, card, Card(id)));
             var affordable = legalTargets.Where(id => quotes[id].Payments.Length > 0).ToArray();

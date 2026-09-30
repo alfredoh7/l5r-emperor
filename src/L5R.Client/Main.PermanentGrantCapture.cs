@@ -17,7 +17,7 @@ public partial class Main
     }
     // Explicit public-snapshot artwork fixture, following the Home/Favor review harness.
     // It never registers Spirit of the Berserker as an executable card or edits engine state.
-    private async void PreparePermanentGrantCapture()
+    private async Task PreparePermanentGrantCapture()
     {
         if(_capturePath is null || !_captureMode.StartsWith("published-grants",StringComparison.Ordinal)) return;
         try

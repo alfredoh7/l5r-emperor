@@ -30,7 +30,7 @@ public partial class Main
         await SettleInspection();
         GD.Print($"DESELECT_CLICK: {card.Definition?.Name} point={point} selected={_selected?.Definition?.Name} hovered={(TableHovered as CardTile)?.Card.Definition?.Name ?? TableHovered?.Name} chosen={_chosen?.Type} focus={GetWindow().HasFocus()} table={_tableViewport.GetGlobalRect()}");
     }
-    private async void ProbeDeselection()
+    private async Task ProbeDeselection()
     {
         try
         {

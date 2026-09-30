@@ -45,6 +45,17 @@ public static class BranchCondition
     public const string ProvinceHoldsCard = "province-holds-card";
     /// <summary>The Personality the source is attached to has a keyword (Strength of the Tsunami: "if this Shugenja is Water").</summary>
     public static string WielderHas(string keyword) => $"wielder-has:{keyword}";
+    /// <summary>The action's optional target was chosen (Forgotten Legacy pass, issue #467, batch 4 -- Steadfast Defense: "you may target a Personality or Follower and bow or
+    /// straighten it" asks bow-or-straighten only when a target was named).</summary>
+    public const string TargetChosen = "target-chosen";
+    /// <summary>The target is dishonorable, Kolat, Ninja or Shadowlands (The Shadow's Embrace pass, issue #476 batch 3 -- Captured Convict, judged after he has moved home).</summary>
+    public const string TargetDishonorableKolatNinjaOrShadowlands = "target-dishonorable-kolat-ninja-or-shadowlands";
+    /// <summary>No condition: the choice is always asked (The Shadow's Embrace pass, issue #476, batch 4 -- Running Battle's "You may move your Scout home").</summary>
+    public const string Always = "always";
+    /// <summary>The target is Kolat, Ninja, or Shadowlands (Emperor Edition Personality pass, issue #477 -- Asako Tsunefusa's second sentence).</summary>
+    public const string TargetKolatNinjaOrShadowlands = "target-kolat-ninja-or-shadowlands";
+    /// <summary>The target is Kolat, Ninja, or Shadowlands, the acting player controls an Inquisitor, and it is not his turn (Emperor Edition Stronghold pass, issue #486 batch 2 -- Temple of Purity).</summary>
+    public const string TargetKolatNinjaOrShadowlandsWithInquisitorOffTurn = "target-kolat-ninja-or-shadowlands-inquisitor-off-turn";
 }
 
 /// <summary>Effects an option may apply. Each goes through the same helper an ordinary effect would, so a negation a reaction set
@@ -65,6 +76,15 @@ public static class BranchEffect
     public const string StraightenWielder = "straighten-wielder";
     /// <summary>The Personality the source is attached to moves home.</summary>
     public const string MoveWielderHome = "move-wielder-home";
+    /// <summary>Celestial Sword of the Scorpion - exp (issue #453 batch 5): the card in the current battlefield's province is discarded, then the target is destroyed if that card was a
+    /// Personality or the acting player controls a Courtier; and the same conditional destroy with nothing discarded (MatchEngine.ScorpionSwordResolve).</summary>
+    public const string ScorpionSwordDiscard = "scorpion-sword-discard";
+    public const string ScorpionSwordKeep = "scorpion-sword-keep";
+    /// <summary>The target is bowed / straightened (Steadfast Defense, issue #467 batch 4).</summary>
+    public const string BowTarget = "bow-target";
+    public const string StraightenTarget = "straighten-target";
+    /// <summary>The action's named performer's unit moves home (Running Battle, issue #476 batch 4).</summary>
+    public const string MovePerformerHome = "move-performer-home";
 }
 
 /// <summary>The four answers to "choose a player who gains or loses N Honor" (issue #336): each player, each direction. Shared by every card that prints it.</summary>
@@ -95,6 +115,9 @@ public sealed class PendingEffectChoice
     public int? OpponentHonorBefore { get; set; }
     public List<string> BowedBefore { get; set; } = [];
     public List<AdditionalActionGrant> PreExistingGrants { get; set; } = [];
+    /// <summary>Options the engine listed for THIS resolution, when they depend on the game (Forgotten Legacy pass, issue #467, batch 1: "choose one of his
+    /// abilities", "destroy a card without attachments in his unit"); null for a branch whose options are the ability's own fixed data.</summary>
+    public List<EffectOption>? Options { get; set; }
 }
 
 public sealed partial class MatchEngine
@@ -109,6 +132,11 @@ public sealed partial class MatchEngine
         BranchCondition.TargetMoved => targetMoved,
         BranchCondition.TargetAtBattlefield => target is not null && target.Zone == Zone.Battlefield,
         BranchCondition.ProvinceHoldsCard => CurrentBattlefieldProvince() is { CardId: not null },
+        BranchCondition.TargetChosen => target is not null,
+        BranchCondition.TargetDishonorableKolatNinjaOrShadowlands => target is not null && MatchesTargetStatus(target, TargetStatus.DishonorableKolatNinjaOrShadowlands),
+        BranchCondition.Always => true,
+        BranchCondition.TargetKolatNinjaOrShadowlands => target is not null && MatchesTargetStatus(target, TargetStatus.KolatNinjaOrShadowlands),
+        BranchCondition.TargetKolatNinjaOrShadowlandsWithInquisitorOffTurn => TempleHonorConditionMet(source, target),
         _ when condition.StartsWith("wielder-has:", StringComparison.Ordinal) => source.AttachedTo is { } wielderId && Keyword(Card(wielderId), condition["wielder-has:".Length..]),
         _ => throw new InvalidOperationException($"Unknown branch condition '{condition}'.")
     };
@@ -124,6 +152,15 @@ public sealed partial class MatchEngine
             ApplyPlayerHonorChoice(performer, affected, int.Parse(parts[2]));
             return;
         }
+        if (ApplyForgottenLegacyBatch1BranchEffect(effect, command)) return;
+        if (ApplyShadowsEmbraceBatch1BranchEffect(effect, command)) return; // The Shadow's Embrace pass (issue #476), batch 1.
+        if (ApplyShadowsEmbraceBatch3BranchEffect(effect, command)) return; // The Shadow's Embrace pass (issue #476), batch 3
+        if (ApplyShadowsEmbraceBatch4BranchEffect(effect, command)) return; // The Shadow's Embrace pass (issue #476), batch 4: The Game Has Changed's steps.
+        if (ApplyEmperorBatch4BranchEffect(effect, command)) return; // Emperor Edition Personality pass (issue #477), batch 4.
+        if (ApplyEmperorRemainingDBranchEffect(effect, command)) return; // Emperor Edition remaining-cards pass (issue #492), group D: The Sincerity of the Dragon's named number.
+        if (ApplyRulingR2BranchEffect(effect, command)) return;
+        if (ApplyEmperorP4BranchEffect(effect, command)) return; // Issue #503, group P4 (EmperorP4.cs).
+        if (ApplyEmperorMechABranchEffect(effect, command)) return; // issue #501 (EmperorMechA.cs): String of Victories' Ring, Aramasu's Legacy's bow // Emperor Edition ruling pass R2 (issue #492): The Honesty of the Phoenix's named card.
         switch (effect)
         {
             case BranchEffect.MoveSourceHome: MoveHome(source, false); break;
@@ -131,13 +168,16 @@ public sealed partial class MatchEngine
             case BranchEffect.DiscardProvinceCard: DiscardCurrentProvinceCard(); break;
             case BranchEffect.StraightenWielder: Straighten(Card(source.AttachedTo)); break;
             case BranchEffect.MoveWielderHome: MoveHome(Card(source.AttachedTo), false); break;
+            case BranchEffect.ScorpionSwordDiscard: ScorpionSwordResolve(command, target!, discardFirst: true); break;
+            case BranchEffect.ScorpionSwordKeep: ScorpionSwordResolve(command, target!, discardFirst: false); break;
+            case BranchEffect.BowTarget: if (InPlay(target!) && !StalwartNegatesBow(target!, command.PlayerId)) target!.Bowed = true; break;
+            case BranchEffect.StraightenTarget: if (InPlay(target!)) Straighten(target!); break;
+            case BranchEffect.MovePerformerHome: if (command.PerformerId is not null && InPlay(Card(command.PerformerId))) MoveHome(Card(command.PerformerId), false); break;
             default: throw new InvalidOperationException($"Unknown branch effect '{effect}'.");
         }
     }
 
-    // The current battlefield's province is the Defender's province at that index (a battlefield is where the Defender's province is).
-    private ProvinceState? CurrentBattlefieldProvince() =>
-        _state.CurrentBattleProvince is int index ? Player(1 - _state.ActivePlayerId).Provinces.FirstOrDefault(p => p.Index == index && !p.Destroyed) : null;
+    // (The current battlefield's province, null when it is at none: EmperorRulingR1.cs.)
 
     // "Discard a card in the current battlefield's province": the Dynasty card sitting there, face up or face down (a discard pile is public, so it is shown), and the
     // province is refilled as after any discard from it.
@@ -182,15 +222,22 @@ public sealed partial class MatchEngine
         var pending = _state.PendingEffectChoice ?? throw new RuleViolation("No effect choice is open.");
         Require(command.Type == "chooseEffect" && command.PlayerId == pending.PlayerId, "Choose one of the offered effects.");
         var ability = AbilityCatalog.All[pending.Command.AbilityId!];
-        var option = FollowUpOf(ability)!.Options.FirstOrDefault(o => o.Id == command.Choice);
+        var option = (pending.Options?.ToArray() ?? FollowUpOf(ability)!.Options).FirstOrDefault(o => o.Id == command.Choice);
         Require(option is not null, "Choose one of the offered effects.");
         var source = Card(pending.Command.CardId);
         var target = pending.Command.TargetId is null ? null : Card(pending.Command.TargetId);
         _state.PendingChoice = null; _state.PendingEffectChoice = null;
         Emit("effectChosen", $"{Player(pending.PlayerId).Name} chose: {option!.Label}.", pending.PlayerId, source.Id);
         _state.NegatedEffects = pending.Negated.ToList();
-        foreach (var effect in option.Effects) ApplyBranchEffect(effect, pending.Command, source, target);
+        // The chosen effects are the paused action's own: they resolve as ITS effects (issue #496: an action whose destruction will not be negated or delayed -- Makito's -- must still be that action here).
+        var runningBefore = _runningCommand;
+        _runningCommand = pending.Command;
+        try { foreach (var effect in option.Effects) ApplyBranchEffect(effect, pending.Command, source, target); }
+        finally { _runningCommand = runningBefore; }
         _state.NegatedEffects.Clear();
+        // The Shadow's Embrace pass (issue #476), batch 4: a choice with further steps (The Game Has Changed) opens its next step and waits.
+        if (ContinueShadowsEmbraceBatch4Choice(pending, option!)) return;
+        if (ContinueEmperorP4Choice(pending, option!)) return; // Issue #503 (EmperorP4More.cs): Secret Reserve's next Item, Power of Strength's deferred Attack.
         CompleteAbilityResolution(pending.Command, ability, pending.ConsumedGrant, pending.PlayedFromDiscard, pending.OpponentHonorBefore,
             pending.BowedBefore.ToHashSet(StringComparer.Ordinal), pending.PreExistingGrants);
     }
@@ -200,7 +247,28 @@ public sealed partial class MatchEngine
     {
         if (_state.PendingEffectChoice is not { } pending || pending.PlayerId != playerId) yield break;
         var ability = AbilityCatalog.All[pending.Command.AbilityId!];
-        foreach (var option in FollowUpOf(ability)!.Options)
+        foreach (var option in pending.Options?.ToArray() ?? FollowUpOf(ability)!.Options)
             yield return new("chooseEffect", option.Label, true, null, new GameCommand("chooseEffect", playerId, _state.Version, Choice: option.Id), pending.Command.CardId);
+    }
+}
+
+public sealed partial class MatchEngine
+{
+    private bool HandleRegisteredEffectChoice(string type, GameCommand command)
+    {
+        if (type != "effectChoice") return false;
+        WithResumedAction(() => ResolveEffectChoice(command));
+        return true;
+    }
+}
+
+public sealed partial class MatchEngine
+{
+    // Registration only: callbacks are not invoked during module initialization.
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
+    [System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void RegisterEffectChoiceHooks()
+    {
+        EngineHooks.PendingChoice.Register("HandleRegisteredEffectChoice", 4100, static (engine, type, command) => engine.HandleRegisteredEffectChoice(type, command));
     }
 }

@@ -1,0 +1,86 @@
+{
+  "Profile": "strategy-wave-81",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-2896",
+      "Name": "Greasing the Wheels",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "As a Focus Effect: After this duel ends, lower the Gold Cost of its winner to 0.\nBattle: Choose your performing unbowed Courtier or Magistrate and target a Personality: You may pay Gold equal to his unit's total Gold Cost minus 6. If you did, move him home. Otherwise, straighten his unit.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-2896.jpg",
+      "Keywords": [],
+      "Focus": 3,
+      "Abilities": [
+        "greasing-wheels-focus",
+        "greasing-wheels-battle"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-8127",
+      "Name": "The Heir's Wrath",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Favor Imperial Political Limited, :gstar:: Discard the Imperial Favor or bow a Personality with 5 or more Force to lose 2 Honor and destroy another player's target Personality whose unit has a total Gold Cost equal to or less than what you paid for this action; these effects will not be negated.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8127.jpg",
+      "Keywords": [
+        "Imperial",
+        "Political",
+        "Unique"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "heirs-wrath-favor",
+        "heirs-wrath-bow"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-8141",
+      "Name": "The Host's Advantage",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Discard the Imperial Favor and target an attachment: Destroy it.\nBattle: Choose your performing Courtier at any location, bow him or discard the Imperial Favor, and target an enemy Personality: Bow him. His controller loses 2 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8141.jpg",
+      "Keywords": [
+        "Political",
+        "Winter"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "hosts-advantage-destroy",
+        "hosts-advantage-bow"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

@@ -7,6 +7,7 @@ public partial class CardTile : Button
 {
     public CardView Card { get; private set; } = null!;
     public bool Highlighted { get; set; }
+    public bool QuietSelection { get; set; }
     public bool LegalTarget { get; set; }
     public bool ChosenTarget { get; set; }
     public bool DecisionSelected { get; set; }
@@ -36,12 +37,21 @@ public partial class CardTile : Button
     public bool IsSelected => Highlighted || SelectedSource || ChosenTarget || DecisionSelected;
     public static readonly Color HoverColor = new("ffda89");
     public static readonly Color SelectionColor = new("9ceafa");
+    // Capped LRU (issue #546): unbounded before this, PublishedArt held every distinct card texture drawn on the
+    // board/hand for the process lifetime. Mirrors CatalogueScans' cache so a long session with many decks/games
+    // doesn't grow this without bound.
+    private const int PublishedArtCap = 200;
     private static readonly Dictionary<string, Texture2D> PublishedArt = [];
+    private static readonly LinkedList<string> PublishedArtOrder = [];
     public static Texture2D? Artwork(CardDefinition definition)
     {
         if (definition.ScenarioOnly) return Atlas;
         if (definition.ArtworkKey is not string path) return null;
-        if (!PublishedArt.TryGetValue(path, out var texture) && ResourceLoader.Exists(path)) PublishedArt[path] = texture = GD.Load<Texture2D>(path);
+        if (PublishedArt.TryGetValue(path, out var texture)) { PublishedArtOrder.Remove(path); PublishedArtOrder.AddLast(path); return texture; }
+        if (!ResourceLoader.Exists(path)) return null;
+        PublishedArt[path] = texture = GD.Load<Texture2D>(path);
+        PublishedArtOrder.AddLast(path);
+        while (PublishedArt.Count > PublishedArtCap && PublishedArtOrder.First is { } oldest) { PublishedArt.Remove(oldest.Value); PublishedArtOrder.RemoveFirst(); }
         return texture;
     }
 
@@ -112,7 +122,7 @@ public partial class CardTile : Button
     public bool ShowTokenRail { get; set; } = true;
     public float TokenRailOffset { get; set; }
     public CardTile[] TokenRailCompanions { get; set; } = [];
-    public Func<string,string?>? TokenSourceName { get; set; }
+    public Func<string, string?>? TokenSourceName { get; set; }
     public CardTokenRail? TokenRail { get; private set; }
     public CreatedCopySeal? CopySeal { get; private set; }
     public ActionLockSeal? RestrictionSeal { get; private set; }
@@ -159,6 +169,7 @@ public partial class CardTile : Button
     private void DrawInteractionHalo()
     {
         if (!IsSelected && !IsInspectionHover && !LegalTarget) return;
+        if (QuietSelection) return;
         var color = DecisionSelected ? Palette.Paper : IsSelected ? SelectionColor : HoverColor;
         var strength = IsSelected ? 1f : IsInspectionHover ? .82f : .28f;
         var edge = LocalFaceCorners(2);
@@ -172,9 +183,9 @@ public partial class CardTile : Button
     private void DrawInteractionEdge()
     {
         var active = IsSelected || IsInspectionHover || LegalTarget;
-        var color = DecisionSelected ? Palette.Paper : IsSelected ? SelectionColor : IsInspectionHover || LegalTarget ? HoverColor : new Color("8e866b");
+        var color = DecisionSelected ? Palette.Paper : IsSelected ? QuietSelection ? Palette.Gold : SelectionColor : IsInspectionHover || LegalTarget ? HoverColor : new Color("8e866b");
         var edge = LocalFaceCorners(active ? 1.6f : 1);
-        DrawPolyline(edge.Append(edge[0]).ToArray(), color with { A = active ? 1 : .58f }, active ? (IsSelected ? 3.2f : 2.3f) * (ProjectToScreen is null ? 1 : 2) : .9f, true);
+        DrawPolyline(edge.Append(edge[0]).ToArray(), color with { A = active ? 1 : .58f }, QuietSelection ? 1.5f : active ? (IsSelected ? 3.2f : 2.3f) * (ProjectToScreen is null ? 1 : 2) : .9f, true);
     }
 
     private void DrawPrintedFace(Texture2D texture)
@@ -207,34 +218,34 @@ public partial class CardTile : Button
         (Card.GrantedKeywords ?? []).Where(k => !CardChanges.IsPermanent(k.Duration)&&k.CopiedFrom is null).Select(k => "+ " + k.Keyword).Distinct().ToArray();
     private void DrawDishonorMarker()
     {
-        if(UprightPreview||!FallenArt.TurnsOnTable(Card))return;
-        var corners=LocalFaceCorners();
-        var width=Math.Max(10,FaceSize().Y*.10f);
+        if (UprightPreview || !FallenArt.TurnsOnTable(Card)) return;
+        var corners = LocalFaceCorners();
+        var width = Math.Max(10, FaceSize().Y * .10f);
         // Lower right stays clear of the left/near token rail and upper-right Force tab.
         // The marker remains readable while the physical printed face turns.
-        FallenArt.Medallion(this,new Vector2(corners.Max(p=>p.X)+3+width/2,corners.Max(p=>p.Y)-width/2),width,true);
+        FallenArt.Medallion(this, new Vector2(corners.Max(p => p.X) + 3 + width / 2, corners.Max(p => p.Y) - width / 2), width, true);
     }
     private void DrawPublicStatus()
     {
         var labels = PublicStatusLabels;
         if (labels.Length == 0) return;
-        var face=FaceSize();
-        var origin=ProjectFacePoint(Vector2.Zero,face);
-        var x=(ProjectFacePoint(Vector2.Right,face)-origin);
-        var y=(ProjectFacePoint(Vector2.Down,face)-origin);
-        DrawSetTransformMatrix(new Transform2D(x,y,origin));
+        var face = FaceSize();
+        var origin = ProjectFacePoint(Vector2.Zero, face);
+        var x = (ProjectFacePoint(Vector2.Right, face) - origin);
+        var y = (ProjectFacePoint(Vector2.Down, face) - origin);
+        DrawSetTransformMatrix(new Transform2D(x, y, origin));
         // Two slim overlay bands across the lower artwork; never cover printed statistics/name/rules.
         var shown = labels.Take(2).ToArray();
-        if(labels.Length>2) shown[1]+=$" · {labels.Length-2} more";
-        for(var i=0;i<shown.Length;i++)
+        if (labels.Length > 2) shown[1] += $" · {labels.Length - 2} more";
+        for (var i = 0; i < shown.Length; i++)
         {
-            var rect=new Rect2(face.X*.035f,face.Y*.395f+i*face.Y*.08f,face.X*.93f,face.Y*.074f);
-            var dishonorable=shown[i]=="Dishonorable";
-            var statusHeading=shown[i].ToUpperInvariant();
-            DrawStyleBox(Palette.Box(dishonorable?new Color("492924"):new Color("202f33"),dishonorable?new Color("b37c67"):Palette.Gold,0,1),rect);
-            var size=Math.Max(11,(int)(face.Y*.06f));
-            while(size>8 && Palette.Title.GetStringSize(statusHeading,fontSize:size).X>rect.Size.X-6) size--;
-            DrawString(Palette.Title,rect.Position+new Vector2(3,rect.Size.Y*.80f),statusHeading,HorizontalAlignment.Center,rect.Size.X-6,size,Palette.Paper);
+            var rect = new Rect2(face.X * .035f, face.Y * .395f + i * face.Y * .08f, face.X * .93f, face.Y * .074f);
+            var dishonorable = shown[i] == "Dishonorable";
+            var statusHeading = shown[i].ToUpperInvariant();
+            DrawStyleBox(Palette.Box(dishonorable ? new Color("492924") : new Color("202f33"), dishonorable ? new Color("b37c67") : Palette.Gold, 0, 1), rect);
+            var size = Math.Max(11, (int)(face.Y * .06f));
+            while (size > 8 && Palette.Title.GetStringSize(statusHeading, fontSize: size).X > rect.Size.X - 6) size--;
+            DrawString(Palette.Title, rect.Position + new Vector2(3, rect.Size.Y * .80f), statusHeading, HorizontalAlignment.Center, rect.Size.X - 6, size, Palette.Paper);
         }
         DrawSetTransformMatrix(Transform2D.Identity);
     }

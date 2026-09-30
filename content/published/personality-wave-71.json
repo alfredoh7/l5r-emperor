@@ -1,0 +1,439 @@
+{
+  "Profile": "personality-wave-71",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-497",
+      "Name": "Asahina Keigo",
+      "Type": "Personality",
+      "Clan": "Crane",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 1,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": 3,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: When paying a Gold cost, bow Keigo and discard a card: Produce Gold equal to its Focus Value.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-497.jpg",
+      "Keywords": [
+        "Air",
+        "Crane Clan",
+        "Shugenja",
+        "Soul of Asahina Yoshino"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "keigo-produce-gold"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-501",
+      "Name": "Asahina Kitiaru",
+      "Type": "Personality",
+      "Clan": "Crane",
+      "GoldCost": 6,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 4,
+      "PersonalHonor": 4,
+      "HonorRequirement": 10,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Political Open: Target a Personality: Kitiaru copies one of his Political abilities that does not itself copy abilities.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-501.jpg",
+      "Keywords": [
+        "Unique",
+        "Courtier",
+        "Crane Clan",
+        "Samurai",
+        "Soul of Konetsu"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "kitiaru-copy"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-503",
+      "Name": "Asahina Michiru",
+      "Type": "Personality",
+      "Clan": "Crane",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 4,
+      "PersonalHonor": 3,
+      "HonorRequirement": 6,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: Target your Personality: Michiru creates a barrier of air. Before the next time (this turn) another player's action destroys the Personality, negate that destruction and move him home.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-503.jpg",
+      "Keywords": [
+        "Air",
+        "Crane Clan",
+        "Shugenja"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "michiru-barrier"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-4166",
+      "Name": "Kakita Genshi",
+      "Type": "Personality",
+      "Clan": "Crane",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 3,
+      "PersonalHonor": 3,
+      "HonorRequirement": 6,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Iaijutsu Limited: Target another player's Personality. His controller may dishonor him. If he did not choose to dishonor him, gain 1 Honor and choose one of the Personality's abilities; it may not be used until your next turn begins.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-4166.jpg",
+      "Keywords": [
+        "Duelist",
+        "Artisan",
+        "Crane Clan",
+        "Master of Ceremonies",
+        "Samurai",
+        "Soul of Kakita Yosuga"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "genshi-shame"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-4220",
+      "Name": "Kakita Seishi",
+      "Type": "Personality",
+      "Clan": "Crane",
+      "GoldCost": 2,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 2,
+      "PersonalHonor": 2,
+      "HonorRequirement": 2,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: Bow Seishi and target a dishonorable Personality: Rehonor him.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-4220.jpg",
+      "Keywords": [
+        "Artisan",
+        "Crane Clan",
+        "Soul of Kakita Ariteko"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "seishi-rehonor"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-4224",
+      "Name": "Kakita Tadanobu",
+      "Type": "Personality",
+      "Clan": "Crane",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 4,
+      "PersonalHonor": 3,
+      "HonorRequirement": 9,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Favor Political Reaction: After the resolution of an action that created a duel that Tadanobu won, discard the Imperial Favor to draw two cards.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-4224.jpg",
+      "Keywords": [
+        "Duelist",
+        "Unique",
+        "Crane Clan",
+        "Samurai",
+        "Soul of Kakita Soichi"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "tadanobu-draw"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-2118",
+      "Name": "Doji Makoto",
+      "Type": "Personality",
+      "Clan": "Crane",
+      "GoldCost": 10,
+      "GoldProduction": 0,
+      "Force": 5,
+      "Chi": 6,
+      "PersonalHonor": 5,
+      "HonorRequirement": 10,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Political Open: Makoto uses his mastery of politics. Take the Imperial Favor.\nIaijutsu Battle: Makoto challenges a target enemy Personality. Destroy the loser.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-2118.jpg",
+      "Keywords": [
+        "Duelist",
+        "Loyal",
+        "Unique",
+        "Clan Champion",
+        "Courtier",
+        "Crane Clan",
+        "Samurai"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "makoto-favor",
+        "makoto-duel"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-790",
+      "Name": "Bayushi Hurunayi",
+      "Type": "Personality",
+      "Clan": "Scorpion",
+      "GoldCost": 4,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 2,
+      "PersonalHonor": 1,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: Remove Ninja from Hurunayi.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-790.jpg",
+      "Keywords": [
+        "Courtier",
+        "Ninja",
+        "Scorpion Clan",
+        "Soul of Bayushi Muraisan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "hurunayi-remove-ninja"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-840",
+      "Name": "Bayushi Mitsuo",
+      "Type": "Personality",
+      "Clan": "Scorpion",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 4,
+      "PersonalHonor": 1,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After the resolution of a Battle action that moved Mitsuo: Take an additional Battle action.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-840.jpg",
+      "Keywords": [
+        "Ninja",
+        "Samurai",
+        "Scorpion Clan",
+        "Soul of Bayushi Muhito"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "mitsuo-additional-action"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-850",
+      "Name": "Bayushi Nitoshi",
+      "Type": "Personality",
+      "Clan": "Scorpion",
+      "GoldCost": 13,
+      "GoldProduction": 0,
+      "Force": 8,
+      "Chi": 5,
+      "PersonalHonor": 1,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Political Limited: Target a Personality and destroy a different one of your Personalities: Nitoshi kills his own and blames another. Dishonor the target. His controller loses 3 Honor.\nPolitical Battle: Target a dishonorable Personality or a card without attachments in a unit: Destroy it.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-850.jpg",
+      "Keywords": [
+        "Loyal",
+        "Unique",
+        "Clan Champion",
+        "Courtier",
+        "Ninja",
+        "Samurai",
+        "Scorpion Clan",
+        "Shoju's Soul",
+        "Sociopath"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "nitoshi-frame",
+        "nitoshi-destroy"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-866",
+      "Name": "Bayushi Rentatsu",
+      "Type": "Personality",
+      "Clan": "Scorpion",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 3,
+      "PersonalHonor": 1,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Bow Rentatsu: While Rentatsu remains bowed, you may negate his straightening and after each of your turns begins, choose a player; he loses 2 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-866.jpg",
+      "Keywords": [
+        "Unique",
+        "Courtier",
+        "Scorpion Clan",
+        "Soul of Bayushi Goshiu Experienced 3"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "rentatsu-hold"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-923",
+      "Name": "Bayushi Waru",
+      "Type": "Personality",
+      "Clan": "Scorpion",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle/Limited: If you control a Courtier or this is a Combat Segment, target a Personality: Bow him.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-923.jpg",
+      "Keywords": [
+        "Loyal",
+        "Paragon",
+        "Samurai",
+        "Scorpion Clan",
+        "Yojimbo"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "waru-bow-battle",
+        "waru-bow-limited"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-7117",
+      "Name": "Shosuro Kameyoi",
+      "Type": "Personality",
+      "Clan": "Scorpion",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 4,
+      "PersonalHonor": 1,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Political Limited: Target a Personality: If he is dishonorable, his controller loses 1 Honor, or 2 Honor if his base Personal Honor is 3 or higher. Dishonor him.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7117.jpg",
+      "Keywords": [
+        "Loyal",
+        "Courtier",
+        "Scorpion Clan",
+        "Seductress"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "kameyoi-shame"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-7169",
+      "Name": "Shosuro Tanzaki",
+      "Type": "Personality",
+      "Clan": "Scorpion",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 4,
+      "PersonalHonor": 2,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Political Open: Target another Personality: Give him +4F.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7169.jpg",
+      "Keywords": [
+        "Courtier",
+        "Scorpion Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "tanzaki-boost"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-7371",
+      "Name": "Soshi Yorimi",
+      "Type": "Personality",
+      "Clan": "Scorpion",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 4,
+      "PersonalHonor": 1,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Twice per turn, you may ignore the cost of bowing Yorimi, if it is the cost of a Political action or an action on a Spell.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7371.jpg",
+      "Keywords": [
+        "Unique",
+        "Air",
+        "Courtier",
+        "Scorpion Clan",
+        "Shugenja",
+        "Soul of Shosuro Dazai Experienced"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "yorimi-bow-waiver"
+    }
+  ],
+  "Decks": []
+}

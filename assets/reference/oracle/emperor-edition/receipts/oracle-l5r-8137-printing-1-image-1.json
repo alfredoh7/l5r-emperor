@@ -25,16 +25,16 @@
   "url_prefix": "https://images.oracleofthevoid.com/l5r/c1/31/printing_8137_1_",
   "width": 750,
   "working_copy": {
-    "bytes": 147020,
+    "bytes": 180432,
     "format": "WEBP",
-    "height": 1050,
+    "height": 1483,
     "path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-8137-printing-1-image-1.webp",
-    "sha256": "453acad8b27321f53c46ed5a871c1ecbb5a4267f6fdd8ed2024c849d03ce786a",
+    "sha256": "f43106f7852766984ea5a80aea971193e1698be28d360a912fb7d0182aaee463",
     "source": {
-      "asset": "L5R-Catalogue-WebP85.zip",
-      "matched_by": "original_sha256",
-      "release": "catalogue-art-webp-v1"
+      "asset": "user-supplied scan (Mendon, 2026-09-25; 1061x1483 re-encoded as WebP quality 85, not resized)",
+      "matched_by": "supplied by Mendon on 2026-09-25",
+      "release": null
     },
-    "width": 750
+    "width": 1061
   }
 }

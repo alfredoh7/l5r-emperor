@@ -137,7 +137,67 @@ def validate_record(record, lane, name=None):
     return errors
 
 
-def audit(root, base, head='HEAD', name=None, working=False):
+HANDOFF_FIX = ('Run `python3 tools/collab.py handoff --lane ui|rules|shared --summary "..." '
+    '--validation "..." --remaining "..." --issue "URL"` on {name}, then commit the new '
+    'handoff and re-run the audit.')
+
+
+def retarget_hint(base_ref):
+    return (f"Retarget this PR's base to `main` (or `git rebase --onto main {base_ref} HEAD` "
+        'and re-push) before merging, or its commits will not reach `main`.')
+
+
+def stale_base_error(root, base_ref):
+    """A PR's base branch that is not the default branch is a normal, in-progress
+    stack as long as it is still alive: present on `origin`, with commits that have
+    not yet reached `main`. It stops being alive when either (a) its tip is already
+    an ancestor of `origin/main` (true after a merge-commit or fast-forward merge,
+    but NOT after a GitHub squash merge, which creates a brand-new commit on `main`
+    unrelated in the commit graph to the source branch), or (b) it no longer exists
+    on `origin` (the common outcome when "delete branch on merge" is enabled).
+
+    When neither local, network-free git signal fires, this also asks GitHub (best
+    effort; skipped if `gh` is unavailable or the call fails) whether any pull
+    request headed by this branch has already merged while none is still open. That
+    is what actually happened in #505/#506: `claude/501-mechanics-batch` was the
+    head of PR #504 (squash-merged into `main`), then PR #505 kept stacking new
+    commits on that same branch name as its base — the branch's tip was never an
+    ancestor of `main` and the branch itself was never deleted, so only the GitHub
+    lookup can see it concluded.
+
+    Returns an error string, or None if the base looks alive (or is the default
+    branch, or there isn't enough information to tell).
+    """
+    if not base_ref or base_ref in ('main', 'master'):
+        return None
+    hint = retarget_hint(base_ref)
+    try:
+        base_tip = commit(root, 'origin/' + base_ref)
+    except RuntimeError:
+        return (f'This PR\'s base branch `{base_ref}` no longer exists on `origin` (it was likely '
+            'deleted after merging elsewhere). ' + hint)
+    try:
+        main_tip = commit(root, 'origin/main')
+    except RuntimeError:
+        main_tip = None
+    if main_tip and git(root, 'merge-base', base_tip, main_tip) == base_tip:
+        return (f"This PR's base branch `{base_ref}` has already been fully merged into `main` via "
+            'another PR. ' + hint)
+    try:
+        cfg = config(root)
+        prs = json.loads(gh(['pr', 'list', '--repo', cfg['repository'], '--head', base_ref,
+            '--state', 'all', '--json', 'number,state'], root))
+    except (OSError, RuntimeError, ValueError, subprocess.TimeoutExpired):
+        return None  # No live GitHub access; the two local git signals above are all we can check.
+    if prs and not any(pr.get('state') == 'OPEN' for pr in prs) and any(pr.get('state') == 'MERGED' for pr in prs):
+        return (f"This PR's base branch `{base_ref}` was the head of a pull request that already "
+            'merged, and no open pull request has that head now, so its own work already landed '
+            "(a GitHub squash merge does not keep the branch's tip as an ancestor of `main`, which "
+            'is why the git check above cannot see this). ' + hint)
+    return None
+
+
+def audit(root, base, head='HEAD', name=None, working=False, base_ref=None):
     cfg = config(root)
     paths = paths_changed(root, base, head, working)
     lane = classify(paths, cfg)
@@ -147,10 +207,14 @@ def audit(root, base, head='HEAD', name=None, working=False):
     # Check actual base freshness even when the branch has a merge conflict-free diff.
     if git(root, 'merge-base', commit(root, base), commit(root, head)) != commit(root, base):
         errors.append('Branch is behind the current base; reconcile it before merging.')
+    stale = stale_base_error(root, base_ref)
+    if stale:
+        errors.append(stale)
     records = [p for p in paths if p.startswith(cfg['handoffs']) and p.endswith('.json')]
     if not records:
         errors.append('Missing changed task handoff; run the handoff command before the final commit.')
     current_record = False
+    foreign_branches = []
     for path in records:
         try:
             if working:
@@ -161,13 +225,17 @@ def audit(root, base, head='HEAD', name=None, working=False):
                 # Stacked PRs carry their dependencies' handoffs. Preserve and
                 # validate that history, but never let it replace this task's record.
                 errors.extend(validate_record(record, record.get('lane'), None))
+                if isinstance(record.get('branch'), str):
+                    foreign_branches.append(record['branch'])
             else:
                 current_record = True
                 errors.extend(validate_record(record, lane, name))
         except (OSError, ValueError, RuntimeError):
             errors.append('Unreadable handoff: ' + path)
     if name and records and not current_record:
-        errors.append('Handoff belongs to another branch; add this task’s handoff.')
+        found = ', '.join(sorted(set(foreign_branches))) if foreign_branches else 'another branch'
+        errors.append(f"Handoff belongs to another branch ('{found}'); '{name}' needs its own. "
+            + HANDOFF_FIX.format(name=f"'{name}'"))
     return {'lane': lane, 'changed_files': paths, 'errors': errors}
 
 
@@ -282,7 +350,15 @@ def main(argv=None):
     check.add_argument('--base', default='origin/main')
     check.add_argument('--head', default='HEAD')
     check.add_argument('--branch')
+    check.add_argument('--base-ref', help="The PR's actual base branch name (e.g. from "
+        "github.event.pull_request.base.ref), to check whether it is stale. Not the same as "
+        "--base, which is a diff endpoint (usually origin/main) and may be a commit SHA in CI.")
     check.add_argument('--working', action='store_true')
+    contract = sub.add_parser('ledger', help='List C# contract candidates from a diff; read-only, offline')
+    contract.add_argument('--base', default='origin/main')
+    contract.add_argument('--head', default='HEAD')
+    contract.add_argument('--working', action='store_true', help='include staged, unstaged and untracked Core source')
+    contract.add_argument('--format', choices=['json', 'markdown'], default='json')
     finish = sub.add_parser('handoff', help='Write one durable task handoff; does not commit or publish')
     finish.add_argument('--lane', choices=['ui', 'rules', 'shared'], required=True)
     for field in ('summary', 'validation', 'remaining'):
@@ -296,7 +372,14 @@ def main(argv=None):
         if args.command == 'context':
             result = context(root, args.offline)
         elif args.command == 'audit':
-            result = audit(root, args.base, args.head, args.branch or branch(root), args.working)
+            result = audit(root, args.base, args.head, args.branch or branch(root), args.working,
+                base_ref=args.base_ref)
+        elif args.command == 'ledger':
+            from collaboration.ledger import ledger, markdown
+            result = ledger(root, args.base, args.head, args.working)
+            if args.format == 'markdown':
+                print(markdown(result))
+                return 0
         elif args.command == 'handoff':
             name = branch(root)
             if name in ('main', 'master'):

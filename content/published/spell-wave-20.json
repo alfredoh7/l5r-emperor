@@ -1,0 +1,110 @@
+{
+  "Profile": "spell-wave-20",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-3738",
+      "Name": "Inescapable Snare",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Bow this card and target an enemy card: Bow it. If this Shugenja is Earth, gain 2 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-3738.jpg",
+      "Keywords": [
+        "Earth"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "snare-bow"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-3732",
+      "Name": "Incite the Phantoms",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "While this Shugenja is Earth, your Spirits contribute Force to their army even while bowed.\nBattle: Even if this unit is not at the current battlefield, bow your performing Spirit and target an enemy card: Bow it.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-3732.jpg",
+      "Keywords": [
+        "Earth",
+        "Forest"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "incite-phantoms-bow"
+      ],
+      "Effect": "incite-the-phantoms-force"
+    },
+    {
+      "Id": "oracle-l5r-7612",
+      "Name": "Sudden Guardian",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Even if this unit is not at the current battlefield, bow this Shugenja, choose your performing Spirit, and target an enemy Personality: Move him home. If this Shugenja is Water, gain 1 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7612.jpg",
+      "Keywords": [
+        "Water"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "sudden-guardian-move"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-8366",
+      "Name": "The Swell of Strength",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 3,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "As a Focus Effect: After this duel ends, you may attach this card to one of your Water Shugenja, ignoring Gold cost.\nThis Shugenja has +2F.\nBattle: Bow this card and target an enemy Personality or Follower: Reduce its Force to 0.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8366.jpg",
+      "Keywords": [
+        "Water"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "swell-of-strength-focus",
+        "swell-of-strength-attack"
+      ],
+      "Effect": "swell-of-strength-force",
+      "AttachRequiresKeyword": "Water"
+    }
+  ],
+  "Decks": []
+}

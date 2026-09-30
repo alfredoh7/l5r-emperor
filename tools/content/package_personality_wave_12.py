@@ -22,7 +22,7 @@ PROFILE = "personality-wave-12"
 ABILITIES: dict[int, list[str]] = {
     # "Noboru pushes him to a new path" is non-functional flavor text folded into the Battle action.
     10058: ["noboru-redirect"],
-    8521: ["hizumi-negate-straighten"],
+    8521: ["hizumi-negate-straighten", "hizumi-province-raise", "hizumi-province-lower"],  # the Battle half wired in issue #492 (ruling R3)
     7789: ["ruya-bow"],
     # "He lobs an alchemical potion at the enemy" is non-functional flavor text folded into the
     # Battle action.

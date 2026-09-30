@@ -33,7 +33,7 @@ public sealed class RoomManager(RoomStore store, ILogger<RoomManager> logger)
 
     public async Task<SeatReservation> CreateAsync(CancellationToken cancellationToken = default, string scenario = "starter")
     {
-        if(scenario is not ("starter" or PublishedContent.Scenario)) throw new RoomException("unsupported_scenario", "Choose training or the published Lion/Crane profile.");
+        if (scenario is not ("starter" or PublishedContent.Scenario)) throw new RoomException("unsupported_scenario", "Choose training or the published Lion/Crane profile.");
         await creationGate.WaitAsync(cancellationToken);
         try
         {
@@ -79,10 +79,10 @@ public sealed class RoomManager(RoomStore store, ILogger<RoomManager> logger)
         return new AuthorizedSeat(code, seat.PlayerId);
     }
 
-    public async Task AttachAsync(AuthorizedSeat seat, ClientConnection connection)
+    public async Task AttachAsync(AuthorizedSeat seat, ClientConnection connection, CancellationToken cancellationToken = default)
     {
         var room = GetRoom(seat.RoomCode);
-        await room.Gate.WaitAsync();
+        await room.Gate.WaitAsync(cancellationToken);
         try
         {
             if (room.Connections.Remove(seat.PlayerId, out var previous)) previous.Abort();
@@ -92,10 +92,13 @@ public sealed class RoomManager(RoomStore store, ILogger<RoomManager> logger)
         finally { room.Gate.Release(); }
     }
 
-    public async Task DetachAsync(AuthorizedSeat seat, ClientConnection connection)
+    // Cleanup, not the request the connection was serving: called from a `finally` once the socket is closing, so
+    // it must run to completion even when the caller's own token (context.RequestAborted) is already canceled --
+    // callers should pass CancellationToken.None, never the token that triggered the detach.
+    public async Task DetachAsync(AuthorizedSeat seat, ClientConnection connection, CancellationToken cancellationToken = default)
     {
         var room = GetRoom(seat.RoomCode);
-        await room.Gate.WaitAsync();
+        await room.Gate.WaitAsync(cancellationToken);
         try
         {
             if (room.Connections.GetValueOrDefault(seat.PlayerId) == connection)
@@ -107,18 +110,19 @@ public sealed class RoomManager(RoomStore store, ILogger<RoomManager> logger)
         finally { room.Gate.Release(); }
     }
 
-    public async Task SubmitAsync(AuthorizedSeat seat, ClientConnection connection, CommandEnvelope envelope)
+    public async Task SubmitAsync(AuthorizedSeat seat, ClientConnection connection, CommandEnvelope envelope, CancellationToken cancellationToken = default)
     {
         var room = GetRoom(seat.RoomCode);
-        await room.Gate.WaitAsync();
+        await room.Gate.WaitAsync(cancellationToken);
         try
         {
-            var version = room.Engine.GetView(seat.PlayerId).Version;
+            var version = room.Engine.Version;
             if (room.Connections.GetValueOrDefault(seat.PlayerId) != connection)
                 throw new RoomException("session_replaced", "This seat has reconnected in another session.", 409);
             if (envelope.Type != "command" || !Guid.TryParseExact(envelope.CommandId, "D", out _)
                 || envelope.Command is null || string.IsNullOrWhiteSpace(envelope.Command.Type))
             {
+                logger.LogDebug("Rejected command from player {PlayerId} in room {RoomCode}: invalid_command", seat.PlayerId, seat.RoomCode);
                 await RejectAsync(connection, envelope.CommandId, version, "invalid_command", "A command requires a UUID commandId and a command type.");
                 return;
             }
@@ -128,7 +132,10 @@ public sealed class RoomManager(RoomStore store, ILogger<RoomManager> logger)
             if (previous is not null)
             {
                 if (previous.PayloadHash != fingerprint)
+                {
+                    logger.LogDebug("Rejected command from player {PlayerId} in room {RoomCode}: command_id_reused", seat.PlayerId, seat.RoomCode);
                     await RejectAsync(connection, envelope.CommandId, version, "command_id_reused", "This commandId was already accepted with a different payload.");
+                }
                 else
                 {
                     await connection.SendAsync(new CommandReply("commandResult", envelope.CommandId, true, true, previous.Version));
@@ -139,12 +146,14 @@ public sealed class RoomManager(RoomStore store, ILogger<RoomManager> logger)
 
             if (envelope.ExpectedVersion != version)
             {
+                logger.LogDebug("Rejected command from player {PlayerId} in room {RoomCode}: stale_version", seat.PlayerId, seat.RoomCode);
                 await RejectAsync(connection, envelope.CommandId, version, "stale_version", "The match changed; use the latest state before acting.");
                 await connection.SendAsync(CreateState(room, seat.PlayerId));
                 return;
             }
             if (room.Record.Seats.Length != 2)
             {
+                logger.LogDebug("Rejected command from player {PlayerId} in room {RoomCode}: waiting_for_opponent", seat.PlayerId, seat.RoomCode);
                 await RejectAsync(connection, envelope.CommandId, version, "waiting_for_opponent", "The second player must join before play begins.");
                 return;
             }
@@ -154,6 +163,7 @@ public sealed class RoomManager(RoomStore store, ILogger<RoomManager> logger)
             var result = trial.Execute(envelope.Command.BindToSeat(seat.PlayerId, envelope.ExpectedVersion));
             if (!result.Accepted)
             {
+                logger.LogDebug("Rejected command from player {PlayerId} in room {RoomCode}: illegal_action: {Reason}", seat.PlayerId, seat.RoomCode, result.Error);
                 await RejectAsync(connection, envelope.CommandId, version, "illegal_action", result.Error ?? "The action is not legal.");
                 return;
             }
@@ -164,7 +174,7 @@ public sealed class RoomManager(RoomStore store, ILogger<RoomManager> logger)
                 Replay = trial.ExportReplay(),
                 Receipts = room.Record.Receipts.Append(receipt).TakeLast(1024).ToArray()
             };
-            try { await store.SaveAsync(updated); }
+            try { await store.SaveAsync(updated, cancellationToken); }
             catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
             {
                 logger.LogError(ex, "Could not persist command for room {RoomCode}; state was not committed", seat.RoomCode);
@@ -183,9 +193,12 @@ public sealed class RoomManager(RoomStore store, ILogger<RoomManager> logger)
         => connection.SendAsync(new CommandReply("commandResult", commandId, false, false, version, new ServerError(code, message)));
 
     private static StateMessage CreateState(Room room, int playerId)
-        => new("state", room.Record.RoomCode, playerId, room.Engine.GetView(playerId).Version,
-            room.Engine.GetView(playerId), room.Engine.QueryActions(playerId).Select(AvailableAction.FromCore).ToArray(),
+    {
+        var view = room.Engine.GetView(playerId);
+        return new("state", room.Record.RoomCode, playerId, view.Version, view,
+            room.Engine.QueryActions(playerId).Select(AvailableAction.FromCore).ToArray(),
             [room.Connections.ContainsKey(0), room.Connections.ContainsKey(1)]);
+    }
 
     private static Task BroadcastLockedAsync(Room room) => Task.WhenAll(room.Connections.Select(pair => pair.Value.SendAsync(CreateState(room, pair.Key))));
 

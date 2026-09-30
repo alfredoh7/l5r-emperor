@@ -1,0 +1,76 @@
+{
+  "Profile": "strategy-wave-69",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-967",
+      "Name": "Beyond the Line",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Take an additional action to use a Limited or Open Recon ability as a Battle action, which must target the current battlefield's province. If you do, draw a card after the action's resolution.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-967.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "beyond-the-line-recon"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-5706",
+      "Name": "One Action, Two Strikes",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: If the enemy leader has taken any Battle actions during this battle: You may take two additional Battle actions after this one. You will not take any other additional Battle actions this battle.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-5706.jpg",
+      "Keywords": [],
+      "Focus": 1,
+      "Abilities": [
+        "one-action-two-strikes"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-7588",
+      "Name": "String of Victories",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle/Open: Straighten all of your Rings. You may put a Ring in your Fate discard pile into your hand. You may take an additional action appropriate to this phase.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7588.jpg",
+      "Keywords": [],
+      "Focus": 4,
+      "Abilities": [
+        "string-of-victories"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

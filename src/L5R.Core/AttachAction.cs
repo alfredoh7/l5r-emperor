@@ -60,11 +60,18 @@ public static class AttachWielder
     public const string Source = "source";
     /// <summary>The performer the acting player chose (AbilityDefinition.Performer names which Personalities are eligible).</summary>
     public const string Performer = "performer";
+    /// <summary>The Personality chosen for the ability's "personality" target slot (Forgotten Legacy pass, issue #467, batch 1: Daigotsu Gyoken's "Target your Personality
+    /// and a non-Unique attachment in any player's discard pile: Attach it to the Personality") -- a TARGET, not a performer, so the source still performs.</summary>
+    public const string PersonalitySlot = "personality-slot";
+    /// <summary>The Personality whose entering play opened the window this Reaction is used in (Emperor Edition Stronghold pass, issue #486 batch 3, The Spider's Web: "After your
+    /// Personality enters play: ... attach a Weapon to him").</summary>
+    public const string Entered = "entered";
 }
 
-/// <summary>An "attach a card" effect. See the file comment; Types is required for a Target attach (the kinds of card the ability names).</summary>
+/// <summary>An "attach a card" effect. See the file comment; Types is required for a Target attach (the kinds of card the ability names).
+/// IgnoreHonorRequirement: "ignoring Honor Requirements" (Daigotsu Gyoken) -- a Follower's Honor Requirement is not checked against the wielder.</summary>
 public sealed record AttachSpec(string Card = AttachSource.Target, string Pile = AttachPile.Any, string Wielder = AttachWielder.Source,
-    CardType[]? Types = null, string[]? Keywords = null, string[]? ExcludedKeywords = null);
+    CardType[]? Types = null, string[]? Keywords = null, string[]? ExcludedKeywords = null, bool IgnoreHonorRequirement = false);
 
 public sealed partial class MatchEngine
 {
@@ -98,16 +105,20 @@ public sealed partial class MatchEngine
     private CardInstance? WielderOfAttach(AttachSpec spec, GameCommand command, CardInstance? source) =>
         spec.Wielder == AttachWielder.Performer
             ? (command.PerformerId is not null && _state.Cards.TryGetValue(command.PerformerId, out var performer) ? performer : null)
-            : source;
+            : spec.Wielder == AttachWielder.Entered
+                ? (_state.PendingChoice?.CardId is { } enteredId && _state.Cards.TryGetValue(enteredId, out var entered) ? entered : null)
+            : spec.Wielder == AttachWielder.PersonalitySlot
+                ? (command.Selections?.FirstOrDefault(s => s.Slot == "personality")?.CardIds is [var slotId, ..] && _state.Cards.TryGetValue(slotId, out var targeted) ? targeted : null)
+                : source;
 
     // What Equip enforces on ANY attach, in one place (the Equip command, Equip (Battle), Low Market and Singh Remnants each still carry their
     // own copy of these four Requires; this is the one a new attach path calls instead of writing a fifth).
-    private void RequireAttachable(CardInstance attachment, CardInstance wielder, int playerId)
+    private void RequireAttachable(CardInstance attachment, CardInstance wielder, int playerId, bool ignoreHonorRequirement = false)
     {
         var def = Definition(attachment);
         var wielderName = Definition(wielder).Name;
         Require(InPlay(wielder) && Definition(wielder).Type == CardType.Personality, $"{wielderName} is not a Personality in play.");
-        Require(AttachmentLegalTarget(def, wielder), $"{def.Name} will not attach to {wielderName}.");
+        Require(AttachmentLegalTarget(ignoreHonorRequirement ? def with { HonorRequirement = null } : def, wielder), $"{def.Name} will not attach to {wielderName}.");
         Require(AttachmentAllowed(attachment, wielder), "A Personality may attach only one Armor and, without Kensai or a Kama, only one Weapon.");
         Require(!(Keyword(attachment, "Unique") || Keyword(attachment, "Singular")) || !ControlsCopyOf(playerId, def.Name),
             $"You already control this {(Keyword(attachment, "Unique") ? "Unique" : "Singular")} card.");
@@ -120,7 +131,7 @@ public sealed partial class MatchEngine
         CardInstance attachment;
         if (spec.Card == AttachSource.Self)
         {
-            Require(source is not null && source.Zone == Zone.Hand && player.Hand.Contains(source.Id), "This card must be in your hand to be attached.");
+            Require(source is not null && (source.Zone == Zone.Hand && player.Hand.Contains(source.Id) || source.Zone == Zone.FateDiscard && source.OwnerId == player.Id && spec.Pile == AttachPile.Own), "This card must be in your hand (or, for a card that names its own discard pile, in it) to be attached.");
             Require(command.TargetId is null, "This action has no target.");
             attachment = source!;
         }
@@ -131,7 +142,7 @@ public sealed partial class MatchEngine
             Require(error is null, error ?? "");
         }
         var wielder = WielderOfAttach(spec, command, source) ?? throw new RuleViolation("Choose a Personality to attach it to.");
-        RequireAttachable(attachment, wielder, player.Id);
+        RequireAttachable(attachment, wielder, player.Id, spec.IgnoreHonorRequirement);
     }
 
     // Control (issue #352): `controllerId` now controls `card`. The real owner is remembered the first time a card changes hands and restored when it
@@ -141,6 +152,7 @@ public sealed partial class MatchEngine
         if (card.OwnerId == controllerId) return;
         card.OriginalOwnerId ??= card.OwnerId;
         card.OwnerId = controllerId;
+        if (card.OriginalOwnerId == controllerId) card.OriginalOwnerId = null; // issue #501: control given back to the owner -- he controls his own card again
         Emit("controlTaken", $"{Player(controllerId).Name} took control of {Definition(card).Name}.", controllerId, card.Id);
     }
 
@@ -156,7 +168,11 @@ public sealed partial class MatchEngine
     // have already been resolved for the controller, as they should be.
     private void ReturnCardsOutOfPlayToTheirOwners()
     {
-        foreach (var card in _state.Cards.Values.Where(c => c.OriginalOwnerId is not null && !InPlay(c))) RestoreOwner(card);
+        // A gift in another player's hand (Naoharu's Gift, issue #492 group F) is his to play until it leaves the hand.
+        foreach (var card in _state.Cards.Values.Where(c => c.OriginalOwnerId is not null && !InPlay(c) && c.Zone != Zone.Hand && !P5Borrowed(c))) RestoreOwner(card); // issue #503: Learning's borrowed Strategy
+        SweepP5Borrowed();
+        ApplyControlReturnsAfterCommand();
+        SweepP5Records(); // issue #503 (EmperorP5Zones.cs): a Ring whose abilities were removed is a new object once it has left play. // issue #501 (EmperorMechB.cs): a return owed to a card that left play (Sachina), and returns blocked by Unique/Singular tried again.
     }
 
     // ExecuteAbilityEffects' step: the Gold has already been paid (PayForAbility), so the card leaves its place and enters play attached.
@@ -167,6 +183,7 @@ public sealed partial class MatchEngine
         var wielder = WielderOfAttach(spec, command, source)!;
         var def = Definition(attachment);
         var fromDiscard = attachment.Zone == Zone.FateDiscard;
+        if (!fromDiscard && attachment.Zone == Zone.Hand) { Player(attachment.OwnerId).AttachedFromHandThisTurn = true; NoteAttachedFollowerFromHand(attachment, wielder); NoteAttachedFromHandForGlory(attachment.OwnerId, attachment); }
         Player(attachment.OwnerId).Hand.Remove(attachment.Id);
         if (fromDiscard)
         {
@@ -177,7 +194,11 @@ public sealed partial class MatchEngine
         TakeControl(attachment, wielder.OwnerId);
         attachment.Zone = Zone.Attached; attachment.AttachedTo = wielder.Id; attachment.FaceUp = true; attachment.ProvinceIndex = wielder.ProvinceIndex;
         if (def.AttachGrantsKeyword is string granted) GrantKeyword(wielder, granted, attachment.Id, "Attachment");
+        if (fromDiscard) NoteAttached(player.Id, attachment, "discard"); // Issue #501 (EmperorMechD.cs): the attach log (a hand attach is logged above).
         Emit("equipped", $"{def.Name} attached to {Definition(wielder).Name}{(fromDiscard ? " from a discard pile" : "")}.", player.Id, attachment.Id);
-        return OpenEntryReactionWindow(player.Id, attachment, 1 - player.Id);
+        // Clearing Crew (issue #476 batch 6): an attach from a discard pile is not an entry "from your hand".
+        _attachingFromPileId = fromDiscard ? attachment.Id : null;
+        try { return OpenEntryReactionWindow(player.Id, attachment, 1 - player.Id); }
+        finally { _attachingFromPileId = null; }
     }
 }

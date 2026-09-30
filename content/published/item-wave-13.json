@@ -1,0 +1,61 @@
+{
+  "Profile": "item-wave-13",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-993",
+      "Name": "Black Pearl",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 4,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 1,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Destroy this card and target a Personality in any player's discard pile: Bring him into play (under your control), paying all costs, but paying 4 less Gold if the Personality is Nonhuman.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-993.jpg",
+      "Keywords": [
+        "Unique",
+        "Experienced",
+        "Pearl"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "black-pearl-recruit"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-1607",
+      "Name": "Cursed Relic",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Any number of times per turn, give this Personality -1C: Ranged 3 Attack.\nBattle: Bow this card, give this Personality -1C, and target an enemy card without attachments: Remove it from the game.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1607.jpg",
+      "Keywords": [
+        "Weapon",
+        "Cursed"
+      ],
+      "Focus": 1,
+      "Abilities": [
+        "cursed-relic-attack",
+        "cursed-relic-remove"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

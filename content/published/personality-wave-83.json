@@ -1,0 +1,62 @@
+{
+  "Profile": "personality-wave-83",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-5106",
+      "Name": "Mirumoto Inokuchi",
+      "Type": "Personality",
+      "Clan": "Dragon",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 4,
+      "PersonalHonor": 2,
+      "HonorRequirement": 4,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Even if Inokuchi is bowed: Straighten him. You may take an additional Battle action, which must be Iaijutsu and which Inokuchi must perform. If you don't, bow him.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-5106.jpg",
+      "Keywords": [
+        "Duelist",
+        "Dragon Clan",
+        "Samurai",
+        "Unbreakable"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "inokuchi-straighten"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10076",
+      "Name": "Isawa Momoko",
+      "Type": "Personality",
+      "Clan": "Phoenix",
+      "GoldCost": 9,
+      "GoldProduction": 0,
+      "Force": 5,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle/Open: After the next time this turn you announce an action on one of Momoko's Spells, ignore the action's non-destruction costs. You may take an additional action.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10076.jpg",
+      "Keywords": [
+        "Fire",
+        "Phoenix Clan",
+        "Shugenja"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "momoko-spell-waiver"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

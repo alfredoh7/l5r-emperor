@@ -42,7 +42,10 @@ public partial class BattleTracker : Control
         DrawLine(new Vector2(0, 116), new Vector2(Size.X, 116), Palette.Gold with { A = .55f }, 1, true);
     }
 
-    private string ProvinceTitle => Snapshot.CurrentBattleProvince is int p ? $"Province {p + 1}" : ResolutionMessage is not null ? "Battle resolved" : "Battle";
+    private string ProvinceTitle => Snapshot.CurrentBattleProvince is int p ? BattlefieldTitle(p) : ResolutionMessage is not null ? "Battle resolved" : "Battle";
+    // An additional battlefield (Emperor Edition rulings pass R1, issue #492) is named by the province it is at, or has none.
+    private string BattlefieldTitle(int p) => p < MatchEngine.FirstAdditionalBattlefield ? $"Province {p + 1}"
+        : Snapshot.Battlefields?.FirstOrDefault(b => b.Index == p)?.Province is int province ? $"Second battlefield · Province {province + 1}" : "No province";
     private void TextAt(string text, Rect2 box, int size, Color color, bool heading)
     {
         if (heading) text = text.ToUpperInvariant();

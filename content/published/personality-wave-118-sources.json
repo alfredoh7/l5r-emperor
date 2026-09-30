@@ -1,0 +1,56 @@
+[
+  {
+    "card_id": "oracle-l5r-9814",
+    "printing_set": [
+      "The Shadow's Embrace"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=9814",
+    "image_path": "assets/reference/oracle/the-shadow-s-embrace/webp/oracle-l5r-9814-printing-1-image-1.webp",
+    "image_sha256": "135b16e7321624356d1209eb4aed1b35bb8d34cc77b42a1fe17e39a78aa7ee3a"
+  },
+  {
+    "card_id": "oracle-l5r-9829",
+    "printing_set": [
+      "The Shadow's Embrace"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=9829",
+    "image_path": "assets/reference/oracle/the-shadow-s-embrace/webp/oracle-l5r-9829-printing-1-image-1.webp",
+    "image_sha256": "55aad4559de31a364a748dabbf5ebff8b571ec2d3b417b108c56d00682ff7999"
+  },
+  {
+    "card_id": "oracle-l5r-9996",
+    "printing_set": [
+      "Embers of War"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=9996",
+    "image_path": "assets/requested-scans/emerald-magistrate.png",
+    "image_sha256": "5d2ef70df3fdad23a2d636f5ab8f3075fe776e4ca9ee5b39eab97b2970ca10ac"
+  },
+  {
+    "card_id": "oracle-l5r-9995",
+    "printing_set": [
+      "Embers of War"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=9995",
+    "image_path": "assets/requested-scans/assassin.png",
+    "image_sha256": "f17602b4d97c565927bc37d793243459f16427014ad1f73216f01835f4d21aea"
+  },
+  {
+    "card_id": "user-scan-ancestor-spirit",
+    "printing_set": [
+      "User-supplied scan"
+    ],
+    "source_url": "user-supplied-in-chat-2026-09-29",
+    "image_path": "assets/requested-scans/ancestor-spirit.png",
+    "image_sha256": "651ac8fba280212b1427ec03f760a4def26044ba4840f47bfd3741db78f38552"
+  },
+  {
+    "card_id": "user-scan-kichis-badger",
+    "printing_set": [
+      "User-supplied scan"
+    ],
+    "source_url": "user-supplied-in-chat-2026-09-29",
+    "image_path": "assets/requested-scans/kichis-badger.png",
+    "image_sha256": "e5590e8186fbfa655313a92f1147eb1fafb0bdee929a90cc2bd1ff925f2279c3"
+  }
+]

@@ -18,6 +18,13 @@ internal static class Batch336Support
     }
 
     // MatchEngine.State is a detached copy, so a mid-test change is made on a copy and the engine rebuilt from it.
+    /// <summary>A province's strength as read once the turn has ended (issue #492 ruling R3: an effect lasts until end of turn unless it is permanent): read from a copy of the state with the turn number stepped forward.</summary>
+    public static int StrengthNextTurn(MatchEngine e, int owner, int index)
+    {
+        var later = e.State; // a copy: stepping its turn forward leaves the engine alone
+        later.TurnNumber++;
+        return MatchEngine.FromTestState(later).ProvinceStrengthForTest(owner, index);
+    }
     public static MatchEngine Edit(MatchEngine e, Action<MatchState> edit) { var st = e.State; edit(st); return MatchEngine.FromTestState(st); }
 
     public static void Force(CardInstance card, int amount) => card.Modifiers.Add(new("test-source", "test", "Force", amount));
@@ -69,6 +76,15 @@ internal static class Batch336Support
     {
         var option = Options(e, player, ability, cardId, performerId).FirstOrDefault(a => a.Enabled && (a.TargetIds?.Contains(targetId) ?? false));
         Check(option is not null, $"{ability} on {cardId} against {targetId} was not offered to player {player}: "
+            + string.Join("; ", Options(e, player, ability, cardId, performerId).Select(a => $"{a.Label} [{a.Enabled}] {a.Reason}")));
+        return option!.Command! with { TargetId = targetId };
+    }
+
+    // Issue #492 (ruling R5): the offered command of an ability with a "may compare" choice, for the chosen comparison ("force", "chi", "gold", "base").
+    public static GameCommand OfferChoice(MatchEngine e, int player, string ability, string cardId, string targetId, string choice, string? performerId = null)
+    {
+        var option = Options(e, player, ability, cardId, performerId).FirstOrDefault(a => a.Enabled && a.Command?.Choice == choice && (a.TargetIds?.Contains(targetId) ?? false));
+        Check(option is not null, $"{ability} on {cardId} against {targetId} comparing {choice} was not offered to player {player}: "
             + string.Join("; ", Options(e, player, ability, cardId, performerId).Select(a => $"{a.Label} [{a.Enabled}] {a.Reason}")));
         return option!.Command! with { TargetId = targetId };
     }
