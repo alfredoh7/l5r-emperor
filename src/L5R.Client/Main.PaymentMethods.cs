@@ -9,11 +9,14 @@ public partial class Main
         Self.Home.Concat(Self.Army).Append(Self.Stronghold).Where(c => !c.Bowed && Production(c, Self) > 0)
             .Select(c => new PaymentSource(c.Id, c.Id, "bow", $"Bow this card: {Production(c, Self)} Gold", Production(c, Self))).ToArray();
 
+    private static bool PaymentMethodUnderstood(PaymentSource method) =>
+        method.Produced > 0 && method.Kind is "bow" or "produce" or "reaction" or "destroy" or "discount";
+
     private bool PaymentSelectionReady(int required, GoldQuote quote)
     {
         var methods = PaymentMethods(quote);
         // Coverage is presentation only; the server validates and commits the whole command.
-        return _sources.All(id => methods.Any(m => m.Id == id)) &&
+        return _sources.All(id => methods.Any(m => m.Id == id && PaymentMethodUnderstood(m))) &&
             !methods.Where(m => _sources.Contains(m.Id)).Any(m => m.ConflictingSourceIds?.Any(_sources.Contains) == true) &&
             methods.Where(m => _sources.Contains(m.Id)).Sum(m => m.Produced) >= required;
     }
@@ -42,13 +45,13 @@ public partial class Main
             {
                 var check = new CheckBox
                 {
-                    Text = method.Label,
+                    Text = PaymentMethodUnderstood(method) ? method.Label : "Additional payment choice unavailable",
                     ButtonPressed = _sources.Contains(method.Id),
-                    Disabled = !DecisionCanSubmit,
+                    Disabled = !DecisionCanSubmit || !PaymentMethodUnderstood(method),
                     CustomMinimumSize = new(0, 40),
                     AutowrapMode = TextServer.AutowrapMode.WordSmart,
                     SizeFlagsHorizontal = Control.SizeFlags.ExpandFill,
-                    TooltipText = method.Label,
+                    TooltipText = PaymentMethodUnderstood(method) ? method.Label : "Additional payment choice unavailable",
                     AccessibilityName = method.Label
                 };
                 check.SetMeta("payment_source_id", method.Id);
@@ -56,7 +59,7 @@ public partial class Main
                 check.AddThemeFontSizeOverride("font_size", 16);
                 check.Toggled += on =>
                 {
-                    if (!DecisionCanSubmit || _chosen is null || QuoteFor(_chosen) != quote) return;
+                    if (!DecisionCanSubmit || !PaymentMethodUnderstood(method) || _chosen is null || QuoteFor(_chosen) != quote) return;
                     if (on) _sources.Add(method.Id); else _sources.Remove(method.Id);
                     RenderInspector(); Highlight();
                     _inspector.FindChildren("*", "CheckBox", true, false).OfType<CheckBox>()

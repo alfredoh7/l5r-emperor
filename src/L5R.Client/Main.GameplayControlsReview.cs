@@ -90,6 +90,17 @@ public partial class Main
                         control.ButtonPressed = true; await EventFrames(2);
                     }
                     GoldRequire(_paymentConfirm is { Disabled: false } && View.Version == version, kind + " selection committed or failed coverage");
+                    if (kind == "reaction")
+                    {
+                        var keigo = Self.Home.Single(c => c.Definition?.Id == "oracle-l5r-497");
+                        var unresolved = quote.Sources!.Single(m => m.CardId == keigo.Id);
+                        var unavailable = _inspector.FindChildren("*", "CheckBox", true, false).OfType<CheckBox>()
+                            .Single(b => b.GetMeta("payment_source_id", "").AsString() == unresolved.Id);
+                        GoldRequire(unresolved.Produced == 0 && unavailable.Disabled, "Variable discard source was offered without a discard picker");
+                        _sources.Add(unresolved.Id); RenderInspector();
+                        GoldRequire(_paymentConfirm is { Disabled: true }, "Unknown payment choice enabled confirmation alongside sufficient Gold");
+                        _sources.Remove(unresolved.Id); RenderInspector();
+                    }
                     await GetTree().ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
                     GetViewport().GetTexture().GetImage().SavePng(System.IO.Path.Combine(directory, kind + ".png"));
                     _paymentConfirm!.EmitSignal(Button.SignalName.Pressed); await EventFrames(18); _uiQueue.Clear(); Render();

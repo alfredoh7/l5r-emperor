@@ -31,6 +31,7 @@ public sealed partial class MatchEngine
                 s.Phase = Phase.Dynasty;
                 s.Cards[s.Players[0].Provinces[0].CardId!].DefinitionId = "training-lion-samurai";
                 Put("oracle-l5r-6529", 0, Zone.Home); Put("training-marketplace", 0, Zone.Home);
+                Put("oracle-l5r-497", 0, Zone.Home); // Variable discard payment is intentionally unavailable in this client.
             }
             else { Put("oracle-l5r-9828", 0, Zone.Home); Put("oracle-l5r-9798", 0, Zone.Home, true); }
         }

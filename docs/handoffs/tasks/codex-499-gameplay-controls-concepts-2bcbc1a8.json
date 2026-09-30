@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Implement approved payment grouping/receipt, explicit pending-choice candidate tray/source context, optional-action decline and Kurohito Favor access. Authoritative source metadata and private entry candidates cross server projection with protocol 3. Three native launchers and exact-source Windows package at 60f431f2, with verified private upload.",
-  "validation": "Client 0 warnings/errors; tooling/Core/AI/8 server tests passed; all 18 transport checks passed after actor/version normalization. Twelve native scenarios passed at 1440x900 and 1120x700, final native rerun passed after cleanup. Existing Gold suite passed; normal and reduced-motion opponent-payment input/hover/privacy/busy checks passed with actual OS focus. Changed-file formatter verification passes; retained all non-whitespace characters in its 7 changed C# files. Windows exporter validated bundled runtime/resources/source omission; upload size/SHA verified. Windows package CI pending.",
-  "remaining": "Windows review package and branch CI; targeted delivery notification after CI. Alfredo native playtest and Mendon/Nathan mechanics/graphical acceptance. No merge authorized.",
+  "summary": "Implement approved payment source groups/receipt and private candidate tray/context, optional-action and Favor controls. Protocol 3 carries source conflicts/private candidates. Final guard disables unknown or unresolved variable payment methods; twelve prepared native scenarios and three launchers.",
+  "validation": "Client compilation 0 warnings/errors; full tooling/Core/AI/server suite and 18 transport checks passed. Twelve native scenarios passed at 1440x900 and 1120x700; final 1440 rerun passed with real Keigo unresolved-source/confirmation regression. Existing Gold and normal/reduced-motion opponent-payment native suites passed. Changed-file formatting passes. Previous Windows package CI passed; final guarded build requires refreshed package.",
+  "remaining": "Refresh and validate final Windows package, then notify Mendon. Keigo variable-discard picker remains a separate unsupported flow, with safe disabled source. Alfredo UI playtest and Mendon/Nathan mechanics/graphical acceptance. No merge authorized.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/499",
   "branch": "codex/499-gameplay-controls-concepts",
-  "updated": "2026-09-30T20:19:28.908051+00:00"
+  "updated": "2026-09-30T20:41:18.200171+00:00"
 }
