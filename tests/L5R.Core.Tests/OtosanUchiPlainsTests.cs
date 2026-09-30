@@ -14,6 +14,7 @@ internal static class OtosanUchiPlainsTests
     private static ActionOption Enabled(MatchEngine e, int player, string ability, string? cardId = null, string? performerId = null) => Batch336Support.Enabled(e, player, ability, cardId, performerId);
 
     public static void Run(TestRunner runner) => runner.Run("otosan-uchi-plains", [
+        ("Published shape: region-wave-21 prints the scan's stats, keywords and text, carries no Abilities (Effect-keyed instead), ships its art and is in its manifest", PublishedShape),
         ("Revealing the Region attaches it and creates an empty second slot, refilled face down; not revealed this turn", AttachCreatesSecondSlot),
         ("Both slots face down: the controller chooses which to reveal first, and it resolves in that order", RevealOrderChoice),
         ("Destroying the province loses 10 Honor and discards both slots and the Region", DestructionHonorLoss),
@@ -21,6 +22,30 @@ internal static class OtosanUchiPlainsTests
         ("Shosuro Toson: two candidates ask which to discard, each face-up card's own title replacing Left/Right", TosonDisambiguation),
         ("Errata: destroying the Region alone leaves the second slot's card in place, but it is not refilled again", RegionDestroyedAloneErrata),
     ]);
+
+    private static string RepoRoot()
+    {
+        var dir = new DirectoryInfo(AppContext.BaseDirectory);
+        while (dir is not null && !File.Exists(Path.Combine(dir.FullName, "AGENTS.md"))) dir = dir.Parent;
+        return dir?.FullName ?? throw new Exception("Repository root not found");
+    }
+    private static bool ArtShipped(string id) => File.Exists(Path.Combine(RepoRoot(), "src/L5R.Client/Content/Published", id + ".jpg"));
+
+    private static void PublishedShape()
+    {
+        const string id = "oracle-l5r-5979";
+        var c = CardCatalog.Get(id);
+        Check(c.Type == CardType.Region && c.Name == "Plains of Otosan Uchi" && c.Clan == "Unaligned", $"{id}'s type/name/clan");
+        Check(c.GoldCost == 0 && c.GoldProduction == 0 && c.ProvinceStrength == 0, $"{id}'s stats");
+        Eq(string.Join(",", (c.Keywords ?? []).Order(StringComparer.Ordinal)), "Imperial,Unique", $"{id}'s keywords");
+        Eq(c.Effect, OtosanUchiPlains.Effect, $"{id}'s effect");
+        Eq((c.Abilities ?? []).Length, 0, $"{id} has no activatable ability (its effects are Effect-keyed engine hooks)");
+        Eq(c.Text, "This Province holds two Dynasty cards; do not reveal the second card the same turn this Region enters play.\nBefore this Province is destroyed, lose 10 Honor.", $"{id} prints the scan's text");
+        Check(!c.ScenarioOnly, $"{id} is playable");
+        Check(ArtShipped(id), $"{id} ships art");
+        var manifest = File.ReadAllLines(Path.Combine(RepoRoot(), "tests/L5R.Core.Tests/PublishedWaves/region-wave-21.txt"));
+        Check(new HashSet<string>(manifest).SetEquals([id]), "region-wave-21 manifest");
+    }
 
     // A fresh economy scenario with both hands and both Dynasty/Fate decks emptied, so every card in a test is one the test put there.
     private static MatchState Start()
