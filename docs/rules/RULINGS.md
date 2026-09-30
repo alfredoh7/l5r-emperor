@@ -257,3 +257,24 @@ that source player.
 - **Cards/primitives:** Crippled Sensei (oracle-l5r-9899); play-to-dead destruction Reaction window and action-source filters.
 - **Date:** 2026-09-29
 - **Source:** [Personality-destruction Reaction triggers](../decisions/2026-09-29-personality-destruction-reactions.md) (Mendon's clarifications in this task)
+
+### R-024 — Inexorable negates the whole announced Reaction, not only a negation
+Inexorable's printed text ("Its effects will not negate other effects") reads narrower than its
+actual ruling: it negates the entire announced Reaction, whatever that Reaction would have done,
+not only one that would itself have negated or modified something. It applies to any Reaction an
+opponent announces during the Combat Segment (Phase.Battle), whether or not that Reaction targets a
+card, reusing the existing whole-action negation primitive (`NegateDeferredAction`, ActionNegation.cs,
+Yoritomo Sakuma's original card).
+
+- **Cards/primitives:** Inexorable (oracle-l5r-3739); `NegateDeferredAction`; `CardWave566BeforeActionApplies`.
+- **Date:** 2026-09-30
+- **Source:** Mendon's ruling in issue #566's card-wave pass, correcting the fork's initial narrower reading of the printed text.
+
+### R-025 — Wanted for Questioning's "custody" is flavor text, not a mechanic
+"Your Magistrate takes him into custody" on Wanted for Questioning is flavor text with no mechanical
+effect; the card is built from its remaining printed clauses alone (destroy the target's attachments
+if he is dishonorable, then move him home).
+
+- **Cards/primitives:** Wanted for Questioning (oracle-l5r-9208).
+- **Date:** 2026-09-30
+- **Source:** Mendon's ruling in issue #566's card-wave pass, resolving the rules-lane question tools/content/ee_p6_blockers.json had recorded for it.

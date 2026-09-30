@@ -1897,6 +1897,9 @@ public sealed partial class MatchEngine
         Require((target.OwnerId == command.PlayerId || def.Effect == "cultist-infiltrator") && (inBattle ? AtBattle(target) : target.Zone == Zone.Home) && Definition(target).Type == CardType.Personality,
             inBattle ? "Choose your Personality at the current battlefield." : def.Effect == "cultist-infiltrator" ? "Choose a Personality at home." : "Choose your Personality at home.");
         Require(def.AttachRequiresKeyword is null || KeywordOrHuman(target, def.AttachRequiresKeyword), $"Will only attach to a {def.AttachRequiresKeyword} Personality.");
+        // Tempest of Flame (issue #566): "Attaches to a Fire or Void Shugenja" -- an OR of two keywords, which the single-string AttachRequiresKeyword above cannot
+        // express, so it is its own separate, Effect-keyed check (the same shape as the cultist-infiltrator override just below).
+        Require(def.Effect != "tempest-of-flame" || Keyword(target, "Fire") || Keyword(target, "Void"), "Will only attach to a Fire or Void Shugenja.");
         Require(def.AttachExcludesKeyword is null || !KeywordOrHuman(target, def.AttachExcludesKeyword), $"Will not attach to a {def.AttachExcludesKeyword} Personality.");
         Require(def.AttachRequiresName is null || Definition(target).Name == def.AttachRequiresName, $"Only attaches to {def.AttachRequiresName}.");
         Require(def.Type != CardType.Follower || def.HonorRequirement is null || IgnoresFollowerHonorRequirement(target) || CardPersonalHonor(target) >= def.HonorRequirement || RoninIgnoresHonorRequirement(card, command.PlayerId), "The Personality does not meet this Follower's Personal Honor Requirement.");
