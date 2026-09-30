@@ -237,7 +237,9 @@ internal static class ForgottenLegacyBatch1Tests
         var offer = Enabled(e, 0, "gyoken-attach", gyoken.Id);
         GameCommand With(string attachment, string personality) => offer.Command! with
         {
-            TargetId = null, Selections = [Pick("attachment", attachment), Pick("personality", personality)], SourceIds = e.PaymentOptions(0, 2).First().SourceIds
+            TargetId = null,
+            Selections = [Pick("attachment", attachment), Pick("personality", personality)],
+            SourceIds = e.PaymentOptions(0, 2).First().SourceIds
         };
         var whyUnique = Rejection(e, With(unique.Id, gyoken.Id)); Check(whyUnique.Contains("Unique"), "a Unique attachment is refused: " + whyUnique);
         var whyEnemy = Rejection(e, With(follower.Id, enemy.Id)); Check(whyEnemy.Length > 0 && !whyEnemy.Contains("Gold") && !whyEnemy.Contains("pay"), "an enemy Personality is refused: " + whyEnemy);
@@ -255,7 +257,9 @@ internal static class ForgottenLegacyBatch1Tests
         var battleOffer = Enabled(be, 0, "gyoken-attach", g2.Id);
         GameCommand InBattle(string personality) => battleOffer.Command! with
         {
-            TargetId = null, Selections = [Pick("attachment", weapon.Id), Pick("personality", personality)], SourceIds = be.PaymentOptions(0, 1).First().SourceIds
+            TargetId = null,
+            Selections = [Pick("attachment", weapon.Id), Pick("personality", personality)],
+            SourceIds = be.PaymentOptions(0, 1).First().SourceIds
         };
         Check(Rejection(be, InBattle(home.Id)).Length > 0, "a Personality at home is not a Battle action's target");
         Accept(be, InBattle(there.Id));

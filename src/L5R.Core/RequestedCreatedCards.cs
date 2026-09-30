@@ -25,7 +25,8 @@ public static class RequestedCreatedCardAbilities
         all["our-ancestors-call-create"] = new("Battle", "If this Shugenja is opposed, destroy this card: Create Ancestor Spirit at the battlefield, or two if this Shugenja is Water and defending", "none",
             Performer: "own-wielder", Costs: [new(CostVerbs.Sacrifice)],
             Creates: new CreatedCardSpec(CardType.Personality, Force: 2, Chi: 2, PersonalHonor: 3,
-                Keywords: ["Samurai", "Ancestor", "Spirit"], ProxyId: "user-scan-ancestor-spirit", AtBattlefield: true) { ControllerClan = true });
+                Keywords: ["Samurai", "Ancestor", "Spirit"], ProxyId: "user-scan-ancestor-spirit", AtBattlefield: true)
+            { ControllerClan = true });
         all["yari-of-air-create"] = new("Limited", "Once per game: Create an Air Yari and attach it to one of your Personalities", "own-personality", OncePerGame: true,
             Creates: new(CardType.Item, Force: 1, Chi: 1, Keywords: ["Air", "Weapon"], ProxyId: "user-scan-air-yari"));
         all["air-yari-penalty"] = new("Battle", "Give each Personality and Follower in the enemy army -1F", "none");

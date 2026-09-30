@@ -34,8 +34,13 @@ public sealed partial class MatchEngine
 
     private PendingAfterResolution NewAfterResolutionFacts(int provinceIndex, int attacker, bool attackerWon, CardInstance[] attackers, int[] destroyed, bool provinceDestroyed, List<int> losers) => new()
     {
-        ProvinceIndex = provinceIndex, Attacker = attacker, AttackerWon = attackerWon, AttackerIds = attackers.Select(c => c.Id).ToList(),
-        DestroyedEnemyUnits = destroyed, ProvinceDestroyedBy = provinceDestroyed ? attacker : null, Losers = losers
+        ProvinceIndex = provinceIndex,
+        Attacker = attacker,
+        AttackerWon = attackerWon,
+        AttackerIds = attackers.Select(c => c.Id).ToList(),
+        DestroyedEnemyUnits = destroyed,
+        ProvinceDestroyedBy = provinceDestroyed ? attacker : null,
+        Losers = losers
     };
 
     // The Reaction plays this player could make right now, asked with the window open exactly as they will be.

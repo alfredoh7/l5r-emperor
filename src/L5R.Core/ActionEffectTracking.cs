@@ -42,8 +42,17 @@ public sealed partial class MatchEngine
         ApplyAgonyOfHerGaze(abilityId, playerId); // issue #503 (EmperorP2.cs): The Agony of Her Gaze's trait, before any Reaction to the same moment
         var affected = _state.CurrentActionAffected;
         P4AfterActionResolved(affected, abilityId, playerId, sourceId); // Scars of War, The Menacing Sky (issue #503, EmperorP4Watches.cs)
-        _state.LastResolvedAction = new ResolvedActionFacts { AbilityId = abilityId, PlayerId = playerId, SourceId = sourceId, Affected = affected, PerformerId = performerId, HonorLosers = _state.CurrentActionHonorLosers,
-            HandRecipients = _state.CurrentActionHandRecipients, FavorTakers = _state.CurrentActionFavorTakers };
+        _state.LastResolvedAction = new ResolvedActionFacts
+        {
+            AbilityId = abilityId,
+            PlayerId = playerId,
+            SourceId = sourceId,
+            Affected = affected,
+            PerformerId = performerId,
+            HonorLosers = _state.CurrentActionHonorLosers,
+            HandRecipients = _state.CurrentActionHandRecipients,
+            FavorTakers = _state.CurrentActionFavorTakers
+        };
         QueueP1AfterActionTraits(_state.LastResolvedAction); // Issue #503 (EmperorP1.cs): Osote's owed discard is due, Bakishi's shield drops, Tamisu's and Shichiro's traits are queued.
         NoteHonorLostToOtherAction(playerId, _state.CurrentActionHonorLosers); // Kitsu Tamasine (issue #477, batch 5)
         CountHandActionResolved(playerId, _state.CurrentActionHandRecipients); // Indecision (issue #501, EmperorMechD.cs): "actions which put cards into his hand this phase".

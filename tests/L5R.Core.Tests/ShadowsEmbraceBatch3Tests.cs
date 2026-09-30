@@ -61,13 +61,25 @@ internal static class ShadowsEmbraceBatch3Tests
         Check(listed.Order(StringComparer.Ordinal).SequenceEqual(Wave.Order(StringComparer.Ordinal)), "the manifest pins exactly the wired cards");
         var expected = new Dictionary<string, (string[] Abilities, string Keywords, int Focus)>
         {
-            [BurningFury] = (["burning-fury-attack"], "Fire", 2), [CapturedConvict] = (["captured-convict-move"], "", 3), [CowedAndDefeated] = (["cowed-defeated-dishonor"], "Political", 2),
-            [CrowdedStreets] = ([], "Terrain", 1), [DeepRoots] = (["deep-roots-negate"], "", 2), [DefensiveGrill] = (["defensive-grill-move"], "", 3),
-            [DirectThePath] = (["direct-the-path-return"], "Kiho", 2), [DuelToFirstBlood] = (["first-blood-focus", "first-blood-duel-battle", "first-blood-duel-limited"], "Iaijutsu", 1),
-            [FieldsOfVictory] = (["fields-of-victory-zero"], "Terrain", 2), [ForgeYourSoul] = (["forge-your-soul-show"], "", 2), [ForgedDocuments] = (["forged-documents-order"], "", 4),
-            [Forthrightness] = (["forthrightness-show"], "Bushido Virtue,Honesty", 2), [Grief] = (["grief-dishonor"], "", 3), [CastTwoShadows] = (["cast-two-shadows-move"], "Ninja", 3),
-            [KitsukiMethods] = (["kitsuki-methods-interrogate"], "Political", 4), [KuonsLegacy] = (["kuons-legacy-rage"], "", 2), [LessonsNeverForgotten] = (["lessons-never-forgotten-attack"], "", 3),
-            [MethodicalQuestioning] = (["methodical-questioning-look", "methodical-questioning-bow-look"], "Dark Virtue,Knowledge", 3), [OneShout] = (["one-shout-boost"], "", 3),
+            [BurningFury] = (["burning-fury-attack"], "Fire", 2),
+            [CapturedConvict] = (["captured-convict-move"], "", 3),
+            [CowedAndDefeated] = (["cowed-defeated-dishonor"], "Political", 2),
+            [CrowdedStreets] = ([], "Terrain", 1),
+            [DeepRoots] = (["deep-roots-negate"], "", 2),
+            [DefensiveGrill] = (["defensive-grill-move"], "", 3),
+            [DirectThePath] = (["direct-the-path-return"], "Kiho", 2),
+            [DuelToFirstBlood] = (["first-blood-focus", "first-blood-duel-battle", "first-blood-duel-limited"], "Iaijutsu", 1),
+            [FieldsOfVictory] = (["fields-of-victory-zero"], "Terrain", 2),
+            [ForgeYourSoul] = (["forge-your-soul-show"], "", 2),
+            [ForgedDocuments] = (["forged-documents-order"], "", 4),
+            [Forthrightness] = (["forthrightness-show"], "Bushido Virtue,Honesty", 2),
+            [Grief] = (["grief-dishonor"], "", 3),
+            [CastTwoShadows] = (["cast-two-shadows-move"], "Ninja", 3),
+            [KitsukiMethods] = (["kitsuki-methods-interrogate"], "Political", 4),
+            [KuonsLegacy] = (["kuons-legacy-rage"], "", 2),
+            [LessonsNeverForgotten] = (["lessons-never-forgotten-attack"], "", 3),
+            [MethodicalQuestioning] = (["methodical-questioning-look", "methodical-questioning-bow-look"], "Dark Virtue,Knowledge", 3),
+            [OneShout] = (["one-shout-boost"], "", 3),
         };
         foreach (var id in Wave)
         {

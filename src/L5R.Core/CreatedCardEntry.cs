@@ -137,7 +137,8 @@ public sealed partial class MatchEngine
         var clans = (stronghold.Clans ?? [stronghold.Clan]).Where(clan => clan != "Unaligned").ToArray();
         return clans.Length == 0 ? printed : printed with
         {
-            Clan = clans[0], Clans = clans.Length > 1 ? clans : null,
+            Clan = clans[0],
+            Clans = clans.Length > 1 ? clans : null,
             Keywords = (printed.Keywords ?? []).Concat(clans.Select(clan => $"{clan} Clan")).Distinct(StringComparer.Ordinal).ToArray()
         };
     }
