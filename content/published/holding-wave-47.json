@@ -1,0 +1,81 @@
+{
+  "Profile": "holding-wave-47",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-1997",
+      "Name": "Diamond Mine",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 6,
+      "GoldProduction": 5,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Bow this card: Produce 5 Gold.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1997.jpg",
+      "Keywords": [
+        "Mine"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-8308",
+      "Name": "The Seekers' Temple",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 2,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Bow this card: Produce 2 Gold.\nOpen: Destroy this Holding to search your Fate deck for a Ring, show it, and put it in your hand. Shuffle your Fate deck.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8308.jpg",
+      "Keywords": [
+        "Unique",
+        "Temple"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "seekers-temple-search"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9797",
+      "Name": "Humble Farm",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 2,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Bow this card: Produce 2 Gold.\nBattle/Open: Destroy this Holding to create a 2F Ashigaru Follower and attach it to your target Personality.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9797.jpg",
+      "Keywords": [
+        "Farm"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "humble-farm-create"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

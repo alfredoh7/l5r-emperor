@@ -4396,6 +4396,7 @@ public sealed partial class MatchEngine
         if (abilityId == "ninja-tricks-negate") return NinjaTricksApplies(card, command);
         // Emperor Edition remaining-cards pass, group C (issue #492): the Strategy Reactions played from a hand (EmperorRemainingC.cs), judged before any target check.
         if (EmperorRemainingCAbilities.BeforeActionHandReactions.Contains(abilityId)) return EmperorRemainingCBeforeActionApplies(card, abilityId, command);
+        if (CardWave566BeforeActionApplies(card, abilityId, command) is { } wave566Before) return wave566Before; // Inexorable (issue #566, CardWave566.cs)
         if (P3BeforeActionApplies(card, abilityId, command) is { } p3Before) return p3Before; // Request Authorization (issue #503, EmperorP3.cs)
         // Akodo Shihiro (issue #458): "Before (each time) another player's action resolves during a battle at Shihiro's battlefield" -- whatever the action targets, so
         // long as it is a genuine action (IsAction), taken by another player, while a battle is under way at Shihiro's own battlefield.
@@ -5108,6 +5109,7 @@ public sealed partial class MatchEngine
     {
         if (targetId is not null && abilityId == "carpenter-castle-siege") GainHonor(playerId, 2, "Carpenter Castle");
         AttackTargetedACardForBatch2(abilityId, targetId); // Kaiu Esumi (Emperor Edition Personality pass, issue #477 batch 2).
+        CardWave566AttackTargeted(abilityId, playerId, targetId); // The Lion's Charge (issue #566): "Gain 1 Honor".
     }
 
     // Called once both players pass consecutively in the attackReaction window (Apply()).

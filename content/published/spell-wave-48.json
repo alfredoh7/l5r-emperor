@@ -1,0 +1,58 @@
+{
+  "Profile": "spell-wave-48",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-2745",
+      "Name": "Fury of the Sea",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 1,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: If this Shugenja is unbowed, bow him unless he is Water: In turn order, each player who now controls a unit in the current enemy army targets and moves home one of his units there.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-2745.jpg",
+      "Keywords": [
+        "Water"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "fury-of-sea-move"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-7866",
+      "Name": "Tempest of Flame",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 4,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Attaches to a Fire or Void Shugenja paying 1 less Gold.\nThis Personality has +2F.\nBattle: Bow this Shugenja: Ranged 5 Attack.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7866.jpg",
+      "Keywords": [
+        "Fire",
+        "Void"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "tempest-of-flame-attack"
+      ],
+      "Effect": "tempest-of-flame"
+    }
+  ],
+  "Decks": []
+}
