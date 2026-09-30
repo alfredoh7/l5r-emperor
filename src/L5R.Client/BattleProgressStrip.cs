@@ -38,7 +38,7 @@ public sealed partial class BattleProgressIcon : Button
     private readonly int _index;
     private static Texture2D? _reference, _helmet;
     // Actual approved concept pixels, sampled as an atlas at draw time. The generated illustration's game cards/text are never used.
-    private static readonly Rect2[] Glyphs = [new(1280,149,32,42), default, new(1275,392,43,33), new(1278,511,36,38), new(1276,634,40,39)];
+    private static readonly Rect2[] Glyphs = [new(1280, 149, 32, 42), default, new(1275, 392, 43, 33), new(1278, 511, 36, 38), new(1276, 634, 40, 39)];
     public bool Current { get; set; }
     public BattleProgressIcon(int index)
     {
@@ -53,7 +53,7 @@ public sealed partial class BattleProgressIcon : Button
         DrawCircle(center, 34, new Color("10100e"));
         if (Current) { DrawArc(center, 36, 0, Mathf.Tau, 64, Palette.Gold with { A = .18f }, 6, true); DrawArc(center, 34, 0, Mathf.Tau, 64, Palette.Gold, 2, true); }
         else DrawArc(center, 34, 0, Mathf.Tau, 64, new Color("796344"), 1.4f, true);
-        if (_index == 1) DrawTextureRect(_helmet ??= GD.Load<Texture2D>("res://Art/BattleProgress/infantry-helmet.png"), new Rect2(center - new Vector2(29,29), new Vector2(58,58)), false, Colors.White with { A = Current ? 1 : .85f });
+        if (_index == 1) DrawTextureRect(_helmet ??= GD.Load<Texture2D>("res://Art/BattleProgress/infantry-helmet.png"), new Rect2(center - new Vector2(29, 29), new Vector2(58, 58)), false, Colors.White with { A = Current ? 1 : .85f });
         else
         {
             var source = Glyphs[_index]; var size = source.Size * (44 / Math.Max(source.Size.X, source.Size.Y));

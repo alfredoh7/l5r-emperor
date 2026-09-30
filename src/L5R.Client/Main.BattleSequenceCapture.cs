@@ -59,7 +59,7 @@ public partial class Main
     private OptionButton? _sequenceReviewPicker;
     private void BuildSequenceReviewControls()
     {
-        if (_root.GetNodeOrNull<Control>("SequenceReviewControls") is {} old) { _root.RemoveChild(old); old.QueueFree(); }
+        if (_root.GetNodeOrNull<Control>("SequenceReviewControls") is { } old) { _root.RemoveChild(old); old.QueueFree(); }
         var row = new HBoxContainer { Name = "SequenceReviewControls", ZIndex = 91 }; row.AddThemeConstantOverride("separation", 10);
         var scenarios = new[] { ("Declaration and maneuvers", "declaration"), ("Ordinary battle", "ordinary"), ("Naval Invasion", "naval"), ("Defender override", "override"), ("First opportunity must pass", "must-pass"), ("Encircled Terrain", "encircled"), ("Order before resolution*", "order"), ("Optional before resolution*", "optional"), ("Reaction before resolution*", "reaction"), ("Empty battlefield", "empty") };
         _sequenceReviewPicker = new OptionButton { FitToLongestItem = false, SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, CustomMinimumSize = new(340, 44), TooltipText = "Prepared review scenarios. * includes synthetic training cards." };
@@ -114,8 +114,8 @@ public partial class Main
         SupportRequire(_timeline.PlateBounds.End.Y <= strip.Position.Y + 1, "Phase plate overlaps battle strip");
         SupportRequire(!_tableViewport.GetGlobalRect().Intersects(strip) && !_hand.GetGlobalRect().Intersects(strip), "Strip overlaps table or hand");
         SupportRequire(!RulesHelp.PhaseGuide(View.Phase).Contains("match has ended"), "Active battle described as ended");
-        if (View.CurrentBattleProvince is {} province)
-            SupportRequire(_tiles.Where(t=>t.Card.Zone == Zone.Battlefield && t.Card.ProvinceIndex == province && t.Card.Definition?.Type == CardType.Personality).All(t=>_tableViewport.GetGlobalRect().HasPoint(ScreenCenter(t))), "Current battle units are offscreen");
+        if (View.CurrentBattleProvince is { } province)
+            SupportRequire(_tiles.Where(t => t.Card.Zone == Zone.Battlefield && t.Card.ProvinceIndex == province && t.Card.Definition?.Type == CardType.Personality).All(t => _tableViewport.GetGlobalRect().HasPoint(ScreenCenter(t))), "Current battle units are offscreen");
     }
     private async Task CaptureBattleSequence()
     {
@@ -169,7 +169,7 @@ public partial class Main
             await SequenceSeat(); SupportRequire(View.BattleStep?.FirstActionLimit == BattleSteps.LimitMustPass, "Must-pass reason missing");
             await SupportCapture("-must-pass"); await SequenceNativePhase("pass"); SupportRequire(View.BattleStep?.ConsecutivePasses == 1, "Forced pass did not count");
             await PrepareSequenceReview("order"); CheckSequenceLayout(); SupportRequire(View.PendingChoice?.Type == "beforeBattleOrder", "Ordering fixture did not open");
-            await SupportCapture("-order"); await SequenceDecision(a => a.Command?.TargetId is {} id && _sequenceFixture.State.Cards.GetValueOrDefault(id)?.DefinitionId == "training-before-resolution-boost-terrain");
+            await SupportCapture("-order"); await SequenceDecision(a => a.Command?.TargetId is { } id && _sequenceFixture.State.Cards.GetValueOrDefault(id)?.DefinitionId == "training-before-resolution-boost-terrain");
             SupportRequire(View.PendingChoice is null && View.Events.Any(e => e.Type == "battleResolved" && e.Message.Contains("attacking Force 4, defending Force 0")), "Chosen before-resolution order did not resolve");
             await PrepareSequenceReview("encircled"); SupportRequire(View.PendingChoice?.Type == "encircledOrder", "Encircled ordering unavailable");
             await SupportCapture("-encircled"); await SequenceDecision(a => a.Command?.Choice == "defender");

@@ -55,26 +55,26 @@ public partial class Main
     {
         foreach (var abilityId in card.Definition!.Abilities ?? [])
         {
-            if(!AbilityCatalog.All.TryGetValue(abilityId,out var ability))continue;
-            var choices=Actions.Where(a=>a.CardId==card.Id && a.Type=="useAbility" &&
-                (a.Command?.AbilityId==abilityId || a.Command is null && a.Label.StartsWith(ability.Label,StringComparison.Ordinal))).ToArray();
-            if(choices.Length==0)continue;
-            var option=choices.FirstOrDefault(a=>a.Enabled)??choices[0];
-            var button=SidebarSkin.Button("Use "+ability.Timing+" ability…",()=>Choose(option));
-            button.Disabled=!option.Enabled||_session.Busy||_session.Online&&!_session.Connected;
-            button.TooltipText=option.Reason??ability.Label;
+            if (!AbilityCatalog.All.TryGetValue(abilityId, out var ability)) continue;
+            var choices = Actions.Where(a => a.CardId == card.Id && a.Type == "useAbility" &&
+                (a.Command?.AbilityId == abilityId || a.Command is null && a.Label.StartsWith(ability.Label, StringComparison.Ordinal))).ToArray();
+            if (choices.Length == 0) continue;
+            var option = choices.FirstOrDefault(a => a.Enabled) ?? choices[0];
+            var button = SidebarSkin.Button("Use " + ability.Timing + " ability…", () => Choose(option));
+            button.Disabled = !option.Enabled || _session.Busy || _session.Online && !_session.Connected;
+            button.TooltipText = option.Reason ?? ability.Label;
             _inspector.AddChild(button);
         }
     }
 
-    private ActionOption[] SupportDraftChoices() => _chosen is {CardId: { } id, Command: { } command} && FindCard(id) is { } card && IsSupportCard(card)
-        ? Actions.Where(a=>a.Enabled && a.CardId==id && a.Command?.AbilityId==command.AbilityId && a.Command?.PerformerId==command.PerformerId).ToArray() : [];
+    private ActionOption[] SupportDraftChoices() => _chosen is { CardId: { } id, Command: { } command } && FindCard(id) is { } card && IsSupportCard(card)
+        ? Actions.Where(a => a.Enabled && a.CardId == id && a.Command?.AbilityId == command.AbilityId && a.Command?.PerformerId == command.PerformerId).ToArray() : [];
 
     private bool ChooseSupportTarget(CardView card)
     {
-        var option=SupportDraftChoices().FirstOrDefault(a=>a.TargetIds?.Contains(card.Id)==true);
-        if(option is null)return false;
-        Choose(option with {Command=option.Command! with {TargetId=card.Id}});return true;
+        var option = SupportDraftChoices().FirstOrDefault(a => a.TargetIds?.Contains(card.Id) == true);
+        if (option is null) return false;
+        Choose(option with { Command = option.Command! with { TargetId = card.Id } }); return true;
     }
 
     private void RenderSupportDraft(CardView card, ActionOption action)
@@ -87,7 +87,7 @@ public partial class Main
             _inspector.AddChild(Palette.Text("PERFORMER", 12, Palette.Gold));
             var picker = new OptionButton { FitToLongestItem = false, ClipText = true };
             foreach (var id in performers) picker.AddItem(FindCard(id!)!.Definition!.Name);
-            picker.Selected = Math.Max(0,Array.IndexOf(performers,command.PerformerId));
+            picker.Selected = Math.Max(0, Array.IndexOf(performers, command.PerformerId));
             picker.ItemSelected += index =>
             {
                 var next = choices.FirstOrDefault(a => a.Command!.PerformerId == performers[(int)index] && a.TargetIds?.Contains(command.TargetId!) == true)
@@ -105,9 +105,9 @@ public partial class Main
             foreach (var id in targets)
             {
                 var target = FindCard(id)!; var option = targetChoices.First(a => a.TargetIds!.Contains(id));
-                picker.AddItem(target.Definition!.Name + (QuoteFor(option with {Command=option.Command! with {TargetId=id}})?.Cost is int gold ? $" · {gold} Gold" : ""));
+                picker.AddItem(target.Definition!.Name + (QuoteFor(option with { Command = option.Command! with { TargetId = id } })?.Cost is int gold ? $" · {gold} Gold" : ""));
             }
-            picker.Selected = Math.Max(0,Array.IndexOf(targets,command.TargetId));
+            picker.Selected = Math.Max(0, Array.IndexOf(targets, command.TargetId));
             picker.ItemSelected += index =>
             {
                 var target = targets[(int)index]; var next = targetChoices.First(a => a.TargetIds!.Contains(target));
@@ -119,7 +119,7 @@ public partial class Main
         var (cost, ready) = RenderGoldPanel(action);
         var confirm = SidebarSkin.Button(cost > 0 ? $"Confirm action · {cost} Gold" : "Confirm action", () => _ = Submit(command with { SourceIds = _sources.ToArray() }), true);
         confirm.Disabled = !action.Enabled || _session.Busy || !ready;
-        _decisionActions.AddChild(confirm); _decisionActions.AddChild(SidebarSkin.Button("Cancel action",CancelChoice));
+        _decisionActions.AddChild(confirm); _decisionActions.AddChild(SidebarSkin.Button("Cancel action", CancelChoice));
     }
 
     // This only separates printed text for reading. It does not infer ability availability or effects.

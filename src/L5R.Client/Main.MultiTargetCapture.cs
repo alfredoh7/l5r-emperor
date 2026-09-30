@@ -47,7 +47,7 @@ public partial class Main
     }
     private void BuildMultiReviewControls()
     {
-        if (_root.GetNodeOrNull<Control>("MultiReviewControls") is {} old) { _root.RemoveChild(old); old.QueueFree(); }
+        if (_root.GetNodeOrNull<Control>("MultiReviewControls") is { } old) { _root.RemoveChild(old); old.QueueFree(); }
         var row = new HBoxContainer { Name = "MultiReviewControls", ZIndex = 91 }; row.AddThemeConstantOverride("separation", 4);
         var buttons = new List<Button>();
         foreach (var (label, mode) in new[] { ("Bonds of Coin", "bonds"), ("Yoshitada", "yoshitada"), ("Honorable", "honorable"), ("Fear Me!", "fear"), ("Groups*", "mixed"), ("Optional*", "optional"), ("Hand*", "hand"), ("Reactions*", "reactions") })
@@ -57,11 +57,12 @@ public partial class Main
         Place(_root, row, 350, 114, 1160, 46); FitMultiReviewControls();
     }
     private void FitMultiReviewControls()
-    { if (_root.GetNodeOrNull<Control>("MultiReviewControls") is {} row) row.Size = new(Math.Min(1160, _layoutWidth - SidebarWidth - 22 - 350 - 18), 46); }
+    { if (_root.GetNodeOrNull<Control>("MultiReviewControls") is { } row) row.Size = new(Math.Min(1160, _layoutWidth - SidebarWidth - 22 - 350 - 18), 46); }
     private async Task RunMultiReview(Func<Task> action)
     {
         if (_multiReviewBusy) return; _multiReviewBusy = true; foreach (var b in _multiReviewButtons) b.Disabled = true;
-        try { await action(); } catch (Exception e) { SetNotice("Restart a target scenario to prepare it again."); GD.PushWarning(e.ToString()); }
+        try { await action(); }
+        catch (Exception e) { SetNotice("Restart a target scenario to prepare it again."); GD.PushWarning(e.ToString()); }
         finally { _multiReviewBusy = false; foreach (var b in _multiReviewButtons) if (IsInstanceValid(b)) b.Disabled = false; }
     }
     private MultiTargetFace MultiFace(string slot, string id) => StabilizationButtons(_inspector).OfType<MultiTargetFace>().Single(b => b.Card.Id == id && b.GetMeta("slot").AsString() == slot);

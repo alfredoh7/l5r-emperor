@@ -108,8 +108,13 @@ public partial class Main
         AddInspectionCaption(selected.EffectId is null ? "IMPERIAL FAVOR · " + owner.Clan.ToUpperInvariant() : "ONGOING EFFECT · " + owner.Clan.ToUpperInvariant());
         if (effect is null)
         {
-            _inspector.AddChild(new TextureRect { Texture = HomeReminder.FavorFace(owner.Clan), ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize,
-                StretchMode = TextureRect.StretchModeEnum.KeepAspectCentered, CustomMinimumSize = new Vector2(0, 350) });
+            _inspector.AddChild(new TextureRect
+            {
+                Texture = HomeReminder.FavorFace(owner.Clan),
+                ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize,
+                StretchMode = TextureRect.StretchModeEnum.KeepAspectCentered,
+                CustomMinimumSize = new Vector2(0, 350)
+            });
             _inspector.AddChild(Palette.Wrapped($"Held by {owner.Clan}. This reminder is not a card in play.", 16, Palette.PaperDim));
         }
         else

@@ -81,7 +81,7 @@ public partial class Main
     }
     private void BuildCreatedReviewControls()
     {
-        if (_root.GetNodeOrNull<Control>("CreatedCopyReviewControls") is {} old) { _root.RemoveChild(old); old.QueueFree(); }
+        if (_root.GetNodeOrNull<Control>("CreatedCopyReviewControls") is { } old) { _root.RemoveChild(old); old.QueueFree(); }
         var row = new HBoxContainer { Name = "CreatedCopyReviewControls", ZIndex = 91 }; row.AddThemeConstantOverride("separation", 10);
         var choices = new[] { ("Gates of Chikushudo · Home", "home"), ("Copy in battle", "battle"), ("Bowed attachment stack*", "crowded"), ("Ordinary Personality copy*", "ordinary"), ("Destroyed copy · Removed gallery*", "removed") };
         var picker = new OptionButton { FitToLongestItem = false, SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, CustomMinimumSize = new(370, 44), TooltipText = "Prepared positions; * includes synthetic training effects." };
@@ -99,15 +99,15 @@ public partial class Main
     }
     private async Task WaitCreatedFocus()
     {
-        var announced=false;
-        for(var i=0;i<18000;i++)
+        var announced = false;
+        for (var i = 0; i < 18000; i++)
         {
-            if(GetWindow().HasFocus())
+            if (GetWindow().HasFocus())
             {
-                await ToSignal(GetTree().CreateTimer(.4),SceneTreeTimer.SignalName.Timeout);
-                if(GetWindow().HasFocus())return;
+                await ToSignal(GetTree().CreateTimer(.4), SceneTreeTimer.SignalName.Timeout);
+                if (GetWindow().HasFocus()) return;
             }
-            if(!announced){GD.Print("CREATED_COPY_FOCUS_REQUIRED: activate the game window.");announced=true;}
+            if (!announced) { GD.Print("CREATED_COPY_FOCUS_REQUIRED: activate the game window."); announced = true; }
             await EventFrames(1);
         }
         throw new Exception("Native window requires OS focus");
@@ -129,7 +129,7 @@ public partial class Main
         var seal = tile.CopySeal!;
         SupportRequire(!Geometry2D.IsPointInPolygon(seal.CenterOnViewport(), tile.FaceCornersOnViewport()), "Seal covers the printed face");
         SupportRequire(_tiles.Single(t => t.Card.Id == _createdOriginal).CopySeal is null, "Original received a copy seal");
-        if (tile.TokenRail is {} rail) SupportRequire(!Geometry2D.IsPointInPolygon(seal.CenterOnViewport(), rail.CornersOnViewport()), "Copy seal overlaps token rail");
+        if (tile.TokenRail is { } rail) SupportRequire(!Geometry2D.IsPointInPolygon(seal.CenterOnViewport(), rail.CornersOnViewport()), "Copy seal overlaps token rail");
     }
     private async Task CaptureCreatedCopy()
     {
@@ -143,7 +143,7 @@ public partial class Main
             SupportRequire(_selected?.Id == _createdId && View.Version == version && StabilizationText(_inspector).Contains("Created copy"), "Seal did not inspect without changing state");
             await SupportCapture("-home");
             DeselectCard(); var tile = _tiles.Single(t => t.Card.Id == _createdId); var point = ScreenCenter(tile);
-            PushCaptureMouse(new InputEventMouseMotion { Position = point, GlobalPosition = point }); await ToSignal(GetTree().CreateTimer(1.1),SceneTreeTimer.SignalName.Timeout); await EventFrames(4);
+            PushCaptureMouse(new InputEventMouseMotion { Position = point, GlobalPosition = point }); await ToSignal(GetTree().CreateTimer(1.1), SceneTreeTimer.SignalName.Timeout); await EventFrames(4);
             SupportRequire(_tableTooltip is not null && StabilizationText(_tableTooltip).Contains("Removed from the game when it leaves play."), $"Hover meaning missing: type={_tableHover?.GetType().Name}, actual={TableHovered?.GetType().Name}, time={_tableHoverTime}, last={_lastTableMouse}, point={point}, blocked={CameraBlocked}");
             SupportRequire(GetViewport().GetVisibleRect().Encloses(_tableTooltip!.GetGlobalRect()), "Hover clipped"); await SaveShownCapture("-hover"); HideTableTooltip();
             _session.SwitchPracticeSeat(); await EventFrames(30); CheckCreatedMarkers(); await ClickCreatedSeal();

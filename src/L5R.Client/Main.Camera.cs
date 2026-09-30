@@ -167,12 +167,12 @@ public partial class Main
             attackReview.IsVisibleInTree() && attackReview.GetGlobalRect().HasPoint(viewportPoint)) return false;
         if (_root.GetNodeOrNull<Control>("OpponentPaymentReviewControls") is { } paymentReview &&
             paymentReview.IsVisibleInTree() && paymentReview.GetGlobalRect().HasPoint(viewportPoint)) return false;
-        if (_root.GetNodeOrNull<Control>("CreatedCopyReviewControls") is {} copyReview && copyReview.IsVisibleInTree() && copyReview.GetGlobalRect().HasPoint(viewportPoint)) return false;
-        if (_root.GetNodeOrNull<Control>("SequenceReviewControls") is {} sequenceReview && sequenceReview.IsVisibleInTree() && sequenceReview.GetGlobalRect().HasPoint(viewportPoint)) return false;
-        if (_root.GetNodeOrNull<Control>("MultiReviewControls") is {} multiReview && multiReview.IsVisibleInTree() && multiReview.GetGlobalRect().HasPoint(viewportPoint)) return false;
+        if (_root.GetNodeOrNull<Control>("CreatedCopyReviewControls") is { } copyReview && copyReview.IsVisibleInTree() && copyReview.GetGlobalRect().HasPoint(viewportPoint)) return false;
+        if (_root.GetNodeOrNull<Control>("SequenceReviewControls") is { } sequenceReview && sequenceReview.IsVisibleInTree() && sequenceReview.GetGlobalRect().HasPoint(viewportPoint)) return false;
+        if (_root.GetNodeOrNull<Control>("MultiReviewControls") is { } multiReview && multiReview.IsVisibleInTree() && multiReview.GetGlobalRect().HasPoint(viewportPoint)) return false;
         if (_root.GetNodeOrNull<Control>("LookReviewControls") is { } lookReview && lookReview.IsVisibleInTree() && lookReview.GetGlobalRect().HasPoint(viewportPoint)) return false;
-        if(_eventHandBar is {Visible:true} && _eventHandBar.GetGlobalRect().HasPoint(viewportPoint))return false;
-        if(_shownPreview is { } preview && IsInstanceValid(preview) && preview.GetGlobalRect().HasPoint(viewportPoint))return false;
+        if (_eventHandBar is { Visible: true } && _eventHandBar.GetGlobalRect().HasPoint(viewportPoint)) return false;
+        if (_shownPreview is { } preview && IsInstanceValid(preview) && preview.GetGlobalRect().HasPoint(viewportPoint)) return false;
         // The Fallen strips can overlap the projection. Check only the visible
         // placards, not their full-screen parent, before forwarding root input.
         return !_clanHud.GetChildren().OfType<Control>().Any(c =>
@@ -183,7 +183,8 @@ public partial class Main
     {
         static bool Covers(Control? control, Vector2 p) => control is not null &&
             control.IsVisibleInTree() && control.GetGlobalRect().HasPoint(p);
-        return Covers(_provinceOrderTray, point) || Covers(_provinceReviewBar, point) || Covers(_inspectorPanel, point) || Covers(_hand, point) || Covers(_timeline, point) || Covers(_menu, point) || Covers(_battleProgressStrip, point)
+        return Covers(_battlefieldReviewBar, point) || Covers(_provinceOrderTray, point) || Covers(_provinceReviewBar, point) || Covers(_inspectorPanel, point) || Covers(_hand, point) || Covers(_timeline, point) || Covers(_menu, point) || Covers(_battleProgressStrip, point)
+            || _battlefieldCaptions.Values.Any(c => Covers(c, point))
             || _clanHud.GetChildren().OfType<Control>().Any(c => Covers(c, point))
             // A hovered hand face can rise above the hand container.
             || _hand.GetChildren().OfType<CardTile>().Any(c => Covers(c, point));
@@ -340,7 +341,7 @@ public partial class Main
         var provinceHover = hovered?.HasMeta("province_marker") == true ? hovered.GetMeta("province_marker").AsString()
             : hovered is CardTile provinceCard && provinceCard.Card.Zone is L5R.Core.Zone.Province or L5R.Core.Zone.Region
                 ? View.Players.SelectMany(p => p.Provinces.Where(q => ProvincePresentation.Cards(q).Any(c => c.Id == provinceCard.Card.Id)).Select(q => $"province:{p.Id}:{q.Index}")).FirstOrDefault() : null;
-        _matSections.Emphasize(provinceHover, hover:true);
+        _matSections.Emphasize(provinceHover, hover: true);
         if (hovered != _tableHover) { HideTableTooltip(); _tableHover = hovered; }
         if (hovered is null || _tableTooltip is not null || (_tableHoverTime += delta) < .5) return;
         _tableTooltip = token is not null ? token._MakeCustomTooltip(token.Explanation) :

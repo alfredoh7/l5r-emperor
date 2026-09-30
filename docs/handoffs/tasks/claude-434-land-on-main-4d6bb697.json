@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Merged current main (PR #563 clan-icon-row, PR #565 open battlefield) into PR #434's UI landing branch; resolved 21 conflict hunks across 10 files (BattleTracker, PhaseTrack, Main.BattleFlow/Camera/Hud/MatLayout/cs, InkMatSections, MatchQueries) by combining both sides' features (movement-destination highlighting, battle-progress redesign, open-battlefield navigation/naming, ActionPhaseTurnPlayerId) rather than picking one; applied the repo's required whitespace formatting (dotnet format whitespace) across the full 124-file changed set, which the prior CI run had flagged almost entirely, not just the 2 files visible in a truncated log.",
+  "validation": "dotnet build tests/L5R.Core.Tests and src/L5R.Client: 0 warnings, 0 errors after the merge and after the formatting pass. Full L5R.Core.Tests run post-merge: 6 failures, identical to the pre-merge/pre-existing set (battle-absent-moves/RealCardsOfferedWithoutPresence, emperor-mech-C/TempleOfTheSevenFortunes, three emperor-proxy-X/Suiteiru* tests, shadows-embrace-batch-4/SuddenMovementScenario) -- unrelated to this branch, already failing on main alone. tools/quality/check_format.py exits 0 (was failing before the formatting pass).",
+  "remaining": "Push and let CI re-run: expect Changed C# formatting and verify (macos-local/windows-2022) to go green against the same 6 pre-existing failures; Context and handoff check should pass now that the branch has its own handoff and is caught up to main. Native Godot client run not re-verified in this environment (resource-constrained machine) against this exact merge commit.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/pull/564",
+  "branch": "claude/434-land-on-main",
+  "updated": "2026-09-30T16:25:37.623905+00:00"
+}

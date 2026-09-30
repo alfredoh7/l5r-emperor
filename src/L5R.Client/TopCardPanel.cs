@@ -45,8 +45,13 @@ public sealed partial class TopCardPanel : PanelContainer
         _body.AddChild(_workspace); _workspace.Hide(); _workspace.AddChild(_landing);
         _workspace.Resized += () => LayoutCards(false);
         _landing.AddThemeStyleboxOverride("panel", new StyleBoxEmpty());
-        var landingArt = new TextureRect { Texture = TopCardSkin.Slot, ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize,
-            StretchMode = TextureRect.StretchModeEnum.Scale, MouseFilter = MouseFilterEnum.Ignore };
+        var landingArt = new TextureRect
+        {
+            Texture = TopCardSkin.Slot,
+            ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize,
+            StretchMode = TextureRect.StretchModeEnum.Scale,
+            MouseFilter = MouseFilterEnum.Ignore
+        };
         _landing.AddChild(landingArt); landingArt.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
         _landingText.HorizontalAlignment = HorizontalAlignment.Center; _landingText.VerticalAlignment = VerticalAlignment.Top;
         _landingText.MouseFilter = MouseFilterEnum.Ignore; _landing.AddChild(_landingText);
@@ -84,8 +89,13 @@ public sealed partial class TopCardPanel : PanelContainer
         foreach (var card in look.Cards!) { _order.Add(card.Position); _destinations[card.Position] = look.Remainder; }
         var heading = new CenterContainer(); _body.AddChild(heading);
         var title = new Control { CustomMinimumSize = new(760, 82), MouseFilter = MouseFilterEnum.Ignore }; heading.AddChild(title);
-        var brush = new TextureRect { Texture = TopCardSkin.Brush, ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize,
-            StretchMode = TextureRect.StretchModeEnum.Scale, MouseFilter = MouseFilterEnum.Ignore };
+        var brush = new TextureRect
+        {
+            Texture = TopCardSkin.Brush,
+            ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize,
+            StretchMode = TextureRect.StretchModeEnum.Scale,
+            MouseFilter = MouseFilterEnum.Ignore
+        };
         title.AddChild(brush); brush.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
         var titleText = look.SourceName.ToUpperInvariant();
         var measuredTitle = Palette.HeadingLabel(56).GetStringSize(titleText, fontSize: 56).X;
@@ -138,14 +148,19 @@ public sealed partial class TopCardPanel : PanelContainer
     {
         "top" => $"TOP OF {(_look.OwnDeck ? "YOUR" : "OPPONENT’S")} {_look.Deck!.ToUpperInvariant()} DECK",
         "bottom" => $"BOTTOM OF {(_look.OwnDeck ? "YOUR" : "OPPONENT’S")} {_look.Deck!.ToUpperInvariant()} DECK",
-        "hand" => "YOUR HAND", "show" => "SHOW AND TAKE", "discard" => _look.OwnDeck ? "YOUR DISCARD PILE" : "OPPONENT’S DISCARD PILE", _ => destination
+        "hand" => "YOUR HAND",
+        "show" => "SHOW AND TAKE",
+        "discard" => _look.OwnDeck ? "YOUR DISCARD PILE" : "OPPONENT’S DISCARD PILE",
+        _ => destination
     };
     private int[] Group(string destination, int? omit = null) => _order.Where(p => p != omit && _destinations[p] == destination).ToArray();
     private string SlotLabel(string destination, int index, int count) => destination switch
     {
         "top" => index == 0 ? "1 · Drawn first" : $"{index + 1} · Below card {index}",
         "bottom" => count == 1 ? "1 · Very bottom\nImmediately below the deck" : index == 0 ? "1 · Immediately\nbelow the deck" : index == count - 1 ? $"{index + 1} · Very bottom" : $"{index + 1} · Below card {index}",
-        "show" => "Will be shown to your opponent", "discard" => "Public after confirmation", _ => "Into your hand"
+        "show" => "Will be shown to your opponent",
+        "discard" => "Public after confirmation",
+        _ => "Into your hand"
     };
     private bool ValidDraft() => (_look.Rules ?? []).All(r =>
         _destinations.Values.Count(d => d == r.Disposition) >= r.Min && _destinations.Values.Count(d => d == r.Disposition) <= r.Max) &&
@@ -216,7 +231,7 @@ public sealed partial class TopCardPanel : PanelContainer
         var index = _preview?.Destination == destination ? _preview.Value.Index + shift : Group(destination, position).Length;
         _preview = (destination, _look.CanReorder || !IsReturn(destination) ? Math.Clamp(index, 0, Group(destination, position).Length) : FixedIndex(position, destination));
         Paint(); LayoutCards(true);
-        if (DropReason(position, destination) is {} reason) _hint.Text = reason;
+        if (DropReason(position, destination) is { } reason) _hint.Text = reason;
     }
     public void PlacePicked(string destination)
     {
@@ -226,7 +241,7 @@ public sealed partial class TopCardPanel : PanelContainer
     }
     private void Move(int position, string destination, int index)
     {
-        if (DropReason(position, destination) is {} reason) { _hint.Text = reason; return; }
+        if (DropReason(position, destination) is { } reason) { _hint.Text = reason; return; }
         var prior = (_order.ToArray(), new Dictionary<int, string>(_destinations));
         var sourceDestination = _destinations[position];
         var rule = _look.Rules?.FirstOrDefault(r => r.Disposition == destination);
@@ -282,10 +297,10 @@ public sealed partial class TopCardPanel : PanelContainer
         }
         return null;
     }
-    public bool CanDrop(Vector2 global, Variant data) => OwnDrag(data, out var position) && TargetAt(global, position) is {} target && DropReason(position, target.Destination) is null;
+    public bool CanDrop(Vector2 global, Variant data) => OwnDrag(data, out var position) && TargetAt(global, position) is { } target && DropReason(position, target.Destination) is null;
     public void Drop(Vector2 global, Variant data)
     {
-        if (OwnDrag(data, out var position) && TargetAt(global, position) is {} target)
+        if (OwnDrag(data, out var position) && TargetAt(global, position) is { } target)
         {
             Move(position, target.Destination, target.Index);
         }
@@ -313,7 +328,7 @@ public sealed partial class TopCardPanel : PanelContainer
         var target = TargetAt(PointerPosition?.Invoke() ?? GetGlobalMousePosition(), position);
         if (target == _preview) return;
         _preview = target; Paint(); LayoutCards(true);
-        _hint.Text = target is {} t ? DropReason(position, t.Destination) ?? "Release in the highlighted slot. Escape cancels." : "Release outside a tray to cancel.";
+        _hint.Text = target is { } t ? DropReason(position, t.Destination) ?? "Release in the highlighted slot. Escape cancels." : "Release outside a tray to cancel.";
     }
     private Rect2[] SlotRects(TopCardTray tray, int count)
     {
@@ -415,8 +430,14 @@ public sealed partial class TopCardTray : Button
     public readonly string Destination;
     public readonly Label Count = Palette.Text("", 21, Palette.PaperDim);
     public readonly Label Empty = Palette.Wrapped("Drop card here", 21, Palette.PaperDim);
-    public readonly TextureRect EmptySlot = new() { Texture = TopCardSkin.Slot, ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize,
-        StretchMode = TextureRect.StretchModeEnum.Scale, MouseFilter = MouseFilterEnum.Ignore, Modulate = new Color(1, 1, 1, .62f) };
+    public readonly TextureRect EmptySlot = new()
+    {
+        Texture = TopCardSkin.Slot,
+        ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize,
+        StretchMode = TextureRect.StretchModeEnum.Scale,
+        MouseFilter = MouseFilterEnum.Ignore,
+        Modulate = new Color(1, 1, 1, .62f)
+    };
     public TopCardTray(TopCardPanel panel, string destination, string title, string? deck)
     {
         _panel = panel; Destination = destination; MouseDefaultCursorShape = CursorShape.PointingHand;
@@ -430,9 +451,15 @@ public sealed partial class TopCardTray : Button
             _anchor = new Control { MouseFilter = MouseFilterEnum.Ignore }; AddChild(_anchor);
             for (var i = 4; i >= 0; i--)
             {
-                var back = new TextureRect { Texture = GD.Load<Texture2D>(deck == "Fate" ? "res://Art/original-fate-back.png" : "res://Art/original-dynasty-back.png"),
-                    ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize, StretchMode = TextureRect.StretchModeEnum.Scale,
-                    MouseFilter = MouseFilterEnum.Ignore, Position = new(i * 3, -i * 3), Size = new(158, 222) };
+                var back = new TextureRect
+                {
+                    Texture = GD.Load<Texture2D>(deck == "Fate" ? "res://Art/original-fate-back.png" : "res://Art/original-dynasty-back.png"),
+                    ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize,
+                    StretchMode = TextureRect.StretchModeEnum.Scale,
+                    MouseFilter = MouseFilterEnum.Ignore,
+                    Position = new(i * 3, -i * 3),
+                    Size = new(158, 222)
+                };
                 _anchor.AddChild(back);
             }
             _anchorLabel = Palette.Wrapped("Rest of deck", 20, Palette.Gold); _anchorLabel.HorizontalAlignment = HorizontalAlignment.Center;

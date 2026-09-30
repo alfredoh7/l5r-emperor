@@ -11,8 +11,8 @@ public partial class Main
     private double _battlePresentationClock, _battleVisualTime;
     private long _presentedResolutionVersion = -1;
     private string _battleOutcomeText = "";
-    private string _battleDefeatHeadline="", _battleDefeatCause="";
-    private double _outcomeHold=1.25;
+    private string _battleDefeatHeadline = "", _battleDefeatCause = "";
+    private double _outcomeHold = 1.25;
     private double _staticOutcomeUntil;
     private bool _actionOutcome;
     private readonly Dictionary<(int Owner, int Province), double> _fallTimes = [];
@@ -23,6 +23,7 @@ public partial class Main
     // No fabricated intermediate rules state, prediction or command is introduced.
     private void PrepareBattlePresentation()
     {
+        if (_battlefieldReviewView is not null) return;
         var next = _session.Snapshot!;
         if (!_tableLayoutSeen || _presentationRoom != next.RoomCode || _motionView is null || next.View.Version < _motionView.Version || next.View.ViewerId != _motionView.ViewerId || next.View.Scenario != _motionView.Scenario)
         { _fallTimes.Clear(); _presentationSnapshot = null; _battlePresentationStage = 0; _presentedResolutionVersion = -1; _motionView = null; _tableLayoutSeen = false; }
@@ -35,14 +36,14 @@ public partial class Main
         _presentedResolutionVersion = next.View.Version;
         _battleOutcomeText = events.FirstOrDefault(e => e.Type == "provinceDestroyed")?.Message
             ?? events.First(e => e.Type is "battleResolved" or "unitDestroyed" or "attachmentDestroyed").Message;
-        var casualties=events.Where(e=>e.Type is "unitDestroyed" or "attachmentDestroyed").ToArray();
-        var visible=BattleJournal.Visible(_motionView).Where(c=>c.Definition is not null).DistinctBy(c=>c.Id).ToDictionary(c=>c.Id);
-        var names=casualties.Select(e=>e.CardId is { } id && visible.TryGetValue(id,out var card)?card.Definition!.Name:e.Message).ToArray();
-        _battleDefeatHeadline=names.Length>0 ? string.Join(" · ",names.Take(2))+" destroyed"+(names.Length>2?$" · +{names.Length-2}":"") : _battleOutcomeText;
-        _battleDefeatCause=events.Any(e=>e.Type=="battleResolved")?"Battle resolution": "Battle action";
-        _actionOutcome=!events.Any(e=>e.Type=="battleResolved");
-        _outcomeHold=names.Length>1?1.8:1.35;
-        if(_reducedMotion) { _staticOutcomeUntil=_battleVisualTime+3; return; }
+        var casualties = events.Where(e => e.Type is "unitDestroyed" or "attachmentDestroyed").ToArray();
+        var visible = BattleJournal.Visible(_motionView).Where(c => c.Definition is not null).DistinctBy(c => c.Id).ToDictionary(c => c.Id);
+        var names = casualties.Select(e => e.CardId is { } id && visible.TryGetValue(id, out var card) ? card.Definition!.Name : e.Message).ToArray();
+        _battleDefeatHeadline = names.Length > 0 ? string.Join(" · ", names.Take(2)) + " destroyed" + (names.Length > 2 ? $" · +{names.Length - 2}" : "") : _battleOutcomeText;
+        _battleDefeatCause = events.Any(e => e.Type == "battleResolved") ? "Battle resolution" : "Battle action";
+        _actionOutcome = !events.Any(e => e.Type == "battleResolved");
+        _outcomeHold = names.Length > 1 ? 1.8 : 1.35;
+        if (_reducedMotion) { _staticOutcomeUntil = _battleVisualTime + 3; return; }
         _presentationSnapshot = next with { View = _motionView, Actions = [] };
         _battlePresentationStage = 1; _battlePresentationClock = 0;
         _chosen = null; _selected = null; _expandedUnits.Clear(); _assignments.Clear(); _sources.Clear(); _assignmentUnit = null;
@@ -51,7 +52,7 @@ public partial class Main
     private void ProcessBattlePresentation(double delta)
     {
         _battleVisualTime += delta;
-        if(!PresentationBusy && _defeatBanner.Visible && _battleVisualTime>=_staticOutcomeUntil) RenderBattleFeedback();
+        if (!PresentationBusy && _defeatBanner.Visible && _battleVisualTime >= _staticOutcomeUntil) RenderBattleFeedback();
         if (!PresentationBusy) return;
         if (_session.Snapshot is null) { _battlePresentationStage = 0; _presentationSnapshot = null; return; }
         _battlePresentationClock += delta;
@@ -84,15 +85,16 @@ public partial class Main
         var defender = View.Players.Single(p => p.Id != View.ActivePlayerId);
         foreach (var (index, court) in _battleCourts)
         {
+            if (!CourtConnectsToProvince(index)) continue;
             var province = _matTargets.FirstOrDefault(s => s.Id == $"province:{defender.Id}:{index}");
             if (province is null) continue;
             var above = province.Bounds.GetCenter().Y < court.GetCenter().Y;
             var edge = new Vector2(court.GetCenter().X, above ? court.Position.Y : court.End.Y);
             var reveal = _matSections.RevealProgress($"battle:{defender.Id}:{index}");
-            BattleInkArt.Neck(canvas, edge, above, new Color(1,1,1,reveal));
+            BattleInkArt.Neck(canvas, edge, above, new Color(1, 1, 1, reveal));
 
         }
-        foreach (var (unit,owner,origin) in ProposedUnitPlacements())
+        foreach (var (unit, owner, origin) in ProposedUnitPlacements())
         {
             var cards = owner.Home.Concat(owner.Army).Where(c => c.AttachedTo == unit.Id).Append(unit).ToArray();
             for (var i = 0; i < cards.Length; i++)
@@ -116,19 +118,20 @@ public partial class Main
             for (var i = 0; i < 4; i++) canvas.DrawDashedLine(corners[i], corners[i + 1], new Color(.57f, .85f, .90f, .65f), 1.5f, 8, true);
         }
         foreach (var player in View.Players)
-        foreach (var province in player.Provinces.Where(p => p.Destroyed))
-        {
-            var key = (player.Id, province.Index);
-            if (!_fallTimes.ContainsKey(key)) _fallTimes[key] = _battlePresentationStage == 2 ? -1 : -10;
-            var start = _fallTimes[key];
-            var progress = start < -2 || _reducedMotion ? 1 : start < 0 ? 0 : Math.Clamp((float)(_battleVisualTime - start) / 1.15f, 0, 1);
-            var width = Math.Min(CardHeight + 8, _laneWidths[province.Index] - 12);
-            var rect = new Rect2(SlotX(player, province.Index + 2) + (CardHeight - width) / 2,
-                ProvinceRowY(player) + PlaneHeight(CardHeight) + MatPadding, width, 64);
-            var frayed=new Rect2(rect.Position.X,ProvinceRowY(player)-MatHeader,width,MatHeader+PlaneHeight(CardHeight)+ProvinceThresholdArt.Footer+MatPadding);
-            BattleEscalationArt.Frayed(canvas,frayed,progress);
-            BattleInkArt.Fallen(canvas, rect, province.Index + 1, progress);
-        }
+            foreach (var province in player.Provinces.Where(p => p.Destroyed))
+            {
+                if (player.Id != View.ActivePlayerId && _battleCourts.ContainsKey(province.Index) && BattlefieldProvince(province.Index) is null) continue;
+                var key = (player.Id, province.Index);
+                if (!_fallTimes.ContainsKey(key)) _fallTimes[key] = _battlePresentationStage == 2 ? -1 : -10;
+                var start = _fallTimes[key];
+                var progress = start < -2 || _reducedMotion ? 1 : start < 0 ? 0 : Math.Clamp((float)(_battleVisualTime - start) / 1.15f, 0, 1);
+                var width = Math.Min(CardHeight + 8, _laneWidths[province.Index] - 12);
+                var rect = new Rect2(SlotX(player, province.Index + 2) + (CardHeight - width) / 2,
+                    ProvinceRowY(player) + PlaneHeight(CardHeight) + MatPadding, width, 64);
+                var frayed = new Rect2(rect.Position.X, ProvinceRowY(player) - MatHeader, width, MatHeader + PlaneHeight(CardHeight) + ProvinceThresholdArt.Footer + MatPadding);
+                BattleEscalationArt.Frayed(canvas, frayed, progress);
+                BattleInkArt.Fallen(canvas, rect, province.Index + 1, progress);
+            }
     }
 }
 

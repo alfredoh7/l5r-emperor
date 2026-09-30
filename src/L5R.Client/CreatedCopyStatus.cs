@@ -48,7 +48,7 @@ public partial class CreatedCopySeal : Button
         var corners = CardAnchor.FaceCornersInCanvas().Select(p => inverse * p).ToArray();
         var diameter = CardAnchor.ProjectToScreen is null ? Math.Clamp(CardAnchor.FaceHeight * .17f, 22, 48) : Math.Max(24, CardAnchor.FaceHeight * .20f);
         var extent = Vector2.One * diameter;
-        if (CardAnchor.ProjectToScreen is {} project)
+        if (CardAnchor.ProjectToScreen is { } project)
         {
             var transform = CardAnchor.GetGlobalTransform();
             var corner = new Vector2(corners.Min(p => p.X), corners.Max(p => p.Y));
@@ -58,7 +58,7 @@ public partial class CreatedCopySeal : Button
             extent.Y = Math.Max(extent.Y, minimum / Math.Max(.01f, project(transform * (corner + Vector2.Down)).DistanceTo(project(origin))));
         }
         var left = corners.Min(p => p.X);
-        if (CardAnchor.TokenRail is {} rail)
+        if (CardAnchor.TokenRail is { } rail)
         {
             var body = rail.Body;
             left = Math.Min(left, new[] { body.Position, body.End, new Vector2(body.End.X, body.Position.Y), new Vector2(body.Position.X, body.End.Y) }

@@ -42,9 +42,9 @@ public partial class Main
     {
         var oldTarget = _chosen!.Command!.TargetId;
         _chosen = _chosen with { Command = MultiCommand() }; _alternativeCostConfirmed = false;
-        if (_chosen.Command.TargetId is {} target && oldTarget != target && _chosen.TargetGold?.ContainsKey(target) == true) ResuggestSources();
+        if (_chosen.Command.TargetId is { } target && oldTarget != target && _chosen.TargetGold?.ContainsKey(target) == true) ResuggestSources();
         RenderInspector(); Highlight();
-        if (focus is not null && _inspector.FindChildren("*", "Button", true, false).OfType<MultiTargetFace>().FirstOrDefault(b => b.GetMeta("focus_key").AsString() == focus) is {} button && !button.Disabled)
+        if (focus is not null && _inspector.FindChildren("*", "Button", true, false).OfType<MultiTargetFace>().FirstOrDefault(b => b.GetMeta("focus_key").AsString() == focus) is { } button && !button.Disabled)
             button.CallDeferred(Control.MethodName.GrabFocus);
     }
     private void ToggleMultiCard(string slotId, string id)
@@ -85,9 +85,9 @@ public partial class Main
             var face = new DecisionSourceFace(source, 140); context.AddChild(face); face.Pressed += () => InspectMultiCard(source);
         }
         var explanation = new VBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill }; explanation.AddThemeConstantOverride("separation", 8); context.AddChild(explanation);
-        var label = action.Command!.PerformerId is {} performer ? action.Label.Replace($" ({performer})", "", StringComparison.Ordinal) : action.Label;
+        var label = action.Command!.PerformerId is { } performer ? action.Label.Replace($" ({performer})", "", StringComparison.Ordinal) : action.Label;
         explanation.AddChild(Palette.Wrapped(label, 18));
-        if (action.Command.PerformerId is {} id && FindCard(id) is {} performing)
+        if (action.Command.PerformerId is { } id && FindCard(id) is { } performing)
             explanation.AddChild(Palette.Wrapped("Performer: " + ShortName(performing), 16, Palette.PaperDim));
         _inspector.AddChild(Palette.Wrapped("Choose on the board or below. Click a chosen card again to remove it.", 16, Palette.PaperDim));
         foreach (var slot in MultiUpFront)
@@ -179,7 +179,7 @@ public partial class Main
         _reactionCameraKey = key;
         if (key is null) return;
         if (BattleActive) FocusBattle();
-        else if (_tiles.FirstOrDefault(t => t.Card.Id == View.PendingChoice!.CardId && _world.IsAncestorOf(t)) is {} tile)
+        else if (_tiles.FirstOrDefault(t => t.Card.Id == View.PendingChoice!.CardId && _world.IsAncestorOf(t)) is { } tile)
         {
             var region = new Rect2(ScreenToWorld(ScreenCenter(tile)) - new Vector2(240, 260), new Vector2(480, 520));
             _cameraFitted = false; _cameraGlide = false; _cameraZoom = FitRegion(region); _cameraCenter = region.GetCenter(); ApplyTableCamera();

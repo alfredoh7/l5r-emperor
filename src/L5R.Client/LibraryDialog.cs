@@ -26,12 +26,13 @@ public partial class CatalogueScreen : Control
     public LineEdit Search { get; private set; } = null!;
     public Rect2 InspectorRect => _detail.GetGlobalRect();
     public string SelectedId => _selected?.Id ?? "";
-    private readonly Control _canvas = new(), _header = new(), _checklists = new(), _filters = new(), _detail = new();
+    private readonly Control _canvas = new(), _header = new(), _clans = new(), _filters = new(), _detail = new();
     private Control _backdrop = null!, _detailFrame = null!;
-    private readonly Dictionary<string, Button> _familyButtons = [];
-    private FilterChecklist _clanFilter = null!, _typeFilter = null!, _keywordFilter = null!;
+    private readonly Dictionary<string, Button> _clanButtons = [], _familyButtons = [];
+    private readonly HashSet<string> _selectedClans = [];
+    private FilterChecklist _typeFilter = null!, _keywordFilter = null!;
     private OptionButton _sort = null!, _set = null!;
-    private Button _allCards = null!, _playable = null!, _clear = null!, _back = null!, _closeDetail = null!;
+    private Button _allCards = null!, _playable = null!, _clear = null!, _back = null!, _closeDetail = null!, _selectAllClans = null!, _deselectAllClans = null!;
     private Label _count = null!, _footer = null!;
     private ScrollContainer _detailScroll = null!;
     private VBoxContainer _detailBody = null!;
@@ -50,7 +51,7 @@ public partial class CatalogueScreen : Control
         _previousEmbed = GetViewport().GuiEmbedSubwindows; GetViewport().GuiEmbedSubwindows = true;
         Theme = CatalogueArt.Theme(); MouseFilter = MouseFilterEnum.Stop; FocusMode = FocusModeEnum.All;
         _backdrop = CatalogueArt.Backdrop(); AddChild(_backdrop); _backdrop.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
-        AddChild(_canvas); _canvas.AddChild(_header); _canvas.AddChild(_checklists); _canvas.AddChild(_filters);
+        AddChild(_canvas); _canvas.AddChild(_header); _canvas.AddChild(_clans); _canvas.AddChild(_filters);
         Grid = new CatalogueGrid(Scans); _canvas.AddChild(Grid); Grid.Selected = SelectCard;
         _canvas.AddChild(_detail); _detailFrame = CatalogueArt.Backdrop(); _detail.AddChild(_detailFrame); _detailFrame.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
         _detail.Visible = false;
@@ -59,15 +60,21 @@ public partial class CatalogueScreen : Control
         Search = new LineEdit { PlaceholderText = "Search cards, keywords, or rules…", ClearButtonEnabled = true }; Put(_header, Search, 618, 20, 600, 44); Search.TextChanged += _ => ApplyFilter();
         _clear = CatalogueArt.Button("Clear filters", ResetFilters); _header.AddChild(_clear);
         var clanNames = new[] { "Crab", "Crane", "Dragon", "Lion", "Mantis", "Phoenix", "Scorpion", "Spider", "Unicorn", "Unaligned" };
-        _clanFilter = new FilterChecklist(this, Theme, "Clans", icon: CatalogueArt.Clan); _clanFilter.SetOptions(clanNames); _clanFilter.Changed += ApplyFilter; _checklists.AddChild(_clanFilter.Trigger);
-        _typeFilter = new FilterChecklist(this, Theme, "Types"); _typeFilter.Changed += ApplyFilter; _checklists.AddChild(_typeFilter.Trigger);
+        foreach (var clan in clanNames)
+        {
+            var b = CatalogueArt.Button("", () => ToggleClan(clan)); b.AccessibilityName = clan + " cards"; b.TooltipText = clan + " cards"; _clans.AddChild(b); _clanButtons[clan] = b;
+            b.AddChild(CatalogueArt.Clan(clan)); b.AddChild(CatalogueArt.Label(clan, 18));
+        }
+        _selectAllClans = CatalogueArt.Button("Select all", () => { _selectedClans.Clear(); _selectedClans.UnionWith(clanNames); ApplyFilter(); }); _clans.AddChild(_selectAllClans);
+        _deselectAllClans = CatalogueArt.Button("Deselect all", () => { _selectedClans.Clear(); ApplyFilter(); }); _clans.AddChild(_deselectAllClans);
+        foreach (var family in new[] { "All", "Dynasty", "Fate", "Strongholds" })
+        { var b = CatalogueArt.Button(family, () => { _family = family; ApplyFilter(); }); _filters.AddChild(b); _familyButtons[family] = b; }
+        _typeFilter = new FilterChecklist(this, Theme, "Types"); _typeFilter.Changed += ApplyFilter; _filters.AddChild(_typeFilter.Trigger);
         var keywordOrder = new HBoxContainer(); keywordOrder.AddThemeConstantOverride("separation", 10);
         keywordOrder.AddChild(CatalogueArt.Label("Order:", 16));
         keywordOrder.AddChild(CatalogueArt.Button("A–Z", () => { _keywordMostCommon = false; ApplyFilter(); }));
         keywordOrder.AddChild(CatalogueArt.Button("Most common", () => { _keywordMostCommon = true; ApplyFilter(); }));
-        _keywordFilter = new FilterChecklist(this, Theme, "Keywords", extraHeader: keywordOrder); _keywordFilter.Changed += ApplyFilter; _checklists.AddChild(_keywordFilter.Trigger);
-        foreach (var family in new[] { "All", "Dynasty", "Fate", "Strongholds" })
-        { var b = CatalogueArt.Button(family, () => { _family = family; ApplyFilter(); }); _filters.AddChild(b); _familyButtons[family] = b; }
+        _keywordFilter = new FilterChecklist(this, Theme, "Keywords", extraHeader: keywordOrder); _keywordFilter.Changed += ApplyFilter; _filters.AddChild(_keywordFilter.Trigger);
         var more = CatalogueArt.Button("More filters", ShowAdvanced); more.Name = "MoreFilters"; _filters.AddChild(more);
         _allCards = CatalogueArt.Button("◉  Entire catalogue", () => { _playableOnly = false; ApplyFilter(); }); _filters.AddChild(_allCards);
         _playable = CatalogueArt.Button("○  Playable now", () => { _playableOnly = true; ApplyFilter(); }); _filters.AddChild(_playable);
@@ -89,6 +96,7 @@ public partial class CatalogueScreen : Control
         var o = new OptionButton { FitToLongestItem = false, ClipText = true }; if (first != "") o.AddItem(first); foreach (var value in values) o.AddItem(value); o.GetPopup().AllowSearch = true; o.GetPopup().MaxSize = new Vector2I(700, 500); o.TooltipText = "Type while this menu is open to jump to an option."; o.ItemSelected += _ => ApplyFilter(); return o;
     }
     private string Value(OptionButton o) => o.Selected <= 0 ? "" : o.GetItemText(o.Selected);
+    private void ToggleClan(string clan) { if (!_selectedClans.Add(clan)) _selectedClans.Remove(clan); ApplyFilter(); }
     private void RefreshTypeOptions()
     {
         var scoped = _family switch
@@ -101,7 +109,7 @@ public partial class CatalogueScreen : Control
     }
     private void RefreshKeywordOptions()
     {
-        var scoped = Data.Filter(Search.Text, _clanFilter.Selected.Count == 0 ? null : _clanFilter.Selected, _family, _typeFilter.Selected.Count == 0 ? null : _typeFilter.Selected, null, _playableOnly, set: _set is null ? "" : Value(_set));
+        var scoped = Data.Filter(Search.Text, _selectedClans.Count == 0 ? null : _selectedClans, _family, _typeFilter.Selected.Count == 0 ? null : _typeFilter.Selected, null, _playableOnly, set: _set is null ? "" : Value(_set));
         var counts = scoped.SelectMany(c => c.Keywords).GroupBy(k => k).ToDictionary(g => g.Key, g => g.Count());
         var ordered = _keywordMostCommon
             ? counts.OrderByDescending(kv => kv.Value).ThenBy(kv => kv.Key, StringComparer.OrdinalIgnoreCase).Select(kv => kv.Key)
@@ -112,23 +120,26 @@ public partial class CatalogueScreen : Control
     {
         if (_loading || Grid is null || _sort is null) return;
         RefreshTypeOptions(); RefreshKeywordOptions();
-        var results = Data.Filter(Search.Text, _clanFilter.Selected.Count == 0 ? null : _clanFilter.Selected, _family, _typeFilter.Selected.Count == 0 ? null : _typeFilter.Selected, _keywordFilter.Selected.Count == 0 ? null : _keywordFilter.Selected, _playableOnly, _sort.GetItemText(_sort.Selected), _set is null ? "" : Value(_set));
+        var results = Data.Filter(Search.Text, _selectedClans.Count == 0 ? null : _selectedClans, _family, _typeFilter.Selected.Count == 0 ? null : _typeFilter.Selected, _keywordFilter.Selected.Count == 0 ? null : _keywordFilter.Selected, _playableOnly, _sort.GetItemText(_sort.Selected), _set is null ? "" : Value(_set));
         Grid.SetCards(results); _count.Text = $"{results.Length:N0} {(results.Length == 1 ? "result" : "results")}  ·  {Data.Cards.Length:N0} cards";
+        foreach (var (key, b) in _clanButtons) Highlight(b, _selectedClans.Contains(key));
         foreach (var (key, b) in _familyButtons) Highlight(b, key == _family);
         _allCards.Text = (_playableOnly ? "○" : "◉") + "  Entire catalogue"; _playable.Text = (_playableOnly ? "◉" : "○") + "  Playable now";
         Highlight(_allCards, !_playableOnly); Highlight(_playable, _playableOnly);
-        _clear.Visible = Search.Text != "" || _clanFilter.Selected.Count > 0 || _family != "All" || _typeFilter.Selected.Count > 0 || _keywordFilter.Selected.Count > 0 || _playableOnly || (_set is not null && Value(_set) != "");
+        _clear.Visible = Search.Text != "" || _selectedClans.Count > 0 || _family != "All" || _typeFilter.Selected.Count > 0 || _keywordFilter.Selected.Count > 0 || _playableOnly || (_set is not null && Value(_set) != "");
         _footer.Text = results.Length == 0 ? "No matching cards · Clear filters or try a shorter search" : "Click a card to inspect  ·  Esc to return";
         if (_selected is not null && !results.Any(c => c.Id == _selected.Id)) CloseInspector();
     }
     private void Highlight(Button b, bool active)
     {
-        var style = Palette.Box(active ? new Color("30271a") : new Color("0a1115"), active ? new Color("d2aa66") : new Color("51442d"), 6, 2);
+        var clan = _clanButtons.ContainsValue(b);
+        var style = Palette.Box(active ? new Color("30271a") : clan ? Colors.Transparent : new Color("0a1115"), active ? new Color("d2aa66") : new Color("51442d"), 6, 2);
+        if (clan && !active) { style.BorderWidthLeft = style.BorderWidthTop = style.BorderWidthBottom = 0; }
         if (active) { style.ShadowColor = new Color(.86f, .65f, .31f, .22f); style.ShadowSize = 6; style.BorderWidthLeft = style.BorderWidthRight = style.BorderWidthTop = style.BorderWidthBottom = 2; }
         b.AddThemeStyleboxOverride("normal", style);
     }
     public void ResetFilters()
-    { _loading = true; Search.Text = ""; _clanFilter.Clear(); _family = "All"; _playableOnly = false; _typeFilter.Clear(); _keywordFilter.Clear(); _set.Selected = 0; _loading = false; ApplyFilter(); }
+    { _loading = true; Search.Text = ""; _selectedClans.Clear(); _family = "All"; _playableOnly = false; _typeFilter.Clear(); _keywordFilter.Clear(); _set.Selected = 0; _loading = false; ApplyFilter(); }
     private void Fit()
     {
         if (Grid is null || Size.X < 100) return;
@@ -137,13 +148,16 @@ public partial class CatalogueScreen : Control
         _canvas.Scale = Vector2.One * scale; _w = Size.X / scale; _h = Size.Y / scale; _canvas.Size = new Vector2(_w, _h);
         _header.Size = new Vector2(_w, 78); Search.Size = new Vector2(Math.Max(300, _w - 1028), 44); _clear.Position = new Vector2(_w - 195, 20); _clear.Size = new Vector2(150, 44);
         var dw = Math.Clamp(_w * .275f, 360, 460); var galleryWidth = _w - 88 - (_detail.Visible ? dw + 24 : 0);
-        _checklists.Position = new Vector2(44, 82); _checklists.Size = new Vector2(galleryWidth, 78);
-        var triggerWidth = Math.Min(220f, (galleryWidth - 24) / 3);
-        var cx = 0f; foreach (var trigger in new[] { _clanFilter.Trigger, _typeFilter.Trigger, _keywordFilter.Trigger }) { trigger.Position = new Vector2(cx, 19); trigger.Size = new Vector2(triggerWidth, 40); cx += triggerWidth + 12; }
+        _clans.Position = new Vector2(44, 82); _clans.Size = new Vector2(galleryWidth, 78);
+        var clanActionsWidth = 224f;
+        var cw = (galleryWidth - clanActionsWidth - 12) / _clanButtons.Count;
+        var i = 0; foreach (var b in _clanButtons.Values) { b.Position = new Vector2(i++ * cw, 0); b.Size = new Vector2(cw - 2, 78); var icon = b.GetChild<Control>(0); icon.Position = new Vector2((cw - 42) / 2, 5); icon.Size = new Vector2(40, 40); var label = b.GetChild<Label>(1); label.Position = new Vector2(0, 46); label.Size = new Vector2(cw, 26); label.HorizontalAlignment = HorizontalAlignment.Center; }
+        var clanActionsX = galleryWidth - clanActionsWidth;
+        _selectAllClans.Position = new Vector2(clanActionsX, 19); _selectAllClans.Size = new Vector2(106, 40);
+        _deselectAllClans.Position = new Vector2(clanActionsX + 112, 19); _deselectAllClans.Size = new Vector2(112, 40);
         _filters.Position = new Vector2(44, 180); _filters.Size = new Vector2(_w - 88, 40); var x = 0f;
         foreach (var (key, b) in _familyButtons) { var width = key == "Strongholds" ? 130 : 84; b.Position = new Vector2(x, 0); b.Size = new Vector2(width, 40); x += width; }
-        x += 18;
-        { var more = _filters.GetNode<Button>("MoreFilters"); more.Position = new Vector2(x, 0); more.Size = new Vector2(126, 40); x += 134; }
+        x += 18; foreach (var b in new Control[] { _typeFilter.Trigger, _keywordFilter.Trigger, _filters.GetNode<Button>("MoreFilters") }) { b.Position = new Vector2(x, 0); b.Size = new Vector2(126, 40); x += 134; }
         x += 12; _allCards.Position = new Vector2(x, 0); _allCards.Size = new Vector2(180, 40); x += 185; _playable.Position = new Vector2(x, 0); _playable.Size = new Vector2(150, 40);
         _sort.Position = new Vector2(_w - 278, 0); _sort.Size = new Vector2(190, 40);
         if (_detail.Visible) { _allCards.Position = new Vector2(0, 49); _playable.Position = new Vector2(190, 49); _sort.Position = new Vector2(galleryWidth - 190, 49); }

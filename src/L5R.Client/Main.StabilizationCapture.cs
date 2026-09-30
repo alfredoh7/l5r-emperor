@@ -8,135 +8,135 @@ public partial class Main
     private bool _stabilizationCaptureStarted;
     private void ProcessStabilizationCapture(double delta)
     {
-        _captureClock+=delta;
-        if(_stabilizationCaptureStarted||_captureClock<1.5)return;
-        _stabilizationCaptureStarted=true;CaptureStabilization();
+        _captureClock += delta;
+        if (_stabilizationCaptureStarted || _captureClock < 1.5) return;
+        _stabilizationCaptureStarted = true; CaptureStabilization();
     }
-    private static (MatchEngine Engine,string Target,string? Source) StabilizationFixture(string mode)
+    private static (MatchEngine Engine, string Target, string? Source) StabilizationFixture(string mode)
     {
-        var s=MatchEngine.CreatePublishedTestMatch(42).State;
-        s.Phase=Phase.Battle;s.ActivePlayerId=1;s.PriorityPlayerId=1;s.CurrentBattleProvince=0;s.UnresolvedBattlefields=[0];
-        CardInstance Add(string def,int owner,Zone zone)
+        var s = MatchEngine.CreatePublishedTestMatch(42).State;
+        s.Phase = Phase.Battle; s.ActivePlayerId = 1; s.PriorityPlayerId = 1; s.CurrentBattleProvince = 0; s.UnresolvedBattlefields = [0];
+        CardInstance Add(string def, int owner, Zone zone)
         {
-            var c=new CardInstance{Id="stabilization-native-"+s.Cards.Count,DefinitionId=def,OwnerId=owner,Zone=zone,FaceUp=true,ProvinceIndex=zone==Zone.Battlefield?0:null};
-            s.Cards[c.Id]=c;if(zone==Zone.Hand)s.Players[owner].Hand.Add(c.Id);return c;
+            var c = new CardInstance { Id = "stabilization-native-" + s.Cards.Count, DefinitionId = def, OwnerId = owner, Zone = zone, FaceUp = true, ProvinceIndex = zone == Zone.Battlefield ? 0 : null };
+            s.Cards[c.Id] = c; if (zone == Zone.Hand) s.Players[owner].Hand.Add(c.Id); return c;
         }
-        GameCommand? trigger=null;string target;string? source=null;
-        if(mode.Contains("equip"))
+        GameCommand? trigger = null; string target; string? source = null;
+        if (mode.Contains("equip"))
         {
-            s.Phase=Phase.Action;s.ActivePlayerId=0;s.PriorityPlayerId=0;s.CurrentBattleProvince=null;s.UnresolvedBattlefields=[];s.Players[0].Clan="Lion";
-            foreach(var c in s.Cards.Values.Where(c=>c.OwnerId==0))c.Bowed=true;
-            Add("oracle-l5r-430",0,Zone.Home);
-            target=Add(mode.Contains("free")?"oracle-l5r-5112":"oracle-l5r-2060",0,Zone.Home).Id;
-            source=Add("oracle-l5r-6481",0,Zone.Hand).Id;
+            s.Phase = Phase.Action; s.ActivePlayerId = 0; s.PriorityPlayerId = 0; s.CurrentBattleProvince = null; s.UnresolvedBattlefields = []; s.Players[0].Clan = "Lion";
+            foreach (var c in s.Cards.Values.Where(c => c.OwnerId == 0)) c.Bowed = true;
+            Add("oracle-l5r-430", 0, Zone.Home);
+            target = Add(mode.Contains("free") ? "oracle-l5r-5112" : "oracle-l5r-2060", 0, Zone.Home).Id;
+            source = Add("oracle-l5r-6481", 0, Zone.Hand).Id;
         }
-        else if(mode.Contains("brash"))
+        else if (mode.Contains("brash"))
         {
-            s.Phase=Phase.InfantryDeclaration;s.CurrentBattleProvince=null;s.UnresolvedBattlefields=[];
-            var brash=Add("oracle-l5r-10058",1,Zone.Home);target=brash.Id;
-            trigger=new("attack",1,s.Version,Assignments:new(){[brash.Id]=0});
+            s.Phase = Phase.InfantryDeclaration; s.CurrentBattleProvince = null; s.UnresolvedBattlefields = [];
+            var brash = Add("oracle-l5r-10058", 1, Zone.Home); target = brash.Id;
+            trigger = new("attack", 1, s.Version, Assignments: new() { [brash.Id] = 0 });
         }
-        else if(mode.Contains("bow"))
+        else if (mode.Contains("bow"))
         {
-            source=Add("oracle-l5r-8521",0,Zone.Battlefield).Id;
-            var bower=Add("oracle-l5r-6885",1,Zone.Battlefield);var bowed=Add("oracle-l5r-2060",0,Zone.Battlefield);target=bowed.Id;
-            trigger=new("useAbility",1,s.Version,CardId:bower.Id,TargetId:bowed.Id,AbilityId:"horibe-bow");
+            source = Add("oracle-l5r-8521", 0, Zone.Battlefield).Id;
+            var bower = Add("oracle-l5r-6885", 1, Zone.Battlefield); var bowed = Add("oracle-l5r-2060", 0, Zone.Battlefield); target = bowed.Id;
+            trigger = new("useAbility", 1, s.Version, CardId: bower.Id, TargetId: bowed.Id, AbilityId: "horibe-bow");
         }
         else
         {
-            source=Add("oracle-l5r-10056",0,Zone.Home).Id;
-            var mover=Add("oracle-l5r-4937",1,Zone.Battlefield);var affected=Add("oracle-l5r-2060",0,Zone.Battlefield);target=affected.Id;
-            trigger=new("useAbility",1,s.Version,CardId:mover.Id,TargetId:affected.Id,AbilityId:"incapacitated");
+            source = Add("oracle-l5r-10056", 0, Zone.Home).Id;
+            var mover = Add("oracle-l5r-4937", 1, Zone.Battlefield); var affected = Add("oracle-l5r-2060", 0, Zone.Battlefield); target = affected.Id;
+            trigger = new("useAbility", 1, s.Version, CardId: mover.Id, TargetId: affected.Id, AbilityId: "incapacitated");
         }
-        var engine=(MatchEngine)typeof(MatchEngine).GetMethod("FromTestState",BindingFlags.NonPublic|BindingFlags.Static)!.Invoke(null,[s])!;
-        if(trigger is not null){var result=engine.Execute(trigger);if(!result.Accepted)throw new Exception(result.Error);}
-        return(engine,target,source);
+        var engine = (MatchEngine)typeof(MatchEngine).GetMethod("FromTestState", BindingFlags.NonPublic | BindingFlags.Static)!.Invoke(null, [s])!;
+        if (trigger is not null) { var result = engine.Execute(trigger); if (!result.Accepted) throw new Exception(result.Error); }
+        return (engine, target, source);
     }
-    private static IEnumerable<Button> StabilizationButtons(Node node) => node.GetChildren().SelectMany(c=>
-        c is Button b ? new[]{b}.Concat(StabilizationButtons(c)) : StabilizationButtons(c));
-    private Button StabilizationButton(string text) => StabilizationButtons(this).FirstOrDefault(b=>b.IsVisibleInTree()&&!b.Disabled&&b.Text.StartsWith(text,StringComparison.Ordinal))
-        ?? throw new Exception("Missing enabled native button: "+text);
+    private static IEnumerable<Button> StabilizationButtons(Node node) => node.GetChildren().SelectMany(c =>
+        c is Button b ? new[] { b }.Concat(StabilizationButtons(c)) : StabilizationButtons(c));
+    private Button StabilizationButton(string text) => StabilizationButtons(this).FirstOrDefault(b => b.IsVisibleInTree() && !b.Disabled && b.Text.StartsWith(text, StringComparison.Ordinal))
+        ?? throw new Exception("Missing enabled native button: " + text);
     private async Task StabilizationClick(Control target)
     {
-        var p=target.GetGlobalTransformWithCanvas()*(target.Size/2);
-        var viewport=target.GetViewport();
-        if(viewport != GetViewport())
+        var p = target.GetGlobalTransformWithCanvas() * (target.Size / 2);
+        var viewport = target.GetViewport();
+        if (viewport != GetViewport())
         {
             // Embedded modal windows have their own GUI focus and input viewport.
             target.GrabFocus();
-            viewport.PushInput(new InputEventKey{Keycode=Key.Enter,Pressed=true},true);
-            viewport.PushInput(new InputEventKey{Keycode=Key.Enter,Pressed=false},true);
-            await EventFrames(12);return;
+            viewport.PushInput(new InputEventKey { Keycode = Key.Enter, Pressed = true }, true);
+            viewport.PushInput(new InputEventKey { Keycode = Key.Enter, Pressed = false }, true);
+            await EventFrames(12); return;
         }
-        void Push(InputEventMouse input){input.SetMeta(CaptureMouseTag,true);viewport.PushInput(input,true);}
-        Push(new InputEventMouseMotion{Position=p,GlobalPosition=p});
-        Push(new InputEventMouseButton{Position=p,GlobalPosition=p,ButtonIndex=MouseButton.Left,ButtonMask=MouseButtonMask.Left,Pressed=true});
-        Push(new InputEventMouseButton{Position=p,GlobalPosition=p,ButtonIndex=MouseButton.Left,Pressed=false});
+        void Push(InputEventMouse input) { input.SetMeta(CaptureMouseTag, true); viewport.PushInput(input, true); }
+        Push(new InputEventMouseMotion { Position = p, GlobalPosition = p });
+        Push(new InputEventMouseButton { Position = p, GlobalPosition = p, ButtonIndex = MouseButton.Left, ButtonMask = MouseButtonMask.Left, Pressed = true });
+        Push(new InputEventMouseButton { Position = p, GlobalPosition = p, ButtonIndex = MouseButton.Left, Pressed = false });
         await EventFrames(12);
     }
     private async void CaptureStabilization()
     {
         try
         {
-            void Check(bool value,string message){if(!value)throw new Exception(message);}
-            var fixture=StabilizationFixture(_captureMode);var other=_captureMode.Contains("opponent");
-            _autoOpponent=false;_reducedMotion=true;_session.StartEventProbe(fixture.Engine,other?1:0);
-            _uiQueue.Clear();_presentationSnapshot=null;_battlePresentationStage=0;_motionView=null;_selected=null;_chosen=null;
-            Render();ResetTableCamera();GetWindow().GrabFocus();await EventFrames(12);
-            for(var n=0;n<180&&(_turnBloom.Playing||!GetWindow().HasFocus());n++)await EventFrames(1);
-            Check(GetWindow().HasFocus(),"Native window did not focus");
-            var before=View.Version;var hand=Self.HandCount;
-            if(other)
+            void Check(bool value, string message) { if (!value) throw new Exception(message); }
+            var fixture = StabilizationFixture(_captureMode); var other = _captureMode.Contains("opponent");
+            _autoOpponent = false; _reducedMotion = true; _session.StartEventProbe(fixture.Engine, other ? 1 : 0);
+            _uiQueue.Clear(); _presentationSnapshot = null; _battlePresentationStage = 0; _motionView = null; _selected = null; _chosen = null;
+            Render(); ResetTableCamera(); GetWindow().GrabFocus(); await EventFrames(12);
+            for (var n = 0; n < 180 && (_turnBloom.Playing || !GetWindow().HasFocus()); n++) await EventFrames(1);
+            Check(GetWindow().HasFocus(), "Native window did not focus");
+            var before = View.Version; var hand = Self.HandCount;
+            if (other)
             {
-                Check(Actions.All(a=>a.Type is "wait" or "concede"),"Other seat received private/acting choices");
-                Check(!StabilizationButtons(_root).Any(b=>b.IsVisibleInTree()&&b.Text=="Draw 1 card"),"Opponent has draw button");
+                Check(Actions.All(a => a.Type is "wait" or "concede"), "Other seat received private/acting choices");
+                Check(!StabilizationButtons(_root).Any(b => b.IsVisibleInTree() && b.Text == "Draw 1 card"), "Opponent has draw button");
             }
-            else if(_captureMode.Contains("brash"))
+            else if (_captureMode.Contains("brash"))
             {
-                Check(View.PendingChoice?.Type=="brashDraw"&&_eventSidebar.Visible,"Brash panel absent");
+                Check(View.PendingChoice?.Type == "brashDraw" && _eventSidebar.Visible, "Brash panel absent");
                 GetViewport().GetTexture().GetImage().SavePng(_capturePath!);
-                var decline=_captureMode.Contains("decline");await StabilizationClick(StabilizationButton(decline?"Decline draw":"Draw 1 card"));
-                Check(View.Version==before+1&&View.PendingChoice is null&&View.Phase==Phase.DefenseAssignment,"Brash failed to resume");
-                Check(Self.HandCount==hand+(decline?0:1),"Wrong Brash draw count");
+                var decline = _captureMode.Contains("decline"); await StabilizationClick(StabilizationButton(decline ? "Decline draw" : "Draw 1 card"));
+                Check(View.Version == before + 1 && View.PendingChoice is null && View.Phase == Phase.DefenseAssignment, "Brash failed to resume");
+                Check(Self.HandCount == hand + (decline ? 0 : 1), "Wrong Brash draw count");
             }
-            else if(_captureMode.Contains("equip"))
+            else if (_captureMode.Contains("equip"))
             {
                 // Select the public card, then use the actual payment controls and viewport input.
-                SelectCard(FindCard(fixture.Source!)!);await EventFrames();
-                var cost=_captureMode.Contains("free")?0:2;
-                var option=Actions.Single(a=>a.Type=="equip"&&a.CardId==fixture.Source&&a.Enabled);
-                Check(option.TargetIds!.Contains(fixture.Target),"Expected target missing from quoted group");
+                SelectCard(FindCard(fixture.Source!)!); await EventFrames();
+                var cost = _captureMode.Contains("free") ? 0 : 2;
+                var option = Actions.Single(a => a.Type == "equip" && a.CardId == fixture.Source && a.Enabled);
+                Check(option.TargetIds!.Contains(fixture.Target), "Expected target missing from quoted group");
                 await StabilizationClick(StabilizationButton(option.Label));
-                ChooseTarget(fixture.Target!);await EventFrames();
-                var button=StabilizationButton(cost==0?"Confirm action":"Confirm action · 2 Gold");
-                Check(_chosen is not null && QuoteFor(_chosen)?.Cost==cost,"Client did not retain authoritative quote");
-                GetViewport().GetTexture().GetImage().SavePng(_capturePath!);await StabilizationClick(button);
-                Check(View.Version==before+1&&FindCard(fixture.Source!)?.Zone==Zone.Attached,"Discounted equip did not execute");
-                Check(FindCard(fixture.Source!)?.AttachedTo==fixture.Target,"Equipment attached to wrong target");
+                ChooseTarget(fixture.Target!); await EventFrames();
+                var button = StabilizationButton(cost == 0 ? "Confirm action" : "Confirm action · 2 Gold");
+                Check(_chosen is not null && QuoteFor(_chosen)?.Cost == cost, "Client did not retain authoritative quote");
+                GetViewport().GetTexture().GetImage().SavePng(_capturePath!); await StabilizationClick(button);
+                Check(View.Version == before + 1 && FindCard(fixture.Source!)?.Zone == Zone.Attached, "Discounted equip did not execute");
+                Check(FindCard(fixture.Source!)?.AttachedTo == fixture.Target, "Equipment attached to wrong target");
             }
             else
             {
-                var bow=_captureMode.Contains("bow");Check(View.PendingChoice?.Type==(bow?"bowReaction":"beforeActionReaction"),"Reaction not opened by engine");
-                var option=Actions.Single(a=>a.Enabled&&a.Command?.AbilityId==(bow?"hizumi-negate-straighten":"tamoko-negate"));
+                var bow = _captureMode.Contains("bow"); Check(View.PendingChoice?.Type == (bow ? "bowReaction" : "beforeActionReaction"), "Reaction not opened by engine");
+                var option = Actions.Single(a => a.Enabled && a.Command?.AbilityId == (bow ? "hizumi-negate-straighten" : "tamoko-negate"));
                 GetViewport().GetTexture().GetImage().SavePng(_capturePath!);
-                if(!_captureMode.Contains("pass"))
+                if (!_captureMode.Contains("pass"))
                 {
                     await StabilizationClick(StabilizationButton(option.Label));
-                    if(bow){Check(View.Version==before,"Target selection mutated the match");GetViewport().GetTexture().GetImage().SavePng(_capturePath+".target.png");await StabilizationClick(StabilizationButton("Confirm action"));}
-                    Check(View.Version==before+1,"Reaction did not execute exactly once");
+                    if (bow) { Check(View.Version == before, "Target selection mutated the match"); GetViewport().GetTexture().GetImage().SavePng(_capturePath + ".target.png"); await StabilizationClick(StabilizationButton("Confirm action")); }
+                    Check(View.Version == before + 1, "Reaction did not execute exactly once");
                 }
-                for(var n=0;n<4&&View.PendingChoice is not null;n++)
+                for (var n = 0; n < 4 && View.PendingChoice is not null; n++)
                 {
-                    if(View.ViewerId!=View.PriorityPlayerId){await StabilizationClick(StabilizationButton("Pass device"));await StabilizationClick(StabilizationButton("I'm ready"));await EventFrames();}
+                    if (View.ViewerId != View.PriorityPlayerId) { await StabilizationClick(StabilizationButton("Pass device")); await StabilizationClick(StabilizationButton("I'm ready")); await EventFrames(); }
                     await StabilizationClick(StabilizationButton("Pass reaction"));
                 }
-                Check(View.PendingChoice is null,"Reaction failed to resume");
-                var target=FindCard(fixture.Target)!;
-                Check(bow?target.StraightenBlocked:target.Zone==(_captureMode.Contains("pass")?Zone.Home:Zone.Battlefield),"Wrong reaction outcome");
+                Check(View.PendingChoice is null, "Reaction failed to resume");
+                var target = FindCard(fixture.Target)!;
+                Check(bow ? target.StraightenBlocked : target.Zone == (_captureMode.Contains("pass") ? Zone.Home : Zone.Battlefield), "Wrong reaction outcome");
             }
-            await EventFrames();GetViewport().GetTexture().GetImage().SavePng(other?_capturePath!:_capturePath+".resolved.png");
-            GD.Print("STABILIZATION_NATIVE_PASS: "+_captureMode);GetTree().Quit();
+            await EventFrames(); GetViewport().GetTexture().GetImage().SavePng(other ? _capturePath! : _capturePath + ".resolved.png");
+            GD.Print("STABILIZATION_NATIVE_PASS: " + _captureMode); GetTree().Quit();
         }
-        catch(Exception e){GD.PushError(e.ToString());RenderingServer.ForceDraw(false);GetViewport().GetTexture().GetImage().SavePng(_capturePath+".failure.png");GetTree().Quit(1);}
+        catch (Exception e) { GD.PushError(e.ToString()); RenderingServer.ForceDraw(false); GetViewport().GetTexture().GetImage().SavePng(_capturePath + ".failure.png"); GetTree().Quit(1); }
     }
 }

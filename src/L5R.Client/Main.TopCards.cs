@@ -28,7 +28,7 @@ public partial class Main
         if (!LookDecisionActive || PresentationBusy) { ClearLookPanel(); return false; }
         _guide.Visible = false;
         var pending = View.PendingChoice!;
-        if (View.PendingLook is not {} look || pending.PlayerId != View.ViewerId || View.PriorityPlayerId != View.ViewerId)
+        if (View.PendingLook is not { } look || pending.PlayerId != View.ViewerId || View.PriorityPlayerId != View.ViewerId)
         {
             ClearLookPanel();
             _sidebarHeader.AddChild(Palette.Text("PRIVATE DECK VIEW", 26, title: true));
@@ -47,13 +47,13 @@ public partial class Main
             {
                 if (!DecisionCanSubmit || key != _lookViewKey || View.PendingLook is null) return;
                 var option = Actions.FirstOrDefault(a => a.Enabled && a.Type == "arrangeTopCards" && a.Command is not null);
-                if (option?.Command is {} command) _ = Submit(command with { CardIds = tokens });
+                if (option?.Command is { } command) _ = Submit(command with { CardIds = tokens });
             };
             _lookPanel.DeckChosen += deck =>
             {
                 if (!DecisionCanSubmit || key != _lookViewKey) return;
                 var option = Actions.FirstOrDefault(a => a.Enabled && a.Type == "chooseLookDeck" && a.Command?.Choice == deck.Deck && a.Command.TargetPlayerId == deck.OwnerId);
-                if (option?.Command is {} command) _ = Submit(command);
+                if (option?.Command is { } command) _ = Submit(command);
             };
             _lookPanel.Inspected += card =>
             {

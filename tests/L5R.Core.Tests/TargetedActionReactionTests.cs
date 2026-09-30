@@ -90,9 +90,9 @@ internal static class TargetedActionReactionTests
         // Defensive projection: a queued command is not itself permission to expose its
         // card ID. A Strategy still in a private hand must not become a public mount.
         s = Table(); var hidden = Add(s, "training-honor-cost-strategy", 1, Zone.Hand);
-        s.PendingAnnouncedAction = new("useAbility",1,s.Version,hidden.Id,AbilityId:"training-honor-cost-attack");
+        s.PendingAnnouncedAction = new("useAbility", 1, s.Version, hidden.Id, AbilityId: "training-honor-cost-attack");
         e = MatchEngine.FromTestState(s); Eq(e.GetView(0).PendingAttack, null);
-        s.PendingAnnouncedAction = new("useAbility",1,s.Version,castle.Id,AbilityId:Bow);
+        s.PendingAnnouncedAction = new("useAbility", 1, s.Version, castle.Id, AbilityId: Bow);
         e = MatchEngine.FromTestState(s); Eq(e.GetView(0).PendingAttack, null);
     }
 

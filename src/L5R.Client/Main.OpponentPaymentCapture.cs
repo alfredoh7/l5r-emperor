@@ -98,7 +98,7 @@ public partial class Main
             SupportRequire(_sources.Count == 0 && View.Version == version, "Zero payment silently selected sources");
             var source = _inspector.FindChildren("*", "Button", true, false).OfType<DecisionSourceFace>().Single();
             var point = source.GetGlobalRect().GetCenter(); PushCaptureMouse(new InputEventMouseMotion { Position = point, GlobalPosition = point });
-            for(var i = 0; i < 240 && !ContainsEitherPreview(GetTree().Root); i++) await EventFrames(1);
+            for (var i = 0; i < 240 && !ContainsEitherPreview(GetTree().Root); i++) await EventFrames(1);
             SupportRequire(ContainsEitherPreview(GetTree().Root), "Payment source has no large hover preview; hovered=" + GetViewport().GuiGetHoveredControl()?.GetPath() + "; focus=" + GetWindow().HasFocus());
             GetViewport().GetTexture().GetImage().SavePng(Path.ChangeExtension(_capturePath, null) + "-hover.png"); HideTableTooltip();
             // Keyboard input into the native amount button; repeated keys retain focus after rebuilding the panel.

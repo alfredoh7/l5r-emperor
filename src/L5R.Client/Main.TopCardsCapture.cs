@@ -34,7 +34,7 @@ public partial class Main
         if (mode == "any")
         {
             var province = state.Players[1].Provinces[0];
-            if (province.CardId is {} id) { state.Cards[id].DefinitionId = "oracle-l5r-7253"; state.Cards[id].FaceUp = false; }
+            if (province.CardId is { } id) { state.Cards[id].DefinitionId = "oracle-l5r-7253"; state.Cards[id].FaceUp = false; }
             else SupportFixtureCard(state, 7253, 1, Zone.Province, 0);
             ability = "";
         }
@@ -57,7 +57,7 @@ public partial class Main
     }
     private void BuildLookReviewControls()
     {
-        if (_root.GetNodeOrNull<Control>("LookReviewControls") is {} old) { _root.RemoveChild(old); old.QueueFree(); }
+        if (_root.GetNodeOrNull<Control>("LookReviewControls") is { } old) { _root.RemoveChild(old); old.QueueFree(); }
         var row = new HBoxContainer { Name = "LookReviewControls", ZIndex = 91 }; row.AddThemeConstantOverride("separation", 6);
         var buttons = new List<Button>();
         foreach (var (label, mode) in new[] { ("Reorder", "reorder"), ("Take + top", "take"), ("Take + bottom", "bottom"), ("Top or bottom", "top-bottom"), ("Any Fate deck", "any"), ("Show + take", "show"), ("Fixed order", "fixed"), ("Mixed choices*", "mixed") })
@@ -69,13 +69,14 @@ public partial class Main
     }
     private void FitLookReviewControls()
     {
-        if (_root.GetNodeOrNull<Control>("LookReviewControls") is {} row)
+        if (_root.GetNodeOrNull<Control>("LookReviewControls") is { } row)
             row.Size = new(Math.Min(1160, _layoutWidth - SidebarWidth - 22 - 350 - 18), 46);
     }
     private async Task RunLookReview(Func<Task> action)
     {
         if (_lookReviewBusy) return; _lookReviewBusy = true; foreach (var b in _lookReviewButtons) b.Disabled = true;
-        try { await action(); } catch (Exception e) { SetNotice("Restart a viewer scenario to prepare it again."); GD.PushWarning(e.ToString()); }
+        try { await action(); }
+        catch (Exception e) { SetNotice("Restart a viewer scenario to prepare it again."); GD.PushWarning(e.ToString()); }
         finally { _lookReviewBusy = false; foreach (var b in _lookReviewButtons) if (IsInstanceValid(b)) b.Disabled = false; }
     }
     private async Task LookKey(Key key)
@@ -169,7 +170,7 @@ public partial class Main
             SupportRequire(_lookPanel.Order.SequenceEqual(new[] { 1, 0, 2 }) && View.Version == version, "Keyboard insertion failed or submitted");
             await SupportClick(_lookPanel.UndoButton);
             await DragLook(2, "top", capture: "-drag-reorder");
-            SupportRequire(_lookPanel.Order.SequenceEqual(new[] { 2, 0, 1 }) && _lookPanel.PositionLabel(2).Contains("Drawn first"), $"Drag reorder or first-drawn label is wrong: {string.Join(",",_lookPanel.Order)}; label={_lookPanel.PositionLabel(2)}; drop={GetViewport().GuiIsDragSuccessful()}");
+            SupportRequire(_lookPanel.Order.SequenceEqual(new[] { 2, 0, 1 }) && _lookPanel.PositionLabel(2).Contains("Drawn first"), $"Drag reorder or first-drawn label is wrong: {string.Join(",", _lookPanel.Order)}; label={_lookPanel.PositionLabel(2)}; drop={GetViewport().GuiIsDragSuccessful()}");
             await SupportCapture("-reorder");
             _lookPanel.Face(1).GrabFocus(); await LookKey(Key.I);
             SupportRequire(_lookInspection?.Visible == true && View.Version == version, "Full inspection failed or submitted");

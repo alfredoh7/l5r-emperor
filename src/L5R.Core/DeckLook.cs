@@ -338,8 +338,11 @@ public sealed partial class MatchEngine
         var spec = LookSpecOf(look); var source = Card(look.SourceCardId); var sourceName = Definition(source).Name;
         if (look.Stage == "ChooseDeck")
             return new("ChooseDeck", source.Id, sourceName, spec.Label, _state.PendingChoice.Prompt,
-                spec.Targets.Select(t => { var owner = LookOwner(look, t); return new LookDeckChoiceView(t.Deck, owner, owner == viewerId,
-                    $"Top {look.Count} cards of {(owner == viewerId ? "your" : "your opponent's")} {t.Deck} deck", LookDeckList(owner, t.Deck).Count); }).ToArray(),
+                spec.Targets.Select(t =>
+                {
+                    var owner = LookOwner(look, t); return new LookDeckChoiceView(t.Deck, owner, owner == viewerId,
+                    $"Top {look.Count} cards of {(owner == viewerId ? "your" : "your opponent's")} {t.Deck} deck", LookDeckList(owner, t.Deck).Count);
+                }).ToArray(),
                 null, null, false, look.Count, 0, null, null, spec.Remainder, spec.Reorder);
         var cards = ViewedCards(look);
         var offered = OfferedDispositions(spec);

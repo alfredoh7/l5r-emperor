@@ -20,11 +20,11 @@ public partial class Main
         await FocusInspectionProbe();
         await SettleInspection();
         var tile = _tiles.First(t => t.Card.Id == card.Id);
-        var point = tile.FaceCornersOnViewport().Aggregate(Vector2.Zero, (a,b) => a+b) / 4;
+        var point = tile.FaceCornersOnViewport().Aggregate(Vector2.Zero, (a, b) => a + b) / 4;
         PushCaptureMouse(new InputEventMouseMotion { Position = point, GlobalPosition = point }, buffered: true);
         await ToSignal(GetTree().CreateTimer(.06), SceneTreeTimer.SignalName.Timeout);
         await FocusInspectionProbe();
-        point = tile.FaceCornersOnViewport().Aggregate(Vector2.Zero, (a,b) => a+b) / 4;
+        point = tile.FaceCornersOnViewport().Aggregate(Vector2.Zero, (a, b) => a + b) / 4;
         PushCaptureMouse(new InputEventMouseButton { Position = point, GlobalPosition = point, ButtonIndex = MouseButton.Left, Pressed = true }, buffered: true);
         PushCaptureMouse(new InputEventMouseButton { Position = point, GlobalPosition = point, ButtonIndex = MouseButton.Left, Pressed = false }, buffered: true);
         await SettleInspection();
@@ -85,7 +85,7 @@ public partial class Main
                 || restoredHeader.End.Y > _phaseActions.GetGlobalRect().Position.Y)
                 throw new Exception($"Fixed battle header was not restored visibly: before={originalHeader}, after={restoredHeader}.");
             GD.Print($"INSPECTION_HEADER: restored={restoredHeader}; minimumHeight={tracker.GetCombinedMinimumSize().Y}; focus={GetWindow().HasFocus()}");
-            PushCaptureMouse(new InputEventMouseMotion { Position = new Vector2(15,140), GlobalPosition = new Vector2(15,140) });
+            PushCaptureMouse(new InputEventMouseMotion { Position = new Vector2(15, 140), GlobalPosition = new Vector2(15, 140) });
             ReleaseTableFocus(); HideTableTooltip();
             await SettleInspection();
             GD.Print("DESELECT_PASS: native hand/board repeat clicks, switching inspection and Close; fixed battle header restored; match version unchanged; assignment drafts preserved.");

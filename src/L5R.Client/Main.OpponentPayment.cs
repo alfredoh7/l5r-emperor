@@ -81,9 +81,14 @@ public partial class Main
     {
         var row = new HBoxContainer { Alignment = BoxContainer.AlignmentMode.Center };
         row.AddThemeConstantOverride("separation", 6);
-        row.AddChild(new TextureRect { Texture = GD.Load<Texture2D>("res://Art/Payments/plain-gold-coin.png"),
-            CustomMinimumSize = new(size + 3, size + 3), ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize,
-            StretchMode = TextureRect.StretchModeEnum.KeepAspectCentered, MouseFilter = Control.MouseFilterEnum.Ignore });
+        row.AddChild(new TextureRect
+        {
+            Texture = GD.Load<Texture2D>("res://Art/Payments/plain-gold-coin.png"),
+            CustomMinimumSize = new(size + 3, size + 3),
+            ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize,
+            StretchMode = TextureRect.StretchModeEnum.KeepAspectCentered,
+            MouseFilter = Control.MouseFilterEnum.Ignore
+        });
         row.AddChild(Palette.Text($"{amount} Gold", size, Palette.Gold));
         return row;
     }

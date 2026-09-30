@@ -65,7 +65,7 @@ public partial class CardTile : Button
         Material = CardPaper.Table;
         MouseDefaultCursorShape = CursorShape.PointingHand;
         TooltipText = card.Definition is null ? "Face-down card. Its identity is hidden." : $"{card.Definition.Name}\n{card.Definition.Type} · {card.Definition.GoldCost} Gold\n{card.Definition.Text}";
-        if(CreatedCopyStatus.VisibleOn(card)) TooltipText += "\n" + CreatedCopyStatus.Description(card);
+        if (CreatedCopyStatus.VisibleOn(card)) TooltipText += "\n" + CreatedCopyStatus.Description(card);
         Pressed += () => clicked(Card);
         MouseEntered += () => { _hover = true; QueueRedraw(); inspected(Card); };
         MouseExited += () => { _hover = false; QueueRedraw(); };
@@ -76,10 +76,10 @@ public partial class CardTile : Button
 
     public override void _Ready()
     {
-        if(CreatedCopyStatus.VisibleOn(Card)) { CopySeal=new CreatedCopySeal {CardAnchor=this};AddChild(CopySeal); }
-        if(!UprightPreview && ActionLockStatus.VisibleOn(Card))
+        if (CreatedCopyStatus.VisibleOn(Card)) { CopySeal = new CreatedCopySeal { CardAnchor = this }; AddChild(CopySeal); }
+        if (!UprightPreview && ActionLockStatus.VisibleOn(Card))
         {
-            RestrictionSeal=new ActionLockSeal {CardAnchor=this};AddChild(RestrictionSeal);
+            RestrictionSeal = new ActionLockSeal { CardAnchor = this }; AddChild(RestrictionSeal);
         }
         if (ShowTokenRail && CardTokenRail.HasRail(Card))
         {
@@ -97,7 +97,7 @@ public partial class CardTile : Button
         AdvanceStatFeedback(delta);
         // The rail cap must stay under the pointer. Enlarging its parent moves this
         // small target into/out of the card face and repeatedly restarts the tooltip.
-        var inspecting = (_hover || HasFocus() && !DecisionSelected) && TokenRail?.GrantSeal?.IsHovered()!=true && RestrictionSeal?.IsHovered()!=true && CopySeal?.IsHovered()!=true;
+        var inspecting = (_hover || HasFocus() && !DecisionSelected) && TokenRail?.GrantSeal?.IsHovered() != true && RestrictionSeal?.IsHovered() != true && CopySeal?.IsHovered() != true;
         var targetLift = inspecting ? Card.Zone == Zone.Hand ? 40f : ProjectToScreen is null ? 4f : 0f : DecisionSelected ? 18f : 0f;
         var targetScale = inspecting ? Card.Zone == Zone.Hand ? 1.22f : 1.06f : 1f;
         ZIndex = _hover ? 30 : HasFocus() ? 20 : IsSelected ? 10 : 0;
@@ -201,21 +201,21 @@ public partial class CardTile : Button
         DrawStatInlays();
         DrawPublicStatus();
         DrawDishonorMarker();
-        if(DecisionSelected)DrawDiscardSelection();
+        if (DecisionSelected) DrawDiscardSelection();
     }
 
     private void DrawDiscardSelection()
     {
-        var corners=LocalFaceCorners();var top=corners[1];var bottom=(corners[2]+corners[3])/2;
-        DrawCircle(top,18,Palette.Ink);DrawArc(top,18,0,Mathf.Tau,40,Palette.Gold,2,true);
-        DrawPolyline([top+new Vector2(-8,0),top+new Vector2(-2,6),top+new Vector2(9,-8)],Palette.Gold,3,true);
-        var rect=new Rect2(bottom+new Vector2(-78,3),new Vector2(156,30));
-        DrawStyleBox(_discardNotch??=SidebarSkin.Surface(true),rect);
-        DrawString(Palette.Body,rect.Position+new Vector2(0,22),"Fate discard",HorizontalAlignment.Center,rect.Size.X,18,Palette.Paper);
+        var corners = LocalFaceCorners(); var top = corners[1]; var bottom = (corners[2] + corners[3]) / 2;
+        DrawCircle(top, 18, Palette.Ink); DrawArc(top, 18, 0, Mathf.Tau, 40, Palette.Gold, 2, true);
+        DrawPolyline([top + new Vector2(-8, 0), top + new Vector2(-2, 6), top + new Vector2(9, -8)], Palette.Gold, 3, true);
+        var rect = new Rect2(bottom + new Vector2(-78, 3), new Vector2(156, 30));
+        DrawStyleBox(_discardNotch ??= SidebarSkin.Surface(true), rect);
+        DrawString(Palette.Body, rect.Position + new Vector2(0, 22), "Fate discard", HorizontalAlignment.Center, rect.Size.X, 18, Palette.Paper);
     }
 
     public string[] PublicStatusLabels => Card.Definition is null || Card.Zone is not (Zone.Home or Zone.Battlefield or Zone.Attached) ? [] :
-        (Card.GrantedKeywords ?? []).Where(k => !CardChanges.IsPermanent(k.Duration)&&k.CopiedFrom is null).Select(k => "+ " + k.Keyword).Distinct().ToArray();
+        (Card.GrantedKeywords ?? []).Where(k => !CardChanges.IsPermanent(k.Duration) && k.CopiedFrom is null).Select(k => "+ " + k.Keyword).Distinct().ToArray();
     private void DrawDishonorMarker()
     {
         if (UprightPreview || !FallenArt.TurnsOnTable(Card)) return;

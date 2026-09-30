@@ -3,7 +3,7 @@ using Godot;
 namespace L5R.Client;
 
 /// <summary>Public layout facts only. Bounds and icon identities are in the unprojected table plane.</summary>
-public sealed record InkMatSection(string Id, string Label, Rect2 Bounds, bool Active = false, int? ProvinceNumber = null, bool ConnectionAbove = false, bool Connected = false, bool RegionPair = false);
+public sealed record InkMatSection(string Id, string Label, Rect2 Bounds, bool Active = false, int? ProvinceNumber = null, bool ConnectionAbove = false, bool Connected = false, bool RegionPair = false, bool ClosedCourt = false);
 
 /// <summary>
 /// Persistent ink under the playable cards. Layout submits resting footprints; pointer
@@ -191,6 +191,7 @@ public partial class InkMatSections : Control
         state.Stroke.Size = state.Current.Size;
         state.Stroke.ConnectionAbove = state.Target.ConnectionAbove; state.Stroke.Connected = state.Target.Connected;
         state.Stroke.RegionPair = state.Target.RegionPair;
+        state.Stroke.ClosedCourt = state.Target.ClosedCourt;
         state.Stroke.Label = state.Target.Label; state.Stroke.ProvinceNumber = state.Target.ProvinceNumber;
         state.Stroke.Present(state.Current.Size, state.Active, state.Reveal,
             state.Removing ? state.RemoveProgress : 0, 1);
@@ -201,6 +202,7 @@ public partial class InkMatSections : Control
             state.Ghost.Size = state.GhostBounds.Size;
             state.Ghost.ConnectionAbove = state.Target.ConnectionAbove; state.Ghost.Connected = state.Target.Connected;
             state.Ghost.RegionPair = state.Target.RegionPair;
+            state.Ghost.ClosedCourt = state.Target.ClosedCourt;
             state.Ghost.Label = state.GhostLabel; state.Ghost.ProvinceNumber = state.Target.ProvinceNumber;
             state.Ghost.Present(state.GhostBounds.Size, state.Active, state.GhostReveal, state.GhostProgress,
                 1 - Ease(state.GhostProgress));
@@ -270,6 +272,7 @@ public partial class InkMatSections : Control
                     "Home" => "Home · Cards at home and their attachments",
                     "Removed" => "Removed from the Game · Both players may inspect. Cannot be targeted or returned.",
                     "Provinces" => "Provinces · The seals below the cards identify each province",
+                    _ when target.Label.StartsWith("Open battlefield", StringComparison.Ordinal) => BattlefieldPresentation.OpenHelp,
                     _ => target.Label + " battlefield"
                 });
                 if (target.ProvinceNumber is not null)
@@ -294,7 +297,7 @@ public partial class InkMatSections : Control
         public string Label = "Home";
         public int? ProvinceNumber;
         private float _active;
-        public bool ConnectionAbove, Connected, RegionPair;
+        public bool ConnectionAbove, Connected, RegionPair, ClosedCourt;
         public InkStroke()
         {
             MouseFilter = MouseFilterEnum.Ignore; FocusMode = FocusModeEnum.None;
@@ -317,7 +320,7 @@ public partial class InkMatSections : Control
         public override void _Draw()
         {
             if (RegionPair) SupportCardArt.DrawProvincePair(this, Size, ProvinceNumber ?? 1, _active);
-            else ProvinceThresholdArt.Draw(this, Size, Label, ProvinceNumber, _active, ConnectionAbove, Connected);
+            else ProvinceThresholdArt.Draw(this, Size, Label, ProvinceNumber, _active, ConnectionAbove, Connected, ClosedCourt);
         }
 
     }

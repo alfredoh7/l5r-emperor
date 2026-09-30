@@ -20,10 +20,10 @@ public partial class Main
     private bool IsMouseInputCapture => _capturePath is not null &&
         (_captureMode.StartsWith("published-stabilization", StringComparison.Ordinal) ||
          _captureMode.StartsWith("published-top-cards", StringComparison.Ordinal) && !_captureMode.EndsWith("-review", StringComparison.Ordinal) ||
-         _captureMode.StartsWith("published-created-copy", StringComparison.Ordinal) && !_captureMode.EndsWith("-review",StringComparison.Ordinal) ||
-         _captureMode.StartsWith("published-shown", StringComparison.Ordinal) && !_captureMode.Contains("review",StringComparison.Ordinal) ||
-         _captureMode.StartsWith("published-action-lock", StringComparison.Ordinal) && !_captureMode.Contains("review",StringComparison.Ordinal) ||
-         _captureMode.StartsWith("published-search", StringComparison.Ordinal) && !_captureMode.Contains("review",StringComparison.Ordinal) ||
+         _captureMode.StartsWith("published-created-copy", StringComparison.Ordinal) && !_captureMode.EndsWith("-review", StringComparison.Ordinal) ||
+         _captureMode.StartsWith("published-shown", StringComparison.Ordinal) && !_captureMode.Contains("review", StringComparison.Ordinal) ||
+         _captureMode.StartsWith("published-action-lock", StringComparison.Ordinal) && !_captureMode.Contains("review", StringComparison.Ordinal) ||
+         _captureMode.StartsWith("published-search", StringComparison.Ordinal) && !_captureMode.Contains("review", StringComparison.Ordinal) ||
          _captureMode.StartsWith("published-supports", StringComparison.Ordinal) && !_captureMode.Contains("review", StringComparison.Ordinal) ||
          _captureMode.StartsWith("published-board", StringComparison.Ordinal) &&
          (_captureMode.Contains("camera", StringComparison.Ordinal) || _captureMode.Contains("deselect", StringComparison.Ordinal)));
@@ -45,20 +45,20 @@ public partial class Main
         // HUD overlays now cover the old viewport-origin target. Find a clear
         // gesture path using current routing and real projected GUI hit tests.
         for (var y = rect.Position.Y; y < rect.End.Y; y += 24)
-        for (var x = rect.Position.X; x < rect.End.X - 60; x += 24)
-        {
-            var point = new Vector2(x, y);
-            if (Enumerable.Range(0, 4).Any(i => !PointerOnTable(point + new Vector2(i * 20, 0))
-                || OverStatToken(point + new Vector2(i * 20, 0))
-                || !fabric.HasPoint(ScreenToWorld(point + new Vector2(i * 20, 0))))) continue;
-            MoveProbeMouse(point);
-            var hit = TableHovered;
-            if (hit is null || hit == _world || hit == _board || hit == _pileHud)
+            for (var x = rect.Position.X; x < rect.End.X - 60; x += 24)
             {
-                GD.Print($"CAMERA_CLOTH_TARGET: {point}; focus={GetWindow().HasFocus()}; hit={hit?.Name}");
-                return point;
+                var point = new Vector2(x, y);
+                if (Enumerable.Range(0, 4).Any(i => !PointerOnTable(point + new Vector2(i * 20, 0))
+                    || OverStatToken(point + new Vector2(i * 20, 0))
+                    || !fabric.HasPoint(ScreenToWorld(point + new Vector2(i * 20, 0))))) continue;
+                MoveProbeMouse(point);
+                var hit = TableHovered;
+                if (hit is null || hit == _world || hit == _board || hit == _pileHud)
+                {
+                    GD.Print($"CAMERA_CLOTH_TARGET: {point}; focus={GetWindow().HasFocus()}; hit={hit?.Name}");
+                    return point;
+                }
             }
-        }
         throw new InvalidOperationException("Camera probe could not find uncovered empty cloth.");
     }
     private void CameraMouse(MouseButton button, bool pressed, Vector2 point) => PushCaptureMouse(
@@ -99,7 +99,7 @@ public partial class Main
                     CameraMouse(MouseButton.WheelUp, true, _probePoint); CameraMouse(MouseButton.WheelUp, false, _probePoint);
                     break;
                 case 2:
-                    RequireCamera(_cameraZoom > _probeZoom,  $"wheel over a card did not zoom (focus={GetWindow().HasFocus()}, blocked={CameraBlocked}, pointer={_probePoint}, viewport={_tableViewport.GetGlobalRect()}, hovered={GetViewport().GuiGetHoveredControl()?.Name})");
+                    RequireCamera(_cameraZoom > _probeZoom, $"wheel over a card did not zoom (focus={GetWindow().HasFocus()}, blocked={CameraBlocked}, pointer={_probePoint}, viewport={_tableViewport.GetGlobalRect()}, hovered={GetViewport().GuiGetHoveredControl()?.Name})");
                     RequireCamera((ScreenToWorld(_probePoint)).DistanceTo(_probeAnchor) < .1f, "cursor-anchored zoom drifted");
                     RequireCamera(_selected?.Id == _probeSelection && View.Version == _probeVersion, "wheel selected or played a card");
                     _probeCenter = _cameraCenter;

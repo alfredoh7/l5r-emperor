@@ -48,8 +48,13 @@ public partial class WarRoomStage : Node3D
             mesh.MaterialOverride = wood;
         AddChild(frame); _paint.Add(wood);
 
-        _camera = new Camera3D { Current = true, Near = .005f, Far = 30,
-            KeepAspect = Camera3D.KeepAspectEnum.Height };
+        _camera = new Camera3D
+        {
+            Current = true,
+            Near = .005f,
+            Far = 30,
+            KeepAspect = Camera3D.KeepAspectEnum.Height
+        };
         AddChild(_camera);
         GD.Print("WAR_ROOM_LIVE: B3 fortress hall; original cloth/frame; card camera and rules unchanged. Presentation-clock firelight and separate Meshy lanterns.");
     }
@@ -95,24 +100,24 @@ public partial class WarRoomStage : Node3D
         // native card-edge input probes independently check the hit mapping.
         var visible = GetViewport().GetVisibleRect().Grow(16);
         for (var row = 0; row <= 4; row++)
-        for (var col = 0; col <= 4; col++)
-        {
-            var uv = new Vector2(col / 4f, row / 4f);
-            var world = uv * boardSize;
-            var p = (world - center) * zoom;
-            var depth = 1 - TableSurface.Depth * p.Y;
-            var expected = screenCenter + new Vector2(p.X, p.Y * TableSurface.Pitch) * density / depth;
-            if (depth <= 0 || !expected.IsFinite() || !visible.HasPoint(expected))
-            { _offscreenProjectionSamples++; continue; }
-            var actual = _camera.UnprojectPosition(new((world.X - boardSize.X / 2) / units, 0, (world.Y - boardSize.Y / 2) / units));
-            var error = expected.DistanceTo(actual);
-            _maximumProjectionError = Math.Max(_maximumProjectionError, error); _projectionSamples++;
-            if (error > .1f)
+            for (var col = 0; col <= 4; col++)
             {
-                _projectionFailed = true;
-                throw new InvalidOperationException($"War room and card projections differ by {error:F4} px; expected={expected}, actual={actual}, depth={1-TableSurface.Depth*p.Y}, zoom={zoom}, viewport={GetViewport().GetVisibleRect().Size}.");
+                var uv = new Vector2(col / 4f, row / 4f);
+                var world = uv * boardSize;
+                var p = (world - center) * zoom;
+                var depth = 1 - TableSurface.Depth * p.Y;
+                var expected = screenCenter + new Vector2(p.X, p.Y * TableSurface.Pitch) * density / depth;
+                if (depth <= 0 || !expected.IsFinite() || !visible.HasPoint(expected))
+                { _offscreenProjectionSamples++; continue; }
+                var actual = _camera.UnprojectPosition(new((world.X - boardSize.X / 2) / units, 0, (world.Y - boardSize.Y / 2) / units));
+                var error = expected.DistanceTo(actual);
+                _maximumProjectionError = Math.Max(_maximumProjectionError, error); _projectionSamples++;
+                if (error > .1f)
+                {
+                    _projectionFailed = true;
+                    throw new InvalidOperationException($"War room and card projections differ by {error:F4} px; expected={expected}, actual={actual}, depth={1 - TableSurface.Depth * p.Y}, zoom={zoom}, viewport={GetViewport().GetVisibleRect().Size}.");
+                }
             }
-        }
     }
 
     public void PresentLight(float time, bool animate)

@@ -32,14 +32,14 @@ public partial class Main
         if (tile is null || tile.Card.Zone == Zone.Hand) return null;
         var inverse = _root.GetGlobalTransform().AffineInverse();
         var face = tile.FaceCornersOnViewport().Select(p => inverse * p).ToArray();
-        var edge = Enumerable.Range(0,4).MaxBy(i => (face[i].X + face[(i+1)%4].X)/2);
-        var ends = new[] { face[edge],face[(edge+1)%4] }.OrderBy(p => p.Y).ToArray();
-        var width = Mathf.Clamp((face.Max(p => p.X)-face.Min(p => p.X))*.24f,32,52);
-        var height = width*396/562;
-        var mount = ends[0].Lerp(ends[1],.07f);
-        var body = new Rect2(mount,new Vector2(width,height));
+        var edge = Enumerable.Range(0, 4).MaxBy(i => (face[i].X + face[(i + 1) % 4].X) / 2);
+        var ends = new[] { face[edge], face[(edge + 1) % 4] }.OrderBy(p => p.Y).ToArray();
+        var width = Mathf.Clamp((face.Max(p => p.X) - face.Min(p => p.X)) * .24f, 32, 52);
+        var height = width * 396 / 562;
+        var mount = ends[0].Lerp(ends[1], .07f);
+        var body = new Rect2(mount, new Vector2(width, height));
         var clip = _tableSurface.GetGlobalRect();
-        var globalBody = new Rect2(_root.GetGlobalTransform()*body.Position,body.Size*_root.Scale);
+        var globalBody = new Rect2(_root.GetGlobalTransform() * body.Position, body.Size * _root.Scale);
         return clip.Encloses(globalBody) ? body : null;
     }
 

@@ -31,20 +31,28 @@ public partial class Main
     }
     private static string BattleStepTitle(BattleStepView? step) => step?.Step switch
     {
-        BattleSteps.DeclareOrDecline => "Declare an attack", BattleSteps.AttackerAssigns => step.Segment == BattleSteps.CavalryManeuvers ? "Cavalry · attacker" : "Infantry · attacker",
+        BattleSteps.DeclareOrDecline => "Declare an attack",
+        BattleSteps.AttackerAssigns => step.Segment == BattleSteps.CavalryManeuvers ? "Cavalry · attacker" : "Infantry · attacker",
         BattleSteps.DefenderAssigns => step.Segment == BattleSteps.CavalryManeuvers ? "Cavalry · defender" : "Infantry · defender",
-        BattleSteps.ChooseBattle => "Choose battlefield", BattleSteps.Engage => "Engage", BattleSteps.BattleActions => "Battle actions",
-        BattleSteps.BeforeResolution => "Before resolution", BattleSteps.Aftermath => "Battle aftermath", _ => "Battle progress"
+        BattleSteps.ChooseBattle => "Choose battlefield",
+        BattleSteps.Engage => "Engage",
+        BattleSteps.BattleActions => "Battle actions",
+        BattleSteps.BeforeResolution => "Before resolution",
+        BattleSteps.Aftermath => "Battle aftermath",
+        _ => "Battle progress"
     };
-    private string BattlePerson(int? id) => id is not {} player ? "No pending decision" : (player == View.ViewerId ? "You" : "Your opponent") + " · " + View.Players.Single(p => p.Id == player).Clan;
+    private string BattlePerson(int? id) => id is not { } player ? "No pending decision" : (player == View.ViewerId ? "You" : "Your opponent") + " · " + View.Players.Single(p => p.Id == player).Clan;
     private string FirstActionReason(string? reason) => reason switch
     {
-        BattleSteps.ReasonDefault => "Defender’s normal first opportunity", BattleSteps.ReasonNaval => "Naval Invasion",
-        BattleSteps.ReasonEngageGrant => "Engage effect", BattleSteps.ReasonDefenderOverride => "Defender’s overriding effect", _ => reason ?? "Not yet determined"
+        BattleSteps.ReasonDefault => "Defender’s normal first opportunity",
+        BattleSteps.ReasonNaval => "Naval Invasion",
+        BattleSteps.ReasonEngageGrant => "Engage effect",
+        BattleSteps.ReasonDefenderOverride => "Defender’s overriding effect",
+        _ => reason ?? "Not yet determined"
     };
     private void RenderBattleFacts(bool showDecision = false)
     {
-        if (View.BattleStep is not {} step || step.Segment == BattleSteps.None || PresentationBusy) return;
+        if (View.BattleStep is not { } step || step.Segment == BattleSteps.None || PresentationBusy) return;
         if (showDecision) FlowText(BattlePerson(step.DecisionPlayerId), 19, Palette.Gold);
         if (step.Step is BattleSteps.AttackerAssigns or BattleSteps.DefenderAssigns)
             FlowText("Attacker assigns first, then defender. You may leave units unassigned.", 16, Palette.PaperDim);

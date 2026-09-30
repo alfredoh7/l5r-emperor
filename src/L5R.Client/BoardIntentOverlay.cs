@@ -31,7 +31,7 @@ public partial class BoardIntentOverlay : Control
                 {
                     var t = i / (float)count; var point = Curve(t);
                     if (point.DistanceTo(end) < 38) continue;
-                    DrawSetTransform(point, (end-start + sideways * Mathf.Pi * Mathf.Cos(t*Mathf.Pi)).Angle());
+                    DrawSetTransform(point, (end - start + sideways * Mathf.Pi * Mathf.Cos(t * Mathf.Pi)).Angle());
                     DrawTextureRect(BattleEscalationArt.Step, new Rect2(-13, -5.5f, 26, 11), false, new Color(1, 1, 1, .94f));
                 }
                 // The exact derivative at t=1 keeps the tip on the final stone's axis.
@@ -40,9 +40,9 @@ public partial class BoardIntentOverlay : Control
                 DrawSetTransform(Vector2.Zero);
                 continue;
             }
-            if(arrow.Attack)
+            if (arrow.Attack)
             {
-                AttackBrushArt.Draw(this,start,end);
+                AttackBrushArt.Draw(this, start, end);
                 continue;
             }
             if (arrow.Label is not null)
@@ -55,7 +55,7 @@ public partial class BoardIntentOverlay : Control
             else { DrawLine(start, end, new Color(0, 0, 0, .7f), 5, true); DrawLine(start, end, arrow.Color, 2.5f, true); }
             var normal = new Vector2(-direction.Y, direction.X);
             DrawColoredPolygon([end, end - direction * 13 + normal * 6, end - direction * 13 - normal * 6], arrow.Color);
-            if (arrow.Label is {} label)
+            if (arrow.Label is { } label)
             {
                 var width = Math.Max(26, Palette.Body.GetStringSize(label, fontSize: 17).X + 14);
                 var center = end - direction * 32 + normal * 18;
@@ -70,5 +70,5 @@ public partial class BoardIntentOverlay : Control
             }
         }
     }
-    internal static Vector2 AssignmentTangent(Vector2 start, Vector2 end, Vector2 sideways) => (end-start-sideways*Mathf.Pi).Normalized();
+    internal static Vector2 AssignmentTangent(Vector2 start, Vector2 end, Vector2 sideways) => (end - start - sideways * Mathf.Pi).Normalized();
 }

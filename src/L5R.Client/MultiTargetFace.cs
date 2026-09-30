@@ -8,7 +8,7 @@ public sealed partial class MultiTargetFace : Button
     public MultiTargetFace(CardView card, int? order)
     {
         Card = card; CustomMinimumSize = new(164, 235); SizeFlagsHorizontal = SizeFlags.ExpandFill;
-        AccessibilityName = card.Definition!.Name + (order is {} n ? $". Selected number {n}. Press to remove." : ". Press to select.");
+        AccessibilityName = card.Definition!.Name + (order is { } n ? $". Selected number {n}. Press to remove." : ". Press to select.");
         TooltipText = card.Definition.Name;
         foreach (var state in new[] { "normal", "hover", "pressed", "focus", "disabled" })
         { var style = SidebarSkin.Inset(); style.ModulateColor = order.HasValue ? new Color(1.5f, 1.3f, .8f) : state == "disabled" ? new Color(.65f, .65f, .65f) : Colors.White; AddThemeStyleboxOverride(state, style); }

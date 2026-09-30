@@ -5631,8 +5631,8 @@ public sealed partial class MatchEngine
         if (IsFavorDiscardAbility(id)) RequireFavorDiscard(command, player);
         // Bonds of Coin (issue #336): "Bow your Stronghold" is a cost of the action, so a bowed Stronghold cannot pay it.
         if (id == "bonds-of-coin-draw") Require(!Card(player.StrongholdId).Bowed, "Your Stronghold is already bowed.");
-        if (id == "overgrown-grove-move") Require(player.FateDeck.Count >= 3,"Discarding three Fate cards is a required cost.");
-        if (id == "improved-defenses-strength") Require(player.FateDeck.Count >= 1,"Discarding a Fate card is a required cost.");
+        if (id == "overgrown-grove-move") Require(player.FateDeck.Count >= 3, "Discarding three Fate cards is a required cost.");
+        if (id == "improved-defenses-strength") Require(player.FateDeck.Count >= 1, "Discarding a Fate card is a required cost.");
         // Midday Shadow Court (Stronghold pass, issue #486 batch 1): "When a Lobby action checks Family Honor, your Honor is treated as 20 points higher."
         if (id is "lobby" or "dainagon-lobby") Require(player.Honor + LobbyHonorBonus(player) > Player(1 - player.Id).Honor, "Lobby requires strictly higher Family Honor than your opponent.");
         // Saibankan's Justice: "Other players may not lobby."
@@ -11295,8 +11295,8 @@ public sealed partial class MatchEngine
                                         Gold: firstQuote, TargetGold: targetQuotes,
                                         // An Attack may always be taken with no target (or on the province where the ability allows it): the client must be able to say so.
                                         NoTarget: ability.Target == "attack" && legal.Any(c => c.TargetId is null && c.Province is null),
-                                        AlternativeCost: costOption is null ? null : new(id,performer,costOption.Id,costOption.Label,ability.Label),
-                                        Movement: MovementPreview(id,ability,source,performer),
+                                        AlternativeCost: costOption is null ? null : new(id, performer, costOption.Id, costOption.Label, ability.Label),
+                                        Movement: MovementPreview(id, ability, source, performer),
                                         Attack: legal.Count > 0 ? AttackCue(legal[0]) : null);
                                 }
                             }

@@ -26,10 +26,14 @@ public partial class AttackSourceTab : Control
         MouseFilter = MouseFilterEnum.Ignore; ClipContents = true;
         TextureFilter = TextureFilterEnum.LinearWithMipmaps;
         _atlas ??= GD.Load<Texture2D>("res://Art/AttackTargets/source-tabs-atlas.png");
-        _ranged ??= new AtlasTexture { Atlas = _atlas, Region = new Rect2(191,305,562,396), FilterClip = true };
-        _melee ??= new AtlasTexture { Atlas = _atlas, Region = new Rect2(858,305,564,396), FilterClip = true };
-        _sprite = new TextureRect { MouseFilter = MouseFilterEnum.Ignore,
-            ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize, StretchMode = TextureRect.StretchModeEnum.Scale };
+        _ranged ??= new AtlasTexture { Atlas = _atlas, Region = new Rect2(191, 305, 562, 396), FilterClip = true };
+        _melee ??= new AtlasTexture { Atlas = _atlas, Region = new Rect2(858, 305, 564, 396), FilterClip = true };
+        _sprite = new TextureRect
+        {
+            MouseFilter = MouseFilterEnum.Ignore,
+            ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize,
+            StretchMode = TextureRect.StretchModeEnum.Scale
+        };
         AddChild(_sprite); Hide();
     }
 

@@ -38,7 +38,7 @@ public sealed partial class MatchSession : IDisposable
 
     public void StartPractice(bool economy, bool published = false, int seat = 0)
     {
-        Generation++;Disconnect();
+        Generation++; Disconnect();
         // A fixed seed shuffled every deck identically, game after game — Practice looked unshuffled
         // even though the shuffle itself was correct. Match the server's per-match randomness (RoomManager.cs).
         var seed = BitConverter.ToUInt64(RandomNumberGenerator.GetBytes(sizeof(ulong)));
@@ -52,8 +52,8 @@ public sealed partial class MatchSession : IDisposable
     /// <summary>Demo hosts own their own MatchSession; this never replaces the main practice session.</summary>
     public void StartDuelDemo(string scenario, ulong seed, int seat = 0)
     {
-        if (seat is <0 or >1) throw new ArgumentOutOfRangeException(nameof(seat));
-        Generation++;Disconnect();
+        if (seat is < 0 or > 1) throw new ArgumentOutOfRangeException(nameof(seat));
+        Generation++; Disconnect();
         _engine = MatchEngine.CreateDuelDemo(scenario, seed);
         _localSeat = _practiceNameSeat = seat;
         RefreshLocal();
@@ -72,7 +72,7 @@ public sealed partial class MatchSession : IDisposable
     public void LeavePrivateTable()
     {
         if (!Online) return;
-        Generation++;Disconnect(); Seat = null; Snapshot = null; _engine = null; Changed?.Invoke();
+        Generation++; Disconnect(); Seat = null; Snapshot = null; _engine = null; Changed?.Invoke();
     }
 
     /// <summary>Scripted UI verification only (issue #303): a real engine state built to put one kind of Gold cost
@@ -153,11 +153,26 @@ public sealed partial class MatchSession : IDisposable
     /// SearchViewsCrossTheWire fails if a MatchView property is ever missing from the wire.</summary>
     public static object ToWire(GameCommand command) => new
     {
-        type = command.Type, cardId = command.CardId, sourceIds = command.SourceIds,
-        province = command.Province, clanDiscount = command.ClanDiscount, clanAllegiance = command.ClanAllegiance,
-        assignments = command.Assignments, cardIds = command.CardIds, targetId = command.TargetId,
-        abilityId = command.AbilityId, performerId = command.PerformerId, choice = command.Choice,
-        deckPosition = command.DeckPosition, targetPlayerId = command.TargetPlayerId, goldAmount = command.GoldAmount, costOption = command.CostOption, selections = command.Selections, createdCard = command.CreatedCard, paymentDiscards = command.PaymentDiscards, provinces = command.Provinces
+        type = command.Type,
+        cardId = command.CardId,
+        sourceIds = command.SourceIds,
+        province = command.Province,
+        clanDiscount = command.ClanDiscount,
+        clanAllegiance = command.ClanAllegiance,
+        assignments = command.Assignments,
+        cardIds = command.CardIds,
+        targetId = command.TargetId,
+        abilityId = command.AbilityId,
+        performerId = command.PerformerId,
+        choice = command.Choice,
+        deckPosition = command.DeckPosition,
+        targetPlayerId = command.TargetPlayerId,
+        goldAmount = command.GoldAmount,
+        costOption = command.CostOption,
+        selections = command.Selections,
+        createdCard = command.CreatedCard,
+        paymentDiscards = command.PaymentDiscards,
+        provinces = command.Provinces
     };
 
     public async Task Submit(GameCommand command)
@@ -219,7 +234,7 @@ public sealed partial class MatchSession : IDisposable
 
     private async Task Connect(Uri server, RoomSeat seat)
     {
-        if(_engine is not null||Seat?.RoomCode!=seat.RoomCode||Seat.PlayerId!=seat.PlayerId)Generation++;
+        if (_engine is not null || Seat?.RoomCode != seat.RoomCode || Seat.PlayerId != seat.PlayerId) Generation++;
         Disconnect();
         _engine = null;
         Snapshot = null;
