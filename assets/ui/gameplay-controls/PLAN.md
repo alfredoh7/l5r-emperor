@@ -15,7 +15,7 @@ Each runtime batch gets a direct Mac review launcher and a self-contained Window
 ## Integration coordination
 
 Current main at start: cdfc83b632f5a409808e2f9afd8d4a9101c063e9.
-Mendon's open PR #564 (head 74dd5a8623e663f54c8de622c63f15c198f447c8) contains the approved generic chooser, Event decision surfaces and opponent-payment treatment. This concept-only branch changes no shared runtime files. Before implementation, refresh that PR/main and reconcile the actual components rather than overwriting them or assuming the integration has landed.
+Mendon's PR #564 (head 74dd5a8623e663f54c8de622c63f15c198f447c8) contains the approved generic chooser, Event decision surfaces and opponent-payment treatment. It merged while this concept review was in progress, at f5e71be4f24ae795ceb70252140a7b9acb4ea82f. This isolated branch integrates that current main before final publication. This concept-only change edits no shared runtime files. Before implementation, refresh main again and extend its actual components rather than overwriting them.
 
 Engine/view findings: GoldQuote.Sources and PurchaseQuote.Sources contain PaymentSource(Id, CardId, Kind, Label, Produced, SubjectId). Discount entries express cost reduction, not newly produced Gold. Main currently counts plain unbowed card IDs in SelectedProduction, missing token sources. Labels and authoritative PaymentOptions must drive consequences and readiness; arbitrary manual source combinations still require server acceptance and may need a reviewed quote/view enhancement for combination legality.
 

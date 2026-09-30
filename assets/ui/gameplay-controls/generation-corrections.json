@@ -1,0 +1,29 @@
+{
+  "mode": "built-in image_gen",
+  "corrections": [
+    {
+      "id": "payment-a",
+      "path": "/Users/alfredo/.codex/generated_images/01a0b019-027d-7ee0-84a4-44aac565a142/exec-c347ed99-60aa-4f40-b109-4c363447c58a.png",
+      "prompt": "Edit only one text label in this image. Replace the payment receipt's label Gold still required with Adjusted Gold cost. Keep its value 4, the cost reduction value 2, the contributed Gold value 4 and Exact payment unchanged. This clarifies that 4 is the cost after the discount, not an unpaid balance. Preserve absolutely everything else including panel geometry, card scans, buttons, board, hand and typography. No new elements.",
+      "generated_path": "/Users/alfredo/.codex/generated_images/01a0b019-027d-7ee0-84a4-44aac565a142/exec-ae996494-0bb2-4f45-97ce-3f85ec2ff0a1.png"
+    },
+    {
+      "id": "payment-b",
+      "path": "/Users/alfredo/.codex/generated_images/01a0b019-027d-7ee0-84a4-44aac565a142/exec-356cf822-4c2e-4ca7-8f24-d6e4955aebcb.png",
+      "prompt": "Edit only one text label in this image. Replace the payment receipt's label Gold still required with Adjusted Gold cost. Keep its value 4, the cost reduction value 2, the contributed Gold value 4 and Exact payment unchanged. This clarifies that 4 is the cost after the discount, not an unpaid balance. Preserve absolutely everything else including panel geometry, card scans, buttons, board, hand and typography. No new elements.",
+      "generated_path": "/Users/alfredo/.codex/generated_images/01a0b019-027d-7ee0-84a4-44aac565a142/exec-9752be9e-8024-4e14-bddc-76517a02362c.png"
+    },
+    {
+      "id": "payment-c",
+      "path": "/Users/alfredo/.codex/generated_images/01a0b019-027d-7ee0-84a4-44aac565a142/exec-a763574d-ec19-43f7-a53e-8d3cbc65831c.png",
+      "prompt": "Edit only one text label in this image. Replace the payment receipt's label Gold still required with Adjusted Gold cost. Keep its value 4, the cost reduction value 2, the contributed Gold value 4 and Exact payment unchanged. This clarifies that 4 is the cost after the discount, not an unpaid balance. Preserve absolutely everything else including panel geometry, card scans, buttons, board, hand and typography. No new elements.",
+      "generated_path": "/Users/alfredo/.codex/generated_images/01a0b019-027d-7ee0-84a4-44aac565a142/exec-ab132b21-90c6-4be3-9547-adb409808762.png"
+    },
+    {
+      "id": "choice-a",
+      "path": "/Users/alfredo/.codex/generated_images/01a0b019-027d-7ee0-84a4-44aac565a142/exec-d73170de-432b-40a8-a6a7-ca0188672b7d.png",
+      "prompt": "Edit only the subtitle of the unselected Destroy a Sake token option in this image. It currently incorrectly says Removed from the game. Replace that subtitle with Choose a token on your cards. Do not change the Remove a hand card option or its Removed from the game subtitle; don't change the selected-card consequence. Preserve everything else including the exact En'you artwork, layout, hand, headings and buttons.",
+      "generated_path": "/Users/alfredo/.codex/generated_images/01a0b019-027d-7ee0-84a4-44aac565a142/exec-cf2e6d24-6542-4241-af08-f94fe928ddcf.png"
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+[
+  {
+    "path": "images/choice-a.png",
+    "sha256": "dcd9b0c1c7992435d87b118ef2b5a170e784a4ae497378a0eb9e675b6d0d6c98",
+    "bytes": 1988508
+  },
+  {
+    "path": "images/choice-b.png",
+    "sha256": "6108172214a22972ac21ad6d9d9fe23fc193ef671d7fd4b7f466ba80bcbe3e76",
+    "bytes": 2205176
+  },
+  {
+    "path": "images/choice-c.png",
+    "sha256": "f9ca0107cec68866ba56334d98215b38d1d0807131a851660699bccf924d2503",
+    "bytes": 2144900
+  },
+  {
+    "path": "images/payment-a.png",
+    "sha256": "9bb07b623c1e82f3ccc7712129c48879153be293b2565cf18f87c82e6138bbe2",
+    "bytes": 2070804
+  },
+  {
+    "path": "images/payment-b.png",
+    "sha256": "8e601dd2068b07920d5f9f7ef9cb7a693312fdb01839d6d649174cd958241e1f",
+    "bytes": 2064624
+  },
+  {
+    "path": "images/payment-c.png",
+    "sha256": "e6ba99d6d4c2c1d0a90addb1570a7de31b929296c88a598d7fd6c34a0318522d",
+    "bytes": 2097347
+  }
+]

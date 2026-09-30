@@ -1,0 +1,9 @@
+{
+  "lane": "ui",
+  "summary": "Prepared six imagegen gameplay-controls concepts and a launchable gallery with recommended combinations and three bounded implementation batches for issue 499; integrated the newly merged UI bundle 564.",
+  "validation": "Generated output QA and targeted imagegen corrections completed; six PNG hashes verified; browser family/hash navigation, full-image dialog and Escape checked; gallery/launcher Python and shell syntax and existing-server launcher passed; git diff --check passed. Concept-only; no native game checks claimed.",
+  "remaining": "Await visual selection for payment and choice concepts; implement payment controls, Event/Honor/entry choices and optional opportunities in separate native review batches; mechanics review and Windows graphical testing remain separate. No merge requested.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/499",
+  "branch": "codex/499-gameplay-controls-concepts",
+  "updated": "2026-09-30T18:08:40.605529+00:00"
+}
