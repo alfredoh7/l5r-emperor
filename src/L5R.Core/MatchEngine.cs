@@ -56,6 +56,21 @@ public sealed partial class MatchEngine
     public static MatchEngine CreatePublishedTestMatch(ulong seed = 20260906) => Create(seed, PublishedContent.TestScenario);
     internal static MatchEngine FromTestState(MatchState state) => new(Copy(state), 1, "test-only");
 
+    // Trial-validate a command against the LIVE state directly, instead of RoomManager replaying every prior
+    // command from turn one (issue #550, O(n) per submission -> O(n^2) over a match). Execute() already
+    // copy-then-rolls-back _state internally on rejection, and every other instance field it touches is reset
+    // to a fixed default at the top of every call (never carries meaning across commands) -- so cloning _state,
+    // _commands (only ever read by ExportReplay, never re-executed here) and _customDecks is the whole state
+    // this engine has. Public so RoomManager (a separate assembly) can call it; a trial substitute for
+    // Replay(ExportReplay()), never crosses a trust boundary itself.
+    public MatchEngine Clone()
+    {
+        var clone = new MatchEngine(Copy(_state), _seed, _scenario);
+        clone._commands.AddRange(_commands);
+        clone._customDecks = _customDecks?.Select(CustomPractice.CopyDeck).ToArray();
+        return clone;
+    }
+
     public ReplayRecord ExportReplay() => new(ContentVersion, _scenario, _seed, _commands.Select(Copy).ToArray(), _customDecks?.Select(CustomPractice.CopyDeck).ToArray());
     public static MatchEngine Replay(ReplayRecord replay)
     {

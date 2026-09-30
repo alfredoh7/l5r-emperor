@@ -158,8 +158,10 @@ public sealed class RoomManager(RoomStore store, ILogger<RoomManager> logger)
                 return;
             }
 
-            // Apply to an isolated replay so persistence failure cannot leave a half-committed room.
-            var trial = MatchEngine.Replay(room.Engine.ExportReplay());
+            // Apply to an isolated clone so persistence failure cannot leave a half-committed room. Execute()
+            // already validates atomically against a detached copy of _state; Clone() (issue #550) gets the
+            // same isolation directly from the live engine instead of replaying every prior command from turn one.
+            var trial = room.Engine.Clone();
             var result = trial.Execute(envelope.Command.BindToSeat(seat.PlayerId, envelope.ExpectedVersion));
             if (!result.Accepted)
             {
