@@ -25,8 +25,25 @@ public partial class CatalogueProbe : Node
             // Every image is local, including on first use. Allow asynchronous decode to finish.
             await Wait(4); await Capture("gallery");
             Click(FindButton(b => b.Text.Contains("Playable now"))); await Wait(.3); Check(_screen.Grid.Cards.Length == _screen.Data.Filter(playable: true).Length && _screen.Grid.Cards.Length > 0, "native playable filter");
-            Click(FindButton(b => b.TooltipText == "Crane cards")); await Wait(.3); Check(_screen.Grid.Cards.Length > 0 && _screen.Grid.Cards.All(c => c.Playable && c.Clans.Contains("Crane")), "native clan filter combines with support");
+            Click(FindButton(b => b.Text.StartsWith("Clans"))); await Wait(.3);
+            Activate(Walk(_screen).OfType<CheckBox>().First(c => c.Text == "Crane")); await Wait(.2);
+            Check(_screen.Grid.Cards.Length > 0 && _screen.Grid.Cards.All(c => c.Playable && c.Clans.Contains("Crane")), "native clan checklist combines with support");
+            Activate(Walk(_screen).OfType<CheckBox>().First(c => c.Text == "Mantis")); await Wait(.2);
+            Check(_screen.Grid.Cards.All(c => c.Playable && (c.Clans.Contains("Crane") || c.Clans.Contains("Mantis"))), "native additive multi-clan filter");
+            await Capture("clans-filter");
+            PressKey(Godot.Key.Escape); await Wait(.2);
             _screen.ResetFilters(); await Wait(.2); Click(FindButton(b => b.Text == "Fate")); await Wait(.3); Check(_screen.Grid.Cards.Length > 0 && _screen.Grid.Cards.All(c => c.DeckTypes.Contains("Fate")), "native family filter");
+            Click(FindButton(b => b.Text.StartsWith("Types"))); await Wait(.3); Check(!Walk(_screen).OfType<CheckBox>().Any(c => c.IsVisibleInTree() && c.Text == "Personality"), "Fate-scoped Type list drops Dynasty-only types");
+            Activate(Walk(_screen).OfType<CheckBox>().First(c => c.Text == "Spell")); await Wait(.2);
+            PressKey(Godot.Key.Escape); await Wait(.2);
+            Click(FindButton(b => b.Text.StartsWith("Keywords"))); await Wait(.3);
+            var fateSpellKeywords = _screen.Data.Cards.Where(c => c.Types.Contains("Spell") && c.DeckTypes.Contains("Fate")).SelectMany(c => c.Keywords).Distinct().ToHashSet();
+            Check(Walk(_screen).OfType<CheckBox>().Where(c => c.IsVisibleInTree()).All(c => fateSpellKeywords.Contains(c.Text)), "keyword list scoped to current Type and Family selection");
+            Activate(Walk(_screen).OfType<Button>().First(b => b.Text == "Most common" && b.IsVisibleInTree())); await Wait(.2);
+            var rows = Walk(_screen).OfType<CheckBox>().Where(c => c.IsVisibleInTree()).Select(c => c.Text).ToArray();
+            var expectedOrder = _screen.Data.Filter(family: "Fate", types: ["Spell"]).SelectMany(c => c.Keywords).GroupBy(k => k).OrderByDescending(g => g.Count()).ThenBy(g => g.Key, StringComparer.OrdinalIgnoreCase).Select(g => g.Key).ToArray();
+            Check(rows.SequenceEqual(expectedOrder), "most-common keyword order ranks by frequency within the current filter");
+            PressKey(Godot.Key.Escape); await Wait(.2);
             _screen.ResetFilters(); await Wait(.2);
             Search("Akodo"); await Wait(3); Check(_screen.Grid.Cards.All(c => c.SearchText.Contains("Akodo", StringComparison.OrdinalIgnoreCase)), "live search");
             var tile = _screen.Grid.Tile("oracle-l5r-229") ?? throw new Exception("Akodo Kisho tile absent"); _screen.Grid.EnsureControlVisible(tile); await Wait(.5); Click(tile); await Wait(1);
@@ -73,4 +90,8 @@ public partial class CatalogueProbe : Node
     private static void Check(bool condition, string message) { if (!condition) throw new Exception(message); GD.Print("PASS " + message); }
     private static void Click(Control c) { var p = c.GetGlobalRect().GetCenter(); Input.ParseInputEvent(new InputEventMouseMotion { Position = p, GlobalPosition = p }); Input.ParseInputEvent(new InputEventMouseButton { Position = p, GlobalPosition = p, ButtonIndex = MouseButton.Left, Pressed = true }); Input.ParseInputEvent(new InputEventMouseButton { Position = p, GlobalPosition = p, ButtonIndex = MouseButton.Left, Pressed = false }); }
     private static void PressKey(Godot.Key key) { Input.ParseInputEvent(new InputEventKey { Keycode = key, Pressed = true }); Input.ParseInputEvent(new InputEventKey { Keycode = key, Pressed = false }); }
+    /// <summary>Activates a focusable control (e.g. a checkbox inside a popover) via keyboard focus
+    /// + Enter rather than a synthesized screen-space click, since global rects inside a popup
+    /// Window do not map back to main-viewport click coordinates.</summary>
+    private static void Activate(Control control) { control.GrabFocus(); PressKey(Godot.Key.Enter); }
 }
