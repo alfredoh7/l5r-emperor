@@ -49,6 +49,9 @@ public sealed class FilterChecklist
         if (Selected.Count != before) Changed?.Invoke();
     }
     public void Clear() { Selected.Clear(); Rebuild(); }
+    /// <summary>Frees the popup for a FilterChecklist being replaced by a fresh instance (the Trigger
+    /// button is expected to already be freed by clearing its own parent container).</summary>
+    public void Free() => _popup.QueueFree();
     private void Rebuild()
     {
         Palette.Clear(_rows);

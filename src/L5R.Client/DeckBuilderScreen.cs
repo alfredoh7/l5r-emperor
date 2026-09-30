@@ -33,12 +33,13 @@ public partial class DeckBuilderScreen : Control
     private Button _dynasty = null!, _fate = null!, _compareButton = null!, _collectionTab = null!, _setupTab = null!, _save = null!;
     private Label _status = null!, _dirtyLabel = null!, _count = null!, _empty = null!;
     private LineEdit _name = null!;
-    private OptionButton _clan = null!, _type = null!, _keyword = null!, _gold = null!, _support = null!, _sort = null!, _group = null!;
+    private OptionButton _gold = null!, _support = null!, _sort = null!, _group = null!;
+    private FilterChecklist _clanFilter = null!, _typeFilter = null!, _keywordFilter = null!;
     private string _setupSlot = "", _setupClan = "Crane", _savedFingerprint = "", _savedName = "";
     private string? _currentPath;
     private float _w = 1672, _h = 941;
     private const float SidebarWidth = 620, MatLeft = 656;
-    private bool _building, _list;
+    private bool _building, _list, _keywordMostCommon;
     private int _hoverTicket;
     private bool _previousEmbed;
     private Control _lines = new() { MouseFilter = MouseFilterEnum.Ignore };
@@ -85,12 +86,17 @@ public partial class DeckBuilderScreen : Control
         _collectionTab = CatalogueArt.Button("Collection", () => SetSetup("")); Put(_left, _collectionTab, 12, 6, 290, 40);
         _setupTab = CatalogueArt.Button("Setup", () => SetSetup("Stronghold")); Put(_left, _setupTab, 310, 6, 290, 40);
         Search = new LineEdit { PlaceholderText = "Search names or rules…", ClearButtonEnabled = true }; Put(_left, Search, 12, 58, 588, 42); Search.TextChanged += _ => ApplyFilters();
-        _clan = Option(new[] { "All clans", "Crab", "Crane", "Dragon", "Lion", "Mantis", "Phoenix", "Scorpion", "Spider", "Unicorn", "Unaligned" }, ApplyFilters);
-        _type = Option(new[] { "All types", "Personality", "Holding", "Region", "Event", "Celestial", "Follower", "Item", "Spell", "Strategy", "Ring" }, ApplyFilters);
-        _keyword = Option(new[] { "Any keyword" }.Concat(Data.Cards.SelectMany(c => c.Keywords).Distinct().Order()).ToArray(), ApplyFilters);
+        _clanFilter?.Free(); _typeFilter?.Free(); _keywordFilter?.Free();
+        _clanFilter = new FilterChecklist(this, Theme, "Clans", icon: CatalogueArt.Clan); _clanFilter.SetOptions(["Crab", "Crane", "Dragon", "Lion", "Mantis", "Phoenix", "Scorpion", "Spider", "Unicorn", "Unaligned"]); _clanFilter.Changed += ApplyFilters;
+        _typeFilter = new FilterChecklist(this, Theme, "Types"); _typeFilter.Changed += ApplyFilters;
+        var keywordOrder = new HBoxContainer(); keywordOrder.AddThemeConstantOverride("separation", 10);
+        keywordOrder.AddChild(CatalogueArt.Label("Order:", 16));
+        keywordOrder.AddChild(CatalogueArt.Button("A–Z", () => { _keywordMostCommon = false; ApplyFilters(); }));
+        keywordOrder.AddChild(CatalogueArt.Button("Most common", () => { _keywordMostCommon = true; ApplyFilters(); }));
+        _keywordFilter = new FilterChecklist(this, Theme, "Keywords", extraHeader: keywordOrder); _keywordFilter.Changed += ApplyFilters;
         _gold = Option(new[] { "Any Gold", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10+" }, ApplyFilters);
         _support = Option(new[] { "All cards", "Implemented" }, ApplyFilters);
-        Put(_left, _clan, 12, 110, 188, 36); Put(_left, _type, 210, 110, 188, 36); Put(_left, _keyword, 408, 110, 192, 36); Put(_left, _gold, 12, 154, 188, 36); Put(_left, _support, 210, 154, 188, 36);
+        Put(_left, _clanFilter.Trigger, 12, 110, 188, 36); Put(_left, _typeFilter.Trigger, 210, 110, 188, 36); Put(_left, _keywordFilter.Trigger, 408, 110, 192, 36); Put(_left, _gold, 12, 154, 188, 36); Put(_left, _support, 210, 154, 188, 36);
         Put(_left, CatalogueArt.Label("In deck", 15), 508, 163, 80, 22);
     }
     private void BuildToolbar()
@@ -177,11 +183,27 @@ public partial class DeckBuilderScreen : Control
         if (_setupSlot == "Stronghold") infos = infos.Where(c => c.Clans.Contains(_setupClan) || (_setupClan == "Unaligned" && c.Clans.Length == 0));
         var cards = infos.OrderByDescending(c => c.Playable).ThenBy(c => c.Name).ToArray(); _count.Text = "Setup · kept outside deck totals"; Mat.Setup = true; Mat.Rows = false; Mat.Reset(cards, true); _empty.Visible = cards.Length == 0; _empty.Text = "No setup choices for this Clan.";
     }
+    private static bool NotSetupOnly(CatalogueData.Card c) => new DeckCardInfo(c.Id, c.Name, c.Types, c.DeckTypes, c.Keywords, c.Playable).SetupSlot.Length == 0;
+    private void RefreshTypeOptions()
+    {
+        var scoped = Data.Cards.Where(c => c.DeckTypes.Contains(Family) && NotSetupOnly(c));
+        _typeFilter.SetOptions(scoped.SelectMany(c => c.Types).Distinct().Order(StringComparer.OrdinalIgnoreCase).ToArray());
+    }
+    private void RefreshKeywordOptions()
+    {
+        var scoped = Data.Filter(Search.Text, _clanFilter.Selected.Count == 0 ? null : _clanFilter.Selected, Family, _typeFilter.Selected.Count == 0 ? null : _typeFilter.Selected, null, _support.Selected == 1).Where(NotSetupOnly);
+        var counts = scoped.SelectMany(c => c.Keywords).GroupBy(k => k).ToDictionary(g => g.Key, g => g.Count());
+        var ordered = _keywordMostCommon
+            ? counts.OrderByDescending(kv => kv.Value).ThenBy(kv => kv.Key, StringComparer.OrdinalIgnoreCase).Select(kv => kv.Key)
+            : counts.Keys.Order(StringComparer.OrdinalIgnoreCase);
+        _keywordFilter.SetOptions(ordered.ToArray());
+    }
     public void ApplyFilters()
     {
         if (_building || Page == "decks" || _setupSlot.Length > 0) return;
-        var cards = Data.Filter(Search.Text, _clan.Selected == 0 ? null : [_clan.Text], Family, _type.Selected == 0 ? null : [_type.Text], _keyword.Selected == 0 ? null : [_keyword.Text], _support.Selected == 1, _sort.Text)
-            .Where(c => new DeckCardInfo(c.Id, c.Name, c.Types, c.DeckTypes, c.Keywords, c.Playable).SetupSlot.Length == 0);
+        RefreshTypeOptions(); RefreshKeywordOptions();
+        var cards = Data.Filter(Search.Text, _clanFilter.Selected.Count == 0 ? null : _clanFilter.Selected, Family, _typeFilter.Selected.Count == 0 ? null : _typeFilter.Selected, _keywordFilter.Selected.Count == 0 ? null : _keywordFilter.Selected, _support.Selected == 1, _sort.Text)
+            .Where(NotSetupOnly);
         if (_gold.Selected > 0) cards = cards.Where(c => _gold.Text == "10+" ? c.Numeric("cost") >= 10 && c.Numeric("cost") != double.MaxValue : c.Numeric("cost") == double.Parse(_gold.Text));
         Collection.Reset(cards.ToArray(), true); _count.Text = $"{Collection.Cards.Length:N0} collection results";
     }
