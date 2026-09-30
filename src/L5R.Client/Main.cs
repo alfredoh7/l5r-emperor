@@ -52,8 +52,8 @@ public partial class Main : Node
     /// so they can be hand-edited or dropped into another player's local install.</summary>
     private string DecksDirectory => ProjectSettings.GlobalizePath("user://Decks");
     private static readonly JsonSerializerOptions Json = new(JsonSerializerDefaults.Web) { WriteIndented = true };
-    private MatchView View => _provinceReviewView ?? (_presentationSnapshot ?? _session.Snapshot)!.View;
-    private ActionOption[] Actions => PresentationBusy || _provinceReviewView is not null || View.PendingProvinceOrder is not null ? [] : _session.Snapshot!.Actions;
+    private MatchView View => _battlefieldReviewView ?? _provinceReviewView ?? (_presentationSnapshot ?? _session.Snapshot)!.View;
+    private ActionOption[] Actions => PresentationBusy || _battlefieldReviewView is not null || _provinceReviewView is not null || View.PendingProvinceOrder is not null ? [] : _session.Snapshot!.Actions;
     private PlayerView Self => View.Players.Single(p => p.Id == View.ViewerId);
 
     public override void _Ready()
@@ -90,6 +90,12 @@ public partial class Main : Node
         _table = new TableArtStage { ReviewMode = false }; AddChild(_table);
         BuildShell();
         InitializeFrontend();
+        if (OS.GetCmdlineUserArgs().Contains("--open-battlefield-review") || _captureMode == "open-battlefield-review")
+        {
+            var startupCapture = _capturePath; _capturePath = null; StartOpenBattlefieldReview();
+            if (startupCapture is not null) Callable.From(() => { _ = CaptureOpenBattlefieldStartup(startupCapture); }).CallDeferred();
+            return;
+        }
         if (OS.GetCmdlineUserArgs().Contains("--province-review") || _captureMode == "province-review")
         {
             var startupCapture = _capturePath; _capturePath = null; StartProvinceReview();
@@ -113,11 +119,13 @@ public partial class Main : Node
         if (_captureMode.StartsWith("menu", StringComparison.Ordinal) && _capturePath is not null) { try { ProcessMenuCapture(delta); } catch (Exception e) { GD.PushError(e.ToString()); GetTree().Quit(1); } return; }
         if (MatchDuelOpen) { ProcessMatchDuel(delta); ProcessMatchDuelCapture(delta); return; }
         if (ProcessMatchDuelCapture(delta)) return;
+        LayoutBattlefieldHeaders();
         if (MenuVisible || DuelDemoOpen || PracticeVisible && _capturePath is null) return;
         ProcessBattlePresentation(delta);
         if (_session.Snapshot is not null) SyncBloodCourts();
         ProcessTableCamera(delta);
         LayoutProvinceReview();
+        LayoutOpenBattlefieldReview();
         if (_session.Snapshot is not null && _matSections.ReducedMotion != _reducedMotion) SyncMatSections();
         ExpireBattleResolution();
         foreach (var tracker in _sidebarHeader.GetChildren().OfType<BattleTracker>()) tracker.ReducedMotion = _reducedMotion;
@@ -437,7 +445,7 @@ public partial class Main : Node
         if (_session.Online && (!_session.Connected || (_session.Snapshot.PlayersConnected?.Any(p => !p) ?? false))) { _chosen = null; _sources.Clear(); _assignments.Clear(); _assignmentUnit = null; }
         if (_selected is not null) _selected = FindCard(_selected.Id);
         _seatLabel.Text = _session.Online ? $"ROOM {_session.Snapshot.RoomCode} · {Self.Clan}" : $"PRACTICE · {Self.Clan}";
-        _status.Text = View.WinnerId is { } winner ? $"{View.Players[winner].Clan} wins · {View.VictoryReason}" : $"Turn {View.TurnNumber}  ·  {View.Players[View.ActivePlayerId].Clan}  ·  {(View.PriorityPlayerId == View.ViewerId ? "Your opportunity" : View.Players[View.PriorityPlayerId].Clan + " is deciding")}";
+        _status.Text = View.WinnerId is { } winner ? $"{View.Players[winner].Clan} wins · {View.VictoryReason}" : $"Turn {View.TurnNumber}  ·  {View.Players[View.ActionPhaseTurnPlayerId ?? View.ActivePlayerId].Clan}  ·  {(View.PriorityPlayerId == View.ViewerId ? "Your opportunity" : View.Players[View.PriorityPlayerId].Clan + " is deciding")}";
         if (View.Scenario is PublishedContent.Scenario or CustomPractice.Scenario) _status.Text += $"  ·  Favor: {(View.FavorPlayerId is int favor ? View.Players[favor].Clan : "unclaimed")}";
         if (_session.Online && _session.Snapshot.PlayersConnected is { } connected && connected.Any(p => !p)) _status.Text = $"Room {_session.Snapshot.RoomCode} · waiting for both players to connect";
         RenderTimeline(); RenderBoard(); RenderInspector(); RenderPhaseActions(); Highlight(); FrameNewBattle();
@@ -527,7 +535,7 @@ public partial class Main : Node
         foreach (var (province, label) in _laneSummaries)
         {
             label.Text = "";
-            label.TooltipText = $"{BattlefieldName(province)} battlefield";
+            label.TooltipText = BattlefieldProvince(province) is null ? BattlefieldPresentation.OpenHelp : BattlefieldName(province);
         }
         _intentOverlay?.QueueRedraw();
     }
@@ -545,7 +553,7 @@ public partial class Main : Node
 
     private async Task Submit(GameCommand command)
     {
-        if (_provinceReviewView is not null) { SetNotice("Presentation preview · game actions are disabled."); return; }
+        if (_provinceReviewView is not null || _battlefieldReviewView is not null) { SetNotice("Presentation preview · game actions are disabled."); return; }
         if (PresentationBusy) return;
         if (_session.Online && (_session.Snapshot?.PlayersConnected?.Any(p => !p) ?? false))
         {

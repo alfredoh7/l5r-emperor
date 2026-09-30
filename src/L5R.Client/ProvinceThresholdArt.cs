@@ -62,14 +62,14 @@ public static class ProvinceThresholdArt
     }
 
     /// <summary>A battlefield's court: "Province N", or a battlefield without a province ("Battlefield ...", Emperor Edition rulings pass R1).</summary>
-    public static bool IsCourtLabel(string label) => label.StartsWith("Province ", StringComparison.Ordinal) || label.StartsWith("Battlefield ", StringComparison.Ordinal);
+    public static bool IsCourtLabel(string label) => label.StartsWith("Province ", StringComparison.Ordinal) || label.StartsWith("Battlefield ", StringComparison.Ordinal) || label.StartsWith("Open battlefield", StringComparison.Ordinal);
 
     public static Rect2 ThresholdBounds(Rect2 bounds) => new(bounds.Position.X, bounds.End.Y - Footer, bounds.Size.X, Footer);
 
-    public static void Draw(Control canvas, Vector2 size, string label, int? province, float active = 0, bool connectionAbove = false, bool connected = false)
+    public static void Draw(Control canvas, Vector2 size, string label, int? province, float active = 0, bool connectionAbove = false, bool connected = false, bool closedCourt = false)
     {
         if (province is null && IsCourtLabel(label))
-        { BattleInkArt.Court(canvas, size, active, connectionAbove); return; }
+        { BattleInkArt.Court(canvas, size, active, connectionAbove, closedCourt); return; }
         var art = Plate(label, province);
         var source = art.GetSize();
         var isProvince = province is not null;

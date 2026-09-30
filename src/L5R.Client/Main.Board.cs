@@ -26,6 +26,7 @@ public partial class Main
         // A removed unit must not leave its inspection tray holding camera input.
         _expandedUnits.RemoveWhere(id => !View.Players.SelectMany(p => p.Home.Concat(p.Army)).Any(c => c.Id == id && c.AttachedTo is null));
         _matSections.Emphasize(null, hover: true);
+        ClearBattlefieldHeaders();
         MeasureTableLayout();
         SyncMatSections();
         var enemy = View.Players.Single(p => p.Id != View.ViewerId);
@@ -67,8 +68,7 @@ public partial class Main
     private float WorldWidth = 1360;
     private readonly float[] _laneWidths = [170, 170, 170, 170];
     // Slots 0-7 are the fixed lanes (piles, four provinces); 8 upward are the lanes of additional battlefields, which exist only while one does (Emperor Edition rulings pass R1, issue #492).
-    private const int MaxExtraLanes = 4;
-    private readonly float[] _slotCenters = new float[8 + MaxExtraLanes];
+    private float[] _slotCenters = new float[8];
     private float _enemyHomeY, _battleY, _battleHeight, _selfHomeY, _selfProvinceY;
     private float _worldHeight = 820;
     private readonly Dictionary<int, float> _homeHeights = [];
@@ -283,6 +283,7 @@ public partial class Main
             var target = new Button { Text = "", Flat = true, TooltipText = $"{BattlefieldName(index)} battlefield" };
             CompactButton(target); target.Pressed += () => SelectProvince(defender.Id, index);
             Place(court, target, 0, 0, bounds.Size.X, MatHeader); _laneSummaries[index] = target;
+            AddOpenBattlefieldHeader(index);
             foreach (var player in View.Players)
                 foreach (var unit in player.Army.Where(c => c.AttachedTo is null && c.ProvinceIndex == index))
                 {
