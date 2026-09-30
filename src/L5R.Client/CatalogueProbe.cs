@@ -25,13 +25,15 @@ public partial class CatalogueProbe : Node
             // Every image is local, including on first use. Allow asynchronous decode to finish.
             await Wait(4); await Capture("gallery");
             Click(FindButton(b => b.Text.Contains("Playable now"))); await Wait(.3); Check(_screen.Grid.Cards.Length == _screen.Data.Filter(playable: true).Length && _screen.Grid.Cards.Length > 0, "native playable filter");
-            Click(FindButton(b => b.Text.StartsWith("Clans"))); await Wait(.3);
-            Activate(Walk(_screen).OfType<CheckBox>().First(c => c.Text == "Crane")); await Wait(.2);
-            Check(_screen.Grid.Cards.Length > 0 && _screen.Grid.Cards.All(c => c.Playable && c.Clans.Contains("Crane")), "native clan checklist combines with support");
-            Activate(Walk(_screen).OfType<CheckBox>().First(c => c.Text == "Mantis")); await Wait(.2);
+            Click(FindButton(b => b.TooltipText == "Crane cards")); await Wait(.3);
+            Check(_screen.Grid.Cards.Length > 0 && _screen.Grid.Cards.All(c => c.Playable && c.Clans.Contains("Crane")), "native clan filter combines with support");
+            Click(FindButton(b => b.TooltipText == "Mantis cards")); await Wait(.3);
             Check(_screen.Grid.Cards.All(c => c.Playable && (c.Clans.Contains("Crane") || c.Clans.Contains("Mantis"))), "native additive multi-clan filter");
             await Capture("clans-filter");
-            PressKey(Godot.Key.Escape); await Wait(.2);
+            Click(FindButton(b => b.Text == "Select all")); await Wait(.3);
+            Check(_screen.Grid.Cards.Length == _screen.Data.Filter(playable: true).Length, "select all clans matches unrestricted filter");
+            Click(FindButton(b => b.Text == "Deselect all")); await Wait(.3);
+            Check(_screen.Grid.Cards.Length == _screen.Data.Filter(playable: true).Length, "deselect all clears the clan filter");
             _screen.ResetFilters(); await Wait(.2); Click(FindButton(b => b.Text == "Fate")); await Wait(.3); Check(_screen.Grid.Cards.Length > 0 && _screen.Grid.Cards.All(c => c.DeckTypes.Contains("Fate")), "native family filter");
             Click(FindButton(b => b.Text.StartsWith("Types"))); await Wait(.3); Check(!Walk(_screen).OfType<CheckBox>().Any(c => c.IsVisibleInTree() && c.Text == "Personality"), "Fate-scoped Type list drops Dynasty-only types");
             Activate(Walk(_screen).OfType<CheckBox>().First(c => c.Text == "Spell")); await Wait(.2);
