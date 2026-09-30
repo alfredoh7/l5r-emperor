@@ -43,7 +43,7 @@ public partial class TurnIndicator : Control
         if (string.IsNullOrEmpty(TurnText)) return;
         var pulse = ReducedMotion ? 1 : 1 + .06f * Mathf.Sin(_time * 2);
         var rect = new Rect2(0, 0, Size.X, 40);
-        DrawStyleBox(Palette.Box(new Color(.045f,.045f,.035f,.95f), _accent with { A = .6f }, 9, 3), rect);
+        DrawStyleBox(Palette.Box(new Color(.045f, .045f, .035f, .95f), _accent with { A = .6f }, 9, 3), rect);
         DrawLine(new Vector2(10, 39), new Vector2(Size.X - 10, 39), _accent with { A = .12f * pulse }, 8, true);
         var titleWidth = Math.Min(Size.X * .48f, 270);
         var titleSize = 24;

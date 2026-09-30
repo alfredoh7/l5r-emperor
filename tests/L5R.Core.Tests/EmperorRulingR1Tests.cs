@@ -56,27 +56,27 @@ internal static class EmperorRulingR1Tests
     private static void AsidePublicContext()
     {
         foreach (var turn in new[] { 0, 1 })
-        foreach (var actor in new[] { 0, 1 })
-        {
-            var engine = TrickeryTable(actor, out var spell, out _, out var spirits, out var target, out _, turnPlayer: turn);
-            Check(engine.GetView(0).ActionPhaseTurnPlayerId is null, "no aside context before the battle");
-            Accept(engine, Slotted(engine, actor, "chikushudo-trickery-battle", spell, spirits, target));
-            foreach (var seat in new[] { 0, 1 })
+            foreach (var actor in new[] { 0, 1 })
             {
-                var view = engine.GetView(seat);
-                Eq(view.ActionPhaseTurnPlayerId, (int?)turn, "original turn, independent of attacker and viewer");
-                Eq(view.ActivePlayerId, 1 - actor, "attacker semantics unchanged");
-                var json = System.Text.Json.JsonSerializer.Serialize(view);
-                var restoredView = System.Text.Json.JsonSerializer.Deserialize<MatchView>(json)!;
-                Eq(restoredView.ActionPhaseTurnPlayerId, (int?)turn, "new display context survives wire serialization");
-                Check(!json.Contains("Paused", StringComparison.Ordinal) && !json.Contains("BowedBefore", StringComparison.Ordinal), "paused private action was not projected");
+                var engine = TrickeryTable(actor, out var spell, out _, out var spirits, out var target, out _, turnPlayer: turn);
+                Check(engine.GetView(0).ActionPhaseTurnPlayerId is null, "no aside context before the battle");
+                Accept(engine, Slotted(engine, actor, "chikushudo-trickery-battle", spell, spirits, target));
+                foreach (var seat in new[] { 0, 1 })
+                {
+                    var view = engine.GetView(seat);
+                    Eq(view.ActionPhaseTurnPlayerId, (int?)turn, "original turn, independent of attacker and viewer");
+                    Eq(view.ActivePlayerId, 1 - actor, "attacker semantics unchanged");
+                    var json = System.Text.Json.JsonSerializer.Serialize(view);
+                    var restoredView = System.Text.Json.JsonSerializer.Deserialize<MatchView>(json)!;
+                    Eq(restoredView.ActionPhaseTurnPlayerId, (int?)turn, "new display context survives wire serialization");
+                    Check(!json.Contains("Paused", StringComparison.Ordinal) && !json.Contains("BowedBefore", StringComparison.Ordinal), "paused private action was not projected");
+                }
+                var restored = Edit(engine, _ => { });
+                Eq(restored.GetView(1).ActionPhaseTurnPlayerId, (int?)turn, "state restoration reconstructs the public context");
+                PassTwice(restored);
+                Check(restored.GetView(0).ActionPhaseTurnPlayerId is null && restored.GetView(1).ActionPhaseTurnPlayerId is null, "aside context retires after resolution");
+                Eq(restored.State.Phase, Phase.Action, "return phase remains engine-owned");
             }
-            var restored = Edit(engine, _ => { });
-            Eq(restored.GetView(1).ActionPhaseTurnPlayerId, (int?)turn, "state restoration reconstructs the public context");
-            PassTwice(restored);
-            Check(restored.GetView(0).ActionPhaseTurnPlayerId is null && restored.GetView(1).ActionPhaseTurnPlayerId is null, "aside context retires after resolution");
-            Eq(restored.State.Phase, Phase.Action, "return phase remains engine-owned");
-        }
         var ended = TrickeryTable(0, out var endSpell, out _, out var endSpirits, out var endTarget, out _);
         Accept(ended, Slotted(ended, 0, "chikushudo-trickery-battle", endSpell, endSpirits, endTarget));
         Accept(ended, new GameCommand("concede", 0, ended.Version));

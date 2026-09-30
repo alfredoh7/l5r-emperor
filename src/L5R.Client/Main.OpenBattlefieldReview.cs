@@ -57,8 +57,11 @@ public partial class Main
         var snapshot = _battlefieldReviewSeed!.GetView(_battlefieldReviewSeat);
         int[] fields = _battlefieldReviewScenario switch
         {
-            1 or 4 => [1, 100], 2 => [100, 101], 3 => [1],
-            5 => [100, 101, 102, 103, 104, 105], _ => [100]
+            1 or 4 => [1, 100],
+            2 => [100, 101],
+            3 => [1],
+            5 => [100, 101, 102, 103, 104, 105],
+            _ => [100]
         };
         var definitions = CardCatalog.Cards.Values.Where(c => !c.ScenarioOnly && c.Type == CardType.Personality && c.ArtworkKey is not null).ToArray();
         var crane = definitions.First(c => c.Name.Contains("Hakuseki", StringComparison.Ordinal));
@@ -86,19 +89,28 @@ public partial class Main
             {
                 Army = army.ToArray(),
                 Home = player.Home.Where(c => c.Definition?.Type == CardType.Holding).ToArray(),
-                Hand = [], HandCount = 0,
+                Hand = [],
+                HandCount = 0,
                 Provinces = player.Provinces.Select(p => _battlefieldReviewScenario == 3 && player.Id == 1 && p.Index == 1
                     ? p with { Destroyed = true, Card = null, DynastySlots = null, Region = null } : p).ToArray()
             };
         }).ToArray();
         _battlefieldReviewView = snapshot with
         {
-            Scenario = "open-battlefield-ui-review", Version = ++_battlefieldReviewVersion,
-            Players = players, Phase = Phase.Battle, ActivePlayerId = 0, PriorityPlayerId = _battlefieldReviewSeat,
-            CurrentBattleProvince = fields.Contains(100) ? 100 : 1, UnresolvedBattlefields = fields,
+            Scenario = "open-battlefield-ui-review",
+            Version = ++_battlefieldReviewVersion,
+            Players = players,
+            Phase = Phase.Battle,
+            ActivePlayerId = 0,
+            PriorityPlayerId = _battlefieldReviewSeat,
+            CurrentBattleProvince = fields.Contains(100) ? 100 : 1,
+            UnresolvedBattlefields = fields,
             Battlefields = fields.Select(i => new BattlefieldView(i,
                 _battlefieldReviewScenario == 4 || i == 1 && _battlefieldReviewScenario != 3 ? 1 : null)).ToArray(),
-            PendingChoice = null, PendingProvinceOrder = null, ActionPhaseTurnPlayerId = _battlefieldReviewScenario == 8 ? 1 : null, Events = []
+            PendingChoice = null,
+            PendingProvinceOrder = null,
+            ActionPhaseTurnPlayerId = _battlefieldReviewScenario == 8 ? 1 : null,
+            Events = []
         };
         _selected = null; _chosen = null; _assignments.Clear(); _motionView = null; _tableLayoutSeen = false;
         _journalView = null; _battlePresentationStage = 0; _presentationSnapshot = null;
@@ -116,7 +128,7 @@ public partial class Main
             Players = View.Players.Select(p => p.Id != 1 ? p : p with
             {
                 Provinces = p.Provinces.Select(v => v.Index != 1 ? v : v with
-                    { Destroyed = true, Card = null, DynastySlots = null, Region = null }).ToArray()
+                { Destroyed = true, Card = null, DynastySlots = null, Region = null }).ToArray()
             }).ToArray(),
             Battlefields = View.Battlefields!.Select(b => b.Province == 1 ? b with { Province = null } : b).ToArray()
         };

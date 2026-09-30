@@ -252,9 +252,21 @@ public sealed partial class MatchEngine
     {
         R1.Aside = new AsideBattle
         {
-            TurnPlayerId = _state.ActivePlayerId, Battlefield = battlefield, AttackerId = attackerId, LoseHonorAfter = loseHonorAfter,
-            Paused = new() { Command = command, PlayerId = command.PlayerId, Negated = _state.NegatedEffects.ToList(), ConsumedGrant = consumedGrant, PlayedFromDiscard = playedFromDiscard,
-                OpponentHonorBefore = opponentHonorBefore, BowedBefore = bowedBefore.ToList(), PreExistingGrants = preExistingGrants.ToList() }
+            TurnPlayerId = _state.ActivePlayerId,
+            Battlefield = battlefield,
+            AttackerId = attackerId,
+            LoseHonorAfter = loseHonorAfter,
+            Paused = new()
+            {
+                Command = command,
+                PlayerId = command.PlayerId,
+                Negated = _state.NegatedEffects.ToList(),
+                ConsumedGrant = consumedGrant,
+                PlayedFromDiscard = playedFromDiscard,
+                OpponentHonorBefore = opponentHonorBefore,
+                BowedBefore = bowedBefore.ToList(),
+                PreExistingGrants = preExistingGrants.ToList()
+            }
         };
         _state.NegatedEffects.Clear();
         _state.ActivePlayerId = attackerId;
