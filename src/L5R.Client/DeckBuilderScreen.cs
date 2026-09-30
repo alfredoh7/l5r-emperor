@@ -95,7 +95,7 @@ public partial class DeckBuilderScreen : Control
     }
     private void BuildToolbar()
     {
-        _group=Option(new[]{"Group: Type","Group: Gold","Group: None"},()=>RefreshMat());_sort=Option(new[]{"Name A–Z","Gold cost","Force","Chi"},()=>{ApplyFilters();RefreshMat();});
+        _group=Option(new[]{"Group: Type","Group: Gold","Group: None"},()=>RefreshMat());_sort=Option(new[]{"Name A–Z","Gold cost","Force","Chi","Set"},()=>{ApplyFilters();RefreshMat();});
         Put(_toolbar,_group,8,8,162,38);Put(_toolbar,_sort,180,8,154,38);
         var mat=CatalogueArt.Button("Mat",()=>{_list=false;RefreshMat();});mat.Name="MatTab";Put(_toolbar,mat,356,8,80,38);
         var list=CatalogueArt.Button("List",()=>{_list=true;RefreshMat();});list.Name="ListTab";Put(_toolbar,list,440,8,80,38);
@@ -179,7 +179,7 @@ public partial class DeckBuilderScreen : Control
     public void ApplyFilters()
     {
         if(_building||Page=="decks"||_setupSlot.Length>0)return;
-        var cards=Data.Filter(Search.Text,_clan.Selected==0?"All":_clan.Text,Family,_type.Selected==0?"":_type.Text,_keyword.Selected==0?"":_keyword.Text,_support.Selected==1,_sort.Text)
+        var cards=Data.Filter(Search.Text,_clan.Selected==0?null:[_clan.Text],Family,_type.Selected==0?null:[_type.Text],_keyword.Selected==0?null:[_keyword.Text],_support.Selected==1,_sort.Text)
             .Where(c=>new DeckCardInfo(c.Id,c.Name,c.Types,c.DeckTypes,c.Keywords,c.Playable).SetupSlot.Length==0);
         if(_gold.Selected>0)cards=cards.Where(c=>_gold.Text=="10+"?c.Numeric("cost")>=10&&c.Numeric("cost")!=double.MaxValue:c.Numeric("cost")==double.Parse(_gold.Text));
         Collection.Reset(cards.ToArray(),true);_count.Text=$"{Collection.Cards.Length:N0} collection results";

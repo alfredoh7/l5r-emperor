@@ -68,7 +68,7 @@ public partial class CatalogueScreen : Control
         var more=CatalogueArt.Button("More filters",ShowAdvanced);more.Name="MoreFilters";_filters.AddChild(more);
         _allCards=CatalogueArt.Button("◉  Entire catalogue",()=>{_playableOnly=false;ApplyFilter();});_filters.AddChild(_allCards);
         _playable=CatalogueArt.Button("○  Playable now",()=>{_playableOnly=true;ApplyFilter();});_filters.AddChild(_playable);
-        _sort=Option("",["Name A–Z","Name Z–A","Gold cost","Force","Chi"]);_filters.AddChild(_sort);
+        _sort=Option("",["Name A–Z","Name Z–A","Gold cost","Force","Chi","Set"]);_filters.AddChild(_sort);
         _count=CatalogueArt.Label("",16);_canvas.AddChild(_count);
         _footer=CatalogueArt.Label("Click a card to inspect  ·  Esc to return",16);_footer.HorizontalAlignment=HorizontalAlignment.Center;_canvas.AddChild(_footer);
         var density=Option("",["Small cards","Medium cards","Large cards"]);density.Name="Density";density.Selected=1;density.ItemSelected+=i=>{Grid.Density=(int)i;Grid.LayoutCards();};_canvas.AddChild(density);
@@ -89,7 +89,7 @@ public partial class CatalogueScreen : Control
     public void ApplyFilter()
     {
         if(_loading||Grid is null||_sort is null)return;
-        var results=Data.Filter(Search.Text,_clan,_family,Value(_type),Value(_keyword),_playableOnly,_sort.GetItemText(_sort.Selected),_set is null?"":Value(_set));
+        var results=Data.Filter(Search.Text,_clan=="All"?null:[_clan],_family,Value(_type)==""?null:[Value(_type)],Value(_keyword)==""?null:[Value(_keyword)],_playableOnly,_sort.GetItemText(_sort.Selected),_set is null?"":Value(_set));
         Grid.SetCards(results);_count.Text=$"{results.Length:N0} {(results.Length==1?"result":"results")}  ·  {Data.Cards.Length:N0} cards";
         foreach(var (key,b) in _clanButtons)Highlight(b,key==_clan);
         foreach(var (key,b) in _familyButtons)Highlight(b,key==_family);

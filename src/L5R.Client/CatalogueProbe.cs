@@ -15,8 +15,11 @@ public partial class CatalogueProbe : Node
             Check(_screen.Data.Cards.Length==2149,"full reference catalogue");
             Check(_screen.Data.Cards.All(c=>c.Printings.Length>0),"every card has indexed scan variants");
             Check(_screen.Data.Filter(playable:true).All(c=>c.Playable),"support comes from Core");
-            Check(_screen.Data.Filter(clan:"Crane",type:"Personality").All(c=>c.Clans.Contains("Crane")&&c.Types.Contains("Personality")),"combined clan and type filters");
-            Check(_screen.Data.Filter(family:"Fate",keyword:"Battle").All(c=>c.DeckTypes.Contains("Fate")&&c.Keywords.Contains("Battle")),"family and keyword filters");
+            Check(_screen.Data.Filter(clans:["Crane"],types:["Personality"]).All(c=>c.Clans.Contains("Crane")&&c.Types.Contains("Personality")),"combined clan and type filters");
+            Check(_screen.Data.Filter(family:"Fate",keywords:["Battle"]).All(c=>c.DeckTypes.Contains("Fate")&&c.Keywords.Contains("Battle")),"family and keyword filters");
+            Check(_screen.Data.Filter(clans:["Crane","Mantis"]).All(c=>c.Clans.Contains("Crane")||c.Clans.Contains("Mantis")),"additive multi-clan filter");
+            var setSorted=_screen.Data.Filter(sort:"Set");
+            Check(setSorted.SequenceEqual(setSorted.OrderBy(CatalogueData.SetRank).ThenBy(c=>c.Name,StringComparer.OrdinalIgnoreCase)),"Set sort follows the presentation order");
             Check(_screen.Data.Filter(search:"nonesuchzzzz").Length==0,"no results");
             // Every image is local, including on first use. Allow asynchronous decode to finish.
             await Wait(4);await Capture("gallery");
