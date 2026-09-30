@@ -279,6 +279,8 @@ internal static class ActionLockTests
         "offeringReverence", "testedLandProvince",
         // Issue #501 (Mendon's item 2): declining an optional additional action is the player's decision, not an action a Personality performs.
         "declineAdditionalAction",
+        // Plains of Otosan Uchi (issue #554): the reveal-order choice and the province-card-targeting disambiguation (Shosuro Toson) are both the province's own controller's decisions.
+        "provinceCardChoice", "provinceOrder",
     ];
 
     private static void InnateActionInventory()

@@ -258,20 +258,24 @@ public sealed partial class MatchEngine
     {
         _state.ProvinceSights.RemoveAll(s => s.Turn != _state.TurnNumber);
         var count = 0;
-        foreach (var province in Player(ownerId).Provinces.Where(p => p.CardId is not null))
-        {
-            var card = Card(province.CardId!);
-            if (card.FaceUp) continue;
-            _state.ProvinceSights.Add(new(viewer.Id, ownerId, province.Index, card.Id, card.DefinitionId, _state.TurnNumber));
-            count++;
-        }
+        // Plains of Otosan Uchi (issue #554): both slots are face-down "cards in a province" for this purpose.
+        foreach (var province in Player(ownerId).Provinces)
+            foreach (var cardId in new[] { province.CardId, province.CardId2 })
+            {
+                if (cardId is not string id) continue;
+                var card = Card(id);
+                if (card.FaceUp) continue;
+                _state.ProvinceSights.Add(new(viewer.Id, ownerId, province.Index, card.Id, card.DefinitionId, _state.TurnNumber));
+                count++;
+            }
         Emit("provincesLooked", $"{viewer.Name} looks at the {count} face-down card{(count == 1 ? "" : "s")} in {(ownerId == viewer.Id ? "their own" : $"{Player(ownerId).Name}'s")} provinces ({Definition(source).Name}).", viewer.Id, source.Id);
     }
 
     private ProvinceSightView[]? BuildProvinceSights(int viewerId)
     {
         var sights = _state.ProvinceSights.Where(s => s.ViewerId == viewerId && s.Turn == _state.TurnNumber
-            && Player(s.OwnerId).Provinces[s.Province].CardId == s.CardId && !Card(s.CardId).FaceUp).ToArray();
+            && (Player(s.OwnerId).Provinces[s.Province].CardId == s.CardId || Player(s.OwnerId).Provinces[s.Province].CardId2 == s.CardId) // issue #554
+            && !Card(s.CardId).FaceUp).ToArray();
         return sights.Length == 0 ? null : sights.Select(s => new ProvinceSightView(s.OwnerId, s.Province, s.DefinitionId, Copy(Definition(Card(s.CardId))))).ToArray();
     }
 

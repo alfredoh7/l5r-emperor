@@ -355,6 +355,11 @@ public sealed class ProvinceState
     // second Region revealed here rather than replacing the first). Mirrors CardId's own role for the
     // face-down/face-up Dynasty card, but for the Zone.Region card instead.
     public string? RegionId { get; set; }
+    // Plains of Otosan Uchi (oracle-l5r-5979, OtosanUchiPlains.cs): the province's second Dynasty-card slot, mirroring
+    // CardId's own role. Only ever populated while GrantsSecondDynastySlot(this) holds (RegionId is Otosan Uchi's own
+    // Region) -- except the catalogue's own errata note: once that Region is destroyed independent of the province
+    // (Brawl), whatever already sits here stays until it next leaves normally, and simply is not refilled again.
+    public string? CardId2 { get; set; }
     // Strength bonuses from cards that stay in play (Hasty Fortifications, issue #418): counted while their source is.
     public List<ProvinceBonus> SourceBonuses { get; set; } = [];
 }
@@ -765,6 +770,16 @@ public sealed partial class MatchState
     // reveal that defers to a player decision (Harsh Choices, Imperial Gift's search) resumes from here,
     // so the card that province refilled with is not revealed in the same phase it was placed.
     public int EventsRevealNext { get; set; }
+    // Plains of Otosan Uchi (oracle-l5r-5979, issue #554, OtosanUchiPlains.cs): a two-slot province's own reveal
+    // sequence in progress -- the province index (of the ACTIVE Events-Phase player's own row), the remaining slots
+    // still to reveal+resolve in the controller's chosen order (0 = CardId, 1 = CardId2), and whether CardId/CardId2
+    // are currently swapped so the ordinary single-slot ResolveEvent/ResolveRegion machinery can run unmodified
+    // against slot 2. All three reset once the sequence finishes; null/empty/false otherwise.
+    public int? OtosanUchiProvinceIndex { get; set; }
+    public List<int> OtosanUchiRevealQueue { get; set; } = [];
+    public bool OtosanUchiSwapped { get; set; }
+    // A province-card-targeting effect (Shosuro Toson's Reaction) paused on a two-candidate province (issue #554); null otherwise.
+    public PendingProvinceCardChoice? PendingProvinceCardChoice { get; set; }
     public int? CurrentBattleProvince { get; set; }
     public List<int> UnresolvedBattlefields { get; set; } = [];
     // Before This Battle Resolves (issue #272): see PendingBeforeBattleResolve's own doc comment.

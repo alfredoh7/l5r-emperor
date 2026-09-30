@@ -307,14 +307,16 @@ public sealed partial class MatchEngine
         {
             case EmperorP3Abilities.TosonEngage:
             {
-                var discarded = CurrentBattlefieldProvince()?.CardId is { } cardId ? Card(cardId) : null;
-                DiscardCurrentProvinceCard();
-                if (discarded is not null && Definition(discarded).Type == CardType.Personality && _state.PendingEngage is { } engage)
+                // A two-slot province (Plains of Otosan Uchi, issue #554) may hold two candidates: asks which to discard.
+                if (CurrentBattlefieldProvince() is { } province)
                 {
-                    ClaimFirstOpportunity(player.Id, "Engage", source);
-                    engage.FirstActionPerformerId = source!.Id; engage.FirstActionPerformerPlayerId = player.Id;
+                    var candidates = ProvinceCardCandidates(province);
+                    if (candidates.Count > 1) return BeginProvinceCardChoice(province, player.Id, EmperorP3Abilities.TosonEngage, source!.Id);
+                    var discarded = candidates.Count == 1 ? candidates[0] : null;
+                    if (discarded is not null) DiscardProvinceCandidate(province, discarded);
+                    FinishTosonAfterProvinceChoice(player, source!, discarded);
                 }
-                else Emit("firstOpportunityNotClaimed", $"{name}: no Personality was discarded, so no opportunity is claimed.", player.Id, source?.Id);
+                else FinishTosonAfterProvinceChoice(player, source!, null);
                 return false;
             }
             case EmperorP3Abilities.TenbatsuEngage:
@@ -398,6 +400,19 @@ public sealed partial class MatchEngine
     }
 
     // ---- Shosuro Toson - exp2: the forced performer of the first opportunity (CloseEngageWindow's hook) --------------------------------------------------------------------------------------
+
+    // TosonEngage's own tail, shared by its immediate (0/1-candidate) path and ResolveProvinceCardChoice's own
+    // continuation (issue #554, a two-candidate province): claims the first opportunity when a Personality was discarded.
+    private void FinishTosonAfterProvinceChoice(PlayerState player, CardInstance source, CardInstance? discarded)
+    {
+        var name = Definition(source).Name;
+        if (discarded is not null && Definition(discarded).Type == CardType.Personality && _state.PendingEngage is { } engage)
+        {
+            ClaimFirstOpportunity(player.Id, "Engage", source);
+            engage.FirstActionPerformerId = source.Id; engage.FirstActionPerformerPlayerId = player.Id;
+        }
+        else Emit("firstOpportunityNotClaimed", $"{name}: no Personality was discarded, so no opportunity is claimed.", player.Id, source.Id);
+    }
 
     private FirstActionRestriction? P3FirstActionPerformerLimit(PendingEngage engage, int holder) =>
         engage.FirstActionPerformerId is { } performer && engage.FirstActionPerformerPlayerId == holder && _state.Cards.ContainsKey(performer)

@@ -19,7 +19,10 @@ public sealed partial class MatchEngine
                 units.Where(c=>c.Zone==Zone.Battlefield || c.Zone==Zone.Attached && Card(c.AttachedTo).Zone==Zone.Battlefield).Select(c=>ViewCard(c)).ToArray(),
                 player.Provinces.Select(p=>new ProvinceView(p.Index,EffectiveProvinceStrength(p),p.Destroyed,
                     p.CardId is null?null:ViewCard(Card(p.CardId),Card(p.CardId).FaceUp),
-                    p.RegionId is null?null:ViewCard(Card(p.RegionId)),ProvinceStrengthMax(p),p.HoldsNoDynastyCards,p.DarkExperimentsMarked)).ToArray(), // issue #503
+                    p.RegionId is null?null:ViewCard(Card(p.RegionId)),ProvinceStrengthMax(p),p.HoldsNoDynastyCards,p.DarkExperimentsMarked)
+                    // Plains of Otosan Uchi (issue #554): DynastySlots is authoritative only once a second slot has ever existed; every
+                    // other province leaves it null, keeping the legacy Card field as the whole story (the PR #544 view contract).
+                    {DynastySlots=p.CardId2 is null?null:[new(0,p.CardId is null?null:ViewCard(Card(p.CardId),Card(p.CardId).FaceUp)),new(1,ViewCard(Card(p.CardId2),Card(p.CardId2).FaceUp))]}).ToArray(), // issue #503
                 player.Id==playerId?player.Hand.Select(id=>ViewCard(Card(id))).ToArray():[],player.Hand.Count,
                 player.DynastyDeck.Count,player.FateDeck.Count,
                 owned.Where(c=>c.Zone is Zone.DynastyDiscard or Zone.FateDiscard or Zone.Dead).Select(c=>ViewCard(c)).ToArray(),
@@ -42,7 +45,25 @@ public sealed partial class MatchEngine
             BuildBattleStepView(),
             // Deck search (issue #312): the deck viewer is private to the searcher; the shown-cards record is public.
             BuildSearchView(playerId),BuildShownCards(),BuildLookView(playerId),BuildCopyView(playerId),BuildEitherOrView(playerId),BuildOpponentPaymentView(playerId),
-            _state.LastDuel is null?null:Copy(_state.LastDuel),BuildProvinceSights(playerId),BuildBattlefieldViews(),BuildHandSights(playerId)); // issue #503: hand sights
+            _state.LastDuel is null?null:Copy(_state.LastDuel),BuildProvinceSights(playerId),BuildBattlefieldViews(),BuildHandSights(playerId)) // issue #503: hand sights
+            {PendingProvinceOrder=BuildProvinceOrderView(playerId)}; // Plains of Otosan Uchi (issue #554)
+    }
+
+    // The reveal-order decision (PR #544's own contract): PUBLIC identity/prompt, options PRIVATE to the deciding
+    // seat (the other seat gets an empty array and shows waiting UI instead).
+    private ProvinceOrderView? BuildProvinceOrderView(int viewerId)
+    {
+        if(_state.PendingChoice is not {Type:"provinceOrder"} pending || _state.OtosanUchiProvinceIndex is not int index) return null;
+        var owner=Player(pending.PlayerId);
+        var province=owner.Provinces[index];
+        var options=viewerId==pending.PlayerId
+            ? new[]
+            {
+                new ProvinceOrderOption("left","Left",[0,1],new GameCommand("provinceOrder",pending.PlayerId,_state.Version,Choice:"left")),
+                new ProvinceOrderOption("right","Right",[1,0],new GameCommand("provinceOrder",pending.PlayerId,_state.Version,Choice:"right")),
+            }
+            : [];
+        return new($"provinceOrder-{province.Index}",pending.PlayerId,owner.Id,province.Index,pending.Prompt,options);
     }
 
     private CardView ViewCard(CardInstance card,bool visible=true)
@@ -468,6 +489,23 @@ public sealed partial class MatchEngine
         {
             Add("chooseRinShame","Dishonor him",Command("chooseRinShame") with {Choice="dishonor"});
             Add("chooseRinShame","Refuse: he is bowed and cannot straighten this turn",Command("chooseRinShame") with {Choice="decline"});
+        }
+        // Plains of Otosan Uchi (issue #554): both slots are always still face down while this is open (it only ever
+        // opens when neither has been revealed yet this Events Phase), so Left/Right never has a title to show instead.
+        else if(_state.PendingChoice is { Type:"provinceOrder" })
+        {
+            Add("provinceOrder","Left",Command("provinceOrder") with {Choice="left"});
+            Add("provinceOrder","Right",Command("provinceOrder") with {Choice="right"});
+        }
+        // Plains of Otosan Uchi (issue #554): a province-card-targeting effect (Shosuro Toson) with two candidates.
+        // Mendon's ruling: a face-up candidate's own title replaces its plain "Left"/"Right" label.
+        else if(_state.PendingChoice is { Type:"provinceCardChoice" })
+        {
+            var pcProvince=Player(_state.PendingProvinceCardChoice!.ProvinceOwnerId).Provinces[_state.PendingProvinceCardChoice!.ProvinceIndex];
+            var pcLeft=pcProvince.CardId is {} pcLeftId && Card(pcLeftId).FaceUp?Definition(Card(pcLeftId)).Name:"Left";
+            var pcRight=pcProvince.CardId2 is {} pcRightId && Card(pcRightId).FaceUp?Definition(Card(pcRightId)).Name:"Right";
+            Add("provinceCardChoice",pcLeft,Command("provinceCardChoice") with {Choice="left"});
+            Add("provinceCardChoice",pcRight,Command("provinceCardChoice") with {Choice="right"});
         }
         else if(_state.PendingChoice is { Type:"yourClanNeedsYouProvince" })
             foreach(var p in Player(playerId).Provinces.Where(p=>!p.Destroyed && !p.HoldsNoDynastyCards)) // issue #503

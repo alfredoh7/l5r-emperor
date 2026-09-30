@@ -479,8 +479,8 @@ public sealed partial class MatchEngine
         Require(quote.Error is null, quote.Error ?? "");
         PayAdditionalEntryCost(command.PlayerId, card); // En'you (issue #501, EmperorMechC.cs): an additional cost of entering play.
         Pay(command.PlayerId, card, quote.Cost, command.SourceIds, paying: new PaymentSubject(card, PaymentKind.Recruit));
-        var province = Player(command.PlayerId).Provinces.Single(p => p.CardId == card.Id);
-        province.CardId = null;
+        var (province, slot) = FindProvinceSlot(Player(command.PlayerId), card.Id); // issue #554: either of Otosan Uchi's two slots
+        ClearProvinceSlot(province, slot);
         _state.LastProvinceEntryCardId = card.Id; _state.LastProvinceEntryProvinceIndex = province.Index; // "enters play from a province" (Yogo Ugimori; issue #453, batch 2; Agasha Ryo, issue #477)
         card.Zone = Zone.Home; card.ProvinceIndex = null; card.FaceUp = true;
         // A Personality is straightened by default; entering bowed is only ever a direct
@@ -490,7 +490,7 @@ public sealed partial class MatchEngine
         Emit("cardEnteredPlay", $"{Player(command.PlayerId).Name} brought {Definition(card).Name} into play{(card.Bowed ? " bowed" : "")}.", command.PlayerId, card.Id);
         AfterHoldingEnteredFromProvinceP6(province, card); // Dark Experiments (issue #503, EmperorP6.cs)
         QueueOverconfidentDraw(card);
-        Refill(Player(command.PlayerId), province);
+        RefillProvinceSlot(Player(command.PlayerId), province, slot);
         var reactionId = EntryReactionAbility(card);
         if (quote.ProclaimEligible)
         {
@@ -785,15 +785,15 @@ public sealed partial class MatchEngine
         Require(quote.Error is null, quote.Error ?? "");
         PayAdditionalEntryCost(command.PlayerId, card); // issue #501 (EmperorMechC.cs)
         Pay(command.PlayerId, card, quote.Cost, command.SourceIds, paying: new PaymentSubject(card, PaymentKind.Recruit));
-        var province = Player(command.PlayerId).Provinces.Single(p => p.CardId == card.Id);
-        province.CardId = null;
+        var (province, slot) = FindProvinceSlot(Player(command.PlayerId), card.Id); // issue #554: either of Otosan Uchi's two slots
+        ClearProvinceSlot(province, slot);
         _state.LastProvinceEntryCardId = card.Id; _state.LastProvinceEntryProvinceIndex = province.Index; // "enters play from a province" (Yogo Ugimori; issue #453, batch 2; Agasha Ryo, issue #477)
         card.Zone = Zone.Battlefield; card.FaceUp = true;
         card.Bowed = Definition(card).Effect == "enters-bowed";
         if (Definition(card).Effect == "enters-dishonored") Dishonor(card);
         Emit("reserveRecruited", $"{Player(command.PlayerId).Name} recruited {Definition(card).Name} from Reserve.", command.PlayerId, card.Id);
         QueueOverconfidentDraw(card);
-        Refill(Player(command.PlayerId), province);
+        RefillProvinceSlot(Player(command.PlayerId), province, slot);
         var reactionId = EntryReactionAbility(card);
         if (quote.ProclaimEligible)
         {
@@ -2594,6 +2594,7 @@ public sealed partial class MatchEngine
     }
     private void DestroyProvince(int owner, ProvinceState province)
     {
+        BeforeDestroyOtosanUchiProvince(owner, province); // Plains of Otosan Uchi (issue #554): "Before this Province is destroyed, lose 10 Honor," and its own second slot's card.
         province.Destroyed = true;
         // Village Guardian (oracle-l5r-9162, issue #285): the single choke point for "a province
         // destroyed this game" -- set once, never cleared, read by village-guardian-draw's own count.
@@ -2847,10 +2848,17 @@ public sealed partial class MatchEngine
         // Deck search (issue #312): a reveal that deferred to a player decision (Harsh Choices, Imperial Gift's
         // search) resumes from the next province, never from the start -- restarting at province 0 would reveal, in
         // this same phase, the face-down card the deferred Event's own province had just been refilled with.
-        foreach (var province in player.Provinces.Where(p => p.Index >= _state.EventsRevealNext && !p.Destroyed && p.CardId is not null))
+        foreach (var province in player.Provinces.Where(p => p.Index >= _state.EventsRevealNext && !p.Destroyed && (p.CardId is not null || p.CardId2 is not null)))
         {
+            // Plains of Otosan Uchi (issue #554): a province with a second Dynasty slot is routed wholesale through its
+            // own reveal-order-aware handler instead of the single-slot block below, which only ever reads CardId.
+            if (province.CardId2 is not null || _state.OtosanUchiProvinceIndex == province.Index)
+            {
+                if (HandleOtosanUchiProvinceReveal(player, province)) return;
+                continue;
+            }
             _state.EventsRevealNext = province.Index + 1;
-            var card = Card(province.CardId);
+            var card = Card(province.CardId!);
             if (!card.FaceUp)
             {
                 card.FaceUp = true;
@@ -3018,6 +3026,7 @@ public sealed partial class MatchEngine
         card.Zone = Zone.Region; card.ProvinceIndex = province.Index; card.FaceUp = true; province.RegionId = card.Id;
         Emit("regionAttached", $"{Definition(card).Name} attached to {player.Name}'s province {province.Index + 1}.", player.Id, card.Id);
         AfterRegionAttachedP6(province, card); // Dark Experiments (issue #503, EmperorP6.cs)
+        AfterRegionAttachedOtosanUchi(province, card); // Plains of Otosan Uchi (issue #554): creates the province's second Dynasty slot.
     }
     // A Celestial (core rules Glossary): unlike Event/Region, it enters play the instant it is
     // revealed regardless of WHICH phase that reveal happens in -- today the Events Phase reveal loop
