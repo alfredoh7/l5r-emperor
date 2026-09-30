@@ -7328,7 +7328,8 @@ public sealed partial class MatchEngine
             // Most Iaijutsu Personalities duel as themselves ("Kitsuki Daisuke... Daisuke duels
             // him") -- no separate Performer selection at all, unlike Steel on Steel's own chosen
             // performer. ability.Performer null means exactly this: the source card is the challenger.
-            var challengerId = ability.Performer is not null ? command.PerformerId! : source!.Id;
+            var challengerId = id == "sword-for-hire-create" ? CreateSwordForHireDuelist(ability, player)
+                : ability.Performer is not null ? command.PerformerId! : source!.Id;
             IssueChallenge(id, player.Id, challengerId, target!.Id, ability.DuelStat, ability.DuelRefusable, source);
             return;
         }

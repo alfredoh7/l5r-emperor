@@ -19,6 +19,8 @@ public sealed record CreatedCardSpec(CardType Type, int? Force = null, int? Chi 
     public bool HostIsPerformer { get; init; }
     /// <summary>Attaches a created attachment to the creating card itself ("attach it to him" on an entering-play Reaction of the Personality: Masayoshi, issue #453).</summary>
     public bool HostIsSource { get; init; }
+    /// <summary>Attach the created Item to the Personality wearing the source Item.</summary>
+    public bool HostIsWielder { get; init; }
     /// <summary>Attaches a created attachment to the Personality whose entry opened the window the Reaction is used in ("After your target Personality enters play: Create ... and attach it to him": Shinjo Ki-Chang - exp, issue #492 proxy group Y).</summary>
     public bool HostIsEntered { get; init; }
     public bool ControllerClan { get; init; }
@@ -51,6 +53,7 @@ public sealed record CreatedCardSpec(CardType Type, int? Force = null, int? Chi 
         if (EntersBowed) text.Append(" bowed");
         if (HostIsPerformer) text.Append(" attached to the performer");
         if (HostIsSource) text.Append(" attached to the source");
+        if (HostIsWielder) text.Append(" attached to the source's wielder");
         if (HostIsEntered) text.Append(" attached to the entering Personality");
         if (ControllerClan) text.Append(" with the controller's Clan");
         if (Values is { Length: > 0 } values) text.Append(" with ").Append(string.Join(", ", values.Select(v => v.Describe())));
@@ -164,28 +167,29 @@ public static class CreatedCards
                 continue;
             }
             foreach (var alternative in spec.Alternatives)
-            try
-            {
-                var scan = Resolve(alternative, all);
-                if (!Creatable(scan.Type) || scan.Type == CardType.Strategy && !IsTerrain(scan)) problems.Add($"{abilityId}: {scan.Name} ({scan.Id}) is a {scan.Type}, which the engine cannot create yet");
-                if (alternative.Count > 1 && (scan.Type == CardType.Holding || IsTerrain(scan))) problems.Add($"{abilityId}: {alternative.Describe()} creates several {scan.Name}, and only one Holding or Terrain is created at a time");
-                if (alternative.EntersBowed && scan.Type != CardType.Holding) problems.Add($"{abilityId}: {alternative.Describe()} enters {scan.Name} bowed, and only a Holding does");
-                if (alternative.Count < 1 || alternative.AtBattlefield && scan.Type != CardType.Personality) problems.Add($"{abilityId}: {alternative.Describe()} names a count or a place that {scan.Name} cannot have");
-                if (alternative.Count > 1 && IsSingleOfKind(scan)) problems.Add($"{abilityId}: {alternative.Describe()} creates several {scan.Name}, a card a Personality carries only one of");
-                if (alternative.Count > 1 && scan.Type == CardType.Personality && (scan.Keywords ?? []).Contains("Unique")) problems.Add($"{abilityId}: {alternative.Describe()} creates several {scan.Name}, a Unique card");
-                if (alternative.HostIsPerformer && !IsAttachment(scan.Type)) problems.Add($"{abilityId}: {alternative.Describe()} attaches {scan.Name}, which is not an attachment");
-                if (alternative.HostIsSource && (!IsAttachment(scan.Type) || alternative.HostIsPerformer)) problems.Add($"{abilityId}: {alternative.Describe()} attaches {scan.Name} to its source, which needs an attachment and no performer host");
-                var namesPerformer = alternative.HostIsPerformer || (alternative.Values ?? []).Any(v => v.From == CreatedSubject.Performer);
-                if (namesPerformer && AbilityCatalog.All.TryGetValue(abilityId, out var creator) && creator.Performer is null) problems.Add($"{abilityId}: {alternative.Describe()} names the performer, and the ability has none");
-                if (alternative.HostIsEntered && (!IsAttachment(scan.Type) || alternative.HostIsPerformer || alternative.HostIsSource
-                        || !AbilityCatalog.All.TryGetValue(abilityId, out var enterer) || enterer.Trigger is not ("own-personality-enters-play" or EmperorRulingR3Abilities.EntersFromProvinceTrigger)))
-                    problems.Add($"{abilityId}: {alternative.Describe()} attaches {scan.Name} to the entering Personality, which needs an attachment, no other host and an own-personality-enters-play Reaction");
-                if (alternative.ControllerClan && scan.Type != CardType.Personality) problems.Add($"{abilityId}: {alternative.Describe()} gives {scan.Name} a Clan, which only a Personality has");
-                foreach (var value in alternative.Values ?? [])
-                    if (!CanHave(scan.Type, value.Stat) || value.Stat == CreatedStat.Name && (value.Read is not null || value.Plus != 0 || value.Keyword is not null) || value.PlusWithKeyword != 0 != (value.Keyword is not null))
-                        problems.Add($"{abilityId}: {alternative.Describe()} sets {value.Stat} of {scan.Name} in a way it cannot be set");
-            }
-            catch (CreatedCardResolutionException e) { problems.Add($"{abilityId}: {e.Message}"); }
+                try
+                {
+                    var scan = Resolve(alternative, all);
+                    if (!Creatable(scan.Type) || scan.Type == CardType.Strategy && !IsTerrain(scan)) problems.Add($"{abilityId}: {scan.Name} ({scan.Id}) is a {scan.Type}, which the engine cannot create yet");
+                    if (alternative.Count > 1 && (scan.Type == CardType.Holding || IsTerrain(scan))) problems.Add($"{abilityId}: {alternative.Describe()} creates several {scan.Name}, and only one Holding or Terrain is created at a time");
+                    if (alternative.EntersBowed && scan.Type != CardType.Holding) problems.Add($"{abilityId}: {alternative.Describe()} enters {scan.Name} bowed, and only a Holding does");
+                    if (alternative.Count < 1 || alternative.AtBattlefield && scan.Type != CardType.Personality) problems.Add($"{abilityId}: {alternative.Describe()} names a count or a place that {scan.Name} cannot have");
+                    if (alternative.Count > 1 && IsSingleOfKind(scan)) problems.Add($"{abilityId}: {alternative.Describe()} creates several {scan.Name}, a card a Personality carries only one of");
+                    if (alternative.Count > 1 && scan.Type == CardType.Personality && (scan.Keywords ?? []).Contains("Unique")) problems.Add($"{abilityId}: {alternative.Describe()} creates several {scan.Name}, a Unique card");
+                    if (alternative.HostIsPerformer && !IsAttachment(scan.Type)) problems.Add($"{abilityId}: {alternative.Describe()} attaches {scan.Name}, which is not an attachment");
+                    if (alternative.HostIsSource && (!IsAttachment(scan.Type) || alternative.HostIsPerformer)) problems.Add($"{abilityId}: {alternative.Describe()} attaches {scan.Name} to its source, which needs an attachment and no performer host");
+                    if (alternative.HostIsWielder && (!IsAttachment(scan.Type) || alternative.HostIsSource || alternative.HostIsPerformer)) problems.Add($"{abilityId}: {alternative.Describe()} attaches {scan.Name} to its wielder, which needs an attachment and no other host");
+                    var namesPerformer = alternative.HostIsPerformer || (alternative.Values ?? []).Any(v => v.From == CreatedSubject.Performer);
+                    if (namesPerformer && AbilityCatalog.All.TryGetValue(abilityId, out var creator) && creator.Performer is null) problems.Add($"{abilityId}: {alternative.Describe()} names the performer, and the ability has none");
+                    if (alternative.HostIsEntered && (!IsAttachment(scan.Type) || alternative.HostIsPerformer || alternative.HostIsSource
+                            || !AbilityCatalog.All.TryGetValue(abilityId, out var enterer) || enterer.Trigger is not ("own-personality-enters-play" or EmperorRulingR3Abilities.EntersFromProvinceTrigger)))
+                        problems.Add($"{abilityId}: {alternative.Describe()} attaches {scan.Name} to the entering Personality, which needs an attachment, no other host and an own-personality-enters-play Reaction");
+                    if (alternative.ControllerClan && scan.Type != CardType.Personality) problems.Add($"{abilityId}: {alternative.Describe()} gives {scan.Name} a Clan, which only a Personality has");
+                    foreach (var value in alternative.Values ?? [])
+                        if (!CanHave(scan.Type, value.Stat) || value.Stat == CreatedStat.Name && (value.Read is not null || value.Plus != 0 || value.Keyword is not null) || value.PlusWithKeyword != 0 != (value.Keyword is not null))
+                            problems.Add($"{abilityId}: {alternative.Describe()} sets {value.Stat} of {scan.Name} in a way it cannot be set");
+                }
+                catch (CreatedCardResolutionException e) { problems.Add($"{abilityId}: {e.Message}"); }
         }
         return problems.ToArray();
     }

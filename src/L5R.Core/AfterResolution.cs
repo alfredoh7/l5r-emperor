@@ -34,8 +34,13 @@ public sealed partial class MatchEngine
 
     private PendingAfterResolution NewAfterResolutionFacts(int provinceIndex, int attacker, bool attackerWon, CardInstance[] attackers, int[] destroyed, bool provinceDestroyed, List<int> losers) => new()
     {
-        ProvinceIndex = provinceIndex, Attacker = attacker, AttackerWon = attackerWon, AttackerIds = attackers.Select(c => c.Id).ToList(),
-        DestroyedEnemyUnits = destroyed, ProvinceDestroyedBy = provinceDestroyed ? attacker : null, Losers = losers
+        ProvinceIndex = provinceIndex,
+        Attacker = attacker,
+        AttackerWon = attackerWon,
+        AttackerIds = attackers.Select(c => c.Id).ToList(),
+        DestroyedEnemyUnits = destroyed,
+        ProvinceDestroyedBy = provinceDestroyed ? attacker : null,
+        Losers = losers
     };
 
     // The Reaction plays this player could make right now, asked with the window open exactly as they will be.
@@ -79,6 +84,8 @@ public sealed partial class MatchEngine
             "ryoken-honor-loss" => ResolutionDestroyedForPlayer(playerId) && source.Zone == Zone.Battlefield && source.ProvinceIndex == facts.ProvinceIndex,
             // Shosuro Rokuta (proxy group Z, issue #492): "After the resolution of a battle, if the resolution destroyed Rokuta."
             "rokuta-battle-create" => RokutaBattleApplies(source, facts),
+            "crippled-sensei-create-battle" => facts.DestroyedCardIds.Any(cardId => _state.Cards.TryGetValue(cardId, out var dead)
+                && dead.OwnerId == playerId && Definition(dead).Type == CardType.Personality && dead.Zone is Zone.Dead or Zone.RemovedFromGame),
             "empress-address-battle" => EmpressAddressBattleApplies(facts, playerId), // Emperor Edition remaining-cards pass, group C (issue #492)
             // Words Have Strength (Emperor Edition remaining-cards pass, issue #492, group D): "if the resolution destroyed any of your Courtiers or Magistrates".
             "words-strength-resolution" => ResolutionDestroyedCourtierOrMagistrate(facts, playerId),

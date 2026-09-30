@@ -11,7 +11,7 @@ internal static class ForgottenLegacyBatch4Tests
 
     // The six Strategies of the batch left unwired (each with a blocker note in tools/content/build_card_inventory.py): never published.
     // Issue #503 (pass group P5): Petty Squabbles (oracle-l5r-5939) is wired and published in strategy-wave-98, so it left this list.
-    private static readonly string[] Unwired = ["oracle-l5r-5648", "oracle-l5r-7696", "oracle-l5r-9208"];
+    private static readonly string[] Unwired = ["oracle-l5r-5648", "oracle-l5r-9208"];
 
     private static void Check(bool ok, string message = "Assertion failed") => Batch336Support.Check(ok, message);
     private static void Eq<T>(T actual, T expected, string message = "Values differ") => Batch336Support.Eq(actual, expected, message);

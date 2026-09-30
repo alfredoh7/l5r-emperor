@@ -95,11 +95,12 @@ public sealed partial class MatchEngine
 
     // "After you reveal cards in your Provinces at the start of your turn, if this Event is face-up in one of them, for each dead Personality in your discard pile, create a
     // 2F/2C/3PH Samurai * Ancestor * Spirit Personality with your Clan Alignment. If this created no Personalities, you may shuffle this Event into your deck instead of
-    // discarding it normally." The Ancestors are the Lion Ancestor scan (oracle-l5r-9785, Kitsu Akai's) printed with the creator's Clan instead of Lion; they enter at home
+    // discarding it normally." The Ancestors use the user-supplied Ancestor Spirit scan; its printed trait gives them their creator's Stronghold Clan at creation. They enter at home
     // with their mandatory entry effects and no entering-play window (the reveal is not an action to react to). With none created the owner chooses: shuffle the Event into
     // the Dynasty deck, or discard it. Either way the province is refilled and the reveal goes on.
     private const string OfferingReverenceEffect = "offering-reverence";
-    private static readonly CreatedCardSpec ReverenceAncestor = new(CardType.Personality, Force: 2, Chi: 2, PersonalHonor: 3, ProxyId: "oracle-l5r-9785");
+    private static readonly CreatedCardSpec ReverenceAncestor = new(CardType.Personality, Force: 2, Chi: 2, PersonalHonor: 3,
+        Keywords: ["Samurai", "Ancestor", "Spirit"], ProxyId: "user-scan-ancestor-spirit");
 
     private bool ResolveOfferingReverence(PlayerState player, ProvinceState province, CardInstance card)
     {
@@ -111,12 +112,7 @@ public sealed partial class MatchEngine
             return true;
         }
         var scan = CreatedCards.Resolve(ReverenceAncestor);
-        var clans = ControllerClans(player.Id);
-        var printed = scan with
-        {
-            Clan = clans.Length > 0 ? clans[0] : "Unaligned", Clans = clans.Length > 1 ? clans : null,
-            Keywords = new[] { "Samurai", "Ancestor", "Spirit" }.Concat(clans.Select(clan => $"{clan} Clan")).ToArray(),
-        };
+        var printed = WithControllerClan(scan, player);
         for (var i = 0; i < dead; i++) CreatePersonality(player.Id, scan, true, null, out _, printed);
         Emit("eventResolved", $"{Definition(card).Name}: {player.Name} created {dead} Ancestor {(dead == 1 ? "Personality" : "Personalities")}.", player.Id, card.Id);
         province.CardId = null; card.ProvinceIndex = null; card.Zone = Zone.DynastyDiscard;
