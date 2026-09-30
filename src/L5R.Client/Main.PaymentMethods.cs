@@ -42,11 +42,14 @@ public partial class Main
             {
                 var check = new CheckBox
                 {
-                    Text = method.Label, ButtonPressed = _sources.Contains(method.Id),
+                    Text = method.Label,
+                    ButtonPressed = _sources.Contains(method.Id),
                     Disabled = !DecisionCanSubmit,
-                    CustomMinimumSize = new(0, 40), AutowrapMode = TextServer.AutowrapMode.WordSmart,
+                    CustomMinimumSize = new(0, 40),
+                    AutowrapMode = TextServer.AutowrapMode.WordSmart,
                     SizeFlagsHorizontal = Control.SizeFlags.ExpandFill,
-                    TooltipText = method.Label, AccessibilityName = method.Label
+                    TooltipText = method.Label,
+                    AccessibilityName = method.Label
                 };
                 check.SetMeta("payment_source_id", method.Id);
                 check.AddThemeFontOverride("font", GD.Load<FontFile>("res://Art/Fonts/Caudex-Regular.ttf"));

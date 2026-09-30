@@ -8,8 +8,17 @@ public sealed partial class MatchEngine
         var s = CreateGoldPaymentShowcase(kind == "discount" ? "derived" : "fixed").State;
         CardInstance Put(string definition, int owner, Zone zone, bool bowed = false, string? parent = null)
         {
-            var c = new CardInstance { Id = "controls-" + s.Cards.Count, DefinitionId = definition, OwnerId = owner,
-                Zone = zone, FaceUp = true, Bowed = bowed, ProvinceIndex = zone == Zone.Battlefield ? 0 : null, AttachedTo = parent };
+            var c = new CardInstance
+            {
+                Id = "controls-" + s.Cards.Count,
+                DefinitionId = definition,
+                OwnerId = owner,
+                Zone = zone,
+                FaceUp = true,
+                Bowed = bowed,
+                ProvinceIndex = zone == Zone.Battlefield ? 0 : null,
+                AttachedTo = parent
+            };
             s.Cards.Add(c.Id, c); if (zone == Zone.Hand) s.Players[owner].Hand.Add(c.Id); return c;
         }
         void Execute(MatchEngine e, GameCommand command)
@@ -64,8 +73,15 @@ public sealed partial class MatchEngine
         {
             var source = Put(CardCatalog.Cards.Values.First(d => d.Effect == GloryOfTheShogunEffect).Id, 0, Zone.EventInPlay);
             var e = FromTestState(s);
-            e.OpenEventChoice(new PendingEventChoice { Kind = "draw", PlayerId = 0, EventCardId = source.Id,
-                Origin = "deferred", ClosesTo = 0, Prompt = "Glory of the Shogun: you may draw a card." }); return e;
+            e.OpenEventChoice(new PendingEventChoice
+            {
+                Kind = "draw",
+                PlayerId = 0,
+                EventCardId = source.Id,
+                Origin = "deferred",
+                ClosesTo = 0,
+                Prompt = "Glory of the Shogun: you may draw a card."
+            }); return e;
         }
         else if (kind is "killing" or "greasing")
         {

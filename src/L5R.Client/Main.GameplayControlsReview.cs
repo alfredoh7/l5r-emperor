@@ -19,10 +19,18 @@ public partial class Main
             _controlsReviewPicker = new OptionButton { CustomMinimumSize = new(420, 54), FitToLongestItem = false, ClipText = true };
             foreach (var kind in ControlsReviewKinds) _controlsReviewPicker.AddItem(kind switch
             {
-                "reaction" => "Payment · Bow and Reaction", "destruction" => "Payment · Destroy a Holding", "discount" => "Payment · Remove for a discount",
-                "entry" => "Entry cost · Hand card or Sake token", "event" => "Event · Optional draw", "honor" => "Honor · Lose or prevent loss",
-                "honor-reaction" => "Honor · Reaction opportunity", "killing" => "Battle · Choose a Personality", "infiltrator" => "Straighten · Choose a Personality",
-                "greasing" => "Battle · Optional Gold payment", "favor" => "Favor · Kurohito’s Perfection", _ => "Optional · Additional action"
+                "reaction" => "Payment · Bow and Reaction",
+                "destruction" => "Payment · Destroy a Holding",
+                "discount" => "Payment · Remove for a discount",
+                "entry" => "Entry cost · Hand card or Sake token",
+                "event" => "Event · Optional draw",
+                "honor" => "Honor · Lose or prevent loss",
+                "honor-reaction" => "Honor · Reaction opportunity",
+                "killing" => "Battle · Choose a Personality",
+                "infiltrator" => "Straighten · Choose a Personality",
+                "greasing" => "Battle · Optional Gold payment",
+                "favor" => "Favor · Kurohito’s Perfection",
+                _ => "Optional · Additional action"
             });
             _controlsReviewPicker.ItemSelected += i => { _ = PrepareGameplayControlsReview(ControlsReviewKinds[(int)i]); };
             _controlsReviewBar.AddChild(_controlsReviewPicker);

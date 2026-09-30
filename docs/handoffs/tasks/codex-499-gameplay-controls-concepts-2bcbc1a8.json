@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Implement Alfredo-approved grouped payment methods and receipt, explicit pending-choice candidate tray and source context, optional-action decline and Kurohito Favor access for #499. Authoritative quote metadata and private entry candidates cross server projection with protocol 3. Twelve real-engine review seeds and three Mac launchers.",
-  "validation": "Client compiles with 0 warnings/errors. check.sh --skip-client: tooling, Core, AI and 8 server tests passed; transport regression normalized authenticated actor/version and rerun passed all 18. Twelve native scenarios passed at 1440x900 and 1120x700, with final 1440 rerun after selection-clear/inspection-hint cleanup; screenshots inspected. Existing Gold suite passed. Native opponent-payment normal passed with actual foreground mouse/keyboard, hover, privacy and busy guards. Initial background runs failed OS focus; not claimed as passes.",
-  "remaining": "Versioned Windows package and CI validation; Alfredo native playtest and Mendon/Nathan mechanics review. Not merged.",
+  "summary": "Implement approved payment grouping/receipt, explicit pending-choice candidate tray/source context, optional-action decline and Kurohito Favor access. Authoritative source metadata and private entry candidates cross server projection with protocol 3. Three native launchers and exact-source Windows package at 60f431f2, with verified private upload.",
+  "validation": "Client 0 warnings/errors; tooling/Core/AI/8 server tests passed; all 18 transport checks passed after actor/version normalization. Twelve native scenarios passed at 1440x900 and 1120x700, final native rerun passed after cleanup. Existing Gold suite passed; normal and reduced-motion opponent-payment input/hover/privacy/busy checks passed with actual OS focus. Changed-file formatter verification passes; retained all non-whitespace characters in its 7 changed C# files. Windows exporter validated bundled runtime/resources/source omission; upload size/SHA verified. Windows package CI pending.",
+  "remaining": "Windows review package and branch CI; targeted delivery notification after CI. Alfredo native playtest and Mendon/Nathan mechanics/graphical acceptance. No merge authorized.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/499",
   "branch": "codex/499-gameplay-controls-concepts",
-  "updated": "2026-09-30T20:03:59.354629+00:00"
+  "updated": "2026-09-30T20:19:28.908051+00:00"
 }

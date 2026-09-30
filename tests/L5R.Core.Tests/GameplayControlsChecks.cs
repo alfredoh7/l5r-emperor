@@ -32,11 +32,11 @@ internal static class GameplayControlsChecks
             if (kind == "entry")
             {
                 var choices = options.Where(a => a.Type == "entryCostChoice").ToArray();
-                if (!choices.Any(a => a.DecisionCandidateIds?.Length == 1) || engine.QueryActions(1-seat).Any(a => a.DecisionCandidateIds?.Length > 0))
+                if (!choices.Any(a => a.DecisionCandidateIds?.Length == 1) || engine.QueryActions(1 - seat).Any(a => a.DecisionCandidateIds?.Length > 0))
                     throw new Exception("Entry candidates missing or disclosed");
                 var answer = choices.First(a => a.Command!.Choice!.StartsWith("remove:", StringComparison.Ordinal));
                 var id = answer.DecisionCandidateIds!.Single();
-                if (engine.GetView(1-seat).Players[seat].Hand.Any(c => c.Id == id)) throw new Exception("Private candidate face leaked");
+                if (engine.GetView(1 - seat).Players[seat].Hand.Any(c => c.Id == id)) throw new Exception("Private candidate face leaked");
                 var result = engine.Execute(answer.Command!);
                 if (!result.Accepted || engine.State.Cards[id].Zone != Zone.RemovedFromGame) throw new Exception("Entry answer did not remove the selected card");
                 if (engine.Execute(answer.Command!).Accepted) throw new Exception("Stale entry answer accepted");

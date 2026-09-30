@@ -23,8 +23,12 @@ public partial class Main
         _candidateTray.AddThemeStyleboxOverride("panel", SidebarSkin.Surface());
         var body = new VBoxContainer(); body.AddThemeConstantOverride("separation", 8); _candidateTray.AddChild(body);
         body.AddChild(Palette.Text("CHOOSE ONE · ONLY YOUR AVAILABLE OPTIONS", 19, Palette.Gold, title: true));
-        var scroll = new ScrollContainer { FollowFocus = true, VerticalScrollMode = ScrollContainer.ScrollMode.Disabled,
-            SizeFlagsVertical = Control.SizeFlags.ExpandFill };
+        var scroll = new ScrollContainer
+        {
+            FollowFocus = true,
+            VerticalScrollMode = ScrollContainer.ScrollMode.Disabled,
+            SizeFlagsVertical = Control.SizeFlags.ExpandFill
+        };
         body.AddChild(scroll);
         var row = new HBoxContainer(); row.AddThemeConstantOverride("separation", 12); scroll.AddChild(row);
         foreach (var candidate in candidates)

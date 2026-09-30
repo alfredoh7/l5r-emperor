@@ -359,19 +359,19 @@ public sealed partial class MatchEngine
                 return false;
             case EmperorMechEAbilities.HeirsWrathFavor:
             case EmperorMechEAbilities.HeirsWrathBow:
-            {
-                // "These effects will not be negated": while they apply, no negation of a bow, a destruction, a movement or an Honor loss stops them (Suitengu's Torch's mark, Unnatural Flood's shape).
-                // The card does not say "or delayed", so a delay (Spirit of the Berserker, the R2 store) still applies (_notNegatedButDelayable).
-                var previousKey = _state.UnnegatableActionKey;
-                _state.UnnegatableActionKey = ActionKey(command); _notNegatedButDelayable = true;
-                try
                 {
-                    GainHonor(player.Id, -2, Definition(source!).Name, source);
-                    if (InPlay(target!)) DestroyTargetCard(target!, player.Id);
+                    // "These effects will not be negated": while they apply, no negation of a bow, a destruction, a movement or an Honor loss stops them (Suitengu's Torch's mark, Unnatural Flood's shape).
+                    // The card does not say "or delayed", so a delay (Spirit of the Berserker, the R2 store) still applies (_notNegatedButDelayable).
+                    var previousKey = _state.UnnegatableActionKey;
+                    _state.UnnegatableActionKey = ActionKey(command); _notNegatedButDelayable = true;
+                    try
+                    {
+                        GainHonor(player.Id, -2, Definition(source!).Name, source);
+                        if (InPlay(target!)) DestroyTargetCard(target!, player.Id);
+                    }
+                    finally { _state.UnnegatableActionKey = previousKey; _notNegatedButDelayable = false; }
+                    return false;
                 }
-                finally { _state.UnnegatableActionKey = previousKey; _notNegatedButDelayable = false; }
-                return false;
-            }
             case EmperorMechEAbilities.HostsLimited:
                 DestroyTargetCard(target!, player.Id);
                 return false;

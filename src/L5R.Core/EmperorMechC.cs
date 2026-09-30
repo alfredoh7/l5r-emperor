@@ -140,11 +140,11 @@ public sealed partial class MatchEngine
             case EmperorMechCAbilities.TemplePerformer:
                 return personality && target.OwnerId == player.Id && InPlay(target) && !target.Bowed && ClanAlignments(target).Length > 0;
             case EmperorMechCAbilities.TemplePartner:
-            {
-                if (!personality || target.OwnerId != player.Id || !InPlay(target) || target.Bowed || ClanAlignments(target).Length == 0) return false;
-                var alignments = ClanAlignments(target);
-                return SlotCards(command, "bowed").All(first => first.Id != target.Id && !ClanAlignments(first).Intersect(alignments, StringComparer.Ordinal).Any());
-            }
+                {
+                    if (!personality || target.OwnerId != player.Id || !InPlay(target) || target.Bowed || ClanAlignments(target).Length == 0) return false;
+                    var alignments = ClanAlignments(target);
+                    return SlotCards(command, "bowed").All(first => first.Id != target.Id && !ClanAlignments(first).Intersect(alignments, StringComparer.Ordinal).Any());
+                }
             default:
                 return false;
         }
@@ -219,12 +219,12 @@ public sealed partial class MatchEngine
             // Temple of the Seven Fortunes: one performer was bowed as the cost; +1 Honor and +2 strength to each of the player's provinces (until the end of the turn: a province strength effect lasts
             // until the end of the turn unless the text says it is permanent, Mendon's R3 ruling).
             case EmperorMechCAbilities.TempleOfSevenFortunes:
-            {
-                var name = Definition(source!).Name;
-                GainHonor(player.Id, 1, name, source);
-                foreach (var province in player.Provinces.Where(p => !p.Destroyed).OrderBy(p => p.Index).ToArray()) GiveProvinceStrengthThisTurn(player.Id, province.Index, 2, name);
-                return false;
-            }
+                {
+                    var name = Definition(source!).Name;
+                    GainHonor(player.Id, 1, name, source);
+                    foreach (var province in player.Provinces.Where(p => !p.Destroyed).OrderBy(p => p.Index).ToArray()) GiveProvinceStrengthThisTurn(player.Id, province.Index, 2, name);
+                    return false;
+                }
             default:
                 return null;
         }
@@ -374,9 +374,15 @@ public sealed partial class MatchEngine
         var options = AdditionalEntryCostOptions(need.PlayerId, card);
         pendingBase.PendingEntryCostDecision = new PendingEntryCostDecision
         {
-            Command = execute, PlayerId = need.PlayerId, CardId = need.CardId, Options = options.Select(o => new EntryCostOption(o.Key, o.Label)).ToList(),
-            PriorChoice = pendingBase.PendingChoice, PriorPriority = pendingBase.PriorityPlayerId, PriorPasses = pendingBase.ConsecutivePasses,
-            HonorDecisions = _honorLossDecisions.ToList(), HonorWindowsDone = _honorWindowsDone
+            Command = execute,
+            PlayerId = need.PlayerId,
+            CardId = need.CardId,
+            Options = options.Select(o => new EntryCostOption(o.Key, o.Label)).ToList(),
+            PriorChoice = pendingBase.PendingChoice,
+            PriorPriority = pendingBase.PriorityPlayerId,
+            PriorPasses = pendingBase.ConsecutivePasses,
+            HonorDecisions = _honorLossDecisions.ToList(),
+            HonorWindowsDone = _honorWindowsDone
         };
         pendingBase.PendingChoice = new("entryCostDecision", need.PlayerId, need.CardId, $"{Definition(card).Name}: as an additional cost of entering play, remove a card in your hand from the game or destroy one of your Sake tokens.");
         pendingBase.PriorityPlayerId = need.PlayerId; pendingBase.ConsecutivePasses = 0;
