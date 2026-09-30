@@ -42,6 +42,8 @@ public partial class Main
         _shownScroll=new ScrollContainer {SizeFlagsVertical=Control.SizeFlags.ExpandFill,HorizontalScrollMode=ScrollContainer.ScrollMode.Disabled};body.AddChild(_shownScroll);
         _shownList=new VBoxContainer {SizeFlagsHorizontal=Control.SizeFlags.ExpandFill};_shownList.AddThemeConstantOverride("separation",12);_shownScroll.AddChild(_shownList);
         body.AddChild(Palette.Wrapped("Hover or focus to enlarge · click to keep open",14,Palette.PaperDim));
+        var acknowledge=SidebarSkin.Button("Okay",()=>ToggleShownCards(false));acknowledge.CustomMinimumSize=new(0,52);
+        acknowledge.AccessibilityName="Acknowledge shown cards and return";body.AddChild(acknowledge);
         FitShownCards();
     }
     private void FitShownCards()
@@ -68,11 +70,20 @@ public partial class Main
             _shownOpen=false;
         var records=OpponentShows;
         var sequences=records.Select(s=>s.Sequence).ToArray();
-        var changed=_shownViewer!=live.ViewerId||!sequences.SequenceEqual(_shownSequences);
+        var viewerChanged=_shownViewer!=live.ViewerId;
+        var changed=viewerChanged||!sequences.SequenceEqual(_shownSequences);
         if(changed)
         {
-            if(_shownViewer==live.ViewerId&&sequences.Length>_shownSequences.Length&&ShownUnread>0)
+            // Force the reveal open rather than leaving it to a toast the recipient can miss (Mendon's review, PR
+            // #434): both when a new show lands while they are already seated, AND when they arrive at this seat
+            // (a local "pass device" hand-off, the delivery mechanism itself) with an unread one already waiting.
+            // They get a chance to actually inspect the card before doing anything else. The "Minimize to return
+            // to your decision" subtitle already existed for exactly this case.
+            if(ShownUnread>0&&(viewerChanged||sequences.Length>_shownSequences.Length))
+            {
                 SetNotice($"{records[0].Definition.Name} was shown by {live.Players.Single(p=>p.Id==records[0].ShownByPlayerId).Name}. Review Shown cards.");
+                _shownOpen=true;
+            }
             _shownViewer=live.ViewerId;_shownSequences=sequences;
             PopulateShownCards();
         }
