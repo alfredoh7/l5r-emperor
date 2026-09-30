@@ -35,7 +35,7 @@ public partial class Main
         layer.AddChild(_titleMenu);
         InitializeTurnBloom();
         GetTree().AutoAcceptQuit = false;
-        GetWindow().CloseRequested += () => { if(MatchDuelOpen){Confirm("Quit the game?","Exit L5R? Private room seats remain resumable; local Practice is not saved.",()=>GetTree().Quit());return;} if(PracticeVisible){Confirm("Quit the game?","Unsaved deck edits and Practice progress will be lost.",()=>GetTree().Quit());return;} CloseDuelDemo(); ShowMainMenu(); _titleMenu.ShowQuit(); };
+        GetWindow().CloseRequested += () => { if (MatchDuelOpen) { Confirm("Quit the game?", "Exit L5R? Private room seats remain resumable; local Practice is not saved.", () => GetTree().Quit()); return; } if (PracticeVisible) { Confirm("Quit the game?", "Unsaved deck edits and Practice progress will be lost.", () => GetTree().Quit()); return; } CloseDuelDemo(); ShowMainMenu(); _titleMenu.ShowQuit(); };
         if (_capturePath is null || _captureMode.StartsWith("menu", StringComparison.Ordinal)) ShowMainMenu();
         else _titleMenu.Hide();
     }
@@ -51,7 +51,7 @@ public partial class Main
     }
     private void CloseDuelDemo()
     {
-        if (_duelDemo is not null) { _duelDemo.GetParent().RemoveChild(_duelDemo); _duelDemo.QueueFree(); _duelDemo=null; }
+        if (_duelDemo is not null) { _duelDemo.GetParent().RemoveChild(_duelDemo); _duelDemo.QueueFree(); _duelDemo = null; }
         ShowMainMenu();
     }
     private void ApplyPreferences(bool window)
@@ -73,6 +73,7 @@ public partial class Main
     }
     private void ShowMainMenu()
     {
+        ClearProvinceReview();
         if (_titleMenu is null) return;
         _cameraDragging = false; HideTableTooltip(); ReleaseTableFocus();
         _root.Hide(); _table.Hide(); _table.SetProcess(false);

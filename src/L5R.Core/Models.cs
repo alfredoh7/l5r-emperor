@@ -191,10 +191,13 @@ public sealed record Protection(string Source, string Duration);
 public sealed record ActionLock(string Source, string Duration);
 
 /// <summary>The moments of a turn a straighten hold can wait for. Each happens during the active player's turn; a hold names whose turn counts.</summary>
-public enum StraightenPoint { TurnBegins, StraightenPhaseEnds, EventsRevealEnds, ActionPhaseEnds, TurnEnds,
+public enum StraightenPoint
+{
+    TurnBegins, StraightenPhaseEnds, EventsRevealEnds, ActionPhaseEnds, TurnEnds,
     // "until the phase ends" (Ronin Ambushers, issue #453 batch 5): released when the phase in progress gives way to a different one (the whole
     // Attack-declaration-through-battle-resolution stretch counts as one phase, the War Weariness convention). Owner is always null.
-    PhaseEnds }
+    PhaseEnds
+}
 
 /// <summary>"May not straighten until X" (issue #415). <see cref="Owner"/> is the player whose turn counts (null: whoever's turn it is when the point comes, "this turn" and "the
 /// next Straighten Phase"); <see cref="Until"/> is the point; <see cref="Skip"/> is how many of those points must pass with the hold still standing before it is released (0: the
@@ -1357,7 +1360,20 @@ public sealed record GrantedAbilityView(string AbilityId, string Label, string T
 /// <param name="MaxStrength">The limit in force (Times of Strife, Ancient Feud), or null. While it holds, the current strength may be higher and returns when the limit ends.</param>
 public sealed record ProvinceView(int Index, int Strength, bool Destroyed, CardView? Card, CardView? Region, int? MaxStrength = null,
     // Issue #503 (EmperorP6.cs): Illusory Defense's province that never holds a Dynasty card, and Dark Experiments' permanent mark (both public).
-    bool HoldsNoDynastyCards = false, bool DarkExperimentsMarked = false);
+    bool HoldsNoDynastyCards = false, bool DarkExperimentsMarked = false)
+{
+    /// <summary>Optional slot view for multi-card provinces. Null retains legacy Card as slot 0.
+    /// When supplied this is authoritative, including empty slots; Card must not be appended again.
+    /// Slot indices are stable across refills. Face-down cards must already be redacted by the producer.</summary>
+    public ProvinceCardSlotView[]? DynastySlots { get; init; }
+}
+public sealed record ProvinceCardSlotView(int Index, CardView? Card);
+/// <summary>Public decision identity/prompt; Options are sent only to PlayerId. Commands are engine-provided,
+/// not inferred by the client. Slot indices refer to OwnerId's Province, not card identities.</summary>
+public sealed record ProvinceOrderView(string Id, int PlayerId, int OwnerId, int Province, string Prompt,
+    ProvinceOrderOption[] Options);
+public sealed record ProvinceOrderOption(string Id, string Label, int[] Slots, GameCommand? Command,
+    bool Enabled = true, string? Reason = null);
 // DeadCount (issue #221): the authoritative count of this player's own Zone.Dead Personalities --
 // already present, individually, within Discard (each CardView's own Zone tells a dead card apart
 // from a merely-discarded one), but computed here as a single number the same way UnitForce is, so
@@ -1452,7 +1468,10 @@ public sealed record MatchView(string ContentVersion, string Scenario, long Vers
     // none. An index below 100 is the battlefield of the Defender's province of that index; a higher one is an additional battlefield (EmperorRulingR1.cs).
     BattlefieldView[]? Battlefields = null,
     // Issue #503 (EmperorP5Hidden.cs): the cards of another player's hand this viewer looked at this turn (Scouting the Pass, The Price of Honor) -- PRIVATE to the looker, never an instance id.
-    HandSightView[]? HandSights = null);
+    HandSightView[]? HandSights = null)
+{
+    public ProvinceOrderView? PendingProvinceOrder { get; init; }
+}
 /// <summary>Engine-private record of one face-down province card a player looked at (MatchState.ProvinceSights). Turn is the turn number it was looked at.</summary>
 public sealed record ProvinceSight(int ViewerId, int OwnerId, int Province, string CardId, string DefinitionId, int Turn);
 /// <summary>PRIVATE to the looking player: what the face-down card in a province is (its owner's province Province).</summary>
