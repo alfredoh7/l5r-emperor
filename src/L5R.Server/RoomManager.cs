@@ -33,7 +33,7 @@ public sealed class RoomManager(RoomStore store, ILogger<RoomManager> logger)
 
     public async Task<SeatReservation> CreateAsync(CancellationToken cancellationToken = default, string scenario = "starter")
     {
-        if(scenario is not ("starter" or PublishedContent.Scenario)) throw new RoomException("unsupported_scenario", "Choose training or the published Lion/Crane profile.");
+        if (scenario is not ("starter" or PublishedContent.Scenario)) throw new RoomException("unsupported_scenario", "Choose training or the published Lion/Crane profile.");
         await creationGate.WaitAsync(cancellationToken);
         try
         {
