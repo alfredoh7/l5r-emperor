@@ -130,7 +130,7 @@ public partial class Main
     {
         if (_selectedHomeReminder is not { EffectId: null } selected || View.FavorPlayerId != selected.Owner || selected.Owner != View.ViewerId) return;
         // Commands, timing, costs and target sets are supplied by the engine, never reconstructed here.
-        foreach (var action in Actions.Where(a => a.Enabled && a.Type == "useAbility" && a.Command?.AbilityId is "favor-cycle" or "favor-battle"))
+        foreach (var action in Actions.Where(a => a.Enabled && a.Type == "useAbility" && a.Command?.AbilityId is "favor-cycle" or "favor-battle" or "favor-cycle-kurohito"))
             AddAction(_inspector, action);
     }
 }

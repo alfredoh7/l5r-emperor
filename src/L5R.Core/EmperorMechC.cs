@@ -355,7 +355,14 @@ public sealed partial class MatchEngine
         if (_state.PendingEntryCostDecision is not { } pending || pending.PlayerId != playerId || !_state.Cards.TryGetValue(pending.CardId, out var card)) yield break;
         var name = Definition(card).Name;
         foreach (var (key, label) in pending.Options)
-            yield return new("entryCostChoice", $"{name} enters play: {label}", true, null, new GameCommand("entryCostChoice", playerId, _state.Version, CardId: card.Id, Choice: key), card.Id);
+        {
+            var candidate = key.StartsWith("remove:", StringComparison.Ordinal) ? key["remove:".Length..] :
+                _state.Cards.Values.FirstOrDefault(c => c.OwnerId == playerId && InPlay(c) && c.Tokens.Any(t => t.Type == "Sake" && "sake:" + t.Id == key))?.Id;
+            yield return new("entryCostChoice", $"{name} enters play: {label}", true, null,
+                new GameCommand("entryCostChoice", playerId, _state.Version, CardId: card.Id, Choice: key), card.Id,
+                DecisionCandidateIds: candidate is null ? [] : [candidate],
+                DecisionLabel: key.StartsWith("remove:", StringComparison.Ordinal) ? "Remove this card from the game" : "Destroy this Sake token");
+        }
     }
 
     // Execute's catch: the command reached an entry cost with more than one way to pay and no answer yet -- nothing it did is kept, the player is asked, and the command waits whole.

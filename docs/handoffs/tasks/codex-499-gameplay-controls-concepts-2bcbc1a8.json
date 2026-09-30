@@ -1,9 +1,9 @@
 {
-  "lane": "ui",
-  "summary": "Prepared six imagegen gameplay-controls concepts and a launchable gallery with recommended combinations and three bounded implementation batches for issue 499; integrated the newly merged UI bundle 564.",
-  "validation": "Generated output QA and targeted imagegen corrections completed; six PNG hashes verified; browser family/hash navigation, full-image dialog and Escape checked; gallery/launcher Python and shell syntax and existing-server launcher passed; git diff --check passed. Concept-only; no native game checks claimed.",
-  "remaining": "Await visual selection for payment and choice concepts; implement payment controls, Event/Honor/entry choices and optional opportunities in separate native review batches; mechanics review and Windows graphical testing remain separate. No merge requested.",
+  "lane": "shared",
+  "summary": "Implement Alfredo-approved grouped payment methods and receipt, explicit pending-choice candidate tray and source context, optional-action decline and Kurohito Favor access for #499. Authoritative quote metadata and private entry candidates cross server projection with protocol 3. Twelve real-engine review seeds and three Mac launchers.",
+  "validation": "Client compiles with 0 warnings/errors. check.sh --skip-client: tooling, Core, AI and 8 server tests passed; transport regression normalized authenticated actor/version and rerun passed all 18. Twelve native scenarios passed at 1440x900 and 1120x700, with final 1440 rerun after selection-clear/inspection-hint cleanup; screenshots inspected. Existing Gold suite passed. Native opponent-payment normal passed with actual foreground mouse/keyboard, hover, privacy and busy guards. Initial background runs failed OS focus; not claimed as passes.",
+  "remaining": "Versioned Windows package and CI validation; Alfredo native playtest and Mendon/Nathan mechanics review. Not merged.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/499",
   "branch": "codex/499-gameplay-controls-concepts",
-  "updated": "2026-09-30T18:08:40.605529+00:00"
+  "updated": "2026-09-30T20:03:59.354629+00:00"
 }

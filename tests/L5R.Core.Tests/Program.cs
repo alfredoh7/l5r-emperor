@@ -8,6 +8,7 @@ using L5R.Client;
 
 var tests = new (string Name, Action Run)[]
 {
+    ("Gameplay-control quotes preserve distinct methods and private entry candidates", GameplayControlsChecks.SourcesAndPrivacy),
     ("Province slots retain empty/hidden positions and legacy wire compatibility", ProvincePresentationChecks.SlotsAndSerialization),
     ("Province order retains exact engine command and rejects stale/other-seat choices", ProvincePresentationChecks.DecisionFreshness),
     ("Battle receipts include both explicit Dynasty slots", ProvincePresentationChecks.BattleReceipts),

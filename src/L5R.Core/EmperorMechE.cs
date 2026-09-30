@@ -33,9 +33,9 @@ namespace L5R.Core;
 //     protected, and during its resolution no negation of a bow, destruction, movement or Honor loss applies: Suitengu's Torch's mark).
 // ======================================================================================================================================================================================
 
-/// <summary>A payment source that is not a card's own production (issue #501): its id (a GameCommand.SourceIds entry), the card whose Reaction it is, its kind ("reaction", "destroy", "discount"), a label,
+/// <summary>An authoritative payment method: its opaque GameCommand.SourceIds entry, source card, kind ("bow", "produce", "reaction", "destroy", "discount"), label,
 /// the Gold it produces, and the card it destroys or removes (null for a plain Reaction).</summary>
-public sealed record PaymentSource(string Id, string CardId, string Kind, string Label, int Produced, string? SubjectId = null);
+public sealed record PaymentSource(string Id, string CardId, string Kind, string Label, int Produced, string? SubjectId = null, string[]? ConflictingSourceIds = null);
 
 public static class EmperorMechEAbilities
 {
@@ -225,11 +225,22 @@ public sealed partial class MatchEngine
         }
     }
 
-    /// <summary>The tokens a quote lists for the client (GoldQuote.Sources / PurchaseQuote.Sources), null when there are none.</summary>
-    private PaymentSource[]? PaymentSourcesFor(int playerId, PaymentSubject? paying)
+    /// <summary>Authoritative methods for this specific payment, including ordinary production.
+    /// IDs are opaque; conflicts describe the same token constraints enforced by ValidatePayment.</summary>
+    private PaymentSource[] PaymentSourcesFor(int playerId, PaymentSubject? paying, IReadOnlySet<string>? exclude = null)
     {
-        var tokens = PaymentTokens(playerId, paying);
-        return tokens.Count == 0 ? null : tokens.Select(t => new PaymentSource(t.Id, t.Card.Id, t.Kind, t.Label, t.Amount, t.Subject?.Id)).ToArray();
+        var tokens = PaymentTokens(playerId, paying).Where(t => exclude is null || t.Subject is null || !exclude.Contains(t.Subject.Id)).ToArray();
+        var ordinary = Producers(playerId, paying).Where(c => exclude is null || !exclude.Contains(c.Id)).Select(card =>
+        {
+            var alternate = Definition(card).GoldProduction == 0 ? AlternateGoldSource(card, paying) : null;
+            var bows = alternate is null || AbilityCatalog.All[alternate.Value.AbilityId].PaymentBows;
+            var amount = GoldProduced(card.Id, playerId, paying);
+            return new PaymentSource(card.Id, card.Id, bows ? "bow" : "produce",
+                $"{(bows ? "Bow this card" : "Produce without bowing")}: {amount} Gold", amount);
+        });
+        return ordinary.Concat(tokens.Select(t => new PaymentSource(t.Id, t.Card.Id, t.Kind, t.Label, t.Amount, t.Subject?.Id,
+            tokens.Where(other => other.Id != t.Id && (other.Card.Id == t.Card.Id ||
+                t.Subject is not null && other.Subject?.Id == t.Subject.Id)).Select(other => other.Id).ToArray()))).ToArray();
     }
 
     // Seaside Bazaar's payment condition (ReactivePaymentConditionMet's fall-through): "When paying a Gold Cost" -- any payment.

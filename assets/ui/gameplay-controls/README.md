@@ -6,12 +6,12 @@ Six final imagegen concepts: Payment A/B/C and Choice A/B/C. This is static desi
 
 Run `Open Gameplay Controls Gallery.command` on Mac. It starts or reuses this gallery on a loopback-only port (8815 onward), then opens the browser. A server started by the launcher stays in its terminal until closed. The gallery can also be opened directly from `index.html` without a server on Mac or Windows. Each family has three variations, thumbnails, a full-image view and a recommendation.
 
-Recommendations awaiting visual selection:
+Alfredo approved these combinations on 2026-09-30:
 
 - Payment: A's card-origin grouping and independent source-method controls with C's cost/consequence receipt; retain the engine's suggested/alternative payments.
 - Choices: B's readable candidate tray with A's compact source context and C's quiet selection cue. Keep the ordinary hand fully visible when implementing the tray; the concept frames do not establish final responsive geometry.
 
-Three implementation batches and review gates are in `PLAN.md`. Implementation begins after visual selection. Each batch will have its own launchable native Mac review and self-contained Windows review for Mendon. Nothing from this branch is merged.
+Three implementation batches and review gates are in `PLAN.md`. The native implementation follows that selection. `python3 tools/create-gameplay-controls-launcher.py` creates three launchable Mac reviews, each with a 12-scenario picker. The versioned Windows package is tracked in `previews/gameplay-controls.json`. Nothing from this branch is merged.
 
 ## Generation provenance and limits
 

@@ -92,6 +92,12 @@ public partial class Main : Node
         _table = new TableArtStage { ReviewMode = false }; AddChild(_table);
         BuildShell();
         InitializeFrontend();
+        if (OS.GetCmdlineUserArgs().Contains("--gameplay-controls-review") || _captureMode is "gameplay-controls-review" or "gameplay-controls-choices-review" or "gameplay-controls-optional-review")
+        {
+            var startupCapture = _capturePath; _capturePath = null;
+            var checks = OS.GetCmdlineUserArgs().FirstOrDefault(a => a.StartsWith("--controls-checks=", StringComparison.Ordinal))?[18..];
+            _ = StartGameplayControlsReview(checks, startupCapture); return;
+        }
         if (OS.GetCmdlineUserArgs().Contains("--open-battlefield-review") || _captureMode == "open-battlefield-review")
         {
             var startupCapture = _capturePath; _capturePath = null; StartOpenBattlefieldReview();
@@ -358,7 +364,7 @@ public partial class Main : Node
         FitCopyReviewControls();
         FitMovementReviewControls();
         FitAttackReviewControls();
-        FitEventDecisions();
+        FitEventDecisions(); FitCandidateChoices();
         _status.Visible = false;
         _timeline.Position = new Vector2(344, 12); _timeline.Size = new Vector2(PhaseTrack.WidthForFrame(_layoutWidth - SidebarWidth - 30 - 344), 100);
         _menu.Position = new Vector2(_layoutWidth - 300, 28); _menu.Size = new Vector2(275, 40);
@@ -529,7 +535,7 @@ public partial class Main : Node
 
     private CardTile Tile(CardView card, bool compact, float width, float height)
     {
-        var tile = new CardTile(card, compact, SelectCard, _ => { }) { CustomMinimumSize = new Vector2(width, card.Zone == Zone.Hand ? height : PlaneHeight(height)), FaceHeight = height - 12, ReducedMotion = _reducedMotion, Highlighted = _selected?.Id == card.Id, SelectedSource = _sources.Contains(card.Id), PreviousBowed = Time.GetTicksMsec() - _bowChangedAt < 180 ? _previousBows.GetValueOrDefault(card.Id, card.Bowed) : card.Bowed, ContextualGoldProduction = Production(card, View.Players.Single(p => p.Id == card.OwnerId)) };
+        var tile = new CardTile(card, compact, SelectCard, _ => { }) { CustomMinimumSize = new Vector2(width, card.Zone == Zone.Hand ? height : PlaneHeight(height)), FaceHeight = height - 12, ReducedMotion = _reducedMotion, Highlighted = _selected?.Id == card.Id, SelectedSource = _sources.Contains(card.Id) || _chosen is not null && QuoteFor(_chosen)?.Sources?.Any(m => m.CardId == card.Id && _sources.Contains(m.Id)) == true, PreviousBowed = Time.GetTicksMsec() - _bowChangedAt < 180 ? _previousBows.GetValueOrDefault(card.Id, card.Bowed) : card.Bowed, ContextualGoldProduction = Production(card, View.Players.Single(p => p.Id == card.OwnerId)) };
         tile.TokenSourceName = id => FindCard(id)?.Definition?.Name;
         tile.ContextHelp = card.AttachedTo is { } parent ? "Attached to " + (FindCard(parent)?.Definition?.Name ?? parent) + ". Moves with this unit." : card.Zone == Zone.Battlefield ? $"At {(card.ProvinceIndex is int at ? BattlefieldName(at) : "a battlefield")}'s battlefield. " + RulesHelp.Topic("force") : card.Zone == Zone.Home ? "At home. Not assigned to a province. " + (card.Bowed ? RulesHelp.Topic("bow") : "") : card.Zone == Zone.Hand ? "In your hand. Select to see legal actions and targets." : "Select to inspect available actions.";
         if (card.Zone == Zone.Province && card.ProvinceIndex is int province)
@@ -548,7 +554,7 @@ public partial class Main : Node
     {
         if (_shownOpen) ToggleShownCards(false);
         if (_session.Busy || PresentationBusy) return;
-        if (SelectEventCard(card)) return;
+        if (SelectEventCard(card) || SelectPendingCandidate(card)) return;
         if (SelectMultiCard(card)) return;
         if (AttackTargetActive && card.Zone is Zone.Province or Zone.Region && card.ProvinceIndex is { } attackProvince)
         { if (AttackProvinceTarget(card.OwnerId, attackProvince)) ChooseAttackTarget(AttackChoice.Province, province: attackProvince); return; }
@@ -604,7 +610,7 @@ public partial class Main : Node
             tile.Highlighted |= GenericDecisionActive && tile.Card.Id == View.PendingChoice?.CardId;
             tile.LegalTarget |= GenericDecisionActive && tile.Card.Id == View.PendingChoice?.CardId;
             tile.LegalTarget |= View.PendingChoice?.Type == "beforeActionReaction" && tile.Card.Id == View.PendingChoice.CardId;
-            tile.DecisionSelected |= GenericDecisionActive && tile.Card.Id == _decisionSelection?.Command?.TargetId;
+            tile.DecisionSelected |= GenericDecisionActive && (tile.Card.Id == _decisionSelection?.Command?.TargetId || _decisionSelection?.DecisionCandidateIds?.Contains(tile.Card.Id) == true);
             tile.LegalTarget |= _chosen?.TargetIds?.Contains(tile.Card.Id) == true || supportTargets.Contains(tile.Card.Id);
             tile.LegalTarget |= MultiTargetActive && MultiUpFront.Any(s => s.Slot == _multiActiveSlot && s.CardIds.Contains(tile.Card.Id));
             tile.ChosenTarget = _chosen?.Command?.TargetId == tile.Card.Id || _assignments.ContainsKey(tile.Card.Id) || MultiTargetActive && MultiSelectedIds.Contains(tile.Card.Id);

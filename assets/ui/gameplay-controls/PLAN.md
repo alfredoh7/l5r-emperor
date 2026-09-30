@@ -2,7 +2,7 @@
 
 Issue: https://github.com/alfredoh7/l5r-emperor/issues/499
 
-Status: concept work authorized on 2026-09-30. Runtime implementation follows visual selection. No merge authorization is inferred.
+Status: Alfredo approved Payment A + C receipt and Choice B + A source context + C quiet selection cue on 2026-09-30. Runtime implementation is in progress in PR #570. No merge authorization is inferred.
 
 ## Three reviewable batches
 

@@ -10,7 +10,7 @@ public sealed partial class MatchEngine
     /// can never claim a protocol whose command/state members the peer would reject (UnmappedMemberHandling.Disallow).
     /// 2: commands carry createdCard, and the state message carries the attack cue and per-action attack/movement/
     /// alternative-cost metadata.</summary>
-    public const int ProtocolVersion = 2;
+    public const int ProtocolVersion = 3;
     private MatchState _state;
     private readonly ulong _seed;
     private readonly string _scenario;
