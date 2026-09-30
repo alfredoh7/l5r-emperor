@@ -13,6 +13,7 @@ public partial class BattleTracker : Control
     public bool PresentationInProgress { get; set; }
     public bool ActionOutcome { get; set; }
     public string? ResolutionMessage { get; set; }
+    public string? LocationName { get; set; }
     public int Stage => ActionOutcome ? 1 : ResolutionMessage is not null ? 2 : Snapshot.Phase == Phase.Battle ? 1 : 0;
     public static bool InBattle(Phase phase) => phase is Phase.AttackDeclaration or Phase.InfantryDeclaration or Phase.DefenseAssignment or Phase.CavalryDeclaration or Phase.CavalryDefense or Phase.BattleSelection or Phase.Battle;
     public override void _Ready()
@@ -52,10 +53,8 @@ public partial class BattleTracker : Control
         DrawLine(new Vector2(0,178),new Vector2(Size.X,178),Palette.Gold with { A=.55f },1,true);
     }
 
-    private string ProvinceTitle => Snapshot.CurrentBattleProvince is int p ? BattlefieldTitle(p) : ResolutionMessage is not null ? "Battle resolved" : "Battle";
+    private string ProvinceTitle => Snapshot.CurrentBattleProvince is int p ? LocationName ?? BattlefieldPresentation.Name(Snapshot, p) : ResolutionMessage is not null ? "Battle resolved" : "Battle";
     // An additional battlefield (Emperor Edition rulings pass R1, issue #492) is named by the province it is at, or has none.
-    private string BattlefieldTitle(int p) => p < MatchEngine.FirstAdditionalBattlefield ? $"Province {p + 1}"
-        : Snapshot.Battlefields?.FirstOrDefault(b => b.Index == p)?.Province is int province ? $"Second battlefield · Province {province + 1}" : "No province";
     private void TextAt(string text, Rect2 box, int size, Color color, bool heading)
     {
         if (heading) text = text.ToUpperInvariant();

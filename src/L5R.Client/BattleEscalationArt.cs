@@ -55,7 +55,7 @@ public static class BattleEscalationArt
         P(new Rect2(w/2+15,h-line,w/2-corner-15,line),new Rect2(440,585,95,32));
     }
 
-    public static void Crimson(Control c, Vector2 size, bool above)
+    public static void Crimson(Control c, Vector2 size, bool above, bool closed = false)
     {
         // 3A's actual rest close-up, isolated by warm pigment. Its blood and
         // gold detail are retained, rather than redrawing a geometric border.
@@ -71,14 +71,15 @@ public static class BattleEscalationArt
         // Gaps beneath the daisho and at the neck preserve the approved join.
         foreach(var y in new[]{0f,size.Y})
         {
-            var gap = (y==0)==above ? 37f : 23f;
+            if (closed && (y == 0) == above) { Line(new(inset, y), 0, size.X - 2 * inset); continue; }
+            var gap = (y==0)==above ? closed ? 0f : 37f : 23f;
             Line(new(inset,y),0,size.X/2-gap-inset);
             Line(new(size.X/2+gap,y),0,size.X/2-gap-inset);
         }
         Line(new(0,inset),Mathf.Pi/2,size.Y-2*inset);
         Line(new(size.X,inset),Mathf.Pi/2,size.Y-2*inset);
         c.DrawSetTransform(Vector2.Zero);
-        BattleInkArt.Neck(c,new Vector2(size.X/2,above?0:size.Y),above,new Color(.70f,.22f,.18f));
+        if (!closed) BattleInkArt.Neck(c,new Vector2(size.X/2,above?0:size.Y),above,new Color(.70f,.22f,.18f));
         // The seal itself stays brass, legible and physically mounted.
         c.DrawTextureRect(Daisho,new Rect2(size.X/2-27,above?size.Y-27:-27,54,54),false);
     }
@@ -87,16 +88,17 @@ public static class BattleEscalationArt
 public partial class CrimsonCourt : Control
 {
     public bool Above { get; set; }
+    public bool Closed { get; set; }
     private readonly ShaderMaterial _blood = new() { Shader = GD.Load<Shader>("res://Art/blood-soak.gdshader") };
     public override void _Ready()
     { MouseFilter=MouseFilterEnum.Ignore; TextureFilter=TextureFilterEnum.LinearWithMipmaps; Material=_blood; }
-    public void Present(Rect2 rect,bool above,double age,bool reduced,bool current)
+    public void Present(Rect2 rect,bool above,double age,bool reduced,bool current,bool closed = false)
     {
-        Position=rect.Position; Size=rect.Size; Above=above;
+        Position=rect.Position; Size=rect.Size; Above=above; Closed=closed;
         _blood.SetShaderParameter("age",(float)(reduced?8:age));
         _blood.SetShaderParameter("still",reduced);
         _blood.SetShaderParameter("emphasis",current?1f:.82f);
         QueueRedraw();
     }
-    public override void _Draw() => BattleEscalationArt.Crimson(this,Size,Above);
+    public override void _Draw() => BattleEscalationArt.Crimson(this,Size,Above,Closed);
 }

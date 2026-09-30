@@ -369,6 +369,11 @@ public partial class Main
         if (PresentationBusy) { Palette.Clear(_phaseActions); _phaseActions.AddChild(SidebarSkin.Button("Review battle", ShowBattleHistory)); return; }
         Palette.Clear(_phaseActions);
         if (_session.Snapshot is null) return;
+        if (_battlefieldReviewView is not null)
+        {
+            _phaseActions.AddChild(Palette.Wrapped("Presentation preview\nUse the prepared scenarios above the table. Card effects are not running.", 17, Palette.PaperDim));
+            return;
+        }
         if (View.PendingProvinceOrder is { } order)
         {
             _phaseActions.AddChild(Palette.Wrapped(order.PlayerId == View.ViewerId ? "Choose an order in the tray." : "Waiting for the province's controller to choose an order.", 18, Palette.Gold));

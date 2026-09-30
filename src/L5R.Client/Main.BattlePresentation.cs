@@ -23,6 +23,7 @@ public partial class Main
     // No fabricated intermediate rules state, prediction or command is introduced.
     private void PrepareBattlePresentation()
     {
+        if (_battlefieldReviewView is not null) return;
         var next = _session.Snapshot!;
         if (!_tableLayoutSeen || _presentationRoom != next.RoomCode || _motionView is null || next.View.Version < _motionView.Version || next.View.ViewerId != _motionView.ViewerId || next.View.Scenario != _motionView.Scenario)
         { _fallTimes.Clear(); _presentationSnapshot = null; _battlePresentationStage = 0; _presentedResolutionVersion = -1; _motionView = null; _tableLayoutSeen = false; }
@@ -84,6 +85,7 @@ public partial class Main
         var defender = View.Players.Single(p => p.Id != View.ActivePlayerId);
         foreach (var (index, court) in _battleCourts)
         {
+            if (!CourtConnectsToProvince(index)) continue;
             var province = _matTargets.FirstOrDefault(s => s.Id == $"province:{defender.Id}:{index}");
             if (province is null) continue;
             var above = province.Bounds.GetCenter().Y < court.GetCenter().Y;

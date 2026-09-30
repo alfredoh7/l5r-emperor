@@ -19,7 +19,7 @@ public partial class Main
     }
     private void ObserveBattleJournal()
     {
-        var snapshot=_session.Snapshot!; var next=snapshot.View;
+        var snapshot=_session.Snapshot!; var next=_battlefieldReviewView ?? snapshot.View;
         var fresh=_journalView is null || _journalRoom!=snapshot.RoomCode || _journalView.ViewerId!=next.ViewerId || _journalView.Scenario!=next.Scenario || next.Version<_journalView.Version;
         if(fresh)
         {
@@ -54,10 +54,11 @@ public partial class Main
         {
             if(!_bloodStarts.TryGetValue(index,out var start)) continue;
             var bay=_matTargets.FirstOrDefault(s=>s.Id==$"province:{1-View.ActivePlayerId}:{index}");
-            if(bay is null) continue;
+            var closed = !CourtConnectsToProvince(index);
             if(!_bloodCourts.TryGetValue(index,out var court))
             { court=new CrimsonCourt(); _battleDecor.AddChild(court); _bloodCourts[index]=court; }
-            court.Present(rect,bay.Bounds.GetCenter().Y<rect.GetCenter().Y,start<0?8+_battleVisualTime:_battleVisualTime-start,_reducedMotion,View.CurrentBattleProvince==index);
+            court.Present(rect,closed || bay is not null && bay.Bounds.GetCenter().Y<rect.GetCenter().Y,
+                start<0?8+_battleVisualTime:_battleVisualTime-start,_reducedMotion,View.CurrentBattleProvince==index,closed);
         }
     }
 }

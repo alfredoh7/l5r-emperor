@@ -42,7 +42,7 @@ public static class BattleInkArt
             new Rect2(courtEdge.X - 37, courtEdge.Y + (provinceAbove ? -55 : -11), 74, 66), false, tint);
     }
     public static Texture2D Step => Extract("res://Art/battle-ink-reference.png", new Rect2I(375, 644, 32, 24));
-    public static void Court(Control canvas, Vector2 size, float active, bool connectionAbove = false)
+    public static void Court(Control canvas, Vector2 size, float active, bool connectionAbove = false, bool closed = false)
     {
         // The neutral B court's actual filigree and sword medallion. Only the
         // straight runs stretch; the center stays empty for real game cards.
@@ -55,8 +55,12 @@ public static class BattleInkArt
         Piece(new Rect2(size.X-edge, size.Y-edge, edge, edge), new Rect2(220, 197, 40, 40));
         if (connectionAbove)
         {
-            Piece(new Rect2(edge, 0, size.X/2-37-edge, 14), new Rect2(45, 0, 45, 14));
-            Piece(new Rect2(size.X/2+37, 0, size.X/2-37-edge, 14), new Rect2(45, 0, 45, 14));
+            if (closed) Piece(new Rect2(edge, 0, size.X-2*edge, 14), new Rect2(45, 0, 45, 14));
+            else
+            {
+                Piece(new Rect2(edge, 0, size.X/2-37-edge, 14), new Rect2(45, 0, 45, 14));
+                Piece(new Rect2(size.X/2+37, 0, size.X/2-37-edge, 14), new Rect2(45, 0, 45, 14));
+            }
         }
         else
         {
@@ -72,8 +76,12 @@ public static class BattleInkArt
         }
         else
         {
-            Piece(new Rect2(edge, size.Y-14, size.X/2-37-edge, 14), new Rect2(45, 223, 45, 14));
-            Piece(new Rect2(size.X/2+37, size.Y-14, size.X/2-37-edge, 14), new Rect2(45, 223, 45, 14));
+            if (closed) Piece(new Rect2(edge, size.Y-14, size.X-2*edge, 14), new Rect2(45, 223, 45, 14));
+            else
+            {
+                Piece(new Rect2(edge, size.Y-14, size.X/2-37-edge, 14), new Rect2(45, 223, 45, 14));
+                Piece(new Rect2(size.X/2+37, size.Y-14, size.X/2-37-edge, 14), new Rect2(45, 223, 45, 14));
+            }
         }
         canvas.DrawTextureRect(BattleEscalationArt.Daisho, new Rect2(size.X/2-27, connectionAbove ? size.Y-27 : -27, 54, 54), false, tint);
     }

@@ -1,9 +1,9 @@
 {
-  "lane": "ui",
-  "summary": "Starting approved standalone battlefield UI, help and viewing navigation for #499.",
-  "validation": "Read current main, R-002, battlefield view and open #564 overlap. Implementation not yet validated.",
-  "remaining": "Implement and test native UI; publish local and Windows review previews; request Mendon review. No merge.",
+  "lane": "shared",
+  "summary": "Implement approved standalone open battlefields, on-demand rules help, stable location labels and camera-only navigation for #499. Shared scope is review tooling and presentation of existing R-002/public view; no Core, server, DTO, legality or resolution changes.",
+  "validation": "Client build 0 warnings/errors; final import and native open-battlefield checks passed (both seats, full scans, native inspection/help, no card overlap, six/empty/crowded courts, orphan stability, responsive sizing and motion); existing emperor-ruling-R1 15/15 passed; source/native captures retained.",
+  "remaining": "Publish versioned Windows preview, complete CI and targeted Mendon review notification. PR #564 overlap remains separate. No merge; human mechanics/playability acceptance pending.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/499",
   "branch": "codex/499-open-battlefield",
-  "updated": "2026-09-30T13:32:17.401593+00:00"
+  "updated": "2026-09-30T14:06:22.849715+00:00"
 }

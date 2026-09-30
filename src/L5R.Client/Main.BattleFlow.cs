@@ -14,8 +14,10 @@ public partial class Main
             _selectedHomeReminder is not null && View.PendingChoice is null)) return false;
         _guide.Visible = false;
         _sidebarHeader.AddChild(new BattleTracker { Snapshot=View, ReducedMotion=_reducedMotion,
+            LocationName=View.CurrentBattleProvince is int current ? BattlefieldName(current) : null,
             PresentationInProgress=PresentationBusy, ActionOutcome=PresentationBusy && _actionOutcome,
             ResolutionMessage=PresentationBusy ? _actionOutcome?null:_battleOutcomeText : _resolutionMessage });
+        RenderBattlefieldNavigation();
         if(!PresentationBusy && View.PendingChoice is { } pending)
         {
             FlowText(pending.Prompt,22,Palette.Paper);
