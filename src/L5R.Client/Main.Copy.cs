@@ -69,7 +69,7 @@ public partial class Main
             _copyPanel=new CopyChoicePanel {ZIndex=90};_root.AddChild(_copyPanel);FitCopyPanel();
             _copyPanel.MinimumSizeChanged+=()=>{if(_copyPanel is {} panel)panel.SetDeferred(Control.PropertyName.Size,new Vector2(Math.Min(1120,_layoutWidth-SidebarWidth-22-344-18),650));};
             _copyPanel.Populate(copy,Actions,DecisionCanSubmit,receiver,_copyTotal);_copyViewKey=key;
-            _copyPanel.Confirmed+=action=>{if(DecisionCanSubmit&&_copyViewKey==key&&Actions.Contains(action)&&action.Command is not null)Submit(action.Command);};
+            _copyPanel.Confirmed+=action=>{if(DecisionCanSubmit&&_copyViewKey==key&&Actions.Contains(action)&&action.Command is not null)_ = Submit(action.Command);};
             _copyPanel.Inspect+=card=>{var (_,body)=Dialog(card.Definition!.Name,720,720);body.AddChild(CardPreview.Face(card,510));body.AddChild(Palette.Wrapped(card.Definition.Text,17));};
         }
         _sidebarHeader.AddChild(Palette.Text("COPY TO "+copy.ReceiverName,25,title:true));

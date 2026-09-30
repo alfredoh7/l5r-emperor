@@ -65,7 +65,7 @@ public partial class Main
                 _searchPanel.Confirmed+=action=>
                 {
                     if(!DecisionCanSubmit||_searchViewKey!=key||!Actions.Contains(action)||action.Command is null)return;
-                    Submit(action.Command);
+                    _ = Submit(action.Command);
                 };
             }
             _sidebarHeader.AddChild(Palette.Text("PRIVATE SEARCH",27,title:true));
@@ -99,7 +99,7 @@ public partial class Main
             var confirm=SidebarSkin.Button(required>0?$"Confirm · {required} Gold":"Confirm choice",()=>
             {
                 if(DecisionCanSubmit&&version==View.Version&&viewer==View.ViewerId&&Actions.Contains(selected))
-                    Submit(command with {SourceIds=required>0?_sources.ToArray():command.SourceIds});
+                    _ = Submit(command with {SourceIds=required>0?_sources.ToArray():command.SourceIds});
             },true);
             confirm.Disabled=!ready||!DecisionCanSubmit;_decisionActions.AddChild(confirm);
             _decisionActions.AddChild(SidebarSkin.Button("Clear selection",CancelChoice));

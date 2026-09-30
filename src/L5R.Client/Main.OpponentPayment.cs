@@ -69,7 +69,7 @@ public partial class Main
             if (!DecisionCanSubmit || key != _opponentPaymentKey || !OpponentPaymentActive ||
                 View.PendingOpponentPayment?.ViewerDecides != true || !ready ||
                 !Actions.Any(a => a.Enabled && a.Type == command.Type && a.Command?.CardId == command.CardId && a.Command?.ExpectedVersion == command.ExpectedVersion)) return;
-            Submit(command with { SourceIds = required > 0 ? _sources.ToArray() : [] });
+            _ = Submit(command with { SourceIds = required > 0 ? _sources.ToArray() : [] });
         }, true);
         _paymentConfirm.Name = "OpponentPaymentConfirm";
         _paymentConfirm.Disabled = !ready || !DecisionCanSubmit; _decisionActions.AddChild(_paymentConfirm);

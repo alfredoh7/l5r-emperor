@@ -159,7 +159,7 @@ public partial class Main
             _paymentConfirm = SidebarSkin.Button((total == 0 ? MultiReady ? "Confirm without targets" : "Choose required targets" : $"Confirm {total} target{(total == 1 ? "" : "s")}") + (required > 0 ? $" · {required} Gold" : ""), () =>
             {
                 if (!DecisionCanSubmit || !MultiTargetActive || key != _multiDraftKey || !MultiReady || !ready) return;
-                Submit(MultiCommand() with { SourceIds = required > 0 ? _sources.ToArray() : [] });
+                _ = Submit(MultiCommand() with { SourceIds = required > 0 ? _sources.ToArray() : [] });
             }, true);
             _paymentConfirm.Disabled = !DecisionCanSubmit || !MultiReady || !ready; _decisionActions.AddChild(_paymentConfirm);
         }

@@ -53,7 +53,7 @@ public partial class Main
         // Check the current permitted action as well as its captured version. No inferred/default answer.
         if(!OwnEventDecision||!CanCommitEvent||option.Command is not { } command||command.ExpectedVersion!=View.Version)return;
         if(!Actions.Any(a=>a.Enabled&&a.Command==command))return;
-        Submit(command);
+        _ = Submit(command);
     }
     private void ClearEventSelection()
     {

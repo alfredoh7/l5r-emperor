@@ -85,7 +85,7 @@ public partial class Main
         _paymentConfirm=SidebarSkin.Button(selected is null?"Choose an option":required>0?$"Confirm · Pay {required} Gold":"Confirm choice",()=>
         {
             if(!DecisionCanSubmit||_eitherOrKey!=key||!choice.ViewerDecides||selected is not {Enabled:true,Command:{ } command}||!Actions.Contains(selected)||!ready)return;
-            Submit(command with {SourceIds=required>0?_sources.ToArray():command.SourceIds});
+            _ = Submit(command with {SourceIds=required>0?_sources.ToArray():command.SourceIds});
         },true);
         _paymentConfirm.Disabled=selected is null||!ready||!DecisionCanSubmit;_decisionActions.AddChild(_paymentConfirm);
         if(selected is not null)_decisionActions.AddChild(SidebarSkin.Button("Back to options",()=>{_chosen=null;_sources.Clear();RenderInspector();RenderPhaseActions();Highlight();}));

@@ -150,7 +150,7 @@ public partial class Main
         if(GenericDecisionActive)
         {
             if(View.PendingChoice!.PlayerId!=View.ViewerId || View.PriorityPlayerId!=View.ViewerId) return;
-            Submit(command); // Pending answers are already complete, including any CardIds or Choice.
+            _ = Submit(command); // Pending answers are already complete, including any CardIds or Choice.
         }
         else if(_reviewingAlternativeCost && _chosen?.Command is { } draft)
         {
@@ -165,7 +165,7 @@ public partial class Main
             var reviewed=selected with {Command=command with {TargetId=draft.TargetId}};
             // Gold still goes through the existing engine-quoted panel when the ability has both kinds of cost.
             if(QuoteFor(reviewed) is not null) { _reviewingAlternativeCost=false;Choose(reviewed);_alternativeCostConfirmed=true;RenderInspector();return; }
-            Submit(reviewed.Command!);
+            _ = Submit(reviewed.Command!);
         }
     }
 }

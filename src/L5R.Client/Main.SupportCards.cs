@@ -117,7 +117,7 @@ public partial class Main
         }
         AddSupportCost(card, command.AbilityId, _inspector);
         var (cost, ready) = RenderGoldPanel(action);
-        var confirm = SidebarSkin.Button(cost > 0 ? $"Confirm action · {cost} Gold" : "Confirm action", () => Submit(command with { SourceIds = _sources.ToArray() }), true);
+        var confirm = SidebarSkin.Button(cost > 0 ? $"Confirm action · {cost} Gold" : "Confirm action", () => _ = Submit(command with { SourceIds = _sources.ToArray() }), true);
         confirm.Disabled = !action.Enabled || _session.Busy || !ready;
         _decisionActions.AddChild(confirm); _decisionActions.AddChild(SidebarSkin.Button("Cancel action",CancelChoice));
     }
