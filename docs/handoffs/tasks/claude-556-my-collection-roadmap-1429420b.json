@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Added a roadmap row for the My Collection feature (togglable owned-cards filter, per-card owned count, CSV import/export) in the card library and deck builder",
+  "validation": "Docs-only change; no engine/client code. gh pr checks 557 all green except this handoff.",
+  "remaining": "None; ready for review. Scoping (persistence, CSV schema, hard vs soft filter) left open on issue #556 for whoever implements it.",
+  "issue": "556",
+  "branch": "claude/556-my-collection-roadmap",
+  "updated": "2026-09-30T10:13:51.976576+00:00"
+}
