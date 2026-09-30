@@ -30,6 +30,11 @@ public partial class DeckBuilderScreen : Control
     private readonly Control _canvas = new(), _header = new(), _setupStrip = new(), _left = new(), _toolbar = new(), _setupTools = new(), _library = new(), _overlay = new(), _hover = new();
     private readonly HashSet<string> _compare = [];
     private Dictionary<string, CatalogueData.Card> _byId = [];
+    // The catalogue-wide DeckCardInfo materialization (each one running per-card ability lookups, DeckWorkshop.cs)
+    // is expensive and the catalogue never changes during this screen's lifetime; built once here instead of
+    // once per NewDraft() call -- BuildDeckList() (DeckBuilderScreen.Storage.cs) calls NewDraft() once per saved
+    // deck file just to get a summary, so this was previously O(saved decks x catalogue size) on every visit.
+    private DeckCardInfo[] _pool = [];
     private Button _dynasty = null!, _fate = null!, _compareButton = null!, _collectionTab = null!, _setupTab = null!, _save = null!;
     private Label _status = null!, _dirtyLabel = null!, _count = null!, _empty = null!;
     private LineEdit _name = null!;
@@ -49,7 +54,9 @@ public partial class DeckBuilderScreen : Control
         _previousEmbed = GetViewport().GuiEmbedSubwindows; GetViewport().GuiEmbedSubwindows = true;
         Theme = DeckSkin.Theme();
         MouseFilter = MouseFilterEnum.Stop;
-        _byId = Data.Cards.ToDictionary(c => c.Id); Draft = NewDraft();
+        _byId = Data.Cards.ToDictionary(c => c.Id);
+        _pool = Data.Cards.Select(c => new DeckCardInfo(c.Id, c.Name, c.Types, c.DeckTypes, c.Definition?.Keywords?.ToArray() ?? c.Keywords, c.Playable, c.Definition?.CreatedOnly ?? false, c.Definition?.DeckCopyLimit, c.Definition is null ? 0 : DeckWorkshop.FateMinimumReductionOf(c.Definition), c.Definition is not null && DeckWorkshop.StrategyCopyRuleOf(c.Definition), c.Definition is not null && DeckWorkshop.BattleStrategyOf(c.Definition))).ToArray();
+        Draft = NewDraft();
         Store = new DeckFileStore(StorageDirectory ?? ProjectSettings.GlobalizePath("user://decks"));
         var bg = new TextureRect { Texture = GD.Load<Texture2D>("res://Art/DeckBuilder/work-mat.png"), ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize, StretchMode = TextureRect.StretchModeEnum.Scale, MouseFilter = MouseFilterEnum.Ignore }; AddChild(bg); bg.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
         AddChild(_lines); _lines.Draw += DrawFrames;
@@ -62,7 +69,7 @@ public partial class DeckBuilderScreen : Control
         _canvas.AddChild(_overlay); _overlay.Visible = false; _canvas.AddChild(_hover); _hover.Visible = false; _hover.MouseFilter = MouseFilterEnum.Ignore;
         Resized += Fit; TreeExiting += Scans.Close; TreeExiting += () => GetViewport().GuiEmbedSubwindows = _previousEmbed; Fit(); ShowDecks();
     }
-    private DeckWorkshop NewDraft() => new(Data.Cards.Select(c => new DeckCardInfo(c.Id, c.Name, c.Types, c.DeckTypes, c.Definition?.Keywords?.ToArray() ?? c.Keywords, c.Playable, c.Definition?.CreatedOnly ?? false, c.Definition?.DeckCopyLimit, c.Definition is null ? 0 : DeckWorkshop.FateMinimumReductionOf(c.Definition), c.Definition is not null && DeckWorkshop.StrategyCopyRuleOf(c.Definition), c.Definition is not null && DeckWorkshop.BattleStrategyOf(c.Definition))));
+    private DeckWorkshop NewDraft() => new(_pool);
     private static void Put(Control parent, Control child, float x, float y, float w, float h)
     { parent.AddChild(child); child.Position = new Vector2(x, y); child.Size = new Vector2(w, h); }
     private static void Place(Control child, float x, float y, float w, float h) { child.Position = new Vector2(x, y); child.Size = new Vector2(w, h); }
@@ -121,7 +128,7 @@ public partial class DeckBuilderScreen : Control
         Place(_toolbar.GetNode<Control>("SizeLabel"), _toolbar.Size.X - 280, 16, 85, 25); Place(_toolbar.GetNode<Control>("CardSize"), _toolbar.Size.X - 187, 14, 172, 32);
         Place(_setupTools, MatLeft, 158, _w - MatLeft - 18, 58); Place(_library, 0, 0, _w, _h); _overlay.Size = _canvas.Size;
         if (IsInsideTree()) { BuildSetupStrip(); if (Page == "decks") BuildDeckList(); else if (_setupSlot.Length > 0) BuildSetupChoices(); }
-        Collection.Relayout(); Mat.Relayout(); HideHover(); if (_overlay.Visible && _inspectionCards.Length > 0) ShowComparison(_inspectionCards); _lines.QueueRedraw();
+        Collection.Reposition(); Mat.Reposition(); HideHover(); if (_overlay.Visible && _inspectionCards.Length > 0) ShowComparison(_inspectionCards); _lines.QueueRedraw();
     }
     private void DrawFrames()
     {
