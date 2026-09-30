@@ -50,6 +50,21 @@ The declarer of the Attack Phase is the Attacker unless a card says otherwise.
 - **Date:** 2026-09-25
 - **Source:** [Emperor Edition rulings pass](../decisions/2026-09-25-emperor-edition-rulings-pass.md) (R1)
 
+### R-023 — Plains of Otosan Uchi: reveal order, Honor timing and province-card targeting
+The 10-Honor loss fires whenever the province is destroyed (the printed "before" ordering is
+immaterial). Provinces still reveal left to right; reaching Otosan Uchi with both slots face down
+asks the controller which to reveal first (Left/Right), then each resolves in that order. The
+second slot is created empty, refilled face down, and never revealed the turn the Region enters
+play. Both cards share the underlying province's one battlefield and its adjacency. An effect
+that targets "a card in a province" (Shosuro Toson's Reaction) may hit only one of the two: a
+Left/Right choice, replaced by the card's own title once it is face up.
+
+- **Cards/primitives:** Plains of Otosan Uchi (oracle-l5r-5979); `ProvinceState.CardId2`,
+  `HandleOtosanUchiProvinceReveal`, `DestroyProvince`, `BeginProvinceCardChoice` (Toson wired as
+  the worked example).
+- **Date:** 2026-09-30
+- **Source:** [Plains of Otosan Uchi province rules](../decisions/2026-09-30-otosan-uchi-province-rules.md)
+
 ## Delays and negation
 
 ### R-003 — The shared delay mechanism

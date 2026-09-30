@@ -311,6 +311,8 @@ public static class CardCatalog
             // through the generalized payment path.
             new("training-search-source", "Training search source", CardType.Personality, "Unaligned", GoldCost:3, Force:2, Chi:2, PersonalHonor:1, Abilities:["training-search-cheap","training-search-focus","training-search-optional"], Text:"Synthetic deck-search fixture: three Limited searches of the Fate deck (cheap non-Unique Follower or Item; Strategy with Focus 2 or less; an optional Weapon search). Never included in a playable deck."),
             new("training-costed-region", "Training costed Region", CardType.Region, GoldCost:2, Text:"Synthetic deck-search fixture: a Region with a Gold cost of 2, attached through the generalized payment path. Never included in a playable deck."),
+            // Plains of Otosan Uchi (issue #554, OtosanUchiPlains.cs): a Region granting its province a second Dynasty slot, for its own Core tests.
+            new("training-otosan-uchi", "Training two-slot Region", CardType.Region, Keywords:["Unique","Imperial"], Effect:OtosanUchiPlains.Effect, Text:"Synthetic Otosan Uchi fixture: this Province holds two Dynasty cards; do not reveal the second the turn this Region enters play. Before this Province is destroyed, lose 10 Honor. Never included in a playable deck."),
             // Daigotsu Bofana (issue #333): one card of each type whose only action is training-bow-at-battle ("Battle: bow a target
             // enemy Personality"), so each kind of card can perform an action that targets him; and a Dark Virtue Strategy with two
             // Battle actions and an Open one, for Bofana - exp's play from the discard pile.
