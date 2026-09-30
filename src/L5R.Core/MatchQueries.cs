@@ -2,6 +2,33 @@ namespace L5R.Core;
 
 public sealed partial class MatchEngine
 {
+    // _state.Events only ever grows via Emit(); GetView is called several times per submitted command (once per
+    // player, sometimes twice per player -- see RoomManager.CreateState/SubmitAsync), and was re-walking and
+    // re-masking the whole history array every single call, an O(total events so far) cost repeated on every
+    // call for the life of a match (issue #546). Cache the masked-per-player projection and only extend it with
+    // newly appended events. The cache key is the exact List<GameEvent> object plus its length, not just the
+    // length: _state is reassigned wholesale (never mutated in place) on the engine's internal rollback paths
+    // (e.g. MatchEngine.cs:197,247,270), so a stale reference can never be mistaken for the current one, and a
+    // miss just falls back to full recomputation -- this can only skip redundant work, never return wrong data.
+    private readonly GameEvent[]?[] _viewedEventsCache = new GameEvent[]?[2];
+    private readonly List<GameEvent>?[] _viewedEventsSource = new List<GameEvent>?[2];
+    private GameEvent[] ViewedEvents(int playerId)
+    {
+        var events = _state.Events;
+        if (ReferenceEquals(_viewedEventsSource[playerId], events) && _viewedEventsCache[playerId] is { } cached && cached.Length == events.Count) return cached;
+        var start = ReferenceEquals(_viewedEventsSource[playerId], events) ? _viewedEventsCache[playerId]!.Length : 0;
+        var result = new GameEvent[events.Count];
+        if (start > 0) Array.Copy(_viewedEventsCache[playerId]!, result, start);
+        for (var i = start; i < events.Count; i++)
+        {
+            var e = events[i];
+            result[i] = e.Type == "duelFocused" && e.PlayerId != playerId ? e with { CardId = null } : e;
+        }
+        _viewedEventsSource[playerId] = events;
+        _viewedEventsCache[playerId] = result;
+        return result;
+    }
+
     /// <summary>Only this detached view may cross the trust boundary to a player.</summary>
     public MatchView GetView(int playerId)
     {
@@ -41,7 +68,7 @@ public sealed partial class MatchEngine
         var duel = _state.PendingDuel;
         return new(ContentVersion, _scenario, _state.Version, _state.TurnNumber, playerId, _state.ActivePlayerId, _state.PriorityPlayerId,
             _state.Phase, _state.PendingChoice, _state.CurrentBattleProvince, _state.UnresolvedBattlefields.ToArray(),
-            _state.WinnerId, _state.VictoryReason, players, _state.Events.Select(e => e.Type == "duelFocused" && e.PlayerId != playerId ? e with { CardId = null } : e).ToArray(), _scenario == CustomPractice.Scenario ? ["Custom Practice: validated deck construction and implemented cards. Not historical tournament certification."] : _scenario.StartsWith("duel-demo/", StringComparison.Ordinal) ? ["Prepared Duel Demo position; not a playable deck profile.", DuelDemoScenarios.Get(_scenario[10..]).Description] : _scenario is PublishedContent.Scenario or PublishedContent.TestScenario ? ["Published Lion/Crane playtest: all 40 definitions supported under the pinned Emperor profile.", "Other imported decks remain reference-only; this profile is not tournament certification."] : [.. Limits], _state.FavorPlayerId,
+            _state.WinnerId, _state.VictoryReason, players, ViewedEvents(playerId), _scenario == CustomPractice.Scenario ? ["Custom Practice: validated deck construction and implemented cards. Not historical tournament certification."] : _scenario.StartsWith("duel-demo/", StringComparison.Ordinal) ? ["Prepared Duel Demo position; not a playable deck profile.", DuelDemoScenarios.Get(_scenario[10..]).Description] : _scenario is PublishedContent.Scenario or PublishedContent.TestScenario ? ["Published Lion/Crane playtest: all 40 definitions supported under the pinned Emperor profile.", "Other imported decks remain reference-only; this profile is not tournament certification."] : [.. Limits], _state.FavorPlayerId,
             duel is null ? null : new DuelView(duel.ChallengerPlayerId, duel.ChallengedPlayerId, duel.ChallengerId, duel.ChallengedId, duel.Stat, duel.Stage, _state.PriorityPlayerId, duel.Struck, duel.DuelId),
             BuildBattleStepView(),
             // Deck search (issue #312): the deck viewer is private to the searcher; the shown-cards record is public.

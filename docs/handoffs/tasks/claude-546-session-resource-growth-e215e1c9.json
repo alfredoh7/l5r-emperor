@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Follow-up to fix #546: applied dotnet format whitespace to MatchQueries.cs and RoomManager.cs (the whole-file 'Changed C# formatting' CI check enforces whitespace on any touched file, same precedent as commit d02edfd3 on MatchEngine.cs). That reformat broke ActionLockTests.InnateActionInventory, a deliberate pinned-source-text test checking that 'attack'/'assignDefense' share one ternary construction in MatchQueries.cs -- updated its expected literal to the new canonical spacing; the test's real invariant is unaffected.",
+  "validation": "bash tools/check.sh --skip-client passed in full (EXIT=0, 2235 PASS / 0 FAIL) after the whitespace reformat and the ActionLockTests fix. python tools/quality/check_format.py --base origin/main reports clean. dotnet build succeeds for L5R.Core and L5R.Server.",
+  "remaining": "None; ready for review. PR #553 already open for issue #546; pushing this as a follow-up commit to the same branch/PR.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/546",
+  "branch": "claude/546-session-resource-growth",
+  "updated": "2026-09-30T09:47:24.661285+00:00"
+}
