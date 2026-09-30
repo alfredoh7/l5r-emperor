@@ -306,19 +306,19 @@ public sealed partial class MatchEngine
         switch (id)
         {
             case EmperorP3Abilities.TosonEngage:
-            {
-                // A two-slot province (Plains of Otosan Uchi, issue #554) may hold two candidates: asks which to discard.
-                if (CurrentBattlefieldProvince() is { } province)
                 {
-                    var candidates = ProvinceCardCandidates(province);
-                    if (candidates.Count > 1) return BeginProvinceCardChoice(province, player.Id, EmperorP3Abilities.TosonEngage, source!.Id);
-                    var discarded = candidates.Count == 1 ? candidates[0] : null;
-                    if (discarded is not null) DiscardProvinceCandidate(province, discarded);
-                    FinishTosonAfterProvinceChoice(player, source!, discarded);
+                    // A two-slot province (Plains of Otosan Uchi, issue #554) may hold two candidates: asks which to discard.
+                    if (CurrentBattlefieldProvince() is { } province)
+                    {
+                        var candidates = ProvinceCardCandidates(province);
+                        if (candidates.Count > 1) return BeginProvinceCardChoice(province, player.Id, EmperorP3Abilities.TosonEngage, source!.Id);
+                        var discarded = candidates.Count == 1 ? candidates[0] : null;
+                        if (discarded is not null) DiscardProvinceCandidate(province, discarded);
+                        FinishTosonAfterProvinceChoice(player, source!, discarded);
+                    }
+                    else FinishTosonAfterProvinceChoice(player, source!, null);
+                    return false;
                 }
-                else FinishTosonAfterProvinceChoice(player, source!, null);
-                return false;
-            }
             case EmperorP3Abilities.TenbatsuEngage:
                 // A Reaction's look sets the window it was played in aside, and the window is given back when the Reaction is done (ReactionsAreActions.cs).
                 SuspendOpenWindow();
@@ -370,13 +370,13 @@ public sealed partial class MatchEngine
                 }
                 return false;
             case EmperorP3Abilities.ForgingMove:
-            {
-                var performer = Card(command.PerformerId!);
-                var wasAway = performer.Zone == Zone.Battlefield;
-                MoveHome(performer, false);
-                if (wasAway && performer.Zone == Zone.Home) StraightenBowedUnit(performer); // "Straighten his unit if he moved."
-                return false;
-            }
+                {
+                    var performer = Card(command.PerformerId!);
+                    var wasAway = performer.Zone == Zone.Battlefield;
+                    MoveHome(performer, false);
+                    if (wasAway && performer.Zone == Zone.Home) StraightenBowedUnit(performer); // "Straighten his unit if he moved."
+                    return false;
+                }
             case EmperorP3Abilities.DefendersHonor:
                 GainHonor(player.Id, 2, name, source);
                 return false;

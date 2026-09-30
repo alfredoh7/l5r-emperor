@@ -108,35 +108,37 @@ public sealed partial class MatchEngine
     {
         switch (id)
         {
-            case "temple-of-death-straighten": case "temple-of-death-straighten-bow":
+            case "temple-of-death-straighten":
+            case "temple-of-death-straighten-bow":
                 Require(_state.Cards.Values.Any(c => c.OwnerId == player.Id && c.Zone == Zone.Dead && Definition(c).Type == CardType.Personality), "You must own a dead Personality.");
                 if (id == "temple-of-death-straighten-bow") Require(_state.Phase == Phase.Battle, "He may be bowed only in the Combat Segment.");
                 break;
             case "shadows-lair-move":
-            {
-                // A slot's candidate is judged alone (ability.Slots is null there): a unit that is not opposed must itself have total Force of 9 or lower. The whole selection is judged below.
-                if (ability.Slots is null)
                 {
-                    if (command.TargetId is not null && _state.Cards.TryGetValue(command.TargetId, out var candidate) && Definition(candidate).Type == CardType.Personality && !Opposed(candidate))
-                        Require(UnitTotalForce(candidate) <= 9, "That unit's total Force is above 9.");
+                    // A slot's candidate is judged alone (ability.Slots is null there): a unit that is not opposed must itself have total Force of 9 or lower. The whole selection is judged below.
+                    if (ability.Slots is null)
+                    {
+                        if (command.TargetId is not null && _state.Cards.TryGetValue(command.TargetId, out var candidate) && Definition(candidate).Type == CardType.Personality && !Opposed(candidate))
+                            Require(UnitTotalForce(candidate) <= 9, "That unit's total Force is above 9.");
+                        break;
+                    }
+                    Require(!(source!.AbilityUses.TryGetValue(ShadowsLairBattleKey, out var battle) && battle == _state.BattleNumber), "The Shadow's Lair may be used once per battle.");
+                    var units = SlotCards(command, "units").ToArray();
+                    Require(units.Length > 0, "Choose at least one unit.");
+                    if (units.Any(Opposed)) Require(units.Length == 1, "Choose one opposed unit, or unopposed units only.");
+                    else Require(units.Sum(UnitTotalForce) <= 9, "The units' combined total Force must be 9 or lower.");
                     break;
                 }
-                Require(!(source!.AbilityUses.TryGetValue(ShadowsLairBattleKey, out var battle) && battle == _state.BattleNumber), "The Shadow's Lair may be used once per battle.");
-                var units = SlotCards(command, "units").ToArray();
-                Require(units.Length > 0, "Choose at least one unit.");
-                if (units.Any(Opposed)) Require(units.Length == 1, "Choose one opposed unit, or unopposed units only.");
-                else Require(units.Sum(UnitTotalForce) <= 9, "The units' combined total Force must be 9 or lower.");
-                break;
-            }
-            case "spiders-web-attach": case "spiders-web-attach-kensai":
-            {
-                var entered = Card(_state.PendingChoice!.CardId!);
-                var discountSpent = source!.AbilityUses.TryGetValue(SpidersWebDiscountKey, out var stamp) && stamp == _state.TurnNumber;
-                var kensai = Keyword(entered, "Kensai");
-                if (id == "spiders-web-attach-kensai") Require(kensai, "The discount is for a Kensai.");
-                else Require(!kensai || discountSpent, "The first attach each turn to a Kensai costs 4 less Gold.");
-                break;
-            }
+            case "spiders-web-attach":
+            case "spiders-web-attach-kensai":
+                {
+                    var entered = Card(_state.PendingChoice!.CardId!);
+                    var discountSpent = source!.AbilityUses.TryGetValue(SpidersWebDiscountKey, out var stamp) && stamp == _state.TurnNumber;
+                    var kensai = Keyword(entered, "Kensai");
+                    if (id == "spiders-web-attach-kensai") Require(kensai, "The discount is for a Kensai.");
+                    else Require(!kensai || discountSpent, "The first attach each turn to a Kensai costs 4 less Gold.");
+                    break;
+                }
         }
     }
 
@@ -156,7 +158,8 @@ public sealed partial class MatchEngine
                 RecordProvinceSight(player, command.TargetPlayerId!.Value, source!);
                 return false;
             // The performing Ninja attacks; "you may move your Ninja home" is the second action's after-Attack step (AfterEmperorStrongholdBatch3Attack).
-            case "otoro-attack": case "otoro-attack-move":
+            case "otoro-attack":
+            case "otoro-attack-move":
                 return ResolveOrDeferAttack(id, player, target?.Id, ActionPerformer(ability, command, source).Id, consumedGrant);
             case "shadows-lair-move":
                 source!.AbilityUses[ShadowsLairBattleKey] = _state.BattleNumber;
@@ -177,7 +180,8 @@ public sealed partial class MatchEngine
                 // "If he moved": a negated move leaves him at the battlefield (Asahina Munefusa's own test).
                 if (target!.Zone == Zone.Home) GainHonor(target.OwnerId, -1, "Yasuki Palaces", source);
                 return false;
-            case "spiders-web-attach": case "spiders-web-attach-kensai":
+            case "spiders-web-attach":
+            case "spiders-web-attach-kensai":
                 return ExecuteAttach(command, ability.Attach!, player, source, target);
             case "waystation-reborn":
                 WaystationReborn(Card(HeldAction().TargetId!), target!, source!);
