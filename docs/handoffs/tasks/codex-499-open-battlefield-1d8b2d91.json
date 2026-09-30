@@ -1,0 +1,9 @@
+{
+  "lane": "ui",
+  "summary": "Starting approved standalone battlefield UI, help and viewing navigation for #499.",
+  "validation": "Read current main, R-002, battlefield view and open #564 overlap. Implementation not yet validated.",
+  "remaining": "Implement and test native UI; publish local and Windows review previews; request Mendon review. No merge.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/499",
+  "branch": "codex/499-open-battlefield",
+  "updated": "2026-09-30T13:32:17.401593+00:00"
+}
