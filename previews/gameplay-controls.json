@@ -3,8 +3,8 @@
   "slug": "gameplay-controls",
   "title": "Gameplay Choices and Payment Controls",
   "source_pr": 570,
-  "source_commit": "60f431f2d2dab7bebf57caf858b03d6d3dc35a50",
-  "revision": 1,
+  "source_commit": "d8a27ef2e17c5e2a58f5b403122e1fc6f65ea3ec",
+  "revision": 2,
   "reviewer": "mdornbrook",
   "summary": "Alfredo approved A\u2019s grouped payment methods with C\u2019s receipt, and B\u2019s candidate tray with A\u2019s source context and C\u2019s quiet selection. Please review the native implementation of the remaining #499 controls before merging.",
   "review_steps": [
@@ -21,7 +21,8 @@
     "The twelve real-engine seeds contain training cards alongside published sources; they are isolated demonstrations, not additions to playable deck profiles. Event draw is seeded at the real pending-choice boundary.",
     "Protocol 3 includes optional private candidate metadata and source conflicts. Client and server must run matching versions; no card rules or authoritative payment resolution moved into the UI.",
     "Native macOS checks passed; Windows CI validates exported runtime and launchers, not Windows graphical playtesting.",
-    "The UI uses the existing responsive lacquer sidebar and a candidate tray above the ordinary hand. Concept images establish accepted grouping and interaction rather than replace the entire game shell."
+    "The UI uses the existing responsive lacquer sidebar and a candidate tray above the ordinary hand. Concept images establish accepted grouping and interaction rather than replace the entire game shell.",
+    "Asahina Keigo\u2019s variable discard-payment picker is not implemented. Its unresolved zero-amount source is disabled and cannot enable confirmation, even alongside sufficient other Gold. Core still accepts the authoritative named-discard command."
   ],
   "scenarios": [
     {
