@@ -9,7 +9,7 @@ public partial class Main
     private InkMatSections _matSections = null!;
     private float _playLeft, _playWidth;
     private int _matMatchEpoch;
-    private float _enemyProvinceY, _reservedBattleHeight, _reservedHoldingWidth;
+    private float _enemyProvinceY, _reservedBattleHeight, _reservedHoldingWidth, _regionLayoutExtent;
     private readonly Dictionary<int, float> _reservedHomeBands = [];
     private readonly float[] _reservedLaneWidths = new float[4];
     // Additional battlefields (Emperor Edition rulings pass R1, issue #492: a battle without a province, or a second one at a province) get a lane of their own beyond the piles while they exist; the set
@@ -47,7 +47,8 @@ public partial class Main
     private readonly Dictionary<string, Vector2> _battlePlacements = [];
     private IEnumerable<CardView> CourtUnits(PlayerView player, int province) => player.Army
         .Where(c => c.AttachedTo is null && c.ProvinceIndex == province)
-        .Concat(player.Home.Where(c => c.AttachedTo is null && _assignments.GetValueOrDefault(c.Id, -1) == province));
+        .Concat(player.Home.Where(c => c.AttachedTo is null && _assignments.GetValueOrDefault(c.Id, -1) == province))
+        .Concat(MovementCourtUnits(player, province));
     private readonly Dictionary<int, CardView[][]> _holdingRows = [];
     private readonly Dictionary<int, Rect2> _holdingBounds = [], _homeBounds = [];
     private readonly List<InkMatSection> _matTargets = [];
@@ -75,6 +76,8 @@ public partial class Main
     {
         ObserveBattlefieldLocations();
         var oldSize = new Vector2(WorldWidth, _worldHeight);
+        var oldRegionExtent = _regionLayoutExtent;
+        _regionLayoutExtent = View.Players.SelectMany(p => p.Provinces).Sum(ProvinceCardWidth);
         var oldPersistentExtent = new Vector3(_persistentWidth, _persistentHeights.GetValueOrDefault(0), _persistentHeights.GetValueOrDefault(1));
         if (!_tableLayoutSeen)
         {
@@ -85,7 +88,7 @@ public partial class Main
         // permanently inflate the next Action/Dynasty board.
         if (!BattleActive && !PresentationBusy)
         { _reservedBattleHeight = 0; _reservedHoldingWidth = 0; _reservedHomeBands.Clear(); Array.Clear(_reservedLaneWidths); _reservedExtraLanes.Clear(); }
-        _matTargets.Clear(); _battleCourts.Clear(); _battlePlacements.Clear();
+        _matTargets.Clear(); _battleCourts.Clear(); _battlePlacements.Clear(); _movementPlacements.Clear();
         MeasurePersistentHome();
         foreach (var extra in ExtraBattlefieldIndices()) _reservedExtraLanes.Add(extra);
         _extraLanes = _reservedExtraLanes.ToArray();
@@ -181,14 +184,14 @@ public partial class Main
             // Destroying one never shifts or renumbers its surviving neighbours.
             foreach (var province in player.Provinces.Where(p => !p.Destroyed))
             {
-                var bayWidth = ProvinceContentWidth(province) + 8;
+                var bayWidth = Math.Min(ProvinceContentWidth(province) + 8, _laneWidths[province.Index] - 12);
                 _matTargets.Add(new($"province:{player.Id}:{province.Index}", $"Province {province.Index + 1}",
                     new Rect2(SlotX(player, province.Index + 2) + (CardHeight - bayWidth) / 2,
                         ProvinceRowY(player) - MatHeader, bayWidth, provinceHeight),
-                    ProvinceNumber: province.Index + 1, ConnectionAbove: player.Id == Self.Id,
+                    ProvinceNumber: province.Index + 1, RegionPair: province.Region is not null, ConnectionAbove: player.Id == Self.Id,
                     Connected: BattleActive && player.Id != View.ActivePlayerId &&
                         CourtConnectsToProvince(province.Index) &&
-                        (View.CurrentBattleProvince == province.Index || View.Players.Any(p => CourtUnits(p, province.Index).Any()))));
+                        (View.CurrentBattleProvince == province.Index || View.Players.Any(p => CourtUnits(p, province.Index).Any()) || MovementDestination(player.Id, province.Index))));
             }
         }
         if (BattleActive)
@@ -197,7 +200,7 @@ public partial class Main
             foreach (var index in CourtIndices(defender).Distinct())
             {
                 if (!View.Players.Any(p => CourtUnits(p, index).Any()) && View.CurrentBattleProvince != index &&
-                    !View.UnresolvedBattlefields.Contains(index)) continue;
+                    !MovementDestination(defender.Id, index) && !View.UnresolvedBattlefields.Contains(index)) continue;
                 var widest = View.Players.SelectMany(p => CourtUnits(p, index).Select(c => UnitWidth(c, p))).DefaultIfEmpty(154).Max();
                 var width = Math.Max(IsAdditionalBattlefield(index) ? 300 : 210,
                     ArmyColumns(index) * (widest + CardGap) + MatPadding * 2 + 10) - 16;
@@ -209,7 +212,7 @@ public partial class Main
                 _battleCourts[index] = bounds;
                 var closed = !CourtConnectsToProvince(index);
                 _matTargets.Add(new($"battle:{defender.Id}:{index}", BattlefieldName(index), bounds,
-                    View.CurrentBattleProvince == index, ConnectionAbove: closed || defender.Id != Self.Id, ClosedCourt: closed));
+                    View.CurrentBattleProvince == index || MovementDestination(defender.Id, index), ConnectionAbove: closed || defender.Id != Self.Id, ClosedCourt: closed));
                 // Top army belongs to the top seat, so the defending seat is
                 // always closest to its own province, from either player's view.
                 foreach (var player in new[] { enemy, Self })
@@ -221,7 +224,12 @@ public partial class Main
                     {
                         var rowWidth = row.Sum(c => UnitWidth(c, player)) + (row.Length - 1) * CardGap;
                         var cx = bounds.GetCenter().X - rowWidth / 2;
-                        foreach (var card in row) { _battlePlacements[card.Id] = new Vector2(cx, y); cx += UnitWidth(card, player) + CardGap; }
+                        foreach (var card in row)
+                        {
+                            if (MovementGhost(card, index)) _movementPlacements[card.Id] = new Vector2(cx, y);
+                            else _battlePlacements[card.Id] = new Vector2(cx, y);
+                            cx += UnitWidth(card, player) + CardGap;
+                        }
                         y += row.Max(c => StackHeight(c, player)) + RowGap;
                     }
                 }
@@ -235,7 +243,7 @@ public partial class Main
         // so a newly gained Favor cannot appear behind the sidebar. A manually
         // positioned camera remains under player control.
         var persistentChanged = oldPersistentExtent.DistanceTo(new Vector3(_persistentWidth, _persistentHeights.GetValueOrDefault(0), _persistentHeights.GetValueOrDefault(1))) > 1;
-        if (_tableLayoutSeen && _cameraFitted && !persistentChanged && oldSize.DistanceTo(new Vector2(WorldWidth, _worldHeight)) > 1) _cameraFitted = false;
+        if (_tableLayoutSeen && _cameraFitted && !persistentChanged && Math.Abs(oldRegionExtent - _regionLayoutExtent) < 1 && oldSize.DistanceTo(new Vector2(WorldWidth, _worldHeight)) > 1) _cameraFitted = false;
         _tableLayoutSeen = true;
         _board.Size = new Vector2(WorldWidth, _worldHeight); _world.Size = _board.Size; _pileHud.Size = _board.Size; _battleDecor.Size = _board.Size;
     }

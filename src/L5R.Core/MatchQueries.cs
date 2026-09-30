@@ -73,8 +73,8 @@ public sealed partial class MatchEngine
             BuildBattleStepView(),
             // Deck search (issue #312): the deck viewer is private to the searcher; the shown-cards record is public.
             BuildSearchView(playerId), BuildShownCards(), BuildLookView(playerId), BuildCopyView(playerId), BuildEitherOrView(playerId), BuildOpponentPaymentView(playerId),
-            _state.LastDuel is null ? null : Copy(_state.LastDuel), BuildProvinceSights(playerId), BuildBattlefieldViews(), BuildHandSights(playerId)) // issue #503: hand sights
-        { PendingProvinceOrder = BuildProvinceOrderView(playerId), ActionPhaseTurnPlayerId = _state.WinnerId is null ? R1.Aside?.TurnPlayerId : null }; // Public context only; the paused effect stays engine-private.
+            _state.LastDuel is null ? null : Copy(_state.LastDuel), BuildPendingAttackCue(), BuildProvinceSights(playerId), BuildBattlefieldViews(), BuildHandSights(playerId)) // issue #503: hand sights
+        { PendingProvinceOrder = BuildProvinceOrderView(playerId), ActionPhaseTurnPlayerId = _state.WinnerId is null ? R1.Aside?.TurnPlayerId : null }; // Plains of Otosan Uchi (issue #554); public context only, the paused effect stays engine-private.
     }
 
     // The reveal-order decision (PR #544's own contract): PUBLIC identity/prompt, options PRIVATE to the deciding
@@ -215,7 +215,21 @@ public sealed partial class MatchEngine
             return result.ToArray();
         }
         var player = Player(playerId);
-        if (_state.PendingChoice is { Type: "proclaim" or "entryReaction" } pending)
+        if (_state.PendingChoice is { Type: "harshChoices" } harsh)
+        {
+            Add("harshChoices", "Keep province", Command("harshChoices") with { Choice = "decline" }, cardId: harsh.CardId);
+            var last = player.Provinces.Count(p => !p.Destroyed) == 1;
+            Add("harshChoices", last ? "Destroy last province · Defeat" : "Destroy province · Draw 3",
+                Command("harshChoices") with { Choice = "destroy" }, cardId: harsh.CardId,
+                provinces: harsh.CardId is not null && _state.Cards.TryGetValue(harsh.CardId, out var eventSource) && eventSource.ProvinceIndex is int province ? [province] : []);
+        }
+        else if (_state.PendingChoice is { Type: "overconfidentDraw" or "brashDraw" } draw)
+        {
+            Add(draw.Type, "Draw 1 card", Command(draw.Type) with { Choice = "draw" });
+            Add(draw.Type, "Decline draw", Command(draw.Type) with { Choice = "decline" });
+        }
+        // "bowReaction" is handled further below (issue #216/#417's candidate-specific version), not here.
+        else if (_state.PendingChoice is { Type: "proclaim" or "entryReaction" } pending)
         {
             if (pending.PlayerId == playerId)
             {

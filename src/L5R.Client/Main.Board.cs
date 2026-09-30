@@ -101,7 +101,8 @@ public partial class Main
     private int ArmyColumns(int province) => Math.Clamp((int)Math.Ceiling(Math.Sqrt(View.Players.Max(p => CourtUnits(p, province).Count()))), 1, 4);
     private static float CardFootprint(CardView card, float height)
     {
-        var rail = CardTokenRail.HasRail(card) ? CardTokenRail.Width * height / CardHeight : 0;
+        var rail = (CardTokenRail.HasRail(card) ? CardTokenRail.Width * height / CardHeight : 0)
+            + (CreatedCopyStatus.VisibleOn(card) ? height * .32f : 0);
         if (card.Bowed) return height + rail;
         var art = card.Definition is { ScenarioOnly: false } definition ? CardTile.Artwork(definition) : null;
         var ratio = art is null ? .7142857f : art.GetWidth() / (float)art.GetHeight();
@@ -192,6 +193,7 @@ public partial class Main
                 Card = personality,
                 Companions = detail ? [] : stack.GetChildren().OfType<CardTile>().Where(t => t != front).ToArray(),
                 Projection = detail ? null : _tableSurface.ProjectCanvas,
+                Unprojection = detail ? null : _tableSurface.ScreenToCanvas,
                 Inline = detail,
                 Explanation = UnitStandard.ExplainUnit(personality),
                 Allowed = () => detail || (_expandedUnits.Count == 0 && _tableSurface.GetGlobalRect().HasPoint(ScreenCenter(front)))
@@ -232,6 +234,7 @@ public partial class Main
             var width = ProvinceContentWidth(province);
             var area = Place(_board, new Control { MouseFilter = Control.MouseFilterEnum.Ignore },
                 SlotX(owner, 2 + province.Index) + (CardHeight - width) / 2, ProvinceRowY(owner), width, PlaneHeight(CardHeight));
+            area.SetMeta("province_pair", $"{owner.Id}:{province.Index}");
             var button = new Button { Text = "", Flat = true };
             CompactButton(button);
             button.Pressed += () => SelectProvince(owner.Id, province.Index);
@@ -296,6 +299,8 @@ public partial class Main
     private void SelectProvince(int owner, int province)
     {
         if (PresentationBusy) return;
+        if (AttackTargetActive) { if (AttackProvinceTarget(owner, province)) ChooseAttackTarget(AttackChoice.Province, province: province); return; }
+        if (MovementActive) { ChooseMovementProvince(owner, province); return; }
         if (_chosen is { Type: "attack" or "assignDefense" } action)
         {
             if (owner != 1 - View.ActivePlayerId || action.Provinces?.Contains(province) != true || _assignmentUnit is null) return;
@@ -336,12 +341,26 @@ public partial class Main
                     yield return new(ScreenCenter(tile), ScreenCenter(target), Palette.Crane, true, clip);
             }
         }
-        if (_chosen is { Type: "equip" or "useAbility" or "playStrategy", Command: { TargetId: string targetId } command })
+        foreach (var (id, origin) in MovementActive ? _movementPlacements : [])
+            if (_tiles.FirstOrDefault(t => t.Card.Id == id) is { } mover && TileVisible(mover))
+                yield return new(ScreenCenter(mover), WorldToScreen(origin + new Vector2(70, 100)), Palette.Gold, true, clip);
+        if (AttackTargetActive && _attackChoice == AttackChoice.Province && _chosen!.Command!.Province is { } attackProvince
+            && _provinceButtons.TryGetValue((1 - View.ActivePlayerId, attackProvince), out var provinceTarget)
+            && _tiles.FirstOrDefault(t => t.Card.Id == (_chosen.Command.PerformerId ?? _chosen.CardId)) is { } attackSource && TileVisible(attackSource))
+            yield return new(ScreenCenter(attackSource), ScreenCenter(provinceTarget), Palette.Gold, false, clip, Attack: true);
+        if (MultiTargetActive && _tiles.FirstOrDefault(t => t.Card.Id == (_chosen!.Command!.PerformerId ?? _chosen.CardId)) is { } multiSource && TileVisible(multiSource))
+        {
+            foreach (var group in MultiSelectedIds.Select((id, index) => (Id: id, Index: index + 1)).GroupBy(x => x.Id))
+                if (_tiles.FirstOrDefault(t => t.Card.Id == group.Key) is { } target && TileVisible(target) && target != multiSource)
+                    yield return new(ScreenCenter(multiSource), MultiTargetPoint(target), Palette.Gold, false,
+                        multiSource.Card.Zone == Zone.Hand ? clip.Merge(_hand.GetGlobalRect()) : clip, Label: string.Join(",", group.Select(x => x.Index)));
+        }
+        if (!MultiTargetActive && !MovementActive && _chosen is { Type: "equip" or "useAbility" or "playStrategy", Command: { TargetId: string targetId } command })
         {
             var from = _tiles.FirstOrDefault(t => t.Card.Id == (command.PerformerId ?? command.CardId));
             var to = _tiles.FirstOrDefault(t => t.Card.Id == targetId);
             if (from is not null && to is not null && from != to && TileVisible(from) && TileVisible(to))
-                yield return new(ScreenCenter(from), ScreenCenter(to), Palette.Gold, false, from.Card.Zone == Zone.Hand ? clip.Merge(_hand.GetGlobalRect()) : clip);
+                yield return new(ScreenCenter(from), ScreenCenter(to), Palette.Gold, false, from.Card.Zone == Zone.Hand ? clip.Merge(_hand.GetGlobalRect()) : clip, Attack: AttackTargetActive);
         }
     }
 

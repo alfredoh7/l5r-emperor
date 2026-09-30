@@ -1,0 +1,19 @@
+{
+  "date": "2026-09-22",
+  "status": "Concepts only; awaiting Alfredo's selection",
+  "tool": "built-in image_gen",
+  "variants": [
+    {
+      "id": "A",
+      "prompt": "Create concept A, 'Spirit seal', for the Legend of the Five Rings digital card game. Use the supplied screenshot as the exact aesthetic and placement reference, and the supplied twin-card medallion as the shape reference. Create a polished widescreen UI design study with a large close-up of the lower-left corner of a full card and a smaller real-size example on the dark blue table mat. Preserve all card artwork and the full rectangular card border; change ONLY the copy marker outside its lower-left corner. Keep the clear two-overlapping-card glyph and a thin aged brass ring, but replace the solid ivory disk with translucent pearl mist. Two or three fine pale ivory/blue-white wisps gently drift outward from the ring, a restrained ethereal aura that says this is a temporary copy. The glyph remains sharp and readable at 24px; aura stays within about 1.4 icon diameters and never blankets card text. No new plaque, no huge glow, no particles over card art, no red, no cartoon icon, no extra game rules. Elegant quiet Japanese fantasy lacquer-and-brass aesthetic. Include title 'A · Spirit seal' and small caption 'A clear copy symbol, softened by a quiet wisp.'"
+    },
+    {
+      "id": "B",
+      "prompt": "Create concept B, 'Ghost impression', for the Legend of the Five Rings digital card game. The supplied native screenshot is the established full-card, dark lacquer, aged gold and blue mat UI. The supplied circular twin-card badge is the semantic reference. Make a polished widescreen concept study with a magnified detail and a separate full-card context example, both showing ONLY a changed copy icon outside the card's lower-left corner. Remove the heavy circular coin casing: two thin ivory-gold overlapping upright card silhouettes hover in place, the front silhouette sharply defined, the rear silhouette ghostly and translucent with its lower-left edge dissolving into two short, fine smoke threads. A faint warm pearl halo, quiet and ethereal. This must instantly mean duplicate/copy at 24–32px and never resemble a third playable card. Keep entire actual card scan crisp, opaque, unaltered, unobscured. Icon and wisps occupy no more than 1.4 badge diameters outside lower-left; no full-card haze, no large particles, no swords, no new plaque. Avoid sci-fi cyan or neon. More airy and elegant than a solid coin but retain the recognizable overlapping-card metaphor. Title 'B · Ghost impression'; caption 'Two card outlines, one fading into mist.'"
+    },
+    {
+      "id": "C",
+      "prompt": "Create concept C, 'Dissolving seal', for the Legend of the Five Rings digital card game. Use reference screenshot for full-card UI context and reference twin-card round seal for shape. Elegant widescreen presentation with large lower-left card corner detail and separate full-card example. Retain the existing small ivory/brass coin outline and unmistakable two overlapping cards glyph at lower-left OUTSIDE the card. The upper-right 2/3 of the seal remains sharply tangible; its lower-left third gradually becomes translucent and softly dissolves into short silvery-ivory ink-smoke threads, like a temporary spiritual impression. The front card symbol must remain crisp and readable. Minimal warm pearl light from within, no big lens flare or neon. Distinct from just putting smoke around a coin: the rim and backing themselves gently fade into wisps at one edge. Preserve the entire card scan and border, opaque and unobscured; don't alter printed stats/rules or add any other copy marks. Restrained, beautiful, built into the existing lacquer and old gold aesthetic. Mist stays very close to the marker, no full-card haze, no extra plaques or interface controls. Title 'C · Dissolving seal'; caption 'A solid symbol with an impermanent edge.'"
+    }
+  ]
+}

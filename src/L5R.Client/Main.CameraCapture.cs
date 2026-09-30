@@ -18,17 +18,48 @@ public partial class Main
 
     private const string CaptureMouseTag = "native_acceptance_mouse";
     private bool IsMouseInputCapture => _capturePath is not null &&
-        _captureMode.StartsWith("published-board", StringComparison.Ordinal) &&
-        (_captureMode.Contains("camera", StringComparison.Ordinal) || _captureMode.Contains("deselect", StringComparison.Ordinal));
-    private void PushCaptureMouse(InputEventMouse mouse)
+        (_captureMode.StartsWith("published-stabilization", StringComparison.Ordinal) ||
+         _captureMode.StartsWith("published-top-cards", StringComparison.Ordinal) && !_captureMode.EndsWith("-review", StringComparison.Ordinal) ||
+         _captureMode.StartsWith("published-created-copy", StringComparison.Ordinal) && !_captureMode.EndsWith("-review", StringComparison.Ordinal) ||
+         _captureMode.StartsWith("published-shown", StringComparison.Ordinal) && !_captureMode.Contains("review", StringComparison.Ordinal) ||
+         _captureMode.StartsWith("published-action-lock", StringComparison.Ordinal) && !_captureMode.Contains("review", StringComparison.Ordinal) ||
+         _captureMode.StartsWith("published-search", StringComparison.Ordinal) && !_captureMode.Contains("review", StringComparison.Ordinal) ||
+         _captureMode.StartsWith("published-supports", StringComparison.Ordinal) && !_captureMode.Contains("review", StringComparison.Ordinal) ||
+         _captureMode.StartsWith("published-board", StringComparison.Ordinal) &&
+         (_captureMode.Contains("camera", StringComparison.Ordinal) || _captureMode.Contains("deselect", StringComparison.Ordinal)));
+    private void PushCaptureMouse(InputEventMouse mouse, bool buffered = false)
     {
         mouse.SetMeta(CaptureMouseTag, true);
-        GetViewport().PushInput(mouse, true);
+        if (buffered) Input.ParseInputEvent(mouse);
+        else GetViewport().PushInput(mouse, true);
     }
     private void MoveProbeMouse(Vector2 point, Vector2 relative = default)
     {
         GetViewport().WarpMouse(point);
         PushCaptureMouse(new InputEventMouseMotion { Position = point, GlobalPosition = point, Relative = relative });
+    }
+    private Vector2 FindProbeCloth()
+    {
+        var rect = _tableViewport.GetGlobalRect().Grow(-16);
+        var fabric = TableArtStage.FabricBounds(new Vector2(WorldWidth, _worldHeight)).Grow(-16);
+        // HUD overlays now cover the old viewport-origin target. Find a clear
+        // gesture path using current routing and real projected GUI hit tests.
+        for (var y = rect.Position.Y; y < rect.End.Y; y += 24)
+            for (var x = rect.Position.X; x < rect.End.X - 60; x += 24)
+            {
+                var point = new Vector2(x, y);
+                if (Enumerable.Range(0, 4).Any(i => !PointerOnTable(point + new Vector2(i * 20, 0))
+                    || OverStatToken(point + new Vector2(i * 20, 0))
+                    || !fabric.HasPoint(ScreenToWorld(point + new Vector2(i * 20, 0))))) continue;
+                MoveProbeMouse(point);
+                var hit = TableHovered;
+                if (hit is null || hit == _world || hit == _board || hit == _pileHud)
+                {
+                    GD.Print($"CAMERA_CLOTH_TARGET: {point}; focus={GetWindow().HasFocus()}; hit={hit?.Name}");
+                    return point;
+                }
+            }
+        throw new InvalidOperationException("Camera probe could not find uncovered empty cloth.");
     }
     private void CameraMouse(MouseButton button, bool pressed, Vector2 point) => PushCaptureMouse(
         new InputEventMouseButton { ButtonIndex = button, Pressed = pressed, Position = point, GlobalPosition = point, Factor = 1 });
@@ -68,7 +99,7 @@ public partial class Main
                     CameraMouse(MouseButton.WheelUp, true, _probePoint); CameraMouse(MouseButton.WheelUp, false, _probePoint);
                     break;
                 case 2:
-                    RequireCamera(_cameraZoom > _probeZoom,  $"wheel over a card did not zoom (focus={GetWindow().HasFocus()}, blocked={CameraBlocked}, pointer={_probePoint}, viewport={_tableViewport.GetGlobalRect()}, hovered={GetViewport().GuiGetHoveredControl()?.Name})");
+                    RequireCamera(_cameraZoom > _probeZoom, $"wheel over a card did not zoom (focus={GetWindow().HasFocus()}, blocked={CameraBlocked}, pointer={_probePoint}, viewport={_tableViewport.GetGlobalRect()}, hovered={GetViewport().GuiGetHoveredControl()?.Name})");
                     RequireCamera((ScreenToWorld(_probePoint)).DistanceTo(_probeAnchor) < .1f, "cursor-anchored zoom drifted");
                     RequireCamera(_selected?.Id == _probeSelection && View.Version == _probeVersion, "wheel selected or played a card");
                     _probeCenter = _cameraCenter;
@@ -82,12 +113,10 @@ public partial class Main
                     RequireCamera(_selected?.Id == _probeSelection && View.Version == _probeVersion, "drag activated a card");
                     RequireCamera(_inspectorPanel.GetGlobalRect().Position == _probeHud, "HUD moved with the table");
                     ResetTableCamera();
-                    // The approved Fallen placard covers the old top-left probe position.
-                    // Exercise empty cloth while respecting the HUD's intentional input exclusion.
-                    var tableRect = _tableViewport.GetGlobalRect();
-                    _probePoint = tableRect.Position + new Vector2(tableRect.Size.X / 2, 5);
+                    _probePoint = FindProbeCloth();
                     MoveProbeMouse(_probePoint); break;
                 case 5:
+                    RequireCamera(GetWindow().HasFocus() && PointerOnTable(_probePoint), "cloth target lost focus or became covered before the drag");
                     _probeCenter = _cameraCenter;
                     CameraMouse(MouseButton.Left, true, _probePoint); break;
                 case 6:
@@ -102,7 +131,7 @@ public partial class Main
                     RequireCamera(_cameraCenter.X > _probeCenter.X, "arrow-key pan failed");
                     CameraKey(Key.Home, true); CameraKey(Key.Home, false); break;
                 case 9:
-                    RequireCamera(_cameraFitted && Mathf.IsEqualApprox(_cameraZoom, FitZoom), $"Home did not restore overview (fitted={_cameraFitted}, zoom={_cameraZoom}, fit={FitZoom}, focus={GetWindow().HasFocus()}, blocked={CameraBlocked}, right={Input.IsPhysicalKeyPressed(Key.Right)}, gui={GetViewport().GuiGetFocusOwner()?.Name}, table={TableFocus?.Name})");
+                    RequireCamera(_cameraFitted && Mathf.IsEqualApprox(_cameraZoom, FitZoom), $"Home did not restore overview (fitted={_cameraFitted}, zoom={_cameraZoom}, fit={FitZoom}, focus={GetWindow().HasFocus()}, blocked={CameraBlocked}, right={Input.IsPhysicalKeyPressed(Key.Right)})");
                     _probeZoom = _cameraZoom;
                     _probePoint = _inspectorPanel.GetGlobalRect().GetCenter(); MoveProbeMouse(_probePoint); break;
                 case 10:

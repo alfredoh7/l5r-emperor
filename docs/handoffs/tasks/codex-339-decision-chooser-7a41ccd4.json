@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Complete #339 individual review candidate with prepared Mac launcher. Integrate current main 0d694f02 into isolated preview base 1ab2d75a, retaining latest proxy-card and player-target fixes. No merge into main.",
+  "validation": "Final full deterministic suite passes on refreshed main, including showcase 3/3, created-card/player-target suites, AI 34/34, server 8/8 and transport 8/8. Client compiles with zero warnings/errors; Godot import passes. Native Mac Yumaru, both Fukui costs and compact review navigation rerun pass after main refresh. Earlier all-three-choice, generic-five-type, waiting and reduced-motion checks pass. Actual Mac app opens prepared demo. Refreshed 2897-scan pack installs and verifies offline.",
+  "remaining": "Alfredo UI acceptance and Mendon shared-contract review pending. GitHub Mac/Windows CI is running; routing check skipped. Multiplayer reconnect and native Windows graphical checks not performed. Seven other approved UI tasks remain pending. No main merge authorized.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/339",
+  "branch": "codex/339-decision-chooser",
+  "updated": "2026-09-20T22:38:47.097715+00:00"
+}

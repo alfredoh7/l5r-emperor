@@ -13,6 +13,7 @@ public partial class Main
             var production = player.Home.Concat(player.Army).Append(player.Stronghold).Where(c => !c.Bowed).Sum(c => Production(c, player));
             var own = player.Id == View.ViewerId;
             var turn = View.WinnerId is int winner ? (winner == player.Id ? "VICTORY" : "MATCH ENDED") :
+                EventDecisionActive && View.PendingChoice!.PlayerId == player.Id ? (own ? "YOUR DECISION" : "OPPONENT DECIDING") :
                 (View.ActionPhaseTurnPlayerId ?? View.ActivePlayerId) == player.Id ? (own ? "YOUR TURN" : "OPPONENT'S TURN") : "";
             var action = own ? player.Name : player.Name == player.Clan ? "Opponent" : player.Name;
             var plaqueY = own ? 950 - FallenCounter.DesignHeight - 4 : 14;

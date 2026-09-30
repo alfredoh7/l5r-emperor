@@ -6,6 +6,11 @@ namespace L5R.Core;
 public sealed partial class MatchEngine
 {
     public const string ContentVersion = "emperor-lion-crane-0.2.0";
+    /// <summary>The wire protocol both the server and the client advertise in the handshake. One constant, so a client
+    /// can never claim a protocol whose command/state members the peer would reject (UnmappedMemberHandling.Disallow).
+    /// 2: commands carry createdCard, and the state message carries the attack cue and per-action attack/movement/
+    /// alternative-cost metadata.</summary>
+    public const int ProtocolVersion = 2;
     private MatchState _state;
     private readonly ulong _seed;
     private readonly string _scenario;
@@ -2989,6 +2994,8 @@ public sealed partial class MatchEngine
         {
             Emit("eventResolved", $"{Definition(card).Name}: {player.Name} destroys the province to draw 3 cards.", player.Id, card.Id);
             DestroyProvince(player.Id, province);
+            // Military defeat is immediate. Do not draw or reveal later Events after victory.
+            if (_state.WinnerId is not null) return;
             Draw(player); Draw(player); Draw(player);
         }
         else
@@ -2997,7 +3004,7 @@ public sealed partial class MatchEngine
             Emit("eventResolved", $"{Definition(card).Name} resolved and was discarded.", player.Id, card.Id);
             Refill(player, province);
         }
-        ContinueEventsReveal(player);
+        if (_state.WinnerId is null) ContinueEventsReveal(player);
     }
     // A Region (core rules Glossary): attaches to the province it was revealed in -- unless that
     // province already has a Region attached, in which case (like any Region that fails to attach for
