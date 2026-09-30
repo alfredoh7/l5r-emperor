@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Fix #546: cache MatchEngine.GetView's per-player event projection (was re-walking and re-masking the full match history every call) and cap CardTile.PublishedArt's card-art texture cache with the same LRU CatalogueScans already uses. Also fixed RoomManager.CreateState/SubmitAsync calling GetView redundantly (2x per call, and once just to read .Version).",
+  "validation": "bash tools/check.sh --skip-client passed in full (all L5R.Core.Tests, L5R.AI.Tests, L5R.Server.Tests, L5R.Client.Transport.Tests suites, plus Python collab/content/hooks/quality tests). Added tests/L5R.Core.Tests/ViewEventCacheTests.cs: proves the cache-hit path returns the identical array reference on a no-op call, proves growth extends correctly without altering prior entries, and proves duelFocused CardId masking is unaffected by the cache for either viewer.",
+  "remaining": "Filed issue #550: RoomManager.SubmitAsync replays the ENTIRE command history via MatchEngine.Replay(ExportReplay()) on every submitted command, which is a bigger O(n^2)-over-a-match CPU cost than what this issue fixed -- out of scope here, needs a dedicated engine-design pass. Deck builder (DeckSurface.Relayout rebuild-per-edit churn, BuildDeckList O(N x catalogue) per visit, DeckSkin re-rasterization per call) also flagged in the original architectural review and not yet started.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/546",
+  "branch": "claude/546-session-resource-growth",
+  "updated": "2026-09-30T08:30:56.797493+00:00"
+}

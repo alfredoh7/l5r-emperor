@@ -34,12 +34,21 @@ public partial class CardTile : Button
     public bool IsSelected => Highlighted || SelectedSource || ChosenTarget;
     public static readonly Color HoverColor = new("ffda89");
     public static readonly Color SelectionColor = new("9ceafa");
+    // Capped LRU (issue #546): unbounded before this, PublishedArt held every distinct card texture drawn on the
+    // board/hand for the process lifetime. Mirrors CatalogueScans' cache so a long session with many decks/games
+    // doesn't grow this without bound.
+    private const int PublishedArtCap = 200;
     private static readonly Dictionary<string, Texture2D> PublishedArt = [];
+    private static readonly LinkedList<string> PublishedArtOrder = [];
     public static Texture2D? Artwork(CardDefinition definition)
     {
         if (definition.ScenarioOnly) return Atlas;
         if (definition.ArtworkKey is not string path) return null;
-        if (!PublishedArt.TryGetValue(path, out var texture) && ResourceLoader.Exists(path)) PublishedArt[path] = texture = GD.Load<Texture2D>(path);
+        if (PublishedArt.TryGetValue(path, out var texture)) { PublishedArtOrder.Remove(path); PublishedArtOrder.AddLast(path); return texture; }
+        if (!ResourceLoader.Exists(path)) return null;
+        PublishedArt[path] = texture = GD.Load<Texture2D>(path);
+        PublishedArtOrder.AddLast(path);
+        while (PublishedArt.Count > PublishedArtCap && PublishedArtOrder.First is { } oldest) { PublishedArt.Remove(oldest.Value); PublishedArtOrder.RemoveFirst(); }
         return texture;
     }
 

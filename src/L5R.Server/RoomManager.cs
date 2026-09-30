@@ -116,7 +116,7 @@ public sealed class RoomManager(RoomStore store, ILogger<RoomManager> logger)
         await room.Gate.WaitAsync(cancellationToken);
         try
         {
-            var version = room.Engine.GetView(seat.PlayerId).Version;
+            var version = room.Engine.Version;
             if (room.Connections.GetValueOrDefault(seat.PlayerId) != connection)
                 throw new RoomException("session_replaced", "This seat has reconnected in another session.", 409);
             if (envelope.Type != "command" || !Guid.TryParseExact(envelope.CommandId, "D", out _)
@@ -193,9 +193,12 @@ public sealed class RoomManager(RoomStore store, ILogger<RoomManager> logger)
         => connection.SendAsync(new CommandReply("commandResult", commandId, false, false, version, new ServerError(code, message)));
 
     private static StateMessage CreateState(Room room, int playerId)
-        => new("state", room.Record.RoomCode, playerId, room.Engine.GetView(playerId).Version,
-            room.Engine.GetView(playerId), room.Engine.QueryActions(playerId).Select(AvailableAction.FromCore).ToArray(),
+    {
+        var view = room.Engine.GetView(playerId);
+        return new("state", room.Record.RoomCode, playerId, view.Version, view,
+            room.Engine.QueryActions(playerId).Select(AvailableAction.FromCore).ToArray(),
             [room.Connections.ContainsKey(0), room.Connections.ContainsKey(1)]);
+    }
 
     private static Task BroadcastLockedAsync(Room room) => Task.WhenAll(room.Connections.Select(pair => pair.Value.SendAsync(CreateState(room, pair.Key))));
 
