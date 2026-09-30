@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Implement standalone open battlefields, quiet help, camera-only navigation and stable orphan courts. Add public Action Phase turn context and retain occupied resolved battlefield associations; no legality, commands or resolution changes. Four-role review and fixes recorded in docs/handoffs/2026-09-30-open-battlefield-review.md.",
-  "validation": "Client build 0 warnings/errors; final native check8 passed; R1 17/17 after review fixes. Full Core/AI/server/transport/tooling checks passed before the final projection fixes; final broad rerun and Windows export/CI are next.",
-  "remaining": "Publish final Windows preview and targeted Mendon notification after CI. Human mechanics/Windows playability and PR #564 integration remain pending. No merge.",
+  "summary": "Approved standalone open courts, quiet help, camera-only navigation and stable orphan locations. Public Action Phase turn context and occupied resolved associations; authoritative actions unchanged. Four-role review fixes and native/source evidence retained. Versioned Windows preview d99482ac16-r2 staged and hash-verified; local review app opens directly.",
+  "validation": "Final bash tools/check.sh --skip-client passed Core/AI/server/transport/tooling; R1 17/17. Client build 0 warnings/errors; final native check8 and interactive launcher passed. Strict Windows export/package passed; hosted Windows launch validation pending.",
+  "remaining": "Hosted Windows package and relevant CI, then targeted Mendon delivery. Human Windows/mechanics acceptance pending; coordinate overlap with open PR #564 before integration. No merge.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/499",
   "branch": "codex/499-open-battlefield",
-  "updated": "2026-09-30T14:30:49.181829+00:00"
+  "updated": "2026-09-30T14:39:00.634976+00:00"
 }
