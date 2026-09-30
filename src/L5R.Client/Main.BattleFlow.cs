@@ -23,13 +23,15 @@ public partial class Main
             ResolutionMessage = PresentationBusy ? _actionOutcome ? null : _battleOutcomeText : _resolutionMessage
         });
         RenderBattlefieldNavigation();
+        RenderBattleFacts();
         if (View.ActionPhaseTurnPlayerId is not null)
             FlowText("Battle during the Action Phase", 17, Palette.Gold);
         if (!PresentationBusy && View.PendingChoice is { } pending)
         {
             FlowText(pending.Prompt, 22, Palette.Paper);
+            RenderReactionTarget();
             if (View.PriorityPlayerId == View.ViewerId)
-                foreach (var option in Actions.Where(a => a.Enabled && a.Command is not null && a.Type is not ("pass" or "declineReaction" or "proclaim" or "chooseShinden"))) AddAction(_inspector, option);
+                foreach (var option in Actions.Where(a => a.Enabled && a.Command is not null && a.Type is not ("pass" or "declineReaction" or "proclaim" or "chooseShinden" or "concede"))) AddAction(_inspector, BattleWindowOption(option));
             return true;
         }
         if (PresentationBusy || _resolutionMessage is not null)
@@ -50,7 +52,7 @@ public partial class Main
         if (View.PriorityPlayerId != View.ViewerId)
         {
             var clan = View.Players.Single(p => p.Id == View.PriorityPlayerId).Clan;
-            FlowText(clan + (View.Phase == Phase.Battle ? " is choosing a Battle action." : View.Phase == Phase.BattleSelection ? " is choosing the next battle." : " is making assignments."), 20, Palette.Paper);
+            FlowText(clan + (View.Phase == Phase.Battle ? " is choosing a Battle action." : View.Phase == Phase.BattleSelection ? " is choosing the next battle." : View.Phase == Phase.AttackDeclaration ? " is deciding whether to attack." : " is making assignments."), 20, Palette.Paper);
             RenderBattleExchanges(); return true;
         }
         if (View.Phase == Phase.BattleSelection)
@@ -60,10 +62,14 @@ public partial class Main
                 AddAction(_inspector, option with { Label = $"{BattlefieldName(option.Command!.Province!.Value)}  ›" });
             FlowText("Selecting a battlefield begins that battle.", 15, Palette.PaperDim);
         }
-        else if (View.Phase is Phase.AttackDeclaration or Phase.DefenseAssignment or Phase.CavalryDeclaration or Phase.CavalryDefense)
+        else if (View.Phase == Phase.AttackDeclaration)
+        {
+            FlowText("Declare an attack, or pass to your Dynasty Phase.", 22, Palette.Paper);
+        }
+        else if (View.Phase is Phase.InfantryDeclaration or Phase.DefenseAssignment or Phase.CavalryDeclaration or Phase.CavalryDefense)
         {
             var cavalry = View.Phase is Phase.CavalryDeclaration or Phase.CavalryDefense;
-            var attack = View.Phase is Phase.AttackDeclaration or Phase.CavalryDeclaration;
+            var attack = View.Phase is Phase.InfantryDeclaration or Phase.CavalryDeclaration;
             FlowText(attack ? "You are attacking." : "You are defending.", 20, Palette.Paper);
             var option = Actions.FirstOrDefault(a => a.Type is "attack" or "assignDefense" && a.Enabled);
             if (option is not null)
@@ -92,20 +98,28 @@ public partial class Main
         return true;
     }
 
+    private ActionOption BattleWindowOption(ActionOption option)
+    {
+        // Preserve the complete engine command; hide a debug identifier in its displayed performer suffix.
+        if (option.Command?.PerformerId is not { } id || FindCard(id)?.Definition is null) return option;
+        return option with { Label = option.Label.Replace(" (" + id + ")", "", StringComparison.Ordinal) };
+    }
+
     private void AddBattleAction(ActionOption option)
     {
-        AddAction(_inspector, option);
+        var count = _inspector.GetChildCount(); AddAction(_inspector, option);
+        if (_inspector.GetChildCount() == count) return;
         var button = _inspector.GetChildren().OfType<Button>().Last();
         var source = option.CardId is { } id ? FindCard(id)?.Definition?.Name : null;
         if (source is null) return;
-        button.Text = source + "\n" + option.Label;
+        button.Text = source + "\n" + (option.AlternativeCost?.ActionLabel ?? option.Label);
         foreach (var state in new[] { "font_color", "font_hover_color", "font_pressed_color", "font_focus_color", "font_disabled_color" }) button.AddThemeColorOverride(state, Colors.Transparent);
         var margin = new MarginContainer { MouseFilter = Control.MouseFilterEnum.Ignore }; button.AddChild(margin);
         margin.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.FullRect);
         margin.OffsetLeft = 20; margin.OffsetRight = -20; margin.OffsetTop = 12; margin.OffsetBottom = -12;
         var column = new VBoxContainer { MouseFilter = Control.MouseFilterEnum.Ignore }; margin.AddChild(column);
         var title = Palette.Wrapped(source, 19); title.AddThemeFontOverride("font", SidebarSkin.Bold); title.MouseFilter = Control.MouseFilterEnum.Ignore; column.AddChild(title);
-        var text = Palette.Wrapped(option.Label, 16, Palette.PaperDim); text.MouseFilter = Control.MouseFilterEnum.Ignore; column.AddChild(text);
+        var text = Palette.Wrapped(option.AlternativeCost?.ActionLabel ?? option.Label, 16, Palette.PaperDim); text.MouseFilter = Control.MouseFilterEnum.Ignore; column.AddChild(text);
         button.CustomMinimumSize = new Vector2(0, 110);
         column.MinimumSizeChanged += () => { if (IsInstanceValid(button)) button.CustomMinimumSize = new Vector2(0, Math.Max(90, column.GetCombinedMinimumSize().Y + 24)); };
     }
@@ -127,8 +141,9 @@ public partial class Main
     }
     private void RenderBattleExchanges(int count = 3)
     {
-        var start = _journal.Exchanges.FindLastIndex(e => e.Events.Any(x => x.Type == "battleStarted"));
-        var recent = _journal.Exchanges.Skip(Math.Max(0, start)).TakeLast(count).ToArray();
+        var start = _journal.Exchanges.FindLastIndex(e => e.Events.Any(x => x.Type is "battleStarted" or "attackDeclared"));
+        if (start < 0) return;
+        var recent = _journal.Exchanges.Skip(start).TakeLast(count).ToArray();
         if (recent.Length == 0) return;
         _inspector.AddChild(new HSeparator()); FlowText("Recent exchanges", 17, Palette.PaperDim);
         foreach (var exchange in recent)

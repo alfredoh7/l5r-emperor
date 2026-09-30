@@ -1,0 +1,20 @@
+[
+  {
+    "variant": "A",
+    "source": "/Users/alfredo/.codex/generated_images/01a0b019-027d-7ee0-84a4-44aac565a142/exec-b1d2898d-bf7d-4a85-b946-2aa16aa5514f.png",
+    "file": "a.png",
+    "sha256": "4ca78697efe52c615baaf136f8e1b39860e835baf6288caf3e7f674cf9322daa"
+  },
+  {
+    "variant": "B",
+    "source": "/Users/alfredo/.codex/generated_images/01a0b019-027d-7ee0-84a4-44aac565a142/exec-89ea7d58-726e-49d9-bf4b-58bb0ce59a6f.png",
+    "file": "b.png",
+    "sha256": "d51daf14636f66d3025c93c74757c615c6dd986b3b468f35a4ebd3f243fd62df"
+  },
+  {
+    "variant": "C",
+    "source": "/Users/alfredo/.codex/generated_images/01a0b019-027d-7ee0-84a4-44aac565a142/exec-bd65eed0-04be-4835-a61e-c2166056f082.png",
+    "file": "c.png",
+    "sha256": "071c42a616ae537a1694c215fdfd52e7f647176d132b45490d2554627866632b"
+  }
+]

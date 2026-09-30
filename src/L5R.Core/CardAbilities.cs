@@ -5631,6 +5631,8 @@ public sealed partial class MatchEngine
         if (IsFavorDiscardAbility(id)) RequireFavorDiscard(command, player);
         // Bonds of Coin (issue #336): "Bow your Stronghold" is a cost of the action, so a bowed Stronghold cannot pay it.
         if (id == "bonds-of-coin-draw") Require(!Card(player.StrongholdId).Bowed, "Your Stronghold is already bowed.");
+        if (id == "overgrown-grove-move") Require(player.FateDeck.Count >= 3, "Discarding three Fate cards is a required cost.");
+        if (id == "improved-defenses-strength") Require(player.FateDeck.Count >= 1, "Discarding a Fate card is a required cost.");
         // Midday Shadow Court (Stronghold pass, issue #486 batch 1): "When a Lobby action checks Family Honor, your Honor is treated as 20 points higher."
         if (id is "lobby" or "dainagon-lobby") Require(player.Honor + LobbyHonorBonus(player) > Player(1 - player.Id).Honor, "Lobby requires strictly higher Family Honor than your opponent.");
         // Saibankan's Justice: "Other players may not lobby."
@@ -6815,7 +6817,9 @@ public sealed partial class MatchEngine
                         // its own printed Force (Definition(...).Force), not CardForce's live value, so
                         // a Force-modifying effect on the performer never changes who is a legal target
                         // mid-battle. The target's own side is its live Force, same as every other
-                        // Force-comparison Target category here.
+                        // Force-comparison Target category here. (personality-force-neq-own-base, the
+                        // target-vs-its-own-base comparison Asako Yorisada and The Weakness of Man's own
+                        // wiring actually use, is already registered below.)
                         "personality-force-neq-performer-base" => personality && CardForce(target) != Definition(Card(command.PerformerId!)).Force,
                         // Mirumoto Hatsuto: an enemy Personality or Follower without the Cavalry
                         // keyword -- "Infantry" (core rules Glossary) has no printed keyword of its
@@ -7503,7 +7507,7 @@ public sealed partial class MatchEngine
                 if (!StalwartNegatesBow(target!, player.Id))
                 {
                     target!.Bowed = true;
-                    if (HasClanAffiliation(Card(command.PerformerId!), "Shadowlands")) target.StraightenBlockedTurn = _state.TurnNumber;
+                    if (Keyword(Card(command.PerformerId!), "Shadowlands")) target.StraightenBlockedTurn = _state.TurnNumber;
                 }
                 GainHonor(player.Id, -2, "Bow Before My Will", source);
                 break;
@@ -11285,12 +11289,15 @@ public sealed partial class MatchEngine
                                         // province indices the assignment flow already draws. An ability has one shape or the other (a Move ability is never an Attack), so the
                                         // same field never means both; ActionOption.Type/Slots/NoTarget say which.
                                         Provinces: ability.Target is "any-province" or "enemy-province" ? legal.Where(c => c.Province is not null).Select(c => c.Province!.Value).Distinct().ToArray()
-                                            : ability.Move is { ChoosesBattlefield: true } ? legal.Where(c => c.Province is not null).Select(c => c.Province!.Value).Distinct().ToArray()
+                                            : ability.Move is { ChoosesBattlefield: true } || id == "hawado-move-battlefield" ? legal.Where(c => c.Province is not null).Select(c => c.Province!.Value).Distinct().ToArray()
                                             : ability.ChoosesOwnProvince ? legal.Where(c => c.Province is not null).Select(c => c.Province!.Value).Distinct().ToArray()
                                             : ability.Target == "attack" && legal.Any(c => c.Province is not null) ? legal.Where(c => c.Province is not null).Select(c => c.Province!.Value).Distinct().ToArray() : null,
                                         Gold: firstQuote, TargetGold: targetQuotes,
                                         // An Attack may always be taken with no target (or on the province where the ability allows it): the client must be able to say so.
-                                        NoTarget: ability.Target == "attack" && legal.Any(c => c.TargetId is null && c.Province is null));
+                                        NoTarget: ability.Target == "attack" && legal.Any(c => c.TargetId is null && c.Province is null),
+                                        AlternativeCost: costOption is null ? null : new(id, performer, costOption.Id, costOption.Label, ability.Label),
+                                        Movement: MovementPreview(id, ability, source, performer),
+                                        Attack: legal.Count > 0 ? AttackCue(legal[0]) : null);
                                 }
                             }
         }

@@ -10,11 +10,13 @@ public partial class CardTile : Button
     public bool QuietSelection { get; set; }
     public bool LegalTarget { get; set; }
     public bool ChosenTarget { get; set; }
+    public bool DecisionSelected { get; set; }
     public bool? PreviousBowed { get; set; }
     private float _bowAngle;
     private float _bowDestination;
     public float VisualBowAngle => _bowAngle;
     public bool UprightPreview { get; set; }
+    public bool CelestialMount { get; set; }
     public float VisualFaceAngle => _bowAngle + RestAngle + (!UprightPreview && FallenArt.TurnsOnTable(Card) ? Mathf.Pi : 0);
     public bool SelectedSource { get; set; }
     public bool Compact { get; set; }
@@ -29,9 +31,10 @@ public partial class CardTile : Button
     private bool _hover;
     private float _lift;
     private float _hoverScale = 1;
+    private StyleBox? _discardNotch;
     public float InteractionScale => _hoverScale;
     public bool IsInspectionHover => _hover || HasFocus();
-    public bool IsSelected => Highlighted || SelectedSource || ChosenTarget;
+    public bool IsSelected => Highlighted || SelectedSource || ChosenTarget || DecisionSelected;
     public static readonly Color HoverColor = new("ffda89");
     public static readonly Color SelectionColor = new("9ceafa");
     // Capped LRU (issue #546): unbounded before this, PublishedArt held every distinct card texture drawn on the
@@ -62,6 +65,7 @@ public partial class CardTile : Button
         Material = CardPaper.Table;
         MouseDefaultCursorShape = CursorShape.PointingHand;
         TooltipText = card.Definition is null ? "Face-down card. Its identity is hidden." : $"{card.Definition.Name}\n{card.Definition.Type} · {card.Definition.GoldCost} Gold\n{card.Definition.Text}";
+        if (CreatedCopyStatus.VisibleOn(card)) TooltipText += "\n" + CreatedCopyStatus.Description(card);
         Pressed += () => clicked(Card);
         MouseEntered += () => { _hover = true; QueueRedraw(); inspected(Card); };
         MouseExited += () => { _hover = false; QueueRedraw(); };
@@ -72,6 +76,11 @@ public partial class CardTile : Button
 
     public override void _Ready()
     {
+        if (CreatedCopyStatus.VisibleOn(Card)) { CopySeal = new CreatedCopySeal { CardAnchor = this }; AddChild(CopySeal); }
+        if (!UprightPreview && ActionLockStatus.VisibleOn(Card))
+        {
+            RestrictionSeal = new ActionLockSeal { CardAnchor = this }; AddChild(RestrictionSeal);
+        }
         if (ShowTokenRail && CardTokenRail.HasRail(Card))
         {
             AlignUnitRightEdge = true;
@@ -88,8 +97,8 @@ public partial class CardTile : Button
         AdvanceStatFeedback(delta);
         // The rail cap must stay under the pointer. Enlarging its parent moves this
         // small target into/out of the card face and repeatedly restarts the tooltip.
-        var inspecting = IsInspectionHover && TokenRail?.GrantSeal?.IsHovered() != true;
-        var targetLift = inspecting ? Card.Zone == Zone.Hand ? 40f : ProjectToScreen is null ? 4f : 0f : 0f;
+        var inspecting = (_hover || HasFocus() && !DecisionSelected) && TokenRail?.GrantSeal?.IsHovered() != true && RestrictionSeal?.IsHovered() != true && CopySeal?.IsHovered() != true;
+        var targetLift = inspecting ? Card.Zone == Zone.Hand ? 40f : ProjectToScreen is null ? 4f : 0f : DecisionSelected ? 18f : 0f;
         var targetScale = inspecting ? Card.Zone == Zone.Hand ? 1.22f : 1.06f : 1f;
         ZIndex = _hover ? 30 : HasFocus() ? 20 : IsSelected ? 10 : 0;
         if (Mathf.IsEqualApprox(_bowAngle, _bowDestination) && Mathf.IsEqualApprox(_lift, targetLift) && Mathf.IsEqualApprox(_hoverScale, targetScale)) return;
@@ -115,6 +124,8 @@ public partial class CardTile : Button
     public CardTile[] TokenRailCompanions { get; set; } = [];
     public Func<string, string?>? TokenSourceName { get; set; }
     public CardTokenRail? TokenRail { get; private set; }
+    public CreatedCopySeal? CopySeal { get; private set; }
+    public ActionLockSeal? RestrictionSeal { get; private set; }
 
     private Vector2 ProjectFacePoint(Vector2 point, Vector2 face)
     {
@@ -159,7 +170,7 @@ public partial class CardTile : Button
     {
         if (!IsSelected && !IsInspectionHover && !LegalTarget) return;
         if (QuietSelection) return;
-        var color = IsSelected ? SelectionColor : HoverColor;
+        var color = DecisionSelected ? Palette.Paper : IsSelected ? SelectionColor : HoverColor;
         var strength = IsSelected ? 1f : IsInspectionHover ? .82f : .28f;
         var edge = LocalFaceCorners(2);
         var closed = edge.Append(edge[0]).ToArray();
@@ -172,7 +183,7 @@ public partial class CardTile : Button
     private void DrawInteractionEdge()
     {
         var active = IsSelected || IsInspectionHover || LegalTarget;
-        var color = IsSelected ? QuietSelection ? Palette.Gold : SelectionColor : IsInspectionHover || LegalTarget ? HoverColor : new Color("8e866b");
+        var color = DecisionSelected ? Palette.Paper : IsSelected ? QuietSelection ? Palette.Gold : SelectionColor : IsInspectionHover || LegalTarget ? HoverColor : new Color("8e866b");
         var edge = LocalFaceCorners(active ? 1.6f : 1);
         DrawPolyline(edge.Append(edge[0]).ToArray(), color with { A = active ? 1 : .58f }, QuietSelection ? 1.5f : active ? (IsSelected ? 3.2f : 2.3f) * (ProjectToScreen is null ? 1 : 2) : .9f, true);
     }
@@ -181,6 +192,7 @@ public partial class CardTile : Button
     {
         var corners = LocalFaceCorners();
         DrawInteractionHalo();
+        if (CelestialMount) SupportCardArt.DrawCelestial(this, corners);
         for (var spread = 3; spread >= 1; spread--)
             DrawColoredPolygon(LocalFaceCorners(spread).Select(p => p + new Vector2(.6f, .8f + _lift * .5f)).ToArray(), new Color(.008f, .006f, .004f, .055f));
         DrawColoredPolygon(corners.Select(p => p + new Vector2(0, .7f)).ToArray(), new Color("a29174"));
@@ -189,10 +201,21 @@ public partial class CardTile : Button
         DrawStatInlays();
         DrawPublicStatus();
         DrawDishonorMarker();
+        if (DecisionSelected) DrawDiscardSelection();
+    }
+
+    private void DrawDiscardSelection()
+    {
+        var corners = LocalFaceCorners(); var top = corners[1]; var bottom = (corners[2] + corners[3]) / 2;
+        DrawCircle(top, 18, Palette.Ink); DrawArc(top, 18, 0, Mathf.Tau, 40, Palette.Gold, 2, true);
+        DrawPolyline([top + new Vector2(-8, 0), top + new Vector2(-2, 6), top + new Vector2(9, -8)], Palette.Gold, 3, true);
+        var rect = new Rect2(bottom + new Vector2(-78, 3), new Vector2(156, 30));
+        DrawStyleBox(_discardNotch ??= SidebarSkin.Surface(true), rect);
+        DrawString(Palette.Body, rect.Position + new Vector2(0, 22), "Fate discard", HorizontalAlignment.Center, rect.Size.X, 18, Palette.Paper);
     }
 
     public string[] PublicStatusLabels => Card.Definition is null || Card.Zone is not (Zone.Home or Zone.Battlefield or Zone.Attached) ? [] :
-        (Card.GrantedKeywords ?? []).Where(k => !CardChanges.IsPermanent(k.Duration)).Select(k => "+ " + k.Keyword).Distinct().ToArray();
+        (Card.GrantedKeywords ?? []).Where(k => !CardChanges.IsPermanent(k.Duration) && k.CopiedFrom is null).Select(k => "+ " + k.Keyword).Distinct().ToArray();
     private void DrawDishonorMarker()
     {
         if (UprightPreview || !FallenArt.TurnsOnTable(Card)) return;

@@ -272,7 +272,7 @@ internal static class ActionLockTests
     private static readonly string[] PerformedByAPersonality = ["orderSeppuku", "useAbility"];
     private static readonly string[] PlayersOwnAndNotBarred =
     [
-        "beforeBattleOptional", "beforeBattleOrder", "chooseConqueror", "choosePreservingHonor", "chooseRikateDetach", "chooseRinShame", "chooseShinden",
+        "beforeBattleOptional", "beforeBattleOrder", "chooseConqueror", "choosePreservingHonor", "chooseRikateDetach", "chooseRinShame", "chooseShinden", "harshChoices",
         "chooseYourClanNeedsYouProvince", "concede", "declareAttack", "declineReaction", "declineStraighten", "discardHand", "discardProvince", "encircledOrder", "encircledSelect",
         "endDynasty", "equip", "forcedDiscard", "overlay", "pass", "playStrategy", "proclaim", "purchase", "recruitReserve", "selectBattle", "wait",
         // Seeds of Decay pass (issue #453), batch 4: two Events Phase decisions of the revealing player's (Offering Reverence's shuffle-or-discard, Tested Land's enemy province).

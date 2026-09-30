@@ -1331,6 +1331,8 @@ public sealed record GoldQuote(int Cost, string Kind, string Basis, string? Erro
     int? MinAmount = null, int? MaxAmount = null, Dictionary<int, PaymentOption[]>? PaymentsByAmount = null,
     // Issue #501 (EmperorMechE.cs): the payment sources that are not a card's own production (see PurchaseQuote.Sources). Null when there are none.
     PaymentSource[]? Sources = null);
+// Presentation metadata survives a disabled option's null Command. No executable command is invented for it.
+public sealed record AlternativeCostView(string AbilityId, string? PerformerId, string Id, string Label, string ActionLabel);
 /// <param name="Gold">The quote for this option's own command (its first legal target when the cost is
 /// target-derived). Null when the action costs no Gold.</param>
 /// <param name="TargetGold">Per-target quotes (target id to quote) for a target-derived cost: the cost
@@ -1343,7 +1345,14 @@ public sealed record ActionOption(string Type, string Label, bool Enabled, strin
     // Multi-target actions (issue #336): the slots of a Slots ability with the legal candidates of each, so a viewer can
     // collect the whole selection. Null for every ability with a single Target.
     TargetSlotOption[]? Slots = null,
-    bool NoTarget = false);
+    bool NoTarget = false, AlternativeCostView? AlternativeCost = null,
+    MoveDestinationView? Movement = null, AttackCueView? Attack = null);
+/// <summary>Read-only attack presentation. SourceId is the explicitly selected performer or the ability source;
+/// it identifies the card to mark, not a new legality or damage calculation.</summary>
+public sealed record AttackCueView(string Kind, string SourceId);
+/// <summary>Proposed movement only: reactions may prevent each arrival independently. FixedMoverIds names the source/performer units;
+/// TargetMoves adds the command's selected target. Destinations remain in ActionOption.Provinces. No card-rule inference belongs in the UI.</summary>
+public sealed record MoveDestinationView(int DefenderId, string[] FixedMoverIds, bool TargetMoves);
 /// <param name="UnitForce">Authoritative effective unit contribution, including qualifying Followers.
 /// Null for hidden/non-unit/out-of-play cards and older payloads; never substitute a client calculation.</param>
 public sealed record CardView(string Id, CardDefinition? Definition, int OwnerId, Zone Zone, bool FaceUp,
@@ -1476,6 +1485,8 @@ public sealed record MatchView(string ContentVersion, string Scenario, long Vers
     // The opposing player's variable payment (issue #373, see OpponentPayment.cs): PUBLIC -- both players see the first player's amount, the card and the
     // Honor at stake; only the paying player's view carries the payment quote and what each amount would do.
     OpponentPaymentView? PendingOpponentPayment = null, DuelRecord? LastDuel = null,
+    // The approved attack cue (#355): public, derived from authoritative state.
+    AttackCueView? PendingAttack = null,
     // Emperor Edition Stronghold pass (issue #486), batch 3 (see EmperorStrongholdBatch3.cs): the face-down province cards this viewer looked at this turn -- PRIVATE to the looker, null for
     // everyone else. Never a card id: a face-down card is named by whose province and which.
     ProvinceSightView[]? ProvinceSights = null,

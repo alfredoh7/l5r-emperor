@@ -238,6 +238,7 @@ var tests = new (string Name, Action Run)[]
     ("Personality wave 22 / region-wave-3 (issue #301): passives, equip and recruit -- Isawa Kojiro's live conditional Naval (appears and disappears with an attached Spell, never a durable grant); Yoritomo Minori's self-received per-other-Magistrate Force bonus (army-scoped, printed or granted, bowed counting, attacking or defending); Soshi Neiru's Open-timed Air-Spell equip (fixed wielder, no once-per-turn limit, usable by the non-active player, never in Battle); Shinden Shorai as the fourth caller of the shared province-Personality entry sequence (the player's OWN turn count, the Lion-Clan-Personality Honor Requirement waiver keyed on the recruit rather than the player, same province, full cost, Proclaim resuming to the opponent)", BatchFPassivesEquipAndRecruit),
     ("Strategy wave 16 (issue #304): Brawl -- its \"Needs Regions (not built)\" blocker was stale. The destroy half's new region-or-terrain Target (a Region at ANY province, either owner's, destroyed to its owner's Dynasty discard with its static strength bonus going with it; a Terrain through the shared DiscardTerrain removal, meeting Ring of Water's destroyed-a-Terrain condition; never a Personality; offered targets exactly the Region and the Terrain; disabled with nothing to destroy), usable at Open timing outside a Battle while the Battle-only bow half is not, and the bow half's reuse of enemy-card-without-attachments (an unattached enemy bows; an attached one and your own card do not)", StrategyWave16Primitives),
     ("Pile-targeted abilities are offered by QueryActions (issue #317): Hunter of Harmony's own-kiho-strategy-in-discard, Scholarly Hermit's own-ring-in-discard and Tranquil Garden's ring-in-play-or-own-discard each had a ValidateAbility branch but no candidates arm, so a target in a discard pile was never offered -- each is now offered enabled with exactly its legal targets (wrong owner, wrong zone and wrong type excluded), every offered target validates, and with no target the ability is offered disabled", PileTargetsAreOffered)
+
 };
 var runner = new TestRunner(args);
 if (!runner.Valid) return 2;
@@ -626,6 +627,30 @@ static void FallowLandsRegion()
 }
 static void LowMarketEquip()
 {
+    // Query-to-command contract: each offered price covers every target in that option.
+    // The client changes only the chosen target and payment; it never computes discounts.
+    {
+        var s = MatchEngine.CreateEconomyScenario().State; s.Phase = Phase.Action;
+        var region = Add(s, "oracle-l5r-4777", 0, Zone.Region, province: 0); s.Players[0].Provinces[0].RegionId = region.Id;
+        var hero = Add(s, "training-crane-clan-samurai", 0, Zone.Home);
+        var cheap = Add(s, "training-item", 0, Zone.Hand);
+        var costly = Add(s, "training-follower-crane-guard", 0, Zone.Hand);
+        var e = MatchEngine.FromTestState(s);
+        var options = e.QueryActions(0).Where(a => a.CardId == region.Id && a.Enabled && a.Command?.PerformerId == hero.Id).ToArray();
+        Check(options.Any(a => a.TargetGold?[cheap.Id].Cost == 1 && a.TargetIds!.Contains(cheap.Id)), "Minimum-one discount must be quoted");
+        Check(options.Any(a => a.TargetGold?[costly.Id].Cost == 2 && a.TargetIds!.Contains(costly.Id)), "Four-Gold attachment must be quoted as two");
+        foreach (var option in options)
+            foreach (var target in option.TargetIds!)
+            {
+                var expected = Math.Max(1, CardCatalog.Get(e.State.Cards[target].DefinitionId).GoldCost - 2);
+                var quote = option.TargetGold![target];
+                Equal(quote.Cost, expected, "Target has its own authoritative quote");
+                var copy = MatchEngine.FromTestState(s);
+                Accept(copy, option.Command! with { TargetId = target, SourceIds = quote.Payments.First().SourceIds });
+                Check(copy.State.Cards[region.Id].Bowed, "Offered command pays the Region's bow cost");
+                Equal(copy.State.Cards[target].AttachedTo, hero.Id);
+            }
+    }
     // "Attach it to him, paying 2 less Gold" -- a genuine reduction (4 -> 2), not a no-op; bowing
     // itself is the entire cost/limiter (no separate UsageKey), so a second use this turn is rejected.
     {
@@ -1048,10 +1073,8 @@ static void SecondCityStrategyWave6()
         Accept(e, new GameCommand("useAbility", 0, e.Version, CardId: strat.Id, TargetId: target.Id, AbilityId: "dispensing-justice-destroy", PerformerId: performer.Id));
         Equal(e.State.Cards[target.Id].Zone, Zone.Home, "Not eligible for destruction (Honorable, no qualifying keyword): moved home instead");
     }
-    // Bow Before My Will: bows the target and costs 2 Honor; no wired Shadowlands-clan card exists
-    // yet to exercise the conditional negated-straightening half, so this only confirms the
-    // baseline (non-Shadowlands performer) case -- HasClanAffiliation itself is already proven
-    // correct elsewhere (e.g. kamina-exp-attack).
+    // Bow Before My Will: baseline without the Shadowlands keyword. StabilizationTests
+    // also covers its conditional straightening block with a Shadowlands performer.
     {
         var s = StrongholdBattle("oracle-l5r-1218");
         var strat = Add(s, "oracle-l5r-1121", 0, Zone.Hand);
@@ -1527,7 +1550,7 @@ static void BattleOpenPresencePrimitive()
         var e = MatchEngine.FromTestState(s);
         Reject(e, new GameCommand("useAbility", 0, e.Version, CardId: strat.Id, TargetId: target.Id, AbilityId: "weakness-of-man-toggle", PerformerId: performer.Id));
     }
-    // The Target's own comparison is against the performer's BASE Force (the printed stat), and the
+    // The target's current Force must differ from that same target's printed Force, and the
     // target itself must also be at the current battlefield during the Battle half.
     {
         var s = StrongholdBattle("oracle-l5r-1218");
@@ -9447,6 +9470,39 @@ static void StrategyWave13Primitives()
         Equal(e.State.Players[0].Hand.Count, handBefore, "The Strategy card itself leaves hand (-1) but the draw (+1) nets back to even");
     }
 }
+
+static void GrantedEffectPresentationView()
+{
+    var state = MatchEngine.CreateEconomyScenario().State;
+    var card = Add(state, "training-crane-samurai", 0, Zone.Home);
+    card.GrantedKeywords = [new("Berserker", "source", "Permanent")];
+    card.Protections = [new("source", "Permanent"), new("temporary-source", "Turn")];
+    var hidden = state.Cards.Values.First(c => c.Zone == Zone.Province && !c.FaceUp);
+    hidden.Protections = [new("hidden-source", "Permanent")];
+    var engine = MatchEngine.FromTestState(state);
+    foreach (var viewer in new[] { 0, 1 })
+    {
+        var view = engine.GetView(viewer);
+        var visible = view.Players[0].Home.Single(c => c.Id == card.Id);
+        Equal(visible.GrantedEffects!.Length, 2);
+        Check(visible.GrantedEffects.Any(e => e.Duration == "Permanent" && e.Source == "source"));
+        Check(visible.GrantedEffects.All(e => e.Text.Contains("will not be negated")));
+        Check(view.Players.SelectMany(p => p.Provinces).Where(p => p.Card?.Definition is null).All(p => p.Card?.GrantedEffects is null), "Hidden provinces never carry metadata");
+        visible.GrantedEffects[0] = new("Changed", "Not engine text", "x", "Turn");
+        Check(engine.GetView(viewer).Players[0].Home.Single(c => c.Id == card.Id).GrantedEffects![0].Name == "Action protection", "Detached view does not mutate the engine");
+    }
+    var snapshot = engine.GetView(0).Players[0].Home.Single(c => c.Id == card.Id);
+    var encoded = JsonSerializer.Serialize(snapshot);
+    var decoded = JsonSerializer.Deserialize<CardView>(encoded)!;
+    Equal(decoded.GrantedEffects!.Length, 2);
+    var old = System.Text.Json.Nodes.JsonNode.Parse(encoded)!.AsObject(); old.Remove("GrantedEffects");
+    Check(JsonSerializer.Deserialize<CardView>(old.ToJsonString())!.GrantedEffects is null, "Older snapshots remain readable");
+    SkipToDynasty(engine); Accept(engine, Cmd(engine, "endDynasty"));
+    var after = engine.GetView(0).Players[0].Home.Single(c => c.Id == card.Id);
+    Equal(after.GrantedEffects!.Length, 1); Equal(after.GrantedEffects[0].Duration, "Permanent");
+    Equal(after.GrantedKeywords!.Single().Duration, "Permanent");
+}
+
 static void StrategyWave14Primitives()
 {
     // Banzai! (oracle-l5r-10929): "Discipline (2). Battle: Give your target opposed Personality +2F."
@@ -9631,6 +9687,13 @@ static void StrategyWave14Primitives()
         var performer = Add(s, "training-thunder-shugenja", 0, Zone.Battlefield, province: 0); // Force 2, raised to 6
         var weak = Add(s, "training-lion-courtier", 1, Zone.Battlefield, province: 0); // Force 2, no attachments
         var e = MatchEngine.FromTestState(s);
+        // A target bar (issue #420) covers this channel too: the bowed card is named on CardIds, not TargetId.
+        var barredState = e.State;
+        barredState.Cards[weak.Id].TargetBars.Add(new TargetBar(performer.Id, barredState.TurnNumber));
+        var barred = MatchEngine.FromTestState(barredState);
+        var barRefusal = barred.Execute(new GameCommand("useAbility", 0, barred.Version, CardId: strat.Id, AbilityId: "visage-of-the-orochi", PerformerId: performer.Id, CardIds: [weak.Id]));
+        Check(!barRefusal.Accepted && (barRefusal.Error ?? "").Contains("may not be targeted"), "A barred card named on CardIds is refused: " + barRefusal.Error);
+        Check(!barred.State.Cards[weak.Id].Bowed, "and it was not bowed");
         Accept(e, new GameCommand("useAbility", 0, e.Version, CardId: strat.Id, AbilityId: "visage-of-the-orochi", PerformerId: performer.Id, CardIds: [weak.Id]));
         Equal(e.GetView(0).Players[0].Army.Single(c => c.Id == performer.Id).Force, 6, "Raised to 6");
         Check(e.State.Cards[weak.Id].Bowed, "Optional bow target bowed");
@@ -9668,6 +9731,7 @@ static void StrategyWave14Primitives()
         var e = MatchEngine.FromTestState(s);
         Reject(e, new GameCommand("useAbility", 0, e.Version, CardId: strat.Id, AbilityId: "visage-of-the-orochi", PerformerId: performer.Id, CardIds: [withAttachment.Id]));
     }
+
 }
 static void BatchDPrimitives()
 {
@@ -11637,36 +11701,4 @@ static MatchState NeiruOfferTable()
     Add(s, "oracle-l5r-6502", 0, Zone.Hand);
     Add(s, "training-marketplace", 0, Zone.Home); Add(s, "training-marketplace", 0, Zone.Home);
     return s;
-}
-
-static void GrantedEffectPresentationView()
-{
-    var state = MatchEngine.CreateEconomyScenario().State;
-    var card = Add(state, "training-crane-samurai", 0, Zone.Home);
-    card.GrantedKeywords = [new("Berserker", "source", "Permanent")];
-    card.Protections = [new("source", "Permanent"), new("temporary-source", "Turn")];
-    var hidden = state.Cards.Values.First(c => c.Zone == Zone.Province && !c.FaceUp);
-    hidden.Protections = [new("hidden-source", "Permanent")];
-    var engine = MatchEngine.FromTestState(state);
-    foreach (var viewer in new[] { 0, 1 })
-    {
-        var view = engine.GetView(viewer);
-        var visible = view.Players[0].Home.Single(c => c.Id == card.Id);
-        Equal(visible.GrantedEffects!.Length, 2);
-        Check(visible.GrantedEffects.Any(e => e.Duration == "Permanent" && e.Source == "source"));
-        Check(visible.GrantedEffects.All(e => e.Text.Contains("will not be negated")));
-        Check(view.Players.SelectMany(p => p.Provinces).Where(p => p.Card?.Definition is null).All(p => p.Card?.GrantedEffects is null), "Hidden provinces never carry metadata");
-        visible.GrantedEffects[0] = new("Changed", "Not engine text", "x", "Turn");
-        Check(engine.GetView(viewer).Players[0].Home.Single(c => c.Id == card.Id).GrantedEffects![0].Name == "Action protection", "Detached view does not mutate the engine");
-    }
-    var snapshot = engine.GetView(0).Players[0].Home.Single(c => c.Id == card.Id);
-    var encoded = JsonSerializer.Serialize(snapshot);
-    var decoded = JsonSerializer.Deserialize<CardView>(encoded)!;
-    Equal(decoded.GrantedEffects!.Length, 2);
-    var old = System.Text.Json.Nodes.JsonNode.Parse(encoded)!.AsObject(); old.Remove("GrantedEffects");
-    Check(JsonSerializer.Deserialize<CardView>(old.ToJsonString())!.GrantedEffects is null, "Older snapshots remain readable");
-    SkipToDynasty(engine); Accept(engine, Cmd(engine, "endDynasty"));
-    var after = engine.GetView(0).Players[0].Home.Single(c => c.Id == card.Id);
-    Equal(after.GrantedEffects!.Length, 1); Equal(after.GrantedEffects[0].Duration, "Permanent");
-    Equal(after.GrantedKeywords!.Single().Duration, "Permanent");
 }

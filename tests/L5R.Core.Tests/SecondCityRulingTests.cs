@@ -272,6 +272,11 @@ internal static partial class SecondCityRulingTests
         var tacticians = option.Slots!.Single(x => x.Slot == "tacticians").CardIds; var opposing = option.Slots!.Single(x => x.Slot == "opposing").CardIds;
         Check(tacticians.Contains(t1.Id) && tacticians.Contains(t2.Id) && tacticians.Contains(elsewhere.Id) && !tacticians.Contains(here.Id) && !tacticians.Contains(plain.Id), "own Tacticians at a battlefield other than the current one: " + string.Join(",", tacticians));
         Check(opposing.Contains(foe.Id), "an enemy Personality is a target");
+        // The opposing candidates are not tied to the DEFAULT Tactician choice: the enemy at the other battlefield is offered
+        // too, because choosing the Tactician standing there is a legal, non-default combination (issue #345 review).
+        Check(opposing.Contains(foeElsewhere.Id), "an enemy opposing a non-default Tactician choice is offered: " + string.Join(",", opposing));
+        Check(!opposing.Contains(foeHere.Id), "an enemy at the current battlefield is still never opposed here: " + string.Join(",", opposing));
+        Accept(MatchEngine.FromTestState(s), Use(e, 0, "dislodge-the-foe", card.Id, selections: [Pick("tacticians", elsewhere.Id), Pick("opposing", foeElsewhere.Id)]));
         // Refused: Tacticians at different battlefields; the opposing Personality not where they stand.
         Reject(e, Use(e, 0, "dislodge-the-foe", card.Id, selections: [Pick("tacticians", t1.Id, elsewhere.Id), Pick("opposing", foe.Id)]));
         Reject(e, Use(e, 0, "dislodge-the-foe", card.Id, selections: [Pick("tacticians", t1.Id, t2.Id), Pick("opposing", foeElsewhere.Id)]));
