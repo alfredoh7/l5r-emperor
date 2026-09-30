@@ -128,7 +128,7 @@ public partial class DeckBuilderScreen : Control
         Place(_toolbar.GetNode<Control>("SizeLabel"), _toolbar.Size.X - 280, 16, 85, 25); Place(_toolbar.GetNode<Control>("CardSize"), _toolbar.Size.X - 187, 14, 172, 32);
         Place(_setupTools, MatLeft, 158, _w - MatLeft - 18, 58); Place(_library, 0, 0, _w, _h); _overlay.Size = _canvas.Size;
         if (IsInsideTree()) { BuildSetupStrip(); if (Page == "decks") BuildDeckList(); else if (_setupSlot.Length > 0) BuildSetupChoices(); }
-        Collection.Relayout(); Mat.Relayout(); HideHover(); if (_overlay.Visible && _inspectionCards.Length > 0) ShowComparison(_inspectionCards); _lines.QueueRedraw();
+        Collection.Reposition(); Mat.Reposition(); HideHover(); if (_overlay.Visible && _inspectionCards.Length > 0) ShowComparison(_inspectionCards); _lines.QueueRedraw();
     }
     private void DrawFrames()
     {
