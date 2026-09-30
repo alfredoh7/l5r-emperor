@@ -1,10 +1,10 @@
 {
   "schema_version": 1,
   "repository": "alfredoh7/l5r-emperor",
-  "tag": "catalogue-art-created-cards-20260929-r1",
+  "tag": "catalogue-art-issue554-20260930-r1",
   "asset": "L5R-Catalogue-WebP85.zip",
-  "sha256": "a1a58e39039a3a03cce03a7120620974b3d16ba97fd70df93478df40a6241721",
-  "bytes": 527835376,
-  "images": 3888,
+  "sha256": "9feb149c9e58ec1e9a740ba39fe2596d47c898affa047d05146c478852455cce",
+  "bytes": 527985826,
+  "images": 3889,
   "quality": 85
 }
