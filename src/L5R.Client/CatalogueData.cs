@@ -86,7 +86,8 @@ public sealed class CatalogueData
             && (typeSet.Length == 0 || typeSet.Any(c.Types.Contains)) && (keywordSet.Length == 0 || keywordSet.Any(c.Keywords.Contains))
             && (set == "" || c.Printings.Any(p => p.Set == set))
             && terms.All(term => c.SearchText.Contains(term, StringComparison.OrdinalIgnoreCase)));
-        return (sort switch {
+        return (sort switch
+        {
             "Name Z–A" => query.OrderByDescending(c => c.Name, StringComparer.OrdinalIgnoreCase),
             "Gold cost" => query.OrderBy(c => c.Numeric("cost")).ThenBy(c => c.Name),
             "Force" => query.OrderBy(c => c.Numeric("force")).ThenBy(c => c.Name),
@@ -95,5 +96,5 @@ public sealed class CatalogueData
             _ => query.OrderBy(c => c.Name, StringComparer.OrdinalIgnoreCase)
         }).ToArray();
     }
-    public static string PlainText(string text) => Regex.Replace(System.Net.WebUtility.HtmlDecode(text).Replace(":bow:", "[Bow]"), @"<[^>]+>|:g(\d+|star):", m => m.Groups[1].Success ? "["+m.Groups[1].Value+" Gold]" : "");
+    public static string PlainText(string text) => Regex.Replace(System.Net.WebUtility.HtmlDecode(text).Replace(":bow:", "[Bow]"), @"<[^>]+>|:g(\d+|star):", m => m.Groups[1].Success ? "[" + m.Groups[1].Value + " Gold]" : "");
 }
