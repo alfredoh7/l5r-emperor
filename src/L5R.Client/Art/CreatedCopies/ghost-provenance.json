@@ -1,0 +1,14 @@
+{
+  "file": "ghost-copy-marker.png",
+  "source": "/Users/alfredo/.codex/generated_images/01a0b019-027d-7ee0-84a4-44aac565a142/exec-aed27337-9af7-486d-9d5e-5c8667b9d204.png",
+  "references": [
+    "docs/designs/2026-09-22-copy-marker/b.png",
+    "docs/designs/2026-09-22-copy-marker/a.png"
+  ],
+  "prompt": "Production 2D UI sprite derived faithfully from the approved two concept references: B's overlapping ghost card outlines, with A's SHORTER, QUIETER wisps. Output ONE isolated icon on genuine transparent background, square PNG. No presentation sheet, no backdrop, no text, no frame, no coin or circle, no whole game card. The icon depicts exactly two overlapping upright playing-card outlines. Front card is vertical, slightly rounded corners, crisp double ivory-gold outline, dark transparent interior (NOT a solid black rectangle). Rear outline is offset up-left with a slight counterclockwise tilt, ghostlike at about half the opacity, fading toward its lower-left edge. Preserve the warm ivory/aged gold edging, understated textured patina and proportions from B. Add just TWO short, delicate pale pearl smoke threads curling closely around the rear card's lower-left corner: use the quiet wispy quality of A, MUCH shorter than B's long smoke tail. Nothing radiates far from the glyph. Glyph occupies about 76% of square canvas height and 68% width; tiny wisps stay within 88% canvas, leave clean transparent margin. Clear recognizable silhouette even at 24–32px: substantial luminous outlines, no complex fine filigree, no speckles/particles. The two card outlines must remain the dominant form; atmospheric smoke subordinate and restrained. This is flat raster interface artwork to sit OUTSIDE lower-left corner of a card on a dark navy mat; no 3D object geometry, no ornament mounting tabs, no swords, no additional symbols. Transparent alpha everywhere around AND inside outlines.",
+  "tool": "built-in image_gen",
+  "sha256": "0eb3463b7578c49297302feb5d79bec825d1a8927638ea40635e7d80f914faf7",
+  "status": "Alfredo approved B ghost outlines with A shorter quieter wisps, 22 September 2026; native verification passed at 1920x1080 normal and 1280x800 reduced motion.",
+  "usage": "Raster marker outside lower-left of full card scan. Public CreatedCopy flag only; no source inference.",
+  "native_use": "Unmodified generated PNG through AtlasTexture region (160,126,956,956); transparent margin trimmed at render time only."
+}

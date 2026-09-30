@@ -1,0 +1,90 @@
+{
+  "native": {
+    "Passed": true,
+    "Steps": 20,
+    "ReducedMotion": false,
+    "Resolution": "(1920, 1080)",
+    "FrameCount": 2267,
+    "P50Ms": 8.39,
+    "P95Ms": 13.108,
+    "P99Ms": 16.61
+  },
+  "small-reduced": {
+    "Passed": true,
+    "Steps": 20,
+    "ReducedMotion": true,
+    "Resolution": "(1120, 700)",
+    "FrameCount": 2107,
+    "P50Ms": 8.529,
+    "P95Ms": 13.356,
+    "P99Ms": 16.935
+  },
+  "stages": {
+    "passed": true,
+    "scenarios": 13
+  },
+  "context": {
+    "date": "2026-09-16",
+    "platform": "native macOS Godot 4.7.2 .NET",
+    "command": "bash tools/check-duel-demo.sh",
+    "base": "56f9ad9267634515cf31fb9794103781a790c8d6",
+    "limits": [
+      "Human visual/mechanical acceptance remains open.",
+      "Windows CI is not native Windows playtesting.",
+      "Grass/cloud quality remains a separate acceptance track.",
+      "The public discard preview is representative; the contract does not expose pile ordering."
+    ]
+  },
+  "regressions": {
+    "command": "L5R_PYTHON=<installed Python 3.14> bash tools/check.sh --skip-client",
+    "passed": true,
+    "python": {
+      "collaboration": 43,
+      "content": 130,
+      "meshy": 6
+    },
+    "dotnet": {
+      "core": 153,
+      "published": 52,
+      "deck-format": 9,
+      "deck-workshop": 10,
+      "ai": 56,
+      "server": 5,
+      "client-transport": 6
+    }
+  },
+  "launcher": {
+    "tested": true,
+    "command": "bash Play Latest.command --resolution 1920x1080 --position 10,50 -- --capture=<output> --capture-mode=menu-duel",
+    "note": "Launcher test preceded final label spacing/contrast polish; final direct native probes cover those visual changes. The launcher script is unchanged."
+  },
+  "native_assertions": [
+    "Begin Duel submits the real challenge",
+    "Continue returns to prepared setup",
+    "Fate discard opens an inspectable public spread",
+    "Play menu opens in-app demo",
+    "blind focus is privately inspectable after commitment",
+    "dead personalities remain separate from Fate discards",
+    "demo exits to normal L5R menu",
+    "direct drag/keyboard placement submits before duplicate click",
+    "drag/keyboard focus and duplicate click advance once",
+    "existing offline practice is preserved unchanged",
+    "native UI reproduces canonical 8\u20137",
+    "opponent focused backs expose no inspection",
+    "private handoff hides the complete table",
+    "projected card input selects a legal hand card",
+    "rapid duplicate focus advances once",
+    "repeated snapshots do not replay the reveal",
+    "resolved commitments leave the focus rows",
+    "result held for Continue"
+  ],
+  "artifact_sha256": {
+    "docs/screenshots/duel-demo/twin-lanes/discard.png": "0a0e12f4d11f0dc3d419d37468ca6980d325cf49b2952217f366f2f6fc900076",
+    "docs/screenshots/duel-demo/twin-lanes/four-focus.png": "fc177bc8385439b6dc1098bfee00ff54b62cd8fd4115476cd3094adc0feb1067",
+    "docs/screenshots/duel-demo/twin-lanes/result.png": "4ae3356d2c2b20ecf552d5bac6df907c35bb4862a23348518592ee3b6c2f3e67",
+    "docs/screenshots/duel-demo/twin-lanes/reduced.png": "6bffeb7e600300e61059e7c5b33a96ad9e6a0b6fe76d8ecc363f17fc5a0f0aa8",
+    "docs/screenshots/duel-demo/twin-lanes/placement.png": "aea3df3fd2ff5596639a28bf12474a5797d3f4db8ce52cbe46a71172fbc689fe",
+    "assets/ui/duel-twin-lanes/approved-twin-lanes.png": "828474ba2b6030ba757aebf77a75354a4e171ed72e13265b989b53832fec8f30",
+    "src/L5R.Client/Art/DuelUi/campaign-plaque.png": "272d4e907419a2dd3b579081a8febb30648b1469ec6ee452705b3c0dedefa965"
+  }
+}

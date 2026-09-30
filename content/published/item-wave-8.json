@@ -1,0 +1,58 @@
+{
+  "Profile": "item-wave-8",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-78",
+      "Name": "A Simple Yari",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 3,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "As a Focus Effect, after this duel ends, bow its winner.\nReaction, :gstar:: After one of your Personalities enters play, Equip this Item to him.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-78.jpg",
+      "Keywords": [
+        "Weapon"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "simple-yari-focus",
+        "simple-yari-attach"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-1564",
+      "Name": "Crimson Shadow Armor",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 3,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Fear Battle: Target an enemy Follower: Bow it.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1564.jpg",
+      "Keywords": [
+        "Armor"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "crimson-shadow-bow"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

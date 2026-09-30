@@ -90,8 +90,10 @@ public partial class Main
             await ClickMultiBoard(ids[2]); SupportRequire(MultiSelectedIds.SequenceEqual(new[] { ids[2] }), "Board attachment selection failed");
             await SupportClick(MultiFace(slot.Slot, ids[0])); await SupportClick(MultiFace(slot.Slot, ids[1]));
             SupportRequire(MultiFace(slot.Slot, ids[3]).Disabled && View.Version == version && IntentArrows().Count(a => a.Label is not null) == 3, "Max bound or arrow count wrong");
-            var earlier = StabilizationButtons(_inspector).Single(b => b.HasMeta("move") && b.GetMeta("move").AsInt32() == -1 && b.GetMeta("card").AsString() == ids[0]);
-            earlier.GrabFocus(); await LookKey(Key.Enter); SupportRequire(MultiSelectedIds.SequenceEqual(new[] { ids[0], ids[2], ids[1] }), "Keyboard reorder failed");
+            SupportRequire(!StabilizationButtons(_inspector).Any(b => b.HasMeta("move") || b.Text is "‹" or "›"), "Redundant target arrows remain");
+            MultiFace(slot.Slot, ids[2]).GrabFocus(); await LookKey(Key.Enter);
+            await SupportClick(MultiFace(slot.Slot, ids[2]));
+            SupportRequire(MultiSelectedIds.SequenceEqual(new[] { ids[0], ids[1], ids[2] }), "Deselect/reselect did not preserve chosen order");
             SupportRequire(GetViewport().GetVisibleRect().Encloses(_paymentConfirm!.GetGlobalRect()), "Target confirmation is offscreen");
             await SupportCapture("-selected");
             await SupportClick(StabilizationButtons(_inspector).Single(b => b.HasMeta("inspect_card") && b.GetMeta("inspect_card").AsString() == ids[2]));

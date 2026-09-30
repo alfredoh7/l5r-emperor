@@ -2355,4 +2355,54 @@ public static class PublishedContent
     public static PublishedSnapshot SpellWave15 { get; } = Load("L5R.Published.SpellWave15.json", "spell-wave-15", requireDecks: false);
     /// <summary>Strategy wave 42 (issue #420): Skipping the Puddle (a Kata), Superior Reach and Scavenging Party.</summary>
     public static PublishedSnapshot StrategyWave42 { get; } = Load("L5R.Published.StrategyWave42.json", "strategy-wave-42", requireDecks: false);
+    /// <summary>Personality wave 43 (issue #431): Before the Dawn Personalities built on existing primitives.</summary>
+    public static PublishedSnapshot PersonalityWave43 { get; } = Load("L5R.Published.PersonalityWave43.json", "personality-wave-43", requireDecks: false);
+    /// <summary>Strategy wave 43 (issue #431): Before the Dawn Strategies built from existing primitives.</summary>
+    public static PublishedSnapshot StrategyWave43 { get; } = Load("L5R.Published.StrategyWave43.json", "strategy-wave-43", requireDecks: false);
+    /// <summary>Item wave 8 (issue #431): A Simple Yari and Crimson Shadow Armor.</summary>
+    public static PublishedSnapshot ItemWave8 { get; } = Load("L5R.Published.ItemWave8.json", "item-wave-8", requireDecks: false);
+    /// <summary>Spell wave 16 (issue #431): A Dragon's Favor and Ember's Final Fire.</summary>
+    public static PublishedSnapshot SpellWave16 { get; } = Load("L5R.Published.SpellWave16.json", "spell-wave-16", requireDecks: false);
+    /// <summary>Follower wave 20 (issue #431): Ashigaru Recruits and Genji's Students.</summary>
+    public static PublishedSnapshot FollowerWave20 { get; } = Load("L5R.Published.FollowerWave20.json", "follower-wave-20", requireDecks: false);
+    /// <summary>Holding wave 6 (issue #431): Indomitable Home.</summary>
+    public static PublishedSnapshot HoldingWave6 { get; } = Load("L5R.Published.HoldingWave6.json", "holding-wave-6", requireDecks: false);
+    /// <summary>Celestial wave 4 (issue #431): Ebisu's Honesty and Saibankan's Justice.</summary>
+    public static PublishedSnapshot CelestialWave4 { get; } = Load("L5R.Published.CelestialWave4.json", "celestial-wave-4", requireDecks: false);
+    /// <summary>Region wave 5 (issue #431): Stone-Hewed Shrine.</summary>
+    public static PublishedSnapshot RegionWave5 { get; } = Load("L5R.Published.RegionWave5.json", "region-wave-5", requireDecks: false);
+    /// <summary>Personality wave 44 (issue #431): The Red Hunger.</summary>
+    public static PublishedSnapshot PersonalityWave44 { get; } = Load("L5R.Published.PersonalityWave44.json", "personality-wave-44", requireDecks: false);
+    /// <summary>Personality wave 45 (issue #431): Goju Sawaki, Kakita Yasunori and the Personalities and Weapon they create.</summary>
+    public static PublishedSnapshot PersonalityWave45 { get; } = Load("L5R.Published.PersonalityWave45.json", "personality-wave-45", requireDecks: false);
+    /// <summary>Spell wave 17 (issue #431): Death, Defeated.</summary>
+    public static PublishedSnapshot SpellWave17 { get; } = Load("L5R.Published.SpellWave17.json", "spell-wave-17", requireDecks: false);
+    /// <summary>Follower wave 21 (issue #431): The Crimson Mark.</summary>
+    public static PublishedSnapshot FollowerWave21 { get; } = Load("L5R.Published.FollowerWave21.json", "follower-wave-21", requireDecks: false);
+    /// <summary>Personality wave 46 (issue #431): Daigotsu Bukaro, The Great Death and Kakita Munemori - exp.</summary>
+    public static PublishedSnapshot PersonalityWave46 { get; } = Load("L5R.Published.PersonalityWave46.json", "personality-wave-46", requireDecks: false);
+    /// <summary>Follower wave 22 (issue #431): the Farmlands Conscripts and the Birds of Prey.</summary>
+    public static PublishedSnapshot FollowerWave22 { get; } = Load("L5R.Published.FollowerWave22.json", "follower-wave-22", requireDecks: false);
+    /// <summary>Personality wave 47 (issue #431): Yasuki Dokansuto.</summary>
+    public static PublishedSnapshot PersonalityWave47 { get; } = Load("L5R.Published.PersonalityWave47.json", "personality-wave-47", requireDecks: false);
+    /// <summary>Strategy wave 44 (issue #431): Necessary Evil.</summary>
+    public static PublishedSnapshot StrategyWave44 { get; } = Load("L5R.Published.StrategyWave44.json", "strategy-wave-44", requireDecks: false);
+    /// <summary>Follower wave 23 (issue #435): Hiromi's Vassals and Home Guard.</summary>
+    public static PublishedSnapshot FollowerWave23 { get; } = Load("L5R.Published.FollowerWave23.json", "follower-wave-23", requireDecks: false);
+    /// <summary>Item wave 9 (issue #435): Shamsir.</summary>
+    public static PublishedSnapshot ItemWave9 { get; } = Load("L5R.Published.ItemWave9.json", "item-wave-9", requireDecks: false);
+    /// <summary>Strategy wave 45 (issue #437): Revenge.</summary>
+    public static PublishedSnapshot StrategyWave45 { get; } = Load("L5R.Published.StrategyWave45.json", "strategy-wave-45", requireDecks: false);
+    /// <summary>Personality wave 48 (issue #437): the Oathsworn Deathseeker Measure of Devotion creates.</summary>
+    public static PublishedSnapshot PersonalityWave48 { get; } = Load("L5R.Published.PersonalityWave48.json", "personality-wave-48", requireDecks: false);
+    /// <summary>Strategy wave 46 (issue #437): Measure of Devotion.</summary>
+    public static PublishedSnapshot StrategyWave46 { get; } = Load("L5R.Published.StrategyWave46.json", "strategy-wave-46", requireDecks: false);
+    /// <summary>Personality wave 49 (issue #440): Akodo Ashiko.</summary>
+    public static PublishedSnapshot PersonalityWave49 { get; } = Load("L5R.Published.PersonalityWave49.json", "personality-wave-49", requireDecks: false);
+    /// <summary>Personality wave 50 (issue #440 follow-up): Akodo Kobi - exp.</summary>
+    public static PublishedSnapshot PersonalityWave50 { get; } = Load("L5R.Published.PersonalityWave50.json", "personality-wave-50", requireDecks: false);
+    /// <summary>Personality wave 51 (issue #449): Matsu Rika.</summary>
+    public static PublishedSnapshot PersonalityWave51 { get; } = Load("L5R.Published.PersonalityWave51.json", "personality-wave-51", requireDecks: false);
+    /// <summary>Personality wave 52 (issue #449 follow-up): Akodo Tezuka.</summary>
+    public static PublishedSnapshot PersonalityWave52 { get; } = Load("L5R.Published.PersonalityWave52.json", "personality-wave-52", requireDecks: false);
 }

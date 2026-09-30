@@ -160,6 +160,12 @@ public sealed partial class MatchEngine
         string? forcePenaltyTargetId = null, int forcePenalty = 0)
     {
         Require(InPlay(target) && AtBattle(target) && target.OwnerId != player.Id, "Target a card in the current enemy army.");
+        // "May not be targeted by" (issue #420) is judged here too, so a bar also stops an Attack whose target
+        // is named on CardIds, chosen later (a sequenced second target) or moved here by a redirection. The
+        // Attack's own performer is the acting card when the command names one (the second half of a sequenced
+        // action carries it even though its ability declares no Performer of its own).
+        RequireTargetNotBarred(command.PerformerId is { } attackPerformerId && _state.Cards.TryGetValue(attackPerformerId, out var attackPerformer)
+            ? ActingPersonality(attackPerformer) : PerformingCard(command, ability), target);
         var type = Definition(target).Type;
         // Core rules: a Personality with an attached FOLLOWER is immune to a Ranged/Melee Attack (attack the
         // Follower instead), unless the Attack is explicitly allowed to target one -- an exception printed

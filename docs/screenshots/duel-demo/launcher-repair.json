@@ -1,0 +1,40 @@
+{
+  "date": "2026-09-16",
+  "base": "286984e42c307ffe27c806634161062e8ae67b74",
+  "integration": "936c206",
+  "pack": {
+    "schema_version": 1,
+    "repository": "alfredoh7/l5r-emperor",
+    "tag": "catalogue-art-webp-v3-20260916",
+    "asset": "L5R-Catalogue-WebP85.zip",
+    "sha256": "992be24c25415ab56676779ebdeebf506f248062ad66f487bdef3d392ba7fcb1",
+    "bytes": 374576790,
+    "images": 2742,
+    "quality": 85
+  },
+  "native_probe": {
+    "Passed": true,
+    "Steps": 20,
+    "ReducedMotion": false,
+    "Resolution": "(1672, 942)",
+    "FrameCount": 3647,
+    "P50Ms": 6.412,
+    "P95Ms": 14.477,
+    "P99Ms": 16.493
+  },
+  "checks": [
+    "Publisher validates all 2742 original receipts, dimensions and optimized scans",
+    "Versioned private release upload digest matches pinned SHA-256",
+    "Local archive installation and subsequent offline preflight passed",
+    "Play Latest.command native menu-duel completed with no Godot errors",
+    "Actual .app launch opened Terminal, passed preflight/build and reached visible Godot game",
+    "132 content Python tests passed (including new bundled-source and real receipt coverage checks)",
+    "Full merged regression suite: 43 collaboration + 6 Meshy Python, 163 Core, 52 published, 9 deck-format, 10 workshop, 56 AI, 5 server, 6 transport",
+    "Client build zero warnings/errors; Godot import passed"
+  ],
+  "limits": [
+    "No native Windows graphical validation",
+    "No fresh-network download exercised: release upload digest checked, local install and offline launch exercised",
+    "Prior pre-merge launcher check did not cover merged source changes; repaired launcher tested after final integration"
+  ]
+}

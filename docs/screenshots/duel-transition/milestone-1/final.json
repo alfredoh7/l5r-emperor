@@ -1,0 +1,15 @@
+{
+  "Passed": true,
+  "ReducedMotion": false,
+  "Skipped": false,
+  "Version": 1,
+  "UnchangedReplayAtHandoff": true,
+  "NativeInput": true,
+  "Resized": false,
+  "DecisionPrompt": "YOUR MOVE",
+  "Resolution": "(1920, 1080)",
+  "Frames": 271,
+  "FrameIntervalP95Ms": 40.057,
+  "TimingUse": "Diagnostic only; forced rendering and image writes affect frame intervals",
+  "ImageCapture": true
+}

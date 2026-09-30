@@ -1,0 +1,157 @@
+{
+  "date": "2026-09-17",
+  "platform": "macOS Apple M1 Max, Godot 4.7.2 .NET Compatibility",
+  "client_build": {
+    "passed": true,
+    "warnings": 0,
+    "errors": 0
+  },
+  "deterministic_checks": {
+    "passed": 512,
+    "suites": {
+      "collaboration": 43,
+      "content": 132,
+      "meshy_tooling": 6,
+      "core": 175,
+      "published": 52,
+      "deck_format": 9,
+      "deck_workshop": 10,
+      "custom_practice": 13,
+      "ai": 60,
+      "server": 5,
+      "transport": 7
+    }
+  },
+  "native_transition": {
+    "final": {
+      "Passed": true,
+      "ReducedMotion": false,
+      "Skipped": false,
+      "Version": 1,
+      "UnchangedReplayAtHandoff": true,
+      "NativeInput": true,
+      "Resized": false,
+      "DecisionPrompt": "YOUR MOVE",
+      "Resolution": "(1920, 1080)",
+      "Frames": 271,
+      "FrameIntervalP95Ms": 40.057,
+      "TimingUse": "Diagnostic only; forced rendering and image writes affect frame intervals",
+      "ImageCapture": true
+    },
+    "reduced": {
+      "Passed": true,
+      "ReducedMotion": true,
+      "Skipped": false,
+      "Version": 1,
+      "UnchangedReplayAtHandoff": true,
+      "NativeInput": true,
+      "Resized": false,
+      "DecisionPrompt": "YOUR MOVE",
+      "Resolution": "(1920, 1080)",
+      "Frames": 18,
+      "FrameIntervalP95Ms": 871.639,
+      "TimingUse": "Diagnostic only; forced rendering and image writes affect frame intervals",
+      "ImageCapture": true
+    },
+    "skip": {
+      "Passed": true,
+      "ReducedMotion": false,
+      "Skipped": true,
+      "Version": 1,
+      "UnchangedReplayAtHandoff": true,
+      "NativeInput": true,
+      "Resized": false,
+      "DecisionPrompt": "YOUR MOVE",
+      "Resolution": "(1920, 1080)",
+      "Frames": 58,
+      "FrameIntervalP95Ms": 27.168,
+      "TimingUse": "Diagnostic only; forced rendering and image writes affect frame intervals",
+      "ImageCapture": true
+    },
+    "compact": {
+      "Passed": true,
+      "ReducedMotion": false,
+      "Skipped": false,
+      "Version": 1,
+      "UnchangedReplayAtHandoff": true,
+      "NativeInput": true,
+      "Resized": false,
+      "DecisionPrompt": "YOUR MOVE",
+      "Resolution": "(1440, 900)",
+      "Frames": 271,
+      "FrameIntervalP95Ms": 26.857,
+      "TimingUse": "Diagnostic only; forced rendering and image writes affect frame intervals",
+      "ImageCapture": true
+    },
+    "wide": {
+      "Passed": true,
+      "ReducedMotion": false,
+      "Skipped": false,
+      "Version": 1,
+      "UnchangedReplayAtHandoff": true,
+      "NativeInput": true,
+      "Resized": false,
+      "DecisionPrompt": "YOUR MOVE",
+      "Resolution": "(2560, 1080)",
+      "Frames": 271,
+      "FrameIntervalP95Ms": 22.293,
+      "TimingUse": "Diagnostic only; forced rendering and image writes affect frame intervals",
+      "ImageCapture": true
+    },
+    "resize": {
+      "Passed": true,
+      "ReducedMotion": false,
+      "Skipped": false,
+      "Version": 1,
+      "UnchangedReplayAtHandoff": true,
+      "NativeInput": true,
+      "Resized": true,
+      "DecisionPrompt": "YOUR MOVE",
+      "Resolution": "(1440, 900)",
+      "Frames": 67,
+      "FrameIntervalP95Ms": 26.898,
+      "TimingUse": "Diagnostic only; forced rendering and image writes affect frame intervals",
+      "ImageCapture": true
+    }
+  },
+  "launcher": {
+    "Passed": true,
+    "ReducedMotion": false,
+    "Skipped": true,
+    "Version": 1,
+    "UnchangedReplayAtHandoff": true,
+    "NativeInput": true,
+    "Resized": false,
+    "DecisionPrompt": "YOUR MOVE",
+    "Resolution": "(1920, 1080)",
+    "Frames": 115,
+    "FrameIntervalP95Ms": 9.034,
+    "TimingUse": "Diagnostic only; forced rendering and image writes affect frame intervals",
+    "ImageCapture": true
+  },
+  "normal_table_camera": {
+    "passed": true,
+    "coverage": "cursor-anchored zoom, middle/empty-cloth/Space drags, arrow pan, Home reset, fixed HUD/hand, inspector scroll, modal isolation, native card selection; no match mutation",
+    "probe_correction": "Empty-cloth probe moved from under the Fallen HUD to exposed top-center cloth; baseline failed at old point."
+  },
+  "transition_projection": {
+    "visible_samples": 7025,
+    "max_error_pixels": 0.00022
+  },
+  "native_movie": {
+    "file": "transition.mp4",
+    "width": 1920,
+    "height": 1080,
+    "capture_fps": 60,
+    "duration_seconds": 8.233333,
+    "bytes": 6649535,
+    "audio": false,
+    "performance_benchmark": false
+  },
+  "limitations": [
+    "Prepared local review encounter only; normal/private-match activation and return choreography are deferred.",
+    "Human motion/art acceptance and Mendon mechanics/shared-interface review remain pending.",
+    "Native Windows testing not performed.",
+    "Fixed-FPS image capture and forced rendering are diagnostic, not a runtime performance benchmark."
+  ]
+}

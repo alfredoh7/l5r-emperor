@@ -1,0 +1,24 @@
+{
+  "date": "2026-09-17",
+  "build": "Zero warnings and errors",
+  "deterministic_checks": 491,
+  "suites": {
+    "collaboration": 43,
+    "content": 132,
+    "meshy_tools": 6,
+    "core": 172,
+    "published": 52,
+    "deck_format": 9,
+    "workshop": 10,
+    "ai": 56,
+    "server": 5,
+    "transport": 6
+  },
+  "native": "20-step normal and 20-step compact reduced; 13 scenarios; 43-step guidance normal and reduced; all pass",
+  "final_followup": "42% defeat brush stroke reviewed with loser on both sides and 7\u20137 double loss; build and native review pass",
+  "transitions": "Two paused motion phases keep cinematic/card clocks and engine version fixed; skipping moving defeat settles retained evidence without command",
+  "movie": "40.833s 1920x1080/30fps, video only; four real commands; canonical 8\u20137; one opening/ending; sampled sequential frames inspected",
+  "performance": "Separate real-time M1 Max completed-frame run: P95 13.815ms, P99 14.431ms, maximum 37.358ms, one >33.34ms during focus selection; no ending-phase frame >33.34ms",
+  "launcher": "Regenerated; artwork preflight, build and headless startup pass; native Play entry covered by suite",
+  "limits": "Mendon mechanical review, effective province strength under Times of Strife, existing outcome/Focus Effect timing question, Windows native graphical acceptance and normal-match activation remain open. This is not AAA certification. Movie encoding/screenshot timing is not performance evidence."
+}

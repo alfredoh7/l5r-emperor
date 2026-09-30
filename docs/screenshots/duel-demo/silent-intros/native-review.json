@@ -1,0 +1,226 @@
+{
+  "Passed": true,
+  "ActualSessionCommands": 4,
+  "CanonicalResult": "8\u20137",
+  "OpeningRuns": 1,
+  "EndingRuns": 1,
+  "ReducedMotion": false,
+  "DetailedGrass": true,
+  "GrassInstances": 188,
+  "Resolution": "(1920, 1080)",
+  "DurationSeconds": 37.09166666666713,
+  "Mode": "offline movie; not a performance benchmark",
+  "Frames": {
+    "Samples": 2044,
+    "P50Ms": 19.299,
+    "P95Ms": 21.461,
+    "P99Ms": 22.027,
+    "MaxMs": 878.965,
+    "Over33Ms": 8
+  },
+  "ByPhase": {
+    "idle": {
+      "Samples": 182,
+      "P50Ms": 19.751,
+      "P95Ms": 21.564,
+      "P99Ms": 25.49,
+      "MaxMs": 878.965,
+      "Over33Ms": 1
+    },
+    "opening-stakes": {
+      "Samples": 204,
+      "P50Ms": 19.69,
+      "P95Ms": 21.682,
+      "P99Ms": 21.978,
+      "MaxMs": 22.142,
+      "Over33Ms": 0
+    },
+    "opening-hush": {
+      "Samples": 42,
+      "P50Ms": 20.023,
+      "P95Ms": 21.822,
+      "P99Ms": 21.965,
+      "MaxMs": 21.965,
+      "Over33Ms": 0
+    },
+    "opening-challenger": {
+      "Samples": 54,
+      "P50Ms": 19.668,
+      "P95Ms": 21.547,
+      "P99Ms": 782.938,
+      "MaxMs": 782.938,
+      "Over33Ms": 1
+    },
+    "opening-answer": {
+      "Samples": 54,
+      "P50Ms": 19.51,
+      "P95Ms": 21.409,
+      "P99Ms": 21.486,
+      "MaxMs": 21.486,
+      "Over33Ms": 0
+    },
+    "opening-standoff": {
+      "Samples": 54,
+      "P50Ms": 19.547,
+      "P95Ms": 21.174,
+      "P99Ms": 52.801,
+      "MaxMs": 52.801,
+      "Over33Ms": 1
+    },
+    "focusing": {
+      "Samples": 532,
+      "P50Ms": 19.531,
+      "P95Ms": 21.513,
+      "P99Ms": 27.286,
+      "MaxMs": 875.347,
+      "Over33Ms": 4
+    },
+    "verdict": {
+      "Samples": 428,
+      "P50Ms": 18.843,
+      "P95Ms": 21.215,
+      "P99Ms": 22.834,
+      "MaxMs": 26.837,
+      "Over33Ms": 0
+    },
+    "ending-reveal": {
+      "Samples": 42,
+      "P50Ms": 19.446,
+      "P95Ms": 21.116,
+      "P99Ms": 21.637,
+      "MaxMs": 21.637,
+      "Over33Ms": 0
+    },
+    "ending-cut": {
+      "Samples": 14,
+      "P50Ms": 19.681,
+      "P95Ms": 21.467,
+      "P99Ms": 21.467,
+      "MaxMs": 21.467,
+      "Over33Ms": 0
+    },
+    "ending-consequence": {
+      "Samples": 438,
+      "P50Ms": 19.134,
+      "P95Ms": 21.244,
+      "P99Ms": 21.498,
+      "MaxMs": 877.265,
+      "Over33Ms": 1
+    }
+  },
+  "SlowFrames": [
+    {
+      "Time": 4.024999999999996,
+      "Phase": "idle",
+      "Milliseconds": 878.965,
+      "Step": 0
+    },
+    {
+      "Time": 10.658333333333307,
+      "Phase": "opening-challenger",
+      "Milliseconds": 782.938,
+      "Step": 0
+    },
+    {
+      "Time": 12.824999999999966,
+      "Phase": "opening-standoff",
+      "Milliseconds": 52.801,
+      "Step": 0
+    },
+    {
+      "Time": 14.62499999999996,
+      "Phase": "focusing",
+      "Milliseconds": 873.375,
+      "Step": 1
+    },
+    {
+      "Time": 16.624999999999986,
+      "Phase": "focusing",
+      "Milliseconds": 70.534,
+      "Step": 2
+    },
+    {
+      "Time": 17.65833333333337,
+      "Phase": "focusing",
+      "Milliseconds": 825.198,
+      "Step": 3
+    },
+    {
+      "Time": 21.691666666666904,
+      "Phase": "focusing",
+      "Milliseconds": 875.347,
+      "Step": 4
+    },
+    {
+      "Time": 27.091666666667173,
+      "Phase": "ending-consequence",
+      "Milliseconds": 877.265,
+      "Step": 4
+    }
+  ],
+  "Timeline": [
+    {
+      "Time": 0.025,
+      "Phase": "idle",
+      "Version": 1
+    },
+    {
+      "Time": 6.058,
+      "Phase": "opening-stakes",
+      "Version": 1
+    },
+    {
+      "Time": 9.458,
+      "Phase": "opening-hush",
+      "Version": 1
+    },
+    {
+      "Time": 10.158,
+      "Phase": "opening-challenger",
+      "Version": 1
+    },
+    {
+      "Time": 11.058,
+      "Phase": "opening-answer",
+      "Version": 1
+    },
+    {
+      "Time": 11.958,
+      "Phase": "opening-standoff",
+      "Version": 1
+    },
+    {
+      "Time": 12.858,
+      "Phase": "focusing",
+      "Version": 1
+    },
+    {
+      "Time": 21.725,
+      "Phase": "verdict",
+      "Version": 4
+    },
+    {
+      "Time": 22.858,
+      "Phase": "ending-reveal",
+      "Version": 4
+    },
+    {
+      "Time": 23.558,
+      "Phase": "ending-cut",
+      "Version": 4
+    },
+    {
+      "Time": 23.792,
+      "Phase": "ending-consequence",
+      "Version": 4
+    },
+    {
+      "Time": 31.092,
+      "Phase": "verdict",
+      "Version": 4
+    }
+  ],
+  "DrawCalls": 80,
+  "Gpu": "Apple M1 Max",
+  "Notes": "Uses the production screen and MatchSession, a blind legal opponent focus, native local selection/placement, and authoritative resolution. Duels are silent; 3D grass is confined to the playable camera. Native Windows/AAA human acceptance not implied."
+}

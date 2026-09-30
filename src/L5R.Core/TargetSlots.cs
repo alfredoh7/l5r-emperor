@@ -136,6 +136,8 @@ public sealed partial class MatchEngine
     private (TargetSlotOption[] Options, GameCommand? Default, string? Error) BuildSlotOffer(GameCommand prototype, AbilityDefinition ability)
     {
         var options = new List<TargetSlotOption>(); var chosen = new List<SlotSelection>(); var complete = true;
+        // Each earlier card slot's own legal candidates, for the probes below.
+        var offered = new List<(string Slot, string[] Candidates)>();
         // Why candidates were refused, most common first: a refusal every candidate shares (the action's timing, its source
         // or its performer) is the reason the whole action is unavailable, and outnumbers any one candidate's own.
         var refusals = new Dictionary<string, int>();
@@ -153,19 +155,50 @@ public sealed partial class MatchEngine
                 continue;
             }
             var legal = new List<string>();
-            var probe = prototype with { Selections = chosen.ToArray() };
+            // A category that compares a candidate with another slot's cards (Dislodge the Foe's opposing Personality, judged
+            // against where the chosen Tacticians stand) would otherwise be judged against the DEFAULT earlier selection only,
+            // hiding every candidate that is legal beside a different one. Each earlier choice is probed, so a candidate is
+            // offered when some legal earlier selection admits it; the combination itself is still validated on submission.
+            var probes = SlotProbes(prototype, chosen, offered);
             foreach (var candidate in SlotCandidateCards(prototype.PlayerId))
             {
-                try { ValidateSlotCard(probe, ability, slot, candidate.Id); legal.Add(candidate.Id); }
-                catch (RuleViolation e) { refusals[e.Message] = refusals.GetValueOrDefault(e.Message) + 1; }
+                RuleViolation? refused = null;
+                foreach (var probe in probes)
+                {
+                    try { ValidateSlotCard(probe, ability, slot, candidate.Id); refused = null; break; }
+                    catch (RuleViolation e) { refused ??= e; }
+                }
+                if (refused is null) legal.Add(candidate.Id);
+                else refusals[refused.Message] = refusals.GetValueOrDefault(refused.Message) + 1;
             }
             options.Add(new(slot.Id, slot.Label, TargetSlotKinds.Card, slot.Min, slot.Max, legal.ToArray(), []));
+            offered.Add((slot.Id, legal.ToArray()));
             if (legal.Count < slot.Min) complete = false;
             else if (slot.Min > 0) chosen.Add(new(slot.Id, legal.Take(slot.Min).ToArray()));
         }
         var error = refusals.Count == 0 ? null : refusals.OrderByDescending(r => r.Value).First().Key;
         if (!complete) return (options.ToArray(), null, error ?? "No legal target.");
         return (options.ToArray(), NormalizeSlotCommand(prototype with { Selections = chosen.ToArray() }), null);
+    }
+
+    // The default selection, plus one variant per alternative single choice of each earlier card slot. Bounded: a table with many
+    // candidates is probed against a capped number of variants, the default always among them.
+    private static GameCommand[] SlotProbes(GameCommand prototype, List<SlotSelection> chosen, List<(string Slot, string[] Candidates)> offered)
+    {
+        const int limit = 48;
+        var probes = new List<GameCommand> { prototype with { Selections = chosen.ToArray() } };
+        foreach (var (slotId, candidates) in offered)
+        {
+            var current = chosen.FirstOrDefault(c => c.Slot == slotId);
+            if (current?.CardIds is null) continue;
+            foreach (var candidate in candidates)
+            {
+                if (current.CardIds.Contains(candidate, StringComparer.Ordinal)) continue;
+                if (probes.Count >= limit) return probes.ToArray();
+                probes.Add(prototype with { Selections = chosen.Select(c => c.Slot == slotId ? c with { CardIds = [candidate] } : c).ToArray() });
+            }
+        }
+        return probes.ToArray();
     }
 
     // AbilityActions' entry for a multi-target ability: one option whose Slots carry every legal candidate and whose Command

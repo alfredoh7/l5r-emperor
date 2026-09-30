@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "First isolated Table-to-Crimson motion milestone: actual card/attachment lift, synchronized live room camera, dry-brush reveal and real DuelScreen handoff. Pins approved UI through PR263 and separate Duel Demo 83231b1; normal/private match activation remains off.",
+  "validation": "Client build: zero warnings/errors. 512 deterministic checks passed. Native macOS full entrance, reduced motion, Skip, 1440x900, 2560x1080 and mid-entrance resize passed with unchanged version/replay and real hand-card input. Launcher offline art/build/Skip passed. General table camera/input checks passed after correcting stale cloth probe under Fallen HUD. Projection max 0.000220px over 7025 samples; final PNGs/JSON committed, local 1080p60 video available. Capture is not a performance benchmark.",
+  "remaining": "Alfredo motion/art acceptance at this milestone; Mendon mechanics/shared integration review for dependency PR220; current CI/reviews; native Windows testing. Normal/private-match routing, interruption/reconnect reconciliation and return-to-table choreography remain later work. No merge or production activation.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/205",
+  "branch": "codex/205-table-crimson-transition",
+  "updated": "2026-09-17T08:22:07.637424+00:00"
+}

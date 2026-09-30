@@ -7,14 +7,22 @@ namespace L5R.Client;
 public partial class TableSurface : TextureRect
 {
     public const float Pitch = .64f, Depth = .00065f;
+    // Optional presentation camera. The normal game table keeps its original defaults.
+    public float PlanePitch { get; set; } = Pitch;
+    public float PlaneDepth { get; set; } = Depth;
+    // Fixed presentation scenes may bound their content more tightly than the pannable board.
+    public Vector2 CanvasExtent { get; set; } = new(1.7f, 2.7f);
     public SubViewport Canvas { get; private set; } = null!;
     public Vector2 CanvasSize { get; private set; }
     public float RenderScale { get; private set; } = 1;
+    private Vector2 _projectionCenter;
     private ShaderMaterial _projection = null!;
     private bool _mouseInside;
     public override void _Ready()
     {
-        MouseFilter = MouseFilterEnum.Stop;
+        // Main routes table input through the inverse projection. The display
+        // texture must not swallow fixed HUD controls earlier in the scene tree.
+        MouseFilter = MouseFilterEnum.Ignore;
         TextureFilter = TextureFilterEnum.Linear;
         ExpandMode = ExpandModeEnum.IgnoreSize;
         Canvas = new SubViewport { TransparentBg = true, Disable3D = true,
@@ -24,30 +32,44 @@ public partial class TableSurface : TextureRect
         Texture = Canvas.GetTexture();
         Material = _projection = new ShaderMaterial { Shader = GD.Load<Shader>("res://Art/table-perspective.gdshader") };
     }
-    public void ResizePlane(Vector2 size, float density)
+    public void ResizePlane(Vector2 fitSize, float density, Rect2? drawingArea = null)
     {
-        Size = size; CanvasSize = size * new Vector2(1.7f, 2.7f);
+        // Fitting chooses the camera anchor; it must not crop a zoomed table.
+        // Cover the visible window while keeping that anchor and its inverse stable.
+        var area = drawingArea ?? new Rect2(Vector2.Zero, fitSize);
+        Position = area.Position; Size = area.Size;
+        _projectionCenter = fitSize / 2 - Position;
+        var extent = Vector2.Zero;
+        foreach (var corner in new[] { Vector2.Zero, new Vector2(Size.X, 0), Size, new Vector2(0, Size.Y) })
+            extent = extent.Max(UnprojectOffset(corner - _projectionCenter, PlanePitch, PlaneDepth).Abs());
+        // Include filtering guard pixels; a fixed overscan multiplier can still
+        // lose the far corners after widening the display or changing its anchor. Never
+        // shrink below CanvasExtent's own tuned minimum for a fixed presentation scene.
+        CanvasSize = (extent * 2 + Vector2.One * 16).Max(Size * CanvasExtent);
         RenderScale = Math.Min(density, 8192 / Math.Max(CanvasSize.X, CanvasSize.Y));
         Canvas.Size = (Vector2I)(CanvasSize * RenderScale).Ceil();
         CanvasSize = (Vector2)Canvas.Size / RenderScale;
         Canvas.CanvasTransform = Transform2D.Identity.Scaled(Vector2.One * RenderScale);
         _projection.SetShaderParameter("display_size", Size);
+        _projection.SetShaderParameter("projection_center", _projectionCenter);
         _projection.SetShaderParameter("canvas_size", CanvasSize);
-        _projection.SetShaderParameter("pitch", Pitch);
-        _projection.SetShaderParameter("depth", Depth);
+        _projection.SetShaderParameter("pitch", PlanePitch);
+        _projection.SetShaderParameter("depth", PlaneDepth);
     }
-    public static Vector2 ProjectOffset(Vector2 plane)
+    public static Vector2 ProjectOffset(Vector2 plane) => ProjectOffset(plane, Pitch, Depth);
+    public static Vector2 ProjectOffset(Vector2 plane, float pitch, float depth)
     {
-        var divisor = 1 - plane.Y * Depth;
-        return new Vector2(plane.X, plane.Y * Pitch) / divisor;
+        var divisor = 1 - plane.Y * depth;
+        return new Vector2(plane.X, plane.Y * pitch) / divisor;
     }
-    public static Vector2 UnprojectOffset(Vector2 screen)
+    public static Vector2 UnprojectOffset(Vector2 screen) => UnprojectOffset(screen, Pitch, Depth);
+    public static Vector2 UnprojectOffset(Vector2 screen, float pitch, float depth)
     {
-        var y = screen.Y / (Pitch + Depth * screen.Y);
-        return new Vector2(screen.X * (1 - Depth * y), y);
+        var y = screen.Y / (pitch + depth * screen.Y);
+        return new Vector2(screen.X * (1 - depth * y), y);
     }
-    public Vector2 ProjectCanvas(Vector2 plane) => GetGlobalTransform() * (Size / 2 + ProjectOffset(plane - CanvasSize / 2));
-    public Vector2 ScreenToCanvas(Vector2 screen) => CanvasSize / 2 + UnprojectOffset(GetGlobalTransform().AffineInverse() * screen - Size / 2);
+    public Vector2 ProjectCanvas(Vector2 plane) => GetGlobalTransform() * (_projectionCenter + ProjectOffset(plane - CanvasSize / 2, PlanePitch, PlaneDepth));
+    public Vector2 ScreenToCanvas(Vector2 screen) => CanvasSize / 2 + UnprojectOffset(GetGlobalTransform().AffineInverse() * screen - _projectionCenter, PlanePitch, PlaneDepth);
     public void ForwardMouse(InputEventMouse mouse)
     {
         var forwarded = (InputEventMouse)mouse.Duplicate();

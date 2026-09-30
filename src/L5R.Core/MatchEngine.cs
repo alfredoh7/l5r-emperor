@@ -6,6 +6,11 @@ namespace L5R.Core;
 public sealed partial class MatchEngine
 {
     public const string ContentVersion = "emperor-lion-crane-0.2.0";
+    /// <summary>The wire protocol both the server and the client advertise in the handshake. One constant, so a client
+    /// can never claim a protocol whose command/state members the peer would reject (UnmappedMemberHandling.Disallow).
+    /// 2: commands carry createdCard, and the state message carries the attack cue and per-action attack/movement/
+    /// alternative-cost metadata.</summary>
+    public const int ProtocolVersion = 2;
     private MatchState _state;
     private readonly ulong _seed;
     private readonly string _scenario;
@@ -68,6 +73,7 @@ public sealed partial class MatchEngine
 
     private static MatchEngine Create(ulong seed, string scenario)
     {
+        if (scenario.StartsWith("duel-demo/", StringComparison.Ordinal)) return CreateDuelDemoState(seed, scenario[10..]);
         if (scenario == PublishedContent.Scenario) return CreatePublished(seed, PublishedContent.Scenario, PublishedContent.Snapshot);
         if (scenario == PublishedContent.TestScenario) return CreatePublished(seed, PublishedContent.TestScenario, PublishedContent.TestSnapshot);
         if (scenario is not ("starter" or "economy" or DeckSearchScenario or CopyShowcaseScenario or AbilityGrantShowcaseScenario or EitherOrShowcaseScenario or OpponentPaymentShowcaseScenario)) throw new ArgumentException("Unknown scenario.");
@@ -176,10 +182,17 @@ public sealed partial class MatchEngine
         var firstEvent = _state.Events.Count;
         try
         {
+            var aftermath = _state.LastDuel is { Complete:false, Result:not null } ? CaptureDuelEvidence() : null;
+            var reactionSource = command.CardId ?? _state.PendingChoice?.CardId;
+            var reactionCard = aftermath is not null && reactionSource is not null && _state.Cards.TryGetValue(reactionSource, out var rc)
+                && rc.FaceUp && rc.Zone is not (Zone.Hand or Zone.FateDeck or Zone.DynastyDeck) ? ViewCard(rc) : null;
+            var reactionLabel = _state.PendingChoice?.Type=="overconfidentDraw" ? "Overconfident" : null;
             Apply(command);
             ReturnCardsOutOfPlayToTheirOwners();
             RemoveCreatedCardsLeftInPiles();
+            if (aftermath is not null) RecordDuelChanges(aftermath, "Aftermath", reactionCard, sourceLabel: reactionLabel);
             _state.Version++;
+            RefreshDuelRecord();
             _commands.Add(Copy(command));
             return new(true,null,_state.Version,_state.Events.Skip(firstEvent).ToArray());
         }
@@ -400,6 +413,15 @@ public sealed partial class MatchEngine
                 if (command.Type=="useAbility") UseAbility(command); else PassReaction();
                 return;
             }
+            if (_state.PendingChoice.Type=="afterActionResolvedReaction")
+            {
+                // After an action's resolution (issue #437): either player may play a Reaction that names it, or pass; two consecutive passes close the window (PassReaction),
+                // the same shape as afterResolutionReaction above -- there is nothing special to do when it closes (no special-cased branch in PassReaction), priority just
+                // returns to whoever this window's own ActingPlayerId (FinishActionEffectTracking's own closesTo) named.
+                Require(command.Type is "useAbility" or "declineReaction" or "pass","Play a Reaction to the action's resolution or pass.");
+                if (command.Type=="useAbility") UseAbility(command); else PassReaction();
+                return;
+            }
             if (_state.PendingChoice.Type=="battleRecruit")
             {
                 // After a battle resolved (issue #379): the players holding a Ring's recruit grant of this battle may put it into play (a
@@ -534,6 +556,9 @@ public sealed partial class MatchEngine
         // Honor loss is his EntryHonorLoss above; each other player then owes their discards (queued, so a Proclaim or entry window
         // already open is never overwritten -- see OpenOverconfidentDrawWindow).
         if(Definition(card).Effect==BofanaEntryDiscardEffect) QueueOtherPlayersEntryDiscards(playerId);
+        // The Great Death (issue #431): "After The Great Death enters play: Create three 1F Shadowlands * Nonhuman * Raptor * Cavalry * Undead Followers, attach them to it, and lose 6 Honor." A trait, so
+        // mandatory like the lines above (the Honor loss is its EntryHonorLoss).
+        if(Definition(card).Effect==GreatDeathEntryEffect) CreateGreatDeathFollowers(playerId,card);
     }
     // Sensei (Mirumoto Hikaro / Mirumoto Yozo, Experienced 2): "your OTHER Sensei Personalities" --
     // every OTHER Sensei-keyword Personality this same controller has, either unbowed-or-bowed in
@@ -661,6 +686,25 @@ public sealed partial class MatchEngine
         EnterPlayFromRecruit(player,card,battlefield,via);
         onEntry?.Invoke(card);
         return OpenRecruitEntryWindows(player,card,false,null);
+    }
+
+    // Akodo Kobi (issue #440 follow-up): each queued recruit -- checked, at the moment it actually resolves, for whether the card is STILL dead (a later
+    // effect could already have brought him back another way) -- enters at home the same way BringDeadPersonalityIntoPlay does, ignoring costs and Honor
+    // Requirements by construction (no QuotePurchase call at all, the same reason that primitive already ignores them for At Any Cost/Goju Plot). Unlike
+    // BringDeadPersonalityIntoPlay, this deliberately does NOT open an entering-play Reaction window: doing so mid-EndTurn would interrupt the turn's own
+    // transition to Phase.End with nothing recorded to resume it correctly (ResumeAfterDeferredWindow has no case for "we were mid-EndTurn"), and no Lion
+    // Clan Personality this pass concerns carries one -- a future card that does would need that resumption built first. The Overconfident draw entering
+    // play still queues (EnterPlayFromRecruit's own QueueOverconfidentDraw) is picked up by EndTurn's very next check, same as any other entry there.
+    private void ResolvePendingEndPhaseRecruits()
+    {
+        var due=_state.PendingEndPhaseRecruits.ToArray();
+        _state.PendingEndPhaseRecruits.Clear();
+        foreach(var pending in due)
+        {
+            if(!_state.Cards.TryGetValue(pending.CardId,out var card) || card.Zone!=Zone.Dead) continue;
+            ResetCardState(card);
+            EnterPlayFromRecruit(Player(pending.PlayerId),card,null,pending.Via);
+        }
     }
 
     private void EnterPlayFromRecruit(PlayerState player,CardInstance card,int? battlefield,string via)
@@ -824,11 +868,17 @@ public sealed partial class MatchEngine
     // possible by a defender's battlefield-creation ability at the attacker's own province -- that
     // mechanic does not exist yet, so QuotePurchase's own ProclaimEligible (which already requires
     // playerId==ActivePlayerId) is reused as-is and simply never overridden for this narrow case.
+    // Akodo Ashiko (oracle-l5r-193, issue #440): "If Ashiko is face-up in one of your Provinces, Recruit her..." is the Reserve keyword's own
+    // shape (an absent battle action, only her own card, no separate granting card needed -- see the Reserve keyword's reminder text on Tamori
+    // Shinji and its own kind), just printed on a card that carries no other Reserve-keyword capability, so IsReserveRecruitable substitutes her
+    // own Effect string for the keyword check rather than adding "Reserve" to her printed Keywords (which she does not carry).
+    private bool IsReserveRecruitable(CardInstance card) => Keyword(card,"Reserve") || Definition(card).Effect=="ashiko-outnumbered-reserve";
+
     private void RecruitReserve(GameCommand command)
     {
         Require(_state.Phase==Phase.Battle,"Reserve recruitment is an absent battle action, only available during the Battle Phase.");
         var card=Card(command.CardId);
-        Require(card.OwnerId==command.PlayerId && card.Zone==Zone.Province && card.FaceUp && Definition(card).Type==CardType.Personality && Keyword(card,"Reserve"),
+        Require(card.OwnerId==command.PlayerId && card.Zone==Zone.Province && card.FaceUp && Definition(card).Type==CardType.Personality && IsReserveRecruitable(card),
             "Choose your own face-up Reserve Personality in a province.");
         var provinceIndex=card.ProvinceIndex!.Value;
         Require(_state.UnresolvedBattlefields.Contains(provinceIndex),"There is no battlefield at this province.");
@@ -926,13 +976,22 @@ public sealed partial class MatchEngine
             && !(ignoreHonorRequirementIfPersonalityClan is string waivedClan && HasClanAffiliation(card,waivedClan))) error="Family Honor is below the Honor Requirement; Clan allegiance may allow purchase.";
         var prosperous=def.Effect=="prosperous-discount"?_state.Cards.Values.Count(c=>c.OwnerId==playerId && InPlay(c) && Definition(c).Type==CardType.Personality):0;
         var reserveDiscount=viaReserve && def.Effect=="reserve-defender-discount"?4:0;
+        // Akodo Ashiko (oracle-l5r-193, issue #440): "reducing her Gold Cost by 2 if there are more units on the enemy side of the current battle
+        // than on your side" -- true by construction only on a Reserve recruit (viaReserve), where card.ProvinceIndex is already the battlefield
+        // (the same one RecruitReserve's own Require checked has enemy presence). Army(...).Count() is the live, always-current unit count at a
+        // battlefield -- already the established primitive for exactly this comparison (e.g. barred-passage-bow's own army-size check), not
+        // something that needs tracking or updating separately: it is read fresh every time a quote is asked for, including after intervening
+        // Battle actions have changed either side's presence.
+        var ashikoDiscount=viaReserve && def.Effect=="ashiko-outnumbered-reserve" && card.ProvinceIndex is int ashikoProvince
+            && Army(1-playerId,ashikoProvince).Count() > Army(playerId,ashikoProvince).Count() ? 2 : 0;
         // "Enters play paying N less Gold if you are a <Clan> Clan player" (issue #336, Daigotsu Hotako exp3): a printed term of the card that
         // stacks with the two Clan choices above; the same one ClanEntryDiscount gives Equip.
         var entryDiscount=ClanEntryDiscount(def,player);
-        var rawCost=def.GoldCost-prosperous-reserveDiscount-(entryDiscount?.Amount??0)+(clanAllegiance?2:0)-(clanDiscount?2:0);
+        var rawCost=def.GoldCost-prosperous-reserveDiscount-ashikoDiscount-(entryDiscount?.Amount??0)+(clanAllegiance?2:0)-(clanDiscount?2:0);
         var cost=Math.Max(0,rawCost);
         // The human-readable derivation the payment panel shows (issue #303), term by term.
         var basis=$"{def.Name} cost {def.GoldCost}"+(prosperous>0?$" − {prosperous} (controlled Personalities)":"")+(reserveDiscount>0?$" − {reserveDiscount} (Reserve while defending)":"")
+            +(ashikoDiscount>0?$" − {ashikoDiscount} (outnumbered)":"")
             +(entryDiscount is {} entry?$" − {entry.Amount} ({entry.Clan} Clan)":"")
             +(clanAllegiance?" + 2 (Clan allegiance)":"")+(clanDiscount?" − 2 (Clan discount)":"")+(rawCost<0?" (min 0)":"");
         if ((Keyword(card,"Unique") || Keyword(card,"Singular")) && ControlsCopyOf(playerId,def.Name)) error=$"You already control this {(Keyword(card,"Unique") ? "Unique" : "Singular")} card.";
@@ -1217,6 +1276,7 @@ public sealed partial class MatchEngine
         Require(_state.Phase==Phase.BattleSelection,"Battle order may be chosen between battles.");
         Require(command.Province is int && _state.UnresolvedBattlefields.Contains(command.Province.Value),"Choose an unresolved battlefield.");
         _state.CurrentBattleProvince=command.Province; _state.BattleNumber++;
+        _state.EnemyDestroyedOwnPersonalitySinceLastBattleAction=new bool[2]; // Revenge (issue #437): "this battle" bounds the window.
         SetPhase(Phase.Battle,1-_state.ActivePlayerId);
         // Battle Phase timing (issue #310): the Defender holds the first opportunity by default (spec 4.4).
         // "Engaging" is exactly this moment -- the Attacker has just selected the battle (spec 4.1) -- so the
@@ -1907,6 +1967,11 @@ public sealed partial class MatchEngine
         // Strength of the Tsunami: "This Shugenja has +6F" -- only the Shugenja it is attached to gets it.
         +Attachments(card.Id).Where(c=>Definition(c).Type==CardType.Spell && Definition(c).Effect=="tsunami-force" && Keyword(card,"Shugenja")).Sum(_=>6)
         +(Definition(card).Effect=="force-with-spell"&&Attachments(card.Id).Any(c=>Definition(c).Type==CardType.Spell)?1:0)
+        +(Definition(card).Effect=="force-with-spell-2"&&Attachments(card.Id).Any(c=>Definition(c).Type==CardType.Spell)?2:0)
+        // Ember's Final Fire: "While this Shugenja is Fire, he has +1F". Stone-Hewed Shrine: "Defending Earth Personalities have +1F while at this province's battlefield."
+        +Attachments(card.Id).Count(c=>Definition(c).Type==CardType.Spell && Definition(c).Effect=="embers-final-fire-force" && Keyword(card,"Fire"))
+        +2*Attachments(card.Id).Count(c=>Definition(c).Effect=="death-defeated-force")
+        +(card.Zone==Zone.Battlefield && Keyword(card,"Earth") && IsDefendingUnit(card) && _state.Cards.Values.Any(r=>r.Zone==Zone.Region && r.ProvinceIndex==card.ProvinceIndex && Definition(r).Effect=="stone-hewed-shrine-force")?1:0)
         +(Definition(card).Effect=="force-if-enemy-dishonorable"&&_state.Cards.Values.Any(c=>c.OwnerId!=card.OwnerId&&Definition(c).Type==CardType.Personality&&InPlay(c)&&c.Dishonorable)?2:0)
         // "The highest number of dead Personalities in any one discard pile" -- the greatest per-player
         // count of Zone.Dead Personalities, i.e. the largest single pile, not the combined total.
@@ -1965,6 +2030,9 @@ public sealed partial class MatchEngine
     private int FollowerForce(CardInstance card) => Math.Max(0,Definition(card).Force+StatModifier(card,"Force")+TerrainForceAdjustment(card)+(Definition(card).Effect switch
     {
         "force-while-defending" => IsDefendingUnit(card) ? 2 : 0,
+        // Home Guard (oracle-l5r-3413, issue #435): "This card has +3F while defending" -- the same
+        // shape as force-while-defending above, at 3 instead of 2.
+        "force-while-defending-3" => IsDefendingUnit(card) ? 3 : 0,
         // Disciples of Ganesh: "+2F while defending" -- shares FollowerForce's existing case, plus a
         // separate destruction-triggered Honor gain (see DestroyedDuringBattleBonus, keyed by the same
         // Effect string) -- one card, two engine hooks, since Effect is a single field per card.
@@ -1990,7 +2058,7 @@ public sealed partial class MatchEngine
         // Item's bonus TO the wielder); here the Follower's own Force is keyed off the wielder instead.
         "force-equals-wielder-printed-force" => card.AttachedTo is null ? 0 : Definition(Card(card.AttachedTo)).Force,
         _ => 0
-    })+UnitFollowerBoost(card)+AshigaruBattleBoost(card)+ArmyBattleMaidenBoost(card));
+    })+UnitFollowerBoost(card)+AkioFollowerBoost(card)+AshigaruBattleBoost(card)+ArmyBattleMaidenBoost(card));
     // "Boost other cards in the unit" primitive (Senior Infantry Legion's shape): distinct from the
     // self-referential conditional bonuses above, this is a card that grants a static Force bonus to
     // every OTHER Follower attached to the same Personality (a unit is a Personality and all of its
@@ -2268,6 +2336,9 @@ public sealed partial class MatchEngine
             card.ProvinceIndex=null;
             MarkDead(card);
             count++;
+            // Action-effect tracking (issue #437): only ever recorded when this destruction came from a specific action (actingPlayerId is set) --
+            // never for the mass casualty sweep a battle's own resolution performs directly (see the comment above on IsCreatedCard's own check).
+            if(actingPlayerId is not null) RecordActionEffect(card.Id,DestroyedKind);
             // The destruction itself, and everything it normally triggers (the Dishonorable-death
             // penalty MarkDead already applied above, ExpendableDraw, DestroyedDuringBattleBonus,
             // Overconfident), still fully happens -- Lady Matsu's Rage only overrides where the
@@ -2361,6 +2432,9 @@ public sealed partial class MatchEngine
     // Asahina Tsugio / Asako Kijo (issue #223): "other players' maximum hand sizes are increased by
     // 1" -- the printed 8 becomes a per-player computed value, raised by 1 for every in-play card an
     // OPPONENT controls carrying this Effect (either of them, on either side, could stack).
+    // False Ring of Earth (oracle-l5r-10532, issue #295): "Other players have -1 maximum hand size" --
+    // a separate Effect from increase-other-hand-size, so an increaser and a decreaser net out.
+    // HandLimitFor also names each contributing card for the public hand-limit placard.
     private HandLimitView HandLimitFor(int playerId)
     {
         var modifiers = _state.Cards.Values
@@ -2386,6 +2460,10 @@ public sealed partial class MatchEngine
         // Lady Matsu's Rage: "this turn" (its own printed parenthetical) -- any watch that never fired
         // (the target never straightened) simply expires here, with no further consequence.
         _state.PendingLadyMatsusRageWatches.Clear();
+        // Akodo Kobi (issue #440 follow-up): "before the current turn ends" -- exactly here, the next End Phase reached by ANY player (this function runs
+        // for every player's own turn ending, not just one). A second Overconfident check catches anything a freshly-entered Personality just queued.
+        ResolvePendingEndPhaseRecruits();
+        if(_state.WinnerId is not null || OpenOverconfidentDrawWindow(_state.ActivePlayerId)) return;
         var player=Player(_state.ActivePlayerId);
         SetPhase(Phase.End,player.Id);
         if(player.DishonorLossPending) { Win(1-player.Id,"Dishonor defeat at the beginning of the End Phase"); return; }
@@ -2519,6 +2597,10 @@ public sealed partial class MatchEngine
                 else if(Definition(card).Type==CardType.Region) ResolveRegion(player,province,card);
                 else if(Definition(card).Type==CardType.Celestial) ResolveCelestial(player,province,card);
             }
+            // An Event already face up (refilled face up by Border Keep's cycle or the Kharmic replacement) was never
+            // revealed here, but Events resolve only in the Events Phase: it resolves now instead of staying stuck
+            // (rules lead ruling, docs/decisions/2026-09-22-suspicions-owner-events-phase.md).
+            else if(Definition(card).Type==CardType.Event && ResolveEvent(player,province,card)) return;
         }
         AdvanceStraightenHolds(StraightenPoint.EventsRevealEnds);
         // Suspicions-shaped ongoing Event effects: re-checked every Events Phase (see ResolveOngoingEvents),
@@ -2694,7 +2776,7 @@ public sealed partial class MatchEngine
     private int EffectiveProvinceStrength(ProvinceState province)
     {
         // The CURRENT strength: raised and lowered by everything that has acted on the province, and by the Region and the Terrain bonuses still in play.
-        var strength=province.Strength + (province.RegionId is string id && RegionStrengthBonus.TryGetValue(Definition(Card(id)).Effect,out var bonus) ? bonus : 0) + ProvinceSourceBonuses(province);
+        var strength=province.Strength + (province.RegionId is string id && RegionStrengthBonus.TryGetValue(Definition(Card(id)).Effect,out var bonus) ? bonus : 0) + ProvinceSourceBonuses(province) + StaticProvinceBonus(province);
         // A limit (TerrainStatics.cs: Times of Strife, issue #259; Ancient Feud, issue #418) is a CEILING on what is read, never a lowering of the current strength: a province already at or
         // below it is untouched, and one above it reads as the maximum until the limit ends.
         return ProvinceStrengthMax(province) is int max ? Math.Min(strength,max) : strength;
@@ -2703,10 +2785,9 @@ public sealed partial class MatchEngine
     // game"): re-checked every Events Phase rather than snapshotted once, the same living-state
     // approach GrantedKeyword.Duration "Permanent" uses for a keyword grant -- a card sitting in
     // Zone.EventInPlay IS the "effect still active" flag, so nothing else needs to remember it
-    // separately, and nothing needs to clear it (Suspicions' own effect never ends). "The player's
-    // Events Phase" (singular, Suspicions' own printed wording) is whichever player's turn this is --
-    // only the active player has an Events Phase at all (turn-based, core rules turn order), and its
-    // trigger affects BOTH players' Honor once per such phase, including the very turn Suspicions
+    // separately, and nothing needs to clear it (Suspicions' own effect never ends). It triggers
+    // "before each of your Action Phases" -- only on its owner's own turns -- and each trigger
+    // affects BOTH players' Honor once, including the very turn Suspicions
     // itself is revealed (ResolveEvent above already moved it into Zone.EventInPlay earlier in this
     // same EventsPhase call).
     private void ResolveOngoingEvents(PlayerState activePlayer)
@@ -2714,8 +2795,9 @@ public sealed partial class MatchEngine
         foreach(var card in _state.Cards.Values.Where(c=>c.Zone==Zone.EventInPlay).ToArray())
         {
             // Suspicions' own printed order: "each player in turn order starting with you" -- the
-            // revealing/active player's own loss resolves first, then the other player's.
-            if(Definition(card).Effect=="suspicions")
+            // revealing/active player's own loss resolves first, then the other player's. It fires
+            // only "before each of YOUR Action Phases": on its owner's turns, never the opponent's.
+            if(Definition(card).Effect=="suspicions" && card.OwnerId==activePlayer.Id)
                 foreach(var playerId in new[] { activePlayer.Id, 1-activePlayer.Id })
                     GainHonor(playerId,-1,$"Suspicions (end of {activePlayer.Name}'s Events Phase)",card);
         }

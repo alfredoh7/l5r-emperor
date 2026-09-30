@@ -7,7 +7,12 @@ namespace L5R.Client;
 public static class CreatedCopyStatus
 {
     private static Texture2D? _seal;
-    public static Texture2D Seal => _seal ??= GD.Load<Texture2D>("res://Art/CreatedCopies/twin-card-seal.png");
+    // Keep the generated pixels; the atlas removes only excess transparent padding.
+    public static Texture2D Seal => _seal ??= new AtlasTexture
+    {
+        Atlas = GD.Load<Texture2D>("res://Art/CreatedCopies/ghost-copy-marker.png"),
+        Region = new Rect2(160, 126, 956, 956)
+    };
     public static bool VisibleOn(CardView card) => card.CreatedCopy && card.FaceUp && card.Definition is not null;
     public static string Description(CardView card) => "Created copy\n" + (card.Zone == Zone.RemovedFromGame
         ? "Removed from the game." : "Removed from the game when it leaves play.");
@@ -20,7 +25,7 @@ public static class CreatedCopyStatus
     }
 }
 
-/// <summary>Approved raster seal, outside the lower-left scan and token rail. Clicking only inspects.</summary>
+/// <summary>Approved overlapping ghost outlines with restrained wisps, outside the lower-left scan and token rail. Clicking only inspects.</summary>
 public partial class CreatedCopySeal : Button
 {
     public required CardTile CardAnchor { get; init; }

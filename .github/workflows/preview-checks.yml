@@ -1,0 +1,37 @@
+name: Windows preview delivery checks
+
+on:
+  pull_request:
+    paths:
+      - 'tools/previews/**'
+      - 'previews/**'
+      - '.github/workflows/preview-checks.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  windows-review:
+    name: Windows review package
+    runs-on: windows-2022
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Packaging regressions
+        run: python -m unittest discover -s tools/previews -p 'test_*.py' -v
+      - name: Download and exercise the actual Windows preview
+        shell: powershell
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $receipts = @(Get-ChildItem previews/published -Filter *.json)
+          if ($receipts.Count -eq 0) { throw 'No package receipts to validate' }
+          foreach ($receipt in $receipts) {
+            & ./tools/previews/check_windows.ps1 -ReceiptPath $receipt.FullName
+          }

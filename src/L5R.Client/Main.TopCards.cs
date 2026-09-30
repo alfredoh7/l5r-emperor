@@ -14,14 +14,14 @@ public partial class Main
     {
         if (_lookInspection is not null && IsInstanceValid(_lookInspection)) { _lookInspection.Hide(); _lookInspection.QueueFree(); }
         _lookInspection = null;
-        if (_lookPanel is not null) { _lookPanel.Hide(); _root.RemoveChild(_lookPanel); _lookPanel.QueueFree(); _lookPanel = null; }
+        if (_lookPanel is not null) { _lookPanel.CancelPrivateDrag(); _lookPanel.Hide(); _root.RemoveChild(_lookPanel); _lookPanel.QueueFree(); _lookPanel = null; }
         _lookViewKey = null;
     }
     private void FitLookPanel()
     {
         if (_lookPanel is null) return;
-        var width = Math.Min(1360, _layoutWidth - 80);
-        _lookPanel.Position = new((_layoutWidth - width) / 2, 168); _lookPanel.Size = new(width, 744);
+        var width = Math.Min(1800, _layoutWidth - 64);
+        _lookPanel.Position = new((_layoutWidth - width) / 2, 168); _lookPanel.Size = new(width, 884);
     }
     private bool RenderLookDecision()
     {
@@ -41,7 +41,7 @@ public partial class Main
         if (_lookViewKey != key)
         {
             ClearLookPanel(); ClearSearchPanel(); ClearCopyPanel(true); HideTableTooltip(); HideShownPreview(); ReleaseTableFocus();
-            _lookPanel = new TopCardPanel { ZIndex = 90 }; _root.AddChild(_lookPanel); FitLookPanel();
+            _lookPanel = new TopCardPanel { ZIndex = 90, ReducedMotion = _reducedMotion, PointerPosition = () => _lastTableMouse }; _root.AddChild(_lookPanel); FitLookPanel();
             _lookPanel.Populate(look, DecisionCanSubmit, View.ViewerId); _lookViewKey = key;
             _lookPanel.Confirmed += tokens =>
             {

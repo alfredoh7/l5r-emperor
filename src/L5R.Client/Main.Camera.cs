@@ -40,7 +40,8 @@ public partial class Main
 
     private void BuildTableViewport()
     {
-        _tableViewport = Place(_root, new Control { ClipContents = true, MouseFilter = Control.MouseFilterEnum.Ignore }, 24, 148, 1500, 702);
+        // Keep overview fitting separate from full-window table drawing.
+        _tableViewport = Place(_root, new Control { ClipContents = false, ZIndex = -1, MouseFilter = Control.MouseFilterEnum.Ignore }, 24, 148, 1500, 702);
         _tableSurface = Place(_tableViewport, new TableSurface(), 0, 0, 1500, 702);
         _tableSurface.ResizePlane(_tableViewport.Size, 1);
         _world = Place(_tableSurface.Canvas, new Control { Theme = Palette.MakeTheme(), MouseFilter = Control.MouseFilterEnum.Ignore }, 0, 0, WorldWidth, 1100);
@@ -63,7 +64,8 @@ public partial class Main
         // upward reach of its fan. Hover can still deliberately lift a hand card.
         _tableViewport.Size = new Vector2(_layoutWidth - SidebarWidth - BattleStripReserve - left - 44,
             Math.Min(666, 1060 - HandCardSide - _tableViewport.Position.Y - 30));
-        _tableSurface.ResizePlane(_tableViewport.Size, _root.Scale.X);
+        _tableSurface.ResizePlane(_tableViewport.Size, _root.Scale.X,
+            new Rect2(-_tableViewport.Position, GetViewport().GetVisibleRect().Size / _root.Scale.X));
         ApplyTableCamera();
     }
 
@@ -151,13 +153,13 @@ public partial class Main
         ApplyTableCamera();
     }
 
-    private bool CameraBlocked => LookPanelOpen || SearchPanelOpen || CopyPanelOpen || PracticeVisible || MenuVisible || !GetWindow().HasFocus() || (_fullscreenGate?.Visible ?? false)
+    private bool CameraBlocked => MatchDuelOpen || LookPanelOpen || SearchPanelOpen || CopyPanelOpen || PracticeVisible || MenuVisible || !GetWindow().HasFocus() || (_fullscreenGate?.Visible ?? false)
         || GetChildren().OfType<Window>().Any(w => w.Visible)
         || _expandedUnits.Count > 0;
 
     private bool PointerOnTable(Vector2 viewportPoint)
     {
-        if (CameraBlocked || !_tableViewport.GetGlobalRect().HasPoint(viewportPoint)) return false;
+        if (CameraBlocked || !_tableSurface.GetGlobalRect().HasPoint(viewportPoint) || FixedHudCovers(viewportPoint)) return false;
         // Prepared attack-review navigation sits over the table. Let native GUI
         // picking receive its clicks instead of forwarding them into the mat.
         if (_root.GetNodeOrNull<Control>("AttackReviewControls") is { } attackReview &&
@@ -176,8 +178,22 @@ public partial class Main
             c.IsVisibleInTree() && c.GetGlobalRect().HasPoint(viewportPoint));
     }
 
+    private bool FixedHudCovers(Vector2 point)
+    {
+        static bool Covers(Control? control, Vector2 p) => control is not null &&
+            control.IsVisibleInTree() && control.GetGlobalRect().HasPoint(p);
+        return Covers(_inspectorPanel, point) || Covers(_hand, point) || Covers(_timeline, point) || Covers(_menu, point) || Covers(_battleProgressStrip, point)
+            || _clanHud.GetChildren().OfType<Control>().Any(c => Covers(c, point))
+            // A hovered hand face can rise above the hand container.
+            || _hand.GetChildren().OfType<CardTile>().Any(c => Covers(c, point));
+    }
+
     public override void _Input(InputEvent @event)
     {
+        // Native camera probes share a desktop with the reviewer. Only their
+        // tagged pointer events belong to the scripted acceptance sequence.
+        if (IsMouseInputCapture && @event is InputEventMouse && !@event.HasMeta(CaptureMouseTag))
+        { GetViewport().SetInputAsHandled(); return; }
         // A recorded demonstration consumes live input so a wheel/key/click
         // cannot alter the evidence mid-take. Normal play and input probes do not.
         if (_capturePath is not null && _captureMode == "published-ink-film")
@@ -187,7 +203,7 @@ public partial class Main
         // focus checks and ordinary game input routing remain in force.
         if (IsMouseInputCapture && @event is InputEventMouse && !@event.HasMeta(CaptureMouseTag))
         { GetViewport().SetInputAsHandled(); return; }
-        if (_tableSurface is null || MenuVisible) return;
+        if (_tableSurface is null || MenuVisible || DuelDemoOpen || _transitionReview || MatchDuelOpen) return;
         if (@event is InputEventMouse location) _lastTableMouse = location.Position;
         // The token buttons live above the projected viewport; let native GUI input
         // reach them instead of forwarding their clicks into the underlying table.
@@ -204,7 +220,9 @@ public partial class Main
             }
             if (!PointerOnTable(mouse.Position))
             {
-                if (!mouse.Pressed) _tableSurface.ReleaseMouseOutside(mouse);
+                // A root-UI drag owns its release. Forwarding it into the table's
+                // SubViewport can end the shared Godot drag before the tray receives it.
+                if (!mouse.Pressed && !GetViewport().GuiIsDragging()) _tableSurface.ReleaseMouseOutside(mouse);
                 return;
             }
             if (!mouse.Pressed) { _tableSurface.ForwardMouse(mouse); GetViewport().SetInputAsHandled(); return; }

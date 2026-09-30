@@ -1,0 +1,13 @@
+{
+  "date": "2026-09-16",
+  "method": "Built-in imagegen",
+  "source": "approved-layout.png",
+  "mat": "src/L5R.Client/Art/CrimsonDuel/campaign-mat-filigree.png",
+  "generationOutput": "exec-bcf27e54-ebfd-4f0e-b3a1-9d5e3397a744.png",
+  "prompt": "Use case: precise-object-edit. Production game texture, orthographic TOP DOWN, rectangular 2:1 aspect ratio, edge-to-edge albedo only. Image 1 is the current texture to edit. Image 2 is the approved design reference for the gold border. Preserve Image 1's navy campaign cloth, EXACT central crossed katanas and five muted gray L5R elemental emblems, their placement and proportions, subtle aged blood stains. Replace ONLY the angular geometric gold border with Image 2's refined Japanese gold filigree: delicate karakusa foliage and chrysanthemum corner ornaments and restrained seigaiha wave line along bottom. Replace thick red outer edging with narrow charcoal woven binding from Image 2. Keep all four borders fully within the image; no perspective, no shadows outside, no camera angle, no surrounding scene, no cards, no numbers, no lettering, no UI. Broad quiet navy center with subtle tactile cloth texture slightly calmer than Image 1. Straight rectangular silhouette, accurate orthographic top-down asset for UV mapping. Use aged muted gold, not shiny bright yellow. Do not reproduce coins or card UI from Image 2.",
+  "userOverrides": [
+    "No stat coins; use live Musashi Brush numerals",
+    "Use existing main-game CardPreview, not concept B's alternate panel"
+  ],
+  "originalMatPreserved": "src/L5R.Client/Art/CrimsonDuel/campaign-mat-albedo.png"
+}

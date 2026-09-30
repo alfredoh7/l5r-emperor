@@ -470,7 +470,11 @@ public sealed record FirstActionRestriction(int PlayerId, string? PerformerId, b
 ///  <param name="Battle">The battle the grant belongs to (MatchState.BattleNumber), or null for one that needs no battle. A Ring's recruit grant
 /// (Mendon's ruling, issue #379: "A recruit grant at one battle is limited to that battle") is usable only at its own battle and lapses when that
 /// battle is over: made during a battle it belongs to that battle, made between battles (the Action phase) it belongs to the NEXT one.</param>
-public sealed record AdditionalActionGrant(int PlayerId, string[]? ScopeCardIds, bool FromDiscard = false, int? Battle = null);
+///  <param name="AnyDiscardTiming">FromDiscard only. False (Daigotsu Bofana - exp) makes only the scoped card's Battle-timed abilities playable, the
+/// default and only shape until issue #449. True (Akodo Tezuka: "play it for one of its Battle, Limited, or Open actions, as appropriate to the
+/// current phase") also admits Limited and Open -- each still gated by its own ordinary phase/active-player legality, so "as appropriate to the
+/// current phase" needs no extra check of its own.</param>
+public sealed record AdditionalActionGrant(int PlayerId, string[]? ScopeCardIds, bool FromDiscard = false, int? Battle = null, bool AnyDiscardTiming = false);
 
 /// <summary>A discard a player owes: they choose the card from their hand (Times of Strife, Daigotsu Bofana - exp's entry).
 /// Reason names the card or rule in the prompt and the event.</summary>
@@ -523,8 +527,12 @@ public sealed class PendingDuel
     // Negations a Reaction set on the issuing action (To First Blood's "negate his destruction from the action's effects"): the duel's own outcome is one of that action's effects.
     public List<NegatedEffect> NegatedEffects { get; set; } = [];
     public string AbilityId { get; set; } = "";
+    public string DuelId { get; set; } = "";
     // The card the challenge-issuing ability is printed on (an Attack keeps it in PendingAttack.Command.CardId); null for a player ability.
     public string? SourceCardId { get; set; }
+    // Duel presentation: the retained result assembled by ResolveDuel and completed by FinishDuelResolution.
+    public DuelResult? ResultDraft { get; set; }
+    public int ResultEventStart { get; set; }
     // The player who issued the challenge -- NextAction is called with this once the duel fully
     // resolves, so priority returns exactly where it would have without the interjecting duel.
     public int ChallengerPlayerId { get; set; }
@@ -578,6 +586,7 @@ public sealed class MatchState
     public PendingAttack? PendingAttack { get; set; }
     public PendingConqueror? PendingConqueror { get; set; }
     public PendingDuel? PendingDuel { get; set; }
+    public DuelRecord? LastDuel { get; set; }
     // Deck search (issue #312): see DeckSearch.cs. Non-null exactly while one of the "search*" PendingChoice
     // types is open; it holds the engine-private context (which deck, which card was picked) that the
     // player's own MatchView.PendingSearch is derived from, and is never sent as-is to anyone.
@@ -871,6 +880,38 @@ public sealed class MatchState
     public PlayerState[] Players { get; set; } = [];
     public Dictionary<string, CardInstance> Cards { get; set; } = [];
     public List<GameEvent> Events { get; set; } = [];
+    // Action-effect tracking (issue #437, ActionEffectTracking.cs): what the currently-resolving action has affected so far -- appended to by
+    // DestroyUnits/DestroyAttachment/MoveHome/MoveByRule as they run, snapshotted into LastResolvedAction and cleared once the action (and any
+    // reaction windows of its own) finishes resolving. Never populated by a mass sweep outside a single action (battle resolution's own casualties).
+    public List<AffectedCard> CurrentActionAffected { get; set; } = [];
+    public ResolvedActionFacts? LastResolvedAction { get; set; }
+    // Revenge (oracle-l5r-6302, issue #437): "another player's action has destroyed one of your Personalities since the end of your last Battle
+    // action this battle" -- per player, set true whenever another player's action destroys one of theirs (FinishActionEffectTracking), cleared
+    // when their own Battle action finishes resolving (the same point) and when a new battle begins (SelectBattle).
+    public bool[] EnemyDestroyedOwnPersonalitySinceLastBattleAction { get; set; } = new bool[2];
+    // Akodo Kobi (oracle-l5r-232, issue #440 follow-up): "Recruit him... before the current turn ends" -- queued when her Reaction triggers, resolved the next time
+    // ANY player's turn ends (MatchEngine.cs's ResolvePendingEndPhaseRecruits, called from EndTurn -- exactly "the next End Phase," whichever player's it is). Via
+    // names the source for the entry log, the same role DestroyUnits'/BringDeadPersonalityIntoPlay's own "via" string already plays elsewhere.
+    public List<PendingEndPhaseRecruit> PendingEndPhaseRecruits { get; set; } = [];
+}
+
+/// <summary>A dead Personality to recruit automatically -- ignoring costs and Honor Requirements -- the next time any player's turn ends, if he is still dead then
+/// (issue #440 follow-up). See MatchState.PendingEndPhaseRecruits.</summary>
+public sealed record PendingEndPhaseRecruit(int PlayerId, string CardId, string Via);
+
+/// <summary>One card the currently-resolving action affected, and how (issue #437: ActionEffectTracking.cs). Kind is "destroyed" or "moved" today;
+/// a bow is not tracked here yet (no single choke point narrates every one the way DestroyUnits/MoveHome already do -- see the file comment).</summary>
+public sealed record AffectedCard(string CardId, string Kind);
+
+/// <summary>What the LAST fully-resolved action did (issue #437): who performed it, which ability, and which cards it affected. Replaced, not
+/// merged, each time a new top-level action -- an ability's own synchronous resolution, a deferred Attack, or a duel -- finishes, including its
+/// own reaction windows. A Reaction whose trigger names "after an action ... " reads this instead of re-deriving it from the raw event log.</summary>
+public sealed class ResolvedActionFacts
+{
+    public string AbilityId { get; set; } = "";
+    public int PlayerId { get; set; }
+    public string? SourceId { get; set; }
+    public List<AffectedCard> Affected { get; set; } = [];
 }
 
 // DeckPosition ("Top"/"Bottom") is the acting player's own upfront choice of where a card goes in
@@ -951,9 +992,11 @@ public sealed record CardView(string Id, CardDefinition? Definition, int OwnerId
     // while a cost is being paid: Yoritomo Sakuma); null when it cannot. The client shows this and never derives it.
     int? GoldProduced = null,
     // "May not perform actions" (issue #336): true while the card, or the Personality it is attached to, is action-locked.
-    bool ActionLocked = false, GrantedEffectView[]? GrantedEffects = null,
-    // Created copies keep the copied definition; this authoritative marker distinguishes the instance.
-    bool CreatedCopy = false);
+    bool ActionLocked = false,
+    // A created copy of another card (issue #398): its Definition is the copied card's own; this says it is a created card, for the client's marker.
+    bool CreatedCopy = false,
+    // Read-only explanations of already enforced granted effects (duel presentation); null when none.
+    GrantedEffectView[]? GrantedEffects = null);
 /// <summary>One granted ability as the client shows it: the id, the engine's label for it, and where it came from.</summary>
 public sealed record GrantedAbilityView(string AbilityId, string Label, string Timing, string Source, string Duration, string? CopiedFrom, string? CopiedFromName,
     string? SourceName = null, int? UsesPerTurn = null, int? UsesRemaining = null);
@@ -974,7 +1017,7 @@ public sealed record PlayerView(int Id, string Name, string Clan, int Honor, int
     // Zone.EventInPlay (Suspicions): public, like RemovedFromGame -- no visibility gate needed.
     CardView[]? EventsInPlay = null,
     // Zone.Celestial (Lady Matsu's Rage): also public -- no visibility gate needed.
-    CardView[]? Celestials = null)
+    CardView[]? Celestials = null, int FocusCount = 0)
 {
     public HandLimitView? HandLimit { get; init; }
 }
@@ -984,7 +1027,7 @@ public sealed record HandLimitView(int Base, int Maximum, HandLimitModifier[] Mo
 /// what stat, and whose turn it is; a focused card's own identity is still gated the normal way,
 /// through PlayerView.Focused's own per-viewer visibility.</summary>
 public sealed record DuelView(int ChallengerPlayerId, int ChallengedPlayerId, string ChallengerId,
-    string ChallengedId, string Stat, string Stage, int TurnPlayerId, bool Struck);
+    string ChallengedId, string Stat, string Stage, int TurnPlayerId, bool Struck, string DuelId = "");
 /// <summary>The names <see cref="BattleStepView"/> speaks in, one per step of the rules lead's formal Battle
 /// Phase (issue #310). A client keys its sidebar off these constants and never infers timing itself.</summary>
 public static class BattleSteps
@@ -1046,5 +1089,7 @@ public sealed record MatchView(string ContentVersion, string Scenario, long Vers
     EitherOrView? PendingEitherOr = null,
     // The opposing player's variable payment (issue #373, see OpponentPayment.cs): PUBLIC -- both players see the first player's amount, the card and the
     // Honor at stake; only the paying player's view carries the payment quote and what each amount would do.
-    OpponentPaymentView? PendingOpponentPayment = null, AttackCueView? PendingAttack = null);
+    OpponentPaymentView? PendingOpponentPayment = null, DuelRecord? LastDuel = null,
+    // The approved attack cue (#355): public, derived from authoritative state.
+    AttackCueView? PendingAttack = null);
 public sealed record ReplayRecord(string ContentVersion, string Scenario, ulong Seed, GameCommand[] Commands, Deck[]? CustomDecks = null);

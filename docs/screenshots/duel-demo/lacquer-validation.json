@@ -1,0 +1,95 @@
+{
+  "date": "2026-09-16",
+  "scope": "Approved in-game lacquer menu family applied to Duel Demo",
+  "source_commit": "5f438d427467d7e2f0e87c6c789b3c00377eecca",
+  "source_prs": [
+    165,
+    169
+  ],
+  "source_reuse": "SidebarSkin.cs, atlas and Caudex fonts copied byte-identically; scoped DuelUi layout adaptation",
+  "native": {
+    "native.json": {
+      "Passed": true,
+      "Steps": 20,
+      "ReducedMotion": false,
+      "Resolution": "(1920, 1080)",
+      "FrameCount": 1249,
+      "P50Ms": 8.543,
+      "P95Ms": 14.016,
+      "P99Ms": 14.644
+    },
+    "small-reduced.json": {
+      "Passed": true,
+      "Steps": 20,
+      "ReducedMotion": true,
+      "Resolution": "(1120, 700)",
+      "FrameCount": 1159,
+      "P50Ms": 5.713,
+      "P95Ms": 14.5,
+      "P99Ms": 19.241
+    },
+    "stages.json": {
+      "passed": true,
+      "scenarios": 13
+    },
+    "lacquer-launcher.json": {
+      "Passed": true,
+      "Steps": 20,
+      "ReducedMotion": true,
+      "Resolution": "(1120, 700)",
+      "FrameCount": 1154,
+      "P50Ms": 8.422,
+      "P95Ms": 14.647,
+      "P99Ms": 18.559
+    }
+  },
+  "build": "Client: 0 warnings, 0 errors",
+  "import": "First font import hit a Godot worker-thread crash; retry completed cleanly. Native runs have no engine/script errors.",
+  "screenshots": {
+    "native-setup.png": {
+      "sha256": "6adacaa6dfde855ca11bf21570f086ac32f712b3c5f46d7f24d1c1116cb0e3d1",
+      "bytes": 2851379
+    },
+    "native-focused.png": {
+      "sha256": "25d9c4ce51ac676efdfd9f54ed394592444054bebbc149848fee233d072034e1",
+      "bytes": 3606828
+    },
+    "native-result.png": {
+      "sha256": "b8d7ad225a7cc4c110e4854680eab9a52dbdb602344e430b72b80e0431122c37",
+      "bytes": 3608469
+    },
+    "native-handoff.png": {
+      "sha256": "d60f8d03b0a57a70be2033ca85a4add69fd2d4007a375cc651a3fda91eebfe3a",
+      "bytes": 220670
+    },
+    "native-inspection.png": {
+      "sha256": "a00f524217eaebf9ec0cc520ae99700b9e24fb134637f3ed6a1592de3492cfbe",
+      "bytes": 2677665
+    },
+    "native-consequences.png": {
+      "sha256": "b70cd1a12a961ea5c41245bbb686a18726a4c7e54946cd98e69f65c0459514d1",
+      "bytes": 2398473
+    },
+    "small-reduced-setup.png": {
+      "sha256": "049b04c0d7741792f8ebcb3560fb25395c20c7af6231f1e22953a0557fdb1180",
+      "bytes": 1128871
+    },
+    "small-reduced-consequences.png": {
+      "sha256": "62a443307f79708d37afbca99bbebc30477a6660aef0bcdd7b5e47a9810d8b2b",
+      "bytes": 955188
+    },
+    "stages-effects-order.png": {
+      "sha256": "4c0257f7fa7b9d8fea0bf99708e07a5fd160c4d201d27d3bf211344b5ad4868e",
+      "bytes": 1923636
+    },
+    "stages-duelist-replacement.png": {
+      "sha256": "90c155386ebd66711273b6bd696784044ebca57236f41fd1d2be0969c829ee9a",
+      "bytes": 2858056
+    }
+  },
+  "limits": [
+    "Native macOS only; Windows graphical testing not performed.",
+    "Core mechanics unchanged in this UI follow-up. Prior full regression evidence is in validation.json.",
+    "Demo and mechanical acceptance remain pending on PR220."
+  ]
+}

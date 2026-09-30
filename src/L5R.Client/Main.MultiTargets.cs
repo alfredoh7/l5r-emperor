@@ -69,13 +69,6 @@ public partial class Main
         // selection always belongs to the active group, including when the candidate is itself a Holding.
         SetNotice("Choose a gold-outlined card for the active group, or open another group in the sidebar."); return true;
     }
-    private void MoveMultiCard(string slotId, int index, int direction)
-    {
-        if (!MultiTargetActive || !DecisionCanSubmit || _multiDraftKey != MultiKey) return;
-        var list = _multiCards[slotId]; var next = index + direction;
-        if (next < 0 || next >= list.Count) return;
-        var focused = list[index]; (list[index], list[next]) = (list[next], list[index]); RefreshMultiTargets(slotId + "/" + focused);
-    }
     private bool RenderMultiTargets()
     {
         if (!MultiTargetActive) { ClearMultiTargets(); return false; }
@@ -96,7 +89,7 @@ public partial class Main
         explanation.AddChild(Palette.Wrapped(label, 18));
         if (action.Command.PerformerId is {} id && FindCard(id) is {} performing)
             explanation.AddChild(Palette.Wrapped("Performer: " + ShortName(performing), 16, Palette.PaperDim));
-        _inspector.AddChild(Palette.Wrapped("Choose on the board or below. Nothing resolves until you confirm.", 16, Palette.PaperDim));
+        _inspector.AddChild(Palette.Wrapped("Choose on the board or below. Click a chosen card again to remove it.", 16, Palette.PaperDim));
         foreach (var slot in MultiUpFront)
         {
             var count = MultiCount(slot); var open = _multiExpanded.Contains(slot.Slot);
@@ -142,21 +135,7 @@ public partial class Main
                     inspect.AddThemeFontSizeOverride("font_size", 15); inspect.AutowrapMode = TextServer.AutowrapMode.Off;
                     var inspectStyle = SidebarSkin.Surface(true); inspectStyle.ContentMarginTop = inspectStyle.ContentMarginBottom = 4;
                     inspect.AddThemeStyleboxOverride("normal", inspectStyle); inspect.SetMeta("inspect_card", targetId); column.AddChild(inspect);
-                    if (selected < 0) continue;
-                    var order = new HBoxContainer(); order.AddThemeConstantOverride("separation", 4); column.AddChild(order);
-                    Button Small(string text, Action callback)
-                    {
-                        var b = SidebarSkin.Button(text, callback); b.CustomMinimumSize = new(48, 32); b.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill;
-                        b.AutowrapMode = TextServer.AutowrapMode.Off; b.AddThemeFontSizeOverride("font_size", 18);
-                        foreach (var state in new[] { "normal", "hover", "pressed", "disabled" }) b.AddThemeStyleboxOverride(state, Palette.Box(new Color("171a1b"), Palette.Gold, 3, 3));
-                        return b;
-                    }
-                    var left = Small("‹", () => MoveMultiCard(slot.Slot, selected, -1)); left.Disabled = !DecisionCanSubmit || selected == 0;
-                    left.AccessibilityName = "Move " + ShortName(target) + " earlier"; left.SetMeta("move", -1); left.SetMeta("card", targetId);
-                    var remove = Small("×", () => ToggleMultiCard(slot.Slot, targetId)); remove.Disabled = !DecisionCanSubmit; remove.AccessibilityName = "Remove " + ShortName(target);
-                    var right = Small("›", () => MoveMultiCard(slot.Slot, selected, 1)); right.Disabled = !DecisionCanSubmit || selected == count - 1;
-                    right.AccessibilityName = "Move " + ShortName(target) + " later"; right.SetMeta("move", 1); right.SetMeta("card", targetId);
-                    order.AddChild(left); order.AddChild(remove); order.AddChild(right);
+
                 }
             }
         }
@@ -168,7 +147,7 @@ public partial class Main
             _inspector.AddChild(Palette.Wrapped("The game will ask this only if the condition is met.", 15, Palette.PaperDim));
         }
         var total = MultiUpFront.Sum(MultiCount);
-        _decisionActions.AddChild(Palette.Wrapped($"{total} selected" + (MultiReady ? " · Review the order before confirming." : " · Complete each required group."), 17, MultiReady ? Palette.Gold : Palette.PaperDim));
+        _decisionActions.AddChild(Palette.Wrapped($"{total} selected" + (MultiReady ? " · Cards resolve in selection order." : " · Complete each required group."), 17, MultiReady ? Palette.Gold : Palette.PaperDim));
         if (action.AlternativeCost is not null && !_alternativeCostConfirmed)
         {
             var costs = SidebarSkin.Button("Review cost choices", () => { _reviewingAlternativeCost = true; _decisionSelection = null; RenderInspector(); }, true);

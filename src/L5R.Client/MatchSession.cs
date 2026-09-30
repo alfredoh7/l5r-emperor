@@ -18,6 +18,8 @@ public sealed partial class MatchSession : IDisposable
     public event Action<string>? Notice;
     public event Action<RoomSeat, string>? SeatCreated;
     public SessionSnapshot? Snapshot { get; private set; }
+    // Local lifecycle identity, never serialized or sent as a rules command.
+    public long Generation { get; private set; }
     public bool Online => _socket is not null;
     public bool Connected => _socket?.State == WebSocketState.Open;
     public bool Busy { get; private set; }
@@ -36,7 +38,7 @@ public sealed partial class MatchSession : IDisposable
 
     public void StartPractice(bool economy, bool published = false, int seat = 0)
     {
-        Disconnect();
+        Generation++;Disconnect();
         // A fixed seed shuffled every deck identically, game after game — Practice looked unshuffled
         // even though the shuffle itself was correct. Match the server's per-match randomness (RoomManager.cs).
         var seed = BitConverter.ToUInt64(RandomNumberGenerator.GetBytes(sizeof(ulong)));
@@ -45,6 +47,32 @@ public sealed partial class MatchSession : IDisposable
         _localSeat = published ? seat : _engine.State.ActivePlayerId;
         _practiceNameSeat = _localSeat;
         RefreshLocal();
+    }
+
+    /// <summary>Demo hosts own their own MatchSession; this never replaces the main practice session.</summary>
+    public void StartDuelDemo(string scenario, ulong seed, int seat = 0)
+    {
+        if (seat is <0 or >1) throw new ArgumentOutOfRangeException(nameof(seat));
+        Generation++;Disconnect();
+        _engine = MatchEngine.CreateDuelDemo(scenario, seed);
+        _localSeat = _practiceNameSeat = seat;
+        RefreshLocal();
+    }
+
+    public Task BeginDuelDemo()
+    {
+        if (_engine is null || !_engine.GetView(0).Scenario.StartsWith("duel-demo/", StringComparison.Ordinal) || _engine.GetView(0).LastDuel is not null)
+            return Task.CompletedTask;
+        var scenario = DuelDemoScenarios.Get(_engine.GetView(0).Scenario[10..]);
+        var command = _engine.QueryActions(0).FirstOrDefault(a => a.Enabled && a.Command?.AbilityId == scenario.ChallengeAbility)?.Command;
+        if (command is null) { Notice?.Invoke("The prepared challenge is unavailable."); return Task.CompletedTask; }
+        return Submit(command);
+    }
+
+    public void LeavePrivateTable()
+    {
+        if (!Online) return;
+        Generation++;Disconnect(); Seat = null; Snapshot = null; _engine = null; Changed?.Invoke();
     }
 
     /// <summary>Scripted UI verification only (issue #303): a real engine state built to put one kind of Gold cost
@@ -83,7 +111,7 @@ public sealed partial class MatchSession : IDisposable
     private void RefreshLocal()
     {
         if (_engine is null) return;
-        Snapshot = new(NamedView(_engine.GetView(_localSeat)), _engine.QueryActions(_localSeat), "Practice");
+        Snapshot = new(NamedView(_engine.GetView(_localSeat)), _engine.QueryActions(_localSeat), _engine.GetView(_localSeat).Scenario.StartsWith("duel-demo/", StringComparison.Ordinal) ? "Duel Demo" : "Practice");
         Changed?.Invoke();
     }
 
@@ -191,6 +219,7 @@ public sealed partial class MatchSession : IDisposable
 
     private async Task Connect(Uri server, RoomSeat seat)
     {
+        if(_engine is not null||Seat?.RoomCode!=seat.RoomCode||Seat.PlayerId!=seat.PlayerId)Generation++;
         Disconnect();
         _engine = null;
         Snapshot = null;
@@ -211,7 +240,7 @@ public sealed partial class MatchSession : IDisposable
             timeout.CancelAfter(TimeSpan.FromSeconds(12));
             await socket.ConnectAsync(builder.Uri, timeout.Token);
             token.ThrowIfCancellationRequested();
-            await Send(new { type = "hello", protocolVersion = 1, contentVersion = MatchEngine.ContentVersion }, socket, token);
+            await Send(new { type = "hello", protocolVersion = MatchEngine.ProtocolVersion, contentVersion = MatchEngine.ContentVersion }, socket, token);
             _ = Receive(socket, token);
         }
         catch

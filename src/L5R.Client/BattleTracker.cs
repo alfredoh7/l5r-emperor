@@ -6,6 +6,7 @@ namespace L5R.Client;
 /// <summary>Presentation of existing public phases, not an additional rules state machine.</summary>
 public partial class BattleTracker : Control
 {
+    private static Texture2D? _flowArt;
     public MatchView Snapshot { get; set; } = null!;
     public bool Compact { get; set; }
     public bool ReducedMotion { get; set; }

@@ -1,0 +1,524 @@
+{
+  "Profile": "strategy-wave-43",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-29",
+      "Name": "A Gentle Word",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Target your performing Magistrate to rehonor a target dishonorable Personality and gain 2 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-29.jpg",
+      "Keywords": [],
+      "Focus": 4,
+      "Abilities": [
+        "gentle-word-rehonor"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-406",
+      "Name": "Anger Management",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Heroic Battle: Target your performing unbowed Hero to target an enemy card. If it has no attachments, and is bowed or Nonhuman, destroy it. Bow it.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-406.jpg",
+      "Keywords": [
+        "Heroic"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "anger-management-destroy"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-1486",
+      "Name": "Control the Board",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Destroy a target Terrain.\nTactical Battle: Target your performing unbowed Tactician to give a target Follower or Personality -6F and bow it.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1486.jpg",
+      "Keywords": [],
+      "Focus": 3,
+      "Abilities": [
+        "control-the-board-terrain",
+        "control-the-board-weaken"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-1930",
+      "Name": "Defending Their Home",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Heroic Battle: Give your target performing unbowed Hero +2F for each Personality you control not at the current battlefield.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1930.jpg",
+      "Keywords": [
+        "Heroic"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "defending-their-home-force"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-1984",
+      "Name": "Detained",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Political Reaction: After engaging, bow your target performing Magistrate to move home a target enemy dishonorable Personality at the current battlefield. If this moved him, bow his unit, and his controller loses 2 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1984.jpg",
+      "Keywords": [
+        "Political"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "detained-move"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-2027",
+      "Name": "Dismissing the Cur",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Political Battle: Bow your target performing Courtier at any location to move home a target enemy Personality with equal or lower Personal Honor. Destroy him if he has no attachments. Gain 2 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-2027.jpg",
+      "Keywords": [
+        "Political"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "dismissing-the-cur-move"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-5668",
+      "Name": "Of One Instant",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "As a Focus Effect: Give your Personality in this duel Tactician.\nBattle/Open: Choose your performing Duelist: Give him a Force bonus equal to his own base Chi.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-5668.jpg",
+      "Keywords": [
+        "Iaijutsu"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "of-one-instant-focus",
+        "of-one-instant-boost"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-6195",
+      "Name": "Readied Steel",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle/Open: Choose your performing Kensai: Straighten his unit if he has a Weapon. You may attach a Weapon to him from your discard pile, paying all costs and paying 2 less Gold.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6195.jpg",
+      "Keywords": [],
+      "Focus": 3,
+      "Abilities": [
+        "readied-steel-straighten",
+        "readied-steel-attach"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-6662",
+      "Name": "Shadow Tactics",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "As a Focus Effect: After this duel ends, the loser's controller draws a card.\nBattle: Choose your performing Personality: Rehonor him. If he is opposed, straighten him. You may move him home.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6662.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "shadow-tactics-focus",
+        "shadow-tactics-stay",
+        "shadow-tactics-home"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-7301",
+      "Name": "Sly Deceiver",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Choose your performing Ninja Personality and target a non-Unique Personality: Your Ninja permanently copies the Personality's base keywords, except Clan Champion, Daimyo, or Shugenja, and permanently copies his base abilities which do not themselves copy abilities.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7301.jpg",
+      "Keywords": [
+        "Ninja"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "sly-deceiver-copy"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-7421",
+      "Name": "Spirit of the Blade",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Choose your performing unbowed Personality: If he is a Kensai, permanently give him the ability, \"Battle: Bow one of this Personality's Weapons and target an enemy card without attachments: Destroy it.\" Otherwise, permanently give him Kensai.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7421.jpg",
+      "Keywords": [],
+      "Focus": 4,
+      "Abilities": [
+        "spirit-of-the-blade"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-7428",
+      "Name": "Spirit of the Truth",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Choose your performing unbowed Personality: If he is a Magistrate, permanently give him +1C and the ability, \"Political Open: If it is not your turn, bow this Personality and target a dishonorable Personality: Bow him.\" Otherwise, permanently give him Magistrate.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7428.jpg",
+      "Keywords": [],
+      "Focus": 4,
+      "Abilities": [
+        "spirit-of-the-truth"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-7429",
+      "Name": "Spirit of the Warrior",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Choose your performing unbowed Personality: If he is a Commander, permanently give him the ability, \"Battle: Bow one of this Personality's performing Followers and target an enemy card without attachments: Destroy it.\" Otherwise, permanently give him Commander.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7429.jpg",
+      "Keywords": [],
+      "Focus": 4,
+      "Abilities": [
+        "spirit-of-the-warrior"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-8353",
+      "Name": "The Spirit of Knowledge",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Choose your performing unbowed Personality: If he is a Tactician, permanently give him the ability, \"Tactical Battle: Bow this Personality: Draw a card.\" Otherwise, permanently give him Tactician.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8353.jpg",
+      "Keywords": [],
+      "Focus": 4,
+      "Abilities": [
+        "spirit-of-knowledge"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-7492",
+      "Name": "Stockpiled Resources",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After engaging, choose your performing Personality at the current battlefield and target an attachment in your hand: Attach it to your Personality, paying all costs and paying 4 less Gold if he is a Commander.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7492.jpg",
+      "Keywords": [],
+      "Focus": 3,
+      "Abilities": [
+        "stockpiled-attach",
+        "stockpiled-attach-commander"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-7557",
+      "Name": "Strength of the Mountain",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing Monk, who must be unbowed unless he is Earth, and target an enemy Personality or Follower: Bow it.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7557.jpg",
+      "Keywords": [
+        "Earth",
+        "Kiho"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "strength-of-the-mountain-bow",
+        "strength-of-the-mountain-earth"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-8305",
+      "Name": "The Second Feint",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Move your performing Ninja Personality home and target an enemy card: Bow it. Negate its next straightening (this turn).",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8305.jpg",
+      "Keywords": [
+        "Ninja"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "second-feint-bow"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-8347",
+      "Name": "The Sound of Thunder",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing Battle Maiden and target an enemy Personality: Move your Battle Maiden to the current battlefield. Straighten her if she moved. Give the enemy Personality -3F.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8347.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "sound-of-thunder-move"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-8436",
+      "Name": "The World Disappears",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: Bow your performing Monk unless he is Void: He meditates. Put a Kiho Strategy in your discard pile into your hand.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8436.jpg",
+      "Keywords": [
+        "Kiho",
+        "Void"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "world-disappears-void",
+        "world-disappears-bow"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-8452",
+      "Name": "Thoughts of Wind",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: Choose your performing unbowed Monk: Give him Cavalry. If you control any Rings or he is Air, give him +4F.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8452.jpg",
+      "Keywords": [
+        "Air",
+        "Kiho"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "thoughts-of-wind-cavalry"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-8793",
+      "Name": "Tsunami Tattoo",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Water Battle: Target your performing unbowed Tattooed Personality to move home a target an enemy Personality. This movement will not be negated if your Personality is Water. After this moves the enemy Personality, bow his unit.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8793.jpg",
+      "Keywords": [
+        "Tattoo",
+        "Water"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "tsunami-tattoo-move"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

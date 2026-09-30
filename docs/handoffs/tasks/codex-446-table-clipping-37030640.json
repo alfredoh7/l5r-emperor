@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Resolved main-into-branch merge conflicts on #447 (table-clipping fix vs. the newly-merged duel-integration PR #268). 4 files conflicted: TableSurface.cs's ResizePlane/ProjectCanvas/ScreenToCanvas (combined the no-crop dynamic canvas sizing with main's per-instance PlanePitch/PlaneDepth/CanvasExtent for duel cameras -- canvas now never shrinks below a scene's tuned CanvasExtent, so duel scenes keep their prior framing while the main table gets the fix), Main.Camera.cs's PointerOnTable (kept the fix's version, which already subsumes main's narrower clanHud-only check via the fuller FixedHudCovers helper), and Main.Board.cs/Main.cs (purely additive: kept both sides' changes -- new Cavalry battle phases from main, the fix's overlay reparenting and HUD picking). Lane is shared only because docs/handoffs/ and Review Table Visibility.command fall outside the ui/rules path patterns; every code change is ui-lane.",
+  "validation": "Client builds clean (0 errors). Full L5R.Core.Tests, L5R.AI.Tests, L5R.Server.Tests and L5R.Client.Transport.Tests suites all green (run directly). bash tools/check.sh --skip-client fails at its Python content-pipeline step, but that failure is a PRE-EXISTING gap on main itself (introduced by #268, unrelated to this PR's own changes -- catalogue-art.json is missing a resources entry for oracle-l5r-9827.jpg even though its scan is already packed) -- confirmed by inspecting origin/main's own copy of the file directly, before this merge touched it. Spun off as its own follow-up rather than fixed here.",
+  "remaining": "Windows/native visual verification of the merged table-clipping behavior is pending CI (this environment has no local Godot editor); watch the PR's Windows preview/verify checks once pushed.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/pull/447",
+  "branch": "codex/446-table-clipping",
+  "updated": "2026-09-22T20:15:35.380689+00:00"
+}

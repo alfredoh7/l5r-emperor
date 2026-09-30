@@ -1,0 +1,33 @@
+{
+  "Profile": "personality-wave-47",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-9437",
+      "Name": "Yasuki Dokansuto",
+      "Type": "Personality",
+      "Clan": "Crab",
+      "GoldCost": 6,
+      "GoldProduction": 0,
+      "Force": 1,
+      "Chi": 3,
+      "PersonalHonor": 1,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Kolat Reaction, Bow this card: When paying for a Holding, produce 2 Gold which may only pay for that card.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9437.jpg",
+      "Keywords": [
+        "Courtier",
+        "Crab Clan",
+        "Kolat",
+        "Merchant"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "dokansuto-gold"
+    }
+  ],
+  "Decks": []
+}

@@ -1,0 +1,33 @@
+{
+  "Profile": "follower-wave-21",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-8002",
+      "Name": "The Crimson Mark",
+      "Type": "Follower",
+      "Clan": "Unaligned",
+      "GoldCost": 4,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "As a Focus Effect: You may destroy an attachment on a Personality involved in this duel.\nBattle: Destroy this card and target an enemy card without attachments: Destroy it.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8002.jpg",
+      "Keywords": [
+        "Ninja"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "crimson-mark-focus",
+        "crimson-mark-destroy"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

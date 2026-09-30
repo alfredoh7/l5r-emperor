@@ -1,0 +1,57 @@
+{
+  "Profile": "spell-wave-16",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-18",
+      "Name": "A Dragon's Favor",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "While this Shugenja is Thunder, he has +1C.\nThunder Battle, Bow this card: Ranged Attack with strength equal to this Shugenja's Chi.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-18.jpg",
+      "Keywords": [
+        "Thunder"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "dragons-favor-attack"
+      ],
+      "Effect": "dragons-favor-chi"
+    },
+    {
+      "Id": "oracle-l5r-2309",
+      "Name": "Ember's Final Fire",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "While this Shugenja is Fire, he has +1F.\nBattle: Bow this card and target an enemy attachment: Destroy it.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-2309.jpg",
+      "Keywords": [
+        "Fire"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "embers-final-fire-destroy"
+      ],
+      "Effect": "embers-final-fire-force"
+    }
+  ],
+  "Decks": []
+}
