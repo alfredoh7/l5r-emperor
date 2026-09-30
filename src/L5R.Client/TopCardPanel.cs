@@ -157,7 +157,14 @@ public sealed partial class TopCardPanel : PanelContainer
         if (option is null || !option.Legal) return option?.Reason ?? "This destination is not available for this card.";
         var rule = _look.Rules?.FirstOrDefault(r => r.Disposition == destination);
         if (_destinations[position] != destination && rule is not null && Group(destination).Length >= rule.Max)
+        {
+            // A single-slot tray that is already full still accepts the drop as a swap with its sole occupant,
+            // bumped back to this card's own prior destination, as long as that occupant is legal there too.
+            if (rule.Max == 1 && Group(destination, position) is [var occupant] &&
+                _look.Cards!.Single(c => c.Position == occupant).Dispositions.Any(d => d.Disposition == _destinations[position] && d.Legal))
+                return null;
             return $"This tray is full ({rule.Max}). Move a card out first.";
+        }
         return null;
     }
     private void Paint()
@@ -221,6 +228,10 @@ public sealed partial class TopCardPanel : PanelContainer
     {
         if (DropReason(position, destination) is {} reason) { _hint.Text = reason; return; }
         var prior = (_order.ToArray(), new Dictionary<int, string>(_destinations));
+        var sourceDestination = _destinations[position];
+        var rule = _look.Rules?.FirstOrDefault(r => r.Disposition == destination);
+        if (rule is { Max: 1 } && sourceDestination != destination && Group(destination, position) is [var occupant])
+            _destinations[occupant] = sourceDestination; // Swap: the displaced card takes the dragged card's old spot.
         var group = Group(destination, position);
         if (!_look.CanReorder && IsReturn(destination)) index = FixedIndex(position, destination);
         index = Math.Clamp(index, 0, group.Length);
