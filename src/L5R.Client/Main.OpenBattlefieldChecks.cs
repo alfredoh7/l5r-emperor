@@ -31,6 +31,14 @@ public partial class Main
                 var point = table ? ScreenCenter(control) : control.GetGlobalRect().GetCenter();
                 MoveProbeMouse(point);
                 await CoverageFrames();
+                // Window-system warp events and dynamic caption layout settle asynchronously.
+                // Reacquire the visible target rather than clicking a stale screen coordinate.
+                for (var attempt = 0; attempt < 12; attempt++)
+                {
+                    point = table ? ScreenCenter(control) : control.GetGlobalRect().GetCenter();
+                    MoveProbeMouse(point); await CoverageFrames();
+                    if (GetViewport().GuiGetHoveredControl() is { } hovered && (hovered == control || control.IsAncestorOf(hovered))) break;
+                }
                 CameraMouse(MouseButton.Left, true, point); CameraMouse(MouseButton.Left, false, point);
                 await CoverageFrames();
             }
@@ -103,13 +111,24 @@ public partial class Main
             _battlefieldReviewScenario = 0; PrepareOpenBattlefieldReview();
             GetWindow().Size = new Vector2I(1440, 900); await CoverageFrames(); FocusReviewBattlefields(); await Capture("10-1440x900");
             GetWindow().Size = new Vector2I(2560, 1080); await CoverageFrames(); FocusReviewBattlefields(); await Capture("11-ultrawide");
+            GetWindow().Size = new Vector2I(1920, 1080); _battlefieldReviewScenario = 8; PrepareOpenBattlefieldReview(); await CoverageFrames(); FocusReviewBattlefields();
+            RequireCamera(_timeline.ActiveSegment == PhaseTrack.SegmentFor(Phase.Action) && _timeline.TurnCue.TurnText == "OPPONENT'S TURN", "aside battle lit Attack or changed the turn owner");
+            RequireCamera(_clanHud.GetChildren().OfType<ClanPlaque>().Single(p => p.TurnOwner).TurnText == "OPPONENT'S TURN", "aside battle mislabeled turn plaque");
+            var gate = new TurnBloomGate();
+            gate.Observe(View with { Phase = Phase.Action, ActivePlayerId = 1, ActionPhaseTurnPlayerId = null }, "test");
+            RequireCamera(!gate.Observe(View, "test"), "aside battle announced a new turn");
+            await ToSignal(GetTree().CreateTimer(.6), SceneTreeTimer.SignalName.Timeout); // Let the existing phase crossfade settle before the evidence capture.
+            RequireCamera(_status.Text.Contains("Lion"), "table menu status names the attacker instead of the turn owner");
+            await Capture("12-action-phase-battle");
+            _timeline.Present(View with { Phase = Phase.Finished, WinnerId = 1 });
+            RequireCamera(_timeline.ActiveSegment == -1 && _timeline.HelpButton.Disabled, "finished aside retains an active phase");
             _reducedMotion = false; _battlefieldReviewScenario = 1; PrepareOpenBattlefieldReview(); await CoverageFrames();
             await CoverageFocus();
             ViewBattlefield(1);
             RequireCamera(_cameraGlide && View.CurrentBattleProvince == 100, "normal-motion navigation did not glide independently");
             for (var i = 0; i < 90 && _cameraGlide; i++) await CoverageFrames();
             RequireCamera(!_cameraGlide, $"camera glide did not settle (blocked={CameraBlocked}, focused={GetWindow().HasFocus()}, time={_cameraGlideTime})");
-            GD.Print("OPEN_BATTLEFIELD_REVIEW_PASS: full scans/native card inspection; help/Escape; camera-only navigation; both seats; associated extra front; stable orphan court positions/names; six courts; empty selection; bowed/attached units; 1440x900/ultrawide; reduced motion and smooth camera.");
+            GD.Print("OPEN_BATTLEFIELD_REVIEW_PASS: full scans/native card inspection; help/Escape; camera-only navigation; both seats; associated extra front; stable orphan court positions/names; six courts; empty selection; bowed/attached units; 1440x900/ultrawide; Action Phase and original turn context; reduced motion and smooth camera.");
             GetTree().Quit();
         }
         catch (Exception error) { GD.PushError(error.ToString()); GetTree().Quit(1); }

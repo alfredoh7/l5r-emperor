@@ -124,7 +124,10 @@ public sealed partial class MatchEngine
 
     private BattlefieldView[]? BuildBattlefieldViews()
     {
-        var battlefields = _state.UnresolvedBattlefields.Concat(_state.CurrentBattleProvince is int current ? [current] : []).Distinct().Order().ToArray();
+        // Defenders can remain at a resolved extra front until the Attack Phase ends.
+        // Its occupied location still needs its authoritative association in both public views.
+        var occupied = _state.Cards.Values.Where(c => c.Zone == Zone.Battlefield && c.ProvinceIndex is >= 0).Select(c => c.ProvinceIndex!.Value);
+        var battlefields = _state.UnresolvedBattlefields.Concat(_state.CurrentBattleProvince is int current ? [current] : []).Concat(occupied).Distinct().Order().ToArray();
         if (battlefields.Length == 0) return null;
         return battlefields.Select(b => new BattlefieldView(b, BattlefieldProvinceIndex(b))).ToArray();
     }

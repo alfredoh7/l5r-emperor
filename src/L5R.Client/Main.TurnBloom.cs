@@ -21,6 +21,6 @@ public partial class Main
         _turnBloom.Size = new Vector2(width, width / 3);
         _turnBloom.Position = _tableViewport.Position + (_tableViewport.Size - _turnBloom.Size) / 2;
         if (_turnBloomGate.Observe(View, _session.Snapshot.RoomCode ?? "practice")) _turnBloom.Play();
-        if (View.ActivePlayerId != View.ViewerId) _turnBloom.Cancel();
+        if ((View.ActionPhaseTurnPlayerId ?? View.ActivePlayerId) != View.ViewerId) _turnBloom.Cancel();
     }
 }

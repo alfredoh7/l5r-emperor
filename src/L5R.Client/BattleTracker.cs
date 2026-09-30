@@ -47,7 +47,7 @@ public partial class BattleTracker : Control
             TextAt(steps[i],new Rect2(i*stepWidth,70,stepWidth,20),13,i==progress?Palette.Paper:Palette.PaperDim,false);
         }
         TextAt(ProvinceTitle,new Rect2(0,104,Size.X,25),20,Palette.Paper,false);
-        var role = Snapshot.Players.Single(p=>p.Id==Snapshot.ActivePlayerId).Clan+" turn · "+
+        var role = Snapshot.Players.Single(p=>p.Id==(Snapshot.ActionPhaseTurnPlayerId ?? Snapshot.ActivePlayerId)).Clan+" turn · "+
             (PresentationInProgress?Status:Stage==2?"Result recorded":Snapshot.PriorityPlayerId==Snapshot.ViewerId?"You may act":"Opponent may act");
         TextAt(role,new Rect2(0,139,Size.X,24),16,Palette.PaperDim,false);
         DrawLine(new Vector2(0,178),new Vector2(Size.X,178),Palette.Gold with { A=.55f },1,true);

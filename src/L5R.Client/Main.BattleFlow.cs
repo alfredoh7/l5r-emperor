@@ -18,6 +18,8 @@ public partial class Main
             PresentationInProgress=PresentationBusy, ActionOutcome=PresentationBusy && _actionOutcome,
             ResolutionMessage=PresentationBusy ? _actionOutcome?null:_battleOutcomeText : _resolutionMessage });
         RenderBattlefieldNavigation();
+        if (View.ActionPhaseTurnPlayerId is not null)
+            FlowText("Battle during the Action Phase", 17, Palette.Gold);
         if(!PresentationBusy && View.PendingChoice is { } pending)
         {
             FlowText(pending.Prompt,22,Palette.Paper);

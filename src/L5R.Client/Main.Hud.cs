@@ -13,11 +13,11 @@ public partial class Main
             var production=player.Home.Concat(player.Army).Append(player.Stronghold).Where(c=>!c.Bowed).Sum(c=>Production(c,player));
             var own = player.Id == View.ViewerId;
             var turn = View.WinnerId is int winner ? (winner == player.Id ? "VICTORY" : "MATCH ENDED") :
-                View.ActivePlayerId == player.Id ? (own ? "YOUR TURN" : "OPPONENT'S TURN") : "";
+                (View.ActionPhaseTurnPlayerId ?? View.ActivePlayerId) == player.Id ? (own ? "YOUR TURN" : "OPPONENT'S TURN") : "";
             var action = own ? player.Name : player.Name == player.Clan ? "Opponent" : player.Name;
             var plaqueY=own?950-FallenCounter.DesignHeight-4:14;
             Place(_clanHud,new ClanPlaque(player.Clan,player.Honor,production,View.FavorPlayerId==player.Id,()=>ShowFallenGallery(player.Id),
-                action, turn, View.WinnerId is null && View.PriorityPlayerId == player.Id, View.WinnerId is null && View.ActivePlayerId == player.Id,
+                action, turn, View.WinnerId is null && View.PriorityPlayerId == player.Id, View.WinnerId is null && (View.ActionPhaseTurnPlayerId ?? View.ActivePlayerId) == player.Id,
                 player.HandCount, player.HandLimit)
                 { ReducedMotion = _reducedMotion },16,plaqueY,ClanPlaque.DesignWidth,ClanPlaque.DesignHeight);
             var fallen=new FallenCounter { Player=player };

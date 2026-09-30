@@ -34,6 +34,8 @@ internal static class EmperorRulingR1Tests
         new("useAbility", player, e.Version, card.Id, AbilityId: ability, TargetId: target.Id, Selections: [Pick("performers", performers.Select(p => p.Id).ToArray()), Pick("target", target.Id)]);
 
     public static void Run(TestRunner runner) => runner.Run("emperor-ruling-R1", [
+        ("An Action Phase battle publishes only its original turn owner to both seats, survives serialization/state restoration and clears the display context on return", AsidePublicContext),
+        ("An occupied resolved extra front keeps its public province association while the Attack Phase continues", ResolvedFrontPublicAssociation),
         ("Published shape: Surprise Attack (strategy-wave-62) and Chikushudo's Trickery (spell-wave-25) print their scans' stats, keywords and ability ids, ship their art and are in the manifests", PublishedShape),
         ("A battle at a battlefield without a province resolves as normal: units are destroyed, Honor is gained and units go home, but the winning Attacker destroys no province and nothing that triggers on one triggers", BattleWithoutProvinceResolves),
         ("A province destroyed before its battle engages leaves a battlefield without one, whose resolution destroys nothing further and cannot end the game twice", ProvinceDestroyedBeforeEngagement),
@@ -50,6 +52,57 @@ internal static class EmperorRulingR1Tests
         ("The Perfect Moment: during its additional Attack Phase a Paragon and a Battle Maiden may assign and move, any other Personality may neither assign nor move (each tested on its own); Retribution's one-Personality limit does not apply", PerfectMomentExceptions),
         ("Published shape: Shinobi Assault, Two Fronts and The Perfect Moment (strategy-wave-64) print their scans' stats, keywords, text and ability ids and ship their art", PublishedShapeWave64),
     ]);
+
+    private static void AsidePublicContext()
+    {
+        foreach (var turn in new[] { 0, 1 })
+        foreach (var actor in new[] { 0, 1 })
+        {
+            var engine = TrickeryTable(actor, out var spell, out _, out var spirits, out var target, out _, turnPlayer: turn);
+            Check(engine.GetView(0).ActionPhaseTurnPlayerId is null, "no aside context before the battle");
+            Accept(engine, Slotted(engine, actor, "chikushudo-trickery-battle", spell, spirits, target));
+            foreach (var seat in new[] { 0, 1 })
+            {
+                var view = engine.GetView(seat);
+                Eq(view.ActionPhaseTurnPlayerId, (int?)turn, "original turn, independent of attacker and viewer");
+                Eq(view.ActivePlayerId, 1 - actor, "attacker semantics unchanged");
+                var json = System.Text.Json.JsonSerializer.Serialize(view);
+                var restoredView = System.Text.Json.JsonSerializer.Deserialize<MatchView>(json)!;
+                Eq(restoredView.ActionPhaseTurnPlayerId, (int?)turn, "new display context survives wire serialization");
+                Check(!json.Contains("Paused", StringComparison.Ordinal) && !json.Contains("BowedBefore", StringComparison.Ordinal), "paused private action was not projected");
+            }
+            var restored = Edit(engine, _ => { });
+            Eq(restored.GetView(1).ActionPhaseTurnPlayerId, (int?)turn, "state restoration reconstructs the public context");
+            PassTwice(restored);
+            Check(restored.GetView(0).ActionPhaseTurnPlayerId is null && restored.GetView(1).ActionPhaseTurnPlayerId is null, "aside context retires after resolution");
+            Eq(restored.State.Phase, Phase.Action, "return phase remains engine-owned");
+        }
+        var ended = TrickeryTable(0, out var endSpell, out _, out var endSpirits, out var endTarget, out _);
+        Accept(ended, Slotted(ended, 0, "chikushudo-trickery-battle", endSpell, endSpirits, endTarget));
+        Accept(ended, new GameCommand("concede", 0, ended.Version));
+        Eq(ended.State.Phase, Phase.Finished);
+        Check(ended.GetView(0).ActionPhaseTurnPlayerId is null && ended.GetView(1).ActionPhaseTurnPlayerId is null, "concession ends the displayed Action Phase battle");
+        var normal = MatchEngine.FromTestState(ProvincelessBattle(20, 1));
+        Check(normal.GetView(0).ActionPhaseTurnPlayerId is null, "a regular Attack Phase open battlefield is not an aside");
+    }
+
+    private static void ResolvedFrontPublicAssociation()
+    {
+        var state = ProvincelessBattle(1, 9, province: 2);
+        state.UnresolvedBattlefields.Add(0);
+        Add(state, "training-lion-samurai", 1, Zone.Battlefield, province: 0);
+        Add(state, "training-crane-samurai", 0, Zone.Battlefield, province: 0);
+        var engine = MatchEngine.FromTestState(state);
+        PassTwice(engine);
+        Check(!engine.State.UnresolvedBattlefields.Contains(Extra), "extra front resolved");
+        Check(engine.State.Cards.Values.Any(c => c.OwnerId == 0 && c.Zone == Zone.Battlefield && c.ProvinceIndex == Extra), "defender remains at the resolved front");
+        foreach (var seat in new[] { 0, 1 })
+            Eq(engine.GetView(seat).Battlefields!.Single(b => b.Index == Extra).Province, (int?)2, "resolved occupied front retains its province");
+        var destroyed = Edit(engine, s => s.Players[0].Provinces[2].Destroyed = true);
+        Check(destroyed.GetView(0).Battlefields!.Single(b => b.Index == Extra).Province is null, "destroyed province makes the occupied front open");
+        var empty = Edit(engine, s => { foreach (var c in s.Cards.Values.Where(c => c.Zone == Zone.Battlefield && c.ProvinceIndex == Extra)) { c.Zone = Zone.Home; c.ProvinceIndex = null; } });
+        Check(empty.GetView(0).Battlefields!.All(b => b.Index != Extra), "resolved empty front is not reintroduced");
+    }
 
     // ---- Published shape --------------------------------------------------------------------------------------------------------------------------------
     private static void PublishedShape()

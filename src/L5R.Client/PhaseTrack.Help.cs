@@ -7,6 +7,7 @@ public partial class PhaseTrack
     private PhaseHelpPanel _help = null!;
     private Label _helpTitle = null!, _helpBody = null!, _helpContext = null!;
     private string _turnContext = "";
+    private bool _battleWithinAction;
     private int _helpIndex, _hoverIndex=-1;
     private float _hoverTime;
     public Button HelpButton { get; private set; } = null!;
@@ -39,7 +40,9 @@ public partial class PhaseTrack
     {
         _helpIndex=Math.Clamp(index,0,5);
         _helpTitle.Text=_names[_helpIndex];
-        _helpBody.Text=SegmentHelp(_helpIndex);
+        _helpBody.Text=_battleWithinAction && _helpIndex == 2
+            ? "A card has started a battle during the Action Phase. Take the Battle actions offered by the game. The Action Phase resumes when this battle finishes."
+            : SegmentHelp(_helpIndex);
         _helpContext.Text=_turnContext+" · Esc to close";
         var pixelScale=Math.Max(.01f,GetGlobalTransformWithCanvas().Scale.X);
         var textScale=Math.Max(1,1/pixelScale);

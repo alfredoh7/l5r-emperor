@@ -12,11 +12,12 @@ public sealed class TurnBloomGate
     public bool Observe(MatchView view, string match)
     {
         bool fresh = _match != match;
-        bool changed = fresh || _turn != view.TurnNumber || _owner != view.ActivePlayerId;
+        var turnOwner = view.ActionPhaseTurnPlayerId ?? view.ActivePlayerId;
+        bool changed = fresh || _turn != view.TurnNumber || _owner != turnOwner;
         // Changing a sandbox viewing seat is not a new turn.
         bool seatChanged = !fresh && _viewer != view.ViewerId;
-        _match = match; _turn = view.TurnNumber; _owner = view.ActivePlayerId; _viewer = view.ViewerId;
-        return changed && !seatChanged && view.WinnerId is null && view.ActivePlayerId == view.ViewerId;
+        _match = match; _turn = view.TurnNumber; _owner = turnOwner; _viewer = view.ViewerId;
+        return changed && !seatChanged && view.WinnerId is null && turnOwner == view.ViewerId;
     }
 }
 

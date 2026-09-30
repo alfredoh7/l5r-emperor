@@ -15,7 +15,7 @@ public partial class Main
     private long _battlefieldReviewVersion = 5000;
     private static readonly string[] BattlefieldReviewScenarios =
     ["Open battlefield", "Province and open battlefield", "Two open battlefields", "Province destroyed before engagement",
-     "Two fronts at one province", "Six extra battlefields", "Empty battlefield", "Crowded armies and attachments"];
+     "Two fronts at one province", "Six extra battlefields", "Empty battlefield", "Crowded armies and attachments", "Battle during the Action Phase"];
 
     private void StartOpenBattlefieldReview()
     {
@@ -98,7 +98,7 @@ public partial class Main
             CurrentBattleProvince = fields.Contains(100) ? 100 : 1, UnresolvedBattlefields = fields,
             Battlefields = fields.Select(i => new BattlefieldView(i,
                 _battlefieldReviewScenario == 4 || i == 1 && _battlefieldReviewScenario != 3 ? 1 : null)).ToArray(),
-            PendingChoice = null, PendingProvinceOrder = null, Events = []
+            PendingChoice = null, PendingProvinceOrder = null, ActionPhaseTurnPlayerId = _battlefieldReviewScenario == 8 ? 1 : null, Events = []
         };
         _selected = null; _chosen = null; _assignments.Clear(); _motionView = null; _tableLayoutSeen = false;
         _journalView = null; _battlePresentationStage = 0; _presentationSnapshot = null;

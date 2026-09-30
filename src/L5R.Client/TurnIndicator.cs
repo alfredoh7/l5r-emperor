@@ -21,7 +21,7 @@ public partial class TurnIndicator : Control
             TurnText = winner == view.ViewerId ? "VICTORY" : "MATCH ENDED";
             ActionText = view.VictoryReason ?? ""; YourAction = false; QueueRedraw(); return;
         }
-        var yourTurn = view.ActivePlayerId == view.ViewerId;
+        var yourTurn = (view.ActionPhaseTurnPlayerId ?? view.ActivePlayerId) == view.ViewerId;
         YourAction = view.PriorityPlayerId == view.ViewerId;
         var actor = view.Players.Single(p => p.Id == view.PriorityPlayerId);
         var name = view.Players.Select(p => p.Clan).Distinct().Count() == 1 ? actor.Name : actor.Clan;

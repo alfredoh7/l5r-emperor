@@ -122,6 +122,7 @@ public partial class Main
         foreach (var player in View.Players)
         foreach (var province in player.Provinces.Where(p => p.Destroyed))
         {
+            if (player.Id != View.ActivePlayerId && _battleCourts.ContainsKey(province.Index) && BattlefieldProvince(province.Index) is null) continue;
             var key = (player.Id, province.Index);
             if (!_fallTimes.ContainsKey(key)) _fallTimes[key] = _battlePresentationStage == 2 ? -1 : -10;
             var start = _fallTimes[key];

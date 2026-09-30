@@ -83,11 +83,12 @@ public partial class PhaseTrack : Control
     {
         TurnCue.Present(view);
         TurnCue.ReducedMotion = ReducedMotion;
-        var next = SegmentFor(view.Phase);
+        _battleWithinAction = view.WinnerId is null && view.Phase != Phase.Finished && view.ActionPhaseTurnPlayerId is not null;
+        var next = SegmentFor(_battleWithinAction ? Phase.Action : view.Phase);
         if (_active < 0 && next >= 0) _weights[next] = 1;
         _active = next;
         HelpButton.Disabled = next < 0;
-        _turnContext=$"Turn {view.TurnNumber} · {view.Players.Single(p=>p.Id==view.ActivePlayerId).Clan}";
+        _turnContext=$"Turn {view.TurnNumber} · {view.Players.Single(p=>p.Id==(view.ActionPhaseTurnPlayerId ?? view.ActivePlayerId)).Clan}";
         if(_areas.Count==0)
         for (var i = 0; i < _names.Length; i++)
         {

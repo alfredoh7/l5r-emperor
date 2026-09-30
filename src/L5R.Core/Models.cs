@@ -1486,6 +1486,9 @@ public sealed record MatchView(string ContentVersion, string Scenario, long Vers
     HandSightView[]? HandSights = null)
 {
     public ProvinceOrderView? PendingProvinceOrder { get; init; }
+    // Public display context for a battle fought inside the Action Phase. ActivePlayerId
+    // remains the battle's attacker; this is the original turn owner, never the paused action.
+    public int? ActionPhaseTurnPlayerId { get; init; }
 }
 /// <summary>Engine-private record of one face-down province card a player looked at (MatchState.ProvinceSights). Turn is the turn number it was looked at.</summary>
 public sealed record ProvinceSight(int ViewerId, int OwnerId, int Province, string CardId, string DefinitionId, int Turn);
