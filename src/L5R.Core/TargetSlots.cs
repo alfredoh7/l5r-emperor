@@ -22,6 +22,11 @@ public sealed record TargetSlot(string Id, string Category, string Label, int Mi
     public bool Repeatable { get; init; }
     /// <summary>The slot names a card only to pay a cost with (Isawa Koiso's Shugenja to destroy, his card to discard; issue #503): not a target of the action.</summary>
     public bool CostOnly { get; init; }
+    /// <summary>A later slot that reads this one's selection (Suiteiru no Oni's hosts, excluding the Personality destroyed as the cost) is offered candidates against its DEFAULT
+    /// choice only -- never a probed alternate. Unlike Dislodge the Foe's performers (issue #429, the ordinary case, every earlier candidate tried so a later slot's legal
+    /// candidates are never hidden behind one arbitrary default), the effect here always uses the one card actually named, so widening the later slot's offer past that single
+    /// card would offer a choice (e.g. the Personality who could be destroyed) that is only ever legal against a target no one submitted.</summary>
+    public bool ProbeDefaultOnlyForLaterSlots { get; init; }
     public bool IsPlayer => Category == TargetSlotKinds.Player;
     public bool AtResolution => Resolution is not null;
 }
@@ -177,9 +182,19 @@ public sealed partial class MatchEngine
                 else refusals[refused.Message] = refusals.GetValueOrDefault(refused.Message) + 1;
             }
             options.Add(new(slot.Id, slot.Label, TargetSlotKinds.Card, slot.Min, slot.Max, legal.ToArray(), []));
-            offered.Add((slot.Id, legal.ToArray()));
+            if (!slot.ProbeDefaultOnlyForLaterSlots) offered.Add((slot.Id, legal.ToArray()));
             if (legal.Count < slot.Min) complete = false;
-            else if (slot.Min > 0) chosen.Add(new(slot.Id, legal.Take(slot.Min).ToArray()));
+            else if (slot.Min > 0)
+            {
+                // Two independent slots drawing from the same candidate pool (Sudden Movement's "first"/"second", each any
+                // Personality with a partner) must not default to the SAME card for both: that default would fail the
+                // ability's own distinctness rule even though other, genuinely legal combinations exist. Prefer a candidate
+                // no earlier up-front slot already picked; only repeat one when the slot has no other legal candidate left
+                // (Repeatable slots, e.g. Suiteiru no Oni's hosts, still take the plain first-legal default).
+                var alreadyChosen = chosen.SelectMany(c => c.CardIds ?? []).ToHashSet(StringComparer.Ordinal);
+                var distinct = legal.Where(id => !alreadyChosen.Contains(id)).ToArray();
+                chosen.Add(new(slot.Id, distinct.Length >= slot.Min ? distinct.Take(slot.Min).ToArray() : legal.Take(slot.Min).ToArray()));
+            }
         }
         var error = refusals.Count == 0 ? null : refusals.OrderByDescending(r => r.Value).First().Key;
         if (!complete) return (options.ToArray(), null, error ?? "No legal target.");
