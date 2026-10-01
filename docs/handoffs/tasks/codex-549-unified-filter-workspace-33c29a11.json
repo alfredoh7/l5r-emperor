@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Implement approved B compact shared catalogue controls with A checklist/search clarity; retain persistent additive clan medallions, scoped counts, existing OR/AND and set semantics, full faces and adjacent deck controls; add continuous draggable 120\u2013300 card-size slider with stable browsing anchor. Main change only adds isolated interactive review entrypoints; no Core, rules, wire or deck-storage contracts change.",
+  "validation": "Client compiled with 0 warnings/errors; Godot import passed; native CatalogueProbe and DeckBuilderProbe passed 76 assertions plus 2 suite summaries at 1672x941 with 1280x800 and 1920x1080 cases, actual slider drags, additive facets, keyword search/scope/counts/order, printing inspection, quantity/comparison and save/load guards. Changed C# whitespace verification, Python launcher compile and shell syntax passed. Both prepared Mac apps launched through Finder/Terminal entrypoints and captured their interactive Library/Deck scenes successfully; final Godot import passed. Contract ledger detects no candidate changes. Main is current 8eb1a7c.",
+  "remaining": "Windows export/package/CI delivery still being finalized. Alfredo approved design; implementation and Mendon/Nathan review remain pending. No merge authorized. Windows graphical play is not claimed.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/549",
+  "branch": "codex/549-unified-filter-workspace",
+  "updated": "2026-10-01T13:08:25.079848+00:00"
+}

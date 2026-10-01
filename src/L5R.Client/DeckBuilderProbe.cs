@@ -27,17 +27,15 @@ public partial class DeckBuilderProbe : Node
             var all = new[] { source.StrongholdId, "oracle-l5r-1106", "oracle-l5r-679" }.Concat(source.Dynasty).Concat(source.Fate);
             var entries = all.GroupBy(id => id).Select(g => new DeckEntry(_screen.Data.Cards.Single(c => c.Id == g.Key).Name, g.Count())).ToArray();
             var path = _screen.Store.Save("Crane — Court and Steel", new Deck("Emperor", entries)); Check(_screen.OpenFile(path), "published deck loads into builder"); await Wait(5); await Capture("mat");
-            Check(_screen.Collection.Size.X >= 590, "collection has doubled logical width");
+            Check(!_screen.Collection.Rows && _screen.Collection.Size.X > _screen.Mat.Size.X, "collection displays full faces beside deck panel");
             Search("Asahina"); await Wait(3); await Capture("collection-large"); Search(""); await Wait(.3);
             var more = Walk(_screen).OfType<MenuButton>().Single(); Click(more); await Wait(.3); Check(more.GetPopup().ItemCount == 2, "compact save-copy and export actions available"); await Capture("deck-actions"); KeyPress(Key.Escape); await Wait(.3);
-            Click(Walk(_screen).OfType<Button>().First(b => b.Text.StartsWith("Clans") && b.IsVisibleInTree())); await Wait(.3);
-            Activate(Walk(_screen).OfType<CheckBox>().First(c => c.Text == "Crane")); await Wait(.2);
-            Check(_screen.Collection.Cards.Length > 0 && _screen.Collection.Cards.All(c => c.Clans.Contains("Crane")), "native clan checklist filters collection");
-            Activate(Walk(_screen).OfType<CheckBox>().First(c => c.Text == "Mantis")); await Wait(.2);
+            Click(Walk(_screen).OfType<Button>().First(b => b.TooltipText == "Crane cards")); await Wait(.2);
+            Check(_screen.Collection.Cards.Length > 0 && _screen.Collection.Cards.All(c => c.Clans.Contains("Crane")), "persistent clan medallion filters collection");
+            Click(Walk(_screen).OfType<Button>().First(b => b.TooltipText == "Mantis cards")); await Wait(.2);
             Check(_screen.Collection.Cards.All(c => c.Clans.Contains("Crane") || c.Clans.Contains("Mantis")), "native additive multi-clan filter");
             await Capture("filter-menu");
-            Activate(Walk(_screen).OfType<CheckBox>().First(c => c.Text == "Crane")); Activate(Walk(_screen).OfType<CheckBox>().First(c => c.Text == "Mantis")); await Wait(.2);
-            KeyPress(Key.Escape); await Wait(.3);
+            Click(Walk(_screen).OfType<Button>().First(b => b.Text == "Deselect all" && b.IsVisibleInTree())); await Wait(.2);
             Click(Walk(_screen).OfType<Button>().First(b => b.Text.StartsWith("Types") && b.IsVisibleInTree())); await Wait(.3);
             Check(!Walk(_screen).OfType<CheckBox>().Any(c => c.IsVisibleInTree() && c.Text == "Spell"), "Dynasty-scoped Type list drops Fate-only types");
             KeyPress(Key.Escape); await Wait(.3);
@@ -53,7 +51,7 @@ public partial class DeckBuilderProbe : Node
             Search("nonesuchzzzz"); await Wait(.2); Check(_screen.Collection.Cards.Length == 0, "empty search results"); Search("");
             var members = _screen.Draft.Cards.Where(c => c.SetupSlot.Length == 0 && c.Families.Contains("Dynasty")).Take(3).Select(c => _screen.Data.Cards.Single(x => x.Id == c.Id)).ToArray();
             Click(Button("List")); await Wait(.3); Check(_screen.Mat.Rows, "list view selected through native input"); Click(Button("Mat")); await Wait(.3);
-            var compareToggle = Walk(_screen.Mat).OfType<CheckBox>().First(c => c.IsVisibleInTree()); Click(compareToggle); await Wait(.3); Check(compareToggle.ButtonPressed, "native comparison selection");
+            var compareToggle = Walk(_screen.Collection).OfType<CheckBox>().First(c => c.IsVisibleInTree()); Click(compareToggle); await Wait(.3); Check(compareToggle.ButtonPressed, "native comparison selection");
             _screen.ShowComparison(members); await Wait(3); await Capture("compare"); KeyPress(Key.Escape); await Wait(.3);
             var events = _screen.Data.Cards.Where(c => c.Name == "A Fever in the Blood" || c.Name == "A Dangerous Game").GroupBy(c => c.Name).Select(g => g.First()).OrderBy(c => c.Name == "A Fever in the Blood" ? 0 : 1).ToArray();
             _screen.ShowComparison(events); await Wait(3); await Capture("compare-two");
@@ -67,7 +65,12 @@ public partial class DeckBuilderProbe : Node
             File.AppendAllText(path, "\n"); _screen.Adjust(card, 1); _screen.SaveDraft(); await Wait(.3); Check(Walk(_screen).OfType<ConfirmationDialog>().Any(d => d.Visible), "external edit requires overwrite decision"); KeyPress(Key.Escape); await Wait(.3); Check(_screen.Dirty, "overwrite cancel preserves dirty draft");
             _screen.SaveDraft(); await Wait(.3); KeyPress(Key.Enter); await Wait(.3); Check(!_screen.Dirty, "confirmed overwrite saves draft");
             Click(Button("‹ My decks")); await Wait(2); await Capture("saved-decks"); Click(Button("Open in builder")); await Wait(.5);
-            var slider = Walk(_screen).OfType<HSlider>().Single(); slider.Value = 110; await Wait(.7); await Capture("compact"); Check(_screen.Mat.VisibleCount < 80 && _screen.Collection.VisibleCount < 25, "virtualized nodes bounded");
+            var slider = _screen.Browser.CardSize; var unchanged = _screen.Collection.Cards.Select(c => c.Id).ToArray();
+            await DragSlider(slider, .9f); await Wait(.4); await Capture("slider-large");
+            Check(slider.Value > 260 && _screen.Collection.CardWidth == (float)slider.Value, "native builder slider drag enlarges collection faces");
+            Check(_screen.Collection.Cards.Select(c => c.Id).SequenceEqual(unchanged), "builder resize preserves filter results");
+            await DragSlider(slider, .03f); await Wait(.4); await Capture("compact");
+            Check(slider.Value < 150 && _screen.Mat.VisibleCount < 80 && _screen.Collection.VisibleCount < 55, "native smaller faces keep virtualized nodes bounded");
             GetWindow().Size = new Vector2I(1280, 800); await Wait(1); await Capture("small-window");
             Check(_screen.Mat.GetGlobalRect().End.X <= 1280, "mat within compact viewport");
             GetWindow().Size = new Vector2I(1920, 1080); await Wait(.5); await Capture("wide-window");
@@ -88,6 +91,14 @@ public partial class DeckBuilderProbe : Node
     private Button Button(string text) => Walk(_screen).OfType<Button>().First(b => b.Text == text && b.IsVisibleInTree());
     private static void Click(Control c) { var p = c.GetGlobalRect().GetCenter(); Input.ParseInputEvent(new InputEventMouseMotion { Position = p, GlobalPosition = p }); Input.ParseInputEvent(new InputEventMouseButton { Position = p, GlobalPosition = p, ButtonIndex = MouseButton.Left, Pressed = true }); Input.ParseInputEvent(new InputEventMouseButton { Position = p, GlobalPosition = p, ButtonIndex = MouseButton.Left, Pressed = false }); }
     private void Search(string text) { _screen.Search.GrabFocus(); _screen.Search.SelectAll(); KeyPress(Key.Backspace); foreach (var ch in text) { Input.ParseInputEvent(new InputEventKey { Unicode = ch, Keycode = (Key)char.ToUpperInvariant(ch), Pressed = true }); Input.ParseInputEvent(new InputEventKey { Unicode = ch, Keycode = (Key)char.ToUpperInvariant(ch), Pressed = false }); } }
+    private async Task DragSlider(HSlider slider, float fraction)
+    {
+        var rect = slider.GetGlobalRect(); var start = rect.Position + new Vector2(12, rect.Size.Y / 2);
+        var end = rect.Position + new Vector2(12 + (rect.Size.X - 24) * fraction, rect.Size.Y / 2);
+        Input.ParseInputEvent(new InputEventMouseButton { Position = start, GlobalPosition = start, ButtonIndex = MouseButton.Left, Pressed = true });
+        for (var i = 1; i <= 6; i++) { var p = start.Lerp(end, i / 6f); Input.ParseInputEvent(new InputEventMouseMotion { Position = p, GlobalPosition = p, ButtonMask = MouseButtonMask.Left }); await Wait(.025); }
+        Input.ParseInputEvent(new InputEventMouseButton { Position = end, GlobalPosition = end, ButtonIndex = MouseButton.Left, Pressed = false });
+    }
     private static void KeyPress(Key key) { Input.ParseInputEvent(new InputEventKey { Keycode = key, Pressed = true }); Input.ParseInputEvent(new InputEventKey { Keycode = key, Pressed = false }); }
     // A checkbox inside a popover Window's global rect does not map back to main-viewport click
     // coordinates, so popover content is activated via keyboard focus + Enter instead of Click().

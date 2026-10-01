@@ -67,6 +67,10 @@ public partial class DeckSurface : ScrollContainer
     }
     private readonly Control _sheet = new();
     private List<Entry> _entries = [];
+    private Entry? _resizeAnchor;
+    private float _resizeOffset;
+    public void BeginCardResize() { _resizeAnchor = _entries.FirstOrDefault(e => e.Card is not null && e.Rect.End.Y > ScrollVertical); _resizeOffset = _resizeAnchor is null ? 0 : ScrollVertical - _resizeAnchor.Rect.Position.Y; }
+    public void EndCardResize() => _resizeAnchor = null;
     private readonly Dictionary<object, Control> _visible = [];
     public CatalogueData.Card[] Cards = [];
     public bool Rows, Setup;
@@ -95,6 +99,8 @@ public partial class DeckSurface : ScrollContainer
     {
         if (Size.X < 40) return;
         if (rebuild) { foreach (var c in _visible.Values) { _sheet.RemoveChild(c); c.QueueFree(); } _visible.Clear(); }
+        var anchor = !rebuild ? _resizeAnchor ?? _entries.FirstOrDefault(e => e.Card is not null && e.Rect.End.Y > ScrollVertical) : null;
+        var offset = _resizeAnchor is not null ? _resizeOffset : anchor is null ? 0 : ScrollVertical - anchor.Rect.Position.Y;
         var entries = new List<Entry>();
         float y = 4, w = Size.X - 18;
         if (Rows)
@@ -115,7 +121,9 @@ public partial class DeckSurface : ScrollContainer
             }
         }
         _entries = entries;
-        _sheet.CustomMinimumSize = new Vector2(0, Math.Max(Size.Y, y)); _sheet.Size = new Vector2(w, Math.Max(Size.Y, y)); Refresh();
+        _sheet.CustomMinimumSize = new Vector2(0, Math.Max(Size.Y, y)); _sheet.Size = new Vector2(w, Math.Max(Size.Y, y));
+        if (anchor is not null && entries.FirstOrDefault(e => ReferenceEquals(e.Card, anchor.Card)) is { } moved) ScrollVertical = (int)Math.Max(0, moved.Rect.Position.Y + offset);
+        Refresh();
     }
     private void Refresh()
     {

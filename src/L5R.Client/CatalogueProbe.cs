@@ -39,26 +39,49 @@ public partial class CatalogueProbe : Node
             Activate(Walk(_screen).OfType<CheckBox>().First(c => c.Text == "Spell")); await Wait(.2);
             PressKey(Godot.Key.Escape); await Wait(.2);
             Click(FindButton(b => b.Text.StartsWith("Keywords"))); await Wait(.3);
+            Check(_screen.Grid.GetGlobalRect().Encloses(_screen.Browser.Keywords.PopupRect), "keyword checklist anchored inside browser card area");
+            var keywordSearch = _screen.Browser.Keywords.Search; EnterText(keywordSearch, "xyz-impossible"); await Wait(.2);
+            Check(!Walk(_screen).OfType<CheckBox>().Any(c => c.IsVisibleInTree()), "keyword search narrows checklist without changing card results");
+            EnterText(keywordSearch, ""); await Wait(.2);
             var fateSpellKeywords = _screen.Data.Cards.Where(c => c.Types.Contains("Spell") && c.DeckTypes.Contains("Fate")).SelectMany(c => c.Keywords).Distinct().ToHashSet();
             Check(Walk(_screen).OfType<CheckBox>().Where(c => c.IsVisibleInTree()).All(c => fateSpellKeywords.Contains(c.Text)), "keyword list scoped to current Type and Family selection");
             Activate(Walk(_screen).OfType<Button>().First(b => b.Text == "Most common" && b.IsVisibleInTree())); await Wait(.2);
             var rows = Walk(_screen).OfType<CheckBox>().Where(c => c.IsVisibleInTree()).Select(c => c.Text).ToArray();
             var expectedOrder = _screen.Data.Filter(family: "Fate", types: ["Spell"]).SelectMany(c => c.Keywords).GroupBy(k => k).OrderByDescending(g => g.Count()).ThenBy(g => g.Key, StringComparer.OrdinalIgnoreCase).Select(g => g.Key).ToArray();
             Check(rows.SequenceEqual(expectedOrder), "most-common keyword order ranks by frequency within the current filter");
-            PressKey(Godot.Key.Escape); await Wait(.2);
+            await Capture("keywords"); PressKey(Godot.Key.Escape); await Wait(.2);
+            _screen.ResetFilters(); await Wait(.2);
+            Click(FindButton(b => b.Text == "Dynasty")); await Wait(.2); Click(FindButton(b => b.Text.StartsWith("Types"))); await Wait(.2);
+            Activate(Walk(_screen).OfType<CheckBox>().First(c => c.Text == "Personality")); await Wait(.2); _screen.Browser.Types.Close();
+            Click(FindButton(b => b.Text == "Fate")); await Wait(.2);
+            Check(_screen.Browser.Types.Selected.Count == 0 && _screen.Browser.ScopeNotice.Contains("Personality cleared"), "incompatible selection clears once with a visible explanation");
+            Click(FindButton(b => b.TooltipText == "Crane cards")); await Wait(.2);
+            Click(FindButton(b => b.AccessibilityName == "Remove filter Crane")); await Wait(.2);
+            Check(_screen.Browser.Clans.Count == 0, "removable clan tag clears only its own selection");
             _screen.ResetFilters(); await Wait(.2);
             Search("Akodo"); await Wait(3); Check(_screen.Grid.Cards.All(c => c.SearchText.Contains("Akodo", StringComparison.OrdinalIgnoreCase)), "live search");
             var tile = _screen.Grid.Tile("oracle-l5r-229") ?? throw new Exception("Akodo Kisho tile absent"); _screen.Grid.EnsureControlVisible(tile); await Wait(.5); Click(tile); await Wait(1);
             Check(_screen.SelectedId == "oracle-l5r-229", "native click opens details"); Check(_screen.Grid.GetGlobalRect().End.X <= _screen.InspectorRect.Position.X, "inspector cannot cover gallery cards"); await Capture("inspection");
             tile = _screen.Grid.Tile("oracle-l5r-229") ?? throw new Exception("Selected tile absent after reflow"); _screen.Grid.EnsureControlVisible(tile); await Wait(.3); Click(tile); await Wait(.5); Check(_screen.SelectedId == "", "repeat click dismisses details");
-            _screen.ResetFilters(); await Wait(.3); _screen.Grid.ScrollVertical = 4800; await Wait(1); Check(_screen.Grid.VisibleTileCount < 55, "bounded visible tile pool");
+            _screen.ResetFilters(); await Wait(.3);
+            _screen.Grid.ScrollVertical = 4800; await Wait(.3);
+            var sizeSlider = _screen.Browser.CardSize;
+            var filtersBefore = _screen.Grid.Cards.Select(c => c.Id).ToArray();
+            var anchorId = _screen.Grid.Cards.First(c => _screen.Grid.Tile(c.Id)?.GetGlobalRect().Intersects(_screen.Grid.GetGlobalRect()) == true).Id;
+            await DragSlider(sizeSlider, .9f); await Wait(.4); await Capture("slider-large");
+            Check(sizeSlider.Value > 260 && _screen.Grid.CardWidth == (float)sizeSlider.Value, "native slider drag enlarges full catalogue faces");
+            Check(_screen.Grid.Cards.Select(c => c.Id).SequenceEqual(filtersBefore), "card resizing preserves filter results");
+            Check(_screen.Grid.Tile(anchorId) is not null, "card resizing preserves browsing anchor in virtual pool");
+            await DragSlider(sizeSlider, .03f); await Wait(.4); await Capture("slider-small");
+            Check(sizeSlider.Value < 150, "native slider drag reduces card size");
+            sizeSlider.Value = 196; await Wait(.3); _screen.Grid.ScrollVertical = 4800; await Wait(1); Check(_screen.Grid.VisibleTileCount < 55, "bounded visible tile pool");
             var before = _screen.Grid.ScrollVertical; var other = _screen.Grid.Cards.First(); _screen.SelectCard(other); await Wait(.2); PressKey(Godot.Key.Escape); await Wait(.3); Check(_screen.SelectedId == "", "Escape dismisses inspector");
             Check(Math.Abs(_screen.Grid.ScrollVertical - before) <= 2, "inspection restores exact scrolling position");
             Search("nonesuchzzzz"); await Wait(.3); await Capture("empty");
             _screen.ResetFilters(); Search("Akodo"); await Wait(.5); _screen.SelectCard(_screen.Data.Cards.First(c => c.Id == "oracle-l5r-229")); await Wait(.3);
             var window = GetWindow(); window.Size = new Vector2I(1280, 800); await Wait(.8); await Capture("compact");
             Click(FindButton(b => b.Text.StartsWith("Rules text"))); await Wait(.3); await Capture("rules");
-            PressKey(Godot.Key.Escape); await Wait(.3); Click(FindButton(b => b.Text == "More filters")); await Wait(.3); await Capture("advanced"); PressKey(Godot.Key.Escape); await Wait(.3);
+            PressKey(Godot.Key.Escape); await Wait(.3); Click(Walk(_screen).OfType<OptionButton>().First(o => o.AccessibilityName == "Printing set")); await Wait(.3); await Capture("sets"); PressKey(Godot.Key.Escape); await Wait(.3);
             var card = _screen.Data.Cards.First(c => !c.Playable); var fallback = new CatalogueData.Printing { Id = "probe-missing", SourceUrl = "https://images.oracleofthevoid.com/l5r/missing.jpg", Sha256 = new string('0', 64) }; _screen.Scans.Get(fallback); await Wait(.3); Check(_screen.Scans.State(fallback).Contains("unavailable"), "missing offline scan is explicit");
             var saved = card.Printings; card.Printings = [fallback]; _screen.ResetFilters(); Search(card.Name); await Wait(.5); await Capture("missing-scan"); card.Printings = saved;
             GD.Print("PLAYABLE COUNT " + _screen.Data.Filter(playable: true).Length);
@@ -91,6 +114,19 @@ public partial class CatalogueProbe : Node
     private Button FindButton(Func<Button, bool> predicate) => Walk(_screen).OfType<Button>().First(predicate);
     private static void Check(bool condition, string message) { if (!condition) throw new Exception(message); GD.Print("PASS " + message); }
     private static void Click(Control c) { var p = c.GetGlobalRect().GetCenter(); Input.ParseInputEvent(new InputEventMouseMotion { Position = p, GlobalPosition = p }); Input.ParseInputEvent(new InputEventMouseButton { Position = p, GlobalPosition = p, ButtonIndex = MouseButton.Left, Pressed = true }); Input.ParseInputEvent(new InputEventMouseButton { Position = p, GlobalPosition = p, ButtonIndex = MouseButton.Left, Pressed = false }); }
+    private async Task DragSlider(HSlider slider, float fraction)
+    {
+        var rect = slider.GetGlobalRect(); var start = rect.Position + new Vector2(12, rect.Size.Y / 2);
+        var end = rect.Position + new Vector2(12 + (rect.Size.X - 24) * fraction, rect.Size.Y / 2);
+        Input.ParseInputEvent(new InputEventMouseButton { Position = start, GlobalPosition = start, ButtonIndex = MouseButton.Left, Pressed = true });
+        for (var i = 1; i <= 6; i++) { var p = start.Lerp(end, i / 6f); Input.ParseInputEvent(new InputEventMouseMotion { Position = p, GlobalPosition = p, ButtonMask = MouseButtonMask.Left }); await Wait(.025); }
+        Input.ParseInputEvent(new InputEventMouseButton { Position = end, GlobalPosition = end, ButtonIndex = MouseButton.Left, Pressed = false });
+    }
+    private static void EnterText(LineEdit field, string text)
+    {
+        field.GrabFocus(); field.SelectAll(); PressKey(Godot.Key.Backspace);
+        foreach (var ch in text) { Input.ParseInputEvent(new InputEventKey { Unicode = ch, Keycode = (Godot.Key)char.ToUpperInvariant(ch), Pressed = true }); Input.ParseInputEvent(new InputEventKey { Unicode = ch, Keycode = (Godot.Key)char.ToUpperInvariant(ch), Pressed = false }); }
+    }
     private static void PressKey(Godot.Key key) { Input.ParseInputEvent(new InputEventKey { Keycode = key, Pressed = true }); Input.ParseInputEvent(new InputEventKey { Keycode = key, Pressed = false }); }
     /// <summary>Activates a focusable control (e.g. a checkbox inside a popover) via keyboard focus
     /// + Enter rather than a synthesized screen-space click, since global rects inside a popup
