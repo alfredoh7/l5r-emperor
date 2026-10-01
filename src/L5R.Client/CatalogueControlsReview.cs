@@ -14,8 +14,7 @@ public partial class CatalogueControlsReview : Control
         _capture = OS.GetCmdlineUserArgs().FirstOrDefault(a => a.StartsWith("--capture="))?[10..] ?? "";
         var profile = OS.GetCmdlineUserArgs().FirstOrDefault(a => a.StartsWith("--profile="))?[10..] ?? "default";
         if (profile.Length is > 0 and <= 32 && profile.All(c => char.IsAsciiLetterOrDigit(c) || c == '-')) _storageRoot = "user://unified-filter-review/" + profile;
-        var collection = OS.GetCmdlineUserArgs().Any(a => a.Contains("collection-review"));
-        if (collection) MyCollection.OverridePath = ProjectSettings.GlobalizePath(_storageRoot + "/my-collection.json");
+        MyCollection.OverridePath = ProjectSettings.GlobalizePath(_storageRoot + "/my-collection.json");
         var builder = OS.GetCmdlineUserArgs().Any(a => a == "--deck-filters-review" || a == "--capture-mode=deck-filters-review" || a == "--deck-collection-review" || a == "--capture-mode=deck-collection-review");
         if (builder) OpenBuilder(); else OpenLibrary();
     }

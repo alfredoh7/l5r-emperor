@@ -13,6 +13,7 @@ public partial class MyCollectionProbe : Node
             // Cocoa may restore a previous Godot window frame despite --resolution. Pin the review size.
             GetWindow().Title = "L5R — My Collection native checks";
             GetWindow().Mode = Window.ModeEnum.Windowed; GetWindow().Size = new Vector2I(1672, 941);
+            if (OS.GetCmdlineUserArgs().Contains("--review-isolation-only")) { await CheckReviewIsolation(); GetTree().Quit(); return; }
             _out = OS.GetCmdlineUserArgs().FirstOrDefault(a => a.StartsWith("--out="))?[6..] ?? ProjectSettings.GlobalizePath("res://../../artifacts/my-collection-checks");
             Directory.CreateDirectory(_out);
             MyCollection.OverridePath = Path.Combine(_out, "inventory-" + Guid.NewGuid().ToString("N"), "collection.json");
@@ -126,6 +127,24 @@ public partial class MyCollectionProbe : Node
             GD.Print($"COLLECTION NATIVE PASS: {_checks} assertions"); GetTree().Quit();
         }
         catch (Exception e) { GD.PushError(e.ToString()); GetTree().Quit(1); }
+    }
+    private async Task CheckReviewIsolation()
+    {
+        var ordinary = ProjectSettings.GlobalizePath("user://my-collection.json");
+        var before = File.Exists(ordinary) ? File.ReadAllBytes(ordinary) : null;
+        MyCollection.OverridePath = null;
+        var review = new CatalogueControlsReview(); AddChild(review); review.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.FullRect);
+        await Wait(1);
+        Check(MyCollection.OverridePath is { } path && path != ordinary && path.Contains("review-isolation-"), "prepared review uses its isolated collection path");
+        var browser = Walk(review).OfType<CatalogueBrowserBar>().Single();
+        Click(browser.EditCollectionButton); await Wait(.2);
+        var editor = Walk(review).OfType<MyCollectionEditor>().Single();
+        var card = Walk(editor).OfType<DeckFace>().First().Card;
+        Click(Walk(editor).OfType<Button>().First(b => b.AccessibilityName == "Increase owned copies of " + card.Name)); await Wait(.2);
+        Check(new MyCollectionStore(MyCollection.OverridePath!).Count(card.Id) == MyCollection.Store.Count(card.Id) && MyCollection.Store.Count(card.Id) > 0, "native review editor writes only its prepared inventory");
+        var after = File.Exists(ordinary) ? File.ReadAllBytes(ordinary) : null;
+        Check(before is null ? after is null : after is not null && before.SequenceEqual(after), "prepared review preserves ordinary collection bytes");
+        GD.Print($"REVIEW ISOLATION PASS: {_checks} assertions");
     }
     private void Check(bool pass, string name) { if (!pass) throw new Exception(name); _checks++; GD.Print("PASS " + name); }
     private async Task Wait(double seconds) => await ToSignal(GetTree().CreateTimer(seconds), SceneTreeTimer.SignalName.Timeout);
