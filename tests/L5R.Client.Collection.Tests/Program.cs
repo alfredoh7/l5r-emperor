@@ -37,10 +37,13 @@ try
     var bad = Path.Combine(dir, "bad.json"); File.WriteAllText(bad, "{corrupt");
     var broken = new MyCollectionStore(bad); Check(broken.LoadError.Length > 0, "corrupt local file reported"); Throws<IOException>(() => broken.Set("a", 1), "corrupt local file cannot be silently replaced"); Check(File.ReadAllText(bad) == "{corrupt", "corrupt original remains intact");
     var unavailable = Path.Combine(dir, "blocked"); Directory.CreateDirectory(unavailable);
-    var blocked = new MyCollectionStore(unavailable); Throws<IOException>(() => blocked.Set("a", 2), "write failure reported"); Check(blocked.Count("a") == 0, "write failure leaves in-memory ownership unchanged");
+    var blocked = new MyCollectionStore(unavailable);
+    // Moving a file onto a directory reports IOException on macOS and denied access on Windows.
+    try { blocked.Set("a", 2); Check(false, "write failure reported"); }
+    catch (Exception e) when (e is IOException or UnauthorizedAccessException) { Check(true, "write failure reported"); }
+    Check(blocked.Count("a") == 0, "write failure leaves in-memory ownership unchanged");
     Throws<FormatException>(() => s.Set("a", -1), "manual negative count rejected");
     Throws<FormatException>(() => s.Preview(new string('x', 1_000_001), cards), "oversized import rejected");
     Console.WriteLine($"COLLECTION DATA PASS: {checks} assertions");
 }
 finally { Directory.Delete(dir, true); }
-
