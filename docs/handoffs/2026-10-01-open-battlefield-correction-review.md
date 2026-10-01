@@ -17,3 +17,9 @@ Run `python3 tools/create-open-battlefield-launcher.py --correction` and open th
 - Review fixtures and automated checks do not replace Mendon/Nathan’s mechanics/presentation acceptance or Windows graphical playtesting.
 
 No merge is authorized. Windows review delivery and expert review remain pending at the initial implementation commit; the task handoff and PR track delivery.
+
+## Windows validation candidate
+
+[Private correction preview](https://github.com/alfredoh7/l5r-emperor/releases/tag/preview-pr575-d00a9c6562-r1-windows) is staged for PR #575 at game source `d00a9c656297cddadb83d4897494c643abbb963c`. The versioned ZIP is `L5R-Review-pr575-d00a9c6562-r1-Windows.zip`, SHA-256 `2b3d80b3cfbf7f8c0eb196e26e532a7a46928677f96ef3594b7cf64e74fe3177`. GitHub upload size/hash verification passed. The interactive correction capture mode was also launched graphically at 1440×900 and inspected; it opens the intended scenario directly. Windows package CI must pass before the publisher sends the targeted review notification. Neither staging nor delivery merges the correction.
+
+The context helper’s refresh timed out reading older local Git history; direct GitHub reads and remote-main verification confirmed the unchanged `8eb1a7c` base and overlapping work. A separate temporary Git transport cache published only this task branch, avoiding cloud-evicted older objects; other branches and main were not changed. Local review tools are preserved in a task-specific non-cloud cache so the one-click launcher does not depend on temporary SDK files.

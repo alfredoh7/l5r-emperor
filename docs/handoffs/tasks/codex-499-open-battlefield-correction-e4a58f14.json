@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Keep engine-listed or occupied resolved primary courts and surviving defenders visible after an extra front destroys their province; old-view fallback and retirement checks; prepared correction launcher. No rules or wire changes.",
-  "validation": "Original renderer reproduced missing court. Final foreground native open-battlefield suite passed both seats/input/resize/fallback/retirement. Client build 0 warnings/errors; changed C# formatting passed. check.sh --skip-client passed; R1 18/18, AI 76/76, server 8/8, transport 17/17. GitHub main verified at 8eb1a7c via ls-remote; overlapping Main.cs PRs inspected.",
-  "remaining": "Prepare and verify Windows correction review package, publish draft PR and request Mendon/Nathan review; no merge authorized.",
+  "summary": "PR #575 correction: keep occupied/view-listed resolved primary courts visible after extra-front province destruction, with old-view fallback and retirement; direct native/Windows correction launchers. No rules or wire changes.",
+  "validation": "Original renderer reproduces missing court; final foreground native suite passes both seats, survivor/attachment inspection, resize, fallback, retirement and existing scenarios. Client 0 warnings/errors; C# formatting and full check.sh --skip-client passed (R1 18/18, AI 76/76, server 8/8, transport 17/17). Correction capture mode visually checked at 1440x900. Windows export/package checks and private upload SHA/size verification passed: source d00a9c656297cddadb83d4897494c643abbb963c, SHA256 2b3d80b3cfbf7f8c0eb196e26e532a7a46928677f96ef3594b7cf64e74fe3177. Refresher timed out on old Git history; GitHub main/overlap reads confirmed 8eb1a7c unchanged.",
+  "remaining": "Windows package CI and relevant desktop CI must pass before targeted review notification. Mendon/Nathan expert review and Windows graphical acceptance pending. No merge authorized.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/499",
   "branch": "codex/499-open-battlefield-correction",
-  "updated": "2026-10-01T11:06:51.534223+00:00"
+  "updated": "2026-10-01T11:31:03.159605+00:00"
 }
