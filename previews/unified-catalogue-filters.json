@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "slug": "unified-catalogue-filters",
+  "title": "Unified Card Library and Deck Builder Filters",
+  "source_pr": 576,
+  "source_commit": "3973082d13e3ccdad18042888c8ad9c32446101b",
+  "revision": 1,
+  "reviewer": "mdornbrook",
+  "summary": "Alfredo approved B’s compact shared controls with A’s checklist clarity/search plus a draggable card-size slider. Please review the implemented Library and Deck Builder workspaces; no merge is authorized until review.",
+  "review_steps": [
+    "Extract the ZIP and open Start Review.cmd. The Card Library opens with Crane + Mantis / Dynasty / Personality selected. Try additive clan choices, Select all/Deselect all, search and removable tags.",
+    "Open Types and Keywords. Check search, immediate checkbox updates, scoped keyword counts and A–Z/Most common. Changing Dynasty/Fate must remove incompatible Type selections with an explanation. Keyword availability comes from actual catalogue data.",
+    "Drag the Card size slider while scrolled into the collection. Full faces should grow/shrink smoothly and retain the browsing anchor; filtering results must remain unchanged. Inspect a card and its printing provenance.",
+    "Use Deck Builder to switch to a prepared published Crane deck, or launch Other previews/Deck Builder.cmd. Try the same filters/slider beside Your Deck, quantity edits, setup selection, Mat/List and comparison. Save/load uses isolated review storage.",
+    "Try set filtering and Set sorting in the requested chronology. Reference/unimplemented cards remain visibly identified and existing deck validation remains authoritative. Open Full Game.cmd opens the same source build normally; Send Feedback.url opens PR #576."
+  ],
+  "known_limitations": [
+    "This is an unmerged preview branch. Alfredo approved the design; implementation acceptance and Mendon/Nathan review remain pending. No merge authorized.",
+    "Owned-copy tracking (#556) and multi-set filtering are outside this change. Ordinary set filtering stays single-select. Card size is remembered across screens within the current process.",
+    "No Core rules, match commands, hidden state, client/server contracts or deck-storage schemas change. Reference cards do not gain engine effects; existing workshop and playable-deck checks are preserved. Separate draft previews #570 and #575 are not included.",
+    "Native graphical interaction/visual checks ran on macOS, including actual slider drags and Library/Builder suites. Windows CI verifies this exact package, runtime and launch arguments; native Windows graphical gameplay is not claimed."
+  ],
+  "scenarios": [
+    {
+      "name": "Start Review",
+      "mode": "catalogue-filters-review"
+    },
+    {
+      "name": "Other previews/Deck Builder",
+      "mode": "deck-filters-review"
+    },
+    {
+      "name": "Open Full Game",
+      "mode": null
+    }
+  ]
+}
