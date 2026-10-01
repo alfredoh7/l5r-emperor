@@ -3,24 +3,24 @@
   "slug": "my-collection",
   "title": "My Collection and Approved Catalogue Workspace",
   "source_pr": 576,
-  "source_commit": "052715caf2215f687d706bcc78eac7b7f6228de3",
-  "revision": 2,
+  "source_commit": "d3ea29daaca1f9221936414a611fbd7a82e7709f",
+  "revision": 3,
   "reviewer": "mdornbrook",
-  "summary": "Alfredo approved the collection concepts and requested a closer native match with the previous mat restored. Please review the implemented ownership/editor/import/missing-copy workflow and note any UI/QoL corrections. Native implementation acceptance and your review remain pending; no merge is authorized.",
+  "summary": "Alfredo approved the collection concepts and requested a closer native match with the previous mat restored. Latest polish moves ticks inside rounded clan tiles, matches spacing and card density, and groups editor quantities with centered Undo. Please review the ownership/editor/import/missing-copy workflow and note UI/QoL corrections. Final native acceptance and your review remain pending; no merge is authorized.",
   "review_steps": [
-    "Extract the ZIP and open Start Review.cmd. The Library opens with prepared Crane + Mantis Personalities and sample ownership counts. Try Collection: All cards/Owned/Unowned, additive filters and card sizing.",
+    "Extract the ZIP and open Start Review.cmd. The Library opens with prepared Crane + Mantis Personalities and sample ownership counts. Try Collection: All cards/Owned/Unowned, additive filters and card sizing. Check that selected clan ticks are inside each tile, with subtle rounded corners and the original mat.",
     "Open the compact More library actions menu beside Deck Builder, inspect Imported decks and source archive, then press Escape to return to the same Library. Drag card size while partway through a row; resizing must preserve its vertical offset.",
-    "Open Edit my collection. Try the four full faces, All/Owned/Unowned tabs, direct numeric entry and minus/plus. Changes save automatically on this preview profile; Undo last change restores the preceding inventory.",
+    "Open Edit my collection. Try the four full faces, All/Owned/Unowned tabs, direct numeric entry and minus/plus. Changes save automatically on this preview profile; Undo last change restores the preceding inventory. Search for discarding or discarding Fate; editor rules/multi-term search must agree with the same Library facets.",
     "Export CSV for a real example, or use CSV template from the import review. Import a file with card_id,card_name,owned_count. Nothing is saved until Apply; repeated imports set totals rather than add. Bare names with Base/Experienced variants require an explicit card selection. Unknown/conflicting IDs/names, invalid quantities and duplicate identities must be corrected or excluded.",
     "Compare Current/Imported/Change. Try default Update listed cards and Cancel; then Replace entire collection, its second confirmation and Undo. Omitted cards become unowned only on confirmed replacement.",
-    "Click Done, then Deck Builder. The prepared published Crane draft shows sample shortages separately from engine checks. Owned is read-only; In deck changes the draft. Try View missing cards and Export missing; the missing CSV uses needed_count. Keep a dirty draft, edit ownership and return; the draft must remain intact and shortages update immediately.",
-    "Use the Library/Builder navigation buttons within the same window. Close it before using the alternative Other previews/Deck Builder.cmd or Open Full Game.cmd. Inspect the restored prior mat, shared checklists, setup choices, comparison and responsive layouts. Send Feedback.url opens PR #576."
+    "Click Done, then Deck Builder. The prepared published Crane draft shows sample shortages separately from engine checks. Owned is read-only; In deck changes the draft. Try View missing cards and Export missing; the missing CSV uses needed_count. Keep a dirty draft, edit ownership and return; the draft must remain intact and shortages update immediately. Scroll the catalogue partway, edit ownership, and return; your place and live Owned labels must be preserved when result identities are unchanged.",
+    "Use the Library/Builder navigation buttons within the same window. Close it before using the alternative Other previews/Deck Builder.cmd or Open Full Game.cmd. Inspect the restored prior mat, shared checklists, setup choices, comparison and responsive layouts. Send Feedback.url opens PR #576. Try a short wide window (1440x700); deck rows and the footer must remain separate."
   ],
   "known_limitations": [
     "Unmerged review build. Alfredo approved the designs; final native visual acceptance and Mendon/Nathan review remain pending. No merge authorized.",
     "Local inventory by canonical catalogue ID, with Base/Experienced versions kept separate. Individual set-printing quantities, cloud sync and simultaneous editors in multiple processes are outside this first implementation. Preview sample inventory is isolated from ordinary game profiles.",
     "No Core rules, match commands, hidden state, client/server contracts or deck-storage schema change. Ownership never blocks drafting/saving or turns reference cards into playable effects. Existing single-select Set filtering remains.",
-    "117 local native graphical assertions passed on macOS: 45 Library, 35 Builder, 28 Collection and 9 ordinary navigation. Final focused regressions cover the restored source archive and partial-row slider resizing in both directions. 38 collection data assertions and the deterministic foundation suite passed. Windows CI validates the exact archive, runtime and launch arguments; native Windows graphical play is not claimed.",
+    "126 native graphical assertions passed on macOS: 45 Library, 37 Builder, 35 Collection and 9 ordinary navigation. Final regressions cover rules-text/multi-term search, unchanged catalogue scroll with refreshed Owned labels, 1440x700 height adaptation, archive access and partial-row slider resizing. 38 collection data assertions passed; full deterministic foundation checks previously passed and exact delivery CI is recorded on PR #576. Windows CI validates the archive, runtime and launch arguments; native Windows graphical play is not claimed.",
     "Original card faces, live numbers and retained setup/comparison controls replace illustrative concept content. The previous mat is restored at Alfredo\u2019s latest direction. The source/native comparisons are on PR #576."
   ],
   "scenarios": [
