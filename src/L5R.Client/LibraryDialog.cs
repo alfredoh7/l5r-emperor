@@ -52,7 +52,17 @@ public partial class CatalogueScreen : Control
         _detail.Visible = false;
         _back = CatalogueArt.Button("‹  Back", () => Closed?.Invoke()); Put(_header, _back, 28, 17, 130, 44); _back.AddThemeStyleboxOverride("normal", new StyleBoxEmpty());
         Put(_header, CatalogueArt.Label("Card library", 44, true), 202, 12, 390, 60);
-        var builder = CatalogueArt.Button("Deck Builder", () => { if (OpenBuilder is not null) OpenBuilder(); else { Closed?.Invoke(); DeckBuilderDialog.Show(GetTree().Root); } }); builder.Name = "OpenBuilder"; _header.AddChild(builder);
+        var builder = CatalogueArt.Button("Deck Builder", () =>
+        {
+            if (OpenBuilder is not null) OpenBuilder();
+            else
+            {
+                var root = GetTree().Root;
+                // Retire the previous overlay's viewport settings before opening the next one.
+                TreeExited += () => Callable.From(() => DeckBuilderDialog.Show(root)).CallDeferred();
+                Closed?.Invoke();
+            }
+        }); builder.Name = "OpenBuilder"; _header.AddChild(builder);
         Browser = new CatalogueBrowserBar(Data, ["All", "Dynasty", "Fate", "Strongholds"]); _canvas.AddChild(Browser); Search = Browser.Search;
         Browser.Changed += ApplyFilter; Browser.PopupBounds = () => Grid.GetGlobalRect();
         Browser.CardSizeChanged += width => { Grid.CardWidth = width; Grid.LayoutCards(); };

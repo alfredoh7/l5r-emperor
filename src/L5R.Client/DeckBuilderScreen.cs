@@ -93,7 +93,16 @@ public partial class DeckBuilderScreen : Control
         DeckSkin.Primary(_save);
         var copy = new MenuButton { Name = "Copy", Text = "", Icon = DeckSkin.Icon("more"), IconAlignment = HorizontalAlignment.Center, Flat = false, TooltipText = "More deck actions", AccessibilityName = "More deck actions" }; copy.AddThemeFontSizeOverride("font_size", 25); _header.AddChild(copy);
         var menu = copy.GetPopup(); menu.AddItem("Save a copy…", 0); menu.AddItem("Export draft…", 1); menu.IdPressed += id => { if (id == 0) SaveCopy(); else ExportFile(Draft.ToDeck(), _name.Text); };
-        var library = CatalogueArt.Button("Card Library", () => Guard(() => { if (OpenLibrary is not null) OpenLibrary(); else { Closed?.Invoke(); LibraryDialog.Show(GetTree().Root); } })); library.Name = "OpenLibrary"; _header.AddChild(library);
+        var library = CatalogueArt.Button("Card Library", () => Guard(() =>
+        {
+            if (OpenLibrary is not null) OpenLibrary();
+            else
+            {
+                var root = GetTree().Root;
+                TreeExited += () => Callable.From(() => LibraryDialog.Show(root)).CallDeferred();
+                Closed?.Invoke();
+            }
+        })); library.Name = "OpenLibrary"; _header.AddChild(library);
         var brand = CatalogueArt.Label("LEGEND OF THE FIVE RINGS\nEMPEROR EDITION", 14); brand.Name = "Brand"; brand.HorizontalAlignment = HorizontalAlignment.Right; brand.AddThemeColorOverride("font_color", DeckSkin.Gold); _header.AddChild(brand);
     }
     private void BuildCollectionControls()

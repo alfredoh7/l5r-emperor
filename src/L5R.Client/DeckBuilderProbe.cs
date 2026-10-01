@@ -11,6 +11,7 @@ public partial class DeckBuilderProbe : Node
     {
         try
         {
+            if (OS.GetCmdlineUserArgs().Contains("--navigation-only")) { await CheckWorkspaceNavigation(); GetTree().Quit(); return; }
             _out = OS.GetCmdlineUserArgs().FirstOrDefault(a => a.StartsWith("--out="))?[6..] ?? ProjectSettings.GlobalizePath("res://../../artifacts/deck-builder-checks"); Directory.CreateDirectory(_out);
             var storage = Path.Combine(_out, "decks-" + Guid.NewGuid().ToString("N"));
             _screen = new DeckBuilderScreen { StorageDirectory = storage }; AddChild(_screen); _screen.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.FullRect);
@@ -86,8 +87,39 @@ public partial class DeckBuilderProbe : Node
         catch (Exception e) { GD.PushError(e.ToString()); GetTree().Quit(1); }
     }
     private async Task Wait(double seconds) => await ToSignal(GetTree().CreateTimer(seconds), SceneTreeTimer.SignalName.Timeout);
+    private async Task CheckWorkspaceNavigation()
+    {
+        await Wait(.1); var root = GetTree().Root; root.GuiEmbedSubwindows = false;
+        LibraryDialog.Show(root); await Wait(.5);
+        var library = Walk(root).OfType<CatalogueScreen>().Single();
+        library.Browser.CardSize.Value = 270;
+        Click(Walk(library).OfType<Button>().Single(b => b.Name == "OpenBuilder")); await Wait(.5);
+        var builder = Walk(root).OfType<DeckBuilderScreen>().Single();
+        Check(!Walk(root).OfType<CatalogueScreen>().Any(), "ordinary Library navigation retires the old overlay");
+        Check(root.GuiEmbedSubwindows, "Library to Builder preserves embedded checklist placement");
+        Check(builder.Browser.CardSize.Value == 270, "card size preference follows Library to Builder");
+        var source = L5R.Core.PublishedContent.Snapshot.Decks.First(d => d.Clan == "Crane");
+        var entries = new[] { source.StrongholdId, "oracle-l5r-1106", "oracle-l5r-679" }.Concat(source.Dynasty).Concat(source.Fate)
+            .GroupBy(id => id).Select(g => new DeckEntry(builder.Data.Cards.Single(c => c.Id == g.Key).Name, g.Count())).ToArray();
+        builder.OpenPracticeDeck(new Deck("Emperor", entries), "Navigation review");
+        Click(Walk(builder).OfType<Button>().Single(b => b.Name == "OpenLibrary")); await Wait(.3);
+        Check(Walk(builder).OfType<ConfirmationDialog>().Any(d => d.Visible), "Library navigation guards an unsaved draft");
+        KeyPress(Key.Escape); await Wait(.2);
+        Check(builder.IsInsideTree() && builder.Dirty && !Walk(root).OfType<CatalogueScreen>().Any(), "cancel preserves the draft and current workspace");
+        Click(Walk(builder).OfType<Button>().Single(b => b.Name == "OpenLibrary")); await Wait(.2);
+        var guard = Walk(builder).OfType<ConfirmationDialog>().Single(d => d.Visible);
+        Activate(Walk(guard, true).OfType<Button>().Single(b => b.Text == "Discard changes")); await Wait(.5);
+        library = Walk(root).OfType<CatalogueScreen>().Single();
+        Check(!Walk(root).OfType<DeckBuilderScreen>().Any() && root.GuiEmbedSubwindows, "Builder to Library retires overlay and preserves embedded menus");
+        Check(library.Browser.CardSize.Value == 270, "card size preference follows Builder to Library");
+        library.Browser.Keywords.Open(); await Wait(.2);
+        Check(library.Browser.Keywords.IsOpen && library.Grid.GetGlobalRect().Encloses(library.Browser.Keywords.PopupRect), "switched workspace checklist remains inside the browser");
+        library.Browser.CloseMenus(); Click(Walk(library).OfType<Button>().Single(b => b.Text == "‹  Back")); await Wait(.3);
+        Check(!root.GuiEmbedSubwindows && !Walk(root).OfType<CatalogueScreen>().Any(), "closing the final workspace restores original popup mode");
+        GD.Print("WORKSPACE NAVIGATION PASS");
+    }
     private async Task Capture(string name) { await Wait(.15); RenderingServer.ForceDraw(); GetViewport().GetTexture().GetImage().SavePng(Path.Combine(_out, name + ".png")); GD.Print("CAPTURE " + name); }
-    private static IEnumerable<Node> Walk(Node root) { foreach (var child in root.GetChildren()) { yield return child; foreach (var n in Walk(child)) yield return n; } }
+    private static IEnumerable<Node> Walk(Node root, bool includeInternal = false) { foreach (var child in root.GetChildren(includeInternal)) { yield return child; foreach (var n in Walk(child, includeInternal)) yield return n; } }
     private Button Button(string text) => Walk(_screen).OfType<Button>().First(b => b.Text == text && b.IsVisibleInTree());
     private static void Click(Control c) { var p = c.GetGlobalRect().GetCenter(); Input.ParseInputEvent(new InputEventMouseMotion { Position = p, GlobalPosition = p }); Input.ParseInputEvent(new InputEventMouseButton { Position = p, GlobalPosition = p, ButtonIndex = MouseButton.Left, Pressed = true }); Input.ParseInputEvent(new InputEventMouseButton { Position = p, GlobalPosition = p, ButtonIndex = MouseButton.Left, Pressed = false }); }
     private void Search(string text) { _screen.Search.GrabFocus(); _screen.Search.SelectAll(); KeyPress(Key.Backspace); foreach (var ch in text) { Input.ParseInputEvent(new InputEventKey { Unicode = ch, Keycode = (Key)char.ToUpperInvariant(ch), Pressed = true }); Input.ParseInputEvent(new InputEventKey { Unicode = ch, Keycode = (Key)char.ToUpperInvariant(ch), Pressed = false }); } }
