@@ -16,9 +16,14 @@ public partial class CatalogueBrowserBar : Control
     public string Sort => _sort.GetItemText(_sort.Selected);
     public bool PlayableOnly { get; private set; }
     public CatalogueData.Card[] Results { get; private set; } = [];
+    public CatalogueData.Card[] CardsWithoutOwnership { get; private set; } = [];
+    public OwnershipFilter Ownership { get; private set; }
+    public Button EditCollectionButton { get; }
+    public event Action? EditCollection;
+    public OptionButton CollectionControl { get; }
     public string ScopeNotice => _notice.Text;
     public Func<Rect2>? PopupBounds { get => Types.PopupBounds; set { Types.PopupBounds = value; Keywords.PopupBounds = value; } }
-    public const float BarHeight = 246;
+    public const float BarHeight = 220;
     private static readonly string[] ClanNames = ["Crab", "Crane", "Dragon", "Lion", "Mantis", "Phoenix", "Scorpion", "Spider", "Unicorn", "Unaligned"];
     private readonly CatalogueData _data;
     private readonly Func<CatalogueData.Card, bool> _eligible;
@@ -40,10 +45,15 @@ public partial class CatalogueBrowserBar : Control
             button.ToggleMode = true; button.AccessibilityName = clan + " cards"; button.TooltipText = clan + " cards";
             AddChild(button); _clans[clan] = button; button.AddChild(CatalogueArt.Clan(clan));
             var label = CatalogueArt.Label(clan, 17); label.HorizontalAlignment = HorizontalAlignment.Center; button.AddChild(label);
-            var mark = CatalogueArt.Label("✓", 16); mark.Name = "SelectedMark"; mark.Hide(); button.AddChild(mark);
+            var mark = new TextureRect { Name = "SelectedMark", Texture = DeckSkin.Icon("unchecked"), MouseFilter = MouseFilterEnum.Ignore, ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize, StretchMode = TextureRect.StretchModeEnum.KeepAspectCentered }; button.AddChild(mark);
         }
         _selectAll = AddButton("Select all", () => { Clans.UnionWith(ClanNames); Refresh(); });
         _deselectAll = AddButton("Deselect all", () => { Clans.Clear(); Refresh(); });
+        CollectionControl = new OptionButton { Name = "CollectionFilter", FitToLongestItem = false, AccessibilityName = "Filter collection ownership" };
+        foreach (var item in new[] { "Collection: All cards", "Collection: Owned", "Collection: Unowned" }) CollectionControl.AddItem(item);
+        AddChild(CollectionControl); CollectionControl.ItemSelected += i => { Ownership = (OwnershipFilter)i; Refresh(); };
+        EditCollectionButton = AddButton("Edit my collection", () => EditCollection?.Invoke());
+        MyCollection.Store.Changed += CollectionChanged; TreeExiting += () => MyCollection.Store.Changed -= CollectionChanged;
         Search = new LineEdit { PlaceholderText = "Search card names, keywords or rules…", ClearButtonEnabled = true }; AddChild(Search); Search.TextChanged += _ => Refresh();
         foreach (var family in families) _families[family] = AddButton(family, () => SetFamily(family));
         Types = new FilterChecklist(this, Theme, "Types"); AddChild(Types.Trigger); Types.Changed += () => Refresh();
@@ -90,7 +100,7 @@ public partial class CatalogueBrowserBar : Control
     }
     public void Reset()
     {
-        _refreshing = true; Clans.Clear(); Types.Clear(); Keywords.Clear(); Search.Text = ""; Family = _initialFamily; PlayableOnly = false; _set.Select(0); _gold.Select(0);
+        _refreshing = true; Clans.Clear(); Types.Clear(); Keywords.Clear(); Search.Text = ""; Family = _initialFamily; PlayableOnly = false; Ownership = OwnershipFilter.All; CollectionControl.Select(0); _set.Select(0); _gold.Select(0);
         _refreshing = false; _notice.Text = ""; Refresh();
     }
     public void Refresh(bool notify = true)
@@ -100,6 +110,7 @@ public partial class CatalogueBrowserBar : Control
         {
             var familyCards = _data.Filter(family: Family).Where(_eligible);
             var removed = Types.SetOptions(familyCards.SelectMany(c => c.Types).Distinct().Order(StringComparer.OrdinalIgnoreCase).ToArray()).ToList();
+            CardsWithoutOwnership = FilterWithoutKeywords(false, true).Where(c => Keywords.Selected.Count == 0 || Keywords.Selected.Any(c.Keywords.Contains)).ToArray();
             var scoped = FilterWithoutKeywords().ToArray();
             var counts = scoped.SelectMany(c => c.Keywords).GroupBy(k => k).ToDictionary(g => g.Key, g => g.Count());
             var ordered = _mostCommon ? counts.OrderByDescending(kv => kv.Value).ThenBy(kv => kv.Key, StringComparer.OrdinalIgnoreCase).Select(kv => kv.Key) : counts.Keys.Order(StringComparer.OrdinalIgnoreCase);
@@ -107,12 +118,15 @@ public partial class CatalogueBrowserBar : Control
             var selected = Keywords.Selected;
             Results = scoped.Where(c => selected.Count == 0 || selected.Any(c.Keywords.Contains)).ToArray();
             if (removed.Count > 0) _notice.Text = string.Join(", ", removed.Distinct()) + " cleared · unavailable with these filters.";
+            else if (MyCollection.Store.LoadError.Length > 0) _notice.Text = "Collection unavailable; open Edit my collection for details. Your original file is preserved.";
             else if (notify) _notice.Text = "";
             _count.Text = $"{Results.Length:N0} matching cards";
             foreach (var (clan, button) in _clans)
             {
-                var active = Clans.Contains(clan); button.SetPressedNoSignal(active); SelectedStyle(button, active);
-                button.GetNode<Label>("SelectedMark").Visible = active;
+                var active = Clans.Contains(clan); button.SetPressedNoSignal(active); foreach (var state in new[] { "normal", "hover", "pressed" }) button.AddThemeStyleboxOverride(state, new StyleBoxEmpty());
+                button.GetChild<TextureRect>(0).Modulate = active ? Colors.White : new Color(.75f, .75f, .75f);
+                button.GetChild<Label>(1).AddThemeColorOverride("font_color", active ? new Color("efd48d") : CatalogueArt.Ivory);
+                button.GetNode<TextureRect>("SelectedMark").Texture = DeckSkin.Icon(active ? "checked" : "unchecked");
             }
             foreach (var (family, button) in _families) SelectedStyle(button, Family == family);
             SelectedStyle(_allCards, !PlayableOnly); SelectedStyle(_playable, PlayableOnly); SelectedStyle(_alphabetical, !_mostCommon); SelectedStyle(_common, _mostCommon);
@@ -121,21 +135,28 @@ public partial class CatalogueBrowserBar : Control
         finally { _refreshing = false; }
         if (notify) Changed?.Invoke();
     }
-    private IEnumerable<CatalogueData.Card> FilterWithoutKeywords()
+    private void CollectionChanged() => Refresh();
+    public void SetOwnership(OwnershipFilter filter) { Ownership = filter; CollectionControl.Select((int)filter); Refresh(); }
+    private IEnumerable<CatalogueData.Card> FilterWithoutKeywords(bool ownership = true, bool ignoreSearch = false)
     {
-        var cards = _data.Filter(Search.Text, Clans, Family, Types.Selected, null, PlayableOnly, Sort).Where(_eligible);
+        var cards = _data.Filter(ignoreSearch ? "" : Search.Text, Clans, Family, Types.Selected, null, PlayableOnly, Sort).Where(_eligible);
         if (_gold.Selected > 0) cards = cards.Where(c => c.Numeric("cost") != double.MaxValue && (_gold.Text == "10+" ? c.Numeric("cost") >= 10 : c.Numeric("cost") == _gold.Selected - 1));
         if (_set.Selected > 0)
         {
             var set = _set.GetItemText(_set.Selected);
             cards = cards.Where(c => c.Printings.Any(p => p.Set != "Game printing" && (set == "Other" ? !CatalogueData.SetOrder.Contains(p.Set) : p.Set == set)));
         }
-        return cards;
+        return ownership ? cards.Where(c => MyCollection.Store.Includes(c.Id, Ownership)) : cards;
     }
     private void BuildTags()
     {
         Palette.Clear(_tags);
-        void Tag(string text, Action remove) { var b = CatalogueArt.Button(text + "  ×", remove); b.AccessibilityName = "Remove filter " + text; b.AddThemeFontSizeOverride("font_size", 16); _tags.AddChild(b); }
+        void Tag(string text, Action remove)
+        {
+            var b = CatalogueArt.Button(text + "  ×", remove);
+            foreach (var state in new[] { "normal", "hover", "pressed" }) b.AddThemeStyleboxOverride(state, Palette.Box(new Color("e1d6c2"), new Color("8c7447"), 8, 1));
+            b.AddThemeColorOverride("font_color", new Color("161d24")); b.AddThemeColorOverride("font_hover_color", new Color("161d24")); b.AccessibilityName = "Remove filter " + text; b.AddThemeFontSizeOverride("font_size", 16); _tags.AddChild(b);
+        }
         foreach (var clan in Clans.Order(StringComparer.OrdinalIgnoreCase)) Tag(clan, () => { Clans.Remove(clan); Refresh(); });
         foreach (var type in Types.Selected.Order(StringComparer.OrdinalIgnoreCase)) Tag(type, () => Types.Remove(type));
         foreach (var keyword in Keywords.Selected.Order(StringComparer.OrdinalIgnoreCase)) Tag(keyword, () => Keywords.Remove(keyword));
@@ -152,18 +173,20 @@ public partial class CatalogueBrowserBar : Control
         var w = Size.X; var cell = (w - 224) / ClanNames.Length; var i = 0;
         foreach (var button in _clans.Values)
         {
-            Place(button, i++ * cell, 0, cell - 6, 72); Place(button.GetChild<Control>(0), (cell - 42) / 2, 3, 40, 40);
-            Place(button.GetChild<Control>(1), 0, 45, cell - 6, 24); Place(button.GetChild<Control>(2), cell - 23, 5, 18, 22);
+            Place(button, i++ * cell, 0, cell - 6, 72); Place(button.GetChild<Control>(0), (cell - 58) / 2, 0, 52, 52);
+            Place(button.GetChild<Control>(1), 0, 48, cell - 6, 24); Place(button.GetChild<Control>(2), cell - 29, 47, 21, 22);
         }
         Place(_selectAll, w - 215, 14, 100, 38); Place(_deselectAll, w - 109, 14, 109, 38);
         var familyWidth = _families.Count == 4 ? 400 : 230;
-        Place(Search, 0, 84, w - familyWidth - 12, 40); var x = w - familyWidth;
+        Place(Search, 0, 84, w - familyWidth - 435, 40);
+        Place(CollectionControl, w - familyWidth - 425, 84, 220, 40); Place(EditCollectionButton, w - familyWidth - 195, 84, 183, 40);
+        var x = w - familyWidth;
         foreach (var (key, button) in _families) { var width = key == "Strongholds" ? 130 : (familyWidth - (_families.ContainsKey("Strongholds") ? 130 : 0)) / (_families.Count - (_families.ContainsKey("Strongholds") ? 1 : 0)); Place(button, x, 84, width, 40); x += width; }
         Place(Types.Trigger, 0, 134, 174, 38); Place(Keywords.Trigger, 184, 134, 192, 38); Place(_set, 386, 134, 245, 38); Place(_gold, 641, 134, 140, 38);
         Place(_allCards, 799, 134, 184, 38); Place(_playable, 993, 134, 166, 38); Place(_count, 1173, 137, Math.Max(130, w - 1173), 32);
         Place(_tagScroll, 0, 182, w - 655, 36); Place(_reset, w - 644, 182, 124, 34);
         Place(_sort, w - 506, 182, 170, 34); Place(_sizeLabel, w - 320, 187, 78, 25); Place(CardSize, w - 238, 188, 230, 24);
-        Place(_notice, 0, 219, w, 24);
+        Place(_notice, 0, 214, w, 20);
         QueueRedraw();
     }
     public override void _Draw()

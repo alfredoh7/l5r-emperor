@@ -11,6 +11,9 @@ public partial class DeckBuilderProbe : Node
     {
         try
         {
+            // Cocoa may restore a previous Godot window frame despite --resolution. Pin the review size.
+            GetWindow().Title = "L5R — Deck Builder native checks";
+            GetWindow().Mode = Window.ModeEnum.Windowed; GetWindow().Size = new Vector2I(1672, 941);
             if (OS.GetCmdlineUserArgs().Contains("--navigation-only")) { await CheckWorkspaceNavigation(); GetTree().Quit(); return; }
             _out = OS.GetCmdlineUserArgs().FirstOrDefault(a => a.StartsWith("--out="))?[6..] ?? ProjectSettings.GlobalizePath("res://../../artifacts/deck-builder-checks"); Directory.CreateDirectory(_out);
             var storage = Path.Combine(_out, "decks-" + Guid.NewGuid().ToString("N"));
@@ -57,7 +60,7 @@ public partial class DeckBuilderProbe : Node
             var events = _screen.Data.Cards.Where(c => c.Name == "A Fever in the Blood" || c.Name == "A Dangerous Game").GroupBy(c => c.Name).Select(g => g.First()).OrderBy(c => c.Name == "A Fever in the Blood" ? 0 : 1).ToArray();
             _screen.ShowComparison(events); await Wait(3); await Capture("compare-two");
             var parchments = Walk(_screen).OfType<Panel>().Where(p => p.Name.ToString().StartsWith("RulesParchment")).ToArray(); Check(parchments.Length == 2 && parchments.All(p => p.Size.Y >= 180), "two readable rules panels");
-            var longRules = _screen.Data.Cards.OrderByDescending(c => c.CurrentOracleText.Length).Take(3).ToArray(); _screen.ShowComparison(longRules); await Wait(2); await Capture("compare-long-rules");
+            var longRules = _screen.Data.Cards.OrderByDescending(c => (c.Playable ? c.Definition!.Text : CatalogueData.PlainText(c.CurrentOracleText)).Length).Take(3).ToArray(); _screen.ShowComparison(longRules); await Wait(2); await Capture("compare-long-rules");
             var rulesScroll = Walk(_screen).OfType<ScrollContainer>().First(s => s.Name == "RulesScroll" && s.GetVScrollBar().MaxValue > s.Size.Y); rulesScroll.ScrollVertical = 100; await Wait(.2); Check(rulesScroll.ScrollVertical > 0, "long comparison rules remain scrollable"); KeyPress(Key.Escape); await Wait(.3);
             var snapshot = DeckFormat.Write(_screen.Draft.ToDeck()); var bad = Path.Combine(_out, "malformed.txt"); File.WriteAllText(bad, "Legality: Emperor\n1 Missing Imaginary Card"); Check(!_screen.OpenFile(bad) && DeckFormat.Write(_screen.Draft.ToDeck()) == snapshot, "bad import preserves draft"); await Wait(.4); KeyPress(Key.Enter); await Wait(.4); Check(!Walk(_screen).OfType<AcceptDialog>().Any(d => d.Visible), "error notice dismissed with keyboard");
             _screen.SaveDraft(); await Wait(.3); Check(!_screen.Dirty && DeckFileStore.Read(path) == snapshot, "save and reopen exact text roundtrip");

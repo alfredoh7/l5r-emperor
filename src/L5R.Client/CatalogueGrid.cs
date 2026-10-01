@@ -15,15 +15,15 @@ public partial class CatalogueGrid : ScrollContainer
     public void BeginCardResize() => _resizeAnchor = (int)(ScrollVertical / _rowHeight) * _columns;
     public void EndCardResize() => _resizeAnchor = null;
     public Action<CatalogueData.Card>? Selected;
-    public float CardWidth { get; set; } = 196;
+    public float CardWidth { get; set; } = 230;
     public int VisibleTileCount => _tiles.Count;
     public CatalogueData.Card[] Cards => _cards;
     public CatalogueGrid(CatalogueScans scans)
     {
         _scans = scans; FocusMode = FocusModeEnum.All; ClipContents = true; HorizontalScrollMode = ScrollMode.Disabled; VerticalScrollMode = ScrollMode.Auto;
         AddChild(_sheet); Resized += LayoutCards; GetVScrollBar().ValueChanged += _ => Refresh();
-        _scans.Changed += RedrawCards;
-        TreeExiting += () => _scans.Changed -= RedrawCards;
+        _scans.Changed += RedrawCards; MyCollection.Store.Changed += RedrawCards;
+        TreeExiting += () => { _scans.Changed -= RedrawCards; MyCollection.Store.Changed -= RedrawCards; };
     }
     public void SetCards(CatalogueData.Card[] cards, bool reset = true)
     { _cards = cards; foreach (var tile in _tiles.Values) { _sheet.RemoveChild(tile); tile.QueueFree(); } _tiles.Clear(); if (reset) ScrollVertical = 0; LayoutCards(); }
@@ -36,7 +36,7 @@ public partial class CatalogueGrid : ScrollContainer
         _columns = Math.Max(1, (int)((Size.X - 12) / desired));
         _cellWidth = (Size.X - 18) / _columns;
         _cardWidth = Math.Min(_cellWidth - 26, CardWidth);
-        _rowHeight = _cardWidth * 1.4f + 32;
+        _rowHeight = _cardWidth * 1.4f + 57;
         _sheet.CustomMinimumSize = new Vector2(0, (float)Math.Max(Size.Y, Math.Ceiling((double)_cards.Length / _columns) * _rowHeight));
         _sheet.Size = new Vector2(Size.X - 18, _sheet.CustomMinimumSize.Y);
         ScrollVertical = (int)(anchor / _columns * _rowHeight); Refresh();
@@ -100,6 +100,7 @@ public partial class CatalogueCardTile : Button
             DrawString(Palette.Body, new Vector2(8, face.Size.Y - 24), _scans.State(Card.Printings.FirstOrDefault()).Split(" · ")[0], HorizontalAlignment.Center, face.Size.X - 16, 13, CatalogueArt.Muted);
         }
         if (hot) DrawRect(face.Grow(2), CatalogueArt.Gold, false, 2);
-        DrawString(Palette.Body, new Vector2(0, face.Size.Y + 19), Card.Playable ? Card.Name : "Not yet playable", HorizontalAlignment.Center, Size.X, 15, Card.Playable ? CatalogueArt.Ivory : CatalogueArt.Muted);
+        DrawString(Palette.Body, new Vector2(0, face.Size.Y + 19), $"Owned: {MyCollection.Store.Count(Card.Id)}", HorizontalAlignment.Center, Size.X, 16, CatalogueArt.Ivory);
+        if (!Card.Playable) DrawString(Palette.Body, new Vector2(0, face.Size.Y + 40), "Not yet playable", HorizontalAlignment.Center, Size.X, 14, CatalogueArt.Muted);
     }
 }

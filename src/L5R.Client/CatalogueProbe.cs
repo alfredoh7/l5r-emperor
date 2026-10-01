@@ -9,6 +9,9 @@ public partial class CatalogueProbe : Node
     {
         try
         {
+            // Cocoa may restore a previous Godot window frame despite --resolution. Pin the review size.
+            GetWindow().Title = "L5R — Card Library native checks";
+            GetWindow().Mode = Window.ModeEnum.Windowed; GetWindow().Size = new Vector2I(1672, 941);
             _output = OS.GetCmdlineUserArgs().FirstOrDefault(a => a.StartsWith("--out="))?[6..] ?? ProjectSettings.GlobalizePath("res://../../artifacts/catalogue-checks"); Directory.CreateDirectory(_output);
             _screen = new CatalogueScreen(); AddChild(_screen); _screen.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.FullRect);
             await Wait(2); Check(_screen.Scans.PackAvailable, "complete local artwork pack present");
@@ -45,6 +48,7 @@ public partial class CatalogueProbe : Node
             EnterText(keywordSearch, ""); await Wait(.2);
             var fateSpellKeywords = _screen.Data.Cards.Where(c => c.Types.Contains("Spell") && c.DeckTypes.Contains("Fate")).SelectMany(c => c.Keywords).Distinct().ToHashSet();
             Check(Walk(_screen).OfType<CheckBox>().Where(c => c.IsVisibleInTree()).All(c => fateSpellKeywords.Contains(c.Text)), "keyword list scoped to current Type and Family selection");
+            await Capture("keyword-search-cleared");
             Activate(Walk(_screen).OfType<Button>().First(b => b.Text == "Most common" && b.IsVisibleInTree())); await Wait(.2);
             var rows = Walk(_screen).OfType<CheckBox>().Where(c => c.IsVisibleInTree()).Select(c => c.Text).ToArray();
             var expectedOrder = _screen.Data.Filter(family: "Fate", types: ["Spell"]).SelectMany(c => c.Keywords).GroupBy(k => k).OrderByDescending(g => g.Count()).ThenBy(g => g.Key, StringComparer.OrdinalIgnoreCase).Select(g => g.Key).ToArray();

@@ -64,6 +64,7 @@ public partial class CatalogueScreen : Control
             }
         }); builder.Name = "OpenBuilder"; _header.AddChild(builder);
         Browser = new CatalogueBrowserBar(Data, ["All", "Dynasty", "Fate", "Strongholds"]); _canvas.AddChild(Browser); Search = Browser.Search;
+        Browser.EditCollection += () => MyCollection.Show(this, Data, Scans, Browser);
         Browser.Changed += ApplyFilter; Browser.PopupBounds = () => Grid.GetGlobalRect();
         Browser.CardSizeChanged += width => { Grid.CardWidth = width; Grid.LayoutCards(); };
         Browser.CardSize.DragStarted += Grid.BeginCardResize; Browser.CardSize.DragEnded += _ => Grid.EndCardResize();
@@ -158,6 +159,7 @@ public partial class CatalogueScreen : Control
     private void UpdateFace() { if (_face is null || _selected is null) return; _face.Texture = Scans.Get(_printing); if (_scanState is not null) { _scanState.Visible = _face.Texture is null; _scanState.Text = Scans.State(_printing); } }
     public override void _UnhandledInput(InputEvent e)
     {
+        if (GetChildren().OfType<MyCollectionEditor>().Any()) return;
         if (e is InputEventKey { Pressed: true, Echo: false } key)
         {
             if (key.Keycode == Key.F11) return;

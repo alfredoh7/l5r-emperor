@@ -28,7 +28,7 @@ public partial class DeckBuilderScreen : Control
     public bool Dirty { get; private set; }
     public string Page { get; private set; } = "decks";
     public string Family { get; private set; } = "Dynasty";
-    private readonly Control _canvas = new(), _header = new(), _setupStrip = new(), _left = new(), _toolbar = new(), _setupTools = new(), _library = new(), _overlay = new(), _hover = new();
+    private readonly Control _canvas = new(), _header = new(), _setupStrip = new(), _left = new(), _toolbar = new(), _setupTools = new(), _deckFooter = new(), _library = new(), _overlay = new(), _hover = new();
     private readonly HashSet<string> _compare = [];
     private Dictionary<string, CatalogueData.Card> _byId = [];
     // The catalogue-wide DeckCardInfo materialization (each one running per-card ability lookups, DeckWorkshop.cs)
@@ -37,6 +37,7 @@ public partial class DeckBuilderScreen : Control
     // deck file just to get a summary, so this was previously O(saved decks x catalogue size) on every visit.
     private DeckCardInfo[] _pool = [];
     private Button _dynasty = null!, _fate = null!, _compareButton = null!, _save = null!;
+    private Label _shortages = null!;
     private Label _status = null!, _dirtyLabel = null!, _count = null!, _empty = null!;
     private LineEdit _name = null!;
     public CatalogueBrowserBar Browser { get; private set; } = null!;
@@ -61,10 +62,11 @@ public partial class DeckBuilderScreen : Control
         Store = new DeckFileStore(StorageDirectory ?? ProjectSettings.GlobalizePath("user://decks"));
         var bg = new TextureRect { Texture = GD.Load<Texture2D>("res://Art/DeckBuilder/work-mat.png"), ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize, StretchMode = TextureRect.StretchModeEnum.Scale, MouseFilter = MouseFilterEnum.Ignore }; AddChild(bg); bg.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
         AddChild(_lines); _lines.Draw += DrawFrames;
-        AddChild(_canvas); foreach (var c in new[] { _header, _setupStrip, _left, _toolbar, _setupTools, _library }) _canvas.AddChild(c);
+        AddChild(_canvas); foreach (var c in new[] { _header, _setupStrip, _left, _toolbar, _setupTools, _deckFooter, _library }) _canvas.AddChild(c);
         Browser = new CatalogueBrowserBar(Data, ["Dynasty", "Fate"], "Dynasty", NotSetupOnly); _canvas.AddChild(Browser); Search = Browser.Search; _sort = Browser.SortControl;
+        Browser.EditCollection += () => { HideHover(); MyCollection.Show(this, Data, Scans, Browser); };
         Browser.Changed += ApplyFilters;
-        Collection = new DeckSurface { Group = "None", MakeCard = MakeCollectionTile }; _canvas.AddChild(Collection);
+        Collection = new DeckSurface { Group = "None", ShowHeadings = false, MakeCard = MakeCollectionTile }; _canvas.AddChild(Collection);
         Mat = new DeckSurface { MakeCard = MakeTile }; _canvas.AddChild(Mat);
         Collection.CardWidth = Mat.CardWidth = (float)Browser.CardSize.Value;
         Browser.PopupBounds = () => Collection.GetGlobalRect();
@@ -113,10 +115,13 @@ public partial class DeckBuilderScreen : Control
     private void BuildToolbar()
     {
         _group = Option(["Group: Type", "Group: Gold", "Group: None"], () => RefreshMat());
-        Put(_toolbar, _group, 8, 8, 162, 36);
-        var mat = CatalogueArt.Button("Mat", () => { _list = false; RefreshMat(); }); mat.Name = "MatTab"; Put(_toolbar, mat, 178, 8, 80, 36);
-        var list = CatalogueArt.Button("List", () => { _list = true; RefreshMat(); }); list.Name = "ListTab"; Put(_toolbar, list, 266, 8, 80, 36);
-        _compareButton = CatalogueArt.Button("Compare (0)", () => ShowComparison(_compare.Select(id => _byId[id]).ToArray())); Put(_toolbar, _compareButton, 8, 48, 338, 34);
+        Put(_deckFooter, _group, 8, 2, 202, 34);
+        var mat = CatalogueArt.Button("Mat", () => { _list = false; RefreshMat(); }); mat.Name = "MatTab"; Put(_deckFooter, mat, 220, 2, 100, 34);
+        var list = CatalogueArt.Button("List", () => { _list = true; RefreshMat(); }); list.Name = "ListTab"; Put(_deckFooter, list, 328, 2, 100, 34);
+        _compareButton = CatalogueArt.Button("Compare (0)", () => ShowComparison(_compare.Select(id => _byId[id]).ToArray())); Put(_deckFooter, _compareButton, 224, 42, 204, 34);
+        _shortages = CatalogueArt.Label("", 15); Put(_toolbar, _shortages, 8, 5, 252, 27);
+        Put(_toolbar, CatalogueArt.Button("View missing cards", ShowMissing), 264, 2, 164, 34);
+        Put(_deckFooter, CatalogueArt.Button("Export missing", ExportMissing), 8, 42, 206, 34);
     }
     private void Fit()
     {
@@ -130,14 +135,15 @@ public partial class DeckBuilderScreen : Control
         var top = 86 + CatalogueBrowserBar.BarHeight + 18;
         if (_setupSlot.Length == 0)
         {
-            var right = _w - 400;
+            var right = _w - 470;
             Place(Collection, 20, top, right - 40, _h - top - 52);
-            Place(_setupStrip, right, top, 372, 225);
-            Place(_toolbar, right, top + 225, 372, 90);
-            Place(Mat, right, top + 318, 372, Math.Max(100, _h - top - 370)); Mat.RowHeight = 64;
+            Place(_setupStrip, right, top, 442, 143);
+            Place(_toolbar, right, top + 143, 442, 40);
+            Place(_deckFooter, right, _h - 132, 442, 82);
+            Place(Mat, right, top + 187, 442, Math.Max(60, _h - top - 325)); Mat.RowHeight = 56;
             Place(_count, 28, _h - 38, right - 48, 26);
-            Place(_empty, right + 16, top + 350, 338, 100);
-            Place(_status, right + 8, _h - 46, 352, 34); _status.AddThemeFontSizeOverride("font_size", 15);
+            Place(_empty, right + 16, top + 220, 408, 100);
+            Place(_status, right + 8, _h - 46, 422, 34); _status.AddThemeFontSizeOverride("font_size", 15);
         }
         else
         {
@@ -166,17 +172,18 @@ public partial class DeckBuilderScreen : Control
         var compact = _setupSlot.Length == 0;
         if (compact)
         {
-            Put(_setupStrip, CatalogueArt.Clan(clan), 10, 8, 34, 34); Put(_setupStrip, CatalogueArt.Label("Your deck", 27, true), 55, 6, 285, 38);
-            var y = 47f;
+            Put(_setupStrip, CatalogueArt.Clan(clan), 10, 8, 34, 34); Put(_setupStrip, CatalogueArt.Label("Your deck", 27, true), 55, 6, 355, 38);
+            var setupX = 10f;
             foreach (var slot in DeckWorkshop.SetupSlots)
             {
                 var info = Draft.Cards.FirstOrDefault(c => c.SetupSlot == slot); var card = info is null ? null : _byId[info.Id];
-                if (card is not null) Put(_setupStrip, new DeckThumbnail(card, Scans), 10, y, 34, 36);
-                var button = CatalogueArt.Button(slot + ": " + (card?.Name ?? "Select…"), () => SetSetup(slot)); button.AccessibilityName = "Choose " + slot; button.Alignment = HorizontalAlignment.Left; button.ClipText = true; button.AddThemeFontSizeOverride("font_size", 15); button.TooltipText = slot + ": " + card?.Name;
-                Put(_setupStrip, button, 51, y, 306, 36); y += 40;
+                var label = slot == "Bamboo Harvesters" ? "Bamboo" : slot;
+                var button = CatalogueArt.Button(label, () => SetSetup(slot)); button.AccessibilityName = "Choose " + slot;
+                button.ClipText = true; button.AddThemeFontSizeOverride("font_size", 14); button.TooltipText = slot + ": " + (card?.Name ?? "Select…");
+                Put(_setupStrip, button, setupX, 48, 134, 32); setupX += 140;
             }
             _dynasty = CatalogueArt.Button("", () => SetFamily("Dynasty")); _fate = CatalogueArt.Button("", () => SetFamily("Fate"));
-            Put(_setupStrip, _dynasty, 10, 172, 170, 46); Put(_setupStrip, _fate, 188, 172, 170, 46);
+            Put(_setupStrip, _dynasty, 10, 90, 204, 46); Put(_setupStrip, _fate, 224, 90, 204, 46);
             _dynasty.AddThemeFontSizeOverride("font_size", 16); _fate.AddThemeFontSizeOverride("font_size", 16);
         }
         else
@@ -197,7 +204,7 @@ public partial class DeckBuilderScreen : Control
     public void SetSetup(string slot)
     {
         _setupSlot = slot; HideHover(); Browser.CloseMenus(); Palette.Clear(_left); BuildCollectionControls();
-        _toolbar.Visible = slot.Length == 0; _setupTools.Visible = slot.Length > 0; Collection.Visible = slot.Length == 0;
+        _toolbar.Visible = slot.Length == 0; _deckFooter.Visible = slot.Length == 0; _setupTools.Visible = slot.Length > 0; Collection.Visible = slot.Length == 0;
         if (slot.Length > 0) BuildSetupChoices(); else { ApplyFilters(); RefreshMat(true); }
         Fit(); UpdateStatus();
     }
@@ -236,8 +243,8 @@ public partial class DeckBuilderScreen : Control
     {
         if (Page == "decks" || _setupSlot.Length > 0) return;
         var ids = Draft.Cards.Where(c => c.SetupSlot.Length == 0 && c.Families.Contains(Family)).Select(c => c.Id).ToHashSet();
-        var cards = Data.Filter(sort: _sort.Text).Where(c => ids.Contains(c.Id)).ToArray();
-        DeckSkin.Selected(_toolbar.GetNode<Button>("MatTab"), !_list); DeckSkin.Selected(_toolbar.GetNode<Button>("ListTab"), _list);
+        var cards = Data.Filter(sort: _sort.Text).Where(c => ids.Contains(c.Id)).OrderByDescending(c => Draft.Count(c.Id) > MyCollection.Store.Count(c.Id)).ToArray();
+        DeckSkin.Selected(_deckFooter.GetNode<Button>("MatTab"), !_list); DeckSkin.Selected(_deckFooter.GetNode<Button>("ListTab"), _list);
         Mat.Setup = false; Mat.Rows = _list; Mat.Group = _group.Selected switch { 1 => "Gold", 2 => "None", _ => "Type" }; Mat.Reset(cards, reset);
         _empty.Visible = cards.Length == 0; _empty.Text = "Your " + Family + " mat is empty.\nAdd cards from the collection to begin.";
     }
@@ -246,6 +253,7 @@ public partial class DeckBuilderScreen : Control
     private void UpdateStatus()
     {
         if (_status is null || Draft is null) return; var r = Draft.Review();
+        var missing = MissingCards(); if (_shortages is not null) { _shortages.Text = missing.Length == 0 ? "Collection: no missing copies" : $"{missing.Sum(c => c.Need)} copies missing · {missing.Length} {(missing.Length == 1 ? "card" : "cards")}"; _shortages.AddThemeColorOverride("font_color", missing.Length == 0 ? CatalogueArt.Muted : CatalogueArt.Gold); }
         if (_dynasty is not null)
         {
             _dynasty.Text = $"DYNASTY  {r.Dynasty}\n40 minimum"; _fate.Text = $"FATE  {r.Fate}\n40 minimum";
@@ -259,11 +267,13 @@ public partial class DeckBuilderScreen : Control
     }
     public override void _Input(InputEvent e)
     {
+        if (GetChildren().OfType<MyCollectionEditor>().Any()) return;
         if (e is InputEventKey { Pressed: true, Echo: false, Keycode: Key.Escape } && _overlay.Visible)
         { CloseOverlay(); GetViewport().SetInputAsHandled(); }
     }
     public override void _UnhandledInput(InputEvent e)
     {
+        if (GetChildren().OfType<MyCollectionEditor>().Any()) return;
         if (e is InputEventKey { Pressed: true, Echo: false } key)
         {
             if (key.Keycode == Key.F11) return;

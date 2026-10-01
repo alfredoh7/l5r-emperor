@@ -74,6 +74,7 @@ public partial class DeckSurface : ScrollContainer
     private readonly Dictionary<object, Control> _visible = [];
     public CatalogueData.Card[] Cards = [];
     public bool Rows, Setup;
+    public bool ShowHeadings = true;
     public float CardWidth = 196, RowHeight = 60;
     public string Group = "Type";
     public Func<CatalogueData.Card, Control> MakeCard = null!;
@@ -111,11 +112,11 @@ public partial class DeckSurface : ScrollContainer
         {
             var width = Setup ? Math.Min(300, (w - 60) / 3) : CardWidth;
             var columns = Setup ? Math.Max(1, Math.Min(3, (int)(w / (width + 22)))) : Math.Max(1, (int)(w / (width + 22))); var cell = w / columns;
-            var height = width * 1.4f + (Setup ? 90 : 104);
+            var height = width * 1.4f + (Setup ? 90 : 142);
             string Key(CatalogueData.Card c) => Setup ? "" : Group == "Gold" ? "GOLD " + (c.Numeric("cost") == double.MaxValue ? "—" : c.Numeric("cost").ToString()) : Group == "None" ? "CARDS" : string.Join(" / ", c.Types.Select(t => t == "Personality" ? "Personalities" : t == "Strategy" ? "Strategies" : t + "s")).ToUpperInvariant();
             foreach (var group in Cards.GroupBy(Key))
             {
-                if (group.Key.Length > 0) { entries.Add(new(null, group.Key, new Rect2(8, y, w - 16, 30), group.Count())); y += 34; }
+                if (ShowHeadings && group.Key.Length > 0) { entries.Add(new(null, group.Key, new Rect2(8, y, w - 16, 30), group.Count())); y += 34; }
                 var i = 0; foreach (var card in group) { entries.Add(new(card, "", new Rect2(i % columns * cell + (cell - width) / 2, y + i / columns * height, width, height - 10))); i++; }
                 y += (float)Math.Ceiling((double)i / columns) * height + 12;
             }

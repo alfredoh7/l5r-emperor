@@ -9,18 +9,20 @@ public partial class DeckBuilderScreen
         var thumb = new DeckThumbnail(card, Scans); row.AddChild(thumb);
         var name = CatalogueArt.Button(card.Name, () => ShowComparison([card])); name.Alignment = HorizontalAlignment.Left; name.ClipText = true; name.TextOverrunBehavior = TextServer.OverrunBehavior.TrimEllipsis; name.AddThemeFontSizeOverride("font_size", collection ? 24 : 18);
         foreach (var state in new[] { "normal", "hover", "pressed" }) name.AddThemeStyleboxOverride(state, new StyleBoxEmpty());
-        row.AddChild(name); var note = CatalogueArt.Label(string.Join(" · ", card.Types), collection ? 18 : 13); row.AddChild(note);
+        row.AddChild(name); var owned = MyCollection.Store.Count(card.Id);
+        var note = CatalogueArt.Label($"In deck: {Draft.Count(card.Id)} · Owned: {owned}", collection ? 18 : 13); row.AddChild(note);
         var support = CatalogueArt.Label(card.Playable ? "" : "Not implemented", 16); row.AddChild(support); support.Visible = collection;
         var minus = CatalogueArt.Button("−", () => Adjust(card, -1)); minus.Disabled = Draft.Count(card.Id) == 0; minus.AccessibilityName = "Remove " + card.Name; row.AddChild(minus);
         var count = CatalogueArt.Label(Draft.Count(card.Id).ToString(), 20); count.HorizontalAlignment = HorizontalAlignment.Center;
         if (Draft.Review().OverLimit.Contains(new L5R.Core.DeckCardInfo(card.Id, card.Name, card.Types, card.DeckTypes, card.Keywords, card.Playable).DeckName)) count.AddThemeColorOverride("font_color", new Color("f37c64")); row.AddChild(count);
         var plus = CatalogueArt.Button("+", () => Adjust(card, 1)); plus.AccessibilityName = "Add " + card.Name; row.AddChild(plus);
+        var need = Math.Max(0, Draft.Count(card.Id) - owned); var shortage = CatalogueArt.Label(need > 0 ? $"Need {need}" : "", 13); shortage.AddThemeColorOverride("font_color", CatalogueArt.Gold); row.AddChild(shortage);
         void Layout()
         {
             var w = row.Size.X; var h = row.Size.Y;
             if (collection) { Place(thumb, 2, 6, 132, h - 12); Place(name, 150, 12, w - 260, 36); Place(note, 155, 49, w - 265, 25); Place(support, 155, 76, w - 265, 24); }
             else { Place(thumb, 2, 4, 44, 47); Place(name, 52, 1, w - 150, 29); Place(note, 57, 32, w - 152, 19); }
-            Place(minus, w - 98, (h - 32) / 2, 29, 32); Place(count, w - 65, (h - 32) / 2, 30, 32); Place(plus, w - 32, (h - 32) / 2, 29, 32); row.QueueRedraw();
+            Place(minus, w - 98, (h - 32) / 2, 29, 32); Place(count, w - 65, (h - 32) / 2, 30, 32); Place(plus, w - 32, (h - 32) / 2, 29, 32); Place(shortage, w - 167, h - 22, 66, 18); row.QueueRedraw();
         }
         row.Draw += () =>
         {
@@ -51,7 +53,9 @@ public partial class DeckBuilderScreen
         }
         else
         {
-            var minus = CatalogueArt.Button("−", () => Adjust(card, -1)); minus.AccessibilityName = "Remove " + card.Name; item.AddChild(minus);
+            var ownedLabel = CatalogueArt.Label($"Owned: {MyCollection.Store.Count(card.Id)}", 16); ownedLabel.HorizontalAlignment = HorizontalAlignment.Center; item.AddChild(ownedLabel);
+            var deckLabel = CatalogueArt.Label("In deck", 15); item.AddChild(deckLabel);
+            var minus = CatalogueArt.Button("−", () => Adjust(card, -1)); minus.Disabled = Draft.Count(card.Id) == 0; minus.AccessibilityName = "Remove " + card.Name; item.AddChild(minus);
             var count = CatalogueArt.Label(Draft.Count(card.Id).ToString(), 22); count.HorizontalAlignment = HorizontalAlignment.Center; if (Draft.Review().OverLimit.Contains(new L5R.Core.DeckCardInfo(card.Id, card.Name, card.Types, card.DeckTypes, card.Keywords, card.Playable).DeckName)) count.AddThemeColorOverride("font_color", new Color("f37c64")); item.AddChild(count);
             var plus = CatalogueArt.Button("+", () => Adjust(card, 1)); plus.AccessibilityName = "Add " + card.Name; item.AddChild(plus);
             var check = new CheckBox { Text = "Compare", ButtonPressed = _compare.Contains(card.Id) }; foreach (var state in new[] { "normal", "hover", "pressed", "hover_pressed", "focus" }) check.AddThemeStyleboxOverride(state, new StyleBoxEmpty()); check.AddThemeFontSizeOverride("font_size", 15); check.Toggled += value =>
@@ -60,7 +64,7 @@ public partial class DeckBuilderScreen
                 if (value && _compare.Count >= 3) { check.SetPressedNoSignal(false); Notice("Compare up to three cards at a time. Remove a selection to compare another."); return; }
                 if (value) _compare.Add(card.Id); else _compare.Remove(card.Id); face.Selected = value; face.QueueRedraw(); UpdateStatus();
             }; check.AccessibilityName = "Compare " + card.Name; item.AddChild(check);
-            item.Resized += () => { var w = item.Size.X; var y = w * 1.4f + 12; Place(face, 0, 0, w, w * 1.4f + 8); Place(note, 0, y - 4, w, 18); Place(minus, w / 2 - 59, y + 13, 32, 29); Place(count, w / 2 - 23, y + 13, 46, 29); Place(plus, w / 2 + 27, y + 13, 32, 29); Place(check, Math.Max(0, w / 2 - 53), y + 44, 110, 26); };
+            item.Resized += () => { var w = item.Size.X; var y = w * 1.4f + 12; Place(face, 0, 0, w, w * 1.4f + 8); Place(note, 0, y - 4, w, 18); Place(ownedLabel, 0, y + 13, w, 25); Place(deckLabel, 0, y + 42, 65, 29); Place(minus, w / 2 - 34, y + 42, 30, 29); Place(count, w / 2, y + 42, 36, 29); Place(plus, w / 2 + 40, y + 42, 30, 29); Place(check, Math.Max(0, w / 2 - 53), y + 76, 110, 26); };
         }
         return item;
     }

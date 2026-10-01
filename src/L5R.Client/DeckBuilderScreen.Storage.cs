@@ -7,7 +7,7 @@ public partial class DeckBuilderScreen
     public void ShowDecks()
     {
         Page = "decks"; HideHover(); _overlay.Hide(); Browser.CloseMenus(); Browser.Hide();
-        foreach (var c in new Control[] { _setupStrip, _left, _toolbar, _setupTools, Collection, Mat, _status, _count, _empty, _name, _save, _dirtyLabel, _header.GetNode<Control>("Copy") }) c.Hide();
+        foreach (var c in new Control[] { _setupStrip, _left, _toolbar, _deckFooter, _setupTools, Collection, Mat, _status, _count, _empty, _name, _save, _dirtyLabel, _header.GetNode<Control>("Copy") }) c.Hide();
         _header.Hide(); _library.Show(); BuildDeckList(); _lines.QueueRedraw();
     }
     private void BuildDeckList()
@@ -62,7 +62,7 @@ public partial class DeckBuilderScreen
     }
     private void EnterEditor()
     {
-        Page = "editor"; _header.Show(); _library.Hide(); foreach (var c in new Control[] { _setupStrip, _left, _toolbar, Collection, Mat, _status, _count, _name, _save, _dirtyLabel, _header.GetNode<Control>("Copy") }) c.Show();
+        Page = "editor"; _header.Show(); _library.Hide(); foreach (var c in new Control[] { _setupStrip, _left, _toolbar, _deckFooter, Collection, Mat, _status, _count, _name, _save, _dirtyLabel, _header.GetNode<Control>("Copy") }) c.Show();
         BuildSetupStrip(); SetSetup(""); Fit(); UpdateStatus();
     }
     public bool OpenFile(string path)
