@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "repository": "alfredoh7/l5r-emperor",
+  "source_pr": 576,
+  "source_commit": "b990f54e52e304478fb079164f9b4bc5b5ce6c0c",
+  "title": "My Collection and Approved Catalogue Workspace",
+  "slug": "my-collection",
+  "tag": "preview-pr576-b990f54e52-r1-windows",
+  "asset": "L5R-Review-pr576-b990f54e52-r1-Windows.zip",
+  "bytes": 2131658720,
+  "sha256": "a506f8f09cdd3b9ea1074c2620ddf7761b45cfd9ae38a16cc74e30f4b256b9b1",
+  "folder": "L5R-Review-pr576-b990f54e52-r1",
+  "launcher": "Start Review.cmd",
+  "reviewer": "mdornbrook"
+}
