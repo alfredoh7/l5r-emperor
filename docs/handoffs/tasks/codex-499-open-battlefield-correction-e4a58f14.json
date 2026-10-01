@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Keep engine-listed or occupied resolved primary courts and surviving defenders visible after an extra front destroys their province; old-view fallback and retirement checks; prepared correction launcher. No rules or wire changes.",
+  "validation": "Original renderer reproduced missing court. Final foreground native open-battlefield suite passed both seats/input/resize/fallback/retirement. Client build 0 warnings/errors; changed C# formatting passed. check.sh --skip-client passed; R1 18/18, AI 76/76, server 8/8, transport 17/17. GitHub main verified at 8eb1a7c via ls-remote; overlapping Main.cs PRs inspected.",
+  "remaining": "Prepare and verify Windows correction review package, publish draft PR and request Mendon/Nathan review; no merge authorized.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/499",
+  "branch": "codex/499-open-battlefield-correction",
+  "updated": "2026-10-01T11:06:51.534223+00:00"
+}

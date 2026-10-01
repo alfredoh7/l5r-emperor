@@ -38,11 +38,13 @@ public partial class Main
         .Concat(View.Players.SelectMany(p => p.Army).Where(c => c.AttachedTo is null && c.ProvinceIndex is not null).Select(c => c.ProvinceIndex!.Value))
         .Where(IsAdditionalBattlefield).Distinct();
 
-    // The battlefields whose court is drawn for the defender: each province that stands, an additional battlefield, and the battlefield of a province that is gone but whose battle is still to be fought
-    // (destroyed before it engaged: it is a battlefield without a province).
-    private IEnumerable<int> CourtIndices(PlayerView defender) => defender.Provinces.Where(p => !p.Destroyed).Select(p => p.Index)
-        .Concat(defender.Provinces.Where(p => p.Destroyed && (View.CurrentBattleProvince == p.Index || View.UnresolvedBattlefields.Contains(p.Index))).Select(p => p.Index))
-        .Concat(_extraLanes);
+    // A resolved primary can still hold survivors when another front destroys its province.
+    // Keep every public or occupied primary court visible; older views can omit battlefield metadata.
+    private IEnumerable<int> CourtIndices(PlayerView defender) => defender.Provinces.Where(p => !p.Destroyed ||
+        View.CurrentBattleProvince == p.Index || View.UnresolvedBattlefields.Contains(p.Index) ||
+        (View.Battlefields ?? []).Any(b => b.Index == p.Index) ||
+        View.Players.Any(player => player.Army.Any(c => c.AttachedTo is null && c.ProvinceIndex == p.Index)))
+        .Select(p => p.Index).Concat(_extraLanes);
     private readonly Dictionary<int, Rect2> _battleCourts = [];
     private readonly Dictionary<string, Vector2> _battlePlacements = [];
     private IEnumerable<CardView> CourtUnits(PlayerView player, int province) => player.Army

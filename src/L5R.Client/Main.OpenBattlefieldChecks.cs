@@ -43,7 +43,35 @@ public partial class Main
                 await CoverageFrames();
             }
             await CoverageFrames(); await CoverageFocus();
-            _reducedMotion = true; PrepareOpenBattlefieldReview(); await CoverageFrames();
+            _reducedMotion = true;
+            foreach (var seat in new[] { 0, 1 })
+            {
+                _battlefieldReviewScenario = 9; _battlefieldReviewSeat = seat; PrepareOpenBattlefieldReview(); await CoverageFrames();
+                await Capture("13-resolved-primary-seat-" + seat);
+                RequireCamera(!View.UnresolvedBattlefields.Contains(1) && View.CurrentBattleProvince != 1 && BattlefieldProvince(1) is null, "resolved-primary fixture is still an active province battle");
+                RequireCamera(_battleCourts.ContainsKey(1), "occupied resolved primary court disappeared after province destruction");
+                RequireCamera(_matTargets.Single(s => s.Id == "battle:1:1").ClosedCourt && !_matTargets.Any(s => s.Id == "province:1:1"), "resolved primary retained a province connection");
+                RequireCamera(BattlefieldName(1) == "Open battlefield A" && BattlefieldName(100) == "Open battlefield B", "visible open court labels skipped their surviving primary");
+                foreach (var card in View.Players[1].Army.Where(c => c.ProvinceIndex == 1))
+                    RequireCamera(_tiles.Any(t => t.Card.Id == card.Id), "surviving defender or attachment was not rendered");
+                var survivor = _tiles.Single(t => t.Card.Id == "open-review-1-1");
+                await Click(survivor, true);
+                RequireCamera(_selected?.Id == survivor.Card.Id, "resolved defender cannot be inspected");
+                DeselectCard();
+                var before = View.Version;
+                await Click(_battlefieldNavigation[1]);
+                RequireCamera(_viewedBattlefield == 1 && View.CurrentBattleProvince == 100 && View.Version == before, "resolved court navigation changed the active battle");
+                _battlefieldReviewView = View with { Battlefields = null }; Render(); await CoverageFrames();
+                RequireCamera(_battleCourts.ContainsKey(1), "occupied primary fallback failed for an older view without battlefield metadata");
+                GetWindow().Size = new Vector2I(1440, 900); await CoverageFrames(); FocusReviewBattlefields();
+                RequireCamera(_tiles.Any(t => t.Card.Id == survivor.Card.Id), "resize lost the resolved defender");
+                await Capture("14-resolved-primary-small-seat-" + seat);
+                GetWindow().Size = new Vector2I(1920, 1080);
+                _battlefieldReviewView = View with { Players = View.Players.Select(player => player with { Army = player.Army.Where(c => c.ProvinceIndex != 1).ToArray() }).ToArray() };
+                Render(); await CoverageFrames();
+                RequireCamera(!_battleCourts.ContainsKey(1), "empty resolved destroyed primary did not retire after its survivors left");
+            }
+            _battlefieldReviewScenario = 0; _battlefieldReviewSeat = 0; PrepareOpenBattlefieldReview(); await CoverageFrames();
             RequireCamera(BattlefieldProvince(100) is null && BattlefieldName(100) == "Open battlefield", "open battlefield identity");
             RequireCamera(_matTargets.Single(s => s.Id == "battle:1:100").ClosedCourt && _bloodCourts[100].Closed, "standalone court is not closed");
             RequireCamera(!_matTargets.Any(s => s.Id == "province:1:100"), "invented province bay");
@@ -128,7 +156,7 @@ public partial class Main
             RequireCamera(_cameraGlide && View.CurrentBattleProvince == 100, "normal-motion navigation did not glide independently");
             for (var i = 0; i < 90 && _cameraGlide; i++) await CoverageFrames();
             RequireCamera(!_cameraGlide, $"camera glide did not settle (blocked={CameraBlocked}, focused={GetWindow().HasFocus()}, time={_cameraGlideTime})");
-            GD.Print("OPEN_BATTLEFIELD_REVIEW_PASS: full scans/native card inspection; help/Escape; camera-only navigation; both seats; associated extra front; stable orphan court positions/names; six courts; empty selection; bowed/attached units; 1440x900/ultrawide; Action Phase and original turn context; reduced motion and smooth camera.");
+            GD.Print("OPEN_BATTLEFIELD_REVIEW_PASS: resolved occupied primary/older-view fallback/retirement; full scans/native card inspection; help/Escape; camera-only navigation; both seats; associated extra front; stable orphan court positions/names; six courts; empty selection; bowed/attached units; 1440x900/ultrawide; Action Phase and original turn context; reduced motion and smooth camera.");
             GetTree().Quit();
         }
         catch (Exception error) { GD.PushError(error.ToString()); GetTree().Quit(1); }
