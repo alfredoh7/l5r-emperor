@@ -63,6 +63,8 @@ public partial class CatalogueScreen : Control
                 Closed?.Invoke();
             }
         }); builder.Name = "OpenBuilder"; _header.AddChild(builder);
+        var more = new MenuButton { Name = "LibraryActions", Icon = DeckSkin.Icon("more"), IconAlignment = HorizontalAlignment.Center, TooltipText = "Imported decks and source archive", AccessibilityName = "More library actions" }; _header.AddChild(more);
+        var menu = more.GetPopup(); menu.AddItem("Imported decks and source archive", 0); menu.IdPressed += _ => LegacyLibraryDialog.Show(this);
         Browser = new CatalogueBrowserBar(Data, ["All", "Dynasty", "Fate", "Strongholds"]); _canvas.AddChild(Browser); Search = Browser.Search;
         Browser.EditCollection += () => MyCollection.Show(this, Data, Scans, Browser);
         Browser.Changed += ApplyFilter; Browser.PopupBounds = () => Grid.GetGlobalRect();
@@ -95,6 +97,7 @@ public partial class CatalogueScreen : Control
         _canvas.Scale = Vector2.One * scale; _w = Size.X / scale; _h = Size.Y / scale; _canvas.Size = new Vector2(_w, _h);
         _header.Size = new Vector2(_w, 78);
         var builder = _header.GetNode<Control>("OpenBuilder"); builder.Position = new Vector2(_w - 222, 20); builder.Size = new Vector2(180, 42);
+        var more = _header.GetNode<Control>("LibraryActions"); more.Position = new Vector2(_w - 278, 20); more.Size = new Vector2(44, 42);
         Browser.Position = new Vector2(36, 86); Browser.Size = new Vector2(_w - 72, CatalogueBrowserBar.BarHeight);
         var dw = Math.Clamp(_w * .25f, 350, 430); var galleryWidth = _w - 72 - (_detail.Visible ? dw + 28 : 0);
         var gridTop = 86 + CatalogueBrowserBar.BarHeight + 18;

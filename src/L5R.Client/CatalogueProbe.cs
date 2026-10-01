@@ -27,6 +27,12 @@ public partial class CatalogueProbe : Node
             Check(_screen.Data.Filter(search: "nonesuchzzzz").Length == 0, "no results");
             // Every image is local, including on first use. Allow asynchronous decode to finish.
             await Wait(4); await Capture("gallery");
+            var actions = Walk(_screen).OfType<MenuButton>().Single(b => b.AccessibilityName == "More library actions");
+            Click(actions); await Wait(.2); actions.GetPopup().SetFocusedItem(0); PressKey(Godot.Key.Enter); await Wait(.4);
+            var archive = Walk(_screen).OfType<Window>().Single(w => w.Title == "Reference library");
+            Check(archive.Visible && Walk(archive).OfType<TabContainer>().Single().GetTabTitle(0) == "Imported decks", "native library menu retains imported decks and source archive");
+            await Capture("source-archive"); PressKey(Godot.Key.Escape); await Wait(.3);
+            Check(!GodotObject.IsInstanceValid(archive) && _screen.Grid.IsVisibleInTree(), "Escape closes only the source archive and returns to browsing");
             Click(FindButton(b => b.Text.Contains("Playable now"))); await Wait(.3); Check(_screen.Grid.Cards.Length == _screen.Data.Filter(playable: true).Length && _screen.Grid.Cards.Length > 0, "native playable filter");
             Click(FindButton(b => b.TooltipText == "Crane cards")); await Wait(.3);
             Check(_screen.Grid.Cards.Length > 0 && _screen.Grid.Cards.All(c => c.Playable && c.Clans.Contains("Crane")), "native clan filter combines with support");
@@ -68,16 +74,21 @@ public partial class CatalogueProbe : Node
             Check(_screen.SelectedId == "oracle-l5r-229", "native click opens details"); Check(_screen.Grid.GetGlobalRect().End.X <= _screen.InspectorRect.Position.X, "inspector cannot cover gallery cards"); await Capture("inspection");
             tile = _screen.Grid.Tile("oracle-l5r-229") ?? throw new Exception("Selected tile absent after reflow"); _screen.Grid.EnsureControlVisible(tile); await Wait(.3); Click(tile); await Wait(.5); Check(_screen.SelectedId == "", "repeat click dismisses details");
             _screen.ResetFilters(); await Wait(.3);
-            _screen.Grid.ScrollVertical = 4800; await Wait(.3);
+            _screen.Grid.ScrollVertical = 4300; await Wait(.3);
             var sizeSlider = _screen.Browser.CardSize;
             var filtersBefore = _screen.Grid.Cards.Select(c => c.Id).ToArray();
             var anchorId = _screen.Grid.Cards.First(c => _screen.Grid.Tile(c.Id)?.GetGlobalRect().Intersects(_screen.Grid.GetGlobalRect()) == true).Id;
+            var anchorTop = _screen.Grid.Tile(anchorId)!.GetGlobalRect().Position.Y;
             await DragSlider(sizeSlider, .9f); await Wait(.4); await Capture("slider-large");
             Check(sizeSlider.Value > 260 && _screen.Grid.CardWidth == (float)sizeSlider.Value, "native slider drag enlarges full catalogue faces");
             Check(_screen.Grid.Cards.Select(c => c.Id).SequenceEqual(filtersBefore), "card resizing preserves filter results");
             Check(_screen.Grid.Tile(anchorId) is not null, "card resizing preserves browsing anchor in virtual pool");
+            Check(Math.Abs(_screen.Grid.Tile(anchorId)!.GetGlobalRect().Position.Y - anchorTop) <= 2, "enlarging cards preserves the partial-row scroll offset");
+            var smallerAnchor = _screen.Grid.Cards.First(c => _screen.Grid.Tile(c.Id)?.GetGlobalRect().Intersects(_screen.Grid.GetGlobalRect()) == true).Id;
+            var smallerTop = _screen.Grid.Tile(smallerAnchor)!.GetGlobalRect().Position.Y;
             await DragSlider(sizeSlider, .03f); await Wait(.4); await Capture("slider-small");
             Check(sizeSlider.Value < 150, "native slider drag reduces card size");
+            Check(Math.Abs(_screen.Grid.Tile(smallerAnchor)!.GetGlobalRect().Position.Y - smallerTop) <= 2, "reducing cards preserves the partial-row scroll offset");
             sizeSlider.Value = 196; await Wait(.3); _screen.Grid.ScrollVertical = 4800; await Wait(1); Check(_screen.Grid.VisibleTileCount < 55, "bounded visible tile pool");
             var before = _screen.Grid.ScrollVertical; var other = _screen.Grid.Cards.First(); _screen.SelectCard(other); await Wait(.2); PressKey(Godot.Key.Escape); await Wait(.3); Check(_screen.SelectedId == "", "Escape dismisses inspector");
             Check(Math.Abs(_screen.Grid.ScrollVertical - before) <= 2, "inspection restores exact scrolling position");
@@ -120,7 +131,9 @@ public partial class CatalogueProbe : Node
     private static void Click(Control c) { var p = c.GetGlobalRect().GetCenter(); Input.ParseInputEvent(new InputEventMouseMotion { Position = p, GlobalPosition = p }); Input.ParseInputEvent(new InputEventMouseButton { Position = p, GlobalPosition = p, ButtonIndex = MouseButton.Left, Pressed = true }); Input.ParseInputEvent(new InputEventMouseButton { Position = p, GlobalPosition = p, ButtonIndex = MouseButton.Left, Pressed = false }); }
     private async Task DragSlider(HSlider slider, float fraction)
     {
-        var rect = slider.GetGlobalRect(); var start = rect.Position + new Vector2(12, rect.Size.Y / 2);
+        var rect = slider.GetGlobalRect();
+        var valueFraction = (float)((slider.Value - slider.MinValue) / (slider.MaxValue - slider.MinValue));
+        var start = rect.Position + new Vector2(12 + (rect.Size.X - 24) * valueFraction, rect.Size.Y / 2);
         var end = rect.Position + new Vector2(12 + (rect.Size.X - 24) * fraction, rect.Size.Y / 2);
         Input.ParseInputEvent(new InputEventMouseButton { Position = start, GlobalPosition = start, ButtonIndex = MouseButton.Left, Pressed = true });
         for (var i = 1; i <= 6; i++) { var p = start.Lerp(end, i / 6f); Input.ParseInputEvent(new InputEventMouseMotion { Position = p, GlobalPosition = p, ButtonMask = MouseButtonMask.Left }); await Wait(.025); }
