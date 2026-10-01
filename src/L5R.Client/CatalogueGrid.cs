@@ -38,10 +38,10 @@ public partial class CatalogueGrid : ScrollContainer
         if (Size.X < 10) return;
         var anchor = _resizeAnchor ?? (_columns > 0 ? (int)(ScrollVertical / _rowHeight) * _columns : 0);
         var offset = _resizeAnchor is not null ? _resizeOffset : ScrollVertical - (int)(ScrollVertical / _rowHeight) * _rowHeight;
-        var desired = CardWidth + 26;
+        var desired = CardWidth + 16;
         _columns = Math.Max(1, (int)((Size.X - 12) / desired));
         _cellWidth = (Size.X - 18) / _columns;
-        _cardWidth = Math.Min(_cellWidth - 26, CardWidth);
+        _cardWidth = Math.Min(_cellWidth - 16, CardWidth);
         _rowHeight = _cardWidth * 1.4f + 57;
         _sheet.CustomMinimumSize = new Vector2(0, (float)Math.Max(Size.Y, Math.Ceiling((double)_cards.Length / _columns) * _rowHeight));
         _sheet.Size = new Vector2(Size.X - 18, _sheet.CustomMinimumSize.Y);

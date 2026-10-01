@@ -28,7 +28,7 @@ public sealed class FilterChecklist
         Trigger = CatalogueArt.Button(label + " · Any  ▾", TogglePopup);
         Trigger.AccessibilityName = "Filter " + label.ToLowerInvariant();
         _popup = new PopupPanel { Theme = theme, Name = label + "Checklist" }; popupParent.AddChild(_popup);
-        _popup.AddThemeStyleboxOverride("panel", Palette.Box(new Color("0e171d"), CatalogueArt.Gold, 18, 1));
+        _popup.AddThemeStyleboxOverride("panel", Palette.Box(new Color("0e171d"), CatalogueArt.Gold, 18, 5));
         var box = new VBoxContainer(); box.AddThemeConstantOverride("separation", 12); _popup.AddChild(box);
         var title = new HBoxContainer(); var heading = CatalogueArt.Label(label, 23, true); heading.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill; title.AddChild(heading);
         var close = CatalogueArt.Button("×", Close); close.AccessibilityName = "Close " + label.ToLowerInvariant() + " filter"; title.AddChild(close); box.AddChild(title);

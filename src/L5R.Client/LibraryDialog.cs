@@ -98,9 +98,9 @@ public partial class CatalogueScreen : Control
         _header.Size = new Vector2(_w, 78);
         var builder = _header.GetNode<Control>("OpenBuilder"); builder.Position = new Vector2(_w - 222, 20); builder.Size = new Vector2(180, 42);
         var more = _header.GetNode<Control>("LibraryActions"); more.Position = new Vector2(_w - 278, 20); more.Size = new Vector2(44, 42);
-        Browser.Position = new Vector2(36, 86); Browser.Size = new Vector2(_w - 72, CatalogueBrowserBar.BarHeight);
+        Browser.Position = new Vector2(36, 86); Browser.Size = new Vector2(_w - 72, Browser.BarHeight);
         var dw = Math.Clamp(_w * .25f, 350, 430); var galleryWidth = _w - 72 - (_detail.Visible ? dw + 28 : 0);
-        var gridTop = 86 + CatalogueBrowserBar.BarHeight + 18;
+        var gridTop = 86 + Browser.BarHeight + 18;
         Grid.Position = new Vector2(28, gridTop); Grid.Size = new Vector2(galleryWidth + 16, _h - gridTop - 52);
         _detail.Position = new Vector2(_w - dw - 28, gridTop); _detail.Size = new Vector2(dw, _h - gridTop - 52);
         _closeDetail.Position = new Vector2(dw - 62, 15); _closeDetail.Size = new Vector2(42, 42);

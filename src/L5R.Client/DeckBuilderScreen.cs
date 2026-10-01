@@ -68,6 +68,8 @@ public partial class DeckBuilderScreen : Control
         Browser.Changed += ApplyFilters;
         Collection = new DeckSurface { Group = "None", ShowHeadings = false, MakeCard = MakeCollectionTile }; _canvas.AddChild(Collection);
         Mat = new DeckSurface { MakeCard = MakeTile }; _canvas.AddChild(Mat);
+        var controlsTheme = CatalogueArt.Theme();
+        foreach (var control in new Control[] { _header, _toolbar, _deckFooter, Collection, Mat }) control.Theme = controlsTheme;
         Collection.CardWidth = Mat.CardWidth = (float)Browser.CardSize.Value;
         Browser.PopupBounds = () => Collection.GetGlobalRect();
         Browser.CardSize.DragStarted += () => { Collection.BeginCardResize(); Mat.BeginCardResize(); }; Browser.CardSize.DragEnded += _ => { Collection.EndCardResize(); Mat.EndCardResize(); };
@@ -88,7 +90,7 @@ public partial class DeckBuilderScreen : Control
     {
         Put(_header, CatalogueArt.Button("‹ My decks", () => Guard(ShowDecks)), 24, 14, 140, 42);
         Put(_header, CatalogueArt.Label("Deck builder", 43, true), 198, 12, 355, 48);
-        _name = new LineEdit { PlaceholderText = "Name your deck", MaxLength = 80 }; Put(_header, _name, 575, 16, 390, 42);
+        _name = new LineEdit { PlaceholderText = "Name your deck", MaxLength = 80, Theme = CatalogueArt.Theme() }; Put(_header, _name, 575, 16, 390, 42);
         _name.TextChanged += _ => { if (!_building) { Dirty = true; UpdateStatus(); } };
         _dirtyLabel = CatalogueArt.Label("", 16); _header.AddChild(_dirtyLabel);
         _save = CatalogueArt.Button("Save draft", () => SaveDraft()); _header.AddChild(_save);
@@ -125,14 +127,14 @@ public partial class DeckBuilderScreen : Control
     }
     private void Fit()
     {
-        var scale = Math.Min(1f, Size.X / 1440f); if (scale <= 0) return;
+        var scale = Math.Min(1f, Math.Min(Size.X / 1440f, Size.Y / 800f)); if (scale <= 0) return;
         _canvas.Scale = Vector2.One * scale; _w = Size.X / scale; _h = Size.Y / scale; _canvas.Size = new Vector2(_w, _h);
         Place(_header, 0, 0, _w, 76);
         Place(_name, 560, 16, Math.Clamp(_w - 1130, 220, 390), 42);
         Place(_dirtyLabel, _w - 548, 22, 150, 30); Place(_save, _w - 388, 15, 172, 42); Place(_header.GetNode<Control>("Copy"), _w - 204, 15, 38, 42);
         _header.GetNode<Control>("Brand").Hide(); Place(_header.GetNode<Control>("OpenLibrary"), _w - 154, 15, 136, 42);
-        Place(Browser, 28, 86, _w - 56, CatalogueBrowserBar.BarHeight);
-        var top = 86 + CatalogueBrowserBar.BarHeight + 18;
+        Place(Browser, 28, 78, _w - 56, Browser.BarHeight);
+        var top = 78 + Browser.BarHeight + 18;
         if (_setupSlot.Length == 0)
         {
             var right = _w - 470;
@@ -236,7 +238,7 @@ public partial class DeckBuilderScreen : Control
     {
         if (_building || Page == "decks" || _setupSlot.Length > 0) return;
         var changedFamily = Family != Browser.Family; Family = Browser.Family;
-        Browser.Refresh(false); Collection.Reset(Browser.Results, true); _count.Text = $"{Collection.Cards.Length:N0} collection results · Click a full card to inspect";
+        Browser.Refresh(false); Collection.Reset(Browser.Results, changedFamily || !Collection.Cards.SequenceEqual(Browser.Results)); _count.Text = $"{Collection.Cards.Length:N0} collection results · Click a full card to inspect";
         RefreshMat(changedFamily); UpdateStatus();
     }
     public void RefreshMat(bool reset = false)
@@ -244,7 +246,7 @@ public partial class DeckBuilderScreen : Control
         if (Page == "decks" || _setupSlot.Length > 0) return;
         var ids = Draft.Cards.Where(c => c.SetupSlot.Length == 0 && c.Families.Contains(Family)).Select(c => c.Id).ToHashSet();
         var cards = Data.Filter(sort: _sort.Text).Where(c => ids.Contains(c.Id)).OrderByDescending(c => Draft.Count(c.Id) > MyCollection.Store.Count(c.Id)).ToArray();
-        DeckSkin.Selected(_deckFooter.GetNode<Button>("MatTab"), !_list); DeckSkin.Selected(_deckFooter.GetNode<Button>("ListTab"), _list);
+        CatalogueArt.Selected(_deckFooter.GetNode<Button>("MatTab"), !_list); CatalogueArt.Selected(_deckFooter.GetNode<Button>("ListTab"), _list);
         Mat.Setup = false; Mat.Rows = _list; Mat.Group = _group.Selected switch { 1 => "Gold", 2 => "None", _ => "Type" }; Mat.Reset(cards, reset);
         _empty.Visible = cards.Length == 0; _empty.Text = "Your " + Family + " mat is empty.\nAdd cards from the collection to begin.";
     }

@@ -77,6 +77,10 @@ public partial class DeckBuilderProbe : Node
             Check(slider.Value < 150 && _screen.Mat.VisibleCount < 80 && _screen.Collection.VisibleCount < 55, "native smaller faces keep virtualized nodes bounded");
             GetWindow().Size = new Vector2I(1280, 800); await Wait(1); await Capture("small-window");
             Check(_screen.Mat.GetGlobalRect().End.X <= 1280, "mat within compact viewport");
+            GetWindow().Size = new Vector2I(1440, 700); await Wait(.5); await Capture("short-window");
+            var footer = Walk(_screen).OfType<Button>().Single(b => b.Text == "Export missing").GetParent<Control>();
+            Check(_screen.Mat.GetGlobalRect().Size.Y >= 150 && _screen.Mat.GetGlobalRect().End.Y <= footer.GetGlobalRect().Position.Y, "short wide window retains usable deck rows without footer overlap");
+            Check(footer.GetGlobalRect().End.Y <= 700 && _screen.Collection.GetGlobalRect().End.Y <= 700, "short wide window keeps deck and collection controls in viewport");
             GetWindow().Size = new Vector2I(1920, 1080); await Wait(.5); await Capture("wide-window");
             _screen.ShowComparison(events); await Wait(.4); await Capture("wide-compare"); KeyPress(Key.Escape); await Wait(.3);
             GetWindow().Size = new Vector2I(1280, 800); await Wait(.4); _screen.ShowComparison(events); await Wait(.4); await Capture("small-compare"); KeyPress(Key.Escape); await Wait(.3);

@@ -77,12 +77,12 @@ public partial class MyCollectionEditor : Control
         _plan = null; StartPanel("Edit my collection");
         var title = _panel.GetChildren().OfType<Label>().First(); title.HorizontalAlignment = HorizontalAlignment.Center; title.Size = new Vector2(1140, 50);
         var saved = CatalogueArt.Label("Changes save automatically on this device", 17); saved.HorizontalAlignment = HorizontalAlignment.Center;
-        Put(_panel, saved, 30, 74, 1140, 28);
+        Put(_panel, saved, 30, 58, 1140, 28);
         Put(_panel, CatalogueArt.Button("Import CSV", ImportFile), 832, 25, 110, 42);
         Put(_panel, CatalogueArt.Button("Export CSV", () => SaveCsv(_store.Export(MyCollection.Identities(_data)), "my-collection.csv")), 954, 25, 110, 42);
         var done = CatalogueArt.Button("Done", Close); DeckSkin.Primary(done); Put(_panel, done, 1076, 25, 100, 42);
         _search = new LineEdit { PlaceholderText = "Search your current card selection…", ClearButtonEnabled = true };
-        _search.Text = _browser.Search.Text; Put(_panel, _search, 30, 118, 800, 42);
+        _search.Text = _browser.Search.Text; Put(_panel, _search, 30, 108, 800, 44);
         _editOwnership = OwnershipFilter.All;
         var ownershipButtons = new List<Button>();
         for (var i = 0; i < 3; i++)
@@ -91,31 +91,35 @@ public partial class MyCollectionEditor : Control
             var button = CatalogueArt.Button(new[] { "All cards", "Owned", "Unowned" }[i], () =>
             {
                 _editOwnership = selection; FilterCards();
-                for (var n = 0; n < ownershipButtons.Count; n++) DeckSkin.Selected(ownershipButtons[n], n == (int)selection);
+                for (var n = 0; n < ownershipButtons.Count; n++) CatalogueArt.Selected(ownershipButtons[n], n == (int)selection);
             });
-            Put(_panel, button, 770 + i * 133, 118, 133, 42); ownershipButtons.Add(button); DeckSkin.Selected(button, i == 0);
+            Put(_panel, button, 770 + i * 133, 108, 131, 44); ownershipButtons.Add(button); CatalogueArt.Selected(button, i == 0);
         }
-        _search.Size = new Vector2(720, 42); _search.TextChanged += _ => FilterCards();
+        _search.Size = new Vector2(720, 44); _search.TextChanged += _ => FilterCards();
         _cards = new DeckSurface { Group = "None", ShowHeadings = false, MakeCard = EditTile, CardWidth = 254 };
-        Put(_panel, _cards, 30, 178, 1160, 450);
+        Put(_panel, _cards, 30, 173, 1160, 450);
         _notice = Palette.Wrapped("", 17, CatalogueArt.Gold); Put(_panel, _notice, 30, 642, 890, 64);
-        _undo = CatalogueArt.Button("Undo last change", () => Try(_store.Undo)); Put(_panel, _undo, 942, 650, 228, 40);
+        var separator = new ColorRect { Color = new Color("6d5935"), MouseFilter = MouseFilterEnum.Ignore }; Put(_panel, separator, 30, 665, 1140, 1);
+        _undo = CatalogueArt.Button("Undo last change", () => Try(_store.Undo)); Put(_panel, _undo, 486, 671, 228, 28);
+        foreach (var state in new[] { "normal", "hover", "pressed", "disabled" }) _undo.AddThemeStyleboxOverride(state, new StyleBoxEmpty());
         StoreChanged(); FilterCards(); Fit();
     }
     private void FilterCards()
     {
         // Match the caller's current facets but do not trap inventory editing behind its ownership filter.
-        var cards = _browser.CardsWithoutOwnership.Where(c => _store.Includes(c.Id, _editOwnership))
-            .Where(c => _search.Text.Length == 0 || c.Name.Contains(_search.Text, StringComparison.OrdinalIgnoreCase) || c.Keywords.Any(k => k.Contains(_search.Text, StringComparison.OrdinalIgnoreCase))).ToArray();
+        var cards = CatalogueData.Search(_browser.CardsWithoutOwnership.Where(c => _store.Includes(c.Id, _editOwnership)), _search.Text).ToArray();
         if (!_cards.Cards.SequenceEqual(cards)) _cards.Reset(cards, true);
         if (cards.Length == 0) _notice.Text = "No cards in this selection. Close the editor and adjust your browsing filters.";
     }
     private Control EditTile(CatalogueData.Card card)
     {
         var tile = new Control(); var face = new DeckFace(card, _scans); tile.AddChild(face); face.Pressed += () => Inspect(card);
-        var label = CatalogueArt.Label("Owned", 18); label.HorizontalAlignment = HorizontalAlignment.Center; tile.AddChild(label);
+        var label = CatalogueArt.Label(_store.Count(card.Id) > 0 ? "Owned" : "Not owned", 18); label.HorizontalAlignment = HorizontalAlignment.Center; label.SetMeta("owned_label_id", card.Id); tile.AddChild(label);
         var count = new LineEdit { Name = "OwnedQuantity", Text = _store.Count(card.Id).ToString(), Alignment = HorizontalAlignment.Center, MaxLength = 5, AccessibilityName = "Owned copies of " + card.Name };
         count.AddThemeConstantOverride("minimum_character_width", 1);
+        count.AddThemeFontSizeOverride("font_size", 22);
+        count.AddThemeStyleboxOverride("normal", CatalogueArt.ControlStyle(new Color("0a1014"), new Color("8c754b"), 4, 0));
+        count.AddThemeStyleboxOverride("focus", CatalogueArt.ControlStyle(new Color("16212a"), CatalogueArt.Gold, 4, 0));
         count.SetMeta("card_id", card.Id); tile.AddChild(count);
         void Commit()
         {
@@ -124,15 +128,20 @@ public partial class MyCollectionEditor : Control
             if (!Try(() => _store.Set(card.Id, value))) count.Text = _store.Count(card.Id).ToString();
         }
         count.TextSubmitted += _ => Commit(); count.FocusExited += Commit;
-        var minus = CatalogueArt.Button("−", () => Try(() => _store.Set(card.Id, Math.Max(0, _store.Count(card.Id) - 1)))); minus.AccessibilityName = "Reduce owned copies of " + card.Name; tile.AddChild(minus);
+        var minus = CatalogueArt.Button("−", () => Try(() => _store.Set(card.Id, Math.Max(0, _store.Count(card.Id) - 1)))); minus.AccessibilityName = "Reduce owned copies of " + card.Name; minus.Disabled = _store.Count(card.Id) == 0; minus.SetMeta("owned_minus_id", card.Id); tile.AddChild(minus);
         var plus = CatalogueArt.Button("+", () => Try(() => _store.Set(card.Id, Math.Min(MyCollectionStore.MaximumCount, _store.Count(card.Id) + 1)))); plus.AccessibilityName = "Increase owned copies of " + card.Name; tile.AddChild(plus);
+        foreach (var state in new[] { "normal", "hover", "pressed", "disabled", "focus" })
+        {
+            var left = (StyleBoxFlat)Theme.GetStylebox(state, "Button").Duplicate(); left.CornerRadiusTopRight = left.CornerRadiusBottomRight = 0; minus.AddThemeStyleboxOverride(state, left);
+            var right = (StyleBoxFlat)Theme.GetStylebox(state, "Button").Duplicate(); right.CornerRadiusTopLeft = right.CornerRadiusBottomLeft = 0; plus.AddThemeStyleboxOverride(state, right);
+        }
         tile.Resized += () =>
         {
             var w = tile.Size.X; face.Position = Vector2.Zero; face.Size = new Vector2(w, w * 1.4f);
             label.Position = new Vector2(0, w * 1.4f + 4); label.Size = new Vector2(w, 26);
-            count.Position = new Vector2(w / 2 - 38, w * 1.4f + 34); count.Size = new Vector2(76, 36);
-            minus.Position = new Vector2(w / 2 - 78, w * 1.4f + 34); minus.Size = new Vector2(36, 36);
-            plus.Position = new Vector2(w / 2 + 42, w * 1.4f + 34); plus.Size = new Vector2(36, 36);
+            count.Position = new Vector2(w / 2 - 38, w * 1.4f + 34); count.Size = new Vector2(76, 44);
+            minus.Position = new Vector2(w / 2 - 78, w * 1.4f + 34); minus.Size = new Vector2(40, 44);
+            plus.Position = new Vector2(w / 2 + 38, w * 1.4f + 34); plus.Size = new Vector2(40, 44);
         };
         return tile;
     }
@@ -141,9 +150,13 @@ public partial class MyCollectionEditor : Control
         if (_plan is not null) return;
         if (_undo is null) return;
         _undo.Disabled = !_store.CanUndo;
-        _notice.Text = _store.LoadError.Length > 0 ? _store.LoadError : $"{_store.Counts.Values.Sum(c => (long)c):N0} copies · {_store.Counts.Count:N0} {(_store.Counts.Count == 1 ? "card" : "different cards")} · Saved locally";
+        _notice.Text = _store.LoadError;
         foreach (var entry in Walk(_panel).OfType<LineEdit>().Where(e => e.HasMeta("card_id")))
             if (!entry.HasFocus()) entry.Text = _store.Count(entry.GetMeta("card_id").AsString()).ToString();
+        foreach (var label in Walk(_panel).OfType<Label>().Where(l => l.HasMeta("owned_label_id")))
+            label.Text = _store.Count(label.GetMeta("owned_label_id").AsString()) > 0 ? "Owned" : "Not owned";
+        foreach (var minus in Walk(_panel).OfType<Button>().Where(b => b.HasMeta("owned_minus_id")))
+            minus.Disabled = _store.Count(minus.GetMeta("owned_minus_id").AsString()) == 0;
         FilterCards();
     }
     private static IEnumerable<Node> Walk(Node node) { foreach (var c in node.GetChildren()) { yield return c; foreach (var n in Walk(c)) yield return n; } }
@@ -184,7 +197,7 @@ public partial class MyCollectionEditor : Control
             var mode = (CollectionImportMode)i;
             var option = CatalogueArt.Button(i == 0 ? "Update listed cards" : "Replace entire collection", () => { _mode = mode; BuildImport(); });
             option.Name = i == 0 ? "UpdateListedMode" : "ReplaceCollectionMode"; option.Icon = DeckSkin.Icon(_mode == mode ? "selected" : "radio"); option.AddThemeConstantOverride("h_separation", 10);
-            Put(_panel, option, 30 + i * 385, 166, 375, 42); DeckSkin.Selected(option, _mode == mode); modes.Add(option);
+            Put(_panel, option, 30 + i * 385, 166, 375, 42); CatalogueArt.Selected(option, _mode == mode); modes.Add(option);
         }
         var omitted = _store.Counts.Keys.Except(plan.Rows.Where(r => !r.Excluded && r.Id is not null).Select(r => r.Id!)).Count();
         var explanation = _mode == CollectionImportMode.UpdateListed ? "Listed counts replace current totals. Unlisted cards stay unchanged." :
@@ -264,4 +277,3 @@ public partial class MyCollectionEditor : Control
         { if (_plan is null) Close(); else BuildEditor(); GetViewport().SetInputAsHandled(); }
     }
 }
-

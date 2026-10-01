@@ -23,7 +23,7 @@ public partial class CatalogueBrowserBar : Control
     public OptionButton CollectionControl { get; }
     public string ScopeNotice => _notice.Text;
     public Func<Rect2>? PopupBounds { get => Types.PopupBounds; set { Types.PopupBounds = value; Keywords.PopupBounds = value; } }
-    public const float BarHeight = 220;
+    public float BarHeight => _families.Count == 2 ? 206 : 254;
     private static readonly string[] ClanNames = ["Crab", "Crane", "Dragon", "Lion", "Mantis", "Phoenix", "Scorpion", "Spider", "Unicorn", "Unaligned"];
     private readonly CatalogueData _data;
     private readonly Func<CatalogueData.Card, bool> _eligible;
@@ -35,7 +35,7 @@ public partial class CatalogueBrowserBar : Control
     private readonly ScrollContainer _tagScroll;
     private readonly HBoxContainer _tags;
     private bool _refreshing, _mostCommon;
-    private static float _preferredCardWidth = 196;
+    private static float? _preferredCardWidth;
     public CatalogueBrowserBar(CatalogueData data, string[] families, string initialFamily = "All", Func<CatalogueData.Card, bool>? eligible = null)
     {
         Name = "CatalogueBrowserBar"; Theme = CatalogueArt.Theme(); _data = data; _eligible = eligible ?? (_ => true); Family = _initialFamily = initialFamily;
@@ -45,7 +45,7 @@ public partial class CatalogueBrowserBar : Control
             button.ToggleMode = true; button.AccessibilityName = clan + " cards"; button.TooltipText = clan + " cards";
             AddChild(button); _clans[clan] = button; button.AddChild(CatalogueArt.Clan(clan));
             var label = CatalogueArt.Label(clan, 17); label.HorizontalAlignment = HorizontalAlignment.Center; button.AddChild(label);
-            var mark = new TextureRect { Name = "SelectedMark", Texture = DeckSkin.Icon("unchecked"), MouseFilter = MouseFilterEnum.Ignore, ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize, StretchMode = TextureRect.StretchModeEnum.KeepAspectCentered }; button.AddChild(mark);
+            var mark = new TextureRect { Name = "SelectedMark", Texture = DeckSkin.Icon("tick"), MouseFilter = MouseFilterEnum.Ignore, ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize, StretchMode = TextureRect.StretchModeEnum.KeepAspectCentered }; button.AddChild(mark);
         }
         _selectAll = AddButton("Select all", () => { Clans.UnionWith(ClanNames); Refresh(); });
         _deselectAll = AddButton("Deselect all", () => { Clans.Clear(); Refresh(); });
@@ -75,7 +75,7 @@ public partial class CatalogueBrowserBar : Control
         _reset = AddButton("Clear filters", Reset);
         _count = CatalogueArt.Label("", 17); AddChild(_count);
         _sizeLabel = CatalogueArt.Label("Card size", 16); AddChild(_sizeLabel);
-        CardSize = new HSlider { Name = "CardSize", MinValue = 120, MaxValue = 300, Step = 2, Value = _preferredCardWidth, AccessibilityName = "Card size", TooltipText = "Drag to resize full card faces. Arrow keys also adjust size." };
+        CardSize = new HSlider { Name = "CardSize", MinValue = 120, MaxValue = 300, Step = 2, Value = _preferredCardWidth ?? (families.Length == 2 ? 196 : 250), AccessibilityName = "Card size", TooltipText = "Drag to resize full card faces. Arrow keys also adjust size." };
         var track = Palette.Box(new Color("10171a"), new Color("665332"), 2, 1); track.ContentMarginTop = track.ContentMarginBottom = 2;
         CardSize.AddThemeStyleboxOverride("slider", track);
         var fill = Palette.Box(new Color("8d7040"), CatalogueArt.Gold, 2, 1); fill.ContentMarginTop = fill.ContentMarginBottom = 2;
@@ -123,10 +123,10 @@ public partial class CatalogueBrowserBar : Control
             _count.Text = $"{Results.Length:N0} matching cards";
             foreach (var (clan, button) in _clans)
             {
-                var active = Clans.Contains(clan); button.SetPressedNoSignal(active); foreach (var state in new[] { "normal", "hover", "pressed" }) button.AddThemeStyleboxOverride(state, new StyleBoxEmpty());
+                var active = Clans.Contains(clan); button.SetPressedNoSignal(active); CatalogueArt.Selected(button, active);
                 button.GetChild<TextureRect>(0).Modulate = active ? Colors.White : new Color(.75f, .75f, .75f);
                 button.GetChild<Label>(1).AddThemeColorOverride("font_color", active ? new Color("efd48d") : CatalogueArt.Ivory);
-                button.GetNode<TextureRect>("SelectedMark").Texture = DeckSkin.Icon(active ? "checked" : "unchecked");
+                button.GetNode<TextureRect>("SelectedMark").Visible = active;
             }
             foreach (var (family, button) in _families) SelectedStyle(button, Family == family);
             SelectedStyle(_allCards, !PlayableOnly); SelectedStyle(_playable, PlayableOnly); SelectedStyle(_alphabetical, !_mostCommon); SelectedStyle(_common, _mostCommon);
@@ -154,7 +154,7 @@ public partial class CatalogueBrowserBar : Control
         void Tag(string text, Action remove)
         {
             var b = CatalogueArt.Button(text + "  ×", remove);
-            foreach (var state in new[] { "normal", "hover", "pressed" }) b.AddThemeStyleboxOverride(state, Palette.Box(new Color("e1d6c2"), new Color("8c7447"), 8, 1));
+            foreach (var state in new[] { "normal", "hover", "pressed" }) b.AddThemeStyleboxOverride(state, CatalogueArt.ControlStyle(new Color("e1d6c2"), new Color("8c7447"), 8, 6));
             b.AddThemeColorOverride("font_color", new Color("161d24")); b.AddThemeColorOverride("font_hover_color", new Color("161d24")); b.AccessibilityName = "Remove filter " + text; b.AddThemeFontSizeOverride("font_size", 16); _tags.AddChild(b);
         }
         foreach (var clan in Clans.Order(StringComparer.OrdinalIgnoreCase)) Tag(clan, () => { Clans.Remove(clan); Refresh(); });
@@ -164,8 +164,7 @@ public partial class CatalogueBrowserBar : Control
         if (_gold.Selected > 0) Tag("Gold " + _gold.Text, () => { _gold.Select(0); Refresh(); });
         if (_tags.GetChildCount() == 0) { var hint = CatalogueArt.Label("Any clan · Any type · Any keyword", 16); hint.CustomMinimumSize = new Vector2(360, 30); _tags.AddChild(hint); }
     }
-    private static void SelectedStyle(Button button, bool selected) =>
-        button.AddThemeStyleboxOverride("normal", Palette.Box(selected ? new Color("332b1f") : new Color("10171a"), selected ? CatalogueArt.Gold : new Color("51442d"), 8, selected ? 2 : 1));
+    private static void SelectedStyle(Button button, bool selected) => CatalogueArt.Selected(button, selected);
     private static void Place(Control child, float x, float y, float w, float h) { child.Position = new Vector2(x, y); child.Size = new Vector2(w, h); }
     private void Fit()
     {
@@ -173,20 +172,22 @@ public partial class CatalogueBrowserBar : Control
         var w = Size.X; var cell = (w - 224) / ClanNames.Length; var i = 0;
         foreach (var button in _clans.Values)
         {
-            Place(button, i++ * cell, 0, cell - 6, 72); Place(button.GetChild<Control>(0), (cell - 58) / 2, 0, 52, 52);
-            Place(button.GetChild<Control>(1), 0, 48, cell - 6, 24); Place(button.GetChild<Control>(2), cell - 29, 47, 21, 22);
+            Place(button, i++ * cell, 0, cell - 6, 72); Place(button.GetChild<Control>(0), (cell - 42) / 2, 4, 36, 36);
+            Place(button.GetChild<Control>(1), 0, 44, cell - 6, 24); Place(button.GetChild<Control>(2), cell - 29, 7, 16, 16);
         }
         Place(_selectAll, w - 215, 14, 100, 38); Place(_deselectAll, w - 109, 14, 109, 38);
+        var compact = _families.Count == 2; var searchY = compact ? 80 : 84; var filterY = compact ? 122 : 150; var tagsY = compact ? 166 : 204;
         var familyWidth = _families.Count == 4 ? 400 : 230;
-        Place(Search, 0, 84, w - familyWidth - 435, 40);
-        Place(CollectionControl, w - familyWidth - 425, 84, 220, 40); Place(EditCollectionButton, w - familyWidth - 195, 84, 183, 40);
+        Place(Search, 0, searchY, w - familyWidth - 435, compact ? 40 : 52);
+        Place(CollectionControl, w - familyWidth - 425, searchY, 220, compact ? 40 : 52); Place(EditCollectionButton, w - familyWidth - 195, searchY, 183, compact ? 40 : 52);
         var x = w - familyWidth;
-        foreach (var (key, button) in _families) { var width = key == "Strongholds" ? 130 : (familyWidth - (_families.ContainsKey("Strongholds") ? 130 : 0)) / (_families.Count - (_families.ContainsKey("Strongholds") ? 1 : 0)); Place(button, x, 84, width, 40); x += width; }
-        Place(Types.Trigger, 0, 134, 174, 38); Place(Keywords.Trigger, 184, 134, 192, 38); Place(_set, 386, 134, 245, 38); Place(_gold, 641, 134, 140, 38);
-        Place(_allCards, 799, 134, 184, 38); Place(_playable, 993, 134, 166, 38); Place(_count, 1173, 137, Math.Max(130, w - 1173), 32);
-        Place(_tagScroll, 0, 182, w - 655, 36); Place(_reset, w - 644, 182, 124, 34);
-        Place(_sort, w - 506, 182, 170, 34); Place(_sizeLabel, w - 320, 187, 78, 25); Place(CardSize, w - 238, 188, 230, 24);
-        Place(_notice, 0, 214, w, 20);
+        foreach (var (key, button) in _families) { var width = key == "Strongholds" ? 130 : (familyWidth - (_families.ContainsKey("Strongholds") ? 130 : 0)) / (_families.Count - (_families.ContainsKey("Strongholds") ? 1 : 0)); Place(button, x, searchY, width - 2, compact ? 40 : 52); x += width; }
+        Place(Types.Trigger, 0, filterY, 174, compact ? 38 : 44); Place(Keywords.Trigger, 184, filterY, 192, compact ? 38 : 44); Place(_set, 386, filterY, 245, compact ? 38 : 44); Place(_gold, 641, filterY, 140, compact ? 38 : 44);
+        Place(_allCards, 799, filterY, 184, compact ? 38 : 44); Place(_playable, 993, filterY, 166, compact ? 38 : 44);
+        Place(_count, compact ? 1173 : w - 320, compact ? filterY + 3 : tagsY + 5, compact ? Math.Max(130, w - 1173) : 320, 32);
+        Place(_tagScroll, 0, tagsY, w - 655, compact ? 38 : 44); Place(_reset, w - 644, tagsY, 124, compact ? 38 : 44);
+        Place(_sort, w - 506, tagsY, 170, compact ? 38 : 44); Place(_sizeLabel, w - 320, compact ? tagsY + 5 : filterY + 12, 78, 25); Place(CardSize, w - 238, compact ? tagsY + 6 : filterY + 13, 230, 24);
+        Place(_notice, 0, compact ? 204 : 248, w, compact ? 18 : 20);
         QueueRedraw();
     }
     public override void _Draw()

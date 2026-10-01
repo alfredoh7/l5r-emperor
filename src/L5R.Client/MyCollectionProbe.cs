@@ -17,7 +17,20 @@ public partial class MyCollectionProbe : Node
             Directory.CreateDirectory(_out);
             MyCollection.OverridePath = Path.Combine(_out, "inventory-" + Guid.NewGuid().ToString("N"), "collection.json");
             var library = new CatalogueScreen(); AddChild(library); library.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.FullRect);
-            await Wait(2); library.Browser.Search.Text = "Asahina"; library.Browser.Refresh(); await Wait(.3);
+            await Wait(2);
+            foreach (var search in new[] { "discarding", "  discarding   Fate  " })
+            {
+                library.Browser.Search.Text = search; library.Browser.Refresh(); await Wait(.2);
+                var expected = library.Browser.Results.Select(c => c.Id).ToArray();
+                Check(expected.Length > 0, "catalogue rules search has results: " + search.Trim());
+                library.Browser.SetOwnership(OwnershipFilter.Owned); await Wait(.2);
+                Click(library.Browser.EditCollectionButton); await Wait(.2);
+                var searchEditor = library.GetChildren().OfType<MyCollectionEditor>().Single();
+                Check(Walk(searchEditor).OfType<DeckSurface>().Single().Cards.Select(c => c.Id).SequenceEqual(expected), "collection editor shares rules and multi-term search while bypassing caller ownership: " + search.Trim());
+                Click(Walk(searchEditor).OfType<Button>().Single(b => b.Text == "Done")); await Wait(.2);
+                library.Browser.SetOwnership(OwnershipFilter.All);
+            }
+            library.Browser.Search.Text = "Asahina"; library.Browser.Refresh(); await Wait(.3);
             var card = library.Browser.Results.First(); MyCollection.Store.Set(card.Id, 3);
             library.Browser.SetOwnership(OwnershipFilter.Owned); await Wait(.2);
             Check(library.Grid.Cards.Length == 1 && library.Grid.Cards[0].Id == card.Id, "Library Owned filter uses shared physical inventory");
@@ -86,8 +99,14 @@ public partial class MyCollectionProbe : Node
             Check(builder.MissingCards().Length == 1 && builder.MissingCards()[0].Need == 2, "deck shortage is exact and separate from legality");
             Check(builder.MissingCsv().Contains("needed_count"), "missing export cannot be mistaken for owned inventory CSV");
             var draft = DeckFormat.Write(builder.Draft.ToDeck()); var dirty = builder.Dirty;
+            builder.Collection.ScrollVertical = 450; await Wait(.2);
+            var browsePosition = builder.Collection.ScrollVertical;
+            var visibleCard = Walk(builder.Collection).OfType<DeckFace>().First(f => f.IsVisibleInTree() && f.Card.Id != target.Id).Card;
+            Check(browsePosition > 0, "builder catalogue is scrolled before ownership edit");
             Click(builder.Browser.EditCollectionButton); await Wait(.2); editor = builder.GetChildren().OfType<MyCollectionEditor>().Single();
-            MyCollection.Store.Set(target.Id, 2); await Wait(.2); Click(Walk(editor).OfType<Button>().Single(b => b.Text == "Done")); await Wait(.2);
+            MyCollection.Store.Set(target.Id, 2); MyCollection.Store.Set(visibleCard.Id, 17); await Wait(.2); Click(Walk(editor).OfType<Button>().Single(b => b.Text == "Done")); await Wait(.2);
+            Check(builder.Collection.ScrollVertical == browsePosition, "ownership editing preserves unchanged catalogue scroll position");
+            Check(Walk(builder.Collection).OfType<Label>().Any(l => l.Text == "Owned: 17"), "ownership labels refresh without resetting the catalogue");
             Check(DeckFormat.Write(builder.Draft.ToDeck()) == draft && builder.Dirty == dirty, "collection editing preserves unsaved deck exactly");
             Check(builder.MissingCards()[0].Need == 1, "deck shortage updates immediately after collection edit");
             var targetCard = builder.Data.Cards.Single(c => c.Id == target.Id); builder.Adjust(targetCard, 1); await Wait(.2);
@@ -115,4 +134,3 @@ public partial class MyCollectionProbe : Node
     private static void Click(Control c) { var p = c.GetGlobalRect().GetCenter(); Input.ParseInputEvent(new InputEventMouseMotion { Position = p, GlobalPosition = p }); Input.ParseInputEvent(new InputEventMouseButton { Position = p, GlobalPosition = p, ButtonIndex = MouseButton.Left, Pressed = true }); Input.ParseInputEvent(new InputEventMouseButton { Position = p, GlobalPosition = p, ButtonIndex = MouseButton.Left, Pressed = false }); }
     private static void KeyPress(Key key) { Input.ParseInputEvent(new InputEventKey { Keycode = key, Pressed = true }); Input.ParseInputEvent(new InputEventKey { Keycode = key, Pressed = false }); }
 }
-

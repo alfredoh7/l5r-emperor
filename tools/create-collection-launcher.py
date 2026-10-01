@@ -10,7 +10,7 @@ out.mkdir(parents=True, exist_ok=True)
 for label, mode in [('My Collection', 'my-collection-review'), ('Deck Builder and Collection', 'deck-collection-review')]:
     command = out / ('Review ' + label + '.command')
     command.write_text('#!/bin/bash\nset -euo pipefail\ncd ' + shlex.quote(str(root)) +
-                       '\nexec bash tools/run.sh --resolution 1672x941 --profile=my-collection-review-20261001-r1 -- --' + mode +
+                       '\nexec bash tools/run.sh --resolution 1672x941 --profile=my-collection-review-20261001-r3 -- --' + mode +
                        ' --capture=' + shlex.quote(str(out / (mode + '.png'))) + '\n')
     command.chmod(0o755)
     app = out / ('L5R ' + label + ' - Review.app')
@@ -20,7 +20,7 @@ for label, mode in [('My Collection', 'my-collection-review'), ('Deck Builder an
         'CFBundleName': 'L5R ' + label + ' - Review',
         'CFBundleIdentifier': 'local.l5r.' + mode,
         'CFBundleExecutable': 'launch', 'CFBundlePackageType': 'APPL',
-        'CFBundleVersion': '1', 'NSHighResolutionCapable': True,
+        'CFBundleVersion': '3', 'NSHighResolutionCapable': True,
     }))
     launcher = macos / 'launch'
     launcher.write_text('#!/bin/bash\nexec /usr/bin/open -a Terminal ' + shlex.quote(str(command)) + '\n')

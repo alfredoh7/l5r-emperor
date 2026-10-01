@@ -79,13 +79,11 @@ public sealed class CatalogueData
         var clanSet = clans?.Where(c => c != "All").ToArray() ?? [];
         var typeSet = types?.ToArray() ?? [];
         var keywordSet = keywords?.ToArray() ?? [];
-        var terms = search.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-        var query = Cards.Where(c => (!playable || c.Playable)
+        var query = Search(Cards, search).Where(c => (!playable || c.Playable)
             && (clanSet.Length == 0 || clanSet.Any(clan => clan == "Unaligned" ? c.Clans.Length == 0 || c.Clans.Contains(clan) : c.Clans.Contains(clan)))
             && (family == "All" || (family == "Strongholds" ? c.Types.Contains("Stronghold") : c.DeckTypes.Contains(family)))
             && (typeSet.Length == 0 || typeSet.Any(c.Types.Contains)) && (keywordSet.Length == 0 || keywordSet.Any(c.Keywords.Contains))
-            && (set == "" || c.Printings.Any(p => p.Set == set))
-            && terms.All(term => c.SearchText.Contains(term, StringComparison.OrdinalIgnoreCase)));
+            && (set == "" || c.Printings.Any(p => p.Set == set)));
         return (sort switch
         {
             "Name Z–A" => query.OrderByDescending(c => c.Name, StringComparer.OrdinalIgnoreCase),
@@ -95,6 +93,11 @@ public sealed class CatalogueData
             "Set" => query.OrderBy(SetRank).ThenBy(c => c.Name, StringComparer.OrdinalIgnoreCase),
             _ => query.OrderBy(c => c.Name, StringComparer.OrdinalIgnoreCase)
         }).ToArray();
+    }
+    public static IEnumerable<Card> Search(IEnumerable<Card> cards, string search)
+    {
+        var terms = search.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        return cards.Where(c => terms.All(term => c.SearchText.Contains(term, StringComparison.OrdinalIgnoreCase)));
     }
     public static string PlainText(string text) => Regex.Replace(System.Net.WebUtility.HtmlDecode(text).Replace(":bow:", "[Bow]"), @"<[^>]+>|:g(\d+|star):", m => m.Groups[1].Success ? "[" + m.Groups[1].Value + " Gold]" : "");
 }

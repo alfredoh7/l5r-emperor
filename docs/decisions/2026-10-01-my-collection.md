@@ -12,4 +12,8 @@ CSV uses `card_id,card_name,owned_count`. ID is preferred when present; conflict
 
 The compact Library actions menu retains imported decks and the uploaded-artwork source archive. Card resizing preserves the pixel offset inside the anchored row, matching the existing Deck Builder behavior.
 
+Alfredo's final visual correction places a small ivory selection tick inside the upper-right corner of each bordered clan tile, rather than beside the sigil or its label. Unselected tiles have no empty checkbox. Controls use subtle four-to-six-pixel corner radii, compact vertical padding and the approved cream removable tags. Library defaults to six full faces; Builder defaults to five beside the deck, with the user's slider choice still shared between screens. The editor uses grouped quantity controls and a centered quiet Undo action. The previous mat and full genuine scans remain preserved.
+
+Collection editor search shares the catalogue's rules-text and separate-word matching. Ownership changes refresh counts without resetting an unchanged Builder result list's scroll position. Builder scales for both window dimensions so its deck rows and footer remain separate in short wide windows.
+
 Native review includes the ordinary workflows, unsaved drafts, small windows, original full faces, input, import/export file choosers, cancellation and undo. Source/native comparisons document the previous-mat override and necessary live card/quantity differences. Package validation is distinct from Windows graphical acceptance. These changes stay unmerged until human review and CI are complete.

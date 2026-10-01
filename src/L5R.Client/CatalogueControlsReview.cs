@@ -7,12 +7,15 @@ public partial class CatalogueControlsReview : Control
 {
     private Control? _screen;
     private string _capture = "";
+    private string _storageRoot = "user://unified-filter-review/default";
     private bool _captured;
     public override void _Ready()
     {
         _capture = OS.GetCmdlineUserArgs().FirstOrDefault(a => a.StartsWith("--capture="))?[10..] ?? "";
+        var profile = OS.GetCmdlineUserArgs().FirstOrDefault(a => a.StartsWith("--profile="))?[10..] ?? "default";
+        if (profile.Length is > 0 and <= 32 && profile.All(c => char.IsAsciiLetterOrDigit(c) || c == '-')) _storageRoot = "user://unified-filter-review/" + profile;
         var collection = OS.GetCmdlineUserArgs().Any(a => a.Contains("collection-review"));
-        if (collection) MyCollection.OverridePath = ProjectSettings.GlobalizePath("user://my-collection-review/my-collection.json");
+        if (collection) MyCollection.OverridePath = ProjectSettings.GlobalizePath(_storageRoot + "/my-collection.json");
         var builder = OS.GetCmdlineUserArgs().Any(a => a == "--deck-filters-review" || a == "--capture-mode=deck-filters-review" || a == "--deck-collection-review" || a == "--capture-mode=deck-collection-review");
         if (builder) OpenBuilder(); else OpenLibrary();
     }
@@ -32,7 +35,7 @@ public partial class CatalogueControlsReview : Control
     private void OpenBuilder()
     {
         RemoveScreen();
-        var builder = new DeckBuilderScreen { StorageDirectory = ProjectSettings.GlobalizePath("user://unified-filter-review/decks"), OpenLibrary = OpenLibrary };
+        var builder = new DeckBuilderScreen { StorageDirectory = ProjectSettings.GlobalizePath(_storageRoot + "/decks"), OpenLibrary = OpenLibrary };
         _screen = builder; AddChild(builder); builder.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
         builder.Closed += OpenLibrary;
         var source = PublishedContent.Snapshot.Decks.First(d => d.Clan == "Crane");
