@@ -285,7 +285,23 @@ public partial class Main
         _decisionActions.AddChild(SidebarSkin.Button(cancel, CancelChoice));
     }
 
-    private int SelectedProduction() => Self.Home.Concat(Self.Army).Append(Self.Stronghold).Where(c => _sources.Contains(c.Id) && !c.Bowed).Sum(c => Production(c, Self));
+    // Issue #501/#578: the payment sources that are not a card's own production (a Reaction's Gold, Zlkyt's destroyed Holding, Moto Rani's discount),
+    // exactly as the engine's quote lists them. Core's suggested payments may name them, so the panel must be able to show, toggle and count them.
+    private PaymentSource[] TokenSources() => _chosen is { } action && QuoteFor(action) is { Sources: { } sources } ? sources : [];
+
+    private int SelectedProduction() => Self.Home.Concat(Self.Army).Append(Self.Stronghold).Where(c => _sources.Contains(c.Id) && !c.Bowed).Sum(c => Production(c, Self))
+        + TokenSources().Where(t => _sources.Contains(t.Id)).Sum(t => t.Produced);
+
+    private void AddTokenSourceToggles()
+    {
+        foreach (var token in TokenSources())
+        {
+            var check = new CheckBox { Text = $"{token.Produced} · {token.Label}", ButtonPressed = _sources.Contains(token.Id), CustomMinimumSize = new Vector2(0, 28), Name = "PaymentToken" };
+            check.AddThemeFontSizeOverride("font_size", 14);
+            check.Toggled += selected => { if (selected) _sources.Add(token.Id); else _sources.Remove(token.Id); RenderInspector(); Highlight(); };
+            _inspector.AddChild(check);
+        }
+    }
 
     private void RenderSources(int cost)
     {
@@ -297,6 +313,7 @@ public partial class Main
             check.Toggled += selected => { if (selected) _sources.Add(card.Id); else _sources.Remove(card.Id); RenderInspector(); Highlight(); };
             _inspector.AddChild(check);
         }
+        AddTokenSourceToggles();
         var produced = SelectedProduction();
         _inspector.AddChild(Palette.Wrapped($"{produced} produced  /  {cost} required" + (produced > cost ? $"\n{produced - cost} excess Gold will be lost." : produced < cost ? "\nChoose more unbowed sources." : "\nExact payment. No excess Gold."), 15, produced < cost ? Palette.Error : Palette.Crane));
     }
