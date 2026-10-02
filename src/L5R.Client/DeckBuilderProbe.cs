@@ -32,6 +32,41 @@ public partial class DeckBuilderProbe : Node
             var entries = all.GroupBy(id => id).Select(g => new DeckEntry(_screen.Data.Cards.Single(c => c.Id == g.Key).Name, g.Count())).ToArray();
             var path = _screen.Store.Save("Crane — Court and Steel", new Deck("Emperor", entries)); Check(_screen.OpenFile(path), "published deck loads into builder"); await Wait(5); await Capture("mat");
             Check(!_screen.Collection.Rows && _screen.Collection.Size.X > _screen.Mat.Size.X, "collection displays full faces beside deck panel");
+            // Deck views, Focus/Action filters and full-size hover (#580)
+            var browser = _screen.Browser;
+            Check(browser.Actions.Trigger.Visible && !browser.Focus.Trigger.Visible, "Dynasty builder offers Action Type but not Focus Value");
+            Check(Button("All Cards (" + _screen.Collection.Cards.Length.ToString("N0") + " shown)").ToggleMode && Button("Dynasty Deck (" + source.Dynasty.Length + " cards)").ToggleMode && Button("Fate Cards (" + source.Fate.Length + " cards)").ToggleMode, "All Cards, Dynasty Deck and Fate Cards toggles show live counts");
+            Check(_screen.Collection.GetGlobalRect().End.Y <= GetViewport().GetVisibleRect().Size.Y, "collection pane stays inside the window with the extra controls");
+            var allCount = _screen.Collection.Cards.Length;
+            Click(Button("Dynasty Deck (" + source.Dynasty.Length + " cards)")); await Wait(.6);
+            var dynastyIds = _screen.Draft.Cards.Where(c => c.SetupSlot.Length == 0 && c.Families.Contains("Dynasty")).Select(c => c.Id).ToHashSet();
+            Check(_screen.DeckViewOnly && _screen.Collection.Cards.Length > 0 && _screen.Collection.Cards.Select(c => c.Id).ToHashSet().SetEquals(dynastyIds), "Dynasty Deck shows only the Dynasty cards in the deck");
+            await Capture("view-dynasty-deck");
+            Click(Button("Fate Cards (" + source.Fate.Length + " cards)")); await Wait(.6);
+            var fateIds = _screen.Draft.Cards.Where(c => c.SetupSlot.Length == 0 && c.Families.Contains("Fate")).Select(c => c.Id).ToHashSet();
+            Check(_screen.Family == "Fate" && _screen.Collection.Cards.Select(c => c.Id).ToHashSet().SetEquals(fateIds), "Fate Cards shows only the Fate cards in the deck");
+            Check(browser.Focus.Trigger.Visible && browser.Actions.Trigger.Visible && _screen.Collection.GetGlobalRect().End.Y <= GetViewport().GetVisibleRect().Size.Y, "Fate builder offers Focus Value and Action Type within the window");
+            var focusValue = _screen.Collection.Cards.First(c => c.Focus is not null).Focus!.Value.ToString();
+            Click(browser.Focus.Trigger); await Wait(.3); Activate(Walk(_screen).OfType<CheckBox>().First(c => c.IsVisibleInTree() && c.Text == focusValue)); await Wait(.4); browser.CloseMenus(); await Wait(.2);
+            Check(_screen.Collection.Cards.Length > 0 && _screen.Collection.Cards.All(c => c.Focus.ToString() == focusValue && fateIds.Contains(c.Id)), "deck view honours the Focus Value filter");
+            await Capture("view-fate-focus");
+            browser.Reset(); await Wait(.3); _screen.SetFamily("Fate"); await Wait(.3);
+            var viewBefore = _screen.Collection.Cards.Select(c => c.Id).ToHashSet(); var firstDeckCard = _screen.Collection.Cards[0];
+            _screen.Adjust(firstDeckCard, -_screen.Draft.Count(firstDeckCard.Id)); await Wait(.3);
+            Check(_screen.Collection.Cards.Select(c => c.Id).ToHashSet().SetEquals(viewBefore), "a card removed in a deck view stays until the view is refreshed");
+            _screen.Adjust(firstDeckCard, 3); await Wait(.2);
+            Click(Button("All Cards (" + _screen.Browser.Results.Length.ToString("N0") + " shown)")); await Wait(.6);
+            Check(!_screen.DeckViewOnly && _screen.Collection.Cards.Length > fateIds.Count, "All Cards restores the full filtered collection");
+            var hoverFace = Walk(_screen.Collection).OfType<DeckFace>().First(f => f.IsVisibleInTree()); var faceWidth = hoverFace.GetGlobalRect().Size.X;
+            HoverOver(hoverFace); await Wait(1.2); var hover = Walk(_screen).OfType<CardScanHover>().Single();
+            Check(hover.Visible && hover.Card?.Id == hoverFace.Card.Id && hover.Face.Size.X >= faceWidth * 1.5f - 1, "builder hover shows a scan at least 50% larger than the collection face");
+            Check(new Rect2(Vector2.Zero, GetViewport().GetVisibleRect().Size).Encloses(hover.Face) && !hover.Face.Intersects(hoverFace.GetGlobalRect().Grow(-1)), "builder hover scan stays inside the window beside the card");
+            await Capture("hover-full-size");
+            Input.ParseInputEvent(new InputEventMouseMotion { Position = new Vector2(5, 5), GlobalPosition = new Vector2(5, 5) }); await Wait(.4); Check(!hover.Visible, "builder hover closes when the pointer leaves");
+            Click(Button("List")); await Wait(.4); var rowName = Walk(_screen.Mat).OfType<Button>().First(b => b.IsVisibleInTree() && b.Text.Length > 2);
+            HoverOver(rowName); await Wait(1.2); Check(hover.Visible && hover.Face.Size.X >= 66, "list rows enlarge the scan beyond their thumbnail");
+            Input.ParseInputEvent(new InputEventMouseMotion { Position = new Vector2(5, 5), GlobalPosition = new Vector2(5, 5) }); await Wait(.3); Click(Button("Mat")); await Wait(.3);
+            _screen.SetFamily("Dynasty"); await Wait(.3);
             Search("Asahina"); await Wait(3); await Capture("collection-large"); Search(""); await Wait(.3);
             var more = Walk(_screen).OfType<MenuButton>().Single(); Click(more); await Wait(.3); Check(more.GetPopup().ItemCount == 2, "compact save-copy and export actions available"); await Capture("deck-actions"); KeyPress(Key.Escape); await Wait(.3);
             Click(Walk(_screen).OfType<Button>().First(b => b.TooltipText == "Crane cards")); await Wait(.2);
@@ -68,7 +103,7 @@ public partial class DeckBuilderProbe : Node
             _screen.SaveDraft();
             File.AppendAllText(path, "\n"); _screen.Adjust(card, 1); _screen.SaveDraft(); await Wait(.3); Check(Walk(_screen).OfType<ConfirmationDialog>().Any(d => d.Visible), "external edit requires overwrite decision"); KeyPress(Key.Escape); await Wait(.3); Check(_screen.Dirty, "overwrite cancel preserves dirty draft");
             _screen.SaveDraft(); await Wait(.3); KeyPress(Key.Enter); await Wait(.3); Check(!_screen.Dirty, "confirmed overwrite saves draft");
-            Click(Button("‹ My decks")); await Wait(2); await Capture("saved-decks"); Click(Button("Open in builder")); await Wait(.5);
+            Click(Button("‹ My decks")); await Wait(2); Check(!_screen.ViewStrip.IsVisibleInTree(), "deck views are hidden on the My decks page"); await Capture("saved-decks"); Click(Button("Open in builder")); await Wait(.5);
             var slider = _screen.Browser.CardSize; var unchanged = _screen.Collection.Cards.Select(c => c.Id).ToArray();
             await DragSlider(slider, .9f); await Wait(.4); await Capture("slider-large");
             Check(slider.Value > 260 && _screen.Collection.CardWidth == (float)slider.Value, "native builder slider drag enlarges collection faces");
@@ -127,6 +162,7 @@ public partial class DeckBuilderProbe : Node
     }
     private async Task Capture(string name) { await Wait(.15); RenderingServer.ForceDraw(); GetViewport().GetTexture().GetImage().SavePng(Path.Combine(_out, name + ".png")); GD.Print("CAPTURE " + name); }
     private static IEnumerable<Node> Walk(Node root, bool includeInternal = false) { foreach (var child in root.GetChildren(includeInternal)) { yield return child; foreach (var n in Walk(child, includeInternal)) yield return n; } }
+    private static void HoverOver(Control c) { var p = c.GetGlobalRect().GetCenter(); Input.ParseInputEvent(new InputEventMouseMotion { Position = p - new Vector2(3, 3), GlobalPosition = p - new Vector2(3, 3) }); Input.ParseInputEvent(new InputEventMouseMotion { Position = p, GlobalPosition = p }); }
     private Button Button(string text) => Walk(_screen).OfType<Button>().First(b => b.Text == text && b.IsVisibleInTree());
     private static void Click(Control c) { var p = c.GetGlobalRect().GetCenter(); Input.ParseInputEvent(new InputEventMouseMotion { Position = p, GlobalPosition = p }); Input.ParseInputEvent(new InputEventMouseButton { Position = p, GlobalPosition = p, ButtonIndex = MouseButton.Left, Pressed = true }); Input.ParseInputEvent(new InputEventMouseButton { Position = p, GlobalPosition = p, ButtonIndex = MouseButton.Left, Pressed = false }); }
     private void Search(string text) { _screen.Search.GrabFocus(); _screen.Search.SelectAll(); KeyPress(Key.Backspace); foreach (var ch in text) { Input.ParseInputEvent(new InputEventKey { Unicode = ch, Keycode = (Key)char.ToUpperInvariant(ch), Pressed = true }); Input.ParseInputEvent(new InputEventKey { Unicode = ch, Keycode = (Key)char.ToUpperInvariant(ch), Pressed = false }); } }

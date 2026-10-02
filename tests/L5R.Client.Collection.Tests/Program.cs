@@ -44,6 +44,19 @@ try
     Check(blocked.Count("a") == 0, "write failure leaves in-memory ownership unchanged");
     Throws<FormatException>(() => s.Set("a", -1), "manual negative count rejected");
     Throws<FormatException>(() => s.Preview(new string('x', 1_000_001), cards), "oversized import rejected");
+    string[] Printed(string text) => CatalogueActions.Printings(text);
+    Check(Printed("Battle/Open: Target your bowed Personality: Straighten him.").SequenceEqual(["Battle/Open"]), "Battle/Open is its own printed action");
+    Check(Printed("Battle/Open: Straighten.\nLimited, :g1:: Draw a card.").SequenceEqual(["Battle/Open", "Limited"]), "a card may print several actions");
+    Check(Printed("Political Open: Copy.").SequenceEqual(["Open"]) && Printed("Iaijutsu Battle, :bow:: Duel.").SequenceEqual(["Battle"]), "trait words before the timing are ignored");
+    Check(Printed("Reaction: When paying a Gold cost: Produce Gold.").SequenceEqual(["Reaction"]), "Reaction is detected");
+    Check(Printed("").Length == 0 && Printed(":bow:: Produce 3 Gold.").Length == 0, "no printed action means None (Remote Village, empty text)");
+    Check(Printed("(Limited, :g2:: Discard a Kharmic card.)").Length == 0 && Printed("Your Tacticians have the ability, \"Tactical Open: Give +1F.\"").Length == 0, "reminder text and granted abilities are not printed actions");
+    Check(CatalogueActions.Matches(["Battle/Open"], "Battle") && CatalogueActions.Matches(["Battle/Open"], "Open") && CatalogueActions.Matches(["Battle/Open"], "Battle/Open"), "Battle and Open filters include Battle/Open cards");
+    Check(!CatalogueActions.Matches(["Battle"], "Battle/Open") && !CatalogueActions.Matches(["Open"], "Battle/Open"), "Battle/Open filter excludes cards printing only Battle or Open");
+    string[] both = ["Battle/Open", "Limited"];
+    Check(new[] { "Battle", "Open", "Battle/Open", "Limited" }.All(choice => CatalogueActions.Matches(both, choice)) && !CatalogueActions.Matches(both, "Reaction") && !CatalogueActions.Matches(both, "None"), "Battle/Open + Limited appears in all four matching filters");
+    Check(CatalogueActions.MatchesAny(both, ["Battle", "Open", "Battle/Open", "Limited"]) && CatalogueActions.MatchesAny(both, []), "any number of selected choices yields one match");
+    Check(CatalogueActions.Matches([], "None") && !CatalogueActions.Matches(["Limited"], "None"), "None matches only cards without printed actions");
     Console.WriteLine($"COLLECTION DATA PASS: {checks} assertions");
 }
 finally { Directory.Delete(dir, true); }

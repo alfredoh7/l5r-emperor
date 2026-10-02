@@ -29,7 +29,7 @@ public partial class DeckBuilderScreen
             row.DrawLine(new Vector2(2, row.Size.Y - 1), new Vector2(row.Size.X - 3, row.Size.Y - 1), new Color(.62f, .47f, .25f, .6f), 1);
             if (name.IsHovered() || name.HasFocus()) row.DrawRect(new Rect2(0, 1, row.Size.X, row.Size.Y - 2), DeckSkin.Gold, false, 1);
         };
-        row.Resized += Layout; name.MouseEntered += () => { row.QueueRedraw(); _ = Hover(card, name); }; name.MouseExited += () => { row.QueueRedraw(); HideHover(); }; name.FocusEntered += () => _ = Hover(card, name); name.FocusExited += HideHover;
+        row.Resized += Layout; name.MouseEntered += () => { row.QueueRedraw(); _ = Hover(card, name, thumb); }; name.MouseExited += () => { row.QueueRedraw(); HideHover(); }; name.FocusEntered += () => _ = Hover(card, name, thumb); name.FocusExited += HideHover; row.TreeExiting += HideHover;
         row.GuiInput += e => { if (e is InputEventMouseButton { Pressed: true, ButtonIndex: MouseButton.Left }) ShowComparison([card]); };
         return row;
     }
@@ -39,7 +39,7 @@ public partial class DeckBuilderScreen
     {
         if (_list && !collection && _setupSlot.Length == 0) return MakeRow(card, false);
         var item = new Control(); var face = new DeckFace(card, Scans) { Copies = Draft.Count(card.Id), Selected = _compare.Contains(card.Id) || (_setupSlot.Length > 0 && Draft.Count(card.Id) == 1) }; item.AddChild(face);
-        face.MouseEntered += () => _ = Hover(card, face); face.MouseExited += HideHover; face.FocusEntered += () => _ = Hover(card, face); face.FocusExited += HideHover; face.Pressed += () => ShowComparison([card]);
+        face.MouseEntered += () => _ = Hover(card, face); face.MouseExited += HideHover; face.FocusEntered += () => _ = Hover(card, face); face.FocusExited += HideHover; face.TreeExiting += HideHover; face.Pressed += () => ShowComparison([card]);
         var note = CatalogueArt.Label(card.Playable ? "" : "Not implemented", 13); note.HorizontalAlignment = HorizontalAlignment.Center; item.AddChild(note);
         if (_setupSlot.Length > 0)
         {
@@ -68,18 +68,13 @@ public partial class DeckBuilderScreen
         }
         return item;
     }
-    private async Task Hover(CatalogueData.Card card, Control target)
+    /// <summary>Full-size WebP scan beside the hovered card; <paramref name="face"/> is the image the pane itself shows when it is smaller than the hovered control.</summary>
+    private async Task Hover(CatalogueData.Card card, Control target, Control? face = null)
     {
-        var ticket = ++_hoverTicket; await ToSignal(GetTree().CreateTimer(.5), SceneTreeTimer.SignalName.Timeout);
-        if (!IsInstanceValid(this) || !IsInsideTree() || ticket != _hoverTicket || _overlay.Visible || !IsInstanceValid(target) || !target.IsInsideTree()) return;
-        Palette.Clear(_hover); var w = 290f; var h = 465f;
-        var panel = new Panel(); panel.AddThemeStyleboxOverride("panel", new DeckPanelStyle()); panel.MouseFilter = MouseFilterEnum.Ignore; Put(_hover, panel, 0, 0, w, h);
-        var face = new DeckFace(card, Scans) { MouseFilter = MouseFilterEnum.Ignore }; Put(panel, face, 16, 12, 258, 370);
-        var label = Palette.Wrapped(card.Name + "\n" + (card.Playable ? "Game printing" : "Reference · not implemented") + "\nClick to inspect", 16, CatalogueArt.Ivory); label.MouseFilter = MouseFilterEnum.Ignore; Put(panel, label, 16, 386, 258, 68);
-        var r = target.GetGlobalRect(); var p = (r.End / _canvas.Scale.X); var x = p.X + 12; if (x + w > _w - 16) x = r.Position.X / _canvas.Scale.X - w - 12;
-        _hover.Position = new Vector2(Math.Clamp(x, 12, _w - w - 12), Math.Clamp(r.Position.Y / _canvas.Scale.Y, 12, _h - h - 12)); _hover.Size = new Vector2(w, h); _hover.Show();
+        if (_overlay.Visible) return;
+        await _scanHover.Arm(card, target, face);
     }
-    private void HideHover() { _hoverTicket++; _hover.Hide(); }
+    private void HideHover() => _scanHover?.Dismiss();
     private void CloseOverlay() { _overlay.Hide(); Palette.Clear(_overlay); RefreshMat(); Collection.Relayout(); }
     private Panel BeginOverlay(string title)
     {

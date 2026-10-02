@@ -23,6 +23,11 @@ public sealed class CatalogueData
         public CardDefinition? Definition => CardCatalog.Cards.GetValueOrDefault(Id);
         public bool Playable => Definition is { ScenarioOnly: false } && Id.StartsWith("oracle-l5r-", StringComparison.Ordinal);
         public string SearchText => string.Join(" ", new[] { Name, CurrentOracleText }.Concat(Clans).Concat(Keywords).Concat(Types));
+        private string[]? _actions;
+        /// <summary>Printed action labels (Limited, Open, Battle, Battle/Open, Reaction); empty when none are printed.</summary>
+        public string[] Actions => _actions ??= CatalogueActions.Printings(CurrentOracleText);
+        /// <summary>Printed Focus Value, or null when the card has none.</summary>
+        public int? Focus => Stats.TryGetValue("focus", out var values) && int.TryParse(values.FirstOrDefault(), out var focus) ? focus : null;
         public double Numeric(string stat) => Stats.TryGetValue(stat, out var values) && double.TryParse(values.FirstOrDefault(), out var value) ? value : double.MaxValue;
     }
     public sealed class Printing
