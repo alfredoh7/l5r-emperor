@@ -327,8 +327,11 @@ internal static class EmperorMechETests
         Check(!Offers(bowed, z2, p2), "not while he is bowed");
         var cherry = Rig((st, _) => Add(st, CherryBlossom, 1, Zone.EventInPlay), out var z3, out _, out var p3);
         Check(!Offers(cherry, z3, p3), "Cherry Blossom Festival bars it");
-        var noFarm = Rig((st, _) => { foreach (var c in st.Cards.Values.Where(c => c.OwnerId == 0 && CardCatalog.Get(c.DefinitionId).Type == CardType.Holding
-                && ((CardCatalog.Get(c.DefinitionId).Keywords ?? []).Contains("Mine") || (CardCatalog.Get(c.DefinitionId).Keywords ?? []).Contains("Farm")))) c.Zone = Zone.DynastyDiscard; }, out var z4, out _, out var p4);
+        var noFarm = Rig((st, _) =>
+        {
+            foreach (var c in st.Cards.Values.Where(c => c.OwnerId == 0 && CardCatalog.Get(c.DefinitionId).Type == CardType.Holding
+                && ((CardCatalog.Get(c.DefinitionId).Keywords ?? []).Contains("Mine") || (CardCatalog.Get(c.DefinitionId).Keywords ?? []).Contains("Farm")))) c.Zone = Zone.DynastyDiscard;
+        }, out var z4, out _, out var p4);
         Check(!Offers(noFarm, z4, p4), "no Mine or Farm: no option");
         // Two of his options in one payment are refused.
         var two = Rig((st, _) => Add(st, PlatinumMine, 0, Zone.Home, bowed: true), out var z5, out var farm5, out var p5);
