@@ -3000,6 +3000,7 @@ public sealed partial class MatchEngine
     // behavior (it discards whatever card currently sits at province.CardId itself) handles discarding
     // Harsh Choices for free on the destroy branch; the decline branch discards/refills it manually,
     // the same as ResolveEvent's own default case.
+    private const int HarshChoicesDraw = 3; // "destroy this province to draw 3 cards" (the view and the resolution share it)
     private void ResolveHarshChoices(GameCommand command)
     {
         var pending = _state.PendingChoice!;
@@ -3014,7 +3015,7 @@ public sealed partial class MatchEngine
             DestroyProvince(player.Id, province);
             // Military defeat is immediate. Do not draw or reveal later Events after victory.
             if (_state.WinnerId is not null) return;
-            Draw(player); Draw(player); Draw(player);
+            for (var i = 0; i < HarshChoicesDraw; i++) Draw(player);
         }
         else
         {
