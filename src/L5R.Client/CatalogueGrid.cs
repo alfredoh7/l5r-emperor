@@ -83,7 +83,7 @@ public partial class CatalogueCardTile : Button
     private readonly CatalogueScans _scans;
     public CatalogueCardTile(CatalogueData.Card card, CatalogueScans scans)
     {
-        Card = card; _scans = scans; AccessibilityName = card.Name; AccessibilityDescription = card.Playable ? "Playable game version. Select to inspect." : "Reference card, not yet playable. Select to inspect."; Flat = true; Text = "";;
+        Card = card; _scans = scans; AccessibilityName = card.Name; AccessibilityDescription = card.Playable ? "Playable game version. Select to inspect." : "Reference card, not yet playable. Select to inspect."; Flat = true; Text = "";
         MouseDefaultCursorShape = CursorShape.PointingHand; TextureFilter = TextureFilterEnum.LinearWithMipmaps;
         foreach (var state in new[] { "normal", "hover", "pressed", "focus" }) AddThemeStyleboxOverride(state, new StyleBoxEmpty());
         MouseEntered += QueueRedraw; MouseExited += QueueRedraw; FocusEntered += QueueRedraw; FocusExited += QueueRedraw;
