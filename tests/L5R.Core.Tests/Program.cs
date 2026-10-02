@@ -9952,6 +9952,26 @@ static void BatchDPrimitives()
         Check(!e.State.Cards[recruit.Id].Bowed, "A fresh start, the same reset a card returning to a deck gets");
     }
     {
+        // The province prompt must not reveal a face-down card's name; a face-up card is still named.
+        var s = StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId = 0; s.PriorityPlayerId = 0;
+        var strat = Add(s, "oracle-l5r-9687", 0, Zone.Hand);
+        var recruit = Add(s, "training-nonhuman-personality", 0, Zone.Province, province: 1);
+        s.Players[0].Provinces[1].CardId = recruit.Id;
+        var hidden = Add(s, "oracle-l5r-9687", 0, Zone.Province, province: 2); hidden.FaceUp = false;
+        s.Players[0].Provinces[2].CardId = hidden.Id;
+        var shown = Add(s, "training-nonhuman-personality", 0, Zone.Province, province: 3); shown.FaceUp = true;
+        s.Players[0].Provinces[3].CardId = shown.Id;
+        s.Players[1].Provinces[0].Strength = 0;
+        var enemy = Add(s, "training-nonhuman-personality", 1, Zone.Battlefield, province: 0);
+        enemy.Modifiers = [new("test-fixture", "test-fixture", "Force", -2)];
+        var e = MatchEngine.FromTestState(s);
+        Accept(e, new GameCommand("useAbility", 0, e.Version, CardId: strat.Id, TargetId: recruit.Id, AbilityId: "your-clan-needs-you"));
+        Resolve(e);
+        var labels = e.QueryActions(0).Where(a => a.Type == "chooseYourClanNeedsYouProvince").ToDictionary(a => a.Command!.Province!.Value, a => a.Label);
+        Check(!labels[2].Contains("Your Clan Needs You!"), "A face-down card's name is not revealed by the province prompt");
+        Check(labels[3].Contains("(discarding ") && !labels[3].Contains("face-down"), "A face-up card is still named");
+    }
+    {
         var s = StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId = 0; s.PriorityPlayerId = 0;
         var strat = Add(s, "oracle-l5r-9687", 0, Zone.Hand);
         var recruit = Add(s, "training-nonhuman-personality", 0, Zone.Province, province: 1);

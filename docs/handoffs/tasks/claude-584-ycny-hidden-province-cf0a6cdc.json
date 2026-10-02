@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Your Clan Needs You! province prompt no longer names a face-down province card (hidden-information leak); face-up cards are still named. Rules-side fix in Core's action labels (MatchQueries) plus a regression test; no client change.",
+  "validation": "dotnet run --project tests/L5R.Core.Tests: all pass; bash tools/check.sh --skip-client: All requested checks passed",
+  "remaining": "None; ready for review.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/584",
+  "branch": "claude/584-ycny-hidden-province",
+  "updated": "2026-10-02T21:46:12.001224+00:00"
+}
