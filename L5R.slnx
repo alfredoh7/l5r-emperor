@@ -10,5 +10,6 @@
     <Project Path="tests/L5R.AI.Tests/L5R.AI.Tests.csproj" />
     <Project Path="tests/L5R.Server.Tests/L5R.Server.Tests.csproj" />
     <Project Path="tests/L5R.Client.Transport.Tests/L5R.Client.Transport.Tests.csproj" />
+    <Project Path="tests/L5R.Client.Collection.Tests/L5R.Client.Collection.Tests.csproj" />
   </Folder>
 </Solution>

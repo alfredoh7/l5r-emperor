@@ -46,7 +46,7 @@ public static class DeckSkin
             ContentMarginBottom = 16
         };
     }
-    // A fixed, tiny key space (7 kinds ever passed) and nothing a caller does to the returned Texture2D mutates
+    // A small fixed key space, and nothing a caller does to the returned Texture2D mutates
     // it (only ever assigned to an Icon/Texture property) -- memoized instead of re-rasterizing the SVG on
     // every call, unlike Plate() below, whose StyleBoxTexture result IS mutated by some callers (ModulateColor,
     // ExpandMarginTop, content margins), so caching that would leak one caller's mutation into every other holder.
@@ -60,6 +60,7 @@ public static class DeckSkin
             "knob" => "<circle cx='10' cy='10' r='6' fill='#efe9dc' stroke='#ac9062' stroke-width='1'/>",
             "arrow" => "<path d='M5 8 L10 13 L15 8 Z' fill='#ddbd79'/>",
             "checked" => "<rect x='2' y='2' width='16' height='16' rx='2' fill='#ddbd79' stroke='#ffe4a4'/><path d='M5 10 L9 14 L15 6' fill='none' stroke='#241d12' stroke-width='2'/>",
+            "tick" => "<path d='M5 10 L9 14 L15 6' fill='none' stroke='#f2e7cf' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/>",
             "radio" => "<circle cx='10' cy='10' r='8' fill='#11191b' stroke='#eacb86' stroke-width='1.5'/>",
             "selected" => "<circle cx='10' cy='10' r='8' fill='#d4af62' stroke='#ffe6a9' stroke-width='1.5'/><circle cx='10' cy='10' r='4' fill='#172126'/>",
             _ => "<rect x='2' y='2' width='16' height='16' rx='2' fill='#0a1519' stroke='#ddbd79' stroke-width='1.5'/>"

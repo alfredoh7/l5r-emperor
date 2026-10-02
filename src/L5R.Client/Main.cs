@@ -88,6 +88,11 @@ public partial class Main : Node
         { SetProcessInput(false); AddChild(new BattleEscalationReview(_capturePath)); SetProcess(false); return; }
         if (_captureMode == "threshold-reference" && _capturePath is not null)
         { SetProcessInput(false); SetProcessUnhandledInput(false); SetProcessUnhandledKeyInput(false); AddChild(new ThresholdArtReview(_capturePath)); SetProcess(false); return; }
+        if (_captureMode is "catalogue-filters-review" or "deck-filters-review" or "my-collection-review" or "deck-collection-review" || OS.GetCmdlineUserArgs().Any(a => a is "--catalogue-filters-review" or "--deck-filters-review" or "--my-collection-review" or "--deck-collection-review"))
+        {
+            SetProcessInput(false); SetProcessUnhandledInput(false); SetProcessUnhandledKeyInput(false); SetProcess(false);
+            var review = new CatalogueControlsReview(); AddChild(review); review.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.FullRect); return;
+        }
         LoadSeat();
         _table = new TableArtStage { ReviewMode = false }; AddChild(_table);
         BuildShell();
