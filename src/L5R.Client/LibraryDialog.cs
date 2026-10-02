@@ -24,6 +24,7 @@ public partial class CatalogueScreen : Control
     public CatalogueData Data { get; } = new();
     public CatalogueScans Scans { get; } = new();
     public CatalogueGrid Grid { get; private set; } = null!;
+    public CardScanHover Hover { get; private set; } = null!;
     public LineEdit Search { get; private set; } = null!;
     public Rect2 InspectorRect => _detail.GetGlobalRect();
     public string SelectedId => _selected?.Id ?? "";
@@ -48,6 +49,7 @@ public partial class CatalogueScreen : Control
         _backdrop = CatalogueArt.Backdrop(); AddChild(_backdrop); _backdrop.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
         AddChild(_canvas); _canvas.AddChild(_header);
         Grid = new CatalogueGrid(Scans); _canvas.AddChild(Grid); Grid.Selected = SelectCard;
+        Hover = new CardScanHover(Scans); AddChild(Hover); Hover.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect); Grid.Hover = Hover;
         _canvas.AddChild(_detail); _detailFrame = CatalogueArt.Backdrop(); _detail.AddChild(_detailFrame); _detailFrame.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
         _detail.Visible = false;
         _back = CatalogueArt.Button("‹  Back", () => Closed?.Invoke()); Put(_header, _back, 28, 17, 130, 44); _back.AddThemeStyleboxOverride("normal", new StyleBoxEmpty());
@@ -68,7 +70,7 @@ public partial class CatalogueScreen : Control
         Browser = new CatalogueBrowserBar(Data, ["All", "Dynasty", "Fate", "Strongholds"]); _canvas.AddChild(Browser); Search = Browser.Search;
         Browser.EditCollection += () => MyCollection.Show(this, Data, Scans, Browser);
         Browser.Changed += ApplyFilter; Browser.PopupBounds = () => Grid.GetGlobalRect();
-        Browser.CardSizeChanged += width => { Grid.CardWidth = width; Grid.LayoutCards(); };
+        Browser.CardSizeChanged += width => { Hover.Dismiss(); Grid.CardWidth = width; Grid.LayoutCards(); };
         Browser.CardSize.DragStarted += Grid.BeginCardResize; Browser.CardSize.DragEnded += _ => Grid.EndCardResize();
         Grid.CardWidth = (float)Browser.CardSize.Value;
         _count = CatalogueArt.Label("", 16); _canvas.AddChild(_count);
