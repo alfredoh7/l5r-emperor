@@ -70,7 +70,7 @@ public partial class Main
             _inspector.AddChild(picker);
             if (command.TargetId is null) _inspector.AddChild(Palette.Wrapped("Choose a target to continue.", 15, Palette.Error));
         }
-        var names =string.Join(" and ", MovementMoverIds().Select(id => FindCard(id)).OfType<CardView>().Select(ShortName));
+        var names = string.Join(" and ", MovementMoverIds().Select(id => FindCard(id)).OfType<CardView>().Select(ShortName));
         foreach (var province in action.Provinces ?? [])
         {
             var selected = command.Province == province;
