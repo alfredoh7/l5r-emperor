@@ -68,8 +68,9 @@ public partial class Main
                 picker.AddItem(FindCard(id) is { } card ? $"{View.Players[card.OwnerId].Clan} · {ShortName(card)}" : "Card unavailable");
             picker.Selected = Array.IndexOf(targets, command.TargetId); picker.ItemSelected += i => { if (DecisionCanSubmit) ChooseTarget(targets[(int)i]); };
             _inspector.AddChild(picker);
+            if (command.TargetId is null) _inspector.AddChild(Palette.Wrapped("Choose a target to continue.", 15, Palette.Error));
         }
-        var names = string.Join(" and ", MovementMoverIds().Select(id => FindCard(id)).OfType<CardView>().Select(ShortName));
+        var names =string.Join(" and ", MovementMoverIds().Select(id => FindCard(id)).OfType<CardView>().Select(ShortName));
         foreach (var province in action.Provinces ?? [])
         {
             var selected = command.Province == province;
@@ -89,7 +90,8 @@ public partial class Main
         }
         var (required, ready) = RenderGoldPanel(action);
         AddConfirm("Confirm movement", required, ready, () => command with { SourceIds = required > 0 ? _sources.ToArray() : [] }, "Cancel movement",
-            action.Enabled && DecisionCanSubmit && command.Province is { } chosen && action.Provinces?.Contains(chosen) == true);
+            action.Enabled && DecisionCanSubmit && command.Province is { } chosen && action.Provinces?.Contains(chosen) == true
+            && (action.TargetIds is not { Length: > 0 } || command.TargetId is not null)); // issue #581: no default target, so the player picks one first
         return true;
     }
 }

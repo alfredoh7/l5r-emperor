@@ -637,9 +637,7 @@ public partial class Main : Node
     {
         if (_shownOpen) ToggleShownCards(false);
         if (!option.Enabled || _session.Busy || PresentationBusy) return;
-        if (!HasAttackTargets(option) && option.Type is "equip" or "playStrategy" or "useAbility" && option.Command is { CardIds: null, TargetId: null } command && option.TargetIds?.FirstOrDefault() is string target)
-            option = option with { Command = command with { TargetId = target } };
-        ResetDecisionSelection();
+        ResetDecisionSelection(); // the target stays unselected until the player picks one (issue #581): the client never chooses a legal target for them
         if (option.Movement is not null && option.Command is { } moveCommand) option = option with { Command = moveCommand with { Province = null } };
         _attackChoice = AttackChoice.Unselected;
         if (HasAttackTargets(option)) option = option with { Command = option.Command! with { TargetId = null, Province = null } };
