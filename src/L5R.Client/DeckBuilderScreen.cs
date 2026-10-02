@@ -28,7 +28,7 @@ public partial class DeckBuilderScreen : Control
     public bool Dirty { get; private set; }
     public string Page { get; private set; } = "decks";
     public string Family { get; private set; } = "Dynasty";
-    private readonly Control _canvas = new(), _header = new(), _setupStrip = new(), _left = new(), _toolbar = new(), _setupTools = new(), _deckFooter = new(), _library = new(), _overlay = new(), _hover = new();
+    private readonly Control _canvas = new(), _header = new(), _setupStrip = new(), _left = new(), _toolbar = new(), _setupTools = new(), _deckFooter = new(), _library = new(), _overlay = new(), _viewStrip = new();
     private readonly HashSet<string> _compare = [];
     private Dictionary<string, CatalogueData.Card> _byId = [];
     // The catalogue-wide DeckCardInfo materialization (each one running per-card ability lookups, DeckWorkshop.cs)
@@ -47,7 +47,12 @@ public partial class DeckBuilderScreen : Control
     private float _w = 1672, _h = 941;
     private const float SidebarWidth = 620, MatLeft = 656;
     private bool _building, _list = true;
-    private int _hoverTicket;
+    private CardScanHover _scanHover = null!;
+    private Button _viewAll = null!, _viewDynasty = null!, _viewFate = null!;
+    private bool _deckOnly;
+    /// <summary>True while the collection pane lists only cards already in the current deck's active family.</summary>
+    public bool DeckViewOnly => _deckOnly;
+    public Control ViewStrip => _viewStrip;
     private bool _previousEmbed;
     private Control _lines = new() { MouseFilter = MouseFilterEnum.Ignore };
     private CatalogueData.Card[] _inspectionCards = [];
@@ -62,7 +67,7 @@ public partial class DeckBuilderScreen : Control
         Store = new DeckFileStore(StorageDirectory ?? ProjectSettings.GlobalizePath("user://decks"));
         var bg = new TextureRect { Texture = GD.Load<Texture2D>("res://Art/DeckBuilder/work-mat.png"), ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize, StretchMode = TextureRect.StretchModeEnum.Scale, MouseFilter = MouseFilterEnum.Ignore }; AddChild(bg); bg.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
         AddChild(_lines); _lines.Draw += DrawFrames;
-        AddChild(_canvas); foreach (var c in new[] { _header, _setupStrip, _left, _toolbar, _setupTools, _deckFooter, _library }) _canvas.AddChild(c);
+        AddChild(_canvas); foreach (var c in new[] { _header, _setupStrip, _left, _toolbar, _setupTools, _deckFooter, _library, _viewStrip }) _canvas.AddChild(c);
         Browser = new CatalogueBrowserBar(Data, ["Dynasty", "Fate"], "Dynasty", NotSetupOnly); _canvas.AddChild(Browser); Search = Browser.Search; _sort = Browser.SortControl;
         Browser.EditCollection += () => { HideHover(); MyCollection.Show(this, Data, Scans, Browser); };
         Browser.Changed += ApplyFilters;
@@ -76,8 +81,9 @@ public partial class DeckBuilderScreen : Control
         Browser.CardSizeChanged += width => { Collection.CardWidth = width; Mat.CardWidth = width; HideHover(); Collection.Reposition(); Mat.Reposition(); };
         _status = CatalogueArt.Label("", 17); _canvas.AddChild(_status); _count = CatalogueArt.Label("", 17); _canvas.AddChild(_count);
         _empty = CatalogueArt.Label("", 24); _empty.HorizontalAlignment = HorizontalAlignment.Center; _canvas.AddChild(_empty);
-        BuildHeader(); BuildCollectionControls(); BuildToolbar();
-        _canvas.AddChild(_overlay); _overlay.Visible = false; _canvas.AddChild(_hover); _hover.Visible = false; _hover.MouseFilter = MouseFilterEnum.Ignore;
+        BuildHeader(); BuildCollectionControls(); BuildToolbar(); BuildViewStrip();
+        _canvas.AddChild(_overlay); _overlay.Visible = false;
+        _scanHover = new CardScanHover(Scans); AddChild(_scanHover); _scanHover.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
         Resized += Fit; TreeExiting += Scans.Close; TreeExiting += () => GetViewport().GuiEmbedSubwindows = _previousEmbed; Fit(); ShowDecks();
     }
     private DeckWorkshop NewDraft() => new(_pool);
@@ -138,7 +144,7 @@ public partial class DeckBuilderScreen : Control
         if (_setupSlot.Length == 0)
         {
             var right = _w - 470;
-            Place(Collection, 20, top, right - 40, _h - top - 52);
+            Place(_viewStrip, 20, top, right - 40, 38); Place(Collection, 20, top + 42, right - 40, _h - top - 94);
             Place(_setupStrip, right, top, 442, 143);
             Place(_toolbar, right, top + 143, 442, 40);
             Place(_deckFooter, right, _h - 132, 442, 82);
@@ -202,11 +208,29 @@ public partial class DeckBuilderScreen : Control
         }
         UpdateStatus();
     }
+    private void BuildViewStrip()
+    {
+        _viewStrip.Name = "CollectionViewStrip"; _viewStrip.Theme = CatalogueArt.Theme();
+        _viewAll = CatalogueArt.Button("", () => { _deckOnly = false; ApplyFilters(); UpdateStatus(); }); _viewAll.Name = "ViewAllCards";
+        _viewDynasty = CatalogueArt.Button("", () => { _deckOnly = true; SetFamily("Dynasty"); }); _viewDynasty.Name = "ViewDynastyDeck";
+        _viewFate = CatalogueArt.Button("", () => { _deckOnly = true; SetFamily("Fate"); }); _viewFate.Name = "ViewFateCards";
+        foreach (var b in new[] { _viewAll, _viewDynasty, _viewFate }) { b.ToggleMode = true; b.ClipText = true; b.AddThemeFontSizeOverride("font_size", 19); b.FocusMode = FocusModeEnum.All; _viewStrip.AddChild(b); }
+        _viewAll.TooltipText = "Browse every card that matches the filters."; _viewDynasty.TooltipText = "Show only the Dynasty cards in this deck."; _viewFate.TooltipText = "Show only the Fate cards in this deck.";
+        _viewStrip.Resized += () => { var w = _viewStrip.Size.X; var each = Math.Min(300f, (w - 16) / 3); Place(_viewAll, 0, 0, each, 36); Place(_viewDynasty, each + 8, 0, each, 36); Place(_viewFate, 2 * (each + 8), 0, each, 36); };
+    }
+    private void UpdateViewStrip(DeckReview r)
+    {
+        if (_viewAll is null) return;
+        var all = Browser.Results.Length;
+        _viewAll.Text = $"All Cards ({all:N0} shown)"; _viewDynasty.Text = $"Dynasty Deck ({r.Dynasty} cards)"; _viewFate.Text = $"Fate Cards ({r.Fate} cards)";
+        _viewAll.SetPressedNoSignal(!_deckOnly); _viewDynasty.SetPressedNoSignal(_deckOnly && Family == "Dynasty"); _viewFate.SetPressedNoSignal(_deckOnly && Family == "Fate");
+        CatalogueArt.Selected(_viewAll, !_deckOnly); CatalogueArt.Selected(_viewDynasty, _deckOnly && Family == "Dynasty"); CatalogueArt.Selected(_viewFate, _deckOnly && Family == "Fate");
+    }
     public void SetFamily(string family) { Family = family; Browser.SetFamily(family); SetSetup(""); ApplyFilters(); RefreshMat(true); }
     public void SetSetup(string slot)
     {
         _setupSlot = slot; HideHover(); Browser.CloseMenus(); Palette.Clear(_left); BuildCollectionControls();
-        _toolbar.Visible = slot.Length == 0; _deckFooter.Visible = slot.Length == 0; _setupTools.Visible = slot.Length > 0; Collection.Visible = slot.Length == 0;
+        _toolbar.Visible = slot.Length == 0; _deckFooter.Visible = slot.Length == 0; _setupTools.Visible = slot.Length > 0; Collection.Visible = slot.Length == 0; _viewStrip.Visible = slot.Length == 0 && Page == "editor";
         if (slot.Length > 0) BuildSetupChoices(); else { ApplyFilters(); RefreshMat(true); }
         Fit(); UpdateStatus();
     }
@@ -238,7 +262,11 @@ public partial class DeckBuilderScreen : Control
     {
         if (_building || Page == "decks" || _setupSlot.Length > 0) return;
         var changedFamily = Family != Browser.Family; Family = Browser.Family;
-        Browser.Refresh(false); Collection.Reset(Browser.Results, changedFamily || !Collection.Cards.SequenceEqual(Browser.Results)); _count.Text = $"{Collection.Cards.Length:N0} collection results · Click a full card to inspect";
+        Browser.Refresh(false);
+        // The deck views list the current deck's cards among the filtered results; a card removed to zero copies stays until the next refresh so rapid clicks never shift tiles under the pointer.
+        var results = _deckOnly ? Browser.Results.Where(c => Draft.Count(c.Id) > 0).ToArray() : Browser.Results;
+        Collection.Reset(results, changedFamily || !Collection.Cards.SequenceEqual(results));
+        _count.Text = _deckOnly ? $"{results.Length:N0} {Family} deck cards shown · Click a full card to inspect" : $"{Collection.Cards.Length:N0} collection results · Click a full card to inspect";
         RefreshMat(changedFamily); UpdateStatus();
     }
     public void RefreshMat(bool reset = false)
@@ -263,6 +291,7 @@ public partial class DeckBuilderScreen : Control
             _fate.AddThemeStyleboxOverride("normal", DeckSkin.Plate(3));
             _fate.AddThemeColorOverride("font_color", Family == "Fate" ? new Color("ffebae") : DeckSkin.Text);
         }
+        UpdateViewStrip(r);
         _status.Text = r.Warnings.Length > 0 ? $"{r.Warnings.Length} deck checks to review  ·  Draft can still be saved" : "Basic checks passed  ·  Draft can be saved";
         _status.TooltipText = string.Join("\n", r.Warnings); _status.MouseFilter = MouseFilterEnum.Stop;
         _dirtyLabel.Text = Dirty ? "Unsaved changes" : "Saved locally"; _compareButton.Text = $"Compare ({_compare.Count})"; _compareButton.Disabled = _compare.Count == 0;

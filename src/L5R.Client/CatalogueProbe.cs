@@ -93,6 +93,55 @@ public partial class CatalogueProbe : Node
             var before = _screen.Grid.ScrollVertical; var other = _screen.Grid.Cards.First(); _screen.SelectCard(other); await Wait(.2); PressKey(Godot.Key.Escape); await Wait(.3); Check(_screen.SelectedId == "", "Escape dismisses inspector");
             Check(Math.Abs(_screen.Grid.ScrollVertical - before) <= 2, "inspection restores exact scrolling position");
             Search("nonesuchzzzz"); await Wait(.3); await Capture("empty");
+            // Focus Value, Action Type and full-size hover (#580)
+            _screen.ResetFilters(); await Wait(.2); var browser = _screen.Browser;
+            Check(!browser.Focus.Trigger.Visible && !browser.Actions.Trigger.Visible, "Focus Value and Action Type stay hidden while browsing All");
+            Click(FindButton(b => b.Text == "Strongholds")); await Wait(.2); Check(!browser.Actions.Trigger.Visible, "Action Type is not offered for Strongholds");
+            Click(FindButton(b => b.Text == "Fate")); await Wait(.3);
+            Check(browser.Focus.Trigger.Visible && browser.Actions.Trigger.Visible, "Focus Value and Action Type appear for Fate cards");
+            Check(browser.Focus.Trigger.GetGlobalRect().End.Y <= _screen.Grid.GetGlobalRect().Position.Y && browser.Actions.Trigger.GetGlobalRect().End.Y <= _screen.Grid.GetGlobalRect().Position.Y, "Focus Value and Action Type sit inside the filter bar above the gallery");
+            var fate = _screen.Data.Filter(family: "Fate");
+            Click(browser.Focus.Trigger); await Wait(.3);
+            Check(Walk(_screen).OfType<CheckBox>().Where(c => c.IsVisibleInTree()).Select(c => c.Text).SequenceEqual(["0", "1", "2", "3", "4", "5"]), "Focus Value offers 0 through 5");
+            Activate(Walk(_screen).OfType<CheckBox>().First(c => c.IsVisibleInTree() && c.Text == "3")); await Wait(.3);
+            Check(_screen.Grid.Cards.Length > 0 && _screen.Grid.Cards.All(c => c.Focus == 3) && _screen.Grid.Cards.Length == fate.Count(c => c.Focus == 3), "Focus Value 3 matches exactly Fate cards with Focus 3");
+            Activate(Walk(_screen).OfType<CheckBox>().First(c => c.IsVisibleInTree() && c.Text == "5")); await Wait(.3);
+            Check(_screen.Grid.Cards.Length == fate.Count(c => c.Focus is 3 or 5), "Focus Value choices combine");
+            await Capture("focus-filter"); browser.CloseMenus(); await Wait(.2);
+            _screen.ResetFilters(); await Wait(.2); Click(FindButton(b => b.Text == "Fate")); await Wait(.3);
+            Click(browser.Actions.Trigger); await Wait(.3);
+            Check(Walk(_screen).OfType<CheckBox>().Where(c => c.IsVisibleInTree()).Select(c => c.Text).SequenceEqual(["Limited", "Open", "Battle", "Battle/Open", "Reaction", "None"]), "Action Type offers the six requested choices");
+            Activate(Walk(_screen).OfType<CheckBox>().First(c => c.IsVisibleInTree() && c.Text == "Battle")); await Wait(.3);
+            Check(_screen.Grid.Cards.Length > 0 && _screen.Grid.Cards.Length == fate.Count(c => c.Actions.Contains("Battle") || c.Actions.Contains("Battle/Open")), "Battle includes cards printing Battle/Open");
+            Check(_screen.Grid.Cards.Any(c => c.Actions.Contains("Battle/Open") && !c.Actions.Contains("Battle")), "Battle results include a Battle/Open-only card");
+            Activate(Walk(_screen).OfType<CheckBox>().First(c => c.IsVisibleInTree() && c.Text == "Battle/Open")); await Wait(.3);
+            Check(_screen.Grid.Cards.Select(c => c.Id).Distinct().Count() == _screen.Grid.Cards.Length, "a card appears once however many checked choices it satisfies");
+            Activate(Walk(_screen).OfType<CheckBox>().First(c => c.IsVisibleInTree() && c.Text == "Battle")); await Wait(.3);
+            Check(_screen.Grid.Cards.Length > 0 && _screen.Grid.Cards.All(c => c.Actions.Contains("Battle/Open")), "Battle/Open alone matches only cards printing Battle/Open");
+            Activate(Walk(_screen).OfType<CheckBox>().First(c => c.IsVisibleInTree() && c.Text == "Battle/Open")); await Wait(.3); Activate(Walk(_screen).OfType<CheckBox>().First(c => c.IsVisibleInTree() && c.Text == "None")); await Wait(.3);
+            Check(_screen.Grid.Cards.Length > 0 && _screen.Grid.Cards.All(c => c.Actions.Length == 0), "None matches only cards with no printed action");
+            await Capture("action-filter"); browser.CloseMenus(); await Wait(.2);
+            Click(FindButton(b => b.Text == "Dynasty")); await Wait(.3);
+            Check(!browser.Focus.Trigger.Visible && browser.Actions.Trigger.Visible && browser.Actions.Selected.Contains("None"), "Dynasty keeps Action Type, hides Focus Value");
+            foreach (var name in new[] { "Akodo Kisho", "Asako Moeru", "Remote Village", "Shinjo's Children", "Focus" })
+                Check(_screen.Data.Cards.Where(c => c.Name == name).All(c => c.Actions.Length == 0), name + " has no printed action");
+            Check(_screen.Grid.Cards.Any(c => c.Name == "Remote Village") && _screen.Grid.Cards.Any(c => c.Name == "Akodo Kisho"), "None filter lists Dynasty cards without printed actions");
+            Click(FindButton(b => b.Text == "All")); await Wait(.3);
+            Check(browser.Actions.Selected.Count == 0 && browser.ScopeNotice.Contains("Action Type"), "Action Type clears with an explanation when unavailable");
+            _screen.ResetFilters(); await Wait(.3);
+            var hoverCard = _screen.Grid.Cards[0]; var hoverTile = _screen.Grid.Tile(hoverCard.Id)!; var cardWidth = hoverTile.Size.X;
+            HoverOver(hoverTile); await Wait(1.2);
+            Check(_screen.Hover.Visible && _screen.Hover.Card?.Id == hoverCard.Id && _screen.Hover.Face.Size.X >= cardWidth * 1.5f - 1, "hover shows a scan at least 50% larger than the gallery face");
+            Check(Math.Abs(_screen.Hover.Face.Size.Y / _screen.Hover.Face.Size.X - 1.4f) < .01f && new Rect2(Vector2.Zero, GetViewport().GetVisibleRect().Size).Encloses(_screen.Hover.Face), "hover scan keeps card proportions inside the window");
+            Check(!_screen.Hover.Face.Intersects(hoverTile.GetGlobalRect().Grow(-1)), "hover scan does not cover the hovered card");
+            await Capture("hover-full-size");
+            Input.ParseInputEvent(new InputEventMouseMotion { Position = new Vector2(5, 5), GlobalPosition = new Vector2(5, 5) }); await Wait(.4);
+            Check(!_screen.Hover.Visible, "hover scan closes when the pointer leaves");
+            Check(_screen.Scans.LoadedFromPackCount > 0, "hover uses the local WebP pack");
+            _screen.Browser.CardSize.Value = 120; await Wait(.5); _screen.Grid.LayoutCards(); await Wait(.3);
+            HoverOver(_screen.Grid.Tile(_screen.Grid.Cards[0].Id)!); await Wait(1.2);
+            Check(_screen.Hover.Visible && _screen.Hover.Face.Size.X >= 120 * 1.5f, "smallest cards still enlarge");
+            _screen.Browser.CardSize.Value = 196; Input.ParseInputEvent(new InputEventMouseMotion { Position = new Vector2(5, 5), GlobalPosition = new Vector2(5, 5) }); await Wait(.3);
             _screen.ResetFilters(); Search("Akodo"); await Wait(.5); _screen.SelectCard(_screen.Data.Cards.First(c => c.Id == "oracle-l5r-229")); await Wait(.3);
             var window = GetWindow(); window.Size = new Vector2I(1280, 800); await Wait(.8); await Capture("compact");
             Click(FindButton(b => b.Text.StartsWith("Rules text"))); await Wait(.3); await Capture("rules");
@@ -126,6 +175,7 @@ public partial class CatalogueProbe : Node
     private async Task Capture(string name) { _screen.QueueRedraw(); await Wait(.1); RenderingServer.ForceDraw(); GD.Print("CAPTURE " + name); GetViewport().GetTexture().GetImage().SavePng(Path.Combine(_output, name + ".png")); }
     private void Search(string text) { _screen.Search.GrabFocus(); _screen.Search.SelectAll(); PressKey(Godot.Key.Backspace); foreach (var ch in text) { Input.ParseInputEvent(new InputEventKey { Unicode = ch, Keycode = (Godot.Key)char.ToUpperInvariant(ch), Pressed = true }); Input.ParseInputEvent(new InputEventKey { Unicode = ch, Keycode = (Godot.Key)char.ToUpperInvariant(ch), Pressed = false }); } }
     private static IEnumerable<Node> Walk(Node root) { foreach (var child in root.GetChildren()) { yield return child; foreach (var n in Walk(child)) yield return n; } }
+    private static void HoverOver(Control c) { var p = c.GetGlobalRect().GetCenter(); Input.ParseInputEvent(new InputEventMouseMotion { Position = p - new Vector2(3, 3), GlobalPosition = p - new Vector2(3, 3) }); Input.ParseInputEvent(new InputEventMouseMotion { Position = p, GlobalPosition = p }); }
     private Button FindButton(Func<Button, bool> predicate) => Walk(_screen).OfType<Button>().First(predicate);
     private static void Check(bool condition, string message) { if (!condition) throw new Exception(message); GD.Print("PASS " + message); }
     private static void Click(Control c) { var p = c.GetGlobalRect().GetCenter(); Input.ParseInputEvent(new InputEventMouseMotion { Position = p, GlobalPosition = p }); Input.ParseInputEvent(new InputEventMouseButton { Position = p, GlobalPosition = p, ButtonIndex = MouseButton.Left, Pressed = true }); Input.ParseInputEvent(new InputEventMouseButton { Position = p, GlobalPosition = p, ButtonIndex = MouseButton.Left, Pressed = false }); }

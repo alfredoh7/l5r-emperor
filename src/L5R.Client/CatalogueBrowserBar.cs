@@ -10,6 +10,11 @@ public partial class CatalogueBrowserBar : Control
     public HSlider CardSize { get; }
     public FilterChecklist Types { get; }
     public FilterChecklist Keywords { get; }
+    /// <summary>Focus Value, offered for Fate cards only.</summary>
+    public FilterChecklist Focus { get; }
+    /// <summary>Printed action type, offered for Dynasty and Fate cards.</summary>
+    public FilterChecklist Actions { get; }
+    public bool ExtraRow => Family is "Dynasty" or "Fate";
     public HashSet<string> Clans { get; } = [];
     public string Family { get; private set; }
     public OptionButton SortControl => _sort;
@@ -22,7 +27,7 @@ public partial class CatalogueBrowserBar : Control
     public event Action? EditCollection;
     public OptionButton CollectionControl { get; }
     public string ScopeNotice => _notice.Text;
-    public Func<Rect2>? PopupBounds { get => Types.PopupBounds; set { Types.PopupBounds = value; Keywords.PopupBounds = value; } }
+    public Func<Rect2>? PopupBounds { get => Types.PopupBounds; set { Types.PopupBounds = value; Keywords.PopupBounds = value; Focus.PopupBounds = value; Actions.PopupBounds = value; } }
     public float BarHeight => _families.Count == 2 ? 206 : 254;
     private static readonly string[] ClanNames = ["Crab", "Crane", "Dragon", "Lion", "Mantis", "Phoenix", "Scorpion", "Spider", "Unicorn", "Unaligned"];
     private readonly CatalogueData _data;
@@ -61,8 +66,13 @@ public partial class CatalogueBrowserBar : Control
         _alphabetical = CatalogueArt.Button("A–Z", () => { _mostCommon = false; Refresh(); }); _common = CatalogueArt.Button("Most common", () => { _mostCommon = true; Refresh(); });
         order.AddChild(_alphabetical); order.AddChild(_common);
         Keywords = new FilterChecklist(this, Theme, "Keywords", extraHeader: order); AddChild(Keywords.Trigger); Keywords.Changed += () => Refresh();
-        Types.Opening += () => { if (Keywords.IsOpen) Keywords.Close(); };
-        Keywords.Opening += () => { if (Types.IsOpen) Types.Close(); };
+        Focus = new FilterChecklist(this, Theme, "Focus Value", new Vector2I(300, 440)); AddChild(Focus.Trigger); Focus.Changed += () => Refresh();
+        Focus.SetOptions(["0", "1", "2", "3", "4", "5"]);
+        Actions = new FilterChecklist(this, Theme, "Action Type", new Vector2I(320, 440)); AddChild(Actions.Trigger); Actions.Changed += () => Refresh();
+        Actions.SetOptions(CatalogueActions.Choices);
+        Actions.Trigger.TooltipText = "Bold actions printed on the card. Battle and Open include Battle/Open cards; Battle/Open matches only cards printing it; None has no printed action.";
+        var menus = new[] { Types, Keywords, Focus, Actions };
+        foreach (var menu in menus) { var self = menu; self.Opening += () => { foreach (var other in menus) if (other != self && other.IsOpen) other.Close(); }; }
         _set = AddOption("Printing set", ["Any set", .. CatalogueData.SetOrder, "Other"]);
         _set.TooltipText = "Filter by a printing set. Unknown source labels are grouped as Other.";
         _gold = AddOption("Gold cost", ["Any Gold", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10+"]);
@@ -100,7 +110,7 @@ public partial class CatalogueBrowserBar : Control
     }
     public void Reset()
     {
-        _refreshing = true; Clans.Clear(); Types.Clear(); Keywords.Clear(); Search.Text = ""; Family = _initialFamily; PlayableOnly = false; Ownership = OwnershipFilter.All; CollectionControl.Select(0); _set.Select(0); _gold.Select(0);
+        _refreshing = true; Clans.Clear(); Types.Clear(); Keywords.Clear(); Focus.Clear(); Actions.Clear(); Search.Text = ""; Family = _initialFamily; PlayableOnly = false; Ownership = OwnershipFilter.All; CollectionControl.Select(0); _set.Select(0); _gold.Select(0);
         _refreshing = false; _notice.Text = ""; Refresh();
     }
     public void Refresh(bool notify = true)
@@ -109,7 +119,10 @@ public partial class CatalogueBrowserBar : Control
         try
         {
             var familyCards = _data.Filter(family: Family).Where(_eligible);
-            var removed = Types.SetOptions(familyCards.SelectMany(c => c.Types).Distinct().Order(StringComparer.OrdinalIgnoreCase).ToArray()).ToList();
+            var removed = new List<string>();
+            if (Family != "Fate" && Focus.Selected.Count > 0) { removed.Add("Focus Value"); Focus.Clear(); }
+            if (!ExtraRow && Actions.Selected.Count > 0) { removed.Add("Action Type"); Actions.Clear(); }
+            removed.AddRange(Types.SetOptions(familyCards.SelectMany(c => c.Types).Distinct().Order(StringComparer.OrdinalIgnoreCase).ToArray()));
             CardsWithoutOwnership = FilterWithoutKeywords(false, true).Where(c => Keywords.Selected.Count == 0 || Keywords.Selected.Any(c.Keywords.Contains)).ToArray();
             var scoped = FilterWithoutKeywords().ToArray();
             var counts = scoped.SelectMany(c => c.Keywords).GroupBy(k => k).ToDictionary(g => g.Key, g => g.Count());
@@ -130,6 +143,7 @@ public partial class CatalogueBrowserBar : Control
             }
             foreach (var (family, button) in _families) SelectedStyle(button, Family == family);
             SelectedStyle(_allCards, !PlayableOnly); SelectedStyle(_playable, PlayableOnly); SelectedStyle(_alphabetical, !_mostCommon); SelectedStyle(_common, _mostCommon);
+            Focus.Trigger.Visible = Family == "Fate"; Actions.Trigger.Visible = ExtraRow;
             BuildTags(); Fit();
         }
         finally { _refreshing = false; }
@@ -146,6 +160,8 @@ public partial class CatalogueBrowserBar : Control
             var set = _set.GetItemText(_set.Selected);
             cards = cards.Where(c => c.Printings.Any(p => p.Set != "Game printing" && (set == "Other" ? !CatalogueData.SetOrder.Contains(p.Set) : p.Set == set)));
         }
+        if (Family == "Fate" && Focus.Selected.Count > 0) cards = cards.Where(c => c.Focus is { } focus && Focus.Selected.Contains(focus.ToString()));
+        if (ExtraRow && Actions.Selected.Count > 0) cards = cards.Where(c => CatalogueActions.MatchesAny(c.Actions, Actions.Selected));
         return ownership ? cards.Where(c => MyCollection.Store.Includes(c.Id, Ownership)) : cards;
     }
     private void BuildTags()
@@ -160,6 +176,8 @@ public partial class CatalogueBrowserBar : Control
         foreach (var clan in Clans.Order(StringComparer.OrdinalIgnoreCase)) Tag(clan, () => { Clans.Remove(clan); Refresh(); });
         foreach (var type in Types.Selected.Order(StringComparer.OrdinalIgnoreCase)) Tag(type, () => Types.Remove(type));
         foreach (var keyword in Keywords.Selected.Order(StringComparer.OrdinalIgnoreCase)) Tag(keyword, () => Keywords.Remove(keyword));
+        foreach (var focus in Focus.Selected.Order()) Tag("Focus " + focus, () => Focus.Remove(focus));
+        foreach (var action in CatalogueActions.Choices.Where(Actions.Selected.Contains)) Tag("Action " + action, () => Actions.Remove(action));
         if (_set.Selected > 0) Tag(_set.Text, () => { _set.Select(0); Refresh(); });
         if (_gold.Selected > 0) Tag("Gold " + _gold.Text, () => { _gold.Select(0); Refresh(); });
         if (_tags.GetChildCount() == 0) { var hint = CatalogueArt.Label("Any clan · Any type · Any keyword", 16); hint.CustomMinimumSize = new Vector2(360, 30); _tags.AddChild(hint); }
@@ -177,6 +195,8 @@ public partial class CatalogueBrowserBar : Control
         }
         Place(_selectAll, w - 215, 14, 100, 38); Place(_deselectAll, w - 109, 14, 109, 38);
         var compact = _families.Count == 2; var searchY = compact ? 80 : 84; var filterY = compact ? 122 : 150; var tagsY = compact ? 166 : 204;
+        // Focus Value and Action Type lead the tag row, so offering them never changes the bar's height.
+        var tagX = 0; if (ExtraRow) { tagX = 190 + 10; if (Focus.Trigger.Visible) tagX += 176 + 10; }
         var familyWidth = _families.Count == 4 ? 400 : 230;
         Place(Search, 0, searchY, w - familyWidth - 435, compact ? 40 : 52);
         Place(CollectionControl, w - familyWidth - 425, searchY, 220, compact ? 40 : 52); Place(EditCollectionButton, w - familyWidth - 195, searchY, 183, compact ? 40 : 52);
@@ -185,8 +205,10 @@ public partial class CatalogueBrowserBar : Control
         Place(Types.Trigger, 0, filterY, 174, compact ? 38 : 44); Place(Keywords.Trigger, 184, filterY, 192, compact ? 38 : 44); Place(_set, 386, filterY, 245, compact ? 38 : 44); Place(_gold, 641, filterY, 140, compact ? 38 : 44);
         Place(_allCards, 799, filterY, 184, compact ? 38 : 44); Place(_playable, 993, filterY, 166, compact ? 38 : 44);
         Place(_count, compact ? 1173 : w - 320, compact ? filterY + 3 : tagsY + 5, compact ? Math.Max(130, w - 1173) : 320, 32);
-        Place(_tagScroll, 0, tagsY, w - 655, compact ? 38 : 44); Place(_reset, w - 644, tagsY, 124, compact ? 38 : 44);
+        Place(_tagScroll, tagX, tagsY, Math.Max(80, w - 655 - tagX), compact ? 38 : 44); Place(_reset, w - 644, tagsY, 124, compact ? 38 : 44);
         Place(_sort, w - 506, tagsY, 170, compact ? 38 : 44); Place(_sizeLabel, w - 320, compact ? tagsY + 5 : filterY + 12, 78, 25); Place(CardSize, w - 238, compact ? tagsY + 6 : filterY + 13, 230, 24);
+        if (ExtraRow) Place(Actions.Trigger, 0, tagsY, 190, compact ? 38 : 44);
+        if (Focus.Trigger.Visible) Place(Focus.Trigger, 200, tagsY, 176, compact ? 38 : 44);
         Place(_notice, 0, compact ? 204 : 248, w, compact ? 18 : 20);
         QueueRedraw();
     }

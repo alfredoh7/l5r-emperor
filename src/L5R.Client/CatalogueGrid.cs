@@ -20,13 +20,15 @@ public partial class CatalogueGrid : ScrollContainer
     }
     public void EndCardResize() => _resizeAnchor = null;
     public Action<CatalogueData.Card>? Selected;
+    /// <summary>Optional full-size scan preview shown while a card face is hovered or focused.</summary>
+    public CardScanHover? Hover { get; set; }
     public float CardWidth { get; set; } = 230;
     public int VisibleTileCount => _tiles.Count;
     public CatalogueData.Card[] Cards => _cards;
     public CatalogueGrid(CatalogueScans scans)
     {
         _scans = scans; FocusMode = FocusModeEnum.All; ClipContents = true; HorizontalScrollMode = ScrollMode.Disabled; VerticalScrollMode = ScrollMode.Auto;
-        AddChild(_sheet); Resized += LayoutCards; GetVScrollBar().ValueChanged += _ => Refresh();
+        AddChild(_sheet); Resized += LayoutCards; GetVScrollBar().ValueChanged += _ => { Hover?.Dismiss(); Refresh(); };
         _scans.Changed += RedrawCards; MyCollection.Store.Changed += RedrawCards;
         TreeExiting += () => { _scans.Changed -= RedrawCards; MyCollection.Store.Changed -= RedrawCards; };
     }
@@ -57,7 +59,7 @@ public partial class CatalogueGrid : ScrollContainer
         {
             if (!_tiles.TryGetValue(i, out var tile))
             {
-                var card = _cards[i]; tile = new CatalogueCardTile(card, _scans); tile.Pressed += () => Selected?.Invoke(card); _sheet.AddChild(tile); _tiles[i] = tile;
+                var card = _cards[i]; tile = new CatalogueCardTile(card, _scans); tile.Pressed += () => { Hover?.Dismiss(); Selected?.Invoke(card); }; Hover?.Track(tile, () => card); _sheet.AddChild(tile); _tiles[i] = tile;
             }
             tile.Position = new Vector2(i % _columns * _cellWidth + (_cellWidth - _cardWidth) / 2, i / _columns * _rowHeight + 7);
             tile.Size = new Vector2(_cardWidth, _rowHeight - 12); tile.Chosen = tile.Card.Id == _selected; tile.QueueRedraw();
@@ -81,7 +83,7 @@ public partial class CatalogueCardTile : Button
     private readonly CatalogueScans _scans;
     public CatalogueCardTile(CatalogueData.Card card, CatalogueScans scans)
     {
-        Card = card; _scans = scans; AccessibilityName = card.Name; AccessibilityDescription = card.Playable ? "Playable game version. Select to inspect." : "Reference card, not yet playable. Select to inspect."; Flat = true; Text = ""; TooltipText = card.Name + " · " + string.Join(" / ", card.Types) + "\n" + (card.Playable ? "Playable · game printing" : "Not yet playable");
+        Card = card; _scans = scans; AccessibilityName = card.Name; AccessibilityDescription = card.Playable ? "Playable game version. Select to inspect." : "Reference card, not yet playable. Select to inspect."; Flat = true; Text = "";;
         MouseDefaultCursorShape = CursorShape.PointingHand; TextureFilter = TextureFilterEnum.LinearWithMipmaps;
         foreach (var state in new[] { "normal", "hover", "pressed", "focus" }) AddThemeStyleboxOverride(state, new StyleBoxEmpty());
         MouseEntered += QueueRedraw; MouseExited += QueueRedraw; FocusEntered += QueueRedraw; FocusExited += QueueRedraw;

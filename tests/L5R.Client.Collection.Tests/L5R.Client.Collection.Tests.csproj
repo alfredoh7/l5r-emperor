@@ -1,2 +1,2 @@
-<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><OutputType>Exe</OutputType><TargetFramework>net10.0</TargetFramework></PropertyGroup><ItemGroup><Compile Include="../../src/L5R.Client/MyCollectionStore.cs" Link="MyCollectionStore.cs" /></ItemGroup></Project>
+<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><OutputType>Exe</OutputType><TargetFramework>net10.0</TargetFramework></PropertyGroup><ItemGroup><Compile Include="../../src/L5R.Client/MyCollectionStore.cs" Link="MyCollectionStore.cs" /><Compile Include="../../src/L5R.Client/CatalogueActions.cs" Link="CatalogueActions.cs" /></ItemGroup></Project>
 
