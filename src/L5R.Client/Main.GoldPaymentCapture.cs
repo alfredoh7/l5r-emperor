@@ -48,6 +48,7 @@ public partial class Main
         // Kharmic is a player ability listed in the inspector; before this change the engine never offered it enabled.
         PressGold(b => b.Text.StartsWith("Pay 2 Gold, discard a Kharmic", StringComparison.Ordinal), "Kharmic action");
         GoldRequire(_chosen is { Type: "useAbility" } && QuoteFor(_chosen) is { Kind: GoldCostKind.Fixed, Cost: 2 }, "Kharmic did not open with its fixed 2 Gold quote.");
+        GoldPickFirstTarget();
         var text = GoldPanelText();
         GoldRequire(text.Contains("PAYMENT · FIXED COST") && text.Contains("2 Gold"), "the panel does not name the fixed cost.");
         GoldRequire(GoldButtons(_inspector).Any(b => b is CheckBox), "the panel lists no Gold sources to bow.");
@@ -67,6 +68,14 @@ public partial class Main
             GoldRequire(paying.All(id => FindCard(id)?.Bowed == true), "the chosen sources did not bow.");
         }
         GD.Print($"UI_SMOKE_PASS: Kharmic's fixed 2 Gold cost opened the shared payment panel through its real button; suggested sources covered it; confirmed={stage == "confirm"}.");
+    }
+
+    // Issue #581: a targeted action starts on "Choose a target…". The capture picks through the real picker, as a player would.
+    private void GoldPickFirstTarget()
+    {
+        if (_chosen?.TargetIds is not { Length: > 0 } || _chosen.Command?.TargetId is not null) return;
+        var picker = _inspector.FindChildren("*", "OptionButton", true, false).OfType<OptionButton>().First();
+        picker.Selected = 1; picker.EmitSignal(OptionButton.SignalName.ItemSelected, 1L);
     }
 
     private void GoldDerivedCapture(string stage, long version)

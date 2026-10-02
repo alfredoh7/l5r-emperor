@@ -633,11 +633,18 @@ public partial class Main : Node
         _intentOverlay?.QueueRedraw();
     }
 
-    private void Choose(ActionOption option)
+    // Core builds each targeted action's command with its first legal target filled in. The player, not the client or that default, picks the target (issue #581):
+    // the panel starts on "Choose a target…". Attack targets and support cards have their own target flows and keep theirs.
+    private bool NeedsTargetPick(ActionOption option) =>
+        option is { Type: "equip" or "playStrategy" or "useAbility", Command: { CardIds: null, TargetId: not null }, TargetIds: { Length: > 0 } } && !HasAttackTargets(option)
+        && !(option.CardId is { } sourceId && FindCard(sourceId) is { } source && IsSupportCard(source));
+
+    private void Choose(ActionOption option, bool keepTarget = false)
     {
         if (_shownOpen) ToggleShownCards(false);
         if (!option.Enabled || _session.Busy || PresentationBusy) return;
-        ResetDecisionSelection(); // the target stays unselected until the player picks one (issue #581): the client never chooses a legal target for them
+        if (!keepTarget && NeedsTargetPick(option)) option = option with { Command = option.Command! with { TargetId = null } };
+        ResetDecisionSelection();
         if (option.Movement is not null && option.Command is { } moveCommand) option = option with { Command = moveCommand with { Province = null } };
         _attackChoice = AttackChoice.Unselected;
         if (HasAttackTargets(option)) option = option with { Command = option.Command! with { TargetId = null, Province = null } };
