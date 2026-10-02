@@ -174,6 +174,7 @@ public partial class Main
             };
             grid.AddChild(face);
         }
+        AddTokenSourceToggles();
         var produced = SelectedProduction();
         _decisionActions.AddChild(Palette.Wrapped($"{produced} produced / {required} required" +
             (produced > required ? $" · {produced - required} excess lost" : produced < required ? " · Choose more ready sources" : " · Exact payment"), 17,

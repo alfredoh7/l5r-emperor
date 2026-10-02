@@ -188,6 +188,10 @@ internal static class EmperorMechETests
         var e2 = MatchEngine.FromTestState(s2);
         var recruiting = new PaymentSubject(e2.State.Cards[recruit2.Id], PaymentKind.Recruit);
         Check(e2.PaymentOptions(0, 1, recruiting).Any(p => p.SourceIds.SequenceEqual([Token(bazaar2, "reaction")])), "any Gold cost: a recruit too");
+        // Issue #578: the recruit's own GoldQuote (what the client's payment panel renders) lists the token its suggestion names, so the client can show, toggle and count it.
+        var recruitOption = e2.QueryActions(0).FirstOrDefault(a => a.Type == "recruitReserve" && a.CardId == recruit2.Id);
+        Check(recruitOption?.Gold?.Payments.Any(p => p.SourceIds.Contains(Token(bazaar2, "reaction"))) == true
+            && recruitOption.Gold.Sources?.Any(x => x.Id == Token(bazaar2, "reaction") && x.Produced == 1) == true, "the recruit's Gold quote lists the Reaction its suggested payment names");
         // Cherry Blossom Festival: no Reactions -- the token disappears, the bow stays.
         var s3 = Economy();
         var bazaar3 = Add(s3, Bazaar, 0, Zone.Home);
