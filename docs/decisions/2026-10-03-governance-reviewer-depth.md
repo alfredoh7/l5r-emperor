@@ -32,3 +32,26 @@ Findings that mattered:
 ## Limits
 
 One PR, one run per cell, Sonnet vs Opus compared only on two roles. Opus roughly doubled tokens and found the more concrete leak, but a single sample does not justify pinning. `omitClaudeMd` could not be tested: this Claude Code session does not discover agent files created mid-session, so it needs a fresh session. The docs summary of subagent context (no parent history; `CLAUDE.md`/`AGENTS.md` and git status loaded; no shared cache between parallel agents) came from a research subagent and was not independently verified.
+
+## Round 2: final profiles on three further PRs
+
+Twelve Sonnet reviewers (four roles x #581, #578, #595), run after the profile edits above. Tokens / tool calls:
+
+| PR (kind) | client-contract | hidden-information | negation/edge | rules-vs-core | Total |
+|---|---|---|---|---|---|
+| #581 (Core view + client) | 30.6k / 9 | 21.8k / 4 | 29.2k / 9 | 35.1k / 6 | 116.7k |
+| #578 (payment quote + client) | 30.8k / 10 | 31.0k / 14 | 28.2k / 9 | 42.5k / 17 | 132.5k |
+| #595 (client probe code only) | 20.6k / 5 | 22.4k / 7 | 20.4k / 4 | 27.5k / 5 | 90.9k |
+
+Role means: client-contract 27.3k, hidden-information 25.1k, negation 25.9k, rules-vs-core 35.0k. Overall mean 28.3k (baseline round 23.6k).
+
+Observed compliance: 12/12 returned Files read / Not read; 12/12 ran the `ContentVersion` check (all judged no bump needed; the changes were additive or client-only); rules-vs-core opened `RULINGS.md` and `ROUTED_CONCERNS.md` in 3/3 (0/2 before the wrapper change).
+
+Findings checked against the code by hand:
+
+- Confirmed, found by 1 of 4 (client-contract): #578 fills `GoldQuote.Sources` only for recruit quotes from `ToGoldQuote`; the two `chooseSearchPayment` producers (`ShadowsEmbraceBatch6.cs:326`, `EmperorRemainingC.cs:527`) build quotes without `Sources:`.
+- Confirmed, found by 2 of 4: #581 `EventDecisionUI.cs:50` dereferences `view.PendingHarshChoices!` with no null guard.
+- Confirmed: #578 removed the client's crane-gold/dragon-gold printed fallback (`Production` is now `card.GoldProduced ?? 0`); 3 of 4 flagged the risk. Whether Core always populates `GoldProduced` for Strongholds was not verified.
+- Not confirmed: #581 alternative-cost path may submit a null target (negation reviewer, marked unverified by it).
+
+Limits: no seeded-defect recall test, so recall is unknown; only findings the reviewers raised were checked. `omitClaudeMd` still untested.
