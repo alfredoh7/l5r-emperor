@@ -27,7 +27,7 @@ public partial class PersistentHomeProbe : Node
         var point = (Vector2)Call("ScreenCenter", control)!;
         Require(new Rect2(Vector2.Zero, GetViewport().GetVisibleRect().Size).HasPoint(point), $"Control is outside viewport: {control.Name} {point}");
         Input.ParseInputEvent(new InputEventMouseMotion { Position = point }); await Settle(.06);
-        GD.Print($"HOME_CLICK: {control.GetPath()} at {point}; root hover {GetViewport().GuiGetHoveredControl()?.GetPath()}; plane hover {Field<TableSurface>("_tableSurface").Canvas.GuiGetHoveredControl()?.GetPath()}; on table {Call("PointerOnTable",point)}");
+        GD.Print($"HOME_CLICK: {control.GetPath()} at {point}; root hover {GetViewport().GuiGetHoveredControl()?.GetPath()}; plane hover {Field<TableSurface>("_tableSurface").Canvas.GuiGetHoveredControl()?.GetPath()}; on table {Call("PointerOnTable", point)}");
         Input.ParseInputEvent(new InputEventMouseButton { Position = point, GlobalPosition = point, ButtonIndex = MouseButton.Left, Pressed = true });
         Input.ParseInputEvent(new InputEventMouseButton { Position = point, GlobalPosition = point, ButtonIndex = MouseButton.Left, Pressed = false }); await Settle();
     }
@@ -46,8 +46,16 @@ public partial class PersistentHomeProbe : Node
     }
     private static CardInstance Add(MatchState state, int definition, int owner = 0, Zone zone = Zone.Home, bool bowed = false, int? province = null)
     {
-        var card = new CardInstance { Id = "home-probe-" + state.Cards.Count, DefinitionId = "oracle-l5r-" + definition,
-            OwnerId = owner, Zone = zone, Bowed = bowed, ProvinceIndex = province, FaceUp = zone != Zone.Hand };
+        var card = new CardInstance
+        {
+            Id = "home-probe-" + state.Cards.Count,
+            DefinitionId = "oracle-l5r-" + definition,
+            OwnerId = owner,
+            Zone = zone,
+            Bowed = bowed,
+            ProvinceIndex = province,
+            FaceUp = zone != Zone.Hand
+        };
         state.Cards.Add(card.Id, card);
         var player = state.Players[owner];
         if (zone == Zone.Hand) player.Hand.Add(card.Id);
