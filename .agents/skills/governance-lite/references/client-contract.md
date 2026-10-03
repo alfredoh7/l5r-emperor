@@ -6,6 +6,8 @@ Reconcile pending-choice kinds and answering commands; new/changed command/view 
 
 For each item identify the authoritative Core/server producer, permitted viewers, submitted intention, and actual client handler or required follow-up. The client presents authoritative options/quotes; it must not recompute Gold or eligibility. A `#` payment token may require summing `Sources` rather than finding a physical card; a `spellId>hostId` target requires intentional selection handling. Keep engine-private state obligations separate from wire/view obligations.
 
+Check `MatchEngine.ContentVersion` and any schema version: if existing ids, seeds, hashes or payload meanings changed, replays and journals (`MatchEngine.Replay`, server recovery, committed `*.replay.json` fixtures) must be versioned or deliberately dropped.
+
 Review `tests/L5R.Client.Transport.Tests` and relevant client source. Transport checks prove payload integration, not graphical playability. Label native input/visual checks and human acceptance separately. A missing client file diff does not prove no client-lane work.
 
 Return priority, file/line and triggering contract for defects, plus a concrete client-lane list including handled/outstanding status and evidence. Do not turn advisory review into an owner-approval requirement.

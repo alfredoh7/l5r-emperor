@@ -20,7 +20,13 @@ Launch four independent read-only reviewers using the available agent/task tool.
 
 Claude exposes corresponding `.claude/agents/governance-*.md` profiles. Codex should dispatch the linked profiles through its supported delegation tools; no custom agent configuration is required. If concurrency is limited, queue roles. If delegation is unavailable, perform four explicitly labelled passes and disclose that they were not independent agent reviews. Do not fabricate a reviewer or a clean verdict for a role that did not run.
 
-Require each reviewer to return actionable findings with priority, file/line, reproduction or concrete path, expected versus actual behavior, and supporting rule/test evidence. Also return uncovered areas and missing tests. Reviewers do not edit, create issues/comments or send external messages. Run only focused read-only checks justified by a finding; do not repeat whole game suites in every reviewer.
+Never skip a role because the ledger is empty or the diff looks small: in the #584 measurement only the client-contract reviewer found that card-id meaning had changed without a `ContentVersion` bump, while the ledger listed nothing. Cost is about 20k tokens per role, so spend depth rather than omit a lens.
+
+Every reviewer must perform its profile's mandatory reads, and also this shared check: if the change alters the meaning of existing ids, seeds, hashes, serialized state, journal/replay input or an existing payload, confirm `ContentVersion` or the relevant schema version moved, or that old replays, journals and committed fixtures are deliberately unsupported. Search committed fixtures (`docs/`, `tests/`, `previews/`) for the old form.
+
+Require each reviewer to return actionable findings with priority, file/line, reproduction or concrete path, expected versus actual behavior, and supporting rule/test evidence. Also return uncovered areas and missing tests, plus a **Files read** list and a **Not read** list with reasons; a mandatory read missing from Files read is a coverage gap to disclose, not a clean result. Report findings in the reviewer's own lens; give an issue belonging to another lens one line so duplicates stay cheap.
+
+For tool use, search before reading: `Grep` with `files_with_matches` or `head_limit` first, then `Read` with `offset`/`limit`. Never read `CardAbilities.cs`, `MatchEngine.cs` or `PublishedContent.cs` whole. Reviewers do not edit, create issues/comments or send external messages. Run only focused read-only checks justified by a finding; do not repeat whole game suites in every reviewer.
 
 Reconcile duplicate findings and verify them in source. Resolve confirmed implementation defects within the authorized scope and rerun affected checks. Keep disputed readings separate from confirmed rulings; use ruling-interview when an actual owner decision is missing. A contract ledger item is not automatically a defect, nor is a proposed reading an accepted ruling.
 
