@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Dependabot: Bump actions/download-artifact from 4.3.0 to 8.0.1 (workflow-only change; no game code).",
+  "validation": "CI re-run on this PR; see PR checks.",
+  "remaining": "None; ready for review once CI is green.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/pull/542",
+  "branch": "dependabot/github_actions/actions/download-artifact-8.0.1",
+  "updated": "2026-10-03T16:36:10.021186+00:00"
+}

@@ -1,0 +1,9 @@
+{
+  "lane": "ui",
+  "summary": "war-room-motion check (#599): installed ffmpeg, which exposed a real failure. Two renders of the identical frozen room differ by one level in 7-23 of 921,600 pixels on this Windows GPU (nondeterminism, also at the same phase), so the byte-identical freeze assertion failed. Freeze/motion/resume now compare bytes differing by more than one level; frozen must show zero, real motion must show some. No game or visual change.",
+  "validation": "check-war-room-motion.sh: composition (192 frames), room-lantern (144), brazier (144) PASS on Windows with ffmpeg 9.0.2. Diagnosed by diffing saved frames: 9 px, max delta 1, and same-phase renders also differ. Not a visual acceptance.",
+  "remaining": "None for #599 beyond this PR; ffmpeg must be on PATH for this script.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/599",
+  "branch": "claude/599-war-room-motion",
+  "updated": "2026-10-03T15:52:04.128975+00:00"
+}
