@@ -23,5 +23,13 @@
   "source_image_hash": "f8/95",
   "source_url": "https://images.oracleofthevoid.com/l5r/f8/95/printing_10020_1_master.jpg",
   "url_prefix": "https://images.oracleofthevoid.com/l5r/f8/95/printing_10020_1_",
-  "width": 750
+  "width": 750,
+  "working_copy": {
+    "path": "assets/requested-scans/hisanos-guide.png",
+    "sha256": "ed55f4013d2f1e5847f5d093372b42b2dfc1b702a4b248b3fbb416143dd032d3",
+    "format": "PNG",
+    "width": 429,
+    "height": 600,
+    "source": "Mendon-supplied full card image, 2026-09-29"
+  }
 }

@@ -1,0 +1,10 @@
+{
+  "file": "twin-card-seal.png",
+  "source": "/Users/alfredo/.codex/generated_images/01a0b019-027d-7ee0-84a4-44aac565a142/exec-80a528aa-1ce8-4f7a-ab65-ab29eb343903.png",
+  "reference": "05-created-a.png",
+  "prompt": "Use case: precise-object-edit. Production 2D game UI sprite derived from the supplied approved concept. Extract/recreate faithfully ONLY the small circular ivory-brass created-copy seal shown at the lower-left corner of the Lion Ancestor card. A warm pale ivory round face with fine aged brass beveled rim, and a clear black symbol of TWO overlapping upright rectangular cards, the rear card offset up-left, front card black with an ivory inner border. Match the concept's proportions, fine wear and restrained relief. Front-on circular badge, one single seal centered occupying 82% of a square image. Genuine transparent background; no black backdrop. No letters, no numbers, no title, no glow, no card illustration, no swords, no ribbons. Clean strong silhouette legible at 28px. This is a flat raster UI medallion, not new 3D geometry.",
+  "tool": "built-in image_gen",
+  "sha256": "938d7ca4f85a32d47648ec5e44680eda64199b19b2fff5e36f4d9cfda4747613",
+  "status": "Approved A derived asset; native Home, battle, hover, stacks and removed gallery verified at normal and reduced-motion sizes.",
+  "usage": "Approved A seal, rendered outside lower-left full card face. Public CreatedCopy flag only; no inferred source."
+}

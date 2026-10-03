@@ -354,6 +354,11 @@ def main(argv=None):
         "github.event.pull_request.base.ref), to check whether it is stale. Not the same as "
         "--base, which is a diff endpoint (usually origin/main) and may be a commit SHA in CI.")
     check.add_argument('--working', action='store_true')
+    contract = sub.add_parser('ledger', help='List C# contract candidates from a diff; read-only, offline')
+    contract.add_argument('--base', default='origin/main')
+    contract.add_argument('--head', default='HEAD')
+    contract.add_argument('--working', action='store_true', help='include staged, unstaged and untracked Core source')
+    contract.add_argument('--format', choices=['json', 'markdown'], default='json')
     finish = sub.add_parser('handoff', help='Write one durable task handoff; does not commit or publish')
     finish.add_argument('--lane', choices=['ui', 'rules', 'shared'], required=True)
     for field in ('summary', 'validation', 'remaining'):
@@ -369,6 +374,12 @@ def main(argv=None):
         elif args.command == 'audit':
             result = audit(root, args.base, args.head, args.branch or branch(root), args.working,
                 base_ref=args.base_ref)
+        elif args.command == 'ledger':
+            from collaboration.ledger import ledger, markdown
+            result = ledger(root, args.base, args.head, args.working)
+            if args.format == 'markdown':
+                print(markdown(result))
+                return 0
         elif args.command == 'handoff':
             name = branch(root)
             if name in ('main', 'master'):

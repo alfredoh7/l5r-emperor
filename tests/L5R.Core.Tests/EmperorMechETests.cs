@@ -188,6 +188,13 @@ internal static class EmperorMechETests
         var e2 = MatchEngine.FromTestState(s2);
         var recruiting = new PaymentSubject(e2.State.Cards[recruit2.Id], PaymentKind.Recruit);
         Check(e2.PaymentOptions(0, 1, recruiting).Any(p => p.SourceIds.SequenceEqual([Token(bazaar2, "reaction")])), "any Gold cost: a recruit too");
+        // Issue #578: a recruit from a province (what the client's payment panel renders) carries the payment tokens on its GoldQuote, not only on its PurchaseQuote.
+        var s5 = Table(Phase.Dynasty, 0); BowAllGold(s5, 0);
+        var bazaar5 = Add(s5, Bazaar, 0, Zone.Home);
+        var forSale = s5.Cards[s5.Players[0].Provinces[0].CardId!]; forSale.DefinitionId = "training-lion-samurai"; forSale.FaceUp = true;
+        var e5 = MatchEngine.FromTestState(s5);
+        var purchase = e5.QueryActions(0).FirstOrDefault(a => a.Type == "purchase" && a.CardId == forSale.Id && a.Gold is not null);
+        Check(purchase?.Gold?.Sources?.Any(x => x.Id == Token(bazaar5, "reaction") && x.Produced == 1) == true, "the recruit's Gold quote lists the Seaside Bazaar's Reaction for the client");
         // Cherry Blossom Festival: no Reactions -- the token disappears, the bow stays.
         var s3 = Economy();
         var bazaar3 = Add(s3, Bazaar, 0, Zone.Home);
@@ -323,8 +330,11 @@ internal static class EmperorMechETests
         Check(!Offers(bowed, z2, p2), "not while he is bowed");
         var cherry = Rig((st, _) => Add(st, CherryBlossom, 1, Zone.EventInPlay), out var z3, out _, out var p3);
         Check(!Offers(cherry, z3, p3), "Cherry Blossom Festival bars it");
-        var noFarm = Rig((st, _) => { foreach (var c in st.Cards.Values.Where(c => c.OwnerId == 0 && CardCatalog.Get(c.DefinitionId).Type == CardType.Holding
-                && ((CardCatalog.Get(c.DefinitionId).Keywords ?? []).Contains("Mine") || (CardCatalog.Get(c.DefinitionId).Keywords ?? []).Contains("Farm")))) c.Zone = Zone.DynastyDiscard; }, out var z4, out _, out var p4);
+        var noFarm = Rig((st, _) =>
+        {
+            foreach (var c in st.Cards.Values.Where(c => c.OwnerId == 0 && CardCatalog.Get(c.DefinitionId).Type == CardType.Holding
+                && ((CardCatalog.Get(c.DefinitionId).Keywords ?? []).Contains("Mine") || (CardCatalog.Get(c.DefinitionId).Keywords ?? []).Contains("Farm")))) c.Zone = Zone.DynastyDiscard;
+        }, out var z4, out _, out var p4);
         Check(!Offers(noFarm, z4, p4), "no Mine or Farm: no option");
         // Two of his options in one payment are refused.
         var two = Rig((st, _) => Add(st, PlatinumMine, 0, Zone.Home, bowed: true), out var z5, out var farm5, out var p5);

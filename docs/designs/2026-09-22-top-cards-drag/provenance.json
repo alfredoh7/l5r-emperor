@@ -1,0 +1,30 @@
+[
+  {
+    "file": "a.png",
+    "source": "/Users/alfredo/.codex/generated_images/01a0b019-027d-7ee0-84a4-44aac565a142/exec-569017a5-2a33-4a88-995c-514a31370433.png",
+    "sha256": "1cec1971c53a5bd3a10a1a68c9b5e1d362d5e0d049d8372119872359e1cbb7f3",
+    "tool": "built-in image_gen",
+    "kind": "concept only; generated card faces and text are illustrative"
+  },
+  {
+    "file": "b.png",
+    "source": "/Users/alfredo/.codex/generated_images/01a0b019-027d-7ee0-84a4-44aac565a142/exec-5fc049cf-ca87-4b31-a476-5b46ff8d6b51.png",
+    "sha256": "e60edc17f450ea0db93412d1f06dc914677aa4e026d9e8f90ed8695ca3c37b3b",
+    "tool": "built-in image_gen",
+    "kind": "concept only; generated card faces and text are illustrative"
+  },
+  {
+    "file": "c.png",
+    "source": "/Users/alfredo/.codex/generated_images/01a0b019-027d-7ee0-84a4-44aac565a142/exec-d2e94d00-ee85-470e-bee2-9656bee24f16.png",
+    "sha256": "96e9933cfa6868617848cef5e3d105363c6c4b43899a9dfe918bca234b059443",
+    "tool": "built-in image_gen",
+    "kind": "concept only; generated card faces and text are illustrative"
+  },
+  {
+    "file": "a-reorder.png",
+    "source": "/Users/alfredo/.codex/generated_images/01a0b019-027d-7ee0-84a4-44aac565a142/exec-576b0f00-175c-4312-8605-7840ba792ab9.png",
+    "sha256": "829d9d7d5aa81343442fe716239fd3d62ec7f23f67bba498e64d68a10b08feaf",
+    "tool": "built-in image_gen",
+    "kind": "concept only; generated card faces and text are illustrative"
+  }
+]

@@ -36,8 +36,13 @@ public sealed partial class MatchEngine
         if (refusable && !ChallengeMayBeRefused(challengedId)) { refusable = false; Emit("refusalForbidden", $"{Definition(challenged).Name} may not refuse this challenge.", challenged.OwnerId, challengedId); }
         _state.PendingDuel = new PendingDuel
         {
-            AbilityId = abilityId, ChallengerPlayerId = challengerPlayerId, ChallengedPlayerId = challenged.OwnerId,
-            ChallengerId = challengerId, ChallengedId = challengedId, Stat = stat, Refusable = refusable,
+            AbilityId = abilityId,
+            ChallengerPlayerId = challengerPlayerId,
+            ChallengedPlayerId = challenged.OwnerId,
+            ChallengerId = challengerId,
+            ChallengedId = challengedId,
+            Stat = stat,
+            Refusable = refusable,
             Stage = refusable ? "AwaitingAccept" : "Reaction",
             NegatedEffects = _state.NegatedEffects.ToList(),
         };
@@ -408,10 +413,18 @@ public sealed partial class MatchEngine
         var draft = duel.ResultDraft!;
         P3RecordDuelWinner(winnerId); // Kakita Kenta (issue #503): the duel's winner goes on the action's record
         P3RecordBowedPersonalities(duel.BowedBefore); // Hida Defenders (issue #503)
-        _state.LastDuel = _state.LastDuel! with { Result = draft with {
-            Consequences = _state.Events.Skip(duel.ResultEventStart).ToArray(),
-            Provinces = draft.Provinces.Select(p => p with { After = EffectiveProvinceStrength(Player(p.PlayerId).Provinces[p.Index]) }).ToArray(),
-            ResolutionVersion = _state.Version + 1, ReturnPhase = _state.Phase, ReturnPriority = _state.PriorityPlayerId } };
+        _state.LastDuel = _state.LastDuel! with
+        {
+            Result = draft with
+            {
+                Consequences = _state.Events.Skip(duel.ResultEventStart).ToArray(),
+                Provinces = draft.Provinces.Select(p => p with { After = EffectiveProvinceStrength(Player(p.PlayerId).Provinces[p.Index]) }).ToArray(),
+                ResolutionVersion = _state.Version + 1,
+                ReturnPhase = _state.Phase,
+                ReturnPriority = _state.PriorityPlayerId
+            }
+        };
+        FinishSwordForHireDuel(duel.AbilityId, duel.ChallengerId);
         _state.PendingDuel = null;
         if (duel.RingsBowedBefore is { } duelRings) RecordBowedRings(duelRings.ToHashSet()); // Deception Revealed (Mendon's R4 ruling): a Ring the duel's action bowed goes on its record (a Focus Effect's bows do not: ApplyDuelFocusEffect).
         ApplyHesMineBows(duel.ChallengerId, duel.ChallengedId); // He's Mine! (Emperor Edition remaining-cards pass, issue #492, group B): the substitute bows once the duel has ended.
@@ -489,7 +502,10 @@ public sealed partial class MatchEngine
         switch (abilityId)
         {
             case "steel-on-steel-duel": DestroyUnits(loserIds.Select(Card).ToArray(), actingPlayerId: challengerPlayerId); break;
-            case "training-duel-force": case "training-duel-honor": case "training-duel-open":
+            case "sword-for-hire-create": DestroyUnits(loserIds.Select(Card).ToArray(), actingPlayerId: challengerPlayerId); break;
+            case "training-duel-force":
+            case "training-duel-honor":
+            case "training-duel-open":
             case "training-duel-challenge": foreach (var id in loserIds) ApplyModifier(Card(id), id, abilityId, "Force", -1); break;
             // Dragon Clan review (issue #207): three real self-performer Iaijutsu duels.
             case "daisuke-duel": case "spirit-duelist-duel": foreach (var id in loserIds) MoveHome(Card(id), false); break;
@@ -533,7 +549,9 @@ public sealed partial class MatchEngine
             // Personality's controller gains the Honor (a tie has no winner); every loser is bowed and dishonored.
             // Duel to First Blood (The Shadow's Embrace pass, issue #476 batch 3): "Bow the duel's loser."
             // Watchful Eye Dojo (Emperor Edition Stronghold pass, issue #486 batch 3): "Bow the duel's loser."
-            case "first-blood-duel-battle": case "first-blood-duel-limited": case "watchful-eye-duel":
+            case "first-blood-duel-battle":
+            case "first-blood-duel-limited":
+            case "watchful-eye-duel":
                 foreach (var id in loserIds) if (InPlay(Card(id)) && !StalwartNegatesBow(Card(id), challengerPlayerId)) Card(id).Bowed = true;
                 break;
             // The Aerie (Emperor Edition Stronghold pass, issue #486 batch 2): Duel of Haiku's outcome.
@@ -591,7 +609,8 @@ public sealed partial class MatchEngine
                 if (_state.PendingDuel?.WinnerId is string paralyzedWinnerId && InPlay(Card(paralyzedWinnerId))) WatchParalyzingTouch(Card(paralyzedWinnerId), "Paralyzing Touch");
                 break;
             // Sudden Movement (The Shadow's Embrace pass, issue #476, batch 4): "After this duel ends, give its winner +3F" (a tie has no winner).
-            case "sudden-movement-focus": case "slow-death-focus": // The Slow Death (Emperor Edition remaining-cards pass, issue #492, group D): "After this duel ends, give its winner +3F."
+            case "sudden-movement-focus":
+            case "slow-death-focus": // The Slow Death (Emperor Edition remaining-cards pass, issue #492, group D): "After this duel ends, give its winner +3F."
                 if (_state.PendingDuel?.WinnerId is string suddenWinnerId && InPlay(Card(suddenWinnerId))) ApplyModifier(Card(suddenWinnerId), suddenWinnerId, abilityId, "Force", 3);
                 break;
             // Scavenging Party: "After this duel ends, give its winner -3F" (a tie has no winner).

@@ -1,0 +1,38 @@
+[
+  {
+    "card_id": "oracle-l5r-2708",
+    "printing_set": [
+      "Forgotten Legacy"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=2708",
+    "image_path": "assets/reference/oracle/forgotten-legacy/webp/oracle-l5r-2708-printing-1-image-1.webp",
+    "image_sha256": "a1383ac7174d46cd1de087610b383864fc0d9d3485c99d0cbd9439978da2d103"
+  },
+  {
+    "card_id": "oracle-l5r-2895",
+    "printing_set": [
+      "Forgotten Legacy"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=2895",
+    "image_path": "assets/reference/oracle/forgotten-legacy/webp/oracle-l5r-2895-printing-1-image-1.webp",
+    "image_sha256": "1bc73f346a01264d66503e6fa976bd744190601c946b63c8109e8bef4ef8adbe"
+  },
+  {
+    "card_id": "oracle-l5r-7696",
+    "printing_set": [
+      "Forgotten Legacy"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=7696",
+    "image_path": "assets/reference/oracle/forgotten-legacy/webp/oracle-l5r-7696-printing-1-image-1.webp",
+    "image_sha256": "5484d0969b460f7b8cb3f0e9159e49d066183671fab041fe1ba6439c99c1da79"
+  },
+  {
+    "card_id": "oracle-l5r-9899",
+    "printing_set": [
+      "The Shadow's Embrace"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=9899",
+    "image_path": "assets/reference/oracle/the-shadow-s-embrace/webp/oracle-l5r-9899-printing-1-image-1.webp",
+    "image_sha256": "ea550e3dfee355302d5c68221898562ecd9cc503a01f9d2c00413a329abbea55"
+  }
+]

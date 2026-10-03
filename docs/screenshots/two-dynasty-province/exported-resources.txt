@@ -1,0 +1,3 @@
+Godot Engine v4.7.2.stable.mono.official.ed1daf0bf - https://godotengine.org
+
+EXPORTED_RESOURCE_PASS: 1676 retained resources; 19 model dependency loads; 55 obsolete resources absent.

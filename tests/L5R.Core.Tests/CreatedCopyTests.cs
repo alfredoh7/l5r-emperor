@@ -126,6 +126,14 @@ internal static class CreatedCopyTests
         foreach (var bad in new[] { ordinarySpirit.Id, noSpirit.Id, enemy.Id, dead.Id, shugenja.Id, spell.Id })
             Reject(e, Offer(e, 0, Copy, spell.Id, okSpirit.Id) with { TargetId = bad });
         Reject(e, Offer(e, 0, Copy, spell.Id, okSpirit.Id) with { TargetId = null });
+        // A copy has no scan to choose: naming one is refused as an illegal action, never as an exception that would end the session.
+        foreach (var named in new[] { "oracle-l5r-10023", "not-a-scan" })
+        {
+            var withScan = Offer(e, 0, Copy, spell.Id, okSpirit.Id) with { CreatedCard = named };
+            var refusal = e.Execute(withScan);
+            Check(!refusal.Accepted && (refusal.Error ?? "").Length > 0, $"naming the scan {named} is refused: {refusal.Error}");
+            Check(e.QueryActions(0).Any(), "and the match is still playable");
+        }
         Check(Copies(e).Length == 0, "refused commands create nothing");
         var handSpell = Put(s, Gates, 0, Zone.Hand);
         var inHand = Engine(s);

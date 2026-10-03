@@ -23,5 +23,13 @@
   "source_image_hash": "1f/61",
   "source_url": "https://images.oracleofthevoid.com/l5r/1f/61/printing_10010_1_master.jpg",
   "url_prefix": "https://images.oracleofthevoid.com/l5r/1f/61/printing_10010_1_",
-  "width": 750
+  "width": 750,
+  "working_copy": {
+    "path": "assets/requested-scans/mounted-ashigaru.png",
+    "sha256": "2cb51a0fd108c8726bcea8677da6fcf45c569667b037373b809d1a6c112542b5",
+    "format": "PNG",
+    "width": 429,
+    "height": 600,
+    "source": "User-supplied full card image, 2026-09-29"
+  }
 }

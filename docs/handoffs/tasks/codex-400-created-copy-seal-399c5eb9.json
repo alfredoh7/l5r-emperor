@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Complete approved created-copy seal with final source/native size refinement; five-feature isolated review stack ready for packaging.",
+  "validation": "Final client build 0 warnings/errors; 1920x1080 normal and 1280x800 reduced native checks PASS after final seal sizing; actual app/scenario picker verified; catalogue coverage verified; no authored rules changes.",
+  "remaining": "Final-head CI; combined Windows review delivery; Alfredo hands-on acceptance and Mendon review. No main merge authorized.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/400",
+  "branch": "codex/400-created-copy-seal",
+  "updated": "2026-09-21T23:06:03.053698+00:00"
+}
