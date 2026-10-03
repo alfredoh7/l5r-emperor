@@ -466,11 +466,12 @@ internal static class EmperorRemainingBTests
 
         var e2 = Setup(out _, out var target2, out _, out var strategy2);
         var samurai2 = e2.State.Cards.Values.Single(c => c.Zone == Zone.Battlefield && c.OwnerId == 0);
+        var honor2 = Honor(e2, 0);
         Accept(e2, Offer(e2, 0, "my-enemys-mercy-choose", strategy2.Id, target2.Id, samurai2.Id));
         Accept(e2, e2.QueryActions(1).Single(x => x.Type == "chooseEitherOr" && x.Command!.Choice == "home").Command!);
         Eq(e2.State.Cards[target2.Id].Zone, Zone.Home, "he was moved home");
         Check(!e2.State.Cards[target2.Id].Bowed, "and not bowed");
-        Eq(Honor(e2, 0), 8 + 2 - 0 + (Honor(e2, 0) - 10) , "the Honor gain stands whatever he chose");
+        Eq(Honor(e2, 0), honor2 + 2, "the Honor gain stands whatever he chose");
     }
 
     // ---- Opportunistic Advance ----

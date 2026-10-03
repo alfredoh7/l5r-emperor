@@ -96,11 +96,11 @@ func _ready() -> void:
             var frozen_b := rendered_image().get_data()
             set_light(2.0, true)
             var resumed := rendered_image().get_data()
-            if moving_a == moving_b or frozen_a != frozen_b or resumed == frozen_b:
+            if visible_difference(moving_a, moving_b) == 0 or visible_difference(frozen_a, frozen_b) > 0 or visible_difference(resumed, frozen_b) == 0:
                 push_error("Room motion check failed: visible motion, exact freeze or resume.")
                 get_tree().quit(1)
                 return
-            print("ROOM_MOTION_PASS: phases 0/4 differ; disabled phases 0/8 byte-identical; motion resumes at phase 2.")
+            print("ROOM_MOTION_PASS: phases 0/4 differ; disabled phases 0/8 identical apart from one-level GPU noise; motion resumes at phase 2.")
         if not film_path.is_empty():
             DirAccess.make_dir_recursive_absolute(film_path)
             for frame_index in range(film_frames):
@@ -131,6 +131,15 @@ func rendered_image() -> Image:
     RenderingServer.force_draw(false)
     RenderingServer.force_sync()
     return get_viewport().get_texture().get_image()
+
+# Bytes differing by more than one level. Some GPUs (seen on a Windows AMD/NVIDIA Compatibility renderer) return
+# one-level differences in a handful of pixels for two renders of the identical frozen state; a frozen
+# room must still show zero differences beyond that, while real motion changes far more.
+func visible_difference(a: PackedByteArray, b: PackedByteArray) -> int:
+    var count := 0
+    for i in range(a.size()):
+        if absi(a[i] - b[i]) > 1: count += 1
+    return count
 
 func set_light(time: float, moving: bool) -> void:
     room.call("PresentLight", time, moving)

@@ -95,6 +95,9 @@ public partial class Main
         SupportRequire(GetViewport().GetVisibleRect().Encloses(_inspectorPanel.GetGlobalRect()), "Attack sidebar extends beyond the window");
         var clip = _tableViewport.GetGlobalRect(); SupportRequire(IntentArrows().All(a => clip.HasPoint(a.From) && clip.HasPoint(a.To)), "Attack intent arrow is outside the table viewport");
     }
+    // The engine's CURRENT province strength, as the player sees it (ProvinceView.Strength), not the raw base field: an Attack's loss is a modifier for the turn on top of it.
+    private int AttackProvinceStrength() => View.Players.Single(p => p.Id == 1).Provinces.Single(p => p.Index == 0).Strength;
+
     private async Task CaptureAttackTargets()
     {
         try
@@ -196,15 +199,15 @@ public partial class Main
                 await SupportClick(AttackNoTargetButton()); CheckAttackConfirmation(); await SupportCapture("-" + mode); await ConfirmAttackTarget();
                 SupportRequire(View.Version == 1 && _attackFixture.State.PendingAttack is null, "No-target " + mode + " could not resolve");
             }
-            await PrepareAttackReview("province"); var strength = _attackFixture.State.Players[1].Provinces[0].Strength;
+            await PrepareAttackReview("province"); var strength = AttackProvinceStrength();
             if (renderOnly) { ChooseAttackTarget(AttackChoice.Province, province: 0); await EventFrames(12); }
             else await SupportClick(_tiles.Single(t => t.Card.OwnerId == 1 && t.Card.Zone == Zone.Province && t.Card.ProvinceIndex == 0));
             SupportRequire(_attackChoice == AttackChoice.Province && _chosen!.Command is { TargetId: null, Province: 0 } && IntentArrows().Count() == 1, "Table province chose its Dynasty card or left no arrow");
             await SupportClick(AttackCardFace(_attackCard)); SupportRequire(_chosen!.Command!.Province is null, "Switching to a card retained the province");
             await SupportClick(StabilizationButtons(_inspector).Single(b => b.Name == "AttackProvince0")); CheckAttackConfirmation(); await SupportCapture("-province"); await ConfirmAttackTarget();
-            SupportRequire(_attackFixture.State.Players[1].Provinces[0].Strength == Math.Max(0, strength - 3) && View.Events.Any(e => e.Type == "provinceAttacked") && _attackFixture.State.PendingChoice is null, "Province Attack failed or opened a card-target reaction");
-            await PrepareAttackReview("province"); strength = _attackFixture.State.Players[1].Provinces[0].Strength;
-            await SupportClick(AttackNoTargetButton()); await ConfirmAttackTarget(); SupportRequire(_attackFixture.State.Players[1].Provinces[0].Strength == strength, "No target silently hit the province");
+            SupportRequire(AttackProvinceStrength() == Math.Max(0, strength - 3) && View.Events.Any(e => e.Type == "provinceAttacked") && _attackFixture.State.PendingChoice is null, "Province Attack failed or opened a card-target reaction");
+            await PrepareAttackReview("province"); strength = AttackProvinceStrength();
+            await SupportClick(AttackNoTargetButton()); await ConfirmAttackTarget(); SupportRequire(AttackProvinceStrength() == strength, "No target silently hit the province");
             await PrepareAttackReview("cost"); var performer = _chosen!.Command!.PerformerId!; var honor = Self.Honor;
             await SupportClick(AttackNoTargetButton()); await SupportCapture("-cost"); await ConfirmAttackTarget();
             SupportRequire(_attackFixture.State.Cards[performer].Bowed && Self.Honor == honor && _attackFixture.State.PendingAttack is null, "No target skipped its bow cost or awarded card-target Honor");

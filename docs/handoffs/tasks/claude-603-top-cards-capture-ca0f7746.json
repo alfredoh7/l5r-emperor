@@ -1,0 +1,9 @@
+{
+  "lane": "ui",
+  "summary": "Update the stale check-top-cards-ui.sh capture: since commit 720eeb91 (30 Sep, 'Top Cards: swap onto a full single-slot tray') a drop on a full single-slot tray swaps with its sole occupant instead of being refused, and Undo reverts one action at a time. The capture still expected the second drop onto the full Hand tray to be rejected and a single Undo to restore the start. It now asserts the swap and undoes it before restoring the starting state. Capture-only change; no game behaviour changed.",
+  "validation": "check-top-cards-ui.sh passes normal and reduced (TOP_CARDS_PASS), after diagnosing with temporary instrumentation (not committed): the rejected drop of card 2 onto the full Hand tray changed the draft from order [1,2,0] / hand:0 to order [1,0,2] / hand:2, i.e. the documented swap; then the Undo assertion failed because one Undo reverted only the swap. Format check passes. Not run: full tools/check.sh or the other native checks.",
+  "remaining": "war-room-motion needs ffmpeg (not installed here); crimson-duel in #600/#601 still fails at a card-layout assertion after the projection fix.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/603",
+  "branch": "claude/603-top-cards-capture",
+  "updated": "2026-10-03T14:04:31.597611+00:00"
+}

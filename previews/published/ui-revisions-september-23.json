@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "repository": "alfredoh7/l5r-emperor",
+  "source_pr": 434,
+  "source_commit": "9f8ef9f5a5af0db65406a9114be14baa515356f3",
+  "title": "Updated UI review - draggable Top Cards, ghost copies and table visibility",
+  "slug": "ui-revisions-september-23",
+  "tag": "preview-pr434-9f8ef9f5a5-r1-windows",
+  "asset": "L5R-Review-pr434-9f8ef9f5a5-r1-Windows.zip",
+  "bytes": 1787505284,
+  "sha256": "12f071d6966e7309a28e81dc63d3059aa76a32bc7997c3e4bd16759b5abb1655",
+  "folder": "L5R-Review-pr434-9f8ef9f5a5-r1",
+  "launcher": "Start Review.cmd",
+  "reviewer": "mdornbrook"
+}

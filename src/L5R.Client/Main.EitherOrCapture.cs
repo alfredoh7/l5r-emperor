@@ -87,6 +87,8 @@ public partial class Main
     }
     private async Task ConfirmEither()
     { await SupportClick(_paymentConfirm!); await WaitDecisionPresentation(); await EventFrames(12); }
+    // The engine's CURRENT province strength, as the player sees it (ProvinceView.Strength), not the raw base field: strength given for the turn is a modifier on top of it.
+    private int EitherProvinceStrength() => View.Players.Single(p => p.Id == 1).Provinces.Single(p => p.Index == 0).Strength;
     private async Task FinishEitherReaction()
     {
         for (var i = 0; i < 2; i++)
@@ -130,12 +132,12 @@ public partial class Main
             foreach (var o in prompt.Options) SupportRequire(StabilizationText(_inspector).Contains(o.Detail), "Waiting player lost public consequence");
             await SupportCapture("-waiting"); _session.SwitchPracticeSeat(); await EventFrames(15);
             SupportRequire(_chosen is null && _paymentConfirm!.Disabled, "Seat switch restored a stale selection");
-            var strength = _eitherFixture.State.Players[1].Provinces[0].Strength;
+            var strength = EitherProvinceStrength();
             await PickEither("pay"); await ConfirmEither();
             SupportRequire(View.PendingEitherOr is null && View.PendingChoice?.Type == "beforeActionReaction" && View.Events.Any(e => e.Type == "payment"), "Payment did not restore reaction window");
-            await FinishEitherReaction(); SupportRequire(_eitherFixture.State.Players[1].Provinces[0].Strength == strength + 2, "Paid action did not resolve");
-            await PrepareEitherReview(); strength = _eitherFixture.State.Players[1].Provinces[0].Strength; await PickEither("negate"); await SupportCapture("-consequence"); await ConfirmEither(); await FinishEitherReaction();
-            SupportRequire(_eitherFixture.State.Players[1].Provinces[0].Strength == strength, "Negated action still applied its effect");
+            await FinishEitherReaction(); SupportRequire(EitherProvinceStrength() == strength + 2, "Paid action did not resolve");
+            await PrepareEitherReview(); strength = EitherProvinceStrength(); await PickEither("negate"); await SupportCapture("-consequence"); await ConfirmEither(); await FinishEitherReaction();
+            SupportRequire(EitherProvinceStrength() == strength, "Negated action still applied its effect");
             await PrepareEitherReview("three"); SupportRequire(_inspector.GetChildren().OfType<EitherOrOptionButton>().Count() == 3, "Three-option decision was truncated"); await SupportCapture("-three");
             var honor = Self.Honor; await PickEither("honor", true); await ConfirmEither(); SupportRequire(Self.Honor == honor - 2, "Honor option failed");
             await PrepareEitherReview("disabled"); var disabled = EitherButton("pay");

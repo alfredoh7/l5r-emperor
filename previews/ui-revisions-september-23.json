@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "slug": "ui-revisions-september-23",
+  "title": "Updated UI review - draggable Top Cards, ghost copies and table visibility",
+  "source_pr": 434,
+  "source_commit": "9f8ef9f5a5af0db65406a9114be14baa515356f3",
+  "revision": 1,
+  "reviewer": "mdornbrook",
+  "summary": "Alfredo requests a refreshed Windows package of the latest combined UI candidate, including Mendon's integration fixes. Start Review opens the redesigned draggable Top Cards. Separate launchers open every requested revision. Delivery does not merge or grant acceptance.",
+  "review_steps": [
+    "This replaces the older five-demo Windows package for reviewing these revisions. Extract the entire ZIP into a new folder. Start Review.cmd opens Top Cards directly; quit the game before opening another named demo. No editor, SDK, build or source checkout is required.",
+    "Demo 1 - Top Cards: try A's destination trays with B's explicit deck-order labels. Drag full cards between allowed destinations and reorder them; inspect the landing position, Drawn first and Very bottom labels. Try Undo, Escape, an outside drop, click/keyboard placement and the final Confirm. Use the prepared cases for top/bottom, taking, showing, fixed order and the other player's deck. Alfredo selected the design; the new implementation still awaits his hands-on acceptance.",
+    "Demo 2 - Ghost Copies: compare the Gates-created Lion Ancestor with the original. The lower-left marker now combines overlapping ghost outlines with short, quiet wisps. Try battle, bowed stacks, inspection and destruction to the Removed gallery. The design is selected; final hands-on acceptance remains separate.",
+    "Demo 3 - Multiple Targets: Alfredo approved this revised demo. The unnecessary left/right chevrons are removed. Click a selected card to deselect it, then reselect to append it to the order. Check independent groups, optional zero, attachment targets and dependent choices, including Mendon's latest integration corrections.",
+    "Demo 4 - Battle Progress: Alfredo approved this revised demo. The phase bar now ends flush with the narrow flag/helmet/horse icon strip. Check legibility, current decision owner, Infantry/Cavalry, Naval/first action, passes and before-resolution choices. Expanding the sequence must not submit a game action.",
+    "Demo 5 - Table Visibility: the prepared table stays still for camera review. Zoom with the wheel, pan from empty cloth or with a middle drag, and use Home/Fit to reset. Cards, markers and inspection must remain visible and clickable across the former invisible interior edges, while the fixed HUD remains protected. Resize the window and check each side. This is the clipping fix from #446/#447 in the combined candidate.",
+    "Other previews/Opponent Payment preserves the already-approved payment demo. Open Full Game opens this exact isolated build's menus. Asterisks in demo controls identify synthetic training cases, not additional published cards.",
+    "Please record UI/QoL or rules feedback for Alfredo on PR #434 using Send Feedback.url: name the demo, steps, expected result and requested adjustment. The earlier feature PRs were closed as superseded, so use #434 for this package. Alfredo's recorded UI approvals do not replace Mendon's review. Do not merge anything as part of launching or reviewing this package."
+  ],
+  "known_limitations": [
+    "Exact source is PR #434 at 9f8ef9f5, after Mendon's main integration and inherited-finding fixes. Source Mac/Windows CI passed. This immutable package will not automatically include later commits.",
+    "The package is for focused review, not a claim of complete human matches, native Windows graphical acceptance or external multiplayer acceptance.",
+    "Known older issues remain outside this delivery: modified hand-limit discarding, cancelling local Pass the device privacy, and duel client follow-ups #448. These are not fixed by refreshing the package.",
+    "Main already contains earlier independently merged work, including the minimal clipping fix. Publishing this preview does not merge the remaining PR #434 revisions or change the normal installation."
+  ],
+  "scenarios": [
+    { "name": "Start Review", "mode": "published-top-cards-review" },
+    { "name": "Demo 1 - Top Cards", "mode": "published-top-cards-review" },
+    { "name": "Demo 2 - Ghost Copies", "mode": "published-created-copy-review" },
+    { "name": "Demo 3 - Multiple Targets", "mode": "published-multi-targets-review" },
+    { "name": "Demo 4 - Battle Progress", "mode": "published-battle-sequence-review" },
+    { "name": "Demo 5 - Table Visibility", "mode": "published-board-camera-coverage-review" },
+    { "name": "Other previews/Opponent Payment", "mode": "published-opponent-payment-review" },
+    { "name": "Open Full Game", "mode": null }
+  ]
+}

@@ -74,11 +74,19 @@ public sealed partial class MatchEngine
             // Deck search (issue #312): the deck viewer is private to the searcher; the shown-cards record is public.
             BuildSearchView(playerId), BuildShownCards(), BuildLookView(playerId), BuildCopyView(playerId), BuildEitherOrView(playerId), BuildOpponentPaymentView(playerId),
             _state.LastDuel is null ? null : Copy(_state.LastDuel), BuildPendingAttackCue(), BuildProvinceSights(playerId), BuildBattlefieldViews(), BuildHandSights(playerId)) // issue #503: hand sights
-        { PendingProvinceOrder = BuildProvinceOrderView(playerId), ActionPhaseTurnPlayerId = _state.WinnerId is null ? R1.Aside?.TurnPlayerId : null }; // Plains of Otosan Uchi (issue #554); public context only, the paused effect stays engine-private.
+        { PendingProvinceOrder = BuildProvinceOrderView(playerId), PendingHarshChoices = BuildHarshChoicesView(), ActionPhaseTurnPlayerId = _state.WinnerId is null ? R1.Aside?.TurnPlayerId : null }; // Plains of Otosan Uchi (issue #554); public context only, the paused effect stays engine-private.
     }
 
     // The reveal-order decision (PR #544's own contract): PUBLIC identity/prompt, options PRIVATE to the deciding
     // seat (the other seat gets an empty array and shows waiting UI instead).
+    // Harsh Choices (issue #581): the same counts the "Destroy last province · Defeat" action is labelled from.
+    private HarshChoicesView? BuildHarshChoicesView()
+    {
+        if (_state.PendingChoice is not { Type: "harshChoices" } harsh) return null;
+        var before = Player(harsh.PlayerId).Provinces.Count(p => !p.Destroyed);
+        return new(before, Math.Max(0, before - 1), before == 1, before == 1 ? 0 : HarshChoicesDraw);
+    }
+
     private ProvinceOrderView? BuildProvinceOrderView(int viewerId)
     {
         if (_state.PendingChoice is not { Type: "provinceOrder" } pending || _state.OtosanUchiProvinceIndex is not int index) return null;
@@ -551,7 +559,8 @@ public sealed partial class MatchEngine
         }
         else if (_state.PendingChoice is { Type: "yourClanNeedsYouProvince" })
             foreach (var p in Player(playerId).Provinces.Where(p => !p.Destroyed && !p.HoldsNoDynastyCards)) // issue #503
-                Add("chooseYourClanNeedsYouProvince", $"Place into province {p.Index + 1}" + (p.CardId is not null ? $" (discarding {Definition(Card(p.CardId)).Name})" : ""),
+                // Hidden information: only a face-up card's name may be shown; a face-down card is never revealed by the prompt.
+                Add("chooseYourClanNeedsYouProvince", $"Place into province {p.Index + 1}" + (p.CardId is { } existingId ? Card(existingId).FaceUp ? $" (discarding {Definition(Card(existingId)).Name})" : " (discarding the face-down card)" : ""),
                     Command("chooseYourClanNeedsYouProvince", province: p.Index));
         else if (_state.PendingChoice is { Type: "conqueror" })
         {
@@ -658,7 +667,7 @@ public sealed partial class MatchEngine
         }
         else if (_state.PendingChoice is { Type: "discardHand" })
         {
-            var count = player.Hand.Count - 8;
+            var count = player.Hand.Count - MaxHandSize(playerId);
             Add("discardHand", $"Discard {count} card(s)", Command("discardHand", cardIds: player.Hand.Take(count).ToArray()), targets: player.Hand.ToArray());
         }
         // Seeds of Decay pass (issue #453), batch 4: the two Events Phase decisions (SeedsOfDecayBatch4.cs), for the revealing player only.

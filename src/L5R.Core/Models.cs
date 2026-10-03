@@ -1309,6 +1309,8 @@ public sealed record GameCommand(string Type, int PlayerId, long ExpectedVersion
     // (a single province rides in Province, as it always has).
     int[]? Provinces = null);
 public sealed record CommandResult(bool Accepted, string? Error, long Version, GameEvent[] Events);
+/// <summary>The consequence of destroying the province in a Harsh Choices decision, so no client re-derives it: the decider's unbroken provinces before and after, whether that ends the match in defeat, and the cards drawn if it does not.</summary>
+public sealed record HarshChoicesView(int ProvincesBefore, int ProvincesAfter, bool EndsMatch, int CardsDrawn);
 public sealed record PaymentOption(string[] SourceIds, int Produced, int Cost, int Excess);
 // Basis (issue #303): the human-readable derivation of Cost, e.g. "Training samurai cost 5 - 2 (Clan
 // discount)". Null only for quotes serialized by an older engine.
@@ -1499,6 +1501,8 @@ public sealed record MatchView(string ContentVersion, string Scenario, long Vers
     HandSightView[]? HandSights = null)
 {
     public ProvinceOrderView? PendingProvinceOrder { get; init; }
+    // Harsh Choices (issue #581): what destroying the province would do, computed by the engine and PUBLIC -- both players see the same consequence. Null when no Harsh Choices decision is open.
+    public HarshChoicesView? PendingHarshChoices { get; init; }
     // Public display context for a battle fought inside the Action Phase. ActivePlayerId
     // remains the battle's attacker; this is the original turn owner, never the paused action.
     public int? ActionPhaseTurnPlayerId { get; init; }

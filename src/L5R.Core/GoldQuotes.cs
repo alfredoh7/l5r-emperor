@@ -493,7 +493,7 @@ public sealed partial class MatchEngine
     /// client has one panel for every Gold action. Recruiting is fixed: the card's printed cost adjusted by
     /// the chosen Clan discount/allegiance, all decided by QuotePurchase.</summary>
     private static GoldQuote ToGoldQuote(PurchaseQuote quote) =>
-        new(quote.Cost, GoldCostKind.Fixed, quote.Basis ?? $"Cost {quote.Cost}", quote.Error, quote.Payments, Sources: quote.Sources);
+        new(quote.Cost, GoldCostKind.Fixed, quote.Basis ?? $"Cost {quote.Cost}", quote.Error, quote.Payments, Sources: quote.Sources); // issue #578: the recruit panel needs the payment tokens its suggestions may name
 
     // Equip (issue #303 folds Equip's own cost into the same quote shape): the attachment's printed cost
     // less every discount that applies to THIS attachment, THIS wielder and THIS player. Katagi's is the

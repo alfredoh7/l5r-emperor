@@ -47,15 +47,15 @@ public partial class EventDecisionSidebar : Control
         }
         else if (harsh)
         {
-            var n = view.Players.Single(p => p.Id == pending.PlayerId).Provinces.Count(p => !p.Destroyed);
-            column.AddChild(Centered(own ? (n == 1 ? "Destroy your last province?" : "Destroy this province to draw 3 cards?") : "Your opponent is deciding whether to destroy this province.", 22, Palette.Paper));
+            var h = view.PendingHarshChoices!; // the engine's own consequence (issue #581); the client counts nothing
+            column.AddChild(Centered(own ? (h.EndsMatch ? "Destroy your last province?" : $"Destroy this province to draw {h.CardsDrawn} cards?") : "Your opponent is deciding whether to destroy this province.", 22, Palette.Paper));
             column.AddChild(new DecisionRule());
             var consequence = new HBoxContainer { Alignment = BoxContainer.AlignmentMode.Center }; consequence.AddThemeConstantOverride("separation", 18); column.AddChild(consequence);
             consequence.AddChild(new DecisionImpact { Province = true, CustomMinimumSize = new(38, 52) });
-            consequence.AddChild(Centered($"Provinces\n{n} → {Math.Max(0, n - 1)}", 19, Palette.Paper));
+            consequence.AddChild(Centered($"Provinces\n{h.ProvincesBefore} → {h.ProvincesAfter}", 19, Palette.Paper));
             consequence.AddChild(new VSeparator());
-            if (n > 1) consequence.AddChild(new DecisionImpact { CustomMinimumSize = new(38, 52) });
-            consequence.AddChild(Centered(n == 1 ? "Defeat\nMatch ends" : "Draw\n3 cards", 19, n == 1 ? new Color("efb09a") : Palette.Paper));
+            if (!h.EndsMatch) consequence.AddChild(new DecisionImpact { CustomMinimumSize = new(38, 52) });
+            consequence.AddChild(Centered(h.EndsMatch ? "Defeat\nMatch ends" : $"Draw\n{h.CardsDrawn} cards", 19, h.EndsMatch ? new Color("efb09a") : Palette.Paper));
             if (own)
             {
                 foreach (var option in actions.Where(a => a.Type == "harshChoices"))
@@ -66,7 +66,7 @@ public partial class EventDecisionSidebar : Control
                     column.AddChild(button); if (destroy) DestroyButton = button; else KeepButton = button;
                 }
             }
-            var warning = Centered(n == 1 ? "Your last province. Destroying it ends the match in defeat." : "The province is permanently lost.", 18, n == 1 ? new Color("efb09a") : Palette.PaperDim);
+            var warning = Centered(h.EndsMatch ? "Your last province. Destroying it ends the match in defeat." : "The province is permanently lost.", 18, h.EndsMatch ? new Color("efb09a") : Palette.PaperDim);
             warning.AddThemeFontOverride("font", SidebarSkin.Italic); column.AddChild(warning);
         }
         else

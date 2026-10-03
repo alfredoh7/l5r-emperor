@@ -177,7 +177,7 @@ public partial class Main
             if (draft.TargetId is { } target && selected.TargetIds?.Contains(target) != true) return;
             var reviewed = selected with { Command = command with { TargetId = draft.TargetId } };
             // Gold still goes through the existing engine-quoted panel when the ability has both kinds of cost.
-            if (QuoteFor(reviewed) is not null) { _reviewingAlternativeCost = false; Choose(reviewed); _alternativeCostConfirmed = true; RenderInspector(); return; }
+            if (QuoteFor(reviewed) is not null) { _reviewingAlternativeCost = false; Choose(reviewed, keepTarget: true); _alternativeCostConfirmed = true; RenderInspector(); return; }
             _ = Submit(reviewed.Command!);
         }
     }
