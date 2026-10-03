@@ -1,0 +1,56 @@
+{
+  "mode": "built-in image_gen",
+  "revisions": [
+    {
+      "id": "payment-a",
+      "prompt": "Use case: ui-mockup. Targeted correction of this payment layout only; preserve board, card faces and card-origin sidebar with distinct payment modes. Remove all Virtuous Charity/opponent-payment/You gain Honor context. Use heading PAYMENT PREVIEW and small context text Example quote · 6 Gold cost. This is an illustrative layout without association to an actual card effect; use generic method labels beside card miniatures rather than fabricating named card abilities. Ensure exact arithmetic: selected methods contribute 4 Gold plus 2 cost reduction against a 6 Gold cost; only two 2-Gold sources selected, the third 2-Gold source unselected. Show an unselected source card with two independent choices Bow for Gold and Use Reaction — stays upright, no zero/dash production label pretending an actual quote. Removal discount selected, label Remove chosen card — cost reduced by 2. Destruction method unselected, label Destroy chosen Holding. Receipt: Gold contributed 4; Cost reduction 2; Gold still required 4; Exact payment. Consequence: Remove selected card from the game. Confirm payment plus Cancel action, no duplicate confirmation or duplicated source selector. Keep the source selection and final receipt together and make card identity readable. Do not show weapons producing Gold or invented named discounts: use generic source labels Holding / Payment Reaction / Removal discount. Complete wide screenshot.",
+      "paths": [
+        "/Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/gameplay-controls-concepts/assets/ui/gameplay-controls/images/payment-a-v1.png"
+      ],
+      "generated_path": "/Users/alfredo/.codex/generated_images/01a0b019-027d-7ee0-84a4-44aac565a142/exec-c347ed99-60aa-4f40-b109-4c363447c58a.png"
+    },
+    {
+      "id": "payment-b",
+      "prompt": "Use case: ui-mockup. Targeted correction of this payment layout only; preserve board, card faces and integrated tray. Remove all Virtuous Charity/opponent-payment/You gain Honor context. Use heading PAYMENT PREVIEW and small context text Example quote · 6 Gold cost. This is an illustrative layout without association to an actual card effect; use generic method labels beside card miniatures rather than fabricating named card abilities. Ensure exact arithmetic: selected methods contribute 4 Gold plus 2 cost reduction against a 6 Gold cost; only two 2-Gold sources selected, the third 2-Gold source unselected. Show an unselected source card with two independent choices Bow for Gold and Use Reaction — stays upright, no zero/dash production label pretending an actual quote. Removal discount selected, label Remove chosen card — cost reduced by 2. Destruction method unselected, label Destroy chosen Holding. Receipt: Gold contributed 4; Cost reduction 2; Gold still required 4; Exact payment. Consequence: Remove selected card from the game. Confirm payment plus Cancel action, no duplicate confirmation or duplicated source selector. Remove the original right sidebar's payment sources/amount controls and redundant confirmation. Keep only compact Example quote context there. Replace neon blue/green/red method ribbons with quiet brass outlines and one subtle selected underline. Do not show weapons producing Gold or invented named discounts: use generic source labels Holding / Payment Reaction / Removal discount. Complete wide screenshot.",
+      "paths": [
+        "/Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/gameplay-controls-concepts/assets/ui/gameplay-controls/images/payment-b-v1.png"
+      ],
+      "generated_path": "/Users/alfredo/.codex/generated_images/01a0b019-027d-7ee0-84a4-44aac565a142/exec-356cf822-4c2e-4ca7-8f24-d6e4955aebcb.png"
+    },
+    {
+      "id": "payment-c",
+      "prompt": "Use case: ui-mockup. Targeted correction of this payment layout only; preserve board, card faces and suggested-payment and editable-detail sidebar. Remove all Virtuous Charity/opponent-payment/You gain Honor context. Use heading PAYMENT PREVIEW and small context text Example quote · 6 Gold cost. This is an illustrative layout without association to an actual card effect; use generic method labels beside card miniatures rather than fabricating named card abilities. Ensure exact arithmetic: selected methods contribute 4 Gold plus 2 cost reduction against a 6 Gold cost; only two 2-Gold sources selected, the third 2-Gold source unselected. Show an unselected source card with two independent choices Bow for Gold and Use Reaction — stays upright, no zero/dash production label pretending an actual quote. Removal discount selected, label Remove chosen card — cost reduced by 2. Destruction method unselected, label Destroy chosen Holding. Receipt: Gold contributed 4; Cost reduction 2; Gold still required 4; Exact payment. Consequence: Remove selected card from the game. Confirm payment plus Cancel action, no duplicate confirmation or duplicated source selector. Keep the source selection and final receipt together and make card identity readable. Do not show weapons producing Gold or invented named discounts: use generic source labels Holding / Payment Reaction / Removal discount. Complete wide screenshot.",
+      "paths": [
+        "/Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/gameplay-controls-concepts/assets/ui/gameplay-controls/images/payment-c-v1.png"
+      ],
+      "generated_path": "/Users/alfredo/.codex/generated_images/01a0b019-027d-7ee0-84a4-44aac565a142/exec-a763574d-ec19-43f7-a53e-8d3cbc65831c.png"
+    },
+    {
+      "id": "choice-a",
+      "prompt": "Use case: ui-mockup. Edit the FIRST image only, preserving its sidebar choice layout, board and lacquer/brass aesthetic. The SECOND image is an exact source-card insert: replace the first image's fabricated/wrong En'you or Kitsu Fukui preview with this complete En'you scan; keep its monkey artwork, green border, full card face, title and text unchanged. Remove any Performer or Target labels inherited from Kitsu Fukui. Correct header to ADDITIONAL ENTRY COST and decider text to Your choice · Crane (omit the stray word State). Exact choice labels: Remove a hand card; Destroy a Sake token. Exact consequence: Removed from the game. Exact button: Confirm entry cost. Selected hand card is named Costly Feud, spelled correctly everywhere. Do not invent new card text or crop card faces. No unrelated top banner, no pass/cancel button for this mandatory entry decision. For integrated tray keep hand fully visible underneath; fit tray just above rather than crop the hand. Selection outline restrained, no neon. One full wide screenshot.",
+      "paths": [
+        "/Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/gameplay-controls-concepts/assets/ui/gameplay-controls/images/choice-a-v1.png",
+        "/Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/gameplay-controls-concepts/assets/ui/gameplay-controls/references/enyou.webp"
+      ],
+      "generated_path": "/Users/alfredo/.codex/generated_images/01a0b019-027d-7ee0-84a4-44aac565a142/exec-d73170de-432b-40a8-a6a7-ca0188672b7d.png"
+    },
+    {
+      "id": "choice-b",
+      "prompt": "Use case: ui-mockup. Edit the FIRST image only, preserving its integrated lower decision tray, board and lacquer/brass aesthetic. The SECOND image is an exact source-card insert: replace the first image's fabricated/wrong En'you or Kitsu Fukui preview with this complete En'you scan; keep its monkey artwork, green border, full card face, title and text unchanged. Remove any Performer or Target labels inherited from Kitsu Fukui. Correct header to ADDITIONAL ENTRY COST and decider text to Your choice · Crane (omit the stray word State). Exact choice labels: Remove a hand card; Destroy a Sake token. Exact consequence: Removed from the game. Exact button: Confirm entry cost. Selected hand card is named Costly Feud, spelled correctly everywhere. Do not invent new card text or crop card faces. No unrelated top banner, no pass/cancel button for this mandatory entry decision. For integrated tray keep hand fully visible underneath; fit tray just above rather than crop the hand. Selection outline restrained, no neon. One full wide screenshot.",
+      "paths": [
+        "/Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/gameplay-controls-concepts/assets/ui/gameplay-controls/images/choice-b-v1.png",
+        "/Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/gameplay-controls-concepts/assets/ui/gameplay-controls/references/enyou.webp"
+      ],
+      "generated_path": "/Users/alfredo/.codex/generated_images/01a0b019-027d-7ee0-84a4-44aac565a142/exec-44aeeb5e-267a-4ce4-92cd-ccca4f70a940.png"
+    },
+    {
+      "id": "choice-c",
+      "prompt": "Use case: ui-mockup. Edit the FIRST image only, preserving its on-table card selection and sidebar, board and lacquer/brass aesthetic. The SECOND image is an exact source-card insert: replace the first image's fabricated/wrong En'you or Kitsu Fukui preview with this complete En'you scan; keep its monkey artwork, green border, full card face, title and text unchanged. Remove any Performer or Target labels inherited from Kitsu Fukui. Correct header to ADDITIONAL ENTRY COST and decider text to Your choice · Crane (omit the stray word State). Exact choice labels: Remove a hand card; Destroy a Sake token. Exact consequence: Removed from the game. Exact button: Confirm entry cost. Selected hand card is named Costly Feud, spelled correctly everywhere. Do not invent new card text or crop card faces. No unrelated top banner, no pass/cancel button for this mandatory entry decision. For integrated tray keep hand fully visible underneath; fit tray just above rather than crop the hand. Selection outline restrained, no neon. One full wide screenshot.",
+      "paths": [
+        "/Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/gameplay-controls-concepts/assets/ui/gameplay-controls/images/choice-c-v1.png",
+        "/Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/gameplay-controls-concepts/assets/ui/gameplay-controls/references/enyou.webp"
+      ],
+      "generated_path": "/Users/alfredo/.codex/generated_images/01a0b019-027d-7ee0-84a4-44aac565a142/exec-65245397-78ed-4220-a048-c7eeab1297d6.png"
+    }
+  ]
+}

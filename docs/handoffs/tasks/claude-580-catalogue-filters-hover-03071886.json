@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Card Library and Deck Builder: Focus Value (Fate) and Action Type (Dynasty/Fate) filters, full-size WebP hover scans (>=1.5x the viewer face), and Deck Builder All Cards / Dynasty Deck / Fate Cards view toggles. Shared change: besides UI files it touches client catalogue data/probes, the collection test project (tests/L5R.Client.Collection.Tests) and tools/previews/package.py (resolve bash from PATH on Windows); no engine rules or client/server messages change. Mendon has standing cross-lane authority.",
+  "validation": "dotnet build 0 warnings/errors; tools/check.sh --skip-client passed incl. 49 collection/data assertions (13 new action-parser); native Windows probes: Library 72, Deck Builder 51, My Collection 35 assertions passed with inspected captures. Fixed stray ';;' flagged by Changed C# formatting CI. Native Windows graphical human play not claimed.",
+  "remaining": "None beyond CI and merge; Alfredo review is advisory. Interrupt-only cards list under None (not a requested choice).",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/580",
+  "branch": "claude/580-catalogue-filters-hover",
+  "updated": "2026-10-02T20:37:58.095686+00:00"
+}

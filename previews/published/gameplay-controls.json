@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "repository": "alfredoh7/l5r-emperor",
+  "source_pr": 570,
+  "source_commit": "d8a27ef2e17c5e2a58f5b403122e1fc6f65ea3ec",
+  "title": "Gameplay Choices and Payment Controls",
+  "slug": "gameplay-controls",
+  "tag": "preview-pr570-d8a27ef2e1-r2-windows",
+  "asset": "L5R-Review-pr570-d8a27ef2e1-r2-Windows.zip",
+  "bytes": 2131633880,
+  "sha256": "98aec32902c53be002f751c4f66e65037a70d9ff2f357fd9f67e966a9bcfac9b",
+  "folder": "L5R-Review-pr570-d8a27ef2e1-r2",
+  "launcher": "Start Review.cmd",
+  "reviewer": "mdornbrook"
+}

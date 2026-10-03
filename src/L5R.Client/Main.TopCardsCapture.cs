@@ -188,7 +188,12 @@ public partial class Main
             SupportRequire(!string.IsNullOrWhiteSpace(_lookPanel.DropReason(illegal.Position, "hand")), "Ineligible engine reason missing");
             await DragLook(illegal.Position, "hand", legal: false);
             await DragLook(0, "hand", capture: "-drag-hand"); SupportRequire(!_lookPanel.ConfirmButton.Disabled, "Required count never satisfied");
-            await DragLook(2, "hand", legal: false); await SupportCapture("-take");
+            // A full single-slot tray accepts the drop as a swap with its sole occupant (720eeb91): card 2 takes the hand slot, card 0 returns to card 2's old spot.
+            await DragLook(2, "hand");
+            SupportRequire(_lookPanel.Destinations[2] == "hand" && _lookPanel.Destinations[0] == "top", "Drop onto the full hand tray did not swap with its occupant");
+            await SupportCapture("-take");
+            // Undo reverts one action at a time: the swap first (card 0 returns to the hand slot), then card 0's own placement.
+            await SupportClick(_lookPanel.UndoButton); SupportRequire(_lookPanel.Destinations[0] == "hand" && _lookPanel.Destinations[2] == "top", "Undo did not revert the swap");
             await SupportClick(_lookPanel.UndoButton); SupportRequire(_lookPanel.ConfirmButton.Disabled && _lookPanel.Destinations[0] == "top", "Undo did not restore required choice");
             await SupportClick(_lookPanel.Face(0)); await SupportClick(_lookPanel.Tray("hand")); await EventFrames(15);
             SupportRequire(_lookPanel.Destinations[0] == "hand", "Click-to-place alternative failed"); await ConfirmLook();

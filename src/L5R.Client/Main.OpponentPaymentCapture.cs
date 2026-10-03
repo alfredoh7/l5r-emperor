@@ -96,7 +96,7 @@ public partial class Main
             var zeroSource = Self.Home.First(c => Production(c, Self) > 0 && !c.Bowed);
             await ClickPaymentTable(_tiles.Single(t => t.Card.Id == zeroSource.Id));
             SupportRequire(_sources.Count == 0 && View.Version == version, "Zero payment silently selected sources");
-            var source = _inspector.FindChildren("*", "Button", true, false).OfType<DecisionSourceFace>().Single();
+            var source = _inspector.FindChildren("*", "Button", true, false).OfType<DecisionSourceFace>().First();
             var point = source.GetGlobalRect().GetCenter(); PushCaptureMouse(new InputEventMouseMotion { Position = point, GlobalPosition = point });
             for (var i = 0; i < 240 && !ContainsEitherPreview(GetTree().Root); i++) await EventFrames(1);
             SupportRequire(ContainsEitherPreview(GetTree().Root), "Payment source has no large hover preview; hovered=" + GetViewport().GuiGetHoveredControl()?.GetPath() + "; focus=" + GetWindow().HasFocus());
@@ -119,8 +119,8 @@ public partial class Main
             await ClickPaymentTable(_tiles.Single(t => t.Card.Id == tableSource.Id));
             SupportRequire(_sources.Contains(tableSource.Id) != wasSelected && View.Version == version, "Table source did not toggle the reviewed payment");
             await ClickPaymentTable(_tiles.Single(t => t.Card.Id == tableSource.Id));
-            var keyboardSource = _inspector.FindChildren("*", "Button", true, false).OfType<PaymentSourceFace>().Last(b => !b.Disabled);
-            var keyboardId = keyboardSource.Card.Id; var keyboardSelected = _sources.Contains(keyboardId);
+            var keyboardSource = _inspector.FindChildren("*", "Button", true, false).OfType<CheckBox>().Last(b => !b.Disabled);
+            var keyboardId = keyboardSource.GetMeta("payment_source_id").AsString(); var keyboardSelected = _sources.Contains(keyboardId);
             keyboardSource.GrabFocus(); await EventFrames(10);
             GetViewport().PushInput(new InputEventKey { Keycode = Key.Enter, Pressed = true });
             GetViewport().PushInput(new InputEventKey { Keycode = Key.Enter, Pressed = false }); await EventFrames(10);
@@ -130,7 +130,7 @@ public partial class Main
             SupportRequire(_sources.Contains(keyboardId) == keyboardSelected, "Keyboard source did not retain focus after rebuilding");
             var selectedSources = _sources.ToArray();
             foreach (var id in selectedSources)
-                await SupportClick(_inspector.FindChildren("*", "Button", true, false).OfType<PaymentSourceFace>().Single(b => b.Card.Id == id));
+                await SupportClick(_inspector.FindChildren("*", "Button", true, false).OfType<CheckBox>().Single(b => b.GetMeta("payment_source_id", "").AsString() == id));
             SupportRequire(_paymentConfirm!.Disabled, "Underfunded payment can be confirmed");
             await SupportCapture("-short");
             await SupportClick(OpponentPaymentButton("OpponentPaymentMax"));
@@ -138,7 +138,7 @@ public partial class Main
             await SupportCapture("-cap");
             _session.SwitchPracticeSeat(); await EventFrames(15);
             SupportRequire(View.PendingOpponentPayment is { ViewerDecides: false, Gold: null, Outcomes: null } && _chosen is null && _paymentConfirm is null, "Waiting seat leaked a private selection or quote");
-            SupportRequire(!_inspector.FindChildren("*", "Button", true, false).OfType<PaymentSourceFace>().Any(), "Waiting seat rendered payer sources");
+            SupportRequire(!_inspector.FindChildren("*", "Button", true, false).OfType<CheckBox>().Any(), "Waiting seat rendered payer sources");
             await SupportCapture("-waiting");
             _session.SwitchPracticeSeat(); await EventFrames(15);
             SupportRequire(_chosen?.Command?.GoldAmount == 0 && _sources.Count == 0, "Seat switch retained private stale choices");

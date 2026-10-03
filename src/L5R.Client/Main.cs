@@ -88,10 +88,26 @@ public partial class Main : Node
         { SetProcessInput(false); AddChild(new BattleEscalationReview(_capturePath)); SetProcess(false); return; }
         if (_captureMode == "threshold-reference" && _capturePath is not null)
         { SetProcessInput(false); SetProcessUnhandledInput(false); SetProcessUnhandledKeyInput(false); AddChild(new ThresholdArtReview(_capturePath)); SetProcess(false); return; }
+        if (_captureMode is "catalogue-filters-review" or "deck-filters-review" or "my-collection-review" or "deck-collection-review" || OS.GetCmdlineUserArgs().Any(a => a is "--catalogue-filters-review" or "--deck-filters-review" or "--my-collection-review" or "--deck-collection-review"))
+        {
+            SetProcessInput(false); SetProcessUnhandledInput(false); SetProcessUnhandledKeyInput(false); SetProcess(false);
+            var review = new CatalogueControlsReview(); AddChild(review); review.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.FullRect); return;
+        }
         LoadSeat();
         _table = new TableArtStage { ReviewMode = false }; AddChild(_table);
         BuildShell();
         InitializeFrontend();
+        if (OS.GetCmdlineUserArgs().Contains("--gameplay-controls-review") || _captureMode is "gameplay-controls-review" or "gameplay-controls-choices-review" or "gameplay-controls-optional-review")
+        {
+            var startupCapture = _capturePath; _capturePath = null;
+            var checks = OS.GetCmdlineUserArgs().FirstOrDefault(a => a.StartsWith("--controls-checks=", StringComparison.Ordinal))?[18..];
+            _ = StartGameplayControlsReview(checks, startupCapture); return;
+        }
+        if (_capturePath is not null && _captureMode.StartsWith("published-interactions-", StringComparison.Ordinal))
+        {
+            var review = new InteractionReview(this, _captureMode, _capturePath);
+            _capturePath = null; AddChild(review); return;
+        }
         if (OS.GetCmdlineUserArgs().Contains("--open-battlefield-review") || _captureMode is "open-battlefield-review" or "open-battlefield-correction-review")
         {
             var startupCapture = _capturePath; _capturePath = null; StartOpenBattlefieldReview();
@@ -104,7 +120,7 @@ public partial class Main : Node
             if (startupCapture is not null) Callable.From(() => { _ = CaptureProvinceStartup(startupCapture); }).CallDeferred();
             return;
         }
-        if (OS.GetCmdlineUserArgs().Contains("--duel-match-review")) { StartMatchDuelCapture(); return; }
+        if (_captureMode.StartsWith("duel-followup-", StringComparison.Ordinal) || OS.GetCmdlineUserArgs().Contains("--duel-match-review")) { StartMatchDuelCapture(); return; }
         if (OS.GetCmdlineUserArgs().Contains("--duel-transition-review")) { StartTransitionReview(); return; }
         if (_capturePath is null || _captureMode.StartsWith("menu", StringComparison.Ordinal)) return;
         var published = _capturePath is null || _captureMode.StartsWith("published", StringComparison.Ordinal);
@@ -358,7 +374,7 @@ public partial class Main : Node
         FitCopyReviewControls();
         FitMovementReviewControls();
         FitAttackReviewControls();
-        FitEventDecisions();
+        FitEventDecisions(); FitCandidateChoices();
         _status.Visible = false;
         _timeline.Position = new Vector2(344, 12); _timeline.Size = new Vector2(PhaseTrack.WidthForFrame(_layoutWidth - SidebarWidth - 30 - 344), 100);
         _menu.Position = new Vector2(_layoutWidth - 300, 28); _menu.Size = new Vector2(275, 40);
@@ -446,6 +462,12 @@ public partial class Main : Node
             if (MenuVisible && _titleMenu!.Page == "options") _titleMenu.ShowOptions();
             GetViewport().SetInputAsHandled();
         }
+        else if (_seatHandoff is not null && IsInstanceValid(_seatHandoff))
+        {
+            // A modal cancellation must not also open the background menu.
+            if (key.Keycode == Key.Escape) _seatHandoff.QueueFree();
+            GetViewport().SetInputAsHandled();
+        }
         else if (MenuVisible || DuelDemoOpen || PracticeVisible || _transitionReview || MatchDuelOpen) return;
         else if (key.Keycode == Key.Escape && _shownPreview is not null) { HideShownPreview(); GetViewport().SetInputAsHandled(); }
         else if (key.Keycode == Key.Escape && _shownOpen) { ToggleShownCards(false); GetViewport().SetInputAsHandled(); }
@@ -529,7 +551,7 @@ public partial class Main : Node
 
     private CardTile Tile(CardView card, bool compact, float width, float height)
     {
-        var tile = new CardTile(card, compact, SelectCard, _ => { }) { CustomMinimumSize = new Vector2(width, card.Zone == Zone.Hand ? height : PlaneHeight(height)), FaceHeight = height - 12, ReducedMotion = _reducedMotion, Highlighted = _selected?.Id == card.Id, SelectedSource = _sources.Contains(card.Id), PreviousBowed = Time.GetTicksMsec() - _bowChangedAt < 180 ? _previousBows.GetValueOrDefault(card.Id, card.Bowed) : card.Bowed, ContextualGoldProduction = Production(card, View.Players.Single(p => p.Id == card.OwnerId)) };
+        var tile = new CardTile(card, compact, SelectCard, _ => { }) { CustomMinimumSize = new Vector2(width, card.Zone == Zone.Hand ? height : PlaneHeight(height)), FaceHeight = height - 12, ReducedMotion = _reducedMotion, Highlighted = _selected?.Id == card.Id, SelectedSource = _sources.Contains(card.Id) || _chosen is not null && QuoteFor(_chosen)?.Sources?.Any(m => m.CardId == card.Id && _sources.Contains(m.Id)) == true, PreviousBowed = Time.GetTicksMsec() - _bowChangedAt < 180 ? _previousBows.GetValueOrDefault(card.Id, card.Bowed) : card.Bowed, ContextualGoldProduction = Production(card, View.Players.Single(p => p.Id == card.OwnerId)) };
         tile.TokenSourceName = id => FindCard(id)?.Definition?.Name;
         tile.ContextHelp = card.AttachedTo is { } parent ? "Attached to " + (FindCard(parent)?.Definition?.Name ?? parent) + ". Moves with this unit." : card.Zone == Zone.Battlefield ? $"At {(card.ProvinceIndex is int at ? BattlefieldName(at) : "a battlefield")}'s battlefield. " + RulesHelp.Topic("force") : card.Zone == Zone.Home ? "At home. Not assigned to a province. " + (card.Bowed ? RulesHelp.Topic("bow") : "") : card.Zone == Zone.Hand ? "In your hand. Select to see legal actions and targets." : "Select to inspect available actions.";
         if (card.Zone == Zone.Province && card.ProvinceIndex is int province)
@@ -548,7 +570,7 @@ public partial class Main : Node
     {
         if (_shownOpen) ToggleShownCards(false);
         if (_session.Busy || PresentationBusy) return;
-        if (SelectEventCard(card)) return;
+        if (SelectEventCard(card) || SelectPendingCandidate(card)) return;
         if (SelectMultiCard(card)) return;
         if (AttackTargetActive && card.Zone is Zone.Province or Zone.Region && card.ProvinceIndex is { } attackProvince)
         { if (AttackProvinceTarget(card.OwnerId, attackProvince)) ChooseAttackTarget(AttackChoice.Province, province: attackProvince); return; }
@@ -604,7 +626,7 @@ public partial class Main : Node
             tile.Highlighted |= GenericDecisionActive && tile.Card.Id == View.PendingChoice?.CardId;
             tile.LegalTarget |= GenericDecisionActive && tile.Card.Id == View.PendingChoice?.CardId;
             tile.LegalTarget |= View.PendingChoice?.Type == "beforeActionReaction" && tile.Card.Id == View.PendingChoice.CardId;
-            tile.DecisionSelected |= GenericDecisionActive && tile.Card.Id == _decisionSelection?.Command?.TargetId;
+            tile.DecisionSelected |= GenericDecisionActive && (tile.Card.Id == _decisionSelection?.Command?.TargetId || _decisionSelection?.DecisionCandidateIds?.Contains(tile.Card.Id) == true);
             tile.LegalTarget |= _chosen?.TargetIds?.Contains(tile.Card.Id) == true || supportTargets.Contains(tile.Card.Id);
             tile.LegalTarget |= MultiTargetActive && MultiUpFront.Any(s => s.Slot == _multiActiveSlot && s.CardIds.Contains(tile.Card.Id));
             tile.ChosenTarget = _chosen?.Command?.TargetId == tile.Card.Id || _assignments.ContainsKey(tile.Card.Id) || MultiTargetActive && MultiSelectedIds.Contains(tile.Card.Id);
@@ -628,12 +650,17 @@ public partial class Main : Node
         _intentOverlay?.QueueRedraw();
     }
 
-    private void Choose(ActionOption option)
+    // Core builds each targeted action's command with its first legal target filled in. The player, not the client or that default, picks the target (issue #581):
+    // the panel starts on "Choose a target…". Attack targets and support cards have their own target flows and keep theirs.
+    private bool NeedsTargetPick(ActionOption option) =>
+        option is { Type: "equip" or "playStrategy" or "useAbility", Command: { CardIds: null, TargetId: not null }, TargetIds: { Length: > 0 } } && !HasAttackTargets(option)
+        && !(option.CardId is { } sourceId && FindCard(sourceId) is { } source && IsSupportCard(source));
+
+    private void Choose(ActionOption option, bool keepTarget = false)
     {
         if (_shownOpen) ToggleShownCards(false);
         if (!option.Enabled || _session.Busy || PresentationBusy) return;
-        if (!HasAttackTargets(option) && option.Type is "equip" or "playStrategy" or "useAbility" && option.Command is { CardIds: null, TargetId: null } command && option.TargetIds?.FirstOrDefault() is string target)
-            option = option with { Command = command with { TargetId = target } };
+        if (!keepTarget && NeedsTargetPick(option)) option = option with { Command = option.Command! with { TargetId = null } };
         ResetDecisionSelection();
         if (option.Movement is not null && option.Command is { } moveCommand) option = option with { Command = moveCommand with { Province = null } };
         _attackChoice = AttackChoice.Unselected;
@@ -663,9 +690,8 @@ public partial class Main : Node
 
     private static string ShortName(CardView card) => card.Definition?.Name.Replace("training ", "").Replace("Training ", "") ?? "Hidden card";
     // The engine's own figure (CardView.GoldProduced, which also covers a Personality that can bow for Gold while a cost is being paid: Yoritomo
-    // Sakuma, issue #338) when it sends one; the printed-card fallback is for payloads from an older engine.
-    private static int Production(CardView card, PlayerView owner) => card.GoldProduced ?? ((card.Definition?.Effect == "crane-gold" && owner.Clan == "Crane" || card.Definition?.Effect == "dragon-gold" && owner.Clan == "Dragon") ? 3 : card.Definition?.GoldProduction ?? 0);
-    private static int UnitForce(CardView unit, PlayerView owner) => (unit.Bowed ? 0 : unit.Force) + owner.Home.Concat(owner.Army).Where(c => c.AttachedTo == unit.Id && c.Definition?.Type == CardType.Follower && !c.Bowed).Sum(c => c.Force);
+    // Sakuma, issue #338). The client holds no production rule of its own (issue #578); payment sources come from the quote (PaymentMethods).
+    private static int Production(CardView card, PlayerView owner) => card.GoldProduced ?? 0;
     private CardView? FindCard(string id) => View.Players.SelectMany(p => p.Home.Concat(p.Army).Concat(p.Hand).Concat(p.Discard).Concat(p.RemovedFromGame).Concat(p.EventsInPlay ?? []).Concat(p.Celestials ?? []).Concat(p.Provinces.SelectMany(ProvincePresentation.Cards)).Append(p.Stronghold)).FirstOrDefault(c => c.Id == id);
     private static string HumanPhase(Phase phase) => phase switch { Phase.AttackDeclaration => "Declare an attack", Phase.InfantryDeclaration => "Assign attackers", Phase.DefenseAssignment => "Assign defenders", Phase.BattleSelection => "Choose a battlefield", Phase.DynastyDiscard => "Dynasty · discard", _ => phase.ToString() };
     private void SetNotice(string message) { _matchDuel?.Notify(message); _notice.Text = message; _notice.TooltipText = message; if (MenuVisible) _titleMenu!.Notify(message); }

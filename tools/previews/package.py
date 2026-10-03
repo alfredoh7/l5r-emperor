@@ -171,7 +171,7 @@ def verify_source(source, spec):
 def package(spec_path, source, output):
     spec = read_spec(spec_path)
     head = verify_source(source, spec)
-    subprocess.run(["bash", "tools/export.sh", "windows"], cwd=source, check=True)
+    subprocess.run([shutil.which("bash") or "bash", "tools/export.sh", "windows"], cwd=source, check=True)
     export_zip = source / "artifacts/windows/L5R-Emperor-Windows.zip"
     export_receipt = json.loads((source / "artifacts/checks/package-manifest.json").read_text())
     match = next(item for item in export_receipt if item["path"] == "artifacts/windows/L5R-Emperor-Windows.zip")

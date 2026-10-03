@@ -168,6 +168,8 @@ public sealed partial class MatchEngine
         if (pending.DelayDecision) { ResolveDelayDecision(command, pending); return; } // The delay Focus Effects' "(now)" choice (EmperorRulingR2Cards.cs).
         if (IsMechDFocusChoice(pending.AbilityId)) { ResolveMechDFocusChoice(command, pending); return; } // Broken Cipher's transfer (issue #501, EmperorMechD.cs)
         var focus = Card(pending.FocusCardId);
+        var evidenceStart = _state.Events.Count;
+        var evidenceSource = ViewCard(focus);
         var destroys = pending.AbilityId is "crimson-mark-focus" or "superior-opponent-focus";
         var attachSelf = IsAttachSelfFocusEffect(pending.AbilityId);
         Require(command.Choice != "decline" || pending.AbilityId != "crippled-sensei-focus", "Choose a player to lose 2 Honor.");
@@ -216,6 +218,7 @@ public sealed partial class MatchEngine
                 Emit("focusEffectTook", $"{Player(pending.PlayerId).Name} put {Definition(taken).Name} into their hand ({Definition(focus).Name}).", pending.PlayerId, taken.Id);
             }
         }
+        RecordFocusChoiceBeat(evidenceStart, evidenceSource);
         _state.PendingChoice = null; _state.PendingFocusChoice = null;
         ContinueDuelFocusEffects(pending.Index + 1);
     }

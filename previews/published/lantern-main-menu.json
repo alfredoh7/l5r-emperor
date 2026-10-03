@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "repository": "alfredoh7/l5r-emperor",
+  "source_pr": 471,
+  "source_commit": "82bf8f659bdcbdd3f7a9ea2634c43a7adf31b8f9",
+  "title": "B6 Lantern Study Main Menu",
+  "slug": "lantern-main-menu",
+  "tag": "preview-pr471-82bf8f659b-r1-windows",
+  "asset": "L5R-Review-pr471-82bf8f659b-r1-Windows.zip",
+  "bytes": 1934119645,
+  "sha256": "9020cef9ad8ce97ea1fda7ea36f8f4eef99927c1bb6be8fb2274bb833b81a8bd",
+  "folder": "L5R-Review-pr471-82bf8f659b-r1",
+  "launcher": "Start Review.cmd",
+  "reviewer": "mdornbrook"
+}

@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Deepen governance-lite reviewers (tooling/process, no game code): no role skipping, versioned-contract (ContentVersion) check in every profile, Files read/Not read reporting, search-before-read rules; Claude agent wrappers and mirrored Codex skill files updated; measurement record in docs/decisions.",
+  "validation": "tools/hooks unittest discover: 27 OK; sync_skills --check OK. Agent experiment on PR 584: 11 reviewer runs, results in docs/decisions/2026-10-03-governance-reviewer-depth.md. Final profile edit not re-measured.",
+  "remaining": "Model pins and omitClaudeMd not adopted (need fresh session / more samples); rules-vs-core RULINGS.md read not re-measured; #584 follow-ups (ContentVersion bump, card-in-province ordering, 2000-id pool) not addressed here.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/608",
+  "branch": "claude/608-governance-reviewer-depth",
+  "updated": "2026-10-03T17:10:34.668614+00:00"
+}

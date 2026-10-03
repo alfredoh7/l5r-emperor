@@ -1,0 +1,14 @@
+Godot Engine v4.7.2.stable.mono.official.ed1daf0bf - https://godotengine.org
+OpenGL API 4.1 Metal - 90.5 - Compatibility - Using Device: Apple - Apple M1 Max
+
+FORTRESS_BATCHES: 288
+FORTRESS_HALL_B3: sparse hall; separate Meshy fixtures; source map/scenery; synchronized firelight with reduced-motion support.
+MAT_TEXTURE: res://Art/navy-mat-topaz-4x.webp 6688x3764; extra weave opt-in only.
+WAR_ROOM_LIVE: B3 fortress hall; original cloth/frame; card camera and rules unchanged. Presentation-clock firelight and separate Meshy lanterns.
+MULTI_TARGETS_FOCUS_REQUIRED: activate this game window for native table input.
+CARD_MOTION: 4 permitted card transfers at version 1.
+CARD_MOTION: 1 permitted card transfers at version 1.
+CARD_MOTION: 1 permitted card transfers at version 2.
+CARD_MOTION: 1 permitted card transfers at version 1.
+MULTI_TARGETS_PASS: native board/keyboard selection, count bounds, ordered arrows, exact engine effects, conditional follow-ups, independent slots, optional zero, hand privacy, seat/busy reset and per-target reactions
+WAR_ROOM_PROJECTION_PASS: 1605 visible samples, max 0,000371 px; 845 offscreen/behind-eye samples excluded.

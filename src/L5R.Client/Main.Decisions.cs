@@ -11,7 +11,7 @@ public partial class Main
     private bool _reviewingAlternativeCost;
     private bool _alternativeCostConfirmed;
     private bool GenericDecisionActive => View.WinnerId is null && !EventDecisionActive &&
-        View.PendingChoice?.Type is "effectChoice" or "preservingHonor" or "rinShame" or "conqueror" or "declineStraighten" or "forcedDiscard" or "beforeBattleOrder" or "beforeBattleOptional" or "encircledOrder" or "encircledSelect";
+        View.PendingChoice?.Type is "effectChoice" or "preservingHonor" or "rinShame" or "conqueror" or "declineStraighten" or "forcedDiscard" or "beforeBattleOrder" or "beforeBattleOptional" or "encircledOrder" or "encircledSelect" or "eventChoice" or "honorLossDecision" or "entryCostDecision" or "honorChangeReaction" or "killingGroundsSelect" or "infiltratorStraighten";
     private bool DecisionCanSubmit => !_session.Busy && !PresentationBusy && (!_session.Online ||
         _session.Connected && !(_session.Snapshot?.PlayersConnected?.Any(p => !p) ?? false));
 
@@ -87,6 +87,7 @@ public partial class Main
             if (!_session.Online && !_autoOpponent) _decisionActions.AddChild(SidebarSkin.Button("Pass device to other player", SwitchSeat));
             return true;
         }
+        if (pending is not null && RenderCandidateChoices(options)) return true;
         var rows = new List<(ActionOption Option, Button Button)>();
         var confirm = SidebarSkin.Button("Confirm choice", CommitDecision, true);
         foreach (var option in options)
@@ -98,6 +99,8 @@ public partial class Main
             button = SidebarSkin.Button(option.AlternativeCost?.Label ?? option.Label, () =>
             {
                 _decisionSelection = option;
+                if (pending is not null) { _chosen = null; _sources.Clear(); }
+                if (QuoteFor(option) is not null) { _chosen = option; ResuggestSources(); RenderInspector(); return; }
                 foreach (var row in rows)
                 {
                     var selected = ReferenceEquals(row.Option, option);
@@ -114,6 +117,11 @@ public partial class Main
         }
         if (_decisionSelection is not null && !options.Contains(_decisionSelection)) _decisionSelection = null;
         confirm.Disabled = _decisionSelection is null || !DecisionCanSubmit;
+        if (_decisionSelection is { } selectedPayment && QuoteFor(selectedPayment) is not null)
+        {
+            var (_, ready) = RenderGoldPanel(selectedPayment);
+            confirm.Disabled |= !ready;
+        }
         _decisionActions.AddChild(confirm);
         if (pending is null) _decisionActions.AddChild(SidebarSkin.Button("Back to target", () => { _reviewingAlternativeCost = false; _decisionSelection = null; RenderInspector(); }));
         else if (_decisionSelection is not null) _decisionActions.AddChild(SidebarSkin.Button("Clear selection", () => { _decisionSelection = null; RenderInspector(); Highlight(); }));
@@ -150,6 +158,11 @@ public partial class Main
         if (GenericDecisionActive)
         {
             if (View.PendingChoice!.PlayerId != View.ViewerId || View.PriorityPlayerId != View.ViewerId) return;
+            if (QuoteFor(selected) is { } quote)
+            {
+                if (!PaymentSelectionReady(AmountFor(selected, quote), quote)) return;
+                command = command with { SourceIds = _sources.ToArray() };
+            }
             _ = Submit(command); // Pending answers are already complete, including any CardIds or Choice.
         }
         else if (_reviewingAlternativeCost && _chosen?.Command is { } draft)
@@ -164,7 +177,7 @@ public partial class Main
             if (draft.TargetId is { } target && selected.TargetIds?.Contains(target) != true) return;
             var reviewed = selected with { Command = command with { TargetId = draft.TargetId } };
             // Gold still goes through the existing engine-quoted panel when the ability has both kinds of cost.
-            if (QuoteFor(reviewed) is not null) { _reviewingAlternativeCost = false; Choose(reviewed); _alternativeCostConfirmed = true; RenderInspector(); return; }
+            if (QuoteFor(reviewed) is not null) { _reviewingAlternativeCost = false; Choose(reviewed, keepTarget: true); _alternativeCostConfirmed = true; RenderInspector(); return; }
             _ = Submit(reviewed.Command!);
         }
     }

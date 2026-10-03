@@ -107,8 +107,10 @@ public partial class Main
             await SupportClick(StabilizationButtons(_shownPreview!).Single(b => b.Text == "Close inspection"));
             await SupportClick(_shownToggle); SupportRequire(!_shownOpen, $"Minimize failed: panel={_shownPanel.GetGlobalRect()} min={_shownPanel.GetCombinedMinimumSize()} scroll={_shownScroll.Size}/{_shownScroll.GetCombinedMinimumSize()} toggle={_shownToggle.GetGlobalRect()} hover={GetViewport().GuiGetHoveredControl()?.GetPath()}");
             SupportRequire(_session.Snapshot.View.Version == version, "Inspection sent a game command");
-            await NextShownReveal(); SupportRequire(ShownUnread == 1 && !_shownOpen, "Incoming show lost its minimized notification");
+            // PR #434: an incoming show forces the panel open and read, so the recipient cannot miss it (the capture used to expect a minimized panel with one unread).
+            await NextShownReveal(); SupportRequire(_shownOpen && ShownUnread == 0 && OpponentShows.Length == 2, "An incoming show was not forced open and read");
             await SaveShownCapture("-new");
+            await SupportClick(_shownToggle); SupportRequire(!_shownOpen && ShownUnread == 0, "Minimize after the forced-open reveal failed");
             await SupportClick(_shownToggle); SupportRequire(_shownOpen && ShownUnread == 0 && OpponentShows.Length == 2, "Maximize lost history or unread state");
             row = _shownList.GetChildren().OfType<ShownCardEntry>().First(); row.GrabFocus(); await EventFrames(8);
             SupportRequire(_shownPreview is not null, "Keyboard focus did not enlarge card"); await SaveShownCapture("-history"); HideShownPreview();

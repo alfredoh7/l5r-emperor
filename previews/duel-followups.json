@@ -1,0 +1,76 @@
+{
+  "schema_version": 1,
+  "slug": "duel-followups",
+  "title": "Live Duel Concede and Focus Effect Choices",
+  "source_pr": 466,
+  "source_commit": "87a4eb7d7b7f63e4a093b13d40f1ce377fc51312",
+  "revision": 5,
+  "reviewer": "mdornbrook",
+  "summary": "Final button-corner correction across shared lacquer, Practice, Fallen gallery and phase help, plus the approved live-duel Concede and Focus choices. Please review before merging.",
+  "review_steps": [
+    "This revision replaces revision 3 (and unannounced validation candidate 4). Inspect the transparent corners on shared buttons, including Menu and Concede, keyboard focus, Practice Setup, Fallen gallery controls and the circular phase-help badge. Original gold borders and opaque button faces should remain intact.",
+    "Open Start Review.cmd. The game prepares a real Disreputable Deal decision; no match or deck setup is needed. Allow the duel entrance to finish.",
+    "Inspect the source, select a candidate, then Return to hand. Selection alone should not submit. Try Take no card on a fresh launch.",
+    "Open Other previews/Concede Match.cmd. Choose Menu > Concede match. Escape or Keep playing must preserve the duel; confirmation must end the whole match.",
+    "Try required straightening, attaching, destroying an attachment, Honor or Draw, two consecutive choices, and the crowded tray. After resolving, use Duel details to review the source-linked outcome, then Continue back to the same match.",
+    "Use Other Seat to inspect the waiting view. Menu > Switch seat must hide private cards until Reveal this seat. Reduced Motion opens the same decision without cinematic movement.",
+    "Record UI, QoL or rules feedback on PR #466. Alfredo approved the concepts; implementation acceptance and merge remain pending your review."
+  ],
+  "known_limitations": [
+    "Review candidate only; nothing is merged automatically. Mendon\u2019s rules-sensitive review and native Windows graphical play remain open.",
+    "Built from main de672f58 plus #448. Other unmerged UI and interaction preview PRs remain separate.",
+    "Prepared positions use real engine choices with manual seats. Close and reopen a launcher to reset. These fixtures do not modify the pinned Lion/Crane decks.",
+    "Windows package/runtime and launcher CI are separate from human graphical playtesting.",
+    "An auxiliary legacy static-art check reports a 0.50006104-pixel projection mismatch on both this branch and unchanged main. Live match, sandbox and transition checks pass; details are in the PR."
+  ],
+  "scenarios": [
+    {
+      "name": "Start Review",
+      "mode": "duel-followup-discard"
+    },
+    {
+      "name": "Other previews/Concede Match",
+      "mode": "duel-followup-concede"
+    },
+    {
+      "name": "Other previews/Other Seat",
+      "mode": "duel-followup-discard-opponent"
+    },
+    {
+      "name": "Other previews/Concede Other Seat",
+      "mode": "duel-followup-concede-opponent"
+    },
+    {
+      "name": "Other previews/Crowded Tray",
+      "mode": "duel-followup-crowded"
+    },
+    {
+      "name": "Other previews/Attach",
+      "mode": "duel-followup-attach"
+    },
+    {
+      "name": "Other previews/Required Straighten",
+      "mode": "duel-followup-straighten"
+    },
+    {
+      "name": "Other previews/Destroy Attachment",
+      "mode": "duel-followup-destroy"
+    },
+    {
+      "name": "Other previews/Honor or Draw",
+      "mode": "duel-followup-effect"
+    },
+    {
+      "name": "Other previews/Consecutive Choices",
+      "mode": "duel-followup-multiple"
+    },
+    {
+      "name": "Other previews/Reduced Motion",
+      "mode": "duel-followup-discard-reduced"
+    },
+    {
+      "name": "Open Full Game",
+      "mode": null
+    }
+  ]
+}

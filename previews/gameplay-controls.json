@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "slug": "gameplay-controls",
+  "title": "Gameplay Choices and Payment Controls",
+  "source_pr": 570,
+  "source_commit": "d8a27ef2e17c5e2a58f5b403122e1fc6f65ea3ec",
+  "revision": 2,
+  "reviewer": "mdornbrook",
+  "summary": "Alfredo approved A\u2019s grouped payment methods with C\u2019s receipt, and B\u2019s candidate tray with A\u2019s source context and C\u2019s quiet selection. Please review the native implementation of the remaining #499 controls before merging.",
+  "review_steps": [
+    "Extract the whole ZIP and open Start Review.cmd. Choose a scenario in the top picker; Restart restores its real engine seed.",
+    "Payments: try Bow plus Reaction from Seaside Bazaar independently, destruction of a Holding and Moto Rani\u2019s remove-for-discount method. The receipt separates Gold from cost reduction; no sources commit before confirmation.",
+    "Open Other previews/Review Choices.cmd. Try En\u2019you hand-card or Sake-token entry choices, optional Event draw, Honor prevention/reaction, The Killing Grounds and Infiltrator Straighten. Only the deciding seat may see its candidates.",
+    "Choose candidates, clear the selection, inspect original source scans and confirm. Other seat uses the ordinary device-handoff flow; private choices must disappear and selection must reset.",
+    "Open Other previews/Review Optional Actions.cmd. Check the additional-action decline. Use the picker for Greasing the Wheels and the Kurohito Favor twin; Favor inspection should expose the engine-offered action.",
+    "Resize the window; check the integrated tray remains above the visible hand, horizontal scrolling and footer confirmation stay usable, and full scans remain readable through inspection.",
+    "Use Send Feedback.url for UI/QoL and mechanics corrections. Open Full Game.cmd opens the same build\u2019s normal menus."
+  ],
+  "known_limitations": [
+    "Unmerged draft PR. Alfredo approved the concepts, not mechanics or final graphical playability; Mendon/Nathan acceptance is required.",
+    "The twelve real-engine seeds contain training cards alongside published sources; they are isolated demonstrations, not additions to playable deck profiles. Event draw is seeded at the real pending-choice boundary.",
+    "Protocol 3 includes optional private candidate metadata and source conflicts. Client and server must run matching versions; no card rules or authoritative payment resolution moved into the UI.",
+    "Native macOS checks passed; Windows CI validates exported runtime and launchers, not Windows graphical playtesting.",
+    "The UI uses the existing responsive lacquer sidebar and a candidate tray above the ordinary hand. Concept images establish accepted grouping and interaction rather than replace the entire game shell.",
+    "Asahina Keigo\u2019s variable discard-payment picker is not implemented. Its unresolved zero-amount source is disabled and cannot enable confirmation, even alongside sufficient other Gold. Core still accepts the authoritative named-discard command."
+  ],
+  "scenarios": [
+    {
+      "name": "Start Review",
+      "mode": "gameplay-controls-review"
+    },
+    {
+      "name": "Other previews/Review Choices",
+      "mode": "gameplay-controls-choices-review"
+    },
+    {
+      "name": "Other previews/Review Optional Actions",
+      "mode": "gameplay-controls-optional-review"
+    },
+    {
+      "name": "Open Full Game",
+      "mode": null
+    }
+  ]
+}

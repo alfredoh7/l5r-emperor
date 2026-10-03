@@ -10,7 +10,7 @@ public sealed partial class MatchEngine
     /// can never claim a protocol whose command/state members the peer would reject (UnmappedMemberHandling.Disallow).
     /// 2: commands carry createdCard, and the state message carries the attack cue and per-action attack/movement/
     /// alternative-cost metadata.</summary>
-    public const int ProtocolVersion = 2;
+    public const int ProtocolVersion = 3;
     private MatchState _state;
     private readonly ulong _seed;
     private readonly string _scenario;
@@ -94,11 +94,11 @@ public sealed partial class MatchEngine
         if (scenario is not ("starter" or "economy" or DeckSearchScenario or CopyShowcaseScenario or AbilityGrantShowcaseScenario or EitherOrShowcaseScenario or OpponentPaymentShowcaseScenario)) throw new ArgumentException("Unknown scenario.");
         var state = new MatchState { Players = [new() { Id = 0, Name = "Crane", Clan = "Crane", Honor = 8 }, new() { Id = 1, Name = "Lion", Clan = "Lion", Honor = 6 }] };
         var random = new StableRandom(seed);
-        var nextId = 0;
+        var nextId = 0; var ids = OpaqueCardIds(seed);
         CardInstance Add(int owner, string definition, Zone zone, bool faceUp = false, bool bowed = false)
         {
             _ = CardCatalog.Get(definition);
-            var card = new CardInstance { Id = $"card-{++nextId:D4}", DefinitionId = definition, OwnerId = owner, Zone = zone, FaceUp = faceUp, Bowed = bowed };
+            var card = new CardInstance { Id = ids[nextId++], DefinitionId = definition, OwnerId = owner, Zone = zone, FaceUp = faceUp, Bowed = bowed };
             state.Cards.Add(card.Id, card);
             return card;
         }
@@ -1820,7 +1820,7 @@ public sealed partial class MatchEngine
         if (province.CardId is string existingId)
         {
             var existing = Card(existingId);
-            existing.Zone = Zone.DynastyDiscard; existing.ProvinceIndex = null;
+            existing.Zone = Zone.DynastyDiscard; existing.ProvinceIndex = null; existing.FaceUp = true;
             Emit("provinceDiscard", $"{Player(pending.PlayerId).Name} discarded {Definition(existing).Name} from a province (Your Clan Needs You!).", pending.PlayerId, existingId);
         }
         card.Zone = Zone.Province; card.ProvinceIndex = province.Index; card.FaceUp = true;
@@ -3000,6 +3000,7 @@ public sealed partial class MatchEngine
     // behavior (it discards whatever card currently sits at province.CardId itself) handles discarding
     // Harsh Choices for free on the destroy branch; the decline branch discards/refills it manually,
     // the same as ResolveEvent's own default case.
+    private const int HarshChoicesDraw = 3; // "destroy this province to draw 3 cards" (the view and the resolution share it)
     private void ResolveHarshChoices(GameCommand command)
     {
         var pending = _state.PendingChoice!;
@@ -3014,7 +3015,7 @@ public sealed partial class MatchEngine
             DestroyProvince(player.Id, province);
             // Military defeat is immediate. Do not draw or reveal later Events after victory.
             if (_state.WinnerId is not null) return;
-            Draw(player); Draw(player); Draw(player);
+            for (var i = 0; i < HarshChoicesDraw; i++) Draw(player);
         }
         else
         {
@@ -3323,6 +3324,14 @@ public sealed partial class MatchEngine
     private sealed class RuleViolation(string message) : Exception(message);
     private static T Copy<T>(T value) => JsonSerializer.Deserialize<T>(JsonSerializer.Serialize(value))!;
 
+    // Card ids are handed out in a seeded permutation, not deck-list order: a face-down card's id (offered in a target list, an action
+    // command or a view) must not reveal which deck-list entry it is. A separate generator keeps the setup shuffles' sequence unchanged.
+    private static string[] OpaqueCardIds(ulong seed)
+    {
+        var ids = Enumerable.Range(1, 2000).Select(n => $"card-{n:D4}").ToArray();
+        new StableRandom(seed ^ 0xA5A5C0DE5EEDF00DUL).Shuffle(ids);
+        return ids;
+    }
     private sealed class StableRandom(ulong seed)
     {
         private ulong _value = seed;

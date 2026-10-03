@@ -8,6 +8,7 @@ using L5R.Client;
 
 var tests = new (string Name, Action Run)[]
 {
+    ("Gameplay-control quotes preserve distinct methods and private entry candidates", GameplayControlsChecks.SourcesAndPrivacy),
     ("Province slots retain empty/hidden positions and legacy wire compatibility", ProvincePresentationChecks.SlotsAndSerialization),
     ("Province order retains exact engine command and rejects stale/other-seat choices", ProvincePresentationChecks.DecisionFreshness),
     ("Battle receipts include both explicit Dynasty slots", ProvincePresentationChecks.BattleReceipts),
@@ -9950,6 +9951,39 @@ static void BatchDPrimitives()
         Check(e.State.Cards[recruit.Id].FaceUp);
         Equal(e.State.Players[0].Provinces[2].CardId, recruit.Id);
         Check(!e.State.Cards[recruit.Id].Bowed, "A fresh start, the same reset a card returning to a deck gets");
+    }
+    {
+        // The province prompt must not reveal a face-down card's name; a face-up card is still named.
+        var s = StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId = 0; s.PriorityPlayerId = 0;
+        var strat = Add(s, "oracle-l5r-9687", 0, Zone.Hand);
+        var recruit = Add(s, "training-nonhuman-personality", 0, Zone.Province, province: 1);
+        s.Players[0].Provinces[1].CardId = recruit.Id;
+        var hidden = Add(s, "oracle-l5r-9687", 0, Zone.Province, province: 2); hidden.FaceUp = false;
+        s.Players[0].Provinces[2].CardId = hidden.Id;
+        var shown = Add(s, "training-nonhuman-personality", 0, Zone.Province, province: 3); shown.FaceUp = true;
+        s.Players[0].Provinces[3].CardId = shown.Id;
+        s.Players[1].Provinces[0].Strength = 0;
+        var enemy = Add(s, "training-nonhuman-personality", 1, Zone.Battlefield, province: 0);
+        enemy.Modifiers = [new("test-fixture", "test-fixture", "Force", -2)];
+        var e = MatchEngine.FromTestState(s);
+        Accept(e, new GameCommand("useAbility", 0, e.Version, CardId: strat.Id, TargetId: recruit.Id, AbilityId: "your-clan-needs-you"));
+        Resolve(e);
+        var labels = e.QueryActions(0).Where(a => a.Type == "chooseYourClanNeedsYouProvince").ToDictionary(a => a.Command!.Province!.Value, a => a.Label);
+        Check(!labels[2].Contains("Your Clan Needs You!"), "A face-down card's name is not revealed by the province prompt");
+        Check(labels[3].Contains("(discarding ") && !labels[3].Contains("face-down"), "A face-up card is still named");
+    }
+    {
+        // Card ids must not follow deck-list order: a face-down card's id (offered in target lists and commands) would identify it.
+        foreach (var (name, create) in new (string, Func<ulong, MatchEngine>)[] { ("published", sd => MatchEngine.CreatePublishedMatch(sd)), ("starter", sd => MatchEngine.CreateStarterMatch(sd)) })
+        {
+            var a = create(11); var b = create(11); var c = create(12);
+            var keys = a.State.Cards.Keys.ToArray();
+            Check(keys.Zip(keys.Skip(1)).Any(x => string.CompareOrdinal(x.First, x.Second) > 0), $"{name}: card ids are not handed out in deck-list order");
+            Check(keys.SequenceEqual(b.State.Cards.Keys), $"{name}: the same seed still yields the same ids");
+            Check(keys.Select(k => a.State.Cards[k].DefinitionId).SequenceEqual(b.State.Cards.Keys.Select(k => b.State.Cards[k].DefinitionId)), $"{name}: and the same cards");
+            Check(!keys.SequenceEqual(c.State.Cards.Keys), $"{name}: a different seed yields a different id order");
+            Check(keys.Distinct().Count() == keys.Length, $"{name}: ids are unique");
+        }
     }
     {
         var s = StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId = 0; s.PriorityPlayerId = 0;

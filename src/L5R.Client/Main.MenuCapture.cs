@@ -17,8 +17,10 @@ public partial class Main
         if (_menuProbeStep == 0)
         {
             MenuAssert(_session.Snapshot is null && MenuVisible, "startup has no match or hidden opponent turns");
+            MenuAssert(Mathf.IsEqualApprox(_preferences.LanternStrength, .85f), "new menu defaults to approved 85 percent lighting");
             if (_captureMode == "menu-options") menu.ShowOptions();
             if (_captureMode == "menu-play") menu.ShowPlay();
+            if (_captureMode == "menu-selection") menu.Entries.GetChild<Button>(4).GrabFocus();
             if (_captureMode is "menu-name" or "menu-name-input") menu.ShowName(1);
             if (_captureMode == "menu-library") LibraryDialog.Show(this);
             if (_captureMode == "menu-private")
@@ -45,35 +47,46 @@ public partial class Main
         }
         if (_captureMode == "menu-input")
         {
-            void KeyEvent(Key key) { Input.ParseInputEvent(new InputEventKey { Keycode=key, PhysicalKeycode=key, Pressed=true }); Input.ParseInputEvent(new InputEventKey { Keycode=key, PhysicalKeycode=key, Pressed=false }); }
-            void MouseClick(Control control) { var point=control.GetGlobalRect().GetCenter(); Input.ParseInputEvent(new InputEventMouseMotion { Position=point, GlobalPosition=point }); Input.ParseInputEvent(new InputEventMouseButton { Position=point, GlobalPosition=point, ButtonIndex=MouseButton.Left, Pressed=true }); Input.ParseInputEvent(new InputEventMouseButton { Position=point, GlobalPosition=point, ButtonIndex=MouseButton.Left, Pressed=false }); }
-            if (_menuProbeStep == 1) { KeyEvent(Key.Enter); _menuProbeStep++; _captureClock=0; return; }
-            if (_menuProbeStep == 2) { MenuAssert(menu.Page == "play", "native Enter activates focused Play"); KeyEvent(Key.Escape); _menuProbeStep++; _captureClock=0; return; }
-            if (_menuProbeStep == 3) { MenuAssert(menu.Page == "main", $"native Escape returns from clan selection (page={menu.Page}, focus={GetViewport().GuiGetFocusOwner()?.GetPath()})"); MouseClick(menu.Entries.GetChildren().OfType<Button>().Single(b=>b.Text=="OPTIONS")); _menuProbeStep++; _captureClock=0; return; }
-            if (_menuProbeStep == 4) { MenuAssert(menu.Page == "options", "native mouse hits Options at rendered coordinates"); MouseClick(menu.Entries.GetChildren().OfType<CheckBox>().Last()); _menuProbeStep++; _captureClock=0; return; }
-            if (_menuProbeStep == 5) { MenuAssert(_reducedMotion, "native mouse toggles reduced motion"); DirAccess.RemoveAbsolute(ProjectSettings.GlobalizePath(_preferences.Path)); KeyEvent(Key.F11); _menuProbeStep++; _captureClock=0; return; }
-            if (_menuProbeStep == 6) { MenuAssert(IsFullscreen, "native F11 enters fullscreen"); KeyEvent(Key.F11); _menuProbeStep++; _captureClock=0; return; }
-            if (_menuProbeStep == 7) { MenuAssert(!IsFullscreen, "native F11 returns to windowed play"); KeyEvent(Key.Escape); _menuProbeStep++; _captureClock=0; return; }
-            if (_menuProbeStep == 8) { MenuAssert(menu.Page == "main", "Options returns to main menu"); KeyEvent(Key.Escape); _menuProbeStep++; _captureClock=0; return; }
+            void KeyEvent(Key key) { Input.ParseInputEvent(new InputEventKey { Keycode = key, PhysicalKeycode = key, Pressed = true }); Input.ParseInputEvent(new InputEventKey { Keycode = key, PhysicalKeycode = key, Pressed = false }); }
+            void MouseClick(Control control) { var point = control.GetGlobalRect().GetCenter(); Input.ParseInputEvent(new InputEventMouseMotion { Position = point, GlobalPosition = point }); Input.ParseInputEvent(new InputEventMouseButton { Position = point, GlobalPosition = point, ButtonIndex = MouseButton.Left, Pressed = true }); Input.ParseInputEvent(new InputEventMouseButton { Position = point, GlobalPosition = point, ButtonIndex = MouseButton.Left, Pressed = false }); }
+            if (_menuProbeStep == 1) { KeyEvent(Key.Up); _menuProbeStep = 20; _captureClock = 0; return; }
+            if (_menuProbeStep == 20) { MenuAssert(menu.SelectedEntry == 5 && menu.Entries.GetChild<Button>(5).HasFocus(), "Up wraps to Quit and moves the visible selection"); KeyEvent(Key.Down); _menuProbeStep = 21; _captureClock = 0; return; }
+            if (_menuProbeStep == 21) { MenuAssert(menu.SelectedEntry == 0, "Down wraps back to Play"); KeyEvent(Key.Enter); _menuProbeStep = 2; _captureClock = 0; return; }
+            if (_menuProbeStep == 2) { MenuAssert(menu.Page == "play", "native Enter activates focused Play"); KeyEvent(Key.Escape); _menuProbeStep++; _captureClock = 0; return; }
+            if (_menuProbeStep == 3) { MenuAssert(menu.Page == "main", $"native Escape returns from clan selection (page={menu.Page}, focus={GetViewport().GuiGetFocusOwner()?.GetPath()})"); MouseClick(menu.Entries.GetChildren().OfType<Button>().Single(b => b.Text == "OPTIONS")); _menuProbeStep++; _captureClock = 0; return; }
+            if (_menuProbeStep == 4) { MenuAssert(menu.Page == "options", "native mouse hits Options at rendered coordinates"); MouseClick(menu.Entries.GetChildren().OfType<CheckBox>().Last()); _menuProbeStep++; _captureClock = 0; return; }
+            if (_menuProbeStep == 5) { MenuAssert(_reducedMotion, "native mouse toggles reduced motion"); DirAccess.RemoveAbsolute(ProjectSettings.GlobalizePath(_preferences.Path)); KeyEvent(Key.F11); _menuProbeStep++; _captureClock = 0; return; }
+            if (_menuProbeStep == 6) { MenuAssert(IsFullscreen, "native F11 enters fullscreen"); KeyEvent(Key.F11); _menuProbeStep++; _captureClock = 0; return; }
+            if (_menuProbeStep == 7) { MenuAssert(!IsFullscreen, "native F11 returns to windowed play"); KeyEvent(Key.Escape); _menuProbeStep++; _captureClock = 0; return; }
+            if (_menuProbeStep == 8) { MenuAssert(menu.Page == "main", "Options returns to main menu"); KeyEvent(Key.Escape); _menuProbeStep++; _captureClock = 0; return; }
             if (_menuProbeStep == 9) { MenuAssert(menu.Page == "quit", "quit requires confirmation"); DirAccess.RemoveAbsolute(ProjectSettings.GlobalizePath(_preferences.Path)); _menuProbeStep++; }
         }
         if (_captureMode == "menu-name-input")
         {
             if (_menuProbeStep == 1)
             {
-                var field=menu.Entries.GetChildren().OfType<LineEdit>().Single(); field.Text="Mendon"; field.GrabFocus();
-                GetViewport().PushInput(new InputEventKey { Keycode=Key.Enter,PhysicalKeycode=Key.Enter,Pressed=true },true);
-                GetViewport().PushInput(new InputEventKey { Keycode=Key.Enter,PhysicalKeycode=Key.Enter,Pressed=false },true);
-                _menuProbeStep++; _captureClock=0; return;
+                var field = menu.Entries.GetChildren().OfType<LineEdit>().Single(); field.Text = "Mendon"; field.GrabFocus();
+                GetViewport().PushInput(new InputEventKey { Keycode = Key.Enter, PhysicalKeycode = Key.Enter, Pressed = true }, true);
+                GetViewport().PushInput(new InputEventKey { Keycode = Key.Enter, PhysicalKeycode = Key.Enter, Pressed = false }, true);
+                _menuProbeStep++; _captureClock = 0; return;
             }
             if (_menuProbeStep == 2)
             {
-            MenuAssert(!MenuVisible && Self.Name=="Mendon", "native Enter submits the local name and enters the chosen deck");
-            ShowMainMenu(); menu.ShowName(1);
-            MenuAssert(menu.Entries.GetChildren().OfType<LineEdit>().Single().Text=="Mendon", "next name entry is prefilled");
-            DirAccess.RemoveAbsolute(ProjectSettings.GlobalizePath(_preferences.Path));
-            _menuProbeStep++;
+                MenuAssert(!MenuVisible && Self.Name == "Mendon", "native Enter submits the local name and enters the chosen deck");
+                ShowMainMenu(); menu.ShowName(1);
+                MenuAssert(menu.Entries.GetChildren().OfType<LineEdit>().Single().Text == "Mendon", "next name entry is prefilled");
+                DirAccess.RemoveAbsolute(ProjectSettings.GlobalizePath(_preferences.Path));
+                _menuProbeStep++;
             }
+        }
+        if (_captureMode == "menu-overlays")
+        {
+            void Escape() { Input.ParseInputEvent(new InputEventKey { Keycode = Key.Escape, Pressed = true }); Input.ParseInputEvent(new InputEventKey { Keycode = Key.Escape, Pressed = false }); }
+            if (_menuProbeStep == 1) { menu.Entries.GetChild<Button>(2).GrabFocus(); Click(menu.Entries.GetChild<Button>(2)); _menuProbeStep = 2; _captureClock = 0; return; }
+            if (_menuProbeStep == 2) { MenuAssert(GetTree().Root.GetNodeOrNull("CatalogueLayer") is not null, "Library entry opens the live catalogue"); Escape(); _menuProbeStep = 3; _captureClock = 0; return; }
+            if (_menuProbeStep == 3) { MenuAssert(GetTree().Root.GetNodeOrNull("CatalogueLayer") is null && menu.Page == "main", "Library Escape closes the overlay without opening Quit behind it"); MenuAssert(menu.Entries.GetChild<Button>(2).HasFocus(), "Library returns keyboard focus to its menu entry"); menu.Entries.GetChild<Button>(3).GrabFocus(); Click(menu.Entries.GetChild<Button>(3)); _menuProbeStep = 4; _captureClock = 0; return; }
+            if (_menuProbeStep == 4) { MenuAssert(GetTree().Root.GetNodeOrNull("DeckBuilderLayer") is not null, "Deck Builder entry opens the live workshop"); Escape(); _menuProbeStep = 5; _captureClock = 0; return; }
+            if (_menuProbeStep == 5) { MenuAssert(GetTree().Root.GetNodeOrNull("DeckBuilderLayer") is null && menu.Page == "main", "Deck Builder Escape returns to the unchanged menu"); MenuAssert(menu.Entries.GetChild<Button>(3).HasFocus(), "Deck Builder returns keyboard focus to its menu entry"); _menuProbeStep = 6; }
         }
         if (_captureMode == "menu-flow")
         {
@@ -81,30 +94,37 @@ public partial class Main
             {
                 Click(menu.Entries.GetChild<Button>(0)); MenuAssert(menu.Page == "play", "Play opens match choices");
                 Click(menu.Entries.GetChild<Button>(0)); MenuAssert(PracticeVisible && _session.Snapshot is null, "Practice setup opens before creating a match");
-                var setup=_practiceLayer!.GetChildren().OfType<PracticeSetupScreen>().Single();
-                setup.Browse(0);setup.Select(PracticeSetupScreen.Preset("Lion"));setup.Browse(1);setup.Select(PracticeSetupScreen.Preset("Crane"));setup.ShowSetup();
-                _preferences.DisplayName="Alfredo";_preferences.Save();ApplyPreferences(false);Click(setup.StartButton);
-                MenuAssert(!MenuVisible && !PracticeVisible && Self.Clan=="Lion" && Self.Name=="Alfredo", "chosen decks and saved display name start custom Practice");
-                _session.SwitchPracticeSeat(); MenuAssert(View.Players.Single(p=>p.Clan=="Lion").Name=="Alfredo" && Self.Name!="Alfredo", "passing device does not move name to opponent"); _session.SwitchPracticeSeat();
+                var setup = _practiceLayer!.GetChildren().OfType<PracticeSetupScreen>().Single();
+                setup.Browse(0); setup.Select(PracticeSetupScreen.Preset("Lion")); setup.Browse(1); setup.Select(PracticeSetupScreen.Preset("Crane")); setup.ShowSetup();
+                _preferences.DisplayName = "Alfredo"; _preferences.Save(); ApplyPreferences(false); Click(setup.StartButton);
+                MenuAssert(!MenuVisible && !PracticeVisible && Self.Clan == "Lion" && Self.Name == "Alfredo", "chosen decks and saved display name start custom Practice");
+                _session.SwitchPracticeSeat(); MenuAssert(View.Players.Single(p => p.Clan == "Lion").Name == "Alfredo" && Self.Name != "Alfredo", "passing device does not move name to opponent"); _session.SwitchPracticeSeat();
                 _menuProbeVersion = View.Version; ShowMainMenu(); _captureClock = 0; _menuProbeStep++; return;
             }
             if (_menuProbeStep == 2)
             {
                 MenuAssert(View.Version == _menuProbeVersion, "practice stays paused behind main menu");
                 menu.ShowPlay(); Click(menu.Entries.GetChild<Button>(0)); MenuAssert(!MenuVisible && View.Version == _menuProbeVersion, "return resumes unchanged practice");
-                ShowMainMenu();menu.ShowPlay();Click(menu.Entries.GetChild<Button>(1));MenuAssert(PracticeVisible,"new Practice opens selection without replacing active match");
-                var setup=_practiceLayer!.GetChildren().OfType<PracticeSetupScreen>().Single();
-                var expected=View.Version;Click(setup.StartButton);var confirm=GetChildren().OfType<ConfirmationDialog>().Single(d=>d.Visible);
-                MenuAssert(confirm.Visible&&View.Version==expected,"replacing an existing match requires confirmation");
-                confirm.EmitSignal(ConfirmationDialog.SignalName.Canceled);ClosePracticeSetup();MenuAssert(View.Version==expected,"cancel replacement keeps current match");
+                ShowMainMenu(); menu.ShowPlay(); Click(menu.Entries.GetChild<Button>(1)); MenuAssert(PracticeVisible, "new Practice opens selection without replacing active match");
+                var setup = _practiceLayer!.GetChildren().OfType<PracticeSetupScreen>().Single();
+                var expected = View.Version; Click(setup.StartButton); var confirm = GetChildren().OfType<ConfirmationDialog>().Single(d => d.Visible);
+                MenuAssert(confirm.Visible && View.Version == expected, "replacing an existing match requires confirmation");
+                confirm.EmitSignal(ConfirmationDialog.SignalName.Canceled); ClosePracticeSetup(); MenuAssert(View.Version == expected, "cancel replacement keeps current match");
                 menu.ShowOptions();
                 var motion = menu.Entries.GetChildren().OfType<CheckBox>().Last(); motion.ButtonPressed = true;
                 MenuAssert(_reducedMotion && _preferences.ReducedMotion, "reduced motion applies to game and menu");
                 var loaded = new MenuPreferences(_preferencesProfile); loaded.Load(); MenuAssert(loaded.ReducedMotion, "options persist through a fresh settings instance");
+                var slider = menu.Entries.GetChildren().OfType<HSlider>().Single(); slider.Value = .4;
+                loaded.Load();
+                MenuAssert(Mathf.IsEqualApprox(loaded.LanternStrength, .4f), "lantern strength persists through the real Options slider");
+                MenuAssert(Mathf.IsEqualApprox(loaded.Atmosphere, .65f), "saving new menu strength preserves the historical atmosphere preference");
                 DirAccess.RemoveAbsolute(ProjectSettings.GlobalizePath(loaded.Path));
                 _menuProbeStep++;
             }
         }
+        // Keep a stationary desktop pointer from replacing this keyboard-focus
+        // fixture when a new native window appears underneath it.
+        if (_captureMode == "menu-selection") menu.Entries.GetChild<Button>(4).GrabFocus();
         if (_captureClock < 1.3) return;
         var path = _capturePath!;
         if (menu.Page == "main")
@@ -112,12 +132,12 @@ public partial class Main
             foreach (var entry in menu.Entries.GetChildren().OfType<MenuEntry>())
             {
                 MenuAssert(GetViewport().GetVisibleRect().Encloses(entry.GetGlobalRect()), "heading/menu entry fits viewport: " + entry.Text);
-                MenuAssert(entry.Text == entry.Text.ToUpperInvariant(), "heading uses uppercase: " + entry.Text);
-                MenuAssert(entry.Size.X <= 525 && entry.Size.Y <= 83, "heading line box fits menu spacing: " + entry.Text);
+                MenuAssert(entry.SourceLettering, "main menu uses approved source lettering: " + entry.Text);
+                MenuAssert(entry.Size.X <= 414 && entry.Size.Y <= 84, "menu hit area fits source lettering: " + entry.Text);
             }
         }
         GetViewport().GetTexture().GetImage().SavePng(path);
-        File.WriteAllText(path+".json", JsonSerializer.Serialize(new { Page=menu.Page, MenuVisible, MatchExists=_session.Snapshot is not null, Preferences=_preferences.ReducedMotion, Resolution=GetViewport().GetVisibleRect().Size.ToString() }));
+        File.WriteAllText(path + ".json", JsonSerializer.Serialize(new { Page = menu.Page, MenuVisible, MatchExists = _session.Snapshot is not null, Preferences = _preferences.ReducedMotion, LanternStrength = _preferences.LanternStrength, SelectedEntry = menu.SelectedEntry, Resolution = GetViewport().GetVisibleRect().Size.ToString() }));
         GD.Print("MENU_CAPTURE: " + path); GetTree().Quit();
     }
 }

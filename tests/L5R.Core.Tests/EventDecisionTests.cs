@@ -45,6 +45,10 @@ internal static class EventDecisionTests
         Check(options.Length == 2 && options.All(a => a.Type == "harshChoices"), "Missing or unrelated Event choices");
         OfferedCommandsValidate(e, () => MatchEngine.FromTestState(before));
         Check(e.QueryActions(0).All(a => a.Type is "wait" or "concede"), "Opponent offered Event decisions");
+        // Issue #581: the consequence is the engine's, public to both seats, so the client counts nothing.
+        var provinces = before.Players[1].Provinces.Count(p => !p.Destroyed);
+        foreach (var seat in new[] { 0, 1 })
+            Check(e.GetView(seat).PendingHarshChoices is { EndsMatch: false, CardsDrawn: 3 } consequence && consequence.ProvincesBefore == provinces && consequence.ProvincesAfter == provinces - 1, $"Seat {seat} lacks the engine's Harsh Choices consequence");
         Reject(e, options[0].Command! with { PlayerId = 0 }); Reject(e, new("pass", 1, e.Version));
         foreach (var choice in options)
         {
@@ -59,7 +63,10 @@ internal static class EventDecisionTests
     {
         var e = Harsh(true); var hand = e.State.Players[1].Hand.Count;
         var action = e.QueryActions(1).Single(a => a.Command?.Choice == "destroy");
-        Check(action.Label.Contains("Defeat"), "Final-province consequence absent"); Accept(e, action.Command!);
+        Check(action.Label.Contains("Defeat"), "Final-province consequence absent");
+        Check(e.GetView(0).PendingHarshChoices is { ProvincesBefore: 1, ProvincesAfter: 0, EndsMatch: true, CardsDrawn: 0 }, "The view does not say the last province ends the match");
+        Accept(e, action.Command!);
+        Check(e.GetView(0).PendingHarshChoices is null, "The consequence outlived the decision");
         Check(e.State.WinnerId == 0 && e.State.Phase == Phase.Finished && e.State.PendingChoice is null, "Victory overwritten by Event continuation");
         Check(e.State.Players[1].Hand.Count == hand, "Drew after match finished"); Check(e.QueryActions(1).Length == 0, "Finished match still offers commands");
     }

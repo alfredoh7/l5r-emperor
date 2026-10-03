@@ -13,7 +13,11 @@ export DOTNET_NOLOGO=1
 export DOTNET_GENERATE_ASPNET_CERTIFICATE=false
 export MSBUILDDISABLENODEREUSE=1
 export GODOT="$L5R_PROJECT_ROOT/.tools/godot/Godot_mono.app/Contents/MacOS/Godot"
-if [ ! -x "$GODOT" ]; then
+# L5R_GODOT points every checkout/worktree at one shared Godot install, so a new worktree needs no
+# copy or junction of .tools/. An explicit override wins over the in-tree locations below.
+if [ -n "${L5R_GODOT:-}" ]; then
+  export GODOT="$L5R_GODOT"
+elif [ ! -x "$GODOT" ]; then
   # nullglob (issue #272): without it, an unmatched glob (no Godot installed yet, e.g. a fresh
   # --skip-client checkout) iterates once over the LITERAL pattern string; the loop's own last
   # command then evaluates false, and since this is the last statement env.sh itself executes, a
@@ -33,4 +37,13 @@ if [ ! -x "$GODOT" ]; then
   done
   shopt -u nullglob
 fi
+# Opt-in guard for scripts that need Godot. Sourcing env.sh must stay non-fatal (check.sh --skip-client
+# has no Godot), but a script that goes on to run "$GODOT" with it missing used to die silently under
+# set -e, with the error buried in a redirected log. Call this right after sourcing.
+l5r_require_godot() {
+  if [ -x "$GODOT" ]; then return 0; fi
+  echo "Godot not found at: $GODOT" >&2
+  echo "Install it under .tools/godot, or set L5R_GODOT to an existing Godot executable shared by all worktrees." >&2
+  return 1
+}
 true

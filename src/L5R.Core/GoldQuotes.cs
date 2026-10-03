@@ -469,7 +469,7 @@ public sealed partial class MatchEngine
         if (cost.Rule.Basis != GoldCostBasis.Variable)
             return new(cost.Amount, cost.Rule.Kind, cost.Basis, error,
                 error is not null ? [] : cost.LeadAmount > 0 ? SplitPaymentOptions(playerId, cost.LeadAmount, cost.Amount - cost.LeadAmount, paying) : PaymentOptionsExcluding(playerId, cost.Amount, exclude, paying),
-                Sources: PaymentSourcesFor(playerId, paying)); // issue #501
+                Sources: PaymentSourcesFor(playerId, paying, exclude)); // issue #501
         return VariableGoldQuote(playerId, cost.Min ?? 0, cost.Max, cost.Amount, cost.Basis, error, paying);
     }
 
@@ -493,7 +493,7 @@ public sealed partial class MatchEngine
     /// client has one panel for every Gold action. Recruiting is fixed: the card's printed cost adjusted by
     /// the chosen Clan discount/allegiance, all decided by QuotePurchase.</summary>
     private static GoldQuote ToGoldQuote(PurchaseQuote quote) =>
-        new(quote.Cost, GoldCostKind.Fixed, quote.Basis ?? $"Cost {quote.Cost}", quote.Error, quote.Payments);
+        new(quote.Cost, GoldCostKind.Fixed, quote.Basis ?? $"Cost {quote.Cost}", quote.Error, quote.Payments, Sources: quote.Sources); // issue #578: the recruit panel needs the payment tokens its suggestions may name
 
     // Equip (issue #303 folds Equip's own cost into the same quote shape): the attachment's printed cost
     // less every discount that applies to THIS attachment, THIS wielder and THIS player. Katagi's is the

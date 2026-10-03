@@ -1,0 +1,12 @@
+[
+  {
+    "id": "concede-frame",
+    "prompt": "Use case: precise-object-edit. Input is the APPROVED game UI reference. Extract the centered black lacquer confirmation dialog as a standalone production bitmap with transparent outside background. Preserve its exact delicate aged gold ornamental corners, five-ring corner motifs, double gold borders and black lacquer texture. Remove EVERY word, ALL buttons and all internal separator ornaments: leave entirely clean subtle black lacquer center with no symbols or smudges. Remove the sunset, table, cards and upper-left menu entirely. Output only ONE flat front-facing wide rectangular panel, aspect ratio 2.24:1, fully visible all four corners, no shadow beyond frame, no perspective. Four ornamented corners must stay inside generous 70px border sections, middle edge runs plain for nine-slice resizing. Genuinely transparent pixels outside panel; black opaque center. Faithfully reuse the approved frame, no new decorative style.",
+    "path": "/Users/alfredo/.codex/generated_images/01a0b019-027d-7ee0-84a4-44aac565a142/exec-23bec5d7-7d42-4f32-8204-6864f03009b8.png"
+  },
+  {
+    "id": "focus-tray-frame",
+    "prompt": "Use case: precise-object-edit. Input is the APPROVED game UI reference. Extract only the broad front-edge navy-black lacquer decision tray as a standalone production bitmap with transparent outside background. Preserve its exact double aged gold borders, small restrained floral corner ornaments, original textured navy-black surface and brass end caps. Remove EVERY word, ALL cards, buttons, arrows, selection glow, hand icon, internal divider lines, cream label brush panels. Leave ENTIRE center blank, evenly textured dark navy-black lacquer. Remove all sunset, background, duelist cards and table behind it. Output only ONE FLAT FRONT-FACING rectangular tray, aspect ratio 3.3:1, fully visible all corners. No perspective distortion. Each ornamental corner/endcap inside its 80px border region, plain middle edge runs suitable for nine-slice resizing. Transparent pixels outside tray; opaque dark center. Exact established approved aesthetic, no invented ornaments.",
+    "path": "/Users/alfredo/.codex/generated_images/01a0b019-027d-7ee0-84a4-44aac565a142/exec-0ebad487-8cd2-4413-98ec-f6d5240a1a85.png"
+  }
+]

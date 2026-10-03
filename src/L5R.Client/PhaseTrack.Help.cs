@@ -20,7 +20,8 @@ public partial class PhaseTrack
         HelpButton = Palette.Button("?", () => ShowHelp(Math.Max(0, _active)));
         HelpButton.AccessibilityName = "Current phase help";
         HelpButton.Text = ""; HelpButton.CustomMinimumSize = Vector2.Zero;
-        var seal = new AtlasTexture { Atlas = GD.Load<Texture2D>("res://Art/six-phase-help-reference.png"), Region = new Rect2(1200, 513, 40, 41) };
+        var seal = ButtonArtwork.Extract(GD.Load<Texture2D>("res://Art/six-phase-help-reference.png"),
+            new Rect2I(1200, 513, 40, 41), 16, matteThreshold: .25f);
         foreach (var state in new[] { "normal", "hover", "pressed", "focus", "disabled" }) HelpButton.AddThemeStyleboxOverride(state, new StyleBoxTexture { Texture = seal, ModulateColor = state == "disabled" ? new Color(1, 1, 1, .45f) : Colors.White });
         HelpButton.FocusEntered += () => ShowHelp(Math.Max(0, _active));
         HelpButton.FocusExited += HideHelp;

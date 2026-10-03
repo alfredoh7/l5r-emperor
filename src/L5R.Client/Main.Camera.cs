@@ -161,16 +161,10 @@ public partial class Main
     private bool PointerOnTable(Vector2 viewportPoint)
     {
         if (CameraBlocked || !_tableSurface.GetGlobalRect().HasPoint(viewportPoint) || FixedHudCovers(viewportPoint)) return false;
-        // Prepared attack-review navigation sits over the table. Let native GUI
-        // picking receive its clicks instead of forwarding them into the mat.
-        if (_root.GetNodeOrNull<Control>("AttackReviewControls") is { } attackReview &&
-            attackReview.IsVisibleInTree() && attackReview.GetGlobalRect().HasPoint(viewportPoint)) return false;
-        if (_root.GetNodeOrNull<Control>("OpponentPaymentReviewControls") is { } paymentReview &&
-            paymentReview.IsVisibleInTree() && paymentReview.GetGlobalRect().HasPoint(viewportPoint)) return false;
-        if (_root.GetNodeOrNull<Control>("CreatedCopyReviewControls") is { } copyReview && copyReview.IsVisibleInTree() && copyReview.GetGlobalRect().HasPoint(viewportPoint)) return false;
-        if (_root.GetNodeOrNull<Control>("SequenceReviewControls") is { } sequenceReview && sequenceReview.IsVisibleInTree() && sequenceReview.GetGlobalRect().HasPoint(viewportPoint)) return false;
-        if (_root.GetNodeOrNull<Control>("MultiReviewControls") is { } multiReview && multiReview.IsVisibleInTree() && multiReview.GetGlobalRect().HasPoint(viewportPoint)) return false;
-        if (_root.GetNodeOrNull<Control>("LookReviewControls") is { } lookReview && lookReview.IsVisibleInTree() && lookReview.GetGlobalRect().HasPoint(viewportPoint)) return false;
+        // Prepared review scenarios (attack, payment, copy, sequence, multi, look, lock, either/or, movement, search, shown...) put a row of navigation buttons over
+        // the table. Let native GUI picking receive its clicks instead of forwarding them into the mat. Matched by name so a new review row cannot be forgotten.
+        foreach (var child in _root.GetChildren())
+            if (child is Control review && review.Name.ToString().EndsWith("ReviewControls", StringComparison.Ordinal) && review.IsVisibleInTree() && review.GetGlobalRect().HasPoint(viewportPoint)) return false;
         if (_eventHandBar is { Visible: true } && _eventHandBar.GetGlobalRect().HasPoint(viewportPoint)) return false;
         if (_shownPreview is { } preview && IsInstanceValid(preview) && preview.GetGlobalRect().HasPoint(viewportPoint)) return false;
         // The Fallen strips can overlap the projection. Check only the visible
@@ -183,7 +177,7 @@ public partial class Main
     {
         static bool Covers(Control? control, Vector2 p) => control is not null &&
             control.IsVisibleInTree() && control.GetGlobalRect().HasPoint(p);
-        return Covers(_battlefieldReviewBar, point) || Covers(_provinceOrderTray, point) || Covers(_provinceReviewBar, point) || Covers(_inspectorPanel, point) || Covers(_hand, point) || Covers(_timeline, point) || Covers(_menu, point) || Covers(_battleProgressStrip, point)
+        return Covers(_battlefieldReviewBar, point) || Covers(_provinceOrderTray, point) || Covers(_provinceReviewBar, point) || Covers(_inspectorPanel, point) || Covers(_notice, point) || Covers(_shownPanel, point) || Covers(_shownToggle, point) || Covers(_eventSidebar, point) || Covers(_eventHandBar, point) || Covers(_hand, point) || Covers(_timeline, point) || Covers(_menu, point) || Covers(_battleProgressStrip, point)
             || _battlefieldCaptions.Values.Any(c => Covers(c, point))
             || _clanHud.GetChildren().OfType<Control>().Any(c => Covers(c, point))
             // A hovered hand face can rise above the hand container.

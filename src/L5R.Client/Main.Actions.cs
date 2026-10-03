@@ -7,6 +7,7 @@ public partial class Main
 {
     private void RenderInspector()
     {
+        if (_candidateTray is not null) _candidateTray.Visible = false;
         var cardActionsRendered = false;
         Palette.Clear(_sidebarHeader); Palette.Clear(_inspector); Palette.Clear(_decisionActions); _paymentConfirm = null;
         RenderEitherOrNotice();
@@ -27,6 +28,7 @@ public partial class Main
             { var command = option.Command!; _inspector.AddChild(SidebarSkin.Button(option.Label, () => _ = Submit(command))); }
             return;
         }
+        if (View.PendingChoice?.Type is "eventChoice" or "honorLossDecision" or "entryCostDecision" or "honorChangeReaction" or "killingGroundsSelect" or "infiltratorStraighten" && RenderDecisionChooser()) return;
         if (RenderBattleSequence()) return;
         if (RenderLookDecision()) return;
         if (RenderSearchDecision()) return;
@@ -71,6 +73,8 @@ public partial class Main
             var status = Palette.Wrapped(View.PriorityPlayerId == View.ViewerId ? "Your decision" : "Opponent may act", 18); status.HorizontalAlignment = HorizontalAlignment.Center; _sidebarHeader.AddChild(status);
             _sidebarHeader.AddChild(new HSeparator());
         }
+        if (Actions.Any(a => a.Enabled && a.Type == "declineAdditionalAction"))
+            _inspector.AddChild(Palette.Wrapped("Additional action available. Choose an offered action or decline this opportunity.", 18, Palette.Gold));
         if (View.PendingChoice is { } pending)
         {
             _inspector.AddChild(Palette.Text(pending.Type == "discardHand" ? "HAND LIMIT" : pending.Type == "shinden" ? "YOUR CHOICE" : "REACTION WINDOW", 12, Palette.Gold));
@@ -257,10 +261,9 @@ public partial class Main
             suggestions.Selected = Array.FindIndex(payments, p => p.SourceIds.ToHashSet().SetEquals(_sources));
             _inspector.AddChild(suggestions);
         }
-        if (required > 0 && opponent) RenderOpponentSources(required);
-        else if (required > 0) RenderSources(required);
+        if (required > 0 || opponent) RenderPaymentMethods(required, quote);
         else _inspector.AddChild(Palette.Wrapped("No Gold sources are needed.", 15, Palette.Crane));
-        return (required, quote.Error is null && SelectedProduction() >= required);
+        return (required, quote.Error is null && PaymentSelectionReady(required, quote));
     }
 
     private void RenderAmountControl(int amount, int min, int max)
@@ -285,21 +288,9 @@ public partial class Main
         _decisionActions.AddChild(SidebarSkin.Button(cancel, CancelChoice));
     }
 
-    private int SelectedProduction() => Self.Home.Concat(Self.Army).Append(Self.Stronghold).Where(c => _sources.Contains(c.Id) && !c.Bowed).Sum(c => Production(c, Self));
-
-    private void RenderSources(int cost)
-    {
-        _inspector.AddChild(Palette.Text("SOURCES TO BOW", 11, Palette.Gold));
-        foreach (var card in Self.Home.Concat(Self.Army).Append(Self.Stronghold).Where(c => Production(c, Self) > 0))
-        {
-            var check = new CheckBox { Text = $"{Production(card, Self)} · {ShortName(card)}" + (card.Bowed ? " (bowed)" : ""), ButtonPressed = _sources.Contains(card.Id), Disabled = card.Bowed, CustomMinimumSize = new Vector2(0, 28) };
-            check.AddThemeFontSizeOverride("font_size", 14);
-            check.Toggled += selected => { if (selected) _sources.Add(card.Id); else _sources.Remove(card.Id); RenderInspector(); Highlight(); };
-            _inspector.AddChild(check);
-        }
-        var produced = SelectedProduction();
-        _inspector.AddChild(Palette.Wrapped($"{produced} produced  /  {cost} required" + (produced > cost ? $"\n{produced - cost} excess Gold will be lost." : produced < cost ? "\nChoose more unbowed sources." : "\nExact payment. No excess Gold."), 15, produced < cost ? Palette.Error : Palette.Crane));
-    }
+    private int SelectedProduction() => _chosen is not null && QuoteFor(_chosen) is { Sources: { } methods }
+        ? methods.Where(m => _sources.Contains(m.Id)).Sum(m => m.Produced)
+        : Self.Home.Concat(Self.Army).Append(Self.Stronghold).Where(c => _sources.Contains(c.Id) && !c.Bowed).Sum(c => Production(c, Self));
 
     private void RenderAssignments()
     {
@@ -331,7 +322,8 @@ public partial class Main
         { RenderSupportDraft(support, action); return; }
         var command = action.Command!;
         var targets = action.TargetIds ?? [];
-        var target = command.TargetId ?? targets.FirstOrDefault();
+        var target = command.TargetId; // issue #581: no default; Confirm waits for the player's pick when the action names legal targets
+        var needsTarget = targets.Length > 0 && target is null;
         _inspector.AddChild(Palette.Wrapped(action.Label, 17, Palette.Gold));
         if (targets.Length > 0) _inspector.AddChild(Palette.Wrapped("Click a gold-outlined card on the table or choose below. The arrow shows the selected target; confirm to resolve.", 13, Palette.PaperDim));
         if (command.PerformerId is string performer)
@@ -340,6 +332,7 @@ public partial class Main
         {
             _inspector.AddChild(Palette.Text(command.AbilityId is "prepared-death" or "defensive-stance" or "lobby" ? "CHOOSE A PERFORMER" : command.AbilityId == "favor-cycle" ? "CHOOSE A CARD TO DISCARD" : "CHOOSE A TARGET", 11, Palette.Gold));
             var picker = new OptionButton { FitToLongestItem = false, ClipText = true };
+            picker.AddItem("Choose a target…");
             foreach (var id in targets)
             {
                 var card = FindCard(id)!;
@@ -347,17 +340,30 @@ public partial class Main
                 var price = action.TargetGold?.TryGetValue(id, out var priced) == true ? $" · {priced.Cost} Gold" : "";
                 picker.AddItem($"{(card.Definition?.Type == CardType.Personality ? CardTile.UnitLabel(card) + " · " : "")}{View.Players[card.OwnerId].Clan} · {ShortName(card)}{price} · {card.Force} F{(card.Bowed ? " · bowed" : "")}");
             }
-            picker.Selected = Math.Max(0, Array.IndexOf(targets, target));
-            picker.ItemSelected += i => ChooseTarget(targets[(int)i]);
+            picker.Selected = target is null ? 0 : Array.IndexOf(targets, target) + 1;
+            picker.ItemSelected += i => { if (i > 0) ChooseTarget(targets[(int)i - 1]); else ClearTarget(); };
             _inspector.AddChild(picker);
+            if (needsTarget) _inspector.AddChild(Palette.Wrapped("Choose a target to continue.", 13, Palette.Error));
         }
         if (action.AlternativeCost is not null && !_alternativeCostConfirmed)
         {
             _decisionActions.AddChild(SidebarSkin.Button("Review cost choices", () => { _reviewingAlternativeCost = true; _decisionSelection = null; RenderInspector(); }, true));
             _decisionActions.AddChild(SidebarSkin.Button("Cancel action", CancelChoice)); return;
         }
+        if (needsTarget && action.TargetGold is not null)
+        { // a target-derived cost belongs to the target: none is shown until the player picks one (issue #581)
+            AddConfirm("Confirm action", 0, false, () => command, "Cancel action", false); return;
+        }
         var (required, ready) = RenderGoldPanel(action);
-        AddConfirm("Confirm action", required, ready, () => command with { SourceIds = required > 0 ? _sources.ToArray() : [], TargetId = target }, "Cancel action", action.Enabled);
+        AddConfirm("Confirm action", required, ready, () => command with { SourceIds = required > 0 ? _sources.ToArray() : [], TargetId = target }, "Cancel action", action.Enabled && !needsTarget);
+    }
+
+    // Back to "Choose a target…": the action keeps its legal targets but none is selected.
+    private void ClearTarget()
+    {
+        if (_chosen?.Command is not { } command) return;
+        _chosen = _chosen with { Command = command with { TargetId = null } };
+        RenderInspector(); Highlight();
     }
 
     private void RenderProvinceRefresh()
@@ -387,11 +393,22 @@ public partial class Main
 
     private void RenderHandDiscard()
     {
-        var count = Self.HandCount - 8;
-        var reviewedVersion = _chosen?.Command?.ExpectedVersion ?? View.Version;
+        // The offered command already contains the engine's required number of cards.
+        // Keep its seat/version and replace only the player's explicit selection.
+        var offered = _chosen?.Command;
+        if (offered is not { Type: "discardHand", CardIds.Length: > 0 }
+            || offered.PlayerId != View.ViewerId || offered.ExpectedVersion != View.Version)
+        {
+            _inspector.AddChild(Palette.Wrapped("Waiting for the current discard choice…", 17));
+            return;
+        }
+        var count = offered.CardIds.Length;
         var selected = new HashSet<string>();
-        _inspector.AddChild(Palette.Wrapped($"Choose {count} card(s) to discard.", 17));
-        var confirm = SidebarSkin.Button("Confirm discard", () => _ = Submit(new GameCommand("discardHand", View.ViewerId, reviewedVersion, CardIds: selected.ToArray())), true);
+        var instruction = Self.HandLimit is { } limit
+            ? $"Choose {count} card(s) to discard. Hand limit: {limit.Maximum}."
+            : $"Choose {count} card(s) to discard.";
+        _inspector.AddChild(Palette.Wrapped(instruction, 17));
+        var confirm = SidebarSkin.Button("Confirm discard", () => _ = Submit(offered with { CardIds = selected.ToArray() }), true);
         confirm.Disabled = true;
         foreach (var c in Self.Hand)
         {
@@ -475,7 +492,7 @@ public partial class Main
         }
         if (View.Phase == Phase.Battle && View.PendingChoice is null && View.PriorityPlayerId == View.ViewerId && View.BattleStep?.ConsecutivePasses == 1)
             _phaseActions.AddChild(Palette.Wrapped("Passing now ends Battle actions.", 16, Palette.PaperDim));
-        foreach (var a in Actions.Where(a => a.Type is "pass" or "endDynasty" or "proclaim" or "declineReaction" or "chooseShinden" or "declareAttack")) AddAction(_phaseActions, a);
+        foreach (var a in Actions.Where(a => a.Type is "pass" or "endDynasty" or "proclaim" or "declineReaction" or "declineAdditionalAction" or "chooseShinden" or "declareAttack")) AddAction(_phaseActions, a);
         if (View.PriorityPlayerId != View.ViewerId) _phaseActions.AddChild(Palette.Wrapped($"Waiting for {View.Players[View.PriorityPlayerId].Clan}…", 15, Palette.Crane));
         if (!_session.Online && !_autoOpponent) _phaseActions.AddChild(SidebarSkin.Button("Pass device to other player", SwitchSeat));
     }
