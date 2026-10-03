@@ -23,5 +23,13 @@
   "source_image_hash": "dc/5f",
   "source_url": "https://images.oracleofthevoid.com/l5r/dc/5f/printing_9749_1_master.jpg",
   "url_prefix": "https://images.oracleofthevoid.com/l5r/dc/5f/printing_9749_1_",
-  "width": 750
+  "width": 750,
+  "working_copy": {
+    "path": "assets/requested-scans/readied-blade.png",
+    "sha256": "51e06e8b239cc9c02e174a4419ae82601b3130804ba209a10d2449371372012c",
+    "format": "PNG",
+    "width": 429,
+    "height": 600,
+    "source": "User-supplied full card image, 2026-09-29"
+  }
 }

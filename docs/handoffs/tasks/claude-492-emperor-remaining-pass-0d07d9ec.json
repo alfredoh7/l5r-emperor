@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Emperor Edition remaining-cards pass: wired 159 of the 171 remaining non-Personality cards plus the 7 Proxy-scan-blocked Personalities (Proxy scans downloaded with Mendon's authorisation, sha256-verified); 12 Emperor Edition cards stay unwired with specific blockers; new primitives, bowed-Region straightening fix, unified duel Focus Effects window; inventory and art pack r2 updated",
+  "validation": "Core suite 0 failures (1716 passes); AI 74/74; Server 8/8; Client.Transport 12/12; content tests 134 OK; Godot client build left to CI",
+  "remaining": "None; ready for review. Follow-ups: shared delay mechanism (6 cards), battle with no province (Surprise Attack, Chikushudo's Trickery), Kaiu Village Weapon Proxy, client rendering of eventChoice/honorLossDecision/killingGroundsSelect",
+  "issue": "492",
+  "branch": "claude/492-emperor-remaining-pass",
+  "updated": "2026-09-25T05:34:58.649666+00:00"
+}

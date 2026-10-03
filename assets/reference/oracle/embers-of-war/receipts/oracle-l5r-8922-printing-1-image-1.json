@@ -25,16 +25,16 @@
   "url_prefix": "https://images.oracleofthevoid.com/l5r/94/02/printing_8922_1_",
   "width": 750,
   "working_copy": {
-    "bytes": 165508,
+    "bytes": 78150,
     "format": "WEBP",
-    "height": 1050,
+    "height": 600,
     "path": "assets/reference/oracle/embers-of-war/webp/oracle-l5r-8922-printing-1-image-1.webp",
-    "sha256": "73bcebc02d6678ddede5b5e02156cd97e495a9750a6f656f3dda5e56757ef073",
+    "sha256": "7641f81fa736a4d6b023de54c6e6f11ce1108f063528a0f0e4535af7f8702933",
     "source": {
-      "asset": "L5R-Catalogue-WebP85.zip",
-      "matched_by": "original_sha256",
-      "release": "catalogue-art-webp-v1"
+      "asset": "user-supplied scan (Mendon, 2026-09-25; 429x600 re-encoded as WebP quality 85, not resized)",
+      "matched_by": "supplied by Mendon on 2026-09-25",
+      "release": null
     },
-    "width": 750
+    "width": 429
   }
 }

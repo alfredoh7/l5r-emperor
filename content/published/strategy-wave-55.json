@@ -1,0 +1,253 @@
+{
+  "Profile": "strategy-wave-55",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-3013",
+      "Name": "Heart of Darkness",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Before this battle's resolution: Choose and bow zero to two cards at the current battlefield with 4 or greater Force.\nBattle: If no Terrain is at the current battlefield: Put this card into play there.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-3013.jpg",
+      "Keywords": [
+        "Terrain"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "heart-of-darkness-bow"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-3790",
+      "Name": "Intimidation",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing Berserker Personality and target another player's Personality not at the current battlefield: Move them both there. Straighten each unit that this moved.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-3790.jpg",
+      "Keywords": [
+        "Fear"
+      ],
+      "Focus": 1,
+      "Abilities": [
+        "intimidation-move"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-5533",
+      "Name": "Never Beyond My Reach",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Even if you control no units at the current battlefield, choose your performing unbowed Kensai, who may be at an adjacent battlefield to the current one if he has a Weapon attached: Ranged 6 Attack (against a target at the current battlefield).",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-5533.jpg",
+      "Keywords": [],
+      "Focus": 1,
+      "Abilities": [
+        "never-beyond-reach-attack"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-5906",
+      "Name": "Pearls & Spirits",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Bow your performing Shugenja, and destroy him unless he is Nonhuman: Ranged Attack with strength equal to his Force plus Chi.\nBattle: Bow your performing Shugenja: Ranged Attack with strength equal to his Force or Chi.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-5906.jpg",
+      "Keywords": [
+        "Pearl"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "pearls-spirits-sacrifice-attack",
+        "pearls-spirits-force-attack",
+        "pearls-spirits-chi-attack"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-6299",
+      "Name": "Returning Home",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After a battle ends in which you destroyed a province as the Attacker: Create a Holding with the trait \"Bow this card: Produce 3 Gold\" (it enters play bowed). Draw a card.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6299.jpg",
+      "Keywords": [],
+      "Focus": 4,
+      "Abilities": [
+        "returning-home-create"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-6343",
+      "Name": "Rise of the Dark Naga",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: If you control two or more Nonhuman Personalities, choose your performing Nonhuman Personality face-up in your province: Bring him into play, paying all costs. Refill the province face-up.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6343.jpg",
+      "Keywords": [],
+      "Focus": 1,
+      "Abilities": [
+        "dark-naga-rise-recruit"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-6566",
+      "Name": "Seeking the Truth",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After engaging, choose your performing unbowed Scout at the current battlefield: You have Reconnaissance there. Put a non-Unique Battle Strategy in your discard pile into your hand. After this battle ends, if you did not destroy the battlefield's province or an army, discard a card at random.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6566.jpg",
+      "Keywords": [
+        "Recon"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "seeking-truth-recon"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-7248",
+      "Name": "Siege Volley",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Siege Battle: Ranged 4 Attack.\nSiege Absent Battle: Give the current Province a strength bonus or penalty equal to the number of Castles you control.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7248.jpg",
+      "Keywords": [
+        "Siege"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "siege-volley-attack",
+        "siege-volley-raise",
+        "siege-volley-lower"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-7477",
+      "Name": "Steadfast Defense",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing Monk: Straighten him. If you control a Temple, you may target a Personality or Follower and bow or straighten it.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7477.jpg",
+      "Keywords": [
+        "Kiho"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "steadfast-defense-straighten"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-7650",
+      "Name": "Sundering Strike",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Target an enemy Personality: You may target one of his attachments and pay Gold equal to its Gold Cost minus four. If you did, destroy it. Move the Personality home.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7650.jpg",
+      "Keywords": [],
+      "Focus": 3,
+      "Abilities": [
+        "sundering-strike"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

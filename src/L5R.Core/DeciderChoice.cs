@@ -11,6 +11,14 @@ public static class DeciderSpecs
     public const string DragonsBreath = "dragons-breath-bow";
     /// <summary>Yoritomo Tarao: "Choose a player. He targets one of his unbowed Personalities or Holdings or a card in his hand. If the targeted card is in his hand, discard it. Otherwise, bow it."</summary>
     public const string TaraoSacrifice = "tarao-sacrifice";
+    /// <summary>Blood of the Preserver (The Shadow's Embrace pass, issue #476 batch 5): "Each player chooses zero to two Personalities at the current battlefield" -- the acting
+    /// player first, then the other player (ShadowsEmbraceBatch5.cs).</summary>
+    public const string BloodOfThePreserverFirst = "blood-preserver-first";
+    public const string BloodOfThePreserverSecond = "blood-preserver-second";
+    /// <summary>Isawa Kimi - exp 2 (issue #477): "That player chooses and discards a card from his hand." The decider is the other player, who was just given a card.</summary>
+    public const string KimiDiscard = "kimi-discard";
+    /// <summary>Governor's Court (Emperor Edition remaining-cards pass, issue #492 group F): "He may choose to target and bow one of his unbowed Personalities. If he did not choose this, gain 2 Honor."</summary>
+    public const string GovernorsCourt = "governors-court";
 }
 
 /// <summary>The decision another player makes inside an action (MatchState.PendingDeciderChoice). Paused is the action that opened it, kept whole so it finishes exactly as it would have.</summary>
@@ -25,6 +33,8 @@ public sealed class PendingDeciderChoice
     public int Min { get; set; }
     public int Max { get; set; }
     public List<string> Chosen { get; set; } = [];
+    /// <summary>What earlier deciders of the same action chose, when one choice follows another (Blood of the Preserver's "each player chooses").</summary>
+    public List<string> EarlierChosen { get; set; } = [];
     public PendingEffectChoice Paused { get; set; } = new();
 }
 
@@ -46,7 +56,10 @@ public sealed partial class MatchEngine
         DeciderSpecs.ScandalousRumors => $"{Definition(Card(p.SourceCardId)).Name}: {Player(p.DeciderPlayerId).Name}, choose any of your Personalities at this battlefield to move home. You lose 1 Honor for each that stays, and dishonor them.",
         DeciderSpecs.DragonsBreath => $"{Definition(Card(p.SourceCardId)).Name}: {Player(p.DeciderPlayerId).Name}, choose one of your Personalities at this battlefield. It is bowed.",
         DeciderSpecs.TaraoSacrifice => $"{Definition(Card(p.SourceCardId)).Name}: {Player(p.DeciderPlayerId).Name}, choose one of your unbowed Personalities or Holdings, or a card in your hand. A card in your hand is discarded; any other is bowed.",
-        _ => throw new RuleViolation("Unknown choice.")
+        DeciderSpecs.BloodOfThePreserverFirst or DeciderSpecs.BloodOfThePreserverSecond => BloodOfThePreserverPrompt(p),
+        DeciderSpecs.KimiDiscard => $"{Definition(Card(p.SourceCardId)).Name}: {Player(p.DeciderPlayerId).Name}, choose a card from your hand. It is discarded.",
+        DeciderSpecs.GovernorsCourt => $"{Definition(Card(p.SourceCardId)).Name}: {Player(p.DeciderPlayerId).Name}, you may choose one of your unbowed Personalities to bow; if you choose none, {Player(p.ActingPlayerId).Name} gains 2 Honor.",
+        _ => RegisteredDeciderPrompt(p) ?? throw new RuleViolation("Unknown choice.")
     };
 
     // The cards the decider may choose among, and how many, for each spec.
@@ -65,9 +78,15 @@ public sealed partial class MatchEngine
             case DeciderSpecs.TaraoSacrifice:
                 return (_state.Cards.Values.Where(c => c.OwnerId == deciderId && (InPlay(c) && !c.Bowed && Definition(c).Type is CardType.Personality or CardType.Holding || c.Zone == Zone.Hand && Player(deciderId).Hand.Contains(c.Id)))
                     .Select(c => c.Id).Order(StringComparer.Ordinal).ToList(), 1, 1);
+            case DeciderSpecs.GovernorsCourt:
+                return (_state.Cards.Values.Where(c => c.OwnerId == deciderId && InPlay(c) && !c.Bowed && Definition(c).Type == CardType.Personality).Select(c => c.Id).Order(StringComparer.Ordinal).ToList(), 0, 1);
+            case DeciderSpecs.KimiDiscard:
+                return (Player(deciderId).Hand.OrderBy(id => id, StringComparer.Ordinal).ToList(), 1, 1);
             case DeciderSpecs.DragonsBreath:
                 return (_state.CurrentBattleProvince is int battle ? Army(deciderId, battle).Where(c => Definition(c).Type == CardType.Personality && !c.Bowed).Select(c => c.Id).Order(StringComparer.Ordinal).ToList() : [], 1, 1);
-            default: throw new RuleViolation("Unknown choice.");
+            case DeciderSpecs.BloodOfThePreserverFirst:
+                return (BloodOfThePreserverCandidates([]), 0, 2);
+            default: return RegisteredDeciderOptions(specId, deciderId, command) ?? throw new RuleViolation("Unknown choice.");
         }
     }
 
@@ -77,7 +96,10 @@ public sealed partial class MatchEngine
         HashSet<string> bowedBefore, List<AdditionalActionGrant> preExistingGrants)
     {
         var source = Card(command.CardId);
-        var deciderId = specId is DeciderSpecs.KnowTheirMinds or DeciderSpecs.TaraoSacrifice ? command.TargetPlayerId ?? command.PlayerId : _state.ActivePlayerId;
+        var deciderId = RegisteredDeciderIdBefore(specId, command)
+            ?? (specId is DeciderSpecs.KnowTheirMinds or DeciderSpecs.TaraoSacrifice or DeciderSpecs.GovernorsCourt ? command.TargetPlayerId ?? command.PlayerId
+                : specId == DeciderSpecs.BloodOfThePreserverFirst ? command.PlayerId
+                : RegisteredDeciderIdAfter(specId, command) ?? (specId == DeciderSpecs.KimiDiscard ? 1 - command.PlayerId : _state.ActivePlayerId));
         var (candidates, min, max) = DeciderOptions(specId, deciderId, command);
         var pending = new PendingDeciderChoice
         {
@@ -95,11 +117,25 @@ public sealed partial class MatchEngine
             Emit("deciderAutoResolved", candidates.Count == 0 ? $"{Definition(source).Name}: {Player(deciderId).Name} has nothing to choose." : $"{Definition(source).Name}: {Player(deciderId).Name} has one choice.", deciderId, source.Id);
             pending.Chosen = candidates.Take(max).ToList();
             ApplyDeciderChoice(pending);
-            return false;
+            return _state.PendingDeciderChoice is not null; // a choice that hands on to a further decider (Blood of the Preserver) is still open
+        }
+        return OpenDeciderChoice(pending);
+    }
+
+    // Hands an assembled choice to its decider (BeginDeciderChoice, and a choice that follows another's: Blood of the Preserver).
+    private bool OpenDeciderChoice(PendingDeciderChoice pending)
+    {
+        var source = Card(pending.SourceCardId);
+        var deciderId = pending.DeciderPlayerId;
+        if (pending.Candidates.Count == 0)
+        {
+            Emit("deciderAutoResolved", $"{Definition(source).Name}: {Player(deciderId).Name} has nothing to choose.", deciderId, source.Id);
+            ApplyDeciderChoice(pending);
+            return _state.PendingDeciderChoice is not null;
         }
         _state.PendingDeciderChoice = pending;
         SuspendOpenWindow();
-        _state.PendingChoice = new("deciderChoice", deciderId, source.Id, DeciderPrompt(pending), command.PlayerId);
+        _state.PendingChoice = new("deciderChoice", deciderId, source.Id, DeciderPrompt(pending), pending.ActingPlayerId);
         _state.PriorityPlayerId = deciderId; _state.ConsecutivePasses = 0;
         Emit("deciderChoiceOffered", $"{Player(deciderId).Name} must choose ({Definition(source).Name}).", deciderId, source.Id);
         return true;
@@ -124,6 +160,7 @@ public sealed partial class MatchEngine
         if (command.Choice != "done") return;
         _state.PendingChoice = null; _state.PendingDeciderChoice = null;
         ApplyDeciderChoice(pending);
+        if (_state.PendingDeciderChoice is not null) return; // the choice handed on to a further decider (Blood of the Preserver), who finishes the action
         var paused = pending.Paused;
         CompleteAbilityResolution(paused.Command, AbilityCatalog.All[paused.Command.AbilityId!], paused.ConsumedGrant, paused.PlayedFromDiscard, paused.OpponentHonorBefore,
             paused.BowedBefore.ToHashSet(StringComparer.Ordinal), paused.PreExistingGrants);
@@ -150,11 +187,19 @@ public sealed partial class MatchEngine
                 if (stayed.Length > 0)
                 {
                     GainHonor(p.DeciderPlayerId, -stayed.Length, name, source);
-                    foreach (var card in stayed) Dishonor(card);
+                    foreach (var card in stayed) Dishonor(card, p.ActingPlayerId);
                 }
                 break;
             }
             case DeciderSpecs.DragonsBreath:
+                foreach (var id in p.Chosen) { var card = Card(id); if (!StalwartNegatesBow(card, p.ActingPlayerId)) card.Bowed = true; }
+                break;
+            case DeciderSpecs.KimiDiscard:
+                foreach (var id in p.Chosen) { var card = Card(id); if (card.Zone == Zone.Hand && !P2HandDiscardBlocked(card.OwnerId, p.ActingPlayerId, true, Definition(Card(p.SourceCardId)).Name)) DiscardFate(Player(card.OwnerId), card); } // issue #503
+                break;
+            case DeciderSpecs.GovernorsCourt:
+                // "If he did not choose this, gain 2 Honor": the action was performed by the Courtier (a dishonorable one is rehonored instead).
+                if (p.Chosen.Count == 0) GainHonorFromPerformer(Card(p.Paused.Command.PerformerId!), 2, name);
                 foreach (var id in p.Chosen) { var card = Card(id); if (!StalwartNegatesBow(card, p.ActingPlayerId)) card.Bowed = true; }
                 break;
             case DeciderSpecs.TaraoSacrifice:
@@ -165,6 +210,11 @@ public sealed partial class MatchEngine
                     else if (!StalwartNegatesBow(card, p.ActingPlayerId)) card.Bowed = true;
                 }
                 break;
+            case DeciderSpecs.BloodOfThePreserverFirst:
+            case DeciderSpecs.BloodOfThePreserverSecond:
+                ApplyBloodOfThePreserverChoice(p);
+                break;
+            default: RegisteredApplyDecider(p); break;
         }
         _state.NegatedEffects.Clear();
     }
@@ -184,13 +234,37 @@ public sealed partial class MatchEngine
     private IEnumerable<ActionOption> DeciderChoiceActions(int playerId)
     {
         if (_state.PendingDeciderChoice is not { } p || p.DeciderPlayerId != playerId) yield break;
-        var verb = p.SpecId switch { DeciderSpecs.ScandalousRumors => "Move home", DeciderSpecs.DragonsBreath => "Bow", DeciderSpecs.TaraoSacrifice => "Sacrifice", _ => "Turn face-down" };
+        var verb = p.SpecId switch { DeciderSpecs.ScandalousRumors => "Move home", DeciderSpecs.DragonsBreath => "Bow", DeciderSpecs.TaraoSacrifice => "Sacrifice", DeciderSpecs.KimiDiscard => "Discard", DeciderSpecs.GovernorsCourt => "Bow",
+            DeciderSpecs.BloodOfThePreserverFirst or DeciderSpecs.BloodOfThePreserverSecond => "Remove from the game",
+            EmperorRemainingBSpecs.HeavilyEngagedFirst or EmperorRemainingBSpecs.HeavilyEngagedSecond => "Bow", EmperorRemainingBSpecs.MysteriousDeathsFirst or EmperorRemainingBSpecs.MysteriousDeathsSecond => "Destroy",
+            _ => RegisteredDeciderVerb(p.SpecId) ?? "Turn face-down" };
         if (p.Chosen.Count < p.Max)
             foreach (var id in p.Candidates.Where(c => !p.Chosen.Contains(c)))
                 yield return new("chooseDecider", $"{verb} · {Definition(Card(id)).Name}", true, null,
                     new GameCommand("chooseDecider", playerId, _state.Version, CardId: p.SourceCardId, TargetId: id), id);
-        if (p.Chosen.Count >= p.Min && p.Max > 1)
+        if (p.Chosen.Count >= p.Min && (p.Max > 1 || p.Min == 0)) // a "may choose" of one card (Governor's Court) can be declined
             yield return new("chooseDecider", p.Chosen.Count == 0 ? "Choose none" : $"Done ({p.Chosen.Count} chosen)", true, null,
                 new GameCommand("chooseDecider", playerId, _state.Version, CardId: p.SourceCardId, Choice: "done"), p.SourceCardId);
+    }
+}
+
+public sealed partial class MatchEngine
+{
+    private bool HandleRegisteredDeciderChoice(string type, GameCommand command)
+    {
+        if (type != "deciderChoice") return false;
+        WithResumedAction(() => ResolveDeciderChoiceCommand(command));
+        return true;
+    }
+}
+
+public sealed partial class MatchEngine
+{
+    // Registration only: callbacks are not invoked during module initialization.
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
+    [System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void RegisterDeciderChoiceHooks()
+    {
+        EngineHooks.PendingChoice.Register("HandleRegisteredDeciderChoice", 700, static (engine, type, command) => engine.HandleRegisteredDeciderChoice(type, command));
     }
 }

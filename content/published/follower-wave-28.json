@@ -1,0 +1,59 @@
+{
+  "Profile": "follower-wave-28",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-2520",
+      "Name": "Field Messenger",
+      "Type": "Follower",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle/Open: Transfer this Follower to your target Personality.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-2520.jpg",
+      "Keywords": [
+        "Cavalry"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "field-messenger-transfer"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-2598",
+      "Name": "Flanking Unit",
+      "Type": "Follower",
+      "Clan": "Unaligned",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": 1,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "As a Focus Effect, you may transfer a Follower from your Personality in this duel to another of your Personalities.\nBattle: Move a target Personality at the current battlefield home or to an adjacent battlefield.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-2598.jpg",
+      "Keywords": [
+        "Cavalry"
+      ],
+      "Focus": 1,
+      "Abilities": [
+        "flanking-unit-focus",
+        "flanking-unit-move-home",
+        "flanking-unit-move-adjacent"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

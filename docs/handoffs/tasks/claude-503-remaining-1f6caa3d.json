@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Evaluated and wired 126 of the 143 remaining cards of eight sets (groups P1-P6): new records, windows, targets, zones, control, provinces; inventory 1419 wired; art pack pr503-r1",
+  "validation": "Core suite 0 failures (2105 passes); AI 74/74; Server 8/8; Client.Transport 13/13; content tests OK; Godot client build left to CI",
+  "remaining": "None; ready for review. 17 cards stay blocked (created-card Proxy scans, Plains of Otosan Uchi issue #499, custody ruling, Regret, Nitoshi, Inexorable)",
+  "issue": "503",
+  "branch": "claude/503-remaining",
+  "updated": "2026-09-26T01:58:11.555240+00:00"
+}

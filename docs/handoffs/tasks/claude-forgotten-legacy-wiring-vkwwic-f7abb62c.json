@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Forgotten Legacy pass (#467): 64 of 81 unwired cards wired across personality-wave-67/66, follower-wave-29, stronghold-wave-15, strategy-wave-54/55, spell-wave-21, holding-wave-11, item-wave-13, event-wave-6, celestial-wave-6, region-wave-8; new primitives in ForgottenLegacyBatch1-5.cs; 17 cards blocked with specific notes; published Terrains now offered as playStrategy actions (pre-existing gap). See docs/decisions/2026-09-24-forgotten-legacy-pass.md. Shared change: the only non-rules files are the 64 bundled card scans under src/L5R.Client/Content/Published/ (same as every earlier wiring pass); no client code changed. The Terrain listing fix changes which legal actions the engine offers (Mendon has standing cross-lane authority).",
+  "validation": "L5R.Core.Tests 1300/1300 after merging main (0 FAIL, +70 new scenarios); AI 74/74; Server 8/8; Client.Transport 12/12; collaboration 45/45; content 134/134 with art pack catalogue-art-pr469-20260924-r2 pinned (3314 scans; GitHub digest matches). Built with SDK 10.0.112 (pinned 10.0.400 unreachable), global.json overridden locally only. Godot client not built; no native visual/Windows checks. GitHub CI jobs refused to start (account billing).",
+  "remaining": "Mendon to confirm the rulings in docs/decisions/2026-09-24-forgotten-legacy-pass.md; 7 cards await scans unreachable from the cloud sandbox; GitHub-hosted CI blocked by account billing until resolved.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/467",
+  "branch": "claude/forgotten-legacy-wiring-vkwwic",
+  "updated": "2026-09-24T09:10:54.821576+00:00"
+}

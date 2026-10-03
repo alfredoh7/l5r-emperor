@@ -1,0 +1,9 @@
+{
+  "lane": "ui",
+  "summary": "Repair the stale persistent Home probe (check-persistent-home.sh): pass the new Choose argument through reflection (my #583 change broke it), pick the first legal target through the real picker before confirming an ability, and confirm the Reserve recruit which now opens the reviewed Gold payment panel. Probe-only change; no game behaviour changed.",
+  "validation": "check-persistent-home.sh passes at 1920x1080 and 1440x900 (PERSISTENT_HOME_PASS twice, all six HOME_PASS lines). Before: on main it threw TargetParameterCountException at the first Ability() call, a regression from my #583 (Choose gained an optional parameter; reflection does not fill it); the pre-#581 baseline failed later at 'Reserve button did not submit the engine action'. Fixed in three steps, each confirmed by re-running: reflective call, target pick, Reserve confirm. Not run: full tools/check.sh or the other native checks.",
+  "remaining": "Still failing and undiagnosed: unit-standard, shown-cards, top-cards-ui, player-clarity, crimson-duel, war-room-motion, table-followup.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/593",
+  "branch": "claude/593-persistent-home-capture",
+  "updated": "2026-10-03T12:22:55.049703+00:00"
+}

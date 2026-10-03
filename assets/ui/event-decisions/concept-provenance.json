@@ -1,0 +1,27 @@
+{
+  "assets": [
+    {
+      "id": "A1",
+      "name": "Harsh Choices \u2014 anchored sidebar",
+      "source": "/Users/alfredo/.codex/generated_images/01a0768d-37dc-7cd1-917d-c69c30ba2ab1/exec-c3bc05a0-1613-4fc4-82cc-4da70af13375.png",
+      "path": "approved-harsh-sidebar.png",
+      "generator": "Built-in image_gen",
+      "review_status": "Approved by Alfredo on 2026-09-17",
+      "runtime_path": "src/L5R.Client/Art/EventDecisions/A1.png"
+    },
+    {
+      "id": "B2",
+      "name": "Times of Strife \u2014 hand-focused decision bar",
+      "source": "/Users/alfredo/.codex/generated_images/01a0768d-37dc-7cd1-917d-c69c30ba2ab1/exec-6bcf1555-e737-46a4-b699-eec60604d802.png",
+      "path": "approved-strife-hand.png",
+      "generator": "Built-in image_gen",
+      "review_status": "Approved by Alfredo on 2026-09-17",
+      "runtime_path": "src/L5R.Client/Art/EventDecisions/B2.png"
+    }
+  ],
+  "recommended": [
+    "A1",
+    "B2"
+  ],
+  "implementation_changed": true
+}

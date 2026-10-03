@@ -4,7 +4,7 @@ namespace L5R.Client;
 public partial class Main
 {
     private bool _hudProbeDone;
-    private async void ProbeHudIcons()
+    private async Task ProbeHudIcons()
     {
         try
         {

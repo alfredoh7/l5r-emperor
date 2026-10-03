@@ -87,7 +87,10 @@ public sealed partial class MatchEngine
     // his controller), his trait has not fired this turn, and the movement is not one that "will not be negated" (MovementCannotBeNegated). The stamp makes it once a turn.
     private bool EnemyActionMovementAutoNegated(CardInstance card)
     {
-        if (Definition(card).Effect != NegateFirstEnemyMoveEachTurnEffect || !InPlay(card)) return false;
+        // Twin Forks City (The Shadow's Embrace pass, issue #476 batch 6): a one-shot shield against another player's card's effect moving him.
+        if (BlessingsShieldNegatesMove(card)) return true; // Blessings of the Shi-Tien Yen-Wang (issue #503).
+        if (_runningCommand is { } mover && !MovementCannotBeNegated(mover) && TwinForksNegates(card, mover.PlayerId, "movement")) return true;
+        if (Definition(card).Effect != NegateFirstEnemyMoveEachTurnEffect || !InPlay(card) || HiromiUnnegatable()) return false; // Yoritomo Hiromi (issue #477).
         if (_runningCommand is not { } acting || acting.PlayerId == card.OwnerId || MovementCannotBeNegated(acting)) return false;
         if (card.AbilityUses.TryGetValue(EnemyMoveNegatedTurnKey, out var turn) && turn == _state.TurnNumber) return false;
         card.AbilityUses[EnemyMoveNegatedTurnKey] = _state.TurnNumber;
@@ -106,4 +109,15 @@ public sealed partial class MatchEngine
 
     // "[Card] will not be controlled by a [Clan] player": a Loyal-like refusal keyed on the controlling player's Clan, read wherever Loyal is (recruiting, overlaying).
     private static bool ControlRefusedByClan(CardInstance card, string clan) => Definition(card).Effect == TanemonoNoPhoenixControlEffect && clan == "Phoenix";
+}
+
+public sealed partial class MatchEngine
+{
+    // Registration only: callbacks are not invoked during module initialization.
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
+    [System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void RegisterSeedsOfDecayBatch3Hooks()
+    {
+        EngineHooks.ValidateLate.Register("ValidateSeedsOfDecayBatch3", 100, static (engine, context) => engine.ValidateSeedsOfDecayBatch3(context.id, context.command, context.ability, context.player, context.source));
+    }
 }

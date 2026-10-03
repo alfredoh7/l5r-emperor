@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Finish approved B shown-card history sidebar (#315), public-record-only inspection, reconnect identity, and a verified prepared Mac review launcher; draft PR #393, no merge authorized.",
+  "validation": "All deterministic checks passed; 34/34 AI, 8/8 server, 9/9 transport including two-session reveal/reconnect/privacy. Client build/import passed. Native 1920x1080 normal and 1280x800 reduced-motion history checks, compact chooser regression, Strife and Harsh Choices passed. Actual Mac app launch, unread arrival, pin inspection and reset verified; screenshots and checklist in docs/handoffs/2026-09-21-shown-cards-review.md.",
+  "remaining": "Alfredo individual UI acceptance, Mendon review, CI on pushed revision, native Windows graphical and external multiplayer acceptance. Six other UI tasks pending. No merge into main authorized.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/315",
+  "branch": "codex/315-shown-card-history",
+  "updated": "2026-09-20T23:12:56.160920+00:00"
+}

@@ -365,7 +365,7 @@ static async Task LookSurvivesRestart()
 static Task GoldWire()
 {
     var command = new GameCommand("useAbility", 1, 9, "card", ["source"], 2, true, true, new() { ["unit"] = 1 }, ["card-a"], "target",
-        "ability", "performer", "choice", "Top", 1, 4, "destroy", [new SlotSelection("slot", ["card-b"], 1)], "created-scan");
+        "ability", "performer", "choice", "Top", 1, 4, "destroy", [new SlotSelection("slot", ["card-b"], 1)], "created-scan", new() { ["source"] = "hand-card" }, [1, 3]); // Provinces: Hidden Falls Dojo (issue #486)
     var properties = typeof(GameCommand).GetProperties().Where(p => p.Name is not ("PlayerId" or "ExpectedVersion" or "EqualityContract")).ToArray();
     foreach (var property in properties)
     {

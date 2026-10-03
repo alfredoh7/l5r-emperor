@@ -1,0 +1,61 @@
+{
+  "Profile": "spell-wave-42",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-6559",
+      "Name": "Seek the Stain",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "You may attach this card from your discard pile to your Void Shugenja.\nOpen: Bow this card and target another player's Personality: You find out his dark secret. Give him Kolat, Ninja, or Shadowlands.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6559.jpg",
+      "Keywords": [
+        "Void"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "p5-seek-stain-equip-limited",
+        "p5-seek-stain-equip-battle",
+        "p5-seek-stain-kolat",
+        "p5-seek-stain-ninja",
+        "p5-seek-stain-shadowlands"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10132",
+      "Name": "Step Through the Void",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle/Open: Destroy this card unless this Shugenja is Void: Remove this Shugenja from the game; his attachments stay attached. Before this turn ends, put his unit into play, ignoring costs, entering-play effects, and restrictions.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10132.jpg",
+      "Keywords": [
+        "Void"
+      ],
+      "Focus": 1,
+      "Abilities": [
+        "p5-step-through-void"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

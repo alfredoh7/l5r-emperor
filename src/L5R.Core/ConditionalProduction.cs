@@ -14,7 +14,8 @@ public enum PaymentKind
 }
 
 /// <summary>What a Gold payment is for: the card being bought, equipped, played or acting, and the ability when the payment is an ability's.</summary>
-public sealed record PaymentSubject(CardInstance Card, PaymentKind Kind, AbilityDefinition? Ability = null);
+/// <param name="Wielder">Issue #501 (Moto Rani - exp): the Personality an attachment being paid for attaches to, when the payment is an Equip; null otherwise.</param>
+public sealed record PaymentSubject(CardInstance Card, PaymentKind Kind, AbilityDefinition? Ability = null, CardInstance? Wielder = null);
 
 /// <summary>What has to be true of a payment for a conditional production to apply.</summary>
 public enum ProductionCondition
@@ -27,12 +28,24 @@ public enum ProductionCondition
     PayingForHolding,
     /// <summary>The Sacred Temple of the Phoenix - inexperienced (issue #458, Honor and Treachery): "When paying for a Spell or Shugenja, produce 5 Gold which may only pay for
     /// that card" -- a Spell equipped (PaymentKind.Equip), or a Shugenja Personality recruited (PaymentKind.Recruit, the printed Shugenja keyword), never an action.</summary>
-    PayingForSpellOrShugenja
+    PayingForSpellOrShugenja,
+    /// <summary>Staging Grounds (issue #460, Embers of War pass): "Produce 3 Gold, or 4 Gold if paying for a card with a printed Gold Cost of 9 or more which may
+    /// only pay for that card." A card bought, equipped or played (never an action), by its own PRINTED Gold Cost (CardDefinition.GoldCost, not any live-modified
+    /// price) -- Threshold names the minimum.</summary>
+    PayingForExpensiveCard,
+    /// <summary>Platinum Mine (The Shadow's Embrace pass, issue #476 batch 6): "Produce 5 Gold, or 6 Gold if paying for an attachment." A Follower, Item or Spell
+    /// being attached and paid for (an Equip, or an attach from a discard pile priced as one) -- never an action, nor a card created as an attachment.</summary>
+    PayingForAttachment,
+    /// <summary>Yasuki Palaces - experienced (Emperor Edition Stronghold pass, issue #486 batch 3): "This card produces 1 less Gold when paying for a Personality." A Personality bought
+    /// (PaymentKind.Recruit) -- never an action of one, and never another kind of card.</summary>
+    PayingForPersonality,
+    /// <summary>Issue #503 (Shrine to Nimuro: "or 3 Gold if you control a Tactician"): a condition on the producing card's controller, already judged when the production was asked for.</summary>
+    ControllerCondition
 }
 
 /// <summary>A Holding's production that depends on what it is paying for (issue #416): while a payment meets <paramref name="When"/> the Holding produces
 /// <paramref name="Amount"/> instead of its printed production. Data on the card's Effect, so a printed Holding of this kind needs no code of its own.</summary>
-public sealed record ConditionalProduction(int Amount, ProductionCondition When, string? Keyword = null);
+public sealed record ConditionalProduction(int Amount, ProductionCondition When, string? Keyword = null, int? Threshold = null);
 
 public static class ConditionalProductionCatalog
 {
@@ -45,6 +58,13 @@ public static class ConditionalProductionCatalog
         "bushi-dojo-gold" => new(6, ProductionCondition.EquipsOrCreatesFollower),
         "dokansuto-gold" => new(2, ProductionCondition.PayingForHolding),
         "sacred-temple-phoenix-gold" => new(5, ProductionCondition.PayingForSpellOrShugenja),
+        "staging-grounds-gold" => new(4, ProductionCondition.PayingForExpensiveCard, Threshold: 9),
+        // Ageless Shrine (Forgotten Legacy pass, issue #467): "Produce 2 Gold, or 3 Gold when paying for a Nonhuman."
+        "ageless-shrine-gold" => new(3, ProductionCondition.PayingForKeyword, "Nonhuman"),
+        // Platinum Mine (The Shadow's Embrace pass, issue #476 batch 6).
+        "platinum-mine-gold" => new(6, ProductionCondition.PayingForAttachment),
+        // Yasuki Palaces - experienced (Emperor Edition Stronghold pass, issue #486 batch 3): printed 5, 1 less (4) when paying for a Personality.
+        "yasuki-palaces-gold" => new(4, ProductionCondition.PayingForPersonality),
         _ => null
     };
 }
@@ -55,10 +75,13 @@ public static class ConditionalProductionCatalog
 // own: Gold does not carry over from one payment to another, so a source's whole production always pays for the one card or action it was chosen for.
 public sealed partial class MatchEngine
 {
-    private ConditionalProduction? ConditionalProductionOf(CardInstance card) => ConditionalProductionCatalog.For(Definition(card).Effect);
+    // Yasuki Dokansuto's production is a printed "Kolat Reaction": Cherry Blossom Festival bars it (Mendon's R4 ruling). Every other conditional production is a Holding's trait.
+    private ConditionalProduction? ConditionalProductionOf(CardInstance card) =>
+        Definition(card).Effect == "dokansuto-gold" && ReactionsBarred() ? null : ConditionalProductionCatalog.For(Definition(card).Effect) ?? P2ConditionalProduction(card); // issue #503
 
     private bool ProductionConditionMet(ConditionalProduction production, PaymentSubject? paying)
     {
+        if (production.When == ProductionCondition.ControllerCondition) return true; // issue #503: judged by P2ConditionalProduction
         if (paying is null) return false;
         return production.When switch
         {
@@ -69,6 +92,11 @@ public sealed partial class MatchEngine
             ProductionCondition.EquipsOrCreatesFollower =>
                 paying.Kind == PaymentKind.Equip && Definition(paying.Card).Type == CardType.Follower
                 || paying.Ability?.Creates is { Type: CardType.Follower },
+            // Staging Grounds: the card's own PRINTED Gold Cost (never a live-modified price), bought, equipped or played -- never an action.
+            ProductionCondition.PayingForExpensiveCard =>
+                paying.Kind != PaymentKind.Action && production.Threshold is int threshold && Definition(paying.Card).GoldCost >= threshold,
+            ProductionCondition.PayingForAttachment => paying.Kind == PaymentKind.Equip && Definition(paying.Card).Type is CardType.Follower or CardType.Item or CardType.Spell,
+            ProductionCondition.PayingForPersonality => paying.Kind == PaymentKind.Recruit && Definition(paying.Card).Type == CardType.Personality,
             _ => false
         };
     }
@@ -79,7 +107,10 @@ public sealed partial class MatchEngine
         if (command.AbilityId is null || !AbilityCatalog.All.TryGetValue(command.AbilityId, out var ability)) return null;
         var source = command.CardId is not null && _state.Cards.TryGetValue(command.CardId, out var s) ? s : null;
         if (ability.Cost?.Basis == GoldCostBasis.TargetRecruit && priced is not null) return new(priced, PaymentKind.Recruit, ability);
-        if (ability.Cost?.Basis == GoldCostBasis.AttachCost && priced is not null) return new(priced, PaymentKind.Equip, ability);
+        if (ability.Cost?.Basis == GoldCostBasis.AttachCost && priced is not null) return new(priced, PaymentKind.Equip, ability, ability.Attach is { } attach ? WielderOfAttach(attach, command, source) : null); // issue #501: the wielder
+        // Equip (Battle) and Soshi Neiru's equip price the attachment by its printed cost: they pay for that attachment too (Platinum Mine, The Shadow's Embrace pass issue #476 batch 6).
+        if (command.AbilityId is "equip-battle" or "neiru-equip" && priced is not null && Definition(priced).Type is CardType.Follower or CardType.Item or CardType.Spell)
+            return new(priced, PaymentKind.Equip, ability, command.PerformerId is not null && _state.Cards.TryGetValue(command.PerformerId, out var equipper) ? equipper : null); // issue #501: the wielder
         return source is null ? null : new(source, source.Zone == Zone.Hand ? PaymentKind.Play : PaymentKind.Action, ability);
     }
 }

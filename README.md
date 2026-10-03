@@ -25,7 +25,7 @@ The engine's `MatchView.Limitations` records unsupported mechanics. Training fix
 
 The playable client supports windowed and fullscreen play (F11 toggles), complete card scans, an expanded navy mat, upright lanterns and warm animated light. The phase bar uses raster lacquer/brass artwork with live Musashi Brush headings and a subtle glow. Physical piles expose counts on hover, and the compact sidebar handles decisions. See [the bitmap phase-bar pass](docs/PHASE_BAR_ART.md) and [the next development phase](docs/NEXT_PHASE.md). For a static historical environment-only view, launch `tools/review-table.command` on this configured Mac.
 
-Prerequisites: **Python 3.12 or later**, macOS or Windows on x64/ARM64, and **Git Bash on Windows** for the shell scripts. The bootstrap installs **.NET SDK 10.0.400** and **Godot 4.7.2 .NET** into `.tools/` using pinned official HTTPS downloads and checksums.
+Prerequisites: **Python 3.12 or later**, macOS or Windows on x64/ARM64, and **Git Bash on Windows** for the shell scripts. The bootstrap installs **.NET SDK 10.0.400** and **Godot 4.7.2 .NET** into `.tools/` using pinned official HTTPS downloads and checksums. The content tools and their tests in `tools/check.sh` also need Python packages that bootstrap reports but never installs; see [Content intake](tools/content/README.md) for the install command.
 
 ```sh
 # Inspect the local toolchain without downloading anything.
@@ -39,6 +39,8 @@ bash tools/run.sh
 ```
 
 Installation is explicit; the run/check scripts never silently download an editor or SDK. A .NET build may restore missing NuGet packages into `.cache/nuget`. Re-running bootstrap reuses matching installed tools and verified cached archives; it refuses to replace an existing mismatched tool directory automatically.
+
+For a double-click launcher instead of typing a run command, double-click `Play Latest.command` (Mac) or `Play Latest.bat` (Windows, needs Git Bash) in the checkout, or run `python3 tools/create-dev-launcher.py` once to create a nicer clickable icon under `artifacts/`: `L5R Emperor - Latest.app` on Mac, `L5R Emperor - Latest.lnk` on Windows. Both build and launch the current checkout without fetching or switching branches, and write launch output to `artifacts/checks/latest-launch.log`.
 
 `tools/env.sh` scopes .NET CLI state, package caches, telemetry settings, and editor selection to this project. The wrappers disable ASP.NET development-certificate generation and shared compiler processes. This matters on first run: `DOTNET_CLI_HOME` relocates CLI state, but by itself does not prevent development-certificate actions. No script trusts a certificate or changes system PATH. The bootstrap enables the local editor's portable settings mode; exported games use normal per-user application storage.
 

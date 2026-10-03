@@ -1,5 +1,7 @@
 using static RegressionAssertions;
 using System.Text.Json;
+using System.Security.Cryptography;
+using System.Text;
 using L5R.Core;
 
 internal static class PublishedTests
@@ -10,6 +12,10 @@ internal static class PublishedTests
             ("Published pool pins card definitions and the ability-free vanilla wave", Catalogue),
             ("Published catalogue is exactly content/published/*.json: nothing missing, extra, duplicated or unembedded", CatalogueMatchesDisk),
             ("Published wave files match their PublishedWaves manifests: no wave dropped, shrunk or added unpinned", WaveManifests),
+            ("Published wave discovery preserves legacy order and named snapshot identity", WaveDiscovery),
+            ("Published discovery rejects missing or duplicate legacy entries", WaveDiscoveryLegacyErrors),
+            ("Published discovery rejects malformed resource names", WaveDiscoveryResourceErrors),
+            ("Published discovery orders new types ordinally and wave numbers numerically", WaveDiscoveryNewOrder),
             ("CatalogueDecks/live: Lion and Crane retain 40/40 decks", () => CatalogueDecks(PublishedContent.Snapshot)),
             ("CatalogueDecks/frozen: Lion and Crane test fixture retains 40/40 decks", () => CatalogueDecks(PublishedContent.TestSnapshot)),
             ("Published setup pins Lion first turn, Honor, province strengths and Crane Bamboo", Setup),
@@ -119,7 +125,7 @@ internal static class PublishedTests
             using var stream=typeof(PublishedContent).Assembly.GetManifestResourceStream(n)!;
             return JsonSerializer.Deserialize<PublishedSnapshot>(stream)!.Profile;
         }).ToHashSet(StringComparer.Ordinal);
-        foreach(var stem in disk.Keys.Where(k=>!embedded.Contains(k)))problems.Add($"content/published/{stem}.json is not embedded in L5R.Core; add its EmbeddedResource to src/L5R.Core/L5R.Core.csproj and load it in PublishedContent.cs and CardCatalog.cs");
+        foreach(var stem in disk.Keys.Where(k=>!embedded.Contains(k)))problems.Add($"content/published/{stem}.json is not embedded in L5R.Core; verify its lowercase <type>-wave-<N>.json filename matches the automatic resource glob and rebuild L5R.Core");
         foreach(var profile in embedded.Where(p=>!disk.ContainsKey(p)))problems.Add($"L5R.Core embeds profile '{profile}' but content/published/{profile}.json does not exist");
         NoProblems(problems,"content/published files are inconsistent or not embedded in L5R.Core");
         var loaded=CardCatalog.Cards.Values.Where(c=>!c.ScenarioOnly).Select(c=>c.Id).ToHashSet(StringComparer.Ordinal);
@@ -136,7 +142,7 @@ internal static class PublishedTests
         Check(Directory.Exists(dir),"tests/L5R.Core.Tests/PublishedWaves is missing; it holds one manifest per wave file");
         var pinned=Directory.GetFiles(dir,"*.txt").ToDictionary(f=>Path.GetFileNameWithoutExtension(f),f=>File.ReadAllLines(f).Where(l=>l.Length>0).ToArray(),StringComparer.Ordinal);
         foreach(var stem in disk.Keys.Where(k=>!pinned.ContainsKey(k)).Order(StringComparer.Ordinal))problems.Add($"content/published/{stem}.json has no manifest; run python3 tools/content/pin_wave_ids.py and commit tests/L5R.Core.Tests/PublishedWaves/{stem}.txt");
-        foreach(var stem in pinned.Keys.Where(k=>!disk.ContainsKey(k)).Order(StringComparer.Ordinal))problems.Add($"PublishedWaves/{stem}.txt pins a wave whose content/published/{stem}.json is gone; restore the wave file with its loader, CardCatalog chain and csproj entry, or delete the manifest only if the wave was removed on purpose");
+        foreach(var stem in pinned.Keys.Where(k=>!disk.ContainsKey(k)).Order(StringComparer.Ordinal))problems.Add($"PublishedWaves/{stem}.txt pins a wave whose content/published/{stem}.json is gone; restore the wave file, or delete the manifest only if the wave was removed on purpose");
         foreach(var (stem,ids) in pinned.Where(p=>disk.ContainsKey(p.Key)).OrderBy(p=>p.Key,StringComparer.Ordinal))
         {
             var actual=disk[stem].Cards.Select(c=>c.Id).ToHashSet(StringComparer.Ordinal);
@@ -144,6 +150,53 @@ internal static class PublishedTests
             if(missing.Length>0||added.Length>0)problems.Add($"{stem}.json no longer matches PublishedWaves/{stem}.txt: missing [{string.Join(", ",missing)}], not pinned [{string.Join(", ",added)}]; a card removed on purpose or added to an existing wave needs python3 tools/content/pin_wave_ids.py --update");
         }
         NoProblems(problems,"Published wave files differ from their manifests");
+    }
+    private static void WaveDiscovery()
+    {
+        var waves = PublishedContent.Waves;
+        var disk = DiskWaves();
+        var expected = disk.Keys.Where(profile => profile.Contains("-wave-", StringComparison.Ordinal)).Order(StringComparer.Ordinal);
+        Eq(string.Join(",", waves.Select(wave => wave.Profile).Order(StringComparer.Ordinal)), string.Join(",", expected));
+        var legacy = File.ReadAllLines(Path.Combine(Support337.RepoRoot(), "src/L5R.Core/PublishedWaveOrder.txt"))
+            .Where(line => line.Length > 0 && !line.StartsWith('#')).ToArray();
+        // Independent pin: editing the runtime order file must not silently redefine the expected order.
+        Eq(Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(string.Join("\n", legacy) + "\n"))), "B365ADBA74173AA4108BDF8453C217E668766D1C167AA0322E0E5D7A91731FF0");
+        Eq(string.Join(",", waves.Take(legacy.Length).Select(wave => wave.Profile)), string.Join(",", legacy));
+        foreach(var property in typeof(PublishedContent).GetProperties().Where(property => property.PropertyType == typeof(PublishedSnapshot) && property.Name.Contains("Wave", StringComparison.Ordinal)))
+        {
+            var named = (PublishedSnapshot)property.GetValue(null)!;
+            Check(ReferenceEquals(named, waves.Single(wave => wave.Profile == named.Profile)), $"{property.Name} must share the discovered snapshot");
+        }
+    }
+    private static void RejectWaveOrder(Action action, string expectedMessage)
+    {
+        try { action(); }
+        catch(InvalidOperationException error)
+        {
+            Check(error.Message.Contains(expectedMessage, StringComparison.Ordinal), error.Message);
+            return;
+        }
+        throw new Exception($"Expected wave discovery to reject: {expectedMessage}");
+    }
+    private static void WaveDiscoveryLegacyErrors()
+    {
+        string[] resources = ["L5R.Published.legacy-wave-1.json"];
+        RejectWaveOrder(() => PublishedContent.OrderWaveProfiles(resources, ["missing-wave-1"]), "missing-wave-1");
+        RejectWaveOrder(() => PublishedContent.OrderWaveProfiles(resources, ["legacy-wave-1", "legacy-wave-1"]), "legacy-wave-1");
+    }
+    private static void WaveDiscoveryResourceErrors()
+    {
+        foreach(var name in new[] { "item-wave-02.json", "item-wave-0.json", "Item-wave-1.json", "item-wave-1.txt", "item-wave-2147483648.json" })
+            RejectWaveOrder(() => PublishedContent.OrderWaveProfiles([$"L5R.Published.{name}"], []), name);
+    }
+    private static void WaveDiscoveryNewOrder()
+    {
+        string[] resources = ["L5R.Published.zeta-wave-2.json", "L5R.Published.alpha-wave-10.json",
+            "L5R.Published.legacy-wave-1.json", "L5R.Published.alpha-wave-2.json",
+            "L5R.Published.json", "L5R.Published.TestSnapshot.json", "L5R.DeckPool.json"];
+        var expected = "legacy-wave-1,alpha-wave-2,alpha-wave-10,zeta-wave-2";
+        Eq(string.Join(",", PublishedContent.OrderWaveProfiles(resources, ["# frozen prefix", "", " legacy-wave-1\r"])), expected);
+        Eq(string.Join(",", PublishedContent.OrderWaveProfiles(resources.Reverse(), ["legacy-wave-1"])), expected);
     }
     private static void CatalogueDecks(PublishedSnapshot snapshot)
     {

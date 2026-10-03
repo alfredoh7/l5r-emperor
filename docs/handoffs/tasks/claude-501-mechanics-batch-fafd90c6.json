@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Mechanics batch: additional actions and Aramasu's phase, control transfer, cost/payment/Favor primitives, records, copy view; wired 33 cards; inventory 1293 wired; art pack pr501-r1",
+  "validation": "Core suite 0 failures (1913 passes); AI 74/74; Server 8/8; Client.Transport 13/13; content tests OK; Godot client build left to CI",
+  "remaining": "None; ready for review. Follow-ups: client work for new pending choices and copy frame (issues #499, #502); remaining unwired cards in issue #503",
+  "issue": "501",
+  "branch": "claude/501-mechanics-batch",
+  "updated": "2026-09-25T20:59:24.292337+00:00"
+}

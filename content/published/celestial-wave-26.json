@@ -1,0 +1,33 @@
+{
+  "Profile": "celestial-wave-26",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-1040",
+      "Name": "Blessings of the Shi-Tien Yen-Wang",
+      "Type": "Celestial",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After your turn begins: You may choose your dead Personality and put him at the top of your deck.\nBattle: Choose your performing opposed Personality and discard this card: The Lords of Death grant him strength. Give him +1F for each dead Personality in all players' discard piles. Negate the next card effect that bows, destroys, or moves him.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1040.jpg",
+      "Keywords": [
+        "Unique",
+        "Fortune"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "p5-blessings-strength"
+      ],
+      "Effect": "p5-blessings-shi-tien"
+    }
+  ],
+  "Decks": []
+}

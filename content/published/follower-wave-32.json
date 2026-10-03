@@ -1,0 +1,33 @@
+{
+  "Profile": "follower-wave-32",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10680",
+      "Name": "Enslaved Djinn",
+      "Type": "Follower",
+      "Clan": "Unaligned",
+      "GoldCost": 4,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After this Follower enters play, search your discard pile, then deck, for another Enslaved Djinn. Show it. Put it into your hand.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10680.jpg",
+      "Keywords": [
+        "Djinn",
+        "Fire",
+        "Nonhuman",
+        "Spirit"
+      ],
+      "Focus": 1,
+      "Abilities": [],
+      "Effect": "enslaved-djinn-search"
+    }
+  ],
+  "Decks": []
+}

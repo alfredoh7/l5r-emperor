@@ -11,6 +11,7 @@ public sealed partial class MatchEngine
             "Only a catalogued card ability can be granted.");
         Require(duration is GrantDuration.Turn or GrantDuration.Permanent or GrantDuration.Battle or GrantDuration.Attachment or GrantDuration.Copy,
             "Unknown ability grant duration.");
+        if (copiedFrom is null && Delay(receiver, DelayedKinds.Ability, arg: $"{abilityId}/{duration}", sourceId: source)) return; // The shared delay mechanism (issue #492, EmperorRulingR2.cs).
         var grant = new GrantedAbility(abilityId, source, duration, copiedFrom, copiedFromName);
         if (!receiver.GrantedAbilities.Contains(grant)) receiver.GrantedAbilities.Add(grant);
     }

@@ -33,6 +33,7 @@ public sealed partial class MatchEngine
         if (ControlsEventEffect(0, "times-of-strife") || ControlsEventEffect(1, "times-of-strife")) Cap(province.PrintedStrength);
         // Ancient Feud (issue #418): "This battlefield's province has a maximum strength equal to its base strength" -- while the Terrain is in play there.
         if (ProvinceIsBattlefieldOfCurrentBattle(province) && TerrainsAtBattlefield(province.Index).Any(t => Definition(t).Effect == "ancient-feud")) Cap(province.PrintedStrength);
+        if (P4ProvinceCapped(province)) Cap(province.PrintedStrength); // The Snow Has Teeth (issue #503): "a maximum strength equal to its base strength until the end of the battle".
         return max;
     }
 
@@ -64,7 +65,7 @@ public sealed partial class MatchEngine
     private void AddHastyBonus(CardInstance hasty)
     {
         if (hasty.ProvinceIndex is not int index) return;
-        var province = _state.Players[1 - _state.ActivePlayerId].Provinces.FirstOrDefault(p => p.Index == index && !p.Destroyed);
+        var province = BattlefieldProvince(index); // a battlefield without a province has none to strengthen (issue #492, rulings pass R1)
         if (province is null) return;
         province.SourceBonuses.Add(new ProvinceBonus(hasty.Id, 1));
         Emit("provinceStrengthRaised", $"{Definition(hasty).Name}: province {index + 1} has +1 strength until it leaves play.", hasty.OwnerId, hasty.Id);

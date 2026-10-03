@@ -18,6 +18,15 @@ namespace L5R.Core;
 public sealed record TargetSlot(string Id, string Category, string Label, int Min = 1, int Max = 1, TargetStatus? MustBe = null,
     ConditionalChoice? Resolution = null, bool Performing = false)
 {
+    /// <summary>The same card may be chosen more than once: each choice is one share ("attach them to one or more of your Personalities", Suiteiru no Oni: a host named twice takes two Followers; emperor proxy pass, issue #492).</summary>
+    public bool Repeatable { get; init; }
+    /// <summary>The slot names a card only to pay a cost with (Isawa Koiso's Shugenja to destroy, his card to discard; issue #503): not a target of the action.</summary>
+    public bool CostOnly { get; init; }
+    /// <summary>A later slot that reads this one's selection (Suiteiru no Oni's hosts, excluding the Personality destroyed as the cost) is offered candidates against its DEFAULT
+    /// choice only -- never a probed alternate. Unlike Dislodge the Foe's performers (issue #429, the ordinary case, every earlier candidate tried so a later slot's legal
+    /// candidates are never hidden behind one arbitrary default), the effect here always uses the one card actually named, so widening the later slot's offer past that single
+    /// card would offer a choice (e.g. the Personality who could be destroyed) that is only ever legal against a target no one submitted.</summary>
+    public bool ProbeDefaultOnlyForLaterSlots { get; init; }
     public bool IsPlayer => Category == TargetSlotKinds.Player;
     public bool AtResolution => Resolution is not null;
 }
@@ -53,7 +62,7 @@ public sealed partial class MatchEngine
     private static string? PrimarySlotCardId(AbilityDefinition ability, SlotSelection[]? selections)
     {
         foreach (var slot in ability.Slots ?? [])
-            if (!slot.IsPlayer && !slot.Performing && selections?.FirstOrDefault(s => s.Slot == slot.Id)?.CardIds is { Length: > 0 } ids) return ids[0];
+            if (!slot.IsPlayer && !slot.Performing && !slot.CostOnly && selections?.FirstOrDefault(s => s.Slot == slot.Id)?.CardIds is { Length: > 0 } ids) return ids[0];
         return null;
     }
 
@@ -70,8 +79,9 @@ public sealed partial class MatchEngine
 
     // Every card a slot could name: all the cards in play, the acting player's own hand (a private zone the opponent's slot
     // never lists) and every public discard pile. Whether a candidate is legal is decided by ValidateSlotCard, never here.
+    // A face-up province card is public too (The Moon's Imperative, The Shadow's Embrace pass issue #476 batch 6: "face-up Personalities in provinces").
     private IEnumerable<CardInstance> SlotCandidateCards(int playerId) =>
-        _state.Cards.Values.Where(c => InPlay(c) || c.OwnerId == playerId && c.Zone == Zone.Hand || c.Zone is Zone.FateDiscard or Zone.DynastyDiscard or Zone.Dead)
+        _state.Cards.Values.Where(c => InPlay(c) || c.OwnerId == playerId && c.Zone == Zone.Hand || c.Zone is Zone.FateDiscard or Zone.DynastyDiscard or Zone.Dead || c.Zone == Zone.Province && c.FaceUp || c.Zone == Zone.Underneath /* issue #503: The New Foundries' Spells, public */)
             .OrderBy(c => c.Id, StringComparer.Ordinal);
 
     // ValidateAbility's arm for a multi-target ability: the whole selection, slot by slot.
@@ -99,7 +109,7 @@ public sealed partial class MatchEngine
             Require(selection?.PlayerId is null, $"{slot.Label}: choose cards, not a player.");
             Require(ids.Length >= slot.Min && ids.Length <= slot.Max, slot.Min == slot.Max ? $"{slot.Label}: choose exactly {slot.Min}."
                 : $"{slot.Label}: choose {slot.Min} to {slot.Max}.");
-            Require(ids.Distinct().Count() == ids.Length, $"{slot.Label}: choose different cards.");
+            Require(slot.Repeatable || ids.Distinct().Count() == ids.Length, $"{slot.Label}: choose different cards.");
             foreach (var id in ids) ValidateSlotCard(command, ability, slot, id);
         }
         // Dislodge the Foe: every performing Tactician stands at the SAME battlefield, and the one Personality they oppose stands there too.
@@ -136,6 +146,8 @@ public sealed partial class MatchEngine
     private (TargetSlotOption[] Options, GameCommand? Default, string? Error) BuildSlotOffer(GameCommand prototype, AbilityDefinition ability)
     {
         var options = new List<TargetSlotOption>(); var chosen = new List<SlotSelection>(); var complete = true;
+        // Each earlier card slot's own legal candidates, for the probes below.
+        var offered = new List<(string Slot, string[] Candidates)>();
         // Why candidates were refused, most common first: a refusal every candidate shares (the action's timing, its source
         // or its performer) is the reason the whole action is unavailable, and outnumbers any one candidate's own.
         var refusals = new Dictionary<string, int>();
@@ -153,19 +165,60 @@ public sealed partial class MatchEngine
                 continue;
             }
             var legal = new List<string>();
-            var probe = prototype with { Selections = chosen.ToArray() };
+            // A category that compares a candidate with another slot's cards (Dislodge the Foe's opposing Personality, judged
+            // against where the chosen Tacticians stand) would otherwise be judged against the DEFAULT earlier selection only,
+            // hiding every candidate that is legal beside a different one. Each earlier choice is probed, so a candidate is
+            // offered when some legal earlier selection admits it; the combination itself is still validated on submission.
+            var probes = SlotProbes(prototype, chosen, offered);
             foreach (var candidate in SlotCandidateCards(prototype.PlayerId))
             {
-                try { ValidateSlotCard(probe, ability, slot, candidate.Id); legal.Add(candidate.Id); }
-                catch (RuleViolation e) { refusals[e.Message] = refusals.GetValueOrDefault(e.Message) + 1; }
+                RuleViolation? refused = null;
+                foreach (var probe in probes)
+                {
+                    try { ValidateSlotCard(probe, ability, slot, candidate.Id); refused = null; break; }
+                    catch (RuleViolation e) { refused ??= e; }
+                }
+                if (refused is null) legal.Add(candidate.Id);
+                else refusals[refused.Message] = refusals.GetValueOrDefault(refused.Message) + 1;
             }
             options.Add(new(slot.Id, slot.Label, TargetSlotKinds.Card, slot.Min, slot.Max, legal.ToArray(), []));
+            if (!slot.ProbeDefaultOnlyForLaterSlots) offered.Add((slot.Id, legal.ToArray()));
             if (legal.Count < slot.Min) complete = false;
-            else if (slot.Min > 0) chosen.Add(new(slot.Id, legal.Take(slot.Min).ToArray()));
+            else if (slot.Min > 0)
+            {
+                // Two independent slots drawing from the same candidate pool (Sudden Movement's "first"/"second", each any
+                // Personality with a partner) must not default to the SAME card for both: that default would fail the
+                // ability's own distinctness rule even though other, genuinely legal combinations exist. Prefer a candidate
+                // no earlier up-front slot already picked; only repeat one when the slot has no other legal candidate left
+                // (Repeatable slots, e.g. Suiteiru no Oni's hosts, still take the plain first-legal default).
+                var alreadyChosen = chosen.SelectMany(c => c.CardIds ?? []).ToHashSet(StringComparer.Ordinal);
+                var distinct = legal.Where(id => !alreadyChosen.Contains(id)).ToArray();
+                chosen.Add(new(slot.Id, distinct.Length >= slot.Min ? distinct.Take(slot.Min).ToArray() : legal.Take(slot.Min).ToArray()));
+            }
         }
         var error = refusals.Count == 0 ? null : refusals.OrderByDescending(r => r.Value).First().Key;
         if (!complete) return (options.ToArray(), null, error ?? "No legal target.");
         return (options.ToArray(), NormalizeSlotCommand(prototype with { Selections = chosen.ToArray() }), null);
+    }
+
+    // The default selection, plus one variant per alternative single choice of each earlier card slot. Bounded: a table with many
+    // candidates is probed against a capped number of variants, the default always among them.
+    private static GameCommand[] SlotProbes(GameCommand prototype, List<SlotSelection> chosen, List<(string Slot, string[] Candidates)> offered)
+    {
+        const int limit = 48;
+        var probes = new List<GameCommand> { prototype with { Selections = chosen.ToArray() } };
+        foreach (var (slotId, candidates) in offered)
+        {
+            var current = chosen.FirstOrDefault(c => c.Slot == slotId);
+            if (current?.CardIds is null) continue;
+            foreach (var candidate in candidates)
+            {
+                if (current.CardIds.Contains(candidate, StringComparer.Ordinal)) continue;
+                if (probes.Count >= limit) return probes.ToArray();
+                probes.Add(prototype with { Selections = chosen.Select(c => c.Slot == slotId ? c with { CardIds = [candidate] } : c).ToArray() });
+            }
+        }
+        return probes.ToArray();
     }
 
     // AbilityActions' entry for a multi-target ability: one option whose Slots carry every legal candidate and whose Command
@@ -174,6 +227,7 @@ public sealed partial class MatchEngine
     {
         var (options, defaultCommand, error) = BuildSlotOffer(prototype, ability);
         if (defaultCommand is null) return new("useAbility", label, false, error ?? "No legal target.", prototype, sourceId, Slots: options);
+        defaultCommand = EmperorP6DefaultSelection(defaultCommand, ability, options) ?? defaultCommand; // issue #503: an aggregate condition's default (EmperorP6.cs)
         var quote = QuoteAbilityGold(defaultCommand);
         defaultCommand = defaultCommand with { SourceIds = quote is null ? [] : quote.Payments.FirstOrDefault()?.SourceIds };
         try { ValidateAbility(defaultCommand); }

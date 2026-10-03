@@ -329,8 +329,9 @@ internal static class DisciplineRulingsTests
             var option = Offer(e, ea, "expensive-achievement-raise")!;
             Check(option.Enabled && option.Gold is null, option.Reason ?? "free from hand");
             Accept(e, Use(e, ea, "expensive-achievement-raise"));
-            Eq(e.State.Players[1].Provinces[0].Strength, before.Item2 + 2, "the Defender's current-battlefield province +2");
-            Eq(e.State.Players[0].Provinces[0].Strength, before.Item1, "not the Attacker's own province of the same index");
+            Eq(e.ProvinceStrengthForTest(1, 0), before.Item2 + 2, "the Defender's current-battlefield province +2");
+            Eq(Batch336Support.StrengthNextTurn(e, 1, 0), before.Item2, "Expensive Achievement: until end of turn (issue #492 ruling R3)");
+            Eq(e.ProvinceStrengthForTest(0, 0), before.Item1, "not the Attacker's own province of the same index");
             Eq(e.State.Cards[ea.Id].Zone, Zone.FateDiscard);
             Reject(e, Use(e, ea, "expensive-achievement-lower")); // one use: the two halves share it (and it left the hand)
         }
@@ -339,9 +340,9 @@ internal static class DisciplineRulingsTests
             var ea = Add(s, ExpensiveAchievement, 0, Zone.Hand);
             Add(s, "training-crane-samurai", 0, Zone.Battlefield, province: 0);
             var e = MatchEngine.FromTestState(s);
-            var before = e.State.Players[1].Provinces[0].Strength;
+            var before = e.ProvinceStrengthForTest(1, 0);
             Accept(e, Use(e, ea, "expensive-achievement-lower"));
-            Eq(e.State.Players[1].Provinces[0].Strength, before - 2);
+            Eq(e.ProvinceStrengthForTest(1, 0), before - 2);
         }
         // The Defender plays it: their OWN province is the one at the current battlefield.
         {
@@ -349,9 +350,9 @@ internal static class DisciplineRulingsTests
             var ea = Add(s, ExpensiveAchievement, 0, Zone.Hand);
             Add(s, "training-crane-samurai", 0, Zone.Battlefield, province: 0);
             var e = MatchEngine.FromTestState(s);
-            var before = (e.State.Players[0].Provinces[0].Strength, e.State.Players[1].Provinces[0].Strength);
+            var before = (e.ProvinceStrengthForTest(0, 0), e.ProvinceStrengthForTest(1, 0));
             Accept(e, Use(e, ea, "expensive-achievement-raise"));
-            Eq(e.State.Players[0].Provinces[0].Strength, before.Item1 + 2); Eq(e.State.Players[1].Provinces[0].Strength, before.Item2);
+            Eq(e.ProvinceStrengthForTest(0, 0), before.Item1 + 2); Eq(e.ProvinceStrengthForTest(1, 0), before.Item2);
         }
         // A plain Battle action: no presence, or the Action phase, is rejected (hand and discard pile alike).
         foreach (var zone in new[] { Zone.Hand, Zone.FateDiscard })
@@ -375,9 +376,9 @@ internal static class DisciplineRulingsTests
             Check(option.Enabled, option.Reason ?? ""); Eq(option.Gold!.Cost, 2);
             Check(option.Gold.Basis.Contains("Discipline cost 2"), option.Gold.Basis);
             Reject(e, Use(e, ea, "expensive-achievement-raise"));
-            var before = e.State.Players[1].Provinces[0].Strength;
+            var before = e.ProvinceStrengthForTest(1, 0);
             Accept(e, option.Command!);
-            Eq(Payments(e).Length, 1); Eq(e.State.Players[1].Provinces[0].Strength, before + 2);
+            Eq(Payments(e).Length, 1); Eq(e.ProvinceStrengthForTest(1, 0), before + 2);
             Eq(e.State.Cards[ea.Id].Zone, Zone.RemovedFromGame);
         }
     }

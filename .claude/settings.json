@@ -1,0 +1,81 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git show:*)",
+      "Bash(git branch)",
+      "Bash(git branch -a)",
+      "Bash(git branch --show-current)",
+      "Bash(git fetch:*)",
+      "Bash(git worktree list:*)",
+      "Bash(git pull --ff-only:*)",
+      "Bash(gh pr view:*)",
+      "Bash(gh pr list:*)",
+      "Bash(gh pr checks:*)",
+      "Bash(gh pr diff:*)",
+      "Bash(gh issue view:*)",
+      "Bash(gh issue list:*)",
+      "Bash(gh run view:*)",
+      "Bash(gh run list:*)",
+      "Bash(python tools/collab.py context:*)",
+      "Bash(python3 tools/collab.py context:*)",
+      "Bash(python tools/collab.py audit:*)",
+      "Bash(python3 tools/collab.py audit:*)",
+      "Bash(python tools/collab.py ledger:*)",
+      "Bash(python3 tools/collab.py ledger:*)",
+      "Bash(python tools/collab.py handoff:*)",
+      "Bash(python3 tools/collab.py handoff:*)",
+      "Bash(python -m unittest discover -s tools/content:*)",
+      "Bash(python3 -m unittest discover -s tools/content:*)",
+      "Bash(python -m unittest discover -s tools/collaboration:*)",
+      "Bash(python3 -m unittest discover -s tools/collaboration:*)",
+      "Bash(python -m unittest discover -s tools -p test_meshy.py:*)",
+      "Bash(python3 -m unittest discover -s tools -p test_meshy.py:*)",
+      "Bash(python -m unittest discover -s tools -p test_bootstrap.py:*)",
+      "Bash(python3 -m unittest discover -s tools -p test_bootstrap.py:*)",
+      "Bash(python -m unittest discover -s tools -p test_lint_comment_swallow.py:*)",
+      "Bash(python3 -m unittest discover -s tools -p test_lint_comment_swallow.py:*)",
+      "Bash(python -m unittest discover -s tools/hooks:*)",
+      "Bash(python3 -m unittest discover -s tools/hooks:*)",
+      "Bash(python tools/lint_comment_swallow.py:*)",
+      "Bash(python3 tools/lint_comment_swallow.py:*)",
+      "Bash(bash tools/check.sh:*)",
+      "Bash(bash tools/run.sh:*)",
+      "Bash(dotnet build:*)",
+      "Bash(dotnet run --project tests/L5R.Core.Tests:*)",
+      "Bash(dotnet run --project tests/L5R.AI.Tests:*)",
+      "Bash(dotnet run --project tests/L5R.Server.Tests:*)",
+      "Bash(dotnet run --project tests/L5R.Client.Transport.Tests:*)",
+      "Bash(dotnet tests/L5R.Core.Tests/bin/Debug/net10.0/L5R.Core.Tests.dll:*)",
+      "Bash(dotnet tests/L5R.AI.Tests/bin/Debug/net10.0/L5R.AI.Tests.dll:*)",
+      "Bash(dotnet tests/L5R.Server.Tests/bin/Debug/net10.0/L5R.Server.Tests.dll:*)",
+      "Bash(dotnet tests/L5R.Client.Transport.Tests/bin/Debug/net10.0/L5R.Client.Transport.Tests.dll:*)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if command -v python3 >/dev/null 2>&1; then python3 \"${CLAUDE_PROJECT_DIR}/tools/hooks/block_generated_edit.py\"; else python \"${CLAUDE_PROJECT_DIR}/tools/hooks/block_generated_edit.py\"; fi"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if command -v python3 >/dev/null 2>&1; then python3 \"${CLAUDE_PROJECT_DIR}/tools/hooks/handoff_reminder.py\"; else python \"${CLAUDE_PROJECT_DIR}/tools/hooks/handoff_reminder.py\"; fi"
+          }
+        ]
+      }
+    ]
+  }
+}

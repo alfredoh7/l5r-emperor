@@ -1,0 +1,198 @@
+{
+  "Profile": "item-wave-14",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-9875",
+      "Name": "Blood of the Preserver",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 4,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Remove this card from the game: Each player chooses zero to two Personalities at the current battlefield. Remove them from the game; cards and tokens stay attached to them. After the next turn begins, each unit enters play in its owner's home, ignoring costs, restrictions, and entering-play effects; then, give them each three +1F Blood tokens.\nBattle: Remove this card from the game: Each player chooses zero to two Personalities at the current battlefield. Remove them from the game; cards and tokens stay attached to them. After the next turn begins, each unit enters play in its owner's home, ignoring costs, restrictions, and entering-play effects; then, give them each three +1F Blood tokens.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9875.jpg",
+      "Keywords": [
+        "Unique"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "blood-preserver-remove"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9876",
+      "Name": "Celestial Sword of the Crab",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 1,
+      "Chi": 1,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Will only attach to a Crab Clan Personality.\nThis card has +1F for each Crab Clan Personality you control. \nAfter this card enters play: Gain 2 Honor.\nBattle/Open: Even if this card is bowed: Straighten this unit.\nWill only attach to a Crab Clan Personality.\nThis card has +1F for each Crab Clan Personality you control. \nAfter this card enters play: Gain 2 Honor.\nBattle/Open: Even if this card is bowed: Straighten this unit.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9876.jpg",
+      "Keywords": [
+        "Unique",
+        "Weapon",
+        "Experienced",
+        "Yuruginai"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "celestial-sword-crab-honor",
+        "celestial-sword-crab-straighten"
+      ],
+      "Effect": "celestial-sword-force-crab",
+      "AttachRequiresKeyword": "Crab Clan"
+    },
+    {
+      "Id": "oracle-l5r-9877",
+      "Name": "Celestial Sword of the Crane",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 1,
+      "Chi": 1,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Will only attach to a Crane Clan Personality.\nThis card has +1F for each Crane Clan Personality you control.\nAfter this card enters play: Gain 2 Honor.\nPolitical Open: Target a Personality or Follower and you may discard the Imperial Favor: Give the target -4F. If you discarded the Imperial Favor, gain 1 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9877.jpg",
+      "Keywords": [
+        "Unique",
+        "Weapon",
+        "Experienced",
+        "Megumi"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "celestial-sword-crane-honor",
+        "celestial-sword-crane-weaken",
+        "celestial-sword-crane-favor"
+      ],
+      "Effect": "celestial-sword-force-crane",
+      "AttachRequiresKeyword": "Crane Clan"
+    },
+    {
+      "Id": "oracle-l5r-9878",
+      "Name": "Celestial Sword of the Phoenix",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 1,
+      "Chi": 1,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Will only attach to a Phoenix Clan Personality.\nThis card has +1F for each Phoenix Clan Personality you control.\nAfter this card enters play: Gain 2 Honor.\nBattle/Open: Target your honorably dead Phoenix Clan Personality: Bring him into play at this card's location, ignoring costs. Remove him from the game before the turn ends.\nWill only attach to a Phoenix Clan Personality.\nThis card has +1F for each Phoenix Clan Personality you control.\nAfter this card enters play: Gain 2 Honor.\nBattle/Open: Target your honorably dead Phoenix Clan Personality: Bring him into play at this card's location, ignoring costs. Remove him from the game before the turn ends.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9878.jpg",
+      "Keywords": [
+        "Unique",
+        "Weapon",
+        "Experienced",
+        "Keitaku"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "celestial-sword-phoenix-honor",
+        "celestial-sword-phoenix-return"
+      ],
+      "Effect": "celestial-sword-force-phoenix",
+      "AttachRequiresKeyword": "Phoenix Clan"
+    },
+    {
+      "Id": "oracle-l5r-9880",
+      "Name": "The String of the Colonies",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 3,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Bow this card: Ranged 5 Attack.\nBattle: Bow this card: Ranged 5 Attack.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9880.jpg",
+      "Keywords": [
+        "Weapon"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "string-colonies-attack"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9881",
+      "Name": "The Victor",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 6,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "This Personality has Conqueror.\nThis Personality has Conqueror.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9881.jpg",
+      "Keywords": [
+        "Armor"
+      ],
+      "Focus": 2,
+      "Abilities": [],
+      "Effect": "none",
+      "AttachGrantsKeyword": "Conqueror"
+    },
+    {
+      "Id": "oracle-l5r-9882",
+      "Name": "Vanquisher's Armor",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 5,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Melee and Ranged Attacks targeting this Personality have -5 strength.\nMelee and Ranged Attacks targeting this Personality have -5 strength.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9882.jpg",
+      "Keywords": [
+        "Armor"
+      ],
+      "Focus": 3,
+      "Abilities": [],
+      "Effect": "none",
+      "AttackDefenseKind": "Both",
+      "AttackDefenseAmount": -5,
+      "AttackDefenseScope": "Wielder"
+    }
+  ],
+  "Decks": []
+}

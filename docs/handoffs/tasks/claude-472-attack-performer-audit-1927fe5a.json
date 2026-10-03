@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Audit of every Melee/Ranged Attack's performer vs the core rules: Followers perform their own actions, Carpenter Castle performs its own action, new attack-performer-audit suite. Shared because the tests/decision doc sit beside engine changes in rules code only; no UI change.",
+  "validation": "Core suite 0 failures; AI 74/74, Server 8/8, Transport 12/12",
+  "remaining": "None; Strength of the Divine performer question left for Mendon.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/472",
+  "branch": "claude/472-attack-performer-audit",
+  "updated": "2026-09-24T12:49:59.674897+00:00"
+}

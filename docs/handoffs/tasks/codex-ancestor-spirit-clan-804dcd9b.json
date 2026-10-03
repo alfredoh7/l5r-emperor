@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Package and wire the user-supplied creator/created card scans; Core owns all card legality and effects, while client changes supply card-face assets and catalogue artwork metadata",
+  "validation": "Full Core suite pass; content 139/139; collaboration 19/19; hooks 27/27; quality 5 pass/2 skipped; AI, Server, Transport tests pass; client build and Godot import/smoke pass; 3,888-image catalogue archive verified locally",
+  "remaining": "Publish the private catalogue artwork release catalogue-art-created-cards-20260929-r1 before merging this draft PR; native graphical playtesting remains",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/503",
+  "branch": "codex/ancestor-spirit-clan",
+  "updated": "2026-09-29T23:13:27.129544+00:00"
+}

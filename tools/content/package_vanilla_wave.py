@@ -65,6 +65,15 @@ def find_receipt(root: Path, slug: str, image_id: str) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+def real_clan(clans: list[str]) -> str:
+    """Issue #492 (Mendon's ruling): "Ninja" is a keyword, never a Clan (there is no Ninja clan). The catalogue lists
+    ["Ninja", "Spider"] / ["Ninja", "Scorpion"] for such cards; take the first real Clan, else Unaligned."""
+    for clan in clans:
+        if clan != "Ninja":
+            return clan
+    return "Unaligned"
+
+
 def build_definition_fields(root: Path, card_id: str, allow_text: bool = False, prefer_slug: str | None = None) -> tuple[dict, dict]:
     """Verify and copy a card's scan, returning (CardDefinition fields minus Effect/Abilities,
     source receipt for a *-sources.json manifest). Fields include "_oracle_id" (int) so a curated
@@ -122,7 +131,7 @@ def build_definition_fields(root: Path, card_id: str, allow_text: bool = False, 
 
     honor = c.get("honor", [])
     fields = dict(
-        Id=card_id, Name=plain(c["title"][0]), Type=c["type"][0], Clan=c.get("clan", ["Unaligned"])[0],
+        Id=card_id, Name=plain(c["title"][0]), Type=c["type"][0], Clan=real_clan(c.get("clan", ["Unaligned"])),
         GoldCost=num("cost"), GoldProduction=num("production"), Force=num("force"), Chi=num("chi"),
         PersonalHonor=num("ph"), HonorRequirement=(num("honor") if honor and honor[0] not in ("-", "") else None),
         ProvinceStrength=num("strength"), StartingHonor=num("startinghonor"), Text=text,

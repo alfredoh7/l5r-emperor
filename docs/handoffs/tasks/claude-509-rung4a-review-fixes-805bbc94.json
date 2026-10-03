@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Follow-up to merged PR #529: independently pin all 306 legacy wave positions, correct the automatic embedding diagnostic, and test missing/duplicate legacy entries, malformed names and ordinal type/numeric wave ordering through the startup parser. Preserve all card content and catalogue behavior.",
+  "validation": "Full bash tools/check.sh --skip-client passed: Core 2109, AI 74, Server 8, Transport 13, Python content 138; temporary parallel wave merge/build passed. Reordering the frozen file in a temporary fixture was rejected by the checksum test. Catalogue 1679 definitions and serialized order/content SHA256 remain 5D186D537D230D1754C0D797CE4117309F8B3703CA3199B8DF0C48150CDA79A5; all 19 seeded AI metrics unchanged. git diff --check clean. Client build left to CI.",
+  "remaining": "Ready for review; do not merge automatically. Phase B not started and awaits explicit user instruction. Card wiring freeze remains through Phase B. Board token unconfigured; issue #509 provides coordination.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/509",
+  "branch": "claude/509-rung4a-review-fixes",
+  "updated": "2026-09-28T15:18:47.292844+00:00"
+}

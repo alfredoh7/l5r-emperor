@@ -37,14 +37,28 @@ public sealed partial class MatchEngine
 
     private void RequireNotBarredFromTargeting(GameCommand command, AbilityDefinition ability)
     {
+        RequireNotBarredByLegionOfPain(command, ability); // Emperor Edition remaining-cards pass (issue #492), group G: Legion of Pain's static bar.
+        RequireSuikihimeNotPoliticallyTargeted(command, ability); // Otomo Suikihime (issue #503, EmperorP6.cs).
         if (!_state.Cards.Values.Any(c => c.TargetBars.Count > 0)) return;
         var actor = PerformingCard(command, ability);
         if (actor is null) return;
-        foreach (var targetId in ActionTargetIds(command))
-        {
-            if (!_state.Cards.TryGetValue(targetId, out var target)) continue;
-            Require(!target.TargetBars.Any(b => b.ActorCardId == actor.Id && TargetBarHolds(target, b)),
-                $"{Definition(target).Name} may not be targeted by {Definition(actor).Name}'s actions this turn.");
-        }
+        foreach (var targetId in BarredTargetChannelIds(command))
+            if (_state.Cards.TryGetValue(targetId, out var target)) RequireTargetNotBarred(actor, target);
+    }
+
+    // Every channel a target can arrive on, not just TargetId: ActionTargetIds' own set (TargetId, Kahoku's
+    // Attack target, each slot's cards) plus any other CardIds an ability carries its targets on (Visage of
+    // the Orochi's bowed card, Scorn the Weak's and Strength in Terror's optional second selection). Ids that
+    // name no card (Knowledge and Power's tokens, Mitsu's Fire tokens) are simply not found and skipped.
+    private static IEnumerable<string> BarredTargetChannelIds(GameCommand command) =>
+        ActionTargetIds(command).Concat(command.CardIds ?? []).Distinct(StringComparer.Ordinal);
+
+    /// <summary>The one bar check: made wherever a target is chosen -- as the action is announced, later
+    /// (a sequenced Attack target), or by redirection (AttackTargeting.RequireLegalAttackTarget).</summary>
+    private void RequireTargetNotBarred(CardInstance? actor, CardInstance target)
+    {
+        if (actor is null) return;
+        Require(!target.TargetBars.Any(b => b.ActorCardId == actor.Id && TargetBarHolds(target, b)),
+            $"{Definition(target).Name} may not be targeted by {Definition(actor).Name}'s actions this turn.");
     }
 }

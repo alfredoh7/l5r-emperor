@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "repository": "alfredoh7/l5r-emperor",
+  "source_pr": 544,
+  "source_commit": "b3138044194cf159070131899a558779a62d990f",
+  "title": "Two Dynasty Cards in One Province",
+  "slug": "two-dynasty-province",
+  "tag": "preview-pr544-b313804419-r2-windows",
+  "asset": "L5R-Review-pr544-b313804419-r2-Windows.zip",
+  "bytes": 2086886320,
+  "sha256": "ffa89f2b75260eca23239711f34b61d8abd23a041750a4c711b17b01badc740d",
+  "folder": "L5R-Review-pr544-b313804419-r2",
+  "launcher": "Start Review.cmd",
+  "reviewer": "mdornbrook"
+}

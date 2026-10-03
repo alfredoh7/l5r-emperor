@@ -1,0 +1,276 @@
+{
+  "Profile": "item-wave-15",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-446",
+      "Name": "Armor of the Heavens",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 4,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Political Reaction: After another player targets this Personality with an action: Choose a player, who gains or loses 2 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-446.jpg",
+      "Keywords": [
+        "Armor",
+        "Imperial"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "armor-heavens-gain",
+        "armor-heavens-lose"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-1010",
+      "Name": "Blade of Perfection",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 4,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 1,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After this card bows: Straighten it.\nReaction: After the resolution of another player's action that destroyed this card or its Personality, choose your performing Personality: Attach this card to him, paying all costs.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1010.jpg",
+      "Keywords": [
+        "Weapon"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "blade-perfection-attach"
+      ],
+      "Effect": "blade-perfection-rebound"
+    },
+    {
+      "Id": "oracle-l5r-1340",
+      "Name": "Chrysanthemum Blossom",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 1,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After this Personality is assigned: Give him a +1F token. Gain 1 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1340.jpg",
+      "Keywords": [
+        "Imperial"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "chrysanthemum-blossom-boost"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-1407",
+      "Name": "Clan Standard",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 3,
+      "GoldProduction": 0,
+      "Force": 1,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Your Personalities with your Clan alignment at this card's battlefield have +1F, or +2F if they have any Followers.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1407.jpg",
+      "Keywords": [
+        "Standard"
+      ],
+      "Focus": 4,
+      "Abilities": [],
+      "Effect": "clan-standard"
+    },
+    {
+      "Id": "oracle-l5r-2798",
+      "Name": "Gift Armor",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 4,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Negate all current and new Chi penalties on this Personality.\nNegate any destruction of this card, except for its Personality being destroyed.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-2798.jpg",
+      "Keywords": [
+        "Armor"
+      ],
+      "Focus": 2,
+      "Abilities": [],
+      "Effect": "gift-armor"
+    },
+    {
+      "Id": "oracle-l5r-4323",
+      "Name": "Kensai's Blade",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 3,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 1,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "This card has +1F while attached to a Kensai.\nReaction: After engaging, choose your performing Personality at the current battlefield: Attach this card from your hand to him, paying all costs.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-4323.jpg",
+      "Keywords": [
+        "Weapon"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "kensais-blade-attach"
+      ],
+      "Effect": "force-to-kensai-wielder"
+    },
+    {
+      "Id": "oracle-l5r-4790",
+      "Name": "Maga-yari",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 5,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 1,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "This card will not be transferred.\nAttaches to a Paragon or Kensai paying 3 less Gold.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-4790.jpg",
+      "Keywords": [
+        "Weapon"
+      ],
+      "Focus": 3,
+      "Abilities": [],
+      "Effect": "maga-yari"
+    },
+    {
+      "Id": "oracle-l5r-5214",
+      "Name": "Modifications",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 1,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Draw a card.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-5214.jpg",
+      "Keywords": [
+        "Weapon"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "modifications-draw"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-6269",
+      "Name": "Reserve Weapon",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 3,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Before this Personality focuses: You may give him +3 to his duel stat until the duel ends instead of focusing.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6269.jpg",
+      "Keywords": [
+        "Weapon"
+      ],
+      "Focus": 3,
+      "Abilities": [],
+      "Effect": "reserve-weapon"
+    },
+    {
+      "Id": "oracle-l5r-6478",
+      "Name": "Sasumata",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 3,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 1,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Bow this card and target an enemy card without a Weapon or Armor: Bow it.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6478.jpg",
+      "Keywords": [
+        "Weapon"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "sasumata-bow"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-8823",
+      "Name": "Tsuruchi Daikyu",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 5,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Bow this card: Ranged 5 Attack.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8823.jpg",
+      "Keywords": [
+        "Weapon"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "tsuruchi-daikyu-attack"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

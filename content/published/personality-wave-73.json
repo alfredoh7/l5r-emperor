@@ -1,0 +1,296 @@
+{
+  "Profile": "personality-wave-73",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-4446",
+      "Name": "Kitsuki Yataku",
+      "Type": "Personality",
+      "Clan": "Dragon",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 1,
+      "Chi": 4,
+      "PersonalHonor": 4,
+      "HonorRequirement": 10,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Political Reaction: After an action targets a target Samurai, bow Yataku: The Samurai's controller may not choose to refuse any challenge created by the action.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-4446.jpg",
+      "Keywords": [
+        "Dragon Clan",
+        "Justicar",
+        "Samurai",
+        "Soul of Kitsuki Yasu"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "yataku-no-refuse"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-5595",
+      "Name": "Nishimura",
+      "Type": "Personality",
+      "Clan": "Spider",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 2,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Bow a target enemy card without attachments. You may discard a Kiho or Weapon from your hand to draw a card.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-5595.jpg",
+      "Keywords": [
+        "Kensai",
+        "Monk",
+        "Order of the Spider",
+        "Soul of The Dread Kar",
+        "Spider Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "nishimura-bow"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-2793",
+      "Name": "Genmyo",
+      "Type": "Personality",
+      "Clan": "Unaligned",
+      "GoldCost": 4,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 2,
+      "PersonalHonor": 1,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: Target your Personality: Genmyo copies one of his keywords.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-2793.jpg",
+      "Keywords": [
+        "Actor",
+        "Ronin",
+        "Soul of Kyogen"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "genmyo-copy"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-6117",
+      "Name": "Qalyar",
+      "Type": "Personality",
+      "Clan": "Unaligned",
+      "GoldCost": 3,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Recon Reaction: After engaging at Qalyar's battlefield: You have Reconnaissance there. Give its province +2 or -2 strength.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6117.jpg",
+      "Keywords": [
+        "Mountaineer",
+        "Naga",
+        "Nonhuman",
+        "Scout"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "qalyar-recon-plus",
+        "qalyar-recon-minus"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-6620",
+      "Name": "Seppun Washi",
+      "Type": "Personality",
+      "Clan": "Unaligned",
+      "GoldCost": 6,
+      "GoldProduction": 0,
+      "Force": 1,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: When paying a Gold cost, bow Washi: Produce 2 Gold.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6620.jpg",
+      "Keywords": [
+        "Banker",
+        "Imperial",
+        "Imperial Bank of Rokugan",
+        "Samurai",
+        "Soul of Seppun Ujifusa"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "washi-produce-gold"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9443",
+      "Name": "Yasuki Jekku",
+      "Type": "Personality",
+      "Clan": "Crab",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 4,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Political Limited: Pay Gold equal to a target Personality's base Personal Honor minus 1: Dishonor him. His controller loses 1 Honor, or 2 Honor if his base Personal Honor is 3 or greater.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9443.jpg",
+      "Keywords": [
+        "Loyal",
+        "Courtier",
+        "Crab Clan",
+        "Merchant"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "jekku-dishonor"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9464",
+      "Name": "Yasuki Tanimura",
+      "Type": "Personality",
+      "Clan": "Crab",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 4,
+      "PersonalHonor": 1,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: When paying for an action, produce 3 Gold which may only pay for that action.\nPolitical Reaction: After another player's Battle action targets Tanimura, the player may pay 4 Gold. If he does not pay the Gold, he loses 3 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9464.jpg",
+      "Keywords": [
+        "Courtier",
+        "Crab Clan",
+        "Merchant"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "tanimura-produce-gold",
+        "tanimura-political-pay"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9697",
+      "Name": "Yung",
+      "Type": "Personality",
+      "Clan": "Unaligned",
+      "GoldCost": 6,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 3,
+      "PersonalHonor": 1,
+      "HonorRequirement": 5,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After one of your Rings enters play, bow Yung: Search your Fate deck for a Ring, show it, and put it in your hand.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9697.jpg",
+      "Keywords": [
+        "Unique",
+        "Monk",
+        "Soul of Yodin"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "yung-search-ring"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-1728",
+      "Name": "Daigotsu Ishibashi",
+      "Type": "Personality",
+      "Clan": "Spider",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Fear Battle: Show a Dark Virtue card in your hand: Ranged Attack with strength equal to the card's Focus Value plus one.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1728.jpg",
+      "Keywords": [
+        "Dark Resolve",
+        "Gunso",
+        "Paragon",
+        "Samurai",
+        "Soul of Daigotsu Shiraki",
+        "Spider Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "ishibashi-attack"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-1733",
+      "Name": "Daigotsu Kanpeki",
+      "Type": "Personality",
+      "Clan": "Spider",
+      "GoldCost": 15,
+      "GoldProduction": 0,
+      "Force": 9,
+      "Chi": 5,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After the resolution of a Battle action from a Strategy, if Kanpeki performed it: Take an additional Battle action.\nBattle: Target an enemy Personality with lower Force. Kanpeki snaps him like a twig. Destroy him.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1733.jpg",
+      "Keywords": [
+        "Kensai",
+        "Loyal",
+        "Unique",
+        "Clan Champion",
+        "Experienced",
+        "Monk",
+        "Paragon",
+        "Samurai",
+        "Spider Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "kanpeki-additional-action",
+        "kanpeki-destroy"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

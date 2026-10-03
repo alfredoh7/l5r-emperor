@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Rung 1 of the PR ladder: collab.py audit gets a stale-PR-base check (stale_base_error) that flags a PR whose base branch is not main and has already concluded -- ancestor-of-main or missing upstream as network-free git signals, plus a best-effort GitHub PR-history lookup for the squash-merge case those two signals cannot see (verified against the real #504/#505/#506 history and against a currently-open PR, both correct). Also improves the handoff-branch-mismatch error message to name both branches and the fix command, unchanged pass/fail behavior. Wired --base-ref through the CLI and collaboration.yml (pull-requests: read added for the GitHub lookup).",
+  "validation": "python -m unittest discover -s tools/collaboration -p test_*.py: 55 passed (12 new). python -m unittest discover -s tools/content -p test*.py: 135 passed, unchanged. python tools/collab.py audit --working: clean on this branch. Manually verified stale_base_error against the live repo: correctly flags claude/501-mechanics-batch (head of merged #504) and correctly clears codex/470-lantern-main-menu (head of open #471). No .NET/engine tests run: no engine code changed.",
+  "remaining": "None; ready for review. Documented limit (see PR body): the ancestor/missing-ref git signals alone would NOT have caught the actual #505 failure (squash merge breaks ancestry, branch was never deleted) -- only the added GitHub PR-history lookup does, and it needs gh/network access, which is why it degrades to a silent no-op (not a false negative flagged as clear) when gh is unavailable, offline, or lacks the pull-requests:read scope.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/509",
+  "branch": "claude/514-pr-ladder-rung1",
+  "updated": "2026-09-26T13:53:45.779254+00:00"
+}

@@ -1,0 +1,20 @@
+[
+  {
+    "card_id": "oracle-l5r-1277",
+    "printing_set": [
+      "Embers of War"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=1277",
+    "image_path": "assets/reference/oracle/embers-of-war/webp/oracle-l5r-1277-printing-1-image-1.webp",
+    "image_sha256": "b3eaea171ceeeaffb30503e31385154342f7678b88947cd0156bc8466cd62213"
+  },
+  {
+    "card_id": "oracle-l5r-2363",
+    "printing_set": [
+      "Before the Dawn"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=2363",
+    "image_path": "assets/reference/oracle/before-the-dawn/webp/oracle-l5r-2363-printing-1-image-1.webp",
+    "image_sha256": "282b42dcb0de8f009de4ad39b0330854e359771463f93436a79d4f6557e3036c"
+  }
+]

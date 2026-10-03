@@ -22,7 +22,7 @@ public sealed partial class MatchEngine
     {
         if (command.AbilityId is not null && AbilityCatalog.All.TryGetValue(command.AbilityId, out var ability) && ability.Slots is not null)
         {
-            var ids = ability.Slots.Where(s => !s.IsPlayer && !s.AtResolution && !s.Performing)
+            var ids = ability.Slots.Where(s => !s.IsPlayer && !s.AtResolution && !s.Performing && !s.CostOnly)
                 .SelectMany(s => command.Selections?.FirstOrDefault(x => x.Slot == s.Id)?.CardIds ?? []).Distinct().ToArray();
             return ids.Length == 0 ? [null] : ids.Cast<string?>().ToArray();
         }

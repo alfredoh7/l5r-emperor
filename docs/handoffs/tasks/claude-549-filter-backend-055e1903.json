@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Extend CatalogueData.Filter to multi-value clan/type/keyword selections (additive/OR within a category) and add a Set sort using Mendon's canonical printing-set presentation order; foundation for unifying Card Library and Deck Builder filters. Also published the catalogue art release (catalogue-art-created-cards-20260929-r1) that PR #545 had merged without, which was blocking these checks on a fresh main checkout.",
+  "validation": "dotnet build clean (0 warnings/errors); tools/check-catalogue.sh native probe all PASS including new additive multi-clan and Set-sort checks; tools/check-deck-builder.sh native probe all PASS",
+  "remaining": "UI still single-select in both screens (checkbox/popover redesign is PR 2 for Card Library, PR 3 for Deck Builder unification), per issue #549",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/549",
+  "branch": "claude/549-filter-backend",
+  "updated": "2026-09-30T08:36:51.628617+00:00"
+}
