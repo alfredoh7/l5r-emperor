@@ -7,7 +7,13 @@ public static class LibraryDialog
     public static void Show(Node parent)
     {
         if (parent.GetTree().Root.GetNodeOrNull<CanvasLayer>("CatalogueLayer") is not null) return;
+        var returnFocus = parent.GetViewport().GuiGetFocusOwner();
         var layer = new CanvasLayer { Name = "CatalogueLayer", Layer = 80 }; parent.GetTree().Root.AddChild(layer);
+        layer.TreeExited += () =>
+        {
+            if (GodotObject.IsInstanceValid(returnFocus) && returnFocus.IsInsideTree() && returnFocus.IsVisibleInTree())
+                returnFocus.CallDeferred(Control.MethodName.GrabFocus);
+        };
         try
         {
             var screen = new CatalogueScreen(); layer.AddChild(screen); screen.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.FullRect);

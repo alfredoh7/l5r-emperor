@@ -8,6 +8,9 @@ public sealed class MenuPreferences
     public bool VSync = true;
     public bool DuelGuidance = true;
     public float Atmosphere = .65f;
+    // Separate from the historical moonlit-menu preference, which remains
+    // preserved when existing profiles save their presentation settings.
+    public float LanternStrength = .85f;
     public string DisplayName = "";
     public static string CleanName(string value)
     {
@@ -28,6 +31,8 @@ public sealed class MenuPreferences
         VSync = config.GetValue("display", "vsync", true).AsBool();
         Atmosphere = Mathf.Clamp((float)config.GetValue("display", "atmosphere", .65f).AsDouble(), 0, 1);
         if (!float.IsFinite(Atmosphere)) Atmosphere = .65f;
+        LanternStrength = Mathf.Clamp((float)config.GetValue("menu", "lantern_strength", .85f).AsDouble(), 0, 1);
+        if (!float.IsFinite(LanternStrength)) LanternStrength = .85f;
     }
     public Error Save()
     {
@@ -38,6 +43,7 @@ public sealed class MenuPreferences
         config.SetValue("display", "reduced_motion", ReducedMotion);
         config.SetValue("display", "vsync", VSync);
         config.SetValue("display", "atmosphere", Atmosphere);
+        config.SetValue("menu", "lantern_strength", LanternStrength);
         return config.Save(Path);
     }
 }
