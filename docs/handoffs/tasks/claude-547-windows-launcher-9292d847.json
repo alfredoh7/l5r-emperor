@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Added a Windows equivalent of the Mac dev-checkout launcher: Play Latest.bat (locates Git Bash, runs the existing Play Latest.command, pauses on failure) and a Windows branch in tools/create-dev-launcher.py that emits a named artifacts/L5R Emperor - Latest.lnk shortcut via WScript.Shell, alongside the existing Mac .app path.",
+  "validation": "Ran python3 tools/create-dev-launcher.py on this Windows machine; verified the resulting .lnk's TargetPath/WorkingDirectory/Description via PowerShell. Launched Play Latest.bat via os.startfile (the same ShellExecute path Explorer uses for a double-click) against this checkout with a temporary junction to an already-installed .tools toolchain; confirmed it found Git Bash, ran tools/run.sh, streamed output into artifacts/checks/latest-launch.log, and progressed into the real dotnet build of src/L5R.Client. Stopped the run there (no native Windows graphical playtest of the launched game itself) and removed the temporary junction/test artifacts before committing. python3 -m ast-checked create-dev-launcher.py for syntax.",
+  "remaining": "None for this task; ready for review. Native Windows graphical playtest of the game window itself (not just the launcher reaching the build step) was not performed.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/547",
+  "branch": "claude/547-windows-launcher",
+  "updated": "2026-09-30T07:51:35.322674+00:00"
+}

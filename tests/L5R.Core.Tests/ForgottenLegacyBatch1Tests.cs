@@ -11,7 +11,7 @@ internal static class ForgottenLegacyBatch1Tests
         Murota = "oracle-l5r-1750", Hakuseki = "oracle-l5r-2082", Rengetsu = "oracle-l5r-2142", Nikaru = "oracle-l5r-3310", Abodan = "oracle-l5r-3974", Kagako = "oracle-l5r-4382";
     private static readonly string[] Wired = [Shigemitsu, Kaitoko, Higaonna, Toshimo, Takichi, Gyoken, Murota, Hakuseki, Rengetsu, Nikaru, Abodan, Kagako];
     // Issue #498: Asako Chukage (oracle-l5r-533) has since been wired and published in personality-wave-80 (Emperor Edition follow-ups).
-    private static readonly string[] Unwired = ["oracle-l5r-551", "oracle-l5r-4464", "oracle-l5r-10020"];
+    private static readonly string[] Unwired = ["oracle-l5r-551"];
 
     public static void Run(TestRunner runner) => runner.Run("forgotten-legacy-batch-1", [
         ("Published shape: personality-wave-67 publishes exactly the 12 wired cards with their printed stats, keywords and ability ids, ships their art and lists them in its manifest; the cards still unwired are not in the catalogue (Asako Chukage has since been published, issue #498)", PublishedShape),
@@ -237,7 +237,9 @@ internal static class ForgottenLegacyBatch1Tests
         var offer = Enabled(e, 0, "gyoken-attach", gyoken.Id);
         GameCommand With(string attachment, string personality) => offer.Command! with
         {
-            TargetId = null, Selections = [Pick("attachment", attachment), Pick("personality", personality)], SourceIds = e.PaymentOptions(0, 2).First().SourceIds
+            TargetId = null,
+            Selections = [Pick("attachment", attachment), Pick("personality", personality)],
+            SourceIds = e.PaymentOptions(0, 2).First().SourceIds
         };
         var whyUnique = Rejection(e, With(unique.Id, gyoken.Id)); Check(whyUnique.Contains("Unique"), "a Unique attachment is refused: " + whyUnique);
         var whyEnemy = Rejection(e, With(follower.Id, enemy.Id)); Check(whyEnemy.Length > 0 && !whyEnemy.Contains("Gold") && !whyEnemy.Contains("pay"), "an enemy Personality is refused: " + whyEnemy);
@@ -255,7 +257,9 @@ internal static class ForgottenLegacyBatch1Tests
         var battleOffer = Enabled(be, 0, "gyoken-attach", g2.Id);
         GameCommand InBattle(string personality) => battleOffer.Command! with
         {
-            TargetId = null, Selections = [Pick("attachment", weapon.Id), Pick("personality", personality)], SourceIds = be.PaymentOptions(0, 1).First().SourceIds
+            TargetId = null,
+            Selections = [Pick("attachment", weapon.Id), Pick("personality", personality)],
+            SourceIds = be.PaymentOptions(0, 1).First().SourceIds
         };
         Check(Rejection(be, InBattle(home.Id)).Length > 0, "a Personality at home is not a Battle action's target");
         Accept(be, InBattle(there.Id));

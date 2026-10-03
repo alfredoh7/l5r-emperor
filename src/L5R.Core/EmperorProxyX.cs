@@ -30,7 +30,7 @@ public static class EmperorProxyXAbilities
         // equal to his Chi. Attach them to one or more of your Personalities. Lose Honor equal to the number of Followers this created." The destruction is a cost (before the colon), so the Chi is read first; the
         // hosts are a repeatable slot of your Personalities other than the destroyed one (at most one share per Follower). The Followers are Suiteiru's Podlings (oracle-l5r-10021).
         all["suiteiru-create"] = new("Open", "Destroy your target unbowed Personality: Create a number of 1F Shadowlands · Nonhuman · Oni Followers equal to his Chi. Attach them to one or more of your Personalities. Lose Honor equal to the number of Followers this created", "slots",
-            Slots: [new("target", "own-unbowed-personality", "Your unbowed Personality to destroy"),
+            Slots: [new("target", "own-unbowed-personality", "Your unbowed Personality to destroy") { ProbeDefaultOnlyForLaterSlots = true },
                 new("hosts", OwnPersonalityOtherThanTarget, "One or more of your Personalities to attach the Followers to (name one twice for two Followers)", 1, 99) { Repeatable = true }],
             Costs: [new(CostVerbs.Sacrifice, CostSubject.Slot("target"))],
             Creates: new(CardType.Follower, Force: 1, Keywords: ["Shadowlands", "Nonhuman", "Oni"], ProxyId: "oracle-l5r-10021") { HostSlot = "hosts", CountFromTargetChi = true });

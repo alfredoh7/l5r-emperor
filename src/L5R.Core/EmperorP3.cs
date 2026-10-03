@@ -306,17 +306,19 @@ public sealed partial class MatchEngine
         switch (id)
         {
             case EmperorP3Abilities.TosonEngage:
-            {
-                var discarded = CurrentBattlefieldProvince()?.CardId is { } cardId ? Card(cardId) : null;
-                DiscardCurrentProvinceCard();
-                if (discarded is not null && Definition(discarded).Type == CardType.Personality && _state.PendingEngage is { } engage)
                 {
-                    ClaimFirstOpportunity(player.Id, "Engage", source);
-                    engage.FirstActionPerformerId = source!.Id; engage.FirstActionPerformerPlayerId = player.Id;
+                    // A two-slot province (Plains of Otosan Uchi, issue #554) may hold two candidates: asks which to discard.
+                    if (CurrentBattlefieldProvince() is { } province)
+                    {
+                        var candidates = ProvinceCardCandidates(province);
+                        if (candidates.Count > 1) return BeginProvinceCardChoice(province, player.Id, EmperorP3Abilities.TosonEngage, source!.Id);
+                        var discarded = candidates.Count == 1 ? candidates[0] : null;
+                        if (discarded is not null) DiscardProvinceCandidate(province, discarded);
+                        FinishTosonAfterProvinceChoice(player, source!, discarded);
+                    }
+                    else FinishTosonAfterProvinceChoice(player, source!, null);
+                    return false;
                 }
-                else Emit("firstOpportunityNotClaimed", $"{name}: no Personality was discarded, so no opportunity is claimed.", player.Id, source?.Id);
-                return false;
-            }
             case EmperorP3Abilities.TenbatsuEngage:
                 // A Reaction's look sets the window it was played in aside, and the window is given back when the Reaction is done (ReactionsAreActions.cs).
                 SuspendOpenWindow();
@@ -368,13 +370,13 @@ public sealed partial class MatchEngine
                 }
                 return false;
             case EmperorP3Abilities.ForgingMove:
-            {
-                var performer = Card(command.PerformerId!);
-                var wasAway = performer.Zone == Zone.Battlefield;
-                MoveHome(performer, false);
-                if (wasAway && performer.Zone == Zone.Home) StraightenBowedUnit(performer); // "Straighten his unit if he moved."
-                return false;
-            }
+                {
+                    var performer = Card(command.PerformerId!);
+                    var wasAway = performer.Zone == Zone.Battlefield;
+                    MoveHome(performer, false);
+                    if (wasAway && performer.Zone == Zone.Home) StraightenBowedUnit(performer); // "Straighten his unit if he moved."
+                    return false;
+                }
             case EmperorP3Abilities.DefendersHonor:
                 GainHonor(player.Id, 2, name, source);
                 return false;
@@ -398,6 +400,19 @@ public sealed partial class MatchEngine
     }
 
     // ---- Shosuro Toson - exp2: the forced performer of the first opportunity (CloseEngageWindow's hook) --------------------------------------------------------------------------------------
+
+    // TosonEngage's own tail, shared by its immediate (0/1-candidate) path and ResolveProvinceCardChoice's own
+    // continuation (issue #554, a two-candidate province): claims the first opportunity when a Personality was discarded.
+    private void FinishTosonAfterProvinceChoice(PlayerState player, CardInstance source, CardInstance? discarded)
+    {
+        var name = Definition(source).Name;
+        if (discarded is not null && Definition(discarded).Type == CardType.Personality && _state.PendingEngage is { } engage)
+        {
+            ClaimFirstOpportunity(player.Id, "Engage", source);
+            engage.FirstActionPerformerId = source.Id; engage.FirstActionPerformerPlayerId = player.Id;
+        }
+        else Emit("firstOpportunityNotClaimed", $"{name}: no Personality was discarded, so no opportunity is claimed.", player.Id, source.Id);
+    }
 
     private FirstActionRestriction? P3FirstActionPerformerLimit(PendingEngage engage, int holder) =>
         engage.FirstActionPerformerId is { } performer && engage.FirstActionPerformerPlayerId == holder && _state.Cards.ContainsKey(performer)

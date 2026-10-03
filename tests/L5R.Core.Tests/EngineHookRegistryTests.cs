@@ -4,6 +4,7 @@ using System.IO.Compression;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using L5R.Core;
 
 internal static class EngineHookRegistryTests
@@ -83,13 +84,34 @@ internal static class EngineHookRegistryTests
     }
     private static void EqualLegacyJson(MatchState state, string expected)
     {
-        using var old = JsonDocument.Parse(expected);
-        using var current = JsonDocument.Parse(JsonSerializer.Serialize(state));
-        var legacyNames = old.RootElement.EnumerateObject().Select(property => property.Name).ToHashSet(StringComparer.Ordinal);
-        var retained = current.RootElement.EnumerateObject().Where(property => legacyNames.Contains(property.Name))
-            .ToDictionary(property => property.Name, property => property.Value, StringComparer.Ordinal);
-        Eq(JsonSerializer.Serialize(retained), expected);
-        // A future feature can add its own state property without redefining this historical fixture.
+        var old = JsonNode.Parse(expected)!;
+        var current = JsonNode.Parse(JsonSerializer.Serialize(state))!;
+        Eq(PruneToLegacyShape(current, old)!.ToJsonString(), old.ToJsonString());
+        // A future feature can add its own state property -- anywhere in the tree, not just MatchState's own top level --
+        // without redefining this historical fixture.
+    }
+
+    // Keeps only what the legacy tree has, recursively (object keys, array length), in the LEGACY tree's own key order:
+    // a new nested field (Plains of Otosan Uchi's ProvinceState.CardId2, issue #554, was the first one) is pruned out
+    // wherever it sits, not just when it is a new top-level MatchState property.
+    private static JsonNode? PruneToLegacyShape(JsonNode? current, JsonNode? legacy)
+    {
+        if (legacy is JsonObject legacyObject && current is JsonObject currentObject)
+        {
+            var result = new JsonObject();
+            foreach (var (key, legacyValue) in legacyObject)
+                if (currentObject.TryGetPropertyValue(key, out var currentValue))
+                    result[key] = PruneToLegacyShape(currentValue?.DeepClone(), legacyValue);
+            return result;
+        }
+        if (legacy is JsonArray legacyArray && current is JsonArray currentArray)
+        {
+            var result = new JsonArray();
+            for (var i = 0; i < legacyArray.Count; i++)
+                result.Add(i < currentArray.Count ? PruneToLegacyShape(currentArray[i]?.DeepClone(), legacyArray[i]) : null);
+            return result;
+        }
+        return current?.DeepClone();
     }
     private static void AllocationFreeDispatch()
     {

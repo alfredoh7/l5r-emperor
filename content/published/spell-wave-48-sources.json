@@ -1,0 +1,20 @@
+[
+  {
+    "card_id": "oracle-l5r-2745",
+    "printing_set": [
+      "War of Honor"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=2745",
+    "image_path": "assets/reference/oracle/war-of-honor/webp/oracle-l5r-2745-printing-1-image-1.webp",
+    "image_sha256": "99180fbe6b1a2ad25ca211627d793329502eaf0105a1c223b9483f4cd69285e5"
+  },
+  {
+    "card_id": "oracle-l5r-7866",
+    "printing_set": [
+      "War of Honor"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=7866",
+    "image_path": "assets/reference/oracle/war-of-honor/webp/oracle-l5r-7866-printing-1-image-1.webp",
+    "image_sha256": "44c95925efcfa407f05206f8fd467bcb15204a76ea955bf422bad690e93165d3"
+  }
+]

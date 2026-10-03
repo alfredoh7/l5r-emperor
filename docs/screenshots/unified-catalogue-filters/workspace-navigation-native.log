@@ -1,0 +1,13 @@
+Godot Engine v4.7.2.stable.mono.official.ed1daf0bf - https://godotengine.org
+OpenGL API 4.1 Metal - 90.5 - Compatibility - Using Device: Apple - Apple M1 Max
+
+PASS ordinary Library navigation retires the old overlay
+PASS Library to Builder preserves embedded checklist placement
+PASS card size preference follows Library to Builder
+PASS Library navigation guards an unsaved draft
+PASS cancel preserves the draft and current workspace
+PASS Builder to Library retires overlay and preserves embedded menus
+PASS card size preference follows Builder to Library
+PASS switched workspace checklist remains inside the browser
+PASS closing the final workspace restores original popup mode
+WORKSPACE NAVIGATION PASS

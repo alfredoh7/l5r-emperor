@@ -593,7 +593,7 @@ internal static class SeedsOfDecayBatch4Tests
         Add(s, "training-lion-samurai", 1, Zone.DynastyDiscard); // discarded, not dead
         var e = MatchEngine.FromTestState(s);
         RunUntil(e, () => e.State.ActivePlayerId == 1 && e.State.Phase == Phase.Action);
-        var ancestors = e.State.Cards.Values.Where(c => c.DefinitionId == "oracle-l5r-9785" && c.OwnerId == 1).ToArray();
+        var ancestors = e.State.Cards.Values.Where(c => c.DefinitionId == "user-scan-ancestor-spirit" && c.OwnerId == 1).ToArray();
         Eq(ancestors.Length, 2, "one Ancestor per dead Personality of the owner's");
         foreach (var ancestor in ancestors)
         {
@@ -614,7 +614,7 @@ internal static class SeedsOfDecayBatch4Tests
         Check(e2.State.Cards[reverence2.Id].Zone == Zone.DynastyDeck && e2.State.Players[1].DynastyDeck.Contains(reverence2.Id), "shuffled into the Dynasty deck");
         Check(e2.State.Players[1].Provinces[0].CardId is not null && e2.State.Players[1].Provinces[0].CardId != reverence2.Id, "the province was refilled");
         Eq(e2.State.Phase, Phase.Action, "the reveal went on");
-        Check(!e2.State.Cards.Values.Any(c => c.DefinitionId == "oracle-l5r-9785"), "no Ancestor was created");
+        Check(!e2.State.Cards.Values.Any(c => c.DefinitionId == "user-scan-ancestor-spirit"), "no Ancestor was created");
         var e3 = MatchEngine.FromTestState(s2);
         RunUntil(e3, () => e3.State.PendingChoice?.Type == "offeringReverence");
         Accept(e3, new GameCommand("offeringReverence", 1, e3.Version, Choice: "discard"));

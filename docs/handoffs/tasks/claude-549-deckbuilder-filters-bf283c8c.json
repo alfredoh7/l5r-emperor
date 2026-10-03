@@ -1,0 +1,9 @@
+{
+  "lane": "ui",
+  "summary": "Deck Builder: replace single-select clan/type/keyword dropdowns with the shared FilterChecklist popover (select-all/deselect-all, additive multi-select) introduced for the Card Library, completing the filter unification across both screens (issue #549). Keywords dynamically scope to the current Clan/Type/Family/search/support selection with A-Z vs most-common (within current filter) ordering; Type list scopes to the active Dynasty/Fate family. FilterChecklist gains a Free() method so BuildCollectionControls' existing rebuild-on-tab-switch pattern doesn't leak popup panels.",
+  "validation": "dotnet build clean; tools/check-deck-builder.sh native probe all PASS including new multi-clan checklist, additive OR, Dynasty-scoped Type list, and Dynasty-scoped Keyword list assertions; tools/check-catalogue.sh still PASS (shared CatalogueFilterChecklist.cs unaffected); dotnet format whitespace --verify-no-changes clean",
+  "remaining": "None; this completes all three planned PRs for issue #549",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/549",
+  "branch": "claude/549-deckbuilder-filters",
+  "updated": "2026-09-30T10:28:16.131613+00:00"
+}

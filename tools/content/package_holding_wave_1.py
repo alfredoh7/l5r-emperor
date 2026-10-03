@@ -31,6 +31,10 @@ ABILITIES: dict[int, list[str]] = {
 }
 
 
+# Printed production is separate from the activated ability; the generic scraper does not infer it.
+GOLD_PRODUCTION = {430: 2, 7291: 5, 7875: 2, 8721: 2}
+
+
 def package(card_ids: list[str], root: Path = ROOT) -> dict:
     definitions = []
     sources = []
@@ -40,6 +44,7 @@ def package(card_ids: list[str], root: Path = ROOT) -> dict:
         del fields["_oracle_id"]
         fields["Abilities"] = ABILITIES.get(oracle_id, [])
         fields["Effect"] = "none"
+        fields["GoldProduction"] = GOLD_PRODUCTION[oracle_id]
         definitions.append(fields)
         sources.append(source)
     assert len(definitions) == len(card_ids) == len({c["Id"] for c in definitions}), "Duplicate or missing card"

@@ -63,8 +63,13 @@ public partial class DuelArenaReview : Control
         }
         if (_pineBefore) _title = "Duel arena · iteration 4 baseline";
         Theme = Palette.MakeTheme();
-        _world = new SubViewport { OwnWorld3D = true, RenderTargetUpdateMode = SubViewport.UpdateMode.Always,
-            HandleInputLocally = false, Msaa3D = Viewport.Msaa.Msaa4X };
+        _world = new SubViewport
+        {
+            OwnWorld3D = true,
+            RenderTargetUpdateMode = SubViewport.UpdateMode.Always,
+            HandleInputLocally = false,
+            Msaa3D = Viewport.Msaa.Msaa4X
+        };
         AddChild(_world);
         _model = GD.Load<PackedScene>(_pineBefore
             ? "res://Art/DuelArena/duel-arena-v4.glb"
@@ -75,39 +80,67 @@ public partial class DuelArenaReview : Control
         var paintedMat = new ShaderMaterial { Shader = GD.Load<Shader>("res://Art/DuelArena/approved-mat.gdshader") };
         paintedMat.SetShaderParameter("artwork", originalMaterial.AlbedoTexture);
         matMesh.MaterialOverride = paintedMat;
-        _environment = new WorldEnvironment { Environment = new Godot.Environment
+        _environment = new WorldEnvironment
         {
-            BackgroundMode = Godot.Environment.BGMode.Color, BackgroundColor = new Color("111823"),
-            AmbientLightSource = Godot.Environment.AmbientSource.Color,
-            AmbientLightColor = new Color("b8c5d4"), AmbientLightEnergy = .45f,
-            TonemapMode = Godot.Environment.ToneMapper.Linear
-        }};
+            Environment = new Godot.Environment
+            {
+                BackgroundMode = Godot.Environment.BGMode.Color,
+                BackgroundColor = new Color("111823"),
+                AmbientLightSource = Godot.Environment.AmbientSource.Color,
+                AmbientLightColor = new Color("b8c5d4"),
+                AmbientLightEnergy = .45f,
+                TonemapMode = Godot.Environment.ToneMapper.Linear
+            }
+        };
         _world.AddChild(_environment);
-        _keyLight = new DirectionalLight3D { RotationDegrees = new Vector3(-62, -25, 0),
-            LightColor = new Color("e4ebff"), LightEnergy = .8f, ShadowEnabled = true };
+        _keyLight = new DirectionalLight3D
+        {
+            RotationDegrees = new Vector3(-62, -25, 0),
+            LightColor = new Color("e4ebff"),
+            LightEnergy = .8f,
+            ShadowEnabled = true
+        };
         _world.AddChild(_keyLight);
         foreach (var name in new[] { "StoneLanternLeftGlow", "StoneLanternRightGlow" })
         {
             var anchor = (Node3D)_model.FindChild(name, true, false);
-            var light = new OmniLight3D { LightColor = new Color("ffaf58"), LightEnergy = 1,
-                OmniRange = 2.3f, ShadowEnabled = true };
+            var light = new OmniLight3D
+            {
+                LightColor = new Color("ffaf58"),
+                LightEnergy = 1,
+                OmniRange = 2.3f,
+                ShadowEnabled = true
+            };
             anchor.AddChild(light); _lanternLights.Add(light);
         }
-        _camera = new Camera3D { Current = true, Near = .05f, Far = 100,
-            Position = new Vector3(0, Distance * TableSurface.Pitch, Distance * Mathf.Sqrt(1 - TableSurface.Pitch * TableSurface.Pitch)) };
+        _camera = new Camera3D
+        {
+            Current = true,
+            Near = .05f,
+            Far = 100,
+            Position = new Vector3(0, Distance * TableSurface.Pitch, Distance * Mathf.Sqrt(1 - TableSurface.Pitch * TableSurface.Pitch))
+        };
         _world.AddChild(_camera); _camera.LookAt(Vector3.Zero);
         BuildGardenPresentation();
-        _worldImage = new TextureRect { Texture = _world.GetTexture(), ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize,
-            MouseFilter = MouseFilterEnum.Ignore };
+        _worldImage = new TextureRect
+        {
+            Texture = _world.GetTexture(),
+            ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize,
+            MouseFilter = MouseFilterEnum.Ignore
+        };
         AddChild(_worldImage);
         Texture2D Source(string name) => ImageTexture.CreateFromImage(Image.LoadFromFile(
             ProjectSettings.GlobalizePath("res://../../assets/ui/duel-arena/" + name)));
         _compositionSource = Source("approved-generation-3.png");
         _matSource = Source("approved-duel-mat.png"); _lanternSource = Source("approved-stone-lantern.png");
         _pineSource = Source("approved-pine-primary.png"); _pineReverseSource = Source("approved-pine-reverse.png");
-        _reference = new TextureRect { Texture = _compositionSource,
-            ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize, StretchMode = TextureRect.StretchModeEnum.KeepAspectCentered,
-            MouseFilter = MouseFilterEnum.Ignore };
+        _reference = new TextureRect
+        {
+            Texture = _compositionSource,
+            ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize,
+            StretchMode = TextureRect.StretchModeEnum.KeepAspectCentered,
+            MouseFilter = MouseFilterEnum.Ignore
+        };
         AddChild(_reference);
         _table = new TableSurface(); AddChild(_table);
         _plane = new Control(); _table.Canvas.AddChild(_plane);
@@ -190,9 +223,9 @@ public partial class DuelArenaReview : Control
         _reference.Visible = detail || _showReference;
         _worldImage.Visible = detail || !_showReference;
         LayoutGardenPresentation(detail);
-        _table.Position = _play.Position;
         _table.Scale = Vector2.One * _density;
         _table.ResizePlane(stageSize / _density, Math.Max(1, _density * 1.4f));
+        _table.Position = _play.Position; // after ResizePlane, which resets Position when no drawing area is given
         _table.Visible = !detail && !_showReference && !_clean;
         _plane.Size = _table.CanvasSize;
         _hud.Visible = detail || (!_showReference && !_clean);
@@ -201,8 +234,13 @@ public partial class DuelArenaReview : Control
             if (_pineDetail)
             {
                 foreach (var y in new[] { 0f, screen.Y - 80 })
-                    _hud.AddChild(new ColorRect { Color = new Color("111823"), Position = new Vector2(0, y),
-                        Size = new Vector2(screen.X, 80), MouseFilter = MouseFilterEnum.Ignore });
+                    _hud.AddChild(new ColorRect
+                    {
+                        Color = new Color("111823"),
+                        Position = new Vector2(0, y),
+                        Size = new Vector2(screen.X, 80),
+                        MouseFilter = MouseFilterEnum.Ignore
+                    });
             }
             Text(_lanternDetail ? "Lantern · Meshy asset in Godot" : _pineDetail
                 ? (_pineBefore ? "Pine · previous foliage" : _pineReverse ? "Pine · refined reverse view" : "Pine · refined needle clusters") : "Mat · native top view",
@@ -246,27 +284,44 @@ public partial class DuelArenaReview : Control
         var handDefs = definitions.Where(d => d.Type == CardType.Strategy).Take(5).ToArray();
         for (var i = 0; i < handDefs.Length; i++)
         {
-            var c = new CardTile(Sample($"hand-{i}", handDefs[i], 0, Zone.Hand), true, Inspect, _ => {})
-            { FaceHeight = 133 * ui, Size = new Vector2(141, 141) * ui,
+            var c = new CardTile(Sample($"hand-{i}", handDefs[i], 0, Zone.Hand), true, Inspect, _ => { })
+            {
+                FaceHeight = 133 * ui,
+                Size = new Vector2(141, 141) * ui,
                 Position = new Vector2(_play.Size.X / 2 - 305 * ui + i * 61 * ui, screen.Y - 181 * ui),
-                ReducedMotion = true, ShowTokenRail = false, Material = CardPaper.FixedTable };
+                ReducedMotion = true,
+                ShowTokenRail = false,
+                Material = CardPaper.FixedTable
+            };
             _hud.AddChild(c); _fixed.Add(c);
         }
-        var controls = new VBoxContainer { Position = new Vector2(_play.Size.X / 2 + 85 * ui, screen.Y - 172 * ui),
-            Size = new Vector2(222, 140) * ui };
+        var controls = new VBoxContainer
+        {
+            Position = new Vector2(_play.Size.X / 2 + 85 * ui, screen.Y - 172 * ui),
+            Size = new Vector2(222, 140) * ui
+        };
         controls.AddThemeConstantOverride("separation", (int)(4 * ui));
         _hud.AddChild(controls); _fixed.Add(controls);
         foreach (var label in new[] { "Focus from hand", "Focus from deck", "Strike" })
         {
-            var b = new Button { Text = label, Disabled = true, CustomMinimumSize = new Vector2(220, 35) * ui,
-                TooltipText = "Placement study only; duel actions remain with the engine." };
+            var b = new Button
+            {
+                Text = label,
+                Disabled = true,
+                CustomMinimumSize = new Vector2(220, 35) * ui,
+                TooltipText = "Placement study only; duel actions remain with the engine."
+            };
             b.AddThemeStyleboxOverride("disabled", Palette.Box(new Color("1c242a"), new Color("655943"), (int)(6 * ui)));
             b.AddThemeFontSizeOverride("font_size", (int)(16 * ui)); controls.AddChild(b);
         }
         if (_sidebar)
         {
-            var panel = new ColorRect { Position = new Vector2(_play.Size.X, 0), Size = new Vector2(side, screen.Y),
-                Color = new Color("12191e") }; _hud.AddChild(panel);
+            var panel = new ColorRect
+            {
+                Position = new Vector2(_play.Size.X, 0),
+                Size = new Vector2(side, screen.Y),
+                Color = new Color("12191e")
+            }; _hud.AddChild(panel);
             Text("Sidebar clearance", new Vector2(_play.Size.X + 20, 125 * ui), 19 * ui, Palette.Paper);
             Text("Reserved space only", new Vector2(_play.Size.X + 20, 162 * ui), 14 * ui, Palette.PaperDim);
         }
@@ -277,7 +332,7 @@ public partial class DuelArenaReview : Control
 
     private void AddCard(CardView card, Vector2 center, float height)
     {
-        CardTile tile = card.Definition is null ? new DuelArenaFocusBack(card) : new CardTile(card, true, Inspect, _ => {});
+        CardTile tile = card.Definition is null ? new DuelArenaFocusBack(card) : new CardTile(card, true, Inspect, _ => { });
         tile.Size = Vector2.One * (height + 12); tile.FaceHeight = height;
         tile.Position = _table.CanvasSize / 2 + center - Vector2.One * (height + 12) / 2;
         tile.ReducedMotion = true; tile.ShowTokenRail = false;
@@ -297,9 +352,15 @@ public partial class DuelArenaReview : Control
         if (_reading is not null) { _hud.RemoveChild(_reading); _reading.QueueFree(); }
         if (card.Definition is null) { _reading = null; return; }
         var h = Math.Min(580, GetViewportRect().Size.Y * .68f);
-        _reading = new CardTile(card with { Bowed = false, Zone = Zone.Home }, true, _ => ClearReading(), _ => {})
-        { FaceHeight = h, Size = Vector2.One * (h + 12), ReducedMotion = true, ShowTokenRail = false,
-            Position = _play.Size / 2 - Vector2.One * (h + 12) / 2, Material = CardPaper.Reading };
+        _reading = new CardTile(card with { Bowed = false, Zone = Zone.Home }, true, _ => ClearReading(), _ => { })
+        {
+            FaceHeight = h,
+            Size = Vector2.One * (h + 12),
+            ReducedMotion = true,
+            ShowTokenRail = false,
+            Position = _play.Size / 2 - Vector2.One * (h + 12) / 2,
+            Material = CardPaper.Reading
+        };
         _hud.AddChild(_reading);
     }
 
@@ -378,7 +439,7 @@ public partial class DuelArenaReview : Control
             {
                 var front = _cards.First(c => c.Card.Id == "unit-0");
                 var points = front.FaceCornersOnViewport();
-                var point = points.Aggregate(Vector2.Zero, (sum, p) => sum+p) / 4;
+                var point = points.Aggregate(Vector2.Zero, (sum, p) => sum + p) / 4;
                 Input.ParseInputEvent(new InputEventMouseMotion { Position = point });
                 Input.ParseInputEvent(new InputEventMouseButton { Position = point, ButtonIndex = MouseButton.Left, Pressed = true });
                 Input.ParseInputEvent(new InputEventMouseButton { Position = point, ButtonIndex = MouseButton.Left, Pressed = false });
@@ -413,19 +474,34 @@ public partial class DuelArenaReview : Control
             }
             var error = GetViewport().GetTexture().GetImage().SavePng(_capture);
             if (error != Error.Ok) throw new Exception($"Capture failed: {error}");
-            System.IO.File.WriteAllText(_capture + ".json", JsonSerializer.Serialize(new {
-                Stage = _pineBefore ? "iteration 4 pine baseline" : "iteration 6", Viewport = GetViewportRect().Size.ToString(),
-                GardenPhase = _gardenPhase, ReducedMotion = _gardenReducedMotion, AtmosphereTime = _gardenTime,
+            System.IO.File.WriteAllText(_capture + ".json", JsonSerializer.Serialize(new
+            {
+                Stage = _pineBefore ? "iteration 4 pine baseline" : "iteration 6",
+                Viewport = GetViewportRect().Size.ToString(),
+                GardenPhase = _gardenPhase,
+                ReducedMotion = _gardenReducedMotion,
+                AtmosphereTime = _gardenTime,
                 Zoom = _zoom,
-                MatDetail = _matDetail, LanternDetail = _lanternDetail, ClearView = _clean,
-                PineDetail = _pineDetail, PineReverse = _pineReverse, PineBefore = _pineBefore,
+                MatDetail = _matDetail,
+                LanternDetail = _lanternDetail,
+                ClearView = _clean,
+                PineDetail = _pineDetail,
+                PineReverse = _pineReverse,
+                PineBefore = _pineBefore,
                 CameraChecked = !detail,
                 PineScreenBounds = pineScreenBounds?.ToString(),
-                MaxCameraErrorPixels = maxError, NativeCardClicks = _inspections,
-                Crowded = _crowded, Bowed = _bowed, Revealed = _revealed, Sidebar = _sidebar,
+                MaxCameraErrorPixels = maxError,
+                NativeCardClicks = _inspections,
+                Crowded = _crowded,
+                Bowed = _bowed,
+                Revealed = _revealed,
+                Sidebar = _sidebar,
                 ObservedFramesPerSecond = Engine.GetFramesPerSecond(),
                 RenderedPrimitives = RenderingServer.GetRenderingInfo(RenderingServer.RenderingInfo.TotalPrimitivesInFrame),
-                CardFaces = _cards.Count, GameplayTested = false, FinalArt = false }));
+                CardFaces = _cards.Count,
+                GameplayTested = false,
+                FinalArt = false
+            }));
             GD.Print($"DUEL_LAYOUT_PASS: camera error {maxError:F4}px; {_cards.Count} cards in viewport; native clicks {_inspections}.");
             GetTree().Quit();
         }
@@ -438,7 +514,7 @@ public partial class DuelArenaReview : Control
 public partial class DuelArenaFocusBack : CardTile
 {
     public DuelArenaFocusBack() { }
-    public DuelArenaFocusBack(CardView card) : base(card, true, _ => {}, _ => {})
+    public DuelArenaFocusBack(CardView card) : base(card, true, _ => { }, _ => { })
     { SetMeta("flat_tooltip", true); TooltipText = "Focused Fate card · face down"; }
     public override void _Draw()
     {

@@ -1,0 +1,92 @@
+[
+  {
+    "card_id": "oracle-l5r-98",
+    "printing_set": [
+      "War of Honor"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=98",
+    "image_path": "assets/reference/oracle/war-of-honor/webp/oracle-l5r-98-printing-1-image-1.webp",
+    "image_sha256": "17005860a926deded12d5e3ba61542658d561e1e34c9bceb5d424162ca3e5856"
+  },
+  {
+    "card_id": "oracle-l5r-1974",
+    "printing_set": [
+      "War of Honor"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=1974",
+    "image_path": "assets/reference/oracle/war-of-honor/webp/oracle-l5r-1974-printing-1-image-1.webp",
+    "image_sha256": "db15da48a4d01fc3d638a4f55ab756a43a8424bb7277c3a2c52c5c6b47813f7f"
+  },
+  {
+    "card_id": "oracle-l5r-2769",
+    "printing_set": [
+      "War of Honor"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=2769",
+    "image_path": "assets/reference/oracle/war-of-honor/webp/oracle-l5r-2769-printing-1-image-1.webp",
+    "image_sha256": "d44fda37220f5f881c8f71a0883c44510ddb7661662678e159e09434d9eb82ce"
+  },
+  {
+    "card_id": "oracle-l5r-3739",
+    "printing_set": [
+      "Embers of War"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=3739",
+    "image_path": "assets/reference/oracle/embers-of-war/webp/oracle-l5r-3739-printing-1-image-1.webp",
+    "image_sha256": "8643385a12c49aaf6538265aca2c8373a4c0c06ef685ac24f0e5d2f9582e1b65"
+  },
+  {
+    "card_id": "oracle-l5r-3767",
+    "printing_set": [
+      "Honor and Treachery"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=3767",
+    "image_path": "assets/reference/oracle/honor-and-treachery/webp/oracle-l5r-3767-printing-2-image-1.webp",
+    "image_sha256": "ea4855850f3b6c700a1b88e2490761c3520bb89fa4c77cac8c72d7840ddc93ec"
+  },
+  {
+    "card_id": "oracle-l5r-6697",
+    "printing_set": [
+      "War of Honor"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=6697",
+    "image_path": "assets/reference/oracle/war-of-honor/webp/oracle-l5r-6697-printing-1-image-1.webp",
+    "image_sha256": "7fa4d429e75b484f6c0abdb651318fa45b28f520765f57837e0c26e46fb6bcd1"
+  },
+  {
+    "card_id": "oracle-l5r-6699",
+    "printing_set": [
+      "War of Honor"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=6699",
+    "image_path": "assets/reference/oracle/war-of-honor/webp/oracle-l5r-6699-printing-1-image-1.webp",
+    "image_sha256": "00df6950d783b62dde9b60b715a922beeafd35b4fc884a3010ab5206496bf5fd"
+  },
+  {
+    "card_id": "oracle-l5r-7587",
+    "printing_set": [
+      "War of Honor"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=7587",
+    "image_path": "assets/reference/oracle/war-of-honor/webp/oracle-l5r-7587-printing-1-image-1.webp",
+    "image_sha256": "435690a0140ed428469781d42e2efb0360b4992d860c9e0ad963ec80250a11a5"
+  },
+  {
+    "card_id": "oracle-l5r-8200",
+    "printing_set": [
+      "War of Honor"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=8200",
+    "image_path": "assets/reference/oracle/war-of-honor/webp/oracle-l5r-8200-printing-1-image-1.webp",
+    "image_sha256": "ea6cf3b79bb80ddead6d0d7ab9e8c332d28eb49c75ac6968a3ef6605d50ef2d6"
+  },
+  {
+    "card_id": "oracle-l5r-9208",
+    "printing_set": [
+      "Forgotten Legacy"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=9208",
+    "image_path": "assets/reference/oracle/forgotten-legacy/webp/oracle-l5r-9208-printing-1-image-1.webp",
+    "image_sha256": "a97055f59ad72c3a49c215a053e7d30338084f09e77d254fa97f42f875b04197"
+  }
+]

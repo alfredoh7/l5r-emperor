@@ -82,11 +82,11 @@ public sealed partial class MatchEngine
         var decks = supplied.Select(CustomPractice.CopyDeck).ToArray();
         var drafts = decks.Select(CustomPractice.Resolve).ToArray();
         var state = new MatchState { Players = [new() { Id = 0 }, new() { Id = 1 }] };
-        var random = new StableRandom(seed); var nextId = 0;
+        var random = new StableRandom(seed); var nextId = 0; var ids = OpaqueCardIds(seed);
         CardInstance Add(int owner, string id, Zone zone, bool faceUp = false, bool bowed = false)
         {
             _ = CardCatalog.Get(id);
-            var card = new CardInstance { Id = $"card-{++nextId:D4}", DefinitionId = id, OwnerId = owner, Zone = zone, FaceUp = faceUp, Bowed = bowed };
+            var card = new CardInstance { Id = ids[nextId++], DefinitionId = id, OwnerId = owner, Zone = zone, FaceUp = faceUp, Bowed = bowed };
             state.Cards.Add(card.Id, card); return card;
         }
         foreach (var player in state.Players)
