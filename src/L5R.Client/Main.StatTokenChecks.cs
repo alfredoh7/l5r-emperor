@@ -15,7 +15,9 @@ public partial class Main
         {
             await ToSignal(GetTree(),SceneTree.SignalName.ProcessFrame);
             await ToSignal(GetTree(),SceneTree.SignalName.ProcessFrame);
-            var tile=InlaidCards.First(t=>_tableViewport.GetGlobalRect().HasPoint(t.InlayCornersOnViewport(0).Aggregate(Vector2.Zero,(a,b)=>a+b)/4));
+            // While a unit stack is expanded the table is deliberately inert (CameraBlocked); the clickable cards are the ones in the detail overlay.
+            var clickable=_expandedUnits.Count>0?InlaidCards.Where(t=>_unitDetail.IsAncestorOf(t)):InlaidCards;
+            var tile=clickable.First(t=>_tableViewport.GetGlobalRect().HasPoint(t.InlayCornersOnViewport(0).Aggregate(Vector2.Zero,(a,b)=>a+b)/4));
             var version=View.Version; var point=tile.InlayCornersOnViewport(0).Aggregate(Vector2.Zero,(a,b)=>a+b)/4;
             Input.ParseInputEvent(new InputEventMouseMotion {Position=point});
             Input.ParseInputEvent(new InputEventMouseButton {Position=point,ButtonIndex=MouseButton.Left,Pressed=true});
