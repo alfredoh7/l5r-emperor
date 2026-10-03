@@ -85,7 +85,13 @@ public partial class PersistentHomeProbe : Node
     {
         var option = _session.Snapshot!.Actions.First(a => a.Enabled && a.Command?.AbilityId == id);
         var version = Engine.Version;
-        Call("Choose", option); await Settle();
+        Call("Choose", option, false); await Settle(); // Choose(option, keepTarget): reflection does not fill optional parameters
+        // Issue #581: the client chooses no target for the player; pick the first legal one through the real picker (item 0 is "Choose a target…") before confirming.
+        if (Field<ActionOption?>("_chosen") is { TargetIds.Length: > 0, Command.TargetId: null })
+        {
+            var picker = Descendants<OptionButton>(_main).First(b => b.IsVisibleInTree());
+            picker.Selected = 1; picker.EmitSignal(OptionButton.SignalName.ItemSelected, 1L); await Settle();
+        }
         await Click(Button("Confirm action")); await Settle(.5);
         Require(Engine.Version > version, id + " did not execute through native confirmation");
     }
@@ -159,6 +165,10 @@ public partial class PersistentHomeProbe : Node
             var reserveButton = Descendants<Button>(Field<VBoxContainer>("_inspector")).FirstOrDefault(b => b.Text.EndsWith(reserveOption.Label) && !b.Disabled);
             Require(reserveButton is not null, "Battle flow hid engine-provided Reserve recruitment");
             reserveButton!.EmitSignal(BaseButton.SignalName.Pressed); await Settle(.4);
+            // The Reserve button opens the reviewed Gold payment panel (issue #303); the engine action is submitted on Confirm.
+            var confirmReserve = Descendants<Button>(_main).FirstOrDefault(b => b.Text.StartsWith("Confirm recruit", StringComparison.Ordinal) && b.IsVisibleInTree() && !b.Disabled);
+            Require(confirmReserve is not null, "Reserve did not open its reviewed payment with an enabled Confirm");
+            await Click(confirmReserve!); await Settle(.5);
             Require(Engine.State.Cards[reserve.Id].Zone == Zone.Battlefield, "Reserve button did not submit the engine action");
             GD.Print("HOME_PASS: consolidated battle flow exposes and executes authoritative Reserve recruitment");
 
