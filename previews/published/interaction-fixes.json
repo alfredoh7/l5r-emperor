@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "repository": "alfredoh7/l5r-emperor",
+  "source_pr": 464,
+  "source_commit": "2f3a9bbc55cc8b7d1342acd26ade66c4d263cd49",
+  "title": "Modified hand limits and private seat handoffs",
+  "slug": "interaction-fixes",
+  "tag": "preview-pr464-2f3a9bbc55-r1-windows",
+  "asset": "L5R-Review-pr464-2f3a9bbc55-r1-Windows.zip",
+  "bytes": 1883880983,
+  "sha256": "7246fb50d0541970c7256701113b03269402067dcabd6ac32572cacc401d22a1",
+  "folder": "L5R-Review-pr464-2f3a9bbc55-r1",
+  "launcher": "Start Review.cmd",
+  "reviewer": "mdornbrook"
+}
