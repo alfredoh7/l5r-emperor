@@ -48,6 +48,7 @@ public partial class Main
         // Kharmic is a player ability listed in the inspector; before this change the engine never offered it enabled.
         PressGold(b => b.Text.StartsWith("Pay 2 Gold, discard a Kharmic", StringComparison.Ordinal), "Kharmic action");
         GoldRequire(_chosen is { Type: "useAbility" } && QuoteFor(_chosen) is { Kind: GoldCostKind.Fixed, Cost: 2 }, "Kharmic did not open with its fixed 2 Gold quote.");
+        GoldPickFirstTarget();
         var text = GoldPanelText();
         GoldRequire(text.Contains("PAYMENT · FIXED COST") && text.Contains("2 Gold"), "the panel does not name the fixed cost.");
         GoldRequire(GoldButtons(_inspector).Any(b => b is CheckBox), "the panel lists no Gold sources to bow.");
@@ -69,20 +70,34 @@ public partial class Main
         GD.Print($"UI_SMOKE_PASS: Kharmic's fixed 2 Gold cost opened the shared payment panel through its real button; suggested sources covered it; confirmed={stage == "confirm"}.");
     }
 
+    // Issue #581: a targeted action starts on "Choose a target…". The capture picks through the real picker, as a player would.
+    private void GoldPickFirstTarget()
+    {
+        if (_chosen?.TargetIds is not { Length: > 0 } || _chosen.Command?.TargetId is not null) return;
+        var picker = _inspector.FindChildren("*", "OptionButton", true, false).OfType<OptionButton>().First();
+        picker.Selected = 1; picker.EmitSignal(OptionButton.SignalName.ItemSelected, 1L);
+    }
+
     private void GoldDerivedCapture(string stage, long version)
     {
         PressGold(b => b.Text.StartsWith("Equip (Battle)", StringComparison.Ordinal), "Equip (Battle) action");
         var action = _chosen!;
         GoldRequire(action.TargetGold is { Count: >= 3 } && action.TargetGold.Values.Select(q => q.Cost).Distinct().Count() >= 3, "Equip (Battle) did not ship distinct per-target quotes.");
-        var firstTarget = action.Command!.TargetId!; var firstCost = QuoteFor(action)!.Cost;
-        GoldRequire(GoldPanelText().Contains("PAYMENT · COST FROM YOUR TARGET") && GoldPanelText().Contains($"{firstCost} Gold"), "the panel does not show the first target's cost.");
+        // Issue #581: the client picks no target for the player. Nothing is priced and Confirm waits until one is chosen through the real picker (item 0 is "Choose a target…").
+        GoldRequire(action.Command!.TargetId is null && _paymentConfirm is { Disabled: true } && !GoldPanelText().Contains("PAYMENT"), "a target-priced action chose or priced a target before the player picked one.");
+        var firstTarget = action.TargetIds![0];
+        var firstPicker = _inspector.FindChildren("*", "OptionButton", true, false).OfType<OptionButton>().First();
+        firstPicker.Selected = 1; firstPicker.EmitSignal(OptionButton.SignalName.ItemSelected, 1L);
+        action = _chosen!; var firstCost = QuoteFor(action)!.Cost;
+        GoldRequire(action.Command!.TargetId == firstTarget, "the picker did not select the first legal target.");
+        GoldRequire(GoldPanelText().Contains("PAYMENT · COST FROM YOUR TARGET") && GoldPanelText().Contains($"{firstCost} Gold"), "the panel does not show the chosen target's cost.");
         if (stage != "")
         {
             // Change the target through the real picker: the quote, the amount and the suggested sources all follow, offline.
             var costliest = action.TargetGold!.OrderByDescending(p => p.Value.Cost).First();
             GoldRequire(costliest.Key != firstTarget && costliest.Value.Cost != firstCost, "the fixture has no differently priced target to swap to.");
             var picker = _inspector.FindChildren("*", "OptionButton", true, false).OfType<OptionButton>().First();
-            picker.Selected = Array.IndexOf(action.TargetIds!, costliest.Key);
+            picker.Selected = Array.IndexOf(action.TargetIds!, costliest.Key) + 1; // item 0 is the "Choose a target…" placeholder
             picker.EmitSignal(OptionButton.SignalName.ItemSelected, (long)picker.Selected);
             GoldRequire(_chosen!.Command!.TargetId == costliest.Key && QuoteFor(_chosen)!.Cost == costliest.Value.Cost, "changing the target did not swap in its own quote.");
             GoldRequire(GoldPanelText().Contains($"{costliest.Value.Cost} Gold"), "the panel does not show the new target's cost.");

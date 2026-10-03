@@ -633,12 +633,17 @@ public partial class Main : Node
         _intentOverlay?.QueueRedraw();
     }
 
-    private void Choose(ActionOption option)
+    // Core builds each targeted action's command with its first legal target filled in. The player, not the client or that default, picks the target (issue #581):
+    // the panel starts on "Choose a target…". Attack targets and support cards have their own target flows and keep theirs.
+    private bool NeedsTargetPick(ActionOption option) =>
+        option is { Type: "equip" or "playStrategy" or "useAbility", Command: { CardIds: null, TargetId: not null }, TargetIds: { Length: > 0 } } && !HasAttackTargets(option)
+        && !(option.CardId is { } sourceId && FindCard(sourceId) is { } source && IsSupportCard(source));
+
+    private void Choose(ActionOption option, bool keepTarget = false)
     {
         if (_shownOpen) ToggleShownCards(false);
         if (!option.Enabled || _session.Busy || PresentationBusy) return;
-        if (!HasAttackTargets(option) && option.Type is "equip" or "playStrategy" or "useAbility" && option.Command is { CardIds: null, TargetId: null } command && option.TargetIds?.FirstOrDefault() is string target)
-            option = option with { Command = command with { TargetId = target } };
+        if (!keepTarget && NeedsTargetPick(option)) option = option with { Command = option.Command! with { TargetId = null } };
         ResetDecisionSelection();
         if (option.Movement is not null && option.Command is { } moveCommand) option = option with { Command = moveCommand with { Province = null } };
         _attackChoice = AttackChoice.Unselected;
@@ -670,7 +675,6 @@ public partial class Main : Node
     // The engine's own figure (CardView.GoldProduced, which also covers a Personality that can bow for Gold while a cost is being paid: Yoritomo
     // Sakuma, issue #338). The client holds no production rule of its own (issue #578); payment tokens come from the quote (TokenSources).
     private static int Production(CardView card, PlayerView owner) => card.GoldProduced ?? 0;
-    private static int UnitForce(CardView unit, PlayerView owner) => (unit.Bowed ? 0 : unit.Force) + owner.Home.Concat(owner.Army).Where(c => c.AttachedTo == unit.Id && c.Definition?.Type == CardType.Follower && !c.Bowed).Sum(c => c.Force);
     private CardView? FindCard(string id) => View.Players.SelectMany(p => p.Home.Concat(p.Army).Concat(p.Hand).Concat(p.Discard).Concat(p.RemovedFromGame).Concat(p.EventsInPlay ?? []).Concat(p.Celestials ?? []).Concat(p.Provinces.SelectMany(ProvincePresentation.Cards)).Append(p.Stronghold)).FirstOrDefault(c => c.Id == id);
     private static string HumanPhase(Phase phase) => phase switch { Phase.AttackDeclaration => "Declare an attack", Phase.InfantryDeclaration => "Assign attackers", Phase.DefenseAssignment => "Assign defenders", Phase.BattleSelection => "Choose a battlefield", Phase.DynastyDiscard => "Dynasty · discard", _ => phase.ToString() };
     private void SetNotice(string message) { _matchDuel?.Notify(message); _notice.Text = message; _notice.TooltipText = message; if (MenuVisible) _titleMenu!.Notify(message); }
