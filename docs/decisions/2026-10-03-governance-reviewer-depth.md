@@ -55,3 +55,5 @@ Findings checked against the code by hand:
 - Not confirmed: #581 alternative-cost path may submit a null target (negation reviewer, marked unverified by it).
 
 Limits: no seeded-defect recall test, so recall is unknown; only findings the reviewers raised were checked. `omitClaudeMd` still untested.
+
+Follow-up from round 2: the client-contract profile now sweeps every producer of a changed payload type (the #578 `chooseSearchPayment` gap) and requires clients to tolerate absent additive view fields (the #581 `PendingHarshChoices!` dereference). Not re-measured with agents.
