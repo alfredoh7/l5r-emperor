@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Implemented approved B6 main-menu artwork and slow 85% lighting, source-aligned native buttons and submenus; fixed overlay Escape routing and focus return. Product changes are UI-only; shared classification is for the native acceptance script and preview delivery records. No engine, state, networking or rules changes.",
+  "validation": "Client build 0 warnings/errors, Godot import, 16 native cases across full and targeted runs; static source/native RGB exact; reduced-motion 0/22 frames identical; local launcher and native UI checked. F11 passed isolated. macOS CI passed at 82bf8f65 after one Godot download timeout retry. Strict Windows export/package validation and GitHub size/SHA verification passed. See docs/screenshots/lantern-menu/README.md.",
+  "remaining": "Windows candidate preview-pr471-82bf8f659b-r1-windows staged as Validation pending. Hosted Windows/collaboration/routing checks cannot start due to GitHub billing/spending limit; Windows runtime check and ready-for-review notification remain pending. No native Windows graphical test or Mendon acceptance claimed. No merge authorized.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/470",
+  "branch": "codex/470-lantern-main-menu",
+  "updated": "2026-09-24T11:34:24.038448+00:00"
+}

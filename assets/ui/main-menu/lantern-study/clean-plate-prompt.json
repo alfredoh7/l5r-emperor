@@ -1,0 +1,8 @@
+{
+  "tool": "built-in ImageGen",
+  "date": "2026-09-24",
+  "input": "src/L5R.Client/Art/lantern-study.png",
+  "output": "src/L5R.Client/Art/lantern-study-clean.png",
+  "prompt": "Use case: precise-object-edit. Asset type: clean background plate for a native game menu. Input image 1 is the edit target, the approved B6 Lantern Study screen. Remove ONLY the six menu labels on the right (PLAY, Private Match, Card Library, Deck Builder, Options, Quit) and the gold brush underline underneath PLAY. Fill those text/underline footprints with the matching dark textured indigo folding-screen silk behind them. Preserve every other part exactly: title LEGEND OF THE FIVE RINGS and EMPEROR EDITION and its rules/flower ornament, faded five-ring emblem on the left, pine-and-cloud Japanese golden border, original rich screen texture, vertical panel seams, cropped bonsai branches left, warm lantern left, tabletop objects, light and framing. No new elements. Same full 1672x941 framing and composition. This is a narrow erasure / clean plate, NOT a redesign; do not simplify or smooth the overall texture. In particular preserve the vertical gold/black panel seam through the menu area.",
+  "use": "Only the menu rectangle is used; source pixels elsewhere stay untouched."
+}

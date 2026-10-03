@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>L5R · Lantern Study B6</title>
+<style>
+:root{color-scheme:dark;font-family:system-ui,sans-serif;background:#080c10;color:#e5decd}
+*{box-sizing:border-box}body{margin:0}main{max-width:1800px;margin:0 auto;padding:20px clamp(12px,2.4vw,40px)}header{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin:0 0 16px}h1{font:25px/1.2 Georgia,serif;margin:0}.eyebrow{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#bba777;margin-bottom:7px}a{color:#cfb784;text-underline-offset:4px}
+.stage{position:relative;aspect-ratio:1672/941;width:min(100%,max(320px,calc((100svh - 230px) * 1.776833)));overflow:hidden;background:#030405;border:1px solid #3b3e3f;box-shadow:0 12px 45px #0005;margin:0 auto}.stage img,.stage canvas{width:100%;height:100%;display:block;object-fit:contain}.stage canvas{position:absolute;inset:0;opacity:0}.stage.ready canvas{opacity:1}.stage.ready img{visibility:hidden}.stage:fullscreen{display:grid;place-items:center;border:0;aspect-ratio:auto;width:100%;height:100%;background:#000}.stage:fullscreen canvas,.stage:fullscreen img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
+.controls{display:flex;align-items:center;gap:14px 24px;flex-wrap:wrap;padding:18px 0}button{font:inherit;color:#e5decd;background:#182029;border:1px solid #6b6047;border-radius:5px;min-height:40px;padding:8px 15px;cursor:pointer}button:hover{background:#242d36}button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid #d8bc7e;outline-offset:4px}button:disabled{opacity:.5;cursor:default}label{display:flex;align-items:center;gap:10px;font-size:14px}input{accent-color:#d1b77b;width:135px}output{font-size:13px;min-width:38px;color:#c8bda4;font-variant-numeric:tabular-nums}.status{color:#b3b9bc;font-size:13px;line-height:1.5;margin:0;flex-basis:100%}footer{color:#959fa5;font-size:13px;padding-bottom:12px;line-height:1.65}footer a{margin-right:15px}
+@media(max-width:620px){header{align-items:flex-start}h1{font-size:22px}.controls{gap:12px}label{flex-basis:100%}label input{flex:1}main{padding:15px 10px}.stage{border:0}}
+</style></head><body><main>
+<header><div><div class="eyebrow">Main menu · animated concept</div><h1>B6 · Lantern Study</h1></div><a href="index.html#B6">Back to the gallery</a></header>
+<figure class="stage" id="stage" aria-label="Animated main-menu concept">
+<img id="art" src="B6-textured-screen-cropped-bonsai.png" alt="Textured navy folding screen with a faded five-ring emblem, Japanese pine-and-cloud border ornament, cropped bonsai on the left, and a warm paper lantern.">
+<canvas id="light" role="img" aria-label="Warm lantern flicker illuminates the folding screen, bonsai and room."></canvas>
+</figure>
+<div class="controls" aria-label="Animation preview controls">
+<button id="toggle" disabled>Loading light…</button>
+<button id="fullscreen" type="button">Full screen</button>
+<label for="strength">Flicker strength <input id="strength" type="range" min="0" max="100" value="85" step="1"><output id="amount" for="strength">85%</output></label>
+<p class="status" id="status" role="status" aria-live="polite">Preparing the lantern preview…</p>
+</div>
+<footer>Visual concept only; the pictured game menu is artwork. The game has not been changed.<br>
+<a href="B6-textured-screen-cropped-bonsai.png" target="_blank">Still image</a><a href="B6-prompt.json">ImageGen prompt</a><a href="B6-README.md">Preview notes</a></footer>
+</main>
+<script>
+'use strict';
+const canvas=document.getElementById('light'),stage=document.getElementById('stage'),art=document.getElementById('art');
+const toggle=document.getElementById('toggle'),strength=document.getElementById('strength'),amount=document.getElementById('amount'),status=document.getElementById('status');
+const reduce=matchMedia('(prefers-reduced-motion: reduce)');
+let playing=!reduce.matches,ready=false,elapsed=0,lastStamp=0,raf=0,gl,program,uTime,uStrength,uMotion,drawCount=0;
+function inform(){
+ toggle.textContent=playing?'Pause flicker':'Resume flicker';
+ toggle.setAttribute('aria-pressed',String(playing));
+ canvas.dataset.animation=playing?'playing':'paused';
+ status.textContent=playing?'Soft lantern light drifts gently across the screen and room.':(reduce.matches?'Reduced motion: steady lantern light. You can enable flicker with Resume flicker.':'Flicker paused. The current lighting is held still.');
+}
+function fallback(message){
+ cancelAnimationFrame(raf);ready=false;stage.classList.remove('ready');
+ toggle.disabled=true;toggle.textContent='Still image';strength.disabled=true;
+ status.textContent=message;canvas.dataset.animation='unavailable';
+}
+function compile(kind,source){
+ const shader=gl.createShader(kind);gl.shaderSource(shader,source);gl.compileShader(shader);
+ if(!gl.getShaderParameter(shader,gl.COMPILE_STATUS))throw new Error(gl.getShaderInfoLog(shader));
+ return shader;
+}
+const vertex='attribute vec2 position; varying vec2 uv; void main(){uv=vec2((position.x+1.0)*0.5,(1.0-position.y)*0.5);gl_Position=vec4(position,0.0,1.0);}';
+const fragment=`
+precision highp float;
+varying vec2 uv;
+uniform sampler2D picture;
+uniform float seconds;
+uniform float strength;
+uniform float motion;
+float hash(float n){return fract(sin(n*127.1+311.7)*43758.5453);}
+float noise(float t){float n=floor(t);float f=fract(t);f=f*f*f*(f*(f*6.0-15.0)+10.0);return mix(hash(n),hash(n+1.0),f)*2.0-1.0;}
+float ellipse(vec2 center,vec2 radius){vec2 p=(uv-center)/radius;return exp(-2.6*dot(p,p));}
+void main(){
+ vec3 color=texture2D(picture,uv).rgb;
+ // Broad room illumination remains, with a much slower and softer candle drift.
+ float slow=sin(seconds*0.52+0.22*sin(seconds*0.11));
+ float flame=(0.72*slow+0.25*noise(seconds*0.35+11.0)+0.03*noise(seconds*0.85+47.0))*strength*motion;
+ float brightness=dot(color,vec3(0.2126,0.7152,0.0722));
+ float warm=smoothstep(0.06,0.32,color.r-color.b);
+ float paper=ellipse(vec2(0.017,0.611),vec2(0.043,0.17))*smoothstep(0.21,0.64,brightness)*warm;
+ float nearby=ellipse(vec2(0.04,0.57),vec2(0.25,0.58));
+ // Broad falloff reaches the sigils and remaining screen panels.
+ float onScreen=smoothstep(0.071,0.095,uv.x)*(1.0-smoothstep(0.87,0.925,uv.y));
+ float facet=1.0-0.08*smoothstep(0.266,0.273,uv.x)-0.10*smoothstep(0.491,0.498,uv.x)-0.10*smoothstep(0.700,0.707,uv.x);
+ float screen=ellipse(vec2(0.21,0.49),vec2(0.67,0.84))*onScreen*facet;
+ float floorLight=ellipse(vec2(0.31,0.941),vec2(0.48,0.11))*mix(0.6,1.0,smoothstep(0.10,0.52,brightness));
+ float weight=0.65*paper+0.75*nearby+1.85*screen+1.05*floorLight;
+ // Keep light-colored menu lettering readable while illuminating the silk behind it.
+ float menuInk=smoothstep(0.58,0.64,uv.x)*smoothstep(0.34,0.72,brightness);
+ weight*=1.0-menuInk;
+ vec3 linear=pow(max(color,vec3(0.0)),vec3(2.2));
+ vec3 gain=exp2(flame*weight*vec3(1.0,0.85,0.60));
+ // Smooth highlight compression protects the paper lantern from clipping.
+ linear=(linear*gain)/(vec3(1.0)+linear*(gain-vec3(1.0)));
+ gl_FragColor=vec4(pow(max(linear,vec3(0.0)),vec3(1.0/2.2)),1.0);
+}`;
+function draw(){
+ if(!ready)return;
+ gl.useProgram(program);gl.uniform1f(uTime,elapsed);gl.uniform1f(uStrength,Number(strength.value)/100);
+ // Freeze the previous animation time on pause; initial reduced-motion view is steady.
+ gl.uniform1f(uMotion,elapsed>0?1:0);
+ gl.drawArrays(gl.TRIANGLE_STRIP,0,4);canvas.dataset.frame=String(++drawCount);
+}
+function resize(){
+ if(!ready)return;
+ const rect=stage.getBoundingClientRect(),ratio=1672/941,dpr=Math.min(devicePixelRatio||1,2);
+ let w=rect.width,h=rect.height;
+ if(w/h>ratio)w=h*ratio;else h=w/ratio;
+ canvas.style.width=w+'px';canvas.style.height=h+'px';
+ canvas.style.left=(rect.width-w)/2+'px';canvas.style.top=(rect.height-h)/2+'px';
+ const px=Math.max(1,Math.round(w*dpr)),py=Math.max(1,Math.round(h*dpr));
+ if(canvas.width!==px||canvas.height!==py){canvas.width=px;canvas.height=py;gl.viewport(0,0,px,py);}
+ draw();
+}
+function loop(stamp){
+ if(!ready||!playing||document.hidden){raf=0;lastStamp=0;return;}
+ if(lastStamp)elapsed+=Math.min((stamp-lastStamp)/1000,0.08);
+ else if(elapsed===0)elapsed=0.001;
+ lastStamp=stamp;draw();raf=requestAnimationFrame(loop);
+}
+function schedule(){
+ cancelAnimationFrame(raf);raf=0;lastStamp=0;
+ if(ready&&playing&&!document.hidden)raf=requestAnimationFrame(loop);
+}
+function initialize(){
+ try{
+  gl=canvas.getContext('webgl',{alpha:false,antialias:false,preserveDrawingBuffer:true});
+  if(!gl)throw new Error('WebGL unavailable');
+  program=gl.createProgram();gl.attachShader(program,compile(gl.VERTEX_SHADER,vertex));gl.attachShader(program,compile(gl.FRAGMENT_SHADER,fragment));gl.linkProgram(program);
+  if(!gl.getProgramParameter(program,gl.LINK_STATUS))throw new Error(gl.getProgramInfoLog(program));
+  gl.useProgram(program);
+  const buffer=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buffer);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);
+  const position=gl.getAttribLocation(program,'position');gl.enableVertexAttribArray(position);gl.vertexAttribPointer(position,2,gl.FLOAT,false,0,0);
+  const texture=gl.createTexture();gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,texture);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
+  gl.texImage2D(gl.TEXTURE_2D,0,gl.RGB,gl.RGB,gl.UNSIGNED_BYTE,art);gl.uniform1i(gl.getUniformLocation(program,'picture'),0);
+  uTime=gl.getUniformLocation(program,'seconds');uStrength=gl.getUniformLocation(program,'strength');uMotion=gl.getUniformLocation(program,'motion');
+  ready=true;toggle.disabled=false;stage.classList.add('ready');inform();resize();schedule();
+ }catch(error){console.error(error);fallback('The animated light could not start in this browser. The still concept is shown.');}
+}
+toggle.addEventListener('click',()=>{playing=!playing;inform();schedule();});
+strength.addEventListener('input',()=>{amount.value=strength.value+'%';draw();});
+reduce.addEventListener('change',()=>{if(reduce.matches){playing=false;elapsed=0;inform();schedule();draw();}});
+document.addEventListener('visibilitychange',schedule);
+new ResizeObserver(resize).observe(stage);
+canvas.addEventListener('webglcontextlost',event=>{event.preventDefault();fallback('The browser paused the light renderer. Reload this page to restart it; the still concept remains visible.');});
+document.getElementById('fullscreen').addEventListener('click',async()=>{
+ try{if(document.fullscreenElement)await document.exitFullscreen();else await stage.requestFullscreen();}
+ catch{status.textContent='Full screen is unavailable in this browser. The preview remains available here.';}
+});
+document.addEventListener('fullscreenchange',()=>{document.getElementById('fullscreen').textContent=document.fullscreenElement?'Exit full screen':'Full screen';resize();});
+art.addEventListener('error',()=>fallback('The artwork could not load. Open this preview from its saved folder or gallery.'));
+if(art.complete&&art.naturalWidth)initialize();else art.addEventListener('load',initialize,{once:true});
+</script></body></html>
