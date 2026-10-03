@@ -13,6 +13,8 @@ public partial class PlayerClarityProbe : Control
     private int _step;
     private long _version;
     private readonly List<CardTile> _cards=[];
+    // Ikoma Takakura was cut from the live Lion/Crane deck and lives in the vanilla wave (PublishedContent.VanillaWave1), so look in both snapshots.
+    private static IEnumerable<CardDefinition> PublishedCards => PublishedContent.Snapshot.Cards.Concat(PublishedContent.VanillaWave1.Cards);
     public override void _Ready()
     {
         _output=OS.GetCmdlineUserArgs().Single(a=>a.StartsWith("--output="))[9..];
@@ -25,13 +27,13 @@ public partial class PlayerClarityProbe : Control
         foreach(var p in view.Players)
             AddChild(new ClanPlaque(p.Clan,p.Honor,4,false,()=>{},p.Name,p.Id==0?"OPPONENT'S TURN":"",p.Id==1,p.Id==0) { Position=new Vector2(24,18+p.Id*146),Size=new Vector2(270,120),ReducedMotion=true });
         var note=Palette.Wrapped("Same-clan example: Mendon owns the turn; Alfredo may act.\nSteady gold plaque · blue action rail",23,Palette.PaperDim); note.Position=new Vector2(350,164);note.Size=new Vector2(900,70);AddChild(note);
-        var def=PublishedContent.Snapshot.Cards.First(d=>d.Name.Contains("Takakura"));
+        var def=PublishedCards.First(d=>d.Name.Contains("Takakura"));
         for(var i=0;i<3;i++)
         {
             var card=new CardView("public-fixture-"+i,def,1,Zone.Home,true,i==1,null,null,3,3,GrantedKeywords:i==2?[new("Elite","Test attachment","Attachment"),new("Cavalry","Test effect","Turn"),new("Naval","Test effect","Turn")]:[new("Elite","Test effect","Turn")],Dishonorable:i!=2,UnitForce:i==1?0:3);
             if(i!=1)
             {
-                var follower=PublishedContent.Snapshot.Cards.First(d=>d.Name=="Native Guide");
+                var follower=PublishedCards.First(d=>d.Name=="Native Guide");
                 for(var j=(i==0?1:3);j>=1;j--)
                     AddChild(new CardTile(new CardView("follower-"+i+"-"+j,follower,1,Zone.Attached,true,false,null,card.Id,5,0),false,_=>{},_=>{})
                     { Position=new Vector2(350+i*390,275-j*20),Size=new Vector2(355,360),FaceHeight=340,ReducedMotion=true });
@@ -49,7 +51,8 @@ public partial class PlayerClarityProbe : Control
         {
             if(_step==0)
             {
-                if(_cards[0].PublicStatusLabels.Length!=2 || _cards[1].PublicStatusLabels.Length!=2 || _cards[2].PublicStatusLabels.Length!=3)throw new Exception("Public status labels lost");
+                // Dishonor is drawn as the medallion marker (CardTile.DrawDishonorMarker), not a text label; the labels are the temporary granted keywords only.
+                if(_cards[0].PublicStatusLabels.Length!=1 || _cards[1].PublicStatusLabels.Length!=1 || _cards[2].PublicStatusLabels.Length!=3)throw new Exception("Public status labels lost: " + string.Join(" / ", _cards.Select(c => c.PublicStatusLabels.Length + "[" + string.Join(",", c.PublicStatusLabels) + "]")));
                 var hidden=_cards[0].Card with{ Definition=null,FaceUp=false };
                 var tile=new CardTile(hidden,true,_=>{},_=>{});
                 if(tile.PublicStatusLabels.Length!=0)throw new Exception("Hidden card status leak"); tile.Free();
