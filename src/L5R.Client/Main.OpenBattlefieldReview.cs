@@ -15,11 +15,13 @@ public partial class Main
     private long _battlefieldReviewVersion = 5000;
     private static readonly string[] BattlefieldReviewScenarios =
     ["Open battlefield", "Province and open battlefield", "Two open battlefields", "Province destroyed before engagement",
-     "Two fronts at one province", "Six extra battlefields", "Empty battlefield", "Crowded armies and attachments", "Battle during the Action Phase"];
+     "Two fronts at one province", "Six extra battlefields", "Empty battlefield", "Crowded armies and attachments", "Battle during the Action Phase", "Resolved defenders after province destruction"];
 
     private void StartOpenBattlefieldReview()
     {
         _autoOpponent = false;
+        if (_captureMode == "open-battlefield-correction-review" || OS.GetCmdlineUserArgs().Contains("--open-battlefield-correction"))
+            _battlefieldReviewScenario = 9;
         _battlefieldReviewSeed = MatchEngine.CreatePublishedMatch(91);
         _session.StartPractice(false, true);
         _battlefieldReviewBar = new HBoxContainer { Theme = SidebarSkin.Theme() };
@@ -57,7 +59,7 @@ public partial class Main
         var snapshot = _battlefieldReviewSeed!.GetView(_battlefieldReviewSeat);
         int[] fields = _battlefieldReviewScenario switch
         {
-            1 or 4 => [1, 100],
+            1 or 4 or 9 => [1, 100],
             2 => [100, 101],
             3 => [1],
             5 => [100, 101, 102, 103, 104, 105],
@@ -77,6 +79,7 @@ public partial class Main
             if (_battlefieldReviewScenario != 6)
                 foreach (var field in fields)
                 {
+                    if (_battlefieldReviewScenario == 9 && field == 1 && player.Id == 0) continue;
                     var id = $"open-review-{player.Id}-{field}";
                     army.Add(Face(id, player.Id == 0 ? crane : lion, player.Id, field));
                     if (player.Id == 1) army.Add(Face(id + "-attachment", follower, player.Id, field, attached: id));
@@ -91,7 +94,7 @@ public partial class Main
                 Home = player.Home.Where(c => c.Definition?.Type == CardType.Holding).ToArray(),
                 Hand = [],
                 HandCount = 0,
-                Provinces = player.Provinces.Select(p => _battlefieldReviewScenario == 3 && player.Id == 1 && p.Index == 1
+                Provinces = player.Provinces.Select(p => _battlefieldReviewScenario is 3 or 9 && player.Id == 1 && p.Index == 1
                     ? p with { Destroyed = true, Card = null, DynastySlots = null, Region = null } : p).ToArray()
             };
         }).ToArray();
@@ -104,9 +107,9 @@ public partial class Main
             ActivePlayerId = 0,
             PriorityPlayerId = _battlefieldReviewSeat,
             CurrentBattleProvince = fields.Contains(100) ? 100 : 1,
-            UnresolvedBattlefields = fields,
+            UnresolvedBattlefields = _battlefieldReviewScenario == 9 ? [100] : fields,
             Battlefields = fields.Select(i => new BattlefieldView(i,
-                _battlefieldReviewScenario == 4 || i == 1 && _battlefieldReviewScenario != 3 ? 1 : null)).ToArray(),
+                _battlefieldReviewScenario == 4 || i == 1 && _battlefieldReviewScenario is not (3 or 9) ? 1 : null)).ToArray(),
             PendingChoice = null,
             PendingProvinceOrder = null,
             ActionPhaseTurnPlayerId = _battlefieldReviewScenario == 8 ? 1 : null,

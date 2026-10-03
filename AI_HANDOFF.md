@@ -4,10 +4,12 @@ Start here when continuing this repository with Codex, Claude Code, or another c
 
 ## Current checkpoint
 
-- Approved UI consolidation: [PR #248](https://github.com/alfredoh7/l5r-emperor/pull/248) is the current combined review build. Read [UI_CONSOLIDATION.md](docs/UI_CONSOLIDATION.md) for source branches, integration fixes and validation. Preserve black lacquer/Caudex menus, uppercase WeatheredQuill headings, the fortress hall, placards and Home/Favor. Alfredo subsequently requested normal-match integration: PR #268 combines the latest duel #220 with transition #266 and preserves Play → Duel Demo as the shared sandbox. Read docs/DUEL_MATCH_INTEGRATION.md for the current combined candidate and remaining review gates.
+- UI/duel baseline: [PR #268](https://github.com/alfredoh7/l5r-emperor/pull/268) merged on 22 September 2026, including the earlier consolidation, live-match duel and table transition. Preserve black lacquer/Caudex menus, uppercase WeatheredQuill headings, the fortress hall, placards and Home/Favor. Play → Duel Demo remains the isolated shared-code sandbox. [UI_CONSOLIDATION.md](docs/UI_CONSOLIDATION.md) and [DUEL_MATCH_INTEGRATION.md](docs/DUEL_MATCH_INTEGRATION.md) retain historical integration evidence; their old pending-review statements are not current PR status.
+- Current UI review: [PR #434](https://github.com/alfredoh7/l5r-emperor/pull/434), still unmerged, is the combined candidate for the newer choice interfaces, Top Cards, Regions/Celestials, ghost copies, attack indicators and battle progress. Alfredo's recorded approvals do not replace Mendon's pending review. [PR #454](https://github.com/alfredoh7/l5r-emperor/pull/454) records delivery of the [revision 2 Windows review](https://github.com/alfredoh7/l5r-emperor/releases/tag/preview-pr434-659e015f0e-r2-windows) at game source `659e015f`; package checks passed and Mendon was notified. Native Windows graphical/rules acceptance remains separate.
+- Task reconciliation: read the [24 September UI task audit](docs/handoffs/2026-09-24-ui-task-record-cleanup.md). Superseded preview #266 is closed with its branch preserved. Open issues are not automatically unfinished implementations or accepted features; the audit distinguishes review, acceptance and remaining work, including duel #448 and rules-reference #58.
 - Desktop presentation: **0.3.10**.
 - Playable content: **`lion-crane-v1`**, content version **`emperor-lion-crane-0.3.0`**.
-- Each Clan has 40 Dynasty and 40 Fate cards. The pool contains 40 distinct published definitions, including pregames, with implementations and original period scans.
+- In the pinned profile each Clan has 40 Dynasty and 40 Fate cards, drawn from 40 distinct published definitions including pregames, with implementations and original period scans. These are profile counts, not totals for the expanded playable catalogue.
 - Game: Godot **4.7.2 .NET**, C#/.NET SDK **10.0.400**; tools are pinned by `tools/bootstrap.py` and `global.json`.
 - Platforms: Mac and Windows exports. Native Mac play/rendering has been checked; a Windows package is not evidence of a native Windows playtest.
 - Current focus: alfredoh7 develops UI/QoL; mdornbrook validates and develops mechanics/rules. Mendon has owner-authorized access to develop across all game areas, including UI/shared code, and merge his tested PRs after CI without Alfredo approval (see AGENTS.md and `.github/collaboration.json`). Preserve the approved aesthetic while both lanes progress. Read docs/COLLABORATION.md for automatic coordination.
@@ -33,7 +35,7 @@ The user explicitly rejected website/dashboard styling and the Impeccable UI ski
 | Client | `src/L5R.Client/Main.cs` and `Main.*.cs` | UI projects engine/server views and submits intentions |
 | Card presentation | `CardTile.cs`, `CardPaper.cs`, `CardFlight.cs`, `TablePile.cs` | Full faces, bowing, patina, transfers, pile counts |
 | Camera/environment | `TableSurface.cs`, `TableArtStage.cs`, `Main.Camera.cs`, `Art/*.gdshader` | Shared projection and inverse input mapping; 2.5D art/light |
-| Phase bar | `PhaseTrack.cs`, `Art/phase-art.gdshader`, `assets/ui/phase-track/` | Live Musashi headings; bitmap materials and glow |
+| Phase bar | `PhaseTrack.cs`, `Art/phase-art.gdshader`, `assets/ui/phase-track/` | Live WeatheredQuill headings; bitmap materials and glow |
 | Server | `src/L5R.Server/`, its README | Private room seats, authority, persistence, reconnection |
 | Opponent | `src/L5R.AI/TrainingOpponent.cs` | Heuristic choices using only the legal actions/private view available to that player |
 | Content intake | `tools/content/`, `content/legacy/`, `content/oracle/` | Reference identity/text/art provenance; catalogue membership does not make a card playable |
@@ -94,7 +96,7 @@ Never edit runtime assets or source while export is in progress. The exporter st
 
 Read the coverage report before modifying cards. In particular, selected Emperor Ikoma Shika costs 4, despite a later Oracle value of 2. Crushing Strength's targeting normalization is an explicit profile decision. Later Oracle wording must not silently replace period printings.
 
-All included effects are implemented under the pinned profile, but expert full-match acceptance and authenticated final historical errata/banlist certification remain open. The broader catalogue is reference-only. Do not infer support for Duels, Spells, Events, Cavalry, Regions, Rings or other mechanics absent from these two decks. Unsupported effects must never silently become blank playable cards.
+All included effects are implemented under the pinned profile, but expert full-match acceptance and authenticated final historical errata/banlist certification remain open. Wider playable coverage has expanded, including live duels on main. Catalogue membership alone does not establish executable support: check current published definitions, engine implementations and their tests before making a coverage claim. Unsupported effects must never silently become blank playable cards.
 
 ## How people and AI sessions collaborate
 
@@ -115,7 +117,7 @@ Suggested prompt for the next AI:
 
 ## Next sequence
 
-See `docs/NEXT_PHASE.md`: full human Lion/Crane matches and corrections; native Windows/external private multiplayer acceptance; scripted beginner tutorial using the real engine; then incremental additional decks and a deck builder. UI/QoL work continues in Alfredo’s lane while the mechanics review proceeds in parallel.
+Full human Lion/Crane matches, native Windows/external private multiplayer acceptance and the later tutorial remain tracked in `docs/NEXT_PHASE.md`. Catalogue, deck-building and custom Practice implementations already exist; do not recreate them from that older sequence. Use current issues and the task audit above for bounded remaining work. UI/QoL work continues in Alfredo’s lane while mechanics development and review proceed in parallel.
 
 ## Project board
 
