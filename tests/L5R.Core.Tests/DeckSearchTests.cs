@@ -808,19 +808,21 @@ internal static class DeckSearchTests
 
     private static void SetupShufflesUnchanged()
     {
-        // Recorded from origin/main before this feature existed: SHA-256 (first 16 hex digits) of each player's Dynasty
+        // Recorded from origin/main before this feature existed (re-pinned by definition when card ids became opaque): SHA-256 (first 16 hex digits) of each player's Dynasty
         // deck order, Fate deck order, opening hand and province cards. Any change to how setup consumes the generator
         // changes one of these.
         var golden = new Dictionary<string, string[]>
         {
-            ["starter 1"] = ["E25B1BE5075E3221", "F0469F4F2EC8EA9A"], ["starter 42"] = ["86586FBF8C6D5709", "9A8A67C294038E80"], ["starter 801"] = ["4786DFE85E9DE25B", "528209AC2020A05A"],
-            ["test 1"] = ["F7443ADE0671216D", "39B2D840727BF6B0"], ["test 42"] = ["0F954577751CB572", "578811F324E7FA99"], ["test 801"] = ["11821DEBA0229C36", "2805A69E145397E4"]
+            ["starter 1"] = ["CE57DDB95720EB22", "5E30152FB8FACFC6"], ["starter 42"] = ["6C85BDF581E790B2", "DD3D7560702197CC"], ["starter 801"] = ["86EE0F9E44456744", "910ACB968F30497B"],
+            ["test 1"] = ["C19E786CA3E959E7", "7690256BD01EA9D3"], ["test 42"] = ["0FB68796D66E5553", "C01708755F7CEC80"], ["test 801"] = ["2BEBF8EDE59F536C", "FCC205FFF2801E51"]
         };
         foreach (var (key, expected) in golden)
         {
             var seed = ulong.Parse(key.Split(' ')[1]);
             var state = (key.StartsWith("starter") ? MatchEngine.CreateStarterMatch(seed) : MatchEngine.CreatePublishedTestMatch(seed)).State;
-            var actual = state.Players.Select(p => Hash(Json(p.DynastyDeck) + "|" + Json(p.FateDeck) + "|" + Json(p.Hand) + "|" + Json(p.Provinces.Select(x => x.CardId)))).ToArray();
+            // Card ids are an opaque permutation (hidden-information fix), so each position is hashed by the definition it holds.
+            string Defs(IEnumerable<string?> ids) => Json(ids.Select(id => id is null ? null : state.Cards[id].DefinitionId));
+            var actual = state.Players.Select(p => Hash(Defs(p.DynastyDeck) + "|" + Defs(p.FateDeck) + "|" + Defs(p.Hand) + "|" + Defs(p.Provinces.Select(x => x.CardId)))).ToArray();
             Equal(string.Join(",", actual), string.Join(",", expected), $"Setup for '{key}' changed");
             // The persisted generator is the setup sequence, continued: four Fisher-Yates shuffles of 40 cards consume 4 * 39 draws.
             Equal(state.RngState, unchecked(seed + 156UL * 0x9E3779B97F4A7C15UL), $"'{key}': nothing but the four setup shuffles may have consumed the generator");

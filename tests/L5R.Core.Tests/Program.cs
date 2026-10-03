@@ -9972,6 +9972,19 @@ static void BatchDPrimitives()
         Check(labels[3].Contains("(discarding ") && !labels[3].Contains("face-down"), "A face-up card is still named");
     }
     {
+        // Card ids must not follow deck-list order: a face-down card's id (offered in target lists and commands) would identify it.
+        foreach (var (name, create) in new (string, Func<ulong, MatchEngine>)[] { ("published", sd => MatchEngine.CreatePublishedMatch(sd)), ("starter", sd => MatchEngine.CreateStarterMatch(sd)) })
+        {
+            var a = create(11); var b = create(11); var c = create(12);
+            var keys = a.State.Cards.Keys.ToArray();
+            Check(keys.Zip(keys.Skip(1)).Any(x => string.CompareOrdinal(x.First, x.Second) > 0), $"{name}: card ids are not handed out in deck-list order");
+            Check(keys.SequenceEqual(b.State.Cards.Keys), $"{name}: the same seed still yields the same ids");
+            Check(keys.Select(k => a.State.Cards[k].DefinitionId).SequenceEqual(b.State.Cards.Keys.Select(k => b.State.Cards[k].DefinitionId)), $"{name}: and the same cards");
+            Check(!keys.SequenceEqual(c.State.Cards.Keys), $"{name}: a different seed yields a different id order");
+            Check(keys.Distinct().Count() == keys.Length, $"{name}: ids are unique");
+        }
+    }
+    {
         var s = StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId = 0; s.PriorityPlayerId = 0;
         var strat = Add(s, "oracle-l5r-9687", 0, Zone.Hand);
         var recruit = Add(s, "training-nonhuman-personality", 0, Zone.Province, province: 1);

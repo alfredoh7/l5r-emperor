@@ -8,11 +8,11 @@ public sealed partial class MatchEngine
     internal static MatchEngine CreatePublished(ulong seed, string scenario, PublishedSnapshot snapshot)
     {
         var state = new MatchState { Players = [new() { Id = 0, Name = "Crane", Clan = "Crane" }, new() { Id = 1, Name = "Lion", Clan = "Lion" }] };
-        var random = new StableRandom(seed); var nextId = 0;
+        var random = new StableRandom(seed); var nextId = 0; var ids = OpaqueCardIds(seed);
         CardInstance Add(int owner, string definition, Zone zone, bool faceUp = false, bool bowed = false)
         {
             _ = CardCatalog.Get(definition);
-            var card = new CardInstance { Id = $"card-{++nextId:D4}", DefinitionId = definition, OwnerId = owner, Zone = zone, FaceUp = faceUp, Bowed = bowed };
+            var card = new CardInstance { Id = ids[nextId++], DefinitionId = definition, OwnerId = owner, Zone = zone, FaceUp = faceUp, Bowed = bowed };
             state.Cards.Add(card.Id, card); return card;
         }
         foreach (var player in state.Players)
