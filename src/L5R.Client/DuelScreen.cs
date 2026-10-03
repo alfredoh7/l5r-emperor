@@ -95,8 +95,9 @@ public partial class DuelScreen : Control
         var size=GetViewportRect().Size;
         _stage.Resize(size);_scale=_stage.ContentScale;_offset=_stage.ContentOffset;
         var density=_scale*DuelCinematicStage.Density;
-        _table.Position=_stage.TableOffset;_table.Scale=Vector2.One*density;
+        _table.Scale=Vector2.One*density;
         _table.ResizePlane(DuelCinematicStage.StageCanvas/DuelCinematicStage.Density,Math.Max(.8f,density*1.2f));
+        _table.Position=_stage.TableOffset; // after ResizePlane, which resets Position when no drawing area is given
         _plane.Size=_table.CanvasSize;_hud.Size=size;_scene.Size=size;
         _uprights.Position=_offset;_uprights.Scale=Vector2.One*_scale;
         ResetCamera();

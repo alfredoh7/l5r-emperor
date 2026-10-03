@@ -190,9 +190,9 @@ public partial class DuelArenaReview : Control
         _reference.Visible = detail || _showReference;
         _worldImage.Visible = detail || !_showReference;
         LayoutGardenPresentation(detail);
-        _table.Position = _play.Position;
         _table.Scale = Vector2.One * _density;
         _table.ResizePlane(stageSize / _density, Math.Max(1, _density * 1.4f));
+        _table.Position = _play.Position; // after ResizePlane, which resets Position when no drawing area is given
         _table.Visible = !detail && !_showReference && !_clean;
         _plane.Size = _table.CanvasSize;
         _hud.Visible = detail || (!_showReference && !_clean);

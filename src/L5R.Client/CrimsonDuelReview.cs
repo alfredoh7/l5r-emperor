@@ -74,8 +74,9 @@ public partial class CrimsonDuelReview : Control
         _play=new Rect2(Vector2.Zero,new Vector2(screen.X-side,screen.Y));
         _stage.Resize(_play.Size,_zoom);_scale=_stage.ContentScale;_offset=_stage.ContentOffset;
         var density=_scale*CrimsonDuelStage.Density*_zoom;
-        _table.Position=_offset;_table.Scale=Vector2.One*density;
+        _table.Scale=Vector2.One*density;
         _table.ResizePlane((Vector2)_stage.World.Size/density,Math.Max(.8f,density*1.2f));
+        _table.Position=_offset; // after ResizePlane, which resets Position when no drawing area is given
         _plane.Size=_table.CanvasSize;
         _table.Visible=!_clean&&!_referenceVisible;
         _hud.Visible=!_clean&&!_referenceVisible;
@@ -242,7 +243,7 @@ public partial class CrimsonDuelReview : Control
             {
                 if(c.Card.Definition is {} d&&CardTile.Artwork(d)is null)throw new Exception("Missing original scan: "+d.Name);
                 if(Mathf.IsEqualApprox(_zoom,1)&&c.FaceCornersOnViewport().Any(p=>!_play.HasPoint(p)))throw new Exception("Card clipped: "+c.Card.Id);
-                if(c.FaceCornersInCanvas().Any(p=>!new Rect2(-788,-480,1576,970).HasPoint(p-_table.CanvasSize/2)))throw new Exception("Card outside mat: "+c.Card.Id);
+                if(c.FaceCornersInCanvas().Any(p=>!new Rect2(-788,-480,1576,970).HasPoint(p-_table.CanvasSize/2)))throw new Exception("Card outside mat: "+c.Card.Id+" corners="+string.Join(";",c.FaceCornersInCanvas().Select(p=>(p-_table.CanvasSize/2).ToString("F1")))+" canvas="+_table.CanvasSize+" tile="+c.Position+"/"+c.Size);
             }
         return error;
     }
