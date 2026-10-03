@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Dependabot: Bump actions/upload-artifact from 4.6.2 to 7.0.1 (workflow-only change; no game code).",
+  "validation": "CI re-run on this PR; see PR checks.",
+  "remaining": "None; ready for review once CI is green.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/pull/539",
+  "branch": "dep-539",
+  "updated": "2026-10-03T16:14:44.797756+00:00"
+}
