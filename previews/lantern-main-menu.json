@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "slug": "lantern-main-menu",
+  "title": "B6 Lantern Study Main Menu",
+  "source_pr": 471,
+  "source_commit": "82bf8f659bdcbdd3f7a9ea2634c43a7adf31b8f9",
+  "revision": 1,
+  "reviewer": "mdornbrook",
+  "summary": "Approved B6 folding-screen menu with the original five-ring artwork, cropped bonsai, Japanese border and slow room illumination at 85%. Native controls and review only; no merge.",
+  "review_steps": [
+    "Extract the whole ZIP and open Start Review.cmd. The game opens directly to the new main menu with fresh preview settings.",
+    "Watch the lantern illumination on the screen, sigils and floor. It should drift slowly and warmly at the approved default of 85%.",
+    "Try each menu entry with the mouse and with Up/Down, Tab and Enter. Play opens Practice and Duel Demo. Library and Deck Builder should return with Escape and restore keyboard focus.",
+    "Open Options. Confirm 85% by default; change the slider, restart and verify it is remembered. Reduced motion should make the room lighting steady.",
+    "Try F11 and a resized window. The full folding screen should remain visible, with letterboxing where needed. Quit should require confirmation.",
+    "Leave any UI or QoL feedback on PR #471. Alfredo approved the visual concept; native implementation acceptance and merge remain pending review."
+  ],
+  "known_limitations": [
+    "Review branch only, based on main 1e494ebe; other unmerged UI previews are separate.",
+    "No rules, network or pinned-deck changes. Private Match UI can be inspected; remote connection testing requires the existing separate server.",
+    "Native Mac rendering/input were checked; Windows package/runtime validation is distinct from human Windows graphical acceptance.",
+    "Static source/native pixels match at original size with steady light. Animation, selected entries and functional submenus intentionally differ from the still concept."
+  ],
+  "scenarios": [
+    {
+      "name": "Start Review",
+      "mode": null
+    }
+  ]
+}

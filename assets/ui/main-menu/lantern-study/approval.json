@@ -1,0 +1,13 @@
+{
+  "approved_on": "2026-09-24",
+  "approved_by": "Alfredo",
+  "user_request": "let's go with this at 85% flicker strength",
+  "concept": "B6 — Lantern Study",
+  "default_flicker_strength_percent": 85,
+  "timing": "Preserve the slower drift and smoothed variation approved in the preceding revision.",
+  "artwork": "B6-textured-screen-cropped-bonsai.png",
+  "preview": "B6-animated.html",
+  "artwork_sha256": "9801aae7eb0efb4db3d342981b73df4c1e12c1ac356924758ebf41d8b2ded857",
+  "preview_sha256": "2299ccca52496a045995cdd639ab75520cf91faa42373c7d088fd324e6bbf1f2",
+  "scope": "Visual concept approval; no native-game implementation or merge performed."
+}

@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Client payment panel now shows and counts payment-token sources (Reaction Gold, Zlkyt, Moto Rani) from GoldQuote.Sources; recruit GoldQuote carries Sources; client's duplicate Gold production fallback removed.",
+  "validation": "Core.Tests built (0 errors) and ran with no FAIL lines, including a new Bazaar recruit-quote regression; client project built with 0 errors. Not run: Godot visual/input check of the payment panel, full tools/check.sh, Windows playtest.",
+  "remaining": "Client still sums Core's per-source amounts for its Confirm gate (server remains authoritative); a fully Core-computed readiness needs a protocol message. Payment panel toggles need a native visual check. Items 2 and 3 of the boundary audit (first-target default, capture fixtures) untouched.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/578",
+  "branch": "claude/578-payment-token-sources",
+  "updated": "2026-10-02T18:31:12.043566+00:00"
+}

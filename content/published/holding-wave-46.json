@@ -1,0 +1,34 @@
+{
+  "Profile": "holding-wave-46",
+  "Rules": "Emperor Edition core rules; reviewed user-supplied created-card scans.",
+  "Cards": [
+    {
+      "Id": "user-scan-maimed-retainer",
+      "Name": "Maimed Retainer",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "May not be included in decks.\nBattle/Open: Destroy this card and target a Personality: Straighten him. Rehonor him.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/user-scan-maimed-retainer.jpg",
+      "Keywords": [
+        "Maimed",
+        "Retainer"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "maimed-retainer-restore"
+      ],
+      "Effect": "none",
+      "CreatedOnly": true
+    }
+  ],
+  "Decks": []
+}

@@ -1,0 +1,71 @@
+{
+  "Profile": "personality-wave-92",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-1663",
+      "Name": "Daidoji Narizane",
+      "Type": "Personality",
+      "Clan": "Crane",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": 2,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Target an enemy Personality: Bow zero or more different cards in his unit up to the number of Recon actions you have taken this turn.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1663.jpg",
+      "Keywords": [
+        "Crane Clan",
+        "Imperial",
+        "Iron Crane",
+        "Samurai",
+        "Scout",
+        "Yojimbo"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "narizane-bow"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-1783",
+      "Name": "Daigotsu Yajinden",
+      "Type": "Personality",
+      "Clan": "Spider",
+      "GoldCost": 12,
+      "GoldProduction": 0,
+      "Force": 6,
+      "Chi": 6,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After Yajinden enters play: Lose 4 Honor.\nLimited: Target a dead Personality: Yajinden raises him from the dead. Bring him into play (under your control) ignoring costs and Honor Requirements. Remove him from the game when the turn ends.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1783.jpg",
+      "Keywords": [
+        "Experienced 3",
+        "Loyal",
+        "Unique",
+        "Artisan",
+        "Bloodspeaker",
+        "Khadi",
+        "Shadowlands",
+        "Shugenja",
+        "Spider Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "yajinden-raise"
+      ],
+      "Effect": "none",
+      "EntryHonorLoss": 4
+    }
+  ],
+  "Decks": []
+}

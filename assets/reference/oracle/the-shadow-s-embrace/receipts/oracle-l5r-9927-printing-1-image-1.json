@@ -25,16 +25,16 @@
   "url_prefix": "https://images.oracleofthevoid.com/l5r/25/01/printing_9927_1_",
   "width": 750,
   "working_copy": {
-    "bytes": 144962,
+    "bytes": 70218,
     "format": "WEBP",
-    "height": 1050,
+    "height": 600,
     "path": "assets/reference/oracle/the-shadow-s-embrace/webp/oracle-l5r-9927-printing-1-image-1.webp",
-    "sha256": "74884379ce6ccb031725d362c3baa5388014a60adf44bbb8f7bf781a185ffccf",
+    "sha256": "d3ccaa711a8dd3aead707b0abcd4732f2207df1cedd5c442bbc4bdafcf26f597",
     "source": {
-      "asset": "L5R-Catalogue-WebP85.zip",
-      "matched_by": "original_sha256",
-      "release": "catalogue-art-webp-v1"
+      "asset": "user-supplied scan (Mendon, 2026-09-25; 429x600 re-encoded as WebP quality 85, not resized)",
+      "matched_by": "supplied by Mendon on 2026-09-25",
+      "release": null
     },
-    "width": 750
+    "width": 429
   }
 }

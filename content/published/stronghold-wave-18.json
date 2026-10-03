@@ -1,0 +1,223 @@
+{
+  "Profile": "stronghold-wave-18",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-5863",
+      "Name": "Palace of the Breaking Dawn",
+      "Type": "Stronghold",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 3,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 7,
+      "StartingHonor": 2,
+      "Text": "Your Ronin cards enter play paying 1 less Gold and ignoring Honor Requirements.\nBattle: Even if this card is bowed, choose your performing opposed Ronin Personality: Give him +2F.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-5863.jpg",
+      "Keywords": [],
+      "Focus": 0,
+      "Abilities": [
+        "palace-dawn-boost"
+      ],
+      "Effect": "palace-breaking-dawn"
+    },
+    {
+      "Id": "oracle-l5r-5957",
+      "Name": "Pillars of Virtue",
+      "Type": "Stronghold",
+      "Clan": "Dragon",
+      "GoldCost": 0,
+      "GoldProduction": 4,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 7,
+      "StartingHonor": 5,
+      "Text": "Reaction: After the resolution of a Kiho Battle action you took: Take an additional Battle action.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-5957.jpg",
+      "Keywords": [],
+      "Focus": 0,
+      "Abilities": [
+        "pillars-virtue-additional-action"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-7008",
+      "Name": "Shiro Chugo",
+      "Type": "Stronghold",
+      "Clan": "Scorpion",
+      "GoldCost": 0,
+      "GoldProduction": 4,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 7,
+      "StartingHonor": 1,
+      "Text": "Political Reaction: Before an action's resolution, choose your performing unbowed Courtier: Reduce any Honor gain or loss from the action's effects by 2.\nBattle: Choose your performing unbowed Personality: Melee 4 Attack, with +1 strength if he is Loyal.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7008.jpg",
+      "Keywords": [],
+      "Focus": 0,
+      "Abilities": [
+        "chugo-honor-reduce",
+        "chugo-melee"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-7484",
+      "Name": "Steel Soul Dojo",
+      "Type": "Stronghold",
+      "Clan": "Spider",
+      "GoldCost": 0,
+      "GoldProduction": 4,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 7,
+      "StartingHonor": 0,
+      "Text": "You do not lose Honor from Spider Clan and Fate cards you own.\nAfter the resolution of the first Dark Virtue action you took each phase: Draw a card.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7484.jpg",
+      "Keywords": [
+        "Dojo"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "steel-soul-dojo"
+    },
+    {
+      "Id": "oracle-l5r-7623",
+      "Name": "Suitengu's Torch",
+      "Type": "Stronghold",
+      "Clan": "Mantis",
+      "GoldCost": 0,
+      "GoldProduction": 4,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 7,
+      "StartingHonor": 2,
+      "Text": "Reaction: After you announce a Thunder Battle action: Its effects will not be negated or delayed.\nBattle: Choose your performing unbowed Personality and target an enemy Personality: Move him home.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7623.jpg",
+      "Keywords": [
+        "Thunder"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "torch-protect",
+        "torch-move"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-7879",
+      "Name": "Temple of Purity",
+      "Type": "Stronghold",
+      "Clan": "Phoenix",
+      "GoldCost": 0,
+      "GoldProduction": 4,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 6,
+      "StartingHonor": 6,
+      "Text": "Open: Even if this card is bowed, target another player's Personality: Give him -4F, which will not be negated. If he is Kolat, Ninja, or Shadowlands, you control an Inquisitor, and it is not your turn, choose a player, who gains or loses 2 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7879.jpg",
+      "Keywords": [
+        "Temple"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "temple-purity-weaken"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-7949",
+      "Name": "The Aerie",
+      "Type": "Stronghold",
+      "Clan": "Crane",
+      "GoldCost": 0,
+      "GoldProduction": 4,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 6,
+      "StartingHonor": 6,
+      "Text": "Iaijutsu Battle: Even if this card is bowed, choose your performing unbowed Samurai and target another player's Personality: Your Samurai duels the Personality. Bow and dishonor the duel's loser. The winner's controller gains 1 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7949.jpg",
+      "Keywords": [],
+      "Focus": 0,
+      "Abilities": [
+        "aerie-duel"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-8105",
+      "Name": "The Golden Plains",
+      "Type": "Stronghold",
+      "Clan": "Lion",
+      "GoldCost": 0,
+      "GoldProduction": 3,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 7,
+      "StartingHonor": 7,
+      "Text": "Recon Reaction: After engaging: You have Reconnaissance at the current battlefield. Create a Terrain Strategy with the ability, \"Battle: If this card is in play, destroy it and target a Terrain in your hand: Take an additional Battle action to play it.\" Put it into play there.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8105.jpg",
+      "Keywords": [],
+      "Focus": 0,
+      "Abilities": [
+        "golden-plains-recon"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10012",
+      "Name": "Plain of Gold",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "May not be included in decks.\nBattle: If this card is in play, destroy it and target a Terrain in your hand: Take an additional Battle action to play it.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10012.jpg",
+      "Keywords": [
+        "Terrain"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "plain-gold-play-terrain"
+      ],
+      "Effect": "none",
+      "CreatedOnly": true
+    }
+  ],
+  "Decks": []
+}

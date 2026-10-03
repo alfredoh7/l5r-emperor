@@ -4,13 +4,16 @@
 Status (default) does not download anything. Install with --install; add
 --with-templates for the large desktop export-template archive. Requires HTTPS.
 No package manager, installer, system PATH, certificate trust, or user preferences
-are modified. The .NET CLI's first-run files and package caches use .cache/;
+are modified. Python packages pinned in tools/content/requirements.txt are
+reported, never installed: the content tools and tools/check.sh need them, the
+game does not. The .NET CLI's first-run files and package caches use .cache/;
 DOTNET_GENERATE_ASPNET_CERTIFICATE=false suppresses development-cert creation.
 """
 from __future__ import annotations
 
 import argparse
 import hashlib
+from importlib import metadata
 import os
 from pathlib import Path, PurePosixPath
 import platform
@@ -26,6 +29,7 @@ import zipfile
 ROOT = Path(__file__).resolve().parents[1]
 TOOLS = ROOT / ".tools"
 DOWNLOADS = TOOLS / "downloads"
+CONTENT_REQUIREMENTS = ROOT / "tools/content/requirements.txt"
 DOTNET_VERSION = "10.0.400"
 GODOT_VERSION = "4.7.2"
 GODOT_RELEASE = f"https://github.com/godotengine/godot-builds/releases/download/{GODOT_VERSION}-stable/"
@@ -72,6 +76,31 @@ def version(executable, *arguments):
     if result.returncode:
         return None
     return result.stdout.strip().splitlines()[-1]
+
+
+def python_packages():
+    # Reports exact name==version pins for this interpreter; returns a warning, never raises for bad input.
+    install = (f'"{sys.executable}" -m pip install -r "{CONTENT_REQUIREMENTS}" (tools/check.sh uses '
+               "$L5R_PYTHON, then python3, then python; install into that interpreter)")
+    try:
+        lines = CONTENT_REQUIREMENTS.read_text(encoding="utf-8").splitlines()
+    except (OSError, ValueError) as error:
+        return f"Could not read {CONTENT_REQUIREMENTS.name} ({error}); install the content-tool packages yourself: {install}"
+    mismatched = False
+    for pin in filter(None, (line.split("#")[0].strip() for line in lines)):
+        name, separator, required = (part.strip() for part in pin.partition("=="))
+        if not separator or not name or not required:
+            print(f"Python requirement not checked (only name==version pins are): {pin}")
+            continue
+        try:
+            installed = metadata.version(name)
+        except (metadata.PackageNotFoundError, ValueError):
+            installed = None
+        print(f"Python {name}: {installed or 'missing'} (required {required})")
+        mismatched |= installed != required
+    if mismatched:
+        return f"Content tools and tools/check.sh need the pinned Python packages; install them yourself: {install}"
+    return None
 
 
 def download(name, url, expected, algorithm):
@@ -203,6 +232,10 @@ def main():
                 ready = True
             print(f"Desktop export templates: {'ready' if ready else 'missing'}")
             missing |= not ready
+    # Warning only: set -e launchers call bootstrap, and the game needs none of these packages.
+    warning = python_packages()
+    if warning:
+        print(warning)
     if missing:
         print("Run python tools/bootstrap.py --install [--with-templates] to install missing pinned tools.")
         return 1

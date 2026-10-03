@@ -6,7 +6,10 @@ namespace L5R.Server;
 
 public static class Protocol
 {
-    public const int Version = 1;
+    // The one constant both ends advertise (MatchEngine.ProtocolVersion): a peer that does not know the
+    // current command/state members rejects them (UnmappedMemberHandling.Disallow), so a schema change is a
+    // new protocol and the handshake refuses the older one rather than failing every command.
+    public const int Version = MatchEngine.ProtocolVersion;
     public const string ContentVersion = MatchEngine.ContentVersion;
     public const int MaximumMessageBytes = 32 * 1024;
 
@@ -31,28 +34,30 @@ public sealed record CommandEnvelope(string Type, string CommandId, long Expecte
 public sealed record WireGameCommand(string Type, string? CardId = null, string[]? SourceIds = null,
     int? Province = null, bool ClanDiscount = false, bool ClanAllegiance = false,
     Dictionary<string, int>? Assignments = null, string[]? CardIds = null, string? TargetId = null, string? AbilityId = null, string? PerformerId = null, string? Choice = null,
-    string? DeckPosition = null, int? TargetPlayerId = null, int? GoldAmount = null, string? CostOption = null, SlotSelection[]? Selections = null, string? CreatedCard = null)
+    string? DeckPosition = null, int? TargetPlayerId = null, int? GoldAmount = null, string? CostOption = null, SlotSelection[]? Selections = null, string? CreatedCard = null,
+    Dictionary<string, string>? PaymentDiscards = null, int[]? Provinces = null)
 {
     public GameCommand BindToSeat(int playerId, long expectedVersion) => new(
         Type, playerId, expectedVersion, CardId, SourceIds, Province,
         ClanDiscount, ClanAllegiance, Assignments, CardIds, TargetId, AbilityId, PerformerId, Choice,
-        DeckPosition, TargetPlayerId, GoldAmount, CostOption, Selections, CreatedCard);
+        DeckPosition, TargetPlayerId, GoldAmount, CostOption, Selections, CreatedCard, PaymentDiscards, Provinces);
 
     public static WireGameCommand FromCore(GameCommand command) => new(command.Type,
         command.CardId, command.SourceIds, command.Province, command.ClanDiscount,
         command.ClanAllegiance, command.Assignments, command.CardIds, command.TargetId, command.AbilityId, command.PerformerId, command.Choice,
-        command.DeckPosition, command.TargetPlayerId, command.GoldAmount, command.CostOption, command.Selections, command.CreatedCard);
+        command.DeckPosition, command.TargetPlayerId, command.GoldAmount, command.CostOption, command.Selections, command.CreatedCard, command.PaymentDiscards, command.Provinces);
 }
 
 // Gold/TargetGold (issue #303): the engine's Gold quotes for the option, so an online client renders the same
 // payment panel from the server's authoritative numbers and never derives a cost.
 public sealed record AvailableAction(string Type, string Label, bool Enabled, string? Reason,
     WireGameCommand? Command, string? CardId, string[]? TargetIds, int[]? Provinces, PurchaseQuote? Quote,
-    GoldQuote? Gold = null, Dictionary<string, GoldQuote>? TargetGold = null, TargetSlotOption[]? Slots = null, bool NoTarget = false)
+    GoldQuote? Gold = null, Dictionary<string, GoldQuote>? TargetGold = null, TargetSlotOption[]? Slots = null, bool NoTarget = false,
+    AlternativeCostView? AlternativeCost = null, MoveDestinationView? Movement = null, AttackCueView? Attack = null, string[]? DecisionCandidateIds = null, string? DecisionLabel = null)
 {
     public static AvailableAction FromCore(ActionOption action) => new(action.Type, action.Label,
         action.Enabled, action.Reason, action.Command is null ? null : WireGameCommand.FromCore(action.Command),
-        action.CardId, action.TargetIds, action.Provinces, action.Quote, action.Gold, action.TargetGold, action.Slots, action.NoTarget);
+        action.CardId, action.TargetIds, action.Provinces, action.Quote, action.Gold, action.TargetGold, action.Slots, action.NoTarget, action.AlternativeCost, action.Movement, action.Attack, action.DecisionCandidateIds, action.DecisionLabel);
 }
 
 public sealed record ServerError(string Code, string Message);

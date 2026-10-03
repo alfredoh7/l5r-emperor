@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "repository": "alfredoh7/l5r-emperor",
+  "source_pr": 565,
+  "source_commit": "d99482ac16d1774f47a38aed9aa24f343c712259",
+  "title": "Battles Without a Province",
+  "slug": "open-battlefield",
+  "tag": "preview-pr565-d99482ac16-r2-windows",
+  "asset": "L5R-Review-pr565-d99482ac16-r2-Windows.zip",
+  "bytes": 2101728559,
+  "sha256": "28300e7f5ba717ee3a9d5ba20d5a3fd34821ddee27961e9c45fb30f5a1ac0e53",
+  "folder": "L5R-Review-pr565-d99482ac16-r2",
+  "launcher": "Start Review.cmd",
+  "reviewer": "mdornbrook"
+}

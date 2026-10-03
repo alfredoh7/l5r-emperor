@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "repository": "alfredoh7/l5r-emperor",
+  "source_pr": 576,
+  "source_commit": "fe8a89e4023aa285431c560a653cbf22e1a80a4c",
+  "title": "Unified Card Library and Deck Builder Filters",
+  "slug": "unified-catalogue-filters",
+  "tag": "preview-pr576-fe8a89e402-r2-windows",
+  "asset": "L5R-Review-pr576-fe8a89e402-r2-Windows.zip",
+  "bytes": 2131631886,
+  "sha256": "78a42021c80667807b810b5d5af84dc913ebf56cf11c2ac8566d0618d436aa6e",
+  "folder": "L5R-Review-pr576-fe8a89e402-r2",
+  "launcher": "Start Review.cmd",
+  "reviewer": "mdornbrook"
+}

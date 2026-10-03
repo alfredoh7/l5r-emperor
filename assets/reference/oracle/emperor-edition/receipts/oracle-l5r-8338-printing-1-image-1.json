@@ -25,16 +25,16 @@
   "url_prefix": "https://images.oracleofthevoid.com/l5r/9e/a0/printing_8338_1_",
   "width": 750,
   "working_copy": {
-    "bytes": 134722,
+    "bytes": 167372,
     "format": "WEBP",
-    "height": 1050,
+    "height": 1483,
     "path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-8338-printing-1-image-1.webp",
-    "sha256": "565d97759c12aa12b5562ddc1c23f37ac75792696aa3b6188b3932974eb4419c",
+    "sha256": "684fbc3cc9560af5773f7e15a387ded18d61b2fab65e0544715e0285dae05882",
     "source": {
-      "asset": "L5R-Catalogue-WebP85.zip",
-      "matched_by": "original_sha256",
-      "release": "catalogue-art-webp-v1"
+      "asset": "user-supplied corrected scan (Mendon, 2026-09-25; 1061x1483, re-encoded WebP quality 85, not resized): the printed text includes the Dragon Clan player condition and 'Remove this card from the game'",
+      "matched_by": "supplied by Mendon on 2026-09-25",
+      "release": null
     },
-    "width": 750
+    "width": 1061
   }
 }

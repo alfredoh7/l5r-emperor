@@ -1,0 +1,67 @@
+Godot Engine v4.7.2.stable.mono.official.ed1daf0bf - https://godotengine.org
+OpenGL API 4.1 Metal - 90.5 - Compatibility - Using Device: Apple - Apple M1 Max
+
+CAPTURE empty-decks
+PASS three equal landing actions
+CAPTURE landing-focus
+CAPTURE setup
+PASS default setup chosen outside deck totals
+PASS setup excluded from counts
+PASS native single stronghold selection
+CAPTURE setup-selected
+PASS setup variant replaces previous starting card
+PASS no redundant printing dropdown
+PASS published deck loads into builder
+CAPTURE mat
+PASS collection displays full faces beside deck panel
+CAPTURE collection-large
+PASS compact save-copy and export actions available
+CAPTURE deck-actions
+PASS persistent clan medallion filters collection
+PASS native additive multi-clan filter
+CAPTURE filter-menu
+PASS Dynasty-scoped Type list drops Fate-only types
+PASS keyword list scoped to current family selection
+PASS authoritative source totals
+PASS native quantity edit marks draft dirty
+PASS over-limit count gets Core warning
+CAPTURE over-limit
+PASS empty search results
+PASS list view selected through native input
+PASS native comparison selection
+CAPTURE compare
+CAPTURE compare-two
+PASS two readable rules panels
+CAPTURE compare-long-rules
+PASS long comparison rules remain scrollable
+PASS bad import preserves draft
+PASS error notice dismissed with keyboard
+PASS save and reopen exact text roundtrip
+CAPTURE before-guard
+CAPTURE after-guard
+PASS unsaved navigation guarded
+PASS cancel keeps draft
+PASS external edit requires overwrite decision
+PASS overwrite cancel preserves dirty draft
+PASS confirmed overwrite saves draft
+CAPTURE saved-decks
+CAPTURE slider-large
+PASS native builder slider drag enlarges collection faces
+PASS builder resize preserves filter results
+CAPTURE compact
+PASS native smaller faces keep virtualized nodes bounded
+CAPTURE small-window
+PASS mat within compact viewport
+CAPTURE wide-window
+CAPTURE wide-compare
+CAPTURE small-compare
+CAPTURE small-saved-decks
+FORTRESS_BATCHES: 288
+FORTRESS_HALL_B3: sparse hall; separate Meshy fixtures; source map/scenery; synchronized firelight with reduced-motion support.
+MAT_TEXTURE: res://Art/navy-mat-topaz-4x.webp 6688x3764; extra weave opt-in only.
+WAR_ROOM_LIVE: B3 fortress hall; original cloth/frame; card camera and rules unchanged. Presentation-clock firelight and separate Meshy lanterns.
+CAPTURE main-menu
+PASS all six menu entries fit in viewport
+PASS main menu opens deck builder
+CAPTURE menu-deck-builder
+DECK BUILDER PASS: native setup, quantity, search, warnings, comparison, save/load, corrupt import, unsaved cancel, density, responsive captures

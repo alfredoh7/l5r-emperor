@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Pin the six Forgotten Legacy attack abilities with an explicit performer in attack-performer-audit: Chokichi, Never Beyond Reach and Pearls' Spirits x3 name a performing card; Thunder's Wrath's own-wielder is the Spell's attached Shugenja.",
+  "validation": "attack-performer-audit 2/2; full core suite run in CI",
+  "remaining": "None; ready for review.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/478",
+  "branch": "claude/478-audit-list-forgotten-legacy",
+  "updated": "2026-09-24T16:08:30.161263+00:00"
+}

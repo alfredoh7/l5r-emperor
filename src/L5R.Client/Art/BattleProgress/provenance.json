@@ -1,0 +1,24 @@
+[
+  {
+    "file": "infantry-helmet.png",
+    "source": "/Users/alfredo/.codex/generated_images/01a0b019-027d-7ee0-84a4-44aac565a142/exec-9c0d4018-99ef-4b22-8e5b-5a8e30fdd430.png",
+    "reference": "04-battle-c.png",
+    "prompt": "Use case: stylized-concept. Production 2D game UI icon to replace the duplicate flag at the Infantry stage in the supplied approved concept. Render one compact FRONT-FACING SAMURAI KABUTO HELMET silhouette in restrained antique gold/brass, fine surface wear and subtle engraved lines, on genuine transparent background. This must read as FOOT SOLDIER/INFANTRY at 28-36px and differ unmistakably from a flag (Declare), a horse (Cavalry), crossed swords (Fight), and an open fan (Resolve). Match the tiny warm gold icons inside the concept's edge progress strip, but do not include the surrounding circular frame: only the isolated gold helmet icon, no rim or backdrop. Single centered asset occupying 78% of square canvas, balanced broad helmet crest and neck guard, minimal details for small-scale readability. No text, letters, numbers, flags, crossed weapons, glow or additional objects. Flat raster UI art, not new 3D geometry.",
+    "tool": "built-in image_gen",
+    "sha256": "3b31526ef9fcb67dc881d86a45b2876e21713de7e623509d7e1ac24c488f6e20",
+    "status": "Approved distinct Infantry production asset; native verification recorded in task handoff."
+  },
+  {
+    "file": "approved-strip-c.png",
+    "source": "/Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/ui-next-design-review-2026-09-21/images/04-battle-c.png",
+    "sha256": "5b053932ea12bf4bfc80d424aae9ac45d7f9be5d1262a2b1d36b40e2ae77776d",
+    "usage": "Atlas regions of the approved flag, horse, swords and fan. Labels and state remain live. Existing approved sidebar frame plus native focus circles; not a full-screen pixel match.",
+    "prompt": "Use case: ui-mockup.\nCreate ONE high-fidelity landscape raster concept for the existing Legend of the Five Rings Emperor Edition desktop card game, approximately 1920x1080. This is a proposed interface.\nImage 1 is actual game layout reference, image 2 the approved lacquer/typography reference. Preserve warm wooden fortress room, navy patterned mat, physical full uncropped cards, stacked attachments, thin weathered brass edges, black lacquer, readable ivory Caudex-like serif and restrained brush headings. Keep player placards, top six-phase rail and bottom hand recognizable. Enough table context but new UI large and readable. No website/dashboard restyling, modern rounded cards, neon, translucent ghost cards, decorative statistics, invented gameplay rules, API names, issue numbers or A/B/C annotations inside the game. Do not invent readable card rules text.\nShow one coherent state with generous breathing room, minimal ornament, selected outline/check and text not relying on color. Design for keyboard and reduced motion. No external plaque below the battle court. Never cover right-side spear/Force ribbons with badges.\n\nFeature:\nInput3 is court composition only, NOT its old four-phase HUD. Keep input1 SIX phases STRAIGHTEN, EVENTS, ACTION, ATTACK, DYNASTY, END, highlight ATTACK. Current example: local Crane defender took first action by default; Lion has now passed, Crane acts. Exact \"BATTLE ACTIONS\", \"Province 1\", \"Your action \u00b7 Crane\", \"Defender took the first action\", \"1 consecutive pass\", \"Passing now proceeds to resolution.\", \"Pass battle action\".\nFormal sequence Declaration, Infantry Maneuvers, Cavalry Maneuvers, Fight Battles, Resolution. Fight Battles contains battlefield choice, Engage, alternating Battle actions. Resolution contains before-resolution effects then outcome. Prior steps quiet/current clear. Battle cycle repeats for other battlefields. No match-ended message, skip-all, autoplay or invented automatic passing; no persistent Force totals. Leave inspector room for actual actions.\nDirection:\nSlim vertical lacquer strip outside right edge of current court, clear of all units/spears. Five restrained symbols/short labels Declare, Infantry, Cavalry, Fight, Resolve. Fight current, small \"Battle actions\" popover. Right inspector holds full current details and Pass. No second large timeline or lower-court plaque.\nCritical: reference inspector is STYLE ONLY. Never copy its Celestial ability prose or old source names; replace all feature-area text with this prompt\u2019s required text only.",
+    "references": [
+      "/Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/regions-celestials/artifacts/checks/support-cards/default.png",
+      "/Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/regions-celestials/artifacts/checks/support-cards/default-celestial-inspector.png",
+      "/Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/attack-targets/docs/screenshots/battle-layout-correction/connected-court.png"
+    ],
+    "tool": "built-in image_gen"
+  }
+]

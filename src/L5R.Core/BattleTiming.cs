@@ -65,6 +65,8 @@ public sealed partial class MatchEngine
         var (holder, reason) = ResolveFirstOpportunity(engage);
         _state.FirstActionPlayerId = holder; _state.FirstActionReason = reason;
         _state.FirstActionRestriction = null;
+        _state.AttackerLeadBattle = holder == engage.Attacker ? _state.BattleNumber : -1;
+        MarkCombatSegmentBegan(); // Issue #503 (EmperorP5.cs): the Engage window has closed and the Combat Segment begins (Headbutt). // Entrenched Position (Forgotten Legacy pass, issue #467 batch 3)
         Emit("firstOpportunity", $"{Player(holder).Name} has the first opportunity to take a Battle action or pass ({reason}).", holder);
         if (holder == engage.Attacker)
         {
@@ -79,8 +81,20 @@ public sealed partial class MatchEngine
             else if (engage.NavalPerformerId is not null)
             {
                 _state.FirstActionRestriction = new(holder, engage.NavalPerformerId, false);
-                Emit("firstActionLimited", $"{Player(holder).Name}'s first Battle action must be performed by {Definition(Card(engage.NavalPerformerId)).Name} (Naval Invasion).", holder, engage.NavalPerformerId);
+                Emit("firstActionLimited", $"{Player(holder).Name}'s first Battle action must be performed by {Definition(Card(engage.NavalPerformerId)).Name} ({FirstPerformerSource()}).", holder, engage.NavalPerformerId); // issue #503: or Scouting the Pass
             }
+        }
+        // Jade's Roar - exp: the claimant's first action must carry the keyword -- whether they hold the opportunity as the Attacker or as the Defender.
+        if (_state.FirstActionRestriction is null && engage.FirstActionKeyword is { } keyword && engage.FirstActionKeywordPlayerId == holder)
+        {
+            _state.FirstActionRestriction = new(holder, null, false, keyword);
+            Emit("firstActionLimited", $"{Player(holder).Name}'s first Battle action must be a {keyword} action.", holder);
+        }
+        // Shosuro Toson - exp2 (issue #503, EmperorP3.cs): the claimant's first action must be performed by the card that claimed it.
+        if (_state.FirstActionRestriction is null && P3FirstActionPerformerLimit(engage, holder) is { } forcedPerformer)
+        {
+            _state.FirstActionRestriction = forcedPerformer;
+            Emit("firstActionLimited", $"{Player(holder).Name}'s first Battle action must be performed by {forcedPerformer.Reason}.", holder, forcedPerformer.PerformerId);
         }
         return holder;
     }
@@ -107,14 +121,21 @@ public sealed partial class MatchEngine
 
     private string FirstActionLimitMessage(FirstActionRestriction limit) => limit.MustPass
         ? "Rebuilding Kyuden Hida: the Attacker may not announce a Battle action before the Defender's first normal opportunity to act or pass."
-        : $"Naval Invasion: your first Battle action must be performed by {Definition(Card(limit.PerformerId)).Name}.";
+        : limit.ActionKeyword is { } keyword ? $"Jade's Roar: your first Battle action must be a {keyword} action."
+        : $"{limit.Reason ?? FirstPerformerSource()}: your first Battle action must be performed by {Definition(Card(limit.PerformerId)).Name}."; // issue #503: or Scouting the Pass
 
     // Applied to a useAbility by ValidateAbility (so offered actions already respect it) and to the two other
     // Battle-action commands by Apply. Ignored inside any reaction window (a Reaction is not the first Battle action).
-    private void CheckFirstActionRestriction(GameCommand command)
+    private void ValidateFirstActionRestriction(GameCommand command)
     {
         if (_state.FirstActionRestriction is not { } limit || _state.PendingChoice is not null || command.PlayerId != limit.PlayerId) return;
         Require(!limit.MustPass, FirstActionLimitMessage(limit));
+        if (limit.ActionKeyword is { } keyword)
+        {
+            Require(command.Type == "useAbility" && command.AbilityId is { } limitedAbilityId && AbilityCatalog.All.TryGetValue(limitedAbilityId, out var limitedAbility)
+                && ActionCarriesKeyword(limitedAbility, command.CardId is not null && _state.Cards.TryGetValue(command.CardId, out var limitedSource) ? limitedSource : null, keyword), FirstActionLimitMessage(limit));
+            return;
+        }
         Require(ActionPerformerPerRules(command)?.Id == limit.PerformerId, FirstActionLimitMessage(limit));
     }
 
@@ -151,7 +172,7 @@ public sealed partial class MatchEngine
         return new BattleStepView(segment, step, inBattle && s.WinnerId is null ? s.PriorityPlayerId : null, inBattle ? s.ActivePlayerId : null,
             s.CurrentBattleProvince,
             holder, reason, resolved, (s.PendingEngage?.Claims ?? []).ToArray(),
-            limit is null ? null : limit.MustPass ? BattleSteps.LimitMustPass : BattleSteps.LimitPerformerOnly, limit?.PerformerId,
+            limit is null ? null : limit.MustPass ? BattleSteps.LimitMustPass : limit.ActionKeyword is not null ? BattleSteps.LimitActionKeyword : BattleSteps.LimitPerformerOnly, limit?.PerformerId,
             s.ConsecutivePasses, before is null ? [] : before.RemainingSourceIds.Concat(before.ActiveSourceId is null ? [] : [before.ActiveSourceId]).ToArray(),
             before?.ActiveSourceId, s.PendingChoice?.Type, BuildBeforeResolutionEffects(before));
     }

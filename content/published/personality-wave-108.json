@@ -1,0 +1,179 @@
+{
+  "Profile": "personality-wave-108",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-910",
+      "Name": "Bayushi Tenzan",
+      "Type": "Personality",
+      "Clan": "Scorpion",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 3,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle/Limited: Target a Personality, or one or two Personalities if you control a Courtier: You may target a Shadowlands Personality. Give each target -3F. If this is the Combat Segment, dishonor them.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-910.jpg",
+      "Keywords": [
+        "Loyal",
+        "Magistrate",
+        "Paragon",
+        "Samurai",
+        "Scorpion Clan",
+        "Tasu's Sorrow",
+        "Yojimbo"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "tenzan-penalty-battle",
+        "tenzan-penalty-limited"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-2880",
+      "Name": "Gozaru no Oni",
+      "Type": "Personality",
+      "Clan": "Unaligned",
+      "GoldCost": 15,
+      "GoldProduction": 0,
+      "Force": 15,
+      "Chi": 5,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After Gozaru enters play: Lose 5 Honor.\nAfter Gozaru is destroyed: It becomes discarded (not dead).\nBattle: Target one or two enemy cards: Bow them. If you only targeted one card, destroy it.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-2880.jpg",
+      "Keywords": [
+        "Nonhuman",
+        "Oni",
+        "Shadowlands"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "gozaru-bow"
+      ],
+      "Effect": "gozaru-becomes-discarded",
+      "EntryHonorLoss": 5
+    },
+    {
+      "Id": "oracle-l5r-3639",
+      "Name": "Ikoma Shinohara",
+      "Type": "Personality",
+      "Clan": "Lion",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 2,
+      "PersonalHonor": 3,
+      "HonorRequirement": 7,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Target a Follower in your hand and one of your Personalities: Attach the Follower to the Personality, paying all costs.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-3639.jpg",
+      "Keywords": [
+        "Commander",
+        "Lion Clan",
+        "Samurai"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "shinohara-attach"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-6883",
+      "Name": "Shinjo Hayan",
+      "Type": "Personality",
+      "Clan": "Unicorn",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": 4,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After Hayan enters play: Discard all your other Sensei Personalities.\nAfter engaging: Once per turn, you may assign your (unbowed) Unicorn Clan Personality in your home to the current battlefield.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6883.jpg",
+      "Keywords": [
+        "Cavalry",
+        "Loyal",
+        "Samurai",
+        "Sensei",
+        "Unicorn Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "hayan-assign"
+      ],
+      "Effect": "discard-other-sensei"
+    },
+    {
+      "Id": "oracle-l5r-6934",
+      "Name": "Shinjo Sarang",
+      "Type": "Personality",
+      "Clan": "Unicorn",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing Personality, and target your Follower at any location: Transfer it to the Personality. Straighten the Follower if the Personality is opposed or Spider Clan.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6934.jpg",
+      "Keywords": [
+        "Cavalry",
+        "Commander",
+        "Samurai",
+        "Unicorn Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "sarang-transfer"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-8861",
+      "Name": "Tsuruchi Nobukatsu",
+      "Type": "Personality",
+      "Clan": "Mantis",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Ranged 4 Attack. If the Ranged Attack destroyed a card, you may target and straighten a Holding.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8861.jpg",
+      "Keywords": [
+        "Bounty Hunter",
+        "Magistrate",
+        "Mantis Clan",
+        "Samurai"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "nobukatsu-inexp-ranged"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

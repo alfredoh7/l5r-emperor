@@ -1,0 +1,9 @@
+{
+  "lane": "ui",
+  "summary": "Card Library: restore the always-visible clan icon row across the top (per Mendon's live design feedback after playtesting), replacing the Clans popover from #559. Each clan box now toggles independently (multi-select, highlighted when active) instead of the old single-select behavior; Select all/Deselect all buttons sit at the right-most end of that row. Types and Keywords keep their popover-checklist filters, now positioned in the row below alongside the Dynasty/Fate/Strongholds family buttons (their original pre-#559 slot).",
+  "validation": "dotnet build clean; tools/check-catalogue.sh native probe all PASS including native clan filter combines with support, native additive multi-clan filter, select all/deselect all assertions, plus all existing Type/Keyword scoping and ordering assertions; tools/check-deck-builder.sh unaffected/still PASS; dotnet format whitespace --verify-no-changes clean",
+  "remaining": "None; ready for review.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/562",
+  "branch": "claude/562-clan-icon-row",
+  "updated": "2026-09-30T12:31:14.730468+00:00"
+}

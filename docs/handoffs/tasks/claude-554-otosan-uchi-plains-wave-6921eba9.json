@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Plains of Otosan Uchi (issue #554): publishes the card as a real playable Region -- region-wave-21 (oracle-l5r-5979), copied into Content/Published, and a catalogue-art rebuild (extend_from_verified_archive against the currently-live catalogue-art-pr503-20260926-r1 release, verified sha256) that also picks up 22 other scans PR #545 shipped but never captured in an art-pack release. Follows PR #558 (already merged), which built the engine rules against the training-only fixture; this makes the actual card loadable via CardCatalog.Get('oracle-l5r-5979') with real art. cwebp (Google.Libwebp via winget) was installed this session to make the rebuild possible.",
+  "validation": "Full Core suite: 2142/2142 passed. Full content Python suite (tools/content, 139 tests, including the coverage guard tools/content/test_catalogue_art.py) : 139/139 passed, 0 errors -- the guard that failed before the rebuild (needs a publisher update for 1 new printing) is now clean. dotnet format: clean (0 changed lines needed). New otosan-uchi-plains/PublishedShape test (7/7 in that suite) verifies the real catalogue entry's stats/keywords/text/effect/art/manifest.",
+  "remaining": "The new local candidate archive (tag catalogue-art-issue554-20260930-r1, sha256 9feb149c9e58ec1e9a740ba39fe2596d47c898affa047d05146c478852455cce, 527985826 bytes, 3889 images, +23 new vs. the live release) is verified locally but NOT published as a GitHub Release -- that needs Mendon's explicit confirmation per the art-pack-release skill's own publish gate. The candidate zip/cache are in this session's scratchpad, not committed. Once published, content/catalogue-art-pack.json's tag here already points at the new tag name, so the release just needs to go out under that exact tag to match.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/554",
+  "branch": "claude/554-otosan-uchi-plains-wave",
+  "updated": "2026-09-30T10:50:28.964198+00:00"
+}

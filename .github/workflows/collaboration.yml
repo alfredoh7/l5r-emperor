@@ -6,6 +6,11 @@ on:
 
 permissions:
   contents: read
+  pull-requests: read # Audit needs PR base/merge metadata.
+
+concurrency:
+  group: collaboration-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   handoff:
@@ -13,11 +18,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           fetch-depth: 0
           persist-credentials: false
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: '3.12'
       - name: Adversarial workflow tests
@@ -27,5 +32,15 @@ jobs:
         env:
           TASK_BRANCH: ${{ github.head_ref }}
           TASK_BASE: ${{ github.event.pull_request.base.sha }}
+          TASK_BASE_REF: ${{ github.event.pull_request.base.ref }}
           TASK_HEAD: ${{ github.event.pull_request.head.sha }}
-        run: python tools/collab.py audit --base "$TASK_BASE" --head "$TASK_HEAD" --branch "$TASK_BRANCH"
+          # Read-only: lets the stale-base check ask whether the PR's base branch was
+          # already the head of a merged PR (the squash-merge case `git` alone can't see).
+          GH_TOKEN: ${{ github.token }}
+        run: python tools/collab.py audit --base "$TASK_BASE" --head "$TASK_HEAD" --branch "$TASK_BRANCH" --base-ref "$TASK_BASE_REF"
+      - name: Client-contract ledger (advisory candidates)
+        if: github.event_name == 'pull_request'
+        env:
+          TASK_BASE: ${{ github.event.pull_request.base.sha }}
+          TASK_HEAD: ${{ github.event.pull_request.head.sha }}
+        run: python tools/collab.py ledger --base "$TASK_BASE" --head "$TASK_HEAD" --format markdown >> "$GITHUB_STEP_SUMMARY"

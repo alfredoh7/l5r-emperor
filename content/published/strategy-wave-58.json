@@ -1,0 +1,583 @@
+{
+  "Profile": "strategy-wave-58",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-23",
+      "Name": "A Forefather's Vengeance",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Gain 3 Honor, or 1 Honor for each Ancestor you have in play, whichever is lower.\nBattle: Destroy your performing unbowed Ancestor and target an enemy card without attachments: Destroy it.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-23.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "forefather-honor",
+        "forefather-destroy"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-61",
+      "Name": "A Paragon's Strength",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing unbowed Paragon: Ranged Attack with strength equal to his Force. Lose 4 Honor.\nBattle: Choose your performing unbowed Paragon and target an enemy Personality with equal or lower Personal Honor: Move him home. Gain 2 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-61.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "paragon-strength-attack",
+        "paragon-strength-move"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-68",
+      "Name": "A Pure Stroke",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle/Open: Target a Weapon: Raise its Force and Chi modifiers to twice its base Force and Chi modifiers (this does not affect negative base modifiers).",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-68.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "pure-stroke-raise"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-90",
+      "Name": "A Time for Mortal Men",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle/Open: Destroy your performing Ancestor and target your Personality: Give him +3F.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-90.jpg",
+      "Keywords": [],
+      "Focus": 3,
+      "Abilities": [
+        "mortal-men-boost"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-370",
+      "Name": "Ancestral Protection",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After an action targets your Personality, destroy your performing Ancestor: Negate the action's effects.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-370.jpg",
+      "Keywords": [],
+      "Focus": 4,
+      "Abilities": [
+        "ancestral-protection-negate"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-424",
+      "Name": "Aramoro's Promise",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Choose your performing Saboteur or Ninja Personality: Discard a Dynasty card in a province. Lose 2 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-424.jpg",
+      "Keywords": [
+        "Ninja"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "aramoro-discard"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-663",
+      "Name": "Bad Kharma",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After another player with Family Honor of -1 or lower announces an action on a Strategy: He ignores the action's costs. Negate its effects.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-663.jpg",
+      "Keywords": [],
+      "Focus": 3,
+      "Abilities": [
+        "bad-kharma-negate"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-954",
+      "Name": "Bend like a Reed",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "You may only play one copy of Bend like a Reed per duel.\nReaction: Before Focus Effects resolve, if your performing Personality in the duel did not strike: Give him +2 to his duel stat until the duel ends.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-954.jpg",
+      "Keywords": [],
+      "Focus": 3,
+      "Abilities": [
+        "bend-reed-boost"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-963",
+      "Name": "Besieged",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: Destroy a performing Personality you own and control: Increase or decrease the strength of all players' provinces by an amount equal to the Personality's base Chi.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-963.jpg",
+      "Keywords": [
+        "Unique",
+        "Siege"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "besieged-raise",
+        "besieged-lower"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-1135",
+      "Name": "Breath of the Heavens",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing unbowed Fire or Tattooed Personality: Ranged 3 Attack with +1 strength for each Fire token on your Personality. Give your Personality a +1F Fire token.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1135.jpg",
+      "Keywords": [
+        "Fire",
+        "Tattoo"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "breath-heavens-attack"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-1180",
+      "Name": "Burn the Towers",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After engaging, choose your performing unbowed Scout Personality at the current battlefield: You have Reconnaissance there. Give its province -3 strength.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1180.jpg",
+      "Keywords": [
+        "Recon"
+      ],
+      "Focus": 1,
+      "Abilities": [
+        "burn-towers-recon"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-1238",
+      "Name": "Caught in the Act",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After another player's action targets one or more of your Personalities: Negate their bowing from the action's effects.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1238.jpg",
+      "Keywords": [],
+      "Focus": 1,
+      "Abilities": [
+        "caught-act-negate-bow"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-1487",
+      "Name": "Control the Field",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing Personality with Scout, Tactician, or 3 or higher Chi, and target a Terrain: Destroy it. You may take an additional Battle action to play a Terrain.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1487.jpg",
+      "Keywords": [],
+      "Focus": 3,
+      "Abilities": [
+        "control-field-destroy"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-1820",
+      "Name": "Dangerous Indulgence",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing unbowed Tactician and target a Personality with equal or lower Chi: Bow or straighten him.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1820.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "dangerous-indulgence-bow",
+        "dangerous-indulgence-straighten"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-1885",
+      "Name": "Deadly Orders",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing Commander and target your Follower: Give it a Force bonus equal to twice its current Force. After this battle's resolution, destroy the Follower.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1885.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "deadly-orders-boost"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-1908",
+      "Name": "Deception Revealed",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After the resolution of an action that bowed a Ring: Straighten it.\nBattle: Target a Personality or Follower: Give it -4F. Bow it if you control a Ring.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1908.jpg",
+      "Keywords": [],
+      "Focus": 4,
+      "Abilities": [
+        "deception-revealed-straighten",
+        "deception-revealed-weaken"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-2246",
+      "Name": "Duel of Serpents",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: If another player has higher Family Honor than you, bow your performing Nonhuman or Spirit: Gain 3 Honor.\nBattle: Choose your performing unbowed Nonhuman or Spirit and target an enemy card without attachments: Bow it.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-2246.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "duel-serpents-honor",
+        "duel-serpents-bow"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-2419",
+      "Name": "Extended Maneuvers",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Before this battle resolves: You may choose and straighten a Samurai Personality at the current battlefield, and you may choose and bow a non-Samurai Personality there.\nBattle: If there are no Terrains at the current battlefield: Put this card into play there.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-2419.jpg",
+      "Keywords": [
+        "Terrain"
+      ],
+      "Focus": 1,
+      "Abilities": [
+        "extended-maneuvers-before-battle"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-2431",
+      "Name": "Face of Ninube",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: Shuffle your hand into your Fate deck: Draw a number of cards equal to the number you shuffled in.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-2431.jpg",
+      "Keywords": [],
+      "Focus": 1,
+      "Abilities": [
+        "face-ninube-draw"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-2454",
+      "Name": "Falling Leaf Strike",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing unbowed Monk and target an enemy Personality or Follower: Move your Monk to the current battlefield. Give the target -3F. Bow it if its Force is now 0.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-2454.jpg",
+      "Keywords": [
+        "Kiho"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "falling-leaf-strike"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-2547",
+      "Name": "Final Confrontation",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "As a Focus Effect: After this duel ends, if your Personality won it, take the Imperial Favor.\nBattle: Choose your performing unbowed Duelist and target one or two Personalities whose total Chi is lower than or equal to your Duelist's Chi: Bow them.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-2547.jpg",
+      "Keywords": [
+        "Iaijutsu",
+        "Political"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "final-confrontation-focus",
+        "final-confrontation-bow"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-2613",
+      "Name": "Flooded Pass",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "This province has +2 strength for each unit in the attacking army.\nBattle: Even if you control no units at the current battlefield, if there are no Terrains there: Put this card into play there.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-2613.jpg",
+      "Keywords": [
+        "Terrain"
+      ],
+      "Focus": 1,
+      "Abilities": [],
+      "Effect": "flooded-pass"
+    },
+    {
+      "Id": "oracle-l5r-2629",
+      "Name": "Footsteps of Madness",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: Before the resolution of an action from a Stronghold, pay Gold equal to the Stronghold's base Gold Production: Negate the action's effects.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-2629.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "footsteps-madness-negate"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-2671",
+      "Name": "Fortitude",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing unbowed Berserker and target an enemy unit with lower total Force than your Berserker's base Force: Bow the target. Negate all current and new Force penalties on your Berserker from actions.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-2671.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "fortitude-bow"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

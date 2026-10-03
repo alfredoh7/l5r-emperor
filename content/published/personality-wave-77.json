@@ -1,0 +1,167 @@
+{
+  "Profile": "personality-wave-77",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-241",
+      "Name": "Akodo Makotai",
+      "Type": "Personality",
+      "Clan": "Lion",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": 3,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Tactical Limited: Create a 2F Follower and attach it to Makotai.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-241.jpg",
+      "Keywords": [
+        "Tactician",
+        "Commander",
+        "Lion Clan",
+        "Samurai",
+        "Soul of Akodo Mirotai"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "makotai-create"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-6905",
+      "Name": "Shinjo Ki-Chang",
+      "Type": "Personality",
+      "Clan": "Unicorn",
+      "GoldCost": 10,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 4,
+      "PersonalHonor": 3,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After your target Personality enters play: Create a 1F Cavalry Follower and attach it to him.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6905.jpg",
+      "Keywords": [
+        "Cavalry",
+        "Tactician",
+        "Unique",
+        "Commander",
+        "Experienced",
+        "Samurai",
+        "Unicorn Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "kichang-exp-create"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-4460",
+      "Name": "Kitsune Gina",
+      "Type": "Personality",
+      "Clan": "Mantis",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 1,
+      "Chi": 3,
+      "PersonalHonor": 4,
+      "HonorRequirement": 2,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After Gina enters play: Create a 2F/2C/3PH Mantis Clan • Nonhuman • Fox • Spirit Personality with the trait, \"Enemy attacking Personalities and Followers at this card's battlefield have -1F\".",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-4460.jpg",
+      "Keywords": [
+        "Earth",
+        "Mantis Clan",
+        "Shugenja"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "gina-create"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9738",
+      "Name": "Infantry Follower",
+      "Type": "Follower",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "May not be included in decks.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9738.jpg",
+      "Keywords": [],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "none",
+      "CreatedOnly": true
+    },
+    {
+      "Id": "oracle-l5r-10003",
+      "Name": "Dutiful Cavalry",
+      "Type": "Follower",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 1,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "May not be included in decks.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10003.jpg",
+      "Keywords": [
+        "Cavalry"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "none",
+      "CreatedOnly": true
+    },
+    {
+      "Id": "oracle-l5r-10005",
+      "Name": "Gina's Fox",
+      "Type": "Personality",
+      "Clan": "Mantis",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 2,
+      "PersonalHonor": 3,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "May not be included in decks.\nEnemy attacking Personalities and Followers at this card's battlefield have -1F.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10005.jpg",
+      "Keywords": [
+        "Mantis Clan",
+        "Nonhuman",
+        "Fox",
+        "Spirit"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "proxy-y-ginas-fox",
+      "CreatedOnly": true
+    }
+  ],
+  "Decks": []
+}

@@ -2,6 +2,7 @@
 # Native integration checks; run in the combined preview for approved room/menu visuals.
 set -euo pipefail
 source "$(dirname "${BASH_SOURCE[0]}")/env.sh"
+l5r_require_godot
 cd "$L5R_PROJECT_ROOT"
 dotnet build src/L5R.Client/L5R.Client.csproj --disable-build-servers -p:UseSharedCompilation=false -m:1 --nologo
 "$GODOT" --headless --editor --path src/L5R.Client --import

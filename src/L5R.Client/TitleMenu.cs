@@ -1,7 +1,7 @@
 using Godot;
 namespace L5R.Client;
 
-/// <summary>Live navigation over the approved moonlit plate; no game state lives here.</summary>
+/// <summary>Live navigation over the approved B6 folding-screen plate; no game state lives here.</summary>
 public partial class TitleMenu : Control
 {
     public Action PracticeSetup = () => { };
@@ -16,47 +16,59 @@ public partial class TitleMenu : Control
     public Control Canvas { get; private set; } = null!;
     public VBoxContainer Entries { get; private set; } = null!;
     private Label _message = null!;
-    private float _time;
+    private float _time, _emphasis = 1;
+    public int SelectedEntry { get; private set; }
     public float? ReviewTime;
     public override void _Ready()
     {
         Theme = Palette.MakeTheme();
         SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
-        var black = new ColorRect { Color = new Color("05090e"), MouseFilter = MouseFilterEnum.Ignore };
+        var black = new ColorRect { Color = Colors.Black, MouseFilter = MouseFilterEnum.Ignore };
         AddChild(black); black.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
         Canvas = new Control { Size = new Vector2(1672, 941) }; AddChild(Canvas);
-        AtmosphereMaterial = new ShaderMaterial { Shader = GD.Load<Shader>("res://Art/moonlit-menu.gdshader") };
-        Canvas.AddChild(new TextureRect { Texture = GD.Load<Texture2D>("res://Art/moonlit-menu.png"), Size = Canvas.Size, ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize, Material = AtmosphereMaterial, MouseFilter = MouseFilterEnum.Ignore });
-        Entries = new VBoxContainer { Position = new Vector2(96, 333), Size = new Vector2(525, 500) };
+        AtmosphereMaterial = new ShaderMaterial { Shader = GD.Load<Shader>("res://Art/lantern-study.gdshader") };
+        AtmosphereMaterial.SetShaderParameter("clean_plate", GD.Load<Texture2D>("res://Art/lantern-study-clean.png"));
+        Canvas.AddChild(new TextureRect { Texture = GD.Load<Texture2D>("res://Art/lantern-study.png"), Size = Canvas.Size, ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize, Material = AtmosphereMaterial, MouseFilter = MouseFilterEnum.Ignore });
+        Entries = new VBoxContainer { Position = new Vector2(1094, 363), Size = new Vector2(380, 0) };
         Entries.AddThemeConstantOverride("separation", 14); Canvas.AddChild(Entries);
-        _message = Palette.Wrapped("", 20, Palette.PaperDim); _message.Position = new Vector2(96, 855); _message.Size = new Vector2(525, 52); Canvas.AddChild(_message);
-        var version = Palette.Text("Emperor · 0.3.10", 17, Palette.Gold); version.Position = new Vector2(40, 913); Canvas.AddChild(version);
+        _message = Palette.Wrapped("", 18, Palette.PaperDim); _message.Position = new Vector2(1056, 807); _message.Size = new Vector2(414, 54); _message.MouseFilter = MouseFilterEnum.Ignore; Canvas.AddChild(_message);
         Resized += Fit; Fit(); ShowMain();
     }
     private void Fit()
     {
         if (Canvas is null) return;
         var scale = Math.Min(Size.X / 1672f, Size.Y / 941f);
-        Canvas.Scale = Vector2.One * scale; Canvas.Position = (Size - Canvas.Size * scale) / 2;
+        Canvas.Scale = Vector2.One * scale;
+        // Retina windows can round a requested odd height up by one pixel.
+        // Avoid a half-pixel translation blurring the entire approved plate.
+        Canvas.Position = ((Size - Canvas.Size * scale) / 2).Round();
     }
     public override void _Process(double delta)
     {
         if (!Visible) return;
         if (!Preferences.ReducedMotion) _time += (float)delta;
         AtmosphereMaterial.SetShaderParameter("clock", ReviewTime ?? _time);
-        AtmosphereMaterial.SetShaderParameter("atmosphere", Preferences.Atmosphere);
+        AtmosphereMaterial.SetShaderParameter("strength", Preferences.LanternStrength);
+        _emphasis = Preferences.ReducedMotion ? 1 : Mathf.Lerp(_emphasis, 1, 1 - Mathf.Exp(-(float)delta * 12));
+        AtmosphereMaterial.SetShaderParameter("emphasis", _emphasis);
         AtmosphereMaterial.SetShaderParameter("motion", Preferences.ReducedMotion ? 0f : 1f);
     }
     private void Clear(string page)
     {
-        Page = page; Palette.Clear(Entries); Entries.AddThemeConstantOverride("separation", page == "options" ? 8 : 14); _message.Text = "";
+        Page = page; Palette.Clear(Entries);
+        Entries.Position = page == "main" ? new Vector2(1094, 363) : new Vector2(1056, 351);
+        Entries.Size = new Vector2(page == "main" ? 380 : 414, 0);
+        Entries.AddThemeConstantOverride("separation", page == "options" ? 6 : 8);
+        AtmosphereMaterial.SetShaderParameter("submenu", page != "main");
+        _message.Position = page == "main" ? new Vector2(1056, 862) : new Vector2(1056, 777);
+        _message.Text = "";
     }
-    private Button Entry(string text, Action action, int fontSize = 80)
+    private Button Entry(string text, Action action, int fontSize = 52)
     {
-        var button = new MenuEntry { Text = text.ToUpperInvariant(), ReducedMotion = () => Preferences.ReducedMotion, CustomMinimumSize = new Vector2(0, 82), Alignment = HorizontalAlignment.Left, MouseDefaultCursorShape = CursorShape.PointingHand };
+        var button = new MenuEntry { Text = text.ToUpperInvariant(), ReducedMotion = () => Preferences.ReducedMotion, CustomMinimumSize = new Vector2(0, 62), Alignment = HorizontalAlignment.Left, MouseDefaultCursorShape = CursorShape.PointingHand };
         // This face has generous vertical metrics. Fit its full line box, not just
         // the glyph width, so five menu entries stay inside the artwork.
-        while (fontSize > 20 && (Palette.Title.GetHeight(fontSize) > 82 || Palette.Title.GetStringSize(button.Text, fontSize: fontSize).X > 490)) fontSize--;
+        while (fontSize > 20 && (Palette.Title.GetHeight(fontSize) > 62 || Palette.Title.GetStringSize(button.Text, fontSize: fontSize).X > 390)) fontSize--;
         button.AddThemeFontOverride("font", Palette.Title); button.AddThemeFontSizeOverride("font_size", fontSize);
         foreach (var state in new[] { "normal", "hover", "pressed", "focus", "disabled" }) button.AddThemeStyleboxOverride(state, new StyleBoxEmpty { ContentMarginLeft = 8 });
         button.AddThemeColorOverride("font_color", new Color("dfd1af"));
@@ -69,22 +81,38 @@ public partial class TitleMenu : Control
     public void ShowMain()
     {
         Clear("main");
-        Entries.AddThemeConstantOverride("separation", 4);
+        Entries.AddThemeConstantOverride("separation", 5);
+        SelectedEntry = 0; _emphasis = 1;
+        AtmosphereMaterial.SetShaderParameter("selection", 0);
         Entry("Play", ShowPlay);
         Entry("Private Match", PrivateMatch);
         Entry("Card Library", Library);
         Entry("Deck Builder", DeckBuilder);
         Entry("Options", ShowOptions);
         Entry("Quit", ShowQuit);
-        foreach(var button in Entries.GetChildren().OfType<Button>())
+        var buttons = Entries.GetChildren().OfType<MenuEntry>().ToArray();
+        for (var i = 0; i < buttons.Length; i++)
         {
-            button.CustomMinimumSize=new Vector2(0,72);
-            var size=66;
-            while(size>20&&(Palette.Title.GetHeight(size)>72||Palette.Title.GetStringSize(button.Text,fontSize:size).X>490))size--;
-            button.AddThemeFontSizeOverride("font_size",size);
+            var index = i; var button = buttons[i];
+            button.SourceLettering = true;
+            button.CustomMinimumSize = new Vector2(380, i == 0 ? 84 : 64);
+            // The visible glyphs are the exact approved raster lettering; Button
+            // text retains the accessible name and normal Godot input behavior.
+            foreach (var state in new[] { "font_color", "font_hover_color", "font_pressed_color", "font_focus_color" })
+                button.AddThemeColorOverride(state, Colors.Transparent);
+            button.FocusEntered += () => SelectEntry(index);
+            button.MouseEntered += () => button.GrabFocus();
+            button.FocusNeighborTop = buttons[(i + buttons.Length - 1) % buttons.Length].GetPath();
+            button.FocusNeighborBottom = buttons[(i + 1) % buttons.Length].GetPath();
         }
         if (CanResume()) _message.Text = IsOnline() ? "Your private table continues online. Play → Return to table." : "Your practice is paused. Play → Return to table.";
         FocusFirst();
+    }
+    private void SelectEntry(int index)
+    {
+        if (SelectedEntry == index) return;
+        SelectedEntry = index; _emphasis = Preferences.ReducedMotion ? 1 : 0;
+        AtmosphereMaterial.SetShaderParameter("selection", index);
     }
     public void ShowPlay()
     {
@@ -115,13 +143,13 @@ public partial class TitleMenu : Control
     public void ShowName(int seat)
     {
         Clear("name");
-        Entries.AddChild(Palette.Text("Take your seat", 48, Palette.Gold, true));
+        Entries.AddChild(Palette.Text("Take your seat", 36, Palette.Gold, true));
         Entries.AddChild(Palette.Wrapped(seat == 0 ? "Crane · Shinden Asahina" : "Lion · Halls of Memory", 25, Palette.PaperDim));
         Entries.AddChild(Palette.Text("Your display name", 24));
         var name = new LineEdit { Text = Preferences.DisplayName, PlaceholderText = "Enter your name", MaxLength = 24, CustomMinimumSize = new Vector2(0, 60), TooltipText = "Up to 24 characters. Remembered on this device; no account or login." };
         name.AddThemeFontSizeOverride("font_size", 30);
-        name.AddThemeStyleboxOverride("normal", Palette.Box(new Color("10181d"),new Color("796442"),12,2));
-        name.AddThemeStyleboxOverride("focus", Palette.Box(Colors.Transparent,Palette.Gold,12,2));
+        name.AddThemeStyleboxOverride("normal", Palette.Box(new Color("10181d"), new Color("796442"), 12, 2));
+        name.AddThemeStyleboxOverride("focus", Palette.Box(Colors.Transparent, Palette.Gold, 12, 2));
         Entries.AddChild(name);
         Entries.AddChild(Palette.Wrapped("Remembered on this device. No account or login.", 21, Palette.PaperDim));
         void Start()
@@ -151,20 +179,20 @@ public partial class TitleMenu : Control
         var heading = Palette.Text("Options", 34, Palette.Gold, true); Entries.AddChild(heading);
         var display = Palette.Button(Preferences.Fullscreen ? "Display: Fullscreen" : "Display: Windowed", () => { });
         display.Pressed += () => { Preferences.Fullscreen = !Preferences.Fullscreen; Changed(); display.Text = Preferences.Fullscreen ? "Display: Fullscreen" : "Display: Windowed"; };
-        StyleOption(display); display.CustomMinimumSize = new Vector2(0, 48); display.AddThemeFontSizeOverride("font_size", 24); Entries.AddChild(display);
+        StyleOption(display); display.CustomMinimumSize = new Vector2(0, 40); display.AddThemeFontSizeOverride("font_size", 22); Entries.AddChild(display);
         Toggle("VSync", Preferences.VSync, value => Preferences.VSync = value);
         Toggle("Reduced motion", Preferences.ReducedMotion, value => Preferences.ReducedMotion = value);
-        var strength = Palette.Text($"Atmosphere intensity · {Preferences.Atmosphere:P0}", 24); Entries.AddChild(strength);
-        var slider = new HSlider { MinValue = 0, MaxValue = 1, Step = .05, Value = Preferences.Atmosphere, CustomMinimumSize = new Vector2(0, 34), TooltipText = "Strength of lantern, moonlight, wind and distant window effects." }; Entries.AddChild(slider);
-        slider.ValueChanged += value => { Preferences.Atmosphere = (float)value; strength.Text = $"Atmosphere intensity · {Preferences.Atmosphere:P0}"; Changed(); };
-        Entries.AddChild(Palette.Wrapped("F11: fullscreen · Arrows / Tab: navigate · Enter: select\nReduced motion freezes the atmosphere and makes card motion instant.", 22, Palette.PaperDim));
-        Entry("Back", ShowMain, 48).CustomMinimumSize = new Vector2(0, 60);
+        var strength = Palette.Text($"Lantern flicker · {Preferences.LanternStrength:P0}", 22); Entries.AddChild(strength);
+        var slider = new HSlider { MinValue = 0, MaxValue = 1, Step = .05, Value = Preferences.LanternStrength, Modulate = Palette.Gold, CustomMinimumSize = new Vector2(0, 28), TooltipText = "Strength of the slow lantern light across the screen and room. Approved default: 85%." }; Entries.AddChild(slider);
+        slider.ValueChanged += value => { Preferences.LanternStrength = (float)value; strength.Text = $"Lantern flicker · {Preferences.LanternStrength:P0}"; Changed(); };
+        Entries.AddChild(Palette.Wrapped("F11: fullscreen · ↑↓ / Tab: navigate · Enter: select\nReduced motion keeps the lantern steady.", 19, Palette.PaperDim));
+        Entry("Back", ShowMain, 48).CustomMinimumSize = new Vector2(0, 54);
         _message.Text = "Changes apply immediately and are saved on this device.";
         display.CallDeferred(Control.MethodName.GrabFocus);
     }
     private void Toggle(string text, bool value, Action<bool> change)
     {
-        var check = new CheckBox { Text = text + (value ? " · On" : " · Off"), ButtonPressed = value, CustomMinimumSize = new Vector2(0, 42) }; check.AddThemeFontSizeOverride("font_size", 24);
+        var check = new CheckBox { Text = text + (value ? " · On" : " · Off"), ButtonPressed = value, CustomMinimumSize = new Vector2(0, 34) }; check.AddThemeFontSizeOverride("font_size", 22);
         StyleOption(check);
         check.Toggled += enabled => { check.Text = text + (enabled ? " · On" : " · Off"); change(enabled); Changed(); }; Entries.AddChild(check);
     }
@@ -172,9 +200,9 @@ public partial class TitleMenu : Control
     {
         foreach (var state in new[] { "normal", "hover", "pressed", "hover_pressed", "focus" })
         {
-            var box=Palette.Box(state == "focus" ? Colors.Transparent : new Color(.025f,.040f,.059f,state == "normal" ? .65f : .9f), new Color(.63f,.49f,.27f,state == "focus" ? .9f : .4f), 8, 0);
-            box.BorderWidthTop=0; box.BorderWidthLeft=0; box.BorderWidthRight=0;
-            button.AddThemeStyleboxOverride(state,box);
+            var box = Palette.Box(state == "focus" ? Colors.Transparent : new Color(.025f, .040f, .059f, state == "normal" ? .65f : .9f), new Color(.63f, .49f, .27f, state == "focus" ? .9f : .4f), 8, 0);
+            box.BorderWidthTop = 0; box.BorderWidthLeft = 0; box.BorderWidthRight = 0;
+            button.AddThemeStyleboxOverride(state, box);
         }
     }
     private void Changed()
@@ -182,7 +210,9 @@ public partial class TitleMenu : Control
         PreferencesChanged();
         _message.Text = Preferences.Save() == Error.Ok ? "Settings saved on this device." : "Settings applied, but could not be saved on this device.";
     }
-    public override void _UnhandledKeyInput(InputEvent @event)
+    // Catalogue and deck-builder overlays handle _UnhandledInput. Consuming
+    // Escape in the earlier key phase would open Quit behind those overlays.
+    public override void _UnhandledInput(InputEvent @event)
     {
         if (!Visible || @event is not InputEventKey { Pressed: true, Echo: false, Keycode: Key.Escape }) return;
         if (Page != "main") ShowMain(); else if (CanResume()) Resume(); else ShowQuit();
@@ -193,27 +223,28 @@ public partial class TitleMenu : Control
 public partial class MenuEntry : Button
 {
     public Func<bool> ReducedMotion = () => false;
+    public bool SourceLettering;
     private float _glow, _time;
-    private readonly StyleBoxFlat[] _halos = Enumerable.Range(1,18).Select(i => Palette.Box(Colors.Transparent, null, 0, i)).ToArray();
+    private readonly StyleBoxFlat[] _halos = Enumerable.Range(1, 18).Select(i => Palette.Box(Colors.Transparent, null, 0, i)).ToArray();
     public override void _Process(double delta)
     {
-        if (!IsVisibleInTree()) return;
+        if (!IsVisibleInTree() || SourceLettering) return;
         var target = IsHovered() || HasFocus() ? 1f : 0f;
-        _glow = ReducedMotion() ? target : Mathf.Lerp(_glow, target, 1-Mathf.Exp(-(float)delta*9));
+        _glow = ReducedMotion() ? target : Mathf.Lerp(_glow, target, 1 - Mathf.Exp(-(float)delta * 9));
         if (!ReducedMotion()) _time += (float)delta;
         QueueRedraw();
     }
     public override void _Draw()
     {
-        if (_glow < .002) return;
-        float width = Math.Min(Size.X-10, Palette.Title.GetStringSize(Text, fontSize: GetThemeFontSize("font_size")).X+55);
-        float pulse = ReducedMotion() ? 1 : .92f+.08f*Mathf.Sin(_time*1.3f);
-        for (var i=18; i>=1; i--)
+        if (SourceLettering || _glow < .002) return;
+        float width = Math.Min(Size.X - 10, Palette.Title.GetStringSize(Text, fontSize: GetThemeFontSize("font_size")).X + 55);
+        float pulse = ReducedMotion() ? 1 : .92f + .08f * Mathf.Sin(_time * 1.3f);
+        for (var i = 18; i >= 1; i--)
         {
-            _halos[i-1].BgColor = new Color(.95f,.54f,.16f,_glow*pulse*.008f);
-            DrawStyleBox(_halos[i-1], new Rect2(5-i, Size.Y*.68f-i, width+i*2, i*2+4));
+            _halos[i - 1].BgColor = new Color(.95f, .54f, .16f, _glow * pulse * .008f);
+            DrawStyleBox(_halos[i - 1], new Rect2(5 - i, Size.Y * .68f - i, width + i * 2, i * 2 + 4));
         }
-        for (var i=0; i<5; i++)
-            DrawLine(new Vector2(10+i*13,Size.Y-13+i),new Vector2(width-i*19,Size.Y-13+i),new Color(.88f,.56f,.20f,_glow*(.12f+i*.02f)),1);
+        for (var i = 0; i < 5; i++)
+            DrawLine(new Vector2(10 + i * 13, Size.Y - 13 + i), new Vector2(width - i * 19, Size.Y - 13 + i), new Color(.88f, .56f, .20f, _glow * (.12f + i * .02f)), 1);
     }
 }

@@ -1,0 +1,20 @@
+[
+  {
+    "card_id": "oracle-l5r-599",
+    "printing_set": [
+      "Before the Dawn"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=599",
+    "image_path": "assets/reference/oracle/before-the-dawn/webp/oracle-l5r-599-printing-1-image-1.webp",
+    "image_sha256": "3b70dd8607622189ddc3c1867bcfc1caf45e4ca4f16bd52bb931762d9f0befab"
+  },
+  {
+    "card_id": "oracle-l5r-2738",
+    "printing_set": [
+      "Before the Dawn"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=2738",
+    "image_path": "assets/reference/oracle/before-the-dawn/webp/oracle-l5r-2738-printing-1-image-1.webp",
+    "image_sha256": "a655319d6cfaac6ae8438e9b6c0fbc5fe2f80f3245d569ad496667e16eb42c44"
+  }
+]

@@ -93,3 +93,24 @@ public sealed partial class MatchEngine
         yield return new("chooseSequencedTarget", "Attack no target", true, null, new GameCommand("chooseSequencedTarget", playerId, _state.Version, CardId: p.SourceCardId, Choice: "none"), p.SourceCardId);
     }
 }
+
+public sealed partial class MatchEngine
+{
+    private bool HandleRegisteredSequencedTarget(string type, GameCommand command)
+    {
+        if (type != "sequencedTarget") return false;
+        ResolveSequencedTargetCommand(command);
+        return true;
+    }
+}
+
+public sealed partial class MatchEngine
+{
+    // Registration only: callbacks are not invoked during module initialization.
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
+    [System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void RegisterSequencedTargetHooks()
+    {
+        EngineHooks.PendingChoice.Register("HandleRegisteredSequencedTarget", 900, static (engine, type, command) => engine.HandleRegisteredSequencedTarget(type, command));
+    }
+}

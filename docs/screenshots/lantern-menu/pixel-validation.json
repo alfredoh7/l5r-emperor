@@ -1,0 +1,47 @@
+{
+  "source_sha256": "9801aae7eb0efb4db3d342981b73df4c1e12c1ac356924758ebf41d8b2ded857",
+  "source_size": [
+    1672,
+    941
+  ],
+  "native_viewport_size": [
+    1672,
+    942
+  ],
+  "art_bounds": [
+    0,
+    0,
+    1672,
+    941
+  ],
+  "excluded": "One bottom letterbox row from macOS rounding an odd requested window height to an even Retina size.",
+  "still_rgb_mean_absolute_error": [
+    0.0,
+    0.0,
+    0.0
+  ],
+  "still_rgb_max_absolute_error": [
+    0,
+    0,
+    0
+  ],
+  "reduced_motion_time_0_and_22_identical": true,
+  "lantern_strength": 0.85,
+  "native_animation_0_to_22_mean_rgb_difference": {
+    "screen_and_sigils": [
+      9.676318788668187,
+      7.8073347443829375,
+      5.490086291110387
+    ],
+    "lantern": [
+      7.122820512820513,
+      6.4785042735042735,
+      3.071196581196581
+    ],
+    "floor": [
+      3.407923416789396,
+      1.93720176730486,
+      0.9192341678939617
+    ]
+  }
+}

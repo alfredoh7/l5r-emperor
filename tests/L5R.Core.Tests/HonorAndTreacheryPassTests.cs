@@ -78,7 +78,7 @@ internal static class HonorAndTreacheryPassTests
         var tsukimi = CardCatalog.Get(Tsukimi);
         Check(tsukimi.Force == 6 && tsukimi.Chi == 5 && tsukimi.GoldCost == 10 && tsukimi.Abilities!.SequenceEqual(["tsukimi-refresh"]) && AbilityCatalog.All["tsukimi-refresh"].UsesPerTurn == 2, "Shiba Tsukimi");
         var chikata = CardCatalog.Get(Chikata);
-        Check(chikata.Clan == "Ninja" && Keywords(Chikata).Contains("Scorpion Clan") && chikata.Force == 3 && chikata.Chi == 3 && chikata.GoldCost == 7 && chikata.Abilities!.SequenceEqual(["chikata-bow", "chikata-straighten"]), "Shosuro Chikata");
+        Check(chikata.Clan == "Scorpion" /* issue #492, ruling R5: Ninja is a keyword, never a Clan */ && Keywords(Chikata).Contains("Scorpion Clan") && chikata.Force == 3 && chikata.Chi == 3 && chikata.GoldCost == 7 && chikata.Abilities!.SequenceEqual(["chikata-bow", "chikata-straighten"]), "Shosuro Chikata");
         var tsubo = CardCatalog.Get(Tsubo);
         Check(tsubo.Force == 4 && tsubo.Chi == 4 && tsubo.GoldCost == 6 && tsubo.Abilities!.SequenceEqual(["tsubo-straighten"]), "Tsubo");
         var haruto = CardCatalog.Get(Haruto);
@@ -165,12 +165,12 @@ internal static class HonorAndTreacheryPassTests
         var duelStrategy = Add(s4, "training-duel-force", 1, Zone.Hand);
         var e4 = MatchEngine.FromTestState(s4);
         Accept(e4, Use(e4, 1, "training-duel-force", duelStrategy.Id, scorpion4.Id, performerId: enemyDuelist.Id));
+        // Issue #492 (ruling R5): the substitute enters only an accepted or mandatory duel: this Force duel is mandatory, so the "before the duel begins" window is open at once.
+        Eq(e4.State.PendingChoice?.Type, "duelReaction", "the mandatory duel opens the before-the-duel window");
         var reaction = Enabled(e4, 0, "irezu-duel-enter", irezu4.Id);
         Accept(e4, reaction.Command!);
         Check(e4.State.Cards[irezu4.Id].Bowed, "Irezu bowed to pay his Reaction's cost");
-        // The redirect only retargets the held action; the window must close (every remaining reactor declines) before the duel it now issues actually opens.
-        while (e4.State.PendingChoice?.Type == "beforeActionReaction") Accept(e4, new("declineReaction", e4.State.PriorityPlayerId, e4.Version));
-        Check(e4.State.PendingDuel is { } pending && (pending.ChallengedId == irezu4.Id || pending.ChallengerId == irezu4.Id), "the duel now involves Irezu instead of the Scorpion Clan Personality");
+        Check(e4.State.PendingDuel is { } pending && pending.ChallengedId == irezu4.Id && pending.ChallengerId == enemyDuelist.Id, "the duel now involves Irezu instead of the Scorpion Clan Personality");
 
         // Not offered once he is bowed.
         var s5 = Table(Phase.Battle, 1);

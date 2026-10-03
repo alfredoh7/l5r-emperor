@@ -1,0 +1,30 @@
+{
+  "Profile": "stronghold-wave-20",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-2950",
+      "Name": "Halls of the Forgotten",
+      "Type": "Stronghold",
+      "Clan": "Crab",
+      "GoldCost": 0,
+      "GoldProduction": 4,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 8,
+      "StartingHonor": 3,
+      "Text": "Reaction: After another player's Battle action targets your Berserker: Delay its effects on him until after this battle ends.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-2950.jpg",
+      "Keywords": [],
+      "Focus": 0,
+      "Abilities": [
+        "halls-forgotten-delay"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

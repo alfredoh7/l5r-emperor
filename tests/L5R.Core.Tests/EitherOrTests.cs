@@ -135,7 +135,7 @@ internal static class EitherOrTests
         Accept(e, option!.Command!);
     }
 
-    private static int ProvinceStrength(MatchEngine e, int player) => e.State.Players[player].Provinces[0].Strength;
+    private static int ProvinceStrength(MatchEngine e, int player) => e.ProvinceStrengthForTest(player, 0);
 
     // ---- published shape -----------------------------------------------------------------------------------------
     private static void PublishedShape()

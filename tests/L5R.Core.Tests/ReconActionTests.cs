@@ -87,7 +87,7 @@ internal static class ReconActionTests
         foreach(var k in new[]{"Elite","Gaijin","Scout"}) Check(scouts.Keywords!.Contains(k),$"Master Scouts printed keyword {k}");
         Eq(scouts.Text,"After the resolution of a Recon action you took: Give this card +1F."); Eq(scouts.Effect,"force-after-own-recon-action"); Eq(scouts.Abilities!.Length,0);
         // The classification: exactly Yuki's real ability and the training fixtures print a Recon tag (other action keywords, Political since issue #338, are separate tags); every published Recon-prefixed text is tagged.
-        Eq(string.Join(",",AbilityCatalog.All.Where(a=>a.Value.ActionKeywords?.Contains("Recon")==true).Select(a=>a.Key).OrderBy(x=>x,StringComparer.Ordinal)),"kyuden-hida-exp-scouts,training-recon-attack,training-recon-duel,training-recon-open,yuki-engage-recon");
+        Eq(string.Join(",",AbilityCatalog.All.Where(a=>a.Value.ActionKeywords?.Contains("Recon")==true).Select(a=>a.Key).OrderBy(x=>x,StringComparer.Ordinal)),"akeha-recon-search,golden-plains-recon,hidden-falls-recon,jades-roar-recon,koshin-keep-recon,kyuden-hida-exp-scouts,qalyar-recon-minus,qalyar-recon-plus,training-recon-attack,training-recon-duel,training-recon-open,wasteland-scout-recon,yuki-engage-recon"); // + jades-roar-recon (issue #461); + wasteland-scout-recon (issue #476 batch 6); + hidden-falls-recon and koshin-keep-recon (issue #486 Stronghold pass, batch 1); + akeha-recon-search (issue #503 group P3: Daidoji Akeha)
     }
 
     // ---- the trait ----------------------------------------------------------------------------------------------
@@ -277,9 +277,11 @@ internal static class ReconActionTests
         }
         {
             var (e,ebizo,target,_,_)=Build("training-lion-veteran"); // Force 6
-            Reject(e,Use(e,0,"ebizo-attack",ebizo.Id,target:target.Id)); // a declared target above the Attack's strength (4) is not a legal target
-            Accept(e,Use(e,0,"ebizo-attack",ebizo.Id)); // ...but the action itself needs no target up front
+            Accept(e,Use(e,0,"ebizo-attack",ebizo.Id,target:target.Id)); // a target above the Attack's strength (4) is still a legal target (core rule)
             Eq(e.State.Cards[target.Id].Zone,Zone.Battlefield,"strength 4 cannot destroy a Force-6 target");
+            var (e2,ebizo2,target2,_,_)=Build("training-lion-veteran");
+            Accept(e2,Use(e2,0,"ebizo-attack",ebizo2.Id)); // ...and the action needs no target up front
+            Eq(e2.State.Cards[target2.Id].Zone,Zone.Battlefield,"no target: nothing destroyed");
         }
         // Held open by an enemy attack reactor, the pending Attack is a Ranged one whose strength is his live Force.
         {

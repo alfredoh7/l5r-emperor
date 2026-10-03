@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Land the #503 remaining-cards pass on main: #505 was merged into the stale stacked branch after #504 was squash-merged, so its squash commit is replayed onto main (identical tree to claude/503-remaining); 126 cards, inventory 1419 wired",
+  "validation": "Tree identical to claude/503-remaining: core suite 0 failures (2105 passes); AI 74/74; Server 8/8; Client.Transport 13/13; content tests OK; macOS, Windows rules and Windows client CI passed on this branch",
+  "remaining": "None; ready for review",
+  "issue": "506",
+  "branch": "claude/506-land-503",
+  "updated": "2026-09-26T11:07:00.361006+00:00"
+}

@@ -67,10 +67,12 @@ public sealed partial class MatchEngine
         ["ranged-attacks-may-target-dishonorable-with-followers"] = new("Ranged", TargetIs: TargetStatus.IsDishonorable),
     };
 
-    // True when `target` is a Personality with at least one attached FOLLOWER. An Item or Spell attachment
-    // never counts (A Close Call's premise -- an Armor-wearing Personality is a legal Attack target).
+    // True when `target` is a Personality with at least one attached FOLLOWER -- a Follower CARD or a Follower TOKEN (Mendon, 2026-09-24: both shield their Personality from Ranged and Melee Attacks).
+    // An Item or Spell attachment never counts (A Close Call's premise -- an Armor-wearing Personality is a legal Attack target); they are attachments only for "without attachments" effects
+    // (HasAttachments), and so is a Weapon or Armor token.
     private bool IsFollowedPersonality(CardInstance target) =>
-        Definition(target).Type == CardType.Personality && Attachments(target.Id).Any(a => Definition(a).Type == CardType.Follower);
+        Definition(target).Type == CardType.Personality
+        && (Attachments(target.Id).Any(a => Definition(a).Type == CardType.Follower) || target.Tokens.Any(t => t.Type == "Follower"));
 
     private bool HasReconnaissanceAtCurrentBattlefield(int playerId) =>
         _state.CurrentBattleProvince is int province && HasReconnaissance(playerId, 1 - _state.ActivePlayerId, province);
@@ -140,14 +142,24 @@ public sealed partial class MatchEngine
     // Personality with no Followers) the two readings are identical, so nothing else depends on it.
     private int AttackComparedForce(CardInstance target) => CardForce(target);
 
+    // "Ranged 6 Attack that you compare against Gold Cost" (Tsuruchi Samuru, Emperor Edition Personality pass, issue #477): core rules -- if an effect compares a stat other than Force,
+    // that stat is compared to the Attack's strength instead. Every caller that compares an Attack's target to its strength asks here.
+    // Unseen Assailant (Emperor Edition remaining-cards pass, issue #492, group D): "If the Ranged Attack targeted a Personality, you may compare it against his Chi" -- Force or Chi (see below).
+    // Issue #492 (Mendon's ruling R5): every "may compare" clause is the PLAYER's choice ("The player chooses."), made with the action (GameCommand.Choice, one listed option per choice) -- the engine no
+    // longer picks the lower value for him (EmperorRulingR5.cs, AttackCompareChoiceOf).
+    private int AttackComparedValue(string abilityId, CardInstance target) =>
+        abilityId == "samuru-attack" ? CardGoldCost(target)
+        : abilityId == "unseen-assailant-attack" && Definition(target).Type == CardType.Personality && AttackCompareChoiceOf(abilityId) == "chi" ? PersonalityChi(target)
+        : AttackComparedValueRemainingG(abilityId, target);
+
     // An Attack that targets the current battlefield's province (issue #335): no card is targeted, so no reaction to a targeted Attack applies and nothing here compares
     // Force. The only such Attack today is the training fixture; a printed card adds its own case.
     private void ResolveProvinceAttack(string abilityId, int provinceIndex, int strength)
     {
         if (abilityId != "training-province-attack") return;
         var owner = 1 - _state.ActivePlayerId;
-        var province = Player(owner).Provinces.Single(p => p.Index == provinceIndex);
-        province.Strength = Math.Max(0, province.Strength - strength);
+        if (BattlefieldProvince(provinceIndex) is not { } province) return; // a battlefield without a province has no strength to lose (issue #492, rulings pass R1)
+        GiveProvinceStrengthThisTurn(owner, provinceIndex, -strength, "Ranged Attack"); // until end of turn (issue #492 ruling R3); the read floors at 0
         Emit("provinceAttacked", $"{Player(owner).Name}'s province {provinceIndex + 1} lost {strength} strength to a Ranged Attack.", owner);
     }
 
@@ -159,7 +171,14 @@ public sealed partial class MatchEngine
     private void RequireLegalAttackTarget(string id, AbilityDefinition ability, GameCommand command, PlayerState player, CardInstance? source, CardInstance target,
         string? forcePenaltyTargetId = null, int forcePenalty = 0)
     {
-        Require(InPlay(target) && AtBattle(target) && target.OwnerId != player.Id, "Target a card in the current enemy army.");
+        // No Hiding Place (issue #498): "That Ranged Attack may target a card in the Defender's home (if otherwise legal)" -- every other rule below still applies.
+        Require(InPlay(target) && (AtBattle(target) || MayTargetInDefendersHome(command, target)) && target.OwnerId != player.Id, "Target a card in the current enemy army.");
+        // "May not be targeted by" (issue #420) is judged here too, so a bar also stops an Attack whose target
+        // is named on CardIds, chosen later (a sequenced second target) or moved here by a redirection. The
+        // Attack's own performer is the acting card when the command names one (the second half of a sequenced
+        // action carries it even though its ability declares no Performer of its own).
+        RequireTargetNotBarred(command.PerformerId is { } attackPerformerId && _state.Cards.TryGetValue(attackPerformerId, out var attackPerformer)
+            ? ActingPersonality(attackPerformer) : PerformingCard(command, ability), target);
         var type = Definition(target).Type;
         // Core rules: a Personality with an attached FOLLOWER is immune to a Ranged/Melee Attack (attack the
         // Follower instead), unless the Attack is explicitly allowed to target one -- an exception printed
@@ -176,16 +195,17 @@ public sealed partial class MatchEngine
         // ability's own AttackKind (already tracked per ability id). Effect, not Keywords -- this is a
         // synthetic marker for the card's own unique text, not a printed keyword other cards could reference.
         Require(AttackKind(id) != "Melee" || Definition(target).Effect != "melee-attack-immune", "Melee Attacks may not target this card.");
+        // Chiisai (The Shadow's Embrace pass, issue #476 batch 1): "Melee Attacks may not target Chiisai's Followers."
+        Require(AttackKind(id) != "Melee" || !IsChiisaisFollower(target), "Melee Attacks may not target Chiisai's Followers.");
+        // Matsu Yuuto (Emperor Edition Personality pass, issue #477 batch 2): "Ranged Attacks may not target cards in this unit."
+        Require(AttackKind(id) != "Ranged" || !UnitImmuneToRangedAttacks(target), "Ranged Attacks may not target cards in this unit.");
         // Strength of the Divine (issue #287): the first "attack" Target ability with its own separate
         // Performer -- sourceId here must be the chosen Performer (the card whose live Force/Personal
         // Honor the strength formula reads), not the ability's own source card, the same distinction
         // ExecuteAbilityEffects' own case already draws for it. Every existing "attack" ability without a
         // Performer of its own falls back to the source card.
-        var strength = id == "mitsu-fire-attack" ? (command.CardIds ?? []).Length : EffectiveAttackStrength(id, player, target, command.PerformerId ?? source?.Id)
-            // Celestial Sword of the Mantis - exp (issue #453 batch 5): "strength equal to twice the amount paid" -- the Gold the command chooses, read here as at resolution.
-            + (id == "celestial-sword-mantis-attack" ? 2 * (command.GoldAmount ?? 0) : 0);
-        var compared = AttackComparedForce(target);
-        if (forcePenaltyTargetId == target.Id) compared = Math.Max(0, compared - forcePenalty);
-        Require(compared <= strength, "That card's Force is above the Attack's strength.");
+        // Core rules (Ranged/Melee Attack, confirmed by Mendon 2026-09-24): "Target a Follower or a Personality without Followers in the current enemy army. If its Force is <= X, destroy it." A target whose
+        // Force (or compared stat) is above the strength is still a LEGAL target; the comparison happens as the Attack resolves (ResolveAttackNow), and it simply fails to destroy it. The strength and any
+        // predicted Force penalty therefore no longer take part in target legality (forcePenaltyTargetId/forcePenalty are kept for the callers that pass them).
     }
 }

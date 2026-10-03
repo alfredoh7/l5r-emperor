@@ -1,0 +1,9 @@
+{
+  "lane": "ui",
+  "summary": "Card Library: replace single-select clan icons and Type/Keyword dropdowns with a shared FilterChecklist popover (select-all/deselect-all, additive multi-select). Keywords dynamically scope to the current Clan/Type/Family/search/set selection and support A-Z vs most-common (within current filter) ordering. Type list scopes to the current Dynasty/Fate family via each card's DeckTypes. Fixes CatalogueScreen to set GuiEmbedSubwindows=true (matching DeckBuilderScreen) so popover content resolves correct click/focus coordinates.",
+  "validation": "dotnet build clean; tools/check-catalogue.sh native probe all PASS including new multi-clan checklist, additive OR, Fate-scoped Type list, Fate+Spell-scoped Keyword list, and most-common keyword ordering assertions; dotnet format whitespace --verify-no-changes clean",
+  "remaining": "Deck Builder (DeckBuilderScreen.cs) still uses single-select dropdowns for clan/type/keyword; reusing FilterChecklist there to finish the unification is the next PR",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/549",
+  "branch": "claude/549-library-filters",
+  "updated": "2026-09-30T09:49:09.457914+00:00"
+}

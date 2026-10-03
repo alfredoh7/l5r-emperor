@@ -1,0 +1,57 @@
+Godot Engine v4.7.2.stable.mono.official.ed1daf0bf - https://godotengine.org
+OpenGL API 4.1 Metal - 90.5 - Compatibility - Using Device: Apple - Apple M1 Max
+
+PASS complete local artwork pack present
+PASS every printing including pinned game faces has WebP artwork
+PASS full reference catalogue
+PASS every card has indexed scan variants
+PASS support comes from Core
+PASS combined clan and type filters
+PASS family and keyword filters
+PASS additive multi-clan filter
+PASS Set sort follows the presentation order
+PASS no results
+CAPTURE gallery
+PASS native playable filter
+PASS native clan filter combines with support
+PASS native additive multi-clan filter
+CAPTURE clans-filter
+PASS select all clans matches unrestricted filter
+PASS deselect all clears the clan filter
+PASS native family filter
+PASS Fate-scoped Type list drops Dynasty-only types
+PASS keyword checklist anchored inside browser card area
+PASS keyword search narrows checklist without changing card results
+PASS keyword list scoped to current Type and Family selection
+PASS most-common keyword order ranks by frequency within the current filter
+CAPTURE keywords
+PASS incompatible selection clears once with a visible explanation
+PASS removable clan tag clears only its own selection
+PASS live search
+PASS native click opens details
+PASS inspector cannot cover gallery cards
+CAPTURE inspection
+PASS repeat click dismisses details
+CAPTURE slider-large
+PASS native slider drag enlarges full catalogue faces
+PASS card resizing preserves filter results
+PASS card resizing preserves browsing anchor in virtual pool
+CAPTURE slider-small
+PASS native slider drag reduces card size
+PASS bounded visible tile pool
+PASS Escape dismisses inspector
+PASS inspection restores exact scrolling position
+CAPTURE empty
+CAPTURE compact
+CAPTURE rules
+CAPTURE sets
+PASS missing offline scan is explicit
+CAPTURE missing-scan
+PLAYABLE COUNT 1412
+PASS bounded texture cache
+PASS gallery and inspector load WebP from local pack
+PASS verified WebP retires only matching legacy JPEG cache
+PASS migration preserves files that do not match source receipt
+PASS corrupt fixture created
+PASS corrupt WebP rejected without an HTTP fallback
+CATALOGUE PASS: data, native select/deselect, filters, virtual rows, Escape, compact layout, missing scans, texture bound

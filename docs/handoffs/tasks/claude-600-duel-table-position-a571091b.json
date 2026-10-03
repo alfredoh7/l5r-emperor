@@ -1,0 +1,9 @@
+{
+  "lane": "ui",
+  "summary": "Fix the duel card table sitting off the 3D stage: TableSurface.ResizePlane (changed in #447) resets Position when no drawing area is given, and DuelScreen (the live duel screen), CrimsonDuelReview and DuelArenaReview set _table.Position before calling it, so the stage offset was lost. They now set Position after ResizePlane, restoring the pre-#447 result. The crimson review's card-outside-mat error also reports corners and canvas size.",
+  "validation": "check-crimson-duel.sh failed on main and the pre-#581 baseline with '3D/card projection mismatch' of 3.55 px (1672x941, same in both seats), 3.22 px (1920x1080) and 112.6 px (1280x800 crowded with sidebar). With this change the projection assertion passes in the normal capture (the check proceeds to its next assertion). Format check passes; client builds. NOT passing: the crimson check still fails at the next assertion, 'Card outside mat: unit-0' (face corners y -495.2 to -35.2 against an allowed -480 to 490, i.e. 15 px above the mat edge); the review file has not changed since #268, so the layout inputs moved elsewhere and this needs a design decision or a bisect. Not run: the other crimson captures after the first assertion, the live duel screen visually, the full native suite.",
+  "remaining": "Decide whether unit-0 poking 15 px above the mat top in the crimson review is a layout drift to fix or a stale threshold (bisect between 86de986d and main would show which commit moved it). The live duel screen was not looked at visually; the position bug there was a few pixels.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/600",
+  "branch": "claude/600-duel-table-position",
+  "updated": "2026-10-03T13:50:51.631542+00:00"
+}

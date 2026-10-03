@@ -4,6 +4,7 @@
 # UI_SMOKE_PASS line. Screenshots land in artifacts/screenshots and should be looked at, not just counted.
 set -euo pipefail
 source "$(dirname "${BASH_SOURCE[0]}")/env.sh"
+l5r_require_godot
 cd "$L5R_PROJECT_ROOT"
 mkdir -p artifacts/screenshots artifacts/checks
 # On Windows the console build of the same editor is the one that writes to a redirected log.

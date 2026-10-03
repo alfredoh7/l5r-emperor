@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Regenerate docs/CARD_INVENTORY.xlsx from current main: 2173 cards, 1048 wired (48.2%), 1125 unwired, with the unwired-by-set-and-type table.",
+  "validation": "build_card_inventory.py output; totals reconcile (2173 - 1048 = 1125)",
+  "remaining": "None; ready for review.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/484",
+  "branch": "claude/484-inventory-refresh",
+  "updated": "2026-09-24T19:54:37.228199+00:00"
+}

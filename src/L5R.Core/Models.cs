@@ -42,7 +42,8 @@ public enum Phase { Straighten, Events, Action, AttackDeclaration, InfantryDecla
 // use Zone.Home internally), until something removes it. A player may control more than one Celestial
 // only in passing -- entering play immediately discards every OTHER Celestial that same player
 // controls, so at most one survives at rest.
-public enum Zone { Stronghold, Home, Province, DynastyDeck, FateDeck, Hand, DynastyDiscard, FateDiscard, Dead, Battlefield, Attached, RemovedFromGame, Focused, EventInPlay, Region, Celestial }
+// Underneath (issue #503, The New Foundries): a card set face-up under a Stronghold -- public, not in play (EmperorP5Zones.cs).
+public enum Zone { Stronghold, Home, Province, DynastyDeck, FateDeck, Hand, DynastyDiscard, FateDiscard, Dead, Battlefield, Attached, RemovedFromGame, Focused, EventInPlay, Region, Celestial, Underneath }
 
 public sealed record CardDefinition(string Id, string Name, CardType Type, string Clan = "Unaligned", int GoldCost = 0,
     int GoldProduction = 0, int Force = 0, int Chi = 0, int PersonalHonor = 0, int? HonorRequirement = null,
@@ -190,10 +191,13 @@ public sealed record Protection(string Source, string Duration);
 public sealed record ActionLock(string Source, string Duration);
 
 /// <summary>The moments of a turn a straighten hold can wait for. Each happens during the active player's turn; a hold names whose turn counts.</summary>
-public enum StraightenPoint { TurnBegins, StraightenPhaseEnds, EventsRevealEnds, ActionPhaseEnds, TurnEnds,
+public enum StraightenPoint
+{
+    TurnBegins, StraightenPhaseEnds, EventsRevealEnds, ActionPhaseEnds, TurnEnds,
     // "until the phase ends" (Ronin Ambushers, issue #453 batch 5): released when the phase in progress gives way to a different one (the whole
     // Attack-declaration-through-battle-resolution stretch counts as one phase, the War Weariness convention). Owner is always null.
-    PhaseEnds }
+    PhaseEnds
+}
 
 /// <summary>"May not straighten until X" (issue #415). <see cref="Owner"/> is the player whose turn counts (null: whoever's turn it is when the point comes, "this turn" and "the
 /// next Straighten Phase"); <see cref="Until"/> is the point; <see cref="Skip"/> is how many of those points must pass with the hold still standing before it is released (0: the
@@ -212,7 +216,8 @@ public sealed class StraightenHold
 /// does not grant its host a keyword. Stat/Amount, when set, is a persistent bonus/penalty carried
 /// by this specific token -- unlike a Modifier, it is not cleared at turn end, only when the token
 /// itself is destroyed or its host card leaves play.</summary>
-public sealed record CardToken(string Id, string Type, string Source, string? Stat = null, int Amount = 0);
+// Issue #503 (Shosuro Keirei's "-1F/-1C Poison tokens"): a token may carry a second stat bonus/penalty (Stat2/Amount2); StatModifier reads both.
+public sealed record CardToken(string Id, string Type, string Source, string? Stat = null, int Amount = 0, string? Stat2 = null, int Amount2 = 0);
 
 public sealed class CardInstance
 {
@@ -230,7 +235,11 @@ public sealed class CardInstance
     public Zone Zone { get; set; }
     public int? ProvinceIndex { get; set; }
     public bool FaceUp { get; set; }
-    public bool Bowed { get; set; }
+    // Issue #492 (Mendon's ruling R5): "Terrain may not be bowed or straightened." A Terrain (a Strategy with the Terrain keyword) is therefore never bowed, whichever path tries: every one of the
+    // hundred-odd places that set a card bowed goes through this one property.
+    private bool _bowed;
+    public bool Bowed { get => _bowed; set => _bowed = value && !IsTerrain(); }
+    private bool IsTerrain() => (Printed ?? (CardCatalog.Cards.TryGetValue(DefinitionId, out var printed) ? printed : null)) is { Type: CardType.Strategy, Keywords: { } keywords } && keywords.Contains("Terrain");
     public string? AttachedTo { get; set; }
     public List<AppliedModifier> Modifiers { get; set; } = [];
     public List<GrantedKeyword> GrantedKeywords { get; set; } = [];
@@ -251,6 +260,15 @@ public sealed class CardInstance
     // Tireless Efforts (Second City): "Negate all current and new Force penalties on him" -- the turn it was played; while TurnNumber equals it, a Force penalty
     // (a negative Force modifier or token) is not applied to this card. Reset with the card like the other per-turn flags.
     public int ForcePenaltiesNegatedTurn { get; set; } = -1;
+    // Creating Order (Forgotten Legacy pass, issue #467 batch 3): "negate all current and new Force bonuses and penalties on him from actions" -- the turn it was played;
+    // while TurnNumber equals it, no Force modifier or Force token from a resolving action is applied to this card (ForgottenLegacyBatch3.cs).
+    public int ForceModifiersNegatedTurn { get; set; } = -1;
+    // Consideration (Forgotten Legacy pass, issue #467 batch 3): "After the next time this turn another player's action targets him, negate its effects" -- the turn the
+    // shield was raised; spent by the first such action that turn (ForgottenLegacyBatch3.cs, TurnTargetShieldNegates).
+    public int TargetShieldTurn { get; set; } = -1;
+    // Deep Roots (The Shadow's Embrace pass, issue #476 batch 3): "Negate ... effects which prevent him from contributing Force. He contributes Force even while bowed" -- the turn it
+    // was played; while TurnNumber equals it, he contributes his Force to his army while bowed and no contribution negation applies to him (ShadowsEmbraceBatch3.cs).
+    public int DeepRootsTurn { get; set; } = -1;
     // "May not be straightened this turn" (issue #411, Basic Lesson's Stronghold): every effect that would straighten this card is refused for the whole of the turn with this number,
     // unlike the one-shot StraightenBlockedTurn above, which negates the next attempt only. Not swept: it simply stops holding when the turn number moves on, which is after the
     // End phase, so the next Straighten phase (which is not an effect) is untouched.
@@ -272,6 +290,8 @@ public sealed class CardInstance
     // set once, in Assign(), the turn this card is assigned during Infantry/Cavalry Maneuvers.
     public int AssignedToAttackTurn { get; set; } = -1;
     public Dictionary<string, int> AbilityUses { get; set; } = [];
+    // Emperor Edition remaining-cards pass (issue #492), group G: the Personality this card was attached to when it was last destroyed (Ikiryo's "the Personality to whom this card was last attached", Blade of Perfection's "its Personality").
+    public string? LastHostId { get; set; }
     // "Until your second turn from now begins" (issue #259 -- Rebuilding Kyuden Hida/Times of
     // Strife/War Weariness, the first Events with a bounded ongoing duration; Suspicions' own
     // "until the game ends" needs no expiry at all). Stamped with the OWNING player's own
@@ -282,16 +302,28 @@ public sealed class CardInstance
     // StartTurn discards the card once the owner's own TurnsTaken reaches it. Null for an Event with
     // no bounded duration (Suspicions, Formal Apology) or any non-Event card.
     public int? ExpiresAtTurnsTaken { get; set; }
+    // Emperor Edition remaining-cards pass (issue #492), group F: "until your Events Phase N turns from now begins" -- the Event leaves play as its owner's Events Phase begins with this many turns taken.
+    public int? ExpiresAtEventsPhaseTurnsTaken { get; set; }
     // A created COPY of another card (issue #398, Mendon): this instance's DefinitionId is the copied card's own, so it behaves exactly as that card, and this flag is the only thing
     // that says it is a created card: it has no physical card to return to (it is removed from the game when it leaves play) and the client marks it so. Every other created card is a
     // CardDefinition.CreatedOnly scan and needs no marker.
     public bool CreatedCopy { get; set; }
+    // Issue #501 (Mendon's item 32, EmperorMechBCopies.cs): what the client's "duplicate" frame shows for a copy -- the instance id and definition id of the card it copies (its scan
+    // is the original's), and the conditions on the copy (timed removal, ...), each a human-readable sentence. Null / empty for every card that is not a copy.
+    public string? CopyOfCardId { get; set; }
+    public string? CopyOfDefinitionId { get; set; }
+    public List<string> CopyConditions { get; set; } = [];
     // Seeds of Decay pass (issue #453), batch 1. Defensive Blockade: the battle (MatchState.BattleNumber) in which this card contributes no Force to its army's total.
     public int ForceContributionNegatedBattle { get; set; } = -1;
     // Embracing Battle / Military Promotion: the turn in which this Personality may be assigned to a battlefield even if bowed.
     public int AssignBowedTurn { get; set; } = -1;
     // Megumi's Guidance: the turn through which this Personality's destruction from other players' cards' effects is negated (SeedsOfDecayBatch1.cs).
     public int DestructionShieldTurn { get; set; } = -1;
+    // Emperor Edition Personality pass (issue #477), batch 4. Asahina Michiru's barrier of air: the turn through which the NEXT destruction of this Personality by another player's action is
+    // negated and moves him home instead (spent by that destruction). Bayushi Rentatsu: true while the Limited action's "while Rentatsu remains bowed" effect stands
+    // (EmperorPersonalityBatch4.cs; ends when he straightens or leaves play).
+    public int BarrierTurn { get; set; } = -1;
+    public bool RentatsuHeld { get; set; }
     // Seeds of Decay pass (issue #453), batch 2. Sentinel Spirit ("if it was opposed this turn"): the last turn this card stood in a battle whose two armies opposed each other
     // (MarkOpposed, at the battle's resolution); the AssignedToAttackTurn convention. Dragon Tattoo - exp ("who has not performed an action from a Dragon Tattoo this game"):
     // the titles of the cards whose actions this Personality performed, kept for the game (never reset with the card: it is the same card).
@@ -311,6 +343,10 @@ public sealed class ProvinceState
     public int PrintedStrength { get; set; }
     public bool Destroyed { get; set; }
     public string? CardId { get; set; }
+    // Issue #503 (EmperorP6.cs): Illusory Defense's created province "permanently does not hold Dynasty cards" (never refilled, nothing put into it); Dark Experiments' permanent mark ("until the
+    // game ends, after a Region attaches to it, destroy the Region, and after a Holding enters play from it, give the Holding a -1GP token").
+    public bool HoldsNoDynastyCards { get; set; }
+    public bool DarkExperimentsMarked { get; set; }
     // Reconnaissance (core rules Glossary): a per-player boolean at this specific province, indexed
     // by player id, defaulted to false. No ability removes it directly; it resets to false for both
     // players only once a battle at this province resolves (ResolveBattle), regardless of outcome.
@@ -319,6 +355,11 @@ public sealed class ProvinceState
     // second Region revealed here rather than replacing the first). Mirrors CardId's own role for the
     // face-down/face-up Dynasty card, but for the Zone.Region card instead.
     public string? RegionId { get; set; }
+    // Plains of Otosan Uchi (oracle-l5r-5979, OtosanUchiPlains.cs): the province's second Dynasty-card slot, mirroring
+    // CardId's own role. Only ever populated while GrantsSecondDynastySlot(this) holds (RegionId is Otosan Uchi's own
+    // Region) -- except the catalogue's own errata note: once that Region is destroyed independent of the province
+    // (Brawl), whatever already sits here stays until it next leaves normally, and simply is not refilled again.
+    public string? CardId2 { get; set; }
     // Strength bonuses from cards that stay in play (Hasty Fortifications, issue #418): counted while their source is.
     public List<ProvinceBonus> SourceBonuses { get; set; } = [];
 }
@@ -340,6 +381,13 @@ public sealed class PlayerState
     // actions in one turn." Incremented at each Favor-consuming ability's own execution case
     // (shunya-honor, favor-cycle, favor-battle); reset every StartTurn.
     public int FavorActionsThisTurn { get; set; }
+    // Moshi Madoka - exp (Gempukku pass, issue #461): "If you have attached a card from your hand this turn" -- set wherever a card leaves the hand to become an attachment, reset every StartTurn.
+    public bool AttachedFromHandThisTurn { get; set; }
+    // Emperor Edition remaining-cards pass (issue #492), group F. Alter History: "until the game ends, he may ignore Honor Requirements when bringing Personalities into play". Benefices of the Emperor:
+    // "permanently increase his maximum hand size by three". Rebuilding the Empire: "he may not declare an attack until your next turn begins" -- refused while the match's turn number is at or below this.
+    public bool IgnoresHonorRequirements { get; set; }
+    public int MaxHandBonus { get; set; }
+    public int AttackLockedThroughTurn { get; set; } = -1;
     // Ring of Fire's own recruitment condition (issue #194, the "Ring of Flame" printing): "after you
     // resolve your second or later action in one turn which destroyed a Personality you did not
     // control." Incremented once per qualifying ResolveBattle destruction (a simplification: only
@@ -360,9 +408,71 @@ public sealed class PlayerState
     public List<ProvinceState> Provinces { get; set; } = [];
     // Brotherhood Schism (issue #453, batch 2): the last turn this player put a Ring into play (its own recruit action), the AssignedToAttackTurn convention.
     public int RingPutIntoPlayTurn { get; set; } = -1;
+    // Plans Within Plans (Emperor Edition remaining-cards pass, issue #492, group B): "At your next opportunity to take an Open action, you may instead take a Limited action" -- armed when the card
+    // resolves, spent by the player's next command at an opportunity of the Action Phase (whatever he does with it); Sets counts the resolutions, so a copy played at that very opportunity re-arms it.
+    public bool PlansWithinPlansArmed { get; set; }
+    public int PlansWithinPlansSets { get; set; }
 }
 
 public sealed record PendingChoice(string Type, int PlayerId, string? CardId, string Prompt, int? ActingPlayerId = null);
+
+/// <summary>The Honor loss Ten Thousand Temples may negate, waiting for its controller's answer. <paramref name="Command"/> is the command that was being executed (the whole of it is replayed once every
+/// decision is made); Decisions are the answers so far (true: the Temple was destroyed to negate that loss), one per earlier loss of that command that the Temple could have negated; the Prior* fields are the
+/// pending choice, priority and pass count the state had before this decision took them over.</summary>
+/// <summary>Emperor Edition mechanics group C (issue #501, EmperorMechC.cs): a command whose execution reached an additional cost of entering play (En'you) with more than one way to pay, held whole
+/// while the entering card's controller chooses (MatchEngine.Execute replays it with the answer, kept on MatchState.EntryCostAnswers).</summary>
+public sealed class PendingEntryCostDecision
+{
+    public GameCommand Command { get; set; } = new("pass", 0, 0);
+    public int PlayerId { get; set; }
+    public string CardId { get; set; } = "";
+    public List<EntryCostOption> Options { get; set; } = [];
+    public PendingChoice? PriorChoice { get; set; }
+    public int PriorPriority { get; set; }
+    public int PriorPasses { get; set; }
+    public List<bool> HonorDecisions { get; set; } = [];
+    public int HonorWindowsDone { get; set; }
+}
+
+/// <summary>One way to pay an additional cost of entering play: Key is "remove:&lt;hand card id&gt;" or "sake:&lt;token id&gt;".</summary>
+public sealed record EntryCostOption(string Key, string Label);
+
+public sealed class PendingHonorLossDecision
+{
+    public GameCommand Command { get; set; } = new("pass", 0, 0);
+    public List<bool> Decisions { get; set; } = [];
+    public int PlayerId { get; set; }
+    public string TempleId { get; set; } = "";
+    public int Amount { get; set; }
+    public string Reason { get; set; } = "";
+    public PendingChoice? PriorChoice { get; set; }
+    public int PriorPriority { get; set; }
+    public int PriorPasses { get; set; }
+    /// <summary>Honor-change windows (PendingHonorChange) already given to this command: its replay does not open them again (issue #492, R4).</summary>
+    public int HonorWindowsDone { get; set; }
+}
+
+/// <summary>An Honor gain or loss from an action's effects that is about to be applied and that a Reaction may be played on (Rhetoric, Solid Defense, Shiro Chugo: Mendon's R4 ruling, "may be played
+/// on any honor gain or loss"). <paramref name="Command"/> is the command that was being executed when the change was reached; nothing it did is kept, the window is open on the state it started
+/// from, and the command is replayed when both players have passed (MatchEngine.Execute, EmperorRulingR4.cs). The Prior* fields are the pending choice, priority and pass count the state had.</summary>
+public sealed class PendingHonorChange
+{
+    public GameCommand Command { get; set; } = new("pass", 0, 0);
+    /// <summary>The action whose effects change Honor (EmperorStrongholdBatch2.ActionKey, or the duel's), who took it, and which of its eligible Honor changes (in order) this is.</summary>
+    public string ActionKey { get; set; } = "";
+    public int ActionPlayerId { get; set; }
+    public int Occurrence { get; set; }
+    /// <summary>The Honor change itself: whose, how much (negative for a loss) and why.</summary>
+    public int PlayerId { get; set; }
+    public int Amount { get; set; }
+    public string Reason { get; set; } = "";
+    /// <summary>The Honor-change windows given so far, this one included; the Ten Thousand Temples answers the replayed command already has.</summary>
+    public int WindowsDone { get; set; }
+    public List<bool> TempleDecisions { get; set; } = [];
+    public PendingChoice? PriorChoice { get; set; }
+    public int PriorPriority { get; set; }
+    public int PriorPasses { get; set; }
+}
 public sealed record GameEvent(long Sequence, string Type, string Message, int? PlayerId = null, string? CardId = null, int? Amount = null);
 
 /// <summary>A Ranged/Melee Attack awaiting resolution, open to reaction (core rules: "players must
@@ -371,6 +481,8 @@ public sealed record GameEvent(long Sequence, string Type, string Message, int? 
 /// Kind/Strength are compared against the target's current Force at actual resolution time.</summary>
 public sealed class PendingAttack
 {
+    // Hida Defenders (issue #503, EmperorP3Windows.cs): the Personalities bowed before the action that declared this Attack began.
+    public List<string>? BowedBefore { get; set; }
     public string AbilityId { get; set; } = "";
     public int PlayerId { get; set; }
     // The Personality that made the attack (an attached Item/Weapon's own wielder, when the attack
@@ -392,6 +504,8 @@ public sealed class PendingAttack
     // card the ability is printed on (not always the performer: an Item, Spell, Follower or hand Strategy performs through a Personality), which is where the
     // inherited keywords of "was that a [keyword] action?" are read.
     public GameCommand? Command { get; set; }
+    // Mendon's R4 ruling on Deception Revealed (issue #492): the Rings bowed before the action that declared this Attack began.
+    public List<string>? RingsBowedBefore { get; set; }
     // The whole Attack was negated by a reaction (Yasuki Jinn-Kuen): it resolves without effect.
     public bool Negated { get; set; }
 }
@@ -466,13 +580,20 @@ public sealed class PendingEngage
     public List<FirstOpportunityClaim> Claims { get; set; } = [];
     public bool NavalInvasionUsed { get; set; }
     public string? NavalPerformerId { get; set; }
+    // Jade's Roar - exp (Gempukku pass, issue #461): "You have the first opportunity to take a Battle action in this battle, which must be a Terrain action." The keyword the
+    // claimant's first action must carry, and who claimed it (the restriction applies only if that player actually ends up holding the first opportunity).
+    public string? FirstActionKeyword { get; set; }
+    public int? FirstActionKeywordPlayerId { get; set; }
+    // Shosuro Toson - exp2 (issue #503, EmperorP3.cs): "you have the first opportunity to take a Battle action in this battle, which must be performed by Toson" -- the performer and who claimed it.
+    public string? FirstActionPerformerId { get; set; }
+    public int? FirstActionPerformerPlayerId { get; set; }
 }
 
 /// <summary>A limit on the FIRST Battle action a player takes in a battle, set when the Engage window closes
 /// and consumed by that player's next accepted command: Naval Invasion's "which he must perform"
 /// (PerformerId), or Rebuilding Kyuden Hida's "the Attacker may not announce a Battle action before the
 /// Defender's first normal opportunity to act or pass" (MustPass).</summary>
-public sealed record FirstActionRestriction(int PlayerId, string? PerformerId, bool MustPass);
+public sealed record FirstActionRestriction(int PlayerId, string? PerformerId, bool MustPass, string? ActionKeyword = null, string? Reason = null); // Reason: the card naming the performer (issue #503; Naval Invasion when null)
 
 /// <summary>An Additional Action grant (core rules Glossary; issue #181): one Battle action the
 /// named player may take out of the normal back-and-forth alternation, without ceding priority to
@@ -490,7 +611,17 @@ public sealed record FirstActionRestriction(int PlayerId, string? PerformerId, b
 /// default and only shape until issue #449. True (Akodo Tezuka: "play it for one of its Battle, Limited, or Open actions, as appropriate to the
 /// current phase") also admits Limited and Open -- each still gated by its own ordinary phase/active-player legality, so "as appropriate to the
 /// current phase" needs no extra check of its own.</param>
-public sealed record AdditionalActionGrant(int PlayerId, string[]? ScopeCardIds, bool FromDiscard = false, int? Battle = null, bool AnyDiscardTiming = false);
+///  <param name="RangedTargetId">Emperor Edition Stronghold pass (issue #486), batch 1 (Koshin Keep: "an additional Ranged Attack Battle action that may only target the same card"): when set, the
+/// grant is used only by a Ranged Attack that targets that card, and while the player holds it nothing else may be taken (EmperorStrongholdBatch1.cs).</param>
+// PerformerId (Emperor Edition remaining-cards pass, group C, issue #492: Spinning Heel Kick): the additional action "which he must perform" -- spent only by an action that Personality performs.
+// BaseAbilityOnly (Emperor Edition three-scans pass, issue #496: Honor Never Falls -- "an additional Battle action to use one of his base abilities"): with a PerformerId, the grant is spent only by one of the abilities PRINTED on that Personality
+// (his own definition's abilities, not one an attachment provides or one granted to him).
+// Issue #501 (EmperorMechA.cs): RequiredActionKeyword -- the action spending the grant must carry that keyword (Mirumoto Inokuchi: "which must be Iaijutsu"; Beyond the Line: a Recon ability);
+// Tag -- a grant with a rule of its own (Beyond the Line: a Limited or Open Recon ability used as a Battle action that targets the current battlefield's province); Id -- a unique name, so a grant can be
+// followed after it leaves the list (Inokuchi's "If you don't, bow him") and is never equal to another grant; Mandatory -- the text does not say "may" (Beyond the Line: "Take an additional action"),
+// so the grant may be taken as a pass but not declined (Mendon's item 2).
+public sealed record AdditionalActionGrant(int PlayerId, string[]? ScopeCardIds, bool FromDiscard = false, int? Battle = null, bool AnyDiscardTiming = false, string? RangedTargetId = null, string? PerformerId = null, bool BaseAbilityOnly = false,
+    string? RequiredActionKeyword = null, string? Tag = null, string? Id = null, bool Mandatory = false);
 
 /// <summary>A discard a player owes: they choose the card from their hand (Times of Strife, Daigotsu Bofana - exp's entry).
 /// Reason names the card or rule in the prompt and the event.</summary>
@@ -540,6 +671,16 @@ public sealed class FieldsOfMercyWatch
 /// Focus-Effect-bearing focused cards) -> resolved (PendingDuel set back to null).</summary>
 public sealed class PendingDuel
 {
+    // Hida Defenders (issue #503, EmperorP3Windows.cs): the Personalities bowed before the action that issued this duel began.
+    public List<string>? BowedBefore { get; set; }
+    // Mendon's R4 ruling on Deception Revealed (issue #492): the Rings that were bowed before the action that issued this duel began; a Ring bowed since is one the action bowed, a Focus Effect's bows excepted.
+    public List<string>? RingsBowedBefore { get; set; }
+    // Kakita Ichigiku (The Shadow's Embrace pass, issue #476 batch 1): he challenged a dishonorable Personality during a Combat Segment, so the loser is destroyed too.
+    public bool IchigikuDestroysLoser { get; set; }
+    // The shared delay mechanism (issue #492, EmperorRulingR2.cs): the Focus Effects "you may choose (now) to delay the effects of losing this duel until ..." are answered before the duel's outcome
+    // applies -- DelayDecisionIndex is how far along the ordered Focus Effects those answers are, and DelayedLossPlayerIds the players whose Personalities' losing effects were delayed (with the trigger).
+    public int DelayDecisionIndex { get; set; }
+    public List<DelayedLossChoice> DelayedLosses { get; set; } = [];
     // Negations a Reaction set on the issuing action (To First Blood's "negate his destruction from the action's effects"): the duel's own outcome is one of that action's effects.
     public List<NegatedEffect> NegatedEffects { get; set; } = [];
     public string AbilityId { get; set; } = "";
@@ -563,6 +704,10 @@ public sealed class PendingDuel
     // Whose turn to Focus or Strike, alternating, starting with ChallengedPlayerId.
     public int TurnPlayerId { get; set; }
     public bool Struck { get; set; }
+    // Bend like a Reed (Emperor Edition remaining-cards pass, group A, issue #492): the player who struck, whether a copy was played this duel, and the "+N to his duel stat until the duel ends" per Personality.
+    public int? StrikerPlayerId { get; set; }
+    public bool BendUsed { get; set; }
+    public Dictionary<string, int> StatBonuses { get; set; } = [];
     public List<string> ChallengerFocused { get; set; } = [];
     public List<string> ChallengedFocused { get; set; } = [];
     // Player ids still owed a Duelist discard-and-refocus decision, in the order they decide (the
@@ -583,7 +728,7 @@ public sealed class PendingDuel
     public List<string> DiscardFocusedIds { get; set; } = [];
 }
 
-public sealed class MatchState
+public sealed partial class MatchState
 {
     public long Version { get; set; }
     public int TokenSequence { get; set; }
@@ -625,6 +770,16 @@ public sealed class MatchState
     // reveal that defers to a player decision (Harsh Choices, Imperial Gift's search) resumes from here,
     // so the card that province refilled with is not revealed in the same phase it was placed.
     public int EventsRevealNext { get; set; }
+    // Plains of Otosan Uchi (oracle-l5r-5979, issue #554, OtosanUchiPlains.cs): a two-slot province's own reveal
+    // sequence in progress -- the province index (of the ACTIVE Events-Phase player's own row), the remaining slots
+    // still to reveal+resolve in the controller's chosen order (0 = CardId, 1 = CardId2), and whether CardId/CardId2
+    // are currently swapped so the ordinary single-slot ResolveEvent/ResolveRegion machinery can run unmodified
+    // against slot 2. All three reset once the sequence finishes; null/empty/false otherwise.
+    public int? OtosanUchiProvinceIndex { get; set; }
+    public List<int> OtosanUchiRevealQueue { get; set; } = [];
+    public bool OtosanUchiSwapped { get; set; }
+    // A province-card-targeting effect (Shosuro Toson's Reaction) paused on a two-candidate province (issue #554); null otherwise.
+    public PendingProvinceCardChoice? PendingProvinceCardChoice { get; set; }
     public int? CurrentBattleProvince { get; set; }
     public List<int> UnresolvedBattlefields { get; set; } = [];
     // Before This Battle Resolves (issue #272): see PendingBeforeBattleResolve's own doc comment.
@@ -642,6 +797,9 @@ public sealed class MatchState
     public List<string> ResolutionWillNotBowCardIds { get; set; } = [];
     // What the battle's resolution did, held while the after-resolution window is open (AfterResolution.cs).
     public PendingAfterResolution? PendingAfterResolution { get; set; }
+    // Emperor Edition remaining-cards pass (issue #492), group G: Bandit Gang's after-resolution trait in progress (EmperorRemainingG.cs), and the Personalities the assignment command just placed (Chrysanthemum Blossom).
+    public PendingBanditGangs? PendingBanditGangs { get; set; }
+    public List<string> AssignedThisCommand { get; set; } = [];
     // Battle Phase timing (issue #310). PendingEngage is non-null exactly while the Engage window is open
     // (PendingChoice "engageReaction"). FirstActionPlayerId/FirstActionReason record WHO holds the first
     // opportunity in the current battle and WHY ("Default", "Naval", "EngageGrant" or "DefenderOverride"),
@@ -667,6 +825,13 @@ public sealed class MatchState
     // (MatchEngine.CheckYourClanNeedsYouReturn), then removed from this list regardless of outcome.
     // A List (not a single nullable id), since more than one copy could resolve within one battle.
     public List<string> YourClanNeedsYouWatchIds { get; set; } = [];
+    /// <summary>Seeking the Truth (Forgotten Legacy pass, issue #467 batch 4): the players who owe a random discard after the battle they played it in ends, unless they destroyed its province or an army.</summary>
+    public List<SeekingTheTruthWatch> SeekingTheTruthWatches { get; set; } = [];
+    // The Shadow's Embrace pass (issue #476), batch 3 (ShadowsEmbraceBatch3.cs): Cowed and Defeated's watches, Methodical Questioning's end-of-turn return to hand and
+    // Forthrightness's watches.
+    public List<CowedAndDefeatedWatch> CowedAndDefeatedWatches { get; set; } = [];
+    public List<ReturnToHandBeforeTurnEnds> ReturnsToHandBeforeTurnEnds { get; set; } = [];
+    public List<ForthrightnessWatch> ForthrightnessWatches { get; set; } = [];
     // Cards an action created "until the battle ends" (Kyuden Hida - exp's Scout Followers): removed from the game when their battle is over, wherever they are.
     public List<string> CreatedUntilBattleEndsIds { get; set; } = [];
     // Ashigaru Elite's shape: a per-player counter of the current battle's Force boost to each of the
@@ -800,6 +965,27 @@ public sealed class MatchState
     // ExecuteAbilityEffects actually runs -- the same defer-then-reexecute shape PendingNegatableAbility
     // already uses for beforeActionReaction.
     public GameCommand? PendingAnnouncedAction { get; set; }
+    // Entrenched Position (Forgotten Legacy pass, issue #467 batch 3): set by its Reaction inside an "announceReaction" window; the announced action then resolves negated
+    // (ResolveNegatedAction: taken, its costs paid, no effects) when the window closes. Cleared as it is read.
+    public bool AnnouncedActionNegated { get; set; }
+    // Emperor Edition Stronghold pass (issue #486), batch 2: the action (a "player|ability|card" key, EmperorStrongholdBatch2.ActionKey) whose effects will not be negated or delayed
+    // (Suitengu's Torch), and the action whose Honor gain and loss is reduced by 2 (Shiro Chugo). Each is read while that action resolves and replaced by the next action announced.
+    public string? UnnegatableActionKey { get; set; }
+    public string? HonorReducedActionKey { get; set; }
+    // Mendon's R4 ruling (issue #492): Unimpeachable Name played in the window before an Honor loss -- the action whose losses of this player's are reduced by 3 (read while it resolves).
+    public string? UnimpeachableActionKey { get; set; }
+    public int? UnimpeachablePlayerId { get; set; }
+    // Emperor Edition remaining-cards pass, group C (issue #492): the state of Rumors Travel, Rhetoric and Solid Defense (EmperorRemainingC.cs).
+    public EmperorRemainingCState RemC { get; set; } = new();
+    // Emperor Edition rulings pass R1 (issue #492): battlefields without a province, and a battle fought inside the Action Phase (EmperorRulingR1.cs).
+    public RulingR1State R1 { get; set; } = new();
+    // Issue #501, mechanics group B (EmperorMechB.cs): control returns owed, the infiltrator straighten trait grants and its open choice.
+    public EmperorMechBState MechB { get; set; } = new();
+    // Issue #501, mechanics group A (EmperorMechA.cs): additional actions (pass and decline, conditional grants, the per-battle records) and Aramasu's Legacy's Attack Phase inside the Action Phase.
+    public MechAState MechA { get; set; } = new();
+    // Entrenched Position: the battle (BattleNumber) in which the Attacker holds the first opportunity to act and the Defender has not yet had his first normal
+    // opportunity to act or pass -- set when the Engage window closes with the Attacker holding it, cleared the moment the Attacker cedes priority (NextAction, Pass).
+    public int AttackerLeadBattle { get; set; } = -1;
     // True for the remainder of the currently-resolving Ranged Attack's own resolution once Tsuruchi
     // Yakusho's Reaction fires -- checked by every existing Attack-strength-reducing Reaction (Fallow
     // Lands, Training's own negate) before it applies, and cleared unconditionally once that specific
@@ -819,7 +1005,15 @@ public sealed class MatchState
     public List<LadyMatsusRageWatch> PendingLadyMatsusRageWatches { get; set; } = [];
     // Spirit of the Berserker (Second City): "Delay his destruction from the action's effects until before this turn ends" -- the Personalities whose destruction a
     // reaction has put off, destroyed for real at the top of EndTurn if they are still in play (DelayedDestruction.cs).
-    public List<string> PendingDelayedDestructions { get; set; } = [];
+    // Now a read-only view of the shared delay store (EmperorRulingR2.cs, issue #492): the destructions owed until the end of the turn.
+    [JsonIgnore]
+    public List<string> PendingDelayedDestructions => DelayedEffects.Where(e => e.Kind == DelayedKinds.Destroy && e.Until == DelayUntil.EndOfTurn).Select(e => e.CardId).ToList();
+    // The shared delay mechanism (Emperor Edition ruling pass R2, issue #492; EmperorRulingR2.cs): every effect an action (or a duel's outcome) applied to a card that a card delayed, kept in the
+    // order it was applied until its trigger point comes (end of battle, end of phase, end of turn, the next Dynasty Phase ...). DelayedEffectSequence numbers them.
+    public List<DelayedEffect> DelayedEffects { get; set; } = [];
+    public int DelayedEffectSequence { get; set; }
+    // He's Mine! (Emperor Edition remaining-cards pass, issue #492, group B): the Samurai who took a Personality's place in a duel and bow once that duel has ended (cleared as the turn ends).
+    public List<string> HesMineSubstitutes { get; set; } = [];
     // Keywords and Clan alignments taken off cards until an action or the turn ends (Red Crane Dojo, TemporaryRemovals.cs).
     public List<TemporaryRemoval> TemporaryRemovals { get; set; } = [];
     // Kyuden Kitsune: the battles ("turn:province") whose one negated movement has been used.
@@ -848,6 +1042,10 @@ public sealed class MatchState
     // the opponent a chance to play it (or pass) before the command actually resolves. See
     // CardAbilities.ResolveOrDeferUnimpeachableName / AbilityMayCauseHonorLoss.
     public GameCommand? PendingOutOfPlayActionReaction { get; set; }
+    // Mendon's R4 ruling (issue #492): the out-of-play Reaction window (Unimpeachable Name, Bad Kharma, Footsteps of Madness) that FOLLOWS the before-action window of the same action carries that
+    // window's negations of effects, and the fact that the action is an additional one (its grant already consumed), to the action's resolution.
+    public List<NegatedEffect>? PendingOutOfPlayNegations { get; set; }
+    public bool PendingOutOfPlayConsumedGrant { get; set; }
     // Set to the reacting player's own id for the duration of resolving PendingOutOfPlayActionReaction
     // only when Unimpeachable Name was actually played (not merely offered) -- consumed (amount
     // floored toward 0, never past it) by every negative GainHonor call for that same player while
@@ -900,6 +1098,15 @@ public sealed class MatchState
     // DestroyUnits/DestroyAttachment/MoveHome/MoveByRule as they run, snapshotted into LastResolvedAction and cleared once the action (and any
     // reaction windows of its own) finishes resolving. Never populated by a mass sweep outside a single action (battle resolution's own casualties).
     public List<AffectedCard> CurrentActionAffected { get; set; } = [];
+    // Mendon's R4 ruling on Deception Revealed (issue #492): the Rings bowed when the action now resolving began (before it paid anything), copied to the Attack or duel it declares.
+    public List<string> CurrentActionRingsBefore { get; set; } = [];
+    // The Shadow's Embrace pass (issue #476), batch 6 (ShadowsEmbraceBatch6.cs). On: each player's Honor when the phase in progress began (null until a phase boundary
+    // has been crossed), and the Honor each gained from battle resolution since. Star-Crossed Lovers: the pairs that may not share a battlefield, for the rest of the game.
+    public int[]? PhaseStartHonor { get; set; }
+    public int[] PhaseBattleHonor { get; set; } = new int[2];
+    public List<string[]> StarCrossedPairs { get; set; } = [];
+    // Emperor Edition Stronghold pass (issue #486), batch 3 (The Otoro Estate: "Look at all face-down cards in one player's provinces"): what a player was shown, private to that viewer.
+    public List<ProvinceSight> ProvinceSights { get; set; } = [];
     public ResolvedActionFacts? LastResolvedAction { get; set; }
     // Revenge (oracle-l5r-6302, issue #437): "another player's action has destroyed one of your Personalities since the end of your last Battle
     // action this battle" -- per player, set true whenever another player's action destroys one of theirs (FinishActionEffectTracking), cleared
@@ -920,8 +1127,42 @@ public sealed class MatchState
     // Seeds of Decay pass (issue #453), batch 2 (SeedsOfDecayBatch2.cs). Each record expires by comparison (a turn number, a phase instance, a player's turn count), never by a sweep.
     // Province strength for the turn (Incriminating Testimony, Bayushi Shibata - exp, Imperial Protection's standing rule) -- read by EffectiveProvinceStrength beside the permanent Strength.
     public List<ProvinceStrengthEffect> ProvinceStrengthEffects { get; set; } = [];
+    // Forgotten Legacy pass (issue #467), batch 1 (ForgottenLegacyBatch1.cs); each record expires by comparison with the turn number.
+    // "Choose one of his abilities; it may not be used" (Doji Hakuseki, Doji Rengetsu): one printed ability (by usage key) of one card, locked for the turn.
+    public List<DisabledAbility> DisabledAbilities { get; set; } = [];
+    // "Until this battle ends, abilities on cards now in that unit may not be used" (Yoritomo Naoto, Emperor Edition Personality pass, issue #477): cleared when the battle ends.
+    public List<BattleAbilityLock> BattleAbilityLocks { get; set; } = [];
+    // "If it is not your turn, before it ends, if none of your provinces were destroyed this turn, gain 1 Honor" (Asahina Shigemitsu): drained in EndTurn.
+    public List<ProvincesHeldHonorCheck> ProvincesHeldHonorChecks { get; set; } = [];
+    // "Unless Murota has performed a Dark Virtue action this turn": the action keywords each Personality has performed an action with, per turn.
+    public List<PerformedKeywordAction> PerformedKeywordActions { get; set; } = [];
     // "After the next time this turn he is assigned to attack [or is destroyed]" (Imperial Protection, Fair Warning): fired from Assign() and MarkDead.
     public List<AssignmentWatch> AssignmentWatches { get; set; } = [];
+    // The Shadow's Embrace pass (issue #476), batch 4 (ShadowsEmbraceBatch4.cs): Preserving Beauty's "before this turn ends, gain 3 Honor if that battlefield's province
+    // has not been destroyed", one record per use, drained in EndTurn.
+    public List<PreservingBeautyCheck> PreservingBeautyChecks { get; set; } = [];
+    // Emperor Edition remaining-cards pass, group A (issue #492; EmperorRemainingA.cs): Followers Deadly Orders destroys once the battle's resolution is over; the held action a hand Reaction
+    // (Bad Kharma, Footsteps of Madness) negated as a whole (and whether its costs are ignored); the number of cards Face of Ninube shuffled in.
+    public bool RemANegatesHeldAction { get; set; }
+    public bool RemAIgnoresHeldCosts { get; set; }
+    public int RemAShuffledCount { get; set; }
+    // Emperor Edition remaining-cards pass (issue #492), group D (EmperorRemainingD.cs): Torch's Flame Flickers' "negate the next card effect that bows ...", The Shadow Court's "after the next time
+    // this turn ... destroys your Courtier" and The Sincerity of the Dragon's named number -- one record per use; and the battle resolution paused for a Shadow Court decision.
+    public List<TorchWatch> TorchWatches { get; set; } = [];
+    public List<ShadowCourtWatch> ShadowCourtWatches { get; set; } = [];
+    public List<SincerityWatch> SincerityWatches { get; set; } = [];
+    public PendingAfterResolution? PendingShadowCourtResolution { get; set; }
+    // Twist of Fate (issue #492, group D): "Before your Dynasty Phase ends: Take an additional Limited or Open action" -- while the additional action is being taken the match sits in the Action Phase
+    // (TwistOfFateActive) and returns to TwistOfFateReturnPhase once it is done; a player who passed the window is not asked again this turn (TwistOfFateDeclinedTurn).
+    public bool TwistOfFateActive { get; set; }
+    public Phase TwistOfFateReturnPhase { get; set; }
+    public int TwistOfFateDeclinedTurn { get; set; } = -1;
+    // Paralyzing Touch's "negate the effects of the next action performed by its winner" (for the turn), spent by that action.
+    public List<ParalyzingTouchWatch> ParalyzingTouchWatches { get; set; } = [];
+    // Spiritual Manipulation's "must declare a normal attack this turn and assign the target (if legal)".
+    public List<ForcedAttack> ForcedAttacks { get; set; } = [];
+    // The Game Has Changed: the attachments its resolving action has already transferred (each at most once), cleared as the action begins.
+    public List<string> GameHasChangedTransferred { get; set; } = [];
     // Sentinel Spirit: judged when the next Dynasty Phase begins (SetPhase).
     public List<SentinelWatch> SentinelWatches { get; set; } = [];
     // Urgency: "each player may only take two more non-Reaction actions this phase" -- ForcedPass's own shape, counted down by Apply().
@@ -936,12 +1177,66 @@ public sealed class MatchState
     public string? LastProvinceEntryCardId { get; set; }
     // An Insult Answered ("an action ... which caused you an Honor loss"): the players the currently-resolving action cost Honor, snapshotted into LastResolvedAction.HonorLosers.
     public List<int> CurrentActionHonorLosers { get; set; } = [];
+    // Emperor Edition Stronghold pass (issue #486), batch 1 (EmperorStrongholdBatch1.cs). Eternal Victory Dojo: "Draw a card after the next End Phase begins" -- one entry per draw owed, the player who
+    // draws it. Kyuden Otomo - exp: the players who took the Imperial Favor during the action now resolving (snapshotted into LastResolvedAction.FavorTakers). Hidden Falls Dojo: the provinces a
+    // player targeted this turn, and whether the additional Infantry Maneuvers Segment it grants is the segment in progress.
+    public List<int> PendingEndPhaseDraws { get; set; } = [];
+    public List<int> CurrentActionFavorTakers { get; set; } = [];
+    public List<HiddenFallsGrant> HiddenFallsGrants { get; set; } = [];
+    // Emperor Edition remaining-cards pass (issue #492), group E (EmperorRemainingE.cs): Consecration's "after the first time this turn a Personality assigns or moves to an attacking army at one of those
+    // provinces' battlefields, gain 2 Honor" -- one record per use, each spent by the event or lapsing with the turn.
+    public List<ConsecrationWatch> ConsecrationWatches { get; set; } = [];
+    public bool ExtraInfantrySegment { get; set; }
     // Brotherhood Schism: the turn in which "Rings will not enter play if their owner has already put a Ring into play this turn" stands.
     public int RingSchismTurn { get; set; } = -1;
     // Moksha Patam (oracle-l5r-10121, issue #453 batch 5): "After an action resolves, if a player gained Honor from its effects" -- set by GainHonor on any
     // gain, reset when an action begins (RunAbilityEffects) and read once when it is truly done (FinishActionEffectTracking, ApplyMokshaPatamTokens).
     public bool CurrentActionHonorGained { get; set; }
+    // The Shadow's Embrace pass (issue #476), batch 1 (ShadowsEmbraceBatch1.cs); each record expires by comparison with the turn (or battle) number.
+    // Bayushi Misaki: "Before this phase ends, straighten him. Before this turn ends, if the Personality was not assigned to attack this turn, dishonor him ..."
+    public List<MisakiWatch> MisakiWatches { get; set; } = [];
+    // Bayushi Waru: "negate the effects of the next action the target performs (this turn)" -- spent by that action.
+    public List<NextPerformedActionNegation> NextPerformedActionNegations { get; set; } = [];
+    // Hiruma Nikaru (Shadow's Embrace): "Negate the effects of the next Battle action this battle another player takes which targets Nikaru" -- spent by that action.
+    public List<BattleTargetShield> BattleTargetShields { get; set; } = [];
+    // Agasha Kurou: "Remove it from the game before the turn ends" -- the Spells he attached, drained in EndTurn.
+    public List<TurnEndRemoval> TurnEndRemovals { get; set; } = [];
+    // Emperor Edition Personality pass (issue #477), batch 5 (EmperorPersonalityBatch5.cs).
+    // Asako Ryo ("refill it face-up"): the province index LastProvinceEntryCardId last left (set beside it).
+    public int? LastProvinceEntryProvinceIndex { get; set; }
+    // Isawa Norimichi ("your army has +5 total Force" until the battle ends): read by ArmyForces, expiring by comparison with BattleNumber.
+    public List<ArmyForceBonus> ArmyForceBonuses { get; set; } = [];
+    // Kitsu Tamasine ("if you have lost Honor from another player's action during an Action Phase since your last turn began"): per player, set as such an action resolves, cleared as that player's turn begins.
+    public bool[] HonorLostToOtherActionSinceTurnBegan { get; set; } = new bool[2];
+    // Rugashi Bazaar (Emperor Edition remaining-cards pass, issue #492 group F): "lost Honor from another player's action during the Action Phase since your last turn ENDED" -- the same
+    // record, restarted when the loser's own turn ends rather than when it begins.
+    public bool[] HonorLostToOtherActionSinceTurnEnded { get; set; } = new bool[2];
+    // Emperor Edition remaining-cards pass (issue #492), group F (EmperorRemainingFEvents.cs): the decision of an Event in progress, the ones queued behind it (an optional draw owed when a battle's
+    // resolution or an attach finishes), and the Personality an Event was told to name (Delayed Arrival), by the Event's card id.
+    public PendingEventChoice? PendingEventChoice { get; set; }
+    // Ten Thousand Temples (issue #492, group F): "Before you lose Honor, destroy this card: Negate the Honor loss." -- the command whose execution reached an Honor loss the Temple could negate, held whole
+    // while its controller decides (MatchEngine.Execute replays it with the decisions made).
+    public PendingHonorLossDecision? PendingHonorLossDecision { get; set; }
+    // Mendon's R4 ruling (issue #492): an Honor gain or loss from an action's effects that Reactions may be played on before it is applied (see PendingHonorChange).
+    public PendingHonorChange? PendingHonorChange { get; set; }
+    public List<PendingEventChoice> PendingEventChoices { get; set; } = [];
+    public Dictionary<string, string> EventTargets { get; set; } = [];
+    // Isawa Kimi - exp 2 ("an action that put any cards into another player's hand"): the players whose hand the currently-resolving action put a card into, snapshotted into LastResolvedAction.HandRecipients.
+    public List<int> CurrentActionHandRecipients { get; set; } = [];
+    // Emperor Edition follow-ups (issue #498, EmperorFollowups*.cs). An "After this card enters play: search ..." trait queued behind the entry windows (Enslaved Djinn, Celestial Sword of the Dragon,
+    // Asako Chukage); the Attack target selection step after an announce window (No Hiding Place); the changes an announce Reaction made to the Attacks of the announced action; Rend the Soul's marks.
+    public List<PendingEntrySearch> PendingEntrySearches { get; set; } = [];
+    public PendingAttackTargetSelection? PendingAttackTargetSelection { get; set; }
+    public List<AnnouncedAttackModifier> AnnouncedAttackModifiers { get; set; } = [];
+    public List<RendTheSoulMark> RendTheSoulMarks { get; set; } = [];
+    // Emperor Edition mechanics group C (issue #501, EmperorMechC.cs): an additional cost of entering play awaiting its payer's choice, and the answers given so far to the command being replayed.
+    public PendingEntryCostDecision? PendingEntryCostDecision { get; set; }
+    public List<string> EntryCostAnswers { get; set; } = [];
+
 }
+
+/// <summary>Isawa Norimichi: PlayerId's army has +Amount total Force in the battle numbered Battle (while it has any units).</summary>
+public sealed record ArmyForceBonus(int PlayerId, int Amount, int Battle);
 
 /// <summary>A standing redirect (Seeds of Decay, issue #453): Kind is a StandingRedirectKinds value, OwnerId the player whose cards it protects, ToCardId the card the action
 /// targets instead, Turn the turn it lasts (Battle: the battle it lasts, or null for the whole turn), SourceName the card that set it up.</summary>
@@ -956,7 +1251,10 @@ public sealed record PendingEndPhaseRecruit(int PlayerId, string CardId, string 
 
 /// <summary>One card the currently-resolving action affected, and how (issue #437: ActionEffectTracking.cs). Kind is "destroyed" or "moved" today;
 /// a bow is not tracked here yet (no single choke point narrates every one the way DestroyUnits/MoveHome already do -- see the file comment).</summary>
-public sealed record AffectedCard(string CardId, string Kind);
+// HostId (The Shadow's Embrace pass, issue #476 batch 6: Shieldman's "destroyed another card in this unit"): the Personality a destroyed attachment was attached to.
+/// FromBattlefield (The Shadow's Embrace pass, issue #476 batch 3): for a move home, the battlefield (province index) the card was moved home FROM; null when it was not at one
+/// (I Cast Two Shadows: "move him to a different battlefield than the one from which he was moved home").
+public sealed record AffectedCard(string CardId, string Kind, string? HostId = null, int? FromBattlefield = null);
 
 /// <summary>What the LAST fully-resolved action did (issue #437): who performed it, which ability, and which cards it affected. Replaced, not
 /// merged, each time a new top-level action -- an ability's own synchronous resolution, a deferred Attack, or a duel -- finishes, including its
@@ -970,6 +1268,12 @@ public sealed class ResolvedActionFacts
     // Seeds of Decay pass (issue #453), batch 2: the Personality who performed the action (the named performer, or the source resolved to its wielder), and the players it cost Honor.
     public string? PerformerId { get; set; }
     public List<int> HonorLosers { get; set; } = [];
+    // Emperor Edition Personality pass (issue #477), batch 5: the players whose hand the action put a card into (Isawa Kimi - exp 2).
+    public List<int> HandRecipients { get; set; } = [];
+    // Emperor Edition Stronghold pass (issue #486), batch 1 (Kyuden Otomo - exp): the players who took the Imperial Favor during the action.
+    public List<int> FavorTakers { get; set; } = [];
+    // Emperor Edition remaining-cards pass (issue #492), group D (Words Have Strength): "You may only play one copy ... in reaction to any one resolution" -- set once a copy is played.
+    public bool WordsHaveStrengthPlayed { get; set; }
 }
 
 // DeckPosition ("Top"/"Bottom") is the acting player's own upfront choice of where a card goes in
@@ -997,13 +1301,24 @@ public sealed record GameCommand(string Type, int PlayerId, long ExpectedVersion
     SlotSelection[]? Selections = null,
     // "Create a card" with a choice of cards (issue #394, "an Armor or Weapon Item"): the id of the scan the acting player chose among the ability's
     // CreatedCardSpec.Or alternatives; null for an ability that creates a single card.
-    string? CreatedCard = null);
+    string? CreatedCard = null,
+    // Emperor Edition Personality pass (issue #477), batch 4 (Asahina Keigo): for each Gold source that produces "Gold equal to the Focus Value of a card discarded", the id of the
+    // hand card the payer discards for it (source id -> hand card id). Null for every other payment.
+    Dictionary<string, string>? PaymentDiscards = null,
+    // Emperor Edition Stronghold pass (issue #486), batch 1 (Hidden Falls Dojo: "Target one or two provinces"): the indices of the Defender's provinces the action targets; null for every other action
+    // (a single province rides in Province, as it always has).
+    int[]? Provinces = null);
 public sealed record CommandResult(bool Accepted, string? Error, long Version, GameEvent[] Events);
+/// <summary>The consequence of destroying the province in a Harsh Choices decision, so no client re-derives it: the decider's unbroken provinces before and after, whether that ends the match in defeat, and the cards drawn if it does not.</summary>
+public sealed record HarshChoicesView(int ProvincesBefore, int ProvincesAfter, bool EndsMatch, int CardsDrawn);
 public sealed record PaymentOption(string[] SourceIds, int Produced, int Cost, int Excess);
 // Basis (issue #303): the human-readable derivation of Cost, e.g. "Training samurai cost 5 - 2 (Clan
 // discount)". Null only for quotes serialized by an older engine.
 public sealed record PurchaseQuote(string CardId, int Cost, bool ClanDiscount, bool ClanAllegiance,
-    bool ProclaimEligible, string? Error, PaymentOption[] Payments, string? Basis = null);
+    bool ProclaimEligible, string? Error, PaymentOption[] Payments, string? Basis = null,
+    // Authoritative methods for this payment, including a card's own production and Reaction's Gold used beside or instead of bowing (Seaside Bazaar, Luxurious Silk, Library of
+    // Rebirth), Zlkyt's "destroy your Mine or Farm" (one per Holding, highest Gold Cost first, always last) -- each a source id Payments and GameCommand.SourceIds may name. Null only for older payloads.
+    PaymentSource[]? Sources = null);
 public sealed record OverlayQuote(string CardId, string TargetId, int HigherLevel, int LowerLevel, string? Error);
 /// <summary>The one authoritative Gold quote (issue #303) for any action that costs Gold: recruiting,
 /// equipping, playing a Strategy and every costed ability. The client renders this and never derives a
@@ -1015,7 +1330,11 @@ public sealed record OverlayQuote(string CardId, string TargetId, int HigherLeve
 /// PaymentsByAmount holds them for every legal amount (keyed by amount) so the client can change the
 /// amount without a round trip. Error, when set, means this quote cannot be paid or used as it stands.</summary>
 public sealed record GoldQuote(int Cost, string Kind, string Basis, string? Error, PaymentOption[] Payments,
-    int? MinAmount = null, int? MaxAmount = null, Dictionary<int, PaymentOption[]>? PaymentsByAmount = null);
+    int? MinAmount = null, int? MaxAmount = null, Dictionary<int, PaymentOption[]>? PaymentsByAmount = null,
+    // Authoritative payment methods and source amounts (see PurchaseQuote.Sources); null only for older payloads.
+    PaymentSource[]? Sources = null);
+// Presentation metadata survives a disabled option's null Command. No executable command is invented for it.
+public sealed record AlternativeCostView(string AbilityId, string? PerformerId, string Id, string Label, string ActionLabel);
 /// <param name="Gold">The quote for this option's own command (its first legal target when the cost is
 /// target-derived). Null when the action costs no Gold.</param>
 /// <param name="TargetGold">Per-target quotes (target id to quote) for a target-derived cost: the cost
@@ -1028,7 +1347,16 @@ public sealed record ActionOption(string Type, string Label, bool Enabled, strin
     // Multi-target actions (issue #336): the slots of a Slots ability with the legal candidates of each, so a viewer can
     // collect the whole selection. Null for every ability with a single Target.
     TargetSlotOption[]? Slots = null,
-    bool NoTarget = false);
+    bool NoTarget = false, AlternativeCostView? AlternativeCost = null,
+    MoveDestinationView? Movement = null, AttackCueView? Attack = null,
+    // Engine-selected preview cards for a complete pending answer; private candidates are only offered to the decider.
+    string[]? DecisionCandidateIds = null, string? DecisionLabel = null);
+/// <summary>Read-only attack presentation. SourceId is the explicitly selected performer or the ability source;
+/// it identifies the card to mark, not a new legality or damage calculation.</summary>
+public sealed record AttackCueView(string Kind, string SourceId);
+/// <summary>Proposed movement only: reactions may prevent each arrival independently. FixedMoverIds names the source/performer units;
+/// TargetMoves adds the command's selected target. Destinations remain in ActionOption.Provinces. No card-rule inference belongs in the UI.</summary>
+public sealed record MoveDestinationView(int DefenderId, string[] FixedMoverIds, bool TargetMoves);
 /// <param name="UnitForce">Authoritative effective unit contribution, including qualifying Followers.
 /// Null for hidden/non-unit/out-of-play cards and older payloads; never substitute a client calculation.</param>
 public sealed record CardView(string Id, CardDefinition? Definition, int OwnerId, Zone Zone, bool FaceUp,
@@ -1045,7 +1373,12 @@ public sealed record CardView(string Id, CardDefinition? Definition, int OwnerId
     // A created copy of another card (issue #398): its Definition is the copied card's own; this says it is a created card, for the client's marker.
     bool CreatedCopy = false,
     // Read-only explanations of already enforced granted effects (duel presentation); null when none.
-    GrantedEffectView[]? GrantedEffects = null);
+    GrantedEffectView[]? GrantedEffects = null,
+    // Issue #501 (Mendon's item 32; the client's "duplicate" frame is issue #502): true for a copy of another card; the copied card's instance id (null when it is no longer known)
+    // and definition id (the scan the client shows); a human-readable sentence of every condition on the copy (timed removal, ...) for the frame's tooltip.
+    bool IsCopy = false, string? CopyOfCardId = null, string? CopyOfDefinitionId = null, string? CopyConditions = null,
+    // Issue #501 (control transfer): the card's OWNER when another player controls it (OwnerId is always the controller); null when its owner controls it.
+    int? RealOwnerId = null);
 /// <summary>One granted ability as the client shows it: the id, the engine's label for it, and where it came from.</summary>
 public sealed record GrantedAbilityView(string AbilityId, string Label, string Timing, string Source, string Duration, string? CopiedFrom, string? CopiedFromName,
     string? SourceName = null, int? UsesPerTurn = null, int? UsesRemaining = null);
@@ -1053,7 +1386,22 @@ public sealed record GrantedAbilityView(string AbilityId, string Label, string T
 // Lands) -- what a player actually needs to beat to destroy the province, not the raw mutable field.
 /// <param name="Strength">What anything reads the province's strength as now: the current strength, or the maximum while a limit holds it down.</param>
 /// <param name="MaxStrength">The limit in force (Times of Strife, Ancient Feud), or null. While it holds, the current strength may be higher and returns when the limit ends.</param>
-public sealed record ProvinceView(int Index, int Strength, bool Destroyed, CardView? Card, CardView? Region, int? MaxStrength = null);
+public sealed record ProvinceView(int Index, int Strength, bool Destroyed, CardView? Card, CardView? Region, int? MaxStrength = null,
+    // Issue #503 (EmperorP6.cs): Illusory Defense's province that never holds a Dynasty card, and Dark Experiments' permanent mark (both public).
+    bool HoldsNoDynastyCards = false, bool DarkExperimentsMarked = false)
+{
+    /// <summary>Optional slot view for multi-card provinces. Null retains legacy Card as slot 0.
+    /// When supplied this is authoritative, including empty slots; Card must not be appended again.
+    /// Slot indices are stable across refills. Face-down cards must already be redacted by the producer.</summary>
+    public ProvinceCardSlotView[]? DynastySlots { get; init; }
+}
+public sealed record ProvinceCardSlotView(int Index, CardView? Card);
+/// <summary>Public decision identity/prompt; Options are sent only to PlayerId. Commands are engine-provided,
+/// not inferred by the client. Slot indices refer to OwnerId's Province, not card identities.</summary>
+public sealed record ProvinceOrderView(string Id, int PlayerId, int OwnerId, int Province, string Prompt,
+    ProvinceOrderOption[] Options);
+public sealed record ProvinceOrderOption(string Id, string Label, int[] Slots, GameCommand? Command,
+    bool Enabled = true, string? Reason = null);
 // DeadCount (issue #221): the authoritative count of this player's own Zone.Dead Personalities --
 // already present, individually, within Discard (each CardView's own Zone tells a dead card apart
 // from a merely-discarded one), but computed here as a single number the same way UnitForce is, so
@@ -1066,7 +1414,9 @@ public sealed record PlayerView(int Id, string Name, string Clan, int Honor, int
     // Zone.EventInPlay (Suspicions): public, like RemovedFromGame -- no visibility gate needed.
     CardView[]? EventsInPlay = null,
     // Zone.Celestial (Lady Matsu's Rage): also public -- no visibility gate needed.
-    CardView[]? Celestials = null, int FocusCount = 0)
+    CardView[]? Celestials = null, int FocusCount = 0,
+    // Zone.Underneath (issue #503, The New Foundries): the cards face-up under the player's Stronghold -- public.
+    CardView[]? Underneath = null)
 {
     public HandLimitView? HandLimit { get; init; }
 }
@@ -1094,7 +1444,7 @@ public static class BattleSteps
     // FirstActionReason values.
     public const string ReasonDefault = "Default", ReasonNaval = "Naval", ReasonEngageGrant = "EngageGrant", ReasonDefenderOverride = "DefenderOverride";
     // FirstActionLimit values.
-    public const string LimitMustPass = "MustPass", LimitPerformerOnly = "PerformerOnly";
+    public const string LimitMustPass = "MustPass", LimitPerformerOnly = "PerformerOnly", LimitActionKeyword = "ActionKeyword";
     // BeforeResolutionEffectView.Kind: the three kinds of item in the one ordered set of before-resolution effects.
     public const string EffectTrait = "Trait", EffectDelayed = "Delayed", EffectReaction = "Reaction";
 }
@@ -1138,5 +1488,27 @@ public sealed record MatchView(string ContentVersion, string Scenario, long Vers
     EitherOrView? PendingEitherOr = null,
     // The opposing player's variable payment (issue #373, see OpponentPayment.cs): PUBLIC -- both players see the first player's amount, the card and the
     // Honor at stake; only the paying player's view carries the payment quote and what each amount would do.
-    OpponentPaymentView? PendingOpponentPayment = null, DuelRecord? LastDuel = null);
+    OpponentPaymentView? PendingOpponentPayment = null, DuelRecord? LastDuel = null,
+    // The approved attack cue (#355): public, derived from authoritative state.
+    AttackCueView? PendingAttack = null,
+    // Emperor Edition Stronghold pass (issue #486), batch 3 (see EmperorStrongholdBatch3.cs): the face-down province cards this viewer looked at this turn -- PRIVATE to the looker, null for
+    // everyone else. Never a card id: a face-down card is named by whose province and which.
+    ProvinceSightView[]? ProvinceSights = null,
+    // Emperor Edition rulings pass R1 (issue #492): every battlefield of the Attack Phase in progress and the province (an index into the Defender's row) it is at, null when it has
+    // none. An index below 100 is the battlefield of the Defender's province of that index; a higher one is an additional battlefield (EmperorRulingR1.cs).
+    BattlefieldView[]? Battlefields = null,
+    // Issue #503 (EmperorP5Hidden.cs): the cards of another player's hand this viewer looked at this turn (Scouting the Pass, The Price of Honor) -- PRIVATE to the looker, never an instance id.
+    HandSightView[]? HandSights = null)
+{
+    public ProvinceOrderView? PendingProvinceOrder { get; init; }
+    // Harsh Choices (issue #581): what destroying the province would do, computed by the engine and PUBLIC -- both players see the same consequence. Null when no Harsh Choices decision is open.
+    public HarshChoicesView? PendingHarshChoices { get; init; }
+    // Public display context for a battle fought inside the Action Phase. ActivePlayerId
+    // remains the battle's attacker; this is the original turn owner, never the paused action.
+    public int? ActionPhaseTurnPlayerId { get; init; }
+}
+/// <summary>Engine-private record of one face-down province card a player looked at (MatchState.ProvinceSights). Turn is the turn number it was looked at.</summary>
+public sealed record ProvinceSight(int ViewerId, int OwnerId, int Province, string CardId, string DefinitionId, int Turn);
+/// <summary>PRIVATE to the looking player: what the face-down card in a province is (its owner's province Province).</summary>
+public sealed record ProvinceSightView(int OwnerId, int Province, string DefinitionId, CardDefinition Definition);
 public sealed record ReplayRecord(string ContentVersion, string Scenario, ulong Seed, GameCommand[] Commands, Deck[]? CustomDecks = null);

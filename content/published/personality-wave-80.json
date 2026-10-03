@@ -1,0 +1,39 @@
+{
+  "Profile": "personality-wave-80",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-533",
+      "Name": "Asako Chukage",
+      "Type": "Personality",
+      "Clan": "Phoenix",
+      "GoldCost": 10,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 5,
+      "PersonalHonor": 3,
+      "HonorRequirement": 6,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After Chukage enters play: Search your discard pile, then hand, then deck, for a Ring of Water. Put it into play or in your hand.\nReaction: Even if Chukage is bowed, after the resolution of an action that moved your Personality: Move Chukage to the Personality's location. Straighten Chukage's unit if he moved.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-533.jpg",
+      "Keywords": [
+        "Cavalry",
+        "Unique",
+        "Elemental Master",
+        "Henshin",
+        "Monk",
+        "Phoenix Clan",
+        "Shugenja",
+        "Water"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "chukage-follow"
+      ],
+      "Effect": "chukage-ring-search"
+    }
+  ],
+  "Decks": []
+}

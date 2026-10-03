@@ -1,0 +1,9 @@
+{
+  "lane": "ui",
+  "summary": "HUD audit follow-up: every review-mode row (any visible root control named *ReviewControls) and the always-visible notice label now count as HUD in the table-input check, so left clicks and wheel over them reach the GUI instead of being forwarded into the table. The six review rows added (lock, copy, either/or, movement, search, shown) join six that already had named exceptions, which are replaced by one name match.",
+  "validation": "Static audit of every root-level interactive control against FixedHudCovers / PointerOnTable / CameraBlocked (read-only subagent; claims about review rows verified at runtime). Temporary probe (not committed) printed PointerOnTable for every button in each review row: on main, the lock and either-or rows were pointerOnTable=True (swallowed) while with the fix all six scenarios (lock, shown, search-none, copy-automatic, either-or-disabled, movement-partial) report False for every button; search and copy already had the camera blocked in those scenarios because a panel was open. Client built (0 errors); format check passes. Not run: the full native check suite after this change, a manual click-through of each review row, the wheel over each row.",
+  "remaining": "The always-covered normal-play panels were judged covered by code reading; only the review rows were verified at runtime. The stat-token branch at Camera.cs OverStatToken looks unreachable (nothing adds to _statTokenLayer) and was left alone. Remaining failing native checks: top-cards-ui, player-clarity, crimson-duel, war-room-motion, table-followup.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/597",
+  "branch": "claude/597-hud-cover-audit",
+  "updated": "2026-10-03T13:27:54.880996+00:00"
+}

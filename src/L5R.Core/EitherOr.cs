@@ -32,6 +32,38 @@ public static class EitherOrSpecs
     public const string ExtendSoulShuffle = "extend-soul-shuffle";
     /// <summary>Moshi Ino's storm (issue #453, batch 3): the player who took the action chooses to discard a card or bow its performer (MoshiInoStorm.cs).</summary>
     public const string InoStorm = "ino-storm";
+    /// <summary>Yasuki Makoto (issue #460, batch 2): "His controller may pay 4 Gold. If he does, he loses 1 Honor. If he does not, dishonor the
+    /// target and move him home." -- the same "the AFFECTED card's controller decides" shape Extend the Soul's Boundaries already established.</summary>
+    public const string MakotoPayOrDishonor = "makoto-pay-or-dishonor";
+    /// <summary>Yasuki Daiki (Forgotten Legacy pass, issue #467 batch 2): "His controller chooses to either pay 4 Gold, lose 2 Honor, or do neither. If he did not pay 4 Gold
+    /// or lose 2 Honor, the Personality may not be assigned, and will not move, into attacking armies." -- Makoto's "the affected card's controller decides", three ways.</summary>
+    public const string DaikiPayLoseOrLock = "daiki-pay-lose-or-lock";
+    /// <summary>Kitsuki Methods (The Shadow's Embrace pass, issue #476 batch 3): "That player may choose to discard a card at random from his hand. If he did not choose this, either
+    /// gain 2 Honor, or the target's controller loses Honor equal to his base Personal Honor." -- the target's controller decides first; a refusal hands the second choice
+    /// (KitsukiMethodsReward) to the acting player, chained (ShadowsEmbraceBatch3.cs).</summary>
+    public const string KitsukiMethodsDiscard = "kitsuki-methods-discard";
+    public const string KitsukiMethodsReward = "kitsuki-methods-reward";
+    /// <summary>Crowded Streets (The Shadow's Embrace pass, issue #476 batch 3): "After an action resolves that one or more of your Personalities at the current battlefield performed:
+    /// You may move any of those performers home." -- the Terrain's controller decides; the resolved action's own tail then carries on (Origin "after-action").</summary>
+    public const string CrowdedStreetsMoveHome = "crowded-streets-move-home";
+    /// <summary>Forge Your Soul (The Shadow's Embrace pass, issue #476 batch 3): "You may attach one of them that is a Weapon to him, paying 4 less Gold. You may shuffle your
+    /// deck." -- the attach (one option per shown Weapon, each with its own Gold cost), then the shuffle, chained; the shuffle's finish draws for a Kensai who showed no Weapon.</summary>
+    public const string ForgeYourSoulAttach = "forge-your-soul-attach";
+    public const string ForgeYourSoulShuffle = "forge-your-soul-shuffle";
+    public const string ForgeYourSoulShuffleNoWeapon = "forge-your-soul-shuffle-no-weapon";
+    /// <summary>Kakita Genshi (Emperor Edition Personality pass, issue #477 batch 4): "His controller may dishonor him. If he did not choose to dishonor him, gain 1 Honor and choose one of the
+    /// Personality's abilities; it may not be used until your next turn begins." -- the affected card's controller decides (Yasuki Makoto's shape); a refusal chains into the acting player's choice.</summary>
+    public const string GenshiShame = "genshi-shame";
+    /// <summary>Yasuki Tanimura (Emperor Edition Personality pass, issue #477 batch 6): "The player may pay 4 Gold. If he does not pay the Gold, he loses 3 Honor." -- the decider is the ACTING player.</summary>
+    public const string TanimuraPayOrLose = "tanimura-pay-or-lose";
+    /// <summary>Sacrifice of Pawns (Emperor Edition remaining-cards pass, group C, issue #492): "His controller may destroy the target. If he did not choose this, search your Dynasty deck for a
+    /// Personality and bring him into play, paying all costs but paying two more Gold." -- the target's controller decides; a refusal opens the acting player's search (EmperorRemainingC.cs).</summary>
+    public const string SacrificeOfPawns = "sacrifice-of-pawns";
+    /// <summary>The Power of a Word (Emperor Edition remaining-cards pass, issue #492, group D): "The player may choose to lose 3 Honor. If he did not choose this, negate the action's effects." -- the decider is the ACTING player.</summary>
+    public const string PowerOfWordLoseOrNegate = "power-word-lose-or-negate";
+    /// <summary>The Shadow Court (issue #492): "draw a card, and choose a player, who gains or loses 2 Honor" -- the watch's controller decides. The Sincerity of the Dragon: "choose a player, who discards a card".</summary>
+    public const string ShadowCourtHonor = "shadow-court-honor";
+    public const string SincerityDiscard = "sincerity-discard";
 }
 
 /// <summary>What choosing an option amounts to, for a client to word and style it: "avoid" (accept a cost or a lesser loss so the
@@ -63,6 +95,16 @@ public sealed class PendingEitherOr
     public int ResumePlayerId { get; set; }
     public bool StayWithActor { get; set; }
     public List<string>? BowedBefore { get; set; }
+    /// <summary>The card that performed the action, when an option reads it (Kitsuki Methods: "gain 2 Honor" is its performer's; The Shadow's Embrace pass, issue #476 batch 3).</summary>
+    public string? PerformerId { get; set; }
+    // Kakita Genshi (issue #477 batch 4): the whole action, so the tail every action ends with runs once the choice (and the one it chains into) is made; ChainAbilityLock is set by the
+    // refusal, which owes the acting player a choice of one of the affected Personality's abilities to lock.
+    public GameCommand? Command { get; set; }
+    public bool ConsumedGrant { get; set; }
+    public bool PlayedFromDiscard { get; set; }
+    public int? OpponentHonorBefore { get; set; }
+    public List<AdditionalActionGrant> PreExistingGrants { get; set; } = [];
+    public bool ChainAbilityLock { get; set; }
 }
 
 /// <summary>One thing the deciding player may choose. Detail says in plain words what it does; Gold is the payment quote for an option
@@ -78,7 +120,7 @@ public sealed record EitherOrView(string ChoiceId, string SourceCardId, string S
 
 public sealed partial class MatchEngine
 {
-    private sealed record EitherOrOption(string Key, string Label, string Detail, string Kind, int GoldCost, bool Legal, string? Reason);
+    internal sealed record EitherOrOption(string Key, string Label, string Detail, string Kind, int GoldCost, bool Legal, string? Reason);
 
     // ---- what is on offer ----
 
@@ -93,7 +135,20 @@ public sealed partial class MatchEngine
             EitherOrSpecs.TrainingThreeWay => $"{source}: pay 2 Gold, lose 2 Honor, or let your opponent gain 2 Honor.",
             EitherOrSpecs.ExtendSoulShuffle => $"{source}: shuffle {affected} and his attachments into their owners' decks, or your opponent takes two additional Battle actions.",
             EitherOrSpecs.InoStorm => $"{source}'s storm: discard a card, or bow {(affected == "" ? "the performer" : affected)}.",
-            _ => throw new RuleViolation("Unknown choice.")
+            EitherOrSpecs.MakotoPayOrDishonor => $"{source}: pay 4 Gold and lose 1 Honor, or {affected} is dishonored and moved home.",
+            EitherOrSpecs.DaikiPayLoseOrLock => $"{source}: pay 4 Gold, lose 2 Honor, or neither -- then {affected} may not be assigned, and will not move, into attacking armies this turn.",
+            EitherOrSpecs.KitsukiMethodsDiscard or EitherOrSpecs.KitsukiMethodsReward or EitherOrSpecs.CrowdedStreetsMoveHome
+                or EitherOrSpecs.ForgeYourSoulAttach or EitherOrSpecs.ForgeYourSoulShuffle or EitherOrSpecs.ForgeYourSoulShuffleNoWeapon => ShadowsEmbraceEitherOrPrompt(p, source, affected),
+            EitherOrSpecs.GenshiShame => $"{source}: dishonor {affected}, or {Player(p.ActingPlayerId).Name} gains 1 Honor and locks one of his abilities until their next turn begins.",
+            EitherOrSpecs.TanimuraPayOrLose => $"{source}: pay 4 Gold, or lose 3 Honor.",
+            EmperorRemainingBSpecs.MercyBowOrHome => $"{source}: choose to either bow {affected} or move him home.", // Emperor Edition remaining-cards pass (issue #492), group B
+            EmperorRemainingBSpecs.AncestorsDestroy => $"{source}: destroy {affected}, or discard a card at random from your hand and {Player(p.ActingPlayerId).Name} chooses a player, who gains or loses 3 Honor.",
+            EmperorRemainingBSpecs.AncestorsHonor => $"{source}: choose a player, who gains or loses 3 Honor.",
+            EitherOrSpecs.SacrificeOfPawns => SacrificeOfPawnsPrompt(p, source, affected),
+            EitherOrSpecs.PowerOfWordLoseOrNegate => $"{source}: lose 3 Honor, or your action's effects are negated.",
+            EitherOrSpecs.ShadowCourtHonor => $"{source}: choose a player who gains or loses 2 Honor.",
+            EitherOrSpecs.SincerityDiscard => $"{source}: choose a player who discards a card.",
+            _ => RegisteredEitherOrPrompt(p, source, affected) ?? throw new RuleViolation("Unknown choice.")
         };
     }
 
@@ -140,7 +195,57 @@ public sealed partial class MatchEngine
             }
             case EitherOrSpecs.InoStorm:
                 return InoStormOptions(p, affected);
-            default: throw new RuleViolation("Unknown choice.");
+            // Yasuki Makoto (issue #460 batch 2): the decider is the TARGET's controller (p.DeciderPlayerId, set to target.OwnerId when the
+            // action opens this decision), not the acting player -- paying avoids both the Honor loss and the dishonor/move-home.
+            case EitherOrSpecs.MakotoPayOrDishonor:
+            {
+                var name = Definition(affected!).Name;
+                return [
+                    new("pay", "Pay 4 Gold", "You lose 1 Honor.", EitherOrKind.Avoid, 4, payable(4), "You cannot produce 4 Gold."),
+                    new("refuse", "Do not pay", $"{name} is dishonored and moved home.", EitherOrKind.Accept, 0, true, null)
+                ];
+            }
+            // Yasuki Daiki (issue #467 batch 2): the decider is the target's controller. Losing Honor is always possible (Family Honor may go negative).
+            case EitherOrSpecs.DaikiPayLoseOrLock:
+            {
+                var name = Definition(affected!).Name;
+                return [
+                    new("pay", "Pay 4 Gold", "Nothing further happens.", EitherOrKind.Avoid, 4, payable(4), "You cannot produce 4 Gold."),
+                    new("honor", "Lose 2 Honor", "Nothing further happens.", EitherOrKind.Avoid, 0, true, null),
+                    new("neither", "Do neither", $"{name} may not be assigned, and will not move, into attacking armies this turn.", EitherOrKind.Accept, 0, true, null)
+                ];
+            }
+            case EitherOrSpecs.KitsukiMethodsDiscard: case EitherOrSpecs.KitsukiMethodsReward: case EitherOrSpecs.CrowdedStreetsMoveHome:
+            case EitherOrSpecs.ForgeYourSoulAttach: case EitherOrSpecs.ForgeYourSoulShuffle: case EitherOrSpecs.ForgeYourSoulShuffleNoWeapon:
+                return ShadowsEmbraceEitherOrOptions(p, affected);
+            // Kakita Genshi (issue #477 batch 4): the decider is the target's controller. Dishonoring is a choice only while the Personality is still in play.
+            case EitherOrSpecs.GenshiShame:
+            {
+                var name = Definition(affected!).Name;
+                return [
+                    new("dishonor", $"Dishonor {name}", $"{name} is dishonored. Nothing further happens.", EitherOrKind.Avoid, 0, InPlay(affected!), $"{name} is no longer in play."),
+                    new("refuse", "Do not dishonor him", $"{Player(p.ActingPlayerId).Name} gains 1 Honor and chooses one of {name}'s abilities, which may not be used until their next turn begins.", EitherOrKind.Accept, 0, true, null)
+                ];
+            }
+            // Yasuki Tanimura (issue #477 batch 6): the decider is the player whose Battle action targeted him. Losing Honor is always possible (Family Honor may go negative).
+            case EitherOrSpecs.SacrificeOfPawns:
+                return SacrificeOfPawnsOptions(p, affected!);
+            case EitherOrSpecs.TanimuraPayOrLose:
+                return [
+                    new("pay", "Pay 4 Gold", "Nothing further happens.", EitherOrKind.Avoid, 4, payable(4), "You cannot produce 4 Gold."),
+                    new("lose", "Do not pay", "You lose 3 Honor.", EitherOrKind.Accept, 0, true, null)
+                ];
+            case EmperorRemainingBSpecs.MercyBowOrHome: return MercyOptions(affected); // Emperor Edition remaining-cards pass (issue #492), group B
+            case EmperorRemainingBSpecs.AncestorsDestroy: case EmperorRemainingBSpecs.AncestorsHonor: return AncestorsOptions(p, affected);
+            // The Power of a Word (issue #492): the decider is the player whose Battle action targeted the Courtier. Losing Honor is always possible (Family Honor may go negative).
+            case EitherOrSpecs.PowerOfWordLoseOrNegate:
+                return [
+                    new("lose", "Lose 3 Honor", "Your action goes ahead: it is not negated.", EitherOrKind.Avoid, 0, true, null),
+                    new("negate", "Do not lose the Honor", "Your action's effects are negated.", EitherOrKind.Accept, 0, true, null)
+                ];
+            case EitherOrSpecs.ShadowCourtHonor: case EitherOrSpecs.SincerityDiscard:
+                return EmperorRemainingDEitherOrOptions(p);
+            default: return RegisteredEitherOrOptions(p, affected, source, payable) ?? throw new RuleViolation("Unknown choice.");
         }
     }
 
@@ -151,13 +256,13 @@ public sealed partial class MatchEngine
     /// taken and announced -- and the caller finishes the action itself. <paramref name="origin"/>: "window" suspends the reaction window
     /// that is open right now, "action" is the tail of an ordinary action (bowedBefore is the snapshot of what was already bowed).</summary>
     private bool OpenEitherOr(string specId, CardInstance source, int actingPlayerId, int deciderId, CardInstance? affected, string origin,
-        IEnumerable<string>? bowedBefore = null, bool stayWithActor = false)
+        IEnumerable<string>? bowedBefore = null, bool stayWithActor = false, string? performerId = null, int? resumePlayerId = null)
     {
         var pending = new PendingEitherOr
         {
             SpecId = specId, SourceCardId = source.Id, AffectedCardId = affected?.Id, ActingPlayerId = actingPlayerId, DeciderPlayerId = deciderId,
-            Origin = origin, BowedBefore = bowedBefore?.ToList(), StayWithActor = stayWithActor,
-            ResumePlayerId = origin == "window" ? source.OwnerId : actingPlayerId
+            Origin = origin, BowedBefore = bowedBefore?.ToList(), StayWithActor = stayWithActor, PerformerId = performerId,
+            ResumePlayerId = resumePlayerId ?? (origin == "window" ? source.OwnerId : actingPlayerId)
         };
         var options = EitherOrOptions(pending);
         var legal = options.Where(o => o.Legal).ToArray();
@@ -191,6 +296,8 @@ public sealed partial class MatchEngine
         if (option.GoldCost > 0) ValidatePayment(pending.DeciderPlayerId, option.GoldCost, command.SourceIds);
         else Require(command.SourceIds is null or { Length: 0 }, "This option needs no Gold sources.");
         ApplyEitherOr(pending, option, command.SourceIds);
+        // A decision that hands a further one to a player (Kitsuki Methods' refusal; The Shadow's Embrace pass, issue #476 batch 3): that one finishes the action when it is answered.
+        if (_state.PendingEitherOr is { } chained && !ReferenceEquals(chained, pending)) return;
         FinishEitherOr(pending);
     }
 
@@ -242,7 +349,77 @@ public sealed partial class MatchEngine
             case (EitherOrSpecs.InoStorm, "bow"):
                 ApplyInoStorm(p, option, decider, affected);
                 break;
-            default: throw new RuleViolation("Unknown choice.");
+            // Yasuki Makoto (issue #460 batch 2).
+            case (EitherOrSpecs.MakotoPayOrDishonor, "pay"):
+                Pay(decider.Id, source, option.GoldCost, sourceIds);
+                GainHonor(decider.Id, -1, Definition(source).Name);
+                Emit("eitherOrChosen", $"{decider.Name} paid 4 Gold and lost 1 Honor ({Definition(source).Name}).", decider.Id, source.Id);
+                break;
+            case (EitherOrSpecs.MakotoPayOrDishonor, "refuse"):
+                Emit("eitherOrChosen", $"{decider.Name} did not pay ({Definition(source).Name}): {Definition(affected!).Name} is dishonored and moved home.", decider.Id, affected!.Id);
+                Dishonor(affected!, p.ActingPlayerId);
+                MoveHome(affected!, false);
+                break;
+            // Yasuki Daiki (issue #467 batch 2; ForgottenLegacyBatch2.cs).
+            case (EitherOrSpecs.DaikiPayLoseOrLock, "pay"):
+                Pay(decider.Id, source, option.GoldCost, sourceIds);
+                Emit("eitherOrChosen", $"{decider.Name} paid 4 Gold ({Definition(source).Name}).", decider.Id, source.Id);
+                break;
+            case (EitherOrSpecs.DaikiPayLoseOrLock, "honor"):
+                Emit("eitherOrChosen", $"{decider.Name} chose to lose 2 Honor ({Definition(source).Name}).", decider.Id, source.Id);
+                GainHonor(decider.Id, -2, Definition(source).Name, source);
+                break;
+            case (EitherOrSpecs.DaikiPayLoseOrLock, "neither"):
+                Emit("eitherOrChosen", $"{decider.Name} did neither ({Definition(source).Name}).", decider.Id, affected!.Id);
+                DaikiLock(affected!, source);
+                break;
+            case (EitherOrSpecs.KitsukiMethodsDiscard, _): case (EitherOrSpecs.KitsukiMethodsReward, _): case (EitherOrSpecs.CrowdedStreetsMoveHome, _):
+            case (EitherOrSpecs.ForgeYourSoulAttach, _): case (EitherOrSpecs.ForgeYourSoulShuffle, _): case (EitherOrSpecs.ForgeYourSoulShuffleNoWeapon, _):
+                ApplyShadowsEmbraceEitherOr(p, option, decider, affected, sourceIds);
+                break;
+            // Kakita Genshi (issue #477 batch 4; EmperorPersonalityBatch4.cs).
+            case (EitherOrSpecs.GenshiShame, "dishonor"):
+                Emit("eitherOrChosen", $"{decider.Name} chose to dishonor {Definition(affected!).Name} ({Definition(source).Name}).", decider.Id, affected!.Id);
+                Dishonor(affected!, p.ActingPlayerId);
+                break;
+            case (EitherOrSpecs.GenshiShame, "refuse"):
+                Emit("eitherOrChosen", $"{decider.Name} did not dishonor {Definition(affected!).Name} ({Definition(source).Name}): {Player(p.ActingPlayerId).Name} gains 1 Honor.", decider.Id, source.Id);
+                GainHonorFromPerformer(source, 1, Definition(source).Name);
+                p.ChainAbilityLock = true;
+                break;
+            // Yasuki Tanimura (issue #477 batch 6).
+            case (EitherOrSpecs.SacrificeOfPawns, _):
+                ApplySacrificeOfPawns(p, option, decider, source, affected);
+                break;
+            case (EitherOrSpecs.TanimuraPayOrLose, "pay"):
+                Pay(decider.Id, source, option.GoldCost, sourceIds);
+                Emit("eitherOrChosen", $"{decider.Name} paid 4 Gold ({Definition(source).Name}).", decider.Id, source.Id);
+                break;
+            case (EitherOrSpecs.TanimuraPayOrLose, "lose"):
+                Emit("eitherOrChosen", $"{decider.Name} did not pay ({Definition(source).Name}): {decider.Name} loses 3 Honor.", decider.Id, source.Id);
+                GainHonor(decider.Id, -3, Definition(source).Name, source);
+                break;
+            case (EmperorRemainingBSpecs.MercyBowOrHome, _): // Emperor Edition remaining-cards pass (issue #492), group B (EmperorRemainingB.cs)
+                ApplyMercy(p, option, decider, affected);
+                break;
+            case (EmperorRemainingBSpecs.AncestorsDestroy, _): case (EmperorRemainingBSpecs.AncestorsHonor, _):
+                ApplyAncestors(p, option, decider, affected);
+                break;
+            // The Power of a Word (issue #492; EmperorRemainingD.cs).
+            case (EitherOrSpecs.PowerOfWordLoseOrNegate, "lose"):
+                Emit("eitherOrChosen", $"{decider.Name} chose to lose 3 Honor ({Definition(source).Name}).", decider.Id, source.Id);
+                GainHonor(decider.Id, -3, Definition(source).Name, source);
+                break;
+            case (EitherOrSpecs.PowerOfWordLoseOrNegate, "negate"):
+                Emit("eitherOrChosen", $"{decider.Name} did not lose the Honor ({Definition(source).Name}): the action's effects are negated.", decider.Id, source.Id);
+                NegateHeldActionFromEitherOr(p, source);
+                break;
+            case (EitherOrSpecs.ShadowCourtHonor, _): case (EitherOrSpecs.SincerityDiscard, _):
+                ApplyEmperorRemainingDEitherOr(p, option, decider);
+                break;
+            default:
+                if (RegisteredApplyEitherOr(p, option, source, decider, affected, sourceIds)) break;
+                throw new RuleViolation("Unknown choice.");
         }
     }
 
@@ -250,6 +427,9 @@ public sealed partial class MatchEngine
     private void FinishEitherOr(PendingEitherOr p)
     {
         _state.PendingEitherOr = null;
+        if (p.SpecId == EitherOrSpecs.SacrificeOfPawns && _state.PendingSearch is not null) return; // Sacrifice of Pawns (issue #492, group C): the refusal opened a search, which finishes the action.
+        if (RegisteredFinishEitherOr(p)) return;
+        if (p.SpecId == EitherOrSpecs.GenshiShame && p.Origin == "action") { FinishGenshi(p); return; } // Kakita Genshi (issue #477 batch 4): the whole Iaijutsu action finishes together.
         if (p.Origin == "window")
         {
             // A Reaction was played inside a reaction window: the window stays open and priority flips, exactly as when any Reaction
@@ -300,5 +480,26 @@ public sealed partial class MatchEngine
             }
             yield return new("chooseEitherOr", o.Label, o.Legal, o.Legal ? null : o.Reason, o.Legal ? command : null, p.SourceCardId, Gold: quote);
         }
+    }
+}
+
+public sealed partial class MatchEngine
+{
+    private bool HandleRegisteredEitherOr(string type, GameCommand command)
+    {
+        if (type != "eitherOr") return false;
+        WithResumedAction(() => ResolveEitherOrCommand(command));
+        return true;
+    }
+}
+
+public sealed partial class MatchEngine
+{
+    // Registration only: callbacks are not invoked during module initialization.
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
+    [System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void RegisterEitherOrHooks()
+    {
+        EngineHooks.PendingChoice.Register("HandleRegisteredEitherOr", 500, static (engine, type, command) => engine.HandleRegisteredEitherOr(type, command));
     }
 }

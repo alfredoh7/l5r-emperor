@@ -1,0 +1,56 @@
+[
+  {
+    "card_id": "oracle-l5r-910",
+    "printing_set": [
+      "Embers of War"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=910",
+    "image_path": "assets/reference/oracle/embers-of-war/webp/oracle-l5r-910-printing-1-image-1.webp",
+    "image_sha256": "70f41023a94d2f81195d36b7b5d1d526fb2326d08d19eaef49c409f8aa9dcd0b"
+  },
+  {
+    "card_id": "oracle-l5r-2880",
+    "printing_set": [
+      "Embers of War"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=2880",
+    "image_path": "assets/reference/oracle/embers-of-war/webp/oracle-l5r-2880-printing-1-image-1.webp",
+    "image_sha256": "feac4a749d110c120de79669685c6cc34085db384812a1b1ae23a5708affdee9"
+  },
+  {
+    "card_id": "oracle-l5r-3639",
+    "printing_set": [
+      "Before the Dawn"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=3639",
+    "image_path": "assets/reference/oracle/before-the-dawn/webp/oracle-l5r-3639-printing-1-image-1.webp",
+    "image_sha256": "9d2deee15b8a8669982136bad15a6995bcf80a0969accd50d0e403935f4e2b19"
+  },
+  {
+    "card_id": "oracle-l5r-6883",
+    "printing_set": [
+      "Embers of War"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=6883",
+    "image_path": "assets/reference/oracle/embers-of-war/webp/oracle-l5r-6883-printing-1-image-1.webp",
+    "image_sha256": "e9169a7fe0223129976c30df2f243491d677dfd6d23165fa2d8a2964df5bd28f"
+  },
+  {
+    "card_id": "oracle-l5r-6934",
+    "printing_set": [
+      "Embers of War"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=6934",
+    "image_path": "assets/reference/oracle/embers-of-war/webp/oracle-l5r-6934-printing-1-image-1.webp",
+    "image_sha256": "243a2db533eb43d937cb2a2e3e0e05fb578f8cb877e483eb3af8f85815057e6c"
+  },
+  {
+    "card_id": "oracle-l5r-8861",
+    "printing_set": [
+      "Forgotten Legacy"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=8861",
+    "image_path": "assets/reference/oracle/forgotten-legacy/webp/oracle-l5r-8861-printing-1-image-1.webp",
+    "image_sha256": "592aafe6f2f6954d78046bb22ef1e9b61b48c3d8284548cc773f565e76df3442"
+  }
+]
