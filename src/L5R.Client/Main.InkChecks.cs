@@ -13,7 +13,7 @@ public partial class Main
     /// layout and card signals. Isolated animation checks use representative
     /// rectangles, not fabricated gameplay events or an altered rules snapshot.
     /// </summary>
-    private async void ProbeInkMat()
+    private async Task ProbeInkMat()
     {
         try
         {

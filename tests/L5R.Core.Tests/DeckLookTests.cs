@@ -484,7 +484,8 @@ internal static class DeckLookTests
         Equal(discarded.Zone, Zone.FateDiscard); Equal(discarded.OwnerId, 1, "Into the deck owner's pile");
         Equal(string.Join(",", Top(e, 1, "Fate")), "training-tactician,training-spell,training-berserker", "The remaining card, then the two sent to the bottom in the chosen order");
 
-        // The opponent's Dynasty deck goes to the Dynasty pile; a look at your own Dynasty deck may take a card into your hand.
+        // The opponent's Dynasty deck goes to the Dynasty pile; a Dynasty card can NEVER go into a hand (Mendon's
+        // ruling), not even from your own deck -- the hand disposition is always capped to 0 for a Dynasty look.
         var e2 = AnyDeckFixture(out var source2);
         Accept(e2, Use(e2, source2, "training-look-any")); Accept(e2, ChooseDeck(e2, "Dynasty", 1));
         Accept(e2, Arrange(e2, "1:discard", "0:top", "2:top"));
@@ -492,14 +493,16 @@ internal static class DeckLookTests
         var e3 = AnyDeckFixture(out var source3);
         Accept(e3, Use(e3, source3, "training-look-any")); Accept(e3, ChooseDeck(e3, "Dynasty", 0));
         var own = Look(e3); Check(own.OwnDeck);
-        Equal(string.Join(",", own.Rules!.Select(r => $"{r.Disposition}:{r.Min}-{r.Max}")), "discard:0-1,bottom:0-2,hand:0-1");
-        Reject(e3, Arrange(e3, "0:hand", "1:hand", "2:top"));                    // one to the hand at most
-        Reject(e3, Arrange(e3, "0:show", "1:top", "2:top"));                     // 'show' is not offered here, only 'hand'
+        Equal(string.Join(",", own.Rules!.Select(r => $"{r.Disposition}:{r.Min}-{r.Max}")), "discard:0-1,bottom:0-2,hand:0-0", "A Dynasty card can never go to a hand, even your own");
+        Check(!own.Cards![0].Dispositions.Single(d => d.Disposition == "hand").Legal);
+        Equal(own.Cards[0].Dispositions.Single(d => d.Disposition == "hand").Reason, "A Dynasty card cannot go into a hand");
+        Reject(e3, Arrange(e3, "0:hand", "1:top", "2:top"));                     // a Dynasty card cannot go to the hand
+        Reject(e3, Arrange(e3, "0:show", "1:top", "2:top"));                     // nor 'show', for the same reason
         var handBefore = e3.State.Players[0].Hand.Count;
-        Accept(e3, Arrange(e3, "0:hand", "1:discard", "2:bottom"));
-        Equal(e3.State.Players[0].Hand.Count, handBefore + 1); Check(e3.State.Players[0].Hand.Any(id => e3.State.Cards[id].DefinitionId == "training-farm"), "The Dynasty card went into the hand");
-        Equal(e3.State.Cards.Values.Single(c => c.DefinitionId == "training-castle").Zone, Zone.DynastyDiscard);
-        Equal(string.Join(",", Top(e3, 0, "Dynasty")), "training-market-holding,training-dojo", "The Dynasty deck: what remained, with the bottom card last");
+        Accept(e3, Arrange(e3, "0:discard", "1:bottom", "2:top"));
+        Equal(e3.State.Players[0].Hand.Count, handBefore, "Nothing entered the hand");
+        Equal(e3.State.Cards.Values.Single(c => c.DefinitionId == "training-farm").Zone, Zone.DynastyDiscard);
+        Equal(string.Join(",", Top(e3, 0, "Dynasty")), "training-dojo,training-market-holding,training-castle", "The Dynasty deck: the top group, the untouched rest, then the bottom group");
         Equal(e3.State.ShownCards.Count, 0);
     }
 

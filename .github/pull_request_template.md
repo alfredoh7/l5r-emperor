@@ -10,6 +10,12 @@ UI / rules / shared. Explain any semantic effect on the other lane, even if the 
 
 List actual commands/results and human/visual evidence where relevant. Do not claim Windows gameplay from CI or expert rules acceptance from automated tests.
 
+## Client-lane items
+
+- [ ] Reviewed the contract ledger and semantic changes; listed client-lane items below, or explained why none apply.
+
+For affected choices, commands, view fields, payment/target payloads and phase/event meanings: identify Core/server authority, permitted viewers, existing client handling or follow-up. Record persistence/replay state obligations separately. `python tools/collab.py ledger --base origin/main --format markdown` lists candidates; add `--working` for local edits. An empty ledger alone does not prove no client impact. Governance-lite supplies four focused review roles; its results are advisory evidence under AGENTS.md.
+
 ## Remaining work
 
 State any unresolved decisions or limitations, or explicitly say none. The agent refreshes current main and runs the collaboration audit before asking to merge.

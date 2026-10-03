@@ -1,0 +1,115 @@
+{
+  "Profile": "personality-wave-76",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-2853",
+      "Name": "Goju Kobashi",
+      "Type": "Personality",
+      "Clan": "Spider",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After Kobashi enters play: Lose 1 Honor.\nBattle: Target an enemy attachment: Kobashi consumes it. Destroy it. You may target one of your Ninja, create a 1F Shadowlands • Ninja Follower, and attach it to him.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-2853.jpg",
+      "Keywords": [
+        "Consumer",
+        "Ninja",
+        "Shadowlands",
+        "Spider Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "kobashi-consume"
+      ],
+      "Effect": "none",
+      "EntryHonorLoss": 1
+    },
+    {
+      "Id": "oracle-l5r-7618",
+      "Name": "Suiteiru no Oni",
+      "Type": "Personality",
+      "Clan": "Unaligned",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 5,
+      "Chi": 3,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After Suiteiru enters play: Lose 4 Honor.\nOpen: Destroy your target unbowed Personality: Create a number of 1F Shadowlands • Nonhuman • Oni Followers equal to his Chi. Attach them to one or more of your Personalities. Lose Honor equal to the number of Followers this created.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7618.jpg",
+      "Keywords": [
+        "Nonhuman",
+        "Oni",
+        "Shadowlands"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "suiteiru-create"
+      ],
+      "Effect": "none",
+      "EntryHonorLoss": 4
+    },
+    {
+      "Id": "oracle-l5r-10008",
+      "Name": "Kobashi's Spawn",
+      "Type": "Follower",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 1,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "May not be included in decks.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10008.jpg",
+      "Keywords": [
+        "Shadowlands",
+        "Ninja"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "none",
+      "CreatedOnly": true
+    },
+    {
+      "Id": "oracle-l5r-10021",
+      "Name": "Suiteiru's Podling",
+      "Type": "Follower",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 1,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "May not be included in decks.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10021.jpg",
+      "Keywords": [
+        "Shadowlands",
+        "Nonhuman",
+        "Oni"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "none",
+      "CreatedOnly": true
+    }
+  ],
+  "Decks": []
+}

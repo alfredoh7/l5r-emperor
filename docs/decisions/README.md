@@ -6,6 +6,10 @@ Use one Markdown file per decision, named `YYYY-MM-DD-topic.md`. Include: decisi
 
 Current standing decisions are in `AI_HANDOFF.md` and the pinned rules coverage report. Current work belongs in issues/PRs and `docs/handoffs/tasks/`, not this index. Private auto-memory can be a convenience but never overrides the checked-in team record or the user's latest instruction.
 
+Mendon's confirmed rulings, once he has stated them, are also indexed by number in
+[`docs/rules/RULINGS.md`](../rules/RULINGS.md) — check there before re-deriving a rules
+interpretation this register's decision docs already settled.
+
 - [Duel verdict with retained evidence](2026-09-17-duel-verdict-evidence.md) — centered result, authoritative reason and continuous card transitions.
 
 - [Inspect every own focused card](2026-09-17-own-focus-inspection.md) — direct private inspection after commitment, from every supported source.
@@ -13,3 +17,7 @@ Current standing decisions are in `AI_HANDOFF.md` and the pinned rules coverage 
 - [Shared live-match duel and sandbox](2026-09-17-live-duel-integration.md) — one approved screen, separate sessions, full table-to-duel round trip.
 
 - [Suspicions on the owner's Events Phase](2026-09-22-suspicions-owner-events-phase.md) — fires only on its owner's turns; an Event already face up resolves in the Events Phase.
+
+- [Personality-destruction Reaction triggers](2026-09-29-personality-destruction-reactions.md) — confirmed play-to-dead trigger, with narrower action-source wording and no later discard-to-dead trigger.
+
+- [Rename the "Fallen" UI label to "Dead"](2026-09-30-dead-not-fallen.md) — proposed, for Alfredo: "Fallen" is a printed keyword later in the Emperor Arc and collides with the client's own word for the dead-personality pile.

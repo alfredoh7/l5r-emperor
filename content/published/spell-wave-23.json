@@ -1,0 +1,283 @@
+{
+  "Profile": "spell-wave-23",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-1216",
+      "Name": "Capturing the Soul",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Bow this Shugenja and 0 or more of your other performing Shugenja, target a Personality, and remove this card from the game: If the total Chi of all your performing Shugenja is higher than three times the Chi of the Personality, remove him (and his attachments) from the game.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1216.jpg",
+      "Keywords": [
+        "Ritual"
+      ],
+      "Focus": 1,
+      "Abilities": [
+        "capturing-soul-remove"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-1416",
+      "Name": "Cleansing the Path",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Destroy this card: Ranged 4 Attack, or Ranged 5 Attack if the performing Shugenja is Fire.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1416.jpg",
+      "Keywords": [
+        "Fire"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "cleansing-path-attack"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-1458",
+      "Name": "Consecration",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: Bow this card: Choose one or two of your provinces. After the first time this turn a Personality assigns or moves to an attacking army at one of those provinces' battlefields, gain 2 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1458.jpg",
+      "Keywords": [
+        "Earth"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "consecration-watch"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-1471",
+      "Name": "Contemplate the Void",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 6,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Bow this Shugenja, destroy this card, and discard your hand (even if empty): Draw four cards.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1471.jpg",
+      "Keywords": [
+        "Void"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "contemplate-void-draw"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-2954",
+      "Name": "Hanabi",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Political Limited: Bow this Shugenja and destroy this card: Gain 4 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-2954.jpg",
+      "Keywords": [
+        "Unique"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "hanabi-honor"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-3541",
+      "Name": "I Give You My Name",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 3,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Bow this Shugenja and destroy your target Human Personality: Search your Dynasty deck or discard pile for a non-Unique Oni with Gold Cost lower than or equal to the Human's Gold Cost plus the performer's Chi. Put the Oni into play, ignoring Gold cost. Lose 2 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-3541.jpg",
+      "Keywords": [
+        "Maho"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "i-give-you-my-name-search"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-5649",
+      "Name": "Obscured Pathways",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "While this Shugenja is Earth, this card's Battle ability may be used even if this unit is not at the current battlefield.\nBattle: Bow this Shugenja if he is home, bow this card and target an attacking Personality: Move him home.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-5649.jpg",
+      "Keywords": [
+        "Earth",
+        "Forest"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "obscured-pathways-move"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-8175",
+      "Name": "The Kami's Blessing",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 3,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle/Open: Bow this card: Give this Shugenja a Force bonus equal to his Chi.\nBattle: Bow this card and target one or two Samurai: Give each of them a Force bonus equal to this Shugenja's Chi.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8175.jpg",
+      "Keywords": [
+        "Kami"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "kami-blessing-self",
+        "kami-blessing-samurai"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-8473",
+      "Name": "Thunder's Favor",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 3,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Bow this card: Ranged 4 Attack, or Ranged 6 Attack if this Shugenja is Thunder.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8473.jpg",
+      "Keywords": [
+        "Thunder"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "thunders-favor-attack"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-8997",
+      "Name": "Unnatural Flood",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Bow this Shugenja and target an enemy Personality: Move him home; if this Shugenja is Water, this movement will not be negated. If the target moved, bow him and negate his (future) movement.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8997.jpg",
+      "Keywords": [
+        "Unique",
+        "Water"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "unnatural-flood-move"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9228",
+      "Name": "Warded Paths",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "While this Shugenja is defending, he has +3F.\nWhile this Shugenja is Earth and you are the Defender, you decide the order in which battles resolve.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9228.jpg",
+      "Keywords": [
+        "Earth"
+      ],
+      "Focus": 2,
+      "Abilities": [],
+      "Effect": "warded-paths"
+    }
+  ],
+  "Decks": []
+}

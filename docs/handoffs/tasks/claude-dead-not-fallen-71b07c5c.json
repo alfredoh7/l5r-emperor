@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Design note recording the decision to rename the 'Fallen' UI label to 'Dead'. Docs only; no code change.",
+  "validation": "Docs-only; collab audit. No build or native checks apply.",
+  "remaining": "None; ready for review. Implementation of the rename is a separate task.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/pull/568",
+  "branch": "claude/dead-not-fallen",
+  "updated": "2026-10-03T15:20:27.717475+00:00"
+}

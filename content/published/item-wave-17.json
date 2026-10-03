@@ -1,0 +1,34 @@
+{
+  "Profile": "item-wave-17",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10112",
+      "Name": "Celestial Sword of the Dragon",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 1,
+      "Chi": 1,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Will only attach to a Dragon Clan Personality.\nThis card has +1F for each Dragon Clan Personality you control.\nAfter this card enters play: Gain 2 Honor.\nAfter this card enters play: Search your discard pile, then deck, for a Ring. Show it. Put it into play or your hand.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10112.jpg",
+      "Keywords": [
+        "Unique",
+        "Weapon",
+        "Experienced",
+        "Suryn"
+      ],
+      "Focus": 4,
+      "Abilities": [],
+      "Effect": "celestial-sword-force-dragon",
+      "AttachRequiresKeyword": "Dragon Clan"
+    }
+  ],
+  "Decks": []
+}

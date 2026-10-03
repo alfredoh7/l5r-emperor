@@ -1,0 +1,38 @@
+[
+  {
+    "card_id": "oracle-l5r-6653",
+    "printing_set": [
+      "Embers of War"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=6653",
+    "image_path": "assets/reference/oracle/embers-of-war/webp/oracle-l5r-6653-printing-1-image-1.webp",
+    "image_sha256": "2212aedb331d95d9c18a21c6f0499b13e1b7546f5b0bc2e3b59827d817584a9a"
+  },
+  {
+    "card_id": "oracle-l5r-8012",
+    "printing_set": [
+      "Forgotten Legacy"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=8012",
+    "image_path": "assets/reference/oracle/forgotten-legacy/webp/oracle-l5r-8012-printing-1-image-1.webp",
+    "image_sha256": "11b3b07da1bd1e40fc05c1b61e43352ba20c3d16a2f68bbd2a89fd598c80fd99"
+  },
+  {
+    "card_id": "oracle-l5r-9623",
+    "printing_set": [
+      "Before the Dawn"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=9623",
+    "image_path": "assets/reference/oracle/before-the-dawn/webp/oracle-l5r-9623-printing-1-image-1.webp",
+    "image_sha256": "b44bec662fbcb1db7f36c24f1d57df9fe0471b604a39c1f4bc3a179f5c9bc38f"
+  },
+  {
+    "card_id": "oracle-l5r-10087",
+    "printing_set": [
+      "Seeds of Decay"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10087",
+    "image_path": "assets/reference/oracle/seeds-of-decay/webp/oracle-l5r-10087-printing-1-image-1.webp",
+    "image_sha256": "2476cb5ced2f516747cddacc35fcd5934c29f83d5b3bdc1d5d69ea584db8bb76"
+  }
+]

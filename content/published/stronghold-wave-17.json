@@ -1,0 +1,177 @@
+{
+  "Profile": "stronghold-wave-17",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-2388",
+      "Name": "Eternal Victory Dojo",
+      "Type": "Stronghold",
+      "Clan": "Lion",
+      "GoldCost": 0,
+      "GoldProduction": 3,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 7,
+      "StartingHonor": 7,
+      "Text": "Your deck may include four copies each of one or two non-Unique Strategies with Battle abilities.\nReaction: After your Tactical action resolves: Draw a card after the next End Phase begins.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-2388.jpg",
+      "Keywords": [
+        "Dojo"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "eternal-victory-draw"
+      ],
+      "Effect": "eternal-victory-dojo"
+    },
+    {
+      "Id": "oracle-l5r-3257",
+      "Name": "Hidden Falls Dojo",
+      "Type": "Stronghold",
+      "Clan": "Crane",
+      "GoldCost": 0,
+      "GoldProduction": 4,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 7,
+      "StartingHonor": 5,
+      "Text": "Recon Open: Target one or two provinces: You have Reconnaissance at their battlefields. After each Cavalry Maneuvers Segment there is an additional Infantry Maneuvers Segment in which only your Scout Personalities may be assigned and only to the targeted provinces' battlefields.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-3257.jpg",
+      "Keywords": [
+        "Dojo"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "hidden-falls-recon"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-4310",
+      "Name": "Keep of the Dead",
+      "Type": "Stronghold",
+      "Clan": "Spider",
+      "GoldCost": 0,
+      "GoldProduction": 4,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 7,
+      "StartingHonor": 0,
+      "Text": "You do not lose Honor from Spider Clan and Fate cards you own. You ignore Honor Requirements on your Followers.\nBattle: Choose your performing Commander: If any enemy units are at the current battlefield or he assigned there, move him there. Straighten his unit if he moved.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-4310.jpg",
+      "Keywords": [],
+      "Focus": 0,
+      "Abilities": [
+        "keep-of-dead-move"
+      ],
+      "Effect": "keep-of-the-dead"
+    },
+    {
+      "Id": "oracle-l5r-4541",
+      "Name": "Koshin Keep",
+      "Type": "Stronghold",
+      "Clan": "Mantis",
+      "GoldCost": 0,
+      "GoldProduction": 4,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 7,
+      "StartingHonor": 2,
+      "Text": "Recon Reaction: After engaging: You have Reconnaissance at the current battlefield. Until this battle ends, your Ranged Attacks that do not destroy their target have the additional effects, \"reduce the target's Force by the Ranged Attack's strength and you may take an additional Ranged Attack Battle action that may only target the same card\".",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-4541.jpg",
+      "Keywords": [],
+      "Focus": 0,
+      "Abilities": [
+        "koshin-keep-recon"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-4646",
+      "Name": "Kyuden Otomo",
+      "Type": "Stronghold",
+      "Clan": "Crane",
+      "GoldCost": 0,
+      "GoldProduction": 4,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 6,
+      "StartingHonor": 6,
+      "Text": "You may substitute discarding a Favor token from this card for discarding the Imperial Favor as a cost.\nAfter you take the Imperial Favor: You may discard it; if you did, add a Favor token to this card.\nPolitical Open: Bow your performing honorable Courtier: Add a Favor token to this card.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-4646.jpg",
+      "Keywords": [
+        "Experienced",
+        "Imperial"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "otomo-favor-token",
+        "otomo-courtier-token"
+      ],
+      "Effect": "kyuden-otomo-exp"
+    },
+    {
+      "Id": "oracle-l5r-4724",
+      "Name": "Library of Rebirth",
+      "Type": "Stronghold",
+      "Clan": "Phoenix",
+      "GoldCost": 0,
+      "GoldProduction": 4,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 6,
+      "StartingHonor": 6,
+      "Text": "Reaction: Even if this card is bowed, when paying for a Spell during the Combat Segment: Produce 4 Gold.\nBattle: Choose your performing Shugenja: Straighten him. You may take an additional Battle action.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-4724.jpg",
+      "Keywords": [],
+      "Focus": 0,
+      "Abilities": [
+        "library-rebirth-gold",
+        "library-rebirth-straighten"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-5037",
+      "Name": "Midday Shadow Court",
+      "Type": "Stronghold",
+      "Clan": "Scorpion",
+      "GoldCost": 0,
+      "GoldProduction": 4,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 7,
+      "StartingHonor": 1,
+      "Text": "When a Lobby action checks Family Honor, your Honor is treated as 20 points higher.\nPolitical Open: Even if this card is bowed, target another player's Personality: After the next time this turn he is assigned, or an action that he performed ends, dishonor him and his controller loses 1 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-5037.jpg",
+      "Keywords": [],
+      "Focus": 0,
+      "Abilities": [
+        "midday-shadow-watch"
+      ],
+      "Effect": "midday-shadow-court"
+    }
+  ],
+  "Decks": []
+}

@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Current fortress integration preview for issue 446 and minimal PR 447. Full-window table drawing/input with fixed HUD protection; attack tabs use the expanded area and remain below fixed UI. Existing feature gates retained.",
+  "validation": "Client build/import PASS. Native coverage at 1920x1080, 1440x900, 2560x1080 PASS; created-copy normal, attack-target normal and board-camera probes PASS. Full check.sh --skip-client PASS after preserving both guards in the CardAbilities main-integration conflict. Finder launched the fast .app; its log reports TABLE_VISIBILITY_REVIEW_READY. See dated review handoff and screenshots.",
+  "remaining": "Alfredo visual review, Mendon review, Windows graphical playtest. Review branch only; no main merge or approval of the stacked UI features.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/446",
+  "branch": "codex/446-table-visibility-review",
+  "updated": "2026-09-22T15:21:09.513338+00:00"
+}

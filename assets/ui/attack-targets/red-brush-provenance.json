@@ -1,0 +1,31 @@
+{
+  "tool": "built-in image_gen",
+  "approved_reference": "approved-red-brush-trail.png",
+  "approval": "Alfredo approved the displayed straight broken red brush trail on 2026-09-21. Ranged/melee treatments remain concepts pending selection.",
+  "atlas": "../../../src/L5R.Client/Art/AttackTargets/red-brush-atlas.png",
+  "generated_output": "exec-e7ddf871-ba8b-4965-8876-0995c66b9a19.png",
+  "image_size": [
+    1536,
+    1024
+  ],
+  "rgba": "Original generated RGBA preserved; RGB in alpha-zero pixels is not visible paint.",
+  "regions": {
+    "dash": [
+      24,
+      216,
+      1488,
+      120
+    ],
+    "head": [
+      296,
+      512,
+      944,
+      320
+    ]
+  },
+  "prompts": [
+    "Use case: background-extraction. Asset type: production 2D game sprite with real alpha transparency.\nInput image: approved L5R attack arrow concept, used solely as extraction/style reference.\nExtract/faithfully derive JUST the bright red broken-brush arrow from the image, removing all cards, board, frames and scenery. Rotate it so it is a perfectly straight HORIZONTAL arrow pointing RIGHT. Match the exact vivid crimson/red pigment, dry-brush streaks, ragged bristle edges, slim shape and compact painted arrowhead in the approved image.\nOutput a single transparent PNG sprite atlas at landscape 1536x1024, with TWO clearly separated centered sprites, no labels: \nTOP ROW, inside rectangle x=160 to 1376 and y=160 to 360: one long narrow individual crimson brush dash, horizontally aligned, tapered frayed ends, matching one of the approved shaft segments. Roughly 1100 pixels long and 120 pixels maximum paint thickness. No arrowhead on this sprite.\nBOTTOM ROW, inside rectangle x=520 to 1120 and y=600 to 880: one compact right-pointing crimson painted arrowhead, with its short tapering shaft at the LEFT and the sharp tip at the RIGHT, matching the final head segment from the approved arrow. Roughly 500 pixels long and 200 pixels maximum paint height. Two short back-swept painted wings make direction clear.\nLeave generous transparent space between both sprites and around the canvas. True transparent background / RGBA alpha, not a rendered checkerboard, not white, not black. No glow, no shadow, no weapon, no outlines, no gold, no decorative splatter outside the stated sprite areas, no scenery, no text. These two actual raster sprites will be repeated and rotated by the game without reconstructing their painted texture.",
+    "Use case: precise-object-edit. This is an RGBA sprite atlas. Edit only the two red sprites: remove ALL red glow, bloom, haze and smooth translucent airbrush around them. Replace the glowing wispy treatment with solid flat crimson/red INK pigment and dense dry-brush bristles like the second reference. Preserve the two separate horizontal sprites, top dash and bottom right-pointing brush arrowhead, positions, scale and transparent canvas. The visible red pigment should be richly opaque within the stroke with sharp, naturally frayed filament boundaries, tiny clear bristle gaps and ZERO soft halo. Transparent pixels everywhere except actual painted brush filaments; NO glow, NO gradients fading beyond edges, NO black background, NO extra objects, NO labels. Deliver genuine RGBA transparency. Keep 1536x1024 composition."
+  ],
+  "implementation": "Actual raster dash repeated along a straight path; painted head retains aspect ratio. No type inference or new rules. No whole-screen pixel equivalence claimed."
+}

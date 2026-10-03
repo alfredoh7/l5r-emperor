@@ -32,9 +32,9 @@ buffs the chosen Performer then attacks with strength read live off that same, n
 Performer. New Performer category: own-unbowed-personality-with-keyword-opposed.
 
 The Strength of the Spider (8362): its own Focus Effect clause ("you may choose now to delay the
-effects of losing this duel until after the next Dynasty Phase begins") is genuinely novel duel-
-timing plumbing, deliberately deferred (see CardAbilities.cs's own doc comment on this ability) --
-its Battle half is fully wired. New Performer category: own-unbowed-spider-personality-at-battle
+effects of losing this duel until after the next Dynasty Phase begins") was deferred until the shared
+delay mechanism existed (src/L5R.Core/EmperorRulingR2.cs, issue #492 ruling pass R2), which wired
+it (strength-spider-focus) -- its Battle half was wired from the start. New Performer category: own-unbowed-spider-personality-at-battle
 (a clan check, not a printed keyword).
 
 Unexpected (9940): "Battle: Choose your performing unbowed Personality and target an enemy card
@@ -63,7 +63,7 @@ ABILITIES: dict[int, list[str]] = {
     7546: ["strength-of-purity"],  # Strength of Purity
     10748: ["strength-of-the-bear"],  # Strength of the Bear
     10555: ["strength-of-the-divine-force", "strength-of-the-divine-honor"],  # Strength of the Divine
-    8362: ["strength-of-the-spider"],  # The Strength of the Spider
+    8362: ["strength-of-the-spider", "strength-spider-focus"],  # The Strength of the Spider (its Focus Effect wired with the shared delay mechanism, issue #492 ruling pass R2)
     9940: ["unexpected"],  # Unexpected
 }
 EFFECTS: dict[int, str] = {}

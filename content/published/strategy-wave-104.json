@@ -1,0 +1,246 @@
+{
+  "Profile": "strategy-wave-104",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-98",
+      "Name": "A Warrior's Wisdom",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Give your target performing Monk a Force bonus equal to his Chi (until the turn ends). You may take an additional Battle action.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-98.jpg",
+      "Keywords": [],
+      "Focus": 4,
+      "Abilities": [
+        "warriors-wisdom-boost"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-1974",
+      "Name": "Desperate Mediation",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: In turn order, starting with you, each player targets and moves home one of his Personalities at the current battlefield. Then, gain Honor equal to the number of Personalities this moved.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1974.jpg",
+      "Keywords": [
+        "Political"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "desperate-mediation-move"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-2769",
+      "Name": "Game of Sincerity",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Dishonor your performing unbowed Personality and target a Personality: Dishonor him. His controller loses 2 Honor. Neither Personality contributes Force in this battle's resolution.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-2769.jpg",
+      "Keywords": [
+        "Political"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "game-of-sincerity-dishonor"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-3739",
+      "Name": "Inexorable",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After another player announces a Reaction during the Combat Segment: Its effects will not negate other effects.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-3739.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "inexorable-negate"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-3767",
+      "Name": "Inspirational Address",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing Personality and target a Follower in your hand or discard pile: Attach it to him, paying 1 less Gold.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-3767.jpg",
+      "Keywords": [],
+      "Focus": 1,
+      "Abilities": [
+        "inspirational-address-attach"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-6697",
+      "Name": "Shameful Death",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing unbowed Magistrate Personality and target an enemy dishonorable Personality: Reduce his Force to 0 (until the turn ends). Give your Magistrate a Force bonus equal to the amount of Force the Personality lost (until the turn ends).",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6697.jpg",
+      "Keywords": [],
+      "Focus": 3,
+      "Abilities": [
+        "shameful-death-reduce"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-6699",
+      "Name": "Shameful Rebuke",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: In turn order, starting with you, each player targets and moves one of his Personalities at the current battlefield home. Then, choose a player who loses Honor equal to the number of Personalities this moved.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6699.jpg",
+      "Keywords": [
+        "Political"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "shameful-rebuke-move"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-7587",
+      "Name": "Striking Through the Void",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle/Open: Choose your performing unbowed Monk and target one to three Personalities controlled by other players: Give one of them -1F (until the turn ends). Give a second different Personality you targeted -2F (until the turn ends). Give a third different Personality you targeted -3F (until the turn ends).",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7587.jpg",
+      "Keywords": [
+        "Kiho",
+        "Void"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "striking-void-reduce"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-8200",
+      "Name": "The Lion's Charge",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Bow your performing Personality or Follower: Ranged 2 Attack, with +2 strength if your Personality or your Follower's Personality is a Paragon. Gain 1 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8200.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "lions-charge-attack"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9208",
+      "Name": "Wanted for Questioning",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing unbowed Magistrate and target an enemy Personality: Your Magistrate takes him into custody. If he is dishonorable, destroy his attachments. Move him home.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9208.jpg",
+      "Keywords": [],
+      "Focus": 4,
+      "Abilities": [
+        "wanted-questioning-move"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

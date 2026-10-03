@@ -418,19 +418,22 @@ internal static class BeforeTheDawnCardTests
         var e = MatchEngine.FromTestState(s);
         var raise = Options(e, 0, "genji-province-raise", genji.Id).First(o => o.Enabled);
         Check(raise.Provinces!.Length > 0, "a province of either player is a target");
-        var strengthBefore = e.State.Players[1].Provinces[0].Strength;
+        var strengthBefore = e.ProvinceStrengthForTest(1, 0);
         Accept(e, raise.Command! with { Province = 0, TargetPlayerId = 1 });
-        Eq(e.State.Players[1].Provinces[0].Strength, strengthBefore + 3, "+3 strength");
+        Eq(e.ProvinceStrengthForTest(1, 0), strengthBefore + 3, "+3 strength");
+        Eq(Batch336Support.StrengthNextTurn(e, 1, 0), strengthBefore, "Genji's Students: the +3 lasts until end of turn (issue #492 ruling R3)");
         Check(e.State.Cards[genji.Id].Bowed && !CanUse(e, 0, "genji-province-lower", genji.Id), "it bowed, and only one of the two is used");
         var lower = MatchEngine.FromTestState(s);
         Accept(lower, Options(lower, 0, "genji-province-lower", genji.Id).First(o => o.Enabled).Command! with { Province = 0, TargetPlayerId = 1 });
-        Eq(lower.State.Players[1].Provinces[0].Strength, strengthBefore - 3, "-3 strength");
+        Eq(lower.ProvinceStrengthForTest(1, 0), strengthBefore - 3, "-3 strength");
+        Eq(Batch336Support.StrengthNextTurn(lower, 1, 0), strengthBefore, "and so does the -3");
         Eq(lower.AttackStrengthForTest("genji-attack", genji.Id), 4, "Ranged 3, +1 for the one other Follower in the unit");
         // Indomitable Home: Siege Absent Battle: bow to raise the current battlefield's province by 2, even with no unit there.
         var h = Battle(); var home = Add(h, Indomitable, 0, Zone.Home); Bf(h, "training-lion-samurai", 1);
-        var he = MatchEngine.FromTestState(h); var strength = he.State.Players[1].Provinces[0].Strength;
+        var he = MatchEngine.FromTestState(h); var strength = he.ProvinceStrengthForTest(1, 0);
         Accept(he, Enabled(he, 0, "indomitable-home-strength", home.Id).Command!);
-        Eq(he.State.Players[1].Provinces[0].Strength, strength + 2, "+2 strength"); Check(he.State.Cards[home.Id].Bowed, "bowed");
+        Eq(he.ProvinceStrengthForTest(1, 0), strength + 2, "+2 strength"); Check(he.State.Cards[home.Id].Bowed, "bowed");
+        Eq(Batch336Support.StrengthNextTurn(he, 1, 0), strength, "Indomitable Home: until end of turn");
         // Ashigaru Recruits: after it enters play from your hand, create a 0F Ashigaru Follower and attach it to your target Personality.
         var a = MatchEngine.CreateEconomyScenario().State;
         for (var i = 0; i < 4; i++) Add(a, "training-marketplace", 0, Zone.Home);
@@ -477,8 +480,9 @@ internal static class BeforeTheDawnCardTests
         var re = MatchEngine.FromTestState(r);
         Eq(re.CardForceForTest(defenderEarth.Id), earthBase + 1, "a defending Earth Personality has +1F"); Eq(re.CardForceForTest(defenderFire.Id), noShrine.CardForceForTest(defenderFire.Id), "a non-Earth one does not");
         Eq(re.CardForceForTest(attackerEarth.Id), noShrine.CardForceForTest(attackerEarth.Id), "an attacking Earth Personality does not");
-        var strength = re.State.Players[0].Provinces[0].Strength;
+        var strength = re.ProvinceStrengthForTest(0, 0);
         Accept(re, Enabled(re, 0, "stone-hewed-shrine-strength", shrine.Id, homeEarth.Id).Command!);
-        Check(re.State.Cards[homeEarth.Id].Bowed && re.State.Players[0].Provinces[0].Strength == strength + 3, "+3 strength; the Earth Personality at home bowed");
+        Check(re.State.Cards[homeEarth.Id].Bowed && re.ProvinceStrengthForTest(0, 0) == strength + 3, "+3 strength; the Earth Personality at home bowed");
+        Eq(Batch336Support.StrengthNextTurn(re, 0, 0), strength, "Stone-Hewed Shrine: until end of turn");
     }
 }

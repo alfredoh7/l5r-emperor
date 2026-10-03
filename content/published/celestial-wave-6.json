@@ -1,0 +1,33 @@
+{
+  "Profile": "celestial-wave-6",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-6425",
+      "Name": "Ryoshun's Guidance",
+      "Type": "Celestial",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Your Personalities have +1C while they are not involved in a duel. \nReaction: When another player's action would target one of your cards, discard this card: Choose another of your non-Stronghold cards at the same location. The action targets it instead, if legal.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6425.jpg",
+      "Keywords": [
+        "Unique",
+        "Kami"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "ryoshun-redirect"
+      ],
+      "Effect": "ryoshuns-guidance"
+    }
+  ],
+  "Decks": []
+}

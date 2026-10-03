@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Dependabot: Bump actions/setup-python from 5.6.0 to 7.0.0 (workflow-only change; no game code).",
+  "validation": "CI re-run on this PR; see PR checks.",
+  "remaining": "None; ready for review once CI is green.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/pull/540",
+  "branch": "dependabot/github_actions/actions/setup-python-7.0.0",
+  "updated": "2026-10-03T16:35:58.362179+00:00"
+}

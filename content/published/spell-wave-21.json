@@ -1,0 +1,111 @@
+{
+  "Profile": "spell-wave-21",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-5903",
+      "Name": "Pearl of Rage",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "This Shugenja has +1F for each Pearl card you control and in your discard piles.\nBattle: Bow this card: Ranged Attack with strength equal to this Shugenja's Chi, plus the number of Pearl cards you control and in your discard piles.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-5903.jpg",
+      "Keywords": [
+        "Unique",
+        "Pearl"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "pearl-of-rage-attack"
+      ],
+      "Effect": "pearl-of-rage"
+    },
+    {
+      "Id": "oracle-l5r-8228",
+      "Name": "The Mountain's Power",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "While this Shugenja is Earth and defending, negate his destruction from other players' cards' effects.\nBattle: Bow this card and target an enemy card without attachments: Bow it. Gain 1 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8228.jpg",
+      "Keywords": [
+        "Earth"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "mountains-power-bow"
+      ],
+      "Effect": "mountains-power"
+    },
+    {
+      "Id": "oracle-l5r-9339",
+      "Name": "Wind of the Moon",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "While this Shugenja is Air, he straightens during each player's Straighten Phase.\nOpen: Bow this Shugenja and target a face-up Personality out of play: Give him +1PH or +1 Gold Cost.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9339.jpg",
+      "Keywords": [
+        "Air",
+        "Political"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "wind-moon-honor",
+        "wind-moon-gold"
+      ],
+      "Effect": "wind-of-the-moon"
+    },
+    {
+      "Id": "oracle-l5r-8475",
+      "Name": "Thunder's Wrath",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Bow this card and target an enemy Personality or Follower: Give it -4F.\nBattle: Destroy this card: Ranged 4 Attack with +2 strength if it targets a Follower. If this Shugenja is Thunder and the Ranged Attack destroyed a Follower, Ranged 4 Attack.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8475.jpg",
+      "Keywords": [
+        "Thunder"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "thunders-wrath-bow",
+        "thunders-wrath-attack"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

@@ -40,8 +40,7 @@ public partial class Main
 
     private void BuildTableViewport()
     {
-        // This rectangle frames the overview. Drawing continues beneath the fixed
-        // HUD to the window edges, rather than stopping at an invisible inner box.
+        // Keep overview fitting separate from full-window table drawing.
         _tableViewport = Place(_root, new Control { ClipContents = false, ZIndex = -1, MouseFilter = Control.MouseFilterEnum.Ignore }, 24, 148, 1500, 702);
         _tableSurface = Place(_tableViewport, new TableSurface(), 0, 0, 1500, 702);
         _tableSurface.ResizePlane(_tableViewport.Size, 1);
@@ -63,7 +62,7 @@ public partial class Main
         _tableViewport.Position = new Vector2(left, 148);
         // Leave the fitted mat clear of the resting hand, including the small
         // upward reach of its fan. Hover can still deliberately lift a hand card.
-        _tableViewport.Size = new Vector2(_layoutWidth - SidebarWidth - left - 44,
+        _tableViewport.Size = new Vector2(_layoutWidth - SidebarWidth - BattleStripReserve - left - 44,
             Math.Min(666, 1060 - HandCardSide - _tableViewport.Position.Y - 30));
         _tableSurface.ResizePlane(_tableViewport.Size, _root.Scale.X,
             new Rect2(-_tableViewport.Position, GetViewport().GetVisibleRect().Size / _root.Scale.X));
@@ -85,8 +84,9 @@ public partial class Main
         var lanes = View.CurrentBattleProvince is int active ? new[] { active }
             : View.Players.SelectMany(p => p.Army).Where(c => c.ProvinceIndex is not null).Select(c => c.ProvinceIndex!.Value).Distinct().ToArray();
         if (lanes.Length == 0) return;
-        var regions = lanes.Where(_battleCourts.ContainsKey).Select(i => _battleCourts[i]
-            .Merge(_matTargets.First(s => s.Id == $"province:{defender.Id}:{i}").Bounds));
+        // A battlefield without a province has no province mat to frame with its court.
+        var regions = lanes.Where(_battleCourts.ContainsKey).Select(i => _matTargets.FirstOrDefault(s => s.Id == $"province:{defender.Id}:{i}") is { } bay
+            ? _battleCourts[i].Merge(bay.Bounds) : _battleCourts[i]);
         if (!regions.Any()) return;
         var region = regions.Aggregate((a, b) => a.Merge(b)).Grow(24);
         _cameraFitted = false; _cameraGlide = false;
@@ -98,12 +98,12 @@ public partial class Main
     private Vector2 _cameraFrom, _cameraTo;
     private float _zoomFrom, _zoomTo;
     private double _cameraGlideTime;
-    private (int Turn, int Owner, int Province)? _framedBattle;
+    private (string Match, int Viewer, int Turn, int Owner, int Province)? _framedBattle;
     private void FrameNewBattle()
     {
-        if (_capturePath is not null || PresentationBusy) return;
+        if (_capturePath is not null && !_captureMode.StartsWith("published-battle-sequence", StringComparison.Ordinal) || PresentationBusy) return;
         if (View.CurrentBattleProvince is not int province || !BattleActive) { _framedBattle = null; return; }
-        var key = (View.TurnNumber, View.ActivePlayerId, province);
+        var key = (_session.MatchKey, View.ViewerId, View.TurnNumber, View.ActivePlayerId, province);
         if (_framedBattle == key) return;
         _framedBattle = key;
         var from = _cameraCenter; var zoom = _cameraZoom;
@@ -154,21 +154,31 @@ public partial class Main
         ApplyTableCamera();
     }
 
-    private bool CameraBlocked => MatchDuelOpen || PracticeVisible || MenuVisible || !GetWindow().HasFocus() || (_fullscreenGate?.Visible ?? false)
+    private bool CameraBlocked => MatchDuelOpen || LookPanelOpen || SearchPanelOpen || CopyPanelOpen || PracticeVisible || MenuVisible || !GetWindow().HasFocus() || (_fullscreenGate?.Visible ?? false)
         || GetChildren().OfType<Window>().Any(w => w.Visible)
         || _expandedUnits.Count > 0;
 
     private bool PointerOnTable(Vector2 viewportPoint)
     {
         if (CameraBlocked || !_tableSurface.GetGlobalRect().HasPoint(viewportPoint) || FixedHudCovers(viewportPoint)) return false;
-        return true;
+        // Prepared review scenarios (attack, payment, copy, sequence, multi, look, lock, either/or, movement, search, shown...) put a row of navigation buttons over
+        // the table. Let native GUI picking receive its clicks instead of forwarding them into the mat. Matched by name so a new review row cannot be forgotten.
+        foreach (var child in _root.GetChildren())
+            if (child is Control review && review.Name.ToString().EndsWith("ReviewControls", StringComparison.Ordinal) && review.IsVisibleInTree() && review.GetGlobalRect().HasPoint(viewportPoint)) return false;
+        if (_eventHandBar is { Visible: true } && _eventHandBar.GetGlobalRect().HasPoint(viewportPoint)) return false;
+        if (_shownPreview is { } preview && IsInstanceValid(preview) && preview.GetGlobalRect().HasPoint(viewportPoint)) return false;
+        // The Fallen strips can overlap the projection. Check only the visible
+        // placards, not their full-screen parent, before forwarding root input.
+        return !_clanHud.GetChildren().OfType<Control>().Any(c =>
+            c.IsVisibleInTree() && c.GetGlobalRect().HasPoint(viewportPoint));
     }
 
     private bool FixedHudCovers(Vector2 point)
     {
         static bool Covers(Control? control, Vector2 p) => control is not null &&
             control.IsVisibleInTree() && control.GetGlobalRect().HasPoint(p);
-        return Covers(_inspectorPanel, point) || Covers(_hand, point) || Covers(_timeline, point) || Covers(_menu, point)
+        return Covers(_battlefieldReviewBar, point) || Covers(_provinceOrderTray, point) || Covers(_provinceReviewBar, point) || Covers(_inspectorPanel, point) || Covers(_notice, point) || Covers(_shownPanel, point) || Covers(_shownToggle, point) || Covers(_eventSidebar, point) || Covers(_eventHandBar, point) || Covers(_hand, point) || Covers(_timeline, point) || Covers(_menu, point) || Covers(_battleProgressStrip, point)
+            || _battlefieldCaptions.Values.Any(c => Covers(c, point))
             || _clanHud.GetChildren().OfType<Control>().Any(c => Covers(c, point))
             // A hovered hand face can rise above the hand container.
             || _hand.GetChildren().OfType<CardTile>().Any(c => Covers(c, point));
@@ -183,6 +193,11 @@ public partial class Main
         // A recorded demonstration consumes live input so a wheel/key/click
         // cannot alter the evidence mid-take. Normal play and input probes do not.
         if (_capturePath is not null && _captureMode == "published-ink-film")
+        { GetViewport().SetInputAsHandled(); return; }
+        // The acceptance probes supply tagged viewport mouse events. Ignore
+        // unrelated live desktop gestures only in those explicit capture modes;
+        // focus checks and ordinary game input routing remain in force.
+        if (IsMouseInputCapture && @event is InputEventMouse && !@event.HasMeta(CaptureMouseTag))
         { GetViewport().SetInputAsHandled(); return; }
         if (_tableSurface is null || MenuVisible || DuelDemoOpen || _transitionReview || MatchDuelOpen) return;
         if (@event is InputEventMouse location) _lastTableMouse = location.Position;
@@ -201,7 +216,9 @@ public partial class Main
             }
             if (!PointerOnTable(mouse.Position))
             {
-                if (!mouse.Pressed) _tableSurface.ReleaseMouseOutside(mouse);
+                // A root-UI drag owns its release. Forwarding it into the table's
+                // SubViewport can end the shared Godot drag before the tray receives it.
+                if (!mouse.Pressed && !GetViewport().GuiIsDragging()) _tableSurface.ReleaseMouseOutside(mouse);
                 return;
             }
             if (!mouse.Pressed) { _tableSurface.ForwardMouse(mouse); GetViewport().SetInputAsHandled(); return; }
@@ -311,14 +328,14 @@ public partial class Main
             _tableSurface.ForwardMouse(new InputEventMouseMotion { Position = _lastTableMouse });
         }
         if (_cameraDragging || (CameraBlocked && token?.Inline != true) || (token is null && !PointerOnTable(_lastTableMouse)))
-        { _matSections.Emphasize(null, hover:true); HideTableTooltip(); return; }
+        { _matSections.Emphasize(null, hover: true); HideTableTooltip(); return; }
         Control? hovered = token ?? _matSections.IconAt(_lastTableMouse) ?? TableHovered;
         if (token is null)
             while (hovered is not null && !hovered.HasMeta("flat_tooltip") && hovered is not (CardTile or PermanentGrantSeal or CardTokenRail)) hovered = hovered.GetParent() as Control;
         var provinceHover = hovered?.HasMeta("province_marker") == true ? hovered.GetMeta("province_marker").AsString()
-            : hovered is CardTile provinceCard && provinceCard.Card.Zone == L5R.Core.Zone.Province
-                ? View.Players.SelectMany(p => p.Provinces.Where(q => q.Card?.Id == provinceCard.Card.Id).Select(q => $"province:{p.Id}:{q.Index}")).FirstOrDefault() : null;
-        _matSections.Emphasize(provinceHover, hover:true);
+            : hovered is CardTile provinceCard && provinceCard.Card.Zone is L5R.Core.Zone.Province or L5R.Core.Zone.Region
+                ? View.Players.SelectMany(p => p.Provinces.Where(q => ProvincePresentation.Cards(q).Any(c => c.Id == provinceCard.Card.Id)).Select(q => $"province:{p.Id}:{q.Index}")).FirstOrDefault() : null;
+        _matSections.Emphasize(provinceHover, hover: true);
         if (hovered != _tableHover) { HideTableTooltip(); _tableHover = hovered; }
         if (hovered is null || _tableTooltip is not null || (_tableHoverTime += delta) < .5) return;
         _tableTooltip = token is not null ? token._MakeCustomTooltip(token.Explanation) :

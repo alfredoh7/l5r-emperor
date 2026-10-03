@@ -20,7 +20,7 @@ public sealed partial class MatchEngine
     private DuelChallenge DescribeChallenge(string abilityId, CardInstance? source, bool refusable)
     {
         var loss = abilityId switch {
-            "steel-on-steel-duel" or "ichizo-exp-duel" or "shikei-duel" => "Defeat: the losing unit is destroyed.",
+            "steel-on-steel-duel" or "ichizo-exp-duel" or "shikei-duel" or "makoto-duel" => "Defeat: the losing unit is destroyed.",
             "daisuke-duel" => "Defeat: the losing unit moves home.",
             "training-duel-force" or "training-duel-honor" or "training-duel-open" or "training-duel-challenge" => "Defeat: the losing Personality gets −1 Force this turn.",
             _ => "The challenge card defines the consequences."
@@ -127,7 +127,17 @@ public sealed partial class MatchEngine
             foreach (var card in _state.Cards.Values.Where(c => c.OwnerId == playerId))
                 foreach (var id in Definition(card).Abilities ?? [])
                 {
-                    if (!AbilityCatalog.All.TryGetValue(id, out var def) || def.Timing != "Reaction" || def.Trigger is not ("before-duel-begins" or "own-won-duel" or "own-personality-won-duel")) continue;
+                    if (!AbilityCatalog.All.TryGetValue(id, out var def) || def.Timing != "Reaction" || def.Trigger is not ("before-duel-begins" or "own-won-duel" or "own-personality-won-duel" or EmperorRemainingAAbilities.BeforeFocusEffects)) continue;
+                    // He's Mine! (issue #492, ruling R5): one option per Samurai who may take the participant's place; the target is the participant.
+                    if (id == "hes-mine-substitute")
+                    {
+                        foreach (var (substituteCommand, substituteLabel) in HesMineDuelOptions(card, playerId))
+                        {
+                            try { ValidateAbility(substituteCommand); Add(substituteCommand, substituteLabel); }
+                            catch (RuleViolation) { }
+                        }
+                        continue;
+                    }
                     var command = new GameCommand("useAbility", playerId, _state.Version, CardId: card.Id, AbilityId: id);
                     try { ValidateAbility(command); Add(command, def.Label); }
                     catch (RuleViolation) { }
@@ -144,14 +154,17 @@ public sealed partial class MatchEngine
                     if (duel.Refusable) Add(Command("declineDuel"), "Refuse challenge");
                     break;
                 case "Focusing":
-                    if (focused.Count < 4)
+                    if (focused.Count + P2FocusSubstitutions(playerId) < 4) // issue #503: Kakita Gonji's replaced focus counts against the cap
                     {
+                        foreach (var gonji in GonjiFocusSources(playerId, duel)) Add(Command("focus", gonji.Id, choice: GonjiFocusChoice), $"Kakita Gonji · +4 duel stat instead of focusing ({Definition(gonji).Name})");
                         foreach (var id in Player(playerId).Hand) Add(Command("focus", id), $"Focus · {Definition(Card(id)).Name}");
                         if (Player(playerId).FateDeck.Count > 0) Add(Command("focus", choice: "deck"), "Focus from deck");
                         if (CanFocusDiscard(playerId, duel))
                             foreach (var c in _state.Cards.Values.Where(c => c.OwnerId == playerId && c.Zone is Zone.FateDiscard or Zone.DynastyDiscard))
                                 Add(Command("focus", c.Id, choice: "discard"), $"Focus from discard · {Definition(c).Name}");
                     }
+                    foreach (var weapon in ReserveWeaponsFor(playerId, duel))
+                        Add(Command("focus", weapon.Id, choice: "reserve"), $"Reserve Weapon · +3 duel stat instead of focusing ({Definition(weapon).Name})");
                     Add(Command("strike"), "Strike");
                     break;
                 case "DuelistRefocus":
@@ -163,6 +176,9 @@ public sealed partial class MatchEngine
                         if (Player(playerId).FateDeck.Count > 0)
                             Add(Command("duelistRefocus", id, choice: "deck"), $"Replace {Definition(Card(id)).Name} from deck");
                     }
+                    break;
+                case P2FocusChoiceStage: // issue #503 (EmperorP2Duel.cs)
+                    foreach (var (p2Command, p2Label) in P2FocusChoiceActions(playerId)) Add(p2Command, p2Label);
                     break;
                 case "OrderingEffects":
                     var ids = FocusEffectCardIds(duel).ToArray();

@@ -11,7 +11,7 @@ public partial class Main
         AddChild(dialog);
         var body = new VBoxContainer(); body.AddThemeConstantOverride("separation", 14); dialog.AddChild(body);
         dialog.GetOkButton().Text = "Close";
-        dialog.GetOkButton().CustomMinimumSize = new Vector2(140,48);
+        dialog.GetOkButton().CustomMinimumSize = new Vector2(140, 48);
         dialog.CloseRequested += dialog.QueueFree; dialog.Confirmed += dialog.QueueFree;
         PresentDialog(dialog, width, height); return (dialog, body);
     }
@@ -78,14 +78,14 @@ public partial class Main
         _savedSeat = seat; _savedServer = server;
         try
         {
-        var path = SeatPath;
-        var temporary = path + ".tmp-" + Guid.NewGuid().ToString("N");
-        var bytes = System.Text.Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new SavedConnection(server, seat), Json));
-        // Create with owner-only access from the first write on Unix; tokens never enter a replay or log.
-        var options = new FileStreamOptions { Mode = FileMode.Create, Access = System.IO.FileAccess.Write, Share = FileShare.None };
-        if (!OperatingSystem.IsWindows()) options.UnixCreateMode = UnixFileMode.UserRead | UnixFileMode.UserWrite;
-        using (var stream = new FileStream(temporary, options)) { stream.Write(bytes); stream.Flush(true); }
-        File.Move(temporary, path, true);
+            var path = SeatPath;
+            var temporary = path + ".tmp-" + Guid.NewGuid().ToString("N");
+            var bytes = System.Text.Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new SavedConnection(server, seat), Json));
+            // Create with owner-only access from the first write on Unix; tokens never enter a replay or log.
+            var options = new FileStreamOptions { Mode = FileMode.Create, Access = System.IO.FileAccess.Write, Share = FileShare.None };
+            if (!OperatingSystem.IsWindows()) options.UnixCreateMode = UnixFileMode.UserRead | UnixFileMode.UserWrite;
+            using (var stream = new FileStream(temporary, options)) { stream.Write(bytes); stream.Flush(true); }
+            File.Move(temporary, path, true);
         }
         catch (Exception e) when (e is IOException or UnauthorizedAccessException)
         {
@@ -106,20 +106,44 @@ public partial class Main
     }
     private sealed record SavedConnection(string Server, RoomSeat Seat);
 
+    private AcceptDialog? _seatHandoff;
     private void SwitchSeat()
     {
+        if (_session.Online || _session.Busy || _session.Snapshot is null
+            || _seatHandoff is not null && IsInstanceValid(_seatHandoff)) return;
+        var generation = _session.Generation;
+        var originalSeat = _session.Snapshot.View.ViewerId;
+        _cameraDragging = false; HideTableTooltip(); ReleaseTableFocus();
         _root.Visible = false;
-        var (dialog, body) = Dialog("Pass the device", 530, 220);
+        var (dialog, body) = Dialog("Pass the device", 530, 310);
+        _seatHandoff = dialog;
         var switched = false;
         dialog.GetOkButton().Hide();
+        dialog.Canceled += dialog.QueueFree;
         dialog.TreeExiting += () =>
         {
-            if (!IsInstanceValid(_root)) return;
-            if (!switched) { _selected = null; _chosen = null; _session.SwitchPracticeSeat(); }
-            Render(); _root.Visible = true;
+            _seatHandoff = null;
+            // Closing/cancelling is never permission to reveal a different private view.
+            // A stale dialog also cannot change or uncover a replacement session.
+            if (!IsInsideTree() || IsQueuedForDeletion() || !IsInstanceValid(_root)
+                || _session.Generation != generation || _session.Online
+                || _session.Snapshot?.View.ViewerId != (switched ? 1 - originalSeat : originalSeat)) return;
+            if (switched) Render();
+            if (!MenuVisible && !DuelDemoOpen && !PracticeVisible && !MatchDuelOpen) _root.Visible = true;
         };
         body.AddChild(Palette.Wrapped("Hand the device to the other player before revealing their private hand.", 21));
-        body.AddChild(SidebarSkin.Button("I'm ready · reveal my hand", () => { _selected = null; _chosen = null; switched = true; _session.SwitchPracticeSeat(); dialog.QueueFree(); }, true));
+        body.AddChild(SidebarSkin.Button("I'm ready · reveal my hand", () =>
+        {
+            if (switched || dialog.IsQueuedForDeletion()) return;
+            if (_session.Generation != generation || _session.Online || _session.Busy
+                || _session.Snapshot?.View.ViewerId != originalSeat) { dialog.QueueFree(); return; }
+            switched = true;
+            _selected = null; _selectedHomeReminder = null; _chosen = null;
+            _sources.Clear(); _assignments.Clear(); _assignmentUnit = null; _expandedUnits.Clear();
+            _presentationSnapshot = null; _motionView = null; _battlePresentationStage = 0;
+            _session.SwitchPracticeSeat(); dialog.QueueFree();
+        }, true));
+        body.AddChild(SidebarSkin.Button("Cancel handoff", dialog.QueueFree));
     }
 
     private void OpenDecksLocation()

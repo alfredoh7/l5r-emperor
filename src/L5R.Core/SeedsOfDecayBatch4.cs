@@ -51,7 +51,10 @@ public sealed partial class MatchEngine
     private void CleanseForcePenaltiesAndLocks(CardInstance card)
     {
         var modifiers = card.Modifiers.RemoveAll(m => m.Stat == "Force" && m.Amount < 0);
-        var tokens = card.Tokens.RemoveAll(t => t.Stat == "Force" && t.Amount < 0);
+        // Issue #503: a two-stat token (-1F/-1C Poison) loses its Force penalty and keeps its other stat.
+        var twoStat = card.Tokens.Where(t => t.Stat == "Force" && t.Amount < 0 && t.Stat2 is not null).ToArray();
+        foreach (var token in twoStat) card.Tokens[card.Tokens.IndexOf(token)] = token with { Stat = token.Stat2, Amount = token.Amount2, Stat2 = null, Amount2 = 0 };
+        var tokens = card.Tokens.RemoveAll(t => t.Stat == "Force" && t.Amount < 0) + twoStat.Length;
         var locks = card.ActionLocks.Count; card.ActionLocks.Clear();
         Emit("penaltiesAndLocksNegated", $"{Definition(card).Name}: {modifiers + tokens} Force {(modifiers + tokens == 1 ? "penalty" : "penalties")} and {locks} action {(locks == 1 ? "lock" : "locks")} negated.", card.OwnerId, card.Id);
     }
@@ -92,11 +95,12 @@ public sealed partial class MatchEngine
 
     // "After you reveal cards in your Provinces at the start of your turn, if this Event is face-up in one of them, for each dead Personality in your discard pile, create a
     // 2F/2C/3PH Samurai * Ancestor * Spirit Personality with your Clan Alignment. If this created no Personalities, you may shuffle this Event into your deck instead of
-    // discarding it normally." The Ancestors are the Lion Ancestor scan (oracle-l5r-9785, Kitsu Akai's) printed with the creator's Clan instead of Lion; they enter at home
+    // discarding it normally." The Ancestors use the user-supplied Ancestor Spirit scan; its printed trait gives them their creator's Stronghold Clan at creation. They enter at home
     // with their mandatory entry effects and no entering-play window (the reveal is not an action to react to). With none created the owner chooses: shuffle the Event into
     // the Dynasty deck, or discard it. Either way the province is refilled and the reveal goes on.
     private const string OfferingReverenceEffect = "offering-reverence";
-    private static readonly CreatedCardSpec ReverenceAncestor = new(CardType.Personality, Force: 2, Chi: 2, PersonalHonor: 3, ProxyId: "oracle-l5r-9785");
+    private static readonly CreatedCardSpec ReverenceAncestor = new(CardType.Personality, Force: 2, Chi: 2, PersonalHonor: 3,
+        Keywords: ["Samurai", "Ancestor", "Spirit"], ProxyId: "user-scan-ancestor-spirit");
 
     private bool ResolveOfferingReverence(PlayerState player, ProvinceState province, CardInstance card)
     {
@@ -108,12 +112,7 @@ public sealed partial class MatchEngine
             return true;
         }
         var scan = CreatedCards.Resolve(ReverenceAncestor);
-        var clans = ControllerClans(player.Id);
-        var printed = scan with
-        {
-            Clan = clans.Length > 0 ? clans[0] : "Unaligned", Clans = clans.Length > 1 ? clans : null,
-            Keywords = new[] { "Samurai", "Ancestor", "Spirit" }.Concat(clans.Select(clan => $"{clan} Clan")).ToArray(),
-        };
+        var printed = WithControllerClan(scan, player);
         for (var i = 0; i < dead; i++) CreatePersonality(player.Id, scan, true, null, out _, printed);
         Emit("eventResolved", $"{Definition(card).Name}: {player.Name} created {dead} Ancestor {(dead == 1 ? "Personality" : "Personalities")}.", player.Id, card.Id);
         province.CardId = null; card.ProvinceIndex = null; card.Zone = Zone.DynastyDiscard;
@@ -210,5 +209,33 @@ public sealed partial class MatchEngine
         Emit("provinceDiscard", $"{Definition(holding).Name} was discarded from {player.Name}'s province {province.Index + 1} (Tested Land).", player.Id, holding.Id);
         DestroyRegion(region);
         Refill(player, province);
+    }
+}
+
+public sealed partial class MatchEngine
+{
+    private bool HandleRegisteredOfferingReverence(string type, GameCommand command)
+    {
+        if (type != "offeringReverence") return false;
+        ResolveOfferingReverenceChoice(command);
+        return true;
+    }
+    private bool HandleRegisteredTestedLandProvince(string type, GameCommand command)
+    {
+        if (type != "testedLandProvince") return false;
+        ResolveTestedLandProvince(command);
+        return true;
+    }
+}
+
+public sealed partial class MatchEngine
+{
+    // Registration only: callbacks are not invoked during module initialization.
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
+    [System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void RegisterSeedsOfDecayBatch4Hooks()
+    {
+        EngineHooks.PendingChoice.Register("HandleRegisteredOfferingReverence", 3600, static (engine, type, command) => engine.HandleRegisteredOfferingReverence(type, command));
+        EngineHooks.PendingChoice.Register("HandleRegisteredTestedLandProvince", 3900, static (engine, type, command) => engine.HandleRegisteredTestedLandProvince(type, command));
     }
 }

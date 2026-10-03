@@ -1,0 +1,11 @@
+<Project>
+  <!-- Rung 6 baseline: all eight existing projects build with zero warnings.
+       Keep the same policy for new projects, including projects that override props. -->
+  <Target Name="CheckNullableBaselinePolicy" BeforeTargets="CoreCompile"
+          Condition="'$(DesignTimeBuild)' != 'true'">
+    <Error Condition="'$(Nullable)' != 'enable'"
+           Text="The nullable baseline requires Nullable=enable. Do not disable analysis to hide new warnings." />
+    <Error Condition="'$(TreatWarningsAsErrors)' != 'true'"
+           Text="The zero-warning baseline requires TreatWarningsAsErrors=true. Fix new warnings instead of disabling the gate." />
+  </Target>
+</Project>

@@ -1,0 +1,55 @@
+{
+  "Profile": "follower-wave-41",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-3083",
+      "Name": "Hida Defenders",
+      "Type": "Follower",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After the resolution of your action that bowed, destroyed, or moved a Personality who has opposed this card at the current battlefield: Gain 2 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-3083.jpg",
+      "Keywords": [],
+      "Focus": 3,
+      "Abilities": [
+        "hida-defenders-honor"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9158",
+      "Name": "Vigilant Riders",
+      "Type": "Follower",
+      "Clan": "Unaligned",
+      "GoldCost": 4,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": 1,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After this card bows: Straighten it.\nReaction: After another player's action targets a card in this unit: Negate this card's destruction from the action's effects.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9158.jpg",
+      "Keywords": [
+        "Cavalry"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "vigilant-riders-negate"
+      ],
+      "Effect": "vigilant-riders-straighten"
+    }
+  ],
+  "Decks": []
+}

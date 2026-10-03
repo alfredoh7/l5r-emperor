@@ -1,0 +1,9 @@
+{
+  "lane": "ui",
+  "summary": "Two click-driven native checks fixed. Real bug: the shown-cards history panel and its toggle were missing from FixedHudCovers (like the Event sidebar, #587), so left clicks on them were forwarded into the table and swallowed while the window had focus; both now count as HUD. Stale captures: the shown capture expected an incoming show to arrive minimized with one unread, but since PR #434 it forces the panel open and read; the stat inlay probe clicked a table card under the expanded-unit overlay, where the table is inert by design, and now picks a card inside the overlay.",
+  "validation": "check-shown-cards.sh passes normal and reduced; check-unit-standard.sh passes all modes (309s). Both failed on main and on the pre-#581 baseline. Diagnosed with temporary instrumentation (not committed): shown row and toggle had pointerOnTable=True, hudCovers=False and received zero mouse-button events; after the next reveal unread=0 and open=True (forced open, by design); in battle-expanded-tokens expandedUnits=1, cameraBlocked=True and the picked tile was a table card while a card inside the detail overlay was available. Not run: full tools/check.sh or the other native checks.",
+  "remaining": "Still failing and undiagnosed: top-cards-ui, player-clarity, crimson-duel, war-room-motion, table-followup. Other fixed overlays may also be missing from FixedHudCovers; a systematic audit of root-level panels against that list has not been done.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/595",
+  "branch": "claude/595-card-click-captures",
+  "updated": "2026-10-03T12:43:08.679975+00:00"
+}

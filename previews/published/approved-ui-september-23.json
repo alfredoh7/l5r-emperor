@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "repository": "alfredoh7/l5r-emperor",
+  "source_pr": 434,
+  "source_commit": "659e015f0e3562bd4b83f5fa445efed1d3fd2892",
+  "title": "Approved Top Cards and updated UI review",
+  "slug": "approved-ui-september-23",
+  "tag": "preview-pr434-659e015f0e-r2-windows",
+  "asset": "L5R-Review-pr434-659e015f0e-r2-Windows.zip",
+  "bytes": 1788872534,
+  "sha256": "d2be7ad61f2491921f45580a4755c42c6f2e845e9a6454bfa237a4f86b8e78ad",
+  "folder": "L5R-Review-pr434-659e015f0e-r2",
+  "launcher": "Start Review.cmd",
+  "reviewer": "mdornbrook"
+}

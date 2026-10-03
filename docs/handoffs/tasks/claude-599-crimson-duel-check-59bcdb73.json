@@ -1,0 +1,9 @@
+{
+  "lane": "ui",
+  "summary": "Repaired the crimson-duel native check: the 'Card outside mat' bound (-788,-480,1576,970) rejected the approved layout (personalities flush at top -495, hand to +559). Bound widened to those extents; no gameplay or visual change.",
+  "validation": "tools/check-crimson-duel.sh: all 9 native views PASS on Windows (build 0 warnings/0 errors). Not a visual acceptance.",
+  "remaining": "war-room-motion still needs ffmpeg (environment, not code); table-followup assignment-720 and player-clarity/top-cards status per #599 comments.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/599",
+  "branch": "claude/599-crimson-duel-check",
+  "updated": "2026-10-03T14:58:20.682394+00:00"
+}

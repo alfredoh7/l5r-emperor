@@ -6,8 +6,10 @@ public sealed record PublishedDeck(string Clan, string StrongholdId, string[] Dy
 public sealed record PublishedSnapshot(string Profile, CardDefinition[] Cards, PublishedDeck[] Decks);
 
 /// <summary>A closed, reviewed card pool embedded in both server and client builds.</summary>
-public static class PublishedContent
+public static partial class PublishedContent
 {
+    private static readonly Dictionary<string, PublishedSnapshot> Loaded = new(StringComparer.Ordinal);
+
     public const string Scenario = "lion-crane-v1";
     public static PublishedSnapshot Snapshot { get; } = Load("L5R.Published.json", Scenario, requireDecks: true);
 
@@ -31,7 +33,7 @@ public static class PublishedContent
 
     private static PublishedSnapshot LoadVanillaWave()
     {
-        var snapshot = Load("L5R.Published.VanillaWave1.json", "vanilla-wave-1", requireDecks: false);
+        var snapshot = Load("L5R.Published.vanilla-wave-1.json", "vanilla-wave-1", requireDecks: false);
         if(snapshot.Cards.Length != 63)
             throw new InvalidOperationException("Unexpected vanilla-wave-1 card count.");
         foreach(var card in snapshot.Cards)
@@ -49,7 +51,7 @@ public static class PublishedContent
 
     private static PublishedSnapshot LoadStrongholdWave()
     {
-        var snapshot = Load("L5R.Published.StrongholdWave1.json", "stronghold-wave-1", requireDecks: false);
+        var snapshot = Load("L5R.Published.stronghold-wave-1.json", "stronghold-wave-1", requireDecks: false);
         if(snapshot.Cards.Length != 4)
             throw new InvalidOperationException("Unexpected stronghold-wave-1 card count.");
         foreach(var card in snapshot.Cards)
@@ -67,7 +69,7 @@ public static class PublishedContent
 
     private static PublishedSnapshot LoadStrongholdWave2()
     {
-        var snapshot = Load("L5R.Published.StrongholdWave2.json", "stronghold-wave-2", requireDecks: false);
+        var snapshot = Load("L5R.Published.stronghold-wave-2.json", "stronghold-wave-2", requireDecks: false);
         if(snapshot.Cards.Length != 2)
             throw new InvalidOperationException("Unexpected stronghold-wave-2 card count.");
         foreach(var card in snapshot.Cards)
@@ -85,7 +87,7 @@ public static class PublishedContent
 
     private static PublishedSnapshot LoadStrongholdWave3()
     {
-        var snapshot = Load("L5R.Published.StrongholdWave3.json", "stronghold-wave-3", requireDecks: false);
+        var snapshot = Load("L5R.Published.stronghold-wave-3.json", "stronghold-wave-3", requireDecks: false);
         if(snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected stronghold-wave-3 card count.");
         foreach(var card in snapshot.Cards)
@@ -103,7 +105,7 @@ public static class PublishedContent
 
     private static PublishedSnapshot LoadPersonalityWave1()
     {
-        var snapshot = Load("L5R.Published.PersonalityWave1.json", "personality-wave-1", requireDecks: false);
+        var snapshot = Load("L5R.Published.personality-wave-1.json", "personality-wave-1", requireDecks: false);
         if(snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected personality-wave-1 card count.");
         foreach(var card in snapshot.Cards)
@@ -121,7 +123,7 @@ public static class PublishedContent
 
     private static PublishedSnapshot LoadPersonalityWave2()
     {
-        var snapshot = Load("L5R.Published.PersonalityWave2.json", "personality-wave-2", requireDecks: false);
+        var snapshot = Load("L5R.Published.personality-wave-2.json", "personality-wave-2", requireDecks: false);
         if(snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected personality-wave-2 card count.");
         foreach(var card in snapshot.Cards)
@@ -139,7 +141,7 @@ public static class PublishedContent
 
     private static PublishedSnapshot LoadPersonalityWave3()
     {
-        var snapshot = Load("L5R.Published.PersonalityWave3.json", "personality-wave-3", requireDecks: false);
+        var snapshot = Load("L5R.Published.personality-wave-3.json", "personality-wave-3", requireDecks: false);
         if(snapshot.Cards.Length != 4)
             throw new InvalidOperationException("Unexpected personality-wave-3 card count.");
         foreach(var card in snapshot.Cards)
@@ -157,7 +159,7 @@ public static class PublishedContent
 
     private static PublishedSnapshot LoadFollowerWave1()
     {
-        var snapshot = Load("L5R.Published.FollowerWave1.json", "follower-wave-1", requireDecks: false);
+        var snapshot = Load("L5R.Published.follower-wave-1.json", "follower-wave-1", requireDecks: false);
         if(snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected follower-wave-1 card count.");
         foreach(var card in snapshot.Cards)
@@ -175,7 +177,7 @@ public static class PublishedContent
 
     private static PublishedSnapshot LoadPersonalityWave4()
     {
-        var snapshot = Load("L5R.Published.PersonalityWave4.json", "personality-wave-4", requireDecks: false);
+        var snapshot = Load("L5R.Published.personality-wave-4.json", "personality-wave-4", requireDecks: false);
         if(snapshot.Cards.Length != 2)
             throw new InvalidOperationException("Unexpected personality-wave-4 card count.");
         foreach(var card in snapshot.Cards)
@@ -195,7 +197,7 @@ public static class PublishedContent
 
     private static PublishedSnapshot LoadPersonalityWave5()
     {
-        var snapshot = Load("L5R.Published.PersonalityWave5.json", "personality-wave-5", requireDecks: false);
+        var snapshot = Load("L5R.Published.personality-wave-5.json", "personality-wave-5", requireDecks: false);
         if(snapshot.Cards.Length != 5)
             throw new InvalidOperationException("Unexpected personality-wave-5 card count.");
         foreach(var card in snapshot.Cards)
@@ -212,11 +214,11 @@ public static class PublishedContent
     /// Immovable Object is that primitive's own worked example; the other three needed only the
     /// already-built keyword-gated Performer/Target categories plus one small precedented
     /// one-off comparison (Chi/Force against the chosen Performer) each.</summary>
-    public static PublishedSnapshot StrategyWave1 { get; } = LoadStrategyWave1();
+    private static readonly PublishedSnapshot StrategyWave1 = LoadStrategyWave1();
 
     private static PublishedSnapshot LoadStrategyWave1()
     {
-        var snapshot = Load("L5R.Published.StrategyWave1.json", "strategy-wave-1", requireDecks: false);
+        var snapshot = Load("L5R.Published.strategy-wave-1.json", "strategy-wave-1", requireDecks: false);
         if(snapshot.Cards.Length != 4)
             throw new InvalidOperationException("Unexpected strategy-wave-1 card count.");
         foreach(var card in snapshot.Cards)
@@ -233,11 +235,11 @@ public static class PublishedContent
     /// pieces (issue #148) -- most reuse the Ranged/Melee Attack primitive verbatim (like Stalking
     /// Tiger); the rest reuse existing Target categories and helpers with at most one new one-off
     /// Require condition each.</summary>
-    public static PublishedSnapshot FollowerWave2 { get; } = LoadFollowerWave2();
+    private static readonly PublishedSnapshot FollowerWave2 = LoadFollowerWave2();
 
     private static PublishedSnapshot LoadFollowerWave2()
     {
-        var snapshot = Load("L5R.Published.FollowerWave2.json", "follower-wave-2", requireDecks: false);
+        var snapshot = Load("L5R.Published.follower-wave-2.json", "follower-wave-2", requireDecks: false);
         if(snapshot.Cards.Length != 11)
             throw new InvalidOperationException("Unexpected follower-wave-2 card count.");
         foreach(var card in snapshot.Cards)
@@ -254,11 +256,11 @@ public static class PublishedContent
     /// aggregate/group Force effects -- Senior Infantry Legion, Ashigaru Elite, Utaku Elite Guard --
     /// and province adjacency). Three of these are the real cards those primitives were built for.
     /// First published use of AttachGrantsKeyword (an attachment granting its wielder a keyword).</summary>
-    public static PublishedSnapshot FollowerWave3 { get; } = LoadFollowerWave3();
+    private static readonly PublishedSnapshot FollowerWave3 = LoadFollowerWave3();
 
     private static PublishedSnapshot LoadFollowerWave3()
     {
-        var snapshot = Load("L5R.Published.FollowerWave3.json", "follower-wave-3", requireDecks: false);
+        var snapshot = Load("L5R.Published.follower-wave-3.json", "follower-wave-3", requireDecks: false);
         if(snapshot.Cards.Length != 28)
             throw new InvalidOperationException("Unexpected follower-wave-3 card count.");
         foreach(var card in snapshot.Cards)
@@ -274,11 +276,11 @@ public static class PublishedContent
     /// Attack-strength defense, Scope Self), Singh Remnants (the same primitive, Scope Unit, Ranged
     /// only, plus the new "any Personality enters play" Reaction letting a card in hand or a discard
     /// pile attach itself), and Clay Kshatriya (the Invest keyword mechanism).</summary>
-    public static PublishedSnapshot FollowerWave4 { get; } = LoadFollowerWave4();
+    private static readonly PublishedSnapshot FollowerWave4 = LoadFollowerWave4();
 
     private static PublishedSnapshot LoadFollowerWave4()
     {
-        var snapshot = Load("L5R.Published.FollowerWave4.json", "follower-wave-4", requireDecks: false);
+        var snapshot = Load("L5R.Published.follower-wave-4.json", "follower-wave-4", requireDecks: false);
         if(snapshot.Cards.Length != 3)
             throw new InvalidOperationException("Unexpected follower-wave-4 card count.");
         foreach(var card in snapshot.Cards)
@@ -292,11 +294,11 @@ public static class PublishedContent
 
     /// <summary>Wave 5: Scourge of the Sea, a pure "This Personality has X" grant (AttachGrantsKeyword:
     /// Naval) with no ability of its own -- issue #179.</summary>
-    public static PublishedSnapshot FollowerWave5 { get; } = LoadFollowerWave5();
+    private static readonly PublishedSnapshot FollowerWave5 = LoadFollowerWave5();
 
     private static PublishedSnapshot LoadFollowerWave5()
     {
-        var snapshot = Load("L5R.Published.FollowerWave5.json", "follower-wave-5", requireDecks: false);
+        var snapshot = Load("L5R.Published.follower-wave-5.json", "follower-wave-5", requireDecks: false);
         if(snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected follower-wave-5 card count.");
         foreach(var card in snapshot.Cards)
@@ -313,11 +315,11 @@ public static class PublishedContent
     /// X" AttachGrantsKeyword grants (Magistrate, Kensai) -- issue #179. Justice of the Crane's
     /// "additional action if the printed Magistrate keyword" bonus is now wired too, once the
     /// Additional Action primitive existed (issue #181).</summary>
-    public static PublishedSnapshot ItemWave1 { get; } = LoadItemWave1();
+    private static readonly PublishedSnapshot ItemWave1 = LoadItemWave1();
 
     private static PublishedSnapshot LoadItemWave1()
     {
-        var snapshot = Load("L5R.Published.ItemWave1.json", "item-wave-1", requireDecks: false);
+        var snapshot = Load("L5R.Published.item-wave-1.json", "item-wave-1", requireDecks: false);
         if(snapshot.Cards.Length != 2)
             throw new InvalidOperationException("Unexpected item-wave-1 card count.");
         foreach(var card in snapshot.Cards)
@@ -333,11 +335,11 @@ public static class PublishedContent
     /// Action primitive (issue #181) -- Again! (an unscoped grant), Two Hands (a scoped grant plus
     /// the "no new grants this battle" restriction), and Effortless Counterattack (the Reaction that
     /// negates one before it resolves, plus an unrelated plain move-home Battle action).</summary>
-    public static PublishedSnapshot StrategyWave2 { get; } = LoadStrategyWave2();
+    private static readonly PublishedSnapshot StrategyWave2 = LoadStrategyWave2();
 
     private static PublishedSnapshot LoadStrategyWave2()
     {
-        var snapshot = Load("L5R.Published.StrategyWave2.json", "strategy-wave-2", requireDecks: false);
+        var snapshot = Load("L5R.Published.strategy-wave-2.json", "strategy-wave-2", requireDecks: false);
         if(snapshot.Cards.Length != 3)
             throw new InvalidOperationException("Unexpected strategy-wave-2 card count.");
         foreach(var card in snapshot.Cards)
@@ -353,11 +355,11 @@ public static class PublishedContent
     /// real cards exercising Reserve (issue #184) -- both pure reminder text (Destined/Reserve,
     /// Cavalry/Destined/Reserve respectively) -- plus Shiba Jikaro, the first real Stalwart carrier
     /// (likewise pure reminder text). No ability of their own beyond the keywords, for any of the three.</summary>
-    public static PublishedSnapshot PersonalityWave6 { get; } = LoadPersonalityWave6();
+    private static readonly PublishedSnapshot PersonalityWave6 = LoadPersonalityWave6();
 
     private static PublishedSnapshot LoadPersonalityWave6()
     {
-        var snapshot = Load("L5R.Published.PersonalityWave6.json", "personality-wave-6", requireDecks: false);
+        var snapshot = Load("L5R.Published.personality-wave-6.json", "personality-wave-6", requireDecks: false);
         if(snapshot.Cards.Length != 3)
             throw new InvalidOperationException("Unexpected personality-wave-6 card count.");
         foreach(var card in snapshot.Cards)
@@ -371,11 +373,11 @@ public static class PublishedContent
 
     /// <summary>Wave 6 of ability-bearing Followers: Floating Reserve, the first real Fate-side
     /// Reserve carrier (issue #184) -- pure reminder text, no ability of its own beyond the keyword.</summary>
-    public static PublishedSnapshot FollowerWave6 { get; } = LoadFollowerWave6();
+    private static readonly PublishedSnapshot FollowerWave6 = LoadFollowerWave6();
 
     private static PublishedSnapshot LoadFollowerWave6()
     {
-        var snapshot = Load("L5R.Published.FollowerWave6.json", "follower-wave-6", requireDecks: false);
+        var snapshot = Load("L5R.Published.follower-wave-6.json", "follower-wave-6", requireDecks: false);
         if(snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected follower-wave-6 card count.");
         foreach(var card in snapshot.Cards)
@@ -391,11 +393,11 @@ public static class PublishedContent
     /// card exercising the Dishonor/Rehonor Personal-Honor override (her dishonorable Battle Maidens
     /// keep their printed/base Personal Honor instead of 0), plus a straightforward Limited ability
     /// (gain 2 Honor; may not declare an attack this turn).</summary>
-    public static PublishedSnapshot PersonalityWave7 { get; } = LoadPersonalityWave7();
+    private static readonly PublishedSnapshot PersonalityWave7 = LoadPersonalityWave7();
 
     private static PublishedSnapshot LoadPersonalityWave7()
     {
-        var snapshot = Load("L5R.Published.PersonalityWave7.json", "personality-wave-7", requireDecks: false);
+        var snapshot = Load("L5R.Published.personality-wave-7.json", "personality-wave-7", requireDecks: false);
         if(snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected personality-wave-7 card count.");
         foreach(var card in snapshot.Cards)
@@ -409,11 +411,11 @@ public static class PublishedContent
 
     /// <summary>Wave 8 of ability-bearing Personalities (issue #198): the first wave from the full
     /// Lion Clan Personality review, 17 cards wired using only already-existing primitives.</summary>
-    public static PublishedSnapshot PersonalityWave8 { get; } = LoadPersonalityWave8();
+    private static readonly PublishedSnapshot PersonalityWave8 = LoadPersonalityWave8();
 
     private static PublishedSnapshot LoadPersonalityWave8()
     {
-        var snapshot = Load("L5R.Published.PersonalityWave8.json", "personality-wave-8", requireDecks: false);
+        var snapshot = Load("L5R.Published.personality-wave-8.json", "personality-wave-8", requireDecks: false);
         if(snapshot.Cards.Length != 17)
             throw new InvalidOperationException("Unexpected personality-wave-8 card count.");
         foreach(var card in snapshot.Cards)
@@ -428,11 +430,11 @@ public static class PublishedContent
     /// <summary>Wave 3 of ability-bearing Strategy cards: Volcano Tattoo (issue #190) -- the first
     /// real published Kiho-keyword card (a plain classification word, same treatment as Recon), and
     /// the target Hunter of Harmony's own Limited ability returns from a Fate discard pile.</summary>
-    public static PublishedSnapshot StrategyWave3 { get; } = LoadStrategyWave3();
+    private static readonly PublishedSnapshot StrategyWave3 = LoadStrategyWave3();
 
     private static PublishedSnapshot LoadStrategyWave3()
     {
-        var snapshot = Load("L5R.Published.StrategyWave3.json", "strategy-wave-3", requireDecks: false);
+        var snapshot = Load("L5R.Published.strategy-wave-3.json", "strategy-wave-3", requireDecks: false);
         if(snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected strategy-wave-3 card count.");
         foreach(var card in snapshot.Cards)
@@ -447,11 +449,11 @@ public static class PublishedContent
     /// <summary>Wave 7 of ability-bearing Followers: Hunter of Harmony (issue #190) -- "Remove this
     /// card from the game: Choose a Kiho Strategy in your discard pile. Put it into your hand."
     /// Exercises the new discard-to-hand primitive (ReturnToHand) against Volcano Tattoo above.</summary>
-    public static PublishedSnapshot FollowerWave7 { get; } = LoadFollowerWave7();
+    private static readonly PublishedSnapshot FollowerWave7 = LoadFollowerWave7();
 
     private static PublishedSnapshot LoadFollowerWave7()
     {
-        var snapshot = Load("L5R.Published.FollowerWave7.json", "follower-wave-7", requireDecks: false);
+        var snapshot = Load("L5R.Published.follower-wave-7.json", "follower-wave-7", requireDecks: false);
         if(snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected follower-wave-7 card count.");
         foreach(var card in snapshot.Cards)
@@ -466,11 +468,11 @@ public static class PublishedContent
     /// <summary>Wave 8 of ability-bearing Followers: Goju House Guard (issue #192) -- the first real
     /// card exercising the new deck-return primitive (ToOwnerDeck), and Aberrations -- the first real
     /// card exercising the top-of-Fate-deck discard primitive (DiscardTopOfFateDeck).</summary>
-    public static PublishedSnapshot FollowerWave8 { get; } = LoadFollowerWave8();
+    private static readonly PublishedSnapshot FollowerWave8 = LoadFollowerWave8();
 
     private static PublishedSnapshot LoadFollowerWave8()
     {
-        var snapshot = Load("L5R.Published.FollowerWave8.json", "follower-wave-8", requireDecks: false);
+        var snapshot = Load("L5R.Published.follower-wave-8.json", "follower-wave-8", requireDecks: false);
         if(snapshot.Cards.Length != 2)
             throw new InvalidOperationException("Unexpected follower-wave-8 card count.");
         foreach(var card in snapshot.Cards)
@@ -485,11 +487,11 @@ public static class PublishedContent
     /// <summary>Wave 2 of ability-bearing Items: Sankaku-Yari (issue #192, target-keyword-
     /// conditional Attack strength, same shape as Horseback Warriors) and Pearl of Embers (zero new
     /// primitives, the existing BattleOrOpen Timing verbatim).</summary>
-    public static PublishedSnapshot ItemWave2 { get; } = LoadItemWave2();
+    private static readonly PublishedSnapshot ItemWave2 = LoadItemWave2();
 
     private static PublishedSnapshot LoadItemWave2()
     {
-        var snapshot = Load("L5R.Published.ItemWave2.json", "item-wave-2", requireDecks: false);
+        var snapshot = Load("L5R.Published.item-wave-2.json", "item-wave-2", requireDecks: false);
         if(snapshot.Cards.Length != 2)
             throw new InvalidOperationException("Unexpected item-wave-2 card count.");
         foreach(var card in snapshot.Cards)
@@ -504,11 +506,11 @@ public static class PublishedContent
     /// <summary>Wave 4 of ability-bearing Strategy cards (issue #192; numbered 4, not 3, to avoid a
     /// filename collision with a sibling in-flight PR's own strategy-wave-3): Ritual Preparation,
     /// needing one new Target category, own-unit-card (a own Personality OR Follower).</summary>
-    public static PublishedSnapshot StrategyWave4 { get; } = LoadStrategyWave4();
+    private static readonly PublishedSnapshot StrategyWave4 = LoadStrategyWave4();
 
     private static PublishedSnapshot LoadStrategyWave4()
     {
-        var snapshot = Load("L5R.Published.StrategyWave4.json", "strategy-wave-4", requireDecks: false);
+        var snapshot = Load("L5R.Published.strategy-wave-4.json", "strategy-wave-4", requireDecks: false);
         if(snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected strategy-wave-4 card count.");
         foreach(var card in snapshot.Cards)
@@ -524,11 +526,11 @@ public static class PublishedContent
     /// collision with two sibling in-flight PRs, issues #190/#192, already claiming strategy-wave-3/
     /// strategy-wave-4): Steel on Steel and The Courtesy of the Crane, the two cards driving the
     /// Dueling primitive.</summary>
-    public static PublishedSnapshot StrategyWave5 { get; } = LoadStrategyWave5();
+    private static readonly PublishedSnapshot StrategyWave5 = LoadStrategyWave5();
 
     private static PublishedSnapshot LoadStrategyWave5()
     {
-        var snapshot = Load("L5R.Published.StrategyWave5.json", "strategy-wave-5", requireDecks: false);
+        var snapshot = Load("L5R.Published.strategy-wave-5.json", "strategy-wave-5", requireDecks: false);
         if(snapshot.Cards.Length != 2)
             throw new InvalidOperationException("Unexpected strategy-wave-5 card count.");
         foreach(var card in snapshot.Cards)
@@ -548,7 +550,7 @@ public static class PublishedContent
 
     private static PublishedSnapshot LoadPersonalityWave9()
     {
-        var snapshot = Load("L5R.Published.PersonalityWave9.json", "personality-wave-9", requireDecks: false);
+        var snapshot = Load("L5R.Published.personality-wave-9.json", "personality-wave-9", requireDecks: false);
         if(snapshot.Cards.Length != 34)
             throw new InvalidOperationException("Unexpected personality-wave-9 card count.");
         foreach(var card in snapshot.Cards)
@@ -567,7 +569,7 @@ public static class PublishedContent
 
     private static PublishedSnapshot LoadPersonalityWave10()
     {
-        var snapshot = Load("L5R.Published.PersonalityWave10.json", "personality-wave-10", requireDecks: false);
+        var snapshot = Load("L5R.Published.personality-wave-10.json", "personality-wave-10", requireDecks: false);
         if(snapshot.Cards.Length != 3)
             throw new InvalidOperationException("Unexpected personality-wave-10 card count.");
         foreach(var card in snapshot.Cards)
@@ -581,11 +583,11 @@ public static class PublishedContent
 
     /// <summary>Wave 11 (issue #212): Tamori Takeshi, the first real card exercising the new
     /// Protection primitive ("effects of actions the target performs will not be negated").</summary>
-    public static PublishedSnapshot PersonalityWave11 { get; } = LoadPersonalityWave11();
+    private static readonly PublishedSnapshot PersonalityWave11 = LoadPersonalityWave11();
 
     private static PublishedSnapshot LoadPersonalityWave11()
     {
-        var snapshot = Load("L5R.Published.PersonalityWave11.json", "personality-wave-11", requireDecks: false);
+        var snapshot = Load("L5R.Published.personality-wave-11.json", "personality-wave-11", requireDecks: false);
         if(snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected personality-wave-11 card count.");
         foreach(var card in snapshot.Cards)
@@ -601,11 +603,11 @@ public static class PublishedContent
     /// Tamori Ruya (the new "after a bow resolves" Reaction trigger family), Tamori Yayu (a
     /// bow-or-destroy dual-cost Ranged Attack), Mirumoto Katagi and Tamori Shinji (single-card Gold
     /// discounts).</summary>
-    public static PublishedSnapshot PersonalityWave12 { get; } = LoadPersonalityWave12();
+    private static readonly PublishedSnapshot PersonalityWave12 = LoadPersonalityWave12();
 
     private static PublishedSnapshot LoadPersonalityWave12()
     {
-        var snapshot = Load("L5R.Published.PersonalityWave12.json", "personality-wave-12", requireDecks: false);
+        var snapshot = Load("L5R.Published.personality-wave-12.json", "personality-wave-12", requireDecks: false);
         if(snapshot.Cards.Length != 6)
             throw new InvalidOperationException("Unexpected personality-wave-12 card count.");
         foreach(var card in snapshot.Cards)
@@ -625,7 +627,7 @@ public static class PublishedContent
 
     private static PublishedSnapshot LoadPersonalityWave13()
     {
-        var snapshot = Load("L5R.Published.PersonalityWave13.json", "personality-wave-13", requireDecks: false);
+        var snapshot = Load("L5R.Published.personality-wave-13.json", "personality-wave-13", requireDecks: false);
         if(snapshot.Cards.Length != 5)
             throw new InvalidOperationException("Unexpected personality-wave-13 card count.");
         foreach(var card in snapshot.Cards)
@@ -647,11 +649,11 @@ public static class PublishedContent
     /// (see package_ring_wave_1.py's own TEXT_OVERRIDE). The engine-side Rings primitives
     /// (recruitment as a granted Additional Battle Action, Enlightenment victory) landed in issue
     /// #194 itself, tested only via training fixtures until now.</summary>
-    public static PublishedSnapshot RingWave1 { get; } = LoadRingWave1();
+    private static readonly PublishedSnapshot RingWave1 = LoadRingWave1();
 
     private static PublishedSnapshot LoadRingWave1()
     {
-        var snapshot = Load("L5R.Published.RingWave1.json", "ring-wave-1", requireDecks: false);
+        var snapshot = Load("L5R.Published.ring-wave-1.json", "ring-wave-1", requireDecks: false);
         if(snapshot.Cards.Length != 7)
             throw new InvalidOperationException("Unexpected ring-wave-1 card count.");
         foreach(var card in snapshot.Cards)
@@ -669,11 +671,11 @@ public static class PublishedContent
     /// downloaded locally (issue #196) until now. Her local catalogue "stats" block does not match
     /// her actual scan (see package_personality_wave_14.py's own STATS_OVERRIDE) -- hand-corrected
     /// against the image directly.</summary>
-    public static PublishedSnapshot PersonalityWave14 { get; } = LoadPersonalityWave14();
+    private static readonly PublishedSnapshot PersonalityWave14 = LoadPersonalityWave14();
 
     private static PublishedSnapshot LoadPersonalityWave14()
     {
-        var snapshot = Load("L5R.Published.PersonalityWave14.json", "personality-wave-14", requireDecks: false);
+        var snapshot = Load("L5R.Published.personality-wave-14.json", "personality-wave-14", requireDecks: false);
         if(snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected personality-wave-14 card count.");
         foreach(var card in snapshot.Cards)
@@ -689,11 +691,11 @@ public static class PublishedContent
     /// Scholarly Hermit, engine-complete since issue #194 itself (scholarly-hermit-search; needed
     /// only a Ring-type check in a discard pile) but blocked on her own scan image not being
     /// downloaded locally (issue #196) until now.</summary>
-    public static PublishedSnapshot FollowerWave9 { get; } = LoadFollowerWave9();
+    private static readonly PublishedSnapshot FollowerWave9 = LoadFollowerWave9();
 
     private static PublishedSnapshot LoadFollowerWave9()
     {
-        var snapshot = Load("L5R.Published.FollowerWave9.json", "follower-wave-9", requireDecks: false);
+        var snapshot = Load("L5R.Published.follower-wave-9.json", "follower-wave-9", requireDecks: false);
         if(snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected follower-wave-9 card count.");
         foreach(var card in snapshot.Cards)
@@ -712,11 +714,11 @@ public static class PublishedContent
     /// actually Chi, scraped Force is actually GoldCost, scraped Chi is actually GoldProduction) --
     /// hand-corrected against each card's own scan directly, see package_personality_wave_15.py's
     /// own STATS_OVERRIDE.</summary>
-    public static PublishedSnapshot PersonalityWave15 { get; } = LoadPersonalityWave15();
+    private static readonly PublishedSnapshot PersonalityWave15 = LoadPersonalityWave15();
 
     private static PublishedSnapshot LoadPersonalityWave15()
     {
-        var snapshot = Load("L5R.Published.PersonalityWave15.json", "personality-wave-15", requireDecks: false);
+        var snapshot = Load("L5R.Published.personality-wave-15.json", "personality-wave-15", requireDecks: false);
         if(snapshot.Cards.Length != 4)
             throw new InvalidOperationException("Unexpected personality-wave-15 card count.");
         foreach(var card in snapshot.Cards)
@@ -736,11 +738,11 @@ public static class PublishedContent
     /// GoldProduction, scraped Force is actually GoldCost, scraped Chi is actually Force, losing the
     /// real Chi value entirely) -- hand-corrected against each card's own scan directly, see
     /// package_personality_wave_16.py's own STATS_OVERRIDE.</summary>
-    public static PublishedSnapshot PersonalityWave16 { get; } = LoadPersonalityWave16();
+    private static readonly PublishedSnapshot PersonalityWave16 = LoadPersonalityWave16();
 
     private static PublishedSnapshot LoadPersonalityWave16()
     {
-        var snapshot = Load("L5R.Published.PersonalityWave16.json", "personality-wave-16", requireDecks: false);
+        var snapshot = Load("L5R.Published.personality-wave-16.json", "personality-wave-16", requireDecks: false);
         if(snapshot.Cards.Length != 4)
             throw new InvalidOperationException("Unexpected personality-wave-16 card count.");
         foreach(var card in snapshot.Cards)
@@ -759,11 +761,11 @@ public static class PublishedContent
     /// scanned; the engine's own bookkeeping choice to move the physical card out of its province and
     /// into a dedicated reminder zone, instead of leaving it face-up where it was revealed, changes
     /// nothing about the rules-visible effect.</summary>
-    public static PublishedSnapshot EventWave1 { get; } = LoadEventWave1();
+    private static readonly PublishedSnapshot EventWave1 = LoadEventWave1();
 
     private static PublishedSnapshot LoadEventWave1()
     {
-        var snapshot = Load("L5R.Published.EventWave1.json", "event-wave-1", requireDecks: false);
+        var snapshot = Load("L5R.Published.event-wave-1.json", "event-wave-1", requireDecks: false);
         if(snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected event-wave-1 card count.");
         foreach(var card in snapshot.Cards)
@@ -782,11 +784,11 @@ public static class PublishedContent
     /// play). Both resolve through the engine's own Events-Phase dispatch (MatchEngine.ResolveRegion)
     /// into the new Zone.Region, attached to the province rather than to another card -- see the Zone
     /// enum's own doc comment.</summary>
-    public static PublishedSnapshot RegionWave1 { get; } = LoadRegionWave1();
+    private static readonly PublishedSnapshot RegionWave1 = LoadRegionWave1();
 
     private static PublishedSnapshot LoadRegionWave1()
     {
-        var snapshot = Load("L5R.Published.RegionWave1.json", "region-wave-1", requireDecks: false);
+        var snapshot = Load("L5R.Published.region-wave-1.json", "region-wave-1", requireDecks: false);
         if(snapshot.Cards.Length != 2)
             throw new InvalidOperationException("Unexpected region-wave-1 card count.");
         foreach(var card in snapshot.Cards)
@@ -805,11 +807,11 @@ public static class PublishedContent
     /// AbilityCatalog entry; her Battle action is a genuine catalog entry
     /// ("lady-matsus-rage-bow-destroy") with a delayed second half tracked via
     /// MatchState.PendingLadyMatsusRageWatches.</summary>
-    public static PublishedSnapshot CelestialWave1 { get; } = LoadCelestialWave1();
+    private static readonly PublishedSnapshot CelestialWave1 = LoadCelestialWave1();
 
     private static PublishedSnapshot LoadCelestialWave1()
     {
-        var snapshot = Load("L5R.Published.CelestialWave1.json", "celestial-wave-1", requireDecks: false);
+        var snapshot = Load("L5R.Published.celestial-wave-1.json", "celestial-wave-1", requireDecks: false);
         if(snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected celestial-wave-1 card count.");
         foreach(var card in snapshot.Cards)
@@ -829,11 +831,11 @@ public static class PublishedContent
     /// Spell never prints its own Force stat box). The Earth's Hunger (The Shadow's Embrace, Earth)
     /// is a cost-choice ability (own-wielder-or-source-with-wielder-keyword) -- Xijkt's own shape,
     /// mirrored the other way round.</summary>
-    public static PublishedSnapshot SpellWave1 { get; } = LoadSpellWave1();
+    private static readonly PublishedSnapshot SpellWave1 = LoadSpellWave1();
 
     private static PublishedSnapshot LoadSpellWave1()
     {
-        var snapshot = Load("L5R.Published.SpellWave1.json", "spell-wave-1", requireDecks: false);
+        var snapshot = Load("L5R.Published.spell-wave-1.json", "spell-wave-1", requireDecks: false);
         if(snapshot.Cards.Length != 3)
             throw new InvalidOperationException("Unexpected spell-wave-1 card count.");
         foreach(var card in snapshot.Cards)
@@ -854,11 +856,11 @@ public static class PublishedContent
     /// no physical printed card to return to any pile. Both fields (its own Type and Clan) are
     /// hand-corrected from the local catalogue's own mis-scoped raw record -- see
     /// package_personality_wave_17.py's own OVERRIDE.</summary>
-    public static PublishedSnapshot PersonalityWave17 { get; } = LoadPersonalityWave17();
+    private static readonly PublishedSnapshot PersonalityWave17 = LoadPersonalityWave17();
 
     private static PublishedSnapshot LoadPersonalityWave17()
     {
-        var snapshot = Load("L5R.Published.PersonalityWave17.json", "personality-wave-17", requireDecks: false);
+        var snapshot = Load("L5R.Published.personality-wave-17.json", "personality-wave-17", requireDecks: false);
         if(snapshot.Cards.Length != 2)
             throw new InvalidOperationException("Unexpected personality-wave-17 card count.");
         foreach(var card in snapshot.Cards)
@@ -884,11 +886,11 @@ public static class PublishedContent
     /// restriction needed no enforcement code at all: verified already the engine's unconditional
     /// default (SelectBattle's one SetPhase(Phase.Battle,...) call always seeds the Defender's own
     /// priority first).</summary>
-    public static PublishedSnapshot EventWave2 { get; } = LoadEventWave2();
+    private static readonly PublishedSnapshot EventWave2 = LoadEventWave2();
 
     private static PublishedSnapshot LoadEventWave2()
     {
-        var snapshot = Load("L5R.Published.EventWave2.json", "event-wave-2", requireDecks: false);
+        var snapshot = Load("L5R.Published.event-wave-2.json", "event-wave-2", requireDecks: false);
         if(snapshot.Cards.Length != 5)
             throw new InvalidOperationException("Unexpected event-wave-2 card count.");
         foreach(var card in snapshot.Cards)
@@ -910,11 +912,11 @@ public static class PublishedContent
     /// exemption by omission (not registered in MoveOrStraightenKind); Unexpected Support needed one
     /// new Target category (enemy-fewer-or-equal-followers-than-performer, the enemy-only counterpart
     /// to journeys-end-move's own unrestricted one).</summary>
-    public static PublishedSnapshot StrategyWave6 { get; } = LoadStrategyWave6();
+    private static readonly PublishedSnapshot StrategyWave6 = LoadStrategyWave6();
 
     private static PublishedSnapshot LoadStrategyWave6()
     {
-        var snapshot = Load("L5R.Published.StrategyWave6.json", "strategy-wave-6", requireDecks: false);
+        var snapshot = Load("L5R.Published.strategy-wave-6.json", "strategy-wave-6", requireDecks: false);
         if(snapshot.Cards.Length != 5)
             throw new InvalidOperationException("Unexpected strategy-wave-6 card count.");
         foreach(var card in snapshot.Cards)
@@ -935,11 +937,11 @@ public static class PublishedContent
     /// Destroy/MoveHome. Takasho's own Clan is hand-corrected (his local catalogue record lists two
     /// raw clan values; his own scan shows no clan mon at all, confirming he is genuinely
     /// clanless -- see package_personality_wave_18.py's own CLAN_OVERRIDE).</summary>
-    public static PublishedSnapshot PersonalityWave18 { get; } = LoadPersonalityWave18();
+    private static readonly PublishedSnapshot PersonalityWave18 = LoadPersonalityWave18();
 
     private static PublishedSnapshot LoadPersonalityWave18()
     {
-        var snapshot = Load("L5R.Published.PersonalityWave18.json", "personality-wave-18", requireDecks: false);
+        var snapshot = Load("L5R.Published.personality-wave-18.json", "personality-wave-18", requireDecks: false);
         if(snapshot.Cards.Length != 10)
             throw new InvalidOperationException("Unexpected personality-wave-18 card count.");
         foreach(var card in snapshot.Cards)
@@ -955,11 +957,11 @@ public static class PublishedContent
     /// fully buildable with primitives that already existed before this wave -- Archery Range,
     /// Slanderer, Temple of Hotei, and Tranquil Garden. First Holding wave to carry curated
     /// Effect/Ability data (every prior published Holding was ability-free).</summary>
-    public static PublishedSnapshot HoldingWave1 { get; } = LoadHoldingWave1();
+    private static readonly PublishedSnapshot HoldingWave1 = LoadHoldingWave1();
 
     private static PublishedSnapshot LoadHoldingWave1()
     {
-        var snapshot = Load("L5R.Published.HoldingWave1.json", "holding-wave-1", requireDecks: false);
+        var snapshot = Load("L5R.Published.holding-wave-1.json", "holding-wave-1", requireDecks: false);
         if(snapshot.Cards.Length != 4)
             throw new InvalidOperationException("Unexpected holding-wave-1 card count.");
         foreach(var card in snapshot.Cards)
@@ -975,11 +977,11 @@ public static class PublishedContent
     /// buildable with primitives that already existed before this wave -- Flesh Cutter Arrows,
     /// Fubatsu Plate, Nightingale Blade, and Satoshi's Dual Warfans. Satoshi's Dual Warfans needed
     /// one new Effect term ("lion-clan-discount") on Equip()'s own existing cost-discount formula.</summary>
-    public static PublishedSnapshot ItemWave3 { get; } = LoadItemWave3();
+    private static readonly PublishedSnapshot ItemWave3 = LoadItemWave3();
 
     private static PublishedSnapshot LoadItemWave3()
     {
-        var snapshot = Load("L5R.Published.ItemWave3.json", "item-wave-3", requireDecks: false);
+        var snapshot = Load("L5R.Published.item-wave-3.json", "item-wave-3", requireDecks: false);
         if(snapshot.Cards.Length != 4)
             throw new InvalidOperationException("Unexpected item-wave-3 card count.");
         foreach(var card in snapshot.Cards)
@@ -996,11 +998,11 @@ public static class PublishedContent
     /// Personality source, so it needed a bespoke standalone Require (own ProvinceIndex ==
     /// CurrentBattleProvince) rather than reusing AtBattle, which structurally can never be true for
     /// a Zone.Region card.</summary>
-    public static PublishedSnapshot RegionWave2 { get; } = LoadRegionWave2();
+    private static readonly PublishedSnapshot RegionWave2 = LoadRegionWave2();
 
     private static PublishedSnapshot LoadRegionWave2()
     {
-        var snapshot = Load("L5R.Published.RegionWave2.json", "region-wave-2", requireDecks: false);
+        var snapshot = Load("L5R.Published.region-wave-2.json", "region-wave-2", requireDecks: false);
         if(snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected region-wave-2 card count.");
         foreach(var card in snapshot.Cards)
@@ -1017,11 +1019,11 @@ public static class PublishedContent
     /// The Earth Flows, and Winds of Dismissal. The Earth Flows' own passive Honor clause is keyed by
     /// a new Effect term ("earth-flows-honor") that MatchEngine.CheckEarthFlowsBonus reads from the
     /// winning army's own attached Spells after an outright battle win.</summary>
-    public static PublishedSnapshot SpellWave2 { get; } = LoadSpellWave2();
+    private static readonly PublishedSnapshot SpellWave2 = LoadSpellWave2();
 
     private static PublishedSnapshot LoadSpellWave2()
     {
-        var snapshot = Load("L5R.Published.SpellWave2.json", "spell-wave-2", requireDecks: false);
+        var snapshot = Load("L5R.Published.spell-wave-2.json", "spell-wave-2", requireDecks: false);
         if(snapshot.Cards.Length != 3)
             throw new InvalidOperationException("Unexpected spell-wave-2 card count.");
         foreach(var card in snapshot.Cards)
@@ -1037,11 +1039,11 @@ public static class PublishedContent
     /// Sacrifice, the one false negative the BLOCKERS documentation pass itself caught -- a plain
     /// Siege Performer plus one new Force-vs-province-strength Target category
     /// ("force-lte-province-strength").</summary>
-    public static PublishedSnapshot StrategyWave7 { get; } = LoadStrategyWave7();
+    private static readonly PublishedSnapshot StrategyWave7 = LoadStrategyWave7();
 
     private static PublishedSnapshot LoadStrategyWave7()
     {
-        var snapshot = Load("L5R.Published.StrategyWave7.json", "strategy-wave-7", requireDecks: false);
+        var snapshot = Load("L5R.Published.strategy-wave-7.json", "strategy-wave-7", requireDecks: false);
         if(snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected strategy-wave-7 card count.");
         foreach(var card in snapshot.Cards)
@@ -1055,11 +1057,11 @@ public static class PublishedContent
 
     /// <summary>Strategy wave 8 (issue #267): The Weakness of Man, the proof case for the general
     /// Battle/Open presence primitive -- see CardAbilities.ValidateAbility's own actingAsBattle.</summary>
-    public static PublishedSnapshot StrategyWave8 { get; } = LoadStrategyWave8();
+    private static readonly PublishedSnapshot StrategyWave8 = LoadStrategyWave8();
 
     private static PublishedSnapshot LoadStrategyWave8()
     {
-        var snapshot = Load("L5R.Published.StrategyWave8.json", "strategy-wave-8", requireDecks: false);
+        var snapshot = Load("L5R.Published.strategy-wave-8.json", "strategy-wave-8", requireDecks: false);
         if(snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected strategy-wave-8 card count.");
         foreach(var card in snapshot.Cards)
@@ -1077,7 +1079,7 @@ public static class PublishedContent
 
     private static PublishedSnapshot LoadStrategyWave9()
     {
-        var snapshot = Load("L5R.Published.StrategyWave9.json", "strategy-wave-9", requireDecks: false);
+        var snapshot = Load("L5R.Published.strategy-wave-9.json", "strategy-wave-9", requireDecks: false);
         if(snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected strategy-wave-9 card count.");
         foreach(var card in snapshot.Cards)
@@ -1093,11 +1095,11 @@ public static class PublishedContent
     /// Fudo's Fiends) whose only printed text is the keyword's own reminder -- zero AbilityCatalog
     /// wiring, since MatchEngine.ExpendableDraw is already unconditionally correct for any card
     /// carrying Expendable.</summary>
-    public static PublishedSnapshot FollowerWave10 { get; } = LoadFollowerWave10();
+    private static readonly PublishedSnapshot FollowerWave10 = LoadFollowerWave10();
 
     private static PublishedSnapshot LoadFollowerWave10()
     {
-        var snapshot = Load("L5R.Published.FollowerWave10.json", "follower-wave-10", requireDecks: false);
+        var snapshot = Load("L5R.Published.follower-wave-10.json", "follower-wave-10", requireDecks: false);
         if(snapshot.Cards.Length != 2)
             throw new InvalidOperationException("Unexpected follower-wave-10 card count.");
         foreach(var card in snapshot.Cards)
@@ -1120,7 +1122,7 @@ public static class PublishedContent
 
     private static PublishedSnapshot LoadStrategyWave10()
     {
-        var snapshot = Load("L5R.Published.StrategyWave10.json", "strategy-wave-10", requireDecks: false);
+        var snapshot = Load("L5R.Published.strategy-wave-10.json", "strategy-wave-10", requireDecks: false);
         if(snapshot.Cards.Length != 3)
             throw new InvalidOperationException("Unexpected strategy-wave-10 card count.");
         foreach(var card in snapshot.Cards)
@@ -1135,11 +1137,11 @@ public static class PublishedContent
     /// <summary>Spell wave 3 (issue #276 follow-up): Stormless Fury, the first card to exercise the
     /// general "after a Battle action resolves" Reaction primitive -- see
     /// CardAbilities.OpenBattleActionReactionWindow's own doc comment.</summary>
-    public static PublishedSnapshot SpellWave3 { get; } = LoadSpellWave3();
+    private static readonly PublishedSnapshot SpellWave3 = LoadSpellWave3();
 
     private static PublishedSnapshot LoadSpellWave3()
     {
-        var snapshot = Load("L5R.Published.SpellWave3.json", "spell-wave-3", requireDecks: false);
+        var snapshot = Load("L5R.Published.spell-wave-3.json", "spell-wave-3", requireDecks: false);
         if(snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected spell-wave-3 card count.");
         foreach(var card in snapshot.Cards)
@@ -1154,11 +1156,11 @@ public static class PublishedContent
     /// <summary>Personality wave 19 (issue #276 follow-up): Tsuruchi Yakusho, the first card to
     /// exercise the general "after you announce an action" Reaction primitive -- see
     /// CardAbilities.ResolveOrDeferAnnounceReaction's own doc comment.</summary>
-    public static PublishedSnapshot PersonalityWave19 { get; } = LoadPersonalityWave19();
+    private static readonly PublishedSnapshot PersonalityWave19 = LoadPersonalityWave19();
 
     private static PublishedSnapshot LoadPersonalityWave19()
     {
-        var snapshot = Load("L5R.Published.PersonalityWave19.json", "personality-wave-19", requireDecks: false);
+        var snapshot = Load("L5R.Published.personality-wave-19.json", "personality-wave-19", requireDecks: false);
         if(snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected personality-wave-19 card count.");
         foreach(var card in snapshot.Cards)
@@ -1173,11 +1175,11 @@ public static class PublishedContent
     /// <summary>Follower wave 11 (the general in-play unit-targeting Reaction primitive): Champion of
     /// Thunder and Brothers of Goemon -- see CardAbilities.cs's own BeforeActionReactionApplies
     /// (the Champion/Brothers branch) and the NegatesEffect helper.</summary>
-    public static PublishedSnapshot FollowerWave11 { get; } = LoadFollowerWave11();
+    private static readonly PublishedSnapshot FollowerWave11 = LoadFollowerWave11();
 
     private static PublishedSnapshot LoadFollowerWave11()
     {
-        var snapshot = Load("L5R.Published.FollowerWave11.json", "follower-wave-11", requireDecks: false);
+        var snapshot = Load("L5R.Published.follower-wave-11.json", "follower-wave-11", requireDecks: false);
         if(snapshot.Cards.Length != 2)
             throw new InvalidOperationException("Unexpected follower-wave-11 card count.");
         foreach(var card in snapshot.Cards)
@@ -1193,11 +1195,11 @@ public static class PublishedContent
     /// targeting a card in the unit" family -- reacts only to a Ranged/Melee Attack targeting an
     /// Armor-wearing Personality, reusing the existing before-attack-resolves Reaction window
     /// verbatim instead of the new unit-targeting watcher.</summary>
-    public static PublishedSnapshot StrategyWave11 { get; } = LoadStrategyWave11();
+    private static readonly PublishedSnapshot StrategyWave11 = LoadStrategyWave11();
 
     private static PublishedSnapshot LoadStrategyWave11()
     {
-        var snapshot = Load("L5R.Published.StrategyWave11.json", "strategy-wave-11", requireDecks: false);
+        var snapshot = Load("L5R.Published.strategy-wave-11.json", "strategy-wave-11", requireDecks: false);
         if(snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected strategy-wave-11 card count.");
         foreach(var card in snapshot.Cards)
@@ -1218,11 +1220,11 @@ public static class PublishedContent
     /// concurrent task (issue #278/PR #281) independently claimed "follower-wave-11" for a different
     /// card set (Champion of Thunder / Brothers of Goemon); this is a genuine content-name collision,
     /// caught only because both PRs were open simultaneously and neither had merged yet.</summary>
-    public static PublishedSnapshot FollowerWave12 { get; } = LoadFollowerWave12();
+    private static readonly PublishedSnapshot FollowerWave12 = LoadFollowerWave12();
 
     private static PublishedSnapshot LoadFollowerWave12()
     {
-        var snapshot = Load("L5R.Published.FollowerWave12.json", "follower-wave-12", requireDecks: false);
+        var snapshot = Load("L5R.Published.follower-wave-12.json", "follower-wave-12", requireDecks: false);
         if(snapshot.Cards.Length != 4)
             throw new InvalidOperationException("Unexpected follower-wave-12 card count.");
         foreach(var card in snapshot.Cards)
@@ -1242,11 +1244,11 @@ public static class PublishedContent
     /// original "strategy-wave-10", then again from "strategy-wave-11" -- both a same-name collision
     /// with issue #273's unrelated Strategy wave 10 above, and then with issue #278/PR #281's own
     /// "strategy-wave-11" (A Close Call), a second sibling PR open at the same time.</summary>
-    public static PublishedSnapshot StrategyWave12 { get; } = LoadStrategyWave12();
+    private static readonly PublishedSnapshot StrategyWave12 = LoadStrategyWave12();
 
     private static PublishedSnapshot LoadStrategyWave12()
     {
-        var snapshot = Load("L5R.Published.StrategyWave12.json", "strategy-wave-12", requireDecks: false);
+        var snapshot = Load("L5R.Published.strategy-wave-12.json", "strategy-wave-12", requireDecks: false);
         if(snapshot.Cards.Length != 2)
             throw new InvalidOperationException("Unexpected strategy-wave-12 card count.");
         foreach(var card in snapshot.Cards)
@@ -1265,11 +1267,11 @@ public static class PublishedContent
     /// again from "follower-wave-11" -- both a same-name collision with issue #271's unrelated
     /// Follower wave 10 above, and then with issue #278/PR #281's own "follower-wave-11" (Champion of
     /// Thunder / Brothers of Goemon), a second sibling PR open at the same time.</summary>
-    public static PublishedSnapshot FollowerWave13 { get; } = LoadFollowerWave13();
+    private static readonly PublishedSnapshot FollowerWave13 = LoadFollowerWave13();
 
     private static PublishedSnapshot LoadFollowerWave13()
     {
-        var snapshot = Load("L5R.Published.FollowerWave13.json", "follower-wave-13", requireDecks: false);
+        var snapshot = Load("L5R.Published.follower-wave-13.json", "follower-wave-13", requireDecks: false);
         if(snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected follower-wave-13 card count.");
         foreach(var card in snapshot.Cards)
@@ -1286,11 +1288,11 @@ public static class PublishedContent
     /// and MatchState.TsujikenWatches. Renamed from this branch's own original "personality-wave-19"
     /// to avoid a same-name collision with issue #276's unrelated Personality wave 19 (Tsuruchi
     /// Yakusho), merged concurrently.</summary>
-    public static PublishedSnapshot PersonalityWave20 { get; } = LoadPersonalityWave20();
+    private static readonly PublishedSnapshot PersonalityWave20 = LoadPersonalityWave20();
 
     private static PublishedSnapshot LoadPersonalityWave20()
     {
-        var snapshot = Load("L5R.Published.PersonalityWave20.json", "personality-wave-20", requireDecks: false);
+        var snapshot = Load("L5R.Published.personality-wave-20.json", "personality-wave-20", requireDecks: false);
         if(snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected personality-wave-20 card count.");
         foreach(var card in snapshot.Cards)
@@ -1312,11 +1314,11 @@ public static class PublishedContent
     /// despite being a Follower), Water Spider Adept's plain AttachRequiresKeyword with no ability
     /// text at all, and Yodotai Legionnaire's EntryHonorLoss carrying the Legionnaire keyword Aulus's
     /// own boost condition (MatchEngine's boost-legionnaires-in-unit) already reads.</summary>
-    public static PublishedSnapshot FollowerWave14 { get; } = LoadFollowerWave14();
+    private static readonly PublishedSnapshot FollowerWave14 = LoadFollowerWave14();
 
     private static PublishedSnapshot LoadFollowerWave14()
     {
-        var snapshot = Load("L5R.Published.FollowerWave14.json", "follower-wave-14", requireDecks: false);
+        var snapshot = Load("L5R.Published.follower-wave-14.json", "follower-wave-14", requireDecks: false);
         if(snapshot.Cards.Length != 6)
             throw new InvalidOperationException("Unexpected follower-wave-14 card count.");
         foreach(var card in snapshot.Cards)
@@ -1344,11 +1346,11 @@ public static class PublishedContent
     /// cripple two-branch effect (its own Focus Effect duel-delay clause is deliberately deferred,
     /// see CardAbilities.cs); and Unexpected's optional self-bow-for-a-draw (a third CardIds
     /// reuse).</summary>
-    public static PublishedSnapshot StrategyWave13 { get; } = LoadStrategyWave13();
+    private static readonly PublishedSnapshot StrategyWave13 = LoadStrategyWave13();
 
     private static PublishedSnapshot LoadStrategyWave13()
     {
-        var snapshot = Load("L5R.Published.StrategyWave13.json", "strategy-wave-13", requireDecks: false);
+        var snapshot = Load("L5R.Published.strategy-wave-13.json", "strategy-wave-13", requireDecks: false);
         if(snapshot.Cards.Length != 7)
             throw new InvalidOperationException("Unexpected strategy-wave-13 card count.");
         foreach(var card in snapshot.Cards)
@@ -1380,11 +1382,11 @@ public static class PublishedContent
     /// and published in strategy-wave-6 -- its own BLOCKERS entry was simply stale (the same "Surety of
     /// Purpose" situation Batch B hit), so it is not re-packaged here; this wave publishes the other
     /// seven.</summary>
-    public static PublishedSnapshot StrategyWave14 { get; } = LoadStrategyWave14();
+    private static readonly PublishedSnapshot StrategyWave14 = LoadStrategyWave14();
 
     private static PublishedSnapshot LoadStrategyWave14()
     {
-        var snapshot = Load("L5R.Published.StrategyWave14.json", "strategy-wave-14", requireDecks: false);
+        var snapshot = Load("L5R.Published.strategy-wave-14.json", "strategy-wave-14", requireDecks: false);
         if(snapshot.Cards.Length != 7)
             throw new InvalidOperationException("Unexpected strategy-wave-14 card count.");
         foreach(var card in snapshot.Cards)
@@ -1417,11 +1419,11 @@ public static class PublishedContent
     /// this batch too, was found already fully wired and published in strategy-wave-6 -- its own
     /// BLOCKERS entry was simply stale (the same "Surety of Purpose"/"Wrathful Ancestor" situation
     /// Batches B and C each hit once), so it is not re-packaged here.</summary>
-    public static PublishedSnapshot StrategyWave15 { get; } = LoadStrategyWave15();
+    private static readonly PublishedSnapshot StrategyWave15 = LoadStrategyWave15();
 
     private static PublishedSnapshot LoadStrategyWave15()
     {
-        var snapshot = Load("L5R.Published.StrategyWave15.json", "strategy-wave-15", requireDecks: false);
+        var snapshot = Load("L5R.Published.strategy-wave-15.json", "strategy-wave-15", requireDecks: false);
         if(snapshot.Cards.Length != 7)
             throw new InvalidOperationException("Unexpected strategy-wave-15 card count.");
         foreach(var card in snapshot.Cards)
@@ -1437,11 +1439,11 @@ public static class PublishedContent
     /// own-wielder-or-personality-with-wielder-keyword Target (the Target-side mirror of
     /// own-wielder-or-source-with-wielder-keyword) and the existing MoveToBattlefield/AtBattle
     /// move-if-opposed shape Intervening Spirit/The Earth Flows already established.</summary>
-    public static PublishedSnapshot SpellWave4 { get; } = LoadSpellWave4();
+    private static readonly PublishedSnapshot SpellWave4 = LoadSpellWave4();
 
     private static PublishedSnapshot LoadSpellWave4()
     {
-        var snapshot = Load("L5R.Published.SpellWave4.json", "spell-wave-4", requireDecks: false);
+        var snapshot = Load("L5R.Published.spell-wave-4.json", "spell-wave-4", requireDecks: false);
         if(snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected spell-wave-4 card count.");
         foreach(var card in snapshot.Cards)
@@ -1462,7 +1464,7 @@ public static class PublishedContent
 
     private static PublishedSnapshot LoadRingWave2()
     {
-        var snapshot = Load("L5R.Published.RingWave2.json", "ring-wave-2", requireDecks: false);
+        var snapshot = Load("L5R.Published.ring-wave-2.json", "ring-wave-2", requireDecks: false);
         if(snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected ring-wave-2 card count.");
         foreach(var card in snapshot.Cards)
@@ -1495,7 +1497,7 @@ public static class PublishedContent
 
     private static PublishedSnapshot LoadPersonalityWave21()
     {
-        var snapshot = Load("L5R.Published.PersonalityWave21.json", "personality-wave-21", requireDecks: false);
+        var snapshot = Load("L5R.Published.personality-wave-21.json", "personality-wave-21", requireDecks: false);
         if(snapshot.Cards.Length != 11)
             throw new InvalidOperationException("Unexpected personality-wave-21 card count.");
         foreach(var card in snapshot.Cards)
@@ -1521,7 +1523,7 @@ public static class PublishedContent
 
     private static PublishedSnapshot LoadPersonalityWave22()
     {
-        var snapshot = Load("L5R.Published.PersonalityWave22.json", "personality-wave-22", requireDecks: false);
+        var snapshot = Load("L5R.Published.personality-wave-22.json", "personality-wave-22", requireDecks: false);
         if(snapshot.Cards.Length != 12)
             throw new InvalidOperationException("Unexpected personality-wave-22 card count.");
         foreach(var card in snapshot.Cards)
@@ -1542,7 +1544,7 @@ public static class PublishedContent
 
     private static PublishedSnapshot LoadRegionWave3()
     {
-        var snapshot = Load("L5R.Published.RegionWave3.json", "region-wave-3", requireDecks: false);
+        var snapshot = Load("L5R.Published.region-wave-3.json", "region-wave-3", requireDecks: false);
         if(snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected region-wave-3 card count.");
         foreach(var card in snapshot.Cards)
@@ -1564,7 +1566,7 @@ public static class PublishedContent
 
     private static PublishedSnapshot LoadStrategyWave16()
     {
-        var snapshot = Load("L5R.Published.StrategyWave16.json", "strategy-wave-16", requireDecks: false);
+        var snapshot = Load("L5R.Published.strategy-wave-16.json", "strategy-wave-16", requireDecks: false);
         if(snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected strategy-wave-16 card count.");
         foreach(var card in snapshot.Cards)
@@ -1588,7 +1590,7 @@ public static class PublishedContent
 
     private static PublishedSnapshot LoadPersonalityWave23()
     {
-        var snapshot = Load("L5R.Published.PersonalityWave23.json", "personality-wave-23", requireDecks: false);
+        var snapshot = Load("L5R.Published.personality-wave-23.json", "personality-wave-23", requireDecks: false);
         if(snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected personality-wave-23 card count.");
         foreach(var card in snapshot.Cards)
@@ -1612,7 +1614,7 @@ public static class PublishedContent
 
     private static PublishedSnapshot LoadPersonalityWave24()
     {
-        var snapshot = Load("L5R.Published.PersonalityWave24.json", "personality-wave-24", requireDecks: false);
+        var snapshot = Load("L5R.Published.personality-wave-24.json", "personality-wave-24", requireDecks: false);
         if(snapshot.Cards.Length != 6)
             throw new InvalidOperationException("Unexpected personality-wave-24 card count.");
         foreach(var card in snapshot.Cards)
@@ -1629,7 +1631,7 @@ public static class PublishedContent
 
     private static PublishedSnapshot LoadPersonalityWave25()
     {
-        var snapshot = Load("L5R.Published.PersonalityWave25.json", "personality-wave-25", requireDecks: false);
+        var snapshot = Load("L5R.Published.personality-wave-25.json", "personality-wave-25", requireDecks: false);
         if(snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected personality-wave-25 card count.");
         foreach(var card in snapshot.Cards)
@@ -1646,7 +1648,7 @@ public static class PublishedContent
 
     private static PublishedSnapshot LoadPersonalityWave26()
     {
-        var snapshot = Load("L5R.Published.PersonalityWave26.json", "personality-wave-26", requireDecks: false);
+        var snapshot = Load("L5R.Published.personality-wave-26.json", "personality-wave-26", requireDecks: false);
         if(snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected personality-wave-26 card count.");
         foreach(var card in snapshot.Cards)
@@ -1663,7 +1665,7 @@ public static class PublishedContent
 
     private static PublishedSnapshot LoadFollowerWave15()
     {
-        var snapshot = Load("L5R.Published.FollowerWave15.json", "follower-wave-15", requireDecks: false);
+        var snapshot = Load("L5R.Published.follower-wave-15.json", "follower-wave-15", requireDecks: false);
         if(snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected follower-wave-15 card count.");
         foreach(var card in snapshot.Cards)
@@ -1680,7 +1682,7 @@ public static class PublishedContent
 
     private static PublishedSnapshot LoadStrategyWave18()
     {
-        var snapshot = Load("L5R.Published.StrategyWave18.json", "strategy-wave-18", requireDecks: false);
+        var snapshot = Load("L5R.Published.strategy-wave-18.json", "strategy-wave-18", requireDecks: false);
         if(snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected strategy-wave-18 card count.");
         foreach(var card in snapshot.Cards)
@@ -1698,11 +1700,11 @@ public static class PublishedContent
     /// when it is revealed (MatchEngine.ResolveEvent), so no new trigger was needed -- the Event just gains the
     /// Honor, runs the search (which defers through its own PendingChoice), then is discarded and its province
     /// refilled. The published Text follows the scan, which does not print the Oracle's boilerplate trigger clause.</summary>
-    public static PublishedSnapshot EventWave3 { get; } = LoadEventWave3();
+    private static readonly PublishedSnapshot EventWave3 = LoadEventWave3();
 
     private static PublishedSnapshot LoadEventWave3()
     {
-        var snapshot = Load("L5R.Published.EventWave3.json", "event-wave-3", requireDecks: false);
+        var snapshot = Load("L5R.Published.event-wave-3.json", "event-wave-3", requireDecks: false);
         if(snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected event-wave-3 card count.");
         foreach(var card in snapshot.Cards)
@@ -1720,11 +1722,11 @@ public static class PublishedContent
     /// card." Her BLOCKERS note ("Regions (not built)") was stale. One Limited ability whose whole behavior is the
     /// SearchSpec on it (SearchCatalog.IkomaShizuka); the published Text follows the scan ("your", not the catalogue's
     /// "you").</summary>
-    public static PublishedSnapshot PersonalityWave27 { get; } = LoadPersonalityWave27();
+    private static readonly PublishedSnapshot PersonalityWave27 = LoadPersonalityWave27();
 
     private static PublishedSnapshot LoadPersonalityWave27()
     {
-        var snapshot = Load("L5R.Published.PersonalityWave27.json", "personality-wave-27", requireDecks: false);
+        var snapshot = Load("L5R.Published.personality-wave-27.json", "personality-wave-27", requireDecks: false);
         if(snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected personality-wave-27 card count.");
         foreach(var card in snapshot.Cards)
@@ -1737,11 +1739,11 @@ public static class PublishedContent
     }
 
     /// <summary>Event wave 4 (issue #322): Signs and Portents (oracle-l5r-7253), "Look at the top four cards of any Fate deck. You may discard one of them. Put the rest back in any order." The Event consumer of the look-at-the-top-N-cards primitive (DeckLook.cs) and the one that looks at the OPPONENT's deck; resolved when the Events Phase reveals it (no new trigger), the published Text follows the scan.</summary>
-    public static PublishedSnapshot EventWave4 { get; } = LoadEventWave4();
+    private static readonly PublishedSnapshot EventWave4 = LoadEventWave4();
 
     private static PublishedSnapshot LoadEventWave4()
     {
-        var snapshot = Load("L5R.Published.EventWave4.json", "event-wave-4", requireDecks: false);
+        var snapshot = Load("L5R.Published.event-wave-4.json", "event-wave-4", requireDecks: false);
         if(snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected event-wave-4 card count.");
         foreach(var card in snapshot.Cards)
@@ -1754,11 +1756,11 @@ public static class PublishedContent
     }
 
     /// <summary>Personality wave 28 (issue #322): Isawa Tamaki (oracle-l5r-3918, look at one card, may put it at the bottom) and Bayushi Kahoku, Experienced 2 (oracle-l5r-10479, look at three, may show a Political Strategy and take it, the rest back in any order): consumers of the look-at-the-top-N-cards primitive (DeckLook.cs).</summary>
-    public static PublishedSnapshot PersonalityWave28 { get; } = LoadPersonalityWave28();
+    private static readonly PublishedSnapshot PersonalityWave28 = LoadPersonalityWave28();
 
     private static PublishedSnapshot LoadPersonalityWave28()
     {
-        var snapshot = Load("L5R.Published.PersonalityWave28.json", "personality-wave-28", requireDecks: false);
+        var snapshot = Load("L5R.Published.personality-wave-28.json", "personality-wave-28", requireDecks: false);
         if(snapshot.Cards.Length != 2)
             throw new InvalidOperationException("Unexpected personality-wave-28 card count.");
         foreach(var card in snapshot.Cards)
@@ -1771,11 +1773,11 @@ public static class PublishedContent
     }
 
     /// <summary>Strategy wave 17 (issue #322): Banish All Doubt (oracle-l5r-690), look at the top four cards of your Fate deck, put exactly one in your hand and the other three on the bottom in any order: the look primitive's take-one-and-send-the-rest-to-the-bottom consumer (DeckLook.cs).</summary>
-    public static PublishedSnapshot StrategyWave17 { get; } = LoadStrategyWave17();
+    private static readonly PublishedSnapshot StrategyWave17 = LoadStrategyWave17();
 
     private static PublishedSnapshot LoadStrategyWave17()
     {
-        var snapshot = Load("L5R.Published.StrategyWave17.json", "strategy-wave-17", requireDecks: false);
+        var snapshot = Load("L5R.Published.strategy-wave-17.json", "strategy-wave-17", requireDecks: false);
         if(snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected strategy-wave-17 card count.");
         foreach(var card in snapshot.Cards)
@@ -1788,11 +1790,11 @@ public static class PublishedContent
     }
 
     /// <summary>Holding wave 2 (issue #322): Public Records (oracle-l5r-6095), bow to look at the top three cards of your Fate deck and put them back in any order: the look primitive's reorder-only consumer (DeckLook.cs).</summary>
-    public static PublishedSnapshot HoldingWave2 { get; } = LoadHoldingWave2();
+    private static readonly PublishedSnapshot HoldingWave2 = LoadHoldingWave2();
 
     private static PublishedSnapshot LoadHoldingWave2()
     {
-        var snapshot = Load("L5R.Published.HoldingWave2.json", "holding-wave-2", requireDecks: false);
+        var snapshot = Load("L5R.Published.holding-wave-2.json", "holding-wave-2", requireDecks: false);
         if(snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected holding-wave-2 card count.");
         foreach(var card in snapshot.Cards)
@@ -1809,7 +1811,7 @@ public static class PublishedContent
 
     private static PublishedSnapshot LoadPersonalityWave29()
     {
-        var snapshot = Load("L5R.Published.PersonalityWave29.json", "personality-wave-29", requireDecks: false);
+        var snapshot = Load("L5R.Published.personality-wave-29.json", "personality-wave-29", requireDecks: false);
         if(snapshot.Cards.Length != 2)
             throw new InvalidOperationException("Unexpected personality-wave-29 card count.");
         foreach(var card in snapshot.Cards)
@@ -1822,11 +1824,11 @@ public static class PublishedContent
     }
 
     /// <summary>Personality wave 31 (issue #337): Kitsu Fukui (oracle-l5r-4375, the alternative cost: bow or destroy the performing Ancestor), Moto Jun-Ni (oracle-l5r-5337, attach a Follower from any discard pile; her unit's Followers have Cavalry), Mirumoto Yumaru (oracle-l5r-5181, the conditional effect choice) and Hiruma Tensin (oracle-l5r-3332, the first Follower Performer). The first consumers of AlternativeCosts.cs, AttachAction.cs and EffectChoice.cs.</summary>
-    public static PublishedSnapshot PersonalityWave31 { get; } = LoadPersonalityWave31();
+    private static readonly PublishedSnapshot PersonalityWave31 = LoadPersonalityWave31();
 
     private static PublishedSnapshot LoadPersonalityWave31()
     {
-        var snapshot = Load("L5R.Published.PersonalityWave31.json", "personality-wave-31", requireDecks: false);
+        var snapshot = Load("L5R.Published.personality-wave-31.json", "personality-wave-31", requireDecks: false);
         if(snapshot.Cards.Length != 4)
             throw new InvalidOperationException("Unexpected personality-wave-31 card count.");
         foreach(var card in snapshot.Cards)
@@ -1839,11 +1841,11 @@ public static class PublishedContent
     }
 
     /// <summary>Follower wave 17 (issue #337): Fading Shadows (oracle-l5r-2437), which attaches itself from hand as a Ninja Battle action (AttachSpec.Self) and prints a deck-copy limit of 10 (CardDefinition.DeckCopyLimit).</summary>
-    public static PublishedSnapshot FollowerWave17 { get; } = LoadFollowerWave17();
+    private static readonly PublishedSnapshot FollowerWave17 = LoadFollowerWave17();
 
     private static PublishedSnapshot LoadFollowerWave17()
     {
-        var snapshot = Load("L5R.Published.FollowerWave17.json", "follower-wave-17", requireDecks: false);
+        var snapshot = Load("L5R.Published.follower-wave-17.json", "follower-wave-17", requireDecks: false);
         if(snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected follower-wave-17 card count.");
         foreach(var card in snapshot.Cards)
@@ -1860,7 +1862,7 @@ public static class PublishedContent
 
     private static PublishedSnapshot LoadPersonalityWave33()
     {
-        var snapshot = Load("L5R.Published.PersonalityWave33.json", "personality-wave-33", requireDecks: false);
+        var snapshot = Load("L5R.Published.personality-wave-33.json", "personality-wave-33", requireDecks: false);
         if(snapshot.Cards.Length != 2)
             throw new InvalidOperationException("Unexpected personality-wave-33 card count.");
         foreach(var card in snapshot.Cards)
@@ -1873,11 +1875,11 @@ public static class PublishedContent
     }
 
     /// <summary>Strategy wave 22 (issue #338): Unfortunate Hesitation (oracle-l5r-9941), whose target's controller chooses to bow him or be forced to pass at his next opportunity this phase (EitherOr.cs, ForcedPass.cs).</summary>
-    public static PublishedSnapshot StrategyWave22 { get; } = LoadStrategyWave22();
+    private static readonly PublishedSnapshot StrategyWave22 = LoadStrategyWave22();
 
     private static PublishedSnapshot LoadStrategyWave22()
     {
-        var snapshot = Load("L5R.Published.StrategyWave22.json", "strategy-wave-22", requireDecks: false);
+        var snapshot = Load("L5R.Published.strategy-wave-22.json", "strategy-wave-22", requireDecks: false);
         if(snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected strategy-wave-22 card count.");
         foreach(var card in snapshot.Cards)
@@ -1894,7 +1896,7 @@ public static class PublishedContent
 
     private static PublishedSnapshot LoadPersonalityWave32()
     {
-        var snapshot = Load("L5R.Published.PersonalityWave32.json", "personality-wave-32", requireDecks: false);
+        var snapshot = Load("L5R.Published.personality-wave-32.json", "personality-wave-32", requireDecks: false);
         if(snapshot.Cards.Length != 4)
             throw new InvalidOperationException("Unexpected personality-wave-32 card count.");
         foreach(var card in snapshot.Cards)
@@ -1911,7 +1913,7 @@ public static class PublishedContent
 
     private static PublishedSnapshot LoadStrategyWave21()
     {
-        var snapshot = Load("L5R.Published.StrategyWave21.json", "strategy-wave-21", requireDecks: false);
+        var snapshot = Load("L5R.Published.strategy-wave-21.json", "strategy-wave-21", requireDecks: false);
         if(snapshot.Cards.Length != 3)
             throw new InvalidOperationException("Unexpected strategy-wave-21 card count.");
         foreach(var card in snapshot.Cards)
@@ -1924,11 +1926,11 @@ public static class PublishedContent
     }
 
     /// <summary>Stronghold wave 5 (issue #352): Foothills Keep (oracle-l5r-2626) -- "Equipping Weapons is a Battle/Open action for you", the first player-level timing grant (TimingGrants.cs), and a Battle/Open attach of a Weapon from your own discard pile to your performing Kensai (AttachAction.cs).</summary>
-    public static PublishedSnapshot StrongholdWave5 { get; } = LoadStrongholdWave5();
+    private static readonly PublishedSnapshot StrongholdWave5 = LoadStrongholdWave5();
 
     private static PublishedSnapshot LoadStrongholdWave5()
     {
-        var snapshot = Load("L5R.Published.StrongholdWave5.json", "stronghold-wave-5", requireDecks: false);
+        var snapshot = Load("L5R.Published.stronghold-wave-5.json", "stronghold-wave-5", requireDecks: false);
         if(snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected stronghold-wave-5 card count.");
         foreach(var card in snapshot.Cards)
@@ -1945,7 +1947,7 @@ public static class PublishedContent
 
     private static PublishedSnapshot LoadPersonalityWave30()
     {
-        var snapshot = Load("L5R.Published.PersonalityWave30.json", "personality-wave-30", requireDecks: false);
+        var snapshot = Load("L5R.Published.personality-wave-30.json", "personality-wave-30", requireDecks: false);
         if(snapshot.Cards.Length != 4)
             throw new InvalidOperationException("Unexpected personality-wave-30 card count.");
         foreach(var card in snapshot.Cards)
@@ -1962,7 +1964,7 @@ public static class PublishedContent
 
     private static PublishedSnapshot LoadItemWave4()
     {
-        var snapshot = Load("L5R.Published.ItemWave4.json", "item-wave-4", requireDecks: false);
+        var snapshot = Load("L5R.Published.item-wave-4.json", "item-wave-4", requireDecks: false);
         if(snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected item-wave-4 card count.");
         foreach(var card in snapshot.Cards)
@@ -1979,7 +1981,7 @@ public static class PublishedContent
 
     private static PublishedSnapshot LoadStrategyWave27()
     {
-        var snapshot = Load("L5R.Published.StrategyWave27.json", "strategy-wave-27", requireDecks: false);
+        var snapshot = Load("L5R.Published.strategy-wave-27.json", "strategy-wave-27", requireDecks: false);
         if(snapshot.Cards.Length != 6)
             throw new InvalidOperationException("Unexpected strategy-wave-27 card count.");
         foreach(var card in snapshot.Cards)
@@ -1996,7 +1998,7 @@ public static class PublishedContent
 
     private static PublishedSnapshot LoadStrategyWave28()
     {
-        var snapshot = Load("L5R.Published.StrategyWave28.json", "strategy-wave-28", requireDecks: false);
+        var snapshot = Load("L5R.Published.strategy-wave-28.json", "strategy-wave-28", requireDecks: false);
         if(snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected strategy-wave-28 card count.");
         foreach(var card in snapshot.Cards)
@@ -2013,7 +2015,7 @@ public static class PublishedContent
 
     private static PublishedSnapshot LoadSpellWave9()
     {
-        var snapshot = Load("L5R.Published.SpellWave9.json", "spell-wave-9", requireDecks: false);
+        var snapshot = Load("L5R.Published.spell-wave-9.json", "spell-wave-9", requireDecks: false);
         if(snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected spell-wave-9 card count.");
         foreach(var card in snapshot.Cards)
@@ -2030,7 +2032,7 @@ public static class PublishedContent
 
     private static PublishedSnapshot LoadPersonalityWave38()
     {
-        var snapshot = Load("L5R.Published.PersonalityWave38.json", "personality-wave-38", requireDecks: false);
+        var snapshot = Load("L5R.Published.personality-wave-38.json", "personality-wave-38", requireDecks: false);
         if(snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected personality-wave-38 card count.");
         foreach(var card in snapshot.Cards)
@@ -2047,7 +2049,7 @@ public static class PublishedContent
 
     private static PublishedSnapshot LoadStrongholdWave8()
     {
-        var snapshot = Load("L5R.Published.StrongholdWave8.json", "stronghold-wave-8", requireDecks: false);
+        var snapshot = Load("L5R.Published.stronghold-wave-8.json", "stronghold-wave-8", requireDecks: false);
         if(snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected stronghold-wave-8 card count.");
         foreach(var card in snapshot.Cards)
@@ -2064,7 +2066,7 @@ public static class PublishedContent
 
     private static PublishedSnapshot LoadStrategyWave23()
     {
-        var snapshot = Load("L5R.Published.StrategyWave23.json", "strategy-wave-23", requireDecks: false);
+        var snapshot = Load("L5R.Published.strategy-wave-23.json", "strategy-wave-23", requireDecks: false);
         if(snapshot.Cards.Length != 3)
             throw new InvalidOperationException("Unexpected strategy-wave-23 card count.");
         foreach(var card in snapshot.Cards)
@@ -2081,7 +2083,7 @@ public static class PublishedContent
 
     private static PublishedSnapshot LoadStrategyWave29()
     {
-        var snapshot = Load("L5R.Published.StrategyWave29.json", "strategy-wave-29", requireDecks: false);
+        var snapshot = Load("L5R.Published.strategy-wave-29.json", "strategy-wave-29", requireDecks: false);
         if(snapshot.Cards.Length != 4)
             throw new InvalidOperationException("Unexpected strategy-wave-29 card count.");
         foreach(var card in snapshot.Cards)
@@ -2098,7 +2100,7 @@ public static class PublishedContent
 
     private static PublishedSnapshot LoadItemWave5()
     {
-        var snapshot = Load("L5R.Published.ItemWave5.json", "item-wave-5", requireDecks: false);
+        var snapshot = Load("L5R.Published.item-wave-5.json", "item-wave-5", requireDecks: false);
         if(snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected item-wave-5 card count.");
         foreach(var card in snapshot.Cards)
@@ -2112,7 +2114,7 @@ public static class PublishedContent
 
     private static PublishedSnapshot LoadSpellWave10()
     {
-        var snapshot = Load("L5R.Published.SpellWave10.json", "spell-wave-10", requireDecks: false);
+        var snapshot = Load("L5R.Published.spell-wave-10.json", "spell-wave-10", requireDecks: false);
         if(snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected spell-wave-10 card count.");
         foreach(var card in snapshot.Cards)
@@ -2126,7 +2128,7 @@ public static class PublishedContent
 
     private static PublishedSnapshot LoadPersonalityWave39()
     {
-        var snapshot = Load("L5R.Published.PersonalityWave39.json", "personality-wave-39", requireDecks: false);
+        var snapshot = Load("L5R.Published.personality-wave-39.json", "personality-wave-39", requireDecks: false);
         if(snapshot.Cards.Length != 5)
             throw new InvalidOperationException("Unexpected personality-wave-39 card count.");
         foreach(var card in snapshot.Cards)
@@ -2140,7 +2142,7 @@ public static class PublishedContent
 
     private static PublishedSnapshot LoadFollowerWave18()
     {
-        var snapshot = Load("L5R.Published.FollowerWave18.json", "follower-wave-18", requireDecks: false);
+        var snapshot = Load("L5R.Published.follower-wave-18.json", "follower-wave-18", requireDecks: false);
         if(snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected follower-wave-18 card count.");
         foreach(var card in snapshot.Cards)
@@ -2154,7 +2156,7 @@ public static class PublishedContent
 
     private static PublishedSnapshot LoadItemWave6()
     {
-        var snapshot = Load("L5R.Published.ItemWave6.json", "item-wave-6", requireDecks: false);
+        var snapshot = Load("L5R.Published.item-wave-6.json", "item-wave-6", requireDecks: false);
         if(snapshot.Cards.Length != 2)
             throw new InvalidOperationException("Unexpected item-wave-6 card count.");
         foreach(var card in snapshot.Cards)
@@ -2168,7 +2170,7 @@ public static class PublishedContent
 
     private static PublishedSnapshot LoadHoldingWave3()
     {
-        var snapshot = Load("L5R.Published.HoldingWave3.json", "holding-wave-3", requireDecks: false);
+        var snapshot = Load("L5R.Published.holding-wave-3.json", "holding-wave-3", requireDecks: false);
         if(snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected holding-wave-3 card count.");
         foreach(var card in snapshot.Cards)
@@ -2182,7 +2184,7 @@ public static class PublishedContent
 
     private static PublishedSnapshot LoadPersonalityWave40()
     {
-        var snapshot = Load("L5R.Published.PersonalityWave40.json", "personality-wave-40", requireDecks: false);
+        var snapshot = Load("L5R.Published.personality-wave-40.json", "personality-wave-40", requireDecks: false);
         if(snapshot.Cards.Length != 2)
             throw new InvalidOperationException("Unexpected personality-wave-40 card count.");
         foreach(var card in snapshot.Cards)
@@ -2196,7 +2198,7 @@ public static class PublishedContent
 
     private static PublishedSnapshot LoadCelestialWave2()
     {
-        var snapshot = Load("L5R.Published.CelestialWave2.json", "celestial-wave-2", requireDecks: false);
+        var snapshot = Load("L5R.Published.celestial-wave-2.json", "celestial-wave-2", requireDecks: false);
         if(snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected celestial-wave-2 card count.");
         foreach(var card in snapshot.Cards)
@@ -2210,7 +2212,7 @@ public static class PublishedContent
 
     private static PublishedSnapshot LoadStrategyWave31()
     {
-        var snapshot = Load("L5R.Published.StrategyWave31.json", "strategy-wave-31", requireDecks: false);
+        var snapshot = Load("L5R.Published.strategy-wave-31.json", "strategy-wave-31", requireDecks: false);
         if(snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected strategy-wave-31 card count.");
         foreach(var card in snapshot.Cards)
@@ -2224,7 +2226,7 @@ public static class PublishedContent
 
     private static PublishedSnapshot LoadFollowerWave19()
     {
-        var snapshot = Load("L5R.Published.FollowerWave19.json", "follower-wave-19", requireDecks: false);
+        var snapshot = Load("L5R.Published.follower-wave-19.json", "follower-wave-19", requireDecks: false);
         if(snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected follower-wave-19 card count.");
         foreach(var card in snapshot.Cards)
@@ -2234,11 +2236,11 @@ public static class PublishedContent
     }
 
     /// <summary>spell-wave-11 (issue #398).</summary>
-    public static PublishedSnapshot SpellWave11 { get; } = LoadSpellWave11();
+    private static readonly PublishedSnapshot SpellWave11 = LoadSpellWave11();
 
     private static PublishedSnapshot LoadSpellWave11()
     {
-        var snapshot = Load("L5R.Published.SpellWave11.json", "spell-wave-11", requireDecks: false);
+        var snapshot = Load("L5R.Published.spell-wave-11.json", "spell-wave-11", requireDecks: false);
         if(snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected spell-wave-11 card count.");
         foreach(var card in snapshot.Cards)
@@ -2252,7 +2254,7 @@ public static class PublishedContent
 
     private static PublishedSnapshot LoadHoldingWave4()
     {
-        var snapshot = Load("L5R.Published.HoldingWave4.json", "holding-wave-4", requireDecks: false);
+        var snapshot = Load("L5R.Published.holding-wave-4.json", "holding-wave-4", requireDecks: false);
         if(snapshot.Cards.Length != 2)
             throw new InvalidOperationException("Unexpected holding-wave-4 card count.");
         foreach(var card in snapshot.Cards)
@@ -2266,7 +2268,7 @@ public static class PublishedContent
 
     private static PublishedSnapshot LoadStrategyWave32()
     {
-        var snapshot = Load("L5R.Published.StrategyWave32.json", "strategy-wave-32", requireDecks: false);
+        var snapshot = Load("L5R.Published.strategy-wave-32.json", "strategy-wave-32", requireDecks: false);
         if(snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected strategy-wave-32 card count.");
         foreach(var card in snapshot.Cards)
@@ -2280,7 +2282,7 @@ public static class PublishedContent
 
     private static PublishedSnapshot LoadPersonalityWave41()
     {
-        var snapshot = Load("L5R.Published.PersonalityWave41.json", "personality-wave-41", requireDecks: false);
+        var snapshot = Load("L5R.Published.personality-wave-41.json", "personality-wave-41", requireDecks: false);
         if(snapshot.Cards.Length != 1)
             throw new InvalidOperationException("Unexpected personality-wave-41 card count.");
         foreach(var card in snapshot.Cards)
@@ -2291,6 +2293,7 @@ public static class PublishedContent
 
     private static PublishedSnapshot Load(string resourceName, string profile, bool requireDecks)
     {
+        if(Loaded.TryGetValue(resourceName, out var existing)) return existing;
         using var stream = typeof(PublishedContent).Assembly.GetManifestResourceStream(resourceName)
             ?? throw new InvalidOperationException($"Published content is missing: {resourceName}");
         var snapshot = JsonSerializer.Deserialize<PublishedSnapshot>(stream)!;
@@ -2309,174 +2312,169 @@ public static class PublishedContent
                 throw new InvalidOperationException("Published deck is incomplete.");
             else if(deck.Dynasty.Concat(deck.Fate).Any(id=>cards[id].CreatedOnly))
                 throw new InvalidOperationException("A published deck lists a card that may not be included in decks.");
+        Loaded.Add(resourceName, snapshot);
         return snapshot;
     }
-    /// <summary>Spirit of the Monk: first permanent, predefined ability grant (#386).</summary>
-    public static PublishedSnapshot StrategyWave30 { get; } = Load("L5R.Published.StrategyWave30.json", "strategy-wave-30", requireDecks: false);
     /// <summary>Second City pass (#264): the other five Spirit Strategies -- Berserker, Duelist, Paragon, Scout, Yojimbo.</summary>
-    public static PublishedSnapshot StrategyWave33 { get; } = Load("L5R.Published.StrategyWave33.json", "strategy-wave-33", requireDecks: false);
+    public static PublishedSnapshot StrategyWave33 { get; } = Load("L5R.Published.strategy-wave-33.json", "strategy-wave-33", requireDecks: false);
     /// <summary>Second City pass (#264): Yoritomo Emoto, whose Battle action bows any of his controller's Followers at the battlefield to destroy an enemy card.</summary>
-    public static PublishedSnapshot PersonalityWave42 { get; } = Load("L5R.Published.PersonalityWave42.json", "personality-wave-42", requireDecks: false);
+    public static PublishedSnapshot PersonalityWave42 { get; } = Load("L5R.Published.personality-wave-42.json", "personality-wave-42", requireDecks: false);
     /// <summary>Second City pass (#264): Interference.</summary>
-    public static PublishedSnapshot StrategyWave34 { get; } = Load("L5R.Published.StrategyWave34.json", "strategy-wave-34", requireDecks: false);
+    public static PublishedSnapshot StrategyWave34 { get; } = Load("L5R.Published.strategy-wave-34.json", "strategy-wave-34", requireDecks: false);
     /// <summary>Second City pass (#264): Control Your Destiny, Katana of Fire and Taming the Beast.</summary>
-    public static PublishedSnapshot SpellWave12 { get; } = Load("L5R.Published.SpellWave12.json", "spell-wave-12", requireDecks: false);
+    public static PublishedSnapshot SpellWave12 { get; } = Load("L5R.Published.spell-wave-12.json", "spell-wave-12", requireDecks: false);
     /// <summary>Second City pass (#264): Flame Katana, the Item Katana of Fire creates.</summary>
-    public static PublishedSnapshot ItemWave7 { get; } = Load("L5R.Published.ItemWave7.json", "item-wave-7", requireDecks: false);
+    public static PublishedSnapshot ItemWave7 { get; } = Load("L5R.Published.item-wave-7.json", "item-wave-7", requireDecks: false);
     /// <summary>Second City pass (#264): Jurojin's Blessing.</summary>
-    public static PublishedSnapshot CelestialWave3 { get; } = Load("L5R.Published.CelestialWave3.json", "celestial-wave-3", requireDecks: false);
+    public static PublishedSnapshot CelestialWave3 { get; } = Load("L5R.Published.celestial-wave-3.json", "celestial-wave-3", requireDecks: false);
     /// <summary>Second City pass (#264): Great Sacrifice, On the Hunt, Tireless Efforts, Costly Opportunity, Silent Terror and Goju Plot.</summary>
-    public static PublishedSnapshot StrategyWave35 { get; } = Load("L5R.Published.StrategyWave35.json", "strategy-wave-35", requireDecks: false);
+    public static PublishedSnapshot StrategyWave35 { get; } = Load("L5R.Published.strategy-wave-35.json", "strategy-wave-35", requireDecks: false);
     /// <summary>Second City pass (#264): Rage of the Spirits and Essence of Undeath.</summary>
-    public static PublishedSnapshot SpellWave13 { get; } = Load("L5R.Published.SpellWave13.json", "spell-wave-13", requireDecks: false);
+    public static PublishedSnapshot SpellWave13 { get; } = Load("L5R.Published.spell-wave-13.json", "spell-wave-13", requireDecks: false);
     /// <summary>Second City pass (#264): Kyuden Kitsune.</summary>
-    public static PublishedSnapshot StrongholdWave10 { get; } = Load("L5R.Published.StrongholdWave10.json", "stronghold-wave-10", requireDecks: false);
-    /// <summary>Strategy wave 36 (issue #415): Hibernation and Visitation.</summary>
-    public static PublishedSnapshot StrategyWave36 { get; } = Load("L5R.Published.StrategyWave36.json", "strategy-wave-36", requireDecks: false);
-    /// <summary>Spell wave 14 (issue #415): Strength of the Tsunami.</summary>
-    public static PublishedSnapshot SpellWave14 { get; } = Load("L5R.Published.SpellWave14.json", "spell-wave-14", requireDecks: false);
-    /// <summary>Strategy wave 37 (issue #416): A Quiet Transaction.</summary>
-    public static PublishedSnapshot StrategyWave37 { get; } = Load("L5R.Published.StrategyWave37.json", "strategy-wave-37", requireDecks: false);
-    /// <summary>Holding wave 5 (issue #416): Red Crane Dojo and Bushi Dojo.</summary>
-    public static PublishedSnapshot HoldingWave5 { get; } = Load("L5R.Published.HoldingWave5.json", "holding-wave-5", requireDecks: false);
-    /// <summary>Strategy wave 38 (issue #417): Never Safe, Redoubled Attack, Tales of Dishonor.</summary>
-    public static PublishedSnapshot StrategyWave38 { get; } = Load("L5R.Published.StrategyWave38.json", "strategy-wave-38", requireDecks: false);
-    /// <summary>Region wave 4 (issue #417): Quagmire.</summary>
-    public static PublishedSnapshot RegionWave4 { get; } = Load("L5R.Published.RegionWave4.json", "region-wave-4", requireDecks: false);
-    /// <summary>Strategy wave 39 (issue #418): Ancient Feud, Hasty Fortifications, Shiotome Plains.</summary>
-    public static PublishedSnapshot StrategyWave39 { get; } = Load("L5R.Published.StrategyWave39.json", "strategy-wave-39", requireDecks: false);
-    /// <summary>Strategy wave 40 (issue #419): Know Their Minds, Scandalous Rumors.</summary>
-    public static PublishedSnapshot StrategyWave40 { get; } = Load("L5R.Published.StrategyWave40.json", "strategy-wave-40", requireDecks: false);
-    /// <summary>Stronghold wave 11 (issue #419): Dragon's Breath Castle.</summary>
-    public static PublishedSnapshot StrongholdWave11 { get; } = Load("L5R.Published.StrongholdWave11.json", "stronghold-wave-11", requireDecks: false);
-    /// <summary>Strategy wave 41 (issue #419): Disreputable Deal.</summary>
-    public static PublishedSnapshot StrategyWave41 { get; } = Load("L5R.Published.StrategyWave41.json", "strategy-wave-41", requireDecks: false);
-    /// <summary>Spell wave 15 (issue #420): Mastering the Elements, a permanent copy of another Spell.</summary>
-    public static PublishedSnapshot SpellWave15 { get; } = Load("L5R.Published.SpellWave15.json", "spell-wave-15", requireDecks: false);
-    /// <summary>Strategy wave 42 (issue #420): Skipping the Puddle (a Kata), Superior Reach and Scavenging Party.</summary>
-    public static PublishedSnapshot StrategyWave42 { get; } = Load("L5R.Published.StrategyWave42.json", "strategy-wave-42", requireDecks: false);
-    /// <summary>Personality wave 43 (issue #431): Before the Dawn Personalities built on existing primitives.</summary>
-    public static PublishedSnapshot PersonalityWave43 { get; } = Load("L5R.Published.PersonalityWave43.json", "personality-wave-43", requireDecks: false);
-    /// <summary>Strategy wave 43 (issue #431): Before the Dawn Strategies built from existing primitives.</summary>
-    public static PublishedSnapshot StrategyWave43 { get; } = Load("L5R.Published.StrategyWave43.json", "strategy-wave-43", requireDecks: false);
-    /// <summary>Item wave 8 (issue #431): A Simple Yari and Crimson Shadow Armor.</summary>
-    public static PublishedSnapshot ItemWave8 { get; } = Load("L5R.Published.ItemWave8.json", "item-wave-8", requireDecks: false);
-    /// <summary>Spell wave 16 (issue #431): A Dragon's Favor and Ember's Final Fire.</summary>
-    public static PublishedSnapshot SpellWave16 { get; } = Load("L5R.Published.SpellWave16.json", "spell-wave-16", requireDecks: false);
-    /// <summary>Follower wave 20 (issue #431): Ashigaru Recruits and Genji's Students.</summary>
-    public static PublishedSnapshot FollowerWave20 { get; } = Load("L5R.Published.FollowerWave20.json", "follower-wave-20", requireDecks: false);
-    /// <summary>Holding wave 6 (issue #431): Indomitable Home.</summary>
-    public static PublishedSnapshot HoldingWave6 { get; } = Load("L5R.Published.HoldingWave6.json", "holding-wave-6", requireDecks: false);
-    /// <summary>Celestial wave 4 (issue #431): Ebisu's Honesty and Saibankan's Justice.</summary>
-    public static PublishedSnapshot CelestialWave4 { get; } = Load("L5R.Published.CelestialWave4.json", "celestial-wave-4", requireDecks: false);
-    /// <summary>Region wave 5 (issue #431): Stone-Hewed Shrine.</summary>
-    public static PublishedSnapshot RegionWave5 { get; } = Load("L5R.Published.RegionWave5.json", "region-wave-5", requireDecks: false);
-    /// <summary>Personality wave 44 (issue #431): The Red Hunger.</summary>
-    public static PublishedSnapshot PersonalityWave44 { get; } = Load("L5R.Published.PersonalityWave44.json", "personality-wave-44", requireDecks: false);
-    /// <summary>Personality wave 45 (issue #431): Goju Sawaki, Kakita Yasunori and the Personalities and Weapon they create.</summary>
-    public static PublishedSnapshot PersonalityWave45 { get; } = Load("L5R.Published.PersonalityWave45.json", "personality-wave-45", requireDecks: false);
-    /// <summary>Spell wave 17 (issue #431): Death, Defeated.</summary>
-    public static PublishedSnapshot SpellWave17 { get; } = Load("L5R.Published.SpellWave17.json", "spell-wave-17", requireDecks: false);
-    /// <summary>Follower wave 21 (issue #431): The Crimson Mark.</summary>
-    public static PublishedSnapshot FollowerWave21 { get; } = Load("L5R.Published.FollowerWave21.json", "follower-wave-21", requireDecks: false);
-    /// <summary>Personality wave 46 (issue #431): Daigotsu Bukaro, The Great Death and Kakita Munemori - exp.</summary>
-    public static PublishedSnapshot PersonalityWave46 { get; } = Load("L5R.Published.PersonalityWave46.json", "personality-wave-46", requireDecks: false);
-    /// <summary>Follower wave 22 (issue #431): the Farmlands Conscripts and the Birds of Prey.</summary>
-    public static PublishedSnapshot FollowerWave22 { get; } = Load("L5R.Published.FollowerWave22.json", "follower-wave-22", requireDecks: false);
-    /// <summary>Personality wave 47 (issue #431): Yasuki Dokansuto.</summary>
-    public static PublishedSnapshot PersonalityWave47 { get; } = Load("L5R.Published.PersonalityWave47.json", "personality-wave-47", requireDecks: false);
-    /// <summary>Strategy wave 44 (issue #431): Necessary Evil.</summary>
-    public static PublishedSnapshot StrategyWave44 { get; } = Load("L5R.Published.StrategyWave44.json", "strategy-wave-44", requireDecks: false);
-    /// <summary>Follower wave 23 (issue #435): Hiromi's Vassals and Home Guard.</summary>
-    public static PublishedSnapshot FollowerWave23 { get; } = Load("L5R.Published.FollowerWave23.json", "follower-wave-23", requireDecks: false);
-    /// <summary>Item wave 9 (issue #435): Shamsir.</summary>
-    public static PublishedSnapshot ItemWave9 { get; } = Load("L5R.Published.ItemWave9.json", "item-wave-9", requireDecks: false);
-    /// <summary>Strategy wave 45 (issue #437): Revenge.</summary>
-    public static PublishedSnapshot StrategyWave45 { get; } = Load("L5R.Published.StrategyWave45.json", "strategy-wave-45", requireDecks: false);
-    /// <summary>Personality wave 48 (issue #437): the Oathsworn Deathseeker Measure of Devotion creates.</summary>
-    public static PublishedSnapshot PersonalityWave48 { get; } = Load("L5R.Published.PersonalityWave48.json", "personality-wave-48", requireDecks: false);
-    /// <summary>Strategy wave 46 (issue #437): Measure of Devotion.</summary>
-    public static PublishedSnapshot StrategyWave46 { get; } = Load("L5R.Published.StrategyWave46.json", "strategy-wave-46", requireDecks: false);
-    /// <summary>Personality wave 49 (issue #440): Akodo Ashiko.</summary>
-    public static PublishedSnapshot PersonalityWave49 { get; } = Load("L5R.Published.PersonalityWave49.json", "personality-wave-49", requireDecks: false);
-    /// <summary>Personality wave 50 (issue #440 follow-up): Akodo Kobi - exp.</summary>
-    public static PublishedSnapshot PersonalityWave50 { get; } = Load("L5R.Published.PersonalityWave50.json", "personality-wave-50", requireDecks: false);
-    /// <summary>Personality wave 51 (issue #449): Matsu Rika.</summary>
-    public static PublishedSnapshot PersonalityWave51 { get; } = Load("L5R.Published.PersonalityWave51.json", "personality-wave-51", requireDecks: false);
-    /// <summary>Personality wave 52 (issue #449 follow-up): Akodo Tezuka.</summary>
-    public static PublishedSnapshot PersonalityWave52 { get; } = Load("L5R.Published.PersonalityWave52.json", "personality-wave-52", requireDecks: false);
+    public static PublishedSnapshot StrongholdWave10 { get; } = Load("L5R.Published.stronghold-wave-10.json", "stronghold-wave-10", requireDecks: false);
     /// <summary>Strategy wave 47 (Seeds of Decay pass, issue #453, batch 1): twenty Seeds of Decay Strategies.</summary>
-    public static PublishedSnapshot StrategyWave47 { get; } = Load("L5R.Published.StrategyWave47.json", "strategy-wave-47", requireDecks: false);
+    public static PublishedSnapshot StrategyWave47 { get; } = Load("L5R.Published.strategy-wave-47.json", "strategy-wave-47", requireDecks: false);
     /// <summary>Stronghold wave 12 (Seeds of Decay pass, issue #453, batch 1): The Castle of Order.</summary>
-    public static PublishedSnapshot StrongholdWave12 { get; } = Load("L5R.Published.StrongholdWave12.json", "stronghold-wave-12", requireDecks: false);
+    public static PublishedSnapshot StrongholdWave12 { get; } = Load("L5R.Published.stronghold-wave-12.json", "stronghold-wave-12", requireDecks: false);
     /// <summary>Celestial wave 5 (Seeds of Decay pass, issue #453, batch 1): Megumi's Guidance.</summary>
-    public static PublishedSnapshot CelestialWave5 { get; } = Load("L5R.Published.CelestialWave5.json", "celestial-wave-5", requireDecks: false);
-    /// <summary>Strategy wave 50 (Seeds of Decay pass, issue #453, batch 2): seventeen Strategies.</summary>
-    public static PublishedSnapshot StrategyWave50 { get; } = Load("L5R.Published.StrategyWave50.json", "strategy-wave-50", requireDecks: false);
-    /// <summary>Personality wave 53 (Seeds of Decay pass, issue #453, batch 2): Yasuki Baiko, Yasuki Tsujiken - exp, Doji Yuka, Kakita Yusugi, Yogo Ugimori, Akodo Hotaka, Bayushi Shibata - exp.</summary>
-    public static PublishedSnapshot PersonalityWave53 { get; } = Load("L5R.Published.PersonalityWave53.json", "personality-wave-53", requireDecks: false);
-    /// <summary>Follower wave 24 (Seeds of Decay pass, issue #453, batch 2): the created-only Ronin Follower Dubious Resources creates.</summary>
-    public static PublishedSnapshot FollowerWave24 { get; } = Load("L5R.Published.FollowerWave24.json", "follower-wave-24", requireDecks: false);
-    /// <summary>Seeds of Decay pass (issue #453), batch 4: the Sensei, Naka Mahatsu - exp, Daigotsu Yamato, Hiruma Sawai, Shinjo Katsuo.</summary>
-    public static PublishedSnapshot PersonalityWave58 { get; } = Load("L5R.Published.PersonalityWave58.json", "personality-wave-58", requireDecks: false);
-    /// <summary>Seeds of Decay pass (issue #453), batch 4: the created-only Detached Personality and Ninja Proxy scans.</summary>
-    public static PublishedSnapshot PersonalityWave60 { get; } = Load("L5R.Published.PersonalityWave60.json", "personality-wave-60", requireDecks: false);
-    /// <summary>Seeds of Decay pass (issue #453), batch 4: Temple to Fudo, Hachi's Revenge, Incense Mill, Overlooked Palace, Second City Port.</summary>
-    public static PublishedSnapshot HoldingWave7 { get; } = Load("L5R.Published.HoldingWave7.json", "holding-wave-7", requireDecks: false);
-    /// <summary>Seeds of Decay pass (issue #453), batch 4: Tested Land.</summary>
-    public static PublishedSnapshot RegionWave6 { get; } = Load("L5R.Published.RegionWave6.json", "region-wave-6", requireDecks: false);
-    /// <summary>Seeds of Decay pass (issue #453), batch 4: Offering Reverence.</summary>
-    public static PublishedSnapshot EventWave5 { get; } = Load("L5R.Published.EventWave5.json", "event-wave-5", requireDecks: false);
-    /// <summary>Seeds of Decay pass (issue #453), batch 4: Cavalry Detachment.</summary>
-    public static PublishedSnapshot FollowerWave26 { get; } = Load("L5R.Published.FollowerWave26.json", "follower-wave-26", requireDecks: false);
-    /// <summary>Item wave 11 (Seeds of Decay pass, issue #453, batch 5): Aka-beko, Blades of the Black Dragon, Celestial Sword of the Mantis - exp, Celestial Sword of the
-    /// Scorpion - exp, Hato-gurama, Kama, Ki-Uso, Moksha Patam, Okesa-goma, Sandalwood Incense.</summary>
-    public static PublishedSnapshot ItemWave11 { get; } = Load("L5R.Published.ItemWave11.json", "item-wave-11", requireDecks: false);
-    /// <summary>Spell wave 18 (Seeds of Decay pass, issue #453, batch 5): Extend the Soul's Boundaries, Immolation, Master of Beasts, Nature's Wrath, Peace of the Kami,
-    /// Scent of Dishonor, The Earth's Strength.</summary>
-    public static PublishedSnapshot SpellWave18 { get; } = Load("L5R.Published.SpellWave18.json", "spell-wave-18", requireDecks: false);
-    /// <summary>Follower wave 25 (Seeds of Decay pass, issue #453, batch 5): O-Yoroi Troops, Ronin Ambushers.</summary>
-    public static PublishedSnapshot FollowerWave25 { get; } = Load("L5R.Published.FollowerWave25.json", "follower-wave-25", requireDecks: false);
-    /// <summary>Personality wave 55 (Seeds of Decay pass, issue #453, batch 3): the batch's 26 wired Personalities.</summary>
-    public static PublishedSnapshot PersonalityWave55 { get; } = Load("L5R.Published.PersonalityWave55.json", "personality-wave-55", requireDecks: false);
-    /// <summary>Personality wave 57 (issue #453, batch 3): Merihiko's Swarm, the created-only Personality Kitsune Merihiko creates.</summary>
-    public static PublishedSnapshot PersonalityWave57 { get; } = Load("L5R.Published.PersonalityWave57.json", "personality-wave-57", requireDecks: false);
-    /// <summary>Item wave 10 (issue #453, batch 3): Masayoshi's Blade, the created-only Weapon Masayoshi creates.</summary>
-    public static PublishedSnapshot ItemWave10 { get; } = Load("L5R.Published.ItemWave10.json", "item-wave-10", requireDecks: false);
-    /// <summary>Personality wave 61 (Honor and Treachery pass, issue #458): Akodo Shihiro, Bayushi Irezu, Bayushi Kasumi, Bayushi Utoro, Isawa Taiken, Shiba Mitsushen,
-    /// Shiba Tsukimi, Shosuro Chikata, Tsubo, Yogo Haruto.</summary>
-    public static PublishedSnapshot PersonalityWave61 { get; } = Load("L5R.Published.PersonalityWave61.json", "personality-wave-61", requireDecks: false);
-    public static PublishedSnapshot PersonalityWave63 { get; } = Load("L5R.Published.PersonalityWave63.json", "personality-wave-63", requireDecks: false);
-    /// <summary>Holding wave 8 (issue #458): Border Keep - inexperienced.</summary>
-    public static PublishedSnapshot HoldingWave8 { get; } = Load("L5R.Published.HoldingWave8.json", "holding-wave-8", requireDecks: false);
-    /// <summary>Spell wave 19 (issue #458): Communion with Earth.</summary>
-    public static PublishedSnapshot SpellWave19 { get; } = Load("L5R.Published.SpellWave19.json", "spell-wave-19", requireDecks: false);
-    /// <summary>Strategy wave 51 (issue #458): Elite Training.</summary>
-    public static PublishedSnapshot StrategyWave51 { get; } = Load("L5R.Published.StrategyWave51.json", "strategy-wave-51", requireDecks: false);
+    public static PublishedSnapshot CelestialWave5 { get; } = Load("L5R.Published.celestial-wave-5.json", "celestial-wave-5", requireDecks: false);
+    private static PublishedSnapshot PersonalityWave63 { get; } = Load("L5R.Published.personality-wave-63.json", "personality-wave-63", requireDecks: false);
     // Embers of War pass, batch 3 (issue #460).
-    public static PublishedSnapshot StrategyWave52 { get; } = Load("L5R.Published.StrategyWave52.json", "strategy-wave-52", requireDecks: false);
-    /// <summary>Stronghold wave 13 (issue #458): The Sacred Temple of the Phoenix - inexperienced, The Towers of the Yogo.</summary>
-    public static PublishedSnapshot StrongholdWave13 { get; } = Load("L5R.Published.StrongholdWave13.json", "stronghold-wave-13", requireDecks: false);
-    /// <summary>Follower wave 27 (issue #458): Devoted Yojimbo.</summary>
-    public static PublishedSnapshot FollowerWave27 { get; } = Load("L5R.Published.FollowerWave27.json", "follower-wave-27", requireDecks: false);
-    /// <summary>Strategy wave 53 (Embers of War pass, issue #460, batch 4): Sheathing the Sword, Tactical Trap, Unstoppable Strike, You Are Unworthy, The Cycle of Vengeance.</summary>
-    public static PublishedSnapshot StrategyWave53 { get; } = Load("L5R.Published.StrategyWave53.json", "strategy-wave-53", requireDecks: false);
-    /// <summary>Spell wave 20 (Embers of War pass, issue #460, batch 5): Inescapable Snare, Incite the Phantoms, Sudden Guardian, The Swell of Strength.</summary>
-    public static PublishedSnapshot SpellWave20 { get; } = Load("L5R.Published.SpellWave20.json", "spell-wave-20", requireDecks: false);
-    /// <summary>Stronghold wave 14 (issue #460, batch 5): The Ki-Rin's Path.</summary>
-    public static PublishedSnapshot StrongholdWave14 { get; } = Load("L5R.Published.StrongholdWave14.json", "stronghold-wave-14", requireDecks: false);
-    /// <summary>Region wave 7 (issue #460, batch 5): The Distant Reaches.</summary>
-    public static PublishedSnapshot RegionWave7 { get; } = Load("L5R.Published.RegionWave7.json", "region-wave-7", requireDecks: false);
-    /// <summary>Item wave 12 (Embers of War pass, issue #460, batch 6): Celestial Sword of the Lion - exp, Celestial Sword of the Unicorn - exp, Dazzling Attire,
-    /// Splintered Weapon, The Ancestral Sword of Hantei - exp.</summary>
-    public static PublishedSnapshot ItemWave12 { get; } = Load("L5R.Published.ItemWave12.json", "item-wave-12", requireDecks: false);
-    /// <summary>Holding wave 9 (Embers of War pass, issue #460, batch 6): Staging Grounds, Surveillance Outpost, Temple to the Elements, Terraced Farm.</summary>
-    public static PublishedSnapshot HoldingWave9 { get; } = Load("L5R.Published.HoldingWave9.json", "holding-wave-9", requireDecks: false);
-    /// <summary>Follower wave 28 (Embers of War pass, issue #460, batch 6): Field Messenger, Flanking Unit.</summary>
-    public static PublishedSnapshot FollowerWave28 { get; } = Load("L5R.Published.FollowerWave28.json", "follower-wave-28", requireDecks: false);
-    /// <summary>Personality wave 64 (Embers of War pass, issue #460, batch 6): Guest and Haruki's Deer, two CreatedOnly Proxy tokens (their creators, Perplexing
-    /// Guests and Kitsune Haruki, are not themselves wired this pass).</summary>
-    public static PublishedSnapshot PersonalityWave64 { get; } = Load("L5R.Published.PersonalityWave64.json", "personality-wave-64", requireDecks: false);
-    /// <summary>Personality wave 62 (Embers of War pass, issue #460, batch 1): Akodo Uehara, Daigotsu Takayasu - exp, Goju Gochiso, Kaiu Onizuka, Kaiu Tojikana.</summary>
-    public static PublishedSnapshot PersonalityWave62 { get; } = Load("L5R.Published.PersonalityWave62.json", "personality-wave-62", requireDecks: false);
+    private static PublishedSnapshot StrategyWave52 { get; } = Load("L5R.Published.strategy-wave-52.json", "strategy-wave-52", requireDecks: false);
+    /// <summary>Strategy wave 54 (Forgotten Legacy pass, batch 3, issue #467): A Game of Dice, A Yojimbo's Duty, Accidental Confession, Broken Alliance, Cast Aside the Weak,
+    /// Consideration, Creating Order, Duel of Haiku, Entrenched Position, Feint &amp; Strike.</summary>
+    public static PublishedSnapshot StrategyWave54 { get; } = Load("L5R.Published.strategy-wave-54.json", "strategy-wave-54", requireDecks: false);
+    /// <summary>Strategy wave 55 (Forgotten Legacy pass, issue #467, batch 4): Heart of Darkness, Intimidation, Never Beyond My Reach, Pearls &amp; Spirits, Returning Home,
+    /// Rise of the Dark Naga, Seeking the Truth, Siege Volley, Steadfast Defense, Sundering Strike.</summary>
+    public static PublishedSnapshot StrategyWave55 { get; } = Load("L5R.Published.strategy-wave-55.json", "strategy-wave-55", requireDecks: false);
+    /// <summary>Strategy wave 56 (The Shadow's Embrace pass, batch 3, issue #476): Burning Fury, Captured Convict, Cowed and Defeated, Crowded Streets, Deep Roots, Defensive Grill,
+    /// Direct the Path, Duel to First Blood, Fields of Victory, Forge Your Soul, Forged Documents, Forthrightness, Grief, I Cast Two Shadows, Kitsuki Methods, Kuon's Legacy, Lessons Never Forgotten,
+    /// Methodical Questioning, One Shout.</summary>
+    public static PublishedSnapshot StrategyWave56 { get; } = Load("L5R.Published.strategy-wave-56.json", "strategy-wave-56", requireDecks: false);
+    /// <summary>Strategy wave 57 (The Shadow's Embrace pass, issue #476, batch 4): the wired Strategies of the batch (package_strategy_wave_57.py lists them).</summary>
+    public static PublishedSnapshot StrategyWave57 { get; } = Load("L5R.Published.strategy-wave-57.json", "strategy-wave-57", requireDecks: false);
+    /// <summary>Strategy wave 58 (Emperor Edition remaining-cards pass, issue #492, group A): the wired Strategies of the group (package_strategy_wave_58.py lists them).</summary>
+    public static PublishedSnapshot StrategyWave58 { get; } = Load("L5R.Published.strategy-wave-58.json", "strategy-wave-58", requireDecks: false);
+    /// <summary>Strategy wave 59 (Emperor Edition remaining-cards pass, issue #492, group B): the wired Strategies of the group (package_strategy_wave_59.py lists them).</summary>
+    public static PublishedSnapshot StrategyWave59 { get; } = Load("L5R.Published.strategy-wave-59.json", "strategy-wave-59", requireDecks: false);
+    /// <summary>Strategy wave 60 (Emperor Edition remaining-cards pass, issue #492, group C): the wired Strategies of the group (package_strategy_wave_60.py lists them).</summary>
+    public static PublishedSnapshot StrategyWave60 { get; } = Load("L5R.Published.strategy-wave-60.json", "strategy-wave-60", requireDecks: false);
+    /// <summary>Strategy wave 61 (Emperor Edition remaining-cards pass, issue #492, group D): the wired Strategies of the group (package_strategy_wave_61.py lists them).</summary>
+    public static PublishedSnapshot StrategyWave61 { get; } = Load("L5R.Published.strategy-wave-61.json", "strategy-wave-61", requireDecks: false);
+    /// <summary>Strategy wave 63 (Emperor Edition ruling pass R2, issue #492): the five Strategies whose Focus Effect delays the effects of losing a duel (package_strategy_wave_63.py lists them).</summary>
+    public static PublishedSnapshot StrategyWave63 { get; } = Load("L5R.Published.strategy-wave-63.json", "strategy-wave-63", requireDecks: false);
+    /// <summary>Personality wave 66 (Forgotten Legacy pass, issue #467, batch 2): Matsu Koyama, Moshi Sasako, Moto Xiao, Ninube Shiho, Shiba Sawaken, Shinjo Junpei,
+    /// Shosuro Makiko, The Shakash, The Sleepless One, Togashi Osawa, Toritaka Chokichi, Utaku Ji-Yun, Yamazaki, Yasuki Daiki, Yoritomo Haruhiko.</summary>
+    public static PublishedSnapshot PersonalityWave66 { get; } = Load("L5R.Published.personality-wave-66.json", "personality-wave-66", requireDecks: false);
+    /// <summary>Follower wave 29 (Forgotten Legacy pass, issue #467, batch 2): The Vengeful.</summary>
+    public static PublishedSnapshot FollowerWave29 { get; } = Load("L5R.Published.follower-wave-29.json", "follower-wave-29", requireDecks: false);
+    /// <summary>Stronghold wave 15 (Forgotten Legacy pass, issue #467, batch 2): The Forgotten Temple.</summary>
+    public static PublishedSnapshot StrongholdWave15 { get; } = Load("L5R.Published.stronghold-wave-15.json", "stronghold-wave-15", requireDecks: false);
+    /// <summary>Personality wave 67 (Forgotten Legacy pass, issue #467, batch 1): Asahina Shigemitsu, Asako Kaitoko, Bayushi Higaonna, Bayushi Toshimo, Daidoji
+    /// Takichi, Daigotsu Gyoken, Daigotsu Murota, Doji Hakuseki, Doji Rengetsu, Hiruma Nikaru, Iuchi Abodan, Kitsu Kagako.</summary>
+    public static PublishedSnapshot PersonalityWave67 { get; } = Load("L5R.Published.personality-wave-67.json", "personality-wave-67", requireDecks: false);
+    /// <summary>Personality wave 69 (Emperor Edition Personality pass, issue #477, batch 2): Hida Horu, Hida Kisada (Emperor), Hida Komatsu, Hida Takeuchi, Hida Watari, Kaiu Esumi,
+    /// Kaiu Hideaki, Kuni Shinoda, Toritaka Shishido, Ikoma Shinju, Matsu Hana, Matsu Yuuto.</summary>
+    public static PublishedSnapshot PersonalityWave69 { get; } = Load("L5R.Published.personality-wave-69.json", "personality-wave-69", requireDecks: false);
+    /// <summary>Personality wave 70 (Emperor Edition Personality pass, issue #477, batch 3): Moto Naleesh, Moto Shigeru, Moto Tetsuo, Shinjo Itao, Utaku Ryoko, Iuchi Shunshi,
+    /// Tsuruchi Samuru, Tsuruchi Tomaru, Unmei, Yoritomo Hama, Yoritomo Hiromi, Yoritomo Naoto.</summary>
+    public static PublishedSnapshot PersonalityWave70 { get; } = Load("L5R.Published.personality-wave-70.json", "personality-wave-70", requireDecks: false);
+    /// <summary>Personality wave 72 (Emperor Edition Personality pass, issue #477, batch 5): Agasha Ryo, Asako Nobunori, Asako Tsunefusa, Asako Yorisada, Isawa Kimi - exp 2, Isawa Norimichi,
+    /// Shiba Kataken, Shiba Sansesuke, Shiba Tsukimi - exp 4, Kitsu Tamasine, Tamori Kusugi.</summary>
+    public static PublishedSnapshot PersonalityWave72 { get; } = Load("L5R.Published.personality-wave-72.json", "personality-wave-72", requireDecks: false);
+    /// <summary>Personality wave 73 (Emperor Edition Personality pass, issue #477, batch 6): Kitsuki Yataku, Nishimura, Genmyo, Qalyar, Seppun Washi, Yasuki Jekku, Yasuki Tanimura, Yung,
+    /// Daigotsu Ishibashi, Daigotsu Kanpeki - exp.</summary>
+    public static PublishedSnapshot PersonalityWave73 { get; } = Load("L5R.Published.personality-wave-73.json", "personality-wave-73", requireDecks: false);
+    /// <summary>Spell wave 21 (Forgotten Legacy pass, issue #467, batch 5): Pearl of Rage, The Mountain's Power, Wind of the Moon, Thunder's Wrath.</summary>
+    public static PublishedSnapshot SpellWave21 { get; } = Load("L5R.Published.spell-wave-21.json", "spell-wave-21", requireDecks: false);
+    /// <summary>Holding wave 11 (issue #467, batch 5): Ageless Shrine, Bamboo Harvesters - experienced, Border Keep - experienced, Colonial Harbor.</summary>
+    public static PublishedSnapshot HoldingWave11 { get; } = Load("L5R.Published.holding-wave-11.json", "holding-wave-11", requireDecks: false);
+    /// <summary>Item wave 13 (issue #467, batch 5): Black Pearl, Cursed Relic.</summary>
+    public static PublishedSnapshot ItemWave13 { get; } = Load("L5R.Published.item-wave-13.json", "item-wave-13", requireDecks: false);
+    /// <summary>Event wave 6 (issue #467, batch 5): Assault in the Jungle, Burning Dreams, Willing Spirits.</summary>
+    public static PublishedSnapshot EventWave6 { get; } = Load("L5R.Published.event-wave-6.json", "event-wave-6", requireDecks: false);
+    /// <summary>Celestial wave 6 (issue #467, batch 5): Ryoshun's Guidance.</summary>
+    public static PublishedSnapshot CelestialWave6 { get; } = Load("L5R.Published.celestial-wave-6.json", "celestial-wave-6", requireDecks: false);
+    /// <summary>Region wave 8 (issue #467, batch 5): The Second City.</summary>
+    public static PublishedSnapshot RegionWave8 { get; } = Load("L5R.Published.region-wave-8.json", "region-wave-8", requireDecks: false);
+    /// <summary>Spell wave 22 (The Shadow's Embrace pass, issue #476, batch 5): Beseech Sakkaku, Channel the Moon, Purify the Soul, Set the Fields Aflame, Thunder's Stamina, Touch the Emptiness, Ward of Air, Your Heart's Enemy.</summary>
+    public static PublishedSnapshot SpellWave22 { get; } = Load("L5R.Published.spell-wave-22.json", "spell-wave-22", requireDecks: false);
+    /// <summary>Item wave 14 (The Shadow's Embrace pass, issue #476, batch 5): Blood of the Preserver, Celestial Sword of the Crab, of the Crane and of the Phoenix, The String of the Colonies, The Victor, Vanquisher's Armor.</summary>
+    public static PublishedSnapshot ItemWave14 { get; } = Load("L5R.Published.item-wave-14.json", "item-wave-14", requireDecks: false);
+    /// <summary>Personality wave 75 (The Shadow's Embrace pass, issue #476, batch 2): Kitsu Sorano (Experienced), Kitsuki Yoyugi, Longtooth, M'rika, Moshi Rukia, Moto Morio,
+    /// Natsumi, Niiro no Oni, Quelsa, Shiba Kudome (Experienced), Shiba Shirou, Shinjo Jong-Ho, Shinjo Min-Hee, Shosuro Nobu, Shosuro Ryoken, Shugorei, Yamazaki (Experienced),
+    /// Yasuki Ikke, Yoritomo Kanahashi.</summary>
+    public static PublishedSnapshot PersonalityWave75 { get; } = Load("L5R.Published.personality-wave-75.json", "personality-wave-75", requireDecks: false);
+    /// <summary>Personality wave 77 (Emperor Edition remaining-cards pass, issue #492, proxy group Y): Akodo Makotai, Shinjo Ki-Chang (Experienced), Kitsune Gina and the three Proxies they create (Infantry Follower, Dutiful Cavalry, Gina's Fox).</summary>
+    public static PublishedSnapshot PersonalityWave77 { get; } = Load("L5R.Published.personality-wave-77.json", "personality-wave-77", requireDecks: false);
+    /// <summary>Holding wave 12 (The Shadow's Embrace pass, issue #476, batch 6): Fortress of Lidless Eyes, Platinum Mine, Sheltered Port, Small-Time Bully, Versatile Farm, Whispering Archive.</summary>
+    public static PublishedSnapshot HoldingWave12 { get; } = Load("L5R.Published.holding-wave-12.json", "holding-wave-12", requireDecks: false);
+    /// <summary>Follower wave 30 (issue #476, batch 6): Clearing Crew, Elephant Caravan, Shieldman, Wasteland Scout.</summary>
+    public static PublishedSnapshot FollowerWave30 { get; } = Load("L5R.Published.follower-wave-30.json", "follower-wave-30", requireDecks: false);
+    /// <summary>Event wave 7 (issue #476, batch 6): Discovering the Temple, On, Star-Crossed Lovers, Wartime Preparations.</summary>
+    public static PublishedSnapshot EventWave7 { get; } = Load("L5R.Published.event-wave-7.json", "event-wave-7", requireDecks: false);
+    /// <summary>Stronghold wave 16 (issue #476, batch 6): Bishamon's Tower, Twin Forks City.</summary>
+    public static PublishedSnapshot StrongholdWave16 { get; } = Load("L5R.Published.stronghold-wave-16.json", "stronghold-wave-16", requireDecks: false);
+    /// <summary>Stronghold wave 17 (Emperor Edition Stronghold pass, issue #486, batch 1): Eternal Victory Dojo, Hidden Falls Dojo, Keep of the Dead, Koshin Keep, Kyuden Otomo - exp, Library of Rebirth, Midday Shadow Court.</summary>
+    public static PublishedSnapshot StrongholdWave17 { get; } = Load("L5R.Published.stronghold-wave-17.json", "stronghold-wave-17", requireDecks: false);
+    /// <summary>Stronghold wave 20 (Emperor Edition ruling pass R2, issue #492): Halls of the Forgotten (package_stronghold_wave_20.py).</summary>
+    public static PublishedSnapshot StrongholdWave20 { get; } = Load("L5R.Published.stronghold-wave-20.json", "stronghold-wave-20", requireDecks: false);
+    /// <summary>Celestial wave 7 (issue #476, batch 6): The Moon's Imperative, The Sun's Aspiration.</summary>
+    public static PublishedSnapshot CelestialWave7 { get; } = Load("L5R.Published.celestial-wave-7.json", "celestial-wave-7", requireDecks: false);
+    /// <summary>Spell wave 23 (Emperor Edition remaining-cards pass, issue #492, group E): Capturing the Soul, Cleansing the Path, Consecration, Contemplate the Void, Hanabi, I Give You My Name,
+    /// Obscured Pathways, The Kami's Blessing, Thunder's Favor, Unnatural Flood, Warded Paths.</summary>
+    public static PublishedSnapshot SpellWave23 { get; } = Load("L5R.Published.spell-wave-23.json", "spell-wave-23", requireDecks: false);
+    /// <summary>Personality wave 76 (Emperor Edition remaining-cards pass, issue #492, proxy group X): Goju Kobashi and Suiteiru no Oni, with the created-only Follower Proxies they create (Kobashi's Spawn, Suiteiru's Podling).</summary>
+    public static PublishedSnapshot PersonalityWave76 { get; } = Load("L5R.Published.personality-wave-76.json", "personality-wave-76", requireDecks: false);
+    /// <summary>Spell wave 24 (Emperor Edition remaining-cards pass, issue #492, proxy group X): Summon Swamp Spirits and the created-only Swamp Spirit Follower it creates.</summary>
+    public static PublishedSnapshot SpellWave24 { get; } = Load("L5R.Published.spell-wave-24.json", "spell-wave-24", requireDecks: false);
+    public static PublishedSnapshot StrategyWave62 { get; } = Load("L5R.Published.strategy-wave-62.json", "strategy-wave-62", requireDecks: false);
+    /// <summary>Strategy wave 64 (Emperor Edition rulings pass, issue #494): Shinobi Assault, Two Fronts and The Perfect Moment, published once Mendon supplied their scans.</summary>
+    public static PublishedSnapshot StrategyWave64 { get; } = Load("L5R.Published.strategy-wave-64.json", "strategy-wave-64", requireDecks: false);
+    /// <summary>Strategy wave 65 (Emperor Edition three-scans pass, issue #496): Honor Never Falls, published once Mendon supplied its scan.</summary>
+    public static PublishedSnapshot StrategyWave65 { get; } = Load("L5R.Published.strategy-wave-65.json", "strategy-wave-65", requireDecks: false);
+    /// <summary>Celestial wave 9 (Emperor Edition three-scans pass, issue #496): Kurohito's Perfection, published once Mendon supplied its scan.</summary>
+    public static PublishedSnapshot CelestialWave9 { get; } = Load("L5R.Published.celestial-wave-9.json", "celestial-wave-9", requireDecks: false);
+    /// <summary>Personality wave 79 (Emperor Edition three-scans pass, issue #496): Makito (Experienced Asako Makito), published once Mendon supplied his scan.</summary>
+    public static PublishedSnapshot PersonalityWave79 { get; } = Load("L5R.Published.personality-wave-79.json", "personality-wave-79", requireDecks: false);
+    public static PublishedSnapshot SpellWave25 { get; } = Load("L5R.Published.spell-wave-25.json", "spell-wave-25", requireDecks: false);
+    /// <summary>Celestial wave 8 (Emperor Edition remaining-cards pass, issue #492, group E): the Kami Guidance Celestials of Akodo, Bayushi, Daigotsu, Doji, Hida, Shiba, Shinjo, Togashi and Yoritomo.</summary>
+    public static PublishedSnapshot CelestialWave8 { get; } = Load("L5R.Published.celestial-wave-8.json", "celestial-wave-8", requireDecks: false);
+    /// <summary>Personality wave 74 (The Shadow's Embrace pass, issue #476, batch 1): Agasha Kurou, Asahina Keigo, Asako Hayate, Asako Jirou, Atosa, Bayushi Misaki,
+    /// Bayushi Tarou, Bayushi Waru, Chiisai, Chuda Hitaka, Daidoji Sosuke, Daigotsu Arakan, Daigotsu Rafu, Goju Bunoro, Hida Bakari, Hiruma Hikazu, Hiruma Nikaru
+    /// (Shadow's Embrace printing), Iuchi Haruma, Kaiu Fumiko, Kakita Ichigiku, Kakita Tadanobu, Kazehime.</summary>
+    public static PublishedSnapshot PersonalityWave74 { get; } = Load("L5R.Published.personality-wave-74.json", "personality-wave-74", requireDecks: false);
+    /// <summary>Personality wave 71 (Emperor Edition Personality pass, issue #477, batch 4): fifteen Crane, Scorpion and Ninja Personalities wired whole.</summary>
+    public static PublishedSnapshot PersonalityWave71 { get; } = Load("L5R.Published.personality-wave-71.json", "personality-wave-71", requireDecks: false);
+    /// <summary>Stronghold wave 18 (Emperor Edition Stronghold pass, issue #486, batch 2): Palace of the Breaking Dawn, Pillars of Virtue, Shiro Chugo, Steel Soul Dojo, Suitengu's Torch,
+    /// Temple of Purity, The Aerie.</summary>
+    public static PublishedSnapshot StrongholdWave18 { get; } = Load("L5R.Published.stronghold-wave-18.json", "stronghold-wave-18", requireDecks: false);
+    /// <summary>Region wave 9 (Emperor Edition remaining-cards pass, issue #492, group F): Blighted Region and Refuge of the Three Sisters (group F).</summary>
+    public static PublishedSnapshot RegionWave9 { get; } = Load("L5R.Published.region-wave-9.json", "region-wave-9", requireDecks: false);
+    /// <summary>Event wave 8 (Emperor Edition remaining-cards pass, issue #492, group F): the twelve Events wired in group F.</summary>
+    public static PublishedSnapshot EventWave8 { get; } = Load("L5R.Published.event-wave-8.json", "event-wave-8", requireDecks: false);
+    /// <summary>Item wave 15 (Emperor Edition remaining-cards pass, issue #492, group G): Armor of the Heavens, Blade of Perfection, Chrysanthemum Blossom, Clan Standard, Gift Armor, Kensai's Blade, Maga-yari,
+    /// Modifications, Reserve Weapon, Sasumata, Tsuruchi Daikyu.</summary>
+    public static PublishedSnapshot ItemWave15 { get; } = Load("L5R.Published.item-wave-15.json", "item-wave-15", requireDecks: false);
+    /// <summary>Follower wave 31 (issue #492, group G): Bandit Gang, Ikiryo, Ikoma House Guard, Kaiu House Guard, Legion of Pain, Moto House Guard, Tamori House Guard, Tsuruchi House Guard.</summary>
+    public static PublishedSnapshot FollowerWave31 { get; } = Load("L5R.Published.follower-wave-31.json", "follower-wave-31", requireDecks: false);
+    /// <summary>Region wave 10 (Emperor Edition remaining-cards pass, issue #492, ruling R3): Kaiu Village.</summary>
+    public static PublishedSnapshot RegionWave10 { get; } = Load("L5R.Published.region-wave-10.json", "region-wave-10", requireDecks: false);
+    /// <summary>Item wave 16 (issue #492, ruling R3): Kaiu Weapon (oracle-l5r-10006, a locally allocated id for the Proxy scan Mendon supplied), the Item Kaiu Village creates.</summary>
+    public static PublishedSnapshot ItemWave16 { get; } = Load("L5R.Published.item-wave-16.json", "item-wave-16", requireDecks: false);
+    /// <summary>Strategy wave 69 (issue #501, mechanics group A): Beyond the Line, One Action, Two Strikes, String of Victories (package_strategy_wave_69.py).</summary>
+    public static PublishedSnapshot StrategyWave69 { get; } = Load("L5R.Published.strategy-wave-69.json", "strategy-wave-69", requireDecks: false);
+    /// <summary>Personality wave 83 (issue #501, mechanics group A): Isawa Momoko, Mirumoto Inokuchi (package_personality_wave_83.py).</summary>
+    public static PublishedSnapshot PersonalityWave83 { get; } = Load("L5R.Published.personality-wave-83.json", "personality-wave-83", requireDecks: false);
+    /// <summary>Stronghold wave 23 (issue #501, mechanics group A): Aramasu's Legacy (package_stronghold_wave_23.py).</summary>
+    public static PublishedSnapshot StrongholdWave23 { get; } = Load("L5R.Published.stronghold-wave-23.json", "stronghold-wave-23", requireDecks: false);
+    /// <summary>Personality wave 96 (issue #503, group P1: EmperorP1.cs): Akodo Tamisu, Asako Megu, Bayushi Nomen, Hida Bakishi, Hida Osote, Ikoma Hakige, Isawa Koiso, Isawa Sanetomo, Itoku, Tsuruchi Shichiro, Moto Taigo.</summary>
+    public static PublishedSnapshot PersonalityWave96 { get; } = Load("L5R.Published.personality-wave-96.json", "personality-wave-96", requireDecks: false);
+    /// <summary>Spell wave 26 (issue #503, group P1: EmperorP1.cs): Damning Ceremony, Extending Influence, Mara's Touch, Ochiai's Bravery.</summary>
+    public static PublishedSnapshot SpellWave26 { get; } = Load("L5R.Published.spell-wave-26.json", "spell-wave-26", requireDecks: false);
+    /// <summary>Strategy wave 82 (issue #503, group P1: EmperorP1.cs): Seeking the Question.</summary>
+    public static PublishedSnapshot StrategyWave82 { get; } = Load("L5R.Published.strategy-wave-82.json", "strategy-wave-82", requireDecks: false);
+    /// <summary>Celestial wave 10 (issue #503, group P1: EmperorP1.cs): Hotei's Contentment.</summary>
+    public static PublishedSnapshot CelestialWave10 { get; } = Load("L5R.Published.celestial-wave-10.json", "celestial-wave-10", requireDecks: false);
 }

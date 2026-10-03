@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Complete focused stabilization: expose three non-duel continuations, fix six PR270 card/query findings, integrate main272 and refresh full artwork receipt. Preserve approved UI and separate duel work.",
+  "validation": "All nine new regression groups failed before fixes and pass afterward. Integrated full suite: 477 checks passed. Client build: zero warnings/errors. All 8 stabilization and 8 existing Event native Mac scenarios passed; representative screenshots inspected. Offline art verification and Play Latest.command headless smoke passed. Evidence and limits: docs/STABILIZATION.md.",
+  "remaining": "Private artwork publication finishing; GitHub CI and mdornbrook shared review before merge. Human acceptance and native Windows gameplay remain separate. Older inherited findings triaged in docs/STABILIZATION.md; Regions/Celestials presentation is next.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/274",
+  "branch": "codex/274-stabilization",
+  "updated": "2026-09-17T16:49:46.374240+00:00"
+}

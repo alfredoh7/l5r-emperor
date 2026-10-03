@@ -1,0 +1,250 @@
+{
+  "Profile": "holding-wave-10",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10211",
+      "Name": "Buried Treasures",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 3,
+      "GoldProduction": 2,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Bow this card: Produce 2 Gold.\nLimited, Bow this card: If you have four or fewer cards in your hand and you are a Mantis Clan player, draw a card.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10211.jpg",
+      "Keywords": [
+        "Unique",
+        "Market",
+        "Retainer"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "market-draw-mantis"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10212",
+      "Name": "Purveyor of Questionable Goods",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 3,
+      "GoldProduction": 2,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Bow this card: Produce 2 Gold.\nLimited, Bow this card: If you have four or fewer cards in your hand and you are a Spider Clan player, draw a card.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10212.jpg",
+      "Keywords": [
+        "Unique",
+        "Market",
+        "Retainer"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "market-draw-spider"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10213",
+      "Name": "Tattoos & Trinkets",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 3,
+      "GoldProduction": 2,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Bow this card: Produce 2 Gold.\nLimited, Bow this card: If you have four or fewer cards in your hand and you are a Dragon Clan player, draw a card.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10213.jpg",
+      "Keywords": [
+        "Unique",
+        "Market",
+        "Retainer"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "market-draw-dragon"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10214",
+      "Name": "The Daidoji Marketplace",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 3,
+      "GoldProduction": 2,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Bow this card: Produce 2 Gold.\nLimited, Bow this card: If you have four or fewer cards in your hand and you are a Crane Clan player, draw a card.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10214.jpg",
+      "Keywords": [
+        "Unique",
+        "Market",
+        "Retainer"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "market-draw-crane"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10215",
+      "Name": "The Ide Caravan",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 3,
+      "GoldProduction": 2,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Bow this card: Produce 2 Gold.\nLimited, Bow this card: If you have four or fewer cards in your hand and you are a Unicorn Clan player, draw a card.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10215.jpg",
+      "Keywords": [
+        "Unique",
+        "Market",
+        "Retainer"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "market-draw-unicorn"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10216",
+      "Name": "The Merchant's District",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 3,
+      "GoldProduction": 2,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Bow this card: Produce 2 Gold.\nLimited, Bow this card: If you have four or fewer cards in your hand and you are a Scorpion Clan player, draw a card.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10216.jpg",
+      "Keywords": [
+        "Unique",
+        "Market",
+        "Retainer"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "market-draw-scorpion"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10217",
+      "Name": "The Mystical Merchant",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 3,
+      "GoldProduction": 2,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Bow this card: Produce 2 Gold.\nLimited, Bow this card: If you have four or fewer cards in your hand and you are a Phoenix Clan player, draw a card.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10217.jpg",
+      "Keywords": [
+        "Unique",
+        "Market",
+        "Retainer"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "market-draw-phoenix"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10218",
+      "Name": "The Quartermaster's Depot",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 3,
+      "GoldProduction": 2,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Bow this card: Produce 2 Gold.\nLimited, Bow this card: If you have four or fewer cards in your hand and you are a Lion Clan player, draw a card.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10218.jpg",
+      "Keywords": [
+        "Unique",
+        "Market",
+        "Retainer"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "market-draw-lion"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10219",
+      "Name": "The Yasuki Peddler",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 3,
+      "GoldProduction": 2,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Bow this card: Produce 2 Gold.\nLimited, Bow this card: If you have four or fewer cards in your hand and you are a Crab Clan player, draw a card.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10219.jpg",
+      "Keywords": [
+        "Unique",
+        "Market",
+        "Retainer"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "market-draw-crab"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

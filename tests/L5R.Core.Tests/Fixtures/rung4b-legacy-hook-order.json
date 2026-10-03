@@ -1,0 +1,1820 @@
+[
+  {
+    "channel": "Abilities",
+    "priority": 100,
+    "hook": "AddEmperorPersonalityBatch2",
+    "file": "EmperorPersonalityBatch2.cs"
+  },
+  {
+    "channel": "Abilities",
+    "priority": 200,
+    "hook": "AddEmperorStrongholdBatch1",
+    "file": "EmperorStrongholdBatch1.cs"
+  },
+  {
+    "channel": "Abilities",
+    "priority": 300,
+    "hook": "AddEmperorStrongholdBatch3",
+    "file": "EmperorStrongholdBatch3.cs"
+  },
+  {
+    "channel": "Abilities",
+    "priority": 400,
+    "hook": "AddEmperorRemainingA",
+    "file": "EmperorRemainingA.cs"
+  },
+  {
+    "channel": "Abilities",
+    "priority": 500,
+    "hook": "AddEmperorRemainingB",
+    "file": "EmperorRemainingB.cs"
+  },
+  {
+    "channel": "Abilities",
+    "priority": 600,
+    "hook": "AddEmperorRemainingC",
+    "file": "EmperorRemainingC.cs"
+  },
+  {
+    "channel": "Abilities",
+    "priority": 700,
+    "hook": "AddEmperorRemainingD",
+    "file": "EmperorRemainingD.cs"
+  },
+  {
+    "channel": "Abilities",
+    "priority": 800,
+    "hook": "AddEmperorRemainingE",
+    "file": "EmperorRemainingE.cs"
+  },
+  {
+    "channel": "Abilities",
+    "priority": 900,
+    "hook": "AddEmperorRemainingF",
+    "file": "EmperorRemainingF.cs"
+  },
+  {
+    "channel": "Abilities",
+    "priority": 1000,
+    "hook": "AddEmperorRemainingG",
+    "file": "EmperorRemainingG.cs"
+  },
+  {
+    "channel": "Abilities",
+    "priority": 1100,
+    "hook": "AddEmperorProxyX",
+    "file": "EmperorProxyX.cs"
+  },
+  {
+    "channel": "Abilities",
+    "priority": 1200,
+    "hook": "AddEmperorProxyY",
+    "file": "EmperorProxyY.cs"
+  },
+  {
+    "channel": "Abilities",
+    "priority": 1300,
+    "hook": "AddEmperorProxyZ",
+    "file": "EmperorProxyZ.cs"
+  },
+  {
+    "channel": "Abilities",
+    "priority": 1400,
+    "hook": "AddEmperorRulingR1",
+    "file": "EmperorRulingR1Cards.cs"
+  },
+  {
+    "channel": "Abilities",
+    "priority": 1500,
+    "hook": "AddEmperorRulingR2",
+    "file": "EmperorRulingR2Cards.cs"
+  },
+  {
+    "channel": "Abilities",
+    "priority": 1600,
+    "hook": "AddEmperorRulingR3",
+    "file": "EmperorRulingR3.cs"
+  },
+  {
+    "channel": "Abilities",
+    "priority": 1700,
+    "hook": "AddEmperorThreeS",
+    "file": "EmperorThreeS.cs"
+  },
+  {
+    "channel": "Abilities",
+    "priority": 1800,
+    "hook": "AddEmperorFollowups",
+    "file": "EmperorFollowups.cs"
+  },
+  {
+    "channel": "Abilities",
+    "priority": 1900,
+    "hook": "AddEmperorMechB",
+    "file": "EmperorMechB.cs"
+  },
+  {
+    "channel": "Abilities",
+    "priority": 2000,
+    "hook": "AddEmperorMechA",
+    "file": "EmperorMechA.cs"
+  },
+  {
+    "channel": "Abilities",
+    "priority": 2100,
+    "hook": "AddEmperorMechC",
+    "file": "EmperorMechC.cs"
+  },
+  {
+    "channel": "Abilities",
+    "priority": 2200,
+    "hook": "AddEmperorMechE",
+    "file": "EmperorMechE.cs"
+  },
+  {
+    "channel": "Abilities",
+    "priority": 2300,
+    "hook": "AddEmperorMechD",
+    "file": "EmperorMechD.cs"
+  },
+  {
+    "channel": "Abilities",
+    "priority": 2400,
+    "hook": "AddEmperorP1",
+    "file": "EmperorP1.cs"
+  },
+  {
+    "channel": "Abilities",
+    "priority": 2500,
+    "hook": "AddEmperorP2",
+    "file": "EmperorP2.cs"
+  },
+  {
+    "channel": "Abilities",
+    "priority": 2600,
+    "hook": "AddEmperorP4",
+    "file": "EmperorP4.cs"
+  },
+  {
+    "channel": "Abilities",
+    "priority": 2700,
+    "hook": "AddEmperorP4Watches",
+    "file": "EmperorP4Watches.cs"
+  },
+  {
+    "channel": "Abilities",
+    "priority": 2800,
+    "hook": "AddEmperorP4Units",
+    "file": "EmperorP4Units.cs"
+  },
+  {
+    "channel": "Abilities",
+    "priority": 2900,
+    "hook": "AddEmperorP4More",
+    "file": "EmperorP4More.cs"
+  },
+  {
+    "channel": "Abilities",
+    "priority": 3000,
+    "hook": "AddEmperorP5",
+    "file": "EmperorP5.cs"
+  },
+  {
+    "channel": "Abilities",
+    "priority": 3100,
+    "hook": "AddEmperorP6",
+    "file": "EmperorP6.cs"
+  },
+  {
+    "channel": "Abilities",
+    "priority": 3200,
+    "hook": "AddEmperorP3",
+    "file": "EmperorP3.cs"
+  },
+  {
+    "channel": "Abilities",
+    "priority": 3300,
+    "hook": "AddEmperorP3Priority",
+    "file": "EmperorP3Priority.cs"
+  },
+  {
+    "channel": "Abilities",
+    "priority": 3400,
+    "hook": "AddEmperorP3Entries",
+    "file": "EmperorP3Entries.cs"
+  },
+  {
+    "channel": "ApplyDecider",
+    "priority": 100,
+    "hook": "ApplyEmperorRemainingBDeciderChoice",
+    "file": "EmperorRemainingB.cs"
+  },
+  {
+    "channel": "ApplyDecider",
+    "priority": 200,
+    "hook": "ApplyMechDDeciderChoice",
+    "file": "EmperorMechD.cs"
+  },
+  {
+    "channel": "ApplyDecider",
+    "priority": 300,
+    "hook": "ApplyKeireiPoison",
+    "file": "EmperorP2Keirei.cs"
+  },
+  {
+    "channel": "ApplyDecider",
+    "priority": 400,
+    "hook": "ApplyP5DeciderChoice",
+    "file": "EmperorP5Zones.cs"
+  },
+  {
+    "channel": "ApplyEitherOr",
+    "priority": 100,
+    "hook": "ApplyEmperorP1EitherOr",
+    "file": "EmperorP1.cs"
+  },
+  {
+    "channel": "ApplyEitherOr",
+    "priority": 200,
+    "hook": "ApplyP5EitherOr",
+    "file": "EmperorP5Zones.cs"
+  },
+  {
+    "channel": "ApplyEitherOr",
+    "priority": 300,
+    "hook": "ApplyEmperorP6EitherOr",
+    "file": "EmperorP6.cs"
+  },
+  {
+    "channel": "ApplyEitherOr",
+    "priority": 400,
+    "hook": "ApplyRemainingGEitherOr",
+    "file": "EmperorRemainingG.cs"
+  },
+  {
+    "channel": "AttackKind",
+    "priority": 100,
+    "hook": "MechCAttackKind",
+    "file": "EmperorMechC.cs"
+  },
+  {
+    "channel": "AttackKind",
+    "priority": 200,
+    "hook": "EmperorP1AttackKind",
+    "file": "EmperorP1.cs"
+  },
+  {
+    "channel": "AttackKind",
+    "priority": 300,
+    "hook": "P2AttackKind",
+    "file": "EmperorP2.cs"
+  },
+  {
+    "channel": "AttackKind",
+    "priority": 400,
+    "hook": "P4AttackKind",
+    "file": "EmperorP4.cs"
+  },
+  {
+    "channel": "AttackKind",
+    "priority": 500,
+    "hook": "P5AttackKind",
+    "file": "EmperorP5.cs"
+  },
+  {
+    "channel": "AttackKind",
+    "priority": 600,
+    "hook": "EmperorRemainingEAttackKind",
+    "file": "EmperorRemainingE.cs"
+  },
+  {
+    "channel": "AttackKind",
+    "priority": 700,
+    "hook": "RemainingGAttackKind",
+    "file": "EmperorRemainingG.cs"
+  },
+  {
+    "channel": "AttackStrengthAfter",
+    "priority": 100,
+    "hook": "MechCAttackStrength",
+    "file": "EmperorMechC.cs"
+  },
+  {
+    "channel": "AttackStrengthAfter",
+    "priority": 200,
+    "hook": "EmperorP1AttackStrength",
+    "file": "EmperorP1.cs"
+  },
+  {
+    "channel": "AttackStrengthAfter",
+    "priority": 300,
+    "hook": "P2AttackStrength",
+    "file": "EmperorP2.cs"
+  },
+  {
+    "channel": "AttackStrengthAfter",
+    "priority": 400,
+    "hook": "P4AttackStrength",
+    "file": "EmperorP4.cs"
+  },
+  {
+    "channel": "AttackStrengthBefore",
+    "priority": 100,
+    "hook": "P3AttackStrength",
+    "file": "EmperorP3Priority.cs"
+  },
+  {
+    "channel": "AttackStrengthBefore",
+    "priority": 200,
+    "hook": "EmperorRemainingEAttackStrength",
+    "file": "EmperorRemainingE.cs"
+  },
+  {
+    "channel": "AttackStrengthBefore",
+    "priority": 300,
+    "hook": "EmperorRemainingGAttackStrength",
+    "file": "EmperorRemainingG.cs"
+  },
+  {
+    "channel": "AttackStrengthBefore",
+    "priority": 400,
+    "hook": "ShadowsEmbraceBatch3AttackStrength",
+    "file": "ShadowsEmbraceBatch3.cs"
+  },
+  {
+    "channel": "AttackStrengthBefore",
+    "priority": 500,
+    "hook": "ForgottenLegacyBatch5AttackStrength",
+    "file": "ForgottenLegacyBatch5.cs"
+  },
+  {
+    "channel": "AttackStrengthBefore",
+    "priority": 600,
+    "hook": "EmperorPersonalityBatch1AttackStrength",
+    "file": "EmperorPersonalityBatch1.cs"
+  },
+  {
+    "channel": "AttackStrengthBefore",
+    "priority": 700,
+    "hook": "ShadowsEmbraceBatch2AttackStrength",
+    "file": "ShadowsEmbraceBatch2.cs"
+  },
+  {
+    "channel": "AttackStrengthBefore",
+    "priority": 800,
+    "hook": "RemAAttackStrength",
+    "file": "EmperorRemainingA.cs"
+  },
+  {
+    "channel": "AttackStrengthBefore",
+    "priority": 900,
+    "hook": "P5AttackStrength",
+    "file": "EmperorP5.cs"
+  },
+  {
+    "channel": "BowsTarget",
+    "priority": 100,
+    "hook": "RemABowsTarget",
+    "file": "EmperorRemainingA.cs"
+  },
+  {
+    "channel": "BowsTarget",
+    "priority": 200,
+    "hook": "P5BowsTarget",
+    "file": "EmperorP5.cs"
+  },
+  {
+    "channel": "BowsTarget",
+    "priority": 300,
+    "hook": "RulingR2BowsTarget",
+    "file": "EmperorRulingR2Cards.cs"
+  },
+  {
+    "channel": "BowsTarget",
+    "priority": 400,
+    "hook": "MechCBowsTarget",
+    "file": "EmperorMechC.cs"
+  },
+  {
+    "channel": "BowsTarget",
+    "priority": 500,
+    "hook": "P2BowsTarget",
+    "file": "EmperorP2.cs"
+  },
+  {
+    "channel": "BowsTarget",
+    "priority": 600,
+    "hook": "MechEHostsBattleBows",
+    "file": "EmperorMechE.cs"
+  },
+  {
+    "channel": "BowsTarget",
+    "priority": 700,
+    "hook": "P4BowsTarget",
+    "file": "EmperorP4.cs"
+  },
+  {
+    "channel": "DeciderIdAfter",
+    "priority": 100,
+    "hook": "IsFirstDecider",
+    "file": "EmperorRemainingB.cs"
+  },
+  {
+    "channel": "DeciderIdAfter",
+    "priority": 200,
+    "hook": "KeireiDeciderOptions",
+    "file": "EmperorP2Keirei.cs"
+  },
+  {
+    "channel": "DeciderIdBefore",
+    "priority": 100,
+    "hook": "P5DeciderId",
+    "file": "EmperorP5Zones.cs"
+  },
+  {
+    "channel": "DeciderIdBefore",
+    "priority": 200,
+    "hook": "MechDDeciderId",
+    "file": "EmperorMechD.cs"
+  },
+  {
+    "channel": "DeciderOptions",
+    "priority": 100,
+    "hook": "EmperorRemainingBDeciderOptions",
+    "file": "EmperorRemainingB.cs"
+  },
+  {
+    "channel": "DeciderOptions",
+    "priority": 200,
+    "hook": "MechDDeciderOptions",
+    "file": "EmperorMechD.cs"
+  },
+  {
+    "channel": "DeciderOptions",
+    "priority": 300,
+    "hook": "KeireiDeciderOptions",
+    "file": "EmperorP2Keirei.cs"
+  },
+  {
+    "channel": "DeciderOptions",
+    "priority": 400,
+    "hook": "P5DeciderOptions",
+    "file": "EmperorP5Zones.cs"
+  },
+  {
+    "channel": "DeciderPrompt",
+    "priority": 100,
+    "hook": "EmperorRemainingBDeciderPrompt",
+    "file": "EmperorRemainingB.cs"
+  },
+  {
+    "channel": "DeciderPrompt",
+    "priority": 200,
+    "hook": "MechDDeciderPrompt",
+    "file": "EmperorMechD.cs"
+  },
+  {
+    "channel": "DeciderPrompt",
+    "priority": 300,
+    "hook": "KeireiDeciderPrompt",
+    "file": "EmperorP2Keirei.cs"
+  },
+  {
+    "channel": "DeciderPrompt",
+    "priority": 400,
+    "hook": "P5DeciderPrompt",
+    "file": "EmperorP5Zones.cs"
+  },
+  {
+    "channel": "DeciderVerb",
+    "priority": 100,
+    "hook": "MechDDeciderVerb",
+    "file": "EmperorMechD.cs"
+  },
+  {
+    "channel": "DeciderVerb",
+    "priority": 200,
+    "hook": "KeireiDeciderPrompt",
+    "file": "EmperorP2Keirei.cs"
+  },
+  {
+    "channel": "DeciderVerb",
+    "priority": 300,
+    "hook": "P5DeciderVerb",
+    "file": "EmperorP5Zones.cs"
+  },
+  {
+    "channel": "DestroysTarget",
+    "priority": 100,
+    "hook": "P5DestroysTarget",
+    "file": "EmperorP5.cs"
+  },
+  {
+    "channel": "DestroysTarget",
+    "priority": 200,
+    "hook": "RulingR2DestroysTarget",
+    "file": "EmperorRulingR2Cards.cs"
+  },
+  {
+    "channel": "DestroysTarget",
+    "priority": 300,
+    "hook": "MechCDestroysTarget",
+    "file": "EmperorMechC.cs"
+  },
+  {
+    "channel": "DestroysTarget",
+    "priority": 400,
+    "hook": "MechEDestroysTarget",
+    "file": "EmperorMechE.cs"
+  },
+  {
+    "channel": "DestroysTarget",
+    "priority": 500,
+    "hook": "P4DestroysTarget",
+    "file": "EmperorP4.cs"
+  },
+  {
+    "channel": "EitherOrOptions",
+    "priority": 100,
+    "hook": "EmperorP1EitherOrOptions",
+    "file": "EmperorP1.cs"
+  },
+  {
+    "channel": "EitherOrOptions",
+    "priority": 200,
+    "hook": "P5EitherOrOptions",
+    "file": "EmperorP5Zones.cs"
+  },
+  {
+    "channel": "EitherOrOptions",
+    "priority": 300,
+    "hook": "EmperorP6EitherOrOptions",
+    "file": "EmperorP6.cs"
+  },
+  {
+    "channel": "EitherOrOptions",
+    "priority": 400,
+    "hook": "RemainingGEitherOrOptions",
+    "file": "EmperorRemainingG.cs"
+  },
+  {
+    "channel": "EitherOrPrompt",
+    "priority": 100,
+    "hook": "EmperorP1EitherOrPrompt",
+    "file": "EmperorP1.cs"
+  },
+  {
+    "channel": "EitherOrPrompt",
+    "priority": 200,
+    "hook": "P5EitherOrPrompt",
+    "file": "EmperorP5Zones.cs"
+  },
+  {
+    "channel": "EitherOrPrompt",
+    "priority": 300,
+    "hook": "EmperorP6EitherOrPrompt",
+    "file": "EmperorP6.cs"
+  },
+  {
+    "channel": "EitherOrPrompt",
+    "priority": 400,
+    "hook": "RemainingGEitherOrPrompt",
+    "file": "EmperorRemainingG.cs"
+  },
+  {
+    "channel": "FinishEitherOr",
+    "priority": 100,
+    "hook": "FinishEmperorRemainingDEitherOr",
+    "file": "EmperorRemainingD.cs"
+  },
+  {
+    "channel": "FinishEitherOr",
+    "priority": 200,
+    "hook": "FinishShadowsEmbraceEitherOr",
+    "file": "ShadowsEmbraceBatch3.cs"
+  },
+  {
+    "channel": "FinishEitherOr",
+    "priority": 300,
+    "hook": "FinishRemainingGEitherOr",
+    "file": "EmperorRemainingG.cs"
+  },
+  {
+    "channel": "FinishEitherOr",
+    "priority": 400,
+    "hook": "FinishEmperorP1EitherOr",
+    "file": "EmperorP1.cs"
+  },
+  {
+    "channel": "FinishEitherOr",
+    "priority": 500,
+    "hook": "FinishP5EitherOr",
+    "file": "EmperorP5Zones.cs"
+  },
+  {
+    "channel": "Looks",
+    "priority": 100,
+    "hook": "EmperorRemainingFLooks",
+    "file": "EmperorRemainingF.cs"
+  },
+  {
+    "channel": "Looks",
+    "priority": 200,
+    "hook": "EmperorP1Looks",
+    "file": "EmperorP1.cs"
+  },
+  {
+    "channel": "Looks",
+    "priority": 300,
+    "hook": "EmperorP2Searches",
+    "file": "EmperorP2Search.cs"
+  },
+  {
+    "channel": "Looks",
+    "priority": 400,
+    "hook": "EmperorP5Looks",
+    "file": "EmperorP5Hidden.cs"
+  },
+  {
+    "channel": "Looks",
+    "priority": 500,
+    "hook": "EmperorP3Looks",
+    "file": "EmperorP3.cs"
+  },
+  {
+    "channel": "PendingChoice",
+    "priority": 100,
+    "hook": "HandleRegisteredSearchChoice",
+    "file": "DeckSearch.cs"
+  },
+  {
+    "channel": "PendingChoice",
+    "priority": 200,
+    "hook": "HandleRegisteredAttackTargetSelect",
+    "file": "EmperorFollowupsAttack.cs"
+  },
+  {
+    "channel": "PendingChoice",
+    "priority": 300,
+    "hook": "HandleRegisteredLookChoice",
+    "file": "DeckLook.cs"
+  },
+  {
+    "channel": "PendingChoice",
+    "priority": 400,
+    "hook": "HandleRegisteredCopyChoice",
+    "file": "CardCopy.cs"
+  },
+  {
+    "channel": "PendingChoice",
+    "priority": 500,
+    "hook": "HandleRegisteredEitherOr",
+    "file": "EitherOr.cs"
+  },
+  {
+    "channel": "PendingChoice",
+    "priority": 600,
+    "hook": "HandleRegisteredOpponentPayment",
+    "file": "OpponentPayment.cs"
+  },
+  {
+    "channel": "PendingChoice",
+    "priority": 700,
+    "hook": "HandleRegisteredDeciderChoice",
+    "file": "DeciderChoice.cs"
+  },
+  {
+    "channel": "PendingChoice",
+    "priority": 800,
+    "hook": "HandleRegisteredFocusEffectChoice",
+    "file": "FocusEffectChoice.cs"
+  },
+  {
+    "channel": "PendingChoice",
+    "priority": 900,
+    "hook": "HandleRegisteredSequencedTarget",
+    "file": "SequencedTarget.cs"
+  },
+  {
+    "channel": "PendingChoice",
+    "priority": 1000,
+    "hook": "HandleRegisteredShinden",
+    "file": "PendingCoreHooks.cs"
+  },
+  {
+    "channel": "PendingChoice",
+    "priority": 1100,
+    "hook": "HandleRegisteredPreservingHonor",
+    "file": "PendingCoreHooks.cs"
+  },
+  {
+    "channel": "PendingChoice",
+    "priority": 1200,
+    "hook": "HandleRegisteredRikateDetach",
+    "file": "PendingCoreHooks.cs"
+  },
+  {
+    "channel": "PendingChoice",
+    "priority": 1300,
+    "hook": "HandleRegisteredRinShame",
+    "file": "PendingCoreHooks.cs"
+  },
+  {
+    "channel": "PendingChoice",
+    "priority": 1400,
+    "hook": "HandleRegisteredYourClanNeedsYouProvince",
+    "file": "PendingCoreHooks.cs"
+  },
+  {
+    "channel": "PendingChoice",
+    "priority": 1500,
+    "hook": "HandleRegisteredDeclineStraighten",
+    "file": "PendingCoreHooks.cs"
+  },
+  {
+    "channel": "PendingChoice",
+    "priority": 1600,
+    "hook": "HandleRegisteredRentatsuLoss",
+    "file": "EmperorPersonalityBatch4.cs"
+  },
+  {
+    "channel": "PendingChoice",
+    "priority": 1700,
+    "hook": "HandleRegisteredP5BlessingsTop",
+    "file": "EmperorP5Zones.cs"
+  },
+  {
+    "channel": "PendingChoice",
+    "priority": 1800,
+    "hook": "HandleRegisteredInfiltratorStraighten",
+    "file": "EmperorMechB.cs"
+  },
+  {
+    "channel": "PendingChoice",
+    "priority": 1900,
+    "hook": "HandleRegisteredP3DarkVirtueDiscard",
+    "file": "EmperorP3.cs"
+  },
+  {
+    "channel": "PendingChoice",
+    "priority": 2000,
+    "hook": "HandleRegisteredP3BeforeEventReaction",
+    "file": "EmperorP3Windows.cs"
+  },
+  {
+    "channel": "PendingChoice",
+    "priority": 2100,
+    "hook": "HandleRegisteredP3MikiDarkVirtue",
+    "file": "EmperorP3Windows.cs"
+  },
+  {
+    "channel": "PendingChoice",
+    "priority": 2200,
+    "hook": "HandleRegisteredP3AroruMove",
+    "file": "EmperorP3Priority.cs"
+  },
+  {
+    "channel": "PendingChoice",
+    "priority": 2300,
+    "hook": "HandleRegisteredP3EntryReaction",
+    "file": "EmperorP3Entries.cs"
+  },
+  {
+    "channel": "PendingChoice",
+    "priority": 2400,
+    "hook": "HandleRegisteredConqueror",
+    "file": "PendingCoreHooks.cs"
+  },
+  {
+    "channel": "PendingChoice",
+    "priority": 2500,
+    "hook": "HandleRegisteredBeforeBattleOrder",
+    "file": "PendingCoreHooks.cs"
+  },
+  {
+    "channel": "PendingChoice",
+    "priority": 2600,
+    "hook": "HandleRegisteredBeforeBattleOptional",
+    "file": "PendingCoreHooks.cs"
+  },
+  {
+    "channel": "PendingChoice",
+    "priority": 2700,
+    "hook": "HandleRegisteredBeforeBattleReaction",
+    "file": "BeforeResolution.cs"
+  },
+  {
+    "channel": "PendingChoice",
+    "priority": 2800,
+    "hook": "HandleRegisteredEngageReaction",
+    "file": "PendingCoreHooks.cs"
+  },
+  {
+    "channel": "PendingChoice",
+    "priority": 2900,
+    "hook": "HandleRegisteredEncircledOrder",
+    "file": "PendingCoreHooks.cs"
+  },
+  {
+    "channel": "PendingChoice",
+    "priority": 3000,
+    "hook": "HandleRegisteredEncircledSelect",
+    "file": "PendingCoreHooks.cs"
+  },
+  {
+    "channel": "PendingChoice",
+    "priority": 3100,
+    "hook": "HandleRegisteredTwistOfFateReaction",
+    "file": "EmperorRemainingD.cs"
+  },
+  {
+    "channel": "PendingChoice",
+    "priority": 3200,
+    "hook": "HandleRegisteredKillingGroundsSelect",
+    "file": "EmperorRemainingD.cs"
+  },
+  {
+    "channel": "PendingChoice",
+    "priority": 3300,
+    "hook": "HandleRegisteredBrashDraw",
+    "file": "PendingCoreHooks.cs"
+  },
+  {
+    "channel": "PendingChoice",
+    "priority": 3400,
+    "hook": "HandleRegisteredOverconfidentDraw",
+    "file": "PendingCoreHooks.cs"
+  },
+  {
+    "channel": "PendingChoice",
+    "priority": 3500,
+    "hook": "HandleRegisteredHarshChoices",
+    "file": "PendingCoreHooks.cs"
+  },
+  {
+    "channel": "PendingChoice",
+    "priority": 3600,
+    "hook": "HandleRegisteredOfferingReverence",
+    "file": "SeedsOfDecayBatch4.cs"
+  },
+  {
+    "channel": "PendingChoice",
+    "priority": 3700,
+    "hook": "HandleRegisteredStarCrossedLovers",
+    "file": "ShadowsEmbraceBatch6.cs"
+  },
+  {
+    "channel": "PendingChoice",
+    "priority": 3800,
+    "hook": "HandleRegisteredEventChoice",
+    "file": "EmperorRemainingFEvents.cs"
+  },
+  {
+    "channel": "PendingChoice",
+    "priority": 3900,
+    "hook": "HandleRegisteredTestedLandProvince",
+    "file": "SeedsOfDecayBatch4.cs"
+  },
+  {
+    "channel": "PendingChoice",
+    "priority": 4000,
+    "hook": "HandleRegisteredForcedDiscard",
+    "file": "PendingCoreHooks.cs"
+  },
+  {
+    "channel": "PendingChoice",
+    "priority": 4100,
+    "hook": "HandleRegisteredEffectChoice",
+    "file": "EffectChoice.cs"
+  },
+  {
+    "channel": "PendingChoice",
+    "priority": 4200,
+    "hook": "HandleRegisteredProclaimNegateReaction",
+    "file": "SeedsOfDecayBatch2.cs"
+  },
+  {
+    "channel": "PendingChoice",
+    "priority": 4300,
+    "hook": "HandleRegisteredProclaim",
+    "file": "PendingCoreHooks.cs"
+  },
+  {
+    "channel": "PendingChoice",
+    "priority": 4400,
+    "hook": "HandleRegisteredBowReaction",
+    "file": "PendingCoreHooks.cs"
+  },
+  {
+    "channel": "PendingChoice",
+    "priority": 4500,
+    "hook": "HandleRegisteredMoveReaction",
+    "file": "PendingCoreHooks.cs"
+  },
+  {
+    "channel": "PendingChoice",
+    "priority": 4600,
+    "hook": "HandleRegisteredNikutaiReaction",
+    "file": "PendingCoreHooks.cs"
+  },
+  {
+    "channel": "PendingChoice",
+    "priority": 4700,
+    "hook": "HandleRegisteredEntryReaction",
+    "file": "PendingCoreHooks.cs"
+  },
+  {
+    "channel": "PendingChoice",
+    "priority": 4800,
+    "hook": "HandleRegisteredAttackReaction",
+    "file": "PendingCoreHooks.cs"
+  },
+  {
+    "channel": "PendingChoice",
+    "priority": 4900,
+    "hook": "HandleRegisteredAdditionalActionReaction",
+    "file": "ActionNegation.cs"
+  },
+  {
+    "channel": "PendingChoice",
+    "priority": 5000,
+    "hook": "HandleRegisteredBeforeActionReaction",
+    "file": "EmperorRulingR4Honor.cs"
+  },
+  {
+    "channel": "PendingChoice",
+    "priority": 5100,
+    "hook": "HandleRegisteredHonorChangeReaction",
+    "file": "EmperorRulingR4Honor.cs"
+  },
+  {
+    "channel": "PendingChoice",
+    "priority": 5200,
+    "hook": "HandleRegisteredUnimpeachableNameReaction",
+    "file": "ActionNegation.cs"
+  },
+  {
+    "channel": "PendingChoice",
+    "priority": 5300,
+    "hook": "HandleRegisteredDuelReaction",
+    "file": "PendingCoreHooks.cs"
+  },
+  {
+    "channel": "PendingChoice",
+    "priority": 5400,
+    "hook": "HandleRegisteredAfterResolutionReaction",
+    "file": "PendingCoreHooks.cs"
+  },
+  {
+    "channel": "PendingChoice",
+    "priority": 5500,
+    "hook": "HandleRegisteredAttackPhaseEndReaction",
+    "file": "EmperorRemainingC.cs"
+  },
+  {
+    "channel": "PendingChoice",
+    "priority": 5600,
+    "hook": "HandleRegisteredAfterActionResolvedReaction",
+    "file": "PendingCoreHooks.cs"
+  },
+  {
+    "channel": "PendingChoice",
+    "priority": 5700,
+    "hook": "HandleRegisteredBattleRecruit",
+    "file": "PendingCoreHooks.cs"
+  },
+  {
+    "channel": "PendingChoice",
+    "priority": 5800,
+    "hook": "HandleRegisteredDuelWonReaction",
+    "file": "PendingCoreHooks.cs"
+  },
+  {
+    "channel": "PendingChoice",
+    "priority": 5900,
+    "hook": "HandleRegisteredBattleActionReaction",
+    "file": "PendingCoreHooks.cs"
+  },
+  {
+    "channel": "PendingChoice",
+    "priority": 6000,
+    "hook": "HandleRegisteredAnnounceReaction",
+    "file": "ActionNegation.cs"
+  },
+  {
+    "channel": "PerformerAllows",
+    "priority": 100,
+    "hook": "RemAPerformerAllows",
+    "file": "EmperorRemainingA.cs"
+  },
+  {
+    "channel": "PerformerAllows",
+    "priority": 200,
+    "hook": "EmperorRemainingBPerformerAllows",
+    "file": "EmperorRemainingB.cs"
+  },
+  {
+    "channel": "PerformerAllows",
+    "priority": 300,
+    "hook": "RemainingDPerformerAllows",
+    "file": "EmperorRemainingD.cs"
+  },
+  {
+    "channel": "PerformerAllows",
+    "priority": 400,
+    "hook": "RulingR2PerformerAllows",
+    "file": "EmperorRulingR2Cards.cs"
+  },
+  {
+    "channel": "PerformerAllows",
+    "priority": 500,
+    "hook": "ThreeSPerformerAllows",
+    "file": "EmperorThreeS.cs"
+  },
+  {
+    "channel": "PerformerAllows",
+    "priority": 600,
+    "hook": "MechEPerformerAllows",
+    "file": "EmperorMechE.cs"
+  },
+  {
+    "channel": "PerformerAllows",
+    "priority": 700,
+    "hook": "P5PerformerAllows",
+    "file": "EmperorP5.cs"
+  },
+  {
+    "channel": "PerformerAllows",
+    "priority": 800,
+    "hook": "EmperorP4PerformerAllows",
+    "file": "EmperorP4.cs"
+  },
+  {
+    "channel": "PerformerCandidates",
+    "priority": 100,
+    "hook": "P5PerformerCandidates",
+    "file": "EmperorP5.cs"
+  },
+  {
+    "channel": "PerformerCandidates",
+    "priority": 200,
+    "hook": "RemAPerformerCandidates",
+    "file": "EmperorRemainingA.cs"
+  },
+  {
+    "channel": "PerformerCandidates",
+    "priority": 300,
+    "hook": "RemainingDPerformers",
+    "file": "EmperorRemainingD.cs"
+  },
+  {
+    "channel": "PerformerCandidates",
+    "priority": 400,
+    "hook": "RulingR2Performers",
+    "file": "EmperorRulingR2Cards.cs"
+  },
+  {
+    "channel": "PerformerCandidates",
+    "priority": 500,
+    "hook": "ThreeSPerformers",
+    "file": "EmperorThreeS.cs"
+  },
+  {
+    "channel": "PerformerCandidates",
+    "priority": 600,
+    "hook": "MechEPerformers",
+    "file": "EmperorMechE.cs"
+  },
+  {
+    "channel": "PerformerCandidates",
+    "priority": 700,
+    "hook": "EmperorP4Performers",
+    "file": "EmperorP4.cs"
+  },
+  {
+    "channel": "PerformerCandidates",
+    "priority": 800,
+    "hook": "EmperorRemainingBPerformers",
+    "file": "EmperorRemainingB.cs"
+  },
+  {
+    "channel": "PersonalityForce",
+    "priority": 100,
+    "hook": "GinasFoxForce",
+    "file": "EmperorProxyY.cs"
+  },
+  {
+    "channel": "PersonalityForce",
+    "priority": 200,
+    "hook": "EmperorRemainingEForce",
+    "file": "EmperorRemainingE.cs"
+  },
+  {
+    "channel": "PersonalityForce",
+    "priority": 300,
+    "hook": "ThreeSForce",
+    "file": "EmperorThreeS.cs"
+  },
+  {
+    "channel": "PersonalityForce",
+    "priority": 400,
+    "hook": "EmperorP1Force",
+    "file": "EmperorP1.cs"
+  },
+  {
+    "channel": "PersonalityForce",
+    "priority": 500,
+    "hook": "P3Force",
+    "file": "EmperorP3Priority.cs"
+  },
+  {
+    "channel": "PersonalityForce",
+    "priority": 600,
+    "hook": "P5Force",
+    "file": "EmperorP5.cs"
+  },
+  {
+    "channel": "PersonalityForce",
+    "priority": 700,
+    "hook": "P2Force",
+    "file": "EmperorP2.cs"
+  },
+  {
+    "channel": "PersonalityForce",
+    "priority": 800,
+    "hook": "ForgottenLegacyBatch5Force",
+    "file": "ForgottenLegacyBatch5.cs"
+  },
+  {
+    "channel": "PersonalityForce",
+    "priority": 900,
+    "hook": "EmperorBatch5Force",
+    "file": "EmperorPersonalityBatch5.cs"
+  },
+  {
+    "channel": "PersonalityForce",
+    "priority": 1000,
+    "hook": "EmperorPersonalityBatch3Force",
+    "file": "EmperorPersonalityBatch3.cs"
+  },
+  {
+    "channel": "PersonalityForce",
+    "priority": 1100,
+    "hook": "ShadowsEmbraceBatch5Force",
+    "file": "ShadowsEmbraceBatch5.cs"
+  },
+  {
+    "channel": "PersonalityForce",
+    "priority": 1200,
+    "hook": "ShadowsEmbraceBatch2Force",
+    "file": "ShadowsEmbraceBatch2.cs"
+  },
+  {
+    "channel": "PersonalityForce",
+    "priority": 1300,
+    "hook": "ShadowsEmbraceBatch1Force",
+    "file": "ShadowsEmbraceBatch1.cs"
+  },
+  {
+    "channel": "PersonalityForce",
+    "priority": 1400,
+    "hook": "EmperorRemainingGForce",
+    "file": "EmperorRemainingG.cs"
+  },
+  {
+    "channel": "ProvinceBonus",
+    "priority": 100,
+    "hook": "P4StaticProvinceBonus",
+    "file": "EmperorP4Watches.cs"
+  },
+  {
+    "channel": "ProvinceBonus",
+    "priority": 200,
+    "hook": "P3StaticProvinceBonus",
+    "file": "EmperorP3.cs"
+  },
+  {
+    "channel": "RunEffects",
+    "priority": 100,
+    "hook": "RunEmperorRemainingA",
+    "file": "EmperorRemainingA.cs"
+  },
+  {
+    "channel": "RunEffects",
+    "priority": 200,
+    "hook": "RunEmperorRemainingC",
+    "file": "EmperorRemainingC.cs"
+  },
+  {
+    "channel": "RunEffects",
+    "priority": 300,
+    "hook": "RunEmperorRemainingE",
+    "file": "EmperorRemainingE.cs"
+  },
+  {
+    "channel": "RunEffects",
+    "priority": 400,
+    "hook": "RunEmperorStrongholdBatch1",
+    "file": "EmperorStrongholdBatch1.cs"
+  },
+  {
+    "channel": "RunEffects",
+    "priority": 500,
+    "hook": "RunEmperorStrongholdBatch3",
+    "file": "EmperorStrongholdBatch3.cs"
+  },
+  {
+    "channel": "RunEffects",
+    "priority": 600,
+    "hook": "RunShadowsEmbraceBatch6",
+    "file": "ShadowsEmbraceBatch6.cs"
+  },
+  {
+    "channel": "RunEffects",
+    "priority": 700,
+    "hook": "RunShadowsEmbraceBatch3",
+    "file": "ShadowsEmbraceBatch3.cs"
+  },
+  {
+    "channel": "RunEffects",
+    "priority": 800,
+    "hook": "RunShadowsEmbraceBatch4",
+    "file": "ShadowsEmbraceBatch4.cs"
+  },
+  {
+    "channel": "RunEffects",
+    "priority": 900,
+    "hook": "RunForgottenLegacyBatch5",
+    "file": "ForgottenLegacyBatch5.cs"
+  },
+  {
+    "channel": "RunEffects",
+    "priority": 1000,
+    "hook": "RunShadowsEmbraceBatch5",
+    "file": "ShadowsEmbraceBatch5.cs"
+  },
+  {
+    "channel": "RunEffects",
+    "priority": 1100,
+    "hook": "RunEmperorRemainingB",
+    "file": "EmperorRemainingB.cs"
+  },
+  {
+    "channel": "RunEffects",
+    "priority": 1200,
+    "hook": "RunEmperorRemainingD",
+    "file": "EmperorRemainingD.cs"
+  },
+  {
+    "channel": "RunEffects",
+    "priority": 1300,
+    "hook": "RunEmperorRulingR2",
+    "file": "EmperorRulingR2Cards.cs"
+  },
+  {
+    "channel": "RunEffects",
+    "priority": 1400,
+    "hook": "RunEmperorP1",
+    "file": "EmperorP1.cs"
+  },
+  {
+    "channel": "RunEffects",
+    "priority": 1500,
+    "hook": "RunEmperorThreeS",
+    "file": "EmperorThreeS.cs"
+  },
+  {
+    "channel": "RunEffects",
+    "priority": 1600,
+    "hook": "RunEmperorMechA",
+    "file": "EmperorMechA.cs"
+  },
+  {
+    "channel": "RunEffects",
+    "priority": 1700,
+    "hook": "RunEmperorFollowups",
+    "file": "EmperorFollowups.cs"
+  },
+  {
+    "channel": "RunEffects",
+    "priority": 1800,
+    "hook": "RunEmperorMechB",
+    "file": "EmperorMechB.cs"
+  },
+  {
+    "channel": "RunEffects",
+    "priority": 1900,
+    "hook": "RunEmperorMechC",
+    "file": "EmperorMechC.cs"
+  },
+  {
+    "channel": "RunEffects",
+    "priority": 2000,
+    "hook": "RunEmperorMechE",
+    "file": "EmperorMechE.cs"
+  },
+  {
+    "channel": "RunEffects",
+    "priority": 2100,
+    "hook": "RunEmperorP4",
+    "file": "EmperorP4.cs"
+  },
+  {
+    "channel": "RunEffects",
+    "priority": 2200,
+    "hook": "RunEmperorP5",
+    "file": "EmperorP5.cs"
+  },
+  {
+    "channel": "RunEffects",
+    "priority": 2300,
+    "hook": "RunEmperorMechD",
+    "file": "EmperorMechD.cs"
+  },
+  {
+    "channel": "RunEffects",
+    "priority": 2400,
+    "hook": "RunEmperorP2",
+    "file": "EmperorP2.cs"
+  },
+  {
+    "channel": "RunEffects",
+    "priority": 2500,
+    "hook": "RunEmperorP6",
+    "file": "EmperorP6.cs"
+  },
+  {
+    "channel": "RunEffects",
+    "priority": 2600,
+    "hook": "RunEmperorP3",
+    "file": "EmperorP3.cs"
+  },
+  {
+    "channel": "Searches",
+    "priority": 100,
+    "hook": "EmperorRemainingESearches",
+    "file": "EmperorRemainingE.cs"
+  },
+  {
+    "channel": "Searches",
+    "priority": 200,
+    "hook": "EmperorFollowupsSearches",
+    "file": "EmperorFollowupsSearch.cs"
+  },
+  {
+    "channel": "Searches",
+    "priority": 300,
+    "hook": "EmperorP2Searches",
+    "file": "EmperorP2Search.cs"
+  },
+  {
+    "channel": "Searches",
+    "priority": 400,
+    "hook": "EmperorP6Searches",
+    "file": "EmperorP6.cs"
+  },
+  {
+    "channel": "Searches",
+    "priority": 500,
+    "hook": "EmperorP3Abilities",
+    "file": "EmperorP3.cs"
+  },
+  {
+    "channel": "StateJSON",
+    "priority": 1001,
+    "hook": "MechD",
+    "file": "EmperorMechD.cs"
+  },
+  {
+    "channel": "StateJSON",
+    "priority": 1002,
+    "hook": "P1",
+    "file": "EmperorP1.cs"
+  },
+  {
+    "channel": "StateJSON",
+    "priority": 1003,
+    "hook": "P2",
+    "file": "EmperorP2.cs"
+  },
+  {
+    "channel": "StateJSON",
+    "priority": 1004,
+    "hook": "P4",
+    "file": "EmperorP4.cs"
+  },
+  {
+    "channel": "StateJSON",
+    "priority": 1005,
+    "hook": "P5",
+    "file": "EmperorP5.cs"
+  },
+  {
+    "channel": "StateJSON",
+    "priority": 1006,
+    "hook": "P6",
+    "file": "EmperorP6.cs"
+  },
+  {
+    "channel": "StateJSON",
+    "priority": 1007,
+    "hook": "P3",
+    "file": "EmperorP3.cs"
+  },
+  {
+    "channel": "TargetAllows",
+    "priority": 100,
+    "hook": "ShadowsEmbraceBatch2TargetAllows",
+    "file": "ShadowsEmbraceBatch2.cs"
+  },
+  {
+    "channel": "TargetAllows",
+    "priority": 200,
+    "hook": "EmperorRemainingCTargetAllows",
+    "file": "EmperorRemainingC.cs"
+  },
+  {
+    "channel": "TargetAllows",
+    "priority": 300,
+    "hook": "RemainingDTargetAllows",
+    "file": "EmperorRemainingD.cs"
+  },
+  {
+    "channel": "TargetAllows",
+    "priority": 400,
+    "hook": "EmperorRemainingETargetAllows",
+    "file": "EmperorRemainingE.cs"
+  },
+  {
+    "channel": "TargetAllows",
+    "priority": 500,
+    "hook": "EmperorProxyXTargetAllows",
+    "file": "EmperorProxyX.cs"
+  },
+  {
+    "channel": "TargetAllows",
+    "priority": 600,
+    "hook": "RulingR1TargetAllows",
+    "file": "EmperorRulingR1Cards.cs"
+  },
+  {
+    "channel": "TargetAllows",
+    "priority": 700,
+    "hook": "RulingR2TargetAllows",
+    "file": "EmperorRulingR2Cards.cs"
+  },
+  {
+    "channel": "TargetAllows",
+    "priority": 800,
+    "hook": "ThreeSTargetAllows",
+    "file": "EmperorThreeS.cs"
+  },
+  {
+    "channel": "TargetAllows",
+    "priority": 900,
+    "hook": "FollowupsTargetAllows",
+    "file": "EmperorFollowups.cs"
+  },
+  {
+    "channel": "TargetAllows",
+    "priority": 1000,
+    "hook": "MechBTargetAllows",
+    "file": "EmperorMechB.cs"
+  },
+  {
+    "channel": "TargetAllows",
+    "priority": 1100,
+    "hook": "EmperorMechCTargetAllows",
+    "file": "EmperorMechC.cs"
+  },
+  {
+    "channel": "TargetAllows",
+    "priority": 1200,
+    "hook": "EmperorP1TargetAllows",
+    "file": "EmperorP1.cs"
+  },
+  {
+    "channel": "TargetAllows",
+    "priority": 1300,
+    "hook": "EmperorP2TargetAllows",
+    "file": "EmperorP2.cs"
+  },
+  {
+    "channel": "TargetAllows",
+    "priority": 1400,
+    "hook": "EmperorP4TargetAllows",
+    "file": "EmperorP4.cs"
+  },
+  {
+    "channel": "TargetAllows",
+    "priority": 1500,
+    "hook": "P5TargetAllows",
+    "file": "EmperorP5.cs"
+  },
+  {
+    "channel": "TargetAllows",
+    "priority": 1600,
+    "hook": "EmperorP6TargetAllows",
+    "file": "EmperorP6.cs"
+  },
+  {
+    "channel": "TargetAllows",
+    "priority": 1700,
+    "hook": "P3TargetAllows",
+    "file": "EmperorP3.cs"
+  },
+  {
+    "channel": "TargetedReaction",
+    "priority": 100,
+    "hook": "RemATargetedActionReactionApplies",
+    "file": "EmperorRemainingA.cs"
+  },
+  {
+    "channel": "TargetedReaction",
+    "priority": 200,
+    "hook": "EmperorRemainingCTargetedReactionApplies",
+    "file": "EmperorRemainingC.cs"
+  },
+  {
+    "channel": "TargetedReaction",
+    "priority": 300,
+    "hook": "RulingR2TargetedReactionApplies",
+    "file": "EmperorRulingR2Cards.cs"
+  },
+  {
+    "channel": "TargetedReaction",
+    "priority": 400,
+    "hook": "MechBTargetedReactionApplies",
+    "file": "EmperorMechB.cs"
+  },
+  {
+    "channel": "TargetedReaction",
+    "priority": 500,
+    "hook": "MechCTargetedReactionApplies",
+    "file": "EmperorMechC.cs"
+  },
+  {
+    "channel": "TargetedReaction",
+    "priority": 600,
+    "hook": "MechETargetedReactionApplies",
+    "file": "EmperorMechE.cs"
+  },
+  {
+    "channel": "TargetedReaction",
+    "priority": 700,
+    "hook": "P4TargetedReactionApplies",
+    "file": "EmperorP4Watches.cs"
+  },
+  {
+    "channel": "TargetedReaction",
+    "priority": 800,
+    "hook": "P5TargetedReactionApplies",
+    "file": "EmperorP5.cs"
+  },
+  {
+    "channel": "TargetedReaction",
+    "priority": 900,
+    "hook": "P3TargetedReactionApplies",
+    "file": "EmperorP3.cs"
+  },
+  {
+    "channel": "ValidateEarly",
+    "priority": 100,
+    "hook": "ValidateForgottenLegacyBatch5",
+    "file": "ForgottenLegacyBatch5.cs"
+  },
+  {
+    "channel": "ValidateEarly",
+    "priority": 200,
+    "hook": "ValidateShadowsEmbraceBatch5",
+    "file": "ShadowsEmbraceBatch5.cs"
+  },
+  {
+    "channel": "ValidateEarly",
+    "priority": 300,
+    "hook": "ValidateShadowsEmbraceBatch6",
+    "file": "ShadowsEmbraceBatch6.cs"
+  },
+  {
+    "channel": "ValidateEarly",
+    "priority": 400,
+    "hook": "ValidateEmperorStrongholdBatch1",
+    "file": "EmperorStrongholdBatch1.cs"
+  },
+  {
+    "channel": "ValidateEarly",
+    "priority": 500,
+    "hook": "ValidateEmperorStrongholdBatch3",
+    "file": "EmperorStrongholdBatch3.cs"
+  },
+  {
+    "channel": "ValidateEarly",
+    "priority": 600,
+    "hook": "ValidateEmperorPersonalityBatch2",
+    "file": "EmperorPersonalityBatch2.cs"
+  },
+  {
+    "channel": "ValidateEarly",
+    "priority": 700,
+    "hook": "ValidateEmperorBatch4",
+    "file": "EmperorPersonalityBatch4.cs"
+  },
+  {
+    "channel": "ValidateEarly",
+    "priority": 800,
+    "hook": "ValidateEmperorRemainingB",
+    "file": "EmperorRemainingB.cs"
+  },
+  {
+    "channel": "ValidateEarly",
+    "priority": 900,
+    "hook": "ValidateEmperorRemainingE",
+    "file": "EmperorRemainingE.cs"
+  },
+  {
+    "channel": "ValidateEarly",
+    "priority": 1000,
+    "hook": "ValidateEmperorRulingR1",
+    "file": "EmperorRulingR1Cards.cs"
+  },
+  {
+    "channel": "ValidateEarly",
+    "priority": 1100,
+    "hook": "ValidateEmperorRulingR5",
+    "file": "EmperorRulingR5.cs"
+  },
+  {
+    "channel": "ValidateEarly",
+    "priority": 1200,
+    "hook": "ValidateEmperorP4",
+    "file": "EmperorP4.cs"
+  },
+  {
+    "channel": "ValidateEarly",
+    "priority": 1300,
+    "hook": "ValidateEmperorMechC",
+    "file": "EmperorMechC.cs"
+  },
+  {
+    "channel": "ValidateLate",
+    "priority": 100,
+    "hook": "ValidateSeedsOfDecayBatch3",
+    "file": "SeedsOfDecayBatch3.cs"
+  },
+  {
+    "channel": "ValidateLate",
+    "priority": 200,
+    "hook": "ValidateForgottenLegacyBatch1",
+    "file": "ForgottenLegacyBatch1.cs"
+  },
+  {
+    "channel": "ValidateLate",
+    "priority": 300,
+    "hook": "ValidateShadowsEmbraceBatch2",
+    "file": "ShadowsEmbraceBatch2.cs"
+  },
+  {
+    "channel": "ValidateLate",
+    "priority": 400,
+    "hook": "ValidateShadowsEmbraceBatch1",
+    "file": "ShadowsEmbraceBatch1.cs"
+  },
+  {
+    "channel": "ValidateLate",
+    "priority": 500,
+    "hook": "ValidateShadowsEmbraceBatch3",
+    "file": "ShadowsEmbraceBatch3.cs"
+  },
+  {
+    "channel": "ValidateLate",
+    "priority": 600,
+    "hook": "ValidateEmperorPersonalityBatch3",
+    "file": "EmperorPersonalityBatch3.cs"
+  },
+  {
+    "channel": "ValidateLate",
+    "priority": 700,
+    "hook": "ValidateEmperorBatch5",
+    "file": "EmperorPersonalityBatch5.cs"
+  },
+  {
+    "channel": "ValidateLate",
+    "priority": 800,
+    "hook": "ValidateEmperorBatch6",
+    "file": "EmperorPersonalityBatch6.cs"
+  },
+  {
+    "channel": "ValidateLate",
+    "priority": 900,
+    "hook": "ValidateEmperorRemainingF",
+    "file": "EmperorRemainingF.cs"
+  },
+  {
+    "channel": "ValidateLate",
+    "priority": 1000,
+    "hook": "ValidateEmperorRemainingG",
+    "file": "EmperorRemainingG.cs"
+  },
+  {
+    "channel": "ValidateLate",
+    "priority": 1100,
+    "hook": "ValidateEmperorP3",
+    "file": "EmperorP3.cs"
+  },
+  {
+    "channel": "ValidateLate",
+    "priority": 1200,
+    "hook": "ValidateEmperorProxyX",
+    "file": "EmperorProxyX.cs"
+  },
+  {
+    "channel": "ValidateMiddle",
+    "priority": 100,
+    "hook": "ValidateForgottenLegacyBatch4",
+    "file": "ForgottenLegacyBatch4.cs"
+  },
+  {
+    "channel": "ValidateMiddle",
+    "priority": 200,
+    "hook": "ValidateShadowsEmbraceBatch4",
+    "file": "ShadowsEmbraceBatch4.cs"
+  },
+  {
+    "channel": "ValidateMiddle",
+    "priority": 300,
+    "hook": "ValidateEmperorRemainingA",
+    "file": "EmperorRemainingA.cs"
+  },
+  {
+    "channel": "ValidateMiddle",
+    "priority": 400,
+    "hook": "ValidateEmperorRemainingC",
+    "file": "EmperorRemainingC.cs"
+  },
+  {
+    "channel": "ValidateMiddle",
+    "priority": 500,
+    "hook": "ValidateEmperorRemainingD",
+    "file": "EmperorRemainingD.cs"
+  },
+  {
+    "channel": "ValidateMiddle",
+    "priority": 600,
+    "hook": "ValidateEmperorRulingR2",
+    "file": "EmperorRulingR2Cards.cs"
+  },
+  {
+    "channel": "ValidateMiddle",
+    "priority": 700,
+    "hook": "ValidateEmperorThreeS",
+    "file": "EmperorThreeS.cs"
+  },
+  {
+    "channel": "ValidateMiddle",
+    "priority": 800,
+    "hook": "ValidateEmperorMechB",
+    "file": "EmperorMechB.cs"
+  },
+  {
+    "channel": "ValidateMiddle",
+    "priority": 900,
+    "hook": "ValidateEmperorMechA",
+    "file": "EmperorMechA.cs"
+  },
+  {
+    "channel": "ValidateMiddle",
+    "priority": 1000,
+    "hook": "ValidateEmperorMechE",
+    "file": "EmperorMechE.cs"
+  },
+  {
+    "channel": "ValidateMiddle",
+    "priority": 1100,
+    "hook": "ValidateEmperorMechD",
+    "file": "EmperorMechD.cs"
+  },
+  {
+    "channel": "ValidateMiddle",
+    "priority": 1200,
+    "hook": "ValidateEmperorP1",
+    "file": "EmperorP1.cs"
+  },
+  {
+    "channel": "ValidateMiddle",
+    "priority": 1300,
+    "hook": "ValidateEmperorP2",
+    "file": "EmperorP2.cs"
+  },
+  {
+    "channel": "ValidateMiddle",
+    "priority": 1400,
+    "hook": "ValidateEmperorP5",
+    "file": "EmperorP5.cs"
+  },
+  {
+    "channel": "ValidateMiddle",
+    "priority": 1500,
+    "hook": "ValidateEmperorP6",
+    "file": "EmperorP6.cs"
+  }
+]

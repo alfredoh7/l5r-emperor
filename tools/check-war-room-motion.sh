@@ -2,6 +2,7 @@
 # Native motion/freeze/resume evidence. Run separately from native input tests.
 set -euo pipefail
 source "$(dirname "${BASH_SOURCE[0]}")/env.sh"
+l5r_require_godot
 cd "$L5R_PROJECT_ROOT"
 output="${L5R_ROOM_EVIDENCE_DIR:-$L5R_PROJECT_ROOT/docs/screenshots/war-room/milestone-7}"
 logs="${L5R_ROOM_LOG_DIR:-$L5R_PROJECT_ROOT/artifacts/war-room-work/milestone-7}"

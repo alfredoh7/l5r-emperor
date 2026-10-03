@@ -13,7 +13,7 @@ public sealed partial class MatchEngine
     // attachment's own "will only/not attach to" rule accepts it, and the Armor/Weapon limits hold. Unique is not re-checked: the card is already the one
     // copy its controller controls.
     private bool CanTransferTo(CardInstance attachment, CardInstance host) =>
-        attachment.Zone == Zone.Attached && attachment.AttachedTo != host.Id && host.OwnerId == attachment.OwnerId
+        attachment.Zone == Zone.Attached && attachment.AttachedTo != host.Id && host.OwnerId == attachment.OwnerId && !WillNotBeTransferred(attachment)
         && InPlay(host) && Definition(host).Type == CardType.Personality
         && AttachmentLegalTarget(Definition(attachment), host) && AttachmentAllowed(attachment, host);
 

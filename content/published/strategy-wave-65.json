@@ -1,0 +1,33 @@
+{
+  "Profile": "strategy-wave-65",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-3426",
+      "Name": "Honor Never Falls",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "As a Focus Effect: Delay all consequences of losing this duel (from any source) until the end of the turn.\nBattle: Choose your performing bowed Personality: Straighten him. If he is Unique, you may take an additional Battle action to use one of his base abilities.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-3426.jpg",
+      "Keywords": [
+        "Unique"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "honor-never-falls-focus",
+        "honor-never-falls-straighten"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

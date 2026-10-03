@@ -1,0 +1,11 @@
+[
+  {
+    "card_id": "user-scan-humble-farmers",
+    "printing_set": [
+      "User-supplied scan"
+    ],
+    "source_url": "user-supplied-in-chat-2026-09-30",
+    "image_path": "assets/requested-scans/humble-farmers.jpg",
+    "image_sha256": "19c3c9bf745133734af356ba9a1b9c644cf9bd6799420886462041a1aca1b800"
+  }
+]

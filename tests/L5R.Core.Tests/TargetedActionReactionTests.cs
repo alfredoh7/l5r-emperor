@@ -15,17 +15,18 @@ internal static class TargetedActionReactionTests
     public static void Run(TestRunner runner)
     {
         (string Name, Action Test)[] tests = [
+            ("Attack presentation uses engine kinds and explicit performers, survives reaction windows for both viewers, clears after resolution, and never exposes hidden sources", AttackPresentation),
             ("Published shape: the five cards are the printed ones (Ezuno F4 C3 Cost 7 Honor Req 3; Yurishi F4 C3 Cost 7 no Honor Req, Spider Clan, loses 3 Honor on entry; Jinn-Kuen F2 C4 Cost 7; Mochitoko F6 C3 Cost 9; Blade +3F +1C Cost 5 Focus 3 Unique Weapon), each whole and with its scan shipped, on ONE shared Reaction trigger", PublishedShape),
             ("The per-turn use limit: every ability keeps the default of once per turn, the ten former id-list exemptions are now Unlimited on their own definitions, and Mochitoko's is twice -- pinned against the old list", UseLimitParity),
             ("Ezuno redirects a non-Attack action (issue #335): another player's Battle action targeting his Shugenja at his location opens the before-action window for his controller, nothing has happened yet, the reaction makes the action target Ezuno, the acting player may still answer, and the action then resolves on Ezuno; the Shugenja is untouched and hidden information stays hidden", EzunoRedirectsAnAction),
             ("Ezuno is offered only for a legal redirect: never for his own controller's action, an action at Ezuno himself, a non-Shugenja, a Shugenja at another location (Home v battlefield, one battlefield v another), while bowed or spent -- and, Mendon's ruling, only when the action would be ACCEPTED against Ezuno (a target that must be dishonorable is not redirected to an honorable Ezuno)", EzunoOnlyWhenLegal),
-            ("Ezuno redirects an Attack: the attack window opens only if Ezuno is a LEGAL target (Ranged 5 reaches his Force 4, Melee 2 does not); redirected, the Attack destroys Ezuno and the Shugenja survives, the Attack's paid costs stay paid, and the reactor is spent", EzunoRedirectsAnAttack),
+            ("Ezuno redirects an Attack: the attack window opens because Ezuno is a legal target whatever his Force (Ranged 5 and Melee 2 alike; the strength only decides whether the Attack destroys him); redirected, the Attack targets Ezuno and the Shugenja survives, the Attack's paid costs stay paid, and the reactor is spent", EzunoRedirectsAnAttack),
             ("Redirection and costs: an action's costs are paid once, when it resolves, for the card it then targets -- and a redirect is only legal if the payment the acting player committed still fits the new target's price (target-priced action: cheaper new target is fine, dearer one is not)", RedirectAndCosts),
             ("Reactions key on the NEW target after a redirect (Mendon's question): a Champion of Thunder in the Shugenja's unit is offered before the redirect and not after; one in Ezuno's unit only after -- and a negation already played on the old card stays with the old card", ReactionsFollowTheNewTarget),
             ("Blade of Champions: a Battle action targeting a card in its unit opens the window; one option per legal new target of the controller's (never the original, the Blade, an enemy card, or a card the action could not legally target); choosing bows the Blade and the action lands on the chosen card; an illegal choice is rejected", BladeRedirects),
             ("Blade of Champions may redirect to ITSELF (Mendon): it is a candidate wherever the action accepts it, judged as though already bowed for the cost -- a bowed-card-only action still reaches the unbowed Blade", BladeMayRedirectToItself),
             ("Blade of Champions is offered only for a Battle action against a card in ITS unit, while unbowed and with a legal candidate: not for an Open action, a card outside the unit, a bowed Blade, or when no other card of the controller's could legally be targeted; a Follower or an Item in the unit counts as a card in the unit", BladeOnlyWhenApplicable),
-            ("Blade of Champions and an Attack: the Attack is redirected to the chosen card, its strength follows the new target (a Destrier's -3) and the new target must be legal for it (Force within strength, no Follower to hide behind)", BladeRedirectsAnAttack),
+            ("Blade of Champions and an Attack: the Attack is redirected to the chosen card, its strength follows the new target (a Destrier's -3) and the new target must be legal for it (a Force above the strength is still legal and simply survives; a Personality with a Follower to hide behind is not)", BladeRedirectsAnAttack),
             ("Yurishi: another player's Battle action targeting him lets him disappear -- home -- and, no longer a legal target for an action that needs him at the battlefield, the action's effects on him are negated; the action's other effects and costs stand; the event log says so", YurishiNegatesWhenNoLongerLegal),
             ("Yurishi's negation stops an Honor loss the action inflicts on his controller (an effect of the action, Mendon), while without the reaction it is lost", YurishiNegationStopsHonorLoss),
             ("Yurishi re-checks legality rather than assuming it: an action that does not need him at the battlefield (The Earth Flows, moving a Personality to it) is still legal after he moves home and resolves on him; and Battle actions only, another player's only, from a battlefield, from an unbowed Yurishi", YurishiRecheckStillLegal),
@@ -50,6 +51,51 @@ internal static class TargetedActionReactionTests
     }
 
     // ---- helpers ----------------------------------------------------------------------------------------------
+    private static void AttackPresentation()
+    {
+        var (s, sh) = ReactiveDefence(); var (castle, stronghold) = Siege(s);
+        var e = MatchEngine.FromTestState(s);
+        var option = e.QueryActions(1).Single(a => a.Enabled && a.Command?.AbilityId == "carpenter-castle-siege" && a.Command.PerformerId == castle.Id);
+        Eq(option.Attack, new AttackCueView("Ranged", castle.Id));
+        var version = e.Version;
+        foreach (var player in new[] { 0, 1 }) Eq(e.GetView(player).PendingAttack, null);
+        Eq(e.Version, version, "presentation queries mutated the match");
+        Accept(e, SiegeAt(e, castle, stronghold, sh.Id));
+        foreach (var player in new[] { 0, 1 }) Eq(e.GetView(player).PendingAttack, option.Attack);
+        ClosePassing(e);
+        foreach (var player in new[] { 0, 1 }) Eq(e.GetView(player).PendingAttack, null, "resolved Attack retained a cue");
+
+        var r = MochitokoTable();
+        var wielder = Add(r.S, "training-lion-samurai", 1, Zone.Battlefield, province: 0);
+        var weapon = Add(r.S, "training-weapon-with-attack", 1, Zone.Attached, province: 0, parent: wielder.Id);
+        e = MatchEngine.FromTestState(r.S);
+        option = e.QueryActions(1).Single(a => a.Enabled && a.CardId == weapon.Id && a.Command?.AbilityId == "training-weapon-attack");
+        Eq(option.Attack, new AttackCueView("Melee", weapon.Id), "attachment source changed to its host");
+        Accept(e, Offer(e, 1, "training-weapon-attack", weapon.Id, r.Follower.Id));
+        Eq(e.GetView(0).PendingAttack, option.Attack);
+        ClosePassing(e); Eq(e.GetView(1).PendingAttack, null);
+
+        s = Table(actor: 0); Add(s, Mochitoko, 0, Zone.Battlefield, province: 0);
+        var tensin = Add(s, "oracle-l5r-3332", 0, Zone.Battlefield, province: 0);
+        var follower = Add(s, "training-follower", 0, Zone.Attached, province: 0, parent: tensin.Id);
+        var enemy = Add(s, "training-shugenja", 1, Zone.Battlefield, province: 0);
+        e = MatchEngine.FromTestState(s);
+        option = e.QueryActions(0).Single(a => a.Enabled && a.Command?.AbilityId == "tensin-follower-attack" && a.Command.PerformerId == follower.Id);
+        Eq(option.Attack, new AttackCueView("Ranged", follower.Id));
+        Accept(e, Offer(e, 0, "tensin-follower-attack", tensin.Id, enemy.Id, follower.Id));
+        Eq(Window(e), "beforeActionReaction");
+        foreach (var player in new[] { 0, 1 }) Eq(e.GetView(player).PendingAttack, option.Attack);
+        ClosePassing(e); Eq(e.GetView(0).PendingAttack, null);
+
+        // Defensive projection: a queued command is not itself permission to expose its
+        // card ID. A Strategy still in a private hand must not become a public mount.
+        s = Table(); var hidden = Add(s, "training-honor-cost-strategy", 1, Zone.Hand);
+        s.PendingAnnouncedAction = new("useAbility", 1, s.Version, hidden.Id, AbilityId: "training-honor-cost-attack");
+        e = MatchEngine.FromTestState(s); Eq(e.GetView(0).PendingAttack, null);
+        s.PendingAnnouncedAction = new("useAbility", 1, s.Version, castle.Id, AbilityId: Bow);
+        e = MatchEngine.FromTestState(s); Eq(e.GetView(0).PendingAttack, null);
+    }
+
     private static void Check(bool ok, string message = "Assertion failed") { if (!ok) throw new Exception(message); }
     private static void Eq<T>(T actual, T expected, string message = "Values differ") => Check(EqualityComparer<T>.Default.Equals(actual, expected), $"{message}: expected {expected}; got {actual}");
 
@@ -178,8 +224,11 @@ internal static class TargetedActionReactionTests
             "neiru-equip", "naval-invasion", "ring-of-air-straighten", "ring-of-water-move-home" };
         foreach (var (id, ability) in AbilityCatalog.All)
             Eq(ability.UsesPerTurn, formerlyExempt.Contains(id) || id == "kaname-ranged-attack" || id == "castle-of-order-redirect" /* once per BATTLE, its own stamp (issue #453) */
-                || id == "shihiro-boost" /* "each time" -- issue #458 */ ? AbilityUseLimit.Unlimited : id == "mochitoko-negate" ? 2 : id == "rika-bushido-virtue-bonus" ? 3
-                : id == "tsukimi-refresh" || id == "tomaru-attack" /* "Twice per turn" -- issue #460 batch 2 */ ? 2 : 1, $"the limit of {id}");
+                || id == "shihiro-boost" /* "each time" -- issue #458 */ || id == "cursed-relic-attack" /* "Any number of times per turn" -- issue #467 batch 5 */ || id is "tsukimi-home" or "tsukimi-battlefield" /* "Twice per battle", its own stamp pair -- issue #477 batch 5 */
+                || id == "otomo-favor-token" /* Kyuden Otomo - exp's triggered trait is not limited to once per turn -- issue #486 batch 1 */ || id == "kae-favor-negate" /* Kakita Kae's trait is repeatable -- issue #501 */ || id is "shadows-lair-move" or "spiders-web-attach" /* batch 3: once per battle (own stamp) / a trait -- issue #486 */
+                || id is "p5-foundries-straighten" or "p5-foundries-attack" or "p5-foundries-draw" /* The New Foundries: "any number of times per turn" -- issue #503 */ || id is "p5-nes-equip" or "p5-nes-equip-open" or "p5-nes-equip-battle" or "p5-seek-stain-equip-limited" or "p5-seek-stain-equip-battle" /* the Equip rulebook action from a discard pile, "any number of times per turn" -- issue #503 */ ? AbilityUseLimit.Unlimited : id == "mochitoko-negate" ? 2 : id == "rika-bushido-virtue-bonus" ? 3
+                : id == "tsukimi-refresh" || id == "tomaru-attack" /* "Twice per turn" -- issue #460 batch 2 */ || id == "tomaru-attack-3" /* "Twice per turn" -- issue #477 batch 3 */
+                    || id == "sleepless-boost" /* "Twice per turn" -- issue #467 batch 2 */ ? 2 : 1, $"the limit of {id}");
         Eq(AbilityUseLimit.Unlimited, 0);
     }
 
@@ -292,23 +341,32 @@ internal static class TargetedActionReactionTests
             Eq(e.State.Cards[ez.Id].AbilityUses["ezuno-redirect"], e.State.TurnNumber);
         }
         {
-            // Melee 2 cannot reach Ezuno (Force 4), so no window opens at all and the Attack resolves on the Shugenja.
-            var s = Table(); var wielder = Add(s, "training-lion-samurai", 1, Zone.Battlefield, province: 0);
-            var weapon = Add(s, "training-weapon-with-attack", 1, Zone.Attached, province: 0, parent: wielder.Id);
-            Add(s, Ezuno, 0, Zone.Battlefield, province: 0); var sh = Add(s, "training-shugenja", 0, Zone.Battlefield, province: 0);
-            var e = MatchEngine.FromTestState(s);
-            Accept(e, Offer(e, 1, "training-weapon-attack", weapon.Id, sh.Id));
-            Check(Window(e) is null && e.State.PendingAttack is null, "Ezuno would not be a legal target: no window");
-            Check(e.State.Cards[sh.Id].Zone != Zone.Battlefield, "the Attack resolved on the Shugenja");
+            // Melee 2 against Ezuno (Force 4): a target above the Attack's strength is still a legal target (core rule), so the window opens;
+            // declined, the Attack resolves on the Shugenja; redirected, it lands on Ezuno, who survives (4 > 2) and so does the Shugenja.
+            foreach (var redirect in new[] { false, true })
+            {
+                var s = Table(); var wielder = Add(s, "training-lion-samurai", 1, Zone.Battlefield, province: 0);
+                var weapon = Add(s, "training-weapon-with-attack", 1, Zone.Attached, province: 0, parent: wielder.Id);
+                var ez = Add(s, Ezuno, 0, Zone.Battlefield, province: 0); var sh = Add(s, "training-shugenja", 0, Zone.Battlefield, province: 0);
+                var e = MatchEngine.FromTestState(s);
+                Accept(e, Offer(e, 1, "training-weapon-attack", weapon.Id, sh.Id));
+                Eq(Window(e), "attackReaction"); Check(Listed(e, 0, "ezuno-redirect").Single().Enabled, "Ezuno is a legal target whatever his Force: the redirect is offered");
+                if (redirect) { Accept(e, ReactionCommand(e, 0, "ezuno-redirect")); Eq(e.State.PendingAttack!.TargetId, ez.Id); }
+                ClosePassing(e);
+                if (redirect) { Eq(e.State.Cards[ez.Id].Zone, Zone.Battlefield, "Force 4 > 2: Ezuno survives"); Eq(e.State.Cards[sh.Id].Zone, Zone.Battlefield, "and the Shugenja lives"); }
+                else Check(e.State.Cards[sh.Id].Zone != Zone.Battlefield, "the Attack resolved on the Shugenja");
+            }
         }
         {
-            // The Attack reaches Ezuno only while he is a legal target: raise his Force above the Attack's strength and the window is not opened.
+            // Raising Ezuno's Force above the Attack's strength does not make him an illegal target: the window still opens, and a redirected Attack does not destroy him.
             var s = Table(); var (castle, stronghold) = Siege(s); Add(s, "training-lion-samurai", 1, Zone.Battlefield, province: 0);
             var ez = Add(s, Ezuno, 0, Zone.Battlefield, province: 0); ez.Modifiers.Add(new("test", "test", "Force", 2));
             var sh = Add(s, "training-shugenja", 0, Zone.Battlefield, province: 0);
             var e = MatchEngine.FromTestState(s);
             Accept(e, SiegeAt(e, castle, stronghold, sh.Id));
-            Check(Window(e) is null, "Force 6 > Ranged 5: Ezuno is not a legal target, so nothing to redirect to");
+            Eq(Window(e), "attackReaction", "Force 6 > Ranged 5: Ezuno is still a legal target, so the redirect is offered");
+            Accept(e, ReactionCommand(e, 0, "ezuno-redirect")); ClosePassing(e);
+            Eq(e.State.Cards[ez.Id].Zone, Zone.Battlefield, "Ranged 5 cannot destroy his Force 6"); Eq(e.State.Cards[sh.Id].Zone, Zone.Battlefield, "and the Shugenja lives");
         }
         {
             // An Attack played as a Strategy from hand: its source is discarded as the window opens, and legality (a target rule) must not depend on it.
@@ -559,10 +617,14 @@ internal static class TargetedActionReactionTests
             Check(e.State.Cards[q.Id].Zone == Zone.Battlefield);
         }
         {
-            // A Destrier of Force 3 is not a legal target for the Attack once its -3 applies (5 - 3 = 2 < 3): not a candidate.
+            // A Destrier of Force 3 exceeds the Attack's strength once its -3 applies (5 - 3 = 2 < 3), but is still a legal target: it is a candidate, and survives.
             var (e, s, castle, p, _, destrier, rr, _) = Rig(destrierForce: 1);
             Accept(e, SiegeAt(e, castle, s.Players[1].StrongholdId, p.Id));
-            Check(BladeTargets(e).SequenceEqual(Sorted(rr.Id)), "candidates: " + string.Join(",", BladeTargets(e)) + " (not " + destrier.Id + ")");
+            Check(BladeTargets(e).SequenceEqual(Sorted(destrier.Id, rr.Id)), "candidates: " + string.Join(",", BladeTargets(e)));
+            Accept(e, ReactionCommand(e, 0, "blade-of-champions-redirect", destrier.Id));
+            Eq(e.State.PendingAttack!.Strength, 2);
+            ClosePassing(e);
+            Eq(e.State.Cards[destrier.Id].Zone, Zone.Attached, "Force 3 > 2: the Destrier survives"); Eq(e.State.Cards[p.Id].Zone, Zone.Battlefield, "the original target lives");
         }
     }
 
@@ -1105,7 +1167,7 @@ internal static class TargetedActionReactionTests
             Eq(Window(e), "beforeActionReaction", "the window opens for player 0");
             return (e, adi, shugenja, ez, sakuma);
         }
-        int Strength(MatchEngine e) => e.State.Players[1].Provinces[0].Strength;
+        int Strength(MatchEngine e) => e.ProvinceStrengthForTest(1, 0);
         void Answer(MatchEngine e, string choice) =>
             Accept(e, e.QueryActions(1).Single(a => a.Type == "chooseEitherOr" && a.Command?.Choice == choice && a.Enabled).Command!);
 
@@ -1356,22 +1418,22 @@ internal static class TargetedActionReactionTests
             var option = e.QueryActions(1).Single(a => a.Type == "useAbility" && a.CardId == attacker.Id && a.Command?.AbilityId == "training-province-attack");
             Check(option.Enabled && option.NoTarget && option.Provinces!.SequenceEqual(new[] { 0 }), "no target, a card, or the province");
             var weak = e.State.Cards.Values.First(c => c.DefinitionId == "training-crane-samurai"); Check(option.TargetIds!.Contains(weak.Id), "a card target is still offered");
-            var strength = e.State.Players[0].Provinces[0].Strength;
+            var strength = e.ProvinceStrengthForTest(0, 0);
             var onProvince = new GameCommand("useAbility", 1, e.Version, CardId: attacker.Id, AbilityId: "training-province-attack", Province: 0);
             Reject(e, onProvince with { TargetId = weak.Id }); Reject(e, onProvince with { Province = 1 });
             var siegeOnProvince = new GameCommand("useAbility", 1, e.Version, CardId: stronghold, PerformerId: castle.Id, AbilityId: "carpenter-castle-siege", Province: 0);
             Reject(e, siegeOnProvince); // an Attack that names no province cannot be aimed at one
             Accept(e, onProvince);
             Check(Window(e) is null && e.State.PendingAttack is null && e.State.PendingNegatableAbility is null, "a province is not a card: no card-targeted reaction, no redirect, no window");
-            Eq(e.State.Players[0].Provinces[0].Strength, Math.Max(0, strength - 3), "the Attack's own effect on the province happened");
+            Eq(e.ProvinceStrengthForTest(0, 0), Math.Max(0, strength - 3), "the Attack's own effect on the province happened");
             Check(EventLogged(e, "provinceAttacked"));
         }
         {
             // The same Attack with no target at all resolves and does nothing to the province.
             var s = Table(); var attacker = Add(s, "training-province-attacker", 1, Zone.Battlefield, province: 0); Add(s, "training-shugenja", 0, Zone.Battlefield, province: 0);
-            var e = MatchEngine.FromTestState(s); var strength = e.State.Players[0].Provinces[0].Strength;
+            var e = MatchEngine.FromTestState(s); var strength = e.ProvinceStrengthForTest(0, 0);
             Accept(e, new GameCommand("useAbility", 1, e.Version, CardId: attacker.Id, AbilityId: "training-province-attack"));
-            Eq(e.State.Players[0].Provinces[0].Strength, strength, "no target, no province: nothing happens");
+            Eq(e.ProvinceStrengthForTest(0, 0), strength, "no target, no province: nothing happens");
         }
     }
 

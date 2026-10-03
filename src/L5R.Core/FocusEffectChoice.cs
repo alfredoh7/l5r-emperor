@@ -9,6 +9,8 @@ public sealed class PendingFocusChoice
     public int PlayerId { get; set; }
     public List<string> Candidates { get; set; } = [];
     public string AbilityId { get; set; } = "";
+    /// <summary>The "(now)" choice of a delay Focus Effect (EmperorRulingR2.cs): answered before the duel's outcome applies, not among the Focus Effects that resolve after it.</summary>
+    public bool DelayDecision { get; set; }
 }
 
 // A Focus Effect that needs a decision (issue #419, Mendon's ruling on Disreputable Deal: "a primitive that pauses the resolution of focus effects to allow a player to select a card ...
@@ -36,7 +38,10 @@ public sealed partial class MatchEngine
         or "sandalwood-incense-focus" // issue #453, batch 5
         or "cycle-of-vengeance-focus" // issue #460, batch 4
         or "swell-of-strength-focus" // issue #460, batch 5: Hiromi's Vassals/Shamsir's own attach-self shape, narrowed to Water Shugenja by AttachRequiresKeyword.
-        || abilityId == "fair-warning-focus"; // issue #453, batch 2
+        or "crippled-sensei-focus"
+        || abilityId == "fair-warning-focus" // issue #453, batch 2
+        || abilityId == "superior-opponent-focus" // Emperor Edition remaining-cards pass, group C (issue #492)
+        || IsMechDFocusChoice(abilityId); // Broken Cipher (issue #501, EmperorMechD.cs)
     // Fair Warning (issue #453, batch 2): "if your Personality won it, you may give a Personality -4F" -- any Personality in play, only when the focus card's player's side won.
     private static bool IsFairWarningFocus(string abilityId) => abilityId == "fair-warning-focus";
     private List<string> FairWarningCandidates(int playerId) =>
@@ -62,10 +67,12 @@ public sealed partial class MatchEngine
         AbilityIdsOf(card).Any(id => AbilityCatalog.All.TryGetValue(id, out var ability) && IsAction(ability) && ActionCarriesKeyword(ability, card, "Political"));
 
     private List<string> FocusChoiceCandidates(int playerId, string abilityId, string focusCardId) => abilityId == "crimson-mark-focus" ? DuelAttachmentCandidates()
+        : abilityId == "crippled-sensei-focus" ? _state.Players.Select(p => p.Id.ToString()).ToList()
         : IsFairWarningFocus(abilityId) ? FairWarningCandidates(playerId)
         : IsEffectKeyFocusEffect(abilityId) ? SandalwoodCandidates(playerId)
         : IsAttachSelfFocusEffect(abilityId) ? AttachWielderCandidates(playerId, focusCardId)
         : IsCycleOfVengeanceFocus(abilityId) ? CycleOfVengeanceCandidates(playerId)
+        : abilityId == "superior-opponent-focus" ? SuperiorOpponentCandidates(playerId)
         : IsStraightenFocusEffect(abilityId) ? StraightenFocusCandidates() : DiscardStrategyCandidates(playerId);
 
     // The attachments on the Personalities involved in the duel: the challenger and the challenged.
@@ -92,9 +99,10 @@ public sealed partial class MatchEngine
     /// <summary>Opens the choice for the Focus Effect at `index`. False (and nothing is asked) when nothing qualifies.</summary>
     private bool BeginFocusEffectChoice(int index, string focusCardId, string abilityId)
     {
+        if (IsMechDFocusChoice(abilityId)) return BeginMechDFocusChoice(index, focusCardId, abilityId); // Broken Cipher's transfer (issue #501, EmperorMechD.cs)
         var focus = Card(focusCardId); var owner = focus.OwnerId;
         var candidates = FocusChoiceCandidates(owner, abilityId, focusCardId);
-        var attachments = abilityId == "crimson-mark-focus";
+        var attachments = abilityId is "crimson-mark-focus" or "superior-opponent-focus";
         var attachSelf = IsAttachSelfFocusEffect(abilityId);
         if (candidates.Count == 0 && IsEffectKeyFocusEffect(abilityId))
         {
@@ -113,6 +121,7 @@ public sealed partial class MatchEngine
         {
             Emit("focusEffectNothing", IsFairWarningFocus(abilityId) ? $"{Definition(focus).Name}: {Player(owner).Name}'s Personality did not win the duel."
                 : IsCycleOfVengeanceFocus(abilityId) ? $"{Definition(focus).Name}: {Player(owner).Name}'s Personality did not lose the duel."
+                : abilityId == "superior-opponent-focus" ? $"{Definition(focus).Name}: {Player(owner).Name}'s Personality is not at the current battlefield, or no attachment is there."
                 : attachments ? $"{Definition(focus).Name}: no Personality involved in the duel has an attachment."
                 : IsStraightenFocusEffect(abilityId) ? $"{Definition(focus).Name}: no Personality in play is bowed."
                 : attachSelf ? $"{Definition(focus).Name}: {Player(owner).Name} controls no Personality it may attach to."
@@ -122,7 +131,9 @@ public sealed partial class MatchEngine
         _state.PendingFocusChoice = new PendingFocusChoice { Index = index, FocusCardId = focusCardId, PlayerId = owner, Candidates = candidates, AbilityId = abilityId };
         _state.PendingChoice = new("focusEffectChoice", owner, focusCardId, IsFairWarningFocus(abilityId)
             ? $"{Definition(focus).Name} (Focus Effect): {Player(owner).Name}, you may give a Personality -4F."
+            : abilityId == "crippled-sensei-focus" ? $"{Definition(focus).Name} (Focus Effect): {Player(owner).Name}, choose a player to lose 2 Honor."
             : IsCycleOfVengeanceFocus(abilityId) ? $"{Definition(focus).Name} (Focus Effect): {Player(owner).Name}, you may give one of your Personalities two +1F Revenge tokens."
+            : abilityId == "superior-opponent-focus" ? $"{Definition(focus).Name} (Focus Effect): {Player(owner).Name}, you may destroy an attachment at the current battlefield."
             : attachments
             ? $"{Definition(focus).Name} (Focus Effect): {Player(owner).Name}, you may destroy an attachment on a Personality involved in this duel."
             : IsStraightenFocusEffect(abilityId) ? $"{Definition(focus).Name} (Focus Effect): {Player(owner).Name}, straighten a Personality."
@@ -138,12 +149,30 @@ public sealed partial class MatchEngine
 
     private void ResolveFocusEffectChoiceCommand(GameCommand command)
     {
+        var wasInFocusEffect = _resolvingFocusEffect; _resolvingFocusEffect = true; // a Focus Effect is not an action (Mendon's R4 ruling)
+        var ringsBefore = BowedRingIds();
+        try
+        {
+            // Honor Never Falls (issue #496): what the choice does to the delaying player's loser is one of the duel's consequences "from any source".
+            if (_state.PendingDuel is { } duel && _state.PendingFocusChoice is { DelayDecision: false } pendingChoice) WithAnySourceLossDelays(duel, pendingChoice.PlayerId, () => ResolveFocusEffectChoiceCommandCore(command));
+            else ResolveFocusEffectChoiceCommandCore(command);
+        }
+        finally { _resolvingFocusEffect = wasInFocusEffect; ExcludeFocusEffectRingBows(ringsBefore); }
+    }
+
+    private void ResolveFocusEffectChoiceCommandCore(GameCommand command)
+    {
         var pending = _state.PendingFocusChoice ?? throw new RuleViolation("No Focus Effect is waiting for a choice.");
         Require(command.Type == "chooseFocusEffect", "Choose a card or decline.");
         Require(command.PlayerId == pending.PlayerId, "Only the Focus Effect's player may choose.");
+        if (pending.DelayDecision) { ResolveDelayDecision(command, pending); return; } // The delay Focus Effects' "(now)" choice (EmperorRulingR2Cards.cs).
+        if (IsMechDFocusChoice(pending.AbilityId)) { ResolveMechDFocusChoice(command, pending); return; } // Broken Cipher's transfer (issue #501, EmperorMechD.cs)
         var focus = Card(pending.FocusCardId);
-        var destroys = pending.AbilityId == "crimson-mark-focus";
+        var evidenceStart = _state.Events.Count;
+        var evidenceSource = ViewCard(focus);
+        var destroys = pending.AbilityId is "crimson-mark-focus" or "superior-opponent-focus";
         var attachSelf = IsAttachSelfFocusEffect(pending.AbilityId);
+        Require(command.Choice != "decline" || pending.AbilityId != "crippled-sensei-focus", "Choose a player to lose 2 Honor.");
         Require(command.Choice != "decline" || !IsStraightenFocusEffect(pending.AbilityId), "This Focus Effect is not optional: choose a Personality to straighten.");
         if (command.Choice == "decline") Emit("focusEffectDeclined", $"{Player(pending.PlayerId).Name} took nothing ({Definition(focus).Name}).", pending.PlayerId, pending.FocusCardId);
         // Sandalwood Incense (issue #453 batch 5): the chosen effect key, not a card.
@@ -153,6 +182,13 @@ public sealed partial class MatchEngine
             if (command.TargetId == SandalwoodGainHonor) GainHonor(pending.PlayerId, 2, Definition(focus).Name, focus);
             else Draw(Player(pending.PlayerId));
             Emit("focusEffectChosen", $"{Player(pending.PlayerId).Name} chose to {(command.TargetId == SandalwoodGainHonor ? "gain 2 Honor" : "draw a card")} ({Definition(focus).Name}).", pending.PlayerId, pending.FocusCardId);
+        }
+        else if (pending.AbilityId == "crippled-sensei-focus")
+        {
+            Require(command.TargetId is not null && pending.Candidates.Contains(command.TargetId), "Choose one of the offered players.");
+            var chosenPlayerId = int.Parse(command.TargetId!);
+            GainHonor(chosenPlayerId, -2, Definition(focus).Name, focus);
+            Emit("focusEffectHonorLoss", $"{Player(chosenPlayerId).Name} lost 2 Honor ({Definition(focus).Name}).", pending.PlayerId, pending.FocusCardId);
         }
         else
         {
@@ -182,6 +218,7 @@ public sealed partial class MatchEngine
                 Emit("focusEffectTook", $"{Player(pending.PlayerId).Name} put {Definition(taken).Name} into their hand ({Definition(focus).Name}).", pending.PlayerId, taken.Id);
             }
         }
+        RecordFocusChoiceBeat(evidenceStart, evidenceSource);
         _state.PendingChoice = null; _state.PendingFocusChoice = null;
         ContinueDuelFocusEffects(pending.Index + 1);
     }
@@ -195,21 +232,46 @@ public sealed partial class MatchEngine
         TakeControl(attachment, wielder.OwnerId);
         attachment.Zone = Zone.Attached; attachment.AttachedTo = wielder.Id; attachment.FaceUp = true; attachment.ProvinceIndex = wielder.ProvinceIndex;
         if (def.AttachGrantsKeyword is string granted) GrantKeyword(wielder, granted, attachment.Id, "Attachment");
+        NoteAttached(playerId, attachment, "focus-effect"); // Issue #501 (EmperorMechD.cs): the attach log.
         Emit("equipped", $"{def.Name} attached to {Definition(wielder).Name} as a Focus Effect.", playerId, attachment.Id);
     }
 
     private IEnumerable<ActionOption> FocusChoiceActions(int playerId)
     {
         if (_state.PendingFocusChoice is not { } p || p.PlayerId != playerId) yield break;
+        if (p.DelayDecision) { foreach (var option in DelayDecisionActions(p)) yield return option; yield break; }
+        if (IsMechDFocusChoice(p.AbilityId)) { foreach (var option in MechDFocusChoiceActions(p, playerId)) yield return option; yield break; } // Broken Cipher (issue #501)
         foreach (var id in p.Candidates)
-            yield return new("chooseFocusEffect", IsFairWarningFocus(p.AbilityId) ? $"Give {Definition(Card(id)).Name} -4F"
+            yield return new("chooseFocusEffect", p.AbilityId == "crippled-sensei-focus" ? $"{Player(int.Parse(id)).Name} loses 2 Honor"
+                : IsFairWarningFocus(p.AbilityId) ? $"Give {Definition(Card(id)).Name} -4F"
                 : IsEffectKeyFocusEffect(p.AbilityId) ? (id == SandalwoodGainHonor ? "Gain 2 Honor" : "Draw a card")
-                : p.AbilityId == "crimson-mark-focus" ? $"Destroy {Definition(Card(id)).Name}"
+                : p.AbilityId is "crimson-mark-focus" or "superior-opponent-focus" ? $"Destroy {Definition(Card(id)).Name}"
                 : IsAttachSelfFocusEffect(p.AbilityId) ? $"Attach to {Definition(Card(id)).Name}"
                 : IsCycleOfVengeanceFocus(p.AbilityId) ? $"Give {Definition(Card(id)).Name} two Revenge tokens"
                 : IsStraightenFocusEffect(p.AbilityId) ? $"Straighten {Definition(Card(id)).Name}" : $"Put {Definition(Card(id)).Name} into your hand", true, null,
                 new GameCommand("chooseFocusEffect", playerId, _state.Version, CardId: p.FocusCardId, TargetId: id), id);
-        if (IsStraightenFocusEffect(p.AbilityId)) yield break; // mandatory: no "take nothing"
+        if (IsStraightenFocusEffect(p.AbilityId) || p.AbilityId == "crippled-sensei-focus") yield break; // mandatory: no "take nothing"
         yield return new("chooseFocusEffect", "Take nothing", true, null, new GameCommand("chooseFocusEffect", playerId, _state.Version, CardId: p.FocusCardId, Choice: "decline"), p.FocusCardId);
+    }
+}
+
+public sealed partial class MatchEngine
+{
+    private bool HandleRegisteredFocusEffectChoice(string type, GameCommand command)
+    {
+        if (type != "focusEffectChoice") return false;
+        ResolveFocusEffectChoiceCommand(command);
+        return true;
+    }
+}
+
+public sealed partial class MatchEngine
+{
+    // Registration only: callbacks are not invoked during module initialization.
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
+    [System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void RegisterFocusEffectChoiceHooks()
+    {
+        EngineHooks.PendingChoice.Register("HandleRegisteredFocusEffectChoice", 800, static (engine, type, command) => engine.HandleRegisteredFocusEffectChoice(type, command));
     }
 }

@@ -1,0 +1,20 @@
+[
+  {
+    "card_id": "oracle-l5r-10010",
+    "printing_set": [
+      "Emperor Edition"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10010",
+    "image_path": "assets/requested-scans/mounted-ashigaru.png",
+    "image_sha256": "2cb51a0fd108c8726bcea8677da6fcf45c569667b037373b809d1a6c112542b5"
+  },
+  {
+    "card_id": "user-scan-aviary-falcon",
+    "printing_set": [
+      "User-supplied scan"
+    ],
+    "source_url": "user-supplied-in-chat-2026-09-29",
+    "image_path": "assets/requested-scans/aviary-falcon.png",
+    "image_sha256": "4f5356373c9a5e42dd3c7a35bb669111b0440263093dd201b8468e2d0c8e51a3"
+  }
+]

@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "slug": "interaction-fixes",
+  "title": "Modified hand limits and private seat handoffs",
+  "source_pr": 464,
+  "source_commit": "2f3a9bbc55cc8b7d1342acd26ade66c4d263cd49",
+  "revision": 1,
+  "reviewer": "mdornbrook",
+  "summary": "Alfredo requested focused fixes for modified hand-limit discarding and accidental hand disclosure when cancelling Pass the device. Both have prepared real-engine scenarios. Please review behavior and note any UI/QoL or rules feedback. These changes remain unmerged pending review.",
+  "review_steps": [
+    "Extract the entire ZIP and open Start Review.cmd. It opens Hand limit 10 with 11 cards. Select one card, confirm, and check that exactly that card enters the discard pile and ten remain.",
+    "The review selector above the table offers limits 7, 8 and 10, an already-at-limit case, and multiple required discards. Try selecting fewer, exactly and more than requested; only exactly enough enables confirmation. Reset and Other seat prepare the same case again.",
+    "Close the game and open Review Seat Handoff Privacy.cmd. Click Pass device to other player at bottom right. Both hands should be hidden. Escape, the dialog close icon and Cancel handoff must restore the original seat without revealing the other hand.",
+    "Reopen the handoff and click I am ready to reveal my hand. Only this explicit readiness should switch the seat. Repeat from the other side. The dropdown and reset controls are review-only.",
+    "Please leave approval or changes on PR #464 using Send Feedback.url. Alfredo will address UI/QoL feedback. No merge is authorized by this delivery; expert rules review remains yours."
+  ],
+  "known_limitations": [
+    "This isolated build is current main de672f58 plus the two focused fixes. It does not include the unmerged #434 UI consolidation. The existing #434 review package and Mendon worktrees/tasks remain unchanged. The fix patch was applied and compiled separately against #434 source 659e015f.",
+    "Prepared local positions use the real engine and published modifier effects; they are synthetic regression scenarios, not full matches or expert acceptance.",
+    "Mac native visual/input checks and automated regressions passed. Windows runtime/launcher CI is distinct from native Windows graphical playtesting, which remains for Mendon."
+  ],
+  "scenarios": [
+    {
+      "name": "Start Review",
+      "mode": "published-interactions-hand-limit-review"
+    },
+    {
+      "name": "Review Modified Hand Limit",
+      "mode": "published-interactions-hand-limit-review"
+    },
+    {
+      "name": "Review Seat Handoff Privacy",
+      "mode": "published-interactions-handoff-review"
+    },
+    {
+      "name": "Open Full Game",
+      "mode": null
+    }
+  ]
+}

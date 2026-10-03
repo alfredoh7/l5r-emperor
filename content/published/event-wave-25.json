@@ -1,0 +1,53 @@
+{
+  "Profile": "event-wave-25",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-5534",
+      "Name": "Never Enough Soldiers",
+      "Type": "Event",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Until your Events Phase three turns from now begins, you may target Followers in your discard pile with the Equip rulebook action.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-5534.jpg",
+      "Keywords": [
+        "Unique"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "p5-never-enough-soldiers"
+    },
+    {
+      "Id": "oracle-l5r-10032",
+      "Name": "Starting on the Path",
+      "Type": "Event",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Until your second turn from now begins, you have the ability, \"Limited: Target a Ring in your hand: Put it into play.\"",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10032.jpg",
+      "Keywords": [
+        "Unique"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "p5-starting-on-the-path"
+    }
+  ],
+  "Decks": []
+}

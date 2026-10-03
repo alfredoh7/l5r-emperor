@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Approved duel UI plus completed transparent-corner correction for shared lacquer, Practice, Fallen-gallery buttons and phase-help badge; versioned Windows revision 5 prepared for review.",
+  "validation": "Clean client compile; native Concede/compact Focus, Practice, deck builder, phase rail and normal/small Fallen gallery checks passed; native alpha/state matrix and actual game screenshots inspected. Mac launch verified. Windows revision 5 from 87a4eb7d passed local package/runtime/resource validation; uploaded archive size and SHA-256 verified. Prior rules/duel regressions remain recorded; exact delivery-commit Windows CI is pending.",
+  "remaining": "Windows CI then ready-review notification for revision 5. Native Windows play and Mendon expert implementation/rules acceptance remain open. Do not merge automatically. Prior baseline static-art precision failure remains separately documented.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/448",
+  "branch": "codex/448-duel-followups",
+  "updated": "2026-09-24T06:44:56.943360+00:00"
+}
