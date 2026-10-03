@@ -203,7 +203,6 @@ internal static partial class EmperorRemainingFTests
         Check(!CanUse(MatchEngine.FromTestState(s4), 0, "temples-gisei-item", temples4.Id), "a bowed Temples cannot look");
     }
 
-    private static void Reject(MatchEngine e, GameCommand command) => Check(!e.Execute(command).Accepted, $"expected {command.Type} to be rejected");
 
     private static void AkodosGraveDestroy()
     {
