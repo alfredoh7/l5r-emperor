@@ -1,0 +1,10 @@
+{
+  "source": "docs/designs/2026-09-22-top-cards-drag/a.png",
+  "selectedCombination": "A's horizontal destination trays plus B's explicit deck-order labels",
+  "date": "2026-09-23",
+  "tool": "Built-in imagegen",
+  "generatedFile": "exec-e0b5ba68-3378-443e-92ed-6d06bb7356c8.png",
+  "runtime": "src/L5R.Client/Art/TopCards/approved-trays-atlas.png",
+  "prompt": "Use case: background-extraction / precise-object-edit. Image 1 is the approved L5R Top Cards concept. Create a production UI sprite sheet on a genuinely transparent background, 1536 by 1024 landscape. Faithfully extract/reconstruct only its decorative elements, no creative redesign. Layout three separate assets with wide transparent gaps: upper half, a large EMPTY wide black lacquer panel with the exact delicate distressed antique gold double border and small square corner ornaments from the reference, clean black lacquer interior, no text no cards no internal dividers. Lower left, one EMPTY warm ivory dry brush swash title strip (very wide and short), ragged fine brushstroke ends, no text. Lower right, one tall EMPTY portrait card drop slot, softly glowing antique gold border, black lacquer center and a very faint gold three-card fan silhouette in its center like the reference hand destination. All assets straight-on orthographic, axis aligned, no perspective, no rotation. Border texture, warm ivory and antique gold match the reference. No labels, no typography, no cards, no scene, no shadows outside sprites, no checkerboard. These must work as native UI assets, not a mockup.",
+  "notes": "Faithful production furniture derived from selected concept. Live text and original scans remain native. Atlas regions are in TopCardSkin.cs. Not a claim of pixel identity or user acceptance."
+}

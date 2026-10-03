@@ -182,7 +182,7 @@ internal static class EmperorRulingR2Tests
         FinishBattle(e);
         Eq(e.State.Cards[berserker.Id].Zone, Zone.Home, "the defender was still at the battlefield when the battle ended: the delayed move home applied");
         Check(e.State.Events.Any(x => x.Type == "delayedEffectApplied" && x.Message.Contains("moved home, as delayed")), "logged as applied");
-        Check(e.State.Cards[actor.Id].Zone != Zone.Battlefield || true, "the attacker is unaffected");
+        Check(e.State.Cards[actor.Id].Zone != Zone.Battlefield, "the attacker is unaffected");
     }
 
     private static void HallsAttackAndLimits()

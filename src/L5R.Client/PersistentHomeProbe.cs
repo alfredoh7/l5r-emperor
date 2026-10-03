@@ -27,7 +27,7 @@ public partial class PersistentHomeProbe : Node
         var point = (Vector2)Call("ScreenCenter", control)!;
         Require(new Rect2(Vector2.Zero, GetViewport().GetVisibleRect().Size).HasPoint(point), $"Control is outside viewport: {control.Name} {point}");
         Input.ParseInputEvent(new InputEventMouseMotion { Position = point }); await Settle(.06);
-        GD.Print($"HOME_CLICK: {control.GetPath()} at {point}; root hover {GetViewport().GuiGetHoveredControl()?.GetPath()}; plane hover {Field<TableSurface>("_tableSurface").Canvas.GuiGetHoveredControl()?.GetPath()}; on table {Call("PointerOnTable",point)}");
+        GD.Print($"HOME_CLICK: {control.GetPath()} at {point}; root hover {GetViewport().GuiGetHoveredControl()?.GetPath()}; plane hover {Field<TableSurface>("_tableSurface").Canvas.GuiGetHoveredControl()?.GetPath()}; on table {Call("PointerOnTable", point)}");
         Input.ParseInputEvent(new InputEventMouseButton { Position = point, GlobalPosition = point, ButtonIndex = MouseButton.Left, Pressed = true });
         Input.ParseInputEvent(new InputEventMouseButton { Position = point, GlobalPosition = point, ButtonIndex = MouseButton.Left, Pressed = false }); await Settle();
     }
@@ -46,8 +46,16 @@ public partial class PersistentHomeProbe : Node
     }
     private static CardInstance Add(MatchState state, int definition, int owner = 0, Zone zone = Zone.Home, bool bowed = false, int? province = null)
     {
-        var card = new CardInstance { Id = "home-probe-" + state.Cards.Count, DefinitionId = "oracle-l5r-" + definition,
-            OwnerId = owner, Zone = zone, Bowed = bowed, ProvinceIndex = province, FaceUp = zone != Zone.Hand };
+        var card = new CardInstance
+        {
+            Id = "home-probe-" + state.Cards.Count,
+            DefinitionId = "oracle-l5r-" + definition,
+            OwnerId = owner,
+            Zone = zone,
+            Bowed = bowed,
+            ProvinceIndex = province,
+            FaceUp = zone != Zone.Hand
+        };
         state.Cards.Add(card.Id, card);
         var player = state.Players[owner];
         if (zone == Zone.Hand) player.Hand.Add(card.Id);
@@ -85,7 +93,13 @@ public partial class PersistentHomeProbe : Node
     {
         var option = _session.Snapshot!.Actions.First(a => a.Enabled && a.Command?.AbilityId == id);
         var version = Engine.Version;
-        Call("Choose", option); await Settle();
+        Call("Choose", option, false); await Settle(); // Choose(option, keepTarget): reflection does not fill optional parameters
+        // Issue #581: the client chooses no target for the player; pick the first legal one through the real picker (item 0 is "Choose a target…") before confirming.
+        if (Field<ActionOption?>("_chosen") is { TargetIds.Length: > 0, Command.TargetId: null })
+        {
+            var picker = Descendants<OptionButton>(_main).First(b => b.IsVisibleInTree());
+            picker.Selected = 1; picker.EmitSignal(OptionButton.SignalName.ItemSelected, 1L); await Settle();
+        }
         await Click(Button("Confirm action")); await Settle(.5);
         Require(Engine.Version > version, id + " did not execute through native confirmation");
     }
@@ -159,6 +173,10 @@ public partial class PersistentHomeProbe : Node
             var reserveButton = Descendants<Button>(Field<VBoxContainer>("_inspector")).FirstOrDefault(b => b.Text.EndsWith(reserveOption.Label) && !b.Disabled);
             Require(reserveButton is not null, "Battle flow hid engine-provided Reserve recruitment");
             reserveButton!.EmitSignal(BaseButton.SignalName.Pressed); await Settle(.4);
+            // The Reserve button opens the reviewed Gold payment panel (issue #303); the engine action is submitted on Confirm.
+            var confirmReserve = Descendants<Button>(_main).FirstOrDefault(b => b.Text.StartsWith("Confirm recruit", StringComparison.Ordinal) && b.IsVisibleInTree() && !b.Disabled);
+            Require(confirmReserve is not null, "Reserve did not open its reviewed payment with an enabled Confirm");
+            await Click(confirmReserve!); await Settle(.5);
             Require(Engine.State.Cards[reserve.Id].Zone == Zone.Battlefield, "Reserve button did not submit the engine action");
             GD.Print("HOME_PASS: consolidated battle flow exposes and executes authoritative Reserve recruitment");
 

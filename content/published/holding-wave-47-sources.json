@@ -1,0 +1,29 @@
+[
+  {
+    "card_id": "oracle-l5r-1997",
+    "printing_set": [
+      "Honor and Treachery"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=1997",
+    "image_path": "assets/reference/oracle/honor-and-treachery/webp/oracle-l5r-1997-printing-11-image-1.webp",
+    "image_sha256": "c104b24d12db586b4842751e9f10a122a7a8dcc3cd62c96bffc130d70ac55381"
+  },
+  {
+    "card_id": "oracle-l5r-8308",
+    "printing_set": [
+      "War of Honor"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=8308",
+    "image_path": "assets/reference/oracle/war-of-honor/webp/oracle-l5r-8308-printing-1-image-1.webp",
+    "image_sha256": "2293c9f217424e0151b7be568fcc8afd56e13137d7801ac327432da28d924e6d"
+  },
+  {
+    "card_id": "oracle-l5r-9797",
+    "printing_set": [
+      "The Shadow's Embrace"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=9797",
+    "image_path": "assets/reference/oracle/the-shadow-s-embrace/webp/oracle-l5r-9797-printing-1-image-1.webp",
+    "image_sha256": "0ba4e6eca18adee0a5f7b6785fe4cc7374071708995ca2149d8a7f6bf69ab50e"
+  }
+]

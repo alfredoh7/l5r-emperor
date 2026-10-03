@@ -1,0 +1,11 @@
+[
+  {
+    "card_id": "user-scan-maimed-retainer",
+    "printing_set": [
+      "User-supplied scan"
+    ],
+    "source_url": "user-supplied-in-chat-2026-09-29",
+    "image_path": "assets/requested-scans/maimed-retainer.png",
+    "image_sha256": "4226e32ffe4bf63d503e4cd8cae573d5cc89f5d8f64d9b7f8f9b1036cd5e2312"
+  }
+]

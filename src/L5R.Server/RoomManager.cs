@@ -33,7 +33,7 @@ public sealed class RoomManager(RoomStore store, ILogger<RoomManager> logger)
 
     public async Task<SeatReservation> CreateAsync(CancellationToken cancellationToken = default, string scenario = "starter")
     {
-        if(scenario is not ("starter" or PublishedContent.Scenario)) throw new RoomException("unsupported_scenario", "Choose training or the published Lion/Crane profile.");
+        if (scenario is not ("starter" or PublishedContent.Scenario)) throw new RoomException("unsupported_scenario", "Choose training or the published Lion/Crane profile.");
         await creationGate.WaitAsync(cancellationToken);
         try
         {
@@ -116,7 +116,7 @@ public sealed class RoomManager(RoomStore store, ILogger<RoomManager> logger)
         await room.Gate.WaitAsync(cancellationToken);
         try
         {
-            var version = room.Engine.GetView(seat.PlayerId).Version;
+            var version = room.Engine.Version;
             if (room.Connections.GetValueOrDefault(seat.PlayerId) != connection)
                 throw new RoomException("session_replaced", "This seat has reconnected in another session.", 409);
             if (envelope.Type != "command" || !Guid.TryParseExact(envelope.CommandId, "D", out _)
@@ -158,8 +158,10 @@ public sealed class RoomManager(RoomStore store, ILogger<RoomManager> logger)
                 return;
             }
 
-            // Apply to an isolated replay so persistence failure cannot leave a half-committed room.
-            var trial = MatchEngine.Replay(room.Engine.ExportReplay());
+            // Apply to an isolated clone so persistence failure cannot leave a half-committed room. Execute()
+            // already validates atomically against a detached copy of _state; Clone() (issue #550) gets the
+            // same isolation directly from the live engine instead of replaying every prior command from turn one.
+            var trial = room.Engine.Clone();
             var result = trial.Execute(envelope.Command.BindToSeat(seat.PlayerId, envelope.ExpectedVersion));
             if (!result.Accepted)
             {
@@ -193,9 +195,12 @@ public sealed class RoomManager(RoomStore store, ILogger<RoomManager> logger)
         => connection.SendAsync(new CommandReply("commandResult", commandId, false, false, version, new ServerError(code, message)));
 
     private static StateMessage CreateState(Room room, int playerId)
-        => new("state", room.Record.RoomCode, playerId, room.Engine.GetView(playerId).Version,
-            room.Engine.GetView(playerId), room.Engine.QueryActions(playerId).Select(AvailableAction.FromCore).ToArray(),
+    {
+        var view = room.Engine.GetView(playerId);
+        return new("state", room.Record.RoomCode, playerId, view.Version, view,
+            room.Engine.QueryActions(playerId).Select(AvailableAction.FromCore).ToArray(),
             [room.Connections.ContainsKey(0), room.Connections.ContainsKey(1)]);
+    }
 
     private static Task BroadcastLockedAsync(Room room) => Task.WhenAll(room.Connections.Select(pair => pair.Value.SendAsync(CreateState(room, pair.Key))));
 

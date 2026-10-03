@@ -189,7 +189,10 @@ public sealed partial class MatchEngine
 
     private static string StatLabel(string stat) => stat switch
     {
-        CostStat.GoldCost => "Gold Cost", CostStat.PersonalHonor => "Personal Honor", CostStat.ProvinceStrength => "Province Strength", _ => stat
+        CostStat.GoldCost => "Gold Cost",
+        CostStat.PersonalHonor => "Personal Honor",
+        CostStat.ProvinceStrength => "Province Strength",
+        _ => stat
     };
 
     /// <summary>A printed number of a card (issue #416): the printed value, or the current one with every modifier and token, of Force, Chi, Gold Cost, Personal Honor, Focus Value
@@ -236,7 +239,8 @@ public sealed partial class MatchEngine
             return cost with { Error = "A Discipline play cannot be combined with a player-chosen Gold amount." };
         return cost with
         {
-            Amount = cost.Amount + lead, LeadAmount = lead,
+            Amount = cost.Amount + lead,
+            LeadAmount = lead,
             Basis = $"{Definition(source).Name} Discipline cost {lead} (paid first), then {cost.Basis} = {cost.Amount + lead} in all"
         };
     }
@@ -258,46 +262,46 @@ public sealed partial class MatchEngine
                 // rather than implying a printed Gold cost the card does not have.
                 return new(rule, Definition(source).GoldCost, $"{Definition(source).Name} {(DisciplineFromDiscard(ability, source) ? "Discipline cost" : "cost")} {Definition(source).GoldCost}", null, false, source);
             case GoldCostBasis.Variable:
-            {
-                var chosen = command.GoldAmount ?? rule.Amount;
-                var error = chosen < rule.Amount ? $"Choose at least {rule.Amount} Gold."
-                    : rule.MaxAmount is int cap && chosen > cap ? $"Choose at most {cap} Gold." : null;
-                var basis = rule.MaxAmount is int max ? $"You choose the amount ({rule.Amount} to {max} Gold)"
-                    : rule.Amount > 0 ? $"You choose the amount (at least {rule.Amount} Gold)" : "You choose the amount (zero or more Gold)";
-                return new(rule, chosen, basis, error, false, source ?? target, rule.Amount, rule.MaxAmount);
-            }
-            case GoldCostBasis.Stat:
-            {
-                var statCard = rule.StatOf switch
                 {
-                    CostStatSubject.Target => target,
-                    CostStatSubject.Performer => command.PerformerId is not null && _state.Cards.TryGetValue(command.PerformerId, out var performing) ? performing : null,
-                    CostStatSubject.HeldActionSource => RemAHeldActionSourceCard(),
-                    _ => source
-                };
-                if (statCard is null)
-                    return new(rule, 0, rule.StatOf == CostStatSubject.Performer ? "Choose a performing card to see this cost." : "Choose a target to see this cost.", null, true, null);
-                var value = CostStatValue(statCard, rule.Stat!, rule.StatBase);
-                return new(rule, Clamp(value + rule.Modifier, rule.Floor),
-                    $"{Definition(statCard).Name} {(rule.StatBase ? "base" : "current")} {StatLabel(rule.Stat!)} {value}{Modified(rule.Modifier, rule.Floor)}", null, false, statCard);
-            }
+                    var chosen = command.GoldAmount ?? rule.Amount;
+                    var error = chosen < rule.Amount ? $"Choose at least {rule.Amount} Gold."
+                        : rule.MaxAmount is int cap && chosen > cap ? $"Choose at most {cap} Gold." : null;
+                    var basis = rule.MaxAmount is int max ? $"You choose the amount ({rule.Amount} to {max} Gold)"
+                        : rule.Amount > 0 ? $"You choose the amount (at least {rule.Amount} Gold)" : "You choose the amount (zero or more Gold)";
+                    return new(rule, chosen, basis, error, false, source ?? target, rule.Amount, rule.MaxAmount);
+                }
+            case GoldCostBasis.Stat:
+                {
+                    var statCard = rule.StatOf switch
+                    {
+                        CostStatSubject.Target => target,
+                        CostStatSubject.Performer => command.PerformerId is not null && _state.Cards.TryGetValue(command.PerformerId, out var performing) ? performing : null,
+                        CostStatSubject.HeldActionSource => RemAHeldActionSourceCard(),
+                        _ => source
+                    };
+                    if (statCard is null)
+                        return new(rule, 0, rule.StatOf == CostStatSubject.Performer ? "Choose a performing card to see this cost." : "Choose a target to see this cost.", null, true, null);
+                    var value = CostStatValue(statCard, rule.Stat!, rule.StatBase);
+                    return new(rule, Clamp(value + rule.Modifier, rule.Floor),
+                        $"{Definition(statCard).Name} {(rule.StatBase ? "base" : "current")} {StatLabel(rule.Stat!)} {value}{Modified(rule.Modifier, rule.Floor)}", null, false, statCard);
+                }
             case GoldCostBasis.OwnPersonalities:
-            {
-                var controlled = _state.Cards.Values.Count(c => c.OwnerId == command.PlayerId && InPlay(c) && Definition(c).Type == CardType.Personality);
-                return new(rule, Clamp(controlled + rule.Modifier, rule.Floor), $"the {controlled} Personalit{(controlled == 1 ? "y" : "ies")} you control{Modified(rule.Modifier, rule.Floor)}", null, false, source);
-            }
+                {
+                    var controlled = _state.Cards.Values.Count(c => c.OwnerId == command.PlayerId && InPlay(c) && Definition(c).Type == CardType.Personality);
+                    return new(rule, Clamp(controlled + rule.Modifier, rule.Floor), $"the {controlled} Personalit{(controlled == 1 ? "y" : "ies")} you control{Modified(rule.Modifier, rule.Floor)}", null, false, source);
+                }
             case GoldCostBasis.AttachCost:
-            {
-                // The attachment is the target (a discard pile) or the source itself (in hand); the wielder is the source or the chosen
-                // performer. Until both are known there is nothing to price. Katagi's "from your hand" discount applies only from a hand.
-                if (ability.Attach is not { } attach) return new(rule, 0, "This ability attaches nothing.", "This ability attaches nothing.", false, null);
-                var attachment = attach.Card == AttachSource.Self ? source : target;
-                var wielder = WielderOfAttach(attach, command, source);
-                if (attachment is null || wielder is null)
-                    return new(rule, 0, attachment is null ? "Choose a target to see this cost." : "Choose a performing card to see this cost.", null, true, null);
-                var (equipCost, equipBasis, _) = EquipGoldCost(command.PlayerId, attachment, wielder, fromHand: attachment.Zone == Zone.Hand);
-                return new(rule, Clamp(equipCost + rule.Modifier, rule.Floor), equipBasis + Modified(rule.Modifier, rule.Floor), null, false, attachment);
-            }
+                {
+                    // The attachment is the target (a discard pile) or the source itself (in hand); the wielder is the source or the chosen
+                    // performer. Until both are known there is nothing to price. Katagi's "from your hand" discount applies only from a hand.
+                    if (ability.Attach is not { } attach) return new(rule, 0, "This ability attaches nothing.", "This ability attaches nothing.", false, null);
+                    var attachment = attach.Card == AttachSource.Self ? source : target;
+                    var wielder = WielderOfAttach(attach, command, source);
+                    if (attachment is null || wielder is null)
+                        return new(rule, 0, attachment is null ? "Choose a target to see this cost." : "Choose a performing card to see this cost.", null, true, null);
+                    var (equipCost, equipBasis, _) = EquipGoldCost(command.PlayerId, attachment, wielder, fromHand: attachment.Zone == Zone.Hand);
+                    return new(rule, Clamp(equipCost + rule.Modifier, rule.Floor), equipBasis + Modified(rule.Modifier, rule.Floor), null, false, attachment);
+                }
         }
         // Every remaining basis is derived from the chosen target.
         if (target is null) return new(rule, 0, "Choose a target to see this cost.", null, true, null);
@@ -305,53 +309,53 @@ public sealed partial class MatchEngine
         switch (rule.Basis)
         {
             case GoldCostBasis.TargetPrinted:
-            {
-                var printed = Definition(target).GoldCost;
-                // Extend the Soul's Boundaries (issue #453 batch 5): "This card enters play paying 1 less Gold for each Ring you control" -- a Spell enters play through Equip (Battle)'s
-                // target-printed price, so the count-scaled discount is read here (never below zero).
-                var ringDiscount = RingEntryDiscount(Definition(target), command.PlayerId);
-                // Purify the Soul (The Shadow's Embrace pass, issue #476 batch 5): "Attaches to an Air Shugenja paying 2 less Gold" -- through Equip (Battle) the Shugenja is the performer.
-                var purifyDiscount = command.AbilityId == "equip-battle" && command.PerformerId is not null && _state.Cards.TryGetValue(command.PerformerId, out var equipper) ? PurifyTheSoulDiscount(target, equipper) + MagaYariDiscount(target, equipper) : 0; // Maga-yari (issue #492 group G): the same kind of wielder discount
-                // Quelsa (The Shadow's Embrace pass, issue #476, batch 2): "Quelsa attaches Spells paying 2 less Gold" -- a Spell attached to him through an ability that pays its printed cost.
-                var quelsaDiscount = QuelsaSpellDiscount(command, target);
-                // Whispering Archive (The Shadow's Embrace pass, issue #476 batch 6): "Your Spells enter play paying 1 less Gold" -- a Spell priced by its printed cost is one entering
-                // play (Equip (Battle), Soshi Neiru's equip), so its discount is a term of that price like the Ring discount.
-                var archiveDiscount = WhisperingArchiveDiscount(target, command.PlayerId);
-                if (ringDiscount + purifyDiscount + quelsaDiscount + archiveDiscount > 0)
-                    return new(rule, Clamp(Math.Max(0, printed - ringDiscount - purifyDiscount - quelsaDiscount - archiveDiscount) + rule.Modifier, rule.Floor),
-                        $"{name} cost {printed}{(ringDiscount > 0 ? $" − {ringDiscount} (Rings you control)" : "")}{(purifyDiscount > 0 ? $" − {purifyDiscount} (Air Shugenja)" : "")}{(quelsaDiscount > 0 ? $" − {quelsaDiscount} (Quelsa)" : "")}{(archiveDiscount > 0 ? $" − {archiveDiscount} (Whispering Archive)" : "")}{Modified(rule.Modifier, rule.Floor)}", null, false, target);
-                return new(rule, Clamp(printed + rule.Modifier, rule.Floor), $"{name} cost {printed}{Modified(rule.Modifier, rule.Floor)}", null, false, target);
-            }
-            case GoldCostBasis.TargetCurrent:
-            {
-                var current = CardGoldCost(target);
-                return new(rule, Clamp(current + rule.Modifier, rule.Floor), $"{name} cost {current}{Modified(rule.Modifier, rule.Floor)}", null, false, target);
-            }
-            case GoldCostBasis.TargetUnitTotal:
-            {
-                var total = UnitTotalGoldCost(target, out var breakdown);
-                var label = Definition(target).Type == CardType.Personality && breakdown.Contains('+') ? $"{name} unit total {breakdown}" : $"{name} total cost {total}";
-                return new(rule, Clamp(total + rule.Modifier, rule.Floor), label + Modified(rule.Modifier, rule.Floor), null, false, target);
-            }
-            case GoldCostBasis.TargetRecruit:
-            {
-                var recruit = QuotePurchase(command.PlayerId, target.Id, ignoreHonorRequirementIfPersonalityClan: rule.HonorWaiverClan, fromDeadPile: target.Zone is Zone.Dead or Zone.DynastyDiscard,
-                    anyOwnerPile: rule.AnyOwnerPile);
-                var derivation = recruit.Error is null && recruit.Cost != Definition(target).GoldCost && recruit.Basis is { } terms ? $" ({terms})" : "";
-                var performerCost = 0; var performerNote = "";
-                if (rule.MinusPerformerCost)
                 {
-                    if (command.PerformerId is null || !_state.Cards.TryGetValue(command.PerformerId, out var performing)) return new(rule, 0, "Choose a performing card to see this cost.", null, true, null);
-                    // A Yojimbo's Duty (Forgotten Legacy pass, issue #467 batch 3): "for less Gold equal to your Yojimbo's PRINTED Gold Cost plus 1" -- StatBase (the flag
-                    // GoldCostRule.StatValue already uses for "the printed value") reads the performer's printed Gold Cost instead of his current one.
-                    performerCost = rule.StatBase ? Definition(performing).GoldCost : CardGoldCost(performing);
-                    performerNote = $" less {Definition(performing).Name}'s {(rule.StatBase ? "printed " : "")}Gold Cost {performerCost}";
+                    var printed = Definition(target).GoldCost;
+                    // Extend the Soul's Boundaries (issue #453 batch 5): "This card enters play paying 1 less Gold for each Ring you control" -- a Spell enters play through Equip (Battle)'s
+                    // target-printed price, so the count-scaled discount is read here (never below zero).
+                    var ringDiscount = RingEntryDiscount(Definition(target), command.PlayerId);
+                    // Purify the Soul (The Shadow's Embrace pass, issue #476 batch 5): "Attaches to an Air Shugenja paying 2 less Gold" -- through Equip (Battle) the Shugenja is the performer.
+                    var purifyDiscount = command.AbilityId == "equip-battle" && command.PerformerId is not null && _state.Cards.TryGetValue(command.PerformerId, out var equipper) ? PurifyTheSoulDiscount(target, equipper) + MagaYariDiscount(target, equipper) : 0; // Maga-yari (issue #492 group G): the same kind of wielder discount
+                                                                                                                                                                                                                                                                       // Quelsa (The Shadow's Embrace pass, issue #476, batch 2): "Quelsa attaches Spells paying 2 less Gold" -- a Spell attached to him through an ability that pays its printed cost.
+                    var quelsaDiscount = QuelsaSpellDiscount(command, target);
+                    // Whispering Archive (The Shadow's Embrace pass, issue #476 batch 6): "Your Spells enter play paying 1 less Gold" -- a Spell priced by its printed cost is one entering
+                    // play (Equip (Battle), Soshi Neiru's equip), so its discount is a term of that price like the Ring discount.
+                    var archiveDiscount = WhisperingArchiveDiscount(target, command.PlayerId);
+                    if (ringDiscount + purifyDiscount + quelsaDiscount + archiveDiscount > 0)
+                        return new(rule, Clamp(Math.Max(0, printed - ringDiscount - purifyDiscount - quelsaDiscount - archiveDiscount) + rule.Modifier, rule.Floor),
+                            $"{name} cost {printed}{(ringDiscount > 0 ? $" − {ringDiscount} (Rings you control)" : "")}{(purifyDiscount > 0 ? $" − {purifyDiscount} (Air Shugenja)" : "")}{(quelsaDiscount > 0 ? $" − {quelsaDiscount} (Quelsa)" : "")}{(archiveDiscount > 0 ? $" − {archiveDiscount} (Whispering Archive)" : "")}{Modified(rule.Modifier, rule.Floor)}", null, false, target);
+                    return new(rule, Clamp(printed + rule.Modifier, rule.Floor), $"{name} cost {printed}{Modified(rule.Modifier, rule.Floor)}", null, false, target);
                 }
-                // Black Pearl (issue #467): "paying 4 less Gold if the Personality is Nonhuman".
-                var keywordDiscount = rule.DiscountKeyword is { } discountKeyword && Keyword(target, discountKeyword) ? rule.KeywordDiscount : 0;
-                var keywordNote = keywordDiscount > 0 ? $" less {keywordDiscount} ({rule.DiscountKeyword})" : "";
-                return new(rule, Clamp(recruit.Cost + rule.Modifier - performerCost - keywordDiscount, rule.Floor), $"{name} recruit cost {recruit.Cost}{derivation}{performerNote}{keywordNote}{Modified(rule.Modifier, rule.Floor)}", recruit.Error, false, target);
-            }
+            case GoldCostBasis.TargetCurrent:
+                {
+                    var current = CardGoldCost(target);
+                    return new(rule, Clamp(current + rule.Modifier, rule.Floor), $"{name} cost {current}{Modified(rule.Modifier, rule.Floor)}", null, false, target);
+                }
+            case GoldCostBasis.TargetUnitTotal:
+                {
+                    var total = UnitTotalGoldCost(target, out var breakdown);
+                    var label = Definition(target).Type == CardType.Personality && breakdown.Contains('+') ? $"{name} unit total {breakdown}" : $"{name} total cost {total}";
+                    return new(rule, Clamp(total + rule.Modifier, rule.Floor), label + Modified(rule.Modifier, rule.Floor), null, false, target);
+                }
+            case GoldCostBasis.TargetRecruit:
+                {
+                    var recruit = QuotePurchase(command.PlayerId, target.Id, ignoreHonorRequirementIfPersonalityClan: rule.HonorWaiverClan, fromDeadPile: target.Zone is Zone.Dead or Zone.DynastyDiscard,
+                        anyOwnerPile: rule.AnyOwnerPile);
+                    var derivation = recruit.Error is null && recruit.Cost != Definition(target).GoldCost && recruit.Basis is { } terms ? $" ({terms})" : "";
+                    var performerCost = 0; var performerNote = "";
+                    if (rule.MinusPerformerCost)
+                    {
+                        if (command.PerformerId is null || !_state.Cards.TryGetValue(command.PerformerId, out var performing)) return new(rule, 0, "Choose a performing card to see this cost.", null, true, null);
+                        // A Yojimbo's Duty (Forgotten Legacy pass, issue #467 batch 3): "for less Gold equal to your Yojimbo's PRINTED Gold Cost plus 1" -- StatBase (the flag
+                        // GoldCostRule.StatValue already uses for "the printed value") reads the performer's printed Gold Cost instead of his current one.
+                        performerCost = rule.StatBase ? Definition(performing).GoldCost : CardGoldCost(performing);
+                        performerNote = $" less {Definition(performing).Name}'s {(rule.StatBase ? "printed " : "")}Gold Cost {performerCost}";
+                    }
+                    // Black Pearl (issue #467): "paying 4 less Gold if the Personality is Nonhuman".
+                    var keywordDiscount = rule.DiscountKeyword is { } discountKeyword && Keyword(target, discountKeyword) ? rule.KeywordDiscount : 0;
+                    var keywordNote = keywordDiscount > 0 ? $" less {keywordDiscount} ({rule.DiscountKeyword})" : "";
+                    return new(rule, Clamp(recruit.Cost + rule.Modifier - performerCost - keywordDiscount, rule.Floor), $"{name} recruit cost {recruit.Cost}{derivation}{performerNote}{keywordNote}{Modified(rule.Modifier, rule.Floor)}", recruit.Error, false, target);
+                }
         }
         return new(rule, 0, "Unsupported Gold cost rule.", "Unsupported Gold cost rule.", false, null);
     }
@@ -489,7 +493,7 @@ public sealed partial class MatchEngine
     /// client has one panel for every Gold action. Recruiting is fixed: the card's printed cost adjusted by
     /// the chosen Clan discount/allegiance, all decided by QuotePurchase.</summary>
     private static GoldQuote ToGoldQuote(PurchaseQuote quote) =>
-        new(quote.Cost, GoldCostKind.Fixed, quote.Basis ?? $"Cost {quote.Cost}", quote.Error, quote.Payments);
+        new(quote.Cost, GoldCostKind.Fixed, quote.Basis ?? $"Cost {quote.Cost}", quote.Error, quote.Payments, Sources: quote.Sources); // issue #578: the recruit panel needs the payment tokens its suggestions may name
 
     // Equip (issue #303 folds Equip's own cost into the same quote shape): the attachment's printed cost
     // less every discount that applies to THIS attachment, THIS wielder and THIS player. Katagi's is the
@@ -508,6 +512,10 @@ public sealed partial class MatchEngine
         // formula directly rather than as a new command flag.
         if (fromHand && Definition(target).Effect == "weapon-discount-non-unique" && Keyword(card, "Weapon") && !Keyword(card, "Unique"))
         { raw -= 4; kind = GoldCostKind.Derived; basis += $" − 4 ({Definition(target).Name}, non-Unique Weapon)"; }
+        // Tempest of Flame (issue #566): "Attaches to a Fire or Void Shugenja paying 1 less Gold" -- the attaching card's OWN discount (unlike Katagi's, which is keyed
+        // on the wielder), unconditional on source zone (no "from your hand" is printed).
+        if (def.Effect == "tempest-of-flame" && (Keyword(target, "Fire") || Keyword(target, "Void")))
+        { raw -= 1; kind = GoldCostKind.Derived; basis += " − 1 (Fire or Void Shugenja)"; }
         // Satoshi's Dual Warfans (issue #264): "Enters play paying 1 less Gold if you are a Lion
         // Clan player" -- the EQUIPPING PLAYER's own Clan, not the wielder's own trait (a different
         // axis from Katagi's own weapon-discount-non-unique above, so a separate term rather than

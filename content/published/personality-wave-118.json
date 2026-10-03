@@ -1,0 +1,169 @@
+{
+  "Profile": "personality-wave-118",
+  "Rules": "Emperor Edition core rules; reviewed user-supplied created-card scans.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-9814",
+      "Name": "Kakita Saki",
+      "Type": "Personality",
+      "Clan": "Crane",
+      "GoldCost": 5,
+      "GoldProduction": 0,
+      "Force": 1,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": 5,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Target your Personality: Create a +2F Armor Item with the trait, \"Melee and Ranged Attacks targeting this Personality have -3 strength\" and attach it to him.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9814.jpg",
+      "Keywords": [
+        "Artisan",
+        "Crane Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "kakita-saki-create-armor"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9829",
+      "Name": "Kitsune Kichi",
+      "Type": "Personality",
+      "Clan": "Mantis",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 3,
+      "PersonalHonor": 3,
+      "HonorRequirement": 3,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After Kichi enters play: Create a 3F/2C/3PH Mantis Clan • Nonhuman • Badger • Spirit Personality with the ability, \"Battle: Target an enemy Personality: Reduce his Force to 0.\"",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9829.jpg",
+      "Keywords": [
+        "Earth",
+        "Kitsune",
+        "Mantis Clan",
+        "Nonhuman",
+        "Shugenja"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "kichi-create-badger"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9996",
+      "Name": "Emerald Magistrate",
+      "Type": "Personality",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 4,
+      "PersonalHonor": 3,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "May not be included in decks.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9996.jpg",
+      "Keywords": [
+        "Duelist",
+        "Imperial",
+        "Magistrate",
+        "Samurai"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "none",
+      "CreatedOnly": true
+    },
+    {
+      "Id": "oracle-l5r-9995",
+      "Name": "Assassin",
+      "Type": "Personality",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 3,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "May not be included in decks.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9995.jpg",
+      "Keywords": [
+        "Duelist",
+        "Assassin"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "none",
+      "CreatedOnly": true
+    },
+    {
+      "Id": "user-scan-ancestor-spirit",
+      "Name": "Ancestor Spirit",
+      "Type": "Personality",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 2,
+      "PersonalHonor": 3,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "This Personality has your Clan alignment.\nMay not be included in decks.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/user-scan-ancestor-spirit.jpg",
+      "Keywords": [
+        "Samurai",
+        "Ancestor",
+        "Spirit"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "none",
+      "CreatedOnly": true
+    },
+    {
+      "Id": "user-scan-kichis-badger",
+      "Name": "Kichi's Badger",
+      "Type": "Personality",
+      "Clan": "Mantis",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 2,
+      "PersonalHonor": 3,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "May not be included in decks.\nBattle: Target an enemy Personality: Reduce his Force to 0.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/user-scan-kichis-badger.jpg",
+      "Keywords": [
+        "Mantis Clan",
+        "Nonhuman",
+        "Badger",
+        "Spirit"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "kichis-badger-reduce"
+      ],
+      "Effect": "none",
+      "CreatedOnly": true
+    }
+  ],
+  "Decks": []
+}

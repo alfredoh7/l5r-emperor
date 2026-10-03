@@ -38,6 +38,7 @@ public sealed partial class MatchEngine
         or "sandalwood-incense-focus" // issue #453, batch 5
         or "cycle-of-vengeance-focus" // issue #460, batch 4
         or "swell-of-strength-focus" // issue #460, batch 5: Hiromi's Vassals/Shamsir's own attach-self shape, narrowed to Water Shugenja by AttachRequiresKeyword.
+        or "crippled-sensei-focus"
         || abilityId == "fair-warning-focus" // issue #453, batch 2
         || abilityId == "superior-opponent-focus" // Emperor Edition remaining-cards pass, group C (issue #492)
         || IsMechDFocusChoice(abilityId); // Broken Cipher (issue #501, EmperorMechD.cs)
@@ -66,6 +67,7 @@ public sealed partial class MatchEngine
         AbilityIdsOf(card).Any(id => AbilityCatalog.All.TryGetValue(id, out var ability) && IsAction(ability) && ActionCarriesKeyword(ability, card, "Political"));
 
     private List<string> FocusChoiceCandidates(int playerId, string abilityId, string focusCardId) => abilityId == "crimson-mark-focus" ? DuelAttachmentCandidates()
+        : abilityId == "crippled-sensei-focus" ? _state.Players.Select(p => p.Id.ToString()).ToList()
         : IsFairWarningFocus(abilityId) ? FairWarningCandidates(playerId)
         : IsEffectKeyFocusEffect(abilityId) ? SandalwoodCandidates(playerId)
         : IsAttachSelfFocusEffect(abilityId) ? AttachWielderCandidates(playerId, focusCardId)
@@ -129,6 +131,7 @@ public sealed partial class MatchEngine
         _state.PendingFocusChoice = new PendingFocusChoice { Index = index, FocusCardId = focusCardId, PlayerId = owner, Candidates = candidates, AbilityId = abilityId };
         _state.PendingChoice = new("focusEffectChoice", owner, focusCardId, IsFairWarningFocus(abilityId)
             ? $"{Definition(focus).Name} (Focus Effect): {Player(owner).Name}, you may give a Personality -4F."
+            : abilityId == "crippled-sensei-focus" ? $"{Definition(focus).Name} (Focus Effect): {Player(owner).Name}, choose a player to lose 2 Honor."
             : IsCycleOfVengeanceFocus(abilityId) ? $"{Definition(focus).Name} (Focus Effect): {Player(owner).Name}, you may give one of your Personalities two +1F Revenge tokens."
             : abilityId == "superior-opponent-focus" ? $"{Definition(focus).Name} (Focus Effect): {Player(owner).Name}, you may destroy an attachment at the current battlefield."
             : attachments
@@ -167,6 +170,7 @@ public sealed partial class MatchEngine
         var focus = Card(pending.FocusCardId);
         var destroys = pending.AbilityId is "crimson-mark-focus" or "superior-opponent-focus";
         var attachSelf = IsAttachSelfFocusEffect(pending.AbilityId);
+        Require(command.Choice != "decline" || pending.AbilityId != "crippled-sensei-focus", "Choose a player to lose 2 Honor.");
         Require(command.Choice != "decline" || !IsStraightenFocusEffect(pending.AbilityId), "This Focus Effect is not optional: choose a Personality to straighten.");
         if (command.Choice == "decline") Emit("focusEffectDeclined", $"{Player(pending.PlayerId).Name} took nothing ({Definition(focus).Name}).", pending.PlayerId, pending.FocusCardId);
         // Sandalwood Incense (issue #453 batch 5): the chosen effect key, not a card.
@@ -176,6 +180,13 @@ public sealed partial class MatchEngine
             if (command.TargetId == SandalwoodGainHonor) GainHonor(pending.PlayerId, 2, Definition(focus).Name, focus);
             else Draw(Player(pending.PlayerId));
             Emit("focusEffectChosen", $"{Player(pending.PlayerId).Name} chose to {(command.TargetId == SandalwoodGainHonor ? "gain 2 Honor" : "draw a card")} ({Definition(focus).Name}).", pending.PlayerId, pending.FocusCardId);
+        }
+        else if (pending.AbilityId == "crippled-sensei-focus")
+        {
+            Require(command.TargetId is not null && pending.Candidates.Contains(command.TargetId), "Choose one of the offered players.");
+            var chosenPlayerId = int.Parse(command.TargetId!);
+            GainHonor(chosenPlayerId, -2, Definition(focus).Name, focus);
+            Emit("focusEffectHonorLoss", $"{Player(chosenPlayerId).Name} lost 2 Honor ({Definition(focus).Name}).", pending.PlayerId, pending.FocusCardId);
         }
         else
         {
@@ -228,14 +239,15 @@ public sealed partial class MatchEngine
         if (p.DelayDecision) { foreach (var option in DelayDecisionActions(p)) yield return option; yield break; }
         if (IsMechDFocusChoice(p.AbilityId)) { foreach (var option in MechDFocusChoiceActions(p, playerId)) yield return option; yield break; } // Broken Cipher (issue #501)
         foreach (var id in p.Candidates)
-            yield return new("chooseFocusEffect", IsFairWarningFocus(p.AbilityId) ? $"Give {Definition(Card(id)).Name} -4F"
+            yield return new("chooseFocusEffect", p.AbilityId == "crippled-sensei-focus" ? $"{Player(int.Parse(id)).Name} loses 2 Honor"
+                : IsFairWarningFocus(p.AbilityId) ? $"Give {Definition(Card(id)).Name} -4F"
                 : IsEffectKeyFocusEffect(p.AbilityId) ? (id == SandalwoodGainHonor ? "Gain 2 Honor" : "Draw a card")
                 : p.AbilityId is "crimson-mark-focus" or "superior-opponent-focus" ? $"Destroy {Definition(Card(id)).Name}"
                 : IsAttachSelfFocusEffect(p.AbilityId) ? $"Attach to {Definition(Card(id)).Name}"
                 : IsCycleOfVengeanceFocus(p.AbilityId) ? $"Give {Definition(Card(id)).Name} two Revenge tokens"
                 : IsStraightenFocusEffect(p.AbilityId) ? $"Straighten {Definition(Card(id)).Name}" : $"Put {Definition(Card(id)).Name} into your hand", true, null,
                 new GameCommand("chooseFocusEffect", playerId, _state.Version, CardId: p.FocusCardId, TargetId: id), id);
-        if (IsStraightenFocusEffect(p.AbilityId)) yield break; // mandatory: no "take nothing"
+        if (IsStraightenFocusEffect(p.AbilityId) || p.AbilityId == "crippled-sensei-focus") yield break; // mandatory: no "take nothing"
         yield return new("chooseFocusEffect", "Take nothing", true, null, new GameCommand("chooseFocusEffect", playerId, _state.Version, CardId: p.FocusCardId, Choice: "decline"), p.FocusCardId);
     }
 }

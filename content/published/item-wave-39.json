@@ -1,0 +1,110 @@
+{
+  "Profile": "item-wave-39",
+  "Rules": "Emperor Edition core rules; reviewed user-supplied created-card scans.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-9883",
+      "Name": "Vanquisher's Blades",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 1,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After this card enters play: Create a +2F/+1C Weapon Item and attach it to this Personality (if legal).",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9883.jpg",
+      "Keywords": [
+        "Weapon"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "vanquishers-blades-create"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9749",
+      "Name": "Readied Blade",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 1,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "May not be included in decks.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9749.jpg",
+      "Keywords": [
+        "Weapon"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "none",
+      "CreatedOnly": true
+    },
+    {
+      "Id": "user-scan-kakita-armor",
+      "Name": "Kakita Armor",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "May not be included in decks.\nMelee and Ranged Attacks targeting this Personality have -3 strength.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/user-scan-kakita-armor.jpg",
+      "Keywords": [
+        "Armor"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "none",
+      "CreatedOnly": true,
+      "AttackDefenseKind": "Both",
+      "AttackDefenseAmount": -3,
+      "AttackDefenseScope": "Wielder"
+    },
+    {
+      "Id": "user-scan-air-yari",
+      "Name": "Air Yari",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 1,
+      "Chi": 1,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "May not be included in decks.\nBattle: Give each Personality and Follower in the enemy army -1F.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/user-scan-air-yari.jpg",
+      "Keywords": [
+        "Air",
+        "Weapon"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "air-yari-penalty"
+      ],
+      "Effect": "none",
+      "CreatedOnly": true
+    }
+  ],
+  "Decks": []
+}

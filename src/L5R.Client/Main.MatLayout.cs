@@ -9,7 +9,7 @@ public partial class Main
     private InkMatSections _matSections = null!;
     private float _playLeft, _playWidth;
     private int _matMatchEpoch;
-    private float _enemyProvinceY, _reservedBattleHeight, _reservedHoldingWidth;
+    private float _enemyProvinceY, _reservedBattleHeight, _reservedHoldingWidth, _regionLayoutExtent;
     private readonly Dictionary<int, float> _reservedHomeBands = [];
     private readonly float[] _reservedLaneWidths = new float[4];
     // Additional battlefields (Emperor Edition rulings pass R1, issue #492: a battle without a province, or a second one at a province) get a lane of their own beyond the piles while they exist; the set
@@ -20,8 +20,10 @@ public partial class Main
     /// <summary>What a battlefield is called: a province by its number, an additional one by the province it is at (if any).</summary>
     private string BattlefieldName(int battlefield)
     {
-        if (battlefield < MatchEngine.FirstAdditionalBattlefield) return $"Province {battlefield + 1}";
-        return View.Battlefields?.FirstOrDefault(b => b.Index == battlefield)?.Province is int province ? $"Additional battlefield at province {province + 1}" : "Battlefield without a province";
+        var name = BattlefieldPresentation.Name(View, battlefield);
+        return BattlefieldProvince(battlefield) is null && _openBattlefieldOrdinals.Count > 1 &&
+            _openBattlefieldOrdinals.TryGetValue(battlefield, out var ordinal)
+            ? name + " " + BattlefieldPresentation.Letter(ordinal) : name;
     }
 
     private static bool IsAdditionalBattlefield(int battlefield) => battlefield >= MatchEngine.FirstAdditionalBattlefield;
@@ -31,6 +33,7 @@ public partial class Main
 
     // Every additional battlefield the table has to show: one the engine lists, the current one, or one with units at it.
     private IEnumerable<int> ExtraBattlefieldIndices() => (View.Battlefields ?? []).Select(b => b.Index)
+        .Concat(View.UnresolvedBattlefields)
         .Concat(View.CurrentBattleProvince is int current ? [current] : [])
         .Concat(View.Players.SelectMany(p => p.Army).Where(c => c.AttachedTo is null && c.ProvinceIndex is not null).Select(c => c.ProvinceIndex!.Value))
         .Where(IsAdditionalBattlefield).Distinct();
@@ -44,7 +47,8 @@ public partial class Main
     private readonly Dictionary<string, Vector2> _battlePlacements = [];
     private IEnumerable<CardView> CourtUnits(PlayerView player, int province) => player.Army
         .Where(c => c.AttachedTo is null && c.ProvinceIndex == province)
-        .Concat(player.Home.Where(c => c.AttachedTo is null && _assignments.GetValueOrDefault(c.Id, -1) == province));
+        .Concat(player.Home.Where(c => c.AttachedTo is null && _assignments.GetValueOrDefault(c.Id, -1) == province))
+        .Concat(MovementCourtUnits(player, province));
     private readonly Dictionary<int, CardView[][]> _holdingRows = [];
     private readonly Dictionary<int, Rect2> _holdingBounds = [], _homeBounds = [];
     private readonly List<InkMatSection> _matTargets = [];
@@ -70,7 +74,10 @@ public partial class Main
 
     private void MeasureTableLayout()
     {
+        ObserveBattlefieldLocations();
         var oldSize = new Vector2(WorldWidth, _worldHeight);
+        var oldRegionExtent = _regionLayoutExtent;
+        _regionLayoutExtent = View.Players.SelectMany(p => p.Provinces).Sum(ProvinceCardWidth);
         var oldPersistentExtent = new Vector3(_persistentWidth, _persistentHeights.GetValueOrDefault(0), _persistentHeights.GetValueOrDefault(1));
         if (!_tableLayoutSeen)
         {
@@ -81,16 +88,18 @@ public partial class Main
         // permanently inflate the next Action/Dynasty board.
         if (!BattleActive && !PresentationBusy)
         { _reservedBattleHeight = 0; _reservedHoldingWidth = 0; _reservedHomeBands.Clear(); Array.Clear(_reservedLaneWidths); _reservedExtraLanes.Clear(); }
-        _matTargets.Clear(); _battleCourts.Clear(); _battlePlacements.Clear();
+        _matTargets.Clear(); _battleCourts.Clear(); _battlePlacements.Clear(); _movementPlacements.Clear();
         MeasurePersistentHome();
         foreach (var extra in ExtraBattlefieldIndices()) _reservedExtraLanes.Add(extra);
-        _extraLanes = _reservedExtraLanes.Take(MaxExtraLanes).ToArray();
+        _extraLanes = _reservedExtraLanes.ToArray();
+        if (_slotCenters.Length < 8 + _extraLanes.Length) Array.Resize(ref _slotCenters, 8 + _extraLanes.Length);
         for (var i = 0; i < 4; i++)
         {
             var unitWidth = View.Players.SelectMany(p => CourtUnits(p, i)
                 .Select(c => UnitWidth(c, p))).DefaultIfEmpty(154).Max();
             _laneWidths[i] = _reservedLaneWidths[i] = Math.Max(_reservedLaneWidths[i],
-                Math.Max(210, ArmyColumns(i) * (unitWidth + CardGap) + MatPadding * 2 + 10));
+                Math.Max(View.Players.Max(p => ProvinceContentWidth(p.Provinces.Single(v => v.Index == i))) + 8,
+                    ArmyColumns(i) * (unitWidth + CardGap) + MatPadding * 2 + 10));
         }
         // This inner play area mirrors by seat. Holdings deliberately remain on
         // screen-left for both owners and never enter this mirrored slot system.
@@ -105,7 +114,7 @@ public partial class Main
         {
             var extra = _extraLanes[k];
             var extraUnitWidth = View.Players.SelectMany(p => CourtUnits(p, extra).Select(c => UnitWidth(c, p))).DefaultIfEmpty(154).Max();
-            var extraWidth = Math.Max(210, ArmyColumns(extra) * (extraUnitWidth + CardGap) + MatPadding * 2 + 10);
+            var extraWidth = Math.Max(300, ArmyColumns(extra) * (extraUnitWidth + CardGap) + MatPadding * 2 + 10);
             _slotCenters[8 + k] = x + extraWidth / 2; x += extraWidth;
         }
         _playWidth = x;
@@ -135,7 +144,7 @@ public partial class Main
         // spacing. The defending court touches its province through B's neck;
         // Home remains outside that court, on the table-facing side as well.
         _enemyProvinceY = MatPadding + MatHeader;
-        var connectedCourt = BattleActive && (View.CurrentBattleProvince is not null || View.Players.Any(p => Enumerable.Range(0, 4).Concat(_extraLanes).Any(i => CourtUnits(p, i).Any())));
+        var connectedCourt = BattleActive && (View.CurrentBattleProvince is not null || View.UnresolvedBattlefields.Length > 0 || View.Players.Any(p => Enumerable.Range(0, 4).Concat(_extraLanes).Any(i => CourtUnits(p, i).Any())));
         var occupied = Enumerable.Range(0, 4).Concat(_extraLanes).Select(i => View.Players.Sum(p => CourtUnits(p, i).Chunk(ArmyColumns(i))
             .Sum(r => r.Max(c => StackHeight(c, p)) + RowGap))).DefaultIfEmpty(0).Max();
         _battleHeight = connectedCourt ? Math.Max(_reservedBattleHeight, Math.Max(270, occupied + MatHeader + MatPadding + 38)) : _reservedBattleHeight;
@@ -175,13 +184,14 @@ public partial class Main
             // Destroying one never shifts or renumbers its surviving neighbours.
             foreach (var province in player.Provinces.Where(p => !p.Destroyed))
             {
-                var bayWidth = Math.Min(CardHeight + 8, _laneWidths[province.Index] - 12);
+                var bayWidth = Math.Min(ProvinceContentWidth(province) + 8, _laneWidths[province.Index] - 12);
                 _matTargets.Add(new($"province:{player.Id}:{province.Index}", $"Province {province.Index + 1}",
                     new Rect2(SlotX(player, province.Index + 2) + (CardHeight - bayWidth) / 2,
                         ProvinceRowY(player) - MatHeader, bayWidth, provinceHeight),
-                    ProvinceNumber: province.Index + 1, ConnectionAbove: player.Id == Self.Id,
+                    ProvinceNumber: province.Index + 1, RegionPair: province.Region is not null, ConnectionAbove: player.Id == Self.Id,
                     Connected: BattleActive && player.Id != View.ActivePlayerId &&
-                        (View.CurrentBattleProvince == province.Index || View.Players.Any(p => CourtUnits(p, province.Index).Any()))));
+                        CourtConnectsToProvince(province.Index) &&
+                        (View.CurrentBattleProvince == province.Index || View.Players.Any(p => CourtUnits(p, province.Index).Any()) || MovementDestination(player.Id, province.Index))));
             }
         }
         if (BattleActive)
@@ -189,17 +199,20 @@ public partial class Main
             var defender = View.Players.Single(p => p.Id != View.ActivePlayerId);
             foreach (var index in CourtIndices(defender).Distinct())
             {
-                if (!View.Players.Any(p => CourtUnits(p, index).Any()) && View.CurrentBattleProvince != index) continue;
+                if (!View.Players.Any(p => CourtUnits(p, index).Any()) && View.CurrentBattleProvince != index &&
+                    !MovementDestination(defender.Id, index) && !View.UnresolvedBattlefields.Contains(index)) continue;
                 var widest = View.Players.SelectMany(p => CourtUnits(p, index).Select(c => UnitWidth(c, p))).DefaultIfEmpty(154).Max();
-                var width = Math.Max(210, ArmyColumns(index) * (widest + CardGap) + MatPadding * 2 + 10) - 16;
+                var width = Math.Max(IsAdditionalBattlefield(index) ? 300 : 210,
+                    ArmyColumns(index) * (widest + CardGap) + MatPadding * 2 + 10) - 16;
                 var occupiedHeight = View.Players.Sum(p => CourtUnits(p, index).Chunk(ArmyColumns(index))
                     .Sum(r => r.Max(c => StackHeight(c, p)) + RowGap));
                 var courtHeight = Math.Max(270, occupiedHeight + MatHeader + MatPadding + 38);
                 var yCourt = defender.Id == Self.Id ? _battleY + _battleHeight - courtHeight : _battleY;
                 var bounds = new Rect2(SlotX(defender, LaneSlot(index)) + CardHeight / 2 - width / 2, yCourt, width, courtHeight);
                 _battleCourts[index] = bounds;
-                // A battlefield without a province is still a court (its label begins "Battlefield", which the threshold art draws as one); it has no province above it to be joined to.
-                _matTargets.Add(new($"battle:{defender.Id}:{index}", IsAdditionalBattlefield(index) ? "Battlefield without a province" : $"Province {index + 1}", bounds, View.CurrentBattleProvince == index, ConnectionAbove: defender.Id != Self.Id));
+                var closed = !CourtConnectsToProvince(index);
+                _matTargets.Add(new($"battle:{defender.Id}:{index}", BattlefieldName(index), bounds,
+                    View.CurrentBattleProvince == index || MovementDestination(defender.Id, index), ConnectionAbove: closed || defender.Id != Self.Id, ClosedCourt: closed));
                 // Top army belongs to the top seat, so the defending seat is
                 // always closest to its own province, from either player's view.
                 foreach (var player in new[] { enemy, Self })
@@ -211,7 +224,12 @@ public partial class Main
                     {
                         var rowWidth = row.Sum(c => UnitWidth(c, player)) + (row.Length - 1) * CardGap;
                         var cx = bounds.GetCenter().X - rowWidth / 2;
-                        foreach (var card in row) { _battlePlacements[card.Id] = new Vector2(cx, y); cx += UnitWidth(card, player) + CardGap; }
+                        foreach (var card in row)
+                        {
+                            if (MovementGhost(card, index)) _movementPlacements[card.Id] = new Vector2(cx, y);
+                            else _battlePlacements[card.Id] = new Vector2(cx, y);
+                            cx += UnitWidth(card, player) + CardGap;
+                        }
                         y += row.Max(c => StackHeight(c, player)) + RowGap;
                     }
                 }
@@ -225,7 +243,7 @@ public partial class Main
         // so a newly gained Favor cannot appear behind the sidebar. A manually
         // positioned camera remains under player control.
         var persistentChanged = oldPersistentExtent.DistanceTo(new Vector3(_persistentWidth, _persistentHeights.GetValueOrDefault(0), _persistentHeights.GetValueOrDefault(1))) > 1;
-        if (_tableLayoutSeen && _cameraFitted && !persistentChanged && oldSize.DistanceTo(new Vector2(WorldWidth, _worldHeight)) > 1) _cameraFitted = false;
+        if (_tableLayoutSeen && _cameraFitted && !persistentChanged && Math.Abs(oldRegionExtent - _regionLayoutExtent) < 1 && oldSize.DistanceTo(new Vector2(WorldWidth, _worldHeight)) > 1) _cameraFitted = false;
         _tableLayoutSeen = true;
         _board.Size = new Vector2(WorldWidth, _worldHeight); _world.Size = _board.Size; _pileHud.Size = _board.Size; _battleDecor.Size = _board.Size;
     }

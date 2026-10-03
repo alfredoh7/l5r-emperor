@@ -1,0 +1,29 @@
+{
+  "approved": "Alfredo, 2026-09-18: A Region layout + B Celestial frame + C inspection behavior",
+  "referenceDate": "2026-09-17",
+  "productionMode": "Built-in image_gen; no CLI/API fallback. Original card scans remain live and unchanged.",
+  "frameSource": "/Users/alfredo/.codex/generated_images/01a0b019-027d-7ee0-84a4-44aac565a142/exec-27682d20-2cbf-4bea-be04-d5d8d82ab56f.png",
+  "prompt": "celestial-frame.prompt.txt",
+  "regionMethod": "Actual warm ornamental pixels sampled from approved A at runtime; original province numeral seals remain proportional.",
+  "frameMethod": "Dedicated alpha-transparent orthographic asset derived from B; source aperture maps to the original full card.",
+  "files": [
+    {
+      "path": "assets/ui/regions-celestials/approved-a.png",
+      "sha256": "88e8c05040d28163d1474de530486b5993535e5ca41acb0b8c17fc9d2a9ef467"
+    },
+    {
+      "path": "assets/ui/regions-celestials/approved-b.png",
+      "sha256": "ec684fc9428ae4a25eb64d3a98c563c7ceb4814790f78321025421211979b3d6"
+    },
+    {
+      "path": "assets/ui/regions-celestials/approved-c.png",
+      "sha256": "24d8d7f7004afd385c4274ee5f39ff96372fbfc0c000b351c01e90433a372c1f"
+    },
+    {
+      "path": "src/L5R.Client/Art/Support/celestial-frame.png",
+      "sha256": "cdf5779a0f046e8f571710d4406af0598650040d7bd3dd052b5a3a34e80f9727"
+    }
+  ],
+  "initialFrameSource": "/Users/alfredo/.codex/generated_images/01a0b019-027d-7ee0-84a4-44aac565a142/exec-b6efd8fc-f217-4dd6-9698-876f7cd237f3.png",
+  "refinement": "Second built-in imagegen pass changed rounded corner plates to stepped angular brass brackets, following approved B. Aperture and silhouette bounds preserved."
+}

@@ -472,7 +472,6 @@ internal static class EmperorPersonalityBatch6Tests
         var voidRing = e.State.Cards.Values.Single(c => c.DefinitionId == RingOfVoid);
         Check(!CanUse(e, 0, "yung-search-ring", yung.Id), "no Ring has entered play yet");
         Accept(e, Use(e, 0, "ring-of-void-recruit", voidRing.Id));
-        Eq(voidRing.Id, voidRing.Id);
         Eq(e.State.Cards[voidRing.Id].Zone, Zone.Home, "the Ring entered play");
         Eq(e.State.PendingChoice?.Type, "afterActionResolvedReaction", "Yung's window opens");
         Accept(e, Enabled(e, 0, "yung-search-ring", yung.Id).Command!);

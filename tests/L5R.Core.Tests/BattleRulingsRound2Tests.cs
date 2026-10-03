@@ -255,7 +255,7 @@ internal static class BattleRulingsRound2Tests
             Take(e2,0,"beforeBattleOrder",o=>o.Command!.TargetId!.StartsWith("delayed:"));
             Check(e2.State.PendingChoice is null,"the Reaction is no longer usable (its performer went home): it is skipped, nobody is asked");
             Check(Fought(e2,"attacking Force 0, defending Force 5"),"the Attacker's army is gone");
-            Check(e2.State.Cards[r.X.Id].Zone==Zone.Home && e2.State.Cards[r.Y.Id].Zone==Zone.Battlefield==false || true);
+            Check(e2.State.Cards[r.X.Id].Zone==Zone.Home && e2.State.Cards[r.Y.Id].Zone!=Zone.Battlefield,"both units have left the battlefield");
             Eq(e2.State.Cards[r.X.Id].Zone,Zone.Home); Eq(e2.State.Cards[r.Y.Id].Zone,Zone.Home,"the winning Defender's unit returns home at the end of the Attack Phase, unharmed");
             Eq(e2.State.Cards[r.Y.Id].Bowed,false);
         }

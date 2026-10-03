@@ -191,10 +191,13 @@ public sealed record Protection(string Source, string Duration);
 public sealed record ActionLock(string Source, string Duration);
 
 /// <summary>The moments of a turn a straighten hold can wait for. Each happens during the active player's turn; a hold names whose turn counts.</summary>
-public enum StraightenPoint { TurnBegins, StraightenPhaseEnds, EventsRevealEnds, ActionPhaseEnds, TurnEnds,
+public enum StraightenPoint
+{
+    TurnBegins, StraightenPhaseEnds, EventsRevealEnds, ActionPhaseEnds, TurnEnds,
     // "until the phase ends" (Ronin Ambushers, issue #453 batch 5): released when the phase in progress gives way to a different one (the whole
     // Attack-declaration-through-battle-resolution stretch counts as one phase, the War Weariness convention). Owner is always null.
-    PhaseEnds }
+    PhaseEnds
+}
 
 /// <summary>"May not straighten until X" (issue #415). <see cref="Owner"/> is the player whose turn counts (null: whoever's turn it is when the point comes, "this turn" and "the
 /// next Straighten Phase"); <see cref="Until"/> is the point; <see cref="Skip"/> is how many of those points must pass with the hold still standing before it is released (0: the
@@ -352,6 +355,11 @@ public sealed class ProvinceState
     // second Region revealed here rather than replacing the first). Mirrors CardId's own role for the
     // face-down/face-up Dynasty card, but for the Zone.Region card instead.
     public string? RegionId { get; set; }
+    // Plains of Otosan Uchi (oracle-l5r-5979, OtosanUchiPlains.cs): the province's second Dynasty-card slot, mirroring
+    // CardId's own role. Only ever populated while GrantsSecondDynastySlot(this) holds (RegionId is Otosan Uchi's own
+    // Region) -- except the catalogue's own errata note: once that Region is destroyed independent of the province
+    // (Brawl), whatever already sits here stays until it next leaves normally, and simply is not refilled again.
+    public string? CardId2 { get; set; }
     // Strength bonuses from cards that stay in play (Hasty Fortifications, issue #418): counted while their source is.
     public List<ProvinceBonus> SourceBonuses { get; set; } = [];
 }
@@ -762,6 +770,16 @@ public sealed partial class MatchState
     // reveal that defers to a player decision (Harsh Choices, Imperial Gift's search) resumes from here,
     // so the card that province refilled with is not revealed in the same phase it was placed.
     public int EventsRevealNext { get; set; }
+    // Plains of Otosan Uchi (oracle-l5r-5979, issue #554, OtosanUchiPlains.cs): a two-slot province's own reveal
+    // sequence in progress -- the province index (of the ACTIVE Events-Phase player's own row), the remaining slots
+    // still to reveal+resolve in the controller's chosen order (0 = CardId, 1 = CardId2), and whether CardId/CardId2
+    // are currently swapped so the ordinary single-slot ResolveEvent/ResolveRegion machinery can run unmodified
+    // against slot 2. All three reset once the sequence finishes; null/empty/false otherwise.
+    public int? OtosanUchiProvinceIndex { get; set; }
+    public List<int> OtosanUchiRevealQueue { get; set; } = [];
+    public bool OtosanUchiSwapped { get; set; }
+    // A province-card-targeting effect (Shosuro Toson's Reaction) paused on a two-candidate province (issue #554); null otherwise.
+    public PendingProvinceCardChoice? PendingProvinceCardChoice { get; set; }
     public int? CurrentBattleProvince { get; set; }
     public List<int> UnresolvedBattlefields { get; set; } = [];
     // Before This Battle Resolves (issue #272): see PendingBeforeBattleResolve's own doc comment.
@@ -1291,6 +1309,8 @@ public sealed record GameCommand(string Type, int PlayerId, long ExpectedVersion
     // (a single province rides in Province, as it always has).
     int[]? Provinces = null);
 public sealed record CommandResult(bool Accepted, string? Error, long Version, GameEvent[] Events);
+/// <summary>The consequence of destroying the province in a Harsh Choices decision, so no client re-derives it: the decider's unbroken provinces before and after, whether that ends the match in defeat, and the cards drawn if it does not.</summary>
+public sealed record HarshChoicesView(int ProvincesBefore, int ProvincesAfter, bool EndsMatch, int CardsDrawn);
 public sealed record PaymentOption(string[] SourceIds, int Produced, int Cost, int Excess);
 // Basis (issue #303): the human-readable derivation of Cost, e.g. "Training samurai cost 5 - 2 (Clan
 // discount)". Null only for quotes serialized by an older engine.
@@ -1313,6 +1333,8 @@ public sealed record GoldQuote(int Cost, string Kind, string Basis, string? Erro
     int? MinAmount = null, int? MaxAmount = null, Dictionary<int, PaymentOption[]>? PaymentsByAmount = null,
     // Issue #501 (EmperorMechE.cs): the payment sources that are not a card's own production (see PurchaseQuote.Sources). Null when there are none.
     PaymentSource[]? Sources = null);
+// Presentation metadata survives a disabled option's null Command. No executable command is invented for it.
+public sealed record AlternativeCostView(string AbilityId, string? PerformerId, string Id, string Label, string ActionLabel);
 /// <param name="Gold">The quote for this option's own command (its first legal target when the cost is
 /// target-derived). Null when the action costs no Gold.</param>
 /// <param name="TargetGold">Per-target quotes (target id to quote) for a target-derived cost: the cost
@@ -1325,7 +1347,14 @@ public sealed record ActionOption(string Type, string Label, bool Enabled, strin
     // Multi-target actions (issue #336): the slots of a Slots ability with the legal candidates of each, so a viewer can
     // collect the whole selection. Null for every ability with a single Target.
     TargetSlotOption[]? Slots = null,
-    bool NoTarget = false);
+    bool NoTarget = false, AlternativeCostView? AlternativeCost = null,
+    MoveDestinationView? Movement = null, AttackCueView? Attack = null);
+/// <summary>Read-only attack presentation. SourceId is the explicitly selected performer or the ability source;
+/// it identifies the card to mark, not a new legality or damage calculation.</summary>
+public sealed record AttackCueView(string Kind, string SourceId);
+/// <summary>Proposed movement only: reactions may prevent each arrival independently. FixedMoverIds names the source/performer units;
+/// TargetMoves adds the command's selected target. Destinations remain in ActionOption.Provinces. No card-rule inference belongs in the UI.</summary>
+public sealed record MoveDestinationView(int DefenderId, string[] FixedMoverIds, bool TargetMoves);
 /// <param name="UnitForce">Authoritative effective unit contribution, including qualifying Followers.
 /// Null for hidden/non-unit/out-of-play cards and older payloads; never substitute a client calculation.</param>
 public sealed record CardView(string Id, CardDefinition? Definition, int OwnerId, Zone Zone, bool FaceUp,
@@ -1357,7 +1386,20 @@ public sealed record GrantedAbilityView(string AbilityId, string Label, string T
 /// <param name="MaxStrength">The limit in force (Times of Strife, Ancient Feud), or null. While it holds, the current strength may be higher and returns when the limit ends.</param>
 public sealed record ProvinceView(int Index, int Strength, bool Destroyed, CardView? Card, CardView? Region, int? MaxStrength = null,
     // Issue #503 (EmperorP6.cs): Illusory Defense's province that never holds a Dynasty card, and Dark Experiments' permanent mark (both public).
-    bool HoldsNoDynastyCards = false, bool DarkExperimentsMarked = false);
+    bool HoldsNoDynastyCards = false, bool DarkExperimentsMarked = false)
+{
+    /// <summary>Optional slot view for multi-card provinces. Null retains legacy Card as slot 0.
+    /// When supplied this is authoritative, including empty slots; Card must not be appended again.
+    /// Slot indices are stable across refills. Face-down cards must already be redacted by the producer.</summary>
+    public ProvinceCardSlotView[]? DynastySlots { get; init; }
+}
+public sealed record ProvinceCardSlotView(int Index, CardView? Card);
+/// <summary>Public decision identity/prompt; Options are sent only to PlayerId. Commands are engine-provided,
+/// not inferred by the client. Slot indices refer to OwnerId's Province, not card identities.</summary>
+public sealed record ProvinceOrderView(string Id, int PlayerId, int OwnerId, int Province, string Prompt,
+    ProvinceOrderOption[] Options);
+public sealed record ProvinceOrderOption(string Id, string Label, int[] Slots, GameCommand? Command,
+    bool Enabled = true, string? Reason = null);
 // DeadCount (issue #221): the authoritative count of this player's own Zone.Dead Personalities --
 // already present, individually, within Discard (each CardView's own Zone tells a dead card apart
 // from a merely-discarded one), but computed here as a single number the same way UnitForce is, so
@@ -1445,6 +1487,8 @@ public sealed record MatchView(string ContentVersion, string Scenario, long Vers
     // The opposing player's variable payment (issue #373, see OpponentPayment.cs): PUBLIC -- both players see the first player's amount, the card and the
     // Honor at stake; only the paying player's view carries the payment quote and what each amount would do.
     OpponentPaymentView? PendingOpponentPayment = null, DuelRecord? LastDuel = null,
+    // The approved attack cue (#355): public, derived from authoritative state.
+    AttackCueView? PendingAttack = null,
     // Emperor Edition Stronghold pass (issue #486), batch 3 (see EmperorStrongholdBatch3.cs): the face-down province cards this viewer looked at this turn -- PRIVATE to the looker, null for
     // everyone else. Never a card id: a face-down card is named by whose province and which.
     ProvinceSightView[]? ProvinceSights = null,
@@ -1452,7 +1496,15 @@ public sealed record MatchView(string ContentVersion, string Scenario, long Vers
     // none. An index below 100 is the battlefield of the Defender's province of that index; a higher one is an additional battlefield (EmperorRulingR1.cs).
     BattlefieldView[]? Battlefields = null,
     // Issue #503 (EmperorP5Hidden.cs): the cards of another player's hand this viewer looked at this turn (Scouting the Pass, The Price of Honor) -- PRIVATE to the looker, never an instance id.
-    HandSightView[]? HandSights = null);
+    HandSightView[]? HandSights = null)
+{
+    public ProvinceOrderView? PendingProvinceOrder { get; init; }
+    // Harsh Choices (issue #581): what destroying the province would do, computed by the engine and PUBLIC -- both players see the same consequence. Null when no Harsh Choices decision is open.
+    public HarshChoicesView? PendingHarshChoices { get; init; }
+    // Public display context for a battle fought inside the Action Phase. ActivePlayerId
+    // remains the battle's attacker; this is the original turn owner, never the paused action.
+    public int? ActionPhaseTurnPlayerId { get; init; }
+}
 /// <summary>Engine-private record of one face-down province card a player looked at (MatchState.ProvinceSights). Turn is the turn number it was looked at.</summary>
 public sealed record ProvinceSight(int ViewerId, int OwnerId, int Province, string CardId, string DefinitionId, int Turn);
 /// <summary>PRIVATE to the looking player: what the face-down card in a province is (its owner's province Province).</summary>

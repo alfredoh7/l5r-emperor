@@ -40,6 +40,8 @@ bash tools/run.sh
 
 Installation is explicit; the run/check scripts never silently download an editor or SDK. A .NET build may restore missing NuGet packages into `.cache/nuget`. Re-running bootstrap reuses matching installed tools and verified cached archives; it refuses to replace an existing mismatched tool directory automatically.
 
+For a double-click launcher instead of typing a run command, double-click `Play Latest.command` (Mac) or `Play Latest.bat` (Windows, needs Git Bash) in the checkout, or run `python3 tools/create-dev-launcher.py` once to create a nicer clickable icon under `artifacts/`: `L5R Emperor - Latest.app` on Mac, `L5R Emperor - Latest.lnk` on Windows. Both build and launch the current checkout without fetching or switching branches, and write launch output to `artifacts/checks/latest-launch.log`.
+
 `tools/env.sh` scopes .NET CLI state, package caches, telemetry settings, and editor selection to this project. The wrappers disable ASP.NET development-certificate generation and shared compiler processes. This matters on first run: `DOTNET_CLI_HOME` relocates CLI state, but by itself does not prevent development-certificate actions. No script trusts a certificate or changes system PATH. The bootstrap enables the local editor's portable settings mode; exported games use normal per-user application storage.
 
 For manual .NET/Godot commands, first run `source tools/env.sh` in Bash (including Git Bash on Windows). For SDK-only work, use `python3 tools/bootstrap.py --install --dotnet-only`.

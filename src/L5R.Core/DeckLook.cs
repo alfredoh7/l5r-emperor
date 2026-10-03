@@ -232,9 +232,15 @@ public sealed partial class MatchEngine
     /// <summary>Whether one viewed card may take one disposition, and the short reason when it may not.</summary>
     private (bool Legal, string? Reason) LookLegal(PendingLook look, LookSpec spec, CardInstance card, string disposition)
     {
+        // Hand and Show put the card into a hand: a Dynasty card can never go there, checked ahead of the Remainder
+        // short-circuit below so a spec could never accidentally default a Dynasty card straight into a hand either.
+        if (disposition is LookDisposition.Hand or LookDisposition.Show)
+        {
+            if (look.Deck != SearchDeck.Fate) return (false, "A Dynasty card cannot go into a hand");
+            if (look.DeckOwnerId != look.PlayerId) return (false, "Only cards from your own deck may be put in your hand");
+        }
         if (disposition == spec.Remainder) return (true, null);
         var rule = spec.Rules.First(r => r.Disposition == disposition);
-        if (disposition is LookDisposition.Hand or LookDisposition.Show && look.DeckOwnerId != look.PlayerId) return (false, "Only cards from your own deck may be put in your hand");
         if (rule.Criteria is not null) { var (eligible, reason) = SearchEligibility(rule.Criteria, card); if (!eligible) return (false, reason); }
         if (disposition == LookDisposition.Play) return P5PlayDispositionLegal(look, card); // issue #503 (EmperorP5Hidden.cs)
         return (true, null);
@@ -332,8 +338,11 @@ public sealed partial class MatchEngine
         var spec = LookSpecOf(look); var source = Card(look.SourceCardId); var sourceName = Definition(source).Name;
         if (look.Stage == "ChooseDeck")
             return new("ChooseDeck", source.Id, sourceName, spec.Label, _state.PendingChoice.Prompt,
-                spec.Targets.Select(t => { var owner = LookOwner(look, t); return new LookDeckChoiceView(t.Deck, owner, owner == viewerId,
-                    $"Top {look.Count} cards of {(owner == viewerId ? "your" : "your opponent's")} {t.Deck} deck", LookDeckList(owner, t.Deck).Count); }).ToArray(),
+                spec.Targets.Select(t =>
+                {
+                    var owner = LookOwner(look, t); return new LookDeckChoiceView(t.Deck, owner, owner == viewerId,
+                    $"Top {look.Count} cards of {(owner == viewerId ? "your" : "your opponent's")} {t.Deck} deck", LookDeckList(owner, t.Deck).Count);
+                }).ToArray(),
                 null, null, false, look.Count, 0, null, null, spec.Remainder, spec.Reorder);
         var cards = ViewedCards(look);
         var offered = OfferedDispositions(spec);

@@ -45,7 +45,8 @@ internal static partial class EmperorP5Tests
         Accept(e, pair.Command!);
         Check(e.State.Cards[mine].FaceUp, "the player's own face-down card was turned face-up");
         Eq(e.State.Cards[celestial.Id].Zone, Zone.Celestial, "the other player's Celestial was revealed and entered play");
-        Check(Rejection(MatchEngine.FromTestState(s), new GameCommand("useAbility", 0, e.Version, petty.Id, AbilityId: "p5-petty-reveal", CardIds: [mine])).Length > 0, "a real card id is refused");
+        var fresh = MatchEngine.FromTestState(s);
+        Reject(fresh, new GameCommand("useAbility", 0, fresh.Version, petty.Id, AbilityId: "p5-petty-reveal", CardIds: [mine]));
     }
 
     private static void PettyReturn()
