@@ -667,8 +667,8 @@ public sealed partial class MatchEngine
         }
         else if (_state.PendingChoice is { Type: "discardHand" })
         {
-            var count=player.Hand.Count-MaxHandSize(playerId);
-            Add("discardHand",$"Discard {count} card(s)",Command("discardHand",cardIds:player.Hand.Take(count).ToArray()),targets:player.Hand.ToArray());
+            var count = player.Hand.Count - MaxHandSize(playerId);
+            Add("discardHand", $"Discard {count} card(s)", Command("discardHand", cardIds: player.Hand.Take(count).ToArray()), targets: player.Hand.ToArray());
         }
         // Seeds of Decay pass (issue #453), batch 4: the two Events Phase decisions (SeedsOfDecayBatch4.cs), for the revealing player only.
         else if (_state.PendingChoice is { Type: "offeringReverence" } reverence)

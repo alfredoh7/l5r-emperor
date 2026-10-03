@@ -11,7 +11,7 @@ public partial class Main
         AddChild(dialog);
         var body = new VBoxContainer(); body.AddThemeConstantOverride("separation", 14); dialog.AddChild(body);
         dialog.GetOkButton().Text = "Close";
-        dialog.GetOkButton().CustomMinimumSize = new Vector2(140,48);
+        dialog.GetOkButton().CustomMinimumSize = new Vector2(140, 48);
         dialog.CloseRequested += dialog.QueueFree; dialog.Confirmed += dialog.QueueFree;
         PresentDialog(dialog, width, height); return (dialog, body);
     }
@@ -78,14 +78,14 @@ public partial class Main
         _savedSeat = seat; _savedServer = server;
         try
         {
-        var path = SeatPath;
-        var temporary = path + ".tmp-" + Guid.NewGuid().ToString("N");
-        var bytes = System.Text.Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new SavedConnection(server, seat), Json));
-        // Create with owner-only access from the first write on Unix; tokens never enter a replay or log.
-        var options = new FileStreamOptions { Mode = FileMode.Create, Access = System.IO.FileAccess.Write, Share = FileShare.None };
-        if (!OperatingSystem.IsWindows()) options.UnixCreateMode = UnixFileMode.UserRead | UnixFileMode.UserWrite;
-        using (var stream = new FileStream(temporary, options)) { stream.Write(bytes); stream.Flush(true); }
-        File.Move(temporary, path, true);
+            var path = SeatPath;
+            var temporary = path + ".tmp-" + Guid.NewGuid().ToString("N");
+            var bytes = System.Text.Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new SavedConnection(server, seat), Json));
+            // Create with owner-only access from the first write on Unix; tokens never enter a replay or log.
+            var options = new FileStreamOptions { Mode = FileMode.Create, Access = System.IO.FileAccess.Write, Share = FileShare.None };
+            if (!OperatingSystem.IsWindows()) options.UnixCreateMode = UnixFileMode.UserRead | UnixFileMode.UserWrite;
+            using (var stream = new FileStream(temporary, options)) { stream.Write(bytes); stream.Flush(true); }
+            File.Move(temporary, path, true);
         }
         catch (Exception e) when (e is IOException or UnauthorizedAccessException)
         {
@@ -127,7 +127,7 @@ public partial class Main
             // A stale dialog also cannot change or uncover a replacement session.
             if (!IsInsideTree() || IsQueuedForDeletion() || !IsInstanceValid(_root)
                 || _session.Generation != generation || _session.Online
-                || _session.Snapshot?.View.ViewerId != (switched ? 1-originalSeat : originalSeat)) return;
+                || _session.Snapshot?.View.ViewerId != (switched ? 1 - originalSeat : originalSeat)) return;
             if (switched) Render();
             if (!MenuVisible && !DuelDemoOpen && !PracticeVisible && !MatchDuelOpen) _root.Visible = true;
         };
