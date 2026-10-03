@@ -73,12 +73,15 @@ public partial class Main
             if (targets.Length > 0)
             {
                 _inspector.AddChild(Palette.Wrapped("Choose a highlighted card on the table, or select it below.", 17, Palette.PaperDim));
-                var picker = new OptionButton { FitToLongestItem = false };
+                var picker = new OptionButton { Name = "DecisionTargetPicker", FitToLongestItem = false };
                 foreach (var id in targets) picker.AddItem(FindCard(id)?.Definition?.Name ?? "Target");
                 picker.Selected = Array.IndexOf(targets, draftCommand.TargetId); picker.ItemSelected += i => ChooseTarget(targets[(int)i]); _inspector.AddChild(picker);
             }
+            // Issue #581: no target is chosen for the player; the cost review waits for their pick when the action names legal targets.
+            var needsTarget = targets.Length > 0 && draftCommand.TargetId is null;
+            if (needsTarget) _inspector.AddChild(Palette.Wrapped("Choose a target to continue.", 15, Palette.Error));
             var next = SidebarSkin.Button("Review cost choices", () => { _reviewingAlternativeCost = true; _decisionSelection = null; RenderInspector(); }, true);
-            next.Disabled = !DecisionCanSubmit; _decisionActions.AddChild(next);
+            next.Disabled = !DecisionCanSubmit || needsTarget; _decisionActions.AddChild(next);
             _decisionActions.AddChild(SidebarSkin.Button("Cancel action", CancelChoice)); return true;
         }
         if (!own)

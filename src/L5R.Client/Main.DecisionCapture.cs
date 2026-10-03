@@ -49,6 +49,13 @@ public partial class Main
         DecisionRequire(!PresentationBusy, "Presentation did not finish");
         await EventFrames(5);
     }
+    // Issue #581: no target is chosen for the player. The capture picks the first one through the real picker, before the cost review, as a player would.
+    private async Task PickDecisionTarget()
+    {
+        if (_inspector.FindChild("DecisionTargetPicker", true, false) is OptionButton picker && _chosen?.Command?.TargetId is null)
+        { picker.Selected = 0; picker.EmitSignal(OptionButton.SignalName.ItemSelected, 0L); await EventFrames(5); }
+    }
+
     private async Task CaptureDecision()
     {
         try
@@ -79,7 +86,7 @@ public partial class Main
                     foreach (var demo in new[] { "yumaru", "fukui", "fukui-bowed" })
                     {
                         DecisionRequire(_decisionReviewCase == demo, "Next demo opened the wrong case");
-                        if (demo != "yumaru") { await SupportClick(DecisionButton("Review cost choices")); await EventFrames(8); }
+                        if (demo != "yumaru") { await PickDecisionTarget(); await SupportClick(DecisionButton("Review cost choices")); await EventFrames(8); }
                         var labels = demo == "yumaru" ? new[] { "Move Yumaru home", "Move the targeted Personality home", "Move both home" } : new[] { "Bow the Ancestor", "Destroy the Ancestor" };
                         var scroll = (ScrollContainer)_inspector.GetParent();
                         foreach (var label in labels)
@@ -130,6 +137,7 @@ public partial class Main
                 var grouped = StabilizationButtons(_inspector).Where(b => b.HasMeta("alternative_cost_group")).ToArray();
                 DecisionRequire(grouped.Length == 1, "Cost variants were not grouped");
                 await SupportClick(grouped[0]); await EventFrames(5);
+                await PickDecisionTarget();
                 await SupportClick(DecisionButton("Review cost choices")); await EventFrames(5);
                 DecisionRequire(DecisionButton("Confirm choice").Disabled, "Alternative cost has implicit default");
                 DecisionRequire(DecisionButton("Bow the Ancestor").Disabled == (kind == "fukui-bowed"), "Incorrect disabled bow option");
