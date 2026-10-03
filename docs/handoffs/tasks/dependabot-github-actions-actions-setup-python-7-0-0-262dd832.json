@@ -4,6 +4,6 @@
   "validation": "CI re-run on this PR; see PR checks.",
   "remaining": "None; ready for review once CI is green.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/pull/540",
-  "branch": "dep-540",
-  "updated": "2026-10-03T16:14:55.940934+00:00"
+  "branch": "dependabot/github_actions/actions/setup-python-7.0.0",
+  "updated": "2026-10-03T16:35:58.362179+00:00"
 }
