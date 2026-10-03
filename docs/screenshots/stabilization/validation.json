@@ -1,0 +1,51 @@
+{
+  "platform": "Native macOS, Apple M1 Max; Godot 4.7.2 .NET",
+  "automated_checks": {
+    "collaboration": 43,
+    "content": 130,
+    "core": 190,
+    "published": 52,
+    "deck_format": 9,
+    "deck_workshop": 10,
+    "custom_practice": 13,
+    "ai": 20,
+    "server": 5,
+    "client_transport": 5
+  },
+  "stabilization_native": [
+    "1672x941 brash",
+    "1280x800 brash-decline",
+    "1280x800 brash-opponent",
+    "1672x941 bow",
+    "1280x800 before",
+    "1280x800 before-pass",
+    "1672x941 equip",
+    "1280x800 equip-free"
+  ],
+  "event_native": [
+    "1672x941 harsh-keep",
+    "1672x941 harsh-destroy",
+    "1672x941 strife",
+    "1280x800 strife-compact",
+    "1280x720 harsh-last",
+    "1672x941 strife-opponent",
+    "1672x941 harsh-opponent",
+    "1920x1080 strife-motion"
+  ],
+  "client_build": "0 warnings, 0 errors",
+  "launcher_smoke": "Play Latest.command --headless --quit-after 3 passed",
+  "native_method": "Injected fixture setup with real engine triggers and native viewport mouse/button routing; embedded privacy modal confirmed through focused Enter key input. Equipment inspection prepared programmatically. No direct button signal invocation.",
+  "native_result": "All 16 scenarios passed without engine errors; representative screenshots visually inspected.",
+  "limits": [
+    "Human rules acceptance pending",
+    "Native Windows gameplay not performed",
+    "Full human match not performed"
+  ],
+  "capture_source_sha256": "d52edf79988f0d3d4be96e21aa4e4ee9a470c7fd50a36cafc369240ed671a103",
+  "screenshots": {
+    "before.png": "addcfded468ab6507fc47fddf3e26896373f4cb1b99af088d3eb1cdd1e6179a5",
+    "bow.png": "78206fce1e2356708360a1a1773a3e38a841d9fb47f2e285b42aab534526f029",
+    "brash-decline.png": "7fa7baf1955b717419d0f4bfb43fb68da6075b8aa2eba4dfe37922dc85e5ebaa",
+    "equip-free.png": "0b6781cbcbcd5a810341142a0e44d14cbb71469c2b9c3e5723dd9c549aa4fdba"
+  }
+}

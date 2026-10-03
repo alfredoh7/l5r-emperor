@@ -42,7 +42,7 @@ public static class BattleInkArt
             new Rect2(courtEdge.X - 37, courtEdge.Y + (provinceAbove ? -55 : -11), 74, 66), false, tint);
     }
     public static Texture2D Step => Extract("res://Art/battle-ink-reference.png", new Rect2I(375, 644, 32, 24));
-    public static void Court(Control canvas, Vector2 size, float active, bool connectionAbove = false)
+    public static void Court(Control canvas, Vector2 size, float active, bool connectionAbove = false, bool closed = false)
     {
         // The neutral B court's actual filigree and sword medallion. Only the
         // straight runs stretch; the center stays empty for real game cards.
@@ -50,32 +50,40 @@ public static class BattleInkArt
         var edge = 40f; var tint = Colors.White.Lerp(new Color(1.25f, 1.18f, 1.08f), active);
         void Piece(Rect2 destination, Rect2 source) => canvas.DrawTextureRectRegion(art, destination, source, tint);
         Piece(new Rect2(0, 0, edge, edge), new Rect2(0, 0, 40, 40));
-        Piece(new Rect2(size.X-edge, 0, edge, edge), new Rect2(220, 0, 40, 40));
-        Piece(new Rect2(0, size.Y-edge, edge, edge), new Rect2(0, 197, 40, 40));
-        Piece(new Rect2(size.X-edge, size.Y-edge, edge, edge), new Rect2(220, 197, 40, 40));
+        Piece(new Rect2(size.X - edge, 0, edge, edge), new Rect2(220, 0, 40, 40));
+        Piece(new Rect2(0, size.Y - edge, edge, edge), new Rect2(0, 197, 40, 40));
+        Piece(new Rect2(size.X - edge, size.Y - edge, edge, edge), new Rect2(220, 197, 40, 40));
         if (connectionAbove)
         {
-            Piece(new Rect2(edge, 0, size.X/2-37-edge, 14), new Rect2(45, 0, 45, 14));
-            Piece(new Rect2(size.X/2+37, 0, size.X/2-37-edge, 14), new Rect2(45, 0, 45, 14));
+            if (closed) Piece(new Rect2(edge, 0, size.X - 2 * edge, 14), new Rect2(45, 0, 45, 14));
+            else
+            {
+                Piece(new Rect2(edge, 0, size.X / 2 - 37 - edge, 14), new Rect2(45, 0, 45, 14));
+                Piece(new Rect2(size.X / 2 + 37, 0, size.X / 2 - 37 - edge, 14), new Rect2(45, 0, 45, 14));
+            }
         }
         else
         {
-            Piece(new Rect2(edge, 0, size.X/2-22-edge, 14), new Rect2(45, 0, 45, 14));
-            Piece(new Rect2(size.X/2+22, 0, size.X/2-22-edge, 14), new Rect2(45, 0, 45, 14));
+            Piece(new Rect2(edge, 0, size.X / 2 - 22 - edge, 14), new Rect2(45, 0, 45, 14));
+            Piece(new Rect2(size.X / 2 + 22, 0, size.X / 2 - 22 - edge, 14), new Rect2(45, 0, 45, 14));
         }
-        Piece(new Rect2(0, edge, 14, size.Y-2*edge), new Rect2(0, 50, 14, 140));
-        Piece(new Rect2(size.X-14, edge, 14, size.Y-2*edge), new Rect2(246, 50, 14, 140));
+        Piece(new Rect2(0, edge, 14, size.Y - 2 * edge), new Rect2(0, 50, 14, 140));
+        Piece(new Rect2(size.X - 14, edge, 14, size.Y - 2 * edge), new Rect2(246, 50, 14, 140));
         if (connectionAbove)
         {
-            Piece(new Rect2(edge, size.Y-14, size.X/2-22-edge, 14), new Rect2(45, 223, 45, 14));
-            Piece(new Rect2(size.X/2+22, size.Y-14, size.X/2-22-edge, 14), new Rect2(45, 223, 45, 14));
+            Piece(new Rect2(edge, size.Y - 14, size.X / 2 - 22 - edge, 14), new Rect2(45, 223, 45, 14));
+            Piece(new Rect2(size.X / 2 + 22, size.Y - 14, size.X / 2 - 22 - edge, 14), new Rect2(45, 223, 45, 14));
         }
         else
         {
-            Piece(new Rect2(edge, size.Y-14, size.X/2-37-edge, 14), new Rect2(45, 223, 45, 14));
-            Piece(new Rect2(size.X/2+37, size.Y-14, size.X/2-37-edge, 14), new Rect2(45, 223, 45, 14));
+            if (closed) Piece(new Rect2(edge, size.Y - 14, size.X - 2 * edge, 14), new Rect2(45, 223, 45, 14));
+            else
+            {
+                Piece(new Rect2(edge, size.Y - 14, size.X / 2 - 37 - edge, 14), new Rect2(45, 223, 45, 14));
+                Piece(new Rect2(size.X / 2 + 37, size.Y - 14, size.X / 2 - 37 - edge, 14), new Rect2(45, 223, 45, 14));
+            }
         }
-        canvas.DrawTextureRect(BattleEscalationArt.Daisho, new Rect2(size.X/2-27, connectionAbove ? size.Y-27 : -27, 54, 54), false, tint);
+        canvas.DrawTextureRect(BattleEscalationArt.Daisho, new Rect2(size.X / 2 - 27, connectionAbove ? size.Y - 27 : -27, 54, 54), false, tint);
     }
     public static void Fallen(Control canvas, Rect2 rect, int number, float progress)
     {

@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Finish approved A vermilion restriction seal (#347), public ActionLocked inspector/hover, visible engine-disabled reason, and verified prepared Mac launcher. Draft PR #395; no merge authorized.",
+  "validation": "Client compile zero warnings/errors and Godot import passed. 16/16 action-lock engine regressions passed. Native 1920x1080 normal and 1280x800 reduced passed: real Hotako activation, seal input, full-card hover, both seats, attachments, turn expiry, bowed/dishonorable crowded states. Actual Mac launcher, full-card/attachment inspection, advance-turn expiry and reset verified. Art comparison and prompt recorded.",
+  "remaining": "Alfredo UI acceptance, Mendon review, CI on pushed revision, native Windows graphical/external multiplayer acceptance. Five UI tasks remain. No merge into main authorized.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/347",
+  "branch": "codex/347-action-lock",
+  "updated": "2026-09-20T23:35:43.194894+00:00"
+}

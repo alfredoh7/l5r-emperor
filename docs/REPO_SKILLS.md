@@ -1,6 +1,6 @@
 # Repository skills
 
-Rung 5 of [the PR ladder](PR_LADDER.md), tracked in [#509](https://github.com/alfredoh7/l5r-emperor/issues/509), provides four project recipes. Open a session in this repository; invoke by name or ask for the described workflow. Repository skills add procedure, not permissions or rulings, and AGENTS.md remains the shared policy.
+Rung 5 of [the PR ladder](PR_LADDER.md), tracked in [#509](https://github.com/alfredoh7/l5r-emperor/issues/509), provides four project recipes; Rung 9 adds governance-lite. Open a session in this repository; invoke by name or ask for the described workflow. Repository skills add procedure, not permissions or rulings, and AGENTS.md remains the shared policy.
 
 | Skill | Claude | Codex | Purpose |
 |---|---|---|---|
@@ -8,6 +8,7 @@ Rung 5 of [the PR ladder](PR_LADDER.md), tracked in [#509](https://github.com/al
 | art-pack-release | `/art-pack-release` | `$art-pack-release` | Complete verified WebP pack and, when requested, versioned private release |
 | card-pass-report | `/card-pass-report` | `$card-pass-report` | Reconciled coverage/blockers, confirmed readings, client contracts and evidence |
 | ruling-interview | `/ruling-interview` | `$ruling-interview` | Focused questions and counterexamples leading to a recorded owner ruling |
+| governance-lite | `/governance-lite` | `$governance-lite` | Four focused review roles and a diff-based client-contract ledger; see [governance guide](GOVERNANCE_LITE.md) |
 
 Edit canonical files in `.claude/skills/<name>/SKILL.md` and their linked resources. Run `python tools/skills/sync_skills.py` to refresh byte-identical copies in `.agents/skills`; Windows checkouts need no symlink setup. Run `python tools/skills/sync_skills.py --check` for a read-only check. The normal tools/hooks test discovery validates names/references and rejects drift, so existing CI checks cover both discovery paths without a new job or dependency.
 

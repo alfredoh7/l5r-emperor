@@ -56,6 +56,7 @@ public sealed partial class MatchEngine
         (nameof(MatchState.PendingDeciderChoice), s => s.PendingDeciderChoice is not null),
         (nameof(MatchState.PendingFocusChoice), s => s.PendingFocusChoice is not null),
         (nameof(MatchState.PendingSequencedTarget), s => s.PendingSequencedTarget is not null),
+        (nameof(MatchState.PendingProvinceCardChoice), s => s.PendingProvinceCardChoice is not null), // Plains of Otosan Uchi (issue #554): a province-card-targeting effect paused on two candidates
         (nameof(MatchState.ForcedDiscardContinuation), s => s.ForcedDiscardContinuation is not null),
         (nameof(MatchState.SuspendedWindows), s => s.SuspendedWindows.Count > 0),
         (nameof(MatchState.ReactionWindowRemaining), s => s.ReactionWindowRemaining.Count > 0),

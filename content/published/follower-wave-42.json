@@ -1,0 +1,58 @@
+{
+  "Profile": "follower-wave-42",
+  "Rules": "Emperor Edition core rules; reviewed user-supplied created-card scans.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10010",
+      "Name": "Mounted Ashigaru",
+      "Type": "Follower",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 1,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "May not be included in decks.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10010.jpg",
+      "Keywords": [
+        "Cavalry",
+        "Ashigaru"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "none",
+      "CreatedOnly": true
+    },
+    {
+      "Id": "user-scan-aviary-falcon",
+      "Name": "Aviary Falcon",
+      "Type": "Follower",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 1,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "May not be included in decks.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/user-scan-aviary-falcon.jpg",
+      "Keywords": [
+        "Nonhuman",
+        "Falcon",
+        "Cavalry"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "none",
+      "CreatedOnly": true
+    }
+  ],
+  "Decks": []
+}

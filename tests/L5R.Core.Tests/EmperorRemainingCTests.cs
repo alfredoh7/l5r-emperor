@@ -672,8 +672,9 @@ internal static class EmperorRemainingCTests
         Check(two.State.Cards[enemy2.Id].OwnerId == 1 && !two.HasKeyword(enemy2.Id, "Ninja") && Honor(two, 0) == honor2 - 3, "Chi above the number of performers: he is untouched, the Honor is still lost");
         // An attachment is destroyed.
         var attach = Build(1, out var card3, out var ninjas3, out _, out var follower3, out _);
+        var honor3 = Honor(attach, 0);
         Accept(attach, Command(attach, card3, ninjas3, follower3));
-        Check(attach.State.Cards[follower3.Id].Zone == Zone.FateDiscard && Honor(attach, 0) == 8 - 3 + 0 || attach.State.Cards[follower3.Id].Zone == Zone.FateDiscard, "the bare attachment was destroyed");
+        Check(attach.State.Cards[follower3.Id].Zone == Zone.FateDiscard && Honor(attach, 0) == honor3 - 3, "the bare attachment was destroyed, and 3 Honor lost");
         // A Loyal Personality of another Clan may not be controlled.
         var s4 = Table(Phase.Action, 0);
         var card4 = Add(s4, ShadowsWalk, 0, Zone.Hand);

@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "slug": "open-battlefield",
+  "title": "Battles Without a Province",
+  "source_pr": 565,
+  "source_commit": "d99482ac16d1774f47a38aed9aa24f343c712259",
+  "revision": 2,
+  "reviewer": "mdornbrook",
+  "summary": "Alfredo approved the standalone court, on-demand help and view-only location navigation. Please review the native implementation of the province-less-battlefield portion of #499.",
+  "review_steps": [
+    "Extract the ZIP, then open Start Review.cmd. The prepared scene has a standalone red brush court, full cards and an Open battlefield caption.",
+    "Click either army to inspect its cards. Click the question mark for the no-province explanation; close it with Escape or by clicking outside.",
+    "Choose Province and open battlefield or Two open battlefields. Use View battlefield in the sidebar: it should move only the camera; the active battle and where actions belong must remain clear.",
+    "Choose Two fronts at one province, then Remove province. Both courts should stay in place, lose their province connection and receive distinct stable Open battlefield labels.",
+    "Try Other seat, six extra battlefields, the empty court and crowded/bowed/attached units. Resize the window; check labels stay clear of card faces and every card remains inspectable.",
+    "Choose Battle during the Action Phase. The Action phase and Lion turn should remain indicated while Crane has the current opportunity; the sidebar explains why a battle is taking place.",
+    "The prepared scenes exercise presentation with effects disabled. Open Full Game.cmd opens the same source build for normal engine-driven gameplay. Report UI/QoL or mechanics-presentation corrections via Send Feedback.url."
+  ],
+  "known_limitations": [
+    "This is an unmerged review branch. Alfredo approved the concept direction; Mendon/Nathan mechanics and graphical-playability acceptance remain pending.",
+    "Prepared scenarios are isolated public-view presentation fixtures, not live card-effect simulations. A new optional public turn-owner field and retained occupied battlefield associations support correct display; legality, commands and resolution are unchanged.",
+    "The concept images show the vertical battle-stage rail from separate open PR #564. This branch is based on main and retains its horizontal stage strip. Reconcile the overlapping UI integration before merge.",
+    "Automated Windows checks establish package/runtime and launcher behavior, not native Windows graphical playtesting.",
+    "Full local Core, AI, server, transport and tooling checks passed; R1 regressions cover public Action Phase context and resolved occupied extra fronts. Automated checks do not replace expert mechanics acceptance."
+  ],
+  "scenarios": [
+    {
+      "name": "Start Review",
+      "mode": "open-battlefield-review"
+    },
+    {
+      "name": "Open Full Game",
+      "mode": null
+    }
+  ]
+}

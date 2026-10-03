@@ -23,5 +23,13 @@
   "source_image_hash": "ba/9d",
   "source_url": "https://images.oracleofthevoid.com/l5r/ba/9d/printing_9996_1_master.jpg",
   "url_prefix": "https://images.oracleofthevoid.com/l5r/ba/9d/printing_9996_1_",
-  "width": 750
+  "width": 750,
+  "working_copy": {
+    "path": "assets/requested-scans/emerald-magistrate.png",
+    "sha256": "5d2ef70df3fdad23a2d636f5ab8f3075fe776e4ca9ee5b39eab97b2970ca10ac",
+    "format": "PNG",
+    "width": 429,
+    "height": 600,
+    "source": "User-supplied full card image, 2026-09-29"
+  }
 }

@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Implement the approved opponent-payment sidebar with plain coin, immediate engine outcomes, public waiting view and prepared review launcher (#377)",
+  "validation": "Integrated deterministic checks passed tools/check.sh --skip-client; client build zero warnings/errors; native 1920x1080 normal, 1280x800 reduced and prepared-navigation runs passed, including real keyboard/table input, outcomes/cap, source coverage, zero, privacy, reset and busy guards. Existing gold-variable-confirm native regression passed. Actual app launcher and manual amount/waiting/automatic clicks passed. Complete current-main artwork package published privately with matching GitHub asset size/digest and local coverage verification.",
+  "remaining": "Exact-head CI after push, Alfredo hands-on review, Mendon review and native Windows playtest remain pending. No merge authorized. Active goal still requires #323, #345, #311 and #400.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/377",
+  "branch": "codex/377-opponent-payment",
+  "updated": "2026-09-21T21:03:44.325410+00:00"
+}

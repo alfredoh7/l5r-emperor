@@ -13,7 +13,7 @@ internal static class ShadowsEmbraceBatch1Tests
         Fumiko = "oracle-l5r-9807", Ichigiku = "oracle-l5r-9813", Tadanobu = "oracle-l5r-9815", Kazehime = "oracle-l5r-9816";
     private static readonly string[] Wired = [Kurou, Keigo, Hayate, Jirou, Atosa, Misaki, Tarou, Waru, Chiisai, Hitaka, Sosuke, Arakan, Rafu, Bunoro, Bakari, Hikazu, Nikaru, Haruma,
         Fumiko, Ichigiku, Tadanobu, Kazehime];
-    private static readonly string[] Unwired = ["oracle-l5r-9814"]; // Kakita Saki
+    private static readonly string[] Unwired = []; // Kakita Saki is published in personality-wave-118.
 
     private const string Lion = "training-lion-samurai", Veteran = "training-lion-veteran", Crane = "training-crane-samurai", Follower = "training-follower";
 
