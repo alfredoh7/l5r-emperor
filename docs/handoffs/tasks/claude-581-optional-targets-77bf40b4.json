@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Targeted actions no longer pre-select a target: the client clears Core's pre-filled first target and starts on 'Choose a target…', Confirm waits for a pick (movement too). Core publishes HarshChoicesView so the client shows the engine's consequence instead of recounting provinces. Deleted the unused client UnitForce.",
+  "validation": "Core.Tests built (0 errors); EventDecisionTests HarshQueries and LastProvince pass with the new view assertions; client built (0 errors). Native checks on the final build with ripgrep installed: check-gold-payment.sh all 11 modes passed; check-movement-ui.sh passed (normal, reduced); check-support-cards.sh passed; check-multi-targets-ui.sh passed (normal, reduced). Two native captures fail with identical errors on a baseline (pre-change) client and on this branch, so they are not caused by this change: check-event-decisions.sh harsh-keep ('Harsh choice did not commit exactly once') and check-attack-targets-ui.sh normal ('Province Attack failed or opened a card-target reaction'). Not run: full tools/check.sh, the other ~35 check-*.sh scripts, visual review of the new picker and Harsh Choices panel.",
+  "remaining": "Investigate the two baseline-failing captures separately. Visual review of the 'Choose a target…' picker and Harsh Choices panel. No Core 'optional target' flag was added: apart from the Attack family and Slots (Min 0), only Unimpeachable Name has an optional single target and it already offers a separate no-target button; add a flag and a 'No target' row if more abilities are 'may'.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/581",
+  "branch": "claude/581-optional-targets",
+  "updated": "2026-10-02T20:12:43.715798+00:00"
+}

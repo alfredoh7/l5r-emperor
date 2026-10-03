@@ -1,0 +1,9 @@
+{
+  "lane": "ui",
+  "summary": "Repair two stale native captures that failed on main and on the pre-#581 baseline: check-stabilization.sh (reviewed Tamoko reaction now confirms; StabilizationClick scrolls the control into view so a partly clipped button is not clicked at its covered centre) and check-either-or-ui.sh (compare the engine's effective province strength from the view, not the raw base field). Capture-only changes; no game behaviour changed.",
+  "validation": "check-stabilization.sh passes all 8 modes (brash, brash-decline, brash-opponent, bow, before, before-pass, equip, equip-free); check-either-or-ui.sh passes normal and reduced. Each failure was diagnosed with temporary instrumentation (not committed): Tamoko opens a reviewed action with a Confirm button; the equip button centre sat under the pinned Pass footer so the click landed on Pass ('Crane passed.'); the paid action did resolve (events show +2 strength this turn on all four provinces) while the raw ProvinceState.Strength is unchanged because the bonus is a timed modifier and ProvinceView.Strength reports EffectiveProvinceStrength. Not run: full tools/check.sh or the other native checks.",
+  "remaining": "attack-targets 'normal' (province-strength expectation) may be the same stale-capture class and is not yet investigated; persistent-home, unit-standard, shown-cards, top-cards-ui, player-clarity, crimson-duel, war-room-motion and table-followup remain. The multi-target path appears to pre-fill required slots from Core's default command, which sits against the unselected-target rule from #581; not changed here.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/589",
+  "branch": "claude/589-decision-captures",
+  "updated": "2026-10-03T12:02:42.380702+00:00"
+}

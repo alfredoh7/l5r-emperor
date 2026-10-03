@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Implement approved My Collection and catalogue fidelity corrections (#577), preserving the previous mat. Rounded clan tiles with internal ticks, matched spacing/density and grouped quantities. Shared search, height fit, ownership-scroll refresh, archive access and review storage corrected. All four review launch modes now isolate physical inventory.",
+  "validation": "Client build 0 warnings/errors. 138 native macOS assertions: Library 45, Builder 37, Collection 35, navigation 9, plus 12 review-isolation checks across four modes proving normal inventory bytes preserved. Final data suite 38 assertions passed. Captures inspected at 1672x941, 1280x800, 1440x700 and larger scenarios. Formatting/diff/launcher checks passed. All eight CI checks passed at 0c662d0fa5fa317ef21ad464abdbaa1358354351 after checkout timeout retries. Verified Windows revision 3 game source d3ea29daaca1f9221936414a611fbd7a82e7709f; its two new collection modes already isolate inventory. Archive 2131662728 bytes, SHA256 11f382e30dbb52109398947aa2c74efeb86530a394f3c0492a2d41f50374ca1d. Windows runtime/launchers passed and Mendon notified at PR #576 issuecomment-5940103586. Additional source-only isolation fix covers the legacy filter modes; it changes neither the delivered UI nor its two collection modes. Exact new-head CI is pending and will be recorded on PR #576.",
+  "remaining": "Exact final CI for the legacy review-mode source fix; human native visual acceptance and Mendon/Nathan review. No merge authorized; Windows graphical play not claimed.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/577",
+  "branch": "codex/549-unified-filter-workspace",
+  "updated": "2026-10-01T20:48:28.856463+00:00"
+}

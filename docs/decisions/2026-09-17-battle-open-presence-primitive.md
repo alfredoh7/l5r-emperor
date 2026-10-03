@@ -1,5 +1,7 @@
 # The Battle/Open presence primitive, and "at any location"
 
+**Correction awaiting shared review:** the target-base Force comparison is corrected by [non-duel stabilization](2026-09-17-non-duel-stabilization.md). The original performer-base description below is retained as history; it is no longer the implementation.
+
 **Decision:** `BattleOrOpen` Timing already existed and already correctly allowed either-phase use
 with shared once-per-turn tracking (`AbilityUses` keyed only by `TurnNumber`, already phase-agnostic)
 and a correct reset-to-fresh when a card returns to hand from a discard pile (`ReturnToHand` already

@@ -22,6 +22,20 @@ class RepoSkillTests(unittest.TestCase):
     def test_checked_in_skills_validate_and_mirrors_match(self):
         self.assertEqual(skills.sync(ROOT, check=True), [])
 
+    def test_governance_roles_are_discoverable_and_point_to_maintained_profiles(self):
+        roles = ('rules-vs-core-rules', 'hidden-information-leak', 'negation-and-edge-case', 'client-contract')
+        skill = ROOT / '.claude/skills/governance-lite'
+        for role in roles:
+            with self.subTest(role=role):
+                wrapper = ROOT / f'.claude/agents/governance-{role}.md'
+                text = wrapper.read_text(encoding='utf-8')
+                self.assertIn(f'name: governance-{role}\n', text)
+                self.assertIn(f'.claude/skills/governance-lite/references/{role}.md', text)
+                self.assertIn('Never edit files', text)
+                self.assertTrue((skill / f'references/{role}.md').is_file())
+                self.assertIn(f'(references/{role}.md)', (skill / 'SKILL.md').read_text(encoding='utf-8'))
+        self.assertEqual(len(list((ROOT / '.claude/agents').glob('governance-*.md'))), 4)
+
     def test_check_never_writes_and_sync_is_idempotent(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

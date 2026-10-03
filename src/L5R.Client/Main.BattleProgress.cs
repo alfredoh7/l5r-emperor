@@ -27,6 +27,6 @@ public partial class Main
     {
         if (_resolutionMessage is null || Time.GetTicksMsec() < _resolutionUntil) return;
         _resolutionMessage = null;
-        if (_session.Snapshot is not null) RenderInspector();
+        if (_session.Snapshot is not null) Render();
     }
 }

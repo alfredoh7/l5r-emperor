@@ -49,7 +49,7 @@ Read `docs/PROJECT_BOARD.md` for the private board and agent client. When `L5R_B
 
 ## Repository skills
 
-Use the relevant recipe under `.claude/skills/` (Claude) or `.agents/skills/` (Codex): `wire-card-wave`, `art-pack-release`, `card-pass-report`, and `ruling-interview`. See [docs/REPO_SKILLS.md](docs/REPO_SKILLS.md) for invocation and maintenance. Skills support the task; they do not replace this policy, create new approval requirements, or turn proposed readings into confirmed rulings.
+Use the relevant recipe under `.claude/skills/` (Claude) or `.agents/skills/` (Codex): `wire-card-wave`, `art-pack-release`, `card-pass-report`, `ruling-interview`, and `governance-lite`. See [docs/REPO_SKILLS.md](docs/REPO_SKILLS.md) for invocation and maintenance. Skills support the task; they do not replace this policy, create new approval requirements, or turn proposed readings into confirmed rulings.
 
 ## Code Review Rules
 

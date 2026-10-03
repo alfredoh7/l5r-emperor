@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Repair two native checks that failed on main and the pre-#581 baseline. check-table-followup.sh (a tools/ script) never created artifacts/table-camera/, so it only worked after table-camera had run. The player clarity probe (a client file) looked for Ikoma Takakura in the live deck snapshot, although that card now lives in PublishedContent.VanillaWave1, and it expected status label counts (2,2,3) from before dishonor became the medallion marker (now 1,1,3). The change is shared only in that it touches one tools/ script and one client probe; both are check tooling and no game behaviour changed.",
+  "validation": "check-table-followup.sh passes (exit 0, all 9 cases, 259s) after adding mkdir -p; check-player-clarity.sh passes (PLAYER_CLARITY_PASS) after searching both snapshots and updating the expected counts to the actual 1[+ Elite] / 1[+ Elite] / 3[+ Elite,+ Cavalry,+ Naval], diagnosed by making the error report the labels. Format check passes; client builds. war-room-motion needs ffmpeg (command -v ffmpeg under set -e), which is not installed here; not run. Not run: full tools/check.sh.",
+  "remaining": "top-cards-ui ('Rejected or outside drop altered draft') not yet diagnosed; war-room-motion needs ffmpeg; crimson-duel is tracked in #600/#601 (projection bug fixed, a card-layout assertion still fails).",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/599",
+  "branch": "claude/599-remaining-native-checks",
+  "updated": "2026-10-03T13:54:31.920821+00:00"
+}

@@ -12,11 +12,12 @@ public sealed class TurnBloomGate
     public bool Observe(MatchView view, string match)
     {
         bool fresh = _match != match;
-        bool changed = fresh || _turn != view.TurnNumber || _owner != view.ActivePlayerId;
+        var turnOwner = view.ActionPhaseTurnPlayerId ?? view.ActivePlayerId;
+        bool changed = fresh || _turn != view.TurnNumber || _owner != turnOwner;
         // Changing a sandbox viewing seat is not a new turn.
         bool seatChanged = !fresh && _viewer != view.ViewerId;
-        _match = match; _turn = view.TurnNumber; _owner = view.ActivePlayerId; _viewer = view.ViewerId;
-        return changed && !seatChanged && view.WinnerId is null && view.ActivePlayerId == view.ViewerId;
+        _match = match; _turn = view.TurnNumber; _owner = turnOwner; _viewer = view.ViewerId;
+        return changed && !seatChanged && view.WinnerId is null && turnOwner == view.ViewerId;
     }
 }
 
@@ -36,9 +37,15 @@ public partial class TurnBloom : Control
     {
         MouseFilter = MouseFilterEnum.Ignore; FocusMode = FocusModeEnum.None;
         _material = new ShaderMaterial { Shader = GD.Load<Shader>("res://Art/turn-ink-bloom.gdshader") };
-        _ink = new TextureRect { Texture = GD.Load<Texture2D>("res://Art/turn-ink-bloom.png"),
-            TextureFilter = TextureFilterEnum.LinearWithMipmaps, Material = _material, ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize,
-            StretchMode = TextureRect.StretchModeEnum.Scale, MouseFilter = MouseFilterEnum.Ignore };
+        _ink = new TextureRect
+        {
+            Texture = GD.Load<Texture2D>("res://Art/turn-ink-bloom.png"),
+            TextureFilter = TextureFilterEnum.LinearWithMipmaps,
+            Material = _material,
+            ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize,
+            StretchMode = TextureRect.StretchModeEnum.Scale,
+            MouseFilter = MouseFilterEnum.Ignore
+        };
         AddChild(_ink); _ink.ZIndex = -1;
         _font = new FontVariation { BaseFont = GD.Load<FontFile>("res://Art/Fonts/WeatheredQuill-Regular.ttf"), SpacingGlyph = -1 };
         SetTime(4);
@@ -57,19 +64,19 @@ public partial class TurnBloom : Control
     public override void _Process(double delta)
     {
         Observe?.Invoke();
-        if (!ManualTime && Playing) SetTime(Elapsed + Math.Min((float)delta,.1f));
+        if (!ManualTime && Playing) SetTime(Elapsed + Math.Min((float)delta, .1f));
     }
-    private static float Ease(float a, float b, float t) { var x = Math.Clamp((t-a)/(b-a),0,1); return x*x*(3-2*x); }
+    private static float Ease(float a, float b, float t) { var x = Math.Clamp((t - a) / (b - a), 0, 1); return x * x * (3 - 2 * x); }
     public override void _Draw()
     {
         if (_font is null || !Playing) return;
-        var opacity = ReducedMotion ? Ease(.08f,.22f,Elapsed)*(1-Ease(2.4f,2.6f,Elapsed))
-            : Ease(.52f,.92f,Elapsed)*(1-Ease(2.5f,3.15f,Elapsed));
-        int size = Math.Max(18,(int)Math.Round(Size.X * 56 / 940));
-        var width = _font.GetStringSize("YOUR TURN",fontSize:size).X;
+        var opacity = ReducedMotion ? Ease(.08f, .22f, Elapsed) * (1 - Ease(2.4f, 2.6f, Elapsed))
+            : Ease(.52f, .92f, Elapsed) * (1 - Ease(2.5f, 3.15f, Elapsed));
+        int size = Math.Max(18, (int)Math.Round(Size.X * 56 / 940));
+        var width = _font.GetStringSize("YOUR TURN", fontSize: size).X;
         // Actual glyph bounds, not the font's unusually large line-box padding.
-        var textAt = new Vector2((Size.X-width)/2, Size.Y/2 + size*.37f - Size.X*6/940);
-        DrawStringOutline(_font,textAt,"YOUR TURN",fontSize:size,size:Math.Max(1,size/10),modulate:new Color(1,.74f,.34f,opacity*.07f));
-        DrawString(_font,textAt,"YOUR TURN",fontSize:size,modulate:new Color("efdfbd") { A = opacity });
+        var textAt = new Vector2((Size.X - width) / 2, Size.Y / 2 + size * .37f - Size.X * 6 / 940);
+        DrawStringOutline(_font, textAt, "YOUR TURN", fontSize: size, size: Math.Max(1, size / 10), modulate: new Color(1, .74f, .34f, opacity * .07f));
+        DrawString(_font, textAt, "YOUR TURN", fontSize: size, modulate: new Color("efdfbd") { A = opacity });
     }
 }

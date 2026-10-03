@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Approved battle strip and expanded formal sequence; engine-derived timing decisions and Cavalry fixes; inherited shared preview plus main 97d8e407",
+  "validation": "Client 0 warnings/errors; native 1920x1080 and reduced 1280x800 battle sequence PASS; native movement and attack regressions PASS; full check.sh --skip-client PASS, 12/12 transport; actual .app and scenario picker verified; source/native gallery inspected; art coverage and uploaded digest verified.",
+  "remaining": "Final-head CI; Alfredo hands-on acceptance and Mendon review. No main merge authorized. Created-copy task and combined Windows review delivery remain in the larger goal.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/311",
+  "branch": "codex/311-battle-progress",
+  "updated": "2026-09-21T22:38:40.610387+00:00"
+}

@@ -38,3 +38,9 @@ jobs:
           # already the head of a merged PR (the squash-merge case `git` alone can't see).
           GH_TOKEN: ${{ github.token }}
         run: python tools/collab.py audit --base "$TASK_BASE" --head "$TASK_HEAD" --branch "$TASK_BRANCH" --base-ref "$TASK_BASE_REF"
+      - name: Client-contract ledger (advisory candidates)
+        if: github.event_name == 'pull_request'
+        env:
+          TASK_BASE: ${{ github.event.pull_request.base.sha }}
+          TASK_HEAD: ${{ github.event.pull_request.head.sha }}
+        run: python tools/collab.py ledger --base "$TASK_BASE" --head "$TASK_HEAD" --format markdown >> "$GITHUB_STEP_SUMMARY"

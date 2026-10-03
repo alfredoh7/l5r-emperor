@@ -1,0 +1,20 @@
+[
+  {
+    "card_id": "oracle-l5r-4464",
+    "printing_set": [
+      "Forgotten Legacy"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=4464",
+    "image_path": "assets/reference/oracle/forgotten-legacy/webp/oracle-l5r-4464-printing-1-image-1.webp",
+    "image_sha256": "5d2fa7d7238f708349b6bf5226df37dc3e250677e53df45205870bcfc7c4b8a2"
+  },
+  {
+    "card_id": "oracle-l5r-10020",
+    "printing_set": [
+      "Forgotten Legacy"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10020",
+    "image_path": "assets/requested-scans/hisanos-guide.png",
+    "image_sha256": "ed55f4013d2f1e5847f5d093372b42b2dfc1b702a4b248b3fbb416143dd032d3"
+  }
+]

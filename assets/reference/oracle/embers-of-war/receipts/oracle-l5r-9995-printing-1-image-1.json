@@ -23,5 +23,13 @@
   "source_image_hash": "e5/1e",
   "source_url": "https://images.oracleofthevoid.com/l5r/e5/1e/printing_9995_1_master.jpg",
   "url_prefix": "https://images.oracleofthevoid.com/l5r/e5/1e/printing_9995_1_",
-  "width": 750
+  "width": 750,
+  "working_copy": {
+    "path": "assets/requested-scans/assassin.png",
+    "sha256": "f17602b4d97c565927bc37d793243459f16427014ad1f73216f01835f4d21aea",
+    "format": "PNG",
+    "width": 150,
+    "height": 210,
+    "source": "User-supplied full card image, 2026-09-29"
+  }
 }

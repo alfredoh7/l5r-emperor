@@ -1,0 +1,30 @@
+{
+  "source": "https://github.com/alfredoh7/l5r-emperor/pull/504",
+  "decision": "docs/decisions/2026-09-25-mechanics-batch.md#client-lane-alfredo",
+  "base": "506a4c6b6b8d078c41be2662b1e62a9f42375228",
+  "head": "90aa0eeff14a873e130e2514db33ea3cd4efc08e",
+  "exact_added": {
+    "pending_choices": ["entryCostDecision", "infiltratorStraighten"],
+    "commands": ["chooseInfiltratorStraighten", "declineAdditionalAction", "entryCostChoice"],
+    "decider_specs": ["indecision-discard", "narizane-bow"],
+    "view_fields": [
+      "CardView.CopyConditions", "CardView.CopyOfCardId", "CardView.CopyOfDefinitionId",
+      "CardView.IsCopy", "CardView.RealOwnerId", "EntryCostOption.Key", "EntryCostOption.Label",
+      "GoldQuote.Sources", "PaymentSource.CardId", "PaymentSource.Id", "PaymentSource.Kind",
+      "PaymentSource.Label", "PaymentSource.Produced", "PaymentSource.SubjectId", "PurchaseQuote.Sources"
+    ],
+    "command_fields": []
+  },
+  "required_state_fields": [
+    "MatchState.EntryCostAnswers", "MatchState.MechA", "MatchState.MechB",
+    "MatchState.MechD", "MatchState.PendingEntryCostDecision"
+  ],
+  "semantic_supplement": [
+    "entryCostChoice Choice encodes remove:<handCardId> or sake:<tokenId>",
+    "Broken Cipher uses existing chooseFocusEffect with TargetId spellId>hostId",
+    "Greasing the Wheels adds pay/decline Choice values to an existing action",
+    "GoldQuote.Sources/PurchaseQuote.Sources include # payment token ids; SelectedProduction must sum Sources",
+    "Kazuko/Shika options populate existing CardIds",
+    "New events and Aramasu's nested Attack Phase require semantic review"
+  ]
+}

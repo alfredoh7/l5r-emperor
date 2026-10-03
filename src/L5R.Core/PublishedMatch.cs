@@ -8,11 +8,11 @@ public sealed partial class MatchEngine
     internal static MatchEngine CreatePublished(ulong seed, string scenario, PublishedSnapshot snapshot)
     {
         var state = new MatchState { Players = [new() { Id = 0, Name = "Crane", Clan = "Crane" }, new() { Id = 1, Name = "Lion", Clan = "Lion" }] };
-        var random = new StableRandom(seed); var nextId = 0;
+        var random = new StableRandom(seed); var nextId = 0; var ids = OpaqueCardIds(seed);
         CardInstance Add(int owner, string definition, Zone zone, bool faceUp = false, bool bowed = false)
         {
             _ = CardCatalog.Get(definition);
-            var card = new CardInstance { Id = $"card-{++nextId:D4}", DefinitionId = definition, OwnerId = owner, Zone = zone, FaceUp = faceUp, Bowed = bowed };
+            var card = new CardInstance { Id = ids[nextId++], DefinitionId = definition, OwnerId = owner, Zone = zone, FaceUp = faceUp, Bowed = bowed };
             state.Cards.Add(card.Id, card); return card;
         }
         foreach (var player in state.Players)
@@ -32,12 +32,12 @@ public sealed partial class MatchEngine
         }
         state.RngState = random.State; // Deck search (issue #312): later shuffles continue this exact sequence.
         state.ActivePlayerId = state.Players.OrderByDescending(p => p.Honor).First().Id;
-        Add(1-state.ActivePlayerId, "oracle-l5r-679", Zone.Home, true, true);
+        Add(1 - state.ActivePlayerId, "oracle-l5r-679", Zone.Home, true, true);
         var engine = new MatchEngine(state, seed, scenario);
         foreach (var player in state.Players)
         {
             foreach (var province in player.Provinces) engine.Refill(player, province);
-            for (var i=0; i<6; i++) engine.Draw(player);
+            for (var i = 0; i < 6; i++) engine.Draw(player);
         }
         engine.Emit("publishedSetup", "Lion goes first (7 starting Honor); Crane starts at 6 Honor with bowed Bamboo Harvesters. Each player uses 40 Dynasty and 40 Fate cards.");
         engine.StartTurn(); return engine;

@@ -50,6 +50,21 @@ The declarer of the Attack Phase is the Attacker unless a card says otherwise.
 - **Date:** 2026-09-25
 - **Source:** [Emperor Edition rulings pass](../decisions/2026-09-25-emperor-edition-rulings-pass.md) (R1)
 
+### R-023 — Plains of Otosan Uchi: reveal order, Honor timing and province-card targeting
+The 10-Honor loss fires whenever the province is destroyed (the printed "before" ordering is
+immaterial). Provinces still reveal left to right; reaching Otosan Uchi with both slots face down
+asks the controller which to reveal first (Left/Right), then each resolves in that order. The
+second slot is created empty, refilled face down, and never revealed the turn the Region enters
+play. Both cards share the underlying province's one battlefield and its adjacency. An effect
+that targets "a card in a province" (Shosuro Toson's Reaction) may hit only one of the two: a
+Left/Right choice, replaced by the card's own title once it is face up.
+
+- **Cards/primitives:** Plains of Otosan Uchi (oracle-l5r-5979); `ProvinceState.CardId2`,
+  `HandleOtosanUchiProvinceReveal`, `DestroyProvince`, `BeginProvinceCardChoice` (Toson wired as
+  the worked example).
+- **Date:** 2026-09-30
+- **Source:** [Plains of Otosan Uchi province rules](../decisions/2026-09-30-otosan-uchi-province-rules.md)
+
 ## Delays and negation
 
 ### R-003 — The shared delay mechanism
@@ -231,3 +246,35 @@ The Killing Grounds fires once per player.
 - **Cards/primitives:** The Killing Grounds.
 - **Date:** 2026-09-25
 - **Source:** [Emperor Edition rulings pass](../decisions/2026-09-25-emperor-edition-rulings-pass.md) (R4)
+
+### R-022 — Personality-destruction Reactions fire on a qualifying play-to-dead transition
+A Reaction to "your Personality is destroyed" is eligible when that Personality leaves play dead,
+including from any action type or battle resolution; marking an already-discarded Personality dead
+does not trigger it. Wording that requires destruction by or as an effect of an action excludes
+battle-resolution deaths, and wording such as "another player's action destroyed" also requires
+that source player.
+
+- **Cards/primitives:** Crippled Sensei (oracle-l5r-9899); play-to-dead destruction Reaction window and action-source filters.
+- **Date:** 2026-09-29
+- **Source:** [Personality-destruction Reaction triggers](../decisions/2026-09-29-personality-destruction-reactions.md) (Mendon's clarifications in this task)
+
+### R-024 — Inexorable negates the whole announced Reaction, not only a negation
+Inexorable's printed text ("Its effects will not negate other effects") reads narrower than its
+actual ruling: it negates the entire announced Reaction, whatever that Reaction would have done,
+not only one that would itself have negated or modified something. It applies to any Reaction an
+opponent announces during the Combat Segment (Phase.Battle), whether or not that Reaction targets a
+card, reusing the existing whole-action negation primitive (`NegateDeferredAction`, ActionNegation.cs,
+Yoritomo Sakuma's original card).
+
+- **Cards/primitives:** Inexorable (oracle-l5r-3739); `NegateDeferredAction`; `CardWave566BeforeActionApplies`.
+- **Date:** 2026-09-30
+- **Source:** Mendon's ruling in issue #566's card-wave pass, correcting the fork's initial narrower reading of the printed text.
+
+### R-025 — Wanted for Questioning's "custody" is flavor text, not a mechanic
+"Your Magistrate takes him into custody" on Wanted for Questioning is flavor text with no mechanical
+effect; the card is built from its remaining printed clauses alone (destroy the target's attachments
+if he is dishonorable, then move him home).
+
+- **Cards/primitives:** Wanted for Questioning (oracle-l5r-9208).
+- **Date:** 2026-09-30
+- **Source:** Mendon's ruling in issue #566's card-wave pass, resolving the rules-lane question tools/content/ee_p6_blockers.json had recorded for it.
