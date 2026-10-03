@@ -32,12 +32,12 @@ public sealed partial class MatchEngine
         }
         state.RngState = random.State; // Deck search (issue #312): later shuffles continue this exact sequence.
         state.ActivePlayerId = state.Players.OrderByDescending(p => p.Honor).First().Id;
-        Add(1-state.ActivePlayerId, "oracle-l5r-679", Zone.Home, true, true);
+        Add(1 - state.ActivePlayerId, "oracle-l5r-679", Zone.Home, true, true);
         var engine = new MatchEngine(state, seed, scenario);
         foreach (var player in state.Players)
         {
             foreach (var province in player.Provinces) engine.Refill(player, province);
-            for (var i=0; i<6; i++) engine.Draw(player);
+            for (var i = 0; i < 6; i++) engine.Draw(player);
         }
         engine.Emit("publishedSetup", "Lion goes first (7 starting Honor); Crane starts at 6 Honor with bowed Bamboo Harvesters. Each player uses 40 Dynasty and 40 Fate cards.");
         engine.StartTurn(); return engine;

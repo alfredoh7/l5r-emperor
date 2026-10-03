@@ -813,8 +813,12 @@ internal static class DeckSearchTests
         // changes one of these.
         var golden = new Dictionary<string, string[]>
         {
-            ["starter 1"] = ["CE57DDB95720EB22", "5E30152FB8FACFC6"], ["starter 42"] = ["6C85BDF581E790B2", "DD3D7560702197CC"], ["starter 801"] = ["86EE0F9E44456744", "910ACB968F30497B"],
-            ["test 1"] = ["C19E786CA3E959E7", "7690256BD01EA9D3"], ["test 42"] = ["0FB68796D66E5553", "C01708755F7CEC80"], ["test 801"] = ["2BEBF8EDE59F536C", "FCC205FFF2801E51"]
+            ["starter 1"] = ["CE57DDB95720EB22", "5E30152FB8FACFC6"],
+            ["starter 42"] = ["6C85BDF581E790B2", "DD3D7560702197CC"],
+            ["starter 801"] = ["86EE0F9E44456744", "910ACB968F30497B"],
+            ["test 1"] = ["C19E786CA3E959E7", "7690256BD01EA9D3"],
+            ["test 42"] = ["0FB68796D66E5553", "C01708755F7CEC80"],
+            ["test 801"] = ["2BEBF8EDE59F536C", "FCC205FFF2801E51"]
         };
         foreach (var (key, expected) in golden)
         {
