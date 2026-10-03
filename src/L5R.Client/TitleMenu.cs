@@ -148,8 +148,8 @@ public partial class TitleMenu : Control
         Entries.AddChild(Palette.Text("Your display name", 24));
         var name = new LineEdit { Text = Preferences.DisplayName, PlaceholderText = "Enter your name", MaxLength = 24, CustomMinimumSize = new Vector2(0, 60), TooltipText = "Up to 24 characters. Remembered on this device; no account or login." };
         name.AddThemeFontSizeOverride("font_size", 30);
-        name.AddThemeStyleboxOverride("normal", Palette.Box(new Color("10181d"),new Color("796442"),12,2));
-        name.AddThemeStyleboxOverride("focus", Palette.Box(Colors.Transparent,Palette.Gold,12,2));
+        name.AddThemeStyleboxOverride("normal", Palette.Box(new Color("10181d"), new Color("796442"), 12, 2));
+        name.AddThemeStyleboxOverride("focus", Palette.Box(Colors.Transparent, Palette.Gold, 12, 2));
         Entries.AddChild(name);
         Entries.AddChild(Palette.Wrapped("Remembered on this device. No account or login.", 21, Palette.PaperDim));
         void Start()
@@ -200,9 +200,9 @@ public partial class TitleMenu : Control
     {
         foreach (var state in new[] { "normal", "hover", "pressed", "hover_pressed", "focus" })
         {
-            var box=Palette.Box(state == "focus" ? Colors.Transparent : new Color(.025f,.040f,.059f,state == "normal" ? .65f : .9f), new Color(.63f,.49f,.27f,state == "focus" ? .9f : .4f), 8, 0);
-            box.BorderWidthTop=0; box.BorderWidthLeft=0; box.BorderWidthRight=0;
-            button.AddThemeStyleboxOverride(state,box);
+            var box = Palette.Box(state == "focus" ? Colors.Transparent : new Color(.025f, .040f, .059f, state == "normal" ? .65f : .9f), new Color(.63f, .49f, .27f, state == "focus" ? .9f : .4f), 8, 0);
+            box.BorderWidthTop = 0; box.BorderWidthLeft = 0; box.BorderWidthRight = 0;
+            button.AddThemeStyleboxOverride(state, box);
         }
     }
     private void Changed()
@@ -225,26 +225,26 @@ public partial class MenuEntry : Button
     public Func<bool> ReducedMotion = () => false;
     public bool SourceLettering;
     private float _glow, _time;
-    private readonly StyleBoxFlat[] _halos = Enumerable.Range(1,18).Select(i => Palette.Box(Colors.Transparent, null, 0, i)).ToArray();
+    private readonly StyleBoxFlat[] _halos = Enumerable.Range(1, 18).Select(i => Palette.Box(Colors.Transparent, null, 0, i)).ToArray();
     public override void _Process(double delta)
     {
         if (!IsVisibleInTree() || SourceLettering) return;
         var target = IsHovered() || HasFocus() ? 1f : 0f;
-        _glow = ReducedMotion() ? target : Mathf.Lerp(_glow, target, 1-Mathf.Exp(-(float)delta*9));
+        _glow = ReducedMotion() ? target : Mathf.Lerp(_glow, target, 1 - Mathf.Exp(-(float)delta * 9));
         if (!ReducedMotion()) _time += (float)delta;
         QueueRedraw();
     }
     public override void _Draw()
     {
         if (SourceLettering || _glow < .002) return;
-        float width = Math.Min(Size.X-10, Palette.Title.GetStringSize(Text, fontSize: GetThemeFontSize("font_size")).X+55);
-        float pulse = ReducedMotion() ? 1 : .92f+.08f*Mathf.Sin(_time*1.3f);
-        for (var i=18; i>=1; i--)
+        float width = Math.Min(Size.X - 10, Palette.Title.GetStringSize(Text, fontSize: GetThemeFontSize("font_size")).X + 55);
+        float pulse = ReducedMotion() ? 1 : .92f + .08f * Mathf.Sin(_time * 1.3f);
+        for (var i = 18; i >= 1; i--)
         {
-            _halos[i-1].BgColor = new Color(.95f,.54f,.16f,_glow*pulse*.008f);
-            DrawStyleBox(_halos[i-1], new Rect2(5-i, Size.Y*.68f-i, width+i*2, i*2+4));
+            _halos[i - 1].BgColor = new Color(.95f, .54f, .16f, _glow * pulse * .008f);
+            DrawStyleBox(_halos[i - 1], new Rect2(5 - i, Size.Y * .68f - i, width + i * 2, i * 2 + 4));
         }
-        for (var i=0; i<5; i++)
-            DrawLine(new Vector2(10+i*13,Size.Y-13+i),new Vector2(width-i*19,Size.Y-13+i),new Color(.88f,.56f,.20f,_glow*(.12f+i*.02f)),1);
+        for (var i = 0; i < 5; i++)
+            DrawLine(new Vector2(10 + i * 13, Size.Y - 13 + i), new Vector2(width - i * 19, Size.Y - 13 + i), new Color(.88f, .56f, .20f, _glow * (.12f + i * .02f)), 1);
     }
 }
