@@ -2,6 +2,7 @@
 # Native Regions/Celestials input, lifecycle and visual evidence on prepared real-engine tables.
 set -euo pipefail
 source "$(dirname "${BASH_SOURCE[0]}")/env.sh"
+l5r_require_godot
 cd "$L5R_PROJECT_ROOT"
 mkdir -p artifacts/checks/support-cards
 dotnet build src/L5R.Client/L5R.Client.csproj --disable-build-servers -p:UseSharedCompilation=false -m:1 --nologo > artifacts/checks/support-cards/build.log

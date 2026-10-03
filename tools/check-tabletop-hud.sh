@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 source "$(dirname "${BASH_SOURCE[0]}")/env.sh"
+l5r_require_godot
 cd "$L5R_PROJECT_ROOT"
 mkdir -p artifacts/tabletop-hud
 "$GODOT" --path "$L5R_PROJECT_ROOT/src/L5R.Client" --resolution 1360x1000 res://TabletopProbe.tscn -- --output="$L5R_PROJECT_ROOT/artifacts/tabletop-hud/pile-counts.png" > artifacts/tabletop-hud/pile-counts.log 2>&1

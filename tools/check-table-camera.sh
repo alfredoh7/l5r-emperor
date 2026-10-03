@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 source "$(dirname "${BASH_SOURCE[0]}")/env.sh"
+l5r_require_godot
 cd "$L5R_PROJECT_ROOT"
 mkdir -p artifacts/table-camera
 for l5r_case in 'published-board-battle-camera:1920x1080:overview' 'published-board-battle-camera-zoom:1920x1080:battle-focus' 'published-board-battle-camera:1440x900:camera-16x10' 'published-board-battle-camera:2560x1080:camera-ultrawide' 'published-board-assignment:1920x1080:assignment' 'published-board-battle-expanded:1920x1080:attachments' 'published-board-battle-piletip:1920x1080:pile-hover' 'published-board-battle-motionoff:1920x1080:reduced-motion'; do

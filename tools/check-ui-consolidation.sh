@@ -3,6 +3,7 @@
 # run through tools/check-persistent-home.sh. Screenshots require visual review.
 set -euo pipefail
 source "$(dirname "${BASH_SOURCE[0]}")/env.sh"
+l5r_require_godot
 cd "$L5R_PROJECT_ROOT"
 l5r_out="$L5R_PROJECT_ROOT/artifacts/ui-consolidation-checks"
 mkdir -p "$l5r_out"
