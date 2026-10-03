@@ -1,0 +1,351 @@
+{
+  "Profile": "personality-wave-63",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-4386",
+      "Name": "Kitsu Miro",
+      "Type": "Personality",
+      "Clan": "Lion",
+      "GoldCost": 5,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 3,
+      "PersonalHonor": 3,
+      "HonorRequirement": 6,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Home Battle, Bow this card: Create a 2F/2C/3PH Lion Clan • Ancestor • Samurai • Spirit Personality at the current battlefield. Remove him from the game after the battle ends. (Home actions can be taken from home.)",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-4386.jpg",
+      "Keywords": [
+        "Lion Clan",
+        "Shugenja",
+        "Sodan Senzo",
+        "Water"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "miro-create"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-5286",
+      "Name": "Moshi Tomiko",
+      "Type": "Personality",
+      "Clan": "Mantis",
+      "GoldCost": 9,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 4,
+      "PersonalHonor": 2,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Bow Tomiko or one of her Spells: Ranged 6 Attack.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-5286.jpg",
+      "Keywords": [
+        "Naval",
+        "Mantis Clan",
+        "Shugenja",
+        "Thunder"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "tomiko-attack"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-5332",
+      "Name": "Moto Isul",
+      "Type": "Personality",
+      "Clan": "Unicorn",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": 4,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Even if Isul is at home, target a Personality: Bow or straighten him.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-5332.jpg",
+      "Keywords": [
+        "Tactician",
+        "Samurai",
+        "Unicorn Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "isul-bow",
+        "isul-straighten"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-6165",
+      "Name": "Rata",
+      "Type": "Personality",
+      "Clan": "Unaligned",
+      "GoldCost": 4,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 3,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After an action resolves that Rata performed and that destroyed a Personality: Rata sacrifices his victim's corpse. Draw a card.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6165.jpg",
+      "Keywords": [
+        "Cultist",
+        "Gaijin"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "rata-draw"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-6376",
+      "Name": "Rokku",
+      "Type": "Personality",
+      "Clan": "Unaligned",
+      "GoldCost": 6,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 3,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Rokku has +1F while a Lion Clan player controls him.\nReaction: Even if Rokku is bowed, after engaging, if any enemy units are at the current battlefield: Move Rokku there. Straighten his unit if he moved.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6376.jpg",
+      "Keywords": [
+        "Experienced Akodo Rokku",
+        "Tactician",
+        "Unique",
+        "Monk",
+        "Order of Strength",
+        "Zealot"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "rokku-move"
+      ],
+      "Effect": "rokku-lion-force-bonus"
+    },
+    {
+      "Id": "oracle-l5r-6454",
+      "Name": "Sakti",
+      "Type": "Personality",
+      "Clan": "Unaligned",
+      "GoldCost": 9,
+      "GoldProduction": 0,
+      "Force": 8,
+      "Chi": 1,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Target an enemy card with lower Force: Bow it. If it is a Personality, you may move it home.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6454.jpg",
+      "Keywords": [
+        "Berserker",
+        "Gaijin"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "sakti-bow"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-6901",
+      "Name": "Shinjo Junpei",
+      "Type": "Personality",
+      "Clan": "Unicorn",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 4,
+      "PersonalHonor": 2,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Tactical Battle: Even if Junpei is at home, choose your performing unbowed Personality: Melee 4 Attack.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6901.jpg",
+      "Keywords": [
+        "Tactician",
+        "Unique",
+        "Experienced",
+        "Samurai",
+        "Unicorn Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "junpei-attack"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-7373",
+      "Name": "Soshi Yoshihara",
+      "Type": "Personality",
+      "Clan": "Scorpion",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 5,
+      "PersonalHonor": 1,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Political Open: Target a Holding or Personality: Its base abilities may not be used.\nPolitical Open: Bow Yoshihara and target a Personality: Dishonor him. If you are a Scorpion Clan or Crab Clan player, his controller loses 1 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7373.jpg",
+      "Keywords": [
+        "Unique",
+        "Advisor to the Jade Champion",
+        "Air",
+        "Courtier",
+        "Experienced",
+        "Magistrate",
+        "Scorpion Clan",
+        "Shugenja"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "yoshihara-lock",
+        "yoshihara-dishonor"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-7615",
+      "Name": "Sugihara",
+      "Type": "Personality",
+      "Clan": "Spider",
+      "GoldCost": 9,
+      "GoldProduction": 0,
+      "Force": 6,
+      "Chi": 3,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Target an enemy Personality: Give him -4F. If his Force is now 0, you may take an additional Battle action which Sugihara must perform.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7615.jpg",
+      "Keywords": [
+        "Kensai",
+        "Monk",
+        "Order of the Spider",
+        "Spider Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "sugihara-penalty"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-8894",
+      "Name": "Tsuruchi Tomaru",
+      "Type": "Personality",
+      "Clan": "Mantis",
+      "GoldCost": 9,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 4,
+      "PersonalHonor": 2,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Twice per turn: Ranged 4 Attack.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8894.jpg",
+      "Keywords": [
+        "Naval",
+        "Unique",
+        "Experienced",
+        "Mantis Clan",
+        "Samurai",
+        "Scout"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "tomaru-attack"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9449",
+      "Name": "Yasuki Makoto",
+      "Type": "Personality",
+      "Clan": "Crab",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 3,
+      "PersonalHonor": 1,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Your Holdings enter play for 1 less Gold. \nEconomic Home Battle, Bow this card: Target an enemy Personality. His controller may pay 4 Gold. If he does, he loses 1 Honor. If he does not, dishonor the target and move him home.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9449.jpg",
+      "Keywords": [
+        "Courtier",
+        "Crab Clan",
+        "Kolat",
+        "Merchant"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "makoto-lock"
+      ],
+      "Effect": "makoto-holding-discount"
+    },
+    {
+      "Id": "oracle-l5r-9579",
+      "Name": "Yoritomo Kanaye",
+      "Type": "Personality",
+      "Clan": "Mantis",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 1,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Target an enemy card without attachments, and you may pay Gold equal to its Gold Cost: Bow it. If you paid the Gold, destroy it.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9579.jpg",
+      "Keywords": [
+        "Naval",
+        "Brute",
+        "Extortionist",
+        "Magistrate",
+        "Mantis Clan",
+        "Samurai"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "kanaye-bow"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

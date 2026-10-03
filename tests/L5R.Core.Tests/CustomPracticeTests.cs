@@ -36,7 +36,7 @@ internal static class CustomPracticeTests
                 Reject(DeckFormat.Parse(DeckFormat.Write(d.ToDeck())));
             }),
             ("Unknown, training, unsupported and wrong-format cards reject", () => {
-                foreach (var name in new[] { "Bogus card", "training-crane-samurai", "A Champion in Court" }) Reject(Crane with { Entries = [.. Crane.Entries, new(name, 1)] });
+                foreach (var name in new[] { "Bogus card", "training-crane-samurai", "Plains of Otosan Uchi" }) // issue #503: A Champion in Court is now wired; Plains of Otosan Uchi is still unpublished Reject(Crane with { Entries = [.. Crane.Entries, new(name, 1)] });
                 Reject(Crane with { Legality = "Modern" });
             }),
             ("Duplicate quantity lines cannot bypass copy limits", () => { var d = Crane; Reject(d with { Entries = [.. d.Entries, new(d.Entries.Last().Name.ToUpperInvariant(), 4)] }); }),

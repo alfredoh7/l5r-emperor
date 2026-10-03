@@ -1,0 +1,33 @@
+{
+  "Profile": "spell-wave-25",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-1323",
+      "Name": "Chikushudo's Trickery",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: Choose one or two of your performing unbowed Nonhuman Spirit Personalities, target another player's unbowed Personality, bow this Shugenja, and destroy this card: Create a battlefield. Negate all movement to it. Assign the target to attack there; he will not be destroyed during the battle's Combat Segment. Assign the performing Spirits to defend there. Fight a battle there.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1323.jpg",
+      "Keywords": [
+        "Earth",
+        "Forest"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "chikushudo-trickery-battle"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

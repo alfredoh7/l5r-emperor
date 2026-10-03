@@ -1,0 +1,110 @@
+{
+  "Profile": "strategy-wave-103",
+  "Rules": "Emperor Edition core rules; reviewed user-supplied created-card scans.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-2708",
+      "Name": "Fruitless Search",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After engaging, if any enemy units are at the current battlefield: Create a 4F/4C/3PH Imperial • Samurai • Duelist • Magistrate Personality on your side there. Remove him from the game after this battle ends.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-2708.jpg",
+      "Keywords": [
+        "Unique",
+        "Imperial",
+        "Political"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "fruitless-search-create"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-2895",
+      "Name": "Grateful Reward",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After engaging, choose your performing Samurai at the current battlefield: Create a 1F Ashigaru • Cavalry Follower and attach it to him. If he is a Paragon, gain 2 Honor and draw a card.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-2895.jpg",
+      "Keywords": [
+        "Bushido Virtue",
+        "Compassion"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "grateful-reward-create"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-7696",
+      "Name": "Sword for Hire",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 10,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Target another player's Personality: Create a 0F/3C/0PH Assassin • Duelist Personality. He duels the targeted Personality. Destroy the duel's loser. After the duel ends, remove the created Personality from the game.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7696.jpg",
+      "Keywords": [
+        "Iaijutsu"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "sword-for-hire-create"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9899",
+      "Name": "Crippled Sensei",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "As a Focus Effect: After this duel ends, choose a player who loses 2 Honor.\nReaction: After one of your Personalities is destroyed: Create a Maimed • Retainer Holding with the ability, \"Battle/Open: Destroy this card and target a Personality: Straighten him. Rehonor him.\"",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9899.jpg",
+      "Keywords": [],
+      "Focus": 3,
+      "Abilities": [
+        "crippled-sensei-focus",
+        "crippled-sensei-create-action",
+        "crippled-sensei-create-battle"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

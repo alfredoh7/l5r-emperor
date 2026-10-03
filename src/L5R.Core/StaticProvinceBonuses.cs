@@ -14,6 +14,7 @@ public sealed partial class MatchEngine
             var effect = Definition(card).Effect;
             if (effect.Length == 0 || effect == "none") continue;
             var mine = card.OwnerId == ownerId;
+            total += RegisteredProvinceBonus(card, mine);
             switch (effect)
             {
                 case "shibata-provinces":
@@ -21,6 +22,10 @@ public sealed partial class MatchEngine
                     break;
                 case "ebisu-provinces":
                     if (mine) total += 2;
+                    break;
+                // Fortifications (issue #492, group F): "Your provinces have +1 strength."
+                case FortificationsEffect:
+                    if (mine) total += 1;
                     break;
             }
         }

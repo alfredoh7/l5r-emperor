@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Prepared revision 2 Windows preview from PR 434 at 659e015f with Alfredos approved Top Cards correction; retains eight direct review launchers and resolves both pending native reruns. Delivery checkpoint and final status are linked from PR 454.",
+  "validation": "9/9 packaging regressions pass. Exact-source Mac Multiple Targets and Battle Progress native suites each pass 1920x1080 normal and 1280x800 reduced; captures inspected and logs committed. Windows export resource/runtime/source checks pass; archive spec, approval wording, eight launcher routes and approved Top Cards atlas verified. Source CI green at 659e015f. Exact uploaded Windows package validation and final notification are recorded on PR 454 after this preparation checkpoint.",
+  "remaining": "Publish only after exact uploaded Windows package CI passes, then notify Mendon once; final delivery evidence on PR 454. Mendon native Windows graphical/rules acceptance and later feedback remain separate. No main merge or outdated-task cleanup in this task.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/297",
+  "branch": "codex/297-windows-refresh",
+  "updated": "2026-09-23T21:55:03.597182+00:00"
+}

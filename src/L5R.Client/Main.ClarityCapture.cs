@@ -25,7 +25,7 @@ public partial class Main
         if (!_clarityInputDone || _clarityError is not null) return;
         GetViewport().PushInput(new InputEventMouseMotion { Position = _clarityPointer, GlobalPosition = _clarityPointer }, true);
     }
-    private async void PrepareClarityCapture()
+    private async Task PrepareClarityCapture()
     {
         try
         {

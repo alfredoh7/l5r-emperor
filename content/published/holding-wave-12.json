@@ -1,0 +1,150 @@
+{
+  "Profile": "holding-wave-12",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-9796",
+      "Name": "Fortress of Lidless Eyes",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "This card's base ability will not be copied. All players have the ability, \"Open: Pay 6 Gold: Destroy a card titled Fortress of Lidless Eyes.\"\nOpen: Once per game, target a Personality: Bow him. Negate his straightening while this card remains in play.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9796.jpg",
+      "Keywords": [
+        "Unique",
+        "Kolat"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "fortress-lidless-bow"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9798",
+      "Name": "Platinum Mine",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 6,
+      "GoldProduction": 5,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Bow this card: Produce 5 Gold, or 6 Gold if paying for an attachment.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9798.jpg",
+      "Keywords": [
+        "Mine"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "platinum-mine-gold"
+    },
+    {
+      "Id": "oracle-l5r-9799",
+      "Name": "Sheltered Port",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 4,
+      "GoldProduction": 2,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Bow this card: Produce 2 Gold, plus 1 Gold for each other Holding you control that is a Market or Port.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9799.jpg",
+      "Keywords": [
+        "Port"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "sheltered-port-gold"
+    },
+    {
+      "Id": "oracle-l5r-9800",
+      "Name": "Small-Time Bully",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 2,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Bow this card: Produce 2 Gold.\nAfter this card enters play, if you control a Courtier or Magistrate: You may dishonor a Personality (in play).",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9800.jpg",
+      "Keywords": [
+        "Retainer"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "small-time-bully-dishonor"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9801",
+      "Name": "Versatile Farm",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Destroy this card: Search your Dynasty deck for a non-Unique Farm Holding with another title and put it into play, unbowed, paying 2 less Gold.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9801.jpg",
+      "Keywords": [
+        "Farm"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "versatile-farm-search"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9802",
+      "Name": "Whispering Archive",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Your Spells enter play paying 1 less Gold.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9802.jpg",
+      "Keywords": [],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "whispering-archive-spell-discount"
+    }
+  ],
+  "Decks": []
+}

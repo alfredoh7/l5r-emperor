@@ -30,6 +30,8 @@ public sealed partial class MatchEngine
         {
             var effect = Definition(card).Effect;
             var was = before.TryGetValue(card.Id, out var b) ? b : (Bowed: false, AttachedTo: (string?)null);
+            P3AfterCommandTrait(card, was.Bowed); // Vigilant Riders (issue #503): "After this card bows: Straighten it."
+            ApplyRemainingGAfterCommandTraits(card, was.Bowed); // Blade of Perfection (issue #492 group G): "After this card bows: Straighten it."
             // Ronin Ambushers (oracle-l5r-10108): "After this card bows: Straighten it and, if you do not control a Terrain, negate its (future)
             // straightening until the phase ends." A straighten hold released when the phase changes (StraightenPoint.PhaseEnds) is the (future)
             // negation; a hold from an earlier bow this phase refuses the straighten itself, exactly as printed.
@@ -49,6 +51,8 @@ public sealed partial class MatchEngine
             // players' actions" -- the penalties already on the wielder from other players' cards are removed the moment it attaches; the "new" half is
             // AkaBekoNegates below, read by ApplyModifier and CreateToken.
             if (effect == "aka-beko-negate-penalties") PurgeOtherPlayersStatPenalties(wielder);
+            // Gift Armor (issue #492 group G): the "current" half of "Negate all current and new Chi penalties".
+            if (effect == GiftArmorEffect) PurgeChiPenalties(wielder);
         }
     }
 
@@ -105,7 +109,7 @@ public sealed partial class MatchEngine
         if (command?.AbilityId is null || !AbilityCatalog.All.TryGetValue(command.AbilityId, out var ability)) return false;
         var source = command.CardId is not null && _state.Cards.TryGetValue(command.CardId, out var s) ? s : null;
         var performer = ActionPerformer(ability, command, source);
-        return Protected(performer)
+        return Protected(performer) || HiromiProtects(command) // Yoritomo Hiromi (issue #477)
             || Attachments(performer.Id).Any(a => Definition(a).Effect == "ki-uso-protect-political") && ActionCarriesKeyword(ability, source, "Political");
     }
 

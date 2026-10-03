@@ -10,7 +10,7 @@ public sealed partial class MatchEngine
 
     private bool KitsuneNegatesMovement(CardInstance card, int province)
     {
-        if (_state.Phase != Phase.Battle) return false;
+        if (_state.Phase != Phase.Battle || HiromiUnnegatable()) return false; // Yoritomo Hiromi (issue #477): the movement from her Battle actions will not be negated.
         var attacker = _state.ActivePlayerId; var defender = 1 - attacker;
         if (card.OwnerId != attacker || _state.PriorityPlayerId == defender) return false;
         if (!_state.Cards.Values.Any(c => c.OwnerId == defender && InPlay(c) && Definition(c).Effect == KitsuneNegationEffect)) return false;

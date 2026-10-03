@@ -14,6 +14,9 @@ public sealed class PendingAfterResolution
     public int? ProvinceDestroyedBy { get; set; }
     /// <summary>The battle's loser or losers: the Defender or the Attacker who was beaten; BOTH players in a tie (Mendon, issue #417); none when nothing was fought.</summary>
     public List<int> Losers { get; set; } = [];
+    /// <summary>Emperor Edition remaining-cards pass (issue #492), group D (Words Have Strength): the cards the resolution destroyed (the losing army or armies), and whether a copy of Words Have Strength was played in reaction to it.</summary>
+    public List<string> DestroyedCardIds { get; set; } = [];
+    public bool WordsHaveStrengthPlayed { get; set; }
 }
 
 // The after-resolution window (issue #417, Mendon's rulings of 2026-09-21). "After a battle's resolution ends" -- after the losing units are destroyed, the province is destroyed
@@ -31,8 +34,13 @@ public sealed partial class MatchEngine
 
     private PendingAfterResolution NewAfterResolutionFacts(int provinceIndex, int attacker, bool attackerWon, CardInstance[] attackers, int[] destroyed, bool provinceDestroyed, List<int> losers) => new()
     {
-        ProvinceIndex = provinceIndex, Attacker = attacker, AttackerWon = attackerWon, AttackerIds = attackers.Select(c => c.Id).ToList(),
-        DestroyedEnemyUnits = destroyed, ProvinceDestroyedBy = provinceDestroyed ? attacker : null, Losers = losers
+        ProvinceIndex = provinceIndex,
+        Attacker = attacker,
+        AttackerWon = attackerWon,
+        AttackerIds = attackers.Select(c => c.Id).ToList(),
+        DestroyedEnemyUnits = destroyed,
+        ProvinceDestroyedBy = provinceDestroyed ? attacker : null,
+        Losers = losers
     };
 
     // The Reaction plays this player could make right now, asked with the window open exactly as they will be.
@@ -70,6 +78,17 @@ public sealed partial class MatchEngine
             // Redoubled Attack needs a Personality of the player's still at the battlefield: its performing slot has no candidate otherwise, so it is not playable.
             // Tales of Dishonor: "if you destroyed any enemy units or a province in that resolution" and somebody lost.
             "tales-of-dishonor-lose-honor" => ResolutionDestroyedForPlayer(playerId) && facts.Losers.Count > 0,
+            // Returning Home (Forgotten Legacy pass, issue #467 batch 4): "a battle ... in which you destroyed a province as the Attacker".
+            "returning-home-create" => facts.ProvinceDestroyedBy == playerId && facts.Attacker == playerId,
+            // Shosuro Ryoken (The Shadow's Embrace pass, issue #476, batch 2): "if Ryoken was at its battlefield during its resolution in which you destroyed a province or army".
+            "ryoken-honor-loss" => ResolutionDestroyedForPlayer(playerId) && source.Zone == Zone.Battlefield && source.ProvinceIndex == facts.ProvinceIndex,
+            // Shosuro Rokuta (proxy group Z, issue #492): "After the resolution of a battle, if the resolution destroyed Rokuta."
+            "rokuta-battle-create" => RokutaBattleApplies(source, facts),
+            "crippled-sensei-create-battle" => facts.DestroyedCardIds.Any(cardId => _state.Cards.TryGetValue(cardId, out var dead)
+                && dead.OwnerId == playerId && Definition(dead).Type == CardType.Personality && dead.Zone is Zone.Dead or Zone.RemovedFromGame),
+            "empress-address-battle" => EmpressAddressBattleApplies(facts, playerId), // Emperor Edition remaining-cards pass, group C (issue #492)
+            // Words Have Strength (Emperor Edition remaining-cards pass, issue #492, group D): "if the resolution destroyed any of your Courtiers or Magistrates".
+            "words-strength-resolution" => ResolutionDestroyedCourtierOrMagistrate(facts, playerId),
             _ => true
         };
     }
@@ -83,5 +102,7 @@ public sealed partial class MatchEngine
     }
 
     // Redoubled Attack: "They will not bow from the battle's resolution" -- named cards, as opposed to a player's whole army (Akodo Dairuko).
-    private bool ResolutionWillNotBow(CardInstance card) => _state.ResolutionWillNotBowCardIds.Contains(card.Id);
+    private bool ResolutionWillNotBow(CardInstance card) => _state.ResolutionWillNotBowCardIds.Contains(card.Id)
+        || SasakoUnitWillNotBow(card) // Moshi Sasako (Forgotten Legacy pass, issue #467 batch 2): "Battle resolution does not bow cards in this unit."
+        || ThundersStaminaUnitWillNotBow(card); // Thunder's Stamina (The Shadow's Embrace pass, issue #476 batch 5): "While this Shugenja is Thunder, battle resolution will not bow cards in this unit."
 }

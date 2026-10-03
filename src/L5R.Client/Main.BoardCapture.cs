@@ -12,6 +12,7 @@ public partial class Main
         _boardFixtureAttempts++;
         var compactMode = _captureMode.Contains("courts-compact", StringComparison.Ordinal);
         var defenseMode = _captureMode.Contains("defense", StringComparison.Ordinal);
+        var cavalryMode = _captureMode.Contains("cavalry", StringComparison.Ordinal);
         var assignmentMode = defenseMode || _captureMode.Contains("assignment", StringComparison.Ordinal);
         var assignmentType = defenseMode ? "assignDefense" : "attack";
         var minimumUnits = defenseMode ? 1 : 2;
@@ -21,7 +22,9 @@ public partial class Main
         while (View.WinnerId is null && steps++ < 1200)
         {
             _session.FollowPracticePriority();
-            var assignment = Actions.FirstOrDefault(a => a.Enabled && a.Type == assignmentType && a.TargetIds?.Length >= minimumUnits);
+            var assignment = Actions.FirstOrDefault(a => a.Enabled && a.Type == assignmentType && a.TargetIds?.Length >= minimumUnits
+                && (!cavalryMode || View.Phase is Phase.CavalryDeclaration or Phase.CavalryDefense
+                    && View.Players.Any(p => p.Army.Length > 0)));
             var targeted = Actions.FirstOrDefault(a => a.Enabled && a.Type == "useAbility" && a.CardId is not null && a.Command?.CardIds is null && a.TargetIds?.Length > 0 && a.Command?.PerformerId != a.Command?.TargetId && a.CardId != a.Command?.TargetId);
             // Fixture selection uses public engine-provided unit force only. The
             // eventual assertion checks actual resolution events, not this estimate.
@@ -32,8 +35,8 @@ public partial class Main
                     + View.Players.Single(p => p.Id != View.ActivePlayerId).Provinces.Single(p => p.Index == active).Strength;
             var attachmentReady = !_captureMode.Contains("ink", StringComparison.Ordinal) ||
                 View.Players.Any(p => p.Home.Concat(p.Army).Any(c => c.AttachedTo is not null));
-            var casualtyReady = !casualtyMode || View.Phase==Phase.Battle && BattleCasualtyAction() is not null;
-            var defeatReady = !_captureMode.Contains("deaths", StringComparison.Ordinal) || View.CurrentBattleProvince is int bp && View.Players.All(p=>p.Army.Any(c=>c.AttachedTo is null && c.ProvinceIndex==bp)) && View.Players.SelectMany(p=>p.Army.Where(c=>c.AttachedTo is null && c.ProvinceIndex==bp)).Sum(c=>c.UnitForce??0)>0;
+            var casualtyReady = !casualtyMode || View.Phase == Phase.Battle && BattleCasualtyAction() is not null;
+            var defeatReady = !_captureMode.Contains("deaths", StringComparison.Ordinal) || View.CurrentBattleProvince is int bp && View.Players.All(p => p.Army.Any(c => c.AttachedTo is null && c.ProvinceIndex == bp)) && View.Players.SelectMany(p => p.Army.Where(c => c.AttachedTo is null && c.ProvinceIndex == bp)).Sum(c => c.UnitForce ?? 0) > 0;
             var compactReady = View.Phase == Phase.Dynasty && View.TurnNumber >= 3 && View.Players.All(p => p.Home.Any(c => c.Definition?.Type == CardType.Personality));
             if (compactMode ? compactReady : ((assignmentMode && assignment is not null || targetMode && View.Phase == Phase.Battle && targeted is not null || !assignmentMode && !targetMode && View.Phase == Phase.Battle && View.Players.Sum(p => p.Army.Count(c => c.AttachedTo is null)) >= 2) && ClarityFixtureReady() && attachmentReady && fallReady && casualtyReady && defeatReady)) break;
             var command = TrainingOpponent.Choose(View, Actions).Command ?? throw new InvalidOperationException("Board capture has no action.");
@@ -57,6 +60,7 @@ public partial class Main
         {
             var action = Actions.First(a => a.Enabled && a.Type == assignmentType && a.TargetIds?.Length >= minimumUnits);
             var ids = action.TargetIds!.Take(2).ToArray(); var provinces = action.Provinces!; var version = View.Version;
+            var committedArrows = IntentArrows().Count();
             // Enter assignment by pressing the actual Personality tile, then province controls.
             _tiles.Single(t => t.Card.Id == ids[0]).EmitSignal(Button.SignalName.Pressed);
             _provinceButtons[(1 - View.ActivePlayerId, provinces[0])].EmitSignal(Button.SignalName.Pressed);
@@ -70,7 +74,12 @@ public partial class Main
             RenderInspector();
             if (_assignments[ids[0]] != provinces[0]) throw new InvalidOperationException("Inspector erased an assignment.");
             CancelChoice();
-            if (_assignments.Count != 0 || IntentArrows().Any() || View.Version != version) throw new InvalidOperationException("Cancel did not clear the draft cleanly.");
+            // Cavalry maneuvers retain reminders for already-committed Infantry.
+            // Cancel removes the local draft, not those public-state reminders.
+            if (_assignments.Count != 0 || _chosen is not null || _assignmentUnit is not null
+                || IntentArrows().Count() != committedArrows || View.Version != version)
+                throw new InvalidOperationException($"Cancel did not restore the pre-draft state: phase={View.Phase}, baselineArrows={committedArrows}, afterArrows={IntentArrows().Count()}, drafts={_assignments.Count}.");
+            GD.Print($"ASSIGNMENT_CANCEL: phase={View.Phase}; committedArrows={committedArrows}; drafts=0; versionUnchanged=True");
             _tiles.Single(t => t.Card.Id == ids[0]).EmitSignal(Button.SignalName.Pressed);
             _provinceButtons[(1 - View.ActivePlayerId, provinces[0])].EmitSignal(Button.SignalName.Pressed);
             if (ids.Length > 1)
@@ -126,33 +135,36 @@ public partial class Main
             if (_selected?.Id != attachment.Id || _selected.AttachedTo != attachment.AttachedTo) throw new InvalidOperationException("Expanded attachment could not be inspected independently.");
             GD.Print("UI_SMOKE_PASS: stack toggle spreads attachments; an individual attachment opens in the inspector with its parent preserved.");
         }
-        if(_captureMode.Contains("board-flow",StringComparison.Ordinal))
+        if (_captureMode.Contains("board-flow", StringComparison.Ordinal))
         {
-            if(_chosen is not null || _selected is not null) CancelChoice();
-            if(_captureMode.EndsWith("target",StringComparison.Ordinal)) {
-                var option=Actions.First(a=>a.Enabled && a.Type=="useAbility" && a.CardId is not null && a.Command?.CardIds is null && a.TargetIds?.Length>0);
-                var beforeAction=View.Version;
-                var button=_inspector.GetChildren().OfType<Button>().First(b=>b.Text.EndsWith(option.Label,StringComparison.Ordinal));
+            if (_chosen is not null || _selected is not null) CancelChoice();
+            if (_captureMode.EndsWith("target", StringComparison.Ordinal))
+            {
+                var option = Actions.First(a => a.Enabled && a.Type == "useAbility" && a.CardId is not null && a.Command?.CardIds is null && a.TargetIds?.Length > 0);
+                var beforeAction = View.Version;
+                var button = _inspector.GetChildren().OfType<Button>().First(b => b.Text.EndsWith(option.Label, StringComparison.Ordinal));
                 button.EmitSignal(Button.SignalName.Pressed);
-                if(_chosen?.Command?.AbilityId!=option.Command?.AbilityId || View.Version!=beforeAction)throw new InvalidOperationException("Direct battle action lost its ability or submitted before confirmation.");
+                if (_chosen?.Command?.AbilityId != option.Command?.AbilityId || View.Version != beforeAction) throw new InvalidOperationException("Direct battle action lost its ability or submitted before confirmation.");
                 CancelChoice();
             }
-            if(_captureMode.EndsWith("waiting",StringComparison.Ordinal)) {
-                var version=View.Version; _phaseActions.GetChildren().OfType<Button>().First(b=>!b.Disabled && b.Text=="Pass battle action").EmitSignal(Button.SignalName.Pressed); _uiQueue.Clear(); Render();
-                if(View.Version!=version+1 || View.PriorityPlayerId==View.ViewerId) throw new InvalidOperationException("Battle pass did not hand priority to opponent.");
+            if (_captureMode.EndsWith("waiting", StringComparison.Ordinal))
+            {
+                var version = View.Version; _phaseActions.GetChildren().OfType<Button>().First(b => !b.Disabled && b.Text == "Pass battle action").EmitSignal(Button.SignalName.Pressed); _uiQueue.Clear(); Render();
+                if (View.Version != version + 1 || View.PriorityPlayerId == View.ViewerId) throw new InvalidOperationException("Battle pass did not hand priority to opponent.");
             }
-            if(_captureMode.EndsWith("outcome",StringComparison.Ordinal)) {
-                _reducedMotion=true;
-                for(var i=0;i<2;i++) { _session.Submit(new GameCommand("pass",View.PriorityPlayerId,View.Version)).GetAwaiter().GetResult(); _uiQueue.Clear(); Render(); }
+            if (_captureMode.EndsWith("outcome", StringComparison.Ordinal))
+            {
+                _reducedMotion = true;
+                for (var i = 0; i < 2; i++) { _session.Submit(new GameCommand("pass", View.PriorityPlayerId, View.Version)).GetAwaiter().GetResult(); _uiQueue.Clear(); Render(); }
                 _uiQueue.Clear(); Render();
             }
-            if(_captureMode.EndsWith("outcome",StringComparison.Ordinal) && _journal.Aftermath.Count==0)throw new InvalidOperationException("Resolution lost named destination receipts.");
-            var before=View.Version;
-            if(_phaseActions.GetChildren().OfType<Button>().Any(b=>!b.Disabled && b.Text=="Pass battle action") && View.PriorityPlayerId!=View.ViewerId)
+            if (_captureMode.EndsWith("outcome", StringComparison.Ordinal) && _journal.Aftermath.Count == 0) throw new InvalidOperationException("Resolution lost named destination receipts.");
+            var before = View.Version;
+            if (_phaseActions.GetChildren().OfType<Button>().Any(b => !b.Disabled && b.Text == "Pass battle action") && View.PriorityPlayerId != View.ViewerId)
                 throw new InvalidOperationException("Waiting player received a Pass button.");
             ShowBattleHistory();
-            var history=GetChildren().OfType<AcceptDialog>().Last();history.EmitSignal(AcceptDialog.SignalName.Confirmed);
-            if(!history.IsQueuedForDeletion() || View.Version!=before) throw new InvalidOperationException("Reviewing battle changed the match or failed to close.");
+            var history = GetChildren().OfType<AcceptDialog>().Last(); history.EmitSignal(AcceptDialog.SignalName.Confirmed);
+            if (!history.IsQueuedForDeletion() || View.Version != before) throw new InvalidOperationException("Reviewing battle changed the match or failed to close.");
             GD.Print("BATTLE_FLOW_PASS: explicit pass changes priority; waiting controls are absent; public history opens/closes without changing state.");
         }
         RenderBoard(); ResetTableCamera();
@@ -171,14 +183,14 @@ public partial class Main
                 _uiQueue.Clear(); Render();
                 if (_resolutionMessage is null) throw new Exception("Native battle result was not presented");
             }
-            ProbeUnitStandardInput();
+            _ = ProbeUnitStandardInput();
         }
-        if (_captureMode.Contains("courts", StringComparison.Ordinal)) { if (!compactMode) FocusBattle(); ProbeBattleCourts(); }
-        if (_captureMode.Contains("ink", StringComparison.Ordinal)) { if (_captureMode.Contains("focus", StringComparison.Ordinal)) FocusMySide(); ProbeInkMat(); }
-        if (_captureMode.Contains("deselect", StringComparison.Ordinal)) ProbeDeselection();
-        if (_captureMode.Contains("clarity", StringComparison.Ordinal)) PrepareClarityCapture();
-        if (_captureMode.Contains("tokens", StringComparison.Ordinal)) { if (_captureMode.Contains("focus", StringComparison.Ordinal)) FocusMySide(); ProbeStatTokenInput(); }
-        if (_captureMode.Contains("hudicons", StringComparison.Ordinal)) ProbeHudIcons();
+        if (_captureMode.Contains("courts", StringComparison.Ordinal)) { if (!compactMode) FocusBattle(); _ = ProbeBattleCourts(); }
+        if (_captureMode.Contains("ink", StringComparison.Ordinal)) { if (_captureMode.Contains("focus", StringComparison.Ordinal)) FocusMySide(); _ = ProbeInkMat(); }
+        if (_captureMode.Contains("deselect", StringComparison.Ordinal)) _ = ProbeDeselection();
+        if (_captureMode.Contains("clarity", StringComparison.Ordinal)) _ = PrepareClarityCapture();
+        if (_captureMode.Contains("tokens", StringComparison.Ordinal)) { if (_captureMode.Contains("focus", StringComparison.Ordinal)) FocusMySide(); _ = ProbeStatTokenInput(); }
+        if (_captureMode.Contains("hudicons", StringComparison.Ordinal)) _ = ProbeHudIcons();
         if (_captureMode.Contains("piles", StringComparison.Ordinal)) ValidatePileControls();
         if (_captureMode.EndsWith("settings", StringComparison.Ordinal)) ShowSettings();
         if (_captureMode.Contains("gate", StringComparison.Ordinal))
@@ -194,12 +206,12 @@ public partial class Main
             else
             {
                 // The menu branch hosts Options in its own canvas rather than a dialog.
-                ResumeCapturedOptions();
+                _ = ResumeCapturedOptions();
             }
         }
     }
 
-    private async void ResumeCapturedOptions()
+    private async Task ResumeCapturedOptions()
     {
         // Let each menu page finish its deferred focus operation before leaving it.
         for (var page = 0; page < 2; page++)
@@ -364,7 +376,7 @@ public partial class Main
             if (forbidden.Any(word => text.Contains(word, StringComparison.Ordinal))) throw new InvalidOperationException("A removed board label returned: " + text);
             if (System.Text.RegularExpressions.Regex.IsMatch(text, @"\d+ F\s*·\s*#|\d+ / \d+|(?:Crane|Lion) P\d")) throw new InvalidOperationException("A unit summary or numeric page counter returned.");
         }
-        if (_clanHud.GetChildren().OfType<ClanPlaque>().Count() != 2 || _pileHud.GetChildren().OfType<TablePile>().Count() != 8 + View.Players.Count(p=>p.RemovedFromGame.Length>0)) throw new InvalidOperationException("Clan plaques or physical piles are missing.");
+        if (_clanHud.GetChildren().OfType<ClanPlaque>().Count() != 2 || _pileHud.GetChildren().OfType<TablePile>().Count() != 8 + View.Players.Count(p => p.RemovedFromGame.Length > 0)) throw new InvalidOperationException("Clan plaques or physical piles are missing.");
         foreach (var player in View.Players)
             foreach (var province in player.Provinces.Where(p => p.Destroyed))
                 if (_provinceButtons.ContainsKey((player.Id, province.Index))) throw new InvalidOperationException("A destroyed province still occupies a board control.");

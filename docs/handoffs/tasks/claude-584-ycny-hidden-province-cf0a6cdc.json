@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Your Clan Needs You! province prompt no longer names a face-down province card. Broader hidden-information audit: card ids were assigned in deck-list order, so a face-down card's real id (Hawado, Aramoro's Promise, Ietsuno, Border Keep/Doubts of Refill targets) could identify it. Ids are now an opaque seeded permutation in all three match setups (separate RNG; setup shuffles unchanged). The discarded card is also marked face-up.",
+  "validation": "dotnet run --project tests/L5R.Core.Tests: all pass; setup-shuffle golden re-pinned by definition using values recorded from the pre-change code; bash tools/check.sh --skip-client: All requested checks passed",
+  "remaining": "Client dereferences FindCard(id)! for face-down province targets (hidden-p ids), likely failing for Border Keep refresh/Hawado targets: separate functional bug, not fixed here. Audit was source-only: no two-seat run, ability error text not exhaustively checked.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/584",
+  "branch": "claude/584-ycny-hidden-province",
+  "updated": "2026-10-03T03:45:58.334223+00:00"
+}

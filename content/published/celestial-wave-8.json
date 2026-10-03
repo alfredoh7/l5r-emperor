@@ -1,0 +1,249 @@
+{
+  "Profile": "celestial-wave-8",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-311",
+      "Name": "Akodo's Guidance",
+      "Type": "Celestial",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Lion Clan players may target defending enemy units with the rulebook Favor Political Battle action.\nBattle: If you are a Lion Clan player, discard this card and choose your performing Personality: Melee 4 Attack.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-311.jpg",
+      "Keywords": [
+        "Unique",
+        "Experienced",
+        "Kami"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "akodo-guidance-melee"
+      ],
+      "Effect": "akodos-guidance"
+    },
+    {
+      "Id": "oracle-l5r-934",
+      "Name": "Bayushi's Guidance",
+      "Type": "Celestial",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After a player's turn begins, if he is Scorpion Clan: Each other player loses 1 Honor.\nOpen: If you are a Scorpion Clan player, discard this card and target one or more face-up Personalities in provinces: Put each one at the bottom of its owner's deck in any order. Refill the provinces face-up.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-934.jpg",
+      "Keywords": [
+        "Unique",
+        "Experienced",
+        "Kami"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "bayushi-guidance-return"
+      ],
+      "Effect": "bayushis-guidance"
+    },
+    {
+      "Id": "oracle-l5r-1788",
+      "Name": "Daigotsu's Guidance",
+      "Type": "Celestial",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After a Celestial enters play (including this one): Discard all Kami Celestials in play.\nBattle: If you are a Spider Clan player, discard this card and target an enemy unit: Destroy all bowed cards in it. Bow it.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1788.jpg",
+      "Keywords": [
+        "Unique"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "daigotsu-guidance-destroy"
+      ],
+      "Effect": "daigotsus-guidance"
+    },
+    {
+      "Id": "oracle-l5r-2181",
+      "Name": "Doji's Guidance",
+      "Type": "Celestial",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Crane Clan players may take the rulebook Favor Political Battle action even if they control no units at the current battlefield.\nOpen: If you are a Crane Clan player, discard this card: Put a non-Unique Strategy with a Political ability in your discard pile into your hand.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-2181.jpg",
+      "Keywords": [
+        "Unique",
+        "Experienced",
+        "Kami"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "dojis-guidance-return"
+      ],
+      "Effect": "dojis-guidance"
+    },
+    {
+      "Id": "oracle-l5r-3250",
+      "Name": "Hida's Guidance",
+      "Type": "Celestial",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Before the first straightening each battle of a Personality whose enemy leader is a Crab Clan player: Negate that straightening.\nBattle: If you are a Crab Clan player, discard this card and target a Personality: Bow him. Bow his unit if he is attacking.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-3250.jpg",
+      "Keywords": [
+        "Unique",
+        "Experienced",
+        "Kami"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "hidas-guidance-bow"
+      ],
+      "Effect": "hidas-guidance"
+    },
+    {
+      "Id": "oracle-l5r-6836",
+      "Name": "Shiba's Guidance",
+      "Type": "Celestial",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After a battle resolution ends in which a Phoenix Clan player destroyed one or more provinces or enemy cards: He draws a card.\nBattle/Open: If you are a Phoenix Clan player, discard this card: Put a non-Unique Spell or Kiho in your discard pile into your hand.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6836.jpg",
+      "Keywords": [
+        "Unique",
+        "Experienced",
+        "Kami"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "shibas-guidance-return"
+      ],
+      "Effect": "shibas-guidance"
+    },
+    {
+      "Id": "oracle-l5r-6978",
+      "Name": "Shinjo's Guidance",
+      "Type": "Celestial",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Unicorn Clan Personalities have +1F while they have an attachment.\nLimited: Discard this card: Search your discard pile, then Dynasty deck, for Moto Naleesh and put her into one of your provinces, face-up, discarding the card that was there.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6978.jpg",
+      "Keywords": [
+        "Unique",
+        "Experienced",
+        "Kami"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "shinjos-guidance-search"
+      ],
+      "Effect": "shinjos-guidance"
+    },
+    {
+      "Id": "oracle-l5r-8603",
+      "Name": "Togashi's Guidance",
+      "Type": "Celestial",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Dragon Clan players' maximum hand size is increased by two.\nBattle/Open: If you are a Dragon Clan player, discard this card: You may either put a Ring in your hand into play, or search your discard pile, then Fate deck, for a Ring and put it into your hand.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8603.jpg",
+      "Keywords": [
+        "Unique",
+        "Experienced",
+        "Kami"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "togashis-guidance-ring-play",
+        "togashis-guidance-ring-search"
+      ],
+      "Effect": "togashis-guidance"
+    },
+    {
+      "Id": "oracle-l5r-9662",
+      "Name": "Yoritomo's Guidance",
+      "Type": "Celestial",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After engaging, if the Attacker is a Mantis Clan player: Reduce the current battlefield's province's strength to 5.\nLimited: If you are a Mantis Clan player, discard this card and target your discarded Port Holding: Put it into play (bowed), paying all costs but paying 2 less Gold.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9662.jpg",
+      "Keywords": [
+        "Unique",
+        "Experienced",
+        "Kami"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "yoritomos-guidance-port"
+      ],
+      "Effect": "yoritomos-guidance"
+    }
+  ],
+  "Decks": []
+}

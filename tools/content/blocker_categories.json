@@ -1,0 +1,164 @@
+{
+ "note": "Primary blocker category for every unwired card of Before the Dawn, Seeds of Decay, Embers of War, Second City, Forgotten Legacy, The Shadow's Embrace, Emperor Edition, Honor and Treachery (Emperor Edition Gempukku has none). Read by build_card_inventory.py.",
+ "categories": [
+  {
+   "code": "WIRE",
+   "title": "Wirable with existing primitives (deferred, not blocked)",
+   "description": "The blocker note says no genuine engine gap remains; the card was left for lack of time or to keep a card whole. Cheapest wins."
+  },
+  {
+   "code": "SMALL",
+   "title": "Wirable with one small, local extension",
+   "description": "One narrow addition (a mandatory targeted Reaction shape, a Ranged-only narrowing, a chooseable performer, a new lock kind, a per-Tactician cap)."
+  },
+  {
+   "code": "SCAN",
+   "title": "Created card needs a Proxy scan",
+   "description": "Mechanically wirable, but the token/Proxy it creates has no published CreatedOnly scan (see the Proxy receipts for the closest printed proxy where one exists)."
+  },
+  {
+   "code": "SCAN2",
+   "title": "The card's own scan is missing or unpublishable",
+   "description": "No scan in the repository, so the card cannot be packaged whatever the engine can do."
+  },
+  {
+   "code": "CONTROL",
+   "title": "Control of an in-play Personality changes hands",
+   "description": "Deliberately not built (docs/decisions/2026-09-12-unique-singular-control-transfer.md); needs a rules decision plus a timed return of control."
+  },
+  {
+   "code": "PROVINCE",
+   "title": "Province model: gained/created provinces, two-card provinces, face-up refills, per-province marks",
+   "description": "Provinces are a fixed, position-indexed list of four, each holding one card refilled face-down; these cards add, mark, or refill them differently. Plains of Otosan Uchi waits for Alfredo's view work (issue #499)."
+  },
+  {
+   "code": "PROVENANCE",
+   "title": "Entry provenance and 'when did it enter play' records",
+   "description": "Nothing records which province or path a card entered play from, or when."
+  },
+  {
+   "code": "ZONE",
+   "title": "Zone-model gaps: under-card zone, dead pile as an action source, unit moved to deck, actions from hand",
+   "description": "The engine has no zone for cards under another card, cannot use a Dead card as an action source or recruit destination, or move a whole in-play unit into decks."
+  },
+  {
+   "code": "WATCH",
+   "title": "One-shot or persistent watches and shields on future events",
+   "description": "'Negate the next ...', 'after the next time ...', until-used protections and game-long triggers. The delay store models effects that already happened, not standing watches."
+  },
+  {
+   "code": "TRIG-ANN",
+   "title": "Announcement and interrupt windows",
+   "description": "Reactions before an action resolves against an untargeted card, on announcing an own action, before an Event resolves, before an Honor gain, or redirects with deferred tails."
+  },
+  {
+   "code": "TRIG-AFTER",
+   "title": "After-event trigger points that are not narrated",
+   "description": "No Reaction window (or fact record) for a bow, a move, an assignment, an engage at a given battlefield, a Ring/Henshin entering, an entry seen by the other player, an own-won duel with a target, a Ring bowed by an action, a start-of-turn trait."
+  },
+  {
+   "code": "PRIORITY",
+   "title": "First-opportunity, priority and Reaction-lockout overrides",
+   "description": "First chance to take a Battle action, forced performers, closing the other player's side of a window, standing rules about other Reactions."
+  },
+  {
+   "code": "ADDACT",
+   "title": "Additional actions beyond one Battle action",
+   "description": "Additional-action grants are consumed only by Battle actions and are scoped by card id, not by ability class, phase or performer."
+  },
+  {
+   "code": "COST",
+   "title": "Costs: optional, alternative, conditional and payment-source models",
+   "description": "Optional costs that feed the effect, chosen-card-of-a-slot costs, entry costs, the Imperial Favor discard as a first-class alternative cost, Reaction gold sources that do not bow, payment-time discounts, restriction overrides."
+  },
+  {
+   "code": "TARGET",
+   "title": "Target and slot model: new categories, counts, comparisons, mappings",
+   "description": "Gold-cost, keyword-count and aggregate-stat comparisons; conditional slot counts and follow-ups; two independent targets; per-item mappings; targets chosen after a resolution; multi-choice actions."
+  },
+  {
+   "code": "TOKEN",
+   "title": "Token model",
+   "description": "Tokens with two stats, a new token kind, or tokens as targets."
+  },
+  {
+   "code": "DUEL",
+   "title": "Duel model extensions",
+   "description": "Replacing the Focus decision, swapping the duel stat live, ending a duel without resolution, substituting a duelist, Focus Effects that rewrite costs."
+  },
+  {
+   "code": "STAT",
+   "title": "Stat and modifier pipeline scopes",
+   "description": "Controller-wide or battle-wide Attack strength, defender-side Attack modifiers, army-conditional durations, Gold Cost floors, raised Honor Requirements, set-to-value province strength."
+  },
+  {
+   "code": "COUNTER",
+   "title": "Per-turn and per-phase records and counters",
+   "description": "Recon actions taken, actions that put cards in hand, Dark Virtue actions this phase, two independent turn conditions, Family Honor as a branch value."
+  },
+  {
+   "code": "HIDDEN",
+   "title": "Hidden-information primitives",
+   "description": "Looking at an opponent's hand, a random hidden card, revealing or addressing a face-down province card."
+  },
+  {
+   "code": "GRANT",
+   "title": "Granted abilities and traits beyond one controller's cards",
+   "description": "Abilities granted to every player, timed player abilities, Kata that grant a player Reaction, granted traits, Tireless granted to another card's abilities."
+  },
+  {
+   "code": "RULEBOOK",
+   "title": "Changes to rulebook actions",
+   "description": "A card alters a core action: Equip/attach from a discard pile, a second Conquest per turn, Equip timing."
+  },
+  {
+   "code": "RULES",
+   "title": "Rules-lane ruling or conflict with the core rules needed first",
+   "description": "Undefined terms (custody, the Cavalry player ability), text that conflicts with the Emperor province model, or ambiguity Mendon must resolve."
+  },
+  {
+   "code": "LOCK",
+   "title": "Movement, assignment and phase-structure rules",
+   "description": "A whole Attack Phase inside the Action Phase, attack obligations, assignment restrictions by side, global movement negation, assigning after engage."
+  },
+  {
+   "code": "CREATE",
+   "title": "Created or borrowed cards with timed removal or wider copying",
+   "description": "Removal at end of turn or next turn start rather than end of battle, copying keyword sets, Holdings, or abilities, temporary recruits, returning a removed unit."
+  },
+  {
+   "code": "SEARCH",
+   "title": "Search and look extensions",
+   "description": "Criteria against a performer's keywords or an ability's keyword, look-then-attach, conditional discard after a look, and a face-up province refill from a search."
+  },
+  {
+   "code": "HONOR",
+   "title": "Honor and hand-discard plumbing",
+   "description": "Immunity from other players' hand-discard effects (needs a 'caused by' parameter), two-condition Honor-loss immunity, per-phase hand-put caps, Family Honor."
+  },
+  {
+   "code": "EFFECT",
+   "title": "New effect primitives",
+   "description": "Swap locations of two Personalities; set a Province's strength to an absolute value."
+  }
+ ],
+ "cards": {
+  "oracle-l5r-10248": "SEARCH",
+  "oracle-l5r-9814": "SCAN",
+  "oracle-l5r-4464": "SCAN",
+  "oracle-l5r-9829": "SCAN",
+  "oracle-l5r-9883": "SCAN",
+  "oracle-l5r-9886": "SCAN",
+  "oracle-l5r-9894": "SCAN",
+  "oracle-l5r-9899": "SCAN2",
+  "oracle-l5r-2708": "SCAN",
+  "oracle-l5r-2895": "SCAN",
+  "oracle-l5r-3739": "PRIORITY",
+  "oracle-l5r-9923": "TARGET",
+  "oracle-l5r-7696": "SCAN",
+  "oracle-l5r-9208": "RULES",
+  "oracle-l5r-9797": "SCAN",
+  "oracle-l5r-9866": "SCAN",
+  "oracle-l5r-5979": "PROVINCE"
+ }
+}

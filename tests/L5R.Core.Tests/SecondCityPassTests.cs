@@ -119,7 +119,6 @@ internal static class SecondCityPassTests
             Accept(e, Offer(e, 0, "emoto-follower-destroy", r.Emoto.Id, r.Enemy.Id, chosen.Id));
             Eq(e.State.Cards[r.Enemy.Id].Zone, Zone.Dead, "the target is destroyed");
             Check(e.State.Cards[chosen.Id].Bowed, "the performing Follower is bowed as the cost");
-            Check(!e.State.Cards[r.Emoto.Id].Bowed || chosen.Id == r.OwnFollower.Id && !e.State.Cards[r.Emoto.Id].Bowed, "Emoto himself is not bowed");
             Check(!e.State.Cards[r.Emoto.Id].Bowed, "Emoto is not bowed");
         }
     }

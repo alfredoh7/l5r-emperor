@@ -1,13 +1,13 @@
 name: Route lane reviews
 
-on:
+# Trusted metadata-only routing: checkout is pinned to base.sha, never PR head.
+# tools/security/check_policy.py guards this exception; see docs/SUPPLY_CHAIN.md.
+on: # zizmor: ignore[dangerous-triggers]
   pull_request_target:
     types: [opened, reopened, synchronize, ready_for_review, edited]
 
 permissions:
   contents: read
-  issues: write
-  pull-requests: write
 
 concurrency:
   group: lane-routing-${{ github.event.pull_request.number }}
@@ -15,6 +15,11 @@ concurrency:
 
 jobs:
   route:
+    name: Route advisory lane reviewers
+    permissions:
+      contents: read
+      issues: write # Apply collaboration lane labels to the PR.
+      pull-requests: write # Request lane reviewers using trusted base policy.
     if: github.event.pull_request.base.ref == 'main'
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -24,7 +29,7 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.base.sha }}
           persist-credentials: false
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with:
           python-version: '3.12'
       - name: Route using trusted base policy and metadata only

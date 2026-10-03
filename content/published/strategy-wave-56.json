@@ -1,0 +1,467 @@
+{
+  "Profile": "strategy-wave-56",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-9896",
+      "Name": "Burning Fury",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing unbowed Personality: Melee Attack with strength equal to 3 plus the number of Fire tokens on him and the number of Rings you control.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9896.jpg",
+      "Keywords": [
+        "Fire"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "burning-fury-attack"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9897",
+      "Name": "Captured Convict",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing unbowed Magistrate and target an enemy Personality: Move him home. If he is dishonorable, Kolat, Ninja, or Shadowlands, choose a player who gains or loses 2 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9897.jpg",
+      "Keywords": [],
+      "Focus": 3,
+      "Abilities": [
+        "captured-convict-move"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9898",
+      "Name": "Cowed and Defeated",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing unbowed Courtier or Magistrate and target a Personality: Dishonor him. His controller loses 1 Honor. After the next time (this turn) another player's action resolves that targeted your performer or a battle resolves which destroyed him, the target's controller loses 2 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9898.jpg",
+      "Keywords": [
+        "Political"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "cowed-defeated-dishonor"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9900",
+      "Name": "Crowded Streets",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After an action resolves that one or more of your Personalities at the current battlefield performed: You may move any of those performers home.\nBattle: If there is no Terrain in play at the current battlefield: Put this card into play there. If you are the Defender, you may take an additional Battle action.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9900.jpg",
+      "Keywords": [
+        "Terrain"
+      ],
+      "Focus": 1,
+      "Abilities": [],
+      "Effect": "crowded-streets"
+    },
+    {
+      "Id": "oracle-l5r-9901",
+      "Name": "Deep Roots",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing Personality with 7 or more base Force: Negate all current and new Force penalties on him and effects which prevent him from contributing Force. He contributes Force even while bowed.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9901.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "deep-roots-negate"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9902",
+      "Name": "Defensive Grill",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Even if you control no units at the current battlefield, target a Personality there: Move him to an unresolved battlefield where he would be opposed.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9902.jpg",
+      "Keywords": [],
+      "Focus": 3,
+      "Abilities": [
+        "defensive-grill-move"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9903",
+      "Name": "Direct the Path",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing unbowed Henshin and target an enemy card without attachments: Put it on top of its owner's deck.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9903.jpg",
+      "Keywords": [
+        "Kiho"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "direct-the-path-return"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9904",
+      "Name": "Duel to First Blood",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "As a Focus Effect: Give +1 Focus Value to each of your focused cards.\nBattle/Limited: Choose your performing unbowed Personality and target another player's Personality: Your Personality challenges the target. He may refuse; if he did, draw two cards. Bow the duel's loser.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9904.jpg",
+      "Keywords": [
+        "Iaijutsu"
+      ],
+      "Focus": 1,
+      "Abilities": [
+        "first-blood-focus",
+        "first-blood-duel-battle",
+        "first-blood-duel-limited"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9906",
+      "Name": "Fields of Victory",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Before this battle's resolution: If your army has more total Force than the enemy army, reduce the Force of each Personality and Follower in the enemy army to 0.\nBattle: If there is no Terrain in play at the current battlefield: Put this card into play there.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9906.jpg",
+      "Keywords": [
+        "Terrain"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "fields-of-victory-zero"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9907",
+      "Name": "Forge Your Soul",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: Choose your performing Personality: Show the top four cards of your Fate deck. You may attach one of them that is a Weapon to him, paying 4 less Gold. You may shuffle your deck. If you did not show a Weapon and he is a Kensai, draw a card.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9907.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "forge-your-soul-show"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9908",
+      "Name": "Forged Documents",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: Target a Personality: You deceive him with a forged order. His controller puts all cards in his provinces at the bottom of his Dynasty deck in any order, refilling them face-up.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9908.jpg",
+      "Keywords": [],
+      "Focus": 4,
+      "Abilities": [
+        "forged-documents-order"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9909",
+      "Name": "Forthrightness",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Choose your performing Samurai and show a Strategy in your hand: After the next time you resolve an action from a card with the Strategy's title this turn, if you have announced no other actions on Strategies between now and then, permanently give your Samurai the ability, \"Limited: Gain 1 Honor.\"",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9909.jpg",
+      "Keywords": [
+        "Bushido Virtue",
+        "Honesty"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "forthrightness-show"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9910",
+      "Name": "Grief",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "You may only play one copy of Grief in reaction to any one resolution.\nReaction: After an action resolves whose effects destroyed a player's Personality, target a Personality controlled by the same player: He is overcome with grief. Dishonor him. His controller loses Honor equal to his base Personal Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9910.jpg",
+      "Keywords": [],
+      "Focus": 3,
+      "Abilities": [
+        "grief-dishonor"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9911",
+      "Name": "I Cast Two Shadows",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After an action resolves which moved your Personality in a Ninja unit home: Move him to a different battlefield than the one from which he was moved home.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9911.jpg",
+      "Keywords": [
+        "Ninja"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "cast-two-shadows-move"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9912",
+      "Name": "Kitsuki Methods",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Choose your performing unbowed Courtier and target another player's Personality: That player may choose to discard a card at random from his hand. If he did not choose this, either gain 2 Honor, or the target's controller loses Honor equal to his base Personal Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9912.jpg",
+      "Keywords": [
+        "Political"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "kitsuki-methods-interrogate"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9913",
+      "Name": "Kuon's Legacy",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle/Open: Choose your performing Personality with 7 or more base Force: His eyes go dead. Straighten him. Give him +3F. He may not perform actions. You may target and bow a card at his location.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9913.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "kuons-legacy-rage"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9914",
+      "Name": "Lessons Never Forgotten",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing unbowed Yojimbo: Melee 4 Attack. If you own a dead Courtier or Shugenja, you may target and destroy an attachment.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9914.jpg",
+      "Keywords": [],
+      "Focus": 3,
+      "Abilities": [
+        "lessons-never-forgotten-attack"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9915",
+      "Name": "Methodical Questioning",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Choose your performing unbowed Samurai and you may bow him: He interrogates a witness. Look at the top 3 cards of any Fate deck. Put them back in any order. If you bowed your Samurai, put this card into your hand from your discard pile before this turn ends.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9915.jpg",
+      "Keywords": [
+        "Dark Virtue",
+        "Knowledge"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "methodical-questioning-look",
+        "methodical-questioning-bow-look"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9917",
+      "Name": "One Shout",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing opposed Personality: Give him +2F, or +4F if he has an attachment.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9917.jpg",
+      "Keywords": [],
+      "Focus": 3,
+      "Abilities": [
+        "one-shout-boost"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

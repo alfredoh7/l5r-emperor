@@ -4,10 +4,12 @@ namespace L5R.Core;
 public sealed partial class MatchEngine
 {
     // ---- Defensive Blockade: "It does not contribute Force to its army's total Force this battle" ---------------------------------------------------------------
-    private bool ForceContributionNegated(CardInstance card) => card.ForceContributionNegatedBattle == _state.BattleNumber && _state.Phase == Phase.Battle;
+    // Deep Roots (The Shadow's Embrace pass, issue #476 batch 3) negates every effect which prevents its Personality from contributing Force (DeepRooted, ShadowsEmbraceBatch3.cs).
+    private bool ForceContributionNegated(CardInstance card) => card.ForceContributionNegatedBattle == _state.BattleNumber && _state.Phase == Phase.Battle && !DeepRooted(card) && !GamesOfWillShields(card); // Games of Will (issue #503)
     private void NegateForceContribution(CardInstance card, string sourceName)
     {
         card.ForceContributionNegatedBattle = _state.BattleNumber;
+        NoteForceContributionNegated(card); // Games of Will (issue #503)
         Emit("forceContributionNegated", $"{sourceName}: {Definition(card).Name} contributes no Force to its army's total this battle.", card.OwnerId, card.Id);
     }
 
@@ -29,6 +31,11 @@ public sealed partial class MatchEngine
     // Read where an action's effect destroys a card (DestroyUnits with an acting player; DestroyAttackTarget): another player's effect only. A battle's own resolution is not a card's effect.
     private bool DestructionShielded(CardInstance card, int actingPlayerId)
     {
+        if (HiromiUnnegatable()) return false; // Yoritomo Hiromi (issue #477): the destruction from her Battle actions will not be negated.
+        if (BlessingsShieldNegates(card, "destruction")) return true; // Blessings of the Shi-Tien Yen-Wang (issue #503).
+        if (MichiruBarrierNegates(card, actingPlayerId)) return true; // Asahina Michiru (Emperor Edition Personality pass, issue #477, batch 4).
+        if (MountainsPowerNegates(card, actingPlayerId)) return true; // The Mountain's Power (Forgotten Legacy pass, issue #467).
+        if (TwinForksNegates(card, actingPlayerId, "destruction")) return true; // Twin Forks City (The Shadow's Embrace pass, issue #476 batch 6).
         if (card.DestructionShieldTurn != _state.TurnNumber || actingPlayerId == card.OwnerId) return false;
         Emit("destructionNegated", $"{Definition(card).Name}'s destruction was negated (Megumi's Guidance).", card.OwnerId, card.Id);
         return true;
@@ -42,6 +49,7 @@ public sealed partial class MatchEngine
     // action's effect (an acting player is set exactly then); an attachment's destruction is always an action's effect (ActionEffectTracking.cs), so DestroyAttachment asks unconditionally.
     private bool WideValleyNegatesDestruction(CardInstance card)
     {
+        if (HiromiUnnegatable()) return false; // Yoritomo Hiromi (issue #477).
         if (Definition(card).Type is not (CardType.Personality or CardType.Follower)) return false;
         var host = Card(UnitHostId(card));
         if (host.Zone != Zone.Battlefield || host.ProvinceIndex is not int battlefield || !TerrainsAtBattlefield(battlefield).Any(t => Definition(t).Effect == "wide-valley")) return false;
@@ -53,7 +61,7 @@ public sealed partial class MatchEngine
     // "You do not lose Honor from Ninja cards you own": the Stronghold's Effect names the keyword; HonorLossNegated (MatchEngine.cs) already limits it to the losing player's own cards.
     private static readonly Dictionary<string, string> HonorLossKeywordImmunity = new(StringComparer.Ordinal) { ["castle-of-order"] = "Ninja" };
     private bool HonorLossNegatedByKeyword(string strongholdEffect, CardInstance? source) =>
-        source is not null && HonorLossKeywordImmunity.TryGetValue(strongholdEffect, out var keyword) && Keyword(source, keyword);
+        source is not null && (HonorLossKeywordImmunity.TryGetValue(strongholdEffect, out var keyword) && Keyword(source, keyword) || StrongholdHonorImmunityBatch3(strongholdEffect, source)); // Stronghold pass (issue #486), batch 3: Otoro Estate, Shadow's Lair.
     // "Once per battle": a stamp of the battle number on the Stronghold's own uses (a card's per-turn stamps live under the ability id; this key cannot collide).
     private const string CastleOfOrderBattleKey = "castle-of-order-redirect:battle";
     private bool CastleOfOrderUsedThisBattle(CardInstance stronghold) => stronghold.AbilityUses.TryGetValue(CastleOfOrderBattleKey, out var battle) && battle == _state.BattleNumber;
@@ -113,7 +121,8 @@ public sealed partial class MatchEngine
         CardInstance? actor = ability.Performer is not null && command.PerformerId is not null && _state.Cards.TryGetValue(command.PerformerId, out var chosen) ? chosen
             : command.CardId is not null && _state.Cards.TryGetValue(command.CardId, out var source) ? source : null;
         if (actor is { Zone: Zone.Attached, AttachedTo: { } hostId }) actor = Card(hostId);
-        return actor is not null && Definition(actor).Type == CardType.Personality && InPlay(actor) ? actor : null;
+        // A printed action is performed by the card that prints it, so a dead Personality's own FromDead action (Hida Yamadera - exp's Melee 8 Attack) is performed by that Personality.
+        return actor is not null && Definition(actor).Type == CardType.Personality && (InPlay(actor) || ability.FromDead && actor.Zone == Zone.Dead) ? actor : null;
     }
     private void UseGrapplingWatch(CardInstance monk, bool negate)
     {
@@ -138,7 +147,7 @@ public sealed partial class MatchEngine
             {
                 _state.PendingGrapplingBows.Remove(pending);
                 if (!_state.Cards.TryGetValue(pending.PerformerId, out var performer) || !InPlay(performer)) continue;
-                foreach (var member in Attachments(performer.Id).Prepend(performer)) if (!StalwartNegatesBow(member, monk.OwnerId)) member.Bowed = true;
+                BowUnitByEffect(performer, monk.OwnerId);
                 Emit("unitBowed", $"{pending.SourceName}: {Definition(performer).Name}'s unit bowed after the action resolved.", monk.OwnerId, performer.Id);
             }
             SpendGrapplingWatch(monk);

@@ -1,0 +1,60 @@
+{
+  "Profile": "spell-wave-47",
+  "Rules": "Emperor Edition core rules; reviewed user-supplied created-card scans.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-9886",
+      "Name": "Our Ancestor's Call",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: If this Shugenja is opposed, destroy this card: Create a 2F/2C/3PH Samurai • Ancestor • Spirit Personality with your Clan alignment at the current battlefield. If this Shugenja is Water and defending, create two such Personalities instead.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9886.jpg",
+      "Keywords": [
+        "Water"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "our-ancestors-call-create"
+      ],
+      "Effect": "none",
+      "AttachRequiresKeyword": "Shugenja"
+    },
+    {
+      "Id": "oracle-l5r-9894",
+      "Name": "Yari of Air",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After this card enters play, if this Shugenja is Air: Gain 1 Honor.\nLimited: Once per game: Create a +1F/+1C Air • Weapon Item with the ability, \"Battle: Give each Personality and Follower in the enemy army -1F\" and attach it to one of your Personalities.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9894.jpg",
+      "Keywords": [
+        "Air",
+        "Experienced"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "yari-of-air-create"
+      ],
+      "Effect": "yari-of-air-entry",
+      "AttachRequiresKeyword": "Shugenja"
+    }
+  ],
+  "Decks": []
+}

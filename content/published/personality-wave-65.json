@@ -1,0 +1,250 @@
+{
+  "Profile": "personality-wave-65",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10220",
+      "Name": "Hida Yamadera",
+      "Type": "Personality",
+      "Clan": "Crab",
+      "GoldCost": 12,
+      "GoldProduction": 0,
+      "Force": 8,
+      "Chi": 3,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After another player's Battle action resolves, if its effects destroyed Yamadera: Melee 8 Attack.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10220.jpg",
+      "Keywords": [
+        "Unique",
+        "Berserker",
+        "Crab Clan",
+        "Damned",
+        "Experienced",
+        "Shadowlands"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "yamadera-attack"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10221",
+      "Name": "Doji Dainagon",
+      "Type": "Personality",
+      "Clan": "Crane",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 4,
+      "PersonalHonor": 3,
+      "HonorRequirement": 6,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Political Open: Take the Imperial Favor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10221.jpg",
+      "Keywords": [
+        "Unique",
+        "Courtier",
+        "Crane Clan",
+        "Experienced",
+        "Imperial"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "dainagon-exp-favor"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10223",
+      "Name": "Jade's Roar",
+      "Type": "Personality",
+      "Clan": "Lion",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 2,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Recon Reaction: After engaging at Jade's Roar's battlefield: You have Reconnaissance there. You have the first opportunity to take a Battle action in this battle, which must be a Terrain action.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10223.jpg",
+      "Keywords": [
+        "Experienced Pride of the Hand",
+        "Unique",
+        "Legendary",
+        "Lion",
+        "Lion Clan",
+        "Nonhuman",
+        "Scout"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "jades-roar-recon"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10224",
+      "Name": "Moshi Madoka",
+      "Type": "Personality",
+      "Clan": "Mantis",
+      "GoldCost": 6,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": 2,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: If you have attached a card from your hand this turn, bow Madoka: Draw a card.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10224.jpg",
+      "Keywords": [
+        "Unique",
+        "Experienced",
+        "Mantis Clan",
+        "Scout",
+        "Shugenja",
+        "Thunder"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "madoka-draw"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10225",
+      "Name": "Kunji",
+      "Type": "Personality",
+      "Clan": "Phoenix",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 4,
+      "PersonalHonor": 1,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: If Kunji is honorably dead: Bring it into play, ignoring costs if you are a Phoenix Clan player.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10225.jpg",
+      "Keywords": [
+        "Cavalry",
+        "Unique",
+        "Experienced",
+        "Fenghuang",
+        "Fire",
+        "Nonhuman",
+        "Phoenix Clan",
+        "Shugenja"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "kunji-exp-return-free",
+        "kunji-exp-return-paid"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10226",
+      "Name": "Shosuro Hawado",
+      "Type": "Personality",
+      "Clan": "Scorpion",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Target a card in a province: Discard it. Refill the province face-up.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10226.jpg",
+      "Keywords": [
+        "Experienced 2",
+        "Unique",
+        "Ninja",
+        "Scorpion Clan",
+        "Shadowspawn"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "hawado-exp2-discard"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10227",
+      "Name": "Daigotsu Negishi",
+      "Type": "Personality",
+      "Clan": "Spider",
+      "GoldCost": 9,
+      "GoldProduction": 0,
+      "Force": 5,
+      "Chi": 2,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After Negishi enters play: Lose 2 Honor.\nNegate Negishi's destruction from effects of actions performed by any Personality whose unit's total Gold Cost was lower than Negishi's unit's (when they performed it).",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10227.jpg",
+      "Keywords": [
+        "Conqueror",
+        "Loyal",
+        "Unique",
+        "Commander",
+        "Experienced",
+        "Samurai",
+        "Shadowlands",
+        "Spider Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "negishi-destruction-shield",
+      "EntryHonorLoss": 2
+    },
+    {
+      "Id": "oracle-l5r-10228",
+      "Name": "Shinjo Byung",
+      "Type": "Personality",
+      "Clan": "Unicorn",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": 4,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After a Tactical Battle action resolves that Byung performed: Take an additional Battle action.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10228.jpg",
+      "Keywords": [
+        "Cavalry",
+        "Tactician",
+        "Unique",
+        "Experienced",
+        "Samurai",
+        "Unicorn Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "byung-additional-action"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

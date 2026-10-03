@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Rung 4a: automatic MSBuild wave embedding and startup discovery preserve all 306 legacy wave positions and 1679 resolved definitions; retain 124 named compatibility properties and all 115 specialized validators, remove 119 unused loaders. Add selective manifest pinning, existing contributor recipe update, and a real two-branch temporary Git merge/build regression. No wire format, view, state, rules, content JSON, workbook or art changes.",
+  "validation": "Before/after: Core 2105/2106 PASS, zero FAIL; AI 74/74, Server 8/8, Client.Transport 13/13, content Python 135/138. Inventory 2183 cards/1419 wired unchanged; all workbook xl entries identical via ignored output copies. Catalogue order/content SHA256 identical: 5D186D537D230D1754C0D797CE4117309F8B3703CA3199B8DF0C48150CDA79A5. All 19 printed seeded AI outcomes identical; replay assertions pass. AI wall time 448.7s/427.2s including dotnet run; baseline overlapped checks, not a performance benchmark. Parallel branch merge zero conflicts, both waves build/load, existing cards/order identical. Full post-change bash tools/check.sh --skip-client passed. Baseline script had a Windows DLL-lock interruption from overlapping standalone AI; all baseline suites passed separately. Godot build left to CI.",
+  "remaining": "Phase A ready for review; do not merge automatically. Phase B is not started and waits for explicit user instruction after 4a merges. Freeze stays until both phases merge; edit both epic freeze notes then (issuecomment-5866753305 and issuecomment-5867245951). Legacy compatibility/validation entry points remain intentionally; no unmigrated Phase A wave. Board token unconfigured; GitHub freeze records provide coordination.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/509",
+  "branch": "claude/509-pr-ladder-rung4a",
+  "updated": "2026-09-28T14:51:20.248355+00:00"
+}

@@ -1,0 +1,33 @@
+{
+  "Profile": "stronghold-wave-15",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-8094",
+      "Name": "The Forgotten Temple",
+      "Type": "Stronghold",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 4,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 7,
+      "StartingHonor": -1,
+      "Text": "You do not gain Honor. You may not take Political actions. You do not lose Honor from cards you own. Before you lose Honor: Reduce the loss to 1, which may not be increased.\nLimited: Target your discarded Nonhuman Personality and discard a card in one of your provinces: Refill the province face-up with the Personality.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8094.jpg",
+      "Keywords": [
+        "Forest",
+        "Temple"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "forgotten-temple-refill"
+      ],
+      "Effect": "forgotten-temple"
+    }
+  ],
+  "Decks": []
+}

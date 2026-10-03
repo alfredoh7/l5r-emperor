@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Card inventory Summary sheet gains an Unwired-by-Set-and-Type table (1305 unwired; 867 wired of 2172); regenerated docs/CARD_INVENTORY.xlsx via build_card_inventory.py. Shared: touches a docs artifact and a content tool, no engine or UI change.",
+  "validation": "Regenerated workbook checked: table totals equal 2172-867=1305",
+  "remaining": "None; ready for review.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/474",
+  "branch": "claude/474-inventory-unwired-table",
+  "updated": "2026-09-24T15:41:30.184314+00:00"
+}

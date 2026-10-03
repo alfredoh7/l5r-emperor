@@ -19,7 +19,7 @@ namespace L5R.Core;
 
 /// <summary>A province strength effect for one turn. Kind "flat": Amount on the province at (PlayerId, ProvinceIndex). Kind "per-dishonorable-attacker":
 /// Amount for each dishonorable enemy Personality attacking each of PlayerId's provinces (Imperial Protection).</summary>
-public sealed record ProvinceStrengthEffect(int PlayerId, int? ProvinceIndex, string Kind, int Amount, int Turn, string Source);
+public sealed record ProvinceStrengthEffect(int PlayerId, int? ProvinceIndex, string Kind, int Amount, int Turn, string Source, int? UntilBattle = null);
 
 /// <summary>"After the next time this turn he is assigned to attack [or is destroyed]": Kind names the card's own consequence (SeedsOfDecayBatch2.cs).</summary>
 public sealed record AssignmentWatch(string CardId, string Kind, int BeneficiaryPlayerId, int Turn, string Source);
@@ -61,6 +61,7 @@ public sealed partial class MatchEngine
 
     private void GiveProvinceStrengthThisTurn(int playerId, int provinceIndex, int amount, string source)
     {
+        if (!Player(playerId).Provinces.Any(p => p.Index == provinceIndex)) return; // a battlefield without a province has no strength to change (issue #492, rulings pass R1 with R3)
         _state.ProvinceStrengthEffects.Add(new(playerId, provinceIndex, ProvinceEffectFlat, amount, _state.TurnNumber, source));
         Emit("provinceStrengthRaised", $"{source}: {Player(playerId).Name}'s province {provinceIndex + 1} has {amount:+#;-#;0} strength this turn.", playerId);
     }
@@ -70,7 +71,8 @@ public sealed partial class MatchEngine
     {
         var ownerId = _state.Players.First(p => p.Provinces.Contains(province)).Id;
         var total = 0;
-        foreach (var effect in _state.ProvinceStrengthEffects.Where(e => e.Turn == _state.TurnNumber && e.PlayerId == ownerId))
+        // UntilBattle (Kaiu Hideaki, Emperor Edition Personality pass, issue #477 batch 2): a strength that lasts only until that battle's resolution begins (ExpireUntilResolutionProvinceStrength).
+        foreach (var effect in _state.ProvinceStrengthEffects.Where(e => e.Turn == _state.TurnNumber && e.PlayerId == ownerId && (e.UntilBattle is null || e.UntilBattle == _state.BattleNumber)))
         {
             if (effect.Kind == ProvinceEffectFlat) { if (effect.ProvinceIndex == province.Index) total += effect.Amount; }
             else if (effect.Kind == ProvinceEffectPerDishonorableAttacker)
@@ -84,9 +86,10 @@ public sealed partial class MatchEngine
 
     private void FireAssignedToAttackWatches(CardInstance card)
     {
-        foreach (var watch in _state.AssignmentWatches.Where(w => w.CardId == card.Id && w.Turn == _state.TurnNumber).ToArray())
+        foreach (var watch in _state.AssignmentWatches.Where(w => w.CardId == card.Id && w.Turn == _state.TurnNumber && w.Kind != WatchVeiledMenace).ToArray()) // Veiled Menace (issue #492) fires on either side's assignment (FireVeiledMenaceAssigned).
         {
-            _state.AssignmentWatches.Remove(watch);
+            // Social Grace (The Shadow's Embrace pass, issue #476, batch 4): "after EACH time he is assigned to attack this turn" -- it stays for the turn.
+            if (watch.Kind != WatchSocialGrace) _state.AssignmentWatches.Remove(watch);
             ResolveAssignmentWatch(watch, card, "was assigned to attack");
         }
     }
@@ -107,13 +110,25 @@ public sealed partial class MatchEngine
             // Imperial Protection: "dishonor him and his controller loses Honor equal to his base Personal Honor".
             case WatchImperialProtection:
                 Emit("watchFired", $"{watch.Source}: {Definition(card).Name} {what}.", watch.BeneficiaryPlayerId, card.Id);
-                Dishonor(card);
+                Dishonor(card, watch.BeneficiaryPlayerId);
                 GainHonor(card.OwnerId, -Definition(card).PersonalHonor, watch.Source);
                 break;
-            // Fair Warning: "gain 2 Honor".
+            // Midday Shadow Court (Stronghold pass, issue #486 batch 1): "dishonor him and his controller loses 1 Honor".
+            case WatchMiddayShadow:
+                Emit("watchFired", $"{watch.Source}: {Definition(card).Name} {what}.", watch.BeneficiaryPlayerId, card.Id);
+                Dishonor(card, watch.BeneficiaryPlayerId);
+                GainHonor(card.OwnerId, -1, watch.Source);
+                break;
+            // Fair Warning: "gain 2 Honor". Social Grace (The Shadow's Embrace pass, issue #476, batch 4): the same, each time.
+            case WatchSocialGrace:
             case WatchFairWarning:
                 Emit("watchFired", $"{watch.Source}: {Definition(card).Name} {what}.", watch.BeneficiaryPlayerId, card.Id);
                 GainHonor(watch.BeneficiaryPlayerId, 2, watch.Source);
+                break;
+            // Veiled Menace (Emperor Edition remaining-cards pass, issue #492, group D): "After each time he is assigned (this turn), his controller loses 1 Honor."
+            case WatchVeiledMenace:
+                Emit("watchFired", $"{watch.Source}: {Definition(card).Name} {what}.", watch.BeneficiaryPlayerId, card.Id);
+                GainHonor(card.OwnerId, -1, watch.Source);
                 break;
         }
     }
@@ -183,7 +198,8 @@ public sealed partial class MatchEngine
         (player.ProclaimUsedTurn != _state.TurnNumber || entering.Effect == "proclaim-ignores-turn-limit") && !ProclaimLocked(player.Id);
 
     private string? ProclaimRejection(PlayerState player, CardDefinition entering) =>
-        ProclaimLocked(player.Id) ? "You may not take the Proclaim Reaction until the locking player's next turn begins."
+        ReactionsBarred() ? "Cherry Blossom Festival: no players may take Reactions." // issue #492, group F
+        : ProclaimLocked(player.Id) ? "You may not take the Proclaim Reaction until the locking player's next turn begins."
         : player.ProclaimUsedTurn == _state.TurnNumber && entering.Effect != "proclaim-ignores-turn-limit" ? "Already used Proclaim this turn." : null;
 
     private const string BeforeProclaimTrigger = "before-proclaim-resolves";
@@ -221,7 +237,8 @@ public sealed partial class MatchEngine
         var player = Player(command.PlayerId);
         var card = Card(_state.PendingChoice!.CardId);
         player.ProclaimUsedTurn = _state.TurnNumber;
-        if (!negated) GainHonor(player.Id, Definition(card).PersonalHonor, "Proclaim");
+        // Proclaim is a Reaction (Mendon's R4 ruling), so its gain is from an action's effects: Rhetoric and the like may be played on it.
+        if (!negated) { var before = _proclaimAction; _proclaimAction = ($"{player.Id}|proclaim|{card.Id}", player.Id); try { GainHonor(player.Id, Definition(card).PersonalHonor + HoteiProclaimBonus(player.Id, card), "Proclaim"); /* Hotei's Contentment (issue #503) */ } finally { _proclaimAction = before; } }
         else Emit("proclaimNegated", $"{player.Name}'s Proclaim resolved with its effects negated.", player.Id, card.Id);
         ApplyPendingEntryEffects();
         _state.ConsecutivePasses = 0;
@@ -278,7 +295,7 @@ public sealed partial class MatchEngine
 
     // "+1PH if any other player is Dragon Clan".
     private int StaticPersonalHonorBonus(CardInstance card) =>
-        Definition(card).Effect == "hotaka-paragon" && _state.Players.Any(p => p.Id != card.OwnerId && p.Clan == "Dragon") ? 1 : 0;
+        (Definition(card).Effect == "hotaka-paragon" && _state.Players.Any(p => p.Id != card.OwnerId && p.Clan == "Dragon") ? 1 : 0) + P3PersonalHonorBonus(card); // + Utaku Lishan (issue #503)
 
     // "The amount of Honor you need in order to win an Honor Victory is reduced by Hotaka's Personal Honor minus one" -- each copy in play.
     private int HonorVictoryThreshold(int playerId) =>
@@ -348,7 +365,7 @@ public sealed partial class MatchEngine
                 break;
             case "incriminating-testimony-bow":
                 if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
-                GiveProvinceStrengthThisTurn(1 - _state.ActivePlayerId, _state.CurrentBattleProvince!.Value, PersonalityChi(performer!), "Incriminating Testimony");
+                if (CurrentProvinceIndex() is int testimonyProvince) GiveProvinceStrengthThisTurn(1 - _state.ActivePlayerId, testimonyProvince, PersonalityChi(performer!), "Incriminating Testimony");
                 break;
             case "ingenuity-dishonor":
                 foreach (var dishonored in SlotCards(command, "targets").ToArray()) Dishonor(dishonored);
@@ -397,7 +414,7 @@ public sealed partial class MatchEngine
                 break;
             }
             case "baiko-shame": GainHonor(target!.OwnerId, -1, "Yasuki Baiko", source); break;
-            case "baiko-favor": _state.FavorPlayerId = player.Id; Emit("favorTaken", $"{player.Name} took the Imperial Favor (Yasuki Baiko).", player.Id, source?.Id); break;
+            case "baiko-favor": TakeImperialFavor(player.Id); Emit("favorTaken", $"{player.Name} took the Imperial Favor (Yasuki Baiko).", player.Id, source?.Id); break;
             case "tsujiken-exp-bow": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;
             case "tsujiken-exp-straighten": Straighten(target!); break;
             case "tsujiken-exp-draw": Draw(player); break;
@@ -411,10 +428,37 @@ public sealed partial class MatchEngine
             }
             case "shibata-exp-bow":
                 if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
-                if (EffectConditionMet(id, target)) GiveProvinceStrengthThisTurn(1 - _state.ActivePlayerId, _state.CurrentBattleProvince!.Value, 3, "Bayushi Shibata");
+                if (EffectConditionMet(id, target) && CurrentProvinceIndex() is int shibataProvince) GiveProvinceStrengthThisTurn(1 - _state.ActivePlayerId, shibataProvince, 3, "Bayushi Shibata");
                 break;
             case "insult-answered-duel": break; // The duel itself is issued generically (IssuesDuel); its outcome is in Dueling.cs's ApplyDuelOutcome.
             default: throw new RuleViolation("Ability effect is not implemented.");
         }
+    }
+}
+
+public sealed partial class MatchEngine
+{
+    private bool HandleRegisteredProclaimNegateReaction(string type, GameCommand command)
+    {
+        if (type != "proclaimNegateReaction") return false;
+        // Turning the Story (issue #453, batch 2): the one reacting player answers -- the Reaction (negating the held Proclaim) or a pass -- and the
+        // Proclaim then resolves, negated or not, back inside the Proclaim window it interrupted (SeedsOfDecayBatch2.cs).
+        Require(command.Type is "useAbility" or "declineReaction" or "pass","Resolve the before-Proclaim reaction window first.");
+        if (command.Type=="useAbility") UseAbility(command);
+        else Emit("reactionPassed",$"{Player(command.PlayerId).Name} passed the reaction opportunity.",command.PlayerId);
+        // The window closes the instant the one reacting player has answered: a pass, or the Reaction that negated the Proclaim.
+        if (_state.HeldProclaim is { } held && (command.Type!="useAbility" || held.Negated)) { _state.PendingChoice=null; _state.ConsecutivePasses=0; ResolveHeldProclaim(); }
+        return true;
+    }
+}
+
+public sealed partial class MatchEngine
+{
+    // Registration only: callbacks are not invoked during module initialization.
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
+    [System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void RegisterSeedsOfDecayBatch2Hooks()
+    {
+        EngineHooks.PendingChoice.Register("HandleRegisteredProclaimNegateReaction", 4200, static (engine, type, command) => engine.HandleRegisteredProclaimNegateReaction(type, command));
     }
 }

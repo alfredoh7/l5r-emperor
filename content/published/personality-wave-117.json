@@ -1,0 +1,68 @@
+{
+  "Profile": "personality-wave-117",
+  "Rules": "Emperor Edition core rules; reviewed Forgotten Legacy scans.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-4464",
+      "Name": "Kitsune Hisano",
+      "Type": "Personality",
+      "Clan": "Mantis",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 4,
+      "PersonalHonor": 4,
+      "HonorRequirement": 2,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: Once per game, after Hisano enters play: Create a 2F/2C/3PH Mantis Clan • Nonhuman • Fox • Spirit • Unique Personality with the ability, \"Battle: Target an enemy attacking Personality: Move him home.\"",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-4464.jpg",
+      "Keywords": [
+        "Naval",
+        "Unique",
+        "Earth",
+        "Experienced",
+        "Mantis Clan",
+        "Scout",
+        "Shugenja"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "hisano-create-guide"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10020",
+      "Name": "Hisano's Guide",
+      "Type": "Personality",
+      "Clan": "Mantis",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 2,
+      "PersonalHonor": 3,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "May not be included in decks.\nBattle: Target an enemy attacking Personality: Move him home.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10020.jpg",
+      "Keywords": [
+        "Unique",
+        "Fox",
+        "Mantis Clan",
+        "Nonhuman",
+        "Spirit"
+      ],
+      "Focus": 0,
+      "CreatedOnly": true,
+      "Abilities": [
+        "hisano-guide-move"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

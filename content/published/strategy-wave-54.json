@@ -1,0 +1,255 @@
+{
+  "Profile": "strategy-wave-54",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-25",
+      "Name": "A Game of Dice",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Draw two additional cards during your next End Phase.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-25.jpg",
+      "Keywords": [
+        "Unique"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "game-of-dice-draw"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-101",
+      "Name": "A Yojimbo's Duty",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: Destroy your performing Yojimbo and target your discarded Courtier or Shugenja: Bring him into play, paying all costs but reducing his Gold cost to enter play by your Yojimbo's base Gold Cost plus 1.\nBattle/Open: Choose your performing Personality: Straighten him. You may take an additional action appropriate to this phase.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-101.jpg",
+      "Keywords": [],
+      "Focus": 3,
+      "Abilities": [
+        "yojimbos-duty-recruit",
+        "yojimbos-duty-straighten"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-109",
+      "Name": "Accidental Confession",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: Choose your performing unbowed Courtier, discard the Imperial Favor, and target a Personality: Dishonor him. His controller may not assign him, and he will not move, to battlefields this turn.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-109.jpg",
+      "Keywords": [
+        "Imperial",
+        "Political"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "accidental-confession-dishonor"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-1150",
+      "Name": "Broken Alliance",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle/Open: Target an attachment and pay Gold equal to its Gold Cost minus two: Destroy it.\nBattle: If there are enemy units at the current battlefield, choose your performing Personality: Move him there. Straighten him if he moved.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1150.jpg",
+      "Keywords": [],
+      "Focus": 3,
+      "Abilities": [
+        "broken-alliance-destroy",
+        "broken-alliance-move"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-1225",
+      "Name": "Cast Aside the Weak",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: Choose your performing Samurai: Straighten his unit.\nBattle: Choose your performing unbowed Samurai and target an enemy card without attachments: Bow it. Destroy it if your Samurai is a Paragon.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1225.jpg",
+      "Keywords": [
+        "Dark Virtue",
+        "Strength"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "cast-aside-straighten",
+        "cast-aside-bow"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-1461",
+      "Name": "Consideration",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: Choose your performing unbowed Tactician and target another of your Personalities: Give the Personality +3F. After the next time this turn another player's action targets him, negate its effects.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1461.jpg",
+      "Keywords": [],
+      "Focus": 3,
+      "Abilities": [
+        "consideration-boost"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-1557",
+      "Name": "Creating Order",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle/Open: Target one or two Personalities: Either negate all current and new Force bonuses and penalties on them from actions, or straighten their units.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1557.jpg",
+      "Keywords": [
+        "Unique"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "creating-order-negate",
+        "creating-order-straighten"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-2245",
+      "Name": "Duel of Haiku",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: Choose your performing unbowed Personality and target another player's Personality: Your Personality duels the other. In this duel, each Personality uses Personal Honor as his duel stat. The duel's winner's controller gains 1 Honor. Bow and dishonor the duel's loser.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-2245.jpg",
+      "Keywords": [
+        "Political"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "duel-of-haiku"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-2355",
+      "Name": "Entrenched Position",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After the Attacker announces a Battle action before the Defender's first normal opportunity to act or pass: Negate its effects.\nBattle: Target an enemy card without attachments: Bow it.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-2355.jpg",
+      "Keywords": [],
+      "Focus": 4,
+      "Abilities": [
+        "entrenched-negate",
+        "entrenched-bow"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-2506",
+      "Name": "Feint & Strike",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "As a Focus Effect: After this duel's resolution, its winner's controller discards a card.\nBattle: Choose your performing unbowed Commander and target an enemy Personality: If your Commander has a Follower, you may target and destroy an attachment in the Personality's unit. Move him home.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-2506.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "feint-strike-focus",
+        "feint-strike-move"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

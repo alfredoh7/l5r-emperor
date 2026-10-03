@@ -1,0 +1,35 @@
+{
+  "Profile": "holding-wave-45",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-7494",
+      "Name": "Stolen Merchandise",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: Target another player's Holding with a base Gold Cost from 1 to 4: This card copies one of its base abilities that does not itself copy abilities, or one of its Gold-producing traits.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7494.jpg",
+      "Keywords": [
+        "Unique",
+        "Kolat",
+        "Retainer"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "p5-stolen-ability",
+        "p5-stolen-gold"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

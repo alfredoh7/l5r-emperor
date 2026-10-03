@@ -23,6 +23,11 @@ public sealed class CatalogueData
         public CardDefinition? Definition => CardCatalog.Cards.GetValueOrDefault(Id);
         public bool Playable => Definition is { ScenarioOnly: false } && Id.StartsWith("oracle-l5r-", StringComparison.Ordinal);
         public string SearchText => string.Join(" ", new[] { Name, CurrentOracleText }.Concat(Clans).Concat(Keywords).Concat(Types));
+        private string[]? _actions;
+        /// <summary>Printed action labels (Limited, Open, Battle, Battle/Open, Reaction); empty when none are printed.</summary>
+        public string[] Actions => _actions ??= CatalogueActions.Printings(CurrentOracleText);
+        /// <summary>Printed Focus Value, or null when the card has none.</summary>
+        public int? Focus => Stats.TryGetValue("focus", out var values) && int.TryParse(values.FirstOrDefault(), out var focus) ? focus : null;
         public double Numeric(string stat) => Stats.TryGetValue(stat, out var values) && double.TryParse(values.FirstOrDefault(), out var value) ? value : double.MaxValue;
     }
     public sealed class Printing
@@ -61,22 +66,43 @@ public sealed class CatalogueData
         using var file = Godot.FileAccess.Open(path, Godot.FileAccess.ModeFlags.Read) ?? throw new InvalidOperationException("Missing catalogue resource: " + path);
         return JsonSerializer.Deserialize<T>(file.GetAsText(), Json) ?? throw new InvalidOperationException("Invalid catalogue data.");
     }
-    public Card[] Filter(string search = "", string clan = "All", string family = "All", string type = "", string keyword = "", bool playable = false, string sort = "Name A–Z", string set = "")
+    /// <summary>Printing sets in Mendon's approved presentation order; anything else (including the
+    /// mojibake-encoded Promotional set labels currently in the catalogue) sorts into "Other".</summary>
+    public static readonly string[] SetOrder =
+    [
+        "Before the Dawn", "War of Honor", "Forgotten Legacy", "Second City", "Promotional–Celestial",
+        "Emperor Edition", "Promotional–Emperor", "Embers of War", "The Shadow's Embrace", "Seeds of Decay",
+        "Honor and Treachery", "Emperor Edition Gempukku", "Torn Asunder", "Coils of Madness", "Gates of Chaos",
+        "Aftermath", "Promotional Ivory",
+    ];
+    /// <summary>A card reprinted across sets sorts by the earliest set it appeared in.</summary>
+    public static int SetRank(Card card) => card.Printings.Where(p => p.Set != "Game printing")
+        .Select(p => { var i = Array.IndexOf(SetOrder, p.Set); return i < 0 ? SetOrder.Length : i; })
+        .DefaultIfEmpty(SetOrder.Length).Min();
+    public Card[] Filter(string search = "", IEnumerable<string>? clans = null, string family = "All", IEnumerable<string>? types = null, IEnumerable<string>? keywords = null, bool playable = false, string sort = "Name A–Z", string set = "")
     {
-        var terms = search.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-        var query = Cards.Where(c => (!playable || c.Playable)
-            && (clan == "All" || (clan == "Unaligned" ? c.Clans.Length == 0 || c.Clans.Contains(clan) : c.Clans.Contains(clan)))
+        var clanSet = clans?.Where(c => c != "All").ToArray() ?? [];
+        var typeSet = types?.ToArray() ?? [];
+        var keywordSet = keywords?.ToArray() ?? [];
+        var query = Search(Cards, search).Where(c => (!playable || c.Playable)
+            && (clanSet.Length == 0 || clanSet.Any(clan => clan == "Unaligned" ? c.Clans.Length == 0 || c.Clans.Contains(clan) : c.Clans.Contains(clan)))
             && (family == "All" || (family == "Strongholds" ? c.Types.Contains("Stronghold") : c.DeckTypes.Contains(family)))
-            && (type == "" || c.Types.Contains(type)) && (keyword == "" || c.Keywords.Contains(keyword))
-            && (set == "" || c.Printings.Any(p => p.Set == set))
-            && terms.All(term => c.SearchText.Contains(term, StringComparison.OrdinalIgnoreCase)));
-        return (sort switch {
+            && (typeSet.Length == 0 || typeSet.Any(c.Types.Contains)) && (keywordSet.Length == 0 || keywordSet.Any(c.Keywords.Contains))
+            && (set == "" || c.Printings.Any(p => p.Set == set)));
+        return (sort switch
+        {
             "Name Z–A" => query.OrderByDescending(c => c.Name, StringComparer.OrdinalIgnoreCase),
             "Gold cost" => query.OrderBy(c => c.Numeric("cost")).ThenBy(c => c.Name),
             "Force" => query.OrderBy(c => c.Numeric("force")).ThenBy(c => c.Name),
             "Chi" => query.OrderBy(c => c.Numeric("chi")).ThenBy(c => c.Name),
+            "Set" => query.OrderBy(SetRank).ThenBy(c => c.Name, StringComparer.OrdinalIgnoreCase),
             _ => query.OrderBy(c => c.Name, StringComparer.OrdinalIgnoreCase)
         }).ToArray();
     }
-    public static string PlainText(string text) => Regex.Replace(System.Net.WebUtility.HtmlDecode(text).Replace(":bow:", "[Bow]"), @"<[^>]+>|:g(\d+|star):", m => m.Groups[1].Success ? "["+m.Groups[1].Value+" Gold]" : "");
+    public static IEnumerable<Card> Search(IEnumerable<Card> cards, string search)
+    {
+        var terms = search.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        return cards.Where(c => terms.All(term => c.SearchText.Contains(term, StringComparison.OrdinalIgnoreCase)));
+    }
+    public static string PlainText(string text) => Regex.Replace(System.Net.WebUtility.HtmlDecode(text).Replace(":bow:", "[Bow]"), @"<[^>]+>|:g(\d+|star):", m => m.Groups[1].Success ? "[" + m.Groups[1].Value + " Gold]" : "");
 }

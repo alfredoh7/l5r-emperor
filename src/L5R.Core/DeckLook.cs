@@ -27,7 +27,9 @@ public static class LookDisposition
     public const string Hand = "hand";
     public const string Show = "show";
     public const string Discard = "discard";
-    public static readonly string[] All = [Top, Bottom, Hand, Show, Discard];
+    /// <summary>Put the card into play at the current battlefield (issue #503, Searching for Answers; EmperorP5Hidden.cs).</summary>
+    public const string Play = "play";
+    public static readonly string[] All = [Top, Bottom, Hand, Show, Discard, Play];
 }
 
 /// <summary>One deck a look may target: which of the viewer's decks ("Fate" or "Dynasty") and whether it is the
@@ -64,6 +66,14 @@ public static class LookCatalog
     public static LookSpec ControlYourDestiny { get; } = new("control-your-destiny", "Look at the top three cards of your Fate or Dynasty deck", [new("Fate"), new("Dynasty")], 3, [new(LookDisposition.Bottom, 0, 2)], Reorder: true);
     /// <summary>Jurojin's Blessing (oracle-l5r-4070, Celestial): "Look at the top card of your Fate deck. You may discard it."</summary>
     public static LookSpec JurojinsBlessing { get; } = new("jurojins-blessing", "Look at the top card of your Fate deck", [new("Fate")], 1, [new(LookDisposition.Discard, 0, 1)]);
+    /// <summary>Akodo Uehara (oracle-l5r-305, Embers of War pass, issue #460): "Look at the top card of your Fate deck. You may leave it there, discard it, or put it
+    /// at the bottom of the deck." -- Isawa Tamaki's own top-1 shape, plus a Discard rule alongside Bottom (the default Remainder, "top", already covers "leave it there").</summary>
+    public static LookSpec UeharaLook { get; } = new("uehara-look", "Look at the top card of your Fate deck", [new("Fate")], 1,
+        [new(LookDisposition.Discard, 0, 1), new(LookDisposition.Bottom, 0, 1)]);
+
+    /// <summary>Methodical Questioning (oracle-l5r-9915, The Shadow's Embrace pass, issue #476 batch 3): "Look at the top 3 cards of any Fate deck. Put them back in any order." --
+    /// Signs and Portents' own either-player's-Fate-deck look, with nothing but a reorder.</summary>
+    public static LookSpec MethodicalQuestioning { get; } = new("methodical-questioning", "Look at the top three cards of any Fate deck", [new("Fate"), new("Fate", Opponent: true)], 3, [], Reorder: true);
 
     // Training fixtures (never in a playable deck): every parameter the 25 cards need, ahead of any published card needing it.
     /// <summary>Own Dynasty deck, two cards, one may go to the bottom (Asako Kikugoro's shape).</summary>
@@ -81,8 +91,8 @@ public static class LookCatalog
     /// Exactly one card must be shown and taken.</summary>
     public static LookSpec TrainingShowAny { get; } = new("training-look-show", "Look at the top cards of your Fate deck", [new("Fate")], 3, [new(LookDisposition.Show, 1, 1)], Reorder: true);
 
-    public static IReadOnlyDictionary<string, LookSpec> All { get; } = new[] { PublicRecords, IsawaTamaki, BanishAllDoubt, BayushiKahokuExp2, SignsAndPortents, ControlYourDestiny, JurojinsBlessing,
-        TrainingDynasty, TrainingAny, TrainingTakeItem, TrainingFixedOrder, TrainingShowAny }.ToDictionary(s => s.Id, StringComparer.Ordinal);
+    public static IReadOnlyDictionary<string, LookSpec> All { get; } = EngineHooks.Catalogue(new[] { PublicRecords, IsawaTamaki, BanishAllDoubt, BayushiKahokuExp2, SignsAndPortents, ControlYourDestiny, JurojinsBlessing,
+        UeharaLook, MethodicalQuestioning, TrainingDynasty, TrainingAny, TrainingTakeItem, TrainingFixedOrder, TrainingShowAny }, EngineHooks.Looks, static entry => entry.Id); // + Temples of Gisei Toshi (issue #492, group F)
 
     /// <summary>The look an Event carries in its Effect (an Event has no abilities of its own to hang a spec on).</summary>
     public static LookSpec? ForEventEffect(string effect) => effect == "signs-and-portents" ? SignsAndPortents : null;
@@ -141,6 +151,7 @@ public sealed partial class MatchEngine
         LookDisposition.Hand => "Put in your hand",
         LookDisposition.Show => "Show and put in your hand",
         LookDisposition.Discard => "Discard",
+        LookDisposition.Play => "Put into play at the current battlefield",
         _ => disposition
     };
 
@@ -203,6 +214,8 @@ public sealed partial class MatchEngine
 
     private void FinishLook(PendingLook look)
     {
+        if (OpenP5LookEntryWindows(look)) return; // issue #503: the Personality Searching for Answers put into play gets his entering-play windows
+        if (P3AfterLook(look)) return; // Daigotsu Tenbatsu (issue #503, EmperorP3.cs): "You may discard a Dark Virtue; if you did, draw a card."
         _state.PendingLook = null;
         FinishDeferredAction(look.PlayerId, look.Origin, look.SourceCardId, look.BowedBefore);
     }
@@ -219,10 +232,17 @@ public sealed partial class MatchEngine
     /// <summary>Whether one viewed card may take one disposition, and the short reason when it may not.</summary>
     private (bool Legal, string? Reason) LookLegal(PendingLook look, LookSpec spec, CardInstance card, string disposition)
     {
+        // Hand and Show put the card into a hand: a Dynasty card can never go there, checked ahead of the Remainder
+        // short-circuit below so a spec could never accidentally default a Dynasty card straight into a hand either.
+        if (disposition is LookDisposition.Hand or LookDisposition.Show)
+        {
+            if (look.Deck != SearchDeck.Fate) return (false, "A Dynasty card cannot go into a hand");
+            if (look.DeckOwnerId != look.PlayerId) return (false, "Only cards from your own deck may be put in your hand");
+        }
         if (disposition == spec.Remainder) return (true, null);
         var rule = spec.Rules.First(r => r.Disposition == disposition);
-        if (disposition is LookDisposition.Hand or LookDisposition.Show && look.DeckOwnerId != look.PlayerId) return (false, "Only cards from your own deck may be put in your hand");
         if (rule.Criteria is not null) { var (eligible, reason) = SearchEligibility(rule.Criteria, card); if (!eligible) return (false, reason); }
+        if (disposition == LookDisposition.Play) return P5PlayDispositionLegal(look, card); // issue #503 (EmperorP5Hidden.cs)
         return (true, null);
     }
 
@@ -285,11 +305,15 @@ public sealed partial class MatchEngine
                 case LookDisposition.Top: top.Add(card.Id); break;
                 case LookDisposition.Bottom: bottom.Add(card.Id); break;
                 case LookDisposition.Hand:
-                    card.Zone = Zone.Hand; viewer.Hand.Add(card.Id); hand++; break;
+                    if (P2CardIntoHandBlocked(viewer.Id)) { top.Add(card.Id); break; } // issue #503: The Scorpion Wall is Finished
+                    card.Zone = Zone.Hand; viewer.Hand.Add(card.Id); NoteCardIntoHand(viewer.Id); hand++; break;
                 case LookDisposition.Show:
                     RecordShown(viewer.Id, card, source, look.Deck!, "look");
-                    card.Zone = Zone.Hand; viewer.Hand.Add(card.Id); shown++; break;
+                    if (P2CardIntoHandBlocked(viewer.Id)) { top.Add(card.Id); break; } // issue #503
+                    card.Zone = Zone.Hand; viewer.Hand.Add(card.Id); NoteCardIntoHand(viewer.Id); shown++; break;
+                case LookDisposition.Play: PutIntoPlayFromLook(look, card, source); break; // issue #503 (EmperorP5Hidden.cs)
                 case LookDisposition.Discard:
+                    if (!P2BeforeLookDiscard(look, source)) { top.Add(card.Id); break; } // issue #503: The Tapestry Perceived destroys itself first
                     card.Zone = look.Deck == SearchDeck.Dynasty ? Zone.DynastyDiscard : Zone.FateDiscard; card.FaceUp = true; discarded++;
                     // A discard is public (a discard pile is a public zone): the event names the card and carries its id.
                     Emit("cardDiscarded", $"{Player(ownerId).Name}'s {look.Deck} deck: {Definition(card).Name} was discarded.", ownerId, card.Id);
@@ -314,8 +338,11 @@ public sealed partial class MatchEngine
         var spec = LookSpecOf(look); var source = Card(look.SourceCardId); var sourceName = Definition(source).Name;
         if (look.Stage == "ChooseDeck")
             return new("ChooseDeck", source.Id, sourceName, spec.Label, _state.PendingChoice.Prompt,
-                spec.Targets.Select(t => { var owner = LookOwner(look, t); return new LookDeckChoiceView(t.Deck, owner, owner == viewerId,
-                    $"Top {look.Count} cards of {(owner == viewerId ? "your" : "your opponent's")} {t.Deck} deck", LookDeckList(owner, t.Deck).Count); }).ToArray(),
+                spec.Targets.Select(t =>
+                {
+                    var owner = LookOwner(look, t); return new LookDeckChoiceView(t.Deck, owner, owner == viewerId,
+                    $"Top {look.Count} cards of {(owner == viewerId ? "your" : "your opponent's")} {t.Deck} deck", LookDeckList(owner, t.Deck).Count);
+                }).ToArray(),
                 null, null, false, look.Count, 0, null, null, spec.Remainder, spec.Reorder);
         var cards = ViewedCards(look);
         var offered = OfferedDispositions(spec);
@@ -378,5 +405,26 @@ public sealed partial class MatchEngine
             parts.Add($"{DispositionLabel(g.Key)}: {string.Join(", ", g.OrderBy(e => e.Position).Select(e => Definition(cards[e.Position]).Name))}");
         parts.Add(spec.Remainder == LookDisposition.Top ? "the rest back on top in this order" : "the rest to the bottom in this order");
         return string.Join("; ", parts);
+    }
+}
+
+public sealed partial class MatchEngine
+{
+    private bool HandleRegisteredLookChoice(string type, GameCommand command)
+    {
+        if (!IsLookChoice(type)) return false;
+        ResolveLookCommand(command);
+        return true;
+    }
+}
+
+public sealed partial class MatchEngine
+{
+    // Registration only: callbacks are not invoked during module initialization.
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2255", Justification = "Register feature callbacks before any engine or catalogue reader.")]
+    [System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void RegisterDeckLookHooks()
+    {
+        EngineHooks.PendingChoice.Register("HandleRegisteredLookChoice", 300, static (engine, type, command) => engine.HandleRegisteredLookChoice(type, command));
     }
 }

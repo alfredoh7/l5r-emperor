@@ -1,0 +1,28 @@
+{
+  "Profile": "stronghold-wave-29",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-8211",
+      "Name": "The Marshalling Fields",
+      "Type": "Stronghold",
+      "Clan": "Lion",
+      "GoldCost": 0,
+      "GoldProduction": 3,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 7,
+      "StartingHonor": 7,
+      "Text": "After you announce a Terrain action: Once per battle, you may ignore any of its restrictions that are based on another Terrain being in play.\nAfter the first time each turn one of your Terrain actions resolves: Draw a card.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8211.jpg",
+      "Keywords": [],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "marshalling-fields"
+    }
+  ],
+  "Decks": []
+}

@@ -1,0 +1,9 @@
+{
+  "lane": "ui",
+  "summary": "Repair the stale check-attack-targets-ui.sh capture: it compared the raw ProvinceState.Strength, but a Ranged Attack's strength loss is a timed modifier; it now reads the effective strength the player sees (ProvinceView.Strength). Capture-only change; no game behaviour changed.",
+  "validation": "check-attack-targets-ui.sh passes normal and reduced (it failed on main and on the pre-#581 baseline with 'Province Attack failed or opened a card-target reaction'). Diagnosed with temporary instrumentation (not committed): effective strength went 7 to 4 (the expected -3), the provinceAttacked event fired, nothing was pending, while the raw base field stayed 7 and the event read 'has -3 strength this turn'. Not run: full tools/check.sh or the other native checks.",
+  "remaining": "Same stale-capture class as #589; the other baseline-failing native checks remain (persistent-home, unit-standard, shown-cards, top-cards-ui, player-clarity, crimson-duel, war-room-motion, table-followup).",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/591",
+  "branch": "claude/591-attack-capture",
+  "updated": "2026-10-03T12:12:05.670761+00:00"
+}

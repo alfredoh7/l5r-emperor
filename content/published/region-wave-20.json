@@ -1,0 +1,32 @@
+{
+  "Profile": "region-wave-20",
+  "Rules": "Emperor Edition core rules; reviewed user-supplied created-card scans.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-9866",
+      "Name": "Natural Aviary",
+      "Type": "Region",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Pay 2 Gold and target your Personality: Create a 1F Nonhuman • Falcon • Cavalry Follower and attach it to him.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9866.jpg",
+      "Keywords": [
+        "Forest"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "natural-aviary-create"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

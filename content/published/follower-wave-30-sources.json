@@ -1,0 +1,38 @@
+[
+  {
+    "card_id": "oracle-l5r-9867",
+    "printing_set": [
+      "The Shadow's Embrace"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=9867",
+    "image_path": "assets/reference/oracle/the-shadow-s-embrace/webp/oracle-l5r-9867-printing-1-image-1.webp",
+    "image_sha256": "abc9754d828be894539de48b0dfd3b965e460c8c2a7ed2e8d8b18ef87a07e656"
+  },
+  {
+    "card_id": "oracle-l5r-9868",
+    "printing_set": [
+      "The Shadow's Embrace"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=9868",
+    "image_path": "assets/reference/oracle/the-shadow-s-embrace/webp/oracle-l5r-9868-printing-1-image-1.webp",
+    "image_sha256": "1f7ce40bf1758dce8f9a68a210ec602af068a280f11b6411bd41ca9f4c576595"
+  },
+  {
+    "card_id": "oracle-l5r-9873",
+    "printing_set": [
+      "The Shadow's Embrace"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=9873",
+    "image_path": "assets/reference/oracle/the-shadow-s-embrace/webp/oracle-l5r-9873-printing-1-image-1.webp",
+    "image_sha256": "f409a066142dea4ef2b998b260fc21a34a40fe6d5e8a1dee40d06e3c71de65e5"
+  },
+  {
+    "card_id": "oracle-l5r-9874",
+    "printing_set": [
+      "The Shadow's Embrace"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=9874",
+    "image_path": "assets/reference/oracle/the-shadow-s-embrace/webp/oracle-l5r-9874-printing-1-image-1.webp",
+    "image_sha256": "314a047c504954d0defc43b77f79b5124fe5950e050cf4677ae5b97606bc2ed0"
+  }
+]

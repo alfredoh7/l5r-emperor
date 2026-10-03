@@ -1,0 +1,29 @@
+# Generated from collaboration.json: python tools/security/check_policy.py --write-codeowners
+# Advisory reviewers only. Standing autonomous authority and AGENTS.md still apply.
+# Last matching pattern wins; shared exceptions must remain last.
+* @alfredoh7 @mdornbrook
+# Per-task handoffs do not add another lane reviewer.
+/docs/handoffs/tasks/
+/src/L5R.Core/ @mdornbrook
+/src/L5R.AI/ @mdornbrook
+/src/L5R.Server/ @mdornbrook
+/content/ @mdornbrook
+/assets/reference/ @mdornbrook
+/tests/L5R.Core.Tests/ @mdornbrook
+/tests/L5R.AI.Tests/ @mdornbrook
+/tests/L5R.Server.Tests/ @mdornbrook
+/docs/rules/ @mdornbrook
+/tools/content/ @mdornbrook
+/src/L5R.Client/ @alfredoh7
+/assets/table/ @alfredoh7
+/assets/ui/ @alfredoh7
+/assets/fonts/ @alfredoh7
+/tools/blender/ @alfredoh7
+/docs/screenshots/ @alfredoh7
+/src/L5R.Core/Models.cs @alfredoh7 @mdornbrook
+/src/L5R.Core/MatchQueries.cs @alfredoh7 @mdornbrook
+/src/L5R.Client/MatchSession.cs @alfredoh7 @mdornbrook
+/src/L5R.Client/Main.Actions.cs @alfredoh7 @mdornbrook
+/src/L5R.Client/Main.cs @alfredoh7 @mdornbrook
+/src/L5R.Client.Transport/ @alfredoh7 @mdornbrook
+/tests/L5R.Client.Transport.Tests/ @alfredoh7 @mdornbrook

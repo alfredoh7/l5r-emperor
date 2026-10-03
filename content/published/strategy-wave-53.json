@@ -1,0 +1,202 @@
+{
+  "Profile": "strategy-wave-53",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-6727",
+      "Name": "Sheathing the Sword",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing unbowed Courtier at any location and target an enemy Personality: Move him home. Gain 1 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6727.jpg",
+      "Keywords": [
+        "Political"
+      ],
+      "Focus": 1,
+      "Abilities": [
+        "sheathing-sword-move"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-7717",
+      "Name": "Tactical Trap",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing unbowed Tactician at any location and target an enemy Personality: Move him home. Bow him if he moved.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7717.jpg",
+      "Keywords": [
+        "Tactical"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "tactical-trap-move"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9020",
+      "Name": "Unstoppable Strike",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing Personality: Give him the ability, \"Battle: Target an enemy Personality: Destroy him.\"",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9020.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "unstoppable-strike-grant"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9683",
+      "Name": "You Are Unworthy",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: Choose your performing unbowed Paragon and target an attachment with Force equal to or lower than your Paragon's Personal Honor: Destroy it.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9683.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "unworthy-destroy"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-8004",
+      "Name": "The Cycle of Vengeance",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "As a Focus Effect: After this duel ends, if your Personality lost it, give one of your Personalities two +1F Revenge tokens.\nBattle/Open: Choose your performing Personality: Straighten his unit.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8004.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "cycle-of-vengeance-focus",
+        "cycle-of-vengeance-straighten"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-7593",
+      "Name": "Stuck in Rokugan",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: Target a Holding: Straighten it.\nLimited: Target a Celestial: Discard it.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7593.jpg",
+      "Keywords": [
+        "Winter"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "stuck-in-rokugan-straighten",
+        "stuck-in-rokugan-discard"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-8445",
+      "Name": "Thick Marsh",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After this card enters play: Choose and bow an enemy card at the current battlefield.\nBattle: If there is no Terrain in play at the current battlefield: Put this card into play there.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8445.jpg",
+      "Keywords": [
+        "Swamp",
+        "Terrain"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "thick-marsh-entry"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-7459",
+      "Name": "Stand as the Mountain",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose one or two of your performing Personalities with 7 or higher base Force: Straighten them.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7459.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "mountain-straighten"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

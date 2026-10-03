@@ -35,24 +35,30 @@ public partial class TableArtStage : Node3D
         var environment = packed.Instantiate<Node3D>(); _environment = environment; AddChild(environment);
         ApplyPaintedMaterials(environment);
         if (!ReviewMode) AddLacquerFrame();
-        AddChild(new WorldEnvironment { Environment = new Godot.Environment
+        AddChild(new WorldEnvironment
         {
-            BackgroundMode = Godot.Environment.BGMode.Color,
-            BackgroundColor = new Color("090806"),
-            TonemapMode = Godot.Environment.ToneMapper.Linear,
-            TonemapExposure = 1,
-            AmbientLightEnergy = 0
-        }});
+            Environment = new Godot.Environment
+            {
+                BackgroundMode = Godot.Environment.BGMode.Color,
+                BackgroundColor = new Color("090806"),
+                TonemapMode = Godot.Environment.ToneMapper.Linear,
+                TonemapExposure = 1,
+                AmbientLightEnergy = 0
+            }
+        });
         _camera = new Camera3D
         {
             Projection = Camera3D.ProjectionType.Orthogonal,
             KeepAspect = Camera3D.KeepAspectEnum.Height,
-            Position = new Vector3(0, 10, 0), Current = true, Near = .05f, Far = 30
+            Position = new Vector3(0, 10, 0),
+            Current = true,
+            Near = .05f,
+            Far = 30
         };
         AddChild(_camera); _camera.LookAt(Vector3.Zero, new Vector3(0, 0, -1));
         GetViewport().SizeChanged += FitCamera;
         FitCamera();
-        GD.Print($"TABLE_ART_STAGE: Blender projection mesh, complete environment plate, {(ReviewMode ? "original aspect" : "navy lantern table, table-anchored light and pan/zoom") }.");
+        GD.Print($"TABLE_ART_STAGE: Blender projection mesh, complete environment plate, {(ReviewMode ? "original aspect" : "navy lantern table, table-anchored light and pan/zoom")}.");
     }
 
     private void ApplyPaintedMaterials(Node node)
@@ -178,7 +184,7 @@ public partial class TableArtStage : Node3D
         return new Rect2(boardSize / 2 - extent / 2 + extent * FabricInset, extent * (1 - 2 * FabricInset));
     }
 
-    public void SetPlaneCamera(Vector2 screenCenter, float density, Vector2 center, float zoom, Vector2 boardSize, float fitZoom, float pitch=TableSurface.Pitch, float depth=TableSurface.Depth)
+    public void SetPlaneCamera(Vector2 screenCenter, float density, Vector2 center, float zoom, Vector2 boardSize, float fitZoom, float pitch = TableSurface.Pitch, float depth = TableSurface.Depth)
     {
         // Expand the environment around the playable area, keeping its native
         // aspect instead of stretching edge pixels into an infinite surface.
@@ -210,7 +216,7 @@ public partial class TableArtStage : Node3D
             material.SetShaderParameter("left_lamp", leftLamp);
             material.SetShaderParameter("right_lamp", RightLamp);
         }
-        _warRoom?.SetTableCamera(screenCenter, density, center, zoom, boardSize, extent, leftLamp, RightLamp, pitch, depth);
+        _warRoom?.SetTableCamera(screenCenter, density, center, zoom, boardSize, extent, leftLamp, RightLamp);
         CardPaper.Table.SetShaderParameter("light_radius", extent * new Vector2(.24f, .31f));
         CardPaper.Table.SetShaderParameter("light_origin", leftWorld);
         CardPaper.Table.SetShaderParameter("light_origin_right", origin + extent * RightLamp);

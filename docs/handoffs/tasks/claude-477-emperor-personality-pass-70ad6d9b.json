@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Emperor Edition Personality pass (#477): 71 of 78 unwired Personalities wired in personality-wave-68..73 (six merged batches); 7 blocked (missing Proxy scans / engine gaps) with specific BLOCKERS notes; inventory regenerated (938 wired of 2172); art pack catalogue-art-pr477-20260924-r1 published and pinned. Shared: adds GameCommand.PaymentDiscards (server/client wire field) alongside rules code.",
+  "validation": "Core suite 0 failures (1383 pass); AI 74/74, Server 8/8, Client.Transport 12/12; content unittests 134/134; new emperor-personality-batch1..6 suites",
+  "remaining": "Readings listed in docs/decisions/2026-09-24-emperor-edition-personality-pass.md need Mendon's confirmation; 7 cards await Proxy scans.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/477",
+  "branch": "claude/477-emperor-personality-pass",
+  "updated": "2026-09-24T17:01:39.333338+00:00"
+}

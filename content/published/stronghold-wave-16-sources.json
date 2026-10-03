@@ -1,0 +1,20 @@
+[
+  {
+    "card_id": "oracle-l5r-9945",
+    "printing_set": [
+      "The Shadow's Embrace"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=9945",
+    "image_path": "assets/reference/oracle/the-shadow-s-embrace/webp/oracle-l5r-9945-printing-1-image-1.webp",
+    "image_sha256": "5288127f8733ce63f414651c4efae828b9ea51afdb4a9a6acf885d4e99df9215"
+  },
+  {
+    "card_id": "oracle-l5r-9946",
+    "printing_set": [
+      "The Shadow's Embrace"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=9946",
+    "image_path": "assets/reference/oracle/the-shadow-s-embrace/webp/oracle-l5r-9946-printing-1-image-1.webp",
+    "image_sha256": "5b50f82c490d0a1a62e82d2908cde754b7a25cd5d440f2750d83b30b360369f4"
+  }
+]

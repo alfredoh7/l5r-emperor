@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Implement approved open battlefield presentation and public phase/location context; four-role review fixes documented. Exact Windows game source is d99482ac16d1774f47a38aed9aa24f343c712259, package revision 2. Follow-up formatting changes whitespace only in touched files; package behavior is unchanged.",
+  "validation": "Final full Core/AI/server/transport/tooling check passed; R1 17/17; native check8 and local one-click launcher passed. Final C# formatting verification and client compilation passed, zero warnings/errors. Strict Windows export and private upload checksum passed; package receipt committed for hosted validation.",
+  "remaining": "CI status and final package delivery/notification recorded on PR #565. Human Windows graphical/mechanics acceptance and coordinated integration with PR #564 remain open. No merge.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/499",
+  "branch": "codex/499-open-battlefield",
+  "updated": "2026-09-30T14:42:42.394112+00:00"
+}
