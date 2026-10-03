@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "tools/env.sh honours L5R_GODOT (one shared Godot for all worktrees, no .tools junction) and gains l5r_require_godot, called by the 54 tools scripts that run $GODOT unguarded, so a missing Godot prints an explicit error and exits 1 instead of dying silently under set -e. Sourcing env.sh stays non-fatal so check.sh --skip-client is unaffected. CONTRIBUTING documents it.",
+  "validation": "Bad L5R_GODOT: check-crimson-duel.sh prints the error, exit 1. No .tools plus valid L5R_GODOT: check-crimson-duel.sh all 9 views PASS. check.sh --skip-client: All requested checks passed. bash -n clean on all tools scripts. Windows Git Bash only; macOS not run locally (CI macOS job covers it).",
+  "remaining": "None; ready for review.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/607",
+  "branch": "claude/607-l5r-godot-env",
+  "updated": "2026-10-03T17:22:22.096072+00:00"
+}
