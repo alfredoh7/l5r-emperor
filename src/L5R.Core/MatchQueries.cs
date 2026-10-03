@@ -559,7 +559,8 @@ public sealed partial class MatchEngine
         }
         else if (_state.PendingChoice is { Type: "yourClanNeedsYouProvince" })
             foreach (var p in Player(playerId).Provinces.Where(p => !p.Destroyed && !p.HoldsNoDynastyCards)) // issue #503
-                Add("chooseYourClanNeedsYouProvince", $"Place into province {p.Index + 1}" + (p.CardId is not null ? $" (discarding {Definition(Card(p.CardId)).Name})" : ""),
+                // Hidden information: only a face-up card's name may be shown; a face-down card is never revealed by the prompt.
+                Add("chooseYourClanNeedsYouProvince", $"Place into province {p.Index + 1}" + (p.CardId is { } existingId ? Card(existingId).FaceUp ? $" (discarding {Definition(Card(existingId)).Name})" : " (discarding the face-down card)" : ""),
                     Command("chooseYourClanNeedsYouProvince", province: p.Index));
         else if (_state.PendingChoice is { Type: "conqueror" })
         {
