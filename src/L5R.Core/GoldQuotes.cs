@@ -469,7 +469,7 @@ public sealed partial class MatchEngine
         if (cost.Rule.Basis != GoldCostBasis.Variable)
             return new(cost.Amount, cost.Rule.Kind, cost.Basis, error,
                 error is not null ? [] : cost.LeadAmount > 0 ? SplitPaymentOptions(playerId, cost.LeadAmount, cost.Amount - cost.LeadAmount, paying) : PaymentOptionsExcluding(playerId, cost.Amount, exclude, paying),
-                Sources: PaymentSourcesFor(playerId, paying)); // issue #501
+                Sources: PaymentSourcesFor(playerId, paying, exclude)); // issue #501
         return VariableGoldQuote(playerId, cost.Min ?? 0, cost.Max, cost.Amount, cost.Basis, error, paying);
     }
 

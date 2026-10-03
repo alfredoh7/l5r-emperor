@@ -18,6 +18,7 @@ try
     var url = app.Urls.Single();
     var cases = new (string Name, Func<Task> Test)[]
     {
+        ("payment source methods and private entry candidates survive the server envelope", () => { GameplayControlsProjection(); return Task.CompletedTask; }),
         ("private duel round trip retains own focus, result and priority through reconnect", () => PrivateDuel(url,duelRoom,duelTokens)),
         ("live duel queue preserves immediate results, reconnects and back-to-back presentations", DuelQueue),
         ("custom Practice keeps selected seat, rejects invalid replacement and exports replay", CustomPlay),
@@ -52,6 +53,28 @@ finally
     if (Directory.Exists(storage)) Directory.Delete(storage, recursive: true);
 }
 return failures == 0 ? 0 : 1;
+
+static void GameplayControlsProjection()
+{
+    foreach (var kind in new[] { "reaction", "entry" })
+    {
+        var engine = MatchEngine.CreateGameplayControlsShowcase(kind);
+        var seat = engine.State.PriorityPlayerId;
+        for (var viewer = 0; viewer < 2; viewer++)
+        {
+            var actions = engine.QueryActions(viewer);
+            var json = JsonSerializer.Serialize(new StateMessage("state", "ROOM", viewer, engine.Version, engine.GetView(viewer), actions.Select(AvailableAction.FromCore).ToArray(), [true, true]), Protocol.Json);
+            using var document = JsonDocument.Parse(json);
+            var received = document.RootElement.GetProperty("actions").Deserialize<ActionOption[]>(new JsonSerializerOptions(JsonSerializerDefaults.Web))!;
+            received = received.Select(a => a with { Command = a.Command is null ? null : a.Command with { PlayerId = viewer, ExpectedVersion = engine.Version } }).ToArray();
+            Check(JsonSerializer.Serialize(received, Protocol.Json) == JsonSerializer.Serialize(actions, Protocol.Json), "Source IDs, production, conflicts and candidate IDs changed in transit");
+            if (kind == "reaction" && viewer == seat)
+                Check(received.Any(a => a.Gold?.Sources?.Any(m => m.Kind == "reaction" && a.Gold.Sources.Any(b => b.Kind == "bow" && b.CardId == m.CardId)) == true), "Purchase quote dropped independent Bow/Reaction methods");
+            if (kind == "entry")
+                Check(received.Any(a => a.DecisionCandidateIds?.Length > 0) == (viewer == seat), "Private entry candidates were dropped or exposed to the waiting seat");
+        }
+    }
+}
 
 static void AttackTargetProjection()
 {

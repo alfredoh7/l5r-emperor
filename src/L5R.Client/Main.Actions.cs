@@ -7,6 +7,7 @@ public partial class Main
 {
     private void RenderInspector()
     {
+        if (_candidateTray is not null) _candidateTray.Visible = false;
         var cardActionsRendered = false;
         Palette.Clear(_sidebarHeader); Palette.Clear(_inspector); Palette.Clear(_decisionActions); _paymentConfirm = null;
         RenderEitherOrNotice();
@@ -27,6 +28,7 @@ public partial class Main
             { var command = option.Command!; _inspector.AddChild(SidebarSkin.Button(option.Label, () => _ = Submit(command))); }
             return;
         }
+        if (View.PendingChoice?.Type is "eventChoice" or "honorLossDecision" or "entryCostDecision" or "honorChangeReaction" or "killingGroundsSelect" or "infiltratorStraighten" && RenderDecisionChooser()) return;
         if (RenderBattleSequence()) return;
         if (RenderLookDecision()) return;
         if (RenderSearchDecision()) return;
@@ -71,6 +73,8 @@ public partial class Main
             var status = Palette.Wrapped(View.PriorityPlayerId == View.ViewerId ? "Your decision" : "Opponent may act", 18); status.HorizontalAlignment = HorizontalAlignment.Center; _sidebarHeader.AddChild(status);
             _sidebarHeader.AddChild(new HSeparator());
         }
+        if (Actions.Any(a => a.Enabled && a.Type == "declineAdditionalAction"))
+            _inspector.AddChild(Palette.Wrapped("Additional action available. Choose an offered action or decline this opportunity.", 18, Palette.Gold));
         if (View.PendingChoice is { } pending)
         {
             _inspector.AddChild(Palette.Text(pending.Type == "discardHand" ? "HAND LIMIT" : pending.Type == "shinden" ? "YOUR CHOICE" : "REACTION WINDOW", 12, Palette.Gold));
@@ -257,10 +261,9 @@ public partial class Main
             suggestions.Selected = Array.FindIndex(payments, p => p.SourceIds.ToHashSet().SetEquals(_sources));
             _inspector.AddChild(suggestions);
         }
-        if (required > 0 && opponent) RenderOpponentSources(required);
-        else if (required > 0) RenderSources(required);
+        if (required > 0 || opponent) RenderPaymentMethods(required, quote);
         else _inspector.AddChild(Palette.Wrapped("No Gold sources are needed.", 15, Palette.Crane));
-        return (required, quote.Error is null && SelectedProduction() >= required);
+        return (required, quote.Error is null && PaymentSelectionReady(required, quote));
     }
 
     private void RenderAmountControl(int amount, int min, int max)
@@ -285,38 +288,9 @@ public partial class Main
         _decisionActions.AddChild(SidebarSkin.Button(cancel, CancelChoice));
     }
 
-    // Issue #501/#578: the payment sources that are not a card's own production (a Reaction's Gold, Zlkyt's destroyed Holding, Moto Rani's discount),
-    // exactly as the engine's quote lists them. Core's suggested payments may name them, so the panel must be able to show, toggle and count them.
-    private PaymentSource[] TokenSources() => _chosen is { } action && QuoteFor(action) is { Sources: { } sources } ? sources : [];
-
-    private int SelectedProduction() => Self.Home.Concat(Self.Army).Append(Self.Stronghold).Where(c => _sources.Contains(c.Id) && !c.Bowed).Sum(c => Production(c, Self))
-        + TokenSources().Where(t => _sources.Contains(t.Id)).Sum(t => t.Produced);
-
-    private void AddTokenSourceToggles()
-    {
-        foreach (var token in TokenSources())
-        {
-            var check = new CheckBox { Text = $"{token.Produced} · {token.Label}", ButtonPressed = _sources.Contains(token.Id), CustomMinimumSize = new Vector2(0, 28), Name = "PaymentToken" };
-            check.AddThemeFontSizeOverride("font_size", 14);
-            check.Toggled += selected => { if (selected) _sources.Add(token.Id); else _sources.Remove(token.Id); RenderInspector(); Highlight(); };
-            _inspector.AddChild(check);
-        }
-    }
-
-    private void RenderSources(int cost)
-    {
-        _inspector.AddChild(Palette.Text("SOURCES TO BOW", 11, Palette.Gold));
-        foreach (var card in Self.Home.Concat(Self.Army).Append(Self.Stronghold).Where(c => Production(c, Self) > 0))
-        {
-            var check = new CheckBox { Text = $"{Production(card, Self)} · {ShortName(card)}" + (card.Bowed ? " (bowed)" : ""), ButtonPressed = _sources.Contains(card.Id), Disabled = card.Bowed, CustomMinimumSize = new Vector2(0, 28) };
-            check.AddThemeFontSizeOverride("font_size", 14);
-            check.Toggled += selected => { if (selected) _sources.Add(card.Id); else _sources.Remove(card.Id); RenderInspector(); Highlight(); };
-            _inspector.AddChild(check);
-        }
-        AddTokenSourceToggles();
-        var produced = SelectedProduction();
-        _inspector.AddChild(Palette.Wrapped($"{produced} produced  /  {cost} required" + (produced > cost ? $"\n{produced - cost} excess Gold will be lost." : produced < cost ? "\nChoose more unbowed sources." : "\nExact payment. No excess Gold."), 15, produced < cost ? Palette.Error : Palette.Crane));
-    }
+    private int SelectedProduction() => _chosen is not null && QuoteFor(_chosen) is { Sources: { } methods }
+        ? methods.Where(m => _sources.Contains(m.Id)).Sum(m => m.Produced)
+        : Self.Home.Concat(Self.Army).Append(Self.Stronghold).Where(c => _sources.Contains(c.Id) && !c.Bowed).Sum(c => Production(c, Self));
 
     private void RenderAssignments()
     {
@@ -518,7 +492,7 @@ public partial class Main
         }
         if (View.Phase == Phase.Battle && View.PendingChoice is null && View.PriorityPlayerId == View.ViewerId && View.BattleStep?.ConsecutivePasses == 1)
             _phaseActions.AddChild(Palette.Wrapped("Passing now ends Battle actions.", 16, Palette.PaperDim));
-        foreach (var a in Actions.Where(a => a.Type is "pass" or "endDynasty" or "proclaim" or "declineReaction" or "chooseShinden" or "declareAttack")) AddAction(_phaseActions, a);
+        foreach (var a in Actions.Where(a => a.Type is "pass" or "endDynasty" or "proclaim" or "declineReaction" or "declineAdditionalAction" or "chooseShinden" or "declareAttack")) AddAction(_phaseActions, a);
         if (View.PriorityPlayerId != View.ViewerId) _phaseActions.AddChild(Palette.Wrapped($"Waiting for {View.Players[View.PriorityPlayerId].Clan}…", 15, Palette.Crane));
         if (!_session.Online && !_autoOpponent) _phaseActions.AddChild(SidebarSkin.Button("Pass device to other player", SwitchSeat));
     }

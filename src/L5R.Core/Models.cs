@@ -1316,8 +1316,8 @@ public sealed record PaymentOption(string[] SourceIds, int Produced, int Cost, i
 // discount)". Null only for quotes serialized by an older engine.
 public sealed record PurchaseQuote(string CardId, int Cost, bool ClanDiscount, bool ClanAllegiance,
     bool ProclaimEligible, string? Error, PaymentOption[] Payments, string? Basis = null,
-    // Issue #501 (EmperorMechE.cs): the payment sources that are not a card's own production -- a Reaction's Gold used beside or instead of bowing (Seaside Bazaar, Luxurious Silk, Library of
-    // Rebirth), Zlkyt's "destroy your Mine or Farm" (one per Holding, highest Gold Cost first, always last) -- each a source id Payments and GameCommand.SourceIds may name. Null when there are none.
+    // Authoritative methods for this payment, including a card's own production and Reaction's Gold used beside or instead of bowing (Seaside Bazaar, Luxurious Silk, Library of
+    // Rebirth), Zlkyt's "destroy your Mine or Farm" (one per Holding, highest Gold Cost first, always last) -- each a source id Payments and GameCommand.SourceIds may name. Null only for older payloads.
     PaymentSource[]? Sources = null);
 public sealed record OverlayQuote(string CardId, string TargetId, int HigherLevel, int LowerLevel, string? Error);
 /// <summary>The one authoritative Gold quote (issue #303) for any action that costs Gold: recruiting,
@@ -1331,7 +1331,7 @@ public sealed record OverlayQuote(string CardId, string TargetId, int HigherLeve
 /// amount without a round trip. Error, when set, means this quote cannot be paid or used as it stands.</summary>
 public sealed record GoldQuote(int Cost, string Kind, string Basis, string? Error, PaymentOption[] Payments,
     int? MinAmount = null, int? MaxAmount = null, Dictionary<int, PaymentOption[]>? PaymentsByAmount = null,
-    // Issue #501 (EmperorMechE.cs): the payment sources that are not a card's own production (see PurchaseQuote.Sources). Null when there are none.
+    // Authoritative payment methods and source amounts (see PurchaseQuote.Sources); null only for older payloads.
     PaymentSource[]? Sources = null);
 // Presentation metadata survives a disabled option's null Command. No executable command is invented for it.
 public sealed record AlternativeCostView(string AbilityId, string? PerformerId, string Id, string Label, string ActionLabel);
@@ -1348,7 +1348,9 @@ public sealed record ActionOption(string Type, string Label, bool Enabled, strin
     // collect the whole selection. Null for every ability with a single Target.
     TargetSlotOption[]? Slots = null,
     bool NoTarget = false, AlternativeCostView? AlternativeCost = null,
-    MoveDestinationView? Movement = null, AttackCueView? Attack = null);
+    MoveDestinationView? Movement = null, AttackCueView? Attack = null,
+    // Engine-selected preview cards for a complete pending answer; private candidates are only offered to the decider.
+    string[]? DecisionCandidateIds = null, string? DecisionLabel = null);
 /// <summary>Read-only attack presentation. SourceId is the explicitly selected performer or the ability source;
 /// it identifies the card to mark, not a new legality or damage calculation.</summary>
 public sealed record AttackCueView(string Kind, string SourceId);

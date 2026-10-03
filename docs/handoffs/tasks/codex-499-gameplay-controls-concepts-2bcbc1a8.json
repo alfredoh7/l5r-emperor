@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Implement approved payment groups/receipt, private candidate tray/source context, optional-action/Favor access and safe disabled unresolved payment sources. Protocol 3 retains authority in Core. Three native review launchers and verified private Windows upload at source d8a27ef2 revision 2. Integrated main through 8eb1a7c1 (Mendon performance PRs 572/574) without conflict.",
+  "validation": "Full tooling/Core/AI/server suite and 18 transport checks passed; twelve native scenarios passed at 1440x900/1120x700. Final real-Keigo confirmation regression passed with 0-warning/error compilation; Core Gameplay-control and KeigoGold regressions passed. Gold and normal/reduced opponent-payment native suites passed. All branch CI at d8a27ef2 passed. Final revision 2 Windows exporter/runtime/resources/source checks and upload size/SHA verified; updated receipt CI and local post-main integration checks pending.",
+  "remaining": "Updated-receipt Windows CI and post-main integration checks, then targeted notification. Alfredo UI playtest and Mendon/Nathan mechanics/graphical acceptance. Keigo variable-discard picker intentionally unavailable as a separate follow-up. No merge authorized.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/499",
+  "branch": "codex/499-gameplay-controls-concepts",
+  "updated": "2026-09-30T23:11:09.014384+00:00"
+}
