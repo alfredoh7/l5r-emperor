@@ -58,6 +58,13 @@ public partial class Main
         ?? throw new Exception("Missing enabled native button: " + text);
     private async Task StabilizationClick(Control target)
     {
+        // Scroll the control fully into view first, as a player would: the centre of a partly clipped button can sit under the pinned footer (SupportClick does the same).
+        if (target.GetViewport() == GetViewport())
+        {
+            for (Node? parent = target.GetParent(); parent is not null; parent = parent.GetParent())
+                if (parent is ScrollContainer scroll) scroll.EnsureControlVisible(target);
+            await EventFrames(5);
+        }
         var p = target.GetGlobalTransformWithCanvas() * (target.Size / 2);
         var viewport = target.GetViewport();
         if (viewport != GetViewport())
@@ -122,7 +129,8 @@ public partial class Main
                 if (!_captureMode.Contains("pass"))
                 {
                     await StabilizationClick(StabilizationButton(option.Label));
-                    if (bow) { Check(View.Version == before, "Target selection mutated the match"); GetViewport().GetTexture().GetImage().SavePng(_capturePath + ".target.png"); await StabilizationClick(StabilizationButton("Confirm action")); }
+                    // Both reactions open their reviewed action first and execute on Confirm (the Tamoko reaction lists no plain targets, so it takes the same review path as the Hizumi bow).
+                    Check(View.Version == before, "Opening the reaction mutated the match"); GetViewport().GetTexture().GetImage().SavePng(_capturePath + ".target.png"); await StabilizationClick(StabilizationButton("Confirm action"));
                     Check(View.Version == before + 1, "Reaction did not execute exactly once");
                 }
                 for (var n = 0; n < 4 && View.PendingChoice is not null; n++)
