@@ -109,7 +109,7 @@ public partial class Main : Node
             if (startupCapture is not null) Callable.From(() => { _ = CaptureProvinceStartup(startupCapture); }).CallDeferred();
             return;
         }
-        if (OS.GetCmdlineUserArgs().Contains("--duel-match-review")) { StartMatchDuelCapture(); return; }
+        if (_captureMode.StartsWith("duel-followup-", StringComparison.Ordinal) || OS.GetCmdlineUserArgs().Contains("--duel-match-review")) { StartMatchDuelCapture(); return; }
         if (OS.GetCmdlineUserArgs().Contains("--duel-transition-review")) { StartTransitionReview(); return; }
         if (_capturePath is null || _captureMode.StartsWith("menu", StringComparison.Ordinal)) return;
         var published = _capturePath is null || _captureMode.StartsWith("published", StringComparison.Ordinal);
