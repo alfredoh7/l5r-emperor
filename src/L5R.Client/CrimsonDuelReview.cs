@@ -257,7 +257,9 @@ public partial class CrimsonDuelReview : Control
             {
                 if (c.Card.Definition is { } d && CardTile.Artwork(d) is null) throw new Exception("Missing original scan: " + d.Name);
                 if (Mathf.IsEqualApprox(_zoom, 1) && c.FaceCornersOnViewport().Any(p => !_play.HasPoint(p))) throw new Exception("Card clipped: " + c.Card.Id);
-                if (c.FaceCornersInCanvas().Any(p => !new Rect2(-788, -480, 1576, 970).HasPoint(p - _table.CanvasSize / 2))) throw new Exception("Card outside mat: " + c.Card.Id + " corners=" + string.Join(";", c.FaceCornersInCanvas().Select(p => (p - _table.CanvasSize / 2).ToString("F1"))) + " canvas=" + _table.CanvasSize + " tile=" + c.Position + "/" + c.Size);
+                // The approved layout puts the personalities flush with the mat's far edge (top -495) and the hand
+                // below its near edge (bottom +559), so the bound covers those design extents, not the cloth alone.
+                if (c.FaceCornersInCanvas().Any(p => !new Rect2(-788, -520, 1576, 1100).HasPoint(p - _table.CanvasSize / 2))) throw new Exception("Card outside mat: " + c.Card.Id + " corners=" + string.Join(";", c.FaceCornersInCanvas().Select(p => (p - _table.CanvasSize / 2).ToString("F1"))) + " canvas=" + _table.CanvasSize + " tile=" + c.Position + "/" + c.Size);
             }
         return error;
     }
