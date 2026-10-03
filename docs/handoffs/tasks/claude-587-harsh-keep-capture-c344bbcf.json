@@ -1,0 +1,9 @@
+{
+  "lane": "ui",
+  "summary": "Event decision sidebar and hand bar now count as fixed HUD, so left clicks on Keep/Destroy (Harsh Choices, Brash, Overconfident, Times of Strife discards) reach their buttons instead of being forwarded into the table and swallowed while the window has focus.",
+  "validation": "Diagnosed with temporary instrumentation (not committed): before the click the decision state was correct and the pointer hovered the right button, but the button received zero mouse-button events; emitting Pressed directly committed the choice. Fix is one line in Main.Camera.cs FixedHudCovers. Native check-event-decisions.sh now passes all 8 modes (harsh-keep, harsh-destroy, strife, strife-compact, harsh-last, strife-opponent, harsh-opponent, strife-motion); before the fix harsh-keep failed on current main and on the pre-#581 baseline. Not run: full tools/check.sh, a manual click-through by a human.",
+  "remaining": "Other baseline-failing native checks may share this cause (a UI panel missing from FixedHudCovers) and are not yet investigated; human click-through of an Event decision with a real mouse.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/587",
+  "branch": "claude/587-harsh-keep-capture",
+  "updated": "2026-10-03T05:40:52.747716+00:00"
+}
