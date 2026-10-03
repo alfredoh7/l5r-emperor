@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Dependabot: Bump actions/checkout from 4.2.2 to 7.0.1 (workflow-only change; no game code).",
+  "validation": "CI re-run on this PR; see PR checks.",
+  "remaining": "None; ready for review once CI is green.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/pull/538",
+  "branch": "dep-538",
+  "updated": "2026-10-03T16:14:33.987039+00:00"
+}
