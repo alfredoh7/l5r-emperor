@@ -108,7 +108,7 @@ public partial class Main : Node
             var review = new InteractionReview(this, _captureMode, _capturePath);
             _capturePath = null; AddChild(review); return;
         }
-        if (OS.GetCmdlineUserArgs().Contains("--open-battlefield-review") || _captureMode == "open-battlefield-review")
+        if (OS.GetCmdlineUserArgs().Contains("--open-battlefield-review") || _captureMode is "open-battlefield-review" or "open-battlefield-correction-review")
         {
             var startupCapture = _capturePath; _capturePath = null; StartOpenBattlefieldReview();
             if (startupCapture is not null) Callable.From(() => { _ = CaptureOpenBattlefieldStartup(startupCapture); }).CallDeferred();

@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "repository": "alfredoh7/l5r-emperor",
+  "source_pr": 575,
+  "source_commit": "d00a9c656297cddadb83d4897494c643abbb963c",
+  "title": "Surviving Defenders After Province Destruction",
+  "slug": "open-battlefield-correction",
+  "tag": "preview-pr575-d00a9c6562-r1-windows",
+  "asset": "L5R-Review-pr575-d00a9c6562-r1-Windows.zip",
+  "bytes": 2131623192,
+  "sha256": "2b3d80b3cfbf7f8c0eb196e26e532a7a46928677f96ef3594b7cf64e74fe3177",
+  "folder": "L5R-Review-pr575-d00a9c6562-r1",
+  "launcher": "Start Review.cmd",
+  "reviewer": "mdornbrook"
+}

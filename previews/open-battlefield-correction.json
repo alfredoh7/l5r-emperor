@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "slug": "open-battlefield-correction",
+  "title": "Surviving Defenders After Province Destruction",
+  "source_pr": 575,
+  "source_commit": "d00a9c656297cddadb83d4897494c643abbb963c",
+  "revision": 1,
+  "reviewer": "mdornbrook",
+  "summary": "Alfredo requested the correction to the province-less battle display. Please check the occupied resolved primary remains visible after its extra front destroys the province. Expert acceptance and merge remain pending.",
+  "review_steps": [
+    "Extract the ZIP, then open Start Review.cmd. It opens Resolved defenders after province destruction directly. The resolved primary retains its defending survivor and attachment; the extra front is the active battle.",
+    "Inspect the survivor in Open battlefield A, then its attachment. Switch Other seat and repeat. Both players must see the same public survivors.",
+    "Use View battlefield A/B in the sidebar. Navigation moves the camera only; B remains the active battle and A is not offered for resolution again.",
+    "Resize the window, try the original scenarios in the dropdown, and check standalone courts, destroyed provinces, multiple fronts and attachments remain inspectable.",
+    "The prepared scenes disable engine commands and do not simulate card effects. Open Full Game.cmd opens the same source build for ordinary gameplay. Report expected/actual behavior and the scenario using Send Feedback.url."
+  ],
+  "known_limitations": [
+    "This correction is on an unmerged review branch. Mendon/Nathan mechanics/presentation acceptance remains pending; no merge is authorized.",
+    "Prepared scenarios exercise public-view presentation. A separate passing Core regression executes the actual Two Fronts sequence, checks both seats, verifies the resolved front is not a legal selection, and checks retirement at phase end.",
+    "No authoritative rules, resolution, commands or public wire contracts change. Separate PR #570 gameplay choices/payments are not included in this build.",
+    "Local graphical input tests ran on macOS. Windows CI verifies the exact package, runtime and launch arguments; it does not establish Windows graphical playability."
+  ],
+  "scenarios": [
+    {
+      "name": "Start Review",
+      "mode": "open-battlefield-correction-review"
+    },
+    {
+      "name": "Other previews/Original Open Battlefield",
+      "mode": "open-battlefield-review"
+    },
+    {
+      "name": "Open Full Game",
+      "mode": null
+    }
+  ]
+}

@@ -35,6 +35,7 @@ internal static class EmperorRulingR1Tests
 
     public static void Run(TestRunner runner) => runner.Run("emperor-ruling-R1", [
         ("An Action Phase battle publishes only its original turn owner to both seats, survives serialization/state restoration and clears the display context on return", AsidePublicContext),
+        ("A defended resolved primary remains public after its extra front destroys the province while other battles continue", ResolvedPrimaryAfterExtraDestruction),
         ("An occupied resolved extra front keeps its public province association while the Attack Phase continues", ResolvedFrontPublicAssociation),
         ("Published shape: Surprise Attack (strategy-wave-62) and Chikushudo's Trickery (spell-wave-25) print their scans' stats, keywords and ability ids, ship their art and are in the manifests", PublishedShape),
         ("A battle at a battlefield without a province resolves as normal: units are destroyed, Honor is gained and units go home, but the winning Attacker destroys no province and nothing that triggers on one triggers", BattleWithoutProvinceResolves),
@@ -84,6 +85,37 @@ internal static class EmperorRulingR1Tests
         Check(ended.GetView(0).ActionPhaseTurnPlayerId is null && ended.GetView(1).ActionPhaseTurnPlayerId is null, "concession ends the displayed Action Phase battle");
         var normal = MatchEngine.FromTestState(ProvincelessBattle(20, 1));
         Check(normal.GetView(0).ActionPhaseTurnPlayerId is null, "a regular Attack Phase open battlefield is not an aside");
+    }
+
+    private static void ResolvedPrimaryAfterExtraDestruction()
+    {
+        var engine = TwoFrontsDeclaration(out var first, out var second, marker: 1);
+        string defenderId = "";
+        engine = Edit(engine, state =>
+        {
+            Force(state.Cards[first.Id], 1);
+            var defender = Add(state, "training-crane-samurai", 0, Zone.Home); Force(defender, 30);
+            defenderId = defender.Id;
+        });
+        Accept(engine, new("attack", 1, engine.Version, Assignments: new() { [first.Id] = 0, [second.Id] = Extra }));
+        Accept(engine, new("assignDefense", 0, engine.Version, Assignments: new() { [defenderId] = 0 }));
+        Accept(engine, new("attack", 1, engine.Version, Assignments: new()));
+        Accept(engine, new("assignDefense", 0, engine.Version, Assignments: new()));
+        Accept(engine, new("selectBattle", 1, engine.Version, Province: 0)); PassTwice(engine);
+        Check(!engine.State.UnresolvedBattlefields.Contains(0) && engine.State.Cards[defenderId].Zone == Zone.Battlefield, "primary resolved with defending survivors");
+        Accept(engine, new("selectBattle", 1, engine.Version, Province: Extra)); PassTwice(engine);
+        Check(engine.State.Players[0].Provinces[0].Destroyed && engine.State.UnresolvedBattlefields.Count > 0, "extra front destroyed the province while other battles remain");
+        foreach (var seat in new[] { 0, 1 })
+        {
+            var view = engine.GetView(seat);
+            Check(!view.UnresolvedBattlefields.Contains(0) && view.CurrentBattleProvince != 0, "primary is no longer selectable or current");
+            Check(view.Battlefields!.Single(b => b.Index == 0).Province is null, "occupied resolved primary is still projected without a province");
+            Check(view.Players[0].Army.Any(c => c.Id == defenderId && c.ProvinceIndex == 0), "both seats can see its defending survivor");
+            Check(engine.QueryActions(seat).All(a => a.Type != "selectBattle" || a.Command?.Province != 0), "displaying a resolved court must not reoffer its battle");
+        }
+        FightOthers(engine);
+        Check(engine.State.Cards[defenderId].Zone == Zone.Home && engine.State.Cards[defenderId].ProvinceIndex is null, "survivor returns home when the Attack Phase ends");
+        Check(engine.GetView(0).Battlefields?.All(b => b.Index != 0) != false, "empty resolved primary retires at phase end");
     }
 
     private static void ResolvedFrontPublicAssociation()
