@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Bump ContentVersion to emperor-lion-crane-0.3.0 (card ids became a seeded permutation in #584); RoomManager.LoadAsync now skips and logs rooms saved under other content instead of aborting startup; docs updated.",
+  "validation": "check.sh --skip-client: core 231 and all core suites passed, ai 97/97, server 9/9 (new IncompatibleRoomSkipped), client transport 18/18, collection 49 assertions, comment-swallow lint ok; new Core check that a 0.2.0 replay is rejected. Client compile not run (no client change).",
+  "remaining": "Items 2-4 of #611 follow in separate PRs (id-ordered setup, 242-card deck cap, per-owner unit number). Committed docs/screenshots/*.replay.json keep 0.2.0 ids as historical evidence; nothing loads them.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/611",
+  "branch": "claude/611-contentversion-bump",
+  "updated": "2026-10-03T23:56:20.048247+00:00"
+}

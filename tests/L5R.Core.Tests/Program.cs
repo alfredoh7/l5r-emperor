@@ -2059,6 +2059,9 @@ static void Unsupported()
     Check(failed);
     failed = false; try { MatchEngine.Replay(new("future", "starter", 1, [])); } catch (ArgumentException) { failed = true; }
     Check(failed);
+    // Issue #611: card ids became a seeded permutation in 0.3.0, so a replay saved before that (card-NNNN in deck-list order) must be refused, not replayed onto different cards.
+    failed = false; try { MatchEngine.Replay(MatchEngine.CreateStarterMatch(1).ExportReplay() with { ContentVersion = "emperor-lion-crane-0.2.0" }); } catch (ArgumentException) { failed = true; }
+    Check(failed);
     Check(CardCatalog.Cards.Values.Where(c => c.Id.StartsWith("training-")).All(c => c.ScenarioOnly));
 }
 static void Detached()

@@ -10,7 +10,7 @@ Alfredo has now requested live duel integration. PR #268 combines the latest #22
 
 ## Current playable baseline
 
-- Desktop **0.3.10**, content profile `lion-crane-v1`, content version `emperor-lion-crane-0.2.0`.
+- Desktop **0.3.10**, content profile `lion-crane-v1`, content version `emperor-lion-crane-0.3.0`.
 - All 40 distinct definitions in the selected Lion/Crane 40/40 decks have implementations and period scans.
 - Rules authority, automated payments/turn flow, choices, attachments, Favor, battles, victory, deterministic replays, a heuristic opponent and private-room networking exist.
 - UI baseline: full card faces, physical piles/stacks, pan/zoom, optional fullscreen, enlarged navy mat, upright lanterns, bitmap phase bar with Musashi Brush headings. Preserve this aesthetic while Alfredo develops UI/QoL improvements.

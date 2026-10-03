@@ -12,6 +12,7 @@ var cases = new (string Name, Func<Task> Test)[]
     ("duplicate commands, stale versions and recovery across restart", IdempotencyAndRecovery),
     ("concurrent commands serialize into exactly one accepted change", ConcurrentCommands),
     ("persistence failures leave gameplay unchanged", PersistenceRollback),
+    ("a room saved under other content is skipped, left on disk, and does not stop the server or the current rooms (issue #611)", IncompatibleRoomSkipped),
     ("reconnect replaces old connection and rejects malformed messages", ReconnectAndMalformedInput),
     ("every command field and every Gold quote cross the wire intact (issue #303)", GoldWire),
     ("a deck search survives a server restart: the journal recovers the shuffle exactly, and each seat sees only what it may (issue #312)", SearchAndShuffleSurviveRestart),
@@ -74,6 +75,27 @@ static async Task AuthorizationAndPrivacy()
     Check((await ReadTypeAsync(first, "commandResult")).GetProperty("accepted").GetBoolean(), "Authorized player may concede.");
     var final = await ReadTypeAsync(first, "state");
     Check(final.GetProperty("view").GetProperty("winnerId").GetInt32() == 1, "The token owner's player conceded.");
+}
+
+static async Task IncompatibleRoomSkipped()
+{
+    var storage = NewStorage();
+    try
+    {
+        static string Hash(string token) => Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(token)));
+        var seats = new[] { new SeatCredential(0, Hash("old-host")) };
+        var store = new RoomStore(storage);
+        var old = MatchEngine.CreateStarterMatch(5).ExportReplay() with { ContentVersion = "emperor-lion-crane-0.2.0" };
+        await store.SaveAsync(new PersistedRoom(1, "ABCDEFGH", DateTimeOffset.UtcNow, seats, old, []));
+        await store.SaveAsync(new PersistedRoom(1, "JKLMNPQR", DateTimeOffset.UtcNow, seats, MatchEngine.CreateStarterMatch(6).ExportReplay(), []));
+        await using (var server = await TestServer.StartAsync(storage))
+        {
+            Check((await server.Http.PostAsync("/rooms/JKLMNPQR/join", null)).IsSuccessStatusCode, "The current-content room is recovered.");
+            Check(!(await server.Http.PostAsync("/rooms/ABCDEFGH/join", null)).IsSuccessStatusCode, "The incompatible room is not loaded.");
+        }
+        Check(File.Exists(Path.Combine(storage, "ABCDEFGH.room.json")), "The incompatible room file stays on disk.");
+    }
+    finally { if (Directory.Exists(storage)) Directory.Delete(storage, true); }
 }
 
 static async Task IdempotencyAndRecovery()

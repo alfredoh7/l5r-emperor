@@ -20,7 +20,12 @@ public sealed class RoomManager(RoomStore store, ILogger<RoomManager> logger)
         foreach (var record in await store.LoadAllAsync(cancellationToken))
         {
             if (record.Replay.ContentVersion != Protocol.ContentVersion)
-                throw new InvalidDataException($"Room {record.RoomCode} uses incompatible content {record.Replay.ContentVersion}.");
+            {
+                // Saved under other content (e.g. before card ids became opaque, issue #611): leave the file on disk, do not load it,
+                // and keep the server starting. There is no migration of saved match semantics.
+                logger.LogWarning("Skipping room {RoomCode}: saved under incompatible content {SavedVersion}, this build is {Version}.", record.RoomCode, record.Replay.ContentVersion, Protocol.ContentVersion);
+                continue;
+            }
             if (record.Seats.Length is < 1 or > 2 || record.Seats[0].PlayerId != 0
                 || (record.Seats.Length == 2 && record.Seats[1].PlayerId != 1)
                 || record.Seats.Any(s => s.TokenHash.Length != 64 || !s.TokenHash.All(Uri.IsHexDigit)))
