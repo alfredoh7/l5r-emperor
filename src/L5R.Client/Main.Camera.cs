@@ -183,7 +183,7 @@ public partial class Main
     {
         static bool Covers(Control? control, Vector2 p) => control is not null &&
             control.IsVisibleInTree() && control.GetGlobalRect().HasPoint(p);
-        return Covers(_battlefieldReviewBar, point) || Covers(_provinceOrderTray, point) || Covers(_provinceReviewBar, point) || Covers(_inspectorPanel, point) || Covers(_eventSidebar, point) || Covers(_eventHandBar, point) || Covers(_hand, point) || Covers(_timeline, point) || Covers(_menu, point) || Covers(_battleProgressStrip, point)
+        return Covers(_battlefieldReviewBar, point) || Covers(_provinceOrderTray, point) || Covers(_provinceReviewBar, point) || Covers(_inspectorPanel, point) || Covers(_shownPanel, point) || Covers(_shownToggle, point) || Covers(_eventSidebar, point) || Covers(_eventHandBar, point) || Covers(_hand, point) || Covers(_timeline, point) || Covers(_menu, point) || Covers(_battleProgressStrip, point)
             || _battlefieldCaptions.Values.Any(c => Covers(c, point))
             || _clanHud.GetChildren().OfType<Control>().Any(c => Covers(c, point))
             // A hovered hand face can rise above the hand container.
