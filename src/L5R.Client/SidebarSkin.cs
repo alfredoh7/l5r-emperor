@@ -28,11 +28,16 @@ public static class SidebarSkin
     public static Font Italic => GD.Load<FontFile>("res://Art/Fonts/Caudex-Italic.ttf");
     public static StyleBoxTexture Surface(bool button = false, bool gold = false, Color? tint = null)
     {
-        var box = new StyleBoxTexture { Texture = button ? ButtonTexture(gold)
+        var box = new StyleBoxTexture
+        {
+            Texture = button ? ButtonTexture(gold)
                 : new AtlasTexture { Atlas = Atlas, Region = new Rect2(18, 19.5f, 315.5f, 470) },
             ModulateColor = tint ?? Colors.White,
-            ContentMarginLeft = button ? 22 : 26, ContentMarginRight = button ? 22 : 26,
-            ContentMarginTop = button ? 16 : 28, ContentMarginBottom = button ? 16 : 28 };
+            ContentMarginLeft = button ? 22 : 26,
+            ContentMarginRight = button ? 22 : 26,
+            ContentMarginTop = button ? 16 : 28,
+            ContentMarginBottom = button ? 16 : 28
+        };
         foreach (var side in new[] { Side.Left, Side.Top, Side.Right, Side.Bottom })
         { box.SetTextureMargin(side, button ? 17 : 27); box.SetExpandMargin(side, 0); }
         // Scale the asset once before nine-slicing so corners retain the concept's proportions.
@@ -43,7 +48,7 @@ public static class SidebarSkin
     public static StyleBoxTexture Inset()
     {
         var box = Surface();
-        box.Texture = new AtlasTexture { Atlas = Atlas, Region = new Rect2(360,305,387,160) };
+        box.Texture = new AtlasTexture { Atlas = Atlas, Region = new Rect2(360, 305, 387, 160) };
         foreach (var side in new[] { Side.Left, Side.Top, Side.Right, Side.Bottom }) box.SetTextureMargin(side, 16);
         box.ContentMarginLeft = box.ContentMarginRight = 14;
         box.ContentMarginTop = box.ContentMarginBottom = 14;
@@ -61,15 +66,15 @@ public static class SidebarSkin
         var t = Palette.MakeTheme();
         t.SetFont("font", "Button", Bold); t.SetFontSize("font_size", "Button", 19);
         t.SetStylebox("normal", "Button", Surface(true));
-        t.SetStylebox("hover", "Button", Surface(true, tint: new Color(1.2f,1.15f,1.05f)));
-        t.SetStylebox("pressed", "Button", Surface(true, tint: new Color(.8f,.8f,.8f)));
-        t.SetStylebox("disabled", "Button", Surface(true, tint: new Color(.55f,.55f,.55f)));
+        t.SetStylebox("hover", "Button", Surface(true, tint: new Color(1.2f, 1.15f, 1.05f)));
+        t.SetStylebox("pressed", "Button", Surface(true, tint: new Color(.8f, .8f, .8f)));
+        t.SetStylebox("disabled", "Button", Surface(true, tint: new Color(.55f, .55f, .55f)));
         t.SetStylebox("focus", "Button", ButtonFocus());
         t.SetColor("font_disabled_color", "Button", new Color("a49d8d"));
         t.SetStylebox("normal", "OptionButton", Surface(true));
         t.SetStylebox("hover", "OptionButton", Surface(true));
-        t.SetStylebox("pressed", "OptionButton", Surface(true, tint: new Color(.8f,.8f,.8f)));
-        t.SetStylebox("disabled", "OptionButton", Surface(true, tint: new Color(.55f,.55f,.55f)));
+        t.SetStylebox("pressed", "OptionButton", Surface(true, tint: new Color(.8f, .8f, .8f)));
+        t.SetStylebox("disabled", "OptionButton", Surface(true, tint: new Color(.55f, .55f, .55f)));
         t.SetStylebox("focus", "OptionButton", ButtonFocus());
         t.SetStylebox("panel", "PopupMenu", Surface());
         foreach (var kind in new[] { "AcceptDialog", "ConfirmationDialog", "PopupPanel" }) t.SetStylebox("panel", kind, Surface());
@@ -82,14 +87,14 @@ public static class SidebarSkin
         t.SetStylebox("panel", "TabContainer", Inset());
         foreach (var type in new[] { "TabContainer", "TabBar" })
         {
-            var selected = Surface(true,true); selected.ContentMarginTop = selected.ContentMarginBottom = 9;
+            var selected = Surface(true, true); selected.ContentMarginTop = selected.ContentMarginBottom = 9;
             var normal = Surface(true); normal.ContentMarginTop = normal.ContentMarginBottom = 9;
             t.SetStylebox("tab_selected", type, selected); t.SetStylebox("tab_unselected", type, normal);
             t.SetStylebox("tab_hovered", type, normal); t.SetColor("font_selected_color", type, new Color("18140d"));
             t.SetColor("font_unselected_color", type, Palette.PaperDim); t.SetFont("font", type, Bold);
         }
-        foreach(var kind in new[] { "LineEdit", "TextEdit", "ItemList" })
-        { t.SetStylebox("normal", kind, Inset()); t.SetStylebox("panel",kind,Inset()); t.SetStylebox("focus",kind,Palette.Box(Colors.Transparent,Palette.Gold,0)); }
+        foreach (var kind in new[] { "LineEdit", "TextEdit", "ItemList" })
+        { t.SetStylebox("normal", kind, Inset()); t.SetStylebox("panel", kind, Inset()); t.SetStylebox("focus", kind, Palette.Box(Colors.Transparent, Palette.Gold, 0)); }
         t.SetStylebox("panel", "TooltipPanel", Inset());
         return t;
     }
@@ -99,9 +104,9 @@ public static class SidebarSkin
         b.AutowrapMode = TextServer.AutowrapMode.WordSmart;
         if (primary)
         {
-            b.AddThemeStyleboxOverride("normal", Surface(true,true));
-            b.AddThemeStyleboxOverride("hover", Surface(true,true,new Color(1.1f,1.08f,1)));
-            b.AddThemeStyleboxOverride("pressed", Surface(true,true,new Color(.85f,.85f,.85f)));
+            b.AddThemeStyleboxOverride("normal", Surface(true, true));
+            b.AddThemeStyleboxOverride("hover", Surface(true, true, new Color(1.1f, 1.08f, 1)));
+            b.AddThemeStyleboxOverride("pressed", Surface(true, true, new Color(.85f, .85f, .85f)));
             b.AddThemeStyleboxOverride("focus", ButtonFocus(true));
             b.AddThemeColorOverride("font_color", new Color("17130c"));
             b.AddThemeColorOverride("font_hover_color", new Color("17130c"));
