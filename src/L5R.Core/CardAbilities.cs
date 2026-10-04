@@ -4191,7 +4191,8 @@ public sealed partial class MatchEngine
         or "serenity-air-straighten" or "serenity-air-straighten-open"
         or IvoryPoliticalAbilities.SandayuStraighten or IvoryPoliticalAbilities.LordsFavorStraighten // Ivory pass (issue #622)
         or "hama-straighten" // Emperor Edition Personality pass (issue #477), batch 3
-        or "yorisada-straighten"; // Emperor Edition Personality pass (issue #477), batch 5
+        or "yorisada-straighten" // Emperor Edition Personality pass (issue #477), batch 5
+        or TfStrategiesAAbilities.OutpostOpen or TfStrategiesAAbilities.OutpostBattle; // Ivory Magistrate Outpost (issue #622)
     private static string? MoveOrStraightenKind(string abilityId) => abilityId switch
     {
         "incapacitated" or "favor-battle" or "journeys-end-move" or "shamate-move" or "effortless-counterattack-move"
@@ -4264,6 +4265,7 @@ public sealed partial class MatchEngine
         "slow-death-straighten" or "well-prepared-straighten" => "straighten",
         "seeking-the-way-move" => "move", // issue #622 (IvorySpells.cs): Seeking the Way moves its target home.
         "servitors-of-stone-straighten" => "straighten", // issue #622: Servitors of Stone straightens its target.
+        TfStrategiesAAbilities.OutpostOpen or TfStrategiesAAbilities.OutpostBattle => "straighten", // Ivory Magistrate Outpost (issue #622)
         _ => EmperorRemainingEMoveKind(abilityId) ?? RulingR2MoveKind(abilityId) // Emperor Edition remaining-cards pass (issue #492), group E: Obscured Pathways and Unnatural Flood move their target home.
             // issue #622 (IvoryMovement.cs): Determined Challenge, Treachery and Deceit and Soul's Sacrifice move their target.
             ?? IvoryMovementMoveKind(abilityId)

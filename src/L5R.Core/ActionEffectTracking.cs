@@ -134,6 +134,8 @@ public sealed partial class MatchEngine
             // extra conditions.
             "training-after-action-resolved-gain" => LastActionDestroyedOwnPersonality(playerId),
             "crippled-sensei-create-action" => LastActionDestroyedOwnPersonality(playerId),
+            // Feign Death (issue #622, TfStrategiesA.cs): "After the resolution of an action ... that destroyed a performing Personality you own" -- the target is checked against the record.
+            TfStrategiesAAbilities.FeignAction => LastActionDestroyedOwnPersonality(playerId),
             // Rata (oracle-l5r-6165, Embers of War pass, issue #460 batch 2): "After an action resolves that Rata
             // performed and that destroyed a Personality" -- scoped to Rata himself as the action's own performer
             // (facts.PerformerId), not merely his controller's action, and to either player's destroyed Personality.

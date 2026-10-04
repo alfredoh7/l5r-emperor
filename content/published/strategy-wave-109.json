@@ -1,0 +1,268 @@
+{
+  "Profile": "strategy-wave-109",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-657",
+      "Name": "Awed Witness",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing unbowed Personality and target an enemy Personality: Your Personality duels the target. Bow the duel's loser. The duel's winner's controller may create a 2F/2C/2PH Samurai Personality with that player's Clan alignment on his side of the current battlefield.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-657.jpg",
+      "Keywords": [
+        "Iaijutsu"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "awed-witness-duel"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-2503",
+      "Name": "Feign Death",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After the resolution of an action or a battle that destroyed a performing Personality you own: Bring him into play (in your home), ignoring costs and Honor Requirement. Bow him. Dishonor him. Lose 2 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-2503.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "feign-death-action",
+        "feign-death-battle"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10544",
+      "Name": "Death of the Winds",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle, :g2:: Target your unbowed Tactician. Search your Fate deck for a non-Unique Battle Strategy and take an additional action to play it.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10544.jpg",
+      "Keywords": [],
+      "Focus": 4,
+      "Abilities": [
+        "death-winds-search"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10732",
+      "Name": "Hidden Storehouse of House Rafiq",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 3,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle, :g3:: If you (after playing this card) have fewer cards in your hand than each other player, draw two cards.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10732.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "hidden-storehouse-draw"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10734",
+      "Name": "Ivory Magistrate Outpost",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: Straighten your target Magistrate.\nBattle: Straighten your target Personality.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10734.jpg",
+      "Keywords": [],
+      "Focus": 3,
+      "Abilities": [
+        "ivory-outpost-open",
+        "ivory-outpost-battle"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10927",
+      "Name": "A Warrior's Brutality",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Give your target opposed Personality +3F.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10927.jpg",
+      "Keywords": [],
+      "Focus": 3,
+      "Abilities": [
+        "crushing-force"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10928",
+      "Name": "Absolution",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "(Repeatable Limited, :g2:: Discard a Kharmic card to draw a card.)\nInterrupt: Negate an Event's effects.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10928.jpg",
+      "Keywords": [
+        "Kharmic"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "absolution-negate"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10931",
+      "Name": "Breaking the Rhythm",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "As a Focus Effect, if you win this duel, gain 1 Honor and give the winner +1F.\nAbsent Battle: Negate a target Personality's current Force bonuses or penalties (you choose). (You may take Absent actions without presence.)",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10931.jpg",
+      "Keywords": [],
+      "Focus": 4,
+      "Abilities": [
+        "breaking-rhythm-focus",
+        "breaking-rhythm-bonuses",
+        "breaking-rhythm-penalties"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10935",
+      "Name": "Directing the Battle",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 4,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle, :g4:: If there are enemy units at this battlefield, search your Fate deck for a non-unique Battle Strategy. Show it and put it in your hand.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10935.jpg",
+      "Keywords": [],
+      "Focus": 1,
+      "Abilities": [
+        "directing-battle-search"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10940",
+      "Name": "Grasp the Swords",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Give your target Personality with a Weapon +2F/+2C. If he is a Kensai, you may take an additional action.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10940.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "grasp-swords-boost"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10941",
+      "Name": "Hold the Walls",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Attacking Personalities and Followers have -1F.\nBattle: Destroy a Terrain (if able). Put this Terrain into play.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10941.jpg",
+      "Keywords": [
+        "Terrain"
+      ],
+      "Focus": 1,
+      "Abilities": [],
+      "Effect": "hold-the-walls"
+    }
+  ],
+  "Decks": []
+}

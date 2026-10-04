@@ -100,7 +100,7 @@ internal static partial class EmperorRulingR4Tests
             Check(AbilityCatalog.All.TryGetValue(id, out var ability) && ability.Timing == "Reaction", $"{id} is a Reaction-timed ability");
             Check(!Regex.IsMatch(ability!.Label, @"^\s*(\w+ )*Reaction\b"), $"{id}'s label does not print a Reaction designator: {ability.Label}");
         }
-        // Against the printed texts: a card whose text never says Reaction has no printed-Reaction ability; a card printing more Reaction lines than it has Reaction-timed non-trait abilities has one
+        // Against the printed texts (an "Interrupt:" is a Reaction to "before an action's effects resolve" under the Emperor Edition rules: Absolution, issue #622): a card whose text never says Reaction has no printed-Reaction ability; a card printing more Reaction lines than it has Reaction-timed non-trait abilities has one
         // mislabelled as a trait. (Split variants of one printed line -- Horume's gain and lose -- are several abilities for a line, so "at least as many abilities as lines".)
         var failures = new List<string>();
         var audited = 0;
