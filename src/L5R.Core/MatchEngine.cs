@@ -1295,7 +1295,7 @@ public sealed partial class MatchEngine
             // than broadening IsCavalryUnit's own shared logic for one card), additive only: it never
             // removes his own default Infantry eligibility, only adds Cavalry while defending.
             var cavalryEligible = IsCavalryUnit(card) || isDefender && Definition(card).Effect == "cavalry-if-defender";
-            Require(cavalry ? cavalryEligible : !IsCavalryUnit(card), cavalry ? "Only a Cavalry unit may assign during Cavalry Maneuvers." : "An Infantry unit must assign during Infantry Maneuvers.");
+            Require(!cavalry || cavalryEligible, "Only a Cavalry unit may assign during Cavalry Maneuvers."); // a Cavalry unit may assign in either segment; an Infantry unit only in Infantry Maneuvers
             Require(!(cavalry && CavalryAssignmentBarredP6()), "Incredible Tragedy: Personalities may not be assigned during the Cavalry Maneuvers Segment."); // issue #503
             Require(provinces.Contains(assignment.Value), "Choose an existing enemy province battlefield.");
             Require(!MovementLocked(card, MovementKinds.Assign), $"{Definition(card).Name} may not be assigned to a battlefield this turn.");
