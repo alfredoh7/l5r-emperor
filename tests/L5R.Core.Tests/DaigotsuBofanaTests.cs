@@ -371,9 +371,12 @@ internal static class DaigotsuBofanaTests
     {
         var perPhase = new Dictionary<int, Phase[]>
         {
-            [0] = [Phase.Straighten], [1] = [Phase.Events], [2] = [Phase.Action],
+            [0] = [Phase.Straighten],
+            [1] = [Phase.Events],
+            [2] = [Phase.Action],
             [3] = [Phase.AttackDeclaration, Phase.InfantryDeclaration, Phase.DefenseAssignment, Phase.CavalryDeclaration, Phase.CavalryDefense, Phase.BattleSelection, Phase.Battle],
-            [4] = [Phase.Dynasty, Phase.DynastyDiscard], [5] = [Phase.End],
+            [4] = [Phase.Dynasty, Phase.DynastyDiscard],
+            [5] = [Phase.End],
         };
         foreach (var (printed, phases) in perPhase)
             foreach (var phase in phases) Eq(PrintedPhases.Of(phase), printed, $"{phase} belongs to printed phase {printed}");

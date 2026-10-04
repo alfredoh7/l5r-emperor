@@ -225,8 +225,11 @@ internal static class SeedsOfDecayBatch2Tests
         Accept(e3a, Enabled(e3a, 0, "imperial-protection-provinces", card3.Id).Command!);
         Eq(Strength(e3a, 0, 0), before, "nobody attacks yet: nothing");
         // The battle of the same turn: everyone at province 0.
-        var e3 = Edit(e3a, st => { st.Phase = Phase.Battle; st.CurrentBattleProvince = 0; st.UnresolvedBattlefields = [0];
-            foreach (var c in st.Cards.Values.Where(c => c.Zone == Zone.Home && CardCatalog.Get(c.DefinitionId).Type == CardType.Personality)) { c.Zone = Zone.Battlefield; c.ProvinceIndex = 0; } });
+        var e3 = Edit(e3a, st =>
+        {
+            st.Phase = Phase.Battle; st.CurrentBattleProvince = 0; st.UnresolvedBattlefields = [0];
+            foreach (var c in st.Cards.Values.Where(c => c.Zone == Zone.Home && CardCatalog.Get(c.DefinitionId).Type == CardType.Personality)) { c.Zone = Zone.Battlefield; c.ProvinceIndex = 0; }
+        });
         Eq(Strength(e3, 0, 0), before + 4, "two dishonorable attackers: +4");
         Eq(Strength(e3, 0, 1), before, "a province nobody attacks: nothing");
         var e3b = Edit(e3, st => st.Cards[a1.Id].Dishonorable = false);
@@ -254,8 +257,11 @@ internal static class SeedsOfDecayBatch2Tests
         var e2a = MatchEngine.FromTestState(s2);
         var h2 = Honor(e2a, 0);
         Accept(e2a, Offer(e2a, 0, "fair-warning-watch", card2.Id, victim.Id));
-        var e2 = Edit(e2a, st => { st.Phase = Phase.Battle; st.CurrentBattleProvince = 0; st.UnresolvedBattlefields = [0]; st.PriorityPlayerId = 0;
-            foreach (var id in new[] { destroyer.Id, victim.Id }) { st.Cards[id].Zone = Zone.Battlefield; st.Cards[id].ProvinceIndex = 0; } });
+        var e2 = Edit(e2a, st =>
+        {
+            st.Phase = Phase.Battle; st.CurrentBattleProvince = 0; st.UnresolvedBattlefields = [0]; st.PriorityPlayerId = 0;
+            foreach (var id in new[] { destroyer.Id, victim.Id }) { st.Cards[id].Zone = Zone.Battlefield; st.Cards[id].ProvinceIndex = 0; }
+        });
         Accept(e2, Offer(e2, 0, "training-destroy-no-attachments", destroyer.Id, victim.Id));
         Eq(Honor(e2, 0), h2 + 2, "2 Honor when he is destroyed");
         Reject(e2, Use(e2, 0, "fair-warning-watch", card2.Id, victim.Id));
