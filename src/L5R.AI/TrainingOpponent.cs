@@ -248,7 +248,7 @@ public static class TrainingOpponent
         return target?.Strength ?? 0;
     }
     private static int ArmyForce(IEnumerable<CardView> cards) => cards.Where(c => !c.Bowed && c.Definition?.Type is CardType.Personality or CardType.Follower).Sum(c => Math.Max(0, c.Force));
-    private static int Production(CardView card, string clan) => card.Bowed ? 0 : (card.Definition?.GoldProduction ?? 0) + (card.Definition?.Effect == "crane-gold" && clan == "Crane" || card.Definition?.Effect == "dragon-gold" && clan == "Dragon" ? 1 : 0);
+    private static int Production(CardView card, string clan) => card.Bowed ? 0 : (card.Definition?.GoldProduction ?? 0) + ClanGoldEffects.Bonus(card.Definition?.Effect, clan); // the Clan Holdings' Effects: ClanGold.cs (shared with the engine)
     private static int HandValue(CardView card) => card.Definition?.Effect switch { "force-three" => 8, "bow-small" => 6, _ => card.Definition?.Type == CardType.Follower ? 5 : 4 };
     private static string Explain(string type) => type switch
     {

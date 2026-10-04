@@ -106,6 +106,7 @@ public sealed partial class MatchEngine
     {
         var reactor = card.OwnerId;
         if (P3HonorChangeApplies(card, abilityId, change) is { } p3) return p3; // Destructive Priorities (issue #503)
+        if (IvoryHoldingsHonorChangeApplies(card, abilityId, change) is { } ivory) return ivory; // Deeds and Words (issue #622, IvoryHoldings.cs)
         switch (abilityId)
         {
             // "Before a player gains or loses Honor from an action's effects, bow your performing Courtier": any change, and an unbowed Courtier to bow.

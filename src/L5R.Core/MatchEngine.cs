@@ -473,6 +473,7 @@ public sealed partial class MatchEngine
         ApplyEmperorFollowupsEntryEffects(playerId, card); // Emperor Edition follow-ups (issue #498): the Dragon Sword's Honor; the entry searches queued (EmperorFollowupsSearch.cs).
         ApplyEmperorP1EntryEffects(playerId, card); // Issue #503 (EmperorP1.cs): its Sensei discards and Extending Influence's Honor loss.
         ApplyRequestedCreatedCardsEntryEffects(playerId, card); // Yari of Air's mandatory Air-wielder Honor gain.
+        ApplyVastPaddyEntry(playerId, card); // Vast Paddy Fields (issue #622, IvoryHoldings.cs): the province the Farm Holding was recruited from refills face-up.
     }
     // Sensei (Mirumoto Hikaro / Mirumoto Yozo, Experienced 2): "your OTHER Sensei Personalities" --
     // every OTHER Sensei-keyword Personality this same controller has, either unbowed-or-bowed in
@@ -969,7 +970,7 @@ public sealed partial class MatchEngine
         // usable beside the card's bow; the card's own id is always its printed production.
         // A card with no printed production that can bow to produce Gold for a payment (Yoritomo Sakuma, issue #338) produces that much.
         if (def.GoldProduction == 0 && AlternateGoldSource(card, paying) is { } alternate) return alternate.Amount;
-        return Math.Max(0, def.GoldProduction + adjustment + (def.Effect == "crane-gold" && Player(playerId).Clan == "Crane" || def.Effect == "dragon-gold" && Player(playerId).Clan == "Dragon" ? 1 : 0));
+        return Math.Max(0, def.GoldProduction + adjustment + ClanGoldEffects.Bonus(def.Effect, Player(playerId).Clan)); // "<clan>-gold" Effects: ClanGold.cs
     }
 
     public PaymentOption[] PaymentOptions(int playerId, int cost, PaymentSubject? paying = null) => PaymentOptionsExcluding(playerId, cost, null, paying);
@@ -1037,6 +1038,7 @@ public sealed partial class MatchEngine
         var produced = allIds.Sum(id => GoldProduced(id, playerId, paying));
         produced -= SpendMoneylenderTokens(ids, cost, playerId, paying); // Moneylender (issue #492, group F): only the Wealth tokens the payment needs are removed.
         RecordGoldPaidForEntry(cost, paying); // Moneylender (issue #492, group F): "the amount of Gold you paid for it".
+        RecordVastPaddyPayment(ids, paying); // Vast Paddy Fields (issue #622, IvoryHoldings.cs): "If this paid for a Farm Holding entering play from a province, refill the province face-up."
         P3RecordEntryPayment(cost, paying); // Easy Persuasion (issue #503): what was paid for a Personality entering play
         // A card bowed for Gold through its own ability (Yoritomo Sakuma, issue #338) has used that Reaction: spent for the turn, and named
         // in the log so the opponent sees why it bowed.
@@ -3195,6 +3197,7 @@ public sealed partial class MatchEngine
         if (amount == 0) return;
         OfferHonorChangeWindow(playerId, amount, reason); // Mendon's R4 ruling (issue #492): Rhetoric, Solid Defense and Shiro Chugo may be played on ANY Honor change from an action's effects.
         if (P3HonorGainNegated(playerId, amount, reason)) return; // Destructive Priorities (issue #503): "Negate the gain."
+        if (DeedsAndWordsReduces(playerId, amount, reason)) return; // Deeds and Words (issue #622, IvoryHoldings.cs): "Reduce it to 0."
         // Emperor Edition remaining-cards pass, group C (issue #492): Rhetoric's redirect, Solid Defense's negation of losses and Rumors Travel's reduction of a gain (EmperorRemainingC.cs).
         (playerId, amount) = EmperorRemainingCHonorChange(playerId, amount, reason);
         if (amount == 0) return;

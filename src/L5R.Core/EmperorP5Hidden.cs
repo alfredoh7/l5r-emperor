@@ -252,7 +252,7 @@ public sealed partial class MatchEngine
     private IEnumerable<string> StolenAbilityChoices(CardInstance holding) =>
         (Definition(holding).Abilities ?? []).Where(a => AbilityCatalog.All.TryGetValue(a, out var ability) && CopyableAbility(ability));
 
-    private static bool IsGoldEffect(string effect) => effect is "crane-gold" or "dragon-gold" || ConditionalProductionCatalog.For(effect) is not null;
+    private static bool IsGoldEffect(string effect) => ClanGoldEffects.IsClanGold(effect) || ConditionalProductionCatalog.For(effect) is not null;
 
     private static bool HasGoldProducingTrait(CardDefinition holding) => holding.GoldProduction > 0 || IsGoldEffect(holding.Effect);
 
