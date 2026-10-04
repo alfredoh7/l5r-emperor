@@ -428,17 +428,39 @@ def load_published_cards() -> dict[str, dict]:
     return cards
 
 
+# Emperor-era sets in Mendon's approved order (the client's CatalogueData.SetOrder, minus the Ivory labels).
+EMPEROR_SET_ORDER = [
+    "Before the Dawn", "War of Honor", "Forgotten Legacy", "Second City", "Promotional-Celestial",
+    "Emperor Edition", "Promotional-Emperor", "Embers of War", "The Shadow's Embrace", "Seeds of Decay",
+    "Honor and Treachery", "Emperor Edition Gempukku", "Torn Asunder", "Coils of Madness", "Gates of Chaos",
+    "Aftermath",
+]
+
+
+def _era_name(name: str) -> str:
+    """The catalogue stores the Promotional sets with a mangled dash; compare on a plain hyphen."""
+    return name.replace("–", "-").replace("�", "-")
+
+
 def load_sets() -> dict[str, str]:
-    """Id -> its own primary printing's Set name(s), read directly from
-    content/oracle/emperor-catalogue.json (the same source build_deck_pool.py itself reads, but that
-    script's own output schema carries no set/printing field to reuse here)."""
+    """Id -> its Set name(s), read directly from content/oracle/emperor-catalogue.json (the same
+    source build_deck_pool.py itself reads, but that script's own output schema carries no
+    set/printing field to reuse here).
+
+    Oracle's primary printing is its newest, which for many cards is Ivory Edition (or Promotional
+    Ivory). Ivory is outside the Emperor era, so such a card shows the earliest Emperor-era set it
+    was printed in instead (issue #622)."""
     data = json.loads(EMPEROR_CATALOGUE.read_text(encoding="utf-8"))
     sets: dict[str, str] = {}
     for card in data["cards"]:
         printings = card.get("printings") or []
-        primary = next((p for p in printings if p.get("id") == card.get("current_primary_printing_id")), None) \
-            or (printings[0] if printings else None)
+        primary = next((p for p in printings if p.get("id") == card.get("current_primary_printing_id")), None)             or (printings[0] if printings else None)
         card_sets = (primary.get("sets") or []) if primary else []
+        if any("Ivory" in s for s in card_sets):
+            era = [(EMPEROR_SET_ORDER.index(_era_name(s)), s) for p in printings for s in p.get("sets") or []
+                   if _era_name(s) in EMPEROR_SET_ORDER]
+            if era:
+                card_sets = [min(era)[1]]
         if card_sets:
             sets[card["id"]] = ", ".join(card_sets)
     return sets
