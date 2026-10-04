@@ -563,6 +563,8 @@ internal static class EmperorStrongholdBatch1Tests
             return s;
         }
         var s1 = Setup(0, out var dojo1, out var scout1, out var plain1);
+        // An idle Cavalry Maneuvers segment is skipped (issue #627), so each player holds a Cavalry unit to keep the segment this test is about.
+        Add(s1, "training-cavalry", 0, Zone.Home); Add(s1, "training-cavalry", 1, Zone.Home);
         var e = MatchEngine.FromTestState(s1);
         var options = Options(e, 0, "hidden-falls-recon", dojo1.Id).Where(o => o.Enabled).ToArray();
         Check(options.Any(o => o.Command!.Provinces is [1, 2]) && options.Any(o => o.Command!.Provinces is [3]) && options.All(o => o.Command!.Provinces is { Length: 1 or 2 }), "one option per set of one or two provinces");
@@ -588,6 +590,7 @@ internal static class EmperorStrongholdBatch1Tests
 
         // Without the Dojo's action there is no additional segment.
         var s2 = Table(Phase.AttackDeclaration, 0); s2.PriorityPlayerId = 0; StrongholdOf(s2, 0, HiddenFalls);
+        Add(s2, "training-cavalry", 0, Zone.Home); Add(s2, "training-cavalry", 1, Zone.Home); // each holds a Cavalry unit so the Cavalry segment still exists (#627)
         var e2 = MatchEngine.FromTestState(s2);
         Accept(e2, new GameCommand("declareAttack", 0, e2.Version));
         Pass(e2); Pass(e2); Pass(e2); Pass(e2);
@@ -596,6 +599,7 @@ internal static class EmperorStrongholdBatch1Tests
         // A holder with no Scout at home has nobody to assign: no additional segment is prompted.
         var s5 = Table(Phase.Action, 0); s5.PriorityPlayerId = 0;
         var dojo5 = StrongholdOf(s5, 0, HiddenFalls); Add(s5, "training-crane-samurai", 0, Zone.Home);
+        Add(s5, "training-cavalry", 0, Zone.Home); Add(s5, "training-cavalry", 1, Zone.Home); // each holds a Cavalry unit so the Cavalry segment still exists (#627)
         var e5 = MatchEngine.FromTestState(s5);
         Accept(e5, Enabled(e5, 0, "hidden-falls-recon", dojo5.Id).Command!);
         Pass(e5); Pass(e5);
@@ -609,6 +613,7 @@ internal static class EmperorStrongholdBatch1Tests
         var dojo3 = StrongholdOf(s3, 1, HiddenFalls);
         var scout3 = Add(s3, "training-recon-actor", 1, Zone.Home);
         Add(s3, "training-lion-samurai", 1, Zone.Home);
+        Add(s3, "training-cavalry", 0, Zone.Home); Add(s3, "training-cavalry", 1, Zone.Home); // each holds a Cavalry unit so the Cavalry segment still exists (#627)
         var e3 = MatchEngine.FromTestState(s3);
         Accept(e3, Enabled(e3, 1, "hidden-falls-recon", dojo3.Id).Command! with { Provinces = [0, 2], Province = 0 });
         Check(e3.State.Players[1].Provinces[0].Reconnaissance[1], "the Defender has Reconnaissance at his own province's battlefield");
