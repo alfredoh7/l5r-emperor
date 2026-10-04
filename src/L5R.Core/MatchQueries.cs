@@ -742,7 +742,8 @@ public sealed partial class MatchEngine
                                 Add(actionType, $"Attack {BattlefieldLabel(province)} with {Definition(Card(unit)).Name}", Command(actionType, assignments: new Dictionary<string, int> { [unit] = province }),
                                     _state.RemC.RetributionAssigned >= 1 ? "You may only assign one Personality in an additional Attack Phase." : null, targets: [unit], provinces: [province]);
                     }
-                    else
+                    // Issue #627: a player with no Cavalry unit to assign is not offered the (empty) Cavalry assignment at all.
+                    else if (!(cavalrySegment && units.Length == 0))
                         foreach (var province in provinces)
                             Add(actionType, $"{(attack ? "Attack" : "Defend")} {BattlefieldLabel(province)} · {units.Length} {(cavalrySegment ? "Cavalry" : "Infantry")} units",
                                 Command(actionType, assignments: units.ToDictionary(id => id, _ => province)), units.Length == 0 ? $"No unbowed {(cavalrySegment ? "Cavalry" : "Infantry")} Personalities at home." : null,
