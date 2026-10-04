@@ -31,7 +31,7 @@ public partial class Main
             FlowText(pending.Prompt, 22, Palette.Paper);
             RenderReactionTarget();
             if (View.PriorityPlayerId == View.ViewerId)
-                foreach (var option in Actions.Where(a => a.Enabled && a.Command is not null && a.Type is not ("pass" or "declineReaction" or "proclaim" or "chooseShinden" or "concede"))) AddAction(_inspector, BattleWindowOption(option));
+                foreach (var option in Actions.Where(a => a.Enabled && a.Command is not null && a.Type is not ("pass" or "passAllBattles" or "declineReaction" or "proclaim" or "chooseShinden" or "concede"))) AddAction(_inspector, BattleWindowOption(option));
             return true;
         }
         if (PresentationBusy || _resolutionMessage is not null)
@@ -90,7 +90,7 @@ public partial class Main
             // Omit controls already in the fixed footer and the menu's confirmed
             // Concede flow; conceding is not a Battle action.
             var options = Actions.Where(a => a.Enabled && a.Command is not null &&
-                a.Type is not ("pass" or "endDynasty" or "declineReaction" or "proclaim" or "chooseShinden" or "concede")).ToArray();
+                a.Type is not ("pass" or "passAllBattles" or "endDynasty" or "declineReaction" or "proclaim" or "chooseShinden" or "concede")).ToArray();
             RenderBattleExchanges(1);
             foreach (var option in options) AddBattleAction(option);
             if (options.Length == 0) FlowText("No Battle action is currently available.", 17, Palette.PaperDim);
