@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Issue #625: tools/env.sh now falls back to the shared Godot in ~/tools/godot (L5R_SHARED_GODOT_DIR overrides) after an explicit L5R_GODOT and an in-tree install, and fills the worktree NuGet feed from whichever shared install is used; run.sh's missing-tools message names the shared options; docs/PITFALLS.md and AGENTS.md document the single shared Godot and how to update it.",
+  "validation": "bash -n tools/env.sh; with L5R_GODOT unset env.sh resolves GODOT to the shared exe and the NuGet feed fills; dotnet build of the client succeeds; Play Latest.command launched Godot 4.7.2 from the worktree with L5R_GODOT unset. The .lnk target (Play Latest.bat) was recreated but its own launch was not observed. CI to follow.",
+  "remaining": "None beyond CI.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/625",
+  "branch": "claude/625-shared-godot-default",
+  "updated": "2026-10-04T16:45:05.995416+00:00"
+}

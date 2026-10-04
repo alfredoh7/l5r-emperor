@@ -142,3 +142,21 @@ first` rather than deleting anything on your behalf.
 existing checkout (junction/symlink) instead of re-downloading; if bootstrap ever refuses to
 install because the directory exists and looks wrong, move it aside yourself rather than assuming
 it's safe to delete.
+
+## One shared Godot, outside every worktree
+
+Do not install Godot per worktree or checkout. One .NET Godot lives at `~/tools/godot` (on this machine
+`C:\Users\mdorn\tools\godot\Godot_v4.7.2-stable_mono_win64.exe`, with its `GodotSharp` folder beside it).
+`tools/env.sh` resolves it in this order: `L5R_GODOT` (explicit executable), an install under the checkout's
+`.tools/godot`, then the shared default `~/tools/godot` (`L5R_SHARED_GODOT_DIR` changes that folder). It also copies
+the install's four `GodotSharp/Tools/nupkgs` into the worktree's `.tools/godot-nuget`, so a new worktree restores
+offline. `Play Latest.bat`, `Play Latest.command`, `tools/run.sh`, `tools/check.sh --client-only` and the
+`artifacts/L5R Emperor - Latest.lnk` shortcut all go through `env.sh`, so none of them needs per-worktree setup.
+
+**Why:** a shortcut started from Explorer does not inherit a user environment variable set after login, so relying on
+`L5R_GODOT` alone made a fresh worktree fail with "Install the project tools first".
+
+**Updating Godot:** put the new editor and its `GodotSharp` folder in `~/tools/godot`, remove the old editor there
+(the glob takes the first `Godot*_mono_*.exe`), bump the `Godot.NET.Sdk/<version>` in the client project files if the
+version changed, and delete each worktree's stale `.tools/godot-nuget/*.nupkg` so `env.sh` refills them. Never commit
+`.tools/`.

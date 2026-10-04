@@ -37,19 +37,35 @@ elif [ ! -x "$GODOT" ]; then
   done
   shopt -u nullglob
 fi
-# NuGet.Config's "Godot bundled" feed is .tools/godot-nuget inside each checkout. With a shared Godot, fill that
-# feed from the install's own GodotSharp/Tools/nupkgs (four small packages) so a fresh worktree restores offline.
-# Best effort and idempotent: a missing source or an unwritable folder must not abort a caller running under set -e.
-if [ -n "${L5R_GODOT:-}" ] && [ -d "$(dirname "$L5R_GODOT")/GodotSharp/Tools/nupkgs" ] && ! ls "$L5R_PROJECT_ROOT"/.tools/godot-nuget/*.nupkg >/dev/null 2>&1; then
-  mkdir -p "$L5R_PROJECT_ROOT/.tools/godot-nuget" && cp "$(dirname "$L5R_GODOT")"/GodotSharp/Tools/nupkgs/*.nupkg "$L5R_PROJECT_ROOT/.tools/godot-nuget/" 2>/dev/null || true
+# Shared default (issue #625): the one Godot install kept outside every checkout, under the home directory
+# (L5R_SHARED_GODOT_DIR overrides the folder). Used when L5R_GODOT is unset and the checkout has no .tools/godot,
+# so a shortcut launched from Explorer -- which does not inherit an environment variable set after login -- and a
+# brand-new worktree both find it with no setup. An explicit L5R_GODOT or an in-tree install still wins.
+if [ ! -x "$GODOT" ]; then
+  shopt -s nullglob
+  for l5r_editor in "${L5R_SHARED_GODOT_DIR:-$HOME/tools/godot}"/Godot*_mono_*.exe; do
+    case "$l5r_editor" in *_console.exe) continue ;; esac
+    if [ -f "$l5r_editor" ]; then export GODOT="$l5r_editor"; break; fi
+  done
+  shopt -u nullglob
 fi
+# NuGet.Config's "Godot bundled" feed is .tools/godot-nuget inside each checkout. With a shared Godot (explicit or
+# default), fill that feed from the install's own GodotSharp/Tools/nupkgs (four small packages) so a fresh worktree
+# restores offline. Best effort and idempotent: a missing source or an unwritable folder must not abort a caller
+# running under set -e.
+l5r_godot_dir="$(dirname "$GODOT")"
+case "$l5r_godot_dir" in "$L5R_PROJECT_ROOT"/*) ;; *)
+  if [ -d "$l5r_godot_dir/GodotSharp/Tools/nupkgs" ] && ! ls "$L5R_PROJECT_ROOT"/.tools/godot-nuget/*.nupkg >/dev/null 2>&1; then
+    mkdir -p "$L5R_PROJECT_ROOT/.tools/godot-nuget" && cp "$l5r_godot_dir"/GodotSharp/Tools/nupkgs/*.nupkg "$L5R_PROJECT_ROOT/.tools/godot-nuget/" 2>/dev/null || true
+  fi ;;
+esac
 # Opt-in guard for scripts that need Godot. Sourcing env.sh must stay non-fatal (check.sh --skip-client
 # has no Godot), but a script that goes on to run "$GODOT" with it missing used to die silently under
 # set -e, with the error buried in a redirected log. Call this right after sourcing.
 l5r_require_godot() {
   if [ -x "$GODOT" ]; then return 0; fi
   echo "Godot not found at: $GODOT" >&2
-  echo "Install it under .tools/godot, or set L5R_GODOT to an existing Godot executable shared by all worktrees." >&2
+  echo "Install it under .tools/godot, put the shared install in ~/tools/godot, or set L5R_GODOT to an existing Godot executable shared by all worktrees." >&2
   return 1
 }
 true
