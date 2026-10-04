@@ -94,6 +94,8 @@ public sealed partial class MatchEngine
         if (duel.AbilityId is "first-blood-duel-battle" or "first-blood-duel-limited") { Draw(Player(duel.ChallengerPlayerId)); Draw(Player(duel.ChallengerPlayerId)); }
         // Watchful Eye Dojo (Emperor Edition Stronghold pass, issue #486 batch 3): "He may refuse; if he did, dishonor him and gain 1 Honor."
         if (duel.AbilityId == "watchful-eye-duel") WatchfulEyeRefusal(duel);
+        // Sanctioned Duel (issue #622, IvorySpells.cs): "He may refuse; if he does, dishonor him and gain 2 Honor."
+        if (duel.AbilityId == IvorySpellAbilities.SanctionedDuel) SanctionedDuelRefusal(duel);
         _state.LastDuel = _state.LastDuel! with { Result = new("Refused", null, [], 0, 0, 0, 0, [], _state.Events.Skip(refusalStart).ToArray(), [], _state.Version + 1, _state.Phase, _state.PriorityPlayerId, "Challenge refused") };
         var challengerPlayerId = duel.ChallengerPlayerId;
         _state.PendingDuel = null;
@@ -510,7 +512,7 @@ public sealed partial class MatchEngine
             case "training-duel-challenge": foreach (var id in loserIds) ApplyModifier(Card(id), id, abilityId, "Force", -1); break;
             // Dragon Clan review (issue #207): three real self-performer Iaijutsu duels.
             case "daisuke-duel": case "spirit-duelist-duel": foreach (var id in loserIds) MoveHome(Card(id), false); break;
-            case "ichizo-exp-duel": case "shikei-duel": case "makoto-duel": DestroyUnits(loserIds.Select(Card).ToArray(), actingPlayerId: challengerPlayerId); break;
+            case "ichizo-exp-duel": case "shikei-duel": case "makoto-duel": case IvorySpellAbilities.SanctionedDuel: DestroyUnits(loserIds.Select(Card).ToArray(), actingPlayerId: challengerPlayerId); break;
             // Second City unwired-card audit (issue #264): "she won" is exactly "the challenger's own
             // side won" in a self-performer 1v1 duel -- there is no ally on that side to conflate her
             // with, so checking the winner's OWNER matches the printed text precisely.

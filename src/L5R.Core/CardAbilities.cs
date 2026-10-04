@@ -4262,6 +4262,8 @@ public sealed partial class MatchEngine
         // Emperor Edition remaining-cards pass (issue #492), group D: The Law's Strength, The Power of a Word and The Serpent's Deception move their target home; The Slow Death and Well Prepared straighten theirs.
         "laws-strength-move" or "power-word-move" or "serpents-deception-move" => "move",
         "slow-death-straighten" or "well-prepared-straighten" => "straighten",
+        "seeking-the-way-move" => "move", // issue #622 (IvorySpells.cs): Seeking the Way moves its target home.
+        "servitors-of-stone-straighten" => "straighten", // issue #622: Servitors of Stone straightens its target.
         _ => EmperorRemainingEMoveKind(abilityId) ?? RulingR2MoveKind(abilityId) // Emperor Edition remaining-cards pass (issue #492), group E: Obscured Pathways and Unnatural Flood move their target home.
             ?? (abilityId is EmperorMechEAbilities.GreasingBattle or EmperorP3Abilities.RequestMove or EmperorP3Abilities.KentaMove or EmperorP3EntryAbilities.PersuasionMove ? "move" : null) // issue #501: Greasing the Wheels moves its target home (or straightens his unit)
     };
