@@ -99,8 +99,7 @@ internal static class EmperorRulingR1Tests
         });
         Accept(engine, new("attack", 1, engine.Version, Assignments: new() { [first.Id] = 0, [second.Id] = Extra }));
         Accept(engine, new("assignDefense", 0, engine.Version, Assignments: new() { [defenderId] = 0 }));
-        Accept(engine, new("attack", 1, engine.Version, Assignments: new()));
-        Accept(engine, new("assignDefense", 0, engine.Version, Assignments: new()));
+        // Neither player has a Cavalry unit, so Cavalry Maneuvers is skipped (issue #627): no empty Cavalry assignments to submit.
         Accept(engine, new("selectBattle", 1, engine.Version, Province: 0)); PassTwice(engine);
         Check(!engine.State.UnresolvedBattlefields.Contains(0) && engine.State.Cards[defenderId].Zone == Zone.Battlefield, "primary resolved with defending survivors");
         Accept(engine, new("selectBattle", 1, engine.Version, Province: Extra)); PassTwice(engine);
@@ -242,8 +241,7 @@ internal static class EmperorRulingR1Tests
     {
         Accept(e, new("attack", 1, e.Version, Assignments: new() { [first.Id] = 0, [second.Id] = Extra }));
         Accept(e, new("assignDefense", 0, e.Version, Assignments: new()));
-        Accept(e, new("attack", 1, e.Version, Assignments: new()));
-        Accept(e, new("assignDefense", 0, e.Version, Assignments: new()));
+        // Neither player has a Cavalry unit, so Cavalry Maneuvers is skipped (issue #627): no empty Cavalry assignments to submit.
         Eq(e.State.Phase, Phase.BattleSelection);
     }
 
@@ -622,8 +620,7 @@ internal static class EmperorRulingR1Tests
         Check(Rejection(e, new("attack", 0, e.Version, Assignments: new() { [plain.Id] = 0 })).Length > 0, "a Personality who is neither a Paragon nor a Battle Maiden may not assign");
         Accept(e, new("attack", 0, e.Version, Assignments: new() { [paragonA.Id] = 0, [paragonB.Id] = 1 }));
         Accept(e, new("assignDefense", 1, e.Version, Assignments: new()));
-        Accept(e, new("attack", 0, e.Version, Assignments: new()));
-        Accept(e, new("assignDefense", 1, e.Version, Assignments: new()));
+        // Neither player has a Cavalry unit, so Cavalry Maneuvers is skipped (issue #627): no empty Cavalry assignments to submit.
         Eq(e.State.Phase, Phase.BattleSelection);
         // "Will not move unless": in the first battle a plain Personality's movement to it is negated, a Paragon's is not.
         Accept(e, new("selectBattle", 0, e.Version, Province: 0));
@@ -678,8 +675,7 @@ internal static class EmperorRulingR1Tests
             var m = PerfectMomentPhase(who, out tested, out anchor, out var mover);
             Accept(m, new("attack", 0, m.Version, Assignments: new() { [anchor.Id] = 0 }));
             Accept(m, new("assignDefense", 1, m.Version, Assignments: new()));
-            Accept(m, new("attack", 0, m.Version, Assignments: new()));
-            Accept(m, new("assignDefense", 1, m.Version, Assignments: new()));
+            // Neither player has a Cavalry unit, so Cavalry Maneuvers is skipped (issue #627): no empty Cavalry assignments to submit.
             Accept(m, new("selectBattle", 0, m.Version, Province: 0));
             Accept(m, PassC(m));
             Accept(m, Offer(m, 0, "training-move-to-battle", mover.Id, tested.Id));

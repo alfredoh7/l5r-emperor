@@ -140,7 +140,7 @@ internal static class BattleRulingsRound2Tests
         Eq(string.Join(",",Offered(e,1,"assignDefense").SelectMany(o=>o.Provinces??[]).Distinct().Order()),"0,1,3","the Defender may defend ANY battlefield, attacked or not");
         var defend=e.QueryActions(1).First(o=>o.Type=="assignDefense" && o.Enabled && o.Command!.Assignments!.Values.All(p=>p==3));
         Accept(e,defend.Command!);
-        Pass(e,0); Pass(e,1); // Cavalry Maneuvers: nobody has Cavalry
+        // Cavalry Maneuvers: nobody has Cavalry, so both segments are skipped (issue #627) and no pass is needed
         Eq(e.State.Phase,Phase.BattleSelection,"battlefields exist, so battles are fought");
         Eq(Offered(e,0,"selectBattle").Length,3);
         // The battlefield with only the Defender's unit: the Attacker has no presence, so nothing to do but pass; the Defender wins, nobody dies.

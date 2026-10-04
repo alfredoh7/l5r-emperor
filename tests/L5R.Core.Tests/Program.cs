@@ -442,9 +442,7 @@ static void Priority()
     // The Declaration Segment is one explicit decision (declareAttack, or pass to decline), then the attacker's Infantry Maneuvers.
     Accept(e, Cmd(e, "declareAttack")); Equal(e.State.PriorityPlayerId, 0); Equal(e.State.Phase, Phase.InfantryDeclaration);
     Accept(e, Cmd(e, "attack", assignments: [])); Equal(e.State.PriorityPlayerId, 1); Equal(e.State.Phase, Phase.DefenseAssignment);
-    Accept(e, Cmd(e, "assignDefense", assignments: [])); Equal(e.State.PriorityPlayerId, 0); Equal(e.State.Phase, Phase.CavalryDeclaration);
-    // Infantry Maneuvers committed above; Cavalry Maneuvers follows the same attacker-then-defender order.
-    Accept(e, Cmd(e, "attack", assignments: [])); Equal(e.State.PriorityPlayerId, 1); Equal(e.State.Phase, Phase.CavalryDefense);
+    // Neither player has a Cavalry unit, so Cavalry Maneuvers is skipped for both (issue #627) and the phase goes straight on.
     // Nobody ever placed a unit anywhere, but the attack WAS declared: a battlefield exists at every province
     // regardless of assignments, so all four are still there to be fought.
     Accept(e, Cmd(e, "assignDefense", assignments: [])); Equal(e.State.Phase, Phase.BattleSelection);
@@ -3527,6 +3525,7 @@ static void CavalryManeuversSegment()
     Add(s, "training-follower", 0, Zone.Attached, attachedTo: mixedUnit.Id); // ...+ a non-Cavalry Follower: still Infantry
     var pureCavalryUnit = Add(s, "training-cavalry", 0, Zone.Home); // Cavalry Personality...
     Add(s, "training-cavalry-follower", 0, Zone.Attached, attachedTo: pureCavalryUnit.Id); // ...+ a Cavalry Follower: Cavalry
+    Add(s, "training-cavalry", 1, Zone.Home); // the defender needs a Cavalry unit too, or his Cavalry segment is skipped (#627)
     var e = MatchEngine.FromTestState(s);
     Accept(e, Cmd(e, "declareAttack", player: 0));
 

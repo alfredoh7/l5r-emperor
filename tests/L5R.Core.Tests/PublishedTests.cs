@@ -45,7 +45,7 @@ internal static class PublishedTests
             ("Followers/Rank & File: equip for 4 Gold and display 4 Force separately", () => Followers(10253,4,4)),
             ("Followers/Native Guide: equip for 6 Gold and display 5 Force separately", () => Followers(9871,5,6)),
             ("Lion attack traits turn on and off as units move", AttackTraits),
-            ("Passing Infantry Maneuvers with nothing to assign still reaches Cavalry Maneuvers", CavalryAfterEmptyInfantry),
+            ("Passing Infantry Maneuvers with nothing to assign still reaches Cavalry Maneuvers for a player with a Cavalry unit; with none the segment is skipped (#627)", CavalryAfterEmptyInfantry),
             ("Halls triggers on Combat destruction, not Resolution casualties", Ancestor),
             ("Lobby and Shunya use Favor with individual once-per-turn limits", Favor),
             ("Favor draw discards from hand and handles empty Fate deck", FavorCycle),
@@ -408,7 +408,19 @@ internal static class PublishedTests
         Accept(e,new("attack",0,e.Version,Assignments:new(){[cavalry.Id]=0}));
         Eq(Card(e,cavalry.Id).Zone,Zone.Battlefield);Eq(Card(e,cavalry.Id).ProvinceIndex,0);
         Check(e.State.UnresolvedBattlefields.Contains(0));
-        Eq(e.State.Phase,Phase.CavalryDefense);
+        // The defender has no Cavalry unit, so his Cavalry Maneuvers segment is skipped (issue #627).
+        Eq(e.State.Phase,Phase.BattleSelection);Check(e.GetView(0).Events.Any(ev=>ev.Type=="cavalrySkipped"));
+        // With the defender holding a Cavalry unit too, he reaches the Cavalry Defense segment.
+        s=State();s.Phase=Phase.AttackDeclaration;s.PriorityPlayerId=0;
+        cavalry=Add(s,3623,0,Zone.Home);Add(s,3623,1,Zone.Home);
+        e=MatchEngine.FromTestState(s);
+        Accept(e,new("declareAttack",0,e.Version));Pass(e);Pass(e);Eq(e.State.Phase,Phase.CavalryDeclaration);
+        Accept(e,new("attack",0,e.Version,Assignments:new(){[cavalry.Id]=0}));
+        Eq(e.State.Phase,Phase.CavalryDefense);Eq(e.State.PriorityPlayerId,1);
+        // Neither player has a Cavalry unit: Cavalry Maneuvers is not offered at all.
+        s=State();s.Phase=Phase.AttackDeclaration;s.PriorityPlayerId=0;
+        e=MatchEngine.FromTestState(s);
+        Accept(e,new("declareAttack",0,e.Version));Pass(e);Pass(e);Eq(e.State.Phase,Phase.BattleSelection);
     }
     private static void Ancestor()
     {
