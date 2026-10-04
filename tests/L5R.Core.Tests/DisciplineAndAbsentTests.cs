@@ -92,7 +92,7 @@ internal static class DisciplineAndAbsentTests
 
         // The flag inventory: exactly what was migrated (and munefusa-move, which took the old move-ability id list's no-presence clause; nothing else), so a new flag on a card is a deliberate edit.
         string Ids(Func<AbilityDefinition, bool> flag) => string.Join(",", AbilityCatalog.All.Where(p => flag(p.Value)).Select(p => p.Key).OrderBy(k => k, StringComparer.Ordinal));
-        Eq(Ids(a => a.Discipline), "banzai,expensive-achievement-lower,expensive-achievement-raise,knowledge-and-power,lost-in-transit-bow,return-to-action-move,training-discipline-ability,training-discipline-counter-negate,two-steady-breaths-destined");
+        Eq(Ids(a => a.Discipline), "banzai,expensive-achievement-lower,expensive-achievement-raise,knowledge-and-power,lost-in-transit-bow,mercantile-conflict-bow,return-to-action-move,training-discipline-ability,training-discipline-counter-negate,two-steady-breaths-destined");
         // isul-bow/isul-straighten (Moto Isul), junpei-attack (Shinjo Junpei - exp), makoto-lock (Yasuki Makoto) and miro-create (Kitsu Miro)
         // are issue #460 Embers of War pass, batch 2; incite-phantoms-bow (Incite the Phantoms) and sudden-guardian-move (Sudden Guardian) are
         // batch 5 -- each printed "Even if [card] is at home" or "Home Battle", the same presence waiver. never-beyond-reach-attack (Never Beyond My Reach) and

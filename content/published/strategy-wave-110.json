@@ -1,0 +1,200 @@
+{
+  "Profile": "strategy-wave-110",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-4480",
+      "Name": "Knife in the Darkness",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing Ninja Personality and target an enemy Personality: Move both Personalities home; this movement will not be negated. Bow them.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-4480.jpg",
+      "Keywords": [
+        "Ninja"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "knife-darkness-move"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10384",
+      "Name": "Mutual Support",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose two or more of your performing opposed Personalities, each with a different Clan alignment: Give each performer +2F.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10384.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "mutual-support-boost"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10735",
+      "Name": "Lakeside Retreat",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Before this battle resolves, straighten a Personality or Follower.\nBattle: Destroy a Terrain (if able). Put this Terrain into play.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10735.jpg",
+      "Keywords": [
+        "Terrain"
+      ],
+      "Focus": 1,
+      "Abilities": [
+        "lakeside-retreat-straighten"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10741",
+      "Name": "The Eternal Rainbows",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Destroy a Terrain (if able). Put this Terrain into play. Your target opposed Personality has +2F (while this card is in play).",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10741.jpg",
+      "Keywords": [
+        "Terrain"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "eternal-rainbows-play"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10947",
+      "Name": "Mercantile Conflict",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 1,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Discipline :g1: (You may pay 1 Gold to play this Discipline from your discard pile, then remove it from the game after its action resolves.)\nPolitical Open: Bow your target unbowed Courtier. The next two Honor losses from your cards (this turn) are increased by 1 each.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10947.jpg",
+      "Keywords": [],
+      "Focus": 3,
+      "Abilities": [
+        "mercantile-conflict-bow"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10955",
+      "Name": "Steal an Advantage",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "This Strategy's ability is Battle/Engage if you control a Scout at this battlefield.\nBattle: A target enemy card may not use one of its abilities (you choose).",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10955.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "steal-advantage-battle",
+        "steal-advantage-engage"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10956",
+      "Name": "Strategic Withdrawal",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "As a Focus Effect, if you win this duel, draw a card.\nBattle: Move your target Personality home. You may target an enemy Personality and give him -3F.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10956.jpg",
+      "Keywords": [],
+      "Focus": 3,
+      "Abilities": [
+        "strategic-withdrawal-focus",
+        "strategic-withdrawal-move"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10963",
+      "Name": "Unholy Strike",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Melee 2 Attack.\nInterrupt: Give a Melee or Ranged Attack +2 strength.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10963.jpg",
+      "Keywords": [],
+      "Focus": 1,
+      "Abilities": [
+        "unholy-strike-attack",
+        "unholy-strike-boost"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}
