@@ -4186,6 +4186,7 @@ public sealed partial class MatchEngine
         or "second-city-port-straighten"
         // Seeds of Decay (issue #453, batch 3): Utaku Hirononri only straightens his target.
         or "hirononri-straighten"
+        or "jiramus-court-straighten" or "shrine-hachiman-straighten" // issue #622 (holding-wave-48, IvoryHoldings.cs): Jiramu's Court and the Shrine to Hachiman only straighten their target
         // The Shadow's Embrace pass (issue #476), batch 4: Serenity in Air only straightens its target.
         or "serenity-air-straighten" or "serenity-air-straighten-open"
         or "hama-straighten" // Emperor Edition Personality pass (issue #477), batch 3
@@ -4248,6 +4249,7 @@ public sealed partial class MatchEngine
         // The Shadow's Embrace pass (issue #476), batch 2: Shosuro Nobu, Yoritomo Kanahashi and Yasuki Ikke move their target home.
         "nobu-move-home" or "kanahashi-move-home" or "ikke-move-home" => "move",
         "creating-order-straighten" => "straighten",
+        "jiramus-court-straighten" => "straighten", // issue #622 (IvoryHoldings.cs): straightens a Courtier, a negatable straightening
         // The Shadow's Embrace pass (issue #476), batch 3: Captured Convict moves its enemy target home, Defensive Grill its target to another battlefield.
         "captured-convict-move" or "defensive-grill-move" => "move",
         // The Shadow's Embrace pass (issue #476), batch 4: The Lesson of Earth and Paralyzing Touch move their target; Serenity in Air straightens its target.

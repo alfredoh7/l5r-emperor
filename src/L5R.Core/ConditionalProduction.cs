@@ -65,6 +65,8 @@ public static class ConditionalProductionCatalog
         "platinum-mine-gold" => new(6, ProductionCondition.PayingForAttachment),
         // Yasuki Palaces - experienced (Emperor Edition Stronghold pass, issue #486 batch 3): printed 5, 1 less (4) when paying for a Personality.
         "yasuki-palaces-gold" => new(4, ProductionCondition.PayingForPersonality),
+        // Temple of Harmony (issue #622, holding-wave-48): "Produce 2 Gold, or 3 Gold if paying for a Monk." (a Monk Personality recruited, PaymentKind.Recruit; never an action).
+        "temple-of-harmony-gold" => new(3, ProductionCondition.PayingForKeyword, "Monk"),
         _ => null
     };
 }
