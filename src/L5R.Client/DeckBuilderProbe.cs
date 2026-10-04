@@ -47,7 +47,7 @@ public partial class DeckBuilderProbe : Node
             Check(_screen.Family == "Fate" && _screen.Collection.Cards.Select(c => c.Id).ToHashSet().SetEquals(fateIds), "Fate Cards shows only the Fate cards in the deck");
             Check(browser.Focus.Trigger.Visible && browser.Actions.Trigger.Visible && _screen.Collection.GetGlobalRect().End.Y <= GetViewport().GetVisibleRect().Size.Y, "Fate builder offers Focus Value and Action Type within the window");
             var focusValue = _screen.Collection.Cards.First(c => c.Focus is not null).Focus!.Value.ToString();
-            Click(browser.Focus.Trigger); await Wait(.3); Activate(Walk(_screen).OfType<CheckBox>().First(c => c.IsVisibleInTree() && c.Text == focusValue)); await Wait(.4); browser.CloseMenus(); await Wait(.2);
+            Click(browser.Focus.Trigger); await Wait(.3); Activate(PopupButton("Focus Value", "Deselect all")); await Wait(.2); Activate(Walk(_screen).OfType<CheckBox>().First(c => c.IsVisibleInTree() && c.Text == focusValue)); await Wait(.4); browser.CloseMenus(); await Wait(.2);
             Check(_screen.Collection.Cards.Length > 0 && _screen.Collection.Cards.All(c => c.Focus.ToString() == focusValue && fateIds.Contains(c.Id)), "deck view honours the Focus Value filter");
             await Capture("view-fate-focus");
             browser.Reset(); await Wait(.3); _screen.SetFamily("Fate"); await Wait(.3);
@@ -69,19 +69,21 @@ public partial class DeckBuilderProbe : Node
             _screen.SetFamily("Dynasty"); await Wait(.3);
             Search("Asahina"); await Wait(3); await Capture("collection-large"); Search(""); await Wait(.3);
             var more = Walk(_screen).OfType<MenuButton>().Single(); Click(more); await Wait(.3); Check(more.GetPopup().ItemCount == 2, "compact save-copy and export actions available"); await Capture("deck-actions"); KeyPress(Key.Escape); await Wait(.3);
+            Click(Walk(_screen).OfType<Button>().First(b => b.Text == "Deselect all" && b.IsVisibleInTree())); await Wait(.2);
+            Check(_screen.Collection.Cards.Length == 0, "Deselect all clans leaves nothing showing");
             Click(Walk(_screen).OfType<Button>().First(b => b.TooltipText == "Crane cards")); await Wait(.2);
             Check(_screen.Collection.Cards.Length > 0 && _screen.Collection.Cards.All(c => c.Clans.Contains("Crane")), "persistent clan medallion filters collection");
             Click(Walk(_screen).OfType<Button>().First(b => b.TooltipText == "Mantis cards")); await Wait(.2);
             Check(_screen.Collection.Cards.All(c => c.Clans.Contains("Crane") || c.Clans.Contains("Mantis")), "native additive multi-clan filter");
             await Capture("filter-menu");
-            Click(Walk(_screen).OfType<Button>().First(b => b.Text == "Deselect all" && b.IsVisibleInTree())); await Wait(.2);
+            Click(Walk(_screen).OfType<Button>().First(b => b.Text == "Select all" && b.IsVisibleInTree())); await Wait(.2);
             Click(Walk(_screen).OfType<Button>().First(b => b.Text.StartsWith("Types") && b.IsVisibleInTree())); await Wait(.3);
             Check(!Walk(_screen).OfType<CheckBox>().Any(c => c.IsVisibleInTree() && c.Text == "Spell"), "Dynasty-scoped Type list drops Fate-only types");
             KeyPress(Key.Escape); await Wait(.3);
             Click(Walk(_screen).OfType<Button>().First(b => b.Text.StartsWith("Keywords") && b.IsVisibleInTree())); await Wait(.3);
             var dynastyKeywords = _screen.Data.Cards.Where(c => c.DeckTypes.Contains("Dynasty") && new DeckCardInfo(c.Id, c.Name, c.Types, c.DeckTypes, c.Keywords, c.Playable).SetupSlot.Length == 0).SelectMany(c => c.Keywords).Distinct().ToHashSet();
             // Exclude each collection tile's own "Compare" checkbox; only the popover's keyword rows matter here.
-            Check(Walk(_screen).OfType<CheckBox>().Where(c => c.IsVisibleInTree() && c.Text != "Compare").All(c => dynastyKeywords.Contains(c.Text)), "keyword list scoped to current family selection");
+            Check(Walk(_screen).OfType<CheckBox>().Where(c => c.IsVisibleInTree() && c.Text != "Compare").All(c => dynastyKeywords.Contains(c.Text) || c.Text == "No keywords"), "keyword list scoped to current family selection");
             KeyPress(Key.Escape); await Wait(.3);
             var before = _screen.Draft.Review(); Check(before.Dynasty == source.Dynasty.Length && before.Fate == source.Fate.Length, "authoritative source totals");
             var card = _screen.Data.Cards.First(c => c.Name == "Daidoji Kenshi");
@@ -163,6 +165,7 @@ public partial class DeckBuilderProbe : Node
     private async Task Capture(string name) { await Wait(.15); RenderingServer.ForceDraw(); GetViewport().GetTexture().GetImage().SavePng(Path.Combine(_out, name + ".png")); GD.Print("CAPTURE " + name); }
     private static IEnumerable<Node> Walk(Node root, bool includeInternal = false) { foreach (var child in root.GetChildren(includeInternal)) { yield return child; foreach (var n in Walk(child, includeInternal)) yield return n; } }
     private static void HoverOver(Control c) { var p = c.GetGlobalRect().GetCenter(); Input.ParseInputEvent(new InputEventMouseMotion { Position = p - new Vector2(3, 3), GlobalPosition = p - new Vector2(3, 3) }); Input.ParseInputEvent(new InputEventMouseMotion { Position = p, GlobalPosition = p }); }
+    private Button PopupButton(string menu, string text) => Walk(_screen).OfType<PopupPanel>().First(p => p.Name == menu + "Checklist").GetChildren().SelectMany(c => Walk(c).Prepend(c)).OfType<Button>().First(b => b.Text == text);
     private Button Button(string text) => Walk(_screen).OfType<Button>().First(b => b.Text == text && b.IsVisibleInTree());
     private static void Click(Control c) { var p = c.GetGlobalRect().GetCenter(); Input.ParseInputEvent(new InputEventMouseMotion { Position = p, GlobalPosition = p }); Input.ParseInputEvent(new InputEventMouseButton { Position = p, GlobalPosition = p, ButtonIndex = MouseButton.Left, Pressed = true }); Input.ParseInputEvent(new InputEventMouseButton { Position = p, GlobalPosition = p, ButtonIndex = MouseButton.Left, Pressed = false }); }
     private void Search(string text) { _screen.Search.GrabFocus(); _screen.Search.SelectAll(); KeyPress(Key.Backspace); foreach (var ch in text) { Input.ParseInputEvent(new InputEventKey { Unicode = ch, Keycode = (Key)char.ToUpperInvariant(ch), Pressed = true }); Input.ParseInputEvent(new InputEventKey { Unicode = ch, Keycode = (Key)char.ToUpperInvariant(ch), Pressed = false }); } }

@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Every Card Library and Deck Builder filter is now an include/exclude check-box group (checked = included, unchecked = excluded, all start checked) with Select all / Deselect all. Gold cost, Printing set, Collection drop-downs and the Entire catalogue / Playable now buttons become check lists; clans, Types, Keywords, Focus Value and Action Type use the same model. Client-only change, shared lane because it spans the Library and Deck Builder workspaces and their probes (Mendon has standing authority; no Core or protocol change).",
+  "validation": "dotnet build of src/L5R.Client succeeded (0 warnings); native Godot probes run on Windows: CatalogueProbe (CATALOGUE PASS), DeckBuilderProbe (DECK BUILDER PASS), MyCollectionProbe (COLLECTION NATIVE PASS, 35 assertions), rewritten for the new semantics; clans-filter and sets captures inspected. check.sh --skip-client not run (no Core change).",
+  "remaining": "Gold cost trigger sits tight against Support in the filter row. Multi-valued features keep a card while ANY of its features is checked; exclusion-wins is the alternative.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/637",
+  "branch": "claude/637-filter-checkboxes",
+  "updated": "2026-10-04T19:49:47.752331+00:00"
+}
