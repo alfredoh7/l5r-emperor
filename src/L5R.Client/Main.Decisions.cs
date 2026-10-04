@@ -63,8 +63,8 @@ public partial class Main
                 .Select(a => a.AlternativeCost!.PerformerId).Distinct().ToArray();
             if (performers.Length > 1)
             {
-                var performerPicker = new OptionButton { FitToLongestItem = false };
-                foreach (var id in performers) performerPicker.AddItem(id is null ? "No performer" : FindCard(id)?.Definition?.Name ?? "Performer");
+                var performerPicker = NewChoiceList(); // issue #635
+                foreach (var id in performers) performerPicker.AddItem(id is null ? "No performer" : FindCard(id)?.Definition?.Name ?? "Performer", id);
                 performerPicker.Selected = Array.IndexOf(performers, draftCommand.PerformerId);
                 performerPicker.ItemSelected += i => Choose(Actions.First(a => a.Enabled && a.CardId == draftAction.CardId && a.AlternativeCost?.AbilityId == draftAction.AlternativeCost!.AbilityId && a.AlternativeCost?.PerformerId == performers[(int)i]));
                 _inspector.AddChild(performerPicker);
@@ -73,8 +73,8 @@ public partial class Main
             if (targets.Length > 0)
             {
                 _inspector.AddChild(Palette.Wrapped("Choose a highlighted card on the table, or select it below.", 17, Palette.PaperDim));
-                var picker = new OptionButton { FitToLongestItem = false };
-                foreach (var id in targets) picker.AddItem(FindCard(id)?.Definition?.Name ?? "Target");
+                var picker = NewChoiceList(); // issue #635
+                foreach (var id in targets) picker.AddItem(FindCard(id)?.Definition?.Name ?? "Target", id);
                 picker.Selected = Array.IndexOf(targets, draftCommand.TargetId); picker.ItemSelected += i => ChooseTarget(targets[(int)i]); _inspector.AddChild(picker);
             }
             var next = SidebarSkin.Button("Review cost choices", () => { _reviewingAlternativeCost = true; _decisionSelection = null; RenderInspector(); }, true);

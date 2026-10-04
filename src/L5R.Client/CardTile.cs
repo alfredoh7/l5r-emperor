@@ -29,11 +29,15 @@ public partial class CardTile : Button
     private static Texture2D? _atlas;
     private static Texture2D? _dynastyBack;
     private bool _hover;
+    /// <summary>Issue #635: set from outside (a hovered row in a target/performer list) to show this card exactly as if the pointer were over it; it fires no inspection.</summary>
+    public bool ForcedHover { get => _forcedHover; set { if (_forcedHover == value) return; _forcedHover = value; QueueRedraw(); } }
+    private bool _forcedHover;
+    private bool Hovered => _hover || ForcedHover;
     private float _lift;
     private float _hoverScale = 1;
     private StyleBox? _discardNotch;
     public float InteractionScale => _hoverScale;
-    public bool IsInspectionHover => _hover || HasFocus();
+    public bool IsInspectionHover => Hovered || HasFocus();
     public bool IsSelected => Highlighted || SelectedSource || ChosenTarget || DecisionSelected;
     public static readonly Color HoverColor = new("ffda89");
     public static readonly Color SelectionColor = new("9ceafa");
@@ -97,10 +101,10 @@ public partial class CardTile : Button
         AdvanceStatFeedback(delta);
         // The rail cap must stay under the pointer. Enlarging its parent moves this
         // small target into/out of the card face and repeatedly restarts the tooltip.
-        var inspecting = (_hover || HasFocus() && !DecisionSelected) && TokenRail?.GrantSeal?.IsHovered() != true && RestrictionSeal?.IsHovered() != true && CopySeal?.IsHovered() != true;
+        var inspecting = (Hovered || HasFocus() && !DecisionSelected) && TokenRail?.GrantSeal?.IsHovered() != true && RestrictionSeal?.IsHovered() != true && CopySeal?.IsHovered() != true;
         var targetLift = inspecting ? Card.Zone == Zone.Hand ? 40f : ProjectToScreen is null ? 4f : 0f : DecisionSelected ? 18f : 0f;
         var targetScale = inspecting ? Card.Zone == Zone.Hand ? 1.22f : 1.06f : 1f;
-        ZIndex = _hover ? 30 : HasFocus() ? 20 : IsSelected ? 10 : 0;
+        ZIndex = Hovered ? 30 : HasFocus() ? 20 : IsSelected ? 10 : 0;
         if (Mathf.IsEqualApprox(_bowAngle, _bowDestination) && Mathf.IsEqualApprox(_lift, targetLift) && Mathf.IsEqualApprox(_hoverScale, targetScale)) return;
         _bowAngle = ReducedMotion ? _bowDestination : Mathf.MoveToward(_bowAngle, _bowDestination, (float)delta * Mathf.Pi * 3);
         // Reduced motion preserves visible feedback and makes its transition immediate.
@@ -297,7 +301,7 @@ public partial class CardTile : Button
         DrawInteractionEdge();
         DrawSetTransformMatrix(new Transform2D(Vector2.Right, Vector2.Down, Size / 2 + new Vector2(0, -_lift)) * Transform2D.Identity.Rotated(VisualFaceAngle).ScaledLocal(Vector2.One * _hoverScale).TranslatedLocal(-faceSize / 2));
         var r = new Rect2(Vector2.Zero, faceSize);
-        var border = SelectedSource || ChosenTarget ? Palette.Crane : Highlighted || LegalTarget || _hover || HasFocus() ? Palette.Gold : new Color("8e866b");
+        var border = SelectedSource || ChosenTarget ? Palette.Crane : Highlighted || LegalTarget || Hovered || HasFocus() ? Palette.Gold : new Color("8e866b");
         // Broad penumbra, close contact shadow, and a thin paper edge. The original
         // scan keeps its printed content; paper grading is a reversible material.
         for (var spread = 3; spread >= 1; spread--)
@@ -310,7 +314,7 @@ public partial class CardTile : Button
             if (_dynastyBack is not null)
             {
                 DrawTextureRect(_dynastyBack, r, false);
-                if (Highlighted || LegalTarget || ChosenTarget || SelectedSource || _hover || HasFocus()) DrawRect(r.Grow(2), border, false, 1.5f, true);
+                if (Highlighted || LegalTarget || ChosenTarget || SelectedSource || Hovered || HasFocus()) DrawRect(r.Grow(2), border, false, 1.5f, true);
                 return;
             }
             DrawStyleBox(Palette.Box(Palette.Ink, border, 0), r);
@@ -332,7 +336,7 @@ public partial class CardTile : Button
             // Never crop, tint for bowing, or paint replacement text over the scan.
             DrawTextureRect(original, r, false);
             DrawRect(r.Grow(1), border with { A = .65f }, false, 1, true);
-            if (Highlighted || LegalTarget || ChosenTarget || SelectedSource || _hover || HasFocus())
+            if (Highlighted || LegalTarget || ChosenTarget || SelectedSource || Hovered || HasFocus())
             {
                 DrawRect(r.Grow(3), border with { A = .20f }, false, 5, true);
                 DrawRect(r.Grow(2), border, false, 1.6f, true);
