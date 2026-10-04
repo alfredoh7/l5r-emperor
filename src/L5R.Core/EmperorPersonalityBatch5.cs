@@ -31,6 +31,7 @@ public sealed partial class MatchEngine
     // The action that just resolved cost these players Honor: in an Action Phase, another player's action's loss is remembered until the loser's next turn begins.
     private void NoteHonorLostToOtherAction(int actingPlayerId, List<int> losers)
     {
+        TfNoteHonorLostToOtherAction(actingPlayerId, losers); // Beautiful Host (issue #622, TfHoldings.cs): "this turn", in any phase
         if (_state.Phase != Phase.Action) return;
         foreach (var loser in losers)
             if (loser != actingPlayerId) { _state.HonorLostToOtherActionSinceTurnBegan[loser] = true; _state.HonorLostToOtherActionSinceTurnEnded[loser] = true; }
