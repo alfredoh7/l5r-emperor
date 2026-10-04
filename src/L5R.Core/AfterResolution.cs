@@ -87,6 +87,9 @@ public sealed partial class MatchEngine
             "crippled-sensei-create-battle" => facts.DestroyedCardIds.Any(cardId => _state.Cards.TryGetValue(cardId, out var dead)
                 && dead.OwnerId == playerId && Definition(dead).Type == CardType.Personality && dead.Zone is Zone.Dead or Zone.RemovedFromGame),
             "empress-address-battle" => EmpressAddressBattleApplies(facts, playerId), // Emperor Edition remaining-cards pass, group C (issue #492)
+            // Feign Death (issue #622, TfStrategiesA.cs): the resolution destroyed a Personality of the reactor's.
+            TfStrategiesAAbilities.FeignBattle => facts.DestroyedCardIds.Any(cardId => _state.Cards.TryGetValue(cardId, out var feignDead) && feignDead.OwnerId == playerId
+                && Definition(feignDead).Type == CardType.Personality && feignDead.Zone is Zone.Dead),
             // Words Have Strength (Emperor Edition remaining-cards pass, issue #492, group D): "if the resolution destroyed any of your Courtiers or Magistrates".
             "words-strength-resolution" => ResolutionDestroyedCourtierOrMagistrate(facts, playerId),
             _ => true

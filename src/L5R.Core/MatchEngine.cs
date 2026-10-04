@@ -1986,7 +1986,7 @@ public sealed partial class MatchEngine
                 // able). Put this Terrain into play" -- unlike the ordinary "at most one Terrain per
                 // battlefield" default (Vital Pathways' own "if there is no Terrain in play" plays by
                 // that default unchanged), these two may replace an already-in-play Terrain outright.
-                if (def.Effect is "encircled-before-battle" or "looting-return-to-hand" or "ancient-feud") DiscardTerrain(existingTerrain);
+                if (def.Effect is "encircled-before-battle" or "looting-return-to-hand" or "ancient-feud" or TfStrategiesAAbilities.HoldTheWallsEffect) DiscardTerrain(existingTerrain);
                 // The Marshalling Fields (issue #501): once per battle its controller ignores the restriction of another Terrain being in play -- the new Terrain enters play beside it.
                 else { Require(MarshallingFieldsWaiverAvailable(command.PlayerId), "This battlefield already has a Terrain in play."); SpendMarshallingFieldsWaiver(command.PlayerId, card); }
             }

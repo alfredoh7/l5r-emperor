@@ -4189,7 +4189,8 @@ public sealed partial class MatchEngine
         // The Shadow's Embrace pass (issue #476), batch 4: Serenity in Air only straightens its target.
         or "serenity-air-straighten" or "serenity-air-straighten-open"
         or "hama-straighten" // Emperor Edition Personality pass (issue #477), batch 3
-        or "yorisada-straighten"; // Emperor Edition Personality pass (issue #477), batch 5
+        or "yorisada-straighten" // Emperor Edition Personality pass (issue #477), batch 5
+        or TfStrategiesAAbilities.OutpostOpen or TfStrategiesAAbilities.OutpostBattle; // Ivory Magistrate Outpost (issue #622)
     private static string? MoveOrStraightenKind(string abilityId) => abilityId switch
     {
         "incapacitated" or "favor-battle" or "journeys-end-move" or "shamate-move" or "effortless-counterattack-move"
@@ -4257,6 +4258,7 @@ public sealed partial class MatchEngine
         // Emperor Edition remaining-cards pass (issue #492), group D: The Law's Strength, The Power of a Word and The Serpent's Deception move their target home; The Slow Death and Well Prepared straighten theirs.
         "laws-strength-move" or "power-word-move" or "serpents-deception-move" => "move",
         "slow-death-straighten" or "well-prepared-straighten" => "straighten",
+        TfStrategiesAAbilities.OutpostOpen or TfStrategiesAAbilities.OutpostBattle => "straighten", // Ivory Magistrate Outpost (issue #622)
         _ => EmperorRemainingEMoveKind(abilityId) ?? RulingR2MoveKind(abilityId) // Emperor Edition remaining-cards pass (issue #492), group E: Obscured Pathways and Unnatural Flood move their target home.
             ?? (abilityId is EmperorMechEAbilities.GreasingBattle or EmperorP3Abilities.RequestMove or EmperorP3Abilities.KentaMove or EmperorP3EntryAbilities.PersuasionMove ? "move" : null) // issue #501: Greasing the Wheels moves its target home (or straightens his unit)
     };
