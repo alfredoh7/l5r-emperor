@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "With L5R_GODOT set, tools/env.sh fills the worktree's .tools/godot-nuget feed from the shared Godot install so a fresh worktree restores and builds the client without its own Godot/.tools",
+  "validation": "Fresh detached worktree with L5R_GODOT: sourcing env.sh under set -e (twice, idempotent) created the 4 nupkgs and dotnet build of L5R.Client succeeded, 0 errors. Before the change the same worktree failed NU1301.",
+  "remaining": "None; ready for review.",
+  "issue": "",
+  "branch": "claude/shared-godot-nuget-feed",
+  "updated": "2026-10-04T05:06:13.918310+00:00"
+}
