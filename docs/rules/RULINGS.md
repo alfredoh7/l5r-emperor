@@ -287,11 +287,11 @@ End Phase, before the hand-size check. A player who takes it back on their own t
 
 - **Cards/primitives:** Embracing Virtue (oracle-l5r-2313); `BeginEmbracingVirtue` (RegretEmbracingVirtue.cs).
 - **Date:** 2026-10-03
-- **Source:** Mendon's instruction when wiring Regret and Embracing Virtue (issue #619). "An End Phase" being any player's, so each player's copy is asked at every End Phase, the active player first, is the implementation's reading of the printed words, not part of the ruling.
+- **Source:** Mendon's instruction when wiring Regret and Embracing Virtue (issue #619). Confirmed by Mendon on 2026-10-04: "an End Phase" is any End Phase, so each player's copy is asked at every End Phase (the active player first, once per copy per turn).
 
 ### R-027 — Regret counts the cards the winner's side focused; a stat bonus instead of focusing is not a focus
 Regret's Focus Effect counts the cards focused by each player and makes the duel winner's controller lose Honor equal to the number of cards his side focused.
-Abilities that add a bonus to a stat instead of focusing (Kakita Gonji) are not a focus and are not counted.
+Abilities that add a bonus to a stat instead of focusing (Kakita Gonji) are not a focus and are not counted. Confirmed 2026-10-04: this holds for any "in place of focusing" ability, not only Gonji's.
 
 - **Cards/primitives:** Regret (oracle-l5r-9923); Kakita Gonji (oracle-l5r-4167); `ApplyRegretFocusEffect`.
 - **Date:** 2026-10-03
@@ -305,4 +305,21 @@ attaches Blades of the Black Dragon can use it on their next turn to make an att
 
 - **Cards/primitives:** Regret (oracle-l5r-9923); Bayushi Nitoshi - inexperienced (the "not Equip (Battle)" half); `GoldCostBasis.AttachSlotsCost`; `RunRegret`; `RegretEntryQueue`.
 - **Date:** 2026-10-03
-- **Source:** Mendon's instruction when wiring Regret (issue #619). Priced as one payment of each card's Equip cost for its own Personality, and each attached card then opens its own entering-play window in turn: the implementation's way of carrying out "pay for each".
+- **Source:** Mendon's instruction when wiring Regret (issue #619). The first implementation (PR #621) priced all the cards as one payment; Mendon's ruling of 2026-10-04 (R-029) replaces that.
+
+### R-029 — Each card Regret attaches is its own Equip (Limited)-like action, resolved in full before the next
+Regret's Open action treats each attachment as a standalone equip (Limited) action taken as part of the Open action. Each card is paid for independently, as an attachment (or its sub-type: Weapon, Armor,
+Follower), so a Gold source that pays more for an attachment does so every time; each can be reacted to on its own; and each attaches and resolves its "after this enters play" effects before the next begins.
+This refines R-028 (which left the payment as the implementation's reading).
+
+- **Cards/primitives:** Regret (oracle-l5r-9923); Platinum Mine (oracle-l5r-9798); `AdvanceRegret`, `RegretStepSpec`, `EitherOrPayingFor` (RegretEmbracingVirtue.cs).
+- **Date:** 2026-10-04
+- **Source:** Mendon's ruling on the PR #621 readings (issue #619). The reaction opportunity of each card is the window of its entering play; a separate before-action window per card is not modelled.
+
+### R-030 — An Open action is an Action Phase action unless an effect grants it in a battle
+Regret has no Battle designator, so it is usable only during the Action Phase. Open actions are not normally usable in the battle segment and stay that way; if an effect grants the ability to play an
+Open action during the Battle Phase, it may be played then.
+
+- **Cards/primitives:** Regret (oracle-l5r-9923); the engine's Open timing (`AbilityActions`, `ValidateAbility`).
+- **Date:** 2026-10-04
+- **Source:** Mendon's ruling on the PR #621 readings (issue #619).
