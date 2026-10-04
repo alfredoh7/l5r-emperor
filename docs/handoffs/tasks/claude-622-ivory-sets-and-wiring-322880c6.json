@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Interim (issue #622): inventory Set now shows the earliest Emperor-era printing for non-Emperor-era primaries; holding-wave-48 wired (17 holdings, generalized Clan Gold). Eight more wiring batches in progress.",
-  "validation": "ivory-holdings suite 12/12 on the batch branch; full Core run exit 0 there. Not yet re-run after merge.",
-  "remaining": "Merge remaining batches, fill BLOCKERS, regenerate inventory, rebuild art pack, run check.sh, final handoff update.",
+  "summary": "Issue #622: inventory Set now shows the earliest Emperor-era printing for every card whose primary printing is Ivory-era (Ivory Edition, Promotional Ivory, Twenty Festivals, stragglers); wired all 111 unwired cards of those sets (holding-wave-48/50, strategy-wave-106..110, personality-wave-120/121, follower-wave-44/45, item-wave-40/41, spell-wave-49/50, event-wave-30, plus created-only Witness), from the period text on the earliest Emperor-era scan; generalized Clan Gold; no card left blocked. 16 stale BLOCKERS removed. Art pack catalogue-art-issue622-20261004-r1 (4020 images, 543897356 bytes, sha256 f233b598...0800) published as a private pre-release.",
+  "validation": "Full Core run on the combined branch: 1 failure (Preserving Forces duel inventory missing sanctioned-duel/awed-witness-duel), fixed; tf-strategies-b 22/22 after. Core suite not re-run in full after the fix and format commits. content unittest 139 OK against the candidate pack; check_format and lint_comment_swallow clean; dotnet build of Core tests OK. Per-batch suites passed on their own branches. No Godot/client build or native visual check.",
+  "remaining": "CI result; Mendon to confirm the rules readings listed in the PR; no native playtest of the new cards yet.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/622",
   "branch": "claude/622-ivory-sets-and-wiring",
-  "updated": "2026-10-04T13:50:53.417907+00:00"
+  "updated": "2026-10-04T15:17:44.811080+00:00"
 }
