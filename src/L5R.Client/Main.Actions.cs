@@ -340,7 +340,7 @@ public partial class Main
                 var card = FindCard(id)!;
                 // A target-derived cost is part of the choice: each target's own engine quote leads the label.
                 var price = action.TargetGold?.TryGetValue(id, out var priced) == true ? $" · {priced.Cost} Gold" : "";
-                picker.AddItem($"{(card.Definition?.Type == CardType.Personality && card.UnitNumber > 0 ? CardTile.UnitLabel(card) + " · " : "")}{View.Players[card.OwnerId].Clan} · {ShortName(card)}{price} · {card.Force} F{(card.Bowed ? " · bowed" : "")}", id);
+                picker.AddItem($"{ShortName(card)}{price} · {card.Force} F{(card.Bowed ? " · bowed" : "")}", id);
             }
             picker.Selected = target is null ? -1 : Array.IndexOf(targets, target);
             picker.ItemSelected += i => { if (targets[i] == _chosen?.Command?.TargetId) ClearTarget(); else ChooseTarget(targets[i]); }; // choosing the chosen row again clears it

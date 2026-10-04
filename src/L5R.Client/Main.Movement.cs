@@ -65,7 +65,7 @@ public partial class Main
             _inspector.AddChild(Palette.Text("TARGET", 17, Palette.Gold));
             var picker = NewChoiceList(DecisionCanSubmit); picker.Name = "MovementTargetPicker"; // issue #635
             foreach (var id in targets)
-                picker.AddItem(FindCard(id) is { } card ? $"{View.Players[card.OwnerId].Clan} · {ShortName(card)}" : "Card unavailable", id);
+                picker.AddItem(FindCard(id) is { } card ? ShortName(card) : "Card unavailable", id);
             picker.Selected = Array.IndexOf(targets, command.TargetId); picker.ItemSelected += i => { if (DecisionCanSubmit) ChooseTarget(targets[(int)i]); };
             _inspector.AddChild(picker);
             if (command.TargetId is null) _inspector.AddChild(Palette.Wrapped("Choose a target to continue.", 15, Palette.Error));
