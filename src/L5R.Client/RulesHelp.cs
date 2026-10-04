@@ -56,6 +56,7 @@ public static class RulesHelp
         "attack" or "assignDefense" => Topic("targets"),
         "declareAttack" => PhaseGuide(Phase.AttackDeclaration),
         "pass" => "Give the other player an opportunity to act. Two consecutive passes usually advance the current action window; in battle they resolve combat.",
+        "passAllBattles" => "Pass your action in this battle and every battle after it. As Attacker, the lowest remaining battlefield is chosen next. If your opponent takes an action in a battle, you must choose this again. If both players choose it, the remaining battles are resolved and the Attack Phase ends.",
         "endDynasty" => "End your Dynasty Phase and turn. Discard unwanted province cards before ending if you wish; starting to discard prevents further recruiting.",
         "proclaim" => Topic("honor"),
         "selectBattle" => PhaseGuide(Phase.BattleSelection),
