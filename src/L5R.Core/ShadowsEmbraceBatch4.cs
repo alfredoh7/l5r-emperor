@@ -307,7 +307,8 @@ public sealed partial class MatchEngine
     // ---- Unstable Ground ----
 
     // The Terrains whose own ability puts them into play: never played through the generic playStrategy Terrain rule (MatchQueries, PlayStrategy).
-    private static bool TerrainPlaysThroughOwnAbility(CardInstance card) => (Definition(card).Abilities ?? []).Any(a => a is "unstable-ground-destroy" or EmperorP3Abilities.DeepSnowsEnter) /* Deep Snows (issue #503): put into play by its Reaction */ || TfStrategiesBTerrainThroughAbility(card); // The Eternal Rainbows (issue #622)
+    // Deep Snows (issue #503) is put into play by its Reaction; The Eternal Rainbows (issue #622, TfStrategiesB.cs) names a target.
+    private static bool TerrainPlaysThroughOwnAbility(CardInstance card) => (Definition(card).Abilities ?? []).Any(a => a is "unstable-ground-destroy" or EmperorP3Abilities.DeepSnowsEnter) || TfStrategiesBTerrainThroughAbility(card);
 
     // "Put this card into play there": PlayStrategy's own Terrain placement, from the hand to the current battlefield.
     private void PutTerrainIntoPlay(PlayerState player, CardInstance terrain)

@@ -110,7 +110,7 @@ internal static partial class EmperorRulingR4Tests
             var text = card.Text ?? "";
             // (Some published texts repeat their lines; a line is counted once.)
             var distinct = text.Split('\n').Select(l => l.Trim()).Distinct().ToArray();
-            var lines = distinct.Count(l => Regex.IsMatch(l, @"\bReaction\b") && !distinct.Any(o => o != l && o.StartsWith(l, StringComparison.Ordinal))); // (a line broken in two by the scan counts once)
+            var lines = distinct.Count(l => Regex.IsMatch(l, @"\b(Reaction|Interrupt|Engage)\b") /* Emperor Edition: Engage and Interrupt replace the Reaction designator (issue #622) */ && !distinct.Any(o => o != l && o.StartsWith(l, StringComparison.Ordinal))); // (a line broken in two by the scan counts once)
             var nonTrait = reactions.Count(a => !TraitReactions.Is(a));
             audited++;
             if (nonTrait > 0 && lines == 0) failures.Add($"{card.Name}: {nonTrait} Reaction ability(ies) but no printed Reaction");

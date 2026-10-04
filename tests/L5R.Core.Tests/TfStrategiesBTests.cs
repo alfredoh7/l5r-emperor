@@ -8,9 +8,9 @@ using static Batch336Support;
 internal static class TfStrategiesBTests
 {
     private const string Knife = "oracle-l5r-4480", Lakeside = "oracle-l5r-10735", Mercantile = "oracle-l5r-10947", Mutual = "oracle-l5r-10384", Steal = "oracle-l5r-10955",
-        Withdrawal = "oracle-l5r-10956", Rainbows = "oracle-l5r-10741", Unholy = "oracle-l5r-10963";
+        Withdrawal = "oracle-l5r-10956", Rainbows = "oracle-l5r-10741", Unholy = "oracle-l5r-10963", Preserving = "oracle-l5r-6059", Unsafe = "oracle-l5r-9008";
     private const string ChampionOfThunder = "oracle-l5r-1292", ShiotomePlains = "oracle-l5r-7001", Incapacitated = "oracle-l5r-3730";
-    private static readonly string[] Wired = [Knife, Lakeside, Mercantile, Mutual, Steal, Withdrawal, Rainbows, Unholy];
+    private static readonly string[] Wired = [Knife, Lakeside, Mercantile, Mutual, Steal, Withdrawal, Rainbows, Unholy, Preserving, Unsafe];
 
     private static void Check(bool ok, string message = "Assertion failed") => Batch336Support.Check(ok, message);
     private static void Eq<T>(T actual, T expected, string message = "Values differ") => Batch336Support.Eq(actual, expected, message);
@@ -27,7 +27,7 @@ internal static class TfStrategiesBTests
     private static int ForceOf(MatchEngine e, CardInstance card) => e.CardForceForTest(card.Id);
 
     public static void Run(TestRunner runner) => runner.Run("tf-strategies-b", [
-        ("Published shape: strategy-wave-110 is exactly the eight wired Strategies, each with its earliest Emperor-era scan's stats, keywords, printed text, ability ids, printing and art", PublishedShape),
+        ("Published shape: strategy-wave-110 is exactly the ten wired Strategies, each with its earliest Emperor-era scan's stats, keywords, printed text, ability ids, printing and art", PublishedShape),
         ("Knife in the Darkness: a Ninja performer and an enemy Personality both move home and bow; the movement cannot be negated (Champion of Thunder, Tamori Tamoko), unlike an ordinary move home", KnifeInTheDarkness),
         ("Knife in the Darkness: refused for a performer who is not a Ninja, an own or absent target, outside a battle -- with nothing changed", KnifeRefusals),
         ("Lakeside Retreat: played as a Terrain it replaces the Terrain at the battlefield; before the battle resolves its controller must straighten a bowed Personality or Follower of either player's", LakesideRetreat),
@@ -43,6 +43,12 @@ internal static class TfStrategiesBTests
         ("The Eternal Rainbows: played through its own Battle action it replaces the Terrain there and gives your target opposed Personality +2F for as long as it stays in play", EternalRainbows),
         ("The Eternal Rainbows: never a plain Terrain play; the target is your own opposed Personality; nothing is changed by a refused command", EternalRainbowsRefusals),
         ("Unholy Strike: its Battle action is a Melee 2 Attack; its Interrupt gives a Melee or Ranged Attack +2 strength in the window before the attack resolves, and only then", UnholyStrike),
+        ("Preserving Forces' Focus Effect: before his Personality is destroyed for losing a duel its focuser may destroy one of the winner's Followers, and then his destruction is negated; declining destroys him as the duel says", PreservingForcesFocus),
+        ("Preserving Forces' Focus Effect is asked only when it matters: a win, a loss the duel does not destroy for, no Follower to destroy, and a tie where both are asked", PreservingForcesWhenAsked),
+        ("Preserving Forces: every duel-issuing ability is classified as one whose outcome destroys its loser or not, so a new duel is a deliberate decision", PreservingForcesDuelInventory),
+        ("Preserving Forces' Open action: one or two Followers in your discard pile go to your hand; three, other cards, the opponent's pile and a hand card are refused", PreservingForcesOpen),
+        ("Unsafe Passage's Reaction: an action that targets your Commander and would move him is answered from the hand and his movement is negated; not for another Personality, a non-movement, an unnegatable move or an empty hand", UnsafePassageReaction),
+        ("Unsafe Passage's Battle action: an additional action for one of your Follower's printed abilities, even though it is bowed or its use is spent; only that Follower, only printed abilities, only once", UnsafePassageGrant),
     ]);
 
     // ---- Published shape ------------------------------------------------------------------------------------------------------------------------------------
@@ -71,13 +77,17 @@ internal static class TfStrategiesBTests
         Shape(Rainbows, "The Eternal Rainbows", 0, 4, "Terrain", ["eternal-rainbows-play"],
             "Battle: Destroy a Terrain (if able). Put this Terrain into play. Your target opposed Personality has +2F (while this card is in play).");
         Shape(Unholy, "Unholy Strike", 0, 1, "", ["unholy-strike-attack", "unholy-strike-boost"], "Battle: Melee 2 Attack.\nInterrupt: Give a Melee or Ranged Attack +2 strength.");
+        Shape(Preserving, "Preserving Forces", 0, 2, "", ["preserving-forces-focus", "preserving-forces-open"],
+            "As a Focus Effect: Before your Personality in this duel is destroyed for losing it, you may destroy one of his Followers; if you did, negate his destruction.\nOpen: Target one or two Followers in your discard pile: Put them into your hand.");
+        Shape(Unsafe, "Unsafe Passage", 0, 3, "", ["unsafe-passage-negate", "unsafe-passage-grant"],
+            "Reaction: After an action targets your Commander: Negate his movement from its effects.\nBattle: Target your Follower: You may take an additional action to use one of its base abilities, even if it is bowed or has already used the ability its maximum number of times this turn.");
         var listed = File.ReadAllLines(Path.Combine(root, "tests/L5R.Core.Tests/PublishedWaves/strategy-wave-110.txt")).Where(l => l.Length > 0).Order(StringComparer.Ordinal);
-        Check(listed.SequenceEqual(Wired.Order(StringComparer.Ordinal)), "the manifest lists exactly the eight cards");
+        Check(listed.SequenceEqual(Wired.Order(StringComparer.Ordinal)), "the manifest lists exactly the ten cards");
         // Each card's provenance is the earliest Emperor-era printing it was read from.
         var sources = JsonDocument.Parse(File.ReadAllText(Path.Combine(root, "content/published/strategy-wave-110-sources.json"))).RootElement.EnumerateArray()
             .ToDictionary(row => row.GetProperty("card_id").GetString()!, row => string.Join("|", row.GetProperty("printing_set").EnumerateArray().Select(x => x.GetString())));
         var expected = new Dictionary<string, string> { [Knife] = "Emperor Edition", [Lakeside] = "Gates of Chaos", [Mercantile] = "Aftermath", [Mutual] = "Torn Asunder", [Steal] = "Aftermath",
-            [Withdrawal] = "Aftermath", [Rainbows] = "Gates of Chaos", [Unholy] = "Aftermath" };
+            [Withdrawal] = "Aftermath", [Rainbows] = "Gates of Chaos", [Unholy] = "Aftermath", [Preserving] = "Embers of War", [Unsafe] = "Embers of War" };
         foreach (var (id, set) in expected) Eq(sources[id], set, $"{id}'s printing");
         Eq(AbilityCatalog.All["mercantile-conflict-bow"].Timing, "Open"); Check(AbilityCatalog.All["mercantile-conflict-bow"].Discipline, "a Discipline action");
         Eq(AbilityCatalog.All["strategic-withdrawal-focus"].Timing, "FocusEffect"); Eq(AbilityCatalog.All["unholy-strike-boost"].Trigger, "before-attack-resolves");
@@ -691,6 +701,263 @@ internal static class TfStrategiesBTests
         var strength = h.State.PendingAttack!.Strength;
         Accept(h, new GameCommand("useAbility", 0, h.Version, CardId: mineInterrupt.Id, AbilityId: "unholy-strike-boost"));
         Eq(h.State.PendingAttack!.Strength, strength + 2, "the Interrupt works on the opponent's Attack too");
+    }
+
+    // ---- Preserving Forces ----------------------------------------------------------------------------------------------------------------------------------
+    // Player 0 challenges with Steel on Steel (the loser is destroyed): his Personality `mine` against player 1's `theirs`, who carries `followers` Followers. Player 0 focuses Preserving Forces,
+    // player 1 focuses a card from his deck, and `mineWins` decides the duel by Chi.
+    private static (MatchEngine E, CardInstance Mine, CardInstance Theirs, CardInstance[] Followers, CardInstance Focus) PreservingRig(bool mineWins = false, int followers = 2)
+    {
+        var d = Table(Phase.Battle, 0);
+        var mine = Add(d, "training-crane-veteran", 0, Zone.Battlefield, province: 0);
+        var theirs = Add(d, "training-lion-samurai", 1, Zone.Battlefield, province: 0);
+        (mineWins ? mine : theirs).Modifiers.Add(new("test-source", "test", "Chi", 6));
+        var attached = Enumerable.Range(0, followers).Select(_ => Add(d, "training-follower", 1, Zone.Attached, province: 0, parent: theirs.Id)).ToArray();
+        var challenge = Add(d, "training-plain-duel-strategy", 0, Zone.Hand);
+        var focus = Add(d, Preserving, 0, Zone.Hand);
+        Deck(d, 0); Deck(d, 1);
+        var e = MatchEngine.FromTestState(d);
+        Accept(e, Offer(e, 0, "steel-on-steel-duel", challenge.Id, theirs.Id, mine.Id));
+        Accept(e, new GameCommand("focus", 1, e.Version, Choice: "deck"));
+        Accept(e, new GameCommand("focus", 0, e.Version, CardId: focus.Id));
+        Accept(e, new GameCommand("strike", 1, e.Version));
+        return (e, mine, theirs, attached, focus);
+    }
+
+    private static GameCommand PreservingAnswer(MatchEngine e, string choice) =>
+        e.QueryActions(0).Single(a => a.Type == "chooseEitherOr" && a.Command!.Choice == choice).Command!;
+
+    private static void PreservingForcesFocus()
+    {
+        // His Personality lost a duel whose outcome destroys the loser, and the winner has Followers: the focuser is asked before anything is destroyed.
+        var (e, mine, theirs, followers, focus) = PreservingRig();
+        Eq(e.State.PendingChoice?.Type, "eitherOr", "the Focus Effect asks before the outcome applies"); Eq(e.State.PendingChoice!.PlayerId, 0, "its player decides");
+        Eq(e.State.Cards[mine.Id].Zone, Zone.Battlefield, "nothing has been destroyed yet");
+        var options = e.QueryActions(0).Where(a => a.Type == "chooseEitherOr").ToArray();
+        Check(options.Select(o => o.Command!.Choice).Order(StringComparer.Ordinal).SequenceEqual(new[] { "decline", "destroy:" + followers[0].Id, "destroy:" + followers[1].Id }.Order(StringComparer.Ordinal)), "one option per Follower, or declining: " + string.Join(",", options.Select(o => o.Command!.Choice)));
+        Check(!e.QueryActions(1).Any(a => a.Type == "chooseEitherOr"), "the other player has nothing to answer");
+        Check(e.GetView(1).PendingEitherOr is { } view && !view.ViewerDecides && e.GetView(0).PendingEitherOr!.ViewerDecides, "he sees the decision read-only");
+        Accept(e, PreservingAnswer(e, "destroy:" + followers[1].Id));
+        Check(e.State.Cards[followers[1].Id].Zone != Zone.Attached, "the chosen Follower was destroyed"); Eq(e.State.Cards[followers[0].Id].Zone, Zone.Attached, "the other Follower was not");
+        Eq(e.State.Cards[mine.Id].Zone, Zone.Battlefield, "his Personality's destruction for losing was negated"); Eq(e.State.Cards[theirs.Id].Zone, Zone.Battlefield, "the winner is untouched");
+        Check(e.State.PendingDuel is null && e.State.PendingChoice is null, "the duel finished"); Eq(e.State.Cards[focus.Id].Zone, Zone.FateDiscard, "the focused card was spent");
+        Check(e.State.Events.Any(ev => ev.Type == "effectsNegated" && ev.Message.Contains("destruction for losing")), "the negation is logged");
+
+        // Declining: nothing is destroyed but him, as the duel says.
+        var (f, mine2, _, followers2, _) = PreservingRig();
+        Accept(f, PreservingAnswer(f, "decline"));
+        Eq(f.State.Cards[mine2.Id].Zone, Zone.Dead, "declined: destroyed as the duel says"); Check(followers2.All(x => f.State.Cards[x.Id].Zone == Zone.Attached), "no Follower was destroyed");
+        Check(f.State.PendingDuel is null, "the duel finished");
+
+        // Wrong answers are refused with nothing changed: another player, an unknown option.
+        var (g, _, _, _, _) = PreservingRig();
+        Reject(g, new GameCommand("chooseEitherOr", 1, g.Version, Choice: "decline"));
+        Reject(g, new GameCommand("chooseEitherOr", 0, g.Version, Choice: "destroy:nonexistent"));
+    }
+
+    private static void PreservingForcesWhenAsked()
+    {
+        // His Personality won: nothing is asked and nothing is negated.
+        var (e, mine, theirs, _, _) = PreservingRig(mineWins: true);
+        Check(e.State.PendingChoice is null && e.State.PendingDuel is null, "a win asks nothing");
+        Eq(e.State.Cards[theirs.Id].Zone, Zone.Dead, "the loser was destroyed"); Eq(e.State.Cards[mine.Id].Zone, Zone.Battlefield);
+        // No Follower to destroy: nothing is asked and he is destroyed.
+        var (f, mine2, _, _, _) = PreservingRig(followers: 0);
+        Check(f.State.PendingChoice is null && f.State.PendingDuel is null, "no Follower, no question"); Eq(f.State.Cards[mine2.Id].Zone, Zone.Dead);
+        // A duel whose outcome does not destroy its loser (a Force penalty): the Focus Effect has nothing to prevent.
+        var d = Table(Phase.Battle, 0);
+        var mine3 = Add(d, "training-crane-veteran", 0, Zone.Battlefield, province: 0);
+        var theirs3 = Add(d, "training-lion-samurai", 1, Zone.Battlefield, province: 0); theirs3.Modifiers.Add(new("test-source", "test", "Chi", 6));
+        var follower = Add(d, "training-follower", 1, Zone.Attached, province: 0, parent: theirs3.Id);
+        var challenge = Add(d, "training-duel-challenge", 0, Zone.Hand); var focus = Add(d, Preserving, 0, Zone.Hand);
+        Deck(d, 0); Deck(d, 1);
+        var g = MatchEngine.FromTestState(d);
+        Accept(g, new GameCommand("useAbility", 0, g.Version, CardId: challenge.Id, PerformerId: mine3.Id, TargetId: theirs3.Id, AbilityId: "training-duel-challenge"));
+        Accept(g, new GameCommand("acceptDuel", 1, g.Version));
+        Accept(g, new GameCommand("focus", 1, g.Version, Choice: "deck"));
+        Accept(g, new GameCommand("focus", 0, g.Version, CardId: focus.Id));
+        Accept(g, new GameCommand("strike", 1, g.Version));
+        Check(g.State.PendingChoice?.Type != "eitherOr", "a duel that only gives a Force penalty asks nothing");
+        _ = follower;
+        // Both players focus Preserving Forces in a tie: each is asked (both Personalities lose), in the duel's Focus Effect order.
+        var t = Table(Phase.Battle, 0);
+        var a = Add(t, "training-crane-veteran", 0, Zone.Battlefield, province: 0); a.Modifiers.Add(new("test-source", "test", "Chi", -1));
+        var b = Add(t, "training-lion-samurai", 1, Zone.Battlefield, province: 0);
+        var af = Add(t, "training-follower", 0, Zone.Attached, province: 0, parent: a.Id); var bf = Add(t, "training-follower", 1, Zone.Attached, province: 0, parent: b.Id);
+        var duelCard = Add(t, "training-plain-duel-strategy", 0, Zone.Hand); var f0 = Add(t, Preserving, 0, Zone.Hand); var f1 = Add(t, Preserving, 1, Zone.Hand);
+        var h = MatchEngine.FromTestState(t);
+        Accept(h, Offer(h, 0, "steel-on-steel-duel", duelCard.Id, b.Id, a.Id));
+        Accept(h, new GameCommand("focus", 1, h.Version, CardId: f1.Id));
+        Accept(h, new GameCommand("focus", 0, h.Version, CardId: f0.Id));
+        Accept(h, new GameCommand("strike", 1, h.Version));
+        Accept(h, new GameCommand("orderDuelFocusEffects", 0, h.Version, CardIds: [f0.Id, f1.Id]));
+        Eq(h.State.PendingChoice?.Type, "eitherOr", "the first Focus Effect asks");
+        var firstDecider = h.State.PendingChoice!.PlayerId;
+        Accept(h, h.QueryActions(firstDecider).Single(x => x.Type == "chooseEitherOr" && x.Command!.Choice!.StartsWith("destroy:", StringComparison.Ordinal)).Command!);
+        Eq(h.State.PendingChoice?.Type, "eitherOr", "then the other asks"); Eq(h.State.PendingChoice!.PlayerId, 1 - firstDecider, "the other player");
+        Accept(h, h.QueryActions(1 - firstDecider).Single(x => x.Type == "chooseEitherOr" && x.Command!.Choice == "decline").Command!);
+        Check(h.State.PendingDuel is null, "the duel finished");
+        var survivors = new[] { a, b }.Count(c => h.State.Cards[c.Id].Zone == Zone.Battlefield);
+        Eq(survivors, 1, "the one whose controller destroyed a Follower survived, the other was destroyed");
+        _ = af; _ = bf;
+    }
+
+    private static void PreservingForcesDuelInventory()
+    {
+        // The duels whose printed outcome destroys the loser (TfStrategiesBDuelDestroysLoser) and the ones that do not. A new duel-issuing ability fails this on purpose.
+        var duels = string.Join(",", AbilityCatalog.All.Where(p => p.Value.IssuesDuel).Select(p => p.Key).OrderBy(k => k, StringComparer.Ordinal));
+        Eq(duels, ExpectedDuelInventory, "every duel-issuing ability is classified: add a new one to TfStrategiesBDuelDestroysLoser (or document that it does not destroy) and to this list");
+        var destroying = string.Join(",", AbilityCatalog.All.Where(p => p.Value.IssuesDuel && MatchEngine.TfStrategiesBDuelAbilityDestroysLoser(p.Key, true)).Select(p => p.Key).OrderBy(k => k, StringComparer.Ordinal));
+        Eq(destroying, "hakuseki-duel,ichizo-exp-duel,insult-answered-duel,kudome-exp-duel,makoto-duel,shikei-duel,steel-on-steel-duel,sword-for-hire-create", "the duels whose outcome destroys the loser (Hakuseki's only a dishonorable one)");
+        Check(!MatchEngine.TfStrategiesBDuelAbilityDestroysLoser("hakuseki-duel", false), "Hakuseki destroys only a dishonorable loser");
+    }
+
+    // Every duel-issuing ability and what its ApplyDuelOutcome does to the loser: destroyed (see above), bowed (aerie, duel-of-haiku, first-blood x2, mitsuru, reckless-duel, shiba-kudome, shigeyuki, tadanobu x2, watchful-eye), moved home
+    // (daisuke, reckless-duel, spirit-duelist), a Force penalty (training-duel-*), nothing (training-recon-duel), or destroyed after the action (ochiai-bravery-duel, queued: a negation of the outcome does not reach it).
+    private const string ExpectedDuelInventory = "aerie-duel,daisuke-duel,duel-of-haiku,first-blood-duel-battle,first-blood-duel-limited,hakuseki-duel,ichizo-exp-duel,insult-answered-duel,kudome-exp-duel,makoto-duel,mitsuru-duel,ochiai-bravery-duel,reckless-duel,shiba-kudome-duel,shigeyuki-duel,shikei-duel,spirit-duelist-duel,steel-on-steel-duel,sword-for-hire-create,tadanobu-duel-battle,tadanobu-duel-limited,training-duel-challenge,training-duel-force,training-duel-honor,training-duel-open,training-recon-duel,watchful-eye-duel";
+
+    private static void PreservingForcesOpen()
+    {
+        var s = Table(Phase.Action, 0);
+        var card = Add(s, Preserving, 0, Zone.Hand);
+        var f1 = Add(s, "training-follower", 0, Zone.FateDiscard); var f2 = Add(s, "training-bow-follower", 0, Zone.FateDiscard); var f3 = Add(s, "training-recon-follower", 0, Zone.FateDiscard);
+        var other = Add(s, "training-crane-samurai", 0, Zone.FateDiscard); var theirs = Add(s, "training-follower", 1, Zone.FateDiscard); var inHand = Add(s, "training-follower", 0, Zone.Hand);
+        var e = MatchEngine.FromTestState(s);
+        var option = Enabled(e, 0, "preserving-forces-open", card.Id);
+        Check(option.Slots!.Single().CardIds.Order(StringComparer.Ordinal).SequenceEqual(new[] { f1.Id, f2.Id, f3.Id }.Order(StringComparer.Ordinal)), "exactly my Followers in my discard pile: " + string.Join(",", option.Slots!.Single().CardIds));
+        Reject(e, Use(e, 0, "preserving-forces-open", card.Id, null, null, Pick("followers", f1.Id, f2.Id, f3.Id)));                       // three
+        Reject(e, Use(e, 0, "preserving-forces-open", card.Id, null, null, Pick("followers", other.Id)));                               // a Personality
+        Reject(e, Use(e, 0, "preserving-forces-open", card.Id, null, null, Pick("followers", theirs.Id)));                              // the opponent's pile
+        Reject(e, Use(e, 0, "preserving-forces-open", card.Id, null, null, Pick("followers", inHand.Id)));                              // a hand card
+        Reject(e, Use(e, 0, "preserving-forces-open", card.Id));                                                                         // none
+        Reject(e, Use(e, 0, "preserving-forces-open", card.Id, null, null, Pick("followers", f1.Id, f1.Id)));                            // the same twice
+        Accept(e, Use(e, 0, "preserving-forces-open", card.Id, null, null, Pick("followers", f1.Id, f3.Id)));
+        Check(e.State.Players[0].Hand.Contains(f1.Id) && e.State.Players[0].Hand.Contains(f3.Id) && e.State.Cards[f1.Id].Zone == Zone.Hand, "the two Followers are in the hand");
+        Eq(e.State.Cards[f2.Id].Zone, Zone.FateDiscard, "the third stayed"); Eq(e.State.Cards[card.Id].Zone, Zone.FateDiscard, "the Strategy was spent");
+        // One Follower is enough.
+        var t = Table(Phase.Action, 0);
+        var card2 = Add(t, Preserving, 0, Zone.Hand); var g1 = Add(t, "training-follower", 0, Zone.FateDiscard);
+        var f = MatchEngine.FromTestState(t);
+        Accept(f, Use(f, 0, "preserving-forces-open", card2.Id, null, null, Pick("followers", g1.Id)));
+        Eq(f.State.Cards[g1.Id].Zone, Zone.Hand);
+        // Nothing to take: not offered.
+        var u = Table(Phase.Action, 0); var card3 = Add(u, Preserving, 0, Zone.Hand);
+        Check(!CanUse(MatchEngine.FromTestState(u), 0, "preserving-forces-open", card3.Id), "no Follower in the discard pile");
+    }
+
+    // ---- Unsafe Passage -------------------------------------------------------------------------------------------------------------------------------------
+    private static bool ReactionOffered(MatchEngine e, int player, string ability) => e.QueryActions(player).Any(a => a.Type == "useAbility" && a.Enabled && a.Command?.AbilityId == ability);
+    private static GameCommand ReactionOffer(MatchEngine e, int player, string ability, string? cardId = null)
+    {
+        var offers = e.QueryActions(player).Where(a => a.Type == "useAbility" && a.Enabled && a.Command?.AbilityId == ability && (cardId is null || a.CardId == cardId)).ToArray();
+        Check(offers.Length == 1, $"{ability}: expected one enabled offer for player {player}, got {offers.Length}; " + string.Join("; ", e.QueryActions(player).Select(a => $"{a.Type}/{a.Label} [{a.Enabled}] {a.Reason}")));
+        return offers[0].Command!;
+    }
+    private static void ClosePassing(MatchEngine e)
+    {
+        for (var guard = 0; e.State.PendingChoice is { Type: "beforeActionReaction" or "attackReaction" or "duelReaction" } && guard < 12; guard++)
+            Accept(e, new GameCommand(e.State.PendingChoice.Type == "duelReaction" ? "declineDuelReaction" : "declineReaction", e.State.PriorityPlayerId, e.Version));
+    }
+
+    private static void UnsafePassageReaction()
+    {
+        (MatchEngine E, string TargetId) Build(bool commander = true, bool held = true, bool negatableMove = true)
+        {
+            var s = Table(Phase.Battle, 0);
+            var attacker = Add(s, "training-crane-samurai", 0, Zone.Battlefield, province: 0);
+            var card = Add(s, negatableMove ? Incapacitated : Knife, 0, Zone.Hand);
+            if (!negatableMove) Kw(attacker, "Ninja");
+            var target = Add(s, "training-lion-samurai", 1, Zone.Battlefield, province: 0); if (commander) Kw(target, "Commander");
+            if (held) Add(s, Unsafe, 1, Zone.Hand);
+            var e = MatchEngine.FromTestState(s);
+            var command = negatableMove ? Use(e, 0, "incapacitated", card.Id, target.Id) : Offer(e, 0, "knife-darkness-move", card.Id, target.Id, attacker.Id);
+            Accept(e, command);
+            return (e, target.Id);
+        }
+        var (e, commanderId) = Build();
+        Eq(e.State.PendingChoice?.Type, "beforeActionReaction", "the window opens for a reactor holding Unsafe Passage");
+        var unsafeCard = e.State.Cards.Values.Single(c => c.DefinitionId == Unsafe);
+        var commanderCard = e.State.Cards[commanderId];
+        Accept(e, ReactionOffer(e, 1, "unsafe-passage-negate", unsafeCard.Id));
+        ClosePassing(e);
+        Eq(e.State.Cards[commanderCard.Id].Zone, Zone.Battlefield, "his movement was negated"); Eq(e.State.Cards[unsafeCard.Id].Zone, Zone.FateDiscard, "the Strategy played from the hand is spent");
+        Check(e.State.Events.Any(ev => ev.Type == "effectsNegated"), "logged");
+        // Controls: no Commander, no card in the hand, and an unnegatable movement (Knife in the Darkness) each open no window.
+        var (noCommander, _) = Build(commander: false); Check(noCommander.State.PendingChoice is not { Type: "beforeActionReaction" }, "only a Commander");
+        var (noCard, noCardTarget) = Build(held: false); Check(noCard.State.PendingChoice is not { Type: "beforeActionReaction" } && noCard.State.Cards[noCardTarget].Zone == Zone.Home, "no card, no window: the action resolves");
+        var (unnegatable, _) = Build(negatableMove: false);
+        Check(unnegatable.State.PendingChoice is not { Type: "beforeActionReaction" }, "a movement that will not be negated is not answered");
+        // An action that does not move him (a bow) is not answered by it either.
+        var s = Table(Phase.Battle, 0);
+        var bower = Add(s, "training-battle-bower", 0, Zone.Battlefield, province: 0);
+        var target = Kw(Add(s, "training-lion-samurai", 1, Zone.Battlefield, province: 0), "Commander"); Add(s, Unsafe, 1, Zone.Hand);
+        var f = MatchEngine.FromTestState(s);
+        Accept(f, Offer(f, 0, "training-bow-at-battle", bower.Id, target.Id));
+        Check(!ReactionOffered(f, 1, "unsafe-passage-negate"), "a bow does not move him");
+        // The opponent never sees the card in the hand.
+        var view = JsonSerializer.Serialize(Build().E.GetView(0));
+        Check(!view.Contains(Unsafe), "hidden information: the other player's view never names the card");
+    }
+
+    private static void UnsafePassageGrant()
+    {
+        MatchEngine Build(out CardInstance card, out CardInstance follower, out CardInstance enemy, out CardInstance enemy2, bool bowed = true)
+        {
+            var s = Table(Phase.Battle, 0);
+            card = Add(s, Unsafe, 0, Zone.Hand);
+            var host = Add(s, "training-crane-samurai", 0, Zone.Battlefield, province: 0);
+            follower = Add(s, "training-bow-follower", 0, Zone.Attached, bowed: bowed, province: 0, parent: host.Id); // Battle: bow a target enemy Personality
+            enemy = Add(s, "training-lion-samurai", 1, Zone.Battlefield, province: 0);
+            enemy2 = Add(s, "training-lion-veteran", 1, Zone.Battlefield, province: 0);
+            return MatchEngine.FromTestState(s);
+        }
+        var e = Build(out var card, out var follower, out var enemy, out var enemy2);
+        // Without the grant a bowed Follower cannot act.
+        Check(!CanUse(e, 0, "training-bow-at-battle", follower.Id), "a bowed Follower cannot use its ability");
+        Reject(e, Use(e, 0, "training-bow-at-battle", follower.Id, enemy.Id));
+        // Unsafe Passage: the Follower is the target; the additional action is granted and priority stays.
+        Accept(e, Offer(e, 0, "unsafe-passage-grant", card.Id, follower.Id));
+        Eq(e.State.Cards[card.Id].Zone, Zone.FateDiscard, "the Strategy was spent");
+        var grant = e.State.AdditionalActions.Single(g => g.Tag == "tfsb-unsafe-passage");
+        Check(!grant.Mandatory && grant.ScopeCardIds!.SequenceEqual([follower.Id]) && grant.PlayerId == 0, "an optional additional action scoped to the Follower");
+        Eq(e.State.PriorityPlayerId, 0, "its player keeps priority");
+        // Now the bowed Follower may use its printed ability.
+        Accept(e, Offer(e, 0, "training-bow-at-battle", follower.Id, enemy.Id));
+        Check(e.State.Cards[enemy.Id].Bowed, "the Follower's ability resolved although it is bowed");
+        Check(!e.State.AdditionalActions.Any(g => g.Tag == "tfsb-unsafe-passage"), "the grant was spent by it");
+        Reject(e, Use(e, 0, "training-bow-at-battle", follower.Id, enemy2.Id));
+
+        // An ability already used the maximum number of times this turn may be used again as the additional action -- and only once.
+        var f = Build(out var card2, out var follower2, out var enemy3, out var enemy4, bowed: false);
+        Accept(f, Offer(f, 0, "training-bow-at-battle", follower2.Id, enemy3.Id));
+        var g = Batch336Support.Edit(f, st => { st.PriorityPlayerId = 0; st.Cards[follower2.Id].Bowed = false; st.Cards[enemy3.Id].Bowed = false; });
+        Check(!CanUse(g, 0, "training-bow-at-battle", follower2.Id), "the ability's use for the turn is spent");
+        Accept(g, Offer(g, 0, "unsafe-passage-grant", card2.Id, follower2.Id));
+        Accept(g, Offer(g, 0, "training-bow-at-battle", follower2.Id, enemy4.Id));
+        Check(g.State.Cards[enemy4.Id].Bowed, "used again as the additional action");
+        Check(!CanUse(g, 0, "training-bow-at-battle", follower2.Id), "and the grant is spent: it is barred again");
+
+        // Only the target Follower: another bowed Follower of mine still cannot act.
+        var s2 = Table(Phase.Battle, 0);
+        var card3 = Add(s2, Unsafe, 0, Zone.Hand); var host3 = Add(s2, "training-crane-samurai", 0, Zone.Battlefield, province: 0);
+        var target = Add(s2, "training-bow-follower", 0, Zone.Attached, bowed: true, province: 0, parent: host3.Id);
+        var bystander = Add(s2, "training-bow-follower", 0, Zone.Attached, bowed: true, province: 0, parent: host3.Id);
+        var enemy5 = Add(s2, "training-lion-samurai", 1, Zone.Battlefield, province: 0);
+        var h = MatchEngine.FromTestState(s2);
+        Accept(h, Offer(h, 0, "unsafe-passage-grant", card3.Id, target.Id));
+        Check(!CanUse(h, 0, "training-bow-at-battle", bystander.Id), "another bowed Follower still may not act");
+        Reject(h, Use(h, 0, "training-bow-at-battle", bystander.Id, enemy5.Id));
+        Check(CanUse(h, 0, "training-bow-at-battle", target.Id), "the target Follower may");
+        // The Follower must be mine and in the battle: an enemy Follower, one at home and a Personality are not targets.
+        var s3 = Table(Phase.Battle, 0);
+        var card4 = Add(s3, Unsafe, 0, Zone.Hand); var host4 = Add(s3, "training-crane-samurai", 0, Zone.Battlefield, province: 0);
+        var enemyHost = Add(s3, "training-lion-samurai", 1, Zone.Battlefield, province: 0);
+        var enemyFollower = Add(s3, "training-bow-follower", 1, Zone.Attached, province: 0, parent: enemyHost.Id);
+        var homeHost = Add(s3, "training-crane-veteran", 0, Zone.Home); var homeFollower = Add(s3, "training-bow-follower", 0, Zone.Attached, parent: homeHost.Id);
+        var i = MatchEngine.FromTestState(s3);
+        Reject(i, Use(i, 0, "unsafe-passage-grant", card4.Id, enemyFollower.Id)); Reject(i, Use(i, 0, "unsafe-passage-grant", card4.Id, homeFollower.Id));
+        Reject(i, Use(i, 0, "unsafe-passage-grant", card4.Id, host4.Id));
+        Eq(i.State.AdditionalActions.Count, 0, "nothing was granted");
     }
 
     // ---- helpers --------------------------------------------------------------------------------------------------------------------------------------------

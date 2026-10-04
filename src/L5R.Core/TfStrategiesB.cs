@@ -25,7 +25,7 @@ namespace L5R.Core;
 //   * UNHOLY STRIKE (Aftermath): "Battle: Melee 2 Attack. Interrupt: Give a Melee or Ranged Attack +2 strength." An Interrupt plays exactly like a Reaction to "before an action's effects resolve" (core
 //     rules): for an Attack that is the before-attack-resolves window every Attack Reaction uses (Precision, Sniping).
 //
-// Preserving Forces and Unsafe Passage are NOT wired: their engine gaps are recorded in the inventory BLOCKERS entries.
+// Preserving Forces and Unsafe Passage (Embers of War) are in TfStrategiesB2.cs.
 // ======================================================================================================================================================================================
 
 public static class TfStrategiesBAbilities
@@ -193,7 +193,7 @@ public sealed partial class MatchEngine
             }
             // Unholy Strike's Battle action: a Melee 2 Attack (kind and strength are the AttackKind / AttackStrengthBefore hooks below).
             case TfStrategiesBAbilities.UnholyAttack:
-                return ResolveOrDeferAttack(id, player, target?.Id, ActionPerformer(ability, command, source).Id, consumedGrant) ? true : false;
+                return ResolveOrDeferAttack(id, player, target?.Id, ActionPerformer(ability, command, source).Id, consumedGrant); // true: the Attack's reaction window is open and the action waits
             // Unholy Strike's Interrupt: the Attack in its before-resolution window gets +2 strength.
             case TfStrategiesBAbilities.UnholyBoost:
                 _state.PendingAttack!.Strength += 2;

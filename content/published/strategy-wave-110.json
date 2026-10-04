@@ -28,6 +28,54 @@
       "Effect": "none"
     },
     {
+      "Id": "oracle-l5r-6059",
+      "Name": "Preserving Forces",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "As a Focus Effect: Before your Personality in this duel is destroyed for losing it, you may destroy one of his Followers; if you did, negate his destruction.\nOpen: Target one or two Followers in your discard pile: Put them into your hand.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6059.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "preserving-forces-focus",
+        "preserving-forces-open"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9008",
+      "Name": "Unsafe Passage",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After an action targets your Commander: Negate his movement from its effects.\nBattle: Target your Follower: You may take an additional action to use one of its base abilities, even if it is bowed or has already used the ability its maximum number of times this turn.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9008.jpg",
+      "Keywords": [],
+      "Focus": 3,
+      "Abilities": [
+        "unsafe-passage-negate",
+        "unsafe-passage-grant"
+      ],
+      "Effect": "none"
+    },
+    {
       "Id": "oracle-l5r-10384",
       "Name": "Mutual Support",
       "Type": "Strategy",

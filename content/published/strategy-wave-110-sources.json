@@ -9,6 +9,24 @@
     "image_sha256": "c49c7ac3b38c284b5ab2bb45b4c849966ec2aa90cff354e668b0c7655177510f"
   },
   {
+    "card_id": "oracle-l5r-6059",
+    "printing_set": [
+      "Embers of War"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=6059",
+    "image_path": "assets/reference/oracle/embers-of-war/webp/oracle-l5r-6059-printing-1-image-1.webp",
+    "image_sha256": "c505a2b0719b2d488f9a6bf796af3f784459a11e669633e31754b5d33949d75d"
+  },
+  {
+    "card_id": "oracle-l5r-9008",
+    "printing_set": [
+      "Embers of War"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=9008",
+    "image_path": "assets/reference/oracle/embers-of-war/webp/oracle-l5r-9008-printing-1-image-1.webp",
+    "image_sha256": "16ecbf59ab8bdc1485e4be0e0d4f50c55518e3e2318903cdc001adb4ce6bc51f"
+  },
+  {
     "card_id": "oracle-l5r-10384",
     "printing_set": [
       "Torn Asunder"

@@ -227,7 +227,9 @@ public sealed partial class MatchEngine
     {
         var (options, defaultCommand, error) = BuildSlotOffer(prototype, ability);
         if (defaultCommand is null) return new("useAbility", label, false, error ?? "No legal target.", prototype, sourceId, Slots: options);
-        defaultCommand = TfStrategiesBDefaultSelection(defaultCommand, ability, options) ?? EmperorP6DefaultSelection(defaultCommand, ability, options) ?? defaultCommand; // issue #503: an aggregate condition's default (EmperorP6.cs)
+        // Mutual Support's default is a pair with different Clans (issue #622, TfStrategiesB.cs); issue #503: an aggregate condition's default (EmperorP6.cs).
+        defaultCommand = TfStrategiesBDefaultSelection(defaultCommand, ability, options) ?? defaultCommand;
+        defaultCommand = EmperorP6DefaultSelection(defaultCommand, ability, options) ?? defaultCommand;
         var quote = QuoteAbilityGold(defaultCommand);
         defaultCommand = defaultCommand with { SourceIds = quote is null ? [] : quote.Payments.FirstOrDefault()?.SourceIds };
         try { ValidateAbility(defaultCommand); }

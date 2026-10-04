@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Build Strategy wave 110 (issue #622): Twenty Festivals Strategies, batch B. Each card is wired from the scan of its EARLIEST EMPEROR-ERA printing and the
 published Text is that scan's own printed wording (not Oracle's later template): Knife in the Darkness (Emperor Edition), Lakeside Retreat and The Eternal
-Rainbows (Gates of Chaos), Mercantile Conflict, Steal an Advantage, Strategic Withdrawal and Unholy Strike (Aftermath), Mutual Support (Torn Asunder).
-Preserving Forces and Unsafe Passage are not packaged: their engine gaps are recorded in tools/content/build_card_inventory.py's BLOCKERS.
+Rainbows (Gates of Chaos), Mercantile Conflict, Steal an Advantage, Strategic Withdrawal and Unholy Strike (Aftermath), Mutual Support (Torn Asunder),
+Preserving Forces and Unsafe Passage (Embers of War).
 
 Each scan was read directly. Where the printed scan and Oracle differ the scan wins: Knife in the Darkness prints the keyword Ninja and "Choose your performing Ninja
 Personality and target an enemy Personality: Move both Personalities home; this movement will not be negated. Bow them."; Lakeside Retreat's trait is printed first;
@@ -29,15 +29,17 @@ ABILITIES: dict[int, list[str]] = {
     10956: ["strategic-withdrawal-focus", "strategic-withdrawal-move"],  # Strategic Withdrawal
     10741: ["eternal-rainbows-play"],  # The Eternal Rainbows
     10963: ["unholy-strike-attack", "unholy-strike-boost"],  # Unholy Strike
+    6059: ["preserving-forces-focus", "preserving-forces-open"],  # Preserving Forces
+    9008: ["unsafe-passage-negate", "unsafe-passage-grant"],  # Unsafe Passage
 }
 # The earliest Emperor-era printing's set (the scan the card is wired from).
 PREFER_SLUG: dict[int, str] = {
     4480: "emperor-edition", 10735: "gates-of-chaos", 10947: "aftermath", 10384: "torn-asunder",
-    10955: "aftermath", 10956: "aftermath", 10741: "gates-of-chaos", 10963: "aftermath",
+    10955: "aftermath", 10956: "aftermath", 10741: "gates-of-chaos", 10963: "aftermath", 6059: "embers-of-war", 9008: "embers-of-war",
 }
 PRINTING_SET: dict[int, str] = {
     4480: "Emperor Edition", 10735: "Gates of Chaos", 10947: "Aftermath", 10384: "Torn Asunder",
-    10955: "Aftermath", 10956: "Aftermath", 10741: "Gates of Chaos", 10963: "Aftermath",
+    10955: "Aftermath", 10956: "Aftermath", 10741: "Gates of Chaos", 10963: "Aftermath", 6059: "Embers of War", 9008: "Embers of War",
 }
 # The printed keyword line, where the scan prints one Oracle's record does not carry.
 KEYWORDS: dict[int, list[str]] = {4480: ["Ninja"]}
@@ -53,6 +55,10 @@ TEXT: dict[int, str] = {
     10956: "As a Focus Effect, if you win this duel, draw a card." + NL + "Battle: Move your target Personality home. You may target an enemy Personality and give him -3F.",
     10741: "Battle: Destroy a Terrain (if able). Put this Terrain into play. Your target opposed Personality has +2F (while this card is in play).",
     10963: "Battle: Melee 2 Attack." + NL + "Interrupt: Give a Melee or Ranged Attack +2 strength.",
+    6059: "As a Focus Effect: Before your Personality in this duel is destroyed for losing it, you may destroy one of his Followers; if you did, negate his destruction." + NL
+          + "Open: Target one or two Followers in your discard pile: Put them into your hand.",
+    9008: "Reaction: After an action targets your Commander: Negate his movement from its effects." + NL
+          + "Battle: Target your Follower: You may take an additional action to use one of its base abilities, even if it is bowed or has already used the ability its maximum number of times this turn.",
 }
 
 
@@ -85,5 +91,5 @@ def package(card_ids: list[str], root: Path = ROOT) -> dict:
 
 if __name__ == "__main__":
     ids = [f"oracle-l5r-{n}" for n in sorted(ABILITIES)]
-    assert len(ids) == 8
+    assert len(ids) == 10
     print(json.dumps(package(ids)))
