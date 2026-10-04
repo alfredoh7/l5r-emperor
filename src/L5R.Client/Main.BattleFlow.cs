@@ -31,7 +31,7 @@ public partial class Main
             FlowText(pending.Prompt, 22, Palette.Paper);
             RenderReactionTarget();
             if (View.PriorityPlayerId == View.ViewerId)
-                foreach (var option in Actions.Where(a => a.Enabled && a.Command is not null && a.Type is not ("pass" or "declineReaction" or "proclaim" or "chooseShinden" or "concede"))) AddAction(_inspector, BattleWindowOption(option));
+                foreach (var option in Actions.Where(a => a.Enabled && a.Command is not null && a.Type is not ("pass" or "passAllBattles" or "declineReaction" or "proclaim" or "chooseShinden" or "concede"))) AddAction(_inspector, BattleWindowOption(option));
             return true;
         }
         if (PresentationBusy || _resolutionMessage is not null)
@@ -90,7 +90,7 @@ public partial class Main
             // Omit controls already in the fixed footer and the menu's confirmed
             // Concede flow; conceding is not a Battle action.
             var options = Actions.Where(a => a.Enabled && a.Command is not null &&
-                a.Type is not ("pass" or "endDynasty" or "declineReaction" or "proclaim" or "chooseShinden" or "concede")).ToArray();
+                a.Type is not ("pass" or "passAllBattles" or "endDynasty" or "declineReaction" or "proclaim" or "chooseShinden" or "concede")).ToArray();
             RenderBattleExchanges(1);
             foreach (var option in options) AddBattleAction(option);
             if (options.Length == 0) FlowText("No Battle action is currently available.", 17, Palette.PaperDim);
@@ -110,16 +110,17 @@ public partial class Main
         var count = _inspector.GetChildCount(); AddAction(_inspector, option);
         if (_inspector.GetChildCount() == count) return;
         var button = _inspector.GetChildren().OfType<Button>().Last();
-        var source = option.CardId is { } id ? FindCard(id)?.Definition?.Name : null;
+        var performer = option.Command?.PerformerId is { } performerId ? FindCard(performerId)?.Definition?.Name : null;
+        var (source, label) = BattleActionText.Present(option.AlternativeCost?.ActionLabel ?? option.Label, performer, option.CardId is { } id ? FindCard(id)?.Definition?.Name : null);
         if (source is null) return;
-        button.Text = source + "\n" + (option.AlternativeCost?.ActionLabel ?? option.Label);
+        button.Text = source + "\n" + label;
         foreach (var state in new[] { "font_color", "font_hover_color", "font_pressed_color", "font_focus_color", "font_disabled_color" }) button.AddThemeColorOverride(state, Colors.Transparent);
         var margin = new MarginContainer { MouseFilter = Control.MouseFilterEnum.Ignore }; button.AddChild(margin);
         margin.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.FullRect);
         margin.OffsetLeft = 20; margin.OffsetRight = -20; margin.OffsetTop = 12; margin.OffsetBottom = -12;
         var column = new VBoxContainer { MouseFilter = Control.MouseFilterEnum.Ignore }; margin.AddChild(column);
         var title = Palette.Wrapped(source, 19); title.AddThemeFontOverride("font", SidebarSkin.Bold); title.MouseFilter = Control.MouseFilterEnum.Ignore; column.AddChild(title);
-        var text = Palette.Wrapped(option.AlternativeCost?.ActionLabel ?? option.Label, 16, Palette.PaperDim); text.MouseFilter = Control.MouseFilterEnum.Ignore; column.AddChild(text);
+        var text = Palette.Wrapped(label, 16, Palette.PaperDim); text.MouseFilter = Control.MouseFilterEnum.Ignore; column.AddChild(text);
         button.CustomMinimumSize = new Vector2(0, 110);
         column.MinimumSizeChanged += () => { if (IsInstanceValid(button)) button.CustomMinimumSize = new Vector2(0, Math.Max(90, column.GetCombinedMinimumSize().Y + 24)); };
     }

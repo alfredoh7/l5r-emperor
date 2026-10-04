@@ -281,6 +281,8 @@ internal static class ActionLockTests
         "declineAdditionalAction",
         // Plains of Otosan Uchi (issue #554): the reveal-order choice and the province-card-targeting disambiguation (Shosuro Toson) are both the province's own controller's decisions.
         "provinceCardChoice", "provinceOrder",
+        // Pass all battles (issue #628): the player's own standing pass, not an action a Personality performs.
+        "passAllBattles",
     ];
 
     private static void InnateActionInventory()

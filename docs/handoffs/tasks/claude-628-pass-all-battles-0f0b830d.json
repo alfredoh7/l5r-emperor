@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Pass all battles (#628): a passAllBattles command/button for either player in battles. The engine passes for a flagged player and, as Attacker, selects the lowest remaining battlefield; an opposing action ends it; both players taking it resolves all remaining battles and ends the Attack Phase. Client footer button added.",
+  "validation": "PassAllBattlesTests 7/7. bash tools/check.sh --skip-client: all requested checks passed (Core, AI 97/97, Server 9/9, Transport 18/18, Collection). First run failed the action-lock inventory until passAllBattles was classified as a player action; fixed and rerun green. Godot client not built locally; no native playtest.",
+  "remaining": "Client lane: a 'passing all battles' indicator (view does not carry MatchState.PassAllBattles yet). Native visual check of the button.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/628",
+  "branch": "claude/628-pass-all-battles",
+  "updated": "2026-10-04T18:23:29.218421+00:00"
+}

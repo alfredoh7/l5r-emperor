@@ -66,6 +66,11 @@ try
     Check(dragon.SequenceEqual(["Battle", "Open"]) && CatalogueActions.Matches(dragon, "Battle") && CatalogueActions.Matches(dragon, "Open") && !CatalogueActions.Matches(dragon, "Limited") && !CatalogueActions.Matches(dragon, "Battle/Open") && !CatalogueActions.Matches(dragon, "None"), "a card with several printed actions appears under each of them");
     Check(CatalogueActions.MatchesAny(dragon, ["Battle", "Open"]) && CatalogueActions.MatchesAny(dragon, ["Open"]) && CatalogueActions.MatchesAny(dragon, ["Battle"]) && !CatalogueActions.MatchesAny(dragon, ["Limited", "Reaction"]), "multi-action card matches when any selected choice fits");
     Check(CatalogueActions.Matches([], "None") && !CatalogueActions.Matches(["Limited"], "None"), "None matches only cards without printed actions");
+    var tactical = BattleActionText.Present("Tactical Advantage: discard a card · performing Tactician +Force = its Focus Value · Akodo Toturi (card-0123)", "Akodo Toturi", "Tactical Advantage");
+    Check(tactical == ("Akodo Toturi", "Tactical Advantage: discard a card · performing Tactician +Force = its Focus Value"), "a performed action leads with the Personality's title and keeps only the action text");
+    var copied = BattleActionText.Present("Open: Straighten · Hida Kisada (card-0456) · copied from Kuni Yori", "Hida Kisada", null);
+    Check(copied == ("Hida Kisada", "Open: Straighten · copied from Kuni Yori"), "provenance after the performer is kept, the id is not");
+    Check(BattleActionText.Present("Reaction: Draw (card-0007)", null, "Kyuden Bayushi") == ("Kyuden Bayushi", "Reaction: Draw"), "with no performer the source card is the title and no id shows");
     Console.WriteLine($"COLLECTION DATA PASS: {checks} assertions");
 }
 finally { Directory.Delete(dir, true); }
