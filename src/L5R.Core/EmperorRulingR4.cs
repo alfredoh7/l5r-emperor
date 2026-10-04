@@ -38,6 +38,8 @@ public static class TraitReactions
         "kae-favor-negate",
         // Issue #503: Shinjo Hayan's "After engaging: Once per turn, you may assign ..." (no designator: a trait; "you may" leaves the assignment optional, usable while he is bowed).
         "hayan-assign",
+        // Issue #622: Words of Consecration's "After this card enters play, if this Shugenja is Air: Choose a player, who gains or loses 1 Honor."
+        "words-of-consecration-honor",
     };
 
     /// <summary>The trait-modelled Reaction-timed abilities, for the audit.</summary>

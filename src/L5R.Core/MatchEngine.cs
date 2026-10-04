@@ -2959,6 +2959,7 @@ public sealed partial class MatchEngine
         // like Offering Reverence's.
         if (Definition(card).Effect == DiscoveringTheTempleEffect) { BeginSearch(SearchCatalog.DiscoveringTheTemple, card, player.Id, "event"); return true; }
         if (Definition(card).Effect == StarCrossedLoversEffect) return ResolveStarCrossedLovers(player, province, card);
+        if (Definition(card).Effect == IvorySpellAbilities.WisdomGainedEffect) return ResolveWisdomGained(player, card); // issue #622 (IvorySpells.cs): each player may search for a Ring, in turn order.
         // Emperor Edition remaining-cards pass (issue #492), group F (EmperorRemainingFEvents.cs): twelve Events, most of which stay in play for a while or ask a player a question.
         if (IsEmperorRemainingFEvent(Definition(card).Effect)) return ResolveEmperorRemainingFEvent(player, province, card);
         if (IsEmperorP2Event(Definition(card).Effect)) return ResolveEmperorP2Event(player, province, card); // issue #503 (EmperorP2*.cs)

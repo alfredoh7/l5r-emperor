@@ -527,6 +527,7 @@ public sealed partial class MatchEngine
             if (deck.Remove(topId)) { deck.Insert(0, topId); Emit("searchedCardOnTop", $"{Player(search.PlayerId).Name} put the found card on top of their {SearchPlace(search.Deck!)} after shuffling.", search.PlayerId); }
         }
         _state.PendingSearch = null;
+        if (ContinueWisdomGained(search)) return; // issue #622 (IvorySpells.cs): the other player's search, or the Event's end.
         if (search.EnteredCardId is { } enteredId && _state.WinnerId is null)
         {
             _state.PendingChoice = null;

@@ -125,6 +125,10 @@ public sealed partial class MatchEngine
                 Emit("watchFired", $"{watch.Source}: {Definition(card).Name} {what}.", watch.BeneficiaryPlayerId, card.Id);
                 GainHonor(watch.BeneficiaryPlayerId, 2, watch.Source);
                 break;
+            // Words of Consecration (issue #622, IvorySpells.cs): "gain 1 Honor, or 2 Honor if you control a Temple".
+            case IvorySpellAbilities.WordsOfConsecrationWatchKind:
+                ResolveWordsOfConsecrationWatch(watch, card);
+                break;
             // Veiled Menace (Emperor Edition remaining-cards pass, issue #492, group D): "After each time he is assigned (this turn), his controller loses 1 Honor."
             case WatchVeiledMenace:
                 Emit("watchFired", $"{watch.Source}: {Definition(card).Name} {what}.", watch.BeneficiaryPlayerId, card.Id);
