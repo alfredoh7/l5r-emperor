@@ -447,16 +447,17 @@ def load_sets() -> dict[str, str]:
     source build_deck_pool.py itself reads, but that script's own output schema carries no
     set/printing field to reuse here).
 
-    Oracle's primary printing is its newest, which for many cards is Ivory Edition (or Promotional
-    Ivory). Ivory is outside the Emperor era, so such a card shows the earliest Emperor-era set it
-    was printed in instead (issue #622)."""
+    Oracle's primary printing is its newest, which for many cards is an Ivory-era set (Ivory Edition,
+    Promotional Ivory, Twenty Festivals) rather than an Emperor-era one. Such a card shows the earliest
+    Emperor-era set it was printed in instead (issue #622)."""
     data = json.loads(EMPEROR_CATALOGUE.read_text(encoding="utf-8"))
     sets: dict[str, str] = {}
     for card in data["cards"]:
         printings = card.get("printings") or []
-        primary = next((p for p in printings if p.get("id") == card.get("current_primary_printing_id")), None)             or (printings[0] if printings else None)
+        primary = next((p for p in printings if p.get("id") == card.get("current_primary_printing_id")), None) \
+            or (printings[0] if printings else None)
         card_sets = (primary.get("sets") or []) if primary else []
-        if any("Ivory" in s for s in card_sets):
+        if card_sets and not any(_era_name(s) in EMPEROR_SET_ORDER for s in card_sets):
             era = [(EMPEROR_SET_ORDER.index(_era_name(s)), s) for p in printings for s in p.get("sets") or []
                    if _era_name(s) in EMPEROR_SET_ORDER]
             if era:
