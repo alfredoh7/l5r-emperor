@@ -7,15 +7,15 @@ namespace L5R.Client;
 internal static class CardPlayTiming
 {
     /// <summary>Seconds the card eases in (fade, and a small grow unless reduced motion is on).</summary>
-    public const double Intro = .35;
+    public const double Intro = .42;
     /// <summary>Seconds a card played from a hand is held face-up before it travels to the discard pile.</summary>
-    public const double Hold = 1.7;
+    public const double Hold = 2.04;
     /// <summary>Seconds a card that stays in play (an ability of a card on the table) is held.</summary>
-    public const double BoardHold = 1.2;
+    public const double BoardHold = 1.44;
     /// <summary>Seconds the card takes to travel to the discard pile (or just fade, for a card that stays in play or under reduced motion).</summary>
-    public const double Outro = .8;
+    public const double Outro = .96;
     /// <summary>With reduced motion the card simply fades in, holds, and fades out, for this many seconds in all.</summary>
-    public const double ReducedHold = 1.4;
+    public const double ReducedHold = 1.68;
     /// <summary>Hold is multiplied by this while more plays are waiting behind it.</summary>
     public const double QueuedHoldScale = .6;
     /// <summary>Card height in the 1920x1080 presentation space, and where its centre sits (over the table, left of the sidebar).</summary>
