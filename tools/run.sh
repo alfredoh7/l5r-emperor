@@ -5,7 +5,7 @@ cd "$L5R_PROJECT_ROOT"
 export MSBUILDDISABLENODEREUSE=1
 export DOTNET_GENERATE_ASPNET_CERTIFICATE=false
 if [ ! -x "$GODOT" ] || ! command -v dotnet >/dev/null; then
-  echo 'Install the project tools first: python tools/bootstrap.py --install' >&2
+  echo 'Install the project tools first: python tools/bootstrap.py --install (or put the shared Godot in ~/tools/godot, or set L5R_GODOT; see docs/PITFALLS.md)' >&2
   exit 1
 fi
 l5r_python="${L5R_PYTHON:-}"
