@@ -4,28 +4,59 @@ namespace L5R.AI;
 
 public sealed record OpponentDecision(GameCommand? Command, string Reason);
 
-/// <summary>A deliberately modest practice opponent. Its only inputs are one player's permitted view and offered actions.</summary>
-public static class TrainingOpponent
+/// <summary>
+/// A practice opponent. Its only inputs are one player's permitted view and offered actions (and, optionally, its own <see cref="BotContext"/> memory of what it
+/// has seen), so it can never cheat. Since issue #642 it can answer ANY action the engine offers: a generic completer fills in targets, slots, payments and
+/// costs from the metadata the engine ships, a card-agnostic <see cref="AbilityIntent"/> scores an ability it has no hand-written rule for, and nothing that is a
+/// card play scores below passing. See Policy, Complete and Plans for the parts.
+/// </summary>
+public static partial class TrainingOpponent
 {
-    public static OpponentDecision Choose(MatchView view, ActionOption[] actions)
+    /// <summary>What passing is worth. No card play is ever worth less.</summary>
+    internal const double PassScore = 10;
+
+    public static OpponentDecision Choose(MatchView view, ActionOption[] actions) => Choose(view, actions, new BotContext());
+
+    public static OpponentDecision Choose(MatchView view, ActionOption[] actions, BotContext memory)
     {
         if (view.WinnerId is not null) return new(null, "The match has finished.");
         if (view.ViewerId != view.PriorityPlayerId) return new(null, "Waiting for the other player's decision.");
+        memory.Observe(view);
         var self = view.Players.Single(p => p.Id == view.ViewerId);
         var opponent = view.Players.Single(p => p.Id != view.ViewerId);
+        var x = new Ctx(view, self, opponent, BotProfile.Assess(self, memory.DeckAveragePersonalHonor), memory, AllCards(view));
         var candidates = actions.Where(a => a.Enabled && a.Type is not ("concede" or "wait"))
-            .Select(a => (Action: a, Command: Prepare(view, self, opponent, a)))
-            .Where(x => x.Command is not null)
-            .Select(x => (x.Action, Command: x.Command!, Score: Score(view, self, opponent, x.Action, x.Command!)))
-            .OrderByDescending(x => x.Score).ThenBy(x => x.Action.Type, StringComparer.Ordinal)
-            .ThenBy(x => x.Command.CardId, StringComparer.Ordinal).ToArray();
+            .Select(a => (Action: a, Command: Prepare(x, a)))
+            .Where(p => p.Command is not null)
+            .Select(p => (p.Action, Command: p.Command!, Score: Score(x, p.Action, p.Command!)))
+            .OrderByDescending(p => p.Score).ThenBy(p => p.Action.Type, StringComparer.Ordinal)
+            .ThenBy(p => p.Command.CardId, StringComparer.Ordinal).ThenBy(p => p.Command.AbilityId, StringComparer.Ordinal).ToArray();
         if (candidates.Length == 0) return new(null, "No complete legal action was supplied for this decision.");
         var chosen = candidates[0];
+        Remember(x, chosen.Command);
         return new(chosen.Command, Explain(chosen.Action.Type));
     }
 
-    private static GameCommand? Prepare(MatchView view, PlayerView self, PlayerView opponent, ActionOption action)
+    /// <summary>Everything one decision reads, built once from the permitted view.</summary>
+    private sealed record Ctx(MatchView View, PlayerView Self, PlayerView Opponent, BotProfile Profile, BotContext Memory, Dictionary<string, CardView> Cards)
     {
+        public int MaxHand => Self.HandLimit?.Maximum ?? 8;
+        public CardView? Card(string? id) => id is not null && Cards.TryGetValue(id, out var c) ? c : null;
+    }
+
+    private static Dictionary<string, CardView> AllCards(MatchView view)
+    {
+        var map = new Dictionary<string, CardView>(StringComparer.Ordinal);
+        foreach (var p in view.Players)
+            foreach (var c in p.Home.Concat(p.Army).Concat(p.Hand).Concat(p.Discard).Concat(p.RemovedFromGame).Concat(p.Celestials ?? []).Concat(p.EventsInPlay ?? [])
+                .Concat(p.Underneath ?? []).Concat(p.Provinces.Select(q => q.Card).OfType<CardView>()).Append(p.Stronghold))
+                map.TryAdd(c.Id, c);
+        return map;
+    }
+
+    private static GameCommand? Prepare(Ctx x, ActionOption action)
+    {
+        var self = x.Self; var opponent = x.Opponent; var view = x.View;
         var command = action.Command;
         if (command is null)
         {
@@ -48,6 +79,12 @@ public static class TrainingOpponent
             var provinces = (action.Provinces ?? (action.Type == "attack" ? opponent.Provinces : self.Provinces).Where(p => !p.Destroyed).Select(p => p.Index).ToArray());
             if (provinces.Length == 0 || units.Length == 0) return null;
             if (command.Assignments is { Count: > 0 } && action.Type == "attack") return command;
+            if (action.Type == "attack")
+            {
+                // Mendon's spec (issue #642): as many sub-armies as can each beat their province plus every unit that could defend it.
+                var plan = PlanAttack(x, units, provinces);
+                if (plan is not null) return command with { Assignments = plan };
+            }
             var target = action.Type == "attack"
                 ? opponent.Provinces.Where(p => provinces.Contains(p.Index)).OrderBy(p => p.Strength).ThenBy(p => p.Index).First().Index
                 : provinces.OrderByDescending(p => ArmyForce(opponent.Army.Where(c => c.ProvinceIndex == p))).ThenBy(p => p).First();
@@ -71,22 +108,26 @@ public static class TrainingOpponent
                 if (selected.Length == 0) return null;
                 return command with { CardIds = selected };
             }
-            if (action.TargetIds is { Length: > 0 } legal)
+            if (action.TargetIds is { Length: > 0 } legal && command.TargetId is null)
             {
-                var target = self.Home.Concat(self.Army).Concat(self.Hand).Concat(opponent.Home).Concat(opponent.Army)
-                    .Where(c => legal.Contains(c.Id)).OrderByDescending(c => AbilityValue(command.AbilityId, c, self, opponent, view))
-                    .ThenBy(c => c.Id, StringComparer.Ordinal).FirstOrDefault();
-                if (target is not null) return WithTarget(command, action, target.Id);
+                var intent = AbilityIntent.Of(command.AbilityId);
+                var known = legal.Select(id => x.Card(id)).OfType<CardView>().Select(c => (Card: c, Value: AbilityValue(command.AbilityId, c, self, opponent, view)))
+                    .Where(p => p.Value > 0).OrderByDescending(p => p.Value).ThenBy(p => p.Card.Id, StringComparer.Ordinal).FirstOrDefault();
+                var target = known.Card ?? PickCard(x, legal, intent, action.Label);
+                if (target is not null) command = WithTarget(command, action, target.Id);
+                else if (command.TargetId is null) command = WithTarget(command, action, legal[0]);
+                if (command is null) return null;
             }
         }
         if (action.Type is "equip" or "playStrategy" && action.TargetIds is { Length: > 0 } targets)
         {
             var targetCards = self.Home.Concat(self.Army).Concat(opponent.Army).Where(c => targets.Contains(c.Id)).ToArray();
-            if (targetCards.Length == 0) return command;
+            if (targetCards.Length == 0) return Complete(x, action, command);
             var ordered = targetCards.OrderBy(c => c.Bowed).ThenByDescending(c => c.Force);
-            return WithTarget(command, action, ordered.ThenBy(c => c.Id, StringComparer.Ordinal).First().Id);
+            var withTarget = WithTarget(command, action, ordered.ThenBy(c => c.Id, StringComparer.Ordinal).First().Id);
+            return withTarget is null ? null : Complete(x, action, withTarget);
         }
-        return command;
+        return Complete(x, action, command);
     }
 
     /// <summary>Retargets an offered command. When the cost depends on the target (issue #303), the engine's
@@ -100,8 +141,9 @@ public static class TrainingOpponent
         return command;
     }
 
-    private static double Score(MatchView view, PlayerView self, PlayerView opponent, ActionOption action, GameCommand command)
+    private static double Score(Ctx x, ActionOption action, GameCommand command)
     {
+        var view = x.View; var self = x.Self; var opponent = x.Opponent;
         var card = self.Provinces.Select(p => p.Card).Concat(self.Hand).FirstOrDefault(c => c?.Id == command.CardId);
         switch (action.Type)
         {
@@ -116,14 +158,8 @@ public static class TrainingOpponent
                 var threatened = self.Home.Concat(self.Army).FirstOrDefault(c => c.Id == view.PendingChoice?.CardId);
                 return command.Choice == "honor" ? (opponent.Honor < 35 && threatened is { Bowed: false, Force: > 0 } ? 150 : 80) : 100;
             case "useAbility":
-                if (command.AbilityId is "border-first" or "border-game") return command.AbilityId == "border-first" ? 140 : 35;
-                if (command.AbilityId == "shunya-honor") return 100;
-                // Deck search (issue #312): a modest bot uses Ikoma Shizuka's search when nothing more useful is on offer
-                // (just above passing), which is what lets a whole AI-vs-AI match exercise the full search flow.
-                if (command.AbilityId == "shizuka-search") return 12;
-                var abilityTarget = self.Home.Concat(self.Army).Concat(self.Hand).Concat(opponent.Home).Concat(opponent.Army).FirstOrDefault(c => c.Id == command.TargetId);
-                return abilityTarget is null ? -20 : AbilityValue(command.AbilityId, abilityTarget, self, opponent, view);
-            case "proclaim": return 1000;
+                return AbilityScore(x, action, command);
+            case "proclaim": return ProclaimActionScore(x);
             case "declineReaction": return 100;
             case "discardHand": return 100;
             case "selectBattle":
@@ -135,44 +171,45 @@ public static class TrainingOpponent
                 if (def.Type == CardType.Holding)
                     return holdings < 5 ? 160 - holdings * 10 : holdings < 8 ? 70 - holdings : 5;
                 var baseScore = 110 + def.Force * 2 + def.PersonalHonor * 2;
-                if (action.Quote?.ProclaimEligible == true) baseScore += 20;
+                var cost = action.Quote?.Cost ?? def.GoldCost;
+                var ready = Production(self.Stronghold, self.Clan) + self.Home.Sum(c => Production(c, self.Clan));
+                var stance = x.Profile.StanceFor(self.Honor, opponent.Honor, ready - cost >= 2);
+                // Proclaim and the Clan discount are the two ways a Clan Personality can pay off: which one the bot wants follows its Honor profile (issue #642).
+                if (action.Quote?.ProclaimEligible == true) baseScore += stance switch { ProclaimStance.Prioritize => 40, ProclaimStance.Neutral => 20, _ => -10 };
                 if (command.ClanAllegiance && self.Honor >= def.HonorRequirement) baseScore -= 20;
-                if (command.ClanDiscount && !self.ProclaimUsedThisTurn) baseScore -= 15;
-                return baseScore - (action.Quote?.Cost ?? def.GoldCost);
+                if (command.ClanDiscount && !self.ProclaimUsedThisTurn) baseScore += stance switch { ProclaimStance.Prioritize => -25, ProclaimStance.Neutral => -15, _ => 15 };
+                return baseScore - cost;
             case "overlay":
                 return card?.Definition is null ? -100 : 180 + card.Definition.Force * 2;
             case "discardProvince": return card?.Definition?.Type == CardType.Holding && self.Home.Count(c => c.Definition?.Type == CardType.Holding) >= 8 ? 40 : 20;
             case "endDynasty": return 0;
             case "equip":
                 var totalProduction = Production(self.Stronghold, self.Clan) + self.Home.Sum(c => Production(c, self.Clan));
-                return totalProduction >= 6 ? 60 : 5;
+                return Math.Max(PassScore, totalProduction >= 6 ? 60 : 5);
             case "playStrategy":
                 var target = self.Army.Concat(opponent.Army).FirstOrDefault(c => c.Id == command.TargetId);
-                if (card?.Definition?.Effect == "bow-small") return target is { Bowed: false } ? 90 + target.Force : 0;
-                if (target?.Bowed == true) return 0;
+                if (card?.Definition?.Effect == "bow-small") return Math.Max(PassScore, target is { Bowed: false } ? 90 + target.Force : 0);
+                if (target?.Bowed == true) return PassScore;
                 return 70;
             // The Declaration Segment: declare when the whole unbowed home army would threaten the weakest province, as the old
             // per-maneuver attack score did, otherwise decline (pass scores 10).
             case "declareAttack":
-                var readyUnits = self.Home.Where(c => c.Definition?.Type == CardType.Personality && !c.Bowed).Select(c => c.Id).ToHashSet(StringComparer.Ordinal);
-                var declaredForce = ArmyForce(self.Home.Where(c => readyUnits.Contains(c.Id) || c.AttachedTo is not null && readyUnits.Contains(c.AttachedTo)));
-                var weakest = opponent.Provinces.Where(p => !p.Destroyed).OrderBy(p => p.Strength).ThenBy(p => p.Index).FirstOrDefault();
-                if (weakest is null || declaredForce == 0) return -100;
-                var homeDefense = ArmyForce(opponent.Home);
-                return declaredForce > homeDefense + weakest.Strength ? 90 + declaredForce - homeDefense : declaredForce > weakest.Strength && homeDefense == 0 ? 80 : 0;
+                return DeclareScore(x);
             case "attack":
                 if (command.Assignments is not { Count: > 0 }) return -100;
                 var attacking = self.Home.Where(c => command.Assignments.ContainsKey(c.Id) || c.AttachedTo is not null && command.Assignments.ContainsKey(c.AttachedTo));
                 var force = ArmyForce(attacking);
-                var province = opponent.Provinces.First(p => p.Index == command.Assignments.First().Value);
-                var defense = ArmyForce(opponent.Home);
-                return force > defense + province.Strength ? 90 + force - defense : force > province.Strength && defense == 0 ? 80 : 0;
+                var homeDefense = ArmyForce(opponent.Home);
+                // Every army in the assignment must beat its own province plus every unit that could defend it.
+                var armies = command.Assignments.GroupBy(p => p.Value).Select(g => (Province: g.Key, Force: ArmyForce(self.Home.Where(c => g.Any(p => p.Key == c.Id) || c.AttachedTo is not null && g.Any(p => p.Key == c.AttachedTo))))).ToArray();
+                var weakestArmyMargin = armies.Length == 0 ? int.MinValue : armies.Min(a => a.Force - (opponent.Provinces.FirstOrDefault(p => p.Index == a.Province)?.Strength ?? int.MaxValue / 2) - homeDefense);
+                return weakestArmyMargin > 0 ? 90 + force - homeDefense : armies.Length == 1 && armies[0].Force > (opponent.Provinces.FirstOrDefault(p => p.Index == armies[0].Province)?.Strength ?? int.MaxValue / 2) && homeDefense == 0 ? 80 : 0;
             case "assignDefense":
                 var enemyForce = ArmyForce(opponent.Army);
                 var ownForce = ArmyForce(self.Home);
                 if (enemyForce == 0) return 0;
                 return ownForce >= enemyForce ? 95 : ownForce + StrongestThreatProvinceStrength(self, opponent) >= enemyForce ? 60 : self.Provinces.Count(p => !p.Destroyed) == 1 ? 50 : 0;
-            case "pass": return 10;
+            case "pass": return PassScore;
             // Deck search (issue #312): a modest bot never stalls in a search. It takes the first eligible card the engine
             // lists (the list is already sorted by type then name, and holds only eligible entries), passes when the
             // engine offers Pass (which it does only when nothing qualifies), attaches a found Region to the first
@@ -212,13 +249,15 @@ public static class TrainingOpponent
             case "killingGroundsSelect":
                 var doomed = self.Army.FirstOrDefault(c => c.Id == command.TargetId);
                 return 100 - (doomed?.Force ?? 0);
-            // A conditional effect choice (issue #337, Mirumoto Yumaru): a modest bot never stalls on it; every offered option is legal, so it
-            // takes the first one the engine lists (ties keep the engine's order).
-            case "chooseEffect": return 100;
+            // A conditional effect choice (issue #337, Mirumoto Yumaru; issue #642): "choose a player who gains or loses N Honor" is answered from the bot's Honor profile
+            // (high deck gains Honor, low deck takes it from the opponent, in between depends on the race); any other effect choice takes the first offered option.
+            case "chooseEffect": return EffectChoiceScore(x, command);
             case "beforeBattleOptional":
                 var optionalTarget = opponent.Army.FirstOrDefault(c => c.Id == command.TargetId);
                 return command.Choice == "use" ? 60 + (optionalTarget?.Force ?? 0) : 20;
-            default: return -100;
+            // Any other decision the engine offers is answered rather than ignored (issue #642): a modest bot takes the first complete option, just above passing,
+            // so a decision it has no rule for can never stall a match.
+            default: return PassScore + 1;
         }
     }
 
@@ -265,6 +304,7 @@ public static class TrainingOpponent
         "equip" => "Attach support to an available Personality using the offered payment.",
         "discardProvince" => "Cycle remaining face-up cards after purchasing is complete.",
         "discardHand" => "Keep more useful combat cards while returning to eight cards.",
+        "useAbility" => "Use a card ability the engine offers.",
         _ => "Continue the current legal action round."
     };
 }

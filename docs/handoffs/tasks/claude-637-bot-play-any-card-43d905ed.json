@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Issue #642 (in progress): the practice bot can answer any enabled action. New AbilityIntent (card-agnostic reading of an ability's label/target), BotProfile (honor tier, Proclaim stance, gain-vs-loss), BotContext (what it has seen), AttackPlanner (multi-province sub-armies), a generic completer and policy scoring in TrainingOpponent; no ability scores below passing.",
+  "validation": "Builds with 0 warnings; the full AI suite and the soak harness are still running; nothing is claimed yet.",
+  "remaining": "Update tests that encoded the old always-pass-on-reactions behaviour, add unit tests, integrate the soak harness, iterate on its findings, wire a BotContext per match in the client, final handoff.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/642",
+  "branch": "claude/637-bot-play-any-card",
+  "updated": "2026-10-04T22:56:44.533634+00:00"
+}
