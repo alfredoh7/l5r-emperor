@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Issue #567: the dead-Personality label reads 'Dead' instead of 'Fallen' everywhere a player sees it: the player placard counter, its tooltip and accessibility name, the gallery window title, tabs, identity text and close button, the pile name in the Hud and the duel screen. Display text only: the Fallen keyword, Zone.Dead and the class/file names are unchanged. UI work done under Mendon's standing authority (collaboration.json); the six touched client files were whitespace-reformatted because CI's format check covers whole changed files.",
+  "validation": "Client project builds, 0 errors; check_format clean. No native visual check (the placard text is shorter, so it should fit where 'Fallen' did).",
+  "remaining": "None; Mendon to look at the placard in play.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/567",
+  "branch": "claude/567-dead-label",
+  "updated": "2026-10-04T19:09:59.013550+00:00"
+}
