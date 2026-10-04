@@ -494,7 +494,7 @@ public partial class Main
         }
         if (View.Phase == Phase.Battle && View.PendingChoice is null && View.PriorityPlayerId == View.ViewerId && View.BattleStep?.ConsecutivePasses == 1)
             _phaseActions.AddChild(Palette.Wrapped("Passing now ends Battle actions.", 16, Palette.PaperDim));
-        foreach (var a in Actions.Where(a => a.Type is "pass" or "endDynasty" or "proclaim" or "declineReaction" or "declineAdditionalAction" or "chooseShinden" or "declareAttack")) AddAction(_phaseActions, a);
+        foreach (var a in Actions.Where(a => a.Type is "pass" or "passAllBattles" or "endDynasty" or "proclaim" or "declineReaction" or "declineAdditionalAction" or "chooseShinden" or "declareAttack")) AddAction(_phaseActions, a);
         if (View.PriorityPlayerId != View.ViewerId) _phaseActions.AddChild(Palette.Wrapped($"Waiting for {View.Players[View.PriorityPlayerId].Clan}…", 15, Palette.Crane));
         if (!_session.Online && !_autoOpponent) _phaseActions.AddChild(SidebarSkin.Button("Pass device to other player", SwitchSeat));
     }

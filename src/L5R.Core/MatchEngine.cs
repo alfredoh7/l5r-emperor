@@ -197,6 +197,12 @@ public sealed partial class MatchEngine
 
     public CommandResult Execute(GameCommand command)
     {
+        var result = ExecuteOne(command);
+        return result.Accepted ? RunPassAllBattles(result) : result; // "Pass all battles" (issue #628, PassAllBattles.cs)
+    }
+
+    private CommandResult ExecuteOne(GameCommand command)
+    {
         if (command.PlayerId is < 0 or > 1) return Reject("Unknown player.");
         if (command.ExpectedVersion != _state.Version) return Reject("The board has changed. Refresh before acting.");
         if (_state.WinnerId is not null) return Reject("The match has finished.");
@@ -339,6 +345,7 @@ public sealed partial class MatchEngine
         OpenAssignedReactionWindow(); // Chrysanthemum Blossom (issue #492 group G): "After this Personality is assigned".
         P4CommandTail(); // Scars of War (issue #503, EmperorP4Watches.cs): "after each time it bows".
         OpenEmperorP6QueuedDecision(); // Issue #503 (EmperorP6.cs): Suikihime's leaves-play watch; the refill decisions owed by the command.
+        PassAllBattlesTail(); // "Pass all battles" (issue #628): the flags last only while battles are being fought
         OpenP3EntryWindow(); // Easy Persuasion (issue #503): the window after a Personality entered play, for either player
         NitoshiCommandTail(); // Bayushi Nitoshi - inexperienced (issue #617): the hold on the card he took lasts until it is played or returned
         OpenP3OwedChoices(); // Shosuro Aroru - exp2 (issue #503): "After the action's resolution, you may move Aroru to a different location."
@@ -363,6 +370,7 @@ public sealed partial class MatchEngine
             return;
         }
         if (_state.PendingDuel is not null) { ResolveDuelCommand(command); return; }
+        if (command.Type == "passAllBattles") { command = BeginPassAllBattles(command); if (command.Type != "pass") return; } // issue #628: a pass that keeps passing
         // Unfortunate Hesitation (issue #338): a player who owes a pass at an ordinary Action/Battle opportunity may only pass.
         EnforceForcedPass(command);
         // Urgency (issue #453, batch 2): a player past his allowance of non-Reaction actions this phase may take none.
@@ -381,6 +389,7 @@ public sealed partial class MatchEngine
             if (command.Type == "useAbility") ValidateFirstActionRestriction(command);
             _state.FirstActionRestriction = null;
         }
+        InterruptPassAllBattles(command); // issue #628: an action in a battle ends the other player's "Pass all battles"
         NoteBattleActionTaken(command); // One Action, Two Strikes (issue #501, EmperorMechA.cs): "if the enemy leader has taken any Battle actions during this battle"
         switch (command.Type)
         {
