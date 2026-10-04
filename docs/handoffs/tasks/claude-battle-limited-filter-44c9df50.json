@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Add a Battle/Limited choice to the catalogue and deck-builder Action Type filter (client UI; the client Collection test project is a rules-lane path, hence shared). Battle/Limited cards such as Bayushi Nitoshi - inexperienced also appear under Battle and Limited, once per card however many choices are selected",
+  "validation": "dotnet run tests/L5R.Client.Collection.Tests: 55 assertions pass, incl. Battle/Limited printing, Battle/Limited appearing only under Battle/Limited/Limited/Battle, one match for any selection, Shadow Dragon (Battle + Open) under both. Nitoshi-inexperienced=[Battle/Limited], Shadow Dragon exp2=[Battle,Open] checked against library.json text (9 Battle/Limited cards). Godot not installed: CatalogueProbe expectations updated (seven choices) but not run locally.",
+  "remaining": "Filter menu layout with a seventh row and the probes were not run or viewed locally; CI import/smoke only.",
+  "issue": "",
+  "branch": "claude/battle-limited-filter",
+  "updated": "2026-10-04T04:24:20.380742+00:00"
+}
