@@ -37,6 +37,12 @@ elif [ ! -x "$GODOT" ]; then
   done
   shopt -u nullglob
 fi
+# NuGet.Config's "Godot bundled" feed is .tools/godot-nuget inside each checkout. With a shared Godot, fill that
+# feed from the install's own GodotSharp/Tools/nupkgs (four small packages) so a fresh worktree restores offline.
+# Best effort and idempotent: a missing source or an unwritable folder must not abort a caller running under set -e.
+if [ -n "${L5R_GODOT:-}" ] && [ -d "$(dirname "$L5R_GODOT")/GodotSharp/Tools/nupkgs" ] && ! ls "$L5R_PROJECT_ROOT"/.tools/godot-nuget/*.nupkg >/dev/null 2>&1; then
+  mkdir -p "$L5R_PROJECT_ROOT/.tools/godot-nuget" && cp "$(dirname "$L5R_GODOT")"/GodotSharp/Tools/nupkgs/*.nupkg "$L5R_PROJECT_ROOT/.tools/godot-nuget/" 2>/dev/null || true
+fi
 # Opt-in guard for scripts that need Godot. Sourcing env.sh must stay non-fatal (check.sh --skip-client
 # has no Godot), but a script that goes on to run "$GODOT" with it missing used to die silently under
 # set -e, with the error buried in a redirected log. Call this right after sourcing.
