@@ -473,6 +473,7 @@ public sealed partial class MatchEngine
         ApplyEmperorFollowupsEntryEffects(playerId, card); // Emperor Edition follow-ups (issue #498): the Dragon Sword's Honor; the entry searches queued (EmperorFollowupsSearch.cs).
         ApplyEmperorP1EntryEffects(playerId, card); // Issue #503 (EmperorP1.cs): its Sensei discards and Extending Influence's Honor loss.
         ApplyRequestedCreatedCardsEntryEffects(playerId, card); // Yari of Air's mandatory Air-wielder Honor gain.
+        ApplyTfPersonalitiesEntryEffects(playerId, card); // Soshi Kodanshi (issue #622, TfPersonalities.cs): "After Kodanshi enters play from a province: Create ..." -- a trait.
     }
     // Sensei (Mirumoto Hikaro / Mirumoto Yozo, Experienced 2): "your OTHER Sensei Personalities" --
     // every OTHER Sensei-keyword Personality this same controller has, either unbowed-or-bowed in
@@ -591,6 +592,7 @@ public sealed partial class MatchEngine
     {
         var province = player.Provinces.Single(p => p.CardId == card.Id);
         province.CardId = null;
+        _state.LastProvinceEntryCardId = card.Id; _state.LastProvinceEntryProvinceIndex = province.Index; // an ability recruit from a province "enters play from a province" too (Soshi Kodanshi, issue #622), as Purchase and RecruitReserve record
         EnterPlayFromRecruit(player, card, battlefield, via);
         Refill(player, province);
         return OpenRecruitEntryWindows(player, card, quote.ProclaimEligible, proclaimResumesTo);
