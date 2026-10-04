@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Wired Bayushi Nitoshi - inexperienced (oracle-l5r-10248, personality-wave-119): one-card Fate look with a Yes/No 'playit' disposition for an attachment or phase-playable Strategy; Yes moves the card to hand and holds the game (nitoshiHold) until it is played via its normal ability/playStrategy or the always-offered 'return to top of deck'; attachments attach to a Personality at Nitoshi's location via nitoshiAttach. Shared edits (Mendon standing authority): DeckLook.cs, MatchQueries.cs, MatchEngine.cs one-liners; client renders the options generically, no client code changed.",
-  "validation": "Core filter nitoshi-inexperienced: 7/7 pass. bash tools/check.sh --skip-client: 138/139 tool tests pass; the 1 error is test_catalogue_art coverage (new Nitoshi scan needs an art pack publisher update). No native client visual check.",
-  "remaining": "Art pack rebuild/publish for the new scan (art-pack-release, not requested here); regenerate docs/CARD_INVENTORY.xlsx (locked by Excel); client visual check of the prompt. Not mergeable until the art coverage test is green.",
+  "summary": "Wired Bayushi Nitoshi - inexperienced (oracle-l5r-10248, personality-wave-119): one-card Fate look with a Yes/No 'playit' disposition for an attachment or phase-playable Strategy; Yes moves the card to hand and holds the game (nitoshiHold) until it is played via its normal ability/playStrategy or the always-offered 'return to top of deck'; attachments attach to a Personality at Nitoshi's location via nitoshiAttach. Shared edits (Mendon standing authority): DeckLook.cs, MatchQueries.cs, MatchEngine.cs one-liners. Art pack catalogue-art-issue617-20261004-r1 (3906 images, +oracle-l5r-10248) published privately; inventory regenerated (2195 cards, 1459 wired, was 1458).",
+  "validation": "Core filter nitoshi-inexperienced 7/7; PR #618 CI all green (macos-local, windows-2022 after one rerun of an unrelated 32 KiB server-test flake that passes locally 9/9, windows-2022-client). Art pack: local install + verify-only OK, 8 art tests OK, uploaded digest matched. No native client visual check of the Yes/No prompt; no clean-download install test of the release.",
+  "remaining": "Native visual check of the Yes/No look panel and the hold prompt.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/617",
   "branch": "claude/617-nitoshi-inexperienced",
-  "updated": "2026-10-04T04:48:43.220261+00:00"
+  "updated": "2026-10-04T11:50:59.817889+00:00"
 }
