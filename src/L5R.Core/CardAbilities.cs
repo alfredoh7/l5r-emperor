@@ -4189,6 +4189,7 @@ public sealed partial class MatchEngine
         or "jiramus-court-straighten" or "shrine-hachiman-straighten" // issue #622 (holding-wave-48, IvoryHoldings.cs): Jiramu's Court and the Shrine to Hachiman only straighten their target
         // The Shadow's Embrace pass (issue #476), batch 4: Serenity in Air only straightens its target.
         or "serenity-air-straighten" or "serenity-air-straighten-open"
+        or IvoryPoliticalAbilities.SandayuStraighten or IvoryPoliticalAbilities.LordsFavorStraighten // Ivory pass (issue #622)
         or "hama-straighten" // Emperor Edition Personality pass (issue #477), batch 3
         or "yorisada-straighten"; // Emperor Edition Personality pass (issue #477), batch 5
     private static string? MoveOrStraightenKind(string abilityId) => abilityId switch
@@ -4242,6 +4243,8 @@ public sealed partial class MatchEngine
         // Emperor Edition Personality pass (issue #477), batch 2: Kuni Shinoda moves himself and his (optional) target to the current battlefield.
         "shinoda-move" => "move",
         "master-of-beasts-straighten" or "peace-of-the-kami-negate" or "earths-strength-straighten" => "straighten",
+        // Ivory pass (issue #622, IvoryPolitical.cs): Sandayu straightens a Personality with a Weapon; My Lord's Favor straightens a unit.
+        IvoryPoliticalAbilities.SandayuStraighten or IvoryPoliticalAbilities.LordsFavorStraighten => "straighten",
         // Emperor Edition remaining-cards pass, group C (issue #492): Selfless Defense, Summoned to Justice and Solid Defense move their target home; Rumors Travel moves its performer.
         "selfless-defense-move" or "summoned-justice-move" or "solid-defense-move" => "move",
         // Forgotten Legacy pass (issue #467), batch 3: Feint & Strike moves its enemy target home; Creating Order's straighten half straightens its target's unit.
@@ -4396,6 +4399,7 @@ public sealed partial class MatchEngine
         if (abilityId == "mahatsu-negate") return MahatsuNegateApplies(card, command);
         // Ninja Tricks (Emperor Edition remaining-cards pass, issue #492, group B): a Strategy in a hand answering an action on a Strategy (EmperorRemainingB.cs).
         if (abilityId == "ninja-tricks-negate") return NinjaTricksApplies(card, command);
+        if (abilityId == IvoryPoliticalAbilities.ConfusionNegate) return ConfusionAtCourtApplies(card, command); // Confusion at Court (issue #622, IvoryPolitical.cs)
         // Emperor Edition remaining-cards pass, group C (issue #492): the Strategy Reactions played from a hand (EmperorRemainingC.cs), judged before any target check.
         if (EmperorRemainingCAbilities.BeforeActionHandReactions.Contains(abilityId)) return EmperorRemainingCBeforeActionApplies(card, abilityId, command);
         if (CardWave566BeforeActionApplies(card, abilityId, command) is { } wave566Before) return wave566Before; // Inexorable (issue #566, CardWave566.cs)
@@ -5518,6 +5522,8 @@ public sealed partial class MatchEngine
                 || MechAEvenIfBowed(id) // Mirumoto Inokuchi (issue #501): "Even if Inokuchi is bowed".
                 || id == EmperorP4UnitAbilities.HayanAssign // Shinjo Hayan's trait (issue #503): a trait is usable while its card is bowed
                 || MechEEvenIfBowed(id) // issue #501: Moto Rani - exp ("Even if Rani is bowed"); Kakita Kae's trait (a trait is usable while bowed)
+                // issue #622 (IvoryPolitical.cs): Komori Taruko ("Even if Taruko is bowed")
+                || IvoryPoliticalEvenIfBowed(id)
                 || TirelessStronghold(source), "Abilities on bowed cards cannot be used.");
             uses = source.AbilityUses;
         }
@@ -6420,6 +6426,9 @@ public sealed partial class MatchEngine
                 // categories above name. Not in play, so it needs its own branch.
                 else if (ability.Target == "personality-in-any-discard")
                     Require(type == CardType.Personality && target.Zone is Zone.DynastyDiscard or Zone.Dead, "Choose a Personality in any discard pile.");
+                // Record of Failure (issue #622, IvoryPolitical.cs): "a dishonorably dead Personality" -- in a dead pile, dishonorable when he died.
+                else if (ability.Target == IvoryPoliticalAbilities.DishonorablyDeadPersonality)
+                    Require(type == CardType.Personality && IsDishonorablyDead(target), "Choose a dishonorably dead Personality.");
                 // Soshi Neiru (issue #301): "Air Spells" from the player's own hand -- equip-battle's
                 // own spell-or-reserve-in-hand shape, narrowed by RequiredKeywords instead of hardcoding a
                 // keyword, with the wielder fixed to the source card itself (no separate Performer).
@@ -7099,6 +7108,7 @@ public sealed partial class MatchEngine
         if (TargetShieldNegates(command)) return;
         if (TurnTargetShieldNegates(command)) return; // Consideration (Forgotten Legacy pass, issue #467 batch 3)
         if (TouchTheEmptinessNegates(command)) return; // Touch the Emptiness (The Shadow's Embrace pass, issue #476 batch 5)
+        if (OriolePoliticalNegates(command)) return; // Oriole Imperial Vanguard (issue #622, IvoryPolitical.cs): the first Political action each phase that targets his Personality
         if (ShadowsEmbraceBatch1Negates(command)) return; // Hiruma Nikaru's battle shield, Bayushi Waru's next-performed-action negation (The Shadow's Embrace pass, issue #476 batch 1)
         if (ResolveOrDeferAnnounceReaction(command)) return;
         if (ResolveOrDeferEntrenchedReaction(command)) return; // Entrenched Position (Forgotten Legacy pass, issue #467 batch 3)
@@ -11226,6 +11236,7 @@ public sealed partial class MatchEngine
                                     // discard pile (Zone.Dead being a Personality's own), and a matching Spell in hand.
                                     "dynasty-card-in-any-discard" => _state.Cards.Values.Where(c => IsDynastyCardType(Definition(c).Type) && c.Zone is Zone.DynastyDiscard or Zone.Dead).Select(c => (string?)c.Id).ToArray(),
                                     "personality-in-any-discard" => _state.Cards.Values.Where(c => Definition(c).Type == CardType.Personality && c.Zone is Zone.DynastyDiscard or Zone.Dead).Select(c => (string?)c.Id).ToArray(),
+                                    IvoryPoliticalAbilities.DishonorablyDeadPersonality => _state.Cards.Values.Where(c => Definition(c).Type == CardType.Personality && IsDishonorablyDead(c)).Select(c => (string?)c.Id).ToArray(), // issue #622
                                     "spell-in-hand-with-keyword" => player.Hand.Where(h => Definition(Card(h)).Type == CardType.Spell && HasKeywords(Card(h), ability.RequiredKeywords)).Cast<string?>().ToArray(),
                                     // Moto Jun-Ni / Foothills Keep (issue #337): every card in a discard pile the ability's AttachSpec accepts.
                                     "attachment-in-discard" => AttachCandidatesInDiscard(ability.Attach!, playerId).Select(c => (string?)c.Id).ToArray(),

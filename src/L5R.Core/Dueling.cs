@@ -72,6 +72,7 @@ public sealed partial class MatchEngine
     {
         var duel = _state.PendingDuel!;
         duel.Stage = "Focusing";
+        ApplyDuelEntryTraits(duel); // Spiked Tetsubo (issue #622, IvoryPolitical.cs): "After this Personality enters a duel"
         duel.TurnPlayerId = duel.ChallengedPlayerId; // the challenged player has the first option, always
         _state.PriorityPlayerId = duel.TurnPlayerId;
         _state.ConsecutivePasses = 0;

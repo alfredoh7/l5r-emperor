@@ -1,0 +1,30 @@
+{
+  "Profile": "follower-wave-44",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose; reviewed Emperor-era scans (issue #622).",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10337",
+      "Name": "Oriole Imperial Vanguard",
+      "Type": "Follower",
+      "Clan": "Unaligned",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "This Personality has +1PH.\nBefore the first Political action that targeted this Personality this phase resolves: Negate its effects.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10337.jpg",
+      "Keywords": [
+        "Imperial"
+      ],
+      "Focus": 4,
+      "Abilities": [],
+      "Effect": "oriole-imperial-vanguard"
+    }
+  ],
+  "Decks": []
+}
