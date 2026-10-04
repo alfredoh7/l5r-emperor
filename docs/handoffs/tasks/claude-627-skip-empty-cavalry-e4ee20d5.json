@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Issue #627: a Cavalry Maneuvers segment where the acting player can only pass is skipped (CavalrySkip.cs, tail of MatchEngine.Apply) and the empty 'Attack/Defend ... 0 Cavalry units' option is no longer listed (MatchQueries.cs). Shared change: the legal-action list the client shows changes (one option no longer offered) and a segment is skipped by the engine, so the client needs no change but sees fewer prompts; made under Mendon's standing authority (collaboration.json). Nine existing tests that walked through an idle Cavalry segment were updated and two compact legacy test files were whitespace-reformatted; new cavalry-skip suite (5 tests).",
+  "validation": "Full Core run before the whitespace-only reformat: 2356 PASS, 0 FAIL. check_format and lint_comment_swallow clean after it. cavalry-skip 5/5. Not covered by a test: a player with no Cavalry but another enabled action keeping the segment (the engine offers no such action in a Cavalry segment today). No client/Godot check.",
+  "remaining": "CI; Mendon to confirm skipping an idle Cavalry segment is the intended rule.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/627",
+  "branch": "claude/627-skip-empty-cavalry",
+  "updated": "2026-10-04T17:55:57.266003+00:00"
+}
