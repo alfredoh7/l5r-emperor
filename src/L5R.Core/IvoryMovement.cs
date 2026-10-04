@@ -195,63 +195,63 @@ public sealed partial class MatchEngine
         switch (id)
         {
             case IvoryMovementAbilities.AdvanceWarningRaise or IvoryMovementAbilities.AdvanceWarningLower:
-            {
-                var scout = Card(command.PerformerId!);
-                StraightenUnit(scout);
-                var force = CardForce(scout);
-                if (CurrentProvinceIndex() is int province)
-                    GiveProvinceStrengthThisTurn(1 - _state.ActivePlayerId, province, id == IvoryMovementAbilities.AdvanceWarningRaise ? force : -force, Definition(source!).Name);
-                return false;
-            }
-            case IvoryMovementAbilities.AmbushBattle:
-            {
-                var performer = Card(command.PerformerId!);
-                SpendHandPlayedCard(player, source);
-                var battlefield = CreateAdditionalBattlefield(null);
-                BeginAsideBattle(battlefield, player.Id, command, c.consumedGrant, c.playedFromDiscard, c.opponentHonorBeforeBattleAction, c.bowedBeforeAction, c.preExistingGrants, firstOpportunity: null, () =>
                 {
-                    AssignToCreatedBattlefield(performer, battlefield, attacking: true, mayBeBowed: false);
-                    AssignToCreatedBattlefield(target!, battlefield, attacking: false, mayBeBowed: true); // "even if he is bowed"
-                }, loseHonorAfter: 5);
-                return true;
-            }
+                    var scout = Card(command.PerformerId!);
+                    StraightenUnit(scout);
+                    var force = CardForce(scout);
+                    if (CurrentProvinceIndex() is int province)
+                        GiveProvinceStrengthThisTurn(1 - _state.ActivePlayerId, province, id == IvoryMovementAbilities.AdvanceWarningRaise ? force : -force, Definition(source!).Name);
+                    return false;
+                }
+            case IvoryMovementAbilities.AmbushBattle:
+                {
+                    var performer = Card(command.PerformerId!);
+                    SpendHandPlayedCard(player, source);
+                    var battlefield = CreateAdditionalBattlefield(null);
+                    BeginAsideBattle(battlefield, player.Id, command, c.consumedGrant, c.playedFromDiscard, c.opponentHonorBeforeBattleAction, c.bowedBeforeAction, c.preExistingGrants, firstOpportunity: null, () =>
+                    {
+                        AssignToCreatedBattlefield(performer, battlefield, attacking: true, mayBeBowed: false);
+                        AssignToCreatedBattlefield(target!, battlefield, attacking: false, mayBeBowed: true); // "even if he is bowed"
+                    }, loseHonorAfter: 5);
+                    return true;
+                }
             case IvoryMovementAbilities.BackToTheFront:
-            {
-                var performer = Card(command.PerformerId!);
-                var (zone, province) = (performer.Zone, performer.ProvinceIndex);
-                ExecuteMove(command, c.ability, source, null);
-                if (performer.Zone != zone || performer.ProvinceIndex != province) StraightenUnit(performer);
-                return false;
-            }
+                {
+                    var performer = Card(command.PerformerId!);
+                    var (zone, province) = (performer.Zone, performer.ProvinceIndex);
+                    ExecuteMove(command, c.ability, source, null);
+                    if (performer.Zone != zone || performer.ProvinceIndex != province) StraightenUnit(performer);
+                    return false;
+                }
             case IvoryMovementAbilities.FallBack:
-            {
-                var performer = Card(command.PerformerId!);
-                var zone = performer.Zone;
-                MoveHome(performer, false);
-                if (performer.Zone == zone) return false; // he did not move: nothing more happens
-                StraightenUnit(performer);
-                // "...and you may straighten one of your other units (at any location)": asked now, when it resolves; nothing is asked when no other unit has anything to straighten.
-                if (IvoryFallBackCandidates(command).Candidates.Count == 0) return false;
-                return BeginDeciderChoice(IvoryMovementAbilities.FallBackSpec, command, c.consumedGrant, c.playedFromDiscard, c.opponentHonorBeforeBattleAction, c.bowedBeforeAction, c.preExistingGrants);
-            }
+                {
+                    var performer = Card(command.PerformerId!);
+                    var zone = performer.Zone;
+                    MoveHome(performer, false);
+                    if (performer.Zone == zone) return false; // he did not move: nothing more happens
+                    StraightenUnit(performer);
+                    // "...and you may straighten one of your other units (at any location)": asked now, when it resolves; nothing is asked when no other unit has anything to straighten.
+                    if (IvoryFallBackCandidates(command).Candidates.Count == 0) return false;
+                    return BeginDeciderChoice(IvoryMovementAbilities.FallBackSpec, command, c.consumedGrant, c.playedFromDiscard, c.opponentHonorBeforeBattleAction, c.bowedBeforeAction, c.preExistingGrants);
+                }
             case IvoryMovementAbilities.DeterminedChallenge:
-            {
-                // "Straighten him if he moved": a target already at the battlefield did not move.
-                var (zone, province) = (target!.Zone, target.ProvinceIndex);
-                if (ExecuteMove(command, c.ability, source, target) && (target.Zone != zone || target.ProvinceIndex != province)) Straighten(target);
-                return false;
-            }
+                {
+                    // "Straighten him if he moved": a target already at the battlefield did not move.
+                    var (zone, province) = (target!.Zone, target.ProvinceIndex);
+                    if (ExecuteMove(command, c.ability, source, target) && (target.Zone != zone || target.ProvinceIndex != province)) Straighten(target);
+                    return false;
+                }
             case IvoryMovementAbilities.TreacheryDeceit:
                 ExecuteMove(command, c.ability, source, target);
                 return false;
             case IvoryMovementAbilities.SoulsSacrifice:
-            {
-                ExecuteMove(command, c.ability, source, target);
-                var samurai = Card(command.PerformerId!);
-                GiveKeywordPermanently(samurai, "Shadowlands", source!.Id);
-                GiveKeywordPermanently(samurai, "Undead", source.Id);
-                return false;
-            }
+                {
+                    ExecuteMove(command, c.ability, source, target);
+                    var samurai = Card(command.PerformerId!);
+                    GiveKeywordPermanently(samurai, "Shadowlands", source!.Id);
+                    GiveKeywordPermanently(samurai, "Undead", source.Id);
+                    return false;
+                }
             case IvoryMovementAbilities.SneakAttack:
                 ClaimFirstOpportunity(_state.PendingEngage!.Attacker, "Engage", source);
                 return false;

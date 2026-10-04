@@ -86,8 +86,19 @@ internal static class TfStrategiesBTests
         // Each card's provenance is the earliest Emperor-era printing it was read from.
         var sources = JsonDocument.Parse(File.ReadAllText(Path.Combine(root, "content/published/strategy-wave-110-sources.json"))).RootElement.EnumerateArray()
             .ToDictionary(row => row.GetProperty("card_id").GetString()!, row => string.Join("|", row.GetProperty("printing_set").EnumerateArray().Select(x => x.GetString())));
-        var expected = new Dictionary<string, string> { [Knife] = "Emperor Edition", [Lakeside] = "Gates of Chaos", [Mercantile] = "Aftermath", [Mutual] = "Torn Asunder", [Steal] = "Aftermath",
-            [Withdrawal] = "Aftermath", [Rainbows] = "Gates of Chaos", [Unholy] = "Aftermath", [Preserving] = "Embers of War", [Unsafe] = "Embers of War" };
+        var expected = new Dictionary<string, string>
+        {
+            [Knife] = "Emperor Edition",
+            [Lakeside] = "Gates of Chaos",
+            [Mercantile] = "Aftermath",
+            [Mutual] = "Torn Asunder",
+            [Steal] = "Aftermath",
+            [Withdrawal] = "Aftermath",
+            [Rainbows] = "Gates of Chaos",
+            [Unholy] = "Aftermath",
+            [Preserving] = "Embers of War",
+            [Unsafe] = "Embers of War"
+        };
         foreach (var (id, set) in expected) Eq(sources[id], set, $"{id}'s printing");
         Eq(AbilityCatalog.All["mercantile-conflict-bow"].Timing, "Open"); Check(AbilityCatalog.All["mercantile-conflict-bow"].Discipline, "a Discipline action");
         Eq(AbilityCatalog.All["strategic-withdrawal-focus"].Timing, "FocusEffect"); Eq(AbilityCatalog.All["unholy-strike-boost"].Trigger, "before-attack-resolves");

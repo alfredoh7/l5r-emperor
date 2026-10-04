@@ -76,8 +76,21 @@ internal static class TfHoldingsTests
         Eq(CardCatalog.Get(Fortress).Text, "After the first time each turn you bow this card: Gain 1 Honor.\nBow this card: Produce 2 Gold.");
         // The sources name the reviewed printings.
         var sources = JsonDocument.Parse(File.ReadAllText(Path.Combine(root, "content/published/holding-wave-50-sources.json"))).RootElement.EnumerateArray().ToDictionary(e => e.GetProperty("card_id").GetString()!);
-        var sets = new Dictionary<string, string> { [BeautifulHost] = "Before the Dawn", [PearlBed] = "Gates of Chaos", [Colonial] = "Coils of Madness", [Fudoist] = "Gates of Chaos", [JadeMine] = "Gates of Chaos",
-            [Miryoku] = "Torn Asunder", [Nexus] = "Aftermath", [SlavePits] = "Gates of Chaos", [SmallLibrary] = "Seeds of Decay", [Suana] = "Aftermath", [Fortress] = "Embers of War", [HotSprings] = "Aftermath" };
+        var sets = new Dictionary<string, string>
+        {
+            [BeautifulHost] = "Before the Dawn",
+            [PearlBed] = "Gates of Chaos",
+            [Colonial] = "Coils of Madness",
+            [Fudoist] = "Gates of Chaos",
+            [JadeMine] = "Gates of Chaos",
+            [Miryoku] = "Torn Asunder",
+            [Nexus] = "Aftermath",
+            [SlavePits] = "Gates of Chaos",
+            [SmallLibrary] = "Seeds of Decay",
+            [Suana] = "Aftermath",
+            [Fortress] = "Embers of War",
+            [HotSprings] = "Aftermath"
+        };
         foreach (var (id, set) in sets) Check(sources[id].GetProperty("printing_set").EnumerateArray().Select(x => x.GetString()).SequenceEqual([set]), $"{id}: printing {set}");
         var pinned = File.ReadAllLines(Path.Combine(root, "tests/L5R.Core.Tests/PublishedWaves/holding-wave-50.txt")).Where(l => l.Length > 0).ToArray();
         Check(pinned.OrderBy(x => x, StringComparer.Ordinal).SequenceEqual(All.OrderBy(x => x, StringComparer.Ordinal)), "the wave pins exactly the twelve");

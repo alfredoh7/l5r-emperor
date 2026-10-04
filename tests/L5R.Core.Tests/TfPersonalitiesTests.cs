@@ -100,9 +100,24 @@ internal static class TfPersonalitiesTests
 
         // Provenance: each is wired from the intended Emperor-era printing's own scan.
         var sources = System.Text.Json.JsonDocument.Parse(File.ReadAllText(Path.Combine(RepoRoot(), "content/published/personality-wave-121-sources.json"))).RootElement;
-        var expected = new Dictionary<string, string> { [Misora] = "aftermath", [Aibako] = "promotional-emperor", [Mifuyu] = "aftermath", [Ryuko] = "gates-of-chaos", [Iguchi] = "promotional-emperor",
-            [Ikariya] = "aftermath", [Nairuko] = "honor-and-treachery", [Gorobei] = "aftermath", [Izumiko] = "promotional-emperor", [Laoshe] = "gates-of-chaos", [Yokohime] = "emperor-edition",
-            [Paikao] = "aftermath", [Kodanshi] = "seeds-of-decay", [Iabuchi] = "gates-of-chaos", [Sakiko] = "aftermath" };
+        var expected = new Dictionary<string, string>
+        {
+            [Misora] = "aftermath",
+            [Aibako] = "promotional-emperor",
+            [Mifuyu] = "aftermath",
+            [Ryuko] = "gates-of-chaos",
+            [Iguchi] = "promotional-emperor",
+            [Ikariya] = "aftermath",
+            [Nairuko] = "honor-and-treachery",
+            [Gorobei] = "aftermath",
+            [Izumiko] = "promotional-emperor",
+            [Laoshe] = "gates-of-chaos",
+            [Yokohime] = "emperor-edition",
+            [Paikao] = "aftermath",
+            [Kodanshi] = "seeds-of-decay",
+            [Iabuchi] = "gates-of-chaos",
+            [Sakiko] = "aftermath"
+        };
         foreach (var row in sources.EnumerateArray())
             Check(row.GetProperty("image_path").GetString()!.Contains($"/oracle/{expected[row.GetProperty("card_id").GetString()!]}/"), $"{row.GetProperty("card_id")} comes from the reviewed printing's scan");
         Eq(sources.GetArrayLength(), 15, "one provenance row per card");

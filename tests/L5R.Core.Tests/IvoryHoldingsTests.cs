@@ -92,10 +92,23 @@ internal static partial class IvoryHoldingsTests
         var sets = sources.EnumerateArray().ToDictionary(r => r.GetProperty("card_id").GetString()!, r => string.Join(",", r.GetProperty("printing_set").EnumerateArray().Select(x => x.GetString()!.Replace("&ndash;", "-"))));
         var expected = new Dictionary<string, string>
         {
-            [CopperMine] = "War of Honor", [GeishaHouse] = "War of Honor", [IronMine] = "Emperor Edition", [KobunePort] = "Emperor Edition", [ShinomenMarsh] = "Emperor Edition",
-            [SilverMine] = "War of Honor", [Stables] = "Emperor Edition", [FarmersMarket] = "Seeds of Decay", [TempleOfHarmony] = "War of Honor", [VastPaddyFields] = "Torn Asunder",
-            [MerchantAtoll] = "Promotional-Celestial", [JiramusCourt] = "Promotional-Emperor", [ShrineToHachiman] = "Emperor Edition", [HeavyInfantryDojo] = "Promotional-Celestial",
-            [RicePaddy] = "Honor and Treachery", [FamilyLibrary] = "War of Honor", [DeedsAndWords] = "Emperor Edition",
+            [CopperMine] = "War of Honor",
+            [GeishaHouse] = "War of Honor",
+            [IronMine] = "Emperor Edition",
+            [KobunePort] = "Emperor Edition",
+            [ShinomenMarsh] = "Emperor Edition",
+            [SilverMine] = "War of Honor",
+            [Stables] = "Emperor Edition",
+            [FarmersMarket] = "Seeds of Decay",
+            [TempleOfHarmony] = "War of Honor",
+            [VastPaddyFields] = "Torn Asunder",
+            [MerchantAtoll] = "Promotional-Celestial",
+            [JiramusCourt] = "Promotional-Emperor",
+            [ShrineToHachiman] = "Emperor Edition",
+            [HeavyInfantryDojo] = "Promotional-Celestial",
+            [RicePaddy] = "Honor and Treachery",
+            [FamilyLibrary] = "War of Honor",
+            [DeedsAndWords] = "Emperor Edition",
         };
         foreach (var (id, set) in expected) Eq(sets[id], set, $"{id}'s printing");
         foreach (var ability in new[] { "jiramus-court-straighten", "shrine-hachiman-straighten", "heavy-infantry-dojo-boost", "rice-paddy-bow", "family-library-refill", "deeds-words-reduce" })

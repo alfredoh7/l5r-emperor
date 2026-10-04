@@ -96,8 +96,16 @@ public sealed partial class MatchEngine
         Emit("lessonTaught", $"A lesson is taught: {Definition(learner).Name} learns from {Definition(teacher).Name}.", player.Id, learner.Id);
         var copy = new PendingCopy
         {
-            PlayerId = player.Id, ReceiverId = learner.Id, ActionCardId = learner.Id, CopierAbilityId = id, Duration = GrantDuration.Turn, SourceDefinitionId = teacher.DefinitionId,
-            SourceName = Definition(teacher).Name, Steps = [CopyStep.Keyword], Origin = "ability", BowedBefore = bowedBeforeAction.ToList()
+            PlayerId = player.Id,
+            ReceiverId = learner.Id,
+            ActionCardId = learner.Id,
+            CopierAbilityId = id,
+            Duration = GrantDuration.Turn,
+            SourceDefinitionId = teacher.DefinitionId,
+            SourceName = Definition(teacher).Name,
+            Steps = [CopyStep.Keyword],
+            Origin = "ability",
+            BowedBefore = bowedBeforeAction.ToList()
         };
         copy.KeywordChoices = CopyableKeywords(teacher, learner).Where(k => TfHoldingsAbilities.LessonKeywords.Contains(k, StringComparer.Ordinal)).ToList();
         return AdvanceCopy(copy);

@@ -86,12 +86,12 @@ public sealed partial class MatchEngine
         {
             // Mutual Support: the whole selection (a candidate's own legality is the "own-opposed" category's).
             case TfStrategiesBAbilities.MutualSupportBoost when ability.Slots is not null:
-            {
-                var performers = SlotCards(command, TfStrategiesBAbilities.PerformersSlot).ToArray();
-                Require(performers.All(p => ClanAlignments(p).Length > 0), "Each performer needs a Clan alignment.");
-                Require(TfStrategiesBClansDiffer(performers), "Each performer needs a different Clan alignment.");
-                break;
-            }
+                {
+                    var performers = SlotCards(command, TfStrategiesBAbilities.PerformersSlot).ToArray();
+                    Require(performers.All(p => ClanAlignments(p).Length > 0), "Each performer needs a Clan alignment.");
+                    Require(TfStrategiesBClansDiffer(performers), "Each performer needs a different Clan alignment.");
+                    break;
+                }
             // Steal an Advantage's Engage action: "if you control a Scout at this battlefield".
             case TfStrategiesBAbilities.StealEngage:
                 Require(ControlsScoutAtBattlefield(player.Id), "You control no Scout at this battlefield.");
@@ -144,13 +144,13 @@ public sealed partial class MatchEngine
         {
             // Knife in the Darkness: both move home (the movement will not be negated), then both are bowed -- each unless its own bowing is prevented.
             case TfStrategiesBAbilities.KnifeMove:
-            {
-                var performer = Card(command.PerformerId);
-                ExecuteMove(command, ability, source, target);
-                foreach (var card in new[] { performer, target! })
-                    if (InPlay(card) && !StalwartNegatesBow(card, player.Id)) card.Bowed = true;
-                return false;
-            }
+                {
+                    var performer = Card(command.PerformerId);
+                    ExecuteMove(command, ability, source, target);
+                    foreach (var card in new[] { performer, target! })
+                        if (InPlay(card) && !StalwartNegatesBow(card, player.Id)) card.Bowed = true;
+                    return false;
+                }
             // Mercantile Conflict: the Courtier is bowed; the next two Honor losses from the player's cards this turn each grow by 1.
             case TfStrategiesBAbilities.MercantileBow:
                 if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
@@ -170,27 +170,27 @@ public sealed partial class MatchEngine
                     consumedGrant, playedFromDiscard, opponentHonorBefore, bowedBefore, preExistingGrants);
             // Strategic Withdrawal: the Personality goes home; an enemy Personality, if one was targeted, has -3F (separate effects).
             case TfStrategiesBAbilities.WithdrawalMove:
-            {
-                var mover = SlotCards(command, TfStrategiesBAbilities.MoverSlot).First();
-                MoveHome(mover, false);
-                foreach (var weakened in SlotCards(command, TfStrategiesBAbilities.WeakenedSlot).ToArray())
-                    if (InPlay(weakened)) ApplyModifier(weakened, source!.Id, id, "Force", -3);
-                return false;
-            }
+                {
+                    var mover = SlotCards(command, TfStrategiesBAbilities.MoverSlot).First();
+                    MoveHome(mover, false);
+                    foreach (var weakened in SlotCards(command, TfStrategiesBAbilities.WeakenedSlot).ToArray())
+                        if (InPlay(weakened)) ApplyModifier(weakened, source!.Id, id, "Force", -3);
+                    return false;
+                }
             // The Eternal Rainbows: any Terrain at the battlefield is destroyed (if able), the Terrain enters play, and the target has +2F while it stays.
             case TfStrategiesBAbilities.RainbowsPlay:
-            {
-                if (_state.CurrentBattleProvince is int battlefield && source!.Zone == Zone.Hand)
                 {
-                    foreach (var existing in _state.Cards.Values.Where(c => c.Zone == Zone.Battlefield && c.ProvinceIndex == battlefield && Keyword(c, "Terrain") && c.Id != source.Id).OrderBy(c => c.Id, StringComparer.Ordinal).Take(1).ToArray())
-                        DiscardTerrain(existing);
-                    PutTerrainIntoPlay(player, source);
-                    _state.TfStrategiesBRainbows.RemoveAll(r => r.TerrainId == source.Id);
-                    _state.TfStrategiesBRainbows.Add(new(source.Id, target!.Id));
-                    Emit("terrainBonus", $"{Definition(target).Name} has +2F while {Definition(source).Name} stays in play.", player.Id, target.Id);
+                    if (_state.CurrentBattleProvince is int battlefield && source!.Zone == Zone.Hand)
+                    {
+                        foreach (var existing in _state.Cards.Values.Where(c => c.Zone == Zone.Battlefield && c.ProvinceIndex == battlefield && Keyword(c, "Terrain") && c.Id != source.Id).OrderBy(c => c.Id, StringComparer.Ordinal).Take(1).ToArray())
+                            DiscardTerrain(existing);
+                        PutTerrainIntoPlay(player, source);
+                        _state.TfStrategiesBRainbows.RemoveAll(r => r.TerrainId == source.Id);
+                        _state.TfStrategiesBRainbows.Add(new(source.Id, target!.Id));
+                        Emit("terrainBonus", $"{Definition(target).Name} has +2F while {Definition(source).Name} stays in play.", player.Id, target.Id);
+                    }
+                    return false;
                 }
-                return false;
-            }
             // Unholy Strike's Battle action: a Melee 2 Attack (kind and strength are the AttackKind / AttackStrengthBefore hooks below).
             case TfStrategiesBAbilities.UnholyAttack:
                 return ResolveOrDeferAttack(id, player, target?.Id, ActionPerformer(ability, command, source).Id, consumedGrant); // true: the Attack's reaction window is open and the action waits

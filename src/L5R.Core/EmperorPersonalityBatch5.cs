@@ -140,14 +140,17 @@ public sealed partial class MatchEngine
                 RefillProvinceFaceUp(player, _state.LastProvinceEntryProvinceIndex!.Value, source!);
                 return false;
             // Asako Tsunefusa: the chosen keyword, for the turn (an effect with no stated duration).
-            case "tsunefusa-kolat": case "tsunefusa-ninja": case "tsunefusa-shadowlands":
+            case "tsunefusa-kolat":
+            case "tsunefusa-ninja":
+            case "tsunefusa-shadowlands":
                 GrantKeyword(target!, id switch { "tsunefusa-kolat" => "Kolat", "tsunefusa-ninja" => "Ninja", _ => "Shadowlands" }, source!.Id, GrantDuration.Turn);
                 return false;
             // "Bow him. If he is Kolat, Ninja, or Shadowlands, choose a player..." -- the bow always happens, the player choice is the follow-up asked after it (Doji Yoshitada's shape).
             case "tsunefusa-bow":
                 if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
                 return BeginConditionalChoice(command, ability, consumedGrant, playedFromDiscard, opponentHonorBefore, bowedBefore, preExistingGrants);
-            case "yorisada-bow": case "kataken-bow":
+            case "yorisada-bow":
+            case "kataken-bow":
                 if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
                 return false;
             case "yorisada-straighten":
@@ -169,23 +172,26 @@ public sealed partial class MatchEngine
                 RedirectAction(HeldAction(), source!.Id, source);
                 return false;
             // Shiba Tsukimi: home, or to the current battlefield; the use is counted for this battle.
-            case "tsukimi-home": case "tsukimi-battlefield":
-            {
-                var uses = TsukimiUsesThisBattle(source!);
-                source!.AbilityUses[TsukimiBattleKey] = _state.BattleNumber; source.AbilityUses[TsukimiCountKey] = uses + 1;
-                // A Reaction (never a Battle action), so it needs no presence and is not an "Absent" move to the battle; it is the ordinary negatable movement.
-                if (id == "tsukimi-home") MoveHome(source, false);
-                else TryMoveToBattlefield(source, _state.CurrentBattleProvince!.Value);
-                return false;
-            }
+            case "tsukimi-home":
+            case "tsukimi-battlefield":
+                {
+                    var uses = TsukimiUsesThisBattle(source!);
+                    source!.AbilityUses[TsukimiBattleKey] = _state.BattleNumber; source.AbilityUses[TsukimiCountKey] = uses + 1;
+                    // A Reaction (never a Battle action), so it needs no presence and is not an "Absent" move to the battle; it is the ordinary negatable movement.
+                    if (id == "tsukimi-home") MoveHome(source, false);
+                    else TryMoveToBattlefield(source, _state.CurrentBattleProvince!.Value);
+                    return false;
+                }
             // Kitsu Tamasine: the Lion Ancestor; and +4F to each targeted Ancestor.
             case "tamasine-create":
                 return ExecuteCreate(ability, ability.Creates!, command, player);
-            case "tamasine-boost-one": case "tamasine-boost-many":
+            case "tamasine-boost-one":
+            case "tamasine-boost-many":
                 foreach (var ancestor in SlotCards(command, "targets").ToArray()) ApplyModifier(ancestor, source!.Id, id, "Force", 4);
                 return false;
             // Tamori Kusugi: the defender's province at the current battlefield, raised or lowered by 4 until end of turn (issue #492 ruling R3: nothing says permanent).
-            case "kusugi-raise": case "kusugi-lower":
+            case "kusugi-raise":
+            case "kusugi-lower":
                 GiveProvinceStrengthThisTurn(1 - _state.ActivePlayerId, _state.CurrentBattleProvince!.Value, id == "kusugi-raise" ? 4 : -4, "Tamori Kusugi");
                 return false;
             default:

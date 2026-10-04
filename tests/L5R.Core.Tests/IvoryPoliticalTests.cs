@@ -94,8 +94,10 @@ internal static class IvoryPoliticalTests
         Stats(Tetsubo, "Spiked Tetsubo", CardType.Item, 3, 2, 1, 0, 3, ["Heavy Weapon", "One-Handed", "Weapon"], [], "spiked-tetsubo", "After this Personality enters a duel: The other Personality in the duel loses Duelist.");
         var manifests = new Dictionary<string, string[]>
         {
-            ["strategy-wave-107"] = [Favors, Inexplicable, Confusion, LordsFavor], ["personality-wave-120"] = [Tametaka, Hibana, Taruko, Sandayu, Suki, Demiyah],
-            ["follower-wave-44"] = [Oriole], ["item-wave-40"] = [Record, Tetsubo],
+            ["strategy-wave-107"] = [Favors, Inexplicable, Confusion, LordsFavor],
+            ["personality-wave-120"] = [Tametaka, Hibana, Taruko, Sandayu, Suki, Demiyah],
+            ["follower-wave-44"] = [Oriole],
+            ["item-wave-40"] = [Record, Tetsubo],
         };
         foreach (var (wave, ids) in manifests)
         {
@@ -108,8 +110,22 @@ internal static class IvoryPoliticalTests
             Eq(CardCatalog.Get(id).ArtworkKey, $"res://Content/Published/{id}.jpg");
         }
         // Provenance: each card came from the reviewed printing, not an Ivory one.
-        var printings = new Dictionary<string, string> { [Favors] = "Before the Dawn", [Inexplicable] = "Emperor Edition", [Confusion] = "Emperor Edition", [LordsFavor] = "Seeds of Decay", [Tametaka] = "Emperor Edition",
-            [Hibana] = "Torn Asunder", [Taruko] = "Before the Dawn", [Sandayu] = "Emperor Edition", [Suki] = "Emperor Edition", [Demiyah] = "Emperor Edition", [Oriole] = "Torn Asunder", [Record] = "Before the Dawn", [Tetsubo] = "Emperor Edition" };
+        var printings = new Dictionary<string, string>
+        {
+            [Favors] = "Before the Dawn",
+            [Inexplicable] = "Emperor Edition",
+            [Confusion] = "Emperor Edition",
+            [LordsFavor] = "Seeds of Decay",
+            [Tametaka] = "Emperor Edition",
+            [Hibana] = "Torn Asunder",
+            [Taruko] = "Before the Dawn",
+            [Sandayu] = "Emperor Edition",
+            [Suki] = "Emperor Edition",
+            [Demiyah] = "Emperor Edition",
+            [Oriole] = "Torn Asunder",
+            [Record] = "Before the Dawn",
+            [Tetsubo] = "Emperor Edition"
+        };
         foreach (var wave in manifests.Keys)
         {
             var rows = System.Text.Json.JsonDocument.Parse(File.ReadAllText(Path.Combine(root, "content/published", wave + "-sources.json"))).RootElement.EnumerateArray().ToArray();

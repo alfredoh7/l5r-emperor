@@ -115,14 +115,14 @@ public sealed partial class MatchEngine
         {
             // Overcome Adversity: "Reduce his Force by your Paragon's Force. Draw a card. You may take an additional Battle action. Lose 5 Honor."
             case "overcome-adversity":
-            {
-                var paragon = Card(command.PerformerId!);
-                ApplyModifier(target!, source!.Id, id, "Force", -CardForce(paragon));
-                Draw(player);
-                GrantAdditionalAction(player.Id, null);
-                GainHonor(player.Id, -5, Definition(source).Name, source);
-                return false;
-            }
+                {
+                    var paragon = Card(command.PerformerId!);
+                    ApplyModifier(target!, source!.Id, id, "Force", -CardForce(paragon));
+                    Draw(player);
+                    GrantAdditionalAction(player.Id, null);
+                    GainHonor(player.Id, -5, Definition(source).Name, source);
+                    return false;
+                }
             // Preserving Beauty: the check names the battlefield's province now; it is judged as the turn ends.
             case "preserving-beauty":
                 // A battlefield without a province has none to keep (issue #492, rulings pass R1): nothing is queued.
@@ -150,12 +150,12 @@ public sealed partial class MatchEngine
                 return false;
             // Social Grace's Open action: the penalty is the Courtier's Personal Honor now; the watch pays 2 Honor each time he is assigned to attack this turn.
             case "social-grace-penalty":
-            {
-                var courtier = Card(command.PerformerId!);
-                ApplyModifier(target!, source!.Id, id, "Force", -CardPersonalHonor(courtier));
-                _state.AssignmentWatches.Add(new(target!.Id, WatchSocialGrace, player.Id, _state.TurnNumber, Definition(source).Name));
-                return false;
-            }
+                {
+                    var courtier = Card(command.PerformerId!);
+                    ApplyModifier(target!, source!.Id, id, "Force", -CardPersonalHonor(courtier));
+                    _state.AssignmentWatches.Add(new(target!.Id, WatchSocialGrace, player.Id, _state.TurnNumber, Definition(source).Name));
+                    return false;
+                }
             // Subtle Games: the Courtier was bowed as the cost.
             case "subtle-games-dishonor":
                 Dishonor(target!);
@@ -193,12 +193,12 @@ public sealed partial class MatchEngine
             // Void Tattoo: the discard (unless Void) and the removal were the costs.
             case "void-tattoo-return":
             case "void-tattoo-return-void":
-            {
-                var tattoo = SlotCards(command, "target").FirstOrDefault() ?? target!;
-                if (tattoo.Zone == Zone.FateDiscard) ReturnToHand(tattoo);
-                GrantAdditionalAction(player.Id, null);
-                return false;
-            }
+                {
+                    var tattoo = SlotCards(command, "target").FirstOrDefault() ?? target!;
+                    if (tattoo.Zone == Zone.FateDiscard) ReturnToHand(tattoo);
+                    GrantAdditionalAction(player.Id, null);
+                    return false;
+                }
             // Paralyzing Touch's Battle action: to another unresolved battlefield (the command names it); bowed if he moved.
             case "paralyzing-touch-move":
                 if (ExecuteMove(command, ability, source, target) && !StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
@@ -214,12 +214,12 @@ public sealed partial class MatchEngine
                 return BeginGameHasChangedChoice(command, consumedGrant, playedFromDiscard, opponentHonorBeforeBattleAction, bowedBeforeAction, preExistingGrants);
             // Watchers in the Dark.
             case "watchers-dark-recon":
-            {
-                GrantReconnaissanceAtCurrentBattlefield(player.Id);
-                var host = Card(UnitHostId(target!));
-                foreach (var card in Attachments(host.Id).Prepend(host).ToArray()) DisableAllAbilities(card, Definition(source!).Name);
-                return false;
-            }
+                {
+                    GrantReconnaissanceAtCurrentBattlefield(player.Id);
+                    var host = Card(UnitHostId(target!));
+                    foreach (var card in Attachments(host.Id).Prepend(host).ToArray()) DisableAllAbilities(card, Definition(source!).Name);
+                    return false;
+                }
             default:
                 return null;
         }
@@ -416,8 +416,14 @@ public sealed partial class MatchEngine
         if (options.Length == 0) return false;
         OpenGameHasChangedChoice(command, options, new()
         {
-            Command = command, PlayerId = command.PlayerId, Negated = _state.NegatedEffects.ToList(), ConsumedGrant = consumedGrant, PlayedFromDiscard = playedFromDiscard,
-            OpponentHonorBefore = opponentHonorBefore, BowedBefore = bowedBefore.ToList(), PreExistingGrants = preExistingGrants.ToList()
+            Command = command,
+            PlayerId = command.PlayerId,
+            Negated = _state.NegatedEffects.ToList(),
+            ConsumedGrant = consumedGrant,
+            PlayedFromDiscard = playedFromDiscard,
+            OpponentHonorBefore = opponentHonorBefore,
+            BowedBefore = bowedBefore.ToList(),
+            PreExistingGrants = preExistingGrants.ToList()
         });
         return true;
     }
@@ -461,8 +467,14 @@ public sealed partial class MatchEngine
         if (options.Length == 0) return false;
         OpenGameHasChangedChoice(pending.Command, options, new()
         {
-            Command = pending.Command, PlayerId = pending.PlayerId, Negated = pending.Negated, ConsumedGrant = pending.ConsumedGrant, PlayedFromDiscard = pending.PlayedFromDiscard,
-            OpponentHonorBefore = pending.OpponentHonorBefore, BowedBefore = pending.BowedBefore, PreExistingGrants = pending.PreExistingGrants
+            Command = pending.Command,
+            PlayerId = pending.PlayerId,
+            Negated = pending.Negated,
+            ConsumedGrant = pending.ConsumedGrant,
+            PlayedFromDiscard = pending.PlayedFromDiscard,
+            OpponentHonorBefore = pending.OpponentHonorBefore,
+            BowedBefore = pending.BowedBefore,
+            PreExistingGrants = pending.PreExistingGrants
         });
         return true;
     }

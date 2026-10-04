@@ -230,20 +230,20 @@ public sealed partial class MatchEngine
             case IvoryPoliticalAbilities.DemiyahGain: ApplyPlayerHonorChoice(source!, command.TargetPlayerId!.Value, 1); return false;
             case IvoryPoliticalAbilities.DemiyahLose: ApplyPlayerHonorChoice(source!, command.TargetPlayerId!.Value, -1); return false;
             case IvoryPoliticalAbilities.RecordOfFailureHonor:
-            {
-                var owed = Definition(target!).PersonalHonor;
-                if (owed > 0) GainHonor(target!.OwnerId, -owed, Definition(source!).Name, source);
-                return false;
-            }
+                {
+                    var owed = Definition(target!).PersonalHonor;
+                    if (owed > 0) GainHonor(target!.OwnerId, -owed, Definition(source!).Name, source);
+                    return false;
+                }
             case IvoryPoliticalAbilities.SukiHonor:
-            {
-                foreach (var p in _state.Players.ToArray())
-                    if (ControlsAncestor(p.Id)) ApplyPlayerHonorChoice(source!, p.Id, 1);
-                var candidates = SukiCandidates();
-                if (candidates.Length == 0) return false;
-                return BeginListedEffectChoice(command, SukiOptions(player.Id, candidates), $"{Definition(source!).Name}: choose who, if anyone, loses 1 Honor.",
-                    consumedGrant, playedFromDiscard, opponentHonorBefore, bowedBefore, preExistingGrants);
-            }
+                {
+                    foreach (var p in _state.Players.ToArray())
+                        if (ControlsAncestor(p.Id)) ApplyPlayerHonorChoice(source!, p.Id, 1);
+                    var candidates = SukiCandidates();
+                    if (candidates.Length == 0) return false;
+                    return BeginListedEffectChoice(command, SukiOptions(player.Id, candidates), $"{Definition(source!).Name}: choose who, if anyone, loses 1 Honor.",
+                        consumedGrant, playedFromDiscard, opponentHonorBefore, bowedBefore, preExistingGrants);
+                }
             default:
                 return null;
         }

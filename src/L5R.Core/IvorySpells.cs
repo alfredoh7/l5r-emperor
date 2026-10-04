@@ -129,15 +129,15 @@ public sealed partial class MatchEngine
         switch (id)
         {
             case IvorySpellAbilities.DeafeningThunderWeaken:
-            {
-                var shugenja = WielderOf(source!)!;
-                ApplyModifier(target!, source!.Id, id, "Force", -PersonalityChi(shugenja));
-                if (!InPlay(target!) || !(CardForce(target!) == 0 || Keyword(shugenja, "Thunder")) || source.Zone != Zone.Attached) return false;
-                // "You may destroy this card; if you did, take an additional Battle action": the acting player decides (Extend the Soul's Boundaries' shape for the grant).
-                if (!consumedGrant && ForfeitsAdditionalActions(ability)) _state.AdditionalActions.RemoveAll(preExistingGrants.Contains);
-                var stay = _state.AdditionalActions.Any(g => g.PlayerId == player.Id && Forfeitable(g));
-                return OpenEitherOr(IvorySpellAbilities.DeafeningThunderDestroySpec, source, player.Id, player.Id, target, "action", bowedBeforeAction, stay);
-            }
+                {
+                    var shugenja = WielderOf(source!)!;
+                    ApplyModifier(target!, source!.Id, id, "Force", -PersonalityChi(shugenja));
+                    if (!InPlay(target!) || !(CardForce(target!) == 0 || Keyword(shugenja, "Thunder")) || source.Zone != Zone.Attached) return false;
+                    // "You may destroy this card; if you did, take an additional Battle action": the acting player decides (Extend the Soul's Boundaries' shape for the grant).
+                    if (!consumedGrant && ForfeitsAdditionalActions(ability)) _state.AdditionalActions.RemoveAll(preExistingGrants.Contains);
+                    var stay = _state.AdditionalActions.Any(g => g.PlayerId == player.Id && Forfeitable(g));
+                    return OpenEitherOr(IvorySpellAbilities.DeafeningThunderDestroySpec, source, player.Id, player.Id, target, "action", bowedBeforeAction, stay);
+                }
             case IvorySpellAbilities.SeekingTheWayMove:
                 MoveHome(target!, false);
                 GainHonor(player.Id, 2, Definition(source!).Name, source);

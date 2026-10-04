@@ -19,7 +19,8 @@ public sealed partial class MatchEngine
 {
     private DuelChallenge DescribeChallenge(string abilityId, CardInstance? source, bool refusable)
     {
-        var loss = abilityId switch {
+        var loss = abilityId switch
+        {
             "steel-on-steel-duel" or "ichizo-exp-duel" or "shikei-duel" or "makoto-duel" or IvorySpellAbilities.SanctionedDuel => "Defeat: the losing unit is destroyed.",
             "daisuke-duel" => "Defeat: the losing unit moves home.",
             "training-duel-force" or "training-duel-honor" or "training-duel-open" or "training-duel-challenge" => "Defeat: the losing Personality gets −1 Force this turn.",
@@ -46,51 +47,59 @@ public sealed partial class MatchEngine
 
     private void RecordDuelChanges(DuelEvidence before, string kind, CardView? source, bool recordNoChange = false, string? sourceLabel = null)
     {
-        if (_state.LastDuel is not {} record) return;
+        if (_state.LastDuel is not { } record) return;
         var lines = new List<string>(); var affected = new List<string>();
         foreach (var (id, prior) in before.Cards)
         {
             if (!_state.Cards.TryGetValue(id, out var current)) continue;
             if (prior.Zone == current.Zone) continue;
-            var destination = current.Zone switch {
-                Zone.Dead => "is destroyed", Zone.FateDiscard or Zone.DynastyDiscard => "is discarded",
-                Zone.Home => "moves home", Zone.RemovedFromGame => "is removed from the game", _ => null };
+            var destination = current.Zone switch
+            {
+                Zone.Dead => "is destroyed",
+                Zone.FateDiscard or Zone.DynastyDiscard => "is discarded",
+                Zone.Home => "moves home",
+                Zone.RemovedFromGame => "is removed from the game",
+                _ => null
+            };
             if (destination is not null) { lines.Add($"{prior.Definition!.Name} {destination}."); affected.Add(id); }
         }
         foreach (var player in _state.Players)
         {
-            var changes = player.Provinces.Select((p,i) => EffectiveProvinceStrength(p)-before.Provinces[player.Id][i]).ToArray();
-            if (changes.Length>0 && changes.All(d => d==changes[0]) && changes[0]!=0)
+            var changes = player.Provinces.Select((p, i) => EffectiveProvinceStrength(p) - before.Provinces[player.Id][i]).ToArray();
+            if (changes.Length > 0 && changes.All(d => d == changes[0]) && changes[0] != 0)
                 lines.Add($"{player.Name}: all provinces {changes[0]:+0;−0} strength.");
-            else for (var i=0;i<changes.Length;i++) if (changes[i]!=0)
-                lines.Add($"{player.Name}: province {i+1} {changes[i]:+0;−0} strength.");
-            var honor=player.Honor-before.Honor[player.Id];
-            if (honor!=0) lines.Add($"{player.Name}: {honor:+0;−0} Honor.");
-            var draws=_state.Events.Skip(before.EventCount).Count(e=>e.Type=="cardDrawn"&&e.PlayerId==player.Id);
-            if (draws>0) lines.Add($"{player.Name} draws {draws} {(draws==1?"card":"cards")}.");
+            else for (var i = 0; i < changes.Length; i++) if (changes[i] != 0)
+                lines.Add($"{player.Name}: province {i + 1} {changes[i]:+0;−0} strength.");
+            var honor = player.Honor - before.Honor[player.Id];
+            if (honor != 0) lines.Add($"{player.Name}: {honor:+0;−0} Honor.");
+            var draws = _state.Events.Skip(before.EventCount).Count(e => e.Type == "cardDrawn" && e.PlayerId == player.Id);
+            if (draws > 0) lines.Add($"{player.Name} draws {draws} {(draws == 1 ? "card" : "cards")}.");
         }
-        if (before.Favor!=_state.FavorPlayerId)
-            lines.Add(_state.FavorPlayerId is {} owner ? $"{Player(owner).Name} takes the Imperial Favor." : "The Imperial Favor is relinquished.");
+        if (before.Favor != _state.FavorPlayerId)
+            lines.Add(_state.FavorPlayerId is { } owner ? $"{Player(owner).Name} takes the Imperial Favor." : "The Imperial Favor is relinquished.");
         // Public modifiers may change without moving a card (training penalties / Iaijutsu bonus).
         foreach (var (id, prior) in before.Cards)
         {
             if (!_state.Cards.TryGetValue(id, out var card) || card.Zone is Zone.Hand or Zone.FateDeck or Zone.DynastyDeck) continue;
-            var now=ViewCard(card);
-            if (now.Zone==prior.Zone && now.Force!=prior.Force) { lines.Add($"{prior.Definition!.Name}: Force {prior.Force} → {now.Force}."); affected.Add(id); }
+            var now = ViewCard(card);
+            if (now.Zone == prior.Zone && now.Force != prior.Force) { lines.Add($"{prior.Definition!.Name}: Force {prior.Force} → {now.Force}."); affected.Add(id); }
         }
-        if (lines.Count==0 && !recordNoChange) return;
-        if (lines.Count==0) lines.Add("No change from this effect.");
-        var beats=record.Beats??[];
-        _state.LastDuel=record with { Beats=[..beats,new(beats.Length,kind,source,lines.ToArray(),affected.Distinct().ToArray(),sourceLabel)] };
+        if (lines.Count == 0 && !recordNoChange) return;
+        if (lines.Count == 0) lines.Add("No change from this effect.");
+        var beats = record.Beats ?? [];
+        _state.LastDuel = record with { Beats = [.. beats, new(beats.Length, kind, source, lines.ToArray(), affected.Distinct().ToArray(), sourceLabel)] };
     }
 
     private void RecordDuelReveal(string kind)
     {
         var duel = _state.PendingDuel!;
         var record = _state.LastDuel!;
-        _state.LastDuel = record with { Reveals = [..record.Reveals,
+        _state.LastDuel = record with
+        {
+            Reveals = [..record.Reveals,
             new(_state.Events[^1].Sequence, kind, duel.ChallengerFocused.Concat(duel.ChallengedFocused)
-                .Select(id => ViewCard(Card(id))).ToArray())] };
+                .Select(id => ViewCard(Card(id))).ToArray())]
+        };
     }
 
     private void RefreshDuelRecord()
@@ -99,10 +108,16 @@ public sealed partial class MatchEngine
         // Reactions belong to the same presentation, but do not change the resolved totals.
         // Retain only public duel consequences, never private draw events from aftermath reactions.
         var consequences = _state.Events.Where(e => e.Sequence >= (result.Consequences.FirstOrDefault()?.Sequence ?? long.MaxValue)
-            && e.Type is not ("draw" or "duelFocused")).Select(e => e with { CardId =
-                e.CardId is { } id && _state.Cards.TryGetValue(id, out var card) && card.Zone is Zone.Hand or Zone.FateDeck or Zone.DynastyDeck ? null : e.CardId }).ToArray();
-        _state.LastDuel = record with { Complete = _state.PendingDuel is null && _state.PendingChoice is null,
-            Result = result with { Consequences = consequences, ReturnPhase = _state.Phase, ReturnPriority = _state.PriorityPlayerId } };
+            && e.Type is not ("draw" or "duelFocused")).Select(e => e with
+            {
+                CardId =
+                e.CardId is { } id && _state.Cards.TryGetValue(id, out var card) && card.Zone is Zone.Hand or Zone.FateDeck or Zone.DynastyDeck ? null : e.CardId
+            }).ToArray();
+        _state.LastDuel = record with
+        {
+            Complete = _state.PendingDuel is null && _state.PendingChoice is null,
+            Result = result with { Consequences = consequences, ReturnPhase = _state.Phase, ReturnPriority = _state.PriorityPlayerId }
+        };
     }
 
     private ActionOption[] QueryDuelActions(int playerId)

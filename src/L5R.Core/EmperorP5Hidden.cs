@@ -357,18 +357,18 @@ public sealed partial class MatchEngine
                 BeginLook(ability.Look!, source!, player.Id, "ability", bowedBeforeAction);
                 return true;
             case EmperorP5HiddenAbilities.ScoutingPass:
-            {
-                GrantReconnaissanceAtCurrentBattlefield(player.Id);
-                var defender = Player(1 - player.Id);
-                var hand = defender.Hand.ToList();
-                var random = new StableRandom(_state.RngState);
-                random.Shuffle(hand);
-                _state.RngState = random.State;
-                SeeHandCards(player.Id, defender.Id, hand.Take(2), Definition(source!).Name);
-                ClaimFirstOpportunity(player.Id, "Engage", source);
-                if (_state.PendingEngage is { } engage) { engage.NavalPerformerId = command.PerformerId; P5.ScoutingBattle = _state.BattleNumber; } // "which must be performed by that Scout": the first-action limit (CloseEngageWindow)
-                return false;
-            }
+                {
+                    GrantReconnaissanceAtCurrentBattlefield(player.Id);
+                    var defender = Player(1 - player.Id);
+                    var hand = defender.Hand.ToList();
+                    var random = new StableRandom(_state.RngState);
+                    random.Shuffle(hand);
+                    _state.RngState = random.State;
+                    SeeHandCards(player.Id, defender.Id, hand.Take(2), Definition(source!).Name);
+                    ClaimFirstOpportunity(player.Id, "Engage", source);
+                    if (_state.PendingEngage is { } engage) { engage.NavalPerformerId = command.PerformerId; P5.ScoutingBattle = _state.BattleNumber; } // "which must be performed by that Scout": the first-action limit (CloseEngageWindow)
+                    return false;
+                }
             case EmperorP5HiddenAbilities.StolenAbility:
                 if (!InPlay(target!)) return false;
                 GrantAbility(source!, command.Choice!, id, GrantDuration.Turn, target!.DefinitionId, Definition(target).Name);
@@ -378,23 +378,23 @@ public sealed partial class MatchEngine
                 if (InPlay(target!)) StealGoldTrait(source!, target!, Definition(source!).Name);
                 return false;
             case EmperorP5HiddenAbilities.Learning:
-            {
-                var strategy = target!;
-                if (strategy.Zone != Zone.FateDiscard) return false;
-                strategy.AbilityUses[SecondUseKey] = _state.TurnNumber; // "Its abilities may be used an additional time this turn"
-                var performer = Card(command.PerformerId!);
-                if (command.Choice is { } keyword && InPlay(performer) && !Keyword(performer, keyword))
                 {
-                    performer.GrantedKeywords.Add(new(keyword, id, GrantDuration.Turn));
-                    Emit("keywordCopied", $"{Definition(performer).Name} copies the keyword {keyword} from an enemy Personality.", player.Id, performer.Id);
+                    var strategy = target!;
+                    if (strategy.Zone != Zone.FateDiscard) return false;
+                    strategy.AbilityUses[SecondUseKey] = _state.TurnNumber; // "Its abilities may be used an additional time this turn"
+                    var performer = Card(command.PerformerId!);
+                    if (command.Choice is { } keyword && InPlay(performer) && !Keyword(performer, keyword))
+                    {
+                        performer.GrantedKeywords.Add(new(keyword, id, GrantDuration.Turn));
+                        Emit("keywordCopied", $"{Definition(performer).Name} copies the keyword {keyword} from an enemy Personality.", player.Id, performer.Id);
+                    }
+                    // The additional action to play it: the player controls the Strategy while that action stands.
+                    strategy.OriginalOwnerId ??= strategy.OwnerId; strategy.OwnerId = player.Id;
+                    if (!P5.Borrowed.Contains(strategy.Id)) P5.Borrowed.Add(strategy.Id);
+                    GrantAdditionalAction(player.Id, [strategy.Id], fromDiscard: true);
+                    Emit("strategyBorrowed", $"{Definition(source!).Name}: {player.Name} may take an additional action to play {Definition(strategy).Name} from {Player(strategy.OriginalOwnerId!.Value).Name}'s discard pile; it is removed from the game after it resolves.", player.Id, strategy.Id);
+                    return false;
                 }
-                // The additional action to play it: the player controls the Strategy while that action stands.
-                strategy.OriginalOwnerId ??= strategy.OwnerId; strategy.OwnerId = player.Id;
-                if (!P5.Borrowed.Contains(strategy.Id)) P5.Borrowed.Add(strategy.Id);
-                GrantAdditionalAction(player.Id, [strategy.Id], fromDiscard: true);
-                Emit("strategyBorrowed", $"{Definition(source!).Name}: {player.Name} may take an additional action to play {Definition(strategy).Name} from {Player(strategy.OriginalOwnerId!.Value).Name}'s discard pile; it is removed from the game after it resolves.", player.Id, strategy.Id);
-                return false;
-            }
             default:
                 return null;
         }

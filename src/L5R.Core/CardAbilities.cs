@@ -4187,7 +4187,7 @@ public sealed partial class MatchEngine
         // Seeds of Decay (issue #453, batch 3): Utaku Hirononri only straightens his target.
         or "hirononri-straighten"
         or "jiramus-court-straighten" or "shrine-hachiman-straighten" // issue #622 (holding-wave-48, IvoryHoldings.cs): Jiramu's Court and the Shrine to Hachiman only straighten their target
-        // The Shadow's Embrace pass (issue #476), batch 4: Serenity in Air only straightens its target.
+                                                                      // The Shadow's Embrace pass (issue #476), batch 4: Serenity in Air only straightens its target.
         or "serenity-air-straighten" or "serenity-air-straighten-open"
         or IvoryPoliticalAbilities.SandayuStraighten or IvoryPoliticalAbilities.LordsFavorStraighten // Ivory pass (issue #622)
         or "hama-straighten" // Emperor Edition Personality pass (issue #477), batch 3
@@ -4267,7 +4267,7 @@ public sealed partial class MatchEngine
         "servitors-of-stone-straighten" => "straighten", // issue #622: Servitors of Stone straightens its target.
         TfStrategiesAAbilities.OutpostOpen or TfStrategiesAAbilities.OutpostBattle => "straighten", // Ivory Magistrate Outpost (issue #622)
         _ => EmperorRemainingEMoveKind(abilityId) ?? RulingR2MoveKind(abilityId) // Emperor Edition remaining-cards pass (issue #492), group E: Obscured Pathways and Unnatural Flood move their target home.
-            // issue #622 (IvoryMovement.cs): Determined Challenge, Treachery and Deceit and Soul's Sacrifice move their target.
+                                                                                 // issue #622 (IvoryMovement.cs): Determined Challenge, Treachery and Deceit and Soul's Sacrifice move their target.
             ?? IvoryMovementMoveKind(abilityId)
             ?? (abilityId is EmperorMechEAbilities.GreasingBattle or EmperorP3Abilities.RequestMove or EmperorP3Abilities.KentaMove or EmperorP3EntryAbilities.PersuasionMove ? "move" : null) // issue #501: Greasing the Wheels moves its target home (or straightens his unit)
     };
@@ -5528,7 +5528,7 @@ public sealed partial class MatchEngine
                 || MechAEvenIfBowed(id) // Mirumoto Inokuchi (issue #501): "Even if Inokuchi is bowed".
                 || id == EmperorP4UnitAbilities.HayanAssign // Shinjo Hayan's trait (issue #503): a trait is usable while its card is bowed
                 || MechEEvenIfBowed(id) // issue #501: Moto Rani - exp ("Even if Rani is bowed"); Kakita Kae's trait (a trait is usable while bowed)
-                // issue #622 (IvoryPolitical.cs): Komori Taruko ("Even if Taruko is bowed")
+                                        // issue #622 (IvoryPolitical.cs): Komori Taruko ("Even if Taruko is bowed")
                 || IvoryPoliticalEvenIfBowed(id)
                 || TirelessStronghold(source) || UnsafePassageWaives(command, source), "Abilities on bowed cards cannot be used.");
             uses = source.AbilityUses;

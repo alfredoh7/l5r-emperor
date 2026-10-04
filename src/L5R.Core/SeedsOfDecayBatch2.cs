@@ -409,14 +409,14 @@ public sealed partial class MatchEngine
                 Emit("ringsBarred", "Brotherhood Schism: until the turn ends, Rings will not enter play for a player who already put one into play this turn.", player.Id);
                 break;
             case "brotherhood-schism-shuffle":
-            {
-                var owner = Player(target!.OwnerId);
-                target.Zone = Zone.DynastyDeck; target.FaceUp = false; target.ProvinceIndex = null;
-                owner.DynastyDeck.Add(target.Id);
-                ShuffleDeck(owner, "Dynasty");
-                Emit("eventShuffled", $"{Definition(target).Name} was shuffled into {owner.Name}'s Dynasty deck (Brotherhood Schism).", player.Id, target.Id);
-                break;
-            }
+                {
+                    var owner = Player(target!.OwnerId);
+                    target.Zone = Zone.DynastyDeck; target.FaceUp = false; target.ProvinceIndex = null;
+                    owner.DynastyDeck.Add(target.Id);
+                    ShuffleDeck(owner, "Dynasty");
+                    Emit("eventShuffled", $"{Definition(target).Name} was shuffled into {owner.Name}'s Dynasty deck (Brotherhood Schism).", player.Id, target.Id);
+                    break;
+                }
             case "baiko-shame": GainHonor(target!.OwnerId, -1, "Yasuki Baiko", source); break;
             case "baiko-favor": TakeImperialFavor(player.Id); Emit("favorTaken", $"{player.Name} took the Imperial Favor (Yasuki Baiko).", player.Id, source?.Id); break;
             case "tsujiken-exp-bow": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;
@@ -424,12 +424,12 @@ public sealed partial class MatchEngine
             case "tsujiken-exp-draw": Draw(player); break;
             case "tsujiken-exp-dishonor": Dishonor(target!); GainHonor(target!.OwnerId, -1, "Yasuki Tsujiken", source); break;
             case "ugimori-proclaim-lock":
-            {
-                var locked = command.TargetPlayerId!.Value;
-                _state.ProclaimLocks.Add(new(locked, player.Id, player.TurnsTaken + 1));
-                Emit("proclaimLocked", $"{Player(locked).Name} may not take the Proclaim Reaction until {player.Name}'s next turn begins (Yogo Ugimori).", player.Id, source?.Id);
-                break;
-            }
+                {
+                    var locked = command.TargetPlayerId!.Value;
+                    _state.ProclaimLocks.Add(new(locked, player.Id, player.TurnsTaken + 1));
+                    Emit("proclaimLocked", $"{Player(locked).Name} may not take the Proclaim Reaction until {player.Name}'s next turn begins (Yogo Ugimori).", player.Id, source?.Id);
+                    break;
+                }
             case "shibata-exp-bow":
                 if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
                 if (EffectConditionMet(id, target) && CurrentProvinceIndex() is int shibataProvince) GiveProvinceStrengthThisTurn(1 - _state.ActivePlayerId, shibataProvince, 3, "Bayushi Shibata");
@@ -447,11 +447,11 @@ public sealed partial class MatchEngine
         if (type != "proclaimNegateReaction") return false;
         // Turning the Story (issue #453, batch 2): the one reacting player answers -- the Reaction (negating the held Proclaim) or a pass -- and the
         // Proclaim then resolves, negated or not, back inside the Proclaim window it interrupted (SeedsOfDecayBatch2.cs).
-        Require(command.Type is "useAbility" or "declineReaction" or "pass","Resolve the before-Proclaim reaction window first.");
-        if (command.Type=="useAbility") UseAbility(command);
-        else Emit("reactionPassed",$"{Player(command.PlayerId).Name} passed the reaction opportunity.",command.PlayerId);
+        Require(command.Type is "useAbility" or "declineReaction" or "pass", "Resolve the before-Proclaim reaction window first.");
+        if (command.Type == "useAbility") UseAbility(command);
+        else Emit("reactionPassed", $"{Player(command.PlayerId).Name} passed the reaction opportunity.", command.PlayerId);
         // The window closes the instant the one reacting player has answered: a pass, or the Reaction that negated the Proclaim.
-        if (_state.HeldProclaim is { } held && (command.Type!="useAbility" || held.Negated)) { _state.PendingChoice=null; _state.ConsecutivePasses=0; ResolveHeldProclaim(); }
+        if (_state.HeldProclaim is { } held && (command.Type != "useAbility" || held.Negated)) { _state.PendingChoice = null; _state.ConsecutivePasses = 0; ResolveHeldProclaim(); }
         return true;
     }
 }

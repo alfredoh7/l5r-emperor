@@ -291,12 +291,12 @@ public sealed partial class MatchEngine
                 NegateEffects(Card(command.PerformerId!), "move");
                 return false;
             case "height-courage-boost":
-            {
-                var performer = Card(command.PerformerId!);
-                ApplyModifier(performer, source!.Id, id, "Force", 1);
-                foreach (var follower in Attachments(performer.Id).Where(a => Definition(a).Type == CardType.Follower).ToArray()) ApplyModifier(follower, source.Id, id, "Force", 1);
-                return false;
-            }
+                {
+                    var performer = Card(command.PerformerId!);
+                    ApplyModifier(performer, source!.Id, id, "Force", 1);
+                    foreach (var follower in Attachments(performer.Id).Where(a => Definition(a).Type == CardType.Follower).ToArray()) ApplyModifier(follower, source.Id, id, "Force", 1);
+                    return false;
+                }
             case "selfless-defense-move":
                 ExecuteMove(command, ability, source, target);
                 if (InPlay(target!) && (ControlsPersonalityWithKeyword(player.Id, "Courtier") || ControlsPersonalityWithKeyword(player.Id, "Shugenja")) && !StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
@@ -305,12 +305,12 @@ public sealed partial class MatchEngine
                 foreach (var moved in SlotCards(command, "targets").ToArray()) if (InPlay(moved)) MoveHome(moved, false);
                 return false;
             case "summoned-justice-move":
-            {
-                var moved = ExecuteMove(command, ability, source, target);
-                if (moved && InPlay(target!) && !StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
-                if (InPlay(target!) && target!.Dishonorable) GainHonor(target.OwnerId, -Definition(target).PersonalHonor, Definition(source!).Name, source);
-                return false;
-            }
+                {
+                    var moved = ExecuteMove(command, ability, source, target);
+                    if (moved && InPlay(target!) && !StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
+                    if (InPlay(target!) && target!.Dishonorable) GainHonor(target.OwnerId, -Definition(target).PersonalHonor, Definition(source!).Name, source);
+                    return false;
+                }
             // The Monk straightens, and an additional Battle action is granted that HE must perform.
             case "spinning-heel-kick-straighten":
                 Straighten(Card(command.PerformerId!));
@@ -342,46 +342,46 @@ public sealed partial class MatchEngine
                 Emit("rumorsTravel", $"{Definition(source!).Name}: until {player.Name}'s next turn begins, each Honor gain outside a battle or Attack Phase is reduced by 1.", player.Id, source!.Id);
                 return false;
             case "rumors-travel-move":
-            {
-                var performer = Card(command.PerformerId!);
-                var wasAtBattle = AtBattle(performer);
-                ExecuteMove(command, ability, source, target);
-                if (!wasAtBattle && AtBattle(performer)) Straighten(performer);
-                return false;
-            }
+                {
+                    var performer = Card(command.PerformerId!);
+                    var wasAtBattle = AtBattle(performer);
+                    ExecuteMove(command, ability, source, target);
+                    if (!wasAtBattle && AtBattle(performer)) Straighten(performer);
+                    return false;
+                }
             // Sacrifice of Pawns: the Courtier's destruction was the cost. The played Strategy is spent now (the decision that follows finishes the action), then the target's controller chooses.
             case "sacrifice-pawns-destroy":
-            {
-                SpendHandPlayedCard(player, source);
-                var opened = OpenEitherOr(EitherOrSpecs.SacrificeOfPawns, source!, player.Id, target!.OwnerId, target, "action", bowedBeforeAction, performerId: command.PerformerId);
-                // A refusal taken automatically (the target already gone) has begun the search itself.
-                return opened || _state.PendingSearch is not null;
-            }
+                {
+                    SpendHandPlayedCard(player, source);
+                    var opened = OpenEitherOr(EitherOrSpecs.SacrificeOfPawns, source!, player.Id, target!.OwnerId, target, "action", bowedBeforeAction, performerId: command.PerformerId);
+                    // A refusal taken automatically (the target already gone) has begun the search itself.
+                    return opened || _state.PendingSearch is not null;
+                }
             case "stay-put-bow":
                 if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
                 return false;
             // The enemy card is bowed, then the Weapon (the action's primary target) is attached to the performing Kensai; an entering-play window ends the action here.
             case "stay-put-bow-attach":
             case "stay-put-bow-attach-discount":
-            {
-                if (SlotCards(command, "target").FirstOrDefault() is { } bowed && InPlay(bowed) && !StalwartNegatesBow(bowed, player.Id)) bowed.Bowed = true;
-                var opened = ExecuteAttach(command, ability.Attach!, player, source, target);
-                if (opened) SpendHandPlayedCard(player, source);
-                return opened;
-            }
-            case "shadows-walk-take":
-            {
-                var performers = PerformingSlotCards(command, ability).Count();
-                if (target!.Zone == Zone.Attached && Definition(target).Type is CardType.Follower or CardType.Item or CardType.Spell) DestroyAttachment(target);
-                else if (Definition(target).Type == CardType.Personality && InPlay(target) && PersonalityChi(target) <= performers)
                 {
-                    GrantKeyword(target, "Ninja", id, GrantDuration.Permanent);
-                    GrantKeyword(target, "Shadowlands", id, GrantDuration.Permanent);
-                    TakeControlOfPersonality(target, player.Id, Definition(source!).Name);
+                    if (SlotCards(command, "target").FirstOrDefault() is { } bowed && InPlay(bowed) && !StalwartNegatesBow(bowed, player.Id)) bowed.Bowed = true;
+                    var opened = ExecuteAttach(command, ability.Attach!, player, source, target);
+                    if (opened) SpendHandPlayedCard(player, source);
+                    return opened;
                 }
-                GainHonor(player.Id, -3, Definition(source!).Name, source);
-                return false;
-            }
+            case "shadows-walk-take":
+                {
+                    var performers = PerformingSlotCards(command, ability).Count();
+                    if (target!.Zone == Zone.Attached && Definition(target).Type is CardType.Follower or CardType.Item or CardType.Spell) DestroyAttachment(target);
+                    else if (Definition(target).Type == CardType.Personality && InPlay(target) && PersonalityChi(target) <= performers)
+                    {
+                        GrantKeyword(target, "Ninja", id, GrantDuration.Permanent);
+                        GrantKeyword(target, "Shadowlands", id, GrantDuration.Permanent);
+                        TakeControlOfPersonality(target, player.Id, Definition(source!).Name);
+                    }
+                    GainHonor(player.Id, -3, Definition(source!).Name, source);
+                    return false;
+                }
             case "fires-of-war-second-use":
                 Card(player.StrongholdId).AbilityUses[SecondUseKey] = _state.TurnNumber;
                 Emit("secondUseGranted", $"{Definition(source!).Name}: each ability on {player.Name}'s Stronghold may be used a second time this turn.", player.Id, source!.Id);
@@ -392,20 +392,20 @@ public sealed partial class MatchEngine
                 return BringDeadPersonalityIntoPlay(player, target!, Definition(source!).Name, null, _ => GainHonor(player.Id, 2, Definition(source!).Name, source));
             // Snake Tattoo: the Personality the action targets moves to the chosen adjacent battlefield; if he is then no longer a legal target the action's effects on him are negated.
             case "snake-tattoo-move":
-            {
-                var held = HeldAction();
-                var moving = Card(held.TargetId!);
-                MoveByRule(moving, ability.Move!, command.Province);
-                RecheckTarget(held, moving);
-                return false;
-            }
+                {
+                    var held = HeldAction();
+                    var moving = Card(held.TargetId!);
+                    MoveByRule(moving, ability.Move!, command.Province);
+                    RecheckTarget(held, moving);
+                    return false;
+                }
             case "superior-opponent-bow":
-            {
-                var chi = PersonalityChi(Card(command.PerformerId!));
-                foreach (var member in UnitMembers(target!).Where(m => Definition(m).Type is CardType.Personality or CardType.Follower && CardForce(m) <= chi).ToArray())
-                    if (InPlay(member) && !StalwartNegatesBow(member, player.Id)) member.Bowed = true;
-                return false;
-            }
+                {
+                    var chi = PersonalityChi(Card(command.PerformerId!));
+                    foreach (var member in UnitMembers(target!).Where(m => Definition(m).Type is CardType.Personality or CardType.Follower && CardForce(m) <= chi).ToArray())
+                        if (InPlay(member) && !StalwartNegatesBow(member, player.Id)) member.Bowed = true;
+                    return false;
+                }
             default:
                 return null;
         }
