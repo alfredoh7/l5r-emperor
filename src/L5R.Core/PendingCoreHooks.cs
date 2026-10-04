@@ -148,7 +148,7 @@ public sealed partial class MatchEngine
         Require(command.Type is "useAbility" or "declineReaction" or "pass", "Resolve the entry reaction window first.");
         if (command.Type == "useAbility") UseAbility(command); else PassReaction();
         FinishPendingAttachTracking(); // Hida Takeuchi (issue #477 batch 2): the Equip whose attached Follower opened this window is now finished.
-        ContinueRegretEntryQueue(); // Regret (RegretEmbracingVirtue.cs): the next attached card's own entry window, once this one has closed.
+        ContinueRegret(); // Regret (RegretEmbracingVirtue.cs): the next card begins once this one's entry window has closed.
         return true;
     }
     private bool HandleRegisteredAttackReaction(string type, GameCommand command)

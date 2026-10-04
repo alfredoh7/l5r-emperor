@@ -21,11 +21,13 @@ internal static class RegretEmbracingVirtueTests
         ("Regret's Focus Effect: the duel's winner's controller loses 1 Honor for each card his side focused, whoever's Regret it is; a loser loses nothing", RegretFocusEffect),
         ("Regret's Focus Effect: Kakita Gonji's +4 instead of focusing is not a focus and is not counted", RegretIgnoresGonji),
         ("Regret's Focus Effect: two Regrets in one duel each take their toll", TwoRegrets),
-        ("Regret's Open action: one or more Followers and Items from your own discard pile go to your Personalities, each to the one named for it, for the sum of their Equip costs, and Regret is spent", OpenAttachesSeveral),
-        ("Regret's Open action: the attachments' own legality still applies as one -- caps, Unique, hosts that refuse, counts that do not match, other piles and Spells are refused with nothing changed", OpenLegality),
+        ("Regret's Open action: each Follower or Item goes to the Personality named for it as its own equip, in order -- paid for on its own at its turn, attached before the next is begun, Regret spent", OpenAttachesSeveral),
+        ("Regret's Open action: a card that cannot be paid for when its turn comes stays in the pile", OpenSkipsWhatCannotBePaidFor),
+        ("Regret's Open action: the attachments' own legality still applies -- caps, Unique, hosts that refuse, counts that do not match, other piles and Spells are refused with nothing changed", OpenLegality),
+        ("Regret's Open action is an Action Phase action: it is not offered in a battle", OpenIsAnActionPhaseAction),
         ("Regret's Open action is not Equip (Battle): no additional action, and an action printed on a card attached by it is usable at the very next action", OpenIsNotEquipBattle),
-        ("Regret's Open action: Platinum Mine's bonus for paying for an attachment applies to the whole payment, whatever number of cards are attached", OpenPlatinumMine),
-        ("Regret's Open action: every attached card opens its own entering-play window, one after another", OpenEntryWindows),
+        ("Regret's Open action: every card is paid for as an attachment, so Platinum Mine's bonus applies to each", OpenPlatinumMine),
+        ("Regret's Open action: each attached card resolves its entering-play window before the next card begins", OpenEntryWindows),
     ]);
 
     // ---- Published shape --------------------------------------------------------------------------------------------------------------------------------
@@ -48,7 +50,7 @@ internal static class RegretEmbracingVirtueTests
             Eq(CardCatalog.Get(id).ArtworkKey, $"res://Content/Published/{id}.jpg");
         }
         Eq(AbilityCatalog.All["regret-focus"].Timing, "FocusEffect"); Eq(AbilityCatalog.All["regret-attach"].Timing, "Open");
-        Eq(AbilityCatalog.All[Open].Cost!.Basis, GoldCostBasis.AttachSlotsCost);
+        Check(AbilityCatalog.All[Open].Cost is null, "the action costs nothing of its own: each card is paid for in its turn");
         Check(AbilityCatalog.All[Open].Slots!.Length == 2 && AbilityCatalog.All[Open].Slots![0].Max > 1 && AbilityCatalog.All[Open].Slots![1].Repeatable, "several cards, and a repeatable choice of Personalities");
     }
 
@@ -232,13 +234,11 @@ internal static class RegretEmbracingVirtueTests
     // ---- Regret: the Open action ------------------------------------------------------------------------------------------------------------------------
     private sealed record Rig(MatchEngine E, CardInstance Regret, CardInstance A, CardInstance B, CardInstance Follower, CardInstance Item, CardInstance Weapon, CardInstance Weapon2, CardInstance Armor, CardInstance Armor2, CardInstance[] Farms);
 
-    private static Rig OpenRig(Phase phase = Phase.Action, Action<MatchState, Rig>? tweak = null)
+    private static Rig OpenRig(Action<MatchState, Rig>? tweak = null)
     {
-        var s = Table(phase, phase == Phase.Battle ? 1 : 0); s.PriorityPlayerId = 0; s.Players[0].TurnsTaken = 3; s.Players[1].TurnsTaken = 3; s.Players[0].Honor = 20;
+        var s = Table(Phase.Action, 0); s.PriorityPlayerId = 0; s.Players[0].TurnsTaken = 3; s.Players[1].TurnsTaken = 3; s.Players[0].Honor = 20;
         var regret = Add(s, Regret, 0, Zone.Hand);
-        var a = Add(s, "training-crane-samurai", 0, phase == Phase.Battle ? Zone.Battlefield : Zone.Home, province: phase == Phase.Battle ? 0 : null);
-        var b = Add(s, "training-crane-samurai", 0, Zone.Home);
-        if (phase == Phase.Battle) Add(s, "training-lion-samurai", 1, Zone.Battlefield, province: 0);
+        var a = Add(s, "training-crane-samurai", 0, Zone.Home); var b = Add(s, "training-crane-samurai", 0, Zone.Home);
         var follower = Add(s, "training-follower", 0, Zone.FateDiscard); var item = Add(s, "training-item", 0, Zone.FateDiscard);
         var weapon = Add(s, "training-weapon", 0, Zone.FateDiscard); var weapon2 = Add(s, "training-weapon", 0, Zone.FateDiscard);
         var armor = Add(s, "training-armor", 0, Zone.FateDiscard); var armor2 = Add(s, "training-armor", 0, Zone.FateDiscard);
@@ -248,16 +248,37 @@ internal static class RegretEmbracingVirtueTests
         return rig with { E = MatchEngine.FromTestState(s) };
     }
 
-    // The offered command with the chosen cards and Personalities, paid with sources the engine suggests for the price it quotes.
-    private static GameCommand Attach(Rig r, CardInstance[] cards, CardInstance[] hosts, bool paid = true)
+    // The offered command with the chosen cards and Personalities. It carries no payment: each card is paid for when its turn comes.
+    private static GameCommand Attach(Rig r, CardInstance[] cards, CardInstance[] hosts) =>
+        Enabled(r.E, 0, Open, r.Regret.Id).Command! with { TargetId = null, Selections = [Pick("attachments", cards.Select(c => c.Id).ToArray()), Pick("personality", hosts.Select(h => h.Id).ToArray())] };
+
+    private static bool Untouched(Rig r) => r.E.State.Cards[r.Regret.Id].Zone == Zone.Hand && r.E.State.Cards.Values.All(c => c.Zone != Zone.Attached) && r.E.State.Events.All(x => x.Type != "payment") && r.E.State.PendingChoice is null;
+
+    // The one enabled answer of the card now being attached (the engine's own suggested payment is on it).
+    private static ActionOption StepAnswer(MatchEngine e)
     {
-        var offer = Enabled(r.E, 0, Open, r.Regret.Id);
-        var command = offer.Command! with { TargetId = null, Selections = [Pick("attachments", cards.Select(c => c.Id).ToArray()), Pick("personality", hosts.Select(h => h.Id).ToArray())] };
-        var quote = r.E.QuoteAbilityGold(command);
-        return paid && quote is { Cost: > 0 } ? command with { SourceIds = quote.Payments.First().SourceIds } : command;
+        Eq(e.State.PendingChoice?.Type, "eitherOr", "a card is waiting to be paid for");
+        return e.QueryActions(0).Single(a => a.Type == "chooseEitherOr" && a.Enabled && a.Command!.Choice == "attach");
     }
 
-    private static bool Untouched(Rig r) => r.E.State.Cards[r.Regret.Id].Zone == Zone.Hand && r.E.State.Cards.Values.All(c => c.Zone != Zone.Attached) && r.E.State.Events.All(x => x.Type != "payment");
+    private static void PassWindow(MatchEngine e)
+    {
+        for (var guard = 0; guard < 6 && e.State.PendingChoice is { Type: "entryReaction" }; guard++)
+            Accept(e, e.QueryActions(e.State.PriorityPlayerId).First(a => a.Enabled && a.Command is not null && a.Type is "declineReaction" or "pass").Command!);
+    }
+
+    // Pays for each card as it comes (with the suggested sources) and passes each entering-play window, until nothing is open. Returns how many cards were paid for.
+    private static int Settle(MatchEngine e)
+    {
+        var paid = 0;
+        for (var guard = 0; guard < 40 && e.State.PendingChoice is not null; guard++)
+        {
+            if (e.State.PendingChoice.Type == "eitherOr") { Accept(e, StepAnswer(e).Command!); paid++; }
+            else PassWindow(e);
+        }
+        Check(e.State.PendingChoice is null, "everything was settled");
+        return paid;
+    }
 
     private static void OpenAttachesSeveral()
     {
@@ -266,27 +287,42 @@ internal static class RegretEmbracingVirtueTests
         var attachments = offer.Slots!.Single(x => x.Slot == "attachments"); var hosts = offer.Slots!.Single(x => x.Slot == "personality");
         Check(attachments.Min == 1 && attachments.Max >= 6 && new[] { r.Follower, r.Item, r.Weapon, r.Weapon2, r.Armor, r.Armor2 }.All(c => attachments.CardIds.Contains(c.Id)), "every Follower and Item of his own pile is a candidate, up to as many as there are");
         Check(hosts.CardIds.Contains(r.A.Id) && hosts.CardIds.Contains(r.B.Id) && hosts.Min == 1, "his Personalities are the hosts");
-        // A Follower and an Item and a Weapon: 2 + 2 + 1 = 5 Gold, the Follower and the Item to A, the Weapon to B.
-        var command = Attach(r, [r.Follower, r.Item, r.Weapon], [r.A, r.A, r.B]);
-        var quote = r.E.QuoteAbilityGold(command)!;
-        Eq(quote.Cost, 5, "each card's own Equip cost, added up"); Eq(quote.Kind, GoldCostKind.Derived, "a derived price"); Check(quote.Basis.Contains('+'), "the basis names each term: " + quote.Basis);
-        Reject(r.E, command with { SourceIds = r.Farms.Take(2).Select(f => f.Id).ToArray() });  // 4 Gold is not 5
-        Check(Untouched(r), "the refused command changed nothing");
-        Accept(r.E, command);
+        Check(offer.Gold is null or { Cost: 0 }, "the action itself costs nothing: each card is paid for in its turn");
+        // A Follower and an Item to A, a Weapon to B: each its own equip, in order -- 2, then 2, then 1 Gold.
+        Accept(r.E, Attach(r, [r.Follower, r.Item, r.Weapon], [r.A, r.A, r.B]));
+        Eq(r.E.State.Cards[r.Regret.Id].Zone, Zone.FateDiscard, "Regret was spent as it was played");
+        Check(r.E.State.Events.All(x => x.Type != "payment") && r.E.State.Cards[r.Follower.Id].Zone == Zone.FateDiscard, "nothing is attached or paid until the first card is answered");
+        var first = StepAnswer(r.E);
+        Eq(first.Gold!.Cost, 2, "the first card costs its own 2"); Check(first.Label.Contains("Training ashigaru") || first.Label.Contains(CardCatalog.Get("training-follower").Name), "it is the first card named: " + first.Label);
+        Accept(r.E, first.Command!);
         var st = r.E.State;
         Check(st.Cards[r.Follower.Id].Zone == Zone.Attached && st.Cards[r.Follower.Id].AttachedTo == r.A.Id, "the Follower is on the first Personality");
-        Check(st.Cards[r.Item.Id].Zone == Zone.Attached && st.Cards[r.Item.Id].AttachedTo == r.A.Id, "the Item on the same one, named twice");
-        Check(st.Cards[r.Weapon.Id].Zone == Zone.Attached && st.Cards[r.Weapon.Id].AttachedTo == r.B.Id, "the Weapon on the second");
+        Check(st.Cards[r.Item.Id].Zone == Zone.FateDiscard && st.Cards[r.Weapon.Id].Zone == Zone.FateDiscard, "the others wait their turn in the pile");
+        Eq(st.Events.Count(x => x.Type == "payment"), 1, "one payment so far");
+        Eq(StepAnswer(r.E).Gold!.Cost, 2, "the Item is quoted and paid on its own");
+        Eq(Settle(r.E), 2, "two more cards were paid for");
+        st = r.E.State;
+        Check(st.Cards[r.Item.Id].AttachedTo == r.A.Id && st.Cards[r.Weapon.Id].AttachedTo == r.B.Id, "the Item is on the same Personality, named twice; the Weapon is on the second");
         Check(st.Cards[r.Weapon2.Id].Zone == Zone.FateDiscard && st.Cards[r.Armor.Id].Zone == Zone.FateDiscard, "what was not chosen is still in the pile");
-        Eq(st.Cards[r.Regret.Id].Zone, Zone.FateDiscard, "Regret was spent");
-        Eq(st.Events.Count(x => x.Type == "payment"), 1, "paid once, for all of it");
+        Eq(string.Join(",", st.Events.Where(x => x.Type == "payment").Select(x => x.CardId)), string.Join(",", new[] { r.Follower.Id, r.Item.Id, r.Weapon.Id }), "three payments, one for each card, in order");
         Eq(Honor(r.E, 0), 20, "no Honor changed");
         Eq(r.E.CardForceForTest(r.A.Id), 3 + 2, "the Item's Force counts for the Personality (3 + 2); a Follower's is the unit's");
 
         // One card to one Personality: the plain case.
         var one = OpenRig();
-        Accept(one.E, Attach(one, [one.Armor], [one.B]));
+        Accept(one.E, Attach(one, [one.Armor], [one.B])); Settle(one.E);
         Check(one.E.State.Cards[one.Armor.Id].AttachedTo == one.B.Id && one.E.State.Cards[one.Regret.Id].Zone == Zone.FateDiscard, "a single card works as Foothills Keep's does");
+    }
+
+    private static void OpenSkipsWhatCannotBePaidFor()
+    {
+        // Only one Farm can produce Gold: the Follower (2) is paid for and attached; the Item (2) and the Weapon (1) cannot be, and stay in the pile.
+        var r = OpenRig((s, rig) => { foreach (var c in s.Cards.Values.Where(c => c.OwnerId == 0 && CardCatalog.Get(c.DefinitionId).GoldProduction > 0 && c.Zone is Zone.Home or Zone.Stronghold)) c.Bowed = true; rig.Farms[0].Bowed = false; });
+        Accept(r.E, Attach(r, [r.Follower, r.Item, r.Weapon], [r.A, r.A, r.B]));
+        Eq(Settle(r.E), 1, "only the Follower could be paid for");
+        var st = r.E.State;
+        Check(st.Cards[r.Follower.Id].Zone == Zone.Attached && st.Cards[r.Item.Id].Zone == Zone.FateDiscard && st.Cards[r.Weapon.Id].Zone == Zone.FateDiscard, "the cards that could not be paid for stay in the pile");
+        Eq(st.Cards[r.Regret.Id].Zone, Zone.FateDiscard, "Regret was spent all the same"); Eq(st.PriorityPlayerId, 1, "and the action ended");
     }
 
     private static void OpenLegality()
@@ -294,20 +330,20 @@ internal static class RegretEmbracingVirtueTests
         var r = OpenRig();
         // Two Weapons for a Personality without Kensai are one too many; to two Personalities they are fine.
         Reject(r.E, Attach(r, [r.Weapon, r.Weapon2], [r.A, r.A])); Check(Untouched(r), "two Weapons for one Personality: refused, nothing moved or paid");
-        Accept(r.E, Attach(r, [r.Weapon, r.Weapon2], [r.A, r.B]));
+        Accept(r.E, Attach(r, [r.Weapon, r.Weapon2], [r.A, r.B])); Settle(r.E);
         Check(r.E.State.Cards[r.Weapon.Id].AttachedTo == r.A.Id && r.E.State.Cards[r.Weapon2.Id].AttachedTo == r.B.Id, "a Weapon for each");
         // Armor the same; and a Weapon already attached counts against the cap too.
-        var r2 = OpenRig(); Reject(r2.E, Attach(r2, [r2.Armor, r2.Armor2], [r2.A, r2.A])); Accept(r2.E, Attach(r2, [r2.Armor, r2.Armor2], [r2.A, r2.B]));
-        var r3 = OpenRig(Phase.Action, (s, rig) => Add(s, "training-weapon", 0, Zone.Attached, parent: rig.A.Id));
-        Reject(r3.E, Attach(r3, [r3.Weapon], [r3.A])); Accept(r3.E, Attach(r3, [r3.Weapon], [r3.B]));
+        var r2 = OpenRig(); Reject(r2.E, Attach(r2, [r2.Armor, r2.Armor2], [r2.A, r2.A])); Accept(r2.E, Attach(r2, [r2.Armor, r2.Armor2], [r2.A, r2.B])); Settle(r2.E);
+        var r3 = OpenRig((s, rig) => Add(s, "training-weapon", 0, Zone.Attached, parent: rig.A.Id));
+        Reject(r3.E, Attach(r3, [r3.Weapon], [r3.A])); Accept(r3.E, Attach(r3, [r3.Weapon], [r3.B])); Settle(r3.E);
         // Unique: two copies of one Unique card cannot both enter; neither can one while you control another.
-        var r4 = OpenRig(Phase.Action, (s, rig) => { Add(s, "training-unique-weapon", 0, Zone.FateDiscard); Add(s, "training-unique-weapon", 0, Zone.FateDiscard); });
+        var r4 = OpenRig((s, rig) => { Add(s, "training-unique-weapon", 0, Zone.FateDiscard); Add(s, "training-unique-weapon", 0, Zone.FateDiscard); });
         var uniques = r4.E.State.Cards.Values.Where(c => c.DefinitionId == "training-unique-weapon").ToArray();
-        Reject(r4.E, Attach(r4, uniques, [r4.A, r4.B])); Accept(r4.E, Attach(r4, [uniques[0]], [r4.A]));
-        var r5 = OpenRig(Phase.Action, (s, rig) => { Add(s, "training-unique-weapon", 0, Zone.Attached, parent: rig.B.Id); Add(s, "training-unique-weapon", 0, Zone.FateDiscard); });
+        Reject(r4.E, Attach(r4, uniques, [r4.A, r4.B])); Accept(r4.E, Attach(r4, [uniques[0]], [r4.A])); Settle(r4.E);
+        var r5 = OpenRig((s, rig) => { Add(s, "training-unique-weapon", 0, Zone.Attached, parent: rig.B.Id); Add(s, "training-unique-weapon", 0, Zone.FateDiscard); });
         Reject(r5.E, Attach(r5, [r5.E.State.Cards.Values.Single(c => c.DefinitionId == "training-unique-weapon" && c.Zone == Zone.FateDiscard)], [r5.A]));
         // A host that refuses attachments refuses the whole action.
-        var r6 = OpenRig(Phase.Action, (s, rig) => Add(s, Natsumi, 0, Zone.Home));
+        var r6 = OpenRig((s, rig) => Add(s, Natsumi, 0, Zone.Home));
         var natsumi = r6.E.State.Cards.Values.Single(c => c.DefinitionId == Natsumi);
         Reject(r6.E, Attach(r6, [r6.Follower, r6.Item], [r6.A, natsumi])); Check(Untouched(r6), "one host that will not attach Followers or Items: nothing happens");
         // The count of Personalities must match the count of cards.
@@ -315,7 +351,7 @@ internal static class RegretEmbracingVirtueTests
         Reject(r10.E, Attach(r10, [r10.Follower, r10.Item], [r10.A])); Reject(r10.E, Attach(r10, [r10.Follower], [r10.A, r10.B])); Check(Untouched(r10), "a Personality for each card, and no more");
         // A Spell, another player's pile and a card that is not a Follower or Item are not targets.
         var strayIds = new List<string>();
-        var r7 = OpenRig(Phase.Action, (s, rig) => { strayIds.Add(Add(s, "training-spell", 0, Zone.FateDiscard).Id); strayIds.Add(Add(s, "training-follower", 1, Zone.FateDiscard).Id); strayIds.Add(Add(s, "training-farm", 0, Zone.FateDiscard).Id); });
+        var r7 = OpenRig((s, rig) => { strayIds.Add(Add(s, "training-spell", 0, Zone.FateDiscard).Id); strayIds.Add(Add(s, "training-follower", 1, Zone.FateDiscard).Id); strayIds.Add(Add(s, "training-farm", 0, Zone.FateDiscard).Id); });
         var offer = Enabled(r7.E, 0, Open, r7.Regret.Id).Slots!.Single(x => x.Slot == "attachments").CardIds;
         var stray = strayIds.ToArray();
         Eq(stray.Length, 3, "the three stray cards exist");
@@ -323,20 +359,29 @@ internal static class RegretEmbracingVirtueTests
         foreach (var id in stray) Reject(r7.E, Enabled(r7.E, 0, Open, r7.Regret.Id).Command! with { TargetId = null, Selections = [Pick("attachments", id), Pick("personality", r7.A.Id)] });
         Check(Untouched(r7), "nothing was attached by any refused command");
         // Another player's Personality is not one of yours; an opponent may not use your Regret.
-        var enemy = Add(r.E.State, "training-lion-samurai", 1, Zone.Home); var r8 = OpenRig(Phase.Action, (s, rig) => Add(s, "training-lion-samurai", 1, Zone.Home));
+        var r8 = OpenRig((s, rig) => Add(s, "training-lion-samurai", 1, Zone.Home));
         var foe = r8.E.State.Cards.Values.First(c => c.OwnerId == 1 && c.Zone == Zone.Home && CardCatalog.Get(c.DefinitionId).Type == CardType.Personality);
         Reject(r8.E, Enabled(r8.E, 0, Open, r8.Regret.Id).Command! with { TargetId = null, Selections = [Pick("attachments", r8.Follower.Id), Pick("personality", foe.Id)] });
-        Check(!CanUse(r8.E, 1, Open, r8.Regret.Id) && enemy.OwnerId == 1, "the other player cannot use it");
+        Check(!CanUse(r8.E, 1, Open, r8.Regret.Id), "the other player cannot use it");
         // Not in hand: no action.
-        var r9 = OpenRig(Phase.Action, (s, rig) => rig.Regret.Zone = Zone.FateDiscard);
+        var r9 = OpenRig((s, rig) => rig.Regret.Zone = Zone.FateDiscard);
         Check(!CanUse(r9.E, 0, Open, r9.Regret.Id), "Regret is played from the hand");
+    }
+
+    private static void OpenIsAnActionPhaseAction()
+    {
+        // Regret prints no Battle designator: an Open action is an Action Phase one, and is not offered in a battle (Mendon).
+        var s = Table(Phase.Battle, 1); s.PriorityPlayerId = 0; s.Players[0].TurnsTaken = 3; s.Players[1].TurnsTaken = 3;
+        var regret = Add(s, Regret, 0, Zone.Hand); Add(s, "training-crane-samurai", 0, Zone.Battlefield, province: 0); Add(s, "training-lion-samurai", 1, Zone.Battlefield, province: 0);
+        Add(s, "training-follower", 0, Zone.FateDiscard); Add(s, "training-farm", 0, Zone.Home);
+        Check(!CanUse(MatchEngine.FromTestState(s), 0, Open, regret.Id), "not offered in a battle");
     }
 
     private static void OpenIsNotEquipBattle()
     {
         // No additional action: the Open action ends as an ordinary action does, and priority passes.
         var r = OpenRig();
-        Accept(r.E, Attach(r, [r.Follower], [r.A]));
+        Accept(r.E, Attach(r, [r.Follower], [r.A])); Settle(r.E);
         Eq(r.E.State.AdditionalActions.Count, 0, "no additional action was granted");
         Eq(r.E.State.PriorityPlayerId, 1, "priority passed to the other player");
 
@@ -347,9 +392,8 @@ internal static class RegretEmbracingVirtueTests
         var valued = Add(s, "training-value-item", 0, Zone.FateDiscard); for (var i = 0; i < 3; i++) Add(s, "training-farm", 0, Zone.Home);
         var e = MatchEngine.FromTestState(s);
         Check(!CanUse(e, 0, "training-create-from-wielder", valued.Id), "in the discard pile its action is not available");
-        var command = Enabled(e, 0, Open, regret.Id).Command! with { TargetId = null, Selections = [Pick("attachments", valued.Id), Pick("personality", samurai.Id)] };
-        var quote = e.QuoteAbilityGold(command);
-        Accept(e, quote is { Cost: > 0 } ? command with { SourceIds = quote.Payments.First().SourceIds } : command);
+        Accept(e, Enabled(e, 0, Open, regret.Id).Command! with { TargetId = null, Selections = [Pick("attachments", valued.Id), Pick("personality", samurai.Id)] });
+        Settle(e);
         Eq(e.State.Cards[valued.Id].AttachedTo, samurai.Id, "the Item is on the Personality");
         Eq(e.State.AdditionalActions.Count, 0, "and no additional action was granted");
         Eq(e.State.PriorityPlayerId, 1, "the other player has the next action");
@@ -358,40 +402,47 @@ internal static class RegretEmbracingVirtueTests
         Check(CanUse(e, 0, "training-create-from-wielder", valued.Id), "the Item's own Open action is available straight away");
     }
 
+    private static void OpenPlatinumMine()
+    {
+        // Each card is paid for as an attachment, so Platinum Mine (6 Gold for an attachment, 5 otherwise) is quoted at 6 for every one of them -- and, bowed by the first, is not offered for the second.
+        var r = OpenRig((s, rig) => Add(s, "oracle-l5r-9798", 0, Zone.Home));
+        var mine = r.E.State.Cards.Values.Single(c => c.DefinitionId == "oracle-l5r-9798");
+        Accept(r.E, Attach(r, [r.Item, r.Armor], [r.A, r.B]));
+        var first = StepAnswer(r.E);
+        Check(first.Gold!.Payments.Any(p => p.SourceIds.SequenceEqual([mine.Id]) && p.Produced == 6), "the Mine produces 6 for the first attachment");
+        Accept(r.E, first.Command! with { SourceIds = [mine.Id] });
+        Check(r.E.State.Cards[mine.Id].Bowed && r.E.State.Cards[r.Item.Id].AttachedTo == r.A.Id, "the Mine paid for the Item");
+        var second = StepAnswer(r.E);
+        Check(second.Gold!.Payments.All(p => !p.SourceIds.Contains(mine.Id)), "bowed, it is not a source for the second card");
+        Accept(r.E, second.Command!);
+        Check(r.E.State.Cards[r.Armor.Id].AttachedTo == r.B.Id, "the second card was paid for on its own");
+        // A fresh position: the second card is the one the Mine pays for, with the same bonus.
+        var r2 = OpenRig((s, rig) => Add(s, "oracle-l5r-9798", 0, Zone.Home));
+        var mine2 = r2.E.State.Cards.Values.Single(c => c.DefinitionId == "oracle-l5r-9798");
+        Accept(r2.E, Attach(r2, [r2.Armor], [r2.A]));
+        Check(StepAnswer(r2.E).Gold!.Payments.Any(p => p.SourceIds.SequenceEqual([mine2.Id]) && p.Produced == 6), "and for a single card");
+    }
+
     private static void OpenEntryWindows()
     {
-        // Two Items that each have an "after entering play" Reaction: each opens its own window, the second only once the first has closed.
-        var r = OpenRig(Phase.Action, (s, rig) => { Add(s, "training-item-entry-reaction", 0, Zone.FateDiscard); Add(s, "training-item-entry-reaction", 0, Zone.FateDiscard); });
+        // Two Items that each have an "after entering play" Reaction: the first is paid for, attached and has its window; only when that has closed does the second begin.
+        var r = OpenRig((s, rig) => { Add(s, "training-item-entry-reaction", 0, Zone.FateDiscard); Add(s, "training-item-entry-reaction", 0, Zone.FateDiscard); });
         var items = r.E.State.Cards.Values.Where(c => c.DefinitionId == "training-item-entry-reaction").OrderBy(c => c.Id, StringComparer.Ordinal).ToArray();
         Accept(r.E, Attach(r, items, [r.A, r.B]));
-        Check(items.All(i => r.E.State.Cards[i.Id].Zone == Zone.Attached), "both are attached before either window opens");
-        Eq(r.E.State.PendingChoice?.Type, "entryReaction", "the first window is open"); Eq(r.E.State.PendingChoice?.CardId, items[0].Id, "for the first card");
-        Eq(r.E.State.Cards[r.Regret.Id].Zone, Zone.FateDiscard, "Regret was spent as the window opened");
+        Eq(r.E.State.PendingChoice?.Type, "eitherOr", "the first card is asked for first");
+        Accept(r.E, StepAnswer(r.E).Command!);
+        Eq(r.E.State.PendingChoice?.Type, "entryReaction", "its window is open"); Eq(r.E.State.PendingChoice?.CardId, items[0].Id, "for the first card");
+        Check(r.E.State.Cards[items[0].Id].Zone == Zone.Attached && r.E.State.Cards[items[1].Id].Zone == Zone.FateDiscard, "the second card is still in the pile while the first resolves");
         var honor = Honor(r.E, 0);
         Accept(r.E, Use(r.E, 0, "training-item-entry-reaction", items[0].Id));
         Eq(Honor(r.E, 0), honor + 1, "its Reaction was used");
-        for (var guard = 0; guard < 6 && r.E.State.PendingChoice is { Type: "entryReaction" } && r.E.State.PendingChoice.CardId == items[0].Id; guard++)
-            Accept(r.E, r.E.QueryActions(r.E.State.PriorityPlayerId).First(a => a.Enabled && a.Command is not null && a.Type is "declineReaction" or "pass").Command!);
-        Eq(r.E.State.PendingChoice?.Type, "entryReaction", "the second window opened when the first closed"); Eq(r.E.State.PendingChoice?.CardId, items[1].Id, "for the second card");
-        for (var guard = 0; guard < 6 && r.E.State.PendingChoice is { Type: "entryReaction" }; guard++)
-            Accept(r.E, r.E.QueryActions(r.E.State.PriorityPlayerId).First(a => a.Enabled && a.Command is not null && a.Type is "declineReaction" or "pass").Command!);
-        Check(r.E.State.PendingChoice is null && r.E.State.Regret.EntryQueue.Count == 0, "both windows closed and nothing is left owing");
+        PassWindow(r.E);
+        Eq(r.E.State.PendingChoice?.Type, "eitherOr", "the first window closed: now the second card is asked for");
+        Accept(r.E, StepAnswer(r.E).Command!);
+        Eq(r.E.State.PendingChoice?.Type, "entryReaction", "the second card's window"); Eq(r.E.State.PendingChoice?.CardId, items[1].Id, "for the second card");
+        PassWindow(r.E);
+        Check(r.E.State.PendingChoice is null && !r.E.State.Regret.Active && r.E.State.Regret.Steps.Count == 0, "both windows closed and nothing is left owing");
         Eq(Honor(r.E, 0), honor + 1, "the second Reaction was passed");
-    }
-
-    private static void OpenPlatinumMine()
-    {
-        // Four cards cost 2 + 2 + 1 + 1 = 6 Gold. Platinum Mine alone produces 6 when paying for an attachment (5 otherwise), so it can pay all of them by itself.
-        var r = OpenRig(Phase.Action, (s, rig) => Add(s, "oracle-l5r-9798", 0, Zone.Home));
-        var mine = r.E.State.Cards.Values.Single(c => c.DefinitionId == "oracle-l5r-9798");
-        var command = Attach(r, [r.Follower, r.Item, r.Weapon, r.Armor], [r.A, r.A, r.B, r.B], paid: false);
-        Eq(r.E.QuoteAbilityGold(command)!.Cost, 6, "the four cards cost 6");
-        Accept(r.E, command with { SourceIds = [mine.Id] });
-        Check(r.E.State.Cards[mine.Id].Bowed && r.E.State.Cards[r.Armor.Id].AttachedTo == r.B.Id, "the Mine alone paid for every card");
-        // Paying for one card is the same bonus.
-        var one = OpenRig(Phase.Action, (s, rig) => Add(s, "oracle-l5r-9798", 0, Zone.Home));
-        var mine1 = one.E.State.Cards.Values.Single(c => c.DefinitionId == "oracle-l5r-9798");
-        Accept(one.E, Attach(one, [one.Item], [one.A], paid: false) with { SourceIds = [mine1.Id] });
-        Check(one.E.State.Cards[mine1.Id].Bowed, "and for a single card");
+        Check(r.E.State.Cards[items[1].Id].AttachedTo == r.B.Id, "the second card is on the second Personality");
     }
 }

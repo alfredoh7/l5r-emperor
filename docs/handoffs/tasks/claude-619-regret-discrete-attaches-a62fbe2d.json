@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Rework Regret's Open action per Mendon's rulings R-029/R-030: each attached Follower/Item is its own equip, paid for independently as an attachment (Platinum Mine applies every time), attached and its entering-play window resolved before the next card begins; action costs nothing itself; Action Phase only. Removes the combined AttachSlotsCost basis. Either/Or payments can now name what they pay for (EitherOrPayingFor). Confirms R-026 (any End Phase) and R-027 (any in-place-of-focusing ability not a focus).",
+  "validation": "Core all suites pass incl. 14 regret-embracing-virtue tests; AI 97/97, Server 9/9, Client.Transport 18/18, Collection 55; formatting check on touched files. No content or scan change, so no art pack change. Godot client not built; no native playtest.",
+  "remaining": "Client must present Regret's per-card Either/Or (chooseEitherOr, spec regret-attach-card) after the two-slot selection; the reaction opportunity per card is its entering-play window (no separate before-action window per card).",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/619",
+  "branch": "claude/619-regret-discrete-attaches",
+  "updated": "2026-10-04T13:25:37.999724+00:00"
+}
