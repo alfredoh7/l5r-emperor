@@ -110,9 +110,9 @@ public partial class CatalogueProbe : Node
             await Capture("focus-filter"); browser.CloseMenus(); await Wait(.2);
             _screen.ResetFilters(); await Wait(.2); Click(FindButton(b => b.Text == "Fate")); await Wait(.3);
             Click(browser.Actions.Trigger); await Wait(.3);
-            Check(Walk(_screen).OfType<CheckBox>().Where(c => c.IsVisibleInTree()).Select(c => c.Text).SequenceEqual(["Limited", "Open", "Battle", "Battle/Open", "Reaction", "None"]), "Action Type offers the six requested choices");
+            Check(Walk(_screen).OfType<CheckBox>().Where(c => c.IsVisibleInTree()).Select(c => c.Text).SequenceEqual(["Limited", "Open", "Battle", "Battle/Open", "Battle/Limited", "Reaction", "None"]), "Action Type offers the seven choices");
             Activate(Walk(_screen).OfType<CheckBox>().First(c => c.IsVisibleInTree() && c.Text == "Battle")); await Wait(.3);
-            Check(_screen.Grid.Cards.Length > 0 && _screen.Grid.Cards.Length == fate.Count(c => c.Actions.Contains("Battle") || c.Actions.Contains("Battle/Open")), "Battle includes cards printing Battle/Open");
+            Check(_screen.Grid.Cards.Length > 0 && _screen.Grid.Cards.Length == fate.Count(c => c.Actions.Contains("Battle") || c.Actions.Contains("Battle/Open") || c.Actions.Contains("Battle/Limited")), "Battle includes cards printing Battle/Open or Battle/Limited");
             Check(_screen.Grid.Cards.Any(c => c.Actions.Contains("Battle/Open") && !c.Actions.Contains("Battle")), "Battle results include a Battle/Open-only card");
             Activate(Walk(_screen).OfType<CheckBox>().First(c => c.IsVisibleInTree() && c.Text == "Battle/Open")); await Wait(.3);
             Check(_screen.Grid.Cards.Select(c => c.Id).Distinct().Count() == _screen.Grid.Cards.Length, "a card appears once however many checked choices it satisfies");

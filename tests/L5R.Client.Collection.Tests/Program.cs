@@ -56,6 +56,15 @@ try
     string[] both = ["Battle/Open", "Limited"];
     Check(new[] { "Battle", "Open", "Battle/Open", "Limited" }.All(choice => CatalogueActions.Matches(both, choice)) && !CatalogueActions.Matches(both, "Reaction") && !CatalogueActions.Matches(both, "None"), "Battle/Open + Limited appears in all four matching filters");
     Check(CatalogueActions.MatchesAny(both, ["Battle", "Open", "Battle/Open", "Limited"]) && CatalogueActions.MatchesAny(both, []), "any number of selected choices yields one match");
+    Check(Printed("Battle/Limited: Look at the top card of your Fate deck.").SequenceEqual(["Battle/Limited"]) && Printed("Limited/Battle: Draw.").SequenceEqual(["Battle/Limited"]), "Battle/Limited is its own printed action");
+    string[] bl = ["Battle/Limited"];
+    Check(new[] { "Battle", "Limited", "Battle/Limited" }.All(choice => CatalogueActions.Matches(bl, choice)) && !new[] { "Open", "Battle/Open", "Reaction", "None" }.Any(choice => CatalogueActions.Matches(bl, choice)), "Battle/Limited appears in Battle, Limited and Battle/Limited only");
+    Check(!CatalogueActions.Matches(["Battle"], "Battle/Limited") && !CatalogueActions.Matches(["Limited"], "Battle/Limited"), "Battle/Limited filter excludes cards printing only Battle or Limited");
+    Check(CatalogueActions.MatchesAny(bl, ["Battle", "Limited", "Battle/Limited"]), "Battle/Limited with every matching choice selected yields one match");
+    // Shadow Dragon prints Battle and Open as separate actions; Nitoshi (inexperienced) prints Battle/Limited.
+    var dragon = Printed("After Shadow Dragon enters play: Lose 5 Honor.\nBattle: Target an enemy Personality: Take control of him.\nOpen: If Shadow Dragon is dead: Bring it into play.");
+    Check(dragon.SequenceEqual(["Battle", "Open"]) && CatalogueActions.Matches(dragon, "Battle") && CatalogueActions.Matches(dragon, "Open") && !CatalogueActions.Matches(dragon, "Limited") && !CatalogueActions.Matches(dragon, "Battle/Open") && !CatalogueActions.Matches(dragon, "None"), "a card with several printed actions appears under each of them");
+    Check(CatalogueActions.MatchesAny(dragon, ["Battle", "Open"]) && CatalogueActions.MatchesAny(dragon, ["Open"]) && CatalogueActions.MatchesAny(dragon, ["Battle"]) && !CatalogueActions.MatchesAny(dragon, ["Limited", "Reaction"]), "multi-action card matches when any selected choice fits");
     Check(CatalogueActions.Matches([], "None") && !CatalogueActions.Matches(["Limited"], "None"), "None matches only cards without printed actions");
     Console.WriteLine($"COLLECTION DATA PASS: {checks} assertions");
 }
