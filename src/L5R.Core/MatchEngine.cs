@@ -1568,7 +1568,7 @@ public sealed partial class MatchEngine
         {
             // Yoritomo Iwashi (issue #453, batch 3): every Personality of the winning attacking army remembers this victory (SeedsOfDecayBatch3.cs).
             MarkAttackVictory(a);
-            var destroyedDefenders = aramasuSpares ? 0 : DestroyUnits(d);
+            var destroyedDefenders = aramasuSpares ? 0 : DestroyUnits(TfResolutionDestroyable(d, true)); // issue #622: Hitomi's Devotion spares its unit (TfGear.cs)
             destroyedByPlayer[attacker] = destroyedDefenders; losers.Add(defender);
             if (!RehonorWinners(a)) { GainHonor(attacker, destroyedDefenders * 2, "Battle victory"); CheckEarthFlowsBonus(attacker, a); }
             var province = battleProvince;
@@ -1595,7 +1595,7 @@ public sealed partial class MatchEngine
         }
         else if (defenderWon)
         {
-            var destroyedAttackers = DestroyUnits(a);
+            var destroyedAttackers = DestroyUnits(TfResolutionDestroyable(a, false));
             destroyedByPlayer[defender] = destroyedAttackers; losers.Add(attacker);
             if (!RehonorWinners(d)) { GainHonor(defender, destroyedAttackers * 2, "Battle victory"); CheckEarthFlowsBonus(defender, d); }
             GrantRingRecruit(Player(defender), a.Length > 0, "false-ring-of-air-recruit");
@@ -1610,7 +1610,7 @@ public sealed partial class MatchEngine
             // penalty (MarkDead) on top of this battle's own gain negation.
             var attackerHadDishonorable = RehonorWinners(a);
             var defenderHadDishonorable = RehonorWinners(d);
-            var destroyedA = DestroyUnits(a); var destroyedD = aramasuSpares ? 0 : DestroyUnits(d); // Aramasu's Legacy (issue #501): the defending army is not destroyed, the attacking one is
+            var destroyedA = DestroyUnits(TfResolutionDestroyable(a, false)); var destroyedD = aramasuSpares ? 0 : DestroyUnits(TfResolutionDestroyable(d, true)); // Aramasu's Legacy (issue #501): the defending army is not destroyed, the attacking one is
             // A tie: both players are the battle's loser (Mendon, issue #417: Tales of Dishonor).
             destroyedByPlayer[attacker] = destroyedD; destroyedByPlayer[defender] = destroyedA; losers.Add(attacker); losers.Add(defender);
             // The Earth Flows (issue #264) is deliberately NOT checked here: its own text requires
@@ -2561,6 +2561,7 @@ public sealed partial class MatchEngine
             if (actingPlayerId is not null && WideValleyNegatesDestruction(card)) continue;
             if (actingPlayerId is int shieldActor && DestructionShielded(card, shieldActor)) continue;
             if (actingPlayerId is not null && NegishiNegatesDestruction(card)) continue;
+            if (actingPlayerId is int armorActor && TfOminousArmorSubstitutes(card, armorActor)) continue; // issue #622: Ominous Armor, "destroy this Item instead" (TfGear.cs)
             foreach (var attachment in Attachments(card.Id).ToArray())
             {
                 RemoveAttachmentGrants(card, attachment.Id);

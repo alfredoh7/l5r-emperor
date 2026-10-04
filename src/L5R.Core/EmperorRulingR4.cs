@@ -40,6 +40,8 @@ public static class TraitReactions
         "hayan-assign",
         // Issue #622: Words of Consecration's "After this card enters play, if this Shugenja is Air: Choose a player, who gains or loses 1 Honor."
         "words-of-consecration-honor",
+        // Issue #622: Band of Brothers' "After this Follower enters play, target one or two of your Personalities. Create and attach a 1F Follower to each of them." prints no designator: a trait.
+        "tf-band-brothers-create",
     };
 
     /// <summary>The trait-modelled Reaction-timed abilities, for the audit.</summary>

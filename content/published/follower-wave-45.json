@@ -1,0 +1,87 @@
+{
+  "Profile": "follower-wave-45",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-9870",
+      "Name": "Lookout",
+      "Type": "Follower",
+      "Clan": "Unaligned",
+      "GoldCost": 4,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Will only attach to a Ninja.\nReaction: After you announce a Ranged Attack action, destroy this card: One Ranged Attack from that action may target a card in the Defender's home.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9870.jpg",
+      "Keywords": [
+        "Ninja"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "tf-lookout-destroy"
+      ],
+      "Effect": "none",
+      "AttachRequiresKeyword": "Ninja"
+    },
+    {
+      "Id": "oracle-l5r-10682",
+      "Name": "Camel Mounts",
+      "Type": "Follower",
+      "Clan": "Unaligned",
+      "GoldCost": 6,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Will only attach to a Human. This Personality has Cavalry.\nHome Battle: Move this unit to the current battlefield if it would be opposed there. (Home actions may be taken from home.)",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10682.jpg",
+      "Keywords": [
+        "Camel",
+        "Nonhuman",
+        "Cavalry"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "tf-camel-mounts-move"
+      ],
+      "Effect": "none",
+      "AttachRequiresKeyword": "Human",
+      "AttachGrantsKeyword": "Cavalry"
+    },
+    {
+      "Id": "oracle-l5r-10891",
+      "Name": "Band of Brothers",
+      "Type": "Follower",
+      "Clan": "Unaligned",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After this Follower enters play, target one or two of your Personalities. Create and attach a 1F Follower to each of them.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10891.jpg",
+      "Keywords": [
+        "Ronin"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "tf-band-brothers-create"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}
