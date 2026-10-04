@@ -754,6 +754,7 @@ public sealed partial class MatchEngine
                     break;
                 case Phase.BattleSelection:
                     foreach (var province in _state.UnresolvedBattlefields) Add("selectBattle", $"Fight at {BattlefieldLabel(province)}", Command("selectBattle", province: province));
+                    if (!_state.PassAllBattles[playerId] && _state.UnresolvedBattlefields.Count > 0) Add("passAllBattles", "Pass all battles", Command("passAllBattles")); // issue #628
                     break;
                 case Phase.Battle:
                     // A published Terrain is played through this same command (the generic Terrain rule -- it prints no Battle ability of its own), so it is listed
@@ -804,6 +805,7 @@ public sealed partial class MatchEngine
                     // A Battle-timing equip granted by a card in play (Foothills Keep, TimingGrants.cs): a Weapon from hand to a Personality at the battlefield.
                     result.AddRange(EquipActions(playerId));
                     Add("pass", "Pass battle action", Command("pass"));
+                    if (!_state.PassAllBattles[playerId]) Add("passAllBattles", "Pass all battles", Command("passAllBattles")); // issue #628
                     if (MayDeclineAdditionalAction(playerId)) Add("declineAdditionalAction", "Decline the additional action", Command("declineAdditionalAction")); // Mendon's item 2 (issue #501)
                     break;
                 case Phase.Dynasty:

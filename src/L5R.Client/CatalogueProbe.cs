@@ -33,7 +33,9 @@ public partial class CatalogueProbe : Node
             Check(archive.Visible && Walk(archive).OfType<TabContainer>().Single().GetTabTitle(0) == "Imported decks", "native library menu retains imported decks and source archive");
             await Capture("source-archive"); PressKey(Godot.Key.Escape); await Wait(.3);
             Check(!GodotObject.IsInstanceValid(archive) && _screen.Grid.IsVisibleInTree(), "Escape closes only the source archive and returns to browsing");
-            Click(FindButton(b => b.Text.Contains("Playable now"))); await Wait(.3); Check(_screen.Grid.Cards.Length == _screen.Data.Filter(playable: true).Length && _screen.Grid.Cards.Length > 0, "native playable filter");
+            Click(_screen.Browser.Support.Trigger); await Wait(.3); Activate(Walk(_screen).OfType<CheckBox>().First(c => c.IsVisibleInTree() && c.Text == "Not yet playable")); await Wait(.3); _screen.Browser.CloseMenus(); await Wait(.2); Check(_screen.Browser.Support.Active && _screen.Grid.Cards.Length == _screen.Data.Filter(playable: true).Length && _screen.Grid.Cards.Length > 0, "native playable filter");
+            Click(FindButton(b => b.Text == "Deselect all")); await Wait(.3);
+            Check(_screen.Grid.Cards.Length == 0, "deselect all clans leaves nothing showing");
             Click(FindButton(b => b.TooltipText == "Crane cards")); await Wait(.3);
             Check(_screen.Grid.Cards.Length > 0 && _screen.Grid.Cards.All(c => c.Playable && c.Clans.Contains("Crane")), "native clan filter combines with support");
             Click(FindButton(b => b.TooltipText == "Mantis cards")); await Wait(.3);
@@ -42,9 +44,10 @@ public partial class CatalogueProbe : Node
             Click(FindButton(b => b.Text == "Select all")); await Wait(.3);
             Check(_screen.Grid.Cards.Length == _screen.Data.Filter(playable: true).Length, "select all clans matches unrestricted filter");
             Click(FindButton(b => b.Text == "Deselect all")); await Wait(.3);
-            Check(_screen.Grid.Cards.Length == _screen.Data.Filter(playable: true).Length, "deselect all clears the clan filter");
+            Check(_screen.Grid.Cards.Length == 0, "deselect all hides every clan");
             _screen.ResetFilters(); await Wait(.2); Click(FindButton(b => b.Text == "Fate")); await Wait(.3); Check(_screen.Grid.Cards.Length > 0 && _screen.Grid.Cards.All(c => c.DeckTypes.Contains("Fate")), "native family filter");
             Click(FindButton(b => b.Text.StartsWith("Types"))); await Wait(.3); Check(!Walk(_screen).OfType<CheckBox>().Any(c => c.IsVisibleInTree() && c.Text == "Personality"), "Fate-scoped Type list drops Dynasty-only types");
+            Activate(PopupButton("Types", "Deselect all")); await Wait(.2); Check(_screen.Grid.Cards.Length == 0, "deselect all types leaves nothing showing");
             Activate(Walk(_screen).OfType<CheckBox>().First(c => c.Text == "Spell")); await Wait(.2);
             PressKey(Godot.Key.Escape); await Wait(.2);
             Click(FindButton(b => b.Text.StartsWith("Keywords"))); await Wait(.3);
@@ -53,10 +56,10 @@ public partial class CatalogueProbe : Node
             Check(!Walk(_screen).OfType<CheckBox>().Any(c => c.IsVisibleInTree()), "keyword search narrows checklist without changing card results");
             EnterText(keywordSearch, ""); await Wait(.2);
             var fateSpellKeywords = _screen.Data.Cards.Where(c => c.Types.Contains("Spell") && c.DeckTypes.Contains("Fate")).SelectMany(c => c.Keywords).Distinct().ToHashSet();
-            Check(Walk(_screen).OfType<CheckBox>().Where(c => c.IsVisibleInTree()).All(c => fateSpellKeywords.Contains(c.Text)), "keyword list scoped to current Type and Family selection");
+            Check(Walk(_screen).OfType<CheckBox>().Where(c => c.IsVisibleInTree()).All(c => fateSpellKeywords.Contains(c.Text) || c.Text == "No keywords"), "keyword list scoped to current Type and Family selection");
             await Capture("keyword-search-cleared");
             Activate(Walk(_screen).OfType<Button>().First(b => b.Text == "Most common" && b.IsVisibleInTree())); await Wait(.2);
-            var rows = Walk(_screen).OfType<CheckBox>().Where(c => c.IsVisibleInTree()).Select(c => c.Text).ToArray();
+            var rows = Walk(_screen).OfType<CheckBox>().Where(c => c.IsVisibleInTree()).Select(c => c.Text).Where(t => t != "No keywords").ToArray();
             var expectedOrder = _screen.Data.Filter(family: "Fate", types: ["Spell"]).SelectMany(c => c.Keywords).GroupBy(k => k).OrderByDescending(g => g.Count()).ThenBy(g => g.Key, StringComparer.OrdinalIgnoreCase).Select(g => g.Key).ToArray();
             Check(rows.SequenceEqual(expectedOrder), "most-common keyword order ranks by frequency within the current filter");
             await Capture("keywords"); PressKey(Godot.Key.Escape); await Wait(.2);
@@ -64,10 +67,11 @@ public partial class CatalogueProbe : Node
             Click(FindButton(b => b.Text == "Dynasty")); await Wait(.2); Click(FindButton(b => b.Text.StartsWith("Types"))); await Wait(.2);
             Activate(Walk(_screen).OfType<CheckBox>().First(c => c.Text == "Personality")); await Wait(.2); _screen.Browser.Types.Close();
             Click(FindButton(b => b.Text == "Fate")); await Wait(.2);
-            Check(_screen.Browser.Types.Selected.Count == 0 && _screen.Browser.ScopeNotice.Contains("Personality cleared"), "incompatible selection clears once with a visible explanation");
+            Check(!_screen.Browser.Types.Checked("Personality") && _screen.Browser.Types.Active, "an unchecked type stays unchecked, and listed, when the family changes");
             Click(FindButton(b => b.TooltipText == "Crane cards")); await Wait(.2);
-            Click(FindButton(b => b.AccessibilityName == "Remove filter Crane")); await Wait(.2);
-            Check(_screen.Browser.Clans.Count == 0, "removable clan tag clears only its own selection");
+            Check(_screen.Browser.ExcludedClans.SetEquals(["Crane"]), "unchecking the Crane box excludes only Crane");
+            Click(FindButton(b => b.AccessibilityName == "Remove filter Clans")); await Wait(.2);
+            Check(_screen.Browser.ExcludedClans.Count == 0 && _screen.Browser.Types.Active, "removable clan tag checks only the clans again");
             _screen.ResetFilters(); await Wait(.2);
             Search("Akodo"); await Wait(3); Check(_screen.Grid.Cards.All(c => c.SearchText.Contains("Akodo", StringComparison.OrdinalIgnoreCase)), "live search");
             var tile = _screen.Grid.Tile("oracle-l5r-229") ?? throw new Exception("Akodo Kisho tile absent"); _screen.Grid.EnsureControlVisible(tile); await Wait(.5); Click(tile); await Wait(1);
@@ -102,7 +106,8 @@ public partial class CatalogueProbe : Node
             Check(browser.Focus.Trigger.GetGlobalRect().End.Y <= _screen.Grid.GetGlobalRect().Position.Y && browser.Actions.Trigger.GetGlobalRect().End.Y <= _screen.Grid.GetGlobalRect().Position.Y, "Focus Value and Action Type sit inside the filter bar above the gallery");
             var fate = _screen.Data.Filter(family: "Fate");
             Click(browser.Focus.Trigger); await Wait(.3);
-            Check(Walk(_screen).OfType<CheckBox>().Where(c => c.IsVisibleInTree()).Select(c => c.Text).SequenceEqual(["0", "1", "2", "3", "4", "5"]), "Focus Value offers 0 through 5");
+            Check(Walk(_screen).OfType<CheckBox>().Where(c => c.IsVisibleInTree()).Select(c => c.Text).SequenceEqual(["0", "1", "2", "3", "4", "5", "None"]), "Focus Value offers 0 through 5 and None");
+            Activate(PopupButton("Focus Value", "Deselect all")); await Wait(.3);
             Activate(Walk(_screen).OfType<CheckBox>().First(c => c.IsVisibleInTree() && c.Text == "3")); await Wait(.3);
             Check(_screen.Grid.Cards.Length > 0 && _screen.Grid.Cards.All(c => c.Focus == 3) && _screen.Grid.Cards.Length == fate.Count(c => c.Focus == 3), "Focus Value 3 matches exactly Fate cards with Focus 3");
             Activate(Walk(_screen).OfType<CheckBox>().First(c => c.IsVisibleInTree() && c.Text == "5")); await Wait(.3);
@@ -111,6 +116,7 @@ public partial class CatalogueProbe : Node
             _screen.ResetFilters(); await Wait(.2); Click(FindButton(b => b.Text == "Fate")); await Wait(.3);
             Click(browser.Actions.Trigger); await Wait(.3);
             Check(Walk(_screen).OfType<CheckBox>().Where(c => c.IsVisibleInTree()).Select(c => c.Text).SequenceEqual(["Limited", "Open", "Battle", "Battle/Open", "Battle/Limited", "Reaction", "None"]), "Action Type offers the seven choices");
+            Activate(PopupButton("Action Type", "Deselect all")); await Wait(.3);
             Activate(Walk(_screen).OfType<CheckBox>().First(c => c.IsVisibleInTree() && c.Text == "Battle")); await Wait(.3);
             Check(_screen.Grid.Cards.Length > 0 && _screen.Grid.Cards.Length == fate.Count(c => c.Actions.Contains("Battle") || c.Actions.Contains("Battle/Open") || c.Actions.Contains("Battle/Limited")), "Battle includes cards printing Battle/Open or Battle/Limited");
             Check(_screen.Grid.Cards.Any(c => c.Actions.Contains("Battle/Open") && !c.Actions.Contains("Battle")), "Battle results include a Battle/Open-only card");
@@ -122,12 +128,12 @@ public partial class CatalogueProbe : Node
             Check(_screen.Grid.Cards.Length > 0 && _screen.Grid.Cards.All(c => c.Actions.Length == 0), "None matches only cards with no printed action");
             await Capture("action-filter"); browser.CloseMenus(); await Wait(.2);
             Click(FindButton(b => b.Text == "Dynasty")); await Wait(.3);
-            Check(!browser.Focus.Trigger.Visible && browser.Actions.Trigger.Visible && browser.Actions.Selected.Contains("None"), "Dynasty keeps Action Type, hides Focus Value");
+            Check(!browser.Focus.Trigger.Visible && browser.Actions.Trigger.Visible && browser.Actions.Checked("None") && !browser.Actions.Checked("Battle"), "Dynasty keeps Action Type, hides Focus Value");
             foreach (var name in new[] { "Akodo Kisho", "Asako Moeru", "Remote Village", "Shinjo's Children", "Focus" })
                 Check(_screen.Data.Cards.Where(c => c.Name == name).All(c => c.Actions.Length == 0), name + " has no printed action");
             Check(_screen.Grid.Cards.Any(c => c.Name == "Remote Village") && _screen.Grid.Cards.Any(c => c.Name == "Akodo Kisho"), "None filter lists Dynasty cards without printed actions");
             Click(FindButton(b => b.Text == "All")); await Wait(.3);
-            Check(browser.Actions.Selected.Count == 0 && browser.ScopeNotice.Contains("Action Type"), "Action Type clears with an explanation when unavailable");
+            Check(!browser.Actions.Active && browser.ScopeNotice.Contains("Action Type"), "Action Type clears with an explanation when unavailable");
             _screen.ResetFilters(); await Wait(.3);
             var hoverCard = _screen.Grid.Cards[0]; var hoverTile = _screen.Grid.Tile(hoverCard.Id)!; var cardWidth = hoverTile.Size.X;
             HoverOver(hoverTile); await Wait(1.2);
@@ -145,7 +151,7 @@ public partial class CatalogueProbe : Node
             _screen.ResetFilters(); Search("Akodo"); await Wait(.5); _screen.SelectCard(_screen.Data.Cards.First(c => c.Id == "oracle-l5r-229")); await Wait(.3);
             var window = GetWindow(); window.Size = new Vector2I(1280, 800); await Wait(.8); await Capture("compact");
             Click(FindButton(b => b.Text.StartsWith("Rules text"))); await Wait(.3); await Capture("rules");
-            PressKey(Godot.Key.Escape); await Wait(.3); Click(Walk(_screen).OfType<OptionButton>().First(o => o.AccessibilityName == "Printing set")); await Wait(.3); await Capture("sets"); PressKey(Godot.Key.Escape); await Wait(.3);
+            PressKey(Godot.Key.Escape); await Wait(.3); Click(_screen.Browser.Sets.Trigger); await Wait(.3); await Capture("sets"); PressKey(Godot.Key.Escape); await Wait(.3);
             var card = _screen.Data.Cards.First(c => !c.Playable); var fallback = new CatalogueData.Printing { Id = "probe-missing", SourceUrl = "https://images.oracleofthevoid.com/l5r/missing.jpg", Sha256 = new string('0', 64) }; _screen.Scans.Get(fallback); await Wait(.3); Check(_screen.Scans.State(fallback).Contains("unavailable"), "missing offline scan is explicit");
             var saved = card.Printings; card.Printings = [fallback]; _screen.ResetFilters(); Search(card.Name); await Wait(.5); await Capture("missing-scan"); card.Printings = saved;
             GD.Print("PLAYABLE COUNT " + _screen.Data.Filter(playable: true).Length);
@@ -174,6 +180,7 @@ public partial class CatalogueProbe : Node
     private async Task Wait(double seconds) => await ToSignal(GetTree().CreateTimer(seconds), SceneTreeTimer.SignalName.Timeout);
     private async Task Capture(string name) { _screen.QueueRedraw(); await Wait(.1); RenderingServer.ForceDraw(); GD.Print("CAPTURE " + name); GetViewport().GetTexture().GetImage().SavePng(Path.Combine(_output, name + ".png")); }
     private void Search(string text) { _screen.Search.GrabFocus(); _screen.Search.SelectAll(); PressKey(Godot.Key.Backspace); foreach (var ch in text) { Input.ParseInputEvent(new InputEventKey { Unicode = ch, Keycode = (Godot.Key)char.ToUpperInvariant(ch), Pressed = true }); Input.ParseInputEvent(new InputEventKey { Unicode = ch, Keycode = (Godot.Key)char.ToUpperInvariant(ch), Pressed = false }); } }
+    private Button PopupButton(string menu, string text) => Walk(_screen).OfType<PopupPanel>().First(p => p.Name == menu + "Checklist").GetChildren().SelectMany(c => Walk(c).Prepend(c)).OfType<Button>().First(b => b.Text == text);
     private static IEnumerable<Node> Walk(Node root) { foreach (var child in root.GetChildren()) { yield return child; foreach (var n in Walk(child)) yield return n; } }
     private static void HoverOver(Control c) { var p = c.GetGlobalRect().GetCenter(); Input.ParseInputEvent(new InputEventMouseMotion { Position = p - new Vector2(3, 3), GlobalPosition = p - new Vector2(3, 3) }); Input.ParseInputEvent(new InputEventMouseMotion { Position = p, GlobalPosition = p }); }
     private Button FindButton(Func<Button, bool> predicate) => Walk(_screen).OfType<Button>().First(predicate);

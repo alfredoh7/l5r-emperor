@@ -1,17 +1,27 @@
 using Godot;
 namespace L5R.Client;
 
-/// <summary>An anchored, immediately applied checklist shared by both catalogue workspaces.</summary>
+/// <summary>An anchored, immediately applied check-box filter shared by both catalogue workspaces. Every option starts checked: a checked option includes the cards
+/// that have it, an unchecked one excludes them. A card with several features (keywords, types, printings) stays while any one of them is checked.
+/// This is the default shape of a catalogue filter: a new one is a FilterChecklist, not a single-select control.</summary>
 public sealed class FilterChecklist
 {
     public Button Trigger { get; }
-    public HashSet<string> Selected { get; } = [];
+    /// <summary>The unchecked options. Empty means every option is checked and the filter hides nothing.</summary>
+    public HashSet<string> Excluded { get; } = [];
+    public bool Active => Excluded.Count > 0;
+    public bool Checked(string option) => !Excluded.Contains(option);
+    /// <summary>True when a card with these features is kept: nothing is unchecked, or at least one of its features is still checked.</summary>
+    public bool Passes(params string[] features) => Passes(Excluded, features);
+    public static bool Passes(HashSet<string> excluded, IEnumerable<string> features) => excluded.Count == 0 || features.Any(f => !excluded.Contains(f));
+    public string Summary => Excluded.Count == 0 ? "All" : Excluded.Count >= _options.Length ? "None" : $"{_options.Length - Excluded.Count} of {_options.Length}";
     public event Action? Changed;
     public event Action? Opening;
     public LineEdit Search { get; }
     public Rect2 PopupRect => new(_popup.Position, _popup.Size);
     public bool IsOpen => _popup.Visible;
     public Func<Rect2>? PopupBounds { get; set; }
+    public string Label => _label;
     private readonly string _label;
     private readonly PopupPanel _popup;
     private readonly VBoxContainer _rows;
@@ -25,7 +35,7 @@ public sealed class FilterChecklist
     public FilterChecklist(Node popupParent, Theme theme, string label, Vector2I? popupSize = null, Func<string, Control>? icon = null, Control? extraHeader = null)
     {
         _label = label; _icon = icon; _popupSize = popupSize ?? new Vector2I(350, 440);
-        Trigger = CatalogueArt.Button(label + " · Any  ▾", TogglePopup);
+        Trigger = CatalogueArt.Button(label + " · All  ▾", TogglePopup);
         Trigger.AccessibilityName = "Filter " + label.ToLowerInvariant();
         _popup = new PopupPanel { Theme = theme, Name = label + "Checklist" }; popupParent.AddChild(_popup);
         _popup.AddThemeStyleboxOverride("panel", Palette.Box(new Color("0e171d"), CatalogueArt.Gold, 18, 5));
@@ -60,25 +70,31 @@ public sealed class FilterChecklist
         _scroll.CustomMinimumSize = new Vector2(size.X - 40, Math.Max(80, size.Y - (_label == "Keywords" ? 240 : 182)));
         _popup.Popup(new Rect2I(x, y, size.X, size.Y)); Search.GrabFocus();
     }
-    private void SetAll(bool selected)
+    /// <summary>Checks or unchecks every option the search box currently shows (all of them when it is empty).</summary>
+    private void SetAll(bool included)
     {
-        Selected.Clear(); if (selected) Selected.UnionWith(_options);
-        foreach (var (option, check) in _checks) check.SetPressedNoSignal(Selected.Contains(option));
+        var shown = _options.Where(o => o.Contains(Search.Text, StringComparison.OrdinalIgnoreCase)).ToArray();
+        if (included) Excluded.ExceptWith(shown); else Excluded.UnionWith(shown);
+        foreach (var (option, check) in _checks) check.SetPressedNoSignal(Checked(option));
         UpdateTrigger(); Changed?.Invoke();
     }
-    /// <summary>Returns cleared selections without reentering the caller's filtering pass.</summary>
-    public string[] SetOptions(string[] options, IReadOnlyDictionary<string, int>? counts = null)
+    /// <summary>Lists the options now on offer. An unchecked option stays listed (with no count) even when the other filters leave it no cards, so it is never silently re-included.</summary>
+    public void SetOptions(string[] options, IReadOnlyDictionary<string, int>? counts = null)
     {
-        var removed = Selected.Except(options).ToArray();
+        options = [.. options, .. Excluded.Where(e => !options.Contains(e))];
         var different = !_options.SequenceEqual(options) || !SameCounts(_counts, counts);
-        _options = options; _counts = counts; Selected.IntersectWith(options);
-        if (different || removed.Length > 0) Rebuild();
-        UpdateTrigger(); return removed;
+        _options = options; _counts = counts; Search.Visible = options.Length > 12;
+        if (different) Rebuild();
+        UpdateTrigger();
     }
     private static bool SameCounts(IReadOnlyDictionary<string, int>? a, IReadOnlyDictionary<string, int>? b) =>
         a is null ? b is null : b is not null && a.Count == b.Count && a.All(kv => b.TryGetValue(kv.Key, out var n) && n == kv.Value);
-    public void Clear() { Selected.Clear(); Search.Text = ""; Rebuild(); }
-    public void Remove(string option) { if (Selected.Remove(option)) { Rebuild(); Changed?.Invoke(); } }
+    /// <summary>Checks only these options and unchecks every other one on offer.</summary>
+    public void Only(params string[] options) => SetExcluded(_options.Except(options));
+    /// <summary>Unchecks exactly these options.</summary>
+    public void SetExcluded(IEnumerable<string> options) { Excluded.Clear(); Excluded.UnionWith(options); Rebuild(); }
+    /// <summary>Checks everything again.</summary>
+    public void Clear() { Excluded.Clear(); Search.Text = ""; Rebuild(); }
     public void Free() => _popup.QueueFree();
     private void Rebuild()
     {
@@ -89,14 +105,14 @@ public sealed class FilterChecklist
         {
             var row = new HBoxContainer(); row.AddThemeConstantOverride("separation", 10);
             if (_icon is not null) { var icon = _icon(option); icon.CustomMinimumSize = new Vector2(28, 28); row.AddChild(icon); }
-            var check = new CheckBox { Text = option, ButtonPressed = Selected.Contains(option), SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, CustomMinimumSize = new Vector2(0, 32) };
+            var check = new CheckBox { Text = option, ButtonPressed = Checked(option), SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, CustomMinimumSize = new Vector2(0, 32) };
             check.AddThemeColorOverride("font_color", CatalogueArt.Ivory);
             check.AddThemeFontSizeOverride("font_size", 18);
             check.AddThemeIconOverride("checked", DeckSkin.Icon("checked"));
             check.AddThemeIconOverride("unchecked", DeckSkin.Icon("unchecked"));
             foreach (var state in new[] { "normal", "hover", "pressed", "hover_pressed", "disabled" })
                 check.AddThemeStyleboxOverride(state, new StyleBoxEmpty());
-            check.Toggled += pressed => { if (pressed) Selected.Add(option); else Selected.Remove(option); UpdateTrigger(); Changed?.Invoke(); };
+            check.Toggled += pressed => { if (pressed) Excluded.Remove(option); else Excluded.Add(option); UpdateTrigger(); Changed?.Invoke(); };
             row.AddChild(check); _checks[option] = check;
             if (_counts?.TryGetValue(option, out var count) == true) { var label = CatalogueArt.Label(count.ToString("N0"), 16); label.CustomMinimumSize = new Vector2(48, 32); label.HorizontalAlignment = HorizontalAlignment.Right; row.AddChild(label); }
             _rows.AddChild(row);
@@ -110,5 +126,5 @@ public sealed class FilterChecklist
         }).CallDeferred();
         UpdateTrigger();
     }
-    private void UpdateTrigger() => Trigger.Text = (Selected.Count == 0 ? _label + " · Any" : $"{_label} ({Selected.Count})") + "  ▾";
+    private void UpdateTrigger() => Trigger.Text = (Excluded.Count == 0 ? _label + " · All" : $"{_label} ({Summary})") + "  ▾";
 }

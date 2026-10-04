@@ -10,32 +10,40 @@ public partial class CatalogueBrowserBar : Control
     public HSlider CardSize { get; }
     public FilterChecklist Types { get; }
     public FilterChecklist Keywords { get; }
+    /// <summary>Printing set (unrecognised sources are Other).</summary>
+    public FilterChecklist Sets { get; }
+    /// <summary>Printed Gold cost, 0 to 10+, or None for a card without one.</summary>
+    public FilterChecklist Gold { get; }
+    /// <summary>Whether the engine can play the card yet.</summary>
+    public FilterChecklist Support { get; }
+    /// <summary>Whether the card is in My collection.</summary>
+    public FilterChecklist Collection { get; }
     /// <summary>Focus Value, offered for Fate cards only.</summary>
     public FilterChecklist Focus { get; }
     /// <summary>Printed action type, offered for Dynasty and Fate cards.</summary>
     public FilterChecklist Actions { get; }
     public bool ExtraRow => Family is "Dynasty" or "Fate";
-    public HashSet<string> Clans { get; } = [];
+    /// <summary>The clan boxes that are unchecked; every clan starts checked.</summary>
+    public HashSet<string> ExcludedClans { get; } = [];
     public string Family { get; private set; }
     public OptionButton SortControl => _sort;
     public string Sort => _sort.GetItemText(_sort.Selected);
-    public bool PlayableOnly { get; private set; }
     public CatalogueData.Card[] Results { get; private set; } = [];
     public CatalogueData.Card[] CardsWithoutOwnership { get; private set; } = [];
-    public OwnershipFilter Ownership { get; private set; }
     public Button EditCollectionButton { get; }
     public event Action? EditCollection;
-    public OptionButton CollectionControl { get; }
     public string ScopeNotice => _notice.Text;
-    public Func<Rect2>? PopupBounds { get => Types.PopupBounds; set { Types.PopupBounds = value; Keywords.PopupBounds = value; Focus.PopupBounds = value; Actions.PopupBounds = value; } }
+    public Func<Rect2>? PopupBounds { get => Types.PopupBounds; set { foreach (var menu in Menus) menu.PopupBounds = value; } }
+    private FilterChecklist[] Menus => [Types, Keywords, Sets, Gold, Support, Collection, Focus, Actions];
     public float BarHeight => _families.Count == 2 ? 206 : 254;
+    private const string Owned = "Owned", Unowned = "Unowned", Playable = "Playable now", NotPlayable = "Not yet playable", OtherSet = "Other", NoneChoice = "None", NoKeywords = "No keywords";
     private static readonly string[] ClanNames = ["Crab", "Crane", "Dragon", "Lion", "Mantis", "Phoenix", "Scorpion", "Spider", "Unicorn", "Unaligned"];
     private readonly CatalogueData _data;
     private readonly Func<CatalogueData.Card, bool> _eligible;
     private readonly string _initialFamily;
     private readonly Dictionary<string, Button> _clans = [], _families = [];
-    private readonly Button _selectAll, _deselectAll, _allCards, _playable, _reset, _alphabetical, _common;
-    private readonly OptionButton _set, _gold, _sort;
+    private readonly Button _selectAll, _deselectAll, _reset, _alphabetical, _common;
+    private readonly OptionButton _sort;
     private readonly Label _count, _sizeLabel, _notice;
     private readonly ScrollContainer _tagScroll;
     private readonly HBoxContainer _tags;
@@ -46,17 +54,16 @@ public partial class CatalogueBrowserBar : Control
         Name = "CatalogueBrowserBar"; Theme = CatalogueArt.Theme(); _data = data; _eligible = eligible ?? (_ => true); Family = _initialFamily = initialFamily;
         foreach (var clan in ClanNames)
         {
-            var button = CatalogueArt.Button("", () => { if (!Clans.Add(clan)) Clans.Remove(clan); Refresh(); });
+            var button = CatalogueArt.Button("", () => { if (!ExcludedClans.Remove(clan)) ExcludedClans.Add(clan); Refresh(); });
             button.ToggleMode = true; button.AccessibilityName = clan + " cards"; button.TooltipText = clan + " cards";
             AddChild(button); _clans[clan] = button; button.AddChild(CatalogueArt.Clan(clan));
             var label = CatalogueArt.Label(clan, 17); label.HorizontalAlignment = HorizontalAlignment.Center; button.AddChild(label);
             var mark = new TextureRect { Name = "SelectedMark", Texture = DeckSkin.Icon("tick"), MouseFilter = MouseFilterEnum.Ignore, ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize, StretchMode = TextureRect.StretchModeEnum.KeepAspectCentered }; button.AddChild(mark);
         }
-        _selectAll = AddButton("Select all", () => { Clans.UnionWith(ClanNames); Refresh(); });
-        _deselectAll = AddButton("Deselect all", () => { Clans.Clear(); Refresh(); });
-        CollectionControl = new OptionButton { Name = "CollectionFilter", FitToLongestItem = false, AccessibilityName = "Filter collection ownership" };
-        foreach (var item in new[] { "Collection: All cards", "Collection: Owned", "Collection: Unowned" }) CollectionControl.AddItem(item);
-        AddChild(CollectionControl); CollectionControl.ItemSelected += i => { Ownership = (OwnershipFilter)i; Refresh(); };
+        _selectAll = AddButton("Select all", () => { ExcludedClans.Clear(); Refresh(); });
+        _deselectAll = AddButton("Deselect all", () => { ExcludedClans.UnionWith(ClanNames); Refresh(); });
+        Collection = new FilterChecklist(this, Theme, "Collection", new Vector2I(300, 300)); AddChild(Collection.Trigger); Collection.Changed += () => Refresh();
+        Collection.SetOptions([Owned, Unowned]); Collection.Trigger.TooltipText = "Cards in My collection (Owned) and cards that are not (Unowned).";
         EditCollectionButton = AddButton("Edit my collection", () => EditCollection?.Invoke());
         MyCollection.Store.Changed += CollectionChanged; TreeExiting += () => MyCollection.Store.Changed -= CollectionChanged;
         Search = new LineEdit { PlaceholderText = "Search card names, keywords or rules…", ClearButtonEnabled = true }; AddChild(Search); Search.TextChanged += _ => Refresh();
@@ -67,17 +74,18 @@ public partial class CatalogueBrowserBar : Control
         order.AddChild(_alphabetical); order.AddChild(_common);
         Keywords = new FilterChecklist(this, Theme, "Keywords", extraHeader: order); AddChild(Keywords.Trigger); Keywords.Changed += () => Refresh();
         Focus = new FilterChecklist(this, Theme, "Focus Value", new Vector2I(300, 440)); AddChild(Focus.Trigger); Focus.Changed += () => Refresh();
-        Focus.SetOptions(["0", "1", "2", "3", "4", "5"]);
+        Focus.SetOptions(["0", "1", "2", "3", "4", "5", NoneChoice]);
         Actions = new FilterChecklist(this, Theme, "Action Type", new Vector2I(320, 440)); AddChild(Actions.Trigger); Actions.Changed += () => Refresh();
         Actions.SetOptions(CatalogueActions.Choices);
         Actions.Trigger.TooltipText = "Bold actions printed on the card. Battle and Open include Battle/Open cards; Battle/Open matches only cards printing it; None has no printed action.";
-        var menus = new[] { Types, Keywords, Focus, Actions };
+        Sets = new FilterChecklist(this, Theme, "Printing set", new Vector2I(340, 480)); AddChild(Sets.Trigger); Sets.Changed += () => Refresh();
+        Sets.SetOptions([.. CatalogueData.SetOrder, OtherSet]); Sets.Trigger.TooltipText = "A card with several printings stays while any of them is checked. Unknown source labels are grouped as Other.";
+        Gold = new FilterChecklist(this, Theme, "Gold cost", new Vector2I(300, 480)); AddChild(Gold.Trigger); Gold.Changed += () => Refresh();
+        Gold.SetOptions(["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10+", NoneChoice]);
+        Support = new FilterChecklist(this, Theme, "Support", new Vector2I(320, 300)); AddChild(Support.Trigger); Support.Changed += () => Refresh();
+        Support.SetOptions([Playable, NotPlayable]); Support.Trigger.TooltipText = "Playable now cards are supported by the rules engine; the rest are reference-only.";
+        var menus = Menus;
         foreach (var menu in menus) { var self = menu; self.Opening += () => { foreach (var other in menus) if (other != self && other.IsOpen) other.Close(); }; }
-        _set = AddOption("Printing set", ["Any set", .. CatalogueData.SetOrder, "Other"]);
-        _set.TooltipText = "Filter by a printing set. Unknown source labels are grouped as Other.";
-        _gold = AddOption("Gold cost", ["Any Gold", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10+"]);
-        _allCards = AddButton("Entire catalogue", () => { PlayableOnly = false; Refresh(); });
-        _playable = AddButton("Playable now", () => { PlayableOnly = true; Refresh(); });
         _sort = AddOption("Sort cards", ["Name A–Z", "Name Z–A", "Gold cost", "Force", "Chi", "Set"]);
         _sort.TooltipText = "Set uses Mendon's presentation order; reprints sort by their earliest recognized set.";
         _tagScroll = new ScrollContainer { HorizontalScrollMode = ScrollContainer.ScrollMode.Auto, VerticalScrollMode = ScrollContainer.ScrollMode.Disabled };
@@ -110,7 +118,7 @@ public partial class CatalogueBrowserBar : Control
     }
     public void Reset()
     {
-        _refreshing = true; Clans.Clear(); Types.Clear(); Keywords.Clear(); Focus.Clear(); Actions.Clear(); Search.Text = ""; Family = _initialFamily; PlayableOnly = false; Ownership = OwnershipFilter.All; CollectionControl.Select(0); _set.Select(0); _gold.Select(0);
+        _refreshing = true; ExcludedClans.Clear(); foreach (var menu in Menus) menu.Clear(); Search.Text = ""; Family = _initialFamily;
         _refreshing = false; _notice.Text = ""; Refresh();
     }
     public void Refresh(bool notify = true)
@@ -120,29 +128,29 @@ public partial class CatalogueBrowserBar : Control
         {
             var familyCards = _data.Filter(family: Family).Where(_eligible);
             var removed = new List<string>();
-            if (Family != "Fate" && Focus.Selected.Count > 0) { removed.Add("Focus Value"); Focus.Clear(); }
-            if (!ExtraRow && Actions.Selected.Count > 0) { removed.Add("Action Type"); Actions.Clear(); }
-            removed.AddRange(Types.SetOptions(familyCards.SelectMany(c => c.Types).Distinct().Order(StringComparer.OrdinalIgnoreCase).ToArray()));
-            CardsWithoutOwnership = FilterWithoutKeywords(false, true).Where(c => Keywords.Selected.Count == 0 || Keywords.Selected.Any(c.Keywords.Contains)).ToArray();
+            if (Family != "Fate" && Focus.Active) { removed.Add("Focus Value"); Focus.Clear(); }
+            if (!ExtraRow && Actions.Active) { removed.Add("Action Type"); Actions.Clear(); }
+            Types.SetOptions(familyCards.SelectMany(c => c.Types).Distinct().Order(StringComparer.OrdinalIgnoreCase).ToArray());
+            CardsWithoutOwnership = FilterWithoutKeywords(false, true).Where(KeywordPasses).ToArray();
             var scoped = FilterWithoutKeywords().ToArray();
-            var counts = scoped.SelectMany(c => c.Keywords).GroupBy(k => k).ToDictionary(g => g.Key, g => g.Count());
+            var counts = scoped.SelectMany(KeywordFeatures).GroupBy(k => k).ToDictionary(g => g.Key, g => g.Count());
+            foreach (var unchecked_ in Keywords.Excluded) counts.TryAdd(unchecked_, 0);
             var ordered = _mostCommon ? counts.OrderByDescending(kv => kv.Value).ThenBy(kv => kv.Key, StringComparer.OrdinalIgnoreCase).Select(kv => kv.Key) : counts.Keys.Order(StringComparer.OrdinalIgnoreCase);
-            removed.AddRange(Keywords.SetOptions(ordered.ToArray(), counts));
-            var selected = Keywords.Selected;
-            Results = scoped.Where(c => selected.Count == 0 || selected.Any(c.Keywords.Contains)).ToArray();
+            Keywords.SetOptions(ordered.ToArray(), counts);
+            Results = scoped.Where(KeywordPasses).ToArray();
             if (removed.Count > 0) _notice.Text = string.Join(", ", removed.Distinct()) + " cleared · unavailable with these filters.";
             else if (MyCollection.Store.LoadError.Length > 0) _notice.Text = "Collection unavailable; open Edit my collection for details. Your original file is preserved.";
             else if (notify) _notice.Text = "";
             _count.Text = $"{Results.Length:N0} matching cards";
             foreach (var (clan, button) in _clans)
             {
-                var active = Clans.Contains(clan); button.SetPressedNoSignal(active); CatalogueArt.Selected(button, active);
+                var active = !ExcludedClans.Contains(clan); button.SetPressedNoSignal(active); CatalogueArt.Selected(button, active);
                 button.GetChild<TextureRect>(0).Modulate = active ? Colors.White : new Color(.75f, .75f, .75f);
                 button.GetChild<Label>(1).AddThemeColorOverride("font_color", active ? new Color("efd48d") : CatalogueArt.Ivory);
                 button.GetNode<TextureRect>("SelectedMark").Visible = active;
             }
             foreach (var (family, button) in _families) SelectedStyle(button, Family == family);
-            SelectedStyle(_allCards, !PlayableOnly); SelectedStyle(_playable, PlayableOnly); SelectedStyle(_alphabetical, !_mostCommon); SelectedStyle(_common, _mostCommon);
+            SelectedStyle(_alphabetical, !_mostCommon); SelectedStyle(_common, _mostCommon);
             Focus.Trigger.Visible = Family == "Fate"; Actions.Trigger.Visible = ExtraRow;
             BuildTags(); Fit();
         }
@@ -150,37 +158,45 @@ public partial class CatalogueBrowserBar : Control
         if (notify) Changed?.Invoke();
     }
     private void CollectionChanged() => Refresh();
-    public void SetOwnership(OwnershipFilter filter) { Ownership = filter; CollectionControl.Select((int)filter); Refresh(); }
+    /// <summary>Checks only these clan boxes.</summary>
+    public void OnlyClans(params string[] clans) { ExcludedClans.Clear(); ExcludedClans.UnionWith(ClanNames.Except(clans)); Refresh(); }
+    /// <summary>Checks Owned, Unowned or both.</summary>
+    public void SetOwnership(OwnershipFilter filter)
+    {
+        Collection.SetExcluded(filter == OwnershipFilter.Owned ? [Unowned] : filter == OwnershipFilter.Unowned ? [Owned] : []); Refresh();
+    }
+    private static string[] KeywordFeatures(CatalogueData.Card c) => c.Keywords.Length == 0 ? [NoKeywords] : c.Keywords;
+    private bool KeywordPasses(CatalogueData.Card c) => Keywords.Passes(KeywordFeatures(c));
+    /// <summary>The clan boxes a card belongs to; a card with no clan, or only clans without a box of their own, is Unaligned.</summary>
+    private static string[] ClanFeatures(CatalogueData.Card c) { var boxes = c.Clans.Where(ClanNames.Contains).ToArray(); return boxes.Length == 0 ? ["Unaligned"] : boxes; }
+    private static string[] GoldFeature(CatalogueData.Card c) => [c.Numeric("cost") is var cost && cost != double.MaxValue ? (cost >= 10 ? "10+" : ((int)cost).ToString()) : NoneChoice];
+    private static string[] SetFeatures(CatalogueData.Card c)
+    {
+        var sets = c.Printings.Where(p => p.Set != "Game printing").Select(p => CatalogueData.SetOrder.Contains(p.Set) ? p.Set : OtherSet).Distinct().ToArray();
+        return sets.Length == 0 ? [OtherSet] : sets;
+    }
     private IEnumerable<CatalogueData.Card> FilterWithoutKeywords(bool ownership = true, bool ignoreSearch = false)
     {
-        var cards = _data.Filter(ignoreSearch ? "" : Search.Text, Clans, Family, Types.Selected, null, PlayableOnly, Sort).Where(_eligible);
-        if (_gold.Selected > 0) cards = cards.Where(c => c.Numeric("cost") != double.MaxValue && (_gold.Text == "10+" ? c.Numeric("cost") >= 10 : c.Numeric("cost") == _gold.Selected - 1));
-        if (_set.Selected > 0)
-        {
-            var set = _set.GetItemText(_set.Selected);
-            cards = cards.Where(c => c.Printings.Any(p => p.Set != "Game printing" && (set == "Other" ? !CatalogueData.SetOrder.Contains(p.Set) : p.Set == set)));
-        }
-        if (Family == "Fate" && Focus.Selected.Count > 0) cards = cards.Where(c => c.Focus is { } focus && Focus.Selected.Contains(focus.ToString()));
-        if (ExtraRow && Actions.Selected.Count > 0) cards = cards.Where(c => CatalogueActions.MatchesAny(c.Actions, Actions.Selected));
-        return ownership ? cards.Where(c => MyCollection.Store.Includes(c.Id, Ownership)) : cards;
+        var cards = _data.Filter(ignoreSearch ? "" : Search.Text, null, Family, null, null, false, Sort).Where(_eligible)
+            .Where(c => FilterChecklist.Passes(ExcludedClans, ClanFeatures(c))
+                && Types.Passes(c.Types) && Sets.Passes(SetFeatures(c)) && Gold.Passes(GoldFeature(c)) && Support.Passes(c.Playable ? Playable : NotPlayable));
+        if (Family == "Fate" && Focus.Active) cards = cards.Where(c => Focus.Passes(c.Focus is { } focus ? focus.ToString() : NoneChoice));
+        if (ExtraRow && Actions.Active) cards = cards.Where(c => CatalogueActions.Choices.Any(choice => Actions.Checked(choice) && CatalogueActions.Matches(c.Actions, choice)));
+        return ownership && Collection.Active ? cards.Where(c => Collection.Passes(MyCollection.Store.Count(c.Id) > 0 ? Owned : Unowned)) : cards;
     }
     private void BuildTags()
     {
         Palette.Clear(_tags);
-        void Tag(string text, Action remove)
+        void Tag(string text, Action remove, string name)
         {
             var b = CatalogueArt.Button(text + "  ×", remove);
             foreach (var state in new[] { "normal", "hover", "pressed" }) b.AddThemeStyleboxOverride(state, CatalogueArt.ControlStyle(new Color("e1d6c2"), new Color("8c7447"), 8, 6));
-            b.AddThemeColorOverride("font_color", new Color("161d24")); b.AddThemeColorOverride("font_hover_color", new Color("161d24")); b.AccessibilityName = "Remove filter " + text; b.AddThemeFontSizeOverride("font_size", 16); _tags.AddChild(b);
+            b.AddThemeColorOverride("font_color", new Color("161d24")); b.AddThemeColorOverride("font_hover_color", new Color("161d24")); b.AccessibilityName = "Remove filter " + name; b.AddThemeFontSizeOverride("font_size", 16); _tags.AddChild(b);
         }
-        foreach (var clan in Clans.Order(StringComparer.OrdinalIgnoreCase)) Tag(clan, () => { Clans.Remove(clan); Refresh(); });
-        foreach (var type in Types.Selected.Order(StringComparer.OrdinalIgnoreCase)) Tag(type, () => Types.Remove(type));
-        foreach (var keyword in Keywords.Selected.Order(StringComparer.OrdinalIgnoreCase)) Tag(keyword, () => Keywords.Remove(keyword));
-        foreach (var focus in Focus.Selected.Order()) Tag("Focus " + focus, () => Focus.Remove(focus));
-        foreach (var action in CatalogueActions.Choices.Where(Actions.Selected.Contains)) Tag("Action " + action, () => Actions.Remove(action));
-        if (_set.Selected > 0) Tag(_set.Text, () => { _set.Select(0); Refresh(); });
-        if (_gold.Selected > 0) Tag("Gold " + _gold.Text, () => { _gold.Select(0); Refresh(); });
-        if (_tags.GetChildCount() == 0) { var hint = CatalogueArt.Label("Any clan · Any type · Any keyword", 16); hint.CustomMinimumSize = new Vector2(360, 30); _tags.AddChild(hint); }
+        // One tag per filter that is hiding something; removing it checks that filter's options again.
+        if (ExcludedClans.Count > 0) Tag("Clans: " + (ExcludedClans.Count >= ClanNames.Length ? "None" : $"{ClanNames.Length - ExcludedClans.Count} of {ClanNames.Length}"), () => { ExcludedClans.Clear(); Refresh(); }, "Clans");
+        foreach (var menu in Menus.Where(m => m.Active && m.Trigger.Visible)) Tag($"{menu.Label}: {menu.Summary}", () => { menu.Clear(); Refresh(); }, menu.Label);
+        if (_tags.GetChildCount() == 0) { var hint = CatalogueArt.Label("All clans · All types · All keywords", 16); hint.CustomMinimumSize = new Vector2(360, 30); _tags.AddChild(hint); }
     }
     private static void SelectedStyle(Button button, bool selected) => CatalogueArt.Selected(button, selected);
     private static void Place(Control child, float x, float y, float w, float h) { child.Position = new Vector2(x, y); child.Size = new Vector2(w, h); }
@@ -199,11 +215,11 @@ public partial class CatalogueBrowserBar : Control
         var tagX = 0; if (ExtraRow) { tagX = 190 + 10; if (Focus.Trigger.Visible) tagX += 176 + 10; }
         var familyWidth = _families.Count == 4 ? 400 : 230;
         Place(Search, 0, searchY, w - familyWidth - 435, compact ? 40 : 52);
-        Place(CollectionControl, w - familyWidth - 425, searchY, 220, compact ? 40 : 52); Place(EditCollectionButton, w - familyWidth - 195, searchY, 183, compact ? 40 : 52);
+        Place(Collection.Trigger, w - familyWidth - 425, searchY, 220, compact ? 40 : 52); Place(EditCollectionButton, w - familyWidth - 195, searchY, 183, compact ? 40 : 52);
         var x = w - familyWidth;
         foreach (var (key, button) in _families) { var width = key == "Strongholds" ? 130 : (familyWidth - (_families.ContainsKey("Strongholds") ? 130 : 0)) / (_families.Count - (_families.ContainsKey("Strongholds") ? 1 : 0)); Place(button, x, searchY, width - 2, compact ? 40 : 52); x += width; }
-        Place(Types.Trigger, 0, filterY, 174, compact ? 38 : 44); Place(Keywords.Trigger, 184, filterY, 192, compact ? 38 : 44); Place(_set, 386, filterY, 245, compact ? 38 : 44); Place(_gold, 641, filterY, 140, compact ? 38 : 44);
-        Place(_allCards, 799, filterY, 184, compact ? 38 : 44); Place(_playable, 993, filterY, 166, compact ? 38 : 44);
+        Place(Types.Trigger, 0, filterY, 174, compact ? 38 : 44); Place(Keywords.Trigger, 184, filterY, 192, compact ? 38 : 44); Place(Sets.Trigger, 386, filterY, 245, compact ? 38 : 44); Place(Gold.Trigger, 641, filterY, 140, compact ? 38 : 44);
+        Place(Support.Trigger, 799, filterY, 184, compact ? 38 : 44);
         Place(_count, compact ? 1173 : w - 320, compact ? filterY + 3 : tagsY + 5, compact ? Math.Max(130, w - 1173) : 320, 32);
         Place(_tagScroll, tagX, tagsY, Math.Max(80, w - 655 - tagX), compact ? 38 : 44); Place(_reset, w - 644, tagsY, 124, compact ? 38 : 44);
         Place(_sort, w - 506, tagsY, 170, compact ? 38 : 44); Place(_sizeLabel, w - 320, compact ? tagsY + 5 : filterY + 12, 78, 25); Place(CardSize, w - 238, compact ? tagsY + 6 : filterY + 13, 230, 24);
@@ -216,5 +232,5 @@ public partial class CatalogueBrowserBar : Control
     {
         DrawLine(new Vector2(0, 77), new Vector2(Size.X, 77), new Color(.56f, .43f, .22f, .55f), 1);
     }
-    public void CloseMenus() { if (Types.IsOpen) Types.Close(); if (Keywords.IsOpen) Keywords.Close(); }
+    public void CloseMenus() { foreach (var menu in Menus) if (menu.IsOpen) menu.Close(); }
 }

@@ -61,7 +61,7 @@ public partial class CatalogueControlsReview : Control
     }
     private static void Prepare(CatalogueBrowserBar bar)
     {
-        bar.SetFamily("Dynasty"); bar.Clans.UnionWith(["Crane", "Mantis"]); bar.Types.Selected.Add("Personality"); bar.Refresh();
+        bar.SetFamily("Dynasty"); bar.OnlyClans("Crane", "Mantis"); bar.Types.Only("Personality"); bar.Refresh();
     }
     private async Task CaptureOnce()
     {
