@@ -25,3 +25,5 @@ interpretation this register's decision docs already settled.
 - [Regret and Embracing Virtue](2026-10-03-regret-embracing-virtue.md) — accepted rulings R-026 to R-030; multi-attach from a discard pile, each card its own equip, the end-of-turn return, and the client's two-slot contract.
 
 - [Pass all battles](2026-10-04-pass-all-battles.md) — accepted: a button that passes a player's actions across every remaining battle; the engine passes and selects battles for them until the opponent acts or a decision needs them.
+
+- [Catalogue check-box filters](2026-10-04-catalogue-checkbox-filters.md) — accepted: every Card Library and Deck Builder filter is an include/exclude check-box group with Select all and Deselect all; the default shape for new filters.

@@ -113,7 +113,7 @@ public partial class MyCollectionProbe : Node
             var targetCard = builder.Data.Cards.Single(c => c.Id == target.Id); builder.Adjust(targetCard, 1); await Wait(.2);
             Check(MyCollection.Store.Count(target.Id) == 2, "adding to deck never changes ownership");
             builder.Browser.SetOwnership(OwnershipFilter.Owned); await Wait(.2); Check(builder.Collection.Cards.All(c => MyCollection.Store.Count(c.Id) > 0), "Builder shares Owned filtering");
-            builder.Browser.SetOwnership(OwnershipFilter.All); builder.Browser.Clans.Add("Crane"); builder.Browser.Types.Selected.Add("Personality"); builder.Browser.Refresh();
+            builder.Browser.SetOwnership(OwnershipFilter.All); builder.Browser.OnlyClans("Crane"); builder.Browser.Types.Only("Personality"); builder.Browser.Refresh();
             await Wait(1); await Capture("deck-builder");
             Click(Walk(builder).OfType<Button>().Single(b => b.Text == "View missing cards")); await Wait(.3); await Capture("missing-list");
             KeyPress(Key.Escape); await Wait(.2);
