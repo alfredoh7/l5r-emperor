@@ -225,8 +225,11 @@ internal static class SeedsOfDecayBatch2Tests
         Accept(e3a, Enabled(e3a, 0, "imperial-protection-provinces", card3.Id).Command!);
         Eq(Strength(e3a, 0, 0), before, "nobody attacks yet: nothing");
         // The battle of the same turn: everyone at province 0.
-        var e3 = Edit(e3a, st => { st.Phase = Phase.Battle; st.CurrentBattleProvince = 0; st.UnresolvedBattlefields = [0];
-            foreach (var c in st.Cards.Values.Where(c => c.Zone == Zone.Home && CardCatalog.Get(c.DefinitionId).Type == CardType.Personality)) { c.Zone = Zone.Battlefield; c.ProvinceIndex = 0; } });
+        var e3 = Edit(e3a, st =>
+        {
+            st.Phase = Phase.Battle; st.CurrentBattleProvince = 0; st.UnresolvedBattlefields = [0];
+            foreach (var c in st.Cards.Values.Where(c => c.Zone == Zone.Home && CardCatalog.Get(c.DefinitionId).Type == CardType.Personality)) { c.Zone = Zone.Battlefield; c.ProvinceIndex = 0; }
+        });
         Eq(Strength(e3, 0, 0), before + 4, "two dishonorable attackers: +4");
         Eq(Strength(e3, 0, 1), before, "a province nobody attacks: nothing");
         var e3b = Edit(e3, st => st.Cards[a1.Id].Dishonorable = false);
@@ -254,8 +257,11 @@ internal static class SeedsOfDecayBatch2Tests
         var e2a = MatchEngine.FromTestState(s2);
         var h2 = Honor(e2a, 0);
         Accept(e2a, Offer(e2a, 0, "fair-warning-watch", card2.Id, victim.Id));
-        var e2 = Edit(e2a, st => { st.Phase = Phase.Battle; st.CurrentBattleProvince = 0; st.UnresolvedBattlefields = [0]; st.PriorityPlayerId = 0;
-            foreach (var id in new[] { destroyer.Id, victim.Id }) { st.Cards[id].Zone = Zone.Battlefield; st.Cards[id].ProvinceIndex = 0; } });
+        var e2 = Edit(e2a, st =>
+        {
+            st.Phase = Phase.Battle; st.CurrentBattleProvince = 0; st.UnresolvedBattlefields = [0]; st.PriorityPlayerId = 0;
+            foreach (var id in new[] { destroyer.Id, victim.Id }) { st.Cards[id].Zone = Zone.Battlefield; st.Cards[id].ProvinceIndex = 0; }
+        });
         Accept(e2, Offer(e2, 0, "training-destroy-no-attachments", destroyer.Id, victim.Id));
         Eq(Honor(e2, 0), h2 + 2, "2 Honor when he is destroyed");
         Reject(e2, Use(e2, 0, "fair-warning-watch", card2.Id, victim.Id));
@@ -478,12 +484,10 @@ internal static class SeedsOfDecayBatch2Tests
         Eq(e.State.PendingChoice?.PlayerId, 1);
         var story = e.QueryActions(1).Single(o => o.Type == "useAbility" && o.Command?.AbilityId == "turning-the-story-negate");
         Accept(e, story.Command!);
-        Eq(e.State.PendingChoice?.Type, "proclaim", "back in the Proclaim window");
+        Check(e.State.PendingChoice is null, "the window closed: the negated Proclaim left nothing to react to (issue #639)");
         Eq(Honor(e, 0), honor - 2, "no Proclaim Honor (the entering loss still applies)");
         Eq(e.State.Players[0].ProclaimUsedTurn, e.State.TurnNumber, "the Proclaim was taken (and spent) all the same");
         Check(e.State.HeldProclaim is null && e.State.Cards.Values.Single(c => c.DefinitionId == TurningTheStory).Zone == Zone.FateDiscard, "the Reaction was played and discarded");
-        Decline(e); Decline(e);
-        Check(e.State.PendingChoice is null, "the window closed");
         // Passing instead: the Proclaim resolves.
         var e2 = BuyInClan("training-crane-proclaim-loss", "Crane", 0, s => Add(s, TurningTheStory, 1, Zone.Hand));
         var honor2 = Honor(e2, 0);
@@ -493,7 +497,7 @@ internal static class SeedsOfDecayBatch2Tests
         // Nothing in hand: no window at all.
         var e3 = BuyInClan("training-crane-proclaim-loss", "Crane", 0);
         Accept(e3, e3.QueryActions(0).Single(a => a.Type == "proclaim").Command!);
-        Eq(e3.State.PendingChoice?.Type, "proclaim", "no Reaction held: the Proclaim resolved at once");
+        Check(e3.State.PendingChoice is null, "no Reaction held: the Proclaim resolved at once, and the window with it (issue #639)");
 
         // Kakita Yusugi: Proclaim already used this turn, he may still be Proclaimed.
         var e4 = BuyInClan(Yusugi, "Crane", 0, s => s.Players[0].ProclaimUsedTurn = s.TurnNumber);

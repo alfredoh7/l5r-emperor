@@ -152,6 +152,16 @@ public partial class Main
         AddDecisionReviewNavigation();
     }
 
+    // Issue #639: a Personality bought with Proclaim available is proclaimed once it is paid for. Choosing the Clan discount (which cannot Proclaim) is how a player declines.
+    private string? _autoProclaimCardId;
+    private void AutoProclaim(SessionSnapshot snapshot)
+    {
+        if (_autoProclaimCardId is not { } cardId) return;
+        if (snapshot.View.PendingChoice is not { Type: "proclaim" } pending || pending.CardId != cardId) return;
+        _autoProclaimCardId = null;
+        if (snapshot.Actions.FirstOrDefault(a => a.Type == "proclaim" && a.Enabled && a.Command is not null) is { } proclaim) _ = Submit(proclaim.Command!);
+    }
+
     // The recruit review for purchase and recruitReserve: their own mode picker and Proclaim notes (from the
     // engine's PurchaseQuote), then the ONE payment panel every costed action shares.
     private void RenderPurchase()
@@ -174,11 +184,15 @@ public partial class Main
             modes.ItemSelected += index => Choose(variants[(int)index]);
             _inspector.AddChild(modes);
         }
-        _inspector.AddChild(Palette.Wrapped(quote.ClanDiscount ? "Clan discount reduces the Gold cost by 2. This purchase cannot trigger Proclaim." : quote.ProclaimEligible ? "Paying without the Clan discount leaves Proclaim available after entry." : "This card is not eligible for Proclaim.", 13, Palette.PaperDim));
+        _inspector.AddChild(Palette.Wrapped(quote.ClanDiscount ? "Clan discount reduces the Gold cost by 2. This purchase cannot trigger Proclaim." : quote.ProclaimEligible ? "Paying without the Clan discount Proclaims the Personality as soon as it is paid for." : "This card is not eligible for Proclaim.", 13, Palette.PaperDim));
         if (quote.ClanAllegiance) _inspector.AddChild(Palette.Wrapped("Clan allegiance adds 2 Gold and ignores the Honor requirement.", 13, Palette.Crane));
         var (required, ready) = RenderGoldPanel(choice);
         AddConfirm(choice.Type == "recruitReserve" ? "Confirm recruit" : "Confirm purchase", required, ready,
-            () => new GameCommand(choice.Type, View.ViewerId, reviewedVersion, choice.CardId, required > 0 ? _sources.ToArray() : [], ClanDiscount: quote.ClanDiscount, ClanAllegiance: quote.ClanAllegiance),
+            () =>
+            {
+                _autoProclaimCardId = choice.Type == "purchase" && quote.ProclaimEligible ? choice.CardId : null; // issue #639
+                return new GameCommand(choice.Type, View.ViewerId, reviewedVersion, choice.CardId, required > 0 ? _sources.ToArray() : [], ClanDiscount: quote.ClanDiscount, ClanAllegiance: quote.ClanAllegiance);
+            },
             "Cancel payment");
     }
 

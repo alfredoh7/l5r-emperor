@@ -247,6 +247,7 @@ public sealed partial class MatchEngine
         ApplyPendingEntryEffects();
         _state.ConsecutivePasses = 0;
         _state.PriorityPlayerId = 1 - command.PlayerId;
+        CloseProclaimWindowIfSpent(); // issue #639: no prompt for a reaction nobody can take
     }
 
     private IEnumerable<ActionOption> BeforeProclaimReactionOptions(int playerId)

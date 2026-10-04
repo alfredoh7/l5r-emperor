@@ -361,7 +361,7 @@ internal static partial class EmperorP3Tests
         var courtier = Add(s, "training-crane-courtier", 0, Zone.Home); GiveKeyword(courtier, "Courtier");
         var e = MatchEngine.FromTestState(s);
         var honor0 = Honor(e, 0);
-        Accept(e, e.QueryActions(0).First(a => a.Type == "purchase" && a.CardId == mrika.Id && a.Enabled).Command!);
+        Accept(e, e.QueryActions(0).First(a => a.Type == "purchase" && a.CardId == mrika.Id && a.Enabled && a.Command!.ClanDiscount).Command!); // the discount: no Proclaim window first (issue #639 makes full cost the first purchase's default)
         Eq(e.State.PendingChoice?.Type, "honorChangeReaction", "the trait's gain opens the window");
         Accept(e, Options(e, 0, "destructive-priorities-reaction", kata.Id).First(o => o.Enabled && o.Command!.TargetPlayerId == 1).Command!);
         PassUntil(e, () => e.State.PendingChoice?.Type != "honorChangeReaction");

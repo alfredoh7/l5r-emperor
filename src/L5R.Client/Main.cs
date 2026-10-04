@@ -67,7 +67,7 @@ public partial class Main : Node
             {
                 if (generation != _session.Generation) return;
                 if (_matchDuelGeneration != generation) { _matchDuelFlow.Reset(); _matchDuelGeneration = generation; }
-                _matchDuelFlow.Observe(snapshot); Render();
+                _matchDuelFlow.Observe(snapshot); Render(); if (snapshot is not null) AutoProclaim(snapshot);
             });
         };
         _session.Notice += message => _uiQueue.Enqueue(() => SetNotice(message));

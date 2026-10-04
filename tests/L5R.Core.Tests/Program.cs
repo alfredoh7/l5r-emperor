@@ -410,7 +410,7 @@ static void Proclaim()
     Accept(e, Cmd(e, "purchase", id: id, sources: e.QuotePurchase(0, id).Payments[0].SourceIds));
     Equal(e.State.Cards[id].Zone, Zone.Home); Equal(e.State.Players[0].Honor, 8); Check(e.State.PendingChoice is not null);
     Reject(e, Cmd(e, "endDynasty")); Accept(e, Cmd(e, "proclaim")); Equal(e.State.Players[0].Honor, 11);
-    Accept(e, Cmd(e, "declineReaction")); Reject(e, Cmd(e, "proclaim")); Accept(e, Cmd(e, "declineReaction"));
+    Check(e.State.PendingChoice is null, "issue #639: nothing is left to react to after the Proclaim, so the window is closed"); Reject(e, Cmd(e, "proclaim"));
     var next = ProvinceCard(e, 1); Check(!e.QuotePurchase(0, next).ProclaimEligible);
     Accept(e, Cmd(e, "purchase", id: next, sources: e.QuotePurchase(0, next).Payments[0].SourceIds));
     Check(e.State.PendingChoice is null); Equal(e.State.Players[0].Honor, 11);
@@ -2376,10 +2376,7 @@ static void MeiyuEntersPlayReaction()
     // Proclaim still works afterward, in either order.
     Accept(e, new GameCommand("proclaim", 0, e.Version));
     Equal(e.State.Players[0].Honor, honorBefore + 2, "Meiyu's printed Personal Honor is 2");
-    Check(e.State.PendingChoice is not null, "Window still open until both players pass");
-    Accept(e, new GameCommand("declineReaction", 1, e.Version));
-    Accept(e, new GameCommand("declineReaction", 0, e.Version));
-    Check(e.State.PendingChoice is null, "Window closes once both players pass consecutively");
+    Check(e.State.PendingChoice is null, "Window closes at once: Meiyu's reaction and Proclaim are both spent (issue #639)");
 }
 static void MonasteryFireTokenAndAttack()
 {
@@ -11741,8 +11738,7 @@ static void BatchFPassivesEquipAndRecruit()
         Equal(e.State.PendingChoice?.ActingPlayerId, 1);
         Accept(e, Cmd(e, "proclaim"));
         Equal(e.State.Players[0].Honor, 3 + CardCatalog.Get(e.State.Cards[id].DefinitionId).PersonalHonor, "Proclaim: gain the recruit's Personal Honor");
-        Accept(e, Cmd(e, "declineReaction")); Accept(e, Cmd(e, "declineReaction"));
-        Check(e.State.PendingChoice is null);
+        Check(e.State.PendingChoice is null, "nothing is left to react to after the Proclaim: the window closed (issue #639)");
         Equal(e.State.PriorityPlayerId, 1);
     }
     {

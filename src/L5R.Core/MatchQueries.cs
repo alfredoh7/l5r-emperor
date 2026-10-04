@@ -815,7 +815,7 @@ public sealed partial class MatchEngine
                         var def = Definition(card);
                         if (_state.Phase == Phase.Dynasty)
                         {
-                            var modes = def.Type == CardType.Personality && HasClanAffiliation(card, player.Clan) ? new[] { (true, false), (false, false), (true, true), (false, true) } : [(false, false)];
+                            var modes = def.Type == CardType.Personality && HasClanAffiliation(card, player.Clan) ? PurchaseModes(player, card) : [(false, false)];
                             foreach (var (discount, allegiance) in modes)
                             {
                                 var quote = QuotePurchase(playerId, card.Id, discount, allegiance);

@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Proclaim flow: the Proclaim window closes at once after a Proclaim when neither player has a reaction left to take; purchase options are ordered so the first Personality bought each turn defaults to full cost with Proclaim (proclaimed automatically by the client once paid), later ones to the Clan discount, and a Personality whose Honor Requirement is unmet to Clan allegiance (+2) automatically. New public state PlayerState.PersonalityPurchaseTurn; client contract: the first enabled purchase option is the default.",
+  "validation": "bash tools/check.sh --skip-client run: Core all pass (new proclaim-flow 4/4; six existing tests updated for the closed window: Proclaim, Meiyu, Shinden Shorai, Bofana x2, Seeds Proclaim negation, M'rika), AI failed once on the old trailing-pass expectation then 97/97 after updating it; Server 9/9, Transport 18/18, Collection 58 assertions rerun separately after the AI fix (check.sh stopped at the AI failure, not rerun end-to-end). Client builds. Auto-proclaim not exercised natively (no Godot playtest).",
+  "remaining": "Client auto-proclaim and the default variant are unplaytested natively. Reserve recruits keep the old option order. Only reactions the window already lists keep it open; no printed after-Proclaim trigger exists in the engine yet.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/639",
+  "branch": "claude/639-proclaim-flow",
+  "updated": "2026-10-04T21:11:46.068151+00:00"
+}
