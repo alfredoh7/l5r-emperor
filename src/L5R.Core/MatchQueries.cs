@@ -637,6 +637,10 @@ public sealed partial class MatchEngine
         {
             result.AddRange(P3DarkVirtueActions(playerId)); // Daigotsu Tenbatsu (issue #503, EmperorP3.cs).
         }
+        else if (_state.PendingChoice is { Type: NitoshiInexperienced.HoldChoice })
+        {
+            result.AddRange(NitoshiHoldActions(playerId)); // Bayushi Nitoshi - inexperienced (issue #617, NitoshiInexperienced.cs).
+        }
         else if (_state.PendingChoice is { Type: "rentatsuLoss" })
         {
             result.AddRange(RentatsuLossActions(playerId)); // Bayushi Rentatsu (Emperor Edition Personality pass, issue #477, batch 4).

@@ -340,6 +340,7 @@ public sealed partial class MatchEngine
         P4CommandTail(); // Scars of War (issue #503, EmperorP4Watches.cs): "after each time it bows".
         OpenEmperorP6QueuedDecision(); // Issue #503 (EmperorP6.cs): Suikihime's leaves-play watch; the refill decisions owed by the command.
         OpenP3EntryWindow(); // Easy Persuasion (issue #503): the window after a Personality entered play, for either player
+        NitoshiCommandTail(); // Bayushi Nitoshi - inexperienced (issue #617): the hold on the card he took lasts until it is played or returned
         OpenP3OwedChoices(); // Shosuro Aroru - exp2 (issue #503): "After the action's resolution, you may move Aroru to a different location."
         CheckInokuchiWatches(); // Mirumoto Inokuchi (issue #501, EmperorMechA.cs): "If you don't, bow him" -- once his additional action is gone without being taken.
     }

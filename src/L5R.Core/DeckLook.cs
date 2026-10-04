@@ -29,7 +29,9 @@ public static class LookDisposition
     public const string Discard = "discard";
     /// <summary>Put the card into play at the current battlefield (issue #503, Searching for Answers; EmperorP5Hidden.cs).</summary>
     public const string Play = "play";
-    public static readonly string[] All = [Top, Bottom, Hand, Show, Discard, Play];
+    /// <summary>Take the card into the hand and hold the game until it is played or returned (Bayushi Nitoshi - inexperienced, issue #617; NitoshiInexperienced.cs).</summary>
+    public const string PlayIt = "playit";
+    public static readonly string[] All = [Top, Bottom, Hand, Show, Discard, Play, PlayIt];
 }
 
 /// <summary>One deck a look may target: which of the viewer's decks ("Fate" or "Dynasty") and whether it is the
@@ -152,8 +154,13 @@ public sealed partial class MatchEngine
         LookDisposition.Show => "Show and put in your hand",
         LookDisposition.Discard => "Discard",
         LookDisposition.Play => "Put into play at the current battlefield",
+        LookDisposition.PlayIt => "Yes: take it and play it",
         _ => disposition
     };
+
+    // The label a spec gives a disposition: Nitoshi's one-card look is a yes/no question, "no" being the card staying where it was.
+    private static string DispositionLabel(string disposition, LookSpec spec) =>
+        spec.Id == NitoshiInexperienced.Look.Id && disposition == LookDisposition.Top ? "No: return it to the top of your deck" : DispositionLabel(disposition);
 
     // ---- the flow ----
 
@@ -215,6 +222,7 @@ public sealed partial class MatchEngine
     private void FinishLook(PendingLook look)
     {
         if (OpenP5LookEntryWindows(look)) return; // issue #503: the Personality Searching for Answers put into play gets his entering-play windows
+        if (NitoshiAfterLook(look)) return; // Bayushi Nitoshi - inexperienced (issue #617): a taken card holds the game until it is played or returned
         if (P3AfterLook(look)) return; // Daigotsu Tenbatsu (issue #503, EmperorP3.cs): "You may discard a Dark Virtue; if you did, draw a card."
         _state.PendingLook = null;
         FinishDeferredAction(look.PlayerId, look.Origin, look.SourceCardId, look.BowedBefore);
@@ -242,6 +250,7 @@ public sealed partial class MatchEngine
         if (disposition == spec.Remainder) return (true, null);
         var rule = spec.Rules.First(r => r.Disposition == disposition);
         if (rule.Criteria is not null) { var (eligible, reason) = SearchEligibility(rule.Criteria, card); if (!eligible) return (false, reason); }
+        if (disposition == LookDisposition.PlayIt) return NitoshiPlayLegal(look, card); // issue #617
         if (disposition == LookDisposition.Play) return P5PlayDispositionLegal(look, card); // issue #503 (EmperorP5Hidden.cs)
         return (true, null);
     }
@@ -311,6 +320,7 @@ public sealed partial class MatchEngine
                     RecordShown(viewer.Id, card, source, look.Deck!, "look");
                     if (P2CardIntoHandBlocked(viewer.Id)) { top.Add(card.Id); break; } // issue #503
                     card.Zone = Zone.Hand; viewer.Hand.Add(card.Id); NoteCardIntoHand(viewer.Id); shown++; break;
+                case LookDisposition.PlayIt: NitoshiTakeCard(look, card); hand++; break; // issue #617
                 case LookDisposition.Play: PutIntoPlayFromLook(look, card, source); break; // issue #503 (EmperorP5Hidden.cs)
                 case LookDisposition.Discard:
                     if (!P2BeforeLookDiscard(look, source)) { top.Add(card.Id); break; } // issue #503: The Tapestry Perceived destroys itself first
@@ -349,8 +359,8 @@ public sealed partial class MatchEngine
         return new("Arrange", source.Id, sourceName, spec.Label, _state.PendingChoice.Prompt, null, look.Deck, look.DeckOwnerId, look.DeckOwnerId == viewerId, look.Count,
             LookDeckList(look.DeckOwnerId!.Value, look.Deck!).Count,
             cards.Select((c, i) => new LookCardView(i, c.DefinitionId, Copy(Definition(c)),
-                offered.Select(d => { var (legal, reason) = LookLegal(look, spec, c, d); return new LookDispositionView(d, DispositionLabel(d), legal, reason); }).ToArray())).ToArray(),
-            spec.Rules.Select(r => { var (min, max) = LookBounds(look, spec, cards, r); return new LookRuleView(r.Disposition, DispositionLabel(r.Disposition), min, max); }).ToArray(),
+                offered.Select(d => { var (legal, reason) = LookLegal(look, spec, c, d); return new LookDispositionView(d, DispositionLabel(d, spec), legal, reason); }).ToArray())).ToArray(),
+            spec.Rules.Select(r => { var (min, max) = LookBounds(look, spec, cards, r); return new LookRuleView(r.Disposition, DispositionLabel(r.Disposition, spec), min, max); }).ToArray(),
             spec.Remainder, spec.Reorder);
     }
 
@@ -399,6 +409,8 @@ public sealed partial class MatchEngine
 
     private string DescribeArrangement(List<CardInstance> cards, string[] tokens, LookSpec spec)
     {
+        if (spec.Id == NitoshiInexperienced.Look.Id) // issue #617: the yes/no question's two answers
+            return tokens[0].EndsWith(":" + LookDisposition.PlayIt, StringComparison.Ordinal) ? $"Yes: add {Definition(cards[0]).Name} to your hand and play it" : "No: return it to the top of your deck";
         var groups = tokens.Select(t => (Position: int.Parse(t.Split(':')[0]), Disposition: t.Split(':')[1])).GroupBy(e => e.Disposition);
         var parts = new List<string>();
         foreach (var g in groups.Where(g => g.Key != spec.Remainder))

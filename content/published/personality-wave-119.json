@@ -1,0 +1,41 @@
+{
+  "Profile": "personality-wave-119",
+  "Rules": "Emperor Edition core rules; reviewed Honor and Treachery scan.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10248",
+      "Name": "Bayushi Nitoshi",
+      "Type": "Personality",
+      "Clan": "Scorpion",
+      "GoldCost": 10,
+      "GoldProduction": 0,
+      "Force": 6,
+      "Chi": 4,
+      "PersonalHonor": 1,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle/Limited: Look at the top card of your Fate deck. If it is an attachment, you may attach it to one of your Personalities at Nitoshi's location, paying all costs. If it is a Strategy, you may take an additional action to play it (if legal).",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10248.jpg",
+      "Keywords": [
+        "Loyal",
+        "Unique",
+        "Clan Champion",
+        "Courtier",
+        "Inexperienced",
+        "Samurai",
+        "Scorpion Clan",
+        "Shoju's Soul",
+        "Sociopath"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "nitoshi-inexp-look-battle",
+        "nitoshi-inexp-look-limited"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}
