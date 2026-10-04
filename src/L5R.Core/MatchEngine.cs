@@ -2704,6 +2704,8 @@ public sealed partial class MatchEngine
     {
         // Abandoning the Fortunes (issue #492, group F): "before each player's turn ends" -- the player whose turn is ending may owe a choice first.
         if (BeginAbandoningTheFortunes()) return;
+        // Embracing Virtue (RegretEmbracingVirtue.cs): "Before an End Phase begins, if this card is in your discard pile: You may put it in your hand" -- ahead of the End Phase's draw and hand-size discard.
+        if (BeginEmbracingVirtue()) return;
         // Tamori Tamoko's own Open action (issue #207 follow-up): "before the turn ends, gain 1
         // Honor if he was not assigned to attack your provinces this turn" -- drained here,
         // unconditionally, the same turn every one of these was queued (her own Open Timing is only

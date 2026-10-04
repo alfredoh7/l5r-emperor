@@ -1,0 +1,20 @@
+[
+  {
+    "card_id": "oracle-l5r-2313",
+    "printing_set": [
+      "War of Honor"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=2313",
+    "image_path": "assets/reference/oracle/war-of-honor/webp/oracle-l5r-2313-printing-1-image-1.webp",
+    "image_sha256": "95a8014f4048d91ca2d4bdb9f5a09f76dda136bd9a3e455cbba024c217a32754"
+  },
+  {
+    "card_id": "oracle-l5r-9923",
+    "printing_set": [
+      "The Shadow's Embrace"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=9923",
+    "image_path": "assets/reference/oracle/the-shadow-s-embrace/webp/oracle-l5r-9923-printing-1-image-1.webp",
+    "image_sha256": "84daf28e3f3955c6b31100e432c949b734cba57fdd6fef9233f0928a853b42a7"
+  }
+]

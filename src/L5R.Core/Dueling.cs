@@ -642,6 +642,7 @@ public sealed partial class MatchEngine
                 break;
             // Emperor Edition mechanics group E (issue #501): Greasing the Wheels (EmperorMechE.cs).
             default:
+                ApplyRegretFocusEffect(abilityId, winnerPlayerId); // Regret (RegretEmbracingVirtue.cs)
                 ApplyMechEFocusEffect(abilityId);
                 ApplyP5FocusEffect(abilityId, ownerId, winnerPlayerId); // issue #503: Searching for Answers (EmperorP5Hidden.cs)
                 break;

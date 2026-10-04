@@ -21,3 +21,5 @@ interpretation this register's decision docs already settled.
 - [Personality-destruction Reaction triggers](2026-09-29-personality-destruction-reactions.md) — confirmed play-to-dead trigger, with narrower action-source wording and no later discard-to-dead trigger.
 
 - [Rename the "Fallen" UI label to "Dead"](2026-09-30-dead-not-fallen.md) — proposed, for Alfredo: "Fallen" is a printed keyword later in the Emperor Arc and collides with the client's own word for the dead-personality pile.
+
+- [Regret and Embracing Virtue](2026-10-03-regret-embracing-virtue.md) — accepted rulings R-026 to R-028; multi-attach from a discard pile, the end-of-turn return, and the client's two-slot contract.
