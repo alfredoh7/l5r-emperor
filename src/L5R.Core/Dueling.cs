@@ -431,6 +431,7 @@ public sealed partial class MatchEngine
         _state.PendingDuel = null;
         if (duel.RingsBowedBefore is { } duelRings) RecordBowedRings(duelRings.ToHashSet()); // Deception Revealed (Mendon's R4 ruling): a Ring the duel's action bowed goes on its record (a Focus Effect's bows do not: ApplyDuelFocusEffect).
         ApplyHesMineBows(duel.ChallengerId, duel.ChallengedId); // He's Mine! (Emperor Edition remaining-cards pass, issue #492, group B): the substitute bows once the duel has ended.
+        ApplyTfPersonalitiesDuelWin(winnerId); // Kakita Izumiko (issue #622, TfPersonalities.cs): "After Izumiko wins a duel, gain 1 Honor." -- a trait.
         ApplyTwinForksCity(winnerId); // Twin Forks City (The Shadow's Embrace pass, issue #476 batch 6): a trait, before any Reaction to the duel's end.
         // The duel itself is a single, complete action from challenge to consequences (issue #209):
         // once everything above has applied, the winning card's own controller gets a chance to
