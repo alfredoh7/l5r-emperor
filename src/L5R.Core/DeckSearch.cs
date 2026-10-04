@@ -615,8 +615,15 @@ public sealed partial class MatchEngine
         foreach (var comparison in criteria.Comparisons ?? [])
         {
             var actual = SearchStat(card, comparison.Stat);
-            var holds = comparison.Op switch { "<=" => actual <= comparison.Value, ">=" => actual >= comparison.Value, "<" => actual < comparison.Value,
-                ">" => actual > comparison.Value, "==" => actual == comparison.Value, _ => throw new RuleViolation("Unknown search comparison.") };
+            var holds = comparison.Op switch
+            {
+                "<=" => actual <= comparison.Value,
+                ">=" => actual >= comparison.Value,
+                "<" => actual < comparison.Value,
+                ">" => actual > comparison.Value,
+                "==" => actual == comparison.Value,
+                _ => throw new RuleViolation("Unknown search comparison.")
+            };
             if (!holds) return (false, $"{comparison.Stat} {actual}, needs {comparison.Op} {comparison.Value}");
         }
         // The Gold Cost ceiling an action names (I Give You My Name, issue #492).
@@ -627,8 +634,15 @@ public sealed partial class MatchEngine
     private static int SearchStat(CardInstance card, string stat)
     {
         var def = Definition(card);
-        return stat switch { "Focus" => def.Focus, "GoldCost" => def.GoldCost, "Force" => def.Force, "Chi" => def.Chi, "PersonalHonor" => def.PersonalHonor,
-            _ => throw new RuleViolation("Unknown search statistic.") };
+        return stat switch
+        {
+            "Focus" => def.Focus,
+            "GoldCost" => def.GoldCost,
+            "Force" => def.Force,
+            "Chi" => def.Chi,
+            "PersonalHonor" => def.PersonalHonor,
+            _ => throw new RuleViolation("Unknown search statistic.")
+        };
     }
 
     // ---- what each player is allowed to see ----

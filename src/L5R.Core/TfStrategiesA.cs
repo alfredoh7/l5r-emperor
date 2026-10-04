@@ -141,29 +141,29 @@ public sealed partial class MatchEngine
                 return true;
             case TfStrategiesAAbilities.FeignAction:
             case TfStrategiesAAbilities.FeignBattle:
-            {
-                var name = Definition(source!).Name;
-                SpendHandPlayedCard(player, source);
-                return BringDeadPersonalityIntoPlay(player, target!, name, null, entered =>
                 {
-                    if (!StalwartNegatesBow(entered, player.Id)) entered.Bowed = true;
-                    Dishonor(entered, player.Id);
-                    GainHonor(player.Id, -2, name, source);
-                });
-            }
+                    var name = Definition(source!).Name;
+                    SpendHandPlayedCard(player, source);
+                    return BringDeadPersonalityIntoPlay(player, target!, name, null, entered =>
+                    {
+                        if (!StalwartNegatesBow(entered, player.Id)) entered.Bowed = true;
+                        Dishonor(entered, player.Id);
+                        GainHonor(player.Id, -2, name, source);
+                    });
+                }
             case TfStrategiesAAbilities.GraspBoost:
                 ApplyModifier(target!, source!.Id, id, "Force", 2);
                 ApplyModifier(target!, source.Id, id, "Chi", 2);
                 if (Keyword(target!, "Kensai")) GrantAdditionalAction(player.Id, null);
                 return false;
             case TfStrategiesAAbilities.StorehouseDraw:
-            {
-                // "After playing this Strategy": the card itself is no longer in the hand it was played from.
-                var mine = player.Hand.Count(h => h != source?.Id);
-                if (_state.Players.Where(p => p.Id != player.Id).All(p => p.Hand.Count > mine)) { Draw(player); Draw(player); }
-                else Emit("storehouseNothing", $"{Definition(source!).Name}: {player.Name} does not have fewer cards in hand than each other player.", player.Id, source!.Id);
-                return false;
-            }
+                {
+                    // "After playing this Strategy": the card itself is no longer in the hand it was played from.
+                    var mine = player.Hand.Count(h => h != source?.Id);
+                    if (_state.Players.Where(p => p.Id != player.Id).All(p => p.Hand.Count > mine)) { Draw(player); Draw(player); }
+                    else Emit("storehouseNothing", $"{Definition(source!).Name}: {player.Name} does not have fewer cards in hand than each other player.", player.Id, source!.Id);
+                    return false;
+                }
             case TfStrategiesAAbilities.OutpostOpen:
             case TfStrategiesAAbilities.OutpostBattle:
                 Straighten(target!);
