@@ -11,6 +11,8 @@ public sealed record PracticeDeckReview(int Dynasty, int Fate, string Clan, stri
 public static class CustomPractice
 {
     public const string Scenario = "custom-practice-v1";
+    /// <summary>Largest Dynasty + Fate card count a Practice deck may have (a resource bound; see <see cref="Review"/>).</summary>
+    public const int MaxDeckCards = 242;
     private sealed record PoolCard(string Id, string Name, string[] Types, string[] DeckTypes, string[] Keywords);
     private sealed record Pool(PoolCard[] Cards);
     private static readonly Lazy<DeckCardInfo[]> PoolCards = new(() =>
@@ -50,8 +52,9 @@ public static class CustomPractice
             }
             foreach (var c in draft.Cards.Where(c => c.SetupSlot.Length == 0))
                 if (c.Families.Count(f => f is "Dynasty" or "Fate") != 1) issues.Add($"{c.DeckName}: deck placement is not supported.");
-            // Resource bound, not an assertion about tournament deck-size rules.
-            if ((long)basic.Dynasty + basic.Fate > 10000) issues.Add("This build supports at most 10,000 cards in a Practice deck.");
+            // Resource bound, not an assertion about tournament deck-size rules. Two decks plus setup cards must fit the fixed opaque
+            // card-id pool (MatchEngine.OpaqueCardIds, 2000): 2 x 242 deck cards + 2 Strongholds, 2 Border Keeps and the Bamboo Harvesters = 489, so setup can never run out of ids (issue #611).
+            if ((long)basic.Dynasty + basic.Fate > MaxDeckCards) issues.Add($"This build supports at most {MaxDeckCards} cards in a Practice deck.");
             var stronghold = draft.Cards.FirstOrDefault(c => c.SetupSlot == "Stronghold");
             var definition = stronghold is null ? null : CardCatalog.Cards.GetValueOrDefault(stronghold.Id);
             return new(basic.Dynasty, basic.Fate, definition?.Clan ?? "Unaligned", stronghold?.Id, issues.ToArray());

@@ -39,6 +39,19 @@ internal static class CustomPracticeTests
                 foreach (var name in new[] { "Bogus card", "training-crane-samurai", "Plains of Otosan Uchi" }) // issue #503: A Champion in Court is now wired; Plains of Otosan Uchi is still unpublished Reject(Crane with { Entries = [.. Crane.Entries, new(name, 1)] });
                 Reject(Crane with { Legality = "Modern" });
             }),
+            ("A deck over the 242-card Practice cap is rejected by Review with the cap named, and cannot start (issue #611)", () => {
+                var d = CustomPractice.Workshop(); d.Load(DeckFormat.Write(Crane));
+                foreach (var card in CardCatalog.Cards.Values.Where(c => c.Id.StartsWith("oracle-l5r-") && !c.ScenarioOnly && !c.CreatedOnly && c.Type is CardType.Personality or CardType.Strategy))
+                {
+                    if (d.ToDeck() is var cur && CustomPractice.Review(cur) is var r && r.Dynasty + r.Fate > CustomPractice.MaxDeckCards) break;
+                    d.Adjust(card.Id, 3);
+                }
+                var big = d.ToDeck(); var review = CustomPractice.Review(big);
+                Check(review.Dynasty + review.Fate > CustomPractice.MaxDeckCards, "Test deck did not exceed the cap");
+                Check(!review.Ready && review.Issues.Any(i => i.Contains("at most 242 cards")), string.Join("; ", review.Issues));
+                Reject(big);
+            }),
+            ("The cap leaves the opaque id pool room for two maximum decks (issue #611)", () => Check(2 * (CustomPractice.MaxDeckCards + 3) < 2000)),
             ("Duplicate quantity lines cannot bypass copy limits", () => { var d = Crane; Reject(d with { Entries = [.. d.Entries, new(d.Entries.Last().Name.ToUpperInvariant(), 4)] }); }),
             ("Missing or extra setup cards reject", () => {
                 Reject(Crane with { Entries = Crane.Entries.Where(e => e.Name != "Border Keep").ToArray() });

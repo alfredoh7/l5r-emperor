@@ -1,0 +1,9 @@
+{
+  "lane": "rules",
+  "summary": "Cap Practice decks at 242 Dynasty+Fate cards (was 10,000) so two decks always fit the fixed 2000-id opaque card pool; names the cap in Review.",
+  "validation": "Core (all suites, incl. 2 new custom-practice checks), AI 97/97, server 9/9, client transport 18/18, collection suite pass; comment-swallow lint ok; format check ok. Client compile not run (no client change).",
+  "remaining": "Items 2 and 4 of #611 follow in separate PRs (id-ordered options, per-owner unit number).",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/611",
+  "branch": "claude/611-deck-cap-242",
+  "updated": "2026-10-04T00:41:20.571352+00:00"
+}
