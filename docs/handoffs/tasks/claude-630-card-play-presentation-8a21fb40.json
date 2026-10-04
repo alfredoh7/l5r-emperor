@@ -1,9 +1,9 @@
 {
-  "lane": "ui",
-  "summary": "Issue #630: a played card is now shown face-up in the middle of the table with a caption (the event text) for a beat, then travels to its owner's discard pile; a card that stays in play (an ability on the table) is shown and fades. Driven by the public strategyPlayed/abilityUsed events; opponent's plays only by default; queued; the practice opponent waits while one is showing; reduced motion gets a plain fade. All timings/sizes/switches are constants in CardPlayTiming (Main.CardPlays.cs). The older quick discard flight skips a card the showcase handles.",
-  "validation": "Client project builds with 0 warnings/errors; check_format and lint_comment_swallow clean. NOT verified: no native visual or motion check, no screenshot, no Godot capture probe; timings and placement are untested guesses for Mendon/Alfredo to tune in play.",
-  "remaining": "Native playtest and tuning of the look/timing; the discard pile's count updates immediately when the view arrives, so the pile can show the card before the showcase finishes.",
+  "lane": "shared",
+  "summary": "Issue #630: a played card is shown face-up in the middle of the table with a caption (the event text) for a beat, then travels to its owner's discard pile; a card that stays in play (an ability on the table) is shown and fades. Client-only (Main.CardPlays.cs, one line each in Main.cs and Main.Motion.cs); no engine or message change. Shared in the sense that it is UI work done under Mendon's standing authority (collaboration.json), so Alfredo's review is optional but welcome for the look. Driven by the public strategyPlayed/abilityUsed events; opponent's plays only by default; queued; the practice opponent waits while one is showing; reduced motion gets a plain fade. Timings/sizes/switches are constants in CardPlayTiming.",
+  "validation": "Client project builds with 0 warnings/errors; check_format and lint_comment_swallow clean. NOT verified: no native visual or motion check, no screenshot, no Godot capture probe; timings and placement are untested guesses to tune in play.",
+  "remaining": "Native playtest and tuning of look/timing; the discard pile's count updates as soon as the view arrives, so the pile can show the card before the showcase finishes.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/630",
   "branch": "claude/630-card-play-presentation",
-  "updated": "2026-10-04T18:15:57.721510+00:00"
+  "updated": "2026-10-04T18:16:10.914727+00:00"
 }
