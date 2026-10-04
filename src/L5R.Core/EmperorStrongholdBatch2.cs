@@ -67,7 +67,7 @@ public sealed partial class MatchEngine
         var thunder = ThunderBattleAction(command, ability);
         var inPlay = !ranged && !thunder ? null : _state.Cards.Values.FirstOrDefault(c => c.OwnerId == command.PlayerId && InPlay(c) && !c.Bowed
             && AbilityIdsOf(c).Any(a => AbilityCatalog.All.TryGetValue(a, out var d) && d.Timing == "Reaction"
-                && (ranged && d.Trigger == "own-ranged-action-announced" && AtBattle(c) || thunder && d.Trigger == TorchAnnounceTrigger && Unspent(c, a))));
+                && (ranged && d.Trigger == "own-ranged-action-announced" && (AtBattle(c) || a == TfGearAbilities.LookoutDestroy /* issue #622: Lookout reacts from anywhere in play */) || thunder && d.Trigger == TorchAnnounceTrigger && Unspent(c, a))));
         return inPlay ?? NoHidingPlaceWatcher(command) ?? P3AnnounceWatcher(command); // No Hiding Place (issue #498): a Strategy in the announcing player's hand (EmperorFollowupsAttack.cs); Ikoma Ayumu, Utaku Lishan (issue #503).
     }
 

@@ -1,0 +1,171 @@
+{
+  "Profile": "spell-wave-50",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-1449",
+      "Name": "Conflagration",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "While this Shugenja is Fire, Ranged Attacks from actions he performs have +1 strength.\nBattle: Bow this card: Give this Shugenja +3F.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1449.jpg",
+      "Keywords": [
+        "Fire"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "tf-conflagration-boost"
+      ],
+      "Effect": "tf-conflagration"
+    },
+    {
+      "Id": "oracle-l5r-10543",
+      "Name": "Typhoon Surge",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Water Battle: Move a target Personality at any location to the current battlefield. Straighten his unit if you do not control him. Destroy this Spell.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10543.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "tf-typhoon-surge-move"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10699",
+      "Name": "The Thunder Resounds",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Thunder Battle: Target a Spell at this battlefield, or at any location if the target is Thunder. Copy an ability on it that does not itself copy ability, to this Spell (until the turn ends).",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10699.jpg",
+      "Keywords": [],
+      "Focus": 1,
+      "Abilities": [
+        "tf-thunder-resounds-copy"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10701",
+      "Name": "Kiyoshi's Wrath",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Earth Battle, Bow this card: Bow a target enemy Follower or Personality with 4 or lower Force.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10701.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "tf-kiyoshi-bow"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10704",
+      "Name": "Steal the Candle's Flame",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Fire Interrupt, Bow this card: Give a Melee or Ranged Attack +2 strength.\nFire Battle: Ranged 0 Attack.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10704.jpg",
+      "Keywords": [],
+      "Focus": 3,
+      "Abilities": [
+        "tf-steal-candle-interrupt",
+        "tf-steal-candle-attack"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10917",
+      "Name": "Hitomi's Devotion",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle resolution will not destroy cards in this unit while defending and, if this Shugenja is Earth, while attacking.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10917.jpg",
+      "Keywords": [
+        "Earth"
+      ],
+      "Focus": 3,
+      "Abilities": [],
+      "Effect": "tf-hitomis-devotion"
+    },
+    {
+      "Id": "oracle-l5r-10920",
+      "Name": "Sailor's Warning",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Thunder Battle, Bow this card: Target your Personality. Ranged Attack with strength equal to his Chi. Destroy this Spell.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10920.jpg",
+      "Keywords": [],
+      "Focus": 1,
+      "Abilities": [
+        "tf-sailors-warning"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

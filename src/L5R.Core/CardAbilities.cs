@@ -4231,7 +4231,7 @@ public sealed partial class MatchEngine
             or "katsuo-straighten" or "second-city-port-straighten" => "straighten",
         // Seeds of Decay pass (issue #453), batch 5: Moksha Patam and Okesa-goma move their target home, Nature's Wrath moves it to the battlefield;
         // Master of Beasts, Peace of the Kami (if a Spirit) and The Earth's Strength straighten theirs.
-        "moksha-patam-move" or "okesa-goma-move" or "natures-wrath-move" => "move",
+        "moksha-patam-move" or "okesa-goma-move" or "natures-wrath-move" or TfGearAbilities.TyphoonMove /* issue #622: Typhoon Surge moves its target to the battlefield */ => "move",
         // Emperor Edition Stronghold pass (issue #486), batch 2: Suitengu's Torch moves its target home.
         "torch-move" => "move",
         // Forgotten Legacy pass (issue #467), batch 1: Daidoji Takichi moves his target (Sea Troll Predator's shape), Iuchi Abodan sends his home.
@@ -4773,7 +4773,7 @@ public sealed partial class MatchEngine
     // adjustment always stacks on top of this, never bypasses it.
     private int EffectiveAttackStrength(string abilityId, PlayerState player, CardInstance? target, string? sourceId = null) =>
         AttackStrength(abilityId, player, target, sourceId) + (target is null ? 0 : AttackDefenseModifier(target, AttackKind(abilityId)))
-        + ShishidoRangedBonus(abilityId, sourceId) + P2AttackStrengthBonus(abilityId, player.Id) // issue #503: Ikoma Yamahatsu, Surrounded! (EmperorP2.cs)
+        + ShishidoRangedBonus(abilityId, sourceId) + P2AttackStrengthBonus(abilityId, player.Id) + TfRangedBonus(abilityId, sourceId) // issue #503: Ikoma Yamahatsu, Surrounded! (EmperorP2.cs); issue #622: Conflagration (TfGear.cs)
         ; // Toritaka Shishido (Emperor Edition Personality pass, issue #477 batch 2): +1 to a Ranged Attack performed by a card in his army.
     // Sums every card in `target`'s own unit (its parent Personality, plus every attachment) granting
     // a passive Attack-strength modifier of this `kind` that reaches `target` specifically: Scope
@@ -5084,7 +5084,7 @@ public sealed partial class MatchEngine
     // when supplied, same final Strength field every other caller already relies on downstream.
     private bool ResolveOrDeferAttack(string abilityId, PlayerState attacker, string? targetId, string? sourceId = null, bool additional = false, int? strengthOverride = null)
     {
-        var strength = strengthOverride is int overridden ? overridden + ShishidoRangedBonus(abilityId, sourceId) + P2AttackStrengthBonus(abilityId, attacker.Id) /* issue #503 */ : EffectiveAttackStrength(abilityId, attacker, targetId is null ? null : Card(targetId), sourceId);
+        var strength = strengthOverride is int overridden ? overridden + ShishidoRangedBonus(abilityId, sourceId) + P2AttackStrengthBonus(abilityId, attacker.Id) /* issue #503 */ + TfRangedBonus(abilityId, sourceId) /* issue #622 */ : EffectiveAttackStrength(abilityId, attacker, targetId is null ? null : Card(targetId), sourceId);
         strength += ConsumeAnnouncedAttackModifiers(abilityId, attacker.Id); // No Hiding Place (issue #498): "Give one Ranged Attack from the action -1 strength".
         // An Attack that targets no card (no target, or a province) opens no reaction window: nothing card-targeted can react to it (issue #335).
         if (targetId is null || !AnyAttackReactionAvailable(attacker.Id, targetId))
@@ -6485,7 +6485,7 @@ public sealed partial class MatchEngine
                     // (it is discarded when its battle resolves), so exempting the whole category is exact.
                     // Return to Action (issue #331): "your Personality at HOME" is by definition not at the battlefield
                     // -- own-personality-at-home is exempt for the same reason.
-                    if (actingAsBattle && ability.Target is not ("personality-at-adjacent-battlefield" or "own-unbowed-farm" or "region-or-terrain" or "own-personality-at-home" or "personality-at-any-location" or "own-follower-at-any-location" or "enemy-personality-at-any-location" or "enemy-personality-not-at-battle"
+                    if (actingAsBattle && ability.Target is not ("personality-at-adjacent-battlefield" or "own-unbowed-farm" or "region-or-terrain" or "own-personality-at-home" or "personality-at-any-location" or TfGearAbilities.SpellForCopy /* issue #622: The Thunder Resounds names a Thunder Spell at any location */ or "own-follower-at-any-location" or "enemy-personality-at-any-location" or "enemy-personality-not-at-battle"
                         or "personality-same-controller-as-first-elsewhere" or "personality-with-switch-partner" or EmperorRulingR1Abilities.EnemyPersonalityAtBattleOrHome
                         or "own-unbowed-ring") && !P4TargetAtAnyLocation(ability.Target) // issue #503 (Turning Away): a Ring is never in a unit, so the Battle rule of location does not reach it
                         && id is not ("intervening-spirit-move" or "earth-flows-move" or "sanctuary-of-the-waves-move" or "dislodge-the-foe" or "heijin-move"

@@ -88,7 +88,7 @@ internal static partial class EmperorRulingR4Tests
         "hayan-assign", // issue #503: Shinjo Hayan's "After engaging: Once per turn, you may assign ..." prints no designator, so it is a trait
         "kae-favor-negate", // issue #501 (Mendon's item 16): Kakita Kae's Favor discard triggers like a Reaction but is a trait
         "makubesu-create", "never-safe-return", "nojima-entry", "noritada-invest", "otomo-favor-token", "rika-bushido-virtue-bonus", "shihiro-boost", "small-time-bully-dishonor",
-        "spiders-web-attach", "spiders-web-attach-kensai", "thick-marsh-entry", "tsudoken-exp2-entry",
+        "spiders-web-attach", "spiders-web-attach-kensai", "tf-band-brothers-create", "thick-marsh-entry", "tsudoken-exp2-entry", // issue #622: Band of Brothers' entering-play trait
     ];
 
     private static void TraitReactionAudit()
@@ -110,7 +110,8 @@ internal static partial class EmperorRulingR4Tests
             var text = card.Text ?? "";
             // (Some published texts repeat their lines; a line is counted once.)
             var distinct = text.Split('\n').Select(l => l.Trim()).Distinct().ToArray();
-            var lines = distinct.Count(l => Regex.IsMatch(l, @"\bReaction\b") && !distinct.Any(o => o != l && o.StartsWith(l, StringComparison.Ordinal))); // (a line broken in two by the scan counts once)
+            var lines = distinct.Count(l => Regex.IsMatch(l, @"\b(Reaction|Interrupt)\b") && // issue #622: an Interrupt (Coils of Madness supplement) plays exactly like a Reaction and prints its designator in the Reaction's place
+                 !distinct.Any(o => o != l && o.StartsWith(l, StringComparison.Ordinal))); // (a line broken in two by the scan counts once)
             var nonTrait = reactions.Count(a => !TraitReactions.Is(a));
             audited++;
             if (nonTrait > 0 && lines == 0) failures.Add($"{card.Name}: {nonTrait} Reaction ability(ies) but no printed Reaction");
