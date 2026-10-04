@@ -1,0 +1,174 @@
+{
+  "Profile": "personality-wave-120",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose; reviewed Emperor-era scans (issue #622).",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-1682",
+      "Name": "Daidoji Tametaka",
+      "Type": "Personality",
+      "Clan": "Crane",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": 4,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Target an enemy Personality or Follower: Give it -4F. You may target one of your Personalities and move him home.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1682.jpg",
+      "Keywords": [
+        "Commander",
+        "Crane Clan",
+        "Iron Crane",
+        "Samurai",
+        "Scout",
+        "Soul of Daidoji Zoushi"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "tametaka-weaken"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-4396",
+      "Name": "Kitsu Suki",
+      "Type": "Personality",
+      "Clan": "Lion",
+      "GoldCost": 6,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 4,
+      "PersonalHonor": 3,
+      "HonorRequirement": 6,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Each player who controls an Ancestor gains 1 Honor. For any player who controls no Ancestors, and with higher Honor than his starting Family Honor, you may cause him to lose 1 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-4396.jpg",
+      "Keywords": [
+        "Lion Clan",
+        "Shugenja",
+        "Water"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "suki-honor"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-4537",
+      "Name": "Komori Taruko",
+      "Type": "Personality",
+      "Clan": "Unaligned",
+      "GoldCost": 5,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 4,
+      "PersonalHonor": 2,
+      "HonorRequirement": 1,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: Even if Taruko is bowed: Straighten her.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-4537.jpg",
+      "Keywords": [
+        "Air",
+        "Bat Clan",
+        "Shugenja"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "taruko-straighten"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-5812",
+      "Name": "Otomo Demiyah",
+      "Type": "Personality",
+      "Clan": "Unaligned",
+      "GoldCost": 4,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Political Reaction: After Demiyah enters play: Choose a player, who gains or loses 1 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-5812.jpg",
+      "Keywords": [
+        "Courtier",
+        "Imperial"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "demiyah-gain",
+        "demiyah-lose"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-6467",
+      "Name": "Sandayu",
+      "Type": "Personality",
+      "Clan": "Spider",
+      "GoldCost": 5,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 2,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle/Open: Target a Personality with a Weapon: Straighten him.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6467.jpg",
+      "Keywords": [
+        "Kensai",
+        "Monk",
+        "Order of the Spider",
+        "Soul of Torao",
+        "Spider Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "sandayu-straighten"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10305",
+      "Name": "Isawa Hibana",
+      "Type": "Personality",
+      "Clan": "Phoenix",
+      "GoldCost": 6,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": 6,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle/Open: Give Hibana -3F and target your Personality without the Water keyword: Give him +3F.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10305.jpg",
+      "Keywords": [
+        "Fire",
+        "Phoenix Clan",
+        "Shugenja"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "hibana-boost"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

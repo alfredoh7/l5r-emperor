@@ -541,6 +541,8 @@ public sealed partial class MatchEngine
         if (PurifyTheSoulDiscount(card, target) is > 0 and var purifyDiscount) { raw -= purifyDiscount; kind = GoldCostKind.Derived; basis += $" − {purifyDiscount} (Air Shugenja)"; }
         // Maga-yari (Emperor Edition remaining-cards pass, issue #492 group G): "Attaches to a Paragon or Kensai paying 3 less Gold."
         if (MagaYariDiscount(card, target) is > 0 and var magaYariDiscount) { raw -= magaYariDiscount; kind = GoldCostKind.Derived; basis += $" − {magaYariDiscount} (Paragon or Kensai)"; }
+        // Record of Failure (issue #622, IvoryPolitical.cs): "Attaches to a Courtier paying 2 less Gold."
+        if (IvoryPoliticalAttachDiscount(card, target) is > 0 and var recordDiscount) { raw -= recordDiscount; kind = GoldCostKind.Derived; basis += $" − {recordDiscount} (Courtier)"; }
         // Quelsa (The Shadow's Embrace pass, issue #476, batch 2): "Quelsa attaches Spells paying 2 less Gold."
         if (QuelsaAttachDiscount(card, target) is > 0 and var quelsaAttach) { raw -= quelsaAttach; kind = GoldCostKind.Derived; basis += $" − {quelsaAttach} (Quelsa)"; }
         // Whispering Archive (The Shadow's Embrace pass, issue #476 batch 6): "Your Spells enter play paying 1 less Gold."

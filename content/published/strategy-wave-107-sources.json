@@ -1,0 +1,38 @@
+[
+  {
+    "card_id": "oracle-l5r-1450",
+    "printing_set": [
+      "Emperor Edition"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=1450",
+    "image_path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-1450-printing-1-image-1.webp",
+    "image_sha256": "d9659de544fdfd128707763aa56fbcb398c089202da15595a04c66925790e684"
+  },
+  {
+    "card_id": "oracle-l5r-2492",
+    "printing_set": [
+      "Before the Dawn"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=2492",
+    "image_path": "assets/reference/oracle/before-the-dawn/webp/oracle-l5r-2492-printing-1-image-1.webp",
+    "image_sha256": "4b95217e8b0be0b40ce6f510878c1409d7b87c97d07697dd6b1c8561e98630c4"
+  },
+  {
+    "card_id": "oracle-l5r-3743",
+    "printing_set": [
+      "Emperor Edition"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=3743",
+    "image_path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-3743-printing-1-image-1.webp",
+    "image_sha256": "c3084ebf2036de9676d92ba4de673f4ec20f3873b9b3220acaa3a7ac7f68e1f8"
+  },
+  {
+    "card_id": "oracle-l5r-10160",
+    "printing_set": [
+      "Seeds of Decay"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10160",
+    "image_path": "assets/reference/oracle/seeds-of-decay/webp/oracle-l5r-10160-printing-1-image-1.webp",
+    "image_sha256": "6f842ea8d629e68bb55536ba3afca17f1ee6c80b0c710fed9ce1b3995840c0be"
+  }
+]
