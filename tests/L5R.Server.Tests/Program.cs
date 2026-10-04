@@ -66,7 +66,9 @@ static async Task AuthorizationAndPrivacy()
 
     await SendAsync(first, new
     {
-        type = "command", commandId = Guid.NewGuid().ToString(), expectedVersion = 0,
+        type = "command",
+        commandId = Guid.NewGuid().ToString(),
+        expectedVersion = 0,
         command = new { type = "concede", playerId = 1 }
     });
     var spoof = await ReadTypeAsync(first, "error");
