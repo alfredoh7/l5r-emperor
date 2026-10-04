@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Wire Regret (oracle-l5r-9923) and Embracing Virtue (oracle-l5r-2313) as strategy-wave-105 (Embracing Virtue end-of-turn return; Regret focus-effect honor loss and multi-attach Open action with combined price, legality and per-card entry windows). Shared edits: hooks in EndTurn, ApplyDuelFocusEffectCore, HandleRegisteredEntryReaction, GoldQuotes/ConditionalProduction; ExecuteAttach split into PlaceAttachment. Rulings R-026..R-028. Art pack extended to catalogue-art-issue619-20261004-r1 (3907 images, +2).",
-  "validation": "Core all suites incl. 12 regret-embracing-virtue tests; AI 97/97, Server 9/9, Transport 18/18, Collection 55; python content tests 139 OK after art pack rebuild; ensure_catalogue_art --archive and --verify-only OK. Godot client not built; no native playtest. Pack: old catalogue-art-issue566-20260930-r1 (3905 images, 529979164 bytes) -> new 3907 images, 530209518 bytes, sha256 31df6aef...a00.",
-  "remaining": "Readings 1,2,4,5 in docs/decisions/2026-10-03-regret-embracing-virtue.md await Mendon; client must collect the two-slot Regret selection; native visual check of the two new faces not done.",
+  "summary": "Wire Regret (oracle-l5r-9923) and Embracing Virtue (oracle-l5r-2313) as strategy-wave-105 (Embracing Virtue end-of-turn return; Regret focus-effect honor loss and multi-attach Open action with combined price, legality and per-card entry windows). Shared edits: hooks in EndTurn, ApplyDuelFocusEffectCore, HandleRegisteredEntryReaction, GoldQuotes/ConditionalProduction; ExecuteAttach split into PlaceAttachment. Rulings R-026..R-028. Art pack extended from catalogue-art-issue617-20261004-r1 (3906 images) to catalogue-art-issue619-20261004-r2 (3908 images).",
+  "validation": "Core all suites pass incl. 12 regret-embracing-virtue tests (after merging main with #617); AI 97/97, Server 9/9, Transport 18/18, Collection 55 (run before the main merge); python content tests 139 OK; ensure_catalogue_art --archive/--verify-only OK; formatting check clean. Pack r2: 3908 images, 530344950 bytes, sha256 f87fbfce...18bc. Godot client not built; no native playtest.",
+  "remaining": "Readings 1,2,4,5 in docs/decisions/2026-10-03-regret-embracing-virtue.md await Mendon; client must collect the two-slot Regret selection; native visual check of the two new faces not done. Unused release catalogue-art-issue619-20261004-r1 left in place.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/619",
   "branch": "claude/619-regret-embracing-virtue",
-  "updated": "2026-10-04T11:56:43.004768+00:00"
+  "updated": "2026-10-04T12:23:54.703119+00:00"
 }
