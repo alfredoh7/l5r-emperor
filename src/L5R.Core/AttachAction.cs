@@ -181,6 +181,18 @@ public sealed partial class MatchEngine
     {
         var attachment = spec.Card == AttachSource.Self ? source! : target!;
         var wielder = WielderOfAttach(spec, command, source)!;
+        var fromDiscard = attachment.Zone == Zone.FateDiscard;
+        PlaceAttachment(attachment, wielder, player);
+        // Clearing Crew (issue #476 batch 6): an attach from a discard pile is not an entry "from your hand".
+        _attachingFromPileId = fromDiscard ? attachment.Id : null;
+        try { return OpenEntryReactionWindow(player.Id, attachment, 1 - player.Id); }
+        finally { _attachingFromPileId = null; }
+    }
+
+    // Everything an attach does short of the entering-play window: the card leaves its hand or discard pile, enters play attached to the wielder under his
+    // controller, and is logged. Split from ExecuteAttach (Regret attaches several cards, then opens one window each: RegretEmbracingVirtue.cs).
+    private void PlaceAttachment(CardInstance attachment, CardInstance wielder, PlayerState player)
+    {
         var def = Definition(attachment);
         var fromDiscard = attachment.Zone == Zone.FateDiscard;
         if (!fromDiscard && attachment.Zone == Zone.Hand) { Player(attachment.OwnerId).AttachedFromHandThisTurn = true; NoteAttachedFollowerFromHand(attachment, wielder); NoteAttachedFromHandForGlory(attachment.OwnerId, attachment); }
@@ -196,9 +208,5 @@ public sealed partial class MatchEngine
         if (def.AttachGrantsKeyword is string granted) GrantKeyword(wielder, granted, attachment.Id, "Attachment");
         if (fromDiscard) NoteAttached(player.Id, attachment, "discard"); // Issue #501 (EmperorMechD.cs): the attach log (a hand attach is logged above).
         Emit("equipped", $"{def.Name} attached to {Definition(wielder).Name}{(fromDiscard ? " from a discard pile" : "")}.", player.Id, attachment.Id);
-        // Clearing Crew (issue #476 batch 6): an attach from a discard pile is not an entry "from your hand".
-        _attachingFromPileId = fromDiscard ? attachment.Id : null;
-        try { return OpenEntryReactionWindow(player.Id, attachment, 1 - player.Id); }
-        finally { _attachingFromPileId = null; }
     }
 }

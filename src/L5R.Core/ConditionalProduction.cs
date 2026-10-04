@@ -108,6 +108,7 @@ public sealed partial class MatchEngine
         var source = command.CardId is not null && _state.Cards.TryGetValue(command.CardId, out var s) ? s : null;
         if (ability.Cost?.Basis == GoldCostBasis.TargetRecruit && priced is not null) return new(priced, PaymentKind.Recruit, ability);
         if (ability.Cost?.Basis == GoldCostBasis.AttachCost && priced is not null) return new(priced, PaymentKind.Equip, ability, ability.Attach is { } attach ? WielderOfAttach(attach, command, source) : null); // issue #501: the wielder
+        if (ability.Cost?.Basis == GoldCostBasis.AttachSlotsCost && priced is not null) return new(priced, PaymentKind.Equip, ability, RegretFirstHost(command)); // Regret: an equip of its first attachment
         // Equip (Battle) and Soshi Neiru's equip price the attachment by its printed cost: they pay for that attachment too (Platinum Mine, The Shadow's Embrace pass issue #476 batch 6).
         if (command.AbilityId is "equip-battle" or "neiru-equip" && priced is not null && Definition(priced).Type is CardType.Follower or CardType.Item or CardType.Spell)
             return new(priced, PaymentKind.Equip, ability, command.PerformerId is not null && _state.Cards.TryGetValue(command.PerformerId, out var equipper) ? equipper : null); // issue #501: the wielder

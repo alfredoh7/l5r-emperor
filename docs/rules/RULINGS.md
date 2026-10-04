@@ -278,3 +278,31 @@ if he is dishonorable, then move him home).
 - **Cards/primitives:** Wanted for Questioning (oracle-l5r-9208).
 - **Date:** 2026-09-30
 - **Source:** Mendon's ruling in issue #566's card-wave pass, resolving the rules-lane question tools/content/ee_p6_blockers.json had recorded for it.
+
+## Regret, Embracing Virtue and attaching several cards from a discard pile
+
+### R-026 — Embracing Virtue is checked before the End Phase's draw and hand-size discard
+Embracing Virtue's "before an End Phase begins, if this card is in your discard pile: you may put it in your hand" is checked in the
+End Phase, before the hand-size check. A player who takes it back on their own turn may therefore draw above their hand size and be forced to discard.
+
+- **Cards/primitives:** Embracing Virtue (oracle-l5r-2313); `BeginEmbracingVirtue` (RegretEmbracingVirtue.cs).
+- **Date:** 2026-10-03
+- **Source:** Mendon's instruction when wiring Regret and Embracing Virtue (issue #619). "An End Phase" being any player's, so each player's copy is asked at every End Phase, the active player first, is the implementation's reading of the printed words, not part of the ruling.
+
+### R-027 — Regret counts the cards the winner's side focused; a stat bonus instead of focusing is not a focus
+Regret's Focus Effect counts the cards focused by each player and makes the duel winner's controller lose Honor equal to the number of cards his side focused.
+Abilities that add a bonus to a stat instead of focusing (Kakita Gonji) are not a focus and are not counted.
+
+- **Cards/primitives:** Regret (oracle-l5r-9923); Kakita Gonji (oracle-l5r-4167); `ApplyRegretFocusEffect`.
+- **Date:** 2026-10-03
+- **Source:** Mendon's instruction when wiring Regret (issue #619).
+
+### R-028 — Regret's Open action attaches many cards at once, and is not Equip (Battle)
+Regret's Open action behaves like the Dragon stronghold's equipping from a discard pile, except that the player may select several targets, pay for each of them, and then attach them to
+Personalities; the legality of each attachment still applies. It is not the Equip (Battle) action (nor is Bayushi Nitoshi's), so a Personality attaching a Spell this way does not get Equip (Battle)'s
+second, subsequent action to cast the Spell. Actions printed on cards attached this way are available at the player's next subsequent action in the phase (Action Phase or battle): a player who
+attaches Blades of the Black Dragon can use it on their next turn to make an attack.
+
+- **Cards/primitives:** Regret (oracle-l5r-9923); Bayushi Nitoshi - inexperienced (the "not Equip (Battle)" half); `GoldCostBasis.AttachSlotsCost`; `RunRegret`; `RegretEntryQueue`.
+- **Date:** 2026-10-03
+- **Source:** Mendon's instruction when wiring Regret (issue #619). Priced as one payment of each card's Equip cost for its own Personality, and each attached card then opens its own entering-play window in turn: the implementation's way of carrying out "pay for each".
