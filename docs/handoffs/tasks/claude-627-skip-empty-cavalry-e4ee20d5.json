@@ -1,0 +1,9 @@
+{
+  "lane": "rules",
+  "summary": "Issue #627 (in progress): a Cavalry Maneuvers segment where the acting player can only pass is skipped, and the empty 'Attack/Defend ... 0 Cavalry units' option is no longer listed. New CavalrySkip.cs plus a one-line guard in MatchQueries and a tail call in Apply.",
+  "validation": "Builds clean; full Core run in progress, regression tests not yet written.",
+  "remaining": "Fix tests that assumed the old prompt, add regression tests, CI, merge.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/627",
+  "branch": "claude/627-skip-empty-cavalry",
+  "updated": "2026-10-04T17:30:29.324111+00:00"
+}
