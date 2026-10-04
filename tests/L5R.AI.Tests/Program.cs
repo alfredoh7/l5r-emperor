@@ -226,6 +226,7 @@ foreach (var scenario in DuelDemoScenarios.All)
             Check(JsonSerializer.Serialize(e.State) == JsonSerializer.Serialize(MatchEngine.Replay(e.ExportReplay()).State), "Replay mismatch");
         });
 runner.Run("ai", tests);
+runner.Run("bot-soak", BotSoak.Tests); // issue #642; see docs/BOT_SOAK.md
 return runner.Finish();
 
 void Run(string name, Action run) => tests.Add((name, run));
