@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Cavalry units could not be assigned in Infantry Maneuvers (Doji Atsumichi never offered). A Cavalry unit may now assign in either segment; Infantry units still only in Infantry. Shared because the engine decides the legal set the client already presents unchanged. Added an audit that every catalogue Personality can be assigned to attack (only Otomo Suikihime excluded, her text forbids it) and updated four tests that encoded the old reading.",
+  "validation": "Core tests all pass after merging origin/main (new attack-assignment-audit suite included).",
+  "remaining": "Client not run; Assign units button with a Cavalry unit not visually checked.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor",
+  "branch": "claude/cavalry-infantry-maneuvers",
+  "updated": "2026-10-04T20:39:09.791392+00:00"
+}

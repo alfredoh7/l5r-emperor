@@ -94,11 +94,11 @@ public partial class PersistentHomeProbe : Node
         var option = _session.Snapshot!.Actions.First(a => a.Enabled && a.Command?.AbilityId == id);
         var version = Engine.Version;
         Call("Choose", option, false); await Settle(); // Choose(option, keepTarget): reflection does not fill optional parameters
-        // Issue #581: the client chooses no target for the player; pick the first legal one through the real picker (item 0 is "Choose a target…") before confirming.
+        // Issue #581: the client chooses no target for the player; pick the first legal one through the real picker (the first row of the legal-card list) before confirming.
         if (Field<ActionOption?>("_chosen") is { TargetIds.Length: > 0, Command.TargetId: null })
         {
-            var picker = Descendants<OptionButton>(_main).First(b => b.IsVisibleInTree());
-            picker.Selected = 1; picker.EmitSignal(OptionButton.SignalName.ItemSelected, 1L); await Settle();
+            var picker = Descendants<CardChoiceList>(_main).First(b => b.IsVisibleInTree()); // issue #635: the list of legal cards
+            picker.Choose(0); await Settle();
         }
         await Click(Button("Confirm action")); await Settle(.5);
         Require(Engine.Version > version, id + " did not execute through native confirmation");

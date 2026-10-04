@@ -98,7 +98,7 @@ public partial class Main
             // settled, never briefly overlaying.
             var attaching = card.AttachedTo is not null;
             var draw = previous is null && card.Zone is Zone.Hand or Zone.Province;
-            var publicDiscard = previous is null && card.Zone == Zone.FateDiscard && card.OwnerId != View.ViewerId;
+            var publicDiscard = previous is null && card.Zone == Zone.FateDiscard && card.OwnerId != View.ViewerId && !_showcasedPlays.Contains(card.Id); // issue #630: a showcased play travels to the pile itself
             var restingTile = _tiles.FirstOrDefault(t => t.Card.Id == card.Id && _world.IsAncestorOf(t));
             if ((!moved || attaching) && !draw && previous is not null && restingTile is not null &&
                 before.TableOrigins.TryGetValue(card.Id, out var oldOrigin))

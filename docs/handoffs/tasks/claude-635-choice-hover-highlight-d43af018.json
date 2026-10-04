@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Issue #635: choosing a performer or target from a list of legal cards now shows an always-visible list of rows (new CardChoiceList) instead of a drop-down. Hovering a row draws its Personality as hovered on the table (new CardTile.ForcedHover); hovering the Personality on the table lights its row. The list replaces the target picker in RenderTargeted (the Asahina Nanae case), the alternative-cost performer and target pickers, the support-card performer and target pickers and the movement target picker; clicking the chosen row again clears it (the old 'Choose a target…' entry). Client-only UI change under Mendon's standing authority (collaboration.json); the three capture/probe files that picked the first target through the drop-down now call CardChoiceList.Choose(0).",
+  "validation": "Client project builds with 0 errors; check_format and lint_comment_swallow clean. NOT verified: no native visual or input check, and the capture probes (MovementCapture, GoldPaymentCapture, PersistentHomeProbe) were edited but not run locally; the CI client job is the first run.",
+  "remaining": "Native check of the hover highlight in both directions, the row styling and long lists in the sidebar; Alfredo may want to restyle the rows.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/635",
+  "branch": "claude/635-choice-hover-highlight",
+  "updated": "2026-10-04T19:15:07.440407+00:00"
+}

@@ -150,7 +150,7 @@ public partial class Main : Node
         foreach (var tracker in _sidebarHeader.GetChildren().OfType<BattleTracker>()) tracker.ReducedMotion = _reducedMotion;
         foreach (var plaque in _clanHud.GetChildren().OfType<ClanPlaque>()) plaque.ReducedMotion = _reducedMotion;
         _fullscreenGate.Visible = false;
-        if (_autoOpponent && !PresentationBusy && !_session.Online && _capturePath is null)
+        if (_autoOpponent && !PresentationBusy && !PlayShowcaseBusy && !_session.Online && _capturePath is null) // issue #630: the practice opponent waits for a played card to finish showing
         {
             _opponentClock += delta;
             if (_opponentClock > (_reducedMotion ? .12 : .7))
@@ -503,6 +503,7 @@ public partial class Main : Node
         }
         if (RouteMatchDuel()) return;
         ObserveBattleJournal();
+        ObserveCardPlays(); // Issue #630: show a played card, then send it to the discard pile (Main.CardPlays.cs).
         PrepareBattlePresentation();
         RenderBattleFeedback();
         RenderProvinceOrder();

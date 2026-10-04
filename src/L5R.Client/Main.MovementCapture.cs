@@ -66,8 +66,8 @@ public partial class Main
     private async Task PickMovement(int province, bool keyboard = false)
     {
         // Issue #581: no target is chosen for the player. When the action names legal targets, pick the first through the real picker, as a player would, before the destination.
-        if (_chosen is { TargetIds.Length: > 0, Command.TargetId: null } && _inspector.FindChild("MovementTargetPicker", true, false) is OptionButton targetPicker)
-        { targetPicker.Selected = 0; targetPicker.EmitSignal(OptionButton.SignalName.ItemSelected, 0L); await EventFrames(3); }
+        if (_chosen is { TargetIds.Length: > 0, Command.TargetId: null } && _inspector.FindChild("MovementTargetPicker", true, false) is CardChoiceList targetPicker)
+        { targetPicker.Choose(0); await EventFrames(3); }
         var version = View.Version; var button = MovementButton(province);
         if (keyboard)
         { button.GrabFocus(); await EventFrames(3); GetViewport().PushInput(new InputEventKey { Keycode = Key.Enter, Pressed = true }); GetViewport().PushInput(new InputEventKey { Keycode = Key.Enter, Pressed = false }); await EventFrames(12); }

@@ -3526,9 +3526,9 @@ static void CavalryManeuversSegment()
     var e = MatchEngine.FromTestState(s);
     Accept(e, Cmd(e, "declareAttack", player: 0));
 
-    // Infantry Maneuvers: only the two Infantry units (plain, and the mixed Cavalry+non-Cavalry-Follower one).
-    Reject(e, Cmd(e, "attack", player: 0, assignments: new() { [soloCavalry.Id] = 0 }));
-    Reject(e, Cmd(e, "attack", player: 0, assignments: new() { [pureCavalryUnit.Id] = 0 }));
+    // Infantry Maneuvers: every unit may assign, Cavalry units included (they may also wait for Cavalry Maneuvers).
+    var infantryOffer = e.QueryActions(0).First(a => a.Type == "attack" && a.Enabled).TargetIds!;
+    Check(infantryOffer.Contains(soloCavalry.Id) && infantryOffer.Contains(pureCavalryUnit.Id) && infantryOffer.Contains(infantry.Id) && infantryOffer.Contains(mixedUnit.Id), "Cavalry units are offered in Infantry Maneuvers too");
     Accept(e, Cmd(e, "attack", player: 0, assignments: new() { [infantry.Id] = 0, [mixedUnit.Id] = 1 }));
     Equal(e.State.Cards[infantry.Id].Zone, Zone.Battlefield);
     Equal(e.State.Cards[mixedUnit.Id].Zone, Zone.Battlefield, "A Cavalry Personality with a non-Cavalry Follower assigns as Infantry");
@@ -3621,7 +3621,7 @@ static void DaigotsuKendoConquerorAndIkomaNatsuCavalry()
     var natsu = Add(s2, "oracle-l5r-3623", 0, Zone.Home);
     var e2 = MatchEngine.FromTestState(s2);
     Accept(e2, Cmd(e2, "declareAttack", player: 0));
-    Reject(e2, Cmd(e2, "attack", player: 0, assignments: new() { [natsu.Id] = 0 }));
+    Check(e2.QueryActions(0).First(a => a.Type == "attack" && a.Enabled).TargetIds!.Contains(natsu.Id), "a Cavalry Personality is also offered in Infantry Maneuvers");
     Accept(e2, Cmd(e2, "attack", player: 0, assignments: []));
     Accept(e2, Cmd(e2, "assignDefense", player: 1, assignments: []));
     Equal(e2.State.Phase, Phase.CavalryDeclaration);

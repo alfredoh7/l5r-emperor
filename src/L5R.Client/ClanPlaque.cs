@@ -41,39 +41,61 @@ public partial class ClanPlaque : Control
         AddSprite(FrameTexture, new Rect2(0, 0, DesignWidth, DesignHeight));
         var emblem = Emblem(clan, new Vector2(94, 94)); emblem.Position = new Vector2(7, 7); _design.AddChild(emblem);
         var title = Palette.Text(clan.ToUpperInvariant(), 22, Palette.Paper, true);
-        title.AddThemeFontOverride("font", new FontVariation {
+        title.AddThemeFontOverride("font", new FontVariation
+        {
             BaseFont = _headingFace ??= CrispFace("res://Art/Fonts/WeatheredQuill-Regular.ttf"),
-            SpacingGlyph = -1, SpacingTop = -15, SpacingBottom = -11 });
+            SpacingGlyph = -1,
+            SpacingTop = -15,
+            SpacingBottom = -11
+        });
         title.Position = new Vector2(113, 3); title.Size = new Vector2(180, 29);
         title.TextOverrunBehavior = TextServer.OverrunBehavior.TrimEllipsis; _design.AddChild(title);
         var turnCue = Text(turn, 11, turnOwner ? new Color("a7d3d5") : Palette.PaperDim, new Rect2(115, 36, 178, 16));
         turnCue.TooltipText = turn;
         var name = Text(action, 14, Palette.PaperDim, new Rect2(114, 54, 180, 20));
-        name.ClipText = true; name.TextOverrunBehavior = TextServer.OverrunBehavior.TrimEllipsis; name.Size = new Vector2(180,20);
+        name.ClipText = true; name.TextOverrunBehavior = TextServer.OverrunBehavior.TrimEllipsis; name.Size = new Vector2(180, 20);
         name.TooltipText = action; name.MouseFilter = MouseFilterEnum.Stop;
         // Labels can expand to their font's minimum width before the first layout pass.
         // A bounded viewport keeps untrusted/long player names inside the frame regardless.
-        var nameClip = new Control { Position = new Vector2(114,54), Size = new Vector2(180,20),
-            ClipContents = true, MouseFilter = MouseFilterEnum.Ignore };
+        var nameClip = new Control
+        {
+            Position = new Vector2(114, 54),
+            Size = new Vector2(180, 20),
+            ClipContents = true,
+            MouseFilter = MouseFilterEnum.Ignore
+        };
         _design.RemoveChild(name); _design.AddChild(nameClip); nameClip.AddChild(name); name.Position = Vector2.Zero;
         AddIcon(0, new Rect2(108, 74, 28, 23));
-        Text(honor.ToString(), honor is >99 or < -9 ? 18 : 21, Palette.Paper, new Rect2(140, 70, 31, 28));
+        Text(honor.ToString(), honor is > 99 or < -9 ? 18 : 21, Palette.Paper, new Rect2(140, 70, 31, 28));
         AddIcon(1, new Rect2(179, 69, 28, 28));
         var goldValue = Text(gold.ToString(), gold > 99 ? 15 : 21, new Color("17110b"), new Rect2(178, 68, 30, 29));
         goldValue.HorizontalAlignment = HorizontalAlignment.Center;
         AddIcon(2, new Rect2(225, 72, 26, 24));
         var countSize = 21;
-        while (countSize > 12 && BodyFace.GetStringSize(HandText, fontSize:countSize).X > 47) countSize--;
-        var hand = new RichTextLabel { Position = new Vector2(256, 70), Size = new Vector2(48, 28),
-            BbcodeEnabled = true, ScrollActive = false, MouseFilter = MouseFilterEnum.Ignore,
-            Text = $"{handCount?.ToString() ?? "—"} / [color=#edc46f]{handLimit?.Maximum.ToString() ?? "—"}[/color]" };
+        while (countSize > 12 && BodyFace.GetStringSize(HandText, fontSize: countSize).X > 47) countSize--;
+        var hand = new RichTextLabel
+        {
+            Position = new Vector2(256, 70),
+            Size = new Vector2(48, 28),
+            BbcodeEnabled = true,
+            ScrollActive = false,
+            MouseFilter = MouseFilterEnum.Ignore,
+            Text = $"{handCount?.ToString() ?? "—"} / [color=#edc46f]{handLimit?.Maximum.ToString() ?? "—"}[/color]"
+        };
         hand.AddThemeFontOverride("normal_font", BodyFace); hand.AddThemeFontSizeOverride("normal_font_size", countSize);
         hand.AddThemeColorOverride("default_color", Palette.Paper); _design.AddChild(hand);
         AddStatRegion(new Rect2(106, 67, 64, 30), "Family Honor", $"{honor} Family Honor");
         AddStatRegion(new Rect2(175, 66, 38, 31), "Available Gold", $"{gold} available Gold production\nProduced when paying, not a saved balance.");
         HandRegion = AddStatRegion(new Rect2(222, 66, 82, 31), "Hand limit", HandHelp);
-        var hit = new TooltipButton { Flat = true, Text = "", Position = new Vector2(9, 10), Size = new Vector2(86, 87),
-            TooltipText = clan + " · inspect Fallen cards", MouseDefaultCursorShape = CursorShape.PointingHand };
+        var hit = new TooltipButton
+        {
+            Flat = true,
+            Text = "",
+            Position = new Vector2(9, 10),
+            Size = new Vector2(86, 87),
+            TooltipText = clan + " · inspect Dead cards",
+            MouseDefaultCursorShape = CursorShape.PointingHand
+        };
         foreach (var state in new[] { "normal", "pressed", "hover", "focus" })
             hit.AddThemeStyleboxOverride(state, Palette.Box(Colors.Transparent, state is "hover" or "focus" ? Palette.Gold : null, 0, 40));
         hit.Pressed += inspect; _design.AddChild(hit);
@@ -110,21 +132,38 @@ public partial class ClanPlaque : Control
         label.Position = rect.Position; label.Size = rect.Size; _design.AddChild(label); return label;
     }
     private void AddSprite(Texture2D texture, Rect2 rect, Material? material = null)
-        => _design.AddChild(new TextureRect { Texture = texture, ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize,
-            StretchMode = TextureRect.StretchModeEnum.Scale, Position = rect.Position, Size = rect.Size,
-            Material = material, MouseFilter = MouseFilterEnum.Ignore, TextureFilter = TextureFilterEnum.LinearWithMipmaps });
+        => _design.AddChild(new TextureRect
+        {
+            Texture = texture,
+            ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize,
+            StretchMode = TextureRect.StretchModeEnum.Scale,
+            Position = rect.Position,
+            Size = rect.Size,
+            Material = material,
+            MouseFilter = MouseFilterEnum.Ignore,
+            TextureFilter = TextureFilterEnum.LinearWithMipmaps
+        });
     private void AddIcon(int cell, Rect2 rect)
     {
         var atlas = GD.Load<Texture2D>("res://Art/ClanPlacard/stats.png");
         var cellWidth = atlas.GetWidth() / 3f;
-        var texture = new AtlasTexture { Atlas = atlas,
-            Region = new Rect2(cellWidth * cell + cellWidth * .10f, atlas.GetHeight() * .10f, cellWidth * .80f, atlas.GetHeight() * .80f) };
+        var texture = new AtlasTexture
+        {
+            Atlas = atlas,
+            Region = new Rect2(cellWidth * cell + cellWidth * .10f, atlas.GetHeight() * .10f, cellWidth * .80f, atlas.GetHeight() * .80f)
+        };
         AddSprite(texture, rect, new ShaderMaterial { Shader = GD.Load<Shader>("res://Art/ClanPlacard/black-cutout.gdshader") });
     }
     private Button AddStatRegion(Rect2 rect, string heading, string help)
     {
-        var target = new PlacardStatRegion(heading) { Position = rect.Position, Size = rect.Size, Flat = true,
-            TooltipText = help, FocusMode = FocusModeEnum.All };
+        var target = new PlacardStatRegion(heading)
+        {
+            Position = rect.Position,
+            Size = rect.Size,
+            Flat = true,
+            TooltipText = help,
+            FocusMode = FocusModeEnum.All
+        };
         foreach (var state in new[] { "normal", "pressed", "hover", "focus" })
             target.AddThemeStyleboxOverride(state, Palette.Box(Colors.Transparent, state == "focus" ? Palette.Gold : null, 0, 2));
         _design.AddChild(target); return target;
@@ -138,7 +177,7 @@ public partial class ClanPlaque : Control
             foreach (var word in paragraph.Split(' ', StringSplitOptions.RemoveEmptyEntries))
             {
                 var candidate = line.Length == 0 ? word : line + " " + word;
-                if (line.Length > 0 && BodyFace.GetStringSize(candidate, fontSize:18).X > 356)
+                if (line.Length > 0 && BodyFace.GetStringSize(candidate, fontSize: 18).X > 356)
                 { lines.Add(line); line = word; }
                 else line = candidate;
             }
@@ -148,12 +187,21 @@ public partial class ClanPlaque : Control
         var shell = new Control { CustomMinimumSize = design * scale, MouseFilter = MouseFilterEnum.Ignore };
         var panel = new Control { Size = design, Scale = Vector2.One * scale, MouseFilter = MouseFilterEnum.Ignore };
         shell.AddChild(panel);
-        panel.AddChild(new NinePatchRect { Texture = FrameTexture, PatchMarginLeft = 96, PatchMarginRight = 96,
-            PatchMarginTop = 96, PatchMarginBottom = 96, Scale = Vector2.One * .25f, Size = design * 4,
-            MouseFilter = MouseFilterEnum.Ignore, TextureFilter = TextureFilterEnum.LinearWithMipmaps });
+        panel.AddChild(new NinePatchRect
+        {
+            Texture = FrameTexture,
+            PatchMarginLeft = 96,
+            PatchMarginRight = 96,
+            PatchMarginTop = 96,
+            PatchMarginBottom = 96,
+            Scale = Vector2.One * .25f,
+            Size = design * 4,
+            MouseFilter = MouseFilterEnum.Ignore,
+            TextureFilter = TextureFilterEnum.LinearWithMipmaps
+        });
         var title = Palette.Text(heading, 23, Palette.Paper); title.AddThemeFontOverride("font", BodyFace);
         title.Position = new Vector2(25, 17); panel.AddChild(title);
-        var copy = Palette.Wrapped(string.Join("\n",lines), 18, Palette.Paper); copy.AddThemeFontOverride("font", BodyFace);
+        var copy = Palette.Wrapped(string.Join("\n", lines), 18, Palette.Paper); copy.AddThemeFontOverride("font", BodyFace);
         copy.Position = new Vector2(25, 53); copy.Size = design - new Vector2(50, 70); panel.AddChild(copy);
         return shell;
     }
@@ -170,29 +218,41 @@ public partial class ClanPlaque : Control
                 DrawLine(new Vector2(x, 73), new Vector2(x, 94), Palette.Gold with { A = .65f }, 1, true);
             if (!turnOwner) return;
             DrawLine(new Vector2(108, 43), new Vector2(112, 43), Palette.Crane with { A = .8f }, 1, true);
-            var cueWidth = BodyFace.GetStringSize(TurnCue, fontSize:11).X;
-            DrawLine(new Vector2(Math.Min(290, 120+cueWidth), 43), new Vector2(Math.Min(297, 144+cueWidth), 43), Palette.Crane with { A = .8f }, 1, true);
+            var cueWidth = BodyFace.GetStringSize(TurnCue, fontSize: 11).X;
+            DrawLine(new Vector2(Math.Min(290, 120 + cueWidth), 43), new Vector2(Math.Min(297, 144 + cueWidth), 43), Palette.Crane with { A = .8f }, 1, true);
         }
         public string TurnCue { get; set; } = "YOUR TURN";
     }
-    public static TextureRect Emblem(string clan,Vector2 size)
+    public static TextureRect Emblem(string clan, Vector2 size)
     {
-        var emblemRegion = clan switch {
-            "Lion" => new Rect2(114,225,224,218), "Crane" => new Rect2(574,220,225,223),
-            "Phoenix" => new Rect2(0,0,222,222), "Scorpion" => new Rect2(234,0,219,222),
-            "Crab" => new Rect2(465,0,218,222), "Unicorn" => new Rect2(689,0,220,222),
-            "Dragon" => new Rect2(340,220,224,223), _ => new Rect2(114,225,224,218)
+        var emblemRegion = clan switch
+        {
+            "Lion" => new Rect2(114, 225, 224, 218),
+            "Crane" => new Rect2(574, 220, 225, 223),
+            "Phoenix" => new Rect2(0, 0, 222, 222),
+            "Scorpion" => new Rect2(234, 0, 219, 222),
+            "Crab" => new Rect2(465, 0, 218, 222),
+            "Unicorn" => new Rect2(689, 0, 220, 222),
+            "Dragon" => new Rect2(340, 220, 224, 223),
+            _ => new Rect2(114, 225, 224, 218)
         };
-        var extra = clan is "Mantis" or "Spider" ? GD.Load<Texture2D>("res://Art/clan-"+clan.ToLowerInvariant()+".png") : null;
-        return Decal(extra is null ? "clan-reference.png" : "clan-"+clan.ToLowerInvariant()+".png", extra is null ? emblemRegion : new Rect2(Vector2.Zero,extra.GetSize()),Vector2.Zero,size,false);
+        var extra = clan is "Mantis" or "Spider" ? GD.Load<Texture2D>("res://Art/clan-" + clan.ToLowerInvariant() + ".png") : null;
+        return Decal(extra is null ? "clan-reference.png" : "clan-" + clan.ToLowerInvariant() + ".png", extra is null ? emblemRegion : new Rect2(Vector2.Zero, extra.GetSize()), Vector2.Zero, size, false);
     }
-    private static TextureRect Decal(string file,Rect2 region,Vector2 position,Vector2 size,bool coin)
+    private static TextureRect Decal(string file, Rect2 region, Vector2 position, Vector2 size, bool coin)
     {
-        var sprite=new TextureRect { Texture=new AtlasTexture { Atlas=GD.Load<Texture2D>("res://Art/"+file),Region=region },
-            ExpandMode=TextureRect.ExpandModeEnum.IgnoreSize,StretchMode=TextureRect.StretchModeEnum.Scale,
-            Position=position,Size=size,MouseFilter=MouseFilterEnum.Ignore,TextureFilter=TextureFilterEnum.LinearWithMipmaps };
-        var material=new ShaderMaterial { Shader=GD.Load<Shader>("res://Art/aged-emblem.gdshader") };
-        material.SetShaderParameter("decal_size",size); material.SetShaderParameter("white_cutout",coin); material.SetShaderParameter("saturation",coin?.80f:.53f);
-        sprite.Material=material; return sprite;
+        var sprite = new TextureRect
+        {
+            Texture = new AtlasTexture { Atlas = GD.Load<Texture2D>("res://Art/" + file), Region = region },
+            ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize,
+            StretchMode = TextureRect.StretchModeEnum.Scale,
+            Position = position,
+            Size = size,
+            MouseFilter = MouseFilterEnum.Ignore,
+            TextureFilter = TextureFilterEnum.LinearWithMipmaps
+        };
+        var material = new ShaderMaterial { Shader = GD.Load<Shader>("res://Art/aged-emblem.gdshader") };
+        material.SetShaderParameter("decal_size", size); material.SetShaderParameter("white_cutout", coin); material.SetShaderParameter("saturation", coin ? .80f : .53f);
+        sprite.Material = material; return sprite;
     }
 }

@@ -371,7 +371,7 @@ internal static class AttachFromDiscardTests
         Expect(attack.TargetIds!.Contains(jun.Id) && !attack.TargetIds.Contains(other.Id), "Jun-Ni's unit assigns in Cavalry Maneuvers; the control unit does not");
         var infantry = Edit(maneuvers, st => { st.Phase = Phase.InfantryDeclaration; });
         var infantryAttack = infantry.QueryActions(0).First(a => a.Type == "attack");
-        Expect(!infantryAttack.TargetIds!.Contains(jun.Id) && infantryAttack.TargetIds.Contains(other.Id), "and the reverse in Infantry Maneuvers");
+        Expect(infantryAttack.TargetIds!.Contains(jun.Id) && infantryAttack.TargetIds.Contains(other.Id), "in Infantry Maneuvers both may assign");
         // Gone the moment it leaves her unit.
         var gone = Edit(e, st => { st.Cards[follower.Id].Zone = Zone.FateDiscard; st.Cards[follower.Id].AttachedTo = null; });
         Expect(!gone.HasKeyword(follower.Id, "Cavalry"), "detached: no longer Cavalry");

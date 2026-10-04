@@ -256,7 +256,7 @@ public partial class DuelScreen
     private void ShowPile(int owner, Zone zone)
     {
         var player = Snapshot!.View.Players[owner]; var cards = (zone == Zone.RemovedFromGame ? player.RemovedFromGame : player.Discard.Where(c => c.Zone == zone)).ToArray();
-        var name = zone switch { Zone.FateDiscard => "Fate discard", Zone.Dead => "Fallen personalities", Zone.DynastyDiscard => "Dynasty discard", _ => "Removed from game" };
+        var name = zone switch { Zone.FateDiscard => "Fate discard", Zone.Dead => "Dead personalities", Zone.DynastyDiscard => "Dynasty discard", _ => "Removed from game" };
         ShowCards($"{player.Name} · {name}", cards, "Public cards · click a face to inspect");
     }
     public void OpenPublicPiles()
@@ -276,7 +276,7 @@ public partial class DuelScreen
     {
         var box = Panel($"{Snapshot!.View.Players[owner].Name} · other piles", 370);
         foreach (var zone in new[] { Zone.DynastyDiscard, Zone.Dead, Zone.RemovedFromGame })
-        { var z = zone; Button(zone switch { Zone.DynastyDiscard => "Dynasty discard", Zone.Dead => "Fallen personalities", _ => "Removed from game" }, () => ShowPile(owner, z), box); }
+        { var z = zone; Button(zone switch { Zone.DynastyDiscard => "Dynasty discard", Zone.Dead => "Dead personalities", _ => "Removed from game" }, () => ShowPile(owner, z), box); }
         Button("Back", ClearReading, box);
     }
     private void ShowCards(string title, CardView[] cards, string hint)
