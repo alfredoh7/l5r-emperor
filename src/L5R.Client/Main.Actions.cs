@@ -327,7 +327,7 @@ public partial class Main
         _inspector.AddChild(Palette.Wrapped(action.Label, 17, Palette.Gold));
         if (targets.Length > 0) _inspector.AddChild(Palette.Wrapped("Click a gold-outlined card on the table or choose below. The arrow shows the selected target; confirm to resolve.", 13, Palette.PaperDim));
         if (command.PerformerId is string performer)
-            _inspector.AddChild(Palette.Wrapped("Performer: " + ShortName(FindCard(performer)!) + " · " + CardTile.UnitLabel(FindCard(performer)!), 14, Palette.Crane));
+            _inspector.AddChild(Palette.Wrapped("Performer: " + ShortName(FindCard(performer)!) + (CardTile.UnitLabel(FindCard(performer)!) is { Length: > 0 } unit ? " · " + unit : ""), 14, Palette.Crane));
         if (targets.Length > 0)
         {
             _inspector.AddChild(Palette.Text(command.AbilityId is "prepared-death" or "defensive-stance" or "lobby" ? "CHOOSE A PERFORMER" : command.AbilityId == "favor-cycle" ? "CHOOSE A CARD TO DISCARD" : "CHOOSE A TARGET", 11, Palette.Gold));
@@ -338,7 +338,7 @@ public partial class Main
                 var card = FindCard(id)!;
                 // A target-derived cost is part of the choice: each target's own engine quote leads the label.
                 var price = action.TargetGold?.TryGetValue(id, out var priced) == true ? $" · {priced.Cost} Gold" : "";
-                picker.AddItem($"{(card.Definition?.Type == CardType.Personality ? CardTile.UnitLabel(card) + " · " : "")}{View.Players[card.OwnerId].Clan} · {ShortName(card)}{price} · {card.Force} F{(card.Bowed ? " · bowed" : "")}");
+                picker.AddItem($"{(card.Definition?.Type == CardType.Personality && card.UnitNumber > 0 ? CardTile.UnitLabel(card) + " · " : "")}{View.Players[card.OwnerId].Clan} · {ShortName(card)}{price} · {card.Force} F{(card.Bowed ? " · bowed" : "")}");
             }
             picker.Selected = target is null ? 0 : Array.IndexOf(targets, target) + 1;
             picker.ItemSelected += i => { if (i > 0) ChooseTarget(targets[(int)i - 1]); else ClearTarget(); };

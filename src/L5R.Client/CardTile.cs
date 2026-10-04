@@ -266,7 +266,8 @@ public partial class CardTile : Button
         return new Rect2(new Vector2(quadrant % 2 * half.X, quadrant / 2 * half.Y), half);
     }
 
-    public static string UnitLabel(CardView card) => "Unit " + card.Id.Replace("card-", "").TrimStart('0');
+    // The engine numbers a Personality when it first enters play (CardView.UnitNumber, issue #611); the card id is opaque and means nothing here. Empty before that.
+    public static string UnitLabel(CardView card) => card.UnitNumber > 0 ? "Unit " + card.UnitNumber : "";
 
     internal static string? LastPreviewCardId;
     internal static Control? LastPreviewControl;
@@ -413,7 +414,7 @@ public partial class CardTile : Button
             DrawCircle(new Vector2(faceSize.X - 15, 17), 11, Palette.Crane);
             DrawString(Palette.Body, new Vector2(faceSize.X - 24, 22), "✓", HorizontalAlignment.Center, 18, 14, Palette.Ink);
         }
-        if (d.Type == CardType.Personality)
+        if (d.Type == CardType.Personality && Card.UnitNumber > 0)
         {
             var label = UnitLabel(Card);
             DrawStyleBox(Palette.Box(Palette.Ink, null, 0), new Rect2(5, art.End.Y - 17, 63, 17));

@@ -9993,6 +9993,28 @@ static void BatchDPrimitives()
         }
     }
     {
+        // Issue #611: a Personality in play carries a match-unique, stable "Unit N" number from the engine (the card id is opaque and means nothing to the client).
+        foreach (var (name, create) in new (string, Func<ulong, MatchEngine>)[] { ("published", sd => MatchEngine.CreatePublishedMatch(sd)), ("starter", sd => MatchEngine.CreateStarterMatch(sd)) })
+        {
+            var m = create(31); var seen = new Dictionary<string, int>();
+            for (var step = 0; step < 400 && m.State.WinnerId is null; step++)
+            {
+                var actions = m.QueryActions(m.State.PriorityPlayerId).Where(a => a.Enabled && a.Command is not null && a.Type != "concede").ToArray();
+                if (actions.Length == 0) break;
+                for (var k = 0; k < actions.Length; k++) if (m.Execute(actions[(step * 7 + k) % actions.Length].Command!).Accepted) break;
+                var st = m.State;
+                foreach (var c in st.Cards.Values.Where(c => CardCatalog.Get(c.DefinitionId).Type == CardType.Personality && (c.Zone is Zone.Home or Zone.Battlefield or Zone.Attached)))
+                    Check(c.UnitNumber > 0, $"{name}: a Personality in play is numbered");
+                var numbered = st.Cards.Values.Where(c => c.UnitNumber > 0).ToArray();
+                Check(numbered.Select(c => c.UnitNumber).Distinct().Count() == numbered.Length, $"{name}: unit numbers are unique");
+                foreach (var c in numbered) { if (seen.TryGetValue(c.Id, out var before)) Check(before == c.UnitNumber, $"{name}: a unit's number never changes"); seen[c.Id] = c.UnitNumber; }
+            }
+            Check(seen.Count >= 3, $"{name}: the walk brought several Personalities into play ({seen.Count})");
+            var shown = m.GetView(0).Players.SelectMany(p => p.Home.Concat(p.Army)).Where(c => c.Definition?.Type == CardType.Personality).ToArray();
+            Check(shown.All(c => c.UnitNumber > 0), $"{name}: the view carries the number");
+        }
+    }
+    {
         var s = StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId = 0; s.PriorityPlayerId = 0;
         var strat = Add(s, "oracle-l5r-9687", 0, Zone.Hand);
         var recruit = Add(s, "training-nonhuman-personality", 0, Zone.Province, province: 1);

@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Replace the client's id-derived 'Unit N' label with an engine-assigned, match-unique UnitNumber on CardInstance/CardView, given when a Personality first enters play (assigned once per committed command and at construction; stable; public cards only).",
+  "validation": "Core all suites pass (new check: published and starter matches walked 400 commands; every in-play Personality numbered, numbers unique and never change, view carries them), AI 97/97, server 9/9, client transport 18/18, collection pass, client project compiles with 0 errors, lint and format ok. Godot is not installed here: no local client smoke run and NO native visual check of the label; CI windows-2022-client covers import/smoke only.",
+  "remaining": "Visual check of the 'Unit N' tile badge and performer picker by a person. Number is match-wide unique (not per owner) so control changes cannot create duplicates. New CardView field is additive and ships with the 0.3.0 content/protocol change from #612 (unreleased).",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/611",
+  "branch": "claude/611-unit-number",
+  "updated": "2026-10-04T01:41:29.503859+00:00"
+}

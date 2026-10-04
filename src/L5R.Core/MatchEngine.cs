@@ -21,7 +21,14 @@ public sealed partial class MatchEngine
         "Not implemented: published card abilities, Border Keep filtering, Imperial Favor, cavalry, duels, dishonored cards, Rings, events, regions, spells and general nested reactions."
     ];
 
-    private MatchEngine(MatchState state, ulong seed, string scenario) { _state = state; _seed = seed; _scenario = scenario; EngineHooks.Initialize(); }
+    private MatchEngine(MatchState state, ulong seed, string scenario) { _state = state; _seed = seed; _scenario = scenario; EngineHooks.Initialize(); AssignUnitNumbers(); }
+    // Issue #611: every Personality in play gets a match-unique number the first time it is seen there (once per committed command and at construction).
+    // Cards are walked in dictionary (opaque-id) order, so which of several units entering together gets the lower number carries no setup information.
+    private void AssignUnitNumbers()
+    {
+        foreach (var card in _state.Cards.Values)
+            if (card.UnitNumber == 0 && InPlay(card) && Definition(card).Type == CardType.Personality) card.UnitNumber = ++_state.UnitSequence;
+    }
     /// <summary>Detached diagnostic snapshot, containing hidden information. Never send to a client.</summary>
     public MatchState State => Copy(_state);
     public long Version => _state.Version;
@@ -255,6 +262,7 @@ public sealed partial class MatchEngine
                 break;
             }
             if (_state.PendingHonorChange is null) _state.EntryCostAnswers.Clear(); // issue #501: the replayed command has finished; its entry-cost answers are spent
+            AssignUnitNumbers();
             _state.Version++;
             RefreshDuelRecord();
             _commands.Add(Copy(command));

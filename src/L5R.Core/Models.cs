@@ -227,6 +227,9 @@ public sealed class CardInstance
     // through MatchEngine.Definition, instead of the catalogue's. Null for every card whose printed values are the catalogue's, which is nearly all of them.
     public CardDefinition? Printed { get; set; }
     public int OwnerId { get; set; }
+    // A match-unique number a Personality is given the first time it is in play (issue #611), so the table can tell identical units apart without
+    // reading the opaque card id. 0 until then; it stays with the card if it leaves play and returns.
+    public int UnitNumber { get; set; }
     // Control follows the Personality (issue #352): a card attached to a Personality is controlled by that Personality's controller, and a card
     // brought into play from an ENEMY discard or dead pile is controlled by the player who brought it. While such a card is in play OwnerId is
     // its CONTROLLER (every "you control" check in the engine reads OwnerId); this is its real OWNER, whose pile it returns to the moment it
@@ -737,6 +740,8 @@ public sealed partial class MatchState
     // above -- match setup's own local `nextId` closure only ever runs once, at Create(), and does
     // not survive into gameplay.
     public int CreatedCardSequence { get; set; }
+    /// <summary>Last UnitNumber handed out (see CardInstance.UnitNumber).</summary>
+    public int UnitSequence { get; set; }
     public int? FavorPlayerId { get; set; }
     public int TurnNumber { get; set; } = 1;
     public int ActivePlayerId { get; set; }
@@ -1378,7 +1383,9 @@ public sealed record CardView(string Id, CardDefinition? Definition, int OwnerId
     // and definition id (the scan the client shows); a human-readable sentence of every condition on the copy (timed removal, ...) for the frame's tooltip.
     bool IsCopy = false, string? CopyOfCardId = null, string? CopyOfDefinitionId = null, string? CopyConditions = null,
     // Issue #501 (control transfer): the card's OWNER when another player controls it (OwnerId is always the controller); null when its owner controls it.
-    int? RealOwnerId = null);
+    int? RealOwnerId = null,
+    // Issue #611: the Personality's match-unique, public "Unit N" number, assigned when it first enters play; 0 for a card that has not (and for hidden cards).
+    int UnitNumber = 0);
 /// <summary>One granted ability as the client shows it: the id, the engine's label for it, and where it came from.</summary>
 public sealed record GrantedAbilityView(string AbilityId, string Label, string Timing, string Source, string Duration, string? CopiedFrom, string? CopiedFromName,
     string? SourceName = null, int? UsesPerTurn = null, int? UsesRemaining = null);
