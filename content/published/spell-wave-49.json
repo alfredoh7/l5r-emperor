@@ -1,0 +1,131 @@
+{
+  "Profile": "spell-wave-49",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-6567",
+      "Name": "Seeking the Way",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Bow this Shugenja, move him home, and target an attacking Personality: Move him home. Gain 2 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6567.jpg",
+      "Keywords": [
+        "Air"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "seeking-the-way-move"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-6624",
+      "Name": "Servitors of Stone",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Bow this card and target a card in this Shugenja's army: Straighten it.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6624.jpg",
+      "Keywords": [
+        "Earth"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "servitors-of-stone-straighten"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9196",
+      "Name": "Walking the Way",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 4,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Bow this Shugenja and destroy this card: Search your Fate deck for a card. Put it in your hand.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9196.jpg",
+      "Keywords": [],
+      "Focus": 3,
+      "Abilities": [
+        "walking-the-way-search"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9378",
+      "Name": "Words of Consecration",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 1,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After this card enters play, if this Shugenja is Air: Choose a player, who gains or loses 1 Honor.\nOpen: Bow this Shugenja and target another player's Personality: After the next time (this turn) he assigns to attack you, gain 1 Honor, or 2 Honor if you control a Temple.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9378.jpg",
+      "Keywords": [
+        "Air"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "words-of-consecration-honor",
+        "words-of-consecration-watch"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10125",
+      "Name": "Deafening Thunder",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Bow this card and target an enemy Personality or Follower: Give it a Force penalty equal to this Shugenja's Chi. If its Force is now 0 or this Shugenja is Thunder, you may destroy this card; if you did, take an additional Battle action.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10125.jpg",
+      "Keywords": [
+        "Thunder"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "deafening-thunder-weaken"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

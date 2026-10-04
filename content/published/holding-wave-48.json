@@ -1,0 +1,408 @@
+{
+  "Profile": "holding-wave-48",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-1497",
+      "Name": "Copper Mine",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 2,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Bow this card: Produce 2 Gold, or 3 Gold if you are a Lion Clan player.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1497.jpg",
+      "Keywords": [
+        "Mine"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "lion-gold"
+    },
+    {
+      "Id": "oracle-l5r-1914",
+      "Name": "Deeds and Words",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 2,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Bow this card: Produce 2 Gold.\nReaction: Before the resolution of an action during the Action Phase, destroy this card: Choose one of the Honor gains or losses from its effects. Reduce it to 0.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1914.jpg",
+      "Keywords": [],
+      "Focus": 0,
+      "Abilities": [
+        "deeds-words-reduce"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-2463",
+      "Name": "Family Library",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 2,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Bow this card: Produce 2 Gold.\nLimited: Destroy this card: Discard a face-up card in one of your provinces, refilling it with a discarded (not dead) Personality from your discard pile.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-2463.jpg",
+      "Keywords": [
+        "Library"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "family-library-refill"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-2784",
+      "Name": "Geisha House",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 2,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Bow this card: Produce 2 Gold, or 3 Gold if you are a Scorpion Clan player.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-2784.jpg",
+      "Keywords": [
+        "Geisha House"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "scorpion-gold"
+    },
+    {
+      "Id": "oracle-l5r-3044",
+      "Name": "Heavy Infantry Dojo",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 4,
+      "GoldProduction": 3,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Bow this card: Produce 3 Gold.\nBattle: Choose your performing Personality and bow this card: Give him +2F.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-3044.jpg",
+      "Keywords": [
+        "Dojo"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "heavy-infantry-dojo-boost"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-3808",
+      "Name": "Iron Mine",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 2,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Bow this card: Produce 2 Gold, or 3 Gold if you are a Crab Clan player.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-3808.jpg",
+      "Keywords": [
+        "Mine"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "crab-gold"
+    },
+    {
+      "Id": "oracle-l5r-4496",
+      "Name": "Kobune Port",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 2,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Bow this card: Produce 2 Gold, or 3 Gold if you are a Mantis Clan player.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-4496.jpg",
+      "Keywords": [
+        "Port"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "mantis-gold"
+    },
+    {
+      "Id": "oracle-l5r-5027",
+      "Name": "Merchant Atoll",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 6,
+      "GoldProduction": 5,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Your provinces have +1 strength.\nBow this card: Produce 5 Gold.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-5027.jpg",
+      "Keywords": [
+        "Castle",
+        "Port"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "merchant-atoll-provinces"
+    },
+    {
+      "Id": "oracle-l5r-6314",
+      "Name": "Rice Paddy",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 2,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Bow this card: Produce 2 Gold.\nBattle: Bow and destroy this card, and target an attacking Follower at one of your provinces' battlefields: Bow it.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6314.jpg",
+      "Keywords": [
+        "Farm"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "rice-paddy-bow"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-6984",
+      "Name": "Shinomen Marsh",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 2,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Bow this card: Produce 2 Gold, or 3 Gold if you are a Spider Clan player.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6984.jpg",
+      "Keywords": [
+        "Swamp"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "spider-gold"
+    },
+    {
+      "Id": "oracle-l5r-7223",
+      "Name": "Shrine to Hachiman",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 2,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Bow this card: Produce 2 Gold.\nBattle/Open: Target an attachment: Straighten it.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7223.jpg",
+      "Keywords": [
+        "Temple"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "shrine-hachiman-straighten"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-7266",
+      "Name": "Silver Mine",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 2,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Bow this card: Produce 2 Gold, or 3 Gold if you are a Phoenix Clan player.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7266.jpg",
+      "Keywords": [
+        "Mine"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "phoenix-gold"
+    },
+    {
+      "Id": "oracle-l5r-7443",
+      "Name": "Stables",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 2,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Bow this card: Produce 2 Gold, or 3 Gold if you are a Unicorn Clan player.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7443.jpg",
+      "Keywords": [
+        "Stables"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "unicorn-gold"
+    },
+    {
+      "Id": "oracle-l5r-7874",
+      "Name": "Temple of Harmony",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 2,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Bow this card: Produce 2 Gold, or 3 Gold if paying for a Monk.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7874.jpg",
+      "Keywords": [
+        "Temple"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "temple-of-harmony-gold"
+    },
+    {
+      "Id": "oracle-l5r-10033",
+      "Name": "Farmer's Market",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 2,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Your maximum hand size is increased by 1.\nBow this card: Produce 2 Gold.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10033.jpg",
+      "Keywords": [
+        "Farm",
+        "Market"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "increase-own-hand-size"
+    },
+    {
+      "Id": "oracle-l5r-10189",
+      "Name": "Jiramu's Court",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 2,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Bow this card: Produce 2 Gold.\nOpen: Bow this card and target your Courtier: Straighten him.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10189.jpg",
+      "Keywords": [],
+      "Focus": 0,
+      "Abilities": [
+        "jiramus-court-straighten"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10271",
+      "Name": "Vast Paddy Fields",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 2,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Bow this card: Produce 2 Gold. If this paid for a Farm Holding entering play from a province, refill the province face-up.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10271.jpg",
+      "Keywords": [
+        "Farm"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "vast-paddy-fields"
+    }
+  ],
+  "Decks": []
+}

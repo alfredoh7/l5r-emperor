@@ -18,7 +18,9 @@ public sealed record MoveSpec(string Movers, string Destination)
     public const string Home = "home", CurrentBattlefield = "current-battlefield", AdjacentUnresolved = "adjacent-unresolved-battlefield", AnyUnresolved = "unresolved-battlefield";
     /// <summary>Issue #503 (Shosuro Keirei: "Move Keirei from the current battlefield to a different battlefield"): any other battlefield of the Attack Phase, resolved or not.</summary>
     public const string AnyOther = "any-other-battlefield";
-    public bool ChoosesBattlefield => Destination is AdjacentUnresolved or AnyUnresolved or AnyOther;
+    /// <summary>Issue #622 (Back to the Front: "a battlefield he assigned to this turn"): any battlefield that exists, the current one included; the ability's own validation keeps the ones the mover was assigned to (IvoryMovement.cs).</summary>
+    public const string AssignedThisTurn = "assigned-this-turn";
+    public bool ChoosesBattlefield => Destination is AdjacentUnresolved or AnyUnresolved or AnyOther or AssignedThisTurn;
 }
 
 public sealed partial class MatchEngine
@@ -47,6 +49,7 @@ public sealed partial class MatchEngine
         if (!move.ChoosesBattlefield || _state.CurrentBattleProvince is not int current) return [];
         var unresolved = _state.UnresolvedBattlefields;
         if (move.Destination == MoveSpec.AnyOther) return P2OtherBattlefields(current); // issue #503 (EmperorP2Keirei.cs)
+        if (move.Destination == MoveSpec.AssignedThisTurn) return IvoryExistingBattlefields(current); // issue #622 (IvoryMovement.cs)
         return move.Destination == MoveSpec.AdjacentUnresolved
             ? AdjacentBattlefields(current).Where(unresolved.Contains).ToArray()
             : unresolved.Where(p => p != current).ToArray();
@@ -58,7 +61,7 @@ public sealed partial class MatchEngine
         if (ability.Move is not { } move) return;
         if (move.ChoosesBattlefield)
             Require(command.Province is int province && MoveDestinations(move).Contains(province), move.Destination == MoveSpec.AdjacentUnresolved
-                ? "Choose an adjacent unresolved battlefield." : move.Destination == MoveSpec.AnyOther ? "Choose a different battlefield." : "Choose another unresolved battlefield.");
+                ? "Choose an adjacent unresolved battlefield." : move.Destination == MoveSpec.AnyOther ? "Choose a different battlefield." : move.Destination == MoveSpec.AssignedThisTurn ? "Choose a battlefield he was assigned to this turn." : "Choose another unresolved battlefield.");
         else Require(command.Province is null, "This move names no battlefield.");
     }
 

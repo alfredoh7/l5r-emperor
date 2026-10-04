@@ -42,9 +42,7 @@ TYPE_ORDER = ["Stronghold", "Personality", "Follower", "Item", "Spell", "Strateg
 # for scope; those say so explicitly rather than pretending there's a technical gap. Extend this
 # dict as future waves triage other Types.
 BLOCKERS: dict[str, str] = {
-    "oracle-l5r-10891": "Card creation is built (issue #387), but no local scan is a 1F Ronin Follower (Ronin Follower, oracle-l5r-10203, is 2F): an open question in docs/decisions/2026-09-20-created-cards-from-proxy-scans.md.",
     "oracle-l5r-10892": "Needs a control-transfer mechanic (explicitly deferred since Loyal, #142).",
-    "oracle-l5r-10682": "Needs Home-timing generalization plus hypothetical-opposition movement.",
     "oracle-l5r-10894": "Needs a \"modify the next Honor change\" pending-state mechanism.",
     "oracle-l5r-10335": "Needs a new tracked EnteredPlayTurn field on CardInstance.",
     "oracle-l5r-10679": "Needs \"grant keyword to whole unit\" (the passive Attack-strength defense half is now built -- Destrier/Singh Remnants -- and directly reusable here).",
@@ -62,7 +60,6 @@ BLOCKERS: dict[str, str] = {
     "oracle-l5r-10898": "Needs a persistent one-time destruction shield.",
     "oracle-l5r-10900": "Needs an attachment Transfer mechanic plus Home-timing generalization.",
     "oracle-l5r-10518": "Focus 4, not 1 -- outside the #192 wave's own scope. The top-of-Fate-deck discard primitive now exists (Aberrations, issue #192), but this needs a \"whose deck\" target choice (\"any Fate deck\", not just your own) plus a variable-strength Melee Attack keyed off the discarded card's Focus Value, not a Force modifier.",
-    "oracle-l5r-10337": "Needs a way for a TRAIT to negate the announced Political action's remaining effects, plus a Political-action classification (the flat +1PH half is separately wirable). The \"first time each phase\" half now exists: the once-per-phase limit (PhaseLimits.cs) and the announce-time targeting trait hook (Daigotsu Bofana, MatchEngine.OpenForcedDiscardForTargetedTrait).",
     "oracle-l5r-10519": "The Engage window and first-action claim now exist (issue #310; a Follower's 'Engage:' is a Reaction to trigger after-engaging, claim: MatchEngine.ClaimFirstOpportunity, conditional on being the Attacker). Still needs: a Follower-sourced Engage action scoped to 'this battlefield' (the Follower's own unit) and its optional 'you may target ... -3F' effect target; Reconnaissance for the acting side is settled (MatchEngine.GrantReconnaissanceAtCurrentBattlefield serves an Attacker at the enemy's province and a Defender at their own, see docs/decisions/2026-09-18-battle-timing-primitives.md decision 5).",
     "oracle-l5r-10587": "Needs a compound Gold-plus-card-discard cost shape (Kharmic keyword's own reminder).",
     "oracle-l5r-10517": "\"You may Equip this Follower as a Battle action\" is now a general capability (AttachSource.Self, issue #337: Fading Shadows attaches itself from hand to a performing Ninja). Shinobi Vassal differs in that the wielder is any Ninja Personality chosen as a target, and its own Battle action destroys a target enemy card without attachments and then the Follower itself -- deferred, not wired in #337.",
@@ -77,13 +74,11 @@ BLOCKERS: dict[str, str] = {
     # also needs something else first.
     "oracle-l5r-10870": "Needs an \"Absent Interrupt\" mechanic (Bayushi Wateru's own printed ability, on top of Reserve).",
     "oracle-l5r-10874": "Needs a Follower-Equip Battle ability with no Shugenja/opposed requirement (Daigotsu Chiboshi's own \"Equip a Follower to Chiboshi\"; the attach primitive of issue #337 needs a hand pile for it), plus tying its own Additional Action grant to a Reserve recruitment specifically.",
-    "oracle-l5r-10862": "Needs a \"count of Spells in this unit\" Attack-strength axis (Isawa Ikariya's own Ranged Attack).",
     "oracle-l5r-10842": "Needs conditional Gold-cost reduction (Kakita Ujirou's own \"enters play for N less Gold if...\").",
     # Tamori Shinji (oracle-l5r-10846) published in personality-wave-12 (issue #216) -- his own
     # narrow "enters play for 4 less Gold if you are the Defender" now applies specifically via
     # RecruitReserve (QuotePurchase's own new viaReserve parameter), not the fully general
     # persistent Gold-cost-modifier primitive a future card like A Fugitive Apprehended would need.
-    "oracle-l5r-10890": "Needs an \"Absent Engage\" mechanic (Utaku Sakiko's own printed ability, on top of Destined/Reserve).",
     # Moshi Ikako (oracle-l5r-10857) published in personality-wave-14, and Scholarly Hermit
     # (oracle-l5r-10684) in follower-wave-9, once their own scan images became available locally via
     # the WebP working-copy pipeline (issue #200) -- see issue #196, now resolved. Moshi Ikako's own
@@ -117,9 +112,7 @@ BLOCKERS: dict[str, str] = {
     # (noted "Not blocked; deferred for scope") but were left for a future pass to keep this wave's
     # own scope bounded.
     "oracle-l5r-10376": "Needs a movement-negation passive for a Terrain (the Terrain-play and additional-Battle-action halves are separately wirable).",
-    "oracle-l5r-10941": "Needs a self-replacing Terrain variant (\"destroy a Terrain if able, then play this one\") plus an ongoing army-wide Force passive tied to being in play as Terrain.",
     "oracle-l5r-3767": "Its Follower may come from your hand OR a discard pile, paying 1 less Gold. The attach-from-a-discard-pile primitive (issue #337) covers the discard half (AttachCost(-1, 0)); a hand-or-discard pile choice (AttachPile has discard values only) is the piece left.",
-    "oracle-l5r-10735": "The general \"before this battle resolves\" window now exists (issue #310). Still needs its own effect: a MANDATORY one-target choice ('straighten a Follower or Personality') -- beforeBattleOptional offers decline-or-target; a mandatory-target variant is a small addition; the Terrain-play half is separately wirable.",
     "oracle-l5r-10943": "Needs a self-replacing Terrain variant plus an ongoing army-wide Force passive tied to being in play as Terrain (same two gaps as oracle-l5r-10941).",
     "oracle-l5r-10551": "Needs a unit-Force-total comparison Target (same gap as oracle-l5r-2900/4118).",
     "oracle-l5r-5046": "Needs a keyword-conditional cost EXEMPTION (bow the performer unless it has a given keyword) -- distinct from every existing keyword-conditional EFFECT.",
@@ -127,9 +120,7 @@ BLOCKERS: dict[str, str] = {
     "oracle-l5r-10388": "Needs a \"count copies of this same card played this battle\" mechanism (novel; the additional-Battle-action half is separately wirable).",
     "oracle-l5r-10718": "Refreshed: the \"delayed post-destruction straighten\" is a delayed effect of a card that is no longer in play, which the store negates by rule (a card that left play has nothing to be affected); it needs a straighten of another card triggered by this card's destruction, plus the self-replacing Terrain variant (unchanged). NO LOCAL SCAN.",
     "oracle-l5r-10958": "Needs a \"Political\" Reaction timing (not built; the plain Ranged 1 Attack half is separately wirable).",
-    "oracle-l5r-10699": "The ability-copying primitive now exists (CardCopy.cs, issue #338: copy one ability that does not itself copy abilities, with Duration \"Turn\" for a copy \"this turn\"). What is still missing is this Spell's own target category (a Spell at this battlefield or a Thunder Spell at any location) and copying onto a Spell receiver during a Thunder Battle action.",
     "oracle-l5r-10960": "Needs a unit-Force-total comparison Target (same gap as oracle-l5r-2900).",
-    "oracle-l5r-10963": "Needs an \"Interrupt\" timing (not built; the plain Melee 2 Attack half is separately wirable).",
 
     # Lion Clan Personality review (issue #198): the 49 unwired Lion Clan Personalities left after
     # wiring Personality wave 8's 17 cards, triaged against every primitive built through wave 8.
@@ -155,7 +146,6 @@ BLOCKERS: dict[str, str] = {
     # UntilBattleEnds (issue #394) already exist -- proven by Kitsu Akai's own identical 2F/2C/3PH Lion Ancestor token
     # (oracle-l5r-9785), which Miro's own miro-create ability resolves to unchanged. See personality-wave-63.
     "oracle-l5r-10293": "The deck search primitive now exists (issue #312) and its criteria can express \"a non-Unique Lion Clan Shugenja\" from the Dynasty deck, but the effect is \"refill this province with him, face-up\" (a search effect the primitive does not have yet) and the ability must be usable from a face-up province card whose own cost is discarding her and paying 2 Gold.",
-    "oracle-l5r-4396": "Needs a per-player 'controls an Ancestor' Honor-gain/loss sweep referencing each player's own starting Family Honor baseline (not tracked as a stat) plus an imposed choice against another player's own card state.",
     "oracle-l5r-10852": "Needs Interrupt timing (not started); card creation is built (issue #387, the Lion Ancestor scan is published).",
     "oracle-l5r-10294": "Needs a 'this card's Force counts twice during battle resolution' hook (no existing mechanism double-counts one specific card in a resolution total), and a personality-level 'will not attach Items' restriction (the existing 'Will only/not attach to X' restriction gates the ATTACHMENT side, not a blanket type-level refusal from the host).",
     "oracle-l5r-10464": "Needs a control-transfer mechanic (explicitly deferred since Loyal, #142) -- specifically a temporary, Gold-production-only control grant over another player's Holding, without a full ownership change.",
@@ -311,11 +301,9 @@ BLOCKERS: dict[str, str] = {
     # Daidoji Takichi (oracle-l5r-1679): wired in personality-wave-67 (Forgotten Legacy pass, issue #467, batch 1) as takichi-move; its old note is gone.
     # Hiruma Nikaru (oracle-l5r-3310): wired in personality-wave-67 (Forgotten Legacy pass, issue #467, batch 1) as nikaru-bow-lock; its old note is gone.
     "oracle-l5r-7587": "The multi-target slots exist (issue #336: one to three Personalities controlled by other players) and the command keeps the order they were chosen in, which is what its -1F, -2F, -3F assignment reads; not yet wired.",
-    "oracle-l5r-10143": "Not blocked since issue #336: two independent targets (your unbowed attacking Personality; an enemy Personality at any location) and the move of the second to the current battlefield (MoveSpec target/current-battlefield), plus the straighten; not yet wired.",
     "oracle-l5r-10529": "The multi-target slots exist (issue #336: one or two target enemy cards, a Min 1 / Max 2 slot); still needs the printed Fallen/maximum-Personal-Honor static and the bow cost; not yet wired.",
     "oracle-l5r-10716": "The multi-target slots exist (issue #336: one or two target opposed Personalities); still needs the count of different Clan alignments at the battlefield; not yet wired.",
     "oracle-l5r-10721": "Not blocked since issue #336: one to three of your target defending Personalities, +2F -- a Min 1 / Max 3 slot; not yet wired.",
-    "oracle-l5r-10947": "Mercantile Conflict (Discipline, issue #353): the Discipline flag and the additive Discipline cost exist, and its first effect (bow your target unbowed Courtier, Political Open) is wirable, but \"the next two Honor losses from your cards (this turn) are increased by 1 each\" needs an Honor-loss-increase primitive -- a per-player, per-turn counter consulted at every Honor loss (GainHonor with a negative amount) that raises the first two by 1; nothing like it exists. Left unwired until that primitive is built.",
     # Before the Dawn (issue #431): the 123 cards that had no abilities were each read against the engine; 68 are wired (personality-wave-43/45/46/47, strategy-wave-43/44, item-wave-8,
     # spell-wave-16/17, follower-wave-20/21/22, holding-wave-6, celestial-wave-4, region-wave-5) and these 55 are not, for the gap each names. Where a note says a half is buildable,
     # the card stays unwired because the other half is not: a card is never wired with a printed ability missing.
@@ -340,18 +328,15 @@ BLOCKERS: dict[str, str] = {
     # Embers of War pass (issue #460), batch 2: 12 of the batch's 25 Personalities are wired in personality-wave-63; these 13 stay blocked.
     # Embers of War pass, batch 3 (issue #460): eleven Strategies left unwired (ten others of the same batch are wired in strategy-wave-52).
     "oracle-l5r-3739": "Inexorable (Embers of War): \"Reaction: After another player announces a Reaction during the Combat Segment: Its effects will not negate other effects.\" Re-checked after issue #503. The trigger is now reachable (group P3 built announce windows that ask more than one watcher per announcement, EmperorP3Priority.cs, and the window could be opened for the OTHER player's hand Strategy when the announced action is a Reaction in a Combat Segment), but the effect is not: \"its effects will not negate other effects\" needs one engine-wide notion of 'a negation made by this action's effects' that can be switched off for one resolving action. Negations live in a dozen unrelated places -- MatchState.NegatedEffects (per card and kind), the whole-action flags (DeferredActionNegated, PendingAttack.Negated, AnnouncedActionNegated, RemANegatesHeldAction, HeldProclaim.Negated, the P3 Event negation), standing card fields that negate later effects (StraightenHolds, MovementLocks, TargetShield, ForceModifiersNegatedTurn, Stalwart-style per-turn stamps), the R4 Honor marks (RemC.NegateLossesActionKey, HonorReducedActionKey, P3 NegatedHonorGains), Fujita's Follower shields and the delay store's negated entries -- and no action records which of them it set. A snapshot-and-revert of a hand-picked list would silently miss the rest, so the card would be partial. Needs: a single NegationLedger that every negation writes through (kind, target, source action key), so an action marked 'non-negating' (Inexorable) has its entries dropped as it resolves; then Inexorable is an announce-window Reaction of the other player that marks the announced Reaction's key.",
-    "oracle-l5r-6059": "Its Open half (\"put one or two target Followers in your discard pile into your hand\") is an ordinary multi-target discard-to-hand pick (TargetSlots' own Min 1 Max 2 shape) and ready to wire on its own. Its Focus Effect (\"before your Personality in this duel is destroyed for losing it, you may destroy one of his Followers to negate his destruction\") needs a Focus-Effect-TIMED hook into duel-loss destruction specifically -- Wide Valley's own \"negate a destruction inside a unit\" trait (issue #453 batch 1) is a standing always-on rule folded into DestroyUnits/DestroyAttachment, not a live in-the-moment CHOICE offered only at Focus Effect resolution before one specific destruction happens; ApplyDuelFocusEffect (Dueling.cs) runs each focused card's own effect in order but has no shape yet for \"conditionally pre-empt the very destruction the duel loss is about to cause.\" The card's own single printed ability id keeps both halves together rather than splitting.",
     # Embers of War pass (issue #460), batch 4: strategy-wave-53 wired 8 of the batch's 24 Strategies (Sheathing the Sword, Tactical Trap,
     # Unstoppable Strike, You Are Unworthy, The Cycle of Vengeance, Stuck in Rokugan, Thick Marsh, Stand as the Mountain); these 16 stay blocked,
     # each on a precise gap. A new enemy-personality-at-any-location Target category (CardAbilities.cs) resolved the oracle-l5r-6727/5941
     # cross-batch blocker; oracle-l5r-5941 (Phantom Visage, a parallel batch's card) still needs its own re-check against the category by its
     # own batch, since it may not have landed yet when this pass ran.
-    "oracle-l5r-9008": "Needs the same pre-resolution Interrupt window as oracle-l5r-6265 (\"Negate your target Commander's movement from the action's effects\" before another player's Battle action resolves) -- see that entry for the exact gap. The Battle half (\"Take an additional action to use a printed ability on your target Follower, even if it is bowed or the ability has been used the maximum number of times this turn\") is close to buildable on its own (Shiba Tsukimi's RefreshBattleAbilities clears a per-turn use stamp; the bowed-source exemption is a literal ability-id list in CardAbilities.cs), but the card's own identity is the Interrupt, so it stays blocked whole.",
     # Embers of War pass (issue #460), batch 5: six of the batch's twelve Spells, one Celestial and two Strongholds stay unwired; eleven cards are wired
     # (spell-wave-20, stronghold-wave-14, region-wave-7). The Distant Reaches's old note (issue #336's Slots primitive) is gone now that it is wired.
     # Embers of War pass (issue #460, batch 6): 11 of the batch's 24 cards stay unwired. Thirteen (item-wave-12, holding-wave-9, follower-wave-28,
     # personality-wave-64) are now wired -- see docs/decisions (batch 6 summary) for the full list.
-    "oracle-l5r-7869": "Needs an \"after the first time each turn you bow this Holding\" Reaction trigger: no existing Trigger fires off a card's OWN bowing (own-enters-play/own-won-duel/before-any-action-resolves are the nearest shapes, none of which watch a bow of the source itself), and a once-per-turn stamp distinct from AbilityUses (a Reaction's own per-turn cap already exists, but nothing currently calls into a Reaction dispatcher from inside Bow()/BowSource cost application at all).",
     "oracle-l5r-9997": "Proxy (a Ronin Samurai, 2F/2C): same orphan-reference gap as oracle-l5r-9995/9996 -- no creating card found (Dubious Resources, the one Ronin-creating card located in this search, creates a 2F Ronin FOLLOWER attached to a Personality, oracle-l5r-10145, a different card from this 2F/2C Ronin Samurai PERSONALITY Proxy).",
     # Embers of War pass, batch 1 (issue #460): 26 candidate Personalities re-checked against the engine as it now stands. Five are wired
     # (personality-wave-62: Akodo Uehara, Daigotsu Takayasu - exp, Goju Gochiso, Kaiu Onizuka, Kaiu Tojikana -- their own printed abilities all
@@ -390,7 +375,6 @@ BLOCKERS: dict[str, str] = {
     # sweep are all built now), event-wave-7 (Discovering the Temple, On, Star-Crossed Lovers, Wartime Preparations), stronghold-wave-16 (Bishamon's Tower, Twin Forks
     # City) and celestial-wave-7 (The Moon's Imperative, The Sun's Aspiration). The five below are not.
     "oracle-l5r-9797": "Humble Farm (issue #503, P6, re-checked): its own scan is local; blocked only by its created plain 2F Ashigaru Follower. No local Proxy fits (Fledgling Ashigaru is 0F, Mounted Ashigaru 1F Cavalry with no local scan, Ronin Follower 2F Ronin, Infantry Follower 2F with no keyword); docs/requests/created-card-scans-needed.md row B3 (ashigaru-2f.jpg) is unticked. Otherwise GoldProduction 2 plus Ashigaru Recruits' Battle/Open create-and-attach with a Sacrifice cost.",
-    "oracle-l5r-9870": "Lookout (scan text: \"Will only attach to a Ninja. Reaction: After you announce a Ranged Attack action, destroy this card: One Ranged Attack from that action may target a card in the Defender's home.\"; the catalogue's Ninja Interrupt wording is the later Oracle text). \"Will only attach to a Ninja\" is AttachRequiresKeyword and the announce window exists (ResolveOrDeferAnnounceReaction, Tsuruchi Yakusho's own-ranged-action-announced), but the effect cannot be built on it: an Attack's target is fixed and judged when the action is ANNOUNCED (RequireLegalAttackTarget, AttackTargeting.cs: 'InPlay && AtBattle && enemy'), before the announce window opens, so a Reaction taken after the announcement cannot widen that target to a card in the Defender's home -- the Attack would need its target chosen (or re-chosen) after the announce Reactions, which the deferred-Attack pipeline does not do. The announce window is also opened only for a watcher at the current battlefield (Yakusho's printed condition) and for one watcher at a time (FirstOrDefault).",
     # The Shadow's Embrace pass (issue #476), batch 1: 23 Personalities (Agasha Kurou .. Kazehime), none with an earlier note. Twenty-two are wired in
     # personality-wave-74 (ShadowsEmbraceBatch1.cs): Agasha Kurou, Asahina Keigo, Asako Hayate, Asako Jirou, Atosa, Bayushi Misaki, Bayushi Tarou, Bayushi Waru,
     # Chiisai, Chuda Hitaka, Daidoji Sosuke, Daigotsu Arakan, Daigotsu Rafu, Goju Bunoro, Hida Bakari, Hiruma Hikazu, Hiruma Nikaru (oracle-l5r-9806), Iuchi Haruma,
@@ -428,10 +412,28 @@ def load_published_cards() -> dict[str, dict]:
     return cards
 
 
+# Emperor-era sets in Mendon's approved order (the client's CatalogueData.SetOrder, minus the Ivory labels).
+EMPEROR_SET_ORDER = [
+    "Before the Dawn", "War of Honor", "Forgotten Legacy", "Second City", "Promotional-Celestial",
+    "Emperor Edition", "Promotional-Emperor", "Embers of War", "The Shadow's Embrace", "Seeds of Decay",
+    "Honor and Treachery", "Emperor Edition Gempukku", "Torn Asunder", "Coils of Madness", "Gates of Chaos",
+    "Aftermath",
+]
+
+
+def _era_name(name: str) -> str:
+    """The catalogue stores the Promotional sets with a mangled dash; compare on a plain hyphen."""
+    return name.replace("–", "-").replace("�", "-")
+
+
 def load_sets() -> dict[str, str]:
-    """Id -> its own primary printing's Set name(s), read directly from
-    content/oracle/emperor-catalogue.json (the same source build_deck_pool.py itself reads, but that
-    script's own output schema carries no set/printing field to reuse here)."""
+    """Id -> its Set name(s), read directly from content/oracle/emperor-catalogue.json (the same
+    source build_deck_pool.py itself reads, but that script's own output schema carries no
+    set/printing field to reuse here).
+
+    Oracle's primary printing is its newest, which for many cards is an Ivory-era set (Ivory Edition,
+    Promotional Ivory, Twenty Festivals) rather than an Emperor-era one. Such a card shows the earliest
+    Emperor-era set it was printed in instead (issue #622)."""
     data = json.loads(EMPEROR_CATALOGUE.read_text(encoding="utf-8"))
     sets: dict[str, str] = {}
     for card in data["cards"]:
@@ -439,6 +441,11 @@ def load_sets() -> dict[str, str]:
         primary = next((p for p in printings if p.get("id") == card.get("current_primary_printing_id")), None) \
             or (printings[0] if printings else None)
         card_sets = (primary.get("sets") or []) if primary else []
+        if card_sets and not any(_era_name(s) in EMPEROR_SET_ORDER for s in card_sets):
+            era = [(EMPEROR_SET_ORDER.index(_era_name(s)), s) for p in printings for s in p.get("sets") or []
+                   if _era_name(s) in EMPEROR_SET_ORDER]
+            if era:
+                card_sets = [min(era)[1]]
         if card_sets:
             sets[card["id"]] = ", ".join(card_sets)
     return sets

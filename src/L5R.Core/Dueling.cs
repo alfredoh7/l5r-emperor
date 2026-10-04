@@ -72,6 +72,7 @@ public sealed partial class MatchEngine
     {
         var duel = _state.PendingDuel!;
         duel.Stage = "Focusing";
+        ApplyDuelEntryTraits(duel); // Spiked Tetsubo (issue #622, IvoryPolitical.cs): "After this Personality enters a duel"
         duel.TurnPlayerId = duel.ChallengedPlayerId; // the challenged player has the first option, always
         _state.PriorityPlayerId = duel.TurnPlayerId;
         _state.ConsecutivePasses = 0;
@@ -93,6 +94,8 @@ public sealed partial class MatchEngine
         if (duel.AbilityId is "first-blood-duel-battle" or "first-blood-duel-limited") { Draw(Player(duel.ChallengerPlayerId)); Draw(Player(duel.ChallengerPlayerId)); }
         // Watchful Eye Dojo (Emperor Edition Stronghold pass, issue #486 batch 3): "He may refuse; if he did, dishonor him and gain 1 Honor."
         if (duel.AbilityId == "watchful-eye-duel") WatchfulEyeRefusal(duel);
+        // Sanctioned Duel (issue #622, IvorySpells.cs): "He may refuse; if he does, dishonor him and gain 2 Honor."
+        if (duel.AbilityId == IvorySpellAbilities.SanctionedDuel) SanctionedDuelRefusal(duel);
         _state.LastDuel = _state.LastDuel! with { Result = new("Refused", null, [], 0, 0, 0, 0, [], _state.Events.Skip(refusalStart).ToArray(), [], _state.Version + 1, _state.Phase, _state.PriorityPlayerId, "Challenge refused") };
         var challengerPlayerId = duel.ChallengerPlayerId;
         _state.PendingDuel = null;
@@ -323,6 +326,8 @@ public sealed partial class MatchEngine
         if (rendOfWinner is not null) { winnerId = null; loserIds = [duel.ChallengerId, duel.ChallengedId]; resolutionReason = "Rend the Soul · the winner loses too"; }
         // The shared delay mechanism (issue #492, EmperorRulingR2Cards.cs): "You may choose (now) to delay the effects of losing this duel ..." is answered before the outcome applies.
         if (BeginDuelLossDelayDecisions(duel, loserIds)) return;
+        if (TfBeginWitnessDecision(duel, winnerId)) return; // Awed Witness (issue #622, TfStrategiesA.cs): the winner's controller may create Witness -- asked once, then the duel resolves again
+        if (BeginTfStrategiesBDuelDecisions(duel, loserIds)) return; // Preserving Forces (issue #622, TfStrategiesB2.cs): "before your Personality is destroyed for losing it".
         var resultStart = _state.Events.Count;
         if (rendOfWinner is not null) Emit("duelWinnerLoses", $"{Definition(rendOfWinner).Name}: {Player(rendOfWinner.OwnerId).Name}'s Personality won the duel, so he loses instead; the other Personality still also loses.", rendOfWinner.OwnerId, rendOfWinner.Id);
         var strengthsBefore = _state.Players.SelectMany(p => p.Provinces.Select(v => new DuelProvince(p.Id, v.Index, EffectiveProvinceStrength(v), EffectiveProvinceStrength(v)))).ToArray();
@@ -428,6 +433,7 @@ public sealed partial class MatchEngine
         _state.PendingDuel = null;
         if (duel.RingsBowedBefore is { } duelRings) RecordBowedRings(duelRings.ToHashSet()); // Deception Revealed (Mendon's R4 ruling): a Ring the duel's action bowed goes on its record (a Focus Effect's bows do not: ApplyDuelFocusEffect).
         ApplyHesMineBows(duel.ChallengerId, duel.ChallengedId); // He's Mine! (Emperor Edition remaining-cards pass, issue #492, group B): the substitute bows once the duel has ended.
+        ApplyTfPersonalitiesDuelWin(winnerId); // Kakita Izumiko (issue #622, TfPersonalities.cs): "After Izumiko wins a duel, gain 1 Honor." -- a trait.
         ApplyTwinForksCity(winnerId); // Twin Forks City (The Shadow's Embrace pass, issue #476 batch 6): a trait, before any Reaction to the duel's end.
         // The duel itself is a single, complete action from challenge to consequences (issue #209):
         // once everything above has applied, the winning card's own controller gets a chance to
@@ -509,7 +515,7 @@ public sealed partial class MatchEngine
             case "training-duel-challenge": foreach (var id in loserIds) ApplyModifier(Card(id), id, abilityId, "Force", -1); break;
             // Dragon Clan review (issue #207): three real self-performer Iaijutsu duels.
             case "daisuke-duel": case "spirit-duelist-duel": foreach (var id in loserIds) MoveHome(Card(id), false); break;
-            case "ichizo-exp-duel": case "shikei-duel": case "makoto-duel": DestroyUnits(loserIds.Select(Card).ToArray(), actingPlayerId: challengerPlayerId); break;
+            case "ichizo-exp-duel": case "shikei-duel": case "makoto-duel": case IvorySpellAbilities.SanctionedDuel: DestroyUnits(loserIds.Select(Card).ToArray(), actingPlayerId: challengerPlayerId); break;
             // Second City unwired-card audit (issue #264): "she won" is exactly "the challenger's own
             // side won" in a self-performer 1v1 duel -- there is no ally on that side to conflate her
             // with, so checking the winner's OWNER matches the printed text precisely.
@@ -538,6 +544,7 @@ public sealed partial class MatchEngine
             case "kudome-exp-duel": KudomeExpDuelOutcome(winnerId, loserIds, challengerPlayerId); break;
             // The Shadow's Embrace pass (issue #476), batch 1: Kakita Tadanobu (ShadowsEmbraceBatch1.cs).
             case "tadanobu-duel-battle": case "tadanobu-duel-limited": TadanobuDuelOutcome(winnerId, loserIds, challengerPlayerId); break;
+            case TfStrategiesAAbilities.WitnessDuel: TfWitnessDuelOutcome(winnerId, loserIds, challengerPlayerId); break; // Awed Witness (issue #622)
             case "reckless-duel":
                 foreach (var id in loserIds)
                 {
@@ -643,6 +650,8 @@ public sealed partial class MatchEngine
             // Emperor Edition mechanics group E (issue #501): Greasing the Wheels (EmperorMechE.cs).
             default:
                 ApplyRegretFocusEffect(abilityId, winnerPlayerId); // Regret (RegretEmbracingVirtue.cs)
+                ApplyTfStrategiesAFocusEffect(abilityId, ownerId, winnerPlayerId); // Breaking the Rhythm (issue #622, TfStrategiesA.cs)
+                ApplyTfStrategiesBFocusEffect(abilityId, ownerId, winnerPlayerId); // Strategic Withdrawal (TfStrategiesB.cs)
                 ApplyMechEFocusEffect(abilityId);
                 ApplyP5FocusEffect(abilityId, ownerId, winnerPlayerId); // issue #503: Searching for Answers (EmperorP5Hidden.cs)
                 break;

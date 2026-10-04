@@ -190,7 +190,7 @@ public sealed partial class MatchEngine
     private bool MovementToBattlefieldNegated(CardInstance card, int battlefield)
     {
         if (P3MoveToBattlefieldNegated(card, battlefield)) { Emit("moveNegated", $"{Definition(card).Name}'s movement to the current battlefield was negated.", card.OwnerId, card.Id); return true; } // Request Authorization (issue #503)
-        if (!R1.MovementNegated.Contains(battlefield)) return false;
+        if (!R1.MovementNegated.Contains(battlefield) && !IvoryAmbushNegatesMove(card, battlefield)) return false; // Ambush (issue #622, IvoryMovement.cs): "Other Personalities will not move there."
         Emit("moveNegated", $"{Definition(card).Name}'s movement to {BattlefieldLabel(battlefield)} was negated.", card.OwnerId, card.Id);
         return true;
     }
@@ -233,6 +233,7 @@ public sealed partial class MatchEngine
         card.Zone = Zone.Battlefield; card.ProvinceIndex = battlefield;
         foreach (var attached in Attachments(card.Id)) attached.ProvinceIndex = battlefield;
         _state.AssignedThisCommand.Add(card.Id);
+        NoteIvoryAssignment(card, battlefield); // Back to the Front (issue #622)
         if (attacking) card.AssignedToAttackTurn = _state.TurnNumber;
         Emit("unitAssigned", $"{Definition(card).Name} assigned to {BattlefieldLabel(battlefield)}.", card.OwnerId, card.Id);
         FireMiddayShadowAssigned(card);

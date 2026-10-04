@@ -1,0 +1,65 @@
+[
+  {
+    "card_id": "oracle-l5r-1449",
+    "printing_set": [
+      "Emperor Edition"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=1449",
+    "image_path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-1449-printing-1-image-1.webp",
+    "image_sha256": "498885ab5b44ca840dd1915de1eaab1924ac6484cebadd9c353b9080a853ecaa"
+  },
+  {
+    "card_id": "oracle-l5r-10543",
+    "printing_set": [
+      "Coils of Madness"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10543",
+    "image_path": "assets/reference/oracle/coils-of-madness/webp/oracle-l5r-10543-printing-1-image-1.webp",
+    "image_sha256": "6521d913be7cfbde13d0c9c4a76896a36a2652304f4747c499c455fe47b5652d"
+  },
+  {
+    "card_id": "oracle-l5r-10699",
+    "printing_set": [
+      "Gates of Chaos"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10699",
+    "image_path": "assets/reference/oracle/gates-of-chaos/webp/oracle-l5r-10699-printing-1-image-1.webp",
+    "image_sha256": "df566e176e176a4f8d56494275024d3b7bd91de264138570fc871020c23f44e5"
+  },
+  {
+    "card_id": "oracle-l5r-10701",
+    "printing_set": [
+      "Gates of Chaos"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10701",
+    "image_path": "assets/reference/oracle/gates-of-chaos/webp/oracle-l5r-10701-printing-1-image-1.webp",
+    "image_sha256": "516949578cc8e50ec14c1a677c00fc74211d54691212af1e3910f5932b97af61"
+  },
+  {
+    "card_id": "oracle-l5r-10704",
+    "printing_set": [
+      "Gates of Chaos"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10704",
+    "image_path": "assets/reference/oracle/gates-of-chaos/webp/oracle-l5r-10704-printing-1-image-1.webp",
+    "image_sha256": "a0d7be98ed050f86d3cac23013301780669ef14799763aae8ada290df5606884"
+  },
+  {
+    "card_id": "oracle-l5r-10917",
+    "printing_set": [
+      "Aftermath"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10917",
+    "image_path": "assets/reference/oracle/aftermath/webp/oracle-l5r-10917-printing-1-image-1.webp",
+    "image_sha256": "6a66c16689f00739412b01f6a84da5eae192ee10a56f78e4a6519cca818a963d"
+  },
+  {
+    "card_id": "oracle-l5r-10920",
+    "printing_set": [
+      "Aftermath"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10920",
+    "image_path": "assets/reference/oracle/aftermath/webp/oracle-l5r-10920-printing-1-image-1.webp",
+    "image_sha256": "6bf589c11991f7201978b3c476a4f1cca4b1bf39e306bf10a8596936be19d11a"
+  }
+]

@@ -1,0 +1,29 @@
+[
+  {
+    "card_id": "oracle-l5r-9870",
+    "printing_set": [
+      "The Shadow's Embrace"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=9870",
+    "image_path": "assets/reference/oracle/the-shadow-s-embrace/webp/oracle-l5r-9870-printing-1-image-1.webp",
+    "image_sha256": "049175f25fc63a54a15bf6f9519d94b205d955d2e749a9dc1c0464f26dc0a534"
+  },
+  {
+    "card_id": "oracle-l5r-10682",
+    "printing_set": [
+      "Gates of Chaos"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10682",
+    "image_path": "assets/reference/oracle/gates-of-chaos/webp/oracle-l5r-10682-printing-1-image-1.webp",
+    "image_sha256": "88aa554dc5a0bab36beb54ad57664f5bc6ca8d0bce96e99a45a74bf8818e3f35"
+  },
+  {
+    "card_id": "oracle-l5r-10891",
+    "printing_set": [
+      "Aftermath"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10891",
+    "image_path": "assets/reference/oracle/aftermath/webp/oracle-l5r-10891-printing-1-image-1.webp",
+    "image_sha256": "1fa3723f7f44f7a4679fd6f296b62fd1f7ea78552cb4eeb937f4ae4395064256"
+  }
+]

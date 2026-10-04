@@ -1,0 +1,55 @@
+{
+  "Profile": "item-wave-40",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose; reviewed Emperor-era scans (issue #622).",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-6213",
+      "Name": "Record of Failure",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Attaches to a Courtier paying 2 less Gold.\nPolitical Limited: Remove this card from the game and target a dishonorably dead Personality: His owner loses Honor equal to the Personality's base Personal Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6213.jpg",
+      "Keywords": [],
+      "Focus": 4,
+      "Abilities": [
+        "record-of-failure-honor"
+      ],
+      "Effect": "record-of-failure"
+    },
+    {
+      "Id": "oracle-l5r-7411",
+      "Name": "Spiked Tetsubo",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 3,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 1,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After this Personality enters a duel: The other Personality in the duel loses Duelist.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7411.jpg",
+      "Keywords": [
+        "Weapon",
+        "Heavy Weapon",
+        "One-Handed"
+      ],
+      "Focus": 3,
+      "Abilities": [],
+      "Effect": "spiked-tetsubo"
+    }
+  ],
+  "Decks": []
+}

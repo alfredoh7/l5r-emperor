@@ -518,6 +518,7 @@ public sealed partial class MatchEngine
     // taken and its effect done, a Region discarded, and a pass.
     private void FinishSearch(PendingSearch search)
     {
+        TfStrategiesAFinishSearch(search); // Death of the Winds (issue #622, TfStrategiesA.cs): an additional action to play the card it found
         // Emperor Edition remaining-cards pass (issue #492), group E: I Give You My Name's "Lose 2 Honor" (whether or not a card was found), then the entering-play window of a Personality it put into play.
         if (search.HonorLossOnFinish > 0) GainHonor(search.PlayerId, -search.HonorLossOnFinish, Definition(Card(search.SourceCardId)).Name, Card(search.SourceCardId));
         ShuffleDeck(Player(search.PlayerId), search.Deck!);
@@ -527,6 +528,7 @@ public sealed partial class MatchEngine
             if (deck.Remove(topId)) { deck.Insert(0, topId); Emit("searchedCardOnTop", $"{Player(search.PlayerId).Name} put the found card on top of their {SearchPlace(search.Deck!)} after shuffling.", search.PlayerId); }
         }
         _state.PendingSearch = null;
+        if (ContinueWisdomGained(search)) return; // issue #622 (IvorySpells.cs): the other player's search, or the Event's end.
         if (search.EnteredCardId is { } enteredId && _state.WinnerId is null)
         {
             _state.PendingChoice = null;
@@ -550,7 +552,7 @@ public sealed partial class MatchEngine
         if (origin == "event") { ResumeEventAfterDeferral(playerId, sourceCardId); return; }
         if (bowedBefore is not null && OpenBowReactionWindow(playerId, bowedBefore.ToHashSet(StringComparer.Ordinal), 1 - playerId)) return;
         if (OpenOverconfidentDrawWindow(1 - playerId)) return;
-        NextAction(playerId);
+        NextAction(playerId, TfStrategiesAKeepsPriority(playerId, sourceCardId)); // Death of the Winds (issue #622): the player takes the additional action it granted
     }
 
     // An Event's own resolution once its deferred text is done (Imperial Gift's search, Signs and Portents' look): the Event
@@ -604,7 +606,7 @@ public sealed partial class MatchEngine
         if (criteria.Types is { Length: > 0 } && !criteria.Types.Contains(def.Type)) return (false, notA);
         if (criteria.Keywords is { Length: > 0 } && !criteria.Keywords.All(k => Keyword(card, k))) return (false, notA);
         if (criteria.AnyKeywords is { Length: > 0 } && !criteria.AnyKeywords.Any(k => Keyword(card, k))) return (false, notA);
-        if (criteria.BattleStrategy && !(Definition(card).Abilities ?? []).Any(a => AbilityCatalog.All.TryGetValue(a, out var battle) && battle.Timing is "Battle" or "BattleOrOpen")) return (false, notA);
+        if (criteria.BattleStrategy && !(Definition(card).Abilities ?? []).Any(a => AbilityCatalog.All.TryGetValue(a, out var battle) && battle.Timing is "Battle" or "BattleOrOpen") && !Keyword(card, "Terrain")) return (false, notA); // a Terrain's printed "Battle:" is how it is played (issue #622)
         if (criteria.AbilityKeyword is { } abilityKeyword && !HasAbilityWithKeyword(card, abilityKeyword)) return (false, notA); // issue #503: Gaining Advantage
         if (criteria.NonUnique && Keyword(card, "Unique")) return (false, "Unique cards cannot be chosen");
         if (criteria.ExcludedKeywords is { Length: > 0 } && criteria.ExcludedKeywords.FirstOrDefault(k => Keyword(card, k)) is string excluded)
@@ -614,8 +616,15 @@ public sealed partial class MatchEngine
         foreach (var comparison in criteria.Comparisons ?? [])
         {
             var actual = SearchStat(card, comparison.Stat);
-            var holds = comparison.Op switch { "<=" => actual <= comparison.Value, ">=" => actual >= comparison.Value, "<" => actual < comparison.Value,
-                ">" => actual > comparison.Value, "==" => actual == comparison.Value, _ => throw new RuleViolation("Unknown search comparison.") };
+            var holds = comparison.Op switch
+            {
+                "<=" => actual <= comparison.Value,
+                ">=" => actual >= comparison.Value,
+                "<" => actual < comparison.Value,
+                ">" => actual > comparison.Value,
+                "==" => actual == comparison.Value,
+                _ => throw new RuleViolation("Unknown search comparison.")
+            };
             if (!holds) return (false, $"{comparison.Stat} {actual}, needs {comparison.Op} {comparison.Value}");
         }
         // The Gold Cost ceiling an action names (I Give You My Name, issue #492).
@@ -626,8 +635,15 @@ public sealed partial class MatchEngine
     private static int SearchStat(CardInstance card, string stat)
     {
         var def = Definition(card);
-        return stat switch { "Focus" => def.Focus, "GoldCost" => def.GoldCost, "Force" => def.Force, "Chi" => def.Chi, "PersonalHonor" => def.PersonalHonor,
-            _ => throw new RuleViolation("Unknown search statistic.") };
+        return stat switch
+        {
+            "Focus" => def.Focus,
+            "GoldCost" => def.GoldCost,
+            "Force" => def.Force,
+            "Chi" => def.Chi,
+            "PersonalHonor" => def.PersonalHonor,
+            _ => throw new RuleViolation("Unknown search statistic.")
+        };
     }
 
     // ---- what each player is allowed to see ----

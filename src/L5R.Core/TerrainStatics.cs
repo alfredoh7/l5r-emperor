@@ -49,8 +49,10 @@ public sealed partial class MatchEngine
     private int TerrainForceAdjustment(CardInstance card)
     {
         var battlefield = card.Zone == Zone.Battlefield ? card.ProvinceIndex : card.Zone == Zone.Attached && card.AttachedTo is { } hostId && _state.Cards.TryGetValue(hostId, out var host) && host.Zone == Zone.Battlefield ? host.ProvinceIndex : null;
-        if (battlefield is not int index || !TerrainsAtBattlefield(index).Any(t => Definition(t).Effect == "shiotome-plains")) return 0;
-        return Keyword(card, "Cavalry") ? 1 : -1;
+        if (battlefield is not int index) return 0;
+        var attackerPenalty = HoldTheWallsForceAdjustment(card, index); // Hold the Walls (issue #622, TfStrategiesA.cs): "Attacking Personalities and Followers have -1F."
+        if (!TerrainsAtBattlefield(index).Any(t => Definition(t).Effect == "shiotome-plains")) return attackerPenalty;
+        return attackerPenalty + (Keyword(card, "Cavalry") ? 1 : -1);
     }
 
     // Hasty Fortifications: "After each resolution of one of your Battle actions (including this card's): Give this province +1 strength until this card leaves play." Each resolution adds

@@ -65,6 +65,8 @@ public static class ConditionalProductionCatalog
         "platinum-mine-gold" => new(6, ProductionCondition.PayingForAttachment),
         // Yasuki Palaces - experienced (Emperor Edition Stronghold pass, issue #486 batch 3): printed 5, 1 less (4) when paying for a Personality.
         "yasuki-palaces-gold" => new(4, ProductionCondition.PayingForPersonality),
+        // Temple of Harmony (issue #622, holding-wave-48): "Produce 2 Gold, or 3 Gold if paying for a Monk." (a Monk Personality recruited, PaymentKind.Recruit; never an action).
+        "temple-of-harmony-gold" => new(3, ProductionCondition.PayingForKeyword, "Monk"),
         _ => null
     };
 }
@@ -76,8 +78,9 @@ public static class ConditionalProductionCatalog
 public sealed partial class MatchEngine
 {
     // Yasuki Dokansuto's production is a printed "Kolat Reaction": Cherry Blossom Festival bars it (Mendon's R4 ruling). Every other conditional production is a Holding's trait.
+    // issues #503, #622: P2ConditionalProduction (EmperorP2.cs), then TfConditionalProduction (TfHoldings.cs).
     private ConditionalProduction? ConditionalProductionOf(CardInstance card) =>
-        Definition(card).Effect == "dokansuto-gold" && ReactionsBarred() ? null : ConditionalProductionCatalog.For(Definition(card).Effect) ?? P2ConditionalProduction(card); // issue #503
+        Definition(card).Effect == "dokansuto-gold" && ReactionsBarred() ? null : ConditionalProductionCatalog.For(Definition(card).Effect) ?? P2ConditionalProduction(card) ?? TfConditionalProduction(card);
 
     private bool ProductionConditionMet(ConditionalProduction production, PaymentSubject? paying)
     {

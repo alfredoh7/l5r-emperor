@@ -1,0 +1,101 @@
+[
+  {
+    "card_id": "oracle-l5r-657",
+    "printing_set": [
+      "Emperor Edition"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=657",
+    "image_path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-657-printing-1-image-1.webp",
+    "image_sha256": "43d499d15d006d9c89cf031d2bbfb0eff038f30c9c6c0b502e7d6550c7273505"
+  },
+  {
+    "card_id": "oracle-l5r-2503",
+    "printing_set": [
+      "Emperor Edition"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=2503",
+    "image_path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-2503-printing-1-image-1.webp",
+    "image_sha256": "b77aef431f796ecf56525e92ce82b2b7ed7f2b3b91501b931485b1e294b43049"
+  },
+  {
+    "card_id": "oracle-l5r-10544",
+    "printing_set": [
+      "Coils of Madness"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10544",
+    "image_path": "assets/reference/oracle/coils-of-madness/webp/oracle-l5r-10544-printing-1-image-1.webp",
+    "image_sha256": "8102f4802ce99211bafd11a894246fa9af69ffd02d813cb25b1f97bad0cfe661"
+  },
+  {
+    "card_id": "oracle-l5r-10732",
+    "printing_set": [
+      "Gates of Chaos"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10732",
+    "image_path": "assets/reference/oracle/gates-of-chaos/webp/oracle-l5r-10732-printing-1-image-1.webp",
+    "image_sha256": "f6d7c95a45e3574850c410c104eb77fd465cf58913257091a618bfcdad52f5c3"
+  },
+  {
+    "card_id": "oracle-l5r-10734",
+    "printing_set": [
+      "Gates of Chaos"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10734",
+    "image_path": "assets/reference/oracle/gates-of-chaos/webp/oracle-l5r-10734-printing-1-image-1.webp",
+    "image_sha256": "61370a9adbbb2617af03936b431dcd7b18a3e4027bf3f06e2d3beaf79a534a39"
+  },
+  {
+    "card_id": "oracle-l5r-10927",
+    "printing_set": [
+      "Aftermath"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10927",
+    "image_path": "assets/reference/oracle/aftermath/webp/oracle-l5r-10927-printing-1-image-1.webp",
+    "image_sha256": "4989466f501d2ed937fe577c71c664f58dd2ea53228c524dbb4cbadfc314198d"
+  },
+  {
+    "card_id": "oracle-l5r-10928",
+    "printing_set": [
+      "Aftermath"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10928",
+    "image_path": "assets/reference/oracle/aftermath/webp/oracle-l5r-10928-printing-1-image-1.webp",
+    "image_sha256": "9b1151e994e10d910e301e89ed9fec79094c777d644b9e91cb8c5a06c853cd3f"
+  },
+  {
+    "card_id": "oracle-l5r-10931",
+    "printing_set": [
+      "Aftermath"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10931",
+    "image_path": "assets/reference/oracle/aftermath/webp/oracle-l5r-10931-printing-1-image-1.webp",
+    "image_sha256": "2a13fa7bd628236f58e2907e59ab9f78929ddfa760c5d48c8cb091e3df1eaf68"
+  },
+  {
+    "card_id": "oracle-l5r-10935",
+    "printing_set": [
+      "Aftermath"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10935",
+    "image_path": "assets/reference/oracle/aftermath/webp/oracle-l5r-10935-printing-1-image-1.webp",
+    "image_sha256": "633470c09bfdbd67cb0a62d800acbc4b467d8c1517404a154386a212c3584391"
+  },
+  {
+    "card_id": "oracle-l5r-10940",
+    "printing_set": [
+      "Aftermath"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10940",
+    "image_path": "assets/reference/oracle/aftermath/webp/oracle-l5r-10940-printing-1-image-1.webp",
+    "image_sha256": "9ff94b7d867d327523994c4b8c97f7727f379cd0f334198870d8368d3c16e138"
+  },
+  {
+    "card_id": "oracle-l5r-10941",
+    "printing_set": [
+      "Aftermath"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10941",
+    "image_path": "assets/reference/oracle/aftermath/webp/oracle-l5r-10941-printing-1-image-1.webp",
+    "image_sha256": "efa20587e5be03036ecf0d70bf58d2e5c55434b201dc5aa9ad380b39712822b5"
+  }
+]

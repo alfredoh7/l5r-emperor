@@ -1,0 +1,155 @@
+{
+  "Profile": "item-wave-41",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10693",
+      "Name": "Lost Blade of the Maharaja",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 1,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle, Bow this card: Bow a target Personality with Force equal to or lower than this Personality's.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10693.jpg",
+      "Keywords": [
+        "Weapon"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "tf-lost-blade-bow"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10695",
+      "Name": "Seppun's Blessed Blade",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 5,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 2,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "This Item's Force modifier equals this Personality's Personal Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10695.jpg",
+      "Keywords": [
+        "Weapon"
+      ],
+      "Focus": 2,
+      "Abilities": [],
+      "Effect": "tf-seppuns-blessed-blade"
+    },
+    {
+      "Id": "oracle-l5r-10696",
+      "Name": "Red Hunger's Fang",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 4,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After this Item enters play, lose 3 Honor.\nBattle, Bow this card: Give a target enemy Personality a –1F/–1C Poison token.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10696.jpg",
+      "Keywords": [
+        "Weapon"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "tf-red-hunger-poison"
+      ],
+      "Effect": "none",
+      "EntryHonorLoss": 3
+    },
+    {
+      "Id": "oracle-l5r-10907",
+      "Name": "Ominous Armor",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 3,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Before another player's card destroys this Personality, destroy this Item instead.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10907.jpg",
+      "Keywords": [
+        "Armor"
+      ],
+      "Focus": 1,
+      "Abilities": [],
+      "Effect": "tf-ominous-armor"
+    },
+    {
+      "Id": "oracle-l5r-10910",
+      "Name": "Tiger Claw",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 5,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle, Bow this card: Melee 3 Attack.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10910.jpg",
+      "Keywords": [
+        "Weapon"
+      ],
+      "Focus": 1,
+      "Abilities": [
+        "tf-tiger-claw-attack"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10912",
+      "Name": "Versatile Blade",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 4,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 1,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Discard a card to straighten this Personality.\nHome Battle: If this Personality would be opposed, discard a card to move him to the current battlefield. (Home actions may be used from home.)",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10912.jpg",
+      "Keywords": [
+        "Weapon"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "tf-versatile-straighten",
+        "tf-versatile-move"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

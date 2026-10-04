@@ -1,0 +1,56 @@
+[
+  {
+    "card_id": "oracle-l5r-10693",
+    "printing_set": [
+      "Gates of Chaos"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10693",
+    "image_path": "assets/reference/oracle/gates-of-chaos/webp/oracle-l5r-10693-printing-1-image-1.webp",
+    "image_sha256": "017944690df7b421f65347c9c5c5723b576e7b26858b568bccfc4157d2d2de6e"
+  },
+  {
+    "card_id": "oracle-l5r-10695",
+    "printing_set": [
+      "Gates of Chaos"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10695",
+    "image_path": "assets/reference/oracle/gates-of-chaos/webp/oracle-l5r-10695-printing-1-image-1.webp",
+    "image_sha256": "4a142e69d3e0b3347700f78f8e2c06535482e8ad756bbef847373226b8673038"
+  },
+  {
+    "card_id": "oracle-l5r-10696",
+    "printing_set": [
+      "Gates of Chaos"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10696",
+    "image_path": "assets/reference/oracle/gates-of-chaos/webp/oracle-l5r-10696-printing-1-image-1.webp",
+    "image_sha256": "3afb82aff6980dffafd78b2d5b8d02b16c9769d48c63f7bc96eede052b28994d"
+  },
+  {
+    "card_id": "oracle-l5r-10907",
+    "printing_set": [
+      "Aftermath"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10907",
+    "image_path": "assets/reference/oracle/aftermath/webp/oracle-l5r-10907-printing-1-image-1.webp",
+    "image_sha256": "bd0c29af1274fc984a9604711b174ead22df4a2c3ab653837c18d0d962c1756f"
+  },
+  {
+    "card_id": "oracle-l5r-10910",
+    "printing_set": [
+      "Aftermath"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10910",
+    "image_path": "assets/reference/oracle/aftermath/webp/oracle-l5r-10910-printing-1-image-1.webp",
+    "image_sha256": "1cfcc9825e31bf280f1c848ffca595ea70c4ae05f4e652aaae79619538a8528e"
+  },
+  {
+    "card_id": "oracle-l5r-10912",
+    "printing_set": [
+      "Aftermath"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10912",
+    "image_path": "assets/reference/oracle/aftermath/webp/oracle-l5r-10912-printing-1-image-1.webp",
+    "image_sha256": "330b5d7862febe007e555946095ed25cb83053ca735ae0295262f566b812b6e9"
+  }
+]

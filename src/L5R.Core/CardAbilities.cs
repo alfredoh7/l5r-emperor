@@ -4186,10 +4186,13 @@ public sealed partial class MatchEngine
         or "second-city-port-straighten"
         // Seeds of Decay (issue #453, batch 3): Utaku Hirononri only straightens his target.
         or "hirononri-straighten"
-        // The Shadow's Embrace pass (issue #476), batch 4: Serenity in Air only straightens its target.
+        or "jiramus-court-straighten" or "shrine-hachiman-straighten" // issue #622 (holding-wave-48, IvoryHoldings.cs): Jiramu's Court and the Shrine to Hachiman only straighten their target
+                                                                      // The Shadow's Embrace pass (issue #476), batch 4: Serenity in Air only straightens its target.
         or "serenity-air-straighten" or "serenity-air-straighten-open"
+        or IvoryPoliticalAbilities.SandayuStraighten or IvoryPoliticalAbilities.LordsFavorStraighten // Ivory pass (issue #622)
         or "hama-straighten" // Emperor Edition Personality pass (issue #477), batch 3
-        or "yorisada-straighten"; // Emperor Edition Personality pass (issue #477), batch 5
+        or "yorisada-straighten" // Emperor Edition Personality pass (issue #477), batch 5
+        or TfStrategiesAAbilities.OutpostOpen or TfStrategiesAAbilities.OutpostBattle; // Ivory Magistrate Outpost (issue #622)
     private static string? MoveOrStraightenKind(string abilityId) => abilityId switch
     {
         "incapacitated" or "favor-battle" or "journeys-end-move" or "shamate-move" or "effortless-counterattack-move"
@@ -4231,7 +4234,7 @@ public sealed partial class MatchEngine
             or "katsuo-straighten" or "second-city-port-straighten" => "straighten",
         // Seeds of Decay pass (issue #453), batch 5: Moksha Patam and Okesa-goma move their target home, Nature's Wrath moves it to the battlefield;
         // Master of Beasts, Peace of the Kami (if a Spirit) and The Earth's Strength straighten theirs.
-        "moksha-patam-move" or "okesa-goma-move" or "natures-wrath-move" => "move",
+        "moksha-patam-move" or "okesa-goma-move" or "natures-wrath-move" or TfGearAbilities.TyphoonMove /* issue #622: Typhoon Surge moves its target to the battlefield */ => "move",
         // Emperor Edition Stronghold pass (issue #486), batch 2: Suitengu's Torch moves its target home.
         "torch-move" => "move",
         // Forgotten Legacy pass (issue #467), batch 1: Daidoji Takichi moves his target (Sea Troll Predator's shape), Iuchi Abodan sends his home.
@@ -4241,6 +4244,8 @@ public sealed partial class MatchEngine
         // Emperor Edition Personality pass (issue #477), batch 2: Kuni Shinoda moves himself and his (optional) target to the current battlefield.
         "shinoda-move" => "move",
         "master-of-beasts-straighten" or "peace-of-the-kami-negate" or "earths-strength-straighten" => "straighten",
+        // Ivory pass (issue #622, IvoryPolitical.cs): Sandayu straightens a Personality with a Weapon; My Lord's Favor straightens a unit.
+        IvoryPoliticalAbilities.SandayuStraighten or IvoryPoliticalAbilities.LordsFavorStraighten => "straighten",
         // Emperor Edition remaining-cards pass, group C (issue #492): Selfless Defense, Summoned to Justice and Solid Defense move their target home; Rumors Travel moves its performer.
         "selfless-defense-move" or "summoned-justice-move" or "solid-defense-move" => "move",
         // Forgotten Legacy pass (issue #467), batch 3: Feint & Strike moves its enemy target home; Creating Order's straighten half straightens its target's unit.
@@ -4248,6 +4253,7 @@ public sealed partial class MatchEngine
         // The Shadow's Embrace pass (issue #476), batch 2: Shosuro Nobu, Yoritomo Kanahashi and Yasuki Ikke move their target home.
         "nobu-move-home" or "kanahashi-move-home" or "ikke-move-home" => "move",
         "creating-order-straighten" => "straighten",
+        "jiramus-court-straighten" => "straighten", // issue #622 (IvoryHoldings.cs): straightens a Courtier, a negatable straightening
         // The Shadow's Embrace pass (issue #476), batch 3: Captured Convict moves its enemy target home, Defensive Grill its target to another battlefield.
         "captured-convict-move" or "defensive-grill-move" => "move",
         // The Shadow's Embrace pass (issue #476), batch 4: The Lesson of Earth and Paralyzing Touch move their target; Serenity in Air straightens its target.
@@ -4257,7 +4263,12 @@ public sealed partial class MatchEngine
         // Emperor Edition remaining-cards pass (issue #492), group D: The Law's Strength, The Power of a Word and The Serpent's Deception move their target home; The Slow Death and Well Prepared straighten theirs.
         "laws-strength-move" or "power-word-move" or "serpents-deception-move" => "move",
         "slow-death-straighten" or "well-prepared-straighten" => "straighten",
+        "seeking-the-way-move" => "move", // issue #622 (IvorySpells.cs): Seeking the Way moves its target home.
+        "servitors-of-stone-straighten" => "straighten", // issue #622: Servitors of Stone straightens its target.
+        TfStrategiesAAbilities.OutpostOpen or TfStrategiesAAbilities.OutpostBattle => "straighten", // Ivory Magistrate Outpost (issue #622)
         _ => EmperorRemainingEMoveKind(abilityId) ?? RulingR2MoveKind(abilityId) // Emperor Edition remaining-cards pass (issue #492), group E: Obscured Pathways and Unnatural Flood move their target home.
+                                                                                 // issue #622 (IvoryMovement.cs): Determined Challenge, Treachery and Deceit and Soul's Sacrifice move their target.
+            ?? IvoryMovementMoveKind(abilityId)
             ?? (abilityId is EmperorMechEAbilities.GreasingBattle or EmperorP3Abilities.RequestMove or EmperorP3Abilities.KentaMove or EmperorP3EntryAbilities.PersuasionMove ? "move" : null) // issue #501: Greasing the Wheels moves its target home (or straightens his unit)
     };
     // Champion of Thunder / Brothers of Goemon's own narrower half (Brothers only ever negates a
@@ -4394,6 +4405,7 @@ public sealed partial class MatchEngine
         if (abilityId == "mahatsu-negate") return MahatsuNegateApplies(card, command);
         // Ninja Tricks (Emperor Edition remaining-cards pass, issue #492, group B): a Strategy in a hand answering an action on a Strategy (EmperorRemainingB.cs).
         if (abilityId == "ninja-tricks-negate") return NinjaTricksApplies(card, command);
+        if (abilityId == IvoryPoliticalAbilities.ConfusionNegate) return ConfusionAtCourtApplies(card, command); // Confusion at Court (issue #622, IvoryPolitical.cs)
         // Emperor Edition remaining-cards pass, group C (issue #492): the Strategy Reactions played from a hand (EmperorRemainingC.cs), judged before any target check.
         if (EmperorRemainingCAbilities.BeforeActionHandReactions.Contains(abilityId)) return EmperorRemainingCBeforeActionApplies(card, abilityId, command);
         if (CardWave566BeforeActionApplies(card, abilityId, command) is { } wave566Before) return wave566Before; // Inexorable (issue #566, CardWave566.cs)
@@ -4486,7 +4498,7 @@ public sealed partial class MatchEngine
     // rules lead's Daidoji Yuki ruling overturned). Wrathful Ancestor was previously protected from Tamoko only by omission from
     // MoveOrStraightenKind, which left Champion of Thunder's own "all" negation able to catch it
     // anyway; routing it through this shared check closes that gap too.
-    private bool MovementCannotBeNegated(GameCommand command) => HiromiPerforms(command) || CommandUnnegatable(command) || command.AbilityId switch // Yoritomo Hiromi (issue #477): the movement from her Battle actions.
+    private bool MovementCannotBeNegated(GameCommand command) => HiromiPerforms(command) || CommandUnnegatable(command) || TfStrategiesBUnnegatable(command) || command.AbilityId switch // Yoritomo Hiromi (issue #477): the movement from her Battle actions.
     {
         "wrathful-ancestor-move" => true,
         // Journey's End Keep (the Stronghold, whose printed action ends "this will not be negated or delayed"; the Strategy of the same ability has no such promise) -- issue #492, ruling pass R2.
@@ -4773,7 +4785,7 @@ public sealed partial class MatchEngine
     // adjustment always stacks on top of this, never bypasses it.
     private int EffectiveAttackStrength(string abilityId, PlayerState player, CardInstance? target, string? sourceId = null) =>
         AttackStrength(abilityId, player, target, sourceId) + (target is null ? 0 : AttackDefenseModifier(target, AttackKind(abilityId)))
-        + ShishidoRangedBonus(abilityId, sourceId) + P2AttackStrengthBonus(abilityId, player.Id) // issue #503: Ikoma Yamahatsu, Surrounded! (EmperorP2.cs)
+        + ShishidoRangedBonus(abilityId, sourceId) + P2AttackStrengthBonus(abilityId, player.Id) + TfRangedBonus(abilityId, sourceId) // issue #503: Ikoma Yamahatsu, Surrounded! (EmperorP2.cs); issue #622: Conflagration (TfGear.cs)
         ; // Toritaka Shishido (Emperor Edition Personality pass, issue #477 batch 2): +1 to a Ranged Attack performed by a card in his army.
     // Sums every card in `target`'s own unit (its parent Personality, plus every attachment) granting
     // a passive Attack-strength modifier of this `kind` that reaches `target` specifically: Scope
@@ -5084,7 +5096,7 @@ public sealed partial class MatchEngine
     // when supplied, same final Strength field every other caller already relies on downstream.
     private bool ResolveOrDeferAttack(string abilityId, PlayerState attacker, string? targetId, string? sourceId = null, bool additional = false, int? strengthOverride = null)
     {
-        var strength = strengthOverride is int overridden ? overridden + ShishidoRangedBonus(abilityId, sourceId) + P2AttackStrengthBonus(abilityId, attacker.Id) /* issue #503 */ : EffectiveAttackStrength(abilityId, attacker, targetId is null ? null : Card(targetId), sourceId);
+        var strength = strengthOverride is int overridden ? overridden + ShishidoRangedBonus(abilityId, sourceId) + P2AttackStrengthBonus(abilityId, attacker.Id) /* issue #503 */ + TfRangedBonus(abilityId, sourceId) /* issue #622 */ : EffectiveAttackStrength(abilityId, attacker, targetId is null ? null : Card(targetId), sourceId);
         strength += ConsumeAnnouncedAttackModifiers(abilityId, attacker.Id); // No Hiding Place (issue #498): "Give one Ranged Attack from the action -1 strength".
         // An Attack that targets no card (no target, or a province) opens no reaction window: nothing card-targeted can react to it (issue #335).
         if (targetId is null || !AnyAttackReactionAvailable(attacker.Id, targetId))
@@ -5516,14 +5528,16 @@ public sealed partial class MatchEngine
                 || MechAEvenIfBowed(id) // Mirumoto Inokuchi (issue #501): "Even if Inokuchi is bowed".
                 || id == EmperorP4UnitAbilities.HayanAssign // Shinjo Hayan's trait (issue #503): a trait is usable while its card is bowed
                 || MechEEvenIfBowed(id) // issue #501: Moto Rani - exp ("Even if Rani is bowed"); Kakita Kae's trait (a trait is usable while bowed)
-                || TirelessStronghold(source), "Abilities on bowed cards cannot be used.");
+                                        // issue #622 (IvoryPolitical.cs): Komori Taruko ("Even if Taruko is bowed")
+                || IvoryPoliticalEvenIfBowed(id)
+                || TirelessStronghold(source) || UnsafePassageWaives(command, source), "Abilities on bowed cards cannot be used.");
             uses = source.AbilityUses;
         }
         // The Forgotten Temple (Forgotten Legacy pass, issue #467 batch 2): "You may not take Political actions." (ForgottenLegacyBatch2.cs)
         Require(!ForgottenTempleForbidsPolitical(id, ability, source, player), "The Forgotten Temple: you may not take Political actions.");
         // The per-turn limit is AbilityDefinition.UsesPerTurn (AbilityLimits.cs). A once-per-GAME ability (AbilityDefinition.OncePerGame: Border Keep's refresh, Bo of Water) never resets: any stamp spends it.
         var usageKey = ability.UsageKey ?? id;
-        Require(ability.OncePerGame ? !uses.ContainsKey(usageKey) : !AbilityUseSpent(uses, ability, usageKey), "This ability has already been used within its limit.");
+        Require(ability.OncePerGame ? !uses.ContainsKey(usageKey) : !AbilityUseSpent(uses, ability, usageKey) || UnsafePassageWaives(command, source), "This ability has already been used within its limit."); // Unsafe Passage (issue #622)
         if (id == "border-first") Require(player.TurnsTaken == 1, "This Border Keep ability is only available on your first turn.");
         // Battle/Open presence primitive (issue #267): a printed "Battle/Open" ability carries no
         // battlefield-presence requirement at all when used as its OPEN half (performed from Home,
@@ -6418,6 +6432,9 @@ public sealed partial class MatchEngine
                 // categories above name. Not in play, so it needs its own branch.
                 else if (ability.Target == "personality-in-any-discard")
                     Require(type == CardType.Personality && target.Zone is Zone.DynastyDiscard or Zone.Dead, "Choose a Personality in any discard pile.");
+                // Record of Failure (issue #622, IvoryPolitical.cs): "a dishonorably dead Personality" -- in a dead pile, dishonorable when he died.
+                else if (ability.Target == IvoryPoliticalAbilities.DishonorablyDeadPersonality)
+                    Require(type == CardType.Personality && IsDishonorablyDead(target), "Choose a dishonorably dead Personality.");
                 // Soshi Neiru (issue #301): "Air Spells" from the player's own hand -- equip-battle's
                 // own spell-or-reserve-in-hand shape, narrowed by RequiredKeywords instead of hardcoding a
                 // keyword, with the wielder fixed to the source card itself (no separate Performer).
@@ -6485,7 +6502,7 @@ public sealed partial class MatchEngine
                     // (it is discarded when its battle resolves), so exempting the whole category is exact.
                     // Return to Action (issue #331): "your Personality at HOME" is by definition not at the battlefield
                     // -- own-personality-at-home is exempt for the same reason.
-                    if (actingAsBattle && ability.Target is not ("personality-at-adjacent-battlefield" or "own-unbowed-farm" or "region-or-terrain" or "own-personality-at-home" or "personality-at-any-location" or "own-follower-at-any-location" or "enemy-personality-at-any-location" or "enemy-personality-not-at-battle"
+                    if (actingAsBattle && ability.Target is not ("personality-at-adjacent-battlefield" or "own-unbowed-farm" or "region-or-terrain" or "own-personality-at-home" or "personality-at-any-location" or TfGearAbilities.SpellForCopy /* issue #622: The Thunder Resounds names a Thunder Spell at any location */ or "own-follower-at-any-location" or "enemy-personality-at-any-location" or "enemy-personality-not-at-battle"
                         or "personality-same-controller-as-first-elsewhere" or "personality-with-switch-partner" or EmperorRulingR1Abilities.EnemyPersonalityAtBattleOrHome
                         or "own-unbowed-ring") && !P4TargetAtAnyLocation(ability.Target) // issue #503 (Turning Away): a Ring is never in a unit, so the Battle rule of location does not reach it
                         && id is not ("intervening-spirit-move" or "earth-flows-move" or "sanctuary-of-the-waves-move" or "dislodge-the-foe" or "heijin-move"
@@ -7097,6 +7114,7 @@ public sealed partial class MatchEngine
         if (TargetShieldNegates(command)) return;
         if (TurnTargetShieldNegates(command)) return; // Consideration (Forgotten Legacy pass, issue #467 batch 3)
         if (TouchTheEmptinessNegates(command)) return; // Touch the Emptiness (The Shadow's Embrace pass, issue #476 batch 5)
+        if (OriolePoliticalNegates(command)) return; // Oriole Imperial Vanguard (issue #622, IvoryPolitical.cs): the first Political action each phase that targets his Personality
         if (ShadowsEmbraceBatch1Negates(command)) return; // Hiruma Nikaru's battle shield, Bayushi Waru's next-performed-action negation (The Shadow's Embrace pass, issue #476 batch 1)
         if (ResolveOrDeferAnnounceReaction(command)) return;
         if (ResolveOrDeferEntrenchedReaction(command)) return; // Entrenched Position (Forgotten Legacy pass, issue #467 batch 3)
@@ -11224,6 +11242,7 @@ public sealed partial class MatchEngine
                                     // discard pile (Zone.Dead being a Personality's own), and a matching Spell in hand.
                                     "dynasty-card-in-any-discard" => _state.Cards.Values.Where(c => IsDynastyCardType(Definition(c).Type) && c.Zone is Zone.DynastyDiscard or Zone.Dead).Select(c => (string?)c.Id).ToArray(),
                                     "personality-in-any-discard" => _state.Cards.Values.Where(c => Definition(c).Type == CardType.Personality && c.Zone is Zone.DynastyDiscard or Zone.Dead).Select(c => (string?)c.Id).ToArray(),
+                                    IvoryPoliticalAbilities.DishonorablyDeadPersonality => _state.Cards.Values.Where(c => Definition(c).Type == CardType.Personality && IsDishonorablyDead(c)).Select(c => (string?)c.Id).ToArray(), // issue #622
                                     "spell-in-hand-with-keyword" => player.Hand.Where(h => Definition(Card(h)).Type == CardType.Spell && HasKeywords(Card(h), ability.RequiredKeywords)).Cast<string?>().ToArray(),
                                     // Moto Jun-Ni / Foothills Keep (issue #337): every card in a discard pile the ability's AttachSpec accepts.
                                     "attachment-in-discard" => AttachCandidatesInDiscard(ability.Attach!, playerId).Select(c => (string?)c.Id).ToArray(),

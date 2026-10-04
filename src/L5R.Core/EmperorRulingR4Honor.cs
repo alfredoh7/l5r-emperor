@@ -106,6 +106,7 @@ public sealed partial class MatchEngine
     {
         var reactor = card.OwnerId;
         if (P3HonorChangeApplies(card, abilityId, change) is { } p3) return p3; // Destructive Priorities (issue #503)
+        if (IvoryHoldingsHonorChangeApplies(card, abilityId, change) is { } ivory) return ivory; // Deeds and Words (issue #622, IvoryHoldings.cs)
         switch (abilityId)
         {
             // "Before a player gains or loses Honor from an action's effects, bow your performing Courtier": any change, and an unbowed Courtier to bow.
@@ -132,9 +133,18 @@ public sealed partial class MatchEngine
     {
         var change = new PendingHonorChange
         {
-            Command = abandoned, ActionKey = need.ActionKey, ActionPlayerId = need.ActionPlayerId, Occurrence = need.Occurrence, PlayerId = need.PlayerId, Amount = need.Amount, Reason = need.Reason,
-            WindowsDone = need.Occurrence + 1, TempleDecisions = _honorLossDecisions.ToList(),
-            PriorChoice = _state.PendingChoice, PriorPriority = _state.PriorityPlayerId, PriorPasses = _state.ConsecutivePasses,
+            Command = abandoned,
+            ActionKey = need.ActionKey,
+            ActionPlayerId = need.ActionPlayerId,
+            Occurrence = need.Occurrence,
+            PlayerId = need.PlayerId,
+            Amount = need.Amount,
+            Reason = need.Reason,
+            WindowsDone = need.Occurrence + 1,
+            TempleDecisions = _honorLossDecisions.ToList(),
+            PriorChoice = _state.PendingChoice,
+            PriorPriority = _state.PriorityPlayerId,
+            PriorPasses = _state.ConsecutivePasses,
         };
         _state.PendingHonorChange = change;
         var first = FirstReactionOpportunity(p => HonorChangeReactionAvailable(p, change));
@@ -203,16 +213,16 @@ public sealed partial class MatchEngine
         // played, each re-checked live by ValidateAbility (BeforeActionReactionApplies) and limited
         // by its own once-per-turn UsageKey. Only when the window closes does the deferred command
         // actually resolve.
-        Require(command.Type is "useAbility" or "declineReaction" or "pass","Resolve the pending reaction first.");
-        if (command.Type=="useAbility") UseAbility(command); else PassReaction();
+        Require(command.Type is "useAbility" or "declineReaction" or "pass", "Resolve the pending reaction first.");
+        if (command.Type == "useAbility") UseAbility(command); else PassReaction();
         if (_state.PendingChoice is null && _state.PendingNegatableAbility is not null)
         {
             // A multi-target action's next target with a possible reactor gets its own window (TargetWindows.cs); a negated action needs no more.
             if (!_state.DeferredActionNegated && OpenNextRemainingTargetWindow()) return true;
-            _state.ReactionWindowTargetId=null; _state.ReactionWindowRemaining=[];
-            var pending=_state.PendingNegatableAbility; _state.PendingNegatableAbility=null;
+            _state.ReactionWindowTargetId = null; _state.ReactionWindowRemaining = [];
+            var pending = _state.PendingNegatableAbility; _state.PendingNegatableAbility = null;
             // A redirect may have made a Bofana the target of an action his trait was not yet judged for (issue #335).
-            if(OpenForcedDiscardForTargetedTrait(pending,"action")) return true;
+            if (OpenForcedDiscardForTargetedTrait(pending, "action")) return true;
             ResolveDeferredActionAfterItsWindows(pending);
         }
         return true;

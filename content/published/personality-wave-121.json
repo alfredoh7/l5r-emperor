@@ -1,0 +1,398 @@
+{
+  "Profile": "personality-wave-121",
+  "Rules": "Emperor Edition core rules; reviewed earliest Emperor-era scans and their printed text.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10861",
+      "Name": "Asako Misora",
+      "Type": "Personality",
+      "Clan": "Phoenix",
+      "GoldCost": 5,
+      "GoldProduction": 0,
+      "Force": 1,
+      "Chi": 4,
+      "PersonalHonor": 3,
+      "HonorRequirement": 6,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "(Draw a card after your Expendable card is destroyed.)",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10861.jpg",
+      "Keywords": [
+        "Expendable",
+        "Earth",
+        "Inquisitor",
+        "Magistrate",
+        "Shugenja"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10581",
+      "Name": "Bayushi Aibako",
+      "Type": "Personality",
+      "Clan": "Scorpion",
+      "GoldCost": 5,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10581.jpg",
+      "Keywords": [
+        "Conqueror",
+        "Bitter Lies",
+        "Samurai"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10869",
+      "Name": "Bayushi Mifuyu",
+      "Type": "Personality",
+      "Clan": "Scorpion",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 1,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Give a target enemy Personality -3F.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10869.jpg",
+      "Keywords": [
+        "Magistrate",
+        "Samurai"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "tfp-mifuyu-weaken"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10660",
+      "Name": "Daigotsu Ryuko",
+      "Type": "Personality",
+      "Clan": "Spider",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 2,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "(Draw a card after your Destined card enters play.)\nAfter Ryuko enters play, lose 1 Honor.\nBattle, Bow: Melee 2 Attack.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10660.jpg",
+      "Keywords": [
+        "Destined",
+        "Fallen",
+        "Paragon",
+        "Samurai",
+        "Shadowlands"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "tfp-ryuko-melee"
+      ],
+      "Effect": "none",
+      "EntryHonorLoss": 1
+    },
+    {
+      "Id": "oracle-l5r-10575",
+      "Name": "Hida Iguchi",
+      "Type": "Personality",
+      "Clan": "Crab",
+      "GoldCost": 4,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 1,
+      "PersonalHonor": 1,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10575.jpg",
+      "Keywords": [
+        "Cavalry",
+        "Samurai"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10862",
+      "Name": "Isawa Ikariya",
+      "Type": "Personality",
+      "Clan": "Phoenix",
+      "GoldCost": 9,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 4,
+      "PersonalHonor": 2,
+      "HonorRequirement": 4,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "(You may Recruit a Reserve card, if it would be opposed, as an Absent Battle action.)\nFire Battle: Ranged Attack with strength equal to the number of Spells in this unit.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10862.jpg",
+      "Keywords": [
+        "Reserve",
+        "Fire",
+        "Shugenja"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "tfp-ikariya-attack"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10242",
+      "Name": "Isawa Nairuko",
+      "Type": "Personality",
+      "Clan": "Phoenix",
+      "GoldCost": 6,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 3,
+      "PersonalHonor": 3,
+      "HonorRequirement": 2,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Nairuko has +2F while she has a Spell.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10242.jpg",
+      "Keywords": [
+        "Earth",
+        "Shugenja",
+        "Soul of Isawa Mariko"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "force-with-spell-2"
+    },
+    {
+      "Id": "oracle-l5r-10835",
+      "Name": "Kaiu Gorobei",
+      "Type": "Personality",
+      "Clan": "Crab",
+      "GoldCost": 5,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 4,
+      "PersonalHonor": 3,
+      "HonorRequirement": 3,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Discard a card to bow a target enemy card with Force equal to or lower than the discarded card's Focus Value.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10835.jpg",
+      "Keywords": [
+        "Samurai",
+        "Siege"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "tfp-gorobei-bow"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10576",
+      "Name": "Kakita Izumiko",
+      "Type": "Personality",
+      "Clan": "Crane",
+      "GoldCost": 5,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 3,
+      "PersonalHonor": 3,
+      "HonorRequirement": 6,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After Izumiko wins a duel, gain 1 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10576.jpg",
+      "Keywords": [
+        "Duelist",
+        "Samurai"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "tfp-izumiko-duel-honor"
+    },
+    {
+      "Id": "oracle-l5r-10663",
+      "Name": "Lao-she",
+      "Type": "Personality",
+      "Clan": "Spider",
+      "GoldCost": 4,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 2,
+      "PersonalHonor": 1,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Home Battle: If Lao-she would be opposed, move him to the current battlefield. (Home actions may be taken from home.)",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10663.jpg",
+      "Keywords": [
+        "Kensai",
+        "Monk"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "tfp-laoshe-move"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-5290",
+      "Name": "Moshi Yokohime",
+      "Type": "Personality",
+      "Clan": "Mantis",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 3,
+      "PersonalHonor": 1,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Target an enemy card without attachments: Bow it.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-5290.jpg",
+      "Keywords": [
+        "Naval",
+        "Shugenja",
+        "Soul of Moshi Yuriko",
+        "Thunder"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "masumi-bow"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10887",
+      "Name": "Moto Paikao",
+      "Type": "Personality",
+      "Clan": "Unicorn",
+      "GoldCost": 5,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": 3,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Discard a card to give a target enemy Personality or Follower a Force penalty equal to the card's Focus Value.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10887.jpg",
+      "Keywords": [
+        "Commander",
+        "Samurai"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "tfp-paikao-weaken"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10082",
+      "Name": "Soshi Kodanshi",
+      "Type": "Personality",
+      "Clan": "Scorpion",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After Kodanshi enters play from a province: Create a 0F/2C/0PH Scorpion Clan • Ninja Personality.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10082.jpg",
+      "Keywords": [
+        "Ninja"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "tfp-kodanshi-entry-create"
+    },
+    {
+      "Id": "oracle-l5r-10621",
+      "Name": "Toritaka Iabuchi",
+      "Type": "Personality",
+      "Clan": "Crab",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 2,
+      "PersonalHonor": 2,
+      "HonorRequirement": 3,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "(Draw a card after your Destined card enters play.)\nBattle, Bow: Ranged 2 Attack.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10621.jpg",
+      "Keywords": [
+        "Destined",
+        "Samurai",
+        "Scout"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "tfp-iabuchi-ranged"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10890",
+      "Name": "Utaku Sakiko",
+      "Type": "Personality",
+      "Clan": "Unicorn",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 3,
+      "PersonalHonor": 3,
+      "HonorRequirement": 4,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "(You may Recruit a Reserve card, if it would be opposed, as an Absent Battle action.)\n(Draw a card after your Destined card enters play.)",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10890.jpg",
+      "Keywords": [
+        "Cavalry",
+        "Destined",
+        "Reserve",
+        "Battle Maiden",
+        "Samurai"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

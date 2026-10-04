@@ -473,6 +473,11 @@ public sealed partial class MatchEngine
             // Hard Pressed (Emperor Edition remaining-cards pass, issue #492, group B): the unit to move home, with or without the bow (EmperorRemainingB.cs).
             foreach (var option in HardPressedOptions(playerId, hardPending.CardId)) result.Add(option);
         }
+        else if (_state.PendingChoice is { Type: "beforeBattleOptional" } lakesidePending && _state.PendingBeforeBattleResolve is { } lakesideResolve && IsLakesideRetreatChoice(lakesideResolve))
+        {
+            // Lakeside Retreat (issue #622, TfStrategiesB.cs): the bowed Personality or Follower to straighten.
+            foreach (var option in LakesideRetreatOptions(playerId, lakesidePending.CardId)) result.Add(option);
+        }
         else if (_state.PendingChoice is { Type: "beforeBattleOptional" } optionalPending)
         {
             // Before This Battle Resolves, an optional ("you may") effect: decline it, or name its one target.

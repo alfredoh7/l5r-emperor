@@ -91,7 +91,8 @@ def build_definition_fields(root: Path, card_id: str, allow_text: bool = False, 
         value = c.get(key, [str(default)])
         value = value[0] if value else str(default)
         # "*" is a printed variable cost (Disgraceful Conduct): its text sets the price, so the card has no fixed Gold Cost.
-        return int(value) if value not in ("-", "", "*") else default
+        # "+*" is an Item's printed variable Force modifier (Seppun's Blessed Blade): its text sets the amount, so the printed stat is 0.
+        return int(value) if value not in ("-", "", "*", "+*") else default
 
     text = plain("\n".join(c.get("text", []) + printing.get("text", [])))
     if text and not allow_text:

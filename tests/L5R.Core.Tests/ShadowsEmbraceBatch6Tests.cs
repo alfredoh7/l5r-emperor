@@ -93,7 +93,8 @@ internal static class ShadowsEmbraceBatch6Tests
         // The unwired cards of the batch are never published (the blank-card guard).
         // Issue #503: The New Foundries (9947) and Distant Expansion (9792) are wired and published, so they left this list.
         // Issue #566: Humble Farm (9797) is wired and published in holding-wave-47 once Mendon confirmed the "Humble Farmers" user-supplied scan is a genuine 2F Ashigaru match, so it left this list too.
-        foreach (var unwired in new[] { "oracle-l5r-9870" })
+        // Issue #622: Lookout (9870) is wired and published in follower-wave-45 (No Hiding Place's target-selection step made its effect buildable), so it left this list.
+        foreach (var unwired in Array.Empty<string>())
             Check(!CardCatalog.Cards.ContainsKey(unwired), $"{unwired} is not published");
 
         var fortress = CardCatalog.Get(Fortress);

@@ -171,7 +171,7 @@ public sealed partial class MatchEngine
                             $"{name}: remove {Definition(dead).Name} from the game, the Spell costs {Definition(dead).Chi} less", dead));
             }
         }
-        return [.. reactions, .. destroys];
+        return [.. reactions, .. destroys, .. TfAltProductionTokens(playerId, paying)]; // Jade Mine, Slave Pits (issue #622, TfHoldings.cs)
     }
 
     private HashSet<string> PaymentSourceIds(int playerId, PaymentSubject? paying) =>
@@ -180,13 +180,14 @@ public sealed partial class MatchEngine
     private int PaymentTokenAmount(string id, int playerId, PaymentSubject? paying) => PaymentTokens(playerId, paying).FirstOrDefault(t => t.Id == id)?.Amount ?? 0;
 
     // The most the tokens can add to one payment: each card's best token.
-    private int MaxPaymentTokenProduction(int playerId, PaymentSubject? paying) => PaymentTokens(playerId, paying).GroupBy(t => t.Card.Id).Sum(g => g.Max(t => t.Amount));
+    private int MaxPaymentTokenProduction(int playerId, PaymentSubject? paying) => PaymentTokens(playerId, paying).GroupBy(t => t.Card.Id).Sum(g => g.Max(t => t.Amount) - TfAltOverlap(g, playerId, paying));
 
     // One token of a card per payment; two tokens never destroy or remove the same card; a card another of the action's costs bows or destroys is not destroyed again.
     private void RequirePaymentTokens(string[] ids, IReadOnlySet<string>? exclude)
     {
         var tokens = ids.Where(IsPaymentToken).ToArray();
         Require(tokens.GroupBy(PaymentTokenCardId).All(g => g.Count() == 1), "A card's Reaction produces Gold only once in a payment.");
+        RequireTfAltExclusive(ids, exclude); // Jade Mine, Slave Pits (issue #622, TfHoldings.cs): a second way to bow is chosen instead of the card's own
         var subjects = tokens.Where(t => t.Contains(':')).Select(t => t[(t.IndexOf(':') + 1)..]).ToArray();
         Require(subjects.Distinct(StringComparer.Ordinal).Count() == subjects.Length, "A card can be destroyed or removed only once in a payment.");
         Require(exclude is null || !subjects.Any(exclude.Contains), "A card bowed or destroyed as part of the action's cost cannot also be destroyed for its Gold.");
@@ -205,6 +206,7 @@ public sealed partial class MatchEngine
     {
         foreach (var token in tokens)
         {
+            if (TfIsAltToken(token)) { TfUseAltToken(token, playerId); continue; } // Jade Mine, Slave Pits (issue #622, TfHoldings.cs)
             var ability = AbilityCatalog.All[token.AbilityId];
             token.Card.AbilityUses[ability.UsageKey ?? token.AbilityId] = _state.TurnNumber;
             var name = Definition(token.Card).Name;
@@ -236,11 +238,11 @@ public sealed partial class MatchEngine
             var bows = alternate is null || AbilityCatalog.All[alternate.Value.AbilityId].PaymentBows;
             var amount = GoldProduced(card.Id, playerId, paying);
             return new PaymentSource(card.Id, card.Id, bows ? "bow" : "produce",
-                $"{(bows ? "Bow this card" : "Produce without bowing")}: {amount} Gold", amount);
+                $"{(bows ? "Bow this card" : "Produce without bowing")}: {amount} Gold", amount, null, TfAltConflicts(card, tokens)); // issue #622: its own second way to bow (Jade Mine, Slave Pits)
         });
         return ordinary.Concat(tokens.Select(t => new PaymentSource(t.Id, t.Card.Id, t.Kind, t.Label, t.Amount, t.Subject?.Id,
             tokens.Where(other => other.Id != t.Id && (other.Card.Id == t.Card.Id ||
-                t.Subject is not null && other.Subject?.Id == t.Subject.Id)).Select(other => other.Id).ToArray()))).ToArray();
+                t.Subject is not null && other.Subject?.Id == t.Subject.Id)).Select(other => other.Id).Concat(TfIsAltToken(t) ? [t.Card.Id] : []).ToArray()))).ToArray(); // issue #622: an alternative conflicts with its card's own bow
     }
 
     // Seaside Bazaar's payment condition (ReactivePaymentConditionMet's fall-through): "When paying a Gold Cost" -- any payment.

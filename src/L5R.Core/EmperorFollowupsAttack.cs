@@ -81,8 +81,13 @@ public sealed partial class MatchEngine
         _state.AnnouncedAttackModifiers.RemoveAll(m => m.Battle != _state.BattleNumber);
         _state.AnnouncedAttackModifiers.Add(new AnnouncedAttackModifier
         {
-            PlayerId = announced.PlayerId, ActionCardId = announced.CardId, ActionAbilityId = announced.AbilityId, StrengthDelta = -1, MayTargetDefenderHome = true,
-            ModifierSourceId = source.Id, Battle = _state.BattleNumber
+            PlayerId = announced.PlayerId,
+            ActionCardId = announced.CardId,
+            ActionAbilityId = announced.AbilityId,
+            StrengthDelta = -1,
+            MayTargetDefenderHome = true,
+            ModifierSourceId = source.Id,
+            Battle = _state.BattleNumber
         });
         Emit("announcedAttackModified", $"{Definition(source).Name}: one Ranged Attack from {player.Name}'s action has -1 strength and may target a card in the Defender's home.", player.Id, source.Id);
     }
@@ -113,7 +118,7 @@ public sealed partial class MatchEngine
         {
             modifier.Applied = true;
             delta += modifier.StrengthDelta;
-            Emit("attackStrengthModified", $"{Definition(Card(modifier.ModifierSourceId)).Name}: this Ranged Attack has {modifier.StrengthDelta:+#;-#;0} strength.", playerId, modifier.ModifierSourceId);
+            if (modifier.StrengthDelta != 0) Emit("attackStrengthModified", $"{Definition(Card(modifier.ModifierSourceId)).Name}: this Ranged Attack has {modifier.StrengthDelta:+#;-#;0} strength.", playerId, modifier.ModifierSourceId);
         }
         return delta;
     }
@@ -135,8 +140,8 @@ public sealed partial class MatchEngine
     /// <summary>Called as the announce window closes: when a Reaction in it changed what the announced Attack may target, its player (re)selects the target now. True when the step opened.</summary>
     private bool BeginAttackTargetSelection(GameCommand announced)
     {
-        if (!ModifiersOf(announced.PlayerId, announced.CardId).Any(m => m.MayTargetDefenderHome && !m.Applied)) return false;
-        return OpenAttackTargetSelection(announced, "No Hiding Place: choose the Ranged Attack's target now");
+        if (ModifiersOf(announced.PlayerId, announced.CardId).FirstOrDefault(m => m.MayTargetDefenderHome && !m.Applied) is not { } permission) return false;
+        return OpenAttackTargetSelection(announced, $"{Definition(Card(permission.ModifierSourceId)).Name}: choose the Ranged Attack's target now"); // issue #622: also Lookout's
     }
 
     /// <summary>The general step: the announced Attack's player selects its target among those legal now (or none). Only an ability whose Attack target is the command's TargetId is re-selected.</summary>

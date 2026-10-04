@@ -473,6 +473,8 @@ public sealed partial class MatchEngine
         ApplyEmperorFollowupsEntryEffects(playerId, card); // Emperor Edition follow-ups (issue #498): the Dragon Sword's Honor; the entry searches queued (EmperorFollowupsSearch.cs).
         ApplyEmperorP1EntryEffects(playerId, card); // Issue #503 (EmperorP1.cs): its Sensei discards and Extending Influence's Honor loss.
         ApplyRequestedCreatedCardsEntryEffects(playerId, card); // Yari of Air's mandatory Air-wielder Honor gain.
+        ApplyVastPaddyEntry(playerId, card); // Vast Paddy Fields (issue #622, IvoryHoldings.cs): the province the Farm Holding was recruited from refills face-up.
+        ApplyTfPersonalitiesEntryEffects(playerId, card); // Soshi Kodanshi (issue #622, TfPersonalities.cs): "After Kodanshi enters play from a province: Create ..." -- a trait.
     }
     // Sensei (Mirumoto Hikaro / Mirumoto Yozo, Experienced 2): "your OTHER Sensei Personalities" --
     // every OTHER Sensei-keyword Personality this same controller has, either unbowed-or-bowed in
@@ -521,6 +523,7 @@ public sealed partial class MatchEngine
         AfterHoldingEnteredFromProvinceP6(province, card); // Dark Experiments (issue #503, EmperorP6.cs)
         QueueOverconfidentDraw(card);
         RefillProvinceSlot(Player(command.PlayerId), province, slot);
+        TfAfterEnteredFromProvince(Player(command.PlayerId), province, slot, card); // Small Library (issue #622, TfHoldings.cs): "Refill it face-up"
         var reactionId = EntryReactionAbility(card);
         if (quote.ProclaimEligible)
         {
@@ -591,6 +594,7 @@ public sealed partial class MatchEngine
     {
         var province = player.Provinces.Single(p => p.CardId == card.Id);
         province.CardId = null;
+        _state.LastProvinceEntryCardId = card.Id; _state.LastProvinceEntryProvinceIndex = province.Index; // an ability recruit from a province "enters play from a province" too (Soshi Kodanshi, issue #622), as Purchase and RecruitReserve record
         EnterPlayFromRecruit(player, card, battlefield, via);
         Refill(player, province);
         return OpenRecruitEntryWindows(player, card, quote.ProclaimEligible, proclaimResumesTo);
@@ -969,7 +973,7 @@ public sealed partial class MatchEngine
         // usable beside the card's bow; the card's own id is always its printed production.
         // A card with no printed production that can bow to produce Gold for a payment (Yoritomo Sakuma, issue #338) produces that much.
         if (def.GoldProduction == 0 && AlternateGoldSource(card, paying) is { } alternate) return alternate.Amount;
-        return Math.Max(0, def.GoldProduction + adjustment + (def.Effect == "crane-gold" && Player(playerId).Clan == "Crane" || def.Effect == "dragon-gold" && Player(playerId).Clan == "Dragon" ? 1 : 0));
+        return Math.Max(0, def.GoldProduction + adjustment + ClanGoldEffects.Bonus(def.Effect, Player(playerId).Clan)); // "<clan>-gold" Effects: ClanGold.cs
     }
 
     public PaymentOption[] PaymentOptions(int playerId, int cost, PaymentSubject? paying = null) => PaymentOptionsExcluding(playerId, cost, null, paying);
@@ -983,8 +987,10 @@ public sealed partial class MatchEngine
         // Issue #501 (EmperorMechE.cs): the payment tokens -- a Reaction's Gold beside a card's bow, Zlkyt's destroyed Mine or Farm, Moto Rani's discount -- join the search as groups of
         // alternatives: at most one token of a card per payment (each is that card's once-a-turn Reaction).
         var groups = sources.Select(c => new[] { (Id: c.Id, Amount: GoldProduced(c.Id, playerId, paying)) }).ToList();
-        foreach (var tokenGroup in PaymentTokens(playerId, paying).Where(t => exclude is null || !exclude.Contains(t.Card.Id) && (t.Subject is null || !exclude.Contains(t.Subject.Id))).GroupBy(t => t.Card.Id))
+        var availableTokens = PaymentTokens(playerId, paying).Where(t => exclude is null || !exclude.Contains(t.Card.Id) && (t.Subject is null || !exclude.Contains(t.Subject.Id))).ToArray();
+        foreach (var tokenGroup in availableTokens.Where(t => !TfIsAltToken(t)).GroupBy(t => t.Card.Id))
             groups.Add(tokenGroup.Select(t => (t.Id, t.Amount)).ToArray());
+        TfMergeAltIntoGroups(groups, availableTokens); // Jade Mine, Slave Pits (issue #622, TfHoldings.cs): a second way to bow joins the card's own group
         // Dynamic programming keeps useful alternatives without exponential work for large economies.
         var byTotal = new Dictionary<int, List<string[]>> { [0] = [[]] };
         foreach (var group in groups)
@@ -1037,6 +1043,7 @@ public sealed partial class MatchEngine
         var produced = allIds.Sum(id => GoldProduced(id, playerId, paying));
         produced -= SpendMoneylenderTokens(ids, cost, playerId, paying); // Moneylender (issue #492, group F): only the Wealth tokens the payment needs are removed.
         RecordGoldPaidForEntry(cost, paying); // Moneylender (issue #492, group F): "the amount of Gold you paid for it".
+        RecordVastPaddyPayment(ids, paying); // Vast Paddy Fields (issue #622, IvoryHoldings.cs): "If this paid for a Farm Holding entering play from a province, refill the province face-up."
         P3RecordEntryPayment(cost, paying); // Easy Persuasion (issue #503): what was paid for a Personality entering play
         // A card bowed for Gold through its own ability (Yoritomo Sakuma, issue #338) has used that Reaction: spent for the turn, and named
         // in the log so the opponent sees why it bowed.
@@ -1055,6 +1062,7 @@ public sealed partial class MatchEngine
         Emit("payment", $"{Player(playerId).Name} paid {cost} Gold for {Definition(target).Name}{(part is null ? "" : $" ({part})")}, producing {produced}; {produced - cost} excess was lost.", playerId, target.Id, produced - cost);
         // Temple to Fudo (Seeds of Decay, issue #453): ":bow:: Produce 2 Gold and lose 1 Honor" -- the loss is part of producing (SeedsOfDecayBatch4.cs).
         LoseHonorForProducers(playerId, ids);
+        TfAfterProducersBowed(playerId, ids); // Temple Fortress (issue #622, TfHoldings.cs): "After the first time each turn you bow this card: Gain 1 Honor"
     }
 
     private void Proclaim(GameCommand command)
@@ -1291,6 +1299,7 @@ public sealed partial class MatchEngine
             RequireStarCrossedMayAssign(card, assignment.Value, command.Assignments!);
             card.Zone = Zone.Battlefield; card.ProvinceIndex = assignment.Value;
             _state.AssignedThisCommand.Add(card.Id); // Chrysanthemum Blossom (issue #492 group G).
+            NoteIvoryAssignment(card, assignment.Value); // Back to the Front (issue #622): the battlefields he was assigned to this turn.
             foreach (var attached in Attachments(card.Id)) attached.ProvinceIndex = assignment.Value;
             // Tamori Tamoko's own Open action (issue #207 follow-up): "gain 1 Honor if he was NOT
             // assigned to attack your provinces this turn" -- a turn-stamped flag, the same
@@ -1471,6 +1480,8 @@ public sealed partial class MatchEngine
             // Emperor Edition remaining-cards pass (issue #492), group B (EmperorRemainingB.cs): Heart of Rokugan's mandatory sweep; Hard Pressed's choice of a unit to move home.
             case "heart-of-rokugan-sweep": HeartOfRokuganSweep(source, pending); break;
             case "hard-pressed-move": if (BeginHardPressed(source, pending)) return; break;
+            // Lakeside Retreat (issue #622, TfStrategiesB.cs): its controller straightens a Personality or Follower.
+            case "lakeside-retreat-straighten": if (BeginLakesideRetreat(source, pending)) return; break;
         }
         FinishBeforeBattleEffect(pending);
     }
@@ -1484,6 +1495,7 @@ public sealed partial class MatchEngine
         if (IsHeartOfDarknessChoice(pending)) ResolveHeartOfDarkness(command, pending, choice.PlayerId);
         else if (IsExtendedManeuversChoice(pending)) ResolveExtendedManeuvers(command, pending, choice.PlayerId); // Extended Maneuvers (issue #492)
         else if (IsHardPressedChoice(pending)) ResolveHardPressed(command, pending, choice.PlayerId);
+        else if (IsLakesideRetreatChoice(pending)) ResolveLakesideRetreat(command, choice.PlayerId); // Lakeside Retreat (issue #622)
         else if (command.Choice == "use")
         {
             var target = Card(command.TargetId);
@@ -1559,7 +1571,7 @@ public sealed partial class MatchEngine
         {
             // Yoritomo Iwashi (issue #453, batch 3): every Personality of the winning attacking army remembers this victory (SeedsOfDecayBatch3.cs).
             MarkAttackVictory(a);
-            var destroyedDefenders = aramasuSpares ? 0 : DestroyUnits(d);
+            var destroyedDefenders = aramasuSpares ? 0 : DestroyUnits(TfResolutionDestroyable(d, true)); // issue #622: Hitomi's Devotion spares its unit (TfGear.cs)
             destroyedByPlayer[attacker] = destroyedDefenders; losers.Add(defender);
             if (!RehonorWinners(a)) { GainHonor(attacker, destroyedDefenders * 2, "Battle victory"); CheckEarthFlowsBonus(attacker, a); }
             var province = battleProvince;
@@ -1586,7 +1598,7 @@ public sealed partial class MatchEngine
         }
         else if (defenderWon)
         {
-            var destroyedAttackers = DestroyUnits(a);
+            var destroyedAttackers = DestroyUnits(TfResolutionDestroyable(a, false));
             destroyedByPlayer[defender] = destroyedAttackers; losers.Add(attacker);
             if (!RehonorWinners(d)) { GainHonor(defender, destroyedAttackers * 2, "Battle victory"); CheckEarthFlowsBonus(defender, d); }
             GrantRingRecruit(Player(defender), a.Length > 0, "false-ring-of-air-recruit");
@@ -1601,7 +1613,7 @@ public sealed partial class MatchEngine
             // penalty (MarkDead) on top of this battle's own gain negation.
             var attackerHadDishonorable = RehonorWinners(a);
             var defenderHadDishonorable = RehonorWinners(d);
-            var destroyedA = DestroyUnits(a); var destroyedD = aramasuSpares ? 0 : DestroyUnits(d); // Aramasu's Legacy (issue #501): the defending army is not destroyed, the attacking one is
+            var destroyedA = DestroyUnits(TfResolutionDestroyable(a, false)); var destroyedD = aramasuSpares ? 0 : DestroyUnits(TfResolutionDestroyable(d, true)); // Aramasu's Legacy (issue #501): the defending army is not destroyed, the attacking one is
             // A tie: both players are the battle's loser (Mendon, issue #417: Tales of Dishonor).
             destroyedByPlayer[attacker] = destroyedD; destroyedByPlayer[defender] = destroyedA; losers.Add(attacker); losers.Add(defender);
             // The Earth Flows (issue #264) is deliberately NOT checked here: its own text requires
@@ -1986,7 +1998,7 @@ public sealed partial class MatchEngine
                 // able). Put this Terrain into play" -- unlike the ordinary "at most one Terrain per
                 // battlefield" default (Vital Pathways' own "if there is no Terrain in play" plays by
                 // that default unchanged), these two may replace an already-in-play Terrain outright.
-                if (def.Effect is "encircled-before-battle" or "looting-return-to-hand" or "ancient-feud") DiscardTerrain(existingTerrain);
+                if (def.Effect is "encircled-before-battle" or "looting-return-to-hand" or "ancient-feud" or TfStrategiesAAbilities.HoldTheWallsEffect || TfStrategiesBTerrainReplaces(def)) DiscardTerrain(existingTerrain);
                 // The Marshalling Fields (issue #501): once per battle its controller ignores the restriction of another Terrain being in play -- the new Terrain enters play beside it.
                 else { Require(MarshallingFieldsWaiverAvailable(command.PlayerId), "This battlefield already has a Terrain in play."); SpendMarshallingFieldsWaiver(command.PlayerId, card); }
             }
@@ -2552,6 +2564,7 @@ public sealed partial class MatchEngine
             if (actingPlayerId is not null && WideValleyNegatesDestruction(card)) continue;
             if (actingPlayerId is int shieldActor && DestructionShielded(card, shieldActor)) continue;
             if (actingPlayerId is not null && NegishiNegatesDestruction(card)) continue;
+            if (actingPlayerId is int armorActor && TfOminousArmorSubstitutes(card, armorActor)) continue; // issue #622: Ominous Armor, "destroy this Item instead" (TfGear.cs)
             foreach (var attachment in Attachments(card.Id).ToArray())
             {
                 RemoveAttachmentGrants(card, attachment.Id);
@@ -2959,6 +2972,7 @@ public sealed partial class MatchEngine
         // like Offering Reverence's.
         if (Definition(card).Effect == DiscoveringTheTempleEffect) { BeginSearch(SearchCatalog.DiscoveringTheTemple, card, player.Id, "event"); return true; }
         if (Definition(card).Effect == StarCrossedLoversEffect) return ResolveStarCrossedLovers(player, province, card);
+        if (Definition(card).Effect == IvorySpellAbilities.WisdomGainedEffect) return ResolveWisdomGained(player, card); // issue #622 (IvorySpells.cs): each player may search for a Ring, in turn order.
         // Emperor Edition remaining-cards pass (issue #492), group F (EmperorRemainingFEvents.cs): twelve Events, most of which stay in play for a while or ask a player a question.
         if (IsEmperorRemainingFEvent(Definition(card).Effect)) return ResolveEmperorRemainingFEvent(player, province, card);
         if (IsEmperorP2Event(Definition(card).Effect)) return ResolveEmperorP2Event(player, province, card); // issue #503 (EmperorP2*.cs)
@@ -3195,6 +3209,7 @@ public sealed partial class MatchEngine
         if (amount == 0) return;
         OfferHonorChangeWindow(playerId, amount, reason); // Mendon's R4 ruling (issue #492): Rhetoric, Solid Defense and Shiro Chugo may be played on ANY Honor change from an action's effects.
         if (P3HonorGainNegated(playerId, amount, reason)) return; // Destructive Priorities (issue #503): "Negate the gain."
+        if (DeedsAndWordsReduces(playerId, amount, reason)) return; // Deeds and Words (issue #622, IvoryHoldings.cs): "Reduce it to 0."
         // Emperor Edition remaining-cards pass, group C (issue #492): Rhetoric's redirect, Solid Defense's negation of losses and Rumors Travel's reduction of a gain (EmperorRemainingC.cs).
         (playerId, amount) = EmperorRemainingCHonorChange(playerId, amount, reason);
         if (amount == 0) return;
@@ -3238,6 +3253,8 @@ public sealed partial class MatchEngine
         if (amount == -1 && !CurrentActionUnnegatable() && YamazakiNegatesLoss(playerId, reason)) return; // issue #501: an unnegatable action's loss is not negated
         // Ten Thousand Temples (issue #492, group F): "Before you lose Honor, destroy this card: Negate the Honor loss." -- asked before the loss happens (the command replays with the answer).
         if (amount < 0 && !CurrentActionUnnegatable() && TenThousandTemplesNegates(playerId, amount, reason)) return; // issue #501: nor by Ten Thousand Temples
+        amount = TfNexusIncreasedLoss(playerId, amount, source); // Nexus of Lies (issue #622, TfHoldings.cs): the loss as it lands
+        amount = TfStrategiesBHonorLoss(playerId, amount, reason, source); // Mercantile Conflict (TfStrategiesB.cs): "the next two Honor losses from your cards are increased by 1 each".
         var player = Player(playerId); player.Honor += amount;
         if (amount < 0) RecordHonorLoss(playerId); // An Insult Answered (issue #453, batch 2): the action that cost this player Honor.
         if (amount > 0) _state.CurrentActionHonorGained = true; // Moksha Patam (issue #453 batch 5): read when the action in progress is done.
