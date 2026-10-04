@@ -77,7 +77,7 @@ public sealed partial class MatchEngine
 {
     // Yasuki Dokansuto's production is a printed "Kolat Reaction": Cherry Blossom Festival bars it (Mendon's R4 ruling). Every other conditional production is a Holding's trait.
     private ConditionalProduction? ConditionalProductionOf(CardInstance card) =>
-        Definition(card).Effect == "dokansuto-gold" && ReactionsBarred() ? null : ConditionalProductionCatalog.For(Definition(card).Effect) ?? P2ConditionalProduction(card); // issue #503
+        Definition(card).Effect == "dokansuto-gold" && ReactionsBarred() ? null : ConditionalProductionCatalog.For(Definition(card).Effect) ?? P2ConditionalProduction(card) ?? TfConditionalProduction(card); // issues #503, #622 (TfHoldings.cs)
 
     private bool ProductionConditionMet(ConditionalProduction production, PaymentSubject? paying)
     {

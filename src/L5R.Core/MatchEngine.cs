@@ -521,6 +521,7 @@ public sealed partial class MatchEngine
         AfterHoldingEnteredFromProvinceP6(province, card); // Dark Experiments (issue #503, EmperorP6.cs)
         QueueOverconfidentDraw(card);
         RefillProvinceSlot(Player(command.PlayerId), province, slot);
+        TfAfterEnteredFromProvince(Player(command.PlayerId), province, slot, card); // Small Library (issue #622, TfHoldings.cs): "Refill it face-up"
         var reactionId = EntryReactionAbility(card);
         if (quote.ProclaimEligible)
         {
@@ -983,8 +984,10 @@ public sealed partial class MatchEngine
         // Issue #501 (EmperorMechE.cs): the payment tokens -- a Reaction's Gold beside a card's bow, Zlkyt's destroyed Mine or Farm, Moto Rani's discount -- join the search as groups of
         // alternatives: at most one token of a card per payment (each is that card's once-a-turn Reaction).
         var groups = sources.Select(c => new[] { (Id: c.Id, Amount: GoldProduced(c.Id, playerId, paying)) }).ToList();
-        foreach (var tokenGroup in PaymentTokens(playerId, paying).Where(t => exclude is null || !exclude.Contains(t.Card.Id) && (t.Subject is null || !exclude.Contains(t.Subject.Id))).GroupBy(t => t.Card.Id))
+        var availableTokens = PaymentTokens(playerId, paying).Where(t => exclude is null || !exclude.Contains(t.Card.Id) && (t.Subject is null || !exclude.Contains(t.Subject.Id))).ToArray();
+        foreach (var tokenGroup in availableTokens.Where(t => !TfIsAltToken(t)).GroupBy(t => t.Card.Id))
             groups.Add(tokenGroup.Select(t => (t.Id, t.Amount)).ToArray());
+        TfMergeAltIntoGroups(groups, availableTokens); // Jade Mine, Slave Pits (issue #622, TfHoldings.cs): a second way to bow joins the card's own group
         // Dynamic programming keeps useful alternatives without exponential work for large economies.
         var byTotal = new Dictionary<int, List<string[]>> { [0] = [[]] };
         foreach (var group in groups)
@@ -1055,6 +1058,7 @@ public sealed partial class MatchEngine
         Emit("payment", $"{Player(playerId).Name} paid {cost} Gold for {Definition(target).Name}{(part is null ? "" : $" ({part})")}, producing {produced}; {produced - cost} excess was lost.", playerId, target.Id, produced - cost);
         // Temple to Fudo (Seeds of Decay, issue #453): ":bow:: Produce 2 Gold and lose 1 Honor" -- the loss is part of producing (SeedsOfDecayBatch4.cs).
         LoseHonorForProducers(playerId, ids);
+        TfAfterProducersBowed(playerId, ids); // Temple Fortress (issue #622, TfHoldings.cs): "After the first time each turn you bow this card: Gain 1 Honor"
     }
 
     private void Proclaim(GameCommand command)
@@ -3238,6 +3242,7 @@ public sealed partial class MatchEngine
         if (amount == -1 && !CurrentActionUnnegatable() && YamazakiNegatesLoss(playerId, reason)) return; // issue #501: an unnegatable action's loss is not negated
         // Ten Thousand Temples (issue #492, group F): "Before you lose Honor, destroy this card: Negate the Honor loss." -- asked before the loss happens (the command replays with the answer).
         if (amount < 0 && !CurrentActionUnnegatable() && TenThousandTemplesNegates(playerId, amount, reason)) return; // issue #501: nor by Ten Thousand Temples
+        amount = TfNexusIncreasedLoss(playerId, amount, source); // Nexus of Lies (issue #622, TfHoldings.cs): the loss as it lands
         var player = Player(playerId); player.Honor += amount;
         if (amount < 0) RecordHonorLoss(playerId); // An Insult Answered (issue #453, batch 2): the action that cost this player Honor.
         if (amount > 0) _state.CurrentActionHonorGained = true; // Moksha Patam (issue #453 batch 5): read when the action in progress is done.
