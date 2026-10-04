@@ -14,7 +14,7 @@ internal static class DisciplineRulingsTests
     public static void Run(TestRunner runner)
     {
         (string Name, Action Test)[] tests = [
-            ("strategy-wave-23 published shape: the three Discipline cards as printed (Focus, the Discipline cost as GoldCost), each ability on the Discipline flag; the two 'Limited, 1 Gold' actions carry an explicit own cost; Mercantile Conflict stays unpublished", PublishedShape),
+            ("strategy-wave-23 published shape: the three Discipline cards as printed (Focus, the Discipline cost as GoldCost), each ability on the Discipline flag; the two 'Limited, 1 Gold' actions carry an explicit own cost; Mercantile Conflict is published in strategy-wave-110", PublishedShape),
             ("Additive Discipline cost (Knowledge and Power): from the discard pile ONE combined quote of 2 (Discipline 1 first, then the action's own 1), two payments in that order, the card removed from the game; the sources' order is irrelevant", AdditiveQuoteAndPayment),
             ("Additive Discipline cost: Gold does not carry over -- one source covering the total is refused; the play is offered only when BOTH parts are payable (else disabled), and a shortfall of either part is rejected", BothPartsMustBePayable),
             ("From HAND only the action's own cost applies (Knowledge and Power 1; Two Steady Breaths 1, not 3); the Discipline cost is never charged there and the card goes to the Fate discard pile", HandPlayPaysOnlyTheOwnCost),
@@ -91,7 +91,8 @@ internal static class DisciplineRulingsTests
         Eq(AbilityCatalog.All[Kp].Timing, "Limited"); Eq(AbilityCatalog.All[Tsb].Timing, "Limited");
         Eq(AbilityCatalog.All[Kp].Cost?.Amount, (int?)1); Eq(AbilityCatalog.All[Tsb].Cost?.Amount, (int?)1);
         Check(AbilityCatalog.All["expensive-achievement-raise"].Cost is null, "Expensive Achievement's action has no cost of its own");
-        Check(!CardCatalog.Cards.ContainsKey(MercantileConflict) || CardCatalog.Get(MercantileConflict).ScenarioOnly, "Mercantile Conflict is not published (needs an Honor-loss-increase primitive)");
+        // Mercantile Conflict waited for an Honor-loss-increase primitive; it is published in strategy-wave-110 (issue #622, TfStrategiesB.cs) with the Discipline amount as its Gold Cost.
+        Check(CardCatalog.Cards.ContainsKey(MercantileConflict) && !CardCatalog.Get(MercantileConflict).ScenarioOnly && CardCatalog.Get(MercantileConflict).GoldCost == 1 && AbilityCatalog.All["mercantile-conflict-bow"].Discipline, "Mercantile Conflict is published with its Discipline cost (strategy-wave-110)");
     }
 
     // ---- the additive cost -------------------------------------------------------------------------------------

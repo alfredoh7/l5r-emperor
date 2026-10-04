@@ -4498,7 +4498,7 @@ public sealed partial class MatchEngine
     // rules lead's Daidoji Yuki ruling overturned). Wrathful Ancestor was previously protected from Tamoko only by omission from
     // MoveOrStraightenKind, which left Champion of Thunder's own "all" negation able to catch it
     // anyway; routing it through this shared check closes that gap too.
-    private bool MovementCannotBeNegated(GameCommand command) => HiromiPerforms(command) || CommandUnnegatable(command) || command.AbilityId switch // Yoritomo Hiromi (issue #477): the movement from her Battle actions.
+    private bool MovementCannotBeNegated(GameCommand command) => HiromiPerforms(command) || CommandUnnegatable(command) || TfStrategiesBUnnegatable(command) || command.AbilityId switch // Yoritomo Hiromi (issue #477): the movement from her Battle actions.
     {
         "wrathful-ancestor-move" => true,
         // Journey's End Keep (the Stronghold, whose printed action ends "this will not be negated or delayed"; the Strategy of the same ability has no such promise) -- issue #492, ruling pass R2.
@@ -5530,14 +5530,14 @@ public sealed partial class MatchEngine
                 || MechEEvenIfBowed(id) // issue #501: Moto Rani - exp ("Even if Rani is bowed"); Kakita Kae's trait (a trait is usable while bowed)
                 // issue #622 (IvoryPolitical.cs): Komori Taruko ("Even if Taruko is bowed")
                 || IvoryPoliticalEvenIfBowed(id)
-                || TirelessStronghold(source), "Abilities on bowed cards cannot be used.");
+                || TirelessStronghold(source) || UnsafePassageWaives(command, source), "Abilities on bowed cards cannot be used.");
             uses = source.AbilityUses;
         }
         // The Forgotten Temple (Forgotten Legacy pass, issue #467 batch 2): "You may not take Political actions." (ForgottenLegacyBatch2.cs)
         Require(!ForgottenTempleForbidsPolitical(id, ability, source, player), "The Forgotten Temple: you may not take Political actions.");
         // The per-turn limit is AbilityDefinition.UsesPerTurn (AbilityLimits.cs). A once-per-GAME ability (AbilityDefinition.OncePerGame: Border Keep's refresh, Bo of Water) never resets: any stamp spends it.
         var usageKey = ability.UsageKey ?? id;
-        Require(ability.OncePerGame ? !uses.ContainsKey(usageKey) : !AbilityUseSpent(uses, ability, usageKey), "This ability has already been used within its limit.");
+        Require(ability.OncePerGame ? !uses.ContainsKey(usageKey) : !AbilityUseSpent(uses, ability, usageKey) || UnsafePassageWaives(command, source), "This ability has already been used within its limit."); // Unsafe Passage (issue #622)
         if (id == "border-first") Require(player.TurnsTaken == 1, "This Border Keep ability is only available on your first turn.");
         // Battle/Open presence primitive (issue #267): a printed "Battle/Open" ability carries no
         // battlefield-presence requirement at all when used as its OPEN half (performed from Home,

@@ -327,6 +327,7 @@ public sealed partial class MatchEngine
         // The shared delay mechanism (issue #492, EmperorRulingR2Cards.cs): "You may choose (now) to delay the effects of losing this duel ..." is answered before the outcome applies.
         if (BeginDuelLossDelayDecisions(duel, loserIds)) return;
         if (TfBeginWitnessDecision(duel, winnerId)) return; // Awed Witness (issue #622, TfStrategiesA.cs): the winner's controller may create Witness -- asked once, then the duel resolves again
+        if (BeginTfStrategiesBDuelDecisions(duel, loserIds)) return; // Preserving Forces (issue #622, TfStrategiesB2.cs): "before your Personality is destroyed for losing it".
         var resultStart = _state.Events.Count;
         if (rendOfWinner is not null) Emit("duelWinnerLoses", $"{Definition(rendOfWinner).Name}: {Player(rendOfWinner.OwnerId).Name}'s Personality won the duel, so he loses instead; the other Personality still also loses.", rendOfWinner.OwnerId, rendOfWinner.Id);
         var strengthsBefore = _state.Players.SelectMany(p => p.Provinces.Select(v => new DuelProvince(p.Id, v.Index, EffectiveProvinceStrength(v), EffectiveProvinceStrength(v)))).ToArray();
@@ -650,6 +651,7 @@ public sealed partial class MatchEngine
             default:
                 ApplyRegretFocusEffect(abilityId, winnerPlayerId); // Regret (RegretEmbracingVirtue.cs)
                 ApplyTfStrategiesAFocusEffect(abilityId, ownerId, winnerPlayerId); // Breaking the Rhythm (issue #622, TfStrategiesA.cs)
+                ApplyTfStrategiesBFocusEffect(abilityId, ownerId, winnerPlayerId); // Strategic Withdrawal (TfStrategiesB.cs)
                 ApplyMechEFocusEffect(abilityId);
                 ApplyP5FocusEffect(abilityId, ownerId, winnerPlayerId); // issue #503: Searching for Answers (EmperorP5Hidden.cs)
                 break;

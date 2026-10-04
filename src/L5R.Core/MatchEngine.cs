@@ -1480,6 +1480,8 @@ public sealed partial class MatchEngine
             // Emperor Edition remaining-cards pass (issue #492), group B (EmperorRemainingB.cs): Heart of Rokugan's mandatory sweep; Hard Pressed's choice of a unit to move home.
             case "heart-of-rokugan-sweep": HeartOfRokuganSweep(source, pending); break;
             case "hard-pressed-move": if (BeginHardPressed(source, pending)) return; break;
+            // Lakeside Retreat (issue #622, TfStrategiesB.cs): its controller straightens a Personality or Follower.
+            case "lakeside-retreat-straighten": if (BeginLakesideRetreat(source, pending)) return; break;
         }
         FinishBeforeBattleEffect(pending);
     }
@@ -1493,6 +1495,7 @@ public sealed partial class MatchEngine
         if (IsHeartOfDarknessChoice(pending)) ResolveHeartOfDarkness(command, pending, choice.PlayerId);
         else if (IsExtendedManeuversChoice(pending)) ResolveExtendedManeuvers(command, pending, choice.PlayerId); // Extended Maneuvers (issue #492)
         else if (IsHardPressedChoice(pending)) ResolveHardPressed(command, pending, choice.PlayerId);
+        else if (IsLakesideRetreatChoice(pending)) ResolveLakesideRetreat(command, choice.PlayerId); // Lakeside Retreat (issue #622)
         else if (command.Choice == "use")
         {
             var target = Card(command.TargetId);
@@ -1995,7 +1998,7 @@ public sealed partial class MatchEngine
                 // able). Put this Terrain into play" -- unlike the ordinary "at most one Terrain per
                 // battlefield" default (Vital Pathways' own "if there is no Terrain in play" plays by
                 // that default unchanged), these two may replace an already-in-play Terrain outright.
-                if (def.Effect is "encircled-before-battle" or "looting-return-to-hand" or "ancient-feud" or TfStrategiesAAbilities.HoldTheWallsEffect) DiscardTerrain(existingTerrain);
+                if (def.Effect is "encircled-before-battle" or "looting-return-to-hand" or "ancient-feud" or TfStrategiesAAbilities.HoldTheWallsEffect || TfStrategiesBTerrainReplaces(def)) DiscardTerrain(existingTerrain);
                 // The Marshalling Fields (issue #501): once per battle its controller ignores the restriction of another Terrain being in play -- the new Terrain enters play beside it.
                 else { Require(MarshallingFieldsWaiverAvailable(command.PlayerId), "This battlefield already has a Terrain in play."); SpendMarshallingFieldsWaiver(command.PlayerId, card); }
             }
@@ -3251,6 +3254,7 @@ public sealed partial class MatchEngine
         // Ten Thousand Temples (issue #492, group F): "Before you lose Honor, destroy this card: Negate the Honor loss." -- asked before the loss happens (the command replays with the answer).
         if (amount < 0 && !CurrentActionUnnegatable() && TenThousandTemplesNegates(playerId, amount, reason)) return; // issue #501: nor by Ten Thousand Temples
         amount = TfNexusIncreasedLoss(playerId, amount, source); // Nexus of Lies (issue #622, TfHoldings.cs): the loss as it lands
+        amount = TfStrategiesBHonorLoss(playerId, amount, reason, source); // Mercantile Conflict (TfStrategiesB.cs): "the next two Honor losses from your cards are increased by 1 each".
         var player = Player(playerId); player.Honor += amount;
         if (amount < 0) RecordHonorLoss(playerId); // An Insult Answered (issue #453, batch 2): the action that cost this player Honor.
         if (amount > 0) _state.CurrentActionHonorGained = true; // Moksha Patam (issue #453 batch 5): read when the action in progress is done.
