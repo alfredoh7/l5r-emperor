@@ -24,6 +24,7 @@ internal static class RegretEmbracingVirtueTests
         ("Regret's Open action: one or more Followers and Items from your own discard pile go to your Personalities, each to the one named for it, for the sum of their Equip costs, and Regret is spent", OpenAttachesSeveral),
         ("Regret's Open action: the attachments' own legality still applies as one -- caps, Unique, hosts that refuse, counts that do not match, other piles and Spells are refused with nothing changed", OpenLegality),
         ("Regret's Open action is not Equip (Battle): no additional action, and an action printed on a card attached by it is usable at the very next action", OpenIsNotEquipBattle),
+        ("Regret's Open action: Platinum Mine's bonus for paying for an attachment applies to the whole payment, whatever number of cards are attached", OpenPlatinumMine),
         ("Regret's Open action: every attached card opens its own entering-play window, one after another", OpenEntryWindows),
     ]);
 
@@ -376,5 +377,21 @@ internal static class RegretEmbracingVirtueTests
             Accept(r.E, r.E.QueryActions(r.E.State.PriorityPlayerId).First(a => a.Enabled && a.Command is not null && a.Type is "declineReaction" or "pass").Command!);
         Check(r.E.State.PendingChoice is null && r.E.State.Regret.EntryQueue.Count == 0, "both windows closed and nothing is left owing");
         Eq(Honor(r.E, 0), honor + 1, "the second Reaction was passed");
+    }
+
+    private static void OpenPlatinumMine()
+    {
+        // Four cards cost 2 + 2 + 1 + 1 = 6 Gold. Platinum Mine alone produces 6 when paying for an attachment (5 otherwise), so it can pay all of them by itself.
+        var r = OpenRig(Phase.Action, (s, rig) => Add(s, "oracle-l5r-9798", 0, Zone.Home));
+        var mine = r.E.State.Cards.Values.Single(c => c.DefinitionId == "oracle-l5r-9798");
+        var command = Attach(r, [r.Follower, r.Item, r.Weapon, r.Armor], [r.A, r.A, r.B, r.B], paid: false);
+        Eq(r.E.QuoteAbilityGold(command)!.Cost, 6, "the four cards cost 6");
+        Accept(r.E, command with { SourceIds = [mine.Id] });
+        Check(r.E.State.Cards[mine.Id].Bowed && r.E.State.Cards[r.Armor.Id].AttachedTo == r.B.Id, "the Mine alone paid for every card");
+        // Paying for one card is the same bonus.
+        var one = OpenRig(Phase.Action, (s, rig) => Add(s, "oracle-l5r-9798", 0, Zone.Home));
+        var mine1 = one.E.State.Cards.Values.Single(c => c.DefinitionId == "oracle-l5r-9798");
+        Accept(one.E, Attach(one, [one.Item], [one.A], paid: false) with { SourceIds = [mine1.Id] });
+        Check(one.E.State.Cards[mine1.Id].Bowed, "and for a single card");
     }
 }

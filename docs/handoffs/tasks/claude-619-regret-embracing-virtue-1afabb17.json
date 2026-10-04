@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Wire Regret (oracle-l5r-9923) and Embracing Virtue (oracle-l5r-2313) as strategy-wave-105: Embracing Virtue's end-of-turn return before the End Phase draw; Regret's Focus Effect honor loss (Gonji stat bonus not counted) and multi-attach Open action (AttachSlotsCost, combined legality, per-card entry-window queue). Shared edits: small hooks in EndTurn, ApplyDuelFocusEffectCore, HandleRegisteredEntryReaction, GoldQuotes/ConditionalProduction, and ExecuteAttach split into PlaceAttachment (behaviour unchanged). Records rulings R-026..R-028.",
-  "validation": "Core suite: all suites pass incl. 11 new regret-embracing-virtue tests (one stale shadows-embrace-batch-4 assertion updated); AI 97/97, Server 9/9, Client.Transport 18/18, Collection 55; python content tests 139 run, 1 error: catalogue art pack coverage for the 2 new printings (publisher step pending, not run). Godot client not built (Core-only change); no native playtest.",
-  "remaining": "Catalogue art pack must be rebuilt/released for the 2 new printings (art-pack-release) before the content coverage test passes and before a client launch; readings 1-5 in docs/decisions/2026-10-03-regret-embracing-virtue.md await Mendon; client must collect the two-slot Regret selection.",
+  "summary": "Wire Regret (oracle-l5r-9923) and Embracing Virtue (oracle-l5r-2313) as strategy-wave-105 (Embracing Virtue end-of-turn return; Regret focus-effect honor loss and multi-attach Open action with combined price, legality and per-card entry windows). Shared edits: hooks in EndTurn, ApplyDuelFocusEffectCore, HandleRegisteredEntryReaction, GoldQuotes/ConditionalProduction; ExecuteAttach split into PlaceAttachment. Rulings R-026..R-028. Art pack extended to catalogue-art-issue619-20261004-r1 (3907 images, +2).",
+  "validation": "Core all suites incl. 12 regret-embracing-virtue tests; AI 97/97, Server 9/9, Transport 18/18, Collection 55; python content tests 139 OK after art pack rebuild; ensure_catalogue_art --archive and --verify-only OK. Godot client not built; no native playtest. Pack: old catalogue-art-issue566-20260930-r1 (3905 images, 529979164 bytes) -> new 3907 images, 530209518 bytes, sha256 31df6aef...a00.",
+  "remaining": "Readings 1,2,4,5 in docs/decisions/2026-10-03-regret-embracing-virtue.md await Mendon; client must collect the two-slot Regret selection; native visual check of the two new faces not done.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/619",
   "branch": "claude/619-regret-embracing-virtue",
-  "updated": "2026-10-04T05:30:40.945609+00:00"
+  "updated": "2026-10-04T11:56:43.004768+00:00"
 }
