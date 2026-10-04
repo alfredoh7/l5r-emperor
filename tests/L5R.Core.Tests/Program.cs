@@ -9977,11 +9977,15 @@ static void BatchDPrimitives()
     }
     {
         // Card ids must not follow deck-list order: a face-down card's id (offered in target lists and commands) would identify it.
-        foreach (var (name, create) in new (string, Func<ulong, MatchEngine>)[] { ("published", sd => MatchEngine.CreatePublishedMatch(sd)), ("starter", sd => MatchEngine.CreateStarterMatch(sd)) })
+        foreach (var (name, create) in new (string, Func<ulong, MatchEngine>)[] { ("published", sd => MatchEngine.CreatePublishedMatch(sd)), ("starter", sd => MatchEngine.CreateStarterMatch(sd)),
+            ("custom", sd => MatchEngine.CreateCustomMatch(sd, CustomPractice.Preset("Crane"), CustomPractice.Preset("Lion"))), ("published test", sd => MatchEngine.CreatePublishedTestMatch(sd)) })
         {
             var a = create(11); var b = create(11); var c = create(12);
             var keys = a.State.Cards.Keys.ToArray();
-            Check(keys.Zip(keys.Skip(1)).Any(x => string.CompareOrdinal(x.First, x.Second) > 0), $"{name}: card ids are not handed out in deck-list order");
+            // Issue #611: the dictionary is enumerated in id order, so no "for each card" list (targets, default commands, first-match lookups) follows deck-list position.
+            // Player 0's Stronghold is created first, so if enumeration still followed setup order it would be first for every seed.
+            Check(keys.Zip(keys.Skip(1)).All(x => string.CompareOrdinal(x.First, x.Second) < 0), $"{name}: cards are enumerated in opaque-id order");
+            Check(Enumerable.Range(1, 12).Any(sd => { var m = create((ulong)sd); return m.State.Cards.Keys.First() != m.State.Players[0].StrongholdId; }), $"{name}: setup order does not decide enumeration order");
             Check(keys.SequenceEqual(b.State.Cards.Keys), $"{name}: the same seed still yields the same ids");
             Check(keys.Select(k => a.State.Cards[k].DefinitionId).SequenceEqual(b.State.Cards.Keys.Select(k => b.State.Cards[k].DefinitionId)), $"{name}: and the same cards");
             Check(!keys.SequenceEqual(c.State.Cards.Keys), $"{name}: a different seed yields a different id order");

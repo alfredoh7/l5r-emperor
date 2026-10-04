@@ -113,6 +113,7 @@ public sealed partial class MatchEngine
         state.ActivePlayerId = state.Players[0].Honor == state.Players[1].Honor ? (int)(seed % 2) : state.Players.OrderByDescending(p => p.Honor).First().Id;
         var second = 1 - state.ActivePlayerId;
         Add(second, drafts[second].Cards.Single(c => c.SetupSlot == "Bamboo Harvesters").Id, Zone.Home, true, true);
+        OrderCardsById(state);
         var engine = new MatchEngine(state, seed, CustomPractice.Scenario) { _customDecks = decks };
         foreach (var player in state.Players)
         {

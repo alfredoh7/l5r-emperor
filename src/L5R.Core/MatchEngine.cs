@@ -120,6 +120,7 @@ public sealed partial class MatchEngine
             player.Provinces = Enumerable.Range(0, 4).Select(i => new ProvinceState { Index = i, Strength = 6, PrintedStrength = 6 }).ToList();
         }
         state.RngState = random.State; // Deck search (issue #312): later shuffles continue this exact sequence.
+        OrderCardsById(state);
         var engine = new MatchEngine(state, seed, scenario);
         foreach (var player in state.Players)
         {
@@ -3326,6 +3327,11 @@ public sealed partial class MatchEngine
 
     // Card ids are handed out in a seeded permutation, not deck-list order: a face-down card's id (offered in a target list, an action
     // command or a view) must not reveal which deck-list entry it is. A separate generator keeps the setup shuffles' sequence unchanged.
+    // Cards are added in deck-list order, and every "for each card in the match" enumeration (target lists, default commands, first-match
+    // lookups) walks the dictionary in insertion order -- which would put deck-list position back into option order. Rebuild it in
+    // opaque-id order so enumeration order carries no setup information (issue #611). Setup shuffles use the deck lists, not this order.
+    private static void OrderCardsById(MatchState state) =>
+        state.Cards = state.Cards.OrderBy(c => c.Key, StringComparer.Ordinal).ToDictionary(c => c.Key, c => c.Value);
     private static string[] OpaqueCardIds(ulong seed)
     {
         var ids = Enumerable.Range(1, 2000).Select(n => $"card-{n:D4}").ToArray();
