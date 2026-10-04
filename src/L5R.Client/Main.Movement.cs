@@ -63,9 +63,9 @@ public partial class Main
         if (action.TargetIds is { Length: > 0 } targets)
         {
             _inspector.AddChild(Palette.Text("TARGET", 17, Palette.Gold));
-            var picker = new OptionButton { Name = "MovementTargetPicker", FitToLongestItem = false, ClipText = true, Disabled = !DecisionCanSubmit };
+            var picker = NewChoiceList(DecisionCanSubmit); picker.Name = "MovementTargetPicker"; // issue #635
             foreach (var id in targets)
-                picker.AddItem(FindCard(id) is { } card ? $"{View.Players[card.OwnerId].Clan} · {ShortName(card)}" : "Card unavailable");
+                picker.AddItem(FindCard(id) is { } card ? $"{View.Players[card.OwnerId].Clan} · {ShortName(card)}" : "Card unavailable", id);
             picker.Selected = Array.IndexOf(targets, command.TargetId); picker.ItemSelected += i => { if (DecisionCanSubmit) ChooseTarget(targets[(int)i]); };
             _inspector.AddChild(picker);
             if (command.TargetId is null) _inspector.AddChild(Palette.Wrapped("Choose a target to continue.", 15, Palette.Error));

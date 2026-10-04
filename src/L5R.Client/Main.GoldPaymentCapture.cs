@@ -74,8 +74,7 @@ public partial class Main
     private void GoldPickFirstTarget()
     {
         if (_chosen?.TargetIds is not { Length: > 0 } || _chosen.Command?.TargetId is not null) return;
-        var picker = _inspector.FindChildren("*", "OptionButton", true, false).OfType<OptionButton>().First();
-        picker.Selected = 1; picker.EmitSignal(OptionButton.SignalName.ItemSelected, 1L);
+        _inspector.GetChildren().OfType<CardChoiceList>().First().Choose(0); // issue #635: the list of legal cards
     }
 
     private void GoldDerivedCapture(string stage, long version)

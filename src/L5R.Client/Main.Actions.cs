@@ -315,6 +315,9 @@ public partial class Main
         _decisionActions.AddChild(SidebarSkin.Button("Cancel assignment", CancelChoice));
     }
 
+    /// <summary>Issue #635: a list of legal cards whose rows and table tiles highlight each other (see CardChoiceList).</summary>
+    private CardChoiceList NewChoiceList(bool enabled = true) => new(id => _tiles.Where(t => IsInstanceValid(t) && t.Card.Id == id).ToArray()) { Enabled = enabled };
+
     private void RenderTargeted()
     {
         var action = _chosen!;
@@ -331,17 +334,16 @@ public partial class Main
         if (targets.Length > 0)
         {
             _inspector.AddChild(Palette.Text(command.AbilityId is "prepared-death" or "defensive-stance" or "lobby" ? "CHOOSE A PERFORMER" : command.AbilityId == "favor-cycle" ? "CHOOSE A CARD TO DISCARD" : "CHOOSE A TARGET", 11, Palette.Gold));
-            var picker = new OptionButton { FitToLongestItem = false, ClipText = true };
-            picker.AddItem("Choose a target…");
+            var picker = NewChoiceList(); // issue #635: every legal card is a visible row that lights its Personality on the table and is lit by it
             foreach (var id in targets)
             {
                 var card = FindCard(id)!;
                 // A target-derived cost is part of the choice: each target's own engine quote leads the label.
                 var price = action.TargetGold?.TryGetValue(id, out var priced) == true ? $" · {priced.Cost} Gold" : "";
-                picker.AddItem($"{(card.Definition?.Type == CardType.Personality && card.UnitNumber > 0 ? CardTile.UnitLabel(card) + " · " : "")}{View.Players[card.OwnerId].Clan} · {ShortName(card)}{price} · {card.Force} F{(card.Bowed ? " · bowed" : "")}");
+                picker.AddItem($"{(card.Definition?.Type == CardType.Personality && card.UnitNumber > 0 ? CardTile.UnitLabel(card) + " · " : "")}{View.Players[card.OwnerId].Clan} · {ShortName(card)}{price} · {card.Force} F{(card.Bowed ? " · bowed" : "")}", id);
             }
-            picker.Selected = target is null ? 0 : Array.IndexOf(targets, target) + 1;
-            picker.ItemSelected += i => { if (i > 0) ChooseTarget(targets[(int)i - 1]); else ClearTarget(); };
+            picker.Selected = target is null ? -1 : Array.IndexOf(targets, target);
+            picker.ItemSelected += i => { if (targets[i] == _chosen?.Command?.TargetId) ClearTarget(); else ChooseTarget(targets[i]); }; // choosing the chosen row again clears it
             _inspector.AddChild(picker);
             if (needsTarget) _inspector.AddChild(Palette.Wrapped("Choose a target to continue.", 13, Palette.Error));
         }

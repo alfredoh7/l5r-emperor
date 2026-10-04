@@ -85,8 +85,8 @@ public partial class Main
         if (performers.Length > 0)
         {
             _inspector.AddChild(Palette.Text("PERFORMER", 12, Palette.Gold));
-            var picker = new OptionButton { FitToLongestItem = false, ClipText = true };
-            foreach (var id in performers) picker.AddItem(FindCard(id!)!.Definition!.Name);
+            var picker = NewChoiceList(); // issue #635
+            foreach (var id in performers) picker.AddItem(FindCard(id!)!.Definition!.Name, id);
             picker.Selected = Math.Max(0, Array.IndexOf(performers, command.PerformerId));
             picker.ItemSelected += index =>
             {
@@ -101,11 +101,11 @@ public partial class Main
         if (targets.Length > 0)
         {
             _inspector.AddChild(Palette.Text("TARGET", 12, Palette.Gold));
-            var picker = new OptionButton { FitToLongestItem = false, ClipText = true };
+            var picker = NewChoiceList(); // issue #635
             foreach (var id in targets)
             {
                 var target = FindCard(id)!; var option = targetChoices.First(a => a.TargetIds!.Contains(id));
-                picker.AddItem(target.Definition!.Name + (QuoteFor(option with { Command = option.Command! with { TargetId = id } })?.Cost is int gold ? $" · {gold} Gold" : ""));
+                picker.AddItem(target.Definition!.Name + (QuoteFor(option with { Command = option.Command! with { TargetId = id } })?.Cost is int gold ? $" · {gold} Gold" : ""), id);
             }
             picker.Selected = Math.Max(0, Array.IndexOf(targets, command.TargetId));
             picker.ItemSelected += index =>
