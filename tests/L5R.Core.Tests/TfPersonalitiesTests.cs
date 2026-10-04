@@ -175,7 +175,7 @@ internal static class TfPersonalitiesTests
         Check(attack.TargetIds!.Contains(iguchi.Id) && !attack.TargetIds.Contains(other.Id), "Iguchi's Cavalry unit assigns in Cavalry Maneuvers; the unit with an Infantry Follower does not");
         var infantry = Batch336Support.Edit(maneuvers, st => st.Phase = Phase.InfantryDeclaration);
         var infantryAttack = infantry.QueryActions(0).First(a => a.Type == "attack");
-        Check(!infantryAttack.TargetIds!.Contains(iguchi.Id) && infantryAttack.TargetIds.Contains(other.Id), "and the reverse in Infantry Maneuvers");
+        Check(infantryAttack.TargetIds!.Contains(iguchi.Id) && infantryAttack.TargetIds.Contains(other.Id), "in Infantry Maneuvers both may assign");
         Eq(CardCatalog.Get(Iguchi).Text, "", "no rules text is printed");
     }
 
