@@ -49,9 +49,6 @@ public static class GoldCostBasis
     /// wielder: the printed cost less every discount that applies to this attachment, this wielder and this player (EquipGoldCost), then Modifier
     /// and Floor. "Paying all costs" is Modifier 0; "paying 1 less Gold" is Modifier -1 (Moto Jun-Ni, Foothills Keep, Fading Shadows).</summary>
     public const string AttachCost = "attach-cost";
-    /// <summary>AttachCost for every (attachment, wielder) pair of a multi-target attach (Regret: "Attach them to any of your Personalities, paying all costs"): each attachment's own Equip
-    /// cost for the Personality it goes to, summed and paid at once. Priced by RegretAttachSlotsCost (RegretEmbracingVirtue.cs).</summary>
-    public const string AttachSlotsCost = "attach-slots-cost";
     /// <summary>"Pay Gold equal to [base | current] [stat] of [target | performer | source] +/- [z]" (issue #416): any printed number of a card, converted into Gold and paid through the
     /// ordinary Gold pathway. Which card, which stat and whether the printed (base) or the current value is read are on the rule (GoldCostRule.StatOf, Stat, StatBase).</summary>
     public const string Stat = "stat";
@@ -110,7 +107,6 @@ public sealed record GoldCostRule(string Basis, int Amount = 0, int Modifier = 0
     public static GoldCostRule TargetCurrent(int modifier = 0, int? floor = null) => new(GoldCostBasis.TargetCurrent, Modifier: modifier, Floor: floor);
     public static GoldCostRule Variable(int min = 0, int? max = null, bool atResolution = false) => new(GoldCostBasis.Variable, Amount: min, MaxAmount: max, AtResolution: atResolution);
     public static GoldCostRule AttachCost(int modifier = 0, int? floor = null) => new(GoldCostBasis.AttachCost, Modifier: modifier, Floor: floor);
-    public static GoldCostRule AttachSlotsCost() => new(GoldCostBasis.AttachSlotsCost);
     /// <summary>Gold equal to a printed number of a card, plus or minus a modifier (A Quiet Transaction: the target's BASE Personal Honor plus one). <paramref name="of"/> is a
     /// CostStatSubject, <paramref name="stat"/> a CostStat; <paramref name="basePrinted"/> reads the printed value, otherwise the current one (every modifier and token).</summary>
     public static GoldCostRule OwnPersonalityCount(int modifier = 0, int? floor = null) => new(GoldCostBasis.OwnPersonalities, Modifier: modifier, Floor: floor);
@@ -120,7 +116,7 @@ public sealed record GoldCostRule(string Basis, int Amount = 0, int Modifier = 0
     public string Kind => Basis switch
     {
         GoldCostBasis.Variable => GoldCostKind.Variable,
-        GoldCostBasis.TargetPrinted or GoldCostBasis.TargetCurrent or GoldCostBasis.TargetUnitTotal or GoldCostBasis.TargetRecruit or GoldCostBasis.AttachCost or GoldCostBasis.AttachSlotsCost or GoldCostBasis.Stat => GoldCostKind.Derived,
+        GoldCostBasis.TargetPrinted or GoldCostBasis.TargetCurrent or GoldCostBasis.TargetUnitTotal or GoldCostBasis.TargetRecruit or GoldCostBasis.AttachCost or GoldCostBasis.Stat => GoldCostKind.Derived,
         _ => GoldCostKind.Fixed
     };
 }
@@ -306,8 +302,6 @@ public sealed partial class MatchEngine
                     var (equipCost, equipBasis, _) = EquipGoldCost(command.PlayerId, attachment, wielder, fromHand: attachment.Zone == Zone.Hand);
                     return new(rule, Clamp(equipCost + rule.Modifier, rule.Floor), equipBasis + Modified(rule.Modifier, rule.Floor), null, false, attachment);
                 }
-            case GoldCostBasis.AttachSlotsCost:
-                return RegretAttachSlotsCost(command, rule); // Regret (RegretEmbracingVirtue.cs): every attachment priced for its own Personality
         }
         // Every remaining basis is derived from the chosen target.
         if (target is null) return new(rule, 0, "Choose a target to see this cost.", null, true, null);
