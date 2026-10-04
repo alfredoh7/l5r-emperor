@@ -1,0 +1,242 @@
+{
+  "Profile": "strategy-wave-106",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-121",
+      "Name": "Advance Warning",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Move your performing Scout Personality home: Straighten his unit. Raise or lower the current battlefield's province's strength by your Scout's Force.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-121.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "advance-warning-raise",
+        "advance-warning-lower"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-344",
+      "Name": "Ambush",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Choose your performing unbowed Personality and target another player's Personality: Create a battlefield (not at any province). Assign your Personality to attack there. Assign the target to defend there, even if he is bowed. Other Personalities will not move there. Fight a battle there (after this action's resolution). After the battle ends, lose 5 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-344.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "ambush-battle"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-662",
+      "Name": "Back to the Front",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing Personality: Move him to a battlefield he assigned to this turn. If he moved, straighten his unit.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-662.jpg",
+      "Keywords": [],
+      "Focus": 3,
+      "Abilities": [
+        "back-to-the-front-move"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-2445",
+      "Name": "Fall Back!",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing Personality: Move him home. If he moved, straighten his unit, and you may straighten one of your other units (at any location).",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-2445.jpg",
+      "Keywords": [],
+      "Focus": 4,
+      "Abilities": [
+        "fall-back-move"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-3774",
+      "Name": "Inspired Devotion",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle/Open: Choose your performing Yojimbo: Give him +2F or a Force bonus equal to the highest Chi of any Courtier or Shugenja you control.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-3774.jpg",
+      "Keywords": [],
+      "Focus": 4,
+      "Abilities": [
+        "inspired-devotion-bonus",
+        "inspired-devotion-chi"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-7311",
+      "Name": "Sneak Attack",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After engaging: The Attacker has the first opportunity to take a Battle action or pass in this battle.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7311.jpg",
+      "Keywords": [],
+      "Focus": 3,
+      "Abilities": [
+        "sneak-attack-claim"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-7385",
+      "Name": "Soul's Sacrifice",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing unbowed Samurai with 3 or higher Personal Honor and target an enemy Personality: Move him home. Permanently give your Samurai Shadowlands and Undead.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7385.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "souls-sacrifice-move"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-8741",
+      "Name": "Treachery and Deceit",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Target a Personality whose unit's total Force is 7 or higher: Move him home.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8741.jpg",
+      "Keywords": [],
+      "Focus": 4,
+      "Abilities": [
+        "treachery-deceit-move"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9156",
+      "Name": "Vigilant Eyes",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: Choose your performing unbowed Samurai and target a Personality: Give him a Force penalty equal to your Samurai's Force.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9156.jpg",
+      "Keywords": [
+        "Dark Virtue",
+        "Insight"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "vigilant-eyes-penalty"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10143",
+      "Name": "Determined Challenge",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing unbowed attacking Personality and target an enemy Personality: Move the target to the current battlefield. Straighten him if he moved.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10143.jpg",
+      "Keywords": [],
+      "Focus": 3,
+      "Abilities": [
+        "determined-challenge-move"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

@@ -4265,6 +4265,8 @@ public sealed partial class MatchEngine
         "seeking-the-way-move" => "move", // issue #622 (IvorySpells.cs): Seeking the Way moves its target home.
         "servitors-of-stone-straighten" => "straighten", // issue #622: Servitors of Stone straightens its target.
         _ => EmperorRemainingEMoveKind(abilityId) ?? RulingR2MoveKind(abilityId) // Emperor Edition remaining-cards pass (issue #492), group E: Obscured Pathways and Unnatural Flood move their target home.
+            // issue #622 (IvoryMovement.cs): Determined Challenge, Treachery and Deceit and Soul's Sacrifice move their target.
+            ?? IvoryMovementMoveKind(abilityId)
             ?? (abilityId is EmperorMechEAbilities.GreasingBattle or EmperorP3Abilities.RequestMove or EmperorP3Abilities.KentaMove or EmperorP3EntryAbilities.PersuasionMove ? "move" : null) // issue #501: Greasing the Wheels moves its target home (or straightens his unit)
     };
     // Champion of Thunder / Brothers of Goemon's own narrower half (Brothers only ever negates a

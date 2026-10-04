@@ -1299,6 +1299,7 @@ public sealed partial class MatchEngine
             RequireStarCrossedMayAssign(card, assignment.Value, command.Assignments!);
             card.Zone = Zone.Battlefield; card.ProvinceIndex = assignment.Value;
             _state.AssignedThisCommand.Add(card.Id); // Chrysanthemum Blossom (issue #492 group G).
+            NoteIvoryAssignment(card, assignment.Value); // Back to the Front (issue #622): the battlefields he was assigned to this turn.
             foreach (var attached in Attachments(card.Id)) attached.ProvinceIndex = assignment.Value;
             // Tamori Tamoko's own Open action (issue #207 follow-up): "gain 1 Honor if he was NOT
             // assigned to attack your provinces this turn" -- a turn-stamped flag, the same
