@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Battle pane actions lead with the performing Personality's title followed by the action text, and never show the engine card id (card-NNNN)",
+  "validation": "Collection tests 58 assertions pass (3 new for BattleActionText); client builds 0 errors; check-action-lock-ui and check-attack-targets-ui pass on the shared Godot. check-battle-sequence-ui fails on this branch (units offscreen) and on clean main (different error), so it is not usable as evidence. Redrawn Battle pane not viewed.",
+  "remaining": "Visual check of the Battle pane in a running game.",
+  "issue": "",
+  "branch": "claude/tactical-action-labels",
+  "updated": "2026-10-04T18:11:56.185483+00:00"
+}
