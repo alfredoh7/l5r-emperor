@@ -74,7 +74,7 @@ public partial class Main
         if (zone == Zone.Dead) { ShowFallenGallery(owner); return; }
         var player = View.Players.Single(p => p.Id == owner);
         var deck = zone is Zone.FateDeck or Zone.DynastyDeck;
-        var name = zone switch { Zone.FateDeck => "Fate deck", Zone.DynastyDeck => "Dynasty deck", Zone.FateDiscard => "Fate discard", Zone.DynastyDiscard => "Dynasty discard", _ => "Fallen cards" };
+        var name = zone switch { Zone.FateDeck => "Fate deck", Zone.DynastyDeck => "Dynasty deck", Zone.FateDiscard => "Fate discard", Zone.DynastyDiscard => "Dynasty discard", _ => "Dead cards" };
         var (_, body) = Dialog(player.Clan + " · " + name, 880, 720);
         body.AddChild(Palette.Text(player.Clan + " · " + name, 27, Palette.Gold, true));
         if (deck)
