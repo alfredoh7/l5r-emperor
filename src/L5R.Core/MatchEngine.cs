@@ -521,6 +521,7 @@ public sealed partial class MatchEngine
         Require(quote.Error is null, quote.Error ?? "");
         PayAdditionalEntryCost(command.PlayerId, card); // En'you (issue #501, EmperorMechC.cs): an additional cost of entering play.
         Pay(command.PlayerId, card, quote.Cost, command.SourceIds, paying: new PaymentSubject(card, PaymentKind.Recruit));
+        if (Definition(card).Type == CardType.Personality) Player(command.PlayerId).PersonalityPurchaseTurn = _state.TurnNumber;
         var (province, slot) = FindProvinceSlot(Player(command.PlayerId), card.Id); // issue #554: either of Otosan Uchi's two slots
         ClearProvinceSlot(province, slot);
         _state.LastProvinceEntryCardId = card.Id; _state.LastProvinceEntryProvinceIndex = province.Index; // "enters play from a province" (Yogo Ugimori; issue #453, batch 2; Agasha Ryo, issue #477)
@@ -1090,12 +1091,18 @@ public sealed partial class MatchEngine
         var pending = _state.PendingChoice!;
         Emit("reactionPassed", $"{Player(_state.PriorityPlayerId).Name} passed the reaction opportunity.", _state.PriorityPlayerId);
         _state.ConsecutivePasses++;
-        if (_state.ConsecutivePasses == 2)
+        if (_state.ConsecutivePasses == 2) CloseReactionWindow(pending);
+        else _state.PriorityPlayerId = 1 - _state.PriorityPlayerId;
+    }
+
+    // The reaction window `pending` is over (both players passed, or nothing is left to offer either): whatever it opened for resumes.
+    private void CloseReactionWindow(PendingChoice pending, string reason = "Both players passed; the reaction window closed.")
+    {
         {
             _state.PendingChoice = null;
             _state.ConsecutivePasses = 0;
             if (pending.Type == "proclaim") ApplyPendingEntryEffects();
-            Emit("reactionClosed", "Both players passed; the reaction window closed.");
+            Emit("reactionClosed", reason);
             // The after-battle recruit window (issue #379): whatever was not used lapses with the battle, which then finishes.
             if (pending.Type == "battleRecruit") { ExpireBattleRecruitGrants(); CompleteBattleTransition(pending.ActingPlayerId!.Value); return; }
             // The after-resolution window (issue #417, AfterResolution.cs): the resolution goes on with the winners' return home.
@@ -1115,7 +1122,6 @@ public sealed partial class MatchEngine
             if (OpenOverconfidentDrawWindow(resumeTo)) return;
             _state.PriorityPlayerId = resumeTo;
         }
-        else _state.PriorityPlayerId = 1 - _state.PriorityPlayerId;
     }
 
     // The deferred action, once its window has closed: negated as a whole (a reaction negated it: Yoritomo Sakuma, issue #338; Jinn-Kuen, issue #335) it is taken and

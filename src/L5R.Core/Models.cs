@@ -375,6 +375,8 @@ public sealed class PlayerState
     public int Honor { get; set; }
     public int TurnsTaken { get; set; }
     public int ProclaimUsedTurn { get; set; } = -1;
+    /// <summary>The turn this player last bought a Personality from a province (issue #639): the next purchase that turn is no longer the one that defaults to Proclaim.</summary>
+    public int PersonalityPurchaseTurn { get; set; } = -1;
     public bool DishonorLossPending { get; set; }
     // Utaku Chikako's own Limited ability (issue #186): "You may not declare an attack this turn" --
     // a broad restriction (not just her own printed card's interaction), so it blocks declaring an

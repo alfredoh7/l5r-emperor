@@ -27,13 +27,7 @@ Run("resolves purchase and Proclaim with alternating reaction priority", () =>
     Check(game.Execute(new("purchase", 0, 0, id, quote.Payments[0].SourceIds)).Accepted, "Purchase failed");
     var move = TrainingOpponent.Choose(game.GetView(0), game.QueryActions(0)); Check(move.Command?.Type == "proclaim", "Proclaim not chosen");
     Check(game.Execute(move.Command!).Accepted, "Proclaim failed");
-    for (var i = 0; i < 2; i++)
-    {
-        var player = game.GetView(0).PriorityPlayerId;
-        move = TrainingOpponent.Choose(game.GetView(player), game.QueryActions(player));
-        Check(move.Command?.Type == "declineReaction", "Reaction not passed"); Check(game.Execute(move.Command!).Accepted, "Reaction pass failed");
-    }
-    Check(game.GetView(0).PendingChoice is null, "Reaction window stuck");
+    Check(game.GetView(0).PendingChoice is null, "Reaction window stuck: after the Proclaim nothing is left to react with, so it closes (issue #639)");
 });
 Run("declines to attack at the Declaration Segment when it has nothing to attack with, and never stalls there (issue #354)", () =>
 {
