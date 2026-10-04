@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Wired Bayushi Nitoshi - inexperienced (oracle-l5r-10248, personality-wave-119): one-card Fate look with a Yes/No 'playit' disposition for an attachment or phase-playable Strategy; Yes moves the card to hand and holds the game (nitoshiHold) until it is played via its normal ability/playStrategy or the always-offered 'return to top of deck'; attachments attach to a Personality at Nitoshi's location via nitoshiAttach. Shared edits (Mendon standing authority): DeckLook.cs, MatchQueries.cs, MatchEngine.cs one-liners; client renders the options generically, no client code changed.",
+  "validation": "Core filter nitoshi-inexperienced: 7/7 pass. bash tools/check.sh --skip-client: 138/139 tool tests pass; the 1 error is test_catalogue_art coverage (new Nitoshi scan needs an art pack publisher update). No native client visual check.",
+  "remaining": "Art pack rebuild/publish for the new scan (art-pack-release, not requested here); regenerate docs/CARD_INVENTORY.xlsx (locked by Excel); client visual check of the prompt. Not mergeable until the art coverage test is green.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/617",
+  "branch": "claude/617-nitoshi-inexperienced",
+  "updated": "2026-10-04T04:48:43.220261+00:00"
+}
