@@ -1417,7 +1417,7 @@ internal static class TargetedActionReactionTests
             var e = MatchEngine.FromTestState(s);
             var option = e.QueryActions(1).Single(a => a.Type == "useAbility" && a.CardId == attacker.Id && a.Command?.AbilityId == "training-province-attack");
             Check(option.Enabled && option.NoTarget && option.Provinces!.SequenceEqual(new[] { 0 }), "no target, a card, or the province");
-            var weak = e.State.Cards.Values.First(c => c.DefinitionId == "training-crane-samurai"); Check(option.TargetIds!.Contains(weak.Id), "a card target is still offered");
+            var weak = e.State.Cards.Values.First(c => c.DefinitionId == "training-crane-samurai" && c.Zone == Zone.Battlefield); // not whichever copy the card dictionary happens to list first (issue #611) Check(option.TargetIds!.Contains(weak.Id), "a card target is still offered");
             var strength = e.ProvinceStrengthForTest(0, 0);
             var onProvince = new GameCommand("useAbility", 1, e.Version, CardId: attacker.Id, AbilityId: "training-province-attack", Province: 0);
             Reject(e, onProvince with { TargetId = weak.Id }); Reject(e, onProvince with { Province = 1 });

@@ -31,6 +31,7 @@ internal static class GempukkuPassTests
         ("Moshi Madoka - exp: bows to draw a card, only once a card has been attached from the hand this turn", MadokaDraw),
         ("Kunji - exp: brought into play from the dead pile only while honorably dead -- free for a Phoenix Clan player, otherwise at his recruit price", KunjiReturn),
         ("Shosuro Hawado - exp 2: discards a card in a province (either player's, face-down included) and refills it face-up from the Dynasty deck", HawadoDiscardAndRefill),
+        ("Shosuro Hawado's province targets are listed in opaque-id order, not dictionary order (issue #611)", HawadoTargetsAreOrderedById),
         ("Daigotsu Negishi - exp: an action's destruction of him is negated when the performing unit's total Gold Cost is lower than his unit's, not otherwise", NegishiShield),
         ("Hida Yamadera - exp: after another player's Battle action destroys him, a Melee 8 Attack from the dead pile", YamaderaAttack),
     ]);
@@ -224,6 +225,19 @@ internal static class GempukkuPassTests
         Check(refill is not null && refill != targetId, "the province was refilled");
         Check(refill is not null && e.State.Cards[refill].FaceUp && e.State.Cards[refill].Zone == Zone.Province, "face-up");
         Eq(e.State.Players[1].DynastyDeck.Count, deckBefore - 1, "from the top of the Dynasty deck");
+    }
+
+    // Issue #611: "card-in-province" lists face-down province cards. Its option order must not depend on how the card dictionary happens to be
+    // ordered (deck-list order before the fix), so build the state with the dictionary deliberately in descending id order.
+    private static void HawadoTargetsAreOrderedById()
+    {
+        var s = Table(Phase.Action, 0);
+        var hawado = Add(s, Hawado, 0, Zone.Home);
+        s.Cards = s.Cards.OrderByDescending(c => c.Key, StringComparer.Ordinal).ToDictionary(c => c.Key, c => c.Value);
+        var e = MatchEngine.FromTestState(s);
+        var targets = Batch336Support.Options(e, 0, "hawado-exp2-discard", hawado.Id).SelectMany(o => o.TargetIds ?? []).ToArray();
+        Check(targets.Length > 1, "Hawado is offered several province cards");
+        Check(targets.SequenceEqual(targets.OrderBy(t => t, StringComparer.Ordinal)), "targets are listed in id order: " + string.Join(", ", targets));
     }
 
     private static void NegishiShield()

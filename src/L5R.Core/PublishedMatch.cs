@@ -33,6 +33,7 @@ public sealed partial class MatchEngine
         state.RngState = random.State; // Deck search (issue #312): later shuffles continue this exact sequence.
         state.ActivePlayerId = state.Players.OrderByDescending(p => p.Honor).First().Id;
         Add(1 - state.ActivePlayerId, "oracle-l5r-679", Zone.Home, true, true);
+        OrderCardsById(state);
         var engine = new MatchEngine(state, seed, scenario);
         foreach (var player in state.Players)
         {

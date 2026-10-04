@@ -1,0 +1,9 @@
+{
+  "lane": "rules",
+  "summary": "Stop deck-list order leaking through option order: card-in-province targets are sorted by opaque id, and the card dictionary is rebuilt in id order after setup for starter, published, custom and published-test matches.",
+  "validation": "Core all suites pass (new: Hawado targets in id order with the dictionary deliberately reversed; rewritten opacity test now asserts id-order enumeration across starter/published/custom/published-test), AI 97/97, server 9/9, client transport 18/18, collection pass, lint and whole-file format ok. One existing test (AttacksNeedNoCardTarget) picked a card by dictionary order; it now selects the battlefield copy. Client compile not run (no client change).",
+  "remaining": "Item 4 of #611 (per-owner unit number) follows. Showcase/duel-demo scenarios keep their own id schemes and were not reordered; other _state.Cards.Values builders over public zones were not changed.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/611",
+  "branch": "claude/611-id-ordered-options",
+  "updated": "2026-10-04T01:11:15.484290+00:00"
+}
