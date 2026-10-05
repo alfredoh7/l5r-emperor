@@ -39,7 +39,7 @@ public partial class DeckBuilderScreen
                 row.AddChild(CatalogueArt.Button("Open in builder", () => OpenFile(path))); row.AddChild(CatalogueArt.Button("Duplicate", () => { if (!OpenFile(path)) return; _name.Text = name + " copy"; _currentPath = null; Dirty = true; UpdateStatus(); }));
                 row.AddChild(CatalogueArt.Button("Export", () => ExportFile(draft.ToDeck(), name)));
             }
-            catch (Exception e) { box.AddChild(Palette.Wrapped("Needs repair: " + e.Message, 18, new Color("e8a896"))); box.AddChild(CatalogueArt.Button("Open folder", () => OS.ShellOpen(Store.DirectoryPath))); }
+            catch (Exception e) { box.AddChild(Palette.Wrapped("Needs repair: " + e.Message, 18, new Color("e8a896"))); var repair = new HBoxContainer(); repair.AddThemeConstantOverride("separation", 12); box.AddChild(repair); repair.AddChild(CatalogueArt.Button("Troubleshoot", () => { if (!TryTroubleshoot(path)) Notice("Nothing to suggest: " + e.Message); })); repair.AddChild(CatalogueArt.Button("Open folder", () => OS.ShellOpen(Store.DirectoryPath))); }
         }
         Put(_library, CatalogueArt.Button("Open deck folder", () => { Directory.CreateDirectory(Store.DirectoryPath); OS.ShellOpen(Store.DirectoryPath); }), 20, _library.Size.Y - 44, 220, 38);
         Put(_library, CatalogueArt.Button("Back to menu", () => Closed?.Invoke()), _library.Size.X - 230, _library.Size.Y - 44, 210, 38);
@@ -77,7 +77,7 @@ public partial class DeckBuilderScreen
             var stronghold = incoming.Cards.FirstOrDefault(c => c.SetupSlot == "Stronghold"); if (stronghold is not null) _setupClan = _byId[stronghold.Id].Clans.FirstOrDefault() ?? "Unaligned";
             EnterEditor(); return true;
         }
-        catch (Exception e) { Notice("Could not load deck. Your open draft has not changed.\n\n" + e.Message); return false; }
+        catch (Exception e) { if (!TryTroubleshoot(path)) Notice("Could not load deck. Your open draft has not changed.\n\n" + e.Message); return false; }
     }
     private void ImportDeck()
     {
