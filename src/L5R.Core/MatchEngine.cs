@@ -981,7 +981,7 @@ public sealed partial class MatchEngine
         var card = Card(cardId); var def = Definition(card);
         if (def.Effect == MoneylenderEffect) return MoneylenderTokens(card); // Moneylender (issue #492, group F): Gold equal to the Wealth tokens it can remove.
         // The Shadow's Embrace pass (issue #476), batch 6: a production modifier for the turn (The Moon's Imperative, The Sun's Aspiration) and Sheltered Port's count.
-        var adjustment = (def.Type == CardType.Holding ? ShadowsEmbraceBatch6Production(card, playerId) + PromoProductionBonus(card, playerId) : 0) + PromoEmperorProductionAdjustment(card, playerId, paying) + (def.Type == CardType.Holding && def.GoldProduction > 0 ? PromoFestivalProduction(card) : 0); // issue #653: Seppun Ritisharu (Holdings), Plantation (a Stronghold) and Kenro-ji-jin's Bounty (the Farms), the Festivals
+        var adjustment = (def.Type == CardType.Holding ? ShadowsEmbraceBatch6Production(card, playerId) + PromoProductionBonus(card, playerId) + PromoCelestialCProduction(card, playerId) : 0) + PromoEmperorProductionAdjustment(card, playerId, paying) + (def.Type == CardType.Holding && def.GoldProduction > 0 ? PromoFestivalProduction(card) : 0); // issue #653: Seppun Ritisharu (Holdings), The Imperial Treasury (PromoCelestialC.cs), Plantation (a Stronghold) and Kenro-ji-jin's Bounty (the Farms), the Festivals
         if (ConditionalProductionOf(card) is { } conditional && ProductionConditionMet(conditional, paying)) return Math.Max(0, conditional.Amount + adjustment);
         // Library of Rebirth (Stronghold pass, issue #486 batch 1), Luxurious Silk, Seaside Bazaar: a Reaction's Gold is its own payment source (issue #501: "<card>#reaction", EmperorMechE.cs),
         // usable beside the card's bow; the card's own id is always its printed production.
@@ -2025,6 +2025,7 @@ public sealed partial class MatchEngine
         Require(card.OwnerId == command.PlayerId && card.Zone == Zone.Hand && def.Type == CardType.Strategy, "Choose a supported Strategy from your hand.");
         var province = _state.CurrentBattleProvince!.Value;
         Require(Army(command.PlayerId, province).Any() || TerrainPlaysWithoutPresence(def) && Keyword(card, "Terrain"), "You need a unit at the current battlefield to take a Battle action."); // Flooded Pass (issue #492): "Even if you control no units".
+        if (Keyword(card, "Terrain")) RequireJahanAllowsTerrain(command.PlayerId); // Jahan (PromoCelestialA.cs): checked before anything is paid
         // A Strategy pays its own printed Gold cost (issue #303: the same QuoteStrategyGold that
         // QueryActions ships to the client; free ones -- every training fixture -- charge nothing and,
         // as before, accept no sources).
@@ -2287,7 +2288,7 @@ public sealed partial class MatchEngine
     // (e.g. "+2F while defending") -- distinct from an Item's, which always conveys to the wielder
     // instead (see PersonalityForce/ItemForceToWielder). Feeds both CardForce (targeting, always
     // visible regardless of bow state) and BattleForce (unit total, gated on unbowed-or-Elite).
-    private int FollowerForce(CardInstance card) => Math.Max(0, Definition(card).Force + StatModifier(card, "Force") + P5Force(card)/* issue #503 */+ PromoItemsFollowerForce(card) /* Battle Standard of the Naga */ + TerrainForceAdjustment(card) + GinasFoxForce(card) + ForgottenLegacyBatch5Force(card) + ShadowsEmbraceBatch5Force(card) + (Definition(card).Effect switch
+    private int FollowerForce(CardInstance card) => Math.Max(0, Definition(card).Force + StatModifier(card, "Force") + P5Force(card)/* issue #503 */+ PromoItemsFollowerForce(card) /* Battle Standard of the Naga */ + TerrainForceAdjustment(card) + GinasFoxForce(card) + PromoCelestialCForce(card) + ForgottenLegacyBatch5Force(card) + ShadowsEmbraceBatch5Force(card) + (Definition(card).Effect switch
     {
         "force-while-defending" => IsDefendingUnit(card) ? 2 : 0,
         // Home Guard (oracle-l5r-3413, issue #435): "This card has +3F while defending" -- the same
@@ -3132,6 +3133,7 @@ public sealed partial class MatchEngine
         Emit("regionAttached", $"{Definition(card).Name} attached to {player.Name}'s province {province.Index + 1}.", player.Id, card.Id);
         AfterRegionAttachedP6(province, card); // Dark Experiments (issue #503, EmperorP6.cs)
         AfterRegionAttachedOtosanUchi(province, card); // Plains of Otosan Uchi (issue #554): creates the province's second Dynasty slot.
+        PromoCelestialCRegionEntered(player, card); // Deadlands (PromoCelestialC.cs): "After this card enters play: Lose 4 Honor."
     }
     // A Celestial (core rules Glossary): unlike Event/Region, it enters play the instant it is
     // revealed regardless of WHICH phase that reveal happens in -- today the Events Phase reveal loop

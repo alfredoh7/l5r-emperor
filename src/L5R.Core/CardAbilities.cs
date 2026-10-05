@@ -4195,8 +4195,10 @@ public sealed partial class MatchEngine
         or "serenity-air-straighten" or "serenity-air-straighten-open"
         or IvoryPoliticalAbilities.SandayuStraighten or IvoryPoliticalAbilities.LordsFavorStraighten // Ivory pass (issue #622)
         or "hama-straighten" // Emperor Edition Personality pass (issue #477), batch 3
+        or PromoCelestialCAbilities.YotsuStraighten // Promotional-Celestial group C (PromoCelestialC.cs)
         or "yorisada-straighten" // Emperor Edition Personality pass (issue #477), batch 5
-        or TfStrategiesAAbilities.OutpostOpen or TfStrategiesAAbilities.OutpostBattle; // Ivory Magistrate Outpost (issue #622)
+        or TfStrategiesAAbilities.OutpostOpen or TfStrategiesAAbilities.OutpostBattle // Ivory Magistrate Outpost (issue #622)
+        or PromoCelestialAAbilities.TashikiStraighten; // Tashiki only straightens his Holding
     private static string? MoveOrStraightenKind(string abilityId) => abilityId switch
     {
         "incapacitated" or "favor-battle" or "journeys-end-move" or "shamate-move" or "effortless-counterattack-move"
@@ -4264,6 +4266,7 @@ public sealed partial class MatchEngine
         "lesson-of-earth-move" or "paralyzing-touch-move" => "move",
         "serenity-air-straighten" or "serenity-air-straighten-open" => "straighten",
         "hama-straighten" => "straighten", // Emperor Edition Personality pass (issue #477), batch 3
+        PromoCelestialCAbilities.YotsuStraighten => "straighten", // Promotional-Celestial group C (PromoCelestialC.cs)
         // Emperor Edition remaining-cards pass (issue #492), group D: The Law's Strength, The Power of a Word and The Serpent's Deception move their target home; The Slow Death and Well Prepared straighten theirs.
         "laws-strength-move" or "power-word-move" or "serpents-deception-move" => "move",
         "slow-death-straighten" or "well-prepared-straighten" => "straighten",
@@ -5533,8 +5536,9 @@ public sealed partial class MatchEngine
                 || id == EmperorP3PriorityAbilities.AyumuStraighten // Ikoma Ayumu (issue #503): "Even if Ayumu is bowed".
                 || MechAEvenIfBowed(id) // Mirumoto Inokuchi (issue #501): "Even if Inokuchi is bowed".
                 || id == EmperorP4UnitAbilities.HayanAssign // Shinjo Hayan's trait (issue #503): a trait is usable while its card is bowed
-                || MechEEvenIfBowed(id) // issue #501: Moto Rani - exp ("Even if Rani is bowed"); Kakita Kae's trait (a trait is usable while bowed)
-                                        // issue #622 (IvoryPolitical.cs): Komori Taruko ("Even if Taruko is bowed")
+                                                            // issue #501: Moto Rani - exp ("Even if Rani is bowed"); Kakita Kae's trait (a trait is usable while bowed)
+                || MechEEvenIfBowed(id)
+                // issue #622 (IvoryPolitical.cs): Komori Taruko ("Even if Taruko is bowed")
                 || IvoryPoliticalEvenIfBowed(id)
                 // Retired Sensei (issue #653, PromoEmperorHoldings.cs)
                 || PromoEmperorEvenIfBowed(id)
@@ -7127,6 +7131,7 @@ public sealed partial class MatchEngine
         if (TurnTargetShieldNegates(command)) return; // Consideration (Forgotten Legacy pass, issue #467 batch 3)
         if (TouchTheEmptinessNegates(command)) return; // Touch the Emptiness (The Shadow's Embrace pass, issue #476 batch 5)
         if (OriolePoliticalNegates(command)) return; // Oriole Imperial Vanguard (issue #622, IvoryPolitical.cs): the first Political action each phase that targets his Personality
+        if (KamalakarPoliticalNegates(command)) return; // Kamalakar (PromoCelestialA.cs): the first Political action each turn that targets him
         if (ShadowsEmbraceBatch1Negates(command)) return; // Hiruma Nikaru's battle shield, Bayushi Waru's next-performed-action negation (The Shadow's Embrace pass, issue #476 batch 1)
         if (ResolveOrDeferAnnounceReaction(command)) return;
         if (ResolveOrDeferEntrenchedReaction(command)) return; // Entrenched Position (Forgotten Legacy pass, issue #467 batch 3)
