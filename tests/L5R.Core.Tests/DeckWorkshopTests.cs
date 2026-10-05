@@ -12,11 +12,11 @@ internal static class DeckWorkshopTests
         new("p5", "Bayushi Paneki", ["Personality"], ["Dynasty"], ["Experienced 5"], true),
         new("strategy-exp1", "Ancestral Lesson", ["Strategy"], ["Fate"], ["Experienced"], true),
         new("strategy-exp2", "Ancestral Lesson", ["Strategy"], ["Fate"], ["Experienced 2"], true)];
-    private static void Check(bool value){if(!value)throw new Exception("Deck workshop assertion failed.");}
-    private static void Throws(Action action){try{action();}catch(FormatException){return;}throw new Exception("Expected format rejection.");}
+    private static void Check(bool value) { if (!value) throw new Exception("Deck workshop assertion failed."); }
+    private static void Throws(Action action) { try { action(); } catch (FormatException) { return; } throw new Exception("Expected format rejection."); }
     public static void Run(TestRunner runner)
     {
-        (string Name,Action Test)[] tests=[
+        (string Name, Action Test)[] tests = [
             ("Setup selections replace versions and stay out of deck totals",()=>{var d=new DeckWorkshop(Pool);d.SelectSetup("Castle");d.SelectSetup("Other Castle");d.SelectSetup("Border Keep");d.SelectSetup("Border Keep - exp");d.SelectSetup("Bamboo Harvesters");d.Adjust("Samurai",3);Check(d.Count("Castle")==0&&d.Count("Border Keep")==0&&d.Review().Dynasty==3&&d.Review().Unimplemented==1);}),
             ("Incomplete and over-limit drafts round trip without hard blocking",()=>{var d=new DeckWorkshop(Pool);d.Adjust("Samurai",4);d.Adjust("Unique Samurai",2);var q=new DeckWorkshop(Pool);q.Load(DeckFormat.Write(d.ToDeck()));Check(q.Count("Samurai")==4&&q.Review().OverLimit.Length==2);}),
             ("Duplicate and case-variant import lines cannot evade limits",()=>{var d=new DeckWorkshop(Pool);d.Load("Legality: Emperor\n2 Samurai\n2 samurai\n");Check(d.Count("Samurai")==4&&d.Review().OverLimit.Length==1);}),
@@ -52,6 +52,6 @@ internal static class DeckWorkshopTests
                 Check(best[0]=="Fukuzo"&&best[1]=="Taishuu"&&best[2].StartsWith("Daigotsu Aya")&&best[3].StartsWith("Utaku Liu"));
                 Check(t.Problems.All(p=>p.Suggestions.Length>0));}),
         ];
-        runner.Run("deck-workshop",tests);
+        runner.Run("deck-workshop", tests);
     }
 }
