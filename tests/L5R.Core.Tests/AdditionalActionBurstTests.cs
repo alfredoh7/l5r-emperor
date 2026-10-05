@@ -92,8 +92,7 @@ internal static class AdditionalActionBurstTests
         Use(e, 0, "ruya-bow", r.Ruya, r.Second.Id);
         Check(e.State.Cards[r.Second.Id].Bowed, "her Reaction resolved");
         Eq(Grants(e), 1, "an ordinary action that was not an additional action would have forfeited it; a Reaction does not");
-        Eq(e.State.PriorityPlayerId, 1, "inside the window the alternation goes on: the opponent may react");
-        Decline(e); Decline(e);
+        // Issue #644: the opponent holds nothing to react with, so nobody is asked to pass and the window closes at once.
         Check(e.State.PendingChoice is null, "the window closed");
         Eq(e.State.PriorityPlayerId, 0, "and the holder has priority again, mid-burst");
         Eq(Grants(e), 1);
@@ -116,8 +115,7 @@ internal static class AdditionalActionBurstTests
         var hizumi = r.S.Cards.Values.First(c => c.DefinitionId == Hizumi);
         Use(e, 1, "hizumi-negate-straighten", hizumi, r.First.Id);
         Eq(Grants(e), 1, "the opponent's Reaction leaves the burst alone");
-        Decline(e); Decline(e);
-        Check(e.State.PendingChoice is null, "the window closed");
+        Check(e.State.PendingChoice is null, "the window closed (issue #644: nobody holds another reaction, so nobody is asked to pass)");
         Eq(e.State.PriorityPlayerId, 0, "control returns to the burst's holder, not to the opponent whose window it was");
         Check(Offered(e, 0, "training-bow-at-battle", r.Follow) is not null, "the next additional action is offered");
     }
@@ -139,10 +137,10 @@ internal static class AdditionalActionBurstTests
         Eq(e.State.PendingChoice?.CardId, hizumi.Id, "Ruya's Reaction bowed a Personality: Hizumi's window opens over hers");
         Eq(e.State.SuspendedWindows.Count, 1); Eq(e.State.SuspendedWindows[0].Choice, ruyasWindow);
         Eq(Grants(e), 1, "the burst holds while a window waits behind another");
-        Decline(e); Decline(e);
-        Eq(e.State.PendingChoice, ruyasWindow, "hers is given back"); Eq(e.State.SuspendedWindows.Count, 0);
+        Decline(e); // Hizumi's controller passes: the attacker holds nothing to react with, so his window closes
+        // Issue #644: Ruya's window is given back (SuspendedWindows is empty again) but her Reaction is spent, so it has nothing left to offer and closes too.
+        Eq(e.State.SuspendedWindows.Count, 0);
         Eq(Grants(e), 1);
-        Decline(e); Decline(e);
         Check(e.State.PendingChoice is null, "every window closed");
         Eq(e.State.PriorityPlayerId, 0, "the holder has priority again");
         Eq(Grants(e), 1, "with the additional action intact");
@@ -259,7 +257,7 @@ internal static class AdditionalActionBurstTests
         Eq(JsonSerializer.Serialize(restored.State), snapshot, "round-trips");
         foreach (var engine in new[] { e, restored })
         {
-            Decline(engine); Decline(engine); Decline(engine); Decline(engine);
+            Decline(engine); // Hizumi's controller passes; both windows close (issue #644)
             Eq(engine.State.PriorityPlayerId, 0); Eq(Grants(engine), 1);
             Accept(engine, engine.QueryActions(0).First(o => o.Type == "useAbility" && o.Enabled && o.Command?.AbilityId == "training-bow-at-battle").Command! with { TargetId = r.Third.Id });
         }

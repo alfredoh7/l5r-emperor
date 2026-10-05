@@ -595,14 +595,14 @@ static void FallowLandsRegion()
         var enemy = Add(s, "training-crane-samurai", 1, Zone.Battlefield, province: 0); enemy.Modifiers = [new("test-fixture", "test-fixture", "Force", 1)]; // Force 4: defender's own presence too
         var fallowLands = Add(s, "oracle-l5r-9865", 1, Zone.Region, province: 0);
         s.Players[1].Provinces[0].RegionId = fallowLands.Id;
+        Add(s, "training-attack-reactor", 1, Zone.Home); // the defender still holds a Reaction, so the window stays open to read the strength (issue #644)
         var e = MatchEngine.FromTestState(s);
         Accept(e, new GameCommand("useAbility", 0, e.Version, CardId: s.Players[0].StrongholdId, PerformerId: castle.Id, TargetId: enemy.Id, AbilityId: "carpenter-castle-siege"));
         Equal(e.State.PendingChoice?.Type, "attackReaction");
         Equal(e.State.PendingAttack?.Strength, 5);
         Accept(e, new GameCommand("useAbility", 1, e.Version, CardId: fallowLands.Id, AbilityId: "fallow-lands-reaction"));
         Equal(e.State.PendingAttack?.Strength, 3);
-        Accept(e, new GameCommand("declineReaction", 0, e.Version));
-        Accept(e, new GameCommand("declineReaction", 1, e.Version));
+        Accept(e, new GameCommand("declineReaction", 1, e.Version)); // the attacker holds nothing, so this one pass closes the window
         Check(e.State.Cards[enemy.Id].Zone == Zone.Battlefield, "Force 4 vs. reduced strength 3 no longer destroys -- worked the very turn Fallow Lands entered play");
     }
     // Rejected when its own province is not the one under attack, even though the window still opens
@@ -619,8 +619,7 @@ static void FallowLandsRegion()
         Accept(e, new GameCommand("useAbility", 0, e.Version, CardId: s.Players[0].StrongholdId, PerformerId: castle.Id, TargetId: enemy.Id, AbilityId: "carpenter-castle-siege"));
         Equal(e.State.PendingChoice?.Type, "attackReaction");
         Reject(e, new GameCommand("useAbility", 1, e.Version, CardId: fallowLands.Id, AbilityId: "fallow-lands-reaction"));
-        Accept(e, new GameCommand("declineReaction", 1, e.Version));
-        Accept(e, new GameCommand("declineReaction", 0, e.Version));
+        Accept(e, new GameCommand("declineReaction", 1, e.Version)); // the attacker holds nothing, so this one pass closes the window (issue #644)
         Check(e.State.Cards[enemy.Id].Zone == Zone.Dead, "Attack resolved at full strength -- Fallow Lands never reacted");
     }
 }
@@ -1264,6 +1263,7 @@ static void SecondCityRestBatch()
         var s = StrongholdBattle("oracle-l5r-1218");
         var shikaro = Add(s, "oracle-l5r-6850", 0, Zone.Battlefield, province: 0); // Shikaro: Ranged 4 Attack
         var range = Add(s, "oracle-l5r-430", 0, Zone.Home);
+        Add(s, "training-attack-reactor", 1, Zone.Home); // the opponent still holds a Reaction, so the window stays open to read the strength (issue #644)
         var target = Add(s, "training-crane-samurai", 1, Zone.Battlefield, province: 0);
         var e = MatchEngine.FromTestState(s);
         Accept(e, new GameCommand("useAbility", 0, e.Version, CardId: shikaro.Id, TargetId: target.Id, AbilityId: "shikaro-attack"));
@@ -1329,6 +1329,7 @@ static void SecondCityRestBatch()
         var s = StrongholdBattle("oracle-l5r-1218");
         var host = Add(s, "oracle-l5r-6850", 0, Zone.Battlefield, province: 0); // Shikaro: Ranged 4 Attack
         var arrows = Add(s, "oracle-l5r-2608", 0, Zone.Attached, province: 0, attachedTo: host.Id);
+        Add(s, "training-attack-reactor", 1, Zone.Home); // the opponent still holds a Reaction, so the window stays open to read the strength (issue #644)
         var target = Add(s, "training-crane-samurai", 1, Zone.Battlefield, province: 0);
         var e = MatchEngine.FromTestState(s);
         Accept(e, new GameCommand("useAbility", 0, e.Version, CardId: host.Id, TargetId: target.Id, AbilityId: "shikaro-attack"));
@@ -2369,9 +2370,9 @@ static void MeiyuEntersPlayReaction()
     Check(e.State.Cards[cardId].Tokens.All(t => t.Type == "Fire" && t.Stat == "Force" && t.Amount == 1));
     Equal(e.GetView(0).Players[0].Home.Single(c => c.Id == cardId).Force, 3, "Base Force 0 plus three +1F Fire tokens");
     Check(e.State.PendingChoice is not null, "The window stays open for Proclaim afterward");
-    // Using the reaction passed priority to the opponent, same as Proclaim's own alternation; they
-    // have nothing to do here but decline, handing priority back for Proclaim.
-    Accept(e, new GameCommand("declineReaction", 1, e.Version));
+    // Issue #644: using the reaction passed priority to the opponent, who holds nothing to react with and is not asked to pass: the opportunity is back with Meiyu's controller for Proclaim.
+    Equal(e.State.PriorityPlayerId, 0, "the opponent has no reaction here, so priority returns to Proclaim's owner without a pass");
+    Reject(e, new GameCommand("declineReaction", 1, e.Version));
     Reject(e, new GameCommand("useAbility", 0, e.Version, CardId: cardId, AbilityId: "meiyu-fire-tokens")); // once only
     // Proclaim still works afterward, in either order.
     Accept(e, new GameCommand("proclaim", 0, e.Version));
@@ -2491,7 +2492,9 @@ static void AttackReactionWindow()
         Check(e.State.Cards[castle.Id].Bowed, "The cost is paid immediately, before the window even opens");
         Accept(e, new GameCommand("useAbility", 1, e.Version, CardId: reactor.Id, AbilityId: "training-attack-negate"));
         Equal(e.State.PendingAttack?.Strength, 0);
-        Accept(e, new GameCommand("declineReaction", 0, e.Version));
+        // Issue #644: the attacker holds no reaction and is not asked to pass; the reactor's other reaction is still his, so he alone passes and the window closes.
+        Equal(e.State.PriorityPlayerId, 1);
+        Reject(e, new GameCommand("declineReaction", 0, e.Version));
         Accept(e, new GameCommand("declineReaction", 1, e.Version));
         Check(e.State.PendingChoice is null && e.State.PendingAttack is null, "Window closed and the attack resolved");
         Check(e.State.Cards[enemy.Id].Zone == Zone.Battlefield, "Negated: the target survives");
@@ -2509,8 +2512,7 @@ static void AttackReactionWindow()
         Accept(e, new GameCommand("useAbility", 0, e.Version, CardId: s.Players[0].StrongholdId, PerformerId: castle.Id, TargetId: enemy.Id, AbilityId: "carpenter-castle-siege"));
         Accept(e, new GameCommand("useAbility", 0, e.Version, CardId: reactor.Id, AbilityId: "training-attack-boost"));
         Equal(e.State.PendingAttack?.Strength, 7, "5 base + 2 from the boost");
-        Accept(e, new GameCommand("declineReaction", 1, e.Version));
-        Accept(e, new GameCommand("declineReaction", 0, e.Version));
+        Accept(e, new GameCommand("declineReaction", 0, e.Version)); // the defender holds nothing, so the attacker's one pass closes the window (issue #644)
         Equal(e.State.Cards[enemy.Id].Zone, Zone.Dead);
         Equal(e.State.Players[0].Honor, honorBefore + 2, "Carpenter Castle's hit bonus still applies to a deferred resolution");
     }
@@ -2554,8 +2556,7 @@ static void HandPlayedAttackSpentWhenWindowOpens()
             var (e, card, enemy) = play(true);
             Equal(e.State.PendingChoice?.Type, "attackReaction", $"{name}: a reactor is available, so the window opens");
             Spent(e, card, $"{name}, while the window is open");
-            Accept(e, new GameCommand("declineReaction", 1, e.Version));
-            Accept(e, new GameCommand("declineReaction", 0, e.Version));
+            Accept(e, new GameCommand("declineReaction", 1, e.Version)); // the attacker holds no reaction, so this one pass closes the window (issue #644)
             Check(e.State.PendingChoice is null && e.State.PendingAttack is null, $"{name}: window closed");
             Equal(e.State.Cards[enemy.Id].Zone, Zone.Dead, $"{name}: the Attack itself still resolves");
             Spent(e, card, $"{name}, after the window closes");
@@ -2566,8 +2567,7 @@ static void HandPlayedAttackSpentWhenWindowOpens()
             var reactor = e.State.Cards.Values.Single(c => c.DefinitionId == "training-attack-reactor");
             Accept(e, new GameCommand("useAbility", 1, e.Version, CardId: reactor.Id, AbilityId: "training-attack-negate"));
             Equal(e.State.PendingAttack?.Strength, 0, $"{name}: negated");
-            Accept(e, new GameCommand("declineReaction", 0, e.Version));
-            Accept(e, new GameCommand("declineReaction", 1, e.Version));
+            Accept(e, new GameCommand("declineReaction", 1, e.Version)); // the attacker holds no reaction, so the reactor's owner alone passes (issue #644)
             Equal(e.State.Cards[enemy.Id].Zone, Zone.Battlefield, $"{name}: the negated Attack does not destroy its target");
             Spent(e, card, $"{name}, after a negated Attack");
         }
@@ -2599,7 +2599,7 @@ static void HandPlayedAttackSpentWhenWindowOpens()
             var e = MatchEngine.FromTestState(s);
             Accept(e, new GameCommand("useAbility", 0, e.Version, CardId: card.Id, PerformerId: performer.Id, TargetId: enemy.Id, AbilityId: "strength-of-the-divine-force"));
             Equal(e.State.PendingChoice?.Type == "attackReaction", reactor, $"{label}: window state (reactor={reactor})");
-            if (reactor) { Accept(e, new GameCommand("declineReaction", 1, e.Version)); Accept(e, new GameCommand("declineReaction", 0, e.Version)); }
+            if (reactor) Accept(e, new GameCommand("declineReaction", 1, e.Version)); // the attacker holds no reaction: this one pass closes the window (issue #644)
             Equal(e.State.Cards[enemy.Id].Zone, Zone.Dead, $"{label}: resolved (reactor={reactor})");
             Equal(e.State.PriorityPlayerId, expectedPriority, $"{label}: priority (reactor={reactor})");
             Equal(e.State.AdditionalActions.Count(g => g.PlayerId == 0), expectedGrants, $"{label}: remaining grants (reactor={reactor})");
@@ -3013,11 +3013,10 @@ static void BayushiKahokuExpTrait()
         }
         var e1 = Declared(out var t1, out var reactor1);
         Equal(e1.State.PendingChoice?.Type, "attackReaction"); Equal(e1.State.PendingAttack?.TargetId, t1.Id); Equal(e1.State.PendingAttack?.Strength, 3); Equal(e1.State.PendingAttack?.Kind, "Ranged");
-        Accept(e1, new GameCommand("useAbility", 1, e1.Version, CardId: reactor1.Id, AbilityId: "training-attack-negate"));
-        Accept(e1, new GameCommand("declineReaction", 0, e1.Version)); Accept(e1, new GameCommand("declineReaction", 1, e1.Version));
+        Accept(e1, new GameCommand("useAbility", 1, e1.Version, CardId: reactor1.Id, AbilityId: "training-attack-negate")); // nobody holds another reaction: the window closes (issue #644)
         Equal(e1.State.Cards[t1.Id].Zone, Zone.Battlefield, "Negated in the window: the (legal) target survives");
         var e2 = Declared(out var t2, out _);
-        Accept(e2, new GameCommand("declineReaction", 1, e2.Version)); Accept(e2, new GameCommand("declineReaction", 0, e2.Version));
+        Accept(e2, new GameCommand("declineReaction", 1, e2.Version)); // the attacker holds no reaction: this one pass closes the window (issue #644)
         Equal(e2.State.Cards[t2.Id].Zone, Zone.Dead, "Not negated: destroyed on resolution, its Follower with it");
     }
     {
@@ -4948,14 +4947,14 @@ static void FollowerWave3Cards()
         var s = StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId = 0;
         var host = Add(s, "training-crane-samurai", 0, Zone.Battlefield, province: 0);
         var regulars = Add(s, "oracle-l5r-4338", 0, Zone.Attached, province: 0, attachedTo: host.Id);
+        Add(s, "training-attack-reactor", 1, Zone.Home); // the opponent still holds a Reaction, so the window stays open to read the strength (issue #644)
         var target = Add(s, "training-crane-samurai", 1, Zone.Battlefield, province: 0); // Force 3, within base Ranged 4
         var e = MatchEngine.FromTestState(s);
         Accept(e, new GameCommand("useAbility", 0, e.Version, CardId: regulars.Id, TargetId: target.Id, AbilityId: "khol-regulars-attack"));
         Equal(e.State.PendingAttack?.Strength, 4, "Base Ranged 4");
         Accept(e, new GameCommand("useAbility", 0, e.Version, CardId: regulars.Id, AbilityId: "khol-regulars-reaction"));
         Equal(e.State.PendingAttack?.Strength, 6, "4 base + 2 from its own Reaction");
-        Accept(e, new GameCommand("declineReaction", 1, e.Version));
-        Accept(e, new GameCommand("declineReaction", 0, e.Version));
+        Accept(e, new GameCommand("declineReaction", 1, e.Version)); // the attacker holds nothing more, so one pass closes the window
         Equal(e.State.Cards[target.Id].Zone, Zone.Dead);
     }
     {
@@ -6280,9 +6279,8 @@ static void ACloseCallArmorAttackNegation()
         Accept(e, new GameCommand("useAbility", 0, e.Version, CardId: s.Players[0].StrongholdId, PerformerId: castle.Id, TargetId: target.Id, AbilityId: "carpenter-castle-siege"));
         Equal(e.State.PendingChoice?.Type, "attackReaction");
         Accept(e, new GameCommand("useAbility", 1, e.Version, CardId: closeCall.Id, AbilityId: "a-close-call-negate"));
-        Equal(e.State.PendingAttack?.Strength, 0);
-        Accept(e, Cmd(e, "declineReaction"));
-        Accept(e, Cmd(e, "declineReaction"));
+        // Issue #644: the negation was the only reaction; nobody is asked to pass, the window closes and the negated Attack resolves.
+        Check(e.State.PendingChoice is null && e.State.PendingAttack is null, "the window closed");
         Check(e.State.Cards[target.Id].Zone == Zone.Battlefield, "Negated: the Armor-wearing target survives");
     }
     {
@@ -6310,9 +6308,7 @@ static void ACloseCallArmorAttackNegation()
         Accept(e, new GameCommand("useAbility", 0, e.Version, CardId: weapon.Id, TargetId: target.Id, AbilityId: "training-weapon-attack"));
         Equal(e.State.PendingChoice?.Type, "attackReaction");
         Accept(e, new GameCommand("useAbility", 1, e.Version, CardId: closeCall.Id, AbilityId: "a-close-call-negate"));
-        Equal(e.State.PendingAttack?.Strength, 0);
-        Accept(e, Cmd(e, "declineReaction"));
-        Accept(e, Cmd(e, "declineReaction"));
+        Check(e.State.PendingChoice is null && e.State.PendingAttack is null, "the negation was the only reaction, so the window closed (issue #644)");
         Check(e.State.Cards[target.Id].Zone == Zone.Battlefield, "Negated: Melee Attacks too, not just Ranged");
     }
 }
@@ -6460,12 +6456,9 @@ static void AkodoKakiharaReactsToNonAttackActions()
         Accept(e, new GameCommand("useAbility", 1, e.Version, CardId: k.Id, AbilityId: "kakihara-force-bonus"));
         Equal(KakiharaForce(e, k.Id), 8, "+4F before the Reaction resolves");
         Accept(e, Cmd(e, "declineReaction")); Accept(e, Cmd(e, "declineReaction"));
-        Equal(e.State.PendingChoice?.Type, "bowReaction", "The window Ruya's Reaction was played in is open again"); Equal(e.State.SuspendedWindows.Count, 0);
-        Equal(e.State.PendingChoice?.CardId, ruya.Id);
-        Equal(e.State.PriorityPlayerId, 1, "and the opportunity has passed to the other player, as after any Reaction");
+        // Issue #644: the window Ruya's Reaction was played in is given back, and with nothing left to take in it nobody is asked to pass it: it closes.
+        Check(e.State.PendingChoice is null && e.State.SuspendedWindows.Count == 0, "The window Ruya's Reaction was played in has nothing left to offer, so it is closed");
         Check(e.State.Cards[k.Id].Bowed, "The Reaction resolved after Kakihara reacted");
-        Accept(e, Cmd(e, "declineReaction")); Accept(e, Cmd(e, "declineReaction"));
-        Check(e.State.PendingChoice is null, "and closes normally on two passes");
     }
     {
         // Open actions too (not just Battle actions), and the acting player must be ANOTHER player: the
@@ -6513,12 +6506,12 @@ static void AkodoKakiharaReactsToAttacks()
         var (e, s, castle, k, _) = Siege();
         Accept(e, Attack(e, s, castle, k.Id));
         Equal(e.State.PendingChoice?.Type, "attackReaction");
-        Accept(e, Cmd(e, "declineReaction")); Accept(e, Cmd(e, "declineReaction"));
+        Accept(e, Cmd(e, "declineReaction")); // the attacker holds no reaction, so his one pass closes the window (issue #644)
         Check(e.State.Cards[k.Id].Zone != Zone.Battlefield, "Force 4 <= strength 5: destroyed when he does not react");
     }
     {
         // Reacting decides it: +4F makes Force 8 > strength 5 by the time the Attack resolves.
-        var (e, s, castle, k, _) = Siege();
+        var (e, s, castle, k, _) = Siege(otherReactor: true); // a second reactor keeps the window open after his reaction, so the strength can be read (issue #644)
         Accept(e, Attack(e, s, castle, k.Id));
         Equal(e.State.PendingChoice?.Type, "attackReaction");
         var options = e.QueryActions(1);
@@ -6528,7 +6521,7 @@ static void AkodoKakiharaReactsToAttacks()
         Accept(e, new GameCommand("useAbility", 1, e.Version, CardId: k.Id, AbilityId: "kakihara-attack-force-bonus"));
         Equal(KakiharaForce(e, k.Id), 8);
         Equal(e.State.PendingAttack?.Strength, 5, "The Attack's own strength is untouched: the bonus is on Kakihara, not a negation");
-        Accept(e, Cmd(e, "declineReaction")); Accept(e, Cmd(e, "declineReaction"));
+        Accept(e, Cmd(e, "declineReaction")); // the attacker holds no reaction: this one pass closes the window
         Check(e.State.PendingChoice is null && e.State.PendingAttack is null);
         Equal(e.State.Cards[k.Id].Zone, Zone.Battlefield, "Force 8 > strength 5: the Attack fails");
         Equal(e.State.Cards[k.Id].AbilityUses["kakihara-force-bonus"], e.State.TurnNumber, "The one printed use is spent (shared UsageKey)");
@@ -6545,8 +6538,8 @@ static void AkodoKakiharaReactsToAttacks()
             var e = MatchEngine.FromTestState(s);
             Accept(e, new GameCommand("useAbility", 0, e.Version, CardId: yari.Id, TargetId: k.Id, AbilityId: "sankaku-yari-attack"));
             Equal(e.State.PendingChoice?.Type, "attackReaction");
-            if (reacts) Accept(e, new GameCommand("useAbility", 1, e.Version, CardId: k.Id, AbilityId: "kakihara-attack-force-bonus"));
-            Accept(e, Cmd(e, "declineReaction")); Accept(e, Cmd(e, "declineReaction"));
+            if (reacts) Accept(e, new GameCommand("useAbility", 1, e.Version, CardId: k.Id, AbilityId: "kakihara-attack-force-bonus")); // nothing is left to react with: the window closes (issue #644)
+            else Accept(e, Cmd(e, "declineReaction"));
             Check((e.State.Cards[k.Id].Zone == Zone.Battlefield) == reacts, reacts ? "Melee 4 < Force 8: survives" : "Melee 4 >= Force 4: destroyed");
         }
     }
@@ -6972,8 +6965,7 @@ static void AttackWindowTurnPlayerFirstThenAlternates()
     Equal(e.State.PriorityPlayerId, 0, "Alternating: the attacker, who had passed, reacts after all");
     Accept(e, new GameCommand("useAbility", 0, e.Version, CardId: reactor.Id, AbilityId: "training-attack-boost"));
     Equal(e.State.PendingAttack?.Strength, 7);
-    Accept(e, Cmd(e, "declineReaction"));
-    Equal(e.State.PendingChoice?.Type, "attackReaction", "One pass does not close it");
+    Equal(e.State.PriorityPlayerId, 0, "Issue #644: Kakihara's controller holds nothing more, so he is not asked to pass: the attacker, who still holds the negate, is");
     Accept(e, Cmd(e, "declineReaction"));
     Check(e.State.PendingChoice is null);
     Check(e.State.Cards[k.Id].Zone != Zone.Battlefield, "Strength 7 >= Force 7: the last reaction decided it");
@@ -8293,11 +8285,8 @@ static void DuelWonReaction()
         var handBefore = e.State.Players[1].Hand.Count;
         Accept(e, new GameCommand("useAbility", 1, e.Version, CardId: daisuke.Id, AbilityId: "daisuke-exp-draw"));
         Equal(e.State.Players[1].Hand.Count, handBefore + 1);
-        Check(e.State.PendingChoice is not null, "The window stays open, same as any other entry-style Reaction");
+        Check(e.State.PendingChoice is null, "Issue #644: nothing is left to react with, so the window closes without a pass");
         Reject(e, new GameCommand("useAbility", 1, e.Version, CardId: daisuke.Id, AbilityId: "daisuke-exp-draw")); // once only
-        Accept(e, new GameCommand("declineReaction", 0, e.Version)); // 1st of two fresh consecutive passes
-        Accept(e, new GameCommand("declineReaction", 1, e.Version)); // 2nd -- closes
-        Check(e.State.PendingChoice is null);
         Equal(e.State.PriorityPlayerId, 0, "Resumes exactly where the challenge was issued -- the Lion-side convention, here the challenger's opponent");
     }
     {
@@ -8312,8 +8301,7 @@ static void DuelWonReaction()
         Accept(e, new GameCommand("strike", 0, e.Version));
         Accept(e, new GameCommand("duelistRefocus", 1, e.Version));
         var honorBefore = e.State.Players[1].Honor;
-        Accept(e, new GameCommand("declineReaction", 1, e.Version));
-        Accept(e, new GameCommand("declineReaction", 0, e.Version));
+        Accept(e, new GameCommand("declineReaction", 1, e.Version)); // the opponent holds no reaction: this one pass closes the window (issue #644)
         Check(e.State.PendingChoice is null);
         Equal(e.State.Players[1].Honor, honorBefore, "Declined -- no Honor gained");
     }
@@ -8330,8 +8318,7 @@ static void DuelWonReaction()
         Accept(e, new GameCommand("duelistRefocus", 1, e.Version));
         Accept(e, new GameCommand("useAbility", 1, e.Version, CardId: jakuei.Id, AbilityId: "jakuei-favor"));
         Equal(e.State.FavorPlayerId, 1);
-        Accept(e, new GameCommand("declineReaction", 0, e.Version));
-        Accept(e, new GameCommand("declineReaction", 1, e.Version));
+        Check(e.State.PendingChoice is null, "nobody holds another reaction, so the window closes without a pass (issue #644)");
     }
     {
         // Kitsuki Jakuei's own separate Political Battle ability: bow only, no Favor involved.
@@ -8499,8 +8486,7 @@ static void ProtectionPrimitive()
         Equal(e.State.PendingAttack?.SourceId, s.Players[0].StrongholdId, "PendingAttack now records the actual performer generically: the Stronghold that prints Carpenter Castle's action");
         Accept(e, new GameCommand("useAbility", 1, e.Version, CardId: reactor.Id, AbilityId: "training-attack-negate"));
         Equal(e.State.PendingAttack?.Strength, 5, "Protection negates the negation -- strength is untouched");
-        Accept(e, new GameCommand("declineReaction", 0, e.Version));
-        Accept(e, new GameCommand("declineReaction", 1, e.Version));
+        Accept(e, new GameCommand("declineReaction", 1, e.Version)); // the attacker holds no reaction, so the reactor's owner alone passes (issue #644)
         Check(e.State.Cards[enemy.Id].Zone == Zone.Dead, "Unnegated: the attack still hits");
     }
     {
@@ -8613,9 +8599,7 @@ static void BrashForceRedirectAndBowReactions()
         Equal(e.State.PendingChoice?.CardId, hizumi.Id);
         Accept(e, new GameCommand("useAbility", 0, e.Version, CardId: hizumi.Id, TargetId: target.Id, AbilityId: "hizumi-negate-straighten"));
         Equal(e.State.Cards[target.Id].StraightenBlockedTurn, e.State.TurnNumber);
-        Accept(e, new GameCommand("declineReaction", 1, e.Version));
-        Accept(e, new GameCommand("declineReaction", 0, e.Version));
-        Check(e.State.PendingChoice is null);
+        Check(e.State.PendingChoice is null, "nobody holds another reaction, so the window closes without a pass (issue #644)");
         // The window closed back to priority 1 (resuming exactly where the original bowing
         // action's own NextAction would have left it) -- an ordinary pass hands it back to 0.
         Accept(e, new GameCommand("pass", 1, e.Version));
@@ -8643,8 +8627,7 @@ static void BrashForceRedirectAndBowReactions()
         Equal(e.State.PendingChoice?.CardId, ruya.Id);
         Accept(e, new GameCommand("useAbility", 0, e.Version, CardId: ruya.Id, TargetId: alsoAtBattlefield.Id, AbilityId: "ruya-bow"));
         Check(e.State.Cards[alsoAtBattlefield.Id].Bowed);
-        Accept(e, new GameCommand("declineReaction", 1, e.Version));
-        Accept(e, new GameCommand("declineReaction", 0, e.Version));
+        Check(e.State.PendingChoice is null, "nobody holds another reaction, so the window closes without a pass (issue #644)");
     }
     {
         // Tamori Ruya, at Home: "the same location" is Home WITH HER (same owner) -- the enemy's
@@ -8661,8 +8644,7 @@ static void BrashForceRedirectAndBowReactions()
         Reject(e, new GameCommand("useAbility", 0, e.Version, CardId: ruya.Id, TargetId: enemyBowed.Id, AbilityId: "ruya-bow"));
         Accept(e, new GameCommand("useAbility", 0, e.Version, CardId: ruya.Id, TargetId: otherAtRuyasHome.Id, AbilityId: "ruya-bow"));
         Check(e.State.Cards[otherAtRuyasHome.Id].Bowed);
-        Accept(e, new GameCommand("declineReaction", 1, e.Version));
-        Accept(e, new GameCommand("declineReaction", 0, e.Version));
+        Check(e.State.PendingChoice is null, "nobody holds another reaction, so the window closes without a pass (issue #644)");
     }
     {
         // Tamori Yayu: "+2F and Cavalry while it is not your turn" -- a live conditional, not a
@@ -9041,14 +9023,10 @@ static void StormlessFuryBattleActionReaction()
     Equal(e.State.Cards[stormlessFury.Id].Zone, Zone.Attached, "Equip (Limited)'s own attach mechanism fires as a Reaction");
     Equal(e.State.Cards[stormlessFury.Id].AttachedTo, thunderShugenja.Id);
     Equal(e.State.AdditionalActions.Count, grantsBefore, "Unlike Equip (Battle), attaching as this Reaction grants no Additional Action");
-    // Using the Reaction hands priority to the opponent first (same shape as any other Reaction) --
-    // they can only ever decline, since the window is scoped to Stormless Fury's own controller.
-    Accept(e, new GameCommand("declineReaction", 1, e.Version));
-    // The card's own errata: the second Reaction may not also fire against the SAME action that
-    // just triggered the first -- still inside the same still-open window.
-    Reject(e, new GameCommand("useAbility", 0, e.Version, CardId: stormlessFury.Id, AbilityId: "stormless-fury-bow"));
-    Accept(e, new GameCommand("declineReaction", 0, e.Version));
+    // Issue #644: the card's own errata bars the second Reaction against the SAME action that just triggered the first, and the window is scoped to Stormless Fury's own controller,
+    // so nobody holds a Reaction any more and nobody is asked to pass: the window has closed.
     Check(e.State.PendingChoice is null, "Window closed");
+    Reject(e, new GameCommand("useAbility", 0, e.Version, CardId: stormlessFury.Id, AbilityId: "stormless-fury-bow"));
     // A later, different action: the second Reaction fires normally, bowing whoever performed it.
     Accept(e, new GameCommand("pass", 1, e.Version)); // hand priority back to player 0 for the next action
     Accept(e, new GameCommand("useAbility", 0, e.Version, CardId: secondPerformer.Id, AbilityId: "training-weapon-attack"));
@@ -9088,8 +9066,7 @@ static void TsuruchiYakushoAnnounceReactionAndImmunity()
     Equal(e.State.PendingChoice?.Type, "attackReaction", "The originally-announced action now resolves, deferred by Training's own available reactor");
     // Immune to strength reduction for the remainder of this Attack's own resolution.
     Reject(e, new GameCommand("useAbility", 1, e.Version, CardId: reactor.Id, AbilityId: "training-attack-negate"));
-    Accept(e, new GameCommand("declineReaction", 1, e.Version));
-    Accept(e, new GameCommand("declineReaction", 0, e.Version));
+    Accept(e, new GameCommand("declineReaction", 1, e.Version)); // the attacker holds no reaction: this one pass closes the window (issue #644)
     Equal(e.State.Cards[rangedTarget1.Id].Zone, Zone.Dead, "Undiminished Ranged 3 destroys the Force-3 target: the negate Reaction never landed");
 
     // Ranged, second Attack: the immunity does not carry over -- Training's own negate now succeeds.
@@ -9103,8 +9080,7 @@ static void TsuruchiYakushoAnnounceReactionAndImmunity()
     Equal(e.State.PendingChoice?.Type, "attackReaction");
     Accept(e, new GameCommand("useAbility", 1, e.Version, CardId: reactor.Id, AbilityId: "training-attack-negate"));
     Equal(e.State.PendingAttack?.Strength, 0, "No lingering immunity from the earlier, separate Attack: the negate Reaction succeeds this time");
-    Accept(e, new GameCommand("declineReaction", 0, e.Version));
-    Accept(e, new GameCommand("declineReaction", 1, e.Version));
+    Accept(e, new GameCommand("declineReaction", 1, e.Version)); // the attacker holds no reaction, so the reactor's owner alone passes (issue #644)
     Equal(e.State.Cards[rangedTarget2.Id].Zone, Zone.Battlefield, "Negated: the second target survives");
 }
 static void FollowerWave14Primitives()
@@ -9606,6 +9582,7 @@ static void StrategyWave14Primitives()
         var wielderHost = Add(s, "training-lion-samurai", 0, Zone.Battlefield, province: 0);
         var weapon = Add(s, "training-weapon-with-attack", 0, Zone.Attached, province: 0, attachedTo: wielderHost.Id);
         var defenses = Add(s, "oracle-l5r-9931", 1, Zone.Hand);
+        Add(s, "training-attack-reactor", 1, Zone.Home); // the defender still holds a Reaction, so the window stays open to read the strength (issue #644)
         var target = Add(s, "training-lion-courtier", 1, Zone.Battlefield, province: 0); // Force 2, within the Melee 2 Attack's strength
         var e = MatchEngine.FromTestState(s);
         Accept(e, new GameCommand("useAbility", 0, e.Version, CardId: weapon.Id, TargetId: target.Id, AbilityId: "training-weapon-attack"));
@@ -9642,6 +9619,7 @@ static void StrategyWave14Primitives()
         var wielderHost = Add(s, "training-lion-samurai", 0, Zone.Battlefield, province: 0);
         var weapon = Add(s, "training-weapon-with-attack", 0, Zone.Attached, province: 0, attachedTo: wielderHost.Id);
         var instinct = Add(s, "oracle-l5r-10402", 1, Zone.Hand);
+        Add(s, "training-attack-reactor", 1, Zone.Home); // the defender still holds a Reaction, so the window stays open to read the strength (issue #644)
         var target = Add(s, "training-lion-courtier", 1, Zone.Battlefield, province: 0); // Force 2, within the Melee 2 Attack's strength
         var e = MatchEngine.FromTestState(s);
         Accept(e, new GameCommand("useAbility", 0, e.Version, CardId: weapon.Id, TargetId: target.Id, AbilityId: "training-weapon-attack"));
@@ -10599,10 +10577,8 @@ static void BatchEPrimitives()
         Check(e.State.Cards[maratai.Id].Bowed, "Bow Maratai: the printed cost");
         Equal(e.State.Players[1].Honor, honorBefore + 2, "Gain 2 Honor");
         Equal(e.State.FavorPlayerId, 1, "Take the Imperial Favor");
+        Check(e.State.PendingChoice is null, "Issue #644: nothing is left to react with, so the window closes without a pass, like every other duelWonReaction");
         Reject(e, new GameCommand("useAbility", 1, e.Version, CardId: maratai.Id, AbilityId: "maratai-statue")); // bowed now, and once only
-        Accept(e, new GameCommand("declineReaction", 0, e.Version));
-        Accept(e, new GameCommand("declineReaction", 1, e.Version));
-        Check(e.State.PendingChoice is null, "Two fresh consecutive passes close the window, exactly like every other duelWonReaction");
     }
     {
         // "your Personality won": the ENEMY's Personality winning never offers Maratai's controller a window.
@@ -10644,7 +10620,7 @@ static void BatchEPrimitives()
         var handBefore = e.State.Players[1].Hand.Count; var honorBefore = e.State.Players[1].Honor;
         Accept(e, new GameCommand("useAbility", 1, e.Version, CardId: daisuke.Id, AbilityId: "daisuke-exp-draw"));
         Equal(e.State.Players[1].Hand.Count, handBefore + 1, "Daisuke's own reaction unaffected");
-        Accept(e, new GameCommand("declineReaction", 0, e.Version));
+        Equal(e.State.PriorityPlayerId, 1, "the opponent holds nothing to react with and is not asked to pass: Maratai's controller still holds a reaction (issue #644)");
         Accept(e, new GameCommand("useAbility", 1, e.Version, CardId: maratai.Id, AbilityId: "maratai-statue"));
         Equal(e.State.Players[1].Honor, honorBefore + 2, "Maratai's reaction in the very same window");
     }
@@ -10688,8 +10664,9 @@ static void BatchEPrimitives()
         Check(sparrow.Id.StartsWith("created-"), "A minted runtime instance, exactly like Kitsu Akai's Lion Ancestor");
         Equal(e.State.PendingChoice?.Type, "proclaim", "The creator's own window was NOT clobbered by any window for the created token");
         Reject(e, new GameCommand("useAbility", 0, e.Version, CardId: id, AbilityId: "ohsuki-create")); // once per entry
-        // ...so Proclaim, still owed to the player, remains available afterward.
-        Accept(e, Cmd(e, "declineReaction", player: 1));
+        // ...so Proclaim, still owed to the player, remains available afterward; the opponent holds nothing to react with and is not asked to pass (issue #644).
+        Equal(e.State.PriorityPlayerId, 0);
+        Reject(e, Cmd(e, "declineReaction", player: 1));
         var honorBefore = e.State.Players[0].Honor;
         Accept(e, Cmd(e, "proclaim"));
         Equal(e.State.Players[0].Honor, honorBefore + CardCatalog.Get("oracle-l5r-4469").PersonalHonor, "Proclaim still works after the token was created");

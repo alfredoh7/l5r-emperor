@@ -54,7 +54,7 @@ internal static class ProclaimFlowTests
         Eq(e.State.PendingChoice?.Type, "proclaim");
         Accept(e, e.QueryActions(0).Single(a => a.Type == "proclaim").Command!);
         Eq(e.State.PendingChoice?.Type, "proclaim", "the entering card's own Reaction is still unused, so the window stays");
-        Accept(e, new GameCommand("declineReaction", e.State.PriorityPlayerId, e.Version)); // the opponent has nothing and passes
+        Eq(e.State.PriorityPlayerId, 0, "the opponent has nothing to react with and is not asked to pass (issue #644): it is back with the Reaction's owner");
         Check(e.QueryActions(0).Any(a => a.Type == "useAbility" && a.Enabled), "and the Reaction is still offered to its owner");
     }
 

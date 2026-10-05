@@ -60,7 +60,7 @@ public sealed partial class MatchEngine
     {
         if (type != "engageReaction") return false;
         Require(command.Type is "useAbility" or "declineReaction" or "pass", "Resolve the Engage window first: play an Engage action or Reaction, or pass.");
-        if (command.Type == "useAbility") UseAbility(command); else PassReaction();
+        if (command.Type == "useAbility") UseAbilityInWindow(command); else PassReaction();
         return true;
     }
     private bool HandleRegisteredEncircledOrder(string type, GameCommand command)
@@ -108,7 +108,7 @@ public sealed partial class MatchEngine
         // clearing PendingChoice), so Proclaim can still follow, in either order, until passed.
         Require(command.Type is "proclaim" or "useAbility" or "declineReaction" or "pass", "Resolve the Proclaim reaction window first.");
         if (command.Type == "proclaim") Proclaim(command);
-        else if (command.Type == "useAbility") { ApplyPendingEntryEffects(); UseAbility(command); CloseEntryWindowIfSpent(); }
+        else if (command.Type == "useAbility") { ApplyPendingEntryEffects(); UseAbilityInWindow(command); }
         else PassReaction();
         return true;
     }
@@ -118,7 +118,7 @@ public sealed partial class MatchEngine
         // Togashi Hizumi / Tamori Ruya (issue #216): same shape as entryReaction below --
         // this specific watching card's own reaction, or pass.
         Require(command.Type is "useAbility" or "declineReaction" or "pass", "Resolve the bow reaction window first.");
-        if (command.Type == "useAbility") UseAbility(command); else PassReaction();
+        if (command.Type == "useAbility") UseAbilityInWindow(command); else PassReaction();
         return true;
     }
     private bool HandleRegisteredMoveReaction(string type, GameCommand command)
@@ -127,7 +127,7 @@ public sealed partial class MatchEngine
         // Legion of the Bat (issue #279): same shape as bowReaction above -- this specific
         // watching card's own reaction, or pass.
         Require(command.Type is "useAbility" or "declineReaction" or "pass", "Resolve the move reaction window first.");
-        if (command.Type == "useAbility") UseAbility(command); else PassReaction();
+        if (command.Type == "useAbility") UseAbilityInWindow(command); else PassReaction();
         return true;
     }
     private bool HandleRegisteredNikutaiReaction(string type, GameCommand command)
@@ -137,7 +137,7 @@ public sealed partial class MatchEngine
         // watching card's own reaction, or pass. "Even if this card is bowed" (ValidateAbility's
         // own bowed-source exemption list) is what lets it actually use the reaction here.
         Require(command.Type is "useAbility" or "declineReaction" or "pass", "Resolve the Nikutai reaction window first.");
-        if (command.Type == "useAbility") UseAbility(command); else PassReaction();
+        if (command.Type == "useAbility") UseAbilityInWindow(command); else PassReaction();
         return true;
     }
     private bool HandleRegisteredEntryReaction(string type, GameCommand command)
@@ -146,7 +146,7 @@ public sealed partial class MatchEngine
         // Same window as "proclaim" above, but for a card that has its own entering-play
         // Reaction and was not itself Proclaim-eligible (e.g. bought with Clan Discount).
         Require(command.Type is "useAbility" or "declineReaction" or "pass", "Resolve the entry reaction window first.");
-        if (command.Type == "useAbility") { UseAbility(command); CloseEntryWindowIfSpent(); } else PassReaction(); // issue #644: a used Reaction leaves nothing to pass
+        if (command.Type == "useAbility") UseAbilityInWindow(command); else PassReaction(); // issue #644: a used Reaction leaves nothing to pass
         FinishPendingAttachTracking(); // Hida Takeuchi (issue #477 batch 2): the Equip whose attached Follower opened this window is now finished.
         ContinueRegret(); // Regret (RegretEmbracingVirtue.cs): the next card begins once this one's entry window has closed.
         return true;
@@ -157,7 +157,7 @@ public sealed partial class MatchEngine
         // Open to either side (unlike the entry-reaction windows above) -- the top-level
         // priority check already enforces whose turn it is to act or pass.
         Require(command.Type is "useAbility" or "declineReaction" or "pass", "Resolve the pending attack first.");
-        if (command.Type == "useAbility") UseAbility(command); else PassReaction();
+        if (command.Type == "useAbility") UseAbilityInWindow(command); else PassReaction();
         if (_state.PendingChoice is null && _state.PendingAttack is { } closing)
         {
             if (closing.Command is not null && OpenForcedDiscardForTargetedTrait(closing.Command, "attack")) return true;
@@ -172,7 +172,7 @@ public sealed partial class MatchEngine
         // after the challenge is accepted but before focusing starts -- open to either side,
         // same shape as attackReaction/additionalActionReaction above.
         Require(command.Type is "useAbility" or "declineReaction" or "pass", "Resolve the duel reaction window first.");
-        if (command.Type == "useAbility") UseAbility(command); else PassReaction();
+        if (command.Type == "useAbility") UseAbilityInWindow(command); else PassReaction();
         if (_state.PendingChoice is null && _state.PendingDuel is { Stage: "Reaction" }) BeginFocusing();
         // Bend like a Reed (Emperor Edition remaining-cards pass, group A, issue #492): the window before the Focus Effects resolve closed.
         else if (_state.PendingChoice is null && _state.PendingDuel is { Stage: "FocusEffectsReaction" }) ContinueToOrderingEffects();
@@ -183,7 +183,7 @@ public sealed partial class MatchEngine
         if (type != "afterResolutionReaction") return false;
         // After a battle's resolution (issue #417): either player may play a Reaction that names it, or pass; two consecutive passes close the window (PassReaction).
         Require(command.Type is "useAbility" or "declineReaction" or "pass", "Play a Reaction to the battle's resolution or pass.");
-        if (command.Type == "useAbility") UseAbility(command); else PassReaction();
+        if (command.Type == "useAbility") UseAbilityInWindow(command); else PassReaction();
         return true;
     }
     private bool HandleRegisteredAfterActionResolvedReaction(string type, GameCommand command)
@@ -193,7 +193,7 @@ public sealed partial class MatchEngine
         // the same shape as afterResolutionReaction above -- there is nothing special to do when it closes (no special-cased branch in PassReaction), priority just
         // returns to whoever this window's own ActingPlayerId (FinishActionEffectTracking's own closesTo) named.
         Require(command.Type is "useAbility" or "declineReaction" or "pass", "Play a Reaction to the action's resolution or pass.");
-        if (command.Type == "useAbility") UseAbility(command); else PassReaction();
+        if (command.Type == "useAbility") UseAbilityInWindow(command); else PassReaction();
         return true;
     }
     private bool HandleRegisteredBattleRecruit(string type, GameCommand command)
@@ -202,7 +202,7 @@ public sealed partial class MatchEngine
         // After a battle resolved (issue #379): the players holding a Ring's recruit grant of this battle may put it into play (a
         // Battle-timed useAbility, spending the grant) or pass; two consecutive passes close the window (PassReaction).
         Require(command.Type is "useAbility" or "declineReaction" or "pass", "Put a Ring into play or pass.");
-        if (command.Type == "useAbility") UseAbility(command); else PassReaction();
+        if (command.Type == "useAbility") UseAbilityInWindow(command); else PassReaction();
         return true;
     }
     private bool HandleRegisteredDuelWonReaction(string type, GameCommand command)
@@ -212,7 +212,7 @@ public sealed partial class MatchEngine
         // once it has fully resolved, the winning card's own controller may react to having
         // won it -- the same shape as entryReaction, closing on two consecutive passes.
         Require(command.Type is "useAbility" or "declineReaction" or "pass", "Resolve the duel-won reaction window first.");
-        if (command.Type == "useAbility") UseAbility(command); else PassReaction();
+        if (command.Type == "useAbility") UseAbilityInWindow(command); else PassReaction();
         return true;
     }
     private bool HandleRegisteredBattleActionReaction(string type, GameCommand command)
@@ -222,7 +222,7 @@ public sealed partial class MatchEngine
         // id, same single-watcher shape as bowReaction/beforeActionReaction above -- only that
         // card's own controller may use it, or either side may pass to close the window.
         Require(command.Type is "useAbility" or "declineReaction" or "pass", "Resolve the battle-action reaction window first.");
-        if (command.Type == "useAbility") UseAbility(command); else PassReaction();
+        if (command.Type == "useAbility") UseAbilityInWindow(command); else PassReaction();
         return true;
     }
 }

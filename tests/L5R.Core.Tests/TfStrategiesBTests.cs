@@ -670,6 +670,7 @@ internal static class TfStrategiesBTests
         Add(s, "training-crane-samurai", 0, Zone.Battlefield, province: 0);
         var enemy = Add(s, "training-lion-samurai", 1, Zone.Battlefield, province: 0);
         var weak = Add(s, "training-scout", 1, Zone.Battlefield, province: 0);
+        Add(s, "training-attack-reactor", 0, Zone.Home); // a second Reaction keeps the window open once the Interrupt is played, so the strength can be read (issue #644)
         var e = MatchEngine.FromTestState(s);
         Eq(e.AttackStrengthForTest("unholy-strike-attack", attack.Id), 2, "Melee 2");
         Check(!CanUse(e, 0, "unholy-strike-boost", attack.Id), "the Interrupt needs an Attack");
@@ -706,6 +707,7 @@ internal static class TfStrategiesBTests
         var theirAttack = Add(v, "training-honor-cost-strategy", 1, Zone.Hand); var mineInterrupt = Add(v, Unholy, 0, Zone.Hand);
         Add(v, "training-lion-samurai", 1, Zone.Battlefield, province: 0);
         var defender = Add(v, "training-crane-samurai", 0, Zone.Battlefield, province: 0);
+        Add(v, "training-attack-reactor", 0, Zone.Home); // a second Reaction keeps the window open once the Interrupt is played, so the strength can be read (issue #644)
         var h = MatchEngine.FromTestState(v);
         Accept(h, Use(h, 1, "training-honor-cost-attack", theirAttack.Id, defender.Id));
         Eq(h.State.PendingChoice?.Type, "attackReaction");

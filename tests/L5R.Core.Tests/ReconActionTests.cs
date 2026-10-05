@@ -206,7 +206,7 @@ internal static class ReconActionTests
             Eq(e.State.PendingChoice?.Type,"attackReaction","The Recon Attack is pending, open to reaction");
             Eq(e.State.PendingAttack!.Kind,"Ranged","a Ranged Attack (Ranged-only reactions -- Strong Defenses, Tsuruchi Yakusho -- key off this)");
             Eq(Bonuses(e,ebizo),0,"Announced, not yet resolved: no bonus yet");
-            Accept(e,Decline(e)); Accept(e,Decline(e));
+            Accept(e,Decline(e)); // the attacker holds no reaction: the defender's one pass closes the window (issue #644)
             Check(e.State.PendingChoice is null && e.State.PendingAttack is null);
             Eq(Bonuses(e,ebizo),1,"Resolved: the bonus lands, exactly once");
         }

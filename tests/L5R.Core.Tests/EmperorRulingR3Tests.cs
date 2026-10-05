@@ -229,7 +229,7 @@ internal static class EmperorRulingR3Tests
         Eq(e.CardForceForTest(host), force + 1, "+1F on the host");
         Check(Attached(e, host).Length == 1, "one Item attached");
         Check(!CanUse(e, 0, "kaiu-village-weapon", regionId), "the Weapon Reaction is spent");
-        Accept(e, new GameCommand("declineReaction", 1, e.Version)); // the other player passes; the window comes back to its owner
+        Eq(e.State.PriorityPlayerId, 0, "the other player holds nothing to react with and is not asked to pass (issue #644): the window is back with its owner");
         // The Armor Reaction is the other printed Reaction: still available, and a Personality may carry an Armor and a Weapon.
         Check(CanUse(e, 0, "kaiu-village-armor", regionId), "the Armor Reaction is still open");
         known = e.State.Cards.Keys.ToHashSet();
@@ -245,7 +245,7 @@ internal static class EmperorRulingR3Tests
         var aForce = a.CardForceForTest(aHost);
         Accept(a, Enabled(a, 0, "kaiu-village-armor", regionId).Command!);
         Eq(Attached(a, aHost).Single().DefinitionId, KaiuArmor, "only the Armor");
-        Accept(a, new GameCommand("declineReaction", 1, a.Version));
+        Eq(a.State.PriorityPlayerId, 0, "the other player holds nothing to react with and is not asked to pass (issue #644)");
         Eq(a.CardForceForTest(aHost), aForce + 1, "+1F");
         Check(CanUse(a, 0, "kaiu-village-weapon", regionId), "the Weapon is still available to a Personality with only an Armor");
     }

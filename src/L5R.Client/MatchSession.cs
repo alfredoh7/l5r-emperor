@@ -138,10 +138,11 @@ public sealed partial class MatchSession : IDisposable
         return false;
     }
 
-    /// <summary>Against a real opponent, a reaction window always waits for an explicit pass — bluffing is
-    /// part of the game, and silently skipping it would leak whether the passer held anything. Solo against
-    /// the practice bot there is no opponent to bluff, so silently pass on the player's behalf whenever
-    /// declining is their only legal option (a real reaction, e.g. an actual Proclaim decision, still prompts).</summary>
+    /// <summary>Core never asks a player who holds no Reaction to pass once a Reaction has resolved or the other player has passed (issue #644): the window is handed on or closed
+    /// there, online and solo alike (the small timing leak that costs was accepted for the proclaim and entry windows in #639/#644). A window can still open on a player whose only
+    /// option is the pass (Core does not decide that at the opening). Against a real opponent that pass is explicit, as bluffing is part of the game; solo against the practice bot
+    /// there is no opponent to bluff, so silently pass on the player's behalf whenever declining is their only legal option (a real reaction, e.g. an actual Proclaim decision,
+    /// still prompts).</summary>
     public bool StepPracticeReaction()
     {
         if (_engine is null || Online || _engine.State.WinnerId is not null) return false;

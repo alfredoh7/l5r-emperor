@@ -239,6 +239,7 @@ internal static class EmbersOfWarBatch3Tests
     {
         var s = Table(Phase.Battle, 1);
         var precisionBoost = Add(s, Precision, 0, Zone.Hand);
+        Add(s, "training-attack-reactor", 0, Zone.Home); // a second Reaction in hand keeps the window open once Precision is played, so the strength can be read (issue #644)
         var attacker = Add(s, "training-honor-cost-strategy", 1, Zone.Hand);
         Add(s, "training-lion-samurai", 1, Zone.Battlefield, province: 0);
         var defender = Add(s, "training-crane-samurai", 0, Zone.Battlefield, province: 0);

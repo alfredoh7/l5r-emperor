@@ -325,6 +325,7 @@ internal static class TargetedActionReactionTests
             // Ranged 5 reaches Ezuno (Force 4): the window opens for him, the redirect lands the Attack on him, and the Shugenja survives.
             var s = Table(); var (castle, stronghold) = Siege(s); Add(s, "training-lion-samurai", 1, Zone.Battlefield, province: 0);
             var ez = Add(s, Ezuno, 0, Zone.Battlefield, province: 0); var sh = Add(s, "training-shugenja", 0, Zone.Battlefield, province: 0);
+            Add(s, "training-attack-reactor", 0, Zone.Home); // a further Reaction keeps the window open once the first is played, so the pending Attack can be read (issue #644)
             var e = MatchEngine.FromTestState(s);
             var honor = e.State.Players[1].Honor;
             Accept(e, SiegeAt(e, castle, stronghold, sh.Id));
@@ -348,6 +349,7 @@ internal static class TargetedActionReactionTests
                 var s = Table(); var wielder = Add(s, "training-lion-samurai", 1, Zone.Battlefield, province: 0);
                 var weapon = Add(s, "training-weapon-with-attack", 1, Zone.Attached, province: 0, parent: wielder.Id);
                 var ez = Add(s, Ezuno, 0, Zone.Battlefield, province: 0); var sh = Add(s, "training-shugenja", 0, Zone.Battlefield, province: 0);
+                Add(s, "training-attack-reactor", 0, Zone.Home); // a further Reaction keeps the window open once the first is played, so the pending Attack can be read (issue #644)
                 var e = MatchEngine.FromTestState(s);
                 Accept(e, Offer(e, 1, "training-weapon-attack", weapon.Id, sh.Id));
                 Eq(Window(e), "attackReaction"); Check(Listed(e, 0, "ezuno-redirect").Single().Enabled, "Ezuno is a legal target whatever his Force: the redirect is offered");
@@ -598,6 +600,7 @@ internal static class TargetedActionReactionTests
             var q = Add(s, "training-crane-samurai", 0, Zone.Battlefield, province: 0);
             var destrier = Add(s, Destrier, 0, Zone.Attached, province: 0, parent: q.Id); destrier.Modifiers.Add(new("test", "test", "Force", destrierForce));
             var rr = Add(s, "training-crane-samurai", 0, Zone.Battlefield, province: 0);
+            Add(s, "training-attack-reactor", 0, Zone.Home); // a further Reaction keeps the window open once the first is played, so the pending Attack can be read (issue #644)
             _ = blade; _ = castle;
             var e = MatchEngine.FromTestState(s);
             return (e, s, castle, p, blade, destrier, rr, q);
@@ -717,6 +720,7 @@ internal static class TargetedActionReactionTests
         {
             var s = Table(); var (castle, stronghold) = Siege(s); Add(s, "training-lion-samurai", 1, Zone.Battlefield, province: 0);
             var y = Add(s, Yurishi, 0, Zone.Battlefield, province: 0);
+            Add(s, "training-attack-reactor", 0, Zone.Home); // a further Reaction keeps the window open once the first is played, so the pending Attack can be read (issue #644)
             var e = MatchEngine.FromTestState(s);
             var honor = e.State.Players[1].Honor;
             Accept(e, SiegeAt(e, castle, stronghold, y.Id));
@@ -1270,7 +1274,8 @@ internal static class TargetedActionReactionTests
         }
         // Negated (Jinn-Kuen negates the Attack): nothing is destroyed, the Honor is still gained.
         {
-            var r = MerchantTable(); var (castle, stronghold) = Siege(r.S); var e = MatchEngine.FromTestState(r.S); var honor = Honor(e);
+            var r = MerchantTable(); var (castle, stronghold) = Siege(r.S); Add(r.S, "training-attack-reactor", 0, Zone.Home); // a further Reaction keeps the window open once the first is played, so the pending Attack can be read (issue #644)
+            var e = MatchEngine.FromTestState(r.S); var honor = Honor(e);
             Accept(e, CarpenterOffer(e, castle, stronghold, r.Merchant.Id)); Eq(Window(e), "attackReaction");
             Accept(e, ReactionCommand(e, 0, "jinn-kuen-negate")); Check(e.State.PendingAttack!.Negated, "the Attack is negated"); ClosePassing(e);
             Eq(e.State.Cards[r.Merchant.Id].Zone, Zone.Battlefield, "the negated Attack destroyed nothing"); Eq(Honor(e), honor + 2, "negated: the Honor is still gained (it targeted a card)");
@@ -1279,6 +1284,7 @@ internal static class TargetedActionReactionTests
         {
             var s = Table(); var (castle, stronghold) = Siege(s); Add(s, "training-lion-samurai", 1, Zone.Battlefield, province: 0);
             var ez = Add(s, Ezuno, 0, Zone.Battlefield, province: 0); var sh = Add(s, "training-shugenja", 0, Zone.Battlefield, province: 0);
+            Add(s, "training-attack-reactor", 0, Zone.Home); // a further Reaction keeps the window open once the first is played, so the pending Attack can be read (issue #644)
             var e = MatchEngine.FromTestState(s); var honor = Honor(e);
             Accept(e, CarpenterOffer(e, castle, stronghold, sh.Id)); Accept(e, ReactionCommand(e, 0, "ezuno-redirect")); Eq(Honor(e), honor, "nothing is gained before the Attack resolves");
             ClosePassing(e);
@@ -1289,6 +1295,7 @@ internal static class TargetedActionReactionTests
             var s = Table(); var (castle, stronghold) = Siege(s); Add(s, "training-lion-samurai", 1, Zone.Battlefield, province: 0);
             var p = Add(s, "training-shugenja", 0, Zone.Battlefield, province: 0); var blade = Add(s, Blade, 0, Zone.Attached, province: 0, parent: p.Id);
             var q = Add(s, "training-crane-samurai", 0, Zone.Battlefield, province: 0);
+            Add(s, "training-attack-reactor", 0, Zone.Home); // a further Reaction keeps the window open once the first is played, so the pending Attack can be read (issue #644)
             var e = MatchEngine.FromTestState(s); var honor = Honor(e);
             Accept(e, CarpenterOffer(e, castle, stronghold, p.Id)); Accept(e, ReactionCommand(e, 0, "blade-of-champions-redirect", q.Id));
             Eq(e.State.PendingAttack!.TargetId, q.Id); Check(e.State.Cards[blade.Id].Bowed);

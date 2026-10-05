@@ -19,7 +19,7 @@ internal static class RingGrantTests
             ("Ring of Earth is a Battle action: not offered enabled outside a battle (Action phase, from the hand or in play), and refused if submitted", EarthNotOutsideBattle),
             ("The other true Rings' hand plays are offered enabled through QueryActions and run: Air straightens, Water moves home, Void draws (Limited, Action phase), Fire destroys (performer plus enemy target); each Ring goes to the discard pile", OtherTrueRingsFromHand),
             ("A recruit grant lapses with its battle: granted at battle 1 it is offered in the after-battle window and is gone at battle 2 in the same turn; a NEW grant at battle 2 is offered only in battle 2's window", GrantBelongsToItsBattle),
-            ("The after-battle window is closed by two passes and the grant does not survive it; the Ring stays in the hand; using the grant in the window puts the Ring into play with no presence needed", AfterBattleWindow),
+            ("The after-battle window is closed by its holder's pass (an opponent with nothing to play is not asked to pass) and the grant does not survive it; the Ring stays in the hand; using the grant in the window puts the Ring into play with no presence needed", AfterBattleWindow),
             ("A recruit grant survives the other actions and the passes of its own battle (its holder's ordinary actions, the opponent's, a pass) and is still there for the after-battle window", GrantSurvivesItsBattlesActions),
             ("A grant made outside a battle (Ring of Air's two Favor actions) belongs to the NEXT battle: not usable before it, and cleared at the end of the turn if that battle is never fought", GrantMadeBetweenBattles),
             ("Every Ring recruit grant is scoped: the grants the engine makes carry a battle, while the other Additional Action grants (Again!, Two Hands and the rest) carry none and keep their own removal", GrantsCarryTheirBattle),
@@ -240,8 +240,8 @@ internal static class RingGrantTests
         Check(RecruitOffered(e, ring), "offered at the battle it was granted at");
         Eq(e.State.Cards[ring.Id].Zone, Zone.Hand);
 
-        // Decline the grant (pass, pass): the battle finishes and the Ring stays in the hand, its grant gone.
-        Accept(e, Command(e, "declineReaction")); Accept(e, Command(e, "declineReaction"));
+        // Decline the grant (the holder passes; the opponent has nothing to play and is not asked to pass, issue #644): the battle finishes and the Ring stays in the hand, its grant gone.
+        Accept(e, Command(e, "declineReaction"));
         Eq(e.State.Phase, Phase.BattleSelection); Check(e.State.PendingChoice is null);
         Check(e.State.AdditionalActions.Count == 0, "the battle 1 grant lapsed with battle 1");
         Eq(e.State.Cards[ring.Id].Zone, Zone.Hand, "the Ring was not recruited");
@@ -286,11 +286,9 @@ internal static class RingGrantTests
         foreach (var c in s.Cards.Values.Where(c => c.OwnerId == 0 && c.Zone == Zone.Battlefield && c.ProvinceIndex == 0)) { c.Zone = Zone.Home; c.ProvinceIndex = null; }
         var e2 = MatchEngine.FromTestState(s);
         Check(RecruitOffered(e2, ring), "no presence is needed");
-        // The holder passes, then the opponent: the window closes and the battle moves on.
+        // The holder passes; the opponent holds nothing to play and is not asked to pass (issue #644): the window closes and the battle moves on.
         Accept(e2, Command(e2, "declineReaction"));
-        Eq(e2.State.PendingChoice?.Type, "battleRecruit", "still open after one pass");
-        Accept(e2, Command(e2, "declineReaction"));
-        Check(e2.State.PendingChoice is null && e2.State.Phase == Phase.BattleSelection, "two passes close it");
+        Check(e2.State.PendingChoice is null && e2.State.Phase == Phase.BattleSelection, "the holder's pass closes it");
         Check(e2.State.AdditionalActions.Count == 0 && e2.State.Cards[ring.Id].Zone == Zone.Hand);
     }
 

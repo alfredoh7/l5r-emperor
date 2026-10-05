@@ -5,22 +5,46 @@ namespace L5R.Core;
 
 public sealed partial class MatchEngine
 {
-    /// <summary>True when the player, given the priority in the open Proclaim window, would be offered something other than passing.</summary>
-    private bool ProclaimWindowOffers(int playerId)
+    // Issue #644 (point 3, Mendon): a player who holds no legal Reaction in an alternating reaction window is never asked to pass it. These are the windows that
+    // alternate between the two players; the others (before-action, engage, honor-change, ...) have their own continuations and keep their own prompts.
+    private static readonly HashSet<string> SettledReactionWindows =
+    [
+        "proclaim", "entryReaction", "bowReaction", "moveReaction", "nikutaiReaction", "attackReaction", "duelReaction", "duelWonReaction",
+        "afterResolutionReaction", "afterActionResolvedReaction", "battleRecruit", "battleActionReaction",
+    ];
+
+    /// <summary>True when the player, given the priority in the open reaction window, would be offered something other than passing (a Reaction, a Proclaim, a Ring to recruit...).</summary>
+    private bool ReactionWindowOffers(int playerId)
     {
         var priority = _state.PriorityPlayerId;
         _state.PriorityPlayerId = playerId;
-        try { return QueryActions(playerId).Any(a => a.Enabled && a.Type is "useAbility" or "proclaim"); }
+        try { return QueryActions(playerId).Any(a => a.Enabled && a.Type is not ("declineReaction" or "pass" or "concede" or "wait") && StillLegal(a)); }
         finally { _state.PriorityPlayerId = priority; }
     }
 
-    /// <summary>Closes the Proclaim or entering-play reaction window the moment an action in it has resolved and no one has a reaction left to take in it (issue #644: a
-    /// Reaction used inside an entry window, Satoshi's Dual Warfans' draw or the Celestial Sword of the Crane's Honor, no longer leaves a Pass reaction box).</summary>
-    private void CloseEntryWindowIfSpent()
+    // Some windows list a Reaction without checking it (a spent one stays "enabled"): a plain ability option counts as an offer only if the engine would still accept it.
+    // Options that need a choice the listing cannot make for the player (targets, slots, destinations) are trusted as listed.
+    private bool StillLegal(ActionOption option) =>
+        option is not { Type: "useAbility", Command: { } command, TargetIds: null, Slots: null, Provinces: null } || AbilityRejection(command) is null;
+
+    /// <summary>Called once an action in an alternating reaction window has resolved (or the other player has passed): a player who has nothing to react with is never asked to pass.
+    /// The opportunity goes on to the other player if they hold a Reaction, and the window closes (play carries on normally) when neither does.
+    /// The timing of the window closing tells the opponent that the other side held (or did not hold) a Reaction; this is the small information leak #639/#644 accept.</summary>
+    private void SettleReactionWindow()
     {
-        if (_state.PendingChoice is not { Type: "proclaim" or "entryReaction" } pending || _state.PendingNegatableAbility is not null) return;
-        if (ProclaimWindowOffers(0) || ProclaimWindowOffers(1)) return;
+        if (_state.PendingChoice is not { } pending || !SettledReactionWindows.Contains(pending.Type) || _state.PendingNegatableAbility is not null) return;
+        var priority = _state.PriorityPlayerId;
+        if (ReactionWindowOffers(priority)) return;
+        if (ReactionWindowOffers(1 - priority)) { _state.PriorityPlayerId = 1 - priority; return; }
         CloseReactionWindow(pending, "No reaction was left to take; the window closed.");
+    }
+
+    /// <summary>A Reaction played in an open window: afterwards the window is settled, unless the Reaction opened a window of its own (that one was opened with its own rules).</summary>
+    private void UseAbilityInWindow(GameCommand command)
+    {
+        var window = _state.PendingChoice;
+        UseAbility(command);
+        if (window is not null && Equals(_state.PendingChoice, window)) SettleReactionWindow();
     }
 }
 

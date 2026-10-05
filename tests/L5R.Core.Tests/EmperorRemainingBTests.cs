@@ -885,8 +885,8 @@ internal static class EmperorRemainingBTests
             Eq(e.State.Cards[card.Id].Zone, Zone.FateDiscard, "He's Mine! was spent");
             Check(e.State.PendingDuel is { } duel && duel.ChallengedId == samurai.Id && duel.ChallengerId == duelist.Id, "the duel is fought by the Samurai instead");
             Check(!e.State.Cards[samurai.Id].Bowed, "he is not bowed while the duel is under way");
-            Accept(e, new("declineReaction", e.State.PriorityPlayerId, e.Version));
-            while (e.State.PendingChoice?.Type == "duelReaction") Accept(e, new("declineReaction", e.State.PriorityPlayerId, e.Version));
+            // Issue #644: nobody holds another reaction before the duel, so nobody is asked to pass and the duel goes on to its focusing.
+            Check(e.State.PendingChoice?.Type != "duelReaction", "the before-the-duel window closed");
             FinishDuel(e);
             Check(e.State.Cards[samurai.Id].Bowed, "he bows after the duel ends");
         }

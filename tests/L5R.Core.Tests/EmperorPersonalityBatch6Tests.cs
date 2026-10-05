@@ -484,9 +484,7 @@ internal static class EmperorPersonalityBatch6Tests
         Check(inHand.Contains(RingOfAir), "the Ring was put in the hand");
         Check(e.State.ShownCards.Any(x => x.DefinitionId == RingOfAir), "and shown");
         Check(e.State.PendingSearch is null, "the search is over");
-        Eq(e.State.PendingChoice?.Type, "afterActionResolvedReaction", "the after-action window Yung was played in is open again");
-        Settle(e);
-        Check(e.State.PendingChoice is null, "and closes");
+        Check(e.State.PendingChoice is null, "the after-action window Yung was played in is given back and, with nothing left to take in it, closes (issue #644)");
 
         // An action that puts no Ring into play gives Yung nothing to react to.
         var s2 = Table(Phase.Action, 0);

@@ -76,9 +76,10 @@ public sealed partial class MatchEngine
     }
 
     // Nothing the Reaction started is waiting any more: its window is open again, the opportunity handed to the other player.
-    private void ResumeIdleSuspendedWindow()
+    private bool ResumeIdleSuspendedWindow()
     {
-        if (_state.SuspendedWindows.Count == 0 || _state.PendingChoice is not null || _state.PendingDuel is not null || _state.WinnerId is not null) return;
+        if (_state.SuspendedWindows.Count == 0 || _state.PendingChoice is not null || _state.PendingDuel is not null || _state.WinnerId is not null) return false;
         RestoreSuspendedWindow(handOn: true);
+        return true;
     }
 }

@@ -191,7 +191,7 @@ static class DuelDemoChecks
         var cap=MatchEngine.CreateDuelDemo("four");Begin(cap,"four");for(var i=0;i<8;i++)Send(cap,Action(cap,"focus",c=>c.Choice=="deck"));
         Equal(cap.QueryActions(1).Single(a=>a.Type!="concede").Type,"strike");Check(!cap.Execute(new("focus",1,cap.Version,Choice:"deck")).Accepted,"fifth rejected");
         var reaction=MatchEngine.CreateDuelDemo("reaction");Begin(reaction,"reaction");Send(reaction,Action(reaction,"useAbility"));
-        for(var i=0;i<2;i++)Send(reaction,Action(reaction,"declineReaction"));Equal(reaction.State.PendingDuel!.Stage,"Focusing");
+        Send(reaction,Action(reaction,"declineReaction"));Equal(reaction.State.PendingDuel!.Stage,"Focusing"); // issue #644: the second reactor passes; the first holds nothing more, so no second pass is asked for
         var order=MatchEngine.CreateDuelDemo("effects");Begin(order,"effects");
         for(var i=0;i<2;i++)Send(order,Action(order,"focus",c=>c.CardId is {} id&&order.State.Cards[id].DefinitionId=="oracle-l5r-7996"));
         Send(order,Action(order,"strike"));var arrange=Action(order,"orderDuelFocusEffects");

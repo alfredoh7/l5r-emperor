@@ -337,8 +337,8 @@ internal static class EmperorStrongholdBatch3Tests
         Accept(e2, Offer(e2, 0, "spiders-web-attach-kensai", IdOf(e2, Web), costly2.Id));
         Check(e2.State.Cards[costly2.Id].AttachedTo == entered2, "attached to the Kensai");
         // Once per turn: the discount is spent, so the Kensai's next attach this turn is at full price (a trait is not limited to once per turn). The window stays open:
-        // the other player passes and the opportunity comes back.
-        Accept(e2, new("declineReaction", 1, e2.Version));
+        // the other player holds nothing to react with, so is not asked to pass, and the opportunity is back with its owner (issue #644).
+        Eq(e2.State.PriorityPlayerId, 0);
         Check(!Listed(e2, "spiders-web-attach-kensai").Any(a => a.Enabled), "the discount is once per turn");
         Check(Listed(e2, "spiders-web-attach").Any(a => a.Enabled && (a.TargetIds ?? []).Contains(plain2.Id)), "and the full-price action is available again for him");
         // Nothing to attach: no window is opened for the Stronghold alone.
@@ -476,8 +476,7 @@ internal static class EmperorStrongholdBatch3Tests
         Check(offered.SequenceEqual(new[] { other.Id, plain.Id }.OrderBy(x => x)), "one option per other Personality of the controller's (never the Henshin himself)");
         var weaponId = e1.State.Cards.Values.First(c => c.AttachedTo == henshin.Id).Id;
         Accept(e1, Reborn(e1, other.Id)!.Command!);
-        Eq(e1.State.Cards[weaponId].AttachedTo, other.Id, "his attachment is transferred");
-        Check(e1.State.Cards[henshin.Id].Tokens.Count == 0 && e1.State.Cards[other.Id].Tokens.Any(t => t.Id == "fx-token-1"), "and his token");
+        // Issue #644: nobody holds another reaction, so the window closes at once and the Attack resolves (the transfer is read from the finished overlay below).
         Pass(e1);
         var covering = e1.State.Cards[henshin.Id];
         Check(covering.Zone == Zone.Home && covering.Bowed, "the Henshin is not destroyed: he takes the other Personality's place and state (at home, bowed)");
