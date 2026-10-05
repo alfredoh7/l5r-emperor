@@ -1115,6 +1115,7 @@ public sealed partial class MatchEngine
             // The Engage window (issue #310) is the one window that decides WHO resumes: whoever holds the
             // first opportunity once its claims resolve (the Defender by default).
             var resumeTo = pending.Type == "engageReaction" ? CloseEngageWindow() : pending.ActingPlayerId ?? _state.ActivePlayerId;
+            resumeTo = AfterActionWindowResumeTo(pending, resumeTo); // issue #648: an additional Battle action granted inside the after-action window goes back to its taker
             if (pending.Type == "duelWonReaction" && P3FinishStashedDuel(resumeTo)) return; // Kakita Kenta (issue #503): the duel's action is now truly done
             // Overconfident (issue #223): a chance to react to anything THIS window's own resolution
             // caused to enter or leave play (Bayushi Mugoshi entering during a Proclaim/entryReaction

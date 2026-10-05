@@ -36,7 +36,7 @@ public sealed partial class MatchEngine
     // the same "who priority returns to once every window this action opens has closed" every one of those already threads through).
     // performerId (issue #453, batch 2): the Personality who performed the action, for a Reaction that targets "the action's performer" (An Insult Answered); the Honor
     // the action cost (RecordHonorLoss, from GainHonor) rides along the same way.
-    private bool FinishActionEffectTracking(string abilityId, int playerId, string? sourceId, int closesTo, string? performerId = null)
+    private bool FinishActionEffectTracking(string abilityId, int playerId, string? sourceId, int closesTo, string? performerId = null, IEnumerable<string>? targetIds = null)
     {
         AfterMechAActionResolved(abilityId, playerId, sourceId); // issue #501 (EmperorMechA.cs): Beyond the Line's draw "after the action's resolution"; Momoko's waiver is spent
         ApplyAgonyOfHerGaze(abilityId, playerId); // issue #503 (EmperorP2.cs): The Agony of Her Gaze's trait, before any Reaction to the same moment
@@ -49,6 +49,7 @@ public sealed partial class MatchEngine
             SourceId = sourceId,
             Affected = affected,
             PerformerId = performerId,
+            TargetIds = targetIds?.Distinct().ToList() ?? [],
             HonorLosers = _state.CurrentActionHonorLosers,
             HandRecipients = _state.CurrentActionHandRecipients,
             FavorTakers = _state.CurrentActionFavorTakers
@@ -110,6 +111,7 @@ public sealed partial class MatchEngine
         if (abilityId == "takeuchi-draw") return ActionAttachedFollowerFromHandTo(source, playerId);
         // Chrysanthemum Blossom (Emperor Edition remaining-cards pass, issue #492 group G): "After this Personality is assigned" -- the assignment command's own record, not a catalogued action.
         if (abilityId == "chrysanthemum-blossom-boost") return ChrysanthemumBlossomApplies(source, playerId, facts);
+        if (WithoutMercyApplies(source, abilityId, playerId, facts) is { } withoutMercy) return withoutMercy; // issue #648 (WithoutMercy.cs): a Battle action by your Samurai that targeted no enemy card
         if (P3AssignmentOrActionApplies(source, abilityId, facts) is { } p3Assigned) return p3Assigned; // Utaku Tairu - exp (issue #503): "after a Personality assigns or moves"
         if (facts.AbilityId == AssignedSentinel) return false;
         if (!AbilityCatalog.All.ContainsKey(facts.AbilityId)) return false;

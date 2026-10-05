@@ -5163,7 +5163,7 @@ public sealed partial class MatchEngine
         FireCowedAndDefeatedActionWatches(attack.PlayerId, attack.Command, attack.TargetId); // The Shadow's Embrace pass (issue #476), batch 3
         // Action-effect tracking (issue #437): the deferred Attack is the action's resolution, the same reasoning FireAfterOwnActionTraits above already follows.
         P3RecordBowedPersonalities(attack.BowedBefore); // Hida Defenders (issue #503): the Personalities the Attack's action bowed go on its record
-        if (FinishActionEffectTracking(attack.AbilityId, attack.PlayerId, attack.SourceId, attackBurstContinues ? attack.PlayerId : 1 - attack.PlayerId)) return;
+        if (FinishActionEffectTracking(attack.AbilityId, attack.PlayerId, attack.SourceId, attackBurstContinues ? attack.PlayerId : 1 - attack.PlayerId, targetIds: attack.TargetId is { } attackTarget ? [attackTarget] : null)) return;
         NextAction(attack.PlayerId, attackBurstContinues);
     }
     private bool IsAttacking(CardInstance card) => card.Zone == Zone.Battlefield && card.OwnerId == _state.ActivePlayerId;
@@ -10396,7 +10396,7 @@ public sealed partial class MatchEngine
         // Reaction that names it, same placement in the chain as the "after this action" windows above.
         P3RecordBowedPersonalities(bowedBeforeAction); // Hida Defenders (issue #503): the Personalities this action bowed go on its record
         RecordBowedRings(bowedBeforeAction); // Deception Revealed (Emperor Edition remaining-cards pass, group A, issue #492): the Rings this action bowed go on its record.
-        if (FinishActionEffectTracking(id, player.Id, source?.Id, closesTo, ActionPerformerIdOrNull(ability, command, source))) return;
+        if (FinishActionEffectTracking(id, player.Id, source?.Id, closesTo, ActionPerformerIdOrNull(ability, command, source), ReactionWindowTargets(command).OfType<string>())) return;
         NextAction(player.Id, burstContinues);
     }
     // Togashi Hizumi: "after the resolution of an action that bowed a Personality AT HIZUMI'S

@@ -130,16 +130,20 @@ public sealed partial class MatchEngine
                         Emit("duelStatBaseForce", $"{name}: {Definition(mine).Name} uses his base Force ({Definition(mine).Force}) as his duel stat.", owner, mine.Id);
                         break;
                     case EmperorP2Abilities.ChampionFocus:
-                    {
-                        var yojimbo = Card(command.TargetId);
-                        if (duel.ChallengerId == mine.Id) duel.ChallengerId = yojimbo.Id; else duel.ChallengedId = yojimbo.Id;
-                        var challenger = Card(duel.ChallengerId); var challenged = Card(duel.ChallengedId);
-                        if (_state.LastDuel is { } record)
-                            _state.LastDuel = record with { Challenger = ViewCard(challenger), Challenged = ViewCard(challenged),
-                                Attachments = Attachments(challenger.Id).Concat(Attachments(challenged.Id)).Select(c => ViewCard(c)).ToArray() };
-                        Emit("duelSubstituted", $"{Definition(yojimbo).Name} enters the duel instead of {Definition(mine).Name} ({name}).", owner, yojimbo.Id);
-                        break;
-                    }
+                        {
+                            var yojimbo = Card(command.TargetId);
+                            if (duel.ChallengerId == mine.Id) duel.ChallengerId = yojimbo.Id; else duel.ChallengedId = yojimbo.Id;
+                            var challenger = Card(duel.ChallengerId); var challenged = Card(duel.ChallengedId);
+                            if (_state.LastDuel is { } record)
+                                _state.LastDuel = record with
+                                {
+                                    Challenger = ViewCard(challenger),
+                                    Challenged = ViewCard(challenged),
+                                    Attachments = Attachments(challenger.Id).Concat(Attachments(challenged.Id)).Select(c => ViewCard(c)).ToArray()
+                                };
+                            Emit("duelSubstituted", $"{Definition(yojimbo).Name} enters the duel instead of {Definition(mine).Name} ({name}).", owner, yojimbo.Id);
+                            break;
+                        }
                     case EmperorP2Abilities.TurningAwayFocus:
                         DiscardPersonalityFromPlay(mine, name);
                         EndDuelWithoutResolution(duel, $"{name}: {Definition(mine).Name} was discarded; the duel ends without resolution.");
@@ -169,7 +173,7 @@ public sealed partial class MatchEngine
             _state.LastDuel = record with { Result = new("Ended", null, [], 0, 0, 0, 0, duel.OrderedFocusEffects.ToArray(), _state.Events.Skip(start).ToArray(), [], _state.Version + 1, _state.Phase, _state.PriorityPlayerId, "Ended without resolution") };
         var challengerPlayerId = duel.ChallengerPlayerId;
         _state.PendingDuel = null;
-        if (FinishActionEffectTracking(duel.AbilityId, challengerPlayerId, duel.SourceCardId, challengerPlayerId, duel.ChallengerId)) return;
+        if (FinishActionEffectTracking(duel.AbilityId, challengerPlayerId, duel.SourceCardId, challengerPlayerId, duel.ChallengerId, [duel.ChallengedId])) return;
         NextAction(challengerPlayerId);
     }
 

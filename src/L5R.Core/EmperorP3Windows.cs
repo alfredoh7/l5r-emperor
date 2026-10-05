@@ -34,8 +34,15 @@ public sealed partial class MatchEngine
     {
         var stash = new StashedDuelTracking
         {
-            AbilityId = duel.AbilityId, PlayerId = duel.ChallengerPlayerId, SourceId = duel.SourceCardId, PerformerId = duel.ChallengerId,
-            Affected = _state.CurrentActionAffected, HonorLosers = _state.CurrentActionHonorLosers, HandRecipients = _state.CurrentActionHandRecipients, FavorTakers = _state.CurrentActionFavorTakers
+            AbilityId = duel.AbilityId,
+            PlayerId = duel.ChallengerPlayerId,
+            SourceId = duel.SourceCardId,
+            PerformerId = duel.ChallengerId,
+            TargetIds = [duel.ChallengedId],
+            Affected = _state.CurrentActionAffected,
+            HonorLosers = _state.CurrentActionHonorLosers,
+            HandRecipients = _state.CurrentActionHandRecipients,
+            FavorTakers = _state.CurrentActionFavorTakers
         };
         _state.CurrentActionAffected = []; _state.CurrentActionHonorLosers = []; _state.CurrentActionHandRecipients = []; _state.CurrentActionFavorTakers = [];
         if (!OpenDuelWonReactionWindow(winnerId, winnerPlayerId, closesTo))
@@ -53,7 +60,7 @@ public sealed partial class MatchEngine
         if (P3.StashedDuel is not { } stash) return false;
         P3.StashedDuel = null;
         _state.CurrentActionAffected = stash.Affected; _state.CurrentActionHonorLosers = stash.HonorLosers; _state.CurrentActionHandRecipients = stash.HandRecipients; _state.CurrentActionFavorTakers = stash.FavorTakers;
-        return FinishActionEffectTracking(stash.AbilityId, stash.PlayerId, stash.SourceId, resumeTo, stash.PerformerId);
+        return FinishActionEffectTracking(stash.AbilityId, stash.PlayerId, stash.SourceId, resumeTo, stash.PerformerId, stash.TargetIds);
     }
 
     // ---- Forging Destiny: the window before an Event resolves -----------------------------------------------------------------------------------------------------------------------------------
