@@ -48,7 +48,7 @@ public static class TraitReactions
     public static IReadOnlyCollection<string> All => Ids;
 
     /// <summary>Whether this ability is a trait (not a printed Reaction) that the engine models with Reaction timing.</summary>
-    public static bool Is(string abilityId) => Ids.Contains(abilityId);
+    public static bool Is(string abilityId) => Ids.Contains(abilityId) || PromoEmperorItemsAbilities.IsTrait(abilityId); // The Ivory Sword (PromoEmperorItems.cs)
 }
 
 public sealed partial class MatchEngine

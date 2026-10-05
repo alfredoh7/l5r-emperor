@@ -545,6 +545,8 @@ public sealed partial class MatchEngine
         if (RoninEntryDiscount(card, playerId) is > 0 and var roninDiscount) { raw -= roninDiscount; basis += $" − {roninDiscount} (Palace of the Breaking Dawn)"; }
         // Daigotsu Misaki (Emperor Edition Personality pass, issue #477): "Followers attaching to Misaki enter play paying 2 less Gold" -- any attach, from a hand or a discard pile.
         if (FollowerAttachDiscount(card, target) is > 0 and var misakiDiscount) { raw -= misakiDiscount; kind = GoldCostKind.Derived; basis += $" − {misakiDiscount} ({Definition(target).Name})"; }
+        // Promotional-Emperor Champion items (PromoEmperorItems.cs): "Attaches to a [X] Champion ignoring costs."
+        if (PromoItemsAttachesFree(card, target)) { raw = 0; kind = GoldCostKind.Derived; basis += " (attaches to a Champion ignoring costs)"; }
         if (raw < 0) basis += " (min 0)";
         return (Math.Max(0, raw), basis, kind);
     }
