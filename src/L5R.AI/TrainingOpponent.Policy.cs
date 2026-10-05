@@ -37,9 +37,13 @@ public static partial class TrainingOpponent
             return roll < weight ? 150 + RankBonus(intent.Rank) : 50;
         }
         // Hand-tuned values for the abilities the bot understood before issue #642 (they score the chosen target).
-        if (x.Card(command.TargetId) is { } target && AbilityValue(id, target, x.Self, x.Opponent, x.View) is var known && known > 0) return known;
-        return Math.Max(PassScore, GenericAbilityScore(x, intent));
+        if (x.Card(command.TargetId) is { } target && AbilityValue(id, target, x.Self, x.Opponent, x.View) is var known && known > 0)
+            return Math.Max(PassScore, known - RepeatPenalty * x.Memory.UsesThisTurn(x.View.TurnNumber, id, command.CardId));
+        return Math.Max(PassScore, GenericAbilityScore(x, intent) - RepeatPenalty * x.Memory.UsesThisTurn(x.View.TurnNumber, id, command.CardId));
     }
+
+    /// <summary>What each earlier use of the same ability from the same card this turn takes off its score (the floor stays at passing).</summary>
+    internal const double RepeatPenalty = 20;
 
     /// <summary>The default for any ability the bot has no rule for: well above passing, higher for what it does, with Mendon's draw and Honor adjustments.</summary>
     private static double GenericAbilityScore(Ctx x, AbilityIntent intent)

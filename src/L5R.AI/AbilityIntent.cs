@@ -21,17 +21,17 @@ public sealed record AbilityIntent(
 {
     public static readonly AbilityIntent None = new(EffectRank.Neutral, TargetSide.None, false, false, false, false, false, false, false, false, false, true);
 
-    private static readonly Regex Negate = new(@"\bnegate", RegexOptions.Compiled | RegexOptions.IgnoreCase);
-    private static readonly Regex Destroy = new(@"\bdestroy(?!\s+(this|itself|the duel))", RegexOptions.Compiled | RegexOptions.IgnoreCase);
-    private static readonly Regex Bow = new(@"\bbow\b", RegexOptions.Compiled | RegexOptions.IgnoreCase);
-    private static readonly Regex Penalize = new(@"(-\s?\d|\bpenalty\b|\bdishonor\b|\bmove (him|her|it|them|a target|the target)?\s*home\b|\blower\b|\bloses?\b|\bdiscard\b[^.:]*\b(from|of) (an? )?(enemy|opponent|his|her))", RegexOptions.Compiled | RegexOptions.IgnoreCase);
-    private static readonly Regex Help = new(@"(\+\s?\d|\bbonus\b|\bstraighten\b|\bgains?\b|\btake\b|\bput\b|\bsearch\b|\bcreate\b|\bproduce\b|\bdraw\b|\brally\b)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
-    private static readonly Regex Draw = new(@"\bdraw\b", RegexOptions.Compiled | RegexOptions.IgnoreCase);
-    private static readonly Regex TakeFavor = new(@"(take the imperial favor|lobby|take favor|add a favor token)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
-    private static readonly Regex DiscardFavor = new(@"discard (the )?(imperial )?favor", RegexOptions.Compiled | RegexOptions.IgnoreCase);
-    private static readonly Regex GainHonor = new(@"\bgains?\s+\d+\s+honor|\bgain\s+\d+\s+honor", RegexOptions.Compiled | RegexOptions.IgnoreCase);
-    private static readonly Regex EitherHonor = new(@"gains?\s+or\s+loses?", RegexOptions.Compiled | RegexOptions.IgnoreCase);
-    private static readonly Regex LoseHonor = new(@"\bloses?\s+\d+\s+honor", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+    private static readonly Regex Negate = new(@"\bnegate", RegexOptions.IgnoreCase);
+    private static readonly Regex Destroy = new(@"\bdestroy(?!\s+(this|itself|the duel))", RegexOptions.IgnoreCase);
+    private static readonly Regex Bow = new(@"\bbow\b", RegexOptions.IgnoreCase);
+    private static readonly Regex Penalize = new(@"(-\s?\d|\bpenalty\b|\bdishonor\b|\bmove (him|her|it|them|a target|the target)?\s*home\b|\blower\b|\bloses?\b|\bdiscard\b[^.:]*\b(from|of) (an? )?(enemy|opponent|his|her))", RegexOptions.IgnoreCase);
+    private static readonly Regex Help = new(@"(\+\s?\d|\bbonus\b|\bstraighten\b|\bgains?\b|\btake\b|\bput\b|\bsearch\b|\bcreate\b|\bproduce\b|\bdraw\b|\brally\b)", RegexOptions.IgnoreCase);
+    private static readonly Regex Draw = new(@"\bdraw\b", RegexOptions.IgnoreCase);
+    private static readonly Regex TakeFavor = new(@"(take the imperial favor|lobby|take favor|add a favor token)", RegexOptions.IgnoreCase);
+    private static readonly Regex DiscardFavor = new(@"discard (the )?(imperial )?favor", RegexOptions.IgnoreCase);
+    private static readonly Regex GainHonor = new(@"\bgains?\s+\d+\s+honor|\bgain\s+\d+\s+honor", RegexOptions.IgnoreCase);
+    private static readonly Regex EitherHonor = new(@"gains?\s+or\s+loses?", RegexOptions.IgnoreCase);
+    private static readonly Regex LoseHonor = new(@"\bloses?\s+\d+\s+honor", RegexOptions.IgnoreCase);
 
     /// <summary>The part of a label after its last colon: the effect, as opposed to the costs before it.</summary>
     internal static string EffectText(string label)

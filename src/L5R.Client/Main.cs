@@ -33,6 +33,8 @@ public partial class Main : Node
     private readonly Dictionary<(int Owner, int Province), Button> _provinceButtons = [];
     private readonly Dictionary<int, Button> _laneSummaries = [];
     private bool _autoOpponent = true, _reducedMotion;
+    private BotContext? _botMemory;
+    private string? _botMemoryKey;
     private double _opponentClock, _captureClock;
     private string? _capturePath;
     private string _captureMode = "table";
@@ -156,7 +158,11 @@ public partial class Main : Node
             if (_opponentClock > (_reducedMotion ? .12 : .7))
             {
                 _opponentClock = 0;
-                _session.StepPracticeOpponent((view, actions) => view.PendingDuel is not null ? DuelOpponent.Choose(view, actions) : TrainingOpponent.Choose(view, actions).Command);
+                // Issue #642: the bot keeps one memory per match (what it has seen played, what the engine refused) and chooses again after a refusal.
+                if (_botMemory is null || _botMemoryKey != _session.MatchKey) { _botMemory = new BotContext(); _botMemoryKey = _session.MatchKey; }
+                var botMemory = _botMemory;
+                _session.StepPracticeOpponent((view, actions) => view.PendingDuel is not null ? DuelOpponent.Choose(view, actions) : TrainingOpponent.Choose(view, actions, botMemory).Command,
+                    (command, error, version) => botMemory.NoteRejection(version, command, error));
             }
             // No delay: this only fires when declining is the player's sole legal option, so there is
             // nothing for them to weigh — unlike the opponent's move above, it needs no "thinking" pause.

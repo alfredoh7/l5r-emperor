@@ -108,6 +108,8 @@ public sealed partial class MatchEngine
     {
         if (command?.AbilityId is null || !AbilityCatalog.All.TryGetValue(command.AbilityId, out var ability)) return false;
         var source = command.CardId is not null && _state.Cards.TryGetValue(command.CardId, out var s) ? s : null;
+        // A rulebook Favor action (Lobby, favor-cycle...) is a player ability: no card performs it, so no card can protect it (found by the bot soak, issue #642).
+        if (source is null && ability.Performer is null) return HiromiProtects(command);
         var performer = ActionPerformer(ability, command, source);
         return Protected(performer) || HiromiProtects(command) // Yoritomo Hiromi (issue #477)
             || Attachments(performer.Id).Any(a => Definition(a).Effect == "ki-uso-protect-political") && ActionCarriesKeyword(ability, source, "Political");

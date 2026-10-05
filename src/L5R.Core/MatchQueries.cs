@@ -246,7 +246,7 @@ public sealed partial class MatchEngine
                 {
                     var honor = Definition(Card(pending.CardId)).PersonalHonor;
                     // Kakita Yusugi / Yogo Ugimori (issue #453, batch 2): the limit he ignores, and the lock (ProclaimRejection).
-                    Add("proclaim", $"Proclaim · gain {honor} Honor", Command("proclaim"), ProclaimRejection(player, Definition(Card(pending.CardId))), pending.CardId);
+                    Add("proclaim", $"Proclaim · gain {honor} Honor", Command("proclaim"), ProclaimRejection(player, Definition(Card(pending.CardId)), pending.CardId), pending.CardId);
                 }
                 var enteringCard = Card(pending.CardId);
                 // Every "own enters play" Reaction the card prints (issue #389: Horume's gain AND lose; before, only the first was listed). One that shares a
@@ -548,7 +548,7 @@ public sealed partial class MatchEngine
         }
         // Plains of Otosan Uchi (issue #554): both slots are always still face down while this is open (it only ever
         // opens when neither has been revealed yet this Events Phase), so Left/Right never has a title to show instead.
-        else if (_state.PendingChoice is { Type: "provinceOrder" })
+        else if (_state.PendingChoice is { Type: "provinceOrder" } orderChoice && orderChoice.PlayerId == playerId)
         {
             Add("provinceOrder", "Left", Command("provinceOrder") with { Choice = "left" });
             Add("provinceOrder", "Right", Command("provinceOrder") with { Choice = "right" });

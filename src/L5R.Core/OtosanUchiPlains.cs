@@ -174,6 +174,7 @@ public sealed partial class MatchEngine
         _state.PendingChoice = new("provinceOrder", player.Id, null,
             $"Which card in {(province.RegionId is string rid ? Definition(Card(rid)).Name : "the province")} would you like to reveal first?");
         _state.OtosanUchiProvinceIndex = province.Index;
+        _state.PriorityPlayerId = player.Id; // the chooser holds the action opportunity (bot soak, issue #642: priority was left with the other player, who was offered the choice instead)
         Emit("provinceOrderOpened", $"{player.Name} chooses which card in province {province.Index + 1} to reveal first.", player.Id);
         return true;
     }

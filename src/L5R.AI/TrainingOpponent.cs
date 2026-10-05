@@ -20,20 +20,22 @@ public static partial class TrainingOpponent
     public static OpponentDecision Choose(MatchView view, ActionOption[] actions, BotContext memory)
     {
         if (view.WinnerId is not null) return new(null, "The match has finished.");
-        if (view.ViewerId != view.PriorityPlayerId) return new(null, "Waiting for the other player's decision.");
+        // A seat waits unless the engine offers it something to do: a pending choice can belong to the player who does not hold priority (the province order, a reaction).
+        if (view.ViewerId != view.PriorityPlayerId && !actions.Any(a => a.Enabled && a.Type is not ("concede" or "wait"))) return new(null, "Waiting for the other player's decision.");
         memory.Observe(view);
         var self = view.Players.Single(p => p.Id == view.ViewerId);
         var opponent = view.Players.Single(p => p.Id != view.ViewerId);
         var x = new Ctx(view, self, opponent, BotProfile.Assess(self, memory.DeckAveragePersonalHonor), memory, AllCards(view));
         var candidates = actions.Where(a => a.Enabled && a.Type is not ("concede" or "wait"))
             .Select(a => (Action: a, Command: Prepare(x, a)))
-            .Where(p => p.Command is not null)
+            .Where(p => p.Command is not null && !memory.IsRejected(view.Version, p.Command))
             .Select(p => (p.Action, Command: p.Command!, Score: Score(x, p.Action, p.Command!)))
             .OrderByDescending(p => p.Score).ThenBy(p => p.Action.Type, StringComparer.Ordinal)
             .ThenBy(p => p.Command.CardId, StringComparer.Ordinal).ThenBy(p => p.Command.AbilityId, StringComparer.Ordinal).ToArray();
         if (candidates.Length == 0) return new(null, "No complete legal action was supplied for this decision.");
         var chosen = candidates[0];
         Remember(x, chosen.Command);
+        if (chosen.Command.Type is "useAbility" or "playStrategy" or "equip") memory.NoteUse(view.TurnNumber, chosen.Command.AbilityId, chosen.Command.CardId);
         return new(chosen.Command, Explain(chosen.Action.Type));
     }
 
@@ -78,12 +80,24 @@ public static partial class TrainingOpponent
             var units = self.Home.Where(c => c.Definition?.Type == CardType.Personality && !c.Bowed && (legalIds is null || legalIds.Contains(c.Id))).ToArray();
             var provinces = (action.Provinces ?? (action.Type == "attack" ? opponent.Provinces : self.Provinces).Where(p => !p.Destroyed).Select(p => p.Index).ToArray());
             if (provinces.Length == 0 || units.Length == 0) return null;
-            if (command.Assignments is { Count: > 0 } && action.Type == "attack") return command;
+            if (action.Type == "attack" && x.Memory.RejectionMessages(view.Version, "attack").Any())
+            {
+                // The engine refused an assignment for a restriction only it checks (a unit that may not go to this battlefield). Try one unit at one province at a time, strongest
+                // unit first, and offer the first pair not already refused.
+                foreach (var unit in units.OrderByDescending(c => ArmyForce(self.Home.Where(h => h.Id == c.Id || h.AttachedTo == c.Id))).ThenBy(c => c.Id, StringComparer.Ordinal))
+                    foreach (var province in provinces.OrderBy(p => opponent.Provinces.FirstOrDefault(q => q.Index == p)?.Strength ?? int.MaxValue).ThenBy(p => p))
+                    {
+                        var probe = command with { Assignments = new Dictionary<string, int> { [unit.Id] = province } };
+                        if (!x.Memory.IsRejected(view.Version, probe)) return probe;
+                    }
+                return null;
+            }
             if (action.Type == "attack")
             {
                 // Mendon's spec (issue #642): as many sub-armies as can each beat their province plus every unit that could defend it.
                 var plan = PlanAttack(x, units, provinces);
                 if (plan is not null) return command with { Assignments = plan };
+                if (command.Assignments is { Count: > 0 }) return command; // no plan clears its threshold: the engine's own assignment (all units at this province), scored low by the Attack rule
             }
             var target = action.Type == "attack"
                 ? opponent.Provinces.Where(p => provinces.Contains(p.Index)).OrderBy(p => p.Strength).ThenBy(p => p.Index).First().Index
@@ -92,7 +106,7 @@ public static partial class TrainingOpponent
         }
         if (action.Type == "discardHand")
         {
-            var count = self.HandCount - 8;
+            var count = self.HandCount - x.MaxHand;
             if (count <= 0 || self.Hand.Length != self.HandCount) return null;
             return command with { CardIds = self.Hand.OrderBy(HandValue).ThenBy(c => c.Id, StringComparer.Ordinal).Take(count).Select(c => c.Id).ToArray() };
         }
@@ -108,9 +122,18 @@ public static partial class TrainingOpponent
                 if (selected.Length == 0) return null;
                 return command with { CardIds = selected };
             }
-            if (action.TargetIds is { Length: > 0 } legal && command.TargetId is null)
+            // The engine marks a "select several cards" action by a CardIds array on its command (province cards, a set of Personalities): the answer is those cards, never a TargetId.
+            if (command.CardIds is { Length: 0 } && action.TargetIds is { Length: > 0 } selectable)
+            {
+                var offered = selectable.Where(id => !id.StartsWith("hidden-", StringComparison.Ordinal)).ToArray();
+                command = command with { CardIds = [(offered.Length > 0 ? offered : selectable)[0]] };
+            }
+            else if (command.CardIds is null && action.TargetIds is { Length: > 0 } && command.TargetId is null)
             {
                 var intent = AbilityIntent.Of(command.AbilityId);
+                var refused = x.Memory.RejectedTargets(view.Version, command.AbilityId, command.CardId, "useAbility");
+                var legal = action.TargetIds.Where(id => !refused.Contains(id)).ToArray();
+                if (legal.Length == 0) return null;
                 var known = legal.Select(id => x.Card(id)).OfType<CardView>().Select(c => (Card: c, Value: AbilityValue(command.AbilityId, c, self, opponent, view)))
                     .Where(p => p.Value > 0).OrderByDescending(p => p.Value).ThenBy(p => p.Card.Id, StringComparer.Ordinal).FirstOrDefault();
                 var target = known.Card ?? PickCard(x, legal, intent, action.Label);
@@ -121,8 +144,9 @@ public static partial class TrainingOpponent
         }
         if (action.Type is "equip" or "playStrategy" && action.TargetIds is { Length: > 0 } targets)
         {
-            var targetCards = self.Home.Concat(self.Army).Concat(opponent.Army).Where(c => targets.Contains(c.Id)).ToArray();
-            if (targetCards.Length == 0) return Complete(x, action, command);
+            var refusedTargets = x.Memory.RejectedTargets(view.Version, command.AbilityId, command.CardId, action.Type);
+            var targetCards = self.Home.Concat(self.Army).Concat(opponent.Army).Where(c => targets.Contains(c.Id) && !refusedTargets.Contains(c.Id)).ToArray();
+            if (targetCards.Length == 0) return refusedTargets.Count > 0 ? null : Complete(x, action, command);
             var ordered = targetCards.OrderBy(c => c.Bowed).ThenByDescending(c => c.Force);
             var withTarget = WithTarget(command, action, ordered.ThenBy(c => c.Id, StringComparer.Ordinal).First().Id);
             return withTarget is null ? null : Complete(x, action, withTarget);
@@ -210,6 +234,8 @@ public static partial class TrainingOpponent
                 if (enemyForce == 0) return 0;
                 return ownForce >= enemyForce ? 95 : ownForce + StrongestThreatProvinceStrength(self, opponent) >= enemyForce ? 60 : self.Provinces.Count(p => !p.Destroyed) == 1 ? 50 : 0;
             case "pass": return PassScore;
+            // A convenience for a human who wants to skip every remaining battle in one go; the bot simply passes when its turn comes (and it is refused while a window is open).
+            case "passAllBattles": return -100;
             // Deck search (issue #312): a modest bot never stalls in a search. It takes the first eligible card the engine
             // lists (the list is already sorted by type then name, and holds only eligible entries), passes when the
             // engine offers Pass (which it does only when nothing qualifies), attaches a found Region to the first
@@ -303,7 +329,7 @@ public static partial class TrainingOpponent
         "playStrategy" => "Use a legal Battle action to improve the visible Force comparison.",
         "equip" => "Attach support to an available Personality using the offered payment.",
         "discardProvince" => "Cycle remaining face-up cards after purchasing is complete.",
-        "discardHand" => "Keep more useful combat cards while returning to eight cards.",
+        "discardHand" => "Keep more useful combat cards while returning to the hand-size maximum.",
         "useAbility" => "Use a card ability the engine offers.",
         _ => "Continue the current legal action round."
     };

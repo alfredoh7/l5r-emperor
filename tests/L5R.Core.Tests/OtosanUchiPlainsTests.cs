@@ -17,6 +17,7 @@ internal static class OtosanUchiPlainsTests
         ("Published shape: region-wave-21 prints the scan's stats, keywords and text, carries no Abilities (Effect-keyed instead), ships its art and is in its manifest", PublishedShape),
         ("Revealing the Region attaches it and creates an empty second slot, refilled face down; not revealed this turn", AttachCreatesSecondSlot),
         ("Both slots face down: the controller chooses which to reveal first, and it resolves in that order", RevealOrderChoice),
+        ("The reveal-order choice goes to the player it belongs to even when the other player held priority; the other player is never offered it (bot soak, issue #642)", RevealOrderTakesPriority),
         ("Destroying the province loses 10 Honor and discards both slots and the Region", DestructionHonorLoss),
         ("Purchasing the card in the second slot refills the second slot, not the first", PurchaseFromSecondSlot),
         ("Shosuro Toson: two candidates ask which to discard, each face-up card's own title replacing Left/Right", TosonDisambiguation),
@@ -113,6 +114,24 @@ internal static class OtosanUchiPlainsTests
         Eq(e.State.Phase, Phase.Action, "the Events Phase finished without getting stuck");
     }
 
+    private static void RevealOrderTakesPriority()
+    {
+        var s = Start();
+        var province = s.Players[0].Provinces[0];
+        if (province.CardId is string old) s.Cards.Remove(old);
+        var region = Put(s, RegionDef, 0, Zone.Region, province: 0); province.RegionId = region.Id;
+        var cardA = Put(s, "training-lion-samurai", 0, Zone.Province, province: 0); cardA.FaceUp = false; province.CardId = cardA.Id;
+        var cardB = Put(s, "training-lion-courtier", 0, Zone.Province, province: 0); cardB.FaceUp = false; province.CardId2 = cardB.Id;
+        s.ActivePlayerId = 0; s.PriorityPlayerId = 1; // the other player answered something just before: priority was left with him
+        var e = Engine(s);
+        var open = typeof(MatchEngine).GetMethod("BeginProvinceRevealOrder", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)!;
+        Check((bool)open.Invoke(e, [e.State.Players[0], e.State.Players[0].Provinces[0]])!, "the choice opens");
+        Eq(e.State.PendingChoice?.Type, "provinceOrder", "asks which to reveal first");
+        Eq(e.State.PriorityPlayerId, 0, "the player it belongs to now holds the action opportunity");
+        Check(e.QueryActions(0).Count(a => a.Type == "provinceOrder" && a.Enabled) == 2, "he is offered Left and Right, enabled");
+        Check(e.QueryActions(1).All(a => a.Type != "provinceOrder"), "the other player is not offered the choice");
+    }
+
     private static void RevealOrderChoice()
     {
         var s = Start();
@@ -126,6 +145,8 @@ internal static class OtosanUchiPlainsTests
         var options = e.QueryActions(1).Where(a => a.Type == "provinceOrder").ToArray();
         Eq(options.Length, 2, "both Left and Right are offered");
         Check(options.All(a => a.Enabled), "both are enabled");
+        Eq(e.State.PriorityPlayerId, 1, "the chooser holds the action opportunity (bot soak, issue #642)");
+        Check(e.QueryActions(0).All(a => a.Type != "provinceOrder"), "the other player is not offered the choice");
         var right = options.Single(a => a.Label == "Right");
         Accept(e, right.Command!);
         // The economy scenario's other three provinces reveal their own (unrelated) cards in this same Events Phase too; filter to these two.

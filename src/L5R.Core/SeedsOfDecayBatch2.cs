@@ -201,9 +201,10 @@ public sealed partial class MatchEngine
     private bool ProclaimAllowed(PlayerState player, CardDefinition entering) =>
         (player.ProclaimUsedTurn != _state.TurnNumber || entering.Effect == "proclaim-ignores-turn-limit") && !ProclaimLocked(player.Id);
 
-    private string? ProclaimRejection(PlayerState player, CardDefinition entering) =>
+    private string? ProclaimRejection(PlayerState player, CardDefinition entering, string? enteringId = null) =>
         ReactionsBarred() ? "Cherry Blossom Festival: no players may take Reactions." // issue #492, group F
         : ProclaimLocked(player.Id) ? "You may not take the Proclaim Reaction until the locking player's next turn begins."
+        : enteringId is not null && player.ProclaimedCardId == enteringId ? "This Personality has already been Proclaimed."
         : player.ProclaimUsedTurn == _state.TurnNumber && entering.Effect != "proclaim-ignores-turn-limit" ? "Already used Proclaim this turn." : null;
 
     private const string BeforeProclaimTrigger = "before-proclaim-resolves";
@@ -240,7 +241,7 @@ public sealed partial class MatchEngine
     {
         var player = Player(command.PlayerId);
         var card = Card(_state.PendingChoice!.CardId);
-        player.ProclaimUsedTurn = _state.TurnNumber;
+        player.ProclaimUsedTurn = _state.TurnNumber; player.ProclaimedCardId = card.Id;
         // Proclaim is a Reaction (Mendon's R4 ruling), so its gain is from an action's effects: Rhetoric and the like may be played on it.
         if (!negated) { var before = _proclaimAction; _proclaimAction = ($"{player.Id}|proclaim|{card.Id}", player.Id); try { GainHonor(player.Id, Definition(card).PersonalHonor + HoteiProclaimBonus(player.Id, card), "Proclaim"); /* Hotei's Contentment (issue #503) */ } finally { _proclaimAction = before; } }
         else Emit("proclaimNegated", $"{player.Name}'s Proclaim resolved with its effects negated.", player.Id, card.Id);

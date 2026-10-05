@@ -117,16 +117,25 @@ public sealed partial class MatchSession : IDisposable
 
     public string? ExportPracticeReplay() => _engine is null ? null : JsonSerializer.Serialize(_engine.ExportReplay(), new JsonSerializerOptions(Json) { WriteIndented = true });
 
-    public bool StepPracticeOpponent(Func<MatchView, ActionOption[], GameCommand?> choose)
+    /// <summary>One move of the practice opponent. Issue #642: like a player whose action is refused, it chooses again: each refusal is reported to <paramref name="refused"/> (the
+    /// bot remembers it) and the opponent is asked once more at the same position, up to a dozen tries. Without a callback a refusal is shown as a notice, as before.</summary>
+    public bool StepPracticeOpponent(Func<MatchView, ActionOption[], GameCommand?> choose, Action<GameCommand, string?, long>? refused = null)
     {
         if (_engine is null || Online || _engine.State.WinnerId is not null || _engine.State.PriorityPlayerId == _localSeat) return false;
         var opponent = 1 - _localSeat;
-        var command = choose(_engine.GetView(opponent), _engine.QueryActions(opponent));
-        if (command is null) return false;
-        var result = _engine.Execute(command);
-        if (!result.Accepted) Notice?.Invoke(result.Error ?? "The practice opponent could not act.");
+        for (var attempt = 0; attempt < 12; attempt++)
+        {
+            var view = _engine.GetView(opponent);
+            var command = choose(view, _engine.QueryActions(opponent));
+            if (command is null) return false;
+            var result = _engine.Execute(command);
+            if (result.Accepted) { RefreshLocal(); return true; }
+            if (refused is null) { Notice?.Invoke(result.Error ?? "The practice opponent could not act."); RefreshLocal(); return false; }
+            refused(command, result.Error, view.Version);
+        }
+        Notice?.Invoke("The practice opponent could not act.");
         RefreshLocal();
-        return result.Accepted;
+        return false;
     }
 
     /// <summary>Against a real opponent, a reaction window always waits for an explicit pass — bluffing is

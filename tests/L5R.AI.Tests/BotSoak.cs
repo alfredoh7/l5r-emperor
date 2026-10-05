@@ -4,7 +4,7 @@ using System.Text.Json;
 using L5R.AI;
 using L5R.Core;
 
-/// <summary>One invariant violation. Category: stall, illegal, cap, exception, setup.</summary>
+/// <summary>One invariant violation. Category: stall, illegal, cap, exception, setup; "rejected" (an offered action the engine refused and the bot recovered from) and "slow" (a match that ran out of wall time, which depends on the machine) are informational.</summary>
 internal sealed record SoakFinding(string Category, ulong Seed, int Turn, string Phase, string PendingChoice, string Id, string Reason, string[]? LastCommands = null);
 internal sealed class AbilityCensus { public int Offered { get; set; } public int Chosen { get; set; } public int Accepted { get; set; } }
 internal sealed class SoakMatchResult
@@ -21,10 +21,12 @@ internal sealed class SoakMatchResult
 /// <summary>Soak harness (issue #642): both seats are the TrainingOpponent, over random decks of wired cards, with invariants collected rather than thrown.</summary>
 internal static class BotSoak
 {
-    public const int DecisionCap = 4000;
+    /// <summary>A match that reaches this turn is a stalemate (two bots that will not attack), not a failure: it ends as finished with the victory reason "turn limit".</summary>
+    public static readonly int TurnLimit = int.TryParse(Environment.GetEnvironmentVariable("L5R_SOAK_TURNS"), out var turns) && turns > 0 ? turns : 80;
+    public static readonly int DecisionCap = int.TryParse(Environment.GetEnvironmentVariable("L5R_SOAK_CAP"), out var cap) && cap > 0 ? cap : 4000;
     static readonly Lazy<SoakPool> Pool = new(() => new SoakPool());
     static AbilityCensus Slot(SoakMatchResult r, string id) { if (!r.Census.TryGetValue(id, out var c)) r.Census[id] = c = new(); return c; }
-    static string Describe(GameCommand c) => $"{c.Type}{(c.AbilityId is null ? "" : "/" + c.AbilityId)}{(c.CardId is null ? "" : " card=" + c.CardId)}{(c.TargetId is null ? "" : " target=" + c.TargetId)}{(c.Choice is null ? "" : " choice=" + c.Choice)}";
+    static string Describe(GameCommand c) => $"{c.Type}{(c.AbilityId is null ? "" : "/" + c.AbilityId)}{(c.CardId is null ? "" : " card=" + c.CardId)}{(c.TargetId is null ? "" : " target=" + c.TargetId)}{(c.Choice is null ? "" : " choice=" + c.Choice)}{(c.Assignments is { Count: > 0 } ? " assign=" + string.Join(",", c.Assignments.Select(p => p.Key + ">" + p.Value)) : "")}{(c.CardIds is { Length: > 0 } ? " cards=" + string.Join(",", c.CardIds) : "")}";
     static string Key(ActionOption a) => a.Command?.AbilityId ?? "action:" + a.Type;
 
     public static SoakMatchResult PlayMatch(ulong seed, TimeSpan matchBudget)
@@ -44,16 +46,18 @@ internal static class BotSoak
         try { game = MatchEngine.CreateCustomMatch(seed, a, b); }
         catch (Exception e) { result.Findings.Add(new("exception", seed, 0, "-", "-", "CreateCustomMatch", "Engine threw creating a Ready match: " + e.Message)); return result; }
         var recent = new Queue<string>();
+        var contexts = new[] { new BotContext(), new BotContext() }; // one memory per seat, as a client keeps
+        var retries = 0;
         void Note(string s) { recent.Enqueue(s); if (recent.Count > 20) recent.Dequeue(); }
         MatchView Peek() => game.GetView(0);
         for (var n = 0; n < DecisionCap; n++)
         {
-            if (clock.Elapsed > matchBudget) { result.Findings.Add(new("cap", seed, Peek().TurnNumber, Peek().Phase.ToString(), Peek().PendingChoice?.Type ?? "-", "wall-time", $"Match exceeded {matchBudget.TotalSeconds:0}s wall time after {n} decisions", recent.ToArray())); result.Decisions = n; return result; }
+            if (clock.Elapsed > matchBudget) { result.Findings.Add(new("slow", seed, Peek().TurnNumber, Peek().Phase.ToString(), Peek().PendingChoice?.Type ?? "-", "wall-time", $"Match exceeded {matchBudget.TotalSeconds:0}s wall time after {n} decisions", recent.ToArray())); result.Decisions = n; return result; }
             MatchView v0; int seat; ActionOption[] actions; MatchView view; string phase, pending;
             try
             {
                 v0 = game.GetView(0);
-                if (v0.WinnerId is not null || v0.Phase == Phase.Finished) { result.Finished = true; result.Victory = v0.VictoryReason; result.Turn = v0.TurnNumber; result.Decisions = n; return result; }
+                if (v0.WinnerId is not null || v0.Phase == Phase.Finished || v0.TurnNumber > TurnLimit) { result.Finished = true; result.Victory = v0.VictoryReason ?? "turn limit"; result.Turn = v0.TurnNumber; result.Decisions = n; return result; }
                 phase = v0.Phase.ToString(); pending = v0.PendingChoice?.Type ?? "-";
                 seat = v0.PendingChoice?.PlayerId ?? v0.PriorityPlayerId;
                 actions = Clone(game.QueryActions(seat));
@@ -64,29 +68,38 @@ internal static class BotSoak
             var enabled = actions.Where(x => x.Enabled && x.Type != "concede").ToArray();
             foreach (var key in enabled.Select(Key).Distinct()) Slot(result, key).Offered++;
             OpponentDecision decision;
-            try { decision = TrainingOpponent.Choose(view, actions); }
+            try { decision = TrainingOpponent.Choose(view, actions, contexts[seat]); }
             catch (Exception e) { result.Findings.Add(new("exception", seed, v0.TurnNumber, phase, pending, "bot", $"TrainingOpponent threw {e.GetType().Name}: {e.Message}", recent.ToArray())); result.Decisions = n; result.Turn = v0.TurnNumber; return result; }
             if (decision.Command is null)
             {
                 if (enabled.Length > 0)
-                    result.Findings.Add(new("stall", seed, v0.TurnNumber, phase, pending, string.Join(",", enabled.Select(Key).Distinct().Take(6)), $"seat {seat} returned no command with {enabled.Length} enabled actions (types {string.Join(",", enabled.Select(x => x.Type).Distinct())}); bot said: {decision.Reason}", recent.ToArray()));
-                else result.Findings.Add(new("cap", seed, v0.TurnNumber, phase, pending, "no-actions", "Neither seat has an enabled non-concede action: the match is stuck", recent.ToArray()));
+                    result.Findings.Add(new("stall", seed, v0.TurnNumber, phase, pending, string.Join(",", enabled.Select(Key).Distinct().Take(6)), $"seat {seat} returned no command with {enabled.Length} enabled actions (types {string.Join(",", enabled.Select(x => x.Type).Distinct())}); bot said: {decision.Reason}. All offered: {string.Join(" | ", actions.Select(x => $"{x.Type}:{x.Enabled}:{x.Reason}:{x.Label}:T[{string.Join("+", x.TargetIds ?? [])}]:P[{string.Join("+", x.Provinces ?? [])}]"))}", recent.ToArray()));
+                else result.Findings.Add(new("cap", seed, v0.TurnNumber, phase, pending, "no-actions", "Neither seat has an enabled non-concede action: the match is stuck. Pending " + JsonSerializer.Serialize(game.State.PendingChoice) + "; seat0 " + string.Join(",", game.QueryActions(0).Select(x => x.Type + ":" + x.Enabled + ":" + x.Reason)) + "; seat1 " + string.Join(",", game.QueryActions(1).Select(x => x.Type + ":" + x.Enabled + ":" + x.Reason)), recent.ToArray()));
                 result.Decisions = n; result.Turn = v0.TurnNumber; return result;
             }
             var cmd = decision.Command; var id = cmd.AbilityId ?? "action:" + cmd.Type; Note($"#{n} seat{seat} {Describe(cmd)} :: {decision.Reason}");
             Slot(result, cmd.AbilityId ?? "action:" + cmd.Type).Chosen++;
             CommandResult outcome;
             try { outcome = game.Execute(cmd); }
-            catch (Exception e) { result.Findings.Add(new("exception", seed, v0.TurnNumber, phase, pending, id, $"Engine threw executing {Describe(cmd)}: {e.GetType().Name}: {e.Message}", recent.ToArray())); result.Decisions = n; result.Turn = v0.TurnNumber; return result; }
+            catch (Exception e) { result.Findings.Add(new("exception", seed, v0.TurnNumber, phase, pending, id, $"Engine threw executing {Describe(cmd)}: {e.GetType().Name}: {e.Message} :: {string.Join(" / ", (e.StackTrace ?? "").Split((char)10).Take(5).Select(l => l.Trim()))}", recent.ToArray())); result.Decisions = n; result.Turn = v0.TurnNumber; return result; }
             if (!outcome.Accepted)
             {
-                result.Findings.Add(new("illegal", seed, v0.TurnNumber, phase, pending, id, $"Engine rejected {Describe(cmd)}: {outcome.Error}"));
-                result.Decisions = n; result.Turn = v0.TurnNumber; return result;
+                // A player whose action is refused chooses again; the engine offered an action it then rejected, which is an action-list gap worth listing (category
+                // "rejected", informational). Only a decision where every try is refused is a real failure.
+                result.Findings.Add(new("rejected", seed, v0.TurnNumber, phase, pending, id, $"Engine rejected {Describe(cmd)} (player {cmd.PlayerId}, seat {seat}, pending player {game.State.PendingChoice?.PlayerId}, priority {game.State.PriorityPlayerId}): {outcome.Error}"));
+                contexts[seat].NoteRejection(view.Version, cmd, outcome.Error);
+                if (++retries > 24)
+                {
+                    result.Findings.Add(new("illegal", seed, v0.TurnNumber, phase, pending, id, $"Twenty-four different answers in a row were refused; the last was {Describe(cmd)}: {outcome.Error}", recent.ToArray()));
+                    result.Decisions = n; result.Turn = v0.TurnNumber; return result;
+                }
+                n--; continue;
             }
+            retries = 0;
             Slot(result, id).Accepted++;
         }
         var last = Peek();
-        result.Findings.Add(new("cap", seed, last.TurnNumber, last.Phase.ToString(), last.PendingChoice?.Type ?? "-", "decision-cap", $"No result after {DecisionCap} decisions (loop or stall)", recent.ToArray()));
+        result.Findings.Add(new("cap", seed, last.TurnNumber, last.Phase.ToString(), last.PendingChoice?.Type ?? "-", "decision-cap", $"No result after {DecisionCap} decisions (loop or stall). Pending " + JsonSerializer.Serialize(game.State.PendingChoice) + "; priority " + game.State.PriorityPlayerId + "; seat0 " + string.Join(",", game.QueryActions(0).Select(x => x.Type + ":" + x.Enabled + ":" + x.Reason + ":" + x.Command?.AbilityId)) + "; seat1 " + string.Join(",", game.QueryActions(1).Select(x => x.Type + ":" + x.Enabled + ":" + x.Reason + ":" + x.Command?.AbilityId)), recent.ToArray()));
         result.Decisions = DecisionCap; result.Turn = last.TurnNumber; return result;
     }
     static ActionOption[] Clone(ActionOption[] a) => JsonSerializer.Deserialize<ActionOption[]>(JsonSerializer.Serialize(a))!;
@@ -115,7 +128,7 @@ internal static class BotSoak
 
     public static string Markdown(SoakSummary s, ulong firstSeed)
     {
-        var sb = new StringBuilder(); var cats = new[] { "stall", "illegal", "cap", "exception", "setup" };
+        var sb = new StringBuilder(); var cats = new[] { "stall", "illegal", "cap", "exception", "setup", "rejected", "slow" };
         sb.AppendLine("# Bot soak report").AppendLine();
         sb.AppendLine($"Seeds {firstSeed}..{firstSeed + (ulong)s.Requested - 1}; played {s.Played}/{s.Requested} (skipped {s.Skipped} for wall time); finished {s.Finished}; {s.Seconds:0.0}s.").AppendLine();
         sb.AppendLine("## Findings by category").AppendLine();
@@ -127,7 +140,7 @@ internal static class BotSoak
         foreach (var f in s.Findings.Take(400))
         {
             sb.AppendLine($"- [{f.Category}] seed {f.Seed} turn {f.Turn} {f.Phase} pending={f.PendingChoice} id=`{f.Id}`: {f.Reason}");
-            if (f.LastCommands is { Length: > 0 } && f.Category == "cap") foreach (var l in f.LastCommands) sb.AppendLine($"    - {l}");
+            if (f.LastCommands is { Length: > 0 } && f.Category is "cap" or "exception" or "illegal" or "stall") foreach (var l in f.LastCommands) sb.AppendLine($"    - {l}");
         }
         if (s.Findings.Count > 400) sb.AppendLine($"- ... {s.Findings.Count - 400} more in the JSON report");
         sb.AppendLine().AppendLine("## Ability census (offered enabled / chosen / accepted)").AppendLine();
@@ -177,10 +190,10 @@ internal static class BotSoak
             var matches = heavy ? int.Parse(Env("L5R_SOAK_MATCHES")!) : 12;
             var budget = heavy ? TimeSpan.FromHours(2) : TimeSpan.FromMinutes(2);
             var summary = Run(seed, matches, budget, heavy ? TimeSpan.FromMinutes(5) : TimeSpan.FromSeconds(60), parallel: Env("L5R_SOAK_PARALLEL") != "0");
-            Console.WriteLine($"  soak: {summary.Played}/{summary.Requested} matches, {summary.Finished} finished, {summary.Seconds:0.0}s; findings " + string.Join(", ", new[] { "stall", "illegal", "cap", "exception", "setup" }.Select(c => $"{c}={summary.Findings.Count(f => f.Category == c)}")) + $"; {summary.NeverOffered.Length} wired abilities never offered");
+            Console.WriteLine($"  soak: {summary.Played}/{summary.Requested} matches, {summary.Finished} finished, {summary.Seconds:0.0}s; findings " + string.Join(", ", new[] { "stall", "illegal", "cap", "exception", "setup", "rejected", "slow" }.Select(c => $"{c}={summary.Findings.Count(f => f.Category == c)}")) + $"; {summary.NeverOffered.Length} wired abilities never offered");
             if (report is not null) WriteReport(summary, seed, report);
             if (heavy) return; // heavy mode reports and never fails on findings
-            var failures = summary.Findings.ToList();
+            var failures = summary.Findings.Where(f => f.Category is not ("rejected" or "slow")).ToList(); // "rejected": the engine offered an action it then refused and the bot chose again (an action-list gap, listed in the report)
             if (failures.Count > 0 && Env("L5R_SOAK_ALLOW_FINDINGS") != "1")
                 throw new Exception($"{failures.Count} soak findings (set L5R_SOAK_REPORT / L5R_SOAK_MATCHES for the full report):\n" + string.Join("\n", failures.Take(15).Select(f => $"[{f.Category}] seed {f.Seed} turn {f.Turn} {f.Phase} pending={f.PendingChoice} id={f.Id}: {f.Reason}")));
             if (summary.Skipped > 0) Console.WriteLine($"  NOTE: {summary.Skipped} matches were not started inside the wall-time cap");

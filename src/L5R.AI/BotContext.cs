@@ -56,6 +56,49 @@ public sealed class BotContext
     public void NoteFavorTaken(int turn) => _favorTakenTurn = turn;
     public bool TookFavorThisTurn(int turn) => _favorTakenTurn == turn;
 
+    // How often the bot has used the same ability from the same card this turn. Two bots can otherwise trade a free, repeatable action back and forth for ever; each use
+    // lowers the next one's score (down to the value of passing, never below), so a loop always ends.
+    private int _usesTurn = -1;
+    private readonly Dictionary<string, int> _uses = new(StringComparer.Ordinal);
+
+    public void NoteUse(int turn, string? abilityId, string? cardId)
+    {
+        if (turn != _usesTurn) { _uses.Clear(); _usesTurn = turn; }
+        var key = abilityId + "|" + cardId;
+        _uses[key] = _uses.GetValueOrDefault(key) + 1;
+    }
+
+    public int UsesThisTurn(int turn, string? abilityId, string? cardId) => turn == _usesTurn ? _uses.GetValueOrDefault(abilityId + "|" + cardId) : 0;
+
+    // What the engine refused at the current decision. The engine lists every action a seat could try, and a few it then rejects (a restriction only checked when the
+    // command arrives). A player whose action is refused chooses again, so the caller reports the refusal here and calls Choose again at the same version: the bot then skips
+    // that exact answer, keeps the other targets of the same action, and drops any unit the refusal names.
+    private long _rejectionVersion = -1;
+    private readonly List<(GameCommand Command, string Error)> _rejections = [];
+
+    /// <summary>Tells the bot the engine refused a command it chose at <paramref name="version"/>. The memory lasts until the version changes.</summary>
+    public void NoteRejection(long version, GameCommand command, string? error)
+    {
+        if (version != _rejectionVersion) { _rejections.Clear(); _rejectionVersion = version; }
+        _rejections.Add((command, error ?? ""));
+    }
+
+    internal bool IsRejected(long version, GameCommand command) => version == _rejectionVersion && _rejections.Any(r => SameAnswer(r.Command, command));
+
+    /// <summary>Targets already refused for this ability on this source at this version, so the next try picks another.</summary>
+    internal HashSet<string> RejectedTargets(long version, string? abilityId, string? cardId, string type) =>
+        version != _rejectionVersion ? [] : _rejections.Where(r => r.Command.Type == type && r.Command.AbilityId == abilityId && r.Command.CardId == cardId && r.Command.TargetId is not null)
+            .Select(r => r.Command.TargetId!).ToHashSet(StringComparer.Ordinal);
+
+    internal IEnumerable<string> RejectionMessages(long version, string type) => version != _rejectionVersion ? [] : _rejections.Where(r => r.Command.Type == type).Select(r => r.Error);
+
+    private static bool SameAnswer(GameCommand a, GameCommand b) =>
+        a.Type == b.Type && a.AbilityId == b.AbilityId && a.CardId == b.CardId && a.TargetId == b.TargetId && a.Province == b.Province && a.Choice == b.Choice
+        && a.TargetPlayerId == b.TargetPlayerId && a.PerformerId == b.PerformerId && a.CostOption == b.CostOption
+        && string.Join(",", a.CardIds ?? []) == string.Join(",", b.CardIds ?? [])
+        && string.Join(",", (a.Assignments ?? []).OrderBy(p => p.Key, StringComparer.Ordinal).Select(p => p.Key + ">" + p.Value)) == string.Join(",", (b.Assignments ?? []).OrderBy(p => p.Key, StringComparer.Ordinal).Select(p => p.Key + ">" + p.Value))
+        && string.Join(",", (a.Selections ?? []).Select(x => x.Slot + ":" + string.Join("+", x.CardIds ?? []) + x.PlayerId)) == string.Join(",", (b.Selections ?? []).Select(x => x.Slot + ":" + string.Join("+", x.CardIds ?? []) + x.PlayerId));
+
     /// <summary>A reproducible weight roll in [0, 1): the same match state and the same ability always roll the same, so replays and tests are deterministic.</summary>
     public static double Roll(long version, string? abilityId, string? cardId)
     {
