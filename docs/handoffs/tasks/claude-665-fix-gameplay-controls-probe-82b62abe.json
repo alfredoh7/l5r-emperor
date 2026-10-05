@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Fix check-gameplay-controls (#665): the 'destruction' (Kharmic) review chose an action with two legal targets and never picked one; since #581 no target is defaulted, so the payment Confirm stayed disabled and the probe reported no usable payment. The probe now picks the first target through the list of legal cards, as the Gold probes do. Failure message now names the chosen action, source count and targets.",
+  "validation": "check-gameplay-controls passes natively (UI_SMOKE_PASS across reaction, destruction, discount, favor, greasing); format and comment-swallow lint clean; client builds.",
+  "remaining": "None; probe-only change. CI does not run the native probes.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/665",
+  "branch": "claude/665-fix-gameplay-controls-probe",
+  "updated": "2026-10-05T23:59:56.443745+00:00"
+}
