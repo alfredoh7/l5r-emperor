@@ -3961,6 +3961,7 @@ public sealed partial class MatchEngine
         // keyword, Tsuruchi Nobukatsu - exp's Magistrate) -- StaticKeywordRules.cs, read live like the two conditional grants around it.
         if (StaticKeywordGranted(card, keyword)) return true;
         if (UnmeiMirrorsKeyword(card, keyword)) return true;
+        if (PromoGrantsKeyword(card, keyword)) return true; // Tamahime's Tactician (issue #653, PromoEmperorPersonalities.cs)
         if (OchiaiGrantsDuelist(card, keyword)) return true; // Ochiai's Bravery (issue #503) // Unmei (Emperor Edition Personality pass, issue #477, batch 3).
         // Tamori Yayu (issue #216): "has ... Cavalry while it is not your turn" -- a live conditional
         // grant, re-evaluated every time (unlike GrantedKeyword's own durable one-time grant).

@@ -980,7 +980,7 @@ public sealed partial class MatchEngine
         var card = Card(cardId); var def = Definition(card);
         if (def.Effect == MoneylenderEffect) return MoneylenderTokens(card); // Moneylender (issue #492, group F): Gold equal to the Wealth tokens it can remove.
         // The Shadow's Embrace pass (issue #476), batch 6: a production modifier for the turn (The Moon's Imperative, The Sun's Aspiration) and Sheltered Port's count.
-        var adjustment = def.Type == CardType.Holding ? ShadowsEmbraceBatch6Production(card, playerId) : 0;
+        var adjustment = def.Type == CardType.Holding ? ShadowsEmbraceBatch6Production(card, playerId) + PromoProductionBonus(card, playerId) : 0; // Seppun Ritisharu (issue #653)
         if (ConditionalProductionOf(card) is { } conditional && ProductionConditionMet(conditional, paying)) return Math.Max(0, conditional.Amount + adjustment);
         // Library of Rebirth (Stronghold pass, issue #486 batch 1), Luxurious Silk, Seaside Bazaar: a Reaction's Gold is its own payment source (issue #501: "<card>#reaction", EmperorMechE.cs),
         // usable beside the card's bow; the card's own id is always its printed production.
@@ -1331,6 +1331,7 @@ public sealed partial class MatchEngine
             // battle may have already resolved and returned this card home, losing a live Zone check.
             card.AssignedToAttackTurn = _state.TurnNumber;
             Emit("unitAssigned", $"{Definition(card).Name} assigned to province {assignment.Value + 1}.", command.PlayerId, card.Id);
+            PromoEmperorAssigned(card, cavalry); // Tsuruchi Nishima's Naval, Fudo's Charging tokens (issue #653, PromoEmperorPersonalities.cs)
             FireMiddayShadowAssigned(card); // Midday Shadow Court (Stronghold pass, issue #486 batch 1): "After the next time this turn he is assigned" -- to either side.
             P4Assigned(card); // The Menacing Sky (issue #503, EmperorP4Watches.cs): "after the next time he assigns".
             FireVeiledMenaceAssigned(card); // Veiled Menace (Emperor Edition remaining-cards pass, issue #492, group D): "After each time he is assigned (this turn)" -- to either side.

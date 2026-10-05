@@ -1,0 +1,83 @@
+{
+  "Profile": "follower-wave-46",
+  "Rules": "Emperor Edition core rules; reviewed Promotional-Emperor scans and their printed text.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10588",
+      "Name": "Horse",
+      "Type": "Follower",
+      "Clan": "Unaligned",
+      "GoldCost": 3,
+      "GoldProduction": 0,
+      "Force": 1,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Attaches to Kataoka ignoring costs.\nWill only attach to a Human.\nThis Personality has Cavalry.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10588.jpg",
+      "Keywords": [
+        "Cavalry",
+        "Horse",
+        "Nonhuman"
+      ],
+      "Focus": 1,
+      "Abilities": [],
+      "Effect": "promo-horse-kataoka-free",
+      "AttachRequiresKeyword": "Human",
+      "AttachGrantsKeyword": "Cavalry"
+    },
+    {
+      "Id": "oracle-l5r-10587",
+      "Name": "Rice Farmer",
+      "Type": "Follower",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "(Limited, 2 Gold: Discard a Kharmic card from your hand to draw a card.)",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10587.jpg",
+      "Keywords": [
+        "Kharmic",
+        "Ashigaru"
+      ],
+      "Focus": 2,
+      "Abilities": [],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9966",
+      "Name": "Treasure Hunter",
+      "Type": "Follower",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After a battle resolves, if this card's army destroyed a province, destroy this card: He plunders enough wealth to retire. Create a Holding with the trait, \"Bow this card: Produce 2 Gold\", and put it into play (bowed).",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9966.jpg",
+      "Keywords": [
+        "Scout"
+      ],
+      "Focus": 1,
+      "Abilities": [
+        "promo-treasure-hunter-retire"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}
