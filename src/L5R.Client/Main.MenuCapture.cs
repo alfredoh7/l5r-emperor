@@ -54,7 +54,7 @@ public partial class Main
             if (_menuProbeStep == 21) { MenuAssert(menu.SelectedEntry == 0, "Down wraps back to Play"); KeyEvent(Key.Enter); _menuProbeStep = 2; _captureClock = 0; return; }
             if (_menuProbeStep == 2) { MenuAssert(menu.Page == "play", "native Enter activates focused Play"); KeyEvent(Key.Escape); _menuProbeStep++; _captureClock = 0; return; }
             if (_menuProbeStep == 3) { MenuAssert(menu.Page == "main", $"native Escape returns from clan selection (page={menu.Page}, focus={GetViewport().GuiGetFocusOwner()?.GetPath()})"); MouseClick(menu.Entries.GetChildren().OfType<Button>().Single(b => b.Text == "OPTIONS")); _menuProbeStep++; _captureClock = 0; return; }
-            if (_menuProbeStep == 4) { MenuAssert(menu.Page == "options", "native mouse hits Options at rendered coordinates"); MouseClick(menu.Entries.GetChildren().OfType<CheckBox>().Last()); _menuProbeStep++; _captureClock = 0; return; }
+            if (_menuProbeStep == 4) { MenuAssert(menu.Page == "options", "native mouse hits Options at rendered coordinates"); MouseClick(menu.Entries.GetChildren().OfType<CheckBox>().First(c => c.Text.StartsWith("Reduced motion", StringComparison.Ordinal))); _menuProbeStep++; _captureClock = 0; return; }
             if (_menuProbeStep == 5) { MenuAssert(_reducedMotion, "native mouse toggles reduced motion"); DirAccess.RemoveAbsolute(ProjectSettings.GlobalizePath(_preferences.Path)); KeyEvent(Key.F11); _menuProbeStep++; _captureClock = 0; return; }
             if (_menuProbeStep == 6) { MenuAssert(IsFullscreen, "native F11 enters fullscreen"); KeyEvent(Key.F11); _menuProbeStep++; _captureClock = 0; return; }
             if (_menuProbeStep == 7) { MenuAssert(!IsFullscreen, "native F11 returns to windowed play"); KeyEvent(Key.Escape); _menuProbeStep++; _captureClock = 0; return; }
@@ -111,7 +111,14 @@ public partial class Main
                 MenuAssert(confirm.Visible && View.Version == expected, "replacing an existing match requires confirmation");
                 confirm.EmitSignal(ConfirmationDialog.SignalName.Canceled); ClosePracticeSetup(); MenuAssert(View.Version == expected, "cancel replacement keeps current match");
                 menu.ShowOptions();
-                var motion = menu.Entries.GetChildren().OfType<CheckBox>().Last(); motion.ButtonPressed = true;
+                var motion = menu.Entries.GetChildren().OfType<CheckBox>().First(c => c.Text.StartsWith("Reduced motion", StringComparison.Ordinal)); motion.ButtonPressed = true;
+                var paused = menu.Entries.GetChildren().OfType<CheckBox>().First(c => c.Text.StartsWith("Paused Animation", StringComparison.Ordinal));
+                MenuAssert(!_preferences.PausedAnimation && paused.Text == "Paused Animation · Off", "Paused Animation defaults to Off");
+                paused.ButtonPressed = true;
+                MenuAssert(_preferences.PausedAnimation && paused.Text == "Paused Animation · On", "Paused Animation toggles On");
+                var pausedLoaded = new MenuPreferences(_preferencesProfile); pausedLoaded.Load(); MenuAssert(pausedLoaded.PausedAnimation, "Paused Animation persists through a fresh settings instance");
+                paused.ButtonPressed = false;
+                pausedLoaded.Load(); MenuAssert(!pausedLoaded.PausedAnimation, "Paused Animation Off persists");
                 MenuAssert(_reducedMotion && _preferences.ReducedMotion, "reduced motion applies to game and menu");
                 var loaded = new MenuPreferences(_preferencesProfile); loaded.Load(); MenuAssert(loaded.ReducedMotion, "options persist through a fresh settings instance");
                 var slider = menu.Entries.GetChildren().OfType<HSlider>().Single(); slider.Value = .4;

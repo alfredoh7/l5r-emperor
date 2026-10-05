@@ -181,18 +181,19 @@ public partial class TitleMenu : Control
         display.Pressed += () => { Preferences.Fullscreen = !Preferences.Fullscreen; Changed(); display.Text = Preferences.Fullscreen ? "Display: Fullscreen" : "Display: Windowed"; };
         StyleOption(display); display.CustomMinimumSize = new Vector2(0, 40); display.AddThemeFontSizeOverride("font_size", 22); Entries.AddChild(display);
         Toggle("VSync", Preferences.VSync, value => Preferences.VSync = value);
-        Toggle("Reduced motion", Preferences.ReducedMotion, value => Preferences.ReducedMotion = value);
+        Toggle("Reduced motion", Preferences.ReducedMotion, value => Preferences.ReducedMotion = value, "Keeps the lantern steady.");
+        Toggle("Paused Animation", Preferences.PausedAnimation, value => Preferences.PausedAnimation = value, "Holds a card your opponent plays on screen until you press Proceed (or Enter).");
         var strength = Palette.Text($"Lantern flicker · {Preferences.LanternStrength:P0}", 22); Entries.AddChild(strength);
         var slider = new HSlider { MinValue = 0, MaxValue = 1, Step = .05, Value = Preferences.LanternStrength, Modulate = Palette.Gold, CustomMinimumSize = new Vector2(0, 28), TooltipText = "Strength of the slow lantern light across the screen and room. Approved default: 85%." }; Entries.AddChild(slider);
         slider.ValueChanged += value => { Preferences.LanternStrength = (float)value; strength.Text = $"Lantern flicker · {Preferences.LanternStrength:P0}"; Changed(); };
-        Entries.AddChild(Palette.Wrapped("F11: fullscreen · ↑↓ / Tab: navigate · Enter: select\nReduced motion keeps the lantern steady.", 19, Palette.PaperDim));
+        Entries.AddChild(Palette.Wrapped("F11: fullscreen · ↑↓ / Tab: navigate · Enter: select", 19, Palette.PaperDim));
         Entry("Back", ShowMain, 48).CustomMinimumSize = new Vector2(0, 54);
         _message.Text = "Changes apply immediately and are saved on this device.";
         display.CallDeferred(Control.MethodName.GrabFocus);
     }
-    private void Toggle(string text, bool value, Action<bool> change)
+    private void Toggle(string text, bool value, Action<bool> change, string tip = "")
     {
-        var check = new CheckBox { Text = text + (value ? " · On" : " · Off"), ButtonPressed = value, CustomMinimumSize = new Vector2(0, 34) }; check.AddThemeFontSizeOverride("font_size", 22);
+        var check = new CheckBox { Text = text + (value ? " · On" : " · Off"), ButtonPressed = value, CustomMinimumSize = new Vector2(0, 34), TooltipText = tip }; check.AddThemeFontSizeOverride("font_size", 22);
         StyleOption(check);
         check.Toggled += enabled => { check.Text = text + (enabled ? " · On" : " · Off"); change(enabled); Changed(); }; Entries.AddChild(check);
     }
