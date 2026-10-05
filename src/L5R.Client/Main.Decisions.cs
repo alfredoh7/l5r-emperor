@@ -79,7 +79,8 @@ public partial class Main
                 picker.Selected = Array.IndexOf(targets, draftCommand.TargetId); picker.ItemSelected += i => ChooseTarget(targets[(int)i]); _inspector.AddChild(picker);
             }
             var next = SidebarSkin.Button("Review cost choices", () => { _reviewingAlternativeCost = true; _decisionSelection = null; RenderInspector(); }, true);
-            next.Disabled = !DecisionCanSubmit; _decisionActions.AddChild(next);
+            next.Disabled = !DecisionCanSubmit || targets.Length > 0 && draftCommand.TargetId is null; // the cost choice confirms a command, which needs the picked target
+            _decisionActions.AddChild(next);
             _decisionActions.AddChild(SidebarSkin.Button("Cancel action", CancelChoice)); return true;
         }
         if (!own)

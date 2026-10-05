@@ -64,7 +64,7 @@ public partial class Main
                     await SupportCapture("-" + generic); await SupportClick(DecisionButton(option.Label));
                     DecisionRequire(View.Version == before, "Selection changed the game: " + generic);
                     await SupportClick(DecisionButton("Confirm choice")); await WaitDecisionPresentation();
-                    DecisionRequire(View.Version == before + 1, "Generic answer did not execute once: " + generic);
+                    DecisionRequire(View.Version == before + 1, $"Generic answer did not execute once: {generic} (v{before} -> v{View.Version}; option '{option.Label}'; pending={View.PendingChoice?.Type})");
                     GD.Print("GENERIC_DECISION_PASS: " + generic);
                 }
                 GD.Print("DECISION_CHOOSER_PASS: " + _captureMode); GetTree().Quit(); return;
@@ -79,7 +79,11 @@ public partial class Main
                     foreach (var demo in new[] { "yumaru", "fukui", "fukui-bowed" })
                     {
                         DecisionRequire(_decisionReviewCase == demo, "Next demo opened the wrong case");
-                        if (demo != "yumaru") { await SupportClick(DecisionButton("Review cost choices")); await EventFrames(8); }
+                        if (demo != "yumaru")
+                        {
+                            ChooseTarget(Actions.First(a => a.Enabled && a.AlternativeCost is not null && a.TargetIds is { Length: > 0 }).TargetIds![0]); await EventFrames(5);
+                            await SupportClick(DecisionButton("Review cost choices")); await EventFrames(8);
+                        }
                         var labels = demo == "yumaru" ? new[] { "Move Yumaru home", "Move the targeted Personality home", "Move both home" } : new[] { "Bow the Ancestor", "Destroy the Ancestor" };
                         var scroll = (ScrollContainer)_inspector.GetParent();
                         foreach (var label in labels)
@@ -130,6 +134,8 @@ public partial class Main
                 var grouped = StabilizationButtons(_inspector).Where(b => b.HasMeta("alternative_cost_group")).ToArray();
                 DecisionRequire(grouped.Length == 1, "Cost variants were not grouped");
                 await SupportClick(grouped[0]); await EventFrames(5);
+                DecisionRequire(DecisionButton("Review cost choices").Disabled, "Cost review opened before a target was chosen");
+                ChooseTarget(Actions.First(a => a.Enabled && a.AlternativeCost is not null && a.TargetIds is { Length: > 0 }).TargetIds![0]); await EventFrames(5);
                 await SupportClick(DecisionButton("Review cost choices")); await EventFrames(5);
                 DecisionRequire(DecisionButton("Confirm choice").Disabled, "Alternative cost has implicit default");
                 DecisionRequire(DecisionButton("Bow the Ancestor").Disabled == (kind == "fukui-bowed"), "Incorrect disabled bow option");
@@ -138,7 +144,7 @@ public partial class Main
                 await SupportCapture(""); await SupportClick(DecisionButton(payBow ? "Bow the Ancestor" : "Destroy the Ancestor"));
                 DecisionRequire(View.Version == version, "Selecting cost mutated state");
                 await SupportCapture("-selected"); await SupportClick(DecisionButton("Confirm choice")); await WaitDecisionPresentation();
-                DecisionRequire(View.Version == version + 1, "Cost did not execute once");
+                DecisionRequire(View.Version == version + 1, $"Cost did not execute once (v{version} -> v{View.Version}; pending={View.PendingChoice?.Type})");
                 var performer = FindCard(selected.AlternativeCost!.PerformerId!);
                 DecisionRequire(payBow ? performer is { Bowed: true, Zone: Zone.Battlefield } : performer?.Zone == Zone.RemovedFromGame, "Selected Ancestor cost did not resolve");
                 DecisionRequire(FindCard(selected.Command!.TargetId!)?.Bowed == true, "Target not bowed");
