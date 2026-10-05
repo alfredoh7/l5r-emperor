@@ -149,10 +149,11 @@ public partial class Main
                 var payment = QuoteFor(option)!.Payments.First();
                 foreach (var id in payment.SourceIds)
                 {
-                    var name = FindCard(id)!.Definition!.Name;
-                    var check = StabilizationButtons(_inspector).OfType<CheckBox>().First(b => b.Text.Contains(name));
+                    // The row names the card; the check box carries the payment method's own label, so find it by the source it stands for.
+                    CheckBox SourceCheck() => StabilizationButtons(_inspector).OfType<CheckBox>().First(b => b.GetMeta("payment_source_id", "").AsString() == id);
+                    var check = SourceCheck();
                     if (check.ButtonPressed) await SupportClick(check);
-                    check = StabilizationButtons(_inspector).OfType<CheckBox>().First(b => b.Text.Contains(name));
+                    check = SourceCheck();
                     await SupportClick(check);
                 }
                 await SupportCapture("-region-confirm"); await SupportClick(StabilizationButton("Confirm action")); await EventFrames(30);

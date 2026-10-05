@@ -378,7 +378,9 @@ public partial class Main
         }
         if (action.AlternativeCost is not null && !_alternativeCostConfirmed)
         {
-            _decisionActions.AddChild(SidebarSkin.Button("Review cost choices", () => { _reviewingAlternativeCost = true; _decisionSelection = null; RenderInspector(); }, true));
+            var review = SidebarSkin.Button("Review cost choices", () => { _reviewingAlternativeCost = true; _decisionSelection = null; RenderInspector(); }, true);
+            review.Disabled = needsTarget; // the cost choice confirms a command, which needs the target the player has not picked yet
+            _decisionActions.AddChild(review);
             _decisionActions.AddChild(SidebarSkin.Button("Cancel action", CancelChoice)); return;
         }
         if (needsTarget && action.TargetGold is not null)
