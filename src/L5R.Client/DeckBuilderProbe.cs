@@ -99,7 +99,7 @@ public partial class DeckBuilderProbe : Node
             var parchments = Walk(_screen).OfType<Panel>().Where(p => p.Name.ToString().StartsWith("RulesParchment")).ToArray(); Check(parchments.Length == 2 && parchments.All(p => p.Size.Y >= 180), "two readable rules panels");
             var longRules = _screen.Data.Cards.OrderByDescending(c => (c.Playable ? c.Definition!.Text : CatalogueData.PlainText(c.CurrentOracleText)).Length).Take(3).ToArray(); _screen.ShowComparison(longRules); await Wait(2); await Capture("compare-long-rules");
             var rulesScroll = Walk(_screen).OfType<ScrollContainer>().First(s => s.Name == "RulesScroll" && s.GetVScrollBar().MaxValue > s.Size.Y); rulesScroll.ScrollVertical = 100; await Wait(.2); Check(rulesScroll.ScrollVertical > 0, "long comparison rules remain scrollable"); KeyPress(Key.Escape); await Wait(.3);
-            var snapshot = DeckFormat.Write(_screen.Draft.ToDeck()); var bad = Path.Combine(_out, "malformed.txt"); File.WriteAllText(bad, "Legality: Emperor\n1 Missing Imaginary Card"); Check(!_screen.OpenFile(bad) && DeckFormat.Write(_screen.Draft.ToDeck()) == snapshot, "bad import preserves draft"); await Wait(.4); KeyPress(Key.Enter); await Wait(.4); Check(!Walk(_screen).OfType<AcceptDialog>().Any(d => d.Visible), "error notice dismissed with keyboard");
+            var snapshot = DeckFormat.Write(_screen.Draft.ToDeck()); var bad = Path.Combine(_out, "malformed.txt"); File.WriteAllText(bad, "Legality: Emperor\n1 Missing Imaginary Card"); Check(!_screen.OpenFile(bad) && DeckFormat.Write(_screen.Draft.ToDeck()) == snapshot, "bad import preserves draft"); await Wait(.4); Check(_screen.TroubleshootDialog is { Visible: true }, "bad import offers the troubleshooter"); KeyPress(Key.Escape); await Wait(.4); Check(!Walk(_screen).OfType<AcceptDialog>().Any(d => d.Visible), "error notice dismissed with keyboard");
             _screen.SaveDraft(); await Wait(.3); Check(!_screen.Dirty && DeckFileStore.Read(path) == snapshot, "save and reopen exact text roundtrip");
             _screen.Adjust(card, 1); await Wait(.4); await Capture("before-guard"); Click(Button("‹ My decks")); await Wait(.3); await Capture("after-guard"); Check(Walk(_screen).OfType<ConfirmationDialog>().Any(), "unsaved navigation guarded"); KeyPress(Key.Escape); await Wait(.3); Check(_screen.Page == "editor" && _screen.Dirty, "cancel keeps draft");
             _screen.SaveDraft();
@@ -122,6 +122,30 @@ public partial class DeckBuilderProbe : Node
             _screen.ShowComparison(events); await Wait(.4); await Capture("wide-compare"); KeyPress(Key.Escape); await Wait(.3);
             GetWindow().Size = new Vector2I(1280, 800); await Wait(.4); _screen.ShowComparison(events); await Wait(.4); await Capture("small-compare"); KeyPress(Key.Escape); await Wait(.3);
             _screen.ShowDecks(); await Wait(.3); await Capture("small-saved-decks"); GetWindow().Size = new Vector2I(1920, 1080); await Wait(.4);
+            // Import troubleshooter (#655): the dialog and its Confirm Repairs button stay inside the window, at a small and a large size, even with many bad lines.
+            var broken = Path.Combine(_screen.Store.DirectoryPath, "Troubleshooter probe.txt"); Directory.CreateDirectory(_screen.Store.DirectoryPath);
+            File.WriteAllText(broken, string.Join('\n', "Legality: Ivory", "Border Keep", "Bamboo Harvesters", "Fukuzo - expFukuzo", "Taishuu - expTaishuu", "Daigotsu Aya - expExperienced", "Utaku Liu Xeung - exp", "Makito - exp",
+                "3 Daigotsu Susaiken - exp", "3 Daigotsu Negishi - exp", "3 Daigotsu Matsuda - exp", "2 Miryoku no Shimaa", "3 Prosprous Village", "3 Platnum Mine", "3 Shinomen Marsh - exp"));
+            foreach (var windowSize in new[] { new Vector2I(1280, 720), new Vector2I(1920, 1080) })
+            {
+                GetWindow().Size = windowSize; await Wait(.4);
+                Check(_screen.TroubleshootFile(broken), "troubleshooter opens for a deck with unknown cards"); await Wait(.6);
+                var dialog = _screen.TroubleshootDialog!; var view = GetViewport().GetVisibleRect();
+                Check(view.Encloses(new Rect2(dialog.Position, dialog.Size)), $"troubleshooter dialog {dialog.Size} stays inside the {windowSize.X}x{windowSize.Y} window");
+                var confirm = dialog.GetOkButton();
+                Check(confirm.Text == "Confirm Repairs" && confirm.IsVisibleInTree() && new Rect2(Vector2.Zero, dialog.Size).Encloses(confirm.GetGlobalRect()), "Confirm Repairs button is visible inside the dialog");
+                var list = Walk(dialog).OfType<ScrollContainer>().First();
+                Check(list.Size.Y >= 100 && list.GetGlobalRect().End.Y <= confirm.GetGlobalRect().Position.Y, "the card list scrolls above the button, which stays below the last errored card");
+                await Capture($"troubleshooter-{windowSize.X}");
+                if (windowSize.X == 1920)
+                {
+                    confirm.EmitSignal(BaseButton.SignalName.Pressed); await Wait(1.5); await Capture("troubleshooter-repaired");
+                    Check(_screen.Draft.Count("Fukuzo") == 1 && _screen.Draft.Count("Taishuu") == 1, "Confirm Repairs applied the chosen cards to the draft");
+                    Check(File.Exists(broken + ".bak") && File.ReadAllText(broken).StartsWith("Legality: Emperor"), "repaired deck file is rewritten in the builder format and the original is kept");
+                    KeyPress(Key.Escape); await Wait(.3);
+                }
+                else { dialog.Hide(); dialog.QueueFree(); await Wait(.3); }
+            }
             _screen.QueueFree(); await Wait(.3); var main = GD.Load<PackedScene>("res://Main.tscn").Instantiate(); AddChild(main); await Wait(2); await Capture("main-menu");
             var menu = Walk(main).OfType<TitleMenu>().Single(); Check(menu.Entries.GetChildren().OfType<Button>().All(b => b.GetGlobalRect().End.Y <= GetViewport().GetVisibleRect().Size.Y), "all six menu entries fit in viewport"); var entry = Walk(menu).OfType<Button>().Single(b => string.Equals(b.Text, "Deck Builder", StringComparison.OrdinalIgnoreCase) && b.IsVisibleInTree()); Click(entry); await Wait(2);
             Check(GetTree().Root.GetNodeOrNull("DeckBuilderLayer") is not null, "main menu opens deck builder"); await Capture("menu-deck-builder");
