@@ -194,7 +194,17 @@ public partial class Main
                 return new GameCommand(choice.Type, View.ViewerId, reviewedVersion, choice.CardId, required > 0 ? _sources.ToArray() : [], ClanDiscount: quote.ClanDiscount, ClanAllegiance: quote.ClanAllegiance);
             },
             "Cancel payment");
+        // Issue #645: a face-up Dynasty card can be discarded straight from its purchase review, as a placard under Confirm purchase.
+        if (choice.Type == "purchase" && Actions.FirstOrDefault(a => a.Type == "discardProvince" && a.CardId == choice.CardId && a.Command is not null) is { } discard)
+        {
+            var button = SidebarSkin.Button("Discard", () => ConfirmDiscardProvince(discard));
+            button.Name = "DiscardProvinceCard"; button.Disabled = !discard.Enabled || _session.Busy || _session.Online && !_session.Connected;
+            button.TooltipText = RulesHelp.Tooltip(discard.Label + "\n\n" + RulesHelp.ActionGuide(discard.Type));
+            _decisionActions.AddChild(button); _decisionActions.MoveChild(button, 1);
+        }
     }
+    private void ConfirmDiscardProvince(ActionOption option) =>
+        Confirm("Discard this province card?", "Discarding starts the Dynasty discard step. You cannot recruit more cards this phase.", () => _ = Submit(option.Command!));
 
     // The quote the panel shows for the chosen action, straight from the engine: the chosen target's own quote
     // when the cost depends on the target, otherwise the option's single quote. The client never derives a cost.
@@ -453,12 +463,12 @@ public partial class Main
             if (!representative.Enabled) container.AddChild(Palette.Wrapped(representative.Reason ?? "No available way to pay.", 15, Palette.PaperDim));
             return;
         }
-        var label = option.Type == "discardProvince" ? "Discard from province…" : option.Type is "purchase" or "recruitReserve" ? "Review payment…" : option.Label;
+        var label = option.Type == "discardProvince" ? "Discard" : option.Type is "purchase" or "recruitReserve" ? "Review payment…" : option.Label;
         var button = SidebarSkin.Button(label, () =>
         {
             if (option.Type == "useAbility" && View.PendingChoice?.Type is "bowReaction" or "beforeActionReaction" && option.TargetIds is { Length: 0 } && option.Command is { } reaction && QuoteFor(option) is null) _ = Submit(reaction);
             else if (option.Type is "purchase" or "recruitReserve" or "equip" or "playStrategy" or "attack" or "assignDefense" or "discardHand" or "useAbility" or "chooseOpponentPayment") Choose(option);
-            else if (option.Type == "discardProvince") Confirm("Discard this province card?", "Discarding starts the Dynasty discard step. You cannot recruit more cards this phase.", () => _ = Submit(option.Command!));
+            else if (option.Type == "discardProvince") ConfirmDiscardProvince(option);
             else if (option.Command is { } command) _ = Submit(command);
         }, option.Type is "pass" or "endDynasty" or "declineReaction");
         button.Disabled = !option.Enabled || _session.Busy || _session.Online && !_session.Connected;
