@@ -4192,7 +4192,8 @@ public sealed partial class MatchEngine
         or IvoryPoliticalAbilities.SandayuStraighten or IvoryPoliticalAbilities.LordsFavorStraighten // Ivory pass (issue #622)
         or "hama-straighten" // Emperor Edition Personality pass (issue #477), batch 3
         or "yorisada-straighten" // Emperor Edition Personality pass (issue #477), batch 5
-        or TfStrategiesAAbilities.OutpostOpen or TfStrategiesAAbilities.OutpostBattle; // Ivory Magistrate Outpost (issue #622)
+        or TfStrategiesAAbilities.OutpostOpen or TfStrategiesAAbilities.OutpostBattle // Ivory Magistrate Outpost (issue #622)
+        or PromoCelestialAAbilities.TashikiStraighten; // Tashiki only straightens his Holding
     private static string? MoveOrStraightenKind(string abilityId) => abilityId switch
     {
         "incapacitated" or "favor-battle" or "journeys-end-move" or "shamate-move" or "effortless-counterattack-move"
@@ -7115,6 +7116,7 @@ public sealed partial class MatchEngine
         if (TurnTargetShieldNegates(command)) return; // Consideration (Forgotten Legacy pass, issue #467 batch 3)
         if (TouchTheEmptinessNegates(command)) return; // Touch the Emptiness (The Shadow's Embrace pass, issue #476 batch 5)
         if (OriolePoliticalNegates(command)) return; // Oriole Imperial Vanguard (issue #622, IvoryPolitical.cs): the first Political action each phase that targets his Personality
+        if (KamalakarPoliticalNegates(command)) return; // Kamalakar (PromoCelestialA.cs): the first Political action each turn that targets him
         if (ShadowsEmbraceBatch1Negates(command)) return; // Hiruma Nikaru's battle shield, Bayushi Waru's next-performed-action negation (The Shadow's Embrace pass, issue #476 batch 1)
         if (ResolveOrDeferAnnounceReaction(command)) return;
         if (ResolveOrDeferEntrenchedReaction(command)) return; // Entrenched Position (Forgotten Legacy pass, issue #467 batch 3)

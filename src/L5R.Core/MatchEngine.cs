@@ -2020,6 +2020,7 @@ public sealed partial class MatchEngine
         Require(card.OwnerId == command.PlayerId && card.Zone == Zone.Hand && def.Type == CardType.Strategy, "Choose a supported Strategy from your hand.");
         var province = _state.CurrentBattleProvince!.Value;
         Require(Army(command.PlayerId, province).Any() || TerrainPlaysWithoutPresence(def) && Keyword(card, "Terrain"), "You need a unit at the current battlefield to take a Battle action."); // Flooded Pass (issue #492): "Even if you control no units".
+        if (Keyword(card, "Terrain")) RequireJahanAllowsTerrain(command.PlayerId); // Jahan (PromoCelestialA.cs): checked before anything is paid
         // A Strategy pays its own printed Gold cost (issue #303: the same QuoteStrategyGold that
         // QueryActions ships to the client; free ones -- every training fixture -- charge nothing and,
         // as before, accept no sources).
