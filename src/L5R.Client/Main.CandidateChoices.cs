@@ -45,7 +45,7 @@ public partial class Main
                 var border = SidebarSkin.Inset(); border.ModulateColor = ReferenceEquals(_decisionSelection, option) ? new Color(1.12f, 1.06f, .94f) : Colors.White;
                 outline.AddThemeStyleboxOverride("panel", border); outline.AddChild(face); box.AddChild(outline);
             }
-            var button = SidebarSkin.Button((ReferenceEquals(_decisionSelection, option) ? "✓ " : "") + (option.DecisionLabel ?? option.Label),
+            var button = SidebarSkin.Button((ReferenceEquals(_decisionSelection, option) ? "✓ " : "") + Placard(option, option.DecisionLabel ?? option.Label),
                 () => SelectCandidateOption(option));
             button.SetMeta("candidate_key", option.Command?.Choice ?? option.Command?.TargetId ?? option.Label);
             button.CustomMinimumSize = new(220, 88); button.Disabled = !option.Enabled || option.Command is null || !DecisionCanSubmit;
@@ -53,7 +53,7 @@ public partial class Main
             if (!option.Enabled) box.AddChild(Palette.Wrapped(option.Reason ?? "Unavailable", 14, Palette.PaperDim));
         }
         FitCandidateChoices();
-        _inspector.AddChild(Palette.Wrapped(_decisionSelection?.Label ?? "Choose a card or option in the tray. Nothing is committed yet.", 20, Palette.Paper));
+        _inspector.AddChild(Palette.Wrapped(_decisionSelection is { } picked ? Placard(picked) : "Choose a card or option in the tray. Nothing is committed yet.", 20, Palette.Paper));
         var confirm = SidebarSkin.Button("Confirm choice", CommitDecision, true);
         confirm.Disabled = _decisionSelection is null || !DecisionCanSubmit;
         if (_decisionSelection is { } payment && QuoteFor(payment) is not null)

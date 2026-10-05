@@ -40,7 +40,7 @@ public partial class Main
         if (pending?.Type is "beforeBattleOrder" or "beforeBattleOptional" or "encircledOrder" or "encircledSelect") RenderBattleFacts(true);
         var sourceId = pending?.CardId ?? _chosen?.CardId;
         var source = sourceId is null ? null : FindCard(sourceId);
-        var prompt = pending?.Prompt;
+        var prompt = pending?.Prompt is { } rawPrompt ? BattleActionText.WithoutIds(rawPrompt) : null;
         if (prompt?.IndexOf(" — ", StringComparison.Ordinal) is int split && split >= 0) prompt = prompt[..split] + ".";
         if (source is { Definition: not null }) AddDecisionSource(source, prompt);
         else if (prompt is not null) _inspector.AddChild(Palette.Wrapped(prompt, 19, Palette.Paper));
@@ -63,6 +63,7 @@ public partial class Main
                 .Select(a => a.AlternativeCost!.PerformerId).Distinct().ToArray();
             if (performers.Length > 1)
             {
+                _inspector.AddChild(Palette.Wrapped("Choose a performer: click a highlighted card on the table, or select it below.", 17, Palette.PaperDim));
                 var performerPicker = NewChoiceList(); // issue #635
                 foreach (var id in performers) performerPicker.AddItem(id is null ? "No performer" : FindCard(id)?.Definition?.Name ?? "Performer", id);
                 performerPicker.Selected = Array.IndexOf(performers, draftCommand.PerformerId);
@@ -96,7 +97,7 @@ public partial class Main
             var matchesTarget = pending is not null || (HasMultiTargets(_chosen) ? MultiSelectionsAllowed(option) : _chosen?.Command?.TargetId is not { } target || option.TargetIds?.Contains(target) == true);
             var enabled = option.Enabled && option.Command is not null && matchesTarget;
             Button? button = null;
-            button = SidebarSkin.Button(option.AlternativeCost?.Label ?? option.Label, () =>
+            button = SidebarSkin.Button(Placard(option, option.AlternativeCost?.Label ?? option.Label), () =>
             {
                 _decisionSelection = option;
                 if (pending is not null) { _chosen = null; _sources.Clear(); }
@@ -104,7 +105,7 @@ public partial class Main
                 foreach (var row in rows)
                 {
                     var selected = ReferenceEquals(row.Option, option);
-                    row.Button.Text = (selected ? "✓  " : "") + (row.Option.AlternativeCost?.Label ?? row.Option.Label);
+                    row.Button.Text = (selected ? "✓  " : "") + (Placard(row.Option, row.Option.AlternativeCost?.Label ?? row.Option.Label));
                     row.Button.AddThemeStyleboxOverride("normal", SidebarSkin.Surface(true, tint: selected ? new Color(1.3f, 1.2f, .9f) : Colors.White));
                 }
                 confirm.Disabled = !DecisionCanSubmit; Highlight();
@@ -139,7 +140,7 @@ public partial class Main
         if (prompt is not null)
         {
             var shortPrompt = prompt.StartsWith(source.Definition.Name + ": ", StringComparison.Ordinal) ? prompt[(source.Definition.Name.Length + 2)..] : prompt;
-            var text = Palette.Wrapped(shortPrompt, 19, Palette.Paper); text.TooltipText = View.PendingChoice?.Prompt ?? prompt; details.AddChild(text);
+            var text = Palette.Wrapped(shortPrompt, 19, Palette.Paper); text.TooltipText = BattleActionText.WithoutIds(View.PendingChoice?.Prompt ?? prompt); details.AddChild(text);
         }
         var inspect = SidebarSkin.Button("Inspect source", () =>
         {

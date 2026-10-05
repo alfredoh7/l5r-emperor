@@ -85,6 +85,7 @@ public partial class Main
         if (performers.Length > 0)
         {
             _inspector.AddChild(Palette.Text("PERFORMER", 12, Palette.Gold));
+            if (performers.Length > 1) _inspector.AddChild(Palette.Wrapped("Click a highlighted card on the table, or choose below.", 13, Palette.PaperDim));
             var picker = NewChoiceList(); // issue #635
             foreach (var id in performers) picker.AddItem(FindCard(id!)!.Definition!.Name, id);
             picker.Selected = Math.Max(0, Array.IndexOf(performers, command.PerformerId));

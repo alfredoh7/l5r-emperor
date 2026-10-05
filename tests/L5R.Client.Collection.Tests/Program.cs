@@ -71,6 +71,9 @@ try
     var copied = BattleActionText.Present("Open: Straighten · Hida Kisada (card-0456) · copied from Kuni Yori", "Hida Kisada", null);
     Check(copied == ("Hida Kisada", "Open: Straighten · copied from Kuni Yori"), "provenance after the performer is kept, the id is not");
     Check(BattleActionText.Present("Reaction: Draw (card-0007)", null, "Kyuden Bayushi") == ("Kyuden Bayushi", "Reaction: Draw"), "with no performer the source card is the title and no id shows");
+    Check(BattleActionText.WithoutIds("Bow Hida Kisada (card-0123): bow him (created-0004)") == "Bow Hida Kisada: bow him", "card and created-card ids never show");
+    Check(BattleActionText.TitleFirst("Reaction: Redirect · Akodo Toturi (card-0123)", ["Akodo Toturi"]) == "Akodo Toturi · Reaction: Redirect", "the card concerned leads the placard, without its id");
+    Check(BattleActionText.TitleFirst("Open: Bow · Not A Card", ["Akodo Toturi"]) == "Open: Bow · Not A Card", "a trailing name that is not one of the option's cards is left alone");
     Console.WriteLine($"COLLECTION DATA PASS: {checks} assertions");
 }
 finally { Directory.Delete(dir, true); }

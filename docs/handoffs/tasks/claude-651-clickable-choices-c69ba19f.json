@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Client-only presentation change plus a Collection test: performers can be picked by clicking a highlighted card on the table (alternative-cost and Region/Celestial actions), as targets already could; sidebar placards lead with the card title and never show card ids (card-NNNN/created-NNNN), cleaned once per snapshot in the client. No rules or engine change.",
+  "validation": "dotnet build L5R.Client; L5R.Client.Collection.Tests 61 assertions incl. new id-stripping/title-first checks; tools/check.sh --client-only passed. No native click-through by the agent.",
+  "remaining": "Native playtest of clicking performers and reading the placards; confirm 'omit mentions of the card' means the engine's card id text.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/651",
+  "branch": "claude/651-clickable-choices",
+  "updated": "2026-10-05T13:42:52.467689+00:00"
+}
