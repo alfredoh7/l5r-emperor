@@ -1,0 +1,33 @@
+{
+  "Profile": "celestial-wave-9202",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-2727",
+      "Name": "Fukurokujin's Wisdom",
+      "Type": "Celestial",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "You have +1 maximum hand size.\nBattle: Discard this card and choose one or more of your performing Personalities: Move them home. Straighten the unit of each of them who moved.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-2727.jpg",
+      "Keywords": [
+        "Unique",
+        "Fortune"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "promo-b-fukurokujin-move-home"
+      ],
+      "Effect": "increase-own-hand-size"
+    }
+  ],
+  "Decks": []
+}

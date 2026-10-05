@@ -304,7 +304,8 @@ public sealed partial class MatchEngine
             case "tanimura-political-pay":
                 return TanimuraApplies(card, subject, affected);
             // Armor of the Heavens (Emperor Edition remaining-cards pass, issue #492 group G): another player's action targets the Personality this card is attached to.
-            case "armor-heavens-gain": case "armor-heavens-lose":
+            case "armor-heavens-gain":
+            case "armor-heavens-lose":
                 return ArmorOfTheHeavensApplies(card, subject, affected);
             // The Waystation of the Path (Emperor Edition Stronghold pass, issue #486 batch 3): another player's action targets the controller's Henshin.
             case "waystation-reborn":
@@ -381,6 +382,6 @@ public sealed partial class MatchEngine
                 .Select(c => ((string?)c.Id, (string?)$"{AbilityCatalog.All[abilityId].Label} · {Definition(c).Name} ({c.Id})")),
             // The Dark Naga (issue #501): one option per unbowed Forest of its controller's to bow (EmperorMechB.cs).
             EmperorMechBAbilities.DarkNagaForest => NagaForests(card).Select(c => ((string?)c.Id, (string?)$"{AbilityCatalog.All[abilityId].Label} · {Definition(c).Name} ({c.Id})")),
-            _ => P3TargetedReactionChoices(card, abilityId, subject) /* issue #503: Shosuro Aroru - exp2 */ ?? MechCTargetedReactionChoices(card, abilityId) ?? [(null, null)] // Isawa Sakonoko (issue #501): one option per Spell he may bow
+            _ => P3TargetedReactionChoices(card, abilityId, subject) /* issue #503: Shosuro Aroru - exp2 */ ?? MechCTargetedReactionChoices(card, abilityId) ?? PromoDTargetedReactionChoices(card, abilityId) /* Promotional-Celestial group D: Colonist's Mark */ ?? [(null, null)] // Isawa Sakonoko (issue #501): one option per Spell he may bow
         };
 }

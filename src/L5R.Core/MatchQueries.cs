@@ -772,8 +772,8 @@ public sealed partial class MatchEngine
                         {
                             var blocked = _state.Cards.Values.Any(c => c.Zone == Zone.Battlefield && c.ProvinceIndex == _state.CurrentBattleProvince && Keyword(c, "Terrain"))
                                 && !MarshallingFieldsWaiverAvailable(playerId); // The Marshalling Fields (issue #501)
-                            var terrainReason = !Army(playerId, _state.CurrentBattleProvince!.Value).Any() && !TerrainPlaysWithoutPresence(def) ? "You have no unit at the current battlefield."
-                                : blocked ? "This battlefield already has a Terrain in play." : strategyReason;
+                            var terrainReason = JahanTerrainReason(playerId) ?? (!Army(playerId, _state.CurrentBattleProvince!.Value).Any() && !TerrainPlaysWithoutPresence(def) ? "You have no unit at the current battlefield."
+                                : blocked ? "This battlefield already has a Terrain in play." : strategyReason);
                             Add("playStrategy", $"Play {def.Name}", terrainReason is null ? Command("playStrategy", card.Id, strategyPay) : null, terrainReason, card.Id, [], gold: strategyGold);
                             continue;
                         }
