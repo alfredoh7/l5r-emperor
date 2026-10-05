@@ -74,7 +74,7 @@ public sealed partial class MatchEngine
     // ---- live terms read by the shared pipelines (each one call from its shared site) ----
 
     // Hikarou: +1F for each Fire Spell attached to him. Ichigo: +1F for each Dojo (a card with the keyword) his controller controls in play.
-    private int PromoEmperorForce(CardInstance card)
+    private int PromoPersonalitiesForce(CardInstance card)
     {
         var effect = Definition(card).Effect;
         if (effect == PromoEmperorPersonalitiesAbilities.HikarouEffect)
@@ -200,10 +200,10 @@ public sealed partial class MatchEngine
         EngineHooks.Abilities.Register("AddPromoEmperorPersonalities", 12000, static abilities => abilities.AddPromoEmperorPersonalities());
         EngineHooks.RunEffects.Register("RunPromoEmperor", 12000, static (engine, context) => engine.RunPromoEmperor(context.id, context.ability, context.command, context.player, context.source, context.target, context.consumedGrant));
         EngineHooks.ValidateMiddle.Register("ValidatePromoEmperor", 12000, static (engine, context) => engine.ValidatePromoEmperor(context.id, context.player, context.source));
-        EngineHooks.PersonalityForce.Register("PromoEmperorForce", 12000, static (engine, context) => engine.PromoEmperorForce(context.card));
+        EngineHooks.PersonalityForce.Register("PromoPersonalitiesForce", 12000, static (engine, context) => engine.PromoPersonalitiesForce(context.card));
         EngineHooks.AttackStrengthBefore.Register("PromoEmperorAttackStrength", 12000, static (engine, context) => engine.PromoEmperorAttackStrength(context.abilityId));
         EngineHooks.AttackKind.Register("PromoEmperorAttackKind", 12000, static context => context.abilityId == PromoEmperorPersonalitiesAbilities.GakkuMelee ? "Melee" : null);
-        EngineHooks.DestroysTarget.Register("PromoEmperorDestroysTarget", 12000, static context => context.abilityId == PromoEmperorPersonalitiesAbilities.FudoDestroy);
+        EngineHooks.DestroysTarget.Register("PromoPersonalitiesDestroysTarget", 12000, static context => context.abilityId == PromoEmperorPersonalitiesAbilities.FudoDestroy);
         EngineHooks.TargetedReaction.Register("PromoEmperorTargetedReaction", 12000, static (engine, context) => engine.PromoEmperorTargetedReaction(context.card, context.abilityId, context.affected));
     }
 }
