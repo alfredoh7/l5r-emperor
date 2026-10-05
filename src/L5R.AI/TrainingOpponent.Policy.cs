@@ -25,6 +25,9 @@ public static partial class TrainingOpponent
         // AI-vs-AI match exercise the full search flow.
         if (id == "shizuka-search") return 12;
         var intent = AbilityIntent.Of(id);
+        // Never aim a harmful ability (destroy, bow, penalize, an Honor loss) at the bot's own cards: that is worse than passing, so it scores below it. The target picker already
+        // prefers the opponent's cards; this catches the case where only the bot's own are legal (found by the arena: Scars of War, Tsujiken and Baiko cost a bot 24 Honor).
+        if ((intent.Rank >= EffectRank.Penalize || intent.HonorLoss) && x.Card(command.TargetId) is { } victim && victim.OwnerId == x.Self.Id) return SelfHarmScore;
         if (intent.TakesFavor) return FavorTakeScore(x, intent);
         if (intent.DiscardsFavor) return FavorSpendScore(x);
         // Mendon's spec: always play a Reaction that negates an effect; a Reaction that does not is a weighted choice (higher-ranked effects are likelier), rolled
@@ -45,6 +48,9 @@ public static partial class TrainingOpponent
         return Math.Max(PassScore, GenericAbilityScore(x, intent) - RepeatPenalty * x.Memory.UsesThisTurn(x.View.TurnNumber, id, command.CardId));
     }
 
+    /// <summary>Below passing: a harmful ability that would hit the bot's own card is never played when passing is possible.</summary>
+    internal const double SelfHarmScore = -50;
+
     /// <summary>What each earlier use of the same ability from the same card this turn takes off its score (the floor stays at passing).</summary>
     internal const double RepeatPenalty = 20;
 
@@ -53,7 +59,13 @@ public static partial class TrainingOpponent
     {
         var score = 30 + RankBonus(intent.Rank);
         // Cards that draw gain priority as the hand falls short of its maximum: the bigger the gap, the more it is worth.
-        if (intent.Draws) score += 12 * Math.Max(0, x.MaxHand - x.Self.HandCount);
+        if (intent.Draws)
+        {
+            var gap = x.MaxHand - x.Self.HandCount;
+            // A hand already at its maximum would discard what a pure draw ability draws, and its Gold is better kept for purchases: worth no more than passing.
+            if (gap <= 0 && intent.Rank <= EffectRank.Help && !intent.HonorGain && !intent.HonorLoss) return PassScore;
+            score += 12 * Math.Max(0, gap);
+        }
         // A deck that wants Honor for itself prefers abilities that give it Honor; one that wants to hurt the opponent prefers abilities that take it away.
         var gain = x.Profile.PrefersOwnGain(x.Self.Honor, x.Opponent.Honor);
         if (intent.HonorGain && gain) score += 25;
@@ -114,7 +126,8 @@ public static partial class TrainingOpponent
         {
             "self-gain" => gain ? 130 : 70,
             "opponent-lose" => gain ? 70 : 130,
-            "opponent-gain" or "self-lose" => 20,
+            // Never the opponent gaining Honor or the bot losing it: only chosen if nothing else is offered.
+            "opponent-gain" or "self-lose" => -100,
             _ => 100
         };
     }

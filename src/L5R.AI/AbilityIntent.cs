@@ -29,9 +29,9 @@ public sealed record AbilityIntent(
     private static readonly Regex Draw = new(@"\bdraw\b", RegexOptions.IgnoreCase);
     private static readonly Regex TakeFavor = new(@"(take the imperial favor|lobby|take favor|add a favor token)", RegexOptions.IgnoreCase);
     private static readonly Regex DiscardFavor = new(@"discard (the )?(imperial )?favor", RegexOptions.IgnoreCase);
-    private static readonly Regex GainHonor = new(@"\bgains?\s+\d+\s+honor|\bgain\s+\d+\s+honor", RegexOptions.IgnoreCase);
+    private static readonly Regex GainHonor = new(@"\bgains?\s+(?:\d+|X|that much)\s+honor", RegexOptions.IgnoreCase);
     private static readonly Regex EitherHonor = new(@"gains?\s+or\s+loses?", RegexOptions.IgnoreCase);
-    private static readonly Regex LoseHonor = new(@"\bloses?\s+\d+\s+honor", RegexOptions.IgnoreCase);
+    private static readonly Regex LoseHonor = new(@"\bloses?\s+(?:\d+|X|that much)\s+honor", RegexOptions.IgnoreCase);
 
     /// <summary>The part of a label after its last colon: the effect, as opposed to the costs before it.</summary>
     internal static string EffectText(string label)

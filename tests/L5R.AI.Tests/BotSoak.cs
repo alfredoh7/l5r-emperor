@@ -202,6 +202,12 @@ internal static class BotSoak
                 if (Env("L5R_SOAK_STRICT") == "1") throw new Exception($"{summary.NeverOffered.Length} wired abilities were never offered (L5R_SOAK_STRICT)");
                 Console.WriteLine($"  SKIP coverage: {summary.NeverOffered.Length} wired abilities never offered in this small run (set L5R_SOAK_STRICT=1 to fail on that)");
             }
+        }),
+        ("bot-arena: decks in L5R_ARENA_DECKS against the Lion and Crane presets, new bot versus the pre-#642 bot (opt-in, see BotArena.cs)", () =>
+        {
+            var folder = Env("L5R_ARENA_DECKS");
+            if (folder is null) { Console.WriteLine("  SKIP: set L5R_ARENA_DECKS to a folder of .txt deck lists to run the arena"); return; }
+            BotArena.Run(folder, ulong.TryParse(Env("L5R_ARENA_SEED"), out var seed) ? seed : 1UL, Env("L5R_ARENA_REPORT"));
         })
     ];
 }

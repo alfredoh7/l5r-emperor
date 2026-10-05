@@ -1,0 +1,9 @@
+{
+  "lane": "rules",
+  "summary": "Issue #642 follow-up: bot tuning from the new arena (tests/L5R.AI.Tests/BotArena.cs, opt-in via L5R_ARENA_DECKS; Legacy/ holds the pre-#642 bot as a baseline). Bot changes only (src/L5R.AI, no engine changes): a harmful ability (destroy/bow/penalize/Honor loss) is never aimed at the bot's own card (scores below passing); Shinden Asahina always bows (never gives the opponent Honor); a pure draw ability at a full hand scores no more than passing; effect choices and Either/Or answers never give the opponent Honor or lose the bot's own Honor unless nothing else is offered; the Honor regexes also read X and 'that much'.",
+  "validation": "Full AI suite 97/97, bot-policy 10/10 (a new test fails without the self-harm and Shinden changes), soak 3/3; check_format and lint clean. Arena, five playable decks, Lion and Crane, 3 seeds (60 head-to-head games): updated bot 31 wins, old bot 25, 4 undecided. Same seeds with the pre-fix new bot: 29 wins, old bot 27, 4 undecided; new/new mirror deck wins 9/30 after vs 11/30 before. So the changes are correct but the arena shows no measurable strength change at this sample size. NOT verified: no human playtest.",
+  "remaining": "Mendon to playtest; Spider Conquer cannot be played until Daigotsu Shiraume and Without Mercy are wired; hypothesis not acted on: holdings-first purchasing may slow holding-heavy decks (needs an A/B run); more seeds are needed to detect a few-point change.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/642",
+  "branch": "claude/642-bot-arena",
+  "updated": "2026-10-05T04:23:05.802322+00:00"
+}
