@@ -912,7 +912,7 @@ public sealed partial class MatchEngine
             return new(cardId, 0, clanDiscount, clanAllegiance, false, fromDeadPile ? "Choose one of your own dead Personalities." : "Choose your face-up province card.", []);
         string? error = null;
         var inClan = def.Type == CardType.Personality && ClanAlignments(card).Contains(player.Clan);
-        if (fromDeadPile ? def.Type != CardType.Personality : def.Type is not (CardType.Personality or CardType.Holding)) error = fromDeadPile ? "Only a Personality can be recruited from the dead pile." : "This card cannot be purchased.";
+        if (fromDeadPile ? def.Type is not (CardType.Personality or CardType.Holding) : def.Type is not (CardType.Personality or CardType.Holding)) error = fromDeadPile ? "Only a Personality or a Holding can be recruited from a discard pile." : "This card cannot be purchased."; // a Holding too (issue #653: Govern the Land, Re-fortification)
         // Loyal (core rules Glossary): a Personality with one or more Clan affiliations may only be
         // controlled by a matching Clan. With none remaining it is Unaligned, so Loyal imposes no
         // Clan restriction, including for a player whose Stronghold represents no Clan.
@@ -1672,6 +1672,7 @@ public sealed partial class MatchEngine
         // After the losing units are destroyed, the province is destroyed and Honor is settled: the Reactions that name this moment (AfterResolution.cs), before the winners go home.
         MarkSeekingTheTruthResolution(destroyedByPlayer, provinceDestroyedNow ? attacker : null); // Forgotten Legacy pass (issue #467 batch 4).
         FireCowedAndDefeatedBattleWatches(a, d); // The Shadow's Embrace pass (issue #476), batch 3: "a battle resolves which destroyed him" (ShadowsEmbraceBatch3.cs).
+        PromoApplyResolution(a, d, attacker, destroyedByPlayer, provinceDestroyedNow); // Imminent Victory (issue #653, PromoEmperorFateReactions.cs): the +1F/+1C tokens at battle resolution.
         ApplyShibasGuidanceTrait(destroyedByPlayer, provinceDestroyedNow ? attacker : null); // Shiba's Guidance (Emperor Edition remaining-cards pass, issue #492, group E): "After a battle resolution ends in which a Phoenix Clan player destroyed ...".
         var resolutionFacts = NewAfterResolutionFacts(provinceIndex, attacker, attackerWon, a, destroyedByPlayer, provinceDestroyedNow, losers);
         // Words Have Strength (Emperor Edition remaining-cards pass, issue #492, group D): the cards the resolution destroyed are the losing army (both armies in a tie).

@@ -4,7 +4,7 @@ using static RegressionAssertions;
 
 // Promotional-Emperor Strategies and Spells (issue #653, strategy-wave-112 and spell-wave-51): each scenario is an explicit position on the economy table (Batch336Support.Table: player 0 the Crane/Defender,
 // player 1 the Lion/Attacker, province 0 the current battlefield) driven only through QueryActions and the commands the engine offers.
-internal static class PromoEmperorFateTests
+internal static partial class PromoEmperorFateTests
 {
     private const string LegendaryRivalry = "oracle-l5r-9991", TamoriPotion = "oracle-l5r-7788", BarFight = "oracle-l5r-696", Glimpse = "oracle-l5r-10597", Adroitness = "oracle-l5r-10600",
         MightOfTheSun = "oracle-l5r-5046", SummonFushicho = "oracle-l5r-10414",
@@ -32,6 +32,20 @@ internal static class PromoEmperorFateTests
         ("Summon Fushicho: bows the Shugenja and destroys the Spell to search the Fate deck for an Item", SummonFushichoScenario),
         ("A Glimpse of Fate: the optional discard, then drawing until exactly two cards are held; never discards itself; nothing is drawn with more than two", GlimpseScenario),
         ("Elemental Adroitness: straightens a Ring in play, and the Strategy returns to the hand before the phase ends", AdroitnessScenario),
+        ("Fallen: Battle/Open bows a target Fallen card (at the battlefield in a battle, anywhere in the Action Phase); a card that is not Fallen is refused", FallenScenario),
+        ("It Was a Cat: bows the performing Personality or Follower and loses 1 Honor to look at the top three cards of any of the four decks (four for a Ninja), discard one and arrange the rest", ItWasACatScenario),
+        ("Sinkhole: destroys the Terrain or Region at the current battlefield, then the acting player chooses to bow the targeted Personality or move him home", SinkholeScenario),
+        ("Closing the Gap: after an action moved a Personality to or from the current battlefield, move the performing Personality to it or home from it, straightening his unit", ClosingTheGapScenario),
+        ("Interrogation: Open pays 2 Gold to draw; its before-action Reaction negates another player's bowing or destruction of the reactor's Holding, Region or Terrain", InterrogationScenario),
+        ("Well Protected: after an action targets your Personality, bowing or destroying his Armor negates his destruction (Attack included); not without an Armor", WellProtectedScenario),
+        ("Imminent Victory: the Personalities of the army that destroyed the enemy army or the Province get a +1F/+1C token at battle resolution; none when it destroyed neither", ImminentVictoryScenario),
+        ("Resurrection: discard a card and recruit one of your dead Personalities for his whole price; refused for a discarded, foreign or missing target and with no card to discard", ResurrectionScenario),
+        ("Renewal: the same for a discarded Personality, but not on the active player's first or second turn", RenewalScenario),
+        ("Govern the Land: a Holding from your discard pile enters play bowed for its price; a Follower or Item from it attaches to the performing Personality", GovernTheLandScenario),
+        ("Re-fortification: a Castle Holding from your discard pile enters play for its price; its Battle half bows a Castle (even with no unit at the battlefield) to move an enemy Personality home", ReFortificationScenario),
+        ("Peace: searches the Dynasty deck for a non-Unique Holding and recruits it bowed for its price", PeaceScenario),
+        ("Imperial Charter: each player in turn may create an unbowed Holding that bows for 2 Gold; not on the first turn", ImperialCharterScenario),
+        ("Trembling Earth: Equips to an Earth Shugenja at any location as a Battle action; its Home Earth Battle bows a target enemy card and destroys the Spell", TremblingEarthScenario),
     ]);
 
     // ---- shape ----------------------------------------------------------------------------------------------------------------------------------------------------------------

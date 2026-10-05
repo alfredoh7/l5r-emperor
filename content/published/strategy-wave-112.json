@@ -119,6 +119,327 @@
         "pe-elemental-adroitness-straighten"
       ],
       "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10598",
+      "Name": "Fallen",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "(Limited, 2 Gold: Discard a Kharmic card from your hand to draw a card.)\nBattle/Open: Bow a target Fallen card.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10598.jpg",
+      "Keywords": [
+        "Kharmic"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "pe-fallen-bow"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10415",
+      "Name": "It Was a Cat",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: Bow your performing Personality or Follower: Look at the top three cards of a deck, or four cards if the performer is a Ninja. You may discard one of them. Put the rest back in any order. Lose 1 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10415.jpg",
+      "Keywords": [
+        "Ninja"
+      ],
+      "Focus": 1,
+      "Abilities": [
+        "pe-it-was-a-cat-look"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9986",
+      "Name": "Sinkhole",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Destroy any player's Terrain or Region at the current battlefield and target a Personality: His path is blocked. Bow him or move him home.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9986.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "pe-sinkhole-terrain",
+        "pe-sinkhole-region"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9989",
+      "Name": "Closing the Gap",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After an action resolves that moved a Personality to or from the current battlefield, choose your performing Personality: Move him to the current battlefield, or from the current battlefield to your home. Straighten his unit if this moved him.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9989.jpg",
+      "Keywords": [
+        "Unique"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "pe-closing-the-gap-to-battle",
+        "pe-closing-the-gap-home"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10239",
+      "Name": "Interrogation",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: Before another player's action resolves: Negate its effects that bow, destroy, or discard your Holdings, Regions, or Terrains in play.\nOpen: Pay 2 Gold: Draw a card.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10239.jpg",
+      "Keywords": [],
+      "Focus": 4,
+      "Abilities": [
+        "pe-interrogation-negate",
+        "pe-interrogation-draw"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9288",
+      "Name": "Well Protected",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After another player's action targets your Personality, bow or destroy his target Armor: Negate his destruction from the action's effects.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9288.jpg",
+      "Keywords": [],
+      "Focus": 1,
+      "Abilities": [
+        "pe-well-protected-bow",
+        "pe-well-protected-destroy"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10601",
+      "Name": "Imminent Victory",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: If you destroy the enemy army or Province in this battle's resolution, give a +1F/+1C token to each of your Personalities in your army (at battle resolution).",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10601.jpg",
+      "Keywords": [],
+      "Focus": 4,
+      "Abilities": [
+        "pe-imminent-victory"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-6281",
+      "Name": "Resurrection",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: Discard a card and choose your performing dead Personality: Bring him into play, paying all costs.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6281.jpg",
+      "Keywords": [
+        "Unique"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "pe-resurrection-recruit"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-6261",
+      "Name": "Renewal",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: If it is not the active player's first or second turn, discard a card and choose your performing discarded Personality: Bring him into play, paying all costs.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6261.jpg",
+      "Keywords": [
+        "Unique"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "pe-renewal-recruit"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-2877",
+      "Name": "Govern the Land",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: Target a Holding in your discard pile: Bring it into play (bowed), paying all costs.\nBattle/Open: Choose your performing Personality and target a Follower or Item in your discard pile: Attach it to him, paying all costs.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-2877.jpg",
+      "Keywords": [],
+      "Focus": 4,
+      "Abilities": [
+        "pe-govern-the-land-holding",
+        "pe-govern-the-land-attach"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-6192",
+      "Name": "Re-fortification",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Target a Castle Holding in your discard pile: Put it into play, paying all costs.\nBattle: Even if you control no units at the current battlefield, bow your target Castle and target an enemy Personality: Move him home.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6192.jpg",
+      "Keywords": [
+        "Siege"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "pe-re-fortification-holding",
+        "pe-re-fortification-move"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-5895",
+      "Name": "Peace",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Search your Dynasty deck for a non-Unique Holding. Bring it into play (bowed), paying all costs.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-5895.jpg",
+      "Keywords": [
+        "Unique"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "pe-peace-search"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9990",
+      "Name": "Imperial Charter",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: If it is not your first turn: Starting with you, each player may create an unbowed Holding with the trait \"Bow this card: Produce 2 Gold.\"",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9990.jpg",
+      "Keywords": [
+        "Imperial"
+      ],
+      "Focus": 1,
+      "Abilities": [
+        "pe-imperial-charter-create"
+      ],
+      "Effect": "none"
     }
   ],
   "Decks": []

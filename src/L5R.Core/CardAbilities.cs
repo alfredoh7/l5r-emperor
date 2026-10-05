@@ -4410,6 +4410,7 @@ public sealed partial class MatchEngine
         if (EmperorRemainingCAbilities.BeforeActionHandReactions.Contains(abilityId)) return EmperorRemainingCBeforeActionApplies(card, abilityId, command);
         if (CardWave566BeforeActionApplies(card, abilityId, command) is { } wave566Before) return wave566Before; // Inexorable (issue #566, CardWave566.cs)
         if (P3BeforeActionApplies(card, abilityId, command) is { } p3Before) return p3Before; // Request Authorization (issue #503, EmperorP3.cs)
+        if (PromoBeforeActionApplies(card, abilityId, command, affectedId) is { } promoBefore) return promoBefore; // Interrogation (issue #653, PromoEmperorFateReactions.cs)
         // Akodo Shihiro (issue #458): "Before (each time) another player's action resolves during a battle at Shihiro's battlefield" -- whatever the action targets, so
         // long as it is a genuine action (IsAction), taken by another player, while a battle is under way at Shihiro's own battlefield.
         if (P2BeforeActionApplies(card, abilityId, command) is { } p2Before) return p2Before; // issue #503: Armor of the Uruwashii (EmperorP2.cs)
@@ -6282,7 +6283,7 @@ public sealed partial class MatchEngine
             else
             {
                 var target = Card(command.TargetId); var type = Definition(target).Type;
-                if (ability.Target == "hand") Require(target.OwnerId == player.Id && target.Zone == Zone.Hand && player.Hand.Contains(target.Id), "Discard a card from your hand.");
+                if (ability.Target == "hand") Require(target.OwnerId == player.Id && target.Zone == Zone.Hand && player.Hand.Contains(target.Id) && target.Id != command.CardId, "Discard a card from your hand."); // a card being played is not in the hand it discards from (issue #653)
                 // Hato-gurama (oracle-l5r-10115, issue #453 batch 5): "You may not choose this card to be discarded as a cost or effect of your actions if you have other cards in your hand."
                 if (ability.Target == "hand") Require(Definition(target).Effect != "hato-gurama" || player.Hand.Count == 1, "Hato-gurama may not be chosen to be discarded while you have other cards in your hand.");
                 // Forthrightness (The Shadow's Embrace pass, issue #476 batch 3): "show a Strategy in your hand" -- another Strategy of the acting player's hand (the played card is not in it).
@@ -10832,6 +10833,7 @@ public sealed partial class MatchEngine
     // battle resolution (FinishBattleResolution) -- both paths share this single removal.
     private void DiscardTerrain(CardInstance terrain)
     {
+        if (NegatesEffect(terrain, "destroy")) { Emit("destructionNegated", $"{Definition(terrain).Name}'s destruction was negated before it resolved.", terrain.OwnerId, terrain.Id); return; } // Interrogation (issue #653)
         terrain.Zone = Zone.FateDiscard; terrain.ProvinceIndex = null; terrain.FaceUp = true;
         // Fields of Mercy (oracle-l5r-2530): "the count of destroyed personalities does not start
         // until Fields of Mercy are played" -- so a LATER copy entering play must start fresh, not
@@ -10844,6 +10846,7 @@ public sealed partial class MatchEngine
     // the same removal ResolveProvinceDestruction applies when the province itself is destroyed.
     private void DestroyRegion(CardInstance region)
     {
+        if (NegatesEffect(region, "destroy")) { Emit("destructionNegated", $"{Definition(region).Name}'s destruction was negated before it resolved.", region.OwnerId, region.Id); return; } // Interrogation (issue #653)
         foreach (var province in _state.Players.SelectMany(p => p.Provinces).Where(p => p.RegionId == region.Id)) province.RegionId = null;
         region.Zone = Zone.DynastyDiscard; region.ProvinceIndex = null; region.FaceUp = true;
         Emit("regionDestroyed", $"{Definition(region).Name} was destroyed.", region.OwnerId, region.Id);

@@ -18,7 +18,7 @@ namespace L5R.Core;
 // ======================================================================================================================================================================================
 
 /// <summary>What the Promotional-Emperor Strategies and Spells keep between commands.</summary>
-public sealed class PromoEmperorFateState
+public sealed partial class PromoEmperorFateState
 {
     /// <summary>Elemental Adroitness: "Before this phase ends, put this Strategy into your hand" -- the card, its owner, and the phase family (as PhaseFamily numbers it) it was played in.</summary>
     public List<PromoPhaseReturn> PhaseReturns { get; set; } = [];
@@ -32,11 +32,12 @@ public sealed partial class MatchState
     public PromoEmperorFateState PromoFate { get; set; } = new();
 }
 
-public static class PromoEmperorFateAbilities
+public static partial class PromoEmperorFateAbilities
 {
     public const string LegendaryRivalry = "pe-legendary-rivalry-bow", TamoriPotion = "pe-tamori-potion-attack", BarFightAttack = "pe-bar-fight-attack",
         MightBow = "pe-might-of-the-sun-bow", MightFree = "pe-might-of-the-sun-free", Fushicho = "pe-summon-fushicho-search", Glimpse = "pe-glimpse-of-fate-draw",
-        Adroitness = "pe-elemental-adroitness-straighten";
+        Adroitness = "pe-elemental-adroitness-straighten", FallenBow = "pe-fallen-bow", CatLook = "pe-it-was-a-cat-look", SinkholeTerrain = "pe-sinkhole-terrain", SinkholeRegion = "pe-sinkhole-region",
+        TremblingEquip = "pe-trembling-earth-equip", TremblingBow = "pe-trembling-earth-bow";
 
     /// <summary>Target categories: a Unique Personality (either player's); a Ring in play (the out-of-play "ring-in-play-or-own-discard" listing, narrowed to play by validation).</summary>
     public const string UniquePersonality = "pe-unique-personality";
@@ -64,8 +65,29 @@ public static class PromoEmperorFateAbilities
             Slots: [new("discard", "hand", "A card in your hand to discard (optional)", 0, 1)]);
         // Elemental Adroitness (oracle-l5r-10600): "Battle: Straighten a target Ring. Before this phase ends, put this Strategy into your hand."
         all[Adroitness] = new("Battle", "Straighten a target Ring. Before this phase ends, put this Strategy into your hand", "ring-in-play-or-own-discard");
+        // Fallen (oracle-l5r-10598): "Battle/Open: Bow a target Fallen card." (Its Kharmic reminder text is the universal Kharmic ability, not an ability of the card.)
+        all[FallenBow] = new("BattleOrOpen", "Bow a target Fallen card", "card-with-any-required-keyword", RequiredKeywords: ["Fallen"]);
+        // It Was a Cat (oracle-l5r-10415): "Open: Bow your performing Personality or Follower: Look at the top three cards of a deck, or four cards if the performer is a Ninja. You may discard one of them.
+        // Put the rest back in any order. Lose 1 Honor." (The card is itself a Ninja, so its Open action is a Ninja Open action by inheritance.)
+        all[CatLook] = new("Open", "Bow your performing Personality or Follower: Look at the top three cards of a deck, or four cards if the performer is a Ninja. You may discard one of them. Put the rest back in any order. Lose 1 Honor", "none",
+            Performer: "own-unbowed-personality-or-follower", Costs: ActionCost.BowPerformer, Look: ItWasACat);
+        // Sinkhole (oracle-l5r-9986): "Battle: Destroy any player's Terrain or Region at the current battlefield and target a Personality: His path is blocked. Bow him or move him home." Two entries sharing one
+        // use (which of the two the battlefield holds); the acting player chooses bow or move home (the conditional effect choice with nothing to test).
+        all[SinkholeTerrain] = new("Battle", "Destroy the Terrain at the current battlefield and target a Personality: His path is blocked. Bow him or move him home", "personality", UsageKey: "pe-sinkhole", Branch: SinkholeBranch);
+        all[SinkholeRegion] = new("Battle", "Destroy the Region at the current battlefield and target a Personality: His path is blocked. Bow him or move him home", "personality", UsageKey: "pe-sinkhole", Branch: SinkholeBranch);
+        // Trembling Earth (oracle-l5r-10595): "You may Equip this Spell as a Battle action to your Earth Shugenja at any location." and "Home Earth Battle: Bow a target enemy card. Destroy this Spell."
+        all[TremblingEquip] = new("Battle", "Equip this Spell as a Battle action to your Earth Shugenja at any location", "none", Performer: EmperorP5Abilities.OwnPersonalityWithKeywordAnywhere, RequiredKeywords: ["Earth", "Shugenja"],
+            Cost: GoldCostRule.AttachCost(), Attach: new(AttachSource.Self, Wielder: AttachWielder.Performer));
+        all[TremblingBow] = new("Battle", "Home Earth Battle: Bow a target enemy card. Destroy this Spell", "enemy-card", ActionKeywords: ["Earth"], SourceUnitMayBeAway: true);
         return all;
     }
+
+    private static readonly ConditionalChoice SinkholeBranch = new(BranchCondition.Always,
+        [new("bow", "Bow him", [BranchEffect.BowTarget]), new("home", "Move him home", [BranchEffect.MoveTargetHome])], new("none", "Nothing happens", []));
+
+    /// <summary>It Was a Cat: the top three cards of any of the four decks, or four; the viewer may discard one and arranges the rest.</summary>
+    public static readonly LookSpec ItWasACat = new("pe-it-was-a-cat", "Look at the top three cards of a deck",
+        [new("Fate"), new("Dynasty"), new("Fate", Opponent: true), new("Dynasty", Opponent: true)], 3, [new(LookDisposition.Discard, 0, 1)], Reorder: true);
 }
 
 public sealed partial class MatchEngine
@@ -101,6 +123,17 @@ public sealed partial class MatchEngine
                 Require(Definition(ring).Type == CardType.Ring && InPlay(ring), "Target a Ring in play.");
                 break;
             // The discard is the player's choice among the other cards in hand: never the Strategy being played.
+            // Sinkhole: the Terrain or the Region the entry destroys must be at the current battlefield (a Terrain leaves when its battle ends, so any Terrain in play is at it).
+            case PromoEmperorFateAbilities.SinkholeTerrain:
+                Require(PromoTerrainAtBattle() is not null, "There is no Terrain at the current battlefield.");
+                break;
+            case PromoEmperorFateAbilities.SinkholeRegion:
+                Require(PromoRegionAtBattle() is not null, "There is no Region at the current battlefield.");
+                break;
+            // Home Earth Battle: the Spell's Shugenja is at home or at the battlefield (a Home action may be taken from home).
+            case PromoEmperorFateAbilities.TremblingBow:
+                Require(source is { Zone: Zone.Attached, AttachedTo: { } spellHostId } && _state.Cards.TryGetValue(spellHostId, out var spellHost) && (spellHost.Zone == Zone.Home || AtBattle(spellHost)), "This Spell's Shugenja must be at home or at the battlefield.");
+                break;
             case PromoEmperorFateAbilities.Glimpse when ability.Slots is not null:
                 Require(SlotCards(command, "discard").All(card => card.Id != command.CardId), "A Strategy being played cannot be discarded to itself.");
                 break;
@@ -138,6 +171,14 @@ public sealed partial class MatchEngine
     // Might of the Sun: "This Shugenja has +4F." A static trait of the Spell while it is attached.
     private int PromoMightForce(CardInstance card) =>
         Definition(card).Type == CardType.Personality ? 4 * Attachments(card.Id).Count(a => Definition(a).Type == CardType.Spell && Definition(a).Effect == PromoEmperorFateAbilities.MightEffect) : 0;
+
+    // ---- Sinkhole's obstacles ------------------------------------------------------------------------------------------------------------------------------------------------
+
+    private CardInstance? PromoTerrainAtBattle() =>
+        _state.CurrentBattleProvince is int battle ? _state.Cards.Values.Where(c => c.Zone == Zone.Battlefield && c.ProvinceIndex == battle && Keyword(c, "Terrain")).OrderBy(c => c.Id, StringComparer.Ordinal).FirstOrDefault() : null;
+
+    private CardInstance? PromoRegionAtBattle() =>
+        CurrentBattlefieldProvince() is { RegionId: { } regionId } && _state.Cards.TryGetValue(regionId, out var region) && region.Zone == Zone.Region ? region : null;
 
     // ---- phase end ------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -185,6 +226,29 @@ public sealed partial class MatchEngine
                 Emit("glimpseOfFate", $"{player.Name} holds {player.Hand.Count(h => h != source!.Id)} card(s) in hand.", player.Id, source!.Id);
                 return false;
             }
+            case PromoEmperorFateAbilities.FallenBow:
+                if (!IsTerrainCard(target!) && !StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
+                return false;
+            case PromoEmperorFateAbilities.CatLook:
+            {
+                var performer = Card(command.PerformerId!);
+                GainHonor(player.Id, -1, "It Was a Cat", source);
+                SpendHandPlayedCard(player, source); // a Strategy is spent as it is played: the look finishes the action
+                BeginLook(ability.Look!, source!, player.Id, "ability", bowedBeforeAction, Keyword(performer, "Ninja") ? 4 : 3);
+                return true;
+            }
+            case PromoEmperorFateAbilities.SinkholeTerrain:
+            case PromoEmperorFateAbilities.SinkholeRegion:
+            {
+                // The obstacle is destroyed first (the Terrain through DiscardTerrain, the Region through DestroyRegion), then the acting player chooses bow or move home for the Personality.
+                if (id == PromoEmperorFateAbilities.SinkholeTerrain && PromoTerrainAtBattle() is { } terrain) { DiscardTerrain(terrain); player.TerrainDestroyedThisBattle = true; }
+                else if (id == PromoEmperorFateAbilities.SinkholeRegion && PromoRegionAtBattle() is { } region) DestroyRegion(region);
+                return BeginConditionalChoice(command, ability, consumedGrant, false, null, bowedBeforeAction, []);
+            }
+            case PromoEmperorFateAbilities.TremblingBow:
+                if (!IsTerrainCard(target!) && !StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
+                if (source is { Zone: Zone.Attached }) DestroyAttachment(source);
+                return false;
             case PromoEmperorFateAbilities.Adroitness:
                 Straighten(target!);
                 if (source is not null && source.Zone is Zone.Hand or Zone.FateDiscard)
@@ -200,14 +264,36 @@ public sealed partial class MatchEngine
     [System.Runtime.CompilerServices.ModuleInitializer]
     internal static void RegisterPromoEmperorFateHooks()
     {
-        EngineHooks.Abilities.Register("AddPromoEmperorFate", 12100, static abilities => abilities.AddPromoEmperorFate());
-        EngineHooks.TargetAllows.Register("PromoEmperorFateTargetAllows", 12100, static (engine, context) => engine.PromoFateTargetAllows(context.ability.Target, context.target));
-        EngineHooks.ValidateLate.Register("ValidatePromoEmperorFate", 12100, static (engine, context) => engine.ValidatePromoFate(context.id, context.ability, context.command, context.player, context.source));
-        EngineHooks.RunEffects.Register("RunPromoEmperorFate", 12100, static (engine, context) => engine.RunPromoFate(context.id, context.ability, context.command, context.player, context.source, context.target, context.consumedGrant, context.bowedBeforeAction));
+        EngineHooks.Abilities.Register("AddPromoEmperorFate", 12100, static abilities => abilities.AddPromoEmperorFate().AddPromoEmperorFateReactions().AddPromoEmperorFateRecruits());
+        EngineHooks.Looks.Register("PromoEmperorFateLooks", 12100, static () => [PromoEmperorFateAbilities.ItWasACat]);
+        EngineHooks.Searches.Register("PromoEmperorFateSearches", 12100, static () => [PeaceSearch]);
+        EngineHooks.TargetAllows.Register("PromoEmperorFateTargetAllows", 12100, static (engine, context) => engine.PromoFateTargetAllows(context.ability.Target, context.target)
+            || engine.PromoReactionTargetAllows(context.ability.Target, context.target));
+        EngineHooks.ValidateLate.Register("ValidatePromoEmperorFate", 12100, static (engine, context) =>
+        {
+            engine.ValidatePromoFate(context.id, context.ability, context.command, context.player, context.source);
+            engine.ValidatePromoRecruit(context.id, context.ability, context.command, context.player, context.source);
+            if (context.id is PromoEmperorFateAbilities.ClosingToBattle or PromoEmperorFateAbilities.ClosingHome) engine.ValidatePromoClosing(context.id, context.command, context.player);
+        });
+        EngineHooks.RunEffects.Register("RunPromoEmperorFate", 12100, static (engine, context) =>
+            engine.RunPromoFate(context.id, context.ability, context.command, context.player, context.source, context.target, context.consumedGrant, context.bowedBeforeAction)
+            ?? engine.RunPromoReactions(context.id, context.ability, context.command, context.player, context.source, context.target)
+            ?? engine.RunPromoRecruits(context.id, context.ability, context.command, context.player, context.source, context.target, context.consumedGrant, context.playedFromDiscard,
+                context.opponentHonorBeforeBattleAction, context.bowedBeforeAction, context.preExistingGrants));
         EngineHooks.AttackStrengthAfter.Register("PromoEmperorFateAttackStrength", 12100, static (engine, context) => engine.PromoFateAttackStrength(context.abilityId, context.sourceId));
         EngineHooks.AttackKind.Register("PromoEmperorFateAttackKind", 12100, static context => PromoFateAttackKind(context.abilityId));
         EngineHooks.PersonalityForce.Register("PromoEmperorFateForce", 12100, static (engine, context) => engine.PromoMightForce(context.card));
-        EngineHooks.BowsTarget.Register("PromoEmperorFateBowsTarget", 12100, static context => context.abilityId is PromoEmperorFateAbilities.LegendaryRivalry);
-        EngineHooks.DestroysTarget.Register("PromoEmperorFateDestroysTarget", 12100, static context => context.abilityId is PromoEmperorFateAbilities.MightBow or PromoEmperorFateAbilities.MightFree);
+        // Interrogation reads these curated lists: set-fields-holding bows its Holding; brawl-destroy and set-fields-terrain destroy their Region / Terrain.
+        EngineHooks.BowsTarget.Register("PromoEmperorFateBowsTarget", 12100, static context => context.abilityId is PromoEmperorFateAbilities.LegendaryRivalry or PromoEmperorFateAbilities.FallenBow
+            or PromoEmperorFateAbilities.TremblingBow or PromoEmperorFateAbilities.SinkholeTerrain or PromoEmperorFateAbilities.SinkholeRegion or "set-fields-holding");
+        EngineHooks.DestroysTarget.Register("PromoEmperorFateDestroysTarget", 12100, static context => context.abilityId is PromoEmperorFateAbilities.MightBow or PromoEmperorFateAbilities.MightFree
+            or "brawl-destroy" or "set-fields-terrain");
+        EngineHooks.TargetedReaction.Register("PromoEmperorFateTargetedReaction", 12100, static (engine, context) =>
+            context.abilityId is PromoEmperorFateAbilities.WellProtectedBow or PromoEmperorFateAbilities.WellProtectedDestroy && engine.PromoWellProtectedApplies(context.card, context.abilityId, context.subject, context.affected));
+        EngineHooks.DeciderPrompt.Register("PromoEmperorFateDeciderPrompt", 12100, static (engine, p) => engine.PromoCharterPrompt(p));
+        EngineHooks.DeciderOptions.Register("PromoEmperorFateDeciderOptions", 12100, static (engine, specId, deciderId, command) => engine.PromoCharterOptions(specId, command));
+        EngineHooks.ApplyDecider.Register("PromoEmperorFateApplyDecider", 12100, static (engine, p) => engine.PromoApplyCharter(p));
+        EngineHooks.DeciderIdBefore.Register("PromoEmperorFateDeciderId", 12100, static (engine, specId, command) => specId == PromoEmperorFateAbilities.CharterFirst ? command.PlayerId : null);
+        EngineHooks.DeciderVerb.Register("PromoEmperorFateDeciderVerb", 12100, static (engine, specId) => PromoEmperorFateAbilities.IsCharterSpec(specId) ? "Create the Holding" : null);
     }
 }

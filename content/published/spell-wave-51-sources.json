@@ -16,5 +16,14 @@
     "source_url": "https://oracleofthevoid.com/#cardid=10414",
     "image_path": "assets/reference/oracle/promotional-emperor/webp/oracle-l5r-10414-printing-1-image-1.webp",
     "image_sha256": "3421b69162007aea0d70ae04e82f3c840389fa387df8df062073f4b653f0b70b"
+  },
+  {
+    "card_id": "oracle-l5r-10595",
+    "printing_set": [
+      "Promotional&ndash;Emperor"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10595",
+    "image_path": "assets/reference/oracle/promotional-emperor/webp/oracle-l5r-10595-printing-1-image-1.webp",
+    "image_sha256": "d9e0fa79106957aa9344d0250a8acf10ac66603d271629f8b0d1d7019347fcb3"
   }
 ]

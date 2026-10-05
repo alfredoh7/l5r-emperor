@@ -16,6 +16,8 @@ ENTRIES: dict[int, dict] = {
                Text="This Shugenja has +4F." + NL + "Battle: Bow this Shugenja unless he is Fire or Thunder and target an enemy card without attachments: Destroy it."),
     10414: dict(Abilities=["pe-summon-fushicho-search"],  # Summon Fushicho
                 Text="Limited: Bow this Shugenja and destroy this card: Search your Fate deck for an Item, show it, and put it in your hand."),
+    10595: dict(Abilities=["pe-trembling-earth-equip", "pe-trembling-earth-bow"],  # Trembling Earth
+                Text="You may Equip this Spell as a Battle action to your Earth Shugenja at any location." + NL + "Home Earth Battle: Bow a target enemy card. Destroy this Spell." + NL + "(Home actions may be used from home.)"),
 }
 
 
