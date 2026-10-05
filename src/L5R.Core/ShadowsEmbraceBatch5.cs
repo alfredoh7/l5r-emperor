@@ -298,7 +298,7 @@ public sealed partial class MatchEngine
                 LockActions(target!, source!.Id);
                 return false;
             case "set-fields-holding":
-                target!.Bowed = true;
+                if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; // a negation of its bowing applies (Interrogation, issue #653)
                 return false;
             // Touch the Emptiness: -2F, and -- while its Shugenja is Void -- the target's next action this turn is negated (TouchTheEmptinessNegates).
             case "touch-emptiness-weaken":

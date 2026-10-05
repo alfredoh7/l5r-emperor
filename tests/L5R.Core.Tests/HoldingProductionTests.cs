@@ -23,7 +23,9 @@ internal static class HoldingProductionTests
          // Issue #653: Kenro-ji-jin's Bounty (10229), a Celestial, prints "Reaction: When paying for a Farm: Produce 1 Gold" -- a Reaction Gold source, as Seaside Bazaar's.
          "oracle-l5r-10229",
          // Issue #653 (PromoEmperorItems.cs): Mantle of the Jade Champion (9967) produces 4 Gold through its Reaction when paying for a Spell, Library of Rebirth's reactive source on an attached card.
-         "oracle-l5r-9967"];
+         "oracle-l5r-9967",
+         // Issue #653 (Promotional-Emperor): Imperial Charter prints the CREATED Holding's "Produce 2 Gold" (the published Charter Holding, oracle-l5r-10806, carries it), as Basic Lesson does.
+         "oracle-l5r-9990"];
 
     public static void Run(TestRunner runner) => runner.Run("holding-production", [
         ("The four holding-wave-1 Holdings produce the Gold they print: the field carries it and each one alone funds a payment of that size", PrintedProductionIsUsable),
