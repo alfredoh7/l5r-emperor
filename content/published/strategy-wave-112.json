@@ -1,0 +1,125 @@
+{
+  "Profile": "strategy-wave-112",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-9991",
+      "Name": "Legendary Rivalry",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle/Open: Target a Unique Personality: Bow him.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9991.jpg",
+      "Keywords": [],
+      "Focus": 3,
+      "Abilities": [
+        "pe-legendary-rivalry-bow"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-7788",
+      "Name": "Tamori Potion",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Bow your performing Personality: Ranged 4 Attack with +1 strength if he is an Alchemist and +1 strength for each different element keyword in his unit.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7788.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "pe-tamori-potion-attack"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-696",
+      "Name": "Bar Fight",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "As a Focus Effect: After this duel ends, bow its winner.\nBattle: Choose your performing unbowed Personality: Melee Attack with strength equal to 4 plus the number of Sake tokens he has.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-696.jpg",
+      "Keywords": [],
+      "Focus": 3,
+      "Abilities": [
+        "simple-yari-focus",
+        "pe-bar-fight-attack"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10597",
+      "Name": "A Glimpse of Fate",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle/Open: You may discard a card. Draw cards until you have exactly two cards in your hand.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10597.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "pe-glimpse-of-fate-draw"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10600",
+      "Name": "Elemental Adroitness",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Straighten a target Ring. Before this phase ends, put this Strategy into your hand.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10600.jpg",
+      "Keywords": [
+        "Unique"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "pe-elemental-adroitness-straighten"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

@@ -3376,6 +3376,7 @@ public sealed partial class MatchEngine
         // "until the phase ends" holds (issue #453 batch 5, Ronin Ambushers): the whole Attack-declaration-through-battle stretch is one phase (the War Weariness convention above).
         if (PhaseFamily(phase) != PhaseFamily(_state.Phase)) AdvanceStraightenHolds(StraightenPoint.PhaseEnds);
         ResolveShadowsEmbraceBatch1PhaseEnd(phase); // The Shadow's Embrace pass (issue #476), batch 1: Bayushi Misaki's "before this phase ends".
+        PromoPhaseEnds(phase); // Promotional-Emperor pass (issue #653, PromoEmperorFate.cs): Elemental Adroitness's "before this phase ends, put this Strategy into your hand".
         if (phase == Phase.Dynasty) DragonsBreathHonor();
         // Sentinel Spirit (issue #453, batch 2): "after the next Dynasty Phase begins".
         if (phase == Phase.Dynasty) ResolveSentinelWatches();
