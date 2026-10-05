@@ -43,6 +43,34 @@ public partial class Main
 
     private bool PlayShowcaseBusy => _playQueue.Count > 0 || _playCurrent is not null && IsInstanceValid(_playCurrent);
 
+    // Issue #660, "Paused Animation": with the preference On a played card is shown fully and stays until the player presses Proceed (button, Enter or
+    // Esc). Only the local player's input is held (_playHeld gates card selection, actions and submits); the engine, a practice opponent (it already
+    // waits on PlayShowcaseBusy) and an online opponent carry on, and further beats queue up and are held one at a time. With the preference Off nothing
+    // below runs and the timing is the original one.
+    private bool _playHeld;
+    private Action? _playProceed;
+    private Button? _proceedButton;
+    private bool _proceedHintShown;
+
+    private void SetPlayHeld(bool held)
+    {
+        if (_playHeld == held) return;
+        _playHeld = held;
+        // Actions/buttons are read from the engine view: draw them again (deferred, as this can be reached from inside Render).
+        Callable.From(() => { if (_session.Snapshot is not null && IsInstanceValid(this)) Render(); }).CallDeferred();
+    }
+
+    /// <summary>Dismisses the card being held (Proceed, Enter or Esc). Idempotent: key auto-repeat or a double click only proceeds once.</summary>
+    private bool ProceedCardPlay()
+    {
+        var proceed = _playProceed;
+        if (proceed is null) return false;
+        _playProceed = null;
+        if (_playQueue.Count == 0) SetPlayHeld(false);
+        proceed();
+        return true;
+    }
+
     private void ObserveCardPlays()
     {
         _showcasedPlays.Clear();
@@ -76,17 +104,20 @@ public partial class Main
         _playQueue.Clear();
         if (_playCurrent is not null && IsInstanceValid(_playCurrent)) _playCurrent.QueueFree();
         _playCurrent = null; _playsMatchKey = null; _playsSeen = -1;
+        _playProceed = null; _proceedButton = null; _proceedHintShown = false; SetPlayHeld(false);
     }
 
     private void StartNextCardPlay()
     {
-        _playCurrent = null;
-        if (_playQueue.Count == 0) return;
+        _playCurrent = null; _playProceed = null;
+        if (_playQueue.Count == 0) { SetPlayHeld(false); return; }
         var beat = _playQueue.Dequeue();
+        var paused = _preferences.PausedAnimation;
+        if (paused) { SetPlayHeld(true); ReleaseTableFocus(); HideTableTooltip(); }
         var height = CardPlayTiming.CardHeight; var width = height * .72f;
         var stage = new Control { MouseFilter = Control.MouseFilterEnum.Ignore, ZIndex = 60, Modulate = new Color(1, 1, 1, 0) };
         _root.AddChild(stage);
-        stage.Size = new Vector2(620, height + 120); stage.Position = CardPlayTiming.Center - new Vector2(stage.Size.X / 2, height / 2);
+        stage.Size = new Vector2(620, height + (paused ? 150 : 120)); stage.Position = CardPlayTiming.Center - new Vector2(stage.Size.X / 2, height / 2 + (paused ? 100 : 0)); // paused: up, so Proceed clears the hand
         var face = CardPreview.Face(beat.Card, height, width);
         face.MouseFilter = Control.MouseFilterEnum.Ignore;
         face.Size = new Vector2(width, height); face.Position = new Vector2((stage.Size.X - width) / 2, 0);
@@ -95,16 +126,25 @@ public partial class Main
         var caption = Palette.Text(beat.Caption, 17, Palette.Gold);
         caption.HorizontalAlignment = HorizontalAlignment.Center; caption.AutowrapMode = TextServer.AutowrapMode.WordSmart;
         caption.MouseFilter = Control.MouseFilterEnum.Ignore;
-        caption.Position = new Vector2(10, height + 14); caption.Size = new Vector2(stage.Size.X - 20, 90);
+        caption.Position = new Vector2(10, height + 14); caption.Size = new Vector2(stage.Size.X - 20, paused ? 60 : 90);
         stage.AddChild(caption);
         _playCurrent = stage;
 
-        var waiting = _playQueue.Count > 0;
+        var waiting = _playQueue.Count > 0 && !paused;
         var hold = (beat.Discarded ? CardPlayTiming.Hold : CardPlayTiming.BoardHold) * (waiting ? CardPlayTiming.QueuedHoldScale : 1);
         var tween = stage.CreateTween();
         if (_reducedMotion)
         {
             tween.TweenProperty(stage, "modulate:a", 1.0, .15);
+            if (paused)
+            {
+                tween.TweenCallback(Callable.From(() => HoldCardPlay(stage, height, () =>
+                {
+                    if (!IsInstanceValid(stage)) return;
+                    var fade = stage.CreateTween(); fade.TweenProperty(stage, "modulate:a", 0.0, .15); fade.TweenCallback(Callable.From(() => FinishCardPlay(stage)));
+                })));
+                return;
+            }
             tween.TweenInterval(Math.Max(.2, CardPlayTiming.ReducedHold * (waiting ? CardPlayTiming.QueuedHoldScale : 1) - .3));
             tween.TweenProperty(stage, "modulate:a", 0.0, .15);
         }
@@ -115,12 +155,37 @@ public partial class Main
             tween.TweenProperty(stage, "modulate:a", 1.0, CardPlayTiming.Intro);
             tween.TweenProperty(face, "scale", Vector2.One, CardPlayTiming.Intro).SetTrans(Tween.TransitionType.Cubic).SetEase(Tween.EaseType.Out);
             tween.SetParallel(false);
-            tween.TweenInterval(hold);
             // The outro is built when the hold ends so the pile's final position is read then, not when the card arrived.
-            tween.TweenCallback(Callable.From(() => PlayCardOutro(stage, face, caption, beat)));
+            if (paused) tween.TweenCallback(Callable.From(() => HoldCardPlay(stage, height, () => PlayCardOutro(stage, face, caption, beat))));
+            else { tween.TweenInterval(hold); tween.TweenCallback(Callable.From(() => PlayCardOutro(stage, face, caption, beat))); }
             return;
         }
         tween.TweenCallback(Callable.From(() => FinishCardPlay(stage)));
+    }
+
+    /// <summary>The card is fully shown: float a Proceed button beneath it and wait. Enter reaches the button through ordinary GUI focus.</summary>
+    private void HoldCardPlay(Control stage, float height, Action then)
+    {
+        if (!IsInstanceValid(stage) || _playCurrent != stage) return;
+        var proceed = Palette.Button("Proceed", () => ProceedCardPlay(), true);
+        _proceedButton = proceed; proceed.Name = "ProceedButton"; proceed.FocusMode = Control.FocusModeEnum.All; proceed.MouseFilter = Control.MouseFilterEnum.Stop;
+        proceed.AddThemeFontSizeOverride("font_size", 22);
+        proceed.Size = new Vector2(200, 46); proceed.Position = new Vector2((stage.Size.X - proceed.Size.X) / 2, height + 70);
+        stage.AddChild(proceed);
+        var hint = Palette.Text("Paused Animation is On. You can turn it off in Settings.", 15, Palette.PaperDim);
+        hint.Name = "ProceedHint"; hint.HorizontalAlignment = HorizontalAlignment.Center; hint.MouseFilter = Control.MouseFilterEnum.Ignore; hint.Visible = false;
+        hint.Position = new Vector2(10, height + 120); hint.Size = new Vector2(stage.Size.X - 20, 28);
+        stage.AddChild(hint);
+        // The first time the pointer reaches Proceed in a match, say where the setting lives. It never blocks the click.
+        proceed.MouseEntered += () =>
+        {
+            if (_proceedHintShown) return;
+            _proceedHintShown = true; hint.Visible = true;
+            SetNotice("Paused Animation is On. You can turn it off in Settings.");
+        };
+        _playProceed = () => { proceed.Hide(); hint.Hide(); then(); };
+        ReleaseTableFocus();
+        Callable.From(() => { if (IsInstanceValid(proceed) && proceed.IsInsideTree()) proceed.GrabFocus(); }).CallDeferred();
     }
 
     private void PlayCardOutro(Control stage, Control face, Control caption, PlayBeat beat)

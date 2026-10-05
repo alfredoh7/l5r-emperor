@@ -10,7 +10,7 @@ public partial class Main
     private long _eventSelectionVersion = -1;
     private bool EventDecisionActive => View.WinnerId is null && (View.PendingChoice?.Type is "harshChoices" or "overconfidentDraw" or "brashDraw" || View.PendingChoice is { Type: "forcedDiscard", CardId: null } discard && discard.Prompt.StartsWith("Times of Strife:", StringComparison.Ordinal));
     private bool OwnEventDecision => EventDecisionActive && View.PendingChoice!.PlayerId == View.ViewerId && View.PriorityPlayerId == View.ViewerId;
-    private bool CanCommitEvent => _session.Snapshot is not null && !_session.Busy && !PresentationBusy && (!_session.Online || _session.Connected && !(_session.Snapshot?.PlayersConnected?.Any(p => !p) ?? false));
+    private bool CanCommitEvent => _session.Snapshot is not null && !_session.Busy && !PresentationBusy && !_playHeld && (!_session.Online || _session.Connected && !(_session.Snapshot?.PlayersConnected?.Any(p => !p) ?? false));
     private ActionOption? SelectedEventDiscard => OwnEventDecision ? Actions.FirstOrDefault(a => a.Enabled && a.Type == "forcedDiscard" && a.Command?.TargetId == _eventDiscardId) : null;
     private void BuildEventDecisions()
     {

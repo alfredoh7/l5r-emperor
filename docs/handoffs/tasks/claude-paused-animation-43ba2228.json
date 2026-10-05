@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Paused Animation setting (default Off, saved per profile): when On, a card an opponent plays stays fully displayed with a floating Proceed button; Proceed/Enter/Esc completes the animation and the local player's input (actions, card selection, submits, decision panels) is held until then. First hover of Proceed per match reminds the player it can be turned off in Settings. Queued plays are held one at a time; the practice bot already waits on the showcase. Shared change: client-only presentation gating (Main.Decisions/EventDecisions DecisionCanSubmit/CanCommitEvent now also respect the hold); no engine, rules or network change. Duel-screen reveals are NOT changed.",
+  "validation": "dotnet build 0 errors; tools/check-paused-animation-ui.sh normal 1920x1080 and reduced 1280x800 PASS (Off timing, hold, blocked input, Enter/click/Esc, queued beats, reminder once per match and re-armed per match, clear on leave); tools/check-main-menu.sh PASS incl. new Paused Animation persistence asserts; check-action-lock-ui and check-shown-cards normal PASS; tools/content unittest 150 OK. Screenshots of held card and 1280x800 options page inspected by the agent, not by a person.",
+  "remaining": "Duel-screen reveal hold not implemented. Human visual/playtest acceptance of the Proceed button placement pending.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/660",
+  "branch": "claude/paused-animation",
+  "updated": "2026-10-05T22:40:52.372414+00:00"
+}
