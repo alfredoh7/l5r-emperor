@@ -32,6 +32,9 @@ public static partial class TrainingOpponent
         if (intent.IsReaction)
         {
             if (intent.Negates) return 1500;
+            // Issue #644: a Reaction a Personality (or item) prints for its own entry -- Togashi Meiyu's and Torazu's Fire tokens, Satoshi's Dual Warfans' draw -- is
+            // never a gamble: the bot always takes it, unless it would only cost the bot Honor.
+            if (id is not null && AbilityCatalog.All.TryGetValue(id, out var printed) && printed.Trigger == "own-enters-play" && !intent.HonorLoss) return 160 + RankBonus(intent.Rank);
             var roll = BotContext.Roll(x.View.Version, id, command.CardId);
             var weight = 0.3 + 0.15 * (int)intent.Rank;
             return roll < weight ? 150 + RankBonus(intent.Rank) : 50;

@@ -108,7 +108,7 @@ public sealed partial class MatchEngine
         // clearing PendingChoice), so Proclaim can still follow, in either order, until passed.
         Require(command.Type is "proclaim" or "useAbility" or "declineReaction" or "pass", "Resolve the Proclaim reaction window first.");
         if (command.Type == "proclaim") Proclaim(command);
-        else if (command.Type == "useAbility") { ApplyPendingEntryEffects(); UseAbility(command); }
+        else if (command.Type == "useAbility") { ApplyPendingEntryEffects(); UseAbility(command); CloseEntryWindowIfSpent(); }
         else PassReaction();
         return true;
     }
@@ -146,7 +146,7 @@ public sealed partial class MatchEngine
         // Same window as "proclaim" above, but for a card that has its own entering-play
         // Reaction and was not itself Proclaim-eligible (e.g. bought with Clan Discount).
         Require(command.Type is "useAbility" or "declineReaction" or "pass", "Resolve the entry reaction window first.");
-        if (command.Type == "useAbility") UseAbility(command); else PassReaction();
+        if (command.Type == "useAbility") { UseAbility(command); CloseEntryWindowIfSpent(); } else PassReaction(); // issue #644: a used Reaction leaves nothing to pass
         FinishPendingAttachTracking(); // Hida Takeuchi (issue #477 batch 2): the Equip whose attached Follower opened this window is now finished.
         ContinueRegret(); // Regret (RegretEmbracingVirtue.cs): the next card begins once this one's entry window has closed.
         return true;

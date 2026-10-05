@@ -5,7 +5,7 @@
     <Nullable>enable</Nullable>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
-  <ItemGroup><InternalsVisibleTo Include="L5R.Core.Tests" /><InternalsVisibleTo Include="L5R.Nightly.Tests" /></ItemGroup>
+  <ItemGroup><InternalsVisibleTo Include="L5R.Core.Tests" /><InternalsVisibleTo Include="L5R.Nightly.Tests" /><InternalsVisibleTo Include="L5R.AI.Tests" /></ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="../../content/deck-pool.json" LogicalName="L5R.DeckPool.json" />
     <EmbeddedResource Include="../../content/published/lion-crane-v1.json" LogicalName="L5R.Published.json" />

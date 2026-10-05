@@ -3804,8 +3804,6 @@ static void OverconfidentPrimitive()
         var opponentHonorBefore = e.State.Players[1].Honor;
         Accept(e, new GameCommand("useAbility", 0, e.Version, CardId: cardId, AbilityId: "mugoshi-slander", TargetPlayerId: 1));
         Equal(e.State.Players[1].Honor, opponentHonorBefore - 1, "Slandered player loses 1 Honor");
-        Accept(e, new GameCommand("declineReaction", 1, e.Version));
-        Accept(e, new GameCommand("declineReaction", 0, e.Version));
         Equal(e.State.PendingChoice?.Type, "overconfidentDraw", "Chains into the Overconfident offer once the entry-reaction window itself closes");
         Equal(e.State.PendingChoice?.PlayerId, 1);
         Accept(e, new GameCommand("overconfidentDraw", 1, e.Version, Choice: "decline"));
@@ -5072,7 +5070,6 @@ static void KeywordMechanics()
         var e2 = MatchEngine.FromTestState(s2);
         Accept(e2, Cmd(e2, "equip", id: invest2.Id, sources: e2.PaymentOptions(0, 2).First().SourceIds, target: host2.Id));
         Accept(e2, new GameCommand("declineReaction", 0, e2.Version));
-        Accept(e2, new GameCommand("declineReaction", 1, e2.Version));
         Equal(e2.State.Cards[invest2.Id].Tokens.Count, 0, "Declined -- no Invest tokens");
     }
 }
@@ -7409,9 +7406,7 @@ static void GeneralizedEntryReactionWindow()
         Equal(e.State.PriorityPlayerId, 0, "Priority has not yet ceded -- the window is still open");
         Accept(e, new GameCommand("useAbility", 0, e.Version, CardId: item.Id, AbilityId: "training-item-entry-reaction"));
         Equal(e.State.Players[0].Honor, honorBefore + 1);
-        Accept(e, new GameCommand("declineReaction", 1, e.Version));
-        Accept(e, new GameCommand("declineReaction", 0, e.Version));
-        Check(e.State.PendingChoice is null);
+        Check(e.State.PendingChoice is null, "issue #644: the used Reaction left nothing to pass, so the window closed");
         Equal(e.State.PriorityPlayerId, 1, "Once closed, priority correctly cedes to the opponent, unlike Purchase's own-turn windows");
     }
     {
@@ -7439,8 +7434,7 @@ static void GeneralizedEntryReactionWindow()
         Equal(e.State.PendingChoice?.Type, "entryReaction");
         Accept(e, new GameCommand("useAbility", 1, e.Version, CardId: terrain.Id, AbilityId: "training-terrain-entry-reaction"));
         Equal(e.State.Players[1].Honor, honorBefore + 1);
-        Accept(e, new GameCommand("declineReaction", 0, e.Version));
-        Accept(e, new GameCommand("declineReaction", 1, e.Version));
+        Check(e.State.PendingChoice is null, "issue #644: nothing is left to react with, so the window closed");
         Equal(e.State.PriorityPlayerId, 0, "Priority cedes to the opponent (player 0) once the window closes");
     }
 }
@@ -8395,11 +8389,10 @@ static void PlayerTargetingPrimitive()
         var opponentHonorBefore = e.State.Players[1].Honor;
         Accept(e, new GameCommand("useAbility", 0, e.Version, CardId: cardId, AbilityId: "training-choose-player-lose", TargetPlayerId: 1));
         Equal(e.State.Players[1].Honor, opponentHonorBefore - 1, "The chosen (opponent) player loses 1 Honor");
-        Accept(e, new GameCommand("declineReaction", 1, e.Version)); // 1st pass -- priority returns to the controller
+        Check(e.State.PendingChoice is null, "issue #644: the window closed: the paired half is spent too"); // formerly two passes
         // Shared UsageKey: the paired "gain" half is now blocked, once per turn -- same stamp,
         // not a separate one per catalog entry.
         Reject(e, new GameCommand("useAbility", 0, e.Version, CardId: cardId, AbilityId: "training-choose-player-gain", TargetPlayerId: 1));
-        Accept(e, new GameCommand("declineReaction", 0, e.Version)); // 2nd pass -- closes
         Check(e.State.PendingChoice is null);
     }
     {
@@ -8470,8 +8463,7 @@ static void PlayerTargetingPrimitive()
         var opponentHonorBefore = e.State.Players[1].Honor;
         Accept(e, new GameCommand("useAbility", 0, e.Version, CardId: cardId, AbilityId: "horume-lose", TargetPlayerId: 1));
         Equal(e.State.Players[1].Honor, opponentHonorBefore - 1, "Horume's controller chooses the opponent to lose 1 Honor");
-        Accept(e, new GameCommand("declineReaction", 1, e.Version));
-        Accept(e, new GameCommand("declineReaction", 0, e.Version));
+        Check(e.State.PendingChoice is null, "issue #644: Horume's reaction is spent (gain or lose), so the window closed");
 
         var s2 = MatchEngine.CreateEconomyScenario().State; s2.Players[0].Honor = 10;
         for (var i = 0; i < 8; i++) Add(s2, "training-marketplace", 0, Zone.Home);

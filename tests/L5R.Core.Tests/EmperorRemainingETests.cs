@@ -598,7 +598,7 @@ internal static class EmperorRemainingETests
         Eq(e5.State.PendingChoice?.Type, "entryReaction", "its entering-play Reaction window opened");
         Eq(e5.State.PendingChoice?.CardId, meiyu.Id, "for the Personality that entered");
         Eq(Honor(e5, 0), honor5 - 2, "the Honor was already lost");
-        Accept(e5, new GameCommand("pass", 0, e5.Version)); Accept(e5, new GameCommand("pass", 1, e5.Version));
+        Accept(e5, new GameCommand("pass", 0, e5.Version)); // the opponent has no Reaction to take, so this pass closes the window (issue #644)
         Check(e5.State.PendingChoice is null, "the window closed");
         Eq(e5.State.PriorityPlayerId, 1, "and the Limited action passed priority on");
         // Only your own Human.
