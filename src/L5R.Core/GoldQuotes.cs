@@ -545,6 +545,8 @@ public sealed partial class MatchEngine
         if (RoninEntryDiscount(card, playerId) is > 0 and var roninDiscount) { raw -= roninDiscount; basis += $" − {roninDiscount} (Palace of the Breaking Dawn)"; }
         // Daigotsu Misaki (Emperor Edition Personality pass, issue #477): "Followers attaching to Misaki enter play paying 2 less Gold" -- any attach, from a hand or a discard pile.
         if (FollowerAttachDiscount(card, target) is > 0 and var misakiDiscount) { raw -= misakiDiscount; kind = GoldCostKind.Derived; basis += $" − {misakiDiscount} ({Definition(target).Name})"; }
+        // Promotional-Celestial group C (PromoCelestialC.cs): Fudo Cultist "ignoring Gold cost" on a Nonhuman Fudo Personality; Yotsu Ueda's Chosen "paying 2 less Gold" on Yotsu Ueda.
+        if (PromoCelestialCAttachDiscount(card, target, raw) is { Amount: > 0 } promoC) { raw -= promoC.Amount; kind = GoldCostKind.Derived; basis += promoC.Basis; }
         if (raw < 0) basis += " (min 0)";
         return (Math.Max(0, raw), basis, kind);
     }

@@ -4191,6 +4191,7 @@ public sealed partial class MatchEngine
         or "serenity-air-straighten" or "serenity-air-straighten-open"
         or IvoryPoliticalAbilities.SandayuStraighten or IvoryPoliticalAbilities.LordsFavorStraighten // Ivory pass (issue #622)
         or "hama-straighten" // Emperor Edition Personality pass (issue #477), batch 3
+        or PromoCelestialCAbilities.YotsuStraighten // Promotional-Celestial group C (PromoCelestialC.cs)
         or "yorisada-straighten" // Emperor Edition Personality pass (issue #477), batch 5
         or TfStrategiesAAbilities.OutpostOpen or TfStrategiesAAbilities.OutpostBattle; // Ivory Magistrate Outpost (issue #622)
     private static string? MoveOrStraightenKind(string abilityId) => abilityId switch
@@ -4260,6 +4261,7 @@ public sealed partial class MatchEngine
         "lesson-of-earth-move" or "paralyzing-touch-move" => "move",
         "serenity-air-straighten" or "serenity-air-straighten-open" => "straighten",
         "hama-straighten" => "straighten", // Emperor Edition Personality pass (issue #477), batch 3
+        PromoCelestialCAbilities.YotsuStraighten => "straighten", // Promotional-Celestial group C (PromoCelestialC.cs)
         // Emperor Edition remaining-cards pass (issue #492), group D: The Law's Strength, The Power of a Word and The Serpent's Deception move their target home; The Slow Death and Well Prepared straighten theirs.
         "laws-strength-move" or "power-word-move" or "serpents-deception-move" => "move",
         "slow-death-straighten" or "well-prepared-straighten" => "straighten",

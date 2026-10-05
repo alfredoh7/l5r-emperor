@@ -277,6 +277,7 @@ public sealed partial class MatchEngine
                 case CostVerbs.DestroyRegion: DestroyRegion(subject); break;
                 case CostVerbs.RemoveUnit: RemoveUnitFromGame(subject); break;
                 case CostVerbs.DiscardFromPlay:
+                    PromoCelestialCRegionLeft(subject); // a Region discarded from play leaves its province (PromoCelestialC.cs)
                     subject.Zone = IsDynastyCardType(Definition(subject).Type) ? Zone.DynastyDiscard : Zone.FateDiscard;
                     subject.ProvinceIndex = null; subject.FaceUp = true;
                     Emit("discardedFromPlay", $"{Definition(subject).Name} was discarded.", subject.OwnerId, subject.Id);
