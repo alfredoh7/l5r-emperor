@@ -95,13 +95,13 @@ public sealed partial class MatchEngine
         switch (id)
         {
             case PromoCelestialBAbilities.BraveNewWorldMove:
-            {
-                var mover = Card(command.PerformerId!);
-                var wasThere = AtBattle(mover);
-                ExecuteMove(command, ability, source, target);
-                if (!wasThere && AtBattle(mover)) StraightenUnit(mover);
-                return false;
-            }
+                {
+                    var mover = Card(command.PerformerId!);
+                    var wasThere = AtBattle(mover);
+                    ExecuteMove(command, ability, source, target);
+                    if (!wasThere && AtBattle(mover)) StraightenUnit(mover);
+                    return false;
+                }
             case PromoCelestialBAbilities.EconomicManipulationDestroy:
                 DestroyTargetCard(target!, player.Id);
                 return false;
@@ -118,14 +118,14 @@ public sealed partial class MatchEngine
                 GiveKeywordPermanently(Card(command.PerformerId!), "Tactician", source!.Id);
                 return false;
             case PromoCelestialBAbilities.FukurokujinMoveHome:
-            {
-                var performers = PerformingSlotCards(command, ability).ToArray();
-                var before = performers.ToDictionary(c => c.Id, c => c.Zone);
-                ExecuteMove(command, ability, source, target);
-                foreach (var performer in performers)
-                    if (before[performer.Id] != performer.Zone) StraightenUnit(performer);
-                return false;
-            }
+                {
+                    var performers = PerformingSlotCards(command, ability).ToArray();
+                    var before = performers.ToDictionary(c => c.Id, c => c.Zone);
+                    ExecuteMove(command, ability, source, target);
+                    foreach (var performer in performers)
+                        if (before[performer.Id] != performer.Zone) StraightenUnit(performer);
+                    return false;
+                }
             default:
                 return null;
         }

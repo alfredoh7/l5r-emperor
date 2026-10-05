@@ -94,7 +94,10 @@ internal static class PromoCelestialCTests
         // The manifests pin exactly these cards, and the sources name the reviewed printings.
         var waves = new Dictionary<string, string[]>
         {
-            ["holding-wave-9301"] = [Tanuki, Officer, Treasury], ["region-wave-9302"] = [Deadlands, IvoryCoast, WarRavaged], ["follower-wave-9303"] = [FudoCultist, YotsuChosen], ["personality-wave-9304"] = [FreshRecruit],
+            ["holding-wave-9301"] = [Tanuki, Officer, Treasury],
+            ["region-wave-9302"] = [Deadlands, IvoryCoast, WarRavaged],
+            ["follower-wave-9303"] = [FudoCultist, YotsuChosen],
+            ["personality-wave-9304"] = [FreshRecruit],
         };
         foreach (var (wave, ids) in waves)
         {
