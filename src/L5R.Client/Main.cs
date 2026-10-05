@@ -55,7 +55,7 @@ public partial class Main : Node
     private string DecksDirectory => ProjectSettings.GlobalizePath("user://Decks");
     private static readonly JsonSerializerOptions Json = new(JsonSerializerDefaults.Web) { WriteIndented = true };
     private MatchView View => _battlefieldReviewView ?? _provinceReviewView ?? (_presentationSnapshot ?? _session.Snapshot)!.View;
-    private ActionOption[] Actions => PresentationBusy || _battlefieldReviewView is not null || _provinceReviewView is not null || View.PendingProvinceOrder is not null ? [] : ReadableActions(_session.Snapshot!.Actions);
+    private ActionOption[] Actions => PresentationBusy || _playHeld || _battlefieldReviewView is not null || _provinceReviewView is not null || View.PendingProvinceOrder is not null ? [] : ReadableActions(_session.Snapshot!.Actions);
     private PlayerView Self => View.Players.Single(p => p.Id == View.ViewerId);
 
     public override void _Ready()
@@ -171,6 +171,7 @@ public partial class Main : Node
         if (_capturePath is not null && _captureMode.StartsWith("published-decisions", StringComparison.Ordinal)) { ProcessDecisionCapture(delta); return; }
         if (_capturePath is not null && _captureMode.StartsWith("published-shown", StringComparison.Ordinal)) { ProcessShownCapture(delta); return; }
         if (_capturePath is not null && _captureMode.StartsWith("published-action-lock", StringComparison.Ordinal)) { ProcessActionLockCapture(delta); return; }
+        if (_capturePath is not null && _captureMode.StartsWith("published-paused-animation", StringComparison.Ordinal)) { ProcessPausedAnimationCapture(delta); return; }
         if (_capturePath is not null && _captureMode.StartsWith("published-search", StringComparison.Ordinal)) { ProcessSearchCapture(delta); return; }
         if (_capturePath is not null && _captureMode.StartsWith("published-created-copy", StringComparison.Ordinal)) { ProcessCreatedCopyCapture(delta); return; }
         if (_capturePath is not null && _captureMode.StartsWith("published-battle-sequence", StringComparison.Ordinal)) { ProcessBattleSequenceCapture(delta); return; }
@@ -475,6 +476,7 @@ public partial class Main : Node
             GetViewport().SetInputAsHandled();
         }
         else if (MenuVisible || DuelDemoOpen || PracticeVisible || _transitionReview || MatchDuelOpen) return;
+        else if (key.Keycode == Key.Escape && _playProceed is not null) { ProceedCardPlay(); GetViewport().SetInputAsHandled(); }
         else if (key.Keycode == Key.Escape && _shownPreview is not null) { HideShownPreview(); GetViewport().SetInputAsHandled(); }
         else if (key.Keycode == Key.Escape && _shownOpen) { ToggleShownCards(false); GetViewport().SetInputAsHandled(); }
         else if (key.Keycode == Key.Escape && _battleSequenceOpen)
@@ -534,6 +536,7 @@ public partial class Main : Node
         if (View.Scenario is PublishedContent.Scenario or CustomPractice.Scenario) _status.Text += $"  ·  Favor: {(View.FavorPlayerId is int favor ? View.Players[favor].Clan : "unclaimed")}";
         if (_session.Online && _session.Snapshot.PlayersConnected is { } connected && connected.Any(p => !p)) _status.Text = $"Room {_session.Snapshot.RoomCode} · waiting for both players to connect";
         ObserveCopyResults();
+        FrameDynasty(); // before the End Dynasty button is built
         RenderTimeline(); RenderBoard(); RenderInspector(); RenderPhaseActions(); Highlight(); FrameNewBattle(); FrameReactionTarget();
         RenderBattleFeedback();
         ObserveShownCards();
@@ -576,7 +579,7 @@ public partial class Main : Node
     private void SelectCard(CardView card)
     {
         if (_shownOpen) ToggleShownCards(false);
-        if (_session.Busy || PresentationBusy) return;
+        if (_session.Busy || PresentationBusy || _playHeld) return;
         if (SelectEventCard(card) || SelectPendingCandidate(card)) return;
         if (SelectMultiCard(card)) return;
         if (AttackTargetActive && card.Zone is Zone.Province or Zone.Region && card.ProvinceIndex is { } attackProvince)
@@ -670,7 +673,7 @@ public partial class Main : Node
     private void Choose(ActionOption option, bool keepTarget = false)
     {
         if (_shownOpen) ToggleShownCards(false);
-        if (!option.Enabled || _session.Busy || PresentationBusy) return;
+        if (!option.Enabled || _session.Busy || PresentationBusy || _playHeld) return;
         if (!keepTarget && NeedsTargetPick(option)) option = option with { Command = option.Command! with { TargetId = null } };
         ResetDecisionSelection();
         if (option.Movement is not null && option.Command is { } moveCommand) option = option with { Command = moveCommand with { Province = null } };
@@ -689,7 +692,7 @@ public partial class Main : Node
     private async Task Submit(GameCommand command)
     {
         if (_provinceReviewView is not null || _battlefieldReviewView is not null) { SetNotice("Presentation preview · game actions are disabled."); return; }
-        if (PresentationBusy) return;
+        if (PresentationBusy || _playHeld) return;
         if (_session.Online && (_session.Snapshot?.PlayersConnected?.Any(p => !p) ?? false))
         {
             SetNotice("Both players need to be connected before continuing."); return;

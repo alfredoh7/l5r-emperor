@@ -203,6 +203,11 @@ public partial class Main
             _decisionActions.AddChild(button); _decisionActions.MoveChild(button, 1);
         }
     }
+    // Client-only guard (Core, the AI and probes that Submit directly are unaffected): ending the Dynasty Phase with nothing bought, overlaid or discarded.
+    // A discard moves the match to DynastyDiscard, so only the Dynasty step can still be an empty one.
+    private bool NeedsEndDynastyConfirmation() =>
+        View.Phase == Phase.Dynasty && Self is { DynastyActionTaken: false };
+
     private void ConfirmDiscardProvince(ActionOption option) =>
         Confirm("Discard this province card?", "Discarding starts the Dynasty discard step. You cannot recruit more cards this phase.", () => _ = Submit(option.Command!));
 
@@ -469,6 +474,8 @@ public partial class Main
             if (option.Type == "useAbility" && View.PendingChoice?.Type is "bowReaction" or "beforeActionReaction" && option.TargetIds is { Length: 0 } && option.Command is { } reaction && QuoteFor(option) is null) _ = Submit(reaction);
             else if (option.Type is "purchase" or "recruitReserve" or "equip" or "playStrategy" or "attack" or "assignDefense" or "discardHand" or "useAbility" or "chooseOpponentPayment") Choose(option);
             else if (option.Type == "discardProvince") ConfirmDiscardProvince(option);
+            else if (option.Type == "endDynasty" && option.Command is { } endCommand && NeedsEndDynastyConfirmation())
+                Confirm("End your Dynasty phase?", "You have not bought or discarded anything from your provinces this turn. End your Dynasty phase anyway?", () => _ = Submit(endCommand));
             else if (option.Command is { } command) _ = Submit(command);
         }, option.Type is "pass" or "endDynasty" or "declineReaction");
         button.Disabled = !option.Enabled || _session.Busy || _session.Online && !_session.Connected;

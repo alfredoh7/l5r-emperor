@@ -106,6 +106,10 @@ public partial class Main
         {
             var seat = _captureMode.Contains("opponent") ? 1 : 0;
             var crowded = _captureMode.Contains("crowded"); _reducedMotion = !_captureMode.Contains("motion");
+            if (_captureMode.Contains("dynasty-flow"))
+            {
+                await CheckDynastyFlow(); GD.Print("REGIONS_CELESTIALS_PASS: " + _captureMode); GetTree().Quit(); return;
+            }
             if (_captureMode.Contains("reaction"))
             {
                 await CheckSupportReaction(); GD.Print("REGIONS_CELESTIALS_PASS: " + _captureMode); GetTree().Quit(); return;
@@ -201,7 +205,7 @@ public partial class Main
     }
     private async Task CheckSupportLifecycle()
     {
-        var state = SupportFixture().State; state.Phase = Phase.Dynasty;
+        var state = SupportFixture().State; state.Phase = Phase.Dynasty; state.Players[0].DynastyActionTaken = true; // the probe clicks End Dynasty directly; the confirmation has its own probe (dynasty-flow)
         var oldCelestial = state.Cards.Values.Single(c => c.OwnerId == 1 && c.Zone == Zone.Celestial).Id;
         var incomingRegion = SupportFixtureCard(state, 4777, 1, Zone.Province, 0);
         var incomingCelestial = SupportFixtureCard(state, 4658, 1, Zone.Province, 3);

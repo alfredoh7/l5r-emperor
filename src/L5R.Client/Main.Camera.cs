@@ -114,6 +114,21 @@ public partial class Main
         _cameraCenter = from; _cameraZoom = zoom; ApplyTableCamera();
     }
 
+    // Entering the Dynasty Phase (after Battle, every turn): snap the table back to the fitted view once, before the player is shown End Dynasty.
+    // Keyed per match/turn/seat so it never fights the player's own pan/zoom later in the phase; it waits out a battle presentation (which hides the
+    // footer and re-frames afterwards) and never disturbs a capture.
+    private (string Match, int Viewer, int Turn, int Owner)? _framedDynasty;
+    private void FrameDynasty()
+    {
+        if (_capturePath is not null && !_captureMode.Contains("dynasty-flow", StringComparison.Ordinal) || _session.Snapshot is null) return;
+        if (View.Phase != L5R.Core.Phase.Dynasty) { _framedDynasty = null; return; }
+        if (PresentationBusy || View.ActivePlayerId != View.ViewerId) return;
+        var key = (_session.MatchKey, View.ViewerId, View.TurnNumber, View.ActivePlayerId);
+        if (_framedDynasty == key) return;
+        _framedDynasty = key;
+        ResetTableCamera(); // an instant snap, so reduced motion needs no special case
+    }
+
     private void ResetTableCamera()
     {
         _cameraGlide = false; _cameraFitted = true; _cameraDragging = false;
@@ -166,6 +181,7 @@ public partial class Main
         foreach (var child in _root.GetChildren())
             if (child is Control review && review.Name.ToString().EndsWith("ReviewControls", StringComparison.Ordinal) && review.IsVisibleInTree() && review.GetGlobalRect().HasPoint(viewportPoint)) return false;
         if (_eventHandBar is { Visible: true } && _eventHandBar.GetGlobalRect().HasPoint(viewportPoint)) return false;
+        if (_proceedButton is { } proceed && IsInstanceValid(proceed) && proceed.Visible && proceed.GetGlobalRect().HasPoint(viewportPoint)) return false; // Issue #660: Proceed floats over the table
         if (_shownPreview is { } preview && IsInstanceValid(preview) && preview.GetGlobalRect().HasPoint(viewportPoint)) return false;
         // The Fallen strips can overlap the projection. Check only the visible
         // placards, not their full-screen parent, before forwarding root input.

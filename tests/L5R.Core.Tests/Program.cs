@@ -44,6 +44,7 @@ var tests = new (string Name, Action Run)[]
     ("Declining Proclaim keeps its once-per-turn use available", Decline),
     ("New Holding enters bowed and province refills face down immediately", HoldingAndRefill),
     ("Province discarding prevents returning to purchases", DynastyDiscard),
+    ("DynastyActionTaken (issue #659): false when a Dynasty Phase begins, true after a purchase or a province discard, visible in both seats' views, and reset when the next Dynasty Phase begins", DynastyActionFlag),
     ("Action phase needs consecutive passes and defender starts battle", Priority),
     ("Bamboo fixture waits until owner's second turn to straighten", Bamboo),
     ("Turn start passes through Straighten then Events before Action", StraightenAndEventsPhaseOrder),
@@ -434,6 +435,22 @@ static void DynastyDiscard()
     var e = MatchEngine.CreateEconomyScenario(); Accept(e, Cmd(e, "discardProvince", id: ProvinceCard(e, 2)));
     Equal(e.State.Phase, Phase.DynastyDiscard); Reject(e, Cmd(e, "purchase", id: ProvinceCard(e), sources: Sources(e)));
     Reject(e, Cmd(e, "discardProvince", id: ProvinceCard(e, 2)));
+}
+static void DynastyActionFlag()
+{
+    var e = MatchEngine.CreateEconomyScenario();
+    Check(!e.State.Players[0].DynastyActionTaken && !e.GetView(0).Players[0].DynastyActionTaken, "nothing bought or discarded at the start of the Dynasty Phase");
+    var id = ProvinceCard(e, 2);
+    Accept(e, Cmd(e, "purchase", id: id, sources: e.QuotePurchase(0, id).Payments[0].SourceIds));
+    Check(e.GetView(0).Players[0].DynastyActionTaken && e.GetView(1).Players[0].DynastyActionTaken, "a purchase sets it, public to both seats");
+    Check(!e.GetView(0).Players[1].DynastyActionTaken, "the opponent's flag is their own");
+    var d = MatchEngine.CreateEconomyScenario();
+    Accept(d, Cmd(d, "discardProvince", id: ProvinceCard(d, 2)));
+    Check(d.GetView(0).Players[0].DynastyActionTaken, "a province discard sets it");
+    var n = MatchEngine.CreateEconomyScenario();
+    Accept(n, Cmd(n, "endDynasty")); Check(!n.State.Players[0].DynastyActionTaken, "ending with neither leaves it false");
+    EndTurnFully(e); SkipToDynasty(e);
+    Check(e.State.Players.All(p => !p.DynastyActionTaken), "the next Dynasty Phase starts clean");
 }
 static void Priority()
 {

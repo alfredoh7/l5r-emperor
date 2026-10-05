@@ -12,7 +12,7 @@ public partial class Main
     private bool _alternativeCostConfirmed;
     private bool GenericDecisionActive => View.WinnerId is null && !EventDecisionActive &&
         View.PendingChoice?.Type is "effectChoice" or "preservingHonor" or "rinShame" or "conqueror" or "declineStraighten" or "forcedDiscard" or "beforeBattleOrder" or "beforeBattleOptional" or "encircledOrder" or "encircledSelect" or "eventChoice" or "honorLossDecision" or "entryCostDecision" or "honorChangeReaction" or "killingGroundsSelect" or "infiltratorStraighten";
-    private bool DecisionCanSubmit => !_session.Busy && !PresentationBusy && (!_session.Online ||
+    private bool DecisionCanSubmit => !_session.Busy && !PresentationBusy && !_playHeld && (!_session.Online ||
         _session.Connected && !(_session.Snapshot?.PlayersConnected?.Any(p => !p) ?? false));
 
     private ActionOption[] AlternativeCosts(ActionOption action) => action.AlternativeCost is not { } cost ? [] :

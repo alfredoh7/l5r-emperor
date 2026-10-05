@@ -75,7 +75,7 @@ public partial class Main
             foreach (var key in _fallTimes.Keys.ToArray()) if (_fallTimes[key] == -1) _fallTimes[key] = _battleVisualTime;
         }
         if (_battlePresentationStage == 3 && _battlePresentationClock >= 1.25)
-        { _battlePresentationStage = 0; RenderInspector(); RenderPhaseActions(); RenderTimeline(); RenderBattleFeedback(); FrameNewBattle(); }
+        { _battlePresentationStage = 0; FrameDynasty(); RenderInspector(); RenderPhaseActions(); RenderTimeline(); RenderBattleFeedback(); FrameNewBattle(); }
 
     }
 
