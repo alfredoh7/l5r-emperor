@@ -351,7 +351,7 @@ public partial class Main
         var targets = action.TargetIds ?? [];
         var target = command.TargetId; // issue #581: no default; Confirm waits for the player's pick when the action names legal targets
         var needsTarget = targets.Length > 0 && target is null;
-        _inspector.AddChild(Palette.Wrapped(action.Label, 17, Palette.Gold));
+        _inspector.AddChild(Palette.Wrapped(Placard(action), 17, Palette.Gold));
         if (targets.Length > 0) _inspector.AddChild(Palette.Wrapped("Click a gold-outlined card on the table or choose below. The arrow shows the selected target; confirm to resolve.", 13, Palette.PaperDim));
         if (command.PerformerId is string performer)
             _inspector.AddChild(Palette.Wrapped("Performer: " + ShortName(FindCard(performer)!) + (CardTile.UnitLabel(FindCard(performer)!) is { Length: > 0 } unit ? " · " + unit : ""), 14, Palette.Crane));
@@ -463,7 +463,7 @@ public partial class Main
             if (!representative.Enabled) container.AddChild(Palette.Wrapped(representative.Reason ?? "No available way to pay.", 15, Palette.PaperDim));
             return;
         }
-        var label = option.Type == "discardProvince" ? "Discard" : option.Type is "purchase" or "recruitReserve" ? "Review payment…" : option.Label;
+        var label = option.Type == "discardProvince" ? "Discard" : option.Type is "purchase" or "recruitReserve" ? "Review payment…" : Placard(option);
         var button = SidebarSkin.Button(label, () =>
         {
             if (option.Type == "useAbility" && View.PendingChoice?.Type is "bowReaction" or "beforeActionReaction" && option.TargetIds is { Length: 0 } && option.Command is { } reaction && QuoteFor(option) is null) _ = Submit(reaction);
