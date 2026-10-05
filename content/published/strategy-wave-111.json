@@ -1,0 +1,33 @@
+{
+  "Profile": "strategy-wave-111",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10405",
+      "Name": "Without Mercy",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After a Battle action performed by your Samurai Personality resolves, if the action did not target an enemy card: Take an additional Battle action.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10405.jpg",
+      "Keywords": [
+        "Dark Virtue",
+        "Determination"
+      ],
+      "Focus": 1,
+      "Abilities": [
+        "without-mercy-action"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

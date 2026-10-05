@@ -1276,6 +1276,8 @@ public sealed class ResolvedActionFacts
     public List<AffectedCard> Affected { get; set; } = [];
     // Seeds of Decay pass (issue #453), batch 2: the Personality who performed the action (the named performer, or the source resolved to its wielder), and the players it cost Honor.
     public string? PerformerId { get; set; }
+    // The cards the action targeted (issue #648, Without Mercy: "if the action did not target an enemy card"): the command's named targets, a duel's challenged Personality, an Attack's target card.
+    public List<string> TargetIds { get; set; } = [];
     public List<int> HonorLosers { get; set; } = [];
     // Emperor Edition Personality pass (issue #477), batch 5: the players whose hand the action put a card into (Isawa Kimi - exp 2).
     public List<int> HandRecipients { get; set; } = [];

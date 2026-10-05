@@ -1,0 +1,36 @@
+{
+  "Profile": "personality-wave-122",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10317",
+      "Name": "Daigotsu Shiraume",
+      "Type": "Personality",
+      "Clan": "Spider",
+      "GoldCost": 6,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 1,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After Shiraume enters play: Lose 1 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10317.jpg",
+      "Keywords": [
+        "Conqueror",
+        "Dark Conquest",
+        "Paragon",
+        "Samurai",
+        "Shadowlands",
+        "Spider Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "none",
+      "EntryHonorLoss": 1
+    }
+  ],
+  "Decks": []
+}
