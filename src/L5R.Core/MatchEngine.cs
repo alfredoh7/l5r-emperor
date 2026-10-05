@@ -486,6 +486,7 @@ public sealed partial class MatchEngine
         ApplyEmperorP1EntryEffects(playerId, card); // Issue #503 (EmperorP1.cs): its Sensei discards and Extending Influence's Honor loss.
         ApplyRequestedCreatedCardsEntryEffects(playerId, card); // Yari of Air's mandatory Air-wielder Honor gain.
         ApplyVastPaddyEntry(playerId, card); // Vast Paddy Fields (issue #622, IvoryHoldings.cs): the province the Farm Holding was recruited from refills face-up.
+        ApplyPromoEmperorEntryEffects(playerId, card); // Bandit's Sanctuary, Renewed Lands (issue #653, PromoEmperorHoldings.cs)
         ApplyTfPersonalitiesEntryEffects(playerId, card); // Soshi Kodanshi (issue #622, TfPersonalities.cs): "After Kodanshi enters play from a province: Create ..." -- a trait.
     }
     // Sensei (Mirumoto Hikaro / Mirumoto Yozo, Experienced 2): "your OTHER Sensei Personalities" --
@@ -980,7 +981,7 @@ public sealed partial class MatchEngine
         var card = Card(cardId); var def = Definition(card);
         if (def.Effect == MoneylenderEffect) return MoneylenderTokens(card); // Moneylender (issue #492, group F): Gold equal to the Wealth tokens it can remove.
         // The Shadow's Embrace pass (issue #476), batch 6: a production modifier for the turn (The Moon's Imperative, The Sun's Aspiration) and Sheltered Port's count.
-        var adjustment = def.Type == CardType.Holding ? ShadowsEmbraceBatch6Production(card, playerId) : 0;
+        var adjustment = (def.Type == CardType.Holding ? ShadowsEmbraceBatch6Production(card, playerId) : 0) + PromoEmperorProductionAdjustment(card, playerId, paying); // issue #653: Plantation (a Stronghold) and Kenro-ji-jin's Bounty (the Farms)
         if (ConditionalProductionOf(card) is { } conditional && ProductionConditionMet(conditional, paying)) return Math.Max(0, conditional.Amount + adjustment);
         // Library of Rebirth (Stronghold pass, issue #486 batch 1), Luxurious Silk, Seaside Bazaar: a Reaction's Gold is its own payment source (issue #501: "<card>#reaction", EmperorMechE.cs),
         // usable beside the card's bow; the card's own id is always its printed production.
@@ -3249,6 +3250,7 @@ public sealed partial class MatchEngine
     private void GainHonor(int playerId, int amount, string reason, CardInstance? source = null)
     {
         if (amount == 0) return;
+        if (PromoEmperorHonorLossPrevented(playerId, amount, source)) return; // Den of Iniquity (issue #653, PromoEmperorHoldings.cs): "Other players will not lose Honor from your Spells."
         OfferHonorChangeWindow(playerId, amount, reason); // Mendon's R4 ruling (issue #492): Rhetoric, Solid Defense and Shiro Chugo may be played on ANY Honor change from an action's effects.
         if (P3HonorGainNegated(playerId, amount, reason)) return; // Destructive Priorities (issue #503): "Negate the gain."
         if (DeedsAndWordsReduces(playerId, amount, reason)) return; // Deeds and Words (issue #622, IvoryHoldings.cs): "Reduce it to 0."

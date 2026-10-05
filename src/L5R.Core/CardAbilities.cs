@@ -3943,6 +3943,7 @@ public sealed partial class MatchEngine
         if (printedOrGranted && keyword == "Overconfident" && Definition(card).Effect == "loses-overconfident-vs-lion" && Player(1 - card.OwnerId).Clan == "Lion")
             return false;
         if (printedOrGranted) return true;
+        if (keyword == "Naval" && PromoEmperorNaval(card)) return true; // Suitengu's Blessing (issue #653): Naval while the Celestial remains in play
         // Isawa Kojiro (oracle-l5r-3850, issue #301): "Kojiro has Naval while he has a Spell" -- the same
         // additive live conditional grant Tamori Yayu's Cavalry below is, re-evaluated on every call so
         // it appears the moment a Spell attaches and disappears the moment it leaves (destroyed,
@@ -5530,6 +5531,7 @@ public sealed partial class MatchEngine
                 || MechEEvenIfBowed(id) // issue #501: Moto Rani - exp ("Even if Rani is bowed"); Kakita Kae's trait (a trait is usable while bowed)
                                         // issue #622 (IvoryPolitical.cs): Komori Taruko ("Even if Taruko is bowed")
                 || IvoryPoliticalEvenIfBowed(id)
+                || PromoEmperorEvenIfBowed(id) // Retired Sensei (issue #653, PromoEmperorHoldings.cs)
                 || TirelessStronghold(source) || UnsafePassageWaives(command, source), "Abilities on bowed cards cannot be used.");
             uses = source.AbilityUses;
         }

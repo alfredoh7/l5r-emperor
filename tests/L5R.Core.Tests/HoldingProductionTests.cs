@@ -17,7 +17,9 @@ internal static class HoldingProductionTests
          // Emperor Edition Personality pass (issue #477 batch 6): Seppun Washi (6620) and Yasuki Tanimura (9464) produce Gold through their Reactions (alternate Gold sources), as Yoritomo Sakuma (9624) does.
          "oracle-l5r-6620", "oracle-l5r-9464",
          // Issue #501 (mechanics group E): Yoritomo Singh - exp2 (9630) produces through his Reaction, as Tanimura does.
-         "oracle-l5r-9630"];
+         "oracle-l5r-9630",
+         // Issue #653: Kenro-ji-jin's Bounty (10229), a Celestial, prints "Reaction: When paying for a Farm: Produce 1 Gold" -- a Reaction Gold source, as Seaside Bazaar's.
+         "oracle-l5r-10229"];
 
     public static void Run(TestRunner runner) => runner.Run("holding-production", [
         ("The four holding-wave-1 Holdings produce the Gold they print: the field carries it and each one alone funds a payment of that size", PrintedProductionIsUsable),

@@ -591,6 +591,7 @@ public sealed partial class MatchEngine
     private void DeclareAdditionalAttackPhase(PlayerState player, CardInstance source)
     {
         SpendHandPlayedCard(player, source);
+        PromoNoteAdditionalAttackPhase(source); // Hofukushu's Vengeance (issue #653): its phase has no +1F after he assigns
         _state.SuspendedWindows.RemoveAll(w => w.Choice.Type == "attackPhaseEndReaction");
         _state.PendingChoice = null;
         if (RemC.RetributionRoot < 0) RemC.RetributionRoot = _state.ActivePlayerId;
@@ -659,6 +660,7 @@ public sealed partial class MatchEngine
         foreach (var id in (command.Assignments ?? []).Keys)
         {
             RemC.RetributionAssigned++;
+            if (PromoEmperorNoRetributionBonus()) continue; // Hofukushu's Vengeance (issue #653)
             var assigned = Card(id);
             ApplyModifier(assigned, id, "retribution-declare", "Force", 1);
             foreach (var follower in Attachments(assigned.Id).Where(a => Definition(a).Type == CardType.Follower).ToArray()) ApplyModifier(follower, id, "retribution-declare", "Force", 1);

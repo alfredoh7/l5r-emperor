@@ -1,0 +1,456 @@
+{
+  "Profile": "holding-wave-51",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-1950",
+      "Name": "Den of Iniquity",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 2,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "This card will not be destroyed. Other players will not lose Honor from your Spells.\nBow this card: Produce 2 Gold.\nPolitical Limited: Bow this card and target another player's dishonorable Personality: His controller loses Honor equal to his base Personal Honor, or 3, whichever is lower. You may not declare an attack this turn.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1950.jpg",
+      "Keywords": [],
+      "Focus": 0,
+      "Abilities": [
+        "pe-den-of-iniquity-shame"
+      ],
+      "Effect": "pe-den-of-iniquity"
+    },
+    {
+      "Id": "oracle-l5r-2658",
+      "Name": "Forgotten Outpost",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 6,
+      "GoldProduction": 5,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Bow this card: Produce 5 Gold.\nLimited: If another player has higher Family Honor than you: Gain 1 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-2658.jpg",
+      "Keywords": [
+        "Castle",
+        "Forest"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "pe-forgotten-outpost-honor"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-4066",
+      "Name": "Jungle Stockade",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 4,
+      "GoldProduction": 3,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Bow this card: Produce 3 Gold, or 4 Gold if paying for an attachment.\nOpen: Choose your two performing Personalities and target an attachment on one of them: Transfer it to the other Personality.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-4066.jpg",
+      "Keywords": [
+        "Dojo",
+        "Forest"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "pe-jungle-stockade-transfer"
+      ],
+      "Effect": "pe-jungle-stockade-gold"
+    },
+    {
+      "Id": "oracle-l5r-6097",
+      "Name": "Public Room",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: Bow this card: Give each of your Sake tokens +1F.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6097.jpg",
+      "Keywords": [
+        "Sake House"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "pe-public-room-sake"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-6539",
+      "Name": "Second City Dojo",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 2,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Bow this card: Produce 2 Gold.\nLimited: Destroy this card: Draw a card.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6539.jpg",
+      "Keywords": [
+        "Dojo"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "pe-second-city-dojo-draw"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9953",
+      "Name": "Plantation",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 2,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Your Stronghold produces one more Gold, to a maximum of five, when paying for a non-Personality card.\nBow this card: Produce 2 Gold.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9953.jpg",
+      "Keywords": [
+        "Farm"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "pe-plantation-stronghold"
+    },
+    {
+      "Id": "oracle-l5r-9955",
+      "Name": "Retired Sensei",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 3,
+      "GoldProduction": 2,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Bow this card: Produce 2 Gold.\nBattle: Even if this card is bowed, target your Personality: Give him +2F.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9955.jpg",
+      "Keywords": [
+        "Retainer"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "pe-retired-sensei-boost"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10187",
+      "Name": "Bandit's Sanctuary",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 2,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "You may include up to five copies of this card in your deck.\nAfter this card enters play, if you have a Clan alignment: Lose 3 Honor.\nBow this card: Produce 2 Gold, or 3 Gold if you are paying for a Ronin.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10187.jpg",
+      "Keywords": [],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "pe-bandits-sanctuary",
+      "DeckCopyLimit": 5
+    },
+    {
+      "Id": "oracle-l5r-10409",
+      "Name": "Sacred Temples",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 2,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Other players' actions will not discard cards from your hand.\nBow this card: Produce 2 Gold.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10409.jpg",
+      "Keywords": [
+        "Temple"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "pe-sacred-temples"
+    },
+    {
+      "Id": "oracle-l5r-10572",
+      "Name": "General's Hatamoto",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 1,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle, Bow this card: Give a target Personality or Follower +2F.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10572.jpg",
+      "Keywords": [
+        "Retainer"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "pe-generals-hatamoto-boost"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10573",
+      "Name": "Family Dojo",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 2,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Bow this card: Produce 2 Gold.\nBattle, Bow this card: Give each of your Followers at this battle +1F.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10573.jpg",
+      "Keywords": [
+        "Dojo"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "pe-family-dojo-boost"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10753",
+      "Name": "The Emerald Dojo",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 3,
+      "GoldProduction": 2,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Bow this card: Produce 2 Gold.\nOpen, Bow this card: Straighten your target Personality.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10753.jpg",
+      "Keywords": [
+        "Unique",
+        "Dojo"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "pe-emerald-dojo-straighten"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10754",
+      "Name": "The Ivory Dojo",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 3,
+      "GoldProduction": 2,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Bow this card: Produce 2 Gold.\nOpen, Bow this card: Bow your target unbowed Personality. Bow a target dishonorable Personality.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10754.jpg",
+      "Keywords": [
+        "Unique",
+        "Dojo"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "pe-ivory-dojo-bow"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10755",
+      "Name": "The Jade Temple",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 3,
+      "GoldProduction": 2,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Bow this card: Produce 2 Gold.\nBattle, Bow this card: Straighten your target Spell. You may use its abilities a second time.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10755.jpg",
+      "Keywords": [
+        "Unique",
+        "Temple"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "pe-jade-temple-straighten"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10756",
+      "Name": "The Obsidian Dueling Grounds",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 3,
+      "GoldProduction": 2,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Bow this card: Produce 2 Gold.\nLimited, Bow this card: Permanently give your target Samurai Shadowlands. Give him three +1F tokens. Destroy this Holding. Lose 4 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10756.jpg",
+      "Keywords": [
+        "Unique"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "pe-obsidian-dueling-grounds"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10758",
+      "Name": "The Ruby Dojo",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 3,
+      "GoldProduction": 2,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Bow this card: Produce 2 Gold.\nPolitical Limited, Bow this card: Bow your target unbowed Magistrate Personality. Dishonor a target Personality.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10758.jpg",
+      "Keywords": [
+        "Unique",
+        "Dojo"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "pe-ruby-dojo-dishonor"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10759",
+      "Name": "The Topaz Dojo",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 3,
+      "GoldProduction": 2,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Bow this card: Produce 2 Gold.\nOpen, Bow this card: Give a +1F/+1C Training token to a target Personality with no printed abilities and no Training tokens.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10759.jpg",
+      "Keywords": [
+        "Unique",
+        "Dojo"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "pe-topaz-dojo-training"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10760",
+      "Name": "The Turquoise Court",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 3,
+      "GoldProduction": 2,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Bow this card: Produce 2 Gold.\nPolitical Limited, Bow this card: Bow your target unbowed Personality. You, or any player if the Personality is an Artisan, gain or lose 1 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10760.jpg",
+      "Keywords": [
+        "Unique"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "pe-turquoise-court-gain",
+        "pe-turquoise-court-lose"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}
