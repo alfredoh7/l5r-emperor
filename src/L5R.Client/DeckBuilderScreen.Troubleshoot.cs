@@ -4,6 +4,9 @@ namespace L5R.Client;
 
 public partial class DeckBuilderScreen
 {
+    /// <summary>The open troubleshooter dialog, for native checks.</summary>
+    public ConfirmationDialog? TroubleshootDialog { get; private set; }
+    public bool TroubleshootFile(string path) => TryTroubleshoot(path);
     private const string LeaveOut = "Leave this card out";
     /// <summary>Import troubleshooter: when a deck file will not load because of card names the catalogue does not know (or a legality
     /// this builder cannot open), offer the nearest catalogue match for each line. The repaired list opens as an unsaved draft; the file is untouched.
@@ -16,20 +19,25 @@ public partial class DeckBuilderScreen
         var problems = report.Problems;
         if (problems.Length == 0 && !report.LegalityNeedsFixing) return false;
         var name = Path.GetFileNameWithoutExtension(path);
-        var dialog = new ConfirmationDialog { Title = "Deck troubleshooter", Theme = Theme, Exclusive = true }; AddChild(dialog);
+        // Size to the window, not the content: wrapped labels report a tall minimum until they have a width, which pushed the buttons off screen.
+        var view = GetViewport().GetVisibleRect().Size;
+        var size = new Vector2I((int)Math.Min(820, view.X - 40), (int)Math.Min(640, view.Y - 60));
+        var inner = size.X - 40;
+        var dialog = new ConfirmationDialog { Title = "Deck troubleshooter", Theme = Theme, Exclusive = true, MinSize = new Vector2I(Math.Min(480, size.X), Math.Min(300, size.Y)) }; AddChild(dialog); TroubleshootDialog = dialog;
         var root = new VBoxContainer(); root.AddThemeConstantOverride("separation", 10); dialog.AddChild(root);
+        Label Note(string text, int fontSize, Color color) { var l = Palette.Wrapped(text, fontSize, color); l.CustomMinimumSize = new Vector2(inner, 0); return l; }
         var summary = problems.Length == 0 ? "Every card was recognised."
             : $"{report.RecognisedLines} lines matched. {problems.Length} {(problems.Length == 1 ? "line was" : "lines were")} not found in the catalogue; pick the closest card for each.";
-        root.AddChild(Palette.Wrapped(summary, 19, new Color("f0e6d2")));
+        root.AddChild(Note(summary, 19, new Color("f0e6d2")));
         if (report.LegalityNeedsFixing)
-            root.AddChild(Palette.Wrapped($"This list says Legality: {report.Legality ?? "(none)"}. The repaired copy opens as Legality: Emperor; cards from other formats will show as not found.", 17, new Color("e8c9a0")));
-        var scroll = new ScrollContainer { HorizontalScrollMode = ScrollContainer.ScrollMode.Disabled, CustomMinimumSize = new Vector2(760, 330), SizeFlagsVertical = Control.SizeFlags.ExpandFill }; root.AddChild(scroll);
+            root.AddChild(Note($"This list says Legality: {report.Legality ?? "(none)"}. The repaired copy opens as Legality: Emperor; cards from other formats will show as not found.", 17, new Color("e8c9a0")));
+        var scroll = new ScrollContainer { HorizontalScrollMode = ScrollContainer.ScrollMode.Disabled, CustomMinimumSize = new Vector2(inner, 120), SizeFlagsVertical = Control.SizeFlags.ExpandFill }; root.AddChild(scroll);
         var rows = new VBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill }; rows.AddThemeConstantOverride("separation", 12); scroll.AddChild(rows);
         var picks = new Dictionary<DeckProblem, OptionButton>();
         foreach (var problem in problems)
         {
             var row = new VBoxContainer(); row.AddThemeConstantOverride("separation", 4); rows.AddChild(row);
-            row.AddChild(Palette.Wrapped($"Line {problem.LineNumber}: {(problem.Count > 1 ? problem.Count + " × " : "")}“{problem.Text}”", 18, new Color("f0e6d2")));
+            row.AddChild(Note($"Line {problem.LineNumber}: {(problem.Count > 1 ? problem.Count + " × " : "")}“{problem.Text}”", 18, new Color("f0e6d2")));
             var pick = new OptionButton { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, FitToLongestItem = false }; row.AddChild(pick);
             foreach (var s in problem.Suggestions) pick.AddItem($"{s.DeckName}  ·  {Math.Round(s.Score * 100)}% match");
             pick.AddItem(problem.Suggestions.Length == 0 ? "No close match · " + LeaveOut.ToLowerInvariant() : LeaveOut);
@@ -43,7 +51,7 @@ public partial class DeckBuilderScreen
             ApplyRepairs(path, name, fixedText);
         };
         dialog.Canceled += dialog.QueueFree;
-        dialog.PopupCentered(new Vector2I(820, 520));
+        dialog.PopupCentered(size);
         return true;
     }
 
