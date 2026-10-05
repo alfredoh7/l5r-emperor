@@ -15,6 +15,7 @@ internal static class BotPolicyTests
         ("Lobby: always with the higher Family Honor and more Personalities; low priority with equal or fewer unless it costs no bow; moderate otherwise", Lobby),
         ("Favor as a cost: spent freely when an Open action takes it back, once when the always-lobby case guarantees it, otherwise never above passing", FavorSpend),
         ("Honor choice: a high deck gains, a low deck takes it from the opponent, an in-between deck gains when ahead or below its starting Honor", HonorChoice),
+        ("Arena fixes: a harmful ability is never aimed at the bot's own card; Shinden always bows; a full hand does not spend Gold on a pure draw; the bot never gives the opponent Honor or loses its own by choice", ArenaFixes),
         ("Memory: copies seen in public zones count (three of a non-Unique card, one of a Unique), the roll is deterministic and fair", Memory),
     ];
 
@@ -119,6 +120,56 @@ internal static class BotPolicyTests
         }
         Check(Pick(8) == "shunya-honor", "a full hand: drawing is worth little");
         Check(Pick(1) == "korimi-exp2-draw", "a nearly empty hand: drawing outranks everything else on offer");
+    }
+
+    private static void ArenaFixes()
+    {
+        var (view, pass, ability) = Table();
+        var person = CardCatalog.Cards.Values.First(d => d.Type == CardType.Personality && d.Force > 0);
+        // 1. Self-harm: Tsujiken's "Dishonor him. His controller loses 1 Honor" aimed at the bot's own Personality scores below passing; aimed at the opponent's it is played.
+        var mine = Person("mine-1", 0, person); var theirs = Person("theirs-1", 1, person);
+        var harmView = view with { Players = [view.Players[0] with { Home = [mine] }, view.Players[1] with { Home = [theirs] }] };
+        ActionOption Aimed(string id, string target) => new("useAbility", id, true, null, new("useAbility", 0, view.Version, CardId: "source-" + id, TargetId: target, AbilityId: id), "source-" + id);
+        Check(AbilityIntent.Of("tsujiken-exp-dishonor").Rank >= EffectRank.Penalize, "Tsujiken's ability reads as harmful");
+        Check(TrainingOpponent.Choose(harmView, [pass, Aimed("tsujiken-exp-dishonor", "mine-1")]).Command?.Type == "pass", "a harmful ability at its own Personality: it passes");
+        Check(TrainingOpponent.Choose(harmView, [pass, Aimed("tsujiken-exp-dishonor", "theirs-1")]).Command?.AbilityId == "tsujiken-exp-dishonor", "...but at the opponent's it is played");
+        Check(AbilityIntent.Of("scars-of-war-mark").HonorLoss, "Scars of War reads as an Honor loss");
+        Check(TrainingOpponent.Choose(harmView, [pass, Aimed("scars-of-war-mark", "mine-1")]).Command?.Type == "pass", "an Honor-loss ability at its own card: it passes");
+        // 2. Shinden: always bow, whatever the Honor totals.
+        ActionOption Shinden(string choice) => new("chooseShinden", choice, true, null, new("chooseShinden", 0, view.Version, Choice: choice));
+        foreach (var opponentHonor in new[] { 1, 20, 36 })
+        {
+            // The threatened Personality is an unbowed one with Force, the case where the old rule allowed the Honor gain while the opponent was under 35.
+            var v = harmView with { Players = [harmView.Players[0], harmView.Players[1] with { Honor = opponentHonor }], PendingChoice = new PendingChoice("shinden", 0, "mine-1", "Shinden Asahina", 1) };
+            Check(TrainingOpponent.Choose(v, [Shinden("honor"), Shinden("bow")]).Command?.Choice == "bow", $"Shinden bows rather than give the opponent Honor (opponent at {opponentHonor})");
+        }
+        // 3. A pure draw ability at a full hand is worth no more than passing; with room in the hand it is played.
+        var draw = ability("korimi-exp2-draw");
+        string Pick(int hand) => TrainingOpponent.Choose(view with { Players = [WithHand(view.Players[0], hand), view.Players[1]] }, [pass, draw]).Command!.Type;
+        Check(Pick(8) == "pass" && Pick(9) == "pass", "a full hand: the Gold stays for purchases");
+        Check(Pick(6) == "useAbility", "room in the hand: draw");
+        // 4. Honor: never the opponent gaining it and never the bot losing it when it chooses who.
+        ActionOption Choice(string type, string key) => new(type, key, true, null, new(type, 0, view.Version, Choice: key));
+        foreach (var gain in new[] { 2, 30 })
+            foreach (var lose in new[] { 2, 30 })
+            {
+                var v = view with { Players = [view.Players[0] with { Honor = gain }, view.Players[1] with { Honor = lose }] };
+                var picked = TrainingOpponent.Choose(v, [Choice("chooseEffect", "opponent-gain"), Choice("chooseEffect", "self-lose"), Choice("chooseEffect", "self-gain"), Choice("chooseEffect", "opponent-lose")]).Command!.Choice;
+                Check(picked is "self-gain" or "opponent-lose", $"an effect choice never picks {picked}");
+            }
+        Check(TrainingOpponent.Choose(view, [Choice("chooseEitherOr", "honor"), Choice("chooseEitherOr", "pay")]).Command?.Choice == "pay", "an Either/Or that costs Honor loses to any other answer");
+        Check(TrainingOpponent.Choose(view, [Choice("chooseEitherOr", "honor"), Choice("chooseEitherOr", "other")]).Command?.Choice == "other", "...even an unremarkable one");
+        var checkedPlayers = 0;
+        foreach (var (id, def) in AbilityCatalog.All.Where(p => p.Value.Target == "player" && !p.Key.StartsWith("training-", StringComparison.Ordinal)))
+        {
+            var intent = AbilityIntent.Of(id);
+            if (intent.HonorGain == intent.HonorLoss) continue; // both (a profile choice) or neither
+            var chosen = TrainingOpponent.Choose(view, [ability(id)]).Command;
+            if (chosen?.TargetPlayerId is not int player) continue;
+            Check(intent.HonorGain ? player == 0 : player == 1, $"{id}: a player who gains Honor is the bot, one who loses it is the opponent (got player {player})");
+            checkedPlayers++;
+        }
+        Check(checkedPlayers > 0, "the catalogue sweep found choose-a-player Honor abilities to check");
     }
 
     private static CardView Person(string id, int owner, CardDefinition d) => new(id, d, owner, Zone.Home, true, false, null, null, d.Force);
