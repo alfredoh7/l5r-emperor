@@ -1,0 +1,115 @@
+using L5R.Core;
+
+namespace L5R.AI;
+
+/// <summary>
+/// Issue #642: what the bot remembers between decisions of one match, using only what a player at the table could see: a card shown face-up in a
+/// public zone stays seen even after it is discarded, removed or returned to a deck, so the bot can reason that a non-Unique card has two more
+/// copies somewhere (the usual three-copy limit) and a Unique card has none. It never reads a hidden zone, the seed, or the engine.
+///
+/// One context belongs to one seat of one match. Choose() works without one (a fresh context is made per call), but then it forgets, so a caller
+/// that plays a whole match should keep and pass the same instance.
+/// </summary>
+public sealed class BotContext
+{
+    /// <summary>The copy limit assumed for a card that is not Unique.</summary>
+    public const int AssumedCopies = 3;
+
+    private readonly Dictionary<string, HashSet<string>> _seenIdsByName = new(StringComparer.Ordinal);
+    private readonly Dictionary<string, bool> _uniqueByName = new(StringComparer.Ordinal);
+    private int _lobbyTurn = -1;
+    private int _favorTakenTurn = -1;
+
+    /// <summary>The average Personal Honor of the bot's own decklist, when the caller knows it (its own deck is its own information). Null: estimated from cards seen.</summary>
+    public double? DeckAveragePersonalHonor { get; init; }
+
+    /// <summary>Records every face-up card in a public zone of either player. Safe to call on every decision.</summary>
+    public void Observe(MatchView view)
+    {
+        foreach (var player in view.Players)
+            foreach (var card in PublicCards(player))
+                Note(card);
+    }
+
+    private static IEnumerable<CardView> PublicCards(PlayerView p) =>
+        p.Home.Concat(p.Army).Concat(p.Discard).Concat(p.RemovedFromGame).Concat(p.EventsInPlay ?? []).Concat(p.Celestials ?? []).Concat(p.Underneath ?? [])
+            .Concat(p.Provinces.Select(x => x.Card).OfType<CardView>()).Append(p.Stronghold).Concat(p.Hand.Where(c => c.Definition is not null));
+
+    private void Note(CardView card)
+    {
+        if (card.Definition is not { } def) return;
+        if (!_seenIdsByName.TryGetValue(def.Name, out var ids)) _seenIdsByName[def.Name] = ids = new(StringComparer.Ordinal);
+        ids.Add(card.Id);
+        _uniqueByName[def.Name] = def.Keywords?.Contains("Unique") == true;
+    }
+
+    /// <summary>How many different copies of a card (by name) the bot has seen.</summary>
+    public int Seen(string cardName) => _seenIdsByName.TryGetValue(cardName, out var ids) ? ids.Count : 0;
+
+    /// <summary>Copies the bot expects could still be hidden somewhere: three minus those seen for a card that is not Unique, one minus those seen for a Unique card, never below zero.</summary>
+    public int ExpectedHiddenCopies(string cardName) =>
+        Math.Max(0, (_uniqueByName.GetValueOrDefault(cardName) ? 1 : AssumedCopies) - Seen(cardName));
+
+    /// <summary>Records that the bot lobbied for the Imperial Favor on a turn (Lobby is once per turn).</summary>
+    public void NoteLobby(int turn) => _lobbyTurn = turn;
+    public bool LobbiedThisTurn(int turn) => _lobbyTurn == turn;
+    public void NoteFavorTaken(int turn) => _favorTakenTurn = turn;
+    public bool TookFavorThisTurn(int turn) => _favorTakenTurn == turn;
+
+    // How often the bot has used the same ability from the same card this turn. Two bots can otherwise trade a free, repeatable action back and forth for ever; each use
+    // lowers the next one's score (down to the value of passing, never below), so a loop always ends.
+    private int _usesTurn = -1;
+    private readonly Dictionary<string, int> _uses = new(StringComparer.Ordinal);
+
+    public void NoteUse(int turn, string? abilityId, string? cardId)
+    {
+        if (turn != _usesTurn) { _uses.Clear(); _usesTurn = turn; }
+        var key = abilityId + "|" + cardId;
+        _uses[key] = _uses.GetValueOrDefault(key) + 1;
+    }
+
+    public int UsesThisTurn(int turn, string? abilityId, string? cardId) => turn == _usesTurn ? _uses.GetValueOrDefault(abilityId + "|" + cardId) : 0;
+
+    // What the engine refused at the current decision. The engine lists every action a seat could try, and a few it then rejects (a restriction only checked when the
+    // command arrives). A player whose action is refused chooses again, so the caller reports the refusal here and calls Choose again at the same version: the bot then skips
+    // that exact answer, keeps the other targets of the same action, and drops any unit the refusal names.
+    private long _rejectionVersion = -1;
+    private readonly List<(GameCommand Command, string Error)> _rejections = [];
+
+    /// <summary>Tells the bot the engine refused a command it chose at <paramref name="version"/>. The memory lasts until the version changes.</summary>
+    public void NoteRejection(long version, GameCommand command, string? error)
+    {
+        if (version != _rejectionVersion) { _rejections.Clear(); _rejectionVersion = version; }
+        _rejections.Add((command, error ?? ""));
+    }
+
+    internal bool IsRejected(long version, GameCommand command) => version == _rejectionVersion && _rejections.Any(r => SameAnswer(r.Command, command));
+
+    /// <summary>Targets already refused for this ability on this source at this version, so the next try picks another.</summary>
+    internal HashSet<string> RejectedTargets(long version, string? abilityId, string? cardId, string type) =>
+        version != _rejectionVersion ? [] : _rejections.Where(r => r.Command.Type == type && r.Command.AbilityId == abilityId && r.Command.CardId == cardId && r.Command.TargetId is not null)
+            .Select(r => r.Command.TargetId!).ToHashSet(StringComparer.Ordinal);
+
+    internal IEnumerable<string> RejectionMessages(long version, string type) => version != _rejectionVersion ? [] : _rejections.Where(r => r.Command.Type == type).Select(r => r.Error);
+
+    private static bool SameAnswer(GameCommand a, GameCommand b) =>
+        a.Type == b.Type && a.AbilityId == b.AbilityId && a.CardId == b.CardId && a.TargetId == b.TargetId && a.Province == b.Province && a.Choice == b.Choice
+        && a.TargetPlayerId == b.TargetPlayerId && a.PerformerId == b.PerformerId && a.CostOption == b.CostOption
+        && string.Join(",", a.CardIds ?? []) == string.Join(",", b.CardIds ?? [])
+        && string.Join(",", (a.Assignments ?? []).OrderBy(p => p.Key, StringComparer.Ordinal).Select(p => p.Key + ">" + p.Value)) == string.Join(",", (b.Assignments ?? []).OrderBy(p => p.Key, StringComparer.Ordinal).Select(p => p.Key + ">" + p.Value))
+        && string.Join(",", (a.Selections ?? []).Select(x => x.Slot + ":" + string.Join("+", x.CardIds ?? []) + x.PlayerId)) == string.Join(",", (b.Selections ?? []).Select(x => x.Slot + ":" + string.Join("+", x.CardIds ?? []) + x.PlayerId));
+
+    /// <summary>A reproducible weight roll in [0, 1): the same match state and the same ability always roll the same, so replays and tests are deterministic.</summary>
+    public static double Roll(long version, string? abilityId, string? cardId)
+    {
+        unchecked
+        {
+            var hash = 17L;
+            hash = hash * 31 + version;
+            foreach (var c in abilityId ?? "") hash = hash * 31 + c;
+            foreach (var c in cardId ?? "") hash = hash * 31 + c;
+            hash ^= hash >> 33; hash *= unchecked((long)0xff51afd7ed558ccdUL); hash ^= hash >> 33;
+            return (hash & 0xFFFFFF) / (double)0x1000000;
+        }
+    }
+}

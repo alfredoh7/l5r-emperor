@@ -45,6 +45,7 @@ internal static class ForgottenLegacyBatch5Tests
         ("Colonial Harbor: produces 5 Gold, and its controller's bowed Stronghold may still use an ability that does not bow it", ColonialHarborTireless),
         ("Black Pearl: destroyed to bring a Personality from the opponent's discard pile into play under its controller's control, 4 Gold less for a Nonhuman", BlackPearlRecruit),
         ("Cursed Relic: each -1C pays for a Ranged 3 Attack, any number of times, until the wielder's last Chi kills him; its bow and -1C remove a card from the game", CursedRelicCosts),
+        ("The Second City: a player with fewer provinces than the opponent still gets the offer built, and an absent province is refused (bot soak, issue #642)", SecondCityWithFewerProvincesThanTheOpponent),
         ("The Second City: +1F to its controller's Courtiers and Magistrates; its Political Open turns a face-down province card face-up, with or without +2 province strength (one use)", SecondCityForceAndReveal),
         ("Pearl of Rage: +1F per Pearl its controller controls or has discarded, and a Ranged Attack of the wielder's Chi plus that count", PearlOfRageCount),
         ("The Mountain's Power: a defending Earth wielder's destruction by another player's card is negated (not while attacking, not for a non-Earth wielder); its Battle bows and gains 1 Honor", MountainsPowerShield),
@@ -402,6 +403,21 @@ internal static class ForgottenLegacyBatch5Tests
     }
 
     // ---- Region ---------------------------------------------------------------------------------------------------------------------------------
+    // Bot soak, issue #642: an "any province" offer lists every province index for both owners, so a player with fewer provinces than the other (a lost province, a
+    // stronghold that changes the count) made QueryActions throw ArgumentOutOfRange while it validated Second City's reveal for a province that is not there.
+    private static void SecondCityWithFewerProvincesThanTheOpponent()
+    {
+        var s = Table(Phase.Action, 0); s.PriorityPlayerId = 0;
+        var city = Add(s, SecondCity, 0, Zone.Region, province: 0); s.Players[0].Provinces[0].RegionId = city.Id;
+        Add(s, "training-courtier-personality", 0, Zone.Home);
+        FaceDownIn(s, "training-crane-samurai", 1, 1);
+        s.Players[1].Provinces.RemoveAt(s.Players[1].Provinces.Count - 1);
+        var e = MatchEngine.FromTestState(s);
+        var offered = e.QueryActions(0).Where(a => a.Type == "useAbility" && a.Label.Contains("Province", StringComparison.Ordinal)).ToArray();
+        Check(offered.Length > 0, "the offer is still built");
+        Check(Rejection(e, new GameCommand("useAbility", 0, e.Version, CardId: city.Id, AbilityId: "second-city-reveal", TargetPlayerId: 1, Province: 3)).Length > 0, "a province that is not there is refused, not a crash");
+    }
+
     private static void SecondCityForceAndReveal()
     {
         var s = Table(Phase.Action, 0); s.PriorityPlayerId = 0;

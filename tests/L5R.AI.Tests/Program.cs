@@ -47,12 +47,12 @@ Run("declines to attack at the Declaration Segment when it has nothing to attack
         Check(game.Execute(decision.Command!).Accepted && game.GetView(0).Phase == Phase.Dynasty, "and declining ends the Attack Phase");
     }
 });
-Run("passes, never deadlocks, in a multi-reaction before-action window (issue #318)", () =>
+Run("never deadlocks in a multi-reaction before-action window: it always plays the Reaction that negates, and passes or reacts from the offered list otherwise (issues #318, #642)", () =>
 {
     // The legal-action listing now offers the player holding priority every reaction of their own that applies to the
     // deferred action (here Kakihara's and a Champion of Thunder's, the latter with a chosen target) alongside a pass.
-    // The practice opponent scores a targetless or unknown reaction below passing, so it always passes -- and since a
-    // pass is always listed for whoever holds priority, the window closes on two consecutive passes.
+    // Issue #642 (Mendon): the bot ALWAYS plays a Reaction that negates an effect (Champion of Thunder), and makes a weighted choice about any other Reaction. Since a
+    // pass is always listed for whoever holds priority, the window still closes on two consecutive passes.
     var game = MatchEngine.CreateStarterMatch();
     var view = game.GetView(0) with { PendingChoice = new("beforeActionReaction", 1, null, "Before this action resolves: either player may use a reaction, or pass.") };
     var actions = new ActionOption[]
@@ -62,13 +62,15 @@ Run("passes, never deadlocks, in a multi-reaction before-action window (issue #3
         new("declineReaction","Pass reaction",true,null,new("declineReaction",0,view.Version))
     };
     var decision = TrainingOpponent.Choose(view, actions);
-    Check(decision.Command?.Type == "declineReaction", "The practice opponent took a reaction over passing");
+    Check(decision.Command?.AbilityId == "champion-of-thunder-negate", "The practice opponent did not play the Reaction that negates");
+    var withoutNegation = TrainingOpponent.Choose(view, actions.Where(a => a.Command?.AbilityId != "champion-of-thunder-negate").ToArray());
+    Check(withoutNegation.Command is { } c && actions.Any(a => a.Command?.Type == c.Type && a.Command?.AbilityId == c.AbilityId), "With nothing to negate it must still answer with an offered action (react or pass)");
 });
-Run("passes, never stalls or spends Gold, in a window holding a redirect or a negation (Ezuno, Blade of Champions, Yurishi, Jinn-Kuen, Mochitoko; issue #335)", () =>
+Run("plays a negation, never stalls, in a window holding a redirect or a negation (Ezuno, Blade of Champions, Yurishi, Jinn-Kuen, Mochitoko; issues #335, #642)", () =>
 {
     // The targeted-by-action reactions are offered as targetless useAbility options (Ezuno, Yurishi, Jinn-Kuen with its Gold quote, Mochitoko) or one
-    // option per candidate card (Blade of Champions). The practice opponent scores an ability it has no rule for below passing, so it always passes
-    // -- and never pays Jinn-Kuen's 2 Gold or redirects an action on its own -- in both windows an action can be held in.
+    // option per candidate card (Blade of Champions). Issue #642: a Reaction that negates is always played (Jinn-Kuen and Mochitoko negate; Jinn-Kuen's Gold quote is
+    // paid from the offered sources), and the others are a weighted choice, so the answer is always one of the offered actions.
     var game = MatchEngine.CreateStarterMatch();
     foreach (var window in new[] { "beforeActionReaction", "attackReaction" })
     {
@@ -84,7 +86,7 @@ Run("passes, never stalls or spends Gold, in a window holding a redirect or a ne
             new("declineReaction","Pass reaction",true,null,new("declineReaction",0,view.Version))
         };
         var decision = TrainingOpponent.Choose(view, actions);
-        Check(decision.Command?.Type == "declineReaction", $"The practice opponent took a reaction over passing in the {window} window");
+        Check(decision.Command is { AbilityId: "jinn-kuen-negate" or "mochitoko-negate" }, $"The practice opponent did not play a negation in the {window} window: {decision.Command?.AbilityId ?? decision.Command?.Type}");
     }
 });
 Run("answers a forced discard (Times of Strife, Daigotsu Bofana) with the least useful card in its hand instead of stalling (issue #333)", () =>
@@ -226,6 +228,8 @@ foreach (var scenario in DuelDemoScenarios.All)
             Check(JsonSerializer.Serialize(e.State) == JsonSerializer.Serialize(MatchEngine.Replay(e.ExportReplay()).State), "Replay mismatch");
         });
 runner.Run("ai", tests);
+runner.Run("bot-policy", BotPolicyTests.Tests); // issue #642: the policies Mendon specified
+runner.Run("bot-soak", BotSoak.Tests); // issue #642; see docs/BOT_SOAK.md
 return runner.Finish();
 
 void Run(string name, Action run) => tests.Add((name, run));
