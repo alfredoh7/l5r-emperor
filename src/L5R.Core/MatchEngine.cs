@@ -350,6 +350,7 @@ public sealed partial class MatchEngine
         NitoshiCommandTail(); // Bayushi Nitoshi - inexperienced (issue #617): the hold on the card he took lasts until it is played or returned
         OpenP3OwedChoices(); // Shosuro Aroru - exp2 (issue #503): "After the action's resolution, you may move Aroru to a different location."
         CheckInokuchiWatches(); // Mirumoto Inokuchi (issue #501, EmperorMechA.cs): "If you don't, bow him" -- once his additional action is gone without being taken.
+        NormalizeOwnerAnsweredPriority(); // Issue #642 (PendingPriority.cs): a choice answered by its owner gives its owner priority.
         SkipIdleCavalrySegments(); // Issue #627 (CavalrySkip.cs): a Cavalry Maneuvers segment where the acting player has nothing to do but pass.
     }
     private void ApplyCore(GameCommand command)

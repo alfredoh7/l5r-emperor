@@ -35,13 +35,15 @@ public sealed partial class MatchEngine
     private void DiscardProvinceCardAndRefillFaceUp(CardInstance target, CardInstance source)
     {
         var owner = Player(target.OwnerId);
-        var province = owner.Provinces.Single(p => p.CardId == target.Id);
-        target.Zone = Zone.DynastyDiscard; target.ProvinceIndex = null; target.FaceUp = true; province.CardId = null;
+        var (province, slot) = FindProvinceSlot(owner, target.Id); // either of a two-card province's slots (found by the bot soak, issue #642: a second-slot card crashed Moon's Imperative)
+        target.Zone = Zone.DynastyDiscard; target.ProvinceIndex = null; target.FaceUp = true; ClearProvinceSlot(province, slot);
         Emit("provinceDiscard", $"{Definition(target).Name} was discarded from {owner.Name}'s province {province.Index + 1} ({Definition(source).Name}).", owner.Id, target.Id);
         if (province.Destroyed || owner.DynastyDeck.Count == 0 || province.HoldsNoDynastyCards) return; // issue #503: Illusory Defense's province
+        if (slot == OtosanSlotSecond && !GrantsSecondDynastySlot(province)) return;
         var refillId = owner.DynastyDeck[0]; owner.DynastyDeck.RemoveAt(0);
         var refill = Card(refillId);
-        province.CardId = refillId; refill.Zone = Zone.Province; refill.ProvinceIndex = province.Index; refill.FaceUp = true;
+        if (slot == OtosanSlotPrimary) province.CardId = refillId; else province.CardId2 = refillId;
+        refill.Zone = Zone.Province; refill.ProvinceIndex = province.Index; refill.FaceUp = true;
         Emit("provinceRefilled", $"{owner.Name} refilled province {province.Index + 1} face up with {Definition(refill).Name}.", owner.Id, refillId);
         AfterProvinceRefilledP6(owner, province, faceUp: true); // issue #503: Shosuro Ietsuno
     }

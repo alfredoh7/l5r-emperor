@@ -314,6 +314,8 @@ public sealed partial class MatchEngine
         {
             Emit("eitherOrChosen", $"{decider.Name} showed his hand to {Player(p.ActingPlayerId).Name} ({Definition(source).Name}).", decider.Id, source.Id);
             SeeHandCards(p.ActingPlayerId, decider.Id, decider.Hand.ToArray(), Definition(source).Name); // private to the acting player (MatchView.HandSights)
+            // The Either/Or prompt is answered: clear it before the discard choice opens, or OpenDeciderChoice shelves it as a suspended Reaction window and gives it back stale when the discard is done (bot soak, issue #642: the match could never continue).
+            _state.PendingChoice = null;
             BeginDeciderChoice(EmperorP5Specs.PriceDiscard, p.Command!, p.ConsumedGrant, p.PlayedFromDiscard, p.OpponentHonorBefore, (p.BowedBefore ?? []).ToHashSet(StringComparer.Ordinal), p.PreExistingGrants);
         }
         else
@@ -397,59 +399,59 @@ public sealed partial class MatchEngine
                 Emit("abilitiesRemoved", $"{Definition(source!).Name}: this is not true enlightenment -- {Definition(target!).Name} permanently loses its abilities.", player.Id, target!.Id);
                 return false;
             case EmperorP5ZoneAbilities.DoubtsRefill:
-            {
-                var emptied = new List<ProvinceState>();
-                foreach (var card in (command.CardIds ?? []).Select(Card).ToArray())
                 {
-                    if (card.Zone != Zone.Province) continue;
-                    var province = player.Provinces.Single(p => p.CardId == card.Id);
-                    card.Zone = Zone.DynastyDiscard; card.ProvinceIndex = null; card.FaceUp = true; province.CardId = null;
-                    Emit("provinceDiscard", $"{Definition(card).Name} was discarded from {player.Name}'s province {province.Index + 1} ({Definition(source!).Name}).", player.Id, card.Id);
-                    emptied.Add(province);
+                    var emptied = new List<ProvinceState>();
+                    foreach (var card in (command.CardIds ?? []).Select(Card).ToArray())
+                    {
+                        if (card.Zone != Zone.Province) continue;
+                        var province = player.Provinces.Single(p => p.CardId == card.Id);
+                        card.Zone = Zone.DynastyDiscard; card.ProvinceIndex = null; card.FaceUp = true; province.CardId = null;
+                        Emit("provinceDiscard", $"{Definition(card).Name} was discarded from {player.Name}'s province {province.Index + 1} ({Definition(source!).Name}).", player.Id, card.Id);
+                        emptied.Add(province);
+                    }
+                    foreach (var province in emptied)
+                    {
+                        if (province.Destroyed || province.CardId is not null || player.DynastyDeck.Count == 0) continue;
+                        var refillId = player.DynastyDeck[^1]; player.DynastyDeck.RemoveAt(player.DynastyDeck.Count - 1);
+                        var refill = Card(refillId);
+                        province.CardId = refillId; refill.Zone = Zone.Province; refill.ProvinceIndex = province.Index; refill.FaceUp = true;
+                        Emit("provinceRefilled", $"{Definition(source!).Name}: {player.Name} refilled province {province.Index + 1} face up from the bottom of his deck with {Definition(refill).Name}.", player.Id, refillId);
+                    }
+                    return false;
                 }
-                foreach (var province in emptied)
-                {
-                    if (province.Destroyed || province.CardId is not null || player.DynastyDeck.Count == 0) continue;
-                    var refillId = player.DynastyDeck[^1]; player.DynastyDeck.RemoveAt(player.DynastyDeck.Count - 1);
-                    var refill = Card(refillId);
-                    province.CardId = refillId; refill.Zone = Zone.Province; refill.ProvinceIndex = province.Index; refill.FaceUp = true;
-                    Emit("provinceRefilled", $"{Definition(source!).Name}: {player.Name} refilled province {province.Index + 1} face up from the bottom of his deck with {Definition(refill).Name}.", player.Id, refillId);
-                }
-                return false;
-            }
             case EmperorP5ZoneAbilities.BlessingsStrength:
-            {
-                var blessed = Card(command.PerformerId!);
-                var dead = _state.Cards.Values.Count(c => c.Zone == Zone.Dead && Definition(c).Type == CardType.Personality);
-                if (dead > 0) ApplyModifier(blessed, source!.Id, id, "Force", dead);
-                if (InPlay(blessed))
                 {
-                    blessed.AbilityUses[BlessingsShieldKey] = _state.TurnNumber;
-                    Emit("shieldRaised", $"{Definition(source!).Name}: the next card effect that bows, destroys or moves {Definition(blessed).Name} this turn is negated.", player.Id, blessed.Id);
+                    var blessed = Card(command.PerformerId!);
+                    var dead = _state.Cards.Values.Count(c => c.Zone == Zone.Dead && Definition(c).Type == CardType.Personality);
+                    if (dead > 0) ApplyModifier(blessed, source!.Id, id, "Force", dead);
+                    if (InPlay(blessed))
+                    {
+                        blessed.AbilityUses[BlessingsShieldKey] = _state.TurnNumber;
+                        Emit("shieldRaised", $"{Definition(source!).Name}: the next card effect that bows, destroys or moves {Definition(blessed).Name} this turn is negated.", player.Id, blessed.Id);
+                    }
+                    return false;
                 }
-                return false;
-            }
             case EmperorP5ZoneAbilities.StepThroughVoid:
                 StepThroughTheVoid(player, Card(command.PerformerId!), source!);
                 return false;
             case EmperorP5ZoneAbilities.RiddleRebirth:
-            {
-                if (!InPlay(target!)) return false;
-                var unit = RiddleUnit(target!);
-                if (unit.Count == 1) { PutAtBottomOfOwnersDeck(target!, Definition(source!).Name); return false; }
-                return BeginDeciderChoice(EmperorP5Specs.RiddleOrder, command, consumedGrant, playedFromDiscard, opponentHonorBeforeBattleAction, bowedBeforeAction, preExistingGrants);
-            }
+                {
+                    if (!InPlay(target!)) return false;
+                    var unit = RiddleUnit(target!);
+                    if (unit.Count == 1) { PutAtBottomOfOwnersDeck(target!, Definition(source!).Name); return false; }
+                    return BeginDeciderChoice(EmperorP5Specs.RiddleOrder, command, consumedGrant, playedFromDiscard, opponentHonorBeforeBattleAction, bowedBeforeAction, preExistingGrants);
+                }
             case EmperorP5ZoneAbilities.TwoFoldVirtue:
                 return CreateTwoFoldVirtue(player, source!, target!);
             case EmperorP5ZoneAbilities.PriceOfHonor:
-            {
-                SpendHandPlayedCard(player, source);
-                if (!OpenEitherOr(EmperorP5Specs.PriceShowHand, source!, player.Id, target!.OwnerId, target, "action", bowedBeforeAction)) return false;
-                var pending = _state.PendingEitherOr!;
-                pending.Command = command; pending.ConsumedGrant = consumedGrant; pending.PlayedFromDiscard = playedFromDiscard; pending.OpponentHonorBefore = opponentHonorBeforeBattleAction;
-                pending.PreExistingGrants = preExistingGrants.ToList();
-                return true;
-            }
+                {
+                    SpendHandPlayedCard(player, source);
+                    if (!OpenEitherOr(EmperorP5Specs.PriceShowHand, source!, player.Id, target!.OwnerId, target, "action", bowedBeforeAction)) return false;
+                    var pending = _state.PendingEitherOr!;
+                    pending.Command = command; pending.ConsumedGrant = consumedGrant; pending.PlayedFromDiscard = playedFromDiscard; pending.OpponentHonorBefore = opponentHonorBeforeBattleAction;
+                    pending.PreExistingGrants = preExistingGrants.ToList();
+                    return true;
+                }
             default:
                 return RunEmperorP5Hidden(id, ability, command, player, source, target, consumedGrant, playedFromDiscard, opponentHonorBeforeBattleAction, bowedBeforeAction, preExistingGrants); // EmperorP5Hidden.cs
         }

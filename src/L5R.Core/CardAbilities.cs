@@ -6124,7 +6124,7 @@ public sealed partial class MatchEngine
         else if (ability.Target == "any-province")
         {
             Require(command.TargetId is null && (command.CardIds is null || command.CardIds.Length == 0), "This action targets a province, not a card.");
-            Require(command.TargetPlayerId is 0 or 1 && command.Province is int anyIdx && anyIdx is >= 0 and <= 3 && !Player(command.TargetPlayerId.Value).Provinces[anyIdx].Destroyed,
+            Require(command.TargetPlayerId is 0 or 1 && command.Province is int anyIdx && anyIdx is >= 0 and <= 3 && anyIdx < Player(command.TargetPlayerId.Value).Provinces.Count && !Player(command.TargetPlayerId.Value).Provinces[anyIdx].Destroyed,
                 "Choose a province (yours or the enemy's).");
         }
         // "Choose a player" (issue #210): a player, not a card, is the target -- either player is
@@ -11273,7 +11273,7 @@ public sealed partial class MatchEngine
                                    // A province target (Ring of Earth's "a province", a Reconnaissance grant's "an enemy province", issue #379) is a command parameter, not a card: one
                                    // candidate per province, and for "any province" one option per owner (whose province) -- the choices QueryActions could not enumerate before.
                                 int?[] destinations = ability.ChoosesOwnProvince ? player.Provinces.Where(p => !p.Destroyed && p.CardId is not null).Select(p => (int?)p.Index).ToArray()
-                                    : ability.Target is "any-province" or "enemy-province" ? Enumerable.Range(0, Player(playerId).Provinces.Count).Select(i => (int?)i).ToArray()
+                                    : ability.Target is "any-province" or "enemy-province" ? Enumerable.Range(0, _state.Players.Max(pl => pl.Provinces.Count)).Select(i => (int?)i).ToArray() /* either owner's province: sized to the larger count (bot soak, issue #642) */
                                     : id == "hawado-move-battlefield" ? _state.UnresolvedBattlefields.Select(p => (int?)p).ToArray()
                                     : ability.Move is { ChoosesBattlefield: true } chosenMove && MoveDestinations(chosenMove) is { Length: > 0 } listed ? listed.Select(p => (int?)p).ToArray()
                                     : ability.Target == "attack" && ability.AttackTargetsProvince && _state.CurrentBattleProvince is int battleProvince ? [null, battleProvince] : [null];

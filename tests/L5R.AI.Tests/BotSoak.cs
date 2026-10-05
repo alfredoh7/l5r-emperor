@@ -64,7 +64,7 @@ internal static class BotSoak
                 if (!actions.Any(x => x.Enabled && x.Type != "concede")) { var other = 1 - seat; var alt = Clone(game.QueryActions(other)); if (alt.Any(x => x.Enabled && x.Type != "concede")) { seat = other; actions = alt; } }
                 view = JsonSerializer.Deserialize<MatchView>(JsonSerializer.Serialize(game.GetView(seat)))!;
             }
-            catch (Exception e) { result.Findings.Add(new("exception", seed, 0, "-", "-", "engine-view", $"Engine threw reading views/actions: {e.GetType().Name}: {e.Message}", recent.ToArray())); result.Decisions = n; return result; }
+            catch (Exception e) { result.Findings.Add(new("exception", seed, 0, "-", "-", "engine-view", $"Engine threw reading views/actions: {e.GetType().Name}: {e.Message} :: {string.Join(" / ", (e.StackTrace ?? "").Split((char)10).Take(6).Select(l => l.Trim()))}", recent.ToArray())); result.Decisions = n; return result; }
             var enabled = actions.Where(x => x.Enabled && x.Type != "concede").ToArray();
             foreach (var key in enabled.Select(Key).Distinct()) Slot(result, key).Offered++;
             OpponentDecision decision;
