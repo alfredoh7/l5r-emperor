@@ -392,6 +392,15 @@ BLOCKERS: dict[str, str] = {
 }
 
 
+
+def load_pass_blockers(root: Path = ROOT) -> dict[str, dict]:
+    """Per-pass blocker files written as {card id: {"note": ..., "category": ...}} (the Promotional-Emperor pass, issue #653: pe_*_blockers.json).
+    A card that has since been wired is skipped by build() because only Unwired rows read these."""
+    merged: dict[str, dict] = {}
+    for path in sorted((root / "tools" / "content").glob("pe_*_blockers.json")):
+        merged.update(json.loads(path.read_text(encoding="utf-8")))
+    return merged
+
 def load_published_cards() -> dict[str, dict]:
     """Id -> the full published CardDefinition dict, for every card published into any
     content/published/*.json wave. Doubles as the wired-id set (its own keys) and as the source row
@@ -459,6 +468,7 @@ def build(root: Path = ROOT) -> dict:
     pool = json.loads(DECK_POOL.read_text(encoding="utf-8"))["cards"]
     published_cards = load_published_cards()
     wired_ids = set(published_cards)
+    pass_blockers = load_pass_blockers(root)
     sets_by_id = load_sets()
 
     rows = []
@@ -473,7 +483,7 @@ def build(root: Path = ROOT) -> dict:
             types[0],
             ", ".join(card.get("clans") or []) or "Unaligned",
             "Wired" if card["id"] in wired_ids else "Unwired",
-            BLOCKERS.get(card["id"], ""),
+            BLOCKERS.get(card["id"]) or pass_blockers.get(card["id"], {}).get("note", ""),
         ))
     # A wired card absent from deck-pool.json entirely -- see load_published_cards' own doc comment.
     for card_id, definition in published_cards.items():
@@ -557,7 +567,7 @@ def build(root: Path = ROOT) -> dict:
         cell.font = Font(bold=True)
         cell.fill = header_fill
     for row in rows:
-        sheet.append([*row, category_of.get(row[0], "") if row[5] == "Unwired" else ""])
+        sheet.append([*row, (category_of.get(row[0]) or pass_blockers.get(row[0], {}).get("category", "")) if row[5] == "Unwired" else ""])
     last_col = get_column_letter(len(header))
     table = Table(displayName="CardInventory", ref=f"A1:{last_col}{len(rows) + 1}")
     table.tableStyleInfo = TableStyleInfo(name="TableStyleMedium2", showRowStripes=True)
@@ -574,7 +584,7 @@ def build(root: Path = ROOT) -> dict:
             cell.font = Font(bold=True)
             cell.fill = header_fill
         for entry in category_data["categories"]:
-            count = sum(1 for code in category_of.values() if code == entry["code"])
+            count = sum(1 for code in category_of.values() if code == entry["code"]) + sum(1 for i, b in pass_blockers.items() if i not in category_of and i not in wired_ids and b.get("category") == entry["code"])
             cat_sheet.append([entry["code"], entry["title"], count, entry["description"]])
         for col, width in {"A": 12, "B": 60, "C": 8, "D": 110}.items():
             cat_sheet.column_dimensions[col].width = width

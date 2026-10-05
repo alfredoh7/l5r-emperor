@@ -62,25 +62,25 @@ public sealed partial class MatchEngine
         switch (id)
         {
             case PromoEmperorFateAbilities.ResurrectionRecruit or PromoEmperorFateAbilities.RenewalRecruit when ability.Slots is not null:
-            {
-                Require(SlotCards(command, "discard").All(card => card.Id != command.CardId), "A Strategy being played cannot be discarded to itself.");
-                if (id == PromoEmperorFateAbilities.RenewalRecruit)
-                    Require(Player(_state.ActivePlayerId).TurnsTaken > 2, "It is the active player's first or second turn.");
-                if (SlotCards(command, "target").FirstOrDefault() is { } recruit)
                 {
-                    var quote = QuotePurchase(player.Id, recruit.Id, fromDeadPile: true);
-                    Require(quote.Error is null, quote.Error ?? "");
+                    Require(SlotCards(command, "discard").All(card => card.Id != command.CardId), "A Strategy being played cannot be discarded to itself.");
+                    if (id == PromoEmperorFateAbilities.RenewalRecruit)
+                        Require(Player(_state.ActivePlayerId).TurnsTaken > 2, "It is the active player's first or second turn.");
+                    if (SlotCards(command, "target").FirstOrDefault() is { } recruit)
+                    {
+                        var quote = QuotePurchase(player.Id, recruit.Id, fromDeadPile: true);
+                        Require(quote.Error is null, quote.Error ?? "");
+                    }
+                    break;
                 }
-                break;
-            }
             case PromoEmperorFateAbilities.GovernHolding or PromoEmperorFateAbilities.FortHolding when command.TargetId is { } holdingId && _state.Cards.TryGetValue(holdingId, out var holding):
-            {
-                Require(holding.OwnerId == player.Id && holding.Zone == Zone.DynastyDiscard && Definition(holding).Type == CardType.Holding, "Choose a Holding in your discard pile.");
-                if (id == PromoEmperorFateAbilities.FortHolding) Require(Keyword(holding, "Castle"), "Choose a Castle Holding in your discard pile.");
-                var quote = QuotePurchase(player.Id, holding.Id, fromDeadPile: true);
-                Require(quote.Error is null, quote.Error ?? "");
-                break;
-            }
+                {
+                    Require(holding.OwnerId == player.Id && holding.Zone == Zone.DynastyDiscard && Definition(holding).Type == CardType.Holding, "Choose a Holding in your discard pile.");
+                    if (id == PromoEmperorFateAbilities.FortHolding) Require(Keyword(holding, "Castle"), "Choose a Castle Holding in your discard pile.");
+                    var quote = QuotePurchase(player.Id, holding.Id, fromDeadPile: true);
+                    Require(quote.Error is null, quote.Error ?? "");
+                    break;
+                }
             case PromoEmperorFateAbilities.GovernAttach when command.TargetId is { } attachmentId && _state.Cards.TryGetValue(attachmentId, out var attachment):
                 Require(attachment.Zone == Zone.FateDiscard && Definition(attachment).Type is CardType.Follower or CardType.Item, "Choose a Follower or Item in your discard pile.");
                 break;
@@ -137,7 +137,14 @@ public sealed partial class MatchEngine
             var other = 1 - p.ActingPlayerId;
             OpenDeciderChoice(new PendingDeciderChoice
             {
-                SpecId = PromoEmperorFateAbilities.CharterSecond, SourceCardId = p.SourceCardId, ActingPlayerId = p.ActingPlayerId, DeciderPlayerId = other, Candidates = [p.SourceCardId], Min = 0, Max = 1, Paused = p.Paused
+                SpecId = PromoEmperorFateAbilities.CharterSecond,
+                SourceCardId = p.SourceCardId,
+                ActingPlayerId = p.ActingPlayerId,
+                DeciderPlayerId = other,
+                Candidates = [p.SourceCardId],
+                Min = 0,
+                Max = 1,
+                Paused = p.Paused
             });
         }
         return true;
@@ -152,12 +159,12 @@ public sealed partial class MatchEngine
         {
             case PromoEmperorFateAbilities.ResurrectionRecruit:
             case PromoEmperorFateAbilities.RenewalRecruit:
-            {
-                // "Discard a card" was paid as a cost; the recruit's price too. A card no longer in the pile (an action in between) is simply not brought back.
-                var recruit = SlotCards(command, "target").First();
-                if (!IsDiscardedPersonality(recruit)) { Emit("raiseFailed", $"{Definition(recruit).Name} is no longer in the discard pile.", player.Id, recruit.Id); return false; }
-                return BringDeadPersonalityIntoPlay(player, recruit, Definition(source!).Name, null);
-            }
+                {
+                    // "Discard a card" was paid as a cost; the recruit's price too. A card no longer in the pile (an action in between) is simply not brought back.
+                    var recruit = SlotCards(command, "target").First();
+                    if (!IsDiscardedPersonality(recruit)) { Emit("raiseFailed", $"{Definition(recruit).Name} is no longer in the discard pile.", player.Id, recruit.Id); return false; }
+                    return BringDeadPersonalityIntoPlay(player, recruit, Definition(source!).Name, null);
+                }
             case PromoEmperorFateAbilities.GovernHolding:
             case PromoEmperorFateAbilities.FortHolding:
                 if (target!.Zone != Zone.DynastyDiscard) { Emit("raiseFailed", $"{Definition(target).Name} is no longer in the discard pile.", player.Id, target.Id); return false; }

@@ -293,7 +293,7 @@ public sealed partial class MatchEngine
 
     // Words that are ordinary English, not a family name, as the Torn Asunder supplement's rule of thumb has it ("the," "Master"): the first word of a two-word title is the family name when it is not one of
     // these and the Personality carries a Clan alignment (or a keyword ending in "Clan"). A three-word title or a Clanless Personality has no family name.
-    private static readonly string[] PromoNotFamilyWords = ["the", "a", "an", "master", "lord", "lady", "old", "great", "honorable", "young"];
+    private static readonly string[] PromoNotFamilyWords = ["the", "a", "an", "master", "lord", "lady", "old", "great", "honorable", "young", "little", "captain", "wise"];
 
     private string? PromoFamilyName(CardInstance card)
     {

@@ -164,11 +164,11 @@ public sealed partial class MatchEngine
                 Draw(player);
                 return false;
             case PromoEmperorFateAbilities.InterrogationNegate:
-            {
-                var held = _state.PendingNegatableAbility ?? throw new RuleViolation("No action is open to this reaction.");
-                if (PromoInterrogationProtected(source!, held, ReactionAffectedId(held)) is { } protectedCard) NegateEffects(protectedCard, "bow", "destroy");
-                return false;
-            }
+                {
+                    var held = _state.PendingNegatableAbility ?? throw new RuleViolation("No action is open to this reaction.");
+                    if (PromoInterrogationProtected(source!, held, ReactionAffectedId(held)) is { } protectedCard) NegateEffects(protectedCard, "bow", "destroy");
+                    return false;
+                }
             case PromoEmperorFateAbilities.WellProtectedBow:
             case PromoEmperorFateAbilities.WellProtectedDestroy:
                 NegateEffects(Card(HeldAction().TargetId!), "destroy");

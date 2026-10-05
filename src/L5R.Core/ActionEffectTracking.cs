@@ -113,7 +113,7 @@ public sealed partial class MatchEngine
         if (abilityId == "chrysanthemum-blossom-boost") return ChrysanthemumBlossomApplies(source, playerId, facts);
         if (PromoAfterActionApplies(source, abilityId, playerId, facts) is { } promoAfter) return promoAfter; // Closing the Gap (issue #653, PromoEmperorFateReactions.cs)
         if (WithoutMercyApplies(source, abilityId, playerId, facts) is { } withoutMercy) return withoutMercy; // issue #648 (WithoutMercy.cs): a Battle action by your Samurai that targeted no enemy card
-        if (PromoItemsAfterActionApplies(source, abilityId, playerId, facts) is { } promoAfter) return promoAfter; // The Ivory Sword (PromoEmperorItems.cs): an action by a dishonorable Personality who opposed it
+        if (PromoItemsAfterActionApplies(source, abilityId, playerId, facts) is { } promoItemsAfter) return promoItemsAfter; // The Ivory Sword (PromoEmperorItems.cs): an action by a dishonorable Personality who opposed it
         if (P3AssignmentOrActionApplies(source, abilityId, facts) is { } p3Assigned) return p3Assigned; // Utaku Tairu - exp (issue #503): "after a Personality assigns or moves"
         if (facts.AbilityId == AssignedSentinel) return false;
         if (!AbilityCatalog.All.ContainsKey(facts.AbilityId)) return false;

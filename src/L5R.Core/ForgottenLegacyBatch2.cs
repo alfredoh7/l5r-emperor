@@ -21,11 +21,11 @@ public sealed partial class MatchEngine
             case "vengeful-attack": return ResolveOrDeferAttack(id, player, target?.Id, ActionPerformer(ability, command, source).Id, consumedGrant);
             // "If this Personality is Nonhuman: Straighten this unit" -- the Personality the Follower is attached to, and every card attached to him.
             case "vengeful-straighten":
-            {
-                if (source!.AttachedTo is string hostId && Card(hostId) is { } host && Keyword(host, "Nonhuman")) StraightenUnit(host);
-                else Emit("effectFailed", $"{Definition(source).Name}: its Personality is not Nonhuman, so nothing is straightened.", player.Id, source.Id);
-                return false;
-            }
+                {
+                    if (source!.AttachedTo is string hostId && Card(hostId) is { } host && Keyword(host, "Nonhuman")) StraightenUnit(host);
+                    else Emit("effectFailed", $"{Definition(source).Name}: its Personality is not Nonhuman, so nothing is straightened.", player.Id, source.Id);
+                    return false;
+                }
             case "koyama-weaken": KoyamaWeakenUnit(source!, target!, id, player.Id); return false;
             case "xiao-destroy": DestroyTargetCard(target!, player.Id); return false;
             case "shiho-return": ShihoReturn(source!, target!); return false;
@@ -42,7 +42,8 @@ public sealed partial class MatchEngine
                 TakeImperialFavor(player.Id);
                 Emit("favorTaken", $"{player.Name} took the Imperial Favor ({Definition(source!).Name}).", player.Id, source!.Id);
                 return false;
-            case "shakash-bow": case "osawa-bow":
+            case "shakash-bow":
+            case "osawa-bow":
                 if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
                 return false;
             case "shakash-move-home": ExecuteMove(command, ability, source, target); return false;

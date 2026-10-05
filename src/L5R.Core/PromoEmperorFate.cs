@@ -111,13 +111,13 @@ public sealed partial class MatchEngine
         {
             // The wielder's keyword decides which of the two entries is the legal one.
             case PromoEmperorFateAbilities.MightBow or PromoEmperorFateAbilities.MightFree:
-            {
-                Require(source is { Zone: Zone.Attached, AttachedTo: { } hostId } && _state.Cards.TryGetValue(hostId, out _), "This Spell must be attached to a Shugenja.");
-                var wielder = Card(source!.AttachedTo);
-                var elemental = Keyword(wielder, "Fire") || Keyword(wielder, "Thunder");
-                Require(id == PromoEmperorFateAbilities.MightFree ? elemental : !elemental, elemental ? "This Shugenja is Fire or Thunder, so he does not bow." : "This Shugenja is neither Fire nor Thunder: he bows.");
-                break;
-            }
+                {
+                    Require(source is { Zone: Zone.Attached, AttachedTo: { } hostId } && _state.Cards.TryGetValue(hostId, out _), "This Spell must be attached to a Shugenja.");
+                    var wielder = Card(source!.AttachedTo);
+                    var elemental = Keyword(wielder, "Fire") || Keyword(wielder, "Thunder");
+                    Require(id == PromoEmperorFateAbilities.MightFree ? elemental : !elemental, elemental ? "This Shugenja is Fire or Thunder, so he does not bow." : "This Shugenja is neither Fire nor Thunder: he bows.");
+                    break;
+                }
             // "Target a Ring": only one in play (the listing category also names the player's own Rings in the Fate discard pile).
             case PromoEmperorFateAbilities.Adroitness when command.TargetId is { } ringId && _state.Cards.TryGetValue(ringId, out var ring):
                 Require(Definition(ring).Type == CardType.Ring && InPlay(ring), "Target a Ring in play.");
@@ -149,11 +149,11 @@ public sealed partial class MatchEngine
             case PromoEmperorFateAbilities.BarFightAttack:
                 return 4 + (performerId is not null && _state.Cards.TryGetValue(performerId, out var fighter) ? TokenCount(fighter, "Sake") : 0);
             case PromoEmperorFateAbilities.TamoriPotion:
-            {
-                if (performerId is null || !_state.Cards.TryGetValue(performerId, out var chemist)) return 4;
-                var elements = UnitMembers(chemist).SelectMany(member => PromoElements.Where(element => Keyword(member, element))).Distinct(StringComparer.Ordinal).Count();
-                return 4 + (Keyword(chemist, "Alchemist") ? 1 : 0) + elements;
-            }
+                {
+                    if (performerId is null || !_state.Cards.TryGetValue(performerId, out var chemist)) return 4;
+                    var elements = UnitMembers(chemist).SelectMany(member => PromoElements.Where(element => Keyword(member, element))).Distinct(StringComparer.Ordinal).Count();
+                    return 4 + (Keyword(chemist, "Alchemist") ? 1 : 0) + elements;
+                }
             default:
                 return null;
         }
@@ -219,33 +219,33 @@ public sealed partial class MatchEngine
                 BeginSearch(ability.Search!, source!, player.Id, "ability", bowedBeforeAction);
                 return true;
             case PromoEmperorFateAbilities.Glimpse:
-            {
-                // "You may discard a card": the chosen one (an effect, so it is skipped when the action is negated). Then draw until exactly two cards are held (the Strategy in play is not one).
-                foreach (var discard in SlotCards(command, "discard").ToArray()) DiscardFate(player, discard);
-                var held = player.Hand.Count(h => h != source!.Id);
-                for (var i = held; i < 2; i++) Draw(player);
-                Emit("glimpseOfFate", $"{player.Name} holds {player.Hand.Count(h => h != source!.Id)} card(s) in hand.", player.Id, source!.Id);
-                return false;
-            }
+                {
+                    // "You may discard a card": the chosen one (an effect, so it is skipped when the action is negated). Then draw until exactly two cards are held (the Strategy in play is not one).
+                    foreach (var discard in SlotCards(command, "discard").ToArray()) DiscardFate(player, discard);
+                    var held = player.Hand.Count(h => h != source!.Id);
+                    for (var i = held; i < 2; i++) Draw(player);
+                    Emit("glimpseOfFate", $"{player.Name} holds {player.Hand.Count(h => h != source!.Id)} card(s) in hand.", player.Id, source!.Id);
+                    return false;
+                }
             case PromoEmperorFateAbilities.FallenBow:
                 if (!IsTerrainCard(target!) && !StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
                 return false;
             case PromoEmperorFateAbilities.CatLook:
-            {
-                var performer = Card(command.PerformerId!);
-                GainHonor(player.Id, -1, "It Was a Cat", source);
-                SpendHandPlayedCard(player, source); // a Strategy is spent as it is played: the look finishes the action
-                BeginLook(ability.Look!, source!, player.Id, "ability", bowedBeforeAction, Keyword(performer, "Ninja") ? 4 : 3);
-                return true;
-            }
+                {
+                    var performer = Card(command.PerformerId!);
+                    GainHonor(player.Id, -1, "It Was a Cat", source);
+                    SpendHandPlayedCard(player, source); // a Strategy is spent as it is played: the look finishes the action
+                    BeginLook(ability.Look!, source!, player.Id, "ability", bowedBeforeAction, Keyword(performer, "Ninja") ? 4 : 3);
+                    return true;
+                }
             case PromoEmperorFateAbilities.SinkholeTerrain:
             case PromoEmperorFateAbilities.SinkholeRegion:
-            {
-                // The obstacle is destroyed first (the Terrain through DiscardTerrain, the Region through DestroyRegion), then the acting player chooses bow or move home for the Personality.
-                if (id == PromoEmperorFateAbilities.SinkholeTerrain && PromoTerrainAtBattle() is { } terrain) { DiscardTerrain(terrain); player.TerrainDestroyedThisBattle = true; }
-                else if (id == PromoEmperorFateAbilities.SinkholeRegion && PromoRegionAtBattle() is { } region) DestroyRegion(region);
-                return BeginConditionalChoice(command, ability, consumedGrant, false, null, bowedBeforeAction, []);
-            }
+                {
+                    // The obstacle is destroyed first (the Terrain through DiscardTerrain, the Region through DestroyRegion), then the acting player chooses bow or move home for the Personality.
+                    if (id == PromoEmperorFateAbilities.SinkholeTerrain && PromoTerrainAtBattle() is { } terrain) { DiscardTerrain(terrain); player.TerrainDestroyedThisBattle = true; }
+                    else if (id == PromoEmperorFateAbilities.SinkholeRegion && PromoRegionAtBattle() is { } region) DestroyRegion(region);
+                    return BeginConditionalChoice(command, ability, consumedGrant, false, null, bowedBeforeAction, []);
+                }
             case PromoEmperorFateAbilities.TremblingBow:
                 if (!IsTerrainCard(target!) && !StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
                 if (source is { Zone: Zone.Attached }) DestroyAttachment(source);

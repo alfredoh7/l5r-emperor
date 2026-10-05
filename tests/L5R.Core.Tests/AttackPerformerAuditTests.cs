@@ -32,7 +32,9 @@ internal static class AttackPerformerAuditTests
         // Issue #503 (pass group P5): Tsubute ("Choose your performing Ninja", both ways to pay) and Shiba Jouta - exp ("choose your performing Shugenja", alive and dead) print named performers.
         "p5-tsubute-attack", "p5-tsubute-attack-hand", "p5-jouta-attack", "p5-jouta-attack-dead",
         // Issue #566: The Lion's Charge ("Bow your performing Personality or Follower: Ranged 2 Attack") prints a named performer, Akio's own shape.
-        "lions-charge-attack"];
+        "lions-charge-attack",
+        // Issue #653 (Promotional-Emperor): Bar Fight ("Target your performing unbowed Personality") and Tamori Potion ("Bow your performing Personality") print named performers.
+        "pe-bar-fight-attack", "pe-tamori-potion-attack"];
     private static readonly string[] NotANamedPerformer = ["carpenter-castle-siege", "cleansing-path-attack", "haruma-attack", "strength-of-the-divine-force", "strength-of-the-divine-honor", "thunders-wrath-attack", "tomiko-attack", "yayu-bow-attack", "yayu-destroy-attack",
         // Issue #566: Tempest of Flame ("Bow this Shugenja: Ranged 5 Attack") prints no named performer -- its own-wielder Performer only names the Spell's wielder, the core rules' performer of a Spell's action anyway.
         "tempest-of-flame-attack"];

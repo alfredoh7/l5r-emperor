@@ -162,39 +162,43 @@ public sealed partial class MatchEngine
         switch (id)
         {
             // Armor of the Heavens: the chosen player gains or loses 2 Honor; the performer is the wielder (a dishonorable one rehonors instead of granting his own controller Honor).
-            case "armor-heavens-gain": case "armor-heavens-lose":
-            {
-                var wielder = source!.AttachedTo is { } hostId ? Card(hostId) : source;
-                ApplyPlayerHonorChoice(wielder, command.TargetPlayerId!.Value, id == "armor-heavens-gain" ? 2 : -2);
-                return false;
-            }
-            case "blade-perfection-attach": case "kensais-blade-attach":
+            case "armor-heavens-gain":
+            case "armor-heavens-lose":
+                {
+                    var wielder = source!.AttachedTo is { } hostId ? Card(hostId) : source;
+                    ApplyPlayerHonorChoice(wielder, command.TargetPlayerId!.Value, id == "armor-heavens-gain" ? 2 : -2);
+                    return false;
+                }
+            case "blade-perfection-attach":
+            case "kensais-blade-attach":
                 return ExecuteAttach(command, ability.Attach!, player, source, target);
             case "chrysanthemum-blossom-boost":
-            {
-                var host = Card(source!.AttachedTo);
-                CreateToken(host, "Force", id, "Force", 1);
-                GainHonorFromPerformer(host, 1, "Chrysanthemum Blossom");
-                return false;
-            }
+                {
+                    var host = Card(source!.AttachedTo);
+                    CreateToken(host, "Force", id, "Force", 1);
+                    GainHonorFromPerformer(host, 1, "Chrysanthemum Blossom");
+                    return false;
+                }
             case "modifications-draw":
                 Draw(player);
                 return false;
             case "sasumata-bow":
                 if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
                 return false;
-            case "tsuruchi-daikyu-attack": case "tsuruchi-house-guard-attack": case "ikoma-house-guard-attack":
+            case "tsuruchi-daikyu-attack":
+            case "tsuruchi-house-guard-attack":
+            case "ikoma-house-guard-attack":
                 return ResolveOrDeferAttack(id, player, target?.Id, ActionPerformer(ability, command, source).Id, consumedGrant);
             case "ikiryo-attack":
-            {
-                // The Follower was destroyed as the cost; it remembers the Personality it was last attached to. "Lose Honor equal to that Personality's Chi and dishonor him."
-                if (source!.LastHostId is { } lastHostId && _state.Cards.TryGetValue(lastHostId, out var lastHost))
                 {
-                    GainHonor(player.Id, -PersonalityChi(lastHost), "Ikiryo", source);
-                    if (InPlay(lastHost) && Definition(lastHost).Type == CardType.Personality) Dishonor(lastHost, player.Id);
+                    // The Follower was destroyed as the cost; it remembers the Personality it was last attached to. "Lose Honor equal to that Personality's Chi and dishonor him."
+                    if (source!.LastHostId is { } lastHostId && _state.Cards.TryGetValue(lastHostId, out var lastHost))
+                    {
+                        GainHonor(player.Id, -PersonalityChi(lastHost), "Ikiryo", source);
+                        if (InPlay(lastHost) && Definition(lastHost).Type == CardType.Personality) Dishonor(lastHost, player.Id);
+                    }
+                    return ResolveOrDeferAttack(id, player, target?.Id, source.Id, consumedGrant);
                 }
-                return ResolveOrDeferAttack(id, player, target?.Id, source.Id, consumedGrant);
-            }
             case "kaiu-house-guard-destroy":
                 DestroyTargetCard(target!, player.Id);
                 GainHonor(player.Id, 1, "Kaiu House Guard", source);
@@ -237,7 +241,10 @@ public sealed partial class MatchEngine
         if (!assigned.Any(id => _state.Cards.TryGetValue(id, out var c) && c.Zone == Zone.Battlefield && Attachments(id).Any(a => AbilityIdsOf(a).Contains("chrysanthemum-blossom-boost"))) && !P3WatchesAssignment(assigned)) return; // + Utaku Tairu - exp (issue #503)
         _state.LastResolvedAction = new ResolvedActionFacts
         {
-            AbilityId = AssignedSentinel, PlayerId = playerId, SourceId = null, PerformerId = null,
+            AbilityId = AssignedSentinel,
+            PlayerId = playerId,
+            SourceId = null,
+            PerformerId = null,
             Affected = assigned.Select(id => new AffectedCard(id, AssignedKind)).ToList()
         };
         var closesTo = _state.PriorityPlayerId;

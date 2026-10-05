@@ -134,13 +134,13 @@ public sealed partial class MatchEngine
                 _state.RingSchismTurn = _state.TurnNumber;
                 return false;
             case PromoEmperorEventAbilities.FeverBreaks:
-            {
-                var destroyed = 0;
-                foreach (var tokenCard in _state.Cards.Values.Where(c => c.Tokens.Any(t => t.Type == "Madness")).OrderBy(c => c.Id, StringComparer.Ordinal).ToArray())
-                    foreach (var token in tokenCard.Tokens.Where(t => t.Type == "Madness").ToArray()) { DestroyToken(tokenCard, token); destroyed++; }
-                Emit("eventResolved", $"{Definition(card).Name}: {destroyed} Madness token(s) were destroyed.", player.Id, card.Id);
-                return DiscardResolvedEvent(player, province, card);
-            }
+                {
+                    var destroyed = 0;
+                    foreach (var tokenCard in _state.Cards.Values.Where(c => c.Tokens.Any(t => t.Type == "Madness")).OrderBy(c => c.Id, StringComparer.Ordinal).ToArray())
+                        foreach (var token in tokenCard.Tokens.Where(t => t.Type == "Madness").ToArray()) { DestroyToken(tokenCard, token); destroyed++; }
+                    Emit("eventResolved", $"{Definition(card).Name}: {destroyed} Madness token(s) were destroyed.", player.Id, card.Id);
+                    return DiscardResolvedEvent(player, province, card);
+                }
             case PromoEmperorEventAbilities.LegionnairesAppointment:
                 return PromoBeginAppointment(player, province, card, c => Definition(c).Type == CardType.Personality, "choose one of your Personalities in play: he is permanently given Conqueror");
             case PromoEmperorEventAbilities.Amethyst:
@@ -178,16 +178,7 @@ public sealed partial class MatchEngine
 
     // ---- Family Maneuvers and Yozo's Inspiration (Personality Force) ----------------------------------------------------------------------------------------------------------
 
-    private static readonly HashSet<string> PromoOrdinaryWords = new(StringComparer.OrdinalIgnoreCase) { "the", "a", "an", "master", "lady", "lord", "old", "young", "great", "little", "captain", "wise" };
-
-    // The Torn Asunder rule of thumb (core rules supplement): the first word of a two-word title that is not an ordinary English word, on a Personality with a Clan alignment or a Clan keyword.
-    private string? PromoFamilyName(CardInstance personality)
-    {
-        var words = Definition(personality).Name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        if (words.Length != 2 || PromoOrdinaryWords.Contains(words[0])) return null;
-        var aligned = ClanAlignments(personality).Length > 0 || (Definition(personality).Keywords ?? []).Any(k => k.EndsWith(" Clan", StringComparison.Ordinal));
-        return aligned ? words[0] : null;
-    }
+    // Family Name: PromoFamilyName (PromoEmperorItems.cs), the Torn Asunder rule of thumb shared with Family Sword.
 
     internal int PromoEventForce(CardInstance card)
     {
@@ -422,13 +413,13 @@ public sealed partial class MatchEngine
                 if (target!.Zone == Zone.Attached && InPlay(target)) DestroyTargetCard(target, player.Id);
                 return false;
             case PromoEmperorEventAbilities.RubyBow:
-            {
-                if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
-                if (target is null || !InPlay(target) || !target.Dishonorable) return false;
-                var options = UnitCardsWithoutAttachments(target).Select(c => new EffectOption(c.Id, $"Destroy {Definition(c).Name}", [Batch1DestroyCardEffect + c.Id])).ToArray();
-                return BeginListedEffectChoice(command, options, $"{Definition(source!).Name}: choose the card without attachments in {Definition(target).Name}'s unit to destroy.",
-                    consumedGrant, playedFromDiscard, opponentHonorBeforeBattleAction, bowedBeforeAction, preExistingGrants);
-            }
+                {
+                    if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
+                    if (target is null || !InPlay(target) || !target.Dishonorable) return false;
+                    var options = UnitCardsWithoutAttachments(target).Select(c => new EffectOption(c.Id, $"Destroy {Definition(c).Name}", [Batch1DestroyCardEffect + c.Id])).ToArray();
+                    return BeginListedEffectChoice(command, options, $"{Definition(source!).Name}: choose the card without attachments in {Definition(target).Name}'s unit to destroy.",
+                        consumedGrant, playedFromDiscard, opponentHonorBeforeBattleAction, bowedBeforeAction, preExistingGrants);
+                }
             case PromoEmperorEventAbilities.TopazDestroy:
                 DestroyTargetCard(target!, player.Id);
                 return false;

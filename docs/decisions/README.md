@@ -31,3 +31,5 @@ interpretation this register's decision docs already settled.
 - [Proclaim flow](2026-10-04-proclaim-flow.md) — accepted: the Proclaim window closes when nothing is left to react with; the first Personality bought each turn defaults to Proclaim, later ones to the Clan discount, a missed Honor Requirement to allegiance.
 
 - [Playtest fixes (#644)](2026-10-05-playtest-fixes-644.md) — accepted: entry-reaction windows close when nothing is left to take, a face-up Celestial enters play at once, Steel on Steel needs a performer at the battlefield, the bot always uses its own entering-play Reactions.
+
+- [Promotional-Emperor pass (#653)](2026-10-05-promotional-emperor-pass.md) — accepted as readings: 106 of 134 unwired Promotional-Emperor cards wired, 28 blocked with notes; the rules readings and open questions for Mendon are listed.

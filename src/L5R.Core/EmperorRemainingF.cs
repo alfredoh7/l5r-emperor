@@ -280,12 +280,12 @@ public sealed partial class MatchEngine
                 for (var i = 0; i < PaidGoldAmount(command); i++) CreateToken(source!, MoneylenderTokenType, id);
                 return false;
             case "falling-rain-boost":
-            {
-                var duelist = FallingRainDuelist(player.Id)!;
-                _state.PendingDuel!.StatBonuses[duelist.Id] = _state.PendingDuel.StatBonuses.GetValueOrDefault(duelist.Id) + 1;
-                Emit("duelStatBonus", $"{Definition(source!).Name}: {Definition(duelist).Name} has +1 to his duel stat until the duel ends.", player.Id, duelist.Id);
-                return false;
-            }
+                {
+                    var duelist = FallingRainDuelist(player.Id)!;
+                    _state.PendingDuel!.StatBonuses[duelist.Id] = _state.PendingDuel.StatBonuses.GetValueOrDefault(duelist.Id) + 1;
+                    Emit("duelStatBonus", $"{Definition(source!).Name}: {Definition(duelist).Name} has +1 to his duel stat until the duel ends.", player.Id, duelist.Id);
+                    return false;
+                }
             case "chugo-seido-redirect":
                 RedirectAction(HeldAction(), target!.Id, source!);
                 return false;
@@ -298,7 +298,9 @@ public sealed partial class MatchEngine
             case "peddler-draw":
                 Draw(player);
                 return false;
-            case "temples-gisei-follower": case "temples-gisei-item": case "temples-gisei-spell":
+            case "temples-gisei-follower":
+            case "temples-gisei-item":
+            case "temples-gisei-spell":
                 BeginLook(ability.Look!, source!, player.Id, "ability", bowedBefore);
                 return true;
             case "refuge-three-sisters-search":

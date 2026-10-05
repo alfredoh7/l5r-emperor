@@ -125,7 +125,9 @@ public sealed partial class MatchEngine
     // phase already knows it -- and the Honor each gained from a battle's resolution is added up as it is gained (GainHonor's hook).
     private static int RulesPhase(Phase phase) => phase switch
     {
-        Phase.Straighten => 0, Phase.Events => 1, Phase.Action => 2,
+        Phase.Straighten => 0,
+        Phase.Events => 1,
+        Phase.Action => 2,
         Phase.AttackDeclaration or Phase.InfantryDeclaration or Phase.DefenseAssignment or Phase.CavalryDeclaration or Phase.CavalryDefense or Phase.BattleSelection or Phase.Battle => 3,
         Phase.Dynasty or Phase.DynastyDiscard => 4,
         Phase.End => 5,
