@@ -114,6 +114,21 @@ public partial class Main
         _cameraCenter = from; _cameraZoom = zoom; ApplyTableCamera();
     }
 
+    // Entering the Dynasty Phase (after Battle, every turn): snap the table back to the fitted view once, before the player is shown End Dynasty.
+    // Keyed per match/turn/seat so it never fights the player's own pan/zoom later in the phase; it waits out a battle presentation (which hides the
+    // footer and re-frames afterwards) and never disturbs a capture.
+    private (string Match, int Viewer, int Turn, int Owner)? _framedDynasty;
+    private void FrameDynasty()
+    {
+        if (_capturePath is not null && !_captureMode.Contains("dynasty-flow", StringComparison.Ordinal) || _session.Snapshot is null) return;
+        if (View.Phase != L5R.Core.Phase.Dynasty) { _framedDynasty = null; return; }
+        if (PresentationBusy || View.ActivePlayerId != View.ViewerId) return;
+        var key = (_session.MatchKey, View.ViewerId, View.TurnNumber, View.ActivePlayerId);
+        if (_framedDynasty == key) return;
+        _framedDynasty = key;
+        ResetTableCamera(); // an instant snap, so reduced motion needs no special case
+    }
+
     private void ResetTableCamera()
     {
         _cameraGlide = false; _cameraFitted = true; _cameraDragging = false;

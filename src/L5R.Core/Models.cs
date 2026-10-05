@@ -379,6 +379,8 @@ public sealed class PlayerState
     public string? ProclaimedCardId { get; set; }
     /// <summary>The turn this player last bought a Personality from a province (issue #639): the next purchase that turn is no longer the one that defaults to Proclaim.</summary>
     public int PersonalityPurchaseTurn { get; set; } = -1;
+    /// <summary>True once this player has bought, overlaid or discarded a province card since the current Dynasty Phase began; reset when a Dynasty Phase begins. Lets a client confirm an End Dynasty that would do neither. Derived from commands, so replay recomputes it.</summary>
+    public bool DynastyActionTaken { get; set; }
     public bool DishonorLossPending { get; set; }
     // Utaku Chikako's own Limited ability (issue #186): "You may not declare an attack this turn" --
     // a broad restriction (not just her own printed card's interaction), so it blocks declaring an
@@ -1432,6 +1434,8 @@ public sealed record PlayerView(int Id, string Name, string Clan, int Honor, int
     CardView[]? Underneath = null)
 {
     public HandLimitView? HandLimit { get; init; }
+    /// <summary>True once this player bought, overlaid or discarded a province card since the current Dynasty Phase began (public; absent/false in older payloads).</summary>
+    public bool DynastyActionTaken { get; init; }
 }
 public sealed record HandLimitModifier(string CardId, string CardName, int Amount);
 public sealed record HandLimitView(int Base, int Maximum, HandLimitModifier[] Modifiers);

@@ -534,6 +534,7 @@ public partial class Main : Node
         if (View.Scenario is PublishedContent.Scenario or CustomPractice.Scenario) _status.Text += $"  ·  Favor: {(View.FavorPlayerId is int favor ? View.Players[favor].Clan : "unclaimed")}";
         if (_session.Online && _session.Snapshot.PlayersConnected is { } connected && connected.Any(p => !p)) _status.Text = $"Room {_session.Snapshot.RoomCode} · waiting for both players to connect";
         ObserveCopyResults();
+        FrameDynasty(); // before the End Dynasty button is built
         RenderTimeline(); RenderBoard(); RenderInspector(); RenderPhaseActions(); Highlight(); FrameNewBattle(); FrameReactionTarget();
         RenderBattleFeedback();
         ObserveShownCards();
