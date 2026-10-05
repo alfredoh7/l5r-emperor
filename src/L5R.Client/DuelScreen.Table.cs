@@ -8,6 +8,8 @@ public partial class DuelScreen
     private readonly Dictionary<(int, Zone), DuelFatePile> _piles = [];
     private readonly List<(Vector2 Point, string Text, float Width, Action? Open)> _tableLabels = [];
     private Button? _landing;
+    // "+X instead of focusing" (Kakita Gonji's +4, a Reserve Weapon's +3): one clickable bonus per engine option, on the controller's side of the board (issue #645).
+    private readonly List<Button> _bonusButtons = [];
     private Panel? _landingCue;
     private int _landingCueState = -1;
     internal bool LandingArmed { get; private set; }
@@ -200,6 +202,7 @@ public partial class DuelScreen
     {
         if (_landing is not null && GodotObject.IsInstanceValid(_landing)) { _plane.RemoveChild(_landing); _landing.QueueFree(); }
         _landing = null; _landingCue = null; _landingCueState = -1; LandingArmed = false;
+        RenderBonusButtons();
         if (Snapshot is null || InputLocked || PresentationBusy || SelectedFocusCommand() is not { } command) return;
         var count = Snapshot.View.Players[Snapshot.View.ViewerId].FocusCount;
         _landing = new Button { Name = _selectedDeck ? "Focus from deck" : "Focus selected card", Text = "PLACE\nFOCUS", TooltipText = _selectedDeck ? "Commit the top Fate card without looking. Enter also commits." : "Commit the selected hand card. Enter also commits.", Size = new Vector2(120, 166), ZIndex = 3, MouseDefaultCursorShape = CursorShape.PointingHand };
@@ -212,6 +215,28 @@ public partial class DuelScreen
         _landing.Disabled = _submitted || _commandCooldown > 0; _landing.Pressed += () => Submit(command); _plane.AddChild(_landing);
         _landingCue = new Panel { Position = new Vector2(-6, -6), Size = _landing.Size + new Vector2(12, 12), ShowBehindParent = true, MouseFilter = MouseFilterEnum.Ignore }; _landing.AddChild(_landingCue);
         UpdateLandingCue(_lastHoverPointer);
+    }
+    private void RenderBonusButtons()
+    {
+        foreach (var old in _bonusButtons) if (GodotObject.IsInstanceValid(old)) { _plane.RemoveChild(old); old.QueueFree(); }
+        _bonusButtons.Clear();
+        if (Snapshot is null || InputLocked || PresentationBusy) return;
+        var index = 0;
+        foreach (var option in Legal.Where(a => a.Type == "focus" && (a.Command!.Choice == "p2-gonji" || a.Command.Choice == "reserve")))
+        {
+            var command = option.Command!;
+            var amount = new string(option.Label.SkipWhile(c => c != '+').Skip(1).TakeWhile(char.IsDigit).ToArray());
+            var button = new Button { Name = "Bonus " + command.Choice + " " + command.CardId, Text = "+" + (amount.Length == 0 ? "?" : amount), CustomMinimumSize = new Vector2(92, 76), Size = new Vector2(92, 76), AccessibilityName = option.Label };
+            button.Position = PlanePoint(new Vector2(FocusPoint(0, 0).X - 76 + index++ * 100, 690)) - button.Size / 2;
+            button.TooltipText = option.Label + "\n\nYou may apply this bonus to your duel stat instead of focusing a card.";
+            foreach (var state in new[] { "normal", "hover", "pressed", "disabled" }) button.AddThemeStyleboxOverride(state, DuelUi.FocusFrame(state == "hover"));
+            button.AddThemeStyleboxOverride("focus", Palette.Box(Colors.Transparent, Palette.Paper, 1, 0));
+            button.AddThemeFontOverride("font", DuelUi.Heading);
+            foreach (var state in new[] { "font_color", "font_hover_color", "font_pressed_color", "font_focus_color" }) button.AddThemeColorOverride(state, Palette.Paper);
+            button.AddThemeFontSizeOverride("font_size", 40);
+            button.Disabled = _submitted || _commandCooldown > 0; button.Pressed += () => Submit(command);
+            _plane.AddChild(button); _bonusButtons.Add(button);
+        }
     }
     private void UpdateLandingCue(Vector2 pointer)
     {

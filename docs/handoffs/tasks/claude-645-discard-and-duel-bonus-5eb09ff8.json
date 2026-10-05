@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Dynasty: a Discard placard under Confirm purchase when a face-up province card is selected (the plain action also reads Discard now). Duel: the engine's focus options 'instead of focusing +X' (Kakita Gonji +4, Reserve Weapon +3) were never surfaced by the duel screen; each now shows a clickable +X on the controller's side of the board with a tooltip saying it may be applied instead of focusing. Client only; shared lane because the changed paths span both lanes (Mendon has standing authority).",
+  "validation": "dotnet build src/L5R.Client succeeded; dotnet format whitespace clean. Not run natively: no Godot playtest or probe of the new buttons (no Gonji duel scenario exists), so button placement and look are unverified.",
+  "remaining": "Native check of +X button placement/look and the Discard placard; the engine's Gonji option is unchanged.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/645",
+  "branch": "claude/645-discard-and-duel-bonus",
+  "updated": "2026-10-05T02:51:20.192450+00:00"
+}
