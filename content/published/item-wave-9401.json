@@ -1,0 +1,56 @@
+{
+  "Profile": "item-wave-9401",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-1432",
+      "Name": "Colonist's Mark",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After an action targets this Personality, discard a card: Negate this Personality's movement from the action's effects.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1432.jpg",
+      "Keywords": [],
+      "Focus": 3,
+      "Abilities": [
+        "promo-d-colonists-mark-negate-move"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-3742",
+      "Name": "Inexpensive Armor",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Ranged Attacks targeting this Personality have -2 strength.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-3742.jpg",
+      "Keywords": [
+        "Armor"
+      ],
+      "Focus": 2,
+      "Abilities": [],
+      "Effect": "none",
+      "AttackDefenseKind": "Ranged",
+      "AttackDefenseAmount": -2,
+      "AttackDefenseScope": "Wielder"
+    }
+  ],
+  "Decks": []
+}
