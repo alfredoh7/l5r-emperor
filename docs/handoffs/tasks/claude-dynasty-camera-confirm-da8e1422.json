@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Camera snaps to the fitted view once per turn on entering Dynasty (before End Dynasty is shown); End Dynasty asks for confirmation when nothing was bought, overlaid or discarded. New additive Core field PlayerView.DynastyActionTaken (PlayerState.DynastyActionTaken), derived from commands.",
+  "validation": "dotnet run tests/L5R.Core.Tests all pass incl. new DynastyActionFlag; tools/check.sh --skip-client passed; native probe check-support-cards dynasty-flow mode passed (default mode fails on pre-existing issue 658); tools/content unittests 150 OK. Visuals not viewed by a person.",
+  "remaining": "None; ready for review. Human playtest of camera feel and dialog wording pending.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/659",
+  "branch": "claude/dynasty-camera-confirm",
+  "updated": "2026-10-05T22:16:41.958482+00:00"
+}

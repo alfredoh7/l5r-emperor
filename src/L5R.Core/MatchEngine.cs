@@ -522,6 +522,7 @@ public sealed partial class MatchEngine
         var card = Card(command.CardId);
         var quote = QuotePurchase(command.PlayerId, card.Id, command.ClanDiscount, command.ClanAllegiance);
         Require(quote.Error is null, quote.Error ?? "");
+        Player(command.PlayerId).DynastyActionTaken = true;
         PayAdditionalEntryCost(command.PlayerId, card); // En'you (issue #501, EmperorMechC.cs): an additional cost of entering play.
         Pay(command.PlayerId, card, quote.Cost, command.SourceIds, paying: new PaymentSubject(card, PaymentKind.Recruit));
         if (Definition(card).Type == CardType.Personality) Player(command.PlayerId).PersonalityPurchaseTurn = _state.TurnNumber;
@@ -706,6 +707,7 @@ public sealed partial class MatchEngine
         Require((command.SourceIds ?? []).Length == 0, "No Gold sources are needed for an Overlay.");
 
         var player = Player(command.PlayerId);
+        player.DynastyActionTaken = true;
         var province = player.Provinces.Single(p => p.CardId == card.Id);
         province.CardId = null;
         _state.LastProvinceEntryCardId = card.Id; _state.LastProvinceEntryProvinceIndex = province.Index; // an overlay recruit enters play from a province too (Kaiu Village, issue #492 ruling R3)
@@ -1216,6 +1218,7 @@ public sealed partial class MatchEngine
         var province = Player(command.PlayerId).Provinces.Single(p => p.CardId == card.Id);
         card.Zone = Zone.DynastyDiscard; card.ProvinceIndex = null;
         province.CardId = null;
+        Player(command.PlayerId).DynastyActionTaken = true;
         Emit("provinceDiscard", $"{Player(command.PlayerId).Name} discarded {Definition(card).Name} from a province.", command.PlayerId, card.Id);
         Refill(Player(command.PlayerId), province);
         SetPhase(Phase.DynastyDiscard, command.PlayerId);
@@ -3391,6 +3394,7 @@ public sealed partial class MatchEngine
         if (PhaseFamily(phase) != PhaseFamily(_state.Phase)) AdvanceStraightenHolds(StraightenPoint.PhaseEnds);
         ResolveShadowsEmbraceBatch1PhaseEnd(phase); // The Shadow's Embrace pass (issue #476), batch 1: Bayushi Misaki's "before this phase ends".
         PromoPhaseEnds(phase); // Promotional-Emperor pass (issue #653, PromoEmperorFate.cs): Elemental Adroitness's "before this phase ends, put this Strategy into your hand".
+        if (phase == Phase.Dynasty) foreach (var p in _state.Players) p.DynastyActionTaken = false; // a new Dynasty Phase: nothing bought/discarded yet
         if (phase == Phase.Dynasty) DragonsBreathHonor();
         // Sentinel Spirit (issue #453, batch 2): "after the next Dynasty Phase begins".
         if (phase == Phase.Dynasty) ResolveSentinelWatches();
