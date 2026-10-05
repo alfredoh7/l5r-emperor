@@ -350,6 +350,7 @@ public sealed partial class MatchEngine
         NitoshiCommandTail(); // Bayushi Nitoshi - inexperienced (issue #617): the hold on the card he took lasts until it is played or returned
         OpenP3OwedChoices(); // Shosuro Aroru - exp2 (issue #503): "After the action's resolution, you may move Aroru to a different location."
         CheckInokuchiWatches(); // Mirumoto Inokuchi (issue #501, EmperorMechA.cs): "If you don't, bow him" -- once his additional action is gone without being taken.
+        NormalizeOwnerAnsweredPriority(); // Issue #642 (PendingPriority.cs): a choice answered by its owner gives its owner priority.
         SkipIdleCavalrySegments(); // Issue #627 (CavalrySkip.cs): a Cavalry Maneuvers segment where the acting player has nothing to do but pass.
     }
     private void ApplyCore(GameCommand command)
@@ -1081,7 +1082,7 @@ public sealed partial class MatchEngine
         var pending = _state.PendingChoice!;
         var player = Player(command.PlayerId);
         Require(pending.PlayerId == command.PlayerId && command.PlayerId == _state.ActivePlayerId, "Only the entering Personality's controller may Proclaim during their turn.");
-        Require(ProclaimRejection(player, Definition(Card(pending.CardId))) is null, ProclaimRejection(player, Definition(Card(pending.CardId))) ?? "Proclaim has already been used this turn.");
+        Require(ProclaimRejection(player, Definition(Card(pending.CardId)), pending.CardId) is null, ProclaimRejection(player, Definition(Card(pending.CardId)), pending.CardId) ?? "Proclaim has already been used this turn.");
         // Turning the Story (issue #453, batch 2): "Before a Proclaim action resolves" -- the Proclaim waits for the opponent's Reaction when they hold one (SeedsOfDecayBatch2.cs).
         if (DeferProclaimForNegation(command)) return;
         FinishProclaim(command, negated: false);
@@ -1533,9 +1534,34 @@ public sealed partial class MatchEngine
         Require(command.Type == "encircledOrder" && command.PlayerId == choice.PlayerId && command.Choice is "attacker" or "defender",
             "Choose the Attacker or the Defender to select first.");
         var firstPlayer = command.Choice == "attacker" ? pending.Attacker : pending.Defender;
-        pending.EncircledStage = "FirstSelect";
-        _state.PendingChoice = new("encircledSelect", firstPlayer, choice.CardId, "Choose one of your Personalities at this battlefield to keep; every other Personality here will be sent home.");
-        _state.PriorityPlayerId = firstPlayer;
+        PromptEncircled(pending, choice.CardId, firstPlayer, true);
+    }
+    // A player with no Personality at this battlefield has nothing to keep and nothing to choose, so his turn to select passes by itself (found by the bot soak, issue #642:
+    // the match used to stall on a prompt with no answer).
+    private bool HasEncircledCandidate(int playerId, PendingBeforeBattleResolve pending) =>
+        _state.Cards.Values.Any(c => c.OwnerId == playerId && c.Zone == Zone.Battlefield && c.ProvinceIndex == pending.ProvinceIndex && Definition(c).Type == CardType.Personality);
+    private void PromptEncircled(PendingBeforeBattleResolve pending, string? terrainId, int player, bool first)
+    {
+        if (!HasEncircledCandidate(player, pending))
+        {
+            if (first) { pending.EncircledFirstSelectedId = null; PromptEncircled(pending, terrainId, 1 - player, false); }
+            else FinishEncircled(pending, terrainId, null);
+            return;
+        }
+        pending.EncircledStage = first ? "FirstSelect" : "SecondSelect";
+        _state.PendingChoice = new("encircledSelect", player, terrainId, "Choose one of your Personalities at this battlefield to keep; every other Personality here will be sent home.");
+        _state.PriorityPlayerId = player;
+    }
+    private void FinishEncircled(PendingBeforeBattleResolve pending, string? terrainId, string? lastKeptId)
+    {
+        var keepIds = new HashSet<string>(StringComparer.Ordinal);
+        if (pending.EncircledFirstSelectedId is not null) keepIds.Add(pending.EncircledFirstSelectedId);
+        if (lastKeptId is not null) keepIds.Add(lastKeptId);
+        foreach (var other in _state.Cards.Values.Where(c => c.Zone == Zone.Battlefield && c.ProvinceIndex == pending.ProvinceIndex && Definition(c).Type == CardType.Personality && !keepIds.Contains(c.Id)).ToArray())
+            ReturnHome(other, false);
+        Emit("encircledTerrainResolved", "Encircled Terrain: every other Personality at this battlefield was sent home.", pending.Attacker, terrainId);
+        _state.PendingChoice = null;
+        FinishBeforeBattleEffect(pending);
     }
     private void ResolveEncircledSelect(GameCommand command)
     {
@@ -1548,18 +1574,10 @@ public sealed partial class MatchEngine
         if (pending.EncircledStage == "FirstSelect")
         {
             pending.EncircledFirstSelectedId = card.Id;
-            pending.EncircledStage = "SecondSelect";
-            var secondPlayer = 1 - command.PlayerId;
-            _state.PendingChoice = new("encircledSelect", secondPlayer, choice.CardId, "Choose one of your Personalities at this battlefield to keep; every other Personality here will be sent home.");
-            _state.PriorityPlayerId = secondPlayer;
+            PromptEncircled(pending, choice.CardId, 1 - command.PlayerId, false);
             return;
         }
-        var keepIds = new HashSet<string>(StringComparer.Ordinal) { pending.EncircledFirstSelectedId!, card.Id };
-        foreach (var other in _state.Cards.Values.Where(c => c.Zone == Zone.Battlefield && c.ProvinceIndex == pending.ProvinceIndex && Definition(c).Type == CardType.Personality && !keepIds.Contains(c.Id)).ToArray())
-            ReturnHome(other, false);
-        Emit("encircledTerrainResolved", "Encircled Terrain: every other Personality at this battlefield was sent home.", pending.Attacker, choice.CardId);
-        _state.PendingChoice = null;
-        FinishBeforeBattleEffect(pending);
+        FinishEncircled(pending, choice.CardId, card.Id);
     }
     // The original body of ResolveBattle, unchanged, now reached either directly (no "before this
     // battle resolves" effects in play) or once PendingBeforeBattleResolve's own sequence empties.
@@ -2801,6 +2819,7 @@ public sealed partial class MatchEngine
     }
     private void StartTurn()
     {
+        foreach (var each in _state.Players) each.ProclaimedCardId = null; // a new turn: every Personality may be Proclaimed again (SeedsOfDecayBatch2.cs ProclaimRejection)
         var player = Player(_state.ActivePlayerId);
         _state.PriorityPlayerId = player.Id;
         // Akodo Hotaka (issue #453, batch 2) lowers the 40 his controller needs (HonorVictoryThreshold).

@@ -375,6 +375,8 @@ public sealed class PlayerState
     public int Honor { get; set; }
     public int TurnsTaken { get; set; }
     public int ProclaimUsedTurn { get; set; } = -1;
+    /// <summary>The Personality whose entry Proclaim was taken this turn: a Personality whose Proclaim ignores the once-per-turn limit (Kakita Yusugi) may still be Proclaimed only ONCE per entry (issue #642: the bot soak found it offered forever).</summary>
+    public string? ProclaimedCardId { get; set; }
     /// <summary>The turn this player last bought a Personality from a province (issue #639): the next purchase that turn is no longer the one that defaults to Proclaim.</summary>
     public int PersonalityPurchaseTurn { get; set; } = -1;
     public bool DishonorLossPending { get; set; }

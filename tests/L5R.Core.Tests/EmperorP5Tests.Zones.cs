@@ -296,6 +296,7 @@ internal static partial class EmperorP5Tests
                 Accept(e, offered.First(o => o.Command?.TargetId == b.Id).Command!);
                 Eq(e.State.Cards[b.Id].Zone, Zone.FateDiscard, "the chosen card was discarded");
                 Eq(e.State.Cards[a.Id].Zone, Zone.Hand, "the other stays");
+                Check(e.State.PendingChoice is null, "the answered Either/Or prompt is not left pending once the discard is made (bot soak, issue #642: a stale prompt stalled the match)");
             }
             else
             {

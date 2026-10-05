@@ -248,6 +248,19 @@ internal static class IvoryPoliticalTests
         Check(e.State.Cards[play.Id].Zone != Zone.Hand, "and the negated Strategy was still played");
         Check(e.State.Events.Any(x => x.Type == "actionNegated"), "the negation is on the record");
 
+        // A rulebook Favor action (favor-cycle) is performed by no card at all: answering it with Confusion at Court must neither throw nor look for a performer (bot soak, issue #642).
+        var fu = Table(Phase.Action, 1); fu.FavorPlayerId = 1;
+        fu.Cards[fu.Players[1].StrongholdId].DefinitionId = CardCatalog.Cards.Values.First(d => d.Type == CardType.Stronghold && !d.ScenarioOnly).Id; // player abilities need a published Stronghold
+        var spare = Add(fu, "training-lion-samurai", 1, Zone.Hand);
+        var answer = Add(fu, Confusion, 0, Zone.Hand);
+        var fe = MatchEngine.FromTestState(fu);
+        var cycleResult = fe.Execute(new GameCommand("useAbility", 1, fe.Version, AbilityId: "favor-cycle", TargetId: spare.Id));
+        Check(cycleResult.Accepted, "favor-cycle was refused: " + cycleResult.Error);
+        Eq(fe.State.PendingChoice?.Type, "beforeActionReaction", "the other player may answer a Favor action too");
+        Accept(fe, Options(fe, 0, "confusion-at-court-negate", answer.Id).Single(o => o.Enabled).Command!); Decline(fe);
+        Eq(fe.State.FavorPlayerId, null, "a negated Favor action still discards the Favor");
+        Check(fe.State.Cards[answer.Id].Zone != Zone.Hand, "Confusion at Court was spent against the card-less action");
+
         // Without a Favor discard among its costs: nothing to answer.
         var t = Table(Phase.Action, 1); t.FavorPlayerId = null;
         var take = Add(t, LordsFavor, 1, Zone.Hand); var any = Add(t, "training-lion-samurai", 1, Zone.Home);

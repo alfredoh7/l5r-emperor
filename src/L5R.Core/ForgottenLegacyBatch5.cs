@@ -214,27 +214,28 @@ public sealed partial class MatchEngine
                 break;
             // Ageless Shrine: "Straighten one of his attachments if he is Nonhuman" -- one attachment must be named exactly when he is Nonhuman and has one.
             case "ageless-shrine-straighten" when ability.Slots is not null:
-            {
-                var him = SlotCards(command, "target").FirstOrDefault();
-                var named = SlotCards(command, "attachment").Count();
-                var owed = him is not null && Keyword(him, "Nonhuman") && Attachments(him.Id).Any() ? 1 : 0;
-                Require(named == owed, owed == 1 ? "Choose one of his attachments to straighten." : "Only a Nonhuman's attachment is straightened.");
-                break;
-            }
+                {
+                    var him = SlotCards(command, "target").FirstOrDefault();
+                    var named = SlotCards(command, "attachment").Count();
+                    var owed = him is not null && Keyword(him, "Nonhuman") && Attachments(him.Id).Any() ? 1 : 0;
+                    Require(named == owed, owed == 1 ? "Choose one of his attachments to straighten." : "Only a Nonhuman's attachment is straightened.");
+                    break;
+                }
             // The Second City: the named province must hold a face-down card.
             case "second-city-reveal" or "second-city-reveal-raise" when command.TargetPlayerId is int cityOwner && command.Province is int cityIndex:
-            {
-                var province = Player(cityOwner).Provinces[cityIndex];
-                Require(province.CardId is { } hiddenId && !Card(hiddenId).FaceUp, "Choose a province holding a face-down card.");
-                break;
-            }
+                {
+                    Require(cityIndex >= 0 && cityIndex < Player(cityOwner).Provinces.Count, "Choose a province holding a face-down card.");
+                    var province = Player(cityOwner).Provinces[cityIndex];
+                    Require(province.CardId is { } hiddenId && !Card(hiddenId).FaceUp, "Choose a province holding a face-down card.");
+                    break;
+                }
             // Black Pearl: "a Personality in any player's discard pile" brought into play under the acting player's control, paying all costs.
             case "black-pearl-recruit" when command.TargetId is not null && _state.Cards.TryGetValue(command.TargetId, out var pearlTarget):
-            {
-                var quote = QuotePurchase(command.PlayerId, pearlTarget.Id, fromDeadPile: true, anyOwnerPile: true);
-                Require(quote.Error is null, quote.Error ?? "");
-                break;
-            }
+                {
+                    var quote = QuotePurchase(command.PlayerId, pearlTarget.Id, fromDeadPile: true, anyOwnerPile: true);
+                    Require(quote.Error is null, quote.Error ?? "");
+                    break;
+                }
         }
     }
 
@@ -251,14 +252,14 @@ public sealed partial class MatchEngine
                 return false;
             // Thunder's Wrath: the Spell was destroyed as the cost; the wielder (the named performer) is "this Shugenja".
             case "thunders-wrath-attack":
-            {
-                var shugenja = Card(command.PerformerId!);
-                _thundersWrathFollowerDestroyed = false;
-                if (ResolveOrDeferAttack(id, player, target?.Id, shugenja.Id, consumedGrant)) return true;
-                if (ThundersWrathFollowUpDue(shugenja))
-                    return BeginSequencedAttackTarget("thunders-wrath-followup-attack", command, shugenja, consumedGrant, playedFromDiscard, opponentHonorBeforeBattleAction, bowedBeforeAction, preExistingGrants);
-                return false;
-            }
+                {
+                    var shugenja = Card(command.PerformerId!);
+                    _thundersWrathFollowerDestroyed = false;
+                    if (ResolveOrDeferAttack(id, player, target?.Id, shugenja.Id, consumedGrant)) return true;
+                    if (ThundersWrathFollowUpDue(shugenja))
+                        return BeginSequencedAttackTarget("thunders-wrath-followup-attack", command, shugenja, consumedGrant, playedFromDiscard, opponentHonorBeforeBattleAction, bowedBeforeAction, preExistingGrants);
+                    return false;
+                }
             // Assault in the Jungle's granted ability: the performer's unit was bowed as the cost (CostVerbs.BowUnit).
             case "assault-jungle-destroy":
                 DestroyTargetCard(target!, player.Id);
@@ -278,26 +279,26 @@ public sealed partial class MatchEngine
             // Border Keep - experienced: "put one to three cards in your hand at the bottom of your deck. Draw cards equal to the number you put at the bottom."
             // The cards are hidden: the log says how many, never which.
             case "border-keep-exp-cycle":
-            {
-                var cycled = SlotCards(command, "cards").ToArray();
-                foreach (var card in cycled)
                 {
-                    player.Hand.Remove(card.Id);
-                    card.Zone = Zone.FateDeck; card.FaceUp = false; card.AbilityUses.Clear();
-                    player.FateDeck.Add(card.Id);
+                    var cycled = SlotCards(command, "cards").ToArray();
+                    foreach (var card in cycled)
+                    {
+                        player.Hand.Remove(card.Id);
+                        card.Zone = Zone.FateDeck; card.FaceUp = false; card.AbilityUses.Clear();
+                        player.FateDeck.Add(card.Id);
+                    }
+                    Emit("toDeck", $"{Definition(source!).Name}: {player.Name} put {cycled.Length} card{(cycled.Length == 1 ? "" : "s")} from their hand on the bottom of their Fate deck.", player.Id, source!.Id);
+                    for (var drawn = 0; drawn < cycled.Length; drawn++) Draw(player);
+                    return false;
                 }
-                Emit("toDeck", $"{Definition(source!).Name}: {player.Name} put {cycled.Length} card{(cycled.Length == 1 ? "" : "s")} from their hand on the bottom of their Fate deck.", player.Id, source!.Id);
-                for (var drawn = 0; drawn < cycled.Length; drawn++) Draw(player);
-                return false;
-            }
             // Black Pearl: the Pearl's destruction was the cost and the Gold (4 less for a Nonhuman) was paid; he enters at home, under the acting player's control.
             case "black-pearl-recruit":
-            {
-                var quote = QuotePurchase(player.Id, target!.Id, fromDeadPile: true, anyOwnerPile: true);
-                Require(quote.Error is null, quote.Error ?? "");
-                TakeControl(target, player.Id);
-                return BringDeadPersonalityIntoPlay(player, target, "Black Pearl", null);
-            }
+                {
+                    var quote = QuotePurchase(player.Id, target!.Id, fromDeadPile: true, anyOwnerPile: true);
+                    Require(quote.Error is null, quote.Error ?? "");
+                    TakeControl(target, player.Id);
+                    return BringDeadPersonalityIntoPlay(player, target, "Black Pearl", null);
+                }
             // Cursed Relic: the -1C was paid as the cost (CostVerbs.ChiPenalty).
             case "cursed-relic-attack":
                 return ResolveOrDeferAttack(id, player, target?.Id, source!.Id, consumedGrant);
@@ -307,18 +308,18 @@ public sealed partial class MatchEngine
             // The Second City: "Turn the face-down card face-up. You may increase the Province's strength by 2" -- the "may" is the choice between the two abilities (one use).
             case "second-city-reveal":
             case "second-city-reveal-raise":
-            {
-                var owner = Player(command.TargetPlayerId!.Value);
-                var province = owner.Provinces[command.Province!.Value];
-                var revealed = Card(province.CardId);
-                revealed.FaceUp = true;
-                Emit("provinceRevealed", $"{Definition(source!).Name}: {Definition(revealed).Name} in {owner.Name}'s province {province.Index + 1} is turned face-up.", player.Id, revealed.Id);
-                if (id == "second-city-reveal-raise")
                 {
-                    GiveProvinceStrengthThisTurn(owner.Id, province.Index, 2, Definition(source!).Name); // until end of turn (issue #492 ruling R3)
+                    var owner = Player(command.TargetPlayerId!.Value);
+                    var province = owner.Provinces[command.Province!.Value];
+                    var revealed = Card(province.CardId);
+                    revealed.FaceUp = true;
+                    Emit("provinceRevealed", $"{Definition(source!).Name}: {Definition(revealed).Name} in {owner.Name}'s province {province.Index + 1} is turned face-up.", player.Id, revealed.Id);
+                    if (id == "second-city-reveal-raise")
+                    {
+                        GiveProvinceStrengthThisTurn(owner.Id, province.Index, 2, Definition(source!).Name); // until end of turn (issue #492 ruling R3)
+                    }
+                    return false;
                 }
-                return false;
-            }
             // Pearl of Rage: "Ranged Attack with strength equal to this Shugenja's Chi, plus the number of Pearl cards you control and in your discard piles."
             case "pearl-of-rage-attack":
                 return ResolveOrDeferAttack(id, player, target?.Id, source!.Id, consumedGrant);
