@@ -1,0 +1,9 @@
+{
+  "lane": "rules",
+  "summary": "Promotional-Emperor pass (interim): 67 of 86 Personalities, Followers, Holdings, Regions, Celestials and Items wired across four agent branches merged here; Strategies/Spells/Events still being merged.",
+  "validation": "Full Core suite passes on the merged Personalities+Holdings+Items code; AI, Server, Client and check.sh not yet run.",
+  "remaining": "Merge Strategies/Spells/Events branch, regenerate card_inventory from the pe_*_blockers.json files, run check.sh, art-pack publisher step for new scans, PR.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/653",
+  "branch": "claude/653-promotional-emperor-pass",
+  "updated": "2026-10-05T15:24:10.292838+00:00"
+}
