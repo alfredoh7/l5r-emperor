@@ -1,0 +1,87 @@
+{
+  "Profile": "celestial-wave-27",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-3401",
+      "Name": "Hofukushu's Vengeance",
+      "Type": "Celestial",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After the end of an Attack Phase in which you were the Defender, discard this card: Declare an additional Attack Phase against that phase's Attacker, in which you may only assign one Personality.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-3401.jpg",
+      "Keywords": [
+        "Unique",
+        "Fortune"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "pe-hofukushus-vengeance-declare"
+      ],
+      "Effect": "pe-hofukushus-vengeance"
+    },
+    {
+      "Id": "oracle-l5r-9948",
+      "Name": "Suitengu's Blessing",
+      "Type": "Celestial",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Once per game, target a Personality: Give him Naval while this card remains in play.\nBattle: Discard this card and choose your performing Personality: If he would be opposed, move him to the current battlefield. Straighten his unit if he moved.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9948.jpg",
+      "Keywords": [
+        "Unique",
+        "Fortune"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "pe-suitengus-blessing-naval",
+        "pe-suitengus-blessing-move"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10229",
+      "Name": "Kenro-ji-jin's Bounty",
+      "Type": "Celestial",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: When paying for a Farm: Produce 1 Gold.\nLimited: Discard this card: Your Farms produce 1 additional Gold when they bow to produce Gold (this turn).",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10229.jpg",
+      "Keywords": [
+        "Unique",
+        "Fortune"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "pe-kenro-ji-jins-bounty-gold",
+        "pe-kenro-ji-jins-bounty-farms"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

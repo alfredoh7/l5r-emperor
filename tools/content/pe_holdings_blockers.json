@@ -1,0 +1,38 @@
+{
+  "oracle-l5r-10231": {
+    "note": "Colonial Farm (Holding, issue #653): blocked only by the card it creates. \"Limited, Bow: Create a 1F Ashigaru Follower and attach it to your target Personality\" needs a CreatedOnly Proxy scan of a 1F Ashigaru Follower with no other keyword; the only candidates are near misses (Mounted Ashigaru oracle-l5r-10010 also has Cavalry; Humble Farmers user-scan-humble-farmers is 2F) and docs/requests/created-card-scans-needed.md row A6 (assets/requested-scans/ashigaru-1f.jpg) is unticked. The rest is buildable: ClanEntryDiscount for the Lion entry discount, a Produce 5 Holding and the bow-and-create-and-attach shape of Natural Aviary.",
+    "category": "SCAN"
+  },
+  "oracle-l5r-10757": {
+    "note": "The Onyx Dueling Circle (Holding, issue #653): blocked only by the Personality it creates. \"Destroy your target Shugenja. Create a 5F/2C/0PH Nonhuman - Oni - Shadowlands Personality. Destroy this Holding. Lose 4 Honor\" needs a CreatedOnly Proxy scan of that 5F/2C/0PH Oni; none exists locally and docs/requests/created-card-scans-needed.md row B12 is unticked. Akuma's Power (celestial-wave-2) creates a 9F/5C Oni from a different scan, which may not stand in for it.",
+    "category": "SCAN"
+  },
+  "oracle-l5r-2391": {
+    "note": "Ever-Winter Copse (Holding, issue #653): \"When another Holding produces Gold to pay for a Nonhuman, bow this card: Produce 1 Gold\" is a payment source whose availability depends on which OTHER producers the payer has chosen for the same payment, and which bows its own card. The payment tokens (EmperorMechE.cs PaymentTokens/UsePaymentTokens) are computed for a payment before any source is chosen, their use never bows their card, and there is no extension point for a condition on the chosen set of sources or for a token kind that bows; adding either means editing the shared payment code, not a feature file.",
+    "category": "COST"
+  },
+  "oracle-l5r-10752": {
+    "note": "The Amethyst Court (Holding, issue #653): its second line, \"Bow: Bow your target unbowed Courtier or Artisan. Produce Gold equal to his Chi\", is a Gold source of its own that names a Personality as it is used (the amount is that Personality's Chi, and bowing him is part of the production). The payment tokens offer a source per candidate only for Zlkyt's destroyed Holding and Moto Rani's removed dead Personality; UsePaymentTokens switches on a closed set of token kinds and has no extension point for a source that bows a chosen Personality, so the production cannot be added from a feature file.",
+    "category": "COST"
+  },
+  "oracle-l5r-10574": {
+    "note": "Hidden Weapons (Holding, issue #653): \"Limited: Put a Weapon in your hand under this Holding (face-down)\" and \"You may Equip Weapons from under this Holding as a Battle/Limited action\" need a zone of cards under a particular Holding that is hidden from the other player. The only under-card zone (Zone.Underneath) is face-up, public and kept under the Stronghold, not per card, and its view projection shows every card in it; hiding a face-down card and equipping from it with the Equip action's own pricing needs a new hidden zone and its projection.",
+    "category": "ZONE"
+  },
+  "oracle-l5r-10408": {
+    "note": "Oracle of the Void - exp (Holding, issue #653): \"Limited, Bow: The next two cards in provinces you refill (this turn) may be refilled face-up\" is an optional face-up refill for each of the next two refills, whichever effect causes them (a purchase, a discard, a Region). Refills happen at many call sites (Purchase, Refill, RefillProvinceSlot and the effects that discard a province card) and there is no single refill hook or per-refill decision; a watch on future refills needs one, which is shared province plumbing. The rest (\"Negate this card's destruction\", Limited bow draw a card) would be buildable.",
+    "category": "PROVINCE"
+  },
+  "oracle-l5r-9142": {
+    "note": "Verdant Jungle (Region, issue #653): its Reaction, \"Before an action resolves, bow this card: Negate its effects that move any Personalities into an attacking army at this Province's battlefield\", negates only the movement part of an announced action by destination. The before-action Reaction window decides which Reactions apply in BeforeActionReactionApplies, a closed switch with no extension hook, and the movement a held action would make is known only per-ability (DeferredActionMovers) with no destination, so \"into an attacking army at this battlefield\" cannot be asked of an announced action. The first line (nonhuman Personalities enter play from this province for 1 less Gold) would be a small entry discount.",
+    "category": "TRIG-ANN"
+  },
+  "oracle-l5r-10563": {
+    "note": "Jizo's Mercy (Celestial, issue #653): the first Battle (\"Move a target attacking Personality home\") is buildable, but the second, \"Battle: Discard this Celestial. In this battle's resolution, before you destroy the Province, gain 4 Honor instead\", has an unresolved reading. Question for Mendon: does \"instead\" mean the Celestial's controller gains 4 Honor INSTEAD of destroying the Province (the Province survives the battle), or only before it, so the Province is still destroyed and \"instead\" has no referent; and may the Defender play it (he would not be destroying the Province) or only an Attacker who wins? The engine has the resolution hooks (BeforeResolution.cs, AfterResolution.cs); the reading must be ruled first.",
+    "category": "RULES"
+  },
+  "oracle-l5r-10186": {
+    "note": "Sadahako's Artistry (Celestial, issue #653): the Honor half (\"Limited: If your Family Honor is 10 or lower: Gain 1 Honor\") is buildable, but the gift (\"Discard this card and target a card in your hand: You offer it as a gift. Show it to another player. He may accept, putting it into his hand; if he did, you gain Honor equal to its Focus Value. If he did not, discard it and draw 3 cards\") needs a ruling and a primitive. Question for Mendon: once the other player accepts, whose card is it and which discard pile does it go to when he discards or plays it (its owner's or the recipient's); may a card be put into another player's hand at all? The engine has the opponent's Either/Or decision (EitherOr.cs) but no move of a hand card into another player's hand: OwnerId means controller and ReturnCardsOutOfPlayToTheirOwners sends a card back to its owner, so the card cannot rest in the recipient's hand without a new ownership rule.",
+    "category": "RULES"
+  }
+}

@@ -1,0 +1,125 @@
+{
+  "Profile": "region-wave-22",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-1108",
+      "Name": "Border Market",
+      "Type": "Region",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: Bow this card, choose your performing Personality, and target a non-Unique Follower or Item in your discard pile: Attach it to your performer, paying all costs.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1108.jpg",
+      "Keywords": [
+        "Forest",
+        "Market"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "pe-border-market-attach"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9961",
+      "Name": "Interesting Plains",
+      "Type": "Region",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After a Personality enters play from this province: Refill the province face-up.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9961.jpg",
+      "Keywords": [
+        "Singular"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "pe-interesting-plains-refill"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9962",
+      "Name": "Quicksand",
+      "Type": "Region",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Destroy this card and target a Follower or Personality without Followers at this province's battlefield: Destroy it.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9962.jpg",
+      "Keywords": [],
+      "Focus": 0,
+      "Abilities": [
+        "pe-quicksand-destroy"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10195",
+      "Name": "Ambush Pass",
+      "Type": "Region",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Your Ronin have +1F.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10195.jpg",
+      "Keywords": [
+        "Singular"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "pe-ambush-pass-force"
+    },
+    {
+      "Id": "oracle-l5r-10234",
+      "Name": "Renewed Lands",
+      "Type": "Region",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After a Farm Holding enters play from this province: Give it a +1 Gold Production token and refill this province face-up.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10234.jpg",
+      "Keywords": [],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "pe-renewed-lands"
+    }
+  ],
+  "Decks": []
+}

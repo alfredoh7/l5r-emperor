@@ -99,7 +99,7 @@ public sealed partial class MatchEngine
     // alternate source it belongs to a card that also has a printed production, and it may be used while the card is bowed.
     private (string AbilityId, int Amount)? ReactiveGoldSource(CardInstance card, PaymentSubject? paying)
     {
-        if (paying is null || card.Zone is not (Zone.Home or Zone.Stronghold or Zone.Battlefield)) return null;
+        if (paying is null || card.Zone is not (Zone.Home or Zone.Stronghold or Zone.Battlefield or Zone.Celestial)) return null; // a Celestial too: Kenro-ji-jin's Bounty (issue #653)
         foreach (var id in AbilityIdsOf(card))
             if (AbilityCatalog.All.TryGetValue(id, out var ability) && ability.PaymentWhen is { } when && ability.PaymentProduction is int amount
                 && !BarredByCherryBlossom(id) /* Cherry Blossom Festival (R4) */ && (ability.PaymentEvenIfBowed || !card.Bowed)
@@ -114,6 +114,7 @@ public sealed partial class MatchEngine
     {
         // "Paying for a Spell during the Combat Segment": a Spell equipped or attached (a payment for the card itself, never an action of a Spell already in play).
         EmperorStrongholdBatch1Abilities.LibraryOfRebirthPaymentWhen => _state.Phase == Phase.Battle && paying.Kind == PaymentKind.Equip && Definition(paying.Card).Type == CardType.Spell,
+        PromoEmperorCelestialAbilities.PayingForFarmWhen => PromoEmperorPaymentCondition(when, paying), // Kenro-ji-jin's Bounty (issue #653)
         _ => EmperorRemainingFPaymentConditionMet(when, paying) // Luxurious Silk (issue #492, group F): paying for an action.
     };
 

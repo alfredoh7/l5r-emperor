@@ -213,7 +213,7 @@ public sealed partial class MatchEngine
     internal int DestroyUnitsForTest(string cardId) => DestroyUnits([Card(cardId)], false, _state.ActivePlayerId);
 
     // "This card will not be destroyed" (Rugashi Bazaar): read where a destruction is applied (DestroyUnits).
-    private bool WillNotBeDestroyed(CardInstance card) => InPlay(card) && Definition(card).Effect == RugashiBazaarEffect || CombatSegmentShielded(card); // Chikushudo's Trickery (issue #492, rulings pass R1)
+    private bool WillNotBeDestroyed(CardInstance card) => InPlay(card) && Definition(card).Effect == RugashiBazaarEffect || PromoEmperorWillNotBeDestroyed(card) || CombatSegmentShielded(card); // Chikushudo's Trickery (issue #492, rulings pass R1)
 
     // "Even if this card is bowed" for group F's abilities (ValidateAbility's list).
     private static bool EmperorRemainingFBowedOk(string id) => id is "governors-court-open";
