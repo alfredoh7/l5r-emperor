@@ -132,7 +132,6 @@ internal static class PlayerTargetTests
         var (f, id) = Enter(MugoshiId, 3);
         var theirs = Honor(f, 1);
         Accept(f, For(f, id, "mugoshi-slander", 1).Command!);
-        Accept(f, new GameCommand("declineReaction", 1, f.Version)); Accept(f, new GameCommand("declineReaction", 0, f.Version));
         Eq(f.State.PendingChoice?.Type, "overconfidentDraw", "Overconfident's offer still follows the window");
         Eq(Honor(f, 1), theirs - 1);
     }
@@ -144,15 +143,11 @@ internal static class PlayerTargetTests
         var mine = Honor(e, 0);
         Accept(e, For(e, id, "training-choose-player-lose", 0).Command!);
         Eq(Honor(e, 0), mine - 1);
-        Accept(e, new GameCommand("declineReaction", 1, e.Version)); // the window alternates: back to the controller
-        // One use for the whole card ("gain or lose"): every remaining option is listed, disabled and says so; the engine agrees.
+        // One use for the whole card ("gain or lose"): nothing is left to take, so the window closes (issue #644) and the engine refuses every remaining option.
+        Check(e.State.PendingChoice is null, "the window closed");
         foreach (var ability in new[] { "training-choose-player-gain", "training-choose-player-lose" })
             foreach (var player in new[] { 0, 1 })
-            {
-                var o = For(e, id, ability, player);
-                Check(!o.Enabled && o.Reason is not null, $"{ability}/{player} is disabled once used");
-                Reject(e, o.Command!);
-            }
+                Reject(e, new GameCommand("useAbility", 0, e.Version, CardId: id, AbilityId: ability, TargetPlayerId: player));
     }
 
     private static void IllegalPlayer()

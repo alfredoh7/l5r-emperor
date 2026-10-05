@@ -14,12 +14,13 @@ public sealed partial class MatchEngine
         finally { _state.PriorityPlayerId = priority; }
     }
 
-    /// <summary>Closes the Proclaim window the moment a Proclaim has resolved and no one has a reaction left to take in it.</summary>
-    private void CloseProclaimWindowIfSpent()
+    /// <summary>Closes the Proclaim or entering-play reaction window the moment an action in it has resolved and no one has a reaction left to take in it (issue #644: a
+    /// Reaction used inside an entry window, Satoshi's Dual Warfans' draw or the Celestial Sword of the Crane's Honor, no longer leaves a Pass reaction box).</summary>
+    private void CloseEntryWindowIfSpent()
     {
-        if (_state.PendingChoice is not { Type: "proclaim" } pending || _state.PendingNegatableAbility is not null) return;
+        if (_state.PendingChoice is not { Type: "proclaim" or "entryReaction" } pending || _state.PendingNegatableAbility is not null) return;
         if (ProclaimWindowOffers(0) || ProclaimWindowOffers(1)) return;
-        CloseReactionWindow(pending, "The Proclaim resolved and no reaction was available; the window closed.");
+        CloseReactionWindow(pending, "No reaction was left to take; the window closed.");
     }
 }
 
@@ -37,5 +38,22 @@ public sealed partial class MatchEngine
         return first
             ? [(false, short_), (true, short_), (false, !short_), (true, !short_)]
             : [(true, short_), (false, short_), (true, !short_), (false, !short_)];
+    }
+}
+
+public sealed partial class MatchEngine
+{
+    /// <summary>A Celestial enters play the instant it is revealed (core rules Glossary), whichever effect turns it face up: an Events Phase reveal already sends it in, and this
+    /// catches the other ways a province card is turned face up (a refill that comes up face up, a reshuffle's reveal, a card that turns a province card face up) so it never
+    /// sits revealed in a province. The primary Dynasty slot only.</summary>
+    private void EnterRevealedCelestials()
+    {
+        foreach (var player in _state.Players)
+            foreach (var province in player.Provinces.ToArray())
+            {
+                // A refill after a Celestial leaves can itself come up face up and be a Celestial: keep going until the province holds none.
+                for (var guard = 0; guard < 4 && province.CardId is string id && _state.Cards.TryGetValue(id, out var card) && card.FaceUp && card.Zone == Zone.Province && Definition(card).Type == CardType.Celestial; guard++)
+                    ResolveCelestial(player, province, card);
+            }
     }
 }

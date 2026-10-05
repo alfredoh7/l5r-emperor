@@ -346,6 +346,7 @@ public sealed partial class MatchEngine
         P4CommandTail(); // Scars of War (issue #503, EmperorP4Watches.cs): "after each time it bows".
         OpenEmperorP6QueuedDecision(); // Issue #503 (EmperorP6.cs): Suikihime's leaves-play watch; the refill decisions owed by the command.
         PassAllBattlesTail(); // "Pass all battles" (issue #628): the flags last only while battles are being fought
+        EnterRevealedCelestials(); // issue #644: a Celestial turned face up anywhere enters play at once
         OpenP3EntryWindow(); // Easy Persuasion (issue #503): the window after a Personality entered play, for either player
         NitoshiCommandTail(); // Bayushi Nitoshi - inexperienced (issue #617): the hold on the card he took lasts until it is played or returned
         OpenP3OwedChoices(); // Shosuro Aroru - exp2 (issue #503): "After the action's resolution, you may move Aroru to a different location."
@@ -1093,7 +1094,12 @@ public sealed partial class MatchEngine
         Emit("reactionPassed", $"{Player(_state.PriorityPlayerId).Name} passed the reaction opportunity.", _state.PriorityPlayerId);
         _state.ConsecutivePasses++;
         if (_state.ConsecutivePasses == 2) CloseReactionWindow(pending);
-        else _state.PriorityPlayerId = 1 - _state.PriorityPlayerId;
+        else
+        {
+            _state.PriorityPlayerId = 1 - _state.PriorityPlayerId;
+            // Issue #644: the player who would answer has no Reaction in this window (they cannot Proclaim and hold nothing to react with): their pass is a given, so the window closes.
+            if (pending.Type is "proclaim" or "entryReaction" && !ProclaimWindowOffers(_state.PriorityPlayerId)) CloseReactionWindow(pending, "No reaction was left to take; the window closed.");
+        }
     }
 
     // The reaction window `pending` is over (both players passed, or nothing is left to offer either): whatever it opened for resumes.

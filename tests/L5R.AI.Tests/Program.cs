@@ -29,6 +29,30 @@ Run("resolves purchase and Proclaim with alternating reaction priority", () =>
     Check(game.Execute(move.Command!).Accepted, "Proclaim failed");
     Check(game.GetView(0).PendingChoice is null, "Reaction window stuck: after the Proclaim nothing is left to react with, so it closes (issue #639)");
 });
+Run("always uses the entering-play Reaction of a Personality it buys (Togashi Meiyu, Togashi Torazu; issue #644)", () =>
+{
+    foreach (var (name, ability, cardDefinition) in new[] { ("Togashi Meiyu", "meiyu-fire-tokens", "oracle-l5r-8550"), ("Togashi Torazu", "torazu-fire-tokens", "oracle-l5r-8590") })
+    {
+        var s = MatchEngine.CreateEconomyScenario().State;
+        s.Players[0].Clan = "Dragon"; s.Players[0].Honor = 20;
+        for (var i = 0; i < 4; i++) { var farm = new CardInstance { Id = "gold-" + i, DefinitionId = "training-marketplace", OwnerId = 0, Zone = Zone.Home }; s.Cards[farm.Id] = farm; }
+        var cardId = s.Players[0].Provinces[0].CardId!;
+        s.Cards[cardId].DefinitionId = cardDefinition; s.Cards[cardId].Printed = CardCatalog.Get(cardDefinition);
+        foreach (var other in s.Players[0].Provinces.Where(p => p.CardId is not null && p.CardId != cardId)) s.Cards[other.CardId!].FaceUp = false;
+        s.Cards[cardId].FaceUp = true; // only the card under test can be bought
+        var game = MatchEngine.FromTestState(s);
+        for (var step = 0; step < 8 && s.Cards[cardId].Tokens.Count == 0; step++)
+        {
+            var player = game.GetView(0).PriorityPlayerId;
+            var move = TrainingOpponent.Choose(game.GetView(player), game.QueryActions(player));
+            if (move.Command is null) break;
+            if (player == 1 && move.Command.Type != "declineReaction" && move.Command.Type != "pass") break;
+            Check(game.Execute(move.Command).Accepted, name + ": the bot's command was refused");
+            if (game.State.Cards[cardId].Zone == Zone.Home && game.State.PendingChoice is null) break;
+        }
+        Check(game.State.Cards[cardId].Tokens.Count == 3, name + ": the bot did not use " + ability);
+    }
+});
 Run("declines to attack at the Declaration Segment when it has nothing to attack with, and never stalls there (issue #354)", () =>
 {
     var game = MatchEngine.CreateStarterMatch();

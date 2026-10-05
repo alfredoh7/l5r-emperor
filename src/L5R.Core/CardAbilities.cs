@@ -919,7 +919,7 @@ public static class AbilityCatalog
         // stronger and equivalent statement). No duel stat is named, so it defaults to Chi. IssuesDuel
         // routes this through IssueChallenge instead of an ordinary execution case; ApplyDuelOutcome
         // is invoked with this same id, once the duel actually resolves, to destroy the loser(s).
-        ["steel-on-steel-duel"] = new("Battle", "Choose your performing unbowed Personality and target an enemy Personality: Your performer duels the target. Destroy the duel's loser.", "enemy-personality", Performer: "own-unbowed-personality", IssuesDuel: true),
+        ["steel-on-steel-duel"] = new("Battle", "Choose your performing unbowed Personality at the current battlefield and target an enemy Personality: Your performer duels the target. Destroy the duel's loser.", "enemy-personality", Performer: "own-unbowed-personality-at-battle", IssuesDuel: true),
         // The Courtesy of the Crane (issue #204): only its own "As a Focus Effect" half is wired this
         // pass -- the printed Political Open half ("Choose another player. He may draw a card. Draw
         // two cards.") needs a new "choose a player" targeting primitive that doesn't exist yet, and
@@ -6001,7 +6001,7 @@ public sealed partial class MatchEngine
                 "own-unbowed-unit-at-battle" => Definition(performer).Type is CardType.Personality or CardType.Follower && !performer.Bowed && AtBattle(performer),
                 // Spirit of the Blade's granted action: "Bow one of this Personality's Weapons" -- an unbowed Weapon attached to the source.
                 "own-unbowed-weapon-of-source" => Definition(performer).Type == CardType.Item && Keyword(performer, "Weapon") && performer.Zone == Zone.Attached && performer.AttachedTo == source!.Id && !performer.Bowed,
-                // Steel on Steel (issue #204): no AtBattle qualifier of its own -- Dueling's own
+                // (Steel on Steel used this until issue #644 gave it own-unbowed-personality-at-battle.) Issue #204: no AtBattle qualifier of its own -- Dueling's own
                 // Timing (Battle, here) already gates the SOURCE card's own presence; the performer's
                 // only extra restriction beyond own-personality is "unbowed".
                 "own-unbowed-personality" => Definition(performer).Type == CardType.Personality && !performer.Bowed,

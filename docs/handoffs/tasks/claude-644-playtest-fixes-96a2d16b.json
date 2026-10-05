@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Playtest fixes (#644): entry-reaction windows (Proclaim and the entering card's own Reaction) close when nothing is left to take or after a used Reaction, so no empty Pass reaction box; a Celestial face up in a province enters play at once; Steel on Steel needs an unbowed performer at the battlefield; the practice bot always uses a Reaction its own card prints for entering play (Togashi Meiyu/Torazu, Satoshi's Dual Warfans). L5R.AI.Tests gets InternalsVisibleTo. The client halves (Discard placard, +X duel bonus) shipped separately as #646.",
+  "validation": "bash tools/check.sh --skip-client passed end to end (Core all pass incl. new playtest-fixes-644 3/3; AI 98/98 incl. a new Meiyu/Torazu bot test; Server 9/9; Transport 18/18; Collection 58 assertions). Eleven existing tests updated because entry windows now close after a used Reaction or a single pass. No native client run needed (no client change).",
+  "remaining": "Celestial sweep covers the primary Dynasty slot only (not Otosan Uchi's second slot). Satoshi's Dual Warfans / Celestial Sword of the Crane were fixed through the shared entry-window rule and tested with training cards, not the real cards. Lady Matsu's Rage was not reproduced from a real match; the sweep guarantees any face-up Celestial enters after the command.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/644",
+  "branch": "claude/644-playtest-fixes",
+  "updated": "2026-10-05T05:15:55.769235+00:00"
+}

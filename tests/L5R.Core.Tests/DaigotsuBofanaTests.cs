@@ -632,7 +632,7 @@ internal static class DaigotsuBofanaTests
             else
             {
                 Check(e.QueryActions(0).Any(a => a.Type == "proclaim"), "Proclaim is offered (and passed on here)");
-                Accept(e, new GameCommand("declineReaction", e.State.PriorityPlayerId, e.Version)); Accept(e, new GameCommand("declineReaction", e.State.PriorityPlayerId, e.Version));
+                Accept(e, new GameCommand("declineReaction", e.State.PriorityPlayerId, e.Version)); // the other player has nothing to react with: this pass closes the window (issue #644)
             }
             Eq(e.State.Players[0].Honor, honor - 2, "his controller loses 2 Honor as he enters (at the latest when the window closes)");
             var owed = 0;
@@ -698,7 +698,7 @@ internal static class DaigotsuBofanaTests
                 Accept(e, e.QueryActions(0).Single(a => a.Type == "proclaim").Command!);
                 Eq(e.State.Players[0].Honor, honor + 3 - 2, "Proclaim +3 then the entering loss -2");
             }
-            if (!takeProclaim) { Accept(e, new GameCommand("declineReaction", e.State.PriorityPlayerId, e.Version)); Accept(e, new GameCommand("declineReaction", e.State.PriorityPlayerId, e.Version)); }
+            if (!takeProclaim) { Accept(e, new GameCommand("declineReaction", e.State.PriorityPlayerId, e.Version)); }
             Eq(e.State.Players[0].Honor, takeProclaim ? honor + 1 : honor - 2, takeProclaim ? "unchanged by the passes" : "no Proclaim: only the loss, applied when the window closed");
             var log = e.State.Events.Select(x => x.Message).ToArray();
             var gain = Array.FindIndex(log, m => m.Contains("+3 Honor") && m.Contains("Proclaim"));
@@ -724,7 +724,7 @@ internal static class DaigotsuBofanaTests
                 var honor = e.State.Players[0].Honor; var hand = e.State.Players[0].Hand.Count;
                 Eq(e.State.Players[0].Honor, honor); Eq(e.State.Players[0].Hand.Count, hand, $"{id}: nothing applied while the Proclaim window is open");
                 if (takeProclaim) Accept(e, e.QueryActions(0).Single(a => a.Type == "proclaim").Command!);
-                else { Accept(e, new GameCommand("declineReaction", e.State.PriorityPlayerId, e.Version)); Accept(e, new GameCommand("declineReaction", e.State.PriorityPlayerId, e.Version)); }
+                else { Accept(e, new GameCommand("declineReaction", e.State.PriorityPlayerId, e.Version)); }
                 var gained = takeProclaim ? def.PersonalHonor : 0;
                 var lost = def.EntryHonorLoss ?? 0;
                 Eq(e.State.Players[0].Honor, honor + gained - lost, $"{id}: Proclaim {(takeProclaim ? "taken" : "passed")}, entering loss {lost}");
