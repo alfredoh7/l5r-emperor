@@ -260,7 +260,10 @@ public sealed partial class MatchEngine
                 if (source is null) return new(rule, 0, "This ability has no source card to price.", "This ability has no source card to price.", false, null);
                 // A Discipline play from a discard pile says so, so the payment panel names the Discipline cost
                 // rather than implying a printed Gold cost the card does not have.
-                return new(rule, Definition(source).GoldCost, $"{Definition(source).Name} {(DisciplineFromDiscard(ability, source) ? "Discipline cost" : "cost")} {Definition(source).GoldCost}", null, false, source);
+                {
+                    var printedCost = Definition(source).GoldCost + PromoBSourceCostAdjustment(source); // Economic Manipulation (PromoCelestialB.cs): "This card has -1 Gold Cost if you control a Merchant."
+                    return new(rule, printedCost, $"{Definition(source).Name} {(DisciplineFromDiscard(ability, source) ? "Discipline cost" : "cost")} {printedCost}", null, false, source);
+                }
             case GoldCostBasis.Variable:
                 {
                     var chosen = command.GoldAmount ?? rule.Amount;

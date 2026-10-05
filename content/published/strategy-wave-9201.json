@@ -1,0 +1,103 @@
+{
+  "Profile": "strategy-wave-9201",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-4",
+      "Name": "A Brave New World",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing Personality and discard a card: Move your Personality to the current battlefield. Straighten his unit if he moved.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-4.jpg",
+      "Keywords": [],
+      "Focus": 4,
+      "Abilities": [
+        "promo-b-brave-new-world-move"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-2279",
+      "Name": "Economic Manipulation",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 4,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "This card has -1 Gold Cost if you control a Merchant.\nLimited: Target a Holding with a base Gold Cost of 4 or less controlled by a player who controls five or more Holdings: Destroy it.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-2279.jpg",
+      "Keywords": [
+        "Kolat"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "promo-b-economic-manipulation-destroy"
+      ],
+      "Effect": "promo-b-economic-manipulation-cost"
+    },
+    {
+      "Id": "oracle-l5r-2621",
+      "Name": "Folklore",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle/Open: Target an unaligned Personality: Give him -3F.\nBattle: Choose your performing Human Personality and target a Nonhuman Personality: Move it home.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-2621.jpg",
+      "Keywords": [],
+      "Focus": 4,
+      "Abilities": [
+        "promo-b-folklore-force",
+        "promo-b-folklore-move"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-2760",
+      "Name": "Gaining Experience",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: Choose your performing Samurai: Permanently give him either Cavalry or Tactician.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-2760.jpg",
+      "Keywords": [],
+      "Focus": 4,
+      "Abilities": [
+        "promo-b-gaining-experience-cavalry",
+        "promo-b-gaining-experience-tactician"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}
