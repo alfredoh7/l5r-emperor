@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Deck import troubleshooter: when a deck file has card names the catalogue does not know (Sun and Moon exports such as 'Fukuzo - expFukuzo'), list each bad line with nearest-match suggestions and open a repaired unsaved draft. Core DeckTroubleshooter (loader stays strict/atomic), client dialog from Import and from the 'Needs repair' deck card.",
+  "validation": "Core tests 13/13 deck-workshop incl. real deck-pool.json case for the Spider/Unicorn names; client project builds 0 errors. No native visual check of the dialog yet.",
+  "remaining": "Visual/input check of the dialog in the running game; Ivory-format decks are only partly repairable (different card pool).",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/655",
+  "branch": "claude/655-deck-import-troubleshooter",
+  "updated": "2026-10-05T17:41:09.736127+00:00"
+}

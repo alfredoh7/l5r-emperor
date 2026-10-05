@@ -82,6 +82,12 @@ public sealed class DeckWorkshop
     }
     public Deck ToDeck() => new(Legality, Cards.OrderBy(c => c.SetupSlot.Length == 0 ? 1 : 0)
         .ThenBy(c => c.DeckName, StringComparer.OrdinalIgnoreCase).Select(c => new DeckEntry(c.DeckName, Count(c.Id))).ToArray());
+    /// <summary>Find the unreadable lines in a deck file and the nearest catalogue card for each (the import troubleshooter). Does not change the draft.</summary>
+    public DeckTroubleshooting Troubleshoot(string text)
+    {
+        if (text.Length > 1_000_000) throw new FormatException("Deck file exceeds the 1 MB limit.");
+        return DeckTroubleshooter.Analyse(text, _pool.Values);
+    }
     public void Load(string text)
     {
         if (text.Length > 1_000_000) throw new FormatException("Deck file exceeds the 1 MB limit.");
