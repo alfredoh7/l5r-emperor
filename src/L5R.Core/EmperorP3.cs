@@ -160,6 +160,7 @@ public sealed class StashedDuelTracking
     public int PlayerId { get; set; }
     public string? SourceId { get; set; }
     public string? PerformerId { get; set; }
+    public List<string> TargetIds { get; set; } = [];
     public List<AffectedCard> Affected { get; set; } = [];
     public List<int> HonorLosers { get; set; } = [];
     public List<int> HandRecipients { get; set; } = [];
