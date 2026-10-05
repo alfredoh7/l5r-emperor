@@ -1,9 +1,9 @@
 {
-  "lane": "rules",
-  "summary": "Promotional-Emperor pass: 106 of the 134 unwired cards wired (Items 23, Holdings 18, Regions 5, Celestials 3, Strategies 18, Spells 3, Events 18, Personalities 15, Followers 3); 28 blocked with notes and categories in the inventory. Inventory builder now reads tools/content/pe_*_blockers.json. Art pack candidate catalogue-art-issue653-20261005-r1 built.",
-  "validation": "Full Core suite passes after merging four agent branches (name collisions and three pinned inventories fixed); dotnet format whitespace check clean; content unittests run against the matching art pack metadata; check.sh result recorded in the PR.",
-  "remaining": "Art pack release is built and verified locally but NOT published; AI/Server/Client suites and native play not run beyond check.sh; rules readings in docs/decisions/2026-10-05-promotional-emperor-pass.md await Mendon.",
+  "lane": "shared",
+  "summary": "Promotional-Emperor pass: 106 of the 134 unwired cards wired (Items 23, Holdings 18, Regions 5, Celestials 3, Strategies 18, Spells 3, Events 18, Personalities 15, Followers 3); 28 blocked with notes and categories in the inventory. Shared change: the catalogue art pack metadata (content/catalogue-art-pack.json, catalogue-art.json) now names candidate catalogue-art-issue653-20261005-r1 for the 106 new scans, and build_card_inventory.py reads tools/content/pe_*_blockers.json; the rules work is in new PromoEmperor*.cs files with one-line hooks in shared engine chains.",
+  "validation": "Full Core suite passes after merging four agent branches (name collisions and three pinned inventories fixed); dotnet format whitespace check clean; check.sh result recorded in the PR.",
+  "remaining": "Art pack release is built and verified locally but NOT published; Client suite and native play not run; rules readings in docs/decisions/2026-10-05-promotional-emperor-pass.md await Mendon.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/653",
   "branch": "claude/653-promotional-emperor-pass",
-  "updated": "2026-10-05T15:49:00.738733+00:00"
+  "updated": "2026-10-05T15:49:08.350217+00:00"
 }
