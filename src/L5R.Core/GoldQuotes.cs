@@ -260,7 +260,10 @@ public sealed partial class MatchEngine
                 if (source is null) return new(rule, 0, "This ability has no source card to price.", "This ability has no source card to price.", false, null);
                 // A Discipline play from a discard pile says so, so the payment panel names the Discipline cost
                 // rather than implying a printed Gold cost the card does not have.
-                return new(rule, Definition(source).GoldCost, $"{Definition(source).Name} {(DisciplineFromDiscard(ability, source) ? "Discipline cost" : "cost")} {Definition(source).GoldCost}", null, false, source);
+                {
+                    var printedCost = Definition(source).GoldCost + PromoBSourceCostAdjustment(source); // Economic Manipulation (PromoCelestialB.cs): "This card has -1 Gold Cost if you control a Merchant."
+                    return new(rule, printedCost, $"{Definition(source).Name} {(DisciplineFromDiscard(ability, source) ? "Discipline cost" : "cost")} {printedCost}", null, false, source);
+                }
             case GoldCostBasis.Variable:
                 {
                     var chosen = command.GoldAmount ?? rule.Amount;
@@ -545,6 +548,8 @@ public sealed partial class MatchEngine
         if (RoninEntryDiscount(card, playerId) is > 0 and var roninDiscount) { raw -= roninDiscount; basis += $" − {roninDiscount} (Palace of the Breaking Dawn)"; }
         // Daigotsu Misaki (Emperor Edition Personality pass, issue #477): "Followers attaching to Misaki enter play paying 2 less Gold" -- any attach, from a hand or a discard pile.
         if (FollowerAttachDiscount(card, target) is > 0 and var misakiDiscount) { raw -= misakiDiscount; kind = GoldCostKind.Derived; basis += $" − {misakiDiscount} ({Definition(target).Name})"; }
+        // Promotional-Celestial group C (PromoCelestialC.cs): Fudo Cultist "ignoring Gold cost" on a Nonhuman Fudo Personality; Yotsu Ueda's Chosen "paying 2 less Gold" on Yotsu Ueda.
+        if (PromoCelestialCAttachDiscount(card, target, raw) is { Amount: > 0 } promoC) { raw -= promoC.Amount; kind = GoldCostKind.Derived; basis += promoC.Basis; }
         if (raw < 0) basis += " (min 0)";
         return (Math.Max(0, raw), basis, kind);
     }

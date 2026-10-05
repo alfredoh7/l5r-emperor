@@ -1,0 +1,81 @@
+{
+  "Profile": "region-wave-9302",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-1879",
+      "Name": "Deadlands",
+      "Type": "Region",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After this card enters play: Lose 4 Honor.\nLimited: If there are any cards in this province, discard this card: Discard a card from the province, refilling it face-up with an Undead Personality in your discard pile.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1879.jpg",
+      "Keywords": [
+        "Shadowlands"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "pcc-deadlands-refill"
+      ],
+      "Effect": "none",
+      "EntryHonorLoss": 4
+    },
+    {
+      "Id": "oracle-l5r-8161",
+      "Name": "The Ivory Coast",
+      "Type": "Region",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing Personality and bow this card: Move him home. Straighten his unit if he moved.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8161.jpg",
+      "Keywords": [
+        "Singular"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "pcc-ivory-coast-home"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9224",
+      "Name": "War-ravaged Plain",
+      "Type": "Region",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Discard this card and target a Region: Destroy it.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9224.jpg",
+      "Keywords": [],
+      "Focus": 0,
+      "Abilities": [
+        "pcc-war-ravaged-destroy"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

@@ -1,0 +1,56 @@
+[
+  {
+    "card_id": "oracle-l5r-4039",
+    "printing_set": [
+      "Promotional&ndash;Celestial"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=4039",
+    "image_path": "assets/reference/oracle/promotional-celestial/webp/oracle-l5r-4039-printing-1-image-1.webp",
+    "image_sha256": "6e4ce4039e22f4620e44da2ccbba2b93e3abdf3b3befd955ef24999a1bc23184"
+  },
+  {
+    "card_id": "oracle-l5r-4253",
+    "printing_set": [
+      "Promotional&ndash;Celestial"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=4253",
+    "image_path": "assets/reference/oracle/promotional-celestial/webp/oracle-l5r-4253-printing-1-image-1.webp",
+    "image_sha256": "420b6075367b32bb46a5f2f2e0b7df44274b98f811e91f3e891b4b5413b4021a"
+  },
+  {
+    "card_id": "oracle-l5r-4852",
+    "printing_set": [
+      "Promotional&ndash;Celestial"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=4852",
+    "image_path": "assets/reference/oracle/promotional-celestial/webp/oracle-l5r-4852-printing-1-image-1.webp",
+    "image_sha256": "27908b1da6a507e6a07507fb9d5020c717de2a773b1b155dad884905b2739298"
+  },
+  {
+    "card_id": "oracle-l5r-5198",
+    "printing_set": [
+      "Promotional&ndash;Celestial"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=5198",
+    "image_path": "assets/reference/oracle/promotional-celestial/webp/oracle-l5r-5198-printing-1-image-1.webp",
+    "image_sha256": "d1d4540d4650ed19de261371e58397d3f51922c30eacc3b3b8d06a2ea2786ebf"
+  },
+  {
+    "card_id": "oracle-l5r-7822",
+    "printing_set": [
+      "Promotional&ndash;Celestial"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=7822",
+    "image_path": "assets/reference/oracle/promotional-celestial/webp/oracle-l5r-7822-printing-1-image-1.webp",
+    "image_sha256": "229fe611a23a0089b882b2049e297e6b9489ddc2bc74ea5b3900eee92def8305"
+  },
+  {
+    "card_id": "oracle-l5r-9680",
+    "printing_set": [
+      "Promotional&ndash;Celestial"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=9680",
+    "image_path": "assets/reference/oracle/promotional-celestial/webp/oracle-l5r-9680-printing-1-image-1.webp",
+    "image_sha256": "f8d34a4120458afdbd4fd6e12348204f7486d541fc0e608f012979f96c5befc3"
+  }
+]

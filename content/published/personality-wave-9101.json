@@ -1,0 +1,173 @@
+{
+  "Profile": "personality-wave-9101",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-4039",
+      "Name": "Jahan",
+      "Type": "Personality",
+      "Clan": "Unaligned",
+      "GoldCost": 3,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 2,
+      "PersonalHonor": 2,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "While Jahan is at the current battlefield, other players may not play Terrains.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-4039.jpg",
+      "Keywords": [
+        "Gaijin",
+        "Kshatriya",
+        "Scout"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "promo-jahan-no-terrain"
+    },
+    {
+      "Id": "oracle-l5r-4253",
+      "Name": "Kamalakar",
+      "Type": "Personality",
+      "Clan": "Unaligned",
+      "GoldCost": 10,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 4,
+      "PersonalHonor": 3,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After the first time each turn a Political action targets Kamalakar: Negate its effects.\nBattle: Kamalakar confounds the enemy. Move Kamalakar home or to a battlefield with enemy units.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-4253.jpg",
+      "Keywords": [
+        "Cavalry",
+        "Tactician",
+        "Unique",
+        "Courtier",
+        "Gaijin",
+        "Kshatriya"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "kamalakar-move-home",
+        "kamalakar-move-battlefield"
+      ],
+      "Effect": "promo-kamalakar-political-shield"
+    },
+    {
+      "Id": "oracle-l5r-4852",
+      "Name": "Masatane",
+      "Type": "Personality",
+      "Clan": "Unaligned",
+      "GoldCost": 5,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Iaijutsu Battle: Target an enemy attachment: Destroy it.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-4852.jpg",
+      "Keywords": [
+        "Duelist",
+        "Kensai",
+        "Ronin",
+        "Samurai"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "masatane-destroy"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-5198",
+      "Name": "Miya Masatsuko",
+      "Type": "Personality",
+      "Clan": "Unaligned",
+      "GoldCost": 5,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 3,
+      "PersonalHonor": 3,
+      "HonorRequirement": 1,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Political Limited: Discard the Imperial Favor: Draw an additional card during your next End Phase.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-5198.jpg",
+      "Keywords": [
+        "Singular",
+        "Courtier",
+        "Herald",
+        "Imperial"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "masatsuko-draw"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-7822",
+      "Name": "Tashiki",
+      "Type": "Personality",
+      "Clan": "Unaligned",
+      "GoldCost": 3,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 3,
+      "PersonalHonor": 1,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: Bow Tashiki and target a Market or Port Holding: Straighten it.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7822.jpg",
+      "Keywords": [
+        "Merchant",
+        "Settler"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "tashiki-straighten"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9680",
+      "Name": "Yotsu Ueda",
+      "Type": "Personality",
+      "Clan": "Unaligned",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 5,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Target an enemy Follower or Personality without Followers with Force equal to or lower than 4: Destroy it.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9680.jpg",
+      "Keywords": [
+        "Kensai",
+        "Commander",
+        "Gunso",
+        "Samurai"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "ueda-destroy"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

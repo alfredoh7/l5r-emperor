@@ -1,10 +1,10 @@
 {
   "schema_version": 1,
   "repository": "alfredoh7/l5r-emperor",
-  "tag": "catalogue-art-issue648-20261004-r1",
+  "tag": "catalogue-art-promo-celestial-20261005-r1",
   "asset": "L5R-Catalogue-WebP85.zip",
-  "sha256": "8478a85a9238c8c89ca4aef5ee9aed78e9de7373dca7a82ead21aa7b6799ce28",
-  "bytes": 544153542,
-  "images": 4022,
+  "sha256": "2a47cdeca847bd6a5cb657916da172423cd9368e43134bc3efd9371f97cae4b0",
+  "bytes": 547371410,
+  "images": 4047,
   "quality": 85
 }

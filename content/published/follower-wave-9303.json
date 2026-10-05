@@ -1,0 +1,54 @@
+{
+  "Profile": "follower-wave-9303",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-2722",
+      "Name": "Fudo Cultist",
+      "Type": "Follower",
+      "Clan": "Unaligned",
+      "GoldCost": 3,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Attaches to a Nonhuman Fudo Personality ignoring Gold cost.\nThis card has +1F for each other Fudo card you control.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-2722.jpg",
+      "Keywords": [
+        "Fudo"
+      ],
+      "Focus": 2,
+      "Abilities": [],
+      "Effect": "pcc-fudo-cultist"
+    },
+    {
+      "Id": "oracle-l5r-9681",
+      "Name": "Yotsu Ueda's Chosen",
+      "Type": "Follower",
+      "Clan": "Unaligned",
+      "GoldCost": 4,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": 1,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Attaches to Yotsu Ueda paying 2 less Gold.\nBattle: Target an attachment: Bow or straighten it.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9681.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "pcc-yotsu-bow",
+        "pcc-yotsu-straighten"
+      ],
+      "Effect": "pcc-yotsu-chosen"
+    }
+  ],
+  "Decks": []
+}

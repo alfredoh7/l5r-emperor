@@ -1,0 +1,81 @@
+{
+  "Profile": "holding-wave-9301",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-1081",
+      "Name": "Blue Tanuki Bar",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 1,
+      "GoldProduction": 1,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Bow this card: Produce 1 Gold.\nLimited: Bow this card and target a Personality: Give him a +1F Sake token.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1081.jpg",
+      "Keywords": [
+        "Sake Works"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "pcc-tanuki-sake"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-6218",
+      "Name": "Recruitment Officer",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 4,
+      "GoldProduction": 3,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Bow this card: Produce 3 Gold.\nReaction: After engaging at a battlefield where you control one or more units, bow this card: Create a 2F/2C/2PH Ronin • Samurai Personality there. Remove him from the game when this turn ends.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6218.jpg",
+      "Keywords": [
+        "Retainer"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "pcc-recruitment-officer"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-8150",
+      "Name": "The Imperial Treasury",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 4,
+      "GoldProduction": 1,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Enters play paying 1 less Gold if you are a Mantis Clan player.\nBow this card: Produce 1 Gold, plus 1 additional Gold for each non-Unique Holding you control.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8150.jpg",
+      "Keywords": [
+        "Imperial",
+        "Unique"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "mantis-clan-discount"
+    }
+  ],
+  "Decks": []
+}
