@@ -27,7 +27,7 @@ public sealed partial class MatchEngine
         if (causer is not int by || by == handOwner) return false;
         var pillowbook = _state.Cards.Values.FirstOrDefault(c => c.OwnerId == handOwner && InPlay(c) && Definition(c).Effect == PillowbookEffect);
         var wall = byAction ? _state.Cards.Values.FirstOrDefault(c => c.OwnerId == handOwner && c.Zone == Zone.EventInPlay && Definition(c).Effect == ScorpionWallEffect) : null;
-        var protector = pillowbook ?? wall;
+        var protector = pillowbook ?? wall ?? (byAction ? PromoEmperorHandProtector(handOwner) : null); // Sacred Temples (issue #653)
         if (protector is null) return false;
         Emit("handDiscardPrevented", $"{Definition(protector).Name}: {Player(by).Name}'s {reason} will not discard cards from {Player(handOwner).Name}'s hand.", handOwner, protector.Id);
         return true;

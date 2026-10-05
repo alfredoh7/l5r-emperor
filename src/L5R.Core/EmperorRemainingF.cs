@@ -213,7 +213,8 @@ public sealed partial class MatchEngine
     internal int DestroyUnitsForTest(string cardId) => DestroyUnits([Card(cardId)], false, _state.ActivePlayerId);
 
     // "This card will not be destroyed" (Rugashi Bazaar): read where a destruction is applied (DestroyUnits).
-    private bool WillNotBeDestroyed(CardInstance card) => InPlay(card) && Definition(card).Effect == RugashiBazaarEffect || CombatSegmentShielded(card); // Chikushudo's Trickery (issue #492, rulings pass R1)
+    // Chikushudo's Trickery (issue #492, rulings pass R1)
+    private bool WillNotBeDestroyed(CardInstance card) => InPlay(card) && Definition(card).Effect == RugashiBazaarEffect || PromoEmperorWillNotBeDestroyed(card) || CombatSegmentShielded(card);
 
     // "Even if this card is bowed" for group F's abilities (ValidateAbility's list).
     private static bool EmperorRemainingFBowedOk(string id) => id is "governors-court-open";
@@ -280,12 +281,12 @@ public sealed partial class MatchEngine
                 for (var i = 0; i < PaidGoldAmount(command); i++) CreateToken(source!, MoneylenderTokenType, id);
                 return false;
             case "falling-rain-boost":
-            {
-                var duelist = FallingRainDuelist(player.Id)!;
-                _state.PendingDuel!.StatBonuses[duelist.Id] = _state.PendingDuel.StatBonuses.GetValueOrDefault(duelist.Id) + 1;
-                Emit("duelStatBonus", $"{Definition(source!).Name}: {Definition(duelist).Name} has +1 to his duel stat until the duel ends.", player.Id, duelist.Id);
-                return false;
-            }
+                {
+                    var duelist = FallingRainDuelist(player.Id)!;
+                    _state.PendingDuel!.StatBonuses[duelist.Id] = _state.PendingDuel.StatBonuses.GetValueOrDefault(duelist.Id) + 1;
+                    Emit("duelStatBonus", $"{Definition(source!).Name}: {Definition(duelist).Name} has +1 to his duel stat until the duel ends.", player.Id, duelist.Id);
+                    return false;
+                }
             case "chugo-seido-redirect":
                 RedirectAction(HeldAction(), target!.Id, source!);
                 return false;
@@ -298,7 +299,9 @@ public sealed partial class MatchEngine
             case "peddler-draw":
                 Draw(player);
                 return false;
-            case "temples-gisei-follower": case "temples-gisei-item": case "temples-gisei-spell":
+            case "temples-gisei-follower":
+            case "temples-gisei-item":
+            case "temples-gisei-spell":
                 BeginLook(ability.Look!, source!, player.Id, "ability", bowedBefore);
                 return true;
             case "refuge-three-sisters-search":

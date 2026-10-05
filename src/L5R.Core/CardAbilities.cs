@@ -199,7 +199,8 @@ public static class AbilityCatalog
         ["crushing-force"] = new("Battle", "Opposed Personality · +3 Force", "own-opposed"),
         ["crushing-destroy"] = new("Battle", "Destroy an enemy Follower or Item", "enemy-attachment"),
         ["never-afraid"] = new("Battle", "Destroy an attachment", "attachment"),
-        ["lobby"] = new("Limited", "Lobby · bow a Personality to take Favor", "lobby", true, Costs: ActionCost.BowTarget),
+        // The Blessed Mantle of the Greensnakes (PromoEmperorItems.cs): "This Personality may lobby ignoring the cost of bowing" -- the bow is not owed by a Personality with the pseudo-keyword it grants.
+        ["lobby"] = new("Limited", "Lobby · bow a Personality to take Favor", "lobby", true, Costs: [new(CostVerb.Bow, CostSubject.Target, UnlessKeyword: PromoEmperorItemsAbilities.LobbiesWithoutBowing)]),
         ["favor-cycle"] = new("Limited", "Discard Favor and a card · draw a card", "hand", true, Costs: ActionCost.DiscardTarget),
         ["favor-battle"] = new("Battle", "Discard Favor · move an enemy attacker home", "enemy-attacking", true),
         ["journeys-end-move"] = new("Battle", "Move home a Personality with no more Followers than the performer", "fewer-or-equal-followers-than-performer", Performer: "own-unbowed-personality-at-battle"),
@@ -3943,6 +3944,7 @@ public sealed partial class MatchEngine
         if (printedOrGranted && keyword == "Overconfident" && Definition(card).Effect == "loses-overconfident-vs-lion" && Player(1 - card.OwnerId).Clan == "Lion")
             return false;
         if (printedOrGranted) return true;
+        if (keyword == "Naval" && PromoEmperorNaval(card)) return true; // Suitengu's Blessing (issue #653): Naval while the Celestial remains in play
         // Isawa Kojiro (oracle-l5r-3850, issue #301): "Kojiro has Naval while he has a Spell" -- the same
         // additive live conditional grant Tamori Yayu's Cavalry below is, re-evaluated on every call so
         // it appears the moment a Spell attaches and disappears the moment it leaves (destroyed,
@@ -3960,7 +3962,9 @@ public sealed partial class MatchEngine
         // A static rule of a card in play gives the keyword to a category of its controller's cards, in or out of play (Ikoma Aimi's Courtier, Seppun Nagi's Clan
         // keyword, Tsuruchi Nobukatsu - exp's Magistrate) -- StaticKeywordRules.cs, read live like the two conditional grants around it.
         if (StaticKeywordGranted(card, keyword)) return true;
+        if (PromoItemsKeywordGranted(card, keyword)) return true; // The Emerald Armor's Imperial and Magistrate, Mantle of the Onyx Champion's Maho (PromoEmperorItems.cs)
         if (UnmeiMirrorsKeyword(card, keyword)) return true;
+        if (PromoGrantsKeyword(card, keyword)) return true; // Tamahime's Tactician (issue #653, PromoEmperorPersonalities.cs)
         if (OchiaiGrantsDuelist(card, keyword)) return true; // Ochiai's Bravery (issue #503) // Unmei (Emperor Edition Personality pass, issue #477, batch 3).
         // Tamori Yayu (issue #216): "has ... Cavalry while it is not your turn" -- a live conditional
         // grant, re-evaluated every time (unlike GrantedKeyword's own durable one-time grant).
@@ -4413,6 +4417,8 @@ public sealed partial class MatchEngine
         if (EmperorRemainingCAbilities.BeforeActionHandReactions.Contains(abilityId)) return EmperorRemainingCBeforeActionApplies(card, abilityId, command);
         if (CardWave566BeforeActionApplies(card, abilityId, command) is { } wave566Before) return wave566Before; // Inexorable (issue #566, CardWave566.cs)
         if (P3BeforeActionApplies(card, abilityId, command) is { } p3Before) return p3Before; // Request Authorization (issue #503, EmperorP3.cs)
+        if (PromoItemsBeforeActionApplies(card, abilityId, command) is { } promoItemsBefore) return promoItemsBefore; // The Pearl-Encrusted Staff of the Cobras (PromoEmperorItems.cs)
+        if (PromoBeforeActionApplies(card, abilityId, command, affectedId) is { } promoBefore) return promoBefore; // Interrogation (issue #653, PromoEmperorFateReactions.cs)
         // Akodo Shihiro (issue #458): "Before (each time) another player's action resolves during a battle at Shihiro's battlefield" -- whatever the action targets, so
         // long as it is a genuine action (IsAction), taken by another player, while a battle is under way at Shihiro's own battlefield.
         if (P2BeforeActionApplies(card, abilityId, command) is { } p2Before) return p2Before; // issue #503: Armor of the Uruwashii (EmperorP2.cs)
@@ -5530,9 +5536,15 @@ public sealed partial class MatchEngine
                 || id == EmperorP3PriorityAbilities.AyumuStraighten // Ikoma Ayumu (issue #503): "Even if Ayumu is bowed".
                 || MechAEvenIfBowed(id) // Mirumoto Inokuchi (issue #501): "Even if Inokuchi is bowed".
                 || id == EmperorP4UnitAbilities.HayanAssign // Shinjo Hayan's trait (issue #503): a trait is usable while its card is bowed
-                || MechEEvenIfBowed(id) // issue #501: Moto Rani - exp ("Even if Rani is bowed"); Kakita Kae's trait (a trait is usable while bowed)
-                                        // issue #622 (IvoryPolitical.cs): Komori Taruko ("Even if Taruko is bowed")
+                                                            // issue #501: Moto Rani - exp ("Even if Rani is bowed"); Kakita Kae's trait (a trait is usable while bowed)
+                || MechEEvenIfBowed(id)
+                // issue #622 (IvoryPolitical.cs): Komori Taruko ("Even if Taruko is bowed")
                 || IvoryPoliticalEvenIfBowed(id)
+                // Retired Sensei (issue #653, PromoEmperorHoldings.cs)
+                || PromoEmperorEvenIfBowed(id)
+                // Family Sword: "Open: Even if this card is bowed ..." (PromoEmperorItems.cs)
+                || PromoItemsEvenIfBowed(id)
+                || id == PromoEmperorEventAbilities.EmeraldStraighten // issue #653: The Emerald Championship, "Even if this Personality is bowed"
                 || TirelessStronghold(source) || UnsafePassageWaives(command, source), "Abilities on bowed cards cannot be used.");
             uses = source.AbilityUses;
         }
@@ -6285,7 +6297,7 @@ public sealed partial class MatchEngine
             else
             {
                 var target = Card(command.TargetId); var type = Definition(target).Type;
-                if (ability.Target == "hand") Require(target.OwnerId == player.Id && target.Zone == Zone.Hand && player.Hand.Contains(target.Id), "Discard a card from your hand.");
+                if (ability.Target == "hand") Require(target.OwnerId == player.Id && target.Zone == Zone.Hand && player.Hand.Contains(target.Id) && target.Id != command.CardId, "Discard a card from your hand."); // a card being played is not in the hand it discards from (issue #653)
                 // Hato-gurama (oracle-l5r-10115, issue #453 batch 5): "You may not choose this card to be discarded as a cost or effect of your actions if you have other cards in your hand."
                 if (ability.Target == "hand") Require(Definition(target).Effect != "hato-gurama" || player.Hand.Count == 1, "Hato-gurama may not be chosen to be discarded while you have other cards in your hand.");
                 // Forthrightness (The Shadow's Embrace pass, issue #476 batch 3): "show a Strategy in your hand" -- another Strategy of the acting player's hand (the played card is not in it).
@@ -6724,7 +6736,7 @@ public sealed partial class MatchEngine
                         // HasAttachments already exists for exactly this boolean (a count, not "any
                         // specific kind"), reused verbatim.
                         "personality-with-attachment" => personality && HasAttachments(target),
-                        "lobby" => personality && own && !target.Bowed && CardPersonalHonor(target) >= 1,
+                        "lobby" => personality && own && (!target.Bowed || Keyword(target, PromoEmperorItemsAbilities.LobbiesWithoutBowing)) && CardPersonalHonor(target) >= 1,
                         "fewer-or-equal-followers-than-performer" => personality &&
                             Attachments(target.Id).Count(a => Definition(a).Type == CardType.Follower) <= Attachments(command.PerformerId!).Count(a => Definition(a).Type == CardType.Follower),
                         // Unexpected Support: the enemy-only counterpart to journeys-end-move's own
@@ -7020,6 +7032,7 @@ public sealed partial class MatchEngine
         // Goju Yurishi - exp (issue #453, batch 3; TargetOfLastResort.cs): a card another player may only target when no other legal target exists -- judged for a
         // single target and for each slot candidate alike, before the slot probe returns.
         RequireNotTargetOfLastResort(command, ability, slotAbility);
+        RequirePromoItemsNotProtected(command, ability, slotAbility); // The Emerald Armor, The Arcane Cloak of the Chameleons (PromoEmperorItems.cs)
         // One slot candidate has now been judged; everything below is about the whole action (its own checks and its price).
         if (slotAbility is not null) return;
         if (id == "red-hunger-attachments")
@@ -10836,6 +10849,7 @@ public sealed partial class MatchEngine
     // battle resolution (FinishBattleResolution) -- both paths share this single removal.
     private void DiscardTerrain(CardInstance terrain)
     {
+        if (NegatesEffect(terrain, "destroy")) { Emit("destructionNegated", $"{Definition(terrain).Name}'s destruction was negated before it resolved.", terrain.OwnerId, terrain.Id); return; } // Interrogation (issue #653)
         terrain.Zone = Zone.FateDiscard; terrain.ProvinceIndex = null; terrain.FaceUp = true;
         // Fields of Mercy (oracle-l5r-2530): "the count of destroyed personalities does not start
         // until Fields of Mercy are played" -- so a LATER copy entering play must start fresh, not
@@ -10848,6 +10862,7 @@ public sealed partial class MatchEngine
     // the same removal ResolveProvinceDestruction applies when the province itself is destroyed.
     private void DestroyRegion(CardInstance region)
     {
+        if (NegatesEffect(region, "destroy")) { Emit("destructionNegated", $"{Definition(region).Name}'s destruction was negated before it resolved.", region.OwnerId, region.Id); return; } // Interrogation (issue #653)
         foreach (var province in _state.Players.SelectMany(p => p.Provinces).Where(p => p.RegionId == region.Id)) province.RegionId = null;
         region.Zone = Zone.DynastyDiscard; region.ProvinceIndex = null; region.FaceUp = true;
         Emit("regionDestroyed", $"{Definition(region).Name} was destroyed.", region.OwnerId, region.Id);

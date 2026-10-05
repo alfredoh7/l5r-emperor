@@ -125,7 +125,9 @@ public sealed partial class MatchEngine
     // phase already knows it -- and the Honor each gained from a battle's resolution is added up as it is gained (GainHonor's hook).
     private static int RulesPhase(Phase phase) => phase switch
     {
-        Phase.Straighten => 0, Phase.Events => 1, Phase.Action => 2,
+        Phase.Straighten => 0,
+        Phase.Events => 1,
+        Phase.Action => 2,
         Phase.AttackDeclaration or Phase.InfantryDeclaration or Phase.DefenseAssignment or Phase.CavalryDeclaration or Phase.CavalryDefense or Phase.BattleSelection or Phase.Battle => 3,
         Phase.Dynasty or Phase.DynastyDiscard => 4,
         Phase.End => 5,
@@ -298,7 +300,7 @@ public sealed partial class MatchEngine
             return;
         }
         search.Stage = SearchStage.ChoosePayment;
-        _state.PendingChoice = new("searchRecruitPay", search.PlayerId, search.SourceCardId, $"{Definition(Card(search.SourceCardId)).Name}: pay {cost} Gold to put {Definition(card).Name} into play unbowed, or decline.");
+        _state.PendingChoice = new("searchRecruitPay", search.PlayerId, search.SourceCardId, $"{Definition(Card(search.SourceCardId)).Name}: pay {cost} Gold to put {Definition(card).Name} into play {(SearchEntersBowed(search) ? "bowed" : "unbowed")}, or decline.");
     }
 
     private void ChooseSearchRecruitPayment(PendingSearch search, GameCommand command)
@@ -325,7 +327,7 @@ public sealed partial class MatchEngine
         var paying = new PaymentSubject(card, PaymentKind.Recruit);
         var quote = new GoldQuote(cost, GoldCostKind.Fixed, $"{Definition(card).Name} cost {CardGoldCost(card)} − {SearchSpecOf(search).RecruitDiscount} ({Definition(Card(search.SourceCardId)).Name})",
             null, PaymentOptions(playerId, cost, paying));
-        yield return new("chooseSearchPayment", $"Pay {cost} Gold: put {Definition(card).Name} into play unbowed", quote.Payments.Length > 0, quote.Payments.Length > 0 ? null : "You cannot pay for it.",
+        yield return new("chooseSearchPayment", $"Pay {cost} Gold: put {Definition(card).Name} into play {(SearchEntersBowed(search) ? "bowed" : "unbowed")}", quote.Payments.Length > 0, quote.Payments.Length > 0 ? null : "You cannot pay for it.",
             new GameCommand("chooseSearchPayment", playerId, _state.Version, SourceIds: quote.Payments.FirstOrDefault()?.SourceIds), card.Id, Gold: quote);
         yield return new("chooseSearchPayment", $"Decline: {Definition(card).Name} stays in the deck", true, null, new GameCommand("chooseSearchPayment", playerId, _state.Version, Choice: "decline"), card.Id);
     }
@@ -334,8 +336,8 @@ public sealed partial class MatchEngine
     {
         var player = Player(search.PlayerId);
         SearchDeckList(player, search.Deck!).Remove(card.Id);
-        card.Zone = Zone.Home; card.ProvinceIndex = null; card.FaceUp = true; card.Bowed = false;
-        Emit("cardEnteredPlay", $"{player.Name} put {Definition(card).Name} into play unbowed ({Definition(Card(search.SourceCardId)).Name}).", player.Id, card.Id);
+        card.Zone = Zone.Home; card.ProvinceIndex = null; card.FaceUp = true; card.Bowed = SearchEntersBowed(search); // Peace (issue #653) enters bowed
+        Emit("cardEnteredPlay", $"{player.Name} put {Definition(card).Name} into play {(card.Bowed ? "bowed" : "unbowed")} ({Definition(Card(search.SourceCardId)).Name}).", player.Id, card.Id);
         // The mandatory half of entering play (a trait of the Holding's own); an entering-play Reaction of its own is not opened inside the search (no Farm Holding prints one).
         ApplyMandatoryEntryEffects(player.Id, card);
     }

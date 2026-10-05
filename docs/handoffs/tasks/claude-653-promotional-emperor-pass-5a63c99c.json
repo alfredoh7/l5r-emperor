@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Promotional-Emperor pass: 106 of the 134 unwired cards wired (Items 23, Holdings 18, Regions 5, Celestials 3, Strategies 18, Spells 3, Events 18, Personalities 15, Followers 3); 28 blocked with notes and categories in the inventory. Shared change: catalogue art pack metadata names catalogue-art-issue653-20261005-r2 (the Promotional-Celestial pack plus 106 new scans); build_card_inventory.py reads tools/content/pe_*_blockers.json; rules work is in new PromoEmperor*.cs files with one-line hooks in shared engine chains. Merged main after the Promotional-Celestial pass.",
+  "validation": "Full Core suite and content tests pass on the merged tree; format and comment-swallow lint clean; earlier check.sh --skip-client and --client-only passed before the merge; native probes: catalogue, practice-setup, event-decisions, deck-builder, gold-payment (non-derived), permanent-grants pass; decision-chooser fukui, gold derived and support-cards fail identically on main.",
+  "remaining": "No native hands-on play of the new cards in a match; rules readings in docs/decisions/2026-10-05-promotional-emperor-pass.md await Mendon.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/653",
+  "branch": "claude/653-promotional-emperor-pass",
+  "updated": "2026-10-05T19:22:55.060508+00:00"
+}

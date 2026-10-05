@@ -152,8 +152,15 @@ public sealed partial class MatchEngine
             var other = 1 - p.ActingPlayerId;
             OpenDeciderChoice(new PendingDeciderChoice
             {
-                SpecId = DeciderSpecs.BloodOfThePreserverSecond, SourceCardId = p.SourceCardId, ActingPlayerId = p.ActingPlayerId, DeciderPlayerId = other,
-                Candidates = BloodOfThePreserverCandidates(chosen), Min = 0, Max = 2, EarlierChosen = chosen, Paused = p.Paused
+                SpecId = DeciderSpecs.BloodOfThePreserverSecond,
+                SourceCardId = p.SourceCardId,
+                ActingPlayerId = p.ActingPlayerId,
+                DeciderPlayerId = other,
+                Candidates = BloodOfThePreserverCandidates(chosen),
+                Min = 0,
+                Max = 2,
+                EarlierChosen = chosen,
+                Paused = p.Paused
             });
             return;
         }
@@ -232,7 +239,9 @@ public sealed partial class MatchEngine
             case "blood-preserver-remove":
                 return BeginDeciderChoice(DeciderSpecs.BloodOfThePreserverFirst, command, consumedGrant, playedFromDiscard, opponentHonorBeforeBattleAction, bowedBeforeAction, preExistingGrants);
             // The Celestial Swords' "After this card enters play: Gain 2 Honor".
-            case "celestial-sword-crab-honor": case "celestial-sword-crane-honor": case "celestial-sword-phoenix-honor":
+            case "celestial-sword-crab-honor":
+            case "celestial-sword-crane-honor":
+            case "celestial-sword-phoenix-honor":
                 GainHonor(player.Id, 2, Definition(source!).Name, source);
                 return false;
             // Celestial Sword of the Crab: "Straighten this unit" -- the Personality it is attached to, and every card attached to him.
@@ -250,15 +259,15 @@ public sealed partial class MatchEngine
             // Celestial Sword of the Phoenix: "Bring him into play at this card's location, ignoring costs" (the wielder's: his battlefield, else home) and "remove him from the game
             // before the turn ends" (the stamp EndTurn reads).
             case "celestial-sword-phoenix-return":
-            {
-                var wielder = WielderOf(source!);
-                var battlefield = wielder is { Zone: Zone.Battlefield } ? wielder.ProvinceIndex : null;
-                return BringDeadPersonalityIntoPlay(player, target!, Definition(source!).Name, battlefield, entered =>
                 {
-                    entered.AbilityUses[PhoenixSwordRemovalKey] = _state.TurnNumber;
-                    Emit("removalScheduled", $"{Definition(entered).Name} will be removed from the game before the turn ends.", entered.OwnerId, entered.Id);
-                });
-            }
+                    var wielder = WielderOf(source!);
+                    var battlefield = wielder is { Zone: Zone.Battlefield } ? wielder.ProvinceIndex : null;
+                    return BringDeadPersonalityIntoPlay(player, target!, Definition(source!).Name, battlefield, entered =>
+                    {
+                        entered.AbilityUses[PhoenixSwordRemovalKey] = _state.TurnNumber;
+                        Emit("removalScheduled", $"{Definition(entered).Name} will be removed from the game before the turn ends.", entered.OwnerId, entered.Id);
+                    });
+                }
             case "string-colonies-attack":
                 return ResolveOrDeferAttack(id, player, target?.Id, ActionPerformer(ability, command, source).Id, consumedGrant);
             // Beseech Sakkaku: 1 Honor, or -- when the Spell was destroyed as the cost -- Honor equal to the Spirit's current Personal Honor.
@@ -270,25 +279,25 @@ public sealed partial class MatchEngine
                 return false;
             // Channel the Moon: the ability is given to the performing Nonhuman for the turn; then "Lose 3 Honor" (an effect, not a cost).
             case "channel-moon-grant":
-            {
-                var nonhuman = Card(command.PerformerId!);
-                GrantAbility(nonhuman, "channel-moon-melee", source!.Id);
-                Emit("abilityGranted", $"{Definition(nonhuman).Name} has \"Battle: Melee Attack with strength equal to this card's Force\" this turn.", player.Id, nonhuman.Id);
-                GainHonor(player.Id, -3, "Channel the Moon", source);
-                return false;
-            }
+                {
+                    var nonhuman = Card(command.PerformerId!);
+                    GrantAbility(nonhuman, "channel-moon-melee", source!.Id);
+                    Emit("abilityGranted", $"{Definition(nonhuman).Name} has \"Battle: Melee Attack with strength equal to this card's Force\" this turn.", player.Id, nonhuman.Id);
+                    GainHonor(player.Id, -3, "Channel the Moon", source);
+                    return false;
+                }
             case "channel-moon-melee":
                 return ResolveOrDeferAttack(id, player, target?.Id, source!.Id, consumedGrant);
             // Purify the Soul: every Personality the held action names that it protects (the window's own target first) is marked for the negation GrantKeyword reads.
             case "purify-soul-negate":
-            {
-                var held = _state.PendingNegatableAbility!;
-                foreach (var protectedId in new[] { ReactionAffectedId(held) }.Concat(ActionTargetIds(held)).OfType<string>().Distinct())
-                    if (_state.Cards.TryGetValue(protectedId, out var protectedCard) && PurifyTheSoulApplies(source!, held, protectedCard))
-                        _state.NegatedEffects.Add(new(PurifyTheSoulKind, protectedId));
-                Emit("effectsNegated", "Purify the Soul: the action's effects that give Kolat, Ninja or Shadowlands to your Personalities are negated.", player.Id, source!.Id);
-                return false;
-            }
+                {
+                    var held = _state.PendingNegatableAbility!;
+                    foreach (var protectedId in new[] { ReactionAffectedId(held) }.Concat(ActionTargetIds(held)).OfType<string>().Distinct())
+                        if (_state.Cards.TryGetValue(protectedId, out var protectedCard) && PurifyTheSoulApplies(source!, held, protectedCard))
+                            _state.NegatedEffects.Add(new(PurifyTheSoulKind, protectedId));
+                    Emit("effectsNegated", "Purify the Soul: the action's effects that give Kolat, Ninja or Shadowlands to your Personalities are negated.", player.Id, source!.Id);
+                    return false;
+                }
             // Set the Fields Aflame: the Spell was destroyed as each action's cost.
             case "set-fields-terrain":
                 DiscardTerrain(target!);
@@ -298,7 +307,7 @@ public sealed partial class MatchEngine
                 LockActions(target!, source!.Id);
                 return false;
             case "set-fields-holding":
-                target!.Bowed = true;
+                if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; // a negation of its bowing applies (Interrogation, issue #653)
                 return false;
             // Touch the Emptiness: -2F, and -- while its Shugenja is Void -- the target's next action this turn is negated (TouchTheEmptinessNegates).
             case "touch-emptiness-weaken":
@@ -318,12 +327,12 @@ public sealed partial class MatchEngine
                 return false;
             // Your Heart's Enemy: -4F; while the Shugenja (the named performer) is Air, the target's actions may not target him (TargetBars.cs, for the turn).
             case "hearts-enemy-weaken":
-            {
-                ApplyModifier(target!, source!.Id, id, "Force", -4);
-                var heartsShugenja = Card(command.PerformerId!);
-                if (Keyword(heartsShugenja, "Air")) AddTargetBar(heartsShugenja, target!.Id);
-                return false;
-            }
+                {
+                    ApplyModifier(target!, source!.Id, id, "Force", -4);
+                    var heartsShugenja = Card(command.PerformerId!);
+                    if (Keyword(heartsShugenja, "Air")) AddTargetBar(heartsShugenja, target!.Id);
+                    return false;
+                }
             default:
                 return null;
         }

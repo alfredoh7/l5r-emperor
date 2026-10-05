@@ -17,7 +17,7 @@ public sealed partial class MatchEngine
 
     // Misaki: "Followers attaching to Misaki enter play paying 2 less Gold" -- every attach of a Follower to her (from a hand or a discard pile alike).
     private static int FollowerAttachDiscount(CardInstance card, CardInstance wielder) =>
-        Definition(wielder).Effect == MisakiFollowerDiscountEffect && Definition(card).Type == CardType.Follower ? 2 : 0;
+        Definition(wielder).Effect == MisakiFollowerDiscountEffect && Definition(card).Type == CardType.Follower ? 2 : PromoHorseAttachDiscount(card, wielder); // Horse ignores its cost attaching to Kataoka (issue #653)
 
     // Misaki: "Melee Attack with strength equal to the Follower's Force" -- sourceId is the performing Follower (ResolveOrDeferAttack's source), read live.
     private int? EmperorPersonalityBatch1AttackStrength(string abilityId, string? sourceId) =>

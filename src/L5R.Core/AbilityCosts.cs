@@ -141,7 +141,7 @@ public sealed partial class MatchEngine
             if (judged is null || judged.Zone != Zone.Home) return true;
         }
         if (cost.UnlessKeyword is not { } keyword) return false;
-        if (cost.Subject == CostSubject.Performer && subject is not null) return Keyword(subject, keyword);
+        if (cost.Subject is CostSubject.Performer or CostSubject.Target && subject is not null) return Keyword(subject, keyword); // + the target who bows: Lobby's Personality (The Blessed Mantle of the Greensnakes)
         if (source is null) return false;
         var holder = source is { Zone: Zone.Attached, AttachedTo: { } hostId } && _state.Cards.TryGetValue(hostId, out var host) ? host : source;
         return Keyword(holder, keyword);
@@ -252,7 +252,7 @@ public sealed partial class MatchEngine
             if (cost.Verb == CostVerbs.ShuffleHand) { RemAShuffleHandIntoDeck(player, source); continue; }
             if (cost.Verb == CostVerbs.DiscardFavor) continue; // issue #501: paid with the other Favor discards (DiscardImperialFavorCost, beside the Gold)
             // Contemplate the Void (issue #492): "discard your hand (even if empty)".
-            if (cost.Verb == CostVerbs.DiscardHand) { foreach (var handId in player.Hand.ToArray()) DiscardFate(player, Card(handId)); continue; }
+            if (cost.Verb == CostVerbs.DiscardHand) { PromoItemsNoteHandDiscard(player.Hand.Count); foreach (var handId in player.Hand.ToArray()) DiscardFate(player, Card(handId)); continue; } // the count: Enigmatic Pendant (PromoEmperorItems.cs)
             // Capturing the Soul (issue #492): "bow ... 0 or more of your other performing Shugenja".
             if (cost.Verb == CostVerbs.BowSlotCards) { foreach (var slotCard in SlotCostCards(command, cost)) slotCard.Bowed = true; continue; }
             if (cost.Verb == CostVerbs.RemoveSlotCards) { foreach (var slotCard in SlotCostCards(command, cost).ToArray()) RemoveFromGame(slotCard); continue; } // Mining Apparatus (issue #503)

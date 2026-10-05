@@ -54,7 +54,8 @@ public sealed partial class MatchEngine
         switch (Definition(card).Effect)
         {
             // "Until the game ends, before each player's turn ends ..." / "Until the game ends, equipping is a Battle/Open action ...": in play for good.
-            case AbandoningFortunesEffect: case GloryOfTheShogunEffect:
+            case AbandoningFortunesEffect:
+            case GloryOfTheShogunEffect:
                 KeepEventInPlay(player, province, card, $"{Definition(card).Name} stays in play until the game ends.");
                 return false;
             // "After the next time this game you destroy a province as the Attacker ...": waits in play for that.
@@ -181,101 +182,109 @@ public sealed partial class MatchEngine
         switch (pending.Kind)
         {
             case "delayed-arrival":
-            {
-                Require(command.TargetId is not null && pending.Candidates.Contains(command.TargetId), "Choose a Personality in play.");
-                var chosen = Card(command.TargetId!);
-                _state.EventTargets[card.Id] = chosen.Id;
-                Emit("eventChose", $"{Definition(card).Name}: {Definition(chosen).Name} may not be assigned to attack {Player(card.OwnerId).Name} until {Player(card.OwnerId).Name}'s next turn begins.", card.OwnerId, chosen.Id);
-                FinishRevealedEvent(card, keep: true, turnBeginsIn: 1, message: $"{Definition(card).Name} stays in play until {Player(card.OwnerId).Name}'s next turn begins.");
-                return;
-            }
+                {
+                    Require(command.TargetId is not null && pending.Candidates.Contains(command.TargetId), "Choose a Personality in play.");
+                    var chosen = Card(command.TargetId!);
+                    _state.EventTargets[card.Id] = chosen.Id;
+                    Emit("eventChose", $"{Definition(card).Name}: {Definition(chosen).Name} may not be assigned to attack {Player(card.OwnerId).Name} until {Player(card.OwnerId).Name}'s next turn begins.", card.OwnerId, chosen.Id);
+                    FinishRevealedEvent(card, keep: true, turnBeginsIn: 1, message: $"{Definition(card).Name} stays in play until {Player(card.OwnerId).Name}'s next turn begins.");
+                    return;
+                }
             case "moon-sun":
-            {
-                Require(command.Choice == "none" || command.TargetId is not null && pending.Candidates.Contains(command.TargetId), "Choose an Event in your discard pile, or none.");
-                if (command.TargetId is not null && command.Choice != "none")
                 {
-                    var event_ = Card(command.TargetId);
-                    event_.Zone = Zone.DynastyDeck; event_.FaceUp = false;
-                    player.DynastyDeck.Add(event_.Id);
-                    ShuffleDeck(player, SearchDeck.Dynasty);
-                    Emit("eventResolved", $"{Definition(card).Name}: {player.Name} shuffled {Definition(event_).Name} into their Dynasty deck.", player.Id, event_.Id);
+                    Require(command.Choice == "none" || command.TargetId is not null && pending.Candidates.Contains(command.TargetId), "Choose an Event in your discard pile, or none.");
+                    if (command.TargetId is not null && command.Choice != "none")
+                    {
+                        var event_ = Card(command.TargetId);
+                        event_.Zone = Zone.DynastyDeck; event_.FaceUp = false;
+                        player.DynastyDeck.Add(event_.Id);
+                        ShuffleDeck(player, SearchDeck.Dynasty);
+                        Emit("eventResolved", $"{Definition(card).Name}: {player.Name} shuffled {Definition(event_).Name} into their Dynasty deck.", player.Id, event_.Id);
+                    }
+                    else Emit("eventChose", $"{Definition(card).Name}: {player.Name} shuffled nothing.", player.Id, card.Id);
+                    _state.PendingChoice = null; _state.PendingEventChoice = null;
+                    if (AskMoonAndSun(Player(card.OwnerId), card, pending.Step + 1)) return;
+                    FinishRevealedEvent(card);
+                    return;
                 }
-                else Emit("eventChose", $"{Definition(card).Name}: {player.Name} shuffled nothing.", player.Id, card.Id);
-                _state.PendingChoice = null; _state.PendingEventChoice = null;
-                if (AskMoonAndSun(Player(card.OwnerId), card, pending.Step + 1)) return;
-                FinishRevealedEvent(card);
-                return;
-            }
             case "naoharu-show":
-            {
-                Require(command.TargetId is not null && pending.Candidates.Contains(command.TargetId) && player.Hand.Contains(command.TargetId), "Choose a card in your hand.");
-                var shown = Card(command.TargetId!);
-                RecordShown(player.Id, shown, card, "Hand", "event");
-                Emit("eventChose", $"{Definition(card).Name}: {player.Name} shows {Definition(shown).Name} and offers it as a gift.", player.Id, shown.Id);
-                var other = Player(1 - player.Id);
-                OpenEventChoice(new PendingEventChoice { Kind = "naoharu-take", EventCardId = card.Id, PlayerId = other.Id, Origin = "reveal", Data = [shown.Id],
-                    Prompt = $"{Definition(card).Name}: {player.Name} offers you {Definition(shown).Name} as a gift. Put it in your hand?" });
-                return;
-            }
+                {
+                    Require(command.TargetId is not null && pending.Candidates.Contains(command.TargetId) && player.Hand.Contains(command.TargetId), "Choose a card in your hand.");
+                    var shown = Card(command.TargetId!);
+                    RecordShown(player.Id, shown, card, "Hand", "event");
+                    Emit("eventChose", $"{Definition(card).Name}: {player.Name} shows {Definition(shown).Name} and offers it as a gift.", player.Id, shown.Id);
+                    var other = Player(1 - player.Id);
+                    OpenEventChoice(new PendingEventChoice
+                    {
+                        Kind = "naoharu-take",
+                        EventCardId = card.Id,
+                        PlayerId = other.Id,
+                        Origin = "reveal",
+                        Data = [shown.Id],
+                        Prompt = $"{Definition(card).Name}: {player.Name} offers you {Definition(shown).Name} as a gift. Put it in your hand?"
+                    });
+                    return;
+                }
             case "naoharu-take":
-            {
-                Require(command.Choice is "yes" or "no", "Choose whether to put the card in your hand.");
-                var giver = Player(card.OwnerId); var shown = Card(pending.Data[0]);
-                _state.PendingChoice = null; _state.PendingEventChoice = null;
-                if (command.Choice == "yes" && P2CardIntoHandBlocked(player.Id)) { } // issue #503: The Scorpion Wall is Finished -- the gift is not put into his hand and stays with its giver
-                else if (command.Choice == "yes")
                 {
-                    giver.Hand.Remove(shown.Id); player.Hand.Add(shown.Id); shown.OriginalOwnerId ??= giver.Id; shown.OwnerId = player.Id; // his to play; it returns to its owner's pile when it leaves his hand
-                    Emit("eventResolved", $"{Definition(card).Name}: {player.Name} put the gift in their hand.", player.Id, shown.Id);
-                    GainHonor(giver.Id, Definition(shown).Focus, Definition(card).Name, card);
+                    Require(command.Choice is "yes" or "no", "Choose whether to put the card in your hand.");
+                    var giver = Player(card.OwnerId); var shown = Card(pending.Data[0]);
+                    _state.PendingChoice = null; _state.PendingEventChoice = null;
+                    if (command.Choice == "yes" && P2CardIntoHandBlocked(player.Id)) { } // issue #503: The Scorpion Wall is Finished -- the gift is not put into his hand and stays with its giver
+                    else if (command.Choice == "yes")
+                    {
+                        giver.Hand.Remove(shown.Id); player.Hand.Add(shown.Id); shown.OriginalOwnerId ??= giver.Id; shown.OwnerId = player.Id; // his to play; it returns to its owner's pile when it leaves his hand
+                        Emit("eventResolved", $"{Definition(card).Name}: {player.Name} put the gift in their hand.", player.Id, shown.Id);
+                        GainHonor(giver.Id, Definition(shown).Focus, Definition(card).Name, card);
+                    }
+                    else
+                    {
+                        giver.Hand.Remove(shown.Id); shown.Zone = Zone.FateDiscard; shown.FaceUp = true;
+                        Emit("eventResolved", $"{Definition(card).Name}: {player.Name} refused the gift; {giver.Name} discards {Definition(shown).Name} and draws two cards.", giver.Id, shown.Id);
+                        Draw(giver); Draw(giver);
+                    }
+                    FinishRevealedEvent(card);
+                    return;
                 }
-                else
-                {
-                    giver.Hand.Remove(shown.Id); shown.Zone = Zone.FateDiscard; shown.FaceUp = true;
-                    Emit("eventResolved", $"{Definition(card).Name}: {player.Name} refused the gift; {giver.Name} discards {Definition(shown).Name} and draws two cards.", giver.Id, shown.Id);
-                    Draw(giver); Draw(giver);
-                }
-                FinishRevealedEvent(card);
-                return;
-            }
             case "rebuilding":
-            {
-                Require(command.Choice is "yes" or "no", "Choose whether to gain a province.");
-                _state.PendingChoice = null; _state.PendingEventChoice = null;
-                if (command.Choice == "yes") RebuildingGains(player, card);
-                if (AskRebuilding(Player(card.OwnerId), card, pending.Step + 1)) return;
-                FinishRevealedEvent(card);
-                return;
-            }
+                {
+                    Require(command.Choice is "yes" or "no", "Choose whether to gain a province.");
+                    _state.PendingChoice = null; _state.PendingEventChoice = null;
+                    if (command.Choice == "yes") RebuildingGains(player, card);
+                    if (AskRebuilding(Player(card.OwnerId), card, pending.Step + 1)) return;
+                    FinishRevealedEvent(card);
+                    return;
+                }
             case "benefices":
-            {
-                Require(command.Choice == "none" || command.TargetId is not null && pending.Candidates.Contains(command.TargetId), "Choose a card in your hand, or none.");
-                var data = pending.Data.Append(command.Choice == "none" ? "" : $"{player.Id}|{command.TargetId}").ToList();
-                _state.PendingChoice = null; _state.PendingEventChoice = null;
-                if (AskBenefices(Player(card.OwnerId), card, pending.Step + 1, data)) return;
-                ResolveBenefices(card, data);
-                return;
-            }
+                {
+                    Require(command.Choice == "none" || command.TargetId is not null && pending.Candidates.Contains(command.TargetId), "Choose a card in your hand, or none.");
+                    var data = pending.Data.Append(command.Choice == "none" ? "" : $"{player.Id}|{command.TargetId}").ToList();
+                    _state.PendingChoice = null; _state.PendingEventChoice = null;
+                    if (AskBenefices(Player(card.OwnerId), card, pending.Step + 1, data)) return;
+                    ResolveBenefices(card, data);
+                    return;
+                }
             case "abandon":
-            {
-                Require(command.TargetId is not null && pending.Candidates.Contains(command.TargetId), "Choose one of your Personalities or Holdings to destroy.");
-                var victim = Card(command.TargetId!);
-                _state.PendingChoice = null; _state.PendingEventChoice = null;
-                Emit("eventChose", $"{Definition(card).Name}: {player.Name} destroys {Definition(victim).Name}.", player.Id, victim.Id);
-                DestroyUnits([victim]);
-                ContinueAbandoning(card, player.Id, pending.Step - 1);
-                return;
-            }
+                {
+                    Require(command.TargetId is not null && pending.Candidates.Contains(command.TargetId), "Choose one of your Personalities or Holdings to destroy.");
+                    var victim = Card(command.TargetId!);
+                    _state.PendingChoice = null; _state.PendingEventChoice = null;
+                    Emit("eventChose", $"{Definition(card).Name}: {player.Name} destroys {Definition(victim).Name}.", player.Id, victim.Id);
+                    DestroyUnits([victim]);
+                    ContinueAbandoning(card, player.Id, pending.Step - 1);
+                    return;
+                }
             case "draw":
-            {
-                Require(command.Choice is "yes" or "no", "Choose whether to draw a card.");
-                _state.PendingChoice = null; _state.PendingEventChoice = null;
-                if (command.Choice == "yes") { Draw(player); Emit("eventResolved", $"{Definition(card).Name}: {player.Name} drew a card.", player.Id, card.Id); }
-                ResumeAfterDeferredWindow(pending.ClosesTo);
-                return;
-            }
+                {
+                    Require(command.Choice is "yes" or "no", "Choose whether to draw a card.");
+                    _state.PendingChoice = null; _state.PendingEventChoice = null;
+                    if (command.Choice == "yes") { Draw(player); Emit("eventResolved", $"{Definition(card).Name}: {player.Name} drew a card.", player.Id, card.Id); }
+                    ResumeAfterDeferredWindow(pending.ClosesTo);
+                    return;
+                }
             default:
                 if (ResolveP4EventChoice(command, pending)) return; // Too Close to Home (issue #503, EmperorP4Watches.cs)
+                if (PromoEventChoice(pending, command)) return; // issue #653 (PromoEmperorEvents.cs)
                 if (ResolveEmperorP6Choice(pending, command)) return; // issue #503 (EmperorP6.cs): Dark Experiments, the face-up refills, Ietsuno's switch
                 throw new RuleViolation("Unknown Event decision.");
         }
@@ -292,12 +301,15 @@ public sealed partial class MatchEngine
             case "p4-too-close": // Too Close to Home (issue #503, EmperorP4Watches.cs)
                 foreach (var option in P4EventChoiceActions(pending, playerId)) yield return option;
                 break;
-            case "moon-sun": case "benefices":
+            case "moon-sun":
+            case "benefices":
                 foreach (var id in pending.Candidates)
                     yield return new("eventChoice", $"{eventName}: {Definition(Card(id)).Name}", true, null, Answer(id), id);
                 yield return new("eventChoice", $"{eventName}: none", true, null, Answer(choice: "none"), pending.EventCardId);
                 break;
-            case "delayed-arrival": case "naoharu-show": case "abandon":
+            case "delayed-arrival":
+            case "naoharu-show":
+            case "abandon":
                 foreach (var id in pending.Candidates)
                     yield return new("eventChoice", $"{eventName}: {Definition(Card(id)).Name}", true, null, Answer(id), id);
                 break;
@@ -314,6 +326,7 @@ public sealed partial class MatchEngine
                 yield return new("eventChoice", $"{eventName}: do not draw", true, null, Answer(choice: "no"), pending.EventCardId);
                 break;
             default:
+                foreach (var option in PromoEventChoiceActions(pending, playerId)) yield return option; // issue #653
                 foreach (var option in EmperorP6ChoiceActions(pending, playerId)) yield return option; // issue #503 (EmperorP6.cs)
                 break;
         }
@@ -349,8 +362,16 @@ public sealed partial class MatchEngine
         }
         if (remaining > 0 && candidates.Count > 0)
         {
-            OpenEventChoice(new PendingEventChoice { Kind = "abandon", EventCardId = card.Id, PlayerId = playerId, Origin = "end-turn", Candidates = candidates, Step = remaining,
-                Prompt = $"{Definition(card).Name}: choose one of your Personalities or Holdings to destroy ({remaining} to go)." });
+            OpenEventChoice(new PendingEventChoice
+            {
+                Kind = "abandon",
+                EventCardId = card.Id,
+                PlayerId = playerId,
+                Origin = "end-turn",
+                Candidates = candidates,
+                Step = remaining,
+                Prompt = $"{Definition(card).Name}: choose one of your Personalities or Holdings to destroy ({remaining} to go)."
+            });
             return true;
         }
         if (fromEndTurn) return false;
@@ -369,8 +390,16 @@ public sealed partial class MatchEngine
             var who = Player(i == 0 ? owner.Id : 1 - owner.Id);
             var events = _state.Cards.Values.Where(c => c.OwnerId == who.Id && c.Zone == Zone.DynastyDiscard && Definition(c).Type == CardType.Event).Select(c => c.Id).Order(StringComparer.Ordinal).ToList();
             if (events.Count == 0) continue;
-            OpenEventChoice(new PendingEventChoice { Kind = "moon-sun", EventCardId = card.Id, PlayerId = who.Id, Origin = "reveal", Candidates = events, Step = i,
-                Prompt = $"{Definition(card).Name}: you may shuffle an Event in your discard pile into your Dynasty deck." });
+            OpenEventChoice(new PendingEventChoice
+            {
+                Kind = "moon-sun",
+                EventCardId = card.Id,
+                PlayerId = who.Id,
+                Origin = "reveal",
+                Candidates = events,
+                Step = i,
+                Prompt = $"{Definition(card).Name}: you may shuffle an Event in your discard pile into your Dynasty deck."
+            });
             return true;
         }
         return false;
@@ -385,8 +414,15 @@ public sealed partial class MatchEngine
         {
             var who = Player(i == 0 ? owner.Id : 1 - owner.Id);
             if (who.Provinces.Count(p => !p.Destroyed) > 3) continue;
-            OpenEventChoice(new PendingEventChoice { Kind = "rebuilding", EventCardId = card.Id, PlayerId = who.Id, Origin = "reveal", Step = i,
-                Prompt = $"{Definition(card).Name}: you have {who.Provinces.Count(p => !p.Destroyed)} provinces. Gain a province to the right of your rightmost province? Your Family Honor is lowered to its starting value and you may not declare an attack until {owner.Name}'s next turn begins." });
+            OpenEventChoice(new PendingEventChoice
+            {
+                Kind = "rebuilding",
+                EventCardId = card.Id,
+                PlayerId = who.Id,
+                Origin = "reveal",
+                Step = i,
+                Prompt = $"{Definition(card).Name}: you have {who.Provinces.Count(p => !p.Destroyed)} provinces. Gain a province to the right of your rightmost province? Your Family Honor is lowered to its starting value and you may not declare an attack until {owner.Name}'s next turn begins."
+            });
             return true;
         }
         return false;
@@ -450,8 +486,17 @@ public sealed partial class MatchEngine
         {
             var who = Player(i == 0 ? owner.Id : 1 - owner.Id);
             if (who.Hand.Count == 0) continue;
-            OpenEventChoice(new PendingEventChoice { Kind = "benefices", EventCardId = card.Id, PlayerId = who.Id, Origin = "reveal", Candidates = who.Hand.ToList(), Step = i, Data = data,
-                Prompt = $"{Definition(card).Name}: you may choose a card in your hand. All chosen cards are discarded; the lowest and highest Focus Values win." });
+            OpenEventChoice(new PendingEventChoice
+            {
+                Kind = "benefices",
+                EventCardId = card.Id,
+                PlayerId = who.Id,
+                Origin = "reveal",
+                Candidates = who.Hand.ToList(),
+                Step = i,
+                Data = data,
+                Prompt = $"{Definition(card).Name}: you may choose a card in your hand. All chosen cards are discarded; the lowest and highest Focus Values win."
+            });
             return true;
         }
         return false;

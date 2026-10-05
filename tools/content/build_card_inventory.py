@@ -54,17 +54,14 @@ BLOCKERS: dict[str, str] = {
     # Transfer mechanic this note asked for exists (AttachmentTransfers.cs, Honor and Treachery pass issue #458). Both are now wired.
     "oracle-l5r-10681": "Its ordinary Equip is allowed from YOUR discard pile (\"You may Equip this Follower from your discard pile\"). The attach-from-a-discard-pile primitive exists (AttachAction.cs, issue #337) for an ability that TARGETS a card in a pile, but here the SOURCE card in the pile is the attachment (AttachSource.Self is hand-only) and the action is the ordinary Limited Equip command, not an ability -- not built.",
     "oracle-l5r-10336": "Needs card creation (its army-scoped keyword-boost half is otherwise wirable).",
-    "oracle-l5r-10588": "Needs cost-ignoring Equip tied to a named restriction (explicitly deferred since #156).",
     "oracle-l5r-10683": "Needs a per-card, permanent \"this Personality may not attack\" attachment flag (Utaku Chikako's own restriction, issue #186, is a player-and-turn-scoped flag, not directly reusable here) plus a self-destroying Limited ability. Dishonor-as-an-action is now built (Justice of the Crane) and directly reusable for its own Dishonor half.",
     "oracle-l5r-10898": "Needs a persistent one-time destruction shield.",
     "oracle-l5r-10900": "Needs an attachment Transfer mechanic plus Home-timing generalization.",
     "oracle-l5r-10518": "Focus 4, not 1 -- outside the #192 wave's own scope. The top-of-Fate-deck discard primitive now exists (Aberrations, issue #192), but this needs a \"whose deck\" target choice (\"any Fate deck\", not just your own) plus a variable-strength Melee Attack keyed off the discarded card's Focus Value, not a Force modifier.",
     "oracle-l5r-10519": "The Engage window and first-action claim now exist (issue #310; a Follower's 'Engage:' is a Reaction to trigger after-engaging, claim: MatchEngine.ClaimFirstOpportunity, conditional on being the Attacker). Still needs: a Follower-sourced Engage action scoped to 'this battlefield' (the Follower's own unit) and its optional 'you may target ... -3F' effect target; Reconnaissance for the acting side is settled (MatchEngine.GrantReconnaissanceAtCurrentBattlefield serves an Attacker at the enemy's province and a Defender at their own, see docs/decisions/2026-09-18-battle-timing-primitives.md decision 5).",
-    "oracle-l5r-10587": "Needs a compound Gold-plus-card-discard cost shape (Kharmic keyword's own reminder).",
     "oracle-l5r-10517": "\"You may Equip this Follower as a Battle action\" is now a general capability (AttachSource.Self, issue #337: Fading Shadows attaches itself from hand to a performing Ninja). Shinobi Vassal differs in that the wielder is any Ninja Personality chosen as a target, and its own Battle action destroys a target enemy card without attachments and then the Follower itself -- deferred, not wired in #337.",
     "oracle-l5r-10338": "Needs a generic ability-usage-limit-reset mechanism.",
     "oracle-l5r-10677": "The Engage window now exists (issue #310); its 'Engage: Give a target enemy Personality or Follower -2F' is a Reaction to trigger after-engaging. Still needs: the same target category costly-feud uses (enemy-force), validated as 'at the current battlefield' by hand (a Reaction is not a Battle action, so the shared Battle-target check does not apply), and the Follower as source of a reaction (in play, attached).",
-    "oracle-l5r-9966": "Holding creation is built (issue #406: Charter, oracle-l5r-10806, published created-only). Needs a general Reaction trigger \"after a battle resolves, if this card's army destroyed a province\" (the only after-battle window is the Rings' own recruit window) and destroying this Follower as the cost.",
     "oracle-l5r-10339": "Needs a conditional-keyword-by-the-card's-own-clan mechanism (the attachment-destroy half is separately wirable).",
     # Reserve (issue #184): the primitive itself (Dynasty absent-battle recruit; Fate Equip (Battle)
     # attachment, no bonus Additional Action for non-Spells) is built and demonstrated on Hida Kurabi,
@@ -407,6 +404,15 @@ BLOCKERS: dict[str, str] = {
 }
 
 
+
+def load_pass_blockers(root: Path = ROOT) -> dict[str, dict]:
+    """Per-pass blocker files written as {card id: {"note": ..., "category": ...}} (the Promotional-Emperor pass, issue #653: pe_*_blockers.json).
+    A card that has since been wired is skipped by build() because only Unwired rows read these."""
+    merged: dict[str, dict] = {}
+    for path in sorted((root / "tools" / "content").glob("pe_*_blockers.json")):
+        merged.update(json.loads(path.read_text(encoding="utf-8")))
+    return merged
+
 def load_published_cards() -> dict[str, dict]:
     """Id -> the full published CardDefinition dict, for every card published into any
     content/published/*.json wave. Doubles as the wired-id set (its own keys) and as the source row
@@ -474,6 +480,7 @@ def build(root: Path = ROOT) -> dict:
     pool = json.loads(DECK_POOL.read_text(encoding="utf-8"))["cards"]
     published_cards = load_published_cards()
     wired_ids = set(published_cards)
+    pass_blockers = load_pass_blockers(root)
     sets_by_id = load_sets()
 
     rows = []
@@ -488,7 +495,7 @@ def build(root: Path = ROOT) -> dict:
             types[0],
             ", ".join(card.get("clans") or []) or "Unaligned",
             "Wired" if card["id"] in wired_ids else "Unwired",
-            BLOCKERS.get(card["id"], ""),
+            BLOCKERS.get(card["id"]) or pass_blockers.get(card["id"], {}).get("note", ""),
         ))
     # A wired card absent from deck-pool.json entirely -- see load_published_cards' own doc comment.
     for card_id, definition in published_cards.items():
@@ -572,7 +579,7 @@ def build(root: Path = ROOT) -> dict:
         cell.font = Font(bold=True)
         cell.fill = header_fill
     for row in rows:
-        sheet.append([*row, category_of.get(row[0], "") if row[5] == "Unwired" else ""])
+        sheet.append([*row, (category_of.get(row[0]) or pass_blockers.get(row[0], {}).get("category", "")) if row[5] == "Unwired" else ""])
     last_col = get_column_letter(len(header))
     table = Table(displayName="CardInventory", ref=f"A1:{last_col}{len(rows) + 1}")
     table.tableStyleInfo = TableStyleInfo(name="TableStyleMedium2", showRowStripes=True)
@@ -589,7 +596,7 @@ def build(root: Path = ROOT) -> dict:
             cell.font = Font(bold=True)
             cell.fill = header_fill
         for entry in category_data["categories"]:
-            count = sum(1 for code in category_of.values() if code == entry["code"])
+            count = sum(1 for code in category_of.values() if code == entry["code"]) + sum(1 for i, b in pass_blockers.items() if i not in category_of and i not in wired_ids and b.get("category") == entry["code"])
             cat_sheet.append([entry["code"], entry["title"], count, entry["description"]])
         for col, width in {"A": 12, "B": 60, "C": 8, "D": 110}.items():
             cat_sheet.column_dimensions[col].width = width

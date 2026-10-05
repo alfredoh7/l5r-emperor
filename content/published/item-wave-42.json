@@ -1,0 +1,609 @@
+{
+  "Profile": "item-wave-42",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-2418",
+      "Name": "Exquisite Blade",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 5,
+      "Chi": 1,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After this card bows: Straighten it.\nBattle: Melee 6 Attack.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-2418.jpg",
+      "Keywords": [
+        "Unique",
+        "Weapon"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "pe-exquisite-melee"
+      ],
+      "Effect": "blade-perfection-rebound"
+    },
+    {
+      "Id": "oracle-l5r-3015",
+      "Name": "Heart of Fudo",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 0,
+      "Force": 1,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Give this Personality one Charging token, or two if any other player has 20 or higher Family Honor or more provinces than you.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-3015.jpg",
+      "Keywords": [
+        "Unique",
+        "Experienced",
+        "Fudo"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "pe-fudo-charging"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-5886",
+      "Name": "Patchwork Armor",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 4,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "As a Focus Effect: After this duel ends, bow its winner.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-5886.jpg",
+      "Keywords": [
+        "Armor"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "simple-yari-focus"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-6354",
+      "Name": "Ritual Dagger",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 1,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After this card enters play: Lose 1 Honor.\nBattle: Destroy this card: Melee Attack with strength equal to this Personality's Force before you destroyed this card.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6354.jpg",
+      "Keywords": [
+        "Weapon",
+        "Gaijin"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "pe-dagger-melee"
+      ],
+      "Effect": "none",
+      "EntryHonorLoss": 1
+    },
+    {
+      "Id": "oracle-l5r-9963",
+      "Name": "Bokken of the Ruby Champion",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 4,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 1,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Attaches to a Ruby Champion ignoring costs.\nBattle: Target one or two enemy Personalities or Followers with 6 or lower Force each: Bow them.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9963.jpg",
+      "Keywords": [
+        "Unique",
+        "Weapon"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "pe-bokken-bow"
+      ],
+      "Effect": "none",
+      "AttachRequiresKeyword": "Ruby Champion"
+    },
+    {
+      "Id": "oracle-l5r-9965",
+      "Name": "Kimono of the Turquoise Champion",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "This Personality has +1PH while he is a Turquoise Champion.\nReaction: Before an action resolves, bow this card: You silence your enemies with your creative genius. Negate any Honor losses until the action ends.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9965.jpg",
+      "Keywords": [
+        "Unique"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "pe-kimono-negate-losses"
+      ],
+      "Effect": "pe-kimono-turquoise"
+    },
+    {
+      "Id": "oracle-l5r-9967",
+      "Name": "Mantle of the Jade Champion",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 6,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 1,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Attaches to a Jade Champion ignoring costs.\nThis card has a Force bonus equal to the highest Focus Value among Spells in its unit.\nReaction: Even if this card is bowed, when paying for a Spell: Produce 4 Gold.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9967.jpg",
+      "Keywords": [
+        "Experienced 2",
+        "Unique"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "pe-jade-gold-for-spell"
+      ],
+      "Effect": "pe-jade-mantle",
+      "AttachRequiresKeyword": "Jade Champion"
+    },
+    {
+      "Id": "oracle-l5r-9968",
+      "Name": "Six-Ring Sword",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 6,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 1,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Before the first time each turn another player's effect from a card destroys this card: Negate this card's destruction.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9968.jpg",
+      "Keywords": [
+        "Weapon"
+      ],
+      "Focus": 3,
+      "Abilities": [],
+      "Effect": "pe-six-ring-sword"
+    },
+    {
+      "Id": "oracle-l5r-9969",
+      "Name": "Mantle of the Onyx Champion",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 6,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 1,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Attaches to an Onyx Champion ignoring costs.\nThis Personality has Shadowlands. This card has a Force bonus equal to the highest Focus Value among Spells in its unit. Spells in this unit have Maho.\nMaho Battle: Ranged 5 Attack.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9969.jpg",
+      "Keywords": [
+        "Unique"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "pe-onyx-ranged"
+      ],
+      "Effect": "pe-onyx-mantle",
+      "AttachRequiresKeyword": "Onyx Champion",
+      "AttachGrantsKeyword": "Shadowlands"
+    },
+    {
+      "Id": "oracle-l5r-9970",
+      "Name": "Ancient Armor of the Qamar",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 6,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Will only attach to a Crab Clan or Naga Personality.\nNegate any destruction of this card, except for its Personality being destroyed.\nReaction: After another player's action targets this Personality: Negate his destruction from the action's effects.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9970.jpg",
+      "Keywords": [
+        "Armor",
+        "Unique",
+        "Experienced"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "pe-qamar-negate-destruction"
+      ],
+      "Effect": "pe-qamar-armor",
+      "AttachRequiresKeyword": "Crab Clan|Naga"
+    },
+    {
+      "Id": "oracle-l5r-9972",
+      "Name": "The Arcane Cloak of the Chameleons",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 3,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Will only attach to a Scorpion Clan or Naga Personality.\nOther players may not target cards in this unit with actions if there are any other legal targets in this army.\nBattle: Move this Personality home.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9972.jpg",
+      "Keywords": [
+        "Unique"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "pe-cloak-move-home"
+      ],
+      "Effect": "pe-arcane-cloak",
+      "AttachRequiresKeyword": "Scorpion Clan|Naga"
+    },
+    {
+      "Id": "oracle-l5r-9973",
+      "Name": "Battle Standard of the Naga",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Will only attach to a Lion Clan or Naga Personality.\nYour other Personalities and Followers at this card's battlefield have +1F.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9973.jpg",
+      "Keywords": [
+        "Unique",
+        "Experienced",
+        "Standard"
+      ],
+      "Focus": 4,
+      "Abilities": [],
+      "Effect": "pe-battle-standard",
+      "AttachRequiresKeyword": "Lion Clan|Naga"
+    },
+    {
+      "Id": "oracle-l5r-9974",
+      "Name": "The Emerald Armor",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 6,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 1,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Attaches to an Emerald Champion ignoring costs.\nThis Personality has +1PH and Imperial • Magistrate.\nOther players may not target this Personality with actions while there is another Personality at his location who is a legal target for the action.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9974.jpg",
+      "Keywords": [
+        "Armor",
+        "Experienced 2",
+        "Unique"
+      ],
+      "Focus": 4,
+      "Abilities": [],
+      "Effect": "pe-emerald-armor",
+      "AttachRequiresKeyword": "Emerald Champion"
+    },
+    {
+      "Id": "oracle-l5r-9976",
+      "Name": "The Ivory Sword",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 6,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 1,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Attaches to an Ivory Champion ignoring costs.\nThis Personality has Magistrate.\nAfter an action resolves that was performed by a dishonorable Personality while he opposed this card: His controller chooses and discards a card.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9976.jpg",
+      "Keywords": [
+        "Unique",
+        "Weapon"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "pe-ivory-discard"
+      ],
+      "Effect": "none",
+      "AttachRequiresKeyword": "Ivory Champion",
+      "AttachGrantsKeyword": "Magistrate"
+    },
+    {
+      "Id": "oracle-l5r-9977",
+      "Name": "The Blessed Mantle of the Greensnakes",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 1,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Will only attach to a Unicorn Clan or Naga Personality.\nWhen a Lobby action checks Family Honor, your Honor is treated as 20 points higher. This Personality may lobby ignoring the cost of bowing.\nLimited: Bow this card and discard the Imperial Favor: Draw a card.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9977.jpg",
+      "Keywords": [
+        "Unique"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "pe-greensnakes-draw-for-favor"
+      ],
+      "Effect": "pe-blessed-mantle-greensnakes",
+      "AttachRequiresKeyword": "Unicorn Clan|Naga"
+    },
+    {
+      "Id": "oracle-l5r-9978",
+      "Name": "The Obsidian Armor",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 6,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Attaches to an Obsidian Champion ignoring costs.\nThis Personality has Shadowlands.\nFear Battle: Target an enemy unit: Bow each Personality and Follower in it with 5 Force or lower.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9978.jpg",
+      "Keywords": [
+        "Armor",
+        "Unique"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "pe-obsidian-fear-bow"
+      ],
+      "Effect": "none",
+      "AttachRequiresKeyword": "Obsidian Champion",
+      "AttachGrantsKeyword": "Shadowlands"
+    },
+    {
+      "Id": "oracle-l5r-9981",
+      "Name": "The Pearl-Encrusted Staff of the Cobras",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 0,
+      "Force": 1,
+      "Chi": 1,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Will only attach to a Spider Clan or Naga Personality.\nReaction: Before a Battle action resolves, target a Personality: Negate his movement from the action's effects.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9981.jpg",
+      "Keywords": [
+        "Experienced Pearl-Encrusted Staff",
+        "Unique",
+        "Pearl"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "pe-pearl-negate-movement"
+      ],
+      "Effect": "none",
+      "AttachRequiresKeyword": "Spider Clan|Naga"
+    },
+    {
+      "Id": "oracle-l5r-9984",
+      "Name": "The Yari of the Shabura",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 3,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Will only attach to a Crane Clan or Naga Personality.\nReaction: After engaging, target a Personality opposing this card: While this card remains in play, actions he performs this battle may not target cards in its unit (when the action is performed).\nBattle: Destroy this card: Ranged 4 Attack. You may put this card into your hand after this battle ends.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9984.jpg",
+      "Keywords": [
+        "Unique",
+        "Weapon"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "pe-yari-bar-targeting",
+        "pe-yari-ranged",
+        "pe-yari-return"
+      ],
+      "Effect": "none",
+      "AttachRequiresKeyword": "Crane Clan|Naga"
+    },
+    {
+      "Id": "oracle-l5r-10411",
+      "Name": "Enigmatic Pendant",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Destroy this card and discard your hand: Draw a number of cards equal to the number you discarded.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10411.jpg",
+      "Keywords": [
+        "Nemuranai"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "pe-pendant-draw-hand"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10412",
+      "Name": "Family Sword",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 4,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 1,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: Even if this card is bowed, target your Personality with the same Family Name as this Personality: Transfer this card to the target.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10412.jpg",
+      "Keywords": [
+        "Weapon"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "pe-family-sword-transfer"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10413",
+      "Name": "Lantern of Revelation",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Look at the top card of one of your decks. You may put it at the bottom.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10413.jpg",
+      "Keywords": [
+        "Nemuranai"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "pe-lantern-look"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10593",
+      "Name": "Simple Spears",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "(Draw a card after your Expendable card is destroyed.)",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10593.jpg",
+      "Keywords": [
+        "Expendable",
+        "Weapon"
+      ],
+      "Focus": 2,
+      "Abilities": [],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10594",
+      "Name": "Imperial Sword",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 1,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "This Personality has +1F while he is Imperial.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10594.jpg",
+      "Keywords": [
+        "Weapon",
+        "Imperial"
+      ],
+      "Focus": 3,
+      "Abilities": [],
+      "Effect": "pe-imperial-sword"
+    }
+  ],
+  "Decks": []
+}

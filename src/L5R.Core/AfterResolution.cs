@@ -71,6 +71,7 @@ public sealed partial class MatchEngine
     private bool AfterResolutionApplies(CardInstance source, string abilityId, int playerId)
     {
         if (_state.PendingAfterResolution is not { } facts || source.OwnerId != playerId) return false;
+        if (PromoItemsAfterResolutionApplies(source, abilityId) is { } promoResolution) return promoResolution; // The Yari of the Shabura's return (PromoEmperorItems.cs)
         return abilityId switch
         {
             // Never Safe: in the discard pile, played in THIS battle.
