@@ -2143,7 +2143,8 @@ public sealed partial class MatchEngine
     private bool HasAttachments(CardInstance card) => Attachments(card.Id).Any() || card.Tokens.Any(t => AttachmentTokenTypes.Contains(t.Type));
     // "Human" is never printed as a keyword -- a Personality/Follower without "Nonhuman" printed is
     // Human by default (core rules Glossary).
-    private bool KeywordOrHuman(CardInstance card, string keyword) => keyword == "Human" ? !Keyword(card, "Nonhuman") : Keyword(card, keyword);
+    // "Will only attach to a Crab Clan or Naga Personality" (Promotional-Emperor items, PromoEmperorItems.cs): a '|' lists alternatives, any of which satisfies the restriction.
+    private bool KeywordOrHuman(CardInstance card, string keyword) => keyword.Contains('|') ? keyword.Split('|').Any(k => KeywordOrHuman(card, k)) : keyword == "Human" ? !Keyword(card, "Nonhuman") : Keyword(card, keyword);
     // An attachment's own "Will only/not attach to X" restriction and Follower Honor Requirement,
     // checked together wherever a legal target is decided (Equip's own Require and the offered-action
     // legal-targets filter both call this, so they can never disagree).
@@ -2281,7 +2282,7 @@ public sealed partial class MatchEngine
     // (e.g. "+2F while defending") -- distinct from an Item's, which always conveys to the wielder
     // instead (see PersonalityForce/ItemForceToWielder). Feeds both CardForce (targeting, always
     // visible regardless of bow state) and BattleForce (unit total, gated on unbowed-or-Elite).
-    private int FollowerForce(CardInstance card) => Math.Max(0, Definition(card).Force + StatModifier(card, "Force") + P5Force(card)/* issue #503 */+ TerrainForceAdjustment(card) + GinasFoxForce(card) + ForgottenLegacyBatch5Force(card) + ShadowsEmbraceBatch5Force(card) + (Definition(card).Effect switch
+    private int FollowerForce(CardInstance card) => Math.Max(0, Definition(card).Force + StatModifier(card, "Force") + P5Force(card)/* issue #503 */+ PromoItemsFollowerForce(card) /* Battle Standard of the Naga */ + TerrainForceAdjustment(card) + GinasFoxForce(card) + ForgottenLegacyBatch5Force(card) + ShadowsEmbraceBatch5Force(card) + (Definition(card).Effect switch
     {
         "force-while-defending" => IsDefendingUnit(card) ? 2 : 0,
         // Home Guard (oracle-l5r-3413, issue #435): "This card has +3F while defending" -- the same

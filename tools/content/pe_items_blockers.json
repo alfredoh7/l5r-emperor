@@ -1,0 +1,30 @@
+{
+  "oracle-l5r-9975": {
+    "category": "RULES",
+    "note": "The Blade of the Balash (scan): \"Battle: Bow this card or, if you are a Dragon Clan player, discard it from your hand: Melee 5 Attack.\" The bow half is a plain wielder Attack, but the discard-from-hand half has no wielder and the text names no performer (Tsubute, the only Item played from a hand, prints \"Choose your performing Ninja\"). Question for Mendon: who performs the Melee 5 Attack when the Balash is discarded from hand -- an own Personality at the battlefield the player chooses, the army as a whole, or none? Wired as printed would guess one of these."
+  },
+  "oracle-l5r-9979": {
+    "category": "RULES",
+    "note": "The Isha's Yumi - exp (scan): \"Battle: Bow this card or, if you are a Mantis Clan player, discard it from your hand: Ranged 6 Attack.\" Same open question as The Blade of the Balash: the discard-from-hand half has no wielder and prints no performing Personality, so who performs the Ranged 6 Attack (and whose Force/keywords, e.g. Conflagration-style bonuses, apply) needs a ruling before the card can be wired whole."
+  },
+  "oracle-l5r-9971": {
+    "category": "RULEBOOK",
+    "note": "Mempo of the Amethyst Champion alters three rulebook Favor actions: \"You may use Favor abilities one additional time per turn\" (needs a per-player +1 use on every Favor-keyword ability, AbilityDefinition.UsesPerTurn is a fixed per-ability number), \"After you announce the rulebook Favor Political Battle action: It may target any player's unit, and even if it is not attacking\" (a retargeting after announcement -- favor-battle's target category 'enemy-attacking' is fixed at announcement and there is no re-selection step), and \"Reaction: After you discard the Imperial Favor: Take the Imperial Favor\" (no after-Favor-discard window exists; the discard is a cost paid in several places)."
+  },
+  "oracle-l5r-9980": {
+    "category": "RULES",
+    "note": "The Topaz Armor - exp: \"After this card enters play: Choose two keywords; Courtier, Samurai, Archer, ... Stalwart. This Personality has the two keywords last chosen from the previous trait.\" The engine's deciders (DeciderChoice.cs) and entry windows choose cards, never a keyword, and a two-of-eleven keyword pick has no primitive; the phrase \"the two keywords last chosen from the previous trait\" is also unclear. Question for Mendon: are the two keywords kept for as long as the Armor stays attached (a re-entry after it left play choosing a fresh pair), and is the choice mandatory on entering play (a trait) rather than a Reaction the controller may decline?"
+  },
+  "oracle-l5r-9982": {
+    "category": "SEARCH",
+    "note": "The Sacred Rosary of the Constrictors: \"Limited: Discard all your Celestials in play. Search your Dynasty deck or discard pile for a Celestial. Put it into play. If you searched your discard pile for it, remove this card from the game.\" Missing primitive: a search effect that puts a Celestial into play with no province (SearchEffect.PutIntoPlay enters only a Personality; ResolveCelestial is tied to refilling the province a Celestial was revealed in and to the discard of the controller's other Celestials), plus remembering which of the two places the card came from to remove the Rosary."
+  },
+  "oracle-l5r-10237": {
+    "category": "RULES",
+    "note": "Peace Treaty (scan): \"Limited: If there are more than two players, choose a player. He may choose to sign a peace treaty with you. If he chose this, then until your next Events Phase begins, neither of you may declare an attack against, or ally against, the other. If he did not choose this, you gain 3 Honor and he loses 3 Honor.\" The whole effect is conditional on a game of more than two players, which the engine does not support: wired it would be a Limited action that can never do anything. Question for Mendon: publish it as a deliberate two-player no-op, or leave it unpublished until multiplayer exists?"
+  },
+  "oracle-l5r-9350": {
+    "category": "LOCK",
+    "note": "Winter Sled: \"While you control a Winter card, other players' cards' effects will not negate this Personality's movement.\" The Reaction half (after engaging, bow this card: Move this Personality to the battlefield if enemy units are there) is buildable, but the static is a standing 'will not be negated' on one Personality's movement spread over roughly seven independent negation sources (NegatesEffect, EnemyActionMovementAutoNegated, the delay store, Show of Restraint's and Blessings' shields, Twin Forks, Request Authorization), none of which knows whose card is negating; MovementCannotBeNegated is a per-command exemption, not per-Personality. A global per-Personality movement-negation check is needed first."
+  }
+}

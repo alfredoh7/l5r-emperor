@@ -276,7 +276,7 @@ public sealed partial class MatchEngine
 
     // "Negate any destruction of this card, except for its Personality being destroyed": DestroyAttachment is the destruction of the card itself; the destruction of its Personality
     // (DestroyUnits) takes it along and is not asked.
-    private bool GiftArmorNegatesDestruction(CardInstance card) => Definition(card).Effect == GiftArmorEffect;
+    private bool GiftArmorNegatesDestruction(CardInstance card) => Definition(card).Effect == GiftArmorEffect || PromoItemsNegateDestruction(card); // Ancient Armor of the Qamar, Six-Ring Sword (PromoEmperorItems.cs)
 
     // ---- Maga-yari ----
 

@@ -112,6 +112,7 @@ public sealed partial class MatchEngine
         // Chrysanthemum Blossom (Emperor Edition remaining-cards pass, issue #492 group G): "After this Personality is assigned" -- the assignment command's own record, not a catalogued action.
         if (abilityId == "chrysanthemum-blossom-boost") return ChrysanthemumBlossomApplies(source, playerId, facts);
         if (WithoutMercyApplies(source, abilityId, playerId, facts) is { } withoutMercy) return withoutMercy; // issue #648 (WithoutMercy.cs): a Battle action by your Samurai that targeted no enemy card
+        if (PromoItemsAfterActionApplies(source, abilityId, playerId, facts) is { } promoAfter) return promoAfter; // The Ivory Sword (PromoEmperorItems.cs): an action by a dishonorable Personality who opposed it
         if (P3AssignmentOrActionApplies(source, abilityId, facts) is { } p3Assigned) return p3Assigned; // Utaku Tairu - exp (issue #503): "after a Personality assigns or moves"
         if (facts.AbilityId == AssignedSentinel) return false;
         if (!AbilityCatalog.All.ContainsKey(facts.AbilityId)) return false;

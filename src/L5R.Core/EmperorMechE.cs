@@ -149,7 +149,7 @@ public sealed partial class MatchEngine
     private List<PaymentToken> PaymentTokens(int playerId, PaymentSubject? paying)
     {
         var reactions = new List<PaymentToken>(); var destroys = new List<PaymentToken>();
-        foreach (var card in _state.Cards.Values.Where(c => c.OwnerId == playerId && c.Zone is Zone.Home or Zone.Stronghold or Zone.Battlefield).OrderBy(c => c.Id, StringComparer.Ordinal))
+        foreach (var card in _state.Cards.Values.Where(c => c.OwnerId == playerId && c.Zone is Zone.Home or Zone.Stronghold or Zone.Battlefield or Zone.Attached /* Mantle of the Jade Champion, PromoEmperorItems.cs */).OrderBy(c => c.Id, StringComparer.Ordinal))
         {
             var name = Definition(card).Name;
             if (ReactiveGoldSource(card, paying) is { } reactive)

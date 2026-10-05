@@ -199,7 +199,8 @@ public static class AbilityCatalog
         ["crushing-force"] = new("Battle", "Opposed Personality · +3 Force", "own-opposed"),
         ["crushing-destroy"] = new("Battle", "Destroy an enemy Follower or Item", "enemy-attachment"),
         ["never-afraid"] = new("Battle", "Destroy an attachment", "attachment"),
-        ["lobby"] = new("Limited", "Lobby · bow a Personality to take Favor", "lobby", true, Costs: ActionCost.BowTarget),
+        // The Blessed Mantle of the Greensnakes (PromoEmperorItems.cs): "This Personality may lobby ignoring the cost of bowing" -- the bow is not owed by a Personality with the pseudo-keyword it grants.
+        ["lobby"] = new("Limited", "Lobby · bow a Personality to take Favor", "lobby", true, Costs: [new(CostVerb.Bow, CostSubject.Target, UnlessKeyword: PromoEmperorItemsAbilities.LobbiesWithoutBowing)]),
         ["favor-cycle"] = new("Limited", "Discard Favor and a card · draw a card", "hand", true, Costs: ActionCost.DiscardTarget),
         ["favor-battle"] = new("Battle", "Discard Favor · move an enemy attacker home", "enemy-attacking", true),
         ["journeys-end-move"] = new("Battle", "Move home a Personality with no more Followers than the performer", "fewer-or-equal-followers-than-performer", Performer: "own-unbowed-personality-at-battle"),
@@ -3960,6 +3961,7 @@ public sealed partial class MatchEngine
         // A static rule of a card in play gives the keyword to a category of its controller's cards, in or out of play (Ikoma Aimi's Courtier, Seppun Nagi's Clan
         // keyword, Tsuruchi Nobukatsu - exp's Magistrate) -- StaticKeywordRules.cs, read live like the two conditional grants around it.
         if (StaticKeywordGranted(card, keyword)) return true;
+        if (PromoItemsKeywordGranted(card, keyword)) return true; // The Emerald Armor's Imperial and Magistrate, Mantle of the Onyx Champion's Maho (PromoEmperorItems.cs)
         if (UnmeiMirrorsKeyword(card, keyword)) return true;
         if (OchiaiGrantsDuelist(card, keyword)) return true; // Ochiai's Bravery (issue #503) // Unmei (Emperor Edition Personality pass, issue #477, batch 3).
         // Tamori Yayu (issue #216): "has ... Cavalry while it is not your turn" -- a live conditional
@@ -4410,6 +4412,7 @@ public sealed partial class MatchEngine
         if (EmperorRemainingCAbilities.BeforeActionHandReactions.Contains(abilityId)) return EmperorRemainingCBeforeActionApplies(card, abilityId, command);
         if (CardWave566BeforeActionApplies(card, abilityId, command) is { } wave566Before) return wave566Before; // Inexorable (issue #566, CardWave566.cs)
         if (P3BeforeActionApplies(card, abilityId, command) is { } p3Before) return p3Before; // Request Authorization (issue #503, EmperorP3.cs)
+        if (PromoItemsBeforeActionApplies(card, abilityId, command) is { } promoBefore) return promoBefore; // The Pearl-Encrusted Staff of the Cobras (PromoEmperorItems.cs)
         // Akodo Shihiro (issue #458): "Before (each time) another player's action resolves during a battle at Shihiro's battlefield" -- whatever the action targets, so
         // long as it is a genuine action (IsAction), taken by another player, while a battle is under way at Shihiro's own battlefield.
         if (P2BeforeActionApplies(card, abilityId, command) is { } p2Before) return p2Before; // issue #503: Armor of the Uruwashii (EmperorP2.cs)
@@ -5530,6 +5533,7 @@ public sealed partial class MatchEngine
                 || MechEEvenIfBowed(id) // issue #501: Moto Rani - exp ("Even if Rani is bowed"); Kakita Kae's trait (a trait is usable while bowed)
                                         // issue #622 (IvoryPolitical.cs): Komori Taruko ("Even if Taruko is bowed")
                 || IvoryPoliticalEvenIfBowed(id)
+                || PromoItemsEvenIfBowed(id) // Family Sword: "Open: Even if this card is bowed ..." (PromoEmperorItems.cs)
                 || TirelessStronghold(source) || UnsafePassageWaives(command, source), "Abilities on bowed cards cannot be used.");
             uses = source.AbilityUses;
         }
@@ -6721,7 +6725,7 @@ public sealed partial class MatchEngine
                         // HasAttachments already exists for exactly this boolean (a count, not "any
                         // specific kind"), reused verbatim.
                         "personality-with-attachment" => personality && HasAttachments(target),
-                        "lobby" => personality && own && !target.Bowed && CardPersonalHonor(target) >= 1,
+                        "lobby" => personality && own && (!target.Bowed || Keyword(target, PromoEmperorItemsAbilities.LobbiesWithoutBowing)) && CardPersonalHonor(target) >= 1,
                         "fewer-or-equal-followers-than-performer" => personality &&
                             Attachments(target.Id).Count(a => Definition(a).Type == CardType.Follower) <= Attachments(command.PerformerId!).Count(a => Definition(a).Type == CardType.Follower),
                         // Unexpected Support: the enemy-only counterpart to journeys-end-move's own
@@ -7017,6 +7021,7 @@ public sealed partial class MatchEngine
         // Goju Yurishi - exp (issue #453, batch 3; TargetOfLastResort.cs): a card another player may only target when no other legal target exists -- judged for a
         // single target and for each slot candidate alike, before the slot probe returns.
         RequireNotTargetOfLastResort(command, ability, slotAbility);
+        RequirePromoItemsNotProtected(command, ability, slotAbility); // The Emerald Armor, The Arcane Cloak of the Chameleons (PromoEmperorItems.cs)
         // One slot candidate has now been judged; everything below is about the whole action (its own checks and its price).
         if (slotAbility is not null) return;
         if (id == "red-hunger-attachments")
