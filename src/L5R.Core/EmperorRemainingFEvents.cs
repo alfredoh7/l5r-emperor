@@ -276,6 +276,7 @@ public sealed partial class MatchEngine
             }
             default:
                 if (ResolveP4EventChoice(command, pending)) return; // Too Close to Home (issue #503, EmperorP4Watches.cs)
+                if (PromoEventChoice(pending, command)) return; // issue #653 (PromoEmperorEvents.cs)
                 if (ResolveEmperorP6Choice(pending, command)) return; // issue #503 (EmperorP6.cs): Dark Experiments, the face-up refills, Ietsuno's switch
                 throw new RuleViolation("Unknown Event decision.");
         }
@@ -314,6 +315,7 @@ public sealed partial class MatchEngine
                 yield return new("eventChoice", $"{eventName}: do not draw", true, null, Answer(choice: "no"), pending.EventCardId);
                 break;
             default:
+                foreach (var option in PromoEventChoiceActions(pending, playerId)) yield return option; // issue #653
                 foreach (var option in EmperorP6ChoiceActions(pending, playerId)) yield return option; // issue #503 (EmperorP6.cs)
                 break;
         }

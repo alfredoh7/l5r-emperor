@@ -185,6 +185,7 @@ public sealed partial class MatchEngine
     // Elemental Adroitness: "Before this phase ends, put this Strategy into your hand." Called by SetPhase just before the phase changes; the whole Attack-through-battle stretch is one phase.
     private void PromoPhaseEnds(Phase next)
     {
+        if (next == Phase.End && _state.Phase != Phase.End) PromoEndPhaseBegins(); // Tales of Valor (PromoEmperorEvents.cs)
         if (PromoFate.PhaseReturns.Count == 0 || PhaseFamily(next) == PhaseFamily(_state.Phase)) return;
         foreach (var due in PromoFate.PhaseReturns.Where(r => r.Family == PhaseFamily(_state.Phase)).ToArray())
         {

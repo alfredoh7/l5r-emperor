@@ -5531,6 +5531,7 @@ public sealed partial class MatchEngine
                 || MechEEvenIfBowed(id) // issue #501: Moto Rani - exp ("Even if Rani is bowed"); Kakita Kae's trait (a trait is usable while bowed)
                                         // issue #622 (IvoryPolitical.cs): Komori Taruko ("Even if Taruko is bowed")
                 || IvoryPoliticalEvenIfBowed(id)
+                || id == PromoEmperorEventAbilities.EmeraldStraighten // issue #653: The Emerald Championship, "Even if this Personality is bowed"
                 || TirelessStronghold(source) || UnsafePassageWaives(command, source), "Abilities on bowed cards cannot be used.");
             uses = source.AbilityUses;
         }

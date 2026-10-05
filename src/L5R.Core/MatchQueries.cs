@@ -112,7 +112,7 @@ public sealed partial class MatchEngine
             def.Type == CardType.Personality && card.Zone is Zone.Home or Zone.Battlefield ? BattleForce(card) : null, card.Tokens.ToArray(),
             GrantedAbilityViews(card),
             GoldSourceProduction(card), ActionLocked(card), card.CreatedCopy,
-            card.Protections.Select(p => new GrantedEffectView("Action protection", "Effects of actions this card performs will not be negated.", p.Source, p.Duration)).Concat(MechBGrantedEffects(card)).ToArray(), // issue #501: Only a Shadow's trait
+            card.Protections.Select(p => new GrantedEffectView("Action protection", "Effects of actions this card performs will not be negated.", p.Source, p.Duration)).Concat(MechBGrantedEffects(card)).Concat(PromoGrantedEffects(card)).ToArray(), // issue #501: Only a Shadow's trait
             IsCopyCard(card), card.CopyOfCardId, CopyOfDefinition(card), CopyConditionsText(card), // issue #501 item 32 (EmperorMechBCopies.cs)
             card.OriginalOwnerId is int realOwner && realOwner != card.OwnerId ? realOwner : null, // issue #501: the owner of a card another player controls
             card.UnitNumber);

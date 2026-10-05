@@ -84,6 +84,18 @@ internal static partial class PromoEmperorFateTests
         Shape(Adroitness, CardType.Strategy, "Elemental Adroitness", 0, 4, ["Unique"], [PromoEmperorFateAbilities.Adroitness], "none");
         Shape(MightOfTheSun, CardType.Spell, "Might of the Sun", 7, 1, ["Fire", "Thunder"], [PromoEmperorFateAbilities.MightBow, PromoEmperorFateAbilities.MightFree], PromoEmperorFateAbilities.MightEffect);
         Shape(SummonFushicho, CardType.Spell, "Summon Fushicho", 0, 3, [], [PromoEmperorFateAbilities.Fushicho], "none");
+        // Every packaged card: listed, art shipped, its abilities in the catalogue and its text the scan's (never empty).
+        foreach (var (wave, count) in new[] { ("strategy-wave-112", 18), ("spell-wave-51", 3) })
+        {
+            var listed = File.ReadAllLines(Path.Combine(RepoRoot(), "tests/L5R.Core.Tests/PublishedWaves", wave + ".txt"));
+            Eq(listed.Length, count, wave + " lists every wired card");
+            foreach (var id in listed)
+            {
+                var d = CardCatalog.Get(id);
+                Check(ArtShipped(id) && d.Clan == "Unaligned" && !string.IsNullOrWhiteSpace(d.Text), d.Name + ": art, clan and text");
+                Check((d.Abilities ?? []).All(AbilityCatalog.All.ContainsKey), d.Name + ": every ability is catalogued");
+            }
+        }
         Check(CardCatalog.Get(Adroitness).Text == "Battle: Straighten a target Ring. Before this phase ends, put this Strategy into your hand.", "Elemental Adroitness' printed text");
         Check(CardCatalog.Get(BarFight).Text.StartsWith("As a Focus Effect: After this duel ends, bow its winner."), "Bar Fight's printed text");
     }

@@ -980,7 +980,7 @@ public sealed partial class MatchEngine
         var card = Card(cardId); var def = Definition(card);
         if (def.Effect == MoneylenderEffect) return MoneylenderTokens(card); // Moneylender (issue #492, group F): Gold equal to the Wealth tokens it can remove.
         // The Shadow's Embrace pass (issue #476), batch 6: a production modifier for the turn (The Moon's Imperative, The Sun's Aspiration) and Sheltered Port's count.
-        var adjustment = def.Type == CardType.Holding ? ShadowsEmbraceBatch6Production(card, playerId) : 0;
+        var adjustment = def.Type == CardType.Holding ? ShadowsEmbraceBatch6Production(card, playerId) + (def.GoldProduction > 0 ? PromoFestivalProduction(card) : 0) : 0; // issue #653: the Festivals
         if (ConditionalProductionOf(card) is { } conditional && ProductionConditionMet(conditional, paying)) return Math.Max(0, conditional.Amount + adjustment);
         // Library of Rebirth (Stronghold pass, issue #486 batch 1), Luxurious Silk, Seaside Bazaar: a Reaction's Gold is its own payment source (issue #501: "<card>#reaction", EmperorMechE.cs),
         // usable beside the card's bow; the card's own id is always its printed production.
@@ -1230,6 +1230,7 @@ public sealed partial class MatchEngine
         Require(!Player(command.PlayerId).MayNotAttackThisTurn && !AttackLockedByEvent(command.PlayerId), "You may not declare an attack this turn.");
         _state.UnresolvedBattlefields = Player(1 - command.PlayerId).Provinces.Where(p => !p.Destroyed).Select(p => p.Index).Order().ToList();
         Emit("attackDeclared", $"{Player(command.PlayerId).Name} declared an attack: a battlefield exists at each of {Player(1 - command.PlayerId).Name}'s provinces.", command.PlayerId);
+        PromoAttackPhaseCreated(command.PlayerId); // issue #653: Yozo's Inspiration, Diplomacy Talks
         CreateTwoFrontsBattlefields(command.PlayerId); // Two Fronts (issue #492, rulings pass R1): a second battlefield at the marked province.
         SetPhase(Phase.InfantryDeclaration, command.PlayerId);
     }
@@ -1672,6 +1673,7 @@ public sealed partial class MatchEngine
         // After the losing units are destroyed, the province is destroyed and Honor is settled: the Reactions that name this moment (AfterResolution.cs), before the winners go home.
         MarkSeekingTheTruthResolution(destroyedByPlayer, provinceDestroyedNow ? attacker : null); // Forgotten Legacy pass (issue #467 batch 4).
         FireCowedAndDefeatedBattleWatches(a, d); // The Shadow's Embrace pass (issue #476), batch 3: "a battle resolves which destroyed him" (ShadowsEmbraceBatch3.cs).
+        PromoApplyEventResolution(a, d, attacker, destroyedByPlayer, provinceDestroyedNow); // A Great Victory (issue #653)
         PromoApplyResolution(a, d, attacker, destroyedByPlayer, provinceDestroyedNow); // Imminent Victory (issue #653, PromoEmperorFateReactions.cs): the +1F/+1C tokens at battle resolution.
         ApplyShibasGuidanceTrait(destroyedByPlayer, provinceDestroyedNow ? attacker : null); // Shiba's Guidance (Emperor Edition remaining-cards pass, issue #492, group E): "After a battle resolution ends in which a Phoenix Clan player destroyed ...".
         var resolutionFacts = NewAfterResolutionFacts(provinceIndex, attacker, attackerWon, a, destroyedByPlayer, provinceDestroyedNow, losers);
@@ -2586,6 +2588,7 @@ public sealed partial class MatchEngine
     private int DestroyUnits(CardInstance[] cards, bool combatDestruction = false, int? actingPlayerId = null)
     {
         var count = 0;
+        var promoNegated = PromoNegatedDestructions(cards, actingPlayerId);
         foreach (var card in cards)
         {
             // Rugashi Bazaar (issue #492, group F): "This card will not be destroyed." -- the destruction simply fails (it is not a negation).
@@ -2606,6 +2609,7 @@ public sealed partial class MatchEngine
             if (actingPlayerId is not null && WideValleyNegatesDestruction(card)) continue;
             if (actingPlayerId is int shieldActor && DestructionShielded(card, shieldActor)) continue;
             if (actingPlayerId is not null && NegishiNegatesDestruction(card)) continue;
+            if (promoNegated.Contains(card.Id)) continue; // issue #653: Expansion, The Topaz Championship's trait
             if (actingPlayerId is int armorActor && TfOminousArmorSubstitutes(card, armorActor)) continue; // issue #622: Ominous Armor, "destroy this Item instead" (TfGear.cs)
             foreach (var attachment in Attachments(card.Id).ToArray())
             {
@@ -2631,6 +2635,7 @@ public sealed partial class MatchEngine
             card.ProvinceIndex = null;
             MarkDead(card);
             count++;
+            PromoAfterPersonalityDestroyed(card, actingPlayerId); // issue #653: Ritual of Sacrifice
             // Action-effect tracking (issue #437): only ever recorded when this destruction came from a specific action (actingPlayerId is set) --
             // never for the mass casualty sweep a battle's own resolution performs directly (see the comment above on IsCreatedCard's own check).
             if (actingPlayerId is not null) RecordActionEffect(card.Id, DestroyedKind, fromBattlefield: destroyedFrom);
@@ -2841,6 +2846,7 @@ public sealed partial class MatchEngine
         if (RingElements.All(e => _state.Cards.Values.Any(c => c.OwnerId == player.Id && InPlay(c) && Definition(c).Type == CardType.Ring && Keyword(c, e) && !Keyword(c, "Fudo") && CountsForEnlightenment(c))))
         { Win(player.Id, "Enlightenment victory"); return; }
         player.TurnsTaken++;
+        PromoTurnBegins(player); // issue #653 (PromoEmperorEvents.cs): Losing the Way
         MechDTurnBegins(player); // Issue #501, mechanics group D (EmperorMechD.cs): "remove ... from the game when your next turn begins" (Amazing Feat).
         player.MayNotAttackThisTurn = false;
         player.FavorActionsThisTurn = 0;
@@ -2985,6 +2991,7 @@ public sealed partial class MatchEngine
     private bool ResolveEvent(PlayerState player, ProvinceState province, CardInstance card)
     {
         if (P3BeforeEvent(player, province, card) is { } p3Event) return p3Event; // Forging Destiny (issue #503): the window before an Event resolves
+        if (RegisteredResolveEvent(player, province, card) is { } registeredEvent) return registeredEvent; // issue #653 (PromoEmperorEvents.cs)
         if (Definition(card).Effect == "harsh-choices")
         {
             _state.PendingChoice = new("harshChoices", player.Id, card.Id, "Harsh Choices: you may destroy this province to draw 3 cards.");
