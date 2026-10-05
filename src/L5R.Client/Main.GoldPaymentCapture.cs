@@ -22,7 +22,7 @@ public partial class Main
 
     private void PressGold(Func<Button, bool> match, string what, Node? root = null)
     {
-        var button = GoldButtons(root).FirstOrDefault(match) ?? throw new InvalidOperationException($"Gold payment UI smoke failed: no {what} control.");
+        var button = GoldButtons(root).FirstOrDefault(match) ?? throw new InvalidOperationException($"Gold payment UI smoke failed: no {what} control (buttons: {string.Join(" | ", GoldButtons(root).Select(b => b.Text))}).");
         GoldRequire(!button.Disabled, $"the {what} control is disabled.");
         button.EmitSignal(Button.SignalName.Pressed);
     }
@@ -79,14 +79,13 @@ public partial class Main
 
     private void GoldDerivedCapture(string stage, long version)
     {
-        PressGold(b => b.Text.StartsWith("Equip (Battle)", StringComparison.Ordinal), "Equip (Battle) action");
+        PressGold(b => b.Text.Contains("Equip (Battle)", StringComparison.Ordinal), "Equip (Battle) action");
         var action = _chosen!;
         GoldRequire(action.TargetGold is { Count: >= 3 } && action.TargetGold.Values.Select(q => q.Cost).Distinct().Count() >= 3, "Equip (Battle) did not ship distinct per-target quotes.");
         // Issue #581: the client picks no target for the player. Nothing is priced and Confirm waits until one is chosen through the real picker (item 0 is "Choose a target…").
         GoldRequire(action.Command!.TargetId is null && _paymentConfirm is { Disabled: true } && !GoldPanelText().Contains("PAYMENT"), "a target-priced action chose or priced a target before the player picked one.");
         var firstTarget = action.TargetIds![0];
-        var firstPicker = _inspector.FindChildren("*", "OptionButton", true, false).OfType<OptionButton>().First();
-        firstPicker.Selected = 1; firstPicker.EmitSignal(OptionButton.SignalName.ItemSelected, 1L);
+        _inspector.FindChildren("*", "VBoxContainer", true, false).OfType<CardChoiceList>().First().Choose(0); // issue #635: the list of legal cards replaced the drop-down
         action = _chosen!; var firstCost = QuoteFor(action)!.Cost;
         GoldRequire(action.Command!.TargetId == firstTarget, "the picker did not select the first legal target.");
         GoldRequire(GoldPanelText().Contains("PAYMENT · COST FROM YOUR TARGET") && GoldPanelText().Contains($"{firstCost} Gold"), "the panel does not show the chosen target's cost.");
@@ -95,9 +94,7 @@ public partial class Main
             // Change the target through the real picker: the quote, the amount and the suggested sources all follow, offline.
             var costliest = action.TargetGold!.OrderByDescending(p => p.Value.Cost).First();
             GoldRequire(costliest.Key != firstTarget && costliest.Value.Cost != firstCost, "the fixture has no differently priced target to swap to.");
-            var picker = _inspector.FindChildren("*", "OptionButton", true, false).OfType<OptionButton>().First();
-            picker.Selected = Array.IndexOf(action.TargetIds!, costliest.Key) + 1; // item 0 is the "Choose a target…" placeholder
-            picker.EmitSignal(OptionButton.SignalName.ItemSelected, (long)picker.Selected);
+            _inspector.FindChildren("*", "VBoxContainer", true, false).OfType<CardChoiceList>().First().Choose(Array.IndexOf(action.TargetIds!, costliest.Key));
             GoldRequire(_chosen!.Command!.TargetId == costliest.Key && QuoteFor(_chosen)!.Cost == costliest.Value.Cost, "changing the target did not swap in its own quote.");
             GoldRequire(GoldPanelText().Contains($"{costliest.Value.Cost} Gold"), "the panel does not show the new target's cost.");
             GoldRequire(_sources.ToHashSet().SetEquals(costliest.Value.Payments[0].SourceIds) && SelectedProduction() >= costliest.Value.Cost, "sources were not re-suggested for the new target's quote.");

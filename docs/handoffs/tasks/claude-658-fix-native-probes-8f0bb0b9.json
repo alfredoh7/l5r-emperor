@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Fix the three native probes that failed on main (#658). Two were real client bugs: a click on the candidate-choice tray over the table was forwarded to the table instead of the tray (tray missing from FixedHudCovers), and 'Review cost choices' stayed enabled with no target chosen so Confirm submitted a targetless command and silently did nothing. The rest were stale probes: Fukui, derived-Gold and support-cards drove a drop-down, button text and checkbox labels that the earlier choice-list and title-first changes replaced.",
+  "validation": "check-decision-chooser (all 9 scenarios), check-gold-payment (all modes), check-support-cards (all 5) pass natively; check-multi-targets-ui, check-attack-targets-ui, check-either-or-ui, check-open-battlefield-ui pass; client build clean; format and comment-swallow lint clean.",
+  "remaining": "check-gameplay-controls fails identically on main ('Gold payment UI smoke failed: destruction has no usable payment'), a fourth pre-existing probe failure left alone. CI does not run these native probes.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/658",
+  "branch": "claude/658-fix-native-probes",
+  "updated": "2026-10-05T22:13:04.463088+00:00"
+}
