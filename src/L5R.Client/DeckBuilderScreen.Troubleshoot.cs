@@ -35,16 +35,40 @@ public partial class DeckBuilderScreen
             pick.AddItem(problem.Suggestions.Length == 0 ? "No close match · " + LeaveOut.ToLowerInvariant() : LeaveOut);
             pick.Select(0); picks[problem] = pick;
         }
-        var ok = dialog.GetOkButton(); ok.Text = "Open repaired deck";
+        var ok = dialog.GetOkButton(); ok.Text = "Confirm Repairs";
         dialog.Confirmed += () =>
         {
             var fixedText = report.Rebuild(p => picks[p].Selected < p.Suggestions.Length ? p.Suggestions[picks[p].Selected].DeckName : null);
             dialog.QueueFree();
-            try { OpenPracticeDeck(DeckFormat.Parse(fixedText), name + " repaired"); }
-            catch (Exception e) { Notice("Could not open the repaired deck: " + e.Message); }
+            ApplyRepairs(path, name, fixedText);
         };
         dialog.Canceled += dialog.QueueFree;
         dialog.PopupCentered(new Vector2I(820, 520));
         return true;
+    }
+
+    /// <summary>Write the repaired list as a canonical deck file and open it. A deck already in the local folder is replaced in place
+    /// (the untouched original is kept beside it as a .bak so nothing is lost); a file from elsewhere is saved as a new local deck.</summary>
+    private void ApplyRepairs(string path, string name, string fixedText)
+    {
+        try
+        {
+            var draft = NewDraft(); draft.Load(fixedText);
+            var local = Path.GetDirectoryName(Path.GetFullPath(path)) == Store.DirectoryPath;
+            string target;
+            if (local) { File.Copy(path, path + ".bak", true); target = Store.Save(name, draft.ToDeck(), true); }
+            else
+            {
+                var saveAs = Store.PathFor(name) is var p && File.Exists(p) ? name + " repaired" : name;
+                target = Store.Save(saveAs, draft.ToDeck(), false);
+            }
+            if (OpenFile(target))
+            {
+                var review = Draft.Review();
+                Notice(review.ChecksPassed ? $"Repairs applied and saved as “{Path.GetFileNameWithoutExtension(target)}”. The deck passes the basic checks."
+                    : $"Repairs applied and saved as “{Path.GetFileNameWithoutExtension(target)}”. Remaining issues:\n\n" + string.Join("\n", review.Warnings));
+            }
+        }
+        catch (Exception e) { Notice("Could not apply the repairs. The original deck file is unchanged.\n\n" + e.Message); }
     }
 }
