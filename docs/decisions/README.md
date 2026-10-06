@@ -50,3 +50,25 @@ interpretation this register's decision docs already settled.
 
 - [Gozu, Hyobuko, Masaya, Rosary, Topaz Armor (#667)](2026-10-05-667-search-play.md) — accepted as readings: owed play after a search, Celestial into play, keyword pair.
 - [Remaining unwired cards and the minimal primitive set (#668)](2026-10-05-remaining-unwired-primitives.md) — proposed: 491 unwired cards triaged against the end-of-arc supplement and the engine; 206 wirable today, 25 ranked primitives, 18 rulings, with a [per-card appendix](2026-10-05-remaining-unwired-primitives-cards.md) and [one implementation prompt per primitive](2026-10-05-remaining-unwired-primitives-prompts.md). No card wired.
+
+- [Holdings wave 53: nineteen Holdings of Torn Asunder, Coils of Madness, Gates of Chaos and Aftermath (#674)](2026-10-06-674-holdings.md) — proposed readings built in for the #674 WIRE-list wave (holdings); Mendon to confirm.
+
+- [Issue #674, cluster "items-misc": 21 Items, Followers, Events and Celestials wired, one blocked](2026-10-06-674-items-misc.md) — proposed readings built in for the #674 WIRE-list wave (items-misc); Mendon to confirm.
+
+- [Wire-list cluster "pers-aftermath" (#674, personality-wave-132)](2026-10-06-674-pers-aftermath.md) — proposed readings built in for the #674 WIRE-list wave (pers-aftermath); Mendon to confirm.
+
+- [pers-coils cluster of the #668 WIRE cards (issue #674)](2026-10-06-674-pers-coils.md) — proposed readings built in for the #674 WIRE-list wave (pers-coils); Mendon to confirm.
+
+- [674 pers-gates-1 (personality-wave-128): fourteen Gates of Chaos Personalities](2026-10-06-674-pers-gates-1.md) — proposed readings built in for the #674 WIRE-list wave (pers-gates-1); Mendon to confirm.
+
+- [Issue #674, cluster "pers-gates-2": thirteen Gates of Chaos Personalities (personality-wave-129)](2026-10-06-674-pers-gates-2.md) — proposed readings built in for the #674 WIRE-list wave (pers-gates-2); Mendon to confirm.
+
+- [Issue #674, cluster "pers-torn": twenty-one Torn Asunder Personalities (personality-wave-131)](2026-10-06-674-pers-torn.md) — proposed readings built in for the #674 WIRE-list wave (pers-torn); Mendon to confirm.
+
+- [674, the "spells-rings" cluster (spell-wave-54, ring-wave-3)](2026-10-06-674-spells-rings.md) — proposed readings built in for the #674 WIRE-list wave (spells-rings); Mendon to confirm.
+
+- [Issue #674, cluster strat-aftermath-coils: Aftermath and Coils of Madness Strategies (strategy-wave-117)](2026-10-06-674-strat-aftermath-coils.md) — proposed readings built in for the #674 WIRE-list wave (strat-aftermath-coils); Mendon to confirm.
+
+- [674 strat-gates: eighteen Gates of Chaos Strategies (strategy-wave-119)](2026-10-06-674-strat-gates.md) — proposed readings built in for the #674 WIRE-list wave (strat-gates); Mendon to confirm.
+
+- [Cluster strat-torn (issue #674): nineteen Torn Asunder Strategies, strategy-wave-118](2026-10-06-674-strat-torn.md) — proposed readings built in for the #674 WIRE-list wave (strat-torn); Mendon to confirm.

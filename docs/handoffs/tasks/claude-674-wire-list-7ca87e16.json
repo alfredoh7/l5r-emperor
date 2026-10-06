@@ -1,9 +1,9 @@
 {
   "lane": "rules",
-  "summary": "Wiring the 206 WIRE cards from #668 (issue #674), in progress: personality-wave-129 (13 Gates of Chaos personalities) merged so far; ten more clusters running.",
-  "validation": "pers-gates-2 cluster: wl-pers-gates-2 11/11, format clean; art pack and full check.sh pending until all clusters merge.",
-  "remaining": "Merge the other ten cluster branches, rebuild/publish art pack, regenerate inventory, full checks, PR and merge.",
+  "summary": "Wires 202 of the 206 WIRE-list cards from the #668 assessment (#674) across 11 waves: personality-wave-128..132, strategy-wave-117..119 (+118), holding-wave-53, spell-wave-54, ring-wave-3, item-wave-47, follower-wave-48, event-wave-32, celestial-wave-28. Four blocked with notes: Benediction (province+card target slot), Read the Essence (two face-down provinces), Witness the Untold (no after-Ring-enters trigger), Fudo's Assurances (Ring entry provenance).",
+  "validation": "Full Core suite pass (after test-list merge fixes); AI suite incl. bot-soak 3/3; check_format and lint_comment_swallow clean; art pack catalogue-art-issue674-20261006-r1 built (4382 images, 202 new) and install-verified locally. All readings in docs/decisions/2026-10-06-674-*.md are proposed, not confirmed rulings. No client changes; no native visual probes run.",
+  "remaining": "Publish art pack release; CI; Mendon to confirm readings; known pre-existing issue: Field Messenger transfer rejected offers (bot-soak rejected count) not addressed.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/674",
   "branch": "claude/674-wire-list",
-  "updated": "2026-10-06T06:17:10.922431+00:00"
+  "updated": "2026-10-06T13:57:56.138067+00:00"
 }
