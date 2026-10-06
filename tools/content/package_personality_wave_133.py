@@ -36,10 +36,10 @@ CARDS: dict[int, tuple[list[str], str, dict]] = {
     10627: (["wl1-tametaka-zero"], "wl1-tametaka", {}),  # Daidoji Tametaka - exp
     10628: (["wl1-tobei-attack"], "none", {"EntryHonorLoss": 1}),  # Daidoji Tobei
     10626: (["wl1-razan-invest", "wl1-razan-destroy"], "none", {}),  # Doji Razan
-    10617: (["wl1-gojiro-invest"], "none", {"EntryHonorLoss": 1}),  # Hida Gojiro
+    10617: (["wl1-gojiro-invest"], "wl1-invest-then-loss-1", {}),  # Hida Gojiro
     10670: (["wl1-hoshoku-destroy"], "none", {}),  # Hoshoku-sha
     10672: ([], "none", {"GoldProduction": 3}),  # Ide Hinobu
-    10649: (["wl1-hajime-invest"], "none", {"EntryHonorLoss": 1}),  # Isawa Hajime
+    10649: (["wl1-hajime-invest"], "wl1-invest-then-loss-1", {}),  # Isawa Hajime
     10641: (["wl1-yuko-invest", "wl1-yuko-honor"], "none", {}),  # Kitsune Yuko
     10668: (["wl1-legulus-search"], "none", {"EntryHonorLoss": 2, "AttackDefenseKind": "Both", "AttackDefenseAmount": -3, "AttackDefenseScope": "Unit"}),  # Legulus
     10661: (["wl1-mrika-bow"], "none", {}),  # M'rika - exp

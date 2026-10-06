@@ -111,7 +111,9 @@ public sealed record SearchSpec(string Id, string Label, SearchDeckOption[] Deck
     // (R4): "If a card satisfies the search criteria, the player must take it from the first source found. If multiple cards in a searched location satisfy the search condition, the player may choose ...
     // If the first search location has no card that satisfies the search conditions, they may search any named additional locations. Always reshuffle a deck after it is searched." So the next place is
     // opened (and its cards shown) only when the current one held no qualifying card and the searcher goes on; a deck that was searched is reshuffled, found or not, as the search leaves it.
-    bool Ordered = false);
+    bool Ordered = false,
+    // Asahina Kitiaru - exp (issue #679, Mendon's ruling): "Show it and put it in your hand. Discard a card." -- the card just found MAY be the card discarded (a ToHandThenDiscard search otherwise excludes it, issue #368).
+    bool DiscardMayBeFound = false);
 
 public static class SearchCatalog
 {
@@ -392,7 +394,7 @@ public sealed partial class MatchEngine
                     break;
                 }
                 search.Stage = SearchStage.ChooseDiscard;
-                _state.PendingChoice = new("searchDiscard", search.PlayerId, search.SourceCardId, $"{Definition(Card(search.SourceCardId)).Name}: discard a card from your hand other than the card you found.");
+                _state.PendingChoice = new("searchDiscard", search.PlayerId, search.SourceCardId, $"{Definition(Card(search.SourceCardId)).Name}: discard a card from your hand{(SearchCatalog.All.TryGetValue(search.SearchId, out var kept) && kept.DiscardMayBeFound ? "." : " other than the card you found.")}");
                 break;
             case SearchEffect.AttachRegion:
                 BeginRegionAttach(search, card);
@@ -507,14 +509,14 @@ public sealed partial class MatchEngine
     {
         var player = Player(search.PlayerId);
         Require(command.Type == "chooseSearchDiscard" && command.TargetId is not null && player.Hand.Contains(command.TargetId), "Choose a card from your hand to discard.");
-        Require(command.TargetId != search.SelectedCardId, "The card you found cannot be the one you discard to its own effect.");
+        Require(command.TargetId != search.SelectedCardId || SearchCatalog.All.TryGetValue(search.SearchId, out var spec) && spec.DiscardMayBeFound, "The card you found cannot be the one you discard to its own effect.");
         DiscardFate(player, Card(command.TargetId));
         FinishSearch(search);
     }
 
     /// <summary>The hand cards that may be discarded after a Terrain is found: every card except the one just found (issue #368).</summary>
     private string[] SearchDiscardCandidates(PendingSearch search) =>
-        Player(search.PlayerId).Hand.Where(id => id != search.SelectedCardId).ToArray();
+        Player(search.PlayerId).Hand.Where(id => id != search.SelectedCardId || SearchCatalog.All.TryGetValue(search.SearchId, out var spec) && spec.DiscardMayBeFound).ToArray();
 
     // 3. SHUFFLE, then the action resolves and play continues. Reached from every path out of a search: a card
     // taken and its effect done, a Region discarded, and a pass.

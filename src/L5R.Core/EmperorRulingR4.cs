@@ -49,7 +49,7 @@ public static class TraitReactions
 
     /// <summary>Whether this ability is a trait (not a printed Reaction) that the engine models with Reaction timing.</summary>
     // The Ivory Sword (PromoEmperorItems.cs); Yoritomo Toganin's Invest (StatTermCards.cs, issue #672)
-    public static bool Is(string abilityId) => Ids.Contains(abilityId) || PromoEmperorItemsAbilities.IsTrait(abilityId) || StatTermCards.IsTrait(abilityId) || WlPersAftermathAbilities.IsTrait(abilityId) || WlPersGates1Abilities.IsTrait(abilityId) || WlPersTornAbilities.IsTrait(abilityId);
+    public static bool Is(string abilityId) => Ids.Contains(abilityId) || PromoEmperorItemsAbilities.IsTrait(abilityId) || StatTermCards.IsTrait(abilityId) || WlPersAftermathAbilities.IsTrait(abilityId) || WlPersGates1Abilities.IsTrait(abilityId) || WlPersTornAbilities.IsTrait(abilityId) || abilityId == WlPersGates2Abilities.InvestTwo; // Invest is an enter-play effect, not a Reaction (Mendon, issue #679): Nigawa's and Sayaka's too
 }
 
 public sealed partial class MatchEngine
