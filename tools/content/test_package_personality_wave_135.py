@@ -5,6 +5,7 @@ import unittest
 import package_personality_wave_135 as wave
 
 ROOT = Path(__file__).resolve().parents[2]
+SCANS_PRESENT = (ROOT / "assets/reference/oracle/coils-of-madness/webp").exists()  # the working copies are gitignored: absent on a fresh CI checkout
 
 
 class PackagePersonalityWave130Tests(unittest.TestCase):
@@ -32,6 +33,7 @@ class PackagePersonalityWave130Tests(unittest.TestCase):
             self.assertEqual(source["printing_set"], ["Coils of Madness"])
             self.assertIn("/oracle/coils-of-madness/", source["image_path"])
 
+    @unittest.skipUnless(SCANS_PRESENT, "re-running the packager needs the gitignored scan working copies")
     def test_a_partial_selection_is_refused_and_a_rerun_is_identical(self):
         with self.assertRaises(ValueError):
             wave.package(wave.CARD_IDS[:3])

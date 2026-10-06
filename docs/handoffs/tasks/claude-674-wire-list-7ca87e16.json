@@ -1,9 +1,9 @@
 {
-  "lane": "rules",
-  "summary": "Wires 202 of the 206 WIRE-list cards from the #668 assessment (#674) across 15 waves: personality-wave-131..135, strategy-wave-117..119, holding-wave-53, spell-wave-55, ring-wave-3, item-wave-48, follower-wave-48, event-wave-32, celestial-wave-28 (renumbered from 128-130/item-47/spell-54 after #672 took those). Four blocked with notes: Benediction, Read the Essence, Witness the Untold, Fudo's Assurances.",
-  "validation": "Full Core suite and check.sh --skip-client pass on the pre-#672-merge tree; re-run after merging main (see PR). AI suite incl bot-soak 3/3; format and lint clean; art pack catalogue-art-issue674-20261006-r2 (4398 images, 202 new, base = #672's r1) built and install-verified. Readings in docs/decisions/2026-10-06-674-*.md are proposed. No client code changed; no native probes run.",
+  "lane": "shared",
+  "summary": "Wires 202 of the 206 WIRE-list cards from the #668 assessment (#674) across 15 waves: personality-wave-131..135, strategy-wave-117..119, holding-wave-53, spell-wave-55, ring-wave-3, item-wave-48, follower-wave-48, event-wave-32, celestial-wave-28 (renumbered from 128-130/item-47/spell-54 after #672 took those). Shared change: cards register through feature-owned hooks, with small local edits to shared engine files (CardAbilities, MatchEngine, Dueling, ActionEffectTracking, EffectChoice, EmperorRulingR4 trait list and similar pinned inventories); engine-hooks AllocationFreeDispatch test now measures steady state. Four cards blocked with notes: Benediction, Read the Essence, Witness the Untold, Fudo's Assurances.",
+  "validation": "Full Core suite and bash tools/check.sh --skip-client pass locally on the merged tree; AI suite incl bot-soak 3/3; format and comment-swallow lint clean; packager tests that need gitignored scans skip when absent. Art pack catalogue-art-issue674-20261006-r2 (4398 images, 202 new, base = #672 r1) built, install-verified and published. Readings in docs/decisions/2026-10-06-674-*.md are proposed. No client code changed; no native probes run.",
   "remaining": "Mendon to confirm readings; Field Messenger transfer rejected offers in bot-soak are pre-existing and unaddressed.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/674",
   "branch": "claude/674-wire-list",
-  "updated": "2026-10-06T14:55:49.750944+00:00"
+  "updated": "2026-10-06T15:32:56.214804+00:00"
 }

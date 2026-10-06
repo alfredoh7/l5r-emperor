@@ -9,6 +9,7 @@ import package_item_wave_48 as items
 import wl_items_misc_common as common
 
 ROOT = Path(__file__).resolve().parents[2]
+SCANS_PRESENT = (ROOT / "assets/reference/oracle/coils-of-madness/webp").exists()  # the working copies are gitignored: absent on a fresh CI checkout
 MODULES = ((items, "Item"), (followers, "Follower"), (events, "Event"), (celestials, "Celestial"))
 
 
@@ -47,6 +48,7 @@ class PackageWlItemsMiscTests(unittest.TestCase):
         for module, _ in MODULES:
             self.assertNotIn(10416, module.ENTRIES)
 
+    @unittest.skipUnless(SCANS_PRESENT, "re-running the packager needs the gitignored scan working copies")
     def test_a_card_without_an_entry_or_of_the_wrong_type_is_refused(self):
         with self.assertRaises(KeyError):
             items.package(["oracle-l5r-10518"])  # a Follower is not an Item-wave card
