@@ -1684,6 +1684,7 @@ public sealed partial class MatchEngine
         }
         // After the losing units are destroyed, the province is destroyed and Honor is settled: the Reactions that name this moment (AfterResolution.cs), before the winners go home.
         MarkSeekingTheTruthResolution(destroyedByPlayer, provinceDestroyedNow ? attacker : null); // Forgotten Legacy pass (issue #467 batch 4).
+        WlGrantVoidRecruit(attacker, provinceDestroyedNow); // issue #674 (WlSpellsRings.cs): False Ring of the Void's recruit, "after a battle resolves where you destroyed a Province"
         FireCowedAndDefeatedBattleWatches(a, d); // The Shadow's Embrace pass (issue #476), batch 3: "a battle resolves which destroyed him" (ShadowsEmbraceBatch3.cs).
         PromoApplyEventResolution(a, d, attacker, destroyedByPlayer, provinceDestroyedNow); // A Great Victory (issue #653)
         PromoApplyResolution(a, d, attacker, destroyedByPlayer, provinceDestroyedNow); // Imminent Victory (issue #653, PromoEmperorFateReactions.cs): the +1F/+1C tokens at battle resolution.
