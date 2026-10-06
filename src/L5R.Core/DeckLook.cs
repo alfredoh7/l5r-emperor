@@ -223,6 +223,7 @@ public sealed partial class MatchEngine
     {
         if (OpenP5LookEntryWindows(look)) return; // issue #503: the Personality Searching for Answers put into play gets his entering-play windows
         if (NitoshiAfterLook(look)) return; // Bayushi Nitoshi - inexperienced (issue #617): a taken card holds the game until it is played or returned
+        if (WlPersCoilsAfterLook(look)) return; // issue #674 (WlPersCoils.cs): Kitsuki Daisuke - exp2's "then discard a card" after a card was shown.
         if (P3AfterLook(look)) return; // Daigotsu Tenbatsu (issue #503, EmperorP3.cs): "You may discard a Dark Virtue; if you did, draw a card."
         _state.PendingLook = null;
         FinishDeferredAction(look.PlayerId, look.Origin, look.SourceCardId, look.BowedBefore);

@@ -71,6 +71,7 @@ public sealed partial class MatchEngine
         CountReconStrategyAction(abilityId, playerId, sourceId); // Advanced Intelligence (Seeds of Decay pass, issue #453, batch 1).
         // Moksha Patam (issue #453 batch 5): "After an action resolves, if a player gained Honor from its effects" -- a trait, so applied here before any Reaction to the same point.
         ApplyMokshaPatamTokens();
+        ApplyWlPersCoilsAfterAction(sourceId); // Daidoji Adachi (issue #674, WlPersCoils.cs): a trait, before any Reaction to the same point.
         ApplyP3AfterActionTraits(affected); // Deep Snows (issue #503, EmperorP3.cs): its trait, before any Reaction to the same point.
         // The Shadow's Embrace pass (issue #476), batch 3: Crowded Streets' trait -- a trait, so before any Reaction to the same point (ShadowsEmbraceBatch3.cs).
         if (OpenCrowdedStreetsTrait(closesTo)) return true;
@@ -79,7 +80,8 @@ public sealed partial class MatchEngine
         if (OpenP1AfterActionTraits(closesTo, playerId)) return true; // Issue #503 (EmperorP1.cs): traits resolve before the Reactions to the same moment.
         if (OpenAfterActionResolvedWindow(closesTo)) return true;
         // Moshi Ino's storm (issue #453, batch 3; MoshiInoStorm.cs): the same "this action is truly done" moment, asked once no Reaction window opened over it.
-        return OpenInoStorm(closesTo);
+        // Adachi's owed discard (issue #674) is asked here when no Reaction window has opened to carry it.
+        return OpenInoStorm(closesTo) || WlPersCoilsDrainDiscards(closesTo);
     }
 
     // The Personality who performs an ability: the named performer, else the source resolved to its wielder; null for a player ability or a non-Personality source.
