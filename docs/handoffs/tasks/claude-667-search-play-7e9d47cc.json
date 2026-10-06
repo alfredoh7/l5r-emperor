@@ -1,0 +1,9 @@
+{
+  "lane": "rules",
+  "summary": "Wired Gozu, Hyobuko, Masaya (personality-wave-125) and Heart of Fudo exp2, Sacred Rosary, Topaz Armor (item-wave-43): owed-play-after-search, Celestial-into-play search, keyword choice, province Open recruit.",
+  "validation": "Core search-play suites 13/13, full Core suite, AI/Server/Transport/Collection suites, format and comment-swallow lint pass; content unittest fails only the art-pack coverage test (pack rebuild pending); no native client check.",
+  "remaining": "Rebuild catalogue art pack for 6 new scans; confirm readings in docs/decisions/2026-10-05-667-search-play.md; native check that Masaya's province action shows.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/667",
+  "branch": "claude/667-search-play",
+  "updated": "2026-10-06T02:34:17.081108+00:00"
+}

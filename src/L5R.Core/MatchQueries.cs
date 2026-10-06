@@ -74,7 +74,7 @@ public sealed partial class MatchEngine
             // Deck search (issue #312): the deck viewer is private to the searcher; the shown-cards record is public.
             BuildSearchView(playerId), BuildShownCards(), BuildLookView(playerId), BuildCopyView(playerId), BuildEitherOrView(playerId), BuildOpponentPaymentView(playerId),
             _state.LastDuel is null ? null : Copy(_state.LastDuel), BuildPendingAttackCue(), BuildProvinceSights(playerId), BuildBattlefieldViews(), BuildHandSights(playerId)) // issue #503: hand sights
-        { PendingProvinceOrder = BuildProvinceOrderView(playerId), PendingHarshChoices = BuildHarshChoicesView(), ActionPhaseTurnPlayerId = _state.WinnerId is null ? R1.Aside?.TurnPlayerId : null }; // Plains of Otosan Uchi (issue #554); public context only, the paused effect stays engine-private.
+        { PhaseOrder = _state.PhaseOrder.IsDefault ? null : [.. _state.PhaseOrder.Order], PendingProvinceOrder = BuildProvinceOrderView(playerId), PendingHarshChoices = BuildHarshChoicesView(), ActionPhaseTurnPlayerId = _state.WinnerId is null ? R1.Aside?.TurnPlayerId : null }; // Plains of Otosan Uchi (issue #554); public context only, the paused effect stays engine-private.
     }
 
     // The reveal-order decision (PR #544's own contract): PUBLIC identity/prompt, options PRIVATE to the deciding
@@ -601,6 +601,10 @@ public sealed partial class MatchEngine
         {
             result.AddRange(SequencedTargetActions(playerId));
         }
+        else if (_state.PendingChoice is { Type: DuelSleepAbilities.PendingType })
+        {
+            result.AddRange(BudgetSelectActions(playerId)); // Sleep (issue #667, DuelSleepBudget.cs): the budgeted multi-select
+        }
         else if (_state.PendingChoice is { Type: "attackTargetSelect" })
         {
             result.AddRange(AttackTargetSelectionActions(playerId)); // the Attack target selection step after an announce window (issue #498)
@@ -845,6 +849,6 @@ public sealed partial class MatchEngine
         Add("concede", "Concede", Command("concede"));
         // Unfortunate Hesitation (issue #338): what a player who owes a pass cannot do at this opportunity is listed disabled.
         // Urgency (issue #453, batch 2): past the allowance, every non-Reaction action is listed disabled too.
-        return ApplyActionAllowanceToOptions(playerId, ApplyForcedPassToOptions(playerId, result));
+        return ApplyActionAllowanceToOptions(playerId, ApplySearchPlayToOptions(playerId, ApplyForcedPassToOptions(playerId, result))); // issue #667 (SearchPlayGozu.cs): while the Terrain Gozu found is owed, only its play is offered enabled
     }
 }

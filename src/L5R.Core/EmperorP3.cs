@@ -500,7 +500,7 @@ public sealed partial class MatchEngine
     // ---- Request Authorization: "Negate his movement to the current battlefield from the action's effects" (MovementToBattlefieldNegated's hook) -------------------------------------------------
 
     private bool P3MoveToBattlefieldNegated(CardInstance card, int battlefield) =>
-        battlefield == _state.CurrentBattleProvince && _state.NegatedEffects.Any(n => n.CardId == card.Id && n.Kind == MoveToCurrentBattlefieldKind);
+        battlefield == _state.CurrentBattleProvince && _state.NegatedEffects.Any(n => n.CardId == card.Id && n.Kind == MoveToCurrentBattlefieldKind && !MovementNegationBarred(card, n.ByPlayer)); // Winter Sled (issue #667)
 
     // ---- Iron Will ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 

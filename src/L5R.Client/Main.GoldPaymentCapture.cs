@@ -10,6 +10,7 @@ namespace L5R.Client;
 //   gold-fixed[-confirm]     an ability with a fixed cost that used to have no panel (Kharmic, 2 Gold)
 //   gold-derived[-swapped|-confirm]  a target-derived cost: changing the target swaps in that target's quote
 //   gold-variable[-raised|-confirm]  a player-chosen amount with its own bounds and re-suggested sources
+//   gold-profits[-confirm]   Profits' "Use Profits" choice, its Wealth-token Gold source and the Coin Pouch, hover-highlighted (issue #667)
 public partial class Main
 {
     private IEnumerable<Button> GoldButtons(Node? root = null) => (root ?? _inspector).FindChildren("*", "Button", true, false).OfType<Button>();
@@ -38,6 +39,7 @@ public partial class Main
             case "fixed": GoldFixedCapture(stage, version); break;
             case "derived": GoldDerivedCapture(stage, version); break;
             case "variable": GoldVariableCapture(stage, version); break;
+            case "profits": GoldProfitsCapture(stage, version); break; // issue #667 (Main.GoldProfitsCapture.cs)
             default: throw new InvalidOperationException("Unknown gold capture mode " + _captureMode);
         }
         RenderBoard(); ResetTableCamera();

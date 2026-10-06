@@ -4021,12 +4021,12 @@ public sealed partial class MatchEngine
         if (BakishiShieldNegates(card) && !(kind is "bow" or "destroy" or "move" && HiromiUnnegatable() || CurrentActionUnnegatable())) return true; // Hida Bakishi (issue #503, EmperorP1.cs)
         if (_state.NegatedEffects.Count == 0) return false;
         if (kind is "bow" or "destroy" or "move" && HiromiUnnegatable() || CurrentActionUnnegatable()) return false; // Yoritomo Hiromi (Emperor Edition Personality pass, issue #477): her Battle actions' bowing, destruction and movement; Suitengu's Torch (issue #486): every effect of the protected action.
-        if (_state.NegatedEffects.Any(n => n.CardId == card.Id && n.Kind == "all")) return true;
+        if (_state.NegatedEffects.FirstOrDefault(n => n.CardId == card.Id && n.Kind == "all") is { } allEntry) return !(kind == "move" && MovementNegationBarred(card, allEntry.ByPlayer)); // Winter Sled (issue #667, PerformersSled.cs)
         if (kind == "destroy" && OverlayInsteadOfDestruction(card)) return true; // The Waystation of the Path (Emperor Edition Stronghold pass, issue #486 batch 3): overlaid instead of destroyed.
         var match = _state.NegatedEffects.FirstOrDefault(n => n.CardId == card.Id && n.Kind == kind);
         if (match is null) return false;
         _state.NegatedEffects.Remove(match);
-        return true;
+        return !(kind == "move" && MovementNegationBarred(card, match.ByPlayer)); // Winter Sled (issue #667, PerformersSled.cs)
     }
     // Stalwart (core rules, issue #184): "the first time on a turn an enemy's effect would bow a card
     // with this keyword, the bowing (and only the bowing) is negated" -- a targeted ability's OWN
@@ -5315,7 +5315,9 @@ public sealed partial class MatchEngine
         ability.Costs?.Any(c => c.Verb == CostVerb.Bow && c.Subject == CostSubject.Source && !c.UnlessInHand) == true;
 
     private bool AbilitySourceZoneAllows(AbilityDefinition ability, CardInstance source, PlayerState player) =>
-        P5SourceZoneAllows(ability, source, player) is bool p5Zone ? p5Zone // issue #503 (EmperorP5.cs): Tsubute discarded from a hand
+        SearchPlaySourceZoneAllows(ability, source, player) is bool searchPlayZone ? searchPlayZone // issue #667 (SearchPlayMasaya.cs): Masaya's Open action from his face-up province
+        : P5SourceZoneAllows(ability, source, player) is bool p5Zone ? p5Zone // issue #503 (EmperorP5.cs): Tsubute discarded from a hand
+        : PerformersSourceZoneAllows(ability, source, player) is bool pfZone ? pfZone // issue #667 (PerformersGear.cs): the Blade of the Balash and the Isha's Yumi discarded from a hand
         : ability.FromDead ? source.Zone == Zone.Dead && source.OwnerId == player.Id && (!ability.RequiresHonorable || !source.Dishonorable)
         : RequiresSourceInPlay(ability) ? InPlay(source)
         : ability.Attach?.Card == AttachSource.Self ? (ability.FromDiscard ? source.Zone == Zone.FateDiscard && source.OwnerId == player.Id : source.Zone == Zone.Hand && player.Hand.Contains(source.Id)) // Blade of Perfection (issue #492): attached from the discard pile
@@ -6161,6 +6163,7 @@ public sealed partial class MatchEngine
             Require(id is "mitsu-fire-attack" or "scorn-the-weak" or "strength-in-terror" or "unexpected" or "visage-of-the-orochi" or "kahoku-exp-attack" or "knowledge-and-power" or "ishibashi-attack"
                 || MechCCarriesCostCard(id) // Emperor Edition mechanics group C (issue #501): the card an optional cost spends.
                 || P5CarriesCostCard(id) // issue #503: the Spell The New Foundries discards from under it
+                || SearchPlayCarriesCostCard(id)
                 || command.CardIds is null || command.CardIds.Length == 0, "This action does not select multiple cards.");
             // Bayushi Kahoku - exp (oracle-l5r-807): "Target an enemy Personality: Give him -4F. Ranged 3
             // Attack." Two SEPARATE selections, the Ranged Attack's own target being the second (per the
@@ -6699,7 +6702,7 @@ public sealed partial class MatchEngine
                         "any-card" => true,
                         "attacking" => personality && target.OwnerId == _state.ActivePlayerId,
                         "defending" => personality && target.OwnerId != _state.ActivePlayerId,
-                        "enemy-attacking" => personality && !own && (target.OwnerId == _state.ActivePlayerId || AkodoAllowsDefendingFavorTarget(id, player, target)), // Akodo's Guidance (issue #492, group E): defending enemy units for a Lion Clan player's Favor Battle action.
+                        "enemy-attacking" => personality && (!own && (target.OwnerId == _state.ActivePlayerId || AkodoAllowsDefendingFavorTarget(id, player, target)) || FavorMempoAllowsAnyUnit(id, player, target)), // Mempo of the Amethyst Champion (issue #667): any player's unit, attacking or not. // Akodo's Guidance (issue #492, group E): defending enemy units for a Lion Clan player's Favor Battle action.
                         // Tokoru's Bear (oracle-l5r-10025, issue #299): "an attacking enemy card" -- not
                         // just an attacking Personality (enemy-attacking above) but any card in an
                         // attacking unit: the Personality himself or one of his attached Followers/
@@ -7253,7 +7256,7 @@ public sealed partial class MatchEngine
         _runningCommand = command;
         var p3BowedBefore = P3BowedPersonalityIds(); // Hida Defenders (issue #503): the Personalities bowed before the action
         try { RunAbilityEffects(command, consumedGrant); }
-        finally { _runningCommand = runningBefore; }
+        finally { _runningCommand = runningBefore; StampNegatedBy(command.PlayerId); } // issue #667 (PerformersSled.cs): who set each negation
         if (_state.PendingDuel is { } issued && !ReferenceEquals(issued, pendingDuelBefore)) { issued.SourceCardId = command.CardId; issued.RingsBowedBefore = _state.CurrentActionRingsBefore.ToList(); issued.BowedBefore = p3BowedBefore; }
         if (_state.PendingAttack is { } declared && !ReferenceEquals(declared, pendingAttackBefore))
         {
@@ -9766,7 +9769,7 @@ public sealed partial class MatchEngine
                     MoveHome(target!, false);
                     if (_state.CurrentBattleProvince is int battlefield)
                     {
-                        target!.MovementLocks.Add(new MovementLock(source!.Id, _state.TurnNumber, MovementKinds.ToBattlefield, WhileCardAtBattlefield: source.Id, Battlefield: battlefield));
+                        target!.MovementLocks.Add(new MovementLock(source!.Id, _state.TurnNumber, MovementKinds.ToBattlefield, WhileCardAtBattlefield: source.Id, Battlefield: battlefield, ByPlayer: source.OwnerId));
                         Emit("movementLocked", $"{Definition(target).Name}'s movement to this battlefield is negated while {Definition(source).Name} is there.", target.OwnerId, target.Id);
                     }
                     GainHonor(player.Id, -1, "Moksha Patam", source);
@@ -11017,7 +11020,7 @@ public sealed partial class MatchEngine
         // HAND is always a candidate (and offered as the ordinary free play); the same card in a discard pile is
         // offered, priced and removed from the game as the Discipline play -- never both at once, since a card is
         // in one zone at a time.
-        var sources = _state.Cards.Values.Where(c => c.OwnerId == playerId && (InPlay(c) || c.Zone == Zone.Hand ||
+        var sources = _state.Cards.Values.Where(c => c.OwnerId == playerId && (InPlay(c) || c.Zone == Zone.Hand || SearchPlayHasProvinceAction(c) || // issue #667: Masaya, face-up in a province
                 c.Zone == Zone.Dead && (Definition(c).Abilities ?? []).Any(a => AbilityCatalog.All.TryGetValue(a, out var deadDef) && deadDef.FromDead) ||
                 c.Zone is Zone.FateDiscard or Zone.DynastyDiscard && ((Definition(c).Abilities ?? []).Any(a => AbilityCatalog.All.TryGetValue(a, out var def) && (def.Discipline || def.FromDiscard)) || DiscardPlayGrant(playerId, c) is not null)))
             .OrderBy(c => c.Id, StringComparer.Ordinal)
@@ -11196,7 +11199,7 @@ public sealed partial class MatchEngine
             CardDefinition?[] createChoices = ability.Creates is { Or.Length: > 0 } multiple ? multiple.Alternatives.Select(a => (CardDefinition?)CreatedCards.Resolve(a)).ToArray() : [null];
             // Daigotsu Ishibashi (issue #477 batch 6): one offered action per Dark Virtue card that may be shown from the hand, each with its own strength (a hand with none is offered once, disabled).
             string?[] shownChoices = id == "ishibashi-attack" ? IshibashiShowableCards(player).Cast<string?>().DefaultIfEmpty(null).ToArray()
-                : MechCCostCardChoices(id, player, source) ?? P5CostCardChoices(id, player, source) /* issue #503: The New Foundries */ ?? [null]; // Emperor Edition mechanics group C (issue #501): one offered action per card an optional cost may spend.
+                : MechCCostCardChoices(id, player, source) ?? P5CostCardChoices(id, player, source) /* issue #503: The New Foundries */ ?? SearchPlayCostCardChoices(id, player, source) /* issue #667: Gozu */ ?? [null]; // Emperor Edition mechanics group C (issue #501): one offered action per card an optional cost may spend.
             // "You may compare it against ..." (issue #492, ruling R5): one offered action per thing the player may compare against; the choice rides on the command.
             string?[] compareChoices = AttackCompareOptions(id) is { } compareOptions ? compareOptions.Select(o => (string?)o.Key).ToArray()
                 : (MechEChoiceOptions(id) ?? P2ChoiceOptions(id)) is { } mechEChoices ? mechEChoices.Select(o => (string?)o.Key).ToArray()
@@ -11320,7 +11323,7 @@ public sealed partial class MatchEngine
                                     var targetQuotes = firstQuote?.Kind == GoldCostKind.Derived
                                         ? quotes.Where(q => q.Command.TargetId is not null && q.Quote is not null).GroupBy(q => q.Command.TargetId!).ToDictionary(g => g.Key, g => g.First().Quote!) : null;
                                     var label = AbilityOptionLabel(id, ability, performer, source, costOption) + (createChoice is null ? "" : $" · {createChoice.Name}")
-                                        + (shownChoice is null ? "" : $" · {MechCCostCardVerb(id) ?? P5CostCardVerb(id) ?? "shows"} {Definition(Card(shownChoice)).Name} ({shownChoice})")
+                                        + (shownChoice is null ? "" : $" · {MechCCostCardVerb(id) ?? P5CostCardVerb(id) ?? SearchPlayCostCardVerb(id) ?? "shows"} {Definition(Card(shownChoice)).Name} ({shownChoice})")
                                         + (compareChoice is null ? "" : AttackCompareOptions(id) is { } compareLabels ? $" · compare against {compareLabels.First(o => o.Key == compareChoice).Label}" : $" · {(MechEChoiceOptions(id) ?? P2ChoiceOptions(id) ?? P5ChoiceOptions(id, playerId))!.First(o => o.Key == compareChoice).Label}")
                                         + (provinceOwner is int owner ? ability.Target == "player" ? (owner == playerId ? " · you" : " · your opponent") : (owner == playerId ? " · your Province" : " · an enemy Province") : "");
                                     yield return new("useAbility", label, legal.Count > 0, legal.Count > 0 ? null : error ?? "No legal target or performer.",

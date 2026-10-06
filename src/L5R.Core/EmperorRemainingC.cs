@@ -618,7 +618,7 @@ public sealed partial class MatchEngine
         RemC.RetributionRoot = -1; RemC.RetributionAssigned = 0;
         R1.PerfectMoment = null; // its restrictions belong to that one Attack Phase (issue #492, rulings pass R1)
         _state.ActivePlayerId = turnPlayer;
-        SetPhase(Phase.Dynasty, turnPlayer);
+        BeginPhaseAfterAttack(turnPlayer); // issue #667: the Dynasty Phase in the default order, otherwise the turn ends
     }
 
     // The window opens only when the Defender holds a Reaction that names it and could play it now (the same "is anything playable" test every after-window uses).

@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Wires 23 blocked Promotional-Emperor/Celestial cards (#667): Fusako, Gaijin Sorcerer, Sleep, Gozu, Heart of Fudo exp2, Hyobuko, Masaya, Sacred Rosary, Topaz Armor, Coin Pouch, Near Miss, Profits, Mempo (+Favor discard window), Blade of the Balash, Isha's Yumi, Winter Sled (as printed), Wyrmbone Katana, Lying in Ambush (+Ambusher), Jade Embrace, Sea & Sky, Through the Breach (+Breached Oni), Colonial Farm (+Colonists), The Deciding Moment and Nocturnal Attack (phase-order marker). Peace Treaty, Wildfire, Green Nightshade Blend recorded as rejected by Mendon.",
+  "validation": "Core suite pass; check.sh --skip-client exit 0; check_format clean; client builds; native probes pass (six-phase-track, gold-payment, decision-chooser, event-decisions, either-or-ui, deck-search-ui, gameplay-controls, multi-targets-ui, deck-builder). Art pack catalogue-art-issue667-20261005-r2 (4180 images, 27 new) built and verified locally. Mendon confirmed the readings in chat 2026-10-05. No dedicated native probe for Fusako bow button, Sleep panel, Masaya province action, Topaz keyword chooser.",
+  "remaining": "None for merge; native hands-on check of Fusako, Sleep, Masaya and Topaz UI paths.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/667",
+  "branch": "claude/667-pe-blocked-wave",
+  "updated": "2026-10-06T04:35:54.317712+00:00"
+}

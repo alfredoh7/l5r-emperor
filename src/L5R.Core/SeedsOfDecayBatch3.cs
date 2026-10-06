@@ -30,13 +30,13 @@ public sealed partial class MatchEngine
             // "If there are now more units there on the enemy side than on yours, you may target an enemy unit and move it home." -- judged for the position after his own
             // move: he joins the army when he would be opposed and is not there yet.
             case "chukage-move" when SlotCards(command, "enemy").Any():
-            {
-                var battle = _state.CurrentBattleProvince!.Value;
-                var enemies = Army(1 - player.Id, battle).Count();
-                var joins = enemies > 0 && !(source!.Zone == Zone.Battlefield && source.ProvinceIndex == battle) ? 1 : 0;
-                Require(enemies > Army(player.Id, battle).Count() + joins, "The enemy must have more units at the battlefield than you once Chukage has moved.");
-                break;
-            }
+                {
+                    var battle = _state.CurrentBattleProvince!.Value;
+                    var enemies = Army(1 - player.Id, battle).Count();
+                    var joins = enemies > 0 && !(source!.Zone == Zone.Battlefield && source.ProvinceIndex == battle) ? 1 : 0;
+                    Require(enemies > Army(player.Id, battle).Count() + joins, "The enemy must have more units at the battlefield than you once Chukage has moved.");
+                    break;
+                }
             // "if Hawado is at the current battlefield, target a Personality that performed it".
             case "hawado-exp-move-home":
             case "hawado-exp-move-battlefield":

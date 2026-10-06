@@ -159,7 +159,7 @@ public sealed partial class MatchEngine
 
     // EquipGoldCost: "Attaches to a [X] Champion ignoring costs" -- nothing is paid to attach it to a Champion it may attach to.
     private bool PromoItemsAttachesFree(CardInstance card, CardInstance wielder) =>
-        PromoEmperorItemsAbilities.FreeAttachIds.Contains(Definition(card).Id, StringComparer.Ordinal) && Definition(card).AttachRequiresKeyword is { } required && KeywordOrHuman(wielder, required);
+        (PromoEmperorItemsAbilities.FreeAttachIds.Contains(Definition(card).Id, StringComparer.Ordinal) || FavorMempoAttachesFree(card)) && Definition(card).AttachRequiresKeyword is { } required && KeywordOrHuman(wielder, required);
 
     // ---- statics -----------------------------------------------------------------------------------------------------------------------------------------------------------
 

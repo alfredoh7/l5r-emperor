@@ -206,7 +206,7 @@ public sealed partial class MatchEngine
             Emit("favorTokenDiscarded", $"{player.Name} discarded a Favor token from {Definition(keep).Name}.", player.Id, keep.Id);
             return;
         }
-        _state.FavorPlayerId = null;
+        ReleaseImperialFavor(player.Id); // issue #667 (FavorMempo.cs): the one helper every Favor discard goes through
         Emit("favorDiscarded", $"{player.Name} discarded the Imperial Favor.", player.Id);
     }
 
@@ -401,7 +401,7 @@ public sealed partial class MatchEngine
                 Emit("koshinKeep", $"{Definition(source).Name}: until this battle ends, {player.Name}'s Ranged Attacks that do not destroy their target reduce its Force by their strength and allow an additional Ranged Attack on the same card.", player.Id, source.Id);
                 return false;
             case "otomo-favor-token":
-                _state.FavorPlayerId = null;
+                ReleaseImperialFavor(player.Id); // issue #667 (FavorMempo.cs)
                 Emit("favorDiscarded", $"{player.Name} discarded the Imperial Favor.", player.Id);
                 CreateToken(source!, FavorTokenType, id);
                 return false;

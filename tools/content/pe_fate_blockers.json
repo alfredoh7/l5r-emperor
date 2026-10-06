@@ -1,30 +1,6 @@
 {
-  "oracle-l5r-6075": {
-    "note": "Profits (Strategy). Needs a payment-time optional 1-Gold reduction, a Wealth token placed on the Holding after it enters, and a Reaction Gold source that discards the card; none of the three exists as a primitive and the payment path (PaymentTokens) cannot take a discard-as-cost source.",
-    "category": "COST"
-  },
-  "oracle-l5r-10119": {
-    "note": "The Deciding Moment (Strategy). Its Open half reorders the turn (the Dynasty Phase before the Attack Phase within one turn); the phase sequence is hard wired (three transitions in SetPhase/CompleteBattleTransition) and no primitive reorders it. The Battle half (draw a card) is not wired alone, because the card is not published half-working.",
-    "category": "LOCK"
-  },
-  "oracle-l5r-9992": {
-    "note": "Through the Breach (Strategy). Needs the permanent removal of one trait or ability of a Castle Holding (the engine has only per-turn locks and total removal), and creates a 4F/2C/0PH Oni Personality for which no published CreatedOnly proxy scan exists.",
-    "category": "EFFECT"
-  },
   "oracle-l5r-9993": {
-    "note": "Wildfire (Strategy). Needs a Fortress tile model (a destroyed-Holding replacement that blocks movement); the engine has no such zone or tile.",
-    "category": "EFFECT"
-  },
-  "oracle-l5r-9985": {
-    "note": "Jade Embrace (Spell). Needs the permanent removal of one chosen ability of a card; the engine has only a per-turn ability lock (DisableAbility) and a total removal.",
-    "category": "EFFECT"
-  },
-  "oracle-l5r-9988": {
-    "note": "Sea & Sky (Spell). Needs the permanent removal of a trait or ability of a Region or Terrain; the engine has no permanent per-ability removal for those zones.",
-    "category": "EFFECT"
-  },
-  "oracle-l5r-10596": {
-    "note": "Sleep (Spell). RULES question for Mendon: are the targeted Personalities chosen after the discarded card reveals the Focus total (a sequenced multi-target: discard first, then choose) or at announcement with the total checked at resolution? The engine cannot do the first (all targets are chosen at announcement) and the second changes what the card does.",
+    "note": "REJECTED BY MENDON (2026-10-05): Wildfire is blocked on purpose; do not wire it. (It also needs a Fortress tile model that the engine does not have.)",
     "category": "RULES"
   },
   "oracle-l5r-8163": {
@@ -34,5 +10,9 @@
   "oracle-l5r-8242": {
     "note": "The Onyx Championship (Event). The granted Maho ability searches the discard pile, then the deck, then the Provinces for an Oni Personality and recruits it paying all costs; the engine's search primitive covers one source at a time and has no ordered multi-source search.",
     "category": "SEARCH"
+  },
+  "oracle-l5r-2904": {
+    "note": "REJECTED BY MENDON (2026-10-05) for complexity: Green Nightshade Blend (transfer any tokens between two Personalities, then destroy each that now holds a Fire, Poison and Sake token) is not to be wired.",
+    "category": "RULES"
   }
 }

@@ -17,13 +17,13 @@ public partial class PhaseTrack
         : RulesHelp.PhaseGuide(Phases[index]);
     private void CreateHelp()
     {
-        HelpButton = Palette.Button("?", () => ShowHelp(Math.Max(0, _active)));
+        HelpButton = Palette.Button("?", () => ShowHelp(Math.Max(0, _activeSlot)));
         HelpButton.AccessibilityName = "Current phase help";
         HelpButton.Text = ""; HelpButton.CustomMinimumSize = Vector2.Zero;
         var seal = ButtonArtwork.Extract(GD.Load<Texture2D>("res://Art/six-phase-help-reference.png"),
             new Rect2I(1200, 513, 40, 41), 16, matteThreshold: .25f);
         foreach (var state in new[] { "normal", "hover", "pressed", "focus", "disabled" }) HelpButton.AddThemeStyleboxOverride(state, new StyleBoxTexture { Texture = seal, ModulateColor = state == "disabled" ? new Color(1, 1, 1, .45f) : Colors.White });
-        HelpButton.FocusEntered += () => ShowHelp(Math.Max(0, _active));
+        HelpButton.FocusEntered += () => ShowHelp(Math.Max(0, _activeSlot));
         HelpButton.FocusExited += HideHelp;
         HelpButton.GuiInput += e => HelpInput(e, -1, HelpButton);
         AddChild(HelpButton);
@@ -40,11 +40,12 @@ public partial class PhaseTrack
     private void ShowHelp(int index)
     {
         _helpIndex = Math.Clamp(index, 0, 5);
-        _helpTitle.Text = _names[_helpIndex];
-        _helpBody.Text = _battleWithinAction && _helpIndex == 2
+        var phase = _slotPhase[_helpIndex]; // the help is the phase in this slot: a card may have switched the Attack and Dynasty Phases this turn (issue #667)
+        _helpTitle.Text = _names[phase];
+        _helpBody.Text = _battleWithinAction && phase == 2
             ? "A card has started a battle during the Action Phase. Take the Battle actions offered by the game. The Action Phase resumes when this battle finishes."
-            : SegmentHelp(_helpIndex);
-        _helpContext.Text = _turnContext + " · Esc to close";
+            : SegmentHelp(phase);
+        _helpContext.Text = _turnContext + (ReorderedThisTurn ? " · phases reordered this turn" : "") + " · Esc to close";
         var pixelScale = Math.Max(.01f, GetGlobalTransformWithCanvas().Scale.X);
         var textScale = Math.Max(1, 1 / pixelScale);
         _helpTitle.AddThemeFontSizeOverride("font_size", (int)(22 * textScale));

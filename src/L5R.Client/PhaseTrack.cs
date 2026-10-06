@@ -9,6 +9,19 @@ public partial class PhaseTrack : Control
     private readonly string[] _names = ["STRAIGHTEN", "EVENTS", "ACTION", "ATTACK", "DYNASTY", "END"];
     private readonly float[] _weights = new float[6];
     private int _active = -1;
+    // Issue #667 (the phase-order marker): a turn may run its Dynasty Phase before its Attack Phase. The medallions are fixed positions ("slots") on the rail; the engine's order (MatchView.PhaseOrder,
+    // null for the usual one) says which phase is in which slot, and the phase names slide between slots when it changes -- and slide back when the engine puts the usual order back.
+    private readonly int[] _slotPhase = [0, 1, 2, 3, 4, 5]; // slot -> phase (an index of _names)
+    private readonly float[] _labelPos = [0, 1, 2, 3, 4, 5]; // phase -> where its name is now, in (fractional) slots
+    private readonly float[] _labelFrom = [0, 1, 2, 3, 4, 5];
+    private int _activeSlot = -1;
+    private bool _orderPresented;
+    private const float LabelSlotsPerSecond = 2.2f;
+    public bool LabelsSettled => Enumerable.Range(0, 6).All(p => Mathf.IsEqualApprox(_labelPos[p], SlotOf(p)));
+    public string PhaseAtSlot(int slot) => _names[_slotPhase[slot]];
+    public int ActiveSlot => _activeSlot;
+    public float LabelPosition(int phase) => _labelPos[phase];
+    private int SlotOf(int phase) => Array.IndexOf(_slotPhase, phase);
     private float _time;
     public Label PriorityLabel { get; private set; } = null!;
     private Color _priorityColor = Palette.Crane;
@@ -95,9 +108,11 @@ public partial class PhaseTrack : Control
         TurnCue.Present(view);
         TurnCue.ReducedMotion = ReducedMotion;
         _battleWithinAction = view.WinnerId is null && view.Phase != Phase.Finished && view.ActionPhaseTurnPlayerId is not null;
+        ApplyOrder(view.PhaseOrder);
         var next = SegmentFor(_battleWithinAction ? Phase.Action : view.Phase);
-        if (_active < 0 && next >= 0) _weights[next] = 1;
-        _active = next;
+        var nextSlot = next < 0 ? -1 : SlotOf(next);
+        if (_activeSlot < 0 && nextSlot >= 0) _weights[nextSlot] = 1;
+        _active = next; _activeSlot = nextSlot;
         HelpButton.Disabled = next < 0;
         _turnContext = $"Turn {view.TurnNumber} · {view.Players.Single(p => p.Id == (view.ActionPhaseTurnPlayerId ?? view.ActivePlayerId)).Clan}";
         if (_areas.Count == 0)
@@ -114,19 +129,43 @@ public partial class PhaseTrack : Control
                 area.GuiInput += e => HelpInput(e, index, area);
                 AddChild(area); _areas.Add(area);
             }
+        for (var slot = 0; slot < _areas.Count; slot++) { _areas[slot].AccessibilityName = _names[_slotPhase[slot]] + " phase help"; _areas[slot].AccessibilityDescription = SegmentHelp(_slotPhase[slot]); }
         if (_help.Visible) ShowHelp(_helpIndex);
         FitArtwork();
         UpdateArt();
+    }
+    // The order the engine says this turn runs in: unknown or malformed orders are the usual one. The first presentation, and any presentation in reduced motion, puts the names in place at once.
+    private void ApplyOrder(string[]? order)
+    {
+        var phases = order is { Length: 6 } ? order.Select(name => Array.IndexOf(_names, name.ToUpperInvariant())).ToArray() : null;
+        if (phases is null || phases.Distinct().Count() != 6 || phases.Any(p => p < 0)) phases = [0, 1, 2, 3, 4, 5];
+        if (!phases.SequenceEqual(_slotPhase))
+        {
+            for (var p = 0; p < 6; p++) _labelFrom[p] = _labelPos[p];
+            Array.Copy(phases, _slotPhase, 6);
+            ReorderedThisTurn = order is not null;
+        }
+        if (!_orderPresented || ReducedMotion) SnapLabels();
+        _orderPresented = true;
+    }
+    private void SnapLabels() { for (var p = 0; p < 6; p++) { _labelPos[p] = SlotOf(p); _labelFrom[p] = _labelPos[p]; } }
+    public bool ReorderedThisTurn { get; private set; }
+    private float CenterAt(float slot)
+    {
+        var low = Mathf.Clamp(Mathf.FloorToInt(slot), 0, 5); var high = Math.Min(5, low + 1);
+        return Mathf.Lerp(_centers[low], _centers[high], Mathf.Clamp(slot - low, 0, 1));
     }
     public override void _Process(double delta)
     {
         TurnCue.ReducedMotion = ReducedMotion;
         if (_hoverIndex >= 0) { _hoverTime += (float)delta; if (_hoverTime >= .25f && !_help.Visible) ShowHelp(_hoverIndex); }
         PlaceHelp();
-        if (ReducedMotion && _weights.Select((weight, i) => weight == (i == _active ? 1 : 0)).All(settled => settled)) return;
+        if (ReducedMotion && !LabelsSettled) { SnapLabels(); QueueRedraw(); }
+        if (ReducedMotion && _weights.Select((weight, i) => weight == (i == _activeSlot ? 1 : 0)).All(settled => settled)) return;
         _time += (float)delta;
         for (var i = 0; i < 6; i++)
-            _weights[i] = ReducedMotion ? (i == _active ? 1 : 0) : Mathf.MoveToward(_weights[i], i == _active ? 1 : 0, (float)delta / .45f);
+            _weights[i] = ReducedMotion ? (i == _activeSlot ? 1 : 0) : Mathf.MoveToward(_weights[i], i == _activeSlot ? 1 : 0, (float)delta / .45f);
+        for (var p = 0; p < 6; p++) _labelPos[p] = Mathf.MoveToward(_labelPos[p], SlotOf(p), (float)delta * LabelSlotsPerSecond);
         UpdateArt();
     }
     public void PresentLight(float time, bool animate)
@@ -135,7 +174,7 @@ public partial class PhaseTrack : Control
         ReducedMotion = !animate;
         TurnCue.ReducedMotion = ReducedMotion;
         PlaceHelp();
-        if (ReducedMotion) for (var i = 0; i < 6; i++) _weights[i] = i == _active ? 1 : 0;
+        if (ReducedMotion) { for (var i = 0; i < 6; i++) _weights[i] = i == _activeSlot ? 1 : 0; SnapLabels(); }
         UpdateArt();
     }
     private void UpdateArt()
@@ -162,9 +201,12 @@ public partial class PhaseTrack : Control
         var baseline = _plate.Size.Y * .48f;
         for (var i = 0; i < 6; i++)
         {
-            var color = new Color("bca477").Lerp(new Color("f6dbad"), Mathf.SmoothStep(0, 1, _weights[i]));
+            // Phase i's name: lit with its slot, drawn where it is now (sliding between slots when the order changes; the two names that swap pass over and under each other).
+            var color = new Color("bca477").Lerp(new Color("f6dbad"), Mathf.SmoothStep(0, 1, _weights[SlotOf(i)]));
             var labelWidth = _plate.Size.X * .15f;
-            var position = new Vector2(_plate.Position.X + _centers[i] * _plate.Size.X - labelWidth / 2, baseline);
+            var travel = Mathf.Abs(SlotOf(i) - _labelFrom[i]);
+            var lift = travel < .001f || ReducedMotion ? 0 : Mathf.Sin(Mathf.Pi * Mathf.Clamp(1 - Mathf.Abs(SlotOf(i) - _labelPos[i]) / travel, 0, 1)) * _plate.Size.Y * .17f * (SlotOf(i) > _labelFrom[i] ? -1 : 1);
+            var position = new Vector2(_plate.Position.X + CenterAt(_labelPos[i]) * _plate.Size.X - labelWidth / 2, baseline + lift);
             DrawString(Palette.Title, position + new Vector2(0, 2), _names[i], HorizontalAlignment.Center, labelWidth, fontSize, new Color(0, 0, 0, .8f));
             DrawString(Palette.Title, position, _names[i], HorizontalAlignment.Center, labelWidth, fontSize, color);
         }

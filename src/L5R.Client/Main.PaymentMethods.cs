@@ -9,8 +9,17 @@ public partial class Main
         Self.Home.Concat(Self.Army).Append(Self.Stronghold).Where(c => !c.Bowed && Production(c, Self) > 0)
             .Select(c => new PaymentSource(c.Id, c.Id, "bow", $"Bow this card: {Production(c, Self)} Gold", Production(c, Self))).ToArray();
 
+    // "reduce" (issue #667, Profits: "reduce the total Gold produced by 1") is the one method that produces less than zero.
     private static bool PaymentMethodUnderstood(PaymentSource method) =>
-        method.Produced > 0 && method.Kind is "bow" or "produce" or "reaction" or "destroy" or "discount";
+        (method.Produced > 0 || method.Kind == "reduce" && method.Produced < 0) && method.Kind is "bow" or "produce" or "reaction" or "destroy" or "discount" or "reduce";
+
+    // Hovering (or focusing) a payment method highlights the card it belongs to, so each Profits in play names its own card.
+    private string? _hoveredPaymentCardId;
+    private void HoverPaymentCard(string? cardId)
+    {
+        if (_hoveredPaymentCardId == cardId) return;
+        _hoveredPaymentCardId = cardId; Highlight();
+    }
 
     private bool PaymentSelectionReady(int required, GoldQuote quote)
     {
@@ -65,6 +74,8 @@ public partial class Main
                     _inspector.FindChildren("*", "CheckBox", true, false).OfType<CheckBox>()
                         .FirstOrDefault(c => c.GetMeta("payment_source_id", "").AsString() == method.Id)?.CallDeferred(Control.MethodName.GrabFocus);
                 };
+                check.MouseEntered += () => HoverPaymentCard(method.CardId); check.MouseExited += () => HoverPaymentCard(null);
+                check.FocusEntered += () => HoverPaymentCard(method.CardId); check.FocusExited += () => HoverPaymentCard(null);
                 body.AddChild(check);
             }
         }
@@ -78,7 +89,7 @@ public partial class Main
         var ready = PaymentSelectionReady(required, quote);
         lines.AddChild(Palette.Wrapped(ready ? gold == Math.Max(0, required - reduction) ? "Exact payment" : "Cost covered · excess reviewed by the engine" :
             picked.Any(m => m.ConflictingSourceIds?.Any(_sources.Contains) == true) ? "Choose one of the conflicting methods" : "Choose more payment sources", 16, ready ? Palette.Gold : Palette.Error));
-        foreach (var method in picked.Where(m => m.Kind is "destroy" or "discount" or "produce" or "reaction"))
+        foreach (var method in picked.Where(m => m.Kind is "destroy" or "discount" or "produce" or "reaction" or "reduce"))
             lines.AddChild(Palette.Wrapped(method.Label, 15, Palette.PaperDim));
         lines.AddChild(Palette.Wrapped("Sources are committed only when you confirm.", 14, Palette.PaperDim));
     }

@@ -13,4 +13,5 @@ internal static partial class EngineHooks
     internal static readonly OrderedHooks<Func<MatchEngine, MatchEngine.PersonalityForceContext, int>> PersonalityForce = new();
     internal static readonly OrderedHooks<Func<MatchEngine, MatchEngine.ProvinceBonusContext, int>> ProvinceBonus = new();
     internal static readonly OrderedHooks<Func<MatchEngine, MatchEngine.TargetedReactionContext, bool>> TargetedReaction = new();
+    internal static readonly OrderedHooks<Func<MatchEngine, MatchEngine.ExtraUsesContext, int>> ExtraUsesPerTurn = new();
 }

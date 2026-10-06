@@ -52,7 +52,8 @@ public sealed partial class MatchEngine
             TargetIds = targetIds?.Distinct().ToList() ?? [],
             HonorLosers = _state.CurrentActionHonorLosers,
             HandRecipients = _state.CurrentActionHandRecipients,
-            FavorTakers = _state.CurrentActionFavorTakers
+            FavorTakers = _state.CurrentActionFavorTakers,
+            FavorDiscarders = TakeFavorDiscarders() // issue #667 (FavorMempo.cs)
         };
         QueueP1AfterActionTraits(_state.LastResolvedAction); // Issue #503 (EmperorP1.cs): Osote's owed discard is due, Bakishi's shield drops, Tamisu's and Shichiro's traits are queued.
         NoteHonorLostToOtherAction(playerId, _state.CurrentActionHonorLosers); // Kitsu Tamasine (issue #477, batch 5)
@@ -106,12 +107,14 @@ public sealed partial class MatchEngine
     private bool AfterActionResolvedApplies(CardInstance source, string abilityId, int playerId)
     {
         if (_state.LastResolvedAction is not { } facts || source.OwnerId != playerId) return false;
+        if (FavorMempoAfterActionApplies(source, abilityId, playerId, facts) is { } favorAfter) return favorAfter; // issue #667 (FavorMempo.cs): after you discard the Imperial Favor, and a negated Favor action's record
         // Hida Takeuchi (Emperor Edition Personality pass, issue #477 batch 2): "After the resolution of an action that attached a Follower from your hand to Takeuchi" -- any action,
         // Equip (a universal player action with no catalog entry) included, so it is read before the per-ability-id switch that indexes the catalog by the action's id.
         if (abilityId == "takeuchi-draw") return ActionAttachedFollowerFromHandTo(source, playerId);
         // Chrysanthemum Blossom (Emperor Edition remaining-cards pass, issue #492 group G): "After this Personality is assigned" -- the assignment command's own record, not a catalogued action.
         if (abilityId == "chrysanthemum-blossom-boost") return ChrysanthemumBlossomApplies(source, playerId, facts);
         if (PromoAfterActionApplies(source, abilityId, playerId, facts) is { } promoAfter) return promoAfter; // Closing the Gap (issue #653, PromoEmperorFateReactions.cs)
+        if (PerformersAmbushApplies(source, abilityId, playerId, facts) is { } performersAmbush) return performersAmbush; // Lying in Ambush (issue #667, PerformersAmbush.cs)
         if (WithoutMercyApplies(source, abilityId, playerId, facts) is { } withoutMercy) return withoutMercy; // issue #648 (WithoutMercy.cs): a Battle action by your Samurai that targeted no enemy card
         if (PromoItemsAfterActionApplies(source, abilityId, playerId, facts) is { } promoItemsAfter) return promoItemsAfter; // The Ivory Sword (PromoEmperorItems.cs): an action by a dishonorable Personality who opposed it
         if (P3AssignmentOrActionApplies(source, abilityId, facts) is { } p3Assigned) return p3Assigned; // Utaku Tairu - exp (issue #503): "after a Personality assigns or moves"
