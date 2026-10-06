@@ -1,0 +1,74 @@
+[
+  {
+    "card_id": "oracle-l5r-10690",
+    "printing_set": [
+      "Gates of Chaos"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10690",
+    "image_path": "assets/reference/oracle/gates-of-chaos/webp/oracle-l5r-10690-printing-1-image-1.webp",
+    "image_sha256": "5804e295a57b62133d270a30df63c45ec67dd9b8024e36ed9ffe6e0fba6a66c2"
+  },
+  {
+    "card_id": "oracle-l5r-10341",
+    "printing_set": [
+      "Torn Asunder"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10341",
+    "image_path": "assets/reference/oracle/torn-asunder/webp/oracle-l5r-10341-printing-1-image-1.webp",
+    "image_sha256": "c55c47cb5eec5c127b908fb27cff74d79ee73d5c6934901c29644d6ab2967230"
+  },
+  {
+    "card_id": "oracle-l5r-10905",
+    "printing_set": [
+      "Aftermath"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10905",
+    "image_path": "assets/reference/oracle/aftermath/webp/oracle-l5r-10905-printing-1-image-1.webp",
+    "image_sha256": "42b26c0726bcc1752b9a1a5492b587f707397be8240a8e79ebb042f14ce697ec"
+  },
+  {
+    "card_id": "oracle-l5r-10527",
+    "printing_set": [
+      "Coils of Madness"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10527",
+    "image_path": "assets/reference/oracle/coils-of-madness/webp/oracle-l5r-10527-printing-1-image-1.webp",
+    "image_sha256": "f5194702f9d6e57f38f44ec69a23f43fe4bf9e9731cc3af7fe6833ebb3566d0c"
+  },
+  {
+    "card_id": "oracle-l5r-10530",
+    "printing_set": [
+      "Coils of Madness"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10530",
+    "image_path": "assets/reference/oracle/coils-of-madness/webp/oracle-l5r-10530-printing-1-image-1.webp",
+    "image_sha256": "dc3c0d10f2dc61aae4645840850ad3d27747a686bed53182908150d4d0d7181d"
+  },
+  {
+    "card_id": "oracle-l5r-10343",
+    "printing_set": [
+      "Torn Asunder"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10343",
+    "image_path": "assets/reference/oracle/torn-asunder/webp/oracle-l5r-10343-printing-1-image-1.webp",
+    "image_sha256": "ac910a50134ee022ea8fe50d65e952bdba79b5b6508e00ba8c7fc6ed3ba62458"
+  },
+  {
+    "card_id": "oracle-l5r-10344",
+    "printing_set": [
+      "Torn Asunder"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10344",
+    "image_path": "assets/reference/oracle/torn-asunder/webp/oracle-l5r-10344-printing-1-image-1.webp",
+    "image_sha256": "516ba7654c9742c87b8215b06bad61ac1f38f4c08498021785eec68252319ca9"
+  },
+  {
+    "card_id": "oracle-l5r-10698",
+    "printing_set": [
+      "Gates of Chaos"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10698",
+    "image_path": "assets/reference/oracle/gates-of-chaos/webp/oracle-l5r-10698-printing-1-image-1.webp",
+    "image_sha256": "2e6019824ea5ea44bc6855ace61ac97b0432b3dd27d026fd81682423da9e928a"
+  }
+]

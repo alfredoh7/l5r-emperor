@@ -3945,6 +3945,7 @@ public sealed partial class MatchEngine
             return false;
         if (printedOrGranted) return true;
         if (keyword == "Naval" && PromoEmperorNaval(card)) return true; // Suitengu's Blessing (issue #653): Naval while the Celestial remains in play
+        if (WlItemsMiscKeywordGranted(card, keyword)) return true; // Hachiman's Prowess (issue #674, WlItemsMiscCelestials.cs): Elite while the Celestial remains in play
         // Isawa Kojiro (oracle-l5r-3850, issue #301): "Kojiro has Naval while he has a Spell" -- the same
         // additive live conditional grant Tamori Yayu's Cavalry below is, re-evaluated on every call so
         // it appears the moment a Spell attaches and disappears the moment it leaves (destroyed,
@@ -6503,6 +6504,9 @@ public sealed partial class MatchEngine
                     ValidateP5ZoneOutOfPlayTarget(ability.Target, player, target);
                 else if (IsEmperorRemainingEOutOfPlayTarget(ability.Target))
                     ValidateEmperorRemainingEOutOfPlayTarget(ability.Target, player, target);
+                // Issue #674 (WlItemsMiscCelestials.cs): The Ways of Sensei Wu's "a Battle Strategy from your discard pile".
+                else if (WlItemsMiscIsOutOfPlayTarget(ability.Target))
+                    Require(WlItemsMiscOutOfPlayTargetAllows(player, target), "Choose a Battle Strategy from your discard pile.");
                 else
                 {
                     Require(InPlay(target), "Target a card in play.");
