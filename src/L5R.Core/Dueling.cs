@@ -547,6 +547,7 @@ public sealed partial class MatchEngine
             // The Shadow's Embrace pass (issue #476), batch 1: Kakita Tadanobu (ShadowsEmbraceBatch1.cs).
             case "tadanobu-duel-battle": case "tadanobu-duel-limited": TadanobuDuelOutcome(winnerId, loserIds, challengerPlayerId); break;
             case TfStrategiesAAbilities.WitnessDuel: TfWitnessDuelOutcome(winnerId, loserIds, challengerPlayerId); break; // Awed Witness (issue #622)
+            case WlStratTornAbilities.EyeDuel: WlEyeDuelOutcome(winnerId, loserIds, challengerPlayerId); break; // Eye of the Sword (issue #674, WlStratTornRun.cs)
             case "reckless-duel":
                 foreach (var id in loserIds)
                 {
