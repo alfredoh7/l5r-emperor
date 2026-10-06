@@ -73,3 +73,5 @@ interpretation this register's decision docs already settled.
 - [674 strat-gates: eighteen Gates of Chaos Strategies (strategy-wave-119)](2026-10-06-674-strat-gates.md) — proposed readings built in for the #674 WIRE-list wave (strat-gates); Mendon to confirm.
 
 - [Cluster strat-torn (issue #674): nineteen Torn Asunder Strategies, strategy-wave-118](2026-10-06-674-strat-torn.md) — proposed readings built in for the #674 WIRE-list wave (strat-torn); Mendon to confirm.
+
+- [Created-card proxies in the Ivory frame, and the creators they unblock (issue #677)](2026-10-06-677-created-card-proxies.md) — Mendon's ruling of 2026-10-06 (the Ivory frame is accepted; an exact Oracle proxy is preferred to a manufactured scan), seventeen proxies published, eighteen creators wired, five left with a precise gap; readings for Mendon to confirm.

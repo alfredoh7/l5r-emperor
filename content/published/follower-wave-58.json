@@ -1,0 +1,132 @@
+{
+  "Profile": "follower-wave-58",
+  "Rules": "Emperor Edition core rules; reviewed created-card proxy scans and their creators (issue #677).",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10336",
+      "Name": "Goju Kaxt",
+      "Type": "Follower",
+      "Clan": "Unaligned",
+      "GoldCost": 6,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Other Ninja in this army have +1F.\nAfter an action resolves during which this card was destroyed: Create a 4F/3C/0PH Ninja Personality with your Clan alignment at any location.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10336.jpg",
+      "Keywords": [
+        "Ninja"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "proxy677-kaxt-create-home",
+        "proxy677-kaxt-create-battle"
+      ],
+      "Effect": "proxy677-kaxt-ninja-force"
+    },
+    {
+      "Id": "oracle-l5r-11332",
+      "Name": "Clay Yojimbo",
+      "Type": "Follower",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 1,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "(This is a proxy for a created card. It is not considered to have a title and cannot be included in decks.)",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-11332.jpg",
+      "Keywords": [
+        "Clay Soldier",
+        "Nonhuman",
+        "Yojimbo"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "none",
+      "CreatedOnly": true
+    },
+    {
+      "Id": "oracle-l5r-11337",
+      "Name": "Little Elephant",
+      "Type": "Follower",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 1,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "(This is a proxy for a created card. It is not considered to have a title and cannot be included in decks.)",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-11337.jpg",
+      "Keywords": [
+        "Cavalry",
+        "Elephant",
+        "Nonhuman"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "none",
+      "CreatedOnly": true
+    },
+    {
+      "Id": "oracle-l5r-10815",
+      "Name": "Renyu's Dog",
+      "Type": "Follower",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 1,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10815.jpg",
+      "Keywords": [
+        "Dog",
+        "Nonhuman"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "none",
+      "CreatedOnly": true
+    },
+    {
+      "Id": "oracle-l5r-9745",
+      "Name": "Disposable Troops",
+      "Type": "Follower",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "May not be included in decks.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9745.jpg",
+      "Keywords": [],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "none",
+      "CreatedOnly": true
+    }
+  ],
+  "Decks": []
+}

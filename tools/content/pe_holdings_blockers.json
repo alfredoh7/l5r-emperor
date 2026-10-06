@@ -1,8 +1,4 @@
 {
-  "oracle-l5r-10757": {
-    "note": "The Onyx Dueling Circle (Holding, issue #653): blocked only by the Personality it creates. \"Destroy your target Shugenja. Create a 5F/2C/0PH Nonhuman - Oni - Shadowlands Personality. Destroy this Holding. Lose 4 Honor\" needs a CreatedOnly Proxy scan of that 5F/2C/0PH Oni; none exists locally and docs/requests/created-card-scans-needed.md row B12 is unticked. Akuma's Power (celestial-wave-2) creates a 9F/5C Oni from a different scan, which may not stand in for it.",
-    "category": "SCAN"
-  },
   "oracle-l5r-2391": {
     "note": "Ever-Winter Copse (Holding, issue #653): \"When another Holding produces Gold to pay for a Nonhuman, bow this card: Produce 1 Gold\" is a payment source whose availability depends on which OTHER producers the payer has chosen for the same payment, and which bows its own card. The payment tokens (EmperorMechE.cs PaymentTokens/UsePaymentTokens) are computed for a payment before any source is chosen, their use never bows their card, and there is no extension point for a condition on the chosen set of sources or for a token kind that bows; adding either means editing the shared payment code, not a feature file.",
     "category": "COST"
