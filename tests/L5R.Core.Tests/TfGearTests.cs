@@ -665,6 +665,7 @@ internal static class TfGearTests
         var u = Table(Phase.Battle, 0);
         var ush = Add(u, "training-shugenja", 0, Zone.Battlefield, province: 0); var usp = Attach(u, StealTheFlame, ush);
         var weak = Add(u, Crane, 1, Zone.Battlefield, province: 0); Batch336Support.Force(weak, -1);        // Force 2
+        Add(u, "training-attack-reactor", 0, Zone.Home); // a second Reaction keeps the window open once the Interrupt is played, so the strength can be read (issue #644)
         var ue = MatchEngine.FromTestState(u);
         Accept(ue, Offer(ue, 0, TfGearAbilities.StealAttack, usp.Id, weak.Id));
         Accept(ue, Enabled(ue, 0, TfGearAbilities.StealInterrupt, usp.Id).Command!);
@@ -677,6 +678,7 @@ internal static class TfGearTests
         var t = Table(Phase.Battle, 1);
         var archer = Add(t, Lion, 1, Zone.Battlefield, province: 0); var bow = Attach(t, TsuruchiDaikyu, archer);
         var guarded = Add(t, Crane, 0, Zone.Battlefield, province: 0); var sh = Add(t, "training-shugenja", 0, Zone.Battlefield, province: 0); var sp = Attach(t, StealTheFlame, sh);
+        Add(t, "training-attack-reactor", 0, Zone.Home); // a second Reaction keeps the window open once the Interrupt is played, so the strength can be read (issue #644)
         var te = MatchEngine.FromTestState(t);
         Accept(te, Use(te, 1, "tsuruchi-daikyu-attack", bow.Id, guarded.Id));
         Eq(te.State.PendingChoice?.Type, "attackReaction", "the Attack is pending");

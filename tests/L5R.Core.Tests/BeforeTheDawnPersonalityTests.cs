@@ -211,6 +211,7 @@ internal static class BeforeTheDawnPersonalityTests
         foreach (var react in new[] { false, true })
         {
             var k = Battle(); var kaname2 = Bf(k, Kaname, 0); var target1 = Bf(k, "training-lion-samurai", 1); Force(target1, -CardCatalog.Get("training-lion-samurai").Force + 1);
+            Bf(k, "training-attack-reactor", 0); // a second Reaction keeps the window open once Kaname's is played, so the strength can be read (issue #644)
             var ke = MatchEngine.FromTestState(k);
             Accept(ke, Offer(ke, 0, "kaname-ranged-attack", kaname2.Id, target1.Id));
             Eq(ke.State.PendingChoice?.Type, "attackReaction", "the Ranged Attack opens its window");
@@ -224,6 +225,7 @@ internal static class BeforeTheDawnPersonalityTests
             var u = Battle(); u.ActivePlayerId = 1; u.PriorityPlayerId = 1;
             var shooter = Bf(u, Yashiro, 1); var umiko = Bf(u, Umiko, 0); var victim = Bf(u, "training-crane-samurai", 0); Force(victim, -CardCatalog.Get("training-crane-samurai").Force + 4);
             u.Players[0].Provinces[0].Reconnaissance[1] = true;
+            Bf(u, "training-attack-reactor", 0); // a second Reaction keeps the window open once Umiko's is played, so the strength can be read (issue #644)
             var ue = MatchEngine.FromTestState(u);
             Accept(ue, Offer(ue, 1, "yashiro-attack", shooter.Id, victim.Id));
             var seen = -1;

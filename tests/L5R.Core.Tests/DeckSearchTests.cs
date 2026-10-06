@@ -539,7 +539,7 @@ internal static class DeckSearchTests
         Equal(e.State.PendingChoice?.Type, "bowReaction", "Ruya may react to Shizuka's action having bowed a Personality"); Equal(e.State.PendingChoice?.CardId, ruya.Id);
         AssertOrder(e, "searchPassed", "deckShuffled", "reactionWindow");
         Equal(e.State.PriorityPlayerId, 0);
-        Accept(e, new("declineReaction", 0, e.Version)); Accept(e, new("declineReaction", 1, e.Version));
+        Accept(e, new("declineReaction", 0, e.Version)); // the opponent holds nothing to react with, so this one pass closes the window (issue #644)
         Equal(e.State.PendingChoice, null); Equal(e.State.PriorityPlayerId, 1, "The action resolved and priority passed on once the window closed");
 
         // Without such a watcher there is no window (nothing changes for every other search).

@@ -137,10 +137,8 @@ internal static partial class EmperorRemainingATests
             Check(!e.QueryActions(1).Any(a => a.Type == "useAbility" && a.Enabled && a.Command?.AbilityId == "bend-reed-boost"), "the player who struck holds no such reaction");
             var play = e.QueryActions(0).First(a => a.Type == "useAbility" && a.Enabled && a.Command?.AbilityId == "bend-reed-boost" && a.CardId == bend1.Id);
             Accept(e, play.Command!);
-            Eq(e.State.PendingDuel!.StatBonuses[mine.Id], 2, "+2 to his duel stat");
-            Decline(e); // the other player passes; the opportunity comes back
-            Check(!Batch336Support.Options(e, 0, "bend-reed-boost", bend2.Id).Any(o => o.Enabled), "only one copy of Bend like a Reed per duel");
-            Decline(e);
+            // Issue #644: the other copy may not also be played in this duel and the opponent holds no reaction, so nobody is asked to pass: the window closes and the duel resolves.
+            Check(e.State.PendingChoice is null, "only one copy of Bend like a Reed per duel: nothing else is offered, so the window closed");
             Eq(e.State.Cards[theirs.Id].Zone, Zone.Dead, "with +2 the tie became a win: the loser was destroyed");
             Eq(e.State.Cards[mine.Id].Zone, Zone.Battlefield, "and his Personality survived");
             Eq(e.State.Cards[bend1.Id].Zone, Zone.FateDiscard, "the copy was discarded");

@@ -67,6 +67,8 @@ internal static class BattleRulingsRound2Tests
         => new("useAbility", player, e.Version, CardId: card, AbilityId: ability, PerformerId: performer, TargetId: target);
     private static void Pass(MatchEngine e, int? player = null) => Accept(e, Cmd(e, "pass", player));
     private static void Decline(MatchEngine e, int? player = null) => Accept(e, Cmd(e, "declineReaction", player));
+    // Passes for whoever still holds a reaction until the window closes (issue #644: a player with none is never asked to pass, so how many passes it takes depends on who holds one).
+    private static void DeclineAll(MatchEngine e) { for (var guard = 0; guard < 6 && e.State.PendingChoice is not null; guard++) Decline(e); }
     private static BattleStepView Step(MatchEngine e, int viewer = 0) => e.GetView(viewer).BattleStep!;
     private static ActionOption[] Offered(MatchEngine e, int player, string type) => e.QueryActions(player).Where(o => o.Type == type).ToArray();
     // Takes the offered command (never a hand-built one) for an action of this type, optionally narrowed.
@@ -493,12 +495,11 @@ internal static class BattleRulingsRound2Tests
         Accept(e, Use(e, 0, "ruya-bow", ruya.Id, target: second.Id));
         Eq(e.State.PendingChoice?.Type, "bowReaction"); Eq(e.State.PendingChoice?.CardId, hizumi.Id, "Ruya's Reaction bowed a Personality: Hizumi's window opens over hers");
         Eq(e.State.SuspendedWindows.Count, 1); Eq(e.State.SuspendedWindows[0].Choice, window, "hers is set aside, exactly as it was");
-        Decline(e); Decline(e);
-        Eq(e.State.PendingChoice, window, "and comes back"); Eq(e.State.SuspendedWindows.Count, 0);
+        Decline(e); // Hizumi's controller passes; Ruya's side holds nothing to react with here, so his window closes
+        // Issue #644: Ruya's window comes back (nothing is left suspended) but she has spent her use and holds nothing else: it is closed rather than offered to be passed.
+        Eq(e.State.SuspendedWindows.Count, 0);
         Check(e.State.Cards[second.Id].Bowed, "Ruya's Reaction resolved");
-        // Ruya has spent her use: her own Reaction's bow did not reopen her window over itself.
-        Decline(e); Decline(e);
-        Check(e.State.PendingChoice is null, "closed on two passes");
+        Check(e.State.PendingChoice is null, "her own Reaction's bow did not reopen her window over itself, and it has nothing left to offer");
     }
 
     private static void DeferredReactionResolvesInItsWindow()
@@ -635,20 +636,20 @@ internal static class BattleRulingsRound2Tests
             Eq(r.E.State.PendingAttack!.Command!.CardId, r.Source.Id, $"{sourceDef}: the pending Attack keeps the card the ability is printed on");
             Eq(r.E.State.PendingAttack.SourceId, CardCatalog.Get(sourceDef).Type == CardType.Follower ? r.Source.Id : r.Performer.Id, $"{sourceDef}: and still the performer (a Follower performs its own action; an Item or Spell's is performed by its wielder)");
             Eq(ReconBonuses(r), 0, "announced, not resolved: no bonus yet");
-            Decline(r.E); Decline(r.E);
+            DeclineAll(r.E);
             Eq(ReconBonuses(r), 1, $"{sourceDef}: the source card's Recon keyword makes the deferred Attack a Recon action when it resolves");
         }
         // The Personality-only case: a Recon Personality's own ability.
         var own = BuildAttack("training-recon-attacker", "training-recon-attacker");
         Accept(own.E, Use(own.E, 0, "training-weapon-attack", own.Source.Id, target: own.Target.Id));
         Eq(own.E.State.PendingAttack!.Command!.CardId, own.Source.Id); Eq(ReconBonuses(own), 0);
-        Decline(own.E); Decline(own.E);
+        DeclineAll(own.E);
         Eq(ReconBonuses(own), 1, "a Personality's own Recon keyword still makes its Attack a Recon action");
         // The performer's keywords are NOT the ability's: a plain weapon wielded by a Recon Personality is no Recon action.
         var plain = BuildAttack("training-weapon-with-attack", "training-recon-attacker");
         Accept(plain.E, Use(plain.E, 0, "training-weapon-attack", plain.Source.Id, target: plain.Target.Id));
         Eq(plain.E.State.PendingAttack!.Command!.CardId, plain.Source.Id); Eq(plain.E.State.PendingAttack.SourceId, plain.Performer.Id);
-        Decline(plain.E); Decline(plain.E);
+        DeclineAll(plain.E);
         Eq(ReconBonuses(plain), 0, "an ability inherits the keywords of the card it is on, not of whoever performs it");
         // Synchronous actions agree: the same weapon, nothing able to react, resolves at once and is still a Recon action by its own card.
         var s = Selection(); s.Phase = Phase.Battle; s.CurrentBattleProvince = 0; s.PriorityPlayerId = 0;

@@ -219,7 +219,7 @@ internal static partial class EmperorRemainingFTests
         var boost = e.QueryActions(0).FirstOrDefault(o => o.Command?.AbilityId == "falling-rain-boost" && o.Enabled);
         Check(boost is not null, "Falling Rain Dojo's Reaction is offered: " + string.Join("; ", e.QueryActions(0).Select(o => o.Label)));
         Accept(e, boost!.Command!);
-        Eq(e.State.PendingDuel?.StatBonuses.GetValueOrDefault(duelist.Id), 1, "+1 to his duel stat");
+        // Issue #644: nobody holds another reaction, so the window closes at once and the duel goes on; the +1 is read from the resolved duel below.
         Check(!e.QueryActions(0).Any(o => o.Command?.AbilityId == "falling-rain-boost" && o.Enabled), "once per turn");
         for (var guard = 0; e.State.PendingDuel is not null && guard < 12; guard++)
             Accept(e, e.State.PendingChoice?.Type == "duelReaction" ? new GameCommand("declineReaction", e.State.PriorityPlayerId, e.Version) : new GameCommand("strike", e.State.PriorityPlayerId, e.Version));

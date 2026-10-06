@@ -581,6 +581,7 @@ internal static class ShadowsEmbraceBatch1Tests
         var fumiko = Bf(s, Fumiko, 0);
         var haruma = Bf(s, Haruma, 0); var spell = Add(s, PlainSpell().Id, 0, Zone.Attached, province: 0, parent: haruma.Id);
         var prey = Bf(s, Lion, 1);
+        Bf(s, "training-attack-reactor", 0); // a second Reaction keeps the window open once Fumiko's is played, so the strength can be read (issue #644)
         var e = MatchEngine.FromTestState(s);
         var honor = Honor(e, 0);
         Accept(e, Offer(e, 0, "haruma-attack", haruma.Id, prey.Id, spell.Id));

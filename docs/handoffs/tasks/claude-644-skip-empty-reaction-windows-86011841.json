@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "A player who holds no legal Reaction is never asked to pass: after a Reaction resolves (or a pass) in any alternating reaction window (proclaim/entry, bow, move, Nikutai, attack, duel, duel-won, after-resolution, after-action-resolved, after-battle recruit, battle-action) priority goes to the other player only if they hold a legal Reaction, else the window closes through CloseReactionWindow and play continues. Generalises CloseEntryWindowIfSpent into SettleReactionWindow in Core; no client-side skip. Accepted hidden-information leak: the timing reveals that a player held nothing to react with (same as #639/#644 for Proclaim/entry). Updated ~30 existing Core test fixtures whose only expectation was a Pass offered with nothing to react with; added reaction-window-settle suite.",
+  "validation": "bash tools/check.sh --skip-client passed (Core suite 2544 PASS with 0 failures incl. new reaction-window-settle 9/9 (2743 PASS lines across Core, AI, Server, Transport and Collection), content/quality/collab/hooks python suites); python -m unittest discover -s tools/content passed (150); dotnet build src/L5R.Client passed; Nightly soak --seeds 6 passed (12 matches, 61055 offered-command probes). Native Godot probe for the one touched capture (EitherOrCapture loop bound) not run.",
+  "remaining": "None for the engine; native client visual playtest of a real Satoshi's Dual Warfans / Celestial Sword of the Crane entry is not done (no Godot run on this worktree). ContentVersion unchanged: committed replay fixtures are already 0.2.0 vs current 0.3.0 and nightly replays are exported fresh.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/644",
+  "branch": "claude/644-skip-empty-reaction-windows",
+  "updated": "2026-10-05T23:15:58.406511+00:00"
+}

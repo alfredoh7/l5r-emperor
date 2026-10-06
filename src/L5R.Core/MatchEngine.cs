@@ -337,9 +337,11 @@ public sealed partial class MatchEngine
     private void Apply(GameCommand command)
     {
         var twistWasActive = _state.TwistOfFateActive; // Twist of Fate (issue #492, group D): the additional action ends with the first command taken during it that leaves nothing open.
+        var suspendedBefore = _state.SuspendedWindows.Count;
         ApplyCore(command);
         if (_honorReplayCommand is not null) return; // an Honor-change window just closed: Execute runs the command it set aside again.
-        ResumeIdleSuspendedWindow();
+        var resumed = ResumeIdleSuspendedWindow() || _state.SuspendedWindows.Count < suspendedBefore;
+        if (resumed) SettleReactionWindow(); // issue #644: a window given back after a Reaction of its own is not offered to a player with nothing to react with: a window given back after a Reaction of its own is not offered to a player with nothing to react with
         FinishSpentBeforeBattleItem();
         FinishTwistOfFateAction(twistWasActive);
         OpenAssignedReactionWindow(); // Chrysanthemum Blossom (issue #492 group G): "After this Personality is assigned".
@@ -1101,7 +1103,7 @@ public sealed partial class MatchEngine
         {
             _state.PriorityPlayerId = 1 - _state.PriorityPlayerId;
             // Issue #644: the player who would answer has no Reaction in this window (they cannot Proclaim and hold nothing to react with): their pass is a given, so the window closes.
-            if (pending.Type is "proclaim" or "entryReaction" && !ProclaimWindowOffers(_state.PriorityPlayerId)) CloseReactionWindow(pending, "No reaction was left to take; the window closed.");
+            if (SettledReactionWindows.Contains(pending.Type) && _state.PendingNegatableAbility is null && !ReactionWindowOffers(_state.PriorityPlayerId)) CloseReactionWindow(pending, "No reaction was left to take; the window closed.");
         }
     }
 

@@ -113,7 +113,7 @@ internal static class EmperorRulingR5Tests
         var reaction = Enabled(e, 0, "hes-mine-substitute", card.Id, samurai.Id);
         Accept(e, reaction.Command!);
         Check(e.State.PendingDuel is { } duel && duel.ChallengedId == samurai.Id && e.State.Cards[victim.Id].Bowed, "the Samurai is in the duel and the Personality bowed");
-        Check(!e.State.PendingDuel!.Refusable || e.State.PendingDuel.Stage == "Reaction", "the duel is already accepted: nobody may refuse it any more");
+        Check(e.State.PendingDuel!.Stage != "AwaitingAccept", "the duel is already accepted: nobody may refuse it any more");
         FinishDuel(e);
         Check(e.State.Cards[samurai.Id].Bowed, "the substitute bows after the duel ends");
 

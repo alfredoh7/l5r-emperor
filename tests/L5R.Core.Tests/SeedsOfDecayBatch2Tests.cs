@@ -516,7 +516,7 @@ internal static class SeedsOfDecayBatch2Tests
         var lockOption = e6.QueryActions(0).Single(o => o.Type == "useAbility" && o.Command?.AbilityId == "ugimori-proclaim-lock" && o.Label.Contains("opponent"));
         Accept(e6, lockOption.Command!);
         Check(e6.State.ProclaimLocks.Any(l => l.PlayerId == 1 && l.OwnerId == 0), "player 1 is locked");
-        Decline(e6); Decline(e6);
+        Decline(e6); // the opponent holds nothing to react with, so this one pass closes the window (issue #644)
         // Player 1, on his turn, buys in Clan: no Proclaim.
         var t = e6.State; t.ActivePlayerId = 1; t.PriorityPlayerId = 1; t.Phase = Phase.Dynasty; t.TurnNumber++; t.Players[1].Clan = "Lion"; t.Players[1].Honor = 30;
         for (var i = 0; i < 8; i++) Add(t, "training-marketplace", 1, Zone.Home);

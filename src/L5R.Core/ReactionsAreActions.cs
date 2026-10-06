@@ -26,12 +26,21 @@ public sealed partial class MatchEngine
         if (_state.PendingChoice is not { } open) return;
         _state.SuspendedWindows.Add(new SuspendedWindow
         {
-            Choice = open, ReactingPlayerId = _state.PriorityPlayerId, ConsecutivePasses = _state.ConsecutivePasses,
-            NegatableAbility = _state.PendingNegatableAbility, ActionNegated = _state.DeferredActionNegated, NegatedEffects = _state.NegatedEffects,
-            OutOfPlayActionReaction = _state.PendingOutOfPlayActionReaction, HonorLossReductionPlayerId = _state.HonorLossReductionPlayerId,
-            ForcedDiscardContinuation = _state.ForcedDiscardContinuation, ForcedDiscardResume = _state.ForcedDiscardResume, BowReactionCandidateIds = _state.BowReactionCandidateIds,
-            MoveReactionTargetId = _state.MoveReactionTargetId, NikutaiReactionTargetId = _state.NikutaiReactionTargetId,
-            ReactionWindowTargetId = _state.ReactionWindowTargetId, ReactionWindowRemaining = _state.ReactionWindowRemaining,
+            Choice = open,
+            ReactingPlayerId = _state.PriorityPlayerId,
+            ConsecutivePasses = _state.ConsecutivePasses,
+            NegatableAbility = _state.PendingNegatableAbility,
+            ActionNegated = _state.DeferredActionNegated,
+            NegatedEffects = _state.NegatedEffects,
+            OutOfPlayActionReaction = _state.PendingOutOfPlayActionReaction,
+            HonorLossReductionPlayerId = _state.HonorLossReductionPlayerId,
+            ForcedDiscardContinuation = _state.ForcedDiscardContinuation,
+            ForcedDiscardResume = _state.ForcedDiscardResume,
+            BowReactionCandidateIds = _state.BowReactionCandidateIds,
+            MoveReactionTargetId = _state.MoveReactionTargetId,
+            NikutaiReactionTargetId = _state.NikutaiReactionTargetId,
+            ReactionWindowTargetId = _state.ReactionWindowTargetId,
+            ReactionWindowRemaining = _state.ReactionWindowRemaining,
         });
         _state.PendingChoice = null;
         _state.PendingNegatableAbility = null; _state.DeferredActionNegated = false; _state.NegatedEffects = [];
@@ -76,9 +85,10 @@ public sealed partial class MatchEngine
     }
 
     // Nothing the Reaction started is waiting any more: its window is open again, the opportunity handed to the other player.
-    private void ResumeIdleSuspendedWindow()
+    private bool ResumeIdleSuspendedWindow()
     {
-        if (_state.SuspendedWindows.Count == 0 || _state.PendingChoice is not null || _state.PendingDuel is not null || _state.WinnerId is not null) return;
+        if (_state.SuspendedWindows.Count == 0 || _state.PendingChoice is not null || _state.PendingDuel is not null || _state.WinnerId is not null) return false;
         RestoreSuspendedWindow(handOn: true);
+        return true;
     }
 }

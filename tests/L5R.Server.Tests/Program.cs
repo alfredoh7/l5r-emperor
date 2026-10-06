@@ -465,18 +465,9 @@ static async Task<JsonElement> ReadLargeTypeAsync(ClientWebSocket socket, string
     }
 }
 
-static async Task<JsonElement> ReadTypeAsync(ClientWebSocket socket, string type, Func<JsonElement, bool>? predicate = null)
-{
-    using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(10));
-    while (true)
-    {
-        var bytes = await ClientConnection.ReceiveAsync(socket, timeout.Token)
-            ?? throw new InvalidOperationException("The socket closed before the expected message.");
-        using var document = JsonDocument.Parse(bytes);
-        var value = document.RootElement;
-        if (value.GetProperty("type").GetString() == type && (predicate is null || predicate(value))) return value.Clone();
-    }
-}
+// Server-to-client snapshots routinely sit within a few hundred bytes of 32 KiB, so reading them with ClientConnection.ReceiveAsync (the limit on what a
+// CLIENT may send) made the integration checks flaky; every read uses the client-side reader that the search test already needs.
+static Task<JsonElement> ReadTypeAsync(ClientWebSocket socket, string type, Func<JsonElement, bool>? predicate = null) => ReadLargeTypeAsync(socket, type, predicate);
 
 sealed class TestServer(WebApplication app, string storage, bool ownsStorage) : IAsyncDisposable
 {

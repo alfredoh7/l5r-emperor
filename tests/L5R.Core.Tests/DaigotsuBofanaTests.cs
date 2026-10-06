@@ -488,7 +488,7 @@ internal static class DaigotsuBofanaTests
             Eq(Fired(e, bofana), "spent", "the first targeting of the phase spends his trigger");
             Check(!e.State.Cards[bofana.Id].Bowed, "Ruya's bow carries on only once the discard is answered");
             Discard(e, 1, e.State.Players[1].Hand[0]);
-            Eq(e.State.PendingChoice?.Type, "bowReaction", "the window Ruya was played in is open again"); Eq(e.State.SuspendedWindows.Count, 0);
+            Check(e.State.PendingChoice is null, "the window Ruya was played in is given back and, with nothing left to take in it, closes (issue #644)"); Eq(e.State.SuspendedWindows.Count, 0);
             Check(e.State.Cards[bofana.Id].Bowed && e.State.Players[1].Hand.Count == 0, "the Reaction resolved after the discard");
         }
         {

@@ -91,7 +91,8 @@ public partial class Main
     private int EitherProvinceStrength() => View.Players.Single(p => p.Id == 1).Provinces.Single(p => p.Index == 0).Strength;
     private async Task FinishEitherReaction()
     {
-        for (var i = 0; i < 2; i++)
+        // Issue #644: a player who holds no Reaction is not asked to pass, so how many passes the windows need depends on who holds one; pass for whoever is asked until they close.
+        for (var i = 0; i < 4 && _eitherFixture.State.PendingChoice is not null; i++)
         {
             var pass = _eitherFixture.QueryActions(_eitherFixture.State.PriorityPlayerId).First(a => a.Enabled && a.Type == "declineReaction");
             await _session.Submit(pass.Command!); await WaitDecisionPresentation();

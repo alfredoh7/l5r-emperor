@@ -175,6 +175,7 @@ internal static class EmperorRemainingCTests
         // Ranged 3 (Training followed-target attacker) on a Force 5 Personality would fail; doubled to 6 it destroys him.
         var s3 = Table(Phase.Battle, 1); s3.PriorityPlayerId = 1;
         var sniping3 = Add(s3, Sniping, 0, Zone.Hand);
+        Add(s3, "training-attack-reactor", 0, Zone.Home); // a second Reaction keeps the window open once Sniping is played, so the strength can be read (issue #644)
         var victim3 = Add(s3, "training-crane-veteran", 0, Zone.Battlefield, province: 0);
         var archer3 = Add(s3, "training-followed-attacker", 1, Zone.Battlefield, province: 0);
         var e3 = MatchEngine.FromTestState(s3);
@@ -190,6 +191,7 @@ internal static class EmperorRemainingCTests
         // Played twice: each doubles the current strength (a second copy in the same window).
         var s4 = Table(Phase.Battle, 1); s4.PriorityPlayerId = 1;
         var one = Add(s4, Sniping, 0, Zone.Hand); var two = Add(s4, Sniping, 1, Zone.Hand);
+        Add(s4, "training-attack-reactor", 0, Zone.Home); // a further Reaction keeps the window open once both copies are played, so the strength can be read (issue #644)
         var victim4 = Add(s4, "training-crane-veteran", 0, Zone.Battlefield, province: 0);
         var archer4 = Add(s4, "training-followed-attacker", 1, Zone.Battlefield, province: 0);
         var e4 = MatchEngine.FromTestState(s4);
