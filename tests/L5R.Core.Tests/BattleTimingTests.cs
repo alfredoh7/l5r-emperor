@@ -106,6 +106,7 @@ internal static class BattleTimingTests
         // none is in the pinned Lion/Crane decks.
         var navalCarriers = CardCatalog.Cards.Values.Where(c => !c.ScenarioOnly && (c.Keywords!.Contains("Naval") || c.AttachGrantsKeyword == "Naval" || c.Effect == "naval-while-has-spell"))
             .Select(c => c.Id).OrderBy(x => x, StringComparer.Ordinal).ToArray();
+        navalCarriers = navalCarriers.Where(id => !WlPersTornTests.NavalCarriers.Contains(id)).ToArray(); // issue #674 (personality-wave-131): Moshi Ira and Yoritomo Tansen, printed Naval, are asserted in WlPersTornTests
         // + oracle-l5r-1726 (issue #336: Daigotsu Hotako, Experienced 3, printed Naval).
         // + oracle-l5r-10067 (issue #503, group P3: Thunder Dragon - exp2, printed Naval).
         // + oracle-l5r-9544 (issue #264 Second City pass: Yoritomo Emoto, printed Naval).

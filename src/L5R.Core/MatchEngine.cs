@@ -1692,6 +1692,7 @@ public sealed partial class MatchEngine
         PromoApplyResolution(a, d, attacker, destroyedByPlayer, provinceDestroyedNow); // Imminent Victory (issue #653, PromoEmperorFateReactions.cs): the +1F/+1C tokens at battle resolution.
         ApplyWlStratTornResolutionTraits(destroyedByPlayer, provinceDestroyedNow ? attacker : null); // issue #674 (WlStratTorn.cs): Spoils of Exploration's draw.
         ApplyShibasGuidanceTrait(destroyedByPlayer, provinceDestroyedNow ? attacker : null); // Shiba's Guidance (Emperor Edition remaining-cards pass, issue #492, group E): "After a battle resolution ends in which a Phoenix Clan player destroyed ...".
+        WlPersTornApplyResolution(a, attacker, destroyedByPlayer, provinceDestroyedNow); // Utaku Suying (issue #674, WlPersTorn.cs): "after a battle resolution in which Suying's army destroyed a defending army or province"
         var resolutionFacts = NewAfterResolutionFacts(provinceIndex, attacker, attackerWon, a, destroyedByPlayer, provinceDestroyedNow, losers);
         // Words Have Strength (Emperor Edition remaining-cards pass, issue #492, group D): the cards the resolution destroyed are the losing army (both armies in a tie).
         resolutionFacts.DestroyedCardIds = (attackerWon ? (aramasuSpares ? [] : d) : defenderWon ? a : (a.Length > 0 && d.Length > 0 ? (aramasuSpares ? a : a.Concat(d).ToArray()) : [])).Select(c => c.Id).ToList(); // Aramasu's Legacy (issue #501): a spared army was not destroyed
@@ -3327,6 +3328,7 @@ public sealed partial class MatchEngine
         }
         // Shiro Chugo (Emperor Edition Stronghold pass, issue #486 batch 2): "Reduce any Honor gain or loss from the action's effects by 2."
         amount = ChugoReducedHonorChange(playerId, amount, reason);
+        amount = WlPersTornReducedHonorGain(playerId, amount, reason); // Shosuro Makiko - exp (issue #674, WlPersTorn.cs): "Reduce all Honor gains from it by 2"
         if (amount == 0) return;
         // Yamazaki - Experienced (The Shadow's Embrace pass, issue #476, batch 2): "Once per phase, before you lose exactly 1 Honor: Negate the loss." -- the loss as it would now happen.
         if (amount == -1 && !CurrentActionUnnegatable() && YamazakiNegatesLoss(playerId, reason)) return; // issue #501: an unnegatable action's loss is not negated

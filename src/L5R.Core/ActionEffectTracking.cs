@@ -39,6 +39,7 @@ public sealed partial class MatchEngine
     private bool FinishActionEffectTracking(string abilityId, int playerId, string? sourceId, int closesTo, string? performerId = null, IEnumerable<string>? targetIds = null)
     {
         WlAfterActionResolved(abilityId, playerId, sourceId); // issue #674 (WlSpellsRings.cs): The Thunderer's Protection bows the action's performers after it resolves
+        WlPersTornActionDone(abilityId, playerId, sourceId); // Moshi Ira (issue #674, WlPersTorn.cs): the -3F owed once the action targeting his unit has resolved
         AfterMechAActionResolved(abilityId, playerId, sourceId); // issue #501 (EmperorMechA.cs): Beyond the Line's draw "after the action's resolution"; Momoko's waiver is spent
         ApplyAgonyOfHerGaze(abilityId, playerId); // issue #503 (EmperorP2.cs): The Agony of Her Gaze's trait, before any Reaction to the same moment
         var affected = _state.CurrentActionAffected;
@@ -119,6 +120,7 @@ public sealed partial class MatchEngine
         if (PerformersAmbushApplies(source, abilityId, playerId, facts) is { } performersAmbush) return performersAmbush; // Lying in Ambush (issue #667, PerformersAmbush.cs)
         if (WithoutMercyApplies(source, abilityId, playerId, facts) is { } withoutMercy) return withoutMercy; // issue #648 (WithoutMercy.cs): a Battle action by your Samurai that targeted no enemy card
         if (PromoItemsAfterActionApplies(source, abilityId, playerId, facts) is { } promoItemsAfter) return promoItemsAfter; // The Ivory Sword (PromoEmperorItems.cs): an action by a dishonorable Personality who opposed it
+        if (WlPersTornAfterActionApplies(source, abilityId, playerId, facts) is { } wlPersTorn) return wlPersTorn; // Shinjo Sihung (issue #674, WlPersTorn.cs): "after your Tactical action resolves"
         if (P3AssignmentOrActionApplies(source, abilityId, facts) is { } p3Assigned) return p3Assigned; // Utaku Tairu - exp (issue #503): "after a Personality assigns or moves"
         if (facts.AbilityId == AssignedSentinel) return false;
         if (!AbilityCatalog.All.ContainsKey(facts.AbilityId)) return false;

@@ -519,6 +519,7 @@ public sealed partial class MatchEngine
             // Dragon Clan review (issue #207): three real self-performer Iaijutsu duels.
             case "daisuke-duel": case "spirit-duelist-duel": foreach (var id in loserIds) MoveHome(Card(id), false); break;
             case "ichizo-exp-duel": case "shikei-duel": case "makoto-duel": case IvorySpellAbilities.SanctionedDuel: case DuelSleepFusakoAbilities.FusakoDuel: DestroyUnits(loserIds.Select(Card).ToArray(), actingPlayerId: challengerPlayerId); break;
+            case WlPersTornAbilities.IzaDuel: case WlPersTornAbilities.KyoshiroDuel: case WlPersTornAbilities.RikuDuel: DestroyUnits(loserIds.Select(Card).ToArray(), actingPlayerId: challengerPlayerId); break; // issue #674: "Destroy the duel's loser"
             // Second City unwired-card audit (issue #264): "she won" is exactly "the challenger's own
             // side won" in a self-performer 1v1 duel -- there is no ally on that side to conflate her
             // with, so checking the winner's OWNER matches the printed text precisely.
