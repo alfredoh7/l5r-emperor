@@ -212,10 +212,10 @@ public sealed partial class MatchEngine
     // ---- Attacks --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     // "Ranged 3 Attack with +2 strength if your performer is a Scout": the performing Personality is the Attack's source.
-    private int? WlAttackStrength(string abilityId, string? sourceId) =>
+    private int? WlStratTornAttackStrengthOf(string abilityId, string? sourceId) =>
         abilityId is WlStratTornAbilities.AmbushAttack or WlStratTornAbilities.AmbushAttackMove ? 3 + (sourceId is not null && _state.Cards.TryGetValue(sourceId, out var performer) && Keyword(performer, "Scout") ? 2 : 0) : null;
 
-    private static string? WlAttackKind(string abilityId) => abilityId is WlStratTornAbilities.AmbushAttack or WlStratTornAbilities.AmbushAttackMove ? "Ranged" : null;
+    private static string? WlStratTornAttackKindOf(string abilityId) => abilityId is WlStratTornAbilities.AmbushAttack or WlStratTornAbilities.AmbushAttackMove ? "Ranged" : null;
 
     // ResolveAttackNow's hook: "You may move him home" (the second action), whether or not the Attack hit.
     private void AfterWlStratTornAttack(string abilityId, string? sourceId)
@@ -295,8 +295,8 @@ public sealed partial class MatchEngine
         EngineHooks.PerformerCandidates.Register("WlStratTornPerformers", 14700, static (engine, context) => engine.WlPerformers(context.ability, context.playerId));
         EngineHooks.TargetAllows.Register("WlStratTornTargetAllows", 14700, static (engine, context) => engine.WlTargetAllows(context.ability, context.command, context.player, context.target));
         EngineHooks.ValidateLate.Register("ValidateWlStratTorn", 14700, static (engine, context) => engine.ValidateWlStratTorn(context.id, context.command, context.player));
-        EngineHooks.AttackStrengthBefore.Register("WlStratTornAttackStrength", 14700, static (engine, context) => engine.WlAttackStrength(context.abilityId, context.sourceId));
-        EngineHooks.AttackKind.Register("WlStratTornAttackKind", 14700, static context => WlAttackKind(context.abilityId));
+        EngineHooks.AttackStrengthBefore.Register("WlStratTornAttackStrength", 14700, static (engine, context) => engine.WlStratTornAttackStrengthOf(context.abilityId, context.sourceId));
+        EngineHooks.AttackKind.Register("WlStratTornAttackKind", 14700, static context => WlStratTornAttackKindOf(context.abilityId));
         EngineHooks.DestroysTarget.Register("WlStratTornDestroysTarget", 14700, static context => WlDestroysTarget(context.abilityId));
         EngineHooks.BowsTarget.Register("WlStratTornBowsTarget", 14700, static context => WlBowsTarget(context.abilityId));
         EngineHooks.RunEffects.Register("RunWlStratTorn", 14700, static (engine, context) => engine.RunWlStratTorn(context));
