@@ -1,0 +1,70 @@
+{
+  "Profile": "personality-wave-128",
+  "Rules": "Emperor Edition core rules; reviewed Coils of Madness scans.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10437",
+      "Name": "Hida O-Ushi",
+      "Type": "Personality",
+      "Clan": "Crab",
+      "GoldCost": 6,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 2,
+      "PersonalHonor": 1,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Bow a target Personality with lower Force.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10437.jpg",
+      "Keywords": [
+        "Loyal",
+        "Unique",
+        "Bully",
+        "Crab Clan",
+        "Inexperienced",
+        "Samurai"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "o-ushi-inexp-bow"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10469",
+      "Name": "Tsuruchi",
+      "Type": "Personality",
+      "Clan": "Mantis",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": 2,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: Give Tsuruchi Arrow tokens until he has exactly five.\nBattle: Destroy zero or more Arrow tokens on Tsuruchi. Ranged Attack with strength equal to twice the number of tokens destroyed. You may use this action three times per turn.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10469.jpg",
+      "Keywords": [
+        "Unique",
+        "Daimyo",
+        "Inexperienced",
+        "Mantis Clan",
+        "Master Bowman",
+        "Samurai",
+        "Scout",
+        "Wasp Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "tsuruchi-inexp-arrows",
+        "tsuruchi-inexp-arrow-attack"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}
