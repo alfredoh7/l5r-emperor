@@ -14,6 +14,7 @@ public sealed partial class MatchEngine
         var attacker = _state.ActivePlayerId; var defender = 1 - attacker;
         if (card.OwnerId != attacker || _state.PriorityPlayerId == defender) return false;
         if (!_state.Cards.Values.Any(c => c.OwnerId == defender && InPlay(c) && Definition(c).Effect == KitsuneNegationEffect)) return false;
+        if (MovementNegationBarred(card, defender)) return false; // Winter Sled (issue #667): the negating card is the Defender's.
         var key = $"{_state.TurnNumber}:{province}";
         if (_state.KitsuneNegatedBattles.Contains(key)) return false;
         _state.KitsuneNegatedBattles.Add(key);

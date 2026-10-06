@@ -17,7 +17,9 @@ public sealed record MovementLock(string Source, int Turn, MovementKinds Kinds,
     string? WhileCardAtBattlefield = null, int? Battlefield = null,
     // Shinjo Junpei (Forgotten Legacy pass, issue #467 batch 2): "negate his NEXT movement" -- a one-shot lock, spent the first time it negates a movement
     // (MovementLockNegates), and otherwise lapsing at the end of the turn like every other lock.
-    bool NextOnly = false);
+    bool NextOnly = false,
+    // Winter Sled (issue #667): the player whose card set the lock, when it was set by another card's effect (null: unknown, never barred).
+    int? ByPlayer = null);
 
 // Movement locks (issue #415, Mendon's ruling on Strength of the Tsunami: "negate his (future) movement" means the movement AFTER the one the card caused, until the end of the
 // turn). Every movement an effect makes goes through MoveHome or MoveToBattlefield, and the assignment of an army through Assign; each asks here first. A battle ending sends its
@@ -27,7 +29,7 @@ public sealed partial class MatchEngine
     private void LockMovement(CardInstance card, string source, MovementKinds kinds)
     {
         if (WartimePreparationsNegatesAssignLock(card, source, kinds)) return; // Wartime Preparations (The Shadow's Embrace pass, issue #476 batch 6).
-        card.MovementLocks.Add(new MovementLock(source, _state.TurnNumber, kinds));
+        card.MovementLocks.Add(new MovementLock(source, _state.TurnNumber, kinds, ByPlayer: (_runningCommand ?? _attackCommandInResolution)?.PlayerId));
         Emit("movementLocked", $"{Definition(card).Name}'s {DescribeKinds(kinds)} is negated for the rest of the turn.", card.OwnerId, card.Id);
     }
 
@@ -42,6 +44,7 @@ public sealed partial class MatchEngine
     private bool MovementLockNegates(CardInstance card, MovementKinds kind)
     {
         if (!MovementLocked(card, kind) || HiromiUnnegatable()) return false; // Yoritomo Hiromi (issue #477): the movement from her Battle actions will not be negated.
+        if (MovementLockBarredBySled(card, kind)) return false; // Winter Sled (issue #667, PerformersSled.cs): every lock that holds is another player's card's.
         Emit("moveNegated", $"{Definition(card).Name}'s movement was negated: it may not move this turn.", card.OwnerId, card.Id);
         // A "next movement" lock is spent by the movement it just negated (Shinjo Junpei); a turn-long lock negating the same movement is not.
         card.MovementLocks.RemoveAll(l => l.NextOnly && l.Turn == _state.TurnNumber && (l.Kinds & kind) != 0 && MovementLockHolds(l));

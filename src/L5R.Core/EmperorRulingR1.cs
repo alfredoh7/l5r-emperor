@@ -190,6 +190,7 @@ public sealed partial class MatchEngine
     private bool MovementToBattlefieldNegated(CardInstance card, int battlefield)
     {
         if (P3MoveToBattlefieldNegated(card, battlefield)) { Emit("moveNegated", $"{Definition(card).Name}'s movement to the current battlefield was negated.", card.OwnerId, card.Id); return true; } // Request Authorization (issue #503)
+        if (SledBarsBattlefieldNegation(card, battlefield)) return false; // Winter Sled (issue #667, PerformersSled.cs): Chikushudo's Trickery and Ambush are another player's cards
         if (!R1.MovementNegated.Contains(battlefield) && !IvoryAmbushNegatesMove(card, battlefield)) return false; // Ambush (issue #622, IvoryMovement.cs): "Other Personalities will not move there."
         Emit("moveNegated", $"{Definition(card).Name}'s movement to {BattlefieldLabel(battlefield)} was negated.", card.OwnerId, card.Id);
         return true;

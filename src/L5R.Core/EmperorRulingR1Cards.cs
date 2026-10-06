@@ -71,20 +71,20 @@ public sealed partial class MatchEngine
         {
             // A battle fought inside the Action Phase cannot itself be started inside another one (the Action Phase is where Open and Limited actions are taken at all).
             case "chikushudo-trickery-battle":
-            {
-                Require(_state.Phase == Phase.Action && R1.Aside is null, "A battle can only be fought from the Action Phase.");
-                // Every unit named must be one the effect could assign: a movement lock on assigning bars it.
-                foreach (var spirit in SlotCards(command, "performers")) Require(MayBeAssignedToCreatedBattlefield(spirit, attacking: false, mayBeBowed: false), $"{Definition(spirit).Name} may not be assigned to a battlefield.");
-                foreach (var target in SlotCards(command, "target")) Require(MayBeAssignedToCreatedBattlefield(target, attacking: true, mayBeBowed: false), $"{Definition(target).Name} may not be assigned to attack.");
-                break;
-            }
+                {
+                    Require(_state.Phase == Phase.Action && R1.Aside is null, "A battle can only be fought from the Action Phase.");
+                    // Every unit named must be one the effect could assign: a movement lock on assigning bars it.
+                    foreach (var spirit in SlotCards(command, "performers")) Require(MayBeAssignedToCreatedBattlefield(spirit, attacking: false, mayBeBowed: false), $"{Definition(spirit).Name} may not be assigned to a battlefield.");
+                    foreach (var target in SlotCards(command, "target")) Require(MayBeAssignedToCreatedBattlefield(target, attacking: true, mayBeBowed: false), $"{Definition(target).Name} may not be assigned to attack.");
+                    break;
+                }
             case "shinobi-assault-battle":
-            {
-                Require(_state.Phase == Phase.Action && R1.Aside is null, "A battle can only be fought from the Action Phase.");
-                if (command.PerformerId is not null) Require(MayBeAssignedToCreatedBattlefield(Card(command.PerformerId), attacking: true, mayBeBowed: false), "The performing Ninja may not be assigned to attack.");
-                if (command.TargetId is not null) Require(MayBeAssignedToCreatedBattlefield(Card(command.TargetId), attacking: false, mayBeBowed: true), "The target may not be assigned to defend.");
-                break;
-            }
+                {
+                    Require(_state.Phase == Phase.Action && R1.Aside is null, "A battle can only be fought from the Action Phase.");
+                    if (command.PerformerId is not null) Require(MayBeAssignedToCreatedBattlefield(Card(command.PerformerId), attacking: true, mayBeBowed: false), "The performing Ninja may not be assigned to attack.");
+                    if (command.TargetId is not null) Require(MayBeAssignedToCreatedBattlefield(Card(command.TargetId), attacking: false, mayBeBowed: true), "The target may not be assigned to defend.");
+                    break;
+                }
             case "two-fronts-mark":
                 Require(Player(1 - player.Id).Provinces.Count(p => !p.Destroyed) >= 2, "The province's player must have two or more provinces.");
                 break;
@@ -99,38 +99,38 @@ public sealed partial class MatchEngine
         {
             // Surprise Attack: the created battlefield joins the battles still to be fought, and every performer and the target move there (each movement its own effect, negatable on its own).
             case "surprise-attack-create":
-            {
-                var battlefield = CreateAdditionalBattlefield(null);
-                foreach (var performer in PerformingSlotCards(command, ability).ToArray()) TryMoveToBattlefield(performer, battlefield);
-                if (SlotCards(command, "target").FirstOrDefault() is { } victim) TryMoveToBattlefield(victim, battlefield);
-                return false;
-            }
+                {
+                    var battlefield = CreateAdditionalBattlefield(null);
+                    foreach (var performer in PerformingSlotCards(command, ability).ToArray()) TryMoveToBattlefield(performer, battlefield);
+                    if (SlotCards(command, "target").FirstOrDefault() is { } victim) TryMoveToBattlefield(victim, battlefield);
+                    return false;
+                }
             case "chikushudo-trickery-battle":
-            {
-                var chosen = SlotCards(command, "target").Single();
-                var spirits = PerformingSlotCards(command, ability).ToArray();
-                SpendHandPlayedCard(player, source);
-                var battlefield = CreateAdditionalBattlefield(null);
-                R1.MovementNegated.Add(battlefield); // "Negate all movement to it."
-                BeginAsideBattle(battlefield, chosen.OwnerId, command, consumedGrant, playedFromDiscard, opponentHonorBefore, bowedBefore, preExistingGrants, firstOpportunity: null, () =>
                 {
-                    if (AssignToCreatedBattlefield(chosen, battlefield, attacking: true, mayBeBowed: false)) R1.CombatShields.Add(chosen.Id); // "he will not be destroyed during the battle's Combat Segment"
-                    foreach (var spirit in spirits) AssignToCreatedBattlefield(spirit, battlefield, attacking: false, mayBeBowed: false);
-                });
-                return true;
-            }
+                    var chosen = SlotCards(command, "target").Single();
+                    var spirits = PerformingSlotCards(command, ability).ToArray();
+                    SpendHandPlayedCard(player, source);
+                    var battlefield = CreateAdditionalBattlefield(null);
+                    R1.MovementNegated.Add(battlefield); PerformersNoteBattlefieldNegator(battlefield, command.PlayerId); // "Negate all movement to it."
+                    BeginAsideBattle(battlefield, chosen.OwnerId, command, consumedGrant, playedFromDiscard, opponentHonorBefore, bowedBefore, preExistingGrants, firstOpportunity: null, () =>
+                    {
+                        if (AssignToCreatedBattlefield(chosen, battlefield, attacking: true, mayBeBowed: false)) R1.CombatShields.Add(chosen.Id); // "he will not be destroyed during the battle's Combat Segment"
+                        foreach (var spirit in spirits) AssignToCreatedBattlefield(spirit, battlefield, attacking: false, mayBeBowed: false);
+                    });
+                    return true;
+                }
             case "shinobi-assault-battle":
-            {
-                var ninja = Card(command.PerformerId!);
-                SpendHandPlayedCard(player, source);
-                var battlefield = CreateAdditionalBattlefield(null);
-                BeginAsideBattle(battlefield, player.Id, command, consumedGrant, playedFromDiscard, opponentHonorBefore, bowedBefore, preExistingGrants, firstOpportunity: player.Id, () =>
                 {
-                    AssignToCreatedBattlefield(ninja, battlefield, attacking: true, mayBeBowed: false);
-                    AssignToCreatedBattlefield(target!, battlefield, attacking: false, mayBeBowed: true); // "even if he is bowed"
-                }, loseHonorAfter: 5);
-                return true;
-            }
+                    var ninja = Card(command.PerformerId!);
+                    SpendHandPlayedCard(player, source);
+                    var battlefield = CreateAdditionalBattlefield(null);
+                    BeginAsideBattle(battlefield, player.Id, command, consumedGrant, playedFromDiscard, opponentHonorBefore, bowedBefore, preExistingGrants, firstOpportunity: player.Id, () =>
+                    {
+                        AssignToCreatedBattlefield(ninja, battlefield, attacking: true, mayBeBowed: false);
+                        AssignToCreatedBattlefield(target!, battlefield, attacking: false, mayBeBowed: true); // "even if he is bowed"
+                    }, loseHonorAfter: 5);
+                    return true;
+                }
             // The Perfect Moment: the additional Attack Phase, with its player's restrictions until it ends.
             case "perfect-moment-declare":
                 R1.PerfectMoment = new PerfectMomentState { PlayerId = player.Id };

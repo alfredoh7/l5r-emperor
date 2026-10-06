@@ -1,0 +1,113 @@
+{
+  "Profile": "item-wave-46",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-9350",
+      "Name": "Winter Sled",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "While you control a Winter card, other players' cards' effects will not negate this Personality's movement.\nReaction: After engaging, if any enemy units are at the current battlefield, bow this card: Move this Personality there.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9350.jpg",
+      "Keywords": [],
+      "Focus": 3,
+      "Abilities": [
+        "pf-sled-move"
+      ],
+      "Effect": "pf-winter-sled"
+    },
+    {
+      "Id": "oracle-l5r-9414",
+      "Name": "Wyrmbone Katana",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 1,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Target an enemy card with lower Force than this Personality and no attachments: Destroy it.\nBattle: Move this Personality to the current battlefield if he assigned there.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9414.jpg",
+      "Keywords": [
+        "Weapon"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "pf-wyrmbone-destroy",
+        "pf-wyrmbone-move"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9975",
+      "Name": "The Blade of the Balash",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 6,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 1,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Will only attach to a Dragon Clan or Naga Personality.\nBattle: Bow this card or, if you are a Dragon Clan player, discard it from your hand: Melee 5 Attack.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9975.jpg",
+      "Keywords": [
+        "Unique",
+        "Weapon"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "pf-balash-attack",
+        "pf-balash-attack-hand"
+      ],
+      "Effect": "none",
+      "AttachRequiresKeyword": "Dragon Clan|Naga"
+    },
+    {
+      "Id": "oracle-l5r-9979",
+      "Name": "The Isha's Yumi",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 6,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Will only attach to a Mantis Clan or Naga Personality.\nBattle: Bow this card or, if you are a Mantis Clan player, discard it from your hand: Ranged 6 Attack.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9979.jpg",
+      "Keywords": [
+        "Unique",
+        "Weapon",
+        "Experienced"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "pf-yumi-attack",
+        "pf-yumi-attack-hand"
+      ],
+      "Effect": "none",
+      "AttachRequiresKeyword": "Mantis Clan|Naga"
+    }
+  ],
+  "Decks": []
+}

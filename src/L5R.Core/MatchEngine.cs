@@ -588,6 +588,7 @@ public sealed partial class MatchEngine
         if (original is not null) MarkAsCopy(card, original); // issue #501 item 32: the copy's frame and the original's scan
         var title = (printed ?? definition).Name; var where = battlefield is null ? "" : " at the battlefield";
         Emit("cardCreated", createdCopy ? $"{Player(ownerId).Name} created a copy of {title}{where}." : $"{Player(ownerId).Name} created {title}{where}.", ownerId, card.Id);
+        NotePersonalityCreated(card, battlefield); // issue #667 (PerformersAmbush.cs): the action's record of what it created
         QueueOverconfidentDraw(card);
         beforeWindow?.Invoke();
         if (duringEntryReaction) { ApplyMandatoryEntryEffects(ownerId, card); return false; }
