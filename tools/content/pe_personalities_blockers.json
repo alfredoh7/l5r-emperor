@@ -1,14 +1,1 @@
-{
-  "oracle-l5r-10232": {
-    "note": "Fusako (issue #653, Promotional-Emperor): her own scan is local and read. \"Iaijustu Limited: Target another player's Personality: Fusako challenges the target. His controller may bow him; if he is now bowed, he may refuse the duel. Destroy the duel's loser.\" Not wired: the challenge machinery offers refusal unconditionally (PendingDuel Stage AwaitingAccept, Dueling.cs IssueChallenge/ResolveDuelCommand), so there is no pre-challenge optional bow by the challenged player whose result (bowed) is what allows the refusal, and a new Iaijutsu Limited duel ability also needs per-ability-id entries in the shared ApplyDuelOutcome / IsIaijutsuAction / DuelPresentation switches (Sanctioned Duel's pattern). Reading to confirm when built: a target that is already bowed may refuse without the choice.",
-    "category": "DUEL"
-  },
-  "oracle-l5r-10585": {
-    "note": "Gaijin Sorcerer (issue #653, Promotional-Emperor): the scan prints \"While your ritual is resolving, Gaijin Sorcerer counts as two Shugenja.\" (the catalogue's \"After you announce your Ritual action...\" is a later wording). Not wired: no ability carries a Ritual action keyword and every Shugenja slot (e.g. capturing-soul-remove's performing 'others', illusory-defense-province) counts each card once, so there is no weighted 'counts as two Shugenja' for a ritual's Shugenja count. RULES question to settle first: does the doubling count only toward the number of Shugenja a ritual requires, or also toward totals such as the combined Chi of the performing Shugenja (Capturing the Soul, Illusory Defense)?",
-    "category": "TARGET"
-  },
-  "oracle-l5r-2887": {
-    "note": "Gozu (issue #653, Promotional-Emperor): \"Battle: Target a Terrain: Destroy it. You may discard a card. If you did, search your Fate deck for a Terrain, show it, then take an additional Battle action to play it, if legal; if not, discard it.\" The Terrain destruction (terrain-at-battle) and the optional discard are buildable, and Control the Field already grants an additional action scoped to Terrains in the hand; what is missing is playing a Terrain Strategy that was found by a search and is still in the Fate deck (play-from-hand is the only Strategy play path, AdditionalActionGrant.ScopeCardIds names hand cards) and discarding it when the additional action is not legal. RULES question: if the Terrain is legal but the player takes no additional action (passes), is it still discarded?",
-    "category": "SEARCH"
-  }
-}
+{}

@@ -1,8 +1,4 @@
 {
-  "oracle-l5r-10231": {
-    "note": "Colonial Farm (Holding, issue #653): blocked only by the card it creates. \"Limited, Bow: Create a 1F Ashigaru Follower and attach it to your target Personality\" needs a CreatedOnly Proxy scan of a 1F Ashigaru Follower with no other keyword; the only candidates are near misses (Mounted Ashigaru oracle-l5r-10010 also has Cavalry; Humble Farmers user-scan-humble-farmers is 2F) and docs/requests/created-card-scans-needed.md row A6 (assets/requested-scans/ashigaru-1f.jpg) is unticked. The rest is buildable: ClanEntryDiscount for the Lion entry discount, a Produce 5 Holding and the bow-and-create-and-attach shape of Natural Aviary.",
-    "category": "SCAN"
-  },
   "oracle-l5r-10757": {
     "note": "The Onyx Dueling Circle (Holding, issue #653): blocked only by the Personality it creates. \"Destroy your target Shugenja. Create a 5F/2C/0PH Nonhuman - Oni - Shadowlands Personality. Destroy this Holding. Lose 4 Honor\" needs a CreatedOnly Proxy scan of that 5F/2C/0PH Oni; none exists locally and docs/requests/created-card-scans-needed.md row B12 is unticked. Akuma's Power (celestial-wave-2) creates a 9F/5C Oni from a different scan, which may not stand in for it.",
     "category": "SCAN"

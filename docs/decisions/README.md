@@ -33,3 +33,19 @@ interpretation this register's decision docs already settled.
 - [Playtest fixes (#644)](2026-10-05-playtest-fixes-644.md) — accepted: entry-reaction windows close when nothing is left to take, a face-up Celestial enters play at once, Steel on Steel needs a performer at the battlefield, the bot always uses its own entering-play Reactions.
 
 - [Promotional-Emperor pass (#653)](2026-10-05-promotional-emperor-pass.md) — accepted as readings: 106 of 134 unwired Promotional-Emperor cards wired, 28 blocked with notes; the rules readings and open questions for Mendon are listed.
+
+- [Rejected cards (#667)](2026-10-05-rejected-cards.md) — accepted as readings: Peace Treaty, Wildfire and Green Nightshade Blend are deliberately not wired (Mendon).
+
+- [Fusako, Gaijin Sorcerer, Sleep (#667)](2026-10-05-667-duel-sleep.md) — accepted as readings: bow-to-refuse duel, weighted Shugenja count, budgeted multi-select.
+
+- [Mempo and the Favor window (#667)](2026-10-05-667-favor.md) — accepted as readings: after-Favor-discard reaction window, +1 Favor use, any-unit Favor Battle.
+
+- [Coin Pouch, Near Miss, Profits (#667)](2026-10-05-667-payments.md) — accepted as readings: extra payment sources in the Gold flow.
+
+- [Blade, Yumi, Winter Sled, Wyrmbone, Lying in Ambush (#667)](2026-10-05-667-performers.md) — accepted as readings: hand-played Items, unnegatable movement, created Ambusher.
+
+- [The Deciding Moment and phase order (#667)](2026-10-05-667-phase-order.md) — accepted as readings: per-turn phase-order marker, allowed swaps, header animation.
+
+- [Jade Embrace, Sea & Sky, Through the Breach, Colonial Farm (#667)](2026-10-05-667-removal.md) — accepted as readings: per-card ability/trait removal that resets on leaving play.
+
+- [Gozu, Hyobuko, Masaya, Rosary, Topaz Armor (#667)](2026-10-05-667-search-play.md) — accepted as readings: owed play after a search, Celestial into play, keyword pair.
