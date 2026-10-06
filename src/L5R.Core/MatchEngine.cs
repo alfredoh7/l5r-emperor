@@ -377,6 +377,7 @@ public sealed partial class MatchEngine
         if (command.Type == "passAllBattles") { command = BeginPassAllBattles(command); if (command.Type != "pass") return; } // issue #628: a pass that keeps passing
         // Unfortunate Hesitation (issue #338): a player who owes a pass at an ordinary Action/Battle opportunity may only pass.
         EnforceForcedPass(command);
+        EnforceSearchPlay(command); // Gozu (issue #667, SearchPlayGozu.cs): the Terrain it found is owed as the next action; nothing else, and no pass, is legal until it is played.
         // Urgency (issue #453, batch 2): a player past his allowance of non-Reaction actions this phase may take none.
         EnforceActionAllowance(command);
         // Battle Phase timing (issue #310): a limit on the first-action holder's FIRST Battle action (Naval
@@ -485,6 +486,7 @@ public sealed partial class MatchEngine
         ApplyShadowsEmbraceBatch1EntryEffects(playerId, card); // The Shadow's Embrace pass (issue #476), batch 1: Atosa's Sensei discard.
         ApplyEmperorRemainingFEntryEffects(playerId, card); // Emperor Edition remaining-cards pass (issue #492), group F: Moneylender's Wealth tokens.
         ApplyEmperorFollowupsEntryEffects(playerId, card); // Emperor Edition follow-ups (issue #498): the Dragon Sword's Honor; the entry searches queued (EmperorFollowupsSearch.cs).
+        ApplySearchPlayEntryEffects(playerId, card); // The Topaz Armor - exp (issue #667, SearchPlayTopaz.cs): "After this card enters play: Choose two keywords" is queued.
         ApplyEmperorP1EntryEffects(playerId, card); // Issue #503 (EmperorP1.cs): its Sensei discards and Extending Influence's Honor loss.
         ApplyRequestedCreatedCardsEntryEffects(playerId, card); // Yari of Air's mandatory Air-wielder Honor gain.
         ApplyVastPaddyEntry(playerId, card); // Vast Paddy Fields (issue #622, IvoryHoldings.cs): the province the Farm Holding was recruited from refills face-up.
@@ -2788,6 +2790,7 @@ public sealed partial class MatchEngine
         ResolvePreservingBeautyChecks(); // The Shadow's Embrace pass (issue #476), batch 4: Preserving Beauty's "before this turn ends".
         // Spirit of the Berserker: a destruction put off "until before this turn ends" happens now.
         ControlReturnsAtTurnEnd(); // Black Marketeering (issue #501, EmperorMechB.cs): "Give control of him to his owner before the turn ends."
+        ResolveSearchPlayTurnEnd(); // Masaya (issue #667, SearchPlayMasaya.cs): "Before the turn ends, put him on top of your Dynasty deck."
         ApplyDelayedEffects(DelayUntil.EndOfTurn);
         ReturnSteppedUnits(); // Step Through the Void (issue #503, EmperorP5Zones.cs): "Before this turn ends, put his unit into play". // The shared delay mechanism (issue #492, EmperorRulingR2.cs): what was delayed "until before this turn ends" (Spirit of the Berserker's destruction, In the Heart of Battle's).
         ResolveEmperorRemainingBTurnEnd(); // Emperor Edition remaining-cards pass (issue #492), group B.
@@ -3154,6 +3157,12 @@ public sealed partial class MatchEngine
     private void ResolveCelestial(PlayerState player, ProvinceState province, CardInstance card)
     {
         province.CardId = null; card.ProvinceIndex = null;
+        EnterCelestialPlay(player, card);
+        Refill(player, province);
+    }
+    // The entry itself (issue #667: The Sacred Rosary of the Constrictors puts a Celestial into play with no province): it replaces the controller's other Celestials and runs the entry traits.
+    private void EnterCelestialPlay(PlayerState player, CardInstance card)
+    {
         var hadRyoshun = ControlsCelestialEffect(player.Id, RyoshunsGuidanceEffect); // Ryoshun's Guidance (issue #467): its +1C leaves with it.
         foreach (var other in _state.Cards.Values.Where(c => c.OwnerId == player.Id && c.Zone == Zone.Celestial).ToArray())
         {
@@ -3164,7 +3173,6 @@ public sealed partial class MatchEngine
         Emit("celestialEnteredPlay", $"{Definition(card).Name} entered play.", player.Id, card.Id);
         ApplyDaigotsusGuidanceTrait(); // Daigotsu's Guidance (Emperor Edition remaining-cards pass, issue #492, group E): "After a Celestial enters play (including this one): Discard all Kami Celestials in play."
         if (hadRyoshun && Definition(card).Effect != RyoshunsGuidanceEffect) CheckChiAfterRyoshunLeaves(player.Id);
-        Refill(player, province);
     }
     // Lady Matsu's Rage's own destroy-redirect trait is Effect-keyed the same way RegionStrengthBonus
     // is, checked from DestroyUnits' own single shared choke point (see its own doc comment).

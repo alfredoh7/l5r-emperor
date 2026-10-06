@@ -24,6 +24,7 @@ public sealed partial class MatchEngine
         RemoveAttachmentGrants(from, attachment.Id);
         attachment.AttachedTo = host.Id; attachment.ProvinceIndex = host.ProvinceIndex;
         if (Definition(attachment).AttachGrantsKeyword is string granted) GrantKeyword(host, granted, attachment.Id, GrantDuration.Attachment);
+        SearchPlayTransferGrants(attachment, host); // The Topaz Armor - exp (issue #667): the two keywords chosen for it follow it
         Emit("attachmentTransferred", $"{reason}: {Definition(attachment).Name} was transferred from {Definition(from).Name} to {Definition(host).Name}.", host.OwnerId, attachment.Id);
     }
 }

@@ -845,6 +845,6 @@ public sealed partial class MatchEngine
         Add("concede", "Concede", Command("concede"));
         // Unfortunate Hesitation (issue #338): what a player who owes a pass cannot do at this opportunity is listed disabled.
         // Urgency (issue #453, batch 2): past the allowance, every non-Reaction action is listed disabled too.
-        return ApplyActionAllowanceToOptions(playerId, ApplyForcedPassToOptions(playerId, result));
+        return ApplyActionAllowanceToOptions(playerId, ApplySearchPlayToOptions(playerId, ApplyForcedPassToOptions(playerId, result))); // issue #667 (SearchPlayGozu.cs): while the Terrain Gozu found is owed, only its play is offered enabled
     }
 }
