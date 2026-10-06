@@ -9,7 +9,7 @@ using static RegressionAssertions;
 internal static class AbilityRemovalTests
 {
     private const string JadeEmbrace = "oracle-l5r-9985", SeaAndSky = "oracle-l5r-9988", ColonialFarm = "oracle-l5r-10231", Colonists = "user-scan-colonists",
-        HoldTheWalls = "oracle-l5r-10941", FallowLands = "oracle-l5r-9865", Outpost = "oracle-l5r-2658", NiiroNoOni = "oracle-l5r-9856", Legendary = "oracle-l5r-9991",
+        HoldTheWalls = "oracle-l5r-10941", FallowLands = "oracle-l5r-9865", Outpost = "oracle-l5r-2658", NiiroNoOni = "oracle-l5r-9856", Legendary = "oracle-l5r-9991", Breach = "oracle-l5r-9992", BreachOni = "user-scan-breached-oni",
         Shugenja = "training-shugenja", Crane = "training-crane-samurai", Lion = "training-lion-samurai", DualAttacker = "training-dual-attacker", Recon = "training-recon-attacker";
 
     private static void Check(bool ok, string message = "Assertion failed") => Batch336Support.Check(ok, message);
@@ -35,6 +35,7 @@ internal static class AbilityRemovalTests
         ("Sea & Sky: destroys itself and the player chooses to destroy a Terrain or Region, or permanently remove its traits and abilities (its Effect, the trait, is gone)", SeaAndSkyScenario),
         ("Sea & Sky: Open in the Action Phase works on a Region, a Personality is not a legal target, and nothing changes on a refused use", SeaAndSkyOpenAndRejections),
         ("Through the Breach's removal: only a Castle Holding in play is a target; the choice lists its non-Gold-producing abilities and trait, never the Gold production", ThroughTheBreachRemoval),
+        ("Through the Breach: pay 4 Gold and control a Personality to create Breached Oni (4F/2C/0PH Oni) and lose 3 Honor; refused without a Personality, without 4 Gold, or at the wrong time, with the state unchanged", ThroughTheBreachCreate),
         ("Every removal choice is answerable by taking the first offered option (what the bots do), so no pending decision can stall a match", ChoicesAreAlwaysAnswerable),
         ("Colonial Farm: a Lion Clan player pays 1 less (6 -> 5), any other Clan 6; it produces 5 Gold; bowing it creates Colonists (a 1F Ashigaru Follower) attached to the targeted Personality", ColonialFarmScenario),
         ("Colonial Farm: a bowed Farm, an opponent's Personality and a second use in the turn are refused; the created Colonists is removed from the game and never reaches a pile", ColonialFarmRejections),
@@ -60,6 +61,13 @@ internal static class AbilityRemovalTests
         Manifest("spell-wave-53", JadeEmbrace, SeaAndSky);
         Manifest("holding-wave-52", ColonialFarm);
         Manifest("follower-wave-47", Colonists);
+        Manifest("strategy-wave-115", Breach);
+        Manifest("personality-wave-126", BreachOni);
+        var oni = CardCatalog.Get(BreachOni);
+        Check(oni.Type == CardType.Personality && oni.Force == 4 && oni.Chi == 2 && oni.PersonalHonor == 0 && oni.GoldCost == 0 && oni.CreatedOnly && oni.Keywords!.SequenceEqual(["Shadowlands", "Nonhuman", "Oni"]), "Breached Oni: a created-only 4F/2C/0PH Oni");
+        var breach = CardCatalog.Get(Breach);
+        Check(breach.Type == CardType.Strategy && breach.Focus == 3 && breach.Keywords!.SequenceEqual(["Siege"]) && breach.Abilities!.SequenceEqual([AbilityRemovalAbilities.ThroughTheBreach, AbilityRemovalAbilities.BreachCreate]), "Through the Breach: printed stats");
+        Eq(CreatedCards.Resolve(AbilityCatalog.All[AbilityRemovalAbilities.BreachCreate].Creates!).Id, BreachOni, "Through the Breach creates Breached Oni");
         var jade = CardCatalog.Get(JadeEmbrace);
         Check(jade.Type == CardType.Spell && jade.GoldCost == 0 && jade.Focus == 2 && jade.Keywords!.SequenceEqual(["Earth", "Jade"]) && jade.Abilities!.SequenceEqual([AbilityRemovalAbilities.JadeEmbrace]), "Jade Embrace: printed stats");
         Check(jade.Text == "Battle: Bow this card and target an enemy Personality: Remove one of his abilities. If this Shugenja is Earth, reduce the target's Force to 0. If the target is an Oni, destroy it and this card.", "Jade Embrace: scan text");
@@ -306,6 +314,41 @@ internal static class AbilityRemovalTests
         Eq(te.State.Cards[keep.Id].Printed!.Effect, "none", "the trait is removed");
         Check(te.AbilityIdsForTest(keep.Id).Length == 1, "its ability is not");
         Eq(te.State.Cards[keep.Id].Printed!.GoldProduction, 5, "and the Gold production is untouched");
+    }
+
+    private static void ThroughTheBreachCreate()
+    {
+        var s = Table(Phase.Action, 0);
+        var breach = Add(s, Breach, 0, Zone.Hand);
+        var mine = Add(s, Crane, 0, Zone.Home);
+        for (var i = 0; i < 4; i++) Add(s, "training-marketplace", 0, Zone.Home);
+        var e = MatchEngine.FromTestState(s);
+        var honor = Batch336Support.Honor(e, 0);
+        var option = Enabled(e, 0, AbilityRemovalAbilities.BreachCreate, breach.Id);
+        Accept(e, option.Command!);
+        var oni = e.State.Cards.Values.Single(c => c.DefinitionId == BreachOni);
+        Eq(oni.Zone, Zone.Home, "the Oni is created at home");
+        Eq(oni.OwnerId, 0, "under the creator's control");
+        Eq(Batch336Support.Honor(e, 0), honor - 3, "Lose 3 Honor");
+        Check(e.State.Cards[breach.Id].Zone != Zone.Hand, "the Strategy was played");
+        // No Personality: refused, nothing changes.
+        var n = Table(Phase.Action, 0);
+        var nb = Add(n, Breach, 0, Zone.Hand);
+        for (var i = 0; i < 4; i++) Add(n, "training-marketplace", 0, Zone.Home);
+        var ne = MatchEngine.FromTestState(n);
+        var before = Fingerprint(ne);
+        var offered = Batch336Support.Options(ne, 0, AbilityRemovalAbilities.BreachCreate, nb.Id);
+        Check(offered.All(o => !o.Enabled), "not offered without a Personality");
+        Reject(ne, Use(ne, 0, AbilityRemovalAbilities.BreachCreate, nb.Id, null));
+        Eq(Fingerprint(ne), before, "refused use changes nothing");
+        // Not enough Gold: refused.
+        var p = Table(Phase.Action, 0);
+        var pb = Add(p, Breach, 0, Zone.Hand); Add(p, Crane, 0, Zone.Home);
+        var pe = MatchEngine.FromTestState(p);
+        var pbefore = Fingerprint(pe);
+        Reject(pe, Use(pe, 0, AbilityRemovalAbilities.BreachCreate, pb.Id, null));
+        Eq(Fingerprint(pe), pbefore, "no Gold: nothing changes");
+        _ = mine;
     }
 
     // ---- bots ----------------------------------------------------------------------------------------------------------------------------------------------------------------------

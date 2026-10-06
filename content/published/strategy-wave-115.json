@@ -1,0 +1,33 @@
+{
+  "Profile": "strategy-wave-115",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-9992",
+      "Name": "Through the Breach",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Target a Castle Holding: Permanently remove one of its non-Gold-producing traits or abilities.\nLimited: If you control a Personality, pay 4 Gold: Create a 4F/2C/0PH Shadowlands • Nonhuman • Oni Personality. Lose 3 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9992.jpg",
+      "Keywords": [
+        "Siege"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "pe-through-the-breach-remove",
+        "pe-through-the-breach-create"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}
