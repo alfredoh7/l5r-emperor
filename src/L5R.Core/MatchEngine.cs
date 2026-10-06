@@ -2733,9 +2733,9 @@ public sealed partial class MatchEngine
     {
         if ((card.Zone != Zone.Battlefield || card.ProvinceIndex != province) && (MovementLockNegates(card, MovementKinds.ToBattlefield) || MovementToBattlefieldNegated(card, province) || KitsuneNegatesMovement(card, province) || UguluNegatesMovement(card, province))) return false;
         // The Shadow's Embrace pass (issue #476), batch 6: Shieldman "will not move into an attacking army"; Star-Crossed Lovers "will not move to each other's battlefields".
-        if ((card.Zone != Zone.Battlefield || card.ProvinceIndex != province) && (ShieldmanNegatesMove(card) || StarCrossedNegatesMove(card, province))) return false; // Goju Asuka (issue #501): "will not move into a defending army".
-        if ((card.Zone != Zone.Battlefield || card.ProvinceIndex != province) && (AsukaNegatesMove(card) || HoteiNegatesMove(card))) return false; // Hotei's Contentment (issue #503)
-        if (P4NegatesMoveToBattlefield(card, province)) return false; // The Snow Has Teeth (issue #503, EmperorP4Watches.cs): a move from its battlefield. // Goju Asuka (issue #501): "will not move into a defending army".
+        if ((card.Zone != Zone.Battlefield || card.ProvinceIndex != province) && SledOf(card) is null && (ShieldmanNegatesMove(card) || StarCrossedNegatesMove(card, province))) return false; // Goju Asuka (issue #501): "will not move into a defending army".
+        if ((card.Zone != Zone.Battlefield || card.ProvinceIndex != province) && SledOf(card) is null && (AsukaNegatesMove(card) || HoteiNegatesMove(card))) return false; // Hotei's Contentment (issue #503)
+        if (SledOf(card) is null && P4NegatesMoveToBattlefield(card, province)) return false; // The Snow Has Teeth (issue #503, EmperorP4Watches.cs): a move from its battlefield. // Goju Asuka (issue #501): "will not move into a defending army".
         // Legion of the Bat (issue #279): "after the resolution of an action that moved a target
         // enemy Infantry Personality to this card's battlefield" -- every printed "move to the
         // current battlefield" ability (Mirumoto Michi/Togashi Rikyou/Intervening Spirit/Takasho/

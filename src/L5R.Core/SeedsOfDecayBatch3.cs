@@ -30,13 +30,13 @@ public sealed partial class MatchEngine
             // "If there are now more units there on the enemy side than on yours, you may target an enemy unit and move it home." -- judged for the position after his own
             // move: he joins the army when he would be opposed and is not there yet.
             case "chukage-move" when SlotCards(command, "enemy").Any():
-            {
-                var battle = _state.CurrentBattleProvince!.Value;
-                var enemies = Army(1 - player.Id, battle).Count();
-                var joins = enemies > 0 && !(source!.Zone == Zone.Battlefield && source.ProvinceIndex == battle) ? 1 : 0;
-                Require(enemies > Army(player.Id, battle).Count() + joins, "The enemy must have more units at the battlefield than you once Chukage has moved.");
-                break;
-            }
+                {
+                    var battle = _state.CurrentBattleProvince!.Value;
+                    var enemies = Army(1 - player.Id, battle).Count();
+                    var joins = enemies > 0 && !(source!.Zone == Zone.Battlefield && source.ProvinceIndex == battle) ? 1 : 0;
+                    Require(enemies > Army(player.Id, battle).Count() + joins, "The enemy must have more units at the battlefield than you once Chukage has moved.");
+                    break;
+                }
             // "if Hawado is at the current battlefield, target a Personality that performed it".
             case "hawado-exp-move-home":
             case "hawado-exp-move-battlefield":
@@ -87,6 +87,7 @@ public sealed partial class MatchEngine
     // his controller), his trait has not fired this turn, and the movement is not one that "will not be negated" (MovementCannotBeNegated). The stamp makes it once a turn.
     private bool EnemyActionMovementAutoNegated(CardInstance card)
     {
+        if (SledOf(card) is not null) return false; // Winter Sled (issue #667): no shield, Twin Forks or trait negates his movement
         // Twin Forks City (The Shadow's Embrace pass, issue #476 batch 6): a one-shot shield against another player's card's effect moving him.
         if (BlessingsShieldNegatesMove(card)) return true; // Blessings of the Shi-Tien Yen-Wang (issue #503).
         if (_runningCommand is { } mover && !MovementCannotBeNegated(mover) && TwinForksNegates(card, mover.PlayerId, "movement")) return true;

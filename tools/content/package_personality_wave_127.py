@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Build personality-wave-127 (issue #667, the "performers" cluster): Ambusher, the created Personality of Lying in Ambush, from the user-supplied scan Mendon provided
-(assets/requested-scans/ambusher.jpg: a 2F/2C Samurai Personality with a dash for its Personal Honor, Gold Cost 0, Focus 2, text "May not be included in decks.", Proxy frame, EoW illustrated
+(assets/requested-scans/ambusher.jpg: a 2F/2C/2PH Samurai Personality (the fan's 2 is its Personal Honor; the dash in the pink box is its Honor Requirement: none), Gold Cost 0, text "May not be included in decks.", Proxy frame, EoW illustrated
 by David Horne). It is a CreatedOnly card: never in a deck, never in a discard pile; it has its creator's Clan alignment because Lying in Ambush says so (the created-card spec), not
 because the scan prints it.
 """
@@ -26,7 +26,7 @@ def package(root: Path = ROOT) -> dict:
     destination.parent.mkdir(parents=True, exist_ok=True)
     with Image.open(image) as source:
         source.convert("RGB").save(destination, "JPEG", quality=95)
-    definition = dict(Id=CARD_ID, Name="Ambusher", Type="Personality", Clan="Unaligned", GoldCost=0, GoldProduction=0, Force=2, Chi=2, PersonalHonor=0, HonorRequirement=None,
+    definition = dict(Id=CARD_ID, Name="Ambusher", Type="Personality", Clan="Unaligned", GoldCost=0, GoldProduction=0, Force=2, Chi=2, PersonalHonor=2, HonorRequirement=None,
                       ProvinceStrength=0, StartingHonor=0, Text="May not be included in decks.", ScenarioOnly=False, ArtworkKey=f"res://Content/Published/{CARD_ID}.jpg",
                       Keywords=["Samurai"], Focus=2, Abilities=[], Effect="none", CreatedOnly=True)
     provenance = dict(card_id=CARD_ID, printing_set=["User-supplied scan"], source_url="user-supplied-by-mendon-2026-10-05",

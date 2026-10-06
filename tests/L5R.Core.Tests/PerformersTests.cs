@@ -46,7 +46,7 @@ internal static class PerformersTests
         ("Wyrmbone Katana's destroy: an enemy Follower or Personality without attachments whose Force is strictly lower than its wielder's, and nothing else", WyrmboneDestroy),
         ("Wyrmbone Katana's move: back to the current battlefield for a wielder assigned there earlier this phase who has moved away, and for nobody else", WyrmboneMove),
         ("Winter Sled's Reaction: after engaging, with enemy units at the battlefield, bow it to move its Personality there", SledReaction),
-        ("Winter Sled's static: while its controller controls a Winter card another player's card cannot negate its Personality's movement (a Reaction's negation, a movement lock, Ugulu), his own cards still can", SledStatic),
+        ("Winter Sled's static: while its controller controls a Winter card no card effect negates its Personality's movement (a Reaction's negation, a movement lock, Ugulu), his own controller's cards included", SledStatic),
         ("Lying in Ambush: after the action that created a non-Shadowlands Personality, create an Ambusher (a 2F/2C Samurai with your Clan alignment) at the same location", AmbushScenario),
         ("Lying in Ambush's limits: not after a Shadowlands creation alone, another player's action, or an action that created nothing; refused attempts change nothing", AmbushLimits),
     ]);
@@ -85,7 +85,7 @@ internal static class PerformersTests
         Eq(string.Join("; ", CreatedCards.Verify()), "", "every created-card spec resolves to exactly one scan");
         Manifest("personality-wave-127", [PerformersAmbushAbilities.AmbusherScan]);
         var ambusher = CardCatalog.Get(PerformersAmbushAbilities.AmbusherScan);
-        Check(ambusher.Name == "Ambusher" && ambusher.Type == CardType.Personality && ambusher.CreatedOnly && ambusher.Force == 2 && ambusher.Chi == 2 && ambusher.Keywords!.SequenceEqual(["Samurai"]) && ambusher.Text == "May not be included in decks.", "Ambusher: the supplied scan");
+        Check(ambusher.Name == "Ambusher" && ambusher.Type == CardType.Personality && ambusher.CreatedOnly && ambusher.Force == 2 && ambusher.Chi == 2 && ambusher.PersonalHonor == 2 && ambusher.HonorRequirement is null && ambusher.Keywords!.SequenceEqual(["Samurai"]) && ambusher.Text == "May not be included in decks.", "Ambusher: the supplied scan");
         Check(File.Exists(Path.Combine(root, "src/L5R.Client/Content/Published", PerformersAmbushAbilities.AmbusherScan + ".jpg")) && File.Exists(Path.Combine(root, "assets/requested-scans/ambusher.jpg")), "Ambusher ships its art and keeps the raw scan");
         Check(CardCatalog.PlayableFromDecks.All(c => c.Id != PerformersAmbushAbilities.AmbusherScan), "the created scan is never playable from a deck");
     }
@@ -333,9 +333,9 @@ internal static class PerformersTests
             Check(e.State.Events.Any(x => x.Type == "movementNotNegated"), "the log says so");
         }
         {
-            // His own controller's Staff still negates him: only OTHER players' cards are barred.
+            // His own controller's Staff does not negate him either (Mendon): no card effect does while the Winter condition holds.
             var (e, w) = MoveTrial(1, sled: true, winterOwner: 1, pearlPlayer: 1);
-            Eq(e.State.Cards[w.Id].Zone, Zone.Home, "his own player's Staff still negates the movement");
+            Eq(e.State.Cards[w.Id].Zone, Zone.Battlefield, "his own player's Staff does not negate it either: no card does");
         }
         {
             var (e, w) = MoveTrial(0, sled: true, winterOwner: 0, pearlPlayer: 1);
@@ -352,7 +352,7 @@ internal static class PerformersTests
         }
         {
             var (e, w) = MoveTrial(1, sled: true, winterOwner: 1, extra: (s, wearer) => wearer.MovementLocks.Add(new("A Quiet Transaction", s.TurnNumber, MovementKinds.ToBattlefield, ByPlayer: 1)));
-            Eq(e.State.Cards[w.Id].Zone, Zone.Home, "his own player's lock still does");
+            Eq(e.State.Cards[w.Id].Zone, Zone.Battlefield, "his own player's lock does not either");
         }
         // Ugulu no Oni at the battlefield: a Human may not move to it. Another player's Ugulu does not stop the Sled; his own does.
         {
@@ -365,7 +365,7 @@ internal static class PerformersTests
         }
         {
             var (e, w) = MoveTrial(1, sled: true, winterOwner: 1, extra: (s, wearer) => Add(s, Ugulu, 1, Zone.Battlefield, province: 0));
-            Eq(e.State.Cards[w.Id].Zone, Zone.Home, "his own player's Ugulu still does");
+            Eq(e.State.Cards[w.Id].Zone, Zone.Battlefield, "his own player's Ugulu does not either");
         }
         // The Sled's own Reaction move is the same movement: another player's lock does not stop it.
         {
@@ -399,6 +399,7 @@ internal static class PerformersTests
         Accept(e, Enabled(e, 0, PerformersAmbushAbilities.AmbushHome, ambush.Id).Command!);
         var witness = CreatedWitnesses(e).Single();
         Eq(witness.Zone, Zone.Home); Eq(witness.OwnerId, 0); Check(witness.FaceUp && !witness.Bowed);
+        Eq(witness.Printed?.PersonalHonor ?? CardCatalog.Get(witness.DefinitionId).PersonalHonor, 2, "2PH");
         Check(witness.Printed is { Clan: "Crane" } printed && printed.Keywords!.Contains("Crane Clan") && printed.Keywords.Contains("Samurai"), "a Samurai with the creator's Clan alignment");
         Eq(e.State.Cards[ambush.Id].Zone, Zone.FateDiscard, "the Strategy was spent");
         Check(e.State.Cards.Values.Count(c => c.DefinitionId == "oracle-l5r-10017") == 1, "the Sensei and the Witness are two different created Personalities");
