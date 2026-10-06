@@ -45,8 +45,8 @@ public sealed partial class MatchEngine
     /// <summary>THE question: is a card controlled by <paramref name="negatingPlayerId"/> barred from negating <paramref name="mover"/>'s movement? An unknown negator is never barred.</summary>
     private bool MovementNegationBarred(CardInstance mover, int? negatingPlayerId)
     {
-        if (negatingPlayerId is not int negator || SledOf(mover) is not { } sled || negator == sled.OwnerId) return false;
-        Emit("movementNotNegated", $"{Definition(mover).Name}'s movement will not be negated by another player's card ({Definition(sled).Name}).", mover.OwnerId, sled.Id);
+        if (SledOf(mover) is not { } sled) return false; // Mendon: no card's effect negates it -- the controller's own cards included; the player is kept for the log only
+        Emit("movementNotNegated", $"{Definition(mover).Name}'s movement will not be negated ({Definition(sled).Name}).", mover.OwnerId, sled.Id);
         return true;
     }
 

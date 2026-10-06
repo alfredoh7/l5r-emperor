@@ -11,7 +11,7 @@ namespace L5R.Core;
 //     Shadowlands keyword (HostId marker, read AT creation so a Personality that leaves play later still counts), and where it was made (FromBattlefield: the battlefield, null for home). The record is
 //     snapshotted into MatchState.LastResolvedAction when the action resolves, which the existing "after an action resolves" Reaction window reads (Closing the Gap's, Without Mercy's).
 //   * THE WINDOW: the action is the Reacting player's own (ResolvedActionFacts.PlayerId), a Battle, Limited, Open (or Battle/Open) ability, and at least one Personality it created is not Shadowlands.
-//   * THE SAMURAI: Ambusher (user-scan-ambusher), the scan Mendon supplied: a 2F/2C Samurai Personality whose Personal Honor prints as a dash (the card text says 2PH; the scan wins, as 0PH), with the creator's Clan alignment fixed at creation (ControllerClan). "At the same location": two catalogue entries
+//   * THE SAMURAI: Ambusher (user-scan-ambusher), the scan Mendon supplied: a 2F/2C/2PH Samurai Personality (the fan's 2 is its Personal Honor; the dash is its Honor Requirement: none), with the creator's Clan alignment fixed at creation (ControllerClan). "At the same location": two catalogue entries
 //     sharing one use, one that creates it at home and one at the current battlefield, each offered only when the first non-Shadowlands Personality was created there (several created at different
 //     locations: the first). The Samurai's own creation is a Reaction's, so it does not itself enable a second Lying in Ambush.
 // ======================================================================================================================================================================================
@@ -23,12 +23,12 @@ public static class PerformersAmbushAbilities
     /// <summary>ResolvedActionFacts.Affected: a Personality the action created. Its HostId is <see cref="ShadowlandsMark"/> when it had the Shadowlands keyword as it was created.</summary>
     public const string CreatedKind = "created", ShadowlandsMark = "shadowlands";
 
-    /// <summary>The scan the Samurai is: Ambusher (user-supplied by Mendon, personality-wave-127), a 2F/2C Samurai Personality; the Clan alignment is the spec's ("with your Clan alignment"), not the scan's.</summary>
+    /// <summary>The scan the Samurai is: Ambusher (user-supplied by Mendon, personality-wave-127), a 2F/2C/2PH Samurai Personality; the Clan alignment is the spec's ("with your Clan alignment"), not the scan's.</summary>
     public const string AmbusherScan = "user-scan-ambusher";
 
     public static Dictionary<string, AbilityDefinition> AddPerformersAmbush(this Dictionary<string, AbilityDefinition> all)
     {
-        var samurai = new CreatedCardSpec(CardType.Personality, Force: 2, Chi: 2, Keywords: ["Samurai"], ProxyId: AmbusherScan) { ControllerClan = true };
+        var samurai = new CreatedCardSpec(CardType.Personality, Force: 2, Chi: 2, PersonalHonor: 2, Keywords: ["Samurai"], ProxyId: AmbusherScan) { ControllerClan = true };
         all[AmbushHome] = new("Reaction", "After the resolution of your Battle, Limited, or Open action that created a non-Shadowlands Personality at home: Create a 2F/2C/2PH Samurai Personality with your Clan alignment there", "none",
             Trigger: AfterActionReactionTriggers.AfterActionResolved, UsageKey: "pf-lying-in-ambush", Creates: samurai);
         all[AmbushBattlefield] = new("Reaction", "After the resolution of your Battle, Limited, or Open action that created a non-Shadowlands Personality at a battlefield: Create a 2F/2C/2PH Samurai Personality with your Clan alignment there", "none",
