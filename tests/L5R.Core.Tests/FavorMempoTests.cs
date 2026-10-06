@@ -106,6 +106,8 @@ internal static class FavorMempoTests
         Check(AbilityCatalog.All["favor-battle"].Target == "enemy-attacking", "the rulebook action's category is unchanged");
         // Using it on a defending unit moves it home (the action's effect) and discards the Favor as the cost.
         Accept(withMempo, Batch336Support.Offer(withMempo, 1, "favor-battle", null!, defender2.Id));
+        var mempoCard = withMempo.State.Cards.Values.Single(c => c.DefinitionId == Mempo);
+        Check(Offered(withMempo, 1, mempoCard), "after the Favor Battle action Mempo's Reaction takes the Favor back");
         PassWindows(withMempo);
         Eq(withMempo.State.Cards[defender2.Id].Zone, Zone.Home, "the defending unit moved home");
         Eq(withMempo.State.FavorPlayerId, null, "the Imperial Favor was discarded as the cost");
@@ -228,6 +230,16 @@ internal static class FavorMempoTests
         Check(m.State.Cards[mm.Id].Zone == Zone.Attached, "Mempo is attached");
         m = Batch336Support.Edit(m, s => s.FavorPlayerId = null);
         Check(!m.QueryActions(1).Any(a => a.Enabled && a.CardId == mm.Id && a.Command?.AbilityId == Take), "no Reaction without a discard to react to");
+
+        // Only the rulebook actions that send a Personality home from battle or cycle a card trigger it: Shunya's Honor action discards the Favor too, but opens nothing.
+        var sh = Published(Batch336Support.Table(Phase.Action, 1)); sh.FavorPlayerId = 1;
+        var shChampion = Kw(Add(sh, Lion, 1, Zone.Home), "Amethyst Champion"); var shMempo = Attach(sh, Mempo, shChampion);
+        var shunya = Add(sh, "oracle-l5r-2158", 1, Zone.Home);
+        var she = MatchEngine.FromTestState(sh);
+        Accept(she, Options(she, 1, "shunya-honor", shunya.Id).First(o => o.Enabled && o.Command?.CostOption is null).Command!);
+        Eq(she.State.FavorPlayerId, null, "Shunya's action discarded the Favor");
+        Check(she.State.PendingChoice is null || !Offered(she, 1, shMempo), "but Mempo's Reaction is not offered after it");
+        Check(!AbilityCatalog.All[Take].Label.Contains("negated") && FavorMempoAbilities.TakeBackTriggers.SequenceEqual(["favor-battle", "favor-cycle", "favor-cycle-kurohito"]), "the triggering actions are the Battle and card-cycling ones");
 
         // A Mempo that left play is no longer a source.
         var (g, gm, gs) = CycleRig(true);
